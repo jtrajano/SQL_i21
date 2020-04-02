@@ -261,6 +261,8 @@ BEGIN
 		WHEN @msgId = 80245 THEN '%s failed to create its transaction id.'
 		WHEN @msgId = 80246 THEN 'Entity user id is invalid.'
 		WHEN @msgId = 80247 THEN '%s already has an existing reversal.'
+		WHEN @msgId = 80248 THEN 'Back-dated reversal is not allowed.'
+		WHEN @msgId = 80249 THEN 'Shipment reversal is not allowed. It already has a credit memo. See %s.'
 	END 
 
 	RETURN @msg
