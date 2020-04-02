@@ -194,6 +194,7 @@ BEGIN TRY
 			,intEntityId				= cs.intEntityId
 			,ysnDelete					= 0
 			,intUserId					= sh.intUserId
+			,strMiscFields 				= NULL
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
