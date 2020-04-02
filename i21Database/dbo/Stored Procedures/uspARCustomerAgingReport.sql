@@ -172,9 +172,11 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 					BEGIN
 						SELECT @strAccountStatusIds = LEFT(intAccountStatusId, LEN(intAccountStatusId) - 1)
 						FROM (
-							SELECT DISTINCT CAST(intAccountStatusId AS VARCHAR(200))  + ', '
-							FROM tblARAccountStatus 
-							WHERE strAccountStatusCode = @from
+							SELECT DISTINCT CAST(S.intAccountStatusId AS VARCHAR(200))  + ', '
+							FROM tblARAccountStatus S
+							INNER JOIN @temp_xml_table TT ON S.strAccountStatusCode = REPLACE(ISNULL(TT.[from], ''), '''''', '''')
+							WHERE TT.fieldname = 'strAccountStatusCode'
+							  AND TT.condition = 'Not Equal To'
 							FOR XML PATH ('')
 						) C (intAccountStatusId)
 
