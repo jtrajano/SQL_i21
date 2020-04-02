@@ -109,6 +109,7 @@ BEGIN TRY
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
 	UPDATE tblGRStorageHistory SET intBillId = NULL WHERE intBillId = @intBillId
+	UPDATE tblGRSettleStorageBillDetail SET intBillId = NULL WHERE intBillId = @intBillId
 	
 	--clear original transaction if this is a reversal
 	UPDATE A
@@ -140,7 +141,7 @@ BEGIN TRY
 	WHERE intBillId = @intBillId
 
 	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
-	WHERE intBillId = @intBillId
+	WHERE intBillId = @intBillId	
 
 	DELETE FROM dbo.tblAPBill 
 	WHERE intBillId = @intBillId

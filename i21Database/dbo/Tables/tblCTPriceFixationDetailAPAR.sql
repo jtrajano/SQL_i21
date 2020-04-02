@@ -32,6 +32,11 @@ BEGIN
 	   DECLARE @strProcess NVARCHAR(20)
 	   DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
+	   IF NOT EXISTS(SELECT TOP 1 1 FROM INSERTED)
+	   BEGIN
+	   		RETURN
+	   END
+
        SELECT @ysnVoucher = CASE WHEN intBillId IS NOT NULL THEN 1 ELSE 0 END
        FROM INSERTED
 

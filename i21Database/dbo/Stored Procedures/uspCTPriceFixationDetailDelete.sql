@@ -44,6 +44,10 @@ BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM #ItemBillPosted)
 	BEGIN
 		SELECT TOP 1 @Id = intBillId FROM #ItemBillPosted
+		IF EXISTS(SELECT 1 FROM vyuAPBillPayment WHERE intBillId = @Id)
+		BEGIN
+			EXEC uspAPDeletePayment @Id, @intUserId
+		END
 		EXEC [dbo].[uspAPPostBill] @transactionType = 'Contract', @post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 		DELETE #ItemBillPosted WHERE intBillId = @Id
 	END
