@@ -1,5 +1,5 @@
-CREATE VIEW [dbo].[vyuAPBillDeductions]
---WITH SCHEMABINDING
+﻿CREATE VIEW [dbo].[vyuAPBillDeductions]
+
 AS
 
 SELECT
@@ -29,7 +29,7 @@ SELECT
     ,BV.strName
     ,CL.strLocationName
     ,BV.intEntityVendorId
-FROM [20.1Dev].[dbo].[tblAPAppliedPrepaidAndDebit] PD
+FROM dbo.tblAPAppliedPrepaidAndDebit PD
 INNER JOIN dbo.vyuAPBill BV 
 	ON PD.intBillId = BV.intBillId
 INNER JOIN dbo.tblAPBill BT
