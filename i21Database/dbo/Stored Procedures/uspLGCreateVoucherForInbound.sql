@@ -194,9 +194,12 @@ BEGIN TRY
 	JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CT.intContractDetailId
 	JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON CH.intEntityId = D1.[intEntityId]  
 	LEFT JOIN tblSMCurrency CY ON CY.intCurrencyID = AD.intSeqCurrencyId
-	LEFT JOIN (tblICInventoryReceipt receipt 
-				INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
-				ON LD.intLoadDetailId = receiptItem.intSourceId AND receipt.intSourceType = 2
+	OUTER APPLY (SELECT receiptItem.intInventoryReceiptItemId, receiptItem.dblTax FROM tblICInventoryReceipt receipt 
+					INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+				WHERE receiptItem.intSourceId = LD.intLoadDetailId AND receipt.intSourceType = 2
+					AND receipt.intSourceInventoryReceiptId IS NULL 
+					AND receipt.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
+				) receiptItem
 	LEFT JOIN tblICItem item ON item.intItemId = LD.intItemId 
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = LD.intItemId and ItemLoc.intLocationId = IsNull(L.intCompanyLocationId, CT.intCompanyLocationId)
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
