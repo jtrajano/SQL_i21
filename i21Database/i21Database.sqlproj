@@ -8110,6 +8110,7 @@
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspAPForceCompletePayable.sql" />
     <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
