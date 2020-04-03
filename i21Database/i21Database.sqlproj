@@ -8621,6 +8621,7 @@
     <Build Include="dbo\Views\vyuIPGetFutureMarket.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuAPBillDeductions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
