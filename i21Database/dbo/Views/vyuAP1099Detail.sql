@@ -34,6 +34,7 @@ SELECT
 			THEN categoryDIV.strCategory
 			ELSE 'NONE'
 	END AS strCategory
+	,voucher.intEntityVendorId
 FROM tblAPBill voucher
 INNER JOIN tblAPBillDetail voucherDetail
 	ON voucher.intBillId = voucherDetail.intBillId
