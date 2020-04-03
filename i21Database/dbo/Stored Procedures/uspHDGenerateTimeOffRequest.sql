@@ -165,13 +165,15 @@ BEGIN
 		if (@strPRDayName <> 'Saturday' and @strPRDayName <> 'Sunday')
 		begin
 			--time off was edited, update the record
-			if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId and dtmPRDate != @dtmPRDate)
+			if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId and (
+				dtmPRDate != @dtmPRDate or dblPRRequest != @dblRequest
+			))
 			begin
 				UPDATE [dbo].[tblHDTimeOffRequest] 
 				SET 
 					[dtmPRDate] = @dtmPRDate,
 					[strPRDayName] = @strPRDayName,
-					[dblPRRequest] = @intFixEightHours,
+					[dblPRRequest] = @dblRequest,
 					[intPRNoOfDays] = @intNoOfDays,
 					[intConcurrencyId] = [intConcurrencyId] + 1
 				WHERE 
