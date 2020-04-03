@@ -98,13 +98,15 @@ BEGIN TRY
 				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceiptItem IRI
 					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intSourceType = 2 AND IR.intSourceInventoryReceiptId IS NULL
 					INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND LD.intLoadId = @intLoadId
-					WHERE IR.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse'))
+					WHERE IR.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt 
+															WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse' AND ysnPosted = 1))
 				BEGIN
 					SELECT TOP 1 @strTransactionNo = IR.strReceiptNumber
 					FROM tblICInventoryReceiptItem IRI
 					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intSourceType = 2 AND IR.intSourceInventoryReceiptId IS NULL
 					INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND LD.intLoadId = @intLoadId
-					WHERE IR.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
+					WHERE IR.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt 
+															WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse' AND ysnPosted = 1)
 
 					SET @strErrMsg = 'Inventory Receipt ' + @strTransactionNo + ' has been generated for ' + @strLoadNumber 
 						+ '. Cannot cancel.';
