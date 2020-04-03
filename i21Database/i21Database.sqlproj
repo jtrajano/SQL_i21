@@ -8627,6 +8627,7 @@
     <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
