@@ -8176,6 +8176,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
+    <Build Include="dbo\Views\vyuAPBillDeductions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
