@@ -821,7 +821,7 @@ SELECT intPriceFixationDetailId		= CPFD.intPriceFixationDetailId
 INTO #FIXATION
 FROM tblCTPriceFixationDetail CPFD
 INNER JOIN #CONTRACTSPRICING CP ON CPFD.intPriceFixationId = CP.intPriceFixationId
-WHERE ISNULL(CPFD.dblQuantityAppliedAndPriced, 0) > 0
+WHERE ISNULL(CPFD.dblQuantity, 0) > 0
   AND CPFD.dtmFixationDate <= CP.dtmInvoiceDate
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
