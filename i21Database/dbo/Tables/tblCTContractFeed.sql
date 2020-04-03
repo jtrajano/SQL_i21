@@ -58,6 +58,7 @@
 	intItemId int,
 	strThirdPartyFeedStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strThirdPartyMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+	ysnThirdPartyMailSent				BIT DEFAULT 0,
     CONSTRAINT [PK_tblCTContractFeed_intContractFeedId] PRIMARY KEY CLUSTERED (intContractFeedId ASC),
 	CONSTRAINT [FK_tblCTContractFeed_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
