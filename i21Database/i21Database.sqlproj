@@ -8642,6 +8642,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShipment_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShipment_CA.sql" />
     <Build Include="dbo\Functions\fnRKGetDAPSettlementSimulation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
