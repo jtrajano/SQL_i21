@@ -68,7 +68,7 @@ BEGIN
 		, intCurrencyId
 		, strCurrency
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.intContractHeaderId, c.strInOut, c.ysnNegate, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.intTransactionRecordHeaderId, c.intContractHeaderId, c.strInOut, c.ysnNegate, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
 			, dtmCreatedDate
 			, dtmTransactionDate
 			, dblTotal = c.dblOrigQty

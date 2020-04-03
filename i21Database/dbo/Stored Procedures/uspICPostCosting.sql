@@ -1116,7 +1116,7 @@ BEGIN
 			AND ISNULL(ysnIsUnposted, 0) = 0 
 			AND t.intInTransitSourceLocationId IS NULL 
 
-	IF (@strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement'))
+	IF (@strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement', 'Transfer Storage'))
 	BEGIN 
 		INSERT INTO @SummaryLogs (	
 			strBatchId
@@ -1190,7 +1190,7 @@ BEGIN
 			AND t.dblQty <> 0 
 			AND v.ysnInTransit = 0
 			AND ISNULL(t.ysnIsUnposted,0) = 0
-			AND v.strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement')
+			AND v.strTransactionType NOT IN ('Inventory Receipt','Inventory Shipment', 'Storage Settlement', 'Transfer Storage')
 	END
 
 	IF (@strTransactionType = 'Inventory Receipt')

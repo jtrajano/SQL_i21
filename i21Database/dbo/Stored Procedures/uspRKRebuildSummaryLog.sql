@@ -1580,17 +1580,29 @@ BEGIN TRY
 		UNION ALL
 		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Company Owned'
-			, strTransactionType = 'Storage Settlement'
-			, intTransactionRecordId = sh.intSettleStorageId
-			, strTransactionNo = sh.strSettleTicket
+			, strTransactionType = CASE 
+										WHEN intTransactionTypeId = 3 THEN 'Transfer Storage'
+										WHEN intTransactionTypeId = 4 THEN 'Storage Settlement'
+									END
+			, intTransactionRecordId = CASE 
+											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
+											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
+										END
+			, strTransactionNo = CASE 
+									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
+									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
+								END
 			, intTransactionRecordHeaderId = sh.intCustomerStorageId
 			, sh.intContractHeaderId
 			, cs.intCommodityId
 			, cs.intItemId
 			, cum.intCommodityUnitMeasureId
 			, sh.intCompanyLocationId
-			, dblQty = (CASE WHEN sh.strType = 'Reverse Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
-			, strInOut = (CASE WHEN sh.strType = 'Reverse Settlement' THEN 'OUT' ELSE 'IN' END)
+			, dblQty = CASE 
+							WHEN intTransactionTypeId = 3 THEN (CASE WHEN sh.strType = 'Reverse Transfer' THEN - sh.dblUnits ELSE sh.dblUnits END)
+							WHEN intTransactionTypeId = 4 THEN (CASE WHEN sh.strType = 'Reverse Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+						END
+			, strInOut = (CASE WHEN sh.strType IN ('Reverse Settlement','Reverse Transfer' ) THEN 'OUT' ELSE 'IN' END)
 			, sh.intTicketId
 			, cs.intEntityId
 			, strDistributionType = st.strStorageTypeDescription
@@ -1613,7 +1625,8 @@ BEGIN TRY
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
 		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
-		WHERE sh.intTransactionTypeId = 4
+		WHERE sh.intTransactionTypeId IN(3,4)
+		AND sh.strType IN ('Settlement', 'Reverse Settlement', 'From Transfer','Reverse Transfer')
 
 		INSERT INTO @ExistingHistory (strBatchId
 			, strBucketType
