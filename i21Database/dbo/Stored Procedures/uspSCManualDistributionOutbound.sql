@@ -110,10 +110,27 @@ DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE @convertedLoopContractUnits numeric(38,20)
+
+IF OBJECT_ID(N'tempdb..#tmpManualDistributionLineItem') IS NOT NULL DROP TABLE #tmpManualDistributionLineItem
+
+SELECT 
+	*
+INTO #tmpManualDistributionLineItem
+FROM @LineItem
+WHERE strDistributionOption = @strTicketDistributionOption
+
+INSERT INTO #tmpManualDistributionLineItem
+SELECT 
+	*
+FROM @LineItem
+WHERE strDistributionOption <> @strTicketDistributionOption
+
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId
-FROM @LineItem;
+FROM #tmpManualDistributionLineItem;
 
 OPEN intListCursor;
 
@@ -284,7 +301,7 @@ OPEN intListCursor;
 								,ysnIsStorage
 								,strDistributionOption
 								,ysnAllowVoucher   
-							FROM @LineItem
+							FROM #tmpManualDistributionLineItem
 							where intId = @intId
 					END
 					ELSE
@@ -331,7 +348,7 @@ OPEN intListCursor;
 								,ysnIsStorage
 								,strDistributionOption
 								,ysnAllowVoucher 
-							FROM @LineItem
+							FROM #tmpManualDistributionLineItem
 							where intId = @intId
 					END
 					EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemShipment; 
