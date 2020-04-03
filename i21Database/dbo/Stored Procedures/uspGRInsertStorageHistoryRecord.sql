@@ -84,7 +84,10 @@ BEGIN TRY
 
     SELECT @intStorageHistoryId = SCOPE_IDENTITY();
 
-	EXEC uspGRRiskSummaryLog @intStorageHistoryId
+    IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5))
+    BEGIN
+        EXEC uspGRRiskSummaryLog @intStorageHistoryId
+    END	
 
     IF @intStorageHistoryId IS NULL 
 	BEGIN

@@ -34,6 +34,9 @@ BEGIN
 	DECLARE @intToEntityId INT
 	DECLARE @intTransferStorageReferenceId INT
 
+	DECLARE @StorageHistoryStagingTable2 AS StorageHistoryStagingTable
+	DECLARE @intIdentityId INT
+
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
 		intToCustomerStorageId INT
@@ -162,7 +165,42 @@ BEGIN
 			ON TransferStorageSplit.intTransferStorageId = SourceSplit.intTransferStorageId	
 		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId		
+		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
+		BEGIN
+			SELECT TOP 1 @intIdentityId = intId FROM @StorageHistoryStagingTable
+
+			DELETE FROM @StorageHistoryStagingTable2
+			INSERT INTO @StorageHistoryStagingTable2
+			(
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			)
+			SELECT TOP 1
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			FROM @StorageHistoryStagingTable
+			WHERE intId = @intIdentityId
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable2, @intStorageHistoryId
+
+			DELETE FROM @StorageHistoryStagingTable WHERE intId = @intIdentityId
+		END
 		----END----TRANSACTIONS FOR THE SOURCE---------
 
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
@@ -1355,7 +1393,44 @@ BEGIN
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE SR.intTransferStorageId = @intTransferStorageId
 		-- FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 AND 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+
+		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
+		BEGIN
+			SELECT TOP 1 @intIdentityId = intId FROM @StorageHistoryStagingTable
+
+			DELETE FROM @StorageHistoryStagingTable2
+			INSERT INTO @StorageHistoryStagingTable2
+			(
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			)
+			SELECT TOP 1
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			FROM @StorageHistoryStagingTable
+			WHERE intId = @intIdentityId
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable2, @intStorageHistoryId
+
+			DELETE FROM @StorageHistoryStagingTable WHERE intId = @intIdentityId
+		END
+		
 		--integration to IC
 		SET @cnt = 0
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
