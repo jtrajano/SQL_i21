@@ -1,8 +1,8 @@
 CREATE VIEW [dbo].[vyuVROpenRebateAll]
 AS
 SELECT *
-	, dblRebateAmount = CASE WHEN strRebateBy = 'Unit' THEN CAST((dblRebateQuantity * dblRebateRate) AS NUMERIC(18, 6))
-		ELSE CAST((dblRebateQuantity * dblRebateRate * dblCost / 100) AS NUMERIC(18, 6))
+	, dblRebateAmount = CASE WHEN strRebateBy = 'Percentage' THEN  CAST((dblRebateQuantity * dblRebateRate * dblCost / 100) AS NUMERIC(18, 6))
+		ELSE CAST((dblRebateQuantity * dblRebateRate) AS NUMERIC(18, 6))
 		END
 FROM (
 	SELECT CASE WHEN pi.intItemId IS NULL THEN 'Category Level' ELSE 'Item Level' END AS Mode,
