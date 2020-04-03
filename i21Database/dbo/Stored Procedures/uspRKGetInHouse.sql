@@ -602,7 +602,7 @@ BEGIN
 			, strTransactionType = 'Inventory Adjustment'
 			, strOwnership
 		FROM @tblResult
-		WHERE strTransactionType LIKE 'Inventory Adjustment -%'
+		WHERE strTransactionType LIKE 'Inventory Adjustment%'
 		GROUP BY dtmDate
 			, strTransactionId
 			, intTransactionId

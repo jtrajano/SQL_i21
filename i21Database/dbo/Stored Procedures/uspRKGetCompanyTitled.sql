@@ -575,7 +575,7 @@ BEGIN
 				UNION ALL
 				select distinct
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, Inv.intItemUOMId,  Inv.dblTotal), 0) 
+					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, IUM.intItemUOMId,  Inv.dblTotal), 0) 
 					,I.strInvoiceNumber
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
@@ -588,6 +588,8 @@ BEGIN
 						AND ID.intInventoryShipmentChargeId IS NULL
 				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
+				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = ID.intItemId
 				where Inv.strTransactionType = 'Inventory Shipment'
 				AND ISI.ysnDestinationWeightsAndGrades = 1
 
@@ -726,7 +728,7 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryAdjustmentDetail ID on Inv.intTransactionDetailId = ID.intInventoryAdjustmentDetailId 
 				inner join tblICInventoryAdjustment I on ID.intInventoryAdjustmentId = I.intInventoryAdjustmentId
-				where Inv.strTransactionType LIKE 'Inventory Adjustment -%'
+				where Inv.strTransactionType LIKE 'Inventory Adjustment%'
 					AND I.ysnPosted = 1
 					AND (I.intSourceTransactionTypeId IS NULL OR I.intSourceTransactionTypeId = 8)
 						
