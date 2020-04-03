@@ -1179,15 +1179,16 @@ BEGIN
 																		WHEN @strInvoiceTransactionTypeMain = @strCASH
 																			THEN ISNULL(IM.intQtySold, 0)
 																		WHEN @strInvoiceTransactionTypeMain = @strCREDITMEMO
-																			THEN CASE
-																					WHEN (ISNULL(IM.intQtySold, 0) > 0)
-																						-- Refference:  http://jira.irelyserver.com/browse/ST-1558
-																						-- If Positive flip the sign to negative
-																						THEN (ISNULL(IM.intQtySold, 0) * -1)
-																					WHEN (ISNULL(IM.intQtySold, 0) < 0)
-																						-- If Negative flip the sign to positive
-																						THEN (ISNULL(IM.intQtySold, 0) * 1)
-																				END
+																			THEN IM.intQtySold
+																				-- CASE
+																				-- 	WHEN (ISNULL(IM.intQtySold, 0) > 0)
+																				-- 		-- Refference:  http://jira.irelyserver.com/browse/ST-1558
+																				-- 		-- If Positive flip the sign to negative
+																				-- 		THEN (ISNULL(IM.intQtySold, 0) * -1)
+																				-- 	WHEN (ISNULL(IM.intQtySold, 0) < 0)
+																				-- 		-- If Negative flip the sign to positive
+																				-- 		THEN (ISNULL(IM.intQtySold, 0) * 1)
+																				-- END
 																	END
 
 											,[dblDiscount]				= 0 --ISNULL(IM.dblDiscountAmount, 0)
