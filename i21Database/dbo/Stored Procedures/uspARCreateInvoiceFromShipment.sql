@@ -23,6 +23,7 @@ DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 	  , @ShipmentNumber					NVARCHAR(100)
 	  , @InvoiceNumber					NVARCHAR(25) = ''
 	  , @strReferenceNumber 			NVARCHAR(100)
+	  , @ysnHasPriceFixation			BIT = 0
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
 
@@ -787,90 +788,108 @@ BEGIN
 	DROP TABLE #CONTRACTSPRICING
 END
 
+IF(OBJECT_ID('tempdb..#CONTRACTSTOPRICE') IS NOT NULL)
+BEGIN
+	DROP TABLE #CONTRACTSTOPRICE
+END
+
+CREATE TABLE #FIXATION (
+      intIdentity				INT
+	, intContractHeaderId		INT
+	, intContractDetailId		INT
+	, ysnLoad					BIT
+	, intPriceContractId		INT
+	, intPriceFixationId		INT
+	, intPriceFixationDetailId	INT
+	, dblQuantity				NUMERIC(18, 6)
+	, dblFinalPrice				NUMERIC(18, 6)
+	, ysnProcessed				BIT DEFAULT ((0))
+)
+
 SELECT intInventoryShipmentItemId	= IE.intInventoryShipmentItemId
 	 , intContractDetailId			= IE.intContractDetailId
+	 , intContractHeaderId			= IE.intContractHeaderId
 	 , intPriceFixationId			= PF.intPriceFixationId
 	 , intInvoiceEntriesId			= IE.intId
 	 , dtmInvoiceDate				= ISNULL(IE.dtmDate, @DateOnly)
 	 , dblQtyShipped				= IE.dblQtyShipped
-	 , dblInvoiced					= ISNULL(INVOICE.dblInvoiced, 0)
 INTO #CONTRACTSPRICING
 FROM @EntriesForInvoice IE
 INNER JOIN tblICInventoryShipmentItem ISI ON IE.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND IE.intContractDetailId = ISI.intLineNo
 INNER JOIN tblCTPriceFixation PF ON IE.intContractDetailId = PF.intContractDetailId 
                                 AND IE.intContractHeaderId = PF.intContractHeaderId
-OUTER APPLY (
-	SELECT dblInvoiced = SUM(dblQtyShipped) 
-	FROM tblARInvoiceDetail ID
-	WHERE ID.intContractDetailId = IE.intContractDetailId
-	  AND ID.dblQtyShipped > 0
-	  AND ID.dblPrice > 0
-	GROUP BY ID.intContractDetailId
-) INVOICE
 WHERE IE.intContractDetailId IS NOT NULL
   AND IE.intInventoryShipmentItemId IS NOT NULL
   AND IE.intInventoryShipmentChargeId IS NULL
   AND ISI.intInventoryShipmentId = @ShipmentId
 
-SELECT intPriceFixationDetailId		= CPFD.intPriceFixationDetailId
-	 , intPriceFixationId			= CPFD.intPriceFixationId
-	 , dblQuantity					= CPFD.dblQuantity
-	 , dblQuantityAppliedAndPriced	= CPFD.dblQuantityAppliedAndPriced
-	 , intContractDetailId			= CP.intContractDetailId
-	 , dblFinalPrice				= CPFD.dblFinalPrice
-INTO #FIXATION
-FROM tblCTPriceFixationDetail CPFD
-INNER JOIN #CONTRACTSPRICING CP ON CPFD.intPriceFixationId = CP.intPriceFixationId
-WHERE ISNULL(CPFD.dblQuantity, 0) > 0
-  AND CPFD.dtmFixationDate <= CP.dtmInvoiceDate
+--POPULATE PRICE FIXATION
+IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
+	BEGIN
+		SET @ysnHasPriceFixation = CAST(1 AS BIT)
 
+		SELECT intContractHeaderId
+			 , intContractDetailId
+			 , dblQtyToPrice		= SUM(dblQtyShipped)
+		INTO #CONTRACTSTOPRICE
+		FROM #CONTRACTSPRICING
+		GROUP BY intContractHeaderId, intContractDetailId
+	END
+	
+WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSTOPRICE)
+	BEGIN
+		DECLARE @intContractHeaderToPriceId	INT = NULL
+			  , @intContractDetailToPriceId	INT = NULL
+			  , @dblQtyToPrice				NUMERIC(18, 6) = 0
+
+		SELECT TOP 1 @intContractHeaderToPriceId = intContractHeaderId
+				   , @intContractDetailToPriceId = intContractDetailId
+				   , @dblQtyToPrice				 = dblQtyToPrice
+		FROM #CONTRACTSTOPRICE
+
+		INSERT INTO #FIXATION (
+			  intIdentity
+			, intContractHeaderId
+			, intContractDetailId
+			, ysnLoad
+			, intPriceContractId
+			, intPriceFixationId
+			, intPriceFixationDetailId
+			, dblQuantity
+			, dblFinalPrice
+		)
+		EXEC dbo.uspCTGetContractPrice @intContractHeaderToPriceId, @intContractDetailToPriceId, @dblQtyToPrice, 'Invoice'
+
+		DELETE FROM #CONTRACTSTOPRICE WHERE intContractDetailId = @intContractDetailToPriceId
+	END
+	
 WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 	BEGIN
 		DECLARE @dblQtyShipped			NUMERIC(18, 6) = 0
-			  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0
-			  , @dblInvoicedQty			NUMERIC(18, 6) = 0
-			  , @dblOriginalInvoicedQty	NUMERIC(18, 6) = 0
+			  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
 			  , @intInvoiceEntriesId	INT = NULL
 			  , @intPriceFixationId		INT = NULL
 
 		SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
 				   , @dblQtyShipped				= dblQtyShipped
-				   , @dblOriginalQtyShipped		= dblQtyShipped
-				   , @dblInvoicedQty			= dblInvoiced
-				   , @dblOriginalInvoicedQty	= dblInvoiced
+				   , @dblOriginalQtyShipped		= dblQtyShipped				   
 				   , @intPriceFixationId		= intPriceFixationId
 		FROM #CONTRACTSPRICING 
 		ORDER BY intInvoiceEntriesId
 
-		WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId) AND @dblQtyShipped > 0
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
 			BEGIN
 				DECLARE @intPriceFixationDetailId		INT = NULL
 					  , @dblQuantity					NUMERIC(18, 6) = 0
-					  , @dblQuantityAppliedAndPriced	NUMERIC(18, 6) = 0
 					  , @dblFinalPrice					NUMERIC(18, 6) = 0
 
 				SELECT TOP 1 @intPriceFixationDetailId		= intPriceFixationDetailId
 						   , @dblQuantity					= dblQuantity
-						   , @dblQuantityAppliedAndPriced	= dblQuantityAppliedAndPriced
 						   , @dblFinalPrice					= dblFinalPrice
 				FROM #FIXATION 
 				WHERE intPriceFixationId = @intPriceFixationId
+				  AND ISNULL(ysnProcessed, 0) = 0
 				ORDER BY intPriceFixationDetailId
-
-				IF @dblInvoicedQty > 0
-					BEGIN
-						IF @dblInvoicedQty > @dblQuantity
-							BEGIN								
-								SET @dblInvoicedQty = @dblInvoicedQty - @dblQuantity
-								SET @dblQuantity = 0
-							END
-						ELSE
-							BEGIN
-								SET @dblQuantity = @dblQuantity - @dblInvoicedQty
-								SET @dblInvoicedQty = 0
-							END
-					END
-
 				
 				IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
 					BEGIN
@@ -885,6 +904,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 						UPDATE @EntriesForInvoice
 						SET dblPrice		= @dblFinalPrice
 						  , dblUnitPrice	= @dblFinalPrice
+						  , dblQtyOrdered	= @dblQuantity
 						WHERE intId = @intInvoiceEntriesId
 
 						SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
@@ -1006,7 +1026,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 						SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
 					END
 
-				DELETE FROM #FIXATION 
+				UPDATE #FIXATION 
+				SET ysnProcessed = CAST(1 AS BIT)
 				WHERE intPriceFixationId = @intPriceFixationId
 				  AND intPriceFixationDetailId = @intPriceFixationDetailId
 			END
@@ -1117,7 +1138,28 @@ ELSE
 			EXEC dbo.uspARUpdateInvoiceIntegrations @intExistingInvoiceId, 0, @UserId
 			EXEC dbo.uspARReComputeInvoiceTaxes @intExistingInvoiceId
 	END
-         
+
+--LOG PRICE FIXATION
+IF @ysnHasPriceFixation = 1
+	BEGIN
+		INSERT INTO tblCTPriceFixationDetailAPAR (
+			  intPriceFixationDetailId
+			, intInvoiceId
+			, intInvoiceDetailId
+			, intConcurrencyId
+		)
+		SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+		     , intInvoiceId				= ID.intInvoiceId
+			 , intInvoiceDetailId		= ID.intInvoiceDetailId
+			 , intConcurrencyId			= 1
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.dblPrice = PRICE.dblFinalPrice
+		WHERE ID.intInvoiceId = @NewInvoiceId
+		  AND PRICE.ysnProcessed = 1
+		  AND ID.intInventoryShipmentItemId IS NOT NULL
+		  AND ID.intInventoryShipmentChargeId IS NULL
+	END
+
 RETURN @NewInvoiceId
 
 END		
