@@ -2,7 +2,7 @@
 	@intContractHeaderId int
 	,@intContractDetailId int
 	,@dblQuantityToPrice int
-	,@strScreen nvarchar(100)
+	,@strScreen nvarchar(100) /*screen that calls the procedure like "Ticket", "Inventory", etc..*/
 	
 AS
 
@@ -34,7 +34,7 @@ declare @ContractPrieList table (
 	,dblPrice numeric(18,6)
 )
 
-select @intContractHeaderId = intContractHeaderId, @intItemUOMId = intItemUOMId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+select @intContractHeaderId = isnull(@intContractHeaderId,intContractHeaderId), @intItemUOMId = intItemUOMId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 select @ysnLoad = isnull(ysnLoad,0) from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
 select @intPriceContractId = intPriceContractId from tblCTPriceFixation where intContractDetailId = @intContractDetailId;
 
@@ -42,7 +42,7 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 				/*---Loop Pricing---*/
 				SET @pricing = CURSOR FOR
 					select
-						a.intContractHeaderId
+						intContractHeaderId = isnull(@intContractHeaderId,a.intContractHeaderId)
 						,a.intPriceFixationId
 						,b.intPriceFixationDetailId
 						,dblQuantity = (case when @ysnLoad = 0 then b.dblQuantity else b.dblLoadPriced end)
