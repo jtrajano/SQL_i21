@@ -100,12 +100,18 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 					else
 					begin
 						set @dblInvoicedPricedQuantity = (
+													select count(*) from
+													(
+														select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId
+													) uniqueInvoice
+													/*
 													SELECT
 														count(*)
 													FROM
 														tblCTPriceFixationDetailAPAR AA
 													WHERE
 														intPriceFixationDetailId = @intPriceFixationDetailId
+													*/
 												 )
 					end
 
