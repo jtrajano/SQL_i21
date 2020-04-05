@@ -123,7 +123,7 @@ BEGIN TRY
 		(
 			SELECT TOP 1 intLoadDetailId
 			FROM tblLGLoadDetail
-			WHERE intContractDetailId = CD.intContractDetailId
+			WHERE CD.intContractDetailId = CASE WHEN CH.intContractTypeId = 1 THEN intPContractDetailId ELSE intSContractDetailId END
 			ORDER BY intLoadDetailId DESC
 		) LG
 		OUTER	APPLY	dbo.fnCTGetSampleDetail(CD.intContractDetailId)						QA
