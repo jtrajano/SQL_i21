@@ -347,7 +347,35 @@ BEGIN TRY
 				END
 			END
 		END
+
+		
+
+		
+
+
 	END
+
+	DECLARE @change_description nvarchar(200)
+	DECLARE @from_description nvarchar(200)
+	DECLARE @to_description nvarchar(200)
+	DECLARE @action_description nvarchar(200)
+	select @change_description = case when @ysnPostDestinationWeight = 1 then 'Transaction has been posted.' else  'Transaction has been unposted.' end 	
+			,@from_description = case when @ysnPostDestinationWeight = 1 then 'Unposted' else  'Posted' end 
+			,@to_description = case when @ysnPostDestinationWeight = 0 then 'Posted' else  'Unposted' end 	
+			,@action_description = case when @ysnPostDestinationWeight = 1 then 'Posted' else  'Unposted' end 	
+
+	EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= @action_description		-- Action Type
+			,@changeDescription	= ''						-- Description
+			,@fromValue			= ''								-- Old Value
+			,@toValue			= ''								-- New Value
+			,@details			= '';
+
+
+
 END TRY
 BEGIN CATCH
 	SELECT 

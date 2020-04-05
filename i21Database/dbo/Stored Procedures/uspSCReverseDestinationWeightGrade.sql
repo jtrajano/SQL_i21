@@ -181,6 +181,17 @@ BEGIN TRY
 		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
 	END
 
+
+	EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= 'Unposted'				-- Action Type
+			,@changeDescription	= ''						-- Description
+			,@fromValue			= ''						-- Old Value
+			,@toValue			= ''						-- New Value
+			,@details			= '';
+
 END TRY
 BEGIN CATCH
 	SELECT 
