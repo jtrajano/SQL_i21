@@ -4115,7 +4115,7 @@
     <Build Include="dbo\User Defined Types\OrderDetailInformation.sql" />
     <Build Include="dbo\User Defined Types\OrderHeaderInformation.sql" />
     <Build Include="dbo\Functions\fnICIsShrinkableUOM.sql" />
-	<Build Include="dbo\Functions\fnICCalculatePrice.sql" />
+    <Build Include="dbo\Functions\fnICCalculatePrice.sql" />
     <Build Include="dbo\Functions\fnICCalculateSalePriceLevel.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateItemComponent.sql" />
     <Build Include="dbo\Stored Procedures\uspSOUpdateItemComponent.sql" />
@@ -8125,8 +8125,7 @@
     <Build Include="dbo\Tables\tblICBackupCollateral.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
-
-      <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
+    <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderFPHose.sql" />
@@ -8134,6 +8133,7 @@
     <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
