@@ -1718,13 +1718,16 @@ BEGIN TRY
 
 						--Check if Shipment Item has unposted Invoice
 						if not exists (
-										SELECT TOP 1 1
-										FROM
-											tblARInvoiceDetail AD
-											JOIN tblARInvoice IV ON IV.intInvoiceId	= AD.intInvoiceId
-										WHERE
-											intInventoryShipmentItemId = @intInventoryShipmentItemId
-											AND ISNULL(IV.ysnPosted,0) = 0
+										select
+											*
+										from
+											tblICInventoryShipmentItem a
+											,tblARInvoiceDetail b, tblARInvoice c
+										where
+											a.intInventoryShipmentId = @intInventoryShipmentId
+											and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
+											and c.intInvoiceId = b.intInvoiceId
+											and isnull(c.ysnPosted,0) = 0
 									  )
 						begin
 							--Shipment Item has no unposted Invoice, therefore create
@@ -1792,23 +1795,16 @@ BEGIN TRY
 						else
 						begin
 							--Shipment Item has unposted Invoice, therefore add new details
-							SELECT
-								@intInvoiceId = AD.intInvoiceId 
-							FROM
-								tblARInvoiceDetail	AD 
-								JOIN tblARInvoice IV ON IV.intInvoiceId	= AD.intInvoiceId
-							WHERE
-								intInventoryShipmentItemId = @intInventoryShipmentItemId
-								AND ISNULL(IV.ysnPosted,0) = 0
-
-							SELECT
-								@intInvoiceDetailId = intInvoiceDetailId
-							FROM
-								tblARInvoiceDetail
-							WHERE
-								intInvoiceId = @intInvoiceId
-								AND intContractDetailId = @intContractDetailId
-								AND intInventoryShipmentChargeId IS NULL
+							select
+								top 1 @intInvoiceId = c.intInvoiceId, @intInvoiceDetailId = b.intInvoiceDetailId
+							from
+								tblICInventoryShipmentItem a
+								,tblARInvoiceDetail b, tblARInvoice c
+							where
+								a.intInventoryShipmentId = @intInventoryShipmentId
+								and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
+								and c.intInvoiceId = b.intInvoiceId
+								and isnull(c.ysnPosted,0) = 0
 
 							print 'add detail to existing invoice';
 
