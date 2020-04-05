@@ -282,7 +282,7 @@ BEGIN TRY
 								,dblUnits								= B.dblOpenReceive
 								,dtmHistoryDate							= B.dtmReceiptDate
 								,dblPaidAmount							= A.dblPaidAmount
-								,strPaidDescription						= A.strPaidDescription
+								,strPaidDescription						= ISNULL(A.strPaidDescription'') + ' - Reversal'
 								,dblCurrencyRate						= A.dblCurrencyRate
 								,strType								= A.strType
 								,strUserName							= NULL
