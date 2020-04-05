@@ -813,9 +813,11 @@ SELECT intInventoryShipmentItemId	= IE.intInventoryShipmentItemId
 	 , intInvoiceEntriesId			= IE.intId
 	 , dtmInvoiceDate				= ISNULL(IE.dtmDate, @DateOnly)
 	 , dblQtyShipped				= IE.dblQtyShipped
+	 , ysnLoad						= ISNULL(CD.ysnLoad, CAST(0 AS BIT))
 INTO #CONTRACTSPRICING
 FROM @EntriesForInvoice IE
 INNER JOIN tblICInventoryShipmentItem ISI ON IE.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND IE.intContractDetailId = ISI.intLineNo
+INNER JOIN tblCTContractHeader CD ON IE.intContractHeaderId = CD.intContractHeaderId
 INNER JOIN tblCTPriceFixation PF ON IE.intContractDetailId = PF.intContractDetailId 
                                 AND IE.intContractHeaderId = PF.intContractHeaderId
 WHERE IE.intContractDetailId IS NOT NULL
@@ -831,9 +833,10 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 		SELECT intContractHeaderId
 			 , intContractDetailId
 			 , dblQtyToPrice		= SUM(dblQtyShipped)
+			 , ysnLoad
 		INTO #CONTRACTSTOPRICE
 		FROM #CONTRACTSPRICING
-		GROUP BY intContractHeaderId, intContractDetailId
+		GROUP BY intContractHeaderId, intContractDetailId, ysnLoad
 	END
 	
 WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSTOPRICE)
@@ -844,7 +847,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSTOPRICE)
 
 		SELECT TOP 1 @intContractHeaderToPriceId = intContractHeaderId
 				   , @intContractDetailToPriceId = intContractDetailId
-				   , @dblQtyToPrice				 = dblQtyToPrice
+				   , @dblQtyToPrice				 = CASE WHEN ysnLoad = 1 THEN 1 ELSE dblQtyToPrice END
 		FROM #CONTRACTSTOPRICE
 
 		INSERT INTO #FIXATION (
@@ -869,11 +872,13 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 			  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
 			  , @intInvoiceEntriesId	INT = NULL
 			  , @intPriceFixationId		INT = NULL
+			  , @ysnLoad				BIT = 0
 
 		SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
 				   , @dblQtyShipped				= dblQtyShipped
 				   , @dblOriginalQtyShipped		= dblQtyShipped				   
 				   , @intPriceFixationId		= intPriceFixationId
+				   , @ysnLoad					= ysnLoad
 		FROM #CONTRACTSPRICING 
 		ORDER BY intInvoiceEntriesId
 
@@ -893,7 +898,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 				
 				IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
 					BEGIN
-						IF @dblQtyShipped > @dblQuantity
+						IF @dblQtyShipped > @dblQuantity AND @ysnLoad = 0
 							BEGIN
 								UPDATE @EntriesForInvoice
 								SET dblQtyShipped	= @dblQuantity
@@ -904,7 +909,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 						UPDATE @EntriesForInvoice
 						SET dblPrice		= @dblFinalPrice
 						  , dblUnitPrice	= @dblFinalPrice
-						  , dblQtyOrdered	= @dblQuantity
+						  , dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN @dblQuantity ELSE @dblOriginalQtyShipped END
 						WHERE intId = @intInvoiceEntriesId
 
 						SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
