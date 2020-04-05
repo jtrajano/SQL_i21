@@ -939,6 +939,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 							 , ysnRecap
 							 , ysnPost
 							 , intItemId
+							 , intTicketId
 							 , ysnInventory
 							 , strDocumentNumber
 							 , strItemDescription
@@ -992,6 +993,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 							 , ysnRecap
 							 , ysnPost
 							 , intItemId
+							 , intTicketId
 							 , ysnInventory
 							 , strDocumentNumber
 							 , strItemDescription
