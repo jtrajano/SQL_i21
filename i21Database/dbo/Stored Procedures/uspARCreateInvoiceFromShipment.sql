@@ -59,10 +59,10 @@ SELECT
 	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
-	,@Date						= @DateOnly
+	,@Date						= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
 	,@ShipDate					= ICIS.[dtmShipDate]
-	,@PostDate					= @DateOnly
-	,@CalculatedDate			= @DateOnly
+	,@PostDate					= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
+	,@CalculatedDate			= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
 	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
@@ -84,6 +84,10 @@ WHERE ICIS.intInventoryShipmentId = @ShipmentId
 		OR
 		ICIS.[intSourceType] <> 1
 		)
+
+SET @Date = CAST(@Date AS DATE)
+SET @ShipDate = CAST(@ShipDate AS DATE)
+SET @PostDate = CAST(@PostDate AS DATE)
 
 --VALIDATIONS
 SELECT TOP 1 @InvoiceNumber = ARI.[strInvoiceNumber]
@@ -811,7 +815,7 @@ SELECT intInventoryShipmentItemId	= IE.intInventoryShipmentItemId
 	 , intContractHeaderId			= IE.intContractHeaderId
 	 , intPriceFixationId			= PF.intPriceFixationId
 	 , intInvoiceEntriesId			= IE.intId
-	 , dtmInvoiceDate				= ISNULL(IE.dtmDate, @DateOnly)
+	 , dtmInvoiceDate				= ISNULL(IE.dtmDate, @Date)
 	 , dblQtyShipped				= IE.dblQtyShipped
 	 , ysnLoad						= ISNULL(CD.ysnLoad, CAST(0 AS BIT))
 INTO #CONTRACTSPRICING
