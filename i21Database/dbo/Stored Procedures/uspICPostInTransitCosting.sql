@@ -520,6 +520,7 @@ BEGIN
 			strBatchId
 			,strBucketType
 			,strTransactionType
+			,intTransactionRecordHeaderId
 			,intTransactionRecordId 
 			,strTransactionNumber 
 			,dtmTransactionDate 
@@ -548,6 +549,7 @@ BEGIN
 			strBatchId = t.strBatchId
 			,strBucketType = @strBucketType_SalesInTransit
 			,strTransactionType = v.strTransactionType
+			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
 			,dtmTransactionDate = t.dtmDate
@@ -590,12 +592,13 @@ BEGIN
 			AND v.strTransactionType IN ('Inventory Shipment', 'Outbound Shipment', 'Invoice')
 	END 
 
-	IF (@strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment', 'Inbound Shipment'))
+	IF (@strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment', 'Inbound Shipments'))
 	BEGIN 
 		INSERT INTO @SummaryLogs (	
 			strBatchId
 			,strBucketType
 			,strTransactionType
+			,intTransactionRecordHeaderId
 			,intTransactionRecordId 
 			,strTransactionNumber 
 			,dtmTransactionDate 
@@ -624,6 +627,7 @@ BEGIN
 			strBatchId = t.strBatchId
 			,strBucketType = @strBucketType_PurchaseInTransit
 			,strTransactionType = v.strTransactionType
+			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
 			,dtmTransactionDate = t.dtmDate
@@ -663,7 +667,7 @@ BEGIN
 			AND t.dblQty <> 0 
 			AND v.ysnInTransit = 1
 			AND ISNULL(t.ysnIsUnposted,0) = 0
-			AND v.strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment', 'Inbound Shipment')
+			AND v.strTransactionType IN ('Inventory Receipt', 'Inventory Transfer with Shipment', 'Inbound Shipments')
 	END 
 
 	EXEC uspRKLogRiskPosition @SummaryLogs
