@@ -330,8 +330,8 @@ BEGIN TRY
 				,x.dblQtyOrdered
 				,x.dblQtyShipped
 				,x.strUnitMeasure
-				,x.dblPrice / 100
-				,x.dblTotal / 100
+				,x.dblPrice
+				,x.dblTotal
 				,x.dblShipmentNetWt
 				,x.dblItemWeight
 				,x.strWeightUnitMeasure
@@ -695,8 +695,8 @@ BEGIN TRY
 			IF @strTransactionType = 'Invoice'
 			BEGIN
 				UPDATE tblAPBillDetail
-				SET dblCost = dblCost / 100
-					,dblTotal = dblTotal / 100
+				SET dblCost = dblCost 
+					,dblTotal = dblTotal 
 				WHERE intBillId = @intBillInvoiceId
 			END
 			ELSE
