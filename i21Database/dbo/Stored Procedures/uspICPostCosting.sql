@@ -1122,7 +1122,8 @@ BEGIN
 			strBatchId
 			,strBucketType
 			,strTransactionType
-			,intTransactionRecordId 
+			,intTransactionRecordHeaderId
+			,intTransactionRecordId
 			,strTransactionNumber 
 			,dtmTransactionDate 
 			,intContractDetailId 
@@ -1150,6 +1151,7 @@ BEGIN
 			strBatchId = t.strBatchId
 			,strBucketType = @strBucketType_CompanyOwned
 			,strTransactionType = v.strTransactionType
+			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
 			,dtmTransactionDate = t.dtmDate
@@ -1199,7 +1201,8 @@ BEGIN
 			strBatchId
 			,strBucketType
 			,strTransactionType
-			,intTransactionRecordId 
+			,intTransactionRecordHeaderId
+			,intTransactionRecordId
 			,strTransactionNumber 
 			,dtmTransactionDate 
 			,intContractDetailId 
@@ -1227,6 +1230,7 @@ BEGIN
 			strBatchId = t.strBatchId
 			,strBucketType = @strBucketType_CompanyOwned
 			,strTransactionType = v.strTransactionType
+			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
 			,dtmTransactionDate = t.dtmDate
@@ -1278,6 +1282,7 @@ BEGIN
 			strBatchId
 			,strBucketType
 			,strTransactionType
+			,intTransactionRecordHeaderId
 			,intTransactionRecordId 
 			,strTransactionNumber 
 			,dtmTransactionDate 
@@ -1306,6 +1311,7 @@ BEGIN
 			strBatchId = t.strBatchId
 			,strBucketType = @strBucketType_CompanyOwned
 			,strTransactionType = v.strTransactionType
+			,intTransactionRecordHeaderId = t.intTransactionId
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
 			,dtmTransactionDate = t.dtmDate
