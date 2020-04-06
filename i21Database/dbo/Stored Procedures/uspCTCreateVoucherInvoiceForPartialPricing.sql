@@ -1719,7 +1719,7 @@ BEGIN TRY
 						--Check if Shipment Item has unposted Invoice
 						if not exists (
 										select
-											*
+											top 1 1
 										from
 											tblICInventoryShipmentItem a
 											,tblARInvoiceDetail b, tblARInvoice c
@@ -1770,6 +1770,9 @@ BEGIN TRY
 										,@Price				=	@dblFinalPrice
 										,@ContractPrice		=	@dblFinalPrice
 										,@UserId			=	@intUserId
+
+								/*when there's multiple line item in IS, uspCTCreateInvoiceFromShipment will create all those line in invoice - need to remove the others and will create in the shipment item loop*/
+								delete FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInvoiceDetailId <> @intInvoiceDetailId;
 							END
 
 							--Create AR record to staging table tblCTPriceFixationDetailAPAR
