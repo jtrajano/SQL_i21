@@ -12,8 +12,7 @@ BEGIN TRY
 			intContractHeaderId		INT,  
 			intContractDetailId		INT,        
 			dblQuantity				NUMERIC(18,6),
-			dblDestinationQuantity	NUMERIC(18,6),
-			ysnInvoicePosted		BIT
+			dblDestinationQuantity	NUMERIC(18,6)
 	)
 
 	DECLARE @tblBill TABLE 
@@ -28,13 +27,12 @@ BEGIN TRY
 			ysnOpenLoad				BIT
 	)
 
-	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity,ysnInvoicePosted)
+	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity)
 	SELECT   
 		intContractHeaderId  = ShipmentItem.intOrderId  
 		,intContractDetailId = ShipmentItem.intLineNo  
 		,dblQuantity   = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, ShipmentItem.dblQuantity)),0)   
-		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,ShipmentItem.dblDestinationNet)),0)   
-		,ysnInvoicePosted  = ISNULL(INV.ysnPosted,0)  
+		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, CASE WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) ELSE ShipmentItem.dblQuantity END)),0)
 	FROM tblICInventoryShipmentItem ShipmentItem  
 	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1  
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId  
@@ -42,9 +40,10 @@ BEGIN TRY
 	(
 		SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
 		FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+		WHERE IV.strTransactionType <> 'Credit Memo'
 	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
-	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId  
-	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo,INV.ysnPosted  
+	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId
+	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo  
 
 	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
 	SELECT 
@@ -342,7 +341,7 @@ BEGIN TRY
 		END AS dblAppliedQty
 		,dblAppliedLoadQty = 
 		CASE 
-			WHEN Shipment.dblQuantity > 0  THEN (CASE WHEN Shipment.ysnInvoicePosted = 1 THEN Shipment.dblDestinationQuantity ELSE Shipment.dblQuantity END)
+			WHEN Shipment.dblQuantity > 0  THEN Shipment.dblDestinationQuantity
 			WHEN Bill.dblQuantity > 0  THEN Bill.dblQuantity
 			ELSE -- dblAppliedQty
 				CASE 
