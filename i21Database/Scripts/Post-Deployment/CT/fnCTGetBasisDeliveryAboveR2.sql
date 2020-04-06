@@ -697,6 +697,15 @@
 					--having(sum(dblQuantity) > 0)) b
 					and dblQuantity > 0) b
 						on a.intContractHeaderId = b.intContractHeaderId
+
+				DELETE FROM @Transaction
+				WHERE intContractDetailId IN (
+					SELECT intContractDetailId
+					FROM @Transaction
+					GROUP BY intContractDetailId
+					HAVING SUM(dblQuantity) = 0
+				)
+
 				-- TEMPORARY SOLUTION
 				IF @dtmDate IS NOT NULL
 				BEGIN

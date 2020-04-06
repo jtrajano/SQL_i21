@@ -191,6 +191,14 @@ BEGIN
 	,OBC.strHeaderUnitMeasure
 	ORDER BY CBL1.dtmCreatedDate, CBL1.intContractBalanceLogId ASC
 
+	DELETE FROM @Transaction
+	WHERE intContractDetailId IN (
+		SELECT intContractDetailId
+		FROM @Transaction
+		GROUP BY intContractDetailId
+		HAVING SUM(dblQuantity) = 0
+	)
+
 	RETURN
 END
 
