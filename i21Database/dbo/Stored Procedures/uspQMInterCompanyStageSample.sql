@@ -77,7 +77,11 @@ BEGIN TRY
 				,@strDelete = TC.strDelete
 				,@strToTransactionType = TT1.strTransactionType
 				,@intCompanyLocationId = TC.intCompanyLocationId
-				,@intToBookId = TC.intToBookId
+				,@intToBookId = CASE 
+					WHEN S.ysnParent = 0
+						THEN TC.intFromBookId
+					ELSE TC.intToBookId
+					END
 				,@strFromCompanyName = MC.strCompanyName
 			FROM tblSMInterCompanyTransactionConfiguration TC WITH (NOLOCK)
 			JOIN tblSMInterCompanyTransactionType TT WITH (NOLOCK) ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
