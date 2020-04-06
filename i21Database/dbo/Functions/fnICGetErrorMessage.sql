@@ -263,6 +263,8 @@ BEGIN
 		WHEN @msgId = 80247 THEN '%s already has an existing reversal.'
 		WHEN @msgId = 80248 THEN 'Back-dated reversal is not allowed.'
 		WHEN @msgId = 80249 THEN 'Shipment reversal is not allowed. It already has a credit memo. See %s.'
+		WHEN @msgId = 80250 THEN 'Inventory Account is set to %s for item %s.'
+		WHEN @msgId = 80251 THEN 'Work In Progress Account is set to %s for item %s.'
 	END 
 
 	RETURN @msg
