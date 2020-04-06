@@ -51,6 +51,7 @@ BEGIN
 		, intTransactionId = intTransactionRecordHeaderId
 		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
+			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN 'CNT'
 			ELSE 'SPT' END
 		,strOwnership = 'Company Owned'
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
