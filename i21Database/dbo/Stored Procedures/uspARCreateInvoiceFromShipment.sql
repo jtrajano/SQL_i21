@@ -841,209 +841,209 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 		INTO #CONTRACTSTOPRICE
 		FROM #CONTRACTSPRICING
 		GROUP BY intContractHeaderId, intContractDetailId, ysnLoad
-	END
-	
-WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSTOPRICE)
-	BEGIN
-		DECLARE @intContractHeaderToPriceId	INT = NULL
-			  , @intContractDetailToPriceId	INT = NULL
-			  , @dblQtyToPrice				NUMERIC(18, 6) = 0
 
-		SELECT TOP 1 @intContractHeaderToPriceId = intContractHeaderId
-				   , @intContractDetailToPriceId = intContractDetailId
-				   , @dblQtyToPrice				 = CASE WHEN ysnLoad = 1 THEN 1 ELSE dblQtyToPrice END
-		FROM #CONTRACTSTOPRICE
-
-		INSERT INTO #FIXATION (
-			  intIdentity
-			, intContractHeaderId
-			, intContractDetailId
-			, ysnLoad
-			, intPriceContractId
-			, intPriceFixationId
-			, intPriceFixationDetailId
-			, dblQuantity
-			, dblFinalPrice
-		)
-		EXEC dbo.uspCTGetContractPrice @intContractHeaderToPriceId, @intContractDetailToPriceId, @dblQtyToPrice, 'Invoice'
-
-		DELETE FROM #CONTRACTSTOPRICE WHERE intContractDetailId = @intContractDetailToPriceId
-	END
-	
-WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
-	BEGIN
-		DECLARE @dblQtyShipped			NUMERIC(18, 6) = 0
-			  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
-			  , @intInvoiceEntriesId	INT = NULL
-			  , @intPriceFixationId		INT = NULL
-			  , @ysnLoad				BIT = 0
-
-		SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
-				   , @dblQtyShipped				= dblQtyShipped
-				   , @dblOriginalQtyShipped		= dblQtyShipped				   
-				   , @intPriceFixationId		= intPriceFixationId
-				   , @ysnLoad					= ysnLoad
-		FROM #CONTRACTSPRICING 
-		ORDER BY intInvoiceEntriesId
-
-		WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSTOPRICE)
 			BEGIN
-				DECLARE @intPriceFixationDetailId		INT = NULL
-					  , @dblQuantity					NUMERIC(18, 6) = 0
-					  , @dblFinalPrice					NUMERIC(18, 6) = 0
+				DECLARE @intContractHeaderToPriceId	INT = NULL
+					, @intContractDetailToPriceId	INT = NULL
+					, @dblQtyToPrice				NUMERIC(18, 6) = 0
 
-				SELECT TOP 1 @intPriceFixationDetailId		= intPriceFixationDetailId
-						   , @dblQuantity					= dblQuantity
-						   , @dblFinalPrice					= dblFinalPrice
-				FROM #FIXATION 
-				WHERE intPriceFixationId = @intPriceFixationId
-				  AND ISNULL(ysnProcessed, 0) = 0
-				ORDER BY intPriceFixationDetailId
-				
-				IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
+				SELECT TOP 1 @intContractHeaderToPriceId = intContractHeaderId
+						, @intContractDetailToPriceId = intContractDetailId
+						, @dblQtyToPrice				 = CASE WHEN ysnLoad = 1 THEN 1 ELSE dblQtyToPrice END
+				FROM #CONTRACTSTOPRICE
+
+				INSERT INTO #FIXATION (
+					intIdentity
+					, intContractHeaderId
+					, intContractDetailId
+					, ysnLoad
+					, intPriceContractId
+					, intPriceFixationId
+					, intPriceFixationDetailId
+					, dblQuantity
+					, dblFinalPrice
+				)
+				EXEC dbo.uspCTGetContractPrice @intContractHeaderToPriceId, @intContractDetailToPriceId, @dblQtyToPrice, 'Invoice'
+
+				DELETE FROM #CONTRACTSTOPRICE WHERE intContractDetailId = @intContractDetailToPriceId
+			END
+
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
+			BEGIN
+				DECLARE @dblQtyShipped			NUMERIC(18, 6) = 0
+					, @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
+					, @intInvoiceEntriesId	INT = NULL
+					, @intPriceFixationId		INT = NULL
+					, @ysnLoad				BIT = 0
+
+				SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
+						, @dblQtyShipped				= dblQtyShipped
+						, @dblOriginalQtyShipped		= dblQtyShipped				   
+						, @intPriceFixationId		= intPriceFixationId
+						, @ysnLoad					= ysnLoad
+				FROM #CONTRACTSPRICING 
+				ORDER BY intInvoiceEntriesId
+
+				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
 					BEGIN
-						IF @dblQtyShipped > @dblQuantity AND @ysnLoad = 0
+						DECLARE @intPriceFixationDetailId		INT = NULL
+							, @dblQuantity					NUMERIC(18, 6) = 0
+							, @dblFinalPrice					NUMERIC(18, 6) = 0
+
+						SELECT TOP 1 @intPriceFixationDetailId		= intPriceFixationDetailId
+								, @dblQuantity					= dblQuantity
+								, @dblFinalPrice					= dblFinalPrice
+						FROM #FIXATION 
+						WHERE intPriceFixationId = @intPriceFixationId
+						AND ISNULL(ysnProcessed, 0) = 0
+						ORDER BY intPriceFixationDetailId
+						
+						IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
 							BEGIN
+								IF @dblQtyShipped > @dblQuantity AND @ysnLoad = 0
+									BEGIN
+										UPDATE @EntriesForInvoice
+										SET dblQtyShipped	= @dblQuantity
+										, dblQtyOrdered	= @dblQuantity
+										WHERE intId = @intInvoiceEntriesId
+									END
+
 								UPDATE @EntriesForInvoice
-								SET dblQtyShipped	= @dblQuantity
-								  , dblQtyOrdered	= @dblQuantity
+								SET dblPrice		= @dblFinalPrice
+								, dblUnitPrice	= @dblFinalPrice
+								, dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN @dblQuantity ELSE @dblOriginalQtyShipped END
 								WHERE intId = @intInvoiceEntriesId
+
+								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
+							END
+						ELSE IF @dblQuantity > 0 
+							BEGIN
+								IF @dblQuantity > @dblQtyShipped
+									SET @dblQuantity = @dblQtyShipped
+
+								INSERT INTO @EntriesForInvoice (
+									strSourceTransaction
+									, intSourceId
+									, strSourceId
+									, intEntityCustomerId
+									, intCompanyLocationId
+									, intCurrencyId
+									, intPeriodsToAccrue
+									, dtmDate
+									, dtmShipDate
+									, intEntitySalespersonId
+									, intFreightTermId
+									, strBOLNumber
+									, strComments
+									, intShipToLocationId
+									, ysnTemplate
+									, ysnForgiven
+									, ysnCalculated
+									, ysnSplitted
+									, intContractHeaderId
+									, intEntityId
+									, ysnResetDetails
+									, ysnRecap
+									, ysnPost
+									, intItemId
+									, intTicketId
+									, ysnInventory
+									, strDocumentNumber
+									, strItemDescription
+									, intOrderUOMId
+									, dblQtyOrdered
+									, intItemUOMId
+									, intPriceUOMId
+									, dblContractPriceUOMQty
+									, dblQtyShipped
+									, dblDiscount
+									, dblItemWeight
+									, intItemWeightUOMId
+									, dblPrice
+									, dblUnitPrice
+									, strPricing
+									, ysnRefreshPrice
+									, dblMaintenanceAmount
+									, dblLicenseAmount
+									, ysnRecomputeTax
+									, intInventoryShipmentItemId
+									, strShipmentNumber
+									, strSalesOrderNumber
+									, intContractDetailId
+									, dblNewMeterReading
+									, dblPreviousMeterReading
+									, dblConversionFactor
+									, ysnClearDetailTaxes
+									, dblSubCurrencyRate
+								)
+								SELECT strSourceTransaction
+									, intSourceId
+									, strSourceId
+									, intEntityCustomerId
+									, intCompanyLocationId
+									, intCurrencyId
+									, intPeriodsToAccrue
+									, dtmDate
+									, dtmShipDate
+									, intEntitySalespersonId
+									, intFreightTermId
+									, strBOLNumber
+									, strComments
+									, intShipToLocationId
+									, ysnTemplate
+									, ysnForgiven
+									, ysnCalculated
+									, ysnSplitted
+									, intContractHeaderId
+									, intEntityId
+									, ysnResetDetails
+									, ysnRecap
+									, ysnPost
+									, intItemId
+									, intTicketId
+									, ysnInventory
+									, strDocumentNumber
+									, strItemDescription
+									, intOrderUOMId
+									, dblQtyOrdered			= @dblQuantity
+									, intItemUOMId
+									, intPriceUOMId
+									, dblContractPriceUOMQty
+									, dblQtyShipped			= @dblQuantity
+									, dblDiscount
+									, dblItemWeight
+									, intItemWeightUOMId
+									, dblPrice					= @dblFinalPrice
+									, dblUnitPrice				= @dblFinalPrice
+									, strPricing
+									, ysnRefreshPrice
+									, dblMaintenanceAmount
+									, dblLicenseAmount
+									, ysnRecomputeTax
+									, intInventoryShipmentItemId
+									, strShipmentNumber
+									, strSalesOrderNumber
+									, intContractDetailId
+									, dblNewMeterReading
+									, dblPreviousMeterReading
+									, dblConversionFactor
+									, ysnClearDetailTaxes
+									, dblSubCurrencyRate
+								FROM @EntriesForInvoice
+								WHERE intId = @intInvoiceEntriesId
+
+								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
 							END
 
-						UPDATE @EntriesForInvoice
-						SET dblPrice		= @dblFinalPrice
-						  , dblUnitPrice	= @dblFinalPrice
-						  , dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN @dblQuantity ELSE @dblOriginalQtyShipped END
-						WHERE intId = @intInvoiceEntriesId
-
-						SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
+						UPDATE #FIXATION 
+						SET ysnProcessed = CAST(1 AS BIT)
+						WHERE intPriceFixationId = @intPriceFixationId
+						AND intPriceFixationDetailId = @intPriceFixationDetailId
 					END
-				ELSE IF @dblQuantity > 0 
-					BEGIN
-						IF @dblQuantity > @dblQtyShipped
-							SET @dblQuantity = @dblQtyShipped
-
-						INSERT INTO @EntriesForInvoice (
-						       strSourceTransaction
-							 , intSourceId
-							 , strSourceId
-							 , intEntityCustomerId
-							 , intCompanyLocationId
-							 , intCurrencyId
-							 , intPeriodsToAccrue
-							 , dtmDate
-							 , dtmShipDate
-							 , intEntitySalespersonId
-							 , intFreightTermId
-							 , strBOLNumber
-							 , strComments
-							 , intShipToLocationId
-							 , ysnTemplate
-							 , ysnForgiven
-							 , ysnCalculated
-							 , ysnSplitted
-							 , intContractHeaderId
-							 , intEntityId
-							 , ysnResetDetails
-							 , ysnRecap
-							 , ysnPost
-							 , intItemId
-							 , intTicketId
-							 , ysnInventory
-							 , strDocumentNumber
-							 , strItemDescription
-							 , intOrderUOMId
-							 , dblQtyOrdered
-							 , intItemUOMId
-							 , intPriceUOMId
-							 , dblContractPriceUOMQty
-							 , dblQtyShipped
-							 , dblDiscount
-							 , dblItemWeight
-							 , intItemWeightUOMId
-							 , dblPrice
-							 , dblUnitPrice
-							 , strPricing
-							 , ysnRefreshPrice
-							 , dblMaintenanceAmount
-							 , dblLicenseAmount
-							 , ysnRecomputeTax
-							 , intInventoryShipmentItemId
-							 , strShipmentNumber
-							 , strSalesOrderNumber
-							 , intContractDetailId
-							 , dblNewMeterReading
-							 , dblPreviousMeterReading
-							 , dblConversionFactor
-							 , ysnClearDetailTaxes
-							 , dblSubCurrencyRate
-						)
-						SELECT strSourceTransaction
-							 , intSourceId
-							 , strSourceId
-							 , intEntityCustomerId
-							 , intCompanyLocationId
-							 , intCurrencyId
-							 , intPeriodsToAccrue
-							 , dtmDate
-							 , dtmShipDate
-							 , intEntitySalespersonId
-							 , intFreightTermId
-							 , strBOLNumber
-							 , strComments
-							 , intShipToLocationId
-							 , ysnTemplate
-							 , ysnForgiven
-							 , ysnCalculated
-							 , ysnSplitted
-							 , intContractHeaderId
-							 , intEntityId
-							 , ysnResetDetails
-							 , ysnRecap
-							 , ysnPost
-							 , intItemId
-							 , intTicketId
-							 , ysnInventory
-							 , strDocumentNumber
-							 , strItemDescription
-							 , intOrderUOMId
-							 , dblQtyOrdered			= @dblQuantity
-							 , intItemUOMId
-							 , intPriceUOMId
-							 , dblContractPriceUOMQty
-							 , dblQtyShipped			= @dblQuantity
-							 , dblDiscount
-							 , dblItemWeight
-							 , intItemWeightUOMId
-							 , dblPrice					= @dblFinalPrice
-							 , dblUnitPrice				= @dblFinalPrice
-							 , strPricing
-							 , ysnRefreshPrice
-							 , dblMaintenanceAmount
-							 , dblLicenseAmount
-							 , ysnRecomputeTax
-							 , intInventoryShipmentItemId
-							 , strShipmentNumber
-							 , strSalesOrderNumber
-							 , intContractDetailId
-							 , dblNewMeterReading
-							 , dblPreviousMeterReading
-							 , dblConversionFactor
-							 , ysnClearDetailTaxes
-							 , dblSubCurrencyRate
-						FROM @EntriesForInvoice
-						WHERE intId = @intInvoiceEntriesId
-
-						SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
-					END
-
-				UPDATE #FIXATION 
-				SET ysnProcessed = CAST(1 AS BIT)
-				WHERE intPriceFixationId = @intPriceFixationId
-				  AND intPriceFixationDetailId = @intPriceFixationDetailId
+				
+				DELETE FROM #CONTRACTSPRICING WHERE intInvoiceEntriesId = @intInvoiceEntriesId
 			END
-		
-		DELETE FROM #CONTRACTSPRICING WHERE intInvoiceEntriesId = @intInvoiceEntriesId
 	END
 
 --CREATE INVOICE IF THERE's NONE
