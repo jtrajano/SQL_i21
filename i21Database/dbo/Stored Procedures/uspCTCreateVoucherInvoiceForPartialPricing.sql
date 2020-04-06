@@ -118,6 +118,10 @@ BEGIN TRY
 			intInventoryShipmentId int
 		)
 		declare @intCommulativeLoadPriced int = 0;
+		
+		declare @intApplied numeric(18,6) = 0;
+		declare @intPreviousPricedLoad numeric(18,6);
+		declare @dblLoadAppliedAndPriced numeric(18,6);
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -983,13 +987,43 @@ BEGIN TRY
 
 
 						--Update the load applied and priced
-						IF @ysnLoad = 1
-						BEGIN
-							UPDATE tblCTPriceFixationDetail 
-								SET dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryShipmentItemLoadApplied,
-									dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryShipmentItemLoadApplied
-							WHERE intPriceFixationDetailId = @intPriceFixationDetailId
-						END
+
+						select @intApplied = count(distinct d.intInventoryShipmentId) from tblICInventoryShipmentItem c
+						left join tblICInventoryShipment d on d.intInventoryShipmentId = c.intInventoryShipmentId
+						where  c.intLineNo = @intContractDetailId
+
+						select @intPreviousPricedLoad = isnull(sum(dblLoadPriced),0.00) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId and intPriceFixationDetailId < @intPriceFixationDetailId;
+
+						if (@intApplied > @intPreviousPricedLoad)
+						begin
+							if ((@intApplied - @intPreviousPricedLoad) >= @dblPriced)
+							begin
+								set @dblLoadAppliedAndPriced = @dblPriced;
+							end
+							else
+							begin
+								set @dblLoadAppliedAndPriced = (@intApplied - @intPreviousPricedLoad);
+							end
+						end
+						else
+						begin
+							set @dblLoadAppliedAndPriced = 0;
+						end
+
+						--Update the load applied and priced
+						UPDATE tblCTPriceFixationDetail 
+							SET dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryShipmentItemLoadApplied,
+								dblLoadAppliedAndPriced = @dblLoadAppliedAndPriced
+						WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+
+
+						-- IF @ysnLoad = 1
+						-- BEGIN
+						-- 	UPDATE tblCTPriceFixationDetail 
+						-- 		SET dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryShipmentItemLoadApplied,
+						-- 			dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryShipmentItemLoadApplied
+						-- 	WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+						-- END
 
 					/*
 					--Check if Shipment Item has unposted Invoice
