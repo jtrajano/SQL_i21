@@ -267,8 +267,8 @@ BEGIN TRY
 	   ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
                     CASE
                      WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
-                        THEN MAX(ShipmentItem.dblDestinationNet * 1)
-                     ELSE SUM(ShipmentItem.dblQuantity)
+                        THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblDestinationNet * 1 ELSE 0 END)
+                     ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)
                     END)
                     ,0)
 		,0
@@ -288,6 +288,13 @@ BEGIN TRY
 			SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
 			FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
 		) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
+		LEFT JOIN 
+		(
+			SELECT DISTINCT ID.intInventoryShipmentItemId
+			FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+			WHERE IV.strTransactionType = 'Credit Memo'
+			AND  IV.ysnPosted = 1
+		) CM ON CM.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId 
 		WHERE Shipment.intOrderType = 1
 		AND Shipment.ysnPosted = 1
 		AND dbo.fnRemoveTimeOnDate(Shipment.dtmShipDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate  ELSE dbo.fnRemoveTimeOnDate(Shipment.dtmShipDate) END
