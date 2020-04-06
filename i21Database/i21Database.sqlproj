@@ -8620,6 +8620,14 @@
     <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_CA.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptStage.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptError.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptArchive.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemStage.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemError.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptItemArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPReceipt_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPReceipt_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
