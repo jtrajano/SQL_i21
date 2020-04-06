@@ -849,12 +849,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 					, @dblQtyToPrice				NUMERIC(18, 6) = 0
 
 				SELECT TOP 1 @intContractHeaderToPriceId = intContractHeaderId
-						, @intContractDetailToPriceId = intContractDetailId
-						, @dblQtyToPrice				 = CASE WHEN ysnLoad = 1 THEN 1 ELSE dblQtyToPrice END
+						   , @intContractDetailToPriceId = intContractDetailId
+						   , @dblQtyToPrice				 = CASE WHEN ysnLoad = 1 THEN 1 ELSE dblQtyToPrice END
 				FROM #CONTRACTSTOPRICE
 
 				INSERT INTO #FIXATION (
-					intIdentity
+					  intIdentity
 					, intContractHeaderId
 					, intContractDetailId
 					, ysnLoad
@@ -872,16 +872,16 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 		WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 			BEGIN
 				DECLARE @dblQtyShipped			NUMERIC(18, 6) = 0
-					, @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
-					, @intInvoiceEntriesId	INT = NULL
-					, @intPriceFixationId		INT = NULL
-					, @ysnLoad				BIT = 0
+					  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
+					  , @intInvoiceEntriesId	INT = NULL
+					  , @intPriceFixationId		INT = NULL
+					  , @ysnLoad				BIT = 0
 
 				SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
-						, @dblQtyShipped				= dblQtyShipped
-						, @dblOriginalQtyShipped		= dblQtyShipped				   
-						, @intPriceFixationId		= intPriceFixationId
-						, @ysnLoad					= ysnLoad
+						   , @dblQtyShipped				= dblQtyShipped
+						   , @dblOriginalQtyShipped		= dblQtyShipped				   
+						   , @intPriceFixationId		= intPriceFixationId
+						   , @ysnLoad					= ysnLoad
 				FROM #CONTRACTSPRICING 
 				ORDER BY intInvoiceEntriesId
 
@@ -892,8 +892,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 							, @dblFinalPrice					NUMERIC(18, 6) = 0
 
 						SELECT TOP 1 @intPriceFixationDetailId		= intPriceFixationDetailId
-								, @dblQuantity					= dblQuantity
-								, @dblFinalPrice					= dblFinalPrice
+								   , @dblQuantity					= dblQuantity
+								   , @dblFinalPrice					= dblFinalPrice
 						FROM #FIXATION 
 						WHERE intPriceFixationId = @intPriceFixationId
 						AND ISNULL(ysnProcessed, 0) = 0
@@ -905,14 +905,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									BEGIN
 										UPDATE @EntriesForInvoice
 										SET dblQtyShipped	= @dblQuantity
-										, dblQtyOrdered	= @dblQuantity
 										WHERE intId = @intInvoiceEntriesId
 									END
 
 								UPDATE @EntriesForInvoice
 								SET dblPrice		= @dblFinalPrice
-								, dblUnitPrice	= @dblFinalPrice
-								, dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN @dblQuantity ELSE @dblOriginalQtyShipped END
+								  , dblUnitPrice	= @dblFinalPrice
 								WHERE intId = @intInvoiceEntriesId
 
 								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
@@ -1006,11 +1004,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, strDocumentNumber
 									, strItemDescription
 									, intOrderUOMId
-									, dblQtyOrdered			= @dblQuantity
+									, dblQtyOrdered				= @dblOriginalQtyShipped
 									, intItemUOMId
 									, intPriceUOMId
 									, dblContractPriceUOMQty
-									, dblQtyShipped			= @dblQuantity
+									, dblQtyShipped				= @dblQuantity
 									, dblDiscount
 									, dblItemWeight
 									, intItemWeightUOMId
