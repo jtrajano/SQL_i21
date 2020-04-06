@@ -320,6 +320,10 @@ BEGIN
 					CASE 
 						WHEN Header.strCountBy = 'Retail Count' THEN 
 							Detail.intItemUOMId						
+						
+						WHEN Header.strCountBy = 'Pack' THEN 
+							StockUOM.intItemUOMId						
+						
 						-- If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
@@ -340,6 +344,20 @@ BEGIN
 								- ISNULL(Detail.dblQtySold, 0) 
 							)
 
+						WHEN Header.strCountBy = 'Pack' THEN 
+							dbo.fnCalculateQtyBetweenUOM (
+								Detail.intItemUOMId
+								,StockUOM.intItemUOMId
+								,(
+									ISNULL(Detail.dblPhysicalCount, 0) 
+									- (
+										ISNULL(Detail.dblSystemCount, 0) 
+										+ ISNULL(Detail.dblQtyReceived, 0)
+										- ISNULL(Detail.dblQtySold, 0) 
+									)
+								)							
+							)
+
 						-- If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
@@ -358,6 +376,9 @@ BEGIN
 					END
 			,dblUOMQty				= 
 					CASE 
+						WHEN Header.strCountBy = 'Pack' THEN 
+							StockUOM.dblUnitQty
+					
 						-- If Physical count is a whole number, use it. 
 						WHEN Item.strLotTracking <> 'No' 
 							 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
@@ -371,29 +392,49 @@ BEGIN
 							CASE WHEN Detail.intLotId IS NOT NULL THEN LotWeightUOM.dblUnitQty ELSE WeightUOM.dblUnitQty END
 					END
 			,dblCost				= 
-					COALESCE (
-						CASE 
-							WHEN (Detail.dblPhysicalCount > Detail.dblSystemCount AND ISNULL(Detail.dblNewCost,0) > 0) THEN 
-								Detail.dblNewCost 
-							ELSE 
-								NULL 
-						END
-						,Detail.dblLastCost
-						,dbo.fnCalculateCostBetweenUOM(
-							StockUOM.intItemUOMId
-							,CASE 
-								-- If Physical count is a whole number, use it. 
-								WHEN Item.strLotTracking <> 'No' 
-									 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
-									 AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
-								THEN 
+					
+					CASE 
+						WHEN Header.strCountBy = 'Pack' THEN 
+							ISNULL(
+								dbo.fnCalculateCostBetweenUOM (
 									Detail.intItemUOMId
-								ELSE 
-									ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
-							END
-							,  ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)
-						)
-					)
+									,StockUOM.intItemUOMId
+									,CASE 
+										WHEN (Detail.dblPhysicalCount > Detail.dblSystemCount AND ISNULL(Detail.dblNewCost,0) > 0) THEN 
+											Detail.dblNewCost 
+										ELSE 
+											Detail.dblLastCost 
+									END							
+								)
+								, ItemPricing.dblLastCost
+							) 
+						ELSE 
+							COALESCE (
+								CASE 
+									WHEN (Detail.dblPhysicalCount > Detail.dblSystemCount AND ISNULL(Detail.dblNewCost,0) > 0) THEN 
+										Detail.dblNewCost 
+									ELSE 
+										NULL 
+								END
+								,Detail.dblLastCost
+								,dbo.fnCalculateCostBetweenUOM(
+									StockUOM.intItemUOMId
+									,CASE 
+										-- If Physical count is a whole number, use it. 
+										WHEN Item.strLotTracking <> 'No' 
+												AND ROUND((ISNULL(Detail.dblPhysicalCount, 0) - ISNULL(Detail.dblSystemCount, 0)) % 1, 6) = 0 
+												AND ROUND((ISNULL(Detail.dblPhysicalCount, 0)), 6) <> 0 
+										THEN 
+											Detail.intItemUOMId
+										ELSE 
+											ISNULL(Detail.intWeightUOMId, Detail.intItemUOMId)
+									END
+									,  ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)
+								)
+							)
+					END
+
+					
 			,dblValue				= 0
 			,dblSalesPrice			= 0
 			,intCurrencyId			= @DefaultCurrencyId 
@@ -415,6 +456,9 @@ BEGIN
 		INNER JOIN dbo.tblICItemLocation ItemLocation 
 			ON ItemLocation.intLocationId = Header.intLocationId 
 			AND ItemLocation.intItemId = Detail.intItemId
+		LEFT JOIN dbo.tblICItemUOM StockUOM 
+			ON StockUOM.intItemId = Detail.intItemId
+			AND StockUOM.ysnStockUnit = 1
 		LEFT JOIN dbo.tblICItemPricing ItemPricing 
 			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 		LEFT JOIN dbo.tblICItemUOM ItemUOM 
@@ -424,12 +468,10 @@ BEGIN
 		LEFT JOIN dbo.tblICLot ItemLot 
 			ON ItemLot.intLotId = Detail.intLotId 
 			AND Item.strLotTracking <> 'No'
-		LEFT JOIN dbo.tblICItemUOM StockUOM 
-			ON Detail.intItemId = StockUOM.intItemId 
-			AND StockUOM.ysnStockUnit = 1
-		LEFT JOIN dbo.tblICItemUOM LotWeightUOM ON LotWeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
-		LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = Detail.intWeightUOMId
-
+		LEFT JOIN dbo.tblICItemUOM LotWeightUOM 
+			ON LotWeightUOM.intItemUOMId = ItemLot.intWeightUOMId 
+		LEFT JOIN tblICItemUOM WeightUOM 
+			ON WeightUOM.intItemUOMId = Detail.intWeightUOMId
 	WHERE 
 		Header.intInventoryCountId = @intTransactionId
 		AND (
@@ -450,7 +492,7 @@ BEGIN
 				<> 0 
 		)
 		AND (
-			ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Item'
+			ISNULL(NULLIF(Header.strCountBy, ''), 'Item') IN ('Item', 'Pack') 
 			OR (ISNULL(NULLIF(Header.strCountBy, ''), 'Item') = 'Retail Count' AND Detail.intItemId IS NOT NULL)
 		)
 		AND Detail.dblPhysicalCount IS NOT NULL
