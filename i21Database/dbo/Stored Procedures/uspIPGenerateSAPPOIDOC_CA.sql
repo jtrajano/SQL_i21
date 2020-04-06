@@ -192,7 +192,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
 
-			SELECT @strXML = @strXML + '<Type>SZ</Type>'
+			SELECT @strXML = @strXML + '<Type>CZ</Type>'
 
 			SELECT @strXML = @strXML + '</Party>'
 
