@@ -132,6 +132,24 @@ BEGIN TRY
 			FROM tblLGLoad
 			WHERE intLoadId = @intLoadId
 
+			UPDATE tblQMSample
+			SET intLoadContainerId = NULL
+				,intLoadDetailId = NULL
+				,intLoadDetailContainerLinkId = NULL
+				,intLoadId = NULL
+			WHERE intLoadId = @intLoadId
+
+			UPDATE tblLGLoad
+			SET intShipmentStatus = 10
+				,ysnCancelled = @ysnCancel
+			WHERE intLoadId = @intLoadId
+
+			/* Perform Reversal */
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ISNULL(ysnImposeReversalTransaction, 0) = 1)
+			BEGIN
+				EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1
+			END
+
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
 				SET @intPContractDetailId = NULL
@@ -181,18 +199,6 @@ BEGIN TRY
 				WHERE intLoadDetailId > @intMinLoadDetailId
 			END
 
-			UPDATE tblQMSample
-			SET intLoadContainerId = NULL
-				,intLoadDetailId = NULL
-				,intLoadDetailContainerLinkId = NULL
-				,intLoadId = NULL
-			WHERE intLoadId = @intLoadId
-
-			UPDATE tblLGLoad
-			SET intShipmentStatus = 10
-				,ysnCancelled = @ysnCancel
-			WHERE intLoadId = @intLoadId
-
 			EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
 				,@ysnReserveStockForInventoryShipment = 0
 
@@ -214,12 +220,6 @@ BEGIN TRY
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
 					,@strRowState = 'Added'
 					,@intShipmentType = 2
-			END
-
-			/* Perform Reversal */
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ISNULL(ysnImposeReversalTransaction, 0) = 1)
-			BEGIN
-				EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1
 			END
 		END
 		ELSE
