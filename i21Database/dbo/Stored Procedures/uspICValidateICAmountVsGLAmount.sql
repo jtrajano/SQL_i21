@@ -79,6 +79,92 @@ BEGIN
 	FROM @GLEntries
 END 
 
+-- Validate the account ids. 
+IF EXISTS (
+	SELECT TOP 1 1 
+	FROM tblICInventoryTransaction t INNER JOIN @glTransactions gl
+		ON t.strTransactionId = gl.strTransactionId 
+		AND t.strBatchId = gl.strBatchId 
+	WHERE	
+		t.intInTransitSourceLocationId IS NULL 
+)
+BEGIN 
+	DECLARE @strAccountCategory AS NVARCHAR(50)
+	DECLARE @strItemNo AS NVARCHAR(50)
+
+	-- Check the 'Inventory' Account
+	SELECT 
+		TOP 1 
+		@strAccountCategory = ac.strAccountCategory
+		,@strItemNo = i.strItemNo
+	FROM	
+		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+			ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		INNER JOIN tblICItem i
+			ON i.intItemId = t.intItemId 
+		INNER JOIN @glTransactions gl
+			ON t.strTransactionId = gl.strTransactionId 
+			AND t.strBatchId = gl.strBatchId
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Inventory')
+		INNER JOIN tblGLAccountSegmentMapping gs
+			ON gs.intAccountId = ga.intAccountId
+		INNER JOIN tblGLAccountSegment gm
+			ON gm.intAccountSegmentId = gs.intAccountSegmentId
+		INNER JOIN tblGLAccountCategory ac 
+			ON ac.intAccountCategoryId = gm.intAccountCategoryId 	
+		INNER JOIN tblGLAccountStructure gst
+			ON gm.intAccountStructureId = gst.intAccountStructureId
+	WHERE
+		gst.strType = 'Primary'
+		AND ac.strAccountCategory NOT IN ('Inventory')
+		AND t.intInTransitSourceLocationId IS NULL 
+
+	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
+	BEGIN 
+		-- 'Inventory Account is set to <Account Category> for item <Item No>.'
+		EXEC uspICRaiseError 80250, @strAccountCategory, @strItemNo
+		RETURN 80250
+	END 
+	
+	-- Check the 'Work In Progress' Account
+	SELECT 
+		TOP 1 
+		@strAccountCategory = ac.strAccountCategory
+		,@strItemNo = i.strItemNo
+	FROM	
+		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+			ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		INNER JOIN tblICItem i
+			ON i.intItemId = t.intItemId 
+		INNER JOIN @glTransactions gl
+			ON t.strTransactionId = gl.strTransactionId 
+			AND t.strBatchId = gl.strBatchId
+		INNER JOIN tblGLAccount ga
+			ON ga.intAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, 'Work In Progress')
+		INNER JOIN tblGLAccountSegmentMapping gs
+			ON gs.intAccountId = ga.intAccountId
+		INNER JOIN tblGLAccountSegment gm
+			ON gm.intAccountSegmentId = gs.intAccountSegmentId
+		INNER JOIN tblGLAccountCategory ac 
+			ON ac.intAccountCategoryId = gm.intAccountCategoryId 	
+		INNER JOIN tblGLAccountStructure gst
+			ON gm.intAccountStructureId = gst.intAccountStructureId
+	WHERE
+		gst.strType = 'Primary'
+		AND ac.strAccountCategory NOT IN ('Work In Progress')
+		AND t.intInTransitSourceLocationId IS NULL 
+		AND ty.strName IN ('Consume', 'Produce')
+
+	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
+	BEGIN 
+		-- 'Inventory Account is set to <Account Id> for item <Item No>.'
+		-- 'Work In Progress Account is set to <Account Id> for item <Item No>.'
+		EXEC uspICRaiseError 80251, @strAccountCategory, @strItemNo
+		RETURN 80251
+	END 
+END 
+
 -- Get the inventory value from the Inventory Valuation 
 BEGIN 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)

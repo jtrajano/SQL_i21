@@ -97,7 +97,7 @@ BEGIN
 END 
 
 -- Check for negative stock qty 
-IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80235)
+IF EXISTS (SELECT TOP 1 1 FROM #FoundErrors WHERE intErrorCode = 80236)
 BEGIN 
 	SELECT @strItemNo = NULL, @intItemId = NULL 
 
@@ -105,7 +105,7 @@ BEGIN
 			@strErrorMsg = Errors.strText
 	FROM	#FoundErrors Errors INNER JOIN tblICItem Item
 				ON Errors.intItemId = Item.intItemId
-	WHERE	intErrorCode = 80235
+	WHERE	intErrorCode = 80236
 
 	--'Negative stock quantity is not allowed for {Item No} in {Location Name}. On Hand is {On Hand Qty}. Reserved is {Reserved Qty}. Available is {Available Qty}.'
 	EXEC uspICRaiseError @strErrorMsg; 
