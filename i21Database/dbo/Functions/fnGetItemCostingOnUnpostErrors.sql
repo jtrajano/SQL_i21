@@ -18,7 +18,7 @@ RETURN (
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText =	dbo.fnFormatMessage(
-								dbo.fnICGetErrorMessage(80235)
+								dbo.fnICGetErrorMessage(80236)
 								,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = @intItemId)
 								,dbo.fnFormatMsg80003(
 									@intItemLocationId
@@ -34,7 +34,7 @@ RETURN (
 								, DEFAULT
 								, DEFAULT
 							)
-				,intErrorCode = 80235
+				,intErrorCode = 80236
 		FROM	(
 				
 					SELECT	TOP 1 
