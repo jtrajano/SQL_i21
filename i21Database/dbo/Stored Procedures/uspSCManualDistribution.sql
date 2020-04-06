@@ -81,6 +81,7 @@ DECLARE @strTicketDistributionOption NVARCHAR(3)
 DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @ysnTicketSpecialGradePosted BIT
 DECLARE @ysnLoadContract BIT
+DECLARE @_dblQuantityPerLoad NUMERIC(18,6)
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -124,8 +125,19 @@ OPEN intListCursor;
 					BEGIN  
 						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
 						BEGIN  
-							--get contract Detail Id of the load detail  
-							SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
+							--get contract Detail Id and quantity of the load detail  
+							SELECT TOP 1 
+								@intLoadContractDetailId = intPContractDetailId 
+								,@_dblQuantityPerLoad = dblQuantity
+							FROM tblLGLoadDetail 
+							WHERE intLoadDetailId = @intLoadDetailId 
+
+							SET @ysnLoadContract = 0
+							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0)
+							FROM tblCTContractHeader A
+							INNER JOIN tblCTContractDetail B
+								ON A.intContractHeaderId = B.intContractHeaderId
+							WHERE B.intContractDetailId = @intLoadContractDetailId 
 							
 							IF(@intLoopContractId = @intLoadContractDetailId)  
 							BEGIN   
@@ -135,6 +147,24 @@ OPEN intListCursor;
 							
 					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
+
+							-- Adjust the contract Scheduled quantity based on the difference between the quantity/load and the units allocated
+							IF(@ysnLoadContract = 0)
+							BEGIN
+								
+								SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQuantityPerLoad 
+								IF(@dblLoopAdjustedScheduleQuantity <> 0)
+								BEGIN
+									EXEC	uspCTUpdateScheduleQuantity 
+									@intContractDetailId	=	@intLoopContractId,
+									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Auto - Scale'
+								END
+								
+							END
+
 						END  
 						ELSE  
 						BEGIN  
