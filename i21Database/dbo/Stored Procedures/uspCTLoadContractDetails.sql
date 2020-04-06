@@ -11,7 +11,9 @@ BEGIN TRY
 	(  
 			intContractHeaderId		INT,  
 			intContractDetailId		INT,        
-			dblQuantity				NUMERIC(18,6)
+			dblQuantity				NUMERIC(18,6),
+			dblDestinationQuantity	NUMERIC(18,6),
+			ysnInvoicePosted		BIT
 	)
 
 	DECLARE @tblBill TABLE 
@@ -26,17 +28,20 @@ BEGIN TRY
 			ysnOpenLoad				BIT
 	)
 
-	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity)
+	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity,ysnInvoicePosted)
 	SELECT 
-		   intContractHeaderId  = ShipmentItem.intOrderId
-		  ,intContractDetailId	= ShipmentItem.intLineNo
-		  ,dblQuantity			= ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,ShipmentItem.dblQuantity)),0)
-	
+			intContractHeaderId		= ShipmentItem.intOrderId
+			,intContractDetailId	= ShipmentItem.intLineNo
+			,dblQuantity			= ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,	ShipmentItem.dblQuantity)),0)	
+			,dblDestinationQuantity = ISNULL(MAX([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,ShipmentItem.dblDestinationNet)),0)	
+			,ysnInvoicePosted		= ISNULL(I.ysnPosted,0)
 	FROM tblICInventoryShipmentItem ShipmentItem
 	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
+	LEFT JOIN tblARInvoiceDetail ID ON CD.intContractDetailId = ID.intContractDetailId
+	LEFT JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId
-	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo
+	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo,I.ysnPosted
 
 	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
 	SELECT 
@@ -334,7 +339,7 @@ BEGIN TRY
 		END AS dblAppliedQty
 		,dblAppliedLoadQty = 
 		CASE 
-			WHEN Shipment.dblQuantity > 0  THEN Shipment.dblQuantity
+			WHEN Shipment.dblQuantity > 0  THEN (CASE WHEN Shipment.ysnInvoicePosted = 1 THEN Shipment.dblDestinationQuantity ELSE Shipment.dblQuantity END)
 			WHEN Bill.dblQuantity > 0  THEN Bill.dblQuantity
 			ELSE -- dblAppliedQty
 				CASE 
