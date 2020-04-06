@@ -50,10 +50,14 @@ FROM (
 		, intVendorSetupId = program.intVendorSetupId
 		, invoice.intInvoiceId
 		, program.ysnActive
+		, strInvoiceUnitMeasure = invoiceUnitMeasure.strUnitMeasure
 	FROM tblARInvoiceDetail invoiceDetail
 		INNER JOIN tblARInvoice invoice ON invoice.intInvoiceId = invoiceDetail.intInvoiceId
 		INNER JOIN tblICItem item ON item.intItemId = invoiceDetail.intItemId
 		INNER JOIN tblICCategory category ON category.intCategoryId = item.intCategoryId
+		LEFT OUTER JOIN tblICItemUOM invoiceItemUOM ON invoiceItemUOM.intItemUOMId = invoiceDetail.intItemUOMId
+			AND invoiceItemUOM.intItemId = invoiceDetail.intItemId
+		LEFT OUTER JOIN tblICUnitMeasure invoiceUnitMeasure ON invoiceUnitMeasure.intUnitMeasureId = invoiceItemUOM.intUnitMeasureId
 		LEFT OUTER JOIN tblARCustomer customer ON customer.intEntityId = invoice.intEntityCustomerId
 		LEFT OUTER JOIN tblEMEntity entityCustomer ON entityCustomer.intEntityId = customer.intEntityId
 		--LEFT OUTER JOIN tblVRCustomerXref customerXref ON customerXref.intEntityId = invoice.intEntityCustomerId
