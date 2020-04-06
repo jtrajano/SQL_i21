@@ -16,7 +16,7 @@ FROM (
 		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
 	JOIN dbo.tblMFInvPlngSummary PS ON PS.intInvPlngSummaryId = SD.intInvPlngSummaryId
-		AND SD.intMainItemId IS NOT NULL
+		AND SD.intMainItemId IS NOT NULL and SD.intAttributeId=1 and SD.strFieldName='strMonth1'
 	JOIN dbo.tblCTContractDetail SS ON SS.intItemId = SD.intItemId
 	JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
 		AND CH.intContractTypeId = 1
@@ -45,9 +45,8 @@ FROM (
 		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
 	JOIN dbo.tblMFInvPlngSummary PS ON PS.intInvPlngSummaryId = SD.intInvPlngSummaryId
-		AND SD.intMainItemId IS NULL
-	JOIN tblICItemBundle IB ON IB.intItemId = SD.intItemId
-	JOIN dbo.tblCTContractDetail SS ON SS.intItemBundleId = IB.intItemId
+		AND SD.intMainItemId IS NULL and SD.intAttributeId=1 and SD.strFieldName='strMonth1'
+	JOIN dbo.tblCTContractDetail SS ON SS.intItemBundleId = SD.intItemId
 	JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
 		AND CH.intContractTypeId = 1
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
