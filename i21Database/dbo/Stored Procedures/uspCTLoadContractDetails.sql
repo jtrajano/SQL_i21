@@ -28,11 +28,22 @@ BEGIN TRY
 	)
 
 	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity)
-	SELECT   
-		intContractHeaderId  = ShipmentItem.intOrderId  
+	SELECT intContractHeaderId  = ShipmentItem.intOrderId  
 		,intContractDetailId = ShipmentItem.intLineNo  
-		,dblQuantity   = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, ShipmentItem.dblQuantity)),0)   
-		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, CASE WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) ELSE ShipmentItem.dblQuantity END)),0)
+		,dblQuantity   = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,
+							CASE
+								WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity
+								ELSE 0
+							END)),0)
+		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, 
+		CASE
+			WHEN CM.intInventoryShipmentItemId IS NULL THEN 
+				(CASE			
+					WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) 
+					ELSE ShipmentItem.dblQuantity 
+				END)
+			ELSE 0
+		END)),0)
 	FROM tblICInventoryShipmentItem ShipmentItem  
 	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1  
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId  
@@ -40,10 +51,17 @@ BEGIN TRY
 	(
 		SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
 		FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
-		WHERE IV.strTransactionType <> 'Credit Memo'
-	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
+		WHERE IV.strTransactionType = 'Invoice'
+	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId    
+	LEFT JOIN 
+	(
+		SELECT DISTINCT ID.intInventoryShipmentItemId
+		FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+		WHERE IV.strTransactionType = 'Credit Memo'
+		AND  IV.ysnPosted = 1
+	) CM ON CM.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId    
 	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId
-	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo  
+	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo 
 
 	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
 	SELECT 
