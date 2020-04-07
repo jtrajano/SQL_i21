@@ -146,6 +146,7 @@ BEGIN
 		,prepay.ysnPaid = 0
 		,prepay.dtmDatePaid = NULL
 		,prepay.ysnPrepayHasPayment = 1
+		,prepay.ysnPosted = 0
 		,prepay.intTransactionReversed = NULL --if the orignal transaction is an reversed transaction, we should null this for created prepaid
 	FROM tblAPBill prepay
 	WHERE prepay.intBillId = @prepayCreated
