@@ -7,7 +7,6 @@ BEGIN
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,CU.strCurrency AS strStaticValueCurrency
 		,ACU.strCurrency AS strAmountCurrency
-		,BRK.strName AS strCustomsBroker
 		,NULL dblUnMatchedQty
 		,NULL dblWeightPerUnit
 	FROM tblLGLoad L
@@ -21,5 +20,4 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intStaticValueCurrencyId
 	LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId
-	LEFT JOIN tblEMEntity BRK ON BRK.intEntityId = LC.intBrokerEntityId
 END
