@@ -74,13 +74,13 @@ IF EXISTS (
 		t.intInTransitSourceLocationId IS NULL 
 )
 BEGIN 
-	DECLARE @strAccountId AS NVARCHAR(50)
+	DECLARE @strAccountCategory AS NVARCHAR(50)
 	DECLARE @strItemNo AS NVARCHAR(50)
 
 	-- Check the 'Inventory' Account
 	SELECT 
 		TOP 1 
-		@strAccountId = ga.strAccountId
+		@strAccountCategory = ac.strAccountCategory
 		,@strItemNo = i.strItemNo
 	FROM	
 		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
@@ -105,17 +105,17 @@ BEGIN
 		AND ac.strAccountCategory NOT IN ('Inventory')
 		AND t.intInTransitSourceLocationId IS NULL 
 
-	IF @strAccountId IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
+	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
-		-- 'Inventory Account is set to <Account Id> for item <Item No>.'
-		EXEC uspICRaiseError 80250, @strAccountId, @strItemNo
+		-- 'Inventory Account is set to <Account Category> for item <Item No>.'
+		EXEC uspICRaiseError 80250, @strAccountCategory, @strItemNo
 		RETURN 80250
 	END 
 	
 	-- Check the 'Work In Progress' Account
 	SELECT 
 		TOP 1 
-		@strAccountId = ga.strAccountId
+		@strAccountCategory = ac.strAccountCategory
 		,@strItemNo = i.strItemNo
 	FROM	
 		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
@@ -141,11 +141,11 @@ BEGIN
 		AND t.intInTransitSourceLocationId IS NULL 
 		AND ty.strName IN ('Consume', 'Produce')
 
-	IF @strAccountId IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
+	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
 		-- 'Inventory Account is set to <Account Id> for item <Item No>.'
 		-- 'Work In Progress Account is set to <Account Id> for item <Item No>.'
-		EXEC uspICRaiseError 80251, @strAccountId, @strItemNo
+		EXEC uspICRaiseError 80251, @strAccountCategory, @strItemNo
 		RETURN 80251
 	END 
 END 
