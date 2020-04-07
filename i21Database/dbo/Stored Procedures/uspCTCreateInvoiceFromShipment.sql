@@ -244,7 +244,7 @@ SELECT
     ,[strDocumentNumber]                    = ARSI.[strTransactionNumber]
     ,[strItemDescription]                   = ARSI.[strItemDescription]
     ,[intOrderUOMId]                        = ARSI.[intOrderUOMId]
-    ,[dblQtyOrdered]                        = ARSI.[dblQtyOrdered]
+    ,[dblQtyOrdered]                        = ICISI.dblQuantity
     ,[intItemUOMId]                         = ARSI.[intItemUOMId]
     ,[intPriceUOMId]                        = ARSI.[intPriceUOMId]
     ,[dblContractPriceUOMQty]               = ARSI.[dblPriceUOMQuantity]
