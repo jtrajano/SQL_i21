@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspARCustomerInquiryReport]
 	  @intEntityCustomerId	INT	= NULL
 	, @intEntityUserId		INT = NULL
+	, @dtmDate				DATE = NULL
 AS
 
 IF(OBJECT_ID('tempdb..#CUSTOMERINQUIRY') IS NOT NULL)
@@ -73,8 +74,11 @@ IF @intEntityCustomerId IS NOT NULL
 IF @intEntityUserId IS NULL
 	SELECT TOP 1 @intEntityUserId = ISNULL(@intEntityUserId, 1)
 
+SET @dtmDate = ISNULL(CAST(@dtmDate AS DATE), CAST(GETDATE() AS DATE))
+
 EXEC dbo.uspARCustomerAgingAsOfDateReport @intEntityUserId			= @intEntityUserId
 										, @strCustomerIds			= @strCustomerIds
+										, @dtmDateTo				= @dtmDate
 
 INSERT INTO #CUSTOMERINQUIRY (
 	   intEntityCustomerId
@@ -181,14 +185,14 @@ LEFT JOIN (
 	SELECT intEntityCustomerId
 		 , dtmBudgetDate		= MAX(dtmBudgetDate)
 	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
-	WHERE (GETDATE() >= dtmBudgetDate AND GETDATE() < DATEADD(MONTH, 1, dtmBudgetDate)) 
+	WHERE (@dtmDate >= dtmBudgetDate AND @dtmDate < DATEADD(MONTH, 1, dtmBudgetDate)) 
 	GROUP BY intEntityCustomerId
 ) BUDGETMONTH ON CUSTOMER.intEntityCustomerId = BUDGETMONTH.intEntityCustomerId
 LEFT JOIN (
 	SELECT intEntityCustomerId
 		 , dblAmountPastDue		= SUM(dblBudgetAmount) - SUM(dblAmountPaid) 
 	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
-	WHERE dtmBudgetDate < GETDATE()
+	WHERE dtmBudgetDate < @dtmDate
 	GROUP BY intEntityCustomerId
 ) BUDGETPASTDUE ON CUSTOMER.intEntityCustomerId = BUDGETPASTDUE.intEntityCustomerId
 LEFT JOIN (
@@ -196,13 +200,13 @@ LEFT JOIN (
 	     , dtmBudgetDate
 		 , dblBudgetAmount
 	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
-	WHERE DATEADD(MONTH, 1, GETDATE()) BETWEEN dtmBudgetDate AND DATEADD(MONTH, 1, dtmBudgetDate)
+	WHERE DATEADD(MONTH, 1, @dtmDate) BETWEEN dtmBudgetDate AND DATEADD(MONTH, 1, dtmBudgetDate)
 ) BUDGET ON CUSTOMER.intEntityCustomerId = BUDGET.intEntityCustomerId 
 LEFT JOIN (
 	SELECT intEntityCustomerId
 		 , intRemainingBudgetPeriods = COUNT(*)
 	FROM dbo.tblARCustomerBudget WITH (NOLOCK)
-	WHERE dtmBudgetDate >= GETDATE()
+	WHERE dtmBudgetDate >= @dtmDate
 	GROUP BY intEntityCustomerId
 ) BUDGETPERIODS ON CUSTOMER.intEntityCustomerId = BUDGETPERIODS.intEntityCustomerId
 LEFT JOIN (
@@ -213,7 +217,7 @@ LEFT JOIN (
 							 END)
 	FROM dbo.tblARInvoice WITH (NOLOCK)	
 	WHERE ysnPosted = 1
-	  AND YEAR(dtmPostDate) = DATEPART(year, GETDATE()) 
+	  AND YEAR(dtmPostDate) = DATEPART(year, @dtmDate) 
 	GROUP BY intEntityCustomerId
 ) YTDSALES ON CUSTOMER.intEntityCustomerId = YTDSALES.intEntityCustomerId
 LEFT JOIN (
@@ -224,7 +228,7 @@ LEFT JOIN (
 								 END)
 	FROM dbo.tblARInvoice WITH (NOLOCK)	
 	WHERE ysnPosted = 1
-	  AND YEAR(dtmPostDate) = DATEPART(year, GETDATE()) - 1
+	  AND YEAR(dtmPostDate) = DATEPART(year, @dtmDate) - 1
 	GROUP BY intEntityCustomerId
 ) LASTYEARSALES ON CUSTOMER.intEntityCustomerId = LASTYEARSALES.intEntityCustomerId
 LEFT JOIN (
@@ -249,7 +253,7 @@ LEFT JOIN (
 	WHERE ysnPosted = 1
 	  AND ysnForgiven = 0
 	  AND strType = 'Service Charge'	  
-	  AND YEAR(dtmPostDate) = DATEPART(YEAR, GETDATE())
+	  AND YEAR(dtmPostDate) = DATEPART(YEAR, @dtmDate)
 	  GROUP BY intEntityCustomerId
 ) YTDSERVICECHARGE ON YTDSERVICECHARGE.intEntityCustomerId = PENDINGPAYMENT.intEntityCustomerId 
 WHERE @intEntityCustomerId IS NULL OR CUSTOMER.intEntityCustomerId = @intEntityCustomerId
@@ -308,8 +312,8 @@ CROSS APPLY (
 	AND strTransactionType IN ('Invoice', 'Debit Memo')
 	AND strType <> 'CF Tran'
 	AND intEntityCustomerId = CI.intEntityCustomerId
-	AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) > 0
-	ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, GETDATE())) DESC
+	AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, @dtmDate)) > 0
+	ORDER BY DATEDIFF(DAYOFYEAR, I.dtmDueDate, ISNULL(PD.dtmDatePaid, @dtmDate)) DESC
 ) HIGHESTDUEAR
 
 UPDATE #CUSTOMERINQUIRY
