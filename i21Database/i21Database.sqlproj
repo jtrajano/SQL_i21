@@ -7753,6 +7753,7 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementSummaryReportForView.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
+    <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
