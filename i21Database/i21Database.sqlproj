@@ -8613,7 +8613,6 @@
     <Build Include="dbo\Views\vyuIPGetFutureMarket.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketProcessStgXML.sql" />
-    <Build Include="dbo\Views\vyuAPBillDeductions.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderFPHose.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
