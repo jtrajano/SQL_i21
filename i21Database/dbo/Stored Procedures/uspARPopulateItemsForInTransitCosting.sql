@@ -167,7 +167,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]                       = - CASE WHEN ISNULL(CP.intPricingCount, 0) > 1 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]                       = - CASE WHEN ISNULL(CP.intPricingCount, 0) > 0 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -212,7 +212,7 @@ LEFT JOIN (
     FROM tblCTPriceFixation CPF
     INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
     GROUP BY CPF.intContractDetailId, CPF.intContractHeaderId
-    HAVING COUNT(*) > 1
+    HAVING COUNT(*) > 0
 ) CP ON ARID.intContractHeaderId = CP.intContractHeaderId
     AND ARID.intContractDetailId = CP.intContractDetailId
 LEFT JOIN (
