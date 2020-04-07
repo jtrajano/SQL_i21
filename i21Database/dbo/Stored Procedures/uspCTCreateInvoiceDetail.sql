@@ -98,7 +98,7 @@ BEGIN TRY
 		SELECT	TOP 1
 				 @InvoiceId								= intInvoiceId
 				,@ItemQtyShipped                        = @dblQty
-				,@ItemQtyOrdered                        = @dblQty
+				,@ItemQtyOrdered                        = (SELECT TOP 1 dblQuantity FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @intInventoryShipmentId AND intInventoryShipmentChargeId IS NULL ORDER by 1 DESC)
 				,@ItemUnitPrice                         = @dblPrice
 				,@ItemPrice								= @dblPrice
 				,@ItemInventoryShipmentItemId			= (SELECT TOP 1 intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @intInventoryShipmentId AND intInventoryShipmentChargeId IS NULL ORDER by 1 DESC)
