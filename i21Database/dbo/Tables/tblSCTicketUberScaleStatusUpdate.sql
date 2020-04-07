@@ -6,5 +6,5 @@
     [intTicketId] INT NOT NULL,
 
     CONSTRAINT [PK_tblSCTicketUberScaleStatusUpdate_intTicketUberScaleStatusUpdateId] PRIMARY KEY ([intTicketUberScaleStatusUpdateId]),
-	CONSTRAINT [FK_tblSCTicketUberScaleStatusUpdate_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]),
+	CONSTRAINT [FK_tblSCTicketUberScaleStatusUpdate_tblSCTicket_intTicketId] FOREIGN KEY ([intTicketId]) REFERENCES [tblSCTicket]([intTicketId]) ON DELETE CASCADE,
 )
