@@ -230,7 +230,7 @@ BEGIN
 				,intCommodityId
 				,intOrigUOMId
 				,strInventoryType = 'Company Titled'
-				,dtmCreateDate
+				,dtmTransactionDate
 				,strTransactionType
 				,intTransactionRecordHeaderId
 				,strTransactionNumber
