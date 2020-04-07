@@ -193,10 +193,10 @@ SELECT
     ,[intCurrencyId]                        = ISNULL(ARSI.[intCurrencyId], ICIS.[intCurrencyId])
     ,[intTermId]                            = ARSI.[intTermID]
     ,[intPeriodsToAccrue]                   = 1
-    ,[dtmDate]                              = @DateOnly
+    ,[dtmDate]                              = (case when isnull(ICIS.[dtmShipDate],@DateOnly) > @DateOnly then ICIS.[dtmShipDate] else @DateOnly end)
     ,[dtmDueDate]                           = NULL
     ,[dtmShipDate]                          = ICIS.[dtmShipDate]
-    ,[dtmPostDate]                          = @DateOnly
+    ,[dtmPostDate]                          = (case when isnull(ICIS.[dtmShipDate],@DateOnly) > @DateOnly then ICIS.[dtmShipDate] else @DateOnly end)
     ,[intEntitySalespersonId]               = ch.intSalespersonId
     ,[intFreightTermId]                     = ICIS.[intFreightTermId]
     ,[intShipViaId]                         = ICIS.[intShipViaId]
