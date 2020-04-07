@@ -8138,6 +8138,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
+    <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
