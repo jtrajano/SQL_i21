@@ -19,15 +19,10 @@
 [strOtherMarks] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [ysnRejected] [bit] NULL,
 [dtmUnloading] DATETIME NULL,
-[dtmEmptyContainerReturn] DATETIME NULL,
 
 [dtmCustoms] DATETIME NULL,
 [ysnCustomsHold] [bit] NULL,
 [strCustomsComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
-[intBrokerEntityId] INT NULL,
-[strID1] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-[strID2] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
-[strID3] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 
 [dtmFDA] DATETIME NULL,
 [ysnFDAHold] [bit] NULL,
@@ -68,9 +63,7 @@ CONSTRAINT [FK_tblLGLoadContainer_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY
 CONSTRAINT [FK_tblLGLoadContainer_tblICUnitMeasure_intWeightUnitMeasureId] FOREIGN KEY ([intWeightUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 
 CONSTRAINT [FK_tblLGLoadContainer_tblICItemUOM_intCostUOMId] FOREIGN KEY ([intCostUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
-CONSTRAINT [FK_tblLGLoadContainer_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
-
-CONSTRAINT [FK_tblLGLoadContainer_tblEMEntity_intBrokerEntityId] FOREIGN KEY ([intBrokerEntityId]) REFERENCES [tblEMEntity]([intEntityId])
+CONSTRAINT [FK_tblLGLoadContainer_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID])
 )
 GO
 
