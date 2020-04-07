@@ -8139,6 +8139,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
+    <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
