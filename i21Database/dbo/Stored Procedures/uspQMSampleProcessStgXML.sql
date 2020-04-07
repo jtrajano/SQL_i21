@@ -1370,6 +1370,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblQMSample WITH (NOLOCK)
 						WHERE intSampleRefId = @intSampleRefId
+							AND intBookId = @intToBookId
 						)
 					SELECT @strRowState = 'Added'
 				ELSE
@@ -1382,6 +1383,7 @@ BEGIN TRY
 					,@strNewSampleNumber = strSampleNumber
 				FROM tblQMSample WITH (NOLOCK)
 				WHERE intSampleRefId = @intSampleRefId
+					AND intBookId = @intToBookId
 
 				SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
 
@@ -1400,6 +1402,7 @@ BEGIN TRY
 				DELETE
 				FROM tblQMSample
 				WHERE intSampleRefId = @intSampleRefId
+					AND intBookId = @intToBookId
 
 				GOTO ext
 			END
@@ -1660,11 +1663,13 @@ BEGIN TRY
 						,strSentBy NVARCHAR(50)
 						) x
 				WHERE tblQMSample.intSampleRefId = @intSampleRefId
+					AND tblQMSample.intBookId = @intToBookId
 
 				SELECT @intNewSampleId = intSampleId
 					,@strNewSampleNumber = strSampleNumber
 				FROM tblQMSample WITH (NOLOCK)
 				WHERE intSampleRefId = @intSampleRefId
+					AND intBookId = @intToBookId
 			END
 
 			EXEC sp_xml_removedocument @idoc
@@ -1743,6 +1748,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblQMSampleDetail WITH (NOLOCK)
 						WHERE intSampleDetailRefId = @intSampleDetailId
+							AND intSampleId = @intNewSampleId
 						)
 				BEGIN
 					INSERT INTO tblQMSampleDetail (
@@ -2130,6 +2136,7 @@ BEGIN TRY
 						SELECT 1
 						FROM tblQMTestResult WITH (NOLOCK)
 						WHERE intTestResultRefId = @intTestResultId
+							AND intSampleId = @intNewSampleId
 						)
 				BEGIN
 					INSERT INTO tblQMTestResult (
@@ -2352,6 +2359,17 @@ BEGIN TRY
 			WHERE intRecordId = @intNewSampleId
 				AND intScreenId = @intScreenId
 
+			IF @ysnParent = 1
+			BEGIN
+				SELECT TOP 1 @intMultiCompanyId = intCompanyId
+				FROM tblIPMultiCompany
+				WHERE ysnParent = 1
+			END
+			ELSE
+			BEGIN
+				SELECT @intMultiCompanyId = @intCompanyId
+			END
+
 			INSERT INTO tblQMSampleAcknowledgementStage (
 				intSampleId
 				,strSampleAckNumber
@@ -2396,6 +2414,7 @@ BEGIN TRY
 				,intNewSampleId = @intNewSampleId
 				,strNewSampleNumber = @strNewSampleNumber
 				,strNewSampleTypeName = @strSampleTypeName
+				,strMessage = 'Success'
 			WHERE intSampleStageId = @intSampleStageId
 
 			IF @intTransactionCount = 0

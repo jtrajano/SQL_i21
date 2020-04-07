@@ -8504,6 +8504,15 @@
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceStage.sql" />
+    <Build Include="dbo\Views\vyuIPGetInvoice.sql" />
+    <Build Include="dbo\Views\vyuIPGetInvoiceDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoicePopulateStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceProcessStgXML.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractStrauss.sql" />
+
+
     <Build Include="dbo\Tables\tblLGLoadCondition.sql" />
     <Build Include="dbo\Tables\tblLGCustomsFee.sql" />
   </ItemGroup>
@@ -8748,6 +8757,7 @@
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
+    <None Include="Scripts\Post-Deployment\HD\20_1_FixCustomLayout.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionConditionReport.sql" />
   </ItemGroup>
   <ItemGroup>

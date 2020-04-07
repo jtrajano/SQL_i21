@@ -438,7 +438,7 @@ BEGIN
   
 DECLARE @TOPROCESSED INT = (SELECT COUNT(intAuditLogId) FROM tblSMAuditLog WHERE strRecordNo = CAST(@keyValue as nvarchar(10))  
        AND strTransactionType = @screenName   
-       AND (ysnProcessed = 0 AND ISNULL(strActionType, '') NOT IN ('Created','Deleted')))     
+       AND (ISNULL(ysnProcessed, 0) = 0 AND ISNULL(strActionType, '') NOT IN ('Created','Deleted')))     
    
  IF (ISNULL(@TOPROCESSED,0) > 0 )  
    

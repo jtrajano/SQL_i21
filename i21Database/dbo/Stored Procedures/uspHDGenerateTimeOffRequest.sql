@@ -28,6 +28,7 @@ begin
 			,intNoOfDays = datediff(day, dtmDateFrom, dtmDateTo) + 1
 		from
 			tblPRTimeOffRequest
+			order by intTimeOffRequestId desc
 
 	OPEN @queryResult
 	FETCH NEXT
@@ -82,8 +83,8 @@ BEGIN
 
 			if (@strPRDayName <> 'Saturday' and @strPRDayName <> 'Sunday')
 			begin
-
-				if not exists (select * from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and dtmPRDate = @dtmPRDate)
+				--insert when payroll timeoff does not exist based on current entity, timeOff id and date
+				if not exists (select * from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and dtmPRDate = @dtmPRDate and intPRTimeOffRequestId = @intTimeOffRequestId)
 				begin
 					if (@intI < @intNoOfDays)
 					begin
@@ -93,26 +94,27 @@ BEGIN
 					begin
 						set @intFixEightHours = @dblRequest;
 					end
-					INSERT INTO [dbo].[tblHDTimeOffRequest]
-							   ([intPRTimeOffRequestId]
-							   ,[intPREntityEmployeeId]
-							   ,[strPRRequestId]
-							   ,[dtmPRDate]
-							   ,[strPRDayName]
-							   ,[dblPRRequest]
-							   ,[intPRNoOfDays]
-							   ,[intConcurrencyId])
-						 VALUES
-							   (@intTimeOffRequestId
-							   ,@intEntityEmployeeId
-							   ,@strRequestId
-							   ,@dtmPRDate
-							   ,@strPRDayName
-							   ,@intFixEightHours
-							   ,@intNoOfDays
-							   ,1)
+					begin
+						INSERT INTO [dbo].[tblHDTimeOffRequest]
+								   ([intPRTimeOffRequestId]
+								   ,[intPREntityEmployeeId]
+								   ,[strPRRequestId]
+								   ,[dtmPRDate]
+								   ,[strPRDayName]
+								   ,[dblPRRequest]
+								   ,[intPRNoOfDays]
+								   ,[intConcurrencyId])
+							 VALUES
+								   (@intTimeOffRequestId
+								   ,@intEntityEmployeeId
+								   ,@strRequestId
+								   ,@dtmPRDate
+								   ,@strPRDayName
+								   ,@intFixEightHours
+								   ,@intNoOfDays
+								   ,1)
+					end
 				end
-
 			end
 
 			set @intI = @intI + 1;
@@ -125,33 +127,45 @@ BEGIN
 		set @dtmPRDate = @dtmDateFrom;
 		set @strPRDayName = DATENAME(WEEKDAY,@dtmPRDate);
 
-			if (@strPRDayName <> 'Saturday' and @strPRDayName <> 'Sunday')
+		if (@strPRDayName <> 'Saturday' and @strPRDayName <> 'Sunday')
+		begin
+			--time off was edited, update the record
+			if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId and (
+				dtmPRDate != @dtmPRDate or dblPRRequest != @dblRequest
+			))
 			begin
-
-				if not exists (select * from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and dtmPRDate = @dtmPRDate)
-				begin
-					INSERT INTO [dbo].[tblHDTimeOffRequest]
-							   ([intPRTimeOffRequestId]
-							   ,[intPREntityEmployeeId]
-							   ,[strPRRequestId]
-							   ,[dtmPRDate]
-							   ,[strPRDayName]
-							   ,[dblPRRequest]
-							   ,[intPRNoOfDays]
-							   ,[intConcurrencyId])
-						 VALUES
-							   (@intTimeOffRequestId
-							   ,@intEntityEmployeeId
-							   ,@strRequestId
-							   ,@dtmPRDate
-							   ,@strPRDayName
-							   ,@dblRequest
-							   ,@intNoOfDays
-							   ,1)
-				end
-
+				UPDATE [dbo].[tblHDTimeOffRequest] 
+				SET 
+					[dtmPRDate] = @dtmPRDate,
+					[strPRDayName] = @strPRDayName,
+					[dblPRRequest] = @dblRequest,
+					[intPRNoOfDays] = @intNoOfDays,
+					[intConcurrencyId] = [intConcurrencyId] + 1
+				WHERE 
+				intPRTimeOffRequestId = @intTimeOffRequestId
 			end
-
+			else if not exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId)
+			begin
+				INSERT INTO [dbo].[tblHDTimeOffRequest]
+							([intPRTimeOffRequestId]
+							,[intPREntityEmployeeId]
+							,[strPRRequestId]
+							,[dtmPRDate]
+							,[strPRDayName]
+							,[dblPRRequest]
+							,[intPRNoOfDays]
+							,[intConcurrencyId])
+						VALUES
+						(@intTimeOffRequestId
+							,@intEntityEmployeeId
+							,@strRequestId
+							,@dtmPRDate
+							,@strPRDayName
+							,@dblRequest
+							,@intNoOfDays
+							,1)
+			end
+		end
 	end
 
 	FETCH NEXT
