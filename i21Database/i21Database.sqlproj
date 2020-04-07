@@ -8183,6 +8183,7 @@
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_CA.sql" />
+    <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
