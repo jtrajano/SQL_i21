@@ -302,6 +302,7 @@ BEGIN
 	DECLARE @IdsP TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
+		, [intPurchaseSale]			INT
 		, [ysnFromProvisional]		BIT
 		, [ysnProvisionalWithGL]	BIT
 		, [ysnFromReturn]			BIT
@@ -310,16 +311,19 @@ BEGIN
 	INSERT INTO @IdsP(
 		  [intInvoiceId]
 		, [intLoadId]
+		, [intPurchaseSale]
 		, [ysnFromProvisional]
 		, [ysnProvisionalWithGL]
 		, [ysnFromReturn]
 	)
 	SELECT [intInvoiceId]			= I.[intInvoiceId]
 		 , [intLoadId]				= I.[intLoadId]
+		 , [intPurchaseSale]		= LG.[intPurchaseSale]
 		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
 		 , [ysnProvisionalWithGL]	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM #ARPostInvoiceHeader I
+	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -349,12 +353,14 @@ BEGIN
 	BEGIN
 		DECLARE @InvoiceIDP 		INT
 			  , @LoadIDP 			INT
+			  , @intPurchaseSaleIDP INT
         	  , @FromProvisionalP 	BIT
         	  , @ProvisionalWithGLP BIT
 			  , @ysnFromReturnP 	BIT
 
 		SELECT TOP 1 @InvoiceIDP			= [intInvoiceId]
 				   , @LoadIDP				= [intLoadId]
+				   , @intPurchaseSaleIDP	= [intPurchaseSale]
 				   , @FromProvisionalP		= [ysnFromProvisional]
 				   , @ProvisionalWithGLP 	= [ysnProvisionalWithGL]
 				   , @ysnFromReturnP		= [ysnFromReturn]
@@ -386,11 +392,13 @@ BEGIN
 													   , @ysnPost				 	= 0
 													   , @intEntityUserSecurityId  	= @UserId
 					END
-
-				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
-												 , @ysnCancel				 = 1
-												 , @intEntityUserSecurityId  = @UserId
-												 , @intShipmentType			 = 1
+				IF ISNULL(@intPurchaseSaleIDP, 0) <> 3
+					BEGIN
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
+														 , @ysnCancel				 = 1
+														 , @intEntityUserSecurityId  = @UserId
+														 , @intShipmentType			 = 1
+					END
 			END
 
 		DELETE FROM @IdsP WHERE [intInvoiceId] = @InvoiceIDP
@@ -625,6 +633,7 @@ BEGIN
 	DECLARE @IdsU TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
+		, [intPurchaseSale]			INT
 		, [ysnFromProvisional]		BIT
 		, [ysnProvisionalWithGL]	BIT
 		, [ysnFromReturn]			BIT
@@ -633,16 +642,19 @@ BEGIN
 	INSERT INTO @IdsU (
 		  [intInvoiceId]
 		, [intLoadId]
+		, [intPurchaseSale]
 		, [ysnFromProvisional]
 		, [ysnProvisionalWithGL]
 		, [ysnFromReturn]
 	)
 	SELECT [intInvoiceId]			= I.[intInvoiceId]
 		 , [intLoadId]				= I.[intLoadId]
+		 , [intPurchaseSale]		= LG.[intPurchaseSale]
 		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
 		 , [ysnProvisionalWithGL] 	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM #ARPostInvoiceHeader I
+	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -672,12 +684,14 @@ BEGIN
 	BEGIN
 		DECLARE @InvoiceIDU				INT
 			  , @LoadIDU				INT
+			  , @intPurchaseSaleIDU		INT
 			  , @FromProvisionalU		BIT
 			  , @ProvisionalWithGLU		BIT
-			  , @ysnFromReturnU			BIT
+			  , @ysnFromReturnU			BIT			  
 
 		SELECT TOP 1 @InvoiceIDU			= [intInvoiceId]
 				   , @LoadIDU				= [intLoadId]
+				   , @intPurchaseSaleIDU	= [intPurchaseSale]
 				   , @FromProvisionalU		= [ysnFromProvisional]
 				   , @ProvisionalWithGLU 	= [ysnProvisionalWithGL]
 				   , @ysnFromReturnU		= [ysnFromReturn]
@@ -703,10 +717,13 @@ BEGIN
 		--POST AND UN-CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnU, 0) = 1 AND @LoadIDU IS NOT NULL
 			BEGIN
-				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
-												 , @ysnCancel				 = 0
-												 , @intEntityUserSecurityId  = @UserId
-												 , @intShipmentType			 = 1
+				IF ISNULL(@intPurchaseSaleIDU, 0) <> 3
+					BEGIN
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
+														 , @ysnCancel				 = 0
+														 , @intEntityUserSecurityId  = @UserId
+														 , @intShipmentType			 = 1
+					END
 												 
 				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
 											   , @ysnPost				 	= 1
