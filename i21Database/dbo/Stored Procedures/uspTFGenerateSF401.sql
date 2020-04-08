@@ -298,8 +298,8 @@ DECLARE @EIN NVARCHAR(50)
 		,@TA
 		,@TACode
 		,@FormCodeParam
-		,'1A,2A,3A'
-		,3
+		,''
+		,4
 		,'Summary'
 		,'Column A Special Fuel (Dyed and Clear Diesel Fuel, Biodiesel and Blended Biodiesel)'
 		,''
@@ -311,8 +311,8 @@ DECLARE @EIN NVARCHAR(50)
 		,@TA
 		,@TACode
 		,@FormCodeParam
-		,'1A,2A,3A'
-		,3
+		,''
+		,4
 		,'Summary'
 		,'Column B Gasoline (Gasoline, Gasohol)'
 		,''
@@ -324,8 +324,8 @@ DECLARE @EIN NVARCHAR(50)
 		,@TA
 		,@TACode
 		,@FormCodeParam
-		,'1A,2A,3A'
-		,3
+		,''
+		,4
 		,'Summary'
 		,'Column C Other Products (Jet Fuel, Kerosene)'
 		,''
