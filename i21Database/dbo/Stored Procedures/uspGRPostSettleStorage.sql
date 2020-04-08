@@ -2124,6 +2124,7 @@ BEGIN TRY
 					,[intContractDetailId]
 					,[intInventoryReceiptItemId]
 					,[intCustomerStorageId]
+					,[intSettleStorageId]
 					,[dblOrderQty]
 					,[dblOrderUnitQty]
 					,[intOrderUOMId]	
@@ -2185,6 +2186,7 @@ BEGIN TRY
 																				END
 																END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
+					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
 														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intUnitMeasureId, CD.dblQuantity),6) 
 														WHEN ISNULL(availableQtyForVoucher.dblContractUnits,0) > 0 THEN availableQtyForVoucher.dblContractUnits
@@ -2580,6 +2582,7 @@ BEGIN TRY
 					,[intContractDetailId]
 					,[intInventoryReceiptChargeId]
 					,[intCustomerStorageId]
+					,[intSettleStorageId]
 					,[dblOrderQty]
 					,[dblOrderUnitQty]
 					,[intOrderUOMId]
@@ -2609,6 +2612,7 @@ BEGIN TRY
 					,[intContractDetailId] 			= NULL
 					,[intInventoryReceiptChargeId]	= CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intInventoryReceiptChargeId END
 					,[intCustomerStorageId] 		= SST.intCustomerStorageId
+					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE WHEN ISNULL(Item.strCostMethod,'') = 'Gross Unit' THEN (SC.dblGrossUnits/SC.dblNetUnits) * SST.dblUnits ELSE SST.dblUnits END
 					,[dblOrderUnitQty]				= 1		
 					,[intOrderUOMId] 				= CASE 
@@ -2695,6 +2699,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intCustomerStorageId]
+					,[intSettleStorageId]
 					,[dblOrderQty]
 					,[dblOrderUnitQty]
 					,[intOrderUOMId]
@@ -2721,6 +2726,7 @@ BEGIN TRY
 					,[intContractHeaderId]	= CD.[intContractHeaderId]
 					,[intContractDetailId]  = CD.[intContractDetailId]
 					,[intCustomerStorageId]	= SV.[intCustomerStorageId]
+					,[intSettleStorageId]	= @intSettleStorageId
 					,[dblOrderQty]			= CASE 
 												WHEN CC.intItemUOMId IS NOT NULL THEN  dbo.fnCTConvertQuantityToTargetItemUOM(CC.intItemId,UOM.intUnitMeasureId,@intUnitMeasureId,SV.dblUnits)
 												ELSE SV.dblUnits 
