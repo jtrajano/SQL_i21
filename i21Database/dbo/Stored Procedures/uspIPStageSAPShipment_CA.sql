@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPStageSAPShippingInstruction @strInfo1 NVARCHAR(MAX) = '' OUTPUT
+﻿CREATE PROCEDURE uspIPStageSAPShipment_CA @strInfo1 NVARCHAR(MAX) = '' OUTPUT
 	,@strInfo2 NVARCHAR(MAX) = '' OUTPUT
 	,@intNoOfRowsAffected INT = 0 OUTPUT
 AS
@@ -19,10 +19,14 @@ BEGIN TRY
 		,strERPPONumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dtmETAPOD DATETIME
+		,dtmETAPOL DATETIME
 		,dtmETSPOL DATETIME
 		,dtmDeadlineCargo DATETIME
 		,strBookingReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,dtmBLDate DATETIME
+		,strShippingLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strMVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strMVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -39,11 +43,19 @@ BEGIN TRY
 		,dblGrossWeight NUMERIC(18, 6)
 		,strPackageType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
+	DECLARE @tblLoadContainer TABLE (
+		strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strContainerNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,dblGrossWt NUMERIC(18, 6)
+		,dblTareWt NUMERIC(18, 6)
+		,dblQuantity NUMERIC(18, 6)
+		)
 	DECLARE @intStageLoadId INT
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage WITH (NOLOCK)
-	WHERE strType = 'ShippingInstruction'
+	WHERE strType = 'Shipment'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -69,15 +81,22 @@ BEGIN TRY
 			DELETE
 			FROM @tblLoadDetail
 
+			DELETE
+			FROM @tblLoadContainer
+
 			INSERT INTO @tblLoad (
 				strCustomerReference
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -89,6 +108,18 @@ BEGIN TRY
 				,OrderReference
 				,Pol
 				,Pod
+				,CASE 
+					WHEN ISDATE(Ata) = 0
+						OR Ata = '1900-01-01 00:00:00.000'
+						THEN NULL
+					ELSE Ata
+					END
+				,CASE 
+					WHEN ISDATE(Atd) = 0
+						OR Atd = '1900-01-01 00:00:00.000'
+						THEN NULL
+					ELSE Atd
+					END
 				,CASE 
 					WHEN ISDATE(Etd) = 0
 						OR Etd = '1900-01-01 00:00:00.000'
@@ -103,6 +134,13 @@ BEGIN TRY
 					END
 				,BookingNumber
 				,BLNumber
+				,CASE 
+					WHEN ISDATE(BLDate) = 0
+						OR BLDate = '1900-01-01 00:00:00.000'
+						THEN NULL
+					ELSE BLDate
+					END
+				,CarrierCode
 				,Vessel
 				,Voyage
 				,LoadingType
@@ -112,16 +150,20 @@ BEGIN TRY
 					ELSE [Count]
 					END
 				,[Type]
-				,'ShippingInstruction'
+				,'Shipment'
 			FROM OPENXML(@idoc, 'Shipment', 2) WITH (
 					CargooReference NVARCHAR(100)
 					,OrderReference NVARCHAR(100)
 					,Pol NVARCHAR(200)
 					,Pod NVARCHAR(200)
+					,Ata DATETIME
+					,Atd DATETIME
 					,Etd DATETIME
 					,Eta DATETIME
 					,BookingNumber NVARCHAR(100)
 					,BLNumber NVARCHAR(100)
+					,BLDate DATETIME
+					,CarrierCode NVARCHAR(100)
 					,Vessel NVARCHAR(200)
 					,Voyage NVARCHAR(100)
 					,LoadingType NVARCHAR(100)
@@ -170,16 +212,56 @@ BEGIN TRY
 					) x
 			WHERE ISNULL(x.CommodityCode, '') <> ''
 
+			INSERT INTO @tblLoadContainer (
+				strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+				)
+			SELECT CargooReference
+				,Number
+				,[Type]
+				,CASE 
+					WHEN ISNUMERIC(GrossWeight) = 0
+						THEN NULL
+					ELSE GrossWeight
+					END
+				,CASE 
+					WHEN ISNUMERIC(TareWeight) = 0
+						THEN NULL
+					ELSE TareWeight
+					END
+				,CASE 
+					WHEN ISNUMERIC(Packages) = 0
+						THEN NULL
+					ELSE Packages
+					END
+			FROM OPENXML(@idoc, 'Shipment/ActualContainers/ActualContainer', 2) WITH (
+					CargooReference NVARCHAR(100) COLLATE Latin1_General_CI_AS '../../CargooReference'
+					,Number NVARCHAR(100)
+					,[Type] NVARCHAR(50)
+					,GrossWeight NVARCHAR(50)
+					,TareWeight NVARCHAR(50)
+					,Packages NVARCHAR(50)
+					) x
+			WHERE ISNULL(x.Number, '') <> ''
+
 			--Add to Staging tables
 			INSERT INTO tblIPLoadStage (
 				strCustomerReference
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -191,10 +273,14 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -224,6 +310,24 @@ BEGIN TRY
 				,dblGrossWeight
 				,strPackageType
 			FROM @tblLoadDetail
+
+			INSERT INTO tblIPLoadContainerStage (
+				intStageLoadId
+				,strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+				)
+			SELECT @intStageLoadId
+				,strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+			FROM @tblLoadContainer
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -274,7 +378,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage WITH (NOLOCK)
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'ShippingInstruction'
+			AND strType = 'Shipment'
 	END
 
 	IF (ISNULL(@strInfo1, '')) <> ''
