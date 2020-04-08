@@ -1,24 +1,25 @@
 CREATE VIEW [dbo].[vyuGRTransferStorage]
 AS
 SELECT 
-	  intTransferStorageId 		= TS.intTransferStorageId
-    , strTransferStorageTicket 	= TS.strTransferStorageTicket
-    , intEntityId 				= TS.intEntityId
-    , intCompanyLocationId 		= TS.intCompanyLocationId
-    , intStorageScheduleTypeId 	= TS.intStorageScheduleTypeId
-    , intItemId 				= TS.intItemId
-    , intItemUOMId 				= TS.intItemUOMId
-	, intTransferLocationId 	= TS.intTransferLocationId
-    , dblTotalUnits 			= TS.dblTotalUnits
-    , dtmTransferStorageDate 	= TS.dtmTransferStorageDate
-    , intConcurrencyId 			= TS.intConcurrencyId
-    , intUserId 				= TS.intUserId
-	, strEntityName 			= EM.strName
-	, strLocationName 			= CL.strLocationName
-	, strStorageTypeDescription = ST.strStorageTypeDescription
-	, strItemNo 				= Item.strItemNo
-	, strUnitMeasure 			= UOM.strUnitMeasure
+	 intTransferStorageId 		= TS.intTransferStorageId
+    ,strTransferStorageTicket 	= TS.strTransferStorageTicket
+    ,intEntityId 				= TS.intEntityId
+    ,intCompanyLocationId 		= TS.intCompanyLocationId
+    ,intStorageScheduleTypeId 	= TS.intStorageScheduleTypeId
+    ,intItemId 					= TS.intItemId
+    ,intItemUOMId 				= TS.intItemUOMId
+	,intTransferLocationId 		= TS.intTransferLocationId
+    ,dblTotalUnits 				= TS.dblTotalUnits
+    ,dtmTransferStorageDate 	= TS.dtmTransferStorageDate
+    ,intConcurrencyId 			= TS.intConcurrencyId
+    ,intUserId 					= TS.intUserId
+	,strEntityName 				= EM.strName
+	,strLocationName 			= CL.strLocationName
+	,strStorageTypeDescription	= ST.strStorageTypeDescription
+	,strItemNo 					= Item.strItemNo
+	,strUnitMeasure 			= UOM.strUnitMeasure
 	,strTransferLocationName 	= (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = TS.intTransferLocationId)
+	,ysnReversed				= TS.ysnReversed
 FROM tblGRTransferStorage TS
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = TS.intEntityId
