@@ -21,7 +21,7 @@ BEGIN TRY
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 	DECLARE @ysnAllowBlankGLEntries AS BIT = 1
 	DECLARE @dummyGLEntries AS RecapTableType
-	DECLARE @intSalesContractId INT
+	DECLARE @intPContractDetailId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intDestinationFOBPointId INT
 
@@ -377,6 +377,85 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
 	END
+
+
+--Update Contract Balance and Scheduled Qty for Drop Ship
+IF (@intPurchaseSale = 3)
+BEGIN 
+	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
+	INSERT INTO @ItemsFromInventoryReceipt (
+		-- Header
+		[intInventoryReceiptId] 
+		,[strInventoryReceiptId] 
+		,[strReceiptType] 
+		,[intSourceType] 
+		,[dtmDate] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		-- Detail 
+		,[intInventoryReceiptDetailId] 
+		,[intItemId] 
+		,[intLocationId] 
+		,[intItemLocationId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[intItemUOMId] 
+		,[intWeightUOMId] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[intLineNo] 
+		,[ysnLoad]
+		,[intLoadReceive]
+	)
+	SELECT 
+		-- Header
+		[intInventoryReceiptId] = L.intLoadId
+		,[strInventoryReceiptId]  = L.strLoadNumber
+		,[strReceiptType] = 'Purchase Contract'
+		,[intSourceType] = -1
+		,[dtmDate] = GETDATE()
+		,[intCurrencyId] = NULL
+		,[dblExchangeRate] = 1
+		-- Detail 
+		,[intInventoryReceiptDetailId] = LD.intLoadDetailId
+		,[intItemId] = LD.intItemId
+		,[intLocationId] = LD.intPCompanyLocationId
+		,[intItemLocationId] = (SELECT TOP 1 ITL.intItemLocationId
+									FROM tblICItemLocation ITL
+									WHERE ITL.intItemId = LD.intItemId
+										AND ITL.intLocationId = CD.intCompanyLocationId)
+		,[intSubLocationId] = LD.intSSubLocationId
+		,[intStorageLocationId] = NULL
+		,[intItemUOMId] = LD.intItemUOMId
+		,[intWeightUOMId] = LD.intWeightItemUOMId
+		,[dblQty] = CASE 
+					WHEN @ysnPost = 1 AND ISNULL(L.ysnCancelled, 0) = 0
+						THEN LD.dblQuantity
+					ELSE -1 * LD.dblQuantity
+					END
+					--* CASE WHEN (L.ysnCancelled = 1) THEN -1 ELSE 1 END
+		,[dblUOMQty] = IU.dblUnitQty
+		,[dblCost] = CD.dblCashPrice
+		,[intLineNo] = ISNULL(LD.intPContractDetailId, 0)
+		,[ysnLoad] = CH.ysnLoad
+		,[intLoadReceive] = CASE WHEN CH.ysnLoad = 1 THEN 
+								CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+							ELSE NULL END
+	FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
+	WHERE L.intLoadId = @intLoadId
+
+	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt
+		,@intEntityUserSecurityId
+		,@ysnPost
+END
+
+
 END TRY
 
 BEGIN CATCH
