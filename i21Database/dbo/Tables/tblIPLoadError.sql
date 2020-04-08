@@ -5,10 +5,14 @@
 	strERPPONumber				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strOriginPort				NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strDestinationPort			NVARCHAR(200) COLLATE Latin1_General_CI_AS,
-	dtmETAPOD					DATETIME,
-	dtmETAPOL					DATETIME,
+	dtmETAPOD					DATETIME, -- Act. ETA
+	dtmETAPOL					DATETIME, -- Act. ETD
+	dtmDeadlineCargo			DATETIME, -- LS. Instr ETA
+	dtmETSPOL					DATETIME, -- LS. Instr ETD
 	strBookingReference			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strBLNumber					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	dtmBLDate					DATETIME, -- LS
+	strShippingLine				NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- LS
 	strMVessel					NVARCHAR(200) COLLATE Latin1_General_CI_AS,
 	strMVoyageNumber			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strShippingMode				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
