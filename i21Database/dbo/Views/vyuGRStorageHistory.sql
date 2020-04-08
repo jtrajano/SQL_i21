@@ -1,10 +1,11 @@
 CREATE VIEW dbo.vyuGRStorageHistory
 AS
 SELECT DISTINCT TOP 100 PERCENT
-	 intStorageHistoryId				= CASE 
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN (SELECT top 1 intStorageHistoryId FROM tblGRStorageHistory WHERE intCustomerStorageId = TSplit.intTransferToCustomerStorageId AND strType = 'From Transfer')
-											ELSE SH.intStorageHistoryId
-										END
+	 intStorageHistoryId				= SH.intStorageHistoryId
+										--CASE 
+										--	WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN (SELECT top 1 intStorageHistoryId FROM tblGRStorageHistory WHERE intCustomerStorageId = TSplit.intTransferToCustomerStorageId AND strType = 'From Transfer')
+										--	ELSE SH.intStorageHistoryId
+										--END
 	,intEntityId						= CASE 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.intEntityId
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.intEntityId
@@ -29,6 +30,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,intTransferCustomerStorageId		= CASE 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN CASE WHEN CSTO.intCustomerStorageId IS NOT NULL THEN CSTO.intCustomerStorageId ELSE  TSplit.intTransferToCustomerStorageId END
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN CASE WHEN CSFRM.intCustomerStorageId IS NOT NULL THEN CSFRM.intCustomerStorageId ELSE TSource.intSourceCustomerStorageId END
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Reversed Transfer' THEN CSTO.intCustomerStorageId
 											ELSE NULL
 										END
 	,strStorageTicket					= CASE 
@@ -51,7 +53,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	,intSettleStorageId					= SH.intSettleStorageId
 	,strSettleTicket					= SH.strSettleTicket
 	,intBillId							= SH.intBillId
-	,strVoucher							= Bill.strBillId
+	,strVoucher							= SH.strVoucher
 	,intContractHeaderId				= SH.intContractHeaderId
 	,strContractNo						= CH.strContractNumber
 	,intDeliverySheetId					= CASE 
@@ -131,9 +133,12 @@ SELECT DISTINCT TOP 100 PERCENT
 	, ''
 	), ' ', '') strBillIds
 	,SH.intUserId
+	,SH.dtmDistributionDate
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
+JOIN tblGRStorageType ST
+	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 LEFT JOIN tblEMEntity E
 	ON E.intEntityId = CS.intEntityId
 LEFT JOIN tblSMCompanyLocation LOC
@@ -142,8 +147,8 @@ LEFT JOIN tblCTContractHeader CH
 	ON CH.intContractHeaderId = SH.intContractHeaderId
 LEFT JOIN tblARInvoice Inv
 	ON Inv.intInvoiceId = SH.intInvoiceId
-LEFT JOIN tblAPBill Bill
-	ON Bill.intBillId = SH.intBillId
+--LEFT JOIN tblAPBill Bill
+--	ON Bill.intBillId = SH.intBillId
 LEFT JOIN tblGRSettleStorage SettleStorage 
 	ON SettleStorage.intSettleStorageId = SH.intSettleStorageId
 LEFT JOIN tblSCDeliverySheet DS 
@@ -172,12 +177,14 @@ LEFT JOIN vyuGRTransferStorageSourceSplit TSource
 	ON TSource.intTransferStorageId = SH.intTransferStorageId
 LEFT JOIN vyuGRTransferStorageSplit TSplit
 	ON TSplit.intTransferStorageId = SH.intTransferStorageId
-LEFT JOIN (tblGRTransferStorageReference TSR
+--LEFT JOIN 
+LEFT JOIN (
+	tblGRTransferStorageReference TSR
 	JOIN tblGRCustomerStorage CSFRM
 		ON CSFRM.intCustomerStorageId = TSR.intSourceCustomerStorageId
 	JOIN tblGRCustomerStorage CSTO
-		ON CSTO.intCustomerStorageId = TSR.intToCustomerStorageId) 
-ON CASE WHEN SH.strType = 'From Transfer' 
+		ON CSTO.intCustomerStorageId = TSR.intToCustomerStorageId
+) ON CASE WHEN SH.strType = 'From Transfer' OR SH.strType = 'Reversed Transfer'
 	    THEN 
 			  CASE WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId AND CSTO.intCustomerStorageId = CS.intCustomerStorageId  THEN 1
 				  WHEN TSR.intToCustomerStorageId  = CS.intCustomerStorageId AND CSFRM.intCustomerStorageId = CS.intCustomerStorageId  THEN 1

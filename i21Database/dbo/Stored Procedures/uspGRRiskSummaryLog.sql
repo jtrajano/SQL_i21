@@ -68,7 +68,7 @@ BEGIN TRY
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 												WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo 
 											END
-			,dtmTransactionDate 			= (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS			
+			,dtmTransactionDate 			= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intTicketId					= sh.intTicketId				
 			,intCommodityId					= cs.intCommodityId
@@ -94,7 +94,8 @@ BEGIN TRY
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
 		JOIN tblGRStorageType st 
-			ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+			ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
+				and st.ysnDPOwnedType = 0
 		JOIN tblICItemUOM iuom 
 			ON iuom.intItemUOMId = cs.intItemUOMId
 		JOIN tblICCommodityUnitMeasure cum 
@@ -143,7 +144,7 @@ BEGIN TRY
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 												WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo 
 											END
-			,dtmTransactionDate				= (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS		
+			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intTicketId 					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId			
@@ -170,7 +171,7 @@ BEGIN TRY
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
 		JOIN tblGRStorageType st 
 			ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
-				AND ysnDPOwnedType = 1
+				AND st.ysnDPOwnedType = 1
 		JOIN tblICItemUOM iuom 
 			ON iuom.intItemUOMId = cs.intItemUOMId
 		JOIN tblICCommodityUnitMeasure cum 
@@ -194,13 +195,16 @@ BEGIN TRY
 												WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
 												WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
 											END
-			,intTransactionRecordHeaderId	= sh.intCustomerStorageId
+			,intTransactionRecordHeaderId	= CASE 
+												WHEN intTransactionTypeId = 3 THEN sh.intTransferCustomerStorageId
+												WHEN intTransactionTypeId = 4 THEN sh.intCustomerStorageId
+											END
 			,strDistributionType 			= st.strStorageTypeDescription
 			,strTransactionNumber 			= CASE 
 												WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 											END
-			,dtmTransactionDate				= (CASE WHEN sh.strType = 'Transfer' THEN RIGHT(CONVERT(VARCHAR(11), sh.dtmHistoryDate, 106), 8) ELSE RIGHT(CONVERT(VARCHAR(11), cs.dtmDeliveryDate, 106), 8) END) COLLATE Latin1_General_CI_AS
+			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intTicketId					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId
@@ -215,13 +219,13 @@ BEGIN TRY
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
 			,strMiscFields 					= NULL
-			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
 		JOIN tblGRStorageType st 
 			ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
-				AND ysnDPOwnedType = 0
+				--AND st.ysnDPOwnedType = 0
 		JOIN tblICItemUOM iuom 
 			ON iuom.intItemUOMId = cs.intItemUOMId
 		JOIN tblICCommodityUnitMeasure cum 
@@ -232,8 +236,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
-		WHERE sh.intTransactionTypeId IN (3,4)
-			AND sh.intStorageHistoryId = @intStorageHistoryId
+		WHERE sh.intStorageHistoryId = @intStorageHistoryId
+			AND ((sh.intTransactionTypeId = 4 AND st.ysnDPOwnedType = 0) OR (sh.intTransactionTypeId = 3 AND st.ysnDPOwnedType = 1))
 		--SELECT 
 		--	strBucketType	 				= 'Company Owned'
 		--	,strTransactionType 			= 'Storage Settlement'
