@@ -8,6 +8,7 @@ FROM (
     --Voucher
     SELECT
     b.intEntityVendorId
+    ,v.strVendorId
     ,e.strName
     ,b.intBillId
     ,b.strBillId
@@ -18,15 +19,17 @@ FROM (
     ,1 intSequence
     FROM tblAPBill b
     JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
-    JOIN tblEMEntity e ON b.intEntityVendorId = e.intEntityId
+	  JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
+		ON b.intEntityVendorId = v.intEntityId
     WHERE b.intTransactionType IN (13,2)
     AND b.ysnPosted = 1
-    GROUP BY b.intEntityVendorId, e.strName, b.intBillId, b.strBillId, b.dtmDate
+    GROUP BY b.intEntityVendorId, v.strVendorId, e.strName, b.intBillId, b.strBillId, b.dtmDate
 
     UNION
     --Voucher Payment
     SELECT
     b.intEntityVendorId
+	  ,v.strVendorId
     ,e.strName
     ,b.intBillId
     ,b.strBillId
@@ -38,7 +41,8 @@ FROM (
     FROM tblAPPaymentDetail pd 
     JOIN tblAPPayment p ON p.intPaymentId = pd.intPaymentId
     JOIN tblAPBill b ON pd.intBillId = b.intBillId
-    JOIN tblEMEntity e ON b.intEntityVendorId = e.intEntityId
+    JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
+		ON b.intEntityVendorId = v.intEntityId
     WHERE pd.ysnOffset = 0
     AND p.ysnPosted = 1
 
@@ -46,6 +50,7 @@ FROM (
     --Applied to Payments
     SELECT 
     b.intEntityVendorId
+	  ,v.strVendorId
     ,e.strName
     ,b.intBillId
     ,b.strBillId
@@ -57,7 +62,8 @@ FROM (
     FROM tblAPPaymentDetail pd 
     JOIN tblAPPayment p ON p.intPaymentId = pd.intPaymentId
     JOIN tblAPBill b ON pd.intBillId = b.intBillId
-    JOIN tblEMEntity e ON b.intEntityVendorId = e.intEntityId
+    JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
+		ON b.intEntityVendorId = v.intEntityId
     WHERE pd.ysnOffset = 1
     AND p.ysnPosted = 1
     AND b.intTransactionType IN (13,2)
@@ -66,6 +72,7 @@ FROM (
     --Applied to voucher
     SELECT 
     b.intEntityVendorId
+	  ,v.strVendorId
     ,e.strName
     ,b.intBillId
     ,b.strBillId
@@ -77,25 +84,28 @@ FROM (
     FROM tblAPAppliedPrepaidAndDebit o
     JOIN tblAPBill b ON o.intTransactionId = b.intBillId
     JOIN tblAPBill b1 ON o.intBillId = b1.intBillId
-    JOIN tblEMEntity e ON b.intEntityVendorId = e.intEntityId
+    JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
+		ON b.intEntityVendorId = v.intEntityId
     WHERE b.ysnPosted = 1
 
     UNION
     --Applied to AR Receive Payments
     SELECT
     b.intEntityVendorId
+	  ,v.strVendorId
     ,e.strName
     ,b.intBillId
     ,b.strBillId
     ,b.dtmDate
-    ,pd.dblInvoiceTotal*-1
+    ,pd.dblPayment*-1
     ,p.strRecordNumber
     ,p.dtmDatePaid
-    ,5 
+    ,5
     FROM tblARPayment p
     JOIN tblARPaymentDetail pd ON p.intPaymentId = pd.intPaymentId
     JOIN tblAPBill b ON pd.intBillId = b.intBillId
-    JOIN tblEMEntity e ON b.intEntityVendorId = e.intEntityId
+    JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
+		ON b.intEntityVendorId = v.intEntityId
     WHERE p.ysnPosted = 1
 ) h
 WHERE strBillId IN ('BA-4','BA-9','VPRE-4')
