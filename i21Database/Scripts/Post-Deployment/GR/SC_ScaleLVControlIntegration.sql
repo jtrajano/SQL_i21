@@ -290,7 +290,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				,gasct_pit_no COLLATE Latin1_General_CI_AS AS strPitNumber
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
-				,gasct_loc_no + '''' + gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
+				,isnull(lb.strStationShortDescription, (a.gasct_loc_no + '''' + a.gasct_scale_id) )  COLLATE Latin1_General_CI_AS  AS strStationShortDescription
 				,CAST(
 				CASE WHEN gasct_split_wgt_yn = ''Y'' THEN 1
 				ELSE 0 END
@@ -306,7 +306,15 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_tic_type = (''T'')       THEN 4
 					ELSE 5
 				END) AS intTicketType
-			from gasctmst
+				,gasct_load_no as strLoadNumber
+			from gasctmst a
+				left join (
+						select a.strLinkStationShortDescription, b.strStationShortDescription from tblSCScaleSetupOriginLink a 
+							join tblSCScaleSetup b
+								on a.intScaleSetupId = b.intScaleSetupId
+						
+				) as lb
+					on (a.gasct_loc_no + '''' + a.gasct_scale_id) COLLATE Latin1_General_CI_AS = lb.strLinkStationShortDescription  COLLATE Latin1_General_CI_AS
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
 
@@ -380,6 +388,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[strCostMethod]
 						,[strDiscountComment]
 						,[strSourceType]
+						,[strLoadNumber]
 					)
 					SELECT 
 						[strTicketNumber]				= LTRIM(RTRIM(SC.strTicketNumber))
@@ -434,7 +443,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[strItemUOM]					= UM.strUnitMeasure
 						,[strCostMethod]				= ''Per Unit''
 						,[strDiscountComment]			= SC.strDiscountComment
-						,[strSourceType]				= ''LV Control''						
+						,[strSourceType]				= ''LV Control''
+						,SC.strLoadNumber
 					FROM vyuSCTicketLVControlView SC 
 					INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 					LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
