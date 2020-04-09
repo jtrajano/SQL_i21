@@ -1890,6 +1890,28 @@ BEGIN
 					intSpecialPriceId = @SpecialPriceId
 					
 				IF @GetAllAvailablePricing = 0 RETURN;
+			END
+
+		--ay. Customer - Customer Location - Item and Item Category are blank (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
+		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND ISNULL(intCategoryId, 0) = 0 AND ISNULL(intItemId, 0) = 0 AND ISNULL(dblCustomerPrice,0) <> 0)
+		IF(ISNULL(@SpecialPriceId,0) <> 0) AND NOT EXISTS(SELECT TOP 1 intSpecialPriceId FROM @returntable WHERE intSpecialPriceId = @SpecialPriceId)
+			BEGIN
+				SET @intSort = @intSort + 1
+				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+				SELECT
+					dblCustomerPrice * @UOMQuantity
+					,strPricing
+					,intSpecialPriceId
+					,dblPriceBasis
+					,dblDeviation
+					,@UOMQuantity
+					,@intSort
+				FROM
+					@SpecialPricing
+				WHERE
+					intSpecialPriceId = @SpecialPriceId
+					
+				IF @GetAllAvailablePricing = 0 RETURN;
 			END			
 										
 	END		
