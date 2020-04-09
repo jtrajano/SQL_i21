@@ -27,11 +27,12 @@ SELECT Header.intCoverageEntryId
     , Detail.dblAveragePrice
     , Detail.dblOptionsCovered
     , Detail.dblFuturesM2M
-	, dblM2MPlus10 = Detail.dblFuturesM2M
-	, dblM2MMinus10 = Detail.dblFuturesM2M
+	, dblM2MPlus10 = ISNULL(DAPSettle.dblFuturesM2MPlus, 0.000000)
+	, dblM2MMinus10 = ISNULL(DAPSettle.dblFuturesM2MMinus, 0.000000)
     , Detail.intConcurrencyId
 FROM tblRKCoverageEntryDetail Detail
 LEFT JOIN vyuRKGetCoverageEntry Header ON Header.intCoverageEntryId = Detail.intCoverageEntryId
 LEFT JOIN tblICCommodityAttribute Attribute ON Attribute.intCommodityAttributeId = Detail.intProductTypeId
 LEFT JOIN tblCTBook Book ON Book.intBookId = Detail.intBookId
 LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Detail.intSubBookId
+OUTER APPLY dbo.fnRKGetDAPSettlementSimulation(Header.intCommodityId, Detail.intProductTypeId, Header.dtmDate, Detail.intBookId, Detail.intSubBookId) DAPSettle
