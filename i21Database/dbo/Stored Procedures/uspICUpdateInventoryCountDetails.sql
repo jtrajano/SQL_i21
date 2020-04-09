@@ -386,20 +386,35 @@ BEGIN
 			ISNULL(
 				CASE 
 					WHEN il.intCostingMethod = 1 THEN 
-						dbo.fnICGetMovingAverageCost(
-							il.intItemId
-							,il.intItemLocationId
-							,lastTransaction.intInventoryTransactionId
+						dbo.fnCalculateCostBetweenUOM (
+							stockUOM.intItemUOMId
+							,itemUOM.intItemUOMId
+							,dbo.fnICGetMovingAverageCost(
+								il.intItemId
+								,il.intItemLocationId
+								,lastTransaction.intInventoryTransactionId
+							)
 						)
 					ELSE 
-						dbo.fnCalculateCostBetweenUOM(
-							ISNULL(lastCost.intItemUOMId, stockUOM.intItemUOMId) 
-							, itemUOM.intItemUOMId
-							, COALESCE(lastCost.dblCost, p.dblLastCost)
+						ISNULL(
+							-- last cost from transaction
+							dbo.fnCalculateCostBetweenUOM(
+								lastCost.intItemUOMId 
+								, itemUOM.intItemUOMId
+								, lastCost.dblCost 
+							)
+							-- last cost from item pricing
+							,dbo.fnCalculateCostBetweenUOM(
+								stockUOM.intItemUOMId
+								, itemUOM.intItemUOMId
+								, p.dblLastCost
+							)
 						)
 				END
+
 				, 0
-			)
+			)			
+
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, itemUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = itemUOM.intItemUOMId
 		, ysnRecount = 0
@@ -435,6 +450,7 @@ BEGIN
 				AND t.intItemLocationId = il.intItemLocationId
 				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
 				AND t.dblQty > 0 
+				AND t.ysnIsUnposted = 0 
 			ORDER BY
 				t.intInventoryTransactionId DESC 
 		) lastCost
@@ -472,7 +488,7 @@ BEGIN
 				t.intItemId = i.intItemId
 				AND t.intItemLocationId = il.intItemLocationId
 				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
-				AND t.dblQty <> 0 
+				AND t.dblQty <> 0 				
 			ORDER BY
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction
