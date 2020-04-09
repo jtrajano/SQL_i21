@@ -947,7 +947,7 @@ BEGIN TRY
 	,strBasisUOM			= BUOM.strUnitMeasure
 	,dblQuantity			= CASE
 							WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
-							ELSE (PF.intNoOfLoad - PF.intShippedNoOfLoad) * CD.dblQuantityPerLoad
+							ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 							END
 	,strQuantityUOM			= IUM.strUnitMeasure
 	,dblCashPrice			= ISNULL(PF.dblCashPrice,0)
@@ -956,25 +956,25 @@ BEGIN TRY
 	,dblQtyinCommodityStockUOM = ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, 
 									(CASE
 									WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
-									ELSE (PF.intNoOfLoad - PF.intShippedNoOfLoad) * CD.dblQuantityPerLoad
+									ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 									END)), 0)
 	,strStockUOM			= dbo.fnCTGetCommodityUOM(C1.intUnitMeasureId)
 	,dblAvailableQty		= CASE
 								WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
-								ELSE (PF.intNoOfLoad - PF.intShippedNoOfLoad) * CD.dblQuantityPerLoad
+								ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 								END
 	,intItemUOMId			= CD.intItemUOMId
 	,intPriceItemUOMId		= CD.intPriceItemUOMId
 	,dblAmount				= ([dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, 
 								(CASE
 								WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
-								ELSE (PF.intNoOfLoad - PF.intShippedNoOfLoad) * CD.dblQuantityPerLoad
+								ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 								END)) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,(ISNULL(PF.dblCashPrice,0))))
 	,dblAmountinCommodityStockUOM = -- This is dblQtyinCommodityStockUOM converted back to item stock UOM
 									ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId,
 									(CASE
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
-										ELSE (PF.intNoOfLoad - PF.intShippedNoOfLoad) * CD.dblQuantityPerLoad
+										ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 									END)), 0)
 									* --dblCashPriceinCommodityStockUOM
 									ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,CH.intCommodityUOMId, ISNULL(PF.dblCashPrice,0)),0)
