@@ -548,7 +548,7 @@ BEGIN TRY
 
 		SELECT @intPriceFixationKey = MIN(intPriceFixationKey) FROM @PriceFixation WHERE (dblQuantity - dblShippedQty) > 0 AND intContractDetailId = @intContractDetailId
 		
-		IF EXISTS(SELECT 1 FROM @Shipment WHERE dblAllocatedQuantity = 0 AND intShipmentKey = @intShipmentKey)
+		IF EXISTS(SELECT 1 FROM @PriceFixation WHERE intNoOfLoad > intShippedNoOfLoad AND intPriceFixationKey = @intPriceFixationKey)--IF EXISTS(SELECT 1 FROM @Shipment WHERE dblAllocatedQuantity = 0 AND intShipmentKey = @intShipmentKey)
 		BEGIN
 				UPDATE @PriceFixation SET intShippedNoOfLoad = ISNULL(intShippedNoOfLoad,0) + 1
 				WHERE intPriceFixationKey = @intPriceFixationKey 
