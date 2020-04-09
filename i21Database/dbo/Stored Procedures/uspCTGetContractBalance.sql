@@ -592,8 +592,8 @@ BEGIN TRY
 	SELECT intContractTypeId,'Shipment',intContractHeaderId,intContractDetailId,(dblQuantity - dblAllocatedQuantity) * -1,ISNULL(intNoOfLoad,0)intNoOfLoad 
 	FROM @Shipment
 
-	INSERT INTO @PriceFixationTotal(intContractHeaderId,intContractDetailId,dblQuantity) 
-	SELECT intContractHeaderId,intContractDetailId,SUM(dblQuantity) * -1 FROM @Balance WHERE strType = 'PriceFixation' 
+	INSERT INTO @PriceFixationTotal(intContractHeaderId,intContractDetailId,dblQuantity,intNoOfLoad) 
+	SELECT intContractHeaderId,intContractDetailId,SUM(dblQuantity) *-1,SUM(intNoOfLoad) FROM @PriceFixation
 	GROUP BY intContractHeaderId,intContractDetailId 
 
 	INSERT INTO @BalanceTotal(intContractHeaderId,intContractDetailId,dblQuantity,intNoOfLoad)
@@ -695,9 +695,9 @@ BEGIN TRY
 		,dblBasis				= ISNULL(HT.dblBasis, CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(CD.dblBasis,0) ELSE NULL END)
 		,dblBasisinCommodityStockUOM = CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0) ELSE NULL END
 		,strBasisUOM			= BUOM.strUnitMeasure
-		,dblQuantity            =   CASE 
+		,dblQuantity            =    CASE 
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-										ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
+										ELSE (CD.intNoOfLoad - CASE WHEN ISNULL(PFT.intNoOfLoad,0) > ISNULL(BL.intNoOfLoad,0) THEN ISNULL(PFT.intNoOfLoad,0) ELSE ISNULL(BL.intNoOfLoad,0) END) * CD.dblQuantityPerLoad
 									END + ISNULL(ADT.dblQuantity, 0)
 		,strQuantityUOM			= IUM.strUnitMeasure
 		,dblCashPrice			= ISNULL(HT.dblCashPrice, CASE WHEN HT.intPricingTypeId = 1 THEN ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0) ELSE NULL END)
@@ -709,13 +709,13 @@ BEGIN TRY
 		,dblQtyinCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId,
 										CASE 
 											WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-											ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
+											ELSE (CD.intNoOfLoad - CASE WHEN ISNULL(PFT.intNoOfLoad,0) > ISNULL(BL.intNoOfLoad,0) THEN ISNULL(PFT.intNoOfLoad,0) ELSE ISNULL(BL.intNoOfLoad,0) END) * CD.dblQuantityPerLoad
 										END + ISNULL(ADT.dblQuantity, 0)
 									)
 		,strStockUOM			= dbo.fnCTGetCommodityUOM(C1.intUnitMeasureId)
 		,dblAvailableQty        =  CASE 
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-										ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
+										ELSE (CD.intNoOfLoad - CASE WHEN ISNULL(PFT.intNoOfLoad,0) > ISNULL(BL.intNoOfLoad,0) THEN ISNULL(PFT.intNoOfLoad,0) ELSE ISNULL(BL.intNoOfLoad,0) END) * CD.dblQuantityPerLoad
 									END + ISNULL(ADT.dblQuantity, 0)
 		,dblAmount				= CASE WHEN HT.intPricingTypeId = 1 THEN
 								  [dbo].[fnCTConvertQtyToStockItemUOM]
@@ -724,7 +724,7 @@ BEGIN TRY
 									(
 										CASE 
 											WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-											ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
+											ELSE (CD.intNoOfLoad - CASE WHEN PFT.intNoOfLoad > BL.intNoOfLoad THEN PFT.intNoOfLoad ELSE BL.intNoOfLoad END) * CD.dblQuantityPerLoad
 										END + ISNULL(ADT.dblQuantity, 0)
 									)
 								  )
@@ -736,7 +736,7 @@ BEGIN TRY
 											(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId,
 												CASE 
 													WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-													ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
+													ELSE (CD.intNoOfLoad - CASE WHEN ISNULL(PFT.intNoOfLoad,0) > ISNULL(BL.intNoOfLoad,0) THEN ISNULL(PFT.intNoOfLoad,0) ELSE ISNULL(BL.intNoOfLoad,0) END) * CD.dblQuantityPerLoad
 												END + ISNULL(ADT.dblQuantity, 0)
 												)
 											)
