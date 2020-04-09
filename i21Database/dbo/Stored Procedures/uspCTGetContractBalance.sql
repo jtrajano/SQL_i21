@@ -542,17 +542,17 @@ BEGIN TRY
 		
 		SET    @dblShipQtyToAllocate = NULL
 		SET    @intContractDetailId  = NULL
+
+		SELECT @dblShipQtyToAllocate = dblQuantity - ISNULL(dblAllocatedQuantity,0), @intContractDetailId = intContractDetailId  
+		FROM @Shipment WHERE intShipmentKey = @intShipmentKey
+
+		SELECT @intPriceFixationKey = MIN(intPriceFixationKey) FROM @PriceFixation WHERE (dblQuantity - dblShippedQty) > 0 AND intContractDetailId = @intContractDetailId
 		
 		IF EXISTS(SELECT 1 FROM @Shipment WHERE dblAllocatedQuantity = 0 AND intShipmentKey = @intShipmentKey)
 		BEGIN
 				UPDATE @PriceFixation SET intShippedNoOfLoad = ISNULL(intShippedNoOfLoad,0) + 1
 				WHERE intPriceFixationKey = @intPriceFixationKey 
 		END
-
-		SELECT @dblShipQtyToAllocate = dblQuantity - ISNULL(dblAllocatedQuantity,0), @intContractDetailId = intContractDetailId  
-		FROM @Shipment WHERE intShipmentKey = @intShipmentKey
-
-		SELECT @intPriceFixationKey = MIN(intPriceFixationKey) FROM @PriceFixation WHERE (dblQuantity - dblShippedQty) > 0 AND intContractDetailId = @intContractDetailId
 
 		SELECT @dblPriceQtyToAllocate = dblQuantity - dblShippedQty  FROM @PriceFixation WHERE intPriceFixationKey = @intPriceFixationKey
 
@@ -695,18 +695,9 @@ BEGIN TRY
 		,dblBasis				= ISNULL(HT.dblBasis, CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(CD.dblBasis,0) ELSE NULL END)
 		,dblBasisinCommodityStockUOM = CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0) ELSE NULL END
 		,strBasisUOM			= BUOM.strUnitMeasure
-		,dblQuantity            =    CASE 
+		,dblQuantity            =   CASE 
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-										ELSE       
-											CASE 
-											WHEN ISNULL(BL.intNoOfLoad, 0) > FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-													THEN (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0))
-											ELSE (CD.intNoOfLoad - 
-													(CASE 
-														WHEN ISNULL(PFT.dblQuantity, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-														ELSE CEILING(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad) 
-													END)) 
-											END * CD.dblQuantityPerLoad
+										ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
 									END + ISNULL(ADT.dblQuantity, 0)
 		,strQuantityUOM			= IUM.strUnitMeasure
 		,dblCashPrice			= ISNULL(HT.dblCashPrice, CASE WHEN HT.intPricingTypeId = 1 THEN ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0) ELSE NULL END)
@@ -718,31 +709,13 @@ BEGIN TRY
 		,dblQtyinCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId,
 										CASE 
 											WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-											ELSE       
-												CASE 
-												WHEN ISNULL(BL.intNoOfLoad, 0) > FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-													THEN (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0))
-												ELSE (CD.intNoOfLoad - 
-														(CASE 
-															WHEN ISNULL(PFT.dblQuantity, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-															ELSE CEILING(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad) 
-														END)) 
-												END * CD.dblQuantityPerLoad
+											ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
 										END + ISNULL(ADT.dblQuantity, 0)
 									)
 		,strStockUOM			= dbo.fnCTGetCommodityUOM(C1.intUnitMeasureId)
 		,dblAvailableQty        =  CASE 
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-										ELSE       
-											CASE 
-											WHEN ISNULL(BL.intNoOfLoad, 0) > FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-												THEN (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0))
-											ELSE (CD.intNoOfLoad - 
-													(CASE 
-														WHEN ISNULL(PFT.dblQuantity, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-														ELSE CEILING(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad) 
-													END)) 
-											END * CD.dblQuantityPerLoad
+										ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
 									END + ISNULL(ADT.dblQuantity, 0)
 		,dblAmount				= CASE WHEN HT.intPricingTypeId = 1 THEN
 								  [dbo].[fnCTConvertQtyToStockItemUOM]
@@ -751,16 +724,7 @@ BEGIN TRY
 									(
 										CASE 
 											WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-											ELSE       
-												CASE 
-												WHEN ISNULL(BL.intNoOfLoad, 0) > FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-													THEN (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0))
-												ELSE (CD.intNoOfLoad - 
-														(CASE 
-															WHEN ISNULL(PFT.dblQuantity, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-															ELSE CEILING(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad) 
-														END)) 
-												END * CD.dblQuantityPerLoad
+											ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
 										END + ISNULL(ADT.dblQuantity, 0)
 									)
 								  )
@@ -772,16 +736,7 @@ BEGIN TRY
 											(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId,
 												CASE 
 													WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
-													ELSE       
-														CASE 
-														WHEN ISNULL(BL.intNoOfLoad, 0) > FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-															THEN (CD.intNoOfLoad - ISNULL(BL.intNoOfLoad, 0))
-														ELSE (CD.intNoOfLoad - 
-																(CASE 
-																	WHEN ISNULL(PFT.dblQuantity, 0) > CD.dblQuantityPerLoad THEN FLOOR(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad)
-																	ELSE CEILING(ISNULL(PFT.dblQuantity, 0) / CD.dblQuantityPerLoad) 
-																END)) 
-														END * CD.dblQuantityPerLoad
+													ELSE (CD.intNoOfLoad - BL.intNoOfLoad) * CD.dblQuantityPerLoad
 												END + ISNULL(ADT.dblQuantity, 0)
 												)
 											)
