@@ -71,6 +71,7 @@ BEGIN TRY
 		,@dtmOldStartDate DATETIME
 		,@dtmOldEndDate DATETIME
 		,@dtmOldPlannedAvailabilityDate DATETIME
+		,@strOldCustomerReference NVARCHAR(100)
 	DECLARE @intNewStageLoadId INT
 	DECLARE @tblLGLoadDetail TABLE (intStageLoadDetailId INT)
 	DECLARE @intStageLoadDetailId INT
@@ -179,6 +180,7 @@ BEGIN TRY
 				,@dtmOldStartDate = NULL
 				,@dtmOldEndDate = NULL
 				,@dtmOldPlannedAvailabilityDate = NULL
+				,@strOldCustomerReference = NULL
 
 			SELECT @intStageLoadDetailId = NULL
 				,@strRowState = ''
@@ -294,11 +296,12 @@ BEGIN TRY
 						)
 			END
 
-			SELECT @strLoadNumber = L.strLoadNumber
+			SELECT TOP 1 @strLoadNumber = L.strLoadNumber
 				,@intLoadId = L.intLoadId
 			FROM tblLGLoad L WITH (NOLOCK)
-			WHERE L.intShipmentType = 1
-				AND L.strCustomerReference = @strCustomerReference
+			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+				AND L.intShipmentType = 1
+				AND LD.intPContractDetailId = @intContractDetailId
 
 			SELECT @intShipmentType = 1
 				,@intShipmentStatus = 1
@@ -470,6 +473,7 @@ BEGIN TRY
 					,@dtmOldStartDate = dtmStartDate
 					,@dtmOldEndDate = dtmEndDate
 					,@dtmOldPlannedAvailabilityDate = dtmPlannedAvailabilityDate
+					,@strOldCustomerReference = strCustomerReference
 				FROM tblLGLoad L WITH (NOLOCK)
 				WHERE L.intLoadId = @intLoadId
 
@@ -498,20 +502,16 @@ BEGIN TRY
 					,strShippingMode = @strShippingMode
 					,intNumberOfContainers = @intNumberOfContainers
 					,intContainerTypeId = @intContainerTypeId
+					,strCustomerReference = @strCustomerReference
 				WHERE intLoadId = @intLoadId
-
-				--IF @dtmOldETAPOD <> @dtmETAPOD
-				--BEGIN
-				--	-- To set Contract Planned Availability Date and send Contract Update feed to SAP
-				--	EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
-				--		,@strRowState = 'Modified'
-				--		,@intShipmentType = 1 -- LS
-				--END
 
 				-- Audit Log
 				IF (@intLoadId > 0)
 				BEGIN
 					DECLARE @strDetails NVARCHAR(MAX) = ''
+
+					IF (@strOldCustomerReference <> @strCustomerReference)
+						SET @strDetails += '{"change":"strCustomerReference","iconCls":"small-gear","from":"' + LTRIM(@strOldCustomerReference) + '","to":"' + LTRIM(@strCustomerReference) + '","leaf":true,"changeDescription":"Customer Ref."},'
 
 					IF (@intOldPurchaseSale <> @intPurchaseSale)
 						SET @strDetails += '{"change":"intPurchaseSale","iconCls":"small-gear","from":"' + LTRIM(@intOldPurchaseSale) + '","to":"' + LTRIM(@intPurchaseSale) + '","leaf":true,"changeDescription":"intPurchaseSale"},'
@@ -950,6 +950,14 @@ BEGIN TRY
 					FROM @tblLGLoadDetailChanges
 					WHERE intLoadDetailId = @intLoadDetailId
 				END
+
+				--IF @dtmOldETAPOD <> @dtmETAPOD
+				--BEGIN
+				--	-- To set Contract Planned Availability Date and send Contract Update feed to SAP
+				--	EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
+				--		,@strRowState = 'Modified'
+				--		,@intShipmentType = 1 -- LS
+				--END
 			END
 
 			--Move to Archive
