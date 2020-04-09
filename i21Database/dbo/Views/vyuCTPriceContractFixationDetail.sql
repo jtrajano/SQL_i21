@@ -1,6 +1,69 @@
 ﻿CREATE VIEW [dbo].[vyuCTPriceContractFixationDetail]
 
 AS
+	
+	with fixationDetailInvoice as (
+		select
+		a.intPriceFixationDetailId
+		,ysnInvoiced = (case when count(a.intInvoiceId) > 0 then convert(bit,1) else convert(bit,0) end)
+		,strInvoiceIds = 
+			STUFF(
+					(
+						SELECT  ',' +  convert(nvarchar(20),c.intInvoiceId)
+						from tblCTPriceFixationDetailAPAR c
+						where c.intPriceFixationDetailId = a.intPriceFixationDetailId
+						FOR xml path('')
+					)
+				, 1
+				, 1
+				, ''
+			)
+		,strInvoices = 
+			STUFF(
+					(
+						SELECT  ', ' + b.strInvoiceNumber
+						FROM tblARInvoice b
+						WHERE b.intInvoiceId in (select c.intInvoiceId from tblCTPriceFixationDetailAPAR c where c.intPriceFixationDetailId = a.intPriceFixationDetailId)
+						FOR xml path('')
+					)
+				, 1
+				, 1
+				, ''
+			)
+		from tblCTPriceFixationDetailAPAR a
+		where a.intInvoiceId is not null group by a.intPriceFixationDetailId			
+		),
+	fixationDetailVoucher as (
+		select
+		a.intPriceFixationDetailId
+		,ysnBilled = (case when count(a.intBillId) > 0 then convert(bit,1) else convert(bit,0) end)
+		,strBillIds = 
+			STUFF(
+					(
+						SELECT  ',' +  convert(nvarchar(20),c.intBillId)
+						from tblCTPriceFixationDetailAPAR c
+						where c.intPriceFixationDetailId = a.intPriceFixationDetailId
+						FOR xml path('')
+					)
+				, 1
+				, 1
+				, ''
+			)
+		,strBills = 
+			STUFF(
+					(
+						SELECT  ', ' + b.strBillId
+						FROM tblAPBill b
+						WHERE b.intBillId in (select c.intBillId from tblCTPriceFixationDetailAPAR c where c.intPriceFixationDetailId = a.intPriceFixationDetailId)
+						FOR xml path('')
+					)
+				, 1
+				, 1
+				, ''
+			)
+		from tblCTPriceFixationDetailAPAR a
+		where a.intBillId is not null group by a.intPriceFixationDetailId
+		)
 
 	SELECT	FD.intPriceFixationDetailId,
 			FD.intConcurrencyId,
@@ -42,7 +105,13 @@ AS
 			TR.ysnFreezed,
 			CD.dblRatio,
 			FD.dblHedgeNoOfLots AS dblHedgeNoOfLots,
-			FD.intDailyAveragePriceDetailId as  intDailyAveragePriceDetailId
+			FD.intDailyAveragePriceDetailId as  intDailyAveragePriceDetailId,
+			ysnInvoiced = FDI.ysnInvoiced,
+			strInvoiceIds = FDI.strInvoiceIds,
+			strInvoices = FDI.strInvoices,
+			ysnBilled = FDV.ysnBilled,
+			strBillIds = FDV.strBillIds,
+			strBills = FDV.strBills
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -55,4 +124,6 @@ AS
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	FD.intBrokerId				LEFT
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId	LEFT
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId
+	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId		
+	LEFT JOIN fixationDetailInvoice FDI ON FDI.intPriceFixationDetailId = FD.intPriceFixationDetailId
+	LEFT JOIN fixationDetailVoucher FDV ON FDV.intPriceFixationDetailId = FD.intPriceFixationDetailId
