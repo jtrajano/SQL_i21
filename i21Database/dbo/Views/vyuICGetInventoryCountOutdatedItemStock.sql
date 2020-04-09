@@ -42,7 +42,7 @@ FROM
 							WHEN ISNULL(Item.ysnSeparateStockForUOMs, 0) = 0 THEN 
 								byStockUOM.dblOnHand								
 							ELSE 
-								dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand)
+								dbo.fnCalculateQtyBetweenUOM(byStockUOM.intItemUOMId, StockUOM.intItemUOMId, byStockUOM.dblOnHand)
 						END
 					ELSE 
 						LotTransactions.dblQty 
