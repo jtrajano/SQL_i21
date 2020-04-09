@@ -182,7 +182,7 @@ BEGIN TRY
 
 	SELECT @List = NULL
 
-	SELECT  DA.intInvoiceId AS Id, DA.intInvoiceDetailId AS DetailId
+	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId
 	INTO	#ItemInvoice
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
 	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intInvoiceDetailId
