@@ -153,6 +153,6 @@ AS
 		JOIN	tblSMTransaction	TR	ON	TR.intTransactionId =	AP.intTransactionId
 										AND	TR.intRecordId		=   CH.intContractHeaderId
 		JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
-		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
+		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments') and AP.ysnCurrent = convert(bit,1)
 		ORDER BY AP.intApprovalId DESC
 	) AP
