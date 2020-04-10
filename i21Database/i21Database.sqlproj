@@ -8143,6 +8143,7 @@
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBillDetailCharges.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
