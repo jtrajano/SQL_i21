@@ -8147,6 +8147,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
