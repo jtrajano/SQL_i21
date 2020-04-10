@@ -25,6 +25,8 @@ BEGIN TRY
 	DECLARE @dblShipQtyToAllocate	NUMERIC(38,20)
 	DECLARE @dblAllocatedQty		NUMERIC(38,20)
 	DECLARE @dblPriceQtyToAllocate  NUMERIC(38,20)
+	DECLARE @intShipmentNoOfLoad	INT
+	DECLARE @intPriceNoOfLoad		INT
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnContractBalanceInProgress = 1)
 	BEGIN
@@ -550,8 +552,14 @@ BEGIN TRY
 		
 		IF EXISTS(SELECT 1 FROM @PriceFixation WHERE intNoOfLoad > intShippedNoOfLoad AND intPriceFixationKey = @intPriceFixationKey)--IF EXISTS(SELECT 1 FROM @Shipment WHERE dblAllocatedQuantity = 0 AND intShipmentKey = @intShipmentKey)
 		BEGIN
-				UPDATE @PriceFixation SET intShippedNoOfLoad = ISNULL(intShippedNoOfLoad,0) + 1
-				WHERE intPriceFixationKey = @intPriceFixationKey 
+				SELECT @intShipmentNoOfLoad = SUM(intNoOfLoad) FROM @Shipment WHERE intContractDetailId = @intContractDetailId
+				SELECT @intPriceNoOfLoad = SUM(intShippedNoOfLoad) FROM @PriceFixation WHERE intContractDetailId = @intContractDetailId
+
+				IF @intShipmentNoOfLoad > @intPriceNoOfLoad
+				BEGIN
+					UPDATE @PriceFixation SET intShippedNoOfLoad = ISNULL(intShippedNoOfLoad,0) + 1
+					WHERE intPriceFixationKey = @intPriceFixationKey 
+				END		
 		END
 
 		SELECT @dblPriceQtyToAllocate = dblQuantity - dblShippedQty  FROM @PriceFixation WHERE intPriceFixationKey = @intPriceFixationKey
