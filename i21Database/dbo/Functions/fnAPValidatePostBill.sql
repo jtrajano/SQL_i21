@@ -507,7 +507,29 @@ BEGIN
 			OR	C.intBillId IS NULL --DELETED
 			)
 		)--Prepay and Debit Memo transactions
-		
+
+		--VALIDATE THE AMOUNT DUE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			A.strBillId + ' has invalid amount due.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			34
+		FROM tblAPBill A
+		WHERE 
+		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND 
+		(
+			--amount due should be total less payment
+			(A.dblAmountDue != (A.dblTotal - A.dblPayment))
+			OR
+			--amount due cannot be greater than the total
+			(A.dblAmountDue > A.dblTotal)
+			OR
+			--amount due cannot be negative
+			(A.dblAmountDue < 0)
+		)
 
 		--VALIDATE TAX AMOUNT
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
