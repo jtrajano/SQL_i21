@@ -594,11 +594,79 @@ ON GL.strTransactionId = PAY.strPaymentRecordNum
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
+	--UPDATE tblAPPaymentDetail
+	EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
+	--UPDATE BILL RECORDS
+	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
+
+	--VALIDATE THE AMOUNT IN CASE THE LOGIC CHANGES THE TWO SP ABOVE AND IT IS FAULTY
+	DECLARE @invalidAmount AS Id
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
+	OUTPUT inserted.intTransactionId INTO @invalidAmount 
+	SELECT 
+		A.strBillId + ' has invalid amount due.',
+		'Payable',
+		C.strPaymentRecordNum,
+		C.ysnLienExists,
+		C.intPaymentId,
+		@batchId
+	FROM tblAPBill A
+	INNER JOIN (tblAPPaymentDetail B INNER JOIN tblAPPayment C ON B.intPaymentId = C.intPaymentId)
+		ON A.intBillId = B.intBillId
+	WHERE 
+		C.intPaymentId IN (SELECT intId FROM @payments UNION ALL SELECT intId FROM @prepayIds)
+	AND 
+	(
+		--amount due should be total less payment
+		(A.dblAmountDue != (A.dblTotal - A.dblPayment))
+		OR
+		--amount due cannot be greater than the total
+		(A.dblAmountDue > A.dblTotal)
+		OR
+		--amount due cannot be negative
+		(A.dblAmountDue < 0)
+	)
+
+	SET @invalidCount = @totalInvalid + (SELECT COUNT(*) FROM @invalidAmount)
+
+	IF EXISTS(SELECT 1 FROM @invalidAmount)
+	BEGIN
+		DECLARE @postVar BIT = ~@post
+		--ROLLBACK THE UPDATING OF AMOUNT DUE IF IF THERE IS NO VALID
+		--UPDATE tblAPPaymentDetail
+		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidAmount, @post = @postVar
+		--UPDATE BILL RECORDS
+		EXEC uspAPUpdateBillPayment @paymentIds = @invalidAmount, @post = @postVar
+	END
+
+	--DELETE INVALID AMOUNT
+	DELETE A
+	FROM @payments A
+	INNER JOIN @invalidAmount B ON A.intId = B.intId
+
+	DELETE A
+	FROM @prepayIds A
+	INNER JOIN @invalidAmount B ON A.intId = B.intId
+
+	--MAKE SURE THAT THERE ARE STILL RECORDS TO POST
+	SET @lenOfSuccessPay = (SELECT COUNT(*) FROM @payments)
+	SET @lenOfSuccessPrePay = (SELECT COUNT(*) FROM @prepayIds)
+
+	IF @lenOfSuccessPay = 0 AND @lenOfSuccessPrePay = 0
+	BEGIN
+		--COMMIT TO RECORD THE POST RESULT
+		IF @transCount = 0 COMMIT TRANSACTION
+		GOTO DONE;
+	END
+
 	--BATCH POST
 	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
 	--Add to invalid payment count those invalid GL entries
-	SET @invalidCount = @totalInvalid + (SELECT COUNT(*) FROM tblGLPostResult B WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId)
+	SET @invalidCount = (SELECT COUNT(*) 
+						FROM tblGLPostResult B 
+						WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId)
+						+ ISNULL(@invalidCount, 0)
 
 	--DELETE THE FAILED POST ENTRIES
 	DELETE A
@@ -631,17 +699,18 @@ BEGIN
 
 	IF @lenOfSuccessPay = 0 AND @lenOfSuccessPrePay = 0
 	BEGIN
+		--COMMIT TO RECORD THE POST RESULT
 		IF @transCount = 0 COMMIT TRANSACTION
 		GOTO DONE;
 	END
 
-	IF @lenOfSuccessPay > 0 
-	BEGIN
-		--UPDATE tblAPPaymentDetail
-		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
-		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
-	END
+	-- IF @lenOfSuccessPay > 0 
+	-- BEGIN
+	-- 	--UPDATE tblAPPaymentDetail
+	-- 	EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
+	-- 	--UPDATE BILL RECORDS
+	-- 	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
+	-- END
 	
 	--Update posted status
 	UPDATE tblAPPayment
