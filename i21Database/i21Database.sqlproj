@@ -8643,6 +8643,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
+    <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
