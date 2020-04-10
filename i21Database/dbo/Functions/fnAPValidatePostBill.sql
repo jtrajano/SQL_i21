@@ -509,6 +509,29 @@ BEGIN
 		)--Prepay and Debit Memo transactions
 		
 
+		--VALIDATE TAX AMOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			ISNULL(item.strItemNo, A2.strMiscDescription) + ' has invalid tax total.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			36
+		FROM tblAPBill A
+		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
+		LEFT JOIN tblICItem item ON A2.intItemId = item.intItemId
+		OUTER APPLY
+		(
+			SELECT SUM(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax)) AS dblTaxTotal FROM tblAPBillDetailTax B
+			WHERE B.intBillDetailId = A2.intBillDetailId
+		) taxDetails
+		WHERE 
+		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND
+		(
+			(A2.dblTax != ISNULL(taxDetails.dblTaxTotal,0))
+		)
+
 	END
 	ELSE
 	BEGIN
