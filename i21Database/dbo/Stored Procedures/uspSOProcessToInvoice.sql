@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOProcessToInvoice]
 	@SalesOrderId			INT,
 	@UserId					INT,
-	@intShipToLocationId	INT = NULL,
-	@NewInvoiceId			INT = NULL OUTPUT
+	@NewInvoiceId			INT = NULL OUTPUT,
+	@intShipToLocationId	INT = NULL	
 AS
 BEGIN
 
