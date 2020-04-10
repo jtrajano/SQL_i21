@@ -1082,61 +1082,92 @@ ON GL.strTransactionId = BL.strBillId
 IF ISNULL(@recap, 0) = 0
 BEGIN
 
-	--handel error here as we do not get the error here
-	IF @totalRecords = 1 AND @isBatch = 0
+	DECLARE @invalidGL AS Id
+	DECLARE @billIdGL AS Id
+	INSERT INTO @billIdGL
+	SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+	--VALIDATE GL ENTRIES
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	OUTPUT inserted.intTransactionId INTO @invalidGL
+	SELECT
+		A.strError
+		,A.strTransactionType
+		,A.strTransactionId
+		,@batchId
+		,A.intTransactionId
+	FROM dbo.fnAPValidateBillGLEntries(@GLEntries, @billIdGL) A
+
+	--DELETE INVALID
+	DELETE A
+	FROM #tmpPostBillData A
+	INNER JOIN @invalidGL B ON A.intBillId = B.intId
+
+	IF EXISTS(SELECT 1 FROM #tmpPostBillData)
 	BEGIN
-		BEGIN TRY
-		EXEC uspGLBookEntries @GLEntries, @post
-		END TRY
-		BEGIN CATCH
-			DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
-			SET @invalidCount = @invalidCount + 1;
-			SET @totalRecords = @totalRecords - 1;
-			RAISERROR(@error, 16, 1);
-			GOTO Post_Rollback
-		END CATCH
+		--handle error here as we do not get the error here
+		IF @totalRecords = 1 AND @isBatch = 0
+		BEGIN
+			BEGIN TRY
+			EXEC uspGLBookEntries @GLEntries, @post
+			END TRY
+			BEGIN CATCH
+				DECLARE @error NVARCHAR(200) = ERROR_MESSAGE()
+				SET @invalidCount = @invalidCount + 1;
+				SET @totalRecords = @totalRecords - 1;
+				RAISERROR(@error, 16, 1);
+				GOTO Post_Rollback
+			END CATCH
+		END
+		ELSE
+		BEGIN
+			BEGIN TRY
+				EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
+
+				DELETE A
+				FROM #tmpPostBillData A
+				INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) B ON A.intBillId = B.intTransactionId
+				WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+				--DELETE data in @GLEntries so it will not add in computing the latest balance
+
+				--update the invalid and total records based on the result of posting to gl and its result
+				SET @failedPostValidation = @@ROWCOUNT;
+				SET @invalidCount = @invalidCount + @failedPostValidation;
+				SET @totalRecords = @totalRecords - @failedPostValidation;
+
+				DELETE A
+				FROM @GLEntries A
+				INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId
+				INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) C ON B.intBillId = C.intTransactionId
+				WHERE C.strDescription NOT LIKE '%success%' AND C.strBatchId = @batchId
+
+				SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData --update total records for the successfulCount
+
+				INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+				SELECT 
+					A.strDescription
+					,A.strTransactionType
+					,A.strTransactionId
+					,@batchId
+					,A.intTransactionId
+				FROM tblGLPostResult A
+				WHERE A.strBatchId = @batchId
+			END TRY
+			BEGIN CATCH
+				DECLARE @errorBatchPost NVARCHAR(200) = ERROR_MESSAGE()
+				SET @invalidCount = @invalidCount + 1;
+				SET @totalRecords = @totalRecords - 1;
+				RAISERROR(@errorBatchPost, 16, 1);
+				GOTO Post_Rollback
+			END CATCH
+		END
 	END
 	ELSE
 	BEGIN
-		BEGIN TRY
-			EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
-
-			DELETE A
-			FROM #tmpPostBillData A
-			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) B ON A.intBillId = B.intTransactionId
-			WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
-			--DELETE data in @GLEntries so it will not add in computing the latest balance
-
-			--update the invalid and total records based on the result of posting to gl and its result
-			SET @failedPostValidation = @@ROWCOUNT;
-			SET @invalidCount = @invalidCount + @failedPostValidation;
-			SET @totalRecords = @totalRecords - @failedPostValidation;
-
-			DELETE A
-			FROM @GLEntries A
-			INNER JOIN #tmpPostBillData B ON A.intTransactionId = B.intBillId
-			INNER JOIN (SELECT DISTINCT strBatchId, intTransactionId, strDescription FROM tblGLPostResult) C ON B.intBillId = C.intTransactionId
-			WHERE C.strDescription NOT LIKE '%success%' AND C.strBatchId = @batchId
-
-			SELECT @totalRecords = COUNT(*) FROM #tmpPostBillData --update total records for the successfulCount
-
-			INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 
-				A.strDescription
-				,A.strTransactionType
-				,A.strTransactionId
-				,@batchId
-				,A.intTransactionId
-			FROM tblGLPostResult A
-			WHERE A.strBatchId = @batchId
-		END TRY
-		BEGIN CATCH
-			DECLARE @errorBatchPost NVARCHAR(200) = ERROR_MESSAGE()
-			SET @invalidCount = @invalidCount + 1;
-			SET @totalRecords = @totalRecords - 1;
-			RAISERROR(@errorBatchPost, 16, 1);
-			GOTO Post_Rollback
-		END CATCH
+		DECLARE @postError NVARCHAR(200);
+		SELECT TOP 1 @postError = strMessage FROM tblAPPostResult WHERE strBatchNumber = @batchId
+		RAISERROR(@postError, 16, 1);
+		GOTO Post_Rollback
 	END
 
 	IF(ISNULL(@post,0) = 0)
