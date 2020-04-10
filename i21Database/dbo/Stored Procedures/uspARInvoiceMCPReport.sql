@@ -63,6 +63,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strContractNo
 	 , strUnitMeasure
 	 , dblPrice
+	 , dblItemPrice
 	 , dblPriceWithTax
 	 , dblTotalPriceWithTax
 	 , dblInvoiceTotal
@@ -82,6 +83,10 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strCommodity
 	 , ysnStretchLogo
 	 , blbSignature
+	 , strTicketType
+	 , strLocationNumber
+	 , strSalesOrderNumber
+	 , strPaymentInfo
 )
 SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCompanyAddress		= COMPANY.strCompanyAddress
@@ -126,6 +131,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strContractNo			= INVOICEDETAIL.strContractNo
 	 , strUnitMeasure			= INVOICEDETAIL.strUnitMeasure
 	 , dblPrice					= INVOICEDETAIL.dblPrice
+	 , dblItemPrice				= INVOICEDETAIL.dblTotal
 	 , dblPriceWithTax			= INVOICEDETAIL.dblPriceWithTax
 	 , dblTotalPriceWithTax		= INVOICEDETAIL.dblTotalPriceWithTax
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
@@ -151,6 +157,10 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , strCommodity				= TICKETDETAILS.strCommodity
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , blbSignature				= INV.blbSignature
+	 , strTicketType			= INV.strTransactionType
+	 , strLocationNumber		= [LOCATION].strLocationNumber
+	 , strSalesOrderNumber		= SO.strSalesOrderNumber
+	 , strPaymentInfo			= CASE WHEN INV.strTransactionType = 'Cash' THEN ISNULL(PAYMENTMETHOD.strPaymentMethod, '') + ' - ' + ISNULL(INV.strPaymentInfo, '') ELSE NULL END
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 LEFT JOIN (
@@ -164,6 +174,7 @@ LEFT JOIN (
 		 , strContractNo		= CT.strContractNumber
 		 , strUnitMeasure		= UOM.strUnitMeasure
 		 , dblPrice				= ID.dblPrice
+		 , dblTotal				= ID.dblTotal
 		 , dblPriceWithTax		= ID.dblPrice + ISNULL(CASE WHEN ID.dblTotalTax <> 0 AND ID.dblQtyShipped <> 0 THEN ID.dblTotalTax/ID.dblQtyShipped ELSE 0 END, 0)
 		 , dblTotalPriceWithTax = ID.dblTotal + ID.dblTotalTax
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
@@ -195,6 +206,7 @@ INNER JOIN (
 INNER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName
+		 , strLocationNumber
 		 , strUseLocationAddress
 		 , strAddress
 		 , strCity
@@ -235,6 +247,12 @@ LEFT JOIN (
 		 , strShipVia
 	FROM tblSMShipVia WITH (NOLOCK)
 ) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
+LEFT JOIN (
+	SELECT intPaymentMethodID
+		 , strPaymentMethod
+	FROM tblSMPaymentMethod
+) PAYMENTMETHOD ON INV.intPaymentMethodId = PAYMENTMETHOD.intPaymentMethodID
+LEFT JOIN tblSOSalesOrder SO ON INV.intSalesOrderId = SO.intSalesOrderId
 OUTER APPLY (
 	SELECT TOP 1 strCompanyName		= CASE WHEN [LOCATION].strUseLocationAddress = 'Letterhead' THEN '' ELSE strCompanyName END
 			   , strCompanyAddress	= CASE WHEN [LOCATION].strUseLocationAddress IS NULL OR [LOCATION].strUseLocationAddress = 'No' OR [LOCATION].strUseLocationAddress = '' OR [LOCATION].strUseLocationAddress = 'Always'
@@ -300,3 +318,115 @@ CROSS APPLY (
 WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId
   AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+
+--HONSTEIN TAX DETAILS
+IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
+	BEGIN
+		INSERT INTO tblARInvoiceReportStagingTable (
+			  intEntityUserId
+			, strRequestId
+			, strInvoiceFormat
+			, strItemComments
+			, dblInvoiceTotal
+			, dblAmountDue
+			, blbSignature
+			, strComments
+			, intInvoiceId
+			, intInvoiceDetailId
+			, strUnitMeasure
+			, strItemNo
+			, strItemDescription
+			, dblQtyShipped
+			, dblPrice
+			, dblItemPrice
+		)
+		SELECT intEntityUserId		= @intEntityUserId
+			, strRequestId			= @strRequestId
+			, strInvoiceFormat		= 'Format 5 - Honstein'
+			, strItemComments		= STAGING.strItemComments
+			, dblInvoiceTotal		= STAGING.dblInvoiceTotal
+			, dblAmountDue			= STAGING.dblAmountDue
+			, blbSignature			= STAGING.blbSignature
+			, strComments			= STAGING.strComments
+			, intInvoiceId			= STAGING.intInvoiceId
+			, intInvoiceDetailId	= STAGING.intInvoiceDetailId
+			, strUnitMeasure		= STAGING.strUnitMeasure
+			, strItemNo				= 'Tax' 
+			, strItemDescription	= TAXES.strTaxCode
+			, dblQtyShipped			= STAGING.dblQtyShipped
+			, dblPrice				= TAXES.dblRate
+			, dblItemPrice			= TAXES.dblAdjustedTax 
+		FROM tblARInvoiceReportStagingTable STAGING
+		INNER JOIN tblARInvoiceDetail ID ON STAGING.intInvoiceDetailId = ID.intInvoiceDetailId
+		INNER JOIN (
+			SELECT intInvoiceDetailId	= IDT.intInvoiceDetailId
+				 , strTaxCode			= TCODE.strTaxCode
+				 , strTaxDescription	= TCODE.strDescription
+				 , dblRate				= SUM(IDT.dblRate)
+				 , dblAdjustedTax		= SUM(IDT.dblAdjustedTax)
+			FROM tblARInvoiceDetailTax IDT
+			INNER JOIN tblSMTaxCode TCODE ON IDT.intTaxCodeId = TCODE.intTaxCodeId
+			INNER JOIN tblSMTaxClass TCLASS ON TCODE.intTaxClassId = TCLASS.intTaxClassId
+			LEFT JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
+			WHERE ISNULL(TREPORT.strType, '') <> 'State Sales Tax'
+			AND IDT.dblAdjustedTax <> 0
+			GROUP BY IDT.intInvoiceDetailId
+				   , IDT.intTaxCodeId
+				   , TCODE.strTaxCode
+				   , TCODE.strDescription
+		) TAXES ON ID.intInvoiceDetailId = TAXES.intInvoiceDetailId
+		WHERE STAGING.intEntityUserId = @intEntityUserId
+		  AND STAGING.strRequestId = @strRequestId
+		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND ID.dblTotalTax <> 0
+
+		UNION ALL
+
+		SELECT intEntityUserId		= @intEntityUserId
+			, strRequestId			= @strRequestId
+			, strInvoiceFormat		= 'Format 5 - Honstein'
+			, strItemComments		= STAGING.strItemComments
+			, dblInvoiceTotal		= STAGING.dblInvoiceTotal
+			, dblAmountDue			= STAGING.dblAmountDue
+			, blbSignature			= STAGING.blbSignature
+			, strComments			= STAGING.strComments
+			, intInvoiceId			= STAGING.intInvoiceId
+			, intInvoiceDetailId	= 99999999--NULL
+			, strUnitMeasure		= NULL
+			, strItemNo				= 'State Sales Tax' 
+			, strItemDescription	= TAXES.strTaxCode
+			, dblQtyShipped			= TAXES.dblQtyShipped
+			, dblPrice				= TAXES.dblRate
+			, dblItemPrice			= TAXES.dblAdjustedTax 
+		FROM (
+			SELECT DISTINCT intInvoiceId
+						  , strItemComments
+						  , dblInvoiceTotal
+						  , dblAmountDue
+						  , blbSignature
+						  , strComments
+			FROM tblARInvoiceReportStagingTable
+			WHERE intEntityUserId = @intEntityUserId
+		      AND strRequestId = @strRequestId
+		      AND strInvoiceFormat = 'Format 5 - Honstein'
+		) STAGING 
+		INNER JOIN (
+			SELECT intInvoiceId			= ID.intInvoiceId
+			     , dblQtyShipped		= SUM(ID.dblQtyShipped)
+				 , strTaxCode			= TCODE.strTaxCode
+				 , strTaxDescription	= TCODE.strDescription
+				 , dblRate				= SUM(IDT.dblRate)
+				 , dblAdjustedTax		= SUM(IDT.dblAdjustedTax)
+			FROM tblARInvoiceDetail ID 
+			INNER JOIN tblARInvoiceDetailTax IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
+			INNER JOIN tblSMTaxCode TCODE ON IDT.intTaxCodeId = TCODE.intTaxCodeId
+			INNER JOIN tblSMTaxClass TCLASS ON TCODE.intTaxClassId = TCLASS.intTaxClassId
+			INNER JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
+			WHERE ISNULL(TREPORT.strType, '') = 'State Sales Tax'
+			  AND IDT.dblAdjustedTax <> 0
+			  AND ID.dblTotalTax <> 0
+			GROUP BY ID.intInvoiceId				   
+				   , TCODE.strTaxCode
+				   , TCODE.strDescription
+		) TAXES ON STAGING.intInvoiceId = TAXES.intInvoiceId
+	END
