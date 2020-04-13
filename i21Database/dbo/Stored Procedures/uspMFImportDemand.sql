@@ -262,7 +262,7 @@ BEGIN TRY
 		SELECT strDemandName
 			,strItemNo
 			,strSubstituteItemNo
-			,CONVERT(NVARCHAR, dtmDemandDate, @intConvertYear)
+			,CONVERT(datetime, CONVERT(datetime, dtmDemandDate, @intConvertYear))
 			,dblQuantity
 			,strUnitMeasure
 			,strLocationName
