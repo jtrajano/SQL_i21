@@ -47,6 +47,7 @@ RETURNS TABLE AS RETURN
 		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
+		,[intSettleStorageId]				=	B.intSettleStorageId
 		,[intCCSiteDetailId]				=	B.intCCSiteDetailId
 		,[intInvoiceId]						=	B.intInvoiceId
 		,[intBuybackChargeId]				=	B.intBuybackChargeId
@@ -94,6 +95,7 @@ RETURNS TABLE AS RETURN
 	OR	B.intLoadDetailId > 0
 	OR	B.intLoadShipmentCostId > 0
 	OR	B.intCustomerStorageId > 0
+	OR	B.intSettleStorageId > 0
 	OR	B.intPaycheckHeaderId > 0
 	OR	B.intBuybackChargeId > 0
 	OR	B.intScaleTicketId > 0
