@@ -42,6 +42,7 @@ BEGIN
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND C.ysnStage = 1
@@ -95,6 +96,7 @@ BEGIN
 			,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 			,[intLoadShipmentCostId]			=	A.intLoadShipmentCostId
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
+			,[intSettleStorageId]				=	A.intSettleStorageId
 			,[intItemId]						=	A.intItemId
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
@@ -337,6 +339,7 @@ BEGIN
 		,[intLoadShipmentDetailId]		
 		,[intLoadShipmentCostId]	
 		,[intCustomerStorageId]	
+		,[intSettleStorageId]
 		,[intItemId]						
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
@@ -418,6 +421,7 @@ BEGIN
 		,[intLoadShipmentDetailId]	
 		,[intLoadShipmentCostId]		
 		,[intCustomerStorageId]
+		,[intSettleStorageId]
 		,[intItemId]						
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		

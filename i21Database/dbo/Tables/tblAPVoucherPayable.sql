@@ -37,6 +37,7 @@
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
 	[intCustomerStorageId]			INT NULL,
+	[intSettleStorageId]			INT NULL,
 	[intTicketId]					INT NULL,
 	[intPaycheckHeaderId]			INT NULL,
 	[intCCSiteDetailId]				INT NULL,
@@ -126,6 +127,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
 								--,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
 								,intCustomerStorageId
+								,intSettleStorageId
 								,intLoadShipmentCostId
 								,intLoadShipmentDetailId
 								,intItemId DESC);
