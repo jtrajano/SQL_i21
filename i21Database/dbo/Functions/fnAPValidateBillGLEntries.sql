@@ -24,9 +24,11 @@ BEGIN
 	INNER JOIN @billIds A2 ON A.intBillId = A2.intId
 	OUTER APPLY (
 		SELECT
-			SUM(dblCredit) AS dblTotal
+			SUM(dblCredit - dblDebit) AS dblTotal
 		FROM @GLEntries B
+		INNER JOIN vyuGLAccountDetail C ON B.intAccountId = C.intAccountId
 		WHERE B.strTransactionId = A.strBillId
+			AND C.intAccountCategoryId IN (1, 53)
 	) glEntries
 	WHERE
 		A.dblAmountDue != ISNULL(glEntries.dblTotal,0)
