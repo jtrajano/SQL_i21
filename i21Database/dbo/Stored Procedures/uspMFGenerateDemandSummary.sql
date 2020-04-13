@@ -49,7 +49,7 @@ BEGIN
 				,intBookId
 				,intSubBookId
 				)
-			SELECT DISTINCT AV.intMainItemId
+			SELECT DISTINCT IsNULL(AV.intMainItemId,AV.intItemId)
 				,RM.intBookId
 				,RM.intSubBookId
 			FROM tblCTInvPlngReportAttributeValue AV
