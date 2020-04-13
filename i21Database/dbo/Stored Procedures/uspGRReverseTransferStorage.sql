@@ -13,7 +13,7 @@ BEGIN
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
-	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]	
+	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
 	DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 	DECLARE @CurrentItemOpenBalance DECIMAL(38,20)
 	DECLARE @intTransferContractDetailId INT
@@ -31,6 +31,10 @@ BEGIN
 	DECLARE @intToEntityId INT
 	DECLARE @intNewTransferStorageId INT
 	DECLARE @intNewTransferStorageSplitId INT
+
+	DECLARE @StorageHistoryStagingTable2 AS StorageHistoryStagingTable
+	DECLARE @intIdentityId INT
+	DECLARE @HistoryIds AS Id
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -299,9 +303,50 @@ BEGIN
 		) TS
 		WHERE SourceSplit.intTransferStorageId = @intNewTransferStorageId
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		DELETE FROM @HistoryIds
+		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
+		BEGIN
+			SELECT TOP 1 @intIdentityId = intId FROM @StorageHistoryStagingTable
 
-		SELECT * FROM tblGRStorageHistory WHERE intTransferStorageId = @intNewTransferStorageId
+			DELETE FROM @StorageHistoryStagingTable2
+			INSERT INTO @StorageHistoryStagingTable2
+			(
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			)
+			SELECT TOP 1
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			FROM @StorageHistoryStagingTable
+			WHERE intId = @intIdentityId
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable2, @intStorageHistoryId OUTPUT
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @HistoryIds WHERE intId = @intStorageHistoryId)
+			BEGIN
+				INSERT INTO @HistoryIds SELECT @intStorageHistoryId
+			END
+			
+			DELETE FROM @StorageHistoryStagingTable WHERE intId = @intIdentityId
+		END
+
+		--SELECT * FROM tblGRStorageHistory WHERE intTransferStorageId = @intNewTransferStorageId
 		----END----TRANSACTIONS FOR THE SOURCE---------
 
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
@@ -927,7 +972,47 @@ BEGIN
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE intTransferStorageId = @intNewTransferStorageId
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
+		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
+		BEGIN
+			SELECT TOP 1 @intIdentityId = intId FROM @StorageHistoryStagingTable
+
+			DELETE FROM @StorageHistoryStagingTable2
+			INSERT INTO @StorageHistoryStagingTable2
+			(
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			)
+			SELECT TOP 1
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+			FROM @StorageHistoryStagingTable
+			WHERE intId = @intIdentityId
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable2, @intStorageHistoryId OUTPUT
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @HistoryIds WHERE intId = @intStorageHistoryId)
+			BEGIN
+				INSERT INTO @HistoryIds SELECT @intStorageHistoryId
+			END
+
+			DELETE FROM @StorageHistoryStagingTable WHERE intId = @intIdentityId
+		END
 
 		--integration to CT
 		SET @cnt = 0
@@ -985,6 +1070,21 @@ BEGIN
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 		WHERE intTransferStorageId = @intNewTransferStorageId
+
+		--RISK SUMMARY LOG
+		SET @intStorageHistoryId = NULL
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+			SELECT intId FROM @HistoryIds
+		OPEN c;
+		FETCH NEXT FROM c INTO @intStorageHistoryId
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspGRRiskSummaryLog @intStorageHistoryId
+			FETCH NEXT FROM c INTO @intStorageHistoryId
+		END
+		CLOSE c; DEALLOCATE c;
 
 		DONE:
 		COMMIT TRANSACTION

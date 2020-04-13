@@ -20,17 +20,18 @@
 	[intTransactionTypeId] INT  NULL,
 	[intEntityId] INT  NULL,
 	[intCompanyLocationId] INT  NULL,
-	[strTransferTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-	[strSettleTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
-	[strVoucher] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL,
+	[strTransferTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, --Transfer Storage Ticket No.
+	[strSettleTicket] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, -- Settle Storage Ticket No.
+	[strVoucher] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL, --Voucher No.
 	[intSettleStorageId] INT NULL,
 	[intDeliverySheetId] INT NULL,
 	[dtmDistributionDate] DATETIME NULL DEFAULT GETDATE(), 
-	[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	[strTransactionId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, --Inventory Adjustment No.
 	[intTransferStorageId] INT NULL,
 	[ysnPost] BIT NULL DEFAULT 0,
 	[intInventoryAdjustmentId] INT NULL,
 	[dblOldCost] DECIMAL(38,20) NULL,
+	[intTransferStorageReferenceId] INT NULL,
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRStorageHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
