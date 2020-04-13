@@ -916,6 +916,38 @@ BEGIN
 	SET ysnMailSent = 1
 	WHERE ISNULL(strFeedStatus, '') = 'Failed'
 		AND ISNULL(ysnMailSent, 0) = 0
+
+	SELECT @strDetail = @strDetail + '<tr>
+		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+		   '<td>&nbsp;' + 'Success' + '</td>' + 
+			'<td>&nbsp;' + 'Forecast Price' + '</td>
+	</tr>'
+	FROM tblRKFutureMarketStage WITH (NOLOCK)
+	WHERE ISNULL(strFeedStatus, '') = 'Processed'
+		AND ISNULL(ysnMailSent, 0) = 0
+
+	UPDATE tblRKFutureMarketStage
+	SET ysnMailSent = 1
+	WHERE ISNULL(strFeedStatus, '') = 'Processed'
+		AND ISNULL(ysnMailSent, 0) = 0
+	
+	SELECT @strDetail = @strDetail + '<tr>
+		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+			'<td>&nbsp;' + 'Forecast Price' + '</td>
+	</tr>'
+	FROM tblRKFutureMarketStage WITH (NOLOCK)
+	WHERE ISNULL(strFeedStatus, '') = 'Failed'
+		AND ISNULL(ysnMailSent, 0) = 0
+
+	UPDATE tblRKFutureMarketStage
+	SET ysnMailSent = 1
+	WHERE ISNULL(strFeedStatus, '') = 'Failed'
+		AND ISNULL(ysnMailSent, 0) = 0
 END
 
 IF @ysnDailyNotification = 1
