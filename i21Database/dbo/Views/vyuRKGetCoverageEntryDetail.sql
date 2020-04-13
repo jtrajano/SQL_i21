@@ -27,8 +27,8 @@ SELECT Header.intCoverageEntryId
     , Detail.dblAveragePrice
     , Detail.dblOptionsCovered
     , Detail.dblFuturesM2M
-	, dblM2MPlus10 = Detail.dblFuturesM2M
-	, dblM2MMinus10 = Detail.dblFuturesM2M
+	, dblM2MPlus10 = ISNULL(Detail.dblM2MPlus10, 0.000000)
+	, dblM2MMinus10 = ISNULL(Detail.dblM2MMinus10, 0.000000)
     , Detail.intConcurrencyId
 FROM tblRKCoverageEntryDetail Detail
 LEFT JOIN vyuRKGetCoverageEntry Header ON Header.intCoverageEntryId = Detail.intCoverageEntryId
