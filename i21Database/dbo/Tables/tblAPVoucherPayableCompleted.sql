@@ -30,6 +30,7 @@
 	[intLoadShipmentDetailId]		INT NULL,
 	[intLoadShipmentCostId]			INT NULL,
 	[intCustomerStorageId]			INT NULL,
+	[intSettleStorageId] 			INT NULL,
 	[intItemId]						INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
@@ -94,6 +95,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayableCompleted_deleteIX]
 								,intInventoryShipmentItemId
 								,intInventoryShipmentChargeId
 								,intCustomerStorageId
+								,intSettleStorageId
 								,intLoadShipmentDetailId 
 								,intLoadShipmentCostId
 								,intItemId DESC);
