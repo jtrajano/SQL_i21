@@ -24,6 +24,7 @@ DECLARE @vouchers AS TABLE(
 	,intLoadShipmentDetailId INT NULL
 	,intLoadShipmentCostId INT NULL
 	,intCustomerStorageId INT NULL
+	,intSettleStorageId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
 	);
@@ -39,6 +40,7 @@ DECLARE @payablesDeleted AS TABLE(
 	,intLoadShipmentDetailId INT NULL
 	,intLoadShipmentCostId INT NULL
 	,intCustomerStorageId INT NULL
+	,intSettleStorageId INT NULL
 	,intItemId INT NULL
 	,intTransactionType INT NOT NULL
 	);
@@ -69,6 +71,7 @@ BEGIN
 		,B.intLoadDetailId
 		,B.intLoadShipmentCostId
 		,B.intCustomerStorageId
+		,B.intSettleStorageId
 		,B.intItemId
 		,A.intTransactionType
 	FROM tblAPBill A
@@ -86,6 +89,7 @@ BEGIN
 		AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 		AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 		AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
+		AND ISNULL(C.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 		AND ISNULL(C.intItemId,-1) = ISNULL(B.intItemId,-1)
 	
 	IF EXISTS(SELECT 1 FROM @vouchers)
@@ -103,6 +107,7 @@ BEGIN
 			,deleted.intLoadShipmentDetailId
 			,deleted.intLoadShipmentCostId
 			,deleted.intCustomerStorageId
+			,deleted.intSettleStorageId
 			,deleted.intItemId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
@@ -118,6 +123,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
+			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(A.intItemId,-1)
 		WHERE A.dblQuantityToBill = 0
 
@@ -143,6 +149,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
+			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
 	END
 
@@ -170,6 +177,7 @@ BEGIN
 			,deleted.intLoadShipmentDetailId
 			,deleted.intLoadShipmentCostId
 			,deleted.intCustomerStorageId
+			,deleted.intSettleStorageId
 			,deleted.intItemId
 			,deleted.intTransactionType
 		INTO @payablesDeleted
@@ -185,6 +193,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(B.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(B.intCustomerStorageId,-1)
+			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(B.intSettleStorageId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(B.intItemId,-1)
 		LEFT JOIN @vouchers C ON ISNULL(A.intEntityVendorId,-1) = ISNULL(C.intEntityVendorId,-1)
 			AND ISNULL(A.intPurchaseDetailId,-1) = ISNULL(C.intPurchaseDetailId,-1)
@@ -196,6 +205,7 @@ BEGIN
 			AND ISNULL(A.intLoadShipmentDetailId,-1) = ISNULL(C.intLoadShipmentDetailId,-1)
 			AND ISNULL(A.intLoadShipmentCostId,-1) = ISNULL(C.intLoadShipmentCostId,-1)
 			AND ISNULL(A.intCustomerStorageId,-1) = ISNULL(C.intCustomerStorageId,-1)
+			AND ISNULL(A.intSettleStorageId,-1) = ISNULL(C.intSettleStorageId,-1)
 			AND ISNULL(A.intItemId,-1) = ISNULL(C.intItemId,-1)
 		WHERE C.intEntityVendorId IS NULL --make sure to delete only if no voucher created
 
