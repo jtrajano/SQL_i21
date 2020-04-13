@@ -82,7 +82,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	 										WHEN ISNULL(CS.intDeliverySheetId,0) > 0 THEN DSSplit.dblSplitPercent
 	 										WHEN ISNULL(SCTicketSplit.dblSplitPercent,0) > 0 THEN SCTicketSplit.dblSplitPercent
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.dblSplitPercent
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN (SELECT dblSplitPercent FROM tblGRTransferStorageSplit WHERE intTransferToCustomerStorageId = CS.intCustomerStorageId)
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN (SELECT dblSplitPercent FROM tblGRTransferStorageSplit WHERE intTransferToCustomerStorageId = CS.intCustomerStorageId AND intTransferStorageId = SH.intTransferStorageId)
 											ELSE 100
 	 									END
 	,strUserName						= US.strUserName	
