@@ -532,7 +532,7 @@ BEGIN TRY
 						,0
 						,0
 						,EL.intEntityLocationId
-						,L.strBLNumber
+						,ISNULL(@strBLNumber, L.strBLNumber)
 						,@intEntityId
 						,@intEntityId
 						,L.intBookId
