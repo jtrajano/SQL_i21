@@ -53,6 +53,21 @@ SELECT DISTINCT
 FROM 
 	@GLEntries gl
 
+IF @strTransactionId IS NOT NULL AND NOT EXISTS (SELECT TOP 1 1 FROM @glTransactions) 
+BEGIN 
+	INSERT INTO @glTransactions (
+		strTransactionId
+		,strBatchId
+	)
+	SELECT DISTINCT 
+		gd.strTransactionId
+		,gd.strBatchId 					
+	FROM 
+		tblGLDetail gd
+	WHERE 
+		gd.strTransactionId = @strTransactionId
+END 
+
 DECLARE @strBatchId AS NVARCHAR(50) = NULL 
 
 -- Get the transaction id if @GLEntries is processing only one transaction 
@@ -228,10 +243,12 @@ BEGIN
 				)
 		FROM	
 			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
+				ON t.intTransactionTypeId = ty.intTransactionTypeId		
+			INNER JOIN @glTransactions gl
+				ON t.strTransactionId = gl.strTransactionId 
+				AND t.strBatchId = gl.strBatchId					
 		WHERE	
-			(t.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
-			AND (ty.strName = @strTransactionType OR @strTransactionType IS NULL) 
+			(ty.strName = @strTransactionType OR @strTransactionType IS NULL) 
 			AND (dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 			AND (dbo.fnDateLessThanEquals(t.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
 			AND t.intInTransitSourceLocationId IS NULL 
@@ -245,11 +262,12 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	AND EXISTS (
 			SELECT TOP 1 1 
-			FROM tblGLDetail gd 
+			FROM 
+				tblGLDetail gd INNER JOIN @glTransactions list
+					ON gd.strTransactionId = list.strTransactionId
+					AND gd.strBatchId = list.strBatchId
 			WHERE 
-				gd.strTransactionId = @strTransactionId 
-				AND (gd.ysnIsUnposted = 0 AND ISNULL(@ysnPost, 0) = 1)
-				AND (@strBatchId IS NULL OR gd.strBatchId = @strBatchId)  
+				(gd.ysnIsUnposted = 0 AND ISNULL(@ysnPost, 0) = 1)				
 		) 
 	BEGIN 		
 		MERGE INTO #uspICValidateICAmountVsGLAmount_result 
@@ -331,10 +349,11 @@ BEGIN
 					ON gm.intAccountSegmentId = gs.intAccountSegmentId
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				INNER JOIN @glTransactions list
+					ON gd.strTransactionId = list.strTransactionId
+					AND gd.strBatchId = list.strBatchId
 			WHERE 
-				(gd.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
-				AND (gd.strBatchId = @strBatchId OR @strBatchId IS NULL) 
-				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
+				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
 				AND gd.ysnIsUnposted = 0 
@@ -465,10 +484,11 @@ BEGIN
 					ON gm.intAccountSegmentId = gs.intAccountSegmentId
 				INNER JOIN tblGLAccountCategory ac 
 					ON ac.intAccountCategoryId = gm.intAccountCategoryId 
+				INNER JOIN @glTransactions list
+					ON gd.strTransactionId = list.strTransactionId
+					AND gd.strBatchId = list.strBatchId
 			WHERE 
-				(gd.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
-				AND (gd.strBatchId = @strBatchId OR @strBatchId IS NULL) 
-				AND (gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
+				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
 				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
 				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
 				AND 1 = 
@@ -498,7 +518,6 @@ BEGIN
 			)
 		;
 	END 
-	--SELECT * FROM @GLEntries
 END
 
 IF @ysnThrowError = 1 
