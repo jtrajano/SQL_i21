@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspGRInsertStorageHistoryRecord]
 (
 	@StorageHistoryData AS StorageHistoryStagingTable READONLY,
-    @intStorageHistoryId AS INT = 0 OUTPUT
+    @intStorageHistoryId AS INT OUTPUT
 )
 AS
 BEGIN TRY   
@@ -51,40 +51,42 @@ BEGIN TRY
         [intConcurrencyId],
 		[strTransferTicket],
 		[strSettleTicket],
-		[strVoucher]
+		[strVoucher],
+        [intTransferStorageReferenceId]
     ) 
     SELECT 
-        [intCustomerStorageId]      = SH.intCustomerStorageId,
-        [intSettleStorageId]        = SH.intSettleStorageId,
-        [intTransferStorageId]      = SH.intTransferStorageId,
-        [intTicketId]               = SH.intTicketId,
-        [intDeliverySheetId]        = SH.intDeliverySheetId,
-        [intInventoryReceiptId]     = SH.intInventoryReceiptId,
-        [intInvoiceId]              = SH.intInvoiceId,
-        [intInventoryShipmentId]    = SH.intInventoryShipmentId,
-        [intBillId]                 = SH.intBillId,
-        [intContractHeaderId]       = SH.intContractHeaderId,
-        [intInventoryAdjustmentId]  = SH.intInventoryAdjustmentId,
-        [dblUnits]                  = SH.dblUnits,
-        [dtmHistoryDate]            = SH.dtmHistoryDate,
-        [dblPaidAmount]             = SH.dblPaidAmount,
-        [strPaidDescription]        = SH.strPaidDescription,
-        [dblCurrencyRate]           = SH.dblCurrencyRate,
-        [strType]                   = SH.strType,
-        [intUserId]                 = SH.intUserId,
-        [ysnPost]                   = SH.ysnPost,
-        [dtmDistributionDate]       = GETDATE(),
-        [intTransactionTypeId]      = SH.intTransactionTypeId,
-		[strTransactionId]			= SH.strTransactionId,
+        [intCustomerStorageId]          = SH.intCustomerStorageId,
+        [intSettleStorageId]            = SH.intSettleStorageId,
+        [intTransferStorageId]          = SH.intTransferStorageId,
+        [intTicketId]                   = SH.intTicketId,
+        [intDeliverySheetId]            = SH.intDeliverySheetId,
+        [intInventoryReceiptId]         = SH.intInventoryReceiptId,
+        [intInvoiceId]                  = SH.intInvoiceId,
+        [intInventoryShipmentId]        = SH.intInventoryShipmentId,
+        [intBillId]                     = SH.intBillId,
+        [intContractHeaderId]           = SH.intContractHeaderId,
+        [intInventoryAdjustmentId]      = SH.intInventoryAdjustmentId,
+        [dblUnits]                      = SH.dblUnits,
+        [dtmHistoryDate]                = SH.dtmHistoryDate,
+        [dblPaidAmount]                 = SH.dblPaidAmount,
+        [strPaidDescription]            = SH.strPaidDescription,
+        [dblCurrencyRate]               = SH.dblCurrencyRate,
+        [strType]                       = SH.strType,
+        [intUserId]                     = SH.intUserId,
+        [ysnPost]                       = SH.ysnPost,
+        [dtmDistributionDate]           = GETDATE(),
+        [intTransactionTypeId]          = SH.intTransactionTypeId,
+		[strTransactionId]			    = SH.strTransactionId,
         1,
-		[strTransferTicket]			= SH.strTransferTicket,
-		[strSettleTicket]			= SH.strSettleTicket,
-		[strVoucher]				= SH.strVoucher
+		[strTransferTicket]			    = SH.strTransferTicket,
+		[strSettleTicket]			    = SH.strSettleTicket,
+		[strVoucher]				    = SH.strVoucher,
+        [intTransferStorageReferenceId] = SH.intTransferStorageReferenceId
     FROM @StorageHistoryData SH
 
     SELECT @intStorageHistoryId = SCOPE_IDENTITY();
 
-    IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5))
+    IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5,3))
     BEGIN
         EXEC uspGRRiskSummaryLog @intStorageHistoryId
     END	

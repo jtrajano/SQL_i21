@@ -1,11 +1,10 @@
 CREATE VIEW dbo.vyuGRStorageHistory
 AS
 SELECT DISTINCT TOP 100 PERCENT
-	 intStorageHistoryId				= SH.intStorageHistoryId
-										--CASE 
-										--	WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN (SELECT top 1 intStorageHistoryId FROM tblGRStorageHistory WHERE intCustomerStorageId = TSplit.intTransferToCustomerStorageId AND strType = 'From Transfer')
-										--	ELSE SH.intStorageHistoryId
-										--END
+	 intStorageHistoryId				= CASE 
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN (SELECT top 1 intStorageHistoryId FROM tblGRStorageHistory WHERE intCustomerStorageId = TSplit.intTransferToCustomerStorageId AND strType = 'From Transfer')
+											ELSE SH.intStorageHistoryId
+										END
 	,intEntityId						= CASE 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.intEntityId
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.intEntityId

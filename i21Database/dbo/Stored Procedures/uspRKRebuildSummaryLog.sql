@@ -1516,7 +1516,8 @@ BEGIN TRY
 		INTO #tmpCustomerOwned
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
-		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
+			AND st.ysnDPOwnedType = 0
 		JOIN tblICItemUOM iuom ON iuom.intItemUOMId = cs.intItemUOMId
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
@@ -1571,7 +1572,8 @@ BEGIN TRY
 			, sl.ysnExternal
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
-		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 1
+		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
+			and st.ysnDPOwnedType = 1	
 		JOIN tblICItemUOM iuom ON iuom.intItemUOMId = cs.intItemUOMId
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
@@ -1620,7 +1622,8 @@ BEGIN TRY
 			, sl.ysnExternal
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
-		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId and ysnDPOwnedType = 0
+		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
+			AND st.ysnDPOwnedType = 0
 		JOIN tblICItemUOM iuom ON iuom.intItemUOMId = cs.intItemUOMId
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
