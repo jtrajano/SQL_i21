@@ -41,7 +41,7 @@ SELECT
 	,dblAverageCost = ISNULL(ItemPricing.dblAverageCost, 0.00)
 	,dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0.00)
 
-	,dblOnOrder = ISNULL(ItemStock.dblOnOrder, 0.00)
+	,dblOnOrder = dbo.fnMaxNumeric(ISNULL(ItemStockUOM.dblOnOrder, 0.00) - ISNULL(ItemStockUOM.dblOpenReceive, 0.00), 0)
 	,dblInTransitInbound = ISNULL(ItemStock.dblInTransitInbound, 0.00)
 	,dblUnitOnHand = CAST(ISNULL(ItemStock.dblOnHand, 0.00) AS NUMERIC(38, 7))
 	,dblInTransitOutbound = ISNULL(ItemStock.dblInTransitOutbound, 0)
@@ -131,6 +131,7 @@ FROM
 		SELECT	ItemStock.intItemId
 				,ItemStock.intItemLocationId				
 				,dblOnOrder = SUM(ISNULL(dblOnOrder, 0)) 
+				,dblOpenReceive = SUM(purchase.dblOpenReceive)
 				,dblOrderCommitted = SUM(ISNULL(dblOrderCommitted, 0)) 
 				,dblOnHand = SUM(ISNULL(dblUnitOnHand, 0)) 
 				,dblUnitReserved = SUM(ISNULL(dblUnitReserved, 0)) 
@@ -143,6 +144,13 @@ FROM
 				,dtmLastPurchaseDate = MAX(ItemStock.dtmLastPurchaseDate)
 				,dtmLastSaleDate = MAX(ItemStock.dtmLastSaleDate) 						
 		FROM	tblICItemStock ItemStock 
+			OUTER APPLY (
+				SELECT SUM(pr.dblOpenReceive) dblOpenReceive
+				FROM vyuICPurchaseReceipts pr
+				WHERE pr.intItemId = ItemStockUOM.intItemId
+					AND pr.intStockUOM = ItemStockUOM.intItemUOMId
+					AND pr.intLocationId = il.intLocationId
+			) purchase
 		WHERE	ItemStock.intItemId = Item.intItemId 
 				AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		GROUP BY 
