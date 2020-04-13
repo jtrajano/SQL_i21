@@ -24,11 +24,12 @@ BEGIN TRY
 	DECLARE @intPContractDetailId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intDestinationFOBPointId INT
+	DECLARE @ysnCancel BIT
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
 		,@strFOBPoint = FT.strFobPoint
-		,@intFOBPointId = FP.intFobPointId
+		,@ysnCancel = ISNULL(L.ysnCancelled, 0)
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
@@ -116,7 +117,7 @@ BEGIN TRY
 						LD.dblNet
 					ELSE 
 						LD.dblQuantity
-				END 
+				END * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = dbo.fnMultiply(
 								dbo.fnCalculateCostBetweenUOM(
