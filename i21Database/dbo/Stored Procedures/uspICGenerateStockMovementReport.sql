@@ -186,8 +186,8 @@ BEGIN
 		,intLocationId ASC 
 		,dtmDate ASC
 		,dtmCreated ASC 
-		,intCategoryId ASC 
-		,intItemId ASC 
+		--,intCategoryId ASC 
+		--,intItemId ASC 
 END 
 
 ELSE IF @strResetType = @ResetType_Category_Location
