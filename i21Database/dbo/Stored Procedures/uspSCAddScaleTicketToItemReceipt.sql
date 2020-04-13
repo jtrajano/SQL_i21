@@ -235,8 +235,8 @@ SELECT
 										END
 									END
 		,intShipFromEntityId		= SC.intEntityId
-		,[intLoadShipmentId] 		= SC.intLoadId
-		,[intLoadShipmentDetailId] 	= SC.intLoadDetailId
+		,[intLoadShipmentId] 		= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadId ELSE NULL END
+		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadDetailId ELSE NULL END
 		,intTaxGroupId				= CASE WHEN LI.strSourceTransactionId = 'DP' THEN -1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
