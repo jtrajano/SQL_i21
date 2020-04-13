@@ -26,7 +26,9 @@ BEGIN
 		SELECT
 			ABS(SUM(dblCredit - dblDebit)) AS dblTotal
 		FROM @GLEntries B
+		INNER JOIN vyuGLAccountDetail C ON B.intAccountId = C.intAccountId
 		WHERE B.strTransactionId = A.strBillId
+			AND C.intAccountCategoryId IN (1, 53)
 	) glEntries
 	WHERE
 		A.dblTotal != ISNULL(glEntries.dblTotal,0)
