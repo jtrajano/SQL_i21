@@ -413,6 +413,11 @@ BEGIN TRY
 					,@strDescription = 'Adjusted from external system'
 			END
 
+			UPDATE tblICLot
+			SET intBookId = @intBookId
+				,intSubBookId = @intSubBookId
+			WHERE intLotId = @intLotId
+
 			--Move to Archive
 			INSERT INTO tblIPLotArchive (
 				strItemNo
