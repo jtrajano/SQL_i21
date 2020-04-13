@@ -48,9 +48,36 @@ BEGIN TRY
 				BEGIN
 					RAISERROR('Voucher exists for this Delivery Sheet.',16, 1);
 				END
-				ELSE IF EXISTS(SELECT 1 FROM [tblGRStorageHistory] WHERE [intCustomerStorageId] = @intCustomerStorageId AND strType = 'Transfer')
+				ELSE IF EXISTS(SELECT 1 
+								FROM tblGRStorageHistory SH
+								INNER JOIN tblGRTransferStorage TS
+									ON TS.intTransferStorageId = SH.intTransferStorageId
+										AND TS.ysnReversed = 0
+								WHERE SH.intCustomerStorageId = @intCustomerStorageId 
+									AND SH.strType = 'Transfer')
 				BEGIN
-					RAISERROR('The Grain Ticket of this receipt has transferred.',16, 1);
+					DECLARE @TransferTicketNo VARCHAR(500)
+
+					SELECT @TransferTicketNo = STUFF((
+						SELECT ',' + TS.strTransferStorageTicket
+						FROM tblGRTransferStorage TS
+						INNER JOIN tblGRTransferStorageSourceSplit T_SOURCE
+							ON T_SOURCE.intSourceCustomerStorageId = @intCustomerStorageId
+								AND T_SOURCE.intTransferStorageId = TS.intTransferStorageId
+						WHERE TS.ysnReversed = 0
+						FOR XML PATH('')
+					),1,1,'')
+
+					IF CHARINDEX(',',@TransferTicketNo) > 0
+					BEGIN
+						SET @ErrMsg = 'Transfers '+ @TransferTicketNo + ' are already created for this Ticket. Reverse Transfer Storages first.'
+					END
+					ELSE
+					BEGIN
+						SET @ErrMsg = 'Transfer '+ @TransferTicketNo + ' is already created for this Ticket. Reverse Transfer Storage first.'
+					END
+						
+					RAISERROR(@ErrMsg,16, 1);
 				END
 				ELSE IF EXISTS(SELECT 1 FROM [tblGRCustomerStorage] WHERE [intCustomerStorageId] = @intCustomerStorageId AND dblOriginalBalance < > dblOpenBalance)
 				BEGIN
