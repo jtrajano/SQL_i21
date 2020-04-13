@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessSAPShippingInstruction @strInfo1 NVARCHAR(MAX) = '' OUT
+﻿CREATE PROCEDURE uspIPProcessSAPShipment_CA @strInfo1 NVARCHAR(MAX) = '' OUT
 	,@strInfo2 NVARCHAR(MAX) = '' OUT
 	,@intNoOfRowsAffected INT = 0 OUT
 AS
@@ -114,7 +114,7 @@ BEGIN TRY
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
 	FROM tblIPLoadStage WITH (NOLOCK)
-	WHERE ISNULL(strTransactionType, '') = 'ShippingInstruction'
+	WHERE ISNULL(strTransactionType, '') = 'Shipment'
 
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
@@ -300,11 +300,11 @@ BEGIN TRY
 				,@intLoadId = L.intLoadId
 			FROM tblLGLoad L WITH (NOLOCK)
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
-				AND L.intShipmentType = 2
+				AND L.intShipmentType = 1
 				AND LD.intPContractDetailId = @intContractDetailId
 
-			SELECT @intShipmentType = 2
-				,@intShipmentStatus = 7
+			SELECT @intShipmentType = 1
+				,@intShipmentStatus = 1
 				,@intSourceType = 2
 				,@intTransportationMode = 2
 				,@intTransUsedBy = 1
@@ -364,10 +364,10 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			-- Shipment Instruction Create / Update
+			-- Shipment Create / Update
 			IF @strRowState = 'Create'
 			BEGIN
-				EXEC uspSMGetStartingNumber 106
+				EXEC uspSMGetStartingNumber 39
 					,@strLoadNumber OUTPUT
 
 				INSERT INTO tblLGLoad (
@@ -504,14 +504,6 @@ BEGIN TRY
 					,intContainerTypeId = @intContainerTypeId
 					,strCustomerReference = @strCustomerReference
 				WHERE intLoadId = @intLoadId
-
-				--IF @dtmOldETSPOL <> @dtmETSPOL
-				--BEGIN
-				--	-- To set Contract Planned Availability Date and send Contract Update feed to SAP
-				--	EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
-				--		,@strRowState = 'Modified'
-				--		,@intShipmentType = 2 -- LSI
-				--END
 
 				-- Audit Log
 				IF (@intLoadId > 0)
@@ -958,6 +950,14 @@ BEGIN TRY
 					FROM @tblLGLoadDetailChanges
 					WHERE intLoadDetailId = @intLoadDetailId
 				END
+
+				--IF @dtmOldETAPOD <> @dtmETAPOD
+				--BEGIN
+				--	-- To set Contract Planned Availability Date and send Contract Update feed to SAP
+				--	EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
+				--		,@strRowState = 'Modified'
+				--		,@intShipmentType = 1 -- LS
+				--END
 			END
 
 			--Move to Archive
@@ -966,10 +966,14 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -984,10 +988,14 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -1023,6 +1031,25 @@ BEGIN TRY
 			FROM tblIPLoadDetailStage
 			WHERE intStageLoadId = @intMinRowNo
 
+			INSERT INTO tblIPLoadContainerArchive (
+				intStageLoadId
+				,strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+				)
+			SELECT @intNewStageLoadId
+				,strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+			FROM tblIPLoadContainerStage
+			WHERE intStageLoadId = @intMinRowNo
+
 			DELETE
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
@@ -1044,10 +1071,14 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -1062,10 +1093,14 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,dtmBLDate
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -1101,6 +1136,25 @@ BEGIN TRY
 			FROM tblIPLoadDetailStage
 			WHERE intStageLoadId = @intMinRowNo
 
+			INSERT INTO tblIPLoadContainerError (
+				intStageLoadId
+				,strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+				)
+			SELECT @intNewStageLoadId
+				,strCustomerReference
+				,strContainerNumber
+				,strContainerType
+				,dblGrossWt
+				,dblTareWt
+				,dblQuantity
+			FROM tblIPLoadContainerStage
+			WHERE intStageLoadId = @intMinRowNo
+
 			DELETE
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
@@ -1109,7 +1163,7 @@ BEGIN TRY
 		SELECT @intMinRowNo = Min(intStageLoadId)
 		FROM tblIPLoadStage WITH (NOLOCK)
 		WHERE intStageLoadId > @intMinRowNo
-			AND ISNULL(strTransactionType, '') = 'ShippingInstruction'
+			AND ISNULL(strTransactionType, '') = 'Shipment'
 	END
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
