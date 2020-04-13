@@ -550,7 +550,7 @@ FROM #tmpGLDetail
 				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
 												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
 											  ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
+				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -600,22 +600,11 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= CASE WHEN @intCurrencyIdFrom <> @intCurrencyIdTo
-												AND @intCurrencyIdTo <> @intDefaultCurrencyId 
-												AND @intCurrencyIdFrom = @intDefaultCurrencyId
-												THEN dblAmount/A.dblRate
-											  WHEN
-												@intCurrencyIdFrom <> @intCurrencyIdTo
-												AND @intCurrencyIdTo = @intDefaultCurrencyId
-												AND @intCurrencyIdFrom <> @intDefaultCurrencyId
-
-												
-											 THEN dblAmount*A.dblHistoricRate
-											ELSE A.dblAmount END
+				,dblAmount					= AmountUSD.Val
 				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
 												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
 											  ELSE 0 END 
-				,strAmountInWords			= dbo.fnConvertNumberToWord(  ROUND(A.dblAmount * ISNULL(@dblRate,1),2))
+				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -641,7 +630,19 @@ FROM #tmpGLDetail
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 				OUTER APPLY(
-					SELECT ROUND(A.dblAmount * ISNULL(A.dblRate,1),2)Val
+					SELECT CASE WHEN @intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo <> @intDefaultCurrencyId 
+												AND @intCurrencyIdFrom = @intDefaultCurrencyId
+												THEN ROUND(dblAmount/A.dblRate,2)
+											  WHEN
+												@intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo = @intDefaultCurrencyId
+												AND @intCurrencyIdFrom <> @intDefaultCurrencyId
+
+												
+											 THEN ROUND(dblAmount*A.dblRate,2) 
+											 ELSE A.dblAmount END
+											 Val
 				)AmountUSD
 				OUTER APPLY(
 					SELECT ROUND(A.dblAmount / ISNULL(A.dblRate,1),2)Val
