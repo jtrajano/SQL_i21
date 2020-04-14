@@ -189,7 +189,7 @@ BEGIN TRY
 
 	SELECT @List = NULL
 
-	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId
+	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId, IV.ysnPosted
 	INTO	#ItemInvoice
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
 	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intInvoiceDetailId
@@ -200,7 +200,7 @@ BEGIN TRY
 	AND		FD.intPriceFixationDetailId	=	ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
-	AND		ISNULL(IV.ysnPosted,0) = 0
+	--AND		ISNULL(IV.ysnPosted,0) = 0
 
 	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
 	 begin
@@ -232,6 +232,11 @@ BEGIN TRY
 								  @strProcess 			= 'Fixation Detail Delete'
 	END
 
+	if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
+	begin
+		SET @ErrMsg = 'Posted invoice exists for the price. Please try to unpost them and try again.'
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+	END
 	DECLARE @dId INT
 	SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice
 	WHILE ISNULL(@DetailId,0) > 0
