@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE uspLGGetWeightClaimsCreditNoteReport 
+﻿CREATE PROCEDURE uspLGGetWeightClaimsCreditNoteReport 
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 DECLARE @intWeightClaimId INT
