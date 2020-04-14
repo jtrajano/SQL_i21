@@ -52,7 +52,7 @@ SELECT
 	, dblAverageCost = ISNULL((itemPricing.dblAverageCost), 0.00)
 	, dblEndMonthCost = ISNULL((itemPricing.dblEndMonthCost), 0.00)
 
-	, dblOnOrder = dbo.fnMaxNumeric(ISNULL(stockUOM.dblOnOrder, 0.00) - ISNULL(stockUOM.dblOpenReceive, 0.00), 0)
+	, dblOnOrder = ISNULL(stockUOM.dblOnOrder, 0)
 	, dblInTransitInbound = ISNULL(stockUOM.dblInTransitInbound, 0)
 	, dblUnitOnHand = ISNULL(stockUOM.dblOnHand, 0)
 	, dblInTransitOutbound = ISNULL(stockUOM.dblInTransitOutbound, 0)
@@ -102,7 +102,6 @@ FROM
 			,stockUOM.intStorageLocationId
 			,stockUOM.intSubLocationId
 			,dblOnHand = SUM(stockUOM.dblOnHand) 
-			,dblOpenReceive = SUM(purchase.dblOpenReceive)
 			,dblInTransitInbound = SUM(stockUOM.dblInTransitInbound) 
 			,dblInTransitOutbound = SUM(stockUOM.dblInTransitOutbound) 
 			,dblInTransitDirect = SUM(stockUOM.dblInTransitDirect) 
@@ -114,14 +113,6 @@ FROM
 			,dblUnitStorage = SUM(stockUOM.dblUnitStorage) 
 		FROM 
 			tblICItemStockUOM stockUOM
-			INNER JOIN tblICItemLocation il ON il.intItemLocationId = stockUOM.intItemLocationId
-			OUTER APPLY (
-				SELECT SUM(pr.dblOpenReceive) dblOpenReceive
-				FROM vyuICPurchaseReceipts pr
-				WHERE pr.intItemId = stockUOM.intItemId
-					AND pr.intStockUOM = stockUOM.intItemUOMId
-					AND pr.intLocationId = il.intLocationId
-			) purchase
 		WHERE
 			stockUOM.intItemId = item.intItemId
 			AND stockUOM.intItemUOMId = itemUOM.intItemUOMId
