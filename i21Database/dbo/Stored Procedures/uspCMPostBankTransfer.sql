@@ -596,9 +596,8 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= Amount.Val
-				
-				,strAmountInWords			= dbo.fnConvertNumberToWord(Amount.Val)
+				,dblAmount					= AmountUSD.Val
+				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -624,14 +623,23 @@ FROM #tmpGLDetail
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 				OUTER APPLY(
-					SELECT CASE WHEN  @ysnForeignToFuncational =1
-											 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  --CAD TO USD
-											 WHEN @ysnFunctionalToForeign = 1
-											 THEN ROUND(A.dblAmount / ISNULL(@dblRate,1),2)
-												   ELSE A.dblAmount
-											  END Val
-				)Amount
-			
+					SELECT CASE WHEN @intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo <> @intDefaultCurrencyId 
+												AND @intCurrencyIdFrom = @intDefaultCurrencyId
+												THEN ROUND(dblAmount/A.dblRate,2)
+											  WHEN
+												@intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo = @intDefaultCurrencyId
+												AND @intCurrencyIdFrom <> @intDefaultCurrencyId
+
+												
+											 THEN ROUND(dblAmount*A.dblRate,2) 
+											 ELSE A.dblAmount END
+											 Val
+				)AmountUSD
+				OUTER APPLY(
+					SELECT ROUND(A.dblAmount / ISNULL(A.dblRate,1),2)Val
+				)AmountForeign
 		WHERE	A.strTransactionId = @strTransactionId	
 	END
 	ELSE
