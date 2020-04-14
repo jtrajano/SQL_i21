@@ -8125,6 +8125,7 @@
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixOtherChargeBilledQty.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetCollateralItems.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
