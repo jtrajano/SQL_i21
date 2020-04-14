@@ -16,6 +16,15 @@ BEGIN TRY
 		,@strFromCompanyName NVARCHAR(150)
 		,@intTransactionCount INT
 	DECLARE @tblRKOptionsMatchPnSHeaderPreStage TABLE (intOptionsMatchPnSHeaderPreStageId INT)
+	DECLARE @intCurrentCompanyId INT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE tblRKOptionsMatchPnSHeader
+	SET intCompanyId = @intCurrentCompanyId
+	WHERE intCompanyId IS NULL
 
 	INSERT INTO @tblRKOptionsMatchPnSHeaderPreStage (intOptionsMatchPnSHeaderPreStageId)
 	SELECT intOptionsMatchPnSHeaderPreStageId
