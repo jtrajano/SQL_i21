@@ -38,6 +38,7 @@ SET ANSI_WARNINGS OFF
 --</xmlparam>'
 
 DECLARE @query NVARCHAR(MAX), @innerQuery NVARCHAR(MAX),  @originInnerQuery NVARCHAR(MAX), @prepaidInnerQuery NVARCHAR(MAX), @filter NVARCHAR(MAX) = '';
+DECLARE @arQuery NVARCHAR(MAX)
 DECLARE @dateFrom DATETIME = NULL;
 DECLARE @dateTo DATETIME = NULL;
 DECLARE @dtmDateTo DATETIME = NULL;
@@ -48,6 +49,7 @@ DECLARE @condition NVARCHAR(20)
 DECLARE @id INT 
 DECLARE @strBillId NVARCHAR(50) 
 DECLARE @strAccountId NVARCHAR(100) 
+DECLARE @strAccountIdTo NVARCHAR(100) 
 DECLARE @strVendorIdName NVARCHAR(150) 
 DECLARE @strVendorId NVARCHAR(50)
 DECLARE @strVendorOrderNumber NVARCHAR(50)
@@ -146,7 +148,7 @@ SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml
 SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 'SELECT --DISTINCT 
 					intBillId
-					,strAccountId
+					-- ,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -158,7 +160,7 @@ SET @innerQuery = 'SELECT --DISTINCT
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
 					intBillId
 					,intAccountId
-					,strAccountId
+					-- ,strAccountId
 					,dblTotal
 					,dblAmountDue
 					,dblAmountPaid
@@ -178,12 +180,23 @@ SET @originInnerQuery = 'SELECT --DISTINCT
 					,dtmDate
 				  FROM dbo.vyuAPOriginPayables'
 
+SET @arQuery = 'SELECT --DISTINCT 
+					intInvoiceId
+					,dblTotal
+					,dblAmountDue
+					,dblAmountPaid
+					,dblDiscount
+					,dblInterest
+					,dtmDate
+				  FROM dbo.vyuAPSalesForPayables'
+
 IF @dateFrom IS NOT NULL
 BEGIN	
 	SET @ysnFilter = 1
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
+		SET @arQuery = @arQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) = ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''''
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateFrom, 101) +''')';
@@ -191,6 +204,7 @@ BEGIN
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
+		SET @arQuery = @arQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''	
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDueDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dateFrom, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dateTo, 110) + ''''
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dateTo, 101) +''')';
@@ -205,6 +219,7 @@ BEGIN
 	IF @condition = 'Equal To'
 	BEGIN 
 		SET @innerQuery = @innerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
+		SET @arQuery = @arQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @prepaidInnerQuery = @prepaidInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @originInnerQuery = @originInnerQuery +  (CASE WHEN @dateFrom IS NOT NULL AND @dtmDate IS NOT NULL THEN + ' AND ' ELSE +' WHERE ' END) +' DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) = ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''''
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dtmDate, 101) +''')';
@@ -212,6 +227,7 @@ BEGIN
     ELSE 
 	BEGIN 
 		SET @innerQuery = @innerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
+		SET @arQuery = @arQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @originInnerQuery = @originInnerQuery + ' WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN ''' + CONVERT(VARCHAR(10), @dtmDate, 110) + ''' AND '''  + CONVERT(VARCHAR(10), @dtmDateTo, 110) + ''''	
 		SET @dtmDateFilter = '(SELECT ''' + CONVERT(VARCHAR(10), @dtmDateTo, 101) +''')';
@@ -227,6 +243,44 @@ BEGIN
 	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
 END
 
+SELECT @strAccountId = [from], @strAccountIdTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';  
+IF @strAccountId IS NOT NULL
+BEGIN
+  DECLARE @intAccountId NVARCHAR(20);
+  DECLARE @intAccountIdTo NVARCHAR(20);
+  SELECT @intAccountId = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountId;
+  SELECT @intAccountIdTo = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountIdTo;
+  IF @dateFrom IS NOT NULL OR @dtmDate IS NOT NULL
+  BEGIN
+	IF @condition = 'Equal To'  
+	BEGIN   
+		SET @innerQuery = @innerQuery + ' WHERE intAccountId = ' + @intAccountId + ''
+		-- SET @arQuery = @arQuery + ' WHERE intAccountId = ' + @intAccountId + ''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE intAccountId = ' + @intAccountId + ''
+	END
+	ELSE
+	BEGIN
+		SET @innerQuery = @innerQuery + ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''
+		-- SET @arQuery = @arQuery + ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''
+	END
+  END
+  ELSE
+  BEGIN
+	IF @condition = 'Equal To'  
+	BEGIN   
+		SET @innerQuery = @innerQuery + ' AND intAccountId = ' + @intAccountId + ''
+		-- SET @arQuery = @arQuery + ' AND intAccountId = ' + @intAccountId + ''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' AND intAccountId = ' + @intAccountId + ''
+	END
+	ELSE
+	BEGIN
+		SET @innerQuery = @innerQuery + ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + '' 
+		-- SET @arQuery = @arQuery + ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + '' 
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + '' 
+	END
+  END
+END
 
 --IF @strAccountId IS NOT NULL
 --BEGIN 
@@ -237,7 +291,8 @@ END
 --	END
 --END
 
---DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'
+
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
