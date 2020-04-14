@@ -425,10 +425,12 @@ BEGIN
 		
 		IF(@strTableName = 'tblSTstgRebatesPMMorris')
 		BEGIN
-				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
-					DECLARE @intNumberOfRecords int
-					DECLARE @intSoldQuantity int
-					DECLARE @dblFinalSales decimal(10, 2)
+				--------------------------------------------------- CSV HEADER FOR PM MORRIS ---------------------------------------------------
+					DECLARE @intNumberOfRecords int = 0
+					DECLARE @intSoldQuantity int = 0
+					DECLARE @dblFinalSales decimal(10, 2) = 0
+					DECLARE @strScanDataProvider nvarchar(max) = 'iRely LLC'
+
 
 					--Get total number of records
 					SELECT @intNumberOfRecords = COUNT(*) FROM @tblTempPMM
@@ -439,7 +441,7 @@ BEGIN
 					--Get sum of the final sales price field
 					SELECT @dblFinalSales = SUM(dblFinalSalesPrice) FROM @tblTempPMM
 
-					SET @strCSVHeader = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50)) + CHAR(13)
+					SET @strCSVHeader = CAST(@intNumberOfRecords as NVARCHAR(50)) + '|' + CAST(@intSoldQuantity as NVARCHAR(50)) + '|' + CAST(@dblFinalSales as NVARCHAR(50)) + '|' + @strScanDataProvider + CHAR(13)
 				---------------------------------------------------CSV HEADER FOR PM MORRIS---------------------------------------------------
 
 			SELECT * FROM @tblTempPMM
