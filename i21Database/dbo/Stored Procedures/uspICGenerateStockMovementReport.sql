@@ -350,7 +350,7 @@ BEGIN
 		vyuICGenerateStockMovement
 	ORDER BY
 		intCommodityId ASC 
-		,intLocationId ASC 
+		--,intLocationId ASC 
 		,dtmDate ASC
 		,dtmCreated ASC 
 END 
