@@ -69,6 +69,8 @@ BEGIN TRY
 		,intInvoiceId
 		,dblFranchise
 		,dblSeqPriceConversionFactoryWeightUOM
+		,dblToGross
+		,dblToTare
 		)
 	SELECT 1
 		,@intNewWeightClaimId
@@ -90,6 +92,8 @@ BEGIN TRY
 		,NULL
 		,dblFranchise
 		,dblSeqPriceConversionFactoryWeightUOM
+		,dblReceivedGrossWt
+		,dblReceivedGrossWt-dblReceivedNetWt
 	FROM vyuLGGetOpenWeightClaim WC
 	WHERE intLoadId = @intLoadId
 
