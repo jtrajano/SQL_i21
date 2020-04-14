@@ -318,7 +318,7 @@ BEGIN TRY
 
 			IF ISNULL(@intLoadId, 0) = 0
 			BEGIN
-				SELECT @strRowState = 'Create'
+				SELECT @strRowState = 'Added'
 
 				SELECT @intContractDetailId = CD.intContractDetailId
 					,@intPurchaseSale = CH.intContractTypeId
@@ -337,7 +337,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				SELECT @strRowState = 'Update'
+				SELECT @strRowState = 'Modified'
 
 				SELECT @strLoadNumber = L.strLoadNumber
 					,@intContractDetailId = CD.intContractDetailId
@@ -365,7 +365,7 @@ BEGIN TRY
 			BEGIN TRAN
 
 			-- Shipment Instruction Create / Update
-			IF @strRowState = 'Create'
+			IF @strRowState = 'Added'
 			BEGIN
 				EXEC uspSMGetStartingNumber 106
 					,@strLoadNumber OUTPUT
@@ -454,7 +454,7 @@ BEGIN TRY
 						,@toValue = @strLoadNumber
 				END
 			END
-			ELSE IF @strRowState = 'Update'
+			ELSE IF @strRowState = 'Modified'
 			BEGIN
 				SELECT @intOldPurchaseSale = intPurchaseSale
 					,@intOldPositionId = intPositionId
@@ -504,14 +504,6 @@ BEGIN TRY
 					,intContainerTypeId = @intContainerTypeId
 					,strCustomerReference = @strCustomerReference
 				WHERE intLoadId = @intLoadId
-
-				--IF @dtmOldETSPOL <> @dtmETSPOL
-				--BEGIN
-				--	-- To set Contract Planned Availability Date and send Contract Update feed to SAP
-				--	EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
-				--		,@strRowState = 'Modified'
-				--		,@intShipmentType = 2 -- LSI
-				--END
 
 				-- Audit Log
 				IF (@intLoadId > 0)
@@ -589,8 +581,8 @@ BEGIN TRY
 			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
 			SET @strInfo2 = ISNULL(@strLoadNumber, '')
 
-			IF @strRowState = 'Create'
-				OR @strRowState = 'Update'
+			IF @strRowState = 'Added'
+				OR @strRowState = 'Modified'
 			BEGIN
 				DELETE
 				FROM @tblLGLoadDetail
@@ -776,7 +768,7 @@ BEGIN TRY
 						AND CD.intContractDetailId = @intContractDetailId
 					LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CD.intPricingTypeId
 
-					IF @strRowState = 'Create'
+					IF @strRowState = 'Added'
 					BEGIN
 						INSERT INTO tblLGLoadDetail (
 							intConcurrencyId
