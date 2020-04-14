@@ -40,7 +40,7 @@ SELECT
 	,dblAverageCost = ISNULL(ItemPricing.dblAverageCost, 0.00)
 	,dblEndMonthCost = ISNULL(ItemPricing.dblEndMonthCost, 0.00)
 
-	,dblOnOrder = dbo.fnMaxNumeric(ISNULL(ItemStockUOM.dblOnOrder, 0.00) - ISNULL(ItemStockUOM.dblOpenReceive, 0.00), 0)
+	,dblOnOrder = ISNULL(ItemStockUOM.dblOnOrder, 0.00)
 	,dblInTransitInbound = ISNULL(ItemStockUOM.dblInTransitInbound, 0.00)
 	,dblUnitOnHand = CAST(ISNULL(ItemStockUOM.dblOnHand, 0.00) AS NUMERIC(38, 7))
 	,dblInTransitOutbound = ISNULL(ItemStockUOM.dblInTransitOutbound, 0)
@@ -105,8 +105,7 @@ FROM
 	OUTER APPLY (
 		SELECT	ItemStockUOM.intItemId
 				,ItemStockUOM.intItemLocationId				
-				,dblOnOrder = SUM(ISNULL(dblOnOrder, 0))
-				,dblOpenReceive = SUM(purchase.dblOpenReceive)
+				,dblOnOrder = SUM(ISNULL(dblOnOrder, 0)) 
 				,dblOrderCommitted = SUM(ISNULL(dblOrderCommitted, 0)) 
 				,dblOnHand = SUM(ISNULL(dblOnHand, 0)) 
 				,dblUnitReserved = SUM(ISNULL(dblUnitReserved, 0)) 
@@ -139,23 +138,15 @@ FROM
 							NULL 
 					END
 				,dtmLastPurchaseDate = MAX(ItemStockUOM.dtmLastPurchaseDate)
-				,dtmLastSaleDate = MAX(ItemStockUOM.dtmLastSaleDate)
-		FROM tblICItemStockUOM ItemStockUOM
-			LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
-			INNER JOIN tblICItemLocation il ON il.intItemLocationId = ItemStockUOM.intItemLocationId
-			OUTER APPLY (
-				SELECT SUM(pr.dblOpenReceive) dblOpenReceive
-				FROM vyuICPurchaseReceipts pr
-				WHERE pr.intItemId = ItemStockUOM.intItemId
-					AND pr.intStockUOM = ItemStockUOM.intItemUOMId
-					AND pr.intLocationId = il.intLocationId
-			) purchase
-		WHERE ItemStockUOM.intItemId = Item.intItemId 
-			AND ItemStockUOM.intItemUOMId = StockUOM.intItemUOMId
-			AND ItemStockUOM.intItemLocationId = ItemLocation.intItemLocationId
+				,dtmLastSaleDate = MAX(ItemStockUOM.dtmLastSaleDate) 						
+		FROM	tblICItemStockUOM ItemStockUOM LEFT JOIN tblICStorageLocation sl
+					ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
+		WHERE	ItemStockUOM.intItemId = Item.intItemId 
+				AND ItemStockUOM.intItemUOMId = StockUOM.intItemUOMId
+				AND ItemStockUOM.intItemLocationId = ItemLocation.intItemLocationId
 		GROUP BY 
-			  ItemStockUOM.intItemId
-			, ItemStockUOM.intItemLocationId
+				ItemStockUOM.intItemId
+				,ItemStockUOM.intItemLocationId
 	) ItemStockUOM
 
 	OUTER APPLY(
