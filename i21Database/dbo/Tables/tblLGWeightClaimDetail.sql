@@ -7,6 +7,8 @@
 [intItemId] INT NULL,
 [dblQuantity] NUMERIC(18, 6) NULL,
 [dblFromNet] NUMERIC(18, 6) NULL,
+[dblToGross] NUMERIC(18, 6) NULL,
+[dblToTare] NUMERIC(18, 6) NULL,
 [dblToNet] NUMERIC(18, 6) NULL,
 [dblFranchiseWt] NUMERIC(18, 6) NULL,
 [dblWeightLoss] NUMERIC(18, 6) NULL,
