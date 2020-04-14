@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspLGGetWeightClaimsDebitNoteReport 
+﻿ALTER PROCEDURE uspLGGetWeightClaimsDebitNoteReport 
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 DECLARE @intWeightClaimId INT
@@ -153,6 +153,8 @@ SELECT DISTINCT WC.intWeightClaimId
 	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 	,dblFromNet = ISNULL(WCD.dblFromNet, 0)
+	,dblToGross = COALESCE(WCD.dblToGross, WCD.dblToNet, 0)
+	,dblToTare = ISNULL(WCD.dblToTare, 0)
 	,dblToNet = ISNULL(WCD.dblToNet, 0)
 	,dblWeightDifference = (ISNULL(WCD.dblFromNet,0) - ISNULL(WCD.dblToNet,0))
 	,strUnitMeasure = isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure)
@@ -307,6 +309,8 @@ GROUP BY WC.intWeightClaimId
 	,WCD.intInvoiceId
 	,CP.ysnFullHeaderLogo
 	,WCD.dblFromNet
+	,WCD.dblToGross
+	,WCD.dblToTare
 	,WCD.dblToNet
 	,WUOM.strUnitMeasure
 	,WUOM.strSymbol
