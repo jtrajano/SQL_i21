@@ -105,7 +105,7 @@ SELECT
 	, A.dtmDueDate 
 	, A.ysnPosted 
 	, A.ysnPaid
-	, A.intAccountId
+	, prepaidDetail.intAccountId
 	, F.strAccountId
 	, EC.strClass
 	, 1
@@ -113,13 +113,13 @@ FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
  	ON A.[intEntityVendorId] = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
-		bd.dblRate
+		bd.dblRate, bd.intAccountId
 	FROM tblAPBillDetail bd
 	WHERE bd.intBillId = A.intBillId
 ) prepaidDetail		
+LEFT JOIN dbo.tblGLAccount F ON  prepaidDetail.intAccountId = F.intAccountId
  WHERE A.ysnPosted = 1
 	AND A.intTransactionType IN (2, 13)
 	AND NOT EXISTS (
@@ -270,7 +270,7 @@ SELECT
 	,A.dtmDueDate
 	,A.ysnPosted
 	,C.ysnPaid
-	,A.intAccountId
+	,C.intAccountId
 	,F.strAccountId
 	,EC.strClass
 	,2
@@ -279,12 +279,12 @@ INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
 INNER JOIN dbo.tblAPBill C ON B.intTransactionId = C.intBillId
 INNER JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId) ON A.intEntityVendorId = D.[intEntityId]
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId	
+LEFT JOIN dbo.tblGLAccount F ON  C.intAccountId = F.intAccountId	
 WHERE A.ysnPosted = 1 AND C.intTransactionType IN (2, 13)
 AND NOT EXISTS (
 	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = A.intBillId
 )
-AND B.ysnApplied = 1
+AND B.ysnApplied = 1 AND A.ysnPosted = 1
 
 UNION ALL
 --PAYMENT MADE TO AR TO OFFSET THE PREPAYMENT
