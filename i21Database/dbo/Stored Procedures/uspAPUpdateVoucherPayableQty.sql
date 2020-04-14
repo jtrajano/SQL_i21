@@ -121,7 +121,6 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
-				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
@@ -141,7 +140,6 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
-				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 	BEGIN
@@ -236,7 +234,6 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intLoadShipmentDetailId]	
 				,B.[intLoadShipmentCostId]	
 				,B.[intCustomerStorageId]	
-				,B.[intSettleStorageId]
 				,B.[intItemId]						
 				,B.[strItemNo]						
 				,B.[intPurchaseTaxGroupId]			
@@ -336,7 +333,6 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
 			,[intCustomerStorageId]	
-			,[intSettleStorageId]
 			,[intItemId]						
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -417,7 +413,6 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
 			,[intCustomerStorageId]	
-			,[intSettleStorageId]
 			,[intItemId]						
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			

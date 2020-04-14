@@ -43,7 +43,6 @@ IF NOT EXISTS(
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
-			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
@@ -65,7 +64,6 @@ IF NOT EXISTS(
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
-			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 			AND C.ysnStage = 1
@@ -100,7 +98,6 @@ SELECT TOP 100 PERCENT
 	,intPaycheckHeaderId				=	A.intPaycheckHeaderId
 	,intPurchaseDetailId				=	A.intPurchaseDetailId
 	,intCustomerStorageId				=	A.intCustomerStorageId
-	,intSettleStorageId					=	A.intSettleStorageId
 	,intLocationId						=	ISNULL(A.intItemLocationId, A.intLocationId)
 	,intLoadDetailId					=	A.intLoadShipmentDetailId
 	,intLoadId							=	A.intLoadShipmentId
@@ -343,8 +340,7 @@ INSERT
 	,intInventoryReceiptChargeId		
 	,intPaycheckHeaderId				
 	,intPurchaseDetailId				
-	,intCustomerStorageId
-	,intSettleStorageId				
+	,intCustomerStorageId				
 	,intLocationId						
 	,intLoadDetailId
 	,intLoadShipmentCostId					
@@ -432,8 +428,7 @@ VALUES
 	,intInventoryReceiptChargeId		
 	,intPaycheckHeaderId				
 	,intPurchaseDetailId				
-	,intCustomerStorageId
-	,intSettleStorageId				
+	,intCustomerStorageId				
 	,intLocationId						
 	,intLoadDetailId	
 	,intLoadShipmentCostId				

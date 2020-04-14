@@ -73,9 +73,8 @@ AS
 		SELECT TOP 1
 			storage.strStorageTicket
 			  FROM tblGRSettleStorage storage
-			  WHERE storage.intSettleStorageId = voucherDetail.intSettleStorageId
-		--INNER JOIN tblGRSettleStorageTicket ticket ON storage.intSettleStorageId = ticket.intSettleStorageId
-		--WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
+		INNER JOIN tblGRSettleStorageTicket ticket ON storage.intSettleStorageId = ticket.intSettleStorageId
+		WHERE storage.intParentSettleStorageId IS NULL AND ticket.intCustomerStorageId = voucherDetail.intCustomerStorageId
 	) storage
 	WHERE voucherDetail.intCustomerStorageId IS NOT NULL AND voucherDetail.intCustomerStorageId > 0
 	--INNER JOIN
