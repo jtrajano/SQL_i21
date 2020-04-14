@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE uspTMUpdateNextJulianDeliveryBySite 
 	@intSiteId INT
-	,@InvoiceMonth INT
+	,@InvoiceMonth INT = 0
 AS
 BEGIN
 	DECLARE @dtmLastDeliveryDate DATETIME
