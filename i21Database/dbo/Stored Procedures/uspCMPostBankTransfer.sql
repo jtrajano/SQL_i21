@@ -550,9 +550,6 @@ FROM #tmpGLDetail
 				,strState					= ''
 				,strCountry					= ''
 				,dblAmount					= A.dblAmount
-				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
-												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
-											  ELSE 0 END 
 				,strAmountInWords			= dbo.fnConvertNumberToWord(A.dblAmount)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceFrom,'') = '' THEN 
 												A.strDescription 
@@ -600,9 +597,6 @@ FROM #tmpGLDetail
 				,strState					= ''
 				,strCountry					= ''
 				,dblAmount					= AmountUSD.Val
-				,dblAmountForeign			= CASE WHEN @intCurrencyIdFrom <> @intDefaultCurrencyId THEN  A.dblAmount 
-												   WHEN @intCurrencyIdTo <> @intDefaultCurrencyId THEN  AmountForeign.Val
-											  ELSE 0 END 
 				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
