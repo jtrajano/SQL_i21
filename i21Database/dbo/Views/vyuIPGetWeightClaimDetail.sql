@@ -30,6 +30,8 @@ SELECT WCD.[intWeightClaimDetailId]
 	,C.strCurrency
 	,E.strName As strPartyName
 	,UM.strUnitMeasure as strPriceUOM
+	,WCD.dblToGross
+	,WCD.dblToTare
 FROM tblLGWeightClaimDetail WCD
 Left JOIN [tblSMCurrency] C on C.intCurrencyID=WCD.intCurrencyId
 Left JOIN tblEMEntity E on E.intEntityId=WCD.intPartyEntityId
