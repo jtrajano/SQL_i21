@@ -2403,9 +2403,25 @@ BEGIN TRY
 
 			SELECT @intSampleAcknowledgementStageId = SCOPE_IDENTITY()
 
-			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-				,@referenceTransactionId = @intTransactionId
-				,@referenceCompanyId = @intCompanyId
+			IF @strRowState <> 'Delete'
+			BEGIN
+				IF @intTransactionRefId IS NULL
+				BEGIN
+					SELECT @strErrorMessage = 'Current Transaction Id is not available. '
+
+					RAISERROR (
+								@strErrorMessage
+								,16
+								,1
+								)
+				END
+				ELSE
+				BEGIN
+					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+						,@referenceTransactionId = @intTransactionId
+						,@referenceCompanyId = @intCompanyId
+				END
+			END
 
 			EXEC sp_xml_removedocument @idoc
 
