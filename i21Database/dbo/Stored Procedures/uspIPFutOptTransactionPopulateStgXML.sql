@@ -24,6 +24,15 @@ BEGIN TRY
 		,@intCompanyId int
 		,@intTransactionId int
 		,@intScreenId int
+		,@intCurrentCompanyId INT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE tblRKFutOptTransactionHeader
+	SET intCompanyId = @intCurrentCompanyId
+	WHERE intCompanyId IS NULL
 
 	SET @intFutOptTransactionHeaderStageId = NULL
 	SET @strHeaderXML = NULL
