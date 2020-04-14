@@ -3812,6 +3812,7 @@ BEGIN TRY
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
+				and ysnApproval=1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
