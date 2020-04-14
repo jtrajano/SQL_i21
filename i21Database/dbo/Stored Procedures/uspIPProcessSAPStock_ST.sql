@@ -320,6 +320,9 @@ BEGIN TRY
 			IF ISNULL(@intSubBookId, 0) = 0
 			BEGIN
 				SELECT @intSubBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'SUB_BOOK_ID')
+
+				IF @intSubBookId = 0
+					SELECT @intSubBookId = NULL
 			END
 
 			SELECT @intEntityId = intEntityId
