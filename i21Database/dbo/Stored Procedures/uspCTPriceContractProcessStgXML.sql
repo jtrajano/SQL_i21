@@ -1552,6 +1552,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intPriceFixationId = @intPriceFixationId
+					AND ysnApproval=1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
