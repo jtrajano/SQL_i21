@@ -8144,6 +8144,7 @@
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBillDetailCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
