@@ -8190,6 +8190,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShipment_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShipment_CA.sql" />
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
