@@ -71,6 +71,16 @@ BEGIN TRY
 			RETURN
 		END
 
+		IF EXISTS
+		(
+			SELECT TOP 1 1 FROM tblCTPriceFixation PF
+			INNER JOIN tblCTContractDetail CD ON PF.intContractDetailId = CD.intContractDetailId
+			WHERE CD.intSplitFromId = @intContractDetailId
+		)
+		BEGIN
+			RETURN
+		END			
+
 		SELECT	@intPriceFixationDetailId	=	intPriceFixationDetailId,
 				@ysnHedge					=	ysnHedge,
 				@intFutOptTransactionId		=	intFutOptTransactionId
