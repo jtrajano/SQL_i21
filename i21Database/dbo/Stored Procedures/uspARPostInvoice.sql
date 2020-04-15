@@ -581,9 +581,12 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
+DELETE PQ
+FROM tblARPostingQueue PQ
+INNER JOIN #ARPostInvoiceHeader II ON II.strInvoiceNumber = PQ.strTransactionNumber AND II.intInvoiceId = PQ.intTransactionId
+WHERE DATEDIFF(SECOND, dtmPostingdate, GETDATE()) > 20 OR @post = 0
 
-
-	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
+EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
          @Post     = @post
         ,@Recap    = @recap
         ,@PostDate = @PostDate
@@ -644,6 +647,27 @@ IF(@totalInvalid > 0)
 	END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM #ARPostInvoiceHeader
+
+--INSERT INVOICES TO POSTING QUEUE
+IF (@totalRecords > 0) AND @recap = 0 AND @post = 1
+	BEGIN
+		INSERT INTO tblARPostingQueue (
+			  intTransactionId
+			, strTransactionNumber
+			, strBatchId
+			, dtmPostingdate
+			, intEntityId
+			, strTransactionType
+		)
+		SELECT DISTINCT 
+			  intTransactionId		= intInvoiceId
+			, strTransactionNumber	= strInvoiceNumber
+			, strBatchId			= strBatchId
+			, dtmPostingdate		= GETDATE()
+			, intEntityId			= intEntityId
+			, strTransactionType	= 'Invoice'
+		FROM #ARPostInvoiceHeader 
+	END
 			
 IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 	BEGIN
@@ -665,14 +689,12 @@ IF(@totalInvalid >= 1 AND @totalRecords <= 0)
 				END	
 
 			INSERT INTO tblARPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
-			SELECT 	
-				[strPostingError]
-				,[strTransactionType]
-				,[strInvoiceNumber]
-				,[strBatchId]
-				,[intInvoiceId]
-			FROM
-				#ARInvalidInvoiceData 			
+			SELECT [strPostingError]
+				 , [strTransactionType]
+				 , [strInvoiceNumber]
+				 , [strBatchId]
+				 , [intInvoiceId]
+			FROM #ARInvalidInvoiceData
 		END
 
 		IF @raiseError = 1
@@ -690,10 +712,6 @@ BEGIN TRY
 
 	IF @recap = 0
 		EXEC [dbo].[uspARPostItemResevation]
-
- --   DECLARE @RecapInvoiceData AS [InvoicePostingTable]
-	--INSERT INTO @RecapInvoiceData
-	--SELECT * FROM #ARPostInvoiceData WHERE [ysnRecap] = 1
 
 	IF @recap = 1
     BEGIN
@@ -717,37 +735,6 @@ BEGIN TRY
 	IF @post = 1
     EXEC [dbo].[uspARPrePostInvoiceIntegration]
 
-	--BEGIN TRY 
-	--	DECLARE @Ids AS Id
-	--	INSERT INTO @Ids(intId)
-	--	SELECT IP.intInvoiceId 
-	--	FROM 
-	--		@PostInvoiceData IP
-	--	WHERE
-	--		IP.[intInvoiceDetailId] IS NULL
-
-	--	EXEC	dbo.[uspARUpdateTransactionAccounts]  
-	--					@Ids				= @Ids
-	--				,@ItemAccounts		= @ItemAccounts
-	--				,@TransactionType	= 1
-
-	--	UPDATE PID
-	--	SET  PID.[intItemAccountId]             = ARID.[intAccountId]
-	--		,PID.[intSalesAccountId]            = ARID.[intSalesAccountId]
-	--		,PID.[intServiceChargeAccountId]    = ARID.[intServiceChargeAccountId]
-	--		,PID.[intLicenseAccountId]          = ARID.[intLicenseAccountId]
-	--		,PID.[intMaintenanceAccountId]      = ARID.[intMaintenanceAccountId]
-	--	FROM 
-	--		@PostInvoiceData PID
-	--	INNER JOIN
-	--		tblARInvoiceDetail ARID
-	--			ON PID.intInvoiceDetailId IS NOT NULL
-	--			AND PID.intInvoiceDetailId = ARID.intInvoiceDetailId				
-	--END TRY
-	--BEGIN CATCH
-	--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--	GOTO Do_Rollback
-	--END CATCH
 	IF @post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  	
 
@@ -801,73 +788,7 @@ END CATCH
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------
-
--- Create the gl entries variable 
---DECLARE @GLEntries          RecapTableType
---		--,@TempGLEntries AS RecapTableType
---        ,@GLPost            RecapTableType
---        ,@GLUnPost          RecapTableType
 BEGIN TRY
-	-- Accruals
-	--BEGIN TRY 
-	--	DECLARE @Accruals AS [InvoicePostingTable]
-	--	INSERT INTO @Accruals
-	--	SELECT * FROM @PostInvoiceData WHERE [intPeriodsToAccrue] > 1
-
-	--	INSERT INTO @PostingGLEntries
-	--        ([dtmDate]
-	--        ,[strBatchId]
-	--        ,[intAccountId]
-	--        ,[dblDebit]
-	--        ,[dblCredit]
-	--        ,[dblDebitUnit]
-	--        ,[dblCreditUnit]
-	--        ,[strDescription]
-	--        ,[strCode]
-	--        ,[strReference]
-	--        ,[intCurrencyId]
-	--        ,[dblExchangeRate]
-	--        ,[dtmDateEntered]
-	--        ,[dtmTransactionDate]
-	--        ,[strJournalLineDescription]
-	--        ,[intJournalLineNo]
-	--        ,[ysnIsUnposted]
-	--        ,[intUserId]
-	--        ,[intEntityId]
-	--        ,[strTransactionId]
-	--        ,[intTransactionId]
-	--        ,[strTransactionType]
-	--        ,[strTransactionForm]
-	--        ,[strModuleName]
-	--        ,[intConcurrencyId]
-	--        ,[dblDebitForeign]
-	--        ,[dblDebitReport]
-	--        ,[dblCreditForeign]
-	--        ,[dblCreditReport]
-	--        ,[dblReportingRate]
-	--        ,[dblForeignRate]
-	--        ,[strRateType]
-	--        ,[strDocument]
-	--        ,[strComments]
-	--        ,[strSourceDocumentId]
-	--        ,[intSourceLocationId]
-	--        ,[intSourceUOMId]
-	--        ,[dblSourceUnitDebit]
-	--        ,[dblSourceUnitCredit]
-	--        ,[intCommodityId]
-	--        ,[intSourceEntityId]
-	--        ,[ysnRebuild])
-	--	EXEC	dbo.uspARGenerateEntriesForAccrual  
-	--				 @Invoices      = @Accruals
-	--				,@ItemAccounts  = @ItemAccounts
-	--				,@PostDate      = @PostDate
-
-	--END TRY
-	--BEGIN CATCH
-	--	SELECT @ErrorMerssage = ERROR_MESSAGE()										
-	--	GOTO Do_Rollback
-	--END CATCH	
-
     IF(OBJECT_ID('tempdb..#ARInvoiceGLEntries') IS NOT NULL)
     BEGIN
         DROP TABLE #ARInvoiceGLEntries
@@ -1122,7 +1043,7 @@ BEGIN TRY
         @InvalidGLEntries IGLE
     LEFT OUTER JOIN
         @GLEntries GLE
-        ON IGLE.[strTransactionId] = GLE.[strTransactionId]
+        ON IGLE.[strTransactionId] = GLE.[strTransactionId]	
 
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
@@ -1220,80 +1141,6 @@ Do_Commit:
 --END
 
 	RETURN 1;
-
---IF @post = 0
---	BEGIN
---		UPDATE ARI
---		SET
---			ARI.dblPayment	=(CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') 
---									THEN @ZeroDecimal 
---									ELSE
---										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WITH(NOLOCK) WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
---								END)
---		FROM
---			(SELECT intInvoiceId FROM @PostInvoiceData) PID
---		INNER JOIN
---			(SELECT intInvoiceId, dblPayment, dblInvoiceTotal, strTransactionType FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
---				ON PID.intInvoiceId = ARI.intInvoiceId 
-
---		UPDATE ARI
---		SET
---			 ARI.ysnPosted				= 0
---			,ARI.ysnPaid				= 0
---			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
---			,ARI.dblDiscount			= @ZeroDecimal
---			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
---			,ARI.dblInterest			= @ZeroDecimal
---			,ARI.dblPayment				= ISNULL(dblPayment, @ZeroDecimal)
---			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
---			,ARI.ysnExcludeFromPayment	= 0
---			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1
---		FROM
---			(SELECT intInvoiceId FROM @PostInvoiceData) PID
---		INNER JOIN
---			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate, ysnExcludeFromPayment, intConcurrencyId,
---				dblInvoiceTotal, strTransactionType, dtmDate
---			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
---				ON PID.intInvoiceId = ARI.intInvoiceId 		
---	END
---ELSE
---	BEGIN
---		UPDATE ARI
---		SET
---			ARI.dblPayment	= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') 
---									THEN @ZeroDecimal 
---									ELSE 
---										ARI.dblPayment - ISNULL((SELECT SUM(tblARPrepaidAndCredit.dblAppliedInvoiceDetailAmount) FROM tblARPrepaidAndCredit WHERE tblARPrepaidAndCredit.intInvoiceId = ARI.intInvoiceId AND tblARPrepaidAndCredit.ysnApplied = 1), @ZeroDecimal)
---								END)
---		FROM
---			(SELECT intInvoiceId FROM @PostInvoiceData) PID
---		INNER JOIN
---			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate,intConcurrencyId,
---				dblInvoiceTotal, strTransactionType, dtmDate
---			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
---				ON PID.intInvoiceId = ARI.intInvoiceId 	
-
---		UPDATE ARI						
---		SET
---			ARI.ysnPosted				= 1
---			,ARI.ysnPaid				= (CASE WHEN ARI.dblInvoiceTotal = @ZeroDecimal OR ARI.strTransactionType IN ('Cash') OR ARI.dblInvoiceTotal = ARI.dblPayment THEN 1 ELSE 0 END)
---			,ARI.dblInvoiceTotal		= ARI.dblInvoiceTotal
---			,ARI.dblAmountDue			= (CASE WHEN ARI.strTransactionType IN ('Cash') THEN @ZeroDecimal ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal) END)
---			,ARI.dblDiscount			= @ZeroDecimal
---			,ARI.dblDiscountAvailable	= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
---			,ARI.dblInterest			= @ZeroDecimal			
---			,ARI.dtmPostDate			= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
---			,ARI.ysnExcludeFromPayment	= PID.ysnExcludeInvoiceFromPayment
---			,ARI.intConcurrencyId		= ISNULL(ARI.intConcurrencyId,0) + 1	
---		FROM
---			(SELECT intInvoiceId, ysnExcludeInvoiceFromPayment FROM @PostInvoiceData) PID
---		INNER JOIN
---			(SELECT intInvoiceId, ysnPosted, ysnPaid, dblAmountDue, dblDiscount, dblDiscountAvailable, dblInterest, dblPayment, dtmPostDate, ysnExcludeFromPayment, intConcurrencyId,
---				dblInvoiceTotal, strTransactionType, dtmDate
---			 FROM dbo.tblARInvoice WITH (NOLOCK)) ARI
-
---				ON PID.intInvoiceId = ARI.intInvoiceId 	
---	END
 
 Do_Rollback:
 	--IF @raiseError = 0
