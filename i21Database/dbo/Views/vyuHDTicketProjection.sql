@@ -13,8 +13,10 @@
 		,strProjectionPriority = g.strPriority
 		,strProjectionPriorityBcColor = g.strBackColor
 		,strProjectionPriorityFcColor = g.strFontColor
+		,strProjectionPriorityJiraPriority = g.strJIRAPriority
 		,strProjectionProduct = h.strProduct
 		,strProjectionModule = i2.strModule
+		,strProjectionModuleJiraProject = i.strJIRAProject
 		,strProjectionVersionNo = j.strVersionNo
 		,strProjectionAssignedToName = k.strName
 		,strProjectionCreatedByName = l.strName
