@@ -8135,6 +8135,7 @@
     <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
