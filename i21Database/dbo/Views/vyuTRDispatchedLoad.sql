@@ -46,13 +46,13 @@ SELECT LG.intLoadId
 	, LG.dtmScheduledDate
 	, LG.dtmDispatchedDate
 	, dtmDeliveredDate = ISNULL(LG.dtmDeliveredDate, LG.dtmScheduledDate)
-	, intShipViaId = LG.intHaulerEntityId
+	, intShipViaId = CASE WHEN LG.intHaulerEntityId IS NULL THEN Config.intShipViaId ELSE LG.intHaulerEntityId END
 	, Config.intSellerId
 	, intDriverId = LG.intDriverEntityId
 	, strDriver = LG.strDriver
 	, strTractor = LG.strTruckNo
 	, strTrailer = LG.strTrailerNo1
-	, strShipVia = LG.strHauler
+	, strShipVia = CASE WHEN LG.intHaulerEntityId IS NULL THEN ShipVia.strName ELSE LG.strHauler END 
 	, strSeller = Seller.strName
 	, strSalespersonId = LG.strDriver
 	, intOutboundContractDetailId = LG.intSContractDetailId
@@ -87,6 +87,7 @@ FROM vyuLGLoadDetailView LG
 LEFT JOIN tblSMCompanyLocation ReceiptLocation ON ReceiptLocation.intCompanyLocationId = ISNULL(LG.intPCompanyLocationId, LG.intSCompanyLocationId)
 LEFT JOIN tblTRCompanyPreference Config ON Config.intCompanyPreferenceId = Config.intCompanyPreferenceId
 LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = Config.intSellerId
+LEFT JOIN tblEMEntity ShipVia ON ShipVia.intEntityId = Config.intShipViaId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
