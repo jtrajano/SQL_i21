@@ -8191,6 +8191,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShipment_CA.sql" />
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
+    <Build Include="dbo\Tables\tblARPostingQueue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8432,7 +8433,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />    
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
