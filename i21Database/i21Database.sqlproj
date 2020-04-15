@@ -8879,6 +8879,7 @@
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
     <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
     <None Include="Scripts\Post-Deployment\HD\20_1_FixCustomLayout.sql" />
+    <Build Include="dbo\Tables\tblARPostingQueue.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
