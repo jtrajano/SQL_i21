@@ -24,7 +24,7 @@ BEGIN
 	INNER JOIN @billIds A2 ON A.intBillId = A2.intId
 	OUTER APPLY (
 		SELECT
-			SUM(dblCredit) AS dblTotal
+			ABS(SUM(dblCredit - dblDebit)) AS dblTotal
 		FROM @GLEntries B
 		WHERE B.strTransactionId = A.strBillId
 	) glEntries
