@@ -37,6 +37,7 @@
 
 -- CM
 :r .\2_CM\1_CM.sql
+:r .\2_CM\2_DataFix.sql
 
 -- DB
 :r .\3_DB\1_1340_to_1410.sql

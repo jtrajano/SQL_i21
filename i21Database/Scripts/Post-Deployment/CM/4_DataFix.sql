@@ -168,5 +168,27 @@ GO
 PRINT('Finished removing Voided prefix in check numbers')
 GO
 
+
+PRINT('Begin correcting unposted bdep with wrong dblamount')
+GO
+--GL-7580
+ 
+	;WITH C AS(
+		SELECT  strTransactionId,(dblAmount + dblShortAmount) dblAmount, dblShortAmount, ysnPosted,
+		SUM(dblCredit-dblDebit) dblAmountDetail
+		FROM
+		tblCMBankTransaction CM JOIN tblCMBankTransactionDetail D ON D.intTransactionId = CM.intTransactionId
+		WHERE intBankTransactionTypeId=1 AND ysnPosted  = 0
+		GROUP BY strTransactionId,dblAmount,dblShortAmount,ysnPosted
+		)
+		UPDATE CM set dblAmount = dblAmountDetail - a.dblShortAmount from C a join tblCMBankTransaction CM 
+		ON a.strTransactionId = CM.strTransactionId 
+		WHERE a.dblAmount <> dblAmountDetail
+	GO
+
+PRINT('Finished correcting unposted bdep with wrong dblamount')
+GO
+
+
 PRINT('/*******************  END Cash Management Data Fixess *******************/')
 GO
