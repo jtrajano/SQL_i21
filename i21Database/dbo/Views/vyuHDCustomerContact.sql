@@ -2,11 +2,12 @@
 	AS
 with arhd as
 (
-	select distinct z.strCompany, z.intCustomerId,z.intProductId,y.strProduct, z.intModuleId, v.strModule, z.intVersionId, w.strVersionNo, t.intEntityId, t.strName, u.intTicketGroupId
+	select distinct z.strCompany, z.intCustomerId,z.intProductId,y.strProduct, z.intModuleId, v.strModule, vv.strJIRAProject, z.intVersionId, w.strVersionNo, t.intEntityId, t.strName, u.intTicketGroupId
 	from tblARCustomerProductVersion z
 	join tblHDTicketProduct y on y.intTicketProductId = z.intProductId
 	join tblHDModule x on x.intModuleId = z.intModuleId
 	join tblSMModule v on v.intModuleId = x.intSMModuleId
+	join tblHDModule vv on vv.intSMModuleId = v.intModuleId
 	join  tblHDVersion w on w.intVersionId = z.intVersionId
 	left join tblHDGroupUserConfig u on u.intTicketGroupId = x.intTicketGroupId and u.ysnOwner = convert(bit,1)
 	left join tblEMEntity t on t.intEntityId = u.intUserSecurityEntityId
@@ -36,6 +37,7 @@ with arhd as
 		  ,strProjectionProduct = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.strProduct from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,strProjectionVersionNo = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.strVersionNo from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,strProjectionModule = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.strModule from arhd where arhd.intCustomerId = c.intEntityId) else null end)
+		  ,strProjectionModuleJiraProject = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.strJIRAProject from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,intTicketGroupId = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.intTicketGroupId from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,intOwnerEntityId = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.intEntityId from arhd where arhd.intCustomerId = c.intEntityId) else null end)
 		  ,strOwnerEntityName = (case when (select count(*) from tblARCustomerProductVersion where tblARCustomerProductVersion.intCustomerId = c.intEntityId) = 1 then (select top 1 arhd.strName from arhd where arhd.intCustomerId = c.intEntityId) else null end)
