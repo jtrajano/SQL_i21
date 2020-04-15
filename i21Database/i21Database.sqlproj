@@ -8142,6 +8142,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBillDetailCharges.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
