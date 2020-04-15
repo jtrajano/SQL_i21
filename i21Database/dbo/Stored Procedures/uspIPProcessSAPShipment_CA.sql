@@ -57,6 +57,7 @@ BEGIN TRY
 		,@dtmEndDate DATETIME
 		,@dtmPlannedAvailabilityDate DATETIME
 		,@intLocationId INT
+		,@ysnPosted BIT
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
 		,@intOldPositionId INT
@@ -129,6 +130,12 @@ BEGIN TRY
 		,@dblCONQuantity NUMERIC(18, 6)
 	DECLARE @intCONUnitMeasureId INT
 		,@intCONWeightUnitMeasureId INT
+		,@intLoadContainerId INT
+	DECLARE @strDeliveryNoticeNumber NVARCHAR(100)
+		,@intSubLocationId INT
+		,@intStorageLocationId INT
+		,@intSort INT
+	DECLARE @tblDeleteContainer TABLE (intLoadContainerId INT)
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
 	FROM tblIPLoadStage WITH (NOLOCK)
@@ -183,6 +190,7 @@ BEGIN TRY
 				,@dtmEndDate = NULL
 				,@dtmPlannedAvailabilityDate = NULL
 				,@intLocationId = NULL
+				,@ysnPosted = NULL
 
 			SELECT @strDescription = NULL
 				,@intOldPurchaseSale = NULL
@@ -364,6 +372,7 @@ BEGIN TRY
 
 			SELECT TOP 1 @strLoadNumber = L.strLoadNumber
 				,@intLoadId = L.intLoadId
+				,@ysnPosted = ISNULL(ysnPosted, 0)
 			FROM tblLGLoad L WITH (NOLOCK)
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 				AND L.intShipmentType = 1
@@ -1055,9 +1064,17 @@ BEGIN TRY
 			END
 
 			-- Load Container
-			IF @strRowState = 'Added'
-				OR @strRowState = 'Modified'
+			IF ISNULL(@ysnPosted, 0) = 0
+				AND (
+					@strRowState = 'Added'
+					OR @strRowState = 'Modified'
+					)
 			BEGIN
+				SELECT @strDeliveryNoticeNumber = NULL
+					,@intSubLocationId = NULL
+					,@intStorageLocationId = NULL
+					,@intSort = 0
+
 				DELETE
 				FROM @tblLGLoadContainer
 
@@ -1075,6 +1092,7 @@ BEGIN TRY
 						,@dblGrossWt = NULL
 						,@dblTareWt = NULL
 						,@dblCONQuantity = NULL
+						,@intLoadContainerId = NULL
 
 					SELECT @intCONUnitMeasureId = NULL
 						,@intCONWeightUnitMeasureId = NULL
@@ -1095,6 +1113,7 @@ BEGIN TRY
 								)
 						BEGIN
 							SET @ErrMsg = 'Container No. ' + @strContainerNumber + ' already exists. '
+
 							RAISERROR (
 									@ErrMsg
 									,16
@@ -1102,7 +1121,7 @@ BEGIN TRY
 									)
 						END
 					END
-					
+
 					IF @dblGrossWt <= 0
 					BEGIN
 						RAISERROR (
@@ -1123,14 +1142,17 @@ BEGIN TRY
 
 					SELECT @intCONUnitMeasureId = IUOM.intUnitMeasureId
 						,@intCONWeightUnitMeasureId = IUOM1.intUnitMeasureId
+						,@intItemUOMId = CD.intItemUOMId
 					FROM tblCTContractDetail CD WITH (NOLOCK)
-					LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = CD.intItemUOMId
+					JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = CD.intItemUOMId
 						AND CD.intContractDetailId = @intContractDetailId
-					LEFT JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = CD.intNetWeightUOMId
+					JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = CD.intNetWeightUOMId
 
 					IF @strRowState = 'Added'
 					BEGIN
-						INSERT INTO tblLGLoadContainer(
+						SELECT @intSort = @intSort + 1
+
+						INSERT INTO tblLGLoadContainer (
 							intConcurrencyId
 							,intLoadId
 							,strContainerNumber
@@ -1141,7 +1163,7 @@ BEGIN TRY
 							,dblNetWt
 							,intWeightUnitMeasureId
 							,ysnNewContainer
-							--,intSort
+							,intSort
 							)
 						SELECT 1
 							,@intLoadId
@@ -1153,31 +1175,251 @@ BEGIN TRY
 							,(@dblGrossWt - @dblTareWt)
 							,@intCONWeightUnitMeasureId
 							,1
-							--,intSort
+							,@intSort
+
+						SELECT @intLoadContainerId = SCOPE_IDENTITY()
+
+						-- Load Detail Container Link
+						INSERT INTO tblLGLoadDetailContainerLink (
+							intConcurrencyId
+							,intLoadId
+							,intLoadContainerId
+							,intLoadDetailId
+							,dblQuantity
+							,intItemUOMId
+							,dblReceivedQty
+							,dblLinkGrossWt
+							,dblLinkTareWt
+							,dblLinkNetWt
+							,strExternalContainerId
+							)
+						SELECT 1
+							,LC.intLoadId
+							,LC.intLoadContainerId
+							,LD.intLoadDetailId
+							,LC.dblQuantity
+							,LD.intItemUOMId
+							,NULL
+							,LC.dblGrossWt
+							,LC.dblTareWt
+							,LC.dblNetWt
+							,NULL
+						FROM tblLGLoadContainer LC
+						JOIN tblLGLoadDetail LD ON LD.intLoadId = LC.intLoadId
+							AND LC.intLoadId = @intLoadId
+							AND LC.intLoadContainerId = @intLoadContainerId
+
+						-- Load Warehouse
+						IF NOT EXISTS (
+								SELECT 1
+								FROM tblLGLoadWarehouse
+								WHERE intLoadId = @intLoadId
+								)
+						BEGIN
+							SELECT @intSubLocationId = intSubLocationId
+								,@intStorageLocationId = intStorageLocationId
+							FROM tblCTContractDetail
+							WHERE intContractDetailId = @intContractDetailId
+
+							EXEC uspSMGetStartingNumber 86
+								,@strDeliveryNoticeNumber OUT
+
+							INSERT INTO tblLGLoadWarehouse (
+								intConcurrencyId
+								,intLoadId
+								,strDeliveryNoticeNumber
+								,dtmDeliveryNoticeDate
+								,intSubLocationId
+								,intStorageLocationId
+								)
+							SELECT 1
+								,@intLoadId
+								,@strDeliveryNoticeNumber
+								,GETDATE()
+								,@intSubLocationId
+								,@intStorageLocationId
+						END
+
+						-- Load Warehouse Container
+						INSERT INTO tblLGLoadWarehouseContainer (
+							intConcurrencyId
+							,intLoadWarehouseId
+							,intLoadContainerId
+							)
+						SELECT TOP 1 1
+							,LW.intLoadWarehouseId
+							,@intLoadContainerId
+						FROM tblLGLoadWarehouse LW
 					END
 					ELSE
 					BEGIN
-						UPDATE tblLGLoadContainer
-						SET intConcurrencyId = intConcurrencyId + 1
-							,dblQuantity = @dblCONQuantity
-							,intUnitMeasureId = @intCONUnitMeasureId
-							,dblGrossWt = @dblGrossWt
-							,dblTareWt = @dblTareWt
-							,dblNetWt = (@dblGrossWt - @dblTareWt)
-							,intWeightUnitMeasureId = @intCONWeightUnitMeasureId
-							--,intSort = intSort
+						SELECT @intLoadContainerId = intLoadContainerId
+						FROM tblLGLoadContainer
 						WHERE intLoadId = @intLoadId
 							AND strContainerNumber = @strContainerNumber
+
+						IF ISNULL(@intLoadContainerId, 0) > 0
+						BEGIN
+							UPDATE tblLGLoadContainer
+							SET intConcurrencyId = intConcurrencyId + 1
+								,dblQuantity = @dblCONQuantity
+								,intUnitMeasureId = @intCONUnitMeasureId
+								,dblGrossWt = @dblGrossWt
+								,dblTareWt = @dblTareWt
+								,dblNetWt = (@dblGrossWt - @dblTareWt)
+								,intWeightUnitMeasureId = @intCONWeightUnitMeasureId
+							WHERE intLoadContainerId = @intLoadContainerId
+
+							UPDATE tblLGLoadDetailContainerLink
+							SET intConcurrencyId = intConcurrencyId + 1
+								,dblQuantity = @dblCONQuantity
+								,intItemUOMId = @intItemUOMId
+								,dblLinkGrossWt = @dblGrossWt
+								,dblLinkTareWt = @dblTareWt
+								,dblLinkNetWt = (@dblGrossWt - @dblTareWt)
+							WHERE intLoadContainerId = @intLoadContainerId
+						END
+						ELSE
+						BEGIN
+							SELECT @intSort = ISNULL(MAX(intSort), 0) + 1
+							FROM tblLGLoadContainer
+							WHERE intLoadId = @intLoadId
+
+							INSERT INTO tblLGLoadContainer (
+								intConcurrencyId
+								,intLoadId
+								,strContainerNumber
+								,dblQuantity
+								,intUnitMeasureId
+								,dblGrossWt
+								,dblTareWt
+								,dblNetWt
+								,intWeightUnitMeasureId
+								,ysnNewContainer
+								,intSort
+								)
+							SELECT 1
+								,@intLoadId
+								,@strContainerNumber
+								,@dblCONQuantity
+								,@intCONUnitMeasureId
+								,@dblGrossWt
+								,@dblTareWt
+								,(@dblGrossWt - @dblTareWt)
+								,@intCONWeightUnitMeasureId
+								,1
+								,@intSort
+
+							SELECT @intLoadContainerId = SCOPE_IDENTITY()
+
+							-- Load Detail Container Link
+							INSERT INTO tblLGLoadDetailContainerLink (
+								intConcurrencyId
+								,intLoadId
+								,intLoadContainerId
+								,intLoadDetailId
+								,dblQuantity
+								,intItemUOMId
+								,dblReceivedQty
+								,dblLinkGrossWt
+								,dblLinkTareWt
+								,dblLinkNetWt
+								,strExternalContainerId
+								)
+							SELECT 1
+								,LC.intLoadId
+								,LC.intLoadContainerId
+								,LD.intLoadDetailId
+								,LC.dblQuantity
+								,LD.intItemUOMId
+								,NULL
+								,LC.dblGrossWt
+								,LC.dblTareWt
+								,LC.dblNetWt
+								,NULL
+							FROM tblLGLoadContainer LC
+							JOIN tblLGLoadDetail LD ON LD.intLoadId = LC.intLoadId
+								AND LC.intLoadId = @intLoadId
+								AND LC.intLoadContainerId = @intLoadContainerId
+
+							-- Load Warehouse
+							IF NOT EXISTS (
+									SELECT 1
+									FROM tblLGLoadWarehouse
+									WHERE intLoadId = @intLoadId
+									)
+							BEGIN
+								SELECT @intSubLocationId = intSubLocationId
+									,@intStorageLocationId = intStorageLocationId
+								FROM tblCTContractDetail
+								WHERE intContractDetailId = @intContractDetailId
+
+								EXEC uspSMGetStartingNumber 86
+									,@strDeliveryNoticeNumber OUT
+
+								INSERT INTO tblLGLoadWarehouse (
+									intConcurrencyId
+									,intLoadId
+									,strDeliveryNoticeNumber
+									,dtmDeliveryNoticeDate
+									,intSubLocationId
+									,intStorageLocationId
+									)
+								SELECT 1
+									,@intLoadId
+									,@strDeliveryNoticeNumber
+									,GETDATE()
+									,@intSubLocationId
+									,@intStorageLocationId
+							END
+
+							-- Load Warehouse Container
+							INSERT INTO tblLGLoadWarehouseContainer (
+								intConcurrencyId
+								,intLoadWarehouseId
+								,intLoadContainerId
+								)
+							SELECT TOP 1 1
+								,LW.intLoadWarehouseId
+								,@intLoadContainerId
+							FROM tblLGLoadWarehouse LW
+						END
 					END
 
-					SELECT @intStageLoadDetailId = MIN(intStageLoadDetailId)
-					FROM @tblLGLoadDetail
-					WHERE intStageLoadDetailId > @intStageLoadDetailId
+					SELECT @intStageLoadContainerId = MIN(intStageLoadContainerId)
+					FROM @tblLGLoadContainer
+					WHERE intStageLoadContainerId > @intStageLoadContainerId
 				END
+
+				-- Delete the containers which are available in i21 but not in the XML
+				DELETE
+				FROM @tblDeleteContainer
+
+				INSERT INTO @tblDeleteContainer (intLoadContainerId)
+				SELECT LC.intLoadContainerId
+				FROM tblLGLoadContainer LC
+				WHERE LC.intLoadId = @intLoadId
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblIPLoadContainerStage LCS
+						WHERE LCS.intStageLoadId = @intMinRowNo
+							AND LCS.strContainerNumber = LC.strContainerNumber
+						)
+
+				DELETE LWC
+				FROM tblLGLoadWarehouseContainer LWC
+				JOIN @tblDeleteContainer DEL ON DEL.intLoadContainerId = LWC.intLoadContainerId
+
+				DELETE LCL
+				FROM tblLGLoadDetailContainerLink LCL
+				JOIN @tblDeleteContainer DEL ON DEL.intLoadContainerId = LCL.intLoadContainerId
+					AND LCL.intLoadId = @intLoadId
+
+				DELETE LC
+				FROM tblLGLoadContainer LC
+				JOIN @tblDeleteContainer DEL ON DEL.intLoadContainerId = LC.intLoadContainerId
+					AND LC.intLoadId = @intLoadId
 			END
-
-
-
 
 			-- To set Contract Planned Availability Date and send Contract feed to SAP
 			-- Also it sends Shipment feed to SAP
