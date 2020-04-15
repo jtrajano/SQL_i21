@@ -74,4 +74,4 @@ BEGIN
 END
 GO
 print N'END Syncing Site Tank Capacity and Device Tank Capacity.'
-GO1
+GO
