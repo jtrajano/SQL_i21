@@ -197,6 +197,9 @@
     <None Include="Scripts\Pre-Deployment\2_CM\1_CM.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\2_CM\2_DataFix.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Scripts\Pre-Deployment\3_DB\1_1340_to_1410.sql" />
   </ItemGroup>
   <ItemGroup>
