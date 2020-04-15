@@ -69,6 +69,7 @@ DECLARE @_intContractDetailId INT
 DECLARE @__intContractDetailId INT
 DECLARE @_intContractItemUom INT
 DECLARE @ysnLoadContract BIT
+DECLARE @_dblContractScheduledQty NUMERIC(18,6)
 
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
@@ -155,9 +156,11 @@ OPEN intListCursor;
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
 		
-
+						SET @_dblContractScheduledQty = 0
 						SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0) 
+							SELECT TOP 1 
+								@ysnLoadContract = ISNULL(ysnLoad,0) 
+								,@_dblContractScheduledQty = ISNULL(B.dblScheduleQty,0)
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
@@ -182,11 +185,21 @@ OPEN intListCursor;
 								BEGIN
 									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+										---This should not be adjusted/happening since the manual distribution screen should not allow allocation of units more than the quantity/load
+										-- SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+										SET @dblLoopAdjustedScheduleQuantity = 0
 									END
 									ELSE
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+										--Check if the units used the same as the contract schedule if yes no adjustment required
+										IF(@dblLoopContractUnits = @_dblContractScheduledQty)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = 0
+										END
+										ELSE
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+										END
 									END
 
 									IF @dblLoopAdjustedScheduleQuantity <> 0
