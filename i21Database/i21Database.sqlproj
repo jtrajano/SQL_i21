@@ -8543,6 +8543,8 @@
     <Build Include="dbo\Views\vyuIPGetFutureMarket.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPContractSubmittedByView.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContractSubmittedByView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
