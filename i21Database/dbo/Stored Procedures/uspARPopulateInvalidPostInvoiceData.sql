@@ -62,7 +62,26 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--INVOICE IS ON QUEUE
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The transaction ' + I.strInvoiceNumber + ' has ongoing posting.'
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN tblARPostingQueue PQ ON I.intInvoiceId = PQ.intTransactionId AND I.strInvoiceNumber = PQ.strTransactionNumber	
 
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--Recurring Invoice
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
