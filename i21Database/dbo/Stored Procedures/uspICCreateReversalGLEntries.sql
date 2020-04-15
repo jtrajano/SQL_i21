@@ -123,7 +123,7 @@ BEGIN
 	-- Reverse the G/L entries for the main transactions
 	-------------------------------------------------------------------------------------------
 	SELECT	
-			dtmDate						= GLEntries.dtmDate
+			dtmDate						= Reversal.dtmDate
 			,strBatchId					= @strBatchId
 			,intAccountId				= GLEntries.intAccountId
 			,dblDebit					= GLEntries.dblCredit	-- Reverse the Debit with Credit 
@@ -292,7 +292,7 @@ BEGIN
 			,intCurrencyId				= GLEntries.intCurrencyId
 			,dblExchangeRate			= GLEntries.dblExchangeRate
 			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= GLEntries.dtmDate
+			,dtmTransactionDate			= Reversal.dtmDate
 			,strJournalLineDescription	= GLEntries.strJournalLineDescription
 			,intJournalLineNo			= Reversal.intInventoryTransactionId
 			,ysnIsUnposted				= 1
