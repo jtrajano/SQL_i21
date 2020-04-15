@@ -187,8 +187,11 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
+		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+			SET 
+				A.dblTax = A.dblTax - taxData.dblTax,
+			 	A.dblAdjustedTax = A.dblAdjustedTax - taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @payablesKey A2
 			ON A.intVoucherPayableId = A2.intNewPayableId
@@ -196,12 +199,14 @@ ELSE SAVE TRAN @SavePoint
 			ON A2.intOldPayableId = B.intVoucherPayableId
 		INNER JOIN tblAPVoucherPayable C
 			ON A2.intNewPayableId = C.intVoucherPayableId
-		CROSS APPLY (
-			SELECT
-				*
-			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
-			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
-		) taxData
+		INNER JOIN @validPayablesTax taxData
+			ON A2.intOldPayableId = taxData.intVoucherPayableId
+		-- CROSS APPLY (
+		-- 	SELECT
+		-- 		*
+		-- 	FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		-- ) taxData
 
 		--back up to tblAPVoucherPayableCompleted if qty to bill is 0
 		MERGE INTO tblAPVoucherPayableCompleted AS destination
@@ -587,7 +592,9 @@ ELSE SAVE TRAN @SavePoint
 			ON C.intVoucherPayableId = B2.intOldPayableId
 
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+			SET 
+				A.dblTax = A.dblTax + taxData.dblTax,
+				A.dblAdjustedTax = A.dblAdjustedTax + taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @payablesKeyPartial A2
 			ON A2.intNewPayableId = A.intVoucherPayableId
@@ -595,12 +602,14 @@ ELSE SAVE TRAN @SavePoint
 			ON B.intVoucherPayableId = A2.intOldPayableId
 		INNER JOIN tblAPVoucherPayable C
 			ON A2.intNewPayableId = C.intVoucherPayableId
-		CROSS APPLY (
-			SELECT
-				*
-			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
-			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
-		) taxData
+		INNER JOIN @validPayablesTax taxData
+			ON A2.intOldPayableId = taxData.intVoucherPayableId
+		-- CROSS APPLY (
+		-- 	SELECT
+		-- 		*
+		-- 	FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		-- ) taxData
 
 
 		--IF ALREADY EXISTS GET PAYABLES KEY
@@ -963,20 +972,25 @@ ELSE SAVE TRAN @SavePoint
 			ON B2.intVoucherPayableKey = C.intVoucherPayableId
 
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+			SET A.dblTax = A.dblTax + taxData.dblTax, A.dblAdjustedTax = A.dblAdjustedTax + taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @deleted del
 			ON del.intNewPayableId = A.intVoucherPayableId
-		INNER JOIN @validPayables B
-			ON del.intVoucherPayableKey = B.intVoucherPayableId
-		INNER JOIN tblAPVoucherPayable C
-			ON del.intNewPayableId = C.intVoucherPayableId
-		CROSS APPLY (
-			SELECT
-				*
-			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
-			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
-		) taxData
+		-- INNER JOIN @validPayables B
+		-- 	ON del.intVoucherPayableKey = B.intVoucherPayableId
+		-- INNER JOIN tblAPVoucherPayable C
+		-- 	ON del.intNewPayableId = C.intVoucherPayableId
+		INNER JOIN @validPayablesTax taxData
+			ON del.intVoucherPayableKey = taxData.intVoucherPayableId
+			AND A.intTaxClassId = taxData.intTaxClassId
+				AND A.intTaxCodeId = taxData.intTaxCodeId
+				AND A.intTaxGroupId = taxData.intTaxGroupId
+		-- CROSS APPLY (
+		-- 	SELECT
+		-- 		*
+		-- 	FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		-- ) taxData
 
 	END
 	ELSE
