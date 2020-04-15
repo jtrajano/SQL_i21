@@ -240,6 +240,7 @@ ELSE SAVE TRAN @SavePoint
 
 EXEC uspAPUpdateVoucherPayableQty 
 	@voucherPayable = @voucherPayables,
+	@voucherPayableTax = @voucherPayableTax,
 	@post = @post,
 	@throwError = 1,
 	@error = NULL
