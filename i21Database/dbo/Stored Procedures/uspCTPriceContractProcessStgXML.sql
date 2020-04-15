@@ -116,6 +116,7 @@ BEGIN TRY
 		,@intCompanyRefId INT
 		,@strDescription NVARCHAR(100)
 		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML NVARCHAR(MAX)
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -151,6 +152,7 @@ BEGIN TRY
 			,@strPriceFixationXML = strPriceFixationXML
 			,@strPriceFixationDetailXML = strPriceFixationDetailXML
 			,@strApproverXML = strApproverXML
+			,@strSubmittedByXML=strSubmittedByXML
 			,@strReference = strReference
 			,@strRowState = strRowState
 			,@strFeedStatus = strFeedStatus
@@ -1561,6 +1563,7 @@ BEGIN TRY
 					,strUserName
 					,strScreen
 					,intConcurrencyId
+					,ysnApproval
 					)
 				SELECT @intContractHeaderId
 					,@intPriceFixationId
@@ -1568,12 +1571,45 @@ BEGIN TRY
 					,strUserName
 					,'Price Contract' strScreenName
 					,1 AS intConcurrencyId
+					,1
 				FROM OPENXML(@idoc, 'vyuCTPriceContractApproverViews/vyuCTPriceContractApproverView', 2) WITH (
 						strName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
 						) x
 
+				EXEC sp_xml_removedocument @idoc
+
+				
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strSubmittedByXML
+				DELETE
+				FROM tblCTIntrCompApproval
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intPriceFixationId = @intPriceFixationId
+					AND ysnApproval=0
+
+				INSERT INTO tblCTIntrCompApproval (
+					intContractHeaderId
+					,intPriceFixationId
+					,strName
+					,strUserName
+					,strScreen
+					,intConcurrencyId
+					,ysnApproval
+					)
+				SELECT @intContractHeaderId
+					,@intPriceFixationId
+					,strName
+					,strUserName
+					,'Price Contract' strScreenName
+					,1 AS intConcurrencyId
+					,0
+				FROM OPENXML(@idoc, 'vyuIPPriceContractSubmittedByViews/vyuIPPriceContractSubmittedByView', 2) WITH (
+						strName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+						) x
 				EXEC sp_xml_removedocument @idoc
 
 				SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intNewPriceContractId)
