@@ -250,7 +250,7 @@ BEGIN
   DECLARE @intAccountIdTo NVARCHAR(20);
   SELECT @intAccountId = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountId;
   SELECT @intAccountIdTo = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountIdTo;
-  IF @dateFrom IS NOT NULL OR @dtmDate IS NOT NULL
+  IF @dateFrom IS NULL OR @dtmDate IS NULL
   BEGIN
 	IF @condition = 'Equal To'  
 	BEGIN   
