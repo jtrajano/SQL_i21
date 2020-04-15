@@ -111,6 +111,21 @@ BEGIN
 				ISNULL(t.dblQty, 0) <> 0 
 				OR t.intCostingMethod = 6
 			)
+
+	-- Get the unpost date. 
+	SELECT TOP 1 
+		@dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
+	FROM
+		tblICInventoryTransaction t
+	WHERE	
+		intTransactionId = @intTransactionId
+		AND strTransactionId = @strTransactionId
+		AND ISNULL(ysnIsUnposted, 0) = 0
+		AND (
+			ISNULL(t.dblQty, 0) <> 0 
+			OR t.intCostingMethod = 6
+		)
+
 END 
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -340,7 +355,7 @@ BEGIN
 			,[intItemUOMId]							= ActualTransaction.intItemUOMId
 			,[intSubLocationId]						= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]					= ActualTransaction.intStorageLocationId
-			,[dtmDate]								= dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
+			,[dtmDate]								= @dtmDate --dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
 			,[dblQty]								= -ActualTransaction.dblQty
 			,[dblUOMQty]							= ActualTransaction.dblUOMQty
 			,[dblCost]								= ActualTransaction.dblCost
@@ -377,7 +392,7 @@ BEGIN
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
-				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
+				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
 	
 	----------------------------------------------------
 	-- Create reversal of the inventory LOT transactions
@@ -413,7 +428,7 @@ BEGIN
 			,[intItemLocationId]		= ActualTransaction.intItemLocationId
 			,[intSubLocationId]			= ActualTransaction.intSubLocationId
 			,[intStorageLocationId]		= ActualTransaction.intStorageLocationId
-			,[dtmDate]					= dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
+			,[dtmDate]					= @dtmDate --dbo.fnRemoveTimeOnDate(ActualTransaction.dtmDate)
 			,[dblQty]					= -ActualTransaction.dblQty
 			,[intItemUOMId]				= ActualTransaction.intItemUOMId
 			,[dblCost]					= ActualTransaction.dblCost
@@ -441,7 +456,7 @@ BEGIN
 	-- Update the ysnIsUnposted flag for related transactions 
 	--------------------------------------------------------------
 	UPDATE	RelatedTransactions
-	SET		ysnIsUnposted = 1
+	SET		ysnIsUnposted = 1			
 	FROM	dbo.tblICInventoryTransaction RelatedTransactions 
 	WHERE	RelatedTransactions.intRelatedTransactionId = @intTransactionId
 			AND RelatedTransactions.strRelatedTransactionId = @strTransactionId
@@ -771,7 +786,6 @@ BEGIN
 					AND intItemLocationId = @intItemLocationId
 		END 
 	END
-
 END
 
 -----------------------------------------
