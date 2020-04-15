@@ -8641,6 +8641,8 @@
     <Build Include="dbo\Stored Procedures\uspRKReassignMatchDerivatives.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
