@@ -23,6 +23,7 @@ BEGIN TRY
 		,@intTransactionId int
 		,@intContractScreenId int
 		,@strApproverXML nvarchar(MAX)
+		,@strSubmittedByXML nvarchar(MAX)
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
@@ -103,6 +104,19 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+		---------------------------------------------Submitted By------------------------------------------
+	SELECT @strSubmittedByXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPPriceContractSubmittedByView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strPriceContractCondition
+		,@strSubmittedByXML OUTPUT
+		,NULL
+		,NULL
+
+
 
 	---------------------------------------------PriceFixationDetail-----------------------------------------------
 	SET @strPriceFixationDetailXML = NULL
@@ -143,6 +157,7 @@ BEGIN TRY
 		,intMultiCompanyId
 		,intTransactionId 
 		,intCompanyId 
+		,strSubmittedByXML
 		)
 	SELECT intPriceContractId = @intPriceContractId
 		,strPriceContractNo = @strPriceContractNo
@@ -156,6 +171,7 @@ BEGIN TRY
 		,intMultiCompanyId = @intToCompanyId
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
+		,strSubmittedByXML=@strSubmittedByXML
 END TRY
 
 BEGIN CATCH

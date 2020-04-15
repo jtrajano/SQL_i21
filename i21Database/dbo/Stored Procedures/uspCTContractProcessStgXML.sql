@@ -38,6 +38,7 @@ BEGIN TRY
 	DECLARE @strAckCostXML NVARCHAR(MAX)
 	DECLARE @strAckDocumentXML NVARCHAR(MAX)
 		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML  NVARCHAR(MAX)
 	DECLARE @intCreatedById INT
 		,@config AS ApprovalConfigurationType
 	DECLARE @idoc INT
@@ -234,6 +235,7 @@ BEGIN TRY
 			,@intToBookId = NULL
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
+			,@strSubmittedByXML=NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
@@ -258,6 +260,7 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
+			,@strSubmittedByXML=strSubmittedByXML
 		FROM tblCTContractStage
 		WHERE intContractStageId = @intContractStageId
 
@@ -3817,13 +3820,43 @@ BEGIN TRY
 					,strUserName
 					,strScreen
 					,intConcurrencyId
+					,ysnApproval
 					)
 				SELECT @intNewContractHeaderId
 					,strName
 					,strUserName
 					,strScreenName
 					,1 AS intConcurrencyId
+					,1
 				FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
+						strName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+						) x
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strSubmittedByXML
+
+				DELETE
+				FROM tblCTIntrCompApproval
+				WHERE intContractHeaderId = @intNewContractHeaderId
+				and ysnApproval=0
+
+				INSERT INTO tblCTIntrCompApproval (
+					intContractHeaderId
+					,strName
+					,strUserName
+					,strScreen
+					,intConcurrencyId
+					,ysnApproval
+					)
+				SELECT @intNewContractHeaderId
+					,strName
+					,strUserName
+					,strScreenName
+					,1 AS intConcurrencyId
+					,0
+				FROM OPENXML(@idoc, 'vyuIPContractSubmittedByViews/vyuIPContractSubmittedByView', 2) WITH (
 						strName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS

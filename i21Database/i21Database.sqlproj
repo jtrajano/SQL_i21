@@ -8634,6 +8634,8 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShipment_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShipment_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
+    <Build Include="dbo\Views\vyuIPContractSubmittedByView.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContractSubmittedByView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
