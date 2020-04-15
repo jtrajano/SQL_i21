@@ -23,6 +23,7 @@ DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 	  , @ShipmentNumber					NVARCHAR(100)
 	  , @InvoiceNumber					NVARCHAR(25) = ''
 	  , @strReferenceNumber 			NVARCHAR(100)
+	  , @ysnHasPriceFixation			BIT = 0
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
 
@@ -58,10 +59,10 @@ SELECT
 	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
-	,@Date						= @DateOnly
+	,@Date						= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
 	,@ShipDate					= ICIS.[dtmShipDate]
-	,@PostDate					= @DateOnly
-	,@CalculatedDate			= @DateOnly
+	,@PostDate					= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
+	,@CalculatedDate			= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
 	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
@@ -83,6 +84,10 @@ WHERE ICIS.intInventoryShipmentId = @ShipmentId
 		OR
 		ICIS.[intSourceType] <> 1
 		)
+
+SET @Date = CAST(@Date AS DATE)
+SET @ShipDate = CAST(@ShipDate AS DATE)
+SET @PostDate = CAST(@PostDate AS DATE)
 
 --VALIDATIONS
 SELECT TOP 1 @InvoiceNumber = ARI.[strInvoiceNumber]
@@ -333,144 +338,10 @@ SELECT
 	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
 	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
 FROM vyuARShippedItems ARSI
-OUTER APPLY (
-	SELECT TOP 1 intPriceFixationId
-	FROM tblCTPriceFixation CPF
-	WHERE CPF.intContractDetailId = ARSI.intContractDetailId
-	  AND CPF.intContractHeaderId = ARSI.intContractHeaderId
-) PRICE
 WHERE ARSI.[strTransactionType] = 'Inventory Shipment'
   AND ARSI.[intInventoryShipmentId] = @ShipmentId
   AND ARSI.intEntityCustomerId = @EntityCustomerId
   AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
-  AND ISNULL(PRICE.intPriceFixationId, 0) = 0
-
-UNION ALL
-
-SELECT
-	 [strSourceTransaction]					= 'Inventory Shipment'
-	,[intSourceId]							= @ShipmentId
-	,[strSourceId]							= @ShipmentNumber
-	,[intInvoiceId]							= NULL
-	,[intEntityCustomerId]					= @EntityCustomerId 
-	,[intCompanyLocationId]					= @CompanyLocationId 
-	,[intCurrencyId]						= @CurrencyId 
-	,[intTermId]							= NULL 
-	,[intPeriodsToAccrue]					= @PeriodsToAccrue 
-	,[dtmDate]								= @Date 
-	,[dtmDueDate]							= NULL
-	,[dtmShipDate]							= @ShipDate 
-	,[intEntitySalespersonId]				= @EntitySalespersonId 
-	,[intFreightTermId]						= @FreightTermId 
-	,[intShipViaId]							= @ShipViaId 
-	,[intPaymentMethodId]					= NULL 
-	,[strInvoiceOriginId]					= NULL 
-	,[strPONumber]							= @PONumber 
-	,[strBOLNumber]							= @BOLNumber 
-	,[strComments]							= @Comments 
-	,[intShipToLocationId]					= @intShipToLocationId 
-	,[intBillToLocationId]					= NULL
-	,[ysnTemplate]							= 0
-	,[ysnForgiven]							= 0
-	,[ysnCalculated]						= 0
-	,[ysnSplitted]							= 0
-	,[intPaymentId]							= NULL
-	,[intSplitId]							= (SELECT TOP 1 intSplitId FROM tblSOSalesOrder WHERE intSalesOrderId = ARSI.intSalesOrderId)
-	,[intDistributionHeaderId]				= NULL
-	,[strActualCostId]						= NULL
-	,[intShipmentId]						= NULL
-	,[intTransactionId]						= NULL
-	,[intOriginalInvoiceId]					= NULL
-	,[intEntityId]							= @UserId
-	,[ysnResetDetails]						= 0
-	,[ysnRecap]								= 0
-	,[ysnPost]								= 0
-																																																		
-	,[intInvoiceDetailId]					= NULL
-	,[intItemId]							= ARSI.[intItemId]
-	,[ysnInventory]							= 1
-	,[strDocumentNumber]					= @ShipmentNumber 
-	,[strItemDescription]					= ARSI.[strItemDescription]
-	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
-	,[intItemUOMId]							= ARSI.[intItemUOMId] 
-	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
-	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
-	,[dblContractPriceUOMQty]				= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblPriceUOMQuantity] ELSE ARSI.[dblQtyShipped] END 
-	,[dblDiscount]							= ARSI.[dblDiscount] 
-	,[dblItemWeight]						= ARSI.[dblWeight]  
-	,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-	,[dblPrice]								= CASE WHEN ARSI.[intOwnershipType] = 2 THEN 0 ELSE ARSI.[dblShipmentUnitPrice] END
-	,[dblUnitPrice]							= CASE WHEN ARSI.[intOwnershipType] = 2 THEN 0 ELSE (CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[dblUnitPrice] ELSE ARSI.[dblShipmentUnitPrice] END) END
-	,[strPricing]							= ARSI.[strPricing]
-	,[ysnRefreshPrice]						= 0
-	,[strMaintenanceType]					= NULL
-	,[strFrequency]							= NULL
-	,[dtmMaintenanceDate]					= NULL
-	,[dblMaintenanceAmount]					= @ZeroDecimal 
-	,[dblLicenseAmount]						= @ZeroDecimal
-	,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
-	,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-	,[intCompanyLocationSubLocationId]		= ARSI.[intSubLocationId]
-	,[ysnRecomputeTax]						= (CASE WHEN ISNULL(ARSI.[intSalesOrderDetailId], 0) = 0 THEN 1 ELSE 0 END)	
-	,[intSCInvoiceId]						= NULL
-	,[strSCInvoiceNumber]					= NULL
-	,[intSCBudgetId]						= NULL
-	,[strSCBudgetDescription]				= NULL
-	,[intInventoryShipmentItemId]			= ARSI.[intInventoryShipmentItemId] 
-	,[intInventoryShipmentChargeId]			= ARSI.[intInventoryShipmentChargeId]
-	,[strShipmentNumber]					= ARSI.[strInventoryShipmentNumber] 
-	,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
-	,[intRecipeId]							= ARSI.[intRecipeId]
-	,[intSubLocationId]						= ARSI.[intSubLocationId]
-	,[intCostTypeId]						= ARSI.[intCostTypeId]
-	,[intMarginById]						= ARSI.[intMarginById]
-	,[intCommentTypeId]						= ARSI.[intCommentTypeId]
-	,[dblMargin]							= ARSI.[dblMargin]
-	,[dblRecipeQuantity]					= ARSI.[dblRecipeQuantity]
-	,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
-	,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
-	,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
-	,[intContractDetailId]					= ARSI.[intContractDetailId] 
-	,[intShipmentPurchaseSalesContractId]	= NULL
-	,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
-	,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
-	,[dblShipmentNetWt]						= ARSI.[dblNetWt] 
-	,[intTicketId]							= ARSI.[intTicketId] 
-	,[intTicketHoursWorkedId]				= NULL
-	,[intOriginalInvoiceDetailId]			= NULL
-	,[intSiteId]							= NULL
-	,[strBillingBy]							= NULL
-	,[dblPercentFull]						= NULL
-	,[dblNewMeterReading]					= @ZeroDecimal
-	,[dblPreviousMeterReading]				= @ZeroDecimal
-	,[dblConversionFactor]					= @ZeroDecimal
-	,[intPerformerId]						= NULL
-	,[ysnLeaseBilling]						= 0
-	,[ysnVirtualMeterReading]				= 0
-	,[ysnClearDetailTaxes]					= 0
-	,[intTempDetailIdForTaxes]				= ARSI.[intSalesOrderDetailId]
-	,[ysnBlended]							= ARSI.[ysnBlended]
-	,[intStorageScheduleTypeId]				= @StorageScheduleTypeId
-	,[intDestinationGradeId]				= ARSI.[intDestinationGradeId]
-	,[intDestinationWeightId]				= ARSI.[intDestinationWeightId]
-	,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId]
-	,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId]
-	,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate]
-	,[intSubCurrencyId]						= ARSI.[intSubCurrencyId]
-	,[dblSubCurrencyRate]					= ARSI.[dblSubCurrencyRate]
-FROM vyuARShippedItems ARSI
-OUTER APPLY (
-	SELECT TOP 1 intPriceFixationId
-	FROM tblCTPriceFixation CPF
-	WHERE CPF.intContractDetailId = ARSI.intContractDetailId
-	  AND CPF.intContractHeaderId = ARSI.intContractHeaderId
-) PRICE
-WHERE (ARSI.[strTransactionType] = 'Inventory Shipment Contract Pricing' OR (ARSI.[strTransactionType] = 'Inventory Shipment' AND ARSI.intInventoryShipmentChargeId IS NOT NULL))
-  AND ARSI.[intInventoryShipmentId] = @ShipmentId
-  AND ARSI.intEntityCustomerId = @EntityCustomerId
-  AND (ISNULL(ARSI.intPricingTypeId, 0) <> 2 OR (ISNULL(ARSI.intPricingTypeId, 0) = 2 AND ISNULL(dbo.fnCTGetAvailablePriceQuantity(ARSI.[intContractDetailId],0), 0) > 0))
-  AND ISNULL(PRICE.intPriceFixationId, 0) <> 0
 
 UNION ALL
 
@@ -909,6 +780,270 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARCustomer WHERE ISNULL(strBatchInvoiceBy, 
 		SELECT @intExistingInvoiceId = dbo.fnARGetInvoiceForBatch(@EntityCustomerId, @intContractShipToLocationId)
 	END
 
+
+--GET INVENTORY SHIPMENT WITH PRICING CONTRACTS
+IF(OBJECT_ID('tempdb..#FIXATION') IS NOT NULL)
+BEGIN
+	DROP TABLE #FIXATION
+END
+
+IF(OBJECT_ID('tempdb..#CONTRACTSPRICING') IS NOT NULL)
+BEGIN
+	DROP TABLE #CONTRACTSPRICING
+END
+
+IF(OBJECT_ID('tempdb..#CONTRACTSTOPRICE') IS NOT NULL)
+BEGIN
+	DROP TABLE #CONTRACTSTOPRICE
+END
+
+CREATE TABLE #FIXATION (
+      intIdentity				INT
+	, intContractHeaderId		INT
+	, intContractDetailId		INT
+	, ysnLoad					BIT
+	, intPriceContractId		INT
+	, intPriceFixationId		INT
+	, intPriceFixationDetailId	INT
+	, dblQuantity				NUMERIC(18, 6)
+	, dblFinalPrice				NUMERIC(18, 6)
+	, ysnProcessed				BIT DEFAULT ((0))
+)
+
+SELECT intInventoryShipmentItemId	= IE.intInventoryShipmentItemId
+	 , intContractDetailId			= IE.intContractDetailId
+	 , intContractHeaderId			= IE.intContractHeaderId
+	 , intPriceFixationId			= PF.intPriceFixationId
+	 , intInvoiceEntriesId			= IE.intId
+	 , dtmInvoiceDate				= ISNULL(IE.dtmDate, @Date)
+	 , dblQtyShipped				= IE.dblQtyShipped
+	 , ysnLoad						= ISNULL(CD.ysnLoad, CAST(0 AS BIT))
+INTO #CONTRACTSPRICING
+FROM @EntriesForInvoice IE
+INNER JOIN tblICInventoryShipmentItem ISI ON IE.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND IE.intContractDetailId = ISI.intLineNo
+INNER JOIN tblCTContractHeader CD ON IE.intContractHeaderId = CD.intContractHeaderId
+INNER JOIN tblCTPriceFixation PF ON IE.intContractDetailId = PF.intContractDetailId 
+                                AND IE.intContractHeaderId = PF.intContractHeaderId
+WHERE IE.intContractDetailId IS NOT NULL
+  AND IE.intInventoryShipmentItemId IS NOT NULL
+  AND IE.intInventoryShipmentChargeId IS NULL
+  AND ISI.intInventoryShipmentId = @ShipmentId
+
+--POPULATE PRICE FIXATION
+IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
+	BEGIN
+		SET @ysnHasPriceFixation = CAST(1 AS BIT)
+
+		SELECT intContractHeaderId
+			 , intContractDetailId
+			 , dblQtyToPrice		= SUM(dblQtyShipped)
+			 , ysnLoad
+		INTO #CONTRACTSTOPRICE
+		FROM #CONTRACTSPRICING
+		GROUP BY intContractHeaderId, intContractDetailId, ysnLoad
+
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSTOPRICE)
+			BEGIN
+				DECLARE @intContractHeaderToPriceId	INT = NULL
+					, @intContractDetailToPriceId	INT = NULL
+					, @dblQtyToPrice				NUMERIC(18, 6) = 0
+
+				SELECT TOP 1 @intContractHeaderToPriceId = intContractHeaderId
+						   , @intContractDetailToPriceId = intContractDetailId
+						   , @dblQtyToPrice				 = CASE WHEN ysnLoad = 1 THEN 1 ELSE dblQtyToPrice END
+				FROM #CONTRACTSTOPRICE
+
+				INSERT INTO #FIXATION (
+					  intIdentity
+					, intContractHeaderId
+					, intContractDetailId
+					, ysnLoad
+					, intPriceContractId
+					, intPriceFixationId
+					, intPriceFixationDetailId
+					, dblQuantity
+					, dblFinalPrice
+				)
+				EXEC dbo.uspCTGetContractPrice @intContractHeaderToPriceId, @intContractDetailToPriceId, @dblQtyToPrice, 'Invoice'
+
+				DELETE FROM #CONTRACTSTOPRICE WHERE intContractDetailId = @intContractDetailToPriceId
+			END
+
+		WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
+			BEGIN
+				DECLARE @dblQtyShipped			NUMERIC(18, 6) = 0
+					  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
+					  , @intInvoiceEntriesId	INT = NULL
+					  , @intPriceFixationId		INT = NULL
+					  , @ysnLoad				BIT = 0
+
+				SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
+						   , @dblQtyShipped				= dblQtyShipped
+						   , @dblOriginalQtyShipped		= dblQtyShipped				   
+						   , @intPriceFixationId		= intPriceFixationId
+						   , @ysnLoad					= ysnLoad
+				FROM #CONTRACTSPRICING 
+				ORDER BY intInvoiceEntriesId
+
+				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
+					BEGIN
+						DECLARE @intPriceFixationDetailId		INT = NULL
+							, @dblQuantity					NUMERIC(18, 6) = 0
+							, @dblFinalPrice					NUMERIC(18, 6) = 0
+
+						SELECT TOP 1 @intPriceFixationDetailId		= intPriceFixationDetailId
+								   , @dblQuantity					= dblQuantity
+								   , @dblFinalPrice					= dblFinalPrice
+						FROM #FIXATION 
+						WHERE intPriceFixationId = @intPriceFixationId
+						AND ISNULL(ysnProcessed, 0) = 0
+						ORDER BY intPriceFixationDetailId
+						
+						IF @dblOriginalQtyShipped = @dblQtyShipped AND @dblQuantity > 0
+							BEGIN
+								IF @dblQtyShipped > @dblQuantity AND @ysnLoad = 0
+									BEGIN
+										UPDATE @EntriesForInvoice
+										SET dblQtyShipped	= @dblQuantity
+										WHERE intId = @intInvoiceEntriesId
+									END
+
+								UPDATE @EntriesForInvoice
+								SET dblPrice		= @dblFinalPrice
+								  , dblUnitPrice	= @dblFinalPrice
+								WHERE intId = @intInvoiceEntriesId
+
+								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
+							END
+						ELSE IF @dblQuantity > 0 
+							BEGIN
+								IF @dblQuantity > @dblQtyShipped
+									SET @dblQuantity = @dblQtyShipped
+
+								INSERT INTO @EntriesForInvoice (
+									strSourceTransaction
+									, intSourceId
+									, strSourceId
+									, intEntityCustomerId
+									, intCompanyLocationId
+									, intCurrencyId
+									, intPeriodsToAccrue
+									, dtmDate
+									, dtmShipDate
+									, intEntitySalespersonId
+									, intFreightTermId
+									, strBOLNumber
+									, strComments
+									, intShipToLocationId
+									, ysnTemplate
+									, ysnForgiven
+									, ysnCalculated
+									, ysnSplitted
+									, intContractHeaderId
+									, intEntityId
+									, ysnResetDetails
+									, ysnRecap
+									, ysnPost
+									, intItemId
+									, intTicketId
+									, ysnInventory
+									, strDocumentNumber
+									, strItemDescription
+									, intOrderUOMId
+									, dblQtyOrdered
+									, intItemUOMId
+									, intPriceUOMId
+									, dblContractPriceUOMQty
+									, dblQtyShipped
+									, dblDiscount
+									, dblItemWeight
+									, intItemWeightUOMId
+									, dblPrice
+									, dblUnitPrice
+									, strPricing
+									, ysnRefreshPrice
+									, dblMaintenanceAmount
+									, dblLicenseAmount
+									, ysnRecomputeTax
+									, intInventoryShipmentItemId
+									, strShipmentNumber
+									, strSalesOrderNumber
+									, intContractDetailId
+									, dblNewMeterReading
+									, dblPreviousMeterReading
+									, dblConversionFactor
+									, ysnClearDetailTaxes
+									, dblSubCurrencyRate
+								)
+								SELECT strSourceTransaction
+									, intSourceId
+									, strSourceId
+									, intEntityCustomerId
+									, intCompanyLocationId
+									, intCurrencyId
+									, intPeriodsToAccrue
+									, dtmDate
+									, dtmShipDate
+									, intEntitySalespersonId
+									, intFreightTermId
+									, strBOLNumber
+									, strComments
+									, intShipToLocationId
+									, ysnTemplate
+									, ysnForgiven
+									, ysnCalculated
+									, ysnSplitted
+									, intContractHeaderId
+									, intEntityId
+									, ysnResetDetails
+									, ysnRecap
+									, ysnPost
+									, intItemId
+									, intTicketId
+									, ysnInventory
+									, strDocumentNumber
+									, strItemDescription
+									, intOrderUOMId
+									, dblQtyOrdered				= @dblOriginalQtyShipped
+									, intItemUOMId
+									, intPriceUOMId
+									, dblContractPriceUOMQty
+									, dblQtyShipped				= @dblQuantity
+									, dblDiscount
+									, dblItemWeight
+									, intItemWeightUOMId
+									, dblPrice					= @dblFinalPrice
+									, dblUnitPrice				= @dblFinalPrice
+									, strPricing
+									, ysnRefreshPrice
+									, dblMaintenanceAmount
+									, dblLicenseAmount
+									, ysnRecomputeTax
+									, intInventoryShipmentItemId
+									, strShipmentNumber
+									, strSalesOrderNumber
+									, intContractDetailId
+									, dblNewMeterReading
+									, dblPreviousMeterReading
+									, dblConversionFactor
+									, ysnClearDetailTaxes
+									, dblSubCurrencyRate
+								FROM @EntriesForInvoice
+								WHERE intId = @intInvoiceEntriesId
+
+								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
+							END
+
+						UPDATE #FIXATION 
+						SET ysnProcessed = CAST(1 AS BIT)
+						WHERE intPriceFixationId = @intPriceFixationId
+						AND intPriceFixationDetailId = @intPriceFixationDetailId
+					END
+				
+				DELETE FROM #CONTRACTSPRICING WHERE intInvoiceEntriesId = @intInvoiceEntriesId
+			END
+	END
+
 --CREATE INVOICE IF THERE's NONE
 IF ISNULL(@intExistingInvoiceId, 0) = 0
 	BEGIN
@@ -1012,7 +1147,28 @@ ELSE
 			EXEC dbo.uspARUpdateInvoiceIntegrations @intExistingInvoiceId, 0, @UserId
 			EXEC dbo.uspARReComputeInvoiceTaxes @intExistingInvoiceId
 	END
-         
+
+--LOG PRICE FIXATION
+IF @ysnHasPriceFixation = 1
+	BEGIN
+		INSERT INTO tblCTPriceFixationDetailAPAR (
+			  intPriceFixationDetailId
+			, intInvoiceId
+			, intInvoiceDetailId
+			, intConcurrencyId
+		)
+		SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+		     , intInvoiceId				= ID.intInvoiceId
+			 , intInvoiceDetailId		= ID.intInvoiceDetailId
+			 , intConcurrencyId			= 1
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.dblPrice = PRICE.dblFinalPrice
+		WHERE ID.intInvoiceId = @NewInvoiceId
+		  AND PRICE.ysnProcessed = 1
+		  AND ID.intInventoryShipmentItemId IS NOT NULL
+		  AND ID.intInventoryShipmentChargeId IS NULL
+	END
+
 RETURN @NewInvoiceId
 
 END		
