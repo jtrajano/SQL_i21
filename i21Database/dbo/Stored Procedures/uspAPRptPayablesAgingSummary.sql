@@ -43,6 +43,8 @@ DECLARE @dateTo DATETIME = NULL;
 DECLARE @dtmDueDate DATETIME = NULL;
 DECLARE @total NUMERIC(18,6), @amountDue NUMERIC(18,6), @amountPad NUMERIC(18,6);
 DECLARE @count INT = 0;
+DECLARE @strAccountId NVARCHAR(100) 
+DECLARE @strAccountIdTo NVARCHAR(100) 
 DECLARE @fieldname NVARCHAR(50)
 DECLARE @condition NVARCHAR(20)     
 DECLARE @id INT 
@@ -191,6 +193,45 @@ BEGIN
 	SET @dateTo = GETDATE();
 	SET @dtmDateFilter =  '(SELECT ''' + CONVERT(VARCHAR(10), GETDATE(), 101) +''')';
     
+END
+
+SELECT @strAccountId = [from], @strAccountIdTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strAccountId';  
+IF @strAccountId IS NOT NULL
+BEGIN
+  DECLARE @intAccountId NVARCHAR(20);
+  DECLARE @intAccountIdTo NVARCHAR(20);
+  SELECT @intAccountId = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountId;
+  SELECT @intAccountIdTo = CAST(intAccountId AS NVARCHAR) FROM tblGLAccount WHERE strAccountId = @strAccountIdTo;
+  IF @dateFrom IS NULL OR @dtmDate IS NULL
+  BEGIN
+	IF @condition = 'Equal To'  
+	BEGIN   
+		SET @innerQuery = @innerQuery + ' WHERE intAccountId = ' + @intAccountId + ''
+		-- SET @arQuery = @arQuery + ' WHERE intAccountId = ' + @intAccountId + ''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE intAccountId = ' + @intAccountId + ''
+	END
+	ELSE
+	BEGIN
+		SET @innerQuery = @innerQuery + ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''
+		-- SET @arQuery = @arQuery + ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' WHERE intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + ''
+	END
+  END
+  ELSE
+  BEGIN
+	IF @condition = 'Equal To'  
+	BEGIN   
+		SET @innerQuery = @innerQuery + ' AND intAccountId = ' + @intAccountId + ''
+		-- SET @arQuery = @arQuery + ' AND intAccountId = ' + @intAccountId + ''
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' AND intAccountId = ' + @intAccountId + ''
+	END
+	ELSE
+	BEGIN
+		SET @innerQuery = @innerQuery + ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + '' 
+		-- SET @arQuery = @arQuery + ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + '' 
+		SET @prepaidInnerQuery = @prepaidInnerQuery + ' AND intAccountId BETWEEN ' + @intAccountId + ' AND '  + @intAccountIdTo + '' 
+	END
+  END
 END
 
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
