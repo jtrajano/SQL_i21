@@ -6,6 +6,7 @@ BEGIN TRY
 		,@intContractHeaderId INT
 		,@strHeaderCondition NVARCHAR(MAX)
 		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML NVARCHAR(MAX)
 		,@intContractFeedHeaderId INT
 		,@strContractNumber NVARCHAR(50)
 		,@intTransactionCount INT
@@ -71,6 +72,14 @@ BEGIN TRY
 			,@strApproverXML OUTPUT
 			,NULL
 			,NULL
+			---------------------------------------------Submitted By------------------------------------------
+		SELECT @strSubmittedByXML = NULL
+
+		EXEC [dbo].[uspCTGetTableDataInXML] 'vyuIPContractSubmittedByView'
+			,@strHeaderCondition
+			,@strSubmittedByXML OUTPUT
+			,NULL
+			,NULL
 
 		IF @strApproverXML IS NOT NULL
 		BEGIN
@@ -83,9 +92,11 @@ BEGIN TRY
 				INSERT INTO tblIPContractFeedHeader (
 					intContractHeaderId
 					,strApproverXML
+					,strSubmittedByXML
 					)
 				SELECT @intContractHeaderId
 					,@strApproverXML
+					,@strSubmittedByXML
 
 				SELECT @intContractFeedHeaderId = SCOPE_IDENTITY();
 
