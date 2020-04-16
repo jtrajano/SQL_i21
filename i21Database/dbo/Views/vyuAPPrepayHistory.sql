@@ -108,4 +108,3 @@ FROM (
 		ON b.intEntityVendorId = v.intEntityId
     WHERE p.ysnPosted = 1
 ) h
-WHERE strBillId IN ('BA-4','BA-9','VPRE-4')
