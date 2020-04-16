@@ -471,14 +471,15 @@ BEGIN TRY
 				DECLARE @intNumberOfRecords int = 0
 				DECLARE @intSoldQuantity int = 0
 				DECLARE @dblFinalSales decimal(10, 2) = 0
+				DECLARE @strScanDataProvider nvarchar(max) = 'iRely LLC'
 				
 				SELECT @intNumberOfRecords = COUNT(*)				-- Get total number of records
 					, @intSoldQuantity = SUM(intQuantitySold)	-- Get total quantity sold
 					, @dblFinalSales = SUM(dblFinalSalesPrice)	-- Get sum of the final sales price field
 				FROM @tblTempPMM
 
-				SET @strCSVHeader = CAST(ISNULL(@intNumberOfRecords, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@intSoldQuantity, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@dblFinalSales, 0) as NVARCHAR(50)) + CHAR(13)
-
+				SET @strCSVHeader = CAST(ISNULL(@intNumberOfRecords, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@intSoldQuantity, 0) as NVARCHAR(50)) + '|' + CAST(ISNULL(@dblFinalSales, 0) as NVARCHAR(50)) + '|' + @strScanDataProvider + CHAR(13)
+				
 				SELECT * FROM @tblTempPMM
 				ORDER BY CAST(strStoreNumber AS INT) ASC
 
