@@ -4,6 +4,7 @@ BEGIN
 	SELECT intContractHeaderId
 		,strApproverXML
 		,intContractFeedHeaderId AS intContractFeedHeaderRefId
+		,strSubmittedByXML
 	FROM tblIPContractFeedHeader
 	WHERE strFeedStatus IS NULL
 
