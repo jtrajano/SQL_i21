@@ -583,7 +583,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , intPOSPaymentId		= POSP.intPOSPaymentId
 				 , strPaymentMethod		= CASE WHEN POSP.strPaymentMethod = 'Credit Card' THEN 'Manual Credit Card' ELSE POSP.strPaymentMethod END
 				 , strReferenceNo		= POSP.strReferenceNo
-				 , dblAmount			= POSP.dblAmountTendered
+				 , dblAmount			= POSP.dblAmount
 			INTO #POSPAYMENTS
 			FROM tblARPOS POS
 			INNER JOIN 
