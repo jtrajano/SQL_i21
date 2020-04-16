@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspMFImportRecipes] @strSessionId NVARCHAR(50) = ''
 	,@strImportType NVARCHAR(50)
 	,@intUserId INT = 1
+	,@ysnMinOneInputItemRequired BIT = 0
 AS
 DECLARE @intMinId INT
 DECLARE @intItemId INT
@@ -26,6 +27,7 @@ DECLARE @intSubstituteItemUOMId INT
 DECLARE @dblRecipeDetailCalculatedQty NUMERIC(18, 6)
 DECLARE @dblRecipeDetailUpperTolerance NUMERIC(18, 6)
 DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
+	,@strRecipeItemType NVARCHAR(50)
 
 --Recipe Delete
 IF @strImportType = 'Recipe Delete'
@@ -71,7 +73,7 @@ BEGIN
 				DELETE
 				FROM tblMFRecipe
 				WHERE strName = @strRecipeName
-				AND intLocationId = @intLocationId
+					AND intLocationId = @intLocationId
 
 			UPDATE tblMFRecipeStage
 			SET strMessage = 'Success'
@@ -399,6 +401,35 @@ BEGIN
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 
+	IF @ysnMinOneInputItemRequired = 1
+	BEGIN
+		--Invalid Detail Item
+		UPDATE tblMFRecipeItemStage
+		SET strMessage = 'Invalid Recipe Detail Item'
+		WHERE ISNULL(strRecipeItemNo, '') NOT IN (
+				SELECT strItemNo
+				FROM tblICItem
+				)
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+
+		UPDATE tblMFRecipeStage
+		SET strMessage = 'Minimum one input item is required to create a recipe.'
+		WHERE strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND NOT EXISTS (
+				SELECT *
+				FROM tblMFRecipeItemStage RI
+				WHERE strSessionId = @strSessionId
+					AND ISNULL(strMessage, '') = ''
+					AND strRecipeItemType = 'INPUT'
+					AND tblMFRecipeStage.strRecipeName = RI.strRecipeName
+					AND tblMFRecipeStage.strVersionNo = RI.strVersionNo
+					AND tblMFRecipeStage.strLocationName = RI.strLocationName
+					AND tblMFRecipeStage.strItemNo  = RI.strRecipeHeaderItemNo 
+				)
+	END
+
 	SELECT @intMinId = MIN(intRecipeStageId)
 	FROM tblMFRecipeStage
 	WHERE strSessionId = @strSessionId
@@ -635,8 +666,8 @@ BEGIN
 				,r.intOneLinePrintId = t.intOneLinePrintId
 				,r.intLastModifiedUserId = @intUserId
 				,r.dtmLastModified = GETDATE()
-				,r.dtmValidFrom =t.strValidFrom
-				,r.dtmValidTo =t.strValidTo
+				,r.dtmValidFrom = t.strValidFrom
+				,r.dtmValidTo = t.strValidTo
 			FROM tblMFRecipe r
 			CROSS JOIN (
 				SELECT TOP 1 s.strRecipeName
@@ -653,7 +684,7 @@ BEGIN
 					,s.[strDiscount]
 					,um.intUnitMeasureId
 					,p.intOneLinePrintId
-					,s.strValidFrom 
+					,s.strValidFrom
 					,s.strValidTo
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
@@ -1055,6 +1086,7 @@ BEGIN
 		SET @intRecipeTypeId = NULL
 
 		SELECT @strLocationName = NULL
+			,@strRecipeItemType = NULL
 
 		--Margin By
 		UPDATE tblMFRecipeItemStage
@@ -1086,6 +1118,7 @@ BEGIN
 			,@intVersionNo = [strVersionNo]
 			,@strLocationName = strLocationName
 			,@strRecipeDetailItemNo = strRecipeItemNo
+			,@strRecipeItemType = strRecipeItemType
 		FROM tblMFRecipeItemStage
 		WHERE intRecipeItemStageId = @intMinId
 
@@ -1130,6 +1163,13 @@ BEGIN
 		FROM tblMFRecipeItem
 		WHERE intRecipeId = @intRecipeId
 			AND intItemId = @intRecipeDetailItemId
+			AND intRecipeItemTypeId = (
+				CASE 
+					WHEN @strRecipeItemType = 'INPUT'
+						THEN 1
+					ELSE 2
+					END
+				)
 
 		IF @intRecipeItemId IS NULL --insert
 		BEGIN
