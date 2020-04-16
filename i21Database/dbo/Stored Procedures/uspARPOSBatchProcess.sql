@@ -884,7 +884,9 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			FROM #POSPAYMENTS POSP
 			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
 			WHERE POSP.strPaymentMethod IN ('Cash', 'Check') 
-			  AND POS.strPOSType = 'Regular'
+			  AND (POS.strPOSType = 'Regular'
+			        OR ( POS.strPOSType = 'Mixed' AND POSP.dblAmount > 0 )
+			  )
 
 			SELECT @dblCashReturn = SUM(POSP.dblAmount)
 			FROM #POSPAYMENTS POSP
