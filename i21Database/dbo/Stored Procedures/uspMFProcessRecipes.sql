@@ -38,6 +38,7 @@ BEGIN
 		EXEC dbo.uspMFImportRecipes @strSessionId
 			,'Recipe'
 			,@intEntityId
+			,1
 
 		EXEC dbo.uspMFImportRecipes @strSessionId
 			,'Recipe Item'
