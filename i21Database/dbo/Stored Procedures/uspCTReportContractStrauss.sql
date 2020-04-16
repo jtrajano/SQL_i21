@@ -9,16 +9,12 @@ BEGIN TRY
 
 	DECLARE
 			@xmlDocumentId							INT
-			,@intMultiCompanyParentId				INT = 0
-			,@StraussContractSubmitSignature		VARBINARY(MAX)
 			,@ysnFeedOnApproval						BIT = 0
 			,@IsFullApproved						BIT = 0
 			,@StraussContractSubmitId				INT
 			,@intContractHeaderId					INT
 			,@strIds								NVARCHAR(MAX)
 			,@intStraussCompanyId					INT
-			,@InterCompApprovalSign					VARBINARY(MAX)
-			,@StraussContractApproverSignature		VARBINARY(MAX)
 			,@FirstApprovalId						INT
 			,@intApproverGroupId					INT
 			,@intTransactionId						INT
@@ -55,7 +51,13 @@ BEGIN TRY
 			,@intDestinationPortId					INT
 			,@strDestinationPort					NVARCHAR(500)
 			,@strApplicableLaw						NVARCHAR(MAX)
-			,@strGeneralCondition		NVARCHAR(MAX);
+			,@strGeneralCondition					NVARCHAR(MAX)
+			,@ysnIsParent							int
+			,@blbParentSubmitSignature				varbinary(max)
+			,@blbParentApproveSignature				varbinary(max)
+			,@blbChildSubmitSignature				varbinary(max)
+			,@blbChildApproveSignature				varbinary(max)
+			,@intChildDefaultSubmitById				int;
 
 	DECLARE @tblSequenceHistoryId TABLE
 	(
@@ -117,41 +119,58 @@ BEGIN TRY
 
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
 
-	SELECT	@intStraussCompanyId = CH.intCompanyId
-	FROM	tblCTContractHeader CH
-	WHERE	CH.intContractHeaderId = @intContractHeaderId
+	select top 1
+		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
+	from
+		tblCTContractHeader ch
+		,tblSMMultiCompany smc
+		,tblIPMultiCompany mc
+		,tblSMUserSecurity us
+	where
+		ch.intContractHeaderId = @intContractHeaderId
+		and smc.intMultiCompanyId = ch.intCompanyId
+		and mc.intCompanyId = smc.intMultiCompanyId
+		and lower(us.strUserName) = lower(mc.strApprover)
 
-	if (@intStraussCompanyId is not null and @intStraussCompanyId > 0)
-	 begin
-		set @intMultiCompanyParentId = (select isnull(intMultiCompanyParentId,0) from tblSMMultiCompany where intMultiCompanyId = @intStraussCompanyId);
-	 end
-
-	SELECT	@InterCompApprovalSign =Sig.blbDetail 
-	FROM	tblCTIntrCompApproval	IA
-	JOIN	tblSMUserSecurity		US	ON	US.strUserName		=	IA.strUserName	
-	JOIN	tblSMSignature			Sig	ON	US.intEntityId		=	Sig.intEntityId
-	JOIN	tblEMEntitySignature	ES	ON	Sig.intSignatureId	=	ES.intElectronicSignatureId
-	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
-	AND		IA.strScreen	=	'Contract'
 	
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
 	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
+	set @StraussContractSubmitId  = isnull(@intChildDefaultSubmitById,(SELECT TOP 1 intSubmittedById FROM tblSMApproval WHERE intTransactionId=@intTransactionId ORDER BY intApprovalId));
 	SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 
-	SELECT @StraussContractApproverSignature =  Sig.blbDetail 
-								FROM tblSMSignature Sig  WITH (NOLOCK)
-								JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
-								left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
-								WHERE Sig.intEntityId=@FirstApprovalId
-
-	SELECT TOP 1 @StraussContractSubmitId=intSubmittedById FROM tblSMApproval WHERE intTransactionId=@intTransactionId ORDER BY intApprovalId
-
-	SELECT @StraussContractSubmitSignature =  Sig.blbDetail 
-								 FROM tblSMSignature Sig  WITH (NOLOCK)
-								 JOIN tblEMEntitySignature ESig ON ESig.intElectronicSignatureId=Sig.intSignatureId
-								 left join tblEMEntity ent on ent.intEntityId = Sig.intEntityId
-								 WHERE Sig.intEntityId=@StraussContractSubmitId
-
+	select
+		@ysnIsParent = t.ysnIsParent
+		,@blbParentSubmitSignature = h.blbDetail
+		,@blbParentApproveSignature = j.blbDetail
+		,@blbChildSubmitSignature = l.blbDetail
+		,@blbChildApproveSignature = n.blbDetail
+	from
+		(
+		select
+			ysnIsParent = (case when isnull(b.intMultiCompanyParentId,0) = 0 then convert(bit,1) else convert(bit,0) end)
+			,intParentSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @StraussContractSubmitId else d.intEntityId end)
+			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else f.intEntityId end)
+			,intChildSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then d.intEntityId else @StraussContractSubmitId end)
+			,intChildApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then f.intEntityId else @FirstApprovalId end)
+		from
+			tblCTContractHeader a
+			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
+			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = 'Contract' and c.ysnApproval = 0
+			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
+			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = 'Contract' and e.ysnApproval = 1
+			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
+		where
+			a.intContractHeaderId = @intContractHeaderId
+		) t
+		left join tblEMEntitySignature g on g.intEntityId = t.intParentSubmitBy
+		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId
+		left join tblEMEntitySignature i on i.intEntityId = t.intParentApprovedBy
+		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId
+		left join tblEMEntitySignature k on k.intEntityId = t.intChildSubmitBy
+		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
+		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
+		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId
+	
 	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
 	FROM tblCTContractHeader CH
 	left join tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
@@ -234,10 +253,14 @@ BEGIN TRY
 	SELECT
 		intContractHeaderId								= CH.intContractHeaderId
 		,intContractTypeId								=		CH.intContractTypeId
-		,InterCompApprovalSign							=		@InterCompApprovalSign
-		,StraussContractSubmitSignature   				=		(case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then null else @StraussContractSubmitSignature  end)
-		,StraussContractSubmitByParentSignature			=		(case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then @StraussContractSubmitSignature else null  end)
-		,StraussContractApproverSignature				=		@StraussContractApproverSignature
+		
+		,StraussContractSubmitByParentSignature			=		@blbParentSubmitSignature--(case when @ysnIsParent = convert(bit,1) then @blbParentSubmitSignature else @blbChildSubmitSignature end)
+		,InterCompApprovalSign							=		@blbParentApproveSignature--(case when @ysnIsParent = convert(bit,1) then @blbParentApproveSignature else @blbChildApproveSignature end)
+		,StraussContractSubmitSignature					=		@blbChildSubmitSignature--(case when @ysnIsParent = convert(bit,1) then @blbChildSubmitSignature else @blbParentSubmitSignature end)
+		,StraussContractApproverSignature				=		@blbChildApproveSignature--(case when @ysnIsParent = convert(bit,1) then @blbChildApproveSignature else @blbParentApproveSignature end)
+		,strEntityName									=		(case when @ysnIsParent = convert(bit,0) then LTRIM(RTRIM(EY.strEntityName)) else @strCompanyName end)
+		,strCompanyName									=		(case when @ysnIsParent = convert(bit,0) then @strCompanyName else LTRIM(RTRIM(EY.strEntityName)) end)
+		
 		,strItemBundleNoLabel							=		(case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end)
 		,blbHeaderLogo									=		dbo.fnSMGetCompanyLogo('Header')
 		,strStraussOtherPartyAddress					= '<span style="font-family:Arial;font-size:12px;">' +
@@ -304,8 +327,6 @@ BEGIN TRY
 	,strStraussApplicableLaw				=	@strApplicableLaw
 	,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
 	,strStrussOtherCondition				= '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
-	,strEntityName							= LTRIM(RTRIM(EY.strEntityName))
-	,strCompanyName							=	@strCompanyName
 	,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 
 	FROM
