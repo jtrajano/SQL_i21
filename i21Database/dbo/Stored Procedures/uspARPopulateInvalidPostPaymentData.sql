@@ -797,31 +797,31 @@ BEGIN
         AND P.[intUndepositedFundsId] IS NOT NULL
         AND GLA.[ysnActive] != @OneBit
 
-	INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	-- GL Account Does not Exist
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Undeposited Funds Account : ' + GLA.[strAccountId] + ' does not exist.'
-	FROM
-		#ARPostPaymentHeader P
-    LEFT OUTER JOIN 
-		#ARPaymentAccount GLA
-			ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
-    WHERE
-            P.[ysnPost] = @OneBit
-        AND P.[intCompanyLocationId] IS NOT NULL
-        AND P.[intUndepositedFundsId] IS NOT NULL
-        AND GLA.[intAccountId] IS NULL
+	-- INSERT INTO #ARInvalidPaymentData
+    --     ([intTransactionId]
+    --     ,[strTransactionId]
+    --     ,[strTransactionType]
+    --     ,[intTransactionDetailId]
+    --     ,[strBatchId]
+    --     ,[strError])
+	-- -- GL Account Does not Exist
+	-- SELECT
+    --      [intTransactionId]         = P.[intTransactionId]
+    --     ,[strTransactionId]         = P.[strTransactionId]
+    --     ,[strTransactionType]       = @TransType
+    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+    --     ,[strBatchId]               = P.[strBatchId]
+    --     ,[strError]                 = 'Undeposited Funds Account : ' + GLA.[strAccountId] + ' does not exist.'
+	-- FROM
+	-- 	#ARPostPaymentHeader P
+    -- LEFT OUTER JOIN 
+	-- 	#ARPaymentAccount GLA
+	-- 		ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
+    -- WHERE
+    --         P.[ysnPost] = @OneBit
+    --     AND P.[intCompanyLocationId] IS NOT NULL
+    --     AND P.[intUndepositedFundsId] IS NOT NULL
+    --     AND GLA.[intAccountId] IS NULL
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
