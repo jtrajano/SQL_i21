@@ -260,7 +260,7 @@ BEGIN TRY
 	SELECT @strObjectName = 'vyuIPContractSubmittedByView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,NULL
+		,@strHeaderCondition
 		,@strSubmittedByXML OUTPUT
 		,NULL
 		,NULL
