@@ -8511,10 +8511,10 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractStrauss.sql" />
-
-
     <Build Include="dbo\Tables\tblLGLoadCondition.sql" />
     <Build Include="dbo\Tables\tblLGCustomsFee.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReportContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
