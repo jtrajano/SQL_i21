@@ -238,7 +238,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - ICIT.[dblQty] * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
+	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 0 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) AND ICS.dblQuantity > ARID.dblQtyShipped THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -258,32 +258,11 @@ SELECT
 	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
 	,[intLinkedItem]				= ICS.intChildItemLinkId
-FROM ( 
-	SELECT intInvoiceDetailId			= MIN(intInvoiceDetailId)
-	     , intLotId						= MIN(intLotId)
-		 , dblPrice						= AVG(dblPrice)
-		 , strInvoiceNumber
-		 , dtmPostDate
-		 , dtmShipDate
-		 , intItemId
-		 , intInventoryShipmentItemId
-		 , intContractHeaderId
-		 , intContractDetailId
-		 , intCurrencyId
-		 , intInvoiceId
-		 , intCurrencyExchangeRateTypeId
-		 , dblCurrencyExchangeRate
-		 , strTransactionType		 
-	FROM #ARPostInvoiceDetail 
-	WHERE ISNULL([intLoadDetailId], 0) = 0
-      AND [intTicketId] IS NOT NULL
-      AND (([strType] <> 'Provisional' AND [ysnFromProvisional] = 0) OR ([strType] = 'Provisional' AND [ysnProvisionalWithGL] = 1))
-      AND ([strTransactionType] <> 'Credit Memo' OR ([strTransactionType] = 'Credit Memo' AND [ysnReversal] = 1))
-	GROUP BY intInventoryShipmentItemId, intContractHeaderId, intContractDetailId, strInvoiceNumber, dtmPostDate, dtmShipDate, intItemId, intCurrencyId, intInvoiceId, intCurrencyExchangeRateTypeId, dblCurrencyExchangeRate, strTransactionType
-) ARID
+FROM #ARPostInvoiceDetail ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
-		 , ICIS.[strShipmentNumber]		
+		 , ICIS.[strShipmentNumber]
+		 , ICISI.[dblQuantity]
 		 , ICISI.[intInventoryShipmentItemId]
 		 , ICISI.[intChildItemLinkId]
 		 , ICISI.[intDestinationWeightId]
@@ -316,6 +295,10 @@ LEFT JOIN (
     HAVING COUNT(*) > 0
 ) CP ON ARID.intContractHeaderId = CP.intContractHeaderId
     AND ARID.intContractDetailId = CP.intContractDetailId 
+WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
+  AND ARID.[intTicketId] IS NOT NULL
+  AND ((ARID.[strType] <> 'Provisional' AND [ysnFromProvisional] = 0) OR ([strType] = 'Provisional' AND [ysnProvisionalWithGL] = 1))
+  AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
 
 UNION ALL
 
