@@ -32,6 +32,7 @@ BEGIN TRY
 	DECLARE @isParentSettleStorage AS BIT
 	DECLARE @intDecimalPrecision INT
 	DECLARE @success BIT
+	DECLARE @intCustomerStorageId AS INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -100,6 +101,9 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			--DELETE FROM @GLEntries
+			SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId FROM tblGRStorageHistory
+			WHERE intSettleStorageId = @intSettleStorageId
 
 			SELECT 
 				@dblUOMQty						= dblUnitQty
@@ -317,13 +321,7 @@ BEGIN TRY
 				,@UserId
 				,0
 		
-				IF @intReturnValue < 0 GOTO SettleStorage_Exit;
-
-				--DELETE FROM @GLEntries
-				DECLARE @intCustomerStorageId AS INT;
-
-				SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId FROM tblGRStorageHistory
-				WHERE intSettleStorageId = @intSettleStorageId
+				IF @intReturnValue < 0 GOTO SettleStorage_Exit;				
 
 				SELECT @strOwnedPhysicalStock = ST.strOwnedPhysicalStock
 				FROM tblGRCustomerStorage CS 
@@ -511,22 +509,29 @@ BEGIN TRY
 				) CS
 				WHERE intSettleStorageId = @intParentSettleStorageId
 
+				UPDATE SST 
+				SET dblUnits = SS.dblSelectedUnits
+				FROM tblGRSettleStorageTicket SST
+				INNER JOIN tblGRSettleStorage SS
+					ON SS.intSettleStorageId = SST.intSettleStorageId
+						AND SS.intSettleStorageId = @intParentSettleStorageId
+
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
 
-			
+			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
 
-			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
-			BEGIN
-				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
-			END
-			ELSE IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
+			--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table
+			IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
 			BEGIN
 				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
 				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			END
 
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
+			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
+			BEGIN
+				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+			END	
 
 			--5. Removing Voucher
 			begin

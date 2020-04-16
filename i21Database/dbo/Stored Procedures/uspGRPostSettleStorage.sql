@@ -187,12 +187,44 @@ BEGIN TRY
 		3-Discount
 		4-Fee
    */
-	
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	SET @dtmDate = GETDATE()
 	SET @intParentSettleStorageId = @intSettleStorageId	
 	
+	/*avoid the oversettling of storages*/
+	IF(@ysnFromPriceBasisContract = 0)
+	BEGIN
+		DECLARE @CustomerStorageIds AS Id
+		DECLARE @intId AS INT
+		DELETE FROM @CustomerStorageIds
+		INSERT INTO @CustomerStorageIds
+		SELECT intCustomerStorageId FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intSettleStorageId
+
+		WHILE EXISTS(SELECT 1 FROM @CustomerStorageIds)
+		BEGIN
+			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
+
+			IF (
+			SELECT SUM(dblUnits) 
+			FROM tblGRSettleStorageTicket A
+			INNER JOIN tblGRSettleStorage B
+				ON B.intSettleStorageId = A.intSettleStorageId
+				AND B.intParentSettleStorageId IS NULL
+			WHERE intCustomerStorageId = @intId ) > 
+			(SELECT dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId)
+			BEGIN
+				DELETE FROM @CustomerStorageIds WHERE intId = @intId
+				RAISERROR('The selected units is already more than the available balance. Please check the available units for settlement and try again.',16,1,1)
+				RETURN;
+			END
+			ELSE
+			BEGIN
+				DELETE FROM @CustomerStorageIds WHERE intId = @intId
+			END			
+		END	
+	END
+
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
 	IF(@ysnFromPriceBasisContract = 0)
