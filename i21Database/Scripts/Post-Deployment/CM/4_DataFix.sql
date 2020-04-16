@@ -297,12 +297,20 @@ BEGIN
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('CM Include Old Transations in Archive Tab','1')
 END    
 
--- UPDATES NULL intEntityId columns that is causing batch post error GL-6595
-UPDATE Trans SET Trans.intEntityId = Undep.intLastModifiedUserId 
-FROM tblCMBankTransactionDetail TransDetail 
-JOIN tblCMUndepositedFund Undep ON Undep.intUndepositedFundId = TransDetail.intUndepositedFundId
-JOIN tblCMBankTransaction Trans ON Trans.intTransactionId = TransDetail.intTransactionId
-WHERE Trans.intEntityId is null AND Trans.ysnPosted = 0
+-- UPDATES NULL intEntityId columns that is causing batch post error GL-6595,GL-7582
+	UPDATE A SET intEntityId =  ISNULL(A.intLastModifiedUserId,  ISNULL(U.intEntityId, G.intEntityId))
+	FROM tblCMBankTransaction A 
+	OUTER APPLY(
+		SELECT TOP 1 intEntityId FROM tblSMAuditLog WHERE strTransactionType LIKE 'CashManagement.view.%'
+		AND strRecordNo = CONVERT(NVARCHAR(20),A.intTransactionId)
+	)U
+	OUTER apply(
+		SELECT TOP 1 intEntityId FROM tblGLDetail WHERE strTransactionId = A.strTransactionId
+		
+	)G
+	WHERE A.intEntityId IS NULL
+	AND ysnPosted = 0
+	AND A.intBankTransactionTypeId IN (1,3,4,5)
 GO
 
 -- Clean up tblCMUndepositedFund
