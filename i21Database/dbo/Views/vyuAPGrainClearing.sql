@@ -77,6 +77,7 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		--AND SS.dblSettleUnits = 0 --OPEN STORAGE ONLY , THIS IS THE ONLY SETTLE STORAGE THAT DO NOT CREATE VOUCHER IMMEDIATELEY
+		AND SS.dblSpotUnits = 0
 INNER JOIN vyuGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -93,7 +94,13 @@ LEFT JOIN
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
-    ON itemUOM.intItemUOMId = CS.intItemUOMId
+    ON itemUOM.intItemUOMId = CS.intItemUOMId	
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
+where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+
 UNION ALL
 SELECT
 	bill.intEntityVendorId
@@ -134,7 +141,8 @@ INNER JOIN tblAPBillDetail billDetail
 INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
-			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL)
+			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL
+			AND SS.dblSpotUnits = 0)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -146,7 +154,14 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId --AND ST.intContractDetailId = billDetail.intContractDetailId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
 WHERE bill.ysnPosted = 1
+AND glAccnt.intAccountCategoryId = 45
 UNION ALL --Charges
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -197,6 +212,14 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
+where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+
 UNION ALL
 SELECT
 	bill.intEntityVendorId
@@ -238,6 +261,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId AND SS.intParentSettleStorageId IS NOT NULL
+		AND SS.dblSpotUnits = 0
 		INNER JOIN tblICCommodity CO
 			ON CO.intCommodityId = CS.intCommodityId
 		INNER JOIN tblICItem IM
@@ -255,7 +279,16 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
+
 WHERE bill.ysnPosted = 1
+AND glAccnt.intAccountCategoryId = 45
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 UNION ALL --DISCOUNTS
 SELECT 
 	CS.intEntityId AS intEntityVendorId
@@ -305,12 +338,15 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.ysnPosted = 1
+		AND SS.dblSpotUnits = 0
 LEFT JOIN tblGRSettleContract SC
 		ON SC.intSettleStorageId = SS.intSettleStorageId
 --SETTLE FOR BASIS CONTRACT IS THE ONLY TRANSACTION THAT SHOULD SHOW ON CLEARING TAB
 --BUT WE WILL INCLUDE THE OTHERS FOR NOW TO IDENTIFY THE DATA ISSUES ON AP CLEARING
 LEFT JOIN tblCTContractDetail CD
 		ON CD.intContractDetailId = SC.intContractDetailId 
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -332,6 +368,7 @@ OUTER APPLY
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 UNION ALL
 SELECT
 	bill.intEntityVendorId
@@ -375,7 +412,8 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				ON SST.intCustomerStorageId = CS.intCustomerStorageId
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId
-					AND SS.intParentSettleStorageId IS NOT NULL)
+					AND SS.intParentSettleStorageId IS NOT NULL
+					AND SS.dblSpotUnits = 0)
 	ON CS.intCustomerStorageId = billDetail.intCustomerStorageId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -387,6 +425,12 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
+LEFT JOIN tblGRSettleContract ST
+	ON ST.intSettleStorageId = SS.intSettleStorageId
+LEFT JOIN tblCTContractDetail CT
+	ON CT.intContractDetailId = ST.intContractDetailId
+left join tblCTContractHeader CH
+		on CH.intContractHeaderId = CT.intContractHeaderId
 WHERE bill.ysnPosted = 1
 AND EXISTS (
 	SELECT 1
@@ -396,3 +440,5 @@ AND EXISTS (
 		AND DSC.intItemId = billDetail.intItemId
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
 )
+AND glAccnt.intAccountCategoryId = 45
+AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
