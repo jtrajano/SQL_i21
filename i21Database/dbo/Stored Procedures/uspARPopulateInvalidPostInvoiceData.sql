@@ -1750,6 +1750,34 @@ BEGIN
 	FROM #ARPostInvoiceHeader I
 	WHERE dbo.isOpenAccountingDateByModule(ISNULL(dtmPostDate, dtmDate), 'Inventory') = 0
 
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--CREDITS APPLIED IS OVER AMOUNT DUE
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Applied credits for ' + I.[strInvoiceNumber] + ' is more than the amount due.'
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN (
+		SELECT intInvoiceId			= APC.intInvoiceId
+			 , dblCreditsApplied	= SUM(APC.dblAppliedInvoiceDetailAmount)
+		FROM tblARPrepaidAndCredit APC
+		WHERE APC.ysnApplied = 1
+		  AND ISNULL(APC.dblAppliedInvoiceDetailAmount, 0) <> 0
+		GROUP BY intInvoiceId
+	) CREDITS ON CREDITS.intInvoiceId = I.intInvoiceId
+	WHERE CREDITS.dblCreditsApplied > I.dblAmountDue
+
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
