@@ -5,6 +5,7 @@ BEGIN TRY
 
 	DECLARE @idoc INT
 	DECLARE @ErrMsg NVARCHAR(MAX)
+		,@strErrorMessage NVARCHAR(MAX)
 	DECLARE @intCoverageEntryAckStageId INT
 	DECLARE @strAckHeaderXML NVARCHAR(MAX)
 	DECLARE @strAckDetailXML NVARCHAR(MAX)
@@ -117,9 +118,25 @@ BEGIN TRY
 			WHERE intCoverageEntryAckStageId = @intCoverageEntryAckStageId
 		END
 
-		--EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
-		--	,@referenceTransactionId = @intTransactionRefId
-		--	,@referenceCompanyId = @intCompanyRefId
+		--IF @strRowState <> 'Delete'
+		--BEGIN
+		--	IF @intTransactionId IS NULL
+		--	BEGIN
+		--		SELECT @strErrorMessage = 'Current Transaction Id is not available. '
+
+		--		RAISERROR (
+		--					@strErrorMessage
+		--					,16
+		--					,1
+		--					)
+		--	END
+		--	ELSE
+		--	BEGIN
+		--		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
+		--			,@referenceTransactionId = @intTransactionRefId
+		--			,@referenceCompanyId = @intCompanyRefId
+		--	END
+		--END
 
 		SELECT @intCoverageEntryAckStageId = MIN(intCoverageEntryAckStageId)
 		FROM tblRKCoverageEntryAckStage WITH (NOLOCK)

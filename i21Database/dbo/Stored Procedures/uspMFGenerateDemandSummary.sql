@@ -49,7 +49,7 @@ BEGIN
 				,intBookId
 				,intSubBookId
 				)
-			SELECT DISTINCT AV.intMainItemId
+			SELECT DISTINCT IsNULL(AV.intMainItemId,AV.intItemId)
 				,RM.intBookId
 				,RM.intSubBookId
 			FROM tblCTInvPlngReportAttributeValue AV
@@ -104,7 +104,7 @@ BEGIN
 		--			AND IBook.intItemId IS NULL
 		--		)
 		--BEGIN
-			SELECT @strItemNo = @strItemNo + I.strItemNo +' - '+IsNULL(I.strShortName,'') + ' / '
+			SELECT @strItemNo = @strItemNo + IsNULL(I.strShortName,'') + ' / '
 			FROM tblICItemBundle IBundle
 			JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
 			JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId

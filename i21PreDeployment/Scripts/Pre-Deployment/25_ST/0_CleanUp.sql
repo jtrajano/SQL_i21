@@ -832,5 +832,92 @@ IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N't
 ----------------------------------------------------------------------------------------------------------------------------------
 
 
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START] - Remove Constraints 
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS (
+SELECT
+* 
+FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS 
+WHERE CONSTRAINT_NAME ='AK_tblSTSubcategoryRegProd_strRegProdCode'
+and TABLE_NAME = 'tblSTSubcategoryRegProd' ) 
+BEGIN
+	ALTER TABLE tblSTSubcategoryRegProd
+	DROP CONSTRAINT AK_tblSTSubcategoryRegProd_strRegProdCode
+END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END] - Remove Duplicate data of tblSTSubcategoryRegProd  
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START] - Consolidate duplicate records of tblSTSubcategoryRegProd
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTSubcategoryRegProd') 
+	BEGIN
+		
+	IF EXISTS(SELECT TOP 1 COUNT(1) FROM tblSTSubcategoryRegProd GROUP BY strRegProdCode HAVING COUNT(1) > 1) 
+	BEGIN
+		print 'STORE > Begin consolidating duplicate records of tblSTSubcategoryRegProd'
+
+		DECLARE @tblTempSubcategoryRegProd TABLE 
+		(
+			 intRegProdId			   INT,
+			 strRegProdCode			   NVARCHAR(MAX)
+		)
+		DECLARE @tblTempPromotionSalesList TABLE 
+		(
+			 intRegProdId			   INT,
+			 intPromoSalesListId	   INT,
+			 strRegProdCode			   NVARCHAR(MAX)
+		)
+
+		INSERT INTO @tblTempSubcategoryRegProd
+		(
+			intRegProdId,
+			strRegProdCode
+		)
+
+		SELECT intRegProdId,strRegProdCode FROM (
+				SELECT intRegProdId, intPartitionNo ,strRegProdCode
+				FROM (
+					SELECT intPartitionNo = ROW_NUMBER() OVER (PARTITION BY strRegProdCode ORDER BY strRegProdCode) , intRegProdId, strRegProdCode 
+					FROM tblSTSubcategoryRegProd ) 
+					as subquery where intPartitionNo = 1
+			) as subquery1
+
+		
+		IF EXISTS(SELECT TOP 1 1 FROM  INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'tblSTPromotionSalesList') 
+		BEGIN
+			INSERT INTO @tblTempPromotionSalesList 
+		(
+			 intRegProdId
+			,strRegProdCode		
+			,intPromoSalesListId
+		)
+		SELECT
+			 tblSTSubcategoryRegProd.intRegProdId
+			,tblSTSubcategoryRegProd.strRegProdCode		
+			,tblSTPromotionSalesList.intPromoSalesListId
+		FROM 
+		tblSTPromotionSalesList
+		INNER JOIN tblSTSubcategoryRegProd
+		ON tblSTPromotionSalesList.intRegProdId = tblSTSubcategoryRegProd.intRegProdId
+
+			UPDATE @tblTempPromotionSalesList SET intRegProdId = [@tblTempSubcategoryRegProd].intRegProdId FROM @tblTempSubcategoryRegProd WHERE [@tblTempSubcategoryRegProd].strRegProdCode = [@tblTempPromotionSalesList].strRegProdCode
+			UPDATE tblSTPromotionSalesList SET tblSTPromotionSalesList.intRegProdId = [@tblTempPromotionSalesList].intRegProdId FROM @tblTempPromotionSalesList WHERE [@tblTempPromotionSalesList].intPromoSalesListId = tblSTPromotionSalesList.intPromoSalesListId
+		END
+
+		DELETE FROM tblSTSubcategoryRegProd WHERE intRegProdId NOT IN ( SELECT intRegProdId FROM @tblTempSubcategoryRegProd ) 
+		print 'STORE > End consolidating duplicate records of tblSTSubcategoryRegProd'
+	END
+
+END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END] - Consolidate duplicate records of tblSTSubcategoryRegProd
+----------------------------------------------------------------------------------------------------------------------------------
+
+
 PRINT('*** ST Cleanup - End ***')
 PRINT('')
