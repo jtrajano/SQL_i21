@@ -68,38 +68,18 @@ SELECT TOP 1 @intReportHierarchyDetailId = intReportHierarchyDetailId, @intParen
 WHILE EXISTS(SELECT 1 FROM #TempFRDHierarchy)
 BEGIN
 	SELECT TOP 1 @intReportHierarchyDetailId = intReportHierarchyDetailId, @intParentGroupId = intParentGroupId, @strLevel = strLevel, @strFilterString = strFilterString FROM #TempFRDHierarchy
-	
-	IF(@intParentId_previous = @intParentGroupId and @intParentGroupId <> 0 and LEN(@strFilterString) > 5)
-	BEGIN
-		SET @strFilterString_NEW = @strFilterString_NEW + @strFilterString + ' or '
-	END
-	ELSE IF(@intParentId_previous = @intReportHierarchyDetailId and LEN(@strFilterString_NEW) > 1)
-	BEGIN
-		UPDATE tblFRReportHierarchyDetail SET strFilterString = SUBSTRING(@strFilterString_NEW, 0,LEN(@strFilterString_NEW) - CHARINDEX('or',REVERSE(@strFilterString_NEW))-1)  WHERE intReportHierarchyDetailId = @intReportHierarchyDetailId		
-		SET @strFilterString_NEW = ''
-	END
-	ELSE IF(LEN(@strFilterString) > 5)
-	BEGIN
-		SET @strFilterString_NEW = @strFilterString + ' or '		
-	END
-	ELSE IF(@intParentId_previous <> @intParentGroupId)
-	BEGIN
-		IF((SELECT TOP 1 1 FROM tblFRReportHierarchyDetail WHERE intReportHierarchyId = @intReportHierarchyId and intParentGroupId = @intParentGroupId and intReportHierarchyDetailId < @intReportHierarchyDetailId) IS NULL)
-		BEGIN	
-			DECLARE @AllFilterString VARCHAR(8000) 
 
-			SET @AllFilterString = (SELECT strFilterString + ' or ' AS 'data()' 
-										FROM tblFRReportHierarchyDetail 
-										WHERE intReportHierarchyId = @intReportHierarchyId and strFilterString IS NOT NULL and strFilterString <> '' and intParentGroupId = @intReportHierarchyDetailId  FOR XML PATH(''))
+	DECLARE @AllFilterString NVARCHAR(MAX) 
+
+	SET @AllFilterString = (SELECT strFilterString + ' or ' AS 'data()' 
+								FROM tblFRReportHierarchyDetail 
+								WHERE intReportHierarchyId = @intReportHierarchyId and strFilterString IS NOT NULL and strFilterString <> '' and intParentGroupId = @intReportHierarchyDetailId  FOR XML PATH(''))
 			
-			IF(LEN(@AllFilterString) > 5)
-			BEGIN
-				UPDATE tblFRReportHierarchyDetail SET strFilterString = SUBSTRING(@AllFilterString, 0,LEN(@AllFilterString) - CHARINDEX('or',REVERSE(@AllFilterString))-1)  WHERE intReportHierarchyDetailId = @intReportHierarchyDetailId		
-				SET @strFilterString_NEW = ''			
-			END			
-		END		
-	END
-
+	IF(LEN(@AllFilterString) > 5)
+	BEGIN
+		UPDATE tblFRReportHierarchyDetail SET strFilterString = SUBSTRING(@AllFilterString, 0,LEN(@AllFilterString) - CHARINDEX('or',REVERSE(@AllFilterString))-1)  WHERE intReportHierarchyDetailId = @intReportHierarchyDetailId		
+		SET @strFilterString_NEW = ''			
+	END	
 
 	SET @intParentId_previous = @intParentGroupId
 
@@ -118,4 +98,4 @@ END
 -- 	SCRIPT EXECUTION 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
---EXEC [dbo].[uspFRDBuildHierarchyFilterString] 1
+--EXEC [dbo].[uspFRDBuildHierarchyFilterString] 2011
