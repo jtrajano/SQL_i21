@@ -8670,6 +8670,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A089.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReportContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
