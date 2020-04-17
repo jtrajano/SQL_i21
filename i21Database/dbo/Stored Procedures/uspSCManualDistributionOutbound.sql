@@ -4,7 +4,8 @@
 	@intUserId AS INT,
 	@intEntityId AS INT,
 	@InventoryShipmentId AS INT OUTPUT ,
-	@intInvoiceId AS INT OUTPUT
+	@intInvoiceId AS INT OUTPUT,
+	@dtmClientDate DATETIME = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -535,7 +536,7 @@ END
 	BEGIN
 		IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ysnAllowInvoice = 1)
 		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
+			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId , 0, 1 ,@dtmShipmentDate = @dtmClientDate;
 		END
 
 		WHILE ISNULL(@_intContractDetailId,0) > 0

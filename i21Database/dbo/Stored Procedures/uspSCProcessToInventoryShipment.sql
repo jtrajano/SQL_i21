@@ -10,6 +10,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@intStorageScheduleId AS INT = NULL
 	,@InventoryShipmentId AS INT OUTPUT
 	,@intInvoiceId AS INT = NULL OUTPUT
+	,@dtmClientDate DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -574,7 +575,7 @@ BEGIN TRY
 		-- IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
 		IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE ysnAllowInvoice = 1 AND intInventoryShipmentId = @InventoryShipmentId)
 		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1;
+			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1,@dtmShipmentDate = @dtmClientDate;
 		END
 
 		--Check for Basis contract and create invoice		
