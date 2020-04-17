@@ -136,6 +136,34 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intSort INT
 	DECLARE @tblDeleteContainer TABLE (intLoadContainerId INT)
+	DECLARE @tblLGLoadContainerChanges TABLE (
+		intLoadContainerId INT
+		,strAction NVARCHAR(50)
+		,strContainerNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,dblNewCONQuantity NUMERIC(18, 6)
+		,dblOldCONQuantity NUMERIC(18, 6)
+		,dblNewGrossWt NUMERIC(18, 6)
+		,dblOldGrossWt NUMERIC(18, 6)
+		,dblNewTareWt NUMERIC(18, 6)
+		,dblOldTareWt NUMERIC(18, 6)
+		,dblNewNetWt NUMERIC(18, 6)
+		,dblOldNetWt NUMERIC(18, 6)
+		)
+	DECLARE @intAuditLoadContainerId INT
+		,@strAuditContainerNumber NVARCHAR(100)
+		,@dblNewCONQuantity NUMERIC(18, 6)
+		,@dblOldCONQuantity NUMERIC(18, 6)
+		,@dblNewGrossWt NUMERIC(18, 6)
+		,@dblOldGrossWt NUMERIC(18, 6)
+		,@dblNewTareWt NUMERIC(18, 6)
+		,@dblOldTareWt NUMERIC(18, 6)
+		,@dblNewNetWt NUMERIC(18, 6)
+		,@dblOldNetWt NUMERIC(18, 6)
+		,@strAction NVARCHAR(50)
+	DECLARE @tblLGLoadContainerOrg TABLE (
+		intLoadContainerId INT
+		,strContainerNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		)
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
 	FROM tblIPLoadStage WITH (NOLOCK)
@@ -433,6 +461,10 @@ BEGIN TRY
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			END
 
+			UPDATE tblIPLoadStage
+			SET strAction = @strRowState
+			WHERE intStageLoadId = @intMinRowNo
+
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
@@ -470,6 +502,7 @@ BEGIN TRY
 					,strOriginPort1
 					,strDestinationPort1
 					,dtmETSPOL
+					,dtmETSPOL1
 					,dtmDeadlineCargo
 					,dtmETAPOD
 					,dtmETAPOL
@@ -507,6 +540,7 @@ BEGIN TRY
 					,@strDestinationPort
 					,@strOriginPort
 					,@strDestinationPort
+					,@dtmETSPOL
 					,@dtmETSPOL
 					,@dtmDeadlineCargo
 					,@dtmETAPOD
@@ -587,6 +621,7 @@ BEGIN TRY
 					,strOriginPort1 = @strOriginPort
 					,strDestinationPort1 = @strDestinationPort
 					,dtmETSPOL = @dtmETSPOL
+					,dtmETSPOL1 = @dtmETSPOL
 					,dtmDeadlineCargo = @dtmDeadlineCargo
 					,dtmETAPOD = @dtmETAPOD
 					,dtmETAPOL = @dtmETAPOL
@@ -687,6 +722,10 @@ BEGIN TRY
 					END
 				END
 			END
+
+			UPDATE tblIPLoadStage
+			SET strLoadNumber = @strLoadNumber
+			WHERE intStageLoadId = @intMinRowNo
 
 			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
 			SET @strInfo2 = ISNULL(@strLoadNumber, '')
@@ -1078,6 +1117,40 @@ BEGIN TRY
 				DELETE
 				FROM @tblLGLoadContainer
 
+				DELETE
+				FROM @tblLGLoadContainerChanges
+
+				DELETE
+				FROM @tblLGLoadContainerOrg
+
+				INSERT INTO @tblLGLoadContainerOrg (
+					intLoadContainerId
+					,strContainerNumber
+					)
+				SELECT LC.intLoadContainerId
+					,LC.strContainerNumber
+				FROM tblLGLoadContainer LC
+				WHERE LC.intLoadId = @intLoadId
+
+				INSERT INTO @tblLGLoadContainerChanges (
+					intLoadContainerId
+					,strAction
+					,strContainerNumber
+					,dblOldCONQuantity
+					,dblOldGrossWt
+					,dblOldTareWt
+					,dblOldNetWt
+					)
+				SELECT LC.intLoadContainerId
+					,'Updated'
+					,LC.strContainerNumber
+					,LC.dblQuantity
+					,LC.dblGrossWt
+					,LC.dblTareWt
+					,LC.dblNetWt
+				FROM tblLGLoadContainer LC
+				WHERE LC.intLoadId = @intLoadId
+
 				INSERT INTO @tblLGLoadContainer (intStageLoadContainerId)
 				SELECT intStageLoadContainerId
 				FROM tblIPLoadContainerStage
@@ -1250,6 +1323,7 @@ BEGIN TRY
 							,LW.intLoadWarehouseId
 							,@intLoadContainerId
 						FROM tblLGLoadWarehouse LW
+						WHERE intLoadId = @intLoadId
 					END
 					ELSE
 					BEGIN
@@ -1383,6 +1457,7 @@ BEGIN TRY
 								,LW.intLoadWarehouseId
 								,@intLoadContainerId
 							FROM tblLGLoadWarehouse LW
+							WHERE intLoadId = @intLoadId
 						END
 					END
 
@@ -1419,6 +1494,255 @@ BEGIN TRY
 				FROM tblLGLoadContainer LC
 				JOIN @tblDeleteContainer DEL ON DEL.intLoadContainerId = LC.intLoadContainerId
 					AND LC.intLoadId = @intLoadId
+
+				INSERT INTO @tblLGLoadContainerChanges (
+					intLoadContainerId
+					,strContainerNumber
+					,strAction
+					)
+				SELECT LC.intLoadContainerId
+					,LC.strContainerNumber
+					,'Created'
+				FROM tblLGLoadContainer LC
+				WHERE intLoadId = @intLoadId
+					AND NOT EXISTS (
+						SELECT 1
+						FROM @tblLGLoadContainerOrg LCS
+						WHERE LCS.intLoadContainerId = LC.intLoadContainerId
+						)
+
+				UPDATE @tblLGLoadContainerChanges
+				SET strAction = 'Deleted'
+				FROM @tblLGLoadContainerChanges OLD
+				JOIN @tblDeleteContainer DEL ON DEL.intLoadContainerId = OLD.intLoadContainerId
+
+				UPDATE @tblLGLoadContainerChanges
+				SET dblNewCONQuantity = LC.dblQuantity
+					,dblNewGrossWt = LC.dblGrossWt
+					,dblNewTareWt = LC.dblTareWt
+					,dblNewNetWt = LC.dblNetWt
+				FROM @tblLGLoadContainerChanges OLD
+				JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = OLD.intLoadContainerId
+
+				-- Load Container Audit Log
+				IF @strRowState = 'Modified'
+				BEGIN
+					DECLARE @Condetails NVARCHAR(MAX) = ''
+
+					-- DROP TABLE tblLGLoadContainerChangesTest
+					--SELECT * INTO tblLGLoadContainerChangesTest FROM @tblLGLoadContainerChanges
+					WHILE EXISTS (
+							SELECT TOP 1 NULL
+							FROM @tblLGLoadContainerChanges
+							WHERE strAction = 'Updated'
+							)
+					BEGIN
+						SELECT @intAuditLoadContainerId = NULL
+							,@strAuditContainerNumber = NULL
+							,@dblNewCONQuantity = NULL
+							,@dblOldCONQuantity = NULL
+							,@dblNewGrossWt = NULL
+							,@dblOldGrossWt = NULL
+							,@dblNewTareWt = NULL
+							,@dblOldTareWt = NULL
+							,@dblNewNetWt = NULL
+							,@dblOldNetWt = NULL
+							,@Condetails = NULL
+
+						SELECT TOP 1 @intAuditLoadContainerId = intLoadContainerId
+							,@strAuditContainerNumber = strContainerNumber
+							,@dblNewCONQuantity = dblNewCONQuantity
+							,@dblOldCONQuantity = dblOldCONQuantity
+							,@dblNewGrossWt = dblNewGrossWt
+							,@dblOldGrossWt = dblOldGrossWt
+							,@dblNewTareWt = dblNewTareWt
+							,@dblOldTareWt = dblOldTareWt
+							,@dblNewNetWt = dblNewNetWt
+							,@dblOldNetWt = dblOldNetWt
+						FROM @tblLGLoadContainerChanges
+						WHERE strAction = 'Updated'
+
+						SET @Condetails = '{  
+								"action":"Updated",
+								"change":"Updated - Record: ' + LTRIM(@intLoadId) + '",
+								"keyValue":' + LTRIM(@intLoadId) + ',
+								"iconCls":"small-tree-modified",
+								"children":[  
+									{  
+										"change":"tblLGLoadContainers",
+										"children":[  
+											{  
+											"action":"Updated",
+											"change":"Updated - Record: ' + LTRIM(@strAuditContainerNumber) + '",
+											"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+											"iconCls":"small-tree-modified",
+											"children":
+												[   
+													'
+
+						IF @dblOldCONQuantity <> @dblNewCONQuantity
+							SET @Condetails = @Condetails + '
+													{  
+													"change":"dblQuantity",
+													"from":"' + LTRIM(@dblOldCONQuantity) + '",
+													"to":"' + LTRIM(@dblNewCONQuantity) + '",
+													"leaf":true,
+													"iconCls":"small-gear",
+													"isField":true,
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"associationKey":"tblLGLoadContainers",
+													"changeDescription":"Quantity",
+													"hidden":false
+													},'
+
+						IF @dblOldGrossWt <> @dblNewGrossWt
+							SET @Condetails = @Condetails + '
+													{  
+													"change":"dblGrossWt",
+													"from":"' + LTRIM(@dblOldGrossWt) + '",
+													"to":"' + LTRIM(@dblNewGrossWt) + '",
+													"leaf":true,
+													"iconCls":"small-gear",
+													"isField":true,
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"associationKey":"tblLGLoadContainers",
+													"changeDescription":"Gross Wt.",
+													"hidden":false
+													},'
+
+						IF @dblOldTareWt <> @dblNewTareWt
+							SET @Condetails = @Condetails + '
+													{  
+													"change":"dblTareWt",
+													"from":"' + LTRIM(@dblOldTareWt) + '",
+													"to":"' + LTRIM(@dblNewTareWt) + '",
+													"leaf":true,
+													"iconCls":"small-gear",
+													"isField":true,
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"associationKey":"tblLGLoadContainers",
+													"changeDescription":"Tare Wt.",
+													"hidden":false
+													},'
+
+						IF @dblOldNetWt <> @dblNewNetWt
+							SET @Condetails = @Condetails + '
+													{  
+													"change":"dblNetWt",
+													"from":"' + LTRIM(@dblOldNetWt) + '",
+													"to":"' + LTRIM(@dblNewNetWt) + '",
+													"leaf":true,
+													"iconCls":"small-gear",
+													"isField":true,
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"associationKey":"tblLGLoadContainers",
+													"changeDescription":"Net Wt.",
+													"hidden":false
+													},'
+
+						IF RIGHT(@Condetails, 1) = ','
+							SET @Condetails = SUBSTRING(@Condetails, 0, LEN(@Condetails))
+						SET @Condetails = @Condetails + '
+											]
+										}
+									],
+									"iconCls":"small-tree-grid",
+									"changeDescription":"Container Information"
+									}
+								]
+								}'
+
+						IF @dblOldCONQuantity <> @dblNewCONQuantity
+							OR @dblOldGrossWt <> @dblNewGrossWt
+							OR @dblOldTareWt <> @dblNewTareWt
+							OR @dblOldNetWt <> @dblNewNetWt
+						BEGIN
+							EXEC uspSMAuditLog @keyValue = @intLoadId
+								,@screenName = 'Logistics.view.ShipmentSchedule'
+								,@entityId = @intEntityId
+								,@actionType = 'Updated'
+								,@actionIcon = 'small-tree-modified'
+								,@details = @Condetails
+						END
+
+						DELETE
+						FROM @tblLGLoadContainerChanges
+						WHERE intLoadContainerId = @intAuditLoadContainerId
+					END
+
+					-- Audit Log for Inserted / Deleted Cotainers
+					WHILE EXISTS (
+							SELECT TOP 1 NULL
+							FROM @tblLGLoadContainerChanges
+							WHERE strAction <> 'Updated'
+							)
+					BEGIN
+						SELECT @intAuditLoadContainerId = NULL
+							,@strAuditContainerNumber = NULL
+							,@strAction = NULL
+							,@Condetails = NULL
+
+						SELECT TOP 1 @intAuditLoadContainerId = intLoadContainerId
+							,@strAuditContainerNumber = strContainerNumber
+							,@strAction = strAction
+						FROM @tblLGLoadContainerChanges
+						WHERE strAction <> 'Updated'
+
+						SET @Condetails = '{  
+								"action":"Updated",
+								"change":"Updated - Record: ' + LTRIM(@intLoadId) + '",
+								"keyValue":' + LTRIM(@intLoadId) + ',
+								"iconCls":"small-tree-modified",
+								"children":[  
+									{  
+										"change":"tblLGLoadContainers",
+										"children":[  
+													'
+
+						IF @strAction = 'Created'
+							SET @Condetails = @Condetails + '
+													{  
+													"action":"Created",
+													"change":"Created - Record: ' + LTRIM(@strAuditContainerNumber) + '",
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"iconCls":"small-new-plus",
+													"leaf": true
+													},'
+
+						IF @strAction = 'Deleted'
+							SET @Condetails = @Condetails + '
+													{  
+													"action":"Deleted",
+													"change":"Deleted - Record: ' + LTRIM(@strAuditContainerNumber) + '",
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"iconCls":"small-new-minus",
+													"leaf": true
+													},'
+
+						IF RIGHT(@Condetails, 1) = ','
+							SET @Condetails = SUBSTRING(@Condetails, 0, LEN(@Condetails))
+						SET @Condetails = @Condetails + '
+									],
+									"iconCls":"small-tree-grid",
+									"changeDescription":"Container Information"
+									}
+								]
+								}'
+
+						BEGIN
+							EXEC uspSMAuditLog @keyValue = @intLoadId
+								,@screenName = 'Logistics.view.ShipmentSchedule'
+								,@entityId = @intEntityId
+								,@actionType = 'Updated'
+								,@actionIcon = 'small-tree-modified'
+								,@details = @Condetails
+						END
+
+						DELETE
+						FROM @tblLGLoadContainerChanges
+						WHERE intLoadContainerId = @intAuditLoadContainerId
+					END
+				END
 			END
 
 			-- To set Contract Planned Availability Date and send Contract feed to SAP
@@ -1450,6 +1774,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -1472,6 +1798,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,''
 				,'Success'
@@ -1555,6 +1883,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -1577,6 +1907,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,@ErrMsg
 				,'Failed'
