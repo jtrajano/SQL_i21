@@ -12,6 +12,7 @@
     [dblMonthsCovered] NUMERIC(18, 6) NULL, 
     [dblAveragePrice] NUMERIC(18, 6) NULL, 
     [dblOptionsCovered] NUMERIC(18, 6) NULL, 
+	[dblTotalOption] NUMERIC(18, 6) NULL, 
     [dblFuturesM2M] NUMERIC(18, 6) NULL, 
 	[dblM2MPlus10] NUMERIC(18, 6) NULL, 
 	[dblM2MMinus10] NUMERIC(18, 6) NULL, 
