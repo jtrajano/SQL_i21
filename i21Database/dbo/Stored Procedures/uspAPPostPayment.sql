@@ -683,26 +683,16 @@ GROUP BY
 	A.[intConcurrencyId]
 END
 
---save the original discount
-DECLARE @paymentDiscount PaymentDetailDiscountTemp
-
-
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF (ISNULL(@recap, 0) = 0)
 BEGIN
 
-	--save discount temporarily
-	INSERT INTO @paymentDiscount (intBillId,dblDiscount)
-	SELECT B.intBillId, B.dblDiscount  FROM tblAPPayment A JOIN tblAPPaymentDetail B ON
-	A.intPaymentId = B.intPaymentId
-	WHERE A.intPaymentId IN(SELECT intId FROM @payments)
-	
 	--UPDATE tblAPPaymentDetail
 	EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
 	--UPDATE BILL RECORDS
-	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post,@paymentDiscount = @paymentDiscount
+	EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
 
 	--VALIDATE THE AMOUNT IN CASE THE LOGIC CHANGES THE TWO SP ABOVE AND IT IS FAULTY
 	DECLARE @invalidAmount AS Id
@@ -739,20 +729,9 @@ BEGIN
 		DECLARE @postVar BIT = ~@post
 		--ROLLBACK THE UPDATING OF AMOUNT DUE IF IF THERE IS NO VALID
 		--UPDATE tblAPPaymentDetail
-
-		-- reset discount table
-		DELETE FROM @paymentDiscount
-		--Save discount temporarily
-
-		INSERT INTO @paymentDiscount (intBillId,dblDiscount)
-		SELECT B.intBillId, B.dblDiscount  FROM tblAPPayment A JOIN tblAPPaymentDetail B ON
-		A.intPaymentId = B.intPaymentId
-		WHERE A.intPaymentId IN(SELECT intId FROM @payments)
-
-		--UPDATE tblAPPaymentDetail
 		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidAmount, @post = @postVar
 		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @invalidAmount, @post = @postVar, @paymentDiscount=@paymentDiscount
+		EXEC uspAPUpdateBillPayment @paymentIds = @invalidAmount, @post = @postVar
 	END
 
 	--DELETE INVALID AMOUNT
