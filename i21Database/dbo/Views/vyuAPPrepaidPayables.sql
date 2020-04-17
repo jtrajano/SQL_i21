@@ -233,7 +233,7 @@ FROM dbo.tblAPPayment  A
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId	
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
+LEFT JOIN dbo.vyuGLAccountDetail F ON  B.intAccountId = F.intAccountId
 OUTER APPLY (
 	SELECT TOP 1
 		bd.dblRate
@@ -245,8 +245,14 @@ OUTER APPLY (
 	AND C.intTransactionType IN (2, 13)
 	AND A.ysnPrepay = 0
 	AND NOT EXISTS (
-	SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
-)
+		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = B.intBillId
+	)
+	--CATEGORY OF OFFSET SHOULD BE PREPAID, EXCLUDE THIS IF IT IS NOT PREPAID
+	--TO HANDLE THE ISSUE ON CREATED PAYMENT FOR PREPAID WITH VOUCHERS
+	--WHERE ysnPrepay IS SET TO 1
+	--WE CANNOT MOVE THIS TO LATER VERSION VICE VERSA THE FIX ON LATER VERSION FOR THIS ISSUE
+	--DUE TO DRASTIC FIXES
+	AND F.intAccountCategoryId != 1 
 UNION ALL --APPLIED PREPAYMENT
 SELECT
 	A.dtmDate
