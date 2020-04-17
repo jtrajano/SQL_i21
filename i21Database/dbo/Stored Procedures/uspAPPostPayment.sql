@@ -724,17 +724,10 @@ BEGIN
 
 	IF @lenOfSuccessPay > 0 
 	BEGIN
-		--Save discount before unpdating
-		DECLARE @paymentDiscount PaymentDetailDiscountTemp
-		INSERT INTO @paymentDiscount (intBillId,dblDiscount)
-		SELECT B.intBillId, B.dblDiscount  FROM tblAPPayment A JOIN tblAPPaymentDetail B ON
-		A.intPaymentId = B.intPaymentId
-		WHERE A.intPaymentId IN(SELECT intId FROM @payments)
-
 		--UPDATE tblAPPaymentDetail
 		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @payments, @post = @post
 		--UPDATE BILL RECORDS
-		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post, @paymentDiscount= @paymentDiscount
+		EXEC uspAPUpdateBillPayment @paymentIds = @payments, @post = @post
 	END
 	
 	--Update posted status
