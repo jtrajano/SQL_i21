@@ -1,9 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspARCreateInvoiceFromShipment]
-	 @ShipmentId		   AS INT
-	,@UserId			   AS INT
-	,@NewInvoiceId		   AS INT			= NULL OUTPUT		
-	,@OnlyUseShipmentPrice AS BIT           = 0
-	,@IgnoreNoAvailableItemError AS BIT     = 0
+	 @ShipmentId		   			AS INT
+	,@UserId			   			AS INT
+	,@NewInvoiceId		   			AS INT	= NULL OUTPUT		
+	,@OnlyUseShipmentPrice 			AS BIT  = 0
+	,@IgnoreNoAvailableItemError 	AS BIT  = 0
+	,@dtmShipmentDate				AS DATETIME = NULL
 AS
 
 BEGIN
@@ -26,6 +27,7 @@ DECLARE @ZeroDecimal					DECIMAL(18,6) = 0
 	  , @ysnHasPriceFixation			BIT = 0
 
 SELECT TOP 1 @strReferenceNumber = strSalesOrderNumber FROM tblSOSalesOrder ORDER BY intSalesOrderId DESC
+SET @dtmShipmentDate			 = ISNULL(CAST(@dtmShipmentDate AS DATE), @DateOnly)
 
 DECLARE
 	 @TransactionType			NVARCHAR(25)
@@ -59,10 +61,10 @@ SELECT
 	,@CurrencyId				= ISNULL( ICIS.intCurrencyId, ISNULL((SELECT TOP 1 intCurrencyId FROM vyuARShippedItems WHERE intInventoryShipmentId = @ShipmentId AND intInventoryShipmentChargeId IS NOT NULL AND intCurrencyId IS nOT NULL),ISNULL(ARC.[intCurrencyId], (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference WHERE intDefaultCurrencyId IS NOT NULL AND intDefaultCurrencyId <> 0))))
 	,@SourceId					= @ShipmentId
 	,@PeriodsToAccrue			= 1
-	,@Date						= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
+	,@Date						= @dtmShipmentDate
 	,@ShipDate					= ICIS.[dtmShipDate]
-	,@PostDate					= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
-	,@CalculatedDate			= CASE WHEN ISNULL(@IgnoreNoAvailableItemError, 0) = 1 THEN ISNULL(ICIS.[dtmShipDate], @DateOnly) ELSE @DateOnly END
+	,@PostDate					= @dtmShipmentDate
+	,@CalculatedDate			= @dtmShipmentDate
 	,@EntitySalespersonId		= ISNULL(CT.[intSalespersonId],ARC.[intSalespersonId])
 	,@FreightTermId				= ICIS.[intFreightTermId]
 	,@ShipViaId					= ICIS.[intShipViaId]
