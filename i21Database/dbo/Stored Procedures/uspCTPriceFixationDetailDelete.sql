@@ -18,6 +18,12 @@ BEGIN TRY
 			@ItemId			INT,
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT;
+
+			declare @strFinalMessage nvarchar(max);
+			declare @AffectedInvoices table
+			(
+				strMessage nvarchar(50)
+			)
 	
 	DECLARE @tblItemBillDetail TABLE
 	(
@@ -181,9 +187,43 @@ BEGIN TRY
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	--AND		ISNULL(IV.ysnPosted,0) = 0
 
-	if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
+	
+	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
+	if EXISTS (select top 1 1 from #ItemInvoice)
 	begin
-		SET @ErrMsg = 'Posted invoice exists for the price. Please try to unpost them and try again.'
+
+		if (@intPriceFixationDetailId is not null)
+		begin
+			insert into @AffectedInvoices
+			select
+			strMessage = d.strInvoiceNumber + ' line item ' + convert(nvarchar(20),t.intInvoiceLineItemId) 
+			from
+			tblCTPriceFixationDetailAPAR c
+			left join 
+			(
+			select
+			intInvoiceLineItemId = ROW_NUMBER() over (partition by b.intInvoiceId order by b.intInvoiceDetailId)
+			,a.intPriceFixationDetailId
+			,b.intInvoiceId
+			,b.intInvoiceDetailId
+			from tblCTPriceFixationDetailAPAR a
+			,tblARInvoiceDetail b
+			where a.intPriceFixationDetailId = @intPriceFixationDetailId
+			and b.intInvoiceId = a.intInvoiceId
+			)t on t.intInvoiceId = c.intInvoiceId and t.intInvoiceDetailId = c.intInvoiceDetailId
+			left join tblARInvoice d on d.intInvoiceId = c.intInvoiceId
+			where c.intPriceFixationDetailId = @intPriceFixationDetailId
+
+			select
+			top 1 @strFinalMessage = 'Invoice/s' + stuff((SELECT ', ' + strMessage FROM @AffectedInvoices FOR XML PATH ('')), 1, 1, '') + ' is using the price. Please delete that first.'
+			from @AffectedInvoices
+		end
+		ELSE
+		begin
+			set @strFinalMessage = 'Invoice/s exists for the price. Please try to delete them first to delete the pricing.';
+		end
+
+		SET @ErrMsg = @strFinalMessage
 		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
 	END
 	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemInvoice
