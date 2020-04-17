@@ -59,7 +59,7 @@ SELECT
 	,strUserEntered					= USERENTERED.strName
 	,intEntityContactId				= I.intEntityContactId
 	,strContactName					= EC.strName
-	,strTicketNumbers				= SCALETICKETS.strTicketNumbers
+	,strTicketNumbers				= CAST(LEFT(SUBSTRING(SCALETICKETS.strTicketNumbers, PATINDEX('%[0-9]%', SCALETICKETS.strTicketNumbers), 8000), PATINDEX('%[^0-9]%', SUBSTRING(SCALETICKETS.strTicketNumbers, PATINDEX('%[0-9]%', SCALETICKETS.strTicketNumbers), 8000) + 'X') -1) AS INT)
 	,strCustomerReferences			= CUSTOMERREFERENCES.strCustomerReferences
 	,ysnHasEmailSetup				= EMAILSETUP.ysnHasEmailSetup --CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END	
 	,strCurrencyDescription			= CUR.strDescription
