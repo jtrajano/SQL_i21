@@ -290,7 +290,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				,gasct_pit_no COLLATE Latin1_General_CI_AS AS strPitNumber
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
-				,gasct_loc_no + '''' + gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
+				,coalesce(lb.strStationShortDescription, a.gasct_tic_pool, (a.gasct_loc_no + '''' + a.gasct_scale_id) )  COLLATE Latin1_General_CI_AS  AS strStationShortDescription
 				,CAST(
 				CASE WHEN gasct_split_wgt_yn = ''Y'' THEN 1
 				ELSE 0 END
@@ -306,7 +306,16 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_tic_type = (''T'')       THEN 4
 					ELSE 5
 				END) AS intTicketType
-			from gasctmst
+				,''LS-'' + replace(gasct_load_no,''S '', '''') as strLoadNumber
+				, CASE WHEN gasct_in_out_ind = ''I'' THEN 1 ELSE 2 END AS intLoadPurchaseSale
+			from gasctmst a
+				left join (
+						select a.strLinkStationShortDescription, b.strStationShortDescription from tblSCScaleSetupOriginLink a 
+							join tblSCScaleSetup b
+								on a.intScaleSetupId = b.intScaleSetupId
+						
+				) as lb
+					on isnull(a.gasct_tic_pool, (a.gasct_loc_no + '''' + a.gasct_scale_id)) COLLATE Latin1_General_CI_AS = lb.strLinkStationShortDescription  COLLATE Latin1_General_CI_AS
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
 
@@ -380,6 +389,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[strCostMethod]
 						,[strDiscountComment]
 						,[strSourceType]
+						,[strLoadNumber]
+						,intLoadDetailId
+						,intContractId
 					)
 					SELECT 
 						[strTicketNumber]				= LTRIM(RTRIM(SC.strTicketNumber))
@@ -406,8 +418,12 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[intCurrencyId]				= SMCR.intCurrencyID
 						,[strCurrency]					= LTRIM(RTRIM(SC.strCurrency))
 						,[strBinNumber]					= LTRIM(RTRIM(SC.strBinNumber))
-						,[strContractNumber]			= LTRIM(RTRIM(SC.strContractNumber))
-						,[intContractSequence]			= SC.intContractSequence
+						,[strContractNumber]			= case when intLoadId is null then LTRIM(RTRIM(SC.strContractNumber))
+															else LG.strContractNumber
+															end
+						,[intContractSequence]			= case when intLoadId is null then LTRIM(RTRIM(SC.intContractSequence))
+															else LG.intContractSeq
+															end
 						,[strScaleOperatorUser]			= LTRIM(RTRIM(SC.strScaleOperatorUser))
 						,[strTruckName]					= LTRIM(RTRIM(SC.strTruckName))
 						,[strDriverName]				= LTRIM(RTRIM(SC.strDriverName))
@@ -434,7 +450,10 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[strItemUOM]					= UM.strUnitMeasure
 						,[strCostMethod]				= ''Per Unit''
 						,[strDiscountComment]			= SC.strDiscountComment
-						,[strSourceType]				= ''LV Control''						
+						,[strSourceType]				= ''LV Control''
+						,SC.strLoadNumber
+						,LG.intLoadId
+						,LG.intContractDetailId
 					FROM vyuSCTicketLVControlView SC 
 					INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 					LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
@@ -454,7 +473,25 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId
 					left join tblGRDiscountSchedule GRDS on GRDS.intCommodityId = IC.intCommodityId
 					left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+					OUTER APPLY (
+						SELECT TOP 1 intLoadId, 
+							intContractDetailId = case 
+													when intPurchaseSale = 1 then intPContractDetailId 
+													else intSContractDetailId 
+												end,
+							
+							strContractNumber = case 
+													when intPurchaseSale = 1 then strPContractNumber 
+													else strSContractNumber 
+												end,
 
+							intContractSeq		= case 
+													when intPurchaseSale = 1 then intPContractSeq 
+													else intSContractSeq 
+												end
+							FROM vyuLGLoadDetailView 
+							where strLoadNumber COLLATE Latin1_General_CI_AS = SC.strLoadNumber COLLATE Latin1_General_CI_AS						
+					) LG
 
 
 					INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)						
