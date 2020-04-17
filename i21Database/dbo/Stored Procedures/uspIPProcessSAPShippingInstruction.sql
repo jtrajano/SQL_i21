@@ -358,6 +358,10 @@ BEGIN TRY
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			END
 
+			UPDATE tblIPLoadStage
+			SET strAction = @strRowState
+			WHERE intStageLoadId = @intMinRowNo
+
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
@@ -577,6 +581,10 @@ BEGIN TRY
 					END
 				END
 			END
+
+			UPDATE tblIPLoadStage
+			SET strLoadNumber = @strLoadNumber
+			WHERE intStageLoadId = @intMinRowNo
 
 			SET @strInfo1 = ISNULL(@strCustomerReference, '') + ' / ' + ISNULL(@strERPPONumber, '')
 			SET @strInfo2 = ISNULL(@strLoadNumber, '')
@@ -967,6 +975,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -985,6 +995,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,''
 				,'Success'
@@ -1045,6 +1057,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -1063,6 +1077,8 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strLoadNumber
+				,strAction
 				,strTransactionType
 				,@ErrMsg
 				,'Failed'
