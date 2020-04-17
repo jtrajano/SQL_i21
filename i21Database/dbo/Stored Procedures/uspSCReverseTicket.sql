@@ -204,11 +204,11 @@ BEGIN TRY
 						BEGIN
 							IF(ISNULL(@intDeliverySheetId,0) > 0)
 							BEGIN
-								EXEC uspGRCheckStorageTicketStatus @intDeliverySheetId, @strDeliverySheetNumber, @intUserId
+								EXEC uspGRCheckStorageTicketStatus @intDeliverySheetId, 'DS', @intUserId
 							END
 							ELSE
 							BEGIN
-								EXEC uspGRCheckStorageTicketStatus @intTicketId, @strTicketNumber, @intUserId
+								EXEC uspGRCheckStorageTicketStatus @intTicketId, 'SC', @intUserId
 							END
 						END
 					END
