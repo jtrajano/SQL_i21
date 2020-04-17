@@ -48,7 +48,14 @@ BEGIN
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
 				,Qty = CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END
-				,TotalUnitsOfItemsPerContract.dblTotalUnits 
+				,dblTotalUnits = 
+					CASE 
+						WHEN CalculatedCharges.strChargesLink IS NULL THEN 
+							TotalUnitsOfAllItems.dblTotalUnits 
+						ELSE 
+							TotalUnitsOfItemsPerContract.dblTotalUnits 
+					END 
+				
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -90,6 +97,7 @@ BEGIN
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 					AND (
 						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+						OR CalculatedCharges.strChargesLink IS NULL 
 					)
 				LEFT JOIN (
 							SELECT	dblTotalUnits = SUM(
@@ -106,12 +114,37 @@ BEGIN
 							INNER JOIN dbo.tblICItemUOM ItemUOM
 								ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					GROUP BY ReceiptItem.intInventoryReceiptId, ReceiptItem.strChargesLink
+					GROUP BY 
+						ReceiptItem.intInventoryReceiptId
+						, ReceiptItem.strChargesLink
 				) TotalUnitsOfItemsPerContract 
 					ON TotalUnitsOfItemsPerContract.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
 					AND (
-						ISNULL(TotalUnitsOfItemsPerContract.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+						ISNULL(TotalUnitsOfItemsPerContract.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')						
 					)
+				LEFT JOIN (
+							SELECT	dblTotalUnits = SUM(
+										CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
+													ISNULL(ReceiptItem.dblNet, 0) 
+												ELSE 
+													ISNULL(ReceiptItem.dblOpenReceive, 0) 
+										END
+									)
+							,ReceiptItem.intInventoryReceiptId 						
+					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
+								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+							INNER JOIN dbo.tblICItemUOM ItemUOM
+								ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
+					WHERE	
+						Receipt.intInventoryReceiptId = @intInventoryReceiptId
+						AND 1 = CASE WHEN Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ReceiptItem.intOrderId IS NULL THEN 1
+								 WHEN Receipt.strReceiptType <> @RECEIPT_TYPE_PurchaseContract THEN 1
+								 ELSE 0
+							END 
+					GROUP BY 
+						ReceiptItem.intInventoryReceiptId						
+				) TotalUnitsOfAllItems 
+					ON TotalUnitsOfAllItems.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
 
 	) AS Source_Query  
 		ON ReceiptItemAllocatedCharge.intInventoryReceiptId = Source_Query.intInventoryReceiptId
@@ -120,7 +153,10 @@ BEGIN
 		AND ReceiptItemAllocatedCharge.ysnInventoryCost = Source_Query.ysnInventoryCost
 		AND ReceiptItemAllocatedCharge.ysnPrice = Source_Query.ysnPrice
 		AND ReceiptItemAllocatedCharge.intInventoryReceiptChargeId = Source_Query.intInventoryReceiptChargeId
-		AND ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
+		AND (
+			ISNULL(ReceiptItemAllocatedCharge.strChargesLink, '') = ISNULL(Source_Query.strChargesLink, '')
+			OR Source_Query.strChargesLink IS NULL 
+		)
 
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
