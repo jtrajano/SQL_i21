@@ -20,6 +20,9 @@
 	intNumberOfContainers		INT,
 	strContainerType			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
+	strLoadNumber				NVARCHAR(100),
+	strAction					NVARCHAR(100),
+
 	strTransactionType			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strErrorMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	strImportStatus				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
