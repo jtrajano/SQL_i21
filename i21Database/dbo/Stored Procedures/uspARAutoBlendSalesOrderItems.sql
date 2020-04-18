@@ -1,11 +1,13 @@
 ﻿CREATE PROCEDURE [dbo].[uspARAutoBlendSalesOrderItems]
 	@intSalesOrderId	INT,
 	@intUserId			INT,
-	@ysnDelete			BIT = 0
+	@ysnDelete			BIT = 0,
+	@dtmDateProcessed	DATETIME = NULL
 AS
 
 DECLARE @strErrorMessage NVARCHAR(MAX)
 SET @ysnDelete = ISNULL(@ysnDelete, 0)
+SET @dtmDateProcessed	= CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE)
 
 IF(OBJECT_ID('tempdb..#UNBLENDEDITEMS') IS NOT NULL)
 BEGIN
@@ -49,8 +51,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 			  , @intSubLocationId		INT = NULL
 			  , @intStorageLocationId	INT = NULL
 			  , @dblQtyOrdered			NUMERIC(18, 6) = 0
-			  , @dblMaxQtyToProduce		NUMERIC(18, 6) = 0
-			--   , @dtmDate				DATETIME = NULL
+			  , @dblMaxQtyToProduce		NUMERIC(18, 6) = 0			  
 
 		SELECT TOP 1 @intSalesOrderDetailId = intSalesOrderDetailId
 				   , @intItemId				= intItemId			 
@@ -58,8 +59,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 				   , @intCompanyLocationId	= intCompanyLocationId
 				   , @intSubLocationId		= intSubLocationId
 				   , @intStorageLocationId	= intStorageLocationId
-				   , @dblQtyOrdered			= dblQtyOrdered
-				--    , @dtmDate				= dtmDate
+				   , @dblQtyOrdered			= dblQtyOrdered				
 		FROM #UNBLENDEDITEMS
 		ORDER BY intSalesOrderDetailId
 
@@ -75,7 +75,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 											  , @intStorageLocationId	= @intStorageLocationId
 											  , @intUserId				= @intUserId
 											  , @dblMaxQtyToProduce		= @dblMaxQtyToProduce OUT
-											--   , @dtmDate				= @dtmDate
+											  , @dtmDate				= @dtmDateProcessed
 
 					IF ISNULL(@dblMaxQtyToProduce, 0) > 0
 						BEGIN
@@ -88,7 +88,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #UNBLENDEDITEMS)
 													  , @intStorageLocationId	= @intStorageLocationId
 													  , @intUserId				= @intUserId
 													  , @dblMaxQtyToProduce		= @dblMaxQtyToProduce OUT
-													--   , @dtmDate				= @dtmDate
+													  , @dtmDate				= @dtmDateProcessed
 						END
 						END
 					ELSE
