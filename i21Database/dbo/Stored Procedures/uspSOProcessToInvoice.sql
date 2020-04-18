@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOProcessToInvoice]
 	@SalesOrderId			INT,
 	@UserId					INT,
-	@intShipToLocationId	INT = NULL,
-	@NewInvoiceId			INT = NULL OUTPUT
+	@NewInvoiceId			INT = NULL OUTPUT,
+	@dtmDateProcessed		DATETIME = NULL	
 AS
 BEGIN
 
@@ -11,6 +11,8 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF
+
+SET @dtmDateProcessed	= CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE)
 
 --VALIDATE IF SO IS ALREADY CLOSED
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
@@ -52,7 +54,7 @@ ELSE
 		DECLARE @strErrorMessage NVARCHAR(MAX)
 
 		BEGIN TRY
-			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId
+			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId, @dtmDateProcessed = @dtmDateProcessed
 		END TRY
 		BEGIN CATCH
 			SET @strErrorMessage = ERROR_MESSAGE()
@@ -63,9 +65,11 @@ ELSE
 		--CONVERT PROSPECT TO CUSTOMER
 		DECLARE @intEntityCustomerId	INT
 			  , @intTermsId				INT
+			  , @intShipToLocationId	INT
 
 		SELECT @intEntityCustomerId = intEntityCustomerId
 			 , @intTermsId			= intTermId
+			 , @intShipToLocationId	= intShipToLocationId
 		FROM dbo.tblSOSalesOrder WITH(NOLOCK) 
 		where intSalesOrderId = @SalesOrderId
 
@@ -93,6 +97,7 @@ ELSE
 									, @FromShipping		 	= 0
 									, @intShipToLocationId	= @intShipToLocationId
 									, @NewInvoiceId		 	= @NewInvoiceId OUT
+									, @dtmDateProcessed		= @dtmDateProcessed
 
 		--UPDATE OVERRAGE CONTRACTS
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SOD.intContractDetailId AND SOD.dblQtyOrdered > CTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
