@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSOProcessToInvoice]
-	@SalesOrderId		INT,
-	@UserId				INT,
-	@NewInvoiceId		INT = NULL OUTPUT
+	@SalesOrderId			INT,
+	@UserId					INT,
+	@NewInvoiceId			INT = NULL OUTPUT,
+	@dtmDateProcessed		DATETIME = NULL	
 AS
 BEGIN
 
@@ -10,6 +11,8 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT OFF  
 SET ANSI_WARNINGS OFF
+
+SET @dtmDateProcessed	= CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE)
 
 --VALIDATE IF SO IS ALREADY CLOSED
 IF EXISTS(SELECT NULL FROM tblSOSalesOrder WHERE [intSalesOrderId] = @SalesOrderId AND [strOrderStatus] = 'Closed') 
@@ -51,7 +54,7 @@ ELSE
 		DECLARE @strErrorMessage NVARCHAR(MAX)
 
 		BEGIN TRY
-			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId
+			EXEC dbo.uspARAutoBlendSalesOrderItems @intSalesOrderId = @SalesOrderId, @intUserId = @UserId, @dtmDateProcessed = @dtmDateProcessed
 		END TRY
 		BEGIN CATCH
 			SET @strErrorMessage = ERROR_MESSAGE()
@@ -62,9 +65,11 @@ ELSE
 		--CONVERT PROSPECT TO CUSTOMER
 		DECLARE @intEntityCustomerId	INT
 			  , @intTermsId				INT
+			  , @intShipToLocationId	INT
 
 		SELECT @intEntityCustomerId = intEntityCustomerId
 			 , @intTermsId			= intTermId
+			 , @intShipToLocationId	= intShipToLocationId
 		FROM dbo.tblSOSalesOrder WITH(NOLOCK) 
 		where intSalesOrderId = @SalesOrderId
 
@@ -86,7 +91,13 @@ ELSE
 		EXEC dbo.uspSOUpdateReservedStock @SalesOrderId, 1
 
 		--INSERT TO INVOICE
-		EXEC dbo.uspARInsertToInvoice @SalesOrderId, @UserId, NULL, 0, @NewInvoiceId OUTPUT
+		EXEC dbo.uspARInsertToInvoice @SalesOrderId	     	= @SalesOrderId
+									, @UserId			    = @UserId
+									, @ShipmentId			= NULL
+									, @FromShipping		 	= 0
+									, @intShipToLocationId	= @intShipToLocationId
+									, @NewInvoiceId		 	= @NewInvoiceId OUT
+									, @dtmDateProcessed		= @dtmDateProcessed
 
 		--UPDATE OVERRAGE CONTRACTS
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SOD.intContractDetailId AND SOD.dblQtyOrdered > CTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
