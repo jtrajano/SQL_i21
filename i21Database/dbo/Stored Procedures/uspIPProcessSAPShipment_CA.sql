@@ -58,6 +58,7 @@ BEGIN TRY
 		,@dtmPlannedAvailabilityDate DATETIME
 		,@intLocationId INT
 		,@ysnPosted BIT
+		,@intLoadShippingInstructionId INT
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
 		,@intOldPositionId INT
@@ -107,6 +108,8 @@ BEGIN TRY
 		,@strVendorReference NVARCHAR(200)
 		,@intPSubLocationId INT
 		,@intPNumberOfContainers INT
+		,@intLoadDetailId INT
+		,@dblOldDetailQuantity NUMERIC(18, 6)
 	DECLARE @tblLGLoadDetailChanges TABLE (
 		dblOldQuantity NUMERIC(18, 6)
 		,dblNewQuantity NUMERIC(18, 6)
@@ -120,7 +123,7 @@ BEGIN TRY
 		,@dblNewQuantity NUMERIC(18, 6)
 		,@dblOldGross NUMERIC(18, 6)
 		,@dblNewGross NUMERIC(18, 6)
-		,@intLoadDetailId INT
+		,@intAuditLoadDetailId INT
 		,@strAuditLogInfo NVARCHAR(200)
 	DECLARE @tblLGLoadContainer TABLE (intStageLoadContainerId INT)
 	DECLARE @intStageLoadContainerId INT
@@ -219,6 +222,7 @@ BEGIN TRY
 				,@dtmPlannedAvailabilityDate = NULL
 				,@intLocationId = NULL
 				,@ysnPosted = NULL
+				,@intLoadShippingInstructionId = NULL
 
 			SELECT @strDescription = NULL
 				,@intOldPurchaseSale = NULL
@@ -287,6 +291,36 @@ BEGIN TRY
 			BEGIN
 				RAISERROR (
 						'Invalid ERP PO Number. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intLoadShippingInstructionId = L.intLoadId
+			FROM tblLGLoad L WITH (NOLOCK)
+			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
+				AND LD.intPContractDetailId = @intContractDetailId
+				AND L.intShipmentType = 2
+				AND L.intShipmentStatus <> 10
+
+			IF ISNULL(@intLoadShippingInstructionId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Shipping Instruction is not available. '
+						,16
+						,1
+						)
+			END
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblLGLoad L WITH (NOLOCK)
+					WHERE intLoadId = @intLoadShippingInstructionId
+						AND strCustomerReference = @strCustomerReference
+					)
+			BEGIN
+				RAISERROR (
+						'Customer Reference is not matching with Shipping Instruction. '
 						,16
 						,1
 						)
@@ -454,6 +488,7 @@ BEGIN TRY
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
 					,@intLocationId = CD.intCompanyLocationId
+					,@intShipmentStatus = L.intShipmentStatus
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intLoadId = @intLoadId
@@ -468,6 +503,15 @@ BEGIN TRY
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
+
+			IF @intShipmentStatus = 10
+			BEGIN
+				RAISERROR (
+						'Shipment cannot update since it is already cancelled. '
+						,16
+						,1
+						)
+			END
 
 			BEGIN TRAN
 
@@ -516,6 +560,7 @@ BEGIN TRY
 					,strShippingMode
 					,intNumberOfContainers
 					,intContainerTypeId
+					,intLoadShippingInstructionId
 					)
 				SELECT 1
 					,@strLoadNumber
@@ -555,6 +600,7 @@ BEGIN TRY
 					,@strShippingMode
 					,@intNumberOfContainers
 					,@intContainerTypeId
+					,@intLoadShippingInstructionId
 
 				SELECT @intLoadId = SCOPE_IDENTITY()
 
@@ -636,6 +682,7 @@ BEGIN TRY
 					,intNumberOfContainers = @intNumberOfContainers
 					,intContainerTypeId = @intContainerTypeId
 					,strCustomerReference = @strCustomerReference
+					,intLoadShippingInstructionId = @intLoadShippingInstructionId
 				WHERE intLoadId = @intLoadId
 
 				-- Audit Log
@@ -791,6 +838,8 @@ BEGIN TRY
 						,@strVendorReference = NULL
 						,@intPSubLocationId = NULL
 						,@intPNumberOfContainers = NULL
+						,@intLoadDetailId = NULL
+						,@dblOldDetailQuantity = NULL
 
 					SELECT @strCommodityCode = strCommodityCode
 						,@strItemNo = strItemNo
@@ -966,9 +1015,25 @@ BEGIN TRY
 							,@strVendorReference
 							,@intPSubLocationId
 							,@intPNumberOfContainers
+
+						SELECT @intLoadDetailId = SCOPE_IDENTITY()
+
+						EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblQuantity
+							,@intUserId = @intEntityId
+							,@intExternalId = @intLoadDetailId
+							,@strScreenName = 'Load Schedule'
+							,@intSourceItemUOMId = @intItemUOMId
 					END
 					ELSE
 					BEGIN
+						SELECT @intLoadDetailId = intLoadDetailId
+							,@dblOldDetailQuantity = dblQuantity
+						FROM tblLGLoadDetail
+						WHERE intLoadId = @intLoadId
+							AND intPContractDetailId = @intContractDetailId
+							AND intItemId = @intItemId
+
 						UPDATE tblLGLoadDetail
 						SET intConcurrencyId = intConcurrencyId + 1
 							,intVendorEntityId = @intVendorEntityId
@@ -989,6 +1054,23 @@ BEGIN TRY
 						WHERE intLoadId = @intLoadId
 							AND intPContractDetailId = @intContractDetailId
 							AND intItemId = @intItemId
+
+						IF @dblOldDetailQuantity <> @dblQuantity
+						BEGIN
+							DECLARE @dblDiffQty NUMERIC(18, 6)
+
+							SELECT @dblDiffQty = @dblQuantity - @dblOldDetailQuantity
+
+							IF @dblDiffQty <> 0
+							BEGIN
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId = @intContractDetailId
+									,@dblQuantityToUpdate = @dblDiffQty
+									,@intUserId = @intEntityId
+									,@intExternalId = @intLoadDetailId
+									,@strScreenName = 'Load Schedule'
+									,@intSourceItemUOMId = @intItemUOMId
+							END
+						END
 					END
 
 					SELECT @intStageLoadDetailId = MIN(intStageLoadDetailId)
@@ -1014,14 +1096,14 @@ BEGIN TRY
 						,@dblNewQuantity = NULL
 						,@dblOldGross = NULL
 						,@dblNewGross = NULL
-						,@intLoadDetailId = NULL
+						,@intAuditLoadDetailId = NULL
 						,@strAuditLogInfo = NULL
 
 					SELECT TOP 1 @dblOldQuantity = dblOldQuantity
 						,@dblNewQuantity = dblNewQuantity
 						,@dblOldGross = dblOldGross
 						,@dblNewGross = dblNewGross
-						,@intLoadDetailId = intLoadDetailId
+						,@intAuditLoadDetailId = intLoadDetailId
 						,@strAuditLogInfo = strAuditLogInfo
 					FROM @tblLGLoadDetailChanges
 
@@ -1037,7 +1119,7 @@ BEGIN TRY
 										{  
 										"action":"Updated",
 										"change":"Updated - Record: ' + LTRIM(@strAuditLogInfo) + '",
-										"keyValue":' + LTRIM(@intLoadDetailId) + ',
+										"keyValue":' + LTRIM(@intAuditLoadDetailId) + ',
 										"iconCls":"small-tree-modified",
 										"children":
 											[   
@@ -1052,7 +1134,7 @@ BEGIN TRY
 												"leaf":true,
 												"iconCls":"small-gear",
 												"isField":true,
-												"keyValue":' + LTRIM(@intLoadDetailId) + ',
+												"keyValue":' + LTRIM(@intAuditLoadDetailId) + ',
 												"associationKey":"tblLGLoadDetails",
 												"changeDescription":"Quantity",
 												"hidden":false
@@ -1067,7 +1149,7 @@ BEGIN TRY
 												"leaf":true,
 												"iconCls":"small-gear",
 												"isField":true,
-												"keyValue":' + LTRIM(@intLoadDetailId) + ',
+												"keyValue":' + LTRIM(@intAuditLoadDetailId) + ',
 												"associationKey":"tblLGLoadDetails",
 												"changeDescription":"Gross",
 												"hidden":false
@@ -1098,7 +1180,7 @@ BEGIN TRY
 
 					DELETE
 					FROM @tblLGLoadDetailChanges
-					WHERE intLoadDetailId = @intLoadDetailId
+					WHERE intLoadDetailId = @intAuditLoadDetailId
 				END
 			END
 
@@ -1528,6 +1610,7 @@ BEGIN TRY
 				IF @strRowState = 'Modified'
 				BEGIN
 					DECLARE @Condetails NVARCHAR(MAX) = ''
+						,@AllCondetails NVARCHAR(MAX) = ''
 
 					-- DROP TABLE tblLGLoadContainerChangesTest
 					--SELECT * INTO tblLGLoadContainerChangesTest FROM @tblLGLoadContainerChanges
@@ -1680,13 +1763,42 @@ BEGIN TRY
 						SELECT @intAuditLoadContainerId = NULL
 							,@strAuditContainerNumber = NULL
 							,@strAction = NULL
-							,@Condetails = NULL
 
 						SELECT TOP 1 @intAuditLoadContainerId = intLoadContainerId
 							,@strAuditContainerNumber = strContainerNumber
 							,@strAction = strAction
 						FROM @tblLGLoadContainerChanges
 						WHERE strAction <> 'Updated'
+
+						IF @strAction = 'Created'
+							SET @AllCondetails = @AllCondetails + '
+													{  
+													"action":"Created",
+													"change":"Created - Record: ' + LTRIM(@strAuditContainerNumber) + '",
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"iconCls":"small-new-plus",
+													"leaf": true
+													},'
+
+						IF @strAction = 'Deleted'
+							SET @AllCondetails = @AllCondetails + '
+													{  
+													"action":"Deleted",
+													"change":"Deleted - Record: ' + LTRIM(@strAuditContainerNumber) + '",
+													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
+													"iconCls":"small-new-minus",
+													"leaf": true
+													},'
+
+						DELETE
+						FROM @tblLGLoadContainerChanges
+						WHERE intLoadContainerId = @intAuditLoadContainerId
+					END
+
+					IF ISNULL(@AllCondetails, '') <> ''
+					BEGIN
+						IF RIGHT(@AllCondetails, 1) = ','
+							SET @AllCondetails = SUBSTRING(@AllCondetails, 0, LEN(@AllCondetails))
 
 						SET @Condetails = '{  
 								"action":"Updated",
@@ -1698,29 +1810,7 @@ BEGIN TRY
 										"change":"tblLGLoadContainers",
 										"children":[  
 													'
-
-						IF @strAction = 'Created'
-							SET @Condetails = @Condetails + '
-													{  
-													"action":"Created",
-													"change":"Created - Record: ' + LTRIM(@strAuditContainerNumber) + '",
-													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
-													"iconCls":"small-new-plus",
-													"leaf": true
-													},'
-
-						IF @strAction = 'Deleted'
-							SET @Condetails = @Condetails + '
-													{  
-													"action":"Deleted",
-													"change":"Deleted - Record: ' + LTRIM(@strAuditContainerNumber) + '",
-													"keyValue":' + LTRIM(@intAuditLoadContainerId) + ',
-													"iconCls":"small-new-minus",
-													"leaf": true
-													},'
-
-						IF RIGHT(@Condetails, 1) = ','
-							SET @Condetails = SUBSTRING(@Condetails, 0, LEN(@Condetails))
+						SET @Condetails = @Condetails + @AllCondetails
 						SET @Condetails = @Condetails + '
 									],
 									"iconCls":"small-tree-grid",
@@ -1737,10 +1827,6 @@ BEGIN TRY
 								,@actionIcon = 'small-tree-modified'
 								,@details = @Condetails
 						END
-
-						DELETE
-						FROM @tblLGLoadContainerChanges
-						WHERE intLoadContainerId = @intAuditLoadContainerId
 					END
 				END
 			END
