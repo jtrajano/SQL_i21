@@ -1,9 +1,11 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertToInvoice]
-	@SalesOrderId	     INT = 0,
-	@UserId			     INT = 0,
-	@ShipmentId			 INT = 0,
-	@FromShipping		 BIT = 0,
-	@NewInvoiceId		 INT = 0 OUTPUT
+	@SalesOrderId	     	INT = 0,
+	@UserId			     	INT = 0,
+	@ShipmentId			 	INT = 0,
+	@FromShipping		 	BIT = 0,
+	@intShipToLocationId	INT = NULL,
+	@NewInvoiceId		 	INT = 0 OUTPUT,
+	@dtmDateProcessed		DATETIME = NULL
 AS
 BEGIN
 
@@ -14,13 +16,13 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 --GLOBAL VARIABLES
-DECLARE @DateOnly				DATETIME,
+DECLARE @DateOnly				DATETIME = CAST(ISNULL(@dtmDateProcessed, GETDATE()) AS DATE),
 		@SoftwareInvoiceId		INT,
 		@dblSalesOrderSubtotal	NUMERIC(18, 6),			
 		@dblTax					NUMERIC(18, 6),
 		@dblSalesOrderTotal		NUMERIC(18, 6),
 		@dblDiscount			NUMERIC(18, 6),
-		@dblZeroAmount			NUMERIC(18, 6),
+		@dblZeroAmount			NUMERIC(18, 6) = 0,
 		@RaiseError				BIT,
 		@ErrorMessage			NVARCHAR(MAX),
 		@CurrentErrorMessage	NVARCHAR(MAX)		 
@@ -175,8 +177,6 @@ DECLARE @tblSODSoftware TABLE(intSalesOrderDetailId		INT,
 							dblPrice					NUMERIC(18,6), 
 							dblTotal					NUMERIC(18,6),
 							dtmMaintenanceDate			DATETIME)
-
-SELECT @DateOnly = CAST(GETDATE() AS DATE), @dblZeroAmount = 0.000000
 
 --GET ITEMS FROM SALES ORDER
 INSERT INTO @tblItemsToInvoiceUnsorted
@@ -535,7 +535,7 @@ SELECT TOP 1
 		@BOLNumber				=	strBOLNumber,
 		@DeliverPickUp			=	'',
 		@SalesOrderNumber		=	strSalesOrderNumber,
-		@ShipToLocationId		=	intShipToLocationId,
+		@ShipToLocationId		=	ISNULL(@intShipToLocationId, intShipToLocationId),
 		@BillToLocationId		=	intBillToLocationId,
 		@SplitId				=	intSplitId,
 		@SalesOrderComment		=   strComments,
@@ -884,9 +884,9 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 					,@CurrencyId					= @CurrencyId
 					,@TermId						= @TermId
 					,@EntityId						= @EntityId
-					,@InvoiceDate					= @Date
-					,@ShipDate						= @Date
-					,@PostDate						= NULL
+					,@InvoiceDate					= @DateOnly
+					,@ShipDate						= @DateOnly
+					,@PostDate						= @DateOnly
 					,@TransactionType				= 'Invoice'
 					,@Type							= 'Standard'
 					,@NewInvoiceId					= @NewInvoiceId			OUTPUT 
