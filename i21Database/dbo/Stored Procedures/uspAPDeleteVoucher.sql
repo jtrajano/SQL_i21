@@ -141,8 +141,6 @@ BEGIN TRY
 	WHERE A.intBillId = @intBillId
 	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 1
 
-	EXEC uspAPUpdateBillBatch @billId = @intBillId
-
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 
@@ -152,13 +150,21 @@ BEGIN TRY
 	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
 	WHERE intBillId = @intBillId
 
+	--Get intBillBatchId of the deleted Voucher
+	DECLARE @billBatchId INT
+	SET @billBatchId = (SELECT A.intBillBatchId FROM tblAPBill A WHERE A.intBillId = @intBillId)
+
+	--Delete Voucher
 	DELETE FROM dbo.tblAPBill 
 	WHERE intBillId = @intBillId
+
+	--Update the tblAPBillBatch
+	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
 
 	DELETE FROM dbo.tblSMTransaction
 	WHERE intRecordId = @intBillId 
 	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
-
+	
 	--Audit Log          
 	EXEC dbo.uspSMAuditLog 
 		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
