@@ -8117,6 +8117,7 @@
     <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
   	<Build Include="dbo\Functions\fnSCGetDPContract.sql" />
+    <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
