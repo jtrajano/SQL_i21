@@ -13,6 +13,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX) = ''
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
+		,@strFileName NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 	DECLARE @tblLoad TABLE (
 		strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -63,10 +64,12 @@ BEGIN TRY
 			BEGIN TRANSACTION
 
 			SELECT @strXml = NULL
+				,@strFileName = NULL
 				,@idoc = NULL
 				,@intNoOfRowsAffected = 1
 
 			SELECT @strXml = strXml
+				,@strFileName = strFileName
 			FROM tblIPIDOCXMLStage WITH (NOLOCK)
 			WHERE intIDOCXMLStageId = @intRowNo
 
@@ -267,6 +270,7 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strFileName
 				,strTransactionType
 				)
 			SELECT strCustomerReference
@@ -286,6 +290,7 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,@strFileName
 				,strTransactionType
 			FROM @tblLoad
 
@@ -333,10 +338,12 @@ BEGIN TRY
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
 				,strType
+				,strFileName
 				,dtmCreatedDate
 				)
 			SELECT strXml
 				,strType
+				,strFileName
 				,dtmCreatedDate
 			FROM tblIPIDOCXMLStage
 			WHERE intIDOCXMLStageId = @intRowNo
@@ -360,11 +367,13 @@ BEGIN TRY
 			INSERT INTO tblIPIDOCXMLError (
 				strXml
 				,strType
+				,strFileName
 				,strMsg
 				,dtmCreatedDate
 				)
 			SELECT strXml
 				,strType
+				,strFileName
 				,@ErrMsg
 				,dtmCreatedDate
 			FROM tblIPIDOCXMLStage
