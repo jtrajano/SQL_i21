@@ -1448,6 +1448,24 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO Export' and strModule = 'Manufacturing')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 150
+			,[strTransactionType]	= N'PO-Sequence-Cancel'
+			,[strPrefix]			= N'PO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO-Sequence-Cancel' and strModule = 'Manufacturing')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 151
+			,[strTransactionType]	= N'LSI and LS Acknowledgement'
+			,[strPrefix]			= N'LS-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'LSI and LS Acknowledgement' and strModule = 'Manufacturing')
 
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
