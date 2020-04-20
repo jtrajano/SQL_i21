@@ -131,6 +131,9 @@ SELECT   L.intLoadId
 		,L.dtmDocumentsApproved
 		,L.ysnCustomsReleased
 		,L.dtmCustomsReleased
+		,L.strMVessel
+	    ,L.strMVoyageNumber
+	    ,L.strIMONumber
 FROM tblLGLoad L
 JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
