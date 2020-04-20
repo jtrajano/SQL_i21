@@ -8116,6 +8116,7 @@
 	<Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContractPrice.sql" />
+  	<Build Include="dbo\Functions\fnSCGetDPContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
