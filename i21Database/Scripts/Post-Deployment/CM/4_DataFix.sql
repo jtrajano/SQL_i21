@@ -101,7 +101,7 @@ AND GL.intTransactionId IS NULL
 DELETE FROM tblGLDetailRecap 
 WHERE intTransactionId IS NULL
 
-UPDATE tblCMBankTransaction set ysnCheckToBePrinted = 0
+UPDATE tblCMBankTransaction set ysnCheckToBePrinted = 0 WHERE ISNULL(ysnCheckToBePrinted,0) = 1
 
 --This will fix all old transaction to be included as one batch in the Archive File tab of Process Payment. This is related to this jira key CM-1904
 IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'CM Include Old Transations in Archive Tab')
