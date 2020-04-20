@@ -3,8 +3,7 @@
 */
 CREATE PROCEDURE [dbo].[uspAPUpdateBillPayment]
 	@paymentIds AS Id READONLY,
-	@post BIT,
-	@paymentDiscount PaymentDetailDiscountTemp READONLY
+	@post BIT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -23,13 +22,12 @@ BEGIN
 	INNER JOIN tblAPPaymentDetail C ON A.intId = C.intPayScheduleId
 	WHERE C.intPaymentId IN (SELECT intId FROM @paymentIds)
 
-
 	UPDATE tblAPBill
 		SET 
 			@amountDue 	= C.dblAmountDue + 
 									(
 										ISNULL(paySchedDetails.dblPayment, ABS(payDetails.dblPayment))
-									+ 	ISNULL(paySchedDetails.dblDiscountTemp, ABS(payDetails.dblDiscountTemp))
+									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
 									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
 			tblAPBill.dblAmountDue = @amountDue, 
@@ -37,8 +35,8 @@ BEGIN
 			tblAPBill.dblPayment = C.dblPayment - 
 									(
 										ISNULL(paySchedDetails.dblPayment, ABS(payDetails.dblPayment))
-									+ 	ISNULL(paySchedDetails.dblDiscountTemp, ABS(payDetails.dblDiscountTemp))
-									-	ABS(ISNULL(payDetails.dblInterest, 0))
+									+ 	ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount))
+									- 	ABS(ISNULL(payDetails.dblInterest, 0))
 									),
 			tblAPBill.dtmDatePaid = NULL,
 			tblAPBill.dblDiscount = ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
@@ -69,12 +67,10 @@ BEGIN
 		SELECT 
 			SUM(B.dblPayment) dblPayment,
 			SUM(B.dblDiscount) dblDiscount,
-			SUM(D.dblDiscount) dblDiscountTemp,
 			SUM(B.dblInterest) dblInterest,
 			MIN(B.dblAmountDue) dblAmountDue,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
-		JOIN @paymentDiscount D on D.intBillId = B.intBillId
 		WHERE 
 			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId IS NULL
 		AND B.intBillId = C.intBillId
@@ -85,10 +81,8 @@ BEGIN
 			SUM(B.dblPayment) dblPayment,
 			SUM(B.dblAmountDue) dblAmountDue,
 			SUM(B.dblDiscount) dblDiscount,
-			SUM(D.dblDiscount) dblDiscountTemp,
 			B.intBillId 
 		FROM tblAPPaymentDetail B 
-		JOIN @paymentDiscount D on D.intBillId = B.intBillId
 		WHERE 
 			B.intPaymentId = A.intPaymentId AND B.intPayScheduleId > 0
 		AND B.intBillId = C.intBillId
