@@ -1862,6 +1862,7 @@ BEGIN TRY
 				,strContainerType
 				,strLoadNumber
 				,strAction
+				,strFileName
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -1886,6 +1887,7 @@ BEGIN TRY
 				,strContainerType
 				,strLoadNumber
 				,strAction
+				,strFileName
 				,strTransactionType
 				,''
 				,'Success'
@@ -1971,6 +1973,7 @@ BEGIN TRY
 				,strContainerType
 				,strLoadNumber
 				,strAction
+				,strFileName
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -1995,6 +1998,7 @@ BEGIN TRY
 				,strContainerType
 				,strLoadNumber
 				,strAction
+				,strFileName
 				,strTransactionType
 				,@ErrMsg
 				,'Failed'
