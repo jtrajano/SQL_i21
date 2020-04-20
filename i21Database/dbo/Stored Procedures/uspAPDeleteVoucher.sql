@@ -141,6 +141,8 @@ BEGIN TRY
 	WHERE A.intBillId = @intBillId
 	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 1
 
+	EXEC uspAPUpdateBillBatch @billId = @intBillId
+
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 
