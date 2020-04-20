@@ -65,8 +65,19 @@ BEGIN
 	INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN tblICInventoryShipmentItem ISI ON ARID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
 	INNER JOIN tblICInventoryShipmentItemLot ISIL ON ISI.[intInventoryShipmentItemId] = ISIL.[intInventoryShipmentItemId]
-    INNER JOIN tblICInventoryLot LOT ON ISIL.[intLotId] = LOT.[intLotId] AND LOT.[intTransactionId] = ISI.[intInventoryShipmentId]
-                                                                         AND LOT.[intTransactionDetailId] = ISI.[intInventoryShipmentItemId]
+    INNER JOIN (
+		SELECT intLotId
+			 , intItemUOMId
+			 , intTransactionId
+			 , intTransactionDetailId
+		FROM tblICInventoryLot LOT
+		GROUP BY intLotId
+			 , intItemUOMId
+			 , intTransactionId
+			 , intTransactionDetailId
+	) LOT ON ISIL.[intLotId] = LOT.[intLotId] 
+         AND LOT.[intTransactionId] = ISI.[intInventoryShipmentId]
+         AND LOT.[intTransactionDetailId] = ISI.[intInventoryShipmentItemId]
     LEFT JOIN tblARTransactionDetail ARTD ON [ARTD].[intTransactionId] = ARI.[intInvoiceId] 
                                          AND [ARTD].[intTransactionDetailId] = ARID.[intInvoiceDetailId]
     OUTER APPLY (
