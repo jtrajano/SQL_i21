@@ -33,18 +33,21 @@ FROM
 		,strBillId						= Bill.strBillId
 		,InboundNetWeight				= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblQtyReceived
 												END
 											)
 		,InboundGrossDollars			= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTotal													
 												END
 											)
 		,InboundTax						= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
 													ELSE BillDtl.dblTax
 												END
@@ -55,12 +58,13 @@ FROM
 										END
 		,InboundNetDue					= SUM(
 												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
 													WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL THEN 0 
-													ELSE BillDtl.dblTotal + BillDtl.dblTax 
+													ELSE BillDtl.dblTotal + BillDtl.dblTax +BillDtl.dblDiscount
 												END
 											) +
 											( 
-												CASE 
+												CASE 													
 													WHEN BillDtl.intInventoryReceiptItemId IS NOT NULL THEN ISNULL(tblOtherCharge.dblTotal,0) 
 													ELSE ISNULL(BillByReceipt.dblTotal, 0) --+ ISNULL(BillByReceiptManuallyAdded.dblTotal, 0)
 												END
@@ -88,10 +92,10 @@ FROM
 										END
 		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblTotals
+											WHEN ISNULL(PartialPayment.dblPayment, 0) <> 0 THEN PartialPayment.dblPayment 
 											ELSE NULL 
 										END
-		,lblPartialPrepayment			= 'Partial Payment Adj' COLLATE Latin1_General_CI_AS
+		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepayment		  = CASE 
 											WHEN ISNULL(BasisPayment.dblVendorPrepayment, 0) <> 0 THEN BasisPayment.dblVendorPrepayment -- PartialPayment.dblTotals 
 											ELSE NULL 
@@ -111,10 +115,12 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
-		FROM vyuGRSettlementSubReport
-		GROUP BY strId
+			,intBillDetailId
+		FROM vyuGRSettlementSubReport 
+		GROUP BY strId, intBillDetailId
 	) tblOtherCharge
-		ON tblOtherCharge.strId = Bill.strBillId
+		ON tblOtherCharge.strId = Bill.strBillId 
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -128,13 +134,15 @@ FROM
 	-- 	ON tblOtherCharge.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
-			intBillId
-			,intInventoryReceiptItemId
-			,SUM(dblTotal) dblTotal
-		FROM tblAPBillDetail
-		WHERE intInventoryReceiptChargeId IS NOT NULL
-		GROUP BY intBillId
-			,intInventoryReceiptItemId
+			a.intBillId
+			,a.intInventoryReceiptItemId
+			,SUM(a.dblTotal) dblTotal
+		FROM tblAPBillDetail a 
+			join tblAPBill  b
+				on a.intBillId = b.intBillId --and b.intTransactionType = 1
+		WHERE a.intInventoryReceiptChargeId IS NOT NULL
+		GROUP BY a.intBillId
+			,a.intInventoryReceiptItemId
 	) BillByReceipt ON BillByReceipt.intBillId = BillDtl.intBillId
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	LEFT JOIN (
@@ -168,7 +176,18 @@ FROM
 			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
 		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
 		WHERE a.ysnApplied = 1
-		GROUP BY a.intBillId
+		GROUP BY a.intBillId		
+
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+		
+
+		
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
 	LEFT JOIN (
 		SELECT 
@@ -235,11 +254,31 @@ FROM
 		intPaymentId					= PYMT.intPaymentId
 		,strPaymentNo					= PYMT.strPaymentRecordNum
 		,strBillId						= Bill.strBillId
-		,InboundNetWeight				= SUM(BillDtl.dblQtyOrdered)
-		,InboundGrossDollars			= SUM(BillDtl.dblTotal) 
-		,InboundTax						= SUM(BillDtl.dblTax) 
-		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal, 0)
-		,InboundNetDue					= SUM(BillDtl.dblTotal) + SUM(BillDtl.dblTax) + ISNULL(tblOtherCharge.dblTotal, 0)
+		,InboundNetWeight				= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblQtyReceived
+												END
+											)
+		,InboundGrossDollars			= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblTotal													
+												END
+											)
+		,InboundTax						= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0
+													ELSE BillDtl.dblTax
+												END
+											)
+		,InboundDiscount				= ISNULL(tblOtherCharge.dblTotal,0) 
+		,InboundNetDue					= SUM(
+												CASE 
+													WHEN Bill.intTransactionType = 2 then 0													
+													ELSE BillDtl.dblTotal + BillDtl.dblTax + isnull(tblOtherCharge.dblTotal, 0)
+												END
+											) 
 		,OutboundNetWeight				= 0 
 		,OutboundGrossDollars			= 0 
 		,OutboundTax		            = 0
@@ -263,14 +302,11 @@ FROM
 										END 
 		,lblFactorTax					= 'Factor Tax' COLLATE Latin1_General_CI_AS
 		,dblPartialPrepaymentSubTotal	= CASE 
-											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblTotals
+											WHEN ISNULL(PartialPayment.dblPayment,0) <> 0 THEN PartialPayment.dblPayment--PartialPayment.dblPayment
 											ELSE NULL 
 										END
-		,lblPartialPrepayment			= 'Partial Payment Adj' COLLATE Latin1_General_CI_AS
-		,dblPartialPrepayment			= CASE 
-											WHEN ISNULL(BasisPayment.dblVendorPrepayment,0) <> 0 THEN BasisPayment.dblVendorPrepayment--PartialPayment.dblTotals 
-											ELSE NULL 
-										END
+		,lblPartialPrepayment			= 'Basis Adv/Debit Memo' COLLATE Latin1_General_CI_AS
+		,dblPartialPrepayment			= sum(ISNULL(BasisPayment.dblVendorPrepayment,0))
 		,CheckAmount				    = PYMT.dblAmountPaid 		    
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL	
@@ -286,10 +322,13 @@ FROM
 		SELECT 
 			SUM(dblAmount) dblTotal
 			,strId
+			,intBillDetailId
 		FROM vyuGRSettlementSubReport
 		GROUP BY strId
+			,intBillDetailId
 	) tblOtherCharge
 		ON tblOtherCharge.strId = Bill.strBillId
+			and BillDtl.intBillDetailId = tblOtherCharge.intBillDetailId
 	-- LEFT JOIN (
 	-- 	SELECT 
 	-- 		A.intBillId
@@ -338,6 +377,15 @@ FROM
 		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType not  in (13, 3)
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
+			
+		union 
+		select 
+			intBillId,
+			dblTotal
+		from 
+		tblAPBill 
+		where intTransactionType = 2 
+
 	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
@@ -350,12 +398,13 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(dblTotal) dblTotals
-			,SUM(dblPayment) dblPayment 
-		FROM tblAPPaymentDetail
-		WHERE intBillId IS NOT NULL
+			,SUM(APD.dblTotal) dblTotals
+			,SUM(APD.dblPayment) dblPayment
+		FROM tblAPPaymentDetail APD
+		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
+		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)
 		GROUP BY intPaymentId
-		HAVING SUM(dblTotal) <> SUM(dblPayment)
+		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
 	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
 		SELECT
@@ -381,7 +430,7 @@ FROM
 		,PartialPayment.dblPayment
 		,PartialPayment.dblTotals
 		,PYMT.dblAmountPaid	
-		,BasisPayment.dblVendorPrepayment					
+		--,BasisPayment.dblVendorPrepayment					
 ) t
 GROUP BY 			
 	intPaymentId	
@@ -402,3 +451,6 @@ GROUP BY
 	,lblPartialPrepayment		 
 	--,dblPartialPrepayment		 
 	,CheckAmount
+GO
+
+
