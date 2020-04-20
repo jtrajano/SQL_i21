@@ -235,7 +235,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= - CASE WHEN ISNULL(CP.intPricingCount, 0) > 0 AND (ISNULL(ICS.ysnDestinationWeightsAndGrades, 0) = 0 OR ISNULL(ICS.intDestinationWeightId, 0) = 0) AND ICS.dblQuantity > ARID.dblQtyShipped AND COSTBUCKET.intCostBucketCount = 1 THEN ARID.dblQtyShipped ELSE ICIT.[dblQty] END
+	,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/AVGT.dblTotalQty, 6) * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -283,35 +283,25 @@ INNER JOIN tblICInventoryTransaction ICIT ON ICIT.[intTransactionId] = ICS.[intI
 										 AND ICIT.[intLotId] = ARIDL.[intLotId]
 										 AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0
 INNER JOIN (
-	SELECT intCostBucketCount = COUNT(*)
-		 , intTransactionId
+	SELECT intTransactionId
 		 , strTransactionId
 		 , intTransactionDetailId
 		 , intItemId
 		 , intLotId
+		 , dblTotalQty = SUM(dblQty)
 	FROM tblICInventoryTransaction ICIT 
-	WHERE ysnIsUnposted = 0 
+	WHERE ICIT.[ysnIsUnposted] = 0
 	  AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0
-	GROUP BY intTransactionId
-		 , strTransactionId
-		 , intTransactionDetailId
-		 , intItemId
-		 , intLotId
-) COSTBUCKET ON COSTBUCKET.[intTransactionId] = ICS.[intInventoryShipmentId] 
-		    AND COSTBUCKET.[strTransactionId] = ICS.[strShipmentNumber] 
-		    AND COSTBUCKET.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
-		    AND COSTBUCKET.[intItemId] = ARID.[intItemId]		    
-		    AND COSTBUCKET.[intLotId] = ARIDL.[intLotId]
-LEFT JOIN (
-    SELECT intContractDetailId  = CPF.intContractDetailId
-        , intContractHeaderId    = CPF.intContractHeaderId 
-        , intPricingCount        = COUNT(*)
-    FROM tblCTPriceFixation CPF
-    INNER JOIN tblCTPriceFixationDetail CPFD ON CPF.intPriceFixationId = CPFD.intPriceFixationId
-    GROUP BY CPF.intContractDetailId, CPF.intContractHeaderId
-    HAVING COUNT(*) > 0
-) CP ON ARID.intContractHeaderId = CP.intContractHeaderId
-    AND ARID.intContractDetailId = CP.intContractDetailId 
+	GROUP BY ICIT.[intTransactionId]
+		   , ICIT.[strTransactionId]
+		   , ICIT.[intTransactionDetailId]
+		   , ICIT.[intItemId]
+		   , ICIT.[intLotId]
+) AVGT ON AVGT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+      AND AVGT.[strTransactionId] = ICS.[strShipmentNumber] 
+      AND AVGT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+      AND AVGT.[intItemId] = ARID.[intItemId]
+      AND AVGT.[intLotId] = ARIDL.[intLotId]
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NOT NULL
   AND ((ARID.[strType] <> 'Provisional' AND [ysnFromProvisional] = 0) OR ([strType] = 'Provisional' AND [ysnProvisionalWithGL] = 1))
