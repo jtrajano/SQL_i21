@@ -58,7 +58,7 @@ BEGIN
 		,dblQuantity = LDT.dblQuantity
 		,strShippingLine = SL.strName
 		,strVessel = L.strMVessel
-		,strVesselIMO = L.strMarks --TODO: Replace with L.strIMONumber after LG-2337
+		,strVesselIMO = L.strIMONumber
 		,strLoadingPort = L.strOriginPort
 		,strDestinationPort = L.strDestinationPort
 		,dtmETAPOD = L.dtmETAPOD
