@@ -267,28 +267,36 @@ BEGIN TRY
 									AND B.intContractDetailId = @intTicketContractDetailId
 
 								SET @dblLoadUsedQty = 0
-								SELECT TOP 1 
-									@dblLoadUsedQty = dblQty
-								FROM tblSCTicketLoadUsed
-								WHERE intTicketId = @intTicketId
-									AND intLoadDetailId = @intTicketLoadDetailId
-									AND intEntityId = @intInventoryReceiptEntityId
+								-- SELECT TOP 1 
+								-- 	@dblLoadUsedQty = dblQty
+								-- FROM tblSCTicketLoadUsed
+								-- WHERE intTicketId = @intTicketId
+								-- 	AND intLoadDetailId = @intTicketLoadDetailId
+								-- 	AND intEntityId = @intInventoryReceiptEntityId
 
 								SET @dblContractAvailableQty = 0
+								SET @ysnLoadContract = 0
 								SELECT TOP 1 
 									@dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
+									,@ysnLoadContract = ISNULL(ysnLoad,0)
 								FROM vyuCTContractDetailView
 								WHERE intContractDetailId = @intTicketContractDetailId
 
-								IF @dblTicketScheduledQty <= @dblContractAvailableQty
+								IF(@ysnLoadContract = 1)
 								BEGIN
-									SET @dblLoadUsedQty = @dblTicketScheduledQty
+									SET @dblLoadUsedQty = 1
 								END
 								ELSE
 								BEGIN
-									SET @dblLoadUsedQty = @dblContractAvailableQty
+									IF @dblTicketScheduledQty <= @dblContractAvailableQty
+									BEGIN
+										SET @dblLoadUsedQty = @dblTicketScheduledQty
+									END
+									ELSE
+									BEGIN
+										SET @dblLoadUsedQty = @dblContractAvailableQty
+									END
 								END
-
 								IF @dblLoadUsedQty <> 0
 								BEGIN
 									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoadUsedQty, @intUserId, @intInventoryReceiptItemUsed, 'Inventory Receipt', @intTicketItemUOMId
@@ -451,7 +459,7 @@ BEGIN TRY
 							-- For Review
 							SET @ysnLoadContract = 0
 							SELECT TOP 1 
-								@ysnLoadContract = A.ysnLoad
+								@ysnLoadContract = ISNULL(A.ysnLoad,0)
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
@@ -1086,29 +1094,36 @@ BEGIN TRY
 										SET @dblContractAvailableQty = 0
 										SELECT TOP 1 
 											@dblContractAvailableQty = ISNULL(dblAvailableQtyInItemStockUOM,0)
+											,@ysnLoadContract = ISNULL(ysnLoad,0)
 										FROM vyuCTContractDetailView
 										WHERE intContractDetailId = @intTicketContractDetailId
 
-										IF @dblTicketScheduledQty <= @dblContractAvailableQty
+										IF(@ysnLoadContract = 1)
 										BEGIN
-											IF @dblLoadUsedQty < @dblTicketScheduledQty
-											BEGIN
-												SET @dblLoadUsedQty = @dblTicketScheduledQty
-											END
-
-											IF @dblLoadUsedQty > @dblContractAvailableQty
-											BEGIN
-												SET	@dblLoadUsedQty = @dblContractAvailableQty
-											END
+											SET @dblLoadUsedQty = 1
 										END
 										ELSE
-										BEGIN
-											IF @dblLoadUsedQty > @dblContractAvailableQty
+										BEGIN										
+											IF @dblTicketScheduledQty <= @dblContractAvailableQty
 											BEGIN
-												SET @dblLoadUsedQty = @dblContractAvailableQty
+												IF @dblLoadUsedQty < @dblTicketScheduledQty
+												BEGIN
+													SET @dblLoadUsedQty = @dblTicketScheduledQty
+												END
+
+												IF @dblLoadUsedQty > @dblContractAvailableQty
+												BEGIN
+													SET	@dblLoadUsedQty = @dblContractAvailableQty
+												END
+											END
+											ELSE
+											BEGIN
+												IF @dblLoadUsedQty > @dblContractAvailableQty
+												BEGIN
+													SET @dblLoadUsedQty = @dblContractAvailableQty
+												END
 											END
 										END
-										
 
 										IF @dblLoadUsedQty <> 0
 										BEGIN
