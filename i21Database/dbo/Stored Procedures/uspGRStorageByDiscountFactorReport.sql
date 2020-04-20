@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspGRStorageByDiscountFactorReport]
+CREATE PROCEDURE [dbo].[uspGRStorageByDiscountFactorReport]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 BEGIN TRY
