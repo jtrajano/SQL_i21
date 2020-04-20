@@ -34,5 +34,12 @@ SELECT	t.intInventoryShipmentId
 		,t.strCurrency
 		,t.strItemUOM
 		,t.intItemUOMId
+		,c.strCategoryCode
+		,c.strDescription strCategoryDescription
+		,cm.strCommodityCode
+		,cm.strDescription strCommodityDescription
 FROM	[tblICSearchShipmentInvoice] t
 	LEFT OUTER JOIN tblICInventoryShipment ship ON ship.intInventoryShipmentId = t.intInventoryShipmentId
+	INNER JOIN tblICItem i ON i.strItemNo = t.strItemNo
+	LEFT OUTER JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
+	left outer join tblICCommodity cm ON cm.intCommodityId = i.intCommodityId
