@@ -76,7 +76,6 @@ BEGIN
 			,[dtmVoucherDate]					=	ISNULL(A.dtmVoucherDate, A.dtmDate)
 			,[dtmDueDate]						=	dbo.fnGetDueDateBasedOnTerm(A.[dtmVoucherDate], A.[intTermId])
 			,[strReference]						=	A.strReference
-			,[strLoadShipmentNumber]			=	A.strLoadShipmentNumber
 			,[strVendorOrderNumber]				=	A.strVendorOrderNumber
 			,[strSourceNumber]					=	A.strSourceNumber
 			,[intPurchaseDetailId]				=	A.intPurchaseDetailId
@@ -400,7 +399,6 @@ BEGIN
 		,[strCurrency]					
 		,[dtmDate]						
 		,[strReference]			
-		,[strLoadShipmentNumber]
 		,[strSourceNumber]				
 		,[intPurchaseDetailId]			
 		,[strPurchaseOrderNumber]		
