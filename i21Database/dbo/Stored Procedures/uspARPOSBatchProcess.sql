@@ -643,7 +643,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
-				,strNotes						= POS.strReceiptNumber
+				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
 													THEN IFP.dblAmountDue
