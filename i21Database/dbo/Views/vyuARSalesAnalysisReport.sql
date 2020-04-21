@@ -197,6 +197,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -324,6 +325,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -458,6 +460,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
 				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -577,6 +580,7 @@ FROM
 												AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												AND ICISI.intItemId						= ICIT.intItemId
 												AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												AND ICIT.intInTransitSourceLocationId IS NULL
 		) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				      AND ARID.intItemId					= NONLOTTED.intItemId
 					  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -711,6 +715,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
 				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -826,6 +831,7 @@ FROM
 												AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												AND ICISI.intItemId						= ICIT.intItemId
 												AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -959,6 +965,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
 				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -1074,6 +1081,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
