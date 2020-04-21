@@ -1432,9 +1432,12 @@ BEGIN TRY
 							EXEC uspCTCreateInvoiceDetail
 								@intInvoiceDetailId
 								,@intInventoryShipmentId
+								,@intInventoryShipmentItemId
 								,@dblQuantityForInvoice
 								,@dblFinalPrice
 								,@intUserId
+								,@intContractHeaderId
+								,@intContractDetailId
 								,@intInvoiceDetailId OUTPUT
 
 							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
