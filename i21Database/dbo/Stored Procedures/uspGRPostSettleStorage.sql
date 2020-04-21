@@ -2188,6 +2188,7 @@ BEGIN TRY
 					,[dblNetWeight]
 					,[dblWeightUnitQty]
 					,[intWeightUOMId]
+					,[dtmDate]
 				 )
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2351,6 +2352,7 @@ BEGIN TRY
 														WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 														ELSE NULL
 													END	
+					,[dtmDate]						= case when CS.dtmDeliveryDate > Getdate() then CS.dtmDeliveryDate else getdate() end 
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -2629,6 +2631,7 @@ BEGIN TRY
 					,[dblWeightUnitQty]
 					,[intWeightUOMId]
 					,[intPurchaseTaxGroupId]
+					,[dtmDate]
 				)
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2678,6 +2681,7 @@ BEGIN TRY
 					,[dblWeightUnitQty] 			= 1
 					,[intWeightUOMId]				= NULL
 					,[intPurchaseTaxGroupId]		= NULL--CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intTaxGroupId END
+					,[dtmDate]						= case when CS.dtmDeliveryDate > Getdate() then CS.dtmDeliveryDate else getdate() end 
 				FROM tblICInventoryReceiptCharge ReceiptCharge
 				JOIN tblICItem Item 
 					ON Item.intItemId = ReceiptCharge.intChargeId
