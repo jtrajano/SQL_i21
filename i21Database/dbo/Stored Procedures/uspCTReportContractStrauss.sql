@@ -219,7 +219,7 @@ BEGIN TRY
 	SELECT	@strGeneralCondition = STUFF(								
 			(
 					SELECT
-							'  </br>' + DM.strConditionDesc
+							'  </br>' + CASE WHEN dbo.fnTrim(CD.strConditionDescription) = '' THEN  DM.strConditionDesc ELSE CD.strConditionDescription END
 					FROM	tblCTContractCondition	CD  WITH (NOLOCK)
 					JOIN	tblCTCondition			DM	WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId	
 					WHERE	CD.intContractHeaderId	=	CH.intContractHeaderId	AND (UPPER(DM.strConditionName)	= 'GENERAL CONDITION' OR UPPER(DM.strConditionName) LIKE	'%GENERAL_CONDITION')
