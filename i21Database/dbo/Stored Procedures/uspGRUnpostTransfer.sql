@@ -49,13 +49,37 @@ BEGIN
 	--		FROM tblGRCustomerStorage A 
 	--		INNER JOIN #tmpTransferCustomerStorage B 
 	--			ON B.intCustomerStorageId = A.intCustomerStorageId)
-	IF EXISTS(
-				SELECT TOP 1 1 FROM tblGRStorageHistory 
-				WHERE strType <> 'From Transfer' 
-				AND intCustomerStorageId IN (SELECT intToCustomerStorageId FROM tblGRTransferStorageReference WHERE intTransferStorageId = @intTransferStorageId)
-			)
+	IF EXISTS(SELECT TOP 1 1 
+			FROM tblGRCustomerStorage A 
+			OUTER APPLY (
+				SELECT dblUnitQty = SUM(dblUnitQty)
+					,intTransferStorageId
+				FROM tblGRTransferStorageReference
+				WHERE intTransferStorageId = @intTransferStorageId
+					AND intToCustomerStorageId = A.intCustomerStorageId
+				GROUP BY intToCustomerStorageId,intTransferStorageId
+			) F
+			WHERE F.intTransferStorageId = @intTransferStorageId AND F.dblUnitQty <> A.dblOpenBalance
+	)
 	BEGIN
-		SET @ErrMsg = 'Unable to reverse this transaction. The open balance of one or more customer storage/s no longer match its original balance.'
+		DECLARE @TicketNo VARCHAR(50)
+
+		SELECT @TicketNo = STUFF((
+			SELECT ',' + strStorageTicketNumber 
+			FROM tblGRCustomerStorage A 
+			OUTER APPLY (
+				SELECT dblUnitQty = SUM(dblUnitQty)
+					,intTransferStorageId
+				FROM tblGRTransferStorageReference
+				WHERE intTransferStorageId = @intTransferStorageId
+					AND intToCustomerStorageId = A.intCustomerStorageId
+				GROUP BY intToCustomerStorageId,intTransferStorageId
+			) F
+			WHERE F.intTransferStorageId = @intTransferStorageId AND F.dblUnitQty <> A.dblOpenBalance
+			FOR XML PATH('')
+		),1,1,'')
+		
+		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Reversal of transfer cannot proceed.'
 		
 		RAISERROR(@ErrMsg,16,1)
 		RETURN;
@@ -243,7 +267,7 @@ BEGIN
 						, ToStorage.intCurrencyId
 						,dblExchangeRate = 1
 						,intTransactionId = SR.intTransferStorageId
-						,intTransactionDetailId = SR.intTransferStorageSplitId
+						,intTransactionDetailId = SR.intTransferStorageReferenceId
 						,strTransactionId = TS.strTransferStorageTicket
 						,intTransactionTypeId = 56
 						,intLotId = NULL

@@ -474,7 +474,7 @@ BEGIN
 					, ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
-					,intTransactionDetailId = SR.intTransferStorageSplitId
+					,intTransactionDetailId = SR.intTransferStorageReferenceId
 					,strTransactionId = TS.strTransferStorageTicket
 					,intTransactionTypeId = 56
 					,intLotId = NULL
@@ -573,7 +573,6 @@ BEGIN
 							ON SR.intTransferStorageId = TS.intTransferStorageId
 						WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 						ORDER BY dtmTransferStorageDate
-
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
 							,@dblUnits = ITP.dblQty
@@ -1161,25 +1160,13 @@ BEGIN
 		FROM tblGRTransferStorageReference SR
 		INNER JOIN tblGRCustomerStorage FromStorage
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
-		INNER JOIN tblGRStorageType FromType
-			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
-		INNER JOIN tblGRStorageType ToType
-			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
-		JOIN tblICItemUOM IU
-			ON IU.intItemId = ToStorage.intItemId
-				AND IU.ysnStockUnit = 1
-		INNER JOIN tblICItemLocation IL
-			ON IL.intItemId = ToStorage.intItemId 
-				AND IL.intLocationId = ToStorage.intCompanyLocationId
-		INNER JOIN tblGRTransferStorage TS
-			ON SR.intTransferStorageId = TS.intTransferStorageId
+		INNER JOIN tblGRTransferStorageSplit TSS
+			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblGRStorageHistory SourceHistory
 			ON SourceHistory.intCustomerStorageId = FromStorage.intCustomerStorageId 
 				AND SourceHistory.intInventoryReceiptId IS NOT NULL
-		INNER JOIN tblGRTransferStorageSplit TSS
-			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
 		WHERE SR.intTransferStorageId = @intTransferStorageId
