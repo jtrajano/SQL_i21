@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblLGPickLotHeader]
 (
 	[intPickLotHeaderId] INT NOT NULL IDENTITY(1, 1), 
+	[intType] INT NULL,
     [intConcurrencyId] INT NOT NULL, 
     [strPickLotNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[dtmPickDate] DATETIME NOT NULL,
