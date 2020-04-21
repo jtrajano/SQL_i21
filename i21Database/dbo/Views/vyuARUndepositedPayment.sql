@@ -42,7 +42,7 @@ FROM (
 					, strPOSDrawerName = POSDRAWER.strPOSDrawerName
 		FROM tblARPaymentDetail PD
 		INNER JOIN tblARInvoice I ON I.intInvoiceId = PD.intInvoiceId AND I.strType = 'POS' AND I.ysnPosted = 1
-		INNER JOIN tblARPOS POS ON I.intInvoiceId = POS.intInvoiceId 
+		INNER JOIN tblARPOS POS ON I.intInvoiceId = POS.intInvoiceId  OR I.intInvoiceId =  POS.intCreditMemoId 
 		INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 		INNER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
 		INNER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
