@@ -50,7 +50,7 @@ BEGIN
 	SELECT 
          [intInvoiceDetailId]       = ARID.[intInvoiceDetailId]
         ,[intLotId]                 = ISIL.[intLotId]
-        ,[dblQuantityShipped]       = dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], LOT.[intItemUOMId], ARID.[dblQtyShipped])
+        ,[dblQuantityShipped]       = dbo.fnCalculateQtyBetweenUOM(ARID.[intItemUOMId], LOT.[intItemUOMId], ROUND(ISIL.dblQuantityShipped/AVGLOT.dblQuantityShipped, 6) * ARID.[dblQtyShipped])
         ,[dblGrossWeight]           = ISIL.[dblGrossWeight]
         ,[dblTareWeight]            = ISIL.[dblTareWeight]
         ,[dblWeightPerQty]          = ISIL.[dblWeightPerQty]
@@ -65,6 +65,12 @@ BEGIN
 	INNER JOIN tblARInvoice ARI ON ARID.[intInvoiceId] = ARI.[intInvoiceId]
 	INNER JOIN tblICInventoryShipmentItem ISI ON ARID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
 	INNER JOIN tblICInventoryShipmentItemLot ISIL ON ISI.[intInventoryShipmentItemId] = ISIL.[intInventoryShipmentItemId]
+    INNER JOIN (
+		SELECT intInventoryShipmentItemId
+			 , dblQuantityShipped	= SUM(dblQuantityShipped)
+		FROM tblICInventoryShipmentItemLot AISIL
+		GROUP BY AISIL.intInventoryShipmentItemId
+	) AVGLOT ON AVGLOT.intInventoryShipmentItemId = ARID.intInventoryShipmentItemId
     INNER JOIN (
 		SELECT intLotId
 			 , intItemUOMId
