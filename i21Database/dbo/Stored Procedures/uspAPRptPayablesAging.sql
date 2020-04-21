@@ -63,6 +63,7 @@ DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
 DECLARE @ysnFilter NVARCHAR(50) = 0;
 DECLARE @dtmDateFilter NVARCHAR(50);
+DECLARE @strPeriod NVARCHAR(50)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -106,7 +107,8 @@ BEGIN
 		0 AS dbl30,
 		0 AS dbl60,
 		0 AS dbl90,
-		0 AS intAging
+		0 AS intAging,
+		NULL AS strPeriod
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -402,6 +404,7 @@ SET @query = '
 	SELECT * FROM (
 		SELECT
 		A.dtmDate
+		,FP.strPeriod
 		,A.dtmDueDate
 		,B.strVendorId
 		,C.strName as strVendorName
@@ -480,10 +483,13 @@ SET @query = '
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
+		LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+		ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL --voided deleted voucher
 		SELECT
 		A.dtmDate
+		,FP.strPeriod
 		,A.dtmDueDate
 		,B.strVendorId
 		,C.strName as strVendorName
@@ -551,10 +557,13 @@ SET @query = '
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 		LEFT JOIN vyuAPVoucherCommodity F ON F.intBillId = tmpAgingSummaryTotal.intBillId
+		LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+		ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		UNION ALL
 		SELECT
 		A.dtmDate
+		,FP.strPeriod
 		,A.dtmDueDate
 		,B.strVendorId
 		,C.strName as strVendorName
@@ -620,6 +629,8 @@ SET @query = '
 		LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 		LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
 		LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
+		LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+		ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		AND D.strAccountCategory = ''AP Account''
 ) MainQuery'

@@ -3,6 +3,7 @@ AS
 SELECT *
 FROM (
 	SELECT A.dtmDate
+		,FP.strPeriod
 		,A.dtmDueDate
 		,B.strVendorId
 		,B.[intEntityId]
@@ -75,11 +76,14 @@ FROM (
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermsId = T.intTermID
 	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
 	LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
+	INNER JOIN dbo.tblGLFiscalYearPeriod FP
+	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	) MainQuery
 	UNION ALL
 	SELECT
 		A.dtmDate
+		,FP.strPeriod
 		,A.dtmDueDate
 		,B.strVendorId
 		,B.[intEntityId] as intEntityVendorId
@@ -132,6 +136,8 @@ FROM (
 	LEFT JOIN dbo.vyuGLAccountDetail D ON  A.intAccountId = D.intAccountId
 	LEFT JOIN dbo.tblSMTerm T ON A.intTermId = T.intTermID
 	LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C.intEntityClassId
+	INNER JOIN dbo.tblGLFiscalYearPeriod FP
+	ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
 	WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 	AND D.strAccountCategory = 'AP Account'
 	UNION ALL
@@ -139,6 +145,7 @@ FROM (
 	   FROM (
 		SELECT DISTINCT
 			 NULL AS dtmDate
+			,NULL AS strPeriod
 			,NULL AS dtmDueDate
 			,NULL AS strVendorId
 			,NULL AS intEntityId
@@ -185,6 +192,8 @@ FROM (
 		LEFT JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = IRE.intOrderId
 		LEFT JOIN dbo.tblLGLoad LG ON LG.intLoadId = APD.intLoadId
 		LEFT JOIN vyuAPVoucherCommodity E ON E.intBillId = tmpAgingSummaryTotal.intBillId
+		INNER JOIN dbo.tblGLFiscalYearPeriod FP
+		ON APB.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR APB.dtmDate = FP.dtmStartDate OR APB.dtmDate = FP.dtmEndDate
 		WHERE tmpAgingSummaryTotal.dblAmountDue <> 0
 		) MainQuery  
 GO
