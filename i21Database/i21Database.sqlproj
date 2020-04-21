@@ -8119,6 +8119,7 @@
     <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Functions\fnSCGetDPContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
