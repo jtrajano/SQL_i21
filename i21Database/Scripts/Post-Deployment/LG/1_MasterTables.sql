@@ -203,3 +203,18 @@ BEGIN
 
 END
 GO
+
+/*
+* Set default data for Pick Lot/Container Type
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGPickLotHeader') AND name = 'intType')
+BEGIN
+	EXEC ('UPDATE tblLGPickLotHeader
+			SET intType = 1
+			WHERE intType IS NULL
+	')
+END
+GO
+
+
+
