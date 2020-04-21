@@ -32,12 +32,14 @@ DECLARE @ysnPosted BIT
 DECLARE @ysnCountByLots BIT
 DECLARE @msg NVARCHAR(600)
 DECLARE @intLocationId INT
+DECLARE @countDate DATETIME
 
 SELECT
 	  @intInventoryCountId = intInventoryCountId
 	, @ysnPosted = ysnPosted
 	, @ysnCountByLots = ISNULL(ysnCountByLots, 0)
 	, @intLocationId = intLocationId
+	, @countDate = dtmCountDate
 FROM tblICInventoryCount 
 WHERE strCountNo = @strCountNo
 
@@ -65,16 +67,76 @@ BEGIN
 
 		IF EXISTS(SELECT * FROM tblICInventoryCountDetail WHERE intInventoryCountId = @intInventoryCountId AND intLotId = @intLotId)
 		BEGIN
-			UPDATE tblICInventoryCountDetail
+			UPDATE cd
 			SET
-				  dblPhysicalCount = @dblPhysicalCount
-				, dblWeightQty = CASE WHEN intWeightUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intWeightUOMId, @dblPhysicalCount) ELSE dblWeightQty END
-				, dblNetQty = CASE WHEN intWeightUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(intItemUOMId, intWeightUOMId, @dblPhysicalCount) ELSE dblNetQty END
-				, intEntityUserSecurityId = @intUserSecurityId
-				, dtmDateModified = GETDATE()
-				, intModifiedByUserId = @intUserSecurityId
-			WHERE intLotId = @intLotId
-				AND intInventoryCountId = @intInventoryCountId
+				  cd.dblPhysicalCount = @dblPhysicalCount
+				, cd.dblWeightQty = CASE WHEN lot.intWeightUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(lot.intItemUOMId, lot.intWeightUOMId, @dblPhysicalCount) ELSE dblWeightQty END
+				, cd.dblNetQty = CASE WHEN lot.intWeightUOMId IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(lot.intItemUOMId, lot.intWeightUOMId, @dblPhysicalCount) ELSE dblNetQty END
+				, cd.intEntityUserSecurityId = @intUserSecurityId
+				, cd.dtmDateModified = GETDATE()
+				, cd.intModifiedByUserId = @intUserSecurityId
+				, cd.dblLastCost = ISNULL(CASE 
+							WHEN lot.intWeightUOMId IS NOT NULL THEN 
+								ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, lot.intWeightUOMId, LastLotTransaction.dblCost), 0)
+							ELSE 
+								ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, lot.intItemUOMId, LastLotTransaction.dblCost), 0)
+						END 
+						, ISNULL(pricing.dblLastCost, pricing.dblStandardCost))
+				, dblSystemCount = ISNULL(LotTransactions.dblQty, 0)
+			FROM tblICInventoryCountDetail cd
+				INNER JOIN tblICLot lot ON lot.intLotId = cd.intLotId
+					AND lot.intItemId = cd.intItemId
+					AND lot.intItemLocationId = cd.intItemLocationId
+				LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = lot.intItemId
+					AND pricing.intItemLocationId = lot.intItemLocationId
+				OUTER APPLY (
+					SELECT
+						TOP 1 
+						t.intItemUOMId
+						,t.dblCost
+						,t.intInventoryTransactionId
+					FROM 
+						tblICInventoryTransaction t
+					WHERE 
+						t.intItemId = lot.intItemId
+						AND t.intItemLocationId = lot.intItemLocationId
+						AND t.intSubLocationId = lot.intSubLocationId
+						AND t.intStorageLocationId = lot.intStorageLocationId
+						AND t.intLotId = lot.intLotId
+						AND t.dblQty > 0 
+						AND ISNULL(t.ysnIsUnposted, 0) = 0 
+						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1	
+					ORDER BY
+						t.intInventoryTransactionId DESC 		
+				) LastLotTransaction
+				CROSS APPLY (
+					SELECT 
+						dblQty = SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, l.intItemUOMId, t.dblQty)) 
+						, dblWeight = 
+							SUM(
+								CASE 
+									WHEN l.intWeightUOMId IS NOT NULL THEN 
+										CASE 
+											WHEN t.intItemUOMId = l.intWeightUOMId THEN t.dblQty 
+											WHEN t.intItemUOMId = t.intItemUOMId THEN dbo.fnMultiply(t.dblQty, ISNULL(l.dblWeightPerQty, 0)) 
+											ELSE 0
+										END 
+									ELSE 
+										0
+								END 
+							)
+					FROM tblICInventoryTransaction t INNER JOIN tblICLot l
+						ON t.intLotId = l.intLotId
+					WHERE
+						t.intItemId = lot.intItemId
+						AND t.intItemLocationId = lot.intItemLocationId
+						AND t.intSubLocationId = lot.intSubLocationId
+						AND t.intStorageLocationId = lot.intStorageLocationId
+						AND t.intLotId = lot.intLotId
+						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1		
+				) LotTransactions
+			WHERE cd.intLotId = @intLotId
+				AND cd.intInventoryCountId = @intInventoryCountId
 		END
 		ELSE
 		BEGIN
@@ -108,6 +170,8 @@ BEGIN
 				, intCreatedByUserId
 				, strCountLine
 				, intStockUOMId
+				, dblLastCost
+				, dblSystemCount
 			)
 			SELECT
 				  intInventoryCountId = @intInventoryCountId
@@ -132,6 +196,14 @@ BEGIN
 				, intCreatedByUserId = @intUserSecurityId
 				, strCountLine = @strCountLine
 				, intStockUOMId = stockUOM.intItemUOMId
+				, dblLastCost = ISNULL(CASE 
+									WHEN lot.intWeightUOMId IS NOT NULL THEN 
+										ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, lot.intWeightUOMId, LastLotTransaction.dblCost), 0)
+									ELSE 
+										ISNULL(dbo.fnCalculateCostBetweenUOM(LastLotTransaction.intItemUOMId, lot.intItemUOMId, LastLotTransaction.dblCost), 0)
+								END 
+								, ISNULL(pricing.dblLastCost, pricing.dblStandardCost))
+				, dblSystemCount = ISNULL(LotTransactions.dblQty, 0)
 			FROM tblICLot lot
 				LEFT JOIN tblICItemStockUOM stockUOM ON stockUOM.intItemUOMId = lot.intItemUOMId
 					AND stockUOM.intItemId = lot.intItemId
@@ -139,6 +211,54 @@ BEGIN
 					AND stockUOM.intSubLocationId = lot.intSubLocationId
 					AND stockUOM.intItemLocationId = lot.intItemLocationId
 				LEFT OUTER JOIN tblICParentLot pLot ON lot.intParentLotId = pLot.intParentLotId
+				LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = lot.intItemId
+					AND pricing.intItemLocationId = lot.intItemLocationId
+				CROSS APPLY (
+					SELECT 
+						dblQty = SUM(dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, l.intItemUOMId, t.dblQty)) 
+						, dblWeight = 
+							SUM(
+								CASE 
+									WHEN l.intWeightUOMId IS NOT NULL THEN 
+										CASE 
+											WHEN t.intItemUOMId = l.intWeightUOMId THEN t.dblQty 
+											WHEN t.intItemUOMId = t.intItemUOMId THEN dbo.fnMultiply(t.dblQty, ISNULL(l.dblWeightPerQty, 0)) 
+											ELSE 0
+										END 
+									ELSE 
+										0
+								END 
+							)
+					FROM tblICInventoryTransaction t INNER JOIN tblICLot l
+						ON t.intLotId = l.intLotId
+					WHERE
+						t.intItemId = lot.intItemId
+						AND t.intItemLocationId = lot.intItemLocationId
+						AND t.intSubLocationId = lot.intSubLocationId
+						AND t.intStorageLocationId = lot.intStorageLocationId
+						AND t.intLotId = lot.intLotId
+						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1		
+				) LotTransactions 
+				OUTER APPLY (
+					SELECT
+						TOP 1 
+						t.intItemUOMId
+						,t.dblCost
+						,t.intInventoryTransactionId
+					FROM 
+						tblICInventoryTransaction t
+					WHERE 
+						t.intItemId = lot.intItemId
+						AND t.intItemLocationId = lot.intItemLocationId
+						AND t.intSubLocationId = lot.intSubLocationId
+						AND t.intStorageLocationId = lot.intStorageLocationId
+						AND t.intLotId = lot.intLotId
+						AND t.dblQty > 0 
+						AND ISNULL(t.ysnIsUnposted, 0) = 0 
+						AND dbo.fnDateLessThanEquals(t.dtmDate, @countDate) = 1	
+					ORDER BY
+						t.intInventoryTransactionId DESC 		
+				) LastLotTransaction
 			WHERE lot.intLotId = @intLotId	
 		END
 	END
@@ -215,13 +335,119 @@ BEGIN
 		BEGIN
 			UPDATE cd
 			SET
-					cd.dblPhysicalCount			= @dblPhysicalCount
+				  cd.dblPhysicalCount			= @dblPhysicalCount
 				, cd.intItemUOMId				= @intItemUOMId
 				, cd.dtmDateModified			= GETDATE()
 				, cd.intModifiedByUserId		= @intUserSecurityId
 				, cd.intEntityUserSecurityId	= @intUserSecurityId
+				, dblSystemCount			= CASE WHEN i.ysnSeparateStockForUOMs = 1 THEN ISNULL(stock.dblOnHand, 0) ELSE ISNULL(stockUnit.dblOnHand, 0)  END
+				, cd.dblLastCost				= ISNULL(
+						CASE 
+							-- Get the average cost. 
+							WHEN il.intCostingMethod = 1 THEN 				
+								dbo.fnCalculateCostBetweenUOM (
+									stockUOM.intItemUOMId
+									,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+									,ISNULL(
+										dbo.fnICGetMovingAverageCost(
+											i.intItemId
+											,il.intItemLocationId
+											,lastTransaction.intInventoryTransactionId
+							
+										)
+										,pricing.dblLastCost
+									)					
+								)
+					
+							-- Or else, get the last cost. 
+							ELSE 				
+								dbo.fnCalculateQtyBetweenUOM (
+									lastTransaction.intItemUOMId
+									, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+									, lastTransaction.dblCost
+								)
+						END 
+						, ISNULL(pricing.dblLastCost, pricing.dblStandardCost))
 			FROM tblICInventoryCount c
 				INNER JOIN tblICInventoryCountDetail cd ON cd.intInventoryCountId = c.intInventoryCountId
+				INNER JOIN tblICItemLocation il ON il.intItemId = cd.intItemId
+				INNER JOIN tblICItem i ON i.intItemId = cd.intItemId
+				INNER JOIN tblICItemUOM u ON u.intItemId = cd.intItemId
+					AND u.ysnStockUnit = 1
+				LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = cd.intItemId
+					AND pricing.intItemLocationId = il.intItemLocationId
+				INNER JOIN tblICItemUOM stockUOM ON stockUOM.intItemId = il.intItemId
+					AND stockUOM.ysnStockUnit = 1
+				LEFT JOIN (
+					SELECT	 
+						st.intItemId
+						,st.intItemLocationId
+						,st.intSubLocationId
+						,st.intStorageLocationId
+						,st.intLocationId
+						,dblOnHand = SUM (
+								dbo.fnCalculateQtyBetweenUOM (
+									st.intItemUOMId
+									, suom.intItemUOMId
+									, ISNULL(st.dblOnHand, 0.00)
+								)
+							)
+					FROM	
+						vyuICGetItemStockSummary st
+						INNER JOIN tblICItemUOM suom 
+							ON suom.intItemId = st.intItemId
+							AND suom.ysnStockUnit = 1
+					WHERE	
+						dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
+						AND st.intItemLocationId = @intItemLocationId
+					GROUP BY 
+						st.intItemId
+						,st.intItemLocationId
+						,st.intSubLocationId
+						,st.intStorageLocationId
+						,st.intLocationId
+				) stockUnit 
+				ON stockUnit.intItemId = i.intItemId			
+					AND stockUnit.intItemLocationId = il.intItemLocationId
+					AND stockUnit.intLocationId = il.intLocationId
+					AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0
+				LEFT JOIN (
+					SELECT	intItemId
+							,intItemUOMId
+							,intItemLocationId
+							,intSubLocationId
+							,intStorageLocationId
+							,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
+					FROM	vyuICGetItemStockSummary
+					WHERE	dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
+					GROUP BY 
+							intItemId,
+							intItemUOMId,
+							intItemLocationId,
+							intSubLocationId,
+							intStorageLocationId
+				) stock 
+					ON stock.intItemId = cd.intItemId
+					AND stock.intItemLocationId = il.intItemLocationId
+					--AND stock.intItemUOMId = stockUOM.intItemUOMId 
+					AND i.ysnSeparateStockForUOMs = 1
+				OUTER APPLY (
+					SELECT
+						TOP 1 
+						t.intItemUOMId
+						,t.dblCost
+						,t.intInventoryTransactionId
+					FROM 
+						tblICInventoryTransaction t
+					WHERE 
+						t.intItemId = i.intItemId
+						AND t.intItemLocationId = il.intItemLocationId 
+						AND t.dblQty > 0 
+						AND ISNULL(t.ysnIsUnposted, 0) = 0 
+						AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @countDate) = 1
+					ORDER BY
+						t.intInventoryTransactionId DESC 		
+				) lastTransaction 
 			WHERE c.intInventoryCountId = @intInventoryCountId
 				AND cd.intItemLocationId = @intItemLocationId
 				AND cd.intItemId = @intItemId
@@ -245,9 +471,11 @@ BEGIN
 				, intCreatedByUserId
 				, strCountLine
 				, intStockUOMId
+				, dblLastCost
+				, dblSystemCount
 			)
 			SELECT
-					intInventoryCountId		= @intInventoryCountId
+				  intInventoryCountId		= @intInventoryCountId
 				, intItemId					= i.intItemId
 				, intItemLocationId			= il.intItemLocationId
 				, intSubLocationId			= @intStorageLocationId
@@ -260,10 +488,112 @@ BEGIN
 				, intCreatedByUserId		= @intUserSecurityId
 				, strCountLine				= @strCountLine
 				, intStockUOMId				= u.intItemUOMId
+				, dblLastCost				= ISNULL(
+											CASE 
+												-- Get the average cost. 
+												WHEN il.intCostingMethod = 1 THEN 				
+													dbo.fnCalculateCostBetweenUOM (
+														stockUOM.intItemUOMId
+														,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+														,ISNULL(
+															dbo.fnICGetMovingAverageCost(
+																i.intItemId
+																,il.intItemLocationId
+																,lastTransaction.intInventoryTransactionId
+							
+															)
+															,pricing.dblLastCost
+														)					
+													)
+					
+												-- Or else, get the last cost. 
+												ELSE 				
+													dbo.fnCalculateQtyBetweenUOM (
+														lastTransaction.intItemUOMId
+														, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+														, lastTransaction.dblCost
+													)
+											END 
+											, ISNULL(pricing.dblLastCost, pricing.dblStandardCost))
+					, dblSystemCount			= CASE WHEN i.ysnSeparateStockForUOMs = 1 THEN ISNULL(stock.dblOnHand, 0) ELSE ISNULL(stockUnit.dblOnHand, 0)  END
 			FROM tblICItem i
 				INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
 				INNER JOIN tblICItemUOM u ON u.intItemId = i.intItemId
 					AND u.ysnStockUnit = 1
+				LEFT OUTER JOIN tblICItemPricing pricing ON pricing.intItemId = i.intItemId
+					AND pricing.intItemLocationId = il.intItemLocationId
+				INNER JOIN tblICItemUOM stockUOM ON stockUOM.intItemId = il.intItemId
+					AND stockUOM.ysnStockUnit = 1
+				LEFT JOIN (
+					SELECT	 
+						st.intItemId
+						,st.intItemLocationId
+						,st.intSubLocationId
+						,st.intStorageLocationId
+						,st.intLocationId
+						,dblOnHand = SUM (
+								dbo.fnCalculateQtyBetweenUOM (
+									st.intItemUOMId
+									, suom.intItemUOMId
+									, ISNULL(st.dblOnHand, 0.00)
+								)
+							)
+					FROM	
+						vyuICGetItemStockSummary st
+						INNER JOIN tblICItemUOM suom 
+							ON suom.intItemId = st.intItemId
+							AND suom.ysnStockUnit = 1
+					WHERE	
+						dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
+						AND st.intItemLocationId = @intItemLocationId
+					GROUP BY 
+						st.intItemId
+						,st.intItemLocationId
+						,st.intSubLocationId
+						,st.intStorageLocationId
+						,st.intLocationId
+				) stockUnit 
+				ON stockUnit.intItemId = i.intItemId			
+					AND stockUnit.intItemLocationId = il.intItemLocationId
+					AND stockUnit.intLocationId = il.intLocationId
+					AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0
+				LEFT JOIN (
+					SELECT	intItemId
+							,intItemUOMId
+							,intItemLocationId
+							,intSubLocationId
+							,intStorageLocationId
+							,dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
+					FROM	vyuICGetItemStockSummary
+					WHERE	dbo.fnDateLessThanEquals(dtmDate, @countDate) = 1
+					GROUP BY 
+							intItemId,
+							intItemUOMId,
+							intItemLocationId,
+							intSubLocationId,
+							intStorageLocationId
+				) stock 
+					ON stock.intItemId = i.intItemId
+					AND stock.intItemLocationId = il.intItemLocationId
+					--AND stock.intItemUOMId = stockUOM.intItemUOMId 
+					AND i.ysnSeparateStockForUOMs = 1
+				OUTER APPLY (
+					SELECT
+						TOP 1 
+						t.intItemUOMId
+						,t.dblCost
+						,t.intInventoryTransactionId
+					FROM 
+						tblICInventoryTransaction t
+					WHERE 
+						t.intItemId = i.intItemId
+						AND t.intItemLocationId = il.intItemLocationId 
+						AND t.dblQty > 0 
+						AND ISNULL(t.ysnIsUnposted, 0) = 0 
+						AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @countDate) = 1
+					ORDER BY
+						t.intInventoryTransactionId DESC 		
+				) lastTransaction 
 			WHERE i.intItemId = @intItemId
 				AND il.intItemLocationId = @intItemLocationId
 		END
