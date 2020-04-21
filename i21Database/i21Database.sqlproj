@@ -8433,7 +8433,8 @@
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />    
+    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />  
+    <Build Include="dbo\Functions\fnCTGetPricingDetailInvoices.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
