@@ -5,6 +5,7 @@
 AS
 
 BEGIN TRY
+
 	--BEGIN TRAN
 	DECLARE	@intReassignPricingId			INT,
 			@intPriceFixationDetailId		INT,
@@ -309,7 +310,7 @@ BEGIN TRY
 				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
+				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT, 1
 
 				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intNewFutOptTransactionId WHERE intPriceFixationDetailId = @intNewPriceFixationDetailId
 
@@ -330,7 +331,7 @@ BEGIN TRY
 				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-				EXEC uspRKAutoHedge @strXML,@intDeductedFutOptTransactionId OUTPUT
+				EXEC uspRKAutoHedge @strXML,@intDeductedFutOptTransactionId OUTPUT, 1
 
 				/*End of CT-3724*/
 			END
@@ -338,6 +339,14 @@ BEGIN TRY
 
 		SELECT	@intReassignPricingId = MIN(intReassignPricingId) FROM @tblPricing WHERE intReassignPricingId > @intReassignPricingId
 	END
+
+	------ Call Reassign of Match Derivatives to fix matched derivatives that were reassigned
+	DECLARE @Ids Id
+	INSERT INTO @Ids(intId)
+	SELECT @intDeductedFutOptTransactionId
+	UNION ALL SELECT @intNewFutOptTransactionId
+
+	EXEC uspRKReassignMatchDerivatives @Ids, @intUserId
 
 	UPDATE	PF
 	SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
@@ -441,7 +450,7 @@ BEGIN TRY
 			SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 			SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-			EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT
+			EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT, 1
 
 			SET @strXML = '<root><Transaction>';
 			SET @strXML = @strXML + '<intContractHeaderId>' + LTRIM(@intRecipientHeaderId) + '</intContractHeaderId>'
