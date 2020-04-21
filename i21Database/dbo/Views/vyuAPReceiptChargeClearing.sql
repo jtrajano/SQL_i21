@@ -1,6 +1,11 @@
 ﻿CREATE VIEW [dbo].[vyuAPReceiptChargeClearing]    
 AS     
-    
+
+ SELECT
+    charges.*
+    ,APClearing.intAccountId
+    ,APClearing.strAccountId
+FROM (   
 --BILL ysnPrice = 1/Charge Entity    
 SELECT    
     Receipt.intEntityVendorId AS intEntityVendorId    
@@ -22,8 +27,8 @@ SELECT
     ,Receipt.intLocationId    
     ,compLoc.strLocationName    
     ,CAST(1 AS BIT) ysnAllowVoucher    
-    ,APClearing.intAccountId  
-    ,APClearing.strAccountId  
+    -- ,APClearing.intAccountId  
+    -- ,APClearing.strAccountId  
 FROM tblICInventoryReceiptCharge ReceiptCharge    
 INNER JOIN tblICInventoryReceipt Receipt     
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
@@ -35,20 +40,20 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId  
-OUTER APPLY (  
- SELECT TOP 1  
-  ga.strAccountId  
-  ,ga.intAccountId  
- FROM   
-  tblGLDetail gd INNER JOIN tblGLAccount ga  
-   ON ga.intAccountId = gd.intAccountId  
-  INNER JOIN tblGLAccountGroup ag  
-   ON ag.intAccountGroupId = ga.intAccountGroupId  
- WHERE  
-  gd.strTransactionId = Receipt.strReceiptNumber  
-  AND ag.strAccountType = 'Liability'  
-  AND gd.ysnIsUnposted = 0   
-) APClearing  
+-- OUTER APPLY (  
+--  SELECT TOP 1  
+--   ga.strAccountId  
+--   ,ga.intAccountId  
+--  FROM   
+--   tblGLDetail gd INNER JOIN tblGLAccount ga  
+--    ON ga.intAccountId = gd.intAccountId  
+--   INNER JOIN tblGLAccountGroup ag  
+--    ON ag.intAccountGroupId = ga.intAccountGroupId  
+--  WHERE  
+--   gd.strTransactionId = Receipt.strReceiptNumber  
+--   AND ag.strAccountType = 'Liability'  
+--   AND gd.ysnIsUnposted = 0   
+-- ) APClearing  
 WHERE     
     Receipt.ysnPosted = 1      
 AND ReceiptCharge.ysnPrice = 1    
@@ -73,8 +78,8 @@ SELECT
     ,Receipt.intLocationId    
     ,compLoc.strLocationName    
     ,CAST(1 AS BIT) ysnAllowVoucher   
-    ,APClearing.intAccountId   
- ,APClearing.strAccountId  
+--     ,APClearing.intAccountId   
+--  ,APClearing.strAccountId  
 FROM tblICInventoryReceiptCharge ReceiptCharge    
 INNER JOIN tblICInventoryReceipt Receipt     
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
@@ -87,20 +92,20 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId   
-OUTER APPLY (  
- SELECT TOP 1  
-  ga.strAccountId  
-  ,ga.intAccountId  
- FROM   
-  tblGLDetail gd INNER JOIN tblGLAccount ga  
-   ON ga.intAccountId = gd.intAccountId  
-  INNER JOIN tblGLAccountGroup ag  
-   ON ag.intAccountGroupId = ga.intAccountGroupId  
- WHERE  
-  gd.strTransactionId = Receipt.strReceiptNumber  
-  AND ag.strAccountType = 'Liability'  
-  AND gd.ysnIsUnposted = 0   
-) APClearing  
+-- OUTER APPLY (  
+--  SELECT TOP 1  
+--   ga.strAccountId  
+--   ,ga.intAccountId  
+--  FROM   
+--   tblGLDetail gd INNER JOIN tblGLAccount ga  
+--    ON ga.intAccountId = gd.intAccountId  
+--   INNER JOIN tblGLAccountGroup ag  
+--    ON ag.intAccountGroupId = ga.intAccountGroupId  
+--  WHERE  
+--   gd.strTransactionId = Receipt.strReceiptNumber  
+--   AND ag.strAccountType = 'Liability'  
+--   AND gd.ysnIsUnposted = 0   
+-- ) APClearing  
 WHERE     
     Receipt.ysnPosted = 1      
 AND ReceiptCharge.ysnAccrue = 1    
@@ -126,8 +131,8 @@ SELECT
     ,Receipt.intLocationId    
     ,compLoc.strLocationName    
     ,CAST(1 AS BIT) ysnAllowVoucher   
-    ,APClearing.intAccountId   
- ,APClearing.strAccountId  
+--     ,APClearing.intAccountId   
+--  ,APClearing.strAccountId  
 FROM tblICInventoryReceiptCharge ReceiptCharge    
 INNER JOIN tblICInventoryReceipt Receipt     
     ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId     
@@ -140,20 +145,20 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = ReceiptCharge.intCostUOMId   
-OUTER APPLY (  
- SELECT TOP 1  
-  ga.strAccountId  
-  ,ga.intAccountId  
- FROM   
-  tblGLDetail gd INNER JOIN tblGLAccount ga  
-   ON ga.intAccountId = gd.intAccountId  
-  INNER JOIN tblGLAccountGroup ag  
-   ON ag.intAccountGroupId = ga.intAccountGroupId  
- WHERE  
-  gd.strTransactionId = Receipt.strReceiptNumber  
-  AND ag.strAccountType = 'Liability'  
-  AND gd.ysnIsUnposted = 0   
-) APClearing  
+-- OUTER APPLY (  
+--  SELECT TOP 1  
+--   ga.strAccountId  
+--   ,ga.intAccountId  
+--  FROM   
+--   tblGLDetail gd INNER JOIN tblGLAccount ga  
+--    ON ga.intAccountId = gd.intAccountId  
+--   INNER JOIN tblGLAccountGroup ag  
+--    ON ag.intAccountGroupId = ga.intAccountGroupId  
+--  WHERE  
+--   gd.strTransactionId = Receipt.strReceiptNumber  
+--   AND ag.strAccountType = 'Liability'  
+--   AND gd.ysnIsUnposted = 0   
+-- ) APClearing  
 WHERE     
     Receipt.ysnPosted = 1      
 AND ReceiptCharge.ysnAccrue = 1    
@@ -194,8 +199,8 @@ SELECT
     ,receipt.intLocationId    
     ,compLoc.strLocationName    
     ,CAST(1 AS BIT) ysnAllowVoucher   
-    ,APClearing.intAccountId  
- ,APClearing.strAccountId   
+--     ,APClearing.intAccountId  
+--  ,APClearing.strAccountId   
 FROM tblAPBill bill    
 INNER JOIN tblAPBillDetail billDetail    
     ON bill.intBillId = billDetail.intBillId    
@@ -211,6 +216,10 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
+WHERE     
+    billDetail.intInventoryReceiptChargeId IS NOT NULL    
+-- AND bill.ysnPosted = 1
+) charges
 OUTER APPLY (  
  SELECT TOP 1  
   ga.strAccountId  
@@ -221,10 +230,7 @@ OUTER APPLY (
   INNER JOIN tblGLAccountGroup ag  
    ON ag.intAccountGroupId = ga.intAccountGroupId  
  WHERE  
-  gd.strTransactionId = receipt.strReceiptNumber  
+  gd.strTransactionId = charges.strTransactionNumber  
   AND ag.strAccountType = 'Liability'  
   AND gd.ysnIsUnposted = 0   
 ) APClearing  
-WHERE     
-    billDetail.intInventoryReceiptChargeId IS NOT NULL    
-AND bill.ysnPosted = 1
