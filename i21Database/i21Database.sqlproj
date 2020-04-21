@@ -8638,6 +8638,7 @@
     <Build Include="dbo\Views\vyuIPPriceContractSubmittedByView.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillBatch.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReassignMatchDerivatives.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
