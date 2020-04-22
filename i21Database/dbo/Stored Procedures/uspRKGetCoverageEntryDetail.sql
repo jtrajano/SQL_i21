@@ -354,14 +354,18 @@ BEGIN
 	) tbl
 
 	SELECT tbl.*
-		, dblRunningTotal = SUM(dblQuantity) OVER (PARTITION BY tbl.intProductTypeId ORDER BY intRowNum)
+		, dblRunningTotal
 		, intProductTypeIndex = ROW_NUMBER() OVER (PARTITION BY tbl.intProductTypeId ORDER BY intRowNum)
 	INTO #Demand
 	FROM #DemandDetail tbl
 	CROSS APPLY (
-		SELECT dblRunningTotal = ISNULL(SUM(dblQuantity), 0)
-		FROM #DemandDetail dd
-		WHERE dd.intRowNum <= tbl.intRowNum
+		SELECT dblRunningTotal = ISNULL(SUM(ddSum.dblQuantity), 0)
+		FROM (
+			SELECT dd.dblQuantity
+			FROM #DemandDetail dd
+			WHERE dd.intRowNum <= tbl.intRowNum
+				AND dd.intProductTypeId = tbl.intProductTypeId
+		) ddSum
 	) RT
 
 	SELECT *
