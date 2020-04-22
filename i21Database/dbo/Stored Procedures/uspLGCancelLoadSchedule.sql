@@ -47,6 +47,11 @@ BEGIN TRY
 				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
 			END
 
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnCancelled, 0) = 1)
+			BEGIN
+				RAISERROR ('Shipment is already cancelled.',11,1)
+			END
+
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLoadDetail
 
@@ -108,11 +113,13 @@ BEGIN TRY
 				,intLoadDetailId = NULL
 				,intLoadDetailContainerLinkId = NULL
 				,intLoadId = NULL
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 10
 				,ysnCancelled = @ysnCancel
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
@@ -131,6 +138,7 @@ BEGIN TRY
 				UPDATE tblLGLoad
 				SET intShipmentStatus = 7
 					,strExternalShipmentNumber = NULL
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadShippingInstructionId
 
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
@@ -190,10 +198,12 @@ BEGIN TRY
 				SET intShipmentStatus = 1
 					,ysnCancelled = @ysnCancel
 					,strExternalShipmentNumber = NULL
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadId
 				
 				UPDATE tblLGLoadContainer
 				SET ysnNewContainer = 1
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadId
 
 				IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE intLoadId = @intLoadId)
@@ -277,6 +287,7 @@ BEGIN TRY
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 10
 				,ysnCancelled = @ysnCancel
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
