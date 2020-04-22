@@ -106,8 +106,7 @@ FROM 	tblICItem i
 			FROM	tblICItemUOM iuStock INNER JOIN tblICUnitMeasure umStock
 						ON iuStock.intUnitMeasureId = umStock.intUnitMeasureId
 			WHERE	iuStock.intItemId = i.intItemId
-					AND iuStock.ysnStockUnit = 1 -- TODO: In 18.3, change it to use the [Stock UOM] instead of [Stock Unit]. 
-					--AND iuStock.ysnStockUOM = 1
+					AND (iuStock.ysnStockUnit = 1 OR dblUnitQty = 1) 
 		) iuStock
 		LEFT JOIN tblICCategory c 
 			ON c.intCategoryId = i.intCategoryId
@@ -245,11 +244,11 @@ FROM 	tblICItem i
 													END
 			AND (receipt.intSourceType = 5 OR shipment.intSourceType = 4)
 
-WHERE	i.strType NOT IN (
-			'Other Charge'
-			,'Non-Inventory'
-			,'Service'
-			,'Software'
-			,'Comment'
-			,'Bundle'
-		)
+--WHERE	i.strType NOT IN (
+--			'Other Charge'
+--			,'Non-Inventory'
+--			,'Service'
+--			,'Software'
+--			,'Comment'
+--			,'Bundle'
+--		)
