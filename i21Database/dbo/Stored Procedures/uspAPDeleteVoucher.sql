@@ -129,7 +129,7 @@ BEGIN TRY
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
 
-	--EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
+	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
