@@ -855,3 +855,5 @@ AND EXISTS (
 		AND DSC.intItemId = billDetail.intItemId
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
 )
+
+*/
