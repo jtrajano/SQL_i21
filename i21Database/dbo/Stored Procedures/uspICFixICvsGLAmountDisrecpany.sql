@@ -42,47 +42,16 @@ SELECT
 	,ic.strBatchId
 	,ic.intInventoryTransactionId
 	,ic.dtmDate
-	,ic.[ic amount]
+	,[ic amount] = round(dbo.fnMultiply(ic.dblQty, ic.dblCost) + ic.dblValue, 2)
 	,gl.[gl amount]
-	,[diff] = ISNULL(ic.[ic amount], 0) - ISNULL(gl.[gl amount], 0)
-		--CASE 
-		--	WHEN SIGN(ISNULL(ic.[ic amount], 0)) = 1 THEN ISNULL(ic.[ic amount], 0) - ISNULL(gl.[gl amount], 0)
-		--	ELSE -(ISNULL(ic.[ic amount], 0) - ISNULL(gl.[gl amount], 0))
-		--END
-FROM 
-	(
-
-	SELECT	--'IC Only'
-			t.strTransactionId
-			,t.strBatchId
-			,t.intInventoryTransactionId
-			,t.dtmDate
-			,[ic amount] = SUM (ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2))
-	FROM	tblICInventoryTransaction t 
-			CROSS APPLY (
-				SELECT DISTINCT
-					t2.strTransactionId
-				FROM 
-					tblICInventoryTransaction t2 INNER JOIN tblICInventoryTransactionType ty
-						ON t2.intTransactionTypeId = ty.intTransactionTypeId
-				WHERE 
-					ty.strName = @strType
-					AND t.strTransactionId = t2.strTransactionId
-			) trans 
-	WHERE	
-			(MONTH(t.dtmDate) = @intMonth OR @intMonth IS NULL)
-			AND (YEAR(t.dtmDate) = @intYear OR @intYear IS NULL) 			
-			AND t.ysnIsUnposted = 0 
-	GROUP BY 
-			t.strTransactionId
-			,t.strBatchId
-			,t.intInventoryTransactionId
-			,t.dtmDate
-	) ic
+	,[diff] = round(dbo.fnMultiply(ic.dblQty, ic.dblCost) + ic.dblValue, 2) - ISNULL(gl.[gl amount], 0)
+FROM	
+	tblICInventoryTransaction ic INNER JOIN tblICInventoryTransactionType ty
+		ON ic.intTransactionTypeId = ty.intTransactionTypeId
 	OUTER APPLY (
 		SELECT 
 			--'GL Only'
-			[gl amount] = SUM(ROUND(dblDebit - dblCredit, 2))	
+			[gl amount] = ISNULL(SUM(ROUND(dblDebit - dblCredit, 2)), 0) 
 		FROM	
 			tblGLDetail gd INNER JOIN tblGLAccount ga
 				ON gd.intAccountId = ga.intAccountId
@@ -92,31 +61,26 @@ FROM
 				ON gm.intAccountSegmentId = gs.intAccountSegmentId
 			INNER JOIN tblGLAccountCategory ac 
 				ON ac.intAccountCategoryId = gm.intAccountCategoryId 
-			CROSS APPLY (
-				SELECT DISTINCT 
-					gd2.strTransactionId
-				FROM 
-					tblGLDetail gd2
-				WHERE 
-					gd2.strTransactionType = @strType
-					AND gd.strTransactionId = gd2.strTransactionId
-			) trans 
-		WHERE 
-			(MONTH(gd.dtmDate) = @intMonth OR @intMonth IS NULL)
-			AND (YEAR(gd.dtmDate) = @intYear OR @intYear IS NULL) 			
-			AND ac.strAccountCategory IN ('Inventory', 'Inventory In-Transit')
-			AND gd.ysnIsUnposted = 0 
-			AND gm.intAccountStructureId = 1
-			AND gd.strTransactionId = ic.strTransactionId
-			AND gd.strBatchId = ic.strBatchId
-			AND gd.intJournalLineNo = ic.intInventoryTransactionId			
-	) gl 
-where
-	ic.[ic amount] <> isnull(gl.[gl amount], 0) 
-order by 
-	ic.strTransactionId
+			INNER JOIN tblGLAccountStructure gst
+				ON gm.intAccountStructureId = gst.intAccountStructureId
 
-select 'debug @discrepancyList', * from @discrepancyList 
+		WHERE 
+			gd.strTransactionId = ic.strTransactionId
+			AND gd.strBatchId = ic.strBatchId
+			AND gd.intJournalLineNo = ic.intInventoryTransactionId
+			AND gd.ysnIsUnposted = 0 
+
+			AND ac.strAccountCategory IN ('Inventory', 'Inventory In-Transit')			
+			and gst.strType = 'Primary'
+	) gl 
+WHERE	
+	ty.strName = @strType
+	AND ic.ysnIsUnposted = 0 
+	AND	round(dbo.fnMultiply(ic.dblQty, ic.dblCost) + ic.dblValue, 2) <> isnull(gl.[gl amount], 0) 
+ORDER BY 
+	ic.intInventoryTransactionId
+
+--select 'debug @discrepancyList', * from @discrepancyList 
 
 -- If the list is empty, exit the sp immediately. 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @discrepancyList)
@@ -148,12 +112,12 @@ FETCH NEXT FROM loopDiscrepancy INTO
 -----------------------------------------------------------------------------------------------------------------------------
 WHILE @@FETCH_STATUS = 0
 BEGIN 
-	--PRINT 'Transaction Id: ' + @strTransactionId
+	PRINT 'Transaction Id: ' + @strTransactionId
 
 	-- Check if the fiscal year period is open
 	IF dbo.isOpenAccountingDate(@dtmDate) = 1
 	BEGIN 
-		--print 'fyp is open'
+		print 'fyp is open'
 		-- When FYP is open, update the existing GL Entries and match it with the value from IC. 
 		UPDATE gd
 		SET 
@@ -239,22 +203,17 @@ BEGIN
 	BEGIN
 		IF @strPreviousTransactionId <> @strTransactionId
 		BEGIN 
-			--PRINT 'different transaction'
-			
-			--IF @strTransactionId = 'SI-2197' -- DEBUG
-			--BEGIN 
-			--	select 'discrepancy @GLEntries', * from @GLEntries
-			--END 
-
+			PRINT 'different transaction'
 			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 			BEGIN
+				--select 'debug discrepancy fix 1', * from @GLEntries
 				EXEC dbo.uspGLBookEntries @GLEntries, 1				
 			END
 
 			DELETE FROM @GLEntries
 		END 
 
-		--print 'fyp is closed' 
+		print 'fyp is closed' 
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
@@ -427,6 +386,7 @@ END
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 BEGIN
-	--PRINT 'Last GL Book Entries'
+	PRINT 'Last GL Book Entries'
+	--select 'debug discrepancy fix 2', * from @GLEntries
 	EXEC dbo.uspGLBookEntries @GLEntries, 1
 END
