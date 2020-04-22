@@ -136,13 +136,18 @@ FROM
 		, dblLineTotal				= ARID.dblTotal
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -224,6 +229,8 @@ FROM
 		WHERE ISNULL(CF.intInvoiceId, 0) <> 0
 	) AS CFTRAN ON ARI.intInvoiceId = CFTRAN.intInvoiceId 
 	           AND ARI.strType = 'CF Tran'
+	LEFT OUTER JOIN tblTMSite TMSITE
+	ON TMSITE.intSiteID = ARID.intSiteId
 	WHERE ARI.ysnPosted = 1 
 		AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		AND ISNULL(ICI.strType, '') NOT IN ('Software', 'Bundle')
@@ -263,13 +270,18 @@ FROM
 		, dblLineTotal				= ARID.dblTotal
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -343,6 +355,8 @@ FROM
 			   AND ARID.intItemId					= LOTTED.intItemId
 			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	LEFT OUTER JOIN tblTMSite TMSITE
+	ON TMSITE.intSiteID = ARID.intSiteId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
@@ -516,13 +530,18 @@ FROM
 		, dblLineTotal				= ARID.dblQtyShipped * ARID.dblLicenseAmount
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -597,6 +616,8 @@ FROM
 				AND ARID.intItemId					= LOTTED.intItemId
 				AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 				AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	LEFT OUTER JOIN tblTMSite TMSITE
+	ON TMSITE.intSiteID = ARID.intSiteId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -765,13 +786,18 @@ FROM
 		, dblLineTotal				= ARID.dblQtyShipped * ARID.dblMaintenanceAmount
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -845,6 +871,8 @@ FROM
 			   AND ARID.intItemId					= LOTTED.intItemId
 			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	LEFT OUTER JOIN tblTMSite TMSITE
+	ON TMSITE.intSiteID = ARID.intSiteId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -1013,13 +1041,18 @@ FROM
 		, dblLineTotal				= ARID.dblTotal
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 								  THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteID IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -1094,6 +1127,8 @@ FROM
 			   AND ARID.intItemId					= LOTTED.intItemId
 			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	LEFT OUTER JOIN tblTMSite TMSITE
+	ON TMSITE.intSiteID = ARID.intSiteId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ICI.strType, '') = 'Software'
