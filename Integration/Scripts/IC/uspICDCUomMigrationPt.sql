@@ -48,7 +48,7 @@ USING
 	FROM ptpkgmst
 	WHERE ptpkg_code != ' '	
 ) AS [Source] (strUnitMeasure, strSymbol, intConcurrencyId)
-ON [Target].strSymbol = [Source].strSymbol
+ON [Target].strSymbol = [Source].strSymbol OR [Target].strUnitMeasure = [Source].strUnitMeasure
 WHEN NOT MATCHED THEN
 INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
 VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);

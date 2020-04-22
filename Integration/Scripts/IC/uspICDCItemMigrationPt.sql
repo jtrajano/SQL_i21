@@ -85,7 +85,6 @@ FROM (
 	GROUP BY ptitm_itm_no
 ) AS i
 WHERE NOT EXISTS(SELECT * FROM tblICItem where strItemNo = i.strItemNo)
-
 --update items Inventory type from Category table
 update	tblICItem 
 set		strType = C.strInventoryType
@@ -127,6 +126,10 @@ FROM   ptitmmst
 where RTRIM(LTRIM(ptitm_phys_inv_yno)) <> 'O'
 ---and ptitm_itm_no = '10093P'
 group by ptitm_itm_no,ptitm_unit,ptitm_pak_desc
+DELETE u
+FROM @ItemUoms u
+WHERE EXISTS(SELECT * FROM tblICItemUOM x inner join tblICItem z on z.intItemId = x.intItemId
+	WHERE z.strItemNo = u.strItemNo AND u.strUpcCode = x.strUpcCode)
 
 DECLARE @PackUnits TABLE (
 	intItemId INT,
@@ -209,13 +212,25 @@ VALUES(Source.intItemId, Source.intUnitMeasureId, Source.dblUnitQty, Source.strU
 --and p.ptitm_unit <> p.ptitm_pak_de
 
 ---- =============================== PACK UNITS ================================================================================
-INSERT INTO @PackUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
-SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 0 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
-FROM @ItemUoms uom
-	INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
-	INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strPack)
-WHERE NULLIF(uom.strPack, '') IS NOT NULL
-	AND NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = inv.intItemId AND intUnitMeasureId = u.intUnitMeasureId)
+ INSERT INTO @PackUnits(intItemId, intUnitMeasureId, dblUnitQty, strUpcCode, ysnStockUnit, ysnAllowPurchase, ysnAllowSale)
+	SELECT inv.intItemId, u.intUnitMeasureId, uom.dblPackQty, uom.strUpcCode, 0 ysnStockUnit, 1 ysnAllowPurchase, 1 ysnAllowSale
+	FROM @ItemUoms uom
+		INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
+		INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strPack)
+	WHERE NULLIF(uom.strPack, '') IS NOT NULL
+		AND NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = inv.intItemId AND intUnitMeasureId = u.intUnitMeasureId)
+
+	;WITH CTE AS 
+	(
+		SELECT intItemId, intUnitMeasureId, ROW_NUMBER() OVER 
+		(
+			PARTITION BY intItemId, intUnitMeasureId ORDER BY intItemId, intUnitMeasureId
+		) RowNumber
+		FROM  @PackUnits
+	)
+	DELETE
+	FROM CTE 
+	WHERE RowNumber > 1
 
 MERGE INTO tblICItemUOM AS Target
 USING (
@@ -372,7 +387,6 @@ where [strPricingLevelName] COLLATE Latin1_General_CI_AS = prclvl COLLATE Latin1
 order by CL.intCompanyLocationId, srt
 
 
-
 ------------------------------------------------------------------------------------------------------------------
 --import pricing levels for the items
 --Petro has 3 levels
@@ -509,6 +523,7 @@ SELECT inv.intItemId
 		JOIN tblICItem IA ON IA.strItemNo = p.ptitm_alt_itm COLLATE SQL_Latin1_General_CP1_CS_AS
 		JOIN tblICItemUOM U ON I.intItemId = U.intItemId AND U.ysnStockUnit = 1
 	WHERE ptitm_alt_itm <>'' AND ptitm_alt_itm <> ptitm_itm_no
+		AND NOT EXISTS(SELECT * FROM tblICItemBundle where intItemId = I.intItemId AND intItemUOMId = U.intItemUOMId)
 
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
