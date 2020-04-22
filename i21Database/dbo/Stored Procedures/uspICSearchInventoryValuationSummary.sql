@@ -67,8 +67,8 @@ FROM	tblGLFiscalYearPeriod f
 					ON Category.intCategoryId = Item.intCategoryId
 				LEFT JOIN tblICCommodity Commodity
 					ON Commodity.intCommodityId = Item.intCommodityId
-			WHERE
-				Item.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment', 'Bundle')
+			--WHERE
+			--	Item.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment', 'Bundle')
 		) Item		
 		OUTER APPLY (
 			SELECT 
@@ -80,7 +80,7 @@ FROM	tblGLFiscalYearPeriod f
 							, t.dblQty
 						)
 					)
-				,dblValue = SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
+				,dblValue = SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2))  --SUM(ROUND(ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0) + ISNULL(t.dblValue, 0), 2))
 				,t.intItemId
 				,t.intItemLocationId
 				,t.intInTransitSourceLocationId
