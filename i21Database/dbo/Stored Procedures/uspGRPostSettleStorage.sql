@@ -2703,7 +2703,7 @@ BEGIN TRY
 								on b.intContractDetailId = a.intContractDetailId
 							join tblCTContractHeader c
 								on c.intContractHeaderId = b.intContractHeaderId
-									and c.intPricingTypeId = 1		
+									and c.intPricingTypeId = 2		
 						where intBillDetailId is not null and intPriceFixationDetailId is not null
 					end
 
