@@ -42,14 +42,14 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
-			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1)
-			BEGIN
-				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
-			END
-
 			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnCancelled, 0) = 1)
 			BEGIN
 				RAISERROR ('Shipment is already cancelled.',11,1)
+			END
+
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+			BEGIN
+				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
 			END
 
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
@@ -167,7 +167,7 @@ BEGIN TRY
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intPContractDetailId AND intContractStatusId = 3)
+				IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractStatusId = 3 AND intContractDetailId IN (@intPContractDetailId, @intSContractDetailId))
 				BEGIN
 					RAISERROR ('Associated contract seq is in cancelled status. Cannot continue.',11,1)
 				END
@@ -232,6 +232,11 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnCancelled, 0) = 1)
+			BEGIN
+				RAISERROR ('Shipping instruction is already cancelled.',11,1)
+			END
+
 			IF EXISTS (
 					SELECT 1
 					FROM tblLGLoad
