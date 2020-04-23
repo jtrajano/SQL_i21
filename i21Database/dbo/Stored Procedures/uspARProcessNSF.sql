@@ -193,7 +193,7 @@ INSERT INTO @GLEntries (
 	,[dblForeignRate]
 )
 SELECT
-	 [dtmDate]					= GL.dtmDate
+	 [dtmDate]					= P.dtmDate
 	,[strBatchID]				= GL.strBatchId
 	,[intAccountId]				= GL.intAccountId
 	,[dblDebit]					= GL.dblCredit
