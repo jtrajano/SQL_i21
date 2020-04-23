@@ -388,6 +388,11 @@ BEGIN
 					SET @effectiveDate = @dtmOutPriceIndexDate
 				END
 			END
+
+			IF(@effectiveDate IS NULL)
+			BEGIN
+				GOTO ENDLOOP
+			END
 		
 			IF(@ysnAccountQuote = 0)
 			BEGIN
