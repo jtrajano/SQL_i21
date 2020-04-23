@@ -49,6 +49,31 @@ IF(ISNULL(@Post,0)) = 1
 		WHERE  
 			ARI.[ysnPosted] = 1
 
+		INSERT INTO @returntable(
+			 [intInvoiceId]
+			,[strInvoiceNumber]
+			,[strTransactionType]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[strBatchId]
+			,[strPostingError])
+
+		--INVENTORY IMPACT UNCHECKED
+		SELECT
+			 [intInvoiceId]			= I.[intInvoiceId]
+			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+			,[strTransactionType]	= I.[strTransactionType]
+			,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+			,[intItemId]			= I.[intItemId] 
+			,[strBatchId]			= I.[strBatchId]
+			,[strPostingError]		= 'Inventory Impact should be checked on type Invoice, Cash  or Cash Refund.'
+		FROM 
+			@Invoices I
+		INNER JOIN  tblARInvoice ARI
+				ON I.[intInvoiceId] = ARI.[intInvoiceId]
+		WHERE  
+			(ARI.[strTransactionType] = 'Invoice' OR ARI.[strTransactionType] = 'Cash Refund' OR ARI.[strTransactionType] = 'Cash')
+			AND ARI.[ysnImpactInventory] = 0
 
 		INSERT INTO @returntable(
 			 [intInvoiceId]
