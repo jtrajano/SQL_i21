@@ -7726,6 +7726,7 @@
     <Build Include="dbo\Tables\tblGROldTransactionMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
