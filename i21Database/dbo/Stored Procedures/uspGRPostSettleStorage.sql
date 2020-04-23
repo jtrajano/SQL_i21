@@ -732,13 +732,6 @@ BEGIN TRY
 					ON IC.intItemId = SCSetup.intDefaultFeeItemId
 			END
 
-
-
-
-
-
-
-
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
 			FROM @SettleStorage
 			WHERE dblRemainingUnits > 0
@@ -1481,13 +1474,10 @@ BEGIN TRY
 						,dblQty
 						,dblUOMQty
 						,dblCost
-						,dblSalesPrice
 						,intCurrencyId
-						,dblExchangeRate
 						,intTransactionId
 						,intTransactionDetailId
 						,strTransactionId
-						,intTransactionTypeId
 						,intLotId
 						,intSubLocationId
 						,intStorageLocationId
@@ -1500,13 +1490,10 @@ BEGIN TRY
 						,dblQty
 						,dblUOMQty
 						,dblCost
-						,dblSalesPrice
 						,intCurrencyId
-						,dblExchangeRate
 						,intTransactionId
 						,intTransactionDetailId
 						,strTransactionId
-						,intTransactionTypeId
 						,intLotId
 						,intSubLocationId
 						,intStorageLocationId
@@ -2493,7 +2480,6 @@ BEGIN TRY
 						insert into tblGRSettleStorageBillDetail(intConcurrencyId, intSettleStorageId, intBillId)
 						select 1, @intSettleStorageId, @createdVouchersId
 					END
-
 
 
 					DELETE FROM @detailCreated

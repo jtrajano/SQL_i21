@@ -1,5 +1,6 @@
 CREATE PROCEDURE [dbo].[uspGRCreateGLEntriesForTransferStorage]
 	 @intTransferStorageId INT
+	,@intTransactionDetailId INT
 	,@strBatchId AS NVARCHAR(40)
 	,@dblCost DECIMAL(18,6)
 	,@ysnPost AS BIT
@@ -96,8 +97,7 @@ BEGIN
 	FROM tblGRTransferStorageReference SR
 	JOIN tblGRCustomerStorage CS 
 		ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
-	WHERE SR.intTransferStorageId = @intTransferStorageId
-	
+	WHERE SR.intTransferStorageId = @intTransferStorageId AND SR.intTransferStorageReferenceId = @intTransactionDetailId
 
 	if @debug_awesome = 1 and 1 = 1
 	begin
@@ -234,18 +234,20 @@ BEGIN
 	JOIN tblICItem IC
 		ON IC.intItemId = CS.intItemId
 	JOIN tblICItemUOM IU
-	ON IU.intItemId = CS.intItemId
-		AND IU.ysnStockUnit = 1
+		ON IU.intItemId = CS.intItemId
+			AND IU.ysnStockUnit = 1
 	JOIN tblQMTicketDiscount QM 
-	ON QM.intTicketFileId = CS.intCustomerStorageId 
-		AND QM.strSourceType = 'Storage'
+		ON QM.intTicketFileId = CS.intCustomerStorageId 
+			AND QM.strSourceType = 'Storage'
 	JOIN tblGRDiscountScheduleCode DSC
-	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 	JOIN tblGRDiscountCalculationOption DCO
-	ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
+		ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
 	JOIN tblICItem DItem 
-	ON DItem.intItemId = DSC.intItemId
-	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId
+		ON DItem.intItemId = DSC.intItemId
+	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 
+		AND SR.intTransferStorageId = @intTransferStorageId 
+		AND SR.intTransferStorageReferenceId = @intTransactionDetailId
 
 
 	UNION
@@ -281,7 +283,7 @@ BEGIN
 	if @debug_awesome = 1 and 1 = 0
 	begin
 		select ' start other charge', @dblGrossUnits
-		select * from @tblOtherCharges
+		select '@tblOtherCharges',* from @tblOtherCharges
 		select ' end other charge'
 				
 		select * 

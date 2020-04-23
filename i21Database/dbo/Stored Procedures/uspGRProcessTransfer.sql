@@ -500,15 +500,15 @@ BEGIN
 					ON SR.intTransferStorageId = TS.intTransferStorageId
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
-
-				DECLARE @cursorId INT
+				
+				DECLARE @cursorId INT, @intTransactionDetailId INT
 
 				DECLARE _CURSOR CURSOR
 				FOR
-				SELECT intId FROM @ItemsToPost
+				SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 				OPEN _CURSOR
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
@@ -831,7 +831,7 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@intTransactionDetailId,@strBatchId,@dblCost,1
 							UPDATE @GLEntries 
 							SET dblDebit		= dblCredit
 								,dblDebitUnit	= dblCreditUnit
@@ -1011,7 +1011,7 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@intTransactionDetailId,@strBatchId,@dblOriginalCost,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
@@ -1020,7 +1020,7 @@ BEGIN
 						END
 
 			
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;

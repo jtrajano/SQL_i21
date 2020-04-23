@@ -816,13 +816,13 @@ BEGIN TRY
 					,dblQty					= dblQty * -1
 					,dblUOMQty				= dblUOMQty * -1
 					,dblCost
-					,dblSalesPrice
+					,0
 					,intCurrencyId
-					,dblExchangeRate
+					,1
 					,intTransactionId		= @intNewSettleStorageId
 					,intTransactionDetailId	= @intSettleStorageTicketId
 					,strTransactionId		= @TicketNo
-					,intTransactionTypeId
+					,intTransactionTypeId	= 44
 					,intLotId
 					,intSubLocationId
 					,intStorageLocationId
@@ -869,13 +869,13 @@ BEGIN TRY
 						,dblQty					= dblQty * -1
 						,dblUOMQty				= dblUOMQty * -1
 						,dblCost
-						,dblSalesPrice
+						,0
 						,intCurrencyId
-						,dblExchangeRate
+						,1
 						,intTransactionId		= @intNewSettleStorageId
 						,intTransactionDetailId	= @intSettleStorageTicketId
 						,strTransactionId		= @TicketNo
-						,intTransactionTypeId
+						,intTransactionTypeId	= 44
 						,intLotId
 						,intSubLocationId
 						,intStorageLocationId

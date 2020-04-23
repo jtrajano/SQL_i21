@@ -25,13 +25,10 @@ BEGIN
 			,dblQty
 			,dblUOMQty
 			,dblCost
-			,dblSalesPrice
 			,intCurrencyId
-			,dblExchangeRate
 			,intTransactionId
 			,intTransactionDetailId
 			,strTransactionId
-			,intTransactionTypeId
 			,intLotId
 			,intSubLocationId
 			,intStorageLocationId
@@ -45,13 +42,10 @@ BEGIN
 			,ITS.dblQty
 			,ITS.dblUOMQty
 			,ITS.dblCost
-			,ITS.dblSalesPrice
 			,ITS.intCurrencyId
-			,ITS.dblExchangeRate
 			,ITS.intTransactionId
 			,ITS.intTransactionDetailId
 			,ITS.strTransactionId
-			,ITS.intTransactionTypeId
 			,ITS.intLotId
 			,ITS.intSubLocationId
 			,ITS.intStorageLocationId
@@ -71,13 +65,10 @@ BEGIN
 			,IT.dblQty
 			,IT.dblUOMQty
 			,IT.dblCost
-			,IT.dblSalesPrice
 			,IT.intCurrencyId
-			,IT.dblExchangeRate
 			,IT.intTransactionId
 			,IT.intTransactionDetailId
 			,IT.strTransactionId
-			,IT.intTransactionTypeId
 			,IT.intLotId
 			,IT.intSubLocationId
 			,IT.intStorageLocationId
