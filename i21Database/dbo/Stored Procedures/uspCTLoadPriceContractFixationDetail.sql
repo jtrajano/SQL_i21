@@ -96,7 +96,7 @@ BEGIN TRY
 			ysnBilled = FDV.ysnBilled,
 			strBillIds = FDV.strBillIds,
 			strBills = FDV.strBills,
-			strEditErrorMessage = dbo.GetPricingDetailInvoices(FD.intPriceFixationDetailId)
+			strEditErrorMessage = dbo.fnCTGetPricingDetailInvoices(FD.intPriceFixationDetailId)
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
