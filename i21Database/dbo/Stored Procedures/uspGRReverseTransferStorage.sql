@@ -400,15 +400,15 @@ BEGIN
 					ON SR.intTransferStorageId = TS.intTransferStorageId
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intNewTransferStorageId
 				ORDER BY dtmTransferStorageDate
-				select '@ItemsToPost',* from @ItemsToPost
-				DECLARE @cursorId INT
+				--select '@ItemsToPost',* from @ItemsToPost
+				DECLARE @cursorId INT, @intTransactionDetailId INT
 
 				DECLARE _CURSOR CURSOR
 				FOR
-				SELECT intId FROM @ItemsToPost
+				SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 				OPEN _CURSOR
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
@@ -479,6 +479,90 @@ BEGIN
 						DELETE FROM @GLEntries
 						DELETE FROM @GLForItem
 
+						DECLARE @OtherChargesDetail AS TABLE(
+							intOtherChargesDetailId INT IDENTITY(1, 1)
+							,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+							,intCustomerStorageId INT
+							,intCompanyLocationId INT
+							,dblUnits DECIMAL(24, 10)
+							,dblCashPrice DECIMAL(36, 20)
+							,dblExactCashPrice DECIMAL (24,10)
+							,intItemId INT NULL
+							,intItemType INT NULL
+							,IsProcessed BIT
+							,intTicketDiscountId INT NULL
+							,ysnDiscountFromGrossWeight BIT NULL
+							,ysnIsPercent BIT NULL
+							,ysnInventoryCost BIT NULL
+						)
+						delete from @OtherChargesDetail
+						INSERT INTO @OtherChargesDetail
+						(
+							intCustomerStorageId
+							,intCompanyLocationId
+							,dblUnits
+							,dblCashPrice
+							,dblExactCashPrice
+							,intItemId
+							,intItemType
+							,IsProcessed
+							,intTicketDiscountId
+							,ysnDiscountFromGrossWeight
+							,ysnIsPercent
+							,ysnInventoryCost
+						)
+						SELECT 
+							 intCustomerStorageId		= CS.intCustomerStorageId
+							,intCompanyLocationId		= CS.intCompanyLocationId 
+							,dblUnits					= CASE
+															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
+																CASE WHEN CS.dblGrossQuantity IS NULL THEN SR.dblUnitQty
+																ELSE
+																	--(SR.dblUnitQty / CS.dblOriginalBalance) * 
+																	ROUND((CS.dblGrossQuantity  * (isnull(SR.dblSplitPercent, 100) / 100)) ,10)
+																END
+															ELSE SR.dblUnitQty
+														END
+							,dblCashPrice				= CASE 
+															WHEN QM.strDiscountChargeType = 'Percent'
+																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
+																			*
+																			@dblCost
+															ELSE --Dollar
+																dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
+														END
+							,dblExactCashPrice			= 0
+							,intItemId					= DItem.intItemId 
+							,intItemType				= 3 
+							,IsProcessed				= 0
+							,intTicketDiscountId		= QM.intTicketDiscountId
+							,ysnDiscountFromGrossWeight	= CASE
+															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
+															ELSE 0
+														END
+							,ysnIsPercent				=  CASE WHEN QM.strDiscountChargeType = 'Percent' THEN 1 ELSE 0 END
+							,ysnInventoryCost			= DItem.ysnInventoryCost
+						FROM @ItemsToPost ITP
+						JOIN tblGRTransferStorageReference SR
+							ON ITP.intTransactionId = SR.intTransferStorageId
+							AND ITP. intTransactionDetailId = SR.intTransferStorageSplitId
+						JOIN tblGRCustomerStorage CS
+							ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
+						JOIN tblICItemUOM IU
+							ON IU.intItemId = CS.intItemId
+								AND IU.ysnStockUnit = 1
+						JOIN tblQMTicketDiscount QM 
+							ON QM.intTicketFileId = CS.intCustomerStorageId 
+								AND QM.strSourceType = 'Storage'
+						JOIN tblGRDiscountScheduleCode DSC
+							ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
+						JOIN tblGRDiscountCalculationOption DCO
+							ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
+						JOIN tblICItem DItem 
+							ON DItem.intItemId = DSC.intItemId
+						WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 
+							AND ITP.intId = @cursorId
+
 						INSERT INTO @Entry 
 						(
 							intItemId
@@ -522,6 +606,8 @@ BEGIN
 							,intStorageScheduleTypeId 
 						FROM @ItemsToPost 
 						WHERE intId = @cursorId
+
+						SELECT @dblDiscountCost = ISNULL(SUM(round(dblUnits * dblCashPrice, 2)),0) FROM @OtherChargesDetail WHERE ysnInventoryCost = 1
 						
 						INSERT INTO @GLForItem
 						(
@@ -566,7 +652,7 @@ BEGIN
 							,intStorageScheduleTypeId 
 						FROM @ItemsToPost 
 						WHERE intId = @cursorId
-
+						select '@GLForItem',* from @GLForItem
 						--IF(SELECT dblQty FROM @Entry) > 0
 						BEGIN
 							UPDATE @Entry
@@ -615,6 +701,85 @@ BEGIN
 								,'AP Clearing'
 								,@intUserId
 
+							--INSERT INTO @GLEntries 
+							--(
+							--	 [dtmDate] 
+							--	,[strBatchId]
+							--	,[intAccountId]
+							--	,[dblDebit]
+							--	,[dblCredit]
+							--	,[dblDebitUnit]
+							--	,[dblCreditUnit]
+							--	,[strDescription]
+							--	,[strCode]
+							--	,[strReference]
+							--	,[intCurrencyId]
+							--	,[dblExchangeRate]
+							--	,[dtmDateEntered]
+							--	,[dtmTransactionDate]
+							--	,[strJournalLineDescription]
+							--	,[intJournalLineNo]
+							--	,[ysnIsUnposted]
+							--	,[intUserId]
+							--	,[intEntityId]
+							--	,[strTransactionId]
+							--	,[intTransactionId]
+							--	,[strTransactionType]
+							--	,[strTransactionForm]
+							--	,[strModuleName]
+							--	,[intConcurrencyId]
+							--	,[dblDebitForeign]	
+							--	,[dblDebitReport]	
+							--	,[dblCreditForeign]	
+							--	,[dblCreditReport]	
+							--	,[dblReportingRate]	
+							--	,[dblForeignRate]
+							--	,[strRateType]
+							--)
+							--SELECT
+							--	GETDATE() 
+							--	,@strBatchId
+							--	,[intAccountId]
+							--	,[dblDebit]			= CASE WHEN dblDebit <> 0 THEN 0 ELSE dblCredit END
+							--	,[dblCredit]		= CASE WHEN dblCredit <> 0 THEN 0 ELSE dblDebit END
+							--	,[dblDebitUnit]		= CASE WHEN dblDebitUnit <> 0 THEN 0 ELSE dblCreditUnit END
+							--	,[dblCreditUnit]	= CASE WHEN dblCreditUnit <> 0 THEN 0 ELSE dblDebitUnit END
+							--	,[strDescription]
+							--	,[strCode]
+							--	,[strReference]
+							--	,[intCurrencyId]
+							--	,[dblExchangeRate]
+							--	,[dtmDateEntered]
+							--	,[dtmTransactionDate]
+							--	,[strJournalLineDescription]
+							--	,[intJournalLineNo]
+							--	,[ysnIsUnposted]
+							--	,[intUserId]
+							--	,[intEntityId]
+							--	,[strTransactionId]	= strTransactionId + '-R'
+							--	,[intTransactionId]	= @intNewTransferStorageId
+							--	,[strTransactionType]
+							--	,[strTransactionForm]
+							--	,[strModuleName]
+							--	,[intConcurrencyId]
+							--	,[dblDebitForeign]	= CASE WHEN dblDebitForeign <> 0 THEN 0 ELSE dblCreditForeign END
+							--	,[dblDebitReport]	= CASE WHEN dblDebitReport <> 0 THEN 0 ELSE dblCreditReport END
+							--	,[dblCreditForeign]	= CASE WHEN dblCreditForeign <> 0 THEN 0 ELSE dblDebitForeign END
+							--	,[dblCreditReport]	= CASE WHEN dblCreditReport <> 0 THEN 0 ELSE dblDebitReport END
+							--	,[dblReportingRate]	
+							--	,[dblForeignRate]
+							--	,[strRateType]
+							--FROM tblGLDetail A
+							--OUTER APPLY (
+							--	SELECT strRateType = currencyRateType.strCurrencyExchangeRateType
+							--	FROM tblSMCurrencyExchangeRateType currencyRateType
+							--	JOIN tblICInventoryTransaction t
+							--		ON t.intForexRateTypeId = currencyRateType.intCurrencyExchangeRateTypeId
+							--	WHERE t.intTransactionId = @intTransferStorageId
+							--		AND t.strTransactionForm = 'Transfer Storage'
+							--) S
+							--WHERE intTransactionId = @intTransferStorageId
+							--	AND strTransactionForm = 'Transfer Storage'
 							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
@@ -650,14 +815,22 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							SELECT
-								GETDATE() 
-								,@strBatchId
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intNewTransferStorageId,@intTransactionDetailId,@strBatchId,@dblCost,1
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= ABS(dblCreditUnit)
+								,dblCredit		= dblDebit
+								,dblCreditUnit  = ABS(dblDebitUnit)
+
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
 								,[intAccountId]
-								,[dblDebit]			= CASE WHEN dblDebit <> 0 THEN 0 ELSE dblCredit END
-								,[dblCredit]		= CASE WHEN dblCredit <> 0 THEN 0 ELSE dblDebit END
-								,[dblDebitUnit]		= CASE WHEN dblDebitUnit <> 0 THEN 0 ELSE dblCreditUnit END
-								,[dblCreditUnit]	= CASE WHEN dblCreditUnit <> 0 THEN 0 ELSE dblDebitUnit END
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
 								,[strDescription]
 								,[strCode]
 								,[strReference]
@@ -670,32 +843,27 @@ BEGIN
 								,[ysnIsUnposted]
 								,[intUserId]
 								,[intEntityId]
-								,[strTransactionId]	= strTransactionId + '-R'
-								,[intTransactionId]	= @intNewTransferStorageId
+								,[strTransactionId]
+								,[intTransactionId]
 								,[strTransactionType]
 								,[strTransactionForm]
 								,[strModuleName]
 								,[intConcurrencyId]
-								,[dblDebitForeign]	= CASE WHEN dblDebitForeign <> 0 THEN 0 ELSE dblCreditForeign END
-								,[dblDebitReport]	= CASE WHEN dblDebitReport <> 0 THEN 0 ELSE dblCreditReport END
-								,[dblCreditForeign]	= CASE WHEN dblCreditForeign <> 0 THEN 0 ELSE dblDebitForeign END
-								,[dblCreditReport]	= CASE WHEN dblCreditReport <> 0 THEN 0 ELSE dblDebitReport END
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
-							FROM tblGLDetail A
-							OUTER APPLY (
-								SELECT strRateType = currencyRateType.strCurrencyExchangeRateType
-								FROM tblSMCurrencyExchangeRateType currencyRateType
-								JOIN tblICInventoryTransaction t
-									ON t.intForexRateTypeId = currencyRateType.intCurrencyExchangeRateTypeId
-								WHERE t.intTransactionId = @intTransferStorageId
-									AND t.strTransactionForm = 'Transfer Storage'
-							) S
-							WHERE intTransactionId = @intTransferStorageId
-								AND strTransactionForm = 'Transfer Storage'
+							)
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
 
-							--select 'test2',* from @GLEntries
+							select 'test2',* from @GLEntries
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
@@ -709,7 +877,7 @@ BEGIN
 						END
 
 			
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
