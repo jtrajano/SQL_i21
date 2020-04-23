@@ -12,7 +12,10 @@ SELECT CD.intCoverageEntryDetailId
 	,CD.dblMonthsCovered
 	,CD.dblAveragePrice
 	,CD.dblOptionsCovered
+	,CD.dblTotalOption
 	,CD.dblFuturesM2M
+	,CD.dblM2MPlus10
+	,CD.dblM2MMinus10
 	,CD.intCoverageEntryDetailRefId
 	,CD.intConcurrencyId
 	,B.strBook
