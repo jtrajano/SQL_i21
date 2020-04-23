@@ -24,15 +24,9 @@ SELECT CHK.dtmDate
 		, strInvoice = BILL.strVendorOrderNumber
 		, dtmDetailDate = BILL.dtmBillDate
 		, strComment = BILL.strComment
-		, dblDetailAmount = 
-			CASE WHEN BILL.intTransactionType IN (2,3) -- Debit Memo , Prepayment (DM, VPRE)
-			THEN PYMTDTL.dblTotal * - 1 
-			ELSE PYMTDTL.dblTotal END
+		, dblDetailAmount = PYMTDTL.dblTotal
 		, dblDiscount = PYMTDTL.dblDiscount
-		, dblNet = 
-		CASE WHEN BILL.intTransactionType IN (2,3) -- Debit Memo , Prepayment (DM, VPRE)
-			THEN PYMTDTL.dblPayment * - 1 
-			ELSE PYMTDTL.dblPayment END
+		, dblNet = PYMTDTL.dblPayment
 		, strBankAccountNo = STUFF(ACCT.strBankAccountNo, 1, LEN (ACCT.strBankAccountNo) - 4
 		, REPLICATE ('x', LEN (ACCT.strBankAccountNo) - 4))
 		, strMessage = 'The following items(s) will be presented to ' + 
