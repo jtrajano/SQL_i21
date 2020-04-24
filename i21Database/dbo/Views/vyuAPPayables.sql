@@ -144,40 +144,22 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 WHERE A.ysnPosted = 1 AND intTransactionType NOT IN (7, 2, 12, 13) AND A.ysnOrigin = 1
 UNION ALL   
-SELECT
-	dtmDate,
-	intBillId,
-	strBillId,
-	CAST(SUM(dblAmountPaid) AS DECIMAL(18,2)) AS dblAmountPaid,
-	CAST(SUM(dblTotal) AS DECIMAL(18,2)) AS dblTotal,
-	CAST(SUM(dblAmountDue) AS DECIMAL(18,2)) AS dblAmountDue,
-	CAST(SUM(dblWithheld) AS DECIMAL(18,2)) AS dblWithheld,
-	CAST(SUM(dblDiscount) AS DECIMAL(18,2)) AS dblDiscount,
-	CAST(SUM(dblInterest) AS DECIMAL(18,2)) AS dblInterest,
-	CAST(SUM(dblPrepaidAmount) AS DECIMAL(18,2)) AS dblPrepaidAmount,
-	strVendorId,
-	strVendorIdName,
-	dtmDueDate,
-	ysnPosted,
-	ysnPaid,
-	intAccountId,
-	strAccountId,
-	strClass
-FROM
-(
 SELECT  A.dtmDatePaid AS dtmDate,    
 	 C.intBillId,   
 	 C.strBillId ,
-	CAST(
-		--TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE
-					--USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT
-		(((C2.dblTotal) / C.dblTotal) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)
-	AS DECIMAL(18,2)) AS dblAmountPaid, 
+	 CAST(
+		 	
+				(
+					--TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE
+							 --USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT
+					(((C2.dblTotal + C2.dblTax) / C.dblTotal) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)
+				)
+				AS DECIMAL(18,2)) AS dblAmountPaid, 
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
 	, CAST(
-		(CASE 
+			(CASE 
 				WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblDiscount) > 0 
 				THEN -1 
 			ELSE 
@@ -192,20 +174,20 @@ SELECT  A.dtmDatePaid AS dtmDate,
 			END) 
 			*
 			(
-				(((C2.dblTotal) / C.dblTotal) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)
+				(((C2.dblTotal + C2.dblTax) / C.dblTotal) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)
 			)
-		AS DECIMAL(182)) AS dblDiscount
+			AS DECIMAL(18,2)) AS dblDiscount
 	, CAST(
-		(CASE 
+			(CASE 
 			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
 			THEN -1 
 			ELSE 1
 			END)
 			*
 			(
-				(((C2.dblTotal) / C.dblTotal) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)
+				(((C2.dblTotal + C2.dblTax) / C.dblTotal) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)
 			)
-		AS DECIMAL(18,2)) AS dblInterest 
+			AS DECIMAL(18,2)) AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
@@ -231,122 +213,6 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId
 	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2, 12, 13)
 	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
-) payDetails
-GROUP BY
-	dtmDate,
-	intBillId,
-	strBillId,
-	strVendorId,
-	strVendorIdName,
-	dtmDueDate,
-	ysnPosted,
-	ysnPaid,
-	intAccountId,
-	strAccountId,
-	strClass
-UNION ALL   
---TAX PAYMENT
-SELECT
-	dtmDate,
-	intBillId,
-	strBillId,
-	CAST(SUM(dblAmountPaid) AS DECIMAL(18,2)) AS dblAmountPaid,
-	CAST(SUM(dblTotal) AS DECIMAL(18,2)) AS dblTotal,
-	CAST(SUM(dblAmountDue) AS DECIMAL(18,2)) AS dblAmountDue,
-	CAST(SUM(dblWithheld) AS DECIMAL(18,2)) AS dblWithheld,
-	CAST(SUM(dblDiscount) AS DECIMAL(18,2)) AS dblDiscount,
-	CAST(SUM(dblInterest) AS DECIMAL(18,2)) AS dblInterest,
-	CAST(SUM(dblPrepaidAmount) AS DECIMAL(18,2)) AS dblPrepaidAmount,
-	strVendorId,
-	strVendorIdName,
-	dtmDueDate,
-	ysnPosted,
-	ysnPaid,
-	intAccountId,
-	strAccountId,
-	strClass
-FROM
-(
-SELECT  A.dtmDatePaid AS dtmDate,    
-	 C.intBillId,   
-	 C.strBillId ,
-	CAST(
-		--TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE
-					--USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT
-		(((C2.dblTax) / C.dblTotal) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)
-	AS DECIMAL(18,2)) AS dblAmountPaid, 
-	 dblTotal = 0 
-	, dblAmountDue = 0 
-	, dblWithheld = B.dblWithheld
-	, CAST(
-		(CASE 
-				WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblDiscount) > 0 
-				THEN -1 
-			ELSE 
-			(
-				--Honor only the discount if full payment, consider only for voucher
-				CASE 
-					WHEN B.dblAmountDue = 0 AND ISNULL(E.ysnCheckVoid,0) = 0
-					THEN 1 
-				ELSE 0
-				END
-			)
-			END) 
-			*
-			(
-				(((C2.dblTax) / C.dblTotal) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)
-			)
-		AS DECIMAL(18,2)) AS dblDiscount
-	, CAST(
-		(CASE 
-			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
-			THEN -1 
-			ELSE 1
-			END)
-			*
-			(
-				(((C2.dblTax) / C.dblTotal) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)
-			)
-		AS DECIMAL(182)) AS dblInterest 
-	, dblPrepaidAmount = 0 
-	, D.strVendorId 
-	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
-	, C.dtmDueDate 
-	, C.ysnPosted 
-	, C.ysnPaid
-	, B.intAccountId
-	, F.strAccountId
-	, EC.strClass
-	-- ,'Payment' AS [Info]
-FROM dbo.tblAPPayment  A
- INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
- INNER JOIN dbo.tblAPBill C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
---  LEFT JOIN dbo.fnAPGetVoucherAverageRate() avgRate ON C.intBillId = avgRate.intBillId --handled payment for origin old payment import
- LEFT JOIN dbo.tblAPBillDetail C2 ON C.intBillId = C2.intBillId
- LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
- 	ON A.[intEntityVendorId] = D.[intEntityId]
-LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId		
-LEFT JOIN dbo.tblCMBankTransaction E
-	ON A.strPaymentRecordNum = E.strTransactionId
-LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
- WHERE A.ysnPosted = 1  
-	AND C.ysnPosted = 1
-	AND C.intTransactionType NOT IN (2, 12, 13)
-	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
-	AND C2.dblTax != 0
-) payDetails
-GROUP BY
-	dtmDate,
-	intBillId,
-	strBillId,
-	strVendorId,
-	strVendorIdName,
-	dtmDueDate,
-	ysnPosted,
-	ysnPaid,
-	intAccountId,
-	strAccountId,
-	strClass
 UNION ALL
 --APPLIED VOUCHER, (Payment have been made using prepaid and debit memos tab)
 SELECT
