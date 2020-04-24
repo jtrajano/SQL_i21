@@ -187,30 +187,38 @@ BEGIN TRY
 	SET @dtmDate = GETDATE()
 	SET @intParentSettleStorageId = @intSettleStorageId	
 
-	-- this will check if there will be an over settlement for a ticket
+	/*avoid the oversettling of storages*/
+	IF(@ysnFromPriceBasisContract = 0)
+	BEGIN
+		DECLARE @CustomerStorageIds AS Id
+		DECLARE @intId AS INT
+		DELETE FROM @CustomerStorageIds
+		INSERT INTO @CustomerStorageIds
+		SELECT intCustomerStorageId FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intSettleStorageId
 
-	select @intCustomerStorageId = intCustomerStorageId 
-		from tblGRSettleStorageTicket 
-			where intSettleStorageId = @intParentSettleStorageId
+		WHILE EXISTS(SELECT 1 FROM @CustomerStorageIds)
+		BEGIN
+			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
 
-	if @ysnFromPriceBasisContract = 0 and exists(select 1 from (
-			select sum(a.dblUnits) as dblUnitsSummed, a.intCustomerStorageId from tblGRSettleStorageTicket  a
-				join tblGRSettleStorage b
-					on a.intSettleStorageId= b.intSettleStorageId 
-						and b.intParentSettleStorageId is null
-						and b.ysnReversed = 0
-				where a.intCustomerStorageId = @intCustomerStorageId 
-			group by a.intCustomerStorageId
-		) a
-		join tblGRCustomerStorage b 
-			on a.intCustomerStorageId = b.intCustomerStorageId 
-			and a.dblUnitsSummed > b.dblOriginalBalance
-	)
-	begin
-		RAISERROR('There are no more available units for settlement. Please check the available units for settlement and try again.',16,1,1)
-		RETURN;
-	end
-
+			IF (
+			SELECT SUM(dblUnits) 
+			FROM tblGRSettleStorageTicket A
+			INNER JOIN tblGRSettleStorage B
+				ON B.intSettleStorageId = A.intSettleStorageId
+				AND B.intParentSettleStorageId IS NULL
+			WHERE intCustomerStorageId = @intId ) > 
+			(SELECT dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId)
+			BEGIN
+				DELETE FROM @CustomerStorageIds WHERE intId = @intId
+				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
+				RETURN;
+			END
+			ELSE
+			BEGIN
+				DELETE FROM @CustomerStorageIds WHERE intId = @intId
+			END			
+		END	
+	END
 
 	if @ysnFromPriceBasisContract = 0 
 	begin
@@ -236,7 +244,6 @@ BEGIN TRY
 			RETURN;
 		end
 	end
-
 
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
