@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTGetContractPrice]
 	@intContractHeaderId int
 	,@intContractDetailId int
-	,@dblQuantityToPrice int
+	,@dblQuantityToPrice numeric(18,6)
 	,@strScreen nvarchar(100) /*screen that calls the procedure like "Ticket", "Inventory", etc..*/
 	
 AS
