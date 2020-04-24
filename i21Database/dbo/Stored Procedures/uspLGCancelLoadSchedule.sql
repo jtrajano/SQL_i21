@@ -19,6 +19,8 @@ BEGIN TRY
 	DECLARE @strAuditLogActionType NVARCHAR(MAX)
 	DECLARE	@dblScheduleQty	NUMERIC(18,6)
 	DECLARE	@intNoOfLoad	INT
+	DECLARE @ysnPosted BIT
+	DECLARE @strLoadNumber NVARCHAR(MAX)
 	DECLARE @tblLoadDetail TABLE (intLoadDetailRecordId INT Identity(1, 1)
 								 ,intLoadDetailId INT
 								 ,intPContractDetailId INT
@@ -26,7 +28,9 @@ BEGIN TRY
 								 ,dblLoadDetailQuantity NUMERIC(18, 6))
 
 	SELECT @intPurchaseSale = intPurchaseSale,
-		   @intShipmentType = ISNULL(@intShipmentType,intShipmentType)
+		   @intShipmentType = ISNULL(@intShipmentType,intShipmentType),
+		   @ysnPosted = ISNULL(ysnPosted, 0),
+		   @strLoadNumber = strLoadNumber
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -42,11 +46,84 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
-			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1) 
-				AND NOT EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
+
+			IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
-				RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
+				DECLARE @strTransactionNo NVARCHAR(100)
+				DECLARE @strInvoiceNo NVARCHAR(100) = NULL
+				DECLARE @strVoucherNo NVARCHAR(100) = NULL
+				/* Validations to Reverse related transactions */
+
+				--Validate if Load has posted Weight Claim
+				IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId AND ysnPosted = 1)
+				BEGIN
+					SELECT TOP 1 @strTransactionNo = tblLGWeightClaim.strReferenceNumber 
+					FROM tblLGWeightClaim WHERE intLoadId = @intLoadId
+
+					SET @strErrMsg = 'Weight Claim ' + @strTransactionNo + ' has been created for ' + @strLoadNumber 
+									+ '. Cannot cancel.'
+
+					RAISERROR (@strErrMsg,16,1);
+
+					RETURN 0;
+				END
+
+				--Validate if Invoice exists
+				SELECT TOP 1 @strInvoiceNo = I.strInvoiceNumber
+					FROM tblLGLoad L
+					JOIN tblARInvoice I ON L.intLoadId = I.intLoadId
+					WHERE L.intLoadId = @intLoadId
+						AND I.ysnReturned = 0 and I.strTransactionType <> 'Credit Memo'
+
+				--Validate if Voucher exists
+				SELECT TOP 1 @strVoucherNo = B.strBillId
+				FROM tblAPBillDetail BD 
+				JOIN tblAPBill B ON B.intBillId = BD.intBillId
+				JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
+				WHERE LD.intLoadId = @intLoadId AND B.intBillId NOT IN (SELECT intReversalId FROM tblAPBill WHERE intTransactionType = 3)
+
+				IF (@strInvoiceNo IS NOT NULL OR @strVoucherNo IS NOT NULL)
+				BEGIN
+					SET @strErrMsg = CASE WHEN (@strInvoiceNo IS NOT NULL) THEN 'Invoice ' + @strInvoiceNo + ' ' ELSE '' END
+						+ CASE WHEN (@strInvoiceNo IS NOT NULL AND @strVoucherNo IS NOT NULL) THEN 'and ' ELSE '' END
+						+ CASE WHEN (@strVoucherNo IS NOT NULL) THEN 'Voucher ' + @strVoucherNo + ' ' ELSE '' END 
+						+ CASE WHEN (@strInvoiceNo IS NOT NULL AND @strVoucherNo IS NOT NULL) THEN 'were ' ELSE 'was ' END
+						+ 'already created for ' + @strLoadNumber + '. Cannot cancel.';
+
+					RAISERROR(@strErrMsg, 16, 1);
+					RETURN 0;
+				END
+
+				--Validate if Inventory Receipt exists
+				IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryReceiptItem IRI
+					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intSourceType = 2 AND IR.intSourceInventoryReceiptId IS NULL
+					INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND LD.intLoadId = @intLoadId
+					WHERE IR.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt 
+															WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse' AND ysnPosted = 1))
+				BEGIN
+					SELECT TOP 1 @strTransactionNo = IR.strReceiptNumber
+					FROM tblICInventoryReceiptItem IRI
+					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId AND IR.intSourceType = 2 AND IR.intSourceInventoryReceiptId IS NULL
+					INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId AND LD.intPContractDetailId = IRI.intLineNo AND LD.intLoadId = @intLoadId
+					WHERE IR.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt 
+															WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse' AND ysnPosted = 1)
+
+					SET @strErrMsg = 'Inventory Receipt ' + @strTransactionNo + ' has been generated for ' + @strLoadNumber 
+						+ '. Cannot cancel.';
+
+					RAISERROR (@strErrMsg,16,1);
+
+					RETURN 0;
+				END
 			END
+			ELSE
+			BEGIN
+				IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ysnPosted = 1) 
+				BEGIN
+					RAISERROR ('Shipment is already posted. Cannot cancel.',11,1)
+				END
+			END
+
 
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
 			FROM @tblLoadDetail
@@ -54,6 +131,24 @@ BEGIN TRY
 			SELECT @intLoadShippingInstructionId = intLoadShippingInstructionId
 			FROM tblLGLoad
 			WHERE intLoadId = @intLoadId
+
+			UPDATE tblQMSample
+			SET intLoadContainerId = NULL
+				,intLoadDetailId = NULL
+				,intLoadDetailContainerLinkId = NULL
+				,intLoadId = NULL
+			WHERE intLoadId = @intLoadId
+
+			UPDATE tblLGLoad
+			SET intShipmentStatus = 10
+				,ysnCancelled = @ysnCancel
+			WHERE intLoadId = @intLoadId
+
+			/* Perform Reversal */
+			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ISNULL(ysnImposeReversalTransaction, 0) = 1)
+			BEGIN
+				EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1
+			END
 
 			WHILE (@intMinLoadDetailId IS NOT NULL)
 			BEGIN
@@ -104,18 +199,6 @@ BEGIN TRY
 				WHERE intLoadDetailId > @intMinLoadDetailId
 			END
 
-			UPDATE tblQMSample
-			SET intLoadContainerId = NULL
-				,intLoadDetailId = NULL
-				,intLoadDetailContainerLinkId = NULL
-				,intLoadId = NULL
-			WHERE intLoadId = @intLoadId
-
-			UPDATE tblLGLoad
-			SET intShipmentStatus = 10
-				,ysnCancelled = @ysnCancel
-			WHERE intLoadId = @intLoadId
-
 			EXEC [uspLGReserveStockForInventoryShipment] @intLoadId = @intLoadId
 				,@ysnReserveStockForInventoryShipment = 0
 
@@ -137,12 +220,6 @@ BEGIN TRY
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
 					,@strRowState = 'Added'
 					,@intShipmentType = 2
-			END
-
-			/* Perform Reversal */
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ISNULL(ysnImposeReversalTransaction, 0) = 1)
-			BEGIN
-				EXEC uspLGPostLoadSchedule @intLoadId, @intEntityUserSecurityId, 1
 			END
 		END
 		ELSE
