@@ -3564,7 +3564,6 @@ BEGIN TRY
 					,[dblPaidAmount]
 					,[intBillId]
 					,[intSettleStorageId]
-					,[strSettleTicket]
 					,[strVoucher]
 					,[dblOldCost]
 				)
@@ -3583,7 +3582,6 @@ BEGIN TRY
 					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
-					,[strSettleTicket]		= (SELECT strStorageTicket FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 					,strVoucher				= @strVoucher
 					,dblOldCost				= (select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0)
 				FROM @SettleVoucherCreate SV
