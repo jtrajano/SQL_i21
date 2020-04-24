@@ -80,7 +80,7 @@ BEGIN TRY
 				FROM tblAPBillDetail BD 
 				JOIN tblAPBill B ON B.intBillId = BD.intBillId
 				JOIN tblLGLoadDetail LD ON BD.intLoadDetailId = LD.intLoadDetailId
-				WHERE LD.intLoadId = @intLoadId
+				WHERE LD.intLoadId = @intLoadId AND B.intBillId NOT IN (SELECT intReversalId FROM tblAPBill WHERE intTransactionType = 3)
 
 				IF (@strInvoiceNo IS NOT NULL OR @strVoucherNo IS NOT NULL)
 				BEGIN
