@@ -21,7 +21,7 @@ SELECT Invoice.intInvoiceId
 	, CASE WHEN InvoiceShift.intShiftNumber IS NULL THEN CONVERT(NVARCHAR(50),InvoiceShift.strShiftNo)  ELSE CONVERT(NVARCHAR(50),InvoiceShift.intShiftNumber) END as strShiftNo
 	, Invoice.strComments
 	, Invoice.strVoidComments
-	, (InvoiceItem.dblPrice * InvoiceItem.dblQuantity) as dblTotal
+	, 0.0 as dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
 	, Invoice.ysnPosted
@@ -33,7 +33,7 @@ SELECT Invoice.intInvoiceId
 	, Invoice.intConcurrencyId
 	, strStatus = dbo.fnMBILGetInvoiceStatus(Invoice.intEntityCustomerId, NULL) COLLATE Latin1_General_CI_AS
 FROM tblMBILInvoice Invoice
-LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId
+--LEFT JOIN tblMBILInvoiceItem InvoiceItem ON InvoiceItem.intInvoiceId = Invoice.intInvoiceId
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Invoice.intEntityCustomerId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Invoice.intLocationId
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Invoice.intDriverId
