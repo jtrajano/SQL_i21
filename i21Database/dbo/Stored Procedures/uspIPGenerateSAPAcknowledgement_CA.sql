@@ -183,7 +183,7 @@ BEGIN TRY
 				AND ISNULL(strAckStatus, '') <> 'Ack Sent'
 		END
 	END
-	ELSE IF @strMsgType = 'LSI-Cancel'
+	ELSE IF @strMsgType = 'LSI_Cancel'
 	BEGIN
 		IF @strImportStatus = 'Success'
 		BEGIN
@@ -214,7 +214,7 @@ BEGIN TRY
 				,strCustomerReference
 				,strLoadNumber
 			FROM tblIPLoadArchive
-			WHERE ISNULL(strTransactionType, '') = 'ShippingInstructionCancel'
+			WHERE ISNULL(strTransactionType, '') = 'LSI_Cancel'
 				AND ISNULL(strAckStatus, '') <> 'Ack Sent'
 		END
 		ELSE IF @strImportStatus = 'Failure'
@@ -246,7 +246,7 @@ BEGIN TRY
 				,strCustomerReference
 				,strLoadNumber
 			FROM tblIPLoadError
-			WHERE ISNULL(strTransactionType, '') = 'ShippingInstructionCancel'
+			WHERE ISNULL(strTransactionType, '') = 'LSI_Cancel'
 				AND ISNULL(strAckStatus, '') <> 'Ack Sent'
 		END
 	END

@@ -96,6 +96,7 @@ BEGIN TRY
 		,@strVendorReference NVARCHAR(200)
 		,@intPSubLocationId INT
 		,@intPNumberOfContainers INT
+		,@dblOldDetailQuantity NUMERIC(18, 6)
 	DECLARE @tblLGLoadDetailChanges TABLE (
 		dblOldQuantity NUMERIC(18, 6)
 		,dblNewQuantity NUMERIC(18, 6)
@@ -109,7 +110,7 @@ BEGIN TRY
 		,@dblNewQuantity NUMERIC(18, 6)
 		,@dblOldGross NUMERIC(18, 6)
 		,@dblNewGross NUMERIC(18, 6)
-		,@intLoadDetailId INT
+		,@intAuditLoadDetailId INT
 		,@strAuditLogInfo NVARCHAR(200)
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
@@ -302,6 +303,7 @@ BEGIN TRY
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 				AND L.intShipmentType = 2
 				AND LD.intPContractDetailId = @intContractDetailId
+				AND L.strCustomerReference = @strCustomerReference
 
 			SELECT @intShipmentType = 2
 				,@intShipmentStatus = 7
@@ -351,6 +353,7 @@ BEGIN TRY
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
 					,@intLocationId = CD.intCompanyLocationId
+					,@intShipmentStatus = L.intShipmentStatus
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intLoadId = @intLoadId
@@ -365,6 +368,15 @@ BEGIN TRY
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
+
+			IF @intShipmentStatus = 10
+			BEGIN
+				RAISERROR (
+						'Shipping instruction cannot update since it is already cancelled. '
+						,16
+						,1
+						)
+			END
 
 			BEGIN TRAN
 
@@ -399,6 +411,7 @@ BEGIN TRY
 					,strOriginPort1
 					,strDestinationPort1
 					,dtmETSPOL
+					,dtmETSPOL1
 					,dtmDeadlineCargo
 					,strBookingReference
 					,strBLNumber
@@ -431,6 +444,7 @@ BEGIN TRY
 					,@strDestinationPort
 					,@strOriginPort
 					,@strDestinationPort
+					,@dtmETSPOL
 					,@dtmETSPOL
 					,@dtmDeadlineCargo
 					,@strBookingReference
@@ -498,6 +512,7 @@ BEGIN TRY
 					,strOriginPort1 = @strOriginPort
 					,strDestinationPort1 = @strDestinationPort
 					,dtmETSPOL = @dtmETSPOL
+					,dtmETSPOL1 = @dtmETSPOL
 					,dtmDeadlineCargo = @dtmDeadlineCargo
 					,strBookingReference = @strBookingReference
 					,strBLNumber = @strBLNumber
@@ -649,6 +664,7 @@ BEGIN TRY
 						,@strVendorReference = NULL
 						,@intPSubLocationId = NULL
 						,@intPNumberOfContainers = NULL
+						,@dblOldDetailQuantity = NULL
 
 					SELECT @strCommodityCode = strCommodityCode
 						,@strItemNo = strItemNo
@@ -824,9 +840,19 @@ BEGIN TRY
 							,@strVendorReference
 							,@intPSubLocationId
 							,@intPNumberOfContainers
+
+						EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
+							,@dblQuantityToUpdate = @dblQuantity
+							,@intUserId = @intEntityId
 					END
 					ELSE
 					BEGIN
+						SELECT @dblOldDetailQuantity = dblQuantity
+						FROM tblLGLoadDetail
+						WHERE intLoadId = @intLoadId
+							AND intPContractDetailId = @intContractDetailId
+							AND intItemId = @intItemId
+
 						UPDATE tblLGLoadDetail
 						SET intConcurrencyId = intConcurrencyId + 1
 							,intVendorEntityId = @intVendorEntityId
@@ -847,6 +873,20 @@ BEGIN TRY
 						WHERE intLoadId = @intLoadId
 							AND intPContractDetailId = @intContractDetailId
 							AND intItemId = @intItemId
+
+						IF @dblOldDetailQuantity <> @dblQuantity
+						BEGIN
+							DECLARE @dblDiffQty NUMERIC(18, 6)
+
+							SELECT @dblDiffQty = @dblQuantity - @dblOldDetailQuantity
+
+							IF @dblDiffQty <> 0
+							BEGIN
+								EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
+									,@dblQuantityToUpdate = @dblDiffQty
+									,@intUserId = @intEntityId
+							END
+						END
 					END
 
 					SELECT @intStageLoadDetailId = MIN(intStageLoadDetailId)
@@ -872,14 +912,14 @@ BEGIN TRY
 						,@dblNewQuantity = NULL
 						,@dblOldGross = NULL
 						,@dblNewGross = NULL
-						,@intLoadDetailId = NULL
+						,@intAuditLoadDetailId = NULL
 						,@strAuditLogInfo = NULL
 
 					SELECT TOP 1 @dblOldQuantity = dblOldQuantity
 						,@dblNewQuantity = dblNewQuantity
 						,@dblOldGross = dblOldGross
 						,@dblNewGross = dblNewGross
-						,@intLoadDetailId = intLoadDetailId
+						,@intAuditLoadDetailId = intLoadDetailId
 						,@strAuditLogInfo = strAuditLogInfo
 					FROM @tblLGLoadDetailChanges
 
@@ -895,7 +935,7 @@ BEGIN TRY
 										{  
 										"action":"Updated",
 										"change":"Updated - Record: ' + LTRIM(@strAuditLogInfo) + '",
-										"keyValue":' + LTRIM(@intLoadDetailId) + ',
+										"keyValue":' + LTRIM(@intAuditLoadDetailId) + ',
 										"iconCls":"small-tree-modified",
 										"children":
 											[   
@@ -910,7 +950,7 @@ BEGIN TRY
 												"leaf":true,
 												"iconCls":"small-gear",
 												"isField":true,
-												"keyValue":' + LTRIM(@intLoadDetailId) + ',
+												"keyValue":' + LTRIM(@intAuditLoadDetailId) + ',
 												"associationKey":"tblLGLoadDetails",
 												"changeDescription":"Quantity",
 												"hidden":false
@@ -925,7 +965,7 @@ BEGIN TRY
 												"leaf":true,
 												"iconCls":"small-gear",
 												"isField":true,
-												"keyValue":' + LTRIM(@intLoadDetailId) + ',
+												"keyValue":' + LTRIM(@intAuditLoadDetailId) + ',
 												"associationKey":"tblLGLoadDetails",
 												"changeDescription":"Gross",
 												"hidden":false
@@ -956,7 +996,7 @@ BEGIN TRY
 
 					DELETE
 					FROM @tblLGLoadDetailChanges
-					WHERE intLoadDetailId = @intLoadDetailId
+					WHERE intLoadDetailId = @intAuditLoadDetailId
 				END
 			END
 

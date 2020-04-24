@@ -302,6 +302,7 @@ BEGIN TRY
 				AND LD.intPContractDetailId = @intContractDetailId
 				AND L.intShipmentType = 2
 				AND L.intShipmentStatus <> 10
+				AND L.strCustomerReference = @strCustomerReference
 
 			IF ISNULL(@intLoadShippingInstructionId, 0) = 0
 			BEGIN
@@ -439,6 +440,7 @@ BEGIN TRY
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 				AND L.intShipmentType = 1
 				AND LD.intPContractDetailId = @intContractDetailId
+				AND L.strCustomerReference = @strCustomerReference
 
 			SELECT @intShipmentType = 1
 				,@intShipmentStatus = 1
