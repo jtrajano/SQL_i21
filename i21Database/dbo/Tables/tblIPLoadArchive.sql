@@ -23,6 +23,8 @@
 	strLoadNumber				NVARCHAR(100),
 	strAction					NVARCHAR(100),
 	strFileName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strCancelStatus				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dtmCancelDate				DATETIME,
 
 	strTransactionType			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strErrorMessage				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
