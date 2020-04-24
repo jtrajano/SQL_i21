@@ -215,7 +215,7 @@ BEGIN TRY
 			(SELECT dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId)
 			BEGIN
 				DELETE FROM @CustomerStorageIds WHERE intId = @intId
-				RAISERROR('The selected units is already more than the available balance. Please check the available units for settlement and try again.',16,1,1)
+				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
 			END
 			ELSE
