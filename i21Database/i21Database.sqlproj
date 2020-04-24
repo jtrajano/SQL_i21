@@ -8192,6 +8192,7 @@
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
+    <Build Include="dbo\Tables\tblSMErrorLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKReassignMatchDerivatives.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
