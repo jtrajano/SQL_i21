@@ -213,7 +213,7 @@ BEGIN TRY
 			and a.dblUnitsSummed > b.dblOriginalBalance
 	)
 	begin
-		RAISERROR('The record is changed. Please refresh.',16,1,1)
+		RAISERROR('The record has changed. Please refresh.',16,1,1)
 		RETURN;
 	end
 
