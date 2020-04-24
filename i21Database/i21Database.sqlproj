@@ -8478,6 +8478,7 @@
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateOriginDMFor20_1.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
