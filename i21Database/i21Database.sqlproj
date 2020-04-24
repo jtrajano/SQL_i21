@@ -8197,6 +8197,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Tables\tblRKTempDPRDetailLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPLSICancel_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
