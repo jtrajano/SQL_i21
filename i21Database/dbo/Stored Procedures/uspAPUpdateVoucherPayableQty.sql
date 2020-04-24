@@ -201,12 +201,14 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @payablesKey A2
 			ON A.intVoucherPayableId = A2.intNewPayableId
-		INNER JOIN @validPayables B
-			ON A2.intOldPayableId = B.intVoucherPayableId
-		INNER JOIN tblAPVoucherPayable C
-			ON A2.intNewPayableId = C.intVoucherPayableId
+		-- INNER JOIN @validPayables B
+		-- 	ON A2.intOldPayableId = B.intVoucherPayableId
+		-- INNER JOIN tblAPVoucherPayable C
+		-- 	ON A2.intNewPayableId = C.intVoucherPayableId
 		INNER JOIN @validPayablesTax taxData
 			ON A2.intOldPayableId = taxData.intVoucherPayableId
+			AND A.intTaxGroupId = taxData.intTaxGroupId
+			AND A.intTaxCodeId = taxData.intTaxCodeId
 		-- CROSS APPLY (
 		-- 	SELECT
 		-- 		*
@@ -513,7 +515,7 @@ ELSE SAVE TRAN @SavePoint
 				,taxes.[ysnTaxExempt]
 			FROM tblAPVoucherPayableTaxStaging taxes
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
-			WHERE taxes.dblTax = 0
+			WHERE (taxes.dblTax = 0 AND taxes.ysnTaxExempt = 0) OR taxes.ysnTaxExempt = 1
 		) AS SourceData
 		 --handle key clashing, there could be already payable id exists on tax completed
 		ON (destination.intVoucherPayableId = SourceData.intNewPayableId)
@@ -612,12 +614,14 @@ ELSE SAVE TRAN @SavePoint
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @payablesKeyPartial A2
 			ON A2.intNewPayableId = A.intVoucherPayableId
-		INNER JOIN @validPayables B
-			ON B.intVoucherPayableId = A2.intOldPayableId
-		INNER JOIN tblAPVoucherPayable C
-			ON A2.intNewPayableId = C.intVoucherPayableId
+		-- INNER JOIN @validPayables B
+		-- 	ON B.intVoucherPayableId = A2.intOldPayableId
+		-- INNER JOIN tblAPVoucherPayable C
+		-- 	ON A2.intNewPayableId = C.intVoucherPayableId
 		INNER JOIN @validPayablesTax taxData
 			ON A2.intOldPayableId = taxData.intVoucherPayableId
+			AND A.intTaxGroupId = taxData.intTaxGroupId
+			AND A.intTaxCodeId = taxData.intTaxCodeId
 		-- CROSS APPLY (
 		-- 	SELECT
 		-- 		*
