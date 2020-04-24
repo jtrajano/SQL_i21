@@ -8196,6 +8196,7 @@
     <Build Include="dbo\Stored Procedures\uspRKReassignMatchDerivatives.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
+    <Build Include="dbo\Tables\tblRKTempDPRDetailLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8437,8 +8438,8 @@
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />  
-    <Build Include="dbo\Functions\fnCTGetPricingDetailInvoices.sql" /> 
+    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
+    <Build Include="dbo\Functions\fnCTGetPricingDetailInvoices.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
