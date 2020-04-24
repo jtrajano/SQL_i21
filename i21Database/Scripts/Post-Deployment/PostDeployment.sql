@@ -315,6 +315,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVoucherPayableTranType.sql
 :r .\AP\PurgePayableCompleted.sql
 :r .\AP\UpdatePaymentDetailOffset.sql
+:r .\AP\UpdateOriginDMFor20_1.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

@@ -160,7 +160,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, dblWithheld = B.dblWithheld
 	, CAST(CASE 
 				WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblDiscount) > 0 
-				THEN B.dblDiscount * -1 
+				THEN B.dblDiscount --* -1 note: we expect that the discount in 20.1 is already negative  
 			ELSE 
 			(
 				--Honor only the discount if full payment, consider only for voucher
@@ -173,7 +173,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 			END * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblDiscount
 	, CAST(CASE 
 			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
-			THEN B.dblInterest * -1 
+			THEN B.dblInterest --* -1 
 			ELSE B.dblInterest
 			END * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblInterest 
 	, dblPrepaidAmount = 0 
