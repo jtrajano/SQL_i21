@@ -195,6 +195,29 @@ BEGIN TRY
 
 	SET @dtmDate = GETDATE()
 	SET @intParentSettleStorageId = @intSettleStorageId	
+
+	-- this will check if there will be an over settlement for a ticket
+
+	select @intCustomerStorageId = intCustomerStorageId 
+		from tblGRSettleStorageTicket 
+			where intSettleStorageId = @intParentSettleStorageId
+
+	if @ysnFromPriceBasisContract = 0 and exists(select 1 from (
+			select sum(a.dblUnits) as dblUnitsSummed, a.intCustomerStorageId from tblGRSettleStorageTicket  a
+				join tblGRSettleStorage b
+					on a.intSettleStorageId= b.intSettleStorageId 
+						and b.intParentSettleStorageId is null	
+				where a.intCustomerStorageId = @intCustomerStorageId 
+			group by a.intCustomerStorageId
+		) a
+		join tblGRCustomerStorage b 
+			on a.intCustomerStorageId = b.intCustomerStorageId 
+			and a.dblUnitsSummed > b.dblOriginalBalance
+	)
+	begin
+		RAISERROR('The record has changed. Please refresh screen.',16,1,1)
+		RETURN;
+	end
 	
 	/* create child settle storage (with voucher) 
 	NOTE: parent settle storage doesn't have a voucher associated in it */
@@ -3541,6 +3564,7 @@ BEGIN TRY
 					,[dblPaidAmount]
 					,[intBillId]
 					,[intSettleStorageId]
+					,[strSettleTicket]
 					,[strVoucher]
 					,[dblOldCost]
 				)
@@ -3555,10 +3579,11 @@ BEGIN TRY
 					,[intUserId]		 	= @intCreatedUserId
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
-					,[intTransactionTypeId]	= 4 
+					,[intTransactionTypeId]	= 4
 					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
+					,[strSettleTicket]		= (SELECT strStorageTicket FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 					,strVoucher				= @strVoucher
 					,dblOldCost				= (select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0)
 				FROM @SettleVoucherCreate SV
