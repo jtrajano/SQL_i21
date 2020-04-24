@@ -215,7 +215,7 @@ BEGIN TRY
 			and a.dblUnitsSummed > b.dblOriginalBalance
 	)
 	begin
-		RAISERROR('There is no more open units available for settlement. Please check the available units for settlement and try again.',16,1,1)
+		RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 		RETURN;
 	end
 	
@@ -3564,6 +3564,7 @@ BEGIN TRY
 					,[dblPaidAmount]
 					,[intBillId]
 					,[intSettleStorageId]
+					,[strSettleTicket]
 					,[strVoucher]
 					,[dblOldCost]
 				)
@@ -3578,10 +3579,11 @@ BEGIN TRY
 					,[intUserId]		 	= @intCreatedUserId
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
-					,[intTransactionTypeId]	= 4 
+					,[intTransactionTypeId]	= 4
 					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
+					,[strSettleTicket]		= (SELECT strStorageTicket FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 					,strVoucher				= @strVoucher
 					,dblOldCost				= (select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0)
 				FROM @SettleVoucherCreate SV
