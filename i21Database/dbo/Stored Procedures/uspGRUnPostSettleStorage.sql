@@ -442,7 +442,6 @@ BEGIN TRY
 					,[intUserId]
 					,[intEntityId]
 					,[strSettleTicket]
-					,[strVoucher]
 					,[intTransactionTypeId]
 					,[dblPaidAmount]
 					,[intBillId]
@@ -460,7 +459,6 @@ BEGIN TRY
 					,[intUserId]			= @UserId
 					,[intEntityId]			= [intEntityId]
 					,[strSettleTicket]		= [strSettleTicket]
-					,[strVoucher]			= [strVoucher]
 					,[intTransactionTypeId]	= 4
 					,[dblPaidAmount]		= [dblPaidAmount]
 					,[intBillId]			= NULL
