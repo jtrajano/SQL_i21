@@ -208,15 +208,25 @@ BEGIN TRY
 	FROM	@tblPricing
 	WHERE	intReassignPricingId = @intReassignPricingId
 
-	IF ISNULL(@intPriceFixationId,0) > 0
+	-- Check if the recipient already have price fixation
+	SELECT @intNewPriceFixationId = d.intPriceFixationId 
+	FROM tblCTReassign a
+	INNER JOIN tblCTContractDetail b on a.intRecipientId = b.intContractDetailId
+	INNER JOIN tblCTContractHeader c on b.intContractHeaderId = c.intContractHeaderId
+	INNER JOIN tblCTPriceFixation d on d.intContractHeaderId = c.intContractHeaderId and isnull(d.intContractDetailId,b.intContractDetailId) = b.intContractDetailId
+	WHERE a.intReassignId = @intReassignId
+
+	IF ISNULL(@intPriceFixationId,0) > 0 AND ISNULL(@intNewPriceFixationId,0) = 0
+	BEGIN
 		EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId,@intNewPriceFixationId OUTPUT,NULL,@strTagRelaceXML
 
-	UPDATE	tblCTPriceFixation 
-	SET		dblOriginalBasis	=	@dblRecipientBasis,
-			dblFinalPrice		=	dblPriceWORollArb - dblOriginalBasis - ISNULL(dblRollArb,0) - ISNULL(dblAdditionalCost,0) + @dblRecipientBasis,
-			dblRollArb			=	NULL,
-			dblAdditionalCost	=	NULL
-	WHERE	intPriceFixationId	=	@intNewPriceFixationId
+		UPDATE	tblCTPriceFixation 
+		SET		dblOriginalBasis	=	@dblRecipientBasis,
+				dblFinalPrice		=	dblPriceWORollArb - dblOriginalBasis - ISNULL(dblRollArb,0) - ISNULL(dblAdditionalCost,0) + @dblRecipientBasis,
+				dblRollArb			=	NULL,
+				dblAdditionalCost	=	NULL
+		WHERE	intPriceFixationId	=	@intNewPriceFixationId
+	END 
 
 	WHILE	ISNULL(@intReassignPricingId,0) > 0
 	BEGIN
