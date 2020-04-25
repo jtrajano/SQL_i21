@@ -18,15 +18,16 @@ BEGIN
 	IF (@intBookId = 0) SET @intBookId = NULL
 	IF (@intSubBookId = 0) SET @intSubBookId = NULL
 	
+	DECLARE @strPurchaseSaleFilter NVARCHAR(50) = NULL
 	IF ISNULL(@strPurchaseSales, '') <> ''
 	BEGIN
 		IF @strPurchaseSales = 'Purchase'
 		BEGIN
-			SELECT @strPurchaseSales = 'Sale'
+			SELECT @strPurchaseSaleFilter = 'Sale'
 		END
 		ELSE
 		BEGIN
-			SELECT @strPurchaseSales = 'Purchase'
+			SELECT @strPurchaseSaleFilter = 'Purchase'
 		END
 	END
 
@@ -2187,14 +2188,25 @@ WHERE intOrderId IS NOT NULL
 
 --Get the Run Number
 DECLARE @intRunNumber INT
+		,@strVendorCustomer NVARCHAR(200)
 
 SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
 FROM tblRKTempDPRDetailLog
+
+IF @intVendorId IS NOT NULL 
+BEGIN
+	SELECT @strVendorCustomer = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
+END
 
 INSERT INTO tblRKTempDPRDetailLog (
 	 intRunNumber 
 	, dtmRunDateTime
 	, intUserId
+	, dtmDPRDate	
+	, strDPRPositionIncludes	
+	, strDPRPositionBy	
+	, strDPRPurchaseSale
+	, strDPRVendorCustomer
 	, intSeqNo
 	, strCommodityCode
 	, strContractNumber
@@ -2234,6 +2246,11 @@ select
 	 intRunNumber = @intRunNumber
 	, dtmRunDateTime = GETDATE()
 	, intUserId = @intUserId
+	, dtmDPRDate = @dtmToDate	
+	, strDPRPositionIncludes = @strPositionIncludes
+	, strDPRPositionBy = @strPositionBy
+	, strDPRPurchaseSale = @strPurchaseSales
+	, strDPRVendorCustomer = @strVendorCustomer
 	, intSeqNo = intOrderId
 	, strCommodityCode
 	, strContractNumber
