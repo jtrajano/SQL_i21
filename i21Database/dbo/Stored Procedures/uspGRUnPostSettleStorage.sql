@@ -447,7 +447,6 @@ BEGIN TRY
 					,[dblPaidAmount]
 					,[intBillId]
 					,[intSettleStorageId]
-					,[strVoucher]
 				)
 				SELECT 
 					 [intConcurrencyId]		= 1 
@@ -465,7 +464,6 @@ BEGIN TRY
 					,[dblPaidAmount]		= [dblPaidAmount]
 					,[intBillId]			= NULL
 					,[intSettleStorageId]   = NULL
-					,[strVoucher]           = strVoucher
 				FROM tblGRStorageHistory
 				WHERE intSettleStorageId = @intSettleStorageId
 
