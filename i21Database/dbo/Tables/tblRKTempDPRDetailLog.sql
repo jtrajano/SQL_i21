@@ -3,6 +3,11 @@
 	intTempDPRDetailLogId INT IDENTITY NOT NULL 
 	, intRunNumber INT
 	, dtmRunDateTime DATETIME
+	, dtmDPRDate DATETIME	
+	, strDPRPositionIncludes NVARCHAR(50)	
+	, strDPRPositionBy NVARCHAR(50)	
+	, strDPRPurchaseSale NVARCHAR(50)	
+	, strDPRVendorCustomer NVARCHAR(200)	
 	, intUserId INT
 	, intSeqNo INT
 	, strCommodityCode NVARCHAR(200) 
