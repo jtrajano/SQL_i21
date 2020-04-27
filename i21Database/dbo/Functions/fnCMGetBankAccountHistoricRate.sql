@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnCMGetBankAccountHistoricRate]
+CREATE FUNCTION [dbo].[fnCMGetBankAccountHistoricRate]
 	(
 	@intBankAccountId INT,
 	@dtmDate DATETIME
@@ -9,22 +9,30 @@ AS
 
 BEGIN
 DECLARE @result DECIMAL(18,6)
-DECLARE @bankBalance decimal(18,6)
-DECLARE @glBalance decimal(18,6)
+DECLARE @AbsbankBalance decimal(18,6)
+DECLARE @AbsglBalance decimal(18,6)
 
-SELECT	@bankBalance = [dbo].[fnCMGetBankBalance] (@intBankAccountId, @dtmDate)
-SELECT	@glBalance = ISNULL(SUM(ISNULL(dblDebit, 0)) - SUM(ISNULL(dblCredit, 0)), 0)
+SELECT	@AbsbankBalance = SUM(ABS(dblAmount))
+FROM tblCMBankTransaction 
+WHERE	ysnPosted = 1
+		AND ysnCheckVoid = 0
+		AND intBankAccountId = @intBankAccountId
+		AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, dtmDate) AS FLOAT)) AS DATETIME)		
+
+
+SELECT	@AbsglBalance = SUM (ABS(ISNULL(dblDebit,0) - ISNULL(dblCredit,0)))
 FROM	[dbo].[tblGLDetail] INNER JOIN [dbo].[tblCMBankAccount]
 			ON [dbo].[tblGLDetail].intAccountId = [dbo].[tblCMBankAccount].intGLAccountId
 WHERE	tblCMBankAccount.intBankAccountId = @intBankAccountId
 		AND CAST(FLOOR(CAST(tblGLDetail.dtmDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(ISNULL(@dtmDate, tblGLDetail.dtmDate) AS FLOAT)) AS DATETIME)
 		AND ysnIsUnposted = 0
 
-IF @glBalance = 0 RETURN -1
-IF @bankBalance = 0 RETURN -2
+IF @AbsglBalance = 0 RETURN -1
+IF @AbsbankBalance = 0 RETURN -2
 
-SELECT @result = @glBalance/@bankBalance
+SELECT @result = @AbsglBalance/@AbsbankBalance
 RETURN @result
 END
+
 
 
