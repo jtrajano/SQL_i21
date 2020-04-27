@@ -8656,6 +8656,9 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
     <Build Include="dbo\Functions\fnMonthName.sql" />
+    <Build Include="dbo\Tables\tblSCImportEntityLog.sql" />
+    <Build Include="dbo\Tables\tblSCEntityGeneratedLog.sql" />
+    <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
