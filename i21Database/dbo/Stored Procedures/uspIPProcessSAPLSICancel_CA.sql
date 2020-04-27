@@ -45,6 +45,10 @@ BEGIN TRY
 
 			SELECT @strRowState = 'Cancel'
 
+			UPDATE tblIPLoadStage
+			SET strAction = @strRowState
+			WHERE intStageLoadId = @intMinRowNo
+
 			SELECT @strCustomerReference = strCustomerReference
 				,@strCancelStatus = strCancelStatus
 				,@dtmCancelDate = dtmCancelDate
@@ -111,8 +115,7 @@ BEGIN TRY
 			SET @strInfo2 = ISNULL(@strLoadNumber, '')
 
 			UPDATE tblIPLoadStage
-			SET strAction = @strRowState
-				,strLoadNumber = @strLoadNumber
+			SET strLoadNumber = @strLoadNumber
 			WHERE intStageLoadId = @intMinRowNo
 
 			BEGIN TRAN

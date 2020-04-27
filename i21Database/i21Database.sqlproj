@@ -8147,6 +8147,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_CA.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
