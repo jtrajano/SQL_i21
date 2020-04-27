@@ -25,6 +25,8 @@ BEGIN TRY
 	DECLARE @intItemLocationId INT
 	DECLARE @intDestinationFOBPointId INT
 	DECLARE @ysnCancel BIT
+	DECLARE @ysnIsReturn BIT = 0
+	DECLARE @strCMActualCostId NVARCHAR(100)
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
@@ -34,6 +36,14 @@ BEGIN TRY
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
 	WHERE intLoadId = @intLoadId
+
+	SELECT TOP 1 @ysnIsReturn = 1, @strCMActualCostId = I.strInvoiceNumber
+	FROM tblLGLoad L 
+		JOIN tblARInvoice CM ON L.intLoadId = CM.intLoadId
+		JOIN tblARInvoice I ON I.intInvoiceId = CM.intOriginalInvoiceId
+	WHERE L.intLoadId = @intLoadId
+		AND CM.strTransactionType = 'Credit Memo'
+		AND CM.ysnPosted = 1
 
 	SELECT @intDestinationFOBPointId = intFobPointId
 	FROM tblICFobPoint
@@ -159,7 +169,7 @@ BEGIN TRY
 			,intTransactionTypeId = 22
 			,intLotId = NULL
 			,intSourceTransactionId = L.intLoadId
-			,strSourceTransactionId = L.strLoadNumber
+			,strSourceTransactionId = CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN @strCMActualCostId ELSE L.strLoadNumber END
 			,intSourceTransactionDetailId = LD.intLoadDetailId
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
@@ -381,7 +391,7 @@ BEGIN TRY
 
 
 --Update Contract Balance and Scheduled Qty for Drop Ship
-IF (@intPurchaseSale = 3)
+IF (@intPurchaseSale = 3 AND @ysnIsReturn = 0)
 BEGIN 
 	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
 	INSERT INTO @ItemsFromInventoryReceipt (
