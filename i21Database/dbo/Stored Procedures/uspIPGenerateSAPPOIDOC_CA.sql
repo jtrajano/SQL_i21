@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA
+﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (@ysnCancel BIT=0)
 AS
 BEGIN
 	DECLARE @strVendorAccountNum NVARCHAR(50)
@@ -39,13 +39,28 @@ BEGIN
 	SELECT @intThirdPartyContractWaitingPeriod = IsNULL(intThirdPartyContractWaitingPeriod, 60)
 	FROM tblIPCompanyPreference
 
-	INSERT INTO @tblCTContractFeed (intContractFeedId)
-	SELECT intContractFeedId
-	FROM dbo.tblCTContractFeed
-	WHERE strThirdPartyFeedStatus IS NULL
-		AND strERPPONumber <> ''
-		AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
-		AND strCommodityCode = 'Coffee'
+	IF @ysnCancel=1
+	BEGIN
+		INSERT INTO @tblCTContractFeed (intContractFeedId)
+		SELECT intContractFeedId
+		FROM dbo.tblCTContractFeed
+		WHERE strThirdPartyFeedStatus IS NULL
+			AND strERPPONumber <> ''
+			AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
+			AND strCommodityCode = 'Coffee'
+			AND strRowState = 'Delete'
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblCTContractFeed (intContractFeedId)
+		SELECT intContractFeedId
+		FROM dbo.tblCTContractFeed
+		WHERE strThirdPartyFeedStatus IS NULL
+			AND strERPPONumber <> ''
+			AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
+			AND strCommodityCode = 'Coffee'
+			AND strRowState <> 'Delete'
+	END
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -65,7 +80,7 @@ BEGIN
 			,@strRowState = NULL
 			,@intEntityId = NULL
 			,@strContractNo = NULL
-			,@dtmFeedCreated=NULL
+			,@dtmFeedCreated = NULL
 
 		SELECT @strError = ''
 
@@ -79,7 +94,7 @@ BEGIN
 			,@dtmPlannedAvailabilityDate = dtmPlannedAvailabilityDate
 			,@intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
-			,@dtmFeedCreated=dtmFeedCreated
+			,@dtmFeedCreated = dtmFeedCreated
 		FROM tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -149,9 +164,13 @@ BEGIN
 		IF @strRowState = 'Delete'
 		BEGIN
 			SELECT @strXML = '<Shipment>'
+
 			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
+
 			SELECT @strXML = @strXML + '<Status>800</Status>'
+
 			SELECT @strXML = @strXML + '<Timestamp>' + CONVERT(VARCHAR(10), @dtmFeedCreated, 112) + '</Timestamp>'
+
 			SELECT @strXML = @strXML + '</Shipment>'
 		END
 		ELSE
@@ -245,6 +264,14 @@ BEGIN
 			UPDATE tblCTContractFeed
 			SET strThirdPartyFeedStatus = 'Awt Ack'
 			WHERE intContractFeedId = @intContractFeedId
+		END
+
+		IF EXISTS (
+				SELECT *
+				FROM @tblOutput
+				)
+		BEGIN
+			BREAK
 		END
 
 		X:
