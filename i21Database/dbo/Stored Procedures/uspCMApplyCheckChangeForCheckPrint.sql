@@ -53,7 +53,7 @@ BEGIN
 	FROM tblCMUndepositedFund U
 	INNER JOIN tblCMBankTransaction B ON U.intBankDepositId = B.intTransactionId
 	CROSS apply (
-		SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where B.intTransactionId = Item ) b
+		SELECT Item  from dbo.fnSplitString(@strTransactionId,',') where U.intUndepositedFundId = Item ) b
 	WHERE 
 	U.intBankAccountId = @intBankAccountId
 	AND U.ysnCommitted is null
