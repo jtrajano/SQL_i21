@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuationWrapper2]
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 	,@intEntityUserId AS INT = NULL
+	,@ysnAcceptBackDate AS BIT = 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -24,6 +25,7 @@ BEGIN TRY
 		,@isPeriodic
 		,@ysnRegenerateBillGLEntries
 		,@intEntityUserId
+		,@ysnAcceptBackDate
 
 	COMMIT TRANSACTION 
 END TRY
