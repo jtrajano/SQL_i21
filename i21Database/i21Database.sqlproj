@@ -8646,6 +8646,8 @@
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
+    <Build Include="dbo\Functions\fnMonthName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

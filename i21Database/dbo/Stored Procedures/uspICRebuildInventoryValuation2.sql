@@ -5,6 +5,7 @@ CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation2]
 	,@isPeriodic AS BIT = 1
 	,@ysnRegenerateBillGLEntries AS BIT = 0
 	,@intUserId AS INT = NULL
+	,@ysnAcceptBackDate AS BIT = 0
 AS
 
 DECLARE @intItemId AS INT
@@ -49,76 +50,56 @@ BEGIN
 	RETURN -1; 
 END 
 
-IF OBJECT_ID('tempdb..#tmpICTransactionForDateSorting') IS NOT NULL  
-	DROP TABLE #tmpICTransactionForDateSorting
+DECLARE @dtmNewStartDate AS DATETIME = @dtmStartDate
+DECLARE @backDateTransaction AS TABLE (
+	dtmDate DATETIME
+)
 
-SELECT	id = IDENTITY(INT, 1, 1) 
-		,dtmDate = CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-INTO	#tmpICTransactionForDateSorting
-FROM	tblICInventoryTransaction t INNER JOIN tblICItem i
-			ON t.intItemId = i.intItemId
-		LEFT JOIN tblICInventoryTransactionType ty
-			ON t.intTransactionTypeId = ty.intTransactionTypeId
-WHERE	1 = CASE	WHEN ty.strName = 'Cost Adjustment' THEN 1 
-					WHEN ISNULL(dblQty, 0) <> 0 THEN 1
-					ELSE 0
-			END 	
-		AND ISNULL(ysnIsUnposted, 0) = 0 -- This part of the 'WHERE' clause will exclude any unposted transactions during the re-post. 
-		AND dbo.fnDateGreaterThanEquals(
-			CASE WHEN @isPeriodic = 0 THEN dtmCreated ELSE dtmDate END
-			, @dtmStartDate
-		) = 1
-		AND t.intItemId = ISNULL(@intItemId, t.intItemId) 
-		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intCategoryId, i.intCategoryId, 0) 
-ORDER BY t.intInventoryTransactionId ASC 
+INSERT INTO @backDateTransaction (
+	dtmDate
+)
+EXEC @intReturnValue = uspICGetBackDatedTransaction
+	@strItemNo = @strItemNo
+	,@strCategoryCode = @strCategoryCode
+	,@dtmStartDate = @dtmStartDate
+	,@strFYMonth = NULL 	
 
-CREATE CLUSTERED INDEX [IX_tmpICTransactionForDateSorting] 
-	ON #tmpICTransactionForDateSorting(id ASC);
-
+IF @intReturnValue <> 0 
 BEGIN 
-	DECLARE @dtmDate AS DATETIME 
-			,@dtmDatePrevious AS DATETIME 
-			,@dtmNewStartDate AS DATETIME = @dtmStartDate
-			,@id AS INT 
+	RETURN @intReturnValue;
+END 
 
-	DECLARE loopICTransactionForDateSorting CURSOR LOCAL FAST_FORWARD
-	FOR SELECT id, dtmDate FROM #tmpICTransactionForDateSorting
-
-	OPEN loopICTransactionForDateSorting;
-
-	FETCH NEXT FROM loopICTransactionForDateSorting INTO @id, @dtmDate;
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN 
-
-		-- Check for invalid date sequence. 
-		-- If invalid, break the loop immediately
-		IF	@dtmDatePrevious IS NOT NULL 
-			AND dbo.fnDateLessThan(@dtmDate, @dtmDatePrevious) = 1
-		BEGIN 
-			GOTO _exit_loopICTransactionForDateSorting
-		END
+IF EXISTS (SELECT TOP 1 1 FROM @backDateTransaction WHERE dbo.fnRemoveTimeOnDate(dtmDate) < dbo.fnRemoveTimeOnDate(@dtmStartDate)) 
+BEGIN 
+	SELECT TOP 1 
+		@dtmNewStartDate = dbo.fnRemoveTimeOnDate(dtmDate)  
+	FROM 
+		@backDateTransaction 
+	WHERE 
+		dbo.fnRemoveTimeOnDate(dtmDate) < dbo.fnRemoveTimeOnDate(@dtmStartDate)		
 		
-		SET @dtmDatePrevious = @dtmDate
-		FETCH NEXT FROM loopICTransactionForDateSorting INTO @id, @dtmDate;
+	IF ISNULL(@ysnAcceptBackDate, 0) = 0
+	BEGIN 
+		-- There are backdated transactions made in <Month> <Year>. Do you want to rebuild from <Month> <Year>??
+		DECLARE @rebuildMonth AS NVARCHAR(50) 
+				,@suggestedRebuildMonth AS NVARCHAR(50) 
+				,@rebuildYear AS INT
+				,@suggestedRebuildYear AS INT 
+
+		
+		SELECT
+			@rebuildMonth = dbo.fnMonthName(MONTH(@dtmStartDate))  
+			,@suggestedRebuildMonth = dbo.fnMonthName(MONTH(@dtmNewStartDate))  
+			,@rebuildYear = YEAR(@dtmStartDate)
+			,@suggestedRebuildYear = YEAR(@dtmNewStartDate)
+
+
+		EXEC uspICRaiseError 80252, @rebuildMonth, @rebuildYear, @suggestedRebuildMonth, @suggestedRebuildYear; 
+		RETURN -80252; 
 	END 
 
-	_exit_loopICTransactionForDateSorting:
-
-	CLOSE loopICTransactionForDateSorting;
-	DEALLOCATE loopICTransactionForDateSorting;
-END
-
--- Get the new start date. 
-SELECT	@dtmNewStartDate = dbo.fnRemoveTimeOnDate(MIN(dtmDate))
-FROM	#tmpICTransactionForDateSorting
-WHERE	id >= @id
-
--- Null the new date if it is invalid.  
-SELECT	@dtmNewStartDate = NULL 
-FROM	#tmpICTransactionForDateSorting
-HAVING	dbo.fnDateEquals(MAX(dtmDate),  @dtmNewStartDate) = 1
-		AND MAX(id) = @id 
+	SET @dtmNewStartDate = ISNULL(@dtmNewStartDate, dbo.fnRemoveTimeOnDate(@dtmStartDate)) 			
+END 
 
 IF @dtmNewStartDate IS NOT NULL 
 BEGIN 
