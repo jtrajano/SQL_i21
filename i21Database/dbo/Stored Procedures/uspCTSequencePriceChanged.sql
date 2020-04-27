@@ -103,7 +103,7 @@ BEGIN TRY
 		RETURN
 
 
-	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(*) FROM tblAPBillDetail a, tblAPBill b WHERE a.intContractDetailId = @intContractDetailId and b.intBillId = a.intBillId and b.intTransactionType <> 13) > 0))
+	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(*) FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId) > 0))
 	BEGIN
 
 		if (@ysnDelete = 1) return;
@@ -150,7 +150,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		IF NOT EXISTS(SELECT top 1 1 FROM tblAPBillDetail a, tblAPBill b WHERE a.intContractDetailId = @intContractDetailId AND a.intContractCostId IS NULL AND a.intInventoryReceiptChargeId IS NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13)
+		IF NOT EXISTS(SELECT * FROM tblAPBillDetail WHERE intContractDetailId = @intContractDetailId AND intContractCostId IS NULL AND intInventoryReceiptChargeId IS NULL)
 		BEGIN
 			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
 			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice, null
