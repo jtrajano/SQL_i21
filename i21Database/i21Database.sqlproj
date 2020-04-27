@@ -7728,6 +7728,8 @@
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
+    <Build Include="dbo\Functions\fnMonthName.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
