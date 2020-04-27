@@ -29,6 +29,7 @@ SELECT
 	ISNULL(D.dblCreditLimit,0) AS dblCredit,
 	D.strVendorId,
 	D1.strName,
+	EL.strLocationName AS strPayTo,
 	ISNULL(E.ysnClr,0) AS ysnClear,
 	F.strPaymentMethod
 	FROM dbo.tblAPPayment A
@@ -38,6 +39,8 @@ SELECT
 			ON B.intBankId = C.intBankId
 		LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D1 ON D.[intEntityId] = D1.intEntityId)
 			ON A.[intEntityVendorId] = D.[intEntityId]
+		LEFT JOIN dbo.tblEMEntityLocation EL
+			ON A.intPayToAddressId = EL.intEntityLocationId
 		LEFT JOIN dbo.tblCMBankTransaction E
 			ON A.strPaymentRecordNum = E.strTransactionId
 		LEFT JOIN dbo.tblSMPaymentMethod F
