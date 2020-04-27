@@ -346,7 +346,7 @@ BEGIN TRY
 				,[dblExchangeRate] = 1
 				,[ysnSubCurrency] = CUR.ysnSubCurrency
 				,[intSubCurrencyCents] = CUR.intCent
-				,[intAccountId] = VDD.intAccountId
+				,[intAccountId] = dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'Other Charge Expense')
 				,[strBillOfLading] = L.strBLNumber
 				,[ysnReturn] = CAST(0 AS BIT)
 				,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
@@ -504,7 +504,7 @@ BEGIN TRY
 					,[dblExchangeRate] = 1
 					,[ysnSubCurrency] = CUR.ysnSubCurrency
 					,[intSubCurrencyCents] = CUR.intCent
-					,[intAccountId] = VDD.intAccountId
+					,[intAccountId] = CASE WHEN (CTC.intContractCostId IS NULL) THEN dbo.fnGetItemGLAccount(VDD.intItemId, CD.intCompanyLocationId, 'Other Charge Expense') ELSE VDD.intAccountId END
 					,[strBillOfLading] = L.strBLNumber
 					,[ysnReturn] = CAST(0 AS BIT)
 					,[ysnStage] = CAST(CASE WHEN (COC.ysnCreateOtherCostPayable = 1 AND CTC.intContractCostId IS NOT NULL) THEN 0 ELSE 1 END AS BIT)
