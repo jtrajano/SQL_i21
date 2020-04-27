@@ -2189,106 +2189,116 @@ WHERE intOrderId IS NOT NULL
 --Get the Run Number
 DECLARE @intRunNumber INT
 		,@strVendorCustomer NVARCHAR(200)
+		,@ysnStoreDPRDetail BIT
 
-SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
-FROM tblRKTempDPRDetailLog
+SELECT @ysnStoreDPRDetail = ysnStoreDPRDetail
+FROM tblSMUserSecurity
+WHERE intEntityId = @intUserId
 
-IF @intVendorId IS NOT NULL 
+IF @ysnStoreDPRDetail = 1
 BEGIN
-	SELECT @strVendorCustomer = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
+	SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
+	FROM tblRKTempDPRDetailLog
+
+	IF @intVendorId IS NOT NULL 
+	BEGIN
+		SELECT @strVendorCustomer = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
+	END
+
+	INSERT INTO tblRKTempDPRDetailLog (
+		 intRunNumber 
+		, dtmRunDateTime
+		, intUserId
+		, dtmDPRDate	
+		, strDPRPositionIncludes	
+		, strDPRPositionBy	
+		, strDPRPurchaseSale
+		, strDPRVendorCustomer
+		, intSeqNo
+		, strCommodityCode
+		, strContractNumber
+		, intContractHeaderId
+		, strInternalTradeNo
+		, intFutOptTransactionHeaderId
+		, strType
+		, strLocationName
+		, strContractEndMonth
+		, strContractEndMonthNearBy
+		, dblTotal
+		, strUnitMeasure
+		, strAccountNumber
+		, strTranType
+		, dblNoOfLot
+		, dblDelta
+		, intBrokerageAccountId
+		, strInstrumentType
+		, strEntityName
+		, intOrderId
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategory
+		, intFutureMarketId
+		, strFutMarketName
+		, intFutureMonthId
+		, strFutureMonth
+		, strDeliveryDate
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+		, strTransactionReferenceId
+		, intTransactionReferenceId
+	)
+	select 
+		 intRunNumber = @intRunNumber
+		, dtmRunDateTime = GETDATE()
+		, intUserId = @intUserId
+		, dtmDPRDate = @dtmToDate	
+		, strDPRPositionIncludes = @strPositionIncludes
+		, strDPRPositionBy = @strPositionBy
+		, strDPRPurchaseSale = @strPurchaseSales
+		, strDPRVendorCustomer = @strVendorCustomer
+		, intSeqNo = intOrderId
+		, strCommodityCode
+		, strContractNumber
+		, intContractHeaderId
+		, strInternalTradeNo
+		, intFutOptTransactionHeaderId
+		, strType
+		, strLocationName
+		, strContractEndMonth
+		, strContractEndMonthNearBy
+		, dblTotal
+		, strUnitMeasure
+		, strAccountNumber
+		, strTranType
+		, dblNoOfLot
+		, dblDelta
+		, intBrokerageAccountId
+		, strInstrumentType
+		, strEntityName
+		, intOrderId
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategory
+		, intFutureMarketId
+		, strFutMarketName
+		, intFutureMonthId
+		, strFutureMonth
+		, strDeliveryDate
+		, strBrokerTradeNo
+		, strNotes
+		, ysnPreCrush
+		, strTransactionReferenceId
+		, intTransactionReferenceId
+	FROM @ListFinal
+	WHERE intOrderId IS NOT NULL
+		AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
+		AND dblTotal IS NOT NULL
+	ORDER BY intSeqNo
 END
 
-INSERT INTO tblRKTempDPRDetailLog (
-	 intRunNumber 
-	, dtmRunDateTime
-	, intUserId
-	, dtmDPRDate	
-	, strDPRPositionIncludes	
-	, strDPRPositionBy	
-	, strDPRPurchaseSale
-	, strDPRVendorCustomer
-	, intSeqNo
-	, strCommodityCode
-	, strContractNumber
-	, intContractHeaderId
-	, strInternalTradeNo
-	, intFutOptTransactionHeaderId
-	, strType
-	, strLocationName
-	, strContractEndMonth
-	, strContractEndMonthNearBy
-	, dblTotal
-	, strUnitMeasure
-	, strAccountNumber
-	, strTranType
-	, dblNoOfLot
-	, dblDelta
-	, intBrokerageAccountId
-	, strInstrumentType
-	, strEntityName
-	, intOrderId
-	, intItemId
-	, strItemNo
-	, intCategoryId
-	, strCategory
-	, intFutureMarketId
-	, strFutMarketName
-	, intFutureMonthId
-	, strFutureMonth
-	, strDeliveryDate
-	, strBrokerTradeNo
-	, strNotes
-	, ysnPreCrush
-	, strTransactionReferenceId
-	, intTransactionReferenceId
-)
-select 
-	 intRunNumber = @intRunNumber
-	, dtmRunDateTime = GETDATE()
-	, intUserId = @intUserId
-	, dtmDPRDate = @dtmToDate	
-	, strDPRPositionIncludes = @strPositionIncludes
-	, strDPRPositionBy = @strPositionBy
-	, strDPRPurchaseSale = @strPurchaseSales
-	, strDPRVendorCustomer = @strVendorCustomer
-	, intSeqNo = intOrderId
-	, strCommodityCode
-	, strContractNumber
-	, intContractHeaderId
-	, strInternalTradeNo
-	, intFutOptTransactionHeaderId
-	, strType
-	, strLocationName
-	, strContractEndMonth
-	, strContractEndMonthNearBy
-	, dblTotal
-	, strUnitMeasure
-	, strAccountNumber
-	, strTranType
-	, dblNoOfLot
-	, dblDelta
-	, intBrokerageAccountId
-	, strInstrumentType
-	, strEntityName
-	, intOrderId
-	, intItemId
-	, strItemNo
-	, intCategoryId
-	, strCategory
-	, intFutureMarketId
-	, strFutMarketName
-	, intFutureMonthId
-	, strFutureMonth
-	, strDeliveryDate
-	, strBrokerTradeNo
-	, strNotes
-	, ysnPreCrush
-	, strTransactionReferenceId
-	, intTransactionReferenceId
-FROM @ListFinal
-WHERE intOrderId IS NOT NULL
-	AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
-	AND dblTotal IS NOT NULL
 
 SELECT intSeqNo = intOrderId
 	, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
