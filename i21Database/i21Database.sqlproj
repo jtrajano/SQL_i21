@@ -7744,6 +7744,9 @@
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMO_4757.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
+    <Build Include="dbo\Tables\tblSCImportEntityLog.sql" />
+    <Build Include="dbo\Tables\tblSCEntityGeneratedLog.sql" />
+    <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
