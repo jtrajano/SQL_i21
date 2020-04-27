@@ -1,4 +1,5 @@
-﻿
+﻿CREATE VIEW [dbo].[vyuAPGrainClearing]
+AS 
 SELECT 
 	CS.intEntityId AS intEntityVendorId
 	,SS.dtmCreated AS dtmDate
