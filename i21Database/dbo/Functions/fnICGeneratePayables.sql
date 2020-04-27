@@ -347,14 +347,30 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 	OUTER APPLY 
 	(
 		SELECT 
-			SUM(ISNULL(H.dblQtyReceived,0)) AS dblQty 
+			SUM(ISNULL(billDetail.dblQtyReceived,0)) AS dblQty 
 		FROM 
-			tblAPBillDetail H 
+			tblAPBillDetail billDetail INNER JOIN tblAPBill bill
+				ON billDetail.intBillId = bill.intBillId 
 		WHERE 
-			H.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
-			AND H.intInventoryReceiptChargeId IS NULL
+			billDetail.intInventoryReceiptItemId = B.intInventoryReceiptItemId 
+			AND billDetail.intInventoryReceiptChargeId IS NULL
+			AND bill.intTransactionType NOT IN (13)  
+			/*
+				CASE A.intTransactionType
+						WHEN 1 THEN 'Voucher'
+						WHEN 2 THEN 'Vendor Prepayment'
+						WHEN 3 THEN 'Debit Memo'
+						WHEN 7 THEN 'Invalid Type'
+						WHEN 9 THEN '1099 Adjustment'
+						WHEN 11 THEN 'Claim'
+						WHEN 12 THEN 'Prepayment Reversal'
+						WHEN 13 THEN 'Basis Advance'
+						WHEN 14 THEN 'Deferred Interest'
+						ELSE 'Invalid Type'
+				END		
+			*/
 		GROUP BY 
-			H.intInventoryReceiptItemId
+			billDetail.intInventoryReceiptItemId
 	) Billed
 	
 	OUTER APPLY (
@@ -591,10 +607,32 @@ FROM [vyuICChargesForBilling] A
 	)  IRCT
 	OUTER APPLY 
 	(
-		SELECT intEntityVendorId,SUM(ISNULL(dblQtyReceived,0)) AS dblQtyReceived FROM tblAPBillDetail BD
-		LEFT JOIN dbo.tblAPBill B ON BD.intBillId = B.intBillId
-		WHERE BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
-		GROUP BY intEntityVendorId, BD.intInventoryReceiptChargeId
+		SELECT 
+			intEntityVendorId
+			,SUM(ISNULL(dblQtyReceived,0)) AS dblQtyReceived 
+		FROM 
+			tblAPBillDetail BD INNER JOIN dbo.tblAPBill B 
+				ON BD.intBillId = B.intBillId
+		WHERE 
+			BD.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
+			AND B.intTransactionType NOT IN (13)  
+			/*
+				CASE A.intTransactionType
+						WHEN 1 THEN 'Voucher'
+						WHEN 2 THEN 'Vendor Prepayment'
+						WHEN 3 THEN 'Debit Memo'
+						WHEN 7 THEN 'Invalid Type'
+						WHEN 9 THEN '1099 Adjustment'
+						WHEN 11 THEN 'Claim'
+						WHEN 12 THEN 'Prepayment Reversal'
+						WHEN 13 THEN 'Basis Advance'
+						WHEN 14 THEN 'Deferred Interest'
+						ELSE 'Invalid Type'
+				END		
+			*/
+		GROUP BY 
+			intEntityVendorId
+			, BD.intInventoryReceiptChargeId
 
 	) Billed
 WHERE
