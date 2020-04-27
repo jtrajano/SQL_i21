@@ -43,6 +43,7 @@ DECLARE @matchStorageType AS INT
 DECLARE @ysnIsStorage AS INT
 DECLARE @strLotTracking NVARCHAR(4000)
 DECLARE @dblAvailableGrainOpenBalance DECIMAL(38, 20)
+DECLARE @intTicketDeliverySheetId INT
 
 DECLARE @ErrorMessage NVARCHAR(4000);
 DECLARE @ErrorSeverity INT;
@@ -66,9 +67,10 @@ DECLARE @ItemsForItemShipment AS ItemCostingTableType
 BEGIN TRY
 
 	SELECT @intDefaultStorageSchedule = SC.intStorageScheduleId
-	, @intCommodityId = SC.intCommodityId
-	, @intScaleStationId = SC.intScaleSetupId
-	, @intItemId = SC.intItemId 
+		, @intCommodityId = SC.intCommodityId
+		, @intScaleStationId = SC.intScaleSetupId
+		, @intItemId = SC.intItemId 
+		, @intTicketDeliverySheetId = ISNULL(SC.intDeliverySheetId,0)
 	FROM tblSCTicket SC
 	WHERE SC.intTicketId = @intTicketId
 
@@ -342,6 +344,13 @@ BEGIN TRY
 	WHERE SC.intTicketId = @intTicketId
 
 	EXEC uspGRCreateCustomerStorage @CustomerStorageStagingTable, @intHoldCustomerStorageId OUTPUT
+
+	IF(ISNULL(@intTicketDeliverySheetId,0) = 0)
+	BEGIN
+		UPDATE tblGRCustomerStorage
+		SET intTicketId = @intTicketId
+		WHERE intCustomerStorageId = @intHoldCustomerStorageId
+	END
 
 	IF EXISTS(SELECT * FROM @CustomerStorageStagingTable WHERE ISNULL(intDeliverySheetId,0) > 0)
 	BEGIN
