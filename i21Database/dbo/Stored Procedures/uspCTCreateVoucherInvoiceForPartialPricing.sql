@@ -437,16 +437,16 @@ BEGIN TRY
 							FROM tblAPBill BL
 							INNER JOIN tblAPBillDetail BD ON BL.intBillId = BD.intBillId
 							LEFT JOIN @tblCreatedTransaction CT ON CT.intTransactionId = BL.intBillId
-							WHERE BD.intInventoryReceiptItemId = @intInventoryReceiptItemId
+							WHERE BL.intTransactionType <> 13 and  BD.intInventoryReceiptItemId = @intInventoryReceiptItemId
 							AND (BL.ysnPosted = 0 OR ISNULL(CT.intTransactionId, 0) <> 0)
 						)
 						BEGIN
 							SET @allowAddDetail = 1
 						END
 
-						IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @allowAddDetail = 1)
+						IF EXISTS(SELECT top 1 1 FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId AND a.intInventoryReceiptChargeId IS NULL AND b.intBillId = a.intBillId and  b.intTransactionType <> 13 AND @allowAddDetail = 1)
 						BEGIN
-							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+							SELECT	@intBillId = a.intBillId, @dblQtyReceived = a.dblQtyReceived FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId and b.intBillId = a.intBillId and b.intTransactionType <> 13
 
 							SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
 
@@ -464,12 +464,14 @@ BEGIN TRY
 					    
 							-- Get the intBillDetailId of the newly inserted voucher item. 
 							SELECT	TOP 1	
-									@intBillDetailId = intBillDetailId 
-							FROM	tblAPBillDetail 
-							WHERE	intBillId = @intBillId 
-									AND intContractDetailId = @intContractDetailId 
-									AND intInventoryReceiptChargeId IS NULL
-							ORDER BY intBillDetailId DESC 
+									@intBillDetailId = a.intBillDetailId 
+							FROM	tblAPBillDetail a, tblAPBill b
+							WHERE	a.intBillId = @intBillId 
+									AND a.intContractDetailId = @intContractDetailId 
+									AND a.intInventoryReceiptChargeId IS NULL
+									and b.intBillId = a.intBillId
+									and b.intTransactionType <> 13
+							ORDER BY a.intBillDetailId DESC 
 							--UPDATING OF QUANTITY Manual
 							UPDATE tblAPBillDetail SET dblQtyOrdered = @dblReceived WHERE intBillDetailId = @intBillDetailId
 					    
@@ -745,9 +747,9 @@ BEGIN TRY
 					BEGIN
 						IF(@ysnDoUpdateCost = 1)
 						BEGIN
-							IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
+							IF EXISTS(SELECT top 1 1 FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId AND a.intInventoryReceiptChargeId IS	NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13)
 							BEGIN 
-								SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived, @dblVoucherPrice = dblCost FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+								SELECT	@intBillId = a.intBillId, @dblQtyReceived = a.dblQtyReceived, @dblVoucherPrice = a.dblCost FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId and b.intBillId = a.intBillId and b.intTransactionType <> 13
 					    
 								SELECT  @ysnBillPosted = ysnPosted, @ysnBillPaid = ysnPaid FROM tblAPBill WHERE intBillId = @intBillId
 								
@@ -761,7 +763,7 @@ BEGIN TRY
 								BEGIN
 									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 								END
-								SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
+								SELECT	@intBillDetailId = a.intBillDetailId FROM tblAPBillDetail a, tblAPBill b WHERE a.intBillId = @intBillId AND a.intContractDetailId = @intContractDetailId AND a.intInventoryReceiptChargeId IS NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13
 					    
 								--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
