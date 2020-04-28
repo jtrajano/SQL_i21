@@ -85,7 +85,7 @@ DECLARE
 	,@intCurrencyIdTo INT
 	,@intDefaultCurrencyId INT
 	,@ysnFunctionalToForeign BIT
-	,@ysnForeignToFuncational BIT
+	,@ysnForeignToFunctional BIT
 	,@ysnForeignToForeign BIT
 	
 	-- Table Variables
@@ -119,12 +119,12 @@ WHERE	strTransactionId = @strTransactionId
 
 
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
-SELECT @ysnForeignToFuncational = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdFrom AND @intCurrencyIdTo = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
+
+SELECT @ysnForeignToFunctional = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdFrom AND @intCurrencyIdTo = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
 SELECT @ysnFunctionalToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
 SELECT @ysnForeignToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom <> @intDefaultCurrencyId AND  @intCurrencyIdFrom = @intCurrencyIdTo THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
-SELECT @dblHistoricRate = CASE WHEN @ysnFunctionalToForeign = 1 THEN @dblRate ELSE @dblHistoricRate END
+SELECT @dblHistoricRate = CASE WHEN @ysnFunctionalToForeign = 1 THEN  @dblRate ELSE dbo.fnCMGetBankAccountHistoricRate(@intBankAccountIdFrom, @dtmDate ) END
 
-		
 
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
@@ -539,8 +539,8 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
 				,intCurrencyId				= @intCurrencyIdFrom
-				,intCurrencyExchangeRateTypeId =CASE WHEN @ysnForeignToFuncational = 1  OR @ysnForeignToForeign =1 THEN A.intCurrencyExchangeRateTypeId ELSE NULL END  
-				,dblExchangeRate			= CASE WHEN @ysnForeignToFuncational = 1  OR @ysnForeignToForeign =1 THEN ISNULL(@dblHistoricRate,1)  ELSE 1 END 
+				,intCurrencyExchangeRateTypeId =CASE WHEN @ysnForeignToFunctional = 1  OR @ysnForeignToForeign =1 THEN A.intCurrencyExchangeRateTypeId ELSE NULL END  
+				,dblExchangeRate			= CASE WHEN @ysnForeignToFunctional = 1  OR @ysnForeignToForeign =1 THEN ISNULL(@dblHistoricRate,1)  ELSE 1 END 
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
