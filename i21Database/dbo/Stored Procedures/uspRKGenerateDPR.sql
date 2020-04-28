@@ -2895,7 +2895,7 @@ BEGIN TRY
 			, strEntityName
 			, strDeliveryDate
 		FROM (
-			SELECT DISTINCT cd.strCommodityCode
+			SELECT cd.strCommodityCode
 				, cd.intContractHeaderId
 				, strContractNumber
 				, cd.strType
@@ -4748,7 +4748,7 @@ BEGIN TRY
 			, intFutureMonthId
 			, strFutureMonth
 		FROM (
-			SELECT DISTINCT strCommodityCode
+			SELECT strCommodityCode
 				, CD.intCommodityId
 				, intContractHeaderId
 				, strContractNumber
@@ -5551,7 +5551,7 @@ BEGIN TRY
 			, strFutureMonth
 			, strDeliveryDate
 		FROM (
-			SELECT DISTINCT strCommodityCode
+			SELECT strCommodityCode
 				, CD.intCommodityId
 				, CD.intContractHeaderId
 				, strContractNumber
