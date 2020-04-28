@@ -41,7 +41,7 @@ BEGIN TRY
 	SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
-		EXEC uspAPReverseTransaction @Id, @intUserId, null, @billCreatedId OUTPUT
+		EXEC uspAPReverseTransaction @Id, @intUserId, 'Contract', @billCreatedId OUTPUT
 		SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id
 	END
 
