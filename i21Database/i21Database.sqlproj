@@ -8120,6 +8120,7 @@
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
     <Build Include="dbo\Tables\tblRKTempDPRDetailLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessShipmentToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

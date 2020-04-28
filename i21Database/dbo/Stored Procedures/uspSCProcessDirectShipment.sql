@@ -10,6 +10,7 @@
 	@ysnPostDestinationWeight BIT = 0,
 	@intInvoiceId AS INT = NULL OUTPUT,
 	@intBillId AS INT = NULL OUTPUT
+	,@dtmClientDate DATETIME = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -198,29 +199,45 @@ BEGIN TRY
 		BEGIN
 			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
 
-			SELECT TOP 1 @InventoryShipmentId = intInventoryShipmentId FROM vyuICGetInventoryShipmentItem where intSourceId = @intTicketId and strSourceType = 'Scale'
-			SELECT @intPricingTypeId = intPricingTypeId FROM tblSCTicket SC
-			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId
+			SELECT TOP 1 
+				@InventoryShipmentId = intInventoryShipmentId 
+			FROM vyuICGetInventoryShipmentItem 
+			WHERE intSourceId = @intTicketId 
+				AND strSourceType = 'Scale'
+
+			SELECT 
+				@intPricingTypeId = intPricingTypeId 
+				,@intTicketItemUOMId = intItemUOMIdTo
+				,@dblNetUnits = dblNetUnits
+			FROM tblSCTicket SC
+			LEFT JOIN tblCTContractDetail CTD 
+				ON CTD.intContractDetailId = SC.intContractId
 			WHERE SC.intTicketId = @intTicketId
 
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
+			IF ISNULL(@InventoryShipmentId, 0) != 0 
 			BEGIN
-				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUTPUT, 0, 1;
-				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
-				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+				EXEC uspSCProcessShipmentToInvoice 
+					@intTicketId = @intTicketId
+					,@intInventoryShipmentId = @InventoryShipmentId
+					,@intUserId = @intUserId
+					,@intInvoiceId = @intInvoiceId OUTPUT 
+					,@dtmClientDate = @dtmClientDate
+				
 
 				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId,@intTicketItemUOMId,ISI.dblQuantity)) AS DECIMAL(18,6))  FROM tblICInventoryShipment ICIS
 					INNER JOIN tblICInventoryShipmentItem ISI ON ICIS.intInventoryShipmentId = ISI.intInventoryShipmentId
 					WHERE intSourceId = @intTicketId))
 				BEGIN
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,@intTicketId
+
+					declare @InAdj as InventoryAdjustmentIntegrationId
+					insert into @InAdj(intInventoryShipmentId, intTicketId, intInvoiceId)
+					select @InventoryShipmentId, @intTicketId, @intInvoiceId
+					Exec uspICInventoryAdjustmentUpdateLinkingId @LinkingData = @InAdj, @ysnShipment = 1
 				END
 			END
 
-			declare @InAdj as InventoryAdjustmentIntegrationId
-			insert into @InAdj(intInventoryShipmentId, intTicketId, intInvoiceId)
-			select @InventoryShipmentId, @intTicketId, @intInvoiceId
-			Exec uspICInventoryAdjustmentUpdateLinkingId @LinkingData = @InAdj, @ysnShipment = 1
+			
 		END
 	END
 	ELSE
@@ -364,3 +381,4 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
+GO
