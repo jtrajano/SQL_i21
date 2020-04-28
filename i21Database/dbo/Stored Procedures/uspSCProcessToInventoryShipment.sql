@@ -559,27 +559,12 @@ BEGIN TRY
 	
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	SELECT @intContractDetailId = MIN(si.intLineNo)
-    FROM tblICInventoryShipment s 
-    JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-    WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
- 
-	--INVOICE intergration
-	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-	WHERE intInventoryShipmentId = @InventoryShipmentId
-
-	-- IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ysnAllowInvoice = 1)
-	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1,@dtmShipmentDate = @dtmClientDate;
-	END
-
-	--Check for Basis contract and create invoice		
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-	BEGIN
-		EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-	END
+	EXEC uspSCProcessShipmentToInvoice 
+		@intTicketId = @intTicketId
+		,@intInventoryShipmentId = @InventoryShipmentId
+		,@intUserId = @intUserId
+		,@intInvoiceId = @intInvoiceId OUTPUT 
+		,@dtmClientDate = @dtmClientDate
 		
 	SELECT @intInvoiceId = id.intInvoiceId
 	FROM tblICInventoryShipment s 
