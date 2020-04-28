@@ -391,7 +391,7 @@ BEGIN TRY
 
 
 --Update Contract Balance and Scheduled Qty for Drop Ship
-IF (@intPurchaseSale = 3 AND @ysnIsReturn = 0)
+IF (@intPurchaseSale = 3)
 BEGIN 
 	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
 	INSERT INTO @ItemsFromInventoryReceipt (

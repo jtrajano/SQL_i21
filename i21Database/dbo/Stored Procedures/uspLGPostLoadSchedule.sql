@@ -153,6 +153,82 @@ BEGIN TRY
 				,@ysnUnShip = @ysnUnShip
 				,@intEntityUserSecurityId = @intEntityUserSecurityId
 
+			--Return Contract Balance when Cancelling Drop Ship (PPT)
+			IF (@ysnCancel = 1)
+			BEGIN
+				DECLARE @ItemsFromInventoryShipment AS dbo.ShipmentItemTableType
+
+				INSERT INTO @ItemsFromInventoryShipment (
+					[intShipmentId]
+					,[strShipmentId]
+					,[intOrderType]
+					,[intSourceType]
+					,[dtmDate]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[intEntityCustomerId]
+					,[intInventoryShipmentItemId]
+					,[intItemId]
+					,[intLocationId]
+					,[intItemLocationId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[intItemUOMId]
+					,[intWeightUOMId]
+					,[dblQty]
+					,[dblUOMQty]
+					,[dblSalesPrice]
+					,[intDockDoorId]
+					,[intOrderId]
+					,[intSourceId]
+					,[intLineNo]
+					,[intLoadShipped]
+					,[ysnLoad]
+					)
+				SELECT L.intLoadId
+					,L.strLoadNumber
+					,1 AS intOrderType
+					,-1 AS intSourceType
+					,GETDATE()
+					,intCurrencyId = NULL
+					,[dblExchangeRate] = 1
+					,LD.intCustomerEntityId
+					,LD.intLoadDetailId
+					,LD.intItemId
+					,[intLocationId] = LD.intSCompanyLocationId
+					,[intItemLocationId] = 
+									(SELECT TOP 1 ITL.intItemLocationId
+									FROM tblICItemLocation ITL
+									WHERE ITL.intItemId = LD.intItemId
+										AND ITL.intLocationId = CD.intCompanyLocationId)
+					,[intSubLocationId] = LD.intSSubLocationId
+					,[intStorageLocationId] = NULL
+					,[intItemUOMId] = LD.intItemUOMId
+					,[intWeightUOMId] = LD.intWeightItemUOMId
+					,[dblQty] = LD.dblQuantity
+					,[dblUOMQty] = IU.dblUnitQty
+					,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
+					,[intDockDoorId] = NULL
+					,[intOrderId] = NULL
+					,[intSourceId] = NULL
+					,[intLineNo] = ISNULL(LD.intSContractDetailId, 0)
+					,[intLoadShipped] = CASE WHEN CH.ysnLoad = 1 THEN 
+											CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+										ELSE NULL END
+					,[ysnLoad] = CH.ysnLoad
+				FROM tblLGLoad L
+				JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+				JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+				JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+				LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
+				WHERE L.intLoadId = @intLoadId
+
+				EXEC dbo.uspCTShipped @ItemsFromInventoryShipment
+					,@intEntityUserSecurityId
+					,@ysnPost
+			END
+
 			UPDATE tblLGLoad
 			SET ysnPosted = @ysnPost
 				,dtmPostedDate = GETDATE()
