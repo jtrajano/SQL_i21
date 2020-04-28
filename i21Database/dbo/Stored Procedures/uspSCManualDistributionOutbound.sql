@@ -492,70 +492,13 @@ END
 
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	SELECT 
-		@intContractDetailId = MIN(si.intLineNo)
-    FROM tblICInventoryShipment s 
-    JOIN tblICInventoryShipmentItem si 
-		ON si.intInventoryShipmentId = s.intInventoryShipmentId
-    WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-
-	SET @_intContractDetailId = @intContractDetailId
-	SET @__intContractDetailId = @intContractDetailId
- 
- 
-	--INVOICE intergration
-	/*
-	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-	WHERE intInventoryShipmentId = @InventoryShipmentId
-
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
-		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
-			IF @intInvoiceId = 0
-				SET @intInvoiceId = NULL
-		END
-	ELSE
-		IF (@intPricingTypeId = 2)
-		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-		END
-			SELECT @intInvoiceId = id.intInvoiceId
-			FROM tblICInventoryShipment s 
-			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
-			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-	*/
-
-	IF(ISNULL(@strWhereFinalizedWeight, 'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade, 'Origin') <> 'Destination' )
-	BEGIN
-		IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId AND ysnAllowInvoice = 1)
-		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId , 0, 1 ,@dtmShipmentDate = @dtmClientDate;
-		END
-
-		WHILE ISNULL(@_intContractDetailId,0) > 0
-		BEGIN
-
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @_intContractDetailId)
-			BEGIN
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @_intContractDetailId, @intUserId
-			END
-
-
-			SET @_intContractDetailId = NULL
-
-			SELECT 
-				@_intContractDetailId = MIN(si.intLineNo)
-			FROM tblICInventoryShipment s 
-			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-				AND ISNULL(intLineNo,0) > @__intContractDetailId
-
-			SET @__intContractDetailId = @_intContractDetailId
-		END
-	END
+	EXEC uspSCProcessShipmentToInvoice 
+		@intTicketId = @intTicketId
+		,@intInventoryShipmentId = @InventoryShipmentId
+		,@intUserId = @intUserId
+		,@intInvoiceId = @intInvoiceId OUTPUT 
+		,@dtmClientDate = @dtmClientDate
+	
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
