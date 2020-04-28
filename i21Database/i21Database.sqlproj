@@ -8652,6 +8652,7 @@
     <Build Include="dbo\Tables\tblSCEntityGeneratedLog.sql" />
     <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCProcessShipmentToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
