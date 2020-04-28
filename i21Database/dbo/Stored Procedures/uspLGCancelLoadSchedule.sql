@@ -46,6 +46,10 @@ BEGIN TRY
 	BEGIN
 		IF (@ysnCancel = 1)
 		BEGIN
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnCancelled, 0) = 1)
+			BEGIN
+				RAISERROR ('Shipment is already cancelled.',11,1)
+			END
 
 			IF EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1)
 			BEGIN
@@ -137,11 +141,13 @@ BEGIN TRY
 				,intLoadDetailId = NULL
 				,intLoadDetailContainerLinkId = NULL
 				,intLoadId = NULL
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 10
 				,ysnCancelled = @ysnCancel
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			/* Perform Reversal */
@@ -215,6 +221,7 @@ BEGIN TRY
 				UPDATE tblLGLoad
 				SET intShipmentStatus = 7
 					,strExternalShipmentNumber = NULL
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadShippingInstructionId
 
 				EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadShippingInstructionId
@@ -243,7 +250,7 @@ BEGIN TRY
 				FROM @tblLoadDetail
 				WHERE intLoadDetailId = @intMinLoadDetailId
 
-				IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intPContractDetailId AND intContractStatusId = 3)
+				IF EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractStatusId = 3 AND intContractDetailId IN (@intPContractDetailId, @intSContractDetailId))
 				BEGIN
 					RAISERROR ('Associated contract seq is in cancelled status. Cannot continue.',11,1)
 				END
@@ -274,10 +281,12 @@ BEGIN TRY
 				SET intShipmentStatus = 1
 					,ysnCancelled = @ysnCancel
 					,strExternalShipmentNumber = NULL
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadId
 				
 				UPDATE tblLGLoadContainer
 				SET ysnNewContainer = 1
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadId
 
 				IF EXISTS(SELECT 1 FROM tblLGLoadStg WHERE intLoadId = @intLoadId)
@@ -314,6 +323,11 @@ BEGIN TRY
 					)
 			BEGIN
 				RAISERROR ('Shipment has already been created for the shipping instruction. Cannot cancel.',11,1)
+			END
+
+			IF EXISTS (SELECT 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnCancelled, 0) = 1)
+			BEGIN
+				RAISERROR ('Shipping instruction is already cancelled.',11,1)
 			END
 
 			SELECT @intMinLoadDetailId = MIN(intLoadDetailId)
@@ -361,6 +375,7 @@ BEGIN TRY
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 10
 				,ysnCancelled = @ysnCancel
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
@@ -420,6 +435,7 @@ BEGIN TRY
 			UPDATE tblLGLoad
 			SET intShipmentStatus = 7
 				,ysnCancelled = @ysnCancel
+				,intConcurrencyId = intConcurrencyId + 1
 			WHERE intLoadId = @intLoadId
 
 			EXEC [uspLGCreateLoadIntegrationLog] @intLoadId = @intLoadId
