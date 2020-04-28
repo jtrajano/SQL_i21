@@ -118,7 +118,9 @@ WHERE	strTransactionId = @strTransactionId
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
 IF @intCurrencyIdTo <> @intDefaultCurrencyId AND @intCurrencyIdFrom = @intDefaultCurrencyId
 	SET @dblHistoricRate = @dblRate
-		
+
+IF @intCurrencyIdTo = @intDefaultCurrencyId AND @intCurrencyIdFrom <> @intDefaultCurrencyId
+	SELECT @dblHistoricRate = dbo.fnCMGetBankAccountHistoricRate(@intBankAccountIdFrom, @dtmDate )
 
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
