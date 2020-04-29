@@ -457,6 +457,7 @@
     <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
     <Build Include="dbo\Stored Procedures\uspGLReverseGLEntries.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
+    <Build Include="dbo\Tables\tblGLDataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
@@ -8407,6 +8408,7 @@
     <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
     <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_InsertTrialBalanceData.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_PostHistoryGroupings.sql" />
     <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
     <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />
