@@ -14,6 +14,7 @@
 			(  
 				-- Filtering Values
 				intUniqueId		        INT IDENTITY(1,1),
+				intTransactionKey		INT,  
 				intContractHeaderId		INT,  
 				intContractDetailId		INT,        
 				intTransactionId		INT,
@@ -48,6 +49,12 @@
 			)
 			AS
 			BEGIN
+
+				if (@dtmDate is not null)
+				begin
+					set @dtmDate = CONVERT(DATETIME, CONVERT(varchar(11),@dtmDate, 111 ) + '' 23:59:59'', 111)
+				end
+
 				DECLARE @OpenBasisContract TABLE
 				(
 					intContractHeaderId		INT,
@@ -90,6 +97,32 @@
 				where tbl.intPricingTypeId = 2
 
 				DECLARE @TemporaryTable TABLE 
+				(  
+					intTransactionKey       INT IDENTITY(1,1),
+					intContractHeaderId		INT,  
+					intContractDetailId		INT,        
+					intTransactionId		INT,
+					strTransactionId		NVARCHAR(50), 
+					strContractType			NVARCHAR(20),
+					strContractNumber		NVARCHAR(50),
+					intContractSeq			INT,
+					intEntityId				INT,
+					strEntityName			NVARCHAR(150),
+					strCommodityCode		NVARCHAR(50),
+					intCommodityId			INT,
+					dtmDate					DATETIME,
+					dblQuantity				NUMERIC(38,20),
+					strTransactionType		NVARCHAR(20),
+					intTimeE				BIGINT,
+					intCommodityUOMId			INT,
+					intUnitMeasureId			INT,
+					intSequenceUnitMeasureId INT,
+					strSequenceUnitMeasure nvarchar(100),
+					intHeaderUnitMeasureId INT,
+					strHeaderUnitMeasure nvarchar(100)
+				)
+
+				DECLARE @TemporaryTable2 TABLE 
 				(  
 					intTransactionKey       INT IDENTITY(1,1),
 					intContractHeaderId		INT,  
@@ -173,6 +206,8 @@
 			join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 			WHERE
 				SS.ysnPosted = 1
+				and SS.dtmCreated is not null
+				 and  SS.dtmCreated <= @dtmDate
 				AND SS.intParentSettleStorageId IS NOT NULL
 			GROUP BY
 				CH.intContractHeaderId
@@ -340,6 +375,7 @@
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
+				where InvTran.dtmDate is not null and  InvTran.dtmDate <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Receipt.intInventoryReceiptId
@@ -417,7 +453,8 @@
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-				WHERE B.ysnPosted = 1
+				-- WHERE B.ysnPosted = 1
+				WHERE B.dtmDateCreated is not null and  B.dtmDateCreated <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,BD.intBillDetailId
@@ -502,6 +539,7 @@
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
+				where InvTran.dtmDate is not null and InvTran.dtmDate <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Shipment.intInventoryShipmentId
@@ -580,6 +618,7 @@
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				--WHERE I.ysnPosted = 1
+				where I.dtmDate is not null and  I.dtmDate <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,ID.intInvoiceDetailId
@@ -599,10 +638,37 @@
 				,OC.intHeaderUnitMeasureId
 				,OC.strHeaderUnitMeasure
 
+				insert into @TemporaryTable2
+				select
+			     intContractHeaderId
+			     ,intContractDetailId
+			     ,intTransactionId
+			     ,strTransactionId
+			     ,strContractType
+			     ,strContractNumber
+			     ,intContractSeq
+			     ,intEntityId
+			     ,strEntityName
+			     ,strCommodityCode
+			     ,intCommodityId
+			     ,dtmDate
+			     ,dblQuantity
+			     ,strTransactionType
+			     ,intTimeE
+			     ,intCommodityUOMId
+			     ,intUnitMeasureId
+			     ,intSequenceUnitMeasureId
+			     ,strSequenceUnitMeasure
+			     ,intHeaderUnitMeasureId
+			     ,strHeaderUnitMeasure
+				from @TemporaryTable
+				order by dtmDate
+
 				-- RESULT TABLE
 				INSERT INTO @Transaction
 				(
 					intContractHeaderId
+	 				,intTransactionKey
 					,intContractDetailId
 					,intTransactionId
 					,strTransactionId
@@ -634,6 +700,7 @@
 				)
 				SELECT 	
 				T.intContractHeaderId
+				,T.intTransactionKey
 				,T.intContractDetailId
 				,T.intTransactionId
 				,T.strTransactionId  
@@ -681,9 +748,10 @@
 				,T.intHeaderUnitMeasureId
 				,T.strHeaderUnitMeasure
 				FROM tblCTContractDetail CD
-				INNER JOIN @TemporaryTable T ON CD.intContractDetailId = T.intContractDetailId
+				INNER JOIN @TemporaryTable2 T ON CD.intContractDetailId = T.intContractDetailId
 				INNER JOIN tblICItem I ON I.intItemId = CD.intItemId
 				INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+				order by T.intTransactionKey
 
 
 				update a set ysnOpenGetBasisDelivery = 1 FROM 
