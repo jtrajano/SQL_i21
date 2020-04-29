@@ -172,8 +172,6 @@
 				),2,1000)
 		END strGradeReading
 		,1 ysnDisplayGradeReading
-		,SC.intCropYearId
-		,CYR.strCropYear
   FROM tblSCTicket SC
 	INNER JOIN tblICInventoryReceiptItem IRD
 		ON SC.intTicketId = IRD.intSourceId	
@@ -185,7 +183,7 @@
 	LEFT JOIN tblSCTicketSplit SCSplit ON SC.intTicketId = SCSplit.intTicketId AND IR.intEntityVendorId = SCSplit.intCustomerId
 	LEFT JOIN tblEMEntity EM 
 		on IR.intEntityVendorId = EM.intEntityId
-	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityVendorId AND EMLocation.ysnDefaultLocation = 1
+	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityId AND EMLocation.ysnDefaultLocation = 1
 	LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
 	LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
@@ -194,8 +192,6 @@
 	LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
 	LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
-	left join tblCTCropYear CYR
-		on CYR.intCropYearId = SC.intCropYearId
 	--LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
 	OUTER APPLY
 	(	
