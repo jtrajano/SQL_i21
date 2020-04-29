@@ -130,11 +130,9 @@ FROM	tblGLFiscalYearPeriod f
 		) ItemLocation
 		LEFT JOIN tblICItemPricing ItemPricing 
 			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-		INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = ItemLocation.intCompanyLocationId
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL 
 	AND (f.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 
-	AND permission.intEntityId = @intUserId
 --CREATE PROCEDURE dbo.[uspICSearchInventoryValuationSummary]
 --	@strPeriod NVARCHAR(50)
 --AS
