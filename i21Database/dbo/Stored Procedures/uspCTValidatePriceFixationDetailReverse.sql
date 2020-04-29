@@ -16,13 +16,17 @@ BEGIN TRY
 			@BillDetailId			INT,
 			@ItemId					INT,
 			@Quantity				NUMERIC(18,6),
-			@TransQty				NUMERIC(18,6)
+			@TransQty				NUMERIC(18,6),
+			@ContractHeaderId		INT,
+			@ContractDetailId		INT
 
 	SELECT  DA.intPriceFixationDetailAPARId
 			,BL.intBillId AS Id
 			,FT.intDetailId AS DetailId
 			,DA.intBillDetailId AS BillDetailId
-			,FD.dblQuantity AS Quantity
+			,FD.dblQuantityAppliedAndPriced AS Quantity
+			,PF.intContractHeaderId AS ContractHeaderId
+			,PF.intContractDetailId AS ContractDetailId
 	INTO	#ItemBill
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
 	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intBillDetailId
@@ -38,9 +42,22 @@ BEGIN TRY
 	SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
-		-- Check if received is equal with the delete pricing
-		SELECT @Quantity = ABS(SUM(Quantity)) FROM #ItemBill WHERE Id = @Id
-		SELECT @TransQty = ABS(SUM(dblQtyReceived)) FROM tblAPBillDetail WHERE intBillId = @Id AND intInventoryReceiptChargeId IS NULL
+		-- Get contract header and detail id
+		SELECT @ContractHeaderId = ContractHeaderId
+			  ,@ContractDetailId = ContractDetailId 
+		FROM #ItemBill WHERE Id = @Id
+		-- Check if received is equal with the delete applied quantity
+		SELECT @Quantity = ABS(SUM(Quantity)) 
+		FROM #ItemBill 
+		WHERE Id = @Id
+
+		SELECT @TransQty = ABS(SUM(dblQtyReceived)) 
+		FROM tblAPBillDetail 
+		WHERE intContractHeaderId = @ContractHeaderId
+		AND intContractDetailId = ISNULL(@ContractDetailId, intContractDetailId) 
+		AND intBillId = @Id 
+		AND intInventoryReceiptChargeId IS NULL
+
 		-- If equal debit memo the voucher
 		IF @Quantity <> @TransQty
 		BEGIN
