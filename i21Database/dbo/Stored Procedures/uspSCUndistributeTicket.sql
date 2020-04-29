@@ -267,12 +267,12 @@ BEGIN TRY
 									AND B.intContractDetailId = @intTicketContractDetailId
 
 								SET @dblLoadUsedQty = 0
-								-- SELECT TOP 1 
-								-- 	@dblLoadUsedQty = dblQty
-								-- FROM tblSCTicketLoadUsed
-								-- WHERE intTicketId = @intTicketId
-								-- 	AND intLoadDetailId = @intTicketLoadDetailId
-								-- 	AND intEntityId = @intInventoryReceiptEntityId
+								SELECT TOP 1 
+									@dblLoadUsedQty = dblQty
+								FROM tblSCTicketLoadUsed
+								WHERE intTicketId = @intTicketId
+									AND intLoadDetailId = @intTicketLoadDetailId
+									AND intEntityId = @intInventoryReceiptEntityId
 
 								SET @dblContractAvailableQty = 0
 								SET @ysnLoadContract = 0
@@ -294,7 +294,17 @@ BEGIN TRY
 									END
 									ELSE
 									BEGIN
-										SET @dblLoadUsedQty = @dblContractAvailableQty
+										IF(@dblTicketScheduledQty > @dblLoadUsedQty)
+										BEGIN
+											IF(@dblLoadUsedQty > @dblContractAvailableQty)
+											BEGIN
+												SET @dblLoadUsedQty = @dblContractAvailableQty
+											END
+										END
+										ELSE
+										BEGIN
+											SET @dblLoadUsedQty = @dblContractAvailableQty
+										END
 									END
 								END
 								IF @dblLoadUsedQty <> 0
@@ -1100,19 +1110,18 @@ BEGIN TRY
 										BEGIN										
 											IF @dblTicketScheduledQty <= @dblContractAvailableQty
 											BEGIN
-												IF @dblLoadUsedQty < @dblTicketScheduledQty
-												BEGIN
-													SET @dblLoadUsedQty = @dblTicketScheduledQty
-												END
-
-												IF @dblLoadUsedQty > @dblContractAvailableQty
-												BEGIN
-													SET	@dblLoadUsedQty = @dblContractAvailableQty
-												END
+												SET @dblLoadUsedQty = @dblTicketScheduledQty
 											END
 											ELSE
 											BEGIN
-												IF @dblLoadUsedQty > @dblContractAvailableQty
+												IF(@dblTicketScheduledQty > @dblLoadUsedQty)
+												BEGIN
+													IF(@dblLoadUsedQty > @dblContractAvailableQty)
+													BEGIN
+														SET @dblLoadUsedQty = @dblContractAvailableQty
+													END
+												END
+												ELSE
 												BEGIN
 													SET @dblLoadUsedQty = @dblContractAvailableQty
 												END
