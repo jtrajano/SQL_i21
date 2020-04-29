@@ -39,8 +39,8 @@ BEGIN TRY
 	WHILE ISNULL(@Id,0) > 0
 	BEGIN
 		-- Check if received is equal with the delete pricing
-		SELECT @Quantity = SUM(Quantity) FROM #ItemBill WHERE Id = @Id
-		SELECT @TransQty = SUM(dblQtyReceived) FROM tblAPBillDetail WHERE intBillId = @Id AND intInventoryReceiptChargeId IS NULL
+		SELECT @Quantity = ABS(SUM(Quantity)) FROM #ItemBill WHERE Id = @Id
+		SELECT @TransQty = ABS(SUM(dblQtyReceived)) FROM tblAPBillDetail WHERE intBillId = @Id AND intInventoryReceiptChargeId IS NULL
 		-- If equal debit memo the voucher
 		IF @Quantity <> @TransQty
 		BEGIN
