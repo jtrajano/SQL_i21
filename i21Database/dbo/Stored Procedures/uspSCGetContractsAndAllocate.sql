@@ -441,7 +441,15 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							-- Adjust the scheduled quantity based on the ticket scheduled and net units
+							IF(@intTicketContractDetailId = @intContractDetailId)
+							BEGIN
+								IF(@dblScheduleQty < @dblNetUnits AND @dblTicketScheduledQuantity >= @dblNetUnits)
+								BEGIN
+									SET @dblInreaseSchBy = @dblNetUnits - @dblScheduleQty
+								END
+							END
+
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units 
 							IF(@dblInreaseSchBy <> 0)
 							BEGIN
 								EXEC	uspCTUpdateScheduleQuantity 
@@ -452,9 +460,6 @@ BEGIN TRY
 										@strScreenName			=	'Auto - Scale'
 							END
 						END
-
-						
-					
 					END
 					ELSE
 					BEGIN
