@@ -79,9 +79,9 @@ BEGIN
 
 	--Calculate if Time Off is Scheduled for Reset
 	UPDATE #tmpEmployees
-	SET ysnForReset = CASE WHEN (
-								 (strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR(dtmNextAward)  )
-								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
+	SET ysnForReset = CASE WHEN ((strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR (dtmNextAward)  )
+									OR 
+								  (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
 								) THEN 1 
 							ELSE 0 END
 
@@ -164,13 +164,22 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN 
-										CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-											dblMaxEarned
-										ELSE
-											(dblHoursEarned + T.dblEarnedHours)
+			SET dblHoursEarned = CASE WHEN (strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
+										CASE WHEN (T.ysnForReset = 1) THEN
+											CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
+												dblMaxEarned
+											ELSE
+												(dblHoursEarned + T.dblEarnedHours)
+											END
+										Else
+											dblHoursEarned
 										END
-								 ELSE dblHoursEarned
+								 ELSE 
+								 		CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
+												dblMaxEarned
+											ELSE
+												(dblHoursEarned + T.dblEarnedHours)
+										END
 								 END
 								
 				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
