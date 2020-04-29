@@ -16,26 +16,15 @@ BEGIN
 SET @dtmAsOfDate = ISNULL(@dtmAsOfDate, GETDATE())
 DECLARE @dblCost NUMERIC(38, 20)
 
-SELECT @dblCost = CASE 
-					WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(Item.intItemId, ItemLocation.intItemLocationId,
-						CASE WHEN @intStorageLocationId IS NULL OR @intStorageLocationId IS NULL THEN StockUOM.intItemUOMId ELSE Lot.intItemUOMId END)
-					WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
-				ELSE Transactions.dblCost
-			END
+SELECT @dblCost = COALESCE(Transactions.dblCost, NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
 FROM tblICItem Item
 	INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId
+	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+    	AND ItemPricing.intItemId = ItemLocation.intItemId
 	INNER JOIN tblICItemUOM StockUOM ON StockUOM.intItemId = Item.intItemId
 		AND StockUOM.ysnStockUnit = 1
-	CROSS APPLY(
-		SELECT TOP 1 dblCost, intItemUOMId
-		FROM tblICInventoryFIFO FIFO
-		WHERE Item.intItemId = FIFO.intItemId
-			AND ItemLocation.intItemLocationId = FIFO.intItemLocationId
-			AND dblStockIn- dblStockOut > 0
-		ORDER BY dtmDate ASC
-	) FIFO
-	INNER JOIN (
-		SELECT
+	CROSS APPLY (
+		SELECT TOP 1
 			  t.intItemId
 			, t.intItemLocationId
 			, t.intSubLocationId
@@ -45,10 +34,11 @@ FROM tblICItem Item
 			, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
 			, dblCost = t.dblCost
 		FROM tblICInventoryTransaction t
-		--GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intCostingMethod, t.intItemUOMId, CONVERT(VARCHAR(10), t.dtmDate,112)
-	) Transactions ON Transactions.intItemId = Item.intItemId
-		AND Transactions.intItemLocationId = ItemLocation.intItemLocationId 
-		AND StockUOM.intItemUOMId = Transactions.intItemUOMId
+		WHERE t.intItemId = Item.intItemId
+			AND t.intItemLocationId = ItemLocation.intItemLocationId 
+			AND StockUOM.intItemUOMId = t.intItemUOMId
+		ORDER BY t.dtmDate DESC, t.dtmCreated DESC
+	) Transactions
 	INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = StockUOM.intUnitMeasureId
 	LEFT OUTER JOIN tblICLot Lot ON Lot.intLotId = @intLotId
 	LEFT JOIN tblICCostingMethod CostMethod ON CostMethod.intCostingMethodId = Transactions.intCostingMethod
@@ -64,6 +54,7 @@ WHERE
 	AND (Item.strStatus = 'Active' AND @ysnActiveOnly = 1 OR NULLIF(@ysnActiveOnly, 0) IS NULL)
 --GROUP BY Item.intItemId, Item.strItemNo, Item.strType, UOM.strUnitMeasure, Lot.strLotNumber
 ORDER BY Item.strItemNo
+
 
 RETURN @dblCost
 
