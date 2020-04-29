@@ -234,6 +234,7 @@ SELECT
 	, strStorageLocationName		= strgLoc.strName
 	, intOwnershipType				= @intOwnershipType
 	, strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
+<<<<<<< Updated upstream
 	, dblRunningAvailableQty		= ROUND(t.dblQty, 6)
 	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
 	, dblCost = CASE 
@@ -241,6 +242,11 @@ SELECT
 				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
 				ELSE t.dblCost
 			END
+=======
+	, dblRunningAvailableQty		= t.dblQty 
+	, dblStorageAvailableQty		= t.dblUnitStorage
+	, dblCost = COALESCE(Transactions.dblCost, NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
+>>>>>>> Stashed changes
 FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		ON i.intItemId = t.intItemId
 	INNER JOIN (
@@ -280,23 +286,29 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			, i.dblUnitQty
 			, i.ysnStockUnit
 	) stock 
-	OUTER APPLY(
+	CROSS APPLY (
 		SELECT TOP 1
-			dblCost
-			, intItemUOMId
-		FROM	
-			tblICInventoryFIFO FIFO
-		WHERE	
-			t.intItemId = FIFO.intItemId
-			AND t.intItemLocationId = FIFO.intItemLocationId
-			AND dblStockIn- dblStockOut > 0
-		ORDER BY dtmDate ASC
-	) FIFO
+			  ts.intItemId
+			, ts.intItemLocationId
+			, ts.intSubLocationId
+			, ts.intStorageLocationId
+			, ts.intItemUOMId
+			, ts.intCostingMethod
+			, dtmDate = CAST(CONVERT(VARCHAR(10), ts.dtmDate,112) AS DATETIME)
+			, dblCost = ts.dblCost
+		FROM tblICInventoryTransaction ts
+		WHERE ts.intItemId = t.intItemId
+			AND ts.intItemLocationId = t.intItemLocationId 
+			AND ItemUOM.intItemUOMId = t.intItemUOMId
+		ORDER BY ts.dtmDate DESC, ts.dtmCreated DESC
+	) Transactions
 	LEFT JOIN tblICItemUOM StockUOM
 		ON StockUOM.intItemId = t.intItemId
 		AND StockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICItemLocation ItemLocation
 		ON ItemLocation.intItemLocationId = t.intItemLocationId
+	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+    	AND ItemPricing.intItemId = ItemLocation.intItemId
 	LEFT JOIN tblSMCompanyLocation CompanyLocation
 		ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
