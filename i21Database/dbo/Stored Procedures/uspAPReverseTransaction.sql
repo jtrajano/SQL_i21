@@ -91,6 +91,7 @@ ON 1 = 0
 			,intContractHeaderId
 			,intContractDetailId
 			,intCustomerStorageId
+			,intSettleStorageId
 			,intStorageLocationId
 			,intSubLocationId
 			,intLocationId
