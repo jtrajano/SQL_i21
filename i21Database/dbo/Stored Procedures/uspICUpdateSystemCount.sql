@@ -2,33 +2,54 @@
 AS
 
 UPDATE cd
-SET cd.dblSystemCount = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN nonLotted.dblOnHand ELSE lotted.dblOnHand END, 0),
+SET cd.dblSystemCount = CASE WHEN c.strCountBy = 'Pack' THEN dbo.fnCalculateQtyBetweenUOM(stockByPackUOM.intItemUOMId, cd.intItemUOMId, stockByPackUOM.dblOnHand)
+		ELSE ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN nonLotted.dblOnHand ELSE lotted.dblOnHand END, 0) END,
 	cd.dblWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0)
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON cd.intInventoryCountId = c.intInventoryCountId
 	INNER JOIN tblICItem Item ON Item.intItemId = cd.intItemId
 	OUTER APPLY (
-			SELECT intItemId
-					, intItemUOMId
-					, intItemLocationId
-					, intSubLocationId
-					, intStorageLocationId
-					, dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
-					, dblLastCost = MAX(ISNULL(dblLastCost, 0))
-	FROM vyuICGetItemStockSummary
-	WHERE	intItemId = cd.intItemId
-		AND intItemLocationId = cd.intItemLocationId
-		AND intItemUOMId = cd.intItemUOMId
-		AND ((cd.intSubLocationId IS NULL) OR (cd.intSubLocationId = intSubLocationId OR ISNULL(intSubLocationId, 0) = 0))
-		AND ((cd.intStorageLocationId IS NULL) OR (cd.intStorageLocationId = intStorageLocationId OR ISNULL(intStorageLocationId, 0) = 0))
-		AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
-	GROUP BY 
-					intItemId,
-					intItemUOMId,
-					intItemLocationId,
-					intSubLocationId,
-					intStorageLocationId
+		SELECT intItemId
+			, intItemUOMId
+			, intItemLocationId
+			, intSubLocationId
+			, intStorageLocationId
+			, dblOnHand =  SUM(COALESCE(dblOnHand, 0.00))
+			, dblLastCost = MAX(ISNULL(dblLastCost, 0))
+		FROM vyuICGetItemStockSummary
+		WHERE	intItemId = cd.intItemId
+			AND intItemLocationId = cd.intItemLocationId
+			AND intItemUOMId = cd.intItemUOMId
+			AND ((cd.intSubLocationId IS NULL) OR (cd.intSubLocationId = intSubLocationId OR ISNULL(intSubLocationId, 0) = 0))
+			AND ((cd.intStorageLocationId IS NULL) OR (cd.intStorageLocationId = intStorageLocationId OR ISNULL(intStorageLocationId, 0) = 0))
+			AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
+		GROUP BY 
+			intItemId,
+			intItemUOMId,
+			intItemLocationId,
+			intSubLocationId,
+			intStorageLocationId
 	) nonLotted
+	OUTER APPLY (
+		SELECT v.intItemId
+			, u.intItemUOMId
+			, v.intItemLocationId
+			, v.intSubLocationId
+			, v.intStorageLocationId
+			, dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(v.intItemUOMId, u.intItemUOMId, v.dblQty))
+		FROM tblICInventoryTransaction v
+		INNER JOIN tblICItemUOM u ON v.intItemId = u.intItemId
+			AND u.ysnStockUnit = 1
+		WHERE v.intItemId = Item.intItemId
+			AND v.intItemLocationId = cd.intItemLocationId
+			AND dbo.fnDateLessThanEquals(v.dtmDate, c.dtmCountDate) = 1
+		GROUP BY 
+			v.intItemId
+			, u.intItemUOMId
+			, v.intItemLocationId
+			, v.intSubLocationId
+			, v.intStorageLocationId  
+	) stockByPackUOM
 	--LEFT OUTER JOIN (
 	--	SELECT
 	--		StockUOM.intItemId,
@@ -146,7 +167,7 @@ WHERE c.intImportFlagInternal = 1
 
 -- Others
 UPDATE c
-SET c.strCountBy = 'Item'
+SET c.strCountBy = CASE WHEN strCountBy = 'Pack' THEN 'Pack' ELSE 'Item' END
 FROM tblICInventoryCount c
 WHERE c.intImportFlagInternal = 1
 
