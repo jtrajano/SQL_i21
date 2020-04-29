@@ -109,7 +109,6 @@ SELECT	TOP 1
 		,@intBankAccountIdTo = intBankAccountIdTo
 		,@intCreatedEntityId = intEntityId
 		,@dblRate = dblRate
-		,@dblHistoricRate = dblHistoricRate
 		,@intCurrencyIdFrom = B.intCurrencyId
 		,@intCurrencyIdTo = C.intCurrencyId
 FROM	[dbo].tblCMBankTransfer A JOIN
