@@ -1058,6 +1058,28 @@ ON GL.strTransactionId = BL.strBillId
 IF ISNULL(@recap, 0) = 0
 BEGIN
 
+	DECLARE @invalidGL AS Id
+	DECLARE @billIdGL AS Id
+	INSERT INTO @billIdGL
+	SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+	--VALIDATE GL ENTRIES
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
+	OUTPUT inserted.intTransactionId INTO @invalidGL
+	SELECT
+		A.strError
+		,A.strTransactionType
+		,A.strTransactionId
+		,@batchId
+		,A.intTransactionId
+	FROM dbo.fnAPValidateBillGLEntries(@GLEntries, @billIdGL) A
+	WHERE 1 = 0
+
+	--DELETE INVALID
+	DELETE A
+	FROM #tmpPostBillData A
+	INNER JOIN @invalidGL B ON A.intBillId = B.intId
+
 	--handel error here as we do not get the error here
 	IF @totalRecords = 1 AND @isBatch = 0
 	BEGIN
