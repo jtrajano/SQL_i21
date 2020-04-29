@@ -50,15 +50,15 @@ AS
 		E.intEntityId,
 		A.strComments COLLATE Latin1_General_CI_AS strComments,
 		U.strUOMCode COLLATE Latin1_General_CI_AS strUOMCode, 
-
         Loc.strLocationName COLLATE Latin1_General_CI_AS strLocationName,
         ICUOM.strUnitMeasure COLLATE Latin1_General_CI_AS strSourceUOMId,
         ICCom.strCommodityCode COLLATE Latin1_General_CI_AS strCommodityCode,
         ISNULL(dblSourceUnitDebit,0) dblSourceUnitDebit,
         ISNULL(dblSourceUnitCredit,0) dblSourceUnitCredit,
 		F.strUserName COLLATE Latin1_General_CI_AS strSourceEntity,
-		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId
-
+		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
+        A.ysnPostAction,
+        A.dtmDateEnteredMin
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId
