@@ -71,6 +71,8 @@ DECLARE @__intContractDetailId INT
 DECLARE @_intContractItemUom INT
 DECLARE @ysnLoadContract BIT
 DECLARE @_dblContractScheduledQty NUMERIC(18,6)
+DECLARE @_dblConvertedLoopQty NUMERIC(18,6)
+
 
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
@@ -150,6 +152,7 @@ OPEN intListCursor;
 			WHERE intContractDetailId = @intLoopContractId
 
 			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
+			SET @_dblConvertedLoopQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@dblLoopContractUnits)
 
 			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
@@ -184,7 +187,7 @@ OPEN intListCursor;
 							BEGIN
 								IF(@intLoadDetailId = @intTicketLoadDetailId)
 								BEGIN
-									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									IF(@_dblConvertedLoopQty > @dblTicketScheduleQuantity )
 									BEGIN
 										---This should not be adjusted/happening since the manual distribution screen should not allow allocation of units more than the quantity/load
 										-- SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
@@ -193,13 +196,13 @@ OPEN intListCursor;
 									ELSE
 									BEGIN
 										--Check if the units used the same as the contract schedule if yes no adjustment required
-										IF(@dblLoopContractUnits = @_dblContractScheduledQty)
+										IF(@_dblConvertedLoopQty = @_dblContractScheduledQty)
 										BEGIN
 											SET @dblLoopAdjustedScheduleQuantity = 0
 										END
 										ELSE
 										BEGIN
-											SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+											SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @_dblConvertedLoopQty) * -1
 										END
 									END
 
@@ -231,13 +234,27 @@ OPEN intListCursor;
 							BEGIN  
 								IF(@ysnLoadContract = 0)
 								BEGIN
-									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									IF(@_dblConvertedLoopQty > @dblTicketScheduleQuantity )
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+										IF(@_dblContractScheduledQty >= @dblTicketScheduleQuantity)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @dblTicketScheduleQuantity
+										END
+										ELSE
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @_dblContractScheduledQty
+										END
 									END
 									ELSE
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+										IF(@_dblContractScheduledQty >= @_dblConvertedLoopQty)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @_dblConvertedLoopQty) * -1
+										END
+										ELSE
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @_dblContractScheduledQty
+										END
 									END
 									
 

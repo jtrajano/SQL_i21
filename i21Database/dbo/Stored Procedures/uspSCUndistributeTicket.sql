@@ -88,6 +88,7 @@ DECLARE @NeedCreditMemoMessage NVARCHAR(200)
 DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @intInventoryShipmentItemUsed INT
 DECLARE @intInventoryReceiptItemUsed INT
+DECLARE @intShipmentReceiptItemId INT
 
 BEGIN TRY
 		SELECT TOP 1
@@ -192,6 +193,8 @@ BEGIN TRY
 
 						WHILE @@FETCH_STATUS = 0
 						BEGIN
+							SELECT @intShipmentReceiptItemId = intInventoryReceiptItemId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId = @InventoryReceiptId
+
 							DECLARE @_intIRVendorId INT
 							SELECT @_intIRVendorId = intEntityVendorId FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @InventoryReceiptId
 							IF OBJECT_ID (N'tempdb.dbo.#tmpVoucherDetail') IS NOT NULL
@@ -470,6 +473,7 @@ BEGIN TRY
 							SET @ysnLoadContract = 0
 							SELECT TOP 1 
 								@ysnLoadContract = ISNULL(A.ysnLoad,0)
+								,@dblContractAvailableQty = [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId,@intTicketItemUOMId,(ISNULL(B.dblBalance,0) - ISNULL(B.dblScheduleQty,0)))
 							FROM tblCTContractHeader A
 							INNER JOIN tblCTContractDetail B
 								ON A.intContractHeaderId = B.intContractHeaderId
@@ -477,12 +481,25 @@ BEGIN TRY
 
 							IF(ISNULL(@ysnLoadContract,0) = 0)
 							BEGIN
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								SET @dblLoopScheduleQty = 0
+								IF(@dblContractAvailableQty >= @dblTicketScheduledQty)
+								BEGIN
+									SET @dblLoopScheduleQty = @dblTicketScheduledQty
+								END
+								ELSE
+								BEGIN
+									SET @dblLoopScheduleQty = @dblContractAvailableQty
+								END
+								IF(@dblLoopScheduleQty <> 0)
+								BEGIN
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoopScheduleQty, @intUserId, @intShipmentReceiptItemId, 'Inventory Receipt', @intTicketItemUOMId
+								END
+								
 							END
 							ELSE
 							BEGIN
 								SET @dblTicketScheduledQty = 1
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intShipmentReceiptItemId, 'Inventory Receipt', @intTicketItemUOMId
 							END
 						
 						END
@@ -958,6 +975,8 @@ BEGIN TRY
 
 							WHILE @@FETCH_STATUS = 0
 							BEGIN
+								SELECT TOP 1 @intShipmentReceiptItemId = intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @InventoryShipmentId
+
 								IF  @ysnAllInvoiceHasCreditMemo = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpShipmentInvoiceDetailIds)
 								BEGIN
 									if (exists ( select top 1 1 from tblGRCompanyPreference where ysnDoNotAllowUndistributePostedInvoice = 1 ))
@@ -1165,19 +1184,33 @@ BEGIN TRY
 								SET @ysnLoadContract = 0
 								SELECT TOP 1
 									@ysnLoadContract = A.ysnLoad
+									,@dblContractAvailableQty = [dbo].[fnCalculateQtyBetweenUOM](B.intItemUOMId,@intTicketItemUOMId,(ISNULL(B.dblBalance,0) - ISNULL(B.dblScheduleQty,0)))
 								FROM tblCTContractHeader A
 								INNER JOIN tblCTContractDetail B
 									ON A.intContractHeaderId = B.intContractHeaderId
 								WHERE B.intContractDetailId = @intTicketContractDetailId
 
+
 								IF(ISNULL(@ysnLoadContract,0) = 0)
 								BEGIN
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+									SET @dblLoopScheduleQty = 0
+									IF(@dblContractAvailableQty >= @dblTicketScheduledQty)
+									BEGIN
+										SET @dblLoopScheduleQty = @dblTicketScheduledQty
+									END
+									ELSE
+									BEGIN
+										SET @dblLoopScheduleQty = @dblContractAvailableQty
+									END
+									IF(@dblLoopScheduleQty <> 0)
+									BEGIN
+										EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblLoopScheduleQty, @intUserId, @intShipmentReceiptItemId, 'Inventory Shipment', @intTicketItemUOMId
+									END
 								END
 								ELSE
 								BEGIN
 									SET @dblTicketScheduledQty = 1
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intShipmentReceiptItemId, 'Inventory Shipment', @intTicketItemUOMId
 								END
 							END
 
