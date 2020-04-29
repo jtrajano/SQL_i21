@@ -96,7 +96,7 @@ DECLARE @OriginalCost TABLE(intInventoryCountDetailId INT,
 
 INSERT INTO @OriginalCost
 	(intInventoryCountDetailId , dblLastCost)
-SELECT d.intInventoryCountDetailId, ISNULL(d.dblLastCost, 0)
+SELECT d.intInventoryCountDetailId, d.dblLastCost
 FROM tblICInventoryCountDetail d
 	INNER JOIN tblICInventoryCount c ON d.intInventoryCountId = d.intInventoryCountId
 WHERE c.intImportFlagInternal = 1
@@ -127,7 +127,7 @@ SET cd.dblLastCost = --ISNULL(cd.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenU
 								dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
 							ELSE
 								dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost)
-						END, 0),
+						END, NULL),
 	cd.dblNetQty = CAST(CASE WHEN cd.intWeightUOMId IS NOT NULL THEN CASE WHEN NULLIF(cd.dblPhysicalCount, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(cd.intItemUOMId, cd.intWeightUOMId, cd.dblPhysicalCount) ELSE cd.dblNetQty END ELSE NULL END AS NUMERIC(38, 20)),
 	cd.dblPhysicalCount = CAST(
 		CASE 
@@ -159,7 +159,7 @@ WHERE c.intImportFlagInternal = 1
 
 
 UPDATE cd
-SET cd.dblLastCost = CASE WHEN ISNULL(cd.dblPhysicalCount, 0) > ISNULL(cd.dblSystemCount, 0) THEN ISNULL(NULLIF(oc.dblLastCost, 0.00), cd.dblLastCost) ELSE cd.dblLastCost END
+SET cd.dblLastCost = CASE WHEN ISNULL(cd.dblPhysicalCount, 0) > ISNULL(cd.dblSystemCount, 0) THEN ISNULL(oc.dblLastCost, cd.dblLastCost) ELSE cd.dblLastCost END
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
 	INNER JOIN @OriginalCost oc ON oc.intInventoryCountDetailId = cd.intInventoryCountDetailId
