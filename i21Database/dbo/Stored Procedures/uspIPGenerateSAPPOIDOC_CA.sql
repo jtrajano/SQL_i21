@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (@ysnCancel BIT=0)
+﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (@ysnCancel BIT = 0)
 AS
 BEGIN
 	DECLARE @strVendorAccountNum NVARCHAR(50)
@@ -39,16 +39,17 @@ BEGIN
 	SELECT @intThirdPartyContractWaitingPeriod = IsNULL(intThirdPartyContractWaitingPeriod, 60)
 	FROM tblIPCompanyPreference
 
-	IF @ysnCancel=1
+	IF @ysnCancel = 1
 	BEGIN
 		INSERT INTO @tblCTContractFeed (intContractFeedId)
 		SELECT intContractFeedId
 		FROM dbo.tblCTContractFeed
 		WHERE strThirdPartyFeedStatus IS NULL
 			AND strERPPONumber <> ''
-			AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
+			AND dtmStartDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
 			AND strCommodityCode = 'Coffee'
 			AND strRowState = 'Delete'
+		ORDER BY intContractFeedId ASC
 	END
 	ELSE
 	BEGIN
@@ -57,9 +58,10 @@ BEGIN
 		FROM dbo.tblCTContractFeed
 		WHERE strThirdPartyFeedStatus IS NULL
 			AND strERPPONumber <> ''
-			AND dtmPlannedAvailabilityDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
+			AND dtmStartDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
 			AND strCommodityCode = 'Coffee'
 			AND strRowState <> 'Delete'
+		ORDER BY intContractFeedId ASC
 	END
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
@@ -87,7 +89,7 @@ BEGIN
 		SELECT @strVendorAccountNum = strVendorAccountNum
 			,@strERPPONumber = strERPPONumber
 			,@strItemNo = strItemNo
-			,@strContractItemNo = strContractItemNo
+			,@strContractItemNo = strContractItemName
 			,@strLoadingPoint = strLoadingPoint
 			,@dblQuantity = dblQuantity
 			,@dblNetWeight = dblNetWeight
@@ -233,9 +235,9 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
-			SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(@dblNetWeight) + '</GrossWeight>'
+			SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(Convert(NUMERIC(18, 2), @dblNetWeight)) + '</GrossWeight>'
 
-			SELECT @strXML = @strXML + '<Packages>' + ltrim(@dblQuantity) + '</Packages>'
+			SELECT @strXML = @strXML + '<Packages>' + ltrim(Convert(NUMERIC(18, 2), @dblQuantity)) + '</Packages>'
 
 			SELECT @strXML = @strXML + '</CommodityItem>'
 
