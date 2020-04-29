@@ -159,7 +159,7 @@ WHERE c.intImportFlagInternal = 1
 
 
 UPDATE cd
-SET cd.dblLastCost = CASE WHEN ISNULL(cd.dblPhysicalCount, 0) > ISNULL(cd.dblSystemCount, 0) THEN oc.dblLastCost ELSE cd.dblLastCost END
+SET cd.dblLastCost = CASE WHEN ISNULL(cd.dblPhysicalCount, 0) > ISNULL(cd.dblSystemCount, 0) THEN ISNULL(NULLIF(oc.dblLastCost, 0.00), cd.dblLastCost) ELSE cd.dblLastCost END
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
 	INNER JOIN @OriginalCost oc ON oc.intInventoryCountDetailId = cd.intInventoryCountDetailId
