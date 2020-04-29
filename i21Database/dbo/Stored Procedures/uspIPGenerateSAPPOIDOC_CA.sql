@@ -26,6 +26,8 @@ BEGIN
 		,@intThirdPartyContractWaitingPeriod INT
 		,@strError NVARCHAR(MAX) = ''
 		,@dtmFeedCreated DATETIME
+		,@strShipperVendorAccountNum NVARCHAR(50)
+		,@intContractDetailId INT
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -70,6 +72,7 @@ BEGIN
 	WHILE @intContractFeedId IS NOT NULL
 	BEGIN
 		SELECT @intContractHeaderId = NULL
+			,@intContractDetailId = NULL
 
 		SELECT @strVendorAccountNum = NULL
 			,@strERPPONumber = NULL
@@ -83,6 +86,7 @@ BEGIN
 			,@intEntityId = NULL
 			,@strContractNo = NULL
 			,@dtmFeedCreated = NULL
+			,@strShipperVendorAccountNum = NULL
 
 		SELECT @strError = ''
 
@@ -97,6 +101,7 @@ BEGIN
 			,@intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
 			,@dtmFeedCreated = dtmFeedCreated
+			,@intContractDetailId = intContractDetailId
 		FROM tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -110,7 +115,7 @@ BEGIN
 			,@intDestinationCityId = intDestinationCityId
 			,@intDestinationPortId = intDestinationPortId
 		FROM tblCTContractDetail
-		WHERE intContractHeaderId = @intContractHeaderId
+		WHERE intContractDetailId = @intContractDetailId
 
 		SELECT @strVendorName = strName
 		FROM tblEMEntity
@@ -119,6 +124,16 @@ BEGIN
 		SELECT @strShipperName = strName
 		FROM tblEMEntity
 		WHERE intEntityId = @intShipperId
+
+		SELECT @strShipperVendorAccountNum = strVendorAccountNum
+		FROM tblAPVendor
+		WHERE intEntityId = @intShipperId
+
+		IF @strShipperVendorAccountNum IS NULL
+			OR @strShipperVendorAccountNum = ''
+		BEGIN
+			SELECT @strShipperVendorAccountNum = @strShipperName
+		END
 
 		SELECT @strDestinationPoint = strCity
 		FROM tblSMCity
@@ -151,6 +166,12 @@ BEGIN
 			OR @strContractItemNo = ''
 		BEGIN
 			SELECT @strError = @strError + 'Contract Item cannot be blank. '
+		END
+
+		IF @strShipperVendorAccountNum IS NULL
+			OR @strShipperVendorAccountNum = ''
+		BEGIN
+			SELECT @strError = @strError + 'Shipper cannot be blank. '
 		END
 
 		IF @strError <> ''
@@ -209,7 +230,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Party>'
 
-			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
+			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strShipperVendorAccountNum, '') + '</Alias>'
 
 			SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
 
@@ -235,9 +256,9 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
-			SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(Convert(NUMERIC(18, 2), @dblNetWeight)) + '</GrossWeight>'
+			SELECT @strXML = @strXML + '<GrossWeight>' + Ltrim(Convert(NUMERIC(18, 0), @dblNetWeight)) + '</GrossWeight>'
 
-			SELECT @strXML = @strXML + '<Packages>' + ltrim(Convert(NUMERIC(18, 2), @dblQuantity)) + '</Packages>'
+			SELECT @strXML = @strXML + '<Packages>' + ltrim(Convert(NUMERIC(18, 0), @dblQuantity)) + '</Packages>'
 
 			SELECT @strXML = @strXML + '</CommodityItem>'
 
