@@ -103,31 +103,7 @@ WHERE c.intImportFlagInternal = 1
 
 -- Update Last Cost, Calculate Physical Count, Physical Weight, & Qty Per Pallet
 UPDATE cd
-SET cd.dblLastCost = --ISNULL(cd.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)), 0)),
-						ISNULL(CASE 
-							WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
-								dbo.fnGetItemAverageCost(
-									cd.intItemId
-									, ItemLocation.intItemLocationId
-									, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-								)
-							WHEN ItemLocation.intCostingMethod = 2 AND Item.strLotTracking = 'No' THEN -- FIFO
-								dbo.fnCalculateCostBetweenUOM(
-									COALESCE(FIFO.intItemUOMId, StockUOM.intItemUOMId)
-									,COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-									,COALESCE(FIFO.dblCost, ItemPricing.dblLastCost)
-								)
-							WHEN ItemLocation.intCostingMethod = 3 AND Item.strLotTracking = 'No' THEN -- LIFO
-								dbo.fnCalculateCostBetweenUOM(
-									StockUOM.intItemUOMId
-									, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-									, ItemPricing.dblLastCost
-								)
-							WHEN Item.strLotTracking != 'No' THEN
-								dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
-							ELSE
-								dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost)
-						END, NULL),
+SET cd.dblLastCost = COALESCE(Transactions.dblCost, NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost),
 	cd.dblNetQty = CAST(CASE WHEN cd.intWeightUOMId IS NOT NULL THEN CASE WHEN NULLIF(cd.dblPhysicalCount, 0) IS NOT NULL THEN dbo.fnCalculateQtyBetweenUOM(cd.intItemUOMId, cd.intWeightUOMId, cd.dblPhysicalCount) ELSE cd.dblNetQty END ELSE NULL END AS NUMERIC(38, 20)),
 	cd.dblPhysicalCount = CAST(
 		CASE 
@@ -144,17 +120,22 @@ FROM tblICInventoryCountDetail cd
 	LEFT JOIN dbo.tblICItem Item ON Item.intItemId = cd.intItemId
 	LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
 	LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
-	OUTER APPLY(
+	CROSS APPLY (
 		SELECT TOP 1
-		dblCost
-				, intItemUOMId
-	FROM tblICInventoryFIFO FIFO
-	WHERE	Item.intItemId = FIFO.intItemId
-		AND ItemLocation.intItemLocationId = FIFO.intItemLocationId
-		AND dblStockIn - dblStockOut > 0
-		AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
-	ORDER BY dtmDate ASC
-	) FIFO 
+			  t.intItemId
+			, t.intItemLocationId
+			, t.intSubLocationId
+			, t.intStorageLocationId
+			, t.intItemUOMId
+			, t.intCostingMethod
+			, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
+			, dblCost = t.dblCost
+		FROM tblICInventoryTransaction t
+		WHERE t.intItemId = Item.intItemId
+			AND t.intItemLocationId = ItemLocation.intItemLocationId 
+			AND cd.intItemUOMId = t.intItemUOMId
+		ORDER BY t.dtmDate DESC, t.dtmCreated DESC
+	) Transactions
 WHERE c.intImportFlagInternal = 1
 
 
