@@ -96,13 +96,11 @@
 		,tblSMCompanyLocation.strLocationNumber
 		,tblSMCompanyLocation.strLocationName
 		,tblSMCompanyLocationSubLocation.strSubLocationName
-		,tblEMEntitySplit.strSplitNumber
+		,DS.strSplitNumber
 		,tblGRStorageScheduleRule.strScheduleId
 		,ICCommodity.strCommodityCode
 		,tblICStorageLocation.strDescription
 		,vyuEMSearchShipVia.strName AS strHaulerName
-		,strDiscountCode = ISNULL(QM.strDiscountCode,'')
-		,dblGradeReading = ISNULL(QM.dblGradeReading,0.0)
 		,tblSMCompanySetup.strCompanyName
 		,tblSMCompanySetup.strCompanyAddress
 		,tblSMCompanySetup.strCompanyPhone
@@ -112,17 +110,29 @@
 		,IRD.intInventoryReceiptItemId
 		,IR.strReceiptNumber
 		,IRD.dblGross
-		,dblShrinkage = CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END
-		,dblNet = IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
+		,dblShrinkage = CASE WHEN DS.intDeliverySheetId IS NULL
+			THEN 
+				CASE WHEN ISNULL(SC.dblShrink,0) = 0 THEN 0
+				ELSE 
+					SC.dblShrink * (CASE WHEN SCSplit.intTicketSplitId IS NULL THEN 1 ELSE SCSplit.dblSplitPercent / 100 END)
+				END
+			ELSE CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END
+			END
+		,dblNet =  CASE WHEN DS.intDeliverySheetId IS NULL
+			THEN IRD.dblNet
+			ELSE IRD.dblGross - (CASE WHEN ISNULL(DS.dblGross,0) = 0 THEN 0 ELSE (DS.dblShrink / DS.dblGross) * IRD.dblGross END)
+			END
 		,dblLineGrossWeight =(IRD.dblNet / SC.dblNetUnits * (SC.dblGrossWeight + SC.dblGrossWeight1 + SC.dblGrossWeight2)) 
 		,dblLineNetWeight = ((IRD.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) 
 		,tblGRDiscountId.strDiscountId
-		,dtmReceiptDate = ISNULL(Voucher.dtmDate, IR.dtmReceiptDate) 
+		-- ,dtmReceiptDate = ISNULL(Voucher.dtmDate, IR.dtmReceiptDate)
+		,dtmReceiptDate = Voucher.dtmDate
 		,DS.strSplitDescription
 		,DS.intDeliverySheetId
+		,DS.strDeliverySheetNumber
 		,CASE WHEN DS.ysnPost = 0 
 			THEN SUBSTRING((
-					SELECT ','+ ICI2.strItemNo + '=' + CONVERT(varchar,QMD2.dblGradeReading) FROM tblSCDeliverySheet DSS2
+					SELECT ', '+ ICI2.strItemNo + '=' + LTRIM(STR(QMD2.dblGradeReading, 10, 2)) FROM tblSCDeliverySheet DSS2
 					INNER JOIN tblSCTicket SC2
 						ON DSS2.intDeliverySheetId = SC2.intDeliverySheetId
 					INNER JOIN tblQMTicketDiscount QMD2
@@ -134,8 +144,21 @@
 					WHERE QMD2.dblGradeReading > 0 and SC2.intTicketId = SC.intTicketId
 					FOR XML PATH('')
 				),2,1000) 
+			WHEN DS.intDeliverySheetId IS NULL
+				THEN SUBSTRING((
+					SELECT ', '+ ICI2.strItemNo + '=' + LTRIM(STR(QMD2.dblGradeReading, 10, 2))
+					FROM tblSCTicket SC2
+					INNER JOIN tblQMTicketDiscount QMD2
+						ON QMD2.intTicketId = SC2.intTicketId and QMD2.strSourceType = 'Scale'
+					INNER JOIN tblGRDiscountScheduleCode DSC2
+						ON QMD2.intDiscountScheduleCodeId = DSC2.intDiscountScheduleCodeId
+					INNER JOIN tblICItem ICI2
+						ON ICI2.intItemId = DSC2.intItemId
+					WHERE QMD2.dblGradeReading > 0 and SC2.intTicketId = SC.intTicketId
+					FOR XML PATH('')
+				),2,1000) 
 			ELSE SUBSTRING((
-					SELECT ','+ ICI2.strItemNo + '=' + CONVERT(varchar,QMD2.dblGradeReading) FROM tblSCDeliverySheet DSS2
+					SELECT ', '+ ICI2.strItemNo + '=' + LTRIM(STR(QMD2.dblGradeReading, 10, 2)) FROM tblSCDeliverySheet DSS2
 					INNER JOIN tblSCTicket SC2
 						ON DSS2.intDeliverySheetId = SC2.intDeliverySheetId
 					INNER JOIN tblQMTicketDiscount QMD2
@@ -149,26 +172,19 @@
 				),2,1000)
 		END strGradeReading
 		,1 ysnDisplayGradeReading
-		,SC.intCropYearId
-		,CYR.strCropYear
-	FROM tblSCDeliverySheet DS
-	INNER JOIN tblSCDeliverySheetSplit DSS
-		ON DS.intDeliverySheetId = DSS.intDeliverySheetId
-	INNER JOIN tblSCTicket SC 
-		ON SC.intDeliverySheetId = DS.intDeliverySheetId
+  FROM tblSCTicket SC
 	INNER JOIN tblICInventoryReceiptItem IRD
 		ON SC.intTicketId = IRD.intSourceId	
-			AND SC.intItemId = IRD.intItemId
+		AND SC.intItemId = IRD.intItemId
 	INNER JOIN tblICInventoryReceipt IR
 		ON IRD.intInventoryReceiptId = IR.intInventoryReceiptId
-			AND IR.intSourceType = 1
-			AND IR.intEntityVendorId = DSS.intEntityId
+		AND IR.intSourceType = 1
 	LEFT JOIN tblICCommodity ICCommodity ON ICCommodity.intCommodityId = SC.intCommodityId
+	LEFT JOIN tblSCTicketSplit SCSplit ON SC.intTicketId = SCSplit.intTicketId AND IR.intEntityVendorId = SCSplit.intCustomerId
 	LEFT JOIN tblEMEntity EM 
 		on IR.intEntityVendorId = EM.intEntityId
-	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityVendorId AND EMLocation.ysnDefaultLocation = 1
+	LEFT JOIN tblEMEntityLocation EMLocation ON EMLocation.intEntityId = IR.intEntityId AND EMLocation.ysnDefaultLocation = 1
 	LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId
-	LEFT JOIN tblEMEntitySplit tblEMEntitySplit on tblEMEntitySplit.intSplitId = DS.intSplitId
 	LEFT JOIN tblSMCompanyLocation tblSMCompanyLocation on tblSMCompanyLocation.intCompanyLocationId = SC.intProcessingLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation tblSMCompanyLocationSubLocation on tblSMCompanyLocationSubLocation.intCompanyLocationSubLocationId = SC.intSubLocationId
 	LEFT JOIN tblSCListTicketTypes tblSCListTicketTypes on (tblSCListTicketTypes.intTicketType = SC.intTicketType AND tblSCListTicketTypes.strInOutIndicator = SC.strInOutFlag)
@@ -176,26 +192,63 @@
 	LEFT JOIN tblGRDiscountId tblGRDiscountId on tblGRDiscountId.intDiscountId = SC.intDiscountId
 	LEFT JOIN tblGRStorageScheduleRule tblGRStorageScheduleRule on tblGRStorageScheduleRule.intStorageScheduleRuleId = SC.intStorageScheduleId
 	LEFT JOIN tblICStorageLocation tblICStorageLocation on tblICStorageLocation.intStorageLocationId = SC.intStorageLocationId
-	left join tblCTCropYear CYR
-		on CYR.intCropYearId = SC.intCropYearId
 	--LEFT JOIN vyuSCGradeReadingReport QM ON QM.intTicketId = SC.intTicketId AND QM.ysnDryingDiscount = 1
+	OUTER APPLY
+	(	
+		SELECT
+			DS.strSplitDescription
+			,DS.strDeliverySheetNumber
+			,DS.intDeliverySheetId
+			,DS.dblShrink
+			,DS.dblGross
+			,DS.ysnPost
+			,tblEMEntitySplit.strSplitNumber
+			,DSS.intEntityId
+		FROM tblSCDeliverySheet DS
+		INNER JOIN tblSCDeliverySheetSplit DSS
+			ON DS.intDeliverySheetId = DSS.intDeliverySheetId
+		LEFT JOIN tblEMEntitySplit tblEMEntitySplit
+			ON tblEMEntitySplit.intSplitId = DS.intSplitId
+		WHERE DS.intDeliverySheetId = SC.intDeliverySheetId
+			AND DSS.intEntityId = IR.intEntityVendorId
+	) DS
+	OUTER APPLY (
+        SELECT 
+            GRCS2.intCustomerStorageId
+            ,GRCS2.intEntityId
+            ,GRCS2.intItemId
+        FROM tblGRCustomerStorage GRCS2
+        WHERE (
+			-- Match customer storage to scale ticket if delivery sheet does not exist
+            (
+                DS.intDeliverySheetId IS NULL
+                AND GRCS2.intTicketId = SC.intTicketId
+            ) 
+			-- Match customer storage to delivery sheet if it exsists
+            OR (
+                DS.intDeliverySheetId IS NOT NULL
+                AND GRCS2.intDeliverySheetId = DS.intDeliverySheetId
+            )
+		)
+        AND GRCS2.intEntityId = EM.intEntityId
+    ) GRCS
 	OUTER APPLY(
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
 		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
-		WHERE APD.intInventoryReceiptItemId = IRD.intInventoryReceiptItemId
+		WHERE
+			-- Match voucher to IR if there's no customer storage
+            (
+                GRCS.intCustomerStorageId IS NULL
+                AND APD.intInventoryReceiptItemId = IRD.intInventoryReceiptItemId
+            )
+			-- Match voucher to customer storage if storage exists
+            OR (
+                GRCS.intCustomerStorageId IS NOT NULL
+                AND APD.intCustomerStorageId = GRCS.intCustomerStorageId
+                AND AP.intEntityVendorId = GRCS.intEntityId
+                AND APD.intItemId = GRCS.intItemId
+            )
 	) Voucher
-	OUTER APPLY
-	(	
-		SELECT 
-			strDiscountCode = MAX(GR.strDiscountChargeType)
-			,dblGradeReading = SUM(ISNULL(QM.dblGradeReading,0.0)) 
-		FROM tblQMTicketDiscount QM 
-		INNER JOIN tblGRDiscountScheduleCode GR 
-			ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
-		WHERE GR.ysnDryingDiscount = 1
-			AND QM.intTicketFileId = DS.intDeliverySheetId
-			AND QM.strSourceType = 'Delivery Sheet'
-	) QM
 	,(	SELECT TOP 1
 			strCompanyName
 			,strAddress AS strCompanyAddress
