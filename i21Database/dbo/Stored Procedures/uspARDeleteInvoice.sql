@@ -61,12 +61,12 @@ BEGIN TRY
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
-			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-								@intContractDetailId 	= 	@intContractDetailId,
-								@strSource			 	= 	'Pricing',
-								@strProcess			 	= 	'Invoice Delete',
-								@contractDetail 		= 	@contractDetails,
-								@intUserId				= 	@UserId
+			-- EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+			-- 					@intContractDetailId 	= 	@intContractDetailId,
+			-- 					@strSource			 	= 	'Pricing',
+			-- 					@strProcess			 	= 	'Invoice Delete',
+			-- 					@contractDetail 		= 	@contractDetails,
+			-- 					@intUserId				= 	@UserId
 
 			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID, @InvoiceDetailId = @InvoiceDetailId
 
@@ -141,12 +141,12 @@ BEGIN TRY
 			FROM tblARInvoiceDetail
 			WHERE intInvoiceId = @InvoiceId
 
-			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-					@intContractDetailId 	= 	@intContractDetailId,
-					@strSource			 	= 	'Pricing',
-					@strProcess			 	= 	'Invoice Delete',
-					@contractDetail 		= 	@contractDetails,
-					@intUserId				= 	@UserId
+			-- EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+			-- 		@intContractDetailId 	= 	@intContractDetailId,
+			-- 		@strSource			 	= 	'Pricing',
+			-- 		@strProcess			 	= 	'Invoice Delete',
+			-- 		@contractDetail 		= 	@contractDetails,
+			-- 		@intUserId				= 	@UserId
 
 			DELETE FROM tblARInvoiceDetail 
 			WHERE intInvoiceId = @InvoiceId
