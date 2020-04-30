@@ -17,6 +17,7 @@ BEGIN TRY
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
 		,@intMinRowNo INT
+		,@intContractFeedId INT
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -76,12 +77,19 @@ BEGIN TRY
 				SELECT @strCode = NULL
 					,@strDescription = NULL
 					,@strReference = NULL
+					,@intContractFeedId = NULL
 
 				SELECT @strCode = strCode
 					,@strDescription = strDescription
 					,@strReference = strReference
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
+
+				SELECT TOP 1 @intContractFeedId = intContractFeedId
+				FROM tblCTContractFeed
+				WHERE strERPPONumber = @strReference
+					AND strThirdPartyFeedStatus = 'Awt Ack'
+				ORDER BY intContractFeedId
 
 				UPDATE tblCTContractFeed
 				SET strThirdPartyFeedStatus = 'Ack Rcvd'
@@ -90,8 +98,7 @@ BEGIN TRY
 							THEN 'Success'
 						ELSE @strDescription
 						END
-				WHERE strERPPONumber = @strReference
-					AND strThirdPartyFeedStatus = 'Awt Ack'
+				WHERE intContractFeedId = @intContractFeedId
 
 				INSERT INTO @tblMessage (
 					strMessageType
