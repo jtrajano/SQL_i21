@@ -164,7 +164,7 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN (strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
+			SET dblHoursEarned = CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
 										CASE WHEN (T.ysnForReset = 1) THEN
 											CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
 												dblMaxEarned
@@ -186,7 +186,17 @@ BEGIN
 				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
 									DATEADD(DD, -1, dtmPaycheckStartDate) 
 								ELSE 
-										CASE WHEN ysnForReset =1 THEN T.dtmNextAward ELSE tblPREmployeeTimeOff.dtmLastAward END
+										CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN
+												CASE WHEN ysnForReset =1 THEN 
+													T.dtmNextAward
+												ELSE
+													tblPREmployeeTimeOff.dtmLastAward
+												END
+										ELSE
+												T.dtmNextAward
+										END
+
+										
 								END
 		FROM
 		#tmpEmployees T
