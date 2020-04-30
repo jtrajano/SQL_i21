@@ -229,7 +229,7 @@ BEGIN TRY
 			, strLocationName
 			, strContractEndMonth = (RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8)) COLLATE Latin1_General_CI_AS
 			, dtmEndDate
-			, dblBalance = dblQty
+			, dblBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(f.intQtyUOMId, @intCommodityUnitMeasureId, dblQty)
 			, intItemUOMId = f.intQtyUOMId
 			, intPricingTypeId
 			, intContractTypeId
