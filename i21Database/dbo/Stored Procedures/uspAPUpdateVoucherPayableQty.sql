@@ -193,8 +193,6 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
-		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
-
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
 			SET 
