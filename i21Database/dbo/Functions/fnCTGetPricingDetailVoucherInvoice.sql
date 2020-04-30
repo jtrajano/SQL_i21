@@ -71,7 +71,11 @@ begin
 	select top 1 @strFinalMessage = case when @strContractType = 'Purchase' 
 										then 'Voucher/s' 
 										else 'Invoice/s' 
-								    end + stuff((SELECT ', ' + strMessage FROM @AffectedVoucherInvoice FOR XML PATH ('')), 1, 1, '') + ' is using the price. Please delete that first.'
+								    end + stuff((SELECT ', ' + strMessage FROM @AffectedVoucherInvoice FOR XML PATH ('')), 1, 1, '') + ' is using the price. '
+									+ case when @strContractType = 'Purchase' 
+										then 'Price cannot be edited.' 
+										else 'Please delete that first.'
+								    end
 	from
 		@AffectedVoucherInvoice
 
