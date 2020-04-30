@@ -122,6 +122,10 @@ BEGIN TRY
 		declare @intApplied numeric(18,6) = 0;
 		declare @intPreviousPricedLoad numeric(18,6);
 		declare @dblLoadAppliedAndPriced numeric(18,6);
+		declare @intGradeId int = 0;
+		declare @intWeightId int = 0;
+		declare @intDestinationWeightGradeId int = 0;
+		declare @ysnWeightGrade bit = 0;
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -174,9 +178,18 @@ BEGIN TRY
 		
 	SELECT	@intEntityId		=	intEntityId,
 			@intContractTypeId	=	intContractTypeId,
-			@ysnLoad			=	ysnLoad
+			@ysnLoad			=	ysnLoad,
+			@intGradeId 		= 	intGradeId,
+			@intWeightId 		= 	intWeightId
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId = @intContractHeaderId
+
+	select @intDestinationWeightGradeId = intWeightGradeId from tblCTWeightGrade where strWeightGradeDesc = 'Destination';
+
+	if ((@intGradeId is not null and @intGradeId = @intDestinationWeightGradeId)  or (@intWeightId is not null and @intWeightId = @intDestinationWeightGradeId))
+	begin
+		set @ysnWeightGrade = convert(bit,1);
+	end
 
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
 
@@ -1275,7 +1288,8 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,(case when @ysnWeightGrade = convert(bit,1) then isnull(RI.dblDestinationQuantity,0) else isnull(RI.dblQuantity,0) end)),
 					intInvoiceDetailId = null,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1292,7 +1306,8 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,(case when @ysnWeightGrade = convert(bit,1) then isnull(RI.dblDestinationQuantity,0) else isnull(RI.dblQuantity,0) end)),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1623,7 +1638,8 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,(case when @ysnWeightGrade = convert(bit,1) then isnull(RI.dblDestinationQuantity,0) else isnull(RI.dblQuantity,0) end)),
 					intInvoiceDetailId = null,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1640,7 +1656,8 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,(case when @ysnWeightGrade = convert(bit,1) then isnull(RI.dblDestinationQuantity,0) else isnull(RI.dblQuantity,0) end)),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
