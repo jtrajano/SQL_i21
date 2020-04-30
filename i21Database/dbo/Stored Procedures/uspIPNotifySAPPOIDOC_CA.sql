@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPNotifySAPPOIDOC_CA
+﻿CREATE PROCEDURE uspIPNotifySAPPOIDOC_CA(@ysnNotifyExternalUser BIT=0)
 AS
 DECLARE @strStyle NVARCHAR(MAX)
 	,@strHtml NVARCHAR(MAX)
@@ -60,13 +60,13 @@ SELECT @strDetail = @strDetail + '<tr>
 		   <td>&nbsp;' + strContractNumber + '</td>' + '<td>&nbsp;' + ISNULL(strThirdPartyMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(intContractDetailId) + '</td>
 	</tr>'
 FROM tblCTContractFeed
-WHERE strThirdPartyFeedStatus = 'Failed'
+WHERE strThirdPartyFeedStatus = (Case When @ysnNotifyExternalUser=1 Then 'Ack Rcvd' Else 'Failed' End)
 	AND ISNULL(strThirdPartyMessage, '') <> ''
 	AND ISNULL(ysnThirdPartyMailSent, 0) = 0
 
 UPDATE tblCTContractFeed
 SET ysnThirdPartyMailSent = 1
-WHERE strThirdPartyFeedStatus = 'Failed'
+WHERE strThirdPartyFeedStatus = (Case When @ysnNotifyExternalUser=1 Then 'Ack Rcvd' Else 'Failed' End)
 	AND ISNULL(strThirdPartyMessage, '') <> ''
 	AND ISNULL(ysnThirdPartyMailSent, 0) = 0
 

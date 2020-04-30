@@ -192,7 +192,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Status>800</Status>'
 
-			SELECT @strXML = @strXML + '<Timestamp>' + CONVERT(VARCHAR(10), @dtmFeedCreated, 112) + '</Timestamp>'
+			SELECT @strXML = @strXML + '<Timestamp>' + CONVERT(VARCHAR(30), @dtmFeedCreated, 126) + '</Timestamp>'
 
 			SELECT @strXML = @strXML + '</Shipment>'
 		END
@@ -244,7 +244,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Pod>' + IsNULL(@strDestinationPoint, '') + '</Pod>'
 
-			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(10), @dtmPlannedAvailabilityDate, 112) + '</Eta>'
+			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(30), @dtmPlannedAvailabilityDate, 126) + '</Eta>'
 
 			SELECT @strXML = @strXML + '<CommodityItems>'
 
@@ -285,7 +285,7 @@ BEGIN
 				)
 
 			UPDATE tblCTContractFeed
-			SET strFeedStatus = 'Awt Ack'
+			SET strThirdPartyFeedStatus = 'Awt Ack',ysnThirdPartyMailSent=0,strThirdPartyMessage=NULL
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
