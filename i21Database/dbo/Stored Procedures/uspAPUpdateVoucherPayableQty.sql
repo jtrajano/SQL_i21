@@ -29,6 +29,8 @@ DECLARE @payablesKey TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @payablesKeyPartial TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
+DECLARE @recordCountToReturn INT = 0;
+DECLARE @recordCountReturned INT = 0;
 
 --uncomment if integrated modules already implemented the new approach
 -- --VALIDATE
@@ -43,6 +45,8 @@ SET @invalidCount = @@ROWCOUNT;
 SELECT TOP 1
 	@error = strError
 FROM @invalidPayables
+
+SELECT @recordCountToReturn = COUNT(*) FROM @voucherPayable
 
 --FILTER VALID PAYABLES
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherValidPayables')) DROP TABLE #tmpVoucherValidPayables
@@ -188,6 +192,8 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
+
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
 
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
@@ -598,6 +604,8 @@ ELSE SAVE TRAN @SavePoint
 		INNER JOIN @validPayables C
 			ON C.intVoucherPayableId = B2.intOldPayableId
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		UPDATE A
 			SET 
 				A.dblTax = A.dblTax + taxData.dblTax,
@@ -900,6 +908,8 @@ ELSE SAVE TRAN @SavePoint
 		)
 		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		MERGE INTO tblAPVoucherPayableTaxStaging AS destination
 		USING (
 			SELECT
@@ -1061,6 +1071,12 @@ ELSE SAVE TRAN @SavePoint
 			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
 		END
 
+	END
+
+	IF @recordCountReturned > 0 AND @recordCountToReturn != @recordCountReturned
+	BEGIN
+		RAISERROR('Error occured while returning Voucher Payables.', 16, 1);
+		RETURN;
 	END
 
 	IF @transCount = 0
