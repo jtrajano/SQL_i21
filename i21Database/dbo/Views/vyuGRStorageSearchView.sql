@@ -106,6 +106,8 @@ SELECT DISTINCT
 	,TSR.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
 	,strStorageTransactionNumber = CASE WHEN CS.ysnTransferStorage = 1 THEN CS.strStorageTicketNumber ELSE TS.strTransferStorageTicket END
+	,CS.dblBasis
+	,CS.dblSettlementPrice
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
