@@ -272,13 +272,21 @@ BEGIN
 				END
 				ELSE -- subtract the quantity of the load used
 				BEGIN
-					IF(@_dblTransactionQty > 0)
+					IF(@_dblTransactionQty > 0 AND @dblLoadQuantity > 0)
 					BEGIN
 						SET @dblRunningSchedule = @dblRunningSchedule + @dblLoadQuantity		
 					END
-					ELSE IF @dblTicketLoadUsedQty > 0 -- if record exists in ticketloadused table
+					ELSE IF @_dblTransactionQty > 0 AND @dblTicketLoadUsedQty > 0 
 					BEGIN
-						SET @dblRunningSchedule = @dblRunningSchedule - @dblLoadQuantity	
+						SET @dblRunningSchedule = @dblRunningSchedule + @dblTicketLoadUsedQty	
+					END
+					ELSE IF (@_dblTransactionQty < 0 AND @dblLoadQuantity > 0)
+					BEGIN
+						SET @dblRunningSchedule = @dblRunningSchedule - @dblLoadQuantity		
+					END
+					ELSE IF @_dblTransactionQty < 0 AND @dblTicketLoadUsedQty > 0
+					BEGIN
+						SET @dblRunningSchedule = @dblRunningSchedule - @dblTicketLoadUsedQty	
 					END
 					ELSE
 					BEGIN
