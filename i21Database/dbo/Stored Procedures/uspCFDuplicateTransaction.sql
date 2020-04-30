@@ -1,14 +1,21 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFDuplicateTransaction]
-	@TransactionId	NVARCHAR(MAX)
+	@TransactionId	NVARCHAR(MAX),
+	@UserId INT
 AS
 BEGIN
 
-
+--Transaction duplicated from CFDT-XXXXXXX
 BEGIN TRANSACTION
 
 	BEGIN TRY
 
 	DECLARE @newId INT
+	DECLARE @strOldId NVARCHAR(MAX)
+	DECLARE @newDate DATETIME = GETDATE()
+	DECLARE @strAuditLogTilte NVARCHAR(MAX)
+
+	SELECT TOP 1 @strOldId = ISNULL(strTransactionId,'') FROM tblCFTransaction WHERE intTransactionId = @TransactionId
+	SET @strAuditLogTilte = 'Transaction duplicated from ' + @strOldId
 
 	INSERT INTO tblCFTransaction
 	(
@@ -141,7 +148,7 @@ BEGIN TRANSACTION
 		,strForeignCardId
 		,ysnDuplicate
 		,dtmInvoiceDate
-		,dtmCreatedDate
+		,@newDate
 		,strOriginalProductNumber
 		,intOverFilledTransactionId
 		,dblInventoryCost
@@ -198,6 +205,36 @@ BEGIN TRANSACTION
 		,strGuid
 	FROM tblCFTransactionNote
 	WHERE ISNULL(intTransactionId,0) = ISNULL(@TransactionId,0)
+
+	DECLARE @processName nvarchar(max) = ('Duplicated from ' + @strTransactionId)
+
+	EXEC [uspCFTransactionAuditLog] 
+		@processName					= @processName
+		,@keyValue						= @newId
+		,@entityId						= @UserId
+		,@action						= ''
+		,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+		,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+		,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+		,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+		,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+		,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+		,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+		,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+		,@strFromPriceMethod			= @strAuditPriceMethod			
+		,@strFromPriceBasis				= @strAuditPriceBasis			
+		,@strFromPriceProfileId			= @strAuditPriceProfileId		
+		,@strFromPriceIndexId			= @strAuditPriceIndexId			
+
+
+	EXEC dbo.uspSMAuditLog 
+	 @keyValue			= @newId							-- Primary Key Value of the Invoice. 
+	,@screenName		= 'CardFueling.view.Transaction'	-- Screen Namespace
+	,@entityId			= @UserId									-- Entity Id.
+	,@actionType		= 'Add'							    -- Action Type
+	,@changeDescription	= @strAuditLogTilte							-- Description
+	,@fromValue			= ''								-- Previous Value
+	,@toValue			= ''	
 
 	COMMIT TRANSACTION
 
