@@ -261,7 +261,7 @@ BEGIN
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = SourceStorage.intTransferStorageId
 		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
-			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId		
+			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId
 		WHERE SourceStorage.intTransferStorageId = @intTransferStorageId
 
 		--SELECT * FROM @CustomerStorageStagingTable
@@ -408,7 +408,7 @@ BEGIN
 					,IU.dblUnitQty
 					,0
 					,dblSalesPrice = 0
-					, ToStorage.intCurrencyId
+					,ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
 					,intTransactionDetailId = SR.intTransferStorageSplitId
@@ -533,8 +533,26 @@ BEGIN
 							ON IL.intItemLocationId = ITP.intItemLocationId
 						WHERE intId = @cursorId
 
+						--update the Basis and Settlement Price of the new customer storage
+						UPDATE CS
+						SET dblBasis = ISNULL(@dblBasisCost,0)
+							,dblSettlementPrice = ISNULL(@dblSettlementPrice,0)
+						FROM tblGRCustomerStorage CS
+						INNER JOIN tblGRTransferStorageReference SR
+							ON SR.intToCustomerStorageId = CS.intCustomerStorageId
+						INNER JOIN @ItemsToPost IC
+							ON IC.intTransactionDetailId = SR.intTransferStorageReferenceId
+						INNER JOIN tblGRStorageType ST
+							ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+								AND ST.ysnDPOwnedType = 1
+						WHERE IC.intId = @cursorId
+
 						IF @ysnDPtoOtherStorage = 0
-						SELECT @strRKError = CASE WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' END +  ' in risk management is not available.'
+						SELECT @strRKError = CASE 
+												WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' 
+												WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' 
+												WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' 
+											END +  ' in risk management is not available.'
 
 						IF @strRKError IS NOT NULL
 						BEGIN
