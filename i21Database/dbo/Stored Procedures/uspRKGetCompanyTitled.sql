@@ -452,7 +452,7 @@ BEGIN
 				,strDistribution
 				,strTransactionType
 			FROM (
-				select
+				select distinct
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
 					,dblUnpaidIncrease = ISNULL(CS.dblUnits,Inv.dblTotal)
 					,dblUnpaidDecrease = dblPartialPaidQty
@@ -475,13 +475,15 @@ BEGIN
 							strVoucher = B.strBillId
 							, B.intBillId
 							, dblUnits =  BD.dblQtyReceived
-							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
 						from tblGRSettleStorage S 
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
 									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
 											AND BD.intItemId = S.intItemId 
-						where S.intSettleStorageId = Inv.intTransactionId 
+						left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+						left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+						where S.intSettleStorageId = Inv.intTransactionDetailId 
 					) t
 					group by strVoucher, intBillId
 	
@@ -526,13 +528,15 @@ BEGIN
 					 from (	
 					select 
 							 dblUnits =  BD.dblQtyReceived
-							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
 						from tblGRSettleStorage S 
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
 									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
-											AND BD.intItemId = S.intItemId 
-						where S.intSettleStorageId = Inv.intTransactionId 
+											AND BD.intItemId = S.intItemId
+						left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+						left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+						where S.intSettleStorageId = Inv.intTransactionDetailId 
 					) t
 				) CS
 				where 
@@ -586,7 +590,7 @@ BEGIN
 				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
-				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId and I.strTransactionType = 'Invoice'
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
 				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
 				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = ID.intItemId
