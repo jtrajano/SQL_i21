@@ -21,8 +21,7 @@ FROM (
     JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
 	  JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
-    WHERE b.intTransactionType IN (13,2)
-    AND b.ysnPosted = 1
+    WHERE (b.intTransactionType IN (13,2) AND b.ysnPosted = 1) OR (b.intTransactionType IN (3) AND b.ysnPosted = 1 AND b.dblAmountDue != 0)
     GROUP BY b.intEntityVendorId, v.strVendorId, e.strName, b.intBillId, b.strBillId, b.dtmDate
 
     UNION
