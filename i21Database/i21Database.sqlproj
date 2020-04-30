@@ -8204,6 +8204,8 @@
     <Build Include="dbo\Functions\fnMonthName.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessShipmentToInvoice.sql" />
+    <None Include="Scripts\Post-Deployment\CT\ScheduledQtyDiagNosticScript.sql" />
+    <None Include="Scripts\Post-Deployment\CT\ScheduledLoadDiagNosticScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
