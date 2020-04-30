@@ -86,7 +86,9 @@
 						, a.intContractHeaderId
 						, a.intContractDetailId
 						, dtmHistoryCreated
+						, stat.strContractStatus
 					from tblCTSequenceHistory a
+						join tblCTContractStatus stat on stat.intContractStatusId = a.intContractStatusId
 						join tblCTContractHeader b
 							on a.intContractHeaderId = b.intContractHeaderId
 					where dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
@@ -95,6 +97,7 @@
 					AND tbl.intContractHeaderId = CD.intContractHeaderId
 					AND tbl.intRowId = 1
 				where tbl.intPricingTypeId = 2
+				and tbl.strContractStatus = ''Open''
 
 				DECLARE @TemporaryTable TABLE 
 				(  
