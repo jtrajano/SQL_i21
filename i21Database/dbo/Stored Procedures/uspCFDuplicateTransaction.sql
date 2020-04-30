@@ -1,10 +1,10 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFDuplicateTransaction]
 	@TransactionId	NVARCHAR(MAX),
-	@UserId	INT
+	@UserId INT
 AS
 BEGIN
 
-
+--Transaction duplicated from CFDT-XXXXXXX
 BEGIN TRANSACTION
 
 	BEGIN TRY
@@ -43,6 +43,12 @@ BEGIN TRANSACTION
 	WHERE intTransactionId = @TransactionId 
 
 	DECLARE @newId INT
+	DECLARE @strOldId NVARCHAR(MAX)
+	DECLARE @newDate DATETIME = GETDATE()
+	DECLARE @strAuditLogTilte NVARCHAR(MAX)
+
+	SELECT TOP 1 @strOldId = ISNULL(strTransactionId,'') FROM tblCFTransaction WHERE intTransactionId = @TransactionId
+	SET @strAuditLogTilte = 'Transaction duplicated from ' + @strOldId
 
 	INSERT INTO tblCFTransaction
 	(
@@ -175,7 +181,7 @@ BEGIN TRANSACTION
 		,strForeignCardId
 		,ysnDuplicate
 		,dtmInvoiceDate
-		,dtmCreatedDate
+		,@newDate
 		,strOriginalProductNumber
 		,intOverFilledTransactionId
 		,dblInventoryCost
@@ -253,6 +259,15 @@ BEGIN TRANSACTION
 		,@strFromPriceProfileId			= @strAuditPriceProfileId		
 		,@strFromPriceIndexId			= @strAuditPriceIndexId			
 
+
+	EXEC dbo.uspSMAuditLog 
+	 @keyValue			= @newId							-- Primary Key Value of the Invoice. 
+	,@screenName		= 'CardFueling.view.Transaction'	-- Screen Namespace
+	,@entityId			= @UserId									-- Entity Id.
+	,@actionType		= 'Add'							    -- Action Type
+	,@changeDescription	= @strAuditLogTilte							-- Description
+	,@fromValue			= ''								-- Previous Value
+	,@toValue			= ''	
 
 	COMMIT TRANSACTION
 
