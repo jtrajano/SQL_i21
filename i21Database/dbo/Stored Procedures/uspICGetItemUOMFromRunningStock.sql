@@ -230,7 +230,11 @@ SELECT
 	,strOwnershipType				= dbo.fnICGetOwnershipType(@intOwnershipType)
 	,dblRunningAvailableQty			= t.dblQty
 	,dblStorageAvailableQty			= t.dblUnitStorage
-	,dblCost = COALESCE(t.dblCost, NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
+	,dblCost = COALESCE(NULLIF(CASE 
+				WHEN CostMethod.intCostingMethodId = 1 THEN dbo.fnGetItemAverageCost(i.intItemId, ItemLocation.intItemLocationId, ItemUOM.intItemUOMId)
+				WHEN CostMethod.intCostingMethodId = 2 THEN dbo.fnCalculateCostBetweenUOM(FIFO.intItemUOMId, StockUOM.intItemUOMId, FIFO.dblCost)
+				ELSE t.dblCost
+			END, 0), NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
 FROM @tblInventoryTransactionGrouped t 
 LEFT JOIN tblICItem i 
 	ON i.intItemId = t.intItemId
