@@ -346,7 +346,23 @@ SELECT
 	, dblRunningReservedQty			= ROUND(ISNULL(reserved.dblQty, 0), 6)
 	, dblRunningAvailableQtyNoReserved = ROUND(ISNULL(t.dblQty, 0) - ISNULL(reserved.dblQty, 0), 6) 
 	, dblStorageAvailableQty		= ROUND(t.dblUnitStorage, 6) 
-	, dblCost = COALESCE(Transactions.dblCost, NULLIF(ItemPricing.dblLastCost, 0), ItemPricing.dblStandardCost)
+	, dblCost = 
+			CASE 
+				-- Get the average cost. 
+				WHEN CostMethod.intCostingMethodId = 1 THEN 				
+					dbo.fnCalculateCostBetweenUOM(
+						@intStockUOMId
+						, ItemUOM.intItemUOMId
+						, dbo.[fnICGetMovingAverageCost](
+							t.intItemId
+							, t.intItemLocationId
+							, @intLastInventoryTransactionId
+						)
+					)
+				-- Otherwise, get the last cost 
+				ELSE 
+					t.dblCost
+			END
 	, intDecimalPlaces = iUOM.intDecimalPlaces
 	, ItemUOM.ysnAllowPurchase
 	, ItemUOM.ysnAllowSale
@@ -403,30 +419,13 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 			, u.strUnitType
 			, i.dblUnitQty
 			, i.ysnStockUnit
-	) stock
-	CROSS APPLY (
-		SELECT TOP 1
-			  ts.intItemId
-			, ts.intItemLocationId
-			, ts.intSubLocationId
-			, ts.intStorageLocationId
-			, ts.intItemUOMId
-			, ts.intCostingMethod
-			, dtmDate = CAST(CONVERT(VARCHAR(10), ts.dtmDate,112) AS DATETIME)
-			, dblCost = ts.dblCost
-		FROM tblICInventoryTransaction ts
-		WHERE ts.intItemId = t.intItemId
-			AND ts.intItemLocationId = t.intItemLocationId 
-			AND ItemUOM.intItemUOMId = t.intItemUOMId
-		ORDER BY ts.dtmDate DESC, ts.dtmCreated DESC
-	) Transactions
+	) stock 
+
 	LEFT JOIN tblICItemUOM StockUOM
 		ON StockUOM.intItemId = t.intItemId
 		AND StockUOM.ysnStockUnit = 1
 	LEFT JOIN tblICItemLocation ItemLocation
 		ON ItemLocation.intItemLocationId = t.intItemLocationId
-	LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-    	AND ItemPricing.intItemId = ItemLocation.intItemId
 	LEFT JOIN tblSMCompanyLocation CompanyLocation
 		ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
 	LEFT JOIN tblSMCompanyLocationSubLocation SubLocation
