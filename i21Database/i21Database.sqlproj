@@ -8449,8 +8449,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
-    <Build Include="dbo\Functions\fnCTGetPricingDetailInvoices.sql" />
+    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />    
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
