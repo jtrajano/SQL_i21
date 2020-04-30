@@ -7420,4 +7420,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="strCreateDateTime" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="cf0d34d5-8e49-4afb-940d-620e825c01fd" ChangeDateTime="04/30/2020 05:49:40">
+    <Property Name="ElementName" Value="[dbo].[fnCTGetPricingDetailInvoices]" />
+    <Property Name="ElementType" Value="SqlScalarFunction" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[fnCTGetPricingDetailVoucherInvoice]" />
+  </Operation>
 </Operations>
