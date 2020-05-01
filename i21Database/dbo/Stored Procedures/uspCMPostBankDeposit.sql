@@ -459,6 +459,14 @@ BEGIN
 	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId, @strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
+
+	--RESET GENERATION FLAGS IN UNDEPOSITED TABLE
+	UPDATE Undeposited SET ysnGenerated =0 , intBankFileAuditId = null
+	FROM tblCMUndepositedFund Undeposited
+	JOIN tblCMBankTransactionDetail B on B.intUndepositedFundId = Undeposited.intUndepositedFundId
+	JOIN tblCMBankTransaction A on A.intTransactionId = B.intTransactionId
+	WHERE A.strTransactionId = @strTransactionId
+	AND @ysnRecap = 0
 	-- Update the posted flag in the transaction table
 	
 END-- @ysnPost = 0
