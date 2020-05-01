@@ -331,7 +331,7 @@ BEGIN
 								ELSE 
 									(CASE WHEN B.dblAmountDue = 0 
 										THEN CAST(B.dblDiscount + B.dblPayment - B.dblInterest AS DECIMAL(18,2)) 
-										ELSE (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
+										ELSE (ISNULL(C.dblAmountDue,0) + B.dblPayment + B.dblDiscount - B.dblInterest) --this will handle issue on voiding which the first payment is voided
 									END)
 							END
 		,B.intOrigBillId = B.intBillId
@@ -341,7 +341,7 @@ BEGIN
 	FROM tblAPPayment A
 		INNER JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
-		INNER JOIN tblAPBill C
+		LEFT JOIN tblAPBill C
 			ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
