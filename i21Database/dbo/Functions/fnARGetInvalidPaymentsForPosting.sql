@@ -88,6 +88,34 @@ BEGIN
 
     UNION
 
+    --Payment with credit memo applied on invoice but have zero amount due
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Transaction - ' + P.[strTransactionNumber] + ' has zero amount due!'
+	FROM
+		@Payments P
+    OUTER APPLY(
+        SELECT TOP 1 strInvoiceNumber from tblARInvoice
+        WHERE intInvoiceId = P.[intTransactionDetailId]
+        AND strTransactionType = 'Credit Memo'
+        AND ysnRefundProcessed = 1
+        AND dblAmountDue = 0
+    ) INVALIDINVOICE
+    WHERE
+            P.[ysnPost] = 1
+        AND P.[intTransactionDetailId] IS NOT NULL
+        AND INVALIDINVOICE.strInvoiceNumber IS NOT NULL
+    GROUP BY
+         P.[intTransactionId]
+        ,P.[strTransactionId]
+        ,P.[strBatchId]
+        ,P.[strTransactionNumber]
+    UNION
+
     --Payment without detail
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
