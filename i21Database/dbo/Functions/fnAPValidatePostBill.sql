@@ -561,6 +561,29 @@ BEGIN
 		--BILL WAS POSTED FROM ORIGIN
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
 		SELECT 
+			'Voucher cannot be unpost because it is applied to voucher ' + applied.strBillId,
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			33
+		FROM tblAPBill A 
+		OUTER APPLY (
+			SELECT TOP 1
+				C.strBillId
+			FROM tblAPAppliedPrepaidAndDebit B 
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			WHERE 
+				B.intTransactionId = A.intBillId
+			AND C.ysnPosted = 1
+		) applied
+		WHERE  
+			A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND A.ysnPosted = 1
+		AND applied.strBillId IS NOT NULL
+
+		--BILL WAS POSTED FROM ORIGIN
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
 			'Voucher cannot be unpost because it is already unposted. Voucher will be refresh.',
 			'Bill',
 			A.strBillId,
