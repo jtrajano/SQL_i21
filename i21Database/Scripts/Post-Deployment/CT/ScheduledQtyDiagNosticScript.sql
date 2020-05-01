@@ -306,6 +306,25 @@ BEGIN
 							END
 							ELSE
 							BEGIN
+								IF(@_dblTransactionQty) > 0
+								BEGIN
+									SELECT TOP 1
+										@dblRunningSchedule = @dblRunningSchedule + @_dblTransactionQty 
+											+ (CASE WHEN ABS(@_dblTransactionQty) > ABS(dblTransactionQuantity) THEN 
+																												-(ABS(@_dblTransactionQty) - ABS(dblTransactionQuantity))
+																											ELSE 
+																												0
+																											END)
+									FROM #tmpCTHistoryTran
+									WHERE intId < @intId
+										AND strNumber = @strTransaction 
+									ORDER BY intId DESC
+								END
+								ELSE
+								BEGIN
+									SET @dblRunningSchedule = @dblRunningSchedule + @_dblTransactionQty
+								END
+								
 								SET @strNote = @strTransaction + ' no Corresponding Load'
 							END
 						END
