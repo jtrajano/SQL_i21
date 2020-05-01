@@ -172,6 +172,61 @@ BEGIN TRY
 		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	)
 
+	DECLARE @FinalContractBalance TABLE(
+		 intContractBalanceId				INT
+		,intContractTypeId					INT	
+		,intEntityId						INT
+		,intCommodityId						INT
+		,dtmEndDate							DATETIME
+		,intCompanyLocationId				INT
+		,intFutureMarketId					INT
+		,intFutureMonthId					INT
+		,intContractHeaderId				INT
+		,strType							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intContractDetailId				INT	
+		,strDate							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
+		,strContractType					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strCommodityCode					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strCommodity						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intItemId							INT
+		,strItemNo							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strLocationName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strCustomer						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strContract						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strPricingType						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strContractDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strShipMethod						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strDeliveryMonth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,dblFutures							NUMERIC(38,20)
+		,dblBasis							NUMERIC(38,20)
+		,strBasisUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblQuantity						NUMERIC(38,20)
+		,strQuantityUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblCashPrice						NUMERIC(38,20)
+		,strPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strStockUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblAvailableQty					NUMERIC(38,20)
+		,dblAmount							NUMERIC(38,20)
+		,dblQtyinCommodityStockUOM			NUMERIC(38,20)
+		,dblFuturesinCommodityStockUOM		NUMERIC(38,20)
+		,dblBasisinCommodityStockUOM		NUMERIC(38,20)
+		,dblCashPriceinCommodityStockUOM	NUMERIC(38,20)
+		,dblAmountinCommodityStockUOM		NUMERIC(38,20)
+		,intPricingTypeId					INT
+		,strPricingTypeDesc					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intUnitMeasureId					INT
+		,intContractStatusId				INT
+		,intCurrencyId						INT
+		,strCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dtmContractDate					DATETIME
+		,dtmSeqEndDate						DATETIME	
+		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	)	
+
 	DECLARE @TempPriceFixation TABLE(
 		 intContractBalanceId				INT
 		,intContractTypeId					INT	
@@ -229,6 +284,64 @@ BEGIN TRY
 		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	)    
+
+	DECLARE @FinalPriceFixation TABLE(
+		 intContractBalanceId				INT
+		,intContractTypeId					INT	
+		,intEntityId						INT
+		,intCommodityId						INT
+		,dtmEndDate							DATETIME
+		,intCompanyLocationId				INT
+		,intFutureMarketId					INT
+		,intFutureMonthId					INT
+		,intContractHeaderId				INT
+		,strType							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intContractDetailId				INT	
+		,strDate							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL		
+		,strContractType					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strCommodityCode					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strCommodity						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intItemId							INT
+		,strItemNo							NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strLocationName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strCustomer						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strContract						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strPricingType						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strContractDate					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strShipMethod						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strShipmentPeriod					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL	
+		,strDeliveryMonth					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,strFutureMonth						NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,dblFutures							NUMERIC(38,20)
+		,dblBasis							NUMERIC(38,20)
+		,strBasisUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblQuantity						NUMERIC(38,20)
+		,strQuantityUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblCashPrice						NUMERIC(38,20)
+		,strPriceUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strStockUOM						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dblAvailableQty					NUMERIC(38,20)
+		,intItemUOMId						INT
+		,intPriceItemUOMId					INT
+		,dblAmount							NUMERIC(38,20)
+		,dblQtyinCommodityStockUOM			NUMERIC(38,20)
+		,dblFuturesinCommodityStockUOM		NUMERIC(38,20)
+		,dblBasisinCommodityStockUOM		NUMERIC(38,20)
+		,dblCashPriceinCommodityStockUOM	NUMERIC(38,20)
+		,dblAmountinCommodityStockUOM		NUMERIC(38,20)
+		,intPricingTypeId					INT
+		,strPricingTypeDesc					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+		,intUnitMeasureId					INT
+		,intContractStatusId				INT
+		,intCurrencyId						INT
+		,strCurrency						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intCent							INT
+		,dtmContractDate					DATETIME
+		,dtmSeqEndDate						DATETIME	
+		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+	)        
     
 	IF @dtmEndDate IS NOT NULL
 		SET @dtmEndDate = dbo.fnRemoveTimeOnDate(@dtmEndDate)
@@ -702,7 +815,7 @@ BEGIN TRY
 		,dblFutures				= ISNULL(HT.dblFutures, CASE WHEN HT.intPricingTypeId IN (1,3) THEN ISNULL(CD.dblFutures,0) ELSE NULL END)
 		,dblFuturesinCommodityStockUOM	= CASE WHEN CD.intPricingTypeId IN (1,3) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(CD.dblFutures,0)),0) ELSE NULL END
 		,dblBasis				= ISNULL(HT.dblBasis, CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(CD.dblBasis,0) ELSE NULL END)
-		,dblBasisinCommodityStockUOM = CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(CD.dblBasis,0)),0) ELSE NULL END
+		,dblBasisinCommodityStockUOM = CASE WHEN CD.intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(HT.dblBasis,CD.dblBasis)),0) ELSE NULL END
 		,strBasisUOM			= BUOM.strUnitMeasure
 		,dblQuantity            =    CASE 
 										WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) + ISNULL(BL.dblQuantity, 0)
@@ -738,7 +851,7 @@ BEGIN TRY
 									)
 								  )
 								  * 
-								  [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CD.dblFutures, 0) + ISNULL(CD.dblBasis, 0))
+								  [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(HT.dblFutures,CD.dblFutures) + ISNULL(HT.dblBasis,CD.dblBasis))
 								  ELSE NULL END
 		,dblAmountinCommodityStockUOM =  -- This is dblQtyinCommodityStockUOM converted back to item stock UOM
 										CASE WHEN HT.intPricingTypeId = 1 THEN
@@ -750,7 +863,7 @@ BEGIN TRY
 												)
 											)
 											*-- This is dblCashPriceinCommodityStockUOM
-											(ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0))
+											(ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId), ISNULL(HT.dblFutures,CD.dblFutures) + ISNULL(HT.dblBasis,CD.dblBasis)),0))
 										ELSE NULL END
 		,intUnitMeasureId		= CD.intItemUOMId
 		,intContractStatusId	= ISNULL(HT.intContractStatusId, CD.intContractStatusId)
@@ -835,6 +948,114 @@ BEGIN TRY
 		WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END AND CS.strContractStatus <> 'Unconfirmed'
 	) t
 	WHERE dblQuantity > 0
+
+	INSERT INTO @FinalContractBalance
+	( 
+     intContractTypeId		
+	,intEntityId			
+	,intCommodityId
+	,dtmEndDate				
+	,intCompanyLocationId	
+	,intFutureMarketId      
+	,intFutureMonthId
+	,intContractHeaderId	
+	,strType				
+	,intContractDetailId	
+	,strDate				
+	,strContractType	
+	,strCommodityCode		
+	,strCommodity			
+	,intItemId				
+	,strItemNo		
+	,strLocationName		
+	,strCustomer			
+	,strContract
+	,intPricingTypeId			
+	,strPricingType
+	,strPricingTypeDesc			
+	,strContractDate		
+	,strShipMethod			
+	,strShipmentPeriod		
+	,strDeliveryMonth
+	,strFutureMonth
+	,dblFutures	
+	,dblFuturesinCommodityStockUOM
+	,dblBasis	
+	,dblBasisinCommodityStockUOM
+	,strBasisUOM			
+	,dblQuantity			
+	,strQuantityUOM			
+	,dblCashPrice		
+	,dblCashPriceinCommodityStockUOM
+	,strPriceUOM	
+	,dblQtyinCommodityStockUOM		
+	,strStockUOM			
+	,dblAvailableQty		
+	,dblAmount
+	,dblAmountinCommodityStockUOM
+	,intUnitMeasureId			
+	,intContractStatusId
+	,intCurrencyId		
+	,strCurrency				
+	,dtmContractDate
+	,dtmSeqEndDate			
+	,strFutMarketName			
+	,strCategory
+	,strPricingStatus 								
+	)	
+	SELECT  intContractTypeId		
+	,intEntityId			
+	,intCommodityId
+	,dtmEndDate				
+	,intCompanyLocationId	
+	,intFutureMarketId      
+	,intFutureMonthId
+	,intContractHeaderId	
+	,strType				
+	,intContractDetailId	
+	,strDate				
+	,strContractType	
+	,strCommodityCode		
+	,strCommodity			
+	,intItemId				
+	,strItemNo		
+	,strLocationName		
+	,strCustomer			
+	,strContract
+	,intPricingTypeId			
+	,strPricingType
+	,strPricingTypeDesc			
+	,strContractDate		
+	,strShipMethod			
+	,strShipmentPeriod		
+	,strDeliveryMonth
+	,strFutureMonth
+	,dblFutures	
+	,dblFuturesinCommodityStockUOM
+	,dblBasis	
+	,dblBasisinCommodityStockUOM
+	,strBasisUOM			
+	,dblQuantity			
+	,strQuantityUOM			
+	,dblCashPrice		
+	,dblCashPriceinCommodityStockUOM
+	,strPriceUOM	
+	,dblQtyinCommodityStockUOM		
+	,strStockUOM			
+	,dblAvailableQty		
+	,dblAmount
+	,dblAmountinCommodityStockUOM
+	,intUnitMeasureId			
+	,intContractStatusId
+	,intCurrencyId		
+	,strCurrency				
+	,dtmContractDate
+	,dtmSeqEndDate			
+	,strFutMarketName			
+	,strCategory
+	,strPricingStatus 
+	FROM @TempContractBalance
+	WHERE intPricingTypeId <> 1
 
 	--UPDATE TempContractBalance 
 	--SET intPricingTypeId   = SH.intPricingTypeId
@@ -950,17 +1171,17 @@ BEGIN TRY
 	,strDeliveryMonth		= LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
 	,strFutureMonth			= FH.strFutureMonth
 	,dblFutures				= ISNULL(PF.dblFutures,0)
-	,dblFuturesinCommodityStockUOM	= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId), ISNULL(PF.dblFutures,0)),0)
-	,dblBasis				= ISNULL(PF.dblBasis,0)
-	,dblBasisinCommodityStockUOM = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(PF.dblBasis,0)),0)
+	,dblFuturesinCommodityStockUOM	= ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(PF.dblFutures,0)),0)
+	,dblBasis				= ISNULL(HT.dblBasis, PF.dblBasis)
+	,dblBasisinCommodityStockUOM = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intPriceItemUOMId,dbo.fnGetItemStockUOM(CD.intItemId),ISNULL(HT.dblBasis,PF.dblBasis)),0)
 	,strBasisUOM			= BUOM.strUnitMeasure
 	,dblQuantity			= CASE
 							WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
 							ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 							END
 	,strQuantityUOM			= IUM.strUnitMeasure
-	,dblCashPrice			= ISNULL(PF.dblCashPrice,0)
-	,dblCashPriceinCommodityStockUOM = ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,CH.intCommodityUOMId, ISNULL(PF.dblCashPrice,0)),0)
+	,dblCashPrice			= ISNULL(HT.dblCashPrice,PF.dblCashPrice)
+	,dblCashPriceinCommodityStockUOM = ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,CH.intCommodityUOMId, ISNULL(HT.dblCashPrice,PF.dblCashPrice)),0)
 	,strPriceUOM			=  PUOM.strUnitMeasure
 	,dblQtyinCommodityStockUOM = ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, 
 									(CASE
@@ -978,7 +1199,7 @@ BEGIN TRY
 								(CASE
 								WHEN ISNULL(CD.intNoOfLoad, 0) = 0 THEN ISNULL(PF.dblQuantity,0) - ISNULL(PF.dblShippedQty,0) 
 								ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
-								END)) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,(ISNULL(PF.dblCashPrice,0))))
+								END)) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,(ISNULL(HT.dblCashPrice,PF.dblCashPrice))))
 	,dblAmountinCommodityStockUOM = -- This is dblQtyinCommodityStockUOM converted back to item stock UOM
 									ISNULL(dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId,
 									(CASE
@@ -986,7 +1207,7 @@ BEGIN TRY
 										ELSE (ISNULL(PF.intNoOfLoad,0) - ISNULL(PF.intShippedNoOfLoad,0)) * CD.dblQuantityPerLoad
 									END)), 0)
 									* --dblCashPriceinCommodityStockUOM
-									ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,CH.intCommodityUOMId, ISNULL(PF.dblCashPrice,0)),0)
+									ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,CH.intCommodityUOMId, ISNULL(HT.dblCashPrice,PF.dblCashPrice)),0)
 	,intUnitMeasureId			= CD.intItemUOMId
 	,intContractStatusId		= ISNULL(HT.intContractStatusId, CD.intContractStatusId)
 	,intCurrencyId				= CD.intCurrencyId
@@ -1037,6 +1258,8 @@ BEGIN TRY
 		SELECT SH.intContractDetailId
 			,SH.intContractStatusId
 			,SH.intPricingTypeId
+			,SH.dblBasis
+			,SH.dblCashPrice
 		FROM @tblChange C 
 		JOIN tblCTSequenceHistory SH ON SH.intSequenceHistoryId = C.intSequenceHistoryId		
 	) HT ON HT.intContractDetailId = CD.intContractDetailId
@@ -1047,7 +1270,7 @@ BEGIN TRY
 												   END
 
 	-- AVERAGE AND REMOVE USED PRICE FIXATION
-	INSERT INTO @TempContractBalance
+	INSERT INTO @FinalPriceFixation
 	( 
 		 intContractTypeId		
 		,intEntityId			
@@ -1200,6 +1423,115 @@ BEGIN TRY
 		,strCategory
 		,strPricingStatus
 
+	-- INSERT PRICED SEQUENCE
+	INSERT INTO @FinalPriceFixation
+	( 
+		 intContractTypeId		
+		,intEntityId			
+		,intCommodityId
+		,dtmEndDate				
+		,intCompanyLocationId	
+		,intFutureMarketId      
+		,intFutureMonthId
+		,intContractHeaderId	
+		,strType				
+		,intContractDetailId	
+		,strDate				
+		,strContractType	
+		,strCommodityCode		
+		,strCommodity			
+		,intItemId				
+		,strItemNo		
+		,strLocationName		
+		,strCustomer			
+		,strContract
+		,intPricingTypeId			
+		,strPricingType
+		,strPricingTypeDesc			
+		,strContractDate		
+		,strShipMethod			
+		,strShipmentPeriod		
+		,strDeliveryMonth
+		,strFutureMonth
+		,dblFutures			
+		,dblFuturesinCommodityStockUOM
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM			
+		,dblQuantity			
+		,strQuantityUOM			
+		,dblCashPrice		
+		,dblCashPriceinCommodityStockUOM
+		,strPriceUOM	
+		,dblQtyinCommodityStockUOM		
+		,strStockUOM			
+		,dblAvailableQty		
+		,dblAmount
+		,dblAmountinCommodityStockUOM
+		,intUnitMeasureId			
+		,intContractStatusId
+		,intCurrencyId		
+		,strCurrency				
+		,dtmContractDate
+		,dtmSeqEndDate			
+		,strFutMarketName			
+		,strCategory
+		,strPricingStatus 				
+	)
+	SELECT intContractTypeId		
+		,intEntityId			
+		,intCommodityId
+		,dtmEndDate				
+		,intCompanyLocationId	
+		,intFutureMarketId      
+		,intFutureMonthId
+		,intContractHeaderId	
+		,strType = 'PriceFixation'
+		,intContractDetailId	
+		,strDate				
+		,strContractType	
+		,strCommodityCode		
+		,strCommodity			
+		,intItemId				
+		,strItemNo		
+		,strLocationName		
+		,strCustomer			
+		,strContract
+		,intPricingTypeId			
+		,strPricingType
+		,strPricingTypeDesc			
+		,strContractDate		
+		,strShipMethod			
+		,strShipmentPeriod		
+		,strDeliveryMonth
+		,strFutureMonth
+		,dblFutures			
+		,dblFuturesinCommodityStockUOM
+		,dblBasis
+		,dblBasisinCommodityStockUOM
+		,strBasisUOM			
+		,dblQuantity			
+		,strQuantityUOM			
+		,dblCashPrice		
+		,dblCashPriceinCommodityStockUOM
+		,strPriceUOM	
+		,dblQtyinCommodityStockUOM		
+		,strStockUOM			
+		,dblAvailableQty		
+		,dblAmount
+		,dblAmountinCommodityStockUOM
+		,intUnitMeasureId			
+		,intContractStatusId
+		,intCurrencyId		
+		,strCurrency				
+		,dtmContractDate
+		,dtmSeqEndDate			
+		,strFutMarketName			
+		,strCategory
+		,strPricingStatus = 'Priced'
+	FROM @TempContractBalance
+	WHERE intPricingTypeId = 1	
+	
 	----UPDATE tblCTContractBalance 
 	----SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
 	----WHERE dtmEndDate = @dtmEndDate
@@ -1274,6 +1606,155 @@ BEGIN TRY
 	----DELETE 
 	----FROM @TempContractBalance
 	----WHERE strType <> 'Basis' AND dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
+
+	INSERT INTO @FinalContractBalance
+	( 
+	intContractTypeId		
+	,intEntityId			
+	,intCommodityId
+	,dtmEndDate				
+	,intCompanyLocationId	
+	,intFutureMarketId      
+	,intFutureMonthId
+	,intContractHeaderId	
+	,strType				
+	,intContractDetailId	
+	,strDate				
+	,strContractType	
+	,strCommodityCode		
+	,strCommodity			
+	,intItemId				
+	,strItemNo		
+	,strLocationName		
+	,strCustomer			
+	,strContract
+	,intPricingTypeId			
+	,strPricingType
+	,strPricingTypeDesc			
+	,strContractDate		
+	,strShipMethod			
+	,strShipmentPeriod		
+	,strDeliveryMonth
+	,strFutureMonth
+	,dblFutures	
+	,dblFuturesinCommodityStockUOM
+	,dblBasis	
+	,dblBasisinCommodityStockUOM
+	,strBasisUOM			
+	,dblQuantity			
+	,strQuantityUOM			
+	,dblCashPrice		
+	,dblCashPriceinCommodityStockUOM
+	,strPriceUOM	
+	,dblQtyinCommodityStockUOM		
+	,strStockUOM			
+	,dblAvailableQty		
+	,dblAmount
+	,dblAmountinCommodityStockUOM
+	,intUnitMeasureId			
+	,intContractStatusId
+	,intCurrencyId		
+	,strCurrency				
+	,dtmContractDate
+	,dtmSeqEndDate			
+	,strFutMarketName			
+	,strCategory
+	,strPricingStatus 								
+	)
+	SELECT
+	FPF.intContractTypeId		
+	,FPF.intEntityId			
+	,FPF.intCommodityId
+	,FPF.dtmEndDate				
+	,FPF.intCompanyLocationId	
+	,FPF.intFutureMarketId      
+	,FPF.intFutureMonthId
+	,FPF.intContractHeaderId	
+	,FPF.strType
+	,FPF.intContractDetailId	
+	,FPF.strDate				
+	,FPF.strContractType	
+	,FPF.strCommodityCode		
+	,FPF.strCommodity			
+	,FPF.intItemId				
+	,FPF.strItemNo		
+	,FPF.strLocationName		
+	,FPF.strCustomer			
+	,FPF.strContract
+	,FPF.intPricingTypeId
+	,FPF.strPricingType
+	,FPF.strPricingTypeDesc			
+	,FPF.strContractDate		
+	,FPF.strShipMethod			
+	,FPF.strShipmentPeriod		
+	,FPF.strDeliveryMonth
+	,FPF.strFutureMonth
+	,dblFutures = MAX(FPF.dblFutures)	
+	,dblFuturesinCommodityStockUOM = MAX(FPF.dblFuturesinCommodityStockUOM)
+	,dblBasis = MAX(FPF.dblBasis)
+	,dblBasisinCommodityStockUOM = MAX(FPF.dblBasisinCommodityStockUOM)
+	,FPF.strBasisUOM			
+	,dblQuantity = SUM(FPF.dblQuantity)			
+	,FPF.strQuantityUOM			
+	,dblCashPrice = MAX(FPF.dblCashPrice)		
+	,dblCashPriceinCommodityStockUOM = MAX(FPF.dblCashPriceinCommodityStockUOM)
+	,FPF.strPriceUOM	
+	,dblQtyinCommodityStockUOM = SUM(FPF.dblQtyinCommodityStockUOM)
+	,FPF.strStockUOM			
+	,dblAvailableQty = SUM(FPF.dblAvailableQty)		
+	,dblAmount = SUM(FPF.dblAmount)
+	,dblAmountinCommodityStockUOM = SUM(FPF.dblAmountinCommodityStockUOM)
+	,FPF.intUnitMeasureId
+	,FPF.intContractStatusId
+	,FPF.intCurrencyId		
+	,FPF.strCurrency				
+	,FPF.dtmContractDate
+	,FPF.dtmSeqEndDate			
+	,FPF.strFutMarketName			
+	,FPF.strCategory
+	,FPF.strPricingStatus
+	FROM @FinalPriceFixation FPF	
+	GROUP BY 
+	FPF.intContractTypeId		
+	,FPF.intEntityId			
+	,FPF.intCommodityId
+	,FPF.dtmEndDate				
+	,FPF.intCompanyLocationId	
+	,FPF.intFutureMarketId      
+	,FPF.intFutureMonthId
+	,FPF.intContractHeaderId	
+	,FPF.strType
+	,FPF.intContractDetailId	
+	,FPF.strDate				
+	,FPF.strContractType	
+	,FPF.strCommodityCode		
+	,FPF.strCommodity			
+	,FPF.intItemId				
+	,FPF.strItemNo		
+	,FPF.strLocationName		
+	,FPF.strCustomer			
+	,FPF.strContract
+	,FPF.intPricingTypeId
+	,FPF.strPricingType
+	,FPF.strPricingTypeDesc			
+	,FPF.strContractDate		
+	,FPF.strShipMethod			
+	,FPF.strShipmentPeriod		
+	,FPF.strDeliveryMonth
+	,FPF.strFutureMonth
+	,FPF.strBasisUOM			
+	,FPF.strQuantityUOM			
+	,FPF.strPriceUOM	
+	,FPF.strStockUOM			
+	,FPF.intUnitMeasureId
+	,FPF.intContractStatusId
+	,FPF.intCurrencyId		
+	,FPF.strCurrency				
+	,FPF.dtmContractDate
+	,FPF.dtmSeqEndDate			
+	,FPF.strFutMarketName			
+	,FPF.strCategory
+	,FPF.strPricingStatus
 		
 	INSERT INTO tblCTContractBalance --WITH (TABLOCK)
 	( 
@@ -1330,58 +1811,58 @@ BEGIN TRY
 	,strPricingStatus 								
 	)
 	SELECT
-	TCB.intContractTypeId		
-	,TCB.intEntityId			
-	,TCB.intCommodityId
-	,TCB.dtmEndDate				
-	,TCB.intCompanyLocationId	
-	,TCB.intFutureMarketId      
-	,TCB.intFutureMonthId
-	,TCB.intContractHeaderId	
-	,TCB.strType				
-	,TCB.intContractDetailId	
-	,TCB.strDate				
-	,TCB.strContractType	
-	,TCB.strCommodityCode		
-	,TCB.strCommodity			
-	,TCB.intItemId				
-	,TCB.strItemNo		
-	,TCB.strLocationName		
-	,TCB.strCustomer			
-	,TCB.strContract
-	,TCB.intPricingTypeId
-	,TCB.strPricingType
-	,TCB.strPricingTypeDesc			
-	,TCB.strContractDate		
-	,TCB.strShipMethod			
-	,TCB.strShipmentPeriod		
-	,TCB.strDeliveryMonth
-	,TCB.strFutureMonth
-	,TCB.dblFutures	
-	,TCB.dblFuturesinCommodityStockUOM
-	,TCB.dblBasis	
-	,TCB.dblBasisinCommodityStockUOM
-	,TCB.strBasisUOM			
-	,TCB.dblQuantity			
-	,TCB.strQuantityUOM			
-	,TCB.dblCashPrice		
-	,TCB.dblCashPriceinCommodityStockUOM
-	,TCB.strPriceUOM	
-	,TCB.dblQtyinCommodityStockUOM		
-	,TCB.strStockUOM			
-	,TCB.dblAvailableQty		
-	,TCB.dblAmount
-	,TCB.dblAmountinCommodityStockUOM
-	,TCB.intUnitMeasureId			
-	,TCB.intContractStatusId
-	,TCB.intCurrencyId		
-	,TCB.strCurrency				
-	,TCB.dtmContractDate
-	,TCB.dtmSeqEndDate			
-	,TCB.strFutMarketName			
-	,TCB.strCategory
-	,TCB.strPricingStatus
-	FROM @TempContractBalance TCB	
+	intContractTypeId		
+	,intEntityId			
+	,intCommodityId
+	,dtmEndDate				
+	,intCompanyLocationId	
+	,intFutureMarketId      
+	,intFutureMonthId
+	,intContractHeaderId	
+	,strType				
+	,intContractDetailId	
+	,strDate				
+	,strContractType	
+	,strCommodityCode		
+	,strCommodity			
+	,intItemId				
+	,strItemNo		
+	,strLocationName		
+	,strCustomer			
+	,strContract
+	,intPricingTypeId			
+	,strPricingType
+	,strPricingTypeDesc			
+	,strContractDate		
+	,strShipMethod			
+	,strShipmentPeriod		
+	,strDeliveryMonth
+	,strFutureMonth
+	,dblFutures	
+	,dblFuturesinCommodityStockUOM
+	,dblBasis	
+	,dblBasisinCommodityStockUOM
+	,strBasisUOM			
+	,dblQuantity			
+	,strQuantityUOM			
+	,dblCashPrice		
+	,dblCashPriceinCommodityStockUOM
+	,strPriceUOM	
+	,dblQtyinCommodityStockUOM		
+	,strStockUOM			
+	,dblAvailableQty		
+	,dblAmount
+	,dblAmountinCommodityStockUOM
+	,intUnitMeasureId			
+	,intContractStatusId
+	,intCurrencyId		
+	,strCurrency				
+	,dtmContractDate
+	,dtmSeqEndDate			
+	,strFutMarketName			
+	,strCategory
+	,strPricingStatus 
+	FROM @FinalContractBalance
 
 	DELETE FROM tblCTContractBalance
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM @SequenceHistory)
