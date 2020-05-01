@@ -219,8 +219,8 @@ declare @dblQuantityForInvoice numeric(18,6);
 							IR.strReceiptNumber,
 							(
 								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
-								FROM	tblAPBillDetail ID 
-								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
+								FROM	tblAPBillDetail ID, tblAPBill B
+								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL and B.intBillId = ID.intBillId and B.intTransactionType <> 13
 							) AS dblTotalIVForSHQty,
 							FT.dblQuantity,
 							RI.intLoadReceive
@@ -250,8 +250,8 @@ declare @dblQuantityForInvoice numeric(18,6);
 							IR.strReceiptNumber,
 							(
 								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
-								FROM	tblAPBillDetail ID 
-								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
+								FROM	tblAPBillDetail ID, tblAPBill B
+								WHERE	ID.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND ID.intInventoryReceiptChargeId IS NULL and B.intBillId = ID.intBillId and B.intTransactionType <> 13
 							) AS dblTotalIVForSHQty,
 							0,
 							RI.intLoadReceive
@@ -387,7 +387,7 @@ declare @dblQuantityForInvoice numeric(18,6);
 						-- Check IF need to create new voucher
 						IF @ysnPartialPriced = 1
 						BEGIN
-							IF EXISTS (SELECT TOP 1 1 FROM tblAPBill WHERE ysnPosted = 1 AND intBillId = (SELECT TOP 1 intBillId FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId) AND @ysnCreateNew = 0)
+							IF EXISTS (SELECT TOP 1 1 FROM tblAPBill WHERE ysnPosted = 1 AND intBillId = (SELECT TOP 1 a.intBillId FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId and b.intBillId = a.intBillId and b.intTransactionType <> 13) AND @ysnCreateNew = 0)
 							BEGIN
 								SET @ysnCreateNew = 1
 							END
@@ -397,9 +397,9 @@ declare @dblQuantityForInvoice numeric(18,6);
 							END
 						END
 
-						IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL AND @ysnCreateNew = 0)
+						IF EXISTS(SELECT top 1 1 FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId AND a.intInventoryReceiptChargeId IS	NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13 AND @ysnCreateNew = 0)
 						BEGIN
-							SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+							SELECT	@intBillId = a.intBillId, @dblQtyReceived = a.dblQtyReceived FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId and b.intBillId = a.intBillId and b.intTransactionType <> 13
 
 							SELECT  @ysnBillPosted = ysnPosted FROM tblAPBill WHERE intBillId = @intBillId
 
@@ -507,7 +507,7 @@ declare @dblQuantityForInvoice numeric(18,6);
 							UPDATE	tblAPBill SET strVendorOrderNumber = @strVendorOrderNumber, dtmDate = @dtmFixationDate, dtmDueDate = @dtmFixationDate, dtmBillDate = @dtmFixationDate WHERE intBillId = @intNewBillId
 							
 							DECLARE @total DECIMAL(18,6)
-							SELECT	@intBillDetailId = intBillDetailId, @total = dblQtyReceived FROM tblAPBillDetail WHERE intBillId = @intNewBillId AND intInventoryReceiptChargeId IS NULL
+							SELECT	@intBillDetailId = a.intBillDetailId, @total = a.dblQtyReceived FROM tblAPBillDetail a, tblAPBill b WHERE a.intBillId = @intNewBillId AND a.intInventoryReceiptChargeId IS NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13
 
 							UPDATE	tblAPBillDetail SET dblQtyReceived = @dblQtyToBill, dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
@@ -605,9 +605,9 @@ declare @dblQuantityForInvoice numeric(18,6);
 					BEGIN
 						IF(@ysnDoUpdateCost = 1)
 						BEGIN
-							IF EXISTS(SELECT * FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND intInventoryReceiptChargeId IS	NULL)
+							IF EXISTS(SELECT top 1 1 FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId AND a.intInventoryReceiptChargeId IS	NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13)
 							BEGIN 
-								SELECT	@intBillId = intBillId, @dblQtyReceived = dblQtyReceived, @dblVoucherPrice = dblCost FROM tblAPBillDetail WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
+								SELECT	@intBillId = a.intBillId, @dblQtyReceived = a.dblQtyReceived, @dblVoucherPrice = a.dblCost FROM tblAPBillDetail a, tblAPBill b WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId and b.intBillId = a.intBillId and b.intTransactionType <> 13
 					    
 								SELECT  @ysnBillPosted = ysnPosted, @ysnBillPaid = ysnPaid FROM tblAPBill WHERE intBillId = @intBillId
 								
@@ -621,7 +621,7 @@ declare @dblQuantityForInvoice numeric(18,6);
 								BEGIN
 									EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 								END
-								SELECT	@intBillDetailId = intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId AND intContractDetailId = @intContractDetailId AND intInventoryReceiptChargeId IS NULL
+								SELECT	@intBillDetailId = a.intBillDetailId FROM tblAPBillDetail a, tblAPBill b WHERE a.intBillId = @intBillId AND a.intContractDetailId = @intContractDetailId AND a.intInventoryReceiptChargeId IS NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13
 					    
 								--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
