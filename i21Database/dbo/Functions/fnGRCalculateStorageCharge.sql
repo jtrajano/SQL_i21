@@ -2158,11 +2158,20 @@ BEGIN
 		---------End Of Monthly----------------------------
 	END	
 	
+	
 	SELECT 
-		@dblStorageDueTotalPerUnit = ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
-		,@dblStorageBilledPerUnit  = ISNULL(dblStoragePaid,0) - @dblOldStoragePaid
-	FROM tblGRCustomerStorage
+		@dblStorageDueTotalPerUnit = case when ISNULL(CS.dblStorageDue,0) = 0 then ISNULL(CS.dblStoragePaid,0) else ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0) end
+		,@dblStorageBilledPerUnit  = ISNULL(CS.dblStoragePaid,0) - @dblOldStoragePaid
+	FROM tblGRCustomerStorage CS
+		outer apply
+		( select top 1 (dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
+			where intCustomerStorageId = CS.intCustomerStorageId 
+				and dtmHistoryDate <=  @dtmCalculationDate 
+				and intTransactionTypeId = 6
+			order by intStorageHistoryId desc
+		) SH
 	WHERE intCustomerStorageId = @intCustomerStorageId
+
 
 	INSERT INTO @returnTable
 	SELECT	
