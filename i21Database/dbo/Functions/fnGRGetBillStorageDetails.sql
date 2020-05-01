@@ -209,8 +209,25 @@ BEGIN
 		ON IC.intItemId = CS.intItemId		
 	LEFT JOIN tblSCDeliverySheet DS
     	ON DS.intDeliverySheetId = CS.intDeliverySheetId --AND (@ysnExcludeNotPostedDS IS NULL OR (@ysnExcludeNotPostedDS = 1 and DS.ysnPost = 1))
+	outer apply
+		( select top 1 (dblPaidAmount) as dblPaidAmount from tblGRStorageHistory 
+			where intCustomerStorageId = CS.intCustomerStorageId 
+				and dtmHistoryDate <=  @dtmStorageChargeDate 				
+				and intTransactionTypeId = 6
+			order by intStorageHistoryId desc 
+		) SH
 	WHERE CS.intEntityId = CASE WHEN @intEntityId > 0 THEN @intEntityId ELSE CS.intEntityId END
-		AND ((ISNULL(CS.dblStorageDue,0) - ISNULL(CS.dblStoragePaid,0)) + SV.dblStorageDuePerUnit) > 0
+		AND (
+				(	
+					ISNULL(CS.dblStorageDue,0) - 
+					
+					case when isnull(CS.dblStoragePaid, 0) >= ISNULL(SH.dblPaidAmount, 0) then 
+						ISNULL(CS.dblStoragePaid,0) - ISNULL(SH.dblPaidAmount, 0)
+					else
+						ISNULL(CS.dblStoragePaid,0)
+					end
+				) + SV.dblStorageDuePerUnit
+			) >= 0
 	ORDER BY EM.strName, CL.strLocationName		
 
 	RETURN;
