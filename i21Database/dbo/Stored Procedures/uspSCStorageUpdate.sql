@@ -479,7 +479,7 @@ BEGIN TRY
 	FROM tblCTContractDetail 
 	WHERE intContractDetailId = ISNULL(@intDPContractId,0)
 
-	SELECT 
+	SELECT TOP 1
 		@dblFutures = dbo.fnCTConvertQtyToTargetItemUOM(@intTicketItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) 
 		,@dblBasis = dbo.fnCTConvertQtyToTargetItemUOM(@intTicketItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
 	FROM dbo.fnRKGetFutureAndBasisPrice (1,@intCommodityId,right(convert(varchar, @dtmContractEndDate, 106),8),3,NULL,NULL,@intTicketProcessingLocationId,NULL,0,@intItemId,@intTicketCurrencyId)
@@ -491,8 +491,9 @@ BEGIN TRY
 				WHERE intCustomerStorageId = @intHoldCustomerStorageId 
 					AND ISNULL(dblBasis,0) = 0 
 					AND ISNULL(dblSettlementPrice,0) = 0
+	   AND ISNULL(@intDeliverySheetId,0) > 0
+	   AND ISNULL(@intDPContractId,0) > 0
 	)
-
 	BEGIN
 		UPDATE tblGRCustomerStorage
 		SET dblBasis = ISNULL(@dblBasis,0)
