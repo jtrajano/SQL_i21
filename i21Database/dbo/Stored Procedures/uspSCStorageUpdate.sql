@@ -482,7 +482,7 @@ BEGIN TRY
 				WHERE intCustomerStorageId = @intHoldCustomerStorageId 
 					AND ISNULL(dblBasis,0) = 0 
 					AND ISNULL(dblSettlementPrice,0) = 0
-	   AND ISNULL(@intDeliverySheetId,0) > 0
+	   AND ISNULL(@intTicketDeliverySheetId,0) > 0
 	   AND ISNULL(@intDPContractId,0) > 0
 	)
 	BEGIN
