@@ -11,7 +11,8 @@ BEGIN TRY
 	(  
 			intContractHeaderId		INT,  
 			intContractDetailId		INT,        
-			dblQuantity				NUMERIC(18,6)
+			dblQuantity				NUMERIC(18,6),
+			dblDestinationQuantity	NUMERIC(18,6)
 	)
 
 	DECLARE @tblBill TABLE 
@@ -26,29 +27,23 @@ BEGIN TRY
 			ysnOpenLoad				BIT
 	)
 
-	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity)
-	SELECT 
-		   intContractHeaderId  = ShipmentItem.intOrderId
-		  ,intContractDetailId	= ShipmentItem.intLineNo
-		  ,dblQuantity			= ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId,ShipmentItem.dblQuantity)),0)
-	
-	FROM tblICInventoryShipmentItem ShipmentItem
-	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId
+	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity)
+	SELECT   
+		intContractHeaderId  = ShipmentItem.intOrderId  
+		,intContractDetailId = ShipmentItem.intLineNo  
+		,dblQuantity   = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, ShipmentItem.dblQuantity)),0)   
+		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, CASE WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) ELSE ShipmentItem.dblQuantity END)),0)
+	FROM tblICInventoryShipmentItem ShipmentItem  
+	JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId AND Shipment.intOrderType = 1  
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo AND CD.intContractHeaderId = ShipmentItem.intOrderId  
+	LEFT JOIN 
+	(
+		SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
+		FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+		WHERE IV.strTransactionType <> 'Credit Memo'
+	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
 	WHERE Shipment.ysnPosted = 1 AND ShipmentItem.intOrderId = @intContractHeaderId
-	and ShipmentItem.intInventoryShipmentItemId not in (
-		select
-			id.intInventoryShipmentItemId
-		from
-			tblARInvoiceDetail id
-			,tblARInvoice i
-		where
-			id.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId
-			and i.intInvoiceId = id.intInvoiceId
-			and i.strTransactionType = 'Credit Memo'
-			and isnull(i.ysnPosted, convert(bit,0)) = convert(bit,1)
-	)
-	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo
+	GROUP BY ShipmentItem.intOrderId,ShipmentItem.intLineNo  
 
 	INSERT INTO @tblBill(intContractDetailId,dblQuantity)
 	SELECT 
@@ -66,7 +61,7 @@ BEGIN TRY
 	JOIN	tblLGLoadDetail LD	ON LD.intLoadId = LO.intLoadId
 	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	ISNULL(LD.intSContractDetailId,LD.intPContractDetailId)
 	WHERE	intTicketId IS NULL 
-	AND		LO.intShipmentStatus IN (1, 7)
+	AND		LO.intShipmentStatus NOT IN (4, 10)
 	AND		LO.intShipmentType <> 2
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
 
@@ -180,19 +175,13 @@ BEGIN TRY
 									THEN CH.intPricingTypeId
 								ELSE CD.intPricingTypeId
 							END
-		,dblFutures = (case
-							when CD.intPricingTypeId = 1
-							then CD.dblFutures
-							else
-								(CASE 
-									WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval')
-										THEN CD.dblFutures	
-									WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval')
-										THEN NULL
-									ELSE CD.dblFutures
-								END)
-					  end)
-
+		,dblFutures = CASE 
+						WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval')
+							THEN CD.dblFutures	
+						WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus <> 'Approved' AND AP.strApprovalStatus <> 'No Need for Approval')
+							THEN NULL
+						ELSE CD.dblFutures
+					END
 		,strPricingType = CASE 
 							WHEN AP.intContractHeaderId IS NOT NULL AND (AP.strApprovalStatus = 'Approved' OR AP.strApprovalStatus = 'No Need for Approval')
 								THEN PT.strPricingType
@@ -352,7 +341,7 @@ BEGIN TRY
 		END AS dblAppliedQty
 		,dblAppliedLoadQty = 
 		CASE 
-			WHEN Shipment.dblQuantity > 0  THEN Shipment.dblQuantity
+			WHEN Shipment.dblQuantity > 0  THEN Shipment.dblDestinationQuantity
 			WHEN Bill.dblQuantity > 0  THEN Bill.dblQuantity
 			ELSE -- dblAppliedQty
 				CASE 
