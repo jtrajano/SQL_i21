@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblCMResponsibleParty](
 	[intResponsiblePartyId] [int] IDENTITY(1,1) NOT NULL,
-	[strContainText] [nvarchar](100)  COLLATE SQL_Latin1_General_CP1_CS_AS NOT NULL,
+	[strContainText] [nvarchar](100)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[intBankAccountIdFrom] [int] NOT NULL,
 	[intBankAccountIdTo] [int] NOT NULL,
 	[intConcurrencyId] int null,
