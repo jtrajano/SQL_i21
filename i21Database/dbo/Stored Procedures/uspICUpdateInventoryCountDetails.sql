@@ -408,6 +408,7 @@ BEGIN
 		)
 			ON itemUOM.intItemId = i.intItemId
 			AND u.strUnitType IN ('Quantity')
+			AND itemUOM.ysnStockUnit <> 1 
 			
 		OUTER APPLY (
 			SELECT TOP 1 
