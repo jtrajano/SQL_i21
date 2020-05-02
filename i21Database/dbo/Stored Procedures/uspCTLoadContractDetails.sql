@@ -52,6 +52,7 @@ BEGIN TRY
 		SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
 		FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
 		WHERE IV.strTransactionType = 'Invoice'
+		AND  IV.ysnPosted = 1
 	) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId    
 	LEFT JOIN 
 	(
