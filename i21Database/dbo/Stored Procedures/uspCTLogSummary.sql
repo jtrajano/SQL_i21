@@ -4,7 +4,8 @@
 	@strSource				NVARCHAR(20),
 	@strProcess				NVARCHAR(50),
 	@contractDetail			AS ContractDetailTable READONLY,
-	@intUserId				INT = NULL
+	@intUserId				INT = NULL,
+	@intTransactionId		INT = NULL
 
 AS
 
@@ -1360,14 +1361,83 @@ BEGIN TRY
 			AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
 		END
 	END
-	--ELSE IF @strSource = 'Invoice'
-	--BEGIN
-	--	-- Direct Invoice:
-	--	-- 1. Posting
-	--	-- 	1.1. Reduce balance
-	--	-- 2. Unposting
-	--	-- 	1.1. Increase balance
-	--END
+	ELSE IF @strSource = 'Invoice'
+	BEGIN
+		-- Invoice/Detail:
+		-- Should be called before deleting the invoice detail
+		-- 1. Delete Invoice/Detail
+		-- 	1.1. Reduce basis deliveries
+		INSERT INTO @cbLogCurrent (strBatchId
+			, dtmTransactionDate
+			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblBasis
+			, dblFutures
+			, intQtyUOMId
+			, intQtyCurrencyId
+			, intBasisUOMId
+			, intBasisCurrencyId
+			, intPriceUOMId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQty
+			, intContractStatusId
+			, intBookId
+			, intSubBookId
+			, strNotes
+		)
+		SELECT strBatchId = NULL
+			, dtmTransactionDate = dbo.fnRemoveTimeOnDate(GETDATE())
+			, strTransactionType = 'Sales Basis Deliveries'
+			, strTransactionReference
+			, intTransactionReferenceId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber		
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblBasis
+			, dblFutures
+			, intQtyUOMId
+			, intQtyCurrencyId = NULL
+			, intBasisUOMId
+			, intBasisCurrencyId
+			, intPriceUOMId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQty
+			, intContractStatusId
+			, intBookId
+			, intSubBookId
+			, strNotes = ''
+			FROM tblCTContractBalanceLog
+			WHERE intContractHeaderId = @intContractHeaderId
+			AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+			AND strTransactionReference = 'Invoice'
+			AND intTransactionReferenceId = @intTransactionId
+	END
 	
 	DECLARE @currentContractDetalId INT
 	WHILE EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
@@ -1882,6 +1952,11 @@ BEGIN TRY
 				UPDATE @cbLogCurrent SET dblQty = dblQty * -1, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END 
 				EXEC uspCTLogContractBalance @cbLogCurrent, 1
 			END
+		END
+		ELSE IF @strSource = 'Invoice'
+		BEGIN
+			UPDATE @cbLogCurrent SET dblQty = dblQty * -1
+			EXEC uspCTLogContractBalance @cbLogCurrent, 1
 		END
 
 		-- IF @strProcess = 'Voucher Delete'
