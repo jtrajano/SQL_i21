@@ -152,13 +152,7 @@ BEGIN
 		RAISERROR('Cannot post an empty detail transaction.', 11, 1)
 		GOTO Post_Rollback
 	END
-
-	IF @ysnPost = 0 AND EXISTS(SELECT TOP 1 1 FROM tblCMUndepositedFund where  intBankDepositId = @intTransactionId AND ysnGenerated = 1  )
-	BEGIN
-		RAISERROR('Transaction already has generated an ACH file.', 11, 1)
-		GOTO Post_Rollback
-	END
-
+	
 -- Validate the date against the FY Periods
 	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0)
 	BEGIN 
