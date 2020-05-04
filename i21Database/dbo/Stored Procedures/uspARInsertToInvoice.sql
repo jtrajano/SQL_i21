@@ -50,7 +50,8 @@ DECLARE @EntityCustomerId		INT,
 		@EntityContactId		INT,
 		@StorageScheduleTypeId	INT,
 		@intLineOfBusinessId	INT,
-		@intSalesOrderId		INT
+		@intSalesOrderId		INT,
+		@intTicketId			INT 
 
 DECLARE @tblItemsToInvoiceUnsorted TABLE (intItemId			INT, 
 							ysnIsInventory					BIT,
@@ -506,7 +507,7 @@ FROM @tblSODSoftware
 SELECT TOP 1
 		@EntityCustomerId		=	intEntityCustomerId,
 		@CompanyLocationId		=	intCompanyLocationId,
-		@CurrencyId				=	intCurrencyId,
+		@CurrencyId				=	tblSOSalesOrder.intCurrencyId, 
 		@TermId					=	intTermId,
 		@EntityId				=	@UserId,
 		@Date					=	@DateOnly,
@@ -519,12 +520,15 @@ SELECT TOP 1
 		@SalesOrderNumber		=	strSalesOrderNumber,
 		@ShipToLocationId		=	intShipToLocationId,
 		@BillToLocationId		=	intBillToLocationId,
-		@SplitId				=	intSplitId,
+		@SplitId				=	tblSOSalesOrder.intSplitId, 
 		@SalesOrderComment		=   strComments,
-		@EntityContactId		=	intEntityContactId,
+		@EntityContactId		=	tblSOSalesOrder.intEntityContactId, 
 		@intLineOfBusinessId	=	intLineOfBusinessId,
-		@intSalesOrderId		=	intSalesOrderId
-FROM tblSOSalesOrder WHERE intSalesOrderId = @SalesOrderId
+		@intSalesOrderId		=	tblSOSalesOrder.intSalesOrderId, 
+		@intTicketId			=	tblSCTicket.intTicketId 
+FROM tblSOSalesOrder 
+LEFT JOIN dbo.tblSCTicket ON tblSCTicket.intSalesOrderId = tblSOSalesOrder.intSalesOrderId
+WHERE tblSOSalesOrder.intSalesOrderId = @SalesOrderId 
 	
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Software', @SoftwareComment OUT
 EXEC dbo.[uspARGetDefaultComment] @CompanyLocationId, @EntityCustomerId, 'Invoice', 'Standard', @InvoiceComment OUT
@@ -1059,6 +1063,7 @@ IF EXISTS (SELECT NULL FROM @tblItemsToInvoice WHERE strMaintenanceType NOT IN (
 							,@ItemAddonDetailKey				= @ItemAddonDetailKey
 							,@ItemAddonParent					= @ItemAddonParent
 							,@ItemAddOnQuantity					= @ItemAddOnQuantity
+							,@ItemTicketId						= @intTicketId 
 
 				IF ISNULL(@ItemContractHeaderId, 0) <> 0 AND ISNULL(@ItemContractDetailId, 0) <> 0
 					BEGIN
