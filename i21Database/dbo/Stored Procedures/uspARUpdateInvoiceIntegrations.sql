@@ -21,6 +21,7 @@ DECLARE @intInvoiceId				INT
 	  , @strBatchId     			NVARCHAR(100)
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
+	  , @InvoicesForDelete			InvoiceId
 
 
 --For Prepaid Contract Update
@@ -125,14 +126,41 @@ BEGIN TRY
 	) 
 	SELECT intHeaderId 	= @intInvoiceId
 		 , ysnForDelete = ISNULL(@ForDelete, 0)
-		 , strBatchId 	= @strBatchId
+		 , strBatchId 	= @strBatchId	
 
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
-	
+
+	--CONTRACT SALES BASIS DELIVERIES
+	INSERT INTO @InvoicesForDelete(
+		  intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	)--INVOICE DELETED 
+	SELECT intHeaderId 	= intInvoiceId
+		 , intDetailId	= intInvoiceDetailId
+		 , ysnForDelete = CAST(1 AS BIT)
+		 , strBatchId 	= @strBatchId
+	FROM tblARInvoiceDetail ID
+	WHERE (@ForDelete = 1 AND ID.intInvoiceId = @intInvoiceId AND (@InvoiceDetailId IS NULL OR (@InvoiceDetailId IS NOT NULL AND ID.intInvoiceDetailId = @InvoiceDetailId)))
+
+	UNION
+
+	--INVOICE LINE ITEM DELETED
+	SELECT intHeaderId 	= TD.intTransactionId
+		 , intDetailId	= TD.intTransactionDetailId
+		 , ysnForDelete = CAST(1 AS BIT)
+		 , strBatchId 	= @strBatchId
+	FROM tblARTransactionDetail TD
+	WHERE TD.strTransactionType = 'Invoice'
+	  AND TD.intTransactionId = @intInvoiceId
+	  AND (@ForDelete = 0 AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail ID WHERE ID.intInvoiceId = @intInvoiceId))
+
+	EXEC [dbo].[uspARLogRiskPosition] @InvoicesForDelete, @UserId
+
 	IF @ForDelete = 1
 		BEGIN
-			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId
-			EXEC [dbo].[uspARLogRiskPosition] @InvoiceIds, @UserId
+			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
 		END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)

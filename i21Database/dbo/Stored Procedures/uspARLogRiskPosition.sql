@@ -31,10 +31,23 @@ BEGIN
 		, intContractHeaderId	= CD.intContractHeaderId
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
-	INNER JOIN @tblInvoiceId I ON ID.intInvoiceId = I.intHeaderId
+	INNER JOIN @tblInvoiceId I ON ID.intInvoiceId = I.intHeaderId AND (I.intDetailId IS NULL OR (I.intDetailId = ID.intInvoiceDetailId))
 	INNER JOIN tblARInvoice II ON II.intInvoiceId = ID.intInvoiceId
 	WHERE ISNULL(I.ysnForDelete, 0) = 1
 	  AND ID.intContractDetailId IS NOT NULL
+	  AND II.strTransactionType = 'Invoice'
+
+	UNION ALL
+
+	SELECT intInvoiceId			= TD.intTransactionId
+		, intInvoiceDetailId	= TD.intTransactionDetailId
+		, intContractDetailId	= TD.intContractDetailId
+		, intContractHeaderId	= TD.intContractHeaderId
+	FROM tblARTransactionDetail TD
+	INNER JOIN @tblInvoiceId I ON TD.intTransactionId = I.intHeaderId AND TD.intTransactionDetailId = I.intDetailId-- IS NULL OR (I.intDetailId = TD.intTransactionDetailId))
+	INNER JOIN tblARInvoice II ON II.intInvoiceId = TD.intTransactionId
+	WHERE ISNULL(I.ysnForDelete, 0) = 1
+	  AND TD.intContractDetailId IS NOT NULL
 	  AND II.strTransactionType = 'Invoice'
 
 	WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceDetails)
