@@ -941,7 +941,7 @@ BEGIN
 				, strTransactionReferenceId
 				, intTransactionReferenceId)
 			SELECT intContractHeaderId
-				, strContractNumber
+				, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR, BD.intContractSeq) COLLATE Latin1_General_CI_AS 
 				, BD.intCommodityId
 				, strCommodityCode
 				, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
@@ -1095,7 +1095,7 @@ BEGIN
 				, strTransactionReferenceId
 				, intTransactionReferenceId)
 			SELECT intContractHeaderId
-				, strContractNumber
+				, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR, BD.intContractSeq) COLLATE Latin1_General_CI_AS 
 				, BD.intCommodityId
 				, strCommodityCode
 				, strType = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
@@ -1488,6 +1488,7 @@ INSERT INTO @List (strCommodityCode
 	, strNotes
 	, ysnPreCrush
 	, strContractNumber
+	, intSeqNo
 	, strContractEndMonth
 	, strContractEndMonthNearBy
 	, intContractHeaderId)
@@ -1513,6 +1514,7 @@ SELECT strCommodityCode
 	, strNotes
 	, ysnPreCrush
 	, strContractNumber
+	, intSeqNo
 	, strContractEndMonth
 	, strContractEndMonthNearBy = strContractEndMonth
 	, intContractHeaderId
@@ -2258,7 +2260,7 @@ BEGIN
 		, strDPRPositionBy = @strPositionBy
 		, strDPRPurchaseSale = @strPurchaseSales
 		, strDPRVendorCustomer = @strVendorCustomer
-		, intSeqNo = intOrderId
+		, intSeqNo
 		, strCommodityCode
 		, strContractNumber
 		, intContractHeaderId
@@ -2296,11 +2298,11 @@ BEGIN
 	WHERE intOrderId IS NOT NULL
 		AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
 		AND dblTotal IS NOT NULL
-	ORDER BY intSeqNo
+	ORDER BY intOrderId
 END
 
 
-SELECT intSeqNo = intOrderId
+SELECT intSeqNo
 	, intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intSeqNo)) 
 	, strCommodityCode
 	, strContractNumber
@@ -2335,5 +2337,5 @@ SELECT intSeqNo = intOrderId
 	, ysnPreCrush
 FROM @ListFinal WHERE ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
 ORDER BY CASE WHEN strContractEndMonth NOT IN ('Near By','Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
-	, intSeqNo
+	, intOrderId
 	, strType

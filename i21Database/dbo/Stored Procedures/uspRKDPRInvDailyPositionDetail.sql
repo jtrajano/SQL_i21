@@ -1590,7 +1590,7 @@ BEGIN
 				, intCompanyLocationId
 				, strDPAReceiptNo = BD.strTransactionId
 				, intContractHeaderId
-				, strContractNumber
+				, strContractNumber = strContractNumber + '-' +LTRIM(intContractSeq) COLLATE Latin1_General_CI_AS
 				, intInventoryShipmentId = BD.intTransactionId
 				, strShipmentNumber = BD.strTransactionId
 				, strTicketNumber = ''
