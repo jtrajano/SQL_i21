@@ -472,7 +472,6 @@ RETURN (
 
 		-- Should not allow posting when AllowZeroCost is not enabled and the cost of the item is zero
 		UNION ALL
-
 		SELECT	intItemId = @intItemId
 				,intItemLocationId = @intItemLocationId
 				,strText = dbo.fnFormatMessage(
@@ -495,7 +494,7 @@ RETURN (
 			INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = IL.intLocationId
 		WHERE Item.intItemId = @intItemId
 			AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 1
-			AND CASE WHEN @intTransactionTypeId = 33 THEN ABS(ISNULL(@dblQty, 0)) ELSE ISNULL(@dblQty, 0) END > 0
+			AND ISNULL(@dblQty, 0) > 0
 			AND ISNULL(@dblCost, 0) = 0
 
 	) AS Query		
