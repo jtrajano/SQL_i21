@@ -388,7 +388,7 @@ BEGIN TRY
 			CLOSE splitCursor;  
 			DEALLOCATE splitCursor;
 			
-			EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
+			EXEC uspGRInsertStorageHistoryRecord @storageHistoryData, 0
 		END
 
 		FETCH NEXT FROM ticketCursor INTO @intItemId
