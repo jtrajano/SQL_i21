@@ -21,6 +21,7 @@ BEGIN TRY
 		,@intLoadId INT
 		,@intContractDetailId INT
 		,@dblQuantityToUpdate NUMERIC(18, 6)
+		,@intShipmentStatus INT
 	DECLARE @strDescription NVARCHAR(MAX)
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
@@ -40,6 +41,7 @@ BEGIN TRY
 				,@intLoadId = NULL
 				,@intContractDetailId = NULL
 				,@dblQuantityToUpdate = NULL
+				,@intShipmentStatus = NULL
 
 			SELECT @strDescription = NULL
 
@@ -77,11 +79,12 @@ BEGIN TRY
 				,@intLoadId = L.intLoadId
 				,@intContractDetailId = CD.intContractDetailId
 				,@dblQuantityToUpdate = - LD.dblQuantity
+				,@intShipmentStatus = L.intShipmentStatus
 			FROM tblLGLoad L WITH (NOLOCK)
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 				AND L.strCustomerReference = @strCustomerReference
 				AND L.intShipmentType = 2
-				AND L.intShipmentStatus <> 10
+				--AND L.intShipmentStatus <> 10
 			JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 
 			IF ISNULL(@intLoadId, 0) = 0
@@ -117,6 +120,11 @@ BEGIN TRY
 			UPDATE tblIPLoadStage
 			SET strLoadNumber = @strLoadNumber
 			WHERE intStageLoadId = @intMinRowNo
+
+			IF ISNULL(@intShipmentStatus, 0) = 10
+			BEGIN
+				SELECT @intLoadId = 0
+			END
 
 			BEGIN TRAN
 
