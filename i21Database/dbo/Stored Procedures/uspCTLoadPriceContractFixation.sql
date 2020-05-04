@@ -124,12 +124,16 @@ BEGIN TRY
 				CD.strContractType,
 				CD.strEntityName,
 				CD.strContractNumber,
-				dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
-				CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
-						WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
-						AND		CD.ysnBasisSubCurrency = 1			THEN 100 
-						ELSE 0.01 
-				END	AS dblConvertedBasis,
+				CASE 
+					WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis
+					ELSE
+						dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
+						CASE	WHEN	intBasisCurrencyId = CD.intCurrencyId	THEN 1
+								WHEN	CD.intBasisCurrencyId <> CD.intCurrencyId 
+								AND		CD.ysnBasisSubCurrency = 1			THEN 100 
+								ELSE 0.01 
+					END	
+				END AS dblConvertedBasis,
 				CY.strCurrency	AS strMarketCurrency,
 				UM.strUnitMeasure AS strMarketUOM,
 				CD.ysnMultiplePriceFixation,
