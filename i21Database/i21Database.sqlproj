@@ -8547,6 +8547,7 @@
     <Build Include="dbo\Views\vyuIPPriceContractSubmittedByView.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
