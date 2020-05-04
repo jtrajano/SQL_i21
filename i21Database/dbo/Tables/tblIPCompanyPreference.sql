@@ -5,5 +5,6 @@
 	strCustomerCode nvarchar(50),
 	ysnReplicationEnabled BIT CONSTRAINT [DF_ttblIPCompanyPreference_ysnReplicationEnabled] DEFAULT 1, 
 	intThirdPartyContractWaitingPeriod int,
+	ysnDestinationPortMandatoryInPOExport BIT
 	CONSTRAINT [PK_tblIPCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
