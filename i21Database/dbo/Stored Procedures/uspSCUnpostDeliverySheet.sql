@@ -148,7 +148,7 @@ BEGIN TRY
 				CLOSE ticketCursor;  
 				DEALLOCATE ticketCursor;
 
-				EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
+				EXEC uspGRInsertStorageHistoryRecord @storageHistoryData, 0
 
 				DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT intCustomerStorageId FROM tblGRCustomerStorage WHERE intDeliverySheetId = @intDeliverySheetId) 
 				AND strSourceType = 'Storage'
