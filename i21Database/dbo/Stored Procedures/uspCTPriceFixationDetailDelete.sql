@@ -17,7 +17,8 @@ BEGIN TRY
 			@BillDetailId	INT,
 			@ItemId			INT,
 			@Quantity		NUMERIC(18,6),
-			@ysnSuccess		BIT;
+			@ysnSuccess		BIT
+			@intContractDetailId INT;
 
 			declare @strFinalMessage nvarchar(max);
 			declare @AffectedInvoices table
@@ -32,6 +33,20 @@ BEGIN TRY
 		intBillDetailId				INT,
 		dblReceived					NUMERIC(26,16)
 	)
+
+	if (@intPriceFixationId is null or @intPriceFixationId < 1)
+	begin
+		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = (select top 1 intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId))
+	end
+	ELSE
+	begin
+		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId)
+	end
+
+	UPDATE	tblCTContractDetail
+	SET		intContractStatusId	=	case when intContractStatusId = 5 then 1 else intContractStatusId end
+	where intContractDetailId = @intContractDetailId
+
 
 	-- UNPOST BILL
 	SELECT  DISTINCT BL.intBillId
