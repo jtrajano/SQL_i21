@@ -29,6 +29,9 @@ DECLARE @payablesKey TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @payablesKeyPartial TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
+DECLARE @recordCountToReturn INT = 0;
+DECLARE @recordCountReturned INT = 0;
+DECLARE @taxCompleted INT = 0;
 
 --uncomment if integrated modules already implemented the new approach
 -- --VALIDATE
@@ -508,7 +511,9 @@ ELSE SAVE TRAN @SavePoint
 				,taxes.[ysnTaxExempt]
 			FROM tblAPVoucherPayableTaxStaging taxes
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
-			WHERE (taxes.dblTax = 0 AND taxes.ysnTaxExempt = 0) OR taxes.ysnTaxExempt = 1
+			WHERE 
+				(taxes.dblTax = 0 AND taxes.ysnTaxExempt = 0) 
+			OR taxes.ysnTaxExempt = 1
 		) AS SourceData
 		 --handle key clashing, there could be already payable id exists on tax completed
 		ON (destination.intVoucherPayableId = SourceData.intNewPayableId)
@@ -576,6 +581,15 @@ ELSE SAVE TRAN @SavePoint
 		DELETE A
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @taxDeleted B ON A.intVoucherPayableId = B.intVoucherPayableId
+
+		SET @taxCompleted = @@ROWCOUNT;
+
+		IF @taxCompleted != (SELECT COUNT(*) FROM @taxDeleted)
+		BEGIN
+			--IF TAXES MOVED TO tblAPVoucherPayableTaxCompleted IS NOT EQUAL TO TAX DELETED IN STAGING
+			RAISERROR('Invalid tax record deleted/inserted.', 16, 1);
+			RETURN;
+		END
 	END
 	ELSE IF @post = 0
 	BEGIN
