@@ -14,12 +14,14 @@ SET ANSI_WARNINGS OFF
 DECLARE @intNSFPaymentMethodId 				INT = NULL
 DECLARE @intPaymentId 						INT = NULL
 DECLARE @intStartingNumberId				INT = NULL
+DECLARE @intBankTransactionStartingNumberId	INT = NULL
 DECLARE @intNewBankTransactionId			INT = NULL
 DECLARE @strErrorMsg						NVARCHAR(MAX) = NULL
 DECLARE @strInvoiceNumbers					NVARCHAR(MAX) = NULL
 DECLARE @strTransactionId					NVARCHAR(100) = ''
 DECLARE @strTransactionNumber				NVARCHAR(100) = ''
 DECLARE @STARTING_NUMBER_BANK_WITHDRAWAL 	NVARCHAR(100) = 'Bank Withdrawal'
+DECLARE @STARTING_NUMBER_BANK_TRANSACTION 	NVARCHAR(100) = 'Bank Transaction'
 DECLARE @ysnSuccess							BIT = 0
 DECLARE @GLEntries							RecapTableType
 DECLARE @BankTransaction					BankTransactionTable
@@ -34,6 +36,10 @@ WHERE strPaymentMethod = 'NSF'
 SELECT TOP 1 @intStartingNumberId = intStartingNumberId 
 FROM dbo.tblSMStartingNumber 
 WHERE strTransactionType = @STARTING_NUMBER_BANK_WITHDRAWAL
+
+SELECT TOP 1 @intBankTransactionStartingNumberId = intStartingNumberId 
+FROM dbo.tblSMStartingNumber 
+WHERE strTransactionType = @STARTING_NUMBER_BANK_TRANSACTION
 
 --INSERT DEFAULT NSF PAYMENT METHOD
 IF ISNULL(@intNSFPaymentMethodId, 0) = 0
@@ -195,7 +201,7 @@ INSERT INTO @GLEntries (
 	,[dblForeignRate]
 )
 SELECT
-	 [dtmDate]					= GL.dtmDate
+	 [dtmDate]					= P.dtmDate
 	,[strBatchID]				= GL.strBatchId
 	,[intAccountId]				= GL.intAccountId
 	,[dblDebit]					= GL.dblCredit
@@ -236,7 +242,8 @@ IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
 								, @ysnPost			= 1
-								, @SkipValidation	= 1
+								, @SkipGLValidation	= 1
+								, @SkipICValidation	= 1
 	END
 
 --UPDATE CASH INVOICE RECORDS
@@ -420,7 +427,7 @@ SELECT intTransactionId			= SP.intTransactionId
 	 , intBankAccountId			= UF.intBankAccountId
 	 , intCurrencyId			= SP.intCurrencyId
 	 , dtmDate					= SP.dtmDate
-	 , dblAmount				= SUM(UF.dblAmount) * -1
+	 , dblAmount				= SUM(UF.dblAmount)
 	 , strMemo					= 'Reversal for ' + SP.strTransactionNumber
 	 , strTransactionNumber		= SP.strTransactionNumber
 	 , intCompanyLocationId		= UF.intLocationId
@@ -457,6 +464,8 @@ GROUP BY UF.intBankAccountId, SP.intCurrencyId, UF.intLocationId, SP.strTransact
 --CREATE NSF BANK TRANSACTION FOR DEPOSITED PAYMENTS
 WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDPAYMENTS)
 	BEGIN
+		DECLARE @dblTotalAmount	NUMERIC(18, 6) = 0
+
 		SET @strTransactionId			= ''
 		SET @intNewBankTransactionId	= NULL
 		SET @ysnSuccess					= 0
@@ -465,10 +474,14 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDPAYMENTS)
 		DELETE FROM @BankTransaction
 		DELETE FROM @BankTransactionDetail
 
-		SELECT TOP 1 @strTransactionNumber = strTransactionNumber
+		SELECT TOP 1 @strTransactionNumber	= strTransactionNumber
+				   , @dblTotalAmount		= dblAmount
 		FROM #GROUPEDPAYMENTS
 
-		EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
+		IF @dblTotalAmount >= 0
+			EXEC uspSMGetStartingNumber @intStartingNumberId, @strTransactionId OUT
+		ELSE
+			EXEC uspSMGetStartingNumber @intBankTransactionStartingNumberId, @strTransactionId OUT
 
 		INSERT INTO @BankTransaction (
 			  [intBankAccountId]
@@ -486,9 +499,9 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDPAYMENTS)
 			  [intBankAccountId]			= GP.intBankAccountId
 			, [strTransactionId]			= @strTransactionId
 			, [intCurrencyId]				= GP.intCurrencyId
-			, [intBankTransactionTypeId]	= 2
+			, [intBankTransactionTypeId]	= CASE WHEN @dblTotalAmount >= 0 THEN 2 ELSE 5 END
 			, [dtmDate]						= GP.dtmDate
-			, [dblAmount]					= GP.dblAmount
+			, [dblAmount]					= GP.dblAmount * -1
 			, [strMemo]						= GP.strMemo
 			, [intCompanyLocationId]		= GP.intCompanyLocationId
 			, [intEntityId]					= GP.intEntityUserId
@@ -513,8 +526,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDPAYMENTS)
 			, [dtmDate]					= UF.dtmDate
 			, [intGLAccountId]			= SP.intAccountId
 			, [strDescription]			= GL.strDescription
-			, [dblDebit]				= ABS(ISNULL(SP.dblAmountPaid, 0))
-			, [dblCredit]				= 0
+			, [dblDebit]				= CASE WHEN ISNULL(SP.dblAmountPaid, 0) >= 0 THEN ABS(ISNULL(SP.dblAmountPaid, 0)) ELSE 0 END
+			, [dblCredit]				= CASE WHEN ISNULL(SP.dblAmountPaid, 0) >= 0 THEN 0 ELSE ABS(ISNULL(SP.dblAmountPaid, 0)) END
 			, [intEntityId]				= SP.intEntityCustomerId
 		FROM dbo.tblCMUndepositedFund UF WITH (NOLOCK)
 		INNER JOIN #GROUPEDPAYMENTS GP ON UF.intSourceTransactionId = GP.intTransactionId

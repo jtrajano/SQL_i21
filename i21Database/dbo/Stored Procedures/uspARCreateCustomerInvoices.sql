@@ -1269,7 +1269,7 @@ CREATE TABLE #CustomerInvoice
 	,[strAcresApplied]				NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
-	,[strApplicatorLicense]			NVARCHAR(20)    COLLATE Latin1_General_CI_AS 	NULL)
+	,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL)
 
 INSERT INTO #CustomerInvoice
 	([intInvoiceId]
@@ -1437,7 +1437,7 @@ SELECT
 	,[strBillToCountry]				= ISNULL(BL.[strCountry], ISNULL(BL1.[strCountry], EL.[strCountry]))		
 	,[ysnPosted]					= (CASE WHEN ITG.strTransactionType IN ('Overpayment', 'Customer Prepayment') THEN ITG.ysnPost ELSE 0 END)
 	,[ysnPaid]						= 0
-	,[ysnProcessed]					= 0
+	,[ysnProcessed]					= CASE WHEN ITG.strTransactionType = 'Credit Memo' AND ITG.strType = 'POS' THEN 1 ELSE 0 END
 	,[ysnRecurring]					= 0
 	,[ysnTemplate]					= ISNULL(ITG.[ysnTemplate],0)
 	,[ysnForgiven]					= ISNULL(ITG.[ysnForgiven],0) 

@@ -11,13 +11,13 @@ AS
 
 BEGIN
 
---DECLARE @Date DATETIME = '2020-02-04'
+--DECLARE @Date DATETIME = '2020-04-14'
 --	, @CommodityId INT = 1
 --	, @UOMType NVARCHAR(50) = 'By Quantity'
 --	, @UOMId INT = 4
---	, @BookId INT = 0
+--	, @BookId INT = 2
 --	, @SubBookId INT = 0
---	, @Decimal INT = 4
+--	, @Decimal INT = 0
 
 	DECLARE @intUnitMeasureId INT
 	SET @Date = CAST(FLOOR(CAST(@Date AS FLOAT)) AS DATETIME)
@@ -102,7 +102,7 @@ BEGIN
 		UNION ALL SELECT strType = 'Stock'
 			, Lots.intBookId
 			, Lots.intSubBookId
-			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, Lots.dblBalance), 0))
+			, dblBalance = SUM(ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, @intUnitMeasureId, Lots.dblQty), 0))
 			, Lots.intCommodityId
 			, Item.intProductTypeId
 		FROM vyuLGPickOpenInventoryLots Lots
@@ -226,10 +226,14 @@ BEGIN
 	GROUP BY intCommodityId, intProductTypeId
 
 	SELECT DER.intCommodityId
-		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, DER.dblOpenContract * DER.dblContractSize))
+		, dblQty = SUM(dbo.fnCTConvertQtyToTargetCommodityUOM(DER.intCommodityId, FM.intUnitMeasureId, @intUnitMeasureId, 
+						CASE WHEN strOptionType = 'Put' THEN DER.dblOpenContract * -1 ELSE DER.dblOpenContract END
+						* DER.dblContractSize))
+		, MAT.strCommodityAttributeId
 	INTO #OptionsTotal
-	FROM dbo.fnRKGetOpenFutureByDate(NULL, '1/1/1900', GETDATE(), 1) DER
+	FROM vyuRKFutOptTransaction DER
 	JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = DER.intFutureMarketId
+	JOIN tblRKCommodityMarketMapping MAT ON MAT.intFutureMarketId = DER.intFutureMarketId
 	LEFT JOIN (
 		SELECT * FROM (
 			SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY SP.intFutureMarketId, SPD.intFutureMonthId, CMM.intCommodityId ORDER BY SP.dtmPriceDate DESC)
@@ -253,7 +257,7 @@ BEGIN
 			(strOptionType = 'Put' AND dblLastSettle < dblStrike))
 		AND ISNULL(DER.intBookId, 0) = ISNULL(@BookId, ISNULL(DER.intBookId, 0))
 		AND ISNULL(DER.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(DER.intSubBookId, 0))
-	GROUP BY DER.intCommodityId
+	GROUP BY DER.intCommodityId, MAT.strCommodityAttributeId
 
 	DECLARE @FinalTable AS TABLE(intRowId INT
 		, intProductTypeId INT
@@ -321,7 +325,7 @@ BEGIN
 	) dap ON dap.intCommodityId = Balance.intCommodityId AND dap.intProdTypeId = ComAtt.intCommodityAttributeId AND
 			ISNULL(dap.intBookId, 0) = ISNULL(Balance.intBookId, 0) AND ISNULL(dap.intSubBookId, 0) = ISNULL(Balance.intSubBookId, 0) 
 	LEFT JOIN #DapSettlement ds ON ds.intCommodityId = Balance.intCommodityId AND ds.intProductTypeId = ComAtt.intCommodityAttributeId
-	LEFT JOIN #OptionsTotal ot ON ot.intCommodityId = Balance.intCommodityId
+	LEFT JOIN #OptionsTotal ot ON ot.intCommodityId = Balance.intCommodityId AND ot.strCommodityAttributeId = ComAtt.intCommodityAttributeId
 	WHERE ISNULL(ComAtt.intCommodityId, 0) = ISNULL(@CommodityId, 0)
 		AND strType = 'ProductType'
 		AND (Balance.dblContracts IS NOT NULL AND Balance.dblInTransit IS NOT NULL AND Balance.dblStock IS NOT NULL AND Balance.dblFutures IS NOT NULL)
@@ -355,9 +359,13 @@ BEGIN
 	INTO #Demand
 	FROM #DemandDetail tbl
 	CROSS APPLY (
-		SELECT dblRunningTotal = ISNULL(SUM(dblQuantity), 0)
-		FROM #DemandDetail dd
-		WHERE dd.intRowNum <= tbl.intRowNum
+		SELECT dblRunningTotal = ISNULL(SUM(ddSum.dblQuantity), 0)
+		FROM (
+			SELECT dd.dblQuantity
+			FROM #DemandDetail dd
+			WHERE dd.intRowNum <= tbl.intRowNum
+				AND dd.intProductTypeId = tbl.intProductTypeId
+		) ddSum
 	) RT
 
 	SELECT *
@@ -367,6 +375,7 @@ BEGIN
 	DECLARE @rowId INT
 		, @dblPosition NUMERIC(24, 10)
 		, @dblOption NUMERIC(24, 10)
+		, @ysnNegativeOptions BIT
 		, @intProductType INT
 		, @dblRunningBalance NUMERIC(24, 10)
 		, @startOption INT
@@ -380,7 +389,8 @@ BEGIN
 	BEGIN
 		SELECT TOP 1 @rowId = intRowId
 			, @dblPosition = dblTotalPosition
-			, @dblOption = dblTotalOption
+			, @dblOption = ABS(dblTotalOption)
+			, @ysnNegativeOptions = CASE WHEN dblTotalOption < 0 THEN 1 ELSE 0 END
 			, @intProductType = intProductTypeId
 		FROM #iterateTable i
 		
@@ -410,7 +420,7 @@ BEGIN
 				SET @monthsCovered += @dblDifference / @dblDemand
 				SET @dblDifference = @dblDemand - @dblDifference
 			END
-
+			
 			IF (@dblDifference > @dblOption)
 			BEGIN
 				SET @optionsCovered = @dblOption / @dblDemand
@@ -447,7 +457,7 @@ BEGIN
 
 		UPDATE @FinalTable
 		SET dblMonthsCovered = @monthsCovered
-			, dblOptionsCovered = @optionsCovered
+			, dblOptionsCovered = CASE WHEN @ysnNegativeOptions = 1 THEN @optionsCovered * -1 ELSE @optionsCovered END
 		WHERE intRowId = @rowId
 
 		DELETE FROM #iterateTable WHERE intRowId = @rowId

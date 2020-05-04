@@ -52,7 +52,7 @@ SELECT
 	CASE WHEN E.intTaxGroupId IS NOT NULL THEN E.strTaxGroup ELSE F.strTaxGroup END AS strTaxGroup,
 	CASE WHEN B.intInventoryShipmentChargeId IS NOT NULL THEN  ISS.strShipmentNumber ELSE  IR.strReceiptNumber END as strReceiptNumber,
 	ISNULL(IR.intInventoryReceiptId,0) AS intInventoryReceiptId,
-	SC.strTicketNumber,
+	ISNULL(SC.strTicketNumber,SCB.strTicketNumber) AS strTicketNumber, 
 	CH.strContractNumber,
 	CL.strLocationName,
 	CASE WHEN (B.intWeightUOMId > 0) 
@@ -89,7 +89,7 @@ SELECT
 	A2.dtmClr
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
-LEFT JOIN dbo.tblAPBillDetail B 
+INNER JOIN dbo.tblAPBillDetail B 
 	ON A.intBillId = B.intBillId
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId
@@ -112,7 +112,9 @@ LEFT JOIN dbo.tblSMTaxGroup E
 LEFT JOIN dbo.tblSMTaxGroup F 
 	ON B.intTaxGroupId = F.intTaxGroupId
 LEFT JOIN dbo.tblSCTicket SC 
-	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId
+	ON SC.intInventoryReceiptId = IR.intInventoryReceiptId 
+LEFT JOIN dbo.tblSCTicket SCB  
+	ON SCB.intTicketId = B.intScaleTicketId 
 INNER JOIN dbo.tblSMCurrency CUR 
 	ON CUR.intCurrencyID = A.intCurrencyId
 LEFT JOIN dbo.tblCTContractDetail CD

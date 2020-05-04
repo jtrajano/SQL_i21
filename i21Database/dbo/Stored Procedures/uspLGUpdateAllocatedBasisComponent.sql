@@ -36,7 +36,6 @@ FROM tblLGAllocationDetail ALD
 	LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = SCD.intFutureMarketId
 	OUTER APPLY (SELECT TOP 1 intCurrencyDecimal FROM tblSMCompanyPreference) CP
 WHERE intAllocationDetailId = @intAllocationDetailId
-	AND SCH.intPricingTypeId = 2
 
 /* Place Reserve B Components with zero rate to temp table */
 SELECT 

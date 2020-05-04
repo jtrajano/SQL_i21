@@ -73,6 +73,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnExcludeFromPayment				= INV.ysnExcludeFromPayment
 	 , ysnFromProvisional					= INV.ysnFromProvisional
      , ysnReturned							= INV.ysnReturned
+     , ysnReversal                          = INV.ysnReversal
      , intPaymentId							= INV.intPaymentId
      , intSplitId							= INV.intSplitId
      , intDistributionHeaderId				= INV.intDistributionHeaderId
@@ -148,7 +149,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , intPurchaseSale						= LG.intPurchaseSale
      , strReceiptNumber						= ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber)
      , strEODNumber							= ISNULL(POS.strEODNo,POSMixedTransactionCreditMemo.strEODNo)
-     , strEODStatus                         = CASE WHEN POS.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END
+     , strEODStatus                         = CASE WHEN POS.ysnClosed = 1 OR POSMixedTransactionCreditMemo.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END
      , strEODPOSDrawerName                  = ISNULL(POS.strPOSDrawerName, POSMixedTransactionCreditMemo.strPOSDrawerName)
 	 , intCreditLimitReached				= CUS.intCreditLimitReached
 	 , dtmCreditLimitReached				= CUS.dtmCreditLimitReached
@@ -294,6 +295,7 @@ LEFT JOIN (
      AND INV.strType = 'POS'
 LEFT OUTER JOIN (
 	SELECT intCreditMemoId
+         , ysnClosed
          , strReceiptNumber
          , strEODNo
 		 , intItemCount

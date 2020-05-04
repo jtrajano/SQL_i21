@@ -38,6 +38,7 @@ DECLARE @CommodityFilterCount INT = 0
 DECLARE @StorageLocationFilterCount INT = 0
 DECLARE @StorageUnitFilterCount INT = 0
 
+DECLARE @strCountBy AS NVARCHAR(50) 
 /*
 Ranges: 
 	Ranges allow you to select a range of filter. For example, the following list of commodities are the available filter that can be selected in range.
@@ -70,56 +71,83 @@ BEGIN
 	
 	-- Convert Storage Location Ranges to multi-filter
 	INSERT INTO @Values
-	SELECT DISTINCT sb.intCompanyLocationSubLocationId
-	FROM tblICInventoryCount c
-    INNER JOIN tblSMCompanyLocationSubLocation sb
-      ON (sb.intCompanyLocationSubLocationId >= ISNULL(dbo.fnMinNumeric(c.intSubLocationId, c.intSubLocationToId), ISNULL(c.intSubLocationId, c.intSubLocationToId))
-        AND sb.intCompanyLocationSubLocationId <= ISNULL(dbo.fnMaxNumeric(c.intSubLocationToId, c.intSubLocationId), ISNULL(c.intSubLocationToId, c.intSubLocationId)))
-	WHERE c.intLocationId = sb.intCompanyLocationId
+	SELECT DISTINCT 
+		sb.intCompanyLocationSubLocationId
+	FROM 
+		tblICInventoryCount c INNER JOIN tblSMCompanyLocationSubLocation sb
+			ON sb.intCompanyLocationSubLocationId >= ISNULL(dbo.fnMinNumeric(c.intSubLocationId, c.intSubLocationToId), ISNULL(c.intSubLocationId, c.intSubLocationToId))
+			AND sb.intCompanyLocationSubLocationId <= ISNULL(dbo.fnMaxNumeric(c.intSubLocationToId, c.intSubLocationId), ISNULL(c.intSubLocationToId, c.intSubLocationId))
+	WHERE 
+		c.intLocationId = sb.intCompanyLocationId
 		AND c.intInventoryCountId = @intInventoryCountId
 
 	-- Update multi-filter and clean up
-	UPDATE tblICInventoryCount SET strStorageLocationsFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	UPDATE tblICInventoryCount 
+	SET 
+		strStorageLocationsFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') 
+	WHERE 
+		intInventoryCountId = @intInventoryCountId
+
 	DELETE FROM @Values
 
--- Convert Storage Unit Ranges to multi-filter
+	-- Convert Storage Unit Ranges to multi-filter
 	INSERT INTO @Values
-	SELECT DISTINCT sb.intStorageLocationId
-	FROM tblICInventoryCount c
-    INNER JOIN tblICStorageLocation sb
-      ON (sb.intStorageLocationId >= ISNULL(dbo.fnMinNumeric(c.intStorageLocationId, c.intStorageLocationToId), ISNULL(c.intStorageLocationId, c.intStorageLocationToId))
-        AND sb.intStorageLocationId <= ISNULL(dbo.fnMaxNumeric(c.intStorageLocationToId, c.intStorageLocationId), ISNULL(c.intStorageLocationToId, c.intStorageLocationId)))
-	WHERE c.intLocationId = sb.intLocationId
+	SELECT DISTINCT 
+		sb.intStorageLocationId
+	FROM 
+		tblICInventoryCount c
+		INNER JOIN tblICStorageLocation sb
+			ON sb.intStorageLocationId >= ISNULL(dbo.fnMinNumeric(c.intStorageLocationId, c.intStorageLocationToId), ISNULL(c.intStorageLocationId, c.intStorageLocationToId))
+			AND sb.intStorageLocationId <= ISNULL(dbo.fnMaxNumeric(c.intStorageLocationToId, c.intStorageLocationId), ISNULL(c.intStorageLocationToId, c.intStorageLocationId))
+	WHERE 
+		c.intLocationId = sb.intLocationId
 		AND c.intInventoryCountId = @intInventoryCountId
 
 	-- Update multi-filter and clean up
-	UPDATE tblICInventoryCount SET strStorageUnitsFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	UPDATE tblICInventoryCount 
+	SET 
+		strStorageUnitsFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') 
+	WHERE 
+		intInventoryCountId = @intInventoryCountId
+
 	DELETE FROM @Values
 
 	-- Convert Commodity Ranges to multi-filter
 	INSERT INTO @Values
-	SELECT DISTINCT sb.intCommodityId
-	FROM tblICInventoryCount c
-    INNER JOIN tblICCommodity sb
-      ON (sb.intCommodityId >= ISNULL(dbo.fnMinNumeric(c.intCommodityId, c.intCommodityToId), ISNULL(c.intCommodityId, c.intCommodityToId))
-        AND sb.intCommodityId <= ISNULL(dbo.fnMaxNumeric(c.intCommodityToId, c.intCommodityId), ISNULL(c.intCommodityToId, c.intCommodityId)))
-	WHERE c.intInventoryCountId = @intInventoryCountId
+	SELECT DISTINCT 
+		sb.intCommodityId
+	FROM 
+		tblICInventoryCount c INNER JOIN tblICCommodity sb
+			ON sb.intCommodityId >= ISNULL(dbo.fnMinNumeric(c.intCommodityId, c.intCommodityToId), ISNULL(c.intCommodityId, c.intCommodityToId))
+			AND sb.intCommodityId <= ISNULL(dbo.fnMaxNumeric(c.intCommodityToId, c.intCommodityId), ISNULL(c.intCommodityToId, c.intCommodityId))
+	WHERE 
+		c.intInventoryCountId = @intInventoryCountId
 
 	-- Update multi-filter and clean up
-	UPDATE tblICInventoryCount SET strCommoditiesFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	UPDATE tblICInventoryCount 
+	SET strCommoditiesFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') 
+	WHERE 
+		intInventoryCountId = @intInventoryCountId
+
 	DELETE FROM @Values
 
 	-- Convert Category Ranges to multi-filter
 	INSERT INTO @Values
-	SELECT DISTINCT sb.intCategoryId
-	FROM tblICInventoryCount c
-    INNER JOIN tblICCategory sb
-      ON (sb.intCategoryId >= ISNULL(dbo.fnMinNumeric(c.intCategoryId, c.intCategoryToId), ISNULL(c.intCategoryId, c.intCategoryToId))
-        AND sb.intCategoryId <= ISNULL(dbo.fnMaxNumeric(c.intCategoryToId, c.intCategoryId), ISNULL(c.intCategoryToId, c.intCategoryId)))
-	WHERE c.intInventoryCountId = @intInventoryCountId
+	SELECT DISTINCT 
+		sb.intCategoryId
+	FROM 
+		tblICInventoryCount c INNER JOIN tblICCategory sb
+			ON sb.intCategoryId >= ISNULL(dbo.fnMinNumeric(c.intCategoryId, c.intCategoryToId), ISNULL(c.intCategoryId, c.intCategoryToId))
+			AND sb.intCategoryId <= ISNULL(dbo.fnMaxNumeric(c.intCategoryToId, c.intCategoryId), ISNULL(c.intCategoryToId, c.intCategoryId))
+	WHERE 
+		c.intInventoryCountId = @intInventoryCountId
 
 	-- Update multi-filter and clean up
-	UPDATE tblICInventoryCount SET strCategoriesFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') WHERE intInventoryCountId = @intInventoryCountId
+	UPDATE tblICInventoryCount 
+	SET 
+		strCategoriesFilter = NULLIF(dbo.fnJoinDelimitedValues(@Values, ','), '') 
+	WHERE 
+		intInventoryCountId = @intInventoryCountId
 	DELETE FROM @Values
 END
 
@@ -128,30 +156,41 @@ SELECT
     @strStorageLocationsFilter = c.strStorageLocationsFilter,
     @strStorageUnitsFilter = c.strStorageUnitsFilter,
     @strCommoditiesFilter = c.strCommoditiesFilter,
-    @strCategoriesFilter = c.strCategoriesFilter
-FROM tblICInventoryCount c
-WHERE c.intInventoryCountId = @intInventoryCountId
+    @strCategoriesFilter = c.strCategoriesFilter,
+	@strCountBy = c.strCountBy 
+FROM 
+	tblICInventoryCount c
+WHERE 
+	c.intInventoryCountId = @intInventoryCountId
 
 BEGIN
 	INSERT INTO @StorageLocationIds
 	SELECT DISTINCT sl.intCompanyLocationSubLocationId
-	FROM dbo.fnICSplitStringToTable(@strStorageLocationsFilter, ',') ids
-		INNER JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = ids.[Value]
+	FROM 
+		dbo.fnICSplitStringToTable(@strStorageLocationsFilter, ',') ids
+		INNER JOIN tblSMCompanyLocationSubLocation sl 
+			ON sl.intCompanyLocationSubLocationId = ids.[Value]
 
 	INSERT INTO @StorageUnitIds
 	SELECT DISTINCT sl.intStorageLocationId
-	FROM dbo.fnICSplitStringToTable(@strStorageUnitsFilter, ',') ids
-		INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = ids.[Value]
+	FROM 
+		dbo.fnICSplitStringToTable(@strStorageUnitsFilter, ',') ids
+		INNER JOIN tblICStorageLocation sl 
+			ON sl.intStorageLocationId = ids.[Value]
 
 	INSERT INTO @CommodityIds
 	SELECT DISTINCT c.intCommodityId
-	FROM dbo.fnICSplitStringToTable(@strCommoditiesFilter, ',') ids
-		INNER JOIN tblICCommodity c ON c.intCommodityId = ids.[Value]
+	FROM 
+		dbo.fnICSplitStringToTable(@strCommoditiesFilter, ',') ids
+		INNER JOIN tblICCommodity c 
+			ON c.intCommodityId = ids.[Value]
 
 	INSERT INTO @CategoryIds
 	SELECT DISTINCT c.intCategoryId
-	FROM dbo.fnICSplitStringToTable(@strCategoriesFilter, ',') ids
-		INNER JOIN tblICCategory c ON c.intCategoryId = ids.[Value]
+	FROM 
+		dbo.fnICSplitStringToTable(@strCategoriesFilter, ',') ids
+		INNER JOIN tblICCategory c 
+			ON c.intCategoryId = ids.[Value]
 
 	SELECT @CategoryFilterCount = COUNT(*) FROM @CategoryIds
 	SELECT @CommodityFilterCount = COUNT(*) FROM @CommodityIds
@@ -306,8 +345,177 @@ BEGIN
 		AND Item.strLotTracking <> 'No'
 		AND Item.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
-
+		AND Item.strStatus NOT IN ('Discontinued')
 END
+
+ELSE IF @strCountBy = 'Pack'
+BEGIN
+	INSERT INTO tblICInventoryCountDetail(
+		  intInventoryCountId
+		, intItemId
+		, intItemLocationId
+		, intSubLocationId
+		, intStorageLocationId
+		, intLotId
+		, dblSystemCount
+		, dblLastCost
+		, strCountLine
+		, intItemUOMId
+		, ysnRecount
+		, ysnFetched
+		, intEntityUserSecurityId
+		, intConcurrencyId
+		, intSort
+		, dblPhysicalCount
+	)
+	SELECT DISTINCT
+		intInventoryCountId = @intInventoryCountId
+		, intItemId = il.intItemId
+		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
+		, intSubLocationId = CASE WHEN lastTransaction.intItemId IS NULL THEN il.intSubLocationId ELSE stock.intSubLocationId END 
+		, intStorageLocationId = CASE WHEN lastTransaction.intItemId IS NULL THEN il.intStorageLocationId ELSE stock.intStorageLocationId END
+		, intLotId = NULL
+		, dblSystemCount =
+			COALESCE(
+				dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, itemUOM.intItemUOMId, stock.dblOnHand) 
+				, 0
+			)
+			
+		, dblLastCost =  
+			-- Convert the last cost from Stock UOM to stock.intItemUOMId
+			ISNULL(
+				CASE 
+					WHEN il.intCostingMethod = 1 THEN 
+						dbo.fnCalculateCostBetweenUOM (
+							stockUOM.intItemUOMId
+							,itemUOM.intItemUOMId
+							,dbo.fnICGetMovingAverageCost(
+								il.intItemId
+								,il.intItemLocationId
+								,lastTransaction.intInventoryTransactionId
+							)
+						)
+					ELSE 
+						ISNULL(
+							-- last cost from transaction
+							dbo.fnCalculateCostBetweenUOM(
+								lastCost.intItemUOMId 
+								, itemUOM.intItemUOMId
+								, lastCost.dblCost 
+							)
+							-- last cost from item pricing
+							,dbo.fnCalculateCostBetweenUOM(
+								stockUOM.intItemUOMId
+								, itemUOM.intItemUOMId
+								, p.dblLastCost
+							)
+						)
+				END
+
+				, 0
+			)			
+
+		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, itemUOM.intItemUOMId ASC) AS NVARCHAR(50))
+		, intItemUOMId = itemUOM.intItemUOMId
+		, ysnRecount = 0
+		, ysnFetched = 1
+		, intEntityUserSecurityId = @intEntityUserSecurityId
+		, intConcurrencyId = 1
+		, intSort = 1
+		, NULL
+	FROM tblICItemLocation il
+		INNER JOIN tblICItemUOM stockUOM 
+			ON stockUOM.intItemId = il.intItemId
+			AND stockUOM.ysnStockUnit = 1
+		INNER JOIN tblICItem i 
+			ON i.intItemId = il.intItemId
+		INNER JOIN tblICItemPricing p
+			ON p.intItemId = i.intItemId
+			AND p.intItemLocationId = il.intItemLocationId
+		INNER JOIN (
+			tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure u
+				ON itemUOM.intUnitMeasureId = u.intUnitMeasureId
+		)
+			ON itemUOM.intItemId = i.intItemId
+			AND u.strUnitType IN ('Quantity')
+			AND itemUOM.ysnStockUnit <> 1 
+			
+		OUTER APPLY (
+			SELECT TOP 1 
+				dblCost = t.dblCost
+				,t.intItemUOMId
+			FROM 
+				tblICInventoryTransaction t 
+			WHERE
+				t.intItemId = i.intItemId
+				AND t.intItemLocationId = il.intItemLocationId
+				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				AND t.dblQty > 0 
+				AND t.ysnIsUnposted = 0 
+			ORDER BY
+				t.intInventoryTransactionId DESC 
+		) lastCost
+
+		OUTER APPLY (
+			SELECT	v.intItemId
+					,u.intItemUOMId
+					,v.intItemLocationId
+					,v.intSubLocationId
+					,v.intStorageLocationId
+					,dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(v.intItemUOMId, u.intItemUOMId, v.dblQty))
+			FROM	tblICInventoryTransaction v
+					INNER JOIN tblICItemUOM u
+						ON v.intItemId = u.intItemId
+						AND u.ysnStockUnit = 1
+			WHERE	
+					v.intItemId = i.intItemId
+					AND v.intItemLocationId = il.intItemLocationId
+					AND dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+			GROUP BY 
+					v.intItemId
+					,u.intItemUOMId
+					,v.intItemLocationId
+					,v.intSubLocationId
+					,v.intStorageLocationId
+		) stock 
+
+		OUTER APPLY (
+			SELECT TOP 1 
+				t.intInventoryTransactionId
+				,t.intItemId
+			FROM 
+				tblICInventoryTransaction t 
+			WHERE
+				t.intItemId = i.intItemId
+				AND t.intItemLocationId = il.intItemLocationId
+				AND dbo.fnDateLessThanEquals(t.dtmDate, @AsOfDate) = 1
+				AND t.dblQty <> 0 				
+			ORDER BY
+				t.intInventoryTransactionId DESC 		
+		) lastTransaction
+
+		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
+		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
+		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1		 
+	WHERE il.intLocationId = @intLocationId
+		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
+		AND i.strLotTracking = 'No'
+		AND i.strStatus NOT IN ('Discontinued')
+		AND i.strType IN ('Inventory', 'Raw Material', 'Finished Good')
+		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
+		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
+		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)
+		AND (
+			(stock.intSubLocationId = storageLocationFilter.intStorageLocationId OR ISNULL(@StorageLocationFilterCount, 0) = 0)
+			OR (lastTransaction.intItemId IS NULL AND il.intSubLocationId = storageLocationFilter.intStorageLocationId)				
+		)
+		AND (
+			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
+			OR (lastTransaction.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
+		)
+END
+
 ELSE
 BEGIN
 	INSERT INTO tblICInventoryCountDetail(
@@ -507,6 +715,7 @@ BEGIN
 		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
 		AND i.strLotTracking = 'No'
 		AND i.strType = 'Inventory'
+		AND i.strStatus NOT IN ('Discontinued')
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND (i.intCategoryId = categoryFilter.intCategoryId OR ISNULL(@CategoryFilterCount, 0) = 0)
 		AND (i.intCommodityId = commodityFilter.intCommodityId OR ISNULL(@CommodityFilterCount, 0) = 0)

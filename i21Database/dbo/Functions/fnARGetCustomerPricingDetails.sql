@@ -218,9 +218,9 @@ BEGIN
 								END)								 
 								+ dblDeviation)
 					WHEN strPriceBasis = 'S'
-						THEN VI.dblSalePrice - (VI.dblSalePrice * (dblDeviation/100.00)) 
+						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) - (ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) * (dblDeviation/100.00)) 
 					WHEN strPriceBasis = 'M'
-						THEN VI.dblSalePrice - dblDeviation
+						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice) - dblDeviation
 					WHEN strPriceBasis = '1'
 						THEN PL1.dblUnitPrice + dblDeviation
 					WHEN strPriceBasis = '2'
@@ -306,7 +306,7 @@ BEGIN
 					WHEN strPriceBasis = 'S'
 						THEN VI.dblSalePrice
 					WHEN strPriceBasis = 'M'
-						THEN VI.dblSalePrice
+						THEN ISNULL(CPL.dblUnitPrice, VI.dblSalePrice)
 					WHEN strPriceBasis = '1'
 						THEN PL1.dblUnitPrice
 					WHEN strPriceBasis = '2'
@@ -320,6 +320,16 @@ BEGIN
 				END)
 		FROM
 			vyuICGetItemStock VI
+		LEFT OUTER JOIN (
+			SELECT TOP 1 IPL.intItemId, IPL.intItemUnitMeasureId AS intItemUOM, IPL.dblMin, IPL.dblMax, IPL.dblUnitPrice, ICL.intCompanyLocationId AS intLocationId 
+			FROM tblARCustomer C
+			INNER JOIN tblICItemPricingLevel IPL ON C.intCompanyLocationPricingLevelId = IPL.intCompanyLocationPricingLevelId
+			INNER JOIN tblSMCompanyLocationPricingLevel ICL ON IPL.strPriceLevel = ICL.strPricingLevelName
+			WHERE C.intEntityId = @CustomerId
+			  AND IPL.intItemId = @ItemId
+			  AND ICL.intCompanyLocationId = @LocationId
+			  AND ((@Quantity BETWEEN ISNULL(IPL.dblMin, 0) AND ISNULL(NULLIF(IPL.dblMax, 0), 999999999999)) OR ( ISNULL(IPL.dblMin, 0) = 0 AND ISNULL(IPL.dblMax, 0) = 0))
+		) AS CPL ON VI.intItemId = CPL.intItemId AND VI.intLocationId = CPL.intLocationId AND VI.intStockUOMId = CPL.intItemUOM
 		LEFT OUTER JOIN
 			(
 				SELECT TOP 1 PL.intItemId, PL.intItemUnitMeasureId AS intItemUOM, PL.dblMin, PL.dblMax, PL.dblUnitPrice, ICL.intLocationId 
@@ -1876,6 +1886,28 @@ BEGIN
 					,@intSort
 				FROM
 					@SpecialGroupPricing
+				WHERE
+					intSpecialPriceId = @SpecialPriceId
+					
+				IF @GetAllAvailablePricing = 0 RETURN;
+			END
+
+		--ay. Customer - Customer Location - Item and Item Category are blank (AR>Maintenance>Customers>Setup Tab>Pricing Tab>Special Pricing)
+		SET @SpecialPriceId = (SELECT TOP 1 intSpecialPriceId FROM @SpecialPricing WHERE intCustomerLocationId = @CustomerShipToLocationId AND (ISNULL(strInvoiceType,'') = ISNULL(@InvoiceType,'') OR ISNULL(strInvoiceType,'') = '' OR ISNULL(@InvoiceType,'') = '') AND ISNULL(intCategoryId, 0) = 0 AND ISNULL(intItemId, 0) = 0 AND ISNULL(dblCustomerPrice,0) <> 0)
+		IF(ISNULL(@SpecialPriceId,0) <> 0) AND NOT EXISTS(SELECT TOP 1 intSpecialPriceId FROM @returntable WHERE intSpecialPriceId = @SpecialPriceId)
+			BEGIN
+				SET @intSort = @intSort + 1
+				INSERT @returntable(dblPrice, strPricing, intSpecialPriceId, dblPriceBasis, dblDeviation, dblUOMQuantity, intSort)
+				SELECT
+					dblCustomerPrice * @UOMQuantity
+					,strPricing
+					,intSpecialPriceId
+					,dblPriceBasis
+					,dblDeviation
+					,@UOMQuantity
+					,@intSort
+				FROM
+					@SpecialPricing
 				WHERE
 					intSpecialPriceId = @SpecialPriceId
 					

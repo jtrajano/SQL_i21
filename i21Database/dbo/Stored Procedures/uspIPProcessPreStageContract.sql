@@ -51,11 +51,11 @@ BEGIN TRY
 			,@strToTransactionType = NULL
 			,@intCompanyLocationId = NULL
 			,@intToBookId = NULL
-			,@ysnApproval=NULL
+			,@ysnApproval = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
-			,@ysnApproval=ysnApproval
+			,@ysnApproval = ysnApproval
 		FROM @tblCTContractPreStage
 		WHERE intContractPreStageId = @intContractPreStageId
 

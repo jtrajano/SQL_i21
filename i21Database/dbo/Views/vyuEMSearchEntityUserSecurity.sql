@@ -13,6 +13,8 @@ SELECT
     e.strZipCode,
     ysnActive = ~c.ysnDisabled,
 	c.strUserName,
+	d.strAzureADUserName,
+	d.strADUserName,
 	h.intUserRoleID,
 	strDefaultUserRole = h.strName,
 	dtmLastLogin = u.dtmDate,
@@ -29,6 +31,8 @@ FROM
         on b.intEntityId = a.intEntityId and b.strType = 'User'
     join tblSMUserSecurity c
         on c.[intEntityId]= a.intEntityId
+	join tblEMEntityCredential d
+        on d.intEntityId= a.intEntityId
     left join [tblEMEntityLocation] e  
         on ( ysnDefaultLocation = 1 )AND a.intEntityId = e.intEntityId
     left join [tblEMEntityToContact] f  

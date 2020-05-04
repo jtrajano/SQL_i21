@@ -18,7 +18,7 @@ SELECT DISTINCT
 	FROM tblSCTicket SC
 	LEFT JOIN tblSCTicketSplit TS
 		ON TS.intTicketId = SC.intTicketId 
-			AND TS.intStorageScheduleTypeId = -3 
+			--AND TS.intStorageScheduleTypeId = -3 
 			AND TS.intCustomerId NOT IN (SELECT intEntityId FROM tblGRUnPricedSpotTicket  WHERE intTicketId = SC.intTicketId)
 	JOIN tblICItem Item	
 		ON Item.intItemId = SC.intItemId
@@ -32,7 +32,12 @@ SELECT DISTINCT
 		ON UOM.intItemUOMId = SC.intItemUOMIdTo
 	JOIN tblICUnitMeasure UnitMeasure
 		ON UnitMeasure.intUnitMeasureId = UOM.intUnitMeasureId
-	LEFT JOIN tblICInventoryReceiptItem IRI
+	LEFT JOIN (
+				select A.* from tblICInventoryReceiptItem A
+					join tblICInventoryReceipt B
+						on A.intInventoryReceiptId = B.intInventoryReceiptId
+						 and B.intSourceType = 1
+		) IRI
 		ON IRI.intSourceId = SC.intTicketId
 	LEFT JOIN tblICInventoryShipmentItem ISI
 		ON ISI.intSourceId = SC.intTicketId
@@ -47,6 +52,7 @@ SELECT DISTINCT
 WHERE ISNULL(SC.dblUnitPrice,0) = 0 
 	AND ISNULL(SC.dblUnitBasis,0) = 0
 	AND SC.intStorageScheduleTypeId IN(-3,-4)	-- Spot,Split
+	AND (TS.intTicketSplitId is null or (TS.intTicketSplitId is not null and TS.strDistributionOption = 'SPT'))
 	AND SC.strTicketStatus = 'C'
 	AND CASE WHEN (lower(Wght.strWhereFinalized) = 'destination' and lower(Grd.strWhereFinalized) = 'destination') THEN SC.ysnDestinationWeightGradePost ELSE 1 END = 1
 	AND (CASE WHEN TicketType.strInOutIndicator='I' 

@@ -38,6 +38,7 @@ BEGIN TRY
 	DECLARE @strAckCostXML NVARCHAR(MAX)
 	DECLARE @strAckDocumentXML NVARCHAR(MAX)
 		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML  NVARCHAR(MAX)
 	DECLARE @intCreatedById INT
 		,@config AS ApprovalConfigurationType
 	DECLARE @idoc INT
@@ -169,7 +170,14 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 		,@strSubBook NVARCHAR(100)
-		,@intSubBookId int
+		,@intSubBookId INT
+		,@strApprover NVARCHAR(100)
+		,@intCurrentUserEntityId INT
+
+	SELECT @intCompanyRefId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
 
 	SELECT @intContractStageId = MIN(intContractStageId)
@@ -227,6 +235,7 @@ BEGIN TRY
 			,@intToBookId = NULL
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
+			,@strSubmittedByXML=NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
@@ -251,6 +260,7 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
+			,@strSubmittedByXML=strSubmittedByXML
 		FROM tblCTContractStage
 		WHERE intContractStageId = @intContractStageId
 
@@ -547,7 +557,7 @@ BEGIN TRY
 					,@strTextCode = NULL
 					,@strCountry = NULL
 					,@ysnApproval = NULL
-					,@strSubBook=NULL
+					,@strSubBook = NULL
 
 				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
@@ -567,7 +577,7 @@ BEGIN TRY
 					,@strTextCode = strTextCode
 					,@strCountry = strCountry
 					,@ysnApproval = ysnApproval
-					,@strSubBook=strSubBook
+					,@strSubBook = strSubBook
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -631,7 +641,7 @@ BEGIN TRY
 						SELECT 1
 						FROM vyuCTEntity SP
 						WHERE SP.strEntityName = @strSalespersonId
-						and SP.strEntityType ='Salesperson'
+							AND SP.strEntityType = 'Salesperson'
 						)
 				BEGIN
 					IF @strErrorMessage <> ''
@@ -835,7 +845,7 @@ BEGIN TRY
 
 				SELECT @intSubBookId = NULL
 
-				SELECT @intSubBookId = intSubBookId 
+				SELECT @intSubBookId = intSubBookId
 				FROM tblCTSubBook
 				WHERE strSubBook = @strSubBook
 
@@ -909,7 +919,7 @@ BEGIN TRY
 				SELECT @intSalespersonId = intEntityId
 				FROM vyuCTEntity SP
 				WHERE SP.strEntityName = @strSalespersonId
-				and SP.strEntityType ='Salesperson'
+					AND SP.strEntityType = 'Salesperson'
 
 				SELECT @intCropYearId = intCropYearId
 				FROM tblCTCropYear YR
@@ -1088,6 +1098,7 @@ BEGIN TRY
 					,ysnReceivedSignedFixationLetter
 					,ysnReadOnlyInterCoContract
 					,intSubBookId
+					,intCompanyId
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1150,6 +1161,7 @@ BEGIN TRY
 					,IsNULL(ysnReceivedSignedFixationLetter, 0)
 					,1 AS ysnReadOnlyInterCoContract
 					,@intSubBookId
+					,@intCompanyRefId
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,dtmContractDate DATETIME
@@ -1225,6 +1237,10 @@ BEGIN TRY
 					EXEC uspCTInsertINTOTableFromXML 'tblCTContractHeader'
 						,@strTblXML
 						,@intNewContractHeaderId OUTPUT
+
+					UPDATE tblCTContractHeader
+					SET intCompanyId = @intCompanyRefId
+					WHERE intContractHeaderId = @intNewContractHeaderId
 				END
 
 				IF @strRowState = 'Modified'
@@ -1332,8 +1348,9 @@ BEGIN TRY
 						,CH.intInvoiceTypeId = CH1.intInvoiceTypeId
 						,CH.intArbitrationId = CH1.intArbitrationId
 						,CH.intCountryId = CH1.intCountryId
-						,CH.ysnReadOnlyInterCoContract=1
-						,CH.intSubBookId =@intSubBookId
+						,CH.ysnReadOnlyInterCoContract = 1
+						,CH.intSubBookId = @intSubBookId
+						,CH.intCompanyId = @intCompanyRefId
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
@@ -2397,6 +2414,7 @@ BEGIN TRY
 						,strFixationBy
 						,intConvPriceCurrencyId
 						,dblConvertedBasis
+						,intSubBookId
 						)
 					SELECT @intNewContractHeaderId
 						,@intItemBundleId
@@ -2488,6 +2506,7 @@ BEGIN TRY
 						,strFixationBy
 						,@intConvPriceCurrencyId
 						,dblConvertedBasis
+						,@intSubBookId
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
 							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 							,dtmContractDate DATETIME
@@ -3793,6 +3812,7 @@ BEGIN TRY
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
+				and ysnApproval=1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -3800,13 +3820,43 @@ BEGIN TRY
 					,strUserName
 					,strScreen
 					,intConcurrencyId
+					,ysnApproval
 					)
 				SELECT @intNewContractHeaderId
 					,strName
 					,strUserName
 					,strScreenName
 					,1 AS intConcurrencyId
+					,1
 				FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
+						strName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+						) x
+
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strSubmittedByXML
+
+				DELETE
+				FROM tblCTIntrCompApproval
+				WHERE intContractHeaderId = @intNewContractHeaderId
+				and ysnApproval=0
+
+				INSERT INTO tblCTIntrCompApproval (
+					intContractHeaderId
+					,strName
+					,strUserName
+					,strScreen
+					,intConcurrencyId
+					,ysnApproval
+					)
+				SELECT @intNewContractHeaderId
+					,strName
+					,strUserName
+					,strScreenName
+					,1 AS intConcurrencyId
+					,0
+				FROM OPENXML(@idoc, 'vyuIPContractSubmittedByViews/vyuIPContractSubmittedByView', 2) WITH (
 						strName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
@@ -3851,7 +3901,7 @@ BEGIN TRY
 
 				----------------------------CALL Stored procedure for APPROVAL -----------------------------------------------------------
 				SELECT @intCreatedById = intCreatedById
-					,@intCompanyRefId = intCompanyId
+				--,@intCompanyRefId = intCompanyId
 				FROM tblCTContractHeader
 				WHERE intContractHeaderId = @intNewContractHeaderId
 
@@ -3862,11 +3912,22 @@ BEGIN TRY
 				SELECT 'Contract Type'
 					,'Purchase'
 
+				SELECT @strApprover = strApprover
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyRefId
+
+				SELECT @intCurrentUserEntityId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strApprover
+
+				IF @intCurrentUserEntityId IS NULL
+					SELECT @intCurrentUserEntityId = @intCreatedById
+
 				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.Contract'
 					,@recordId = @intNewContractHeaderId
 					,@transactionNo = @strNewContractNumber
 					,@transactionEntityId = @intEntityId
-					,@currentUserEntityId = @intCreatedById
+					,@currentUserEntityId = @intCurrentUserEntityId
 					,@amount = 0
 					,@approverConfiguration = @config
 
@@ -3897,7 +3958,7 @@ BEGIN TRY
 					,intTransactionRefId
 					,intCompanyRefId
 					)
-				SELECT @NewContractHeaderId
+				SELECT @intNewContractHeaderId
 					,@strNewContractNumber
 					,GETDATE()
 					,'Success'

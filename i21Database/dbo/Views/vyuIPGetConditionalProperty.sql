@@ -12,6 +12,6 @@ SELECT CP.intConditionalPropertyId
 	,CP.intConditionalPropertyRefId
 	,P1.strPropertyName AS strSuccessPropertyName
 	,P2.strPropertyName AS strFailurePropertyName
-FROM tblQMConditionalProperty CP
-LEFT JOIN tblQMProperty P1 ON P1.intPropertyId = CP.intOnSuccessPropertyId
-LEFT JOIN tblQMProperty P2 ON P2.intPropertyId = CP.intOnFailurePropertyId
+FROM tblQMConditionalProperty CP WITH (NOLOCK)
+LEFT JOIN tblQMProperty P1 WITH (NOLOCK) ON P1.intPropertyId = CP.intOnSuccessPropertyId
+LEFT JOIN tblQMProperty P2 WITH (NOLOCK) ON P2.intPropertyId = CP.intOnFailurePropertyId

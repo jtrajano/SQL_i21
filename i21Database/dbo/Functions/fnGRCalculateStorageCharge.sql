@@ -90,6 +90,7 @@ BEGIN
 			WHERE intCustomerStorageId = @intCustomerStorageId 
 				AND strType = 'Settlement' 
 				AND intBillId IS NOT NULL
+				AND dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= dbo.fnRemoveTimeOnDate(@dtmCalculationDate)
 			ORDER BY 1 DESC
 			UNION			
 			SELECT TOP 1 dbo.fnRemoveTimeOnDate(dtmHistoryDate) dtmHistoryDate
@@ -97,6 +98,7 @@ BEGIN
 			WHERE intCustomerStorageId = @intCustomerStorageId 
 				AND (strType = 'Generated Storage Invoice' OR strPaidDescription = 'Generated Storage Invoice')
 				AND intInvoiceId IS NOT NULL
+				AND dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= dbo.fnRemoveTimeOnDate(@dtmCalculationDate)
 			ORDER BY 1 DESC
 			UNION
 			SELECT TOP 1 dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate)
@@ -109,6 +111,7 @@ BEGIN
 						FROM tblGRStorageHistory
 						WHERE strType = 'Reduced By Invoice' 
 							AND intCustomerStorageId = @intCustomerStorageId
+							AND dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= dbo.fnRemoveTimeOnDate(@dtmCalculationDate)
 						GROUP BY intCustomerStorageId, intInvoiceId
 				       ) Depleted ON Depleted.intCustomerStorageId = SH.intCustomerStorageId
 			
@@ -120,6 +123,7 @@ BEGIN
 						 FROM tblGRStorageHistory
 						 WHERE strType = 'Reverse By Invoice' 
 							AND intCustomerStorageId = @intCustomerStorageId
+							AND dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= dbo.fnRemoveTimeOnDate(@dtmCalculationDate)
 						 GROUP BY intCustomerStorageId, intInvoiceId
 					 ) ReverseInvoice ON ReverseInvoice.intCustomerStorageId = SH.intCustomerStorageId
 			WHERE ISNULL(Depleted.dblDepletedUnits, 0) <> ISNULL(ReverseInvoice.dblReversedUnits, 0)
@@ -127,6 +131,7 @@ BEGIN
 				AND SH.strType = 'Reduced By Invoice'
 				AND SH.intInvoiceId IS NOT NULL 
 				AND SH.intCustomerStorageId = @intCustomerStorageId
+				AND dbo.fnRemoveTimeOnDate(SH.dtmHistoryDate) <= dbo.fnRemoveTimeOnDate(@dtmCalculationDate)
 			ORDER BY 1 DESC
 		) t
 

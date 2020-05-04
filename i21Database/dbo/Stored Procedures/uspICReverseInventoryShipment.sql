@@ -15,6 +15,7 @@ SET ANSI_WARNINGS OFF
 DECLARE 
 	@strNewShipmentNumber AS NVARCHAR(50)
 	,@intCreatedEntityId AS INT 
+	,@strCreditMemo AS NVARCHAR(50)
 
 SET @intNewInventoryShipmentId = NULL 
 
@@ -74,6 +75,52 @@ BEGIN
 		EXEC uspICRaiseError 80246;
 		RETURN -80246
 	END 
+END 
+
+-- Check the reversal date. 
+BEGIN 
+	IF dbo.fnRemoveTimeOnDate(@dtmReversalDate) < dbo.fnRemoveTimeOnDate(GETDATE())
+	BEGIN 
+		-- 'Back-dated reversal is not allowed.'  
+		EXEC uspICRaiseError 80248;
+		RETURN -80248
+	END 
+END 
+
+-- Check if CM is already created for Scale-Ticket shipments. 
+BEGIN 
+	SET @strCreditMemo = NULL 
+	SELECT TOP 1 
+		@strCreditMemo = cm.strInvoiceNumber
+	FROM 
+		tblICInventoryShipment s INNER JOIN tblICInventoryShipmentItem si
+			ON s.intInventoryShipmentId = si.intInventoryShipmentId
+		INNER JOIN (
+			tblARInvoice inv INNER JOIN tblARInvoiceDetail invD
+				ON inv.intInvoiceId = invD.intInvoiceId
+		)
+			ON invD.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+		LEFT JOIN (
+			tblARInvoice cm INNER JOIN tblARInvoiceDetail cmD
+				ON cm.intInvoiceId = cmD.intInvoiceId		
+		)
+			ON cmD.intOriginalInvoiceDetailId = invD.intInvoiceDetailId
+			AND cm.strTransactionType IN ('Credit Memo')
+	WHERE
+		(s.strShipmentNumber = @strShipmentNumber OR @strShipmentNumber IS NULL)
+		AND	(s.intInventoryShipmentId = @intInventoryShipmentId OR @intInventoryShipmentId IS NULL)			
+		AND (@strShipmentNumber IS NOT NULL OR @intInventoryShipmentId IS NOT NULL) 
+		AND s.ysnPosted = 1
+		AND s.intSourceType = 1 -- Scale Ticket
+		AND cmD.intInvoiceDetailId IS NOT NULL 
+		AND cm.ysnReversal <> 1
+
+	IF @strCreditMemo IS NOT NULL 
+	BEGIN 
+		-- 'Shipment reversal is not allowed. It already has a credit memo. See %s.'
+		EXEC uspICRaiseError 80249, @strCreditMemo;
+		RETURN -80249
+	END
 END 
 
 -- Duplicate and reverse the shipment. 

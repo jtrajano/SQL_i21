@@ -113,6 +113,15 @@ BEGIN TRY
 				UPDATE tblICInventoryReceiptItem
 				SET ysnAllowVoucher = CASE WHEN ISNULL(ysnAllowVoucher,0) = 0 THEN CASE WHEN @dblCashPrice > 0 THEN 1 ELSE 0 END ELSE ysnAllowVoucher END
 				WHERE intInventoryReceiptId = @intInventoryReceiptId
+
+				UPDATE  A
+					SET ysnAllowVoucher = ISNULL(B.ysnAllowVoucher,0)
+				FROM tblICInventoryReceiptCharge A
+				INNER JOIN  tblICInventoryReceiptItem B
+					ON A.strChargesLink = B.strChargesLink
+				WHERE A.intInventoryReceiptId = @intInventoryReceiptId
+					AND B.intInventoryReceiptId = @intInventoryReceiptId
+					AND B.ysnAllowVoucher = 1
 				
 
 				BEGIN /* BUILD VOUCHER DETAIL AND PAYABLE */

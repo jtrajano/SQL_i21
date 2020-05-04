@@ -10,6 +10,6 @@ SELECT D.intDailyAveragePriceId
 	,D.intConcurrencyId
 	,B.strBook
 	,SB.strSubBook
-FROM tblRKDailyAveragePrice D
-LEFT JOIN tblCTBook B ON B.intBookId = D.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = D.intSubBookId
+FROM tblRKDailyAveragePrice D WITH (NOLOCK)
+LEFT JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = D.intBookId
+LEFT JOIN tblCTSubBook SB WITH (NOLOCK) ON SB.intSubBookId = D.intSubBookId

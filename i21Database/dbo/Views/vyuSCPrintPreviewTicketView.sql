@@ -219,6 +219,7 @@ AS SELECT
 	,tblSCTicketFormat.ysnSuppressCashPrice
 	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')
 	,EMScaleOps.strTimezone
+	,SC.strTrailerId
   FROM tblSCTicket SC
   LEFT JOIN tblEMEntity tblEMEntity on tblEMEntity.intEntityId = SC.intEntityId
   LEFT JOIN vyuEMSearchShipVia vyuEMSearchShipVia on vyuEMSearchShipVia.intEntityId = SC.intHaulerId

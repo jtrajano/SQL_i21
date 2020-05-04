@@ -85,7 +85,7 @@ FROM (
 		,CCV.intConcurrencyId
 		,CCV.intContractDetailId
 		,CCV.intItemId
-		,CH.intEntityId
+		,E.intEntityId
 		,CCV.strCostMethod
 		,CCV.intCurrencyId
 		,CCV.dblRate
@@ -131,6 +131,6 @@ FROM (
 	FROM vyuCTContractCostView CCV
 	JOIN tblICItem IM ON IM.intItemId = CCV.intItemId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CCV.intContractHeaderId
-	JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
+	JOIN tblEMEntity E ON E.intEntityId = CCV.intVendorId
 	WHERE CCV.ysnPrice = 1
 	) tbl

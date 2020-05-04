@@ -424,7 +424,7 @@ DECLARE @TRRCId NVARCHAR(50)
 				SET @TRquery = 'INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intProductCodeId, strProductCode, intItemId, dblQtyShipped, dblGross, dblNet,
 							  dblBillQty, dblTax, dblTaxExempt, strInvoiceNumber, strPONumber, strBillOfLading, dtmDate, strDestinationCity, strDestinationState, strOriginCity, strOriginState, strShipVia, strTransporterLicense,
 							  strTransportationMode, strTransporterName, strTransporterFederalTaxId, strConsignorName, strConsignorFederalTaxId, strTerminalControlNumber, strVendorName, strVendorFederalTaxId,strCustomerName,strCustomerFederalTaxId,
-							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd, strItemNo,intIntegrationError)
+							  strTaxPayerName, strTaxPayerAddress, strCity, strState, strZipCode, strTelephoneNumber, strTaxPayerIdentificationNumber, strTaxPayerFEIN, dtmReportingPeriodBegin, dtmReportingPeriodEnd,intIntegrationError)
 							  SELECT DISTINCT ''' + @Guid + ''', RC.intReportingComponentId,
 								VPC.intProductCodeId,
 								IPC.strProductCode,
@@ -465,7 +465,6 @@ DECLARE @TRRCId NVARCHAR(50)
 								SMCOMPSETUP.strEin,
 								''' + @DateFrom + ''',
 								''' + @DateTo + ''',
-								TR.strItemNumber,
 								(SELECT COUNT(*) FROM tblTFIntegrationError)
 							  FROM tblTFReportingComponentCriteria RIGHT OUTER JOIN
 							  vyuTFGetReportingComponentProductCode AS VPC INNER JOIN
@@ -490,5 +489,19 @@ DECLARE @TRRCId NVARCHAR(50)
 		SELECT TOP 1 @TRHasResult = intTransactionId FROM tblTFTransaction
 		IF(@TRHasResult IS NULL AND @IsEdi = 0)
 		BEGIN
-			INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intProductCodeId, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd)VALUES(@Guid, @TRRCId, NULL, GETDATE(), @DateFrom, @DateTo)
+			INSERT INTO tblTFTransaction(uniqTransactionGuid
+			, intReportingComponentId
+			, strProductCode
+			, dtmDate
+			, dtmReportingPeriodBegin
+			, dtmReportingPeriodEnd
+			, strTransactionType)
+			VALUES(@Guid
+			, @RCId
+			, 'No record found.'
+			, @DateFrom
+			, @DateFrom
+			, @DateTo
+			, 'Invoice')
+			--INSERT INTO tblTFTransaction (uniqTransactionGuid, intReportingComponentId, intProductCodeId, dtmDate,dtmReportingPeriodBegin,dtmReportingPeriodEnd, strProductCode)VALUES(@Guid, @TRRCId, NULL, GETDATE(), @DateFrom, @DateTo, 'No record found.')
 		END

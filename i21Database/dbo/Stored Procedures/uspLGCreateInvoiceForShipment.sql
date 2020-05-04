@@ -85,6 +85,7 @@ DECLARE
 	,@TransactionId				INT
 	,@OriginalInvoiceId			INT
 	,@intARAccountId			INT
+	,@isPosted					BIT
 
 	SELECT TOP 1 @intARAccountId = ISNULL(intARAccountId,0) FROM tblARCompanyPreference
 	IF @intARAccountId = 0
@@ -155,6 +156,7 @@ DECLARE
 		,@InboundShipmentId			= NULL
 		,@TransactionId				= NULL
 		,@OriginalInvoiceId			= NULL
+		,@isPosted					= ISNULL(L.ysnPosted, 0)
 	FROM [tblLGLoad] L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -164,213 +166,449 @@ DECLARE
 
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable		
 
-	INSERT INTO @EntriesForInvoice
-		([strTransactionType]
-		,[strType]
-		,[strSourceTransaction]
-		,[intSourceId]
-		,[strSourceId]
-		,[intInvoiceId]
-		,[intEntityCustomerId]
-		,[intCompanyLocationId]
-		,[intCurrencyId]
-		,[intTermId]
-		,[intPeriodsToAccrue]
-		,[dtmDate]
-		,[dtmDueDate]
-		,[dtmShipDate]
-		,[intEntitySalespersonId]
-		,[intFreightTermId]
-		,[intShipViaId]
-		,[intPaymentMethodId]
-		,[strInvoiceOriginId]
-		,[strPONumber]
-		,[strBOLNumber]
-		,[strComments]
-		,[intShipToLocationId]
-		,[intBillToLocationId]
-		,[ysnTemplate]
-		,[ysnForgiven]
-		,[ysnCalculated]
-		,[ysnSplitted]
-		,[intPaymentId]
-		,[intSplitId]
-		,[intLoadDistributionHeaderId]
-		,[strActualCostId]
-		,[intShipmentId]
-		,[intTransactionId]
-		,[intOriginalInvoiceId]
-		,[intEntityId]
-		,[ysnResetDetails]
-		,[ysnRecap]
-		,[ysnPost]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[ysnInventory]
-		,[strDocumentNumber]
-		,[strItemDescription]
-		,[intOrderUOMId]
-		,[dblQtyOrdered]
-		,[intItemUOMId]
-		,[dblQtyShipped]
-		,[dblDiscount]
-		,[dblItemWeight]
-		,[intItemWeightUOMId]
-		,[dblPrice]
-		,[intPriceUOMId]
-		,[dblUnitPrice]
-		,[strPricing]
-		,[ysnRefreshPrice]
-		,[strMaintenanceType]
-		,[strFrequency]
-		,[dtmMaintenanceDate]
-		,[dblMaintenanceAmount]
-		,[dblLicenseAmount]
-		,[intTaxGroupId]
-		,[intStorageLocationId]
-		,[ysnRecomputeTax]
-		,[intSCInvoiceId]
-		,[strSCInvoiceNumber]
-		,[intSCBudgetId]
-		,[strSCBudgetDescription]
-		,[intInventoryShipmentItemId]
-		,[intLoadDetailId]
-		,[intLoadId]
-		,[intLotId]
-		,[strShipmentNumber]
-		,[intRecipeItemId] 
-		,[intSalesOrderDetailId]
-		,[strSalesOrderNumber]
-		,[intContractHeaderId]
-		,[intContractDetailId]
-		,[intShipmentPurchaseSalesContractId]
-		,[dblShipmentGrossWt]
-		,[dblShipmentTareWt]
-		,[dblShipmentNetWt]
-		,[intTicketId]
-		,[intTicketHoursWorkedId]
-		,[intOriginalInvoiceDetailId]
-		,[intSiteId]
-		,[strBillingBy]
-		,[dblPercentFull]
-		,[dblNewMeterReading]
-		,[dblPreviousMeterReading]
-		,[dblConversionFactor]
-		,[intPerformerId]
-		,[ysnLeaseBilling]
-		,[ysnVirtualMeterReading]
-		,[ysnClearDetailTaxes]
-		,[intTempDetailIdForTaxes]
-		,[intCurrencyExchangeRateTypeId]
-		,[intCurrencyExchangeRateId]
-		,[dblCurrencyExchangeRate]
-		,[intSubCurrencyId]
-		,[dblSubCurrencyRate])
-	SELECT
-		[strTransactionType]					= @TransactionType
-		,[strType]								= @Type
-		,[strSourceTransaction]					= 'Load Schedule'
-		,[intSourceId]							= @intLoadId
-		,[strSourceId]							= ARSI.strLoadNumber
-		,[intInvoiceId]							= NULL
-		,[intEntityCustomerId]					= ARSI.intEntityCustomerId 
-		,[intCompanyLocationId]					= @CompanyLocationId 
-		,[intCurrencyId]						= ARSI.intCurrencyId 
-		,[intTermId]							= @TermId 
-		,[intPeriodsToAccrue]					= @PeriodsToAccrue 
-		,[dtmDate]								= @Date 
-		,[dtmDueDate]							= @DueDate 
-		,[dtmShipDate]							= @ShipDate 
-		,[intEntitySalespersonId]				= @EntitySalespersonId 
-		,[intFreightTermId]						= @FreightTermId 
-		,[intShipViaId]							= @ShipViaId 
-		,[intPaymentMethodId]					= @PaymentMethodId 
-		,[strInvoiceOriginId]					= @InvoiceOriginId 
-		,[strPONumber]							= @PONumber 
-		,[strBOLNumber]							= @BOLNumber 
-		,[strComments]							= @Comments 
-		,[intShipToLocationId]					= @ShipToLocationId 
-		,[intBillToLocationId]					= @BillToLocationId
-		,[ysnTemplate]							= @Template
-		,[ysnForgiven]							= @Forgiven
-		,[ysnCalculated]						= @Calculated
-		,[ysnSplitted]							= @Splitted
-		,[intPaymentId]							= @PaymentId
-		,[intSplitId]							= @SplitId
-		,[intDistributionHeaderId]				= @DistributionHeaderId
-		,[strActualCostId]						= @ActualCostId
-		,[intShipmentId]						= NULL
-		,[intTransactionId]						= @TransactionId
-		,[intOriginalInvoiceId]					= @OriginalInvoiceId
-		,[intEntityId]							= @intUserId
-		,[ysnResetDetails]						= 0
-		,[ysnRecap]								= 0
-		,[ysnPost]								= 0
-		,[intInvoiceDetailId]					= NULL
-		,[intItemId]							= ARSI.[intItemId]
-		,[ysnInventory]							= 1
-		,[strDocumentNumber]					= @ShipmentNumber 
-		,[strItemDescription]					= CASE WHEN ISNULL(ARSI.[strItemDescription],'') = '' THEN ARSI.strItemNo ELSE ARSI.strItemDescription END
-		,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-		,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
-		,[intItemUOMId]							= ARSI.[intItemUOMId] 
-		,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
-		,[dblDiscount]							= ARSI.[dblDiscount] 
-		,[dblItemWeight]						= ARSI.[dblWeight]  
-		,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
-		,[dblPrice]								= ARSI.[dblPrice] 
-		,[intPriceUOMId]						= ARSI.[intPriceUOMId]
-		,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
-		,[strPricing]							= 'Inventory Shipment Item Price'
-		,[ysnRefreshPrice]						= 0
-		,[strMaintenanceType]					= NULL
-		,[strFrequency]							= NULL
-		,[dtmMaintenanceDate]					= NULL
-		,[dblMaintenanceAmount]					= @ZeroDecimal 
-		,[dblLicenseAmount]						= @ZeroDecimal
-		,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
-		,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
-		,[ysnRecomputeTax]						= 1
-		,[intSCInvoiceId]						= NULL
-		,[strSCInvoiceNumber]					= NULL
-		,[intSCBudgetId]						= NULL
-		,[strSCBudgetDescription]				= NULL
-		,[intInventoryShipmentItemId]			= NULL
-		,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
-		,[intLoadId]							= @intLoadId
-		,[intLotId]								= ARSI.[intLotId] 
-		,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
-		,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
-		,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
-		,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
-		,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
-		,[intContractDetailId]					= ARSI.[intContractDetailId] 
-		,[intShipmentPurchaseSalesContractId]	= NULL
-		,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
-		,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
-		,[dblShipmentNetWt]						= ARSI.[dblNetWt] 
-		,[intTicketId]							= ARSI.[intTicketId] 
-		,[intTicketHoursWorkedId]				= NULL
-		,[intOriginalInvoiceDetailId]			= NULL
-		,[intSiteId]							= NULL
-		,[strBillingBy]							= NULL
-		,[dblPercentFull]						= NULL
-		,[dblNewMeterReading]					= @ZeroDecimal
-		,[dblPreviousMeterReading]				= @ZeroDecimal
-		,[dblConversionFactor]					= @ZeroDecimal
-		,[intPerformerId]						= NULL
-		,[ysnLeaseBilling]						= 0
-		,[ysnVirtualMeterReading]				= 0
-		,[ysnClearDetailTaxes]					= 0
-		,[intTempDetailIdForTaxes]				= NULL
-		,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId] 
-		,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId] 
-		,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
-		,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
-		,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
-	FROM vyuARShippedItems ARSI
-	WHERE ARSI.[strTransactionType] = 'Load Schedule' 
-	  AND ARSI.[intLoadId] = @intLoadId
+	IF (@intType = 3 AND @isPosted = 0)
+		
+		/* Proforma Invoice for Unposted LS */
+		INSERT INTO @EntriesForInvoice
+			([strTransactionType]
+			,[strType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intInvoiceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[intPeriodsToAccrue]
+			,[dtmDate]
+			,[dtmDueDate]
+			,[dtmShipDate]
+			,[intEntitySalespersonId]
+			,[intFreightTermId]
+			,[intShipViaId]
+			,[intPaymentMethodId]
+			,[strInvoiceOriginId]
+			,[strPONumber]
+			,[strBOLNumber]
+			,[strComments]
+			,[intShipToLocationId]
+			,[intBillToLocationId]
+			,[ysnTemplate]
+			,[ysnForgiven]
+			,[ysnCalculated]
+			,[ysnSplitted]
+			,[intPaymentId]
+			,[intSplitId]
+			,[intLoadDistributionHeaderId]
+			,[strActualCostId]
+			,[intShipmentId]
+			,[intTransactionId]
+			,[intOriginalInvoiceId]
+			,[intEntityId]
+			,[ysnResetDetails]
+			,[ysnRecap]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[ysnInventory]
+			,[strDocumentNumber]
+			,[strItemDescription]
+			,[intOrderUOMId]
+			,[dblQtyOrdered]
+			,[intItemUOMId]
+			,[dblQtyShipped]
+			,[dblDiscount]
+			,[dblItemWeight]
+			,[intItemWeightUOMId]
+			,[dblPrice]
+			,[intPriceUOMId]
+			,[dblUnitPrice]
+			,[strPricing]
+			,[ysnRefreshPrice]
+			,[strMaintenanceType]
+			,[strFrequency]
+			,[dtmMaintenanceDate]
+			,[dblMaintenanceAmount]
+			,[dblLicenseAmount]
+			,[intTaxGroupId]
+			,[intStorageLocationId]
+			,[ysnRecomputeTax]
+			,[intSCInvoiceId]
+			,[strSCInvoiceNumber]
+			,[intSCBudgetId]
+			,[strSCBudgetDescription]
+			,[intInventoryShipmentItemId]
+			,[intLoadDetailId]
+			,[intLoadId]
+			,[intLotId]
+			,[strShipmentNumber]
+			,[intRecipeItemId] 
+			,[intSalesOrderDetailId]
+			,[strSalesOrderNumber]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intShipmentPurchaseSalesContractId]
+			,[dblShipmentGrossWt]
+			,[dblShipmentTareWt]
+			,[dblShipmentNetWt]
+			,[intTicketId]
+			,[intTicketHoursWorkedId]
+			,[intOriginalInvoiceDetailId]
+			,[intSiteId]
+			,[strBillingBy]
+			,[dblPercentFull]
+			,[dblNewMeterReading]
+			,[dblPreviousMeterReading]
+			,[dblConversionFactor]
+			,[intPerformerId]
+			,[ysnLeaseBilling]
+			,[ysnVirtualMeterReading]
+			,[ysnClearDetailTaxes]
+			,[intTempDetailIdForTaxes]
+			,[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateId]
+			,[dblCurrencyExchangeRate]
+			,[intSubCurrencyId]
+			,[dblSubCurrencyRate])
+		SELECT
+			[strTransactionType]					= @TransactionType
+			,[strType]								= @Type
+			,[strSourceTransaction]					= 'Load Schedule'
+			,[intSourceId]							= @intLoadId
+			,[strSourceId]							= L.strLoadNumber
+			,[intInvoiceId]							= NULL
+			,[intEntityCustomerId]					= LD.intCustomerEntityId 
+			,[intCompanyLocationId]					= @CompanyLocationId 
+			,[intCurrencyId]						= CASE WHEN L.intSourceType = 7 
+															THEN LD.intPriceCurrencyId 
+														 ELSE 
+															CASE WHEN (CD.ysnUseFXPrice = 1 AND CD.intCurrencyExchangeRateId IS NOT NULL AND 
+																		CD.dblRate IS NOT NULL AND CD.intFXPriceUOMId IS NOT NULL) 
+																THEN CD.intInvoiceCurrencyId 
+															ELSE 
+																CASE WHEN AD.ysnSeqSubCurrency = 1 THEN 
+																		(SELECT ISNULL(intMainCurrencyId,0) FROM dbo.tblSMCurrency WHERE intCurrencyID = intSeqCurrencyId)
+																	ELSE 
+																		AD.intSeqCurrencyId 
+																	END
+																END
+														 END 
+			,[intTermId]							= @TermId 
+			,[intPeriodsToAccrue]					= @PeriodsToAccrue 
+			,[dtmDate]								= @Date 
+			,[dtmDueDate]							= @DueDate 
+			,[dtmShipDate]							= @ShipDate 
+			,[intEntitySalespersonId]				= @EntitySalespersonId 
+			,[intFreightTermId]						= @FreightTermId 
+			,[intShipViaId]							= @ShipViaId 
+			,[intPaymentMethodId]					= @PaymentMethodId 
+			,[strInvoiceOriginId]					= @InvoiceOriginId 
+			,[strPONumber]							= @PONumber 
+			,[strBOLNumber]							= @BOLNumber 
+			,[strComments]							= @Comments 
+			,[intShipToLocationId]					= @ShipToLocationId 
+			,[intBillToLocationId]					= @BillToLocationId
+			,[ysnTemplate]							= @Template
+			,[ysnForgiven]							= @Forgiven
+			,[ysnCalculated]						= @Calculated
+			,[ysnSplitted]							= @Splitted
+			,[intPaymentId]							= @PaymentId
+			,[intSplitId]							= @SplitId
+			,[intDistributionHeaderId]				= @DistributionHeaderId
+			,[strActualCostId]						= @ActualCostId
+			,[intShipmentId]						= NULL
+			,[intTransactionId]						= @TransactionId
+			,[intOriginalInvoiceId]					= @OriginalInvoiceId
+			,[intEntityId]							= @intUserId
+			,[ysnResetDetails]						= 0
+			,[ysnRecap]								= 0
+			,[ysnPost]								= 0
+			,[intInvoiceDetailId]					= NULL
+			,[intItemId]							= LD.[intItemId]
+			,[ysnInventory]							= 1
+			,[strDocumentNumber]					= @ShipmentNumber 
+			,[strItemDescription]					= CASE WHEN ISNULL(I.[strDescription],'') = '' THEN I.strItemNo ELSE I.strDescription END
+			,[intOrderUOMId]						= CD.intItemUOMId 
+			,[dblQtyOrdered]						= ISNULL(LD.dblQuantity, 0)
+			,[intItemUOMId]							= LD.intWeightItemUOMId
+			,[dblQtyShipped]						= ISNULL(LD.dblQuantity, 0)
+			,[dblDiscount]							= CAST(0.0000000 AS NUMERIC(18, 6))
+			,[dblItemWeight]						= dbo.fnCalculateQtyBetweenUOM(ISNULL(CD.intItemUOMId, LD.intItemUOMId), LD.intWeightItemUOMId, 1.000000)
+			,[intItemWeightUOMId]					= LD.intWeightItemUOMId
+			,[dblPrice]								= CASE WHEN L.intSourceType = 7 THEN LD.dblUnitPrice ELSE dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) END
+			,[intPriceUOMId]						= ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId)
+			,[dblUnitPrice]							= CASE WHEN L.intSourceType = 7 
+															THEN (LD.dblUnitPrice) * dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(LD.intPriceUOMId, LD.intItemUOMId), 1)
+														 ELSE ((dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)) 
+															* dbo.fnCalculateQtyBetweenUOM(LD.intWeightItemUOMId, ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId), 1)) 
+														END
+			,[strPricing]							= 'Inventory Shipment Item Price'
+			,[ysnRefreshPrice]						= 0
+			,[strMaintenanceType]					= NULL
+			,[strFrequency]							= NULL
+			,[dtmMaintenanceDate]					= NULL
+			,[dblMaintenanceAmount]					= @ZeroDecimal 
+			,[dblLicenseAmount]						= @ZeroDecimal
+			,[intTaxGroupId]						= NULL
+			,[intStorageLocationId]					= NULL 
+			,[ysnRecomputeTax]						= 1
+			,[intSCInvoiceId]						= NULL
+			,[strSCInvoiceNumber]					= NULL
+			,[intSCBudgetId]						= NULL
+			,[strSCBudgetDescription]				= NULL
+			,[intInventoryShipmentItemId]			= NULL
+			,[intLoadDetailId]						= LD.[intLoadDetailId] 
+			,[intLoadId]							= @intLoadId
+			,[intLotId]								= NULL 
+			,[strShipmentNumber]					= CAST('' AS NVARCHAR(50))
+			,[intRecipeItemId]						= NULL 
+			,[intSalesOrderDetailId]				= NULL
+			,[strSalesOrderNumber]					= NULL
+			,[intContractHeaderId]					= CD.[intContractHeaderId] 
+			,[intContractDetailId]					= CD.[intContractDetailId] 
+			,[intShipmentPurchaseSalesContractId]	= NULL
+			,[dblShipmentGrossWt]					= LD.dblGross
+			,[dblShipmentTareWt]					= LD.dblTare
+			,[dblShipmentNetWt]						= LD.dblNet
+			,[intTicketId]							= NULL
+			,[intTicketHoursWorkedId]				= NULL
+			,[intOriginalInvoiceDetailId]			= NULL
+			,[intSiteId]							= NULL
+			,[strBillingBy]							= NULL
+			,[dblPercentFull]						= NULL
+			,[dblNewMeterReading]					= @ZeroDecimal
+			,[dblPreviousMeterReading]				= @ZeroDecimal
+			,[dblConversionFactor]					= @ZeroDecimal
+			,[intPerformerId]						= NULL
+			,[ysnLeaseBilling]						= 0
+			,[ysnVirtualMeterReading]				= 0
+			,[ysnClearDetailTaxes]					= 0
+			,[intTempDetailIdForTaxes]				= NULL
+			,[intCurrencyExchangeRateTypeId]		= CD.intRateTypeId
+			,[intCurrencyExchangeRateId]			= CD.intCurrencyExchangeRateId
+			,[dblCurrencyExchangeRate]				= CD.dblRate
+			,[intSubCurrencyId]						= AD.intSeqCurrencyId 
+			,[dblSubCurrencyRate]					= CASE WHEN AD.ysnSeqSubCurrency = 1
+															THEN CU.intCent
+														ELSE 1.000000
+														END
+		FROM tblLGLoad L
+			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+			LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
+			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = AD.intSeqCurrencyId
+		WHERE L.intLoadId = @intLoadId
+
+	ELSE
+		INSERT INTO @EntriesForInvoice
+			([strTransactionType]
+			,[strType]
+			,[strSourceTransaction]
+			,[intSourceId]
+			,[strSourceId]
+			,[intInvoiceId]
+			,[intEntityCustomerId]
+			,[intCompanyLocationId]
+			,[intCurrencyId]
+			,[intTermId]
+			,[intPeriodsToAccrue]
+			,[dtmDate]
+			,[dtmDueDate]
+			,[dtmShipDate]
+			,[intEntitySalespersonId]
+			,[intFreightTermId]
+			,[intShipViaId]
+			,[intPaymentMethodId]
+			,[strInvoiceOriginId]
+			,[strPONumber]
+			,[strBOLNumber]
+			,[strComments]
+			,[intShipToLocationId]
+			,[intBillToLocationId]
+			,[ysnTemplate]
+			,[ysnForgiven]
+			,[ysnCalculated]
+			,[ysnSplitted]
+			,[intPaymentId]
+			,[intSplitId]
+			,[intLoadDistributionHeaderId]
+			,[strActualCostId]
+			,[intShipmentId]
+			,[intTransactionId]
+			,[intOriginalInvoiceId]
+			,[intEntityId]
+			,[ysnResetDetails]
+			,[ysnRecap]
+			,[ysnPost]
+			,[intInvoiceDetailId]
+			,[intItemId]
+			,[ysnInventory]
+			,[strDocumentNumber]
+			,[strItemDescription]
+			,[intOrderUOMId]
+			,[dblQtyOrdered]
+			,[intItemUOMId]
+			,[dblQtyShipped]
+			,[dblDiscount]
+			,[dblItemWeight]
+			,[intItemWeightUOMId]
+			,[dblPrice]
+			,[intPriceUOMId]
+			,[dblUnitPrice]
+			,[strPricing]
+			,[ysnRefreshPrice]
+			,[strMaintenanceType]
+			,[strFrequency]
+			,[dtmMaintenanceDate]
+			,[dblMaintenanceAmount]
+			,[dblLicenseAmount]
+			,[intTaxGroupId]
+			,[intStorageLocationId]
+			,[ysnRecomputeTax]
+			,[intSCInvoiceId]
+			,[strSCInvoiceNumber]
+			,[intSCBudgetId]
+			,[strSCBudgetDescription]
+			,[intInventoryShipmentItemId]
+			,[intLoadDetailId]
+			,[intLoadId]
+			,[intLotId]
+			,[strShipmentNumber]
+			,[intRecipeItemId] 
+			,[intSalesOrderDetailId]
+			,[strSalesOrderNumber]
+			,[intContractHeaderId]
+			,[intContractDetailId]
+			,[intShipmentPurchaseSalesContractId]
+			,[dblShipmentGrossWt]
+			,[dblShipmentTareWt]
+			,[dblShipmentNetWt]
+			,[intTicketId]
+			,[intTicketHoursWorkedId]
+			,[intOriginalInvoiceDetailId]
+			,[intSiteId]
+			,[strBillingBy]
+			,[dblPercentFull]
+			,[dblNewMeterReading]
+			,[dblPreviousMeterReading]
+			,[dblConversionFactor]
+			,[intPerformerId]
+			,[ysnLeaseBilling]
+			,[ysnVirtualMeterReading]
+			,[ysnClearDetailTaxes]
+			,[intTempDetailIdForTaxes]
+			,[intCurrencyExchangeRateTypeId]
+			,[intCurrencyExchangeRateId]
+			,[dblCurrencyExchangeRate]
+			,[intSubCurrencyId]
+			,[dblSubCurrencyRate])
+		SELECT
+			[strTransactionType]					= @TransactionType
+			,[strType]								= @Type
+			,[strSourceTransaction]					= 'Load Schedule'
+			,[intSourceId]							= @intLoadId
+			,[strSourceId]							= ARSI.strLoadNumber
+			,[intInvoiceId]							= NULL
+			,[intEntityCustomerId]					= ARSI.intEntityCustomerId 
+			,[intCompanyLocationId]					= @CompanyLocationId 
+			,[intCurrencyId]						= ARSI.intCurrencyId 
+			,[intTermId]							= @TermId 
+			,[intPeriodsToAccrue]					= @PeriodsToAccrue 
+			,[dtmDate]								= @Date 
+			,[dtmDueDate]							= @DueDate 
+			,[dtmShipDate]							= @ShipDate 
+			,[intEntitySalespersonId]				= @EntitySalespersonId 
+			,[intFreightTermId]						= @FreightTermId 
+			,[intShipViaId]							= @ShipViaId 
+			,[intPaymentMethodId]					= @PaymentMethodId 
+			,[strInvoiceOriginId]					= @InvoiceOriginId 
+			,[strPONumber]							= @PONumber 
+			,[strBOLNumber]							= @BOLNumber 
+			,[strComments]							= @Comments 
+			,[intShipToLocationId]					= @ShipToLocationId 
+			,[intBillToLocationId]					= @BillToLocationId
+			,[ysnTemplate]							= @Template
+			,[ysnForgiven]							= @Forgiven
+			,[ysnCalculated]						= @Calculated
+			,[ysnSplitted]							= @Splitted
+			,[intPaymentId]							= @PaymentId
+			,[intSplitId]							= @SplitId
+			,[intDistributionHeaderId]				= @DistributionHeaderId
+			,[strActualCostId]						= @ActualCostId
+			,[intShipmentId]						= NULL
+			,[intTransactionId]						= @TransactionId
+			,[intOriginalInvoiceId]					= @OriginalInvoiceId
+			,[intEntityId]							= @intUserId
+			,[ysnResetDetails]						= 0
+			,[ysnRecap]								= 0
+			,[ysnPost]								= 0
+			,[intInvoiceDetailId]					= NULL
+			,[intItemId]							= ARSI.[intItemId]
+			,[ysnInventory]							= 1
+			,[strDocumentNumber]					= @ShipmentNumber 
+			,[strItemDescription]					= CASE WHEN ISNULL(ARSI.[strItemDescription],'') = '' THEN ARSI.strItemNo ELSE ARSI.strItemDescription END
+			,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
+			,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
+			,[intItemUOMId]							= ARSI.[intItemUOMId] 
+			,[dblQtyShipped]						= ARSI.[dblShipmentQuantity] 
+			,[dblDiscount]							= ARSI.[dblDiscount] 
+			,[dblItemWeight]						= ARSI.[dblWeight]  
+			,[intItemWeightUOMId]					= ARSI.[intWeightUOMId] 
+			,[dblPrice]								= ARSI.[dblPrice] 
+			,[intPriceUOMId]						= ARSI.[intPriceUOMId]
+			,[dblUnitPrice]							= ARSI.[dblShipmentUnitPrice]
+			,[strPricing]							= 'Inventory Shipment Item Price'
+			,[ysnRefreshPrice]						= 0
+			,[strMaintenanceType]					= NULL
+			,[strFrequency]							= NULL
+			,[dtmMaintenanceDate]					= NULL
+			,[dblMaintenanceAmount]					= @ZeroDecimal 
+			,[dblLicenseAmount]						= @ZeroDecimal
+			,[intTaxGroupId]						= ARSI.[intTaxGroupId] 
+			,[intStorageLocationId]					= ARSI.[intStorageLocationId] 
+			,[ysnRecomputeTax]						= 1
+			,[intSCInvoiceId]						= NULL
+			,[strSCInvoiceNumber]					= NULL
+			,[intSCBudgetId]						= NULL
+			,[strSCBudgetDescription]				= NULL
+			,[intInventoryShipmentItemId]			= NULL
+			,[intLoadDetailId]						= ARSI.[intLoadDetailId] 
+			,[intLoadId]							= @intLoadId
+			,[intLotId]								= ARSI.[intLotId] 
+			,[strShipmentNumber]					= ARSI.strInventoryShipmentNumber 
+			,[intRecipeItemId]						= ARSI.[intRecipeItemId] 
+			,[intSalesOrderDetailId]				= ARSI.[intSalesOrderDetailId] 
+			,[strSalesOrderNumber]					= ARSI.[strSalesOrderNumber] 
+			,[intContractHeaderId]					= ARSI.[intContractHeaderId] 
+			,[intContractDetailId]					= ARSI.[intContractDetailId] 
+			,[intShipmentPurchaseSalesContractId]	= NULL
+			,[dblShipmentGrossWt]					= ARSI.[dblGrossWt] 
+			,[dblShipmentTareWt]					= ARSI.[dblTareWt] 
+			,[dblShipmentNetWt]						= ARSI.[dblNetWt] 
+			,[intTicketId]							= ARSI.[intTicketId] 
+			,[intTicketHoursWorkedId]				= NULL
+			,[intOriginalInvoiceDetailId]			= NULL
+			,[intSiteId]							= NULL
+			,[strBillingBy]							= NULL
+			,[dblPercentFull]						= NULL
+			,[dblNewMeterReading]					= @ZeroDecimal
+			,[dblPreviousMeterReading]				= @ZeroDecimal
+			,[dblConversionFactor]					= @ZeroDecimal
+			,[intPerformerId]						= NULL
+			,[ysnLeaseBilling]						= 0
+			,[ysnVirtualMeterReading]				= 0
+			,[ysnClearDetailTaxes]					= 0
+			,[intTempDetailIdForTaxes]				= NULL
+			,[intCurrencyExchangeRateTypeId]		= ARSI.[intCurrencyExchangeRateTypeId] 
+			,[intCurrencyExchangeRateId]			= ARSI.[intCurrencyExchangeRateId] 
+			,[dblCurrencyExchangeRate]				= ARSI.[dblCurrencyExchangeRate] 
+			,[intSubCurrencyId]						= ARSI.intSubCurrencyId 
+			,[dblSubCurrencyRate]					= ARSI.dblSubCurrencyRate 
+		FROM vyuARShippedItems ARSI
+		WHERE ARSI.[strTransactionType] = 'Load Schedule' 
+		  AND ARSI.[intLoadId] = @intLoadId
 
 	
 	IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice ARI

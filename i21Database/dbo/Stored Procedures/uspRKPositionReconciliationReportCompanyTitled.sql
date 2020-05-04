@@ -24,19 +24,22 @@ BEGIN
 
 
 	DECLARE @CompanyTitle AS TABLE (
-		dtmDate  DATE  NULL
-		,dblUnpaidIncrease  NUMERIC(18,6)
-		,dblUnpaidDecrease  NUMERIC(18,6)
-		,dblUnpaidBalance  NUMERIC(18,6)
-		,dblPaidBalance  NUMERIC(18,6)
-		,strTransactionId NVARCHAR(50)
-		,intTransactionId INT
-		,strTransactionType NVARCHAR(50)
-		,strDistribution NVARCHAR(10)
-		,dblCompanyTitled NUMERIC(18,6)
-		,intCommodityId INT
-		,strCommodityCode NVARCHAR(100)
-		,ysnInTransit BIT DEFAULT (0)
+		 dtmCreateDate DATETIME
+		, dtmTransactionDate DATETIME
+		, dblTotal NUMERIC(18,6)
+		, intEntityId INT
+		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intLocationId INT
+		, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intItemId INT
+		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intCommodityId INT
+		, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, intTransactionRecordId INT
+		, intOrigUOMId INT
+		, ysnInTransit BIT DEFAULT (0)
 	)
 	
 	
@@ -62,58 +65,69 @@ BEGIN
 		FROM #tempCommodity
 		
 		INSERT INTO @CompanyTitle(
-			dtmDate
-			,dblUnpaidIncrease 
-			,dblUnpaidDecrease 
-			,dblUnpaidBalance  
-			,dblPaidBalance  
-			,strTransactionId
-			,intTransactionId 
-			,strTransactionType
-			,strDistribution
-			,dblCompanyTitled
-			,intCommodityId
+			 dtmCreateDate
+			, dtmTransactionDate
+			, dblTotal
+			, intEntityId
+			, strEntityName
+			, intLocationId
+			, strLocationName
+			, intItemId 
+			, strItemNo 
+			, intCommodityId 
+			, strCommodityCode
+			, strTransactionNumber 
+			, strTransactionType 
+			, intTransactionRecordId
+			, intOrigUOMId 
 		)
-		EXEC uspRKGetCompanyTitled @dtmFromTransactionDate = @dtmFromTransactionDate
-			, @dtmToTransactionDate = @dtmToTransactionDate
-			, @intCommodityId = @intCommodityId
-			, @intItemId = null
-			, @strPositionIncludes = null
-			, @intLocationId = null
+		SELECT
+			 dtmCreateDate
+			, dtmTransactionDate
+			, dblTotal
+			, intEntityId
+			, strEntityName
+			, intLocationId
+			, strLocationName
+			, intItemId 
+			, strItemNo 
+			, intCommodityId 
+			, strCommodityCode
+			, strTransactionNumber 
+			, strTransactionType 
+			, intTransactionRecordId
+			, intOrigUOMId 
+		FROM dbo.fnRKGetBucketCompanyOwned (@dtmToTransactionDate,@intCommodityId,NULL)
 
-		
+
 		INSERT INTO @CompanyTitle(
-			dtmDate
-			,dblUnpaidIncrease 
-			,dblUnpaidDecrease 
-			,dblUnpaidBalance  
-			,dblPaidBalance  
-			,strTransactionId
-			,intTransactionId 
-			,strDistribution
-			,dblCompanyTitled
+			dtmCreateDate
+			,dtmTransactionDate
+			,dblTotal
+			,strTransactionNumber 
+			,strTransactionType 
+			,intTransactionRecordId
 			,intCommodityId
 			,ysnInTransit
 		)
 		SELECT 
-			dtmDate
-			,0
-			,dblInTransitQty
-			,0
-			,0
-			,strTransactionId
-			,intTransactionId
-			,''
-			,dblInTransitQty
+			dtmCreateDate
+			,dtmTransactionDate
+			,dblTotal
+			,strTransactionNumber
+			,'Sales In-Transit'
+			,intTransactionRecordId
 			,@intCommodityId
 			,1
-		FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToTransactionDate) InTran
-		WHERE @ysnIncludeInTransitInCompanyTitled = 1
+		FROM dbo.fnRKGetBucketInTransit(@dtmToTransactionDate,@intCommodityId,NULL) InTran
+		WHERE strBucketType = 'Sales In-Transit'
+			AND @ysnIncludeInTransitInCompanyTitled = 1
 
-		SELECT 
-			@dblInTransitBegBalance = @dblInTransitBegBalance + SUM(dblInTransitQty)
-		FROM dbo.fnICOutstandingInTransitAsOf(NULL, 1, DATEADD(day, -1, convert(date, @dtmFromTransactionDate))) InTran
-		WHERE @ysnIncludeInTransitInCompanyTitled = 1
+			
+		--SELECT 
+		--	@dblInTransitBegBalance = @dblInTransitBegBalance + SUM(dblInTransitQty)
+		--FROM dbo.fnICOutstandingInTransitAsOf(NULL, 1, DATEADD(day, -1, convert(date, @dtmFromTransactionDate))) InTran
+		--WHERE @ysnIncludeInTransitInCompanyTitled = 1
 
 	
 		UPDATE @CompanyTitle SET strCommodityCode = @strCommodityCode WHERE intCommodityId = @intCommodityId
@@ -121,25 +135,22 @@ BEGIN
 		DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
 	END 
 
-
-	
 		
-
 	SELECT 
-		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmDate ASC))
-		,dtmTransactionDate = dtmDate
-		,dblIn = ISNULL(CASE WHEN strDistribution IN('ADJ','IC','CM','DP', 'IT','IS', 'CLT', 'PRDC', 'CNSM','LG') AND  dblPaidBalance > 0 THEN dblPaidBalance ELSE dblUnpaidIncrease END,0)
-		,dblOut = ISNULL(CASE WHEN strTransactionId LIKE 'BL-%' THEN 0 WHEN dblPaidBalance < 0 THEN ABS(dblPaidBalance) ELSE dblUnpaidDecrease END,0)
-		,strTransactionId
-		,intTransactionId
+		intRowNum = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY dtmCreateDate ASC))
+		,dtmTransactionDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110)
+		,dblIn = CASE WHEN dblTotal > 0 THEN dblTotal ELSE 0 END
+		,dblOut = CASE WHEN dblTotal < 0 THEN ABS(dblTotal) ELSE 0 END
+		,strTransactionId = strTransactionNumber
+		,intTransactionId = intTransactionRecordId
 		,strTransactionType
 		,strCommodityCode
 		,ysnInTransit = ISNULL(ysnInTransit,0)
 	INTO #tmpCompanyTitled
 	FROM @CompanyTitle
-	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
-		AND intTransactionId IS NOT NULL
-	ORDER BY dtmDate 
+	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110) BETWEEN CONVERT(DATETIME, @dtmFromTransactionDate) AND CONVERT(DATETIME, @dtmToTransactionDate)
+		--AND intTransactionId IS NOT NULL
+	ORDER BY CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110) 
 
 	SELECT	intRowNum, dtmTransactionDate 
 	INTO #tempDateRange
@@ -160,9 +171,9 @@ BEGIN
 			,@dblCTBalanceForward  NUMERIC(18,6)
 			,@dblCompTitledBegBalForSummary NUMERIC(18,6)
 
-	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblCompanyTitled,0)) + ISNULL(@dblInTransitBegBalance,0)
+	SELECT @dblCTBalanceForward =  SUM(ISNULL(dblTotal,0)) --+ ISNULL(@dblInTransitBegBalance,0)
 	FROM @CompanyTitle
-	WHERE dtmDate IS NULL
+	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreateDate, 110), 110) < CONVERT(DATETIME, @dtmFromTransactionDate)
 
 	IF NOT EXISTS (SELECT TOP 1 * FROM #tempDateRange)
 	BEGIN

@@ -16,10 +16,12 @@
 	[intCurrencyExchangeRateTypeId] INT NULL,
     [dblExchangeRate]           NUMERIC (38, 20) NOT NULL,
     [dtmDateEntered]            DATETIME         NOT NULL,
+    [dtmDateEnteredMin]         DATETIME         NULL,
     [dtmTransactionDate]        DATETIME         NULL,
     [strJournalLineDescription] NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
 	[intJournalLineNo]			INT              NULL,
     [ysnIsUnposted]             BIT              NOT NULL,    
+    [ysnPostAction]             BIT              NULL,    
     [intUserId]                 INT              NULL,
     [intEntityId]				INT              NULL,
     [strTransactionId]          NVARCHAR (40)    COLLATE Latin1_General_CI_AS NOT NULL,
@@ -53,6 +55,10 @@
     CONSTRAINT [FK_tblGL_tblGLAccount] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
     CONSTRAINT [FK_tblGLDetail_tblSMMultiCompany] FOREIGN KEY([intMultiCompanyId]) REFERENCES [dbo].[tblSMMultiCompany] ([intMultiCompanyId])
 );
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGLDetail_Valuation]
+	ON [dbo].[tblGLDetail]([strTransactionId], [strBatchId])
+	INCLUDE (dtmDate, strTransactionType);
 GO
 
 CREATE NONCLUSTERED INDEX [_dta_index_tblEMEntityCredential_9_1290448367__K2_3] ON [dbo].[tblEMEntityCredential]

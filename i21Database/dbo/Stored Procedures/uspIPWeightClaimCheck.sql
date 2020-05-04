@@ -1,23 +1,21 @@
-﻿Create PROCEDURE uspIPWeightClaimCheck
+﻿CREATE PROCEDURE uspIPWeightClaimCheck
 AS
 BEGIN
 	DECLARE @intInventoryReceiptId INT
 		,@intLoadDetailId INT
 		,@intLoadId INT
-		,@intNewWeightClaimId int
-
-	SELECT @intInventoryReceiptId = Max(intInventoryReceiptId)
-	FROM tblIPInventoryReceiptWeightClaim
-
-	IF @intInventoryReceiptId IS NULL
-		SELECT @intInventoryReceiptId = 0
-
+		,@intNewWeightClaimId INT
 	DECLARE @tblIPInventoryReceipt TABLE (intInventoryReceiptId INT)
 
 	INSERT INTO @tblIPInventoryReceipt (intInventoryReceiptId)
 	SELECT intInventoryReceiptId
-	FROM tblICInventoryReceipt
-	WHERE intInventoryReceiptId > @intInventoryReceiptId
+	FROM tblICInventoryReceipt IR
+	WHERE ysnPosted = 1
+		AND NOT EXISTS (
+			SELECT *
+			FROM tblIPInventoryReceiptWeightClaim IRWC
+			WHERE IRWC.intInventoryReceiptId = IR.intInventoryReceiptId
+			)
 
 	SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId)
 	FROM @tblIPInventoryReceipt
@@ -27,6 +25,8 @@ BEGIN
 		SELECT @intLoadDetailId = NULL
 
 		SELECT @intLoadId = NULL
+
+		SELECT @intNewWeightClaimId = NULL
 
 		SELECT @intLoadDetailId = intSourceId
 		FROM tblICInventoryReceiptItem
@@ -41,19 +41,24 @@ BEGIN
 				FROM vyuIPGetOpenWeightClaim
 				WHERE intLoadId = @intLoadId
 					AND intContainerCount = intIRCount
-					AND IsNULL(dblClaimableWt, 0) < 0
+					AND IsNULL(dblClaimableWt, 0) + IsNULL(dblFranchiseWt, 0) < 0
 				)
 		BEGIN
-			--INSERT INTO tblLGWeightClaimStage (intLoadId)
-			--SELECT @intLoadId
+			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
+				,@intNewWeightClaimId = @intNewWeightClaimId OUTPUT
 
-			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId,@intNewWeightClaimId=@intNewWeightClaimId output
-			
-			EXEC [dbo].[uspIPWeightClaimPopulateStgXML] @intWeightClaimId =@intNewWeightClaimId,@strRowState ='Added'
+			EXEC [dbo].[uspIPWeightClaimPopulateStgXML] @intWeightClaimId = @intNewWeightClaimId
+				,@strRowState = 'Added'
 		END
 
-		INSERT INTO tblIPInventoryReceiptWeightClaim (intInventoryReceiptId)
+		INSERT INTO tblIPInventoryReceiptWeightClaim (
+			intInventoryReceiptId
+			,intLoadId
+			,intWeightClaimId
+			)
 		SELECT @intInventoryReceiptId
+			,@intLoadId
+			,@intNewWeightClaimId
 
 		SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId)
 		FROM @tblIPInventoryReceipt

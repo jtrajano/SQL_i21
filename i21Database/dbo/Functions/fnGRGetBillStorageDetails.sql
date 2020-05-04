@@ -81,8 +81,7 @@ BEGIN
 	SELECT 
 		CS.intCustomerStorageId
 		,CS.intStorageScheduleId
-		--,CASE WHEN @dblBalanceToAccrue = 0 THEN CS.dblOpenBalance ELSE @dblBalanceToAccrue END
-		,CS.dblOpenBalance
+		,ISNULL(MagicalOpenBalance.dblOpenBalance, 0) as dblOpenBalance
 		,0
 		,0
 		,0
@@ -91,9 +90,16 @@ BEGIN
 		,0
 		,0
 	FROM tblGRCustomerStorage CS
+	OUTER APPLY (
+		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
+			from tblGRStorageHistory 
+				where intCustomerStorageId = CS.intCustomerStorageId 
+					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+					and intTransactionTypeId in ( 1, 4, 3, 5, 9)
+	) as MagicalOpenBalance
 	INNER JOIN tblGRStorageType ST
 		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-	WHERE CS.dblOpenBalance > 0
+	WHERE ISNULL(MagicalOpenBalance.dblOpenBalance, 0) > 0
 		AND ST.ysnCustomerStorage = 0
 		--AND CS.intCustomerStorageId = ISNULL(@intCustomerStorageIdParam,CS.intCustomerStorageId)
 	ORDER BY CS.dtmDeliveryDate
@@ -168,7 +174,7 @@ BEGIN
 		,IC.strItemNo
 		,CS.intCompanyLocationId
 		,CL.strLocationName
-		,CS.dblOpenBalance
+		,MagicalOpenBalance.dblOpenBalance
 		,dblUnpaid = SV.dblStorageDueTotalPerUnit --Unpaid Storage (storage due from storage screen; storage due - storage paid)
 		,CS.intStorageTypeId
 		,ST.strStorageTypeDescription
@@ -185,6 +191,13 @@ BEGIN
 		,SV.dblFlatFeeTotal
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 	FROM tblGRCustomerStorage CS
+	OUTER APPLY (
+		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
+			from tblGRStorageHistory 
+				where intCustomerStorageId = CS.intCustomerStorageId 
+					and dbo.fnRemoveTimeOnDate(dtmHistoryDate) <= @dtmStorageChargeDate
+					and intTransactionTypeId in ( 1, 4, 3, 5, 9)
+	) as MagicalOpenBalance
 	INNER JOIN @BillStorageValues SV
 		ON SV.intCustomerStorageId = CS.intCustomerStorageId
 	INNER JOIN tblEMEntity EM

@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblRKOptionsMonthPreStage (intOptionMonthPreStageId)
 	SELECT intOptionMonthPreStageId
-	FROM tblRKOptionsMonthPreStage
+	FROM tblRKOptionsMonthPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intOptionMonthPreStageId = MIN(intOptionMonthPreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intOptionMonthId = intOptionMonthId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblRKOptionsMonthPreStage
+		FROM tblRKOptionsMonthPreStage WITH (NOLOCK)
 		WHERE intOptionMonthPreStageId = @intOptionMonthPreStageId
 
 		EXEC uspIPOptionMonthPopulateStgXML @intOptionMonthId

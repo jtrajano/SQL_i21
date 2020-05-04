@@ -50,7 +50,8 @@ BEGIN TRY
 					FROM tblSTCheckoutDeposits 
 					GROUP BY intCheckoutId
 				   ) G ON A.intCheckoutId =G.intCheckoutId 
-   where A.intCheckoutId = @intCheckoutId 
+   WHERE A.intCheckoutId = @intCheckoutId 
+   AND A.dblTotalSalesAmountComputed > 0
     
 END TRY
 

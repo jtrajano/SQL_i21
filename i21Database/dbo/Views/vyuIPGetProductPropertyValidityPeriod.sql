@@ -22,8 +22,8 @@ SELECT PPV.intProductPropertyValidityPeriodId
 	,T.strTestName
 	,P.strPropertyName
 	,PP.intProductId
-FROM tblQMProductPropertyValidityPeriod PPV
-JOIN tblQMProductProperty PP ON PP.intProductPropertyId = PPV.intProductPropertyId
-LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = PPV.intUnitMeasureId
-LEFT JOIN tblQMTest T ON T.intTestId = PP.intTestId
-LEFT JOIN tblQMProperty P ON P.intPropertyId = PP.intPropertyId
+FROM tblQMProductPropertyValidityPeriod PPV WITH (NOLOCK)
+JOIN tblQMProductProperty PP WITH (NOLOCK) ON PP.intProductPropertyId = PPV.intProductPropertyId
+LEFT JOIN tblICUnitMeasure UOM WITH (NOLOCK) ON UOM.intUnitMeasureId = PPV.intUnitMeasureId
+LEFT JOIN tblQMTest T WITH (NOLOCK) ON T.intTestId = PP.intTestId
+LEFT JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = PP.intPropertyId

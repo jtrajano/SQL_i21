@@ -145,8 +145,8 @@ BEGIN TRY
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
 			JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId 
+			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
@@ -161,7 +161,9 @@ BEGIN TRY
 	
 		IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
 		BEGIN
-			IF EXISTS(SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
+			IF EXISTS(SELECT 1 FROM tblLGLoadDetailContainerLink LDCL 
+						INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
+						WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 			BEGIN
 				SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
 			END
@@ -223,7 +225,7 @@ BEGIN TRY
 			,[intCurrencyId] = L.intCurrencyId
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
-			,[ysnPrice] = 0
+			,[ysnPrice] = CV.ysnPrice
 			,[ysnSubCurrency] = CUR.ysnSubCurrency
 			,[intCostCurrencyId] = CV.intCurrencyId
 			,[intShipFromId] = EL.intEntityLocationId
@@ -256,6 +258,7 @@ BEGIN TRY
 			,EL.intEntityLocationId
 			,L.intCurrencyId
 			,CUR.ysnSubCurrency
+			,CV.ysnPrice
 
 		UNION ALL
 
@@ -349,8 +352,8 @@ BEGIN TRY
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
 			JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1 
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LD.intLoadDetailId = LDCL.intLoadDetailId
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId		
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = L.intCurrencyId
@@ -450,7 +453,9 @@ BEGIN TRY
 			WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
 		END
 	
-		IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
+		IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink LDCL 
+					INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
+					WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 		BEGIN
 			INSERT INTO @ReceiptStagingTable (
 				[strReceiptType]
@@ -571,8 +576,8 @@ BEGIN TRY
 			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
 			JOIN tblICItemLocation IL ON IL.intItemId = CD.intItemId AND IL.intLocationId = CD.intCompanyLocationId
 			JOIN tblEMEntityLocation EL ON EL.intEntityId = CH.intEntityId AND EL.ysnDefaultLocation = 1
-			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
+			LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
 			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = AD.intSeqCurrencyId
 			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
 			LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
@@ -724,7 +729,9 @@ BEGIN TRY
 
 		IF NOT EXISTS(SELECT TOP 1 1 FROM @ReceiptStagingTable)
 		BEGIN
-			IF EXISTS(SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
+			IF EXISTS(SELECT 1 FROM tblLGLoadDetailContainerLink LDCL 
+						INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
+						WHERE ISNULL(LC.ysnRejected, 0) = 0 AND LC.intLoadId = @intLoadId)
 			BEGIN
 				SET @strErrorMessage = 'All the containers in the inbound shipment has already been received.'
 			END
@@ -786,7 +793,7 @@ BEGIN TRY
 			,[intCurrencyId] = L.intCurrencyId
 			,[intEntityVendorId] = LD.intVendorEntityId
 			,[intLocationId] = LD.intPCompanyLocationId
-			,[ysnPrice] = 0
+			,[ysnPrice] = CV.ysnPrice
 			,[ysnSubCurrency] = CUR.ysnSubCurrency
 			,[intCostCurrencyId] = CV.intCurrencyId
 			,[intShipFromId] = EL.intEntityLocationId
@@ -819,6 +826,7 @@ BEGIN TRY
 			,EL.intEntityLocationId
 			,L.intCurrencyId
 			,CUR.ysnSubCurrency
+			,CV.ysnPrice
 
 		UNION ALL
 

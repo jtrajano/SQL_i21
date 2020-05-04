@@ -91,9 +91,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_UpdateNoSpaceModuleName.sql
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
-
-
-
+:r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 
 
 -- Canned Report
@@ -224,6 +222,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
 :r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
+:r .\GL\DefaultData\1u_PostHistoryGroupings.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -313,6 +312,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVoucherPayableTranType.sql
 :r .\AP\PurgePayableCompleted.sql
 :r .\AP\UpdatePaymentDetailOffset.sql
+:r .\AP\UpdateOriginDMFor20_1.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -368,7 +368,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\172To173.sql
 :R .\CT\174To181.sql
 :R .\CT\ExcelAndTableColumnMap.sql
-:R .\CT\fnCTGetBasisDeliveryAboveR2.sql
+-- :R .\CT\fnCTGetBasisDeliveryAboveR2.sql
 :R .\CT\uspCTRebuildScheduledQuantityAboveR2.sql
 :R .\CT\PariallyToPartially.sql
 :R .\CT\TitleToCode.sql
@@ -393,6 +393,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+:R .\GR\PriorPeriodTransactions.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -596,6 +597,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\CustomField.sql
 :R .\HD\RemoveHDObsoleteScreen.sql
 :R .\HD\RenameHDScreen.sql
+:R .\HD\20_1_FixCustomLayout.sql
 
 --CRM
 :R .\CRM\SplitCRMData.sql

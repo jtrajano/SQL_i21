@@ -10,6 +10,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@intStorageScheduleId AS INT = NULL
 	,@InventoryShipmentId AS INT OUTPUT
 	,@intInvoiceId AS INT = NULL OUTPUT
+	,@dtmClientDate DATETIME = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -210,10 +211,12 @@ BEGIN TRY
 						,intSubLocationId
 						,intStorageLocationId
 						,ysnIsStorage
+						,strSourceTransactionId 
 						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnitStorage , @intEntityId, @strDistributionOption, NULL
+
 					SELECT TOP 1 @dblQtyShipped = dblQty FROM @ItemsForItemShipment IIS
 					SET @dblRemainingUnits = (@dblRemainingUnits - CASE WHEN ISNULL(@dblQtyShipped,0) = 0 THEN 0 ELSE (@dblRemainingUnitStorage * -1) END)
 					IF(@dblRemainingUnits > 0)
@@ -465,6 +468,7 @@ BEGIN TRY
 									,intSubLocationId
 									,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 									,ysnIsStorage
+									,strSourceTransactionId 
 									,intStorageScheduleTypeId
 									,ysnAllowVoucher
 								)
@@ -501,6 +505,7 @@ BEGIN TRY
 						,intSubLocationId
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
+						,strSourceTransactionId 
 						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
@@ -639,32 +644,18 @@ BEGIN TRY
 	
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	SELECT @intContractDetailId = MIN(si.intLineNo)
-    FROM tblICInventoryShipment s 
-    JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-    WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
- 
-	--INVOICE intergration
-	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-	WHERE intInventoryShipmentId = @InventoryShipmentId
-
-	-- IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE ysnAllowInvoice = 1 AND intInventoryShipmentId = @InventoryShipmentId)
-		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 1, 1;
-		END
-	ELSE
-			IF (@intPricingTypeId = 2)
-			BEGIN
-				IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-			END
-			SELECT @intInvoiceId = id.intInvoiceId
-			FROM tblICInventoryShipment s 
-			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
-			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
+	EXEC uspSCProcessShipmentToInvoice 
+		@intTicketId = @intTicketId
+		,@intInventoryShipmentId = @InventoryShipmentId
+		,@intUserId = @intUserId
+		,@intInvoiceId = @intInvoiceId OUTPUT 
+		,@dtmClientDate = @dtmClientDate
+		
+	SELECT @intInvoiceId = id.intInvoiceId
+	FROM tblICInventoryShipment s 
+	JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+	WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
 	
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

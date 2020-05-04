@@ -27,6 +27,13 @@ BEGIN
 		, @strRateType = strRateType
 	FROM tblRKM2MInquiry WHERE intM2MInquiryId = @intM2MInquiryId
 
+	IF @strRateType = 'Stress Test' RETURN
+
+	DECLARE @GLAccounts TABLE(strCategory NVARCHAR(100)
+		, intAccountId INT
+		, strAccountNo NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, ysnHasError BIT
+		, strErrorMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS)
 
 	DECLARE @intUnrealizedGainOnBasisId INT
 		, @intUnrealizedGainOnFuturesId INT
@@ -48,103 +55,132 @@ BEGIN
 		, @intUnrealizedLossOnInventoryRatioIOSId INT
 		, @intUnrealizedGainOnInventoryIOSId INT
 		, @intUnrealizedLossOnInventoryIOSId INT
+		, @strUnrealizedGainOnBasisId NVARCHAR(250)
+		, @strUnrealizedGainOnFuturesId NVARCHAR(250)
+		, @strUnrealizedGainOnCashId NVARCHAR(250)
+		, @strUnrealizedLossOnBasisId NVARCHAR(250)
+		, @strUnrealizedLossOnFuturesId NVARCHAR(250)
+		, @strUnrealizedLossOnCashId NVARCHAR(250)
+		, @strUnrealizedGainOnInventoryBasisIOSId NVARCHAR(250)
+		, @strUnrealizedGainOnInventoryFuturesIOSId NVARCHAR(250)
+		, @strUnrealizedGainOnInventoryCashIOSId NVARCHAR(250)
+		, @strUnrealizedLossOnInventoryBasisIOSId NVARCHAR(250)
+		, @strUnrealizedLossOnInventoryFuturesIOSId NVARCHAR(250)
+		, @strUnrealizedLossOnInventoryCashIOSId NVARCHAR(250)
+		, @strUnrealizedGainOnInventoryIntransitIOSId NVARCHAR(250)
+		, @strUnrealizedLossOnInventoryIntransitIOSId NVARCHAR(250)
+		, @strUnrealizedGainOnRatioId NVARCHAR(250)
+		, @strUnrealizedLossOnRatioId NVARCHAR(250)
+		, @strUnrealizedGainOnInventoryRatioIOSId NVARCHAR(250)
+		, @strUnrealizedLossOnInventoryRatioIOSId NVARCHAR(250)
+		, @strUnrealizedGainOnInventoryIOSId NVARCHAR(250)
+		, @strUnrealizedLossOnInventoryIOSId NVARCHAR(250)
 
 
-	IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 1
-	BEGIN
+	INSERT INTO @GLAccounts
+	EXEC uspRKGetGLAccountsForPosting @intCommodityId = @intCommodityId
+		, @intLocationId = @intLocationId
 
-		SELECT @intUnrealizedGainOnBasisId = intUnrealizedGainOnBasisId
-			, @intUnrealizedGainOnFuturesId = intUnrealizedGainOnFuturesId
-			, @intUnrealizedGainOnCashId = intUnrealizedGainOnCashId
-			, @intUnrealizedLossOnBasisId = intUnrealizedLossOnBasisId
-			, @intUnrealizedLossOnFuturesId = intUnrealizedLossOnFuturesId
-			, @intUnrealizedLossOnCashId = intUnrealizedLossOnCashId
-			, @intUnrealizedGainOnInventoryBasisIOSId = intUnrealizedGainOnInventoryBasisIOSId
-			, @intUnrealizedGainOnInventoryFuturesIOSId = intUnrealizedGainOnInventoryFuturesIOSId
-			, @intUnrealizedGainOnInventoryCashIOSId = intUnrealizedGainOnInventoryCashIOSId
-			, @intUnrealizedLossOnInventoryBasisIOSId = intUnrealizedLossOnInventoryBasisIOSId
-			, @intUnrealizedLossOnInventoryFuturesIOSId = intUnrealizedLossOnInventoryFuturesIOSId
- 			, @intUnrealizedLossOnInventoryCashIOSId = intUnrealizedLossOnInventoryCashIOSId
-			, @intUnrealizedGainOnInventoryIntransitIOSId= intUnrealizedGainOnInventoryIntransitIOSId
- 			, @intUnrealizedLossOnInventoryIntransitIOSId = intUnrealizedLossOnInventoryIntransitIOSId
-			, @intUnrealizedGainOnRatioId = intUnrealizedGainOnRatioId
-			, @intUnrealizedLossOnRatioId = intUnrealizedLossOnRatioId
-			, @intUnrealizedGainOnInventoryRatioIOSId = intUnrealizedGainOnInventoryRatioIOSId
-			, @intUnrealizedLossOnInventoryRatioIOSId = intUnrealizedLossOnInventoryRatioIOSId 
-			, @intUnrealizedGainOnInventoryIOSId = intUnrealizedGainOnInventoryIOSId
-			, @intUnrealizedLossOnInventoryIOSId = intUnrealizedLossOnInventoryIOSId 
-		FROM tblRKCompanyPreference
-	
-	END 
-	ELSE
-	BEGIN
-		SELECT @intUnrealizedGainOnBasisId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Basis')
-			, @intUnrealizedGainOnFuturesId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Futures')
-			, @intUnrealizedGainOnCashId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Cash')
-			, @intUnrealizedGainOnRatioId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Ratio')
-			, @intUnrealizedLossOnBasisId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Basis')
-			, @intUnrealizedLossOnFuturesId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Futures')
-			, @intUnrealizedLossOnCashId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Cash')
-			, @intUnrealizedLossOnRatioId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Ratio')
-			, @intUnrealizedGainOnInventoryBasisIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Basis (Inventory Offset)')
-			, @intUnrealizedGainOnInventoryFuturesIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Futures (Inventory Offset)')
-			, @intUnrealizedGainOnInventoryCashIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Cash (Inventory Offset)')
-			, @intUnrealizedGainOnInventoryRatioIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Ratio (Inventory Offset)')
-			, @intUnrealizedGainOnInventoryIntransitIOSId= dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Intransit (Inventory Offset)')
-			, @intUnrealizedGainOnInventoryIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Gain on Inventory (Inventory Offset)')
-			, @intUnrealizedLossOnInventoryBasisIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Basis (Inventory Offset)')
-			, @intUnrealizedLossOnInventoryFuturesIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Futures (Inventory Offset)')
- 			, @intUnrealizedLossOnInventoryCashIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Cash (Inventory Offset)')
-			, @intUnrealizedLossOnInventoryRatioIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Ratio (Inventory Offset)') 
- 			, @intUnrealizedLossOnInventoryIntransitIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Intransit (Inventory Offset)')
-			, @intUnrealizedLossOnInventoryIOSId = dbo.fnGetCommodityGLAccountM2M(DEFAULT,@intCommodityId,'Unrealized Loss on Inventory (Inventory Offset)') 
-	END
-	
-	DECLARE @strUnrealizedGainOnBasisId NVARCHAR(50)
-		, @strUnrealizedGainOnFuturesId NVARCHAR(50)
-		, @strUnrealizedGainOnCashId NVARCHAR(50)
-		, @strUnrealizedLossOnBasisId NVARCHAR(50)
-		, @strUnrealizedLossOnFuturesId NVARCHAR(50)
-		, @strUnrealizedLossOnCashId NVARCHAR(50)
-		, @strUnrealizedGainOnInventoryBasisIOSId NVARCHAR(50)
-		, @strUnrealizedGainOnInventoryFuturesIOSId NVARCHAR(50)
-		, @strUnrealizedGainOnInventoryCashIOSId NVARCHAR(50)
-		, @strUnrealizedLossOnInventoryBasisIOSId NVARCHAR(50)
-		, @strUnrealizedLossOnInventoryFuturesIOSId NVARCHAR(50)
-		, @strUnrealizedLossOnInventoryCashIOSId NVARCHAR(50)
-		, @strUnrealizedGainOnInventoryIntransitIOSId NVARCHAR(50)
-		, @strUnrealizedLossOnInventoryIntransitIOSId NVARCHAR(50)
-		, @strUnrealizedGainOnRatioId NVARCHAR(50)
-		, @strUnrealizedLossOnRatioId NVARCHAR(50)
-		, @strUnrealizedGainOnInventoryRatioIOSId NVARCHAR(50)
-		, @strUnrealizedLossOnInventoryRatioIOSId NVARCHAR(50)
-		, @strUnrealizedGainOnInventoryIOSId NVARCHAR(50)
-		, @strUnrealizedLossOnInventoryIOSId NVARCHAR(50)
+	SELECT @intUnrealizedGainOnBasisId = intAccountId
+		, @strUnrealizedGainOnBasisId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnBasisId'
 
-	SELECT @strUnrealizedGainOnBasisId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnBasisId
-	SELECT @strUnrealizedGainOnFuturesId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnFuturesId
-	SELECT @strUnrealizedGainOnCashId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnCashId
-	SELECT @strUnrealizedLossOnBasisId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnBasisId
-	SELECT @strUnrealizedLossOnFuturesId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnFuturesId
-	SELECT @strUnrealizedLossOnCashId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnCashId
-	SELECT @strUnrealizedGainOnInventoryBasisIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryBasisIOSId
-	SELECT @strUnrealizedGainOnInventoryFuturesIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryFuturesIOSId
-	SELECT @strUnrealizedGainOnInventoryCashIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryCashIOSId
-	SELECT @strUnrealizedLossOnInventoryBasisIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryBasisIOSId
-	SELECT @strUnrealizedLossOnInventoryFuturesIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryFuturesIOSId
-	SELECT @strUnrealizedLossOnInventoryCashIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryCashIOSId
-	SELECT @strUnrealizedGainOnInventoryIntransitIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryIntransitIOSId
-	SELECT @strUnrealizedLossOnInventoryIntransitIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryIntransitIOSId
-	SELECT @strUnrealizedGainOnRatioId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnRatioId
-	SELECT @strUnrealizedLossOnRatioId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnRatioId
-	SELECT @strUnrealizedGainOnInventoryRatioIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryRatioIOSId
-	SELECT @strUnrealizedLossOnInventoryRatioIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryRatioIOSId
-	SELECT @strUnrealizedGainOnInventoryIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedGainOnInventoryIOSId
-	SELECT @strUnrealizedLossOnInventoryIOSId = strAccountId FROM tblGLAccount WHERE intAccountId = @intUnrealizedLossOnInventoryIOSId
+	SELECT @intUnrealizedGainOnFuturesId = intAccountId
+		, @strUnrealizedGainOnFuturesId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnFuturesId'
 
+	SELECT @intUnrealizedGainOnCashId = intAccountId
+		, @strUnrealizedGainOnCashId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnCashId'
 
-	
-	IF @strRateType = 'Stress Test' RETURN
+	SELECT @intUnrealizedLossOnBasisId = intAccountId
+		, @strUnrealizedLossOnBasisId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnBasisId'
+
+	SELECT @intUnrealizedLossOnFuturesId = intAccountId
+		, @strUnrealizedLossOnFuturesId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnFuturesId'
+
+	SELECT @intUnrealizedLossOnCashId = intAccountId
+		, @strUnrealizedLossOnCashId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnCashId'
+
+	SELECT @intUnrealizedGainOnInventoryBasisIOSId = intAccountId
+		, @strUnrealizedGainOnInventoryBasisIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnInventoryBasisIOSId'
+
+	SELECT @intUnrealizedGainOnInventoryFuturesIOSId = intAccountId
+		, @strUnrealizedGainOnInventoryFuturesIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnInventoryFuturesIOSId'
+
+	SELECT @intUnrealizedGainOnInventoryCashIOSId = intAccountId
+		, @strUnrealizedGainOnInventoryCashIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnInventoryCashIOSId'
+
+	SELECT @intUnrealizedLossOnInventoryBasisIOSId = intAccountId
+		, @strUnrealizedLossOnInventoryBasisIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnInventoryBasisIOSId'
+
+	SELECT @intUnrealizedLossOnInventoryFuturesIOSId = intAccountId
+		, @strUnrealizedLossOnInventoryFuturesIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnInventoryFuturesIOSId'
+
+	SELECT @intUnrealizedLossOnInventoryCashIOSId = intAccountId
+		, @strUnrealizedLossOnInventoryCashIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnInventoryCashIOSId'
+
+	SELECT @intUnrealizedGainOnInventoryIntransitIOSId = intAccountId
+		, @strUnrealizedGainOnInventoryIntransitIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnInventoryIntransitIOSId'
+
+	SELECT @intUnrealizedLossOnInventoryIntransitIOSId = intAccountId
+		, @strUnrealizedLossOnInventoryIntransitIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnInventoryIntransitIOSId'
+
+	SELECT @intUnrealizedGainOnRatioId = intAccountId
+		, @strUnrealizedGainOnRatioId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnRatioId'
+
+	SELECT @intUnrealizedLossOnRatioId = intAccountId
+		, @strUnrealizedLossOnRatioId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnRatioId'
+
+	SELECT @intUnrealizedGainOnInventoryRatioIOSId = intAccountId
+		, @strUnrealizedGainOnInventoryRatioIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnInventoryRatioIOSId'
+
+	SELECT @intUnrealizedLossOnInventoryRatioIOSId = intAccountId
+		, @strUnrealizedLossOnInventoryRatioIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnInventoryRatioIOSId'
+
+	SELECT @intUnrealizedGainOnInventoryIOSId = intAccountId
+		, @strUnrealizedGainOnInventoryIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedGainOnInventoryIOSId'
+
+	SELECT @intUnrealizedLossOnInventoryIOSId = intAccountId
+		, @strUnrealizedLossOnInventoryIOSId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
+	FROM @GLAccounts
+	WHERE strCategory = 'intUnrealizedLossOnInventoryIOSId'
+
 	----Derivative unrealized start
 
 	DECLARE @Result AS TABLE (intFutOptTransactionId INT
@@ -832,162 +868,4 @@ BEGIN
 	FROM @Result t
 	JOIN tblEMEntity e on t.strName = e.strName
 	WHERE ISNULL(dblGrossPnL,0) <> 0
-
-	--No need this if Post to GL Using Commodity GL
-	IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 2
-	BEGIN
-		RETURN
-	END
-	--=====================================================================
-	--		Update the proper GL Account for each transaction
-	--		Set null if GL Account not exist
-	--=====================================================================
-	SELECT * INTO #tmpPostRecap
-	FROM tblRKM2MPostRecap 
-	WHERE intM2MInquiryId = @intM2MInquiryId
-
-	DECLARE @tblResult TABLE (Result NVARCHAR(200))
-	
-	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpPostRecap)
-	BEGIN
-		DECLARE @strTransactionId NVARCHAR(50)
-			, @strContractNumber NVARCHAR(50)
-			, @intContractSeq NVARCHAR(20)
-			, @intTransactionId INT
-			, @intUsedCommoidtyId INT
-			, @intUseCompanyLocationId INT
-			, @strCommodityCode NVARCHAR(100)
-			, @intM2MTransactionId INT
-			, @strTransactionType NVARCHAR(100)
-			, @dblAmount NUMERIC(18,6)
-
-		SELECT TOP 1 @intM2MTransactionId = intM2MTransactionId
-			, @strTransactionId = strTransactionId
-			, @intTransactionId = intTransactionId
-			, @strTransactionType = strTransactionType
-			, @dblAmount = (dblDebit + dblCredit)
-		FROM #tmpPostRecap
-		
-		IF @strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures Derivative Offset'
-		BEGIN
-			--Get the used Commodity AND Location in the Derivative Entry
-			SELECT @intUsedCommoidtyId = DE.intCommodityId
-				, @strCommodityCode = C.strCommodityCode
-				, @intUseCompanyLocationId = DE.intLocationId
-			FROM tblRKFutOptTransaction DE
-			INNER JOIN tblICCommodity C ON DE.intCommodityId = C.intCommodityId
-			WHERE strInternalTradeNo = @strTransactionId
-		END
-		ELSE
-		BEGIN
-			--Parse strTransactionId to get strContractNumber AND intContractSeq
-			--Before dash(-) is the contract number after that is the contract sequence
-			SET @strContractNumber = SUBSTRING(@strTransactionId,0,CHARINDEX('-',@strTransactionId))
-			--SET @intContractSeq = SUBSTRING(@strTransactionId,CHARINDEX('-',@strTransactionId) + 1,LEN(@strTransactionId) - CHARINDEX('-',@strTransactionId)) 
-			SET @intContractSeq = RIGHT(@strTransactionId , CHARINDEX ('-',REVERSE(@strTransactionId))-1)
-		
-			--Get the used Commodity AND Location in the Contract
-			SELECT @intUsedCommoidtyId = H.intCommodityId
-				, @strCommodityCode = C.strCommodityCode
-				, @intUseCompanyLocationId = D.intCompanyLocationId 
-			FROM tblCTContractHeader H
-			INNER JOIN tblCTContractDetail D ON H.intContractHeaderId = D.intContractHeaderId
-			INNER JOIN tblICCommodity C ON H.intCommodityId = C.intCommodityId
-			WHERE D.intContractDetailId = @intTransactionId
-
-		END
-		
-		DECLARE @strPrimaryAccountCode NVARCHAR(50)
-			, @strLocationAccountCode NVARCHAR(50)
-			, @strLOBAccountCode NVARCHAR(50)
-			, @intAccountIdFromCompPref INT
-			, @strAccountNumberToBeUse NVARCHAR(50)
-			, @strErrorMessage NVARCHAR(200)
-
-		SELECT @intAccountIdFromCompPref = (CASE WHEN @strTransactionType = 'Mark To Market-Basis' OR @strTransactionType = 'Mark To Market-Basis Intransit'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnBasisId ELSE compPref.intUnrealizedLossOnBasisId END
-												 WHEN @strTransactionType = 'Mark To Market-Basis Offset' OR @strTransactionType = 'Mark To Market-Basis Intransit Offset'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryBasisIOSId ELSE compPref.intUnrealizedLossOnInventoryBasisIOSId END
-												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative' OR @strTransactionType = 'Mark To Market-Futures'  OR @strTransactionType = 'Mark To Market-Futures Intransit'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnFuturesId ELSE compPref.intUnrealizedLossOnFuturesId END
-												 WHEN @strTransactionType = 'Mark To Market-Futures Derivative Offset' OR @strTransactionType = 'Mark To Market-Futures Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryFuturesIOSId ELSE compPref.intUnrealizedLossOnInventoryFuturesIOSId END
-												 WHEN @strTransactionType = 'Mark To Market-Cash' OR @strTransactionType = 'Mark To Market-Cash Intransit' OR @strTransactionType = 'Mark To Market-Cash Inventory'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnCashId ELSE compPref.intUnrealizedLossOnCashId END
-												 WHEN @strTransactionType = 'Mark To Market-Cash Offset' OR @strTransactionType = 'Mark To Market-Futures Intransit Offset'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryCashIOSId ELSE compPref.intUnrealizedLossOnInventoryCashIOSId END
-												 WHEN @strTransactionType = 'Mark To Market-Ratio'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnRatioId ELSE compPref.intUnrealizedLossOnRatioId END
-												 WHEN @strTransactionType = 'Mark To Market-Ratio Offset'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryRatioIOSId ELSE compPref.intUnrealizedLossOnInventoryRatioIOSId END
-												 WHEN @strTransactionType = 'Mark To Market-Cash Inventory Offset'
-													THEN CASE WHEN ISNULL(@dblAmount,0) >= 0 THEN compPref.intUnrealizedGainOnInventoryIOSId ELSE compPref.intUnrealizedLossOnInventoryIOSId END
-												 ELSE 0 END)
-		FROM tblRKCompanyPreference compPref
-
-		--Get the account code for Primary
-		SET @strPrimaryAccountCode = ''
-		SELECT @strPrimaryAccountCode = acct.[Primary Account]
-		FROM vyuGLAccountView acct
-		WHERE acct.intAccountId = @intAccountIdFromCompPref
-
-		--Get the account code for Location
-		SET @strLocationAccountCode = ''
-		SELECT @strLocationAccountCode = acctSgmt.strCode
-		FROM tblSMCompanyLocation compLoc
-		LEFT OUTER JOIN tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
-		WHERE intCompanyLocationId = @intUseCompanyLocationId
-
-		--If LOB is setup on GL Account Structure. intStructureType 5 is equal to Line of Bussiness on default data
-		IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType = 5)
-		BEGIN
-			--Get the account code for LOB
-			SET @strLOBAccountCode = ''
-			SELECT @strLOBAccountCode = acctSgmt.strCode
-			FROM tblICCommodity com
-			INNER JOIN tblSMLineOfBusiness lob ON com.intLineOfBusinessId = lob.intLineOfBusinessId
-			LEFT OUTER JOIN tblGLAccountSegment acctSgmt ON lob.intSegmentCodeId = acctSgmt.intAccountSegmentId
-			WHERE intCommodityId = @intUsedCommoidtyId
-
-			--Build the account number with LOB
-			SET @strAccountNumberToBeUse = ''
-
-			IF ISNULL(@strPrimaryAccountCode,'') <> '' AND ISNULL(@strLocationAccountCode,'') <> '' AND ISNULL(@strLOBAccountCode,'') <> '' 
-			BEGIN
-				SET @strAccountNumberToBeUse =  @strPrimaryAccountCode +'-'+ @strLocationAccountCode +'-'+ @strLOBAccountCode
-			END
-		END 
-		ELSE
-		BEGIN
-			--Build the account number without LOB
-			SET @strAccountNumberToBeUse = ''
-
-			IF ISNULL(@strPrimaryAccountCode,'') <> '' AND ISNULL(@strLocationAccountCode,'') <> ''
-			BEGIN
-				SET @strAccountNumberToBeUse =  @strPrimaryAccountCode +'-'+ @strLocationAccountCode
-			END
-		END
-
-		--Check if GL Account Number exists. Set null of not exist.
-		IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLAccount WHERE strAccountId = ISNULL(@strAccountNumberToBeUse,''))
-		BEGIN
-			UPDATE tblRKM2MPostRecap
-			SET intAccountId = NULL
-				, strAccountId = NULL
-			WHERE intM2MTransactionId = @intM2MTransactionId
-		END
-		ELSE
-		BEGIN
-			DECLARE @intAccountIdToBeUse INT
-			SELECT TOP 1 @intAccountIdToBeUse = intAccountId FROM tblGLAccount WHERE strAccountId = ISNULL(@strAccountNumberToBeUse,'')
-		
-			--Update the Post Recap table to the right GL Account
-			UPDATE tblRKM2MPostRecap
-			SET intAccountId = @intAccountIdToBeUse
-				, strAccountId = @strAccountNumberToBeUse
-			WHERE intM2MTransactionId = @intM2MTransactionId
-		END	
-		DELETE FROM #tmpPostRecap WHERE intM2MTransactionId = @intM2MTransactionId
-	END
-
 END

@@ -1,9 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateInvoiceDetail]
 	@intInvoiceDetailId		INT,
 	@intInventoryShipmentId	INT,
+	@intInventoryShipmentItemId INT,
 	@dblQty					NUMERIC(18,6),
 	@dblPrice				NUMERIC(18,6),
 	@intUserId				INT,
+	@intContractHeaderId	INT,
+	@intContractDetailId	INT,
 	@NewInvoiceDetailId		INT OUTPUT
 AS
 
@@ -92,20 +95,20 @@ BEGIN TRY
 				,@ItemDestinationGradeId				INT             = NULL
 				,@ItemDestinationWeightId				INT             = NULL
 				,@intScaleUOMId							INT  
-				,@ItemPrice								INT  
+				,@ItemPrice								NUMERIC(18,8)  
 				,@InvoiceId								INT
 
 		SELECT	TOP 1
 				 @InvoiceId								= intInvoiceId
 				,@ItemQtyShipped                        = @dblQty
-				,@ItemQtyOrdered                        = @dblQty
+				,@ItemQtyOrdered                        = (SELECT TOP 1 dblQuantity FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId)
 				,@ItemUnitPrice                         = @dblPrice
 				,@ItemPrice								= @dblPrice
-				,@ItemInventoryShipmentItemId			= (SELECT TOP 1 intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @intInventoryShipmentId AND intInventoryShipmentChargeId IS NULL ORDER by 1 DESC)
+				,@ItemInventoryShipmentItemId			= @intInventoryShipmentItemId
 				,@ItemShipmentNumber					= (SELECT TOP 1 strShipmentNumber FROM tblICInventoryShipment WHERE intInventoryShipmentId = @intInventoryShipmentId)
 				
-				,@ItemContractHeaderId                  = intContractHeaderId
-				,@ItemContractDetailId                  = intContractDetailId
+				,@ItemContractHeaderId                  = @intContractHeaderId
+				,@ItemContractDetailId                  = @intContractDetailId
 				,@ItemId								= intItemId
 				,@ItemPrepayTypeId						= intPrepayTypeId
 				,@ItemPrepayRate						= dblPrepayRate

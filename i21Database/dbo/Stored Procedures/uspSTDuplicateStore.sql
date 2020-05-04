@@ -133,6 +133,7 @@ BEGIN TRANSACTION
 		,dtmStoreAppLastDateLog
 		--,strHandheldScannerServerFolderPath
 		,intConcurrencyId
+		,ysnLotterySetupMode
 	)
 	SELECT TOP 1
 		@newStoreTransactionId
@@ -251,6 +252,7 @@ BEGIN TRANSACTION
 		,dtmStoreAppLastDateLog
 		--,''
 		,intConcurrencyId
+		,ysnLotterySetupMode
 	FROM tblSTStore
 	WHERE ISNULL(intStoreId,0) = ISNULL(@StoreId,0)
 
@@ -490,24 +492,22 @@ BEGIN TRANSACTION
 	FROM tblSTStoreRebates
 	WHERE intStoreId = @StoreId
 
-	--REGISTER PRODUCT--
-	INSERT INTO tblSTSubcategoryRegProd
-	(
-		 intStoreId
-		,strRegProdCode
-		,strRegProdDesc
-		,strRegProdComment  
-		,intConcurrencyId
-	)
-	SELECT 
-		 @NewStoreId
-		,strRegProdCode
-		,strRegProdDesc
-		,strRegProdComment  
-		,intConcurrencyId
-	FROM
-	tblSTSubcategoryRegProd
-	WHERE intStoreId = @StoreId
+	----REGISTER PRODUCT--
+	--INSERT INTO tblSTSubcategoryRegProd
+	--(
+	--	 strRegProdCode
+	--	,strRegProdDesc
+	--	,strRegProdComment  
+	--	,intConcurrencyId
+	--)
+	--SELECT 
+	--	 strRegProdCode
+	--	,strRegProdDesc
+	--	,strRegProdComment  
+	--	,intConcurrencyId
+	--FROM
+	--tblSTSubcategoryRegProd
+	--WHERE intStoreId = @StoreId
 
 	--PAYMENT OPTION-- 
 	INSERT INTO tblSTPaymentOption

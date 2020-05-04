@@ -33,10 +33,10 @@ BEGIN TRY
 	SET @strProductName = NULL
 
 	SELECT @strProductName = COALESCE(C.strCategoryCode, I.strItemNo)
-	FROM tblQMProduct P
-	LEFT JOIN tblICCategory C ON C.intCategoryId = P.intProductValueId
+	FROM tblQMProduct P WITH (NOLOCK)
+	LEFT JOIN tblICCategory C WITH (NOLOCK) ON C.intCategoryId = P.intProductValueId
 		AND P.intProductTypeId = 1
-	LEFT JOIN tblICItem I ON I.intItemId = P.intProductValueId
+	LEFT JOIN tblICItem I WITH (NOLOCK) ON I.intItemId = P.intProductValueId
 		AND P.intProductTypeId = 2
 	WHERE intProductId = @intProductId
 

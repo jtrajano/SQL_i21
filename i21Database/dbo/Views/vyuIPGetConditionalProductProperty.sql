@@ -15,9 +15,9 @@ SELECT CPP.intConditionalProductPropertyId
 	,T.strTestName
 	,P.strPropertyName
 	,PP.intProductId
-FROM tblQMConditionalProductProperty CPP
-JOIN tblQMProductProperty PP ON PP.intProductPropertyId = CPP.intProductPropertyId
-LEFT JOIN tblQMProperty P1 ON P1.intPropertyId = CPP.intOnSuccessPropertyId
-LEFT JOIN tblQMProperty P2 ON P2.intPropertyId = CPP.intOnFailurePropertyId
-LEFT JOIN tblQMTest T ON T.intTestId = PP.intTestId
-LEFT JOIN tblQMProperty P ON P.intPropertyId = PP.intPropertyId
+FROM tblQMConditionalProductProperty CPP WITH (NOLOCK)
+JOIN tblQMProductProperty PP WITH (NOLOCK) ON PP.intProductPropertyId = CPP.intProductPropertyId
+LEFT JOIN tblQMProperty P1 WITH (NOLOCK) ON P1.intPropertyId = CPP.intOnSuccessPropertyId
+LEFT JOIN tblQMProperty P2 WITH (NOLOCK) ON P2.intPropertyId = CPP.intOnFailurePropertyId
+LEFT JOIN tblQMTest T WITH (NOLOCK) ON T.intTestId = PP.intTestId
+LEFT JOIN tblQMProperty P WITH (NOLOCK) ON P.intPropertyId = PP.intPropertyId

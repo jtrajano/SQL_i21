@@ -73,7 +73,7 @@ BEGIN
 		, strTransactionNo
 		, intBundleItemId = intBundleItemId
 		, strBundleItem = strBundleItem
-		, intItemId
+		, t.intItemId
 		, strItemDescription
 		, dtmAvailability
 		, t.intFutureMarketId
@@ -100,17 +100,17 @@ BEGIN
 			, dtmAvailability = Detail.dtmUpdatedAvailabilityDate
 			, Detail.intFutureMarketId
 			, Detail.intFutureMonthId
-			, dblQty = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(Detail.intItemId, Detail.intUnitMeasureId, TonUOM.intUnitMeasureId, Detail.dblBalance), 0)
-			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intItemUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
-			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0) 
+			, dblQty = ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(Detail.intItemId, Detail.intUnitMeasureId, TonUOM.intUnitMeasureId,(Detail.dblBalance - ISNULL(Detail.dblScheduleQty, 0))), 0)
+			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intPriceItemUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
+			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, TonUOM.intItemUOMId, 1, Detail.intBasisCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0) 
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
 			, intBundleItemId = Detail.intItemBundleId
-			, strBundleItem = IB.strDescription
+			, strBundleItem = IB.strItemNo
 		FROM tblCTContractDetail Detail
 		JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 		JOIN TonUOM ON TonUOM.intCommodityId = Header.intCommodityId AND TonUOM.intItemId = Detail.intItemId
-		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
+		LEFT JOIN tblICItem IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -121,8 +121,9 @@ BEGIN
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = Detail.intContractDetailId
 		WHERE Detail.intContractStatusId = 1
-			AND Detail.intPricingTypeId = 1
+			--AND Detail.intPricingTypeId = 1
 			AND Detail.dblBalance <> 0
+			AND (Detail.dblBalance - ISNULL(Detail.dblScheduleQty, 0)) > 0
 			AND Header.intContractTypeId = 1
 	
 		UNION ALL SELECT DISTINCT CH.intCommodityId
@@ -138,19 +139,19 @@ BEGIN
 			, CD.intFutureMarketId
 			, CD.intFutureMonthId
 			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](LD.intItemId, ItemUOM.intUnitMeasureId, TonUOM.intUnitMeasureId, LD.dblQuantity), 0)
-			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, TonUOM.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, LD.dblQuantity, CD.intContractDetailId), 0)
-			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', LD.intItemUOMId, TonUOM.intItemUOMId, 1, L.intCurrencyId, @intCurrencyId, CD.dblBasis, CD.intContractDetailId), 0)
+			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intPriceItemUOMId, TonUOM.intItemUOMId, 1, CD.intCurrencyId, @intCurrencyId, CD.dblCashPrice, CD.intContractDetailId), 0)
+			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', CD.intBasisUOMId, TonUOM.intItemUOMId, 1, CD.intBasisCurrencyId, @intCurrencyId, CD.dblBasis, CD.intContractDetailId), 0)
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
 			, intBundleItemId = CD.intItemBundleId
-			, strBundleItem = IB.strDescription
+			, strBundleItem = IB.strItemNo
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intPurchaseSale = 1
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId AND TonUOM.intItemId = L.intItemId
+		JOIN TonUOM ON TonUOM.intCommodityId = CH.intCommodityId AND TonUOM.intItemId = LD.intItemId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
-		LEFT JOIN tblICItemBundle IB ON IB.intItemId = CD.intItemBundleId
+		LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -161,10 +162,10 @@ BEGIN
 			GROUP BY CC.intContractDetailId
 		) CC ON CC.intContractDetailId = CD.intContractDetailId
 		WHERE L.ysnPosted = 1
-			AND L.intShipmentStatus <> 10
+			AND L.intShipmentStatus = 3
 			AND L.intShipmentType = 1
 
-		UNION ALL SELECT DISTINCT Header.intCommodityId
+		UNION ALL SELECT DISTINCT Item.intCommodityId
 			, Lots.intBookId
 			, Lots.intSubBookId
 			, Item.intProductTypeId
@@ -173,22 +174,42 @@ BEGIN
 			, strTransactionNo = Header.strContractNumber + ' - ' + CAST(Detail.intContractSeq AS NVARCHAR(10)) COLLATE Latin1_General_CI_AS
 			, Item.intItemId
 			, strItemDescription = Item.strDescription
-			, dtmAvailability = Detail.dtmUpdatedAvailabilityDate
-			, Detail.intFutureMarketId
+			, dtmAvailability = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN Detail.dtmUpdatedAvailabilityDate ELSE GETDATE() END
+			, intFutureMarketId = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN
+											Detail.intFutureMarketId
+										ELSE
+											(SELECT Top(1) F.intFutureMarketId FROM tblRKCommodityMarketMapping F WHERE F.strCommodityAttributeId = Item.intProductTypeId)
+										END
 			, Detail.intFutureMonthId
-			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, TonUOM.intUnitMeasureId, Lots.dblBalance), 0)
-			, dblTransactionPrice = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Lots.intItemUOMId, TonUOM.intItemUOMId, 1, Lots.intDefaultCurrencyId, @intCurrencyId, Lots.dblCashPrice, Detail.intContractDetailId), 0)
-			, dblContractDifferential = ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Lots.intItemUOMId, TonUOM.intItemUOMId, 1, Lots.intDefaultCurrencyId, @intCurrencyId, Lots.dblBasis, Detail.intContractDetailId), 0)
+			, dblQty = ISNULL(dbo.[fnCTConvertQuantityToTargetItemUOM](Lots.intItemId, ItemUOM.intUnitMeasureId, TonUOM.intUnitMeasureId, Lots.dblQty), 0)
+			, dblTransactionPrice = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN
+										ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intPriceItemUOMId, TonUOM.intItemUOMId, 1, Detail.intCurrencyId, @intCurrencyId, Detail.dblCashPrice, Detail.intContractDetailId), 0)
+									ELSE
+										ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', (select intItemUOMId from tblICItemUOM where intItemId=Item.intItemId and ysnStockUOM=1), TonUOM.intItemUOMId, 1, @intCurrencyId, @intCurrencyId, Lots.dblLastCost, NULL), 0)
+									END
+			, dblContractDifferential = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN
+											ISNULL(dbo.fnRKConvertUOMCurrency('ItemUOM', Detail.intBasisUOMId, TonUOM.intItemUOMId, 1, Detail.intBasisCurrencyId, @intCurrencyId, Detail.dblBasis, Detail.intContractDetailId), 0)
+										ELSE
+											0.0
+										END
 			, dblFreight = ISNULL(CC.dblAmount, 0.00)
-			, intBundleItemId = Detail.intItemBundleId
-			, strBundleItem = IB.strDescription
+			, intBundleItemId = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN 
+									Detail.intItemBundleId
+								ELSE
+									(SELECT B.intItemId FROM tblICItemBundle B WHERE B.intBundleItemId = Item.intItemId)
+								END
+			, strBundleItem = CASE WHEN ISNULL(Detail.intContractDetailId, 0) <> 0 THEN 
+								 IB.strItemNo
+							ELSE
+								(SELECT IT.strItemNo FROM tblICItem IT JOIN tblICItemBundle ICB ON ICB.intItemId = IT.intItemId WHERE ICB.intBundleItemId = Item.intItemId)
+							END
 		FROM vyuLGPickOpenInventoryLots Lots
 		JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = Lots.intItemUOMId
 		JOIN tblICItem Item ON Item.intItemId = Lots.intItemId
 		LEFT JOIN tblCTContractDetail Detail ON Detail.intContractDetailId = Lots.intContractDetailId
 		LEFT JOIN tblCTContractHeader Header ON Header.intContractHeaderId = Detail.intContractHeaderId
 		JOIN TonUOM ON TonUOM.intCommodityId = Lots.intCommodityId AND TonUOM.intItemId = Item.intItemId
-		LEFT JOIN tblICItemBundle IB ON IB.intItemId = Detail.intItemBundleId
+		LEFT JOIN tblICItem IB ON IB.intItemId = Detail.intItemBundleId
 		LEFT JOIN (
 			SELECT CC.intContractDetailId
 				, dblAmount = SUM(dbo.fnRKConvertUOMCurrency('ItemUOM', CC.intItemUOMId, CCUOM.intItemUOMId, 1, CC.intCurrencyId, @intCurrencyId, dblAmount, CC.intContractDetailId))
@@ -249,17 +270,22 @@ BEGIN
 			, dblTransactionPrice = NULL
 			, dblContractDifferential = NULL
 			, dblFreight = NULL
-			, intBundleItemId = NULL
-			, strBundleItem = NULL
+			, intBundleItemId = i.intItemId
+			, strBundleItem = IB.strItemNo
 		FROM tblMFDemandDetail DD
-		LEFT JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = DD.intDemandHeaderId
-		LEFT JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
+		JOIN tblMFDemandHeader DH ON DH.intDemandHeaderId = DD.intDemandHeaderId
+		JOIN tblICItemUOM iUOM ON iUOM.intItemUOMId = DD.intItemUOMId
 		JOIN tblICItem i ON i.intItemId = DD.intItemId
 		JOIN TonUOM ON TonUOM.intCommodityId = i.intCommodityId AND TonUOM.intItemId = DD.intItemId
 		JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = i.intCommodityId
 			AND cUOM.intUnitMeasureId = iUOM.intUnitMeasureId
 		JOIN tblICCommodityUnitMeasure mtUOM ON mtUOM.intCommodityId = i.intCommodityId
 			AND mtUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
+		JOIN tblICItem IB ON IB.intItemId = DD.intItemId
+		WHERE DH.intDemandHeaderId = (SELECT TOP 1 intDemandHeaderId
+										FROM tblMFDemandHeader
+										WHERE CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @dtmDate
+										ORDER BY dtmDate DESC)
 	) t
 	LEFT JOIN tblCTBook book ON book.intBookId = t.intBookId
 	LEFT JOIN tblCTSubBook subBook ON subBook.intSubBookId = t.intSubBookId
@@ -294,11 +320,11 @@ BEGIN
 		AND LastSettle.intCommodityId = t.intCommodityId
 		AND LastSettle.intRowNo = 1
 	LEFT JOIN (
-		SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY BD.intFutureMarketId, BD.intFutureMonthId, BD.intCommodityId ORDER BY B.dtmM2MBasisDate DESC)
+		SELECT intRowNo = ROW_NUMBER() OVER(PARTITION BY BD.intFutureMarketId, BD.intItemId, BD.intCommodityId ORDER BY B.dtmM2MBasisDate DESC)
 			, BD.intM2MBasisId
 			, BD.intM2MBasisDetailId
 			, BD.intFutureMarketId
-			, BD.intFutureMonthId
+			, BD.intItemId
 			, BD.intCommodityId
 			, dblBasisOrDiscount = ISNULL(dbo.fnRKConvertUOMCurrency('CommodityUOM', cUOM.intCommodityUnitMeasureId, mtUOM.intCommodityUnitMeasureId, 1, BD.intCurrencyId, @intCurrencyId, BD.dblBasisOrDiscount, NULL), 0)
 			, B.dtmM2MBasisDate
@@ -313,9 +339,9 @@ BEGIN
 			AND cUOM.intUnitMeasureId = BD.intUnitMeasureId
 		JOIN tblICCommodityUnitMeasure mtUOM ON mtUOM.intCommodityId = BD.intCommodityId
 			AND mtUOM.intUnitMeasureId = TonUOM.intUnitMeasureId
-		WHERE CAST(FLOOR(CAST(B.dtmM2MBasisDate AS FLOAT)) AS DATETIME) <= @Date
+		WHERE B.strPricingType = 'Forecast' AND CAST(FLOOR(CAST(B.dtmM2MBasisDate AS FLOAT)) AS DATETIME) <= @Date
 	) BasisEntry ON BasisEntry.intFutureMarketId = t.intFutureMarketId
-		AND BasisEntry.intFutureMonthId = t.intFutureMonthId
+		AND BasisEntry.intItemId = t.intItemId
 		AND BasisEntry.intCommodityId = t.intCommodityId
 		AND BasisEntry.intRowNo = 1
 

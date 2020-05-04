@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
-	,@SkipValidation BIT = 0
+	,@SkipGLValidation BIT = 0
+	,@SkipICValidation BIT = 0
+	
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,11 +13,16 @@ SET ANSI_WARNINGS OFF
 --=====================================================================================================================================
 -- 	VALIDATION
 ------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@SkipValidation,0)  = 0)
-BEGIN 
-	DECLARE @errorCode INT
+DECLARE @errorCode INT
+
+IF (ISNULL(@SkipGLValidation,0)  = 0)
+BEGIN
 	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries, @ysnPost
 	IF @errorCode > 0	RETURN @errorCode
+END
+
+IF (ISNULL(@SkipICValidation,0)  = 0)
+BEGIN 
 	
 	EXEC  @errorCode = dbo.uspICValidateICAmountVsGLAmount 
 			@strTransactionId = NULL 
@@ -28,7 +35,8 @@ BEGIN
 
 	IF @errorCode > 0	RETURN @errorCode
 END 
-;
+
+
 --=====================================================================================================================================
 -- 	BOOK THE G/L ENTRIES TO THE tblGLDetail table.
 --------------------------------------------------------------------------------------------------------------------------------------
@@ -38,7 +46,12 @@ BEGIN
 	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
 	tblSMMultiCompany MC JOIN tblSMCompanySetup C ON C.intMultiCompanyId = MC.intMultiCompanyId
 
-	DECLARE @dtmDateEntered DATETIME
+	DECLARE @dtmDateEntered DATETIME = GETDATE(),@dtmDateEnteredMin DATETIME = NULL ,@strBatchId NVARCHAR(50)
+
+	SELECT TOP 1 @strBatchId =strBatchId FROM @GLEntries 
+
+	SELECT @dtmDateEnteredMin = MIN(dtmDateEntered) FROM tblGLDetail WHERE strBatchId =@strBatchId group by strBatchId
+
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
 			,[strBatchId]
@@ -82,6 +95,8 @@ BEGIN
 			,intCommodityId
 			,intSourceEntityId
 			,[intConcurrencyId]
+			,[ysnPostAction]
+			,dtmDateEnteredMin
 	)
 	SELECT 
 			dbo.fnRemoveTimeOnDate([dtmDate])
@@ -100,7 +115,7 @@ BEGIN
 			,[intCurrencyId]
 			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,GETDATE()
+			,@dtmDateEntered
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
@@ -126,11 +141,14 @@ BEGIN
 			,intCommodityId
 			,intSourceEntityId
 			,[intConcurrencyId]
+			,@ysnPost
+			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
 	FROM	@GLEntries GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
+
 END
 ;
 

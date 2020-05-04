@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblQMTestPreStage (intTestPreStageId)
 	SELECT intTestPreStageId
-	FROM tblQMTestPreStage
+	FROM tblQMTestPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intTestPreStageId = MIN(intTestPreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intTestId = intTestId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblQMTestPreStage
+		FROM tblQMTestPreStage WITH (NOLOCK)
 		WHERE intTestPreStageId = @intTestPreStageId
 
 		EXEC uspIPTestPopulateStgXML @intTestId

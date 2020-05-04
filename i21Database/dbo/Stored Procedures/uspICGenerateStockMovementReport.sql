@@ -302,6 +302,59 @@ BEGIN
 
 END 
 
+ELSE IF @strResetType = @ResetType_Commodity
+BEGIN 
+	INSERT INTO dbo.tblICInventoryStockMovementReport (		
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,intLotId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,dblCost
+		,dblValue
+		,dblSalesPrice
+		,intCurrencyId
+		,dblExchangeRate
+		,intTransactionId
+		,intTransactionDetailId
+		,strTransactionId
+		,strBatchId
+		,intTransactionTypeId
+		,ysnIsUnposted
+		,strTransactionForm
+		,intRelatedInventoryTransactionId
+		,intRelatedTransactionId
+		,strRelatedTransactionId
+		,intCostingMethod
+		,dtmCreated
+		,intCreatedUserId
+		,intCreatedEntityId
+		,intConcurrencyId
+		,intForexRateTypeId
+		,dblForexRate
+		,intInventoryTransactionId
+		,intInventoryTransactionStorageId
+		,intOwnershipType
+		,intCommodityId
+		,intCategoryId
+		,intLocationId
+		,intSourceEntityId
+	)
+	SELECT 
+		*
+	FROM 
+		vyuICGenerateStockMovement
+	ORDER BY
+		intCommodityId ASC 
+		--,intLocationId ASC 
+		,dtmDate ASC
+		,dtmCreated ASC 
+END 
+
 ELSE
 BEGIN 
 	INSERT INTO dbo.tblICInventoryStockMovementReport (		

@@ -26,6 +26,7 @@
 	, dblContractSize DECIMAL(24, 10) NULL DEFAULT((0))
 	, intEntityId INT NULL
 	, ysnDelete BIT NULL DEFAULT((0))
+	, intCurrencyId INT NULL
 	, intUserId INT NULL
 	, strNotes NVARCHAR(250) NULL
 	, strMiscFields NVARCHAR(MAX) NULL

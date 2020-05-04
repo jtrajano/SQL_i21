@@ -40,6 +40,7 @@ BEGIN TRY
 	DECLARE @dblOldQuantity NUMERIC(18,6)
 	DECLARE @dblTolerance NUMERIC(18,6) = 0.0001
 	DECLARE @NoOFHistorysForBill INT
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -122,46 +123,26 @@ BEGIN TRY
 		
 		EXEC [uspGRUpdateOnStoreInventory] @intCustomerStorageId,@dblOpenBalance
 
-		INSERT INTO [dbo].[tblGRStorageHistory] 
+		INSERT INTO @StorageHistoryStagingTable
 		(
-			 [intConcurrencyId]
-			,[intCustomerStorageId]
-			,[intTicketId]
-			,[intInventoryReceiptId]
-			,[intInvoiceId]
-			,[intContractHeaderId]
+			[intCustomerStorageId]
 			,[dblUnits]
 			,[dtmHistoryDate]
-			,[dblPaidAmount]
-			,[strPaidDescription]
-			,[dblCurrencyRate]
 			,[strType]
-			,[strUserName]
 			,[intUserId]
 			,[intTransactionTypeId]
-			,[intEntityId]
-			,[intCompanyLocationId]
 		)
 		VALUES 
 		(
-			 1
-			,@intCustomerStorageId
-			,NULL
-			,NULL
-			,NULL
-			,NULL
+			@intCustomerStorageId
 			,- @dblUnits
 			,GETDATE()
-			,NULL
-			,NULL
-			,NULL
 			,'Reverse Adjustment'
-			,NULL
 			,@intEntityUserSecurityId
 			,2
-			,NULL
-			,NULL
 		)
+
+		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 	END
 	ELSE IF @intTransactionTypeId =4 --Settle Storage
@@ -298,7 +279,7 @@ BEGIN TRY
 		IF @NoOFHistorysForBill = 1
 		BEGIN		
 				EXEC uspGRDeleteStorageHistory 'Voucher',@intBillId
-				EXEC uspAPDeleteVoucher @intBillId,@intEntityUserSecurityId		
+				EXEC uspAPDeleteVoucher @intBillId,@intEntityUserSecurityId, 1		
 		END
 		ELSE
 		BEGIN

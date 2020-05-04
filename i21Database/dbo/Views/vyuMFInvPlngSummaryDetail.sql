@@ -11,12 +11,12 @@ FROM (
 	SELECT I.strItemNo
 		,'UnAllocated Purchase' strAttributeName
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2) AS strMonth
-		,0 AS dblPlannedPurchaseQty
+		,Convert(Decimal(26,12),0.0) AS dblPlannedPurchaseQty
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, PS.intUnitMeasureId, SS.dblBalance)) AS dblUnAllocatedPurchaseQty
 		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
 	JOIN dbo.tblMFInvPlngSummary PS ON PS.intInvPlngSummaryId = SD.intInvPlngSummaryId
-		AND SD.intMainItemId IS NOT NULL
+		AND SD.intMainItemId IS NOT NULL and SD.intAttributeId=1 and SD.strFieldName='strMonth1'
 	JOIN dbo.tblCTContractDetail SS ON SS.intItemId = SD.intItemId
 	JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
 		AND CH.intContractTypeId = 1
@@ -40,14 +40,13 @@ FROM (
 	SELECT I.strItemNo
 		,'UnAllocated Purchase' strAttributeName
 		,Left(DATENAME(mm, DateAdd(m, 2, SS.dtmStartDate)), 3) + ' ' + Right(DATENAME(YY, DateAdd(m, 2, SS.dtmStartDate)), 2) AS strMonth
-		,0 AS dblPlannedPurchaseQty
+		,0.0 AS dblPlannedPurchaseQty
 		,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, PS.intUnitMeasureId, SS.dblBalance)) AS dblUnAllocatedPurchaseQty
 		,DateAdd(m, 2, SS.dtmStartDate) as dtmStartDate
 	FROM dbo.tblMFInvPlngSummaryDetail SD
 	JOIN dbo.tblMFInvPlngSummary PS ON PS.intInvPlngSummaryId = SD.intInvPlngSummaryId
-		AND SD.intMainItemId IS NULL
-	JOIN tblICItemBundle IB ON IB.intItemId = SD.intItemId
-	JOIN dbo.tblCTContractDetail SS ON SS.intItemBundleId = IB.intItemId
+		AND SD.intMainItemId IS NULL and SD.intAttributeId=1 and SD.strFieldName='strMonth1'
+	JOIN dbo.tblCTContractDetail SS ON SS.intItemBundleId = SD.intItemId
 	JOIN dbo.tblCTContractHeader CH ON CH.intContractHeaderId = SS.intContractHeaderId
 		AND CH.intContractTypeId = 1
 	JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
@@ -78,7 +77,7 @@ FROM (
 		,RA.strAttributeName
 		,SD1.strValue AS strMonth
 		,SD.strValue
-		,0 AS dblUnAllocatedPurchaseQty
+		,0.0 AS dblUnAllocatedPurchaseQty
 		,Convert(Datetime,'01 '+ SD1.strValue)
 	FROM tblMFInvPlngSummaryDetail SD
 	JOIN tblICItem I ON I.intItemId = SD.intItemId

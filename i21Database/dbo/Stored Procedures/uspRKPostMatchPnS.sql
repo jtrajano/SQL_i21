@@ -14,12 +14,14 @@ BEGIN TRY
 		, @BrokerAccount NVARCHAR(100)
 		, @strBook NVARCHAR(100)
 		, @strSubBook NVARCHAR(100)
+		, @intLocationId INT
 		, @strLocationName NVARCHAR(100)
 		, @strFutMarketName NVARCHAR(100)
 		, @intMatchFuturesPSHeaderId INT
 		, @GLEntries AS RecapTableType
 		, @strBatchId NVARCHAR(100)
 		, @intCommodityId INT
+		
 
 	DECLARE @tblResult TABLE (Result NVARCHAR(MAX))
 	
@@ -43,6 +45,7 @@ BEGIN TRY
 		, @strSubBook = strSubBook
 		, @strFutMarketName = strFutMarketName
 		, @strLocationName = strLocationName
+		, @intLocationId = h.intCompanyLocationId
 	FROM tblRKMatchFuturesPSHeader h
 	JOIN tblRKFutureMarket fm ON h.intFutureMarketId = fm.intFutureMarketId
 	JOIN tblRKBrokerageAccount ba ON ba.intBrokerageAccountId = h.intBrokerageAccountId
@@ -67,6 +70,16 @@ BEGIN TRY
 	FROM tblSMCurrency
 	WHERE intCurrencyID = @intCurrencyId
 
+	DECLARE @GLAccounts TABLE(strCategory NVARCHAR(100)
+		, intAccountId INT
+		, strAccountNo NVARCHAR(20) COLLATE Latin1_General_CI_AS
+		, ysnHasError BIT
+		, strErrorMessage NVARCHAR(250) COLLATE Latin1_General_CI_AS)
+
+	INSERT INTO @GLAccounts
+	EXEC uspRKGetGLAccountsForPosting @intCommodityId = @intCommodityId
+		, @intLocationId = @intLocationId
+
 	--GL Account Validation
 	SELECT * INTO #tmpPostRecap
 	FROM tblRKMatchDerivativesPostRecap 
@@ -76,119 +89,63 @@ BEGIN TRY
 	BEGIN
 		DECLARE @intMatchDerivativesPostRecapId INT
 			, @intAccountId INT
+			, @strAccountNo NVARCHAR(50)
+			, @strDescription NVARCHAR(MAX)
+			, @strTransactionType NVARCHAR(250)
+			, @strErrorMessage NVARCHAR(MAX)
+			, @ysnHasError BIT
 
 		SELECT TOP 1 @intMatchDerivativesPostRecapId = intMatchDerivativesPostRecapId
-			, @intAccountId = intAccountId
-		FROM #tmpPostRecap
+			, @strTransactionType = CASE WHEN vyu.dblNetPL > 0
+											THEN CASE WHEN r.dblDebit > 0 THEN 'Futures Gain or Loss Realized Offset' ELSE 'Futures Gain or Loss Realized' END
+										ELSE CASE WHEN r.dblDebit > 0 THEN 'Futures Gain or Loss Realized' ELSE 'Futures Gain or Loss Realized Offset' END END
+		FROM #tmpPostRecap r
+		LEFT JOIN vyuRKMatchedPSTransaction vyu ON vyu.intMatchFuturesPSHeaderId = r.intTransactionId
+
 
 		DECLARE @intFuturesGainOrLossRealized INT
 			, @intFuturesGainOrLossRealizedOffset INT
 			, @strFuturesGainOrLossRealized NVARCHAR(100)
 			, @strFuturesGainOrLossRealizedOffset NVARCHAR(100)
-			, @strFuturesGainOrLossRealizedDescription NVARCHAR(100)
-			, @strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(100)
+			, @strFuturesGainOrLossRealizedDescription NVARCHAR(250)
+			, @strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(250)
 
-		IF (SELECT intPostToGLId FROM tblRKCompanyPreference) = 1
+		IF (@strTransactionType = 'Futures Gain or Loss Realized')
 		BEGIN
-			SELECT @intFuturesGainOrLossRealized = intFuturesGainOrLossRealizedId
-				, @intFuturesGainOrLossRealizedOffset = intFuturesGainOrLossRealizedOffsetId
-			FROM tblRKCompanyPreference
+			SELECT TOP 1 @intFuturesGainOrLossRealized = rk.intAccountId
+				, @strFuturesGainOrLossRealized = strAccountNo
+				, @strFuturesGainOrLossRealizedDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
+				, @strErrorMessage = strErrorMessage
+				, @ysnHasError = ysnHasError
+			FROM @GLAccounts rk
+			LEFT JOIN tblGLAccount gl ON gl.intAccountId = rk.intAccountId
+			WHERE strCategory = 'intFuturesGainOrLossRealizedId'
+		END
+		ELSE IF (@strTransactionType = 'Futures Gain or Loss Realized Offset')
+		BEGIN
+			SELECT TOP 1 @intFuturesGainOrLossRealizedOffset = rk.intAccountId
+				, @strFuturesGainOrLossRealizedOffset = strAccountNo
+				, @strFuturesGainOrLossRealizedOffsetDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
+				, @strErrorMessage = strErrorMessage
+				, @ysnHasError = ysnHasError
+			FROM @GLAccounts rk
+			LEFT JOIN tblGLAccount gl ON gl.intAccountId = rk.intAccountId
+			WHERE strCategory = 'intFuturesGainOrLossRealizedOffsetId'
+		END
 
-			IF ISNULL(@intFuturesGainOrLossRealized, 0) = 0 
-			BEGIN
-				INSERT INTO @tblResult(Result)
-				VALUES('Futures Gain or Loss Realized cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.')
-			END
-			ELSE
-			BEGIN
-				IF ISNULL(@intAccountId, 0) = 0
-				BEGIN
-					SELECT @strFuturesGainOrLossRealized = strAccountId
-						, @strFuturesGainOrLossRealizedDescription = strDescription
-					FROM tblGLAccount 
-					WHERE intAccountId = @intFuturesGainOrLossRealized
-
-					UPDATE tblRKMatchDerivativesPostRecap
-					SET intAccountId = @intFuturesGainOrLossRealized
-						, strAccountId = @strFuturesGainOrLossRealized
-						, strAccountDescription = @strFuturesGainOrLossRealizedDescription
-					WHERE dblCredit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
-				END
-			END
-
-			IF ISNULL(@intFuturesGainOrLossRealizedOffset, 0) = 0 
-			BEGIN
-				INSERT INTO @tblResult(Result)
-				VALUES('Futures Gain or Loss Realized Offset cannot be blank. Please set up the default account(s) in Company Configuration Risk Management GL Account tab.')
-			END
-			ELSE
-			BEGIN
-				IF ISNULL(@intAccountId, 0) = 0
-				BEGIN
-					SELECT @strFuturesGainOrLossRealizedOffset = strAccountId 
-						, @strFuturesGainOrLossRealizedOffsetDescription = strDescription
-					FROM tblGLAccount 
-					WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
-
-					UPDATE tblRKMatchDerivativesPostRecap
-					SET intAccountId = @intFuturesGainOrLossRealizedOffset
-						, strAccountId = @strFuturesGainOrLossRealizedOffset
-						, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
-					WHERE dblDebit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
-				END
-			END
+		IF (@ysnHasError = 1)
+		BEGIN
+			INSERT INTO @tblResult(Result)
+			VALUES(@strErrorMessage)
 		END
 		ELSE
 		BEGIN
-			SELECT @intFuturesGainOrLossRealized = dbo.fnGetCommodityGLAccountM2M(DEFAULT, @intCommodityId, 'Futures Gain or Loss Realized')
-			SELECT @intFuturesGainOrLossRealizedOffset = dbo.fnGetCommodityGLAccountM2M(DEFAULT, @intCommodityId, 'Futures Gain or Loss Realized Offset')
-
-			IF ISNULL(@intFuturesGainOrLossRealized, 0) = 0 
-			BEGIN
-				INSERT INTO @tblResult(Result)
-				VALUES('Futures Gain or Loss Realized cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.')
-			END
-			ELSE
-			BEGIN
-				IF ISNULL(@intAccountId, 0) = 0
-				BEGIN
-					SELECT @strFuturesGainOrLossRealized = strAccountId 
-						, @strFuturesGainOrLossRealizedDescription = strDescription
-					FROM tblGLAccount 
-					WHERE intAccountId = @intFuturesGainOrLossRealized
-
-					UPDATE tblRKMatchDerivativesPostRecap
-					SET intAccountId = @intFuturesGainOrLossRealized
-						, strAccountId = @strFuturesGainOrLossRealized
-						, strAccountDescription = @strFuturesGainOrLossRealizedDescription
-					WHERE dblCredit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
-				END
-			END
-
-			IF ISNULL(@intFuturesGainOrLossRealizedOffset, 0) = 0 
-			BEGIN
-				INSERT INTO @tblResult(Result)
-				VALUES('Futures Gain or Loss Realized Offset cannot be blank. Please set up the default account(s) in Commodity GL Accounts M2M tab.')
-			END
-			ELSE
-			BEGIN
-				IF ISNULL(@intAccountId, 0) = 0
-				BEGIN
-					SELECT @strFuturesGainOrLossRealizedOffset = strAccountId 
-						, @strFuturesGainOrLossRealizedOffsetDescription = strDescription
-					FROM tblGLAccount 
-					WHERE intAccountId = @intFuturesGainOrLossRealizedOffset
-
-					UPDATE tblRKMatchDerivativesPostRecap
-					SET intAccountId = @intFuturesGainOrLossRealizedOffset
-						, strAccountId = @strFuturesGainOrLossRealizedOffset
-						, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
-					WHERE dblDebit <> 0 AND intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
-				END
-			END
+			UPDATE tblRKMatchDerivativesPostRecap
+			SET intAccountId = @intFuturesGainOrLossRealized
+				, strAccountId = @strFuturesGainOrLossRealized
+				, strAccountDescription = @strFuturesGainOrLossRealizedDescription
+			WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 		END
-
-		Delete_Routine:
 		
 		DELETE FROM #tmpPostRecap WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 	END
@@ -304,7 +261,7 @@ BEGIN TRY
 		, dblExchangeRate
 		, dtmDateEntered
 		, ysnIsUnposted
-		, strCode
+		, 'RK'
 		, strReference
 		, intEntityId
 		, intUserId

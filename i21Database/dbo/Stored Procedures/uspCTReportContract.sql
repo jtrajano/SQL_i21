@@ -65,7 +65,10 @@ BEGIN TRY
 			@strOurCommn				NVARCHAR(MAX),
 			@strBrkgCommn				NVARCHAR(MAX),
 			@strApplicableLaw			NVARCHAR(MAX),
-			@strGeneralCondition		NVARCHAR(MAX)
+			@strGeneralCondition		NVARCHAR(MAX),
+			@ysnExternal				BIT,
+			@intStraussCompanyId INT,
+			@intMultiCompanyParentId INT = 0
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -158,10 +161,16 @@ BEGIN TRY
 
 	SELECT	@strCommodityCode	=	CM.strCommodityCode,
 			@ysnPrinted			=	CH.ysnPrinted,
-			@strReportTo		=	strReportTo
+			@strReportTo		=	strReportTo,
+   			@intStraussCompanyId = CH.intCompanyId
 	FROM	tblCTContractHeader CH	WITH (NOLOCK)
 	JOIN	tblICCommodity		CM	WITH (NOLOCK) ON	CM.intCommodityId		=	CH.intCommodityId
 	WHERE	CH.intContractHeaderId = @intContractHeaderId
+
+	 if (@intStraussCompanyId is not null and @intStraussCompanyId > 0)
+	 begin
+		set @intMultiCompanyParentId = (select isnull(intMultiCompanyParentId,0) from tblSMMultiCompany where intMultiCompanyId = @intStraussCompanyId);
+	 end
 
 	IF @IsFullApproved = 1	
 	BEGIN	
@@ -273,8 +282,10 @@ BEGIN TRY
 					FOR XML PATH(''), TYPE				
 			   ).value('.','varchar(max)')
 			   ,1,2, ''						
-		  )  				
-	FROM tblCTContractHeader CH						
+		  ),
+		  @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
+	FROM tblCTContractHeader CH
+	left join tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
 	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	SELECT	@strContractConditions = STUFF(								
@@ -497,6 +508,7 @@ BEGIN TRY
 			,strBuyerRefNo							= CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strSellerRefNo							= CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strContractNumber						= CH.strContractNumber
+			,strContractNumberStrauss				= CH.strContractNumber + (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 then '' else ' - AMENDMENT' end)
 			,strCustomerContract					= CH.strCustomerContract
 			,strContractBasis						= CB.strFreightTerm
 			,strContractBasisDesc					= CB.strFreightTerm+' '+CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END
@@ -673,7 +685,9 @@ BEGIN TRY
 			,FirstApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @FirstApprovalName ELSE NULL END
 			,SecondApprovalName						= CASE WHEN @IsFullApproved=1 AND @strCommodityCode = 'Coffee' THEN @SecondApprovalName ELSE NULL END
 			,StraussContractApproverSignature		=  @StraussContractApproverSignature
-			,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
+			--,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
+			,StraussContractSubmitSignature   		=  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then null else @StraussContractSubmitSignature  end)
+   			,StraussContractSubmitByParentSignature =  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then @StraussContractSubmitSignature else null  end)
 			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
@@ -788,15 +802,17 @@ BEGIN TRY
 			,strBrkgCommn							=	@strBrkgCommn
 			,strItemDescription						=	strItemDescription
 			,strStraussQuantity						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strPackingDescription, '')
-			,strItemBundleNo						=	SQ.strItemBundleNo
+			,strItemBundleNo						=	(case when @ysnExternal = convert(bit,1) then SQ.strItemBundleNo else null end)
+			,strItemBundleNoLabel					=	(case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end)
 			,strStraussPrice						=	CASE WHEN CH.intPricingTypeId = 2 THEN 
 															'Price to be fixed basis ' + strFutMarketName + ' ' + 
 															strFutureMonthYear + CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +
 															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(SQ.dblBasis),2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
-														ELSE	
-															'Priced ' + strFutMarketName + ' ' + 
-															strFutureMonthYear + ' ' +
-															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
+														ELSE
+															'' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + ' ' + strPriceCurrencyAndUOMForPriced2	
+															--'Priced ' + strFutMarketName + ' ' + 
+															--strFutureMonthYear + ' ' +
+															--SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
 														END
 			--,strStraussCondition					=	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + strDestinationPointName + ' ' + W1.strWeightGradeDesc
 			,strStraussCondition     				= 	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(CT.strCity,'') + ' ' + isnull(W1.strWeightGradeDesc,'')  
@@ -888,6 +904,7 @@ BEGIN TRY
 							CD.intPricingTypeId,
 							CY.strCurrency + '-' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOM,
 							CY.strCurrency + '/' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOMForPriced,
+							CY.strCurrency + ' per ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) AS	strPriceCurrencyAndUOMForPriced2,
 							CD.dtmStartDate,
 							CD.dtmEndDate,
 							dbo.fnCTGetTranslation('RiskManagement.view.FuturesTradingMonths',CD.intFutureMonthId,@intLaguageId,'Future Trading Month',MO.strFutureMonth) strFutureMonth,

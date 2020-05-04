@@ -42,22 +42,23 @@ DECLARE @intScaleStationId AS INT
 		,@ysnRequireProducerQty AS BIT
 		,@intDeliverySheetId INT
 		,@intFreightItemId INT;
+DECLARE @_intStorageHistoryId INT
 	
-	SELECT @intFreightItemId = SCSetup.intFreightItemId
-		, @intHaulerId = SC.intHaulerId
-		, @ysnDeductFreightFarmer = SC.ysnFarmerPaysFreight 
-		, @ysnDeductFeesCusVen = SC.ysnCusVenPaysFees
-		, @intTicketItemUOMId = SC.intItemUOMIdTo
-		, @intLoadId = SC.intLoadId
-		, @intContractDetailId = SC.intContractId
-		, @splitDistribution = SC.strDistributionOption
-		, @intItemId = SC.intItemId 
-		, @ticketStatus = SC.strTicketStatus
-		, @intContractCostId = SC.intContractCostId
-		, @intDeliverySheetId = SC.intDeliverySheetId
-	FROM tblSCTicket SC 
-	INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId 
-	WHERE SC.intTicketId = @intTicketId
+SELECT @intFreightItemId = SCSetup.intFreightItemId
+	, @intHaulerId = SC.intHaulerId
+	, @ysnDeductFreightFarmer = SC.ysnFarmerPaysFreight 
+	, @ysnDeductFeesCusVen = SC.ysnCusVenPaysFees
+	, @intTicketItemUOMId = SC.intItemUOMIdTo
+	, @intLoadId = SC.intLoadId
+	, @intContractDetailId = SC.intContractId
+	, @splitDistribution = SC.strDistributionOption
+	, @intItemId = SC.intItemId 
+	, @ticketStatus = SC.strTicketStatus
+	, @intContractCostId = SC.intContractCostId
+	, @intDeliverySheetId = SC.intDeliverySheetId
+FROM tblSCTicket SC 
+INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId 
+WHERE SC.intTicketId = @intTicketId
 
 IF @ticketStatus = 'C'
 BEGIN
@@ -234,8 +235,8 @@ SELECT
 										END
 									END
 		,intShipFromEntityId		= SC.intEntityId
-		,[intLoadShipmentId] 		= SC.intLoadId
-		,[intLoadShipmentDetailId] 	= SC.intLoadDetailId
+		,[intLoadShipmentId] 		= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadId ELSE NULL END
+		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadDetailId ELSE NULL END
 		,intTaxGroupId				= CASE WHEN LI.strSourceTransactionId = 'DP' THEN -1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
@@ -1600,10 +1601,12 @@ BEGIN
 			@ReceiptId = intInventoryReceiptId  
 	FROM	#tmpAddItemReceiptResult 
   
+	
 	SET @InventoryReceiptId = @ReceiptId
+	SET @_intStorageHistoryId = 0
 
-	UPDATE SH  
-	SET SH.[intInventoryReceiptId] = @InventoryReceiptId
+	SELECT TOP 1
+		@_intStorageHistoryId = SH.intStorageHistoryId
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
 	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
@@ -1611,10 +1614,22 @@ BEGIN
 	AND IR.intInventoryReceiptId=@InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
 
+	IF(ISNULL(@_intStorageHistoryId,0) > 0)
+	BEGIN
+		UPDATE SH  
+		SET SH.[intInventoryReceiptId] = @InventoryReceiptId
+		FROM tblGRStorageHistory SH
+		WHERE SH.intStorageHistoryId = @_intStorageHistoryId
+
+
+		EXEC uspGRRiskSummaryLog @_intStorageHistoryId
+	END
+
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
 END
 
+/*
 BEGIN
 	INSERT INTO [dbo].[tblQMTicketDiscount]
        ([intConcurrencyId]     
@@ -1653,7 +1668,7 @@ BEGIN
 	ON ISH.intSourceId = SD.intTicketId AND SD.strSourceType = 'Scale' AND
 	SD.intTicketFileId = @intTicketId WHERE	ISH.intSourceId = @intTicketId AND ISH.intInventoryReceiptId = @InventoryReceiptId
 END
-
+*/
 GO
 
 

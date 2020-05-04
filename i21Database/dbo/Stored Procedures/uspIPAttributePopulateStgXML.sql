@@ -27,7 +27,7 @@ BEGIN TRY
 	SET @strAttributeName = NULL
 
 	SELECT @strAttributeName = strAttributeName
-	FROM tblQMAttribute
+	FROM tblQMAttribute WITH (NOLOCK)
 	WHERE intAttributeId = @intAttributeId
 
 	-------------------------Header-----------------------------------------------------------

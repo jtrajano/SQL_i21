@@ -77,7 +77,7 @@ BEGIN
 		, intRefSummaryLogId INT NULL
 		, strMiscFields NVARCHAR(MAX))
 
-	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs
+	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs ORDER BY dtmTransactionDate
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpSummaryLogs WHERE ISNULL(strBatchId, '') = '')
@@ -156,6 +156,9 @@ BEGIN
 			, @strMiscFields = strMiscFields
 		FROM #tmpSummaryLogs
 
+		IF OBJECT_ID('tempdb..#tmpPrevLog') IS NOT NULL
+			DROP TABLE #tmpPrevLog
+
 		SELECT TOP 1 *
 		INTO #tmpPrevLog
 		FROM tblRKSummaryLog
@@ -229,6 +232,10 @@ BEGIN
 				, 'Delete Record'
 				, strMiscField
 			FROM #tmpPrevLog
+
+			DELETE FROM #tmpSummaryLogs
+			WHERE intId = @intId
+
 			CONTINUE
 		END
 
@@ -249,6 +256,10 @@ BEGIN
 				AND intContractHeaderId = @intContractHeaderId
 				AND intTicketId = @intTicketId)
 		BEGIN
+
+			DELETE FROM #tmpSummaryLogs
+			WHERE intId = @intId
+			
 			CONTINUE
 		END
 
@@ -803,11 +814,66 @@ BEGIN
 		---------------------------------------
 		------------- Scale --------------
 		---------------------------------------
-		ELSE IF @strTransactionType = ''
+		ELSE IF @strBucketType = 'On Hold'
 		BEGIN
-			PRINT 'BEGIN ' + @strTransactionType
 
-			PRINT 'END ' + @strTransactionType
+			INSERT INTO @FinalTable(strBatchId
+				, strBucketType
+				, strTransactionType
+				, intTransactionRecordId
+				, intTransactionRecordHeaderId
+				, strDistributionType
+				, strTransactionNumber
+				, dtmTransactionDate
+				, intContractDetailId
+				, intContractHeaderId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intFutOptTransactionId
+				, intCommodityId
+				, intItemId
+				, intProductTypeId
+				, intOrigUOMId
+				, intBookId
+				, intSubBookId
+				, intLocationId
+				, strInOut
+				, dblOrigQty
+				, dblPrice
+				, intEntityId
+				, intTicketId
+				, intUserId
+				, strNotes
+				, strMiscFields)
+			SELECT TOP 1 @strBatchId
+				, @strBucketType
+				, @strTransactionType
+				, @intTransactionRecordId
+				, @intTransactionRecordHeaderId
+				, @strDistributionType
+				, @strTransactionNumber
+				, @dtmTransactionDate
+				, @intContractDetailId
+				, @intContractHeaderId
+				, @intFutureMarketId
+				, @intFutureMonthId
+				, @intTransactionRecordId
+				, @intCommodityId
+				, @intItemId
+				, intProductTypeId = NULL--I.intProductTypeId
+				, intOrigUOMId = @intCommodityUOMId
+				, @intBookId
+				, @intSubBookId
+				, @intLocationId
+				, strInOut = CASE WHEN ISNULL(@dblQty, 0) >= 0 THEN 'IN' ELSE 'OUT' END
+				, dblOrigQty = @dblQty
+				, dblPrice = @dblPrice
+				, @intEntityId
+				, @intTicketId
+				, @intUserId
+				, @strNotes
+				, @strMiscFields
+
 		END
 
 		---------------------------------------
@@ -995,7 +1061,6 @@ BEGIN
 		------------------------------
 		------------------------------
 		
-		DROP TABLE #tmpPrevLog
 
 		DELETE FROM #tmpSummaryLogs
 		WHERE intId = @intId
@@ -1068,6 +1133,7 @@ BEGIN
 		, intRefSummaryLogId
 		, strMiscFields
 	FROM @FinalTable
+	ORDER BY dtmTransactionDate
 
 	DROP TABLE #tmpSummaryLogs
 END

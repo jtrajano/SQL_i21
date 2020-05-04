@@ -151,7 +151,8 @@ BEGIN TRY
 		BEGIN
 
 			UPDATE	CD
-			SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
+			SET		CD.dblBasis				=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblOriginalBasis,0) END,
+					CD.dblFreightBasisBase	=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblFreightBasisBase,0) END,
 					CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 					CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 					CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId = 8 THEN 8 WHEN CH.intPricingTypeId = 3 THEN 3 ELSE 2 END,
@@ -199,7 +200,10 @@ BEGIN TRY
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
-			EXEC	uspCTCreateDetailHistory	@intContractHeaderId,@intContractDetailId, 'Pricing Delete'
+			EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
+												@intContractDetailId 	= @intContractDetailId, 
+												@strSource 			 	= 'Pricing',
+												@strProcess 			= 'Price Delete'
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
@@ -535,7 +539,9 @@ BEGIN TRY
 												)/
 												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END
+					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
+					CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
+					CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
@@ -582,7 +588,10 @@ BEGIN TRY
 		
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
-		EXEC	uspCTCreateDetailHistory	@intContractHeaderId = @intContractHeaderId, @intContractDetailId = @intContractDetailId, @strProcess = 'Price Fixation'
+		EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
+											@intContractDetailId 	= @intContractDetailId, 
+											@strSource				= 'Pricing',
+											@strProcess 			= 'Price Fixation'
 		
 		/*CT-3569 - this will create amendment for newly added sequence from partial pricing SPLIT function.*/
 		  if (ISNULL(@ysnSplit,0) = 1 )

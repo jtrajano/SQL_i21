@@ -116,6 +116,12 @@ BEGIN TRY
 		,@intCompanyRefId INT
 		,@strDescription NVARCHAR(100)
 		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML NVARCHAR(MAX)
+
+	SELECT @intCompanyRefId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
 
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 	FROM tblCTPriceContractStage
@@ -146,6 +152,7 @@ BEGIN TRY
 			,@strPriceFixationXML = strPriceFixationXML
 			,@strPriceFixationDetailXML = strPriceFixationDetailXML
 			,@strApproverXML = strApproverXML
+			,@strSubmittedByXML=strSubmittedByXML
 			,@strReference = strReference
 			,@strRowState = strRowState
 			,@strFeedStatus = strFeedStatus
@@ -691,6 +698,7 @@ BEGIN TRY
 						,dtmLastModified
 						,intConcurrencyId
 						,intPriceContractRefId
+						,intCompanyId
 						)
 					SELECT @strNewPriceContractNo
 						,@intCommodityId
@@ -702,7 +710,7 @@ BEGIN TRY
 						,@dtmLastModified
 						,1 AS intConcurrencyId
 						,@intPriceContractId
-
+						,@intCompanyRefId
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
@@ -731,9 +739,9 @@ BEGIN TRY
 						AND intPriceContractId = @intNewPriceContractId
 				END
 
-				SELECT @intCompanyRefId = intCompanyId
-				FROM tblCTPriceContract
-				WHERE intPriceContractId = @intNewPriceContractId
+				--SELECT @intCompanyRefId = intCompanyId
+				--FROM tblCTPriceContract
+				--WHERE intPriceContractId = @intNewPriceContractId
 
 				EXEC sp_xml_removedocument @idoc
 
@@ -975,14 +983,14 @@ BEGIN TRY
 							,ysnToBeAgreed
 							,dblSettlementPrice
 							,dblAgreedAmount
-							,@intAgreedItemUOMId
+							,@intCommodityUnitMeasureId2
 							,dblPolPct
 							,dblPriceWORollArb
 							,dblRollArb
 							,dblPolSummary
 							,dblAdditionalCost
 							,dblFinalPrice
-							,@intFinalPriceUOMId
+							,@intCommodityUnitMeasureId
 							,ysnSplit
 							,intPriceFixationId
 						FROM OPENXML(@idoc, 'vyuIPPriceFixations/vyuIPPriceFixation', 2) WITH (
@@ -1049,14 +1057,14 @@ BEGIN TRY
 							,ysnToBeAgreed = x.ysnToBeAgreed
 							,dblSettlementPrice = x.dblSettlementPrice
 							,dblAgreedAmount = x.dblAgreedAmount
-							,intAgreedItemUOMId = @intAgreedItemUOMId
+							,intAgreedItemUOMId = @intCommodityUnitMeasureId2
 							,dblPolPct = x.dblPolPct
 							,dblPriceWORollArb = x.dblPriceWORollArb
 							,dblRollArb = x.dblRollArb
 							,dblPolSummary = x.dblPolSummary
 							,dblAdditionalCost = x.dblAdditionalCost
 							,dblFinalPrice = x.dblFinalPrice
-							,intFinalPriceUOMId = @intFinalPriceUOMId
+							,intFinalPriceUOMId = @intCommodityUnitMeasureId
 							,ysnSplit = x.ysnSplit
 						FROM tblCTPriceFixation PF
 						JOIN OPENXML(@idoc, 'vyuIPPriceFixations/vyuIPPriceFixation', 2) WITH (
@@ -1540,12 +1548,13 @@ BEGIN TRY
 				SELECT @intPriceFixationId = intPriceFixationId
 					,@intContractHeaderId = intContractHeaderId
 				FROM tblCTPriceFixation
-				WHERE PF.intPriceContractId = @intNewPriceContractId
+				WHERE intPriceContractId = @intNewPriceContractId
 
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intPriceFixationId = @intPriceFixationId
+					AND ysnApproval=1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -1554,19 +1563,53 @@ BEGIN TRY
 					,strUserName
 					,strScreen
 					,intConcurrencyId
+					,ysnApproval
 					)
 				SELECT @intContractHeaderId
 					,@intPriceFixationId
 					,strName
 					,strUserName
-					,strScreenName
+					,'Price Contract' strScreenName
 					,1 AS intConcurrencyId
-				FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
+					,1
+				FROM OPENXML(@idoc, 'vyuCTPriceContractApproverViews/vyuCTPriceContractApproverView', 2) WITH (
 						strName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
 						) x
 
+				EXEC sp_xml_removedocument @idoc
+
+				
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strSubmittedByXML
+				DELETE
+				FROM tblCTIntrCompApproval
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intPriceFixationId = @intPriceFixationId
+					AND ysnApproval=0
+
+				INSERT INTO tblCTIntrCompApproval (
+					intContractHeaderId
+					,intPriceFixationId
+					,strName
+					,strUserName
+					,strScreen
+					,intConcurrencyId
+					,ysnApproval
+					)
+				SELECT @intContractHeaderId
+					,@intPriceFixationId
+					,strName
+					,strUserName
+					,'Price Contract' strScreenName
+					,1 AS intConcurrencyId
+					,0
+				FROM OPENXML(@idoc, 'vyuIPPriceContractSubmittedByViews/vyuIPPriceContractSubmittedByView', 2) WITH (
+						strName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+						) x
 				EXEC sp_xml_removedocument @idoc
 
 				SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intNewPriceContractId)
@@ -1636,9 +1679,12 @@ BEGIN TRY
 					,@intTransactionRefId
 					,@intCompanyRefId
 
-				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-					,@referenceTransactionId = @intTransactionId
-					,@referenceCompanyId = @intCompanyId
+				IF @strRowState <> 'Delete'
+				BEGIN
+					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+						,@referenceTransactionId = @intTransactionId
+						,@referenceCompanyId = @intCompanyId
+				END
 
 				UPDATE tblCTPriceContractStage
 				SET strFeedStatus = 'Processed'

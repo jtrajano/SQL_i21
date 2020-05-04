@@ -26,13 +26,14 @@ SELECT [intId] 				= a.intEntityId
 	 , [ModifiedDate]		= COALESCE(c.dtmDateModified, c.dtmDateCreated)
 	 , [Comment]			= ''
 	 , [LicenseApplicator] 	= g.strLicenseNo 
+	 , [LicenseExpirationDate] = g.dtmExpirationDate
 FROM tblEMEntity a
 INNER JOIN tblEMEntityType b ON a.intEntityId = b.intEntityId and b.strType = 'Customer'
 INNER JOIN tblARCustomer c ON a.intEntityId = c.intEntityId
 INNER JOIN tblEMEntityToContact d ON a.intEntityId = d.intEntityId and d.ysnDefaultContact = 1
 INNER JOIN tblEMEntity e ON d.intEntityContactId = e.intEntityId
 INNER JOIN tblEMEntityLocation f ON a.intEntityId = f.intEntityId and f.ysnDefaultLocation = 1
-INNER JOIN tblARCustomerApplicatorLicense g ON g.intEntityId = a.intEntityId
+INNER JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = a.intEntityId
 OUTER APPLY ( 
 	SELECT TOP 1 strPhone = ISNULL(strPhone, '') 
 	FROM tblEMEntityPhoneNumber 

@@ -4,7 +4,8 @@
 	@intUserId AS INT,
 	@intEntityId AS INT,
 	@InventoryShipmentId AS INT OUTPUT ,
-	@intInvoiceId AS INT OUTPUT
+	@intInvoiceId AS INT OUTPUT,
+	@dtmClientDate DATETIME = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -69,6 +70,9 @@ DECLARE @_intContractDetailId INT
 DECLARE @__intContractDetailId INT
 DECLARE @_intContractItemUom INT
 DECLARE @ysnLoadContract BIT
+DECLARE @_dblContractScheduledQty NUMERIC(18,6)
+DECLARE @_dblConvertedLoopQty NUMERIC(18,6)
+
 
 
 SELECT @ysnUpdateContractWeightGrade  = CASE WHEN intContractId IS NULL AND strDistributionOption = 'CNT' AND (intWeightId IS NULL AND intGradeId IS NULL ) THEN 1 ELSE 0 END FROM tblSCTicket WHERE intTicketId = @intTicketId
@@ -109,10 +113,28 @@ DECLARE @intId INT;
 DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
+DECLARE @convertedLoopContractUnits numeric(38,20)
+
+IF OBJECT_ID(N'tempdb..#tmpManualDistributionLineItem') IS NOT NULL DROP TABLE #tmpManualDistributionLineItem
+
+SELECT 
+	*
+INTO #tmpManualDistributionLineItem
+FROM @LineItem
+WHERE strDistributionOption = @strTicketDistributionOption
+
+INSERT INTO #tmpManualDistributionLineItem
+SELECT 
+	*
+FROM @LineItem
+WHERE strDistributionOption <> @strTicketDistributionOption
+
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, ysnAllowVoucher, intLoadDetailId
-FROM @LineItem;
+FROM #tmpManualDistributionLineItem;
 
 OPEN intListCursor;
 
@@ -131,80 +153,109 @@ OPEN intListCursor;
 			WHERE intContractDetailId = @intLoopContractId
 
 			SET @dblTicketScheduleQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@_dblTicketScheduleQuantity)
+			SET @_dblConvertedLoopQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId,@_intContractItemUom,@dblLoopContractUnits)
 
 			IF @ysnIsStorage = 0 AND ISNULL(@intStorageScheduleTypeId, 0) <= 0
 				BEGIN
+
 					IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 					BEGIN
-						-- IF ISNULL(@intLoopContractId,0) != 0 AND @strDistributionOption = 'CNT'
-						-- EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-						-- EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-
-						-- IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)
-						-- BEGIN
-						-- 	EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;	
-						-- END
+		
+						SET @_dblContractScheduledQty = 0
+						SET @ysnLoadContract = 0
+							SELECT TOP 1 
+								@ysnLoadContract = ISNULL(ysnLoad,0) 
+								,@_dblContractScheduledQty = ISNULL(B.dblScheduleQty,0)
+							FROM tblCTContractHeader A
+							INNER JOIN tblCTContractDetail B
+								ON A.intContractHeaderId = B.intContractHeaderId
+							WHERE B.intContractDetailId = @intLoopContractId
 
 						IF(@strDistributionOption = 'LOD' AND @intLoadDetailId > 0)  
 						BEGIN  
 							--get contract Detail Id of the load detail  
-							SELECT @intLoadContractDetailId = intPContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
+							SELECT @intLoadContractDetailId = intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId  
 							
 							IF(@intLoopContractId = @intLoadContractDetailId)  
 							BEGIN   
 
 								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;  
-							END  
-
-							
+							END 
 					
 							EXEC dbo.uspSCUpdateTicketLoadUsed @intTicketId, @intLoadDetailId, @dblLoopContractUnits, @intEntityId;   
-
-							IF(@intLoadDetailId = @intTicketLoadDetailId)
+						
+							IF(@ysnLoadContract = 0)
 							BEGIN
-								IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+								IF(@intLoadDetailId = @intTicketLoadDetailId)
 								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
-								END
-								ELSE
-								BEGIN
-									SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
-								END
-								
+									IF(@_dblConvertedLoopQty > @dblTicketScheduleQuantity )
+									BEGIN
+										---This should not be adjusted/happening since the manual distribution screen should not allow allocation of units more than the quantity/load
+										-- SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+										SET @dblLoopAdjustedScheduleQuantity = 0
+									END
+									ELSE
+									BEGIN
+										--Check if the units used the same as the contract schedule if yes no adjustment required
+										IF(@_dblConvertedLoopQty = @_dblContractScheduledQty)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = 0
+										END
+										ELSE
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @_dblConvertedLoopQty) * -1
+										END
+									END
 
-								IF @dblLoopAdjustedScheduleQuantity <> 0
+									IF @dblLoopAdjustedScheduleQuantity <> 0
+									BEGIN
+										EXEC	uspCTUpdateScheduleQuantity 
+										@intContractDetailId	=	@intLoopContractId,
+										@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intTicketId,
+										@strScreenName			=	'Auto - Scale'
+									END
+								END
+							END
+							ELSE
+							BEGIN
+								IF(@intLoadDetailId = @intTicketLoadDetailId)
 								BEGIN
-									EXEC	uspCTUpdateScheduleQuantity 
-									@intContractDetailId	=	@intLoopContractId,
-									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Auto - Scale'
+									-- no scheduling of load based contract since load shipment already have the schedule 
+									print 'no scheduling of load based'
 								END
 							END
 						END  
 						ELSE  
 						BEGIN  
 
-							SET @ysnLoadContract = 0
-							SELECT TOP 1 @ysnLoadContract = ISNULL(ysnLoad,0) 
-							FROM tblCTContractHeader A
-							INNER JOIN tblCTContractDetail B
-								ON A.intContractHeaderId = B.intContractHeaderId
-							WHERE B.intContractDetailId = @intLoopContractId
-
 							-- do not schedule if the contract is the same as the ticket contract since this is already scheduled upon saving the ticket. Only adjust
 							IF ISNULL(@intLoopContractId,0) <> 0 AND @strTicketDistributionOption = 'CNT' AND @intTicketContractDetailId = @intLoopContractId  
 							BEGIN  
 								IF(@ysnLoadContract = 0)
 								BEGIN
-									IF(@dblLoopContractUnits > @dblTicketScheduleQuantity )
+									IF(@_dblConvertedLoopQty > @dblTicketScheduleQuantity )
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @dblTicketScheduleQuantity
+										IF(@_dblContractScheduledQty >= @dblTicketScheduleQuantity)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @dblTicketScheduleQuantity
+										END
+										ELSE
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @_dblContractScheduledQty
+										END
 									END
 									ELSE
 									BEGIN
-										SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @dblLoopContractUnits) * -1
+										IF(@_dblContractScheduledQty >= @_dblConvertedLoopQty)
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = (@dblTicketScheduleQuantity - @_dblConvertedLoopQty) * -1
+										END
+										ELSE
+										BEGIN
+											SET @dblLoopAdjustedScheduleQuantity = @_dblConvertedLoopQty - @_dblContractScheduledQty
+										END
 									END
 									
 
@@ -277,7 +328,7 @@ OPEN intListCursor;
 								,ysnIsStorage
 								,strDistributionOption
 								,ysnAllowVoucher   
-							FROM @LineItem
+							FROM #tmpManualDistributionLineItem
 							where intId = @intId
 					END
 					ELSE
@@ -324,7 +375,7 @@ OPEN intListCursor;
 								,ysnIsStorage
 								,strDistributionOption
 								,ysnAllowVoucher 
-							FROM @LineItem
+							FROM #tmpManualDistributionLineItem
 							where intId = @intId
 					END
 					EXEC dbo.uspICValidateProcessToItemReceipt @ItemsForItemShipment; 
@@ -422,6 +473,7 @@ OPEN intListCursor;
 						,intSubLocationId
 						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
 						,ysnIsStorage
+						,strSourceTransactionId
 						,intStorageScheduleTypeId
 						,ysnAllowVoucher
 					)
@@ -457,67 +509,13 @@ END
 
 	EXEC dbo.uspICPostInventoryShipment 1, 0, @strTransactionId, @intUserId;
 
-	SELECT 
-		@intContractDetailId = MIN(si.intLineNo)
-    FROM tblICInventoryShipment s 
-    JOIN tblICInventoryShipmentItem si 
-		ON si.intInventoryShipmentId = s.intInventoryShipmentId
-    WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-
-	SET @_intContractDetailId = @intContractDetailId
-	SET @__intContractDetailId = @intContractDetailId
- 
- 
-	--INVOICE intergration
-	/*
-	SELECT @intPricingTypeId = CTD.intPricingTypeId FROM tblICInventoryShipmentItem ISI 
-	LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = ISI.intLineNo
-	WHERE intInventoryShipmentId = @InventoryShipmentId
-
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6) AND ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Origin' AND @ysnPriceFixation = 0
-		BEGIN
-			EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
-			IF @intInvoiceId = 0
-				SET @intInvoiceId = NULL
-		END
-	ELSE
-		IF (@intPricingTypeId = 2)
-		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
-		END
-			SELECT @intInvoiceId = id.intInvoiceId
-			FROM tblICInventoryShipment s 
-			JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-			join tblARInvoiceDetail id on id.intInventoryShipmentItemId = si.intInventoryShipmentItemId
-			WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-	*/
-
-	IF ISNULL(@InventoryShipmentId, 0) != 0 AND EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE ysnAllowInvoice = 1 AND intInventoryShipmentId = @InventoryShipmentId)
-	BEGIN
-		EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, NULL, 0, 1;
-	END
-
-	WHILE ISNULL(@_intContractDetailId,0) > 0
-	BEGIN
-
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @_intContractDetailId)
-		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @_intContractDetailId, @intUserId
-		END
-
-
-		SET @_intContractDetailId = NULL
-
-		SELECT 
-			@_intContractDetailId = MIN(si.intLineNo)
-		FROM tblICInventoryShipment s 
-		JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
-		WHERE si.intInventoryShipmentId = @InventoryShipmentId AND s.intOrderType = 1
-			AND ISNULL(intLineNo,0) > @__intContractDetailId
-
-		SET @__intContractDetailId = @_intContractDetailId
-	END
+	EXEC uspSCProcessShipmentToInvoice 
+		@intTicketId = @intTicketId
+		,@intInventoryShipmentId = @InventoryShipmentId
+		,@intUserId = @intUserId
+		,@intInvoiceId = @intInvoiceId OUTPUT 
+		,@dtmClientDate = @dtmClientDate
+	
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

@@ -28,7 +28,7 @@ BEGIN TRY
 	SET @strListName = NULL
 
 	SELECT @strListName = strListName
-	FROM tblQMList
+	FROM tblQMList WITH (NOLOCK)
 	WHERE intListId = @intListId
 
 	-------------------------Header-----------------------------------------------------------

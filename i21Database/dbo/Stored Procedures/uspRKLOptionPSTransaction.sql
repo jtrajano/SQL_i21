@@ -138,7 +138,7 @@ BEGIN TRY
 											WHERE 
 												--mp.intFutureMarketId = sp.intFutureMarketId AND
 												spm.intOptionMonthId = ot.intOptionMonthId
-												--AND spm.dblStrike = mp.dblStrike
+												AND spm.dblStrike = ot.dblStrike
 												AND spm.intTypeId = (CASE WHEN ot.strOptionType = 'Put' THEN 1 ELSE 2 END)
 												AND CAST(FLOOR(CAST(sp.dtmPriceDate AS FLOAT)) AS DATETIME) <= CAST(FLOOR(CAST(@dtmPositionAsOf AS FLOAT)) AS DATETIME)
 											ORDER BY sp.dtmPriceDate DESC), 0)

@@ -367,7 +367,7 @@ BEGIN
 																END,
 	
 							[strICPOSCodeFormatFormat]			= PCF.strPosCodeFormat,
-							[strICPOSCode]						= IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
+							[strICPOSCode]						= PCF.strUPCwthOrwthOutCheckDigit, --IUOM.strLongUPCCode, -- IF PASSPORT DO NOT include check digit
 							[strICPOSCodeModifier]				= '0',
 
 							[strITTDataActiveFlgValue]			= CASE 
@@ -428,8 +428,7 @@ BEGIN
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						INNER JOIN tblSTStore ST 
-							ON ST.intStoreId = SubCat.intStoreId
-							AND IL.intLocationId = ST.intCompanyLocationId
+							ON IL.intLocationId = ST.intCompanyLocationId
 							AND CatLoc.intLocationId = ST.intCompanyLocationId
 						INNER JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = ST.intCompanyLocationId
@@ -559,7 +558,7 @@ BEGIN
 															ORDER BY ITTDetail.strICPOSCode ASC
 															FOR XML PATH('ITTDetail'), TYPE
 														)
-													FOR XML PATH('ItemListMaintenance'), TYPE
+													FOR XML PATH('ItemMaintenance'), TYPE
 												)
 											FROM 
 											(
@@ -643,8 +642,8 @@ BEGIN
 													LEFT JOIN tblSTSubcategoryRegProd SubCat 
 														ON SubCat.intRegProdId = IL.intProductCodeId
 													JOIN tblSTStore ST 
-														ON ST.intStoreId = SubCat.intStoreId
-														AND IL.intLocationId = ST.intCompanyLocationId
+														--ON ST.intStoreId = SubCat.intStoreId
+														ON IL.intLocationId = ST.intCompanyLocationId
 													JOIN tblSMCompanyLocation L 
 														ON L.intCompanyLocationId = IL.intLocationId
 													JOIN tblICItemUOM IUOM 
@@ -781,8 +780,7 @@ BEGIN
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
-							ON ST.intStoreId = SubCat.intStoreId
-							   AND IL.intLocationId = ST.intCompanyLocationId
+							ON IL.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -910,8 +908,8 @@ BEGIN
 						LEFT JOIN tblSTSubcategoryRegProd SubCat 
 							ON SubCat.intRegProdId = IL.intProductCodeId
 						JOIN tblSTStore ST 
-							ON ST.intStoreId = SubCat.intStoreId
-							   AND IL.intLocationId = ST.intCompanyLocationId
+							--ON ST.intStoreId = SubCat.intStoreId
+							ON IL.intLocationId = ST.intCompanyLocationId
 						JOIN tblSMCompanyLocation L 
 							ON L.intCompanyLocationId = IL.intLocationId
 						JOIN tblICItemUOM IUOM 
@@ -1081,12 +1079,11 @@ BEGIN
 					ON Category.intCategoryId = CategoryLoc.intCategoryId
 				INNER JOIN tblSTStore Store
 					ON CategoryLoc.intLocationId = Store.intCompanyLocationId
-				INNER JOIN tblSTSubcategoryRegProd StorePCode
-					ON Store.intStoreId = StorePCode.intStoreId
 				INNER JOIN tblICItemLocation ItemLoc
 					ON Item.intItemId = ItemLoc.intItemId
 					AND Store.intCompanyLocationId = ItemLoc.intLocationId
-					AND StorePCode.intRegProdId = ItemLoc.intProductCodeId
+				INNER JOIN tblSTSubcategoryRegProd StorePCode
+					ON StorePCode.intRegProdId = ItemLoc.intProductCodeId
 				INNER JOIN 
 				(
 						SELECT 
@@ -1226,8 +1223,8 @@ BEGIN
 								LEFT JOIN tblSTSubcategoryRegProd SubCat 
 									ON SubCat.intRegProdId = IL.intProductCodeId
 								JOIN tblSTStore ST 
-									ON ST.intStoreId = SubCat.intStoreId
-									AND IL.intLocationId = ST.intCompanyLocationId
+									--ON ST.intStoreId = SubCat.intStoreId
+									ON IL.intLocationId = ST.intCompanyLocationId
 								JOIN tblSMCompanyLocation L 
 									ON L.intCompanyLocationId = IL.intLocationId
 								JOIN tblICItemUOM IUOM 

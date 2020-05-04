@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE dbo.uspLGProcessShipmentXML (
 	@strInfo1 NVARCHAR(MAX) = '' OUTPUT
 	,@ysnDropShip BIT = 0
+	,@intMultiCompanyId INT
 	)
 AS
 BEGIN TRY
@@ -27,7 +28,7 @@ BEGIN TRY
 		,@strFeedStatus NVARCHAR(MAX)
 		,@dtmFeedDate DATETIME
 		,@strMessage NVARCHAR(MAX)
-		,@intMultiCompanyId INT
+		--,@intMultiCompanyId INT
 		,@intReferenceId INT
 		,@intEntityId INT
 		,@strTransactionType NVARCHAR(MAX)
@@ -85,6 +86,9 @@ BEGIN TRY
 		,@intVendorEntityId INT
 		,@intPContractHeaderId INT
 		,@strCustomerContract NVARCHAR(50)
+		,@intSACompanyLocationId INT
+		,@intSContractHeaderId INT
+		,@intCustomerEntityId INT
 	DECLARE @tblLGLoadDetail TABLE (intLoadDetailId INT)
 	DECLARE @strItemNo NVARCHAR(50)
 		,@strItemUOM NVARCHAR(50)
@@ -206,9 +210,14 @@ BEGIN TRY
 		,ysnNoClaim BIT
 		)
 
+	SELECT @intCompanyRefId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
 	SELECT @intId = MIN(intId)
 	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
+		AND intMultiCompanyId = @intMultiCompanyId
 
 	WHILE @intId > 0
 	BEGIN
@@ -231,7 +240,7 @@ BEGIN TRY
 				,@strFeedStatus = NULL
 				,@dtmFeedDate = NULL
 				,@strMessage = NULL
-				,@intMultiCompanyId = NULL
+				--,@intMultiCompanyId = NULL
 				,@intReferenceId = NULL
 				,@intEntityId = NULL
 				,@strTransactionType = NULL
@@ -300,7 +309,7 @@ BEGIN TRY
 				,@strFeedStatus = strFeedStatus
 				,@dtmFeedDate = dtmFeedDate
 				,@strMessage = strMessage
-				,@intMultiCompanyId = intMultiCompanyId
+				--,@intMultiCompanyId = intMultiCompanyId
 				,@intReferenceId = intReferenceId
 				,@intEntityId = intEntityId
 				,@strTransactionType = strTransactionType
@@ -768,11 +777,11 @@ BEGIN TRY
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
-				,@intCompanyRefId = intCompanyId
+			--,@intCompanyRefId = intCompanyId
 			FROM tblLGLoad
 			WHERE intLoadRefId = @intLoadRefId
-			AND intBookId =@intBookId
-			AND IsNULL(intSubBookId,0) =IsNULL(@intSubBookId,0) 
+				AND intBookId = @intBookId
+				AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
 			SELECT @intTransactionCount = @@TRANCOUNT
 
@@ -928,7 +937,7 @@ BEGIN TRY
 					,strGenerateLoadHauler
 					,ysnDocumentsReceived
 					,ysnSubCurrency
-					,intCompanyId
+					--,intCompanyId
 					,intBookId
 					,intSubBookId
 					,intLoadRefId
@@ -953,6 +962,7 @@ BEGIN TRY
 					,[strDestinationPort4]
 					,[dtmETSPOL4]
 					,[dtmETAPOD4]
+					,intCompanyId
 					)
 				SELECT 1 AS intConcurrencyId
 					,@strNewLoadNumber
@@ -1060,8 +1070,12 @@ BEGIN TRY
 					,intDischargeUnitMeasureId
 					,strDischargePerUnit
 					,intTransportationMode
-					,intShipmentStatus
-					,0 As ysnPosted
+					,CASE 
+						WHEN intShipmentType = 1
+							THEN 1
+						ELSE intShipmentStatus
+						END
+					,0 AS ysnPosted
 					--,dtmPostedDate
 					,intTransUsedBy
 					,intShipmentType
@@ -1087,7 +1101,7 @@ BEGIN TRY
 					,strGenerateLoadHauler
 					,ysnDocumentsReceived
 					,ysnSubCurrency
-					,intCompanyId
+					--,intCompanyId
 					,@intBookId
 					,@intSubBookId
 					,@intLoadRefId
@@ -1112,6 +1126,7 @@ BEGIN TRY
 					,[strDestinationPort4]
 					,[dtmETSPOL4]
 					,[dtmETAPOD4]
+					,@intCompanyRefId
 				FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 						strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -1388,7 +1403,11 @@ BEGIN TRY
 					,intDischargeUnitMeasureId = x.intDischargeUnitMeasureId
 					,strDischargePerUnit = x.strDischargePerUnit
 					,intTransportationMode = x.intTransportationMode
-					,intShipmentStatus = x.intShipmentStatus
+					,intShipmentStatus = CASE 
+						WHEN x.intShipmentType = 1
+							THEN L.intShipmentStatus
+						ELSE x.intShipmentStatus
+						END
 					--,ysnPosted = x.ysnPosted
 					--,dtmPostedDate = x.dtmPostedDate
 					,intTransUsedBy = x.intTransUsedBy
@@ -1967,6 +1986,22 @@ BEGIN TRY
 						,@strCustomerContract = strCustomerContract
 					FROM tblCTContractHeader
 					WHERE intContractHeaderId = @intPContractHeaderId
+
+					---************
+					SELECT @intSACompanyLocationId = NULL
+						,@intSContractHeaderId = NULL
+
+					SELECT @intSACompanyLocationId = intCompanyLocationId
+						,@intSContractHeaderId = intContractHeaderId
+					FROM tblCTContractDetail
+					WHERE intContractDetailId = @intSContractDetailId
+
+					SELECT @intCustomerEntityId = NULL
+						,@strCustomerContract = NULL
+
+					SELECT @intCustomerEntityId = intEntityId
+					FROM tblCTContractHeader
+					WHERE intContractHeaderId = @intSContractHeaderId
 				END
 
 				IF NOT EXISTS (
@@ -2039,7 +2074,11 @@ BEGIN TRY
 							ELSE PCH.intEntityId
 							END
 						,@intVendorLocationId
-						,@intCustomerId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intCustomerEntityId
+							ELSE @intCustomerId
+							END
 						,@intCustomerLocationId
 						,@intItemId
 						,CASE 
@@ -2053,7 +2092,11 @@ BEGIN TRY
 								THEN @intPACompanyLocationId
 							ELSE PCD.intCompanyLocationId
 							END
-						,@intSCompanyLocationId
+						,CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intSACompanyLocationId
+							ELSE @intSCompanyLocationId
+							END
 						,x.[dblQuantity]
 						,@intItemUOMId
 						,x.[dblGross]
@@ -2169,7 +2212,11 @@ BEGIN TRY
 							ELSE PCH.intEntityId
 							END
 						,[intVendorEntityLocationId] = @intVendorLocationId
-						,[intCustomerEntityId] = @intCustomerId
+						,[intCustomerEntityId] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intCustomerEntityId
+							ELSE @intCustomerId
+							END
 						,[intCustomerEntityLocationId] = @intCustomerLocationId
 						,[intItemId] = @intItemId
 						,[intPContractDetailId] = (
@@ -2185,7 +2232,11 @@ BEGIN TRY
 								THEN @intPACompanyLocationId
 							ELSE PCD.intCompanyLocationId
 							END
-						,[intSCompanyLocationId] = @intSCompanyLocationId
+						,[intSCompanyLocationId] = CASE 
+							WHEN @strTransactionType = 'Drop Shipment'
+								THEN @intSACompanyLocationId
+							ELSE @intSCompanyLocationId
+							END
 						,[dblQuantity] = x.[dblQuantity]
 						,[intItemUOMId] = @intItemUOMId
 						,[dblGross] = x.[dblGross]
@@ -2555,7 +2606,7 @@ BEGIN TRY
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
 				,x.[strNotifyOrConsignee]
-				,x.[strType]
+				,Case When x.[strType]='Customer' Then 'Company' Else x.[strType] End
 				,NULL
 				,C.[intCompanySetupID]
 				,B.[intBankId]
@@ -2578,17 +2629,12 @@ BEGIN TRY
 					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			--LEFT JOIN tblEMEntity E ON E.strName = x.strParty
-			--LEFT JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
-			--	AND ET1.strType = x.[strType]
 			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
 				AND x.strType = 'Bank'
-			--LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
-			--	AND EL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			WHERE NOT EXISTS (
 					SELECT *
 					FROM tblLGLoadNotifyParties NP
@@ -2599,7 +2645,7 @@ BEGIN TRY
 			UPDATE NP
 			SET [intConcurrencyId] = NP.[intConcurrencyId] + 1
 				,[strNotifyOrConsignee] = NP.[strNotifyOrConsignee]
-				,[strType] = NP.[strType]
+				,[strType] = Case When x.[strType]='Customer' Then 'Company' Else x.[strType] End
 				--,[intEntityId] = E.[intEntityId]
 				,[intCompanySetupID] = C.[intCompanySetupID]
 				,[intBankId] = B.[intBankId]
@@ -2621,17 +2667,12 @@ BEGIN TRY
 					,strParty NVARCHAR(100) COLLATE Latin1_General_CI_AS
 					,strPartyLocation NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
-			--LEFT JOIN tblEMEntity E ON E.strName = x.strParty
-			--JOIN tblEMEntityType ET1 ON ET1.intEntityId = E.intEntityId
-			--	AND ET1.strType = x.[strType]
 			LEFT JOIN tblSMCompanySetup C ON C.strCompanyName = x.strParty
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			LEFT JOIN tblCMBank B ON B.strBankName = x.strParty
 				AND x.strType = 'Bank'
-			--LEFT JOIN tblEMEntityLocation EL ON EL.strLocationName = x.strPartyLocation
-			--	AND EL.intEntityId = E.intEntityId
 			LEFT JOIN tblSMCompanyLocation CL ON CL.strLocationName = x.strPartyLocation
-				AND x.strType = 'Company'
+				AND x.strType = 'Customer'
 			JOIN tblLGLoadNotifyParties NP ON NP.intLoadId = @intNewLoadId
 				AND NP.intLoadNotifyPartyRefId = x.intLoadNotifyPartyId
 
@@ -4011,6 +4052,7 @@ BEGIN TRY
 		FROM tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
 			AND IsNULL(strFeedStatus, '') = ''
+			AND intMultiCompanyId = @intMultiCompanyId
 	END
 
 	IF @strTransactionType IN (

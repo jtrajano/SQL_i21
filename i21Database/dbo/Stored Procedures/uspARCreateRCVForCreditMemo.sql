@@ -43,6 +43,7 @@ INSERT INTO tblARPayment (
    , intCurrencyId
    , intPaymentMethodId
    , intLocationId
+   , intAccountId
    , intBankAccountId
    , intEntityId
    , dtmDatePaid
@@ -63,6 +64,7 @@ SELECT TOP 1
    , intCurrencyId			    = I.intCurrencyId
    , intPaymentMethodId		  = @intPaymentMethodId
    , intLocationId			    = I.intCompanyLocationId
+   , intAccountId           = CL.intUndepositedFundsId
    , intBankAccountId				= BA.intBankAccountId
    , intEntityId            = ISNULL(@intUserId, I.intEntityId)
    , dtmDatePaid			      = I.dtmPostDate

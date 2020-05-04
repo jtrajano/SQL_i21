@@ -29,7 +29,7 @@ BEGIN TRY
 	SET @strPropertyName = NULL
 
 	SELECT @strPropertyName = strPropertyName
-	FROM tblQMProperty
+	FROM tblQMProperty WITH (NOLOCK)
 	WHERE intPropertyId = @intPropertyId
 
 	-------------------------Header-----------------------------------------------------------

@@ -19,7 +19,13 @@ BEGIN TRY
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
 			@intContractHeaderId int,
-			@intCOntractDetailId int;
+			@intContractDetailId int;
+
+			declare @strFinalMessage nvarchar(max);
+			declare @AffectedInvoices table
+			(
+				strMessage nvarchar(50)
+			)
 	
 	DECLARE @tblItemBillDetail TABLE
 	(
@@ -114,8 +120,16 @@ BEGIN TRY
 			-- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
 			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
 			BEGIN
+				-- Disable constraints
+				ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
+				ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId
+
 				EXEC uspAPDeleteVoucher @Id,@intUserId,4
-		
+				
+				-- Enable constraints
+				ALTER TABLE tblCTPriceFixationDetailAPAR CHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
+				ALTER TABLE tblCTPriceFixationDetailAPAR CHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId		
+
 				--Audit Log
 				EXEC uspSMAuditLog
 				@screenName = 'AccountsPayable.view.Voucher',
@@ -162,8 +176,17 @@ BEGIN TRY
 			--END
 			--DELETE FROM @tblItemBillDetail
 
-			----------------------------------------			
+			----------------------------------------		
+			-- Disable constraints
+			ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
+			ALTER TABLE tblCTPriceFixationDetailAPAR NOCHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId
+
 			EXEC uspAPDeleteVoucher @Id,@intUserId,4
+			
+			-- Enable constraints
+			ALTER TABLE tblCTPriceFixationDetailAPAR CHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBill_intBillId  
+			ALTER TABLE tblCTPriceFixationDetailAPAR CHECK CONSTRAINT FK_tblCTPriceFixationDetailAPAR_tblAPBillDetail_intBillDetailId		
+			
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id	
 		END
 
@@ -172,7 +195,7 @@ BEGIN TRY
 
 	SELECT @List = NULL
 
-	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId
+	SELECT  DA.intInvoiceId AS Id, isnull(FT.intDetailId,DA.intInvoiceDetailId) AS DetailId, IV.ysnPosted
 	INTO	#ItemInvoice
 	FROM	tblCTPriceFixationDetailAPAR	DA	LEFT
 	JOIN    vyuCTPriceFixationTicket        FT	ON  FT.intDetailId				=   DA.intInvoiceDetailId
@@ -183,7 +206,7 @@ BEGIN TRY
 	AND		FD.intPriceFixationDetailId	=	ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
-	AND		ISNULL(IV.ysnPosted,0) = 0
+	--AND		ISNULL(IV.ysnPosted,0) = 0
 
 	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
 	 begin
@@ -205,20 +228,74 @@ BEGIN TRY
 	AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
-	select @intContractHeaderId = intContractHeaderId, @intCOntractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-	exec uspCTCreateDetailHistory @intContractHeaderId,@intCOntractDetailId,null,null;
+	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 
-	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemInvoice
-	WHILE ISNULL(@Id,0) > 0
+	IF ISNULL(@intPriceFixationId,0) = 0
 	BEGIN
-		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
-		IF @Count = 1
-			SELECT @DetailId = NULL
-		ELSE
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id AND intInvoiceDetailId = @DetailId
+		exec uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
+								  @intContractDetailId 	= @intContractDetailId, 
+								  @strSource 			= 'Pricing',
+								  @strProcess 			= 'Fixation Detail Delete'
+	END
+	
+	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
+	if EXISTS (select top 1 1 from #ItemInvoice)
+	begin
 
-		EXEC uspARDeleteInvoice @Id,@intUserId,@DetailId
-		SELECT @Id = MIN(Id) FROM #ItemInvoice WHERE Id > @Id
+		if (@intPriceFixationDetailId is not null)
+		begin
+			insert into @AffectedInvoices
+			select
+			strMessage = d.strInvoiceNumber + ' line item ' + convert(nvarchar(20),t.intInvoiceLineItemId) 
+			from
+			tblCTPriceFixationDetailAPAR c
+			left join 
+			(
+			select
+			intInvoiceLineItemId = ROW_NUMBER() over (partition by b.intInvoiceId order by b.intInvoiceDetailId)
+			,a.intPriceFixationDetailId
+			,b.intInvoiceId
+			,b.intInvoiceDetailId
+			from tblCTPriceFixationDetailAPAR a
+			,tblARInvoiceDetail b
+			where a.intPriceFixationDetailId = @intPriceFixationDetailId
+			and b.intInvoiceId = a.intInvoiceId
+			)t on t.intInvoiceId = c.intInvoiceId and t.intInvoiceDetailId = c.intInvoiceDetailId
+			left join tblARInvoice d on d.intInvoiceId = c.intInvoiceId
+			where c.intPriceFixationDetailId = @intPriceFixationDetailId
+
+			select
+			top 1 @strFinalMessage = 'Invoice/s' + stuff((SELECT ', ' + strMessage FROM @AffectedInvoices FOR XML PATH ('')), 1, 1, '') + ' is using the price. Please delete that first.'
+			from @AffectedInvoices
+		end
+		ELSE
+		begin
+			set @strFinalMessage = 'Invoice/s exists for the price. Please try to delete them first to delete the pricing.';
+		end
+
+		SET @ErrMsg = @strFinalMessage
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+	END
+	DECLARE @dId INT
+	SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice
+	WHILE ISNULL(@DetailId,0) > 0
+	BEGIN
+		SELECT @Id = intInvoiceId FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @DetailId
+		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
+
+		IF @Count > 1
+		BEGIN
+			SELECT @dId = @DetailId
+		END
+		ELSE
+		BEGIN
+			SELECT @dId = NULL
+		END
+
+		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @DetailId
+		EXEC uspARDeleteInvoice @Id,@intUserId, @dId
+
+		SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice WHERE DetailId > @DetailId
 	END
 
 END TRY

@@ -17,7 +17,7 @@ BEGIN TRY
 
 	INSERT INTO @tblQMAttributePreStage (intAttributePreStageId)
 	SELECT intAttributePreStageId
-	FROM tblQMAttributePreStage
+	FROM tblQMAttributePreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intAttributePreStageId = MIN(intAttributePreStageId)
@@ -32,7 +32,7 @@ BEGIN TRY
 		SELECT @intAttributeId = intAttributeId
 			,@strRowState = strRowState
 			,@intUserId = intUserId
-		FROM tblQMAttributePreStage
+		FROM tblQMAttributePreStage WITH (NOLOCK)
 		WHERE intAttributePreStageId = @intAttributePreStageId
 
 		EXEC uspIPAttributePopulateStgXML @intAttributeId

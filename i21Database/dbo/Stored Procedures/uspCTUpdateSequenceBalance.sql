@@ -22,7 +22,8 @@ BEGIN TRY
 			@dblTolerance			NUMERIC(18,6) = 0.0001,
 			@ysnLoad				BIT,
 			@intSequenceUsageHistoryId	INT,  
-			@dblQuantityPerLoad NUMERIC(18,6)
+			@dblQuantityPerLoad NUMERIC(18,6),
+   			@intAllocatedPurchaseContractDetailId int
 	
 	BEGINING:
 
@@ -39,8 +40,7 @@ BEGIN TRY
 
 	 if (@ysnLoad = 1 and @ysnFromInvoice = convert(bit,1)) 
 	 begin
-		set @dblQuantityToUpdate = (convert(numeric(18,6),convert(int,@dblQuantityToUpdate))/@dblQuantityPerLoad);
-		set @dblQuantityToUpdate = convert(int,@dblQuantityToUpdate);
+		set @dblQuantityToUpdate = case when @dblQuantityToUpdate < 0 then -1 else 1 end;
 	 end
 	
 	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
@@ -109,6 +109,28 @@ BEGIN TRY
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
 
+	 /*
+	 CT-4516
+	 Check if the Sales Contract is allocated and get the Purchase Contract allocated on it and update the Status
+	 considering the quantity is the same.
+	 */ 
+	set @intAllocatedPurchaseContractDetailId = (select intPContractDetailId from tblLGAllocationDetail where intSContractDetailId = @intContractDetailId);
+	if (@intAllocatedPurchaseContractDetailId is not null and @intAllocatedPurchaseContractDetailId > 0)
+	begin
+
+	 UPDATE tblCTContractDetail  
+	 SET  intConcurrencyId = intConcurrencyId + 1,   
+	   intContractStatusId = CASE WHEN @ysnCompleted = 0    
+	           THEN CASE WHEN intContractStatusId = 5   
+	               THEN 1   
+	               ELSE intContractStatusId   
+	             END   
+	           ELSE 5   
+	         END  
+	 WHERE intContractDetailId = @intAllocatedPurchaseContractDetailId
+
+	end
+
 	EXEC	uspCTCreateSequenceUsageHistory 
 			@intContractDetailId	=	@intContractDetailId,
 			@strScreenName			=	@strScreenName,
@@ -129,10 +151,12 @@ BEGIN TRY
 			@strScreenName			=	@strScreenName
 
 	EXEC	uspCTCreateDetailHistory	
-	@intContractHeaderId		=	NULL,
-    @intContractDetailId		=	@intContractDetailId,
-	@strComment				    =	NULL,
-	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId
+			@intContractHeaderId		=	NULL,
+			@intContractDetailId		=	@intContractDetailId,
+			@strComment				    =	NULL,
+			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
+			@strSource	 				= 	'Inventory',
+			@strProcess 				= 	'Balance'
 
 END TRY
 

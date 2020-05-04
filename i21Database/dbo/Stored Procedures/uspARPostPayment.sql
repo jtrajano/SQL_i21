@@ -292,8 +292,6 @@ CREATE TABLE #ARPaymentAccount
     ,[strAccountCategory]	NVARCHAR(50)    COLLATE Latin1_General_CI_AS    NOT NULL
     ,[ysnActive]            BIT                                             NOT NULL)
 
-IF @post = @OneBit
-     EXEC [dbo].[uspARPopulatePaymentAccountForPosting]
 
 IF(OBJECT_ID('tempdb..#ARInvalidPaymentData') IS NOT NULL)
 BEGIN
@@ -317,6 +315,14 @@ EXEC [dbo].[uspARPopulateInvalidPostPaymentData]
     ,@BatchId  = @batchIdUsed
 
 SET @totalInvalid = ISNULL((SELECT COUNT(DISTINCT [intTransactionId]) FROM #ARInvalidPaymentData),0)
+
+
+
+IF(@totalInvalid = 0)
+BEGIN
+	IF @post = @OneBit
+		 EXEC [dbo].[uspARPopulatePaymentAccountForPosting]
+END
 
 IF(@totalInvalid > 0)
 BEGIN
@@ -801,7 +807,9 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
     EXEC dbo.uspGLBookEntries
              @GLEntries         = @GLEntries
             ,@ysnPost           = @post
-            ,@SkipValidation	= 1
+            ,@SkipGLValidation	= 1
+			,@SkipICValidation	= 1
+			
 
     EXEC [dbo].[uspARPostPaymentIntegration]
          @Post					= @post

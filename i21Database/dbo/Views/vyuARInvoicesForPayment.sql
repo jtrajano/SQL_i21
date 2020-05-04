@@ -229,7 +229,7 @@ FROM (
 		) ONACCOUNT
 		WHERE ARI.[ysnPosted] = 1
 			AND ISNULL(ARI.ysnCancelled, 0) = 0
-			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 AND ISNULL(ARI.ysnRefundProcessed, 0) = 0))
+			AND (ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 1 OR ISNULL(PREPAY.ysnInvoicePrepayment, 0) = 0 )
 			AND strTransactionType != 'Credit Note'
 			AND (NOT(ARI.strType = 'Provisional' AND ARI.ysnProcessed = 1) OR ysnExcludeFromPayment = 1)
 	
@@ -426,3 +426,4 @@ LEFT OUTER JOIN (
 		 , strLocationName
 	FROM dbo.tblSMCompanyLocation WITH (NOLOCK)
 ) SMCL ON ARIFP.intCompanyLocationId = SMCL.intCompanyLocationId
+

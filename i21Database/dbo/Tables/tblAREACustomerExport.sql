@@ -47,4 +47,6 @@
 	--Comment
 	strComment				NVARCHAR(0100) COLLATE Latin1_General_CI_AS NOT NULL,
 	
+	strLicenseApplicator    NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
+	dtmLicenseExpirationDate DATETIME NULL
 )

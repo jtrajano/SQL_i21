@@ -10,6 +10,7 @@
 	@ysnPostDestinationWeight BIT = 0,
 	@intInvoiceId AS INT = NULL OUTPUT,
 	@intBillId AS INT = NULL OUTPUT
+	,@dtmClientDate DATETIME = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -198,29 +199,45 @@ BEGIN TRY
 		BEGIN
 			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 1
 
-			SELECT TOP 1 @InventoryShipmentId = intInventoryShipmentId FROM vyuICGetInventoryShipmentItem where intSourceId = @intTicketId and strSourceType = 'Scale'
-			SELECT @intPricingTypeId = intPricingTypeId FROM tblSCTicket SC
-			LEFT JOIN tblCTContractDetail CTD ON CTD.intContractDetailId = SC.intContractId
+			SELECT TOP 1 
+				@InventoryShipmentId = intInventoryShipmentId 
+			FROM vyuICGetInventoryShipmentItem 
+			WHERE intSourceId = @intTicketId 
+				AND strSourceType = 'Scale'
+
+			SELECT 
+				@intPricingTypeId = intPricingTypeId 
+				,@intTicketItemUOMId = intItemUOMIdTo
+				,@dblNetUnits = dblNetUnits
+			FROM tblSCTicket SC
+			LEFT JOIN tblCTContractDetail CTD 
+				ON CTD.intContractDetailId = SC.intContractId
 			WHERE SC.intTicketId = @intTicketId
 
-			IF ISNULL(@InventoryShipmentId, 0) != 0 AND (ISNULL(@intPricingTypeId,0) <= 1 OR ISNULL(@intPricingTypeId,0) = 6)
+			IF ISNULL(@InventoryShipmentId, 0) != 0 
 			BEGIN
-				EXEC dbo.uspARCreateInvoiceFromShipment @InventoryShipmentId, @intUserId, @intInvoiceId OUTPUT, 0, 1;
-				SELECT @intTicketItemUOMId = intItemUOMIdTo, @dblNetUnits = dblNetUnits
-				FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
+				EXEC uspSCProcessShipmentToInvoice 
+					@intTicketId = @intTicketId
+					,@intInventoryShipmentId = @InventoryShipmentId
+					,@intUserId = @intUserId
+					,@intInvoiceId = @intInvoiceId OUTPUT 
+					,@dtmClientDate = @dtmClientDate
+				
 
 				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId,@intTicketItemUOMId,ISI.dblQuantity)) AS DECIMAL(18,6))  FROM tblICInventoryShipment ICIS
 					INNER JOIN tblICInventoryShipmentItem ISI ON ICIS.intInventoryShipmentId = ISI.intInventoryShipmentId
 					WHERE intSourceId = @intTicketId))
 				BEGIN
 					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,@intTicketId
+
+					declare @InAdj as InventoryAdjustmentIntegrationId
+					insert into @InAdj(intInventoryShipmentId, intTicketId, intInvoiceId)
+					select @InventoryShipmentId, @intTicketId, @intInvoiceId
+					Exec uspICInventoryAdjustmentUpdateLinkingId @LinkingData = @InAdj, @ysnShipment = 1
 				END
 			END
 
-			declare @InAdj as InventoryAdjustmentIntegrationId
-			insert into @InAdj(intInventoryShipmentId, intTicketId, intInvoiceId)
-			select @InventoryShipmentId, @intTicketId, @intInvoiceId
-			Exec uspICInventoryAdjustmentUpdateLinkingId @LinkingData = @InAdj, @ysnShipment = 1
+			
 		END
 	END
 	ELSE
@@ -304,24 +321,24 @@ BEGIN TRY
 					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
 					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
 					
-					IF(ISNULL(@intDirectLoadId,0) = 0)
-					BEGIN
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
-					END
+					-- IF(ISNULL(@intDirectLoadId,0) = 0)
+					-- BEGIN
+					-- 	EXEC uspCTUpdateScheduleQuantity
+					-- 					@intContractDetailId	=	@intContractDetailId,
+					-- 					@dblQuantityToUpdate	=	@dblContractAvailableQty,
+					-- 					@intUserId				=	@intUserId,
+					-- 					@intExternalId			=	@intTicketId,
+					-- 					@strScreenName			=	'Scale'	
+					-- END
 
 
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
-					EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intContractDetailId,
-									@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'	
+					-- EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+					-- EXEC uspCTUpdateScheduleQuantity
+					-- 				@intContractDetailId	=	@intContractDetailId,
+					-- 				@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
+					-- 				@intUserId				=	@intUserId,
+					-- 				@intExternalId			=	@intTicketId,
+					-- 				@strScreenName			=	'Scale'	
 				END
 					
 				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
@@ -347,7 +364,35 @@ BEGIN TRY
 				END
 			END
 		END
+
+		
+
+		
+
+
 	END
+
+	DECLARE @change_description nvarchar(200)
+	DECLARE @from_description nvarchar(200)
+	DECLARE @to_description nvarchar(200)
+	DECLARE @action_description nvarchar(200)
+	select @change_description = case when @ysnPostDestinationWeight = 1 then 'Transaction has been posted.' else  'Transaction has been unposted.' end 	
+			,@from_description = case when @ysnPostDestinationWeight = 1 then 'Unposted' else  'Posted' end 
+			,@to_description = case when @ysnPostDestinationWeight = 0 then 'Posted' else  'Unposted' end 	
+			,@action_description = case when @ysnPostDestinationWeight = 1 then 'Posted' else  'Unposted' end 	
+
+	EXEC dbo.uspSMAuditLog 
+			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
+			,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
+			,@entityId			= @intUserId				-- Entity Id.
+			,@actionType		= @action_description		-- Action Type
+			,@changeDescription	= ''						-- Description
+			,@fromValue			= ''								-- Old Value
+			,@toValue			= ''								-- New Value
+			,@details			= '';
+
+
+
 END TRY
 BEGIN CATCH
 	SELECT 
@@ -364,3 +409,4 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
+GO

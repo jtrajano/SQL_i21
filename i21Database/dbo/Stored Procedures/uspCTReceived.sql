@@ -37,6 +37,11 @@ BEGIN TRY
 
 	SELECT @strScreenName = CASE WHEN @strReceiptType = 'Inventory Return' THEN 'Receipt Return' ELSE 'Inventory Receipt' END
 
+	IF @intSourceType = -1
+	BEGIN
+		SELECT @strScreenName = 'Load Schedule'
+	END
+
 	IF	@strReceiptType NOT IN ('Purchase Contract','Purchase Order', 'Inventory Return')
 		RETURN
 
@@ -95,7 +100,9 @@ BEGIN TRY
 		FROM	@tblToProcess 
 		WHERE	intUniqueId						=	 @intUniqueId
 
+		IF (@intSourceType <> -1)
 		SELECT @intSourceId = intSourceId, @intInventoryReceiptId = intInventoryReceiptId FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId = @intInventoryReceiptDetailId
+		
 		SELECT	@intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -141,6 +148,7 @@ BEGIN TRY
 
 			/*
 				intSourceType: 
+				-1 = 'Drop Ship'
 				0 = 'None'
 				1 = 'Scale'
 				2 = 'Inbound Shipment'
@@ -149,7 +157,7 @@ BEGIN TRY
 				5 = 'Delivery Sheet'
 			*/			
 
-			IF ((@intSourceType IN (0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
+			IF ((@intSourceType IN (-1,0,1,2,3,5) OR @ysnPO = 1)AND @strReceiptType <> 'Inventory Return') 
 			   -- OR (@intSourceType IN (2) AND @strReceiptType = 'Inventory Return' )
 			BEGIN					
 				EXEC	uspCTUpdateScheduleQuantity

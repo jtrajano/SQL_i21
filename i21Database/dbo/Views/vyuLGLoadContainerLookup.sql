@@ -15,10 +15,10 @@ SELECT	L.strLoadNumber
 		,LC.dblNetWt
 FROM	tblLGLoad L INNER JOIN tblLGLoadDetail LD
 			ON L.intLoadId = LD.intLoadId
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL 
-			ON LDCL.intLoadDetailId = LD.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC 
-			ON LC.intLoadContainerId = LDCL.intLoadContainerId
+			ON LC.intLoadId = L.intLoadId AND ISNULL(LC.ysnRejected, 0) = 0
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL 
+			ON LDCL.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN tblICItemUOM ItemUOM 
 			ON ItemUOM.intItemUOMId = LD.intItemUOMId
 		LEFT JOIN tblICUnitMeasure WeightUOM 

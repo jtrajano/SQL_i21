@@ -31,6 +31,7 @@ RETURNS @returntable TABLE
 	[strShipFromZipCode]	NVARCHAR (12) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipFromCountry]	NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
 	[strShipFromPhone]		NVARCHAR (25) COLLATE Latin1_General_CI_AS NULL, 
+	[strReference]			NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
     [intShipFromId]			INT NULL , 
 	[intShipFromEntityId]	INT NOT NULL,
 	[intDeferredVoucherId]	INT NULL,
@@ -129,6 +130,7 @@ BEGIN
 		[strShipFromZipCode]	,
 		[strShipFromCountry]	,
 		[strShipFromPhone]		,
+		[strReference]			,
 		[intShipFromId]			,
 		[intShipFromEntityId]	,
 		[intDeferredVoucherId]	,
@@ -196,6 +198,7 @@ BEGIN
 									-- CASE WHEN A.intShipFromEntityId > 0 THEN shipFromEntityLoc.strPhone
 									-- 	WHEN A.intShipFromId > 0 THEN B2.strPhone
 									-- ELSE B.strPhone END,
+		[strReference]			=	A.strReference,
 		[intShipFromId]			=	shipFromData.intEntityLocationId,
 									-- CASE WHEN A.intShipFromEntityId > 0 THEN shipFromEntityLoc.intEntityLocationId --ship from entity
 									-- 	WHEN A.intShipFromId > 0 THEN A.intShipFromId --voucher payable data

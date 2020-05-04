@@ -85,7 +85,7 @@ BEGIN TRY
 		WHERE intWorkOrderId = @intWorkOrderId
 			AND ysnProductionReversed = 0
 
-		IF @dtmProductionDate IS not NULL
+		IF @dtmProductionDate IS NOT NULL
 		BEGIN
 			IF @dtmProductionDate > @dtmCurrentDateTime
 				SELECT @dtmCurrentDateTime = @dtmProductionDate
@@ -211,7 +211,8 @@ BEGIN TRY
 				,@strPatternString = @intBatchId OUTPUT
 
 			DECLARE @tblMFMachine TABLE (intMachineId INT)
-			DECLARE @intMachineId INT, @ysnProducedByPackUnit int
+			DECLARE @intMachineId INT
+				,@ysnProducedByPackUnit INT
 
 			INSERT INTO @tblMFMachine (intMachineId)
 			SELECT DISTINCT intMachineId
@@ -224,12 +225,15 @@ BEGIN TRY
 
 			WHILE @intMachineId IS NOT NULL
 			BEGIN
-				SELECT 
-					@dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
+				SELECT @dblProduceQty = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intItemUOMId, IsNULL(IU.intItemUOMId, WP.intItemUOMId), WP.dblQuantity))
 					,@intItemUOMId = @intWOItemUOMId
 					,@dblPhysicalCount = SUM(dbo.fnMFConvertQuantityToTargetItemUOM(WP.intPhysicalItemUOMId, IsNULL(IU.intItemUOMId, WP.intPhysicalItemUOMId), WP.dblPhysicalCount))
 					,@intPhysicalItemUOMId = @intWOItemUOMId
-					,@ysnProducedByPackUnit=Case When MIN(WP.intItemUOMId) =MAX(WP.intPhysicalItemUOMId)  Then 0 Else 1 End
+					,@ysnProducedByPackUnit = CASE 
+						WHEN MIN(WP.intItemUOMId) = MAX(WP.intPhysicalItemUOMId)
+							THEN 0
+						ELSE 1
+						END
 				FROM dbo.tblMFWorkOrderProducedLot WP
 				LEFT JOIN dbo.tblICItemUOM IU ON IU.intItemId = WP.intItemId
 					AND IU.intUnitMeasureId = @intUnitMeasureId
@@ -249,7 +253,8 @@ BEGIN TRY
 						FROM tblMFWorkOrderRecipe
 						WHERE intWorkOrderId = @intWorkOrderId
 							AND intItemUOMId = @intItemUOMId
-						) and @ysnProducedByPackUnit=0
+						)
+					AND @ysnProducedByPackUnit = 0
 				BEGIN
 					IF EXISTS (
 							SELECT *
@@ -316,7 +321,7 @@ BEGIN TRY
 								,@dblUnitQty = NULL
 								,@dblProducePartialQty = @dblProduceQty1
 								,@intMachineId = @intMachineId
-								,@dtmCurrentDateTime=@dtmCurrentDateTime
+								,@dtmCurrentDateTime = @dtmCurrentDateTime
 						END
 					END
 					ELSE
@@ -331,7 +336,7 @@ BEGIN TRY
 							,@dblUnitQty = NULL
 							,@dblProducePartialQty = 0
 							,@intMachineId = @intMachineId
-							,@dtmCurrentDateTime=@dtmCurrentDateTime
+							,@dtmCurrentDateTime = @dtmCurrentDateTime
 					END
 
 					EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
@@ -412,7 +417,7 @@ BEGIN TRY
 								,@dblUnitQty = NULL
 								,@dblProducePartialQty = @dblPhysicalCount1
 								,@intMachineId = @intMachineId
-								,@dtmCurrentDateTime=@dtmCurrentDateTime
+								,@dtmCurrentDateTime = @dtmCurrentDateTime
 						END
 					END
 					ELSE
@@ -427,7 +432,7 @@ BEGIN TRY
 							,@dblUnitQty = NULL
 							,@dblProducePartialQty = 0
 							,@intMachineId = @intMachineId
-							,@dtmCurrentDateTime=@dtmCurrentDateTime
+							,@dtmCurrentDateTime = @dtmCurrentDateTime
 					END
 
 					EXEC dbo.uspMFConsumeWorkOrder @intWorkOrderId = @intWorkOrderId
@@ -575,7 +580,6 @@ BEGIN TRY
 			WHERE PL.intWorkOrderId = @intWorkOrderId
 				AND intTransactionTypeId = 25
 
-
 			INSERT INTO tblMFInventoryAdjustment (
 				dtmDate
 				,intTransactionTypeId
@@ -588,8 +592,8 @@ BEGIN TRY
 				,intStorageLocationId
 				,intWorkOrderConsumedLotId
 				,intWorkOrderId
-				,dtmBusinessDate 
-				,intBusinessShiftId 
+				,dtmBusinessDate
+				,intBusinessShiftId
 				)
 			SELECT @dtmCurrentDateTime
 				,8
@@ -604,8 +608,9 @@ BEGIN TRY
 				,intWorkOrderId
 				,@dtmBusinessDate
 				,@intBusinessShiftId
-			FROM tblMFWorkOrderConsumedLot 
-			Where intWorkOrderId=@intWorkOrderId and intSequenceNo=9999
+			FROM tblMFWorkOrderConsumedLot
+			WHERE intWorkOrderId = @intWorkOrderId
+				AND intSequenceNo = 9999
 
 			DELETE
 			FROM @ItemsForPost
@@ -714,8 +719,24 @@ BEGIN TRY
 					FROM @GLEntries
 					)
 			BEGIN
-				EXEC dbo.uspGLBookEntries @GLEntries
-					,1
+				IF EXISTS (
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
+						)
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+						,1
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+				END
 			END
 		END
 
@@ -1355,7 +1376,7 @@ BEGIN TRY
 					)
 				EXEC dbo.uspICCreateGLEntriesOnCostAdjustment @strBatchId = @strBatchId
 					,@intEntityUserSecurityId = @userId
-					,@AccountCategory_Cost_Adjustment = 'Work In Progress'
+					,@AccountCategory_Cost_Adjustment = 'Inventory Adjustment'
 			END
 
 			IF EXISTS (
@@ -1363,29 +1384,45 @@ BEGIN TRY
 					FROM @GLEntries
 					)
 			BEGIN
-				EXEC uspGLBookEntries @GLEntries
-					,1
-
-				--**************************************
-				--GL Post Valiation
-				--**************************************
 				IF EXISTS (
-						SELECT 1
-						FROM tblGLDetail gd
-						JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
-						JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
-						JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
-						JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
-						WHERE ac.strAccountCategory IN ('Work In Progress')
-							AND gd.strTransactionId = @strWorkOrderNo
-						HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
+						SELECT *
+						FROM tblMFWorkOrderRecipeItem WRI
+						JOIN tblICItem I ON I.intItemId = WRI.intItemId
+						WHERE I.strType = 'Other Charge'
+							AND WRI.intWorkOrderId = @intWorkOrderId
 						)
 				BEGIN
-					RAISERROR (
-							'Mismatch in debit and credit amount for WIP account.'
-							,11
-							,1
-							)
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+						,1
+						,1
+				END
+				ELSE
+				BEGIN
+					EXEC dbo.uspGLBookEntries @GLEntries
+						,1
+
+					----**************************************
+					----GL Post Valiation
+					----**************************************
+					--IF EXISTS (
+					--		SELECT 1
+					--		FROM tblGLDetail gd
+					--		JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
+					--		JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
+					--		JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					--		JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
+					--		WHERE ac.strAccountCategory IN ('Work In Progress')
+					--			AND gd.strTransactionId = @strWorkOrderNo
+					--		HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
+					--		)
+					--BEGIN
+					--	RAISERROR (
+					--			'Mismatch in debit and credit amount for WIP account.'
+					--			,11
+					--			,1
+					--			)
+					--END
 				END
 			END
 		END

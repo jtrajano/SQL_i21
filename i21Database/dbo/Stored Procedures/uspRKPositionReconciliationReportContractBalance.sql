@@ -22,19 +22,7 @@ BEGIN
 			SET @strContractType = 'Sale'
 		END
 
-		select @dtmContractBeginBalance = DATEADD(day, -1, convert(date, @dtmFromTransactionDate))
-
-		--EXEC [dbo].[uspCTGetContractBalance]
-		--@intContractTypeId		  = @intContractTypeId
-		--,@intEntityId			  = NULL
-		--,@IntCommodityId			  = NULL  
-		--,@dtmEndDate				 = @dtmContractBeginBalance
-		--,@intCompanyLocationId     = NULL
-		--,@IntFutureMarketId        = NULL
-		--,@IntFutureMonthId         = NULL
-		--,@strPositionIncludes    = NULL
-		--,@strCallingApp			 = 'DPR'
-		--,@strPrintOption			 = NULL
+		--select @dtmContractBeginBalance = DATEADD(day, -1, convert(date, @dtmFromTransactionDate))
 
 
 	DECLARE @Commodity AS TABLE (intCommodityIdentity INT IDENTITY PRIMARY KEY
@@ -53,175 +41,78 @@ BEGIN
 	--Build concatenated commodities to be used if begin balance only (no record from given date range)
 	SELECT @strCommodities =  COALESCE(@strCommodities + ', ' + strCommodityCode, strCommodityCode) FROM #tempCommodity
 
+--Get raw Contract Balance
+SELECT * INTO #tblRawContractBalance
+FROM dbo.fnRKGetBucketContractBalance(@dtmToTransactionDate,NULL,NULL)
 
-SELECT DISTINCT
-	strHeaderType = @strContractType + ' Contract Balance' 
-	,dtmTransactionDate 
-	,C.strCommodityCode
-	,t.intContractHeaderId
-	,t.intContractDetailId
-	,CH.strContractNumber
-	,CD.intContractSeq
-	,dblIncrease = CASE WHEN t.dblQty > 0 THEN t.dblQty ELSE 0 END
-	,dblDecrease = CASE WHEN t.dblQty < 0 THEN t.dblQty * -1 ELSE 0 END
-	,t.strPricingType
-	,t.strTransactionType
-	,t.intTransactionId
-	,t.strTransactionId
-	,intOrderBy
-INTO #tblContractBalance
-FROM(
-	select 
-		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId DESC) AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
-		, sh.intContractHeaderId
-		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance - isnull(sh.dblOldQuantity,0))
-		, pt.strPricingType
-		, strTransactionType = ''
-		, intTransactionId = null
-		, strTransactionId = ''
-		, intOrderBy = 1
-	from tblCTSequenceHistory sh
-	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
-	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	where intSequenceUsageHistoryId is null and strPricingStatus not in ( 'Partially Priced', 'Fully Priced')
+DECLARE @intCommodityId INT
+		,@intCommodityUnitMeasureId INT
 
-	union
-	select 
-		Row_Number() OVER (PARTITION BY sh.intContractDetailId ORDER BY cd.dtmCreated  DESC, sh.intSequenceHistoryId) AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
-		, sh.intContractHeaderId
-		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,sh.dblBalance)
-		, pt.strPricingType
-		, strTransactionType = ''
-		, intTransactionId = null
-		, strTransactionId = ''
-		, intOrderBy = 1
-	from tblCTSequenceHistory sh
-	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
-	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	where intSequenceUsageHistoryId is null 
+DECLARE @tblContractBalance AS TABLE (
+	strHeaderType NVARCHAR(100)
+	,dtmTransactionDate DATETIME
+	,strCommodityCode NVARCHAR(100)
+	,intContractHeaderId INT
+	,intContractDetailId INT
+	,strContractNumber NVARCHAR(100)
+	,intContractSeq INT
+	,dblIncrease NUMERIC(18,6)
+	,dblDecrease NUMERIC(18,6)
+	,strPricingType NVARCHAR(100)
+	,strTransactionType  NVARCHAR(100)
+	,intTransactionId INT
+	,strTransactionId NVARCHAR(100)
+	,intOrderBy INT
+)
 
-	union all --HTA (Priced) decrease
-	select 
-		1 as Row_Num
-		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(a.dtmHistoryCreated))
-		, a.intContractHeaderId
-		, a.intContractDetailId
-		, dblQuantity = a.dblQuantity * -1
-		, b.strPricingType
-		, strTransactionType = ''
-		, intTransactionId = null
-		, strTransactionId = ''
-		, intOrderBy = 1
-	from tblCTSequenceHistory a
-	INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
-	AND a.intPricingTypeId = 1 AND b.intPricingTypeId = 3
-	group by 
-		a.dblQuantity,
-		b.strPricingType,
-		a.intContractHeaderId,
-		a.intContractDetailId
+WHILE EXISTS(SELECT TOP 1 * FROM #tempCommodity)
+BEGIN
 
-	union all --HTA (Priced) increase
-	select 
-		1 as Row_Num
-		, dtmTransactionDate = min(dbo.fnRemoveTimeOnDate(b.dtmHistoryCreated))
-		, a.intContractHeaderId
-		, a.intContractDetailId
-		, dblQuantity = b.dblQuantity 
-		, b.strPricingType
-		, strTransactionType = ''
-		, intTransactionId = null
-		, strTransactionId = ''
-		, intOrderBy = 4
-	from tblCTSequenceHistory a
-	INNER JOIN tblCTSequenceHistory b on a.intContractDetailId = b.intContractDetailId
-	AND a.intPricingTypeId = 3 AND b.intPricingTypeId = 1
-	group by 
-		b.dblQuantity,
-		b.strPricingType,
-		a.intContractHeaderId,
-		a.intContractDetailId
-	
-	union all
-	select  
-		1 AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmScreenDate)
-		, sh.intContractHeaderId
-		, sh.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
-						else suh.dblTransactionQuantity * cd.dblQuantityPerLoad
-					end)
-		, pt.strPricingType
-		, strTransactionType = strScreenName
-		, intTransactionId = suh.intExternalHeaderId
-		, strTransactionId = suh.strNumber
-		, intOrderBy = 2
-	from vyuCTSequenceUsageHistory suh
-	inner join tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-	inner join tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
-	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblCTPricingType pt on pt.intPricingTypeId = sh.intPricingTypeId
-	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	where strFieldName = 'Balance'
+	SELECT @intCommodityId = intCommodityId FROM #tempCommodity
 
-	union all
-	SELECT	
-		Row_Number() OVER (PARTITION BY pf.intContractDetailId, fd.intPriceFixationDetailId ORDER BY fd.dtmFixationDate  DESC) AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(fd.dtmFixationDate)
-		, pf.intContractHeaderId
-		, pf.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,(fd.dblQuantity - fd.dblQuantityAppliedAndPriced) * -1)
-		, 'Basis'
-		, strTransactionType = ''
-		, intTransactionId = null
-		, strTransactionId = ''
-		, intOrderBy = 3
-	FROM	tblCTPriceFixationDetail fd
-	JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
-	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
-	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	WHERE (fd.dblQuantity - fd.dblQuantityAppliedAndPriced) <> 0
+	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
+	FROM tblICCommodityUnitMeasure
+	WHERE intCommodityId = @intCommodityId AND ysnDefault = 1 AND ysnStockUnit = 1
 
-	union all
-	SELECT	
-		Row_Number() OVER (PARTITION BY pf.intContractDetailId, fd.intPriceFixationDetailId ORDER BY fd.dtmFixationDate  DESC) AS Row_Num
-		, dtmTransactionDate = dbo.fnRemoveTimeOnDate(fd.dtmFixationDate)
-		, pf.intContractHeaderId
-		, pf.intContractDetailId
-		, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(ch.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(ch.intCommodityUOMId),cum.intUnitMeasureId,fd.dblQuantity - fd.dblQuantityAppliedAndPriced)
-		, 'Priced'
-		, strTransactionType = ''
-		, intTransactionId = null
-		, strTransactionId = ''
-		, intOrderBy = 4
-	FROM	tblCTPriceFixationDetail fd
-	JOIN	tblCTPriceFixation		 pf	ON	pf.intPriceFixationId =	fd.intPriceFixationId
-	JOIN tblCTContractDetail		 cd ON cd.intContractDetailId = pf.intContractDetailId
-	inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-	inner join tblICCommodityUnitMeasure cum on cum.intCommodityId = ch.intCommodityId and cum.ysnDefault = 1
-	WHERE (fd.dblQuantity - fd.dblQuantityAppliedAndPriced) <> 0
+	INSERT INTO @tblContractBalance(
+		strHeaderType 
+		,dtmTransactionDate
+		,strCommodityCode 
+		,intContractHeaderId 
+		,intContractDetailId
+		,strContractNumber 
+		,intContractSeq 
+		,dblIncrease 
+		,dblDecrease
+		,strPricingType 
+		,strTransactionType  
+		,intTransactionId 
+		,strTransactionId 
+		,intOrderBy 
+	)
+	SELECT DISTINCT
+		strHeaderType = @strContractType + ' Contract Balance' 
+		,dtmTransactionDate = CONVERT(DATETIME, CONVERT(VARCHAR(10),t.dtmTransactionDate, 110), 110)
+		,t.strCommodityCode
+		,t.intContractHeaderId
+		,t.intContractDetailId
+		,t.strContractNumber
+		,t.intContractSeq
+		,dblIncrease = CASE WHEN  dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) ELSE 0 END
+		,dblDecrease = CASE WHEN dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) < 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) * -1 ELSE 0 END
+		,t.strPricingType
+		,strTransactionType = t.strTransactionReference
+		,intTransactionId = t.intTransactionReferenceId
+		,strTransactionId = t.strTransactionReferenceNo
+		,intOrderBy = intContractBalanceLogId
+	FROM #tblRawContractBalance t
+	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10),t.dtmTransactionDate, 110), 110) between @dtmFromTransactionDate and @dtmToTransactionDate
+	AND t.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
+	AND t.intCommodityId = @intCommodityId
+	ORDER BY dtmTransactionDate, intContractBalanceLogId
 
-
-
-) t
-INNER JOIN tblCTContractHeader CH on CH.intContractHeaderId = t.intContractHeaderId 
-INNER JOIN tblCTContractDetail CD on CD.intContractDetailId = t.intContractDetailId
-INNER JOIN tblICCommodity C  on C.intCommodityId = CH.intCommodityId
-WHERE Row_Num = 1
-AND dtmTransactionDate between @dtmFromTransactionDate and @dtmToTransactionDate
-AND CH.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
-AND CH.intCommodityId  IN (SELECT com.intCommodityId FROM @Commodity com)
-ORDER BY dtmTransactionDate, intOrderBy
-
+	DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
+END
 
 SELECT *
 INTO #tblFinalContractBalance
@@ -248,7 +139,7 @@ FROM (
 			,intTransactionId
 			,strTransactionId
 			,intOrderBy
-		FROM #tblContractBalance
+		FROM @tblContractBalance
 ) t
 ORDER BY dtmTransactionDate, intOrderBy
 
@@ -297,35 +188,35 @@ Declare @intRowNum int
 	,@dblCashBegBalForSummary NUMERIC(18,6)
 
 
-select @dblBasisBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
-from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
+select @dblBasisBalanceForward = isnull(sum(dblQty) ,0)
+from #tblRawContractBalance where dtmTransactionDate < @dtmFromTransactionDate
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
-and strPricingTypeDesc = 'Basis'
+and strPricingType = 'Basis'
 
-select @dblPricedBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
-from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
+select @dblPricedBalanceForward = isnull(sum(dblQty) ,0)
+from #tblRawContractBalance where dtmTransactionDate < @dtmFromTransactionDate
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
-and strPricingTypeDesc = 'Priced'
+and strPricingType = 'Priced'
 
-select @dblDPBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
-from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
+select @dblDPBalanceForward = isnull(sum(dblQty) ,0)
+from #tblRawContractBalance where dtmTransactionDate < @dtmFromTransactionDate
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
-and strPricingTypeDesc = 'DP (Priced Later)'
+and strPricingType = 'DP (Priced Later)'
 
-select @dblHTABalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
-from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
+select @dblHTABalanceForward = isnull(sum(dblQty) ,0)
+from #tblRawContractBalance where dtmTransactionDate < @dtmFromTransactionDate
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
-and strPricingTypeDesc = 'HTA'
+and strPricingType = 'HTA'
 
-select @dblCashBalanceForward = isnull(sum(dblQtyinCommodityStockUOM) ,0)
-from tblCTContractBalance where dtmEndDate = @dtmContractBeginBalance
+select @dblCashBalanceForward = isnull(sum(dblQty) ,0)
+from #tblRawContractBalance where dtmTransactionDate < @dtmFromTransactionDate
 and intCommodityId  IN (SELECT intCommodityId FROM @Commodity)
 and intContractTypeId = @intContractTypeId
-and strPricingTypeDesc = 'Cash'
+and strPricingType = 'Cash'
 
 --insert into @tblRunningBalance(
 --		intRowNum
@@ -548,7 +439,7 @@ BEGIN
 END
 
 ExitRoutine:
-DROP TABLE #tblContractBalance
+DROP TABLE #tblRawContractBalance
 DROP TABLE #tblFinalContractBalance 
 DROP TABLE #tempDateRange
 DROP TABLE #tempCommodity

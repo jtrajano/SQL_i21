@@ -18,6 +18,8 @@ RETURNS @returntable TABLE
 	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
 	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intCategoryId INT
+	, strCategoryCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intCommodityId INT
 	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -33,54 +35,56 @@ AS
 BEGIN
 
 	INSERT @returntable	
-	SELECT
-		 intSummaryLogId 
-		,dtmCreatedDate
-		,dtmTransactionDate  
-		,strDistributionType
-		,strStorageTypeCode
-		,dblTotal
-		,intEntityId
-		,strEntityName
-		,intLocationId
-		,strLocationName
-		,intItemId
-		,strItemNo
-		,intCommodityId
-		,strCommodityCode
-		,strTransactionNumber
-		,strTransactionType
-		,intTransactionRecordId
-		,intTransactionRecordHeaderId
-		,strContractNumber
-		,intContractHeaderId
-		,intOrigUOMId
-		,strNotes
+	SELECT intSummaryLogId 
+		, dtmCreatedDate
+		, dtmTransactionDate  
+		, strDistributionType
+		, strStorageTypeCode
+		, dblTotal
+		, intEntityId
+		, strEntityName
+		, intLocationId
+		, strLocationName
+		, intItemId
+		, strItemNo
+		, intCategoryId
+		, strCategoryCode
+		, intCommodityId
+		, strCommodityCode
+		, strTransactionNumber
+		, strTransactionType
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strContractNumber
+		, intContractHeaderId
+		, intOrigUOMId
+		, strNotes
 	FROM (
-		SELECT 
-			intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
-			,sl.intSummaryLogId
-			,dtmCreatedDate
-			,dtmTransactionDate
-			,strDistributionType
-			,a.strStorageTypeCode
-			,dblTotal = sl.dblOrigQty
-			,intEntityId
-			,strEntityName
-			,intLocationId
-			,strLocationName
-			,intItemId
-			,strItemNo
-			,intCommodityId
-			,strCommodityCode
-			,strTransactionNumber
-			,strTransactionType
-			,intTransactionRecordId
-			,intTransactionRecordHeaderId
-			,strContractNumber
-			,intContractHeaderId
-			,intOrigUOMId
-			,strNotes
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
+			, sl.intSummaryLogId
+			, dtmCreatedDate
+			, dtmTransactionDate
+			, strDistributionType
+			, a.strStorageTypeCode
+			, dblTotal = sl.dblOrigQty
+			, intEntityId
+			, strEntityName
+			, intLocationId
+			, strLocationName
+			, intItemId
+			, strItemNo
+			, intCategoryId
+			, strCategoryCode
+			, intCommodityId
+			, strCommodityCode
+			, strTransactionNumber
+			, strTransactionType
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strContractNumber
+			, intContractHeaderId
+			, intOrigUOMId
+			, strNotes
 		FROM vyuRKGetSummaryLog sl
 		CROSS APPLY (
 			SELECT 
@@ -99,8 +103,6 @@ BEGIN
 			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
 			AND ISNULL(sl.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(sl.intEntityId, 0))
 	) t WHERE intRowNum = 1
-	
-
 
 RETURN
 

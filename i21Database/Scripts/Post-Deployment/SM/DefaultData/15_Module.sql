@@ -1239,6 +1239,16 @@ GO
 		   [ysnSupported]					=		1,
 	       [intSort]						=		119,
 		   [strPrefix]						=		N'IT'
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMModule WHERE strApplicationName = 'i21' AND strModule = 'Special Features')
+	INSERT INTO [dbo].[tblSMModule] ([intModuleId],[strApplicationName], [strModule], [strAppCode], [ysnSupported], [intSort], [strPrefix] )
+	SELECT [intModuleId]					=		120,
+		   [strApplicationName]				=		N'i21',
+		   [strModule]						=		N'Special Features',
+		   [strAppCode]						=		N'',
+		   [ysnSupported]					=		1,
+	       [intSort]						=		120,
+		   [strPrefix]						=		N''
 	
 	SET IDENTITY_INSERT [dbo].[tblSMModule] OFF
 

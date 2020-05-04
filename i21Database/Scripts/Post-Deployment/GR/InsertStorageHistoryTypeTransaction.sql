@@ -37,6 +37,10 @@ GO
     BEGIN
         INSERT INTO [dbo].[tblGRStorageHistoryTypeTransaction] (strType, intTypeId) VALUES ('InventoryAdjustment', 9)
     END
+    IF NOT EXISTS (SELECT TOP 1 1 FROM tblGRStorageHistoryTypeTransaction WHERE strType = 'Bill')
+    BEGIN
+        INSERT INTO [dbo].[tblGRStorageHistoryTypeTransaction] (strType, intTypeId) VALUES ('Bill', 10)
+    END
 
     PRINT 'End inserting fixed data in tblGRStorageHistoryTransaction'
 GO

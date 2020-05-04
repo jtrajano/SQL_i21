@@ -57,8 +57,24 @@ DECLARE @intDSContractAdjusmentContractDetailId INT
 DECLARE @intDSContractAdjusmentEntityId INT
 DECLARE @dblDSContractAdjusmentQuantity NUMERIC(38,20)
 DECLARE @intDSContractAdjusmentItemUOMId INT
+DECLARE @ysnImposeReversalTransaction BIT
 
 BEGIN TRY
+
+		SET @ysnImposeReversalTransaction = 0
+		
+		SELECT TOP 1
+			@ysnImposeReversalTransaction = ysnImposeReversalTransaction
+		FROM tblRKCompanyPreference
+		
+		IF(@ysnImposeReversalTransaction = 1)
+		BEGIN
+			EXEC uspSCReverseDeliverySheet @intDeliverySheetId, @intUserId
+			GOTO _Exit
+		END
+
+
+
 		-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 		SET @currencyDecimal = 20
 		IF @strInOutFlag = 'I'
@@ -132,7 +148,7 @@ BEGIN TRY
 				CLOSE ticketCursor;  
 				DEALLOCATE ticketCursor;
 
-				EXEC uspGRInsertStorageHistoryRecord @storageHistoryData
+				EXEC uspGRInsertStorageHistoryRecord @storageHistoryData, 0
 
 				DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT intCustomerStorageId FROM tblGRCustomerStorage WHERE intDeliverySheetId = @intDeliverySheetId) 
 				AND strSourceType = 'Storage'
@@ -266,7 +282,7 @@ BEGIN TRY
 								RETURN;
 							END
 						END
-						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+						EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 						FETCH NEXT FROM voucherCursor INTO @intBillId;
 					END
 

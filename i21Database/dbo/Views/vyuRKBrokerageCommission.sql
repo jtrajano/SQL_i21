@@ -7,7 +7,7 @@ SELECT
 	,BC.dtmEffectiveDate
 	,BC.dtmEndDate
 	,BC.intFuturesRateType
-	,CASE WHEN BC.intFuturesRateType = 1 THEN 'Round-turn' ELSE 'Half-turn' END COLLATE Latin1_General_CI_AS AS strFuturesRateType
+	,CASE WHEN BC.intFuturesRateType = 1 THEN 'Round-turn' WHEN BC.intFuturesRateType  = 2 THEN 'Half-turn' ELSE '' END COLLATE Latin1_General_CI_AS AS strFuturesRateType
 	,BC.dblFutCommission
 	,BC.intFutCurrencyId
 	,FutCur.strCurrency AS strFutCurrency

@@ -113,6 +113,22 @@ BEGIN
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Brokerage Commission','1')
 END  
 
+--This will fix all commission entry to set blank Futures Rate Type to Half-turn.This is related to this jira RM-3672
+IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for Brokerage Commission Futures Rate Type')
+BEGIN
+
+	UPDATE tblRKBrokerageCommission
+	SET intFuturesRateType = 2
+	FROM
+	tblRKBrokerageAccount BA
+	INNER JOIN tblRKBrokerageCommission BC ON BC.intBrokerageAccountId = BA.intBrokerageAccountId
+	WHERE BA.intInstrumentTypeId IN(1,3)
+	AND BC.intFuturesRateType IS NULL
+
+    --Insert into EM Preferences. This will serve as the checking if the datafix will be executed or not.
+    INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Brokerage Commission Futures Rate Type','1')
+END  
+
 --This will fix  Future Settlement Price to include Commodity Market Id. This is related to this jira key RM-730
 IF NOT EXISTS (SELECT * FROM tblEMEntityPreferences WHERE strPreference = 'RM data fix for Future Settlement Price')
 BEGIN

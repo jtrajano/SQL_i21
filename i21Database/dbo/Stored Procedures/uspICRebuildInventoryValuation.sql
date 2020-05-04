@@ -801,13 +801,16 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-						WHEN dblValue <> 0 THEN 6
-						ELSE 7
-					END    
+						WHEN dblQty > 0 AND ty.strName IN ('Inventory Adjustment - Opening Inventory') THEN 2 
+						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+						WHEN dblValue <> 0 THEN 8
+						ELSE 9
+					END 
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -826,13 +829,13 @@ BEGIN
 				,t.strTransactionId
 				,intTransactionDetailId
 				,strBatchId
-				,intTransactionTypeId
+				,t.intTransactionTypeId
 				,intLotId
 				,ysnIsUnposted
 				,intRelatedInventoryTransactionId
 				,intRelatedTransactionId
 				,strRelatedTransactionId
-				,strTransactionForm
+				,t.strTransactionForm
 				,intCostingMethod
 				,dtmCreated
 				,strDescription
@@ -850,23 +853,28 @@ BEGIN
 				,intFobPointId
 		FROM	#tmpUnOrderedICTransaction t LEFT JOIN #tmpPriorityTransactions priorityTransaction
 					ON t.strTransactionId = priorityTransaction.strTransactionId
+				LEFT JOIN tblICInventoryTransactionType  ty
+					ON t.intTransactionTypeId = ty.intTransactionTypeId
 		ORDER BY 
 			DATEADD(dd, DATEDIFF(dd, 0, dtmDate), 0) ASC			
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 
 					-CAST(REPLACE(strBatchId, 'BATCH-', '') AS INT)
 				ELSE
-					1
-			END ASC 
+					NULL
+			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-				WHEN dblValue <> 0 THEN 6
-				ELSE 7
-			END   
+				WHEN dblQty > 0 AND ty.strName IN ('Inventory Adjustment - Opening Inventory') THEN 2 
+				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+				WHEN dblValue <> 0 THEN 8
+				ELSE 9
+			END  
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 
@@ -1387,7 +1395,6 @@ BEGIN
 		SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	END 
 
-
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
 		IF ISNULL(@isPeriodic, 0) = 1
@@ -1788,7 +1795,13 @@ BEGIN
 							ON ICTrans.strTransactionId = Header.strTransferNo				
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
 							ON Detail.intInventoryTransferId = Header.intInventoryTransferId
-							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId 
+							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId
+							AND Detail.intItemId = ICTrans.intItemId 
+						INNER JOIN tblICItem i
+							ON i.intItemId = Detail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						INNER JOIN tblICItemUOM StockUOM
 							ON StockUOM.intItemId = ICTrans.intItemId 
 							AND StockUOM.ysnStockUnit = 1
@@ -1806,6 +1819,7 @@ BEGIN
 								AND intItemLocationId = ICTrans.intItemLocationId
 						) itemPricing
 				WHERE	strBatchId = @strBatchId
+						AND ICTrans.strTransactionId = @strTransactionId
 						AND ICTrans.dblQty < 0 
 
 				EXEC @intReturnValue = dbo.uspICRepostCosting
@@ -1899,7 +1913,7 @@ BEGIN
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 				END
 				ELSE 
-				BEGIN 
+				BEGIN
 					DELETE FROM @ItemsToPost
 					INSERT INTO @ItemsToPost (
 							intItemId  
@@ -1963,6 +1977,7 @@ BEGIN
 								AND TransferSource.strTransactionId = Header.strTransferNo
 								AND TransferSource.strBatchId = @strBatchId
 								AND TransferSource.dblQty < 0
+								AND TransferSource.ysnIsUnposted = 0 
 							LEFT JOIN dbo.tblICItemUOM ItemUOM
 								ON TransferSource.intItemId = ItemUOM.intItemId
 								AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId
@@ -3369,40 +3384,21 @@ BEGIN
 						,RebuildInvTrans.dtmDate  
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-						,dblCost  = CASE
-										WHEN RebuildInvTrans.dblQty < 0 THEN 
-											CASE	
-													WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
-														dbo.fnGetItemAverageCost(
-															RebuildInvTrans.intItemId
-															, RebuildInvTrans.intItemLocationId
-															, RebuildInvTrans.intItemUOMId
-														) 
-													ELSE 
-														dbo.fnCalculateCostBetweenUOM (
-															StockUOM.intItemUOMId
-															,RebuildInvTrans.intItemUOMId
-															,ISNULL(lot.dblLastCost, itemPricing.dblLastCost) 
-														)
-											END 
-
-										-- When it is a credit memo:
-										WHEN RebuildInvTrans.dblQty > 0 THEN 
-											
-											CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
+						,dblCost  = 
+								ISNULL(
+									dbo.fnCalculateCostBetweenUOM(
+											StockUOM.intItemUOMId
+											,RebuildInvTrans.intItemUOMId
+											,CASE	WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 														-- If using Average Costing, use Ave Cost.
-														dbo.fnGetItemAverageCost(
-															RebuildInvTrans.intItemId
-															, RebuildInvTrans.intItemLocationId
-															, RebuildInvTrans.intItemUOMId
-														) 
+														itemPricing.dblAverageCost 
 													ELSE
-														-- Otherwise, get the last cost. 
-														ISNULL(lot.dblLastCost, itemPricing.dblLastCost)
+														-- Otherwise, get the last cost. 														
+														COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
 											END 
-										ELSE 
-											RebuildInvTrans.dblCost
-									END 
+									)
+									,RebuildInvTrans.dblCost
+								)
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
@@ -3445,7 +3441,8 @@ BEGIN
 
 						OUTER APPLY (
 							SELECT TOP 1 
-								dblLastCost 
+								dblLastCost
+								, dblAverageCost 
 							FROM 
 								tblICItemPricing p
 							WHERE 
@@ -4592,6 +4589,7 @@ BEGIN
 							,[dblForeignRate]
 							,[strRateType]
 							,[intSourceEntityId]
+							,[intCommodityId]
 					)			
 					EXEC @intReturnValue = dbo.uspICCreateReturnGLEntries
 						@strBatchId 

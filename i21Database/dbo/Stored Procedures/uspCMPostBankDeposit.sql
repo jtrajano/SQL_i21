@@ -152,13 +152,7 @@ BEGIN
 		RAISERROR('Cannot post an empty detail transaction.', 11, 1)
 		GOTO Post_Rollback
 	END
-
-	IF @ysnPost = 0 AND EXISTS(SELECT TOP 1 1 FROM tblCMUndepositedFund where  intBankDepositId = @intTransactionId AND ysnGenerated = 1  )
-	BEGIN
-		RAISERROR('Transaction already has generated an ACH file.', 11, 1)
-		GOTO Post_Rollback
-	END
-
+	
 -- Validate the date against the FY Periods
 	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0)
 	BEGIN 
@@ -459,6 +453,14 @@ BEGIN
 	EXEC dbo.uspCMReverseGLEntries @strTransactionId, @GL_DETAIL_CODE, NULL, @intUserId, @strBatchId
 	IF @@ERROR <> 0	GOTO Post_Rollback
 	
+
+	--RESET GENERATION FLAGS IN UNDEPOSITED TABLE
+	UPDATE Undeposited SET ysnGenerated =0 , intBankFileAuditId = null
+	FROM tblCMUndepositedFund Undeposited
+	JOIN tblCMBankTransactionDetail B on B.intUndepositedFundId = Undeposited.intUndepositedFundId
+	JOIN tblCMBankTransaction A on A.intTransactionId = B.intTransactionId
+	WHERE A.strTransactionId = @strTransactionId
+	AND @ysnRecap = 0
 	-- Update the posted flag in the transaction table
 	
 END-- @ysnPost = 0
@@ -533,7 +535,7 @@ FROM #tmpGLDetail
 
 
 	DECLARE @PostResult INT
-	EXEC @PostResult = uspGLBookEntries @GLEntries, @ysnPost
+	EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 

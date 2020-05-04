@@ -105,7 +105,7 @@ BEGIN TRY
 		,[strAcresApplied]				NVARCHAR(10)    COLLATE Latin1_General_CI_AS 	NULL
 		,[strNutrientAnalysis]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 		,[strBillingMethod]				NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
-		,[strApplicatorLicense]			NVARCHAR(20)    COLLATE Latin1_General_CI_AS 	NULL
+		,[strApplicatorLicense]			NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 
 	)
 	

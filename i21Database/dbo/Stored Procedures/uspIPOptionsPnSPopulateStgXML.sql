@@ -33,15 +33,15 @@ BEGIN TRY
 	SET @strDetailCondition = NULL
 
 	SELECT @intCompanyId = intCompanyId
-	FROM tblRKOptionsMatchPnSHeader
+	FROM tblRKOptionsMatchPnSHeader WITH (NOLOCK)
 	WHERE intOptionsMatchPnSHeaderId = @intOptionsMatchPnSHeaderId
 
 	SELECT @intScreenId = intScreenId
-	FROM tblSMScreen
+	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'RiskManagement.view.OptionsLifecycle'
  
 	SELECT @intTransactionId = intTransactionId 
-	FROM tblSMTransaction
+	FROM tblSMTransaction WITH (NOLOCK)
 	WHERE intRecordId = @intOptionsMatchPnSHeaderId
 		AND intScreenId = @intScreenId
 

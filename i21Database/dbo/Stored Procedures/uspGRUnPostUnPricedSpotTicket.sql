@@ -75,6 +75,7 @@ BEGIN TRY
 			BEGIN
 				EXEC uspAPDeleteVoucher @intBillId
 					,@UserId
+					,1
 			END
 
 			SELECT @intBillKey = MIN(intBillKey)

@@ -8,7 +8,7 @@ select
 			,intHours
 			,dblHours
 			,dblEstimatedHours
-			,dtmDate
+			,convert(datetime,ceiling(convert(numeric(18,6), dtmDate))) dtmDate
 			,dtmStartTime
 			,dtmEndTime
 			,dblRate

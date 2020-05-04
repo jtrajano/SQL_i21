@@ -10,5 +10,5 @@ SELECT STU.intSampleTypeUserRoleId
 	,STU.dtmLastModified
 	,STU.intSampleTypeUserRoleRefId
 	,UR.strName
-FROM tblQMSampleTypeUserRole STU
-LEFT JOIN tblSMUserRole UR ON UR.intUserRoleID = STU.intUserRoleID
+FROM tblQMSampleTypeUserRole STU WITH (NOLOCK)
+LEFT JOIN tblSMUserRole UR WITH (NOLOCK) ON UR.intUserRoleID = STU.intUserRoleID

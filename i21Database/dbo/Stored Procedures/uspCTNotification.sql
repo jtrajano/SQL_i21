@@ -183,6 +183,7 @@ BEGIN TRY
 			JOIN	tblQMSampleStatus as SMS
 					on SMS.intSampleStatusId = SM.intSampleStatusId
 						and SMS. strStatus <> ''Approved''
+			WHERE CH.strContractType = ''Purchase''
 	
 			UNION 
 
@@ -211,6 +212,7 @@ BEGIN TRY
 							on CH.intContractHeaderId = a.intContractHeaderId
 				where CH.intContractHeaderId not in (select intContractHeaderId from tblCTContractDetail where intContractDetailId in (select intContractDetailId from tblQMSample, tblQMSampleStatus
 																			where tblQMSampleStatus.intSampleStatusId = tblQMSample.intSampleStatusId and tblQMSampleStatus.strStatus = ''Approved''))
+				and CH.strContractType = ''Purchase''
 		
 			) EDPEXO			
 			LEFT	JOIN	vyuCTEventRecipientFilter	RF	ON	RF.intEntityId			=	'+LTRIM(@intUserId)+' AND RF.strNotificationType = ''Pre-shipment sample not yet approved'' 

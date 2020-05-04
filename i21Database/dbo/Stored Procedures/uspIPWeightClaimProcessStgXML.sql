@@ -45,6 +45,17 @@ BEGIN TRY
 		,@intLoadId INT
 		,@intNewWeightClaimId2 INT
 		,@strReferenceNumber NVARCHAR(50)
+		,@intContractDetailId INT
+		,@dblUnitPriceInSupplierContract NUMERIC(18, 6)
+		,@dblClaimAmountInSupplierContract NUMERIC(18, 6)
+
+				,@intCurrentCompanyId INT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+
 
 	--,@strNewWeightClaimReferenceNo nvarchar(50)
 	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
@@ -143,15 +154,6 @@ BEGIN TRY
 				END
 			END
 
-			IF @strErrorMessage <> ''
-			BEGIN
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
-
 			SELECT @intBookId = NULL
 
 			SELECT @intSubBookId = NULL
@@ -182,6 +184,15 @@ BEGIN TRY
 				BEGIN
 					SELECT @strErrorMessage = 'Unable to find Outbound shipment.'
 				END
+			END
+
+			IF @strErrorMessage <> ''
+			BEGIN
+				RAISERROR (
+						@strErrorMessage
+						,16
+						,1
+						)
 			END
 
 			SELECT @intPaymentMethodId = intPaymentMethodID
@@ -248,6 +259,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
+					,intCompanyId 
 					)
 				SELECT 1 intConcurrencyId
 					,@strReferenceNumber
@@ -269,6 +281,7 @@ BEGIN TRY
 					,@intSubBookId
 					,@intPaymentMethodId
 					,@intWeightClaimId
+					,@intCurrentCompanyId
 				FROM OPENXML(@idoc, 'vyuIPGetWeightClaims/vyuIPGetWeightClaim', 2) WITH (
 						strReferenceNumber NVARCHAR(50) Collate Latin1_General_CI_AS
 						,dtmTransDate DATETIME
@@ -380,6 +393,8 @@ BEGIN TRY
 				,strCurrency NVARCHAR(50) collate Latin1_General_CI_AS
 				,strPartyName NVARCHAR(100) collate Latin1_General_CI_AS
 				,strPriceUOM NVARCHAR(50) collate Latin1_General_CI_AS
+				,dblToGross NUMERIC(18, 6)
+				,dblToTare NUMERIC(18, 6)
 				)
 			DECLARE @tblLGFinalWeightClaimDetail TABLE (
 				intWeightClaimDetailId INT identity(1, 1)
@@ -407,6 +422,10 @@ BEGIN TRY
 				,dblSeqPriceConversionFactoryWeightUOM NUMERIC(18, 6)
 				,intWeightClaimDetailRefId INT
 				,intItemRefId INT
+				,dblUnitPriceInSupplierContract NUMERIC(18, 6)
+				,dblClaimAmountInSupplierContract NUMERIC(18, 6)
+				,dblToGross NUMERIC(18, 6)
+				,dblToTare NUMERIC(18, 6)
 				)
 
 			INSERT INTO @tblLGWeightClaimDetail (
@@ -438,6 +457,8 @@ BEGIN TRY
 				,strCurrency
 				,strPartyName
 				,strPriceUOM
+				,dblToGross
+				,dblToTare
 				)
 			SELECT intConcurrencyId
 				,intWeightClaimId
@@ -467,6 +488,8 @@ BEGIN TRY
 				,strCurrency
 				,strPartyName
 				,strPriceUOM
+				,dblToGross
+				,dblToTare
 			FROM OPENXML(@idoc, 'vyuIPGetWeightClaimDetails/vyuIPGetWeightClaimDetail', 2) WITH (
 					intConcurrencyId INT
 					,intWeightClaimId INT
@@ -497,6 +520,8 @@ BEGIN TRY
 					,strCurrency NVARCHAR(50) collate Latin1_General_CI_AS
 					,strPartyName NVARCHAR(100) collate Latin1_General_CI_AS
 					,strPriceUOM NVARCHAR(50) collate Latin1_General_CI_AS
+					,dblToGross NUMERIC(18, 6)
+					,dblToTare NUMERIC(18, 6)
 					)
 
 			DECLARE @intWeightClaimDetailId INT
@@ -521,11 +546,13 @@ BEGIN TRY
 					,@strPartyName = NULL
 					,@strPriceUOM = NULL
 					,@strErrorMessage = ''
+					,@intContractDetailId = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strCurrency = strCurrency
 					,@strPartyName = strPartyName
 					,@strPriceUOM = strPriceUOM
+					,@intContractDetailId = intContractDetailId
 				FROM @tblLGWeightClaimDetail
 				WHERE intWeightClaimDetailId = @intWeightClaimDetailId
 
@@ -637,6 +664,40 @@ BEGIN TRY
 							)
 				END
 
+				SELECT @dblUnitPriceInSupplierContract = AD.dblSeqPrice
+					,@dblClaimAmountInSupplierContract =  (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice / (
+								CASE 
+									WHEN ysnSeqSubCurrency = 1
+										THEN 100
+									ELSE 1
+									END
+								)
+				FROM tblLGLoad L
+				JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
+					AND L.intLoadRefId = @intLoadId
+					AND L.intBookId = @intBookId
+					AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+				JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
+					AND SCD.intContractDetailRefId = @intContractDetailId
+					AND SCD.intBookId = @intBookId
+					AND IsNULL(SCD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+				JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+				OUTER APPLY (
+					SELECT TOP 1 intWeightUOMId = IU.intItemUOMId
+						,dblUnitQty
+					FROM tblICItemUOM IU
+					WHERE IU.intItemId = CD.intItemId
+						AND IU.intUnitMeasureId = WUOM.intUnitMeasureId
+					) WUI
+				OUTER APPLY (
+					SELECT TOP 1 intPriceUOMId = IU.intItemUOMId
+						,dblUnitQty
+					FROM tblICItemUOM IU
+					WHERE IU.intItemUOMId = AD.intSeqPriceUOMId
+					) PUI
+
 				INSERT INTO @tblLGFinalWeightClaimDetail (
 					intConcurrencyId
 					,intWeightClaimId
@@ -662,6 +723,10 @@ BEGIN TRY
 					,dblSeqPriceConversionFactoryWeightUOM
 					,intWeightClaimDetailRefId
 					,intItemRefId
+					,dblUnitPriceInSupplierContract
+					,dblClaimAmountInSupplierContract
+					,dblToGross
+					,dblToTare
 					)
 				SELECT 1 AS intConcurrencyId
 					,@intNewWeightClaimId
@@ -687,6 +752,10 @@ BEGIN TRY
 					,dblSeqPriceConversionFactoryWeightUOM
 					,intWeightClaimDetailRefId
 					,intItemRefId
+					,@dblUnitPriceInSupplierContract
+					,@dblClaimAmountInSupplierContract
+					,dblToGross
+					,dblToTare
 				FROM @tblLGWeightClaimDetail WCD
 				WHERE intWeightClaimDetailId = @intWeightClaimDetailId
 
@@ -723,6 +792,8 @@ BEGIN TRY
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
+				,dblToGross
+				,dblToTare
 				)
 			SELECT [intConcurrencyId]
 				,[intWeightClaimId]
@@ -741,10 +812,12 @@ BEGIN TRY
 					JOIN tblCTContractDetail CD1 ON CD1.intContractDetailId = AD.intPContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD1.intContractHeaderId
 					WHERE CD.intContractDetailRefId = IA.intContractDetailId
+					AND CD.intBookId = @intBookId
+					AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS [intPartyEntityId]
-				,[dblUnitPrice]
+				,dblUnitPriceInSupplierContract
 				,[intCurrencyId]
-				,[dblClaimAmount]
+				,ABS(Round([dblClaimableWt] * dblClaimAmountInSupplierContract,2))
 				,[intPriceItemUOMId]
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
@@ -753,19 +826,20 @@ BEGIN TRY
 					FROM tblCTContractDetail CD
 					JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
 					WHERE CD.intContractDetailRefId = IA.intContractDetailId
+					AND CD.intBookId = @intBookId
+					AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS intContractDetailId
 				,[intBillId]
 				,[intInvoiceId]
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
+				,dblToGross
+				,dblToTare
 			FROM @tblLGFinalWeightClaimDetail IA
 
 			DELETE
 			FROM @tblLGWeightClaimDetail
-
-			DELETE
-			FROM @tblLGFinalWeightClaimDetail
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -833,6 +907,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
+					,intCompanyId
 					)
 				SELECT intConcurrencyId
 					,@strReferenceNumber
@@ -848,6 +923,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,@intNewWeightClaimId
+					,@intCurrentCompanyId
 				FROM tblLGWeightClaim
 				WHERE intWeightClaimId = @intNewWeightClaimId
 
@@ -919,6 +995,8 @@ BEGIN TRY
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
+				,dblToGross
+				,dblToTare
 				)
 			SELECT [intConcurrencyId]
 				,@intNewWeightClaimId2
@@ -932,13 +1010,11 @@ BEGIN TRY
 				,[dblClaimableWt]
 				,(
 					SELECT TOP 1 CH.intEntityId
-					FROM tblLGAllocationDetail AD
-					JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-					JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
+					FROM tblCTContractDetail CD
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					WHERE AD.intPContractDetailId = WCD.intContractDetailId
-						AND AH.intBookId = @intBookId
-						AND IsNULL(AH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					WHERE CD.intContractDetailRefId = WCD.intContractDetailId
+						AND CH.intBookId = @intBookId
+						AND IsNULL(CH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS [intPartyEntityId]
 				,[dblUnitPrice]
 				,[intCurrencyId]
@@ -947,20 +1023,20 @@ BEGIN TRY
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
 				,(
-					SELECT TOP 1 AD.intSContractDetailId
-					FROM tblLGAllocationDetail AD
-					JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-					WHERE AD.intPContractDetailId = WCD.intContractDetailId
-						AND AH.intBookId = @intBookId
-						AND IsNULL(AH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+					SELECT TOP 1 CD.intContractDetailId
+					FROM tblCTContractDetail CD
+					WHERE CD.intContractDetailRefId = WCD.intContractDetailId
+						AND CD.intBookId = @intBookId
+						AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS intContractDetailId
 				,[intBillId]
 				,[intInvoiceId]
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
-			FROM tblLGWeightClaimDetail WCD
-			WHERE intWeightClaimId = @intNewWeightClaimId
+				,dblToGross
+				,dblToTare
+			FROM @tblLGFinalWeightClaimDetail WCD
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION

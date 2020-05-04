@@ -171,6 +171,11 @@ AS
      ,SCT.dtmImportedDate
 	 ,ContractsApplied.strContractsApplied
     ,SCT.strTrailerId
+    ,SCT.intParentTicketId
+    ,SCT.intTicketTransactionType
+    ,SCT.ysnReversed
+	,SCT.ysnCertOfAnalysisPosted
+	,SCT.ysnExportRailXML
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId

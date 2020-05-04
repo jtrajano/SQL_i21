@@ -36,4 +36,42 @@ BEGIN
 END
 GO
 print N'END Populate global julian calendar for site'
+print N'BEGIN Syncing Site Tank Capacity and Device Tank Capacity.'
+GO
+IF EXISTS(SELECT top 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'tblTMSite')
+BEGIN
+	EXEC ('
+			update
+				s
+			set
+				s.dblTotalCapacity = t.dblDeviceTotalTankCapacity
+				,s.dblTotalReserve = t.dblDeviceTotalTankReserve
+			from
+				tblTMSite s
+				,(
+				select
+					s.intSiteID
+					,dblDeviceTotalTankCapacity = sum(d.dblTankCapacity)
+					,dblDeviceTotalTankReserve = sum(d.dblTankReserve)
+				from
+					tblTMSite s
+					,tblTMSiteDevice sd
+					,tblTMDevice d
+					,tblTMDeviceType dt
+				where
+					sd.intSiteID = s.intSiteID
+					and d.intDeviceId = sd.intDeviceId
+					and dt.intDeviceTypeId = d.intDeviceTypeId
+					and dt.strDeviceType = ''Tank''
+				group by
+					s.intSiteID
+				) t
+			where
+				s.intSiteID = t.intSiteID
+				and s.dblTotalCapacity <> t.dblDeviceTotalTankCapacity
+	')
+
+END
+GO
+print N'END Syncing Site Tank Capacity and Device Tank Capacity.'
 GO

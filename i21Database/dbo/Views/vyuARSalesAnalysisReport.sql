@@ -53,26 +53,28 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 											 END
 									ELSE 0 
 								  END
-	 , dblMarginPerUnit = ISNULL(
-			CASE WHEN dblQtyShipped != 0 THEN 
-				((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
-					CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
-						THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-							THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
-						ELSE ISNULL(SAR.dblQtyOrdered, 0)
-					END) / ISNULL(SAR.dblQtyShipped, 0) + (ISNULL(SAR.dblRebateAmount, 0) / ISNULL(SAR.dblQtyShipped, 0))
-			END
-		,0)
+	 , dblMarginPerUnit 		= ISNULL(
+									CASE WHEN dblQtyShipped != 0 THEN 
+										((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
+											CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
+												THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
+													THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
+												ELSE ISNULL(SAR.dblQtyOrdered, 0)
+											END) / ISNULL(SAR.dblQtyShipped, 0) + (ISNULL(SAR.dblRebateAmount, 0) / ISNULL(SAR.dblQtyShipped, 0))
+									END
+								,0)
 	 , dblMarginPerUnitPercentage = ISNULL(
-			CASE WHEN dblQtyShipped != 0 THEN 
-				(((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
-					CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
-						THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
-							THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
-						ELSE ISNULL(SAR.dblQtyOrdered, 0) 
-					END + ISNULL(SAR.dblRebateAmount, 0) / ISNULL(SAR.dblQtyShipped, 0)) / 100) / ISNULL(SAR.dblQtyShipped, 0) 
-			END
-		,0)
+									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') AND ISNULL(SAR.dblQtyShipped, 0) <> 0
+										 THEN (((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0) + (ISNULL(SAR.dblRebateAmount, 0) / ABS(SAR.dblQtyShipped) )) *
+											CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
+													THEN -SAR.dblQtyShipped
+													ELSE SAR.dblQtyShipped 
+											END) / 100) / SAR.dblQtyShipped
+										 WHEN SAR.strTransactionType = 'Order' AND ISNULL(SAR.dblQtyOrdered, 0) <> 0
+										 THEN (((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * SAR.dblQtyOrdered) / 100) / SAR.dblQtyOrdered
+										 ELSE 0
+									END
+								, 0)
 	 , dblPrice					= ISNULL(SAR.dblPrice, 0)
 	 , dblTax					= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblTax, 0) ELSE ISNULL(SAR.dblTax, 0) END
 	 , dblLineTotal				= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblLineTotal, 0) ELSE ISNULL(SAR.dblLineTotal, 0) END
@@ -145,13 +147,18 @@ FROM
 		, dblLineTotal				= ARID.dblTotal
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -197,6 +204,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -233,6 +241,20 @@ FROM
 		WHERE ISNULL(CF.intInvoiceId, 0) <> 0
 	) AS CFTRAN ON ARI.intInvoiceId = CFTRAN.intInvoiceId 
 	           AND ARI.strType = 'CF Tran'
+	OUTER APPLY
+	(
+		SELECT TOP 1
+		 intSiteId = S.intSiteID,
+		 strSiteAddress = S.strSiteAddress,
+		 strCity = S.strCity,
+		 strState = S.strState,
+		 strZipCode =  S.strZipCode, 
+		 strCountry = S.strCountry	
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+		WHERE ID.intInvoiceId = ARID.intInvoiceId 
+	    AND ISNULL(ID.intSiteId, 0) <> 0
+	) TMSITE
 	WHERE ARI.ysnPosted = 1 
 		AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		AND ISNULL(ICI.strType, '') NOT IN ('Software', 'Bundle')
@@ -272,13 +294,18 @@ FROM
 		, dblLineTotal				= ARID.dblTotal
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -324,6 +351,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -352,6 +380,20 @@ FROM
 			   AND ARID.intItemId					= LOTTED.intItemId
 			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	OUTER APPLY
+	(
+		SELECT TOP 1
+		 intSiteId = S.intSiteID,
+		 strSiteAddress = S.strSiteAddress,
+		 strCity = S.strCity,
+		 strState = S.strState,
+		 strZipCode =  S.strZipCode, 
+		 strCountry = S.strCountry	
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+		WHERE ID.intInvoiceId = ARID.intInvoiceId 
+	    AND ISNULL(ID.intSiteId, 0) <> 0
+	) TMSITE
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
@@ -458,6 +500,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
 				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -525,13 +568,18 @@ FROM
 		, dblLineTotal				= ARID.dblQtyShipped * ARID.dblLicenseAmount
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -577,6 +625,7 @@ FROM
 												AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												AND ICISI.intItemId						= ICIT.intItemId
 												AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												AND ICIT.intInTransitSourceLocationId IS NULL
 		) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				      AND ARID.intItemId					= NONLOTTED.intItemId
 					  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -606,6 +655,20 @@ FROM
 				AND ARID.intItemId					= LOTTED.intItemId
 				AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 				AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	OUTER APPLY
+	(
+		SELECT TOP 1
+		 intSiteId = S.intSiteID,
+		 strSiteAddress = S.strSiteAddress,
+		 strCity = S.strCity,
+		 strState = S.strState,
+		 strZipCode =  S.strZipCode, 
+		 strCountry = S.strCountry	
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+		WHERE ID.intInvoiceId = ARID.intInvoiceId 
+	    AND ISNULL(ID.intSiteId, 0) <> 0
+	) TMSITE
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -711,6 +774,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
 				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -774,13 +838,18 @@ FROM
 		, dblLineTotal				= ARID.dblQtyShipped * ARID.dblMaintenanceAmount
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		=  CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -826,6 +895,7 @@ FROM
 												AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												AND ICISI.intItemId						= ICIT.intItemId
 												AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -854,6 +924,20 @@ FROM
 			   AND ARID.intItemId					= LOTTED.intItemId
 			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	OUTER APPLY
+	(
+		SELECT TOP 1
+		 intSiteId = S.intSiteID,
+		 strSiteAddress = S.strSiteAddress,
+		 strCity = S.strCity,
+		 strState = S.strState,
+		 strZipCode =  S.strZipCode, 
+		 strCountry = S.strCountry	
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+		WHERE ID.intInvoiceId = ARID.intInvoiceId 
+	    AND ISNULL(ID.intSiteId, 0) <> 0
+	) TMSITE
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -959,6 +1043,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
 				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
@@ -1022,13 +1107,18 @@ FROM
 		, dblLineTotal				= ARID.dblTotal
 		, dblTotal					= ARI.dblInvoiceTotal			
 		, strBillToLocationName		= ARI.strBillToLocationName
-		, strShipToLocationName		= ARI.strShipToLocationName
+		, strShipToLocationName		= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 								  THEN TMSITE.strSiteAddress ELSE ARI.strShipToLocationName END
 		, intSiteId					= ARID.intSiteId
 		, intTicketId				= ARID.intTicketId
-		, strShipToCity				= ARI.strShipToCity
-		, strShipToState			= ARI.strShipToState
-		, strShipToCountry			= ARI.strShipToCountry
-		, strShipToZipCode			= ARI.strShipToZipCode
+		, strShipToCity				= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCity ELSE ARI.strShipToCity END
+		, strShipToState			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strState ELSE ARI.strShipToState END
+		, strShipToCountry			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strCountry ELSE ARI.strShipToCountry END
+		, strShipToZipCode			= CASE WHEN ARI.strType = 'Tank Delivery' AND TMSITE.intSiteId IS NOT NULL 
+	 									THEN TMSITE.strZipCode ELSE ARI.strShipToZipCode END 
 		, intCurrencyId				= ARI.intCurrencyId
 		, strCurrency				= SMC.strCurrency
 		, strCurrencyDescription	= SMC.strDescription
@@ -1074,6 +1164,7 @@ FROM
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
 												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
 				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
@@ -1103,6 +1194,20 @@ FROM
 			   AND ARID.intItemId					= LOTTED.intItemId
 			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+	OUTER APPLY
+	(
+		SELECT TOP 1
+		 intSiteId = S.intSiteID,
+		 strSiteAddress = S.strSiteAddress,
+		 strCity = S.strCity,
+		 strState = S.strState,
+		 strZipCode =  S.strZipCode, 
+		 strCountry = S.strCountry	
+		FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+		INNER JOIN tblTMSite S ON ID.intSiteId = S.intSiteID
+		WHERE ID.intInvoiceId = ARID.intInvoiceId 
+	    AND ISNULL(ID.intSiteId, 0) <> 0
+	) TMSITE
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ICI.strType, '') = 'Software'

@@ -12,5 +12,5 @@ SELECT FSP.intFutSettlementPriceMonthId
 	,FSP.intFutSettlementPriceMonthRefId
 	,FSP.ysnImported
 	,FM.strFutureMonth
-FROM tblRKFutSettlementPriceMarketMap FSP
-JOIN tblRKFuturesMonth FM ON FM.intFutureMonthId = FSP.intFutureMonthId
+FROM tblRKFutSettlementPriceMarketMap FSP WITH (NOLOCK)
+JOIN tblRKFuturesMonth FM WITH (NOLOCK) ON FM.intFutureMonthId = FSP.intFutureMonthId

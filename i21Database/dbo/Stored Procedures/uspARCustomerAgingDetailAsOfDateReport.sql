@@ -40,7 +40,7 @@ DECLARE @tblCustomers TABLE (
 
 DECLARE @tblSalesperson TABLE (intSalespersonId INT)
 DECLARE @tblCompanyLocation TABLE (intCompanyLocationId INT)
-DECLARE @tblAccountStatus TABLE (intAccountStatusId INT)
+DECLARE @tblAccountStatus TABLE (intAccountStatusId INT, intEntityCustomerId INT)
 
 SET @dtmDateFromLocal			= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
 SET	@dtmDateToLocal				= ISNULL(@dtmDateTo, GETDATE())
@@ -108,9 +108,14 @@ ELSE
 
 IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
 	BEGIN
-		INSERT INTO @tblAccountStatus
-		SELECT ACCS.intAccountStatusId
+		INSERT INTO @tblAccountStatus (
+			  intAccountStatusId
+			, intEntityCustomerId
+		)
+		SELECT intAccountStatusId	= ACCS.intAccountStatusId
+			 , intEntityCustomerId	= CAS.intEntityCustomerId
 		FROM dbo.tblARAccountStatus ACCS WITH (NOLOCK) 
+		INNER JOIN tblARCustomerAccountStatus CAS ON ACCS.intAccountStatusId = CAS.intAccountStatusId
 		INNER JOIN (
 			SELECT intID
 			FROM dbo.fnGetRowsFromDelimitedValues(@strAccountStatusIdsLocal)
@@ -120,16 +125,15 @@ IF ISNULL(@strAccountStatusIdsLocal, '') <> ''
 			BEGIN
 				DELETE CUSTOMERS 
 				FROM @tblCustomers CUSTOMERS
-				LEFT JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
-				LEFT JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
+				LEFT JOIN @tblAccountStatus ACCSTATUS ON CUSTOMERS.intEntityCustomerId = ACCSTATUS.intEntityCustomerId
 				WHERE ACCSTATUS.intAccountStatusId IS NULL
 			END
 		ELSE 
 			BEGIN
 				DELETE CUSTOMERS 
 				FROM @tblCustomers CUSTOMERS
-				INNER JOIN tblARCustomerAccountStatus CAS ON CUSTOMERS.intEntityCustomerId = CAS.intEntityCustomerId
-				INNER JOIN @tblAccountStatus ACCSTATUS ON CAS.intAccountStatusId = ACCSTATUS.intAccountStatusId
+				INNER JOIN @tblAccountStatus ACCSTATUS ON CUSTOMERS.intEntityCustomerId = ACCSTATUS.intEntityCustomerId
+				WHERE ACCSTATUS.intAccountStatusId IS NOT NULL
 			END
 	END
 
@@ -169,9 +173,10 @@ INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON P.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON P.intLocationId = CL.intCompanyLocationId
-WHERE ysnPosted = 1
-	AND ysnProcessedToNSF = 0
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+LEFT JOIN dbo.tblARNSFStagingTableDetail NSF ON P.intPaymentId = NSF.intTransactionId AND NSF.strTransactionType = 'Payment'
+WHERE P.ysnPosted = 1
+  AND (P.ysnProcessedToNSF = 0 OR (P.ysnProcessedToNSF = 1 AND CAST(NSF.dtmDate AS DATE) > @dtmDateToLocal))
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 
 --#INVOICETOTALPREPAYMENTS
 SELECT dblPayment	= SUM(dblPayment) + SUM(ISNULL(dblWriteOffAmount, 0))

@@ -12,5 +12,5 @@ SELECT OSP.intOptSettlementPriceMonthId
 	,OSP.intOptSettlementPriceMonthRefId
 	,OSP.ysnImported
 	,OM.strOptionMonth
-FROM tblRKOptSettlementPriceMarketMap OSP
-JOIN tblRKOptionsMonth OM ON OM.intOptionMonthId = OSP.intOptionMonthId
+FROM tblRKOptSettlementPriceMarketMap OSP WITH (NOLOCK)
+JOIN tblRKOptionsMonth OM WITH (NOLOCK) ON OM.intOptionMonthId = OSP.intOptionMonthId

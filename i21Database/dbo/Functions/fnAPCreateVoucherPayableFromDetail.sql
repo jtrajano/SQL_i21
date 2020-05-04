@@ -40,13 +40,14 @@ RETURNS TABLE AS RETURN
 		,[intScaleTicketId]					=	B.intScaleTicketId
 		,[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	B.intInventoryReceiptChargeId
-		,[intInventoryShipmentItemId]		=	NULL
+		,[intInventoryShipmentItemId]		=	B.intItemId
 		,[intInventoryShipmentChargeId]		=	B.intInventoryShipmentChargeId
 		,[intLoadShipmentId]				=	B.intLoadId
 		,[intLoadShipmentDetailId]			=	B.intLoadDetailId
 		,[intLoadShipmentCostId]			=	B.intLoadShipmentCostId
 		,[intPaycheckHeaderId]				=	B.intPaycheckHeaderId
 		,[intCustomerStorageId]				=	B.intCustomerStorageId
+		,[intSettleStorageId]				=	B.intSettleStorageId
 		,[intCCSiteDetailId]				=	B.intCCSiteDetailId
 		,[intInvoiceId]						=	B.intInvoiceId
 		,[intBuybackChargeId]				=	B.intBuybackChargeId
@@ -82,10 +83,14 @@ RETURNS TABLE AS RETURN
 		,[dblActual]						=	B.dblActual
 		,[dblDifference]					=	B.dblDifference
 		,[ysnStage]							=	B.ysnStage
+		,[intBillDetailId]					=	B.intBillDetailId
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
 	WHERE
+		A.intTransactionType IN (1, 3)
+		AND
+		(
 		B.intPurchaseDetailId > 0
 	OR	B.intInventoryReceiptItemId > 0
 	OR 	B.intInventoryReceiptChargeId > 0
@@ -94,9 +99,11 @@ RETURNS TABLE AS RETURN
 	OR	B.intLoadDetailId > 0
 	OR	B.intLoadShipmentCostId > 0
 	OR	B.intCustomerStorageId > 0
+	OR	B.intSettleStorageId > 0
 	OR	B.intPaycheckHeaderId > 0
 	OR	B.intBuybackChargeId > 0
 	OR	B.intScaleTicketId > 0
 	OR	B.intInventoryShipmentChargeId > 0
+		)
 )
 

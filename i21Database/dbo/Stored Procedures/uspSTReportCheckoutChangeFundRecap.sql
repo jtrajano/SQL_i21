@@ -11,9 +11,10 @@ BEGIN TRY
 		cf.intItemId,
 		cf.dblItemAmount,
 		item.strItemNo,
+		cf.intSequence,
 		SUM(cf.dblItemAmount) OVER() AS dblTotalAmount 
 	FROM vyuSTCheckoutChangeFund cf
-	INNER JOIN tblICItem item
+	LEFT JOIN tblICItem item
 		ON cf.intItemId = item.intItemId
 	WHERE intCheckoutId = @intCheckoutId
 	GROUP BY
@@ -21,8 +22,9 @@ BEGIN TRY
 		cf.strType,
 		cf.intItemId,
 		cf.dblItemAmount,
-		item.strItemNo
-	--ORDER BY intCheckoutId ASC
+		item.strItemNo,
+		cf.intSequence
+	ORDER BY cf.intSequence
 
 END TRY
 BEGIN CATCH

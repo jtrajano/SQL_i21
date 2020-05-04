@@ -28,7 +28,7 @@ BEGIN TRY
 	SET @strTestName = NULL
 
 	SELECT @strTestName = strTestName
-	FROM tblQMTest
+	FROM tblQMTest WITH (NOLOCK)
 	WHERE intTestId = @intTestId
 
 	-------------------------Header-----------------------------------------------------------

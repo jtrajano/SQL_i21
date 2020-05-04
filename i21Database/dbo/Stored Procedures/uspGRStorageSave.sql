@@ -227,7 +227,7 @@ BEGIN TRY
 			  @intCustomerStorageId
 			, @UserKey
 			, 1
-			, 55 -- Transaction Type Id for Maintain Storage
+			, 2 -- Transaction Type Id for Maintain Storage
 			, 'Added by Storage Maintenance'
 			, @NewdblOpenBalance
 			, GETDATE()
@@ -331,7 +331,7 @@ BEGIN TRY
 					@intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, CASE 
 					WHEN @NewdblOriginalBalance > @OlddblOriginalBalance
 						THEN 'Original Units Increased'
@@ -384,7 +384,7 @@ BEGIN TRY
 					@intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, CASE 
 					WHEN @NewdblOpenBalance > @OlddblOpenBalance
 						THEN 'Available Units Increased'
@@ -437,7 +437,7 @@ BEGIN TRY
 					@intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Insurance Rate changed from ' + LTRIM(@OlddblInsuranceRate)
 				, (@NewdblInsuranceRate - @OlddblInsuranceRate)
 				, GETDATE()
@@ -481,7 +481,7 @@ BEGIN TRY
 					@intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Storage Due Adjustment'
 				, (@NewdblStorageDue - @OlddblStorageDue)
 				, GETDATE()
@@ -526,7 +526,7 @@ BEGIN TRY
 					@intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Storage Paid Adjustment'
 				, (@NewdblStoragePaid - @OlddblStoragePaid)
 				, GETDATE()
@@ -571,7 +571,7 @@ BEGIN TRY
 				  @intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Fees Due Adjustment'
 				, (@NewdblFeesDue - @OlddblFeesDue)
 				, GETDATE()
@@ -616,7 +616,7 @@ BEGIN TRY
 				  @intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Fees Paid Adjustment'
 				, (@NewdblFeesPaid - @OlddblFeesPaid)
 				, GETDATE()
@@ -660,7 +660,7 @@ BEGIN TRY
 				  @intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Discount Due Adjustment'
 				, (@NewdblDiscountsDue - @OlddblDiscountsDue)
 				, GETDATE()
@@ -705,7 +705,7 @@ BEGIN TRY
 				  @intCustomerStorageId
 				, @UserKey
 				, 1
-				, 55 -- Transaction Type Id for Maintain Storage
+				, 2 -- Transaction Type Id for Maintain Storage
 				, 'Discount Paid Adjustment'
 				, (@NewdblDiscountsPaid - @OlddblDiscountsPaid)
 				, GETDATE()

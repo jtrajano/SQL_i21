@@ -19,7 +19,7 @@ BEGIN TRY
 
 	INSERT INTO @tblRKFutOptTransactionHeaderPreStage (intFutOptTransactionHeaderPreStageId)
 	SELECT intFutOptTransactionHeaderPreStageId
-	FROM tblRKFutOptTransactionHeaderPreStage
+	FROM tblRKFutOptTransactionHeaderPreStage WITH (NOLOCK)
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFutOptTransactionHeaderPreStageId = MIN(intFutOptTransactionHeaderPreStageId)
@@ -41,11 +41,11 @@ BEGIN TRY
 			SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId
 				,@strRowState = strRowState
 				,@intUserId = intUserId
-			FROM tblRKFutOptTransactionHeaderPreStage
+			FROM tblRKFutOptTransactionHeaderPreStage WITH (NOLOCK)
 			WHERE intFutOptTransactionHeaderPreStageId = @intFutOptTransactionHeaderPreStageId
 
 			SELECT TOP 1 @strFromCompanyName = strName
-			FROM tblIPMultiCompany
+			FROM tblIPMultiCompany WITH (NOLOCK)
 			WHERE ysnParent = 1
 
 			DECLARE @ToCompanyList TABLE (
@@ -67,15 +67,15 @@ BEGIN TRY
 				,CASE 
 					WHEN EXISTS (
 							SELECT 1
-							FROM tblRKFutOptTransactionHeaderBook
+							FROM tblRKFutOptTransactionHeaderBook WITH (NOLOCK)
 							WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 								AND intBookId = MC.intBookId
 							)
 						THEN 'Modified'
 					ELSE 'Added'
 					END
-			FROM tblRKFutOptTransaction T
-			JOIN tblIPMultiCompany MC ON MC.intBookId = T.intBookId
+			FROM tblRKFutOptTransaction T WITH (NOLOCK)
+			JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = T.intBookId
 				AND MC.ysnParent = 0
 			WHERE T.intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 
@@ -85,13 +85,13 @@ BEGIN TRY
 				)
 			SELECT DISTINCT MC.intCompanyId
 				,'Delete'
-			FROM tblRKFutOptTransactionHeaderBook TB
-			JOIN tblIPMultiCompany MC ON MC.intBookId = TB.intBookId
+			FROM tblRKFutOptTransactionHeaderBook TB WITH (NOLOCK)
+			JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intBookId = TB.intBookId
 				AND MC.ysnParent = 0
 			WHERE TB.intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 				AND NOT EXISTS (
 					SELECT 1
-					FROM tblRKFutOptTransaction
+					FROM tblRKFutOptTransaction WITH (NOLOCK)
 					WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
 						AND intBookId = TB.intBookId
 					)
@@ -120,7 +120,7 @@ BEGIN TRY
 
 				SELECT @intToBookId = intBookId
 					,@intToCompanyId = intCompanyId
-				FROM tblIPMultiCompany
+				FROM tblIPMultiCompany WITH (NOLOCK)
 				WHERE intCompanyId = @intCompanyId
 
 				EXEC uspIPFutOptTransactionPopulateStgXML @intFutOptTransactionHeaderId
