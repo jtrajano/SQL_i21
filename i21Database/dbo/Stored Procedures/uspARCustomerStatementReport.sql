@@ -341,6 +341,7 @@ FROM (
 														SELECT intPaymentId
 														FROM dbo.tblARPayment WITH (NOLOCK)
 														WHERE ysnPosted = 1
+															AND strPaymentMethod  = ''Write Off''
 															AND ISNULL(ysnProcessedToNSF, 0) = 0
 															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'																	
 													) P ON PD.intPaymentId = P.intPaymentId))
@@ -349,7 +350,8 @@ FROM (
 													INNER JOIN (
 														SELECT intPaymentId
 														FROM dbo.tblARPayment WITH (NOLOCK)
-														WHERE ysnPosted = 1
+														WHERE ysnPosted = 1	
+															AND strPaymentMethod  = ''Write Off''
 															AND ISNULL(ysnProcessedToNSF, 0) = 0
 															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
 													) P ON PD.intPaymentId = P.intPaymentId))))
@@ -663,6 +665,7 @@ LEFT JOIN tblARCustomerAgingStagingTable AS AGINGREPORT
 	AND AGINGREPORT.strAgingType = 'Summary'
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
 
+
 UPDATE tblARCustomerStatementStagingTable
 SET strComment			= dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')
   , blbLogo				= CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN ISNULL(@blbStretchedLogo, @blbLogo) ELSE @blbLogo END
@@ -685,3 +688,4 @@ IF @ysnPrintCreditBalanceLocal = 0
 				AND ISNULL(AGINGREPORT.dblTotalAR, 0) < 0
 		  )
 	END
+
