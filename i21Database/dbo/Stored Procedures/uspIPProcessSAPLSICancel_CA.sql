@@ -87,14 +87,13 @@ BEGIN TRY
 				--AND L.intShipmentStatus <> 10
 			JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 
+			-- Contract Unslice - LSI will get deleted. so will not have LSI No.
 			IF ISNULL(@intLoadId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Shipping instruction is not available. '
-						,16
-						,1
-						)
-			END
+				SELECT @intLoadId = 0
+
+			-- If LSI is already cancelled, we should not do the process again.
+			IF ISNULL(@intShipmentStatus, 0) = 10
+				SELECT @intLoadId = 0
 
 			IF EXISTS (
 					SELECT 1
@@ -120,11 +119,6 @@ BEGIN TRY
 			UPDATE tblIPLoadStage
 			SET strLoadNumber = @strLoadNumber
 			WHERE intStageLoadId = @intMinRowNo
-
-			IF ISNULL(@intShipmentStatus, 0) = 10
-			BEGIN
-				SELECT @intLoadId = 0
-			END
 
 			BEGIN TRAN
 
