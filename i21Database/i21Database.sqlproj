@@ -8207,6 +8207,7 @@
     <None Include="Scripts\Post-Deployment\CT\ScheduledQtyDiagNosticScript.sql" />
     <None Include="Scripts\Post-Deployment\CT\ScheduledLoadDiagNosticScript.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A089.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8449,7 +8450,7 @@
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
-    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />    
+    <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
