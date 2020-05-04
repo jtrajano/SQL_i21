@@ -221,7 +221,8 @@ BEGIN TRY
 			CD.dblFutures			=	NULL,
 			CD.dblCashPrice			=	NULL,
 			CD.dblTotalCost			=	NULL,
-			CD.intConcurrencyId		=	CD.intConcurrencyId + 1
+			CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+			CD.intContractStatusId	=	case when CD.intContractStatusId = 5 then 1 else CD.intContractStatusId end
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
