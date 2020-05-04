@@ -26,6 +26,7 @@ SELECT Header.intCoverageEntryId
     , Detail.dblMonthsCovered
     , Detail.dblAveragePrice
     , Detail.dblOptionsCovered
+	, Detail.dblTotalOption
     , Detail.dblFuturesM2M
 	, dblM2MPlus10 = ISNULL(Detail.dblM2MPlus10, 0.000000)
 	, dblM2MMinus10 = ISNULL(Detail.dblM2MMinus10, 0.000000)

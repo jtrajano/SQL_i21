@@ -38,6 +38,10 @@ BEGIN TRY
 	FROM tblRKCoverageEntry WITH (NOLOCK)
 	WHERE intCoverageEntryId = @intCoverageEntryId
 
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'RiskManagement.view.CoverageReport'

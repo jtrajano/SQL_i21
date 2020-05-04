@@ -632,21 +632,21 @@ BEGIN TRY
 						)
 			END
 
-			IF @strSubLocationName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblSMCompanyLocationSubLocation CS WITH (NOLOCK)
-					WHERE CS.strSubLocationName = @strSubLocationName
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Sub Location ' + @strSubLocationName + ' is not available.'
+			--IF @strSubLocationName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblSMCompanyLocationSubLocation CS WITH (NOLOCK)
+			--		WHERE CS.strSubLocationName = @strSubLocationName
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Sub Location ' + @strSubLocationName + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			IF @strBundleItemNo IS NOT NULL
 				AND NOT EXISTS (

@@ -4,6 +4,7 @@ BEGIN TRY
 	DECLARE @intContractFeedHeaderId INT
 		,@intContractHeaderId INT
 		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML  NVARCHAR(MAX)
 		,@intContractHeaderRefId INT
 		,@strErrorMessage NVARCHAR(MAX)
 		,@intTransactionCount INT
@@ -19,9 +20,11 @@ BEGIN TRY
 		SELECT @intContractHeaderId = NULL
 			,@strApproverXML = NULL
 			,@intContractHeaderRefId = NULL
+			,@strSubmittedByXML=NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strApproverXML = strApproverXML
+			,@strSubmittedByXML = strSubmittedByXML
 		FROM tblIPContractFeedHeader
 		WHERE intContractFeedHeaderId = @intContractFeedHeaderId
 
@@ -60,6 +63,7 @@ BEGIN TRY
 			DELETE
 			FROM tblCTIntrCompApproval
 			WHERE intContractHeaderId = @intContractHeaderRefId
+			AND ysnApproval=1
 
 			INSERT INTO tblCTIntrCompApproval (
 				intContractHeaderId
@@ -67,13 +71,45 @@ BEGIN TRY
 				,strUserName
 				,strScreen
 				,intConcurrencyId
+				,ysnApproval
 				)
 			SELECT @intContractHeaderRefId
 				,strName
 				,strUserName
 				,strScreenName
 				,1 AS intConcurrencyId
+				,1
 			FROM OPENXML(@idoc, 'vyuCTContractApproverViews/vyuCTContractApproverView', 2) WITH (
+					strName NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+					) x
+
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+			,@strSubmittedByXML
+				
+			DELETE
+			FROM tblCTIntrCompApproval
+			WHERE intContractHeaderId = @intContractHeaderRefId
+			AND ysnApproval=0
+
+			INSERT INTO tblCTIntrCompApproval (
+				intContractHeaderId
+				,strName
+				,strUserName
+				,strScreen
+				,intConcurrencyId
+				,ysnApproval
+				)
+			SELECT @intContractHeaderRefId
+				,strName
+				,strUserName
+				,strScreenName
+				,1 AS intConcurrencyId
+				,0
+			FROM OPENXML(@idoc, 'vyuIPContractSubmittedByViews/vyuIPContractSubmittedByView', 2) WITH (
 					strName NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS

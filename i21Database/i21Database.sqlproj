@@ -8547,6 +8547,11 @@
     <Build Include="dbo\Views\vyuIPGetFutureMarket.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPFutureMarketProcessStgXML.sql" />
+    <Build Include="dbo\Views\vyuIPContractSubmittedByView.sql" />
+    <Build Include="dbo\Views\vyuIPPriceContractSubmittedByView.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

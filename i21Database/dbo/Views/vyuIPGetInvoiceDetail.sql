@@ -22,8 +22,8 @@ SELECT I.strItemNo
 	,LD.intLoadDetailId
 FROM dbo.tblARInvoice IV
 JOIN dbo.tblARInvoiceDetail IVD ON IV.intInvoiceId = IVD.intInvoiceId
-JOIN dbo.tblICItemUOM OIU ON OIU.intItemUOMId = IVD.intOrderUOMId
-JOIN dbo.tblICUnitMeasure OUM ON OUM.intUnitMeasureId = OIU.intUnitMeasureId
+LEFT JOIN dbo.tblICItemUOM OIU ON OIU.intItemUOMId = IVD.intOrderUOMId
+LEFT JOIN dbo.tblICUnitMeasure OUM ON OUM.intUnitMeasureId = OIU.intUnitMeasureId
 JOIN dbo.tblCTBook B ON B.intBookId = IV.intBookId
 LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IVD.intLoadDetailId
 LEFT JOIN dbo.tblCTSubBook SB ON SB.intSubBookId = IV.intSubBookId

@@ -46,6 +46,7 @@ FROM
 		,strWeightGradeDesc = WG.strWeightGradeDesc
 		,dblShippedNetWt = (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0))
 		,dblReceivedNetWt = (RI.dblNet - ISNULL(IRN.dblIRNet, 0))
+		,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 		,dblFranchisePercent = WG.dblFranchise
 		,dblFranchise = WG.dblFranchise / 100
 		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
@@ -127,11 +128,11 @@ FROM
 	OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
-	CROSS APPLY (SELECT dblNet = SUM(IRI.dblNet) FROM tblICInventoryReceipt IR 
+	CROSS APPLY (SELECT dblNet = SUM(IRI.dblNet),dblGross = SUM(IRI.dblGross) FROM tblICInventoryReceipt IR 
 					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
 						AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return') RI
-	CROSS APPLY (SELECT dblIRNet = SUM(IRI.dblNet) FROM tblICInventoryReceipt IR 
+	CROSS APPLY (SELECT dblIRNet = SUM(IRI.dblNet),dblIRGross = SUM(IRI.dblGross) FROM tblICInventoryReceipt IR 
 					JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 					WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
 						AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = 'Inventory Return') IRN
@@ -179,6 +180,7 @@ FROM
 		,strWeightGradeDesc = WG.strWeightGradeDesc
 		,dblShippedNetWt = CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END
 		,dblReceivedNetWt = CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END
+		,dblReceivedGrossWt = CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkGrossWt) ELSE LD.dblGross END
 		,dblFranchisePercent = WG.dblFranchise
 		,dblFranchise = WG.dblFranchise / 100
 		,dblFranchiseWt = CASE WHEN (CASE WHEN (CLCT.intCount > 0) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
@@ -255,7 +257,7 @@ FROM
 	OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 	OUTER APPLY (SELECT intCount = COUNT(*) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLCT
-	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+	OUTER APPLY (SELECT dblLinkNetWt = SUM(dblLinkNetWt),dblLinkGrossWt = SUM(dblLinkGrossWt) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
 	WHERE L.intPurchaseSale IN (2, 3)
 		AND L.intShipmentStatus IN (6, 11)
 		AND WC.intWeightClaimId IS NULL
