@@ -47,8 +47,6 @@ SELECT TOP 1
 	@error = strError
 FROM @invalidPayables
 
-SELECT @recordCountToReturn = COUNT(*) FROM @voucherPayable
-
 --FILTER VALID PAYABLES
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherValidPayables')) DROP TABLE #tmpVoucherValidPayables
 
@@ -194,6 +192,8 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+		
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
 			SET 
@@ -1083,9 +1083,10 @@ ELSE SAVE TRAN @SavePoint
 
 	END
 
-	IF @recordCountReturned > 0 AND @recordCountToReturn != @recordCountReturned
+	SET @recordCountToReturn = (SELECT COUNT(*) FROM @payablesKey) + (SELECT COUNT(*) FROM @payablesKeyPartial)
+	IF @recordCountReturned > 0 AND @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned
 	BEGIN
-		RAISERROR('Error occured while returning Voucher Payables.', 16, 1);
+		RAISERROR('Error occured while updating Voucher Payables.', 16, 1);
 		RETURN;
 	END
 
