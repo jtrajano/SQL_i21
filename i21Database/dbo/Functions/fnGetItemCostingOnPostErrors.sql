@@ -471,5 +471,32 @@ RETURN (
 		WHERE	Item.intItemId = @intItemId
 				AND Item.strType = 'Bundle'
 
+		-- Should not allow posting when AllowZeroCost is not enabled and the cost of the item is zero
+		UNION ALL
+		SELECT	intItemId = @intItemId
+				,intItemLocationId = @intItemLocationId
+				,strText = dbo.fnFormatMessage(
+							dbo.fnICGetErrorMessage(80229)
+							, Item.strItemNo
+							, Location.strLocationName
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+							, DEFAULT
+						) 
+				,intErrorCode = 80229				
+		FROM tblICItem Item
+			INNER JOIN tblICItemLocation IL ON IL.intItemId = @intItemId
+				AND IL.intItemLocationId = @intItemLocationId
+			INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = IL.intLocationId
+		WHERE Item.intItemId = @intItemId
+			AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 1
+			AND ISNULL(@dblQty, 0) > 0
+			AND ISNULL(@dblCost, 0) = 0
+
 	) AS Query		
 )
