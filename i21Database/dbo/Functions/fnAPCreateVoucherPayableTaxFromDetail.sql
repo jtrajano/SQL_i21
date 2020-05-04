@@ -25,4 +25,6 @@ RETURNS TABLE AS RETURN
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
 	INNER JOIN tblAPBillDetailTax D ON C.intId = D.intBillDetailId
+	WHERE
+		A.intTransactionType IN (1,3) --voucher and debit memo are only on payables table
 )
