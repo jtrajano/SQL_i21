@@ -228,6 +228,7 @@ BEGIN
 					end
 				) + SV.dblStorageDuePerUnit
 			) >= 0
+		and SV.dblStorageDuePerUnit > 0
 	ORDER BY EM.strName, CL.strLocationName		
 
 	RETURN;
