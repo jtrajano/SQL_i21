@@ -17,7 +17,7 @@ BEGIN TRY
 			@BillDetailId	INT,
 			@ItemId			INT,
 			@Quantity		NUMERIC(18,6),
-			@ysnSuccess		BIT
+			@ysnSuccess		BIT,
 			@intContractDetailId INT;
 
 			declare @strFinalMessage nvarchar(max);
