@@ -17,23 +17,37 @@ AS
 			l.intTicketId = ivd.intTicketId
 			and ivd.intContractDetailId is not null
 	),
-	schedule as
+	schedule_raw as
 	(
-		select
-			c.intContractDetailId
-			,dblScheduledQty = sum(a.dblQuantity) - (sum(b.dblNetUnits) / avg(d.dblUnitQty))
+		select intId = row_number() over(partition by c.intContractDetailId order by a.intLoadDetailId asc)
+			,c.intContractDetailId
+			,a.intLoadDetailId
+			,dblScheduledQty = case when b.intLoadDetailId is not null then 0 else a.dblQuantity end
+			,dblOverageQty = case when b.intLoadDetailId is not null and b.dblNetUnits > a.dblQuantity then b.dblNetUnits - a.dblQuantity else 0 end
 		from
-			tblCTContractDetail c 
-			join tblLGLoadDetail a
-				on a.intPContractDetailId = c.intContractDetailId
-				or a.intSContractDetailId = c.intContractDetailId
-			join tblICItemUOM d
-				on d.intItemId = c.intItemId
-				and d.intItemUOMId = c.intItemUOMId
-			left join tblSCTicket b
-				on b.intLoadDetailId = a.intLoadDetailId
-		group by
-			c.intContractDetailId
+		tblCTContractDetail c 
+		join tblLGLoadDetail a
+			on a.intPContractDetailId = c.intContractDetailId
+			or a.intSContractDetailId = c.intContractDetailId
+		join tblICItemUOM d
+			on d.intItemId = c.intItemId
+			and d.intItemUOMId = c.intItemUOMId
+		left join tblSCTicket b
+			on b.intLoadDetailId = a.intLoadDetailId and b.strTicketStatus <> 'O'
+	),
+	schedule as (
+		select intContractDetailId
+			,intLoadDetailId
+			,dblScheduledQty = case when dblScheduledQty < 0 then 0 else dblScheduledQty end
+		from
+		(
+			select a.intContractDetailId
+			,a.intLoadDetailId
+			,dblScheduledQty = (a.dblScheduledQty - (a.dblOverageQty - sum(b.dblOverageQty)) *-1)
+			from schedule_raw a
+			inner join schedule_raw b on a.intId >= b.intId and a.intContractDetailId = b.intContractDetailId
+			group by a.intId,a.intContractDetailId,a.intLoadDetailId,a.dblScheduledQty,a.dblOverageQty
+		) tbl
 	)
 
     SELECT ROW_NUMBER() OVER(ORDER BY CD.intContractDetailId DESC) intUniqueId,t.*,CD.intContractSeq,CD.intContractHeaderId FROM
@@ -60,7 +74,7 @@ AS
 		FROM	tblLGLoadDetail		   LD
 		JOIN	tblLGLoad			   LO  ON  LO.intLoadId			    =   LD.intLoadId
 		left join Invoice on Invoice.intContractDetailId = LD.intPContractDetailId and Invoice.intLoadId = LO.intLoadId
-		left join schedule on schedule.intContractDetailId = LD.intPContractDetailId
+		left join schedule on schedule.intContractDetailId = LD.intPContractDetailId and LD.intLoadDetailId = schedule.intLoadDetailId
 		WHERE   NOT (LO.intPurchaseSale	    =   1 AND LO.intShipmentStatus    IN(4,11,7))
 		AND	LD.intPContractDetailId IS NOT NULL
 		AND isnull(LO.ysnCancelled,convert(bit,0)) = convert(bit,0)
@@ -71,7 +85,7 @@ AS
 		FROM	tblLGLoadDetail			LD
 		JOIN	tblLGLoad				LO  ON  LO.intLoadId			    =   LD.intLoadId
 		left join Invoice on Invoice.intContractDetailId = LD.intSContractDetailId and Invoice.intLoadId = LO.intLoadId
-		left join schedule on schedule.intContractDetailId = LD.intSContractDetailId
+		left join schedule on schedule.intContractDetailId = LD.intSContractDetailId and LD.intLoadDetailId = schedule.intLoadDetailId
 		WHERE   NOT (LO.intPurchaseSale	    =   2 AND LO.intShipmentStatus    IN(6,11,7))
 		AND	LD.intSContractDetailId IS NOT NULL
 		AND isnull(LO.ysnCancelled,convert(bit,0)) = convert(bit,0)
