@@ -36,6 +36,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblContractQty INT
 		,@intTicketItemUOMId INT
 		,@dblContractAvailableQty NUMERIC(38,20);
+DECLARE @ysnTicketContractLoadBased BIT
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
@@ -65,9 +66,21 @@ BEGIN TRY
 
 		IF ISNULL(@intContractDetailId,0) != 0
 		BEGIN
+			SELECT TOP 1 @ysnTicketContractLoadBased = ISNULl(A.ysnLoad,0)
+			FROM tblCTContractHeader A
+			INNER JOIN tblCTContractDetail B	
+				ON A.intContractHeaderId = B.intContractHeaderId
+			WHERE B.intContractDetailId = @intContractDetailId
+
 			SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+			IF(@ysnTicketContractLoadBased = 1)
+			BEGIN
+				SET @dblContractAvailableQty = 1
+			END
+
 			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
-			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
 		END
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
