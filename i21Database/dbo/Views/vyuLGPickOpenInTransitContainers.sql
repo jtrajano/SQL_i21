@@ -35,6 +35,7 @@ SELECT
 	,dblUnchangedGrossWeight = LDCL.dblLinkGrossWt
 	,dblUnchangedTareWeight = LDCL.dblLinkTareWt
 	,dblUnchangedNetWeight = LDCL.dblLinkNetWt
+	,intConcurrencyId = LC.intConcurrencyId
 FROM
 	tblLGLoadDetailContainerLink LDCL
 	INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
