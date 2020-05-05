@@ -136,7 +136,7 @@ BEGIN TRY
 
 		SET @line5_C = @line1_B + @line2c_B + @line3_B + @line4_B
 
-		SELECT @line6_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode LIKE '7%')
+		SELECT @line6_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode LIKE '7%'
 		SELECT @line7_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '6'	
 		SELECT @line9_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10Y'
 		SELECT @line10_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '8'
