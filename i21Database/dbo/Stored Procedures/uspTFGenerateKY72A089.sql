@@ -116,8 +116,8 @@ BEGIN TRY
 		SET @line23				= CONVERT(NUMERIC(18,0), @strConfig_StaGal)
 		
 		SELECT @line1_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode = '2'
-		SELECT @line2a_A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode IN ('5DIL','5DIN','5DTN')
-		SELECT @line2b_A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode IN ('3IL','3IN','3TN')
+		SELECT @line2a_A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode LIKE '5D%'
+		SELECT @line2b_A = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode LIKE '3%'
 
 		SET @line2c_B = @line2a_A + @line2b_A
 
@@ -126,7 +126,7 @@ BEGIN TRY
 
 		SET @line5_C = @line1_B + @line2c_B + @line3_B + @line4_B
 
-		SELECT @line6_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode IN ('7IL','7IN','7TN')
+		SELECT @line6_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode LIKE '7%'
 		SELECT @line7_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode = '6'
 		SELECT @line8_B = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A089' AND strScheduleCode = '8'
 
