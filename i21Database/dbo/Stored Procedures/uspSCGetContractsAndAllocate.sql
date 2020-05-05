@@ -724,6 +724,7 @@ BEGIN TRY
 			AND		CD.ysnEarlyDayPassed	=	1
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			AND		NOT EXISTS (SELECT TOP 1 intId FROM @LoadContractsDetailId WHERE intId = CD.intContractDetailId)
+			AND 	CD.ISNULL(ysnLoad,0) = @ysnLoad
 			ORDER 
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
@@ -743,6 +744,7 @@ BEGIN TRY
 			AND		CD.ysnEarlyDayPassed	=	1
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			AND		NOT EXISTS (SELECT TOP 1  intId FROM @LoadContractsDetailId WHERE intId = CD.intContractDetailId)
+			AND 	CD.ISNULL(ysnLoad,0) = @ysnLoad
 			ORDER 
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
