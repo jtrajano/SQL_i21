@@ -101,7 +101,9 @@ BEGIN TRY
 				WHERE intParentSettleStorageId = @intParentSettleStorageId
 					AND intSettleStorageId > @intSettleStorageId
 			END
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+			--UPDATE tblGRStorageHistory set intSettleStorageId  = null where intSettleStorageId = @intParentSettleStorageId
+			--DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+			EXEC [uspGRDeleteStorageHistoryWithLog] @intParentSettleStorageId, @UserId
 		END
 		ELSE
 		BEGIN
@@ -490,25 +492,30 @@ BEGIN TRY
 			END
 
 			
-
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
-				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+				--UPDATE tblGRStorageHistory set intSettleStorageId  = null where intSettleStorageId = @intParentSettleStorageId
+				--DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId				
+				EXEC [uspGRDeleteStorageHistoryWithLog] @intParentSettleStorageId, @UserId
 			END
 			ELSE IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
 			BEGIN
 				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
 				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			END
-
-			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
+			
+			--UPDATE tblGRStorageHistory set intSettleStorageId  = null where intSettleStorageId = @intSettleStorageId
+			--DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId			
+			EXEC [uspGRDeleteStorageHistoryWithLog] @intSettleStorageId, @UserId
 
 			---This is just to insure that the parent is delete if there is no child in existence
 			IF @isParentSettleStorage = 0
 			BEGIN
 				IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
-				BEGIN				
-					DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+				BEGIN					
+					--UPDATE tblGRStorageHistory set intSettleStorageId  = null where intSettleStorageId = @intParentSettleStorageId				
+					--DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId			
+					EXEC [uspGRDeleteStorageHistoryWithLog] @intParentSettleStorageId, @UserId
 				END
 			END
 
