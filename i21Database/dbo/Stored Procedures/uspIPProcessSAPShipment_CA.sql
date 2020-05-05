@@ -373,13 +373,10 @@ BEGIN TRY
 						)
 			END
 
+			-- If Ata(dtmETAPOD) is empty, take Eta(dtmDeadlineCargo)
 			IF @dtmETAPOD IS NULL
 			BEGIN
-				RAISERROR (
-						'Invalid Act. ETA. '
-						,16
-						,1
-						)
+				SELECT @dtmETAPOD = @dtmDeadlineCargo
 			END
 
 			IF @dtmETAPOL IS NULL
