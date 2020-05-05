@@ -8660,6 +8660,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A089.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
+    <Build Include="dbo\Tables\tblGRStorageHistoryDeleteHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistoryWithLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
