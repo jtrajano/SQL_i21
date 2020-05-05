@@ -38,6 +38,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblContractAvailableQty NUMERIC(38,20);
 DECLARE @ysnImposeReversalTransaction BIT
 DECLARE @intReversedBillId INT
+DECLARE @ysnTicketContractLoadBased BIT
 
 BEGIN TRY
 
@@ -76,12 +77,24 @@ BEGIN TRY
 			IF ISNULL(@intBillId, 0) > 0
 				EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
 
-			IF ISNULL(@intContractDetailId,0) != 0
+		IF ISNULL(@intContractDetailId,0) != 0
+		BEGIN
+			SELECT TOP 1 @ysnTicketContractLoadBased = ISNULl(A.ysnLoad,0)
+			FROM tblCTContractHeader A
+			INNER JOIN tblCTContractDetail B	
+				ON A.intContractHeaderId = B.intContractHeaderId
+			WHERE B.intContractDetailId = @intContractDetailId
+
+			SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+			IF(@ysnTicketContractLoadBased = 1)
 			BEGIN
-				SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-				SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
-				EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+				SET @dblContractAvailableQty = 1
 			END
+
+			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+		END
 
 			SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
 			SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
