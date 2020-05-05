@@ -107,6 +107,9 @@ SELECT
 		END COLLATE Latin1_General_CI_AS
 	,BI.strBillId
 	,strLSINumber = LSI.strLoadNumber
+	,strERPPONUmber = PCD.strERPPONumber
+	,strDocStatus = CASE WHEN L.ysnDocumentsReceived = 1 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
+	,strRegistration = CASE WHEN L.ysn4cRegistration = 1 THEN 'Y' ELSE 'N' END COLLATE Latin1_General_CI_AS
 FROM tblLGLoadWarehouse LW
 	JOIN tblLGLoad L ON L.intLoadId = LW.intLoadId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
