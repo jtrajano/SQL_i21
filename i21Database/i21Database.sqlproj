@@ -8208,6 +8208,7 @@
     <None Include="Scripts\Post-Deployment\CT\ScheduledLoadDiagNosticScript.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A089.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
+    <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
