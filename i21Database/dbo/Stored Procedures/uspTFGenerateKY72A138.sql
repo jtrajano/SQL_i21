@@ -153,13 +153,13 @@ BEGIN TRY
 		SELECT @dblLine17d = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10G'
 		SELECT @dblLine17e = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '72A138' AND strScheduleCode = '10A'
 
-		SET @Line17a = @dblLine17a * @dblConfig_Line17
-		SET @Line17b = @dblLine17b * @dblConfig_Line17
-		SET @Line17c = @dblLine17c * @dblConfig_Line17
-		SET @Line17d = @dblLine17d * @dblConfig_Line17
-		SET @Line17e = @dblLine17e * @dblConfig_Line17
+		SET @line17a = @dblLine17a * @dblConfig_Line17
+		SET @line17b = @dblLine17b * @dblConfig_Line17
+		SET @line17c = @dblLine17c * @dblConfig_Line17
+		SET @line17d = @dblLine17d * @dblConfig_Line17
+		SET @line17e = @dblLine17e * @dblConfig_Line17
 
-		SET @line18 = @Line17a + @Line17b + @Line17c + @Line17d + @Line17e
+		SET @line18 = @line17a + @line17b + @line17c + @line17d + @line17e
 		SET @line19 = @line16 - @line18
 		SET @line20 = @line19 * @dblConfig_Line20
 		SET @line21 = @line19 - @line20
