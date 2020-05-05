@@ -416,24 +416,44 @@ BEGIN
 
 	--ADJUST CONTRACT SCHEDULED QTY IF TRANSACTION ALREADY HAVE CONTRACT--
 	DECLARE @transactionContractDetailId	INT
+	DECLARE @transactionItemContractDetailId	INT
 	DECLARE @transactionCurrentQty NUMERIC(18,6)
+	DECLARE @transactionPriceMethod NVARCHAR(MAX)
 
 	SELECT TOP 1
 	 @transactionContractDetailId = ISNULL(intContractDetailId,0)
+	,@transactionItemContractDetailId = ISNULL(intItemContractDetailId,0)
 	,@transactionCurrentQty = ISNULL(dblQuantity,0)
+	,@transactionPriceMethod = ISNULL(strPriceMethod,'')
 	FROM tblCFTransaction
 	WHERE intTransactionId = @intTransactionId
 
-	IF(@transactionContractDetailId > 0)
+	IF(@transactionContractDetailId > 0 OR @transactionItemContractDetailId > 0)
 	BEGIN 
 
 		SET @transactionCurrentQty = @transactionCurrentQty * -1
-		EXEC uspCTUpdateScheduleQuantity 
-			 @intContractDetailId = @transactionContractDetailId
+
+		IF(LOWER(@transactionPriceMethod) = 'item contract pricing')
+		BEGIN
+			print 'itc'
+			EXEC uspCTItemContractUpdateScheduleQuantity
+			@intItemContractDetailId = @transactionItemContractDetailId,
+			@dblQuantityToUpdate = @transactionCurrentQty,
+			@intUserId = 1,
+			@intTransactionDetailId = @intTransactionId,
+			@strScreenName = 'Card Fueling Transaction Screen'
+		END
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contract')
+		BEGIN
+			EXEC uspCTUpdateScheduleQuantity 
+			@intContractDetailId = @transactionContractDetailId
 			,@dblQuantityToUpdate = @transactionCurrentQty
 			,@intUserId = 1
 			,@intExternalId = @intTransactionId
 			,@strScreenName = 'Card Fueling Transaction Screen'
+		END
+
+		
 
 	END
 
@@ -473,20 +493,36 @@ BEGIN
 	@CFItemContractNumber		=	@strItemContractNumber		output,
 	@CFItemContractSeq			=	@intItemContractSeq			output
 
-	
-	IF(@transactionContractDetailId > 0)
+
+	IF(@transactionContractDetailId > 0 OR @transactionItemContractDetailId > 0)
 	BEGIN 
 
 		SET @transactionCurrentQty = @transactionCurrentQty * -1
-		EXEC uspCTUpdateScheduleQuantity 
-			 @intContractDetailId = @transactionContractDetailId
+
+		IF(LOWER(@transactionPriceMethod) = 'item contract pricing')
+		BEGIN
+			print 'itc'
+			EXEC uspCTItemContractUpdateScheduleQuantity
+			@intItemContractDetailId = @transactionItemContractDetailId,
+			@dblQuantityToUpdate = @transactionCurrentQty,
+			@intUserId = 1,
+			@intTransactionDetailId = @intTransactionId,
+			@strScreenName = 'Card Fueling Transaction Screen'
+		END
+		ELSE IF(LOWER(@transactionPriceMethod) = 'contract')
+		BEGIN
+			EXEC uspCTUpdateScheduleQuantity 
+			@intContractDetailId = @transactionContractDetailId
 			,@dblQuantityToUpdate = @transactionCurrentQty
 			,@intUserId = 1
 			,@intExternalId = @intTransactionId
 			,@strScreenName = 'Card Fueling Transaction Screen'
+		END
+
+		
 
 	END
-
+	
 	
 	IF(LOWER(@strPriceMethod) = 'network cost' OR LOWER(@strPriceBasis) = 'transfer cost')
 	BEGIN
