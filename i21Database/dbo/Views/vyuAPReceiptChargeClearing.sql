@@ -178,8 +178,8 @@ SELECT
     ,billDetail.intItemId      
     ,billDetail.intUnitOfMeasureId AS intItemUOMId  
     ,unitMeasure.strUnitMeasure AS strUOM  
-    ,billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal      
-    ,CASE       
+    ,ROUND(billDetail.dblTotal + billDetail.dblTax,2) AS dblVoucherTotal      
+    ,ROUND(CASE       
         WHEN billDetail.intWeightUOMId IS NULL THEN       
             ISNULL(billDetail.dblQtyReceived, 0)       
         ELSE       
@@ -189,7 +189,7 @@ SELECT
                 ELSE       
                     ISNULL(billDetail.dblNetWeight, 0)       
             END      
-    END AS dblVoucherQty      
+    END,2) AS dblVoucherQty      
     ,0 AS dblReceiptChargeTotal  
     ,0 AS dblReceiptChargeQty  
     -- ,((receiptCharge.dblAmount) * (CASE WHEN receiptCharge.ysnPrice = 1 THEN -1 ELSE 1 END))    
