@@ -8662,6 +8662,7 @@
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistoryDeleteHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistoryWithLog.sql" />
+    <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
