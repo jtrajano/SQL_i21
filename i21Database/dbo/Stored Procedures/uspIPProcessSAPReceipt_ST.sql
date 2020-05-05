@@ -372,6 +372,15 @@ BEGIN TRY
 					END
 				END
 
+				IF @dblGrossWeight = 0
+					SELECT @dblGrossWeight = @dblNetWeight
+
+				IF @dblGrossWeight > 0
+					AND @dblGrossWeight <> @dblNetWeight
+				BEGIN
+					SELECT @dblTareWeight = @dblGrossWeight - @dblNetWeight
+				END
+
 				IF @dblCost >= 0
 					AND ISNULL(@strCostUOM, '') <> ''
 					AND ISNULL(@strCostCurrency, '') <> ''
@@ -561,6 +570,7 @@ BEGIN TRY
 					,dblOrderQty
 					,dblOpenReceive
 					,intStorageLocationId
+					,intOwnershipType
 					,intUnitMeasureId
 					,intWeightUOMId
 					,dblUnitCost
@@ -571,6 +581,8 @@ BEGIN TRY
 					,dblUnitRetail
 					,intCostUOMId
 					,ysnSubCurrency
+					,intContractHeaderId
+					,intContractDetailId
 					)
 				SELECT @intInventoryReceiptId
 					,CT.intContractDetailId
@@ -582,13 +594,14 @@ BEGIN TRY
 					,CL.dblQuantity
 					,CL.dblQuantity
 					,SL.intStorageLocationId
+					,1
 					,CL.intItemUOMId
 					,IU.intItemUOMId
 					,@dblCost
-					,RI.dblQuantity
-					,RI.dblQuantity
+					,@dblGrossWeight
+					,RI.dblNetWeight
 					,1
-					,(dbo.[fnCTConvertQtyToTargetItemUOM](IU.intItemUOMId, @intCostItemUOMId, RI.dblQuantity)) * (
+					,(dbo.[fnCTConvertQtyToTargetItemUOM](IU.intItemUOMId, @intCostItemUOMId, RI.dblNetWeight)) * (
 						@dblCost / CASE 
 							WHEN ISNULL(@ysnSubCurrency, 0) = 1
 								THEN 100
@@ -602,6 +615,8 @@ BEGIN TRY
 							THEN 1
 						ELSE 0
 						END
+					,CT.intContractHeaderId
+					,CT.intContractDetailId
 				FROM tblIPInvReceiptItemStage RI
 				JOIN tblICItem I ON I.strItemNo = RI.strItemNo
 					AND RI.intStageReceiptItemId = @intStageReceiptItemId
@@ -657,8 +672,8 @@ BEGIN TRY
 					,RI.dblOrderQty
 					,RI.intUnitMeasureId
 					,RI.dblUnitCost
-					,RI.dblNet
-					,0
+					,RI.dblGross
+					,@dblTareWeight
 					,1
 					,C.strContainerNumber
 					,GETUTCDATE()
