@@ -21,6 +21,7 @@ SELECT
 	,intOriginId = OG.intCountryID
 	,strOrigin = OG.strCountry
 	,intItemUOMId = LD.intItemUOMId
+	,intItemWeightUOMId = LD.intWeightItemUOMId
 	,strItemUOM = UM.strUnitMeasure
     ,strItemUOMType = UM.strUnitType
 	,dblQty = LC.dblQuantity
