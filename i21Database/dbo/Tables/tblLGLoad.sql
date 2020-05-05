@@ -64,6 +64,7 @@
 [strMVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strFVessel] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 [strFVoyageNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strIMONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intForwardingAgentEntityId] INT NULL,
 [strForwardingAgentRef] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [intInsurerEntityId] INT NULL,
