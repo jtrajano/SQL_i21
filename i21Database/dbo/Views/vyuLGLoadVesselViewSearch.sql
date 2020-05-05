@@ -15,6 +15,7 @@ SELECT  L.intLoadId
 	   ,L.strMVoyageNumber
 	   ,L.strFVessel
 	   ,L.strFVoyageNumber
+	   ,L.strIMONumber
 	   ,L.dblInsuranceValue
 	   ,L.strShippingMode
 	   ,L.intNumberOfContainers
