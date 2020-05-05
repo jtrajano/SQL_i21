@@ -7,7 +7,8 @@ SELECT DISTINCT * FROM (
   ad.strAccountId      
   ,ad.intAccountId      
   ,t.strTransactionId      
-  ,t.intTransactionDetailId      
+  ,t.intTransactionDetailId   
+  ,NULL AS intTransactionChargeId   
   ,t.intTransactionId      
   ,t.intItemId      
  FROM       
@@ -28,7 +29,8 @@ SELECT DISTINCT * FROM (
    ad.strAccountId    
    ,ad.intAccountId    
    ,A.strReceiptNumber    
-   ,B.intInventoryReceiptItemId    
+   ,B.intInventoryReceiptItemId   
+   ,NULL AS intTransactionChargeId 
    ,A.intInventoryReceiptId    
    ,B.intItemId    
  FROM tblICInventoryReceipt A    
@@ -41,5 +43,26 @@ SELECT DISTINCT * FROM (
  WHERE     
   ad.intAccountCategoryId = 45      
  AND C.ysnIsUnposted = 0       
- AND (C.dblCredit != 0 OR C.dblDebit != 0)    
+ AND (C.dblCredit != 0 OR C.dblDebit != 0)   
+ UNION ALL 
+ --ADD THIS TO GET THE ACCOUNT OF CHARGE FROM IR-39345 (MCP)
+ SELECT DISTINCT    
+   ad.strAccountId    
+   ,ad.intAccountId    
+   ,A.strReceiptNumber    
+   ,NULL AS intInventoryReceiptItemId  
+   ,B.intInventoryReceiptChargeId  
+   ,A.intInventoryReceiptId    
+   ,B.intChargeId    
+ FROM tblICInventoryReceipt A    
+ INNER JOIN tblICInventoryReceiptCharge  B ON A.intInventoryReceiptId = B.intInventoryReceiptId    
+ INNER JOIN tblGLDetail C     
+  ON C.strTransactionId = A.strReceiptNumber    
+   AND C.intJournalLineNo = B.intInventoryReceiptChargeId    
+ INNER JOIN vyuGLAccountDetail ad    
+  ON ad.intAccountId = C.intAccountId    
+ WHERE     
+  ad.intAccountCategoryId = 45      
+ AND C.ysnIsUnposted = 0       
+ AND (C.dblCredit != 0 OR C.dblDebit != 0)   
 ) tmp
