@@ -46,7 +46,8 @@ FROM
 					 END
 	FROM 
 		(SELECT * FROM vyuPRPaycheckEarning 
-			WHERE intWorkersCompensationId IS NOT NULL AND strCalculationType IN ('Hourly Rate', 'Salary', 'Overtime')) PE
+			WHERE intWorkersCompensationId IS NOT NULL AND strCalculationType IN ('Hourly Rate', 'Salary', 'Overtime')
+			AND vyuPRPaycheckEarning.ysnVoid = 0) PE
 		INNER JOIN tblPREmployeeEarning EE ON EE.intEmployeeEarningId = PE.intEmployeeEarningId
 		INNER JOIN tblPREmployee EMP ON PE.intEntityEmployeeId = EMP.intEntityId
 		INNER JOIN tblEMEntity ENT ON EMP.intEntityId = ENT.intEntityId
