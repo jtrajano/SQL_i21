@@ -42,6 +42,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblNetUnits NUMERIC(18,6) = 0
 		,@intDirectLoadId INT
 DECLARE @ysnTicketMatchContractLoadBased BIT
+DECLARE @ysnTicketContractLoadBased BIT
 
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
