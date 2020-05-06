@@ -18,10 +18,15 @@ SELECT
 	,strItemDescription = I.strDescription
 	,intCompanyLocationId = CD.intCompanyLocationId
     ,strLocationName = CL.strLocationName
+	,intSubLocationId = LW.intSubLocationId
+    ,strSubLocationName = CLSL.strSubLocationName
+	,intStorageLocationId = LW.intStorageLocationId
+    ,strStorageLocation = SL.strName
 	,intOriginId = OG.intCountryID
 	,strOrigin = OG.strCountry
 	,intItemUOMId = LD.intItemUOMId
 	,intItemWeightUOMId = LD.intWeightItemUOMId
+	,intUnitMeasureId = UM.intUnitMeasureId
 	,strItemUOM = UM.strUnitMeasure
     ,strItemUOMType = UM.strUnitType
 	,dblQty = LC.dblQuantity
@@ -45,6 +50,7 @@ FROM
 	LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 	LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId 
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
+	LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = LW.intStorageLocationId
 	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 	LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
@@ -80,4 +86,5 @@ WHERE L.intPurchaseSale = 1
 	AND L.ysnPosted = 1
 	AND (L.ysnCancelled IS NULL OR L.ysnCancelled = 0)
 	AND LOT.intLotId IS NULL
-	AND (CASE WHEN LC.dblQuantity > 0.0 THEN LC.dblQuantity - ISNULL(PL.dblPickedQty, 0) ELSE 0.0 END) > 0
+
+GO

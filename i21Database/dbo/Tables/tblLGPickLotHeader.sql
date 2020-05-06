@@ -8,7 +8,7 @@
 	[intCustomerEntityId] INT NOT NULL,
     [intCompanyLocationId] INT NOT NULL, 
     [intCommodityId] INT NOT NULL, 
-	[intSubLocationId] INT NOT NULL,
+	[intSubLocationId] INT NULL,
 	[intWeightUnitMeasureId] INT NOT NULL,
     [intUserSecurityId] INT NOT NULL, 	
 	[intDeliveryHeaderId] INT NULL,
