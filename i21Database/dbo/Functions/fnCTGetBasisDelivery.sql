@@ -72,6 +72,7 @@ BEGIN
 			, SH.intContractHeaderId
 			, SH.intContractDetailId
 			, dtmHistoryCreated
+			, intContractStatusId
 		FROM tblCTSequenceHistory SH
 			INNER JOIN tblCTContractHeader ET
 				ON SH.intContractHeaderId = ET.intContractHeaderId
@@ -80,6 +81,7 @@ BEGIN
 		AND tbl.intContractHeaderId = CD.intContractHeaderId
 		AND tbl.intRowId = 1
 	WHERE tbl.intPricingTypeId = 2
+	AND tbl.intContractStatusId = 1
 
 	INSERT INTO @Transaction
 	(
@@ -157,6 +159,7 @@ BEGIN
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId AND CUM.ysnStockUnit=1
 	INNER JOIN @OpenBasisContract OBC ON CBL1.intContractDetailId = OBC.intContractDetailId AND CBL1.intContractHeaderId = OBC.intContractHeaderId
 	WHERE CBL1.strTransactionType LIKE '%Basis Deliveries'
+	AND CBL1.dtmTransactionDate < DATEADD(DAY, 1, @dtmDate)
 	GROUP BY CBL1.dtmCreatedDate
 	,CBL1.intContractBalanceLogId
 	,CBL1.intContractHeaderId
