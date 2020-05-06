@@ -48,6 +48,8 @@ DECLARE @intContractHeaderPricingTypeId INT
 DECLARE @intTicketContractDetailId INT
 DECLARE @intTicketContractHeaderId INT
 DECLARE @ysnDestinationationWGPosted BIT
+DECLARE @strWhereFinalizedWeight NVARCHAR(20)
+DECLARE @strWhereFinalizedGrade NVARCHAR(20)
 
 -- DECLARE @tblPriceContractAvailableFixation AS TABLE(
 -- 	intContractDetailId INT,
@@ -84,7 +86,9 @@ BEGIN TRY
 		,@intTicketContractHeaderId = CH.intContractHeaderId
 		,@ysnDestinationationWGPosted = ysnDestinationWeightGradePost
 		,@_intTicketId = SC.intTicketId
-	FROM tblSCTicket SC
+		,@strWhereFinalizedWeight = strWeightFinalized
+		,@strWhereFinalizedGrade = strGradeFinalized
+	FROM vyuSCTicketScreenView SC
 	INNER JOIN tblCTContractDetail CD
 		ON CD.intContractDetailId = SC.intContractId
 	INNER JOIN tblCTContractHeader CH	
@@ -119,7 +123,7 @@ BEGIN TRY
 
 
 
-	IF(ISNULL(@ysnDestinationationWGPosted,0) = 0)
+	IF((ISNULL(@strWhereFinalizedWeight,'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'Origin') = 'Destination') AND ISNULL(@ysnDestinationationWGPosted,0) = 0)
 	BEGIN
 		GOTO _Exit
 	END
