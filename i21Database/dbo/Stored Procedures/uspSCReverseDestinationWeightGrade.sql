@@ -94,6 +94,13 @@ BEGIN TRY
 
 			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
 			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
+			EXEC uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intContractDetailId,
+										@dblQuantityToUpdate	=	@dblContractAvailableQty,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intMatchTicketId,
+										@strScreenName			=	'Scale'	
 		END
 
 			SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
