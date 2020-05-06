@@ -21,6 +21,7 @@ BEGIN TRY
 		,@intLoadId INT
 		,@intContractDetailId INT
 		,@dblQuantityToUpdate NUMERIC(18, 6)
+		,@intShipmentStatus INT
 	DECLARE @strDescription NVARCHAR(MAX)
 
 	SELECT @intMinRowNo = Min(intStageLoadId)
@@ -40,6 +41,7 @@ BEGIN TRY
 				,@intLoadId = NULL
 				,@intContractDetailId = NULL
 				,@dblQuantityToUpdate = NULL
+				,@intShipmentStatus = NULL
 
 			SELECT @strDescription = NULL
 
@@ -77,21 +79,21 @@ BEGIN TRY
 				,@intLoadId = L.intLoadId
 				,@intContractDetailId = CD.intContractDetailId
 				,@dblQuantityToUpdate = - LD.dblQuantity
+				,@intShipmentStatus = L.intShipmentStatus
 			FROM tblLGLoad L WITH (NOLOCK)
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 				AND L.strCustomerReference = @strCustomerReference
 				AND L.intShipmentType = 2
-				AND L.intShipmentStatus <> 10
+				--AND L.intShipmentStatus <> 10
 			JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 
+			-- Contract Unslice - LSI will get deleted. so will not have LSI No.
 			IF ISNULL(@intLoadId, 0) = 0
-			BEGIN
-				RAISERROR (
-						'Shipping instruction is not available. '
-						,16
-						,1
-						)
-			END
+				SELECT @intLoadId = 0
+
+			-- If LSI is already cancelled, we should not do the process again.
+			IF ISNULL(@intShipmentStatus, 0) = 10
+				SELECT @intLoadId = 0
 
 			IF EXISTS (
 					SELECT 1

@@ -83,7 +83,7 @@ BEGIN TRY
 		, @intTicketCurrencyId = intCurrencyId
 		, @intTicketDeliverySheetId = ISNULL(intDeliverySheetId,0)
 		, @intTicketItemUOMIdTo = intItemUOMIdTo
-		, @intTicketProcessingLocationId = @intTicketProcessingLocationId
+		, @intTicketProcessingLocationId = intProcessingLocationId
 	FROM tblSCTicket SC
 	WHERE SC.intTicketId = @intTicketId
 
@@ -487,26 +487,27 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = @intItemId
 
 
-	IF EXISTS (SELECT TOP 1 1 FROM tblGRCustomerStorage 
-				WHERE intCustomerStorageId = @intHoldCustomerStorageId 
-					AND ISNULL(dblBasis,0) = 0 
-					AND ISNULL(dblSettlementPrice,0) = 0
-	   AND ISNULL(@intTicketDeliverySheetId,0) > 0
-	   AND ISNULL(@intDPContractId,0) > 0
-	)
+	IF(ISNULL(@intTicketDeliverySheetId,0) > 0)
 	BEGIN
-		UPDATE tblGRCustomerStorage
-		SET dblBasis = ISNULL(@dblBasis,0)
-			,dblSettlementPrice = ISNULL(@dblFutures,0)
-		WHERE intCustomerStorageId = @intHoldCustomerStorageId
-	END
-	ELSE
-	BEGIN
-		SELECT TOP 1 
-			@dblBasis = dblBasis
-			,@dblFutures = dblSettlementPrice
-		FROM tblGRCustomerStorage
-		WHERE intCustomerStorageId = @intHoldCustomerStorageId
+		IF EXISTS (SELECT TOP 1 1 FROM tblGRCustomerStorage 
+					WHERE intCustomerStorageId = @intHoldCustomerStorageId 
+						AND ISNULL(dblBasis,0) = 0 
+						AND ISNULL(dblSettlementPrice,0) = 0)
+			AND ISNULL(@intDPContractId,0) > 0
+		BEGIN
+			UPDATE tblGRCustomerStorage
+			SET dblBasis = ISNULL(@dblBasis,0)
+				,dblSettlementPrice = ISNULL(@dblFutures,0)
+			WHERE intCustomerStorageId = @intHoldCustomerStorageId
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 
+				@dblBasis = dblBasis
+				,@dblFutures = dblSettlementPrice
+			FROM tblGRCustomerStorage
+			WHERE intCustomerStorageId = @intHoldCustomerStorageId
+		END
 	END
 	
 	SELECT intItemId = ScaleTicket.intItemId

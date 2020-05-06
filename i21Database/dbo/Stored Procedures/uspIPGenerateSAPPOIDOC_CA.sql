@@ -28,6 +28,8 @@ BEGIN
 		,@dtmFeedCreated DATETIME
 		,@strShipperVendorAccountNum NVARCHAR(50)
 		,@intContractDetailId INT
+		,@strSeq NVARCHAR(50)
+
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -87,6 +89,7 @@ BEGIN
 			,@strContractNo = NULL
 			,@dtmFeedCreated = NULL
 			,@strShipperVendorAccountNum = NULL
+			,@strSeq=NULL
 
 		SELECT @strError = ''
 
@@ -102,6 +105,7 @@ BEGIN
 			,@strRowState = strRowState
 			,@dtmFeedCreated = dtmFeedCreated
 			,@intContractDetailId = intContractDetailId
+			,@strSeq=intContractSeq
 		FROM tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -280,7 +284,7 @@ BEGIN
 				@intContractFeedId
 				,@strRowState
 				,@strXML
-				,ISNULL(@strContractNo, '')
+				,ISNULL(@strContractNo, '')+ ' / ' + ISNULL(@strSeq, '')
 				,ISNULL(@strERPPONumber, '')
 				)
 

@@ -302,7 +302,7 @@ BEGIN TRY
 				AND LD.intPContractDetailId = @intContractDetailId
 				AND L.intShipmentType = 2
 				AND L.intShipmentStatus <> 10
-				AND L.strCustomerReference = @strCustomerReference
+				--AND L.strCustomerReference = @strCustomerReference
 
 			IF ISNULL(@intLoadShippingInstructionId, 0) = 0
 			BEGIN
@@ -313,19 +313,19 @@ BEGIN TRY
 						)
 			END
 
-			IF NOT EXISTS (
-					SELECT 1
-					FROM tblLGLoad L WITH (NOLOCK)
-					WHERE intLoadId = @intLoadShippingInstructionId
-						AND strCustomerReference = @strCustomerReference
-					)
-			BEGIN
-				RAISERROR (
-						'Customer Reference is not matching with Shipping Instruction. '
-						,16
-						,1
-						)
-			END
+			--IF NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblLGLoad L WITH (NOLOCK)
+			--		WHERE intLoadId = @intLoadShippingInstructionId
+			--			AND strCustomerReference = @strCustomerReference
+			--		)
+			--BEGIN
+			--	RAISERROR (
+			--			'Customer Reference is not matching with Shipping Instruction. '
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			SELECT @intOriginPortId = t.intCityId
 			FROM tblSMCity t WITH (NOLOCK)
@@ -373,13 +373,10 @@ BEGIN TRY
 						)
 			END
 
+			-- If Ata(dtmETAPOD) is empty, take Eta(dtmDeadlineCargo)
 			IF @dtmETAPOD IS NULL
 			BEGIN
-				RAISERROR (
-						'Invalid Act. ETA. '
-						,16
-						,1
-						)
+				SELECT @dtmETAPOD = @dtmDeadlineCargo
 			END
 
 			IF @dtmETAPOL IS NULL
@@ -420,6 +417,11 @@ BEGIN TRY
 						)
 			END
 
+			IF @strContainerType = '20GP'
+				SELECT @strContainerType = '20 FT'
+			ELSE IF @strContainerType = '40GP'
+				SELECT @strContainerType = '40 FT'
+
 			SELECT @intContainerTypeId = t.intContainerTypeId
 			FROM tblLGContainerType t WITH (NOLOCK)
 			WHERE t.strContainerType = @strContainerType
@@ -433,6 +435,7 @@ BEGIN TRY
 						)
 			END
 
+			-- Should not go based on Customer Ref since it will clash with Slicing logic
 			SELECT TOP 1 @strLoadNumber = L.strLoadNumber
 				,@intLoadId = L.intLoadId
 				,@ysnPosted = ISNULL(ysnPosted, 0)
@@ -440,7 +443,8 @@ BEGIN TRY
 			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 				AND L.intShipmentType = 1
 				AND LD.intPContractDetailId = @intContractDetailId
-				AND L.strCustomerReference = @strCustomerReference
+				AND L.intShipmentStatus <> 10
+				--AND L.strCustomerReference = @strCustomerReference
 
 			SELECT @intShipmentType = 1
 				,@intShipmentStatus = 1
