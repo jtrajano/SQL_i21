@@ -190,6 +190,13 @@ BEGIN TRY
 						END
 
 						EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+						SET @dblContractAvailableQty = @dblContractAvailableQty * -1
+						EXEC uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intMatchContractDetailId,
+										@dblQuantityToUpdate	=	@dblContractAvailableQty,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intMatchTicketId,
+										@strScreenName			=	'Scale'	
 					END
 				END
 				DECLARE @dblPricedContractQty AS DECIMAL(18,6)
