@@ -835,7 +835,7 @@ SELECT * FROM (
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup 
  WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0 
   UNION ALL  
  --CHARGES  
@@ -901,7 +901,7 @@ SELECT * FROM (
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0  
  UNION ALL  
  --SHIPMENT CHARGES  
@@ -967,7 +967,7 @@ SELECT * FROM (
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
   WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0  
  UNION ALL
  --LOAD TRANSACTION ITEM
@@ -1033,7 +1033,7 @@ SELECT * FROM (
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0 
  UNION ALL
  --LOAD COST TRANSACTION ITEM
@@ -1099,7 +1099,7 @@ SELECT * FROM (
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0  
 --  OUTER APPLY  
 --  (  
@@ -1229,7 +1229,7 @@ INNER JOIN tblGRSettleStorage SS
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0   
    UNION ALL 
  --PATRONAGE
@@ -1291,7 +1291,7 @@ INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
-      (dblClearingQty) != 0 
+      (dblClearingQty) > 0 
   -- OR  (dblClearingAmount) != 0  
 ) MainQuery '  
   
