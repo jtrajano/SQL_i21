@@ -282,18 +282,23 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
 			BEGIN
+
+				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
+
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
+
+					SELECT TOP 1 @ysnTicketContractLoadBased = ISNULl(A.ysnLoad,0)
+					FROM tblCTContractHeader A
+					INNER JOIN tblCTContractDetail B	
+						ON A.intContractHeaderId = B.intContractHeaderId
+					WHERE B.intContractDetailId = @intContractDetailId
+
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-					
-					IF(ISNULL(@intDirectLoadId,0) = 0)
+
+					IF(@ysnTicketContractLoadBased = 1)
 					BEGIN
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
+						SET @dblContractAvailableQty = 1
 					END
 
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
@@ -306,7 +311,6 @@ BEGIN TRY
 									@intExternalId			=	@intTicketId,
 									@strScreenName			=	'Scale'	
 				END
-				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
 			END
 			INSERT INTO @ItemsToIncreaseInTransitDirect(
 				[intItemId]
@@ -342,54 +346,7 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
 			BEGIN
-				IF ISNULL(@intContractDetailId,0) != 0
-				BEGIN
-					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-
-					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
-					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
-					
-					IF(ISNULL(@intDirectLoadId,0) = 0)
-					BEGIN
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
-					END
-
-
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
-					EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intContractDetailId,
-									@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'	
-				END
-					
-				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
-				SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
-				INNER JOIN tblCTPriceFixation CPX
-					ON CPX.intPriceFixationId = CTP.intPriceFixationId
-				INNER JOIN tblCTContractDetail CT
-					ON CPX.intContractDetailId = CT.intContractDetailId
-				INNER JOIN tblSCTicket SC
-					ON SC.intContractId = CT.intContractDetailId
-				WHERE CT.intContractDetailId = @intTicketId
-
-				IF(@dblPricedContractQty > 0 OR NOT EXISTS (SELECT TOP 1 1 FROM vyuCTPriceContractFixationDetail CTP
-				INNER JOIN tblCTPriceFixation CPX
-					ON CPX.intPriceFixationId = CTP.intPriceFixationId
-				INNER JOIN tblCTContractDetail CT
-					ON CPX.intContractDetailId = CT.intContractDetailId
-				INNER JOIN tblSCTicket SC
-					ON SC.intContractId = CT.intContractDetailId
-				WHERE  SC.intTicketId = @intTicketId))
-				BEGIN
-					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
-				END
+				EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
 			END
 		END
 	END
