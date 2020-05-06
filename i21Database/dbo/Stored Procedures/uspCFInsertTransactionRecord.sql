@@ -154,6 +154,8 @@ BEGIN
 
 
 
+	BEGIN TRY 
+	BEGIN TRANSACTION 
 
 	------------------------------------------------------------
 	--					  DECLARE VARIABLE 					  --
@@ -1200,6 +1202,10 @@ BEGIN
 		DECLARE @intPrcContractDetailId		INT				
 		DECLARE @intPrcContractNumber		NVARCHAR(MAX)				
 		DECLARE @intPrcContractSeq			INT				
+		DECLARE @intPrcItemContractHeaderId		INT				
+		DECLARE @intPrcItemContractDetailId		INT				
+		DECLARE @intPrcItemContractNumber		NVARCHAR(MAX)				
+		DECLARE @intPrcItemContractSeq			INT				
 		DECLARE @strPrcPriceBasis			NVARCHAR(MAX)	
 		DECLARE @dblCalcQuantity			NUMERIC(18,6)
 		DECLARE @dblCalcOverfillQuantity	NUMERIC(18,6)
@@ -1730,6 +1736,10 @@ BEGIN
 		,@intPrcContractDetailId		= intContractDetailId
 		,@intPrcContractNumber			= strContractNumber
 		,@intPrcContractSeq				= intContractSeq
+		,@intPrcItemContractHeaderId		= intItemContractHeaderId
+		,@intPrcItemContractDetailId		= intItemContractDetailId
+		,@intPrcItemContractNumber			= strItemContractNumber
+		,@intPrcItemContractSeq				= intItemContractSeq
 		,@strPrcPriceBasis				= strPriceBasis
 		,@strPriceMethod   				= strPriceMethod
 		,@strPriceBasis 				= strPriceBasis
@@ -1896,6 +1906,166 @@ BEGIN
 				WHERE intTransactionId = @Pk
 					
 		END
+		ELSE IF (LOWER(@strPriceMethod) = 'item contract pricing' OR LOWER(@strPriceMethod) = 'item contracts')
+		BEGIN
+
+				IF(@intPrcAvailableQuantity < @dblQuantity)
+					BEGIN
+						SET @dblCalcQuantity = @intPrcAvailableQuantity
+						SET @dblCalcOverfillQuantity = @dblQuantity - @intPrcAvailableQuantity
+						SET @dblQuantity = @intPrcAvailableQuantity
+						print 'calc'
+						print @dblCalcOverfillQuantity
+					END
+				ELSE
+					BEGIN
+						SET @dblCalcQuantity = @dblQuantity
+					END
+
+						
+				UPDATE tblCFTransaction 
+				SET dblQuantity = @dblQuantity
+				WHERE intTransactionId = @Pk
+
+
+				EXEC dbo.uspCFRecalculateTransaciton 
+				 @ProductId						=	@intProductId
+				,@CardId						=	@intCardId
+				,@VehicleId						=	@intVehicleId
+				,@SiteId						=	@intSiteId
+				,@TransactionDate				=	@dtmTransactionDate
+				,@Quantity						=	@dblQuantity
+				,@OriginalPrice					=	@dblOriginalGrossPrice
+				,@TransactionType				=	@strTransactionType
+				,@NetworkId						=	@intNetworkId
+				,@TransferCost					=	@dblTransferCost
+				,@TransactionId					=	@Pk
+				,@CreditCardUsed				=	@ysnCreditCardUsed
+				,@PostedOrigin					=	@ysnOriginHistory  
+				,@PostedCSV						=	@ysnPostedCSV  
+				,@PumpId						=	@intPumpNumber
+				,@IsImporting					=	1
+				,@TaxState						=	@TaxState						
+				,@FederalExciseTaxRate        	=	@FederalExciseTaxRate        
+				,@StateExciseTaxRate1         	=	@StateExciseTaxRate1         
+				,@StateExciseTaxRate2         	=	@StateExciseTaxRate2         
+				,@CountyExciseTaxRate         	=	@CountyExciseTaxRate         
+				,@CityExciseTaxRate           	=	@CityExciseTaxRate           
+				,@StateSalesTaxPercentageRate 	=	@StateSalesTaxPercentageRate 
+				,@CountySalesTaxPercentageRate	=	@CountySalesTaxPercentageRate
+				,@CitySalesTaxPercentageRate  	=	@CitySalesTaxPercentageRate  
+				,@OtherSalesTaxPercentageRate	=	@OtherSalesTaxPercentageRate 
+				,@FederalExciseTax1				=   @FederalExciseTax1	
+				,@FederalExciseTax2				=   @FederalExciseTax2	
+				,@StateExciseTax1				=   @StateExciseTax1	
+				,@StateExciseTax2				=   @StateExciseTax2	
+				,@StateExciseTax3				=   @StateExciseTax3	
+				,@CountyTax1					=   @CountyTax1		
+				,@CityTax1						=   @CityTax1			
+				,@StateSalesTax					=   @StateSalesTax		
+				,@CountySalesTax				=   @CountySalesTax	
+				,@CitySalesTax					=   @CitySalesTax		
+				,@strGUID						=   @strGUID		
+				,@strProcessDate				=	@strProcessDate
+				,@Tax1							=	@Tax1		
+				,@Tax2							=	@Tax2		
+				,@Tax3							=	@Tax3		
+				,@Tax4							=	@Tax4		
+				,@Tax5							=	@Tax5		
+				,@Tax6							=	@Tax6		
+				,@Tax7							=	@Tax7		
+				,@Tax8							=	@Tax8		
+				,@Tax9							=	@Tax9		
+				,@Tax10							=	@Tax10		
+				,@TaxValue1						=	@TaxValue1	
+				,@TaxValue2						=	@TaxValue2	
+				,@TaxValue3						=	@TaxValue3	
+				,@TaxValue4						=	@TaxValue4	
+				,@TaxValue5						=	@TaxValue5	
+				,@TaxValue6						=	@TaxValue6	
+				,@TaxValue7						=	@TaxValue7	
+				,@TaxValue8						=	@TaxValue8	
+				,@TaxValue9						=	@TaxValue9	
+				,@TaxValue10					=	@TaxValue10
+				,@ForeignCardId					=   @strCardId
+
+
+				SELECT
+				 @dblPrcPriceOut				= dblPrice
+				,@strPrcPricingOut				= strPriceMethod
+				,@dblPrcOriginalPrice			= dblOriginalPrice
+				,@strPrcPriceBasis				= strPriceBasis
+				,@strPriceMethod   				= strPriceMethod
+				,@strPriceBasis 				= strPriceBasis
+				,@intPriceProfileId 			= intPriceProfileId 	
+				,@intPriceIndexId				= intPriceIndexId	
+				,@intSiteGroupId				= intSiteGroupId		
+				,@strPriceProfileId				= strPriceProfileId	
+				,@strPriceIndexId				= strPriceIndexId	
+				,@strSiteGroup					= strSiteGroup		
+				,@dblPriceProfileRate			= dblPriceProfileRate
+				,@dblPriceIndexRate				= dblPriceIndexRate	
+				,@dtmPriceIndexDate				= dtmPriceIndexDate	
+				,@ysnDuplicate					= ysnDuplicate
+				,@ysnRecalculateInvalid			= ysnInvalid
+				,@dblInventoryCost				= dblInventoryCost
+				,@dblMargin						= dblMargin
+				,@dblGrossTransferCost			= dblGrossTransferCost
+				,@dblNetTransferCost			= dblNetTransferCost
+				,@dblAdjustmentRate				= dblAdjustmentRate
+				FROM tblCFTransactionPricingType
+
+					
+				UPDATE tblCFTransaction 
+				SET strPriceBasis = null 
+				,dblInventoryCost		= @dblInventoryCost	
+				,dblMargin				= @dblMargin
+				,strPriceMethod 		= 'Item Contract Pricing'
+				,intItemContractId 			= @intPrcItemContractHeaderId
+				,intItemContractDetailId 	= @intPrcItemContractDetailId
+				,dblQuantity 			= @dblQuantity
+				,intPriceProfileId 		= null
+				,intPriceIndexId		= null
+				,intSiteGroupId			= @intSiteGroupId
+				,strPriceProfileId		= ''
+				,strPriceIndexId		= ''
+				,strSiteGroup			= @strSiteGroup
+				,dblPriceProfileRate	= null
+				,dblPriceIndexRate		= null
+				,dtmPriceIndexDate		= null
+				,ysnDuplicate			= @ysnDuplicate
+				,ysnInvalid				= @ysnInvalid
+				,dblGrossTransferCost	= @dblGrossTransferCost
+				,dblNetTransferCost		= @dblNetTransferCost
+				,dblAdjustmentRate		= @dblAdjustmentRate
+				WHERE intTransactionId = @Pk
+
+				------------------------------------------------------------
+				--				UPDATE CONTRACTS QUANTITY				  --
+				------------------------------------------------------------
+				IF (LOWER(@strPriceMethod) = 'item contract pricing' OR LOWER(@strPriceMethod) = 'item contracts')
+				BEGIN
+					--EXEC uspCTUpdateScheduleQuantity 
+					-- @intContractDetailId = @intContractId
+					--,@dblQuantityToUpdate = @dblCalcQuantity
+					--,@intUserId = 0
+					--,@intExternalId = @Pk
+					--,@strScreenName = 'Card Fueling Transaction Screen'
+
+					EXEC uspCTItemContractUpdateScheduleQuantity
+					@intItemContractDetailId = @intPrcItemContractDetailId,
+					@dblQuantityToUpdate = @dblCalcQuantity,
+					@intUserId = 0,
+					@intTransactionDetailId = @Pk,
+					@strScreenName = 'Card Fueling Transaction Screen'
+				END
+
+
+				SELECT @dblCalcOverfillQuantity,@intPrcItemContractDetailId,@dblCalcQuantity'itc', * FROM tblCFTransaction Where intTransactionId = @Pk
+				
+				------------------------------------------------------------
+
+		END
 		ELSE IF (@strPriceMethod = 'Contracts' OR @strPriceMethod = 'Contract Pricing')
 		BEGIN
 
@@ -2010,10 +2180,10 @@ BEGIN
 				SET strPriceBasis = null 
 				,dblInventoryCost		= @dblInventoryCost	
 				,dblMargin				= @dblMargin
-				,strPriceMethod = 'Contract Pricing'
-				,intContractId = @intPrcContractHeaderId
-				,intContractDetailId = @intPrcContractDetailId
-				,dblQuantity = @dblQuantity
+				,strPriceMethod 		= 'Contract Pricing'
+				,intContractId 			= @intPrcContractHeaderId
+				,intContractDetailId 	= @intPrcContractDetailId
+				,dblQuantity 			= @dblQuantity
 				,intPriceProfileId 		= null
 				,intPriceIndexId		= null
 				,intSiteGroupId			= @intSiteGroupId
@@ -2113,6 +2283,8 @@ BEGIN
 		IF(@dblCalcOverfillQuantity > 0)
 		BEGIN
 
+			SELECT 'ovf' ,@dblCalcOverfillQuantity,@intOverFilledTransactionId
+
 			IF(@intOverFilledTransactionId IS NULL)
 			BEGIN
 				SET @intOverFilledTransactionId = @Pk
@@ -2127,10 +2299,24 @@ BEGIN
 			SET @intPrcContractDetailId		  = NULL
 			SET @intPrcContractNumber		  = NULL
 			SET @intPrcContractSeq			  = NULL
+			SET @intPrcItemContractHeaderId   = NULL
+			SET @intPrcItemContractDetailId	  = NULL
+			SET @intPrcItemContractNumber	  = NULL
+			SET @intPrcItemContractSeq		  = NULL
 			SET @strPrcPriceBasis			  = NULL
 			print 'goto calculate price'
 			GOTO CALCULATEPRICE
 		END
 		------------------------------------------------------------
 	END
+
+
+		COMMIT TRANSACTION
+
+	END TRY 
+	BEGIN CATCH
+
+		ROLLBACK TRANSACTION
+
+	END CATCH
 END
