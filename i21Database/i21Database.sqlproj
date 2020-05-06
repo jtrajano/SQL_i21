@@ -8663,6 +8663,8 @@
     <Build Include="dbo\Tables\tblGRStorageHistoryDeleteHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistoryWithLog.sql" />
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDestinationWeightVarianceVarianceReport.sql" />
+    <Build Include="dbo\Views\vyuGRDestinationWeightVarianceReportView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
