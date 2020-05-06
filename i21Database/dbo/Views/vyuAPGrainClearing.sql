@@ -189,7 +189,7 @@ SELECT
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,CASE WHEN SS.dblSettleUnits != 0 THEN  -SS.dblSettleUnits ELSE -SS.dblUnpaidUnits END
+	,ROUND(CASE WHEN SS.dblSettleUnits != 0 THEN  -SS.dblSettleUnits ELSE -SS.dblUnpaidUnits END, 2)
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
@@ -239,7 +239,7 @@ SELECT
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,billDetail.dblTotal AS dblVoucherTotal
-    ,CASE 
+    ,ROUND(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
 		ELSE 
@@ -249,7 +249,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS dblVoucherQty
+		END,2) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
@@ -391,7 +391,7 @@ SELECT
 	-- 	WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount)
 	-- 	WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
 	-- END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
-    ,CASE 
+    ,ROUND(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
 		ELSE 
@@ -401,7 +401,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS dblVoucherQty
+		END, 2) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount
