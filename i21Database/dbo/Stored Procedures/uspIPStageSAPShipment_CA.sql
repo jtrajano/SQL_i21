@@ -159,13 +159,13 @@ BEGIN TRY
 					,OrderReference NVARCHAR(100)
 					,Pol NVARCHAR(200)
 					,Pod NVARCHAR(200)
-					,Ata DATETIME
-					,Atd DATETIME
-					,Etd DATETIME
-					,Eta DATETIME
+					,Ata NVARCHAR(50)
+					,Atd NVARCHAR(50)
+					,Etd NVARCHAR(50)
+					,Eta NVARCHAR(50)
 					,BookingNumber NVARCHAR(100)
 					,BLNumber NVARCHAR(100)
-					,BLDate DATETIME
+					,BLDate NVARCHAR(50)
 					,CarrierCode NVARCHAR(100)
 					,Vessel NVARCHAR(200)
 					,Voyage NVARCHAR(100)
