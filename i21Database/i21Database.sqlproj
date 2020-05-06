@@ -2470,6 +2470,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptUpdateInternalComments.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCalculateTotals.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptDetail.sql" />
     <Build Include="dbo\Tables\tblARImportFile.sql" />
@@ -2699,7 +2700,9 @@
     <Build Include="dbo\Stored Procedures\uspMFReportToteLabel.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchWithApproval.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchByEntity.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchByEntityWithApproval.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeByEntity.sql" />
@@ -3211,6 +3214,7 @@
     <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemLowerTolerance.sql" />
     <Build Include="dbo\Views\vyuSTVendorList.sql" />
     <Build Include="dbo\Views\vyuICGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryAdjustmentWithApproval.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
@@ -3464,6 +3468,10 @@
     <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentSubLedgerGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentSummaryGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentJournalGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentGLPostPreview.sql" />
     <Build Include="dbo\Views\vyuEME2C2Role.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />

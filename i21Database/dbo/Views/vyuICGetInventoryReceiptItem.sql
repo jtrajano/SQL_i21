@@ -94,6 +94,7 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, Category.intCategoryId
 	, dblPendingVoucherQty = ISNULL(ReceiptItem.dblOpenReceive, 0) - ISNULL(ReceiptItem.dblBillQty, 0) 
 	, strVoucherNo = voucher.strBillId
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
@@ -124,3 +125,8 @@ FROM tblICInventoryReceiptItem ReceiptItem
 			bd.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 
 	) voucher
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal

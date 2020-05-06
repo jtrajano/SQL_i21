@@ -106,7 +106,8 @@ SET  IDENTITY_INSERT tblGLAccountCategory ON
 			SELECT id = 135, name = 'Unrealized Loss on Cash (Inventory Offset)' UNION ALL
 			SELECT id = 136, name = 'Unrealized Loss on Ratio (Inventory Offset)' UNION ALL
 			SELECT id = 137, name = 'Unrealized Loss on Intransit (Inventory Offset)' UNION ALL
-			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' 
+			SELECT id = 138, name = 'Futures Gain or Loss Realized Offset' UNION ALL
+			SELECT id = 139, name = 'Deferred Expense'
 
 	) AS CategoryHardCodedValues
 		ON  CategoryTable.intAccountCategoryId = CategoryHardCodedValues.id
@@ -354,6 +355,12 @@ BEGIN -- INVENTORY ACCOUNT CATEGORY GROUPING
 		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
 	END	
 	SET @strAccountCategory  = 'Futures Gain or Loss Realized Offset'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
+	BEGIN
+		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)
+		SELECT intAccountCategoryId ,'Inventories','INV' FROM tblGLAccountCategory WHERE strAccountCategory = @strAccountCategory
+	END	
+	SET @strAccountCategory  = 'Deferred Expense'
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountCategoryGroup ACG LEFT JOIN tblGLAccountCategory AC ON AC.intAccountCategoryId = ACG.intAccountCategoryId WHERE strAccountCategory = @strAccountCategory)
 	BEGIN
 		INSERT INTO tblGLAccountCategoryGroup (intAccountCategoryId,strAccountCategoryGroupDesc,strAccountCategoryGroupCode)

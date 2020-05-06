@@ -23,5 +23,6 @@
     [intCreatedByUserId] INT NULL,
     [intModifiedByUserId] INT NULL,
     [ysnIsCountSheetMultiFilter] BIT NULL DEFAULT(1),
+	[strBookInventoryOn] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL DEFAULT 'Receipt', 
     CONSTRAINT [PK_tblICCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

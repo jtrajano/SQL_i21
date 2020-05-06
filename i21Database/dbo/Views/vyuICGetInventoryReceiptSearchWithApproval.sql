@@ -1,7 +1,13 @@
-CREATE VIEW [dbo].[vyuICGetInventoryReceiptSearch]
-	AS
-
-SELECT Receipt.intInventoryReceiptId
+CREATE VIEW [dbo].[vyuICGetInventoryReceiptSearchWithApproval]
+AS
+SELECT
+	  approvalStatus.strApprovalStatus
+	, approvalStatus.strStatus AS strDocumentStatus
+	, approvalStatus.dtmDate AS dtmLastApproved
+	, approvalStatus.strApprovedBy AS strLastApprovedBy
+	, submissionStatus.dtmDate AS dtmLastSubmitted
+	, submissionStatus.strSubmittedBy AS strLastSubmittedBy
+	, Receipt.intInventoryReceiptId
 	, Receipt.strReceiptType
 	, Receipt.intSourceType
 	, strSourceType = (
@@ -88,7 +94,39 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Receipt.intTaxGroupId
 	LEFT JOIN tblCTBook Book ON Book.intBookId = Receipt.intBookId
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId
-	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	CROSS APPLY (
+		SELECT TOP 1
+			  trans.intRecordId
+			, trans.strApprovalStatus
+			, approval.strStatus
+			, approval.dtmDate
+			, approval.intApprovalId
+			, entity.strName strApprovedBy
+		FROM tblSMApproval approval
+			INNER JOIN tblSMTransaction trans ON trans.intTransactionId = approval.intTransactionId
+			INNER JOIN tblSMScreen screen ON screen.intScreenId = trans.intScreenId
+			INNER JOIN tblEMEntity entity ON entity.intEntityId = approval.intApproverId
+		WHERE (screen.strNamespace = 'Inventory.view.InventoryReceipt' OR screen.strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders')
+			AND trans.intRecordId = Receipt.intInventoryReceiptId
+		ORDER BY approval.intApprovalId DESC, approval.dtmDate DESC
+	) approvalStatus
+	CROSS APPLY (
+		SELECT TOP 1
+			  trans.intRecordId
+			, trans.strApprovalStatus
+			, entity.strName strSubmittedBy
+			, approval.intSubmittedById
+			, approval.strStatus
+			, approval.dtmDate
+			, approval.intApprovalId
+		FROM tblSMApproval approval
+			INNER JOIN tblSMTransaction trans ON trans.intTransactionId = approval.intTransactionId
+			INNER JOIN tblSMScreen screen ON screen.intScreenId = trans.intScreenId
+			INNER JOIN tblEMEntity entity ON entity.intEntityId = approval.intSubmittedById
+		WHERE (screen.strNamespace = 'Inventory.view.InventoryReceipt' OR screen.strNamespace = 'Inventory.view.InventoryReceipt.TransferOrders')
+			AND trans.intRecordId = Receipt.intInventoryReceiptId
+		ORDER BY approval.intApprovalId DESC, approval.dtmDate DESC
+	) submissionStatus
 	OUTER APPLY (
 		SELECT TOP 1 fp.strPeriod
 		FROM tblGLFiscalYearPeriod fp
