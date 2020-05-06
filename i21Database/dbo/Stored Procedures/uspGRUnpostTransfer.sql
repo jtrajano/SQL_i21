@@ -43,11 +43,11 @@ BEGIN
 	IF (SELECT TOP 1 A.dblOriginalBalance
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
-			ON B.intCustomerStorageId = A.intCustomerStorageId) <>	
+			ON B.[intToCustomerStorage] = A.intCustomerStorageId) <>	
 		(SELECT  sum(B.dblUnits)
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
-				ON B.intCustomerStorageId = A.intCustomerStorageId)
+				ON B.[intToCustomerStorage] = A.intCustomerStorageId)
 	BEGIN
 		SET @ErrMsg = 'Unable to reverse this transaction. The open balance of one or more customer storage/s no longer match its original balance.'
 		
