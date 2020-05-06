@@ -1192,6 +1192,11 @@ BEGIN TRY
 
 			-- Load Container
 			IF ISNULL(@ysnPosted, 0) = 0
+				AND EXISTS (
+					SELECT 1
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
 				AND (
 					@strRowState = 'Added'
 					OR @strRowState = 'Modified'

@@ -121,8 +121,8 @@ BEGIN TRY
 					,OrderReference NVARCHAR(100)
 					,Pol NVARCHAR(200)
 					,Pod NVARCHAR(200)
-					,Etd DATETIME
-					,Eta DATETIME
+					,Etd NVARCHAR(50)
+					,Eta NVARCHAR(50)
 					,BookingNumber NVARCHAR(100)
 					,BLNumber NVARCHAR(100)
 					,Vessel NVARCHAR(200)
