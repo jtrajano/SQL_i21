@@ -32,6 +32,7 @@ RETURNS @returnTable TABLE
 	,[dblStorageDueAmount]			DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[dblFlatFeeTotal]				DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[ysnDSPosted]					BIT 				NOT NULL	DEFAULT 0
+	,[strTransactionNo]				NVARCHAR(150)		NULL
 )
 AS
 BEGIN
@@ -187,6 +188,7 @@ BEGIN
 		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * CS.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
 		,SV.dblFlatFeeTotal
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
+		,SSVW.strTransaction
 	FROM tblGRCustomerStorage CS
 	OUTER APPLY (
 		select sum((dblUnits * case when strType = 'Settlement' then -1 else 1 end )) as dblOpenBalance
@@ -216,6 +218,8 @@ BEGIN
 				and intTransactionTypeId = 6
 			order by intStorageHistoryId desc 
 		) SH
+	left join  vyuGRStorageSearchView SSVW 
+			on CS.intCustomerStorageId = SSVW.intCustomerStorageId
 	WHERE CS.intEntityId = CASE WHEN @intEntityId > 0 THEN @intEntityId ELSE CS.intEntityId END
 		AND (
 				(	
