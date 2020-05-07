@@ -183,13 +183,23 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
 					AND SST.intSettleStorageId = UH.intExternalHeaderId
-			JOIN tblGRStorageHistory SH 
-				ON SH.intContractHeaderId = UH.intContractHeaderId 
-					AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			-- JOIN tblGRStorageHistory SH 
+			-- 	ON SH.intContractHeaderId = UH.intContractHeaderId 
+			-- 		AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			OUTER APPLY (
+				SELECT DISTINCT
+					intContractHeaderId
+				FROM tblGRStorageHistory
+				WHERE intCustomerStorageId = SST.intCustomerStorageId
+					AND intContractHeaderId IS NOT NULL
+					AND intInventoryReceiptId IS NOT NULL
+					AND intContractHeaderId = UH.intContractHeaderId
+			) SH
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
-				AND SH.strType IN ('From Scale','From Delivery Sheet')
+				--AND SH.strType IN ('From Scale','From Delivery Sheet')
+				AND SH.intContractHeaderId IS NOT NULL
 
 			UNION ALL
 		
@@ -532,6 +542,15 @@ BEGIN TRY
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 			END	
+
+			---This is just to insure that the parent is delete if there is no child in existence
+			IF @isParentSettleStorage = 0
+			BEGIN
+				IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
+				BEGIN				
+					DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
+				END
+			END
 
 			--5. Removing Voucher
 			begin
