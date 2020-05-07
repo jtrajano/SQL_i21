@@ -5,6 +5,7 @@ SELECT DISTINCT PL.intPickLotDetailId,
   PLH.strCustomer,
   PLH.intCustomerEntityId,
   PLH.[strPickLotNumber],
+  PLH.strType,
   PLH.dtmPickDate,
   PLH.strCommodity,
   PLH.strLocationName,
@@ -16,6 +17,7 @@ SELECT DISTINCT PL.intPickLotDetailId,
   PLH.strSubBook,
   PL.intAllocationDetailId,
   PL.intLotId,
+  PL.intContainerId,
   PL.dblSalePickedQty,
   PL.dblLotPickedQty,
   PL.intSaleUnitMeasureId,
@@ -29,6 +31,8 @@ SELECT DISTINCT PL.intPickLotDetailId,
   Lot.strLotNumber,
   Lot.strReceiptNumber,
   Lot.strMarkings,
+  Con.strContainerNumber,
+  strContainerID = Con.strContainerNumber, --TO BE REPLACED BY CONTAINER Unique ID
   IM.intItemId,
   Lot.intItemUOMId,
   IM.strItemNo,
@@ -76,8 +80,6 @@ SELECT DISTINCT PL.intPickLotDetailId,
   strAllocationDetailRefNo = AD.strAllocationDetailRefNo
 FROM tblLGPickLotDetail  PL
 JOIN vyuLGDeliveryOpenPickLotHeader PLH ON PLH.intPickLotHeaderId  = PL.intPickLotHeaderId
-JOIN vyuICGetLot    Lot ON Lot.intLotId    = PL.intLotId
-JOIN tblICItem    IM ON IM.intItemId    = Lot.intItemId
 JOIN tblLGAllocationDetail AD ON AD.intAllocationDetailId = PL.intAllocationDetailId
 JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = AD.intPContractDetailId
@@ -89,7 +91,10 @@ JOIN tblICUnitMeasure SaleUOM ON SaleUOM.intUnitMeasureId = PL.intSaleUnitMeasur
 JOIN tblSMCurrency SCurrency ON SCurrency.intCurrencyID = SCD.intCurrencyId
 JOIN tblICItemUOM SItemUOM ON SItemUOM.intItemUOMId = SCD.intPriceItemUOMId
 JOIN tblICUnitMeasure SUOM ON SUOM.intUnitMeasureId = SItemUOM.intUnitMeasureId
-JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
+JOIN tblICItem IM ON IM.intItemId = SCD.intItemId 
+LEFT JOIN tblLGLoadContainer Con ON Con.intLoadContainerId = PL.intContainerId
+LEFT JOIN tblSMCompanyLocationSubLocation SubLocation ON SubLocation.intCompanyLocationSubLocationId = PLH.intSubLocationId
+LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = PL.intLotId
 LEFT JOIN tblICInventoryReceiptItemLot ReceiptLot ON ReceiptLot.intParentLotId = Lot.intParentLotId
 LEFT JOIN tblICInventoryReceiptItem	ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = ReceiptLot.intInventoryReceiptItemId
 LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
