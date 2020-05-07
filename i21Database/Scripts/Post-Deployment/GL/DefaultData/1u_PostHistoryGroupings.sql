@@ -1,6 +1,6 @@
 GO
 
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDetail WHERE strDescription ='Post History Groupings') -- THIS INDICATES THAT THIS UPDATE SCRIPT HAVE NOT BEEN EXECUTED
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataFix WHERE strDescription ='Post History Groupings') -- THIS INDICATES THAT THIS UPDATE SCRIPT HAVE NOT BEEN EXECUTED
 BEGIN
     PRINT ('Begin updating Post History Groupings');
     WITH GLGroupings as(

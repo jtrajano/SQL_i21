@@ -1,7 +1,13 @@
 ﻿GO
 PRINT ('Started Recalculating Trial Balance')
 GO
-EXEC dbo.uspGLRecalcTrialBalance
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataFix WHERE strDescription ='Initialize Trial Balance')
+    BEGIN
+        EXEC dbo.uspGLRecalcTrialBalance
+        
+    INSERT INTO tblGLDataFix VALUES('Initialize Trial Balance')
+    END
+
 GO
 PRINT ('Finished Recalculating Trial Balance')
 GO
