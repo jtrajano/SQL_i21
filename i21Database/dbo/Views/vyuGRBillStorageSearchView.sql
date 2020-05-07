@@ -37,6 +37,7 @@ SELECT
 								ELSE 0
 							END AS BIT
 						)
+	,SSVW.strTransaction
 FROM tblGRStorageHistory SH
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
@@ -61,5 +62,7 @@ INNER JOIN tblSMUserSecurity US
 	ON US.intEntityId = SH.intUserId
 LEFT JOIN tblARInvoice IV
 	ON IV.intInvoiceId = SH.intInvoiceId
+left join  vyuGRStorageSearchView SSVW 
+		on CS.intCustomerStorageId = SSVW.intCustomerStorageId
 WHERE (SH.strType = 'Accrue Storage' AND SH.intInvoiceId IS NULL) --Accrued Storage
 	OR ((SH.strType = 'Invoice' OR SH.strType = 'Generated Storage Invoice') AND SH.intInvoiceId IS NOT NULL)--Generated Invoice
