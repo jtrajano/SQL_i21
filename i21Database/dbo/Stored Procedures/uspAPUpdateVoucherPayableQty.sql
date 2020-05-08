@@ -146,6 +146,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
+		AND @post != 0
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
 		
@@ -190,8 +191,6 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
-
-		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
 		
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
@@ -1055,7 +1054,7 @@ ELSE SAVE TRAN @SavePoint
 	END
 
 	SELECT @recordCountToReturn = COUNT(*) FROM @voucherPayable
-	IF @recordCountReturned > 0 AND @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned
+	IF @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned AND @post = 0
 	BEGIN
 		RAISERROR('Error occured while updating Voucher Payables.', 16, 1);
 		RETURN;
