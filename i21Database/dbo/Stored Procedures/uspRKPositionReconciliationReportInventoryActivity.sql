@@ -61,7 +61,7 @@ BEGIN
 			dtmTransactionDate
 			,dblTotal
 			,strTransactionNumber
-			,intTransactionRecordId
+			,intTransactionRecordHeaderId
 			,strTransactionType
 			,intCommodityId
 			,strCommodityCode
@@ -73,7 +73,7 @@ BEGIN
 			dtmTransactionDate
 			,dblTotal
 			,strTransactionNumber
-			,intTransactionRecordId
+			,intTransactionRecordHeaderId
 			,strTransactionType
 			,intCommodityId
 			,strCommodityCode
