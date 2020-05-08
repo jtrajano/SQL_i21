@@ -109,7 +109,7 @@ BEGIN
 	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10),t.dtmTransactionDate, 110), 110) between @dtmFromTransactionDate and @dtmToTransactionDate
 	AND t.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
 	AND t.intCommodityId = @intCommodityId
-	ORDER BY dtmTransactionDate, intContractBalanceLogId
+	ORDER BY intContractBalanceLogId
 
 	DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
 END

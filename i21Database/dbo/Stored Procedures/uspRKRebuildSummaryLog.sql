@@ -958,7 +958,6 @@ BEGIN TRY
 			, intSubBookId
 			, strNotes 		
 		FROM @tblContractBalance
-		ORDER BY dtmTransactionDate,  intContractDetailId
 
 
 		EXEC uspCTLogContractBalance @cbLog, 1
