@@ -207,11 +207,9 @@
 			JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 			JOIN tblICCommodity C ON C.intCommodityId = CH.intCommodityId
 			join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-			WHERE
-				SS.ysnPosted = 1
-				and SS.dtmCreated is not null
-				 and  SS.dtmCreated <= @dtmDate
-				AND SS.intParentSettleStorageId IS NOT NULL
+			WHERE SS.ysnPosted = 1
+			and SS.dtmCreated is not null and  dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= @dtmDate
+			AND SS.intParentSettleStorageId IS NOT NULL
 			GROUP BY
 				CH.intContractHeaderId
 				,CD.intContractDetailId
@@ -378,7 +376,7 @@
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-				where InvTran.dtmDate is not null and  InvTran.dtmDate <= @dtmDate
+				where InvTran.dtmDate is not null and  dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Receipt.intInventoryReceiptId
@@ -458,7 +456,7 @@
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				-- WHERE B.ysnPosted = 1
-				WHERE B.dtmDateCreated is not null and  B.dtmDateCreated <= @dtmDate
+				WHERE B.dtmDateCreated is not null and dbo.fnRemoveTimeOnDate(B.dtmDateCreated) <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,BD.intBillDetailId
@@ -543,7 +541,7 @@
 				INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-				where InvTran.dtmDate is not null and InvTran.dtmDate <= @dtmDate
+				where InvTran.dtmDate is not null and dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,Shipment.intInventoryShipmentId
@@ -622,7 +620,7 @@
 				INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN ''Vendor'' ELSE ''Customer'' END)
 				inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 				--WHERE I.ysnPosted = 1
-				where I.dtmDate is not null and  I.dtmDate <= @dtmDate
+				where I.dtmDate is not null and  dbo.fnRemoveTimeOnDate(I.dtmDate) <= @dtmDate
 				GROUP BY CH.intContractHeaderId
 				,CD.intContractDetailId
 				,ID.intInvoiceDetailId
