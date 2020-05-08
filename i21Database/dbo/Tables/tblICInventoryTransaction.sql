@@ -66,6 +66,9 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intCategoryId] INT NULL,
 		[intSourceEntityId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 		
+		-- AUDIT (UTC)---
+		[dtmDateCreated] DATETIME2 NULL,
+		[dtmDateModified] DATETIME2 NULL,
 		CONSTRAINT [PK_tblICInventoryTransaction] PRIMARY KEY ([intInventoryTransactionId], [dtmCreated]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 		CONSTRAINT [FK_tblICInventoryTransaction_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),

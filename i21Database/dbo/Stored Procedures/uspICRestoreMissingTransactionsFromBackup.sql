@@ -48,6 +48,7 @@ INSERT INTO tblICInventoryTransaction (
 	,intCreatedUserId
 	,intCreatedEntityId
 	,intConcurrencyId
+	,dtmDateCreated
 )
 -- restore the missing cost adjustments from voucher. 
 select 
@@ -88,6 +89,7 @@ select
 	,bu.intCreatedUserId
 	,bu.intCreatedEntityId
 	,intConcurrencyId = 1
+	,GETUTCDATE()
 from	tblICBackupDetailInventoryTransaction bu inner join tblAPBill b
 			on bu.strTransactionId = b.strBillId
 		left join tblICInventoryTransaction t 
