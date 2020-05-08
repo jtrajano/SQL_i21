@@ -94,9 +94,9 @@ BEGIN TRY
 
 		SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
 
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuCTContractHeaderView></vyuCTContractHeaderViews>'
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
-	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuCTContractHeaderView></vyuCTContractHeaderViews>', @strAdditionalInfo)
+	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
 	
 
 	SELECT @intPContractDetailId = intPContractDetailId
@@ -127,10 +127,10 @@ BEGIN TRY
 
 		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + @strExternalEntity + '</strExternalEntity>'
 
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuCTContractHeaderView></vyuCTContractHeaderViews>'
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
 		IF @strAdditionalInfo <> ''
-			SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuCTContractHeaderView></vyuCTContractHeaderViews>', @strAdditionalInfo)
+			SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
 	END
 
 	SET @intContractStageId = SCOPE_IDENTITY();
