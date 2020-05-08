@@ -122,6 +122,8 @@ BEGIN TRY
 		declare @intApplied numeric(18,6) = 0;
 		declare @intPreviousPricedLoad numeric(18,6);
 		declare @dblLoadAppliedAndPriced numeric(18,6);
+		declare @ysnDestinationWeightsGrades bit = convert(bit,0);
+		declare @intWeightGradeId int = 0;
 
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
@@ -171,10 +173,25 @@ BEGIN TRY
 	)
 
 	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+	select @intWeightGradeId = intWeightGradeId from tblCTWeightGrade where strWeightGradeDesc = 'Destination'
+	--intWeightId, intGradeId
 		
 	SELECT	@intEntityId		=	intEntityId,
 			@intContractTypeId	=	intContractTypeId,
-			@ysnLoad			=	ysnLoad
+			@ysnLoad			=	ysnLoad,
+			@ysnDestinationWeightsGrades = (
+												case
+												when isnull(@intWeightGradeId,0) = 0
+												then convert(bit,0) 
+												else (
+															case
+															when intWeightId = @intWeightGradeId or intGradeId = @intWeightGradeId
+															then convert(bit,1)
+															else convert(bit,0)
+															end
+													  )
+												end
+											)
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId = @intContractHeaderId
 
@@ -1314,11 +1331,24 @@ BEGIN TRY
 			set @intShipmentCount = 0;
 			set @intCommulativeLoadPriced = @intCommulativeLoadPriced + @dblPriced;
 
+			--@ysnDestinationWeightsGrades
+
 			SET @shipment = CURSOR FOR
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																	RI.intItemUOMId
+																	,CD.intItemUOMId
+																	,(
+																			case
+																			when @ysnDestinationWeightsGrades = convert(bit,1)
+																			then ISNULL(RI.dblDestinationQuantity,0)
+																			else ISNULL(RI.dblQuantity,0)
+																			end
+																	  )
+																  ),
 					intInvoiceDetailId = null,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1335,7 +1365,18 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																	RI.intItemUOMId
+																	,CD.intItemUOMId
+																	,(
+																			case
+																			when @ysnDestinationWeightsGrades = convert(bit,1)
+																			then ISNULL(RI.dblDestinationQuantity,0)
+																			else ISNULL(RI.dblQuantity,0)
+																			end
+																	  )
+																  ),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1672,7 +1713,18 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																	RI.intItemUOMId
+																	,CD.intItemUOMId
+																	,(
+																			case
+																			when @ysnDestinationWeightsGrades = convert(bit,1)
+																			then ISNULL(RI.dblDestinationQuantity,0)
+																			else ISNULL(RI.dblQuantity,0)
+																			end
+																	  )
+																  ),
 					intInvoiceDetailId = null,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1689,7 +1741,18 @@ BEGIN TRY
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					--dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(RI.intItemUOMId,CD.intItemUOMId,ISNULL(RI.dblDestinationQuantity,RI.dblQuantity)),
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																	RI.intItemUOMId
+																	,CD.intItemUOMId
+																	,(
+																			case
+																			when @ysnDestinationWeightsGrades = convert(bit,1)
+																			then ISNULL(RI.dblDestinationQuantity,0)
+																			else ISNULL(RI.dblQuantity,0)
+																			end
+																	  )
+																  ),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = CD.intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
@@ -1994,8 +2057,8 @@ BEGIN TRY
 					/*---End Loop Pricing---*/
 				end
 
-				SkipQtyShipmentLoop:				
-							
+				SkipQtyShipmentLoop:
+
 				FETCH NEXT
 				FROM
 					@shipment
