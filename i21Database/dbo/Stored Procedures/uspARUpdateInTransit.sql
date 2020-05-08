@@ -32,7 +32,8 @@ BEGIN
 		 , intLotId							= ID.intLotId
 		 , intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 		 , intStorageLocationId				= ID.intStorageLocationId
-		 , dblQty							= CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL THEN ISNULL(ICSI.dblQuantity, 0)
+		 , dblQty							= CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL 
+												   THEN ROUND(ID.dblQtyShipped/ CASE WHEN ICSI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICSI.[dblDestinationQuantity], ICSI.[dblQuantity]) ELSE ICSI.[dblQuantity] END, 6) * ICSI.[dblQuantity]
 												   ELSE ID.dblQtyShipped
 											  END
 		 , intInvoiceId						= I.intInvoiceId
