@@ -8239,6 +8239,7 @@
     <Build Include="dbo\Tables\tblSMDataEventLog.sql" />
     <Build Include="dbo\Tables\tblSMControlEventLog.sql" />
     <Build Include="dbo\Tables\tblSMMessageLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
