@@ -95,7 +95,7 @@ BEGIN
 			, strCommodityCode
 			, strTransactionNumber 
 			, strTransactionType 
-			, intTransactionRecordId
+			, intTransactionRecordHeaderId
 			, intOrigUOMId 
 		FROM dbo.fnRKGetBucketCompanyOwned (@dtmToTransactionDate,@intCommodityId,NULL)
 
