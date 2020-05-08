@@ -40,6 +40,9 @@ BEGIN TRY
 		  , @dblShippedQty					NUMERIC(18,6)
 		  , @intShippedQtyUOMId				INT
 		  , @ysnFromReturn					BIT = 0
+		  , @ysnLoad						BIT = 0
+		  , @intLoadDetailId				INT = NULL
+		  , @intPurchaseSale				INT = NULL
 
 	DECLARE @tblToProcess TABLE (
 		  intUniqueId				INT IDENTITY
@@ -153,7 +156,10 @@ BEGIN TRY
 				@dblShippedQty					=	NULL,
 				@intShippedQtyUOMId				=	NULL,
 				@dblRemainingSchedQty			=	NULL,
-				@ysnFromReturn					=	CAST(0 AS BIT)
+				@intLoadDetailId				=	NULL,
+				@intPurchaseSale				=	NULL,
+				@ysnFromReturn					=	CAST(0 AS BIT),
+				@ysnLoad						=	CAST(0 AS BIT)
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
@@ -177,7 +183,8 @@ BEGIN TRY
 				@intEntityId					=	CH.intEntityId,
 				@intPriceItemUOMId				=	CD.intPriceItemUOMId,
 				@ysnBestPriceOnly				=	CH.ysnBestPriceOnly,
-				@dblCashPrice					=	CD.dblCashPrice
+				@dblCashPrice					=	CD.dblCashPrice,
+				@ysnLoad						=	ISNULL(CH.ysnLoad, 0)
 
 		FROM	@tblToProcess P
 		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	P.intContractDetailId
@@ -241,8 +248,8 @@ BEGIN TRY
 							@intUserId				=	@intUserId,
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
-
-					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND @dblQty > 0
+				
+					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty > 0 AND ISNULL(@ysnLoad, 0) = 0
 						BEGIN
 							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
 
