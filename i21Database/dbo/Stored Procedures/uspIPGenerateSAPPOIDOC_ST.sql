@@ -43,7 +43,7 @@ BEGIN
 	BEGIN
 		UPDATE CF
 		SET CF.strMessage = 'Destination Port is empty.'
-			,CF.strFeedStatus = 'Failed'
+			,CF.strFeedStatus = 'IGNORE'
 		FROM dbo.tblCTContractFeed CF
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
 		WHERE IsNULL(CF.strFeedStatus, '') = ''

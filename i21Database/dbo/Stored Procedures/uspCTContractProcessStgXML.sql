@@ -3272,8 +3272,10 @@ BEGIN TRY
 							FROM tblCTContractFeed
 							WHERE intContractHeaderId = @intNewContractHeaderId
 								AND intContractSeq = @intContractSeq
-								AND strFeedStatus = NULL
-								AND strRowState = 'Modified'
+								AND IsNULL(strFeedStatus, '') IN (
+									''
+									,'IGNORE'
+									)
 
 							INSERT INTO tblCTContractFeed (
 								intContractHeaderId
@@ -3355,7 +3357,18 @@ BEGIN TRY
 								,CASE 
 									WHEN intContractStatusId = 3
 										THEN 'Delete'
-									ELSE 'Modified'
+									ELSE (
+											CASE 
+												WHEN EXISTS (
+														SELECT *
+														FROM tblCTContractFeed
+														WHERE intContractHeaderId = @intNewContractHeaderId
+															AND intContractSeq = @intContractSeq
+														)
+													THEN 'Modified'
+												ELSE 'Added'
+												END
+											)
 									END
 								,dtmContractDate
 								,dtmStartDate
