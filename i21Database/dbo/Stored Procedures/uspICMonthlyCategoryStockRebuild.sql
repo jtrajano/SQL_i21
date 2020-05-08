@@ -16,29 +16,29 @@ BEGIN TRY
 				, DATEADD(month, -1, DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0))
 			) 
 
-		-- Get the last rebuild date for all items 
-		SELECT TOP 1 
-			@dtmLastRebuild = dtmStart
-			,@intBackupId = intBackupId
-		FROM 
-			tblICBackup 
-		WHERE
-			strItemNo IS NULL 
-			AND strCategoryCode IS NULL 
-		ORDER BY 
-			intBackupId DESC 	
+		---- Get the last rebuild date for all items 
+		--SELECT TOP 1 
+		--	@dtmLastRebuild = dtmStart
+		--	,@intBackupId = intBackupId
+		--FROM 
+		--	tblICBackup 
+		--WHERE
+		--	strItemNo IS NULL 
+		--	AND strCategoryCode IS NULL 
+		--ORDER BY 
+		--	intBackupId DESC 	
 
-		-- Get the last rebuild date for the category 
-		SELECT TOP 1 
-			@dtmLastRebuild = dtmStart
-		FROM 
-			tblICBackup 
-		WHERE
-			strCategoryCode = @strCategoryCode			
-			AND @dtmLastRebuild IS NULL 
-			AND (intBackupId > @intBackupId OR @intBackupId IS NULL) 
-		ORDER BY 
-			intBackupId DESC 			
+		---- Get the last rebuild date for the category 
+		--SELECT TOP 1 
+		--	@dtmLastRebuild = dtmStart
+		--FROM 
+		--	tblICBackup 
+		--WHERE
+		--	(strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL)			
+		--	AND (@dtmLastRebuild IS NULL OR FLOOR(CAST(dtmStart AS FLOAT)) > FLOOR(CAST(@dtmLastRebuild AS FLOAT)))			
+		--	AND (intBackupId > @intBackupId OR @intBackupId IS NULL) 
+		--ORDER BY 
+		--	intBackupId DESC 			
 
 		-- Find the back-dated transactions. 
 		SELECT 
@@ -54,10 +54,10 @@ BEGIN TRY
 			AND t.dblValue = 0  
 			AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(@dtmStartMonth AS FLOAT))
 			AND FLOOR(CAST(t.dtmCreated AS FLOAT)) >= FLOOR(CAST(@dtmStartMonth AS FLOAT))
-			AND (
-				FLOOR(CAST(t.dtmCreated AS FLOAT)) > FLOOR(CAST(@dtmLastRebuild AS FLOAT))
-				OR @dtmLastRebuild IS NULL 
-			)
+			--AND (
+			--	FLOOR(CAST(t.dtmCreated AS FLOAT)) > FLOOR(CAST(@dtmLastRebuild AS FLOAT))
+			--	OR @dtmLastRebuild IS NULL 
+			--)
 
 		IF	@dtmCustomDate IS NOT NULL 
 			AND @dtmStartDate IS NOT NULL 
@@ -160,3 +160,4 @@ BEGIN CATCH
 END CATCH
 
 IF OBJECT_ID('tempdb..#tmpAllowNegativeStockSetup') IS NOT NULL DROP TABLE #tmpAllowNegativeStockSetup
+
