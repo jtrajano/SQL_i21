@@ -701,6 +701,8 @@ BEGIN
 						--END
 				
 					END
+
+					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
 				END
 			END
 			ELSE
