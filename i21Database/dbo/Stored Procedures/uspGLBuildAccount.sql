@@ -107,6 +107,7 @@
 
 
 	--DELETE FROM tblGLTempAccount WHERE intUserId = @intUserId
-
-	--EXEC uspGLAccountOriginSync @intUserId
+	IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))
+		EXEC uspGLAccountOriginSync @intUserId
+		
 	EXEC uspGLBuildTempCOASegment
