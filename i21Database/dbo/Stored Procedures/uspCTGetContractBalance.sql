@@ -379,13 +379,17 @@ BEGIN TRY
 	   ,CD.intContractDetailId
 	   ,Shipment.dtmShipDate
 	   ,@dtmEndDate AS dtmEndDate
-	   ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
-                    CASE
-                     WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
-                        THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblDestinationNet * 1 ELSE 0 END)
-                     ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)
-                    END)
-                    ,0)
+	   ,dblQuantity = CASE 
+	   					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+						ELSE
+							ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
+							CASE
+								WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
+								THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblDestinationNet * 1 ELSE 0 END)
+								ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)
+							END)
+							,0)
+						END
 		,0
 		,COUNT(DISTINCT Shipment.intInventoryShipmentId)
 		,Shipment.intInventoryShipmentId
@@ -425,6 +429,7 @@ BEGIN TRY
 		  ,ShipmentItem.dblDestinationNet
 		  ,CD.intItemUOMId
 		  ,ShipmentItem.intPriceUOMId
+		  ,CH.ysnLoad
 		
 	INSERT INTO @Shipment
 	  (
@@ -444,8 +449,11 @@ BEGIN TRY
 	  ,CH.intContractHeaderId
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate	  
-	  ,@dtmEndDate  AS dtmEndDate
-	  ,SUM(InvTran.dblQty * - 1) AS dblQuantity
+	  ,@dtmEndDate AS dtmEndDate
+	  ,dblQuantity = CASE 
+	  					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+						ELSE SUM(InvTran.dblQty * - 1)
+					 END
 	  ,0
 	  ,COUNT(DISTINCT Invoice.intInvoiceId)
 	  ,Invoice.intInvoiceId
@@ -470,6 +478,7 @@ BEGIN TRY
 	   	,CD.intContractDetailId
 		,InvTran.dtmDate
 		,Invoice.intInvoiceId
+		,CH.ysnLoad
 
 	INSERT INTO @Shipment
 	  (
@@ -490,7 +499,10 @@ BEGIN TRY
 	  ,CD.intContractDetailId
 	   ,InvTran.dtmDate
 	  ,@dtmEndDate  AS dtmEndDate
-	  ,MAX(LD.dblNet) dblQuantity--,SUM(InvTran.dblQty)*-1 dblQuantity
+	  ,dblQuantity = CASE
+	  					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+						ELSE MAX(LD.dblNet)--,SUM(InvTran.dblQty)*-1 dblQuantity
+					 END
 	  ,0
 	  ,COUNT(DISTINCT LD.intLoadId)
 	  ,LD.intLoadId
@@ -505,8 +517,7 @@ BEGIN TRY
 	  	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END	
 	  	AND InvTran.intTransactionTypeId = 46
 	  	AND InvTran.intInTransitSourceLocationId IS NULL
-	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
-	  	,CD.intContractDetailId,InvTran.dtmDate, LD.intLoadId
+	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,InvTran.dtmDate,LD.intLoadId,CH.ysnLoad
 
 	INSERT INTO @Shipment
 	  (
@@ -527,7 +538,10 @@ BEGIN TRY
 	  ,CD.intContractDetailId
 	  ,InvTran.dtmDate
 	  ,@dtmEndDate  AS dtmEndDate
-	  ,dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intCostUOMId,MAX(ReceiptItem.dblOpenReceive)),0)
+	  ,dblQuantity = CASE
+	  					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+						ELSE ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intCostUOMId,MAX(ReceiptItem.dblOpenReceive)),0)
+					 END
 	  ,0
 	  ,COUNT(DISTINCT Receipt.intInventoryReceiptId)
 	  ,Receipt.intInventoryReceiptId
@@ -547,7 +561,7 @@ BEGIN TRY
 	  	AND intContractTypeId = 1
 	  	AND InvTran.intTransactionTypeId = 4
 	  GROUP BY CH.intContractTypeId,CH.intContractHeaderId
-	  	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId,CD.intItemUOMId,ReceiptItem.intCostUOMId
+	  	,CD.intContractDetailId,InvTran.dtmDate,Receipt.intInventoryReceiptId,CD.intItemUOMId,ReceiptItem.intCostUOMId,CH.ysnLoad
 
 	INSERT INTO @Shipment
 	  (
@@ -568,7 +582,10 @@ BEGIN TRY
 		,CD.intContractDetailId
 		,dbo.fnRemoveTimeOnDate(SS.dtmCreated)
 	    ,@dtmEndDate  AS dtmEndDate
-		,SUM(SC.dblUnits) AS dblQuantity
+		,dblQuantity = CASE
+						WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+						ELSE SUM(SC.dblUnits)
+					   END
 		,0
 		,COUNT(DISTINCT SS.intSettleStorageId)
 		,SS.intSettleStorageId
@@ -581,8 +598,7 @@ BEGIN TRY
 		WHERE SS.ysnPosted = 1
 			AND SS.intParentSettleStorageId IS NULL
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
-		GROUP BY CH.intContractTypeId,CH.intContractHeaderId
-			,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId
+		GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId,CH.ysnLoad
 
 	INSERT INTO @Shipment
 	  (
@@ -603,7 +619,10 @@ BEGIN TRY
 		,CD.intContractDetailId
 		,IB.dtmImported
 		,@dtmEndDate  AS dtmEndDate
-		,SUM(IB.dblReceivedQty) dblQuantity
+		,dblQuantity = CASE
+						WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+						ELSE SUM(IB.dblReceivedQty)
+					   END
 		,0
 		,COUNT(DISTINCT IB.intImportBalanceId)
 		,IB.intImportBalanceId
@@ -612,7 +631,7 @@ BEGIN TRY
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = IB.intContractHeaderId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
 	WHERE dbo.fnRemoveTimeOnDate(IB.dtmImported) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IB.dtmImported) END
-	GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,IB.dtmImported,IB.intImportBalanceId
+	GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,IB.dtmImported,IB.intImportBalanceId,CH.ysnLoad
 		  	
 	INSERT INTO @PriceFixation
 	(
