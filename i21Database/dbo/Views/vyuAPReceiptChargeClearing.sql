@@ -178,7 +178,7 @@ SELECT
     ,billDetail.intItemId      
     ,billDetail.intUnitOfMeasureId AS intItemUOMId  
     ,unitMeasure.strUnitMeasure AS strUOM  
-    ,ROUND(billDetail.dblTotal + billDetail.dblTax,2) AS dblVoucherTotal      
+    ,ROUND(billDetail.dblTotal + billDetail.dblTax, 2) AS dblVoucherTotal      
     ,ROUND(CASE       
         WHEN billDetail.intWeightUOMId IS NULL THEN       
             ISNULL(billDetail.dblQtyReceived, 0)       
