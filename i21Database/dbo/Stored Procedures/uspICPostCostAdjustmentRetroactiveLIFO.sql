@@ -728,6 +728,7 @@ BEGIN
 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+				, dtmDateModified = GETUTCDATE()
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 
 			-- Update the log with correct inventory transaction id
@@ -806,6 +807,7 @@ BEGIN
 		BEGIN 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+				, dtmDateModified = GETUTCDATE()
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 		END 
 

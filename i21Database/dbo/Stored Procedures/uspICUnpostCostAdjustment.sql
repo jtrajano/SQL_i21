@@ -294,7 +294,7 @@ BEGIN
 	-- Update the ysnIsUnposted flag for the inventory transactions 
 	-------------------------------------------------------------------
 	UPDATE	t
-	SET		ysnIsUnposted = 1
+	SET		ysnIsUnposted = 1, dtmDateModified = GETUTCDATE()
 	FROM	tblICInventoryTransaction t
 	WHERE	t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId

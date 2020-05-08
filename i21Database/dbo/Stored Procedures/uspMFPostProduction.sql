@@ -817,7 +817,7 @@ BEGIN
 	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
 	BEGIN
 		UPDATE t
-		SET t.strBatchId = @strBatchId
+		SET t.strBatchId = @strBatchId, dtmDateModified = GETUTCDATE()
 		FROM tblICInventoryTransaction t
 		WHERE t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId

@@ -381,6 +381,7 @@ BEGIN
 					,[intInTransitSourceLocationId]
 					,[intForexRateTypeId]
 					,[dblForexRate]
+					,[dtmDateCreated]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -428,6 +429,7 @@ BEGIN
 				,[intInTransitSourceLocationId]			= @intInTransitSourceLocationId
 				,[intForexRateTypeId]					= @intForexRateTypeId
 				,[dblForexRate]							= @dblForexRate
+				,[dtmDateCreated]						= GETUTCDATE()
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItem i
 					ON i.intItemId = iWithZeroStock.intItemId
 				INNER JOIN tblICItemLocation il

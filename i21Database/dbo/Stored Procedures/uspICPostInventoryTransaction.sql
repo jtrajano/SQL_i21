@@ -106,6 +106,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[dblCategoryCostValue]
 		,[dblCategoryRetailValue]
 		,[intCategoryId]
+		,[dtmDateCreated]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -145,6 +146,7 @@ SELECT	[intItemId]							= @intItemId
 		,[dblCategoryCostValue]				= @dblCategoryCostValue
 		,[dblCategoryRetailValue]			= @dblCategoryRetailValue 
 		,[intCategoryId]					= i.intCategoryId
+		,[dtmDateCreated]					= GETUTCDATE()
 FROM	tblICItem i 
 WHERE	i.intItemId = @intItemId
 		AND @intItemId IS NOT NULL

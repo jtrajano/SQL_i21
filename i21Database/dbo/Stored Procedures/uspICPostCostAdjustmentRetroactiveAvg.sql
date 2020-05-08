@@ -868,6 +868,7 @@ BEGIN
 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+				, dtmDateModified = GETUTCDATE()
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 	END
 
@@ -946,6 +947,7 @@ BEGIN
 		BEGIN 
 			UPDATE	tblICInventoryTransaction 
 			SET		ysnIsUnposted = CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END 
+				, dtmDateModified = GETUTCDATE()
 			WHERE	intInventoryTransactionId = @InventoryTransactionIdentityId
 		END 
 
@@ -1062,6 +1064,7 @@ BEGIN
 				,[strDescription]
 				,[intForexRateTypeId]
 				,[dblForexRate]
+				,[dtmDateCreated]
 		)			
 	SELECT	
 			[intItemId]								= @intItemId
@@ -1109,6 +1112,7 @@ BEGIN
 													)
 			,[intForexRateTypeId]					= NULL 
 			,[dblForexRate]							= 1 
+			,[dtmDateCreated]						= GETUTCDATE()
 	FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 				ON ItemPricing.intItemId = Stock.intItemId
 				AND ItemPricing.intItemLocationId = Stock.intItemLocationId
