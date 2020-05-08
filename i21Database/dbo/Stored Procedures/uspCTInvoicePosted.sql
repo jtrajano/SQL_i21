@@ -300,6 +300,7 @@ BEGIN TRY
 					) ISS ON IID.intInventoryShipmentItemId = ISS.intInventoryShipmentItemId
 					INNER JOIN tblARInvoice I ON IID.intInvoiceId = I.intInvoiceId
 					WHERE I.ysnPosted = 1
+					  AND IID.intInvoiceDetailId <> @intInvoiceDetailId
 				)
 				BEGIN								
 					SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) * -1	
@@ -345,6 +346,7 @@ BEGIN TRY
 						  AND ID.intInventoryShipmentItemId IS NOT NULL
 					) ISS ON IID.intInventoryShipmentItemId = ISS.intInventoryShipmentItemId
 					INNER JOIN tblARInvoice I ON IID.intInvoiceId = I.intInvoiceId
+					WHERE IID.intInvoiceDetailId <> @intInvoiceDetailId
 				)
 				BEGIN		
 					SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	
