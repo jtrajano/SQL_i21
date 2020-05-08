@@ -349,6 +349,7 @@ BEGIN
 			,[strActualCostId]
 			,[intSourceEntityId]
 			,[intCompanyLocationId]
+			,[dtmDateCreated]
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -392,6 +393,7 @@ BEGIN
 			,[strActualCostId]						= ActualTransaction.strActualCostId
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 			,[intCompanyLocationId]					= ActualTransaction.intCompanyLocationId
+			,[dtmDateCreated]						= GETUTCDATE()
 	FROM	#tmpInventoryTransactionStockToReverse transactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON transactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId				
 	
@@ -457,7 +459,7 @@ BEGIN
 	-- Update the ysnIsUnposted flag for related transactions 
 	--------------------------------------------------------------
 	UPDATE	RelatedTransactions
-	SET		ysnIsUnposted = 1			
+	SET		ysnIsUnposted = 1, dtmDateModified = GETUTCDATE()
 	FROM	dbo.tblICInventoryTransaction RelatedTransactions 
 	WHERE	RelatedTransactions.intRelatedTransactionId = @intTransactionId
 			AND RelatedTransactions.strRelatedTransactionId = @strTransactionId
@@ -731,6 +733,7 @@ BEGIN
 						,[intConcurrencyId]
 						,[strDescription]
 						,[intCompanyLocationId]
+						,[dtmDateCreated]
 				)			
 			SELECT	
 					[intItemId]								= @intItemId
@@ -775,6 +778,7 @@ BEGIN
 																, DEFAULT
 															)
 					,[intCompanyLocationId]					= [location].intCompanyLocationId
+					,[dtmDateCreated]						= GETUTCDATE()
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId

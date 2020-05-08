@@ -876,6 +876,7 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[intCompanyLocationId]
+					,[dtmDateCreated]
 			)			
 		SELECT	
 				[intItemId]								= @intItemId
@@ -923,6 +924,7 @@ BEGIN
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[intCompanyLocationId]					= [location].intCompanyLocationId
+				,[dtmDateCreated]						= GETUTCDATE()
 		FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 					ON ItemPricing.intItemId = Stock.intItemId
 					AND ItemPricing.intItemLocationId = Stock.intItemLocationId
@@ -1003,6 +1005,7 @@ BEGIN
 					,[intForexRateTypeId]
 					,[dblForexRate]
 					,[intCompanyLocationId]
+					,[dtmDateCreated]
 			)			
 		SELECT	
 				[intItemId]								= iWithZeroStock.intItemId
@@ -1050,6 +1053,7 @@ BEGIN
 				,[intForexRateTypeId]					= NULL -- @intForexRateTypeId
 				,[dblForexRate]							= 1 -- @dblForexRate
 				,[intCompanyLocationId]					= cl.intCompanyLocationId
+				,[dtmDateCreated]						= GETUTCDATE()
 		FROM	@ItemsWithZeroStock iWithZeroStock INNER JOIN tblICItemStock iStock
 					ON iWithZeroStock.intItemId = iStock.intItemId
 					AND iWithZeroStock.intItemLocationId = iStock.intItemLocationId

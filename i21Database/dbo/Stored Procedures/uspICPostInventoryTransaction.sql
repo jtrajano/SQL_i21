@@ -109,6 +109,7 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intCategoryId]
 		,[intSourceEntityId]
 		,[intCompanyLocationId]
+		,[dtmDateCreated]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -150,6 +151,7 @@ SELECT	[intItemId]							= @intItemId
 		,[intCategoryId]					= i.intCategoryId
 		,[intSourceEntityId]				= @intSourceEntityId
 		,[intCompanyLocationId]				= [location].intCompanyLocationId
+		,[dtmDateCreated]					= GETUTCDATE()
 FROM	tblICItem i 
 		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 WHERE	i.intItemId = @intItemId
