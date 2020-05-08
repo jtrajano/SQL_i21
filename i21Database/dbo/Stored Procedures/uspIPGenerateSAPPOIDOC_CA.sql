@@ -29,7 +29,6 @@ BEGIN
 		,@strShipperVendorAccountNum NVARCHAR(50)
 		,@intContractDetailId INT
 		,@strSeq NVARCHAR(50)
-
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -89,7 +88,7 @@ BEGIN
 			,@strContractNo = NULL
 			,@dtmFeedCreated = NULL
 			,@strShipperVendorAccountNum = NULL
-			,@strSeq=NULL
+			,@strSeq = NULL
 
 		SELECT @strError = ''
 
@@ -105,7 +104,7 @@ BEGIN
 			,@strRowState = strRowState
 			,@dtmFeedCreated = dtmFeedCreated
 			,@intContractDetailId = intContractDetailId
-			,@strSeq=intContractSeq
+			,@strSeq = intContractSeq
 		FROM tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
@@ -143,39 +142,42 @@ BEGIN
 		FROM tblSMCity
 		WHERE intCityId = IsNULl(@intDestinationCityId, @intDestinationPortId)
 
-		IF @strVendorAccountNum IS NULL
-			OR @strVendorAccountNum = ''
+		IF @strRowState <> 'Delete'
 		BEGIN
-			SELECT @strError = @strError + 'Vendor Account Number cannot be blank. '
-		END
+			IF @strVendorAccountNum IS NULL
+				OR @strVendorAccountNum = ''
+			BEGIN
+				SELECT @strError = @strError + 'Vendor Account Number cannot be blank. '
+			END
 
-		IF @strLoadingPoint IS NULL
-			OR @strLoadingPoint = ''
-		BEGIN
-			SELECT @strError = @strError + 'Loading Point cannot be blank. '
-		END
+			IF @strLoadingPoint IS NULL
+				OR @strLoadingPoint = ''
+			BEGIN
+				SELECT @strError = @strError + 'Loading Point cannot be blank. '
+			END
 
-		IF @strDestinationPoint IS NULL
-			OR @strDestinationPoint = ''
-		BEGIN
-			SELECT @strError = @strError + 'Destination Point cannot be blank. '
-		END
+			IF @strDestinationPoint IS NULL
+				OR @strDestinationPoint = ''
+			BEGIN
+				SELECT @strError = @strError + 'Destination Point cannot be blank. '
+			END
 
-		IF @dtmPlannedAvailabilityDate IS NULL
-		BEGIN
-			SELECT @strError = @strError + 'Planned Availability date cannot be blank. '
-		END
+			IF @dtmPlannedAvailabilityDate IS NULL
+			BEGIN
+				SELECT @strError = @strError + 'Planned Availability date cannot be blank. '
+			END
 
-		IF @strContractItemNo IS NULL
-			OR @strContractItemNo = ''
-		BEGIN
-			SELECT @strError = @strError + 'Contract Item cannot be blank. '
-		END
+			IF @strContractItemNo IS NULL
+				OR @strContractItemNo = ''
+			BEGIN
+				SELECT @strError = @strError + 'Contract Item cannot be blank. '
+			END
 
-		IF @strShipperVendorAccountNum IS NULL
-			OR @strShipperVendorAccountNum = ''
-		BEGIN
-			SELECT @strError = @strError + 'Shipper cannot be blank. '
+			IF @strShipperVendorAccountNum IS NULL
+				OR @strShipperVendorAccountNum = ''
+			BEGIN
+				SELECT @strError = @strError + 'Shipper cannot be blank. '
+			END
 		END
 
 		IF @strError <> ''
@@ -284,12 +286,14 @@ BEGIN
 				@intContractFeedId
 				,@strRowState
 				,@strXML
-				,ISNULL(@strContractNo, '')+ ' / ' + ISNULL(@strSeq, '')
+				,ISNULL(@strContractNo, '') + ' / ' + ISNULL(@strSeq, '')
 				,ISNULL(@strERPPONumber, '')
 				)
 
 			UPDATE tblCTContractFeed
-			SET strThirdPartyFeedStatus = 'Awt Ack',ysnThirdPartyMailSent=0,strThirdPartyMessage=NULL
+			SET strThirdPartyFeedStatus = 'Awt Ack'
+				,ysnThirdPartyMailSent = 0
+				,strThirdPartyMessage = NULL
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
