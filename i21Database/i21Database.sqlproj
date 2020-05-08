@@ -7731,6 +7731,7 @@
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
     <Build Include="dbo\Functions\fnMonthName.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
