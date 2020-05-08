@@ -60,13 +60,13 @@ SELECT @strDetail = @strDetail + '<tr>
 		   <td>&nbsp;' + strContractNumber + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(intContractDetailId) + '</td>
 	</tr>'
 FROM tblCTContractFeed
-WHERE strFeedStatus = (Case When @ysnNotifyExternalMessage=1 Then 'Ack Rcvd' Else 'Failed' End)
+WHERE strFeedStatus = (Case When @ysnNotifyExternalMessage=1 Then 'Ack Rcvd' Else 'IGNORE' End)
 	AND ISNULL(strMessage, '') <> ''
 	AND ISNULL(ysnMailSent, 0) = 0
 
 UPDATE tblCTContractFeed
 SET ysnMailSent = 1
-WHERE strFeedStatus = (Case When @ysnNotifyExternalMessage=1 Then 'Ack Rcvd' Else 'Failed' End)
+WHERE strFeedStatus = (Case When @ysnNotifyExternalMessage=1 Then 'Ack Rcvd' Else 'IGNORE' End)
 	AND ISNULL(strMessage, '') <> ''
 	AND ISNULL(ysnMailSent, 0) = 0
 
