@@ -13,6 +13,7 @@ BEGIN TRY
 	DECLARE @BillId INT
 	DECLARE @strBillId VARCHAR(MAX)
 	DECLARE @dblUnits DECIMAL(24, 10)
+	DECLARE @dblUnitsUnposted DECIMAL(24, 10)
 	DECLARE @ItemId INT
 	DECLARE @intCustomerStorageId AS INT
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
@@ -507,6 +508,15 @@ BEGIN TRY
 			--UPDATE tblGRStorageHistory set intSettleStorageId  = null where intSettleStorageId = @intSettleStorageId
 			--DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId			
 			EXEC [uspGRDeleteStorageHistoryWithLog] @intSettleStorageId, @UserId
+
+			IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId) <> @dblUnitsUnposted
+			BEGIN
+				UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+			END
+			ELSE
+			BEGIN
+				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+			END
 
 			---This is just to insure that the parent is delete if there is no child in existence
 			IF @isParentSettleStorage = 0
