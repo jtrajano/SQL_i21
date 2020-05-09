@@ -201,6 +201,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\7_DeleteAllFloatingPanels.sql
 
 -- General Ledger
+:r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
 :r .\GL\DefaultData\1a_AccountStructure.sql
 :r .\GL\DefaultData\1b_AccountType.sql
 :r .\GL\DefaultData\1c_AccountGroup.sql
