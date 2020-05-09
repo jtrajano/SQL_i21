@@ -13,6 +13,7 @@ BEGIN TRY
 	DECLARE @BillId INT
 	DECLARE @strBillId VARCHAR(MAX)
 	DECLARE @dblUnits DECIMAL(24, 10)
+	DECLARE @dblUnitsUnposted DECIMAL(24, 10)
 	DECLARE @ItemId INT
 
 	DECLARE @STARTING_NUMBER_BATCH AS INT = 3
@@ -519,19 +520,30 @@ BEGIN TRY
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
 
+			SELECT @dblUnitsUnposted = dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intSettleStorageId
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
-
 			--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table
-			IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
-			BEGIN
-				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
-				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
-			END
+			-- IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
+			-- BEGIN
+			-- 	--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
+			-- 	DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
+			-- END
 
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
-			END	
+			END
+			ELSE
+			BEGIN
+				IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId) <> @dblUnitsUnposted
+				BEGIN
+					UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				END
+				ELSE
+				BEGIN
+					DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				END
+			END
 
 			--5. Removing Voucher
 			begin
