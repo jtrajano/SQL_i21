@@ -189,6 +189,7 @@
     <Folder Include="Scripts\Post-Deployment\MB" />
     <Folder Include="Scripts\Post-Deployment\ET" />
     <Folder Include="Scripts\Post-Deployment\SC\" />
+    <Folder Include="Scripts\Post-Deployment\GL\StoredProcedures\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -445,6 +446,7 @@
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLAccountOriginSync.sql" />
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
