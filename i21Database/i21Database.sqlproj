@@ -389,6 +389,7 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLFixPostHistoryGroupings.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
