@@ -350,7 +350,7 @@ BEGIN TRY
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
-			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById, 1
 		END		
 		
 		-- ADD DERIVATIVES
@@ -381,7 +381,7 @@ BEGIN TRY
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 2)
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
-			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById, 1
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)

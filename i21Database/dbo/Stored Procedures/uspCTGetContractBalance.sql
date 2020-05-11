@@ -201,7 +201,7 @@ BEGIN
 												WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		 
 												ELSE ISNULL(intFutureMonthId,0)		 
 											END
-		AND dtmTransactionDate 			<= @dtmEndDate
+		AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
 		GROUP BY intContractHeaderId
 			,strType
 			,intContractDetailId
@@ -372,7 +372,7 @@ BEGIN
 												WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		 
 												ELSE ISNULL(intFutureMonthId,0)		 
 										 END
-		AND dtmTransactionDate 			<= @dtmEndDate
+		AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
 		GROUP BY intContractHeaderId
 			,strType
 			,intContractDetailId

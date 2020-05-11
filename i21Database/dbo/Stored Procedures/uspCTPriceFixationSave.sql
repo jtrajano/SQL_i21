@@ -2,7 +2,8 @@
 	
 	@intPriceFixationId INT,
 	@strAction			NVARCHAR(50),
-	@intUserId			INT
+	@intUserId			INT,
+	@ysnSaveContract	BIT = 0	
 	
 AS
 
@@ -589,10 +590,13 @@ BEGIN TRY
 		
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
+		DECLARE @process NVARCHAR(20)
+		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Contract Sequence' END
+
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
 											@intContractDetailId 	= @intContractDetailId, 
 											@strSource				= 'Pricing',
-											@strProcess 			= 'Price Fixation'
+											@strProcess 			=  @process
 		
 		/*CT-3569 - this will create amendment for newly added sequence from partial pricing SPLIT function.*/
 		  if (ISNULL(@ysnSplit,0) = 1 )

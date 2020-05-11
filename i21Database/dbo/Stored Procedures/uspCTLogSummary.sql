@@ -24,7 +24,12 @@ BEGIN TRY
 	IF @strProcess = 'Scheduled Quantity'
 	BEGIN
 		RETURN
-	END	
+	END
+		
+	IF @strSource = 'Pricing' AND @strProcess = 'Contract Sequence'
+	BEGIN
+		RETURN
+	END
 
 	IF @strSource = '' AND @strProcess = ''
 	BEGIN
@@ -229,7 +234,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(sh.dtmHistoryCreated)--cd.dtmCreated
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -1335,7 +1340,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(sh.dtmHistoryCreated)
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -1723,12 +1728,12 @@ BEGIN TRY
 				WHERE intId <> (SELECT TOP 1 intId FROM @cbLogPrev ORDER BY intId DESC)
 
 				-- Compare previous AND current except the qty				
-				SELECT @ysnMatched = CASE WHEN COUNT(dtmTransactionDate) = 1 THEN 1 ELSE 0 END
+				SELECT @ysnMatched = CASE WHEN COUNT(strTransactionType) = 1 THEN 1 ELSE 0 END
 				FROM
 				(
-					SELECT dtmTransactionDate
-					, strTransactionType
-					, strTransactionReference
+					SELECT --dtmTransactionDate, 
+					strTransactionType
+					--, strTransactionReference --CT-4726
 					, intTransactionReferenceId
 					, strTransactionReferenceNo
 					, intContractDetailId
@@ -1758,9 +1763,9 @@ BEGIN TRY
 					, intSubBookId
 					, strNotes FROM @cbLogPrev
 					UNION
-					SELECT dtmTransactionDate
-					, strTransactionType
-					, strTransactionReference
+					SELECT --dtmTransactionDate, 
+					strTransactionType
+					--, strTransactionReference --CT-4726
 					, intTransactionReferenceId
 					, strTransactionReferenceNo
 					, intContractDetailId
