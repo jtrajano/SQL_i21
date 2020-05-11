@@ -31,7 +31,7 @@ FROM (
 		 , strPaymentSource			= CASE WHEN POSEOD.strEODNo IS NULL THEN 'Manual Entry' ELSE 'POS' END COLLATE Latin1_General_CI_AS
 		 , strEODNumber				= POSEOD.strEODNo
 		 , strDrawerName			= POSEOD.strPOSDrawerName
-		 , ysnCompleted				= CAST(1 AS BIT)
+		 , ysnCompleted				= POSEOD.ysnClosed
 	FROM tblARPayment PAYMENT
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON PAYMENT.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
@@ -40,9 +40,10 @@ FROM (
 	OUTER APPLY (
 		SELECT TOP 1 strEODNo = POSEOD.strEODNo
 					, strPOSDrawerName = POSDRAWER.strPOSDrawerName
+					, ysnClosed = POSEOD.ysnClosed
 		FROM tblARPaymentDetail PD
 		INNER JOIN tblARInvoice I ON I.intInvoiceId = PD.intInvoiceId AND I.strType = 'POS' AND I.ysnPosted = 1
-		INNER JOIN tblARPOS POS ON I.intInvoiceId = POS.intInvoiceId 
+		INNER JOIN tblARPOS POS ON I.intInvoiceId = POS.intInvoiceId  OR I.intInvoiceId =  POS.intCreditMemoId 
 		INNER JOIN tblARPOSLog POSLOG ON POS.intPOSLogId = POSLOG.intPOSLogId
 		INNER JOIN tblARPOSEndOfDay POSEOD ON POSLOG.intPOSEndOfDayId = POSEOD.intPOSEndOfDayId
 		INNER JOIN tblSMCompanyLocationPOSDrawer POSDRAWER ON POSEOD.intCompanyLocationPOSDrawerId = POSDRAWER.intCompanyLocationPOSDrawerId
