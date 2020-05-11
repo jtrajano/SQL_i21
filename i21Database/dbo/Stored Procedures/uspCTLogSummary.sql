@@ -2037,15 +2037,15 @@ BEGIN TRY
 		END
 		ELSE IF @strSource = 'Inventory'
 		BEGIN
-			UPDATE @cbLogCurrent SET dblQty = dblQty * -1
-			EXEC uspCTLogContractBalance @cbLogCurrent, 0
+			UPDATE @cbLogCurrent SET dblQty = dblQty * -1  
+			EXEC uspCTLogContractBalance @cbLogCurrent, 0  
 
-			IF @ysnDirect <> 1
-			BEGIN
-				-- Basis Deliveries
-				UPDATE @cbLogCurrent SET dblQty = dblQty * -1, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END 
-				EXEC uspCTLogContractBalance @cbLogCurrent, 0
-			END
+			IF @ysnDirect <> 1 AND EXISTS (SELECT TOP 1 1 FROM @cbLogCurrent WHERE strTransactionType IN ('Invoice', 'Voucher'))
+			BEGIN  
+				-- Basis Deliveries  
+				UPDATE @cbLogCurrent SET dblQty = dblQty * -1, strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END   
+				EXEC uspCTLogContractBalance @cbLogCurrent, 0  
+			END  
 		END
 		ELSE IF @strSource = 'Invoice'
 		BEGIN
