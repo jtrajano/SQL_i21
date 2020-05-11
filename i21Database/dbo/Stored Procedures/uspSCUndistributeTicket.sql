@@ -778,11 +778,13 @@ BEGIN TRY
 						DECLARE @strWght VARCHAR(MAX)
 						SELECT @strTicketType = strTicketType,@dblNetUnit = dblNetUnits*-1,@_intContractDetailId = intContractId, @_strDistributionOption  = strDistributionOption FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 						
-						SELECT @strGrade = Grade.strWeightGradeDesc,@strWght = Wght.strWeightGradeDesc FROM tblSCTicket SC
-						LEFT JOIN tblCTWeightGrade Grade  ON Grade.intWeightGradeId = SC.intGradeId
-						LEFT JOIN tblCTWeightGrade Wght ON Wght.intWeightGradeId = SC.intWeightId
+						SELECT 
+							@strGrade = SC.strGradeFinalized
+							,@strWght = SC.strWeightFinalized
+						FROM vyuSCTicketScreenView SC
 						WHERE intTicketId = @intTicketId
-						IF(@strTicketType = 'Direct Out' and ((LOWER(ISNULL(@strGrade,'')) <> 'destination') AND LOWER(ISNULL(@strWght,'')) <> 'destination'))
+
+						IF(@strTicketType = 'Direct Out' and ((LOWER(ISNULL(@strGrade,'Origin')) <> 'destination') AND LOWER(ISNULL(@strWght,'Origin')) <> 'destination'))
 						BEGIN
 							IF(ISNULL(@dblScheduleQty,0) = 0)
 							BEGIN
@@ -809,6 +811,8 @@ BEGIN TRY
 						BEGIN
 							IF ISNULL(@intTicketContractDetailId, 0) > 0 AND (@strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD')
 							BEGIN
+								---No schedule update should be done in unposting of destination weight and grades
+
 								-- For Review
 								SET @ysnLoadContract = 0
 								SELECT TOP 1 
@@ -818,15 +822,17 @@ BEGIN TRY
 									ON A.intContractHeaderId = B.intContractHeaderId
 								WHERE B.intContractDetailId = @intTicketContractDetailId
 
-								IF(ISNULL(@ysnLoadContract,0) = 0)
-								BEGIN
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-								END
-								ELSE
-								BEGIN
-									SET @dblTicketScheduledQty = 1
-									EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-								END
+								-- IF(ISNULL(@ysnLoadContract,0) = 0)
+								-- BEGIN
+								-- 	EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								-- END
+								-- ELSE
+								-- BEGIN
+								-- 	SET @dblTicketScheduledQty = 1
+								-- 	EXEC uspCTUpdateScheduleQuantityUsingUOM @intTicketContractDetailId, @dblTicketScheduledQty, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								-- END
+
+								
 							END
 						END
 

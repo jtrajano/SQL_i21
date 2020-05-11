@@ -33,7 +33,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@ysnPosted BIT
 		,@ysnRecap BIT
 		,@intContractDetailId INT
-		,@dblContractQty INT
+		,@dblContractQty NUMERIC(18,6)
 		,@intTicketItemUOMId INT
 		,@dblContractAvailableQty NUMERIC(38,20);
 DECLARE @ysnTicketContractLoadBased BIT
