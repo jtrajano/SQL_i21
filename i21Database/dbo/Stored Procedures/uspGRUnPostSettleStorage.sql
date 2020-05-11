@@ -510,12 +510,12 @@ BEGIN TRY
 				) CS
 				WHERE intSettleStorageId = @intParentSettleStorageId
 
-				UPDATE SST 
-				SET dblUnits = SS.dblSelectedUnits
-				FROM tblGRSettleStorageTicket SST
-				INNER JOIN tblGRSettleStorage SS
-					ON SS.intSettleStorageId = SST.intSettleStorageId
-						AND SS.intSettleStorageId = @intParentSettleStorageId
+				--UPDATE SST 
+				--SET dblUnits = SS.dblSelectedUnits
+				--FROM tblGRSettleStorageTicket SST
+				--INNER JOIN tblGRSettleStorage SS
+				--	ON SS.intSettleStorageId = SST.intSettleStorageId
+				--		AND SS.intSettleStorageId = @intParentSettleStorageId
 
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
@@ -535,7 +535,7 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId) <> @dblUnitsUnposted
+				IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId AND intCustomerStorageId = @intCustomerStorageId) <> @dblUnitsUnposted
 				BEGIN
 					UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
 				END
