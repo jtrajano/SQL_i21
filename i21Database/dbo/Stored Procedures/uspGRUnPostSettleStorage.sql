@@ -515,7 +515,14 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId AND intCustomerStorageId = @intCustomerStorageId) <> @dblUnitsUnposted
+				BEGIN
+					UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				END
+				ELSE
+				BEGIN
+					DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				END
 			END
 
 			---This is just to insure that the parent is delete if there is no child in existence
