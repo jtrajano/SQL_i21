@@ -145,7 +145,6 @@ BEGIN
 			,LC.dblQuantity AS dblContainerContractQty
 			,CH.strCustomerContract AS strCustomerContractNo
 			,CH.dtmContractDate
-			,CH.strContractNumber + '-' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberDashSeq
 			,CB.strContractBasis
 			,strContractBasisDescription = CB.strFreightTerm
 			,AB.strApprovalBasis
@@ -180,7 +179,7 @@ BEGIN
 			,CASE WHEN ISNULL(ITM.strContractItemName,'') = '' THEN LDV.strItemDescription ELSE ITM.strContractItemName END AS strItemDescription
 			,CB.strContractBasis
 			,CH.strContractNumber
-			,CH.strContractNumber + '-' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberDashSeq
+			,CH.strContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
 			,CH.strCustomerContract
 			,LC.dblQuantity AS tractQty
 			,LC.strMarks
