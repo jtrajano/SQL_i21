@@ -101,6 +101,7 @@ SET ANSI_WARNINGS OFF
 					BEGIN
 						UPDATE PLC
 						SET intLotId = CASE WHEN (@dblQty > 0) THEN @intLotId ELSE NULL END
+							,intConcurrencyId = PLC.intConcurrencyId + 1
 						FROM tblLGPickLotDetail PLC
 							LEFT JOIN tblLGPickLotHeader PL ON PL.intPickLotHeaderId = PLC.intPickLotHeaderId
 						WHERE PL.intType = 2
