@@ -41,7 +41,7 @@ FROM (
 		 , dblAmountDue			= 0.00
 		 , dblInterest			= ISNULL(PD.dblInterest, 0.00)
 		 , intEntityCustomerId	
-		 , ysnPaid				= 0
+		 , ysnPaid				= ISNULL(PAIDRCV.ysnPaid,0)
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	LEFT OUTER JOIN (SELECT intPaymentId 
 						  , dblTotal	= SUM(dblInvoiceTotal)
@@ -49,6 +49,14 @@ FROM (
 					 FROM dbo.tblARPaymentDetail WITH (NOLOCK) 
 					 GROUP BY intPaymentId
 	) PD ON P.intPaymentId = PD.intPaymentId
+	LEFT OUTER JOIN 
+	(
+		SELECT intPaymentId = VUF.intSourceTransactionId, ysnPaid = 1 FROM vyuCMUndepositedFund VUF
+		INNER JOIN tblCMUndepositedFund UF on UF.intUndepositedFundId = VUF.intUndepositedFundId
+		LEFT outer JOIN tblCMBankTransactionDetail BTD on VUF.intUndepositedFundId = BTD.intUndepositedFundId
+		LEFT outer JOIN tblCMBankTransaction BT on BT.intTransactionId = BTD.intTransactionId
+		WHERE  BT.ysnPosted = 1 --- bank dep
+	) PAIDRCV ON P.intPaymentId = PAIDRCV.intPaymentId
 ) TRANSACTIONS
 INNER JOIN (
 	SELECT intEntityId
