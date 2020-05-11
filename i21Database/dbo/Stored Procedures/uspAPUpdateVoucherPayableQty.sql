@@ -1063,13 +1063,6 @@ ELSE SAVE TRAN @SavePoint
 
 	END
 
-	SET @recordCountToReturn = (SELECT COUNT(*) FROM @payablesKey) + (SELECT COUNT(*) FROM @payablesKeyPartial)
-	IF @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned AND @post = 0
-	BEGIN
-		RAISERROR('Error occured while updating Voucher Payables.', 16, 1);
-		RETURN;
-	END
-
 	IF @transCount = 0
 	BEGIN
 		IF (XACT_STATE()) = -1
