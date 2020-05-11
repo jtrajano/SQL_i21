@@ -75,7 +75,7 @@ BEGIN
 			,dblBasisinCommodityStockUOM
 			,dblCashPriceinCommodityStockUOM
 			,dblAmountinCommodityStockUOM)
-		SELECT dtmTransactionDate
+		SELECT dtmTransactionDate = MAX(dtmTransactionDate)
 			,intContractHeaderId
 			,strType
 			,intContractDetailId
@@ -201,9 +201,8 @@ BEGIN
 												WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		 
 												ELSE ISNULL(intFutureMonthId,0)		 
 											END
-		AND dtmTransactionDate 			= @dtmEndDate
-		GROUP BY dtmTransactionDate
-			,intContractHeaderId
+		AND dtmTransactionDate 			<= @dtmEndDate
+		GROUP BY intContractHeaderId
 			,strType
 			,intContractDetailId
 			,strDate
@@ -246,7 +245,7 @@ BEGIN
 	ELSE
 	BEGIN
 		SELECT intContractBalanceId = MAX(intContractBalanceId)
-			,dtmTransactionDate
+			,dtmTransactionDate		= MAX(dtmTransactionDate)
 			,intContractHeaderId
 			,strType
 			,intContractDetailId
@@ -373,9 +372,8 @@ BEGIN
 												WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		 
 												ELSE ISNULL(intFutureMonthId,0)		 
 										 END
-		AND dtmTransactionDate 			= @dtmEndDate
-		GROUP BY dtmTransactionDate
-			,intContractHeaderId
+		AND dtmTransactionDate 			<= @dtmEndDate
+		GROUP BY intContractHeaderId
 			,strType
 			,intContractDetailId
 			,strDate

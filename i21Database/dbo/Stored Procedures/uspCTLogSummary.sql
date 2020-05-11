@@ -360,11 +360,11 @@ BEGIN TRY
 				, ch.intCommodityId
 				, sh.intItemId
 				, sh.intCompanyLocationId
-				, sh.intPricingTypeId
-				, sh.intFutureMarketId
-				, sh.intFutureMonthId
-				, sh.dblBasis
-				, sh.dblFutures
+				, intPricingTypeId = CASE WHEN suh.strScreenName IN ('Voucher', 'Invoice') THEN 1 ELSE sh.intPricingTypeId END
+				, sh.intFutureMarketId  
+				, sh.intFutureMonthId  
+				, sh.dblBasis  
+				, dblFutures = CASE WHEN suh.strScreenName IN ('Voucher', 'Invoice') THEN price.dblFutures ELSE sh.dblFutures END
 				, intQtyUOMId = ch.intCommodityUOMId
 				, cd.intBasisUOMId
 				, cd.intBasisCurrencyId
@@ -380,9 +380,15 @@ BEGIN TRY
 				INNER JOIN tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 				INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 				INNER JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+				OUTER APPLY 
+				(
+					SELECT dblFutures = AVG(pfd.dblFutures)
+					FROM tblCTPriceFixation pf 
+					INNER JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId
+					WHERE pf.intContractHeaderId = suh.intContractHeaderId 
+					AND pf.intContractDetailId = suh.intContractDetailId
+				) price
 			WHERE strFieldName = 'Balance'
-			AND sh.strPricingStatus = 'Unpriced'
-			AND sh.strPricingType = 'Basis'
 		) tbl
 		WHERE Row_Num = 1
 		AND intContractHeaderId = @intContractHeaderId
@@ -644,8 +650,8 @@ BEGIN TRY
 							AND dblFutures IS NOT NULL
 						) future
 						WHERE strFieldName = 'Balance'
-						AND sh.strPricingStatus = 'Unpriced'
-						AND sh.strPricingType = 'Basis'
+						-- AND sh.strPricingStatus = 'Unpriced'
+						-- AND sh.strPricingType = 'Basis'
 						AND bd.intInventoryReceiptChargeId IS NULL
 						AND bd.intBillDetailId NOT IN 
 						(
@@ -763,8 +769,8 @@ BEGIN TRY
 						INNER JOIN tblAPBillDetail bd ON suh.intContractHeaderId = bd.intContractHeaderId and suh.intContractDetailId = bd.intContractDetailId
 						INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
 						WHERE strFieldName = 'Balance'
-						AND sh.strPricingStatus = 'Unpriced'
-						AND sh.strPricingType = 'Basis'
+						-- AND sh.strPricingStatus = 'Unpriced'
+						-- AND sh.strPricingType = 'Basis'
 						AND bd.intInventoryReceiptChargeId IS NULL
 						AND bd.intBillDetailId NOT IN 
 						(
@@ -883,8 +889,8 @@ BEGIN TRY
 					INNER JOIN tblAPBillDetail bd ON suh.intExternalId = bd.intInventoryReceiptItemId
 					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
 					WHERE strFieldName = 'Balance'
-					AND sh.strPricingStatus = 'Unpriced'
-					AND sh.strPricingType = 'Basis'
+					-- AND sh.strPricingStatus = 'Unpriced'
+					-- AND sh.strPricingType = 'Basis'
 					AND bd.intInventoryReceiptChargeId IS NULL
 					AND bd.intBillDetailId NOT IN 
 					(
@@ -1003,8 +1009,8 @@ BEGIN TRY
 					INNER JOIN tblAPBillDetail bd ON suh.intExternalId = bd.intInventoryReceiptItemId
 					INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
 					WHERE strFieldName = 'Balance'
-					AND sh.strPricingStatus = 'Unpriced'
-					AND sh.strPricingType = 'Basis'
+					-- AND sh.strPricingStatus = 'Unpriced'
+					-- AND sh.strPricingType = 'Basis'
 					AND bd.intInventoryReceiptChargeId IS NULL
 				) tbl
 				WHERE intContractHeaderId = @intContractHeaderId
@@ -1127,8 +1133,8 @@ BEGIN TRY
 						AND dblFutures IS NOT NULL
 					) future
 					WHERE strFieldName = 'Balance'
-					AND sh.strPricingStatus = 'Unpriced'
-					AND sh.strPricingType = 'Basis'
+					-- AND sh.strPricingStatus = 'Unpriced'
+					-- AND sh.strPricingType = 'Basis'
 					AND id.intInventoryShipmentChargeId IS NULL
 					AND suh.intContractHeaderId = @intContractHeaderId
 					AND id.intInvoiceDetailId NOT IN 
@@ -1248,8 +1254,8 @@ BEGIN TRY
 					INNER JOIN tblARInvoiceDetail id ON suh.intExternalId = id.intInventoryShipmentItemId
 					INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 					WHERE strFieldName = 'Balance'
-					AND sh.strPricingStatus = 'Unpriced'
-					AND sh.strPricingType = 'Basis'
+					-- AND sh.strPricingStatus = 'Unpriced'
+					-- AND sh.strPricingType = 'Basis'
 					AND id.intInventoryShipmentChargeId IS NULL
 					AND suh.intContractHeaderId = @intContractHeaderId					
 				)tbl
