@@ -90,6 +90,8 @@ BEGIN TRY
 				SELECT @intMinRecordLotId = MIN(intLotRecordId)
 				FROM @tblLotTable
 
+				BEGIN TRAN
+
 				WHILE (ISNULL(@intMinRecordLotId, 0) > 0)
 				BEGIN
 					SELECT @intItemId = NULL
@@ -120,6 +122,8 @@ BEGIN TRY
 					FROM @tblLotTable
 					WHERE intLotRecordId > @intMinRecordLotId
 				END
+
+				COMMIT TRAN
 			END
 
 			SELECT @strItemNo = NULL
