@@ -509,12 +509,12 @@ BEGIN TRY
 				) CS
 				WHERE intSettleStorageId = @intParentSettleStorageId
 
-				UPDATE SST 
-				SET dblUnits = SS.dblSelectedUnits
-				FROM tblGRSettleStorageTicket SST
-				INNER JOIN tblGRSettleStorage SS
-					ON SS.intSettleStorageId = SST.intSettleStorageId
-						AND SS.intSettleStorageId = @intParentSettleStorageId
+				--UPDATE SST 
+				--SET dblUnits = SS.dblSelectedUnits
+				--FROM tblGRSettleStorageTicket SST
+				--INNER JOIN tblGRSettleStorage SS
+				--	ON SS.intSettleStorageId = SST.intSettleStorageId
+				--		AND SS.intSettleStorageId = @intParentSettleStorageId
 
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
@@ -524,8 +524,14 @@ BEGIN TRY
 			--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table
 			IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
 			BEGIN
-				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
-				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
+				IF(SELECT dblUnits FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intParentSettleStorageId AND intCustomerStorageId = @intCustomerStorageId) <> @dblUnitsUnposted
+				BEGIN
+					UPDATE tblGRSettleStorageTicket SET dblUnits = dblUnits - @dblUnitsUnposted WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				END
+				ELSE
+				BEGIN
+					DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = @intParentSettleStorageId
+				END
 			END
 
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
