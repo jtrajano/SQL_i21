@@ -1053,7 +1053,7 @@ ELSE SAVE TRAN @SavePoint
 
 	END
 
-	SET @recordCountToReturn = (SELECT COUNT(*) FROM @payablesKey) + (SELECT COUNT(*) FROM @payablesKeyPartial)
+	SELECT @recordCountToReturn = COUNT(*) FROM @voucherPayable
 	IF @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned AND @post = 0
 	BEGIN
 		RAISERROR('Error occured while updating Voucher Payables.', 16, 1);
