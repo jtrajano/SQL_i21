@@ -53,6 +53,9 @@ SELECT intFutOptTransactionHistoryId
 	, intRollingMonthId
 	, intTraderId
 	, strSalespersonId
+	, intContractDetailId
+	, intContractHeaderId
+	, intUserId
 FROM (
 	SELECT intFutOptTransactionHistoryId
 		, History.intFutOptTransactionId
@@ -112,6 +115,9 @@ FROM (
 		, FutMarket.intUnitMeasureId
 		, intCommodityUOMId = CommodityUOM.intCommodityUnitMeasureId
 		, intStockUOMId = CommodityStock.intCommodityUnitMeasureId
+		, Trans.intContractDetailId
+		, Trans.intContractHeaderId
+		, intUserId = secUser.intEntityId
 	FROM tblRKFutOptTransactionHistory History
 	LEFT JOIN tblRKFutOptTransaction Trans ON Trans.intFutOptTransactionId = History.intFutOptTransactionId
 	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.strFutMarketName = History.strFutureMarket
@@ -133,6 +139,11 @@ FROM (
 		JOIN tblEMEntityType ET ON ET.intEntityId = E.intEntityId
 		WHERE strType = 'Salesperson'
 	) Trader ON Trader.strName = History.strTrader 
+	LEFT JOIN (
+		tblEMEntity secUser
+		JOIN tblEMEntityType et ON et.intEntityId = secUser.intEntityId AND et.strType = 'User'
+		JOIN tblSMUserSecurity sec on sec.intEntityId = secUser.intEntityId AND ysnDisabled = 0
+	) ON secUser.strName = History.strUserName
 	LEFT JOIN tblICCommodityUnitMeasure CommodityUOM ON CommodityUOM.intCommodityId = Commodity.intCommodityId AND CommodityUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure CommodityStock ON CommodityStock.intCommodityId = Commodity.intCommodityId AND CommodityStock.ysnStockUnit = 1
 	WHERE ISNULL(History.strAction, '') <> ''

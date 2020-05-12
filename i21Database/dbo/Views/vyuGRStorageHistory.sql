@@ -130,6 +130,8 @@ SELECT DISTINCT TOP 100 PERCENT
 	, 1
 	, ''
 	), ' ', '') strBillIds
+	,SH.intUserId
+	,SH.dtmDistributionDate
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId

@@ -8127,6 +8127,14 @@
     <Build Include="dbo\Stored Procedures\uspSCProcessShipmentToInvoice.sql" />
     <None Include="Scripts\Post-Deployment\CT\ScheduledQtyDiagNosticScript.sql" />
     <None Include="Scripts\Post-Deployment\CT\ScheduledLoadDiagNosticScript.sql" />
+    <Build Include="dbo\Tables\tblRKSummaryLog.sql" />
+    <Build Include="dbo\Tables\tblCTContractBalanceLog.sql" />
+    <Build Include="dbo\User Defined Types\CTContractBalanceLog.sql" />
+    <Build Include="dbo\User Defined Types\RKSummaryLog.sql" />
+    <Build Include="dbo\Views\vyuRKGetSummaryLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLogContractBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKLogRiskPosition.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKRebuildSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
