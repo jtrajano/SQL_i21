@@ -215,6 +215,7 @@ FROM tblICImportStagingItem s
 		FROM (
 			SELECT 'Bundle' strType UNION
 			SELECT 'Inventory' strType UNION
+			SELECT 'Non-Inventory' strType UNION
 			SELECT 'Kit' strType UNION
 			SELECT 'Finished Good' strType UNION
 			SELECT 'Other Charge' strType UNION
