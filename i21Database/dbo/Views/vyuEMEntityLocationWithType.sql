@@ -48,7 +48,7 @@ SELECT intEntityLocationId			= EL.intEntityLocationId
 FROM tblEMEntityLocation EL
 JOIN vyuEMEntityType ET ON EL.intEntityId = ET.intEntityId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = EL.intEntityLocationId 
-							 AND SP.intEntityVendorId = EL.intEntityId
+							 --AND SP.intEntityVendorId = EL.intEntityId
 LEFT JOIN tblTFTerminalControlNumber TCN ON TCN.intTerminalControlNumberId = SP.intTerminalControlNumberId
 LEFT JOIN tblTRSupplyPoint RPSP ON SP.intSupplyPointId = SP.intRackPriceSupplyPointId
 LEFT JOIN tblEMEntityLocation SPEL ON SPEL.intEntityLocationId = RPSP.intEntityLocationId
