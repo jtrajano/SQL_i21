@@ -432,13 +432,39 @@ BEGIN
 		INNER JOIN tblICItemPricing p
 			ON p.intItemId = i.intItemId
 			AND p.intItemLocationId = il.intItemLocationId
-		INNER JOIN (
-			tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure u
-				ON itemUOM.intUnitMeasureId = u.intUnitMeasureId
-		)
-			ON itemUOM.intItemId = i.intItemId
-			AND u.strUnitType IN ('Quantity')
-			AND itemUOM.ysnStockUnit <> 1 
+		--INNER JOIN (
+		--	tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure u
+		--		ON itemUOM.intUnitMeasureId = u.intUnitMeasureId
+		--)
+		--	ON itemUOM.intItemId = i.intItemId
+		--	AND u.strUnitType IN ('Quantity')
+		--	AND itemUOM.ysnStockUnit <> 1 
+
+		OUTER APPLY (
+			SELECT [count] = COUNT(1) 
+			FROM 
+				tblICItemUOM iu INNER JOIN tblICUnitMeasure u 
+					ON iu.intUnitMeasureId = u.intUnitMeasureId
+			WHERE
+				iu.intItemId = i.intItemId
+				AND u.strUnitType IN ('Quantity')		
+				AND iu.ysnStockUnit <> 1 
+		) numberOfPackUOMs
+
+		CROSS APPLY (
+			SELECT 
+				iu.intItemUOMId
+				,u.strUnitMeasure
+			FROM 
+				tblICItemUOM iu INNER JOIN tblICUnitMeasure u 
+					ON iu.intUnitMeasureId = u.intUnitMeasureId
+			WHERE
+				iu.intItemId = i.intItemId
+				AND (
+					(u.strUnitType IN ('Quantity') AND iu.ysnStockUnit <> 1)
+					OR (ISNULL(numberOfPackUOMs.[count], 0) = 0 AND iu.ysnStockUnit = 1)
+				)			
+		) itemUOM
 			
 		OUTER APPLY (
 			SELECT TOP 1 
