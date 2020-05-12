@@ -2,7 +2,9 @@
 	@intContractHeaderId	   INT,
     @intContractDetailId	   INT = NULL,
 	@strComment				   NVARCHAR(100) = NULL,
-	@intSequenceUsageHistoryId INT = NULL
+	@intSequenceUsageHistoryId INT = NULL,
+	@strSource				   NVARCHAR(50) = '',
+	@strProcess				   NVARCHAR(50) = ''
 AS	   
 
 BEGIN TRY
@@ -23,8 +25,8 @@ BEGIN TRY
 				@dblPrevCashPrice		NUMERIC(18,6),
 				@dblFutures				NUMERIC(18,6),
 				@dblBasis				NUMERIC(18,6),
-				@dblCashPrice			NUMERIC(18,6)
-
+				@dblCashPrice			NUMERIC(18,6),
+				@strTransactionType		NVARCHAR(20) 
 	
 		DECLARE @tblHeader AS TABLE 
 		(
@@ -222,6 +224,14 @@ BEGIN TRY
 		SELECT @intPrevHistoryId = NULL
 		SELECT @intContractDetailId = intContractDetailId FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
 		SELECT @intPrevHistoryId = intSequenceHistoryId FROM tblCTSequenceHistory WITH (NOLOCK) WHERE intSequenceHistoryId < @intSequenceHistoryId AND intContractDetailId = @intContractDetailId
+
+		-- CONTRACT BALANCE LOG
+		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+							 @intContractDetailId 	= 	@intContractDetailId,
+							 @strSource			 	= 	@strSource,
+							 @strProcess		 	= 	@strProcess,
+							 @contractDetail 		= 	@contractDetails		
 
 		IF @intPrevHistoryId IS NULL
 		BEGIN

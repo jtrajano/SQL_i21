@@ -741,3 +741,35 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	begin catch
 		rollback transaction;
 	end catch
+GO
+
+CREATE TRIGGER [dbo].[trgCTContractDetailDelete]
+	ON [dbo].[tblCTContractDetail]
+    AFTER DELETE
+AS
+BEGIN	
+	ALTER TABLE tblCTContractCost DISABLE TRIGGER trgCTContractCostInstedOfDelete
+
+	DELETE FROM tblCTContractCost 
+	WHERE intContractDetailId IN (SELECT intContractDetailId FROM DELETED)
+
+	ALTER TABLE tblCTContractCost ENABLE TRIGGER trgCTContractCostInstedOfDelete
+
+    DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+    INSERT INTO @contractDetails ([intContractDetailId],[intContractHeaderId],[dtmCreated],[intContractSeq],[intBasisCurrencyId],[intBasisUOMId])
+    SELECT [intContractDetailId],[intContractHeaderId],[dtmCreated],[intContractSeq],[intBasisCurrencyId],[intBasisUOMId]
+	FROM DELETED
+
+	EXEC uspCTLogSummary @intContractHeaderId 	= 	NULL,
+    					 @intContractDetailId 	= 	NULL,
+						 @strSource			 	= 	NULL,
+						 @strProcess		 	= 	NULL,
+						 @contractDetail 		= 	@contractDetails
+
+	DELETE sh
+	FROM   tblCTSequenceHistory sh
+	JOIN   deleted d
+	ON     sh.intContractDetailId = d.intContractDetailId
+END
+
+GO

@@ -17,7 +17,7 @@ AS
 			,UH.dblNewValue
 			,UH.dblBalance
 			,UH.strUserName
-			,UH.intExternalHeaderId
+			,intExternalHeaderId = isnull(UH.intExternalHeaderId,AP.intExternalHeaderId)
 			,intExternalId = UH.intExternalId
 			,CAST(CASE WHEN ISNULL(AP.intExternalHeaderId,0) = 0 THEN 1 ELSE 0 END AS BIT) AS ysnDeleted
 			,AP.strHeaderIdColumn
@@ -25,3 +25,4 @@ AS
 
 	FROM	tblCTSequenceUsageHistory	UH	CROSS
 	APPLY	dbo.fnCTGetSequenceUsageHistoryAdditionalParam(UH.intContractDetailId,UH.strScreenName,UH.intExternalId,UH.intUserId) AP
+GO

@@ -349,7 +349,7 @@ BEGIN TRY
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
-			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById, 1
 		END		
 		
 		-- ADD DERIVATIVES
@@ -380,7 +380,7 @@ BEGIN TRY
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 2)
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
-			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById, 1
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
 			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
@@ -410,7 +410,9 @@ BEGIN TRY
 		UPDATE tblCTContractHeader SET dtmSigned = DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) WHERE intContractHeaderId = @intContractHeaderId		
 	END
 
-	EXEC	uspCTCreateDetailHistory		@intContractHeaderId
+	EXEC	uspCTCreateDetailHistory		@intContractHeaderId 	= @intContractHeaderId,
+											@strSource 				= 'Contract',
+											@strProcess 			= 'Contract Sequence'
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
 
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true

@@ -8135,6 +8135,8 @@
     <Build Include="dbo\Stored Procedures\uspCTLogContractBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKLogRiskPosition.sql" />
     <Build Include="dbo\Stored Procedures\uspRKRebuildSummaryLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTLogSummary.sql" />
+    <Build Include="dbo\User Defined Types\ContractDetailTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
