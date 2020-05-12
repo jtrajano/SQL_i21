@@ -63,6 +63,8 @@ BEGIN TRY
 		,SCHEDLINE.dblIncrementValue
 		,SCHEDLINE.dblDiscountValue
 		,SCHEDLINE.dblShrinkValue
+		,UOM.strUnitMeasure
+		,SHRINK.ysnHasShrink
 	INTO ##tmpGRDiscountTableIncremental
 	FROM tblGRDiscountScheduleCode SCHEDCODE
 	INNER JOIN tblGRDiscountSchedule SCHED
@@ -73,6 +75,16 @@ BEGIN TRY
 		ON COMMODITY.intCommodityId = ITEM.intCommodityId
 	LEFT JOIN tblGRDiscountScheduleLine SCHEDLINE
 		ON SCHEDLINE.intDiscountScheduleCodeId = SCHEDCODE.intDiscountScheduleCodeId
+	LEFT JOIN tblICItemUOM IUOM
+		ON IUOM.intItemId = ITEM.intItemId
+		AND IUOM.ysnStockUnit = 1
+	LEFT JOIN tblICUnitMeasure UOM
+		ON UOM.intUnitMeasureId = ISNULL(SCHEDCODE.intUnitMeasureId, IUOM.intUnitMeasureId)
+	OUTER APPLY (
+		SELECT [ysnHasShrink] = CAST((CASE WHEN MAX(dblShrinkValue) = 0 THEN 0 ELSE 1 END) AS BIT)
+		FROM tblGRDiscountScheduleLine
+		WHERE intDiscountScheduleCodeId = SCHEDCODE.intDiscountScheduleCodeId
+	) SHRINK
 	WHERE SCHED.intDiscountScheduleId = @intDiscountScheduleId
 
 	-- Create empty temp table for extended list
@@ -160,13 +172,13 @@ BEGIN TRY
 				BEGIN
 					SET @dblNewEndingValue = CASE
 						WHEN (@dblRangeStartingValue + @dblIncrementValue) > @dblRangeEndingValue
-							THEN @dblRangeEndingValue - (CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue THEN 0.000001 ELSE 0 END)
+							THEN @dblRangeEndingValue - (CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue THEN 0.01 ELSE 0 END)
 						WHEN (@dblRangeStartingValue + @dblIncrementValue) >= @dblNextRangeStartingValue AND @dblNextRangeStartingValue > 0
-							THEN @dblNextRangeStartingValue - 0.000001
+							THEN @dblNextRangeStartingValue - 0.01
 						WHEN (@dblRangeStartingValue + @dblIncrementValue) < @dblRangeEndingValue
-							THEN (@dblRangeStartingValue + @dblIncrementValue) - 0.000001
+							THEN (@dblRangeStartingValue + @dblIncrementValue) - 0.01
 						WHEN @dblRangeEndingValue < @dblNextRangeStartingValue AND @dblNextRangeStartingValue > 0
-							THEN @dblNextRangeStartingValue - 0.000001
+							THEN @dblNextRangeStartingValue - 0.01
 						ELSE @dblRangeStartingValue + @dblIncrementValue END
 					
 					IF @dblIncrementValue <= 0
@@ -191,6 +203,8 @@ BEGIN TRY
 						,INC.dblIncrementValue
 						,@dblNewDiscountValue
 						,@dblNewShrinkValue
+						,INC.strUnitMeasure
+						,INC.ysnHasShrink
 					FROM ##tmpGRDiscountTableIncremental INC
 					WHERE intDiscountScheduleLineId = @intCursorDiscountScheduleLineId
 					
@@ -209,13 +223,13 @@ BEGIN TRY
 							THEN @dblRangeStartingValue + @dblIncrementValue
 								+ (CASE WHEN (@dblRangeStartingValue + @dblIncrementValue) >= @dblNextRangeStartingValue
 									OR @dblNextRangeStartingValue IS NULL
-									THEN 0.000001 ELSE 0 END)
+									THEN 0.01 ELSE 0 END)
 						WHEN @dblRangeStartingValue <= (@dblRangeEndingValue - @dblIncrementValue) THEN
 							CASE WHEN @dblNextRangeStartingValue IS NOT NULL THEN
 								CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue
-								THEN @dblRangeEndingValue + 0.000001
+								THEN @dblRangeEndingValue + 0.01
 								ELSE
-									CASE WHEN @dblNextRangeStartingValue > 0 THEN @dblNextRangeStartingValue + 0.000001 ELSE @dblRangeEndingValue END
+									CASE WHEN @dblNextRangeStartingValue > 0 THEN @dblNextRangeStartingValue + 0.01 ELSE @dblRangeEndingValue END
 								END
 							ELSE @dblRangeEndingValue END
 						END;
@@ -242,6 +256,8 @@ BEGIN TRY
 						,INC.dblIncrementValue
 						,@dblNewDiscountValue
 						,@dblNewShrinkValue
+						,INC.strUnitMeasure
+						,INC.ysnHasShrink
 					FROM ##tmpGRDiscountTableIncremental INC
 					WHERE intDiscountScheduleLineId = @intCursorDiscountScheduleLineId
 					
