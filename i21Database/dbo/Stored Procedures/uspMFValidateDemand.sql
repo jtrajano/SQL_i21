@@ -297,9 +297,9 @@ BEGIN TRY
 				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity ' + ltrim(@dblQuantity) + ' is invalid. '
 			END
 
-			IF @dblQuantity <= 0
+			IF @dblQuantity < 0
 			BEGIN
-				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity should be greater than zero. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity cannot be negative. '
 			END
 
 			IF @dtmDemandDate IS NULL
