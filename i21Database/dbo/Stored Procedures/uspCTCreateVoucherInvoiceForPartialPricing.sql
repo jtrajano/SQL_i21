@@ -425,12 +425,20 @@ BEGIN TRY
 
 						IF EXISTS 
 						(
+							/*
 							SELECT TOP 1 1 intBillId
 							FROM tblAPBill BL
 							INNER JOIN tblAPBillDetail BD ON BL.intBillId = BD.intBillId
 							LEFT JOIN @tblCreatedTransaction CT ON CT.intTransactionId = BL.intBillId
 							WHERE BL.intTransactionType <> 13 and  BD.intInventoryReceiptItemId = @intInventoryReceiptItemId
 							AND (BL.ysnPosted = 0 OR ISNULL(CT.intTransactionId, 0) <> 0)
+							*/
+							SELECT top 1 1
+							FROM tblAPBillDetail a, tblAPBill b
+							WHERE a.intInventoryReceiptItemId = @intInventoryReceiptItemId
+							AND b.intBillId = a.intBillId
+							AND b.ysnPosted = 0
+							and  b.intTransactionType <> 13
 						)
 						BEGIN
 							SET @allowAddDetail = 1
