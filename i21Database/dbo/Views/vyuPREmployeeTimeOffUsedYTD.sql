@@ -22,19 +22,12 @@ FROM
 		UNION ALL
 	
 		SELECT 
-			intYear = YEAR(dtmPayDate)
+			intYear = YEAR(GETDATE())
 			,intEntityEmployeeId
-			,intTypeTimeoffId = intEmployeeTimeOffId
-			,dblHours
+			,intTypeTimeoffId = intTypeTimeOffId
+			,dblHoursUsed
 		FROM 
-			tblPRPaycheckEarning PCE 
-			INNER JOIN tblPRPaycheck PC
-				ON PCE.intPaycheckId = PC.intPaycheckId
-		WHERE 
-			intEmployeeTimeOffId IS NOT NULL
-			AND ysnPosted = 1
-			AND ysnVoid = 0
-			AND dblHours <> 0
+			vyuPREmployeeTimeOff			
 
 		) TimeOffHours
 GROUP BY 
