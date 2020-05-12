@@ -101,8 +101,11 @@ BEGIN TRY
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
 			DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 			
-			INSERT INTO @voucherIds			
-			SELECT @DetailId
+			if not exists (select top 1 1 from @voucherIds where intId = @DetailId)
+			begin
+				INSERT INTO @voucherIds			
+				SELECT @DetailId
+			end
 
 			EXEC uspAPUpdateVoucherTotal @voucherIds
 
