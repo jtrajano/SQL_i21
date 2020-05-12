@@ -20,6 +20,7 @@ SELECT DISTINCT PL.intPickLotDetailId,
   PL.intContainerId,
   PL.dblSalePickedQty,
   PL.dblLotPickedQty,
+  dblLotPickedQtyFromParent = PL.dblLotPickedQty - ISNULL(PCPL.dblLotPickedQtyFromParent, 0),
   PL.intSaleUnitMeasureId,
   PL.intLotUnitMeasureId,
   PL.dblGrossWt,
@@ -101,3 +102,11 @@ LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = Recei
 LEFT JOIN tblLGLoadDetail LD ON LD.intPickLotDetailId = PL.intPickLotDetailId
 LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 LEFT JOIN tblLGPickLotHeader PPL ON PPL.intPickLotHeaderId = PLH.intParentPickLotHeaderId
+OUTER APPLY 
+	(SELECT dblLotPickedQtyFromParent = SUM(PL1.dblLotPickedQty) 
+	 FROM tblLGPickLotDetail PL1
+	 LEFT JOIN tblLGPickLotHeader PH1 ON PH1.intPickLotHeaderId = PL1.intPickLotHeaderId
+	 WHERE PH1.intParentPickLotHeaderId = PLH.intPickLotHeaderId
+		AND PH1.intType = 1
+		AND PL1.intLotId = PL.intLotId 
+	) PCPL
