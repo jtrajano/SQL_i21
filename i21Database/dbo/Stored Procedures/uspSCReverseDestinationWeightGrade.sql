@@ -37,6 +37,7 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intTicketItemUOMId INT
 		,@dblContractAvailableQty NUMERIC(38,20);
 DECLARE @ysnTicketContractLoadBased BIT
+DECLARE @dblTicketMatchScheduleQty NUMERIC(18,6)
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
@@ -46,6 +47,7 @@ BEGIN TRY
 			SELECT @intTicketItemUOMId = intItemUOMIdTo
 				, @intContractDetailId = intContractId
 				, @dblContractQty = dblNetUnits
+				, @dblTicketMatchScheduleQty = dblScheduleQty
 			FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
 		END
 
@@ -81,13 +83,15 @@ BEGIN TRY
 
 			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
 			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
-			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
-			EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intMatchTicketId,
-										@strScreenName			=	'Scale'	
+			IF(ISNULL(@dblTicketMatchScheduleQty,0) <> 0)
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity
+											@intContractDetailId	=	@intContractDetailId,
+											@dblQuantityToUpdate	=	@dblTicketMatchScheduleQty,
+											@intUserId				=	@intUserId,
+											@intExternalId			=	@intMatchTicketId,
+											@strScreenName			=	'Scale'	
+			END
 		END
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
