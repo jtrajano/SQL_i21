@@ -135,12 +135,12 @@ FROM
 		, dblStandardCost			= (CASE WHEN ARI.strType = 'CF Tran' AND CFTRAN.strTransactionType IN ('Remote', 'Extended Remote')
 												THEN ISNULL(CFTRAN.dblNetTransferCost, 0)
 											WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-												THEN ISNULL(NONSO.dblCost, 0)
-											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 --AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN NONLOTTED.dblCost
+												THEN dbo.fnCalculateCostBetweenUOM(NONSO.intItemUOMId, ARID.intItemUOMId, ISNULL(NONSO.dblCost, 0))
+											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0
+												THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN LOTTED.dblCost
-											ELSE ISNULL(NONSO.dblCost, 0)
+												THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
+											ELSE dbo.fnCalculateCostBetweenUOM(NONSO.intItemUOMId, ARID.intItemUOMId, ISNULL(NONSO.dblCost, 0))
 										END)
 		, dblPrice					= ARID.dblPrice
 		, dblTax					= ARID.dblTotalTax
@@ -186,7 +186,7 @@ FROM
 	) AS NONSO ON ARI.intInvoiceId		= NONSO.intTransactionId
 			  AND ARI.strInvoiceNumber	= NONSO.strTransactionId
 			  AND ARID.intItemId		= NONSO.intItemId
-			  AND ARID.intItemUOMId		= NONSO.intItemUOMId
+			  --AND ARID.intItemUOMId		= NONSO.intItemUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			 , ICISI.intLineNo
@@ -203,11 +203,11 @@ FROM
 												 AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
-												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 --AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
-				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
+				  --AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
 				  AND ((ARID.intSalesOrderDetailId IS NOT NULL AND ARID.intSalesOrderDetailId	= NONLOTTED.intLineNo) OR ARID.intSalesOrderDetailId IS NULL)
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
@@ -231,7 +231,7 @@ FROM
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 				AND ARID.intItemId					= LOTTED.intItemId
-				AND ARID.intItemUOMId				= LOTTED.intItemUOMId
+				--AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 				AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT intInvoiceId
@@ -397,11 +397,11 @@ FROM
 		, dblQtyOrdered					= SOD.dblQtyOrdered
 		, dblQtyShipped					= SOD.dblQtyShipped
 		, dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
-													THEN INV.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(INV.intOrderUOMId, SOD.intItemUOMId, ISNULL(INV.dblCost, 0))
 												WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(NONLOTTED.intInventoryShipmentItemId, 0) <> 0
-													THEN NONLOTTED.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, SOD.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 												WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(LOTTED.intInventoryShipmentItemId, 0) <> 0
-													THEN LOTTED.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, SOD.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
 												ELSE 0.000000
 											END)
 		, dblPrice						= SOD.dblPrice
@@ -455,10 +455,10 @@ FROM
 												 AND I.strInvoiceNumber			= ICIT.strTransactionId
 												 AND ID.intInvoiceDetailId		= ICIT.intTransactionDetailId
 												 AND ID.intItemId				= ICIT.intItemId
-												 AND ID.intItemUOMId			= ICIT.intItemUOMId
+												 --AND ID.intItemUOMId			= ICIT.intItemUOMId
 	) AS INV ON SOD.intSalesOrderDetailId = INV.intSalesOrderDetailId
 			AND SOD.intItemId			 = INV.intItemId
-			AND SOD.intItemUOMId		 = INV.intOrderUOMId
+			--AND SOD.intItemUOMId		 = INV.intOrderUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			 , ICISI.intLineNo
@@ -475,10 +475,10 @@ FROM
 												 AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
-												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 --AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
-				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
+				  --AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
@@ -505,7 +505,7 @@ FROM
 			AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1 THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON SOD.intItemId				= LOTTED.intItemId
-			   AND SOD.intItemUOMId				= LOTTED.intItemUOMId
+			   --AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 			   AND SOD.intSalesOrderDetailId	= LOTTED.intLineNo
 	WHERE SO.ysnProcessed = 1
 	  AND SO.strTransactionType = 'Order'
@@ -532,11 +532,11 @@ FROM
 		, dblQtyOrdered				= ARID.dblQtyOrdered
 		, dblQtyShipped				= ARID.dblQtyShipped
 		, dblStandardCost			= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-												THEN ISNULL(NONSO.dblCost, 0)
+												THEN dbo.fnCalculateCostBetweenUOM(NONSO.intItemUOMId, ARID.intItemUOMId, ISNULL(NONSO.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN NONLOTTED.dblCost
+												THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN LOTTED.dblCost
+												THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
 											ELSE 0.000000
 										END)
 		, dblPrice					= ARID.dblLicenseAmount 
@@ -583,7 +583,7 @@ FROM
 	) AS NONSO ON ARI.intInvoiceId		= NONSO.intTransactionId
 			  AND ARI.strInvoiceNumber	= NONSO.strTransactionId
 			  AND ARID.intItemId		= NONSO.intItemId
-			  AND ARID.intItemUOMId		= NONSO.intItemUOMId
+			  --AND ARID.intItemUOMId		= NONSO.intItemUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			 , ICISI.intLineNo
@@ -600,12 +600,12 @@ FROM
 												AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												AND ICISI.intItemId						= ICIT.intItemId
-												AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												--AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												AND ICIT.intInTransitSourceLocationId IS NULL
-		) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
-				      AND ARID.intItemId					= NONLOTTED.intItemId
-					  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
-					  AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
+	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
+				  AND ARID.intItemId					= NONLOTTED.intItemId
+				  --AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
+				  AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			 , ICISI.intLineNo
@@ -626,11 +626,11 @@ FROM
 			AND ISNULL(ICI.strLotTracking, 'No')	<> 'No'
 		INNER JOIN tblICLot ICL ON ICIT.intLotId = ICL.intLotId
 							   AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1 THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
-		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId) AS LOTTED
-				ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
-				AND ARID.intItemId					= LOTTED.intItemId
-				AND ARID.intItemUOMId				= LOTTED.intItemUOMId
-				AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
+		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
+	) AS LOTTED ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
+			   AND ARID.intItemId					= LOTTED.intItemId
+			   --AND ARID.intItemUOMId				= LOTTED.intItemUOMId
+			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
 	WHERE ARI.ysnPosted = 1 
@@ -660,11 +660,11 @@ FROM
 		, dblQtyOrdered					= SOD.dblQtyOrdered
 		, dblQtyShipped					= SOD.dblQtyShipped
 		, dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
-													THEN INV.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(INV.intOrderUOMId, SOD.intItemUOMId, ISNULL(INV.dblCost, 0))
 												WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(NONLOTTED.intInventoryShipmentItemId, 0) <> 0
-													THEN NONLOTTED.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, SOD.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 												WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(LOTTED.intInventoryShipmentItemId, 0) <> 0
-													THEN LOTTED.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, SOD.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
 												ELSE 0.000000
 											END)
 		, dblPrice						= SOD.dblLicenseAmount
@@ -717,10 +717,10 @@ FROM
 												 AND I.strInvoiceNumber			= ICIT.strTransactionId
 												 AND ID.intInvoiceDetailId		= ICIT.intTransactionDetailId
 												 AND ID.intItemId				= ICIT.intItemId
-												 AND ID.intItemUOMId			= ICIT.intItemUOMId
+												 --AND ID.intItemUOMId			= ICIT.intItemUOMId
 	) AS INV ON SOD.intSalesOrderDetailId = INV.intSalesOrderDetailId
 			AND SOD.intItemId			 = INV.intItemId
-			AND SOD.intItemUOMId		 = INV.intOrderUOMId
+			--AND SOD.intItemUOMId		 = INV.intOrderUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			, ICISI.intLineNo
@@ -737,10 +737,10 @@ FROM
 												 AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
-												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 --AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
-				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
+				  --AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
@@ -762,7 +762,7 @@ FROM
 							   AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1 THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON SOD.intItemId				= LOTTED.intItemId
-				AND SOD.intItemUOMId			= LOTTED.intItemUOMId
+				--AND SOD.intItemUOMId			= LOTTED.intItemUOMId
 				AND SOD.intSalesOrderDetailId	= LOTTED.intLineNo
 	WHERE SO.ysnProcessed = 1
 	  AND SO.strTransactionType = 'Order'
@@ -790,11 +790,11 @@ FROM
 		, dblQtyOrdered				= ARID.dblQtyOrdered
 		, dblQtyShipped				= ARID.dblQtyShipped
 		, dblStandardCost			= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-												THEN ISNULL(NONSO.dblCost, 0)
+												THEN dbo.fnCalculateCostBetweenUOM(NONSO.intItemUOMId, ARID.intItemUOMId, ISNULL(NONSO.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN NONLOTTED.dblCost
+												THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN LOTTED.dblCost
+												THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
 											ELSE 0.000000
 										END)
 		, dblPrice					= ARID.dblMaintenanceAmount  
@@ -841,7 +841,7 @@ FROM
 	) AS NONSO ON ARI.intInvoiceId		= NONSO.intTransactionId
 			  AND ARI.strInvoiceNumber	= NONSO.strTransactionId
 			  AND ARID.intItemId		= NONSO.intItemId
-			  AND ARID.intItemUOMId		= NONSO.intItemUOMId
+			  --AND ARID.intItemUOMId		= NONSO.intItemUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			 , ICISI.intLineNo
@@ -858,11 +858,11 @@ FROM
 												AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												AND ICISI.intItemId						= ICIT.intItemId
-												AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												--AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
-				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
+				  --AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
 				  AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
@@ -886,7 +886,7 @@ FROM
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 			   AND ARID.intItemId					= LOTTED.intItemId
-			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
+			   --AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
@@ -917,11 +917,11 @@ FROM
 		, dblQtyOrdered					= SOD.dblQtyOrdered
 		, dblQtyShipped					= SOD.dblQtyShipped
 		, dblStandardCost				= (CASE WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(INV.intSalesOrderDetailId, 0) <> 0
-													THEN INV.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(INV.intOrderUOMId, SOD.intItemUOMId, ISNULL(INV.dblCost, 0))
 												WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(NONLOTTED.intInventoryShipmentItemId, 0) <> 0
-													THEN NONLOTTED.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, SOD.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 												WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(LOTTED.intInventoryShipmentItemId, 0) <> 0
-													THEN LOTTED.dblCost
+													THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, SOD.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
 												ELSE 0.000000
 											END)
 		, dblPrice						= SOD.dblMaintenanceAmount
@@ -974,10 +974,10 @@ FROM
 												 AND I.strInvoiceNumber			= ICIT.strTransactionId
 												 AND ID.intInvoiceDetailId		= ICIT.intTransactionDetailId
 												 AND ID.intItemId				= ICIT.intItemId
-												 AND ID.intItemUOMId			= ICIT.intItemUOMId
+												 --AND ID.intItemUOMId			= ICIT.intItemUOMId
 	) AS INV ON SOD.intSalesOrderDetailId = INV.intSalesOrderDetailId
 			AND SOD.intItemId			 = INV.intItemId
-			AND SOD.intItemUOMId		 = INV.intOrderUOMId
+			--AND SOD.intItemUOMId		 = INV.intOrderUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 			 , ICISI.intLineNo
@@ -994,10 +994,10 @@ FROM
 												 AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
-												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 --AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON SOD.intItemId					= NONLOTTED.intItemId
-				  AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
+				  --AND SOD.intItemUOMId				= NONLOTTED.intItemUOMId
 				  AND SOD.intSalesOrderDetailId		= NONLOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
@@ -1019,7 +1019,7 @@ FROM
 							   AND ICISI.intItemUOMId = (CASE WHEN ICI.strType = 'Finished Good' OR ICI.ysnAutoBlend = 1 THEN ICISI.intItemUOMId ELSE ICL.intItemUOMId END)
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON SOD.intItemId				= LOTTED.intItemId
-			   AND SOD.intItemUOMId				= LOTTED.intItemUOMId
+			   --AND SOD.intItemUOMId				= LOTTED.intItemUOMId
 			   AND SOD.intSalesOrderDetailId	= LOTTED.intLineNo
 	WHERE SO.ysnProcessed = 1
 	  AND SO.strTransactionType = 'Order'
@@ -1046,13 +1046,13 @@ FROM
 		, intItemAccountId			=  ISNULL(ARID.intSalesAccountId , ARID.intAccountId)   
 		, dblQtyOrdered				= ARID.dblQtyOrdered
 		, dblQtyShipped				= ARID.dblQtyShipped
-		, dblStandardCost			= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0
-												THEN ISNULL(NONSO.dblCost, 0)
+		, dblStandardCost			= (CASE WHEN ISNULL(ARID.intInventoryShipmentItemId, 0) = 0												
+												THEN dbo.fnCalculateCostBetweenUOM(NONSO.intItemUOMId, ARID.intItemUOMId, ISNULL(NONSO.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') = 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN NONLOTTED.dblCost
+												THEN dbo.fnCalculateCostBetweenUOM(NONLOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(NONLOTTED.dblCost, 0))
 											WHEN ISNULL(ICI.strLotTracking, 'No') <> 'No' AND ISNULL(ARID.intInventoryShipmentItemId, 0) <> 0 AND ISNULL(ARID.intSalesOrderDetailId, 0) <> 0
-												THEN LOTTED.dblCost
-											ELSE ISNULL(NONSO.dblCost, 0)
+												THEN dbo.fnCalculateCostBetweenUOM(LOTTED.intItemUOMId, ARID.intItemUOMId, ISNULL(LOTTED.dblCost, 0))
+											ELSE dbo.fnCalculateCostBetweenUOM(NONSO.intItemUOMId, ARID.intItemUOMId, ISNULL(NONSO.dblCost, 0))
 										END)
 		, dblPrice					= ARID.dblPrice
 		, dblTax					= ARID.dblTotalTax
@@ -1098,7 +1098,7 @@ FROM
 	) AS NONSO ON ARI.intInvoiceId		= NONSO.intTransactionId
 			  AND ARI.strInvoiceNumber	= NONSO.strTransactionId
 			  AND ARID.intItemId		= NONSO.intItemId
-			  AND ARID.intItemUOMId		= NONSO.intItemUOMId
+			  --AND ARID.intItemUOMId		= NONSO.intItemUOMId
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
 				, ICISI.intLineNo
@@ -1115,11 +1115,11 @@ FROM
 												 AND ICIS.strShipmentNumber				= ICIT.strTransactionId
 												 AND ICISI.intInventoryShipmentItemId	= ICIT.intTransactionDetailId
 												 AND ICISI.intItemId					= ICIT.intItemId
-												 AND ICISI.intItemUOMId					= ICIT.intItemUOMId
+												 --AND ICISI.intItemUOMId					= ICIT.intItemUOMId
 												 AND ICIT.intInTransitSourceLocationId IS NULL
 	) AS NONLOTTED ON ARID.intInventoryShipmentItemId	= NONLOTTED.intInventoryShipmentItemId
 				  AND ARID.intItemId					= NONLOTTED.intItemId
-				  AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
+				  --AND ARID.intItemUOMId					= NONLOTTED.intItemUOMId
 				  AND ARID.intSalesOrderDetailId		= NONLOTTED.intLineNo
 	LEFT OUTER JOIN (
 		SELECT ICISI.intInventoryShipmentItemId
@@ -1144,7 +1144,7 @@ FROM
 		GROUP BY ICISI.intInventoryShipmentItemId, ICISI.intLineNo, ICISI.intItemId, ICISI.intItemUOMId
 	) AS LOTTED ON ARID.intInventoryShipmentItemId	= LOTTED.intInventoryShipmentItemId
 			   AND ARID.intItemId					= LOTTED.intItemId
-			   AND ARID.intItemUOMId				= LOTTED.intItemUOMId
+			   --AND ARID.intItemUOMId				= LOTTED.intItemUOMId
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
