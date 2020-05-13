@@ -29,6 +29,8 @@ DECLARE @ErrMsg	NVARCHAR(MAX)
 	,@strBatchId NVARCHAR(40)
 	,@strDistributionOption NVARCHAR(40);
 
+DECLARE @SummaryLogs AS RKSummaryLog
+
 SELECT @strDistributionOption = strDistributionOption FROM tblSCTicket WHERE intTicketId = @intTicketId
 BEGIN
 	IF @ysnDeliverySheet = 0
@@ -287,6 +289,75 @@ BEGIN TRY
 					UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
 				END
 			END
+
+		INSERT INTO @SummaryLogs (    
+            strBatchId
+            ,strBucketType
+            ,strTransactionType
+            ,intTransactionRecordId 
+            ,intTransactionRecordHeaderId
+            ,strDistributionType
+            ,strTransactionNumber 
+            ,dtmTransactionDate 
+            ,intContractDetailId 
+            ,intContractHeaderId 
+            ,intTicketId 
+            ,intCommodityId 
+            ,intCommodityUOMId 
+            ,intItemId 
+            ,intBookId 
+            ,intSubBookId 
+            ,intLocationId 
+            ,intFutureMarketId 
+            ,intFutureMonthId 
+            ,dblNoOfLots 
+            ,dblQty 
+            ,dblPrice 
+            ,intEntityId 
+            ,ysnDelete 
+            ,intUserId 
+            ,strNotes     
+        )
+		SELECT
+            strBatchId = NULL
+            ,strBucketType = 'On Hold'
+            ,strTransactionType = 'Scale Ticket'
+            ,intTransactionRecordId = intTicketId
+            ,intTransactionRecordHeaderId = intTicketId
+            ,strDistributionType = strStorageTypeDescription
+            ,strTransactionNumber = strTicketNumber
+            ,dtmTransactionDate  = dtmTicketDateTime
+            ,intContractDetailId = intContractId
+            ,intContractHeaderId = intContractSequence
+            ,intTicketId  = intTicketId
+            ,intCommodityId  = TV.intCommodityId
+            ,intCommodityUOMId  = CUM.intCommodityUnitMeasureId
+            ,intItemId = TV.intItemId
+            ,intBookId = NULL
+            ,intSubBookId = NULL
+            ,intLocationId = intProcessingLocationId
+            ,intFutureMarketId = NULL
+            ,intFutureMonthId = NULL
+            ,dblNoOfLots = 0
+            ,dblQty = CASE WHEN @ysnPost = 1
+						THEN 
+							(CASE WHEN strInOutFlag = 'I' THEN dblNetUnits ELSE dblNetUnits * -1 END )
+						ELSE
+							(CASE WHEN strInOutFlag = 'I' THEN dblNetUnits * -1 ELSE dblNetUnits END )
+						END
+
+            ,dblPrice = dblUnitPrice
+            ,intEntityId 
+            ,ysnDelete = 0
+            ,intUserId = NULL
+            ,strNotes = strTicketComment
+        FROM tblSCTicket TV
+        LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
+        LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo
+        LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = IUM.intUnitMeasureId AND CUM.intCommodityId = TV.intCommodityId
+        WHERE TV.intTicketId = @intTicketId
+
+		EXEC uspRKLogRiskPosition @SummaryLogs
 	END
 _Exit:
 END TRY
