@@ -40,6 +40,10 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intPricingTypeId INT
 		,@dblNetUnits NUMERIC(18,6) = 0
 		,@intDirectLoadId INT
+DECLARE @intTicketContractDetailId INT
+DECLARE @intMatchTicketContractDetailId INT
+DECLARE @ysnContractLoadBased BIT
+
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
 	BEGIN
@@ -91,58 +95,56 @@ BEGIN TRY
 
 			IF ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
-				UPDATE	MatchDiscount SET
-					MatchDiscount.dblShrinkPercent = QM.dblShrinkPercent
-					,MatchDiscount.dblDiscountAmount = QM.dblDiscountAmount
-					,MatchDiscount.dblGradeReading = QM.dblGradeReading
-					FROM dbo.tblSCTicket SC 
-					INNER JOIN tblQMTicketDiscount QM ON QM.intTicketId = SC.intTicketId AND QM.strSourceType = 'Scale'
-					OUTER APPLY(
-						SELECT dblShrinkPercent, dblDiscountAmount, dblGradeReading
-						FROM tblQMTicketDiscount
-						where intTicketId = SC.intMatchTicketId AND intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-						 AND strSourceType = 'Scale'
-					) MatchDiscount
-				WHERE SC.intTicketId = @intTicketId
-				IF EXISTS (SELECT intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
-				AND intDiscountScheduleCodeId NOT IN(SELECT intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId))
-				BEGIN
-					INSERT INTO tblQMTicketDiscount (
-						dblGradeReading
-						,strCalcMethod
-						,strShrinkWhat
-						,dblShrinkPercent
-						,dblDiscountAmount
-						,dblDiscountDue
-						,dblDiscountPaid
-						,ysnGraderAutoEntry
-						,intDiscountScheduleCodeId
-						,dtmDiscountPaidDate
-						,intTicketId
-						,intTicketFileId
-						,strSourceType
-						,intSort
-						,strDiscountChargeType
-					)
-					SELECT 
-						dblGradeReading
-						,strCalcMethod
-						,strShrinkWhat
-						,dblShrinkPercent
-						,dblDiscountAmount
-						,dblDiscountDue
-						,dblDiscountPaid
-						,ysnGraderAutoEntry
-						,intDiscountScheduleCodeId
-						,dtmDiscountPaidDate
-						,intTicketId
-						,intTicketFileId
-						,strSourceType
-						,intSort
-						,strDiscountChargeType
-					FROM tblQMTicketDiscount WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
-					AND intDiscountScheduleCodeId NOT IN(SELECT intDiscountScheduleCodeId FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId)
-				END
+				DELETE FROM tblQMTicketDiscount
+				WHERE intTicketId = @intMatchTicketId AND strSourceType = 'Scale'
+
+				UPDATE tblSCTicket
+				SET intDiscountId = A.intDiscountId
+					,intDiscountSchedule = A.intDiscountSchedule
+				FROM (SELECT TOP 1 intDiscountId 
+							,intDiscountSchedule
+						FROM tblSCTicket
+						WHERE intTicketId  = @intTicketId) A
+				WHERE intTicketId = @intMatchTicketId
+
+			
+				INSERT INTO tblQMTicketDiscount (
+					dblGradeReading
+					,strCalcMethod
+					,strShrinkWhat
+					,dblShrinkPercent
+					,dblDiscountAmount
+					,dblDiscountDue
+					,dblDiscountPaid
+					,ysnGraderAutoEntry
+					,intDiscountScheduleCodeId
+					,dtmDiscountPaidDate
+					,intTicketId
+					,intTicketFileId
+					,strSourceType
+					,intSort
+					,strDiscountChargeType
+					,intConcurrencyId
+				)
+				SELECT 
+					dblGradeReading
+					,strCalcMethod
+					,strShrinkWhat
+					,dblShrinkPercent
+					,dblDiscountAmount
+					,dblDiscountDue
+					,dblDiscountPaid
+					,ysnGraderAutoEntry
+					,intDiscountScheduleCodeId
+					,dtmDiscountPaidDate
+					,intTicketId = @intMatchTicketId
+					,intTicketFileId
+					,strSourceType
+					,intSort
+					,strDiscountChargeType
+					,intConcurrencyId = 0
+				FROM tblQMTicketDiscount WHERE intTicketId = @intTicketId AND strSourceType = 'Scale'
+				
 			END
 
 			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
@@ -150,17 +152,40 @@ BEGIN TRY
 				DECLARE @_strWhereFinalizedWeightIn VARCHAR(MAX)
 				DECLARE @_strWhereFinalizedGradeIn VARCHAR(MAX)
 
-				SELECT @_strWhereFinalizedWeightIn = strWeightFinalized, @_strWhereFinalizedGradeIn = strGradeFinalized
+				SELECT TOP 1
+					 @_strWhereFinalizedWeightIn = strWeightFinalized
+					, @_strWhereFinalizedGradeIn = strGradeFinalized
+					, @intMatchTicketContractDetailId = intContractId
 				FROM vyuSCTicketScreenView WHERE intTicketId = @intMatchTicketId
 
 				IF ISNULL(@_strWhereFinalizedWeightIn, 'Origin') = 'Destination' OR ISNULL(@_strWhereFinalizedGradeIn, 'Origin') = 'Destination'
 				BEGIN
 					EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
 
-					IF ISNULL(@intContractDetailId,0) != 0
+					IF ISNULL(@intMatchTicketContractDetailId,0) != 0
 					BEGIN
+						SELECT TOP 1
+							@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
+						FROM tblCTContractDetail A
+						INNER JOIN tblCTContractHeader B
+							ON A.intContractHeaderId = B.intContractHeaderId
+						WHERE A.intContractDetailId = @intMatchTicketContractDetailId 
+
 						SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+						IF(ISNULL(@ysnContractLoadBased,0) = 1)
+						BEGIN
+							SET @dblContractAvailableQty = 1
+						END
+
 						EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+						SET @dblContractAvailableQty = @dblContractAvailableQty * -1
+						EXEC uspCTUpdateScheduleQuantity
+										@intContractDetailId	=	@intMatchContractDetailId,
+										@dblQuantityToUpdate	=	@dblContractAvailableQty,
+										@intUserId				=	@intUserId,
+										@intExternalId			=	@intMatchTicketId,
+										@strScreenName			=   'Scale'	
 					END
 				END
 				DECLARE @dblPricedContractQty AS DECIMAL(18,6)
@@ -223,21 +248,33 @@ BEGIN TRY
 
 		IF @strInOutFlag = 'I'
 		BEGIN
-			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
+			IF ISNULL(@strWhereFinalizedWeight,'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade,'Origin') <> 'Destination'
 			BEGIN
 				IF ISNULL(@intContractDetailId,0) != 0
 				BEGIN
+					SELECT TOP 1
+						@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
+					FROM tblCTContractDetail A
+					INNER JOIN tblCTContractHeader B
+						ON A.intContractHeaderId = B.intContractHeaderId
+					WHERE A.intContractDetailId = @intContractDetailId 
+
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-					
-					IF(ISNULL(@intDirectLoadId,0) = 0)
+
+					IF(ISNULL(@ysnContractLoadBased,0) = 1)
 					BEGIN
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
+						SET @dblContractAvailableQty = 1
 					END
+					
+					-- IF(ISNULL(@intDirectLoadId,0) = 0)
+					-- BEGIN
+					-- 	EXEC uspCTUpdateScheduleQuantity
+					-- 					@intContractDetailId	=	@intContractDetailId,
+					-- 					@dblQuantityToUpdate	=	@dblContractAvailableQty,
+					-- 					@intUserId				=	@intUserId,
+					-- 					@intExternalId			=	@intTicketId,
+					-- 					@strScreenName			=	'Scale'	
+					-- END
 
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
 					DECLARE @dblScheduleQty AS DECIMAL(18,6)
@@ -283,34 +320,34 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-			IF ISNULL(@strWhereFinalizedWeight,'Origin') = 'Origin' AND ISNULL(@strWhereFinalizedGrade,'Origin') = 'Origin'
+			IF ISNULL(@strWhereFinalizedWeight,'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade,'Origin') <> 'Destination'
 			BEGIN
-				IF ISNULL(@intContractDetailId,0) != 0
-				BEGIN
-					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+				-- IF ISNULL(@intContractDetailId,0) != 0
+				-- BEGIN
+				-- 	SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 
-					DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
-					SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
+				-- 	DECLARE @dblScheduleQuantityToReduce DECIMAL(18,6);
+				-- 	SET @dblScheduleQuantityToReduce = @dblContractAvailableQty *-1
 					
-					IF(ISNULL(@intDirectLoadId,0) = 0)
-					BEGIN
-						EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
-					END
+				-- 	IF(ISNULL(@intDirectLoadId,0) = 0)
+				-- 	BEGIN
+				-- 		EXEC uspCTUpdateScheduleQuantity
+				-- 						@intContractDetailId	=	@intContractDetailId,
+				-- 						@dblQuantityToUpdate	=	@dblContractAvailableQty,
+				-- 						@intUserId				=	@intUserId,
+				-- 						@intExternalId			=	@intTicketId,
+				-- 						@strScreenName			=	'Scale'	
+				-- 	END
 
 
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
-					EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intContractDetailId,
-									@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'	
-				END
+				-- 	EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+				-- 	EXEC uspCTUpdateScheduleQuantity
+				-- 					@intContractDetailId	=	@intContractDetailId,
+				-- 					@dblQuantityToUpdate	=	@dblScheduleQuantityToReduce,
+				-- 					@intUserId				=	@intUserId,
+				-- 					@intExternalId			=	@intTicketId,
+				-- 					@strScreenName			=	'Scale'	
+				-- END
 					
 				--EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 				SELECT @dblPricedContractQty = SUM(CTP.dblQuantity) FROM vyuCTPriceContractFixationDetail CTP
