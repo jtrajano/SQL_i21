@@ -394,6 +394,7 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixPostHistoryGroupings.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
+    <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql"/>
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
