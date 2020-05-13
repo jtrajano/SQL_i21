@@ -43,7 +43,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 									END) * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , dblTotalSales 			= (CASE WHEN INVOICE.dblTax = 0 
 		 							THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
-									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000 AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000 
+									ELSE ((CASE WHEN DETAIL.dblAdjustedTax = 0.000000 --AND ISNULL(DETAIL.dblTotalAdjustedTax, 0.000000) = 0.000000 
 												THEN DETAIL.dblLineTotal / ISNULL(NULLIF(DETAIL.intTaxCodeCount, 0), 1.000000)
 												ELSE 0.000000 
 											END) +
