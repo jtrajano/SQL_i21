@@ -52,6 +52,7 @@ BEGIN
 			AND dtmStartDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
 			AND strCommodityCode = 'Coffee'
 			AND strRowState = 'Delete'
+			AND strContractBasis = 'FOB'
 		ORDER BY intContractFeedId ASC
 	END
 	ELSE
@@ -64,6 +65,7 @@ BEGIN
 			AND dtmStartDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
 			AND strCommodityCode = 'Coffee'
 			AND strRowState <> 'Delete'
+			AND strContractBasis = 'FOB'
 		ORDER BY intContractFeedId ASC
 	END
 
@@ -172,12 +174,6 @@ BEGIN
 			BEGIN
 				SELECT @strError = @strError + 'Contract Item cannot be blank. '
 			END
-
-			IF @strShipperVendorAccountNum IS NULL
-				OR @strShipperVendorAccountNum = ''
-			BEGIN
-				SELECT @strError = @strError + 'Shipper cannot be blank. '
-			END
 		END
 
 		IF @strError <> ''
@@ -234,15 +230,18 @@ BEGIN
 
 			SELECT @strXML = @strXML + '</Party>'
 
-			SELECT @strXML = @strXML + '<Party>'
+			IF IsNULL(@strShipperName, '') <> ''
+			BEGIN
+				SELECT @strXML = @strXML + '<Party>'
 
-			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strShipperVendorAccountNum, '') + '</Alias>'
+				SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strShipperVendorAccountNum, '') + '</Alias>'
 
-			SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
+				SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
 
-			SELECT @strXML = @strXML + '<Type>SZ</Type>'
+				SELECT @strXML = @strXML + '<Type>CZ</Type>'
 
-			SELECT @strXML = @strXML + '</Party>'
+				SELECT @strXML = @strXML + '</Party>'
+			END
 
 			SELECT @strXML = @strXML + '</Parties>'
 
