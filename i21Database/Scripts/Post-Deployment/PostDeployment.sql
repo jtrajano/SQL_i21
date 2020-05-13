@@ -202,6 +202,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\7_DeleteAllFloatingPanels.sql
 
 -- General Ledger
+:r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
 :r .\GL\DefaultData\1a_AccountStructure.sql
 :r .\GL\DefaultData\1b_AccountType.sql
 :r .\GL\DefaultData\1c_AccountGroup.sql
@@ -223,7 +224,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
 :r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
-:r .\GL\DefaultData\1u_PostHistoryGroupings.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql

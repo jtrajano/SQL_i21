@@ -284,7 +284,11 @@ BEGIN TRY
 								FROM tblAPBill B 
 								LEFT JOIN tblAPBill B1 ON B.intBillId = B1.intBillId
 								INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-								WHERE B.intTransactionType = 1 AND BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL AND B.intBillId IS NULL
+								WHERE
+									B.intTransactionType = 1
+									AND BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+									AND BD.intInventoryReceiptChargeId IS NULL
+									--AND B.intBillId IS NULL
 							) AS dblTotalIVForSHQty,
 							0,
 							RI.intLoadReceive

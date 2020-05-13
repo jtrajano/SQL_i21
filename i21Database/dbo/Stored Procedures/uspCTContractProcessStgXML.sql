@@ -38,7 +38,7 @@ BEGIN TRY
 	DECLARE @strAckCostXML NVARCHAR(MAX)
 	DECLARE @strAckDocumentXML NVARCHAR(MAX)
 		,@strApproverXML NVARCHAR(MAX)
-		,@strSubmittedByXML  NVARCHAR(MAX)
+		,@strSubmittedByXML NVARCHAR(MAX)
 	DECLARE @intCreatedById INT
 		,@config AS ApprovalConfigurationType
 	DECLARE @idoc INT
@@ -235,7 +235,7 @@ BEGIN TRY
 			,@intToBookId = NULL
 			,@intTransactionId = NULL
 			,@intCompanyId = NULL
-			,@strSubmittedByXML=NULL
+			,@strSubmittedByXML = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strContractNumber = strContractNumber
@@ -260,7 +260,7 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
-			,@strSubmittedByXML=strSubmittedByXML
+			,@strSubmittedByXML = strSubmittedByXML
 		FROM tblCTContractStage
 		WHERE intContractStageId = @intContractStageId
 
@@ -3266,6 +3266,139 @@ BEGIN TRY
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
 							AND CD.intContractSeq = @intContractSeq
 
+						IF @ysnApproval = 0
+						BEGIN
+							DELETE
+							FROM tblCTContractFeed
+							WHERE intContractHeaderId = @intNewContractHeaderId
+								AND intContractSeq = @intContractSeq
+								AND IsNULL(strFeedStatus, '') IN (
+									''
+									,'IGNORE'
+									)
+
+							INSERT INTO tblCTContractFeed (
+								intContractHeaderId
+								,intContractDetailId
+								,strCommodityCode
+								,strCommodityDesc
+								,strContractBasis
+								,strContractBasisDesc
+								,strSubLocation
+								,strCreatedBy
+								,strCreatedByNo
+								,strEntityNo
+								,strTerm
+								,strPurchasingGroup
+								,strContractNumber
+								,strERPPONumber
+								,intContractSeq
+								,strItemNo
+								,strStorageLocation
+								,dblQuantity
+								,dblCashPrice
+								,strQuantityUOM
+								,dtmPlannedAvailabilityDate
+								,dblBasis
+								,strCurrency
+								,dblUnitCashPrice
+								,strPriceUOM
+								,strRowState
+								,dtmContractDate
+								,dtmStartDate
+								,dtmEndDate
+								,dtmFeedCreated
+								,strSubmittedBy
+								,strSubmittedByNo
+								,strOrigin
+								,dblNetWeight
+								,strNetWeightUOM
+								,strVendorAccountNum
+								,strTermCode
+								,strContractItemNo
+								,strContractItemName
+								,strERPItemNumber
+								,strERPBatchNumber
+								,strLoadingPoint
+								,strPackingDescription
+								,ysnMaxPrice
+								,ysnSubstituteItem
+								,strLocationName
+								,strSalesperson
+								,strSalespersonExternalERPId
+								,strProducer
+								,intItemId
+								)
+							SELECT intContractHeaderId
+								,intContractDetailId
+								,strCommodityCode
+								,strCommodityDesc
+								,strContractBasis
+								,strContractBasisDesc
+								,strSubLocation
+								,strCreatedBy
+								,strCreatedByNo
+								,strEntityNo
+								,strTerm
+								,strPurchasingGroup
+								,strContractNumber
+								,strERPPONumber
+								,intContractSeq
+								,strItemNo
+								,strStorageLocation
+								,dblQuantity
+								,dblCashPrice
+								,strQuantityUOM
+								,dtmPlannedAvailabilityDate
+								,dblBasis
+								,strCurrency
+								,dblUnitCashPrice
+								,strPriceUOM
+								,CASE 
+									WHEN intContractStatusId = 3
+										THEN 'Delete'
+									ELSE (
+											CASE 
+												WHEN EXISTS (
+														SELECT *
+														FROM tblCTContractFeed
+														WHERE intContractHeaderId = @intNewContractHeaderId
+															AND intContractSeq = @intContractSeq
+														)
+													THEN 'Modified'
+												ELSE 'Added'
+												END
+											)
+									END
+								,dtmContractDate
+								,dtmStartDate
+								,dtmEndDate
+								,GETDATE()
+								,strSubmittedBy
+								,strSubmittedByNo
+								,strOrigin
+								,dblNetWeight
+								,strNetWeightUOM
+								,strVendorAccountNum
+								,strTermCode
+								,strContractItemNo
+								,strContractItemName
+								,strERPItemNumber
+								,strERPBatchNumber
+								,strLoadingPoint
+								,strPackingDescription
+								,ysnMaxPrice
+								,ysnSubstituteItem
+								,strLocationName
+								,strSalesperson
+								,strSalespersonExternalERPId
+								,strProducer
+								,intItemId
+							FROM vyuCTContractFeed
+							WHERE intContractHeaderId = @intNewContractHeaderId
+								AND intContractSeq = @intContractSeq
+						END
+
 						SELECT @intContractDetailId = intContractDetailId
 						FROM tblCTContractDetail
 						WHERE intContractHeaderId = @intNewContractHeaderId
@@ -3812,7 +3945,7 @@ BEGIN TRY
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
-				and ysnApproval=1
+					AND ysnApproval = 1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -3840,7 +3973,7 @@ BEGIN TRY
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
-				and ysnApproval=0
+					AND ysnApproval = 0
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId

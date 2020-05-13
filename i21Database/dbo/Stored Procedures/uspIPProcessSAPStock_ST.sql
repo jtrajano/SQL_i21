@@ -49,6 +49,15 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@dblWeightPerQty INT
 		,@intInventoryAdjustmentId INT
+	DECLARE @tblLotTable TABLE (
+		intLotRecordId INT IDENTITY(1, 1)
+		,intItemId INT
+		,intLocationId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
+		)
+	DECLARE @intMinRecordLotId INT
+		,@ysnResetLotQtyOnce BIT = 1
 
 	SELECT @intMinRowNo = Min(intStageLotId)
 	FROM tblIPLotStage WITH (NOLOCK)
@@ -57,6 +66,65 @@ BEGIN TRY
 	BEGIN
 		BEGIN TRY
 			SET @intNoOfRowsAffected = 1
+
+			SELECT @intEntityId = intEntityId
+			FROM tblSMUserSecurity WITH (NOLOCK)
+			WHERE strUserName = 'IRELYADMIN'
+
+			-- Resetting all the available lot qty to 0
+			IF @ysnResetLotQtyOnce = 1
+			BEGIN
+				SELECT @ysnResetLotQtyOnce = 0
+
+				DELETE
+				FROM @tblLotTable
+
+				INSERT INTO @tblLotTable
+				SELECT DISTINCT intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+				FROM tblICLot WITH (NOLOCK)
+				WHERE dblQty > 0
+
+				SELECT @intMinRecordLotId = MIN(intLotRecordId)
+				FROM @tblLotTable
+
+				BEGIN TRAN
+
+				WHILE (ISNULL(@intMinRecordLotId, 0) > 0)
+				BEGIN
+					SELECT @intItemId = NULL
+						,@intCompanyLocationId = NULL
+						,@intSubLocationId = NULL
+						,@intStorageLocationId = NULL
+
+					SELECT @intItemId = intItemId
+						,@intCompanyLocationId = intLocationId
+						,@intSubLocationId = intSubLocationId
+						,@intStorageLocationId = intStorageLocationId
+					FROM @tblLotTable
+					WHERE intLotRecordId = @intMinRecordLotId
+
+					EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
+						,@intItemId = @intItemId
+						,@strLotNumber = 'FIFO'
+						,@intLocationId = @intCompanyLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@intItemUOMId = NULL
+						,@dblNewQty = 0
+						,@dblCost = NULL
+						,@intEntityUserId = @intEntityId
+						,@intSourceId = 1
+
+					SELECT @intMinRecordLotId = MIN(intLotRecordId)
+					FROM @tblLotTable
+					WHERE intLotRecordId > @intMinRecordLotId
+				END
+
+				COMMIT TRAN
+			END
 
 			SELECT @strItemNo = NULL
 				,@strLocationName = NULL
@@ -325,10 +393,6 @@ BEGIN TRY
 					SELECT @intSubBookId = NULL
 			END
 
-			SELECT @intEntityId = intEntityId
-			FROM tblSMUserSecurity WITH (NOLOCK)
-			WHERE strUserName = 'IRELYADMIN'
-
 			SELECT @intLotId = L.intLotId
 			FROM tblICLot L WITH (NOLOCK)
 			WHERE L.strLotNumber = @strLotNumber
@@ -387,18 +451,17 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				-- To adjust Qty as 0
-				EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
-					,@intItemId = @intItemId
-					,@strLotNumber = @strLotNumber
-					,@intLocationId = @intCompanyLocationId
-					,@intSubLocationId = @intSubLocationId
-					,@intStorageLocationId = @intStorageLocationId
-					,@intItemUOMId = NULL
-					,@dblNewQty = 0
-					,@dblCost = NULL
-					,@intEntityUserId = @intEntityId
-					,@intSourceId = 1
-
+				--EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
+				--	,@intItemId = @intItemId
+				--	,@strLotNumber = @strLotNumber
+				--	,@intLocationId = @intCompanyLocationId
+				--	,@intSubLocationId = @intSubLocationId
+				--	,@intStorageLocationId = @intStorageLocationId
+				--	,@intItemUOMId = NULL
+				--	,@dblNewQty = 0
+				--	,@dblCost = NULL
+				--	,@intEntityUserId = @intEntityId
+				--	,@intSourceId = 1
 				-- Update - To adjust to new Qty. Doing this way (Resetting and Adjusting) to handle the qty and cost correctly
 				EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
 					,@dtmDate = NULL

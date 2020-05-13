@@ -72,7 +72,9 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblGrandTotal
 	, permission.intEntityId intUserId
     , permission.intUserRoleID intRoleId
+	, Receipt.strInternalComments
 	--, WeightLoss.dblClaimableWt
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
@@ -89,3 +91,8 @@ FROM tblICInventoryReceipt Receipt
 	LEFT JOIN tblCTSubBook SubBook ON SubBook.intSubBookId = Receipt.intSubBookId
 	INNER JOIN vyuICUserCompanyLocations permission ON permission.intCompanyLocationId = Receipt.intLocationId
 	--LEFT JOIN vyuLGWeightLoss WeightLoss ON WeightLoss.intInventoryReceiptId = Receipt.intInventoryReceiptId
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal

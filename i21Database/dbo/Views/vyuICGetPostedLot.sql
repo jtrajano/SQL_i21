@@ -31,6 +31,8 @@ SELECT	intLotId				= Lot.intLotId
 		,intItemOwnerId			= Lot.intItemOwnerId
 		,intOwnershipType		= Lot.intOwnershipType
 		,strWarehouseRefNo		= Lot.strWarehouseRefNo
+		,strCargoNo				= Lot.strCargoNo
+		,strWarrantNo				= Lot.strWarrantNo
 FROM	dbo.tblICLot Lot INNER JOIN tblICItem Item 
 			ON Item.intItemId = Lot.intItemId
 		LEFT JOIN tblSMCompanyLocation Location 

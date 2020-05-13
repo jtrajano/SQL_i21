@@ -77,6 +77,9 @@ SELECT
 	,receiptItem.intCategoryId
 	,receiptItem.intCommodityId
 	,permission.intEntityContactId
+	,receiptItemLot.strCargoNo
+	,receiptItemLot.strWarrantNo
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
@@ -107,5 +110,10 @@ LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = receiptItemLot.intProdu
 		WHERE sl.intCompanyLocationId = Receipt.intLocationId
 			AND sl.intVendorId = permission.intEntityId
 	) accessibleReceipts
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2

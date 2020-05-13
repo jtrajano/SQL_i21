@@ -115,6 +115,8 @@ DECLARE
 	,@strCertificateId			AS NVARCHAR(50)
 	,@strTrackingNumber			AS NVARCHAR(255) 
 	,@strWarehouseRefNo			AS NVARCHAR(255)
+	,@strCargoNo			AS NVARCHAR(50)
+	,@strWarrantNo			AS NVARCHAR(50)
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 		,@intEntityProducerId AS INT 
@@ -223,6 +225,8 @@ SELECT  intId
 		,strCertificateId
 		,strTrackingNumber
 		,strWarehouseRefNo
+		,strCargoNo
+		,strWarrantNo
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -284,6 +288,8 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strCertificateId
 		,@strTrackingNumber
 		,@strWarehouseRefNo
+		,@strCargoNo
+		,@strWarrantNo
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -688,6 +694,8 @@ BEGIN
 						,intBookId = @intBookId
 						,intSubBookId = @intSubBookId 
 						,strWarehouseRefNo = @strWarehouseRefNo
+						,strCargoNo = @strCargoNo
+						,strWarrantNo = @strWarrantNo
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -720,7 +728,9 @@ BEGIN
 				,intUnitPallet			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intUnitPallet ELSE LotMaster.intUnitPallet END 
 				,strContainerNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strContainerNo ELSE LotMaster.strContainerNo END 
 				,strCondition			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCondition ELSE LotMaster.strCondition END 
-				,intSeasonCropYear		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSeasonCropYear ELSE LotMaster.intSeasonCropYear END 				
+				,intSeasonCropYear		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @intSeasonCropYear ELSE LotMaster.intSeasonCropYear END 	
+				,strCargoNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strCargoNo ELSE LotMaster.strCargoNo END 	
+				,strWarrantNo			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN @strWarrantNo ELSE LotMaster.strWarrantNo END 	
 				-- Find out if there any possible errors when updating an existing lot record. 
 				,@errorFoundOnUpdate	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) <> 0 THEN 
 													CASE	WHEN ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intItemUOMId AND ISNULL(LotMaster.intWeightUOMId, 0) = LotToUpdate.intWeightUOMId THEN 0 -- Incoming lot is already in wgt. If incoming and target lot shares the same wgt uom, then this is valid. 
@@ -1002,6 +1012,8 @@ BEGIN
 				,strCertificateId
 				,strTrackingNumber
 				,strWarehouseRefNo
+				,strCargoNo
+				,strWarrantNo
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -1058,6 +1070,8 @@ BEGIN
 				,@strCertificateId
 				,@strTrackingNumber
 				,@strWarehouseRefNo
+				,@strCargoNo
+				,@strWarrantNo
 			)
 		;
 	
@@ -1253,6 +1267,8 @@ BEGIN
 		,@strCertificateId
 		,@strTrackingNumber
 		,@strWarehouseRefNo
+		,@strCargoNo
+		,@strWarrantNo
 	;
 END
 

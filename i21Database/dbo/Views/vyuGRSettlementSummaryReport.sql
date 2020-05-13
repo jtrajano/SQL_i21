@@ -353,7 +353,11 @@ FROM
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 
-				AND Bill.intTransactionType = 3
+				--AND Bill.intTransactionType = 3
+		JOIN tblAPBillDetail BD
+			ON BD.intBillId = Bill.intBillId
+				AND BD.intCustomerStorageId IS NULL
+				AND BD.intSettleStorageId IS NULL
 		GROUP BY intPaymentId
 	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId			
 	LEFT JOIN (

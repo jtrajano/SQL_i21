@@ -41,7 +41,7 @@ FROM (
 		 , dblAmountDue			= 0.00
 		 , dblInterest			= ISNULL(PD.dblInterest, 0.00)
 		 , intEntityCustomerId	
-		 , ysnPaid				= 0
+		 , ysnPaid				= P.ysnPosted
 	FROM dbo.tblARPayment P WITH (NOLOCK)
 	LEFT OUTER JOIN (SELECT intPaymentId 
 						  , dblTotal	= SUM(dblInvoiceTotal)

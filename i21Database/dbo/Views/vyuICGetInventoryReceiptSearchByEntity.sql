@@ -70,7 +70,9 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, permission.intEntityContactId
-	, Receipt.dtmCreated 
+	, Receipt.dtmCreated
+	, Receipt.strInternalComments
+	, fiscal.strPeriod strAccountingPeriod
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId
@@ -101,5 +103,10 @@ FROM tblICInventoryReceipt Receipt
 		WHERE sl.intCompanyLocationId = Receipt.intLocationId
 			AND sl.intVendorId = permission.intEntityId
 	) accessibleReceipts
+	OUTER APPLY (
+		SELECT TOP 1 fp.strPeriod
+		FROM tblGLFiscalYearPeriod fp
+		WHERE Receipt.dtmReceiptDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+	) fiscal
 WHERE Receipt.strReceiptType = 'Purchase Contract'
 	AND Receipt.intSourceType = 2

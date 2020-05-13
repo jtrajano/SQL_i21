@@ -147,6 +147,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
+		AND @post != 0
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
 		
@@ -191,7 +192,7 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
-
+		
 		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
 			SET 
@@ -612,6 +613,8 @@ ELSE SAVE TRAN @SavePoint
 		INNER JOIN @validPayables C
 			ON C.intVoucherPayableId = B2.intOldPayableId
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		UPDATE A
 			SET 
 				A.dblTax = A.dblTax + taxData.dblTax,
@@ -914,6 +917,8 @@ ELSE SAVE TRAN @SavePoint
 		)
 		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		MERGE INTO tblAPVoucherPayableTaxStaging AS destination
 		USING (
 			SELECT
@@ -1075,6 +1080,13 @@ ELSE SAVE TRAN @SavePoint
 			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
 		END
 
+	END
+
+	SELECT @recordCountToReturn = COUNT(*) FROM @voucherPayable
+	IF @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned AND @post = 0
+	BEGIN
+		RAISERROR('Error occured while updating Voucher Payables.', 16, 1);
+		RETURN;
 	END
 
 	IF @transCount = 0

@@ -189,6 +189,7 @@
     <Folder Include="Scripts\Post-Deployment\MB" />
     <Folder Include="Scripts\Post-Deployment\ET" />
     <Folder Include="Scripts\Post-Deployment\SC\" />
+    <Folder Include="Scripts\Post-Deployment\GL\StoredProcedures\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -391,7 +392,9 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLFixPostHistoryGroupings.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
+    <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql"/>
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
@@ -445,6 +448,7 @@
     <None Include="Scripts\Post-Deployment\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Reports\3_ReportEnableConstraints.sql" />
+    <None Include="Scripts\Post-Deployment\GL\StoredProcedures\uspGLAccountOriginSync.sql" />
     <None Include="Scripts\Post-Deployment\TM\1_OriginIndexing.sql" />
     <None Include="Scripts\Post-Deployment\Reports\4_ReportData.sql" />
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
@@ -463,6 +467,7 @@
     <Build Include="dbo\Tables\tblGLDataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
+    <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql"/>
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedPayments.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedDeposits.sql" />
@@ -2470,6 +2475,7 @@
     <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
     <Build Include="dbo\Tables\tblPREmployeeEarningDistribution.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptAfterSave.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryReceiptUpdateInternalComments.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryReceiptCalculateTotals.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryReceiptDetail.sql" />
     <Build Include="dbo\Tables\tblARImportFile.sql" />
@@ -2699,7 +2705,9 @@
     <Build Include="dbo\Stored Procedures\uspMFReportToteLabel.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptSearch.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchWithApproval.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchByEntity.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryReceiptSearchByEntityWithApproval.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemLotByEntity.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptChargeByEntity.sql" />
@@ -3211,6 +3219,7 @@
     <Build Include="dbo\Functions\fnMFCalculateRecipeSubItemLowerTolerance.sql" />
     <Build Include="dbo\Views\vyuSTVendorList.sql" />
     <Build Include="dbo\Views\vyuICGetItemUOM.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryAdjustmentWithApproval.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuWHStorageLocation.sql" />
@@ -3464,6 +3473,10 @@
     <Build Include="dbo\Tables\tblMFUserPrinterMap.sql" />
     <Build Include="dbo\Views\vyuQMSampleTypeControlPoint.sql" />
     <Build Include="dbo\Stored Procedures\uspICReportInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentSubLedgerGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentSummaryGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentJournalGLPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAdjustmentGLPostPreview.sql" />
     <Build Include="dbo\Views\vyuEME2C2Role.sql" />
     <Build Include="dbo\Views\vyuSMMasterContactMenu.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
@@ -8511,6 +8524,8 @@
     <Build Include="dbo\Stored Procedures\uspRKGetGLAccountsForPosting.sql" />
     <Build Include="dbo\Functions\fnGRCalculateStorageUnits.sql" />
     <Build Include="dbo\Views\vyuCTPriceContractApproverView.sql" />
+    <Build Include="dbo\Tables\tblLGLoadCondition.sql" />
+    <Build Include="dbo\Tables\tblLGCustomsFee.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderDepartment.sql" />
@@ -8662,9 +8677,9 @@
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
     <Build Include="dbo\Tables\tblGRStorageHistoryDeleteHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDeleteStorageHistoryWithLog.sql" />
-    <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRDestinationWeightVarianceVarianceReport.sql" />
-    <Build Include="dbo\Views\vyuGRDestinationWeightVarianceReportView.sql" />
+    <Build Include="dbo\Views\vyuLGPickOpenInTransitContainers.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReportContainer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8869,7 +8884,6 @@
     <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
     <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_InsertTrialBalanceData.sql" />
-    <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_PostHistoryGroupings.sql" />
     <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
     <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />
@@ -8909,6 +8923,7 @@
     <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionConditionReport.sql" />
     <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
     <None Include="Scripts\Post-Deployment\HD\20_1_FixCustomLayout.sql" />
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
