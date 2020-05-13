@@ -49,9 +49,9 @@ SELECT DISTINCT TOP 100 PERCENT
 	,intInvoiceId						= SH.intInvoiceId
 	,strInvoice							= Inv.strInvoiceNumber
 	,intSettleStorageId					= SH.intSettleStorageId
-	,strSettleTicket					= SettleStorage.strStorageTicket
+	,strSettleTicket					= SH.strSettleTicket
 	,intBillId							= SH.intBillId
-	,strVoucher							= Bill.strBillId
+	,strVoucher							= SH.strVoucher
 	,intContractHeaderId				= SH.intContractHeaderId
 	,strContractNo						= CH.strContractNumber
 	,intDeliverySheetId					= CASE 
@@ -81,7 +81,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	 										WHEN ISNULL(CS.intDeliverySheetId,0) > 0 THEN DSSplit.dblSplitPercent
 	 										WHEN ISNULL(SCTicketSplit.dblSplitPercent,0) > 0 THEN SCTicketSplit.dblSplitPercent
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.dblSplitPercent
-											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN (SELECT dblSplitPercent FROM tblGRTransferStorageSplit WHERE intTransferToCustomerStorageId = CS.intCustomerStorageId)
+											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN (SELECT dblSplitPercent FROM tblGRTransferStorageSplit WHERE intTransferToCustomerStorageId = CS.intCustomerStorageId AND intTransferStorageId = SH.intTransferStorageId)
 											ELSE 100
 	 									END
 	,strUserName						= US.strUserName	
@@ -135,6 +135,8 @@ SELECT DISTINCT TOP 100 PERCENT
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
+JOIN tblGRStorageType ST
+	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 LEFT JOIN tblEMEntity E
 	ON E.intEntityId = CS.intEntityId
 LEFT JOIN tblSMCompanyLocation LOC
@@ -143,8 +145,8 @@ LEFT JOIN tblCTContractHeader CH
 	ON CH.intContractHeaderId = SH.intContractHeaderId
 LEFT JOIN tblARInvoice Inv
 	ON Inv.intInvoiceId = SH.intInvoiceId
-LEFT JOIN tblAPBill Bill
-	ON Bill.intBillId = SH.intBillId
+--LEFT JOIN tblAPBill Bill
+--	ON Bill.intBillId = SH.intBillId
 LEFT JOIN tblGRSettleStorage SettleStorage 
 	ON SettleStorage.intSettleStorageId = SH.intSettleStorageId
 LEFT JOIN tblSCDeliverySheet DS 
@@ -173,7 +175,9 @@ LEFT JOIN vyuGRTransferStorageSourceSplit TSource
 	ON TSource.intTransferStorageId = SH.intTransferStorageId
 LEFT JOIN vyuGRTransferStorageSplit TSplit
 	ON TSplit.intTransferStorageId = SH.intTransferStorageId
-LEFT JOIN (tblGRTransferStorageReference TSR
+--LEFT JOIN 
+LEFT JOIN (
+	tblGRTransferStorageReference TSR
 	JOIN tblGRCustomerStorage CSFRM
 		ON CSFRM.intCustomerStorageId = TSR.intSourceCustomerStorageId
 	JOIN tblGRCustomerStorage CSTO
