@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPReceiptClearingGL]
+CREATE VIEW [dbo].[vyuAPReceiptClearingGL]
 AS 
 
 SELECT DISTINCT * FROM (

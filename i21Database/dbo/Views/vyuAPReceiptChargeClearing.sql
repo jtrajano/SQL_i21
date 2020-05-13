@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPReceiptChargeClearing]    
+CREATE VIEW [dbo].[vyuAPReceiptChargeClearing]    
 AS     
 
  SELECT
