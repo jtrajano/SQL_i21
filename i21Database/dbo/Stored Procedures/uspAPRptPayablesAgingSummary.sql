@@ -416,6 +416,7 @@ SET @query = '
 				') tmpAPPayables 
 			GROUP BY intBillId
 			HAVING SUM(DISTINCT intCount) > 1 --DO NOT INCLUDE DELETED REPORT IF THAT IS ONLY THE PART OF DELETED DATA
+			AND SUM(DISTINCT intCount) <> 4 --THESE ARE THE COMBINATIONS THAT ARE NOT BALANCE
 		) AS tmpAgingSummaryTotal
 		LEFT JOIN dbo.tblAPBillArchive A
 		ON A.intBillId = tmpAgingSummaryTotal.intBillId

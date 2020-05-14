@@ -113,7 +113,7 @@ LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 LEFT JOIN dbo.tblAPBillArchive C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
 LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
 	ON A.[intEntityVendorId] = D.[intEntityId]
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId		
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
