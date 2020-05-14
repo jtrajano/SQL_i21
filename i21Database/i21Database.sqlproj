@@ -7963,6 +7963,7 @@
     <Build Include="dbo\Views\vyuCTAvailableQuantityForVoucher.sql" />
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
