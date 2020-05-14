@@ -8803,6 +8803,7 @@
     <None Include="Scripts\Post-Deployment\HD\20_1_FixCustomLayout.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A089.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
