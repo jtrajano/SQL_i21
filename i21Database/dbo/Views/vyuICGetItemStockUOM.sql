@@ -92,7 +92,7 @@ LEFT JOIN tblICLot Lot ON Lot.intItemId = StockUOM.intItemId
 UNION
 
 SELECT
-	im.intItemUOMId,
+	intItemStockUOMId = im.intItemUOMId,
 	i.intItemId,
 	i.strItemNo,
 	strItemDescription = i.strDescription,
@@ -128,7 +128,10 @@ SELECT
 	dblStockUnitCost = p.dblLastCost,
 	dblLastCost = p.dblLastCost,
 	i.intLifeTime,
-	i.strLifeTimeType
+	i.strLifeTimeType,
+	strReceiveUPC = COALESCE(im.strLongUPCCode, im.strLongUPCCode, ''),
+	i.ysnLotWeightsRequired,
+	l.ysnStorageUnitRequired
 FROM tblICItem i
 	INNER JOIN tblICItemUOM im ON im.intItemId = i.intItemId
 		AND im.ysnStockUnit = 1
