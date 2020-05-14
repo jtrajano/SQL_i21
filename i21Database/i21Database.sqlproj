@@ -8791,6 +8791,7 @@
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
