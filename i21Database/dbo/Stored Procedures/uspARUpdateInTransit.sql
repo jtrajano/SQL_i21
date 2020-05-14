@@ -37,7 +37,7 @@ BEGIN
 		 , intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 		 , intStorageLocationId				= ID.intStorageLocationId
 		 , dblQty							= CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL 
-		 										   THEN ISNULL(ICSI.dblQuantity, 0)
+												   THEN ROUND(ID.dblQtyShipped/ CASE WHEN ICSI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICSI.[dblDestinationQuantity], ICSI.[dblQuantity]) ELSE ICSI.[dblQuantity] END, 2) * ICSI.[dblQuantity]
 												   ELSE ID.dblQtyShipped
 											  END * (CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
 		 , intInvoiceId						= I.intInvoiceId
@@ -48,6 +48,7 @@ BEGIN
 	FROM tblARInvoiceDetail ID
 	INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 	INNER JOIN tblICItemLocation IL ON ID.intItemId = IL.intItemId AND I.intCompanyLocationId = IL.intLocationId
+	INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
 	LEFT JOIN tblICInventoryShipmentItem ICSI ON ICSI.intInventoryShipmentItemId = ID.intInventoryShipmentItemId
 	LEFT JOIN tblLGLoadDetail LGD ON ID.intLoadDetailId = LGD.intLoadDetailId
 	LEFT JOIN tblSMFreightTerms FT ON I.intFreightTermId = FT.intFreightTermId
@@ -62,10 +63,11 @@ BEGIN
 			AND I.intOriginalInvoiceId = R.intInvoiceId
 	) RI
 	WHERE ID.intInvoiceId = @TransactionId 
-	AND (ID.intInventoryShipmentItemId IS NOT NULL OR ID.intLoadDetailId IS NOT NULL)
-	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O'))
-	AND (RI.[intInvoiceId] IS NULL OR (I.ysnReversal = 1 AND I.strTransactionType = 'Credit Memo'))
-	AND (
+	  AND (ID.intInventoryShipmentItemId IS NOT NULL OR ID.intLoadDetailId IS NOT NULL)
+	  AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O'))
+	  AND (RI.[intInvoiceId] IS NULL OR (I.ysnReversal = 1 AND I.strTransactionType = 'Credit Memo'))
+	  AND ITEM.strType <> 'Other Charge'
+	  AND (
 			(I.[strType] <> 'Provisional' AND I.[ysnProvisionalWithGL] = 0)
 		OR
 			(I.[strType] = 'Provisional' AND I.[ysnProvisionalWithGL] = 1)
