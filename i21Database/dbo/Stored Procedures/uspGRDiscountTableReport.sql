@@ -6,7 +6,7 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
-	DECLARE @intDiscountScheduleId INT;
+	DECLARE @intDiscountScheduleCodeId INT;
 
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
@@ -40,9 +40,9 @@ BEGIN TRY
 		,[datatype] NVARCHAR(50)
 	)
 
-	SELECT @intDiscountScheduleId = [from]
+	SELECT @intDiscountScheduleCodeId = [from]
 	FROM @temp_xml_table
-	WHERE [fieldname] = 'intDiscountScheduleId';
+	WHERE [fieldname] = 'intDiscountScheduleCodeId';
 
 	IF OBJECT_ID (N'tempdb.dbo.##tmpGRDiscountTableIncremental') IS NOT NULL
 		DROP TABLE ##tmpGRDiscountTableIncremental
@@ -85,7 +85,7 @@ BEGIN TRY
 		FROM tblGRDiscountScheduleLine
 		WHERE intDiscountScheduleCodeId = SCHEDCODE.intDiscountScheduleCodeId
 	) SHRINK
-	WHERE SCHED.intDiscountScheduleId = @intDiscountScheduleId
+	WHERE SCHEDCODE.intDiscountScheduleCodeId = @intDiscountScheduleCodeId
 
 	-- Create empty temp table for extended list
 	SELECT TOP 0 *
@@ -94,7 +94,6 @@ BEGIN TRY
 
 	DECLARE 
 		@intCursorDiscountScheduleLineId INT
-		,@intCursorDiscountScheduleCodeId INT
 		,@dblRangeStartingValue NUMERIC(24, 10) 
     	,@dblRangeEndingValue NUMERIC(24, 10) 
     	,@dblIncrementValue NUMERIC(24, 10) 
@@ -106,53 +105,154 @@ BEGIN TRY
     	,@dblNewEndingValue NUMERIC(24, 10)
 		,@ysnIsAscending BIT;
 
-	-- Loop through each Disccount Schedule Code
-	DECLARE intListCursorDiscScheduleCode CURSOR LOCAL FAST_FORWARD
+	SET @dblNewDiscountValue = 0;
+	SET @dblNewShrinkValue = 0;
+
+	-- Loop through each discount schedule lines along with the starting value from the next row
+	DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 	FOR
-	SELECT DISTINCT intDiscountScheduleCodeId
-	FROM ##tmpGRDiscountTableIncremental;
+	WITH TMP AS (
+		SELECT 
+			*
+			-- Conditionally sort the schedule lines based on sblRangeStartingValue
+			,[intRow] = ROW_NUMBER() OVER (ORDER BY
+				CASE WHEN dblRangeStartingValue < dblRangeEndingValue
+				THEN dblRangeStartingValue END ASC,
+				CASE WHEN dblRangeStartingValue >= dblRangeEndingValue
+				THEN dblRangeStartingValue END DESC)
+		FROM ##tmpGRDiscountTableIncremental
+	)
+	SELECT
+		TMP.intDiscountScheduleLineId
+		,TMP.dblRangeStartingValue
+		,TMP.dblRangeEndingValue
+		,TMP.dblIncrementValue
+		,TMP.dblDiscountValue
+		,TMP.dblShrinkValue
+		,[dblNextRangeStartingValue]=NEXTROW.dblRangeStartingValue
+		,[ysnIsAscending] = CAST((CASE WHEN TMP.dblRangeStartingValue < TMP.dblRangeEndingValue THEN 1 ELSE 0 END) AS BIT)
+	FROM TMP
+	LEFT JOIN TMP NEXTROW
+		ON NEXTROW.intRow = TMP.intRow + 1
+		AND TMP.intDiscountScheduleCodeId = NEXTROW.intDiscountScheduleCodeId;
 
-	OPEN intListCursorDiscScheduleCode;
-
-	FETCH NEXT FROM intListCursorDiscScheduleCode
-	INTO @intCursorDiscountScheduleCodeId;
-
+	OPEN intListCursor;
+	FETCH NEXT FROM intListCursor
+	INTO 
+		@intCursorDiscountScheduleLineId
+		,@dblRangeStartingValue
+		,@dblRangeEndingValue
+		,@dblIncrementValue
+		,@dblDiscountValue
+		,@dblShrinkValue
+		,@dblNextRangeStartingValue
+		,@ysnIsAscending;
+	
 	WHILE @@FETCH_STATUS = 0
 	BEGIN
-		SET @dblNewDiscountValue = 0;
-		SET @dblNewShrinkValue = 0;
+		-- Ascending logic
+		IF @ysnIsAscending = 1
+		BEGIN
+			WHILE @dblRangeStartingValue < @dblRangeEndingValue
+			BEGIN
+				SET @dblNewEndingValue = CASE
+					WHEN (@dblRangeStartingValue + @dblIncrementValue) > @dblRangeEndingValue
+						THEN @dblRangeEndingValue - (CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue THEN 0.01 ELSE 0 END)
+					WHEN (@dblRangeStartingValue + @dblIncrementValue) >= @dblNextRangeStartingValue AND @dblNextRangeStartingValue > 0
+						THEN @dblNextRangeStartingValue - 0.01
+					WHEN (@dblRangeStartingValue + @dblIncrementValue) < @dblRangeEndingValue
+						THEN (@dblRangeStartingValue + @dblIncrementValue) - 0.01
+					WHEN @dblRangeEndingValue < @dblNextRangeStartingValue AND @dblNextRangeStartingValue > 0
+						THEN @dblNextRangeStartingValue - 0.01
+					ELSE @dblRangeStartingValue + @dblIncrementValue END
+				
+				IF @dblIncrementValue <= 0
+					SET @dblNewEndingValue = @dblRangeEndingValue;
 
-		-- Loop through each discount schedule lines along with the starting value from the next row
-		DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-		FOR
-		WITH TMP AS (
-			SELECT 
-				*
-				-- Conditionally sort the schedule lines based on sblRangeStartingValue
-				,[intRow] = ROW_NUMBER() OVER (ORDER BY
-					CASE WHEN dblRangeStartingValue < dblRangeEndingValue
-					THEN dblRangeStartingValue END ASC,
-					CASE WHEN dblRangeStartingValue >= dblRangeEndingValue
-					THEN dblRangeStartingValue END DESC)
-			FROM ##tmpGRDiscountTableIncremental
-			WHERE intDiscountScheduleCodeId = @intCursorDiscountScheduleCodeId
-		)
-		SELECT
-			TMP.intDiscountScheduleLineId
-			,TMP.dblRangeStartingValue
-			,TMP.dblRangeEndingValue
-			,TMP.dblIncrementValue
-			,TMP.dblDiscountValue
-			,TMP.dblShrinkValue
-			,[dblNextRangeStartingValue]=NEXTROW.dblRangeStartingValue
-			,[ysnIsAscending] = CAST((CASE WHEN TMP.dblRangeStartingValue < TMP.dblRangeEndingValue THEN 1 ELSE 0 END) AS BIT)
-		FROM TMP
-		LEFT JOIN TMP NEXTROW
-			ON NEXTROW.intRow = TMP.intRow + 1
-			AND TMP.intDiscountScheduleCodeId = NEXTROW.intDiscountScheduleCodeId;
+				SET @dblNewDiscountValue += @dblDiscountValue;
+				SET @dblNewShrinkValue += @dblShrinkValue;
 
-		OPEN intListCursor;
-		FETCH NEXT FROM intListCursor
+				-- Insert entry to extended table
+				INSERT INTO ##tmpGRDiscountTableExtended
+				SELECT
+					INC.intDiscountScheduleId
+					,INC.strCommodityCode
+					,INC.strDiscountDescription
+					,INC.intItemId
+					,INC.strItemNo
+					,INC.strDescription
+					,INC.intDiscountScheduleLineId
+					,INC.intDiscountScheduleCodeId
+					,@dblNewEndingValue
+					,@dblRangeStartingValue
+					,INC.dblIncrementValue
+					,@dblNewDiscountValue
+					,@dblNewShrinkValue
+					,INC.strUnitMeasure
+					,INC.ysnHasShrink
+				FROM ##tmpGRDiscountTableIncremental INC
+				WHERE intDiscountScheduleLineId = @intCursorDiscountScheduleLineId
+				
+				SET @dblRangeStartingValue += @dblIncrementValue;
+				IF @dblIncrementValue <= 0
+					BREAK;
+			END
+		END
+		ELSE
+		-- Descending logic
+		BEGIN
+			WHILE @dblRangeStartingValue > @dblRangeEndingValue
+			BEGIN
+				SET @dblNewEndingValue = CASE
+					WHEN (@dblRangeStartingValue) > (@dblRangeEndingValue - @dblIncrementValue)
+						THEN @dblRangeStartingValue + @dblIncrementValue
+							+ (CASE WHEN (@dblRangeStartingValue + @dblIncrementValue) >= @dblNextRangeStartingValue
+								OR @dblNextRangeStartingValue IS NULL
+								THEN 0.01 ELSE 0 END)
+					WHEN @dblRangeStartingValue <= (@dblRangeEndingValue - @dblIncrementValue) THEN
+						CASE WHEN @dblNextRangeStartingValue IS NOT NULL THEN
+							CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue
+							THEN @dblRangeEndingValue + 0.01
+							ELSE
+								CASE WHEN @dblNextRangeStartingValue > 0 THEN @dblNextRangeStartingValue + 0.01 ELSE @dblRangeEndingValue END
+							END
+						ELSE @dblRangeEndingValue END
+					END;
+				
+				IF @dblIncrementValue = 0
+					SET @dblNewEndingValue = @dblRangeEndingValue;
+				
+				SET @dblNewDiscountValue += @dblDiscountValue;
+				SET @dblNewShrinkValue += @dblShrinkValue;
+
+				-- Insert entry to extended table
+				INSERT INTO ##tmpGRDiscountTableExtended
+				SELECT
+					INC.intDiscountScheduleId
+					,INC.strCommodityCode
+					,INC.strDiscountDescription
+					,INC.intItemId
+					,INC.strItemNo
+					,INC.strDescription
+					,INC.intDiscountScheduleLineId
+					,INC.intDiscountScheduleCodeId
+					,@dblNewEndingValue
+					,@dblRangeStartingValue
+					,INC.dblIncrementValue
+					,@dblNewDiscountValue
+					,@dblNewShrinkValue
+					,INC.strUnitMeasure
+					,INC.ysnHasShrink
+				FROM ##tmpGRDiscountTableIncremental INC
+				WHERE intDiscountScheduleLineId = @intCursorDiscountScheduleLineId
+				
+				SET @dblRangeStartingValue += @dblIncrementValue;
+				IF @dblIncrementValue = 0
+					BREAK;
+			END
+		END
+
+		FETCH NEXT FROM intListCursor 
 		INTO 
 			@intCursorDiscountScheduleLineId
 			,@dblRangeStartingValue
@@ -162,132 +262,10 @@ BEGIN TRY
 			,@dblShrinkValue
 			,@dblNextRangeStartingValue
 			,@ysnIsAscending;
-		
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			-- Ascending logic
-			IF @ysnIsAscending = 1
-			BEGIN
-				WHILE @dblRangeStartingValue < @dblRangeEndingValue
-				BEGIN
-					SET @dblNewEndingValue = CASE
-						WHEN (@dblRangeStartingValue + @dblIncrementValue) > @dblRangeEndingValue
-							THEN @dblRangeEndingValue - (CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue THEN 0.01 ELSE 0 END)
-						WHEN (@dblRangeStartingValue + @dblIncrementValue) >= @dblNextRangeStartingValue AND @dblNextRangeStartingValue > 0
-							THEN @dblNextRangeStartingValue - 0.01
-						WHEN (@dblRangeStartingValue + @dblIncrementValue) < @dblRangeEndingValue
-							THEN (@dblRangeStartingValue + @dblIncrementValue) - 0.01
-						WHEN @dblRangeEndingValue < @dblNextRangeStartingValue AND @dblNextRangeStartingValue > 0
-							THEN @dblNextRangeStartingValue - 0.01
-						ELSE @dblRangeStartingValue + @dblIncrementValue END
-					
-					IF @dblIncrementValue <= 0
-						SET @dblNewEndingValue = @dblRangeEndingValue;
-
-					SET @dblNewDiscountValue += @dblDiscountValue;
-					SET @dblNewShrinkValue += @dblShrinkValue;
-
-					-- Insert entry to extended table
-					INSERT INTO ##tmpGRDiscountTableExtended
-					SELECT
-						INC.intDiscountScheduleId
-						,INC.strCommodityCode
-						,INC.strDiscountDescription
-						,INC.intItemId
-						,INC.strItemNo
-						,INC.strDescription
-						,INC.intDiscountScheduleLineId
-						,INC.intDiscountScheduleCodeId
-						,@dblNewEndingValue
-						,@dblRangeStartingValue
-						,INC.dblIncrementValue
-						,@dblNewDiscountValue
-						,@dblNewShrinkValue
-						,INC.strUnitMeasure
-						,INC.ysnHasShrink
-					FROM ##tmpGRDiscountTableIncremental INC
-					WHERE intDiscountScheduleLineId = @intCursorDiscountScheduleLineId
-					
-					SET @dblRangeStartingValue += @dblIncrementValue;
-					IF @dblIncrementValue <= 0
-						BREAK;
-				END
-			END
-			ELSE
-			-- Descending logic
-			BEGIN
-				WHILE @dblRangeStartingValue > @dblRangeEndingValue
-				BEGIN
-					SET @dblNewEndingValue = CASE
-						WHEN (@dblRangeStartingValue) > (@dblRangeEndingValue - @dblIncrementValue)
-							THEN @dblRangeStartingValue + @dblIncrementValue
-								+ (CASE WHEN (@dblRangeStartingValue + @dblIncrementValue) >= @dblNextRangeStartingValue
-									OR @dblNextRangeStartingValue IS NULL
-									THEN 0.01 ELSE 0 END)
-						WHEN @dblRangeStartingValue <= (@dblRangeEndingValue - @dblIncrementValue) THEN
-							CASE WHEN @dblNextRangeStartingValue IS NOT NULL THEN
-								CASE WHEN @dblRangeEndingValue = @dblNextRangeStartingValue
-								THEN @dblRangeEndingValue + 0.01
-								ELSE
-									CASE WHEN @dblNextRangeStartingValue > 0 THEN @dblNextRangeStartingValue + 0.01 ELSE @dblRangeEndingValue END
-								END
-							ELSE @dblRangeEndingValue END
-						END;
-					
-					IF @dblIncrementValue = 0
-						SET @dblNewEndingValue = @dblRangeEndingValue;
-					
-					SET @dblNewDiscountValue += @dblDiscountValue;
-					SET @dblNewShrinkValue += @dblShrinkValue;
-
-					-- Insert entry to extended table
-					INSERT INTO ##tmpGRDiscountTableExtended
-					SELECT
-						INC.intDiscountScheduleId
-						,INC.strCommodityCode
-						,INC.strDiscountDescription
-						,INC.intItemId
-						,INC.strItemNo
-						,INC.strDescription
-						,INC.intDiscountScheduleLineId
-						,INC.intDiscountScheduleCodeId
-						,@dblNewEndingValue
-						,@dblRangeStartingValue
-						,INC.dblIncrementValue
-						,@dblNewDiscountValue
-						,@dblNewShrinkValue
-						,INC.strUnitMeasure
-						,INC.ysnHasShrink
-					FROM ##tmpGRDiscountTableIncremental INC
-					WHERE intDiscountScheduleLineId = @intCursorDiscountScheduleLineId
-					
-					SET @dblRangeStartingValue += @dblIncrementValue;
-					IF @dblIncrementValue = 0
-						BREAK;
-				END
-			END
-
-			FETCH NEXT FROM intListCursor 
-			INTO 
-				@intCursorDiscountScheduleLineId
-				,@dblRangeStartingValue
-				,@dblRangeEndingValue
-				,@dblIncrementValue
-				,@dblDiscountValue
-				,@dblShrinkValue
-				,@dblNextRangeStartingValue
-				,@ysnIsAscending;
-		END
-
-		CLOSE intListCursor;
-		DEALLOCATE intListCursor;
-
-		FETCH NEXT FROM intListCursorDiscScheduleCode
-		INTO @intCursorDiscountScheduleCodeId;
 	END
 
-	CLOSE intListCursorDiscScheduleCode;
-	DEALLOCATE intListCursorDiscScheduleCode;
+	CLOSE intListCursor;
+	DEALLOCATE intListCursor;
 	
 	-- Fetch final result
 	SELECT * FROM ##tmpGRDiscountTableExtended
