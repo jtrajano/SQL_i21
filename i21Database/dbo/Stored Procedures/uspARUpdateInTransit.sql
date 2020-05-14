@@ -37,7 +37,7 @@ BEGIN
 		 , intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
 		 , intStorageLocationId				= ID.intStorageLocationId
 		 , dblQty							= CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL 
-												   THEN ROUND(ID.dblQtyShipped/ CASE WHEN ICSI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICSI.[dblDestinationQuantity], ICSI.[dblQuantity]) ELSE ICSI.[dblQuantity] END, 6) * ICSI.[dblQuantity]
+												   THEN ROUND(ID.dblQtyShipped/ CASE WHEN ICSI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICSI.[dblDestinationQuantity], ICSI.[dblQuantity]) ELSE ICSI.[dblQuantity] END, 2) * ICSI.[dblQuantity]
 												   ELSE ID.dblQtyShipped
 											  END * (CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
 		 , intInvoiceId						= I.intInvoiceId
