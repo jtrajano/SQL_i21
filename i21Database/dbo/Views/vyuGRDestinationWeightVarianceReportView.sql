@@ -26,6 +26,7 @@
 		,ISNULL(SPLIT.dblSplitPercent, 100) AS [dblSplitPercent]
 		,COMLOC.intCompanyLocationId
 		,COMLOC.strLocationName
+		,COMLOC.strLocationNumber
 		,DISCID.strDiscountId
 		,SC.dblTicketFees
 		,SC.strCustomerReference
