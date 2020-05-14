@@ -10,7 +10,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strBucketType
 		,strTransactionType
 		,strTransactionNumber
-		,strContractSeq
+		,strContractNumber
+		,intContractSeq
 		,dblTransactionQty = dblOrigQty
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, dblOrigQty)
@@ -41,7 +42,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strBucketType = strTransactionType
 		,strTransactionType = strTransactionReference
 		,strTransactionNumber = strTransactionReferenceNo
-		,strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR(10),intContractSeq)
+		,strContractNumber
+		,intContractSeq
 		,dblTransactionQty = dblQty 
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(CB.intQtyUOMId,stckUOM.intCommodityUnitMeasureId, dblQty)
@@ -72,7 +74,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strBucketType = strTransactionType
 		,strTransactionType = strTransactionReference
 		,strTransactionNumber = strTransactionReferenceNo
-		,strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR(10),intContractSeq)
+		,strContractNumber
+		,intContractSeq
 		,dblTransactionQty = dblQty 
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQtyToTargetItemUOM(SD.intQtyUOMId ,stckUOM.intItemUOMId, dblQty)

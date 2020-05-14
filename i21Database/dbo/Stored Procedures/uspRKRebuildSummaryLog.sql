@@ -1154,7 +1154,7 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Voucher'
-				, intTransactionId = bd.intBillDetailId
+				, intTransactionId = b.intBillId
 				, strTransactionId = b.strBillId
 				, intFutureMarketId
 				, intFutureMonthId
@@ -1182,7 +1182,7 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Voucher'
-				, intTransactionId = bd.intBillDetailId
+				, intTransactionId = b.intBillId
 				, strTransactionId = b.strBillId
 				, intFutureMarketId
 				, intFutureMonthId
@@ -1210,7 +1210,7 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Invoice'
-				, intTransactionId = id.intInvoiceDetailId
+				, intTransactionId = i.intInvoiceId
 				, strTransactionId = i.strInvoiceNumber
 				, intFutureMarketId
 				, intFutureMonthId
@@ -1238,7 +1238,7 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Invoice'
-				, intTransactionId = id.intInvoiceDetailId
+				, intTransactionId = i.intInvoiceId
 				, strTransactionId = i.strInvoiceNumber
 				, intFutureMarketId
 				, intFutureMonthId

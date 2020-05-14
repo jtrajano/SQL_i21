@@ -15,6 +15,7 @@ SELECT SL.intSummaryLogId
 	, SL.intContractDetailId
 	, SL.intContractHeaderId
 	, CH.strContractNumber
+	, CD.intContractSeq
 	, strContractSeq = CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
 	, SL.intFutureMarketId
 	, strFutureMarket = fMar.strFutMarketName
