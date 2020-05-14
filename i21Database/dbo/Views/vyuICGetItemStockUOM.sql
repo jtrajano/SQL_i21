@@ -143,4 +143,7 @@ FROM tblICItem i
 	LEFT OUTER JOIN tblICCountGroup g ON g.intCountGroupId = l.intCountGroupId
 	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
 	LEFT OUTER JOIN tblICCategory cg ON cd.intCommodityId = i.intCategoryId
-WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemStockUOM WHERE intItemId = i.intItemId)
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemStockUOM
+	WHERE intItemId = i.intItemId
+		AND intItemLocationId = l.intItemLocationId
+		AND im.intItemUOMId = intItemUOMId)
