@@ -515,6 +515,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId
 			, intSubLocationId
 			, intCompanyLocationSubLocationId
+			, strDocumentNumber
 		)
 		SELECT intInvoiceDetailId				= NULL
 		    , strSourceTransaction				= 'Direct'
@@ -546,6 +547,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId				= ID.intStorageLocationId
 			, intSubLocationId					= ID.intSubLocationId
 			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
+			, strDocumentNumber					= ID.strDocumentNumber
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
@@ -593,6 +595,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId				= NULL
 			, intSubLocationId					= NULL
 			, intCompanyLocationSubLocationId	= NULL
+			, strDocumentNumber					= ID.strDocumentNumber
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
