@@ -1009,18 +1009,30 @@ BEGIN TRY
         ,[intErrorCode]     INT
         ,[strModuleName]    NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
 
-    INSERT INTO @InvalidGLEntries
-        ([strTransactionId]
-        ,[strText]
-        ,[intErrorCode]
-        ,[strModuleName])
+    INSERT INTO @InvalidGLEntries (
+		  [strTransactionId]
+        , [strText]
+        , [intErrorCode]
+        , [strModuleName]
+	)
     SELECT DISTINCT
-         [strTransactionId]
-        ,[strText]
-        ,[intErrorCode]
-        ,[strModuleName]
-    FROM
-        [dbo].[fnGetGLEntriesErrors](@GLEntries)
+          [strTransactionId]
+        , [strText]
+        , [intErrorCode]
+        , [strModuleName]
+    FROM [dbo].[fnGetGLEntriesErrors](@GLEntries)
+
+	INSERT INTO @InvalidGLEntries (
+		  [strTransactionId]
+        , [strText]
+        , [intErrorCode]
+        , [strModuleName])
+    SELECT DISTINCT
+          [strTransactionId]
+        , [strText]
+        , [intErrorCode]
+        , [strModuleName]
+    FROM [dbo].[fnARGetInvalidGLEntries](@GLEntries, @post)
 
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
