@@ -8148,6 +8148,8 @@
     <Build Include="dbo\Stored Procedures\uspRKSaveMatchDerivative.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSaveDerivativeEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspRKSaveCollateral.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

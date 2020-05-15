@@ -1981,6 +1981,16 @@ BEGIN
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
 	END
+
+	---- Call the uspICLogRiskPositionFromOnHand to log data for DPR Summary Log
+	--BEGIN 
+	--	EXEC @intReturnValue = uspICLogRiskPositionFromOnHand
+	--		@strBatchId = @strBatchId
+	--		,@strTransactionId = @strTransactionId
+	--		,@intBucketType = 1
+	--		,@intActionType = 1
+	--		,@intEntityUserSecurityId = @intEntityUserSecurityId
+	--END 
 END   
 
 --------------------------------------------------------------------------------------------  
