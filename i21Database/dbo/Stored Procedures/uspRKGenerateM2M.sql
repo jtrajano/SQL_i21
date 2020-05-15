@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateM2M]
-	@intM2MHeaderId INT = NULL
+	@intM2MHeaderId INT = NULL OUTPUT
 	, @intCommodityId INT = NULL
 	, @intM2MTypeId INT
 	, @intM2MBasisId INT
