@@ -4,12 +4,13 @@
 	@intUserId INT
 )
 AS
+ 
 BEGIN
 	SET QUOTED_IDENTIFIER OFF
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF	
+	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]	
@@ -20,7 +21,6 @@ BEGIN
 	DECLARE @intSourceItemUOMId INT
 	DECLARE @intCustomerStorageId INT --new customer storage id
 	DECLARE @intStorageHistoryId INT = 0
-	DECLARE @intDecimalPrecision INT = 20
 	DECLARE @intTransferStorageSplitId INT
 	DECLARE @XML NVARCHAR(MAX)
 	DECLARE @strScreenName NVARCHAR(50)
@@ -28,18 +28,23 @@ BEGIN
 	DECLARE @intNewContractDetailId INT
 	DECLARE @intEntityId INT
 	DECLARE @intToEntityId INT
+	DECLARE @intTransferStorageReferenceId INT
+
+	DECLARE @StorageHistoryStagingTable2 AS StorageHistoryStagingTable
+	DECLARE @intIdentityId INT
+	DECLARE @HistoryIds AS Id
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
-		intToCustomerStorageId INT
+		intId INT IDENTITY(1,1)
+		,intToCustomerStorageId INT
 		,intTransferStorageSplitId INT
 		,intSourceCustomerStorageId INT
 		,dblUnitQty NUMERIC(38,20)
 		,dblSplitPercent NUMERIC(38,20)
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
-	DECLARE @intTransferStorageReferenceId INT
+	DECLARE @GLForItem AS GLForItem
 
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
@@ -60,7 +65,7 @@ BEGIN
 			FOR XML PATH('')
 		),1,1,'')
 		
-		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user.  Transfer process cannot proceed.'
+		SET @ErrMsg = 'The Open balance of ticket ' + @TicketNo + ' has been modified by another user. Transfer process cannot proceed.'
 		
 		RAISERROR(@ErrMsg,16,1)
 		RETURN;
@@ -107,7 +112,7 @@ BEGIN
 				@intContractDetailId	= @intTransferContractDetailId
 				,@dblQuantityToUpdate	= @dblTransferUnits
 				,@intUserId				= @intUserId
-				,@intExternalId			= @intCustomerStorageId
+				,@intExternalId			= @intTransferStorageId
 				,@strScreenName			= 'Transfer Storage'
 				,@intSourceItemUOMId	= @intSourceItemUOMId
 
@@ -117,48 +122,11 @@ BEGIN
 
 		--update the source's customer storage open balance
 		UPDATE A
-		SET A.dblOpenBalance 	= ROUND(B.dblOriginalUnits - B.dblDeductedUnits,@intDecimalPrecision)
+		SET A.dblOpenBalance 	= CASE WHEN (ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6)) > A.dblOriginalBalance THEN A.dblOriginalBalance ELSE ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6) END
 		FROM tblGRCustomerStorage A 
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
 		WHERE B.intTransferStorageId = @intTransferStorageId
-		
-		DELETE FROM @StorageHistoryStagingTable
-		--insert history for the old (source) customer storage		
-		INSERT INTO @StorageHistoryStagingTable
-		(
-			[intCustomerStorageId]
-			,[intTransferStorageId]
-			,[intContractHeaderId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[intUserId]
-			,[ysnPost]
-			,[intTransactionTypeId]
-			,[strPaidDescription]
-			,[strType]
-		)
-		SELECT
-			[intCustomerStorageId]	= SourceSplit.intSourceCustomerStorageId
-			,[intTransferStorageId]	= SourceSplit.intTransferStorageId
-			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= -(SourceSplit.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100))
-			,[dtmHistoryDate]		= GETDATE()
-			,[intUserId]			= @intUserId
-			,[ysnPost]				= 1
-			,[intTransactionTypeId]	= 3
-			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'Transfer'
-		FROM tblGRTransferStorageSourceSplit SourceSplit
-		LEFT JOIN tblCTContractDetail CD
-			ON CD.intContractDetailId = SourceSplit.intContractDetailId
-		INNER JOIN tblGRTransferStorage TS
-			ON TS.intTransferStorageId = SourceSplit.intTransferStorageId
-		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
-			ON TransferStorageSplit.intTransferStorageId = SourceSplit.intTransferStorageId	
-		WHERE SourceSplit.intTransferStorageId = @intTransferStorageId	
-
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId		
 		----END----TRANSACTIONS FOR THE SOURCE---------
 
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
@@ -218,7 +186,7 @@ BEGIN
 			,[intDiscountScheduleId]			= CS.intDiscountScheduleId
 			,[dblTotalPriceShrink]				= CS.dblTotalPriceShrink		
 			,[dblTotalWeightShrink]				= CS.dblTotalWeightShrink		
-			,[dblQuantity]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblQuantity]						= ROUND(SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100),6)
 			,[dtmDeliveryDate]					= CS.dtmDeliveryDate
 			,[dtmZeroBalanceDate]				= CS.dtmZeroBalanceDate			
 			,[strDPARecieptNumber]				= CS.strDPARecieptNumber		
@@ -248,9 +216,9 @@ BEGIN
 			,[intTicketId]						= CS.intTicketId
 			,[intDeliverySheetId]				= CS.intDeliverySheetId
 			,[ysnTransferStorage]				= 1
-			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,@intDecimalPrecision)
+			,[dblGrossQuantity]					= ROUND(((SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)) / CS.dblOriginalBalance) * CS.dblGrossQuantity,6)
 			,[intSourceCustomerStorageId]		= CS.intCustomerStorageId
-			,[dblUnitQty]						= SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100)
+			,[dblUnitQty]						= ROUND(SourceStorage.dblOriginalUnits * (TransferStorageSplit.dblSplitPercent / 100),6)
 			,[intSplitPercent]					= TransferStorageSplit.dblSplitPercent
 		FROM tblGRCustomerStorage CS
 		INNER JOIN tblGRTransferStorageSourceSplit SourceStorage
@@ -258,7 +226,7 @@ BEGIN
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = SourceStorage.intTransferStorageId
 		INNER JOIN tblGRTransferStorageSplit TransferStorageSplit
-			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId		
+			ON TransferStorageSplit.intTransferStorageId = SourceStorage.intTransferStorageId
 		WHERE SourceStorage.intTransferStorageId = @intTransferStorageId
 
 		--SELECT * FROM @CustomerStorageStagingTable
@@ -359,16 +327,113 @@ BEGIN
 		OUTPUT
 			inserted.intCustomerStorageId,
 			SourceData.intTransferStorageSplitId,
-			SourceData.[intSourceCustomerStorageId],
+			SourceData.intSourceCustomerStorageId,
 			SourceData.dblUnitQty,
 			SourceData.dblSplitPercent,
 			GETDATE()
-			--SourceData.
 		INTO @newCustomerStorageIds;
 
-		INSERT INTO tblGRTransferStorageReference
-		SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds
-		SET @intTransferStorageReferenceId = @@ROWCOUNT
+		--NEW: HISTORY AND REFERENCE FOR THE SOURCE CUSTOMER STORAGE
+		DECLARE @intId INT
+		DECLARE @intInsertedId INT
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+			SELECT intId FROM @newCustomerStorageIds
+		OPEN c;
+		FETCH NEXT FROM c INTO @intId
+
+		DELETE FROM @HistoryIds
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			INSERT INTO tblGRTransferStorageReference
+			SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds WHERE intId = @intId
+
+			SET @intTransferStorageReferenceId = CASE WHEN ISNULL(@intTransferStorageReferenceId,0) = 0 THEN @@ROWCOUNT ELSE @intTransferStorageReferenceId + 1 END
+
+			SET @intInsertedId = SCOPE_IDENTITY()
+
+			DELETE FROM @StorageHistoryStagingTable
+			--insert history for the old (source) customer storage		
+			INSERT INTO @StorageHistoryStagingTable
+			(
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+				,[intTransferStorageReferenceId]
+			)
+			SELECT
+				[intCustomerStorageId]				= TSR.intSourceCustomerStorageId
+				,[intTransferStorageId]				= TSR.intTransferStorageId
+				,[intContractHeaderId]				= CD.intContractHeaderId
+				,[dblUnits]							= -TSR.dblUnitQty
+				,[dtmHistoryDate]					= GETDATE()
+				,[intUserId]						= @intUserId
+				,[ysnPost]							= 1
+				,[intTransactionTypeId]				= 3
+				,[strPaidDescription]				= 'Generated from Transfer Storage'
+				,[strType]							= 'Transfer'
+				,[intTransferStorageReferenceId]	= @intInsertedId
+			FROM tblGRTransferStorageReference TSR
+			INNER JOIN tblGRTransferStorageSourceSplit T_SOURCE
+				ON T_SOURCE.intTransferStorageId = TSR.intTransferStorageId
+					AND TSR.intSourceCustomerStorageId = T_SOURCE.intSourceCustomerStorageId
+			LEFT JOIN tblCTContractDetail CD
+				ON CD.intContractDetailId = T_SOURCE.intContractDetailId
+			WHERE TSR.intTransferStorageReferenceId = @intInsertedId
+			
+			WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
+			BEGIN
+				SELECT TOP 1 @intIdentityId = intId FROM @StorageHistoryStagingTable
+
+				DELETE FROM @StorageHistoryStagingTable2
+				INSERT INTO @StorageHistoryStagingTable2
+				(
+					[intCustomerStorageId]
+					,[intTransferStorageId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]
+					,[intUserId]
+					,[ysnPost]
+					,[intTransactionTypeId]
+					,[strPaidDescription]
+					,[strType]
+					,[intTransferStorageReferenceId]
+				)
+				SELECT TOP 1
+					[intCustomerStorageId]
+					,[intTransferStorageId]
+					,[intContractHeaderId]
+					,[dblUnits]
+					,[dtmHistoryDate]
+					,[intUserId]
+					,[ysnPost]
+					,[intTransactionTypeId]
+					,[strPaidDescription]
+					,[strType]
+					,[intTransferStorageReferenceId]
+				FROM @StorageHistoryStagingTable
+				WHERE intId = @intIdentityId
+
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable2, @intStorageHistoryId OUTPUT
+
+				IF NOT EXISTS(SELECT TOP 1 1 FROM @HistoryIds WHERE intId = @intStorageHistoryId)
+				BEGIN
+					INSERT INTO @HistoryIds SELECT @intStorageHistoryId
+				END
+			
+				DELETE FROM @StorageHistoryStagingTable WHERE intId = @intIdentityId
+			END
+			FETCH c INTO @intId
+		END
+		CLOSE c; DEALLOCATE c;
 
 		--
 		IF(ISNULL(@intTransferStorageReferenceId,0) > 0)
@@ -376,7 +441,7 @@ BEGIN
 				DECLARE @ItemsToPost AS ItemCostingTableType
 				INSERT INTO @ItemsToPost 
 				(
-						intItemId
+					intItemId
 					,intItemLocationId
 					,intItemUOMId
 					,dtmDate
@@ -401,14 +466,15 @@ BEGIN
 					,IL.intItemLocationId 
 					,ToStorage.intItemUOMId
 					,dtmTransferStorageDate
-					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) * CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
+					,dbo.fnCTConvertQuantityToTargetItemUOM(ToStorage.intItemId, IU.intUnitMeasureId, ToStorage.intUnitMeasureId, SR.dblUnitQty) 
+						* CASE WHEN (FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) THEN -1 ELSE 1 END
 					,IU.dblUnitQty
 					,0
 					,dblSalesPrice = 0
-					, ToStorage.intCurrencyId
+					,ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
-					,intTransactionDetailId = SR.intTransferStorageSplitId
+					,intTransactionDetailId = SR.intTransferStorageReferenceId
 					,strTransactionId = TS.strTransferStorageTicket
 					,intTransactionTypeId = 56
 					,intLotId = NULL
@@ -434,21 +500,24 @@ BEGIN
 					ON SR.intTransferStorageId = TS.intTransferStorageId
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
-
-
-				DECLARE @cursorId INT
+				
+				DECLARE @cursorId INT, @intTransactionDetailId INT
 
 				DECLARE _CURSOR CURSOR
 				FOR
-				SELECT intId FROM @ItemsToPost
+				SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 				OPEN _CURSOR
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
+						DECLARE @DummyGLEntries AS RecapTableType;
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
+						DECLARE @dblOriginalCost AS DECIMAL(24,10);
+						DECLARE @dblDiscountCost AS DECIMAL(24,10);
+						DECLARE @dblUnits AS DECIMAL(24,10);
 						DECLARE @strBatchId AS NVARCHAR(40);
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -486,10 +555,27 @@ BEGIN
 							,@dblBasisCost DECIMAL(18,6)
 							,@dblSettlementPrice DECIMAL(18,6)
 							,@strRKError VARCHAR(MAX)
+							,@ysnDPtoOtherStorage BIT
 
+						--Check if Transfer is DP To Other Storage (Disregard Risk Error)
+						SELECT 
+							@ysnDPtoOtherStorage = CASE WHEN FromStorage.intStorageTypeId = 2 AND ToStorage.intStorageTypeId != 2 THEN 1 ELSE 0 END
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage FromStorage
+							ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType FromType
+							ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+						INNER JOIN tblGRCustomerStorage ToStorage
+							ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+						INNER JOIN tblGRStorageType ToType
+							ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+						INNER JOIN tblGRTransferStorage TS
+							ON SR.intTransferStorageId = TS.intTransferStorageId
+						WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
+						ORDER BY dtmTransferStorageDate
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
-							
+							,@dblUnits = ITP.dblQty
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -510,7 +596,12 @@ BEGIN
 							ON IL.intItemLocationId = ITP.intItemLocationId
 						WHERE intId = @cursorId
 
-						SELECT @strRKError = CASE WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' END +  ' in risk management is not available.'
+						IF @ysnDPtoOtherStorage = 0
+						SELECT @strRKError = CASE 
+												WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' 
+												WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' 
+												WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' 
+											END +  ' in risk management is not available.'
 
 						IF @strRKError IS NOT NULL
 						BEGIN
@@ -518,31 +609,37 @@ BEGIN
 						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
-						
+						set @dblOriginalCost = @dblCost
+
 						DECLARE @OtherChargesDetail AS TABLE(
 							intOtherChargesDetailId INT IDENTITY(1, 1)
 							,strOrderType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 							,intCustomerStorageId INT
 							,intCompanyLocationId INT
 							,dblUnits DECIMAL(24, 10)
-							,dblCashPrice DECIMAL(24, 10)
+							,dblCashPrice DECIMAL(36, 20)
+							,dblExactCashPrice DECIMAL (24,10)
 							,intItemId INT NULL
 							,intItemType INT NULL
 							,IsProcessed BIT
 							,intTicketDiscountId INT NULL
 							,ysnDiscountFromGrossWeight BIT NULL
+							,ysnIsPercent bit null
 						)
+						delete from @OtherChargesDetail
 						INSERT INTO @OtherChargesDetail
 						(
 							intCustomerStorageId
 							,intCompanyLocationId
 							,dblUnits
 							,dblCashPrice
+							,dblExactCashPrice
 							,intItemId
 							,intItemType
 							,IsProcessed
 							,intTicketDiscountId
 							,ysnDiscountFromGrossWeight
+							,ysnIsPercent
 						)
 						SELECT 
 							 intCustomerStorageId		= CS.intCustomerStorageId
@@ -551,7 +648,8 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 																CASE WHEN CS.dblGrossQuantity IS NULL THEN SR.dblUnitQty
 																ELSE
-																	ROUND((SR.dblUnitQty / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)
+																	--(SR.dblUnitQty / CS.dblOriginalBalance) * 
+																	ROUND((CS.dblGrossQuantity  * (isnull(SR.dblSplitPercent, 100) / 100)) ,10)
 																END
 															ELSE SR.dblUnitQty
 														END
@@ -559,10 +657,11 @@ BEGIN
 															WHEN QM.strDiscountChargeType = 'Percent'
 																		THEN (dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0)))
 																			*
-																			@dblCost/*@dblCost*/--(CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END)
+																			@dblCost
 															ELSE --Dollar
 																dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountPaid, 0)) - dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId, IU.intUnitMeasureId, CS.intUnitMeasureId, ISNULL(QM.dblDiscountDue, 0))
 														END
+							,dblExactCashPrice			= 0
 							,intItemId					= DItem.intItemId 
 							,intItemType				= 3 
 							,IsProcessed				= 0
@@ -571,6 +670,7 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
 															ELSE 0
 														END
+							,ysnIsPercent				=  CASE WHEN QM.strDiscountChargeType = 'Percent' THEN 1 ELSE 0 END
 							FROM @ItemsToPost ITP
 							JOIN tblGRTransferStorageReference SR
 							  ON ITP.intTransactionId = SR.intTransferStorageId
@@ -589,15 +689,23 @@ BEGIN
 							ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
 							JOIN tblICItem DItem 
 							ON DItem.intItemId = DSC.intItemId
-							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
-							
+							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and ITP.intId = @cursorId
+						
 						SELECT @dblCost = @dblCost + ISNULL(SUM(dblCashPrice),0) FROM @OtherChargesDetail OCD 
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = OCD.intItemId
 						WHERE IC.ysnInventoryCost = 1
-						
+
+						update @OtherChargesDetail set dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
+
+						SELECT @dblDiscountCost = ISNULL(SUM(round(dblUnits*dblCashPrice, 2)),0) FROM @OtherChargesDetail OCD 
+						INNER JOIN tblICItem IC
+							ON IC.intItemId = OCD.intItemId
+						WHERE IC.ysnInventoryCost = 1
+
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
+						DELETE FROM @GLForItem
 						INSERT INTO @Entry 
 						(
 							intItemId
@@ -620,15 +728,41 @@ BEGIN
 							,ysnIsStorage
 							,intStorageScheduleTypeId
 						)
-						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblOriginalCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
 
+						INSERT INTO @GLForItem
+						(
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId
+							,ysnIsStorage
+							,intStorageScheduleTypeId
+						)
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblDiscountCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						FROM @ItemsToPost WHERE intId = @cursorId
+						
 						IF(SELECT dblQty FROM @Entry) > 0
 						BEGIN
-							UPDATE @Entry
-							SET dblQty = dblQty*-1
-
-							INSERT INTO @GLEntries 
+						
+							--UPDATE @Entry
+							--SET dblQty = 0--dblQty*-1
+							
+							INSERT INTO @DummyGLEntries 
 							(
 							[dtmDate] 
 							,[strBatchId]
@@ -666,6 +800,48 @@ BEGIN
 							,[intCommodityId]--MOD
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
+							select 'check'
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@intTransactionDetailId,@strBatchId,@dblCost,1
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= dblCreditUnit
+								,dblCredit		= dblDebit
+								,dblCreditUnit  = dblDebitUnit
 
 							INSERT INTO @GLEntries 
 							(
@@ -702,27 +878,30 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
-									EXEC dbo.uspGLBookEntries @GLEntries, 1 
+								EXEC dbo.uspGLBookEntries @GLEntries, 1 
 							END
 							
-							UPDATE @Entry
-							SET dblQty = dblQty*-1
+							UPDATE @Entry SET dblQty = dblQty*-1
 							
-							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,@intUserId
+							EXEC dbo.uspICPostStorage @Entry,@strBatchId,@intUserId
 
 						END
 						ELSE
 						BEGIN
-							EXEC	dbo.uspICPostStorage @Entry,@strBatchId,@intUserId
+						select @strBatchId,@intUserId,* from @Entry
+							EXEC dbo.uspICPostStorage @Entry,@strBatchId,@intUserId
 
-							UPDATE @Entry
-							SET dblQty = dblQty*-1
+							UPDATE @Entry SET dblQty = dblQty*-1
 
-							INSERT INTO @GLEntries 
+							INSERT INTO @DummyGLEntries 
 							(
 							[dtmDate] 
 							,[strBatchId]
@@ -760,6 +939,7 @@ BEGIN
 							,[intCommodityId]--MOD
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
+							--Used total discount cost on @GLForItem to get the correct decimal					
 
 							INSERT INTO @GLEntries 
 							(
@@ -796,16 +976,57 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							EXEC dbo.uspGRCreateItemGLEntriesTransfer
+								@strBatchId
+								,@GLForItem
+								,'AP Clearing'
+								,1
+
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@intTransactionDetailId,@strBatchId,@dblOriginalCost,1
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
-									EXEC dbo.uspGLBookEntries @GLEntries, 1 
+								EXEC dbo.uspGLBookEntries @GLEntries, 1 
 							END
 						END
 
 			
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
@@ -816,12 +1037,19 @@ BEGIN
 		--update tblGRTransferStorageSplit's intCustomerStorageId
 		UPDATE A
 		SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
-			,A.intContractDetailId = CT.intContractDetailId
+			,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN 
+										CASE 
+											WHEN A.intContractDetailId IS NULL THEN CT.intContractDetailId 
+											ELSE A.intContractDetailId
+										END
+									ELSE NULL END
 		FROM tblGRTransferStorageSplit A		
 		INNER JOIN @newCustomerStorageIds B
 			ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
 		INNER JOIN tblGRCustomerStorage CS
 			ON CS.intCustomerStorageId = B.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ST
+			ON ST.intStorageScheduleTypeId = A.intStorageTypeId
 		OUTER APPLY (
 			SELECT TOP 1 intContractDetailId
 			FROM vyuCTGetContractForScaleTicket
@@ -832,10 +1060,16 @@ BEGIN
 				AND ysnEarlyDayPassed = 1
 				AND intContractTypeId = 1
 				AND ysnAllowedToShow = 1
-		) CT		
+		) CT
 		
 		SET @cnt = 0
-		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NULL)
+		SET @cnt = (SELECT COUNT(*) 
+					FROM tblGRTransferStorageSplit TSS
+					INNER JOIN tblGRStorageType ST
+						ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+					WHERE intTransferStorageId = @intTransferStorageId 
+						AND ST.ysnDPOwnedType = 1
+						AND intContractDetailId IS NULL)
 
 		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 		FOR
@@ -900,38 +1134,7 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 
 		--(for new customer storage) insert to storage history table
-		DELETE FROM @StorageHistoryStagingTable
-		
-		INSERT INTO @StorageHistoryStagingTable
-		(
-			[intCustomerStorageId]
-			,[intTransferStorageId]
-			,[intContractHeaderId]
-			,[dblUnits]
-			,[dtmHistoryDate]
-			,[intUserId]
-			,[ysnPost]
-			,[intTransactionTypeId]
-			,[strPaidDescription]
-			,[strType]
-		)
-		SELECT
-			[intCustomerStorageId]	= A.intToCustomerStorageId
-			,[intTransferStorageId]	= TransferStorageSplit.intTransferStorageId
-			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= A.dblUnitQty
-			,[dtmHistoryDate]		= GETDATE()
-			,[intUserId]			= @intUserId
-			,[ysnPost]				= 1
-			,[intTransactionTypeId]	= 3
-			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'From Transfer'
-		FROM tblGRTransferStorageSplit TransferStorageSplit
-		INNER JOIN @newCustomerStorageIds A
-			ON A.intTransferStorageSplitId = TransferStorageSplit.intTransferStorageSplitId		
-		LEFT JOIN tblCTContractDetail CD
-			ON CD.intContractDetailId = TransferStorageSplit.intContractDetailId
-		
+		DELETE FROM @StorageHistoryStagingTable		
 		INSERT INTO @StorageHistoryStagingTable
 		(
 			[intCustomerStorageId]
@@ -945,46 +1148,81 @@ BEGIN
 			,[strPaidDescription]
 			,[strType]
 			,[intInventoryReceiptId]
+			,[intTransferStorageReferenceId]
 		)
 		SELECT DISTINCT	
-		     [intCustomerStorageId]	= SR.intToCustomerStorageId
-			,[intTransferStorageId]	= SR.intTransferStorageId
-			,[intContractHeaderId]	= CD.intContractHeaderId
-			,[dblUnits]				= SR.dblUnitQty
-			,[dtmHistoryDate]		= GETDATE()
-			,[intUserId]			= @intUserId
-			,[ysnPost]				= 1
-			,[intTransactionTypeId]	= 3
-			,[strPaidDescription]	= 'Generated from Transfer Storage'
-			,[strType]				= 'From Transfer'
-			,[intInventoryReceiptId] = SourceHistory.intInventoryReceiptId
+		     [intCustomerStorageId]				= SR.intToCustomerStorageId
+			,[intTransferStorageId]				= SR.intTransferStorageId
+			,[intContractHeaderId]				= CD.intContractHeaderId
+			,[dblUnits]							= SR.dblUnitQty
+			,[dtmHistoryDate]					= GETDATE()
+			,[intUserId]						= @intUserId
+			,[ysnPost]							= 1
+			,[intTransactionTypeId]				= 3
+			,[strPaidDescription]				= 'Generated from Transfer Storage'
+			,[strType]							= 'From Transfer'
+			,[intInventoryReceiptId]			= SourceHistory.intInventoryReceiptId
+			,[intTransferStorageReferenceId]	= SR.intTransferStorageReferenceId
 		FROM tblGRTransferStorageReference SR
 		INNER JOIN tblGRCustomerStorage FromStorage
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
-		INNER JOIN tblGRStorageType FromType
-			ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
 		INNER JOIN tblGRCustomerStorage ToStorage
 			ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
-		INNER JOIN tblGRStorageType ToType
-			ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
-		JOIN tblICItemUOM IU
-			ON IU.intItemId = ToStorage.intItemId
-				AND IU.ysnStockUnit = 1
-		INNER JOIN tblICItemLocation IL
-			ON IL.intItemId = ToStorage.intItemId AND IL.intLocationId = ToStorage.intCompanyLocationId
-		INNER JOIN tblGRTransferStorage TS
-			ON SR.intTransferStorageId = TS.intTransferStorageId
-		INNER JOIN tblGRStorageHistory SourceHistory
-			ON SourceHistory.intCustomerStorageId = FromStorage.intCustomerStorageId AND SourceHistory.intInventoryReceiptId IS NOT NULL
 		INNER JOIN tblGRTransferStorageSplit TSS
 			ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
+		LEFT JOIN tblGRStorageHistory SourceHistory
+			ON SourceHistory.intCustomerStorageId = FromStorage.intCustomerStorageId 
+				AND SourceHistory.intInventoryReceiptId IS NOT NULL
 		LEFT JOIN tblCTContractDetail CD
 			ON CD.intContractDetailId = TSS.intContractDetailId
-		WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
-		AND SR.intTransferStorageId = @intTransferStorageId
+		WHERE SR.intTransferStorageId = @intTransferStorageId
+		-- FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1 AND 
 
-		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
-		--integration to IC
+		WHILE EXISTS(SELECT TOP 1 1 FROM @StorageHistoryStagingTable)
+		BEGIN
+			SELECT TOP 1 @intIdentityId = intId FROM @StorageHistoryStagingTable
+
+			DELETE FROM @StorageHistoryStagingTable2
+			INSERT INTO @StorageHistoryStagingTable2
+			(
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+				,[intTransferStorageReferenceId]
+			)
+			SELECT TOP 1
+				[intCustomerStorageId]
+				,[intTransferStorageId]
+				,[intContractHeaderId]
+				,[dblUnits]
+				,[dtmHistoryDate]
+				,[intUserId]
+				,[ysnPost]
+				,[intTransactionTypeId]
+				,[strPaidDescription]
+				,[strType]
+				,[intTransferStorageReferenceId]
+			FROM @StorageHistoryStagingTable
+			WHERE intId = @intIdentityId
+
+			EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable2, @intStorageHistoryId OUTPUT
+
+			IF NOT EXISTS(SELECT TOP 1 1 FROM @HistoryIds WHERE intId = @intStorageHistoryId)
+			BEGIN
+				INSERT INTO @HistoryIds SELECT @intStorageHistoryId
+			END
+
+			DELETE FROM @StorageHistoryStagingTable WHERE intId = @intIdentityId
+		END
+		
+		--integration to CT
 		SET @cnt = 0
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
 
@@ -1023,7 +1261,7 @@ BEGIN
 				@intContractDetailId	= @intTransferContractDetailId
 				,@dblQuantityToUpdate	= @dblTransferUnits
 				,@intUserId				= @intUserId
-				,@intExternalId			= @intCustomerStorageId
+				,@intExternalId			= @intTransferStorageId
 				,@strScreenName			= 'Transfer Storage'
 				,@intSourceItemUOMId	= @intSourceItemUOMId
 
@@ -1091,6 +1329,21 @@ BEGIN
 		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
 		WHERE intTransferStorageId = @intTransferStorageId
 		
+		--RISK SUMMARY LOG
+		SET @intStorageHistoryId = NULL
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+			SELECT intId FROM @HistoryIds
+		OPEN c;
+		FETCH NEXT FROM c INTO @intStorageHistoryId
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspGRRiskSummaryLog @intStorageHistoryId
+			FETCH NEXT FROM c INTO @intStorageHistoryId
+		END
+		CLOSE c; DEALLOCATE c;
+
 		DONE:
 		COMMIT TRANSACTION
 	

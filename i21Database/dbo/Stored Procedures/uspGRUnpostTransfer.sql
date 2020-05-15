@@ -231,7 +231,7 @@ BEGIN
 					, ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
-					,intTransactionDetailId = SR.intTransferStorageSplitId
+					,intTransactionDetailId = SR.intTransferStorageReferenceId
 					,strTransactionId = TS.strTransferStorageTicket
 					,intTransactionTypeId = 56
 					,intLotId = NULL
@@ -259,14 +259,14 @@ BEGIN
 				ORDER BY dtmTransferStorageDate
 
 
-				DECLARE @cursorId INT
+				DECLARE @cursorId INT, @intTransactionDetailId INT
 
 				DECLARE _CURSOR CURSOR
 				FOR
-				SELECT intId FROM @ItemsToPost
+				SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 				OPEN _CURSOR
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
@@ -386,7 +386,7 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,0,1,@intEntityId
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId, @intTransactionDetailId, @strBatchId,0,1,@intEntityId
 							UPDATE @GLEntries 
 							SET dblDebit		= dblCredit
 								,dblDebitUnit	= dblCreditUnit
@@ -457,10 +457,13 @@ BEGIN
 		--LEFT JOIN tblGRTransferStorageSplit TSS
 		--	ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
 		--WHERE B.intTransferStorageId = @intTransferStorageId AND ISNULL(TSR.intTransferStorageId, @intTransferStorageId) = @intTransferStorageId
-
+		
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
+
+		--DELETE IN SUMMARY LOG
+		DELETE FROM tblRKSummaryLog WHERE intTransactionRecordHeaderId = @intTransferStorageId
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION

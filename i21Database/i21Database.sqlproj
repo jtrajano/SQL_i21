@@ -8137,6 +8137,8 @@
     <Build Include="dbo\Stored Procedures\uspRKRebuildSummaryLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLogSummary.sql" />
     <Build Include="dbo\User Defined Types\ContractDetailTable.sql" />
+    <Build Include="dbo\User Defined Types\GLForItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog.sql" />
     <Build Include="dbo\Tables\tblRKRebuildSummaryLog.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketContractBalance.sql" />

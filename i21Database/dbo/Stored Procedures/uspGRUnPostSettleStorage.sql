@@ -34,6 +34,8 @@ BEGIN TRY
 	DECLARE @intDecimalPrecision INT
 	DECLARE @success BIT
 	DECLARE @intCustomerStorageId AS INT
+	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
+	DECLARE @intStorageHistoryId INT
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
@@ -44,8 +46,6 @@ BEGIN TRY
 	FROM OPENXML(@idoc, 'root', 2) WITH (intSettleStorageId INT,intEntityUserSecurityId INT)
 	
 	SET @intParentSettleStorageId = @intSettleStorageId
-
-	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	DECLARE @tblContractIncrement AS TABLE 
 	(
@@ -64,12 +64,6 @@ BEGIN TRY
 
 	BEGIN
 		--1. Unpost the Voucher
-		
-		--check first if the settle storage being deleted is the parent, then its children should be deleted first
-		SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
-		FROM tblGRSettleStorage
-		WHERE intParentSettleStorageId = @intParentSettleStorageId
-
 		SELECT 
 			@BillId					= intBillId
 			,@TicketNo				= strStorageTicket
@@ -184,13 +178,23 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
 					AND SST.intSettleStorageId = UH.intExternalHeaderId
-			JOIN tblGRStorageHistory SH 
-				ON SH.intContractHeaderId = UH.intContractHeaderId 
-					AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			-- JOIN tblGRStorageHistory SH 
+			-- 	ON SH.intContractHeaderId = UH.intContractHeaderId 
+			-- 		AND SH.intCustomerStorageId = SST.intCustomerStorageId
+			OUTER APPLY (
+				SELECT DISTINCT
+					intContractHeaderId
+				FROM tblGRStorageHistory
+				WHERE intCustomerStorageId = SST.intCustomerStorageId
+					AND intContractHeaderId IS NOT NULL
+					AND intInventoryReceiptId IS NOT NULL
+					AND intContractHeaderId = UH.intContractHeaderId
+			) SH
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
-				AND SH.strType IN ('From Scale','From Delivery Sheet')
+				--AND SH.strType IN ('From Scale','From Delivery Sheet')
+				AND SH.intContractHeaderId IS NOT NULL
 
 			UNION ALL
 		
@@ -434,47 +438,41 @@ BEGIN TRY
 				END
 			END
 
-			--4. Deleting History
+			--4. Inserting in History
 			BEGIN
-				--EXEC uspGRDeleteStorageHistory 
-				--	 'Voucher'
-				--	,@BillId			
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					 [intConcurrencyId]
-					,[intCustomerStorageId]
+					[intCustomerStorageId]
 					,[intContractHeaderId]
 					,[dblUnits]
 					,[dtmHistoryDate]
 					,[strType]
-					,[strUserName]
 					,[intUserId]
-					,[intEntityId]
+					,[intSettleStorageId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
 					,[dblPaidAmount]
-					,[intBillId]
-					,[intSettleStorageId]
 					,[strVoucher]
+					,[ysnPost]
 				)
 				SELECT 
-					 [intConcurrencyId]		= 1 
-					,[intCustomerStorageId] = [intCustomerStorageId]
-					,[intContractHeaderId]  = [intContractHeaderId]
-					,[dblUnits]				= [dblUnits]
+					[intCustomerStorageId] 	= intCustomerStorageId
+					,[intContractHeaderId]  = intContractHeaderId
+					,[dblUnits]				= dblUnits
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Reverse Settlement'
-					,[strUserName]			= NULL
 					,[intUserId]			= @UserId
-					,[intEntityId]			= [intEntityId]
-					,[strSettleTicket]		= [strSettleTicket]
+					,[intSettleStorageId]	= intSettleStorageId
+					,[strSettleTicket]		= strSettleTicket
 					,[intTransactionTypeId]	= 4
-					,[dblPaidAmount]		= [dblPaidAmount]
-					,[intBillId]			= NULL
-					,[intSettleStorageId]   = NULL
+					,[dblPaidAmount]		= dblPaidAmount
+					,[intBillId]			= intBillId
 					,[strVoucher]           = strVoucher
+					,1
 				FROM tblGRStorageHistory
 				WHERE intSettleStorageId = @intSettleStorageId
+
+				EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
 				UPDATE tblGRStorageHistory SET intSettleStorageId = NULL,intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
 
@@ -509,13 +507,6 @@ BEGIN TRY
 					WHERE intSettleStorageId = @intSettleStorageId
 				) CS
 				WHERE intSettleStorageId = @intParentSettleStorageId
-
-				--UPDATE SST 
-				--SET dblUnits = SS.dblSelectedUnits
-				--FROM tblGRSettleStorageTicket SST
-				--INNER JOIN tblGRSettleStorage SS
-				--	ON SS.intSettleStorageId = SST.intSettleStorageId
-				--		AND SS.intSettleStorageId = @intParentSettleStorageId
 
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
 			END
