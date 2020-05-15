@@ -72,6 +72,7 @@ DECLARE @dblTicketScheduleQty NUMERIC(18,6)
 DECLARE @dblTicketNetUnits NUMERIC(18,6)
 DECLARE @intTicketTypeId AS INT
 DECLARE @intTicketLoadId INT
+DECLARE @intTicketStorageScheduleTypeId INT
 
 BEGIN TRY
 		IF ISNULL(@ysnDeliverySheet, 0) = 0
@@ -315,6 +316,7 @@ BEGIN TRY
 							,@intTicketContractDetailId = SC.intContractId
 							,@dblTicketScheduleQty = ISNULL(dblScheduleQty,0)
 							,@intTicketLoadId = intLoadId
+							,@dblTicketNetUnits = dblNetUnits
 						FROM tblSCTicket SC
 						LEFT JOIN tblCTWeightGrade CTGrade 
 							ON CTGrade.intWeightGradeId = SC.intGradeId
@@ -328,32 +330,34 @@ BEGIN TRY
 							RAISERROR('Unable to un-distribute ticket, match ticket already completed', 11, 1);
 							RETURN;
 						END
-						IF ISNULL(@intMatchTicketId,0) > 0 AND @intTicketType = 6
+						IF ISNULL(@intMatchTicketId,0) > 0 AND @intTicketType = 6 
 						BEGIN 
-							
-							IF @intStorageScheduleTypeId = -6 -- load distribution
+							IF(ISNULL(@intMatchTicketContractDetailId,0) > 0)
 							BEGIN
-								SELECT @intMatchLoadId = LGLD.intLoadId 
-								, @intMatchLoadDetailId = LGLD.intLoadDetailId
-								, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
-								, @dblMatchLoadScheduledUnits = LGLD.dblQuantity
-								, @intMatchLoadContractId = LGLD.intSContractDetailId
-								FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
-								WHERE LGL.intTicketId = @intMatchTicketId
-								SELECT @intMatchLoadDetailId
-								IF ISNULL(@intMatchLoadDetailId, 0) > 0
+								IF @intStorageScheduleTypeId = -6 -- load distribution
 								BEGIN
-									
-									EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
-									UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intTicketId = @intMatchTicketId
-									
+									SELECT @intMatchLoadId = LGLD.intLoadId 
+									, @intMatchLoadDetailId = LGLD.intLoadDetailId
+									, @dblMatchDeliveredQuantity = LGLD.dblDeliveredQuantity
+									, @dblMatchLoadScheduledUnits = LGLD.dblQuantity
+									, @intMatchLoadContractId = LGLD.intSContractDetailId
+									FROM tblLGLoad LGL INNER JOIN vyuLGLoadDetailView LGLD ON LGL.intLoadId = LGLD.intLoadId 
+									WHERE LGL.intTicketId = @intMatchTicketId
+									SELECT @intMatchLoadDetailId
+									IF ISNULL(@intMatchLoadDetailId, 0) > 0
+									BEGIN
+										
+										EXEC [dbo].[uspLGUpdateLoadDetails] @intMatchLoadDetailId, 0;
+										UPDATE tblLGLoad set intTicketId = NULL, ysnInProgress = 0 WHERE intTicketId = @intMatchTicketId
+										
+									END
 								END
-							END
-							ELSE IF @intStorageScheduleTypeId = -2
-							BEGIN  
-								SET @dblScheduleQty = @dblMatchTicketScheduleQty *-1
+								ELSE IF @intStorageScheduleTypeId = -2
+								BEGIN  
+									SET @dblScheduleQty = @dblMatchTicketScheduleQty *-1
 
-								EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+									EXEC uspCTUpdateScheduleQuantityUsingUOM @intMatchTicketContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale', @intMatchTicketItemUOMId
+								END
 							END
 
 							UPDATE tblSCTicket SET intMatchTicketId = null WHERE intTicketId = @intTicketId
@@ -397,14 +401,26 @@ BEGIN TRY
 							
 
 							SET @dblScheduleQty = (@dblScheduleQty * -1)
-							EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @dblScheduleQty, @intUserId, @intMatchTicketId, 'Scale'
+							EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
 							SET @dblScheduleQty = (@dblScheduleQty * -1)
-							EXEC uspCTUpdateScheduleQuantity
-													@intContractDetailId	=	@intTicketContractDetailId,
-													@dblQuantityToUpdate	=	@dblScheduleQty,
-													@intUserId				=	@intUserId,
-													@intExternalId			=	@intTicketId,
-													@strScreenName			=	'Scale'	
+							IF(@intTicketStorageScheduleTypeId <> -6)
+							BEGIN
+								EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intTicketContractDetailId,
+									@dblQuantityToUpdate	=	@dblScheduleQty,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'	
+							END
+							ELSE
+							BEGIN
+								EXEC uspCTUpdateScheduleQuantity
+									@intContractDetailId	=	@intTicketContractDetailId,
+									@dblQuantityToUpdate	=	@dblTicketScheduleQty,
+									@intUserId				=	@intUserId,
+									@intExternalId			=	@intTicketId,
+									@strScreenName			=	'Scale'	
+							END
 
 							INSERT INTO @ItemsToIncreaseInTransitDirect(
 								[intItemId]
