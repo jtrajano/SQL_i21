@@ -1268,6 +1268,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonthList.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesMonthList.sql" />
     <Build Include="dbo\Functions\fnCalculateQtyBetweenUOM.sql" />
+    <Build Include="dbo\Functions\fnCalculateQtyBetweenUoms.sql" />
     <Build Include="dbo\Functions\fnGetItemUnitType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateInventoryRecieptwithPO.sql" />
