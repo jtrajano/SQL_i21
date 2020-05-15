@@ -15,6 +15,8 @@ BEGIN
 			@strZip						NVARCHAR(12),
 			@strCountry					NVARCHAR(25),
 			@strPhone					NVARCHAR(50),
+			@strFax						NVARCHAR(50),
+			@strWebSite					NVARCHAR(500),
 			@strFullName				NVARCHAR(100),
 			@strUserPhoneNo				NVARCHAR(100),
 			@strUserEmailId				NVARCHAR(100),
@@ -91,6 +93,8 @@ BEGIN
 				,@strZip = strZip
 				,@strCountry = strCountry
 				,@strPhone = strPhone
+				,@strFax = strFax
+				,@strWebSite = strWebSite
 	FROM tblSMCompanySetup
 
 	SELECT @strFullName = E.strName,
@@ -182,12 +186,14 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.intShippingLineEntityId,
 			LW.dtmPickupDate,
 			LW.dtmLastFreeDate,
+			LW.dtmEmptyContainerReturn,
 			LW.dtmStrippingReportReceivedDate,
 			LW.dtmSampleAuthorizedDate,
 			LW.strStrippingReportComments,
 			LW.strFreightComments,
 			LW.strSampleComments,
 			LW.strOtherComments,
+			strOriginCountry = PCountry.strCountry,
 			L.strOriginPort,
 			L.strDestinationPort,
 			L.strDestinationCity,
@@ -300,6 +306,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strCompanyZip = @strZip,
 			strCompanyCountry = @strCountry,
 			strCompanyPhone = @strPhone,
+			strCompanyFax = @strFax,
+			strCompanyWebSite = @strWebSite,
 			strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ',',
 			strUserFullName = CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END,
 			strExternalPONumber = CD.strERPPONumber,
@@ -313,6 +321,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strDefaultReleaseOrderText = CP.strReleaseOrderText,
 			strPCustomerContract = PCH.strCustomerContract,
 			strSalesContractNumber = SCH.strContractNumber,
+			intSalesContractSeq = SCD.intContractSeq,
 
 			strWarehouseVendorName = '', 
 			strWarehouseVendorLocation = '', 
@@ -336,6 +345,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strUserEmailId = '',
 			strUserPhoneNo = '',
 			L.strShippingMode,
+			PL.strPickComments,
 			strCertificationName = (SELECT TOP 1 strCertificationName
 									FROM tblICCertification CER
 									JOIN tblCTContractCertification CTCER ON CTCER.intCertificationId = CER.intCertificationId
@@ -548,6 +558,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
+		LEFT JOIN tblSMCity PCity ON PCity.intCityId = PCH.intINCOLocationTypeId
+		LEFT JOIN tblSMCountry PCountry ON PCountry.intCountryID = PCity.intCountryId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
 		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
@@ -606,6 +618,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation CNCompanyLocation ON CNCompanyLocation.intCompanyLocationId = CLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
+		OUTER APPLY (SELECT TOP 1 strPickComments = PLH.strComments
+					 FROM tblLGPickLotDetail PLD LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLD.intPickLotHeaderId
+					 WHERE PLD.intContainerId = LC.intLoadContainerId) PL
 		CROSS APPLY tblLGCompanyPreference CP
 		WHERE L.strLoadNumber = @strTrackingNumber) tbl
 	END
@@ -726,6 +741,8 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strCompanyZip = @strZip,
 			strCompanyCountry = @strCountry,
 			strCompanyPhone = @strPhone,
+			strCompanyFax = @strFax,
+			strCompanyWebSite = @strWebSite,
 			strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ',',
 			strUserFullName = CASE WHEN ISNULL(@strFullName,'') = '' THEN  @strUserName ELSE @strFullName END,
 			strExternalPONumber = CD.strERPPONumber,
