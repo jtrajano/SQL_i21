@@ -303,7 +303,7 @@ BEGIN
 					, NULLIF(chk.termMsgSNtype, '')
 					, NULLIF(chk.termMsgSNterm, '')
 
-					, NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(chk.termMsgSN AS BIGINT), chk.trpPaycode ORDER BY CAST(chk.intRowCount AS INT)), '') AS intScanTransactionId
+					, NULLIF(ROW_NUMBER() OVER(PARTITION BY CAST(chk.termMsgSN AS BIGINT), (CASE WHEN chk.date = '' THEN NULL ELSE left(REPLACE(chk.date, 'T', ' '), len(chk.date) - 6) END) ORDER BY CAST(chk.intRowCount AS INT)), '') AS intScanTransactionId
 
 					, NULLIF(chk.termMsgSN, '')
 					, NULLIF(chk.periodlevel, '')
