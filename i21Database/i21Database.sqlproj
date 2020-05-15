@@ -8143,6 +8143,11 @@
     <Build Include="dbo\Functions\fnRKGetBucketBasisDeliveries.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketContractBalance.sql" />
     <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
+    <Build Include="dbo\Functions\fnRKConvertMiscFieldString.sql" />
+    <Build Include="dbo\User Defined Types\RKMiscField.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSaveMatchDerivative.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSaveDerivativeEntry.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKSaveCollateral.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

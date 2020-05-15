@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKSavePnsOptionsMatched]
 	@strXml NVARCHAR(MAX)
 	, @strTranNoPNS NVARCHAR(50) OUT
+	, @intUserId INT
 
 AS    
 
@@ -22,6 +23,8 @@ BEGIN TRY
 	DECLARE @strExpiredTranNo NVARCHAR(50)
 	DECLARE @strExercisedAssignedNo NVARCHAR(50)
 	DECLARE @ErrMsg NVARCHAR(MAX)
+
+	DECLARE @SummaryLog AS RKSummaryLog
 	
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @strXml
 	
@@ -62,6 +65,21 @@ BEGIN TRY
 		FROM tblRKOptionsMatchPnS p
 		JOIN @tblMatchedDelete m on p.strTranNo = m.strTranNo
 		
+		SELECT DISTINCT intOptionsMatchPnSHeaderId
+		INTO #tmpMatchDeletedHeader
+		FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblMatchedDelete)
+		
+		DECLARE @intMatchDeletedHeaderId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpMatchDeletedHeader)
+		BEGIN
+			SELECT TOP 1 @intMatchDeletedHeaderId = intOptionsMatchPnSHeaderId FROM #tmpMatchDeletedHeader
+
+			DELETE FROM #tmpMatchDeletedHeader WHERE intOptionsMatchPnSHeaderId = @intMatchDeletedHeaderId
+		END
+		
+		DROP TABLE #tmpMatchDeletedHeader
+
 		DELETE FROM tblRKOptionsMatchPnS WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblMatchedDelete)
 	END
 	------------------------- END Delete Matched ---------------------
@@ -79,7 +97,49 @@ BEGIN TRY
 		
 	IF EXISTS(SELECT TOP 1 1 FROM @tblExpiredDelete)
 	BEGIN
+		SELECT DISTINCT intOptionsMatchPnSHeaderId
+		INTO #tmpExpireDeletedHeader
+		FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+		
+		DECLARE @intExpireDeletedHeaderId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExpireDeletedHeader)
+		BEGIN
+			SELECT TOP 1 @intExpireDeletedHeaderId = intOptionsMatchPnSHeaderId FROM #tmpExpireDeletedHeader
+
+			DELETE FROM #tmpExpireDeletedHeader WHERE intOptionsMatchPnSHeaderId = @intExpireDeletedHeaderId
+		END
+		
+		DROP TABLE #tmpExpireDeletedHeader
+
+		SELECT DISTINCT intFutOptTransactionId
+		INTO #tmpExpireDeleted
+		FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+		
+		DECLARE @intExpireDeletedId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExpireDeleted)
+		BEGIN
+			SELECT TOP 1 @intExpireDeletedId = intFutOptTransactionId FROM #tmpExpireDeleted
+
+			INSERT INTO @SummaryLog(strTransactionType
+				, intTransactionRecordId
+				, ysnDelete
+				, intUserId
+				, strNotes)
+			SELECT strTransactionType = 'Expired Options'
+				, intTransactionRecordId = @intExpireDeletedId
+				, ysnDelete = 1
+				, intUserId = @intUserId
+				, strNotes = 'Delete Expired Options'
+
+			DELETE FROM #tmpExpireDeleted WHERE intFutOptTransactionId = @intExpireDeletedId
+		END
+		
+		DROP TABLE #tmpExpireDeleted
+
 		DELETE FROM tblRKOptionsPnSExpired WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExpiredDelete)
+
 	END
 	------------------------- END Delete Expired ---------------------------
 	
@@ -108,6 +168,32 @@ BEGIN TRY
 										FROM tblRKOptionsPnSExercisedAssigned
 										WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExercisedAssignedDelete))
 		
+		SELECT DISTINCT intFutOptTransactionId
+		INTO #tmpExerciseDeleted
+		FROM tblRKOptionsPnSExercisedAssigned WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExercisedAssignedDelete)
+		
+		DECLARE @intExerciseAssignDeletedId INT
+
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExerciseDeleted)
+		BEGIN
+			SELECT TOP 1 @intExerciseAssignDeletedId = intFutOptTransactionId FROM #tmpExerciseDeleted
+
+			INSERT INTO @SummaryLog(strTransactionType
+				, intTransactionRecordId
+				, ysnDelete
+				, intUserId
+				, strNotes)
+			SELECT strTransactionType = 'Excercised/Assigned Options'
+				, intTransactionRecordId = @intExerciseAssignDeletedId
+				, ysnDelete = 1
+				, intUserId = @intUserId
+				, strNotes = 'Delete Excercised/Assigned Options'
+
+			DELETE FROM #tmpExerciseDeleted WHERE intFutOptTransactionId = @intExerciseAssignDeletedId
+		END
+		
+		DROP TABLE #tmpExerciseDeleted
+
 		DELETE FROM tblRKOptionsPnSExercisedAssigned
 		WHERE CONVERT(INT, strTranNo) IN (SELECT CONVERT(INT, strTranNo) FROM @tblExercisedAssignedDelete)
 	END
@@ -119,7 +205,8 @@ BEGIN TRY
 	
 	SELECT @intOptionsMatchPnSHeaderId = SCOPE_IDENTITY();
 	---------------Matched Record Insert ----------------
-	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) FROM tblRKOptionsMatchPnS
+	DECLARE @MaxRow INT
+	SELECT @strTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = ISNULL(MAX(ISNULL(intMatchOptionsPnSId, 0)), 0) FROM tblRKOptionsMatchPnS
 	
 	INSERT INTO tblRKOptionsMatchPnS (intOptionsMatchPnSHeaderId
 		, strTranNo
@@ -169,9 +256,21 @@ BEGIN TRY
 		, @strName
 	FROM tblRKOptionsMatchPnS
 	WHERE strTranNo = @strTranNoPNS
+
+	DECLARE @newRowId INT
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewMatched FROM tblRKOptionsMatchPnS WHERE intOptionsMatchPnSHeaderId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewMatched)
+	BEGIN
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewMatched
+
+		DELETE FROM #tmpNewMatched WHERE intOptionsMatchPnSHeaderId = @newRowId
+	END
+
+	DROP TABLE #tmpNewMatched
 	
 	---------------Expired Record Insert ----------------
-	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0) FROM tblRKOptionsPnSExpired
+	SET @MaxRow = NULL
+	SELECT @strExpiredTranNo = ISNULL(MAX(CONVERT(INT, strTranNo)), 0), @MaxRow = ISNULL(MAX(ISNULL(intOptionsPnSExpiredId, 0)), 0) FROM tblRKOptionsPnSExpired
 	
 	INSERT INTO tblRKOptionsPnSExpired (intOptionsMatchPnSHeaderId
 		, strTranNo
@@ -190,7 +289,68 @@ BEGIN TRY
 	WITH ([dtmExpiredDate]  DATETIME
 		, [dblLots] numeric(18,6)
 		, [intFutOptTransactionId] INT)
+
+	SET @newRowId = NULL
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewExpired FROM tblRKOptionsPnSExpired WHERE intOptionsPnSExpiredId > @MaxRow
+	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewExpired)
+	BEGIN
+		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewExpired
+
+		DELETE FROM #tmpNewExpired WHERE intOptionsMatchPnSHeaderId = @newRowId
+	END
+
+	DROP TABLE #tmpNewExpired
 	
+	INSERT INTO @SummaryLog(strBucketType
+		, strTransactionType
+		, intFutOptTransactionId
+		, intTransactionRecordId
+		, intTransactionRecordHeaderId
+		, strDistributionType
+		, strTransactionNumber
+		, dtmTransactionDate		
+		, intCommodityId
+		, intLocationId
+		, intBookId
+		, intSubBookId
+		, intFutureMarketId
+		, intFutureMonthId
+		, strNotes
+		, dblNoOfLots
+		, dblPrice
+		, dblContractSize
+		, intEntityId
+		, intUserId
+		, intCommodityUOMId)
+	SELECT strBucketType = 'Derivatives'
+		, strTransactionType = 'Options Lifecycle'
+		, intFutOptTransactionId = detail.intFutOptTransactionId
+		, intTransactionRecordId = detail.intOptionsPnSExpiredId
+		, intTransactionRecordHeaderId = header.intOptionsMatchPnSHeaderId
+		, strDistributionType = de.strBuySell
+		, strTransactionNumber = de.strInternalTradeNo
+		, dtmTransactionDate = detail.dtmExpiredDate		
+		, intCommodityId = de.intCommodityId
+		, de.intLocationId
+		, intBookId = de.intBookId
+		, intSubBookId = de.intSubBookId
+		, intFutureMarketId = de.intFutureMarketId
+		, intFutureMonthId = de.intFutureMonthId
+		, strNotes = 'Expire Options'
+		, dblNoOfLots = detail.dblLots
+		, dblPrice = de.dblPrice
+		, dblContractSize
+		, intEntityId = de.intEntityId
+		, intUserId = @intUserId
+		, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+	FROM tblRKOptionsPnSExpired detail
+	JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
+	JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
+	LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
+	LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+	WHERE intOptionsPnSExpiredId > @MaxRow
+	ORDER BY intOptionsPnSExpiredId
+
 	---------------Exercised/Assigned Record Insert ----------------
 	DECLARE @tblExercisedAssignedDetail TABLE (RowNumber INT IDENTITY(1,1)
 		, intFutOptTransactionId INT
@@ -256,7 +416,56 @@ BEGIN TRY
 			, 1)
 		
 		SELECT @intOptionsPnSExercisedAssignedId = SCOPE_IDENTITY()
-		
+
+		INSERT INTO @SummaryLog(strBucketType
+			, strTransactionType
+			, intFutOptTransactionId
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intCommodityId
+			, intLocationId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, strNotes
+			, dblNoOfLots
+			, dblPrice
+			, dblContractSize
+			, intEntityId
+			, intUserId
+			, intCommodityUOMId)
+		SELECT strBucketType = 'Derivatives'
+			, strTransactionType = 'Options Lifecycle'
+			, intFutOptTransactionId = detail.intFutOptTransactionId
+			, intTransactionRecordId = detail.intOptionsPnSExercisedAssignedId
+			, intTransactionRecordHeaderId = header.intOptionsMatchPnSHeaderId
+			, strDistributionType = de.strBuySell
+			, strTransactionNumber = de.strInternalTradeNo
+			, dtmTransactionDate = detail.dtmTranDate
+			, intCommodityId = de.intCommodityId
+			, de.intLocationId
+			, intBookId = de.intBookId
+			, intSubBookId = de.intSubBookId
+			, intFutureMarketId = de.intFutureMarketId
+			, intFutureMonthId = de.intFutureMonthId
+			, strNotes = 'Excercised/Assigned Options'
+			, dblNoOfLots = detail.dblLots
+			, dblPrice = de.dblPrice
+			, dblContractSize
+			, intEntityId = de.intEntityId
+			, intUserId = @intUserId
+			, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+		FROM tblRKOptionsPnSExercisedAssigned detail
+		JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
+		JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
+		LEFT JOIN tblRKFutureMarket FutMarket ON FutMarket.intFutureMarketId = de.intFutureMarketId
+		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
+		WHERE intOptionsPnSExercisedAssignedId = @intOptionsPnSExercisedAssignedId
+
 		DECLARE @intTransactionId NVARCHAR(50)
 		SET @strTranNo = ''
 		SELECT @strTranNo = strTranNo FROM tblRKOptionsPnSExercisedAssigned WHERE intOptionsPnSExercisedAssignedId = @intOptionsPnSExercisedAssignedId
@@ -343,13 +552,15 @@ BEGIN TRY
 			, intOptionMonthId = null
 		WHERE intFutOptTransactionId = @NewFutOptTransactionId
 
-		DECLARE @intUserId INT
-		SELECT TOP 1 @intUserId = intEntityId FROM tblEMEntity WHERE strName = @strName
-		EXEC uspRKFutOptTransactionHistory @NewFutOptTransactionId, @NewFutOptTransactionHeaderId, 'Exercise Options', @intUserId, 'ADD'
+		DECLARE @UserId INT
+		SELECT TOP 1 @UserId = intEntityId FROM tblEMEntity WHERE strName = @strName
+		EXEC uspRKFutOptTransactionHistory @NewFutOptTransactionId, @NewFutOptTransactionHeaderId, 'Exercise Options', @UserId, 'ADD'
 		
 		UPDATE tblRKOptionsPnSExercisedAssigned SET intFutTransactionId = @NewFutOptTransactionId WHERE intOptionsPnSExercisedAssignedId = @intOptionsPnSExercisedAssignedId
 		SELECT @mRowNumber = MIN(RowNumber) FROM @tblExercisedAssignedDetail WHERE RowNumber > @mRowNumber
 	END
+
+	EXEC uspRKLogRiskPosition @SummaryLog, 0, 1
 	
 	COMMIT TRAN
 	EXEC sp_xml_removedocument @idoc
