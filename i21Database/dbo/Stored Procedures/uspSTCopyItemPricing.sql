@@ -52,6 +52,7 @@ BEGIN
 				, intItemId_FROM			INT
 				, dblStandardCost_FROM		NUMERIC(38,20)
 				, dblLastCost_FROM			NUMERIC(38,20)
+				, dblSalePrice_FROM		NUMERIC(18,6)
 			);
 		END
 
@@ -62,6 +63,7 @@ BEGIN
 				, intItemId_TO			INT
 				, dblStandardCost_TO	NUMERIC(38,20)
 				, dblLastCost_TO		NUMERIC(38,20)
+				, dblSalePrice_TO		NUMERIC(18,6)
 			);
 		END
 
@@ -72,12 +74,14 @@ BEGIN
 			, intItemId_FROM
 			, dblStandardCost_FROM
 			, dblLastCost_FROM
+			, dblSalePrice_FROM
 		)
 		SELECT
 			intItemPricingId_FROM	= itemPricing.intItemPricingId
 			, intItemId_FROM		= itemPricing.intItemId
 			, dblStandardCost_FROM	= itemPricing.dblStandardCost
 			, dblLastCost_FROM		= itemPricing.dblLastCost
+			, dblSalePrice_FROM		= itemPricing.dblSalePrice
 		FROM tblICItemPricing itemPricing
 		WHERE itemPricing.intItemPricingId = @intItemPricingId
 
@@ -103,12 +107,14 @@ BEGIN
 			, intItemId_TO
 			, dblStandardCost_TO
 			, dblLastCost_TO
+			, dblSalePrice_TO
 		)
 		SELECT
 			intItemPricingId_TO		= itemPricing.intItemPricingId
 			, intItemId_TO			= itemPricing.intItemId
 			, dblStandardCost_TO	= itemPricing.dblStandardCost
 			, dblLastCost_TO		= itemPricing.dblLastCost
+			, dblSalePrice_TO		= itemPricing.dblSalePrice
 		FROM tblICItemPricing itemPricing
 		WHERE itemPricing.intItemPricingId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCopyToItemPricingIdList))
 			AND itemPricing.intItemPricingId != @intItemPricingId
@@ -142,6 +148,7 @@ BEGIN
 							  , @intItemId_FROM				AS INT
 							  , @dblStandardCost_FROM		AS NUMERIC(38,20)
 							  , @dblLastCost_FROM			AS NUMERIC(38,20)
+							  , @dblSalePrice_FROM			AS NUMERIC(18,6)
 						
 
 						SELECT TOP 1
@@ -149,6 +156,7 @@ BEGIN
 							  , @intItemId_FROM			= temp.intItemId_FROM
 							  , @dblStandardCost_FROM	= CAST(temp.dblStandardCost_FROM AS NUMERIC(38, 20))
 							  , @dblLastCost_FROM		= CAST(temp.dblLastCost_FROM AS NUMERIC(38, 20))
+							  , @dblSalePrice_FROM		= CAST(temp.dblSalePrice_FROM AS NUMERIC(18,6))
 						FROM @tblItemPricing_FROM temp
 
 
@@ -174,7 +182,7 @@ BEGIN
 
 												-- update params
 												, @dblStandardCost			= @dblStandardCost_FROM 
-												, @dblRetailPrice			= NULL 
+												, @dblRetailPrice			= @dblSalePrice_FROM
 												, @dblLastCost				= @dblLastCost_FROM
 												, @intEntityUserSecurityId	= @intEntityId
 								END TRY
@@ -203,6 +211,7 @@ BEGIN
 										, itemPricing.intItemId
 										, itemPricing.dblStandardCost
 										, itemPricing.dblLastCost
+										, itemPricing.dblSalePrice
 									FROM tblICItemPricing itemPricing
 									WHERE itemPricing.intItemPricingId != @intItemPricingId
 										AND itemPricing.intItemPricingId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strCopyToItemPricingIdList))
