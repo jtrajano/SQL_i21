@@ -42,6 +42,7 @@ DECLARE @intScaleStationId AS INT
 		,@ysnRequireProducerQty AS BIT
 		,@intDeliverySheetId INT
 		,@intFreightItemId INT;
+DECLARE @_intStorageHistoryId INT
 	
 	SELECT @intFreightItemId = SCSetup.intFreightItemId
 		, @intHaulerId = SC.intHaulerId
@@ -1600,16 +1601,29 @@ BEGIN
 			@ReceiptId = intInventoryReceiptId  
 	FROM	#tmpAddItemReceiptResult 
   
+	
 	SET @InventoryReceiptId = @ReceiptId
+	SET @_intStorageHistoryId = 0
 
-	UPDATE SH  
-	SET SH.[intInventoryReceiptId] = @InventoryReceiptId
+	SELECT TOP 1
+		@_intStorageHistoryId = SH.intStorageHistoryId
 	FROM tblGRStorageHistory SH
 	JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId=SH.intCustomerStorageId
 	JOIN tblICInventoryReceipt IR ON IR.intEntityVendorId=CS.intEntityId 
 	WHERE SH.[strType] IN ('From Scale', 'From Delivery Sheet')
 	AND IR.intInventoryReceiptId=@InventoryReceiptId 
 	AND ISNULL(SH.intInventoryReceiptId,0) = 0
+
+	IF(ISNULL(@_intStorageHistoryId,0) > 0)
+	BEGIN
+		UPDATE SH  
+		SET SH.[intInventoryReceiptId] = @InventoryReceiptId
+		FROM tblGRStorageHistory SH
+		WHERE SH.intStorageHistoryId = @_intStorageHistoryId
+
+
+		EXEC uspGRRiskSummaryLog @_intStorageHistoryId
+	END
 
 	DELETE	FROM #tmpAddItemReceiptResult 
 	WHERE	intInventoryReceiptId = @ReceiptId
