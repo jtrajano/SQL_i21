@@ -1370,8 +1370,10 @@ BEGIN TRY
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
 
+
 					if (@dblShipped = 0)
 					begin
+						UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
 						goto SkipShipmentLoop;
 					end
 
@@ -1748,6 +1750,7 @@ BEGIN TRY
 
 				if (@dblShipped = 0)
 				begin
+					UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
 					goto SkipQtyShipmentLoop;
 				end
 
@@ -1970,6 +1973,8 @@ BEGIN TRY
 								and isnull(c.ysnPosted,0) = 0
 
 							print 'add detail to existing invoice';
+
+							UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
 
 							EXEC uspCTCreateInvoiceDetail
 								@intInvoiceDetailId
