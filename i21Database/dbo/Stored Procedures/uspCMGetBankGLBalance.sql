@@ -1,18 +1,12 @@
-﻿--Last Modified 02-13-2020 
---GL-7471 Bank Transfer Foreign Exchange -- this will reflect get the balance based on bank's currency. This is for Bank Recon screen.
+
 CREATE PROCEDURE [dbo].[uspCMGetBankGLBalance]
 	@intBankAccountId INT = NULL,
 	@dtmDate AS DATETIME = NULL
 AS
 
-SET QUOTED_IDENTIFIER OFF
-SET ANSI_NULLS ON
-SET NOCOUNT ON
-SET XACT_ABORT ON
-SET ANSI_WARNINGS OFF
-			
 DECLARE @intDefaultCurrencyId INT
-SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId   FROM tblSMCompanyPreference 
+
+SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId   FROM tblSMCompanyPreference
 
 IF EXISTS (SELECT TOP 1 1 FROM tblCMBankAccount where intBankAccountId = @intBankAccountId and intCurrencyId = @intDefaultCurrencyId)
 
