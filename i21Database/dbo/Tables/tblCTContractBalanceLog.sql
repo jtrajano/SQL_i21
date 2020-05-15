@@ -37,5 +37,7 @@
 	[ysnNegated] BIT DEFAULT((0)) NULL,
 	[intRefContractBalanceId] INT NULL,
 	intUserId INT NULL, 
+	[intActionId] INT NULL,
+	[intRefSummaryLogId] INT NULL, 
     CONSTRAINT [PK_tblCTContractBalanceLog] PRIMARY KEY ([intContractBalanceLogId]) 
 )
