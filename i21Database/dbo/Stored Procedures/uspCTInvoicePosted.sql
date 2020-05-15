@@ -132,17 +132,17 @@ BEGIN TRY
 			, [intShippedQtyUOMId]
 			, [strPricing]
 		)
-		SELECT I.[intInvoiceDetailId]
-		    , I.[intInvoiceId]
-			, I.[intContractDetailId]
-			, I.[intContractHeaderId]
-			, I.[intItemUOMId]
-			, I.[dblQtyShipped]
-			, I.[intTicketId]
-			, 1
-			, ISNULL(S.dblQuantity, ID.dblQtyShipped)
-			, ISNULL(S.intItemUOMId, ID.intItemUOMId)
-			, ID.[strPricing]
+		SELECT [intInvoiceDetailId]	= MIN(I.[intInvoiceDetailId])
+			, [intInvoiceId]		= I.[intInvoiceId]
+			, [intContractDetailId]	= I.[intContractDetailId]
+			, [intContractHeaderId]	= I.[intContractHeaderId]
+			, [intItemUOMId]		= I.[intItemUOMId]
+			, [dblQty]				= SUM(I.[dblQtyShipped])
+			, [intTicketId]			= I.[intTicketId]
+			, [ysnDestWtGrd]		= 1
+			, [dblShippedQty]		= AVG(ISNULL(S.dblQuantity, ID.dblQtyShipped))
+			, [intShippedQtyUOMId]	= ISNULL(S.intItemUOMId, ID.intItemUOMId)
+			, [strPricing]			= ID.[strPricing]			
 		FROM @ItemsFromInvoice	I
 		JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 		JOIN tblSCTicket T ON T.intTicketId	= I.intTicketId
@@ -157,6 +157,7 @@ BEGIN TRY
 		AND	I.[intShipmentPurchaseSalesContractId] IS NULL
 		AND	ISNULL(I.[intLoadDetailId],0) = 0
 		AND	ISNULL(I.[intTransactionId],0) = 0
+		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId
 	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
