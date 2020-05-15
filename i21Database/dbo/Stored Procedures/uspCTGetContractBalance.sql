@@ -386,7 +386,7 @@ BEGIN TRY
 							ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
 							CASE
 								WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
-								THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblDestinationNet * 1 ELSE 0 END)
+								THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN (ShipmentItem.dblDestinationNet * 1) - ISNULL(OVR.dblOverage,0)  ELSE 0 END)
 								ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)
 							END)
 							,0)
@@ -408,6 +408,7 @@ BEGIN TRY
 			SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
 			FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
 			AND  IV.ysnPosted = 1
+			AND dbo.fnRemoveTimeOnDate(IV.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IV.dtmPostDate) END
 		) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
 		LEFT JOIN 
 		(
@@ -415,7 +416,17 @@ BEGIN TRY
 			FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
 			WHERE IV.strTransactionType = 'Credit Memo'
 			AND  IV.ysnPosted = 1
+			AND dbo.fnRemoveTimeOnDate(IV.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IV.dtmPostDate) END
 		) CM ON CM.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId 
+		OUTER APPLY
+		(
+			SELECT dblOverage = SUM(b.dblQtyShipped)
+			FROM tblARInvoice a
+			INNER JOIN tblARInvoiceDetail b on a.intInvoiceId = b.intInvoiceId
+			WHERE b.strPricing = 'Subsystem - Direct'
+			AND dbo.fnRemoveTimeOnDate(a.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(a.dtmPostDate) END
+			AND b.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId 
+		) OVR 
 		WHERE Shipment.intOrderType = 1
 		AND Shipment.ysnPosted = 1
 		AND dbo.fnRemoveTimeOnDate(Shipment.dtmShipDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate  ELSE dbo.fnRemoveTimeOnDate(Shipment.dtmShipDate) END
@@ -634,6 +645,50 @@ BEGIN TRY
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
 	WHERE dbo.fnRemoveTimeOnDate(IB.dtmImported) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IB.dtmImported) END
 	GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,IB.dtmImported,IB.intImportBalanceId,CH.ysnLoad
+
+	INSERT INTO @Shipment
+	(
+	  intContractTypeId
+	  ,intContractHeaderId	
+	  ,intContractDetailId	
+	  ,dtmDate
+	  ,dtmEndDate			
+	  ,dblQuantity
+	  ,dblAllocatedQuantity
+	  ,intNoOfLoad
+	  ,intSourceId
+	  ,strType
+	)
+	SELECT 
+	CH.intContractTypeId 
+	,CH.intContractHeaderId
+	,CD.intContractDetailId
+	,Invoice.dtmPostDate
+	,@dtmEndDate AS dtmEndDate
+	,dblQuantity = CASE 
+					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+					ELSE SUM(InvoiceDetail.dblQtyShipped)
+				   END
+	,0
+	,COUNT(DISTINCT Invoice.intInvoiceId)
+	,Invoice.intInvoiceId
+	,'Invoice'
+	FROM tblARInvoiceDetail InvoiceDetail
+	JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+	AND Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = InvoiceDetail.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvoiceDetail.intContractDetailId
+	LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = InvoiceDetail.intSalesOrderDetailId
+	AND CD.intContractHeaderId = CH.intContractHeaderId
+	WHERE dbo.fnRemoveTimeOnDate(Invoice.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Invoice.dtmPostDate) END
+	AND InvoiceDetail.strPricing = 'Subsystem - Direct'
+	GROUP BY 
+	CH.intContractTypeId
+	,CH.intContractHeaderId
+	,CD.intContractDetailId
+	,Invoice.dtmPostDate
+	,Invoice.intInvoiceId
+	,CH.ysnLoad
 
 	INSERT INTO @PriceFixation
 	(
