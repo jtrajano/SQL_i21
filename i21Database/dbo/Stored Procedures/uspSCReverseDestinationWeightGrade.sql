@@ -43,20 +43,24 @@ DECLARE @strTicketGradeFinalizedWhere NVARCHAR(20)
 DECLARE @intMatchTicketStorageScheduleTypeId AS INT
 DECLARE @dblMatchTicketScheduleQty NUMERIC(38,20)
 DECLARE @intMatchTicketItemUOMIdTo INT
+DECLARE @dblMatchTicketNetUnits NUMERIC(38,20)
+DECLARE @dblUnits NUMERIC(38,20)
+
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
 	BEGIN
 		IF ISNULL(@intMatchTicketId, 0) > 0
 		BEGIN
-			SELECT @intTicketItemUOMId = intItemUOMIdTo
-				, @intContractDetailId = intContractId
-				, @dblContractQty = dblNetUnits
-				, @intMatchTicketContractDetailId = intContractId
-				, @intMatchTicketStorageScheduleTypeId = intStorageScheduleTypeId
+			SELECT @intTicketItemUOMId = SC.intItemUOMIdTo
+				, @intContractDetailId = SC.intContractId
+				, @dblContractQty = SC.dblNetUnits
+				, @intMatchTicketContractDetailId = SC.intContractId
+				, @intMatchTicketStorageScheduleTypeId = SC.intStorageScheduleTypeId
 				,@strTicketWeightFinalizedWhere = CTWeight.strWhereFinalized
 				,@strTicketGradeFinalizedWhere = CTGrade.strWhereFinalized
-				, @dblMatchTicketScheduleQty = ISNULL(dblScheduleQty,0)
+				, @dblMatchTicketScheduleQty = ISNULL(SC.dblScheduleQty,0)
+				,@dblMatchTicketNetUnits = SC.dblNetUnits
 			FROM tblSCTicket SC
 			LEFT JOIN tblCTWeightGrade CTGrade 
 				ON CTGrade.intWeightGradeId = SC.intGradeId
@@ -99,9 +103,8 @@ BEGIN TRY
 					END
 					
 
-					SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
-					SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
+					SET @dblUnits = (@dblMatchTicketNetUnits * -1)
+					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblUnits, @intUserId, @intMatchTicketId, 'Scale'
 					EXEC uspCTUpdateScheduleQuantity
 											@intContractDetailId	=	@intContractDetailId,
 											@dblQuantityToUpdate	=	@dblContractAvailableQty,
