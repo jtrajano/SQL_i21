@@ -1979,7 +1979,8 @@ BEGIN TRY
 					DEALLOCATE @pricing
 					/*---End Loop Pricing---*/
 				end
-				
+
+				SkipQtyShipmentLoop:				
 							
 				FETCH NEXT
 				FROM
