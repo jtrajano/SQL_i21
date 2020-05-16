@@ -38,7 +38,7 @@ BEGIN
 	SELECT 
 		strBatchId = NULL
 		, strBucketType = 'Accounts Payables'
-		, strTransactionType = 'Voucher'
+		, strTransactionType = 'Bill'
 		, intTransactionRecordId = bd.intBillDetailId
 		, intTransactionRecordHeaderId = bd.intBillId
 		, intContractDetailId = bd.intContractDetailId
@@ -59,7 +59,7 @@ BEGIN
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
 	INNER JOIN @voucherDetailIds bb
-		on bb.intId = b.intBillId
+		on bb.intId = bd.intBillDetailId
 	CROSS APPLY (
 		SELECT * FROM dbo.fnAPGetVoucherCommodity(b.intBillId)
 	) c
