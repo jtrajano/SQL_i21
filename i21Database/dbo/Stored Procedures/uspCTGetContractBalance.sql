@@ -1023,6 +1023,7 @@ BEGIN TRY
 	) t
 	WHERE dblQuantity > 0
 
+	-- INSERT BASIS QUANTITIES
 	INSERT INTO @FinalContractBalance
 	( 
      intContractTypeId		
@@ -1130,33 +1131,6 @@ BEGIN TRY
 	,strPricingStatus 
 	FROM @TempContractBalance
 	WHERE intPricingTypeId <> 1
-
-	--UPDATE TempContractBalance 
-	--SET intPricingTypeId   = SH.intPricingTypeId
- --      ,strPricingType	   = LEFT(PT.strPricingType,1)
- --      ,strPricingTypeDesc = PT.strPricingType
- --      ,dblFutures         = CASE WHEN SH.intPricingTypeId IN (1,3) THEN ISNULL(SH.dblFutures,0) ELSE NULL END
-	--   ,dblFuturesinCommodityStockUOM	=	CASE WHEN SH.intPricingTypeId IN (1,3) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblFutures,0)),0) ELSE NULL END 
-	--   ,dblBasis           = CASE WHEN SH.intPricingTypeId <> 3 THEN ISNULL(SH.dblBasis,0) ELSE NULL END
-	--   ,dblBasisinCommodityStockUOM		=	CASE WHEN SH.intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(SH.intPriceItemUOMId,dbo.fnGetItemStockUOM(SH.intItemId), ISNULL(SH.dblBasis,0)),0) ELSE NULL END
-	--   ,dblCashPrice       =  CASE
-	--							WHEN SH.intPricingTypeId = 1 THEN  ISNULL(SH.dblFutures,0) + ISNULL(SH.dblBasis,0)
-	--							ELSE NULL
-	--						  END
-	--	,dblCashPriceinCommodityStockUOM	=	CASE 
-	--									WHEN SH.intPricingTypeId = 1 THEN  ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(SH.intCommodityId,SH.intPriceItemUOMId,dbo.fnCTGetCommodityStockUOM(SH.intCommodityId), ISNULL(SH.dblFutures,0)),0)
-	--																		 + ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(SH.intCommodityId,SH.intPriceItemUOMId,dbo.fnCTGetCommodityStockUOM(SH.intCommodityId), ISNULL(SH.dblBasis,0)),0)
-	--									ELSE NULL
-	--						  END
-	--   ,intFutureMarketId = SH.intFutureMarketId
-	--   ,intFutureMonthId  = SH.intFutureMonthId
-	--   ,strPricingStatus =  SH.strPricingStatus
-	--FROM @TempContractBalance FR 
-	--JOIN @tblChange tblChange ON tblChange.intContractDetailId = FR.intContractDetailId
-	--JOIN tblCTSequenceHistory SH ON SH.intSequenceHistoryId = tblChange.intSequenceHistoryId
-	--JOIN tblCTPricingType	  PT ON PT.intPricingTypeId		= SH.intPricingTypeId
-	--LEFT JOIN tblICItemUOM	PriceUOM  ON PriceUOM.intItemUOMId = SH.intPriceItemUOMId
-	--WHERE FR.dtmEndDate = @dtmEndDate
 
 	INSERT INTO @TempPriceFixation
 	( 
@@ -1497,7 +1471,7 @@ BEGIN TRY
 		,strCategory
 		,strPricingStatus
 
-	-- INSERT PRICED SEQUENCE
+	-- INSERT PRICED QUANTITIES
 	INSERT INTO @FinalPriceFixation
 	( 
 		 intContractTypeId		
@@ -1605,81 +1579,6 @@ BEGIN TRY
 		,strPricingStatus = 'Priced'
 	FROM @TempContractBalance
 	WHERE intPricingTypeId = 1	
-	
-	----UPDATE tblCTContractBalance 
-	----SET dblAmount = ISNULL(dblAvailableQty,0) * (ISNULL(dblFutures,0)+ISNULL(dblBasis,0))
-	----WHERE dtmEndDate = @dtmEndDate
-	
-	;WITH CTE
-	AS 
-	(
-		SELECT Row_Number() OVER (PARTITION BY SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC) AS Row_Num
-		,SH.intContractDetailId
-		--,SH.intContractStatusId
-		--,SH.intPricingTypeId
-		--,SH.dtmHistoryCreated
-		FROM tblCTSequenceHistory SH
-		JOIN  @TempContractBalance FR ON SH.intContractDetailId = FR.intContractDetailId
-		WHERE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE 
-																WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 
-																ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) 
-															END		
-		AND	FR.dtmEndDate =		 @dtmEndDate
-		AND FR.intContractStatusId IN (3,5,6)
-
-	)
-	INSERT INTO @SequenceHistory
-	(
-		intContractDetailId--,
-		--intContractStatusId,
-		--intPricingTypeId,
-		--dtmHistoryCreated
-	)
-	SELECT DISTINCT
-	intContractDetailId--,
-	--intContractStatusId,
-	--intPricingTypeId,
-	--dtmHistoryCreated
-	FROM CTE WHERE Row_Num = 1
-
-	----UPDATE FR
-	----SET 
-	----	 FR.intContractStatusId = SH.intContractStatusId
-	----	,FR.intPricingTypeId	= SH.intPricingTypeId
-	----FROM @TempContractBalance FR
-	----JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
-	----WHERE FR.dtmEndDate = @dtmEndDate
-
-	----UPDATE FR
-	----SET FR.strPricingType	  = LEFT(PT.strPricingType,1),
-	----	FR.strPricingTypeDesc = PT.strPricingType
-	----FROM @TempContractBalance FR
-	----JOIN tblCTPricingType PT ON PT.intPricingTypeId = FR.intPricingTypeId
-	----WHERE FR.dtmEndDate = @dtmEndDate AND (FR.strPricingType IS NULL OR FR.strPricingTypeDesc IS NULL)
-
-	----DELETE FR
-	----FROM @TempContractBalance FR
-	----JOIN @SequenceHistory SH ON SH.intContractDetailId = FR.intContractDetailId
-	----WHERE SH.intContractStatusId IN (3,5,6)
-	----	AND FR.dtmEndDate = @dtmEndDate
-
-	----UPDATE FR
-	---- SET
-	----FR.dblQtyinCommodityStockUOM		 = dbo.fnICConvertUOMtoStockUnit(FR.intItemId,FR.intUnitMeasureId,FR.dblQuantity)
-	----FR.dblFuturesinCommodityStockUOM    = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblFutures)
-	----,FR.dblBasisinCommodityStockUOM      = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblBasis)
-	----,FR.dblCashPriceinCommodityStockUOM  = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblCashPrice)
-	----,FR.dblAmountinCommodityStockUOM     = dbo.fnGRConvertQuantityToTargetItemUOM(FR.intItemId,ItemStockUOM.intUnitMeasureId,ComStockUOM.intUnitMeasureId,FR.dblAmount)
-	----FROM tblCTContractBalance FR
-	----JOIN tblICCommodityUnitMeasure ComStockUOM	ON	ComStockUOM.intCommodityId = FR.intCommodityId 
-	----	AND ComStockUOM.ysnStockUnit = 1
-	----JOIN tblICItemUOM ItemStockUOM ON ItemStockUOM.intItemId = FR.intItemId 
-	----	AND ItemStockUOM.ysnStockUnit = 1
-	----WHERE FR.dtmEndDate = @dtmEndDate
-
-	----DELETE 
-	----FROM @TempContractBalance
-	----WHERE strType <> 'Basis' AND dblQuantity <= 0 AND dtmEndDate = @dtmEndDate
 
 	INSERT INTO @FinalContractBalance
 	( 
@@ -1829,6 +1728,29 @@ BEGIN TRY
 	,FPF.strFutMarketName			
 	,FPF.strCategory
 	,FPF.strPricingStatus
+
+	;WITH CTE
+	AS 
+	(
+		SELECT Row_Number() OVER (PARTITION BY SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC) AS Row_Num
+		,SH.intContractDetailId
+		FROM tblCTSequenceHistory SH
+		JOIN  @FinalPriceFixation FR ON SH.intContractDetailId = FR.intContractDetailId
+		WHERE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE 
+																WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 
+																ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) 
+															END		
+		AND	FR.dtmEndDate =		 @dtmEndDate
+		AND FR.intContractStatusId IN (3,5,6)
+
+	)
+	INSERT INTO @SequenceHistory
+	(
+		intContractDetailId
+	)
+	SELECT DISTINCT
+	intContractDetailId
+	FROM CTE WHERE Row_Num = 1	
 		
 	INSERT INTO tblCTContractBalance --WITH (TABLOCK)
 	( 
