@@ -110,6 +110,7 @@ BEGIN TRY
 		,@intPNumberOfContainers INT
 		,@intLoadDetailId INT
 		,@dblOldDetailQuantity NUMERIC(18, 6)
+		,@intContractHeaderId INT
 	DECLARE @tblLGLoadDetailChanges TABLE (
 		dblOldQuantity NUMERIC(18, 6)
 		,dblNewQuantity NUMERIC(18, 6)
@@ -846,6 +847,7 @@ BEGIN TRY
 						,@intPNumberOfContainers = NULL
 						,@intLoadDetailId = NULL
 						,@dblOldDetailQuantity = NULL
+						,@intContractHeaderId = NULL
 
 					SELECT @strCommodityCode = strCommodityCode
 						,@strItemNo = strItemNo
@@ -969,6 +971,7 @@ BEGIN TRY
 						,@strVendorReference = CH.strCustomerContract
 						,@intPSubLocationId = CD.intSubLocationId
 						,@intPNumberOfContainers = CD.intNumberOfContainers
+						,@intContractHeaderId = CD.intContractHeaderId
 					FROM tblCTContractDetail CD WITH (NOLOCK)
 					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 						AND CD.intContractDetailId = @intContractDetailId
@@ -1031,6 +1034,28 @@ BEGIN TRY
 							,@intExternalId = @intLoadDetailId
 							,@strScreenName = 'Load Schedule'
 							,@intSourceItemUOMId = @intItemUOMId
+
+						INSERT INTO tblLGLoadDocuments (
+							intConcurrencyId
+							,intLoadId
+							,intDocumentId
+							,strDocumentType
+							,intOriginal
+							,intCopies
+							)
+						SELECT 1
+							,@intLoadId
+							,CD.intDocumentId
+							,CASE WHEN ID.intDocumentType = 1 THEN 'Contract'
+									WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
+									WHEN ID.intDocumentType = 3	THEN 'Container'
+									ELSE ''
+								END COLLATE Latin1_General_CI_AS
+							,ISNULL(ID.intOriginal, 0)
+							,ISNULL(ID.intCopies, 0)
+						FROM tblCTContractDocument CD
+						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
+							AND CD.intContractHeaderId = @intContractHeaderId
 					END
 					ELSE
 					BEGIN
