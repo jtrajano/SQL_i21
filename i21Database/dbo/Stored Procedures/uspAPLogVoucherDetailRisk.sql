@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPLogVoucherDetailRisk]
-	@voucherDetailIds AS Id,
+	@voucherDetailIds AS Id READONLY,
 	@remove BIT = 0
 AS
 
