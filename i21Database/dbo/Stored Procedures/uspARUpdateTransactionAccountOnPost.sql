@@ -155,6 +155,11 @@ SET ANSI_WARNINGS OFF
 	INNER JOIN #ARPostInvoiceDetail ARID ON ARITD.intInvoiceDetailId = ARID.intInvoiceDetailId
 
 	--UPDATE FINAL
+	UPDATE PIH
+	SET PIH.intAccountId	= ARI.intAccountId
+	FROM #ARPostInvoiceHeader PIH
+	INNER JOIN tblARInvoice ARI ON PIH.intInvoiceId = ARI.intInvoiceId
+
     UPDATE PID
     SET  PID.[intItemAccountId]             = ARID.[intAccountId]
         ,PID.[intSalesAccountId]            = ARID.[intSalesAccountId]
