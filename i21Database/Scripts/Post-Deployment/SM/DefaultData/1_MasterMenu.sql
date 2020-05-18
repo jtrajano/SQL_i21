@@ -29,7 +29,8 @@ GO
 	-- 	AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Inquiry' AND strModuleName = 'Accounts Payable' 
 	-- 		AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Payable')) 
 	-- 	AND strCommand = N'EntityManagement.view.EntityInquiry?showSearch=true') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DPRSummaryLog?showSearch=true') 
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DPRSummaryLog?showSearch=true') 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management') AND strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -3753,6 +3754,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Storage B
 	VALUES (N'Storage By Grades', N'Ticket Management', @TicketManagementReportParentMenuId, N'Storage By Grades', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true', N'small-menu-report', 0, 0, 0, 1, 6, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Reporting.view.ReportManager?group=Grain&report=StorageByGrades&direct=true&showCriteria=true' WHERE strMenuName = 'Storage By Grades' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Destination Weight Variance Report', N'Ticket Management', @TicketManagementReportParentMenuId, N'Destination Weight Variance Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 6, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true' WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId
 
 --IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Unsent Tickets' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementReportParentMenuId)
 --	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
