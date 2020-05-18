@@ -19,6 +19,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , dblInvoiceTotal		= I.dblInvoiceTotal
 	 , dblAmountDue			= I.dblAmountDue
 	 , ysnPosted			= I.ysnPosted
+	 , ysnPaid = CASE WHEN (I.strTransactionType IN ('Customer Prepayment') AND I.ysnPaid = 0) THEN I.ysnPaidCPP ELSE I.ysnPaid END
 	 , ysnHasEmailSetup		= ISNULL(EMAILSETUP.ysnHasEmailSetup, CAST(0 AS BIT))
 	 , ysnMailSent			= ISNULL(EMAILSTATUS.ysnMailSent, CAST(0 AS BIT))
 FROM tblARInvoice I WITH (NOLOCK)
