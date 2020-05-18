@@ -70,3 +70,57 @@ BEGIN
 	VALUES('Currency Exposure',1,'','Risk Management',0,0,getdate(),1,1)
 END
 GO
+
+PRINT ('/*******************  START Syncing Commodity Attributes to RM *******************/')
+GO
+
+IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKLogAction')
+BEGIN
+	SET IDENTITY_INSERT tblRKLogAction ON
+
+	INSERT INTO tblRKLogAction(intLogActionId
+		, strActionIn
+		, strDescription)
+	SELECT intActionId
+		, strActionIn
+		, strDescription
+	FROM (
+		SELECT intActionId = 1, strActionIn = 'Rebuild', strDescription = 'Logs created upon rebuild.'
+		UNION ALL SELECT 2, 'Produce', 'Inventory Increasing from Posted Work Order'
+		UNION ALL SELECT 3, 'Consume', 'Inventory Decreasing from posted Work Order'
+		UNION ALL SELECT 4, 'Inventory Transfer', 'Positive and negative change from transferring inventory from one location to another.'
+		UNION ALL SELECT 5, 'Receipt on Purchase Priced Contract', 'Inventory increasing from receipt on a purchase priced contract or priced portion of a purchase basis contract'
+		UNION ALL SELECT 6, 'Receipt on Purchase Basis Contract (PBD)', 'Inventory increasing from receipt on Purchase Basis contract (unpriced Portion)'
+		UNION ALL SELECT 7, 'Receipt on Company Owned Storage', 'Inventory increasing from receipt on Storage Type of "Company Owned"'
+		UNION ALL SELECT 8, 'Receipt on Spot Priced', 'Inventory increasing from receipt of units Spot priced as scale ( can either have distribution type of spot or units can have split application in manual screen with some going to spot)'
+		UNION ALL SELECT 9, 'Customer owned to Company owned Storage', 'Settle Storage to: Spot or Purchase Priced or Purchase Basis Contract. Transfer storage from Customer owned to Company owned '
+		UNION ALL SELECT 10, 'Delivery on Sales Priced Contract', 'Inventory Decreasing from shipment on a Sales priced contract or priced portion of a Sales basis contract'
+		UNION ALL SELECT 11, 'Delivery on Sales Basis Contract (SBD)', 'Inventory Decreasing from shipment on Sales Basis contract (unpriced Portion)'
+		UNION ALL SELECT 12, 'Shipment on Spot Priced', 'Inventory Decreasing from shipment of units Spot priced as scale ( can either have distribution type of spot or units can have split application in manual screen with some going to spot)'
+		UNION ALL SELECT 13, 'Distributed Ticket', 'Happens when distributing ticket with Hold distribution type.'
+		UNION ALL SELECT 14, 'Undistributed Ticket', 'Happens when undistributing ticket with Hold distribution type.'
+		UNION ALL SELECT 15, 'Created Voucher', 'Created Voucher.'
+		UNION ALL SELECT 16, 'Created Invoice', 'Created Invoice.'
+		UNION ALL SELECT 17, 'Created Price', 'Created Pricing Layer.'
+		UNION ALL SELECT 18, 'Inventory Shipped on Basis Delivery', 'Shipment is invoiced.'
+		UNION ALL SELECT 19, 'Inventory Received on Basis Delivery', 'Receipt is vouchered.'
+		UNION ALL SELECT 20, 'Inventory Adjustment - Quantity', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 21, 'Inventory Adjustment - UOM', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 22, 'Inventory Adjustment - Item', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 23, 'Inventory Adjustment - Lot Status', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 24, 'Inventory Adjustment - Split Lot', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 25, 'Inventory Adjustment - Expiry Date', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 26, 'Inventory Adjustment - Lot Merge', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 27, 'Inventory Adjustment - Lot Move', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 28, 'Inventory Adjustment - Ownership', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 29, 'Inventory Adjustment - Opening Inventory', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 30, 'Inventory Adjustment - Lot Weight', 'Positive or negative change to inventory based on Change from Posted Inventory adjustment'
+		UNION ALL SELECT 31, 'Inbound Shipment', 'Positive or negative change to inventory based on Load Schedule -> Inbound Shipment'
+		UNION ALL SELECT 32, 'Outbound Shipment', 'Positive or negative change to inventory based on Load Schedule -> Outbound Shipment'
+	) tbl
+	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
+
+	SET IDENTITY_INSERT tblRKLogAction OFF
+
+END
+GO
