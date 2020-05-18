@@ -6,6 +6,8 @@ SELECT SL.intSummaryLogId
 	, SL.strBatchId
 	, SL.dtmCreatedDate
 	, SL.strBucketType
+	, SL.intActionId
+	, SL.strAction
 	, SL.strTransactionType
 	, SL.intTransactionRecordId
 	, SL.intTransactionRecordHeaderId
