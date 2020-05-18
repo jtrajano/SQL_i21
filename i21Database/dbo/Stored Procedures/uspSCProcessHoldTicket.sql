@@ -316,7 +316,8 @@ BEGIN TRY
             ,intEntityId 
             ,ysnDelete 
             ,intUserId 
-            ,strNotes     
+            ,strNotes
+			,intActionId     
         )
 		SELECT
             strBatchId = NULL
@@ -351,6 +352,7 @@ BEGIN TRY
             ,ysnDelete = 0
             ,intUserId = NULL
             ,strNotes = strTicketComment
+			,intActionId = CASE WHEN @ysnPost = 1 THEN 13 ELSE 14 END
         FROM tblSCTicket TV
         LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
         LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo
