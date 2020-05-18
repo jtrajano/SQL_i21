@@ -906,3 +906,27 @@ BEGIN
 			AND t.strTransactionId = @strTransactionId
 			AND t.ysnIsUnposted = 0
 END 
+
+-----------------------------------------
+-- Call the Risk Log sp
+-----------------------------------------
+IF @ysnRecap = 0 
+BEGIN 
+	EXEC dbo.uspICLogRiskPositionFromOnHand
+		@strBatchId
+		,@strTransactionId
+		,@intEntityUserSecurityId
+		,0
+END 
+
+-----------------------------------------
+-- Call the Risk Log sp
+-----------------------------------------
+IF @ysnRecap = 0 
+BEGIN 
+	EXEC dbo.uspICLogRiskPositionFromInTransit
+		@strBatchId
+		,@strTransactionId
+		,@intEntityUserSecurityId
+		,0
+END 

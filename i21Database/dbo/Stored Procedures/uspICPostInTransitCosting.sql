@@ -425,3 +425,14 @@ BEGIN
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
 END 
+
+-----------------------------------------
+-- Call the Risk Log sp
+-----------------------------------------
+BEGIN 
+	EXEC @intReturnValue = dbo.uspICLogRiskPositionFromInTransit
+		@strBatchId
+		,@strTransactionId
+		,@intEntityUserSecurityId
+		,1
+END 
