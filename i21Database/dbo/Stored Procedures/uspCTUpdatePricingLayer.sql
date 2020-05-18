@@ -6,9 +6,11 @@ AS
 BEGIN
 
     declare @intPriceFixationId int;
+    declare @intContractPriceId int;
     declare @intPriceFixationDetailId int;
 	declare @dblPricedQuantity numeric(18,6);
 	declare @dblInvoiceDetailQuantity numeric(18,6);
+	declare @intContractDetailId int;
 
 	declare @InvoiceDetails table (
 		intInvoiceDetailId int
@@ -36,7 +38,7 @@ BEGIN
 		from
 			tblCTPriceFixationDetailAPAR
 		where intInvoiceDetailId = @intInvoiceDetailId;
-	
+
 		select
 			@dblInvoiceDetailQuantity = dblQtyShipped
 		from
@@ -51,6 +53,8 @@ BEGIN
 			tblCTPriceFixationDetail
 		where
 			intPriceFixationDetailId = @intPriceFixationDetailId
+
+		select @intContractPriceId = intPriceContractId,@intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 
 		set @dblPricedQuantity = isnull(@dblPricedQuantity,0)
 		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
@@ -69,6 +73,10 @@ BEGIN
 			if ((select count(*) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId) = 1)
 			begin
 				delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
+				if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
+				begin
+					delete from tblCTPriceContract where intPriceContractId = @intContractPriceId;
+				end
 			end
 			else
 			begin
@@ -78,6 +86,8 @@ BEGIN
 
 		set @intInvoiceDetailId = (select min(intInvoiceDetailId) from @InvoiceDetails where intInvoiceDetailId > @intInvoiceDetailId);
 	end
+
+	update tblCTContractDetail set intConcurrencyId = intConcurrencyId where intContractDetailId = @intContractDetailId;
     
 
 END
