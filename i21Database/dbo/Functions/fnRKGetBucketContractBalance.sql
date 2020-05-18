@@ -58,6 +58,7 @@ RETURNS @returntable TABLE
 	, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intUserId INT
 	, strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strAction  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -116,6 +117,7 @@ BEGIN
 		, strNotes
 		, intUserId
 		, strUserName
+		, strAction
 	FROM (
 		SELECT
 			 intContractBalanceLogId 
@@ -169,7 +171,8 @@ BEGIN
 			, strBasisCurrency = qCur.strCurrency
 			, cb.strNotes
 			, cb.intUserId
-			, strUserName = u.strName		
+			, strUserName = u.strName
+			, cb.strAction		
 		FROM tblCTContractBalanceLog cb
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblCTPricingType pt ON pt.intPricingTypeId = cb.intPricingTypeId

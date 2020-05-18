@@ -27,7 +27,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intLocationId
 		,intUserId
 		,strUserName 
-		,strAction = 'Created ' + strTransactionType
+		,strAction
 	from vyuRKGetSummaryLog SL
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
@@ -59,7 +59,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intLocationId
 		,intUserId
 		,strUserName
-		,strAction = 'Created ' + strTransactionReference
+		,strAction
 	from dbo.fnRKGetBucketContractBalance(getdate(),null,null) CB
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = CB.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = CB.intQtyUOMId
@@ -91,15 +91,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intLocationId
 		,intUserId
 		,strUserName 
-		,strAction = CASE WHEN strTransactionReference = 'Inventory Shipment' THEN 
-							'Shipped a Basis Delivery'
-						WHEN strTransactionReference = 'Invoice' THEN
-							'Created an Invoice'
-						WHEN strTransactionReference = 'Inventory Receipt' THEN
-							'Received a Basis Delivery'
-						WHEN strTransactionReference = 'Voucher' THEN
-							'Created a Voucher'
-					END
+		,strAction
 	from dbo.fnRKGetBucketBasisDeliveries(getdate(),null,null) SD
 	left join tblICItemUOM stckUOM on stckUOM.intItemId = SD.intItemId AND stckUOM.ysnStockUnit = 1
 	left join tblICItemUOM origUOM ON origUOM.intItemUOMId = SD.intQtyUOMId

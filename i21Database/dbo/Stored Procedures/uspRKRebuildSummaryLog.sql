@@ -957,7 +957,8 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, strNotes
-			, intUserId)
+			, intUserId
+			, intActionId)
 		SELECT strBatchId = NULL
 			, dtmTransactionDate
 			, strTransactionType
@@ -990,7 +991,8 @@ BEGIN TRY
 			, intBookId
 			, intSubBookId
 			, strNotes
-			, intUserId 		
+			, intUserId
+			, intActionId  = 1 --Rebuild 		
 		FROM @tblContractBalance
 
 
@@ -1271,6 +1273,7 @@ BEGIN TRY
 			, intFutureMarketId
 			, intFutureMonthId
 			, intUserId
+			, intActionId
 		)
 		SELECT 
 			strBatch = NULL
@@ -1295,6 +1298,7 @@ BEGIN TRY
 			, intFutureMarketId
 			, intFutureMonthId
 			, intUserId
+			, intActionId  = 1 --Rebuild
 		FROM #tblFinalBasisDeliveries 
 
 		EXEC uspCTLogContractBalance @cbLog, 1
@@ -1330,7 +1334,8 @@ BEGIN TRY
 			, intLocationId
 			, intCommodityUOMId
 			, strNotes
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType = 'Derivative Entry'
@@ -1366,6 +1371,7 @@ BEGIN TRY
 								+ ' {strBuySell = "' + ISNULL(strNewBuySell, '') +'"}'
 								+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 								+ ' {strBrokerTradeNo = "' + ISNULL(strBrokerTradeNo, '') +'"}'
+			, intActionId  = 1 --Rebuild
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
@@ -1405,7 +1411,8 @@ BEGIN TRY
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives'
 			, strTransactionType
@@ -1431,6 +1438,7 @@ BEGIN TRY
 			, intUserId
 			, intCommodityUOMId
 			, strMiscFields
+			, intActionId  = 1 --Rebuild
 		FROM (
 			SELECT strTransactionType = 'Match Derivatives'
 				, intTransactionRecordId = history.intLFutOptTransactionId
@@ -1542,7 +1550,8 @@ BEGIN TRY
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType
@@ -1568,6 +1577,7 @@ BEGIN TRY
 			, intUserId
 			, intCommodityUOMId
 			, strMiscFields
+			, intActionId  = 1 --Rebuild
 		FROM (
 			SELECT strTransactionType = 'Expired Options'
 				, intTransactionRecordId = detail.intFutOptTransactionId
@@ -1651,7 +1661,8 @@ BEGIN TRY
 			, intLocationId
 			, dblQty
 			, intUserId
-			, strNotes)
+			, strNotes
+			, intActionId)
 		SELECT
 			  strBucketType = 'Collateral' 
 			, strTransactionType = 'Collateral'
@@ -1668,6 +1679,7 @@ BEGIN TRY
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
 							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
+			, intActionId  = 1 --Rebuild
 		FROM tblRKCollateral a
 		
 		INSERT INTO @ExistingHistory(
@@ -1685,7 +1697,8 @@ BEGIN TRY
 			, dblQty
 			, intCommodityUOMId
 			, intUserId
-			, strNotes)
+			, strNotes
+			, intActionId)
 		SELECT
 			  strBucketType = 'Collateral'  
 			, strTransactionType = 'Collateral Adjustments'
@@ -1704,6 +1717,7 @@ BEGIN TRY
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
 							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
+			, intActionId  = 1 --Rebuild
 		FROM tblRKCollateralAdjustment CA
 		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
 		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
@@ -1752,6 +1766,7 @@ BEGIN TRY
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,intActionId
 		)
 		SELECT
 			strBatchId
@@ -1780,6 +1795,7 @@ BEGIN TRY
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,intActionId  = 1 --Rebuild
 		FROM (
 			SELECT 
 				strBatchId = t.strBatchId
@@ -2288,7 +2304,8 @@ BEGIN TRY
 			, intEntityId 
 			, intUserId 
 			, strNotes
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT strBatchId = NULL
 			, strBucketType
 			, strTransactionType
@@ -2317,6 +2334,7 @@ BEGIN TRY
 								+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
 								+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 								+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
+			, intActionId  = 1 --Rebuild
 		FROM #tmpCustomerOwned co
 		ORDER BY dtmDeliveryDate, intStorageHistoryId
 	
@@ -2356,7 +2374,8 @@ BEGIN TRY
             ,intEntityId 
             ,ysnDelete 
             ,intUserId 
-            ,strNotes     
+            ,strNotes
+			,intActionId     
         )
          SELECT
             strBatchId = NULL
@@ -2385,6 +2404,7 @@ BEGIN TRY
             ,ysnDelete = 0
             ,intUserId = TV.intEntityScaleOperatorId
             ,strNotes = strTicketComment
+			,intActionId  = 1 --Rebuild
         FROM tblSCTicket TV
         LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
         LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo

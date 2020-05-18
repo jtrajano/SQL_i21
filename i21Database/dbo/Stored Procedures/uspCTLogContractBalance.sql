@@ -39,6 +39,7 @@ BEGIN
 		, @intSubBookId INT
 		, @strNotes NVARCHAR(100)
 		, @intUserId INT
+		, @intActionId INT
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpLogItems WHERE ISNULL(strBatchId, '') = '')
@@ -85,7 +86,8 @@ BEGIN
 		, [strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, [ysnNegated] BIT DEFAULT((0)) NULL
 		, [intRefContractBalanceId] INT NULL
-		, [intUserId] INT NULL)
+		, [intUserId] INT NULL
+		, [intActionId] INT NULL)
 
 	--DECLARE @PrevLog AS TABLE ([intContractBalanceLogId] INT
 	--	, [strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
@@ -156,6 +158,7 @@ BEGIN
 			, @intSubBookId = intSubBookId
 			, @strNotes = strNotes
 			, @intUserId = intUserId
+			, @intActionId = intActionId
 		FROM #tmpLogItems
 
 		--SELECT * INTO #tmpPrevLogList
@@ -318,7 +321,8 @@ BEGIN
 			, intBookId
 			, intSubBookId
 			, strNotes
-			, intUserId)
+			, intUserId
+			, intActionId)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -352,6 +356,7 @@ BEGIN
 			, intSubBookId
 			, strNotes
 			,intUserId
+			, intActionId
 		FROM #tmpLogItems WHERE intId = @Id
 
 		--DROP TABLE #tmpPrevLogList
@@ -360,6 +365,8 @@ BEGIN
 	END
 
 	INSERT INTO tblCTContractBalanceLog(strBatchId
+		, intActionId
+		, strAction 
 		, dtmTransactionDate
 		, dtmCreatedDate
 		, strTransactionType
@@ -396,6 +403,8 @@ BEGIN
 		, intRefContractBalanceId
 		, intUserId)
 	SELECT strBatchId
+		, intActionId
+		, strAction = A.strActionIn 
 		, dtmTransactionDate
 		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
 		, strTransactionType
@@ -431,7 +440,8 @@ BEGIN
 		, ysnNegated
 		, intRefContractBalanceId
 		, intUserId
-	FROM @FinalTable
+	FROM @FinalTable F
+	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 
 	DROP TABLE #tmpLogItems
 END

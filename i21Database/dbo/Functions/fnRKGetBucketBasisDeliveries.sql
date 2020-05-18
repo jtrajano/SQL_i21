@@ -43,6 +43,7 @@ RETURNS @returntable TABLE
 	, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intUserId INT
 	, strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strAction  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -126,6 +127,7 @@ BEGIN
 		, strNotes
 		, intUserId
 		, strUserName
+		, strAction
 	FROM (
 		SELECT 
 			 dtmTransactionDate
@@ -173,6 +175,7 @@ BEGIN
 			, cb.strNotes
 			, cb.intUserId
 			, strUserName = u.strName
+			, cb.strAction
 		FROM tblCTContractBalanceLog cb
 		INNER JOIN @OpenBasisContract obc ON cb.intContractDetailId = obc.intContractDetailId
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
