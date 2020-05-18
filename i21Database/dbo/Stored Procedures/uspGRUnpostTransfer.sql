@@ -21,6 +21,8 @@ BEGIN
 	DECLARE @intEntityId INT
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
+	DECLARE @HistoryIds AS Id
+
 	SELECT @strTransferStorageId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
 		DROP TABLE #tmpTransferCustomerStorage
@@ -37,8 +39,6 @@ BEGIN
 	LEFT JOIN tblGRTransferStorageReference TSR
 	ON TSR.intTransferStorageSplitId = TSS.intTransferStorageSplitId
 	WHERE TSS.intTransferStorageId = @intTransferStorageId   AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
-
-
 
 	IF (SELECT TOP 1 A.dblOriginalBalance
 			FROM tblGRCustomerStorage A 
@@ -114,19 +114,19 @@ BEGIN
 				@intContractDetailId	= @intTransferContractDetailId
 				,@dblQuantityToUpdate	= @dblTransferUnits
 				,@intUserId				= @intUserId
-				,@intExternalId			= @intCustomerStorageId
+				,@intExternalId			= @intTransferStorageId
 				,@strScreenName			= 'Transfer Storage'
 				,@intSourceItemUOMId	= @intSourceItemUOMId
 
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 		END
-		CLOSE c; DEALLOCATE c;				
+		CLOSE c; DEALLOCATE c;
 		
-		--DELETE HISTORY
-		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
-		DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
+		--DELETE HISTORY (moved at the end of the script for GRN-2150)
+		--DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
+		--DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		--DELETE DISCOUNTS
-		DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage) AND strSourceType = 'Storage'
+		--DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage) AND strSourceType = 'Storage'
 
 		--integration to IC
 		SET @cnt = 0
@@ -427,6 +427,8 @@ BEGIN
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
+								,[intSourceEntityId]
+								,[intCommodityId]
 							)
 							EXEC dbo.uspICUnpostCosting @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0	
 							 							
@@ -440,7 +442,7 @@ BEGIN
 
 						
 			
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
@@ -458,12 +460,35 @@ BEGIN
 		--	ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
 		--WHERE B.intTransferStorageId = @intTransferStorageId AND ISNULL(TSR.intTransferStorageId, @intTransferStorageId) = @intTransferStorageId
 		
+		--risk summary log
+		INSERT INTO @HistoryIds
+		SELECT intStorageHistoryId FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
+
+		DECLARE @intStorageHistoryId INT 
+
+		SET @intStorageHistoryId = NULL
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+			SELECT intId FROM @HistoryIds
+		OPEN c;
+		FETCH NEXT FROM c INTO @intStorageHistoryId
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspGRRiskSummaryLog @intStorageHistoryId,'UNPOST'
+			FETCH NEXT FROM c INTO @intStorageHistoryId
+		END
+		CLOSE c; DEALLOCATE c;
+
+		--DELETE HISTORY
+		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
+		DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
+		--DELETE DISCOUNTS
+		DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage) AND strSourceType = 'Storage'
+
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
-
-		--DELETE IN SUMMARY LOG
-		DELETE FROM tblRKSummaryLog WHERE intTransactionRecordHeaderId = @intTransferStorageId
 
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION

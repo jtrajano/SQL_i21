@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRRiskSummaryLog]
 (
 	@intStorageHistoryId INT
+	,@strAction NVARCHAR(50) = NULL
 )
 AS
 BEGIN TRY
@@ -235,7 +236,7 @@ BEGIN TRY
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId			
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= sh.dblUnits
+			,dblQty 						= CASE WHEN ISNULL(@strAction,'') = '' THEN sh.dblUnits ELSE (sh.dblUnits * -1 )END
 			,intEntityId					= cs.intEntityId			
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
@@ -284,7 +285,7 @@ BEGIN TRY
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= sh.dblUnits
+			,dblQty 						= CASE WHEN ISNULL(@strAction,'') = '' THEN sh.dblUnits ELSE (sh.dblUnits * -1 )END
 			,intEntityId					= cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
@@ -333,7 +334,7 @@ BEGIN TRY
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId			
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= sh.dblUnits
+			,dblQty 						= CASE WHEN ISNULL(@strAction,'') = '' THEN sh.dblUnits ELSE (sh.dblUnits * -1 ) END
 			,intEntityId					= cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
