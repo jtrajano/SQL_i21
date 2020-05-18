@@ -452,6 +452,7 @@ BEGIN TRY
 					,[strSettleTicket]
 					,[intTransactionTypeId]
 					,[dblPaidAmount]
+					,[intBillId]
 					,[strVoucher]
 					,[ysnPost]
 				)
