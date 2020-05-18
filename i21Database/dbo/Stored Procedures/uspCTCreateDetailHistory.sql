@@ -3,8 +3,9 @@
     @intContractDetailId	   INT = NULL,
 	@strComment				   NVARCHAR(100) = NULL,
 	@intSequenceUsageHistoryId INT = NULL,
-	@strSource				   NVARCHAR(50) = '',
-	@strProcess				   NVARCHAR(50) = ''
+	@strSource				   NVARCHAR(50),
+	@strProcess				   NVARCHAR(50),
+	@intUserId				   INT
 AS	   
 
 BEGIN TRY
@@ -151,7 +152,7 @@ BEGIN TRY
 			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus,			intContractBasisId			
 			,intGradeId,					intItemUOMId,					intPositionId,						intPriceItemUOMId,			intTermId			
 			,intWeightId,					intBookId,						intSubBookId,						dblRatio,					strBook
-			,strSubBook,					intSequenceUsageHistoryId		
+			,strSubBook,					intSequenceUsageHistoryId,		intUserId
 		)
 		OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 		SELECT   
@@ -198,6 +199,7 @@ BEGIN TRY
 			,strBook			  = BK.strBook
 			,strSubBook			  = SB.strSubBook
 			,intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId
+			,intUserId			  = @intUserId
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId

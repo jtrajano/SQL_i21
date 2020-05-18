@@ -80,8 +80,17 @@ BEGIN TRY
 	EXEC uspQMTransferContractSample @intFromContractDetailId, @intToContractDetailId, @intUserId
 	EXEC uspLGTransferContractLoads @intFromContractDetailId, @intToContractDetailId, @intUserId
 
-	EXEC	uspCTCreateDetailHistory	NULL,@intFromContractDetailId
-	EXEC	uspCTCreateDetailHistory	NULL,@intToContractDetailId
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL,
+										@intContractDetailId = @intFromContractDetailId,
+										@strSource			 = 'Contract',
+										@strProcess		  	 = 'Transfer Sequence Attribute',
+										@intUserId			 = @intUserId
+										
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL,
+										@intContractDetailId = @intToContractDetailId,
+										@strSource			 = 'Contract',
+										@strProcess		  	 = 'Transfer Sequence Atrribute',
+										@intUserId			 = @intUserId
 
 END TRY
 BEGIN CATCH       

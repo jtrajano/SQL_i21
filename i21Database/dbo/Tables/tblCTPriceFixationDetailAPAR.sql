@@ -17,52 +17,52 @@
 )
 GO
 
-CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsert]
-    ON [dbo].[tblCTPriceFixationDetailAPAR]
-    AFTER INSERT
-AS
-BEGIN
-       SET NOCOUNT ON;
+-- CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsert]
+--     ON [dbo].[tblCTPriceFixationDetailAPAR]
+--     AFTER INSERT
+-- AS
+-- BEGIN
+--        SET NOCOUNT ON;
 
-	   DECLARE @ysnVoucher BIT
-	   DECLARE @intDetailId INT
-	   DECLARE @intContractHeaderId INT
-	   DECLARE @intContractDetailId INT
-	   DECLARE @strProcess NVARCHAR(20)
-	   DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+-- 	   DECLARE @ysnVoucher BIT
+-- 	   DECLARE @intDetailId INT
+-- 	   DECLARE @intContractHeaderId INT
+-- 	   DECLARE @intContractDetailId INT
+-- 	   DECLARE @strProcess NVARCHAR(20)
+-- 	   DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
-       SELECT @ysnVoucher = CASE WHEN intBillId IS NOT NULL THEN 1 ELSE 0 END
-       FROM INSERTED
+--        SELECT @ysnVoucher = CASE WHEN intBillId IS NOT NULL THEN 1 ELSE 0 END
+--        FROM INSERTED
 
-	   IF @ysnVoucher = 1
-	   BEGIN
-			SELECT @intDetailId = intBillDetailId
-			FROM INSERTED
+-- 	   IF @ysnVoucher = 1
+-- 	   BEGIN
+-- 			SELECT @intDetailId = intBillDetailId
+-- 			FROM INSERTED
 
-			SELECT @intContractHeaderId = intContractHeaderId
-				  ,@intContractDetailId = intContractDetailId 
-			FROM tblAPBillDetail
-			WHERE intBillDetailId = @intDetailId
-	   END
-	   ELSE
-	   BEGIN
-			SELECT @intDetailId = intInvoiceDetailId
-			FROM INSERTED
+-- 			SELECT @intContractHeaderId = intContractHeaderId
+-- 				  ,@intContractDetailId = intContractDetailId 
+-- 			FROM tblAPBillDetail
+-- 			WHERE intBillDetailId = @intDetailId
+-- 	   END
+-- 	   ELSE
+-- 	   BEGIN
+-- 			SELECT @intDetailId = intInvoiceDetailId
+-- 			FROM INSERTED
 
-			SELECT @intContractHeaderId = intContractHeaderId
-				  ,@intContractDetailId = intContractDetailId 
-			FROM tblARInvoiceDetail
-			WHERE intInvoiceDetailId = @intDetailId
-	   END
+-- 			SELECT @intContractHeaderId = intContractHeaderId
+-- 				  ,@intContractDetailId = intContractDetailId 
+-- 			FROM tblARInvoiceDetail
+-- 			WHERE intInvoiceDetailId = @intDetailId
+-- 	   END
 
-	   SELECT @strProcess = CASE WHEN @ysnVoucher = 1 THEN 'Voucher' ELSE 'Invoice' END
+-- 	   SELECT @strProcess = CASE WHEN @ysnVoucher = 1 THEN 'Voucher' ELSE 'Invoice' END
 
-	   EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess			 	= 	@strProcess,
-							@contractDetail 		= 	@contractDetails
-END
+-- 	   EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+-- 							@intContractDetailId 	= 	@intContractDetailId,
+-- 							@strSource			 	= 	'Pricing',
+-- 							@strProcess			 	= 	@strProcess,
+-- 							@contractDetail 		= 	@contractDetails
+-- END
 
 -- GO
 

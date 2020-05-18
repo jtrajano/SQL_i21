@@ -39,6 +39,7 @@
 	[dblHedgeNoOfLots]				NUMERIC(18,6) NULL,
 	--This is to track the used pricing for load
 	[dblLoadApplied]				NUMERIC(18,6) NULL,
+	[ysnToBeDeleted]				BIT NOT NULL DEFAULT 0,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetail_intPriceFixationDetailId] PRIMARY KEY CLUSTERED ([intPriceFixationDetailId] ASC),

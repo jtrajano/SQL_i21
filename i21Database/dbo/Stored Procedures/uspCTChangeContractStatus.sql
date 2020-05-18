@@ -98,7 +98,11 @@ BEGIN TRY
 			EXEC uspCTCancelOpenLoadSchedule @intId
 		END
 
-		EXEC	uspCTCreateDetailHistory	NULL, @intId
+		EXEC	uspCTCreateDetailHistory @intContractHeaderId = NULL, 
+										 @intContractDetailId = @intId,
+										 @strSource			  = 'Contract',
+										 @strProcess		  = 'Change Contract Status',
+										 @intUserId			  = @intEntityId										 
 
 		SELECT @intId = MIN(intId) FROM @ids WHERE intId > @intId
 	END

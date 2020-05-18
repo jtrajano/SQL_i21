@@ -336,7 +336,11 @@ BEGIN TRY
 		EXEC	uspCTValidateContractDetail @strTblXML,'Added'
 		
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@strTblXML,@intContractDetailId OUTPUT
-		EXEC	uspCTCreateDetailHistory	NULL, @intContractDetailId
+		EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL, 
+											@intContractDetailId = @intContractDetailId,
+											@strSource			 = 'Contract',
+										    @strProcess		     = 'Create Contract',
+											@intUserId			 = @intUserId
 	END
 
 

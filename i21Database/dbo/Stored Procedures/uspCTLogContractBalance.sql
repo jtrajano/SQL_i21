@@ -355,7 +355,7 @@ BEGIN
 			, intBookId
 			, intSubBookId
 			, strNotes
-			,intUserId
+			, intUserId
 			, intActionId
 		FROM #tmpLogItems WHERE intId = @Id
 
@@ -401,7 +401,8 @@ BEGIN
 		, strNotes
 		, ysnNegated
 		, intRefContractBalanceId
-		, intUserId)
+		, intUserId
+		, intActionId)
 	SELECT strBatchId
 		, intActionId
 		, strAction = A.strActionIn 
@@ -440,6 +441,7 @@ BEGIN
 		, ysnNegated
 		, intRefContractBalanceId
 		, intUserId
+		, intActionId
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 

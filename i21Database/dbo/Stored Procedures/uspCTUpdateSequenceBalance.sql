@@ -133,7 +133,8 @@ BEGIN TRY
 			@strComment				    =	NULL,
 			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
 			@strSource	 				= 	'Inventory',
-			@strProcess 				= 	'Balance'
+			@strProcess 				= 	'Update Sequence Balance',
+			@intUserId					= 	@intUserId
 
 END TRY
 

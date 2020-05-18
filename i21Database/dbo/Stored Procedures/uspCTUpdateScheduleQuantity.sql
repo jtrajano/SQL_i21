@@ -164,7 +164,8 @@ BEGIN TRY
 			@strComment				    =	NULL,
 			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
 			@strSource	 				= 	'Inventory',
-			@strProcess 				= 	'Scheduled Quantity'
+			@strProcess 				= 	'Update Scheduled Quantity',
+			@intUserId					= 	@intUserId
 
 END TRY
 
