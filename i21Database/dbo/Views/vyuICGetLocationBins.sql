@@ -12,6 +12,7 @@ SELECT
 	,ItemLocation.intLocationId
 	,ItemLocation.intItemLocationId
 	,ItemLocation.intSubLocationId
+	,ItemLocation.strStorageUnitNo
 	,Item.intCategoryId
 	,Category.strCategoryCode
 	,Item.intCommodityId
