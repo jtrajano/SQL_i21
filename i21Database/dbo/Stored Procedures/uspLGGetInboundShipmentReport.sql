@@ -179,6 +179,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 	FROM (
 		SELECT TOP 1
 			strTrackingNumber = L.strLoadNumber,
+			L.intPurchaseSale,
 			LW.strDeliveryNoticeNumber, 
 			LW.dtmDeliveryNoticeDate,
 			LW.dtmDeliveryDate,
@@ -207,6 +208,11 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.strFVessel,
 			L.strMVoyageNumber,
 			L.strFVoyageNumber,
+			ysnHasTransshipment = CAST(CASE WHEN ISNULL(L.strVessel1, '') <> '' AND ISNULL(L.strVessel2, '') <> '' THEN 1 ELSE 0 END AS BIT),
+			L.strVessel1, L.dtmETAPOD1, L.dtmETSPOL1, L.strOriginPort1, L.strDestinationPort1,
+			L.strVessel2, L.dtmETAPOD2, L.dtmETSPOL2, L.strOriginPort2, L.strDestinationPort2,
+			L.strVessel3, L.dtmETAPOD3, L.dtmETSPOL3, L.strOriginPort3, L.strDestinationPort3,
+			L.strVessel4, L.dtmETAPOD4, L.dtmETSPOL4, L.strOriginPort4, L.strDestinationPort4,
 			L.dblInsuranceValue,
 			L.intInsuranceCurrencyId,
 			InsuranceCur.strCurrency,
@@ -338,13 +344,14 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 
 			strWarehouseAddressInfo = '',
 			strWarehouseContractInfo = '',
-			intContractBasisId = '',
-			strContractBasis = '',
-			strContractBasisDescription = '',
+			intContractBasisId = CASE WHEN (PL.intSContractDetailId IS NOT NULL) THEN SCH.intFreightTermId ELSE NULL END,
+			strContractBasis = CASE WHEN (PL.intSContractDetailId IS NOT NULL) THEN SCB.strContractBasis ELSE '' END,
+			strContractBasisDescription = CASE WHEN (PL.intSContractDetailId IS NOT NULL) THEN SCB.strDescription ELSE '' END,
 			strWeightTerms = '',
 			strUserEmailId = '',
 			strUserPhoneNo = '',
 			L.strShippingMode,
+			strPickLotNumber = ISNULL(PL.strPickLotNumber, ''),
 			PL.strPickComments,
 			strCertificationName = (SELECT TOP 1 strCertificationName
 									FROM tblICCertification CER
@@ -554,16 +561,29 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
-		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = LD.intSContractDetailId
+		OUTER APPLY 
+			(SELECT TOP 1 strPickComments = PLH.strComments, PLH.strPickLotNumber, ALD.intSContractDetailId, ACH.intEntityId
+				FROM tblLGPickLotDetail PLD 
+				LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLD.intPickLotHeaderId
+				LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId
+				LEFT JOIN tblCTContractDetail ACD ON ACD.intContractDetailId = ALD.intSContractDetailId
+				LEFT JOIN tblCTContractHeader ACH ON ACH.intContractHeaderId = ACD.intContractHeaderId
+				WHERE PLD.intContainerId = LC.intLoadContainerId) PL
+		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN PL.intSContractDetailId ELSE LD.intSContractDetailId END
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
+		LEFT JOIN tblSMFreightTerms SCB ON SCB.intFreightTermId = SCH.intFreightTermId
 		LEFT JOIN tblSMCity PCity ON PCity.intCityId = PCH.intINCOLocationTypeId
 		LEFT JOIN tblSMCountry PCountry ON PCountry.intCountryID = PCity.intCountryId
 		LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
 		LEFT JOIN [tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
-		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
-		LEFT JOIN [tblEMEntityLocation] CLocation ON CLocation.intEntityId = LD.intCustomerEntityId and CLocation.ysnDefaultLocation = 1
+		LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = SCH.intEntityId
+		LEFT JOIN [tblEMEntityLocation] CLocation ON CLocation.intEntityId = SCH.intEntityId and CLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntityToContact CustomerContact ON CustomerContact.intEntityId = Customer.intEntityId
 		LEFT JOIN tblEMEntity CustomerContactEntity ON CustomerContactEntity.intEntityId = CustomerContact.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
@@ -574,10 +594,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN [tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId	
 		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
 		LEFT JOIN [tblEMEntityLocation] SpLocation ON SpLocation.intEntityId = Shipper.intEntityId and SpLocation.intEntityLocationId = Shipper.intDefaultLocationId
-		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
-		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+		
 		LEFT JOIN tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
@@ -618,9 +635,6 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblSMCompanySetup ConsigneeNotifyCompany ON ConsigneeNotifyCompany.intCompanySetupID = CLNP.intCompanySetupID
 		LEFT JOIN tblSMCompanyLocation CNCompanyLocation ON CNCompanyLocation.intCompanyLocationId = CLNP.intCompanyLocationId
 		LEFT JOIN tblEMEntityLocation CNLocation ON CNLocation.intEntityLocationId = CLNP.intEntityLocationId
-		OUTER APPLY (SELECT TOP 1 strPickComments = PLH.strComments
-					 FROM tblLGPickLotDetail PLD LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLD.intPickLotHeaderId
-					 WHERE PLD.intContainerId = LC.intLoadContainerId) PL
 		CROSS APPLY tblLGCompanyPreference CP
 		WHERE L.strLoadNumber = @strTrackingNumber) tbl
 	END
@@ -628,6 +642,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 	BEGIN
 		SELECT TOP 1			
 			strTrackingNumber = L.strLoadNumber,
+			L.intPurchaseSale,
 			LW.strDeliveryNoticeNumber,
 			LW.dtmDeliveryNoticeDate,
 			LW.dtmDeliveryDate,
