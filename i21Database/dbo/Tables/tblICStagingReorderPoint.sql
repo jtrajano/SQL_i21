@@ -9,6 +9,7 @@ CREATE TABLE [dbo].[tblICStagingReorderPoint]
     , strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , strEntityVendor NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+    , strStorageUnitNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
     , dblLastCost NUMERIC(38, 20) NULL
     , dblReorderPoint NUMERIC(38, 20) NULL
     , dblSuggestedQty NUMERIC(38, 20) NULL
