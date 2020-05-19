@@ -8154,6 +8154,8 @@
     <Build Include="dbo\Tables\tblRKLogAction.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogRiskPosition.sql" />
+    <Build Include="dbo\Views\vyuRKGetMatchDerivativesFromSummaryLog.sql" />
+    <Build Include="dbo\Functions\fnRKGetMiscFieldTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
