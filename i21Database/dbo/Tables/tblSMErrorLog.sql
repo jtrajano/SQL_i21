@@ -10,6 +10,6 @@
 	[dtmDate]				DATETIME		NOT NULL,
 	[intConcurrencyId]   INT              NOT NULL
 
-	CONSTRAINT [FK_dbo.tblSMAErrorLog_dbo.tblSMLog_intLogId] FOREIGN KEY ([intLogId]) REFERENCES [dbo].tblSMLog ([intLogId]),
+	CONSTRAINT [FK_dbo.tblSMAErrorLog_dbo.tblSMLog_intLogId] FOREIGN KEY ([intLogId]) REFERENCES [dbo].tblSMLog ([intLogId]) ON DELETE CASCADE,
     CONSTRAINT [PK_dbo.tblSMErrorLog] PRIMARY KEY CLUSTERED ([intErrorLogId] ASC)
 )
