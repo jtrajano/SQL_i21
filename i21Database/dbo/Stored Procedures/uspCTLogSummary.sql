@@ -19,7 +19,7 @@ BEGIN TRY
 			@ysnMatched				BIT,
 			@ysnDirect				BIT = 0
 
-	-- SELECT @strSource, @strProcess
+	--  SELECT @strSource, @strProcess
 
 	IF @strProcess = 'Update Scheduled Quantity'
 	BEGIN
@@ -89,6 +89,7 @@ BEGIN TRY
 				, intSubBookId
 				, strNotes
 				, intUserId
+				, intActionId
 			)
 			SELECT strBatchId = NULL
 				, dtmTransactionDate
@@ -123,6 +124,7 @@ BEGIN TRY
 				, intSubBookId
 				, strNotes = ''
 				, intUserId
+				, intActionId = 44
 			FROM
 			(
 				SELECT 
@@ -235,7 +237,7 @@ BEGIN TRY
 				, intSubBookId
 				, strNotes = ''
 				, intUserId			
-				, intActionId = null	
+				, intActionId = 43	
 			FROM
 			(
 				SELECT 
@@ -1839,6 +1841,7 @@ BEGIN TRY
 
 			IF @ysnNew = 1
 			BEGIN
+				UPDATE @cbLogSpecific SET intActionId = 42
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 				--DELETE FROM @cbLogCurrent WHERE intContractDetailId = @currentContractDetalId
