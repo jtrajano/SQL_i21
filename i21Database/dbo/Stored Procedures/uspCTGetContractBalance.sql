@@ -1680,7 +1680,7 @@ BEGIN TRY
 		SELECT Row_Number() OVER (PARTITION BY SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC) AS Row_Num
 		,SH.intContractDetailId
 		FROM tblCTSequenceHistory SH
-		JOIN  @FinalPriceFixation FR ON SH.intContractDetailId = FR.intContractDetailId
+		JOIN  @FinalContractBalance FR ON SH.intContractDetailId = FR.intContractDetailId
 		WHERE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) <= CASE 
 																WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	 
 																ELSE dbo.fnRemoveTimeOnDate(dtmHistoryCreated) 
