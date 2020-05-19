@@ -31,6 +31,12 @@ BEGIN TRY
 		RETURN
 	END
 
+	 IF @strSource = 'Contract'
+	 BEGIN
+	 	SET @strProcess = 'Contract Sequence'
+	 END
+
+
 	-- IF @strSource = '' AND @strProcess = ''
 	-- BEGIN
 	-- 	SET @strSource = 'Contract'
@@ -130,7 +136,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(cd.dtmCreated)
+					, dtmTransactionDate = cd.dtmCreated
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -243,7 +249,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(sh.dtmHistoryCreated)--cd.dtmCreated
+					, dtmTransactionDate = sh.dtmHistoryCreated--cd.dtmCreated
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -368,7 +374,7 @@ BEGIN TRY
 		FROM 
 		(
 			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
-			, dtmTransactionDate = dbo.fnRemoveTimeOnDate(CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END)
+			, dtmTransactionDate = (CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END)
 			, strTransactionType = strScreenName
 			, intTransactionId = suh.intExternalId -- or intExternalHeaderId since this was used by basis deliveries on search screen
 			, strTransactionId = suh.strNumber
@@ -490,7 +496,7 @@ BEGIN TRY
 			(
 				SELECT  
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+					, dtmTransactionDate = (dtmTransactionDate)
 					, strTransactionType = strScreenName
 					, intTransactionId = suh.intExternalId -- or intExternalHeaderId since this was used by basis deliveries on search screen
 					, strTransactionId = suh.strNumber
@@ -1324,6 +1330,7 @@ BEGIN TRY
 					, intSubBookId
 					, strNotes
 					, intUserId
+					, intActionId
 				)
 				SELECT strBatchId = NULL
 					, dtmTransactionDate
@@ -1358,12 +1365,13 @@ BEGIN TRY
 					, intSubBookId
 					, strNotes = ''
 					, intUserId
+					, intActionId = 17
 				FROM
 				(
 					SELECT 
 						ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 						, sh.intSequenceHistoryId
-						, dtmTransactionDate = dbo.fnRemoveTimeOnDate(sh.dtmHistoryCreated)
+						, dtmTransactionDate = sh.dtmHistoryCreated
 						, sh.intContractHeaderId
 						, ch.strContractNumber
 						, sh.intContractDetailId
@@ -1439,7 +1447,8 @@ BEGIN TRY
 					, intBookId
 					, intSubBookId
 					, strNotes
-				  , intUserId
+					, intUserId
+					, intActionId
 				)
 				SELECT strBatchId = NULL
 					, dtmTransactionDate
@@ -1474,10 +1483,11 @@ BEGIN TRY
 					, intSubBookId
 					, strNotes = ''
 					, intUserId
+					, intActionId = 17
 				FROM
 				(
 					SELECT intTransactionReferenceId = pfd.intPriceFixationDetailId
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(pfd.dtmFixationDate)
+					, dtmTransactionDate = pfd.dtmFixationDate
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -1569,6 +1579,7 @@ BEGIN TRY
 					, intSubBookId
 					, strNotes
 				    , intUserId
+					, intActionId
 				)
 				SELECT strBatchId = NULL
 					, dtmTransactionDate
@@ -1603,10 +1614,11 @@ BEGIN TRY
 					, intSubBookId
 					, strNotes = ''
 					, intUserId
+					, intActionId
 				FROM
 				(
 					SELECT intTransactionReferenceId = pfd.intPriceFixationDetailId
-					, dtmTransactionDate = dbo.fnRemoveTimeOnDate(pfd.dtmFixationDate)
+					, dtmTransactionDate = pfd.dtmFixationDate
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -1637,6 +1649,7 @@ BEGIN TRY
 					, sh.intSubBookId
 					, intOrderBy = 1
 					, sh.intUserId
+					, intActionId = 17
 					FROM tblCTPriceFixationDetail pfd
 					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
@@ -2139,9 +2152,12 @@ BEGIN TRY
 					--EXEC uspCTLogContractBalance @cbLogPrev, 0
 				END
 
-				-- Add create price event/log
-				UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				IF ISNULL(@dblQtys,0) = 0
+				BEGIN
+					-- Add create price event/log
+					UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
 			END
 			ELSE IF @strProcess = 'Fixation Detail Delete'
 			BEGIN
@@ -2194,9 +2210,9 @@ BEGIN TRY
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 
-				-- Add create price event/log
-				UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				---- Add create price event/log
+				--UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
+				--EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			
 				--IF @dblBasisDel > 0
 				--BEGIN
@@ -2253,9 +2269,29 @@ BEGIN TRY
 		END
 		ELSE IF @strSource = 'Inventory'
 		BEGIN
-			UPDATE @cbLogSpecific SET dblQty = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) THEN ISNULL(@dblPriced,0) ELSE @dblQty END) * -1, 
-												 intPricingTypeId = CASE WHEN ISNULL(@dblPriced,0) <> 0 THEN 1 ELSE 2 END
-			EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+			-- Get previous totals
+			DECLARE @_basis 		NUMERIC(24, 10) = 0,
+				    @_priced 		NUMERIC(24, 10) = 0,
+					@_balance		NUMERIC(24, 10) = 0;
+
+			IF ISNULL(@dblPriced,0) > 0
+			BEGIN
+				SET @_priced = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) THEN ISNULL(@dblPriced,0) ELSE @dblQty END)
+				UPDATE @cbLogSpecific SET dblQty = @_priced * -1, intPricingTypeId = 1
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+			END
+			IF ISNULL(@dblBasis,0) > 0
+			BEGIN
+				SET @_basis = (CASE WHEN @dblQty > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblQty END)
+				UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+			END
+			--UPDATE @cbLogSpecific SET dblQty = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) 
+			--											THEN ISNULL(@dblPriced,0) 
+			--											ELSE @dblQty 
+			--									END) * -1, 
+			--									 intPricingTypeId = CASE WHEN ISNULL(@dblPriced,0) <> 0 THEN 1 ELSE 2 END
+			--EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 			
 			IF @ysnDirect <> 1
 			BEGIN  

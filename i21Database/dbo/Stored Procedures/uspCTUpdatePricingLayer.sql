@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdatePricingLayer]
 	@intInvoiceId int = null, --> can be null - means detail delete only NOTE: If NULL, @intInvoiceDetailId parameter should have its value
 	@intInvoiceDetailId int = null, --> can be null - means header delete NOTE: If NULL, @intInvoiceId parameter should have its value
-	@strScreen nvarchar(50) = null --> possible values are 'Invoice', 'Voucher', etc...
+	@strScreen nvarchar(50) = null, --> possible values are 'Invoice', 'Voucher', etc...
+	@intUserId int
 AS
 BEGIN
 
@@ -11,6 +12,8 @@ BEGIN
 	declare @dblPricedQuantity numeric(18,6);
 	declare @dblInvoiceDetailQuantity numeric(18,6);
 	declare @intContractDetailId int;
+	declare @intContractHeaderId int;
+
 
 	declare @InvoiceDetails table (
 		intInvoiceDetailId int
@@ -75,6 +78,17 @@ BEGIN
 				delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 				if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
 				begin
+					-- Summary Log
+					select @intContractHeaderId = intContractHeaderId, 
+						   @intContractDetailId = intContractDetailId 
+					from tblCTPriceFixation 
+					where intPriceFixationId = @intPriceFixationId
+					exec	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
+														@intContractDetailId 	= @intContractDetailId, 
+														@strSource 			 	= 'Pricing',
+														@strProcess 			= 'Price Delete',
+														@intUserId				= @intUserId
+
 					delete from tblCTPriceContract where intPriceContractId = @intContractPriceId;
 				end
 			end
