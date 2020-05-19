@@ -54,7 +54,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN 
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -75,8 +76,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,	
-	[dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),	
+	[dblAmountApplied]		=	ROUND(
+								(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -87,7 +90,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN B.dblTotal + B.dblTax
 											ELSE B.dblTotal + B.dblTax END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -149,7 +153,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]		=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -170,8 +175,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),
+	[dblAmountApplied]			=	ROUND(
+									(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -182,7 +189,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN (B.dblTotal + B.dblTax)  
 											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -252,7 +260,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -273,8 +282,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                       
-									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),
+	[dblAmountApplied]			=	ROUND(
+									(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -285,7 +296,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN (B.dblTotal + B.dblTax)
 											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -348,7 +360,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -368,8 +381,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,
-	[dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),
+	[dblAmountApplied]		=	ROUND(
+								(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -381,7 +396,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN (B.dblTotal + B.dblTax)
 											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -480,7 +496,8 @@ SELECT
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal + ISNULL(CurrentBill.dblDiscountTotal,0),
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -500,8 +517,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),
+	[dblAmountApplied]			=	ROUND(
+									(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -512,7 +531,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN (B.dblTotal + B.dblTax)
 											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -579,7 +599,8 @@ SELECT
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -599,8 +620,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),
+	[dblAmountApplied]			=	ROUND(
+									(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -611,7 +634,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN (B.dblTotal + B.dblTax)
 											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
@@ -673,7 +697,8 @@ SELECT
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION 
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -693,8 +718,10 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
-	[dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
+									ELSE 0 END
+									,2),
+	[dblAmountApplied]			=	ROUND(
+									(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 									WHEN 1 THEN
 											A.dblAmountDue 
 									WHEN 2 THEN 
@@ -705,7 +732,8 @@ SELECT
 										CASE WHEN (B.dblTotal + B.dblTax) < ((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal)
 											THEN (B.dblTotal + B.dblTax)
 											ELSE (B.dblTotal + B.dblTax) END
-									ELSE 0 END),
+									ELSE 0 END)
+									,2),
 	[ysnApplied]			=	0,
 	[intConcurrencyId]		=	0
 FROM tblAPBill A
