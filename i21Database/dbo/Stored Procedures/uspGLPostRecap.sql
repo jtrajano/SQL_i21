@@ -8,17 +8,15 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
---SET ANSI_WARNINGS OFF
 
 DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
 SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
--- DELETE OLD RECAP DATA (IF IT EXISTS)
+
 IF EXISTS(SELECT TOP 1 1 FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101))
 	DELETE FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
-	-- G/L entries are expected. Cannot continue because it is missing.
 	RAISERROR('G/L entries are expected. Cannot continue because it is missing.', 11, 1)
 	GOTO _Exit
 END
