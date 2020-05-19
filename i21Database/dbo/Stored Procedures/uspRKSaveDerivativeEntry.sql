@@ -129,7 +129,8 @@ BEGIN
 			, intUserId
 			, strNotes
 			, intCommodityUOMId
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT strBucketType = 'Derivatives'
 			, strTransactionType = 'Derivative Entry'
 			, intTransactionRecordId = der.intTransactionRecordId
@@ -156,6 +157,7 @@ BEGIN
 			, strNotes = der.strNotes
 			, intCommodityUOMId = der.intCommodityUOMId
 			, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
+			, intActionId = 34
 		FROM #tmpDerivative der		
 	END
 	ELSE

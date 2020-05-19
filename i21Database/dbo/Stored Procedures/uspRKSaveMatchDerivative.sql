@@ -184,7 +184,8 @@ BEGIN TRY
 				, intEntityId
 				, intUserId
 				, intCommodityUOMId
-				, strMiscFields)
+				, strMiscFields
+				, intActionId)
 			SELECT strBucketType
 				, strTransactionType
 				, intTransactionRecordId
@@ -206,6 +207,7 @@ BEGIN TRY
 				, intUserId
 				, intCommodityUOMId
 				, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
+				, intActionId = 36
 			FROM #tmpFinalList WHERE intTransactionRecordId = @intDetailId
 
 			DELETE FROM @LogHelper
