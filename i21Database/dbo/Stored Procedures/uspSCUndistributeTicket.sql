@@ -1328,18 +1328,18 @@ BEGIN TRY
 
 					---Summary Log
 					BEGIN
-						IF OBJECT_ID (N'tempdb.dbo.#tmpSCStorageHistory') IS NOT NULL
-							DROP TABLE #tmpSCStorageHistory
+						IF OBJECT_ID (N'tempdb.dbo.#tmpSCStorageHistory1') IS NOT NULL
+							DROP TABLE #tmpSCStorageHistory1
 
 						SELECT 
 							*
-						INTO #tmpSCStorageHistory
+						INTO #tmpSCStorageHistory1
 						FROM tblGRStorageHistory 
 						WHERE intInventoryReceiptId = @InventoryReceiptId 
 						ORDER BY intStorageHistoryId
 
 						SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 MIN(intStorageHistoryId) 
-															FROM #tmpSCStorageHistory 
+															FROM #tmpSCStorageHistory1 
 															WHERE intInventoryReceiptId = @InventoryReceiptId ),0)
 					
 						WHILE ISNULL(@_intStorageHistoryId,0) > 0
@@ -1354,7 +1354,7 @@ BEGIN TRY
 							--LOOP Iterator
 							BEGIN
 								SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 ISNULL(intStorageHistoryId,0) 
-																	FROM #tmpSCStorageHistory 
+																	FROM #tmpSCStorageHistory1 
 																	WHERE intInventoryReceiptId = @InventoryReceiptId 
 																		AND intStorageHistoryId > @_intStorageHistoryId
 																	ORDER BY intStorageHistoryId),0)
