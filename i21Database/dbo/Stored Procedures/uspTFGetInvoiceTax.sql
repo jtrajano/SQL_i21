@@ -658,7 +658,7 @@ BEGIN TRY
 		SELECT @intMaxId = ISNULL(MAX(intId), 0) FROM @tmpTransaction	
 
 		--INVENTORY TRANSFER - Track MFT Activity
-		IF (EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1)) 
+		IF NOT EXISTS(SELECT TOP 1 1 FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId)
 		BEGIN
 			INSERT INTO @tmpTransaction(intId
 				, intTransactionDetailId
