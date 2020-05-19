@@ -323,12 +323,22 @@ BEGIN TRY
 				SELECT @intEntityId = t.intEntityId
 				FROM tblEMEntity t WITH (NOLOCK)
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
+				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
 				WHERE ET.strType IN (
 						'Vendor'
 						,'Customer'
 						)
-					AND t.strName = @strVendor
+					AND V.strVendorAccountNum = @strVendor
 					AND t.strEntityNo <> ''
+			END
+
+			IF ISNULL(@intEntityId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Vendor. '
+						,16
+						,1
+						)
 			END
 
 			IF ISNULL(@strQuantityUOM, '') <> ''
