@@ -58,7 +58,8 @@ C AS (
 								  ELSE
 										1
 								  END
-
+		,intCurrencyExchangeRateTypeId
+		,CMUF.strSourceTransactionId
 	FROM
 		tblCMUndepositedFund CMUF
 	INNER JOIN
@@ -94,7 +95,9 @@ SELECT
 	intEntityCustomerId,
 	dtmDate,			
 	intCurrencyId,
-	dblWeightRate
+	dblWeightRate,
+	intCurrencyExchangeRateTypeId,
+	strSourceTransactionId
 	FROM C c
 OUTER APPLY(
 	SELECT GL.strDescription FROM tblGLAccount GL WHERE GL.intAccountId = c.intGLAccountId
