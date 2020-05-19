@@ -59,6 +59,7 @@ BEGIN
 				, strNotes
 				, intFutureMarketId
 				, intFutureMonthId
+				, intActionId
 				)
 			SELECT strBucketType = 'Collateral'
 				, strTransactionType = 'Collateral'
@@ -77,6 +78,7 @@ BEGIN
 				, strComments
 				, intFutureMarketId
 				, intFutureMonthId
+				, intActionId = 35
 			FROM #tmpCollateral
 		END
 
@@ -98,7 +100,8 @@ BEGIN
 			, strNotes
 			, intFutureMarketId
 			, intFutureMonthId
-			, intEntityId)
+			, intEntityId
+			, intActionId)
 		SELECT strBucketType = 'Collateral'
 			, strTransactionType = 'Collateral Adjustments'
 			, intTransactionRecordId = CA.intCollateralAdjustmentId
@@ -117,6 +120,7 @@ BEGIN
 			, intFutureMarketId
 			, intFutureMonthId
 			, intEntityId
+			, intActionId = 38
 		FROM tblRKCollateralAdjustment CA
 		JOIN #tmpCollateral C ON C.intCollateralId = CA.intCollateralId
 		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId

@@ -321,7 +321,8 @@ BEGIN TRY
 		, dblContractSize
 		, intEntityId
 		, intUserId
-		, intCommodityUOMId)
+		, intCommodityUOMId
+		, intActionId)
 	SELECT strBucketType = 'Derivatives'
 		, strTransactionType = 'Options Lifecycle'
 		, intFutOptTransactionId = detail.intFutOptTransactionId
@@ -343,6 +344,7 @@ BEGIN TRY
 		, intEntityId = de.intEntityId
 		, intUserId = @intUserId
 		, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+		, intActionId = 39
 	FROM tblRKOptionsPnSExpired detail
 	JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 	JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
@@ -437,7 +439,8 @@ BEGIN TRY
 			, dblContractSize
 			, intEntityId
 			, intUserId
-			, intCommodityUOMId)
+			, intCommodityUOMId
+			, intActionId)
 		SELECT strBucketType = 'Derivatives'
 			, strTransactionType = 'Options Lifecycle'
 			, intFutOptTransactionId = detail.intFutOptTransactionId
@@ -459,6 +462,7 @@ BEGIN TRY
 			, intEntityId = de.intEntityId
 			, intUserId = @intUserId
 			, intCommodityUOMId = cUOM.intCommodityUnitMeasureId
+			, intActionId = 39
 		FROM tblRKOptionsPnSExercisedAssigned detail
 		JOIN tblRKOptionsMatchPnSHeader header ON header.intOptionsMatchPnSHeaderId = detail.intOptionsMatchPnSHeaderId
 		JOIN tblRKFutOptTransaction de ON de.intFutOptTransactionId = detail.intFutOptTransactionId
