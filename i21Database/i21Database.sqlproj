@@ -7733,6 +7733,10 @@
     <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
     <Build Include="dbo\Functions\fnMonthName.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementTaxDetailsSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementInboundSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementOutboundSubReportForView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
