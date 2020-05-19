@@ -10,6 +10,7 @@ INNER JOIN tblEMEntity F on F.intEntityId = B.intRecordId
 INNER JOIN tblEMEntityType G on G.intEntityId = F.intEntityId
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId  
 WHERE C.strNamespace = 'EntityManagement.view.Entity' 
+AND F.ysnSent = 0 
 AND E.intParentAuditId IS NULL  
 AND E.strAction IN ('Created','Updated')   
 AND G.strType in ('User', 'Customer', 'Vendor', 'Salesperson')
@@ -26,6 +27,7 @@ INNER JOIN tblEMEntity F on F.intEntityId = X.intEntityId
 INNER JOIN tblEMEntityType G on G.intEntityId = F.intEntityId
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId  
 WHERE C.strNamespace = 'EntityManagement.view.EntitySplit' 
+AND F.ysnSent = 0
 )
    
 SELECT intRecordId, intLogId, dtmDate  FROM secondLayer 
@@ -44,8 +46,8 @@ WHERE C.strNamespace = 'EntityManagement.view.Entity'
 AND E.strAction = 'Deleted' AND E.intParentAuditId IS NULL  
   
 )  
-AND intLogId   
-NOT IN  
-(  
-    SELECT intLogId FROM tblSCEntityGeneratedLog  
-)  
+-- AND intLogId   
+-- NOT IN  
+-- (  
+--     SELECT intLogId FROM tblSCEntityGeneratedLog  
+-- )  
