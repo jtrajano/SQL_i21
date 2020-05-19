@@ -8207,6 +8207,10 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
     <Build Include="dbo\Functions\fnMonthName.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementTaxDetailsSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementInboundSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementOutboundSubReportForView.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessShipmentToInvoice.sql" />
     <None Include="Scripts\Post-Deployment\CT\ScheduledQtyDiagNosticScript.sql" />
@@ -8458,6 +8462,7 @@
     <None Include="Scripts\Post-Deployment\SM\1920_DeleteDuplicateEntityPhoneNumber.sql" />
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
