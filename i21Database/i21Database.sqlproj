@@ -8153,6 +8153,7 @@
     <Build Include="dbo\Stored Procedures\uspAPLogVoucherDetailRisk.sql" />
     <Build Include="dbo\Tables\tblRKLogAction.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogPaymentRisk.sql" />
+    <Build Include="dbo\Stored Procedures\uspARLogRiskPosition.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
