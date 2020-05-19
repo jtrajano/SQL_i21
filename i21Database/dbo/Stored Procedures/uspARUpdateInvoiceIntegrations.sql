@@ -22,7 +22,7 @@ DECLARE @intInvoiceId				INT
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
 	  , @InvoicesForDelete			InvoiceId
-
+	  , @InvoicesForContract		InvoiceId
 
 --For Prepaid Contract Update
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
@@ -118,7 +118,7 @@ BEGIN TRY
 	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
-
+	
 	INSERT INTO @InvoiceIds(
 		  intHeaderId
 		, ysnForDelete
@@ -157,6 +157,37 @@ BEGIN TRY
 	  AND (@ForDelete = 0 AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail ID WHERE ID.intInvoiceId = @intInvoiceId))
 
 	EXEC [dbo].[uspARLogRiskPosition] @InvoicesForDelete, @UserId
+
+	--PRICING LAYER
+	INSERT INTO @InvoicesForContract(
+		  intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	)
+	SELECT intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	FROM @InvoicesForDelete IDD
+	INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDD.intDetailId
+	WHERE ID.intContractDetailId IS NOT NULL
+
+	WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContract)
+		BEGIN
+			DECLARE @intInvoiceToDelete			INT = NULL
+				  , @intInvoiceDetailToDeleteId	INT = NULL
+
+			SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
+				       , @intInvoiceDetailToDeleteId	= intDetailId
+			FROM @InvoicesForContract
+
+			EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
+											   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
+    										   , @strScreen 			= 'Invoice'
+			
+			DELETE FROM @InvoicesForContract WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
+		END
 
 	IF @ForDelete = 1
 		BEGIN
