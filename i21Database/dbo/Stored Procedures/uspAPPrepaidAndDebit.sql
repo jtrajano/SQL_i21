@@ -76,7 +76,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,	
+									ELSE 0 END
+									,2),	
 	-- [dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -173,7 +174,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -278,7 +280,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                       
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -375,7 +378,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -509,7 +513,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -610,7 +615,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -706,7 +712,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
