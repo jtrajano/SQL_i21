@@ -124,7 +124,12 @@ BEGIN
 		UNION ALL SELECT 37, 'Settle Storage - Company owned storage', 'Company owned storage is settled or reversed'
 		UNION ALL SELECT 38, 'Collateral Adjustments', 'Created collateral receipt line items.'
 		UNION ALL SELECT 39, 'Options', 'Created options lifecycle transactions.'
-
+		UNION ALL SELECT 40, 'Receipt on Customer Owned Storage', 'Inventory increasing from receipt on Storage Type of "Customer Owned"'
+		UNION ALL SELECT 41, 'Inventory Shipment', 'Reducing a storage (company or customer owned) thru Load Out ticket'
+		UNION ALL SELECT 42, 'Created Contract', 'Created contract'
+		UNION ALL SELECT 43, 'Updated Contract', 'Updated contract when there was changes in quantity, slice, and status'
+		UNION ALL SELECT 44, 'Removed Sequence', 'When a sequence removed.'
+	
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 
