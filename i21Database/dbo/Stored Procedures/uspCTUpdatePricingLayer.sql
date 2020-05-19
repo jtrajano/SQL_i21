@@ -87,7 +87,7 @@ BEGIN
 		set @intInvoiceDetailId = (select min(intInvoiceDetailId) from @InvoiceDetails where intInvoiceDetailId > @intInvoiceDetailId);
 	end
 
-	update tblCTContractDetail set intConcurrencyId = intConcurrencyId where intContractDetailId = @intContractDetailId;
+	update tblCTContractDetail set intPricingTypeId = 2,dblFutures = null, dblCashPrice = null,intConcurrencyId = (intConcurrencyId + 1) where intContractDetailId = @intContractDetailId;
     
 
 END
