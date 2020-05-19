@@ -33,7 +33,8 @@ BEGIN
 		intEntityId,
 		intUserId,
 		intTicketId,
-		strMiscFields
+		strMiscFields,
+		intActionId
 	)
 	SELECT 
 		strBatchId = NULL
@@ -56,6 +57,7 @@ BEGIN
 		, intUserId = b.intEntityId
 		, intTicketId = bd.intScaleTicketId
 		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(bd.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(bd.intLoadDetailId,'') AS NVARCHAR) +'"}'
+		, intActionId = 15
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
 	INNER JOIN @voucherDetailIds bb
