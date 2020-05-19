@@ -47,36 +47,36 @@ BEGIN
         , intCurrencyId
     )
     --INVOICE HEADER ADD/DELETE 
-    SELECT strBatchId				    = II.strBatchId
-        , strBucketType					= 'Accounts Receivable'
+    SELECT strBatchId				            = II.strBatchId
+        , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
-        , intTransactionRecordId		= ID.intInvoiceDetailId
+        , intTransactionRecordId		    = ID.intInvoiceDetailId
         , intTransactionRecordHeaderId	= I.intInvoiceId
-        , strDistributionType			= NULL
-        , strTransactionNumber			= I.strInvoiceNumber
-        , dtmTransactionDate			= I.dtmDate
-        , intContractDetailId			= ID.intContractDetailId
-        , intContractHeaderId			= ID.intContractHeaderId
-        , intFutOptTransactionId		= NULL
-        , intTicketId					= ID.intTicketId
-        , intCommodityId				= ITEM.intCommodityId
-        , intCommodityUOMId				= ICUM.intCommodityUnitMeasureId
-        , intItemId						= ID.intItemId
-        , intBookId						= I.intBookId
-        , intSubBookId					= I.intSubBookId
-        , intLocationId					= I.intCompanyLocationId
-        , intFutureMarketId				= CTD.intFutureMarketId
-        , intFutureMonthId				= CTD.intFutureMonthId
-        , dblNoOfLots					= CTD.dblNoOfLots
-        , dblQty						= -((ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END) * CASE WHEN ISNULL(II.ysnForDelete, 0) = 1 THEN -1 ELSE 1 END)
-        , dblPrice						= ISNULL(ID.dblPrice, 0)
-        , dblContractSize				= NULL
-        , intEntityId					= I.intEntityId
-        , ysnDelete						= ISNULL(II.ysnForDelete, 0)
-        , intUserId						= @intUserId
-        , strNotes						= NULL
-        , strMiscFields					= NULL
-        , intActionId					= 16--CREATE INVOICE
+        , strDistributionType			      = NULL
+        , strTransactionNumber			    = I.strInvoiceNumber
+        , dtmTransactionDate			      = I.dtmDate
+        , intContractDetailId			      = ID.intContractDetailId
+        , intContractHeaderId			      = ID.intContractHeaderId
+        , intFutOptTransactionId		    = NULL
+        , intTicketId					          = ID.intTicketId
+        , intCommodityId				        = ITEM.intCommodityId
+        , intCommodityUOMId				      = ICUM.intCommodityUnitMeasureId
+        , intItemId						          = ID.intItemId
+        , intBookId						          = I.intBookId
+        , intSubBookId					        = I.intSubBookId
+        , intLocationId					        = I.intCompanyLocationId
+        , intFutureMarketId				      = CTD.intFutureMarketId
+        , intFutureMonthId				      = CTD.intFutureMonthId
+        , dblNoOfLots					          = CTD.dblNoOfLots
+        , dblQty						            = -((ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END) * CASE WHEN ISNULL(II.ysnForDelete, 0) = 1 THEN -1 ELSE 1 END)
+        , dblPrice						          = ISNULL(ID.dblPrice, 0)
+        , dblContractSize				        = NULL
+        , intEntityId					          = I.intEntityId
+        , ysnDelete						          = ISNULL(II.ysnForDelete, 0)
+        , intUserId						          = @intUserId
+        , strNotes						          = NULL
+        , strMiscFields					        = NULL
+        , intActionId					          = 16--CREATE INVOICE
         , intCurrencyId                 = I.intCurrencyId    
     FROM tblARInvoice I
     INNER JOIN @tblInvoiceId II ON I.intInvoiceId = II.intHeaderId
@@ -93,36 +93,36 @@ BEGIN
     UNION ALL
 
     --ADD LINE ITEM 
-    SELECT strBatchId				    = II.strBatchId
-        , strBucketType					= 'Accounts Receivable'
+    SELECT strBatchId				            = II.strBatchId
+        , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
-        , intTransactionRecordId		= ID.intInvoiceDetailId
+        , intTransactionRecordId		    = ID.intInvoiceDetailId
         , intTransactionRecordHeaderId	= I.intInvoiceId
-        , strDistributionType			= NULL
-        , strTransactionNumber			= I.strInvoiceNumber
-        , dtmTransactionDate			= I.dtmDate
-        , intContractDetailId			= ID.intContractDetailId
-        , intContractHeaderId			= ID.intContractHeaderId
-        , intFutOptTransactionId		= NULL
-        , intTicketId					= ID.intTicketId
-        , intCommodityId				= ITEM.intCommodityId
-        , intCommodityUOMId				= ICUM.intCommodityUnitMeasureId
-        , intItemId						= ID.intItemId
-        , intBookId						= I.intBookId
-        , intSubBookId					= I.intSubBookId
-        , intLocationId					= I.intCompanyLocationId
-        , intFutureMarketId				= CTD.intFutureMarketId
-        , intFutureMonthId				= CTD.intFutureMonthId
-        , dblNoOfLots					= CTD.dblNoOfLots
-        , dblQty						= -(ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
-        , dblPrice						= ISNULL(ID.dblPrice, 0)
-        , dblContractSize				= NULL
-        , intEntityId					= I.intEntityId
-        , ysnDelete						= ISNULL(II.ysnForDelete, 0)
-        , intUserId						= @intUserId
-        , strNotes						= NULL
-        , strMiscFields					= NULL
-        , intActionId					= 16--CREATE INVOICE
+        , strDistributionType			      = NULL
+        , strTransactionNumber			    = I.strInvoiceNumber
+        , dtmTransactionDate			      = I.dtmDate
+        , intContractDetailId			      = ID.intContractDetailId
+        , intContractHeaderId			      = ID.intContractHeaderId
+        , intFutOptTransactionId		    = NULL
+        , intTicketId					          = ID.intTicketId
+        , intCommodityId				        = ITEM.intCommodityId
+        , intCommodityUOMId				      = ICUM.intCommodityUnitMeasureId
+        , intItemId						          = ID.intItemId
+        , intBookId						          = I.intBookId
+        , intSubBookId					        = I.intSubBookId
+        , intLocationId					        = I.intCompanyLocationId
+        , intFutureMarketId				      = CTD.intFutureMarketId
+        , intFutureMonthId				      = CTD.intFutureMonthId
+        , dblNoOfLots					          = CTD.dblNoOfLots
+        , dblQty						            = -(ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
+        , dblPrice						          = ISNULL(ID.dblPrice, 0)
+        , dblContractSize				        = NULL
+        , intEntityId					          = I.intEntityId
+        , ysnDelete						          = ISNULL(II.ysnForDelete, 0)
+        , intUserId						          = @intUserId
+        , strNotes						          = NULL
+        , strMiscFields					        = NULL
+        , intActionId					          = 16--CREATE INVOICE
         , intCurrencyId                 = I.intCurrencyId       
     FROM tblARInvoice I
     INNER JOIN @tblInvoiceId II ON I.intInvoiceId = II.intHeaderId
@@ -139,36 +139,36 @@ BEGIN
     UNION ALL
 
     --DELETE LINE ITEM
-    SELECT strBatchId				    = II.strBatchId
-        , strBucketType					= 'Accounts Receivable'
+    SELECT strBatchId				            = II.strBatchId
+        , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
-        , intTransactionRecordId		= TD.intTransactionDetailId
+        , intTransactionRecordId		    = TD.intTransactionDetailId
         , intTransactionRecordHeaderId	= I.intInvoiceId
-        , strDistributionType			= NULL
-        , strTransactionNumber			= I.strInvoiceNumber
-        , dtmTransactionDate			= I.dtmDate
-        , intContractDetailId			= TD.intContractDetailId
-        , intContractHeaderId			= TD.intContractHeaderId
-        , intFutOptTransactionId		= NULL
-        , intTicketId					= TD.intTicketId
-        , intCommodityId				= ITEM.intCommodityId
-        , intCommodityUOMId				= ICUM.intCommodityUnitMeasureId
-        , intItemId						= TD.intItemId
-        , intBookId						= I.intBookId
-        , intSubBookId					= I.intSubBookId
-        , intLocationId					= I.intCompanyLocationId
-        , intFutureMarketId				= CTD.intFutureMarketId
-        , intFutureMonthId				= CTD.intFutureMonthId
-        , dblNoOfLots					= CTD.dblNoOfLots
-        , dblQty						= TD.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END
-        , dblPrice						= ISNULL(TD.dblPrice, 0)
-        , dblContractSize				= NULL
-        , intEntityId					= I.intEntityId
-        , ysnDelete						= ISNULL(II.ysnForDelete, 0)
-        , intUserId						= @intUserId
-        , strNotes						= NULL
-        , strMiscFields					= NULL
-        , intActionId					= 16--CREATE INVOICE
+        , strDistributionType			      = NULL
+        , strTransactionNumber			    = I.strInvoiceNumber
+        , dtmTransactionDate			      = I.dtmDate
+        , intContractDetailId			      = TD.intContractDetailId
+        , intContractHeaderId			      = TD.intContractHeaderId
+        , intFutOptTransactionId		    = NULL
+        , intTicketId					          = TD.intTicketId
+        , intCommodityId				        = ITEM.intCommodityId
+        , intCommodityUOMId				      = ICUM.intCommodityUnitMeasureId
+        , intItemId						          = TD.intItemId
+        , intBookId						          = I.intBookId
+        , intSubBookId					        = I.intSubBookId
+        , intLocationId					        = I.intCompanyLocationId
+        , intFutureMarketId				      = CTD.intFutureMarketId
+        , intFutureMonthId				      = CTD.intFutureMonthId
+        , dblNoOfLots					          = CTD.dblNoOfLots
+        , dblQty						            = TD.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END
+        , dblPrice						          = ISNULL(TD.dblPrice, 0)
+        , dblContractSize			        	= NULL
+        , intEntityId				          	= I.intEntityId
+        , ysnDelete				          		= ISNULL(II.ysnForDelete, 0)
+        , intUserId					          	= @intUserId
+        , strNotes					            = NULL
+        , strMiscFields					        = NULL
+        , intActionId					          = 16--CREATE INVOICE
         , intCurrencyId                 = I.intCurrencyId
     FROM tblARTransactionDetail TD
     INNER JOIN tblARInvoice I ON I.intInvoiceId = TD.intTransactionId
@@ -186,36 +186,36 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (RETURN ORGINAL QTY)
-    SELECT strBatchId				    = II.strBatchId
-        , strBucketType					= 'Accounts Receivable'
+    SELECT strBatchId				            = II.strBatchId
+        , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
-        , intTransactionRecordId		= ID.intInvoiceDetailId
+        , intTransactionRecordId		    = ID.intInvoiceDetailId
         , intTransactionRecordHeaderId	= I.intInvoiceId
-        , strDistributionType			= NULL
-        , strTransactionNumber			= I.strInvoiceNumber
-        , dtmTransactionDate			= I.dtmDate
-        , intContractDetailId			= ID.intContractDetailId
-        , intContractHeaderId			= ID.intContractHeaderId
-        , intFutOptTransactionId		= NULL
-        , intTicketId					= ID.intTicketId
-        , intCommodityId				= ITEM.intCommodityId
-        , intCommodityUOMId				= ICUM.intCommodityUnitMeasureId
-        , intItemId						= ID.intItemId
-        , intBookId						= I.intBookId
-        , intSubBookId					= I.intSubBookId
-        , intLocationId					= I.intCompanyLocationId
-        , intFutureMarketId				= CTD.intFutureMarketId
-        , intFutureMonthId				= CTD.intFutureMonthId
-        , dblNoOfLots					= CTD.dblNoOfLots
-        , dblQty						= TD.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END
-        , dblPrice						= ISNULL(ID.dblPrice, 0)
-        , dblContractSize				= NULL
-        , intEntityId					= I.intEntityId
-        , ysnDelete						= ISNULL(II.ysnForDelete, 0)
-        , intUserId						= @intUserId
-        , strNotes						= NULL
-        , strMiscFields					= NULL
-        , intActionId					= 16--CREATE INVOICE
+        , strDistributionType			      = NULL
+        , strTransactionNumber			    = I.strInvoiceNumber
+        , dtmTransactionDate			      = I.dtmDate
+        , intContractDetailId			      = ID.intContractDetailId
+        , intContractHeaderId			      = ID.intContractHeaderId
+        , intFutOptTransactionId		    = NULL
+        , intTicketId				          	= ID.intTicketId
+        , intCommodityId				        = ITEM.intCommodityId
+        , intCommodityUOMId				      = ICUM.intCommodityUnitMeasureId
+        , intItemId						          = ID.intItemId
+        , intBookId					          	= I.intBookId
+        , intSubBookId			        		= I.intSubBookId
+        , intLocationId			        		= I.intCompanyLocationId
+        , intFutureMarketId		      		= CTD.intFutureMarketId
+        , intFutureMonthId		      		= CTD.intFutureMonthId
+        , dblNoOfLots				          	= CTD.dblNoOfLots
+        , dblQty					            	= TD.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END
+        , dblPrice				          		= ISNULL(ID.dblPrice, 0)
+        , dblContractSize		        		= NULL
+        , intEntityId				          	= I.intEntityId
+        , ysnDelete				          		= ISNULL(II.ysnForDelete, 0)
+        , intUserId				          		= @intUserId
+        , strNotes					          	= NULL
+        , strMiscFields			        		= NULL
+        , intActionId				           	= 16--CREATE INVOICE
         , intCurrencyId                 = I.intCurrencyId       
     FROM tblARInvoice I
     INNER JOIN @tblInvoiceId II ON I.intInvoiceId = II.intHeaderId
@@ -233,36 +233,36 @@ BEGIN
     UNION ALL
 
     --UPDATE LINE ITEM (DEDUCT ACTUAL QTY)
-    SELECT strBatchId				    = II.strBatchId
-        , strBucketType					= 'Accounts Receivable'
+    SELECT strBatchId				            = II.strBatchId
+        , strBucketType					        = 'Accounts Receivable'
         , strTransactionType            = I.strTransactionType
-        , intTransactionRecordId		= ID.intInvoiceDetailId
+        , intTransactionRecordId		    = ID.intInvoiceDetailId
         , intTransactionRecordHeaderId	= I.intInvoiceId
-        , strDistributionType			= NULL
-        , strTransactionNumber			= I.strInvoiceNumber
-        , dtmTransactionDate			= I.dtmDate
-        , intContractDetailId			= ID.intContractDetailId
-        , intContractHeaderId			= ID.intContractHeaderId
-        , intFutOptTransactionId		= NULL
-        , intTicketId					= ID.intTicketId
-        , intCommodityId				= ITEM.intCommodityId
-        , intCommodityUOMId				= ICUM.intCommodityUnitMeasureId
-        , intItemId						= ID.intItemId
-        , intBookId						= I.intBookId
-        , intSubBookId					= I.intSubBookId
-        , intLocationId					= I.intCompanyLocationId
-        , intFutureMarketId				= CTD.intFutureMarketId
-        , intFutureMonthId				= CTD.intFutureMonthId
-        , dblNoOfLots					= CTD.dblNoOfLots
-        , dblQty						= -(ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
-        , dblPrice						= ISNULL(ID.dblPrice, 0)
-        , dblContractSize				= NULL
-        , intEntityId					= I.intEntityId
-        , ysnDelete						= ISNULL(II.ysnForDelete, 0)
-        , intUserId						= @intUserId
-        , strNotes						= NULL
-        , strMiscFields					= NULL
-        , intActionId					= 16--CREATE INVOICE
+        , strDistributionType			      = NULL
+        , strTransactionNumber			    = I.strInvoiceNumber
+        , dtmTransactionDate			      = I.dtmDate
+        , intContractDetailId			      = ID.intContractDetailId
+        , intContractHeaderId			      = ID.intContractHeaderId
+        , intFutOptTransactionId		    = NULL
+        , intTicketId					          = ID.intTicketId
+        , intCommodityId				        = ITEM.intCommodityId
+        , intCommodityUOMId				      = ICUM.intCommodityUnitMeasureId
+        , intItemId						          = ID.intItemId
+        , intBookId						          = I.intBookId
+        , intSubBookId					        = I.intSubBookId
+        , intLocationId				        	= I.intCompanyLocationId
+        , intFutureMarketId		      		= CTD.intFutureMarketId
+        , intFutureMonthId			      	= CTD.intFutureMonthId
+        , dblNoOfLots				          	= CTD.dblNoOfLots
+        , dblQty					             	= -(ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
+        , dblPrice			        	  		= ISNULL(ID.dblPrice, 0)
+        , dblContractSize		        		= NULL
+        , intEntityId			          		= I.intEntityId
+        , ysnDelete				          		= ISNULL(II.ysnForDelete, 0)
+        , intUserId			           			= @intUserId
+        , strNotes			          			= NULL
+        , strMiscFields			        		= NULL
+        , intActionId				          	= 16--CREATE INVOICE
         , intCurrencyId                 = I.intCurrencyId       
     FROM tblARInvoice I
     INNER JOIN @tblInvoiceId II ON I.intInvoiceId = II.intHeaderId
@@ -282,55 +282,57 @@ BEGIN
           strTransactionType
         , strTransactionReference
         , dtmTransactionDate
-		, intContractHeaderId
-		, intContractDetailId
-		, strContractNumber
-		, intContractSeq
-		, intContractTypeId
-		, intContractStatusId
-		, intCommodityId
-		, intItemId
-		, intEntityId
-		, intLocationId
+		    , intContractHeaderId
+		    , intContractDetailId
+	    	, strContractNumber
+	    	, intContractSeq
+		    , intContractTypeId
+	    	, intContractStatusId
+		    , intCommodityId
+	    	, intItemId
+		    , intEntityId
+		    , intLocationId
         , intBookId
         , intSubBookId
-		, dblQty
-		, intQtyUOMId
+		    , dblQty
+		    , intQtyUOMId
         , intBasisUOMId
         , intPriceUOMId
-		, intPricingTypeId		
-		, intTransactionReferenceId
-		, strTransactionReferenceNo
-		, intFutureMarketId
-		, intFutureMonthId
-		, intUserId
+		    , intPricingTypeId		
+		    , intTransactionReferenceId
+	    	, strTransactionReferenceNo
+	    	, intFutureMarketId
+	    	, intFutureMonthId
+	    	, intUserId
+        , intActionId
     )
-    SELECT strTransactionType	    = 'Sales Basis Deliveries'
+    SELECT strTransactionType	      = 'Sales Basis Deliveries'
         , strTransactionReference   = SL.strTransactionType
-        , dtmTransactionDate	    = SL.dtmTransactionDate
-		, intContractHeaderId	    = SL.intContractHeaderId
-		, intContractDetailId	    = SL.intContractDetailId
-		, strContractNumber	        = CH.strContractNumber
-		, intContractSeq		    = CD.intContractSeq
-		, intContractTypeId	        = CH.intContractTypeId
-		, intContractStatusId	    = CD.intContractStatusId
-		, intCommodityId		    = SL.intCommodityId
-		, intItemId			        = SL.intItemId
-		, intEntityId			    = SL.intEntityId
-		, intLocationId		        = SL.intLocationId
+        , dtmTransactionDate	      = SL.dtmTransactionDate
+		    , intContractHeaderId	      = SL.intContractHeaderId
+	    	, intContractDetailId	      = SL.intContractDetailId
+	    	, strContractNumber	        = CH.strContractNumber
+	    	, intContractSeq		        = CD.intContractSeq
+	    	, intContractTypeId	        = CH.intContractTypeId
+	    	, intContractStatusId	      = CD.intContractStatusId
+	    	, intCommodityId		        = SL.intCommodityId
+	    	, intItemId			            = SL.intItemId
+	    	, intEntityId			          = SL.intEntityId
+		    , intLocationId		          = SL.intLocationId
         , intBookId                 = SL.intBookId
         , intSubBookId              = SL.intSubBookId
-		, dblQty				    = SL.dblQty
-		, intQtyUOMId			    = SL.intCommodityUOMId
+		    , dblQty				            = SL.dblQty
+		    , intQtyUOMId			          = SL.intCommodityUOMId
         , intBasisUOMId             = SL.intCommodityUOMId
         , intPriceUOMId             = SL.intCommodityUOMId
-		, intPricingTypeId		    = CD.intPricingTypeId		
-		, intTransactionReferenceId = SL.intTransactionRecordHeaderId
-		, strTransactionReferenceNo = SL.strTransactionNumber
-		, intFutureMarketId	        = SL.intFutureMarketId
-		, intFutureMonthId		    = SL.intFutureMonthId
-		, intUserId			        = SL.intEntityId
-    FROM @tblSummaryLog SL
+		    , intPricingTypeId		      = CD.intPricingTypeId		
+		    , intTransactionReferenceId = SL.intTransactionRecordHeaderId
+		    , strTransactionReferenceNo = SL.strTransactionNumber
+		    , intFutureMarketId	        = SL.intFutureMarketId
+		    , intFutureMonthId		      = SL.intFutureMonthId
+		    , intUserId			            = SL.intEntityId
+        , intActionId					      = 16--CREATE INVOICE
+  FROM @tblSummaryLog SL
 	INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId
 	INNEr JOIN tblCTContractDetail CD ON SL.intContractDetailId = CD.intContractDetailId
 	WHERE SL.intContractDetailId IS NOT NULL
