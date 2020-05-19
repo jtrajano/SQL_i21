@@ -1652,8 +1652,9 @@ BEGIN TRY
 								SELECT *
 								FROM #tblMFDemand
 								WHERE intItemId = @intItemId
-									AND intMonthId = @intConsumptionMonth
+									AND intMonthId > @intConsumptionMonth
 									AND intAttributeId = 8
+									AND ABS(dblQty)>0
 								)
 						BEGIN
 							INSERT INTO #tblMFDemand (
