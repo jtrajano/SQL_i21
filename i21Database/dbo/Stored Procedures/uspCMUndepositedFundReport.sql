@@ -37,7 +37,7 @@ IF EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT 
 		@asOfDate =  [from] 
-	FROM @temp_xml_table WHERE [fieldname] = 'AsOf' AND condition ='Equal To'
+	FROM @temp_xml_table WHERE [fieldname] = 'As Of' AND condition ='Equal To'
 END
 SELECT @asOfDate = isnull(@asOfDate,'01/01/2099')
 
