@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspFRDSortRowDesign]
+CREATE PROCEDURE [dbo].[uspFRDSortRowDesign]
 	@RowId				AS INT,
 	@RowDetailId		AS NVARCHAR(MAX)	=	'',
 	@ReOrder			AS BIT				=	0
@@ -62,15 +62,20 @@ BEGIN
 	UPDATE tblFRRowDesignCalculation SET intRefNoId = @SORT WHERE intRowId = @RowId and intRowDetailId = @intRowDetailId
 	UPDATE tblFRRowDesignCalculation SET intRefNoCalc = @SORT WHERE intRowId = @RowId and intRowDetailRefNo = @intRowDetailId
 	
-	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + 
+	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :') ,'R',' R'),'R' + 
 	CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows not like '%SUM%'
-
-	UPDATE tblFRRowDesign SET strPercentage = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strPercentage,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + 
+	
+	UPDATE tblFRRowDesign SET strPercentage = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strPercentage,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')	,'R',' R'),'R' + 
 	CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage not like '%SUM%'
 
-	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'), ' +R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' +X' + 
-	CAST(@SORT AS NVARCHAR(15))) + ' ', ' -R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' -X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' *R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' *X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' /R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' /X' + CAST(@SORT AS NVARCHAR(15)) + ' ' ) 
-	WHERE intRowId = @RowId and strRowType IN ('Row Calculation')  and strRelatedRows like '%SUM%'
+	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'), ' +R' + 
+	CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' +X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' -R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' -X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' *R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' *X' 
+	+ CAST(@SORT AS NVARCHAR(15))) + ' ', ' /R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' /X' + CAST(@SORT AS NVARCHAR(15)) + ' ' ) WHERE intRowId = @RowId and strRowType IN ('Row Calculation')  and strRelatedRows like '%SUM%'
+
+	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( REPLACE(REPLACE(REPLACE(' ' + REPLACE('+'+strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'), ' +R' + 
+	CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' +X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' -R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' -X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' *R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' *X' 
+	+ CAST(@SORT AS NVARCHAR(15))) + ' ', ' /R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' /X' + CAST(@SORT AS NVARCHAR(15)) + ' ' ) WHERE intRowId = @RowId and strRowType IN ('Row Calculation') 
+	and (strRelatedRows like '%+SUM%' or strRelatedRows like '%-SUM%' or strRelatedRows like '%*SUM%' or strRelatedRows like '%/SUM%')
 
 	DELETE #TempRowDesign WHERE [RowDetailId] = @intRowDetailId
 END
@@ -91,7 +96,6 @@ UPDATE tblFRRowDesign SET strPercentage = SUBSTRING(REPLACE(strPercentage,' ',''
 UPDATE tblFRRowDesign SET strPercentage = '(' + strPercentage WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage like '%)%' and strPercentage not like '%(%'
 UPDATE tblFRRowDesign SET strPercentage = strPercentage + ')' WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage like '%(%' and strPercentage not like '%)%'
 
-
 -- SUM FUNCTION
 INSERT INTO #TempSUMRows ([RowDetailId],[RefNo],[Formula],[Sort])
 	SELECT intRowDetailId, intRefNo, strRelatedRows, intSort FROM tblFRRowDesign WHERE intRowId = @RowId and strRelatedRows like '%SUM%'
@@ -111,6 +115,10 @@ BEGIN
 	WHILE (CHARINDEX(@SplitOn,@Formula)>0)
 	BEGIN
 		DECLARE @new_intRefNo INT
+		
+		--SELECT LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))) + ' - SUM'
+		--SELECT * FROM #TempRowDesign2
+		--SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))
 
 		IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))) = 1)
 		BEGIN						
@@ -137,7 +145,6 @@ BEGIN
 				END
 				ELSE
 					BEGIN
-	
 						UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId					
 					END
 				SET @intRefNo_1 = @new_intRefNo
@@ -150,6 +157,8 @@ BEGIN
 				BEGIN
 					SET @new_intRefNo = @new_intRefNo - 1
 					SET @position_2_value = @new_intRefNo
+
+					--PRINT 'counter pos 2 - A'
 
 					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
 					BEGIN
@@ -175,7 +184,8 @@ BEGIN
 			SET @new_intRefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))
 			WHILE (@new_intRefNo >= @intRefNo_1)
 			BEGIN
-				IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = @new_intRefNo) = 1 AND (SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NOT NULL)
+				IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = @new_intRefNo) = 1 AND (SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo 
+						AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NOT NULL)
 				BEGIN
 					UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
 					SET @new_intRefNo = @intRefNo_1
@@ -195,6 +205,10 @@ END
 DROP TABLE #TempRowDesign
 
 UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'X','R') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '%SUM%'
+UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'++','') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and (strRelatedRows like '%+SUM%' or strRelatedRows like '%-SUM%' or strRelatedRows like '%*SUM%' or strRelatedRows like '%/SUM%')
+UPDATE tblFRRowDesign SET strRelatedRows = RIGHT(strRelatedRows, LEN(strRelatedRows) - 1) WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '+R%' 
+and (strRelatedRows like '%+SUM%' or strRelatedRows like '%-SUM%' or strRelatedRows like '%*SUM%' or strRelatedRows like '%/SUM%')
+
 
 END
 
