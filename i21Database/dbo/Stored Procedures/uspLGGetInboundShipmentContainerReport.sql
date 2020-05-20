@@ -24,9 +24,10 @@ BEGIN
 
 	IF (@ysnLoadNumber = 1)
 	BEGIN
-		SELECT DISTINCT LC.strContainerNumber
+		SELECT DISTINCT 
+			strContainerNumber = CASE WHEN (LV.intPurchaseSale = 2) THEN ICL.strLotNumber ELSE LC.strContainerNumber END
 			,LV.strBLNumber
-			,LC.strMarks
+			,strMarks = CASE WHEN (LV.intPurchaseSale = 2) THEN ICL.strMarkings ELSE LC.strMarks END 
 			,LDV.dblDeliveredGross
 			,LDV.dblDeliveredNet
 			,LDV.dblDeliveredQuantity
@@ -72,11 +73,11 @@ BEGIN
 			,LDV.strInboundIndexType
 			,LDV.strInboundPricingType
 			,LDV.strInboundTaxGroup
-			,CASE 
+			,strItemDescription = CASE 
 				WHEN ISNULL(ITM.strContractItemName, '') = ''
 					THEN LDV.strItemDescription
 				ELSE ITM.strContractItemName
-				END AS strItemDescription
+				END
 			,LDV.strItemNo
 			,LDV.strItemUOM
 			,LDV.strLoadDirectionMsg
@@ -151,26 +152,29 @@ BEGIN
 			,LDV.strVendorPhone
 			,LDV.strWeightItemUOM
 			,LDV.strZipCode
-			,LC.dblQuantity AS dblContainerContractQty
+			,dblContainerContractQty = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblLotQuantity ELSE LC.dblQuantity END
 			,CH.strCustomerContract AS strCustomerContractNo
 			,CH.dtmContractDate
-			,CH.strContractNumber + '-' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberDashSeq
+			,strContractNumberDashSeq = CASE WHEN  (LV.intPurchaseSale = 2) 
+											THEN LDV.strSContractNumber + '-' + CONVERT(NVARCHAR, LDV.intSContractSeq)
+											ELSE LDV.strPContractNumber + '-' + CONVERT(NVARCHAR, LDV.intPContractSeq) END
 			,CB.strContractBasis
 			,strContractBasisDescription = CB.strFreightTerm
 			,AB.strApprovalBasis
-			,LC.dblGrossWt AS dblContainerGrossWt
-			,LC.dblNetWt AS dblContainerNetWt
-			,LC.dblTareWt AS dblContainerTareWt
-			,LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq) AS strContractNumberWithSeq
-			,LDV.strSContractNumber + '/' + CONVERT(NVARCHAR, LDV.intSContractSeq) AS strSContractNumberWithSeq
+			,dblContainerGrossWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblGross ELSE LC.dblGrossWt END
+			,dblContainerNetWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblNet ELSE LC.dblNetWt END
+			,dblContainerTareWt = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblTare ELSE LC.dblTareWt END
+			,strContractNumberWithSeq = LDV.strPContractNumber + '/' + CONVERT(NVARCHAR, LDV.intPContractSeq)
+			,strSContractNumberWithSeq = LDV.strSContractNumber + '/' + CONVERT(NVARCHAR, LDV.intSContractSeq)
 			,IC.strCommodityCode
 			,LDCL.dblQuantity AS dblContainerLinkQty
 			,LDCL.dblLinkGrossWt AS dblContainerLinkGrossWt
 			,LDCL.dblLinkNetWt AS dblContainerLinkNetWt
+			,LV.intPurchaseSale
 		FROM vyuLGLoadDetailView LDV
 		JOIN vyuLGLoadView LV ON LV.intLoadId = LDV.intLoadId
-		JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
-		JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
+		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LDV.intLoadDetailId
+		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		OUTER APPLY (SELECT TOP 1 intPickLotDetailId FROM tblLGPickLotDetail WHERE intContainerId = LC.intLoadContainerId) PL
 		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
@@ -180,6 +184,8 @@ BEGIN
 		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 		LEFT JOIN tblICCommodity IC ON IC.intCommodityId = CH.intCommodityId
 		LEFT JOIN tblICItemContract ITM ON ITM.intItemContractId = CD.intItemContractId
+		LEFT JOIN tblLGLoadDetailLot LDL ON LDL.intLoadDetailId = LDV.intLoadDetailId AND LV.intPurchaseSale = 2
+		LEFT JOIN tblICLot ICL ON ICL.intLotId = LDL.intLotId
 		WHERE LDV.strLoadNumber = @xmlParam
 			AND (@ysnHasPickContainer = 0
 				 OR (@ysnHasPickContainer = 1 AND LC.intLoadContainerId IN 

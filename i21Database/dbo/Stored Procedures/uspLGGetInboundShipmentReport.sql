@@ -344,9 +344,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 
 			strWarehouseAddressInfo = '',
 			strWarehouseContractInfo = '',
-			intContractBasisId = CASE WHEN (PL.intSContractDetailId IS NOT NULL) THEN SCH.intFreightTermId ELSE NULL END,
-			strContractBasis = CASE WHEN (PL.intSContractDetailId IS NOT NULL) THEN SCB.strContractBasis ELSE '' END,
-			strContractBasisDescription = CASE WHEN (PL.intSContractDetailId IS NOT NULL) THEN SCB.strDescription ELSE '' END,
+			intContractBasisId = CASE WHEN (PL.intSContractDetailId IS NOT NULL OR L.intPurchaseSale = 2) THEN SCH.intFreightTermId ELSE NULL END,
+			strContractBasis = CASE WHEN (PL.intSContractDetailId IS NOT NULL OR L.intPurchaseSale = 2) THEN SCB.strContractBasis ELSE '' END,
+			strContractBasisDescription = CASE WHEN (PL.intSContractDetailId IS NOT NULL OR L.intPurchaseSale = 2) THEN SCB.strDescription ELSE '' END,
 			strWeightTerms = '',
 			strUserEmailId = '',
 			strUserPhoneNo = '',
@@ -558,19 +558,19 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WHEN CLNP.strType = 'Company' THEN ISNULL(CNCompanyLocation.strZipPostalCode, ConsigneeNotifyCompany.strZip)
 				WHEN CLNP.strType IN ('Vendor', 'Customer', 'Forwarding Agent') THEN ISNULL(CNLocation.strZipCode, '')
 				ELSE '' END
-		FROM tblLGLoad L
+			FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
-		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId AND LW.intLoadWarehouseId = ISNULL(LWC.intLoadWarehouseId, LW.intLoadWarehouseId)
 		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		OUTER APPLY 
 			(SELECT TOP 1 strPickComments = PLH.strComments, PLH.strPickLotNumber, ALD.intSContractDetailId, ACH.intEntityId
 				FROM tblLGPickLotDetail PLD 
-				LEFT JOIN tblLGPickLotHeader PLH ON PLD.intPickLotHeaderId = PLD.intPickLotHeaderId
+				LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 				LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId
 				LEFT JOIN tblCTContractDetail ACD ON ACD.intContractDetailId = ALD.intSContractDetailId
 				LEFT JOIN tblCTContractHeader ACH ON ACH.intContractHeaderId = ACD.intContractHeaderId
