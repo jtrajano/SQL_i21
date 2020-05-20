@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspFRDSortRowDesign]
+CREATE PROCEDURE [dbo].[uspFRDSortRowDesign]
 	@RowId				AS INT,
 	@RowDetailId		AS NVARCHAR(MAX)	=	'',
 	@ReOrder			AS BIT				=	0
