@@ -64,7 +64,8 @@ BEGIN
 			update
 				tblCTPriceFixationDetail
 			set
-				dblQuantity = @dblPricedQuantity - @dblInvoiceDetailQuantity
+				dblNoOfLots = dblNoOfLots - ((@dblPricedQuantity - @dblInvoiceDetailQuantity)/(dblQuantity / case when isnull(dblNoOfLots,0) = 0 then 1 else dblNoOfLots end))
+				,dblQuantity = @dblPricedQuantity - @dblInvoiceDetailQuantity
 			where
 				intPriceFixationDetailId = @intPriceFixationDetailId;
 		end
