@@ -2,8 +2,8 @@
 BEGIN
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference)
 	BEGIN
-		INSERT INTO tblRKCompanyPreference(intConcurrencyId, dblDecimals, dblRefreshRate, strRiskView, strM2MView, strDateTimeFormat, strEvaluationBy, strEvaluationByZone)
-		SELECT 1, 2, 60, 'Processor', 'View 1 - Standard', 'MM DD YYYY HH:MI', 'Item', 'Location'
+		INSERT INTO tblRKCompanyPreference(intConcurrencyId, dblDecimals, dblRefreshRate, strM2MView, strDateTimeFormat, strEvaluationBy, strEvaluationByZone)
+		SELECT 1, 2, 60, 'Processor', 'MM DD YYYY HH:MI', 'Item', 'Location'
 	END
 END
 GO
