@@ -25,6 +25,7 @@ SELECT
 	A.ysnReadyForPayment,
 	ysnRestricted = ISNULL((SELECT TOP 1 ysnRestricted FROM dbo.tblAPBillDetail H WHERE A.intBillId = H.intBillId),0),
 	A.dtmDate,
+	FP.strPeriod,
 	A.dtmDatePaid,
 	A.dtmBillDate,
 	A.dtmDueDate,
@@ -93,7 +94,9 @@ FROM
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN
-		ON EN.intEntityId = A.intContactId	
+		ON EN.intEntityId = A.intContactId
+	LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+			ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate	
 	OUTER APPLY dbo.fnAPGetVoucherLatestPayment(A.intBillId) Payment
 	-- LEFT JOIN
 	-- (

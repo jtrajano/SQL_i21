@@ -8683,6 +8683,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReport.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReportContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentPickedSalesReport.sql" />
+    <Build Include="dbo\Views\vyuAPFiscalPeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
