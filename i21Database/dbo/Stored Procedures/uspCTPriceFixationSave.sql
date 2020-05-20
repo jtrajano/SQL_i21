@@ -201,6 +201,9 @@ BEGIN TRY
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
+			UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
+			WHERE  intPriceFixationId = @intPriceFixationId
+
 			EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
 												@intContractDetailId 	= @intContractDetailId, 
 												@strSource 			 	= 'Pricing',
