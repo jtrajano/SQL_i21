@@ -246,12 +246,16 @@ BEGIN
 
 									RETURN
 								END
+
+
+								
+
+							select * into #tempMisMatchPromotionalItem from tblSTPromotionSalesList 
+							where (LOWER(strPromoType) = 'mixmatch' OR Lower(strPromoType) = 'm') and intPromoUnits > 1
 				
-
-
-
 							INSERT INTO @tblTempPMM
-							SELECT DISTINCT @intVendorAccountNumber intRCN 
+							SELECT DISTINCT @intVendorAccountNumber intRCN   --STRT.intRetailAccountNumber AS intRCN
+											--, replace(convert(NVARCHAR, DATEADD(DAY, (DATEDIFF(DAY, @NextDayID, @dtmBeginningDate) / 7) * 7 + 7, @NextDayID), 111), '/', '') as dtmWeekEndingDate
 											, replace(convert(NVARCHAR, @dtmEndingDate, 111), '/', '') as dtmWeekEndingDate
 											, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
 											, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
@@ -267,18 +271,19 @@ BEGIN
 
 											, strTrlDept as strCategory
 											, EM.strName as strManufacturerName
-
-											, strTrlUPC as strSKUCode		-- 4
-
-											, strTrlUPC as strUpcCode		-- Check digit is included. Since RJ and PM requires check digits
-
+											, strTrlUPC as strSKUCode --14
+											, strTrlUPC as strUpcCode
 											, strTrlDesc as strSkuUpcDescription
 											, CASE	
+												--WHEN TR.strTrlDept = 'OTP'
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													THEN 'CANS'
+												--WHEN TR.strTrlDept = 'CIGARETTES'
+												--	THEN 'PACKS'
 												ELSE 'PACKS'
 											  END as strUnitOfMeasure
 
+											--, CAST(CASE WHEN strTrpPaycode = 'CASH' THEN dblTrlQty ELSE 0 END as INT) as intQuantitySold  ST-680
 											, CASE 
 												WHEN strTrpPaycode != 'Change' 
 													THEN CAST(dblTrlQty as INT) 
@@ -287,27 +292,88 @@ BEGIN
 
 											, 1 as intConsumerUnits
 
-											, CASE
-												-- 2 Can Deal
-												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
-													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-														THEN 'Y'
+											-- OLD CODE--
+											-- , CASE
+											-- 	-- 2 Can Deal
+											-- 	--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+											-- 	WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
+											-- 		AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+											-- 			THEN 'Y'
+											-- 	ELSE 'N'
+											--   END AS strMultiPackIndicator	
+											-- OLD CODE--
+											-- NEW CODE-- ST-1717
+											,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID) > 0
+											THEN 
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												THEN 'Y'
 												ELSE 'N'
-											  END AS strMultiPackIndicator	
-											, CASE
-												-- 2 Can Deal
-												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
-													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-														THEN 2
+												END
+											END AS strMultiPackIndicator	
+											-- NEW CODE-- ST-1717
+
+											-- OLD CODE--
+											-- , CASE
+											-- 	-- 2 Can Deal
+											-- 	-- WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2'
+											-- 	WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
+											-- 		AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+											-- 			THEN 2
+											-- 	ELSE NULL
+											--   END as intMultiPackRequiredQuantity
+											-- OLD CODE--
+											-- NEW CODE-- ST-1717
+											,
+											CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID) > 0
+											THEN 
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												THEN (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID)
 												ELSE NULL
-											  END as intMultiPackRequiredQuantity
-											, CASE
-												-- 2 Can Deal
-												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
-													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
-														THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
+												END
+											ELSE
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												THEN 2 
 												ELSE NULL
-											  END as dblMultiPackDiscountAmount
+												END
+											END 
+											AS intMultiPackRequiredQuantity	
+											-- NEW CODE-- ST-1717
+
+											-- OLD CODE--
+											-- , CASE
+											-- 	-- 2 Can Deal
+											-- 	--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+											-- 	WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
+											-- 		AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
+											-- 			THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
+											-- 	ELSE NULL
+											--   END as dblMultiPackDiscountAmount
+											-- OLD CODE--
+											-- NEW CODE-- ST-1717
+											,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID) > 0
+											THEN 
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												THEN 
+													CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID AND intPromoUnits = dblTrlMatchLineTrlMatchQuantity) > 0
+													THEN 
+														dblTrlMatchLineTrlPromoAmount
+													ELSE
+														dblTrlMatchLineTrlPromoAmount * (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID)
+													END
+												ELSE NULL
+												END
+											ELSE
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												THEN 
+													CASE WHEN dblTrlMatchLineTrlMatchQuantity = 2
+													THEN dblTrlMatchLineTrlPromoAmount
+													ELSE dblTrlMatchLineTrlPromoAmount * 2
+													END
+												ELSE NULL
+												END
+											END 
+											AS dblMultiPackDiscountAmount	
+											-- NEW CODE-- ST-1717
 
 											, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
 											, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
@@ -328,6 +394,7 @@ BEGIN
 
 											-- PRICE
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 												    AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
@@ -370,22 +437,20 @@ BEGIN
 							JOIN tblAPVendor APV 
 								ON APV.intEntityId = EM.intEntityId
 							LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
-								-- ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode
-								ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
-									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-
-							-- http://jira.irelyserver.com/browse/ST-1459
-							--LEFT JOIN
-							--(
-							--	SELECT [intID] 
-							--	FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
-							--	GROUP BY [intID]
-							--) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
-
+								ON TR.strTrlUPC = CRP.strLongUPCCode 
+								AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+							LEFT JOIN
+							(
+								SELECT [intID] 
+								FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+								GROUP BY [intID]
+							) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+							-- OUTER APPLY [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) RebateTobacco
 							WHERE TR.intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) 
 								AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 								AND TR.strTrpPaycode != 'Change' --ST-680
 								AND TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
+								-- AND RebateTobacco.ysnTobacco = 1
 
 
 							-- Check if has record
@@ -402,7 +467,6 @@ BEGIN
 
 					END
 			END
-
 		ELSE IF(@intCsvFormat = 1)
 			BEGIN
 				IF EXISTS (SELECT * FROM tblSTTranslogRebates WHERE intStoreId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)) AND CAST(dtmDate as DATE) >= @dtmBeginningDate AND CAST(dtmDate as DATE) <= @dtmEndingDate)
@@ -431,6 +495,7 @@ BEGIN
 
 											-- PRICE
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 -- 2 Can Deal
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 													AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -444,17 +509,20 @@ BEGIN
 											  END as dblPrice
 
 
-											, strTrlUPC as strUpcCode		-- Check digit is included. Since RJ and PM requires check digits
-
+											, strTrlUPC as strUpcCode
 											, REPLACE(strTrlDesc, ',', ' ') as strUpcDescription
 											, CASE	
+												--WHEN TR.strTrlDept = 'OTP'
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 													THEN 'CANS'
+												--WHEN TR.strTrlDept = 'CIGARETTES'
+												--	THEN 'PACKS'
 												ELSE 'PACKS'
 											  END as strUnitOfMeasure
 
 											, CASE 
 												WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') THEN 'Y'
+												--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -469,6 +537,7 @@ BEGIN
 											----------------------------------------------------------------- START: OUTLET Multi-Pack Discount ----------------------------------------------------------------------------------
 											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
 													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -481,6 +550,7 @@ BEGIN
 												ELSE 'N' 
 											  END as strOutletMultipackFlag
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -493,6 +563,7 @@ BEGIN
 												ELSE 0 
 											  END as intOutletMultipackQuantity
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2 
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -533,6 +604,7 @@ BEGIN
 											----------------------------------------------------------------- START: MANUFACTURER Multi-Pack Discount -----------------------------------------------------------------------------
 											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -541,6 +613,7 @@ BEGIN
 												ELSE 'N' 
 											END AS strManufacturerMultipackFlag
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -549,6 +622,7 @@ BEGIN
 												ELSE 0 
 											END AS intManufacturerMultipackQuantity
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -557,6 +631,7 @@ BEGIN
 												ELSE 0 
 											END AS dblManufacturerMultipackDiscountAmount
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -569,12 +644,21 @@ BEGIN
 											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 											------------------------------------------------------------------ END: MANUFACTURER Multi-Pack Discount ------------------------------------------------------------------------------
 											--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
+											--, 'N' as strManufacturerMultipackFlag
+											--, 0 as intManufacturerMultipackQuantity
+											--, 0 as dblManufacturerMultipackDiscountAmount
+											--, CASE 
+											--	WHEN CRP.strPromotionType IN ('VAPS', 'B2S$') 
+											--		THEN CRP.strManufacturerPromotionDescription 
+											--	ELSE '' 
+											--  END as strManufacturerPromotionDescription
 
 											, REPLACE(CRP.strProgramName, ',','') as strManufacturerBuydownDescription
 											, CRP.dblManufacturerBuyDownAmount as dblManufacturerBuydownAmount
 
+											--, '' as strManufacturerMultiPackDescription
 											, CASE 
+												--WHEN TR.strTrlDept = 'OTP' AND TR.strTrlMatchLineTrlMatchName IS NOT NULL AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' AND TR.dblTrlQty >= 2
 												WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1) 
 													AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
@@ -605,17 +689,18 @@ BEGIN
 								JOIN tblSTStore ST 
 									ON ST.intStoreId = TR.intStoreId
 								LEFT JOIN vyuSTCigaretteRebatePrograms CRP 
-									--ON TR.strTrlUPCwithoutCheckDigit = CRP.strLongUPCCode -- Always compare UPC without check digit since Inventory UPC has no check digit
-									ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
-										AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
-								--LEFT JOIN
-								--(
-								--	SELECT DISTINCT [intID] 
-								--	FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
-								--	GROUP BY [intID]
-								--) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
+									ON (TR.strTrlUPC = CRP.strLongUPCCode OR TR.strTrlUPC = CRP.intLongUpcCode)
+									AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
+								LEFT JOIN
+								(
+									SELECT DISTINCT [intID] 
+									FROM [dbo].[fnGetRowsFromDelimitedValues](@strStoreIdList)
+									GROUP BY [intID]
+								) x ON x.intID IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](CRP.strStoreIdList))
 								WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
+								    --TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 									AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
+									
 
 								-- Check if has record
 								IF EXISTS(select * from @tblTempRJR)
