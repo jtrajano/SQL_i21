@@ -199,11 +199,6 @@ BEGIN
 		, dblFuturesM2MMinus = SUM(dblFuturesM2MMinus)
 	INTO #DapSettlement
 	FROM (
-		SELECT t.*
-			, dblFuturesM2MPlus = dblFuturesM2M + (dblFuturesM2M * (dblM2MSimulationPercent / 100))
-			, dblFuturesM2MMinus = dblFuturesM2M - (dblFuturesM2M * (dblM2MSimulationPercent / 100))
-		FROM
-		(
 			SELECT dap.intCommodityId
 				, intProductTypeId = MAT.strCommodityAttributeId
 				, dap.intFutureMarketId
@@ -212,16 +207,18 @@ BEGIN
 				, dap.dblNetLongAvg
 				, dblSettlementPrice = ISNULL(dap.dblSettlementPrice, 0)
 				, dblFuturesM2M = dap.dblM2M
+				, dblFuturesM2MPlus = (((dap.dblSettlementPrice + (dap.dblSettlementPrice * Market.dblM2MSimulationPercent/100)) - dap.dblNetLongAvg) * dap.dblNoOfLots * Market.dblContractSize) / CASE WHEN ISNULL(Cur.ysnSubCurrency, 0) = 1 THEN 100 ELSE 1 END  
+				, dblFuturesM2MMinus = (((dap.dblSettlementPrice - (dap.dblSettlementPrice * Market.dblM2MSimulationPercent/100)) - dap.dblNetLongAvg) * dap.dblNoOfLots * Market.dblContractSize) / CASE WHEN ISNULL(Cur.ysnSubCurrency, 0) = 1 THEN 100 ELSE 1 END  
 			FROM vyuRKGetDailyAveragePriceDetail dap
+			JOIN tblRKFutureMarket Market ON Market.intFutureMarketId = dap.intFutureMarketId  
 			JOIN tblRKCommodityMarketMapping MAT ON MAT.intFutureMarketId = dap.intFutureMarketId
+			LEFT JOIN tblSMCurrency Cur ON Cur.intCurrencyID = Market.intCurrencyId  
 			WHERE dap.intDailyAveragePriceId = (SELECT TOP 1 intDailyAveragePriceId
 												FROM tblRKDailyAveragePrice
 												WHERE ysnPosted = 1 AND CAST(FLOOR(CAST(dtmDate AS FLOAT)) AS DATETIME) <= @Date
 													AND ISNULL(tblRKDailyAveragePrice.intBookId, 0) = ISNULL(@BookId, ISNULL(tblRKDailyAveragePrice.intBookId, 0))
 													AND ISNULL(tblRKDailyAveragePrice.intSubBookId, 0) = ISNULL(@SubBookId, ISNULL(tblRKDailyAveragePrice.intSubBookId, 0))
 												ORDER BY dtmDate DESC)
-		) t
-		JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = t.intFutureMarketId
 	) t
 	GROUP BY intCommodityId, intProductTypeId
 
