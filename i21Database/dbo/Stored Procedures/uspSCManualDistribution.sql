@@ -82,6 +82,8 @@ DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @ysnTicketSpecialGradePosted BIT
 DECLARE @ysnLoadContract BIT
 DECLARE @_dblQuantityPerLoad NUMERIC(18,6)
+DECLARE @strTicketStatus NVARCHAR(5)
+DECLARE @_strReceiptNumber NVARCHAR(50)
 
 SELECT	
 	@intTicketItemUOMId = UOM.intItemUOMId
@@ -96,6 +98,7 @@ SELECT
 	, @strTicketDistributionOption = SC.strDistributionOption
 	, @ysnTicketHasSpecialDiscount = SC.ysnHasSpecialDiscount
 	, @ysnTicketSpecialGradePosted = SC.ysnSpecialGradePosted
+	, @strTicketStatus = SC.strTicketStatus
 FROM dbo.tblSCTicket SC JOIN dbo.tblICItemUOM UOM ON SC.intItemId = UOM.intItemId
 WHERE SC.intTicketId = @intTicketId AND UOM.ysnStockUnit = 1		
 
@@ -104,6 +107,33 @@ DECLARE @intId INT;
 DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38, 20);
+
+--Validation
+BEGIN
+
+	IF @strTicketStatus = 'C' OR  @strTicketStatus = 'V'
+	BEGIN
+		RAISERROR('Cannot distribute closed ticket.', 11, 1);
+	END
+
+	---Check existing IS and Invoice
+	
+	SELECT TOP 1 
+		@_strReceiptNumber = ISNULL(B.strReceiptNumber,'')
+	FROM tblICInventoryReceiptItem A
+	INNER JOIN tblICInventoryReceipt B
+		ON A.intInventoryReceiptId = B.intInventoryReceiptId
+	WHERE B.intSourceType = 1
+		AND A.intSourceId = @intTicketId
+
+	IF ISNULL(@_strReceiptNumber,'') <> ''
+	BEGIN
+		SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a receipt ' + @_strReceiptNumber + '.'
+		RAISERROR(@ErrMsg, 11, 1);
+	END
+
+END
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, intLoadDetailId
