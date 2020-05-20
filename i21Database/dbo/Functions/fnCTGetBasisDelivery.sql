@@ -57,19 +57,23 @@ BEGIN
 		intSequenceUnitMeasureId INT,
 		strSequenceUnitMeasure nvarchar(100),
 		intHeaderUnitMeasureId INT,
-		strHeaderUnitMeasure nvarchar(100)
+		strHeaderUnitMeasure nvarchar(100),
+		ysnDestinationWeightGrade bit
 	)
 
-	insert into @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure)
+	insert into @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure,ysnDestinationWeightGrade)
 	select 		
 		CD.intContractDetailId,
 		CH.intContractHeaderId,
 		intSequenceUnitMeasureId = CDUM.intUnitMeasureId,
 		strSequenceUnitMeasure = CDUM.strUnitMeasure,
 		intHeaderUnitMeasureId = CHUM.intUnitMeasureId,
-		strHeaderUnitMeasure = CHUM.strUnitMeasure
+		strHeaderUnitMeasure = CHUM.strUnitMeasure,
+		ysnDestinationWeightGrade = (case when w.strWeightGradeDesc = 'Destination' or g.strWeightGradeDesc = 'Destination' then convert(bit,1) else convert(bit,0) end)
 	from tblCTContractHeader CH
 	join tblCTContractDetail CD on CH.intContractHeaderId = CD.intContractHeaderId
+	left join tblCTWeightGrade w on w.intWeightGradeId = CH.intWeightId
+	left join tblCTWeightGrade g on g.intWeightGradeId = CH.intGradeId
 	left join tblICUnitMeasure CDUM on CDUM.intUnitMeasureId = CD.intUnitMeasureId
 	left join tblICCommodityUnitMeasure CHCUM on CHCUM.intCommodityId = CH.intCommodityId and CHCUM.ysnStockUnit = 1
 	left join tblICUnitMeasure CHUM on CHUM.intUnitMeasureId = CHCUM.intUnitMeasureId
@@ -205,6 +209,7 @@ BEGIN
 	WHERE SS.ysnPosted = 1
 	and SS.dtmCreated is not null and  dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= @dtmDate
 	AND SS.intParentSettleStorageId IS NOT NULL
+	--and OC.ysnDestinationWeightGrade = convert(bit,0)
 	GROUP BY
 		CH.intContractHeaderId
 		,CD.intContractDetailId
@@ -374,6 +379,7 @@ BEGIN
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 	where InvTran.dtmDate is not null and  dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= @dtmDate
+	--and OC.ysnDestinationWeightGrade = convert(bit,0)
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,Receipt.intInventoryReceiptId
@@ -454,6 +460,7 @@ BEGIN
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 	-- WHERE B.ysnPosted = 1
 	WHERE B.dtmDateCreated is not null and dbo.fnRemoveTimeOnDate(B.dtmDateCreated) <= @dtmDate
+	and OC.ysnDestinationWeightGrade = convert(bit,0)
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,BD.intBillDetailId
@@ -510,7 +517,12 @@ BEGIN
 	,C.strCommodityCode
 	,C.intCommodityId
 	,InvTran.dtmDate
-	,dblQuantity = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
+	,dblQuantity = (case
+					when OC.ysnDestinationWeightGrade = convert(bit,0)
+					then SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
+					else SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(ShipmentItem.dblDestinationQuantity,0))     ),0))
+					end)
+	--,dblQuantity = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
 	,'Inventory Shipment'
 	,CAST(replace(convert(varchar, InvTran.dtmDate,101),'/','') + replace(convert(varchar, InvTran.dtmDate,108),':','')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
 	,CH.intCommodityUOMId
@@ -539,6 +551,7 @@ BEGIN
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 	where InvTran.dtmDate is not null and dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= @dtmDate
+	and (OC.ysnDestinationWeightGrade = convert(bit,0) or (OC.ysnDestinationWeightGrade = convert(bit,1) and isnull(ShipmentItem.dblDestinationQuantity,0) > 0))
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,Shipment.intInventoryShipmentId
@@ -557,6 +570,7 @@ BEGIN
 		,OC.strSequenceUnitMeasure
 		,OC.intHeaderUnitMeasureId
 		,OC.strHeaderUnitMeasure
+		,OC.ysnDestinationWeightGrade
 
 	-- INVOICE
 	INSERT INTO @TemporaryTable
@@ -618,6 +632,7 @@ BEGIN
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 	--WHERE I.ysnPosted = 1
 	where I.dtmDate is not null and  dbo.fnRemoveTimeOnDate(I.dtmDate) <= @dtmDate
+	and OC.ysnDestinationWeightGrade = convert(bit,0)
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,ID.intInvoiceDetailId
@@ -636,6 +651,85 @@ BEGIN
 		,OC.strSequenceUnitMeasure
 		,OC.intHeaderUnitMeasureId
 		,OC.strHeaderUnitMeasure
+
+	-- DWG Pricing
+	INSERT INTO @TemporaryTable
+	(
+		intContractHeaderId	
+		,intContractDetailId	
+		,intTransactionId
+		,strTransactionId	
+		,strContractType		
+		,strContractNumber	
+		,intContractSeq		
+		,intEntityId
+		,strEntityName		
+		,strCommodityCode
+		,intCommodityId	
+		,dtmDate				
+		,dblQuantity			
+		,strTransactionType				
+		,intTimeE
+		,intCommodityUOMId
+		,intUnitMeasureId
+		,intSequenceUnitMeasureId
+		,strSequenceUnitMeasure
+		,intHeaderUnitMeasureId
+		,strHeaderUnitMeasure
+	)
+	SELECT CH.intContractHeaderId
+	,CD.intContractDetailId
+	,pfd.intPriceFixationDetailId
+	,pc.strPriceContractNo
+	,CT.strContractType
+	,CH.strContractNumber
+	,CD.intContractSeq
+	,E.intEntityId
+	,E.strEntityName
+	,C.strCommodityCode
+	,C.intCommodityId
+	,pfd.dtmFixationDate
+	,SUM(dbo.fnICConvertUOMtoStockUnit( CD.intItemId, CD.intItemUOMId, pfd.dblQuantity)) * -1
+	,'Pricing'
+	,CAST(replace(convert(varchar, pfd.dtmFixationDate,101),'/','') + replace(convert(varchar, pfd.dtmFixationDate,108),':','')	AS BIGINT) + CAST(pfd.intPriceFixationDetailId AS BIGINT)
+	,CH.intCommodityUOMId
+	,m.intUnitMeasureId
+	,OC.intSequenceUnitMeasureId
+	,OC.strSequenceUnitMeasure
+	,OC.intHeaderUnitMeasureId
+	,OC.strHeaderUnitMeasure
+	FROM tblCTContractDetail CD
+	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		AND CH.intContractTypeId = 2
+	JOIN @OpenBasisContract OC
+		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
+	Inner join tblCTPriceFixation pf on pf.intContractHeaderId = CH.intContractHeaderId and pf.intContractDetailId = CD.intContractDetailId
+	inner join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+	inner join tblCTPriceContract pc on pc.intPriceContractId = pf.intPriceContractId
+	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
+	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
+	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
+	where pfd.dtmFixationDate is not null and  dbo.fnRemoveTimeOnDate(pfd.dtmFixationDate) <= @dtmDate
+	and OC.ysnDestinationWeightGrade = convert(bit,1)
+	GROUP BY CH.intContractHeaderId
+	,CD.intContractDetailId
+	,pfd.intPriceFixationDetailId
+	,pc.strPriceContractNo
+	,CT.strContractType
+	,CH.strContractNumber
+	,CD.intContractSeq
+	,E.intEntityId
+	,E.strEntityName
+	,C.strCommodityCode
+	,C.intCommodityId
+	,pfd.dtmFixationDate
+	,CH.intCommodityUOMId
+	,m.intUnitMeasureId
+	,OC.intSequenceUnitMeasureId
+	,OC.strSequenceUnitMeasure
+	,OC.intHeaderUnitMeasureId
+	,OC.strHeaderUnitMeasure
 
 	insert into @TemporaryTable2
 	select
@@ -787,7 +881,7 @@ BEGIN
 		SELECT intContractDetailId
 		FROM @Transaction
 		GROUP BY intContractDetailId
-		HAVING SUM(dblQuantity) = 0
+		HAVING SUM(dblQuantity) < 1
 	)
 
 	-- TEMPORARY SOLUTION
