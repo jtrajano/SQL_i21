@@ -18,6 +18,7 @@ SELECT intInvoiceId			= I.intInvoiceId
 	 , dtmBatchDate			= I.dtmBatchDate
 	 , dblInvoiceTotal		= I.dblInvoiceTotal
 	 , dblAmountDue			= I.dblAmountDue
+	 , ysnRecurring			= I.ysnRecurring
 	 , ysnPosted			= I.ysnPosted
 	 , ysnPaid = CASE WHEN (I.strTransactionType IN ('Customer Prepayment') AND I.ysnPaid = 0) THEN I.ysnPaidCPP ELSE I.ysnPaid END
 	 , ysnHasEmailSetup		= ISNULL(EMAILSETUP.ysnHasEmailSetup, CAST(0 AS BIT))
