@@ -64,6 +64,8 @@ SELECT Lot.intLotId
 	, Lot.intConcurrencyId
 	, intQtyUOMDecimalPlaces = UOM.intDecimalPlaces
 	, intGrossUOMDecimalPlaces = WeightUOM.intDecimalPlaces
+	, Lot.strCargoNo
+	, Lot.strWarrantNo
 FROM tblICLot Lot
 LEFT JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Lot.intLocationId
