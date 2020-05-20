@@ -192,8 +192,27 @@ DECLARE @NonStockGLAccounts AS TABLE
    FROM @GLAccounts a
    WHERE a.intNonInventoryId IS NOT NULL
 )
-INSERT INTO @NonStockGLAccounts(intItemId, intItemLocationId, intPOId, intTransactionTypeId, intNonInventoryId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder)
-SELECT intItemId, intItemLocationId, intPOId, intTransactionTypeId, intNonInventoryId, intContraNonInventoryId, strNonInventoryAccountCategory, strContraNonInventoryAccountCategory, intOrder
+INSERT INTO @NonStockGLAccounts (
+	intItemId
+	, intItemLocationId
+	, intPOId
+	, intTransactionTypeId
+	, intNonInventoryId
+	, intContraNonInventoryId
+	, strNonInventoryAccountCategory
+	, strContraNonInventoryAccountCategory
+	, intOrder
+)
+SELECT 
+	intItemId
+	, intItemLocationId
+	, intPOId
+	, intTransactionTypeId
+	, intNonInventoryId
+	, intContraNonInventoryId
+	, strNonInventoryAccountCategory
+	, strContraNonInventoryAccountCategory
+	, intOrder
 FROM cte
 WHERE rn = 1
 
@@ -203,43 +222,23 @@ DECLARE @intItemId AS INT
 DECLARE @strLocationName AS NVARCHAR(50)
 
 -- Check for missing Non-Inventory Account Id
-BEGIN 
-	SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-	FROM tblICItem Item
-        INNER JOIN @NonStockGLAccounts ItemGLAccount ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE ItemGLAccount.intNonInventoryId IS NULL
-
-	SELECT	TOP 1 
-			@strLocationName = c.strLocationName
-	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @NonStockGLAccounts ItemGLAccount
-				ON ItemGLAccount.intItemId = il.intItemId
-				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-	WHERE	il.intItemId = @intItemId
-			AND ItemGLAccount.intNonInventoryId IS NULL 
-
-
-    IF NOT EXISTS(SELECT * FROM @NonStockGLAccounts)
-    BEGIN
-        SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-        FROM tblICItem Item
-            INNER JOIN @GLAccounts ItemGLAccount ON Item.intItemId = ItemGLAccount.intItemId
-        
-        SELECT	TOP 1 
-                @strLocationName = c.strLocationName
-        FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-                    ON il.intLocationId = c.intCompanyLocationId
-                INNER JOIN @GLAccounts ItemGLAccount
-                    ON ItemGLAccount.intItemId = il.intItemId
-                    AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-        WHERE	il.intItemId = @intItemId
-                 
-    END
+BEGIN 	
+	SELECT TOP 1 
+		@intItemId = i.intItemId
+		,@strItemNo = i.strItemNo
+		,@strLocationName = c.strLocationName
+	FROM 
+		@UnitTrans A INNER JOIN tblICItem i 
+			ON A.intItemId = i.intItemId
+		INNER JOIN tblICItemLocation il 
+			ON il.intItemLocationId = A.intItemLocationId
+		INNER JOIN tblSMCompanyLocation c
+			ON il.intLocationId = c.intCompanyLocationId
+		LEFT JOIN @NonStockGLAccounts B
+			ON A.intItemId = B.intItemId
+			AND A.intItemLocationId = B.intItemLocationId
+	WHERE
+		B.intNonInventoryId IS NULL 
 
 	IF @intItemId IS NOT NULL
 	BEGIN 
@@ -258,22 +257,22 @@ BEGIN
 	SET @strItemNo = NULL
 	SET @intItemId = NULL
 
-	SELECT	TOP 1 
-			@intItemId = Item.intItemId 
-			,@strItemNo = Item.strItemNo
-	FROM	dbo.tblICItem Item INNER JOIN @NonStockGLAccounts ItemGLAccount
-				ON Item.intItemId = ItemGLAccount.intItemId
-	WHERE	ItemGLAccount.intContraNonInventoryId IS NULL 			
-
-	SELECT	TOP 1 
-			@strLocationName = c.strLocationName
-	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
-				ON il.intLocationId = c.intCompanyLocationId
-			INNER JOIN @NonStockGLAccounts ItemGLAccount
-				ON ItemGLAccount.intItemId = il.intItemId
-				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
-	WHERE	il.intItemId = @intItemId
-			AND ItemGLAccount.intContraNonInventoryId IS NULL 			
+	SELECT TOP 1 
+		@intItemId = i.intItemId
+		,@strItemNo = i.strItemNo
+		,@strLocationName = c.strLocationName
+	FROM 
+		@UnitTrans A INNER JOIN tblICItem i 
+			ON A.intItemId = i.intItemId
+		INNER JOIN tblICItemLocation il 
+			ON il.intItemLocationId = A.intItemLocationId
+		INNER JOIN tblSMCompanyLocation c
+			ON il.intLocationId = c.intCompanyLocationId
+		LEFT JOIN @NonStockGLAccounts B
+			ON A.intItemId = B.intItemId
+			AND A.intItemLocationId = B.intItemLocationId
+	WHERE
+		B.intContraNonInventoryId IS NULL 
 
 	IF @intItemId IS NOT NULL 
 	BEGIN 
