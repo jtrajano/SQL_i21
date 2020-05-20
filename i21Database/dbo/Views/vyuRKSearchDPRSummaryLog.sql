@@ -39,7 +39,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		dtmTransactionDate
 		,dtmCreateDate
 		,strCommodityCode
-		,strBucketType = strTransactionType
+		,strBucketType = (strContractType + ' ' + strPricingType) COLLATE Latin1_General_CI_AS
 		,strTransactionType = strTransactionReference
 		,strTransactionNumber = strTransactionReferenceNo
 		,strContractNumber

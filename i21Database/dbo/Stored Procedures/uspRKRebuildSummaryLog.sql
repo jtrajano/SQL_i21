@@ -1516,7 +1516,7 @@ BEGIN TRY
 		) tbl
 		ORDER BY intMatchDerivativeHistoryId
 
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Match Derivatives'
 		DELETE FROM @ExistingHistory
@@ -1638,7 +1638,7 @@ BEGIN TRY
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
 		) tbl
 
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Option Derivatives'
 		DELETE FROM @ExistingHistory
@@ -1729,7 +1729,7 @@ BEGIN TRY
 					AND adj.dblAdjustmentAmount = history.dblOrigQty
 				WHERE adj.intCollateralId = C.intCollateralId)
 		
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Collateral'
 		DELETE FROM @ExistingHistory
