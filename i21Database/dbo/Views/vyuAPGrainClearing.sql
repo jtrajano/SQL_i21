@@ -162,8 +162,8 @@ SELECT
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
-	,GD.intAccountId
-	,AD.strAccountId
+	,GLDetail.intAccountId
+	,GLDetail.strAccountId
 FROM tblGRCustomerStorage CS
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
@@ -179,14 +179,26 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.dblSpotUnits = 0
-INNER JOIN tblGLDetail GD
-	ON GD.strTransactionId = SS.strStorageTicket
-		AND GD.intTransactionId = SS.intSettleStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND GD.ysnIsUnposted = 0
-		--AND GD.strCode = 'STR'
-INNER JOIN vyuGLAccountDetail AD
-	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+OUTER APPLY  
+(  
+ SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit  
+ FROM tblGLDetail GD  
+ INNER JOIN vyuGLAccountDetail AD  
+  ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45  
+ WHERE GD.strTransactionId = SS.strStorageTicket  
+  AND GD.intTransactionId = SS.intSettleStorageId  
+  AND GD.strCode = 'STR'  
+  AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo  
+  AND GD.ysnIsUnposted = 0  
+) GLDetail 
+-- INNER JOIN tblGLDetail GD
+-- 	ON GD.strTransactionId = SS.strStorageTicket
+-- 		AND GD.intTransactionId = SS.intSettleStorageId
+-- 		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+-- 		AND GD.ysnIsUnposted = 0
+-- 		--AND GD.strCode = 'STR'
+-- INNER JOIN vyuGLAccountDetail AD
+-- 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
