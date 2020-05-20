@@ -62,23 +62,32 @@ BEGIN
 	UPDATE tblFRRowDesignCalculation SET intRefNoId = @SORT WHERE intRowId = @RowId and intRowDetailId = @intRowDetailId
 	UPDATE tblFRRowDesignCalculation SET intRefNoCalc = @SORT WHERE intRowId = @RowId and intRowDetailRefNo = @intRowDetailId
 	
-	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows not like '%SUM%'
-	UPDATE tblFRRowDesign SET strPercentage = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strPercentage,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage not like '%SUM%'
+	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + 
+	CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows not like '%SUM%'
 
-	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'), ' +R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' +X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' -R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' -X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' *R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' *X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' /R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' /X' + CAST(@SORT AS NVARCHAR(15)) + ' ' ) WHERE intRowId = @RowId and strRowType IN ('Row Calculation')  and strRelatedRows like '%SUM%'
+	UPDATE tblFRRowDesign SET strPercentage = REPLACE(REPLACE(REPLACE(		REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(' ' + REPLACE(strPercentage,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'),'(',' ('),')',' )'),':',' :')		,'R',' R'),'R' + 
+	CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ','X' + CAST(@SORT AS NVARCHAR(15)) + ' '),' ','') WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage not like '%SUM%'
+
+	UPDATE tblFRRowDesign SET strRelatedRows = REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( REPLACE(REPLACE(REPLACE(' ' + REPLACE(strRelatedRows,' ','') + ' ','/',' /'),'*',' *'),'-',' -'),'+',' +'), ' +R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' +X' + 
+	CAST(@SORT AS NVARCHAR(15))) + ' ', ' -R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' -X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' *R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' *X' + CAST(@SORT AS NVARCHAR(15))) + ' ', ' /R' + CAST(@intRefNoCurrent AS NVARCHAR(15)) + ' ', ' /X' + CAST(@SORT AS NVARCHAR(15)) + ' ' ) 
+	WHERE intRowId = @RowId and strRowType IN ('Row Calculation')  and strRelatedRows like '%SUM%'
 
 	DELETE #TempRowDesign WHERE [RowDetailId] = @intRowDetailId
 END
 
 UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,' ','') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '%SUM%'
 UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'X','R') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows not like '%SUM%'
-UPDATE tblFRRowDesign SET strRelatedRows = SUBSTRING(REPLACE(strRelatedRows,' ',''),2,LEN(REPLACE(strRelatedRows,' ','')))  WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and (REPLACE(strRelatedRows,' ','') like '+%' OR REPLACE(strRelatedRows,' ','') like '-%' OR REPLACE(strRelatedRows,' ','') like '*%' OR REPLACE(strRelatedRows,' ','') like '/%')
+UPDATE tblFRRowDesign SET strRelatedRows = SUBSTRING(REPLACE(strRelatedRows,' ',''),2,LEN(REPLACE(strRelatedRows,' ','')))  WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and 
+(REPLACE(strRelatedRows,' ','') like '+%' OR REPLACE(strRelatedRows,' ','') like '-%' OR REPLACE(strRelatedRows,' ','') like '*%' OR REPLACE(strRelatedRows,' ','') like '/%')
+
 UPDATE tblFRRowDesign SET strRelatedRows = '(' + strRelatedRows WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '%)%' and strRelatedRows not like '%(%'
 UPDATE tblFRRowDesign SET strRelatedRows = strRelatedRows + ')' WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '%(%' and strRelatedRows not like '%)%'
 
 UPDATE tblFRRowDesign SET strPercentage = REPLACE(strPercentage,' ','') WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage like '%SUM%'
 UPDATE tblFRRowDesign SET strPercentage = REPLACE(strPercentage,'X','R') WHERE intRowId = @RowId and strRowType IN ('Filter Accounts')
-UPDATE tblFRRowDesign SET strPercentage = SUBSTRING(REPLACE(strPercentage,' ',''),2,LEN(REPLACE(strPercentage,' ','')))  WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and (REPLACE(strPercentage,' ','') like '+%' OR REPLACE(strPercentage,' ','') like '-%' OR REPLACE(strPercentage,' ','') like '*%' OR REPLACE(strPercentage,' ','') like '/%')
+UPDATE tblFRRowDesign SET strPercentage = SUBSTRING(REPLACE(strPercentage,' ',''),2,LEN(REPLACE(strPercentage,' ','')))  WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and 
+(REPLACE(strPercentage,' ','') like '+%' OR REPLACE(strPercentage,' ','') like '-%' OR REPLACE(strPercentage,' ','') like '*%' OR REPLACE(strPercentage,' ','') like '/%')
+
 UPDATE tblFRRowDesign SET strPercentage = '(' + strPercentage WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage like '%)%' and strPercentage not like '%(%'
 UPDATE tblFRRowDesign SET strPercentage = strPercentage + ')' WHERE intRowId = @RowId and strRowType IN ('Filter Accounts') and strPercentage like '%(%' and strPercentage not like '%)%'
 
