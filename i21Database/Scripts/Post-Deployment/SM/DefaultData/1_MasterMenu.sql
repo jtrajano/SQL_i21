@@ -30,7 +30,8 @@ GO
 	-- 		AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Accounts Payable')) 
 	-- 	AND strCommand = N'EntityManagement.view.EntityInquiry?showSearch=true') 
 	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'DPR Summary Log' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DPRSummaryLog?showSearch=true') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management') AND strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true') 
+	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Destination Weight Variance Report' AND strModuleName = 'Ticket Management') AND strCommand = N'Reporting.view.ReportManager?group=Ticket Management&report=DestinationWeightVarianceReport&direct=true') 
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Undeposited Fund' AND strModuleName = 'Cash Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management') AND strCommand = N'Reporting.view.ReportManager?group=Cash Management&report=UndepositedFund&reportDesc=Undeposited Fund Report&direct=true&showCriteria=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -1392,6 +1393,23 @@ UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.BankA
 
 IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Bank File Formats' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId)
 UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'CashManagement.view.BankFileFormat?showSearch=true' WHERE strMenuName = N'Bank File Formats' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Reports', N'Cash Management', @CashManagementParentMenuId, N'Reports', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+
+DECLARE @CashManagementReportParentMenuId INT
+SELECT @CashManagementReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Undeposited Fund' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Undeposited Fund', N'Cash Management', @CashManagementReportParentMenuId, N'Undeposited Fund', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Cash Management&report=UndepositedFund&reportDesc=Undeposited Fund Report&direct=true&showCriteria=true', N'small-menu-report', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Reporting.view.ReportManager?group=Cash Management&report=UndepositedFund&reportDesc=Undeposited Fund Report&direct=true&showCriteria=true' WHERE strMenuName = N'Undeposited Fund' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId
+
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Positive Pay Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId

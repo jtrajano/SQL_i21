@@ -72,6 +72,8 @@ DECLARE @_intContractItemUom INT
 DECLARE @ysnLoadContract BIT
 DECLARE @_dblContractScheduledQty NUMERIC(18,6)
 DECLARE @_dblConvertedLoopQty NUMERIC(18,6)
+DECLARE @strTicketStatus NVARCHAR(5)
+DECLARE @_strShipmentNumber NVARCHAR(50)
 
 
 
@@ -114,6 +116,36 @@ DECLARE @ysnDPStorage AS BIT;
 DECLARE @intLoopContractId INT;
 DECLARE @dblLoopContractUnits NUMERIC(38,20);
 DECLARE @convertedLoopContractUnits numeric(38,20)
+
+	IF @strTicketStatus = 'C' OR  @strTicketStatus = 'V'
+	BEGIN
+		RAISERROR('Cannot distribute closed ticket.', 11, 1);
+	END
+
+	---Check existing IS and Invoice
+	
+	SELECT TOP 1 
+		@_strShipmentNumber = ISNULL(B.strShipmentNumber,'')
+	FROM tblICInventoryShipmentItem A
+	INNER JOIN tblICInventoryShipment B
+		ON A.intInventoryShipmentId = B.intInventoryShipmentId
+	LEFT JOIN tblARInvoiceDetail C
+		ON A.intInventoryShipmentItemId = ISNULL(C.intInventoryShipmentItemId,0)
+	LEFT JOIN tblARInvoice D
+		ON ISNULL(D.intInvoiceId,0) = ISNULL(C.intInvoiceId,0)
+	LEFT JOIN tblARInvoiceDetail E
+		ON ISNULL(C.intInvoiceDetailId,0) = ISNULL(E.intOriginalInvoiceDetailId,0)
+	WHERE B.intSourceType = 1
+		AND A.intSourceId = @intTicketId
+		AND D.strTransactionType = 'Invoice'
+		AND E.intInvoiceDetailId IS NULL
+
+	IF ISNULL(@_strShipmentNumber,'') <> ''
+	BEGIN
+		SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a shipment ' + @_strShipmentNumber + '.'
+		RAISERROR(@ErrMsg, 11, 1);
+	END
+
 
 IF OBJECT_ID(N'tempdb..#tmpManualDistributionLineItem') IS NOT NULL DROP TABLE #tmpManualDistributionLineItem
 
