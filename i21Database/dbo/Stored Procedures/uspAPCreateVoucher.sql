@@ -455,6 +455,14 @@ BEGIN TRY
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
+	DECLARE @billDetailIds AS Id
+	INSERT INTO @billDetailIds
+	SELECT
+		A.intBillDetailId
+	FROM tblAPBillDetail A
+	INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 0
+
 	SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
 	FROM @createdVouchers
 	
