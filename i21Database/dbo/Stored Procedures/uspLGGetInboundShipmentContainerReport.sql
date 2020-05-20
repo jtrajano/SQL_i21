@@ -155,9 +155,9 @@ BEGIN
 			,dblContainerContractQty = CASE WHEN (LV.intPurchaseSale = 2) THEN LDL.dblLotQuantity ELSE LC.dblQuantity END
 			,CH.strCustomerContract AS strCustomerContractNo
 			,CH.dtmContractDate
-			,strContractNumberDashSeq = CASE WHEN  (LV.intPurchaseSale = 2) 
-											THEN LDV.strSContractNumber + '-' + CONVERT(NVARCHAR, LDV.intSContractSeq)
-											ELSE LDV.strPContractNumber + '-' + CONVERT(NVARCHAR, LDV.intPContractSeq) END
+			,strContractNumberDashSeq = CASE WHEN  (LV.intPurchaseSale = 1) 
+											THEN LDV.strPContractNumber + '-' + CONVERT(NVARCHAR, LDV.intPContractSeq)
+											ELSE LDV.strSContractNumber + '-' + CONVERT(NVARCHAR, LDV.intSContractSeq) END
 			,CB.strContractBasis
 			,strContractBasisDescription = CB.strFreightTerm
 			,AB.strApprovalBasis
