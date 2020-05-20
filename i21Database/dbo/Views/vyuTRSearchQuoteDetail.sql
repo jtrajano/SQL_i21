@@ -11,7 +11,7 @@
 			, Detail.intShipToLocationId
 			, ShipToLocation.strLocationName
 			, Detail.intSupplyPointId
-			, strSupplyPoint = SupplyPoint.strLocationName
+			, strSupplyPoint = SupplyPointLoc.strLocationName
 			, Detail.intItemId
 			, Item.strItemNo
 			, dblRackPrice = ISNULL(Detail.dblRackPrice, 0.000000)
@@ -34,6 +34,7 @@
 		LEFT JOIN tblICItem Item ON Item.intItemId = Detail.intItemId
 		LEFT JOIN tblEMEntity Terminal ON Terminal.intEntityId = Detail.intTerminalId
 		left join tblAPVendor Terminal2 on Terminal2.intEntityId = Terminal.intEntityId
-		LEFT JOIN tblEMEntityLocation SupplyPoint ON SupplyPoint.intEntityLocationId = Detail.intSupplyPointId
+		LEFT JOIN tblTRSupplyPoint SupplyPoint ON SupplyPoint.intSupplyPointId = Detail.intSupplyPointId
+		LEFT JOIN tblEMEntityLocation SupplyPointLoc ON SupplyPointLoc.intEntityLocationId = SupplyPoint.intEntityLocationId
 		LEFT JOIN tblEMEntityLocation ShipToLocation ON ShipToLocation.intEntityLocationId = Detail.intShipToLocationId
 		LEFT JOIN tblSMTaxGroup TaxGroup ON TaxGroup.intTaxGroupId = Detail.intTaxGroupId
