@@ -36,6 +36,7 @@ BEGIN TRY
 	DECLARE @intContractDetailId INT
 	DECLARE @intItemUOMId INT
 	DECLARE @dblCost DECIMAL(24, 10)
+	DECLARE @dblUnitsUnposted DECIMAL(24, 10)
 
 	EXEC sp_xml_preparedocument @idoc OUTPUT
 		,@strXml
