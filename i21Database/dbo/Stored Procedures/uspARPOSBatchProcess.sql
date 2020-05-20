@@ -637,7 +637,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
-				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END
+				,strNotes						= CASE  WHEN RT.strPOSType = 'Mixed' THEN 'POS Settle Amount Due of Exchange Transaction' ELSE CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END END
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,intEntityId					= @intEntityUserId
