@@ -85,7 +85,7 @@ BEGIN
     INNER JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ID.intItemUOMId
     INNER JOIN tblICCommodityUnitMeasure ICUM ON ICUM.intCommodityId = ITEM.intCommodityId AND ICUM.intUnitMeasureId = IUOM.intUnitMeasureId 
     LEFT JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
-    LEFT JOIN tblARTransactionDetail TD ON I.intInvoiceId = TD.intTransactionId AND ID.intInvoiceDetailId = TD.intTransactionDetailId AND I.strTransactionType = TD.strTransactionType
+    LEFT JOIN tblARTransactionDetail TD ON I.intInvoiceId = TD.intTransactionId AND I.strTransactionType = TD.strTransactionType
     WHERE ID.intItemId IS NOT NULL
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND TD.intTransactionId IS NULL
@@ -131,6 +131,7 @@ BEGIN
     INNER JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = ID.intItemUOMId
     INNER JOIN tblICCommodityUnitMeasure ICUM ON ICUM.intCommodityId = ITEM.intCommodityId AND ICUM.intUnitMeasureId = IUOM.intUnitMeasureId 
     LEFT JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
+    INNER JOIN tblARTransactionDetail TD ON I.intInvoiceId = TD.intTransactionId AND I.strTransactionType = TD.strTransactionType
     WHERE ID.intItemId IS NOT NULL
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
@@ -282,6 +283,8 @@ BEGIN
           strTransactionType
         , strTransactionReference
         , dtmTransactionDate
+        , dtmStartDate
+        , dtmEndDate
 		    , intContractHeaderId
 		    , intContractDetailId
 	    	, strContractNumber
@@ -295,8 +298,11 @@ BEGIN
         , intBookId
         , intSubBookId
 		    , dblQty
+        , dblBasis
+        , dblFutures
 		    , intQtyUOMId
         , intBasisUOMId
+        , intBasisCurrencyId
         , intPriceUOMId
 		    , intPricingTypeId		
 		    , intTransactionReferenceId
@@ -304,11 +310,14 @@ BEGIN
 	    	, intFutureMarketId
 	    	, intFutureMonthId
 	    	, intUserId
+        
         , intActionId
     )
     SELECT strTransactionType	      = 'Sales Basis Deliveries'
         , strTransactionReference   = SL.strTransactionType
         , dtmTransactionDate	      = SL.dtmTransactionDate
+        , dtmStartDate              = CD.dtmStartDate
+        , dtmEndDate                = CD.dtmEndDate
 		    , intContractHeaderId	      = SL.intContractHeaderId
 	    	, intContractDetailId	      = SL.intContractDetailId
 	    	, strContractNumber	        = CH.strContractNumber
@@ -322,8 +331,11 @@ BEGIN
         , intBookId                 = SL.intBookId
         , intSubBookId              = SL.intSubBookId
 		    , dblQty				            = SL.dblQty
+        , dblBasis                  = CD.dblBasis
+        , dblFutures                = CD.dblFutures
 		    , intQtyUOMId			          = SL.intCommodityUOMId
-        , intBasisUOMId             = SL.intCommodityUOMId
+        , intBasisUOMId             = CD.intBasisUOMId
+        , intBasisCurrencyId        = CD.intBasisCurrencyId
         , intPriceUOMId             = SL.intCommodityUOMId
 		    , intPricingTypeId		      = CD.intPricingTypeId		
 		    , intTransactionReferenceId = SL.intTransactionRecordHeaderId
