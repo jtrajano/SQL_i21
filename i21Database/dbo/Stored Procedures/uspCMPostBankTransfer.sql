@@ -85,8 +85,9 @@ DECLARE
 	,@intCurrencyIdTo INT
 	,@intDefaultCurrencyId INT
 	,@ysnFunctionalToForeign BIT
-	,@ysnForeignToFuncational BIT
+	,@ysnForeignToFunctional BIT
 	,@ysnForeignToForeign BIT
+	,@ysnDefaultTransfer BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -109,7 +110,6 @@ SELECT	TOP 1
 		,@intBankAccountIdTo = intBankAccountIdTo
 		,@intCreatedEntityId = intEntityId
 		,@dblRate = dblRate
-		,@dblHistoricRate = dblHistoricRate
 		,@intCurrencyIdFrom = B.intCurrencyId
 		,@intCurrencyIdTo = C.intCurrencyId
 FROM	[dbo].tblCMBankTransfer A JOIN
@@ -119,12 +119,20 @@ WHERE	strTransactionId = @strTransactionId
 
 
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference 
-SELECT @ysnForeignToFuncational = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdFrom AND @intCurrencyIdTo = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
+
+SELECT @ysnForeignToFunctional = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdFrom AND @intCurrencyIdTo = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
 SELECT @ysnFunctionalToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
 SELECT @ysnForeignToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom <> @intDefaultCurrencyId AND  @intCurrencyIdFrom = @intCurrencyIdTo THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
-SELECT @dblHistoricRate = CASE WHEN @ysnFunctionalToForeign = 1 THEN @dblRate ELSE @dblHistoricRate END
+SELECT @ysnDefaultTransfer = CASE WHEN @intDefaultCurrencyId = @intCurrencyIdTo AND @intCurrencyIdFrom = @intCurrencyIdTo THEN 1 ELSE 0 END
 
-		
+SELECT @dblHistoricRate = 
+	CASE 
+	WHEN @ysnDefaultTransfer = 1 THEN 1
+	WHEN @ysnForeignToFunctional = 1 THEN dbo.fnCMGetBankAccountHistoricRate(@intBankAccountIdFrom, @dtmDate ) 
+	WHEN @ysnFunctionalToForeign = 1 THEN @dblRate
+	ELSE
+	1 END
+
 
 IF @@ERROR <> 0	GOTO Post_Rollback	
 
@@ -525,7 +533,6 @@ FROM #tmpGLDetail
 			,ysnCheckVoid
 			,ysnPosted
 			,strLink
-			,strFiscalPeriod
 			,ysnClr
 			,intEntityId
 			,dtmDateReconciled
@@ -540,8 +547,8 @@ FROM #tmpGLDetail
 				,intBankTransactionTypeId	= @BANK_TRANSFER_WD
 				,intBankAccountId			= A.intBankAccountIdFrom
 				,intCurrencyId				= @intCurrencyIdFrom
-				,intCurrencyExchangeRateTypeId =CASE WHEN @ysnForeignToFuncational = 1  OR @ysnForeignToForeign =1 THEN A.intCurrencyExchangeRateTypeId ELSE NULL END  
-				,dblExchangeRate			= CASE WHEN @ysnForeignToFuncational = 1  OR @ysnForeignToForeign =1 THEN ISNULL(@dblHistoricRate,1)  ELSE 1 END 
+				,intCurrencyExchangeRateTypeId =CASE WHEN @ysnForeignToFunctional = 1  OR @ysnForeignToForeign =1 THEN A.intCurrencyExchangeRateTypeId ELSE NULL END  
+				,dblExchangeRate			= CASE WHEN @ysnForeignToFunctional = 1  OR @ysnForeignToForeign =1 THEN ISNULL(@dblHistoricRate,1)  ELSE 1 END 
 				,dtmDate					= A.dtmDate
 				,strPayee					= ''
 				,intPayeeId					= NULL
@@ -564,7 +571,6 @@ FROM #tmpGLDetail
 				,ysnCheckVoid				= 0
 				,ysnPosted					= 1
 				,strLink					= A.strTransactionId
-				,strFiscalPeriod			= F.strPeriod
 				,ysnClr						= 0
 				,intEntityId				= A.intEntityId
 				,dtmDateReconciled			= NULL
@@ -577,7 +583,8 @@ FROM #tmpGLDetail
 					ON A.intGLAccountIdFrom = GLAccnt.intAccountId		
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
-		CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
+				
+
 		WHERE	A.strTransactionId = @strTransactionId
 	
 		-- Bank Transaction Debit
@@ -597,9 +604,8 @@ FROM #tmpGLDetail
 				,strCity					= ''
 				,strState					= ''
 				,strCountry					= ''
-				,dblAmount					= Amount.Val
-				
-				,strAmountInWords			= dbo.fnConvertNumberToWord(Amount.Val)
+				,dblAmount					= AmountUSD.Val
+				,strAmountInWords			= dbo.fnConvertNumberToWord(AmountUSD.Val)
 				,strMemo					= CASE WHEN ISNULL(A.strReferenceTo,'') = '' THEN 
 												A.strDescription 
 												WHEN ISNULL(A.strDescription,'') = '' THEN
@@ -612,7 +618,6 @@ FROM #tmpGLDetail
 				,ysnCheckVoid				= 0
 				,ysnPosted					= 1
 				,strLink					= A.strTransactionId
-				,strFiscalPeriod			= F.strPeriod
 				,ysnClr						= 0
 				,intEntityId				= A.intEntityId
 				,dtmDateReconciled			= NULL
@@ -626,14 +631,23 @@ FROM #tmpGLDetail
 				INNER JOIN [dbo].tblGLAccountGroup GLAccntGrp
 					ON GLAccnt.intAccountGroupId = GLAccntGrp.intAccountGroupId
 				OUTER APPLY(
-					SELECT CASE WHEN  @ysnForeignToFuncational =1
-											 THEN ROUND(A.dblAmount * ISNULL(@dblRate,1),2)  --CAD TO USD
-											 WHEN @ysnFunctionalToForeign = 1
-											 THEN ROUND(A.dblAmount / ISNULL(@dblRate,1),2)
-												   ELSE A.dblAmount
-											  END Val
-				)Amount
-				CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
+					SELECT CASE WHEN @intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo <> @intDefaultCurrencyId 
+												AND @intCurrencyIdFrom = @intDefaultCurrencyId
+												THEN ROUND(dblAmount/A.dblRate,2)
+											  WHEN
+												@intCurrencyIdFrom <> @intCurrencyIdTo
+												AND @intCurrencyIdTo = @intDefaultCurrencyId
+												AND @intCurrencyIdFrom <> @intDefaultCurrencyId
+
+												
+											 THEN ROUND(dblAmount*A.dblRate,2) 
+											 ELSE A.dblAmount END
+											 Val
+				)AmountUSD
+				OUTER APPLY(
+					SELECT ROUND(A.dblAmount / ISNULL(A.dblRate,1),2)Val
+				)AmountForeign
 		WHERE	A.strTransactionId = @strTransactionId	
 	END
 	ELSE

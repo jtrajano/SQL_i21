@@ -2,6 +2,7 @@
 	  @intTransactionId AS INT	 
 	 ,@intUserId AS INT	
 	 ,@intContractId AS INT = 0
+	 ,@intItemContractId AS INT = 0
 	 ,@ysnRaiseError AS BIT = 1
 	 ,@strErrorMessage AS NVARCHAR(MAX) = NULL OUTPUT  
 AS
@@ -31,9 +32,50 @@ DECLARE @IVTable TABLE
 
 BEGIN TRY
 
-IF(ISNULL(@intContractId,0) = 0)
+
+DECLARE @dblQuantity AS NUMERIC(18,6)
+
+IF(ISNULL(@intContractId,0) != 0)
 BEGIN
 
+	SELECT TOP 1 @dblQuantity = dblQuantity FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+	SET @dblQuantity = @dblQuantity * -1
+	EXEC uspCTUpdateScheduleQuantity 
+		@intContractDetailId = @intContractId
+	,@dblQuantityToUpdate = @dblQuantity
+	,@intUserId = @intUserId
+	,@intExternalId = @intTransactionId
+	,@strScreenName = 'Card Fueling Transaction Screen'
+
+	DELETE FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+	RETURN 1
+
+
+END
+ELSE IF(ISNULL(@intItemContractId,0) != 0)
+BEGIN
+
+	SELECT TOP 1 @dblQuantity = dblQuantity FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+	SET @dblQuantity = @dblQuantity * -1
+	EXEC uspCTItemContractUpdateScheduleQuantity
+			@intItemContractDetailId = @intItemContractId,
+			@dblQuantityToUpdate = @dblQuantity,
+			@intUserId = @intUserId,
+			@intTransactionDetailId = @intTransactionId,
+			@strScreenName = 'Card Fueling Transaction Screen'
+
+	DELETE FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
+
+	RETURN 1
+
+END
+ELSE
+BEGIN
+	
+	
 	SELECT	TOP 1 @intEntityUserSecurityId = [intEntityId] 
 			FROM	dbo.tblSMUserSecurity 
 			WHERE	[intEntityId] = @intUserId
@@ -61,24 +103,6 @@ BEGIN
 	   DELETE FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 	END;
-
-	RETURN 1
-
-END
-ELSE
-BEGIN
-	DECLARE @dblQuantity AS NUMERIC(18,6)
-	SELECT TOP 1 @dblQuantity = dblQuantity FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
-
-	SET @dblQuantity = @dblQuantity * -1
-	EXEC uspCTUpdateScheduleQuantity 
-		@intContractDetailId = @intContractId
-	,@dblQuantityToUpdate = @dblQuantity
-	,@intUserId = @intUserId
-	,@intExternalId = @intTransactionId
-	,@strScreenName = 'Card Fueling Transaction Screen'
-
-	DELETE FROM tblCFTransaction WHERE intTransactionId = @intTransactionId
 
 	RETURN 1
 

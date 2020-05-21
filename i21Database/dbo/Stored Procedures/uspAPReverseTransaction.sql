@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPReverseTransaction]
 	@billId AS INT,
 	@userId AS INT,
+	@transactionType NVARCHAR(30) = NULL,
 	@billCreatedId INT OUTPUT
 AS
 
@@ -45,7 +46,7 @@ SET
 	,A.dblAmountDue = A.dblTotal
 	,A.dtmDatePaid = NULL
 	,A.ysnPaid = 0
-	,A.intTransactionReversed = @billId
+	,A.intReversalId = @billId
 FROM #tmpDuplicateBill A
 
 INSERT INTO tblAPBill
@@ -90,6 +91,7 @@ ON 1 = 0
 			,intContractHeaderId
 			,intContractDetailId
 			,intCustomerStorageId
+			,intSettleStorageId
 			,intStorageLocationId
 			,intSubLocationId
 			,intLocationId
@@ -186,6 +188,7 @@ BEGIN
 		@post=1,
 		@recap=0,
 		@isBatch=0,
+		@transactionType = @transactionType,
 		@param=@billToPost,
 		@userId=@userId,
 		@batchIdUsed = @batchIdUsed OUTPUT,
@@ -199,6 +202,11 @@ BEGIN
 		RETURN;
 	END
 END
+
+UPDATE A
+SET A.intReversalId = @billCreatedId
+FROM tblAPBill A
+WHERE A.intBillId = @billId
 
 IF @transCount = 0 COMMIT TRANSACTION
 

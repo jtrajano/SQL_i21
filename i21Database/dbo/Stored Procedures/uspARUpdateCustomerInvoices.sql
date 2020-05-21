@@ -948,6 +948,7 @@ BEGIN TRY
 			ITG.strType = 'CF Tran'	
 	)
 
+	--DELETE ALL INVOICE DETAILS TO RESET
 	DELETE FROM tblARInvoiceDetail 
 	WHERE 
 		EXISTS(	
@@ -961,6 +962,17 @@ BEGIN TRY
 				tblARInvoiceDetail.[intInvoiceId] = IL.[intInvoiceId]
 				AND IL.[ysnSuccess] = 1 
 				AND ISNULL(ITG.[ysnResetDetails], 0) = 1)
+
+	--DELETE INVOICE DETAILS THAT NOT EXISTS ON STAGING
+	DELETE ID
+	FROM tblARInvoiceDetail ID
+	INNER JOIN @InvoiceEntries ITG ON ITG.intInvoiceId = ID.intInvoiceId --AND ITG.intInvoiceDetailId = ID.intInvoiceDetailId
+	WHERE ISNULL(ITG.[ysnResetDetails], 0) = 0 
+	 AND ID.intInvoiceDetailId NOT IN (
+		SELECT IE.intInvoiceDetailId
+		FROM @InvoiceEntries IE
+		WHERE IE.intInvoiceId = ID.intInvoiceId
+	 )
 
 	DECLARE @LineItems InvoiceStagingTable
 	DELETE FROM @LineItems
@@ -1242,15 +1254,11 @@ BEGIN TRY
 		,[intStorageScheduleTypeId]				= ITG.[intStorageScheduleTypeId]
 		,[intDestinationGradeId]				= ITG.[intDestinationGradeId]
 		,[intDestinationWeightId]				= ITG.[intDestinationWeightId]
-	FROM
-		@InvoiceEntries ITG
-	INNER JOIN
-		@IntegrationLog IL
-			ON ITG.[intInvoiceId] = IL.[intInvoiceId]
-			
-	WHERE
-		IL.[ysnSuccess] = 1
-		AND ISNULL(ITG.[ysnResetDetails], 0) = 1
+	FROM @InvoiceEntries ITG
+	LEFT JOIN tblARInvoiceDetail ID ON ITG.intInvoiceId = ID.intInvoiceId AND ITG.intInvoiceDetailId = ID.intInvoiceDetailId
+	INNER JOIN @IntegrationLog IL ON ITG.[intInvoiceId] = IL.[intInvoiceId]			
+	WHERE IL.[ysnSuccess] = 1
+	  AND (ISNULL(ITG.[ysnResetDetails], 0) = 1 OR (ISNULL(ITG.[ysnResetDetails], 0) = 0) AND ID.intInvoiceDetailId IS NULL)
 
 	EXEC [dbo].[uspARAddItemToInvoices]
 		 @InvoiceEntries	= @LineItems

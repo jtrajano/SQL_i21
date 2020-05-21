@@ -13,6 +13,45 @@ BEGIN TRY
 		,@intCompanyLocationId INT
 		,@intToBookId INT
 		,@ysnApproval BIT
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblARInvoice
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
+
+	UPDATE tblARInvoicePreStage
+	SET strFeedStatus = 'IGNORE'
+	WHERE strFeedStatus IS NULL
+		AND strRowState <> 'Posted'
+
+	UPDATE tblARInvoicePreStage
+	SET strFeedStatus = 'IGNORE'
+	WHERE strFeedStatus IS NULL
+		AND strRowState = 'Posted'
+		AND intInvoiceId IN (
+			SELECT PS.intInvoiceId
+			FROM tblARInvoicePreStage PS
+			WHERE strFeedStatus IS NOT NULL
+				AND strRowState = 'Posted'
+			)
+
+	UPDATE tblARInvoicePreStage
+	SET strFeedStatus = 'IGNORE'
+	WHERE strFeedStatus IS NULL
+		AND intInvoiceId IN (
+			SELECT intInvoiceId
+			FROM tblARInvoice
+			WHERE ysnPosted = 1
+				AND (strTransactionType NOT IN (
+					'Invoice'
+					,'Credit Memo'
+					) or intOriginalInvoiceId is not null)
+			)
+
 	DECLARE @tblARInvoicePreStage TABLE (
 		intInvoicePreStageId INT
 		,intInvoiceId INT

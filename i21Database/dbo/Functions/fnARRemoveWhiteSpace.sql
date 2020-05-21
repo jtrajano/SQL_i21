@@ -1,7 +1,7 @@
 ﻿CREATE FUNCTION dbo.fnARRemoveWhiteSpace(@data NVARCHAR(max)) 
 RETURNS NVARCHAR(MAX)
 BEGIN
-	IF @data IS NULL
+	IF @data IS NULL OR @data LIKE '%<img src%'
 		RETURN NULL
 
 	DECLARE @result		NVARCHAR(MAX)

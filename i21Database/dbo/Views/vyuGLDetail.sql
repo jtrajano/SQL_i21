@@ -59,7 +59,8 @@ AS
 		strSourceDocumentId COLLATE Latin1_General_CI_AS strSourceDocumentId,
 		SE.strEntityNo COLLATE Latin1_General_CI_AS strSourceEntityNo,
         A.intSourceEntityId,
-        A.strFiscalPeriod
+        A.ysnPostAction,
+        A.dtmDateEnteredMin
      FROM tblGLDetail AS A
 	 LEFT JOIN tblGLAccount AS B ON A.intAccountId = B.intAccountId
 	 LEFT JOIN tblGLAccountGroup AS C ON C.intAccountGroupId = B.intAccountGroupId

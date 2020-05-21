@@ -88,3 +88,62 @@ LEFT JOIN tblICLot Lot ON Lot.intItemId = StockUOM.intItemId
 	AND Lot.intItemUOMId = StockUOM.intItemUOMId
 	AND Lot.intSubLocationId = StockUOM.intSubLocationId
 	AND Lot.intStorageLocationId = StockUOM.intStorageLocationId
+
+UNION
+
+SELECT
+	intItemStockUOMId = im.intItemUOMId,
+	i.intItemId,
+	i.strItemNo,
+	strItemDescription = i.strDescription,
+	strType = i.strType,
+	i.strBundleType,
+	i.intCategoryId,
+	strCategory = cg.strCategoryCode,
+	i.intCommodityId,
+	strCommodity = cd.strCommodityCode,
+	strLotTracking = i.strLotTracking,
+	intLocationId = c.intCompanyLocationId,
+	l.intItemLocationId,
+	l.intCountGroupId,
+	g.strCountGroup,
+	c.strLocationName,
+	im.intItemUOMId,
+	u.strUnitMeasure,
+	u.strUnitType,
+	intSubLocationId = NULL,
+	strSubLocationName = NULL,
+	intStorageLocationId = NULL,
+	strStorageLocationName = NULL,
+	intLotId = NULL,
+	strLotNumber = NULL,
+	strLotAlias = NULL,
+	dblOnHand = 0,	
+	dblOnOrder = 0,
+	dblReservedQty = 0,
+	dblAvailableQty = 0,
+	dblStorageQty = 0,
+	dblUnitQty = im.dblUnitQty,
+	ysnStockUnit = im.ysnStockUnit,
+	dblStockUnitCost = p.dblLastCost,
+	dblLastCost = p.dblLastCost,
+	i.intLifeTime,
+	i.strLifeTimeType,
+	strReceiveUPC = COALESCE(im.strLongUPCCode, im.strLongUPCCode, ''),
+	i.ysnLotWeightsRequired,
+	l.ysnStorageUnitRequired
+FROM tblICItem i
+	INNER JOIN tblICItemUOM im ON im.intItemId = i.intItemId
+		AND im.ysnStockUnit = 1
+	INNER JOIN tblICItemLocation l ON l.intItemId = i.intItemId
+	INNER JOIN tblICUnitMeasure u ON u.intUnitMeasureId = im.intUnitMeasureId
+	LEFT OUTER JOIN tblICItemPricing p ON p.intItemId = i.intItemId
+		AND p.intItemLocationId = l.intItemLocationId
+	INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = l.intLocationId
+	LEFT OUTER JOIN tblICCountGroup g ON g.intCountGroupId = l.intCountGroupId
+	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
+	LEFT OUTER JOIN tblICCategory cg ON cd.intCommodityId = i.intCategoryId
+WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItemStockUOM
+	WHERE intItemId = i.intItemId
+		AND intItemLocationId = l.intItemLocationId
+		AND im.intItemUOMId = intItemUOMId)

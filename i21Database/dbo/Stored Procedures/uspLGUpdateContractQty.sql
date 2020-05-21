@@ -75,36 +75,42 @@ BEGIN TRY
 		FROM @tblLoadDetail
 		WHERE intRecordId = @intMinRecordId
 
-		IF(@intPContractDetailId > 0 AND @intShipmentType = 1)
+		IF(@intShipmentType = 2)
 		BEGIN
-			EXEC [uspCTUpdateScheduleQuantityUsingUOM] @intContractDetailId = @intPContractDetailId
-													  ,@dblQuantityToUpdate = @dblQuantity
-													  ,@intUserId = @intUserId
-													  ,@intExternalId = @intLoadDetailId
-													  ,@strScreenName = 'Load Schedule'
-													  ,@intSourceItemUOMId = @intItemUOMId
+			IF (@intPContractDetailId > 0)
+			BEGIN
+				EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intPContractDetailId,
+														   @dblQuantityToUpdate = @dblQuantity,
+														   @intUserId = @intUserId
+			END
+			IF (@intSContractDetailId > 0)
+			BEGIN
+				EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intSContractDetailId,
+														   @dblQuantityToUpdate = @dblQuantity,
+														   @intUserId = @intUserId
+			END
 		END
-		ELSE IF (@intPContractDetailId > 0 AND @intShipmentType = 2)
+		ELSE 
 		BEGIN
-			EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intPContractDetailId,
-														   @dblQuantityToUpdate = @dblQuantity,
-														   @intUserId = @intUserId
-		END	
-		ELSE IF (@intSContractDetailId > 0 AND @intShipmentType = 1)
-		BEGIN
-			EXEC [uspCTUpdateScheduleQuantityUsingUOM] @intContractDetailId = @intSContractDetailId
+			IF (@intPContractDetailId > 0)
+			BEGIN
+				EXEC [uspCTUpdateScheduleQuantityUsingUOM] @intContractDetailId = @intPContractDetailId
 													  ,@dblQuantityToUpdate = @dblQuantity
 													  ,@intUserId = @intUserId
 													  ,@intExternalId = @intLoadDetailId
 													  ,@strScreenName = 'Load Schedule'
 													  ,@intSourceItemUOMId = @intItemUOMId
-		END	
-		ELSE IF (@intSContractDetailId > 0 AND @intShipmentType = 2)
-		BEGIN
-			EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intSContractDetailId,
-														   @dblQuantityToUpdate = @dblQuantity,
-														   @intUserId = @intUserId
-		END	
+			END
+			IF (@intSContractDetailId > 0)
+			BEGIN
+				EXEC [uspCTUpdateScheduleQuantityUsingUOM] @intContractDetailId = @intSContractDetailId
+													  ,@dblQuantityToUpdate = @dblQuantity
+													  ,@intUserId = @intUserId
+													  ,@intExternalId = @intLoadDetailId
+													  ,@strScreenName = 'Load Schedule'
+													  ,@intSourceItemUOMId = @intItemUOMId
+			END	
+		END
 				
 		SELECT @intMinRecordId = MIN(intRecordId)
 		FROM @tblLoadDetail

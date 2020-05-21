@@ -20,6 +20,7 @@
 	[intContractHeaderId]    INT             NULL,
 	[intContractDetailId]    INT             NULL,
 	[intCustomerStorageId]    INT             NULL,
+	[intSettleStorageId] INT NULL,
 	[intStorageLocationId] INT             NULL,
 	[intSubLocationId] INT             NULL,
 	[intLocationId] INT             NULL,
@@ -134,6 +135,11 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intCustomerStorageId]
 		ON [dbo].[tblAPBillDetail]([intCustomerStorageId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intSettleStorageId]
+		ON [dbo].[tblAPBillDetail]([intSettleStorageId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
 

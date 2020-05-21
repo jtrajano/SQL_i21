@@ -27,6 +27,8 @@ BEGIN TRY
 		,dblCost NUMERIC(38, 20)
 		,strCostUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strCostCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strBook NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strSubBook NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strSessionId NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
@@ -69,6 +71,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strSessionId
 				,strTransactionType
 				)
@@ -96,6 +100,8 @@ BEGIN TRY
 					END
 				,COST_UOM
 				,COST_CURRENCY
+				,BOOK
+				,SUB_BOOK
 				,DOC_NO
 				,MSG_TYPE
 			FROM OPENXML(@idoc, 'ROOT_STOCK/LINE_ITEM', 2) WITH (
@@ -111,6 +117,8 @@ BEGIN TRY
 					,COST NVARCHAR(50)
 					,COST_UOM NVARCHAR(50)
 					,COST_CURRENCY NVARCHAR(50)
+					,BOOK NVARCHAR(50)
+					,SUB_BOOK NVARCHAR(50)
 					,DOC_NO INT '../CTRL_POINT/DOC_NO'
 					,MSG_TYPE NVARCHAR(50) '../CTRL_POINT/MSG_TYPE'
 					)
@@ -133,6 +141,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strSessionId
 				,strTransactionType
 				)
@@ -148,6 +158,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strSessionId
 				,strTransactionType
 			FROM @tblLot

@@ -6,7 +6,8 @@ SELECT DISTINCT
 	strName = UPPER(CS.strName),
 	strAddress = UPPER(CS.strAddress),	
 	strCityStateZipCode = UPPER(CS.strCity) + ' '+ UPPER(CS.strState) + ' ' + CS.strZipCode,
-	strAccountNumber = CS.strAccountNumber		
+	strAccountNumber = CS.strAccountNumber,
+	ysnActive = CS.ysnActive		
 from tblARAccountStatus ACS
 INNER JOIN 
 	tblARCustomerAccountStatus CAS

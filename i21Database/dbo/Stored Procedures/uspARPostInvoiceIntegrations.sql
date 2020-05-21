@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
+DECLARE @ysnImposeReversalTransaction BIT = 0
 
 DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 DECLARE @Invoices AS dbo.[InvoiceId]
@@ -24,6 +25,11 @@ DECLARE  @InitTranCount				INT
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
+FROM tblRKCompanyPreference
+
+SET @ysnImposeReversalTransaction = ISNULL(@ysnImposeReversalTransaction, 0)
 
 IF @InitTranCount = 0
 	BEGIN TRANSACTION
@@ -296,6 +302,7 @@ BEGIN
 	DECLARE @IdsP TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
+		, [intPurchaseSale]			INT
 		, [ysnFromProvisional]		BIT
 		, [ysnProvisionalWithGL]	BIT
 		, [ysnFromReturn]			BIT
@@ -304,16 +311,19 @@ BEGIN
 	INSERT INTO @IdsP(
 		  [intInvoiceId]
 		, [intLoadId]
+		, [intPurchaseSale]
 		, [ysnFromProvisional]
 		, [ysnProvisionalWithGL]
 		, [ysnFromReturn]
 	)
 	SELECT [intInvoiceId]			= I.[intInvoiceId]
 		 , [intLoadId]				= I.[intLoadId]
+		 , [intPurchaseSale]		= LG.[intPurchaseSale]
 		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
 		 , [ysnProvisionalWithGL]	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM #ARPostInvoiceHeader I
+	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -343,12 +353,14 @@ BEGIN
 	BEGIN
 		DECLARE @InvoiceIDP 		INT
 			  , @LoadIDP 			INT
+			  , @intPurchaseSaleIDP INT
         	  , @FromProvisionalP 	BIT
         	  , @ProvisionalWithGLP BIT
 			  , @ysnFromReturnP 	BIT
 
 		SELECT TOP 1 @InvoiceIDP			= [intInvoiceId]
 				   , @LoadIDP				= [intLoadId]
+				   , @intPurchaseSaleIDP	= [intPurchaseSale]
 				   , @FromProvisionalP		= [ysnFromProvisional]
 				   , @ProvisionalWithGLP 	= [ysnProvisionalWithGL]
 				   , @ysnFromReturnP		= [ysnFromReturn]
@@ -374,14 +386,19 @@ BEGIN
 		--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnP, 0) = 1 AND @LoadIDP IS NOT NULL
 			BEGIN
-				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
-											   , @ysnPost				 	= 0
-											   , @intEntityUserSecurityId  	= @UserId
-
-				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
-												 , @ysnCancel				 = 1
-												 , @intEntityUserSecurityId  = @UserId
-												 , @intShipmentType			 = 1
+				IF @ysnImposeReversalTransaction = 0
+					BEGIN
+						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+													   , @ysnPost				 	= 0
+													   , @intEntityUserSecurityId  	= @UserId
+					END
+				IF ISNULL(@intPurchaseSaleIDP, 0) <> 3
+					BEGIN
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
+														 , @ysnCancel				 = 1
+														 , @intEntityUserSecurityId  = @UserId
+														 , @intShipmentType			 = 1
+					END
 			END
 
 		DELETE FROM @IdsP WHERE [intInvoiceId] = @InvoiceIDP
@@ -616,6 +633,7 @@ BEGIN
 	DECLARE @IdsU TABLE (
 		  [intInvoiceId]			INT
 		, [intLoadId]				INT
+		, [intPurchaseSale]			INT
 		, [ysnFromProvisional]		BIT
 		, [ysnProvisionalWithGL]	BIT
 		, [ysnFromReturn]			BIT
@@ -624,16 +642,19 @@ BEGIN
 	INSERT INTO @IdsU (
 		  [intInvoiceId]
 		, [intLoadId]
+		, [intPurchaseSale]
 		, [ysnFromProvisional]
 		, [ysnProvisionalWithGL]
 		, [ysnFromReturn]
 	)
 	SELECT [intInvoiceId]			= I.[intInvoiceId]
 		 , [intLoadId]				= I.[intLoadId]
+		 , [intPurchaseSale]		= LG.[intPurchaseSale]
 		 , [ysnFromProvisional]		= I.[ysnFromProvisional]
 		 , [ysnProvisionalWithGL] 	= I.[ysnProvisionalWithGL]
 		 , [ysnFromReturn] 			= CASE WHEN I.[strTransactionType] = 'Credit Memo' AND RI.[intInvoiceId] IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	FROM #ARPostInvoiceHeader I
+	LEFT JOIN tblLGLoad LG ON I.intLoadId = LG.intLoadId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice RET
@@ -663,12 +684,14 @@ BEGIN
 	BEGIN
 		DECLARE @InvoiceIDU				INT
 			  , @LoadIDU				INT
+			  , @intPurchaseSaleIDU		INT
 			  , @FromProvisionalU		BIT
 			  , @ProvisionalWithGLU		BIT
-			  , @ysnFromReturnU			BIT
+			  , @ysnFromReturnU			BIT			  
 
 		SELECT TOP 1 @InvoiceIDU			= [intInvoiceId]
 				   , @LoadIDU				= [intLoadId]
+				   , @intPurchaseSaleIDU	= [intPurchaseSale]
 				   , @FromProvisionalU		= [ysnFromProvisional]
 				   , @ProvisionalWithGLU 	= [ysnProvisionalWithGL]
 				   , @ysnFromReturnU		= [ysnFromReturn]
@@ -694,10 +717,13 @@ BEGIN
 		--POST AND UN-CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnU, 0) = 1 AND @LoadIDU IS NOT NULL
 			BEGIN
-				EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
-												 , @ysnCancel				 = 0
-												 , @intEntityUserSecurityId  = @UserId
-												 , @intShipmentType			 = 1
+				IF ISNULL(@intPurchaseSaleIDU, 0) <> 3
+					BEGIN
+						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDU
+														 , @ysnCancel				 = 0
+														 , @intEntityUserSecurityId  = @UserId
+														 , @intShipmentType			 = 1
+					END
 												 
 				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
 											   , @ysnPost				 	= 1
@@ -787,7 +813,7 @@ SELECT
 	,[dblQtyShipped]				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
 										   THEN 1 
 										   ELSE 
-												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL AND ID.[dblQtyShipped] > ISNULL(ISI.dblQuantity, 0)
+												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL AND ID.[dblQtyShipped] > ISNULL(ISI.dblQuantity, 0) AND ISNULL(CD.dblBalance, 0) = 0
 												     THEN ID.[dblQtyShipped] - ISNULL(ISI.dblQuantity, 0)
 													 ELSE ID.[dblQtyShipped] 
 												END

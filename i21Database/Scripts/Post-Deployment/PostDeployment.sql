@@ -14,6 +14,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
+:r .\SetInLineToOff.sql
 :r .\EncryptionDataFix.sql
 
 -- System Manager Default Data
@@ -91,9 +92,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_UpdateNoSpaceModuleName.sql
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
-
-
-
+:r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
 
 
 -- Canned Report
@@ -203,6 +202,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\7_DeleteAllFloatingPanels.sql
 
 -- General Ledger
+:r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
 :r .\GL\DefaultData\1a_AccountStructure.sql
 :r .\GL\DefaultData\1b_AccountType.sql
 :r .\GL\DefaultData\1c_AccountGroup.sql
@@ -314,6 +314,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVoucherPayableTranType.sql
 :r .\AP\PurgePayableCompleted.sql
 :r .\AP\UpdatePaymentDetailOffset.sql
+:r .\AP\UpdateOriginDMFor20_1.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -394,6 +395,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
+:R .\GR\PriorPeriodTransactions.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -597,6 +599,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\HD\CustomField.sql
 :R .\HD\RemoveHDObsoleteScreen.sql
 :R .\HD\RenameHDScreen.sql
+:R .\HD\20_1_FixCustomLayout.sql
 
 --CRM
 :R .\CRM\SplitCRMData.sql

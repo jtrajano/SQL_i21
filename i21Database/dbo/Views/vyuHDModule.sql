@@ -14,5 +14,6 @@
 			,strModule = strModule
 			,ysnSupported = ysnSupported
 			,strProduct = (select top 1 strProduct from tblHDTicketProduct where intTicketProductId = tblHDModule.intTicketProductId)
+			,strJIRAProject
 		from
 			tblHDModule

@@ -8,36 +8,36 @@ SELECT DISTINCT
 	,strLocationName			= ISNULL(L.strLocationName, 'Multi')
 	,intItemId					= SS.intItemId
 	,strItemNo					= Item.strItemNo
-	,dblSpotUnits				= SS.dblSpotUnits
+	,dblSpotUnits				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblSpotUnits ELSE SS.dblSpotUnits END
+	--,dblSpotUnits				= SS.dblSpotUnits
 	,dblFuturesPrice			= SS.dblFuturesPrice
 	,dblFuturesBasis			= SS.dblFuturesBasis
-	,dblCashPrice				= case when SS.intParentSettleStorageId is null then
-										isnull(computed_header.dblCashPrice, 0) / NULLIF(isnull(SS.dblSelectedUnits, 1),0)
-									else
+	,dblCashPrice				= CASE 
+									WHEN SS.intParentSettleStorageId IS NULL AND ISNULL(SS.dblSelectedUnits,0) = 0 THEN 0
+									WHEN SS.intParentSettleStorageId IS NULL AND ISNULL(SS.dblSelectedUnits,0) > 0 THEN isnull(computed_header.dblCashPrice, 0) / NULLIF(isnull(SS.dblSelectedUnits, 1),0)
+									ELSE
 										CASE 
 											WHEN ISNULL(_dblCashPrice.dblCashPrice,0) > 0 THEN _dblCashPrice.dblCashPrice
-											ELSE
-												SS.dblCashPrice
-												-- CASE 
-												-- 	WHEN SS.intParentSettleStorageId IS NOT NULL THEN SS.dblCashPrice
-												-- 	ELSE 0
-												-- END
+											ELSE SS.dblCashPrice
 										END
-									end
+								END
 	,strStorageAdjustment		= SS.strStorageAdjustment
 	,dtmCalculateStorageThrough = SS.dtmCalculateStorageThrough
-	,dblAdjustPerUnit			= SS.dblAdjustPerUnit
-	,dblStorageDue				= SS.dblStorageDue
+	,dblAdjustPerUnit			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblAdjustPerUnit * -1 ELSE SS.dblAdjustPerUnit END
+	,dblStorageDue				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblStorageDue * -1 ELSE SS.dblStorageDue END
+	-- ,dblAdjustPerUnit			= SS.dblAdjustPerUnit
+	-- ,dblStorageDue				= SS.dblStorageDue
 	,strStorageTicket			= SS.strStorageTicket
-	,dblSelectedUnits			= SS.dblSelectedUnits
-	,dblUnpaidUnits				= SS.dblUnpaidUnits
-	,dblSettleUnits				= SS.dblSettleUnits
-	,dblDiscountsDue			= SS.dblDiscountsDue
-	,dblNetSettlement			= case when SS.intParentSettleStorageId is not null and Bill.intBillId is not null then
-										SS.dblSelectedUnits
-									else
-										SS.dblNetSettlement
-									end
+	,dblSelectedUnits			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblSelectedUnits * -1 ELSE SS.dblSelectedUnits END
+	,dblUnpaidUnits				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblUnpaidUnits * -1 ELSE SS.dblUnpaidUnits END
+	,dblSettleUnits				= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblSettleUnits * -1 ELSE SS.dblSettleUnits END
+	,dblDiscountsDue			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblDiscountsDue * -1 ELSE SS.dblDiscountsDue END
+	,dblNetSettlement			= CASE WHEN SS.strStorageTicket NOT LIKE '%-R' THEN SS.dblNetSettlement * -1 ELSE SS.dblNetSettlement END
+	-- ,dblSelectedUnits			= SS.dblSelectedUnits
+	-- ,dblUnpaidUnits				= SS.dblUnpaidUnits
+	-- ,dblSettleUnits				= SS.dblSettleUnits
+	-- ,dblDiscountsDue			= SS.dblDiscountsDue
+	-- ,dblNetSettlement			= SS.dblNetSettlement
 	,intCreatedUserId			= SS.intCreatedUserId
 	,strUserName				= Entity.strUserName
 	,dtmCreated					= SS.dtmCreated
@@ -46,9 +46,17 @@ SELECT DISTINCT
 	,strBillId					= ISNULL(Bill.strBillId,'')
 	,strContractIds				= _strContractIds.strContractIds
 	,strContractNumbers         = STUFF(_strContractNumbers.strContractNumbers,1,1,'') 
-	,strUnits                   =  CASE
-										WHEN SS.intParentSettleStorageId IS NOT NULL THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol
-										ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol
+	,strUnits                   = CASE
+										WHEN SS.intParentSettleStorageId IS NOT NULL THEN
+											CASE 
+												WHEN SS.strStorageTicket NOT LIKE '%-R' THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, (ST.dblUnits * -1)))) + ' ' + UOM.strSymbol
+												ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, ST.dblUnits))) + ' ' + UOM.strSymbol 
+											END
+										ELSE 
+											CASE 
+												WHEN SS.strStorageTicket NOT LIKE '%-R' THEN CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, (SS.dblSettleUnits * -1)))) + ' ' + UOM.strSymbol
+												ELSE CONVERT(VARCHAR(MAX), dbo.fnRemoveTrailingZeroes(dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(SS.intItemUOMId, CS.intItemUOMId), ItemUOM.intItemUOMId, SS.dblSettleUnits))) + ' ' + UOM.strSymbol 
+											END
 								END
 	,intTransactionId			= CASE 
 									WHEN SS.intParentSettleStorageId IS NULL THEN 99999999
@@ -91,6 +99,7 @@ SELECT DISTINCT
 								END COLLATE Latin1_General_CI_AS AS strTransactionCode
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
+	, SS.ysnReversed
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId
@@ -167,24 +176,24 @@ OUTER APPLY (
 	WHERE CD.intPricingTypeId <> 2
 ) AS _dblCashPrice
 OUTER APPLY (
-	select sum(_son.dblCashPrice) as dblCashPrice from (
+	SELECT dblCashPrice = SUM(_son.dblCashPrice)
+	FROM (
 		SELECT 
-			SUM(CD.dblCashPrice * SC.dblUnits) AS dblCashPrice
+			dblCashPrice = SUM(CD.dblCashPrice * SC.dblUnits)
 		FROM tblGRSettleContract SC
-			JOIN tblGRSettleStorage SSS
-				on SC.intSettleStorageId = SSS.intSettleStorageId 
-					and SSS.intParentSettleStorageId = SS.intSettleStorageId
-			JOIN tblCTContractDetail CD
-				ON CD.intContractDetailId = SC.intContractDetailId
+		JOIN tblGRSettleStorage SSS
+			ON SC.intSettleStorageId = SSS.intSettleStorageId 
+				AND SSS.intParentSettleStorageId = SS.intSettleStorageId
+		JOIN tblCTContractDetail CD
+			ON CD.intContractDetailId = SC.intContractDetailId
 		WHERE CD.intPricingTypeId <> 2
-			and SS.intParentSettleStorageId is null
-		
-		Union all
-		select SUM(TSS.dblSpotUnits * TSS.dblCashPrice) dblCashPrice 
-			from tblGRSettleStorageTicket T
-				join tblGRSettleStorage TSS
-					on T.intSettleStorageId = TSS.intSettleStorageId
-						and TSS.intParentSettleStorageId = SS.intSettleStorageId
-				where SS.intParentSettleStorageId is null 
+			AND SS.intParentSettleStorageId IS NULL		
+		UNION ALL
+		SELECT dblCashPrice  = SUM(TSS.dblSpotUnits * TSS.dblCashPrice)
+		FROM tblGRSettleStorageTicket T
+		JOIN tblGRSettleStorage TSS
+			ON T.intSettleStorageId = TSS.intSettleStorageId
+				AND TSS.intParentSettleStorageId = SS.intSettleStorageId
+		WHERE SS.intParentSettleStorageId IS NULL
 	) _son
 ) AS computed_header

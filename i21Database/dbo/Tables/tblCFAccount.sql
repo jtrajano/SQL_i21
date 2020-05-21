@@ -75,29 +75,6 @@
     CONSTRAINT [FK_tblCFAccount_tblSMTerm] FOREIGN KEY ([intTermsCode]) REFERENCES [dbo].[tblSMTerm] ([intTermID])
 );
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
 CREATE NONCLUSTERED INDEX [tblCFAccount_intTermsCode]
     ON [dbo].[tblCFAccount]([intTermsCode] ASC);
@@ -116,9 +93,7 @@ CREATE NONCLUSTERED INDEX [tblCFAccount_intDiscountScheduleId]
 GO
 CREATE NONCLUSTERED INDEX [tblCFAccount_intCustomerId]
     ON [dbo].[tblCFAccount]([intCustomerId] ASC);
-
-
 GO
 CREATE NONCLUSTERED INDEX [tblCFAccount_intAccountId]
     ON [dbo].[tblCFAccount]([intAccountId] ASC);
-
+    

@@ -230,7 +230,7 @@ BEGIN
 				,intCommodityId
 				,intOrigUOMId
 				,strInventoryType = 'Company Titled'
-				,dtmCreateDate
+				,dtmTransactionDate
 				,strTransactionType
 				,intTransactionRecordHeaderId
 				,strTransactionNumber
@@ -362,7 +362,7 @@ BEGIN
 				select
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
 					,dblQtyReceived = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId, BD.dblQtyReceived)
-					,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,(BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment )
+					,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,(BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment )
 					,B.strBillId 
 					,B.intBillId 
 					,strDistribution =  ISNULL(ST.strStorageTypeCode,ISNULL(TV.strDistributionOption, ''))
@@ -452,7 +452,7 @@ BEGIN
 				,strDistribution
 				,strTransactionType
 			FROM (
-				select
+				select distinct
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110)
 					,dblUnpaidIncrease = ISNULL(CS.dblUnits,Inv.dblTotal)
 					,dblUnpaidDecrease = dblPartialPaidQty
@@ -475,13 +475,15 @@ BEGIN
 							strVoucher = B.strBillId
 							, B.intBillId
 							, dblUnits =  BD.dblQtyReceived
-							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
 						from tblGRSettleStorage S 
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
 									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
 											AND BD.intItemId = S.intItemId 
-						where S.intSettleStorageId = Inv.intTransactionId 
+						left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+						left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+						where S.intSettleStorageId = Inv.intTransactionDetailId 
 					) t
 					group by strVoucher, intBillId
 	
@@ -526,13 +528,15 @@ BEGIN
 					 from (	
 					select 
 							 dblUnits =  BD.dblQtyReceived
-							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, Inv.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
 						from tblGRSettleStorage S 
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
 									inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
-											AND BD.intItemId = S.intItemId 
-						where S.intSettleStorageId = Inv.intTransactionId 
+											AND BD.intItemId = S.intItemId
+						left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+						left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+						where S.intSettleStorageId = Inv.intTransactionDetailId 
 					) t
 				) CS
 				where 
@@ -575,7 +579,7 @@ BEGIN
 				UNION ALL
 				select distinct
 						dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, Inv.intItemUOMId,  Inv.dblTotal), 0) 
+					,dblQtyShipped = ISNULL(dbo.fnCalculateQtyBetweenUOM(ID.intItemUOMId, IUM.intItemUOMId,  Inv.dblTotal), 0) 
 					,I.strInvoiceNumber
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
@@ -586,8 +590,10 @@ BEGIN
 				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
 				inner join tblARInvoiceDetail ID on Inv.intTransactionDetailId = ID.intInventoryShipmentItemId 
 						AND ID.intInventoryShipmentChargeId IS NULL
-				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId
+				inner join tblARInvoice I on ID.intInvoiceId = I.intInvoiceId and I.strTransactionType = 'Invoice'
 				left join vyuSCTicketView TV on ID.intTicketId = TV.intTicketId
+				left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+				left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = ID.intItemId
 				where Inv.strTransactionType = 'Inventory Shipment'
 				AND ISI.ysnDestinationWeightsAndGrades = 1
 
@@ -726,7 +732,7 @@ BEGIN
 				from @InventoryStock Inv
 				inner join tblICInventoryAdjustmentDetail ID on Inv.intTransactionDetailId = ID.intInventoryAdjustmentDetailId 
 				inner join tblICInventoryAdjustment I on ID.intInventoryAdjustmentId = I.intInventoryAdjustmentId
-				where Inv.strTransactionType LIKE 'Inventory Adjustment -%'
+				where Inv.strTransactionType LIKE 'Inventory Adjustment%'
 					AND I.ysnPosted = 1
 					AND (I.intSourceTransactionTypeId IS NULL OR I.intSourceTransactionTypeId = 8)
 						
@@ -879,6 +885,75 @@ BEGIN
 
 			
 
+			IF (@ysnIncludeDPPurchasesInCompanyTitled = 1)
+			BEGIN
+				--DP Settlement
+				INSERT INTO @CompanyTitle(
+					dtmDate
+					,dblUnpaidIncrease
+					,dblUnpaidDecrease
+					,dblUnpaidBalance
+					,dblPaidBalance
+					,strTransactionId
+					,intTransactionId
+					,strDistribution
+					,strTransactionType
+				)
+				SELECT
+					dtmDate
+					,dblUnpaidIncrease = dblTotal
+					,dblUnpaidDecrease = 0
+					,dblUnpaidBalance = dblTotal
+					,dblPaidBalance = 0
+					,strTransactionId  =  strTransactionNumber
+					,intTransactionId = intTransactionRecordHeaderId
+					,strDistribution = 'DP'
+					,strTransactionType
+				FROM (
+					select
+						dtmDate = CONVERT(VARCHAR(10),dtmCreatedDate,110)
+						, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,@intCommodityUnitMeasureId,dblTotal)
+						, strTransactionNumber
+						, intTransactionRecordHeaderId
+						, strTransactionType
+					from dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) OH
+					where OH.intItemId = ISNULL(@intItemId, OH.intItemId)
+						and OH.intLocationId = ISNULL(@intLocationId, OH.intLocationId)
+						and OH.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+						and strTransactionType = 'Storage Settlement'
+				) t
+
+				UNION ALL
+				SELECT
+					dtmDate
+					,dblUnpaidIncrease = dblQtyReceived
+					,dblUnpaidDecrease = dblPartialPaidQty
+					,dblUnpaidBalance = dblQtyReceived - dblPartialPaidQty
+					,dblPaidBalance = dblPartialPaidQty
+					,strTransactionId  =  strBillId
+					,intTransactionId = intBillId
+					,strDistribution = 'DP'
+					,strTransactionType = 'Bill'
+				FROM (
+					select
+						dtmDate = CONVERT(VARCHAR(10),dtmCreatedDate,110)
+						, dblQtyReceived = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,BD.dblQtyReceived)
+						,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,(BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * dblPayment )
+						, B.strBillId
+						, B.intBillId
+						, strTransactionType
+					from dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) OH
+					inner join tblAPBillDetail BD on BD.intCustomerStorageId = OH.intTransactionRecordHeaderId
+					inner join tblAPBill B on B.intBillId = BD.intBillId
+					left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = OH.intOrigUOMId
+					left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+					where OH.intItemId = ISNULL(@intItemId, OH.intItemId)
+						and OH.intLocationId = ISNULL(@intLocationId, OH.intLocationId)
+						and OH.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+						and strTransactionType = 'Storage Settlement'
+				) t
+
+			END
 			
 
 			--If (@ysnIncludeDPPurchasesInCompanyTitled = 0)

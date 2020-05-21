@@ -117,7 +117,7 @@ BEGIN TRY
 		,intCreatedUserId
 		)
 	SELECT DISTINCT strDemandName
-		,CONVERT(NVARCHAR, GETDATE(), @intConvertYear)
+		,CONVERT(NVARCHAR, GETDATE(), 101)
 		,strBook
 		,strSubBook
 		,intCreatedUserId
@@ -262,7 +262,7 @@ BEGIN TRY
 		SELECT strDemandName
 			,strItemNo
 			,strSubstituteItemNo
-			,CONVERT(NVARCHAR, dtmDemandDate, @intConvertYear)
+			,CONVERT(datetime, CONVERT(datetime, dtmDemandDate, @intConvertYear))
 			,dblQuantity
 			,strUnitMeasure
 			,strLocationName

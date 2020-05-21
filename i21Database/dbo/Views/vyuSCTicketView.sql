@@ -121,9 +121,11 @@ AS
        ,SCT.ysnHasGeneratedTicketNumber
 	   ,CASE 
 			WHEN SCT.ysnDestinationWeightGradePost = 1 THEN 'Posted' 
-			WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Unposted' 
-		END AS strWeightGradePostStatus
-	   ,CASE WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Destination' END AS strWeightGradeDest
+			WHEN lower(isnull(CTWGH.strWeightGradeDesc, '')) = 'destination' or lower(isnull(CTWGG.strWeightGradeDesc, '')) = 'destination' then 'Unposted'
+			--WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Unposted' 
+		END AS strWeightGradePostStatus   
+      ,CASE WHEN CTH.intWeightId is not null OR CTH.intGradeId is not null 
+         THEN isnull(CTWGH.strWeightGradeDesc, '') +'/' + isnull(CTWGG.strWeightGradeDesc, '') END AS strWeightGradeDest
        ,SCT.intInventoryTransferId
        ,SCT.dblShrink
        ,SCT.dblConvertedUOMQty
@@ -171,6 +173,11 @@ AS
      ,SCT.dtmImportedDate
 	 ,ContractsApplied.strContractsApplied
     ,SCT.strTrailerId
+    ,SCT.intParentTicketId
+    ,SCT.intTicketTransactionType
+    ,SCT.ysnReversed
+	,SCT.ysnCertOfAnalysisPosted
+	,SCT.ysnExportRailXML
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -194,6 +201,10 @@ AS
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN tblCTContractDetail CTD ON SCT.intContractId = CTD.intContractDetailId
 	LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+   LEFT JOIN tblCTWeightGrade CTWGG
+      on CTWGG.intWeightGradeId = CTH.intGradeId
+   LEFT JOIN tblCTWeightGrade CTWGH
+      on CTWGH.intWeightGradeId = CTH.intWeightId
 	OUTER APPLY(
 		SELECT strContractsApplied =LEFT(strContractsApplied, LEN(strContractsApplied) - 1) FROM (
 		SELECT ContractHeader.strContractNumber +'-'+ CAST(ContractDetail.intContractSeq AS VARCHAR(20)) + ', ' FROM tblSCTicketContractUsed ContractUsed

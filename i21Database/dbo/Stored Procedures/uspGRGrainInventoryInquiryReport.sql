@@ -160,10 +160,12 @@ CREATE TABLE #tblInOut
 	intTransactionId INT,
 	strDistribution VARCHAR(MAX),
 	dblBalance DECIMAL(18,6),
+	dblBalanceCompanyOwned DECIMAL(18,6),
+	dblBalanceCustomerOwned DECIMAL(18,6),
 	dblSalesInTransit DECIMAL(18,6),
 	strTransactionType NVARCHAR(50),
-	intCommodityId INT
-
+	intCommodityId INT,
+	strOwnership VARCHAR(50)
 )
 
 CREATE TABLE #tblInOutAllLocation
@@ -177,9 +179,12 @@ CREATE TABLE #tblInOutAllLocation
 	intTransactionId INT,
 	strDistribution VARCHAR(MAX),
 	dblBalance DECIMAL(18,6),
+	dblBalanceCompanyOwned DECIMAL(18,6),
+	dblBalanceCustomerOwned DECIMAL(18,6),
 	dblSalesInTransit DECIMAL(18,6),
 	strTransactionType NVARCHAR(50),
-	intCommodityId INT
+	intCommodityId INT,
+	strOwnership VARCHAR(50)
 )
 
 CREATE TABLE #tblInTransit

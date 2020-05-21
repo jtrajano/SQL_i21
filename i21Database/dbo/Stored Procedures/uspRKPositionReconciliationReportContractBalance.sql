@@ -45,29 +45,74 @@ BEGIN
 SELECT * INTO #tblRawContractBalance
 FROM dbo.fnRKGetBucketContractBalance(@dtmToTransactionDate,NULL,NULL)
 
-SELECT DISTINCT
-	strHeaderType = @strContractType + ' Contract Balance' 
-	,dtmTransactionDate 
-	,t.strCommodityCode
-	,t.intContractHeaderId
-	,t.intContractDetailId
-	,t.strContractNumber
-	,t.intContractSeq
-	,dblIncrease = CASE WHEN t.dblQty > 0 THEN t.dblQty ELSE 0 END
-	,dblDecrease = CASE WHEN t.dblQty < 0 THEN t.dblQty * -1 ELSE 0 END
-	,t.strPricingType
-	,strTransactionType = t.strTransactionReference
-	,intTransactionId = t.intTransactionReferenceId
-	,strTransactionId = t.strTransactionReferenceNo
-	,intOrderBy = intContractBalanceLogId
-INTO #tblContractBalance
-FROM #tblRawContractBalance t
-WHERE t.dtmTransactionDate between @dtmFromTransactionDate and @dtmToTransactionDate
-AND t.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
-AND t.intCommodityId  IN (SELECT com.intCommodityId FROM @Commodity com)
-ORDER BY dtmTransactionDate, intContractBalanceLogId
+DECLARE @intCommodityId INT
+		,@intCommodityUnitMeasureId INT
 
+DECLARE @tblContractBalance AS TABLE (
+	strHeaderType NVARCHAR(100)
+	,dtmTransactionDate DATETIME
+	,strCommodityCode NVARCHAR(100)
+	,intContractHeaderId INT
+	,intContractDetailId INT
+	,strContractNumber NVARCHAR(100)
+	,intContractSeq INT
+	,dblIncrease NUMERIC(18,6)
+	,dblDecrease NUMERIC(18,6)
+	,strPricingType NVARCHAR(100)
+	,strTransactionType  NVARCHAR(100)
+	,intTransactionId INT
+	,strTransactionId NVARCHAR(100)
+	,intOrderBy INT
+)
 
+WHILE EXISTS(SELECT TOP 1 * FROM #tempCommodity)
+BEGIN
+
+	SELECT @intCommodityId = intCommodityId FROM #tempCommodity
+
+	SELECT @intCommodityUnitMeasureId = intCommodityUnitMeasureId
+	FROM tblICCommodityUnitMeasure
+	WHERE intCommodityId = @intCommodityId AND ysnDefault = 1 AND ysnStockUnit = 1
+
+	INSERT INTO @tblContractBalance(
+		strHeaderType 
+		,dtmTransactionDate
+		,strCommodityCode 
+		,intContractHeaderId 
+		,intContractDetailId
+		,strContractNumber 
+		,intContractSeq 
+		,dblIncrease 
+		,dblDecrease
+		,strPricingType 
+		,strTransactionType  
+		,intTransactionId 
+		,strTransactionId 
+		,intOrderBy 
+	)
+	SELECT DISTINCT
+		strHeaderType = @strContractType + ' Contract Balance' 
+		,dtmTransactionDate = CONVERT(DATETIME, CONVERT(VARCHAR(10),t.dtmTransactionDate, 110), 110)
+		,t.strCommodityCode
+		,t.intContractHeaderId
+		,t.intContractDetailId
+		,t.strContractNumber
+		,t.intContractSeq
+		,dblIncrease = CASE WHEN  dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) > 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) ELSE 0 END
+		,dblDecrease = CASE WHEN dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) < 0 THEN dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intQtyUOMId, @intCommodityUnitMeasureId, t.dblQty) * -1 ELSE 0 END
+		,t.strPricingType
+		,strTransactionType = t.strTransactionReference
+		,intTransactionId = t.intTransactionReferenceId
+		,strTransactionId = t.strTransactionReferenceNo
+		,intOrderBy = intContractBalanceLogId
+	FROM #tblRawContractBalance t
+	WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10),t.dtmTransactionDate, 110), 110) between @dtmFromTransactionDate and @dtmToTransactionDate
+	AND t.intContractTypeId = @intContractTypeId --1 = Purchase, 2 = Sale
+	AND t.intCommodityId = @intCommodityId
+	ORDER BY intContractBalanceLogId
+
+	DELETE FROM #tempCommodity WHERE intCommodityId = @intCommodityId
+END
 
 SELECT *
 INTO #tblFinalContractBalance
@@ -94,7 +139,7 @@ FROM (
 			,intTransactionId
 			,strTransactionId
 			,intOrderBy
-		FROM #tblContractBalance
+		FROM @tblContractBalance
 ) t
 ORDER BY dtmTransactionDate, intOrderBy
 
@@ -395,7 +440,6 @@ END
 
 ExitRoutine:
 DROP TABLE #tblRawContractBalance
-DROP TABLE #tblContractBalance
 DROP TABLE #tblFinalContractBalance 
 DROP TABLE #tempDateRange
 DROP TABLE #tempCommodity

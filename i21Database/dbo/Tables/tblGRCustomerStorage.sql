@@ -44,6 +44,8 @@
     [dblGrossQuantity] NUMERIC(18,6) NULL,
     [intShipFromLocationId] INT NULL,
     [intShipFromEntityId] INT NULL,
+    [dblBasis] DECIMAL(18, 6) NOT NULL DEFAULT 0,
+    [dblSettlementPrice] DECIMAL(18, 6) NOT NULL DEFAULT 0,
     CONSTRAINT [PK_tblGRCustomerStorage_intCustomerStorageId] PRIMARY KEY ([intCustomerStorageId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
 	CONSTRAINT [FK_tblGRCustomerStorage_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [dbo].[tblICCommodity] ([intCommodityId]),

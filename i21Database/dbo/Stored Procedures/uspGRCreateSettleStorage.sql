@@ -116,6 +116,7 @@ BEGIN TRY
 		SET @dblRemainingUnits = NULL
 		SET @dblRemainingSpotUnits = NULL		
 
+
 		SELECT TOP 1
 			@intSettleStorageKey		= intSettleStorageKey
 			,@intCustomerStorageId		= intCustomerStorageId
@@ -238,7 +239,7 @@ BEGIN TRY
 			WHERE intCustomerStorageId = @intCustomerStorageId
 		END
 
-		IF ISNULL(@dblRemainingUnits,0) <= 0
+		IF ISNULL(@dblRemainingUnits,0) <= 0 or ISNULL(@dblRemainingUnits,0) <= 0.01
 		BEGIN
 			DELETE FROM @SettleStorage WHERE intCustomerStorageId = @intCustomerStorageId
 		END
@@ -326,6 +327,7 @@ BEGIN TRY
 			,dtmCreated
 			,intParentSettleStorageId
 			,intItemUOMId
+			,ysnReversed
 		)
 		SELECT 
 			intConcurrencyId			= 1
@@ -353,6 +355,7 @@ BEGIN TRY
 			,dtmCreated					= dtmCreated
 			,intParentSettleStorageId	= @intSettleStorageId
 			,intItemUOMId				= intItemUOMId
+			,ysnReversed				= 0
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 
@@ -413,10 +416,13 @@ BEGIN TRY
 
 		DELETE FROM @MainSettleStorageToSave WHERE intSettleStorageKey = @intSettleStorageKey
 	END
+
+	
+	DELETE FROM @MainSettleStorageToSave
+	DELETE FROM @SettleStorageToSave
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 END CATCH
-

@@ -730,6 +730,7 @@ BEGIN TRY
 					EXEC dbo.uspGLBookEntries @GLEntries
 						,1
 						,1
+						,1
 				END
 				ELSE
 				BEGIN
@@ -1394,33 +1395,34 @@ BEGIN TRY
 					EXEC dbo.uspGLBookEntries @GLEntries
 						,1
 						,1
+						,1
 				END
 				ELSE
 				BEGIN
 					EXEC dbo.uspGLBookEntries @GLEntries
 						,1
 
-					--**************************************
-					--GL Post Valiation
-					--**************************************
-					IF EXISTS (
-							SELECT 1
-							FROM tblGLDetail gd
-							JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
-							JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
-							JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
-							JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
-							WHERE ac.strAccountCategory IN ('Work In Progress')
-								AND gd.strTransactionId = @strWorkOrderNo
-							HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
-							)
-					BEGIN
-						RAISERROR (
-								'Mismatch in debit and credit amount for WIP account.'
-								,11
-								,1
-								)
-					END
+					----**************************************
+					----GL Post Valiation
+					----**************************************
+					--IF EXISTS (
+					--		SELECT 1
+					--		FROM tblGLDetail gd
+					--		JOIN tblGLAccount ga ON gd.intAccountId = ga.intAccountId
+					--		JOIN tblGLAccountSegmentMapping gs ON gs.intAccountId = ga.intAccountId
+					--		JOIN tblGLAccountSegment gm ON gm.intAccountSegmentId = gs.intAccountSegmentId
+					--		JOIN tblGLAccountCategory ac ON ac.intAccountCategoryId = gm.intAccountCategoryId
+					--		WHERE ac.strAccountCategory IN ('Work In Progress')
+					--			AND gd.strTransactionId = @strWorkOrderNo
+					--		HAVING abs(sum(gd.dblDebit - gd.dblCredit)) > 1
+					--		)
+					--BEGIN
+					--	RAISERROR (
+					--			'Mismatch in debit and credit amount for WIP account.'
+					--			,11
+					--			,1
+					--			)
+					--END
 				END
 			END
 		END

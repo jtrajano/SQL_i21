@@ -11,6 +11,8 @@
     [dtmPriceIndexDate]          DATETIME        NULL,
     [intContractDetailId]        INT             NULL,
     [intContractId]              INT             NULL,
+    [intItemContractDetailId]	 INT	         NULL,
+    [intItemContractId]	         INT	         NULL,
     [dblQuantity]                NUMERIC (18, 6) NULL,
     [dtmBillingDate]             DATETIME        NULL,
     [dtmTransactionDate]         DATETIME        NOT NULL,

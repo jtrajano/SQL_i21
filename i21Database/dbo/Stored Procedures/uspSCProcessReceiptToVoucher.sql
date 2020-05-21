@@ -192,15 +192,13 @@ BEGIN
 						DECLARE @Ids as Id
 				
 						INSERT INTO @Ids(intId)
-						SELECT CT.intContractHeaderId 
+						SELECT DISTINCT
+							CT.intContractDetailId 
 						FROM tblICInventoryReceiptItem A 
 						INNER JOIN tblCTContractDetail CT 
 							ON CT.intContractDetailId = A.intContractDetailId
 						WHERE A.dblUnitCost > 0
 							AND A.intInventoryReceiptId = @intInventoryReceiptId
-						GROUP BY CT.intContractHeaderId 
-					
-					
 
 						INSERT INTO #tmpContractPrepay(
 							[intPrepayId]

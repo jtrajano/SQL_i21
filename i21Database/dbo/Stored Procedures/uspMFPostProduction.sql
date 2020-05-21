@@ -26,6 +26,9 @@ CREATE PROCEDURE [dbo].[uspMFPostProduction] @ysnPost BIT = 0
 	,@dblUnitCost NUMERIC(38, 20) = NULL
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@intLotStatusId INT = NULL
+	,@intBookId INT = NULL
+	,@intSubBookId INT = NULL
+	,@intOriginId INT = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -298,6 +301,8 @@ BEGIN
 		,intSourceTransactionTypeId
 		,intShiftId
 		,strParentLotNumber
+		,intBookId
+		,intSubBookId
 		)
 	SELECT intLotId = NULL
 		,strLotNumber = @strLotNumber
@@ -312,7 +317,7 @@ BEGIN
 		,intWeightUOMId = @intWeightUOMId
 		,dtmExpiryDate = @dtmExpiryDate
 		,dtmManufacturedDate = @dtmProductionDate
-		,intOriginId = NULL
+		,intOriginId = @intOriginId
 		,strBOLNo = NULL
 		,strVessel = @strVessel
 		,strReceiptNumber = NULL
@@ -328,6 +333,8 @@ BEGIN
 		,intSourceTransactionTypeId = @INVENTORY_PRODUCE
 		,intShiftId = @intShiftId
 		,strParentLotNumber = @strParentLotNumber
+		,intBookId = @intBookId
+		,intSubBookId = @intSubBookId
 
 	EXEC dbo.uspICCreateUpdateLotNumber @ItemsThatNeedLotId
 		,@intUserId
@@ -607,6 +614,7 @@ BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries
 					,@ysnPost
 					,1
+					,1
 			END
 			ELSE
 			BEGIN
@@ -834,7 +842,7 @@ BEGIN
 	-- After sorting out the Batch for the Consume and Produce, the Produce still need to be posted using the original @strBatchId. 
 	BEGIN
 		UPDATE t
-		SET t.strBatchId = @strBatchId
+		SET t.strBatchId = @strBatchId, dtmDateModified = GETUTCDATE()
 		FROM tblICInventoryTransaction t
 		WHERE t.intTransactionId = @intTransactionId
 			AND t.strTransactionId = @strTransactionId
@@ -870,6 +878,7 @@ BEGIN
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
+				,1
 				,1
 		END
 		ELSE

@@ -13,26 +13,51 @@ BEGIN TRY
 		,@ErrMsg NVARCHAR(MAX)
 		,@strFinalErrMsg NVARCHAR(MAX) = ''
 		,@intEntityId INT
-	DECLARE @strContractNumber NVARCHAR(50)
-		,@intContractSeq INT
-		,@strBLNumber NVARCHAR(100)
-		,@strStatus NVARCHAR(100)
-		,@dtmArrivedInPort DATETIME
-		,@dtmCustomsReleased DATETIME
-		,@dtmETA DATETIME
-	DECLARE @strLoadNumber NVARCHAR(100)
-		,@strDeliveryNo NVARCHAR(50)
-		,@intLoadId INT
-	DECLARE @dtmNewArrivedInPort DATETIME
-		,@dtmNewCustomsReleased DATETIME
-		,@ysnNewArrivedInPort BIT
-		,@ysnNewCustomsReleased BIT
-		,@dtmOldArrivedInPort DATETIME
-		,@dtmOldCustomsReleased DATETIME
-		,@ysnOldArrivedInPort BIT
-		,@ysnOldCustomsReleased BIT
-		,@dtmOldETA DATETIME
-		,@strDetails NVARCHAR(MAX)
+	DECLARE @strItemNo NVARCHAR(50)
+		,@strLocationName NVARCHAR(50)
+		,@strSubLocationName NVARCHAR(50)
+		,@strStorageLocationName NVARCHAR(50)
+		,@dblQuantity NUMERIC(38, 20)
+		,@strQuantityUOM NVARCHAR(50)
+		,@dblNetWeight NUMERIC(38, 20)
+		,@strNetWeightUOM NVARCHAR(50)
+		,@strLotNumber NVARCHAR(50)
+		,@dblCost NUMERIC(38, 20)
+		,@strCostUOM NVARCHAR(50)
+		,@strCostCurrency NVARCHAR(50)
+		,@strBook NVARCHAR(50)
+		,@strSubBook NVARCHAR(50)
+	DECLARE @intCompanyLocationId INT
+		,@intItemId INT
+		,@intSubLocationId INT
+		,@intStorageLocationId INT
+		,@intQtyUnitMeasureId INT
+		,@intQtyItemUOMId INT
+		,@intNetWeightUnitMeasureId INT
+		,@intNetWeightItemUOMId INT
+		,@intCostUnitMeasureId INT
+		,@intCostItemUOMId INT
+		,@intCostCurrencyId INT
+		,@intDefaultCurrencyId INT
+		,@intLotId INT
+		,@intOriginId INT
+		,@intItemLocationId INT
+		,@intBatchId INT
+		,@dblNewCost NUMERIC(38, 20)
+		,@intStockItemUOMId INT
+		,@intBookId INT
+		,@intSubBookId INT
+		,@dblWeightPerQty INT
+		,@intInventoryAdjustmentId INT
+	DECLARE @tblLotTable TABLE (
+		intLotRecordId INT IDENTITY(1, 1)
+		,intItemId INT
+		,intLocationId INT
+		,intSubLocationId INT
+		,intStorageLocationId INT
+		)
+	DECLARE @intMinRecordLotId INT
+		,@ysnResetLotQtyOnce BIT = 1
 
 	SELECT @intMinRowNo = Min(intStageLotId)
 	FROM tblIPLotStage WITH (NOLOCK)
@@ -42,188 +67,422 @@ BEGIN TRY
 		BEGIN TRY
 			SET @intNoOfRowsAffected = 1
 
-			SELECT @strContractNumber = NULL
-				,@intContractSeq = NULL
-				,@strBLNumber = NULL
-				,@strStatus = NULL
-				,@dtmArrivedInPort = NULL
-				,@dtmCustomsReleased = NULL
-				,@dtmETA = NULL
-
-			SELECT @strLoadNumber = NULL
-				,@strDeliveryNo = NULL
-				,@intLoadId = NULL
-
-			SELECT @dtmNewArrivedInPort = NULL
-				,@dtmNewCustomsReleased = NULL
-				,@ysnNewArrivedInPort = NULL
-				,@ysnNewCustomsReleased = NULL
-				,@dtmOldArrivedInPort = NULL
-				,@dtmOldCustomsReleased = NULL
-				,@ysnOldArrivedInPort = NULL
-				,@ysnOldCustomsReleased = NULL
-				,@dtmOldETA = NULL
-
-			SELECT @strContractNumber = strContractNumber
-				,@intContractSeq = intContractSeq
-				,@strBLNumber = strBLNumber
-				,@strStatus = strStatus
-				,@dtmArrivedInPort = dtmArrivedInPort
-				,@dtmCustomsReleased = dtmCustomsReleased
-				,@dtmETA = dtmETA
-			FROM tblIPShipmentStatusStage WITH (NOLOCK)
-			WHERE intStageShipmentStatusId = @intMinRowNo
-
-			SELECT @strLoadNumber = L.strLoadNumber
-				,@strDeliveryNo = L.strExternalShipmentNumber
-				,@intLoadId = L.intLoadId
-				,@dtmOldArrivedInPort = L.dtmArrivedInPort
-				,@dtmOldCustomsReleased = L.dtmCustomsReleased
-				,@ysnOldArrivedInPort = L.ysnArrivedInPort
-				,@ysnOldCustomsReleased = L.ysnCustomsReleased
-				,@dtmOldETA = L.dtmETAPOD
-			FROM tblLGLoad L WITH (NOLOCK)
-			JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
-				AND L.intShipmentType = 1
-				AND L.strBLNumber = @strBLNumber
-			JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
-				AND CD.intContractSeq = @intContractSeq
-			JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-				AND CH.strContractNumber = @strContractNumber
-
-			SET @strInfo1 = ISNULL(@strLoadNumber, '') + ' / ' + ISNULL(@strDeliveryNo, '')
-			SET @strInfo2 = ISNULL(CONVERT(VARCHAR(10), @dtmETA, 121), '')
-
 			SELECT @intEntityId = intEntityId
 			FROM tblSMUserSecurity WITH (NOLOCK)
 			WHERE strUserName = 'IRELYADMIN'
 
-			IF @strStatus IS NULL
-				AND @dtmETA IS NULL
+			-- Resetting all the available lot qty to 0
+			IF @ysnResetLotQtyOnce = 1
+			BEGIN
+				SELECT @ysnResetLotQtyOnce = 0
+
+				DELETE
+				FROM @tblLotTable
+
+				INSERT INTO @tblLotTable
+				SELECT DISTINCT intItemId
+					,intLocationId
+					,intSubLocationId
+					,intStorageLocationId
+				FROM tblICLot WITH (NOLOCK)
+				WHERE dblQty > 0
+
+				SELECT @intMinRecordLotId = MIN(intLotRecordId)
+				FROM @tblLotTable
+
+				BEGIN TRAN
+
+				WHILE (ISNULL(@intMinRecordLotId, 0) > 0)
+				BEGIN
+					SELECT @intItemId = NULL
+						,@intCompanyLocationId = NULL
+						,@intSubLocationId = NULL
+						,@intStorageLocationId = NULL
+
+					SELECT @intItemId = intItemId
+						,@intCompanyLocationId = intLocationId
+						,@intSubLocationId = intSubLocationId
+						,@intStorageLocationId = intStorageLocationId
+					FROM @tblLotTable
+					WHERE intLotRecordId = @intMinRecordLotId
+
+					EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
+						,@intItemId = @intItemId
+						,@strLotNumber = 'FIFO'
+						,@intLocationId = @intCompanyLocationId
+						,@intSubLocationId = @intSubLocationId
+						,@intStorageLocationId = @intStorageLocationId
+						,@intItemUOMId = NULL
+						,@dblNewQty = 0
+						,@dblCost = NULL
+						,@intEntityUserId = @intEntityId
+						,@intSourceId = 1
+
+					SELECT @intMinRecordLotId = MIN(intLotRecordId)
+					FROM @tblLotTable
+					WHERE intLotRecordId > @intMinRecordLotId
+				END
+
+				COMMIT TRAN
+			END
+
+			SELECT @strItemNo = NULL
+				,@strLocationName = NULL
+				,@strSubLocationName = NULL
+				,@strStorageLocationName = NULL
+				,@dblQuantity = NULL
+				,@strQuantityUOM = NULL
+				,@dblNetWeight = NULL
+				,@strNetWeightUOM = NULL
+				,@strLotNumber = NULL
+				,@dblCost = NULL
+				,@strCostUOM = NULL
+				,@strCostCurrency = NULL
+				,@strBook = NULL
+				,@strSubBook = NULL
+
+			SELECT @intCompanyLocationId = NULL
+				,@intItemId = NULL
+				,@intSubLocationId = NULL
+				,@intStorageLocationId = NULL
+				,@intQtyUnitMeasureId = NULL
+				,@intQtyItemUOMId = NULL
+				,@intNetWeightUnitMeasureId = NULL
+				,@intNetWeightItemUOMId = NULL
+				,@intCostUnitMeasureId = NULL
+				,@intCostItemUOMId = NULL
+				,@intCostCurrencyId = NULL
+				,@intDefaultCurrencyId = NULL
+				,@intLotId = NULL
+				,@intOriginId = NULL
+				,@intItemLocationId = NULL
+				,@intBatchId = NULL
+				,@dblNewCost = NULL
+				,@intStockItemUOMId = NULL
+				,@intBookId = NULL
+				,@intSubBookId = NULL
+				,@dblWeightPerQty = NULL
+				,@intInventoryAdjustmentId = NULL
+
+			SELECT @strItemNo = strItemNo
+				,@strLocationName = strLocationName
+				,@strSubLocationName = strSubLocationName
+				,@strStorageLocationName = strStorageLocationName
+				,@dblQuantity = ISNULL(dblQuantity, 0)
+				,@strQuantityUOM = strQuantityUOM
+				,@dblNetWeight = ISNULL(dblNetWeight, 0)
+				,@strNetWeightUOM = strNetWeightUOM
+				,@strLotNumber = strLotNumber
+				,@dblCost = ISNULL(dblCost, 0)
+				,@strCostUOM = strCostUOM
+				,@strCostCurrency = strCostCurrency
+				,@strBook = strBook
+				,@strSubBook = strSubBook
+			FROM tblIPLotStage WITH (NOLOCK)
+			WHERE intStageLotId = @intMinRowNo
+
+			SET @strInfo1 = ISNULL(@strItemNo, '') + ' / ' + ISNULL(@strLotNumber, '')
+			SET @strInfo2 = ISNULL(@strStorageLocationName, '') + ' / ' + ISNULL(CONVERT(NVARCHAR, dbo.fnRemoveTrailingZeroes(@dblQuantity)), '')
+
+			SELECT @intItemId = t.intItemId
+				,@intOriginId = t.intOriginId
+			FROM tblICItem t WITH (NOLOCK)
+			WHERE t.strItemNo = @strItemNo
+
+			IF ISNULL(@intItemId, 0) = 0
 			BEGIN
 				RAISERROR (
-						'Invalid Status and ETA. '
+						'Invalid Item No. '
 						,16
 						,1
 						)
 			END
 
-			IF ISNULL(@intLoadId, 0) = 0
+			SELECT @intCompanyLocationId = t.intCompanyLocationId
+			FROM tblSMCompanyLocation t WITH (NOLOCK)
+			WHERE t.strLocationName = @strLocationName
+
+			IF ISNULL(@intCompanyLocationId, 0) = 0
+			BEGIN
+				SELECT TOP 1 @intCompanyLocationId = t.intCompanyLocationId
+				FROM tblSMCompanyLocation t WITH (NOLOCK)
+			END
+
+			SELECT @intStockItemUOMId = t.intItemUOMId
+			FROM tblICItemUOM t WITH (NOLOCK)
+			WHERE t.intItemId = @intItemId
+				AND t.ysnStockUnit = 1
+
+			SELECT @intItemLocationId = t.intItemLocationId
+			FROM tblICItemLocation t WITH (NOLOCK)
+			WHERE t.intItemId = @intItemId
+				AND t.intLocationId = @intCompanyLocationId
+
+			IF ISNULL(@intItemLocationId, 0) = 0
 			BEGIN
 				RAISERROR (
-						'Invalid Load No. '
+						'Invalid Item Location. '
 						,16
 						,1
 						)
 			END
 
-			BEGIN TRAN
+			SELECT @intSubLocationId = t.intCompanyLocationSubLocationId
+			FROM tblSMCompanyLocationSubLocation t WITH (NOLOCK)
+			WHERE t.strSubLocationName = @strSubLocationName
 
-			-- Shipment Status Update
-			IF ISNULL(@strStatus, '') <> ''
+			IF ISNULL(@intSubLocationId, 0) = 0
 			BEGIN
-				IF @strStatus <> 'Arrived in Port'
-					AND @strStatus <> 'Customs Released'
+				RAISERROR (
+						'Invalid Sub Location. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intStorageLocationId = t.intStorageLocationId
+			FROM tblICStorageLocation t WITH (NOLOCK)
+			WHERE t.strName = @strStorageLocationName
+
+			IF ISNULL(@intStorageLocationId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Storage Location. '
+						,16
+						,1
+						)
+			END
+
+			SELECT @intQtyUnitMeasureId = t.intUnitMeasureId
+			FROM tblICUnitMeasure t WITH (NOLOCK)
+			WHERE t.strUnitMeasure = @strQuantityUOM
+
+			IF ISNULL(@intQtyUnitMeasureId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Quantity UOM. '
+						,16
+						,1
+						)
+			END
+			ELSE
+			BEGIN
+				SELECT @intQtyItemUOMId = intItemUOMId
+				FROM tblICItemUOM t WITH (NOLOCK)
+				WHERE t.intItemId = @intItemId
+					AND t.intUnitMeasureId = @intQtyUnitMeasureId
+
+				IF ISNULL(@intQtyItemUOMId, 0) = 0
 				BEGIN
 					RAISERROR (
-							'Invalid Status. '
+							'Quantity UOM does not belongs to the Item. '
 							,16
 							,1
 							)
 				END
-
-				UPDATE tblLGLoad
-				SET intConcurrencyId = intConcurrencyId + 1
-					,ysnArrivedInPort = CASE 
-						WHEN @strStatus = 'Arrived in Port'
-							THEN 1
-						ELSE ysnArrivedInPort
-						END
-					,ysnCustomsReleased = CASE 
-						WHEN @strStatus = 'Customs Released'
-							THEN 1
-						ELSE ysnCustomsReleased
-						END
-					,dtmArrivedInPort = CASE 
-						WHEN @dtmArrivedInPort IS NOT NULL
-							THEN @dtmArrivedInPort
-						ELSE dtmArrivedInPort
-						END
-					,dtmCustomsReleased = CASE 
-						WHEN @dtmCustomsReleased IS NOT NULL
-							THEN @dtmCustomsReleased
-						ELSE dtmCustomsReleased
-						END
-				WHERE intLoadId = @intLoadId
-					AND intShipmentStatus = 3
-
-				SELECT @dtmNewArrivedInPort = L.dtmArrivedInPort
-					,@dtmNewCustomsReleased = L.dtmCustomsReleased
-					,@ysnNewArrivedInPort = L.ysnArrivedInPort
-					,@ysnNewCustomsReleased = L.ysnCustomsReleased
-				FROM tblLGLoad L WITH (NOLOCK)
-				WHERE L.intLoadId = @intLoadId
-
-				-- Audit Log
-				SELECT @strDetails = ''
-
-				IF (@dtmOldArrivedInPort <> @dtmNewArrivedInPort)
-					SET @strDetails += '{"change":"dtmArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived in Port Date"},'
-
-				IF (@dtmOldCustomsReleased <> @dtmNewCustomsReleased)
-					SET @strDetails += '{"change":"dtmCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@dtmNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released Date"},'
-
-				IF (@ysnOldArrivedInPort <> @ysnNewArrivedInPort)
-					SET @strDetails += '{"change":"ysnArrivedInPort","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldArrivedInPort, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewArrivedInPort, '')) + '","leaf":true,"changeDescription":"Arrived In Port"},'
-
-				IF (@ysnOldCustomsReleased <> @ysnNewCustomsReleased)
-					SET @strDetails += '{"change":"ysnCustomsReleased","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@ysnOldCustomsReleased, '')) + '","to":"' + LTRIM(ISNULL(@ysnNewCustomsReleased, '')) + '","leaf":true,"changeDescription":"Customs Released"},'
-
-				IF (LEN(@strDetails) > 1)
-				BEGIN
-					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
-
-					EXEC uspSMAuditLog @keyValue = @intLoadId
-						,@screenName = 'Logistics.view.ShipmentSchedule'
-						,@entityId = @intEntityId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
-				END
 			END
 
-			-- ETA Date Update
-			IF @dtmETA IS NOT NULL
+			SELECT @intNetWeightUnitMeasureId = t.intUnitMeasureId
+			FROM tblICUnitMeasure t WITH (NOLOCK)
+			WHERE t.strUnitMeasure = @strNetWeightUOM
+
+			IF ISNULL(@intNetWeightUnitMeasureId, 0) = 0
 			BEGIN
-				IF ISNULL(CONVERT(VARCHAR(10), @dtmOldETA, 112), '') <> ISNULL(CONVERT(VARCHAR(10), @dtmETA, 112), '')
+				RAISERROR (
+						'Invalid Net Weight UOM. '
+						,16
+						,1
+						)
+			END
+			ELSE
+			BEGIN
+				SELECT @intNetWeightItemUOMId = intItemUOMId
+				FROM tblICItemUOM t WITH (NOLOCK)
+				WHERE t.intItemId = @intItemId
+					AND t.intUnitMeasureId = @intNetWeightUnitMeasureId
+
+				IF ISNULL(@intNetWeightItemUOMId, 0) = 0
 				BEGIN
-					UPDATE tblLGLoad
-					SET intConcurrencyId = intConcurrencyId + 1
-						,dtmETAPOD = @dtmETA
-					WHERE intLoadId = @intLoadId
-
-					-- To set Contract Updated Availability Date and send Contract Update feed to SAP
-					EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
-						,@strRowState = 'Modified'
-						,@intShipmentType = 1
-
-					-- To send LS Update to Inter Company
-					EXEC uspLGInterCompanyTransaction @intLoadId = @intLoadId
-						,@strRowState = 'Modified'
-
-					-- Audit Log
-					SELECT @strDetails = ''
-
-					SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETA, '')) + '","to":"' + LTRIM(ISNULL(@dtmETA, '')) + '","leaf":true,"changeDescription":"ETA POD"}'
-
-					EXEC uspSMAuditLog @keyValue = @intLoadId
-						,@screenName = 'Logistics.view.ShipmentSchedule'
-						,@entityId = @intEntityId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
+					RAISERROR (
+							'Net Weight UOM does not belongs to the Item. '
+							,16
+							,1
+							)
 				END
 			END
+
+			-- Weight Per Qty
+			SELECT @dblWeightPerQty = @dblNetWeight / @dblQuantity
+
+			SELECT @intCostUnitMeasureId = t.intUnitMeasureId
+			FROM tblICUnitMeasure t WITH (NOLOCK)
+			WHERE t.strUnitMeasure = @strCostUOM
+
+			IF ISNULL(@intCostUnitMeasureId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Cost UOM. '
+						,16
+						,1
+						)
+			END
+			ELSE
+			BEGIN
+				SELECT @intCostItemUOMId = intItemUOMId
+				FROM tblICItemUOM t WITH (NOLOCK)
+				WHERE t.intItemId = @intItemId
+					AND t.intUnitMeasureId = @intCostUnitMeasureId
+
+				IF ISNULL(@intCostItemUOMId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Cost UOM does not belongs to the Item. '
+							,16
+							,1
+							)
+				END
+			END
+
+			SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId
+			FROM tblSMCompanyPreference t WITH (NOLOCK)
+
+			SELECT @intCostCurrencyId = t.intCurrencyID
+			FROM tblSMCurrency t WITH (NOLOCK)
+			WHERE t.strCurrency = @strCostCurrency
+
+			IF @intDefaultCurrencyId <> @intCostCurrencyId
+			BEGIN
+				RAISERROR (
+						'Invalid Currency. '
+						,16
+						,1
+						)
+			END
+
+			-- Cost UOM Conversion
+			SELECT @dblNewCost = dbo.fnCTConvertQtyToTargetItemUOM(@intCostItemUOMId, @intStockItemUOMId, @dblCost)
+
+			SELECT @intBookId = t.intBookId
+			FROM tblCTBook t WITH (NOLOCK)
+			WHERE t.strBook = @strBook
+
+			IF ISNULL(@intBookId, 0) = 0
+			BEGIN
+				SELECT @intBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'BOOK_ID')
+
+				IF ISNULL(@intBookId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Book. '
+							,16
+							,1
+							)
+				END
+			END
+
+			SELECT @intSubBookId = t.intSubBookId
+			FROM tblCTSubBook t WITH (NOLOCK)
+			WHERE t.strSubBook = @strSubBook
+				AND t.intBookId = @intBookId
+
+			IF ISNULL(@intSubBookId, 0) = 0
+			BEGIN
+				SELECT @intSubBookId = dbo.[fnIPGetSAPIDOCTagValue]('STOCK', 'SUB_BOOK_ID')
+
+				IF @intSubBookId = 0
+					SELECT @intSubBookId = NULL
+			END
+
+			SELECT @intLotId = L.intLotId
+			FROM tblICLot L WITH (NOLOCK)
+			WHERE L.strLotNumber = @strLotNumber
+				AND L.intItemId = @intItemId
+				AND L.intSubLocationId = @intSubLocationId
+				AND L.intStorageLocationId = @intStorageLocationId
+
+			BEGIN TRAN
+
+			-- Lot Create / Update
+			IF ISNULL(@intLotId, 0) = 0
+			BEGIN
+				EXEC uspMFGeneratePatternId @intCategoryId = NULL
+					,@intItemId = NULL
+					,@intManufacturingId = NULL
+					,@intSubLocationId = NULL
+					,@intLocationId = @intCompanyLocationId
+					,@intOrderTypeId = NULL
+					,@intBlendRequirementId = NULL
+					,@intPatternCode = 33 -- Transaction Batch Id
+					,@ysnProposed = 0
+					,@strPatternString = @intBatchId OUTPUT
+
+				EXEC uspMFPostProduction 1
+					,0
+					,NULL
+					,@intItemId
+					,@intEntityId
+					,NULL
+					,@intStorageLocationId
+					,@dblNetWeight
+					,@intNetWeightItemUOMId
+					,@dblWeightPerQty
+					,@dblQuantity
+					,@intQtyItemUOMId
+					,@strLotNumber
+					,@strLotNumber
+					,@intBatchId
+					,@intLotId OUTPUT
+					,NULL
+					,NULL
+					,@strLotNumber
+					,NULL
+					,NULL
+					,NULL
+					,NULL
+					,NULL
+					,NULL
+					,@dblNewCost
+					,'Created from external system'
+					,1
+					,@intBookId
+					,@intSubBookId
+					,@intOriginId
+			END
+			ELSE
+			BEGIN
+				-- To adjust Qty as 0
+				--EXEC uspICAdjustStockFromSAP @dtmQtyChange = NULL
+				--	,@intItemId = @intItemId
+				--	,@strLotNumber = @strLotNumber
+				--	,@intLocationId = @intCompanyLocationId
+				--	,@intSubLocationId = @intSubLocationId
+				--	,@intStorageLocationId = @intStorageLocationId
+				--	,@intItemUOMId = NULL
+				--	,@dblNewQty = 0
+				--	,@dblCost = NULL
+				--	,@intEntityUserId = @intEntityId
+				--	,@intSourceId = 1
+				-- Update - To adjust to new Qty. Doing this way (Resetting and Adjusting) to handle the qty and cost correctly
+				EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId = @intItemId
+					,@dtmDate = NULL
+					,@intLocationId = @intCompanyLocationId
+					,@intSubLocationId = @intSubLocationId
+					,@intStorageLocationId = @intStorageLocationId
+					,@strLotNumber = @strLotNumber
+					,@dblAdjustByQuantity = @dblQuantity
+					,@dblNewUnitCost = @dblNewCost
+					,@intItemUOMId = @intQtyItemUOMId
+					,@intSourceId = 1
+					,@intSourceTransactionTypeId = 8
+					,@intEntityUserSecurityId = @intEntityId
+					,@intInventoryAdjustmentId = @intInventoryAdjustmentId OUTPUT
+					,@strDescription = 'Adjusted from external system'
+			END
+
+			UPDATE tblICLot
+			SET intBookId = @intBookId
+				,intSubBookId = @intSubBookId
+			WHERE intLotId = @intLotId
 
 			--Move to Archive
 			INSERT INTO tblIPLotArchive (
@@ -239,6 +498,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -256,6 +517,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strTransactionType
 				,''
 				,'Success'
@@ -292,6 +555,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strTransactionType
 				,strErrorMessage
 				,strImportStatus
@@ -309,6 +574,8 @@ BEGIN TRY
 				,dblCost
 				,strCostUOM
 				,strCostCurrency
+				,strBook
+				,strSubBook
 				,strTransactionType
 				,@ErrMsg
 				,'Failed'

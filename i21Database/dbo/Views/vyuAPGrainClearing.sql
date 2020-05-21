@@ -162,12 +162,12 @@ SELECT
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
-	,CASE WHEN SS.dblSettleUnits != 0 THEN  -SS.dblSettleUnits ELSE -SS.dblUnpaidUnits END
+	,CAST(CASE WHEN SS.dblSettleUnits != 0 THEN  -SS.dblSettleUnits ELSE -SS.dblUnpaidUnits END AS DECIMAL(18,2))
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
-	,GD.intAccountId
-	,AD.strAccountId
+	,GLDetail.intAccountId
+	,GLDetail.strAccountId
 FROM tblGRCustomerStorage CS
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
@@ -183,14 +183,26 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.dblSpotUnits = 0
-INNER JOIN tblGLDetail GD
-	ON GD.strTransactionId = SS.strStorageTicket
-		AND GD.intTransactionId = SS.intSettleStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND GD.ysnIsUnposted = 0
-		--AND GD.strCode = 'STR'
-INNER JOIN vyuGLAccountDetail AD
-	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+OUTER APPLY  
+(  
+ SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit  
+ FROM tblGLDetail GD  
+ INNER JOIN vyuGLAccountDetail AD  
+  ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45  
+ WHERE GD.strTransactionId = SS.strStorageTicket  
+  AND GD.intTransactionId = SS.intSettleStorageId  
+  AND GD.strCode = 'STR'  
+  AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo  
+  AND GD.ysnIsUnposted = 0  
+) GLDetail 
+-- INNER JOIN tblGLDetail GD
+-- 	ON GD.strTransactionId = SS.strStorageTicket
+-- 		AND GD.intTransactionId = SS.intSettleStorageId
+-- 		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+-- 		AND GD.ysnIsUnposted = 0
+-- 		--AND GD.strCode = 'STR'
+-- INNER JOIN vyuGLAccountDetail AD
+-- 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -222,7 +234,7 @@ SELECT
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,billDetail.dblTotal AS dblVoucherTotal
-    ,CASE 
+    ,CAST(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
 		ELSE 
@@ -232,7 +244,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS dblVoucherQty
+		END AS DECIMAL(18,2)) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(-SS.dblStorageDue AS DECIMAL(18,2)) AS dblSettleStorageAmount
@@ -305,9 +317,9 @@ SELECT
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
 	END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
 	
-	,CASE WHEN QM.strCalcMethod = 3 
+	,ROUND(CASE WHEN QM.strCalcMethod = 3 
 		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SST.dblUnits END * (CASE WHEN QM.dblDiscountAmount > 0 THEN -1 ELSE 1 END)
+	ELSE SST.dblUnits END * (CASE WHEN QM.dblDiscountAmount > 0 THEN -1 ELSE 1 END), 2)
 	--,GLDetail.dblCreditUnit - GLDetail.dblDebitUnit 
 	,CS.intCompanyLocationId
 	,CL.strLocationName
@@ -390,7 +402,7 @@ SELECT
 	-- 	WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount)
 	-- 	WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
 	-- END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
-    ,CASE 
+    ,ROUND(CASE 
 		WHEN billDetail.intWeightUOMId IS NULL THEN 
 			ISNULL(billDetail.dblQtyReceived, 0) 
 		ELSE 
@@ -400,7 +412,7 @@ SELECT
 			ELSE 
 				ISNULL(billDetail.dblNetWeight, 0) 
 		END
-		END AS dblVoucherQty
+		END, 2) AS dblVoucherQty
 	,0 AS dblSettleStorageAmount
 	,0 AS dblSettleStorageQty
 	-- ,CAST(SS.dblNetSettlement AS DECIMAL(18,2)) AS dblSettleStorageAmount

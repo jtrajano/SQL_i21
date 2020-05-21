@@ -55,7 +55,7 @@ AS
 			CH.ysnLoad,
 			dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,SK.intStockUOMId,ISNULL(CD.dblBalance,0))			AS	dblBalanceInItemStockUOM
 																												
-	FROM	tblCTContractDetail				CD	
+	FROM	tblCTContractDetail				CD
 	CROSS																						
 	JOIN	tblCTCompanyPreference			CP																									
 	JOIN	tblSMCompanyLocation			CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId																			
@@ -74,6 +74,5 @@ AS
 					FROM	tblICItemUOM		IU	 
 					JOIN	tblICUnitMeasure	UM	ON	UM.intUnitMeasureId			=	IU.intUnitMeasureId 
 					WHERE	IU.ysnStockUnit = 1
-				)	SK								ON	SK.intItemId				=	CD.intItemId																			
-																	
-
+			)	SK								ON	SK.intItemId				=	CD.intItemId
+	where (CD.intPricingTypeId <> 3  or (CD.intPricingTypeId = 3 and isnull(CD.dblBasis,0) > 0))

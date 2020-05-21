@@ -77,7 +77,7 @@ BEGIN
 		, intRefSummaryLogId INT NULL
 		, strMiscFields NVARCHAR(MAX))
 
-	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs
+	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs ORDER BY dtmTransactionDate
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpSummaryLogs WHERE ISNULL(strBatchId, '') = '')
@@ -1133,6 +1133,7 @@ BEGIN
 		, intRefSummaryLogId
 		, strMiscFields
 	FROM @FinalTable
+	ORDER BY dtmTransactionDate
 
 	DROP TABLE #tmpSummaryLogs
 END

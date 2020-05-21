@@ -5,6 +5,7 @@ SELECT
 	intKey = CAST(ROW_NUMBER() OVER(ORDER BY Item.intItemId, ItemLocation.intLocationId, ItemStock.intItemStockId) AS INT),
 	Item.intItemId,
 	Item.strItemNo,
+	Item.strShortName,
 	Item.strType,
 	Item.strManufactureType,
 	Item.strBundleType,

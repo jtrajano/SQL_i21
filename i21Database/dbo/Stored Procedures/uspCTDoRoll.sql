@@ -102,9 +102,17 @@ BEGIN TRY
 			CD.dblCashPrice		    =	CASE WHEN CD.dblCashPrice IS NULL THEN CD.dblCashPrice ELSE ISNULL(TD.dblFutures,0) + ISNULL(TD.dblBasis,0) END,
 			CD.dblTotalCost		    =	CASE WHEN CD.dblTotalCost IS NULL THEN CD.dblTotalCost ELSE (ISNULL(TD.dblFutures,0) + ISNULL(TD.dblBasis,0)) * ISNULL(CD.dblQuantity,0) END,
 			CD.intFutureMarketId	=	CASE WHEN ISNULL(TD.intFutureMarketId,0) = 0 THEN CD.intFutureMarketId ELSE TD.intFutureMarketId END
-			
+				
 	FROM	tblCTContractDetail		CD
 	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId
+
+	-- UPDATE TOTAL COST
+	UPDATE	CD
+	SET		CD.dblTotalCost			= 	dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, CD.intPriceItemUOMId, CD.dblQuantity) 
+										* (CD.dblCashPrice / (CASE WHEN CU.ysnSubCurrency = 1 THEN CU.intCent ELSE 1 END))
+	FROM	tblCTContractDetail		CD
+	JOIN	#tblCTContractDetail	TD ON TD.intContractDetailId = CD.intContractDetailId
+	LEFT    JOIN	tblSMCurrency	CU	ON	CU.intCurrencyID	 = CD.intCurrencyId
 	
 	--EXEC	uspCTCreateDetailHistory	NULL, @intDonorId
 

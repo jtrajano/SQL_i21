@@ -51,7 +51,7 @@ BEGIN TRY
 					GROUP BY intCheckoutId
 				   ) G ON A.intCheckoutId =G.intCheckoutId 
    WHERE A.intCheckoutId = @intCheckoutId 
-   AND A.dblTotalSalesAmountComputed > 0
+   AND A.dblTotalSalesAmountComputed != 0
     
 END TRY
 

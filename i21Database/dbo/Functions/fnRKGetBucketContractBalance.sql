@@ -41,9 +41,12 @@ RETURNS @returntable TABLE
 	, intQtyUOMId INT
 	, dblFutures NUMERIC(24,10)
 	, dblBasis NUMERIC(24,10)
+	, dblCashPrice NUMERIC(24,10)
+	, dblAmount NUMERIC(24,10)
 	, intBasisUOMId INT
 	, intPriceUOMId INT
 	, intContractStatusId INT
+	, strContractStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, intBookId INT
 	, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intSubBookId INT
@@ -94,9 +97,12 @@ BEGIN
 		, intQtyUOMId
 		, dblFutures
 		, dblBasis
+		, dblCashPrice
+		, dblAmount
 		, intBasisUOMId
 		, intPriceUOMId
 		, intContractStatusId
+		, strContractStatus
 		, intBookId
 		, strBook
 		, intSubBookId
@@ -139,13 +145,16 @@ BEGIN
 			, fMon.strFutureMonth
 			, dtmStartDate
 			, dtmEndDate
-			, dblQty
+			, dblQty = ISNULL(dblQty, 0.000000)
 			, intQtyUOMId
-			, dblFutures
-			, dblBasis
+			, dblFutures = ISNULL(dblFutures, 0.000000)
+			, dblBasis = ISNULL(dblBasis, 0.000000)
+			, dblCashPrice = ISNULL(dblFutures, 0.000000) + ISNULL(dblBasis, 0.000000)
+			, dblAmount = CASE WHEN cb.intPricingTypeId = 1 THEN ISNULL(dblQty, 0.000000) * (ISNULL(dblFutures, 0.000000) + ISNULL(dblBasis, 0.000000)) ELSE 0.000000 END
 			, intBasisUOMId
 			, intPriceUOMId
-			, intContractStatusId
+			, cb.intContractStatusId
+			, cs.strContractStatus
 			, cb.intBookId
 			, book.strBook
 			, cb.intSubBookId
@@ -154,21 +163,22 @@ BEGIN
 			, strQtyCurrency = qCur.strCurrency
 			, intBasisCurrencyId
 			, strBasisCurrency = qCur.strCurrency
-			, cb.strNotes
+			, cb.strNotes			
 		FROM tblCTContractBalanceLog cb
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblCTPricingType pt ON pt.intPricingTypeId = cb.intPricingTypeId
 		INNER JOIN tblICItem Item ON Item.intItemId = cb.intItemId
 		INNER JOIN tblICCategory cat ON cat.intCategoryId = Item.intCategoryId
 		INNER JOIN tblCTContractType ct ON ct.intContractTypeId = cb.intContractTypeId
-		INNER JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cb.intLocationId
-		INNER JOIN tblSMCurrency qCur ON qCur.intCurrencyID = cb.intQtyCurrencyId
-		INNER JOIN tblSMCurrency bCur ON bCur.intCurrencyID = cb.intBasisCurrencyId
-		INNER JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = cb.intFutureMarketId
-		INNER JOIN tblRKFuturesMonth fMon on fMon.intFutureMonthId = cb.intFutureMonthId
-		INNER JOIN tblCTBook book ON book.intBookId = cb.intBookId
-		INNER JOIN tblCTSubBook subBook ON subBook.intSubBookId = cb.intSubBookId
-		INNER JOIN tblEMEntity em ON em.intEntityId = cb.intEntityId
+		LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = cb.intLocationId
+		LEFT  JOIN tblSMCurrency qCur ON qCur.intCurrencyID = cb.intQtyCurrencyId
+		LEFT  JOIN tblSMCurrency bCur ON bCur.intCurrencyID = cb.intBasisCurrencyId
+		LEFT  JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = cb.intFutureMarketId
+		LEFT  JOIN tblRKFuturesMonth fMon on fMon.intFutureMonthId = cb.intFutureMonthId
+		LEFT  JOIN tblCTBook book ON book.intBookId = cb.intBookId
+		LEFT  JOIN tblCTSubBook subBook ON subBook.intSubBookId = cb.intSubBookId
+		LEFT JOIN tblEMEntity em ON em.intEntityId = cb.intEntityId
+		LEFT JOIN tblCTContractStatus cs ON cs.intContractStatusId = cb.intContractStatusId
 		WHERE strTransactionType IN ('Contract Balance')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cb.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cb.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)

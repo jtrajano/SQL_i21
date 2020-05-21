@@ -29,6 +29,9 @@ DECLARE @payablesKey TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @payablesKeyPartial TABLE(intOldPayableId int, intNewPayableId int);
 DECLARE @invalidCount INT;
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayableQty';
+DECLARE @recordCountToReturn INT = 0;
+DECLARE @recordCountReturned INT = 0;
+DECLARE @taxCompleted INT = 0;
 
 --uncomment if integrated modules already implemented the new approach
 -- --VALIDATE
@@ -121,6 +124,7 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
 		AND NOT EXISTS(
@@ -140,8 +144,10 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
 				AND ISNULL(C.intEntityVendorId,-1) = ISNULL(A.intEntityVendorId,-1)
 				AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
+				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
+		AND @post != 0
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
 		
@@ -186,22 +192,29 @@ ELSE SAVE TRAN @SavePoint
 			-- AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(B.intLoadShipmentDetailId,-1)
 			-- AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(B.intInventoryShipmentChargeId,-1)
 		--WHERE C.intBillId IN (SELECT intId FROM @voucherIds)
-
+		
+		--SET THE REMAINING TAX TO VOUCHER
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+			SET 
+				A.dblTax = A.dblTax - taxData.dblTax,
+			 	A.dblAdjustedTax = A.dblAdjustedTax - taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @payablesKey A2
 			ON A.intVoucherPayableId = A2.intNewPayableId
-		INNER JOIN @validPayables B
-			ON A2.intOldPayableId = B.intVoucherPayableId
-		INNER JOIN tblAPVoucherPayable C
-			ON A2.intNewPayableId = C.intVoucherPayableId
-		CROSS APPLY (
-			SELECT
-				*
-			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
-			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
-		) taxData
+		-- INNER JOIN @validPayables B
+		-- 	ON A2.intOldPayableId = B.intVoucherPayableId
+		-- INNER JOIN tblAPVoucherPayable C
+		-- 	ON A2.intNewPayableId = C.intVoucherPayableId
+		INNER JOIN @validPayablesTax taxData
+			ON A2.intOldPayableId = taxData.intVoucherPayableId
+			AND A.intTaxGroupId = taxData.intTaxGroupId
+			AND A.intTaxCodeId = taxData.intTaxCodeId
+		-- CROSS APPLY (
+		-- 	SELECT
+		-- 		*
+		-- 	FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		-- ) taxData
 
 		--back up to tblAPVoucherPayableCompleted if qty to bill is 0
 		MERGE INTO tblAPVoucherPayableCompleted AS destination
@@ -236,6 +249,7 @@ ELSE SAVE TRAN @SavePoint
 				,B.[intLoadShipmentDetailId]	
 				,B.[intLoadShipmentCostId]	
 				,B.[intCustomerStorageId]	
+				,B.[intSettleStorageId]
 				,B.[intItemId]						
 				,B.[strItemNo]						
 				,B.[intPurchaseTaxGroupId]			
@@ -336,6 +350,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
 			,[intCustomerStorageId]	
+			,[intSettleStorageId]
 			,[intItemId]						
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -417,6 +432,7 @@ ELSE SAVE TRAN @SavePoint
 			,[intLoadShipmentDetailId]	
 			,[intLoadShipmentCostId]	
 			,[intCustomerStorageId]	
+			,[intSettleStorageId]
 			,[intItemId]						
 			,[strItemNo]						
 			,[intPurchaseTaxGroupId]			
@@ -496,7 +512,9 @@ ELSE SAVE TRAN @SavePoint
 				,taxes.[ysnTaxExempt]
 			FROM tblAPVoucherPayableTaxStaging taxes
 			INNER JOIN @deleted del ON taxes.intVoucherPayableId = del.intVoucherPayableId
-			WHERE taxes.dblTax = 0
+			WHERE 
+				(taxes.dblTax = 0 AND taxes.ysnTaxExempt = 0) 
+			OR taxes.ysnTaxExempt = 1
 		) AS SourceData
 		 --handle key clashing, there could be already payable id exists on tax completed
 		ON (destination.intVoucherPayableId = SourceData.intNewPayableId)
@@ -564,6 +582,15 @@ ELSE SAVE TRAN @SavePoint
 		DELETE A
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @taxDeleted B ON A.intVoucherPayableId = B.intVoucherPayableId
+
+		SET @taxCompleted = @@ROWCOUNT;
+
+		IF @taxCompleted != (SELECT COUNT(*) FROM @taxDeleted)
+		BEGIN
+			--IF TAXES MOVED TO tblAPVoucherPayableTaxCompleted IS NOT EQUAL TO TAX DELETED IN STAGING
+			RAISERROR('Invalid tax record deleted/inserted.', 16, 1);
+			RETURN;
+		END
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -586,21 +613,29 @@ ELSE SAVE TRAN @SavePoint
 		INNER JOIN @validPayables C
 			ON C.intVoucherPayableId = B2.intOldPayableId
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+			SET 
+				A.dblTax = A.dblTax + taxData.dblTax,
+				A.dblAdjustedTax = A.dblAdjustedTax + taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @payablesKeyPartial A2
 			ON A2.intNewPayableId = A.intVoucherPayableId
-		INNER JOIN @validPayables B
-			ON B.intVoucherPayableId = A2.intOldPayableId
-		INNER JOIN tblAPVoucherPayable C
-			ON A2.intNewPayableId = C.intVoucherPayableId
-		CROSS APPLY (
-			SELECT
-				*
-			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
-			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
-		) taxData
+		-- INNER JOIN @validPayables B
+		-- 	ON B.intVoucherPayableId = A2.intOldPayableId
+		-- INNER JOIN tblAPVoucherPayable C
+		-- 	ON A2.intNewPayableId = C.intVoucherPayableId
+		INNER JOIN @validPayablesTax taxData
+			ON A2.intOldPayableId = taxData.intVoucherPayableId
+			AND A.intTaxGroupId = taxData.intTaxGroupId
+			AND A.intTaxCodeId = taxData.intTaxCodeId
+		-- CROSS APPLY (
+		-- 	SELECT
+		-- 		*
+		-- 	FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		-- ) taxData
 
 
 		--IF ALREADY EXISTS GET PAYABLES KEY
@@ -882,6 +917,8 @@ ELSE SAVE TRAN @SavePoint
 		)
 		OUTPUT SourceData.intVoucherPayableId, inserted.intVoucherPayableId, SourceData.intVoucherPayableKey INTO @deleted;
 
+		SET @recordCountReturned = @recordCountReturned + @@ROWCOUNT;
+
 		MERGE INTO tblAPVoucherPayableTaxStaging AS destination
 		USING (
 			SELECT
@@ -963,20 +1000,25 @@ ELSE SAVE TRAN @SavePoint
 			ON B2.intVoucherPayableKey = C.intVoucherPayableId
 
 		UPDATE A
-			SET A.dblTax = taxData.dblTax, A.dblAdjustedTax = taxData.dblAdjustedTax
+			SET A.dblTax = A.dblTax + taxData.dblTax, A.dblAdjustedTax = A.dblAdjustedTax + taxData.dblAdjustedTax
 		FROM tblAPVoucherPayableTaxStaging A
 		INNER JOIN @deleted del
 			ON del.intNewPayableId = A.intVoucherPayableId
-		INNER JOIN @validPayables B
-			ON del.intVoucherPayableKey = B.intVoucherPayableId
-		INNER JOIN tblAPVoucherPayable C
-			ON del.intNewPayableId = C.intVoucherPayableId
-		CROSS APPLY (
-			SELECT
-				*
-			FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
-			WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
-		) taxData
+		-- INNER JOIN @validPayables B
+		-- 	ON del.intVoucherPayableKey = B.intVoucherPayableId
+		-- INNER JOIN tblAPVoucherPayable C
+		-- 	ON del.intNewPayableId = C.intVoucherPayableId
+		INNER JOIN @validPayablesTax taxData
+			ON del.intVoucherPayableKey = taxData.intVoucherPayableId
+			AND A.intTaxClassId = taxData.intTaxClassId
+				AND A.intTaxCodeId = taxData.intTaxCodeId
+				AND A.intTaxGroupId = taxData.intTaxGroupId
+		-- CROSS APPLY (
+		-- 	SELECT
+		-- 		*
+		-- 	FROM dbo.fnAPRecomputeStagingTaxes(A.intVoucherPayableId, B.dblCost, C.dblQuantityToBill) taxes
+		-- 	WHERE A.intTaxCodeId = taxes.intTaxCodeId AND A.intTaxGroupId = taxes.intTaxGroupId
+		-- ) taxData
 
 	END
 	ELSE
@@ -1038,6 +1080,13 @@ ELSE SAVE TRAN @SavePoint
 			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
 		END
 
+	END
+
+	SELECT @recordCountToReturn = COUNT(*) FROM @voucherPayable
+	IF @recordCountToReturn > 0 AND @recordCountToReturn != @recordCountReturned AND @post = 0
+	BEGIN
+		RAISERROR('Error occured while updating Voucher Payables.', 16, 1);
+		RETURN;
 	END
 
 	IF @transCount = 0

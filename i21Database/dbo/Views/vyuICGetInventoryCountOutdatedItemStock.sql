@@ -33,10 +33,17 @@ FROM
 		dblNewOnHand = 
 			ISNULL(
 				CASE 
-					WHEN Item.strLotTracking = 'No' AND Item.ysnSeparateStockForUOMs = 1 THEN 
-						separateUOM.dblOnHand
-					WHEN Item.strLotTracking = 'No' AND ISNULL(Item.ysnSeparateStockForUOMs, 0) = 0 THEN 
-						byStockUOM.dblOnHand
+					WHEN Item.strLotTracking = 'No' THEN 
+						CASE 
+							WHEN c.strCountBy = 'Pack' THEN 
+								dbo.fnCalculateQtyBetweenUOM(stockByPackUOM.intItemUOMId, cd.intItemUOMId, stockByPackUOM.dblOnHand)
+							WHEN Item.ysnSeparateStockForUOMs = 1 THEN 
+								separateUOM.dblOnHand
+							WHEN ISNULL(Item.ysnSeparateStockForUOMs, 0) = 0 THEN 
+								byStockUOM.dblOnHand								
+							ELSE 
+								dbo.fnCalculateQtyBetweenUOM(byStockUOM.intItemUOMId, StockUOM.intItemUOMId, byStockUOM.dblOnHand)
+						END
 					ELSE 
 						LotTransactions.dblQty 
 				END
@@ -164,8 +171,31 @@ FROM
 				AND t.intSubLocationId = cd.intSubLocationId
 				AND t.intStorageLocationId = cd.intStorageLocationId
 				AND t.intLotId = cd.intLotId
-				
-		) LotTransactions 
+				AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1
+		) LotTransactions
+		OUTER APPLY (
+			SELECT	v.intItemId
+					,u.intItemUOMId
+					,v.intItemLocationId
+					,v.intSubLocationId
+					,v.intStorageLocationId
+					,dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(v.intItemUOMId, u.intItemUOMId, v.dblQty))
+			FROM	tblICInventoryTransaction v
+					INNER JOIN tblICItemUOM u
+						ON v.intItemId = u.intItemId
+						AND u.ysnStockUnit = 1
+			WHERE	
+					v.intItemId = Item.intItemId
+					AND v.intItemLocationId = ItemLocation.intItemLocationId
+					AND dbo.fnDateLessThanEquals(v.dtmDate, c.dtmCountDate) = 1
+			GROUP BY 
+					v.intItemId
+					,u.intItemUOMId
+					,v.intItemLocationId
+					,v.intSubLocationId
+					,v.intStorageLocationId		
+		) stockByPackUOM
+
 		OUTER APPLY (
 			SELECT 
 				dblQty = SUM(ReservedQty.dblQty) 

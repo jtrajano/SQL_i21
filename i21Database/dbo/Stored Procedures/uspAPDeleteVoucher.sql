@@ -10,6 +10,7 @@
 	7 = LG
 	8 = Payroll
 	9 = Credit Card
+	10 = BuyBack
 */
 CREATE PROCEDURE [dbo].[uspAPDeleteVoucher]
 	 @intBillId	INT   
@@ -43,7 +44,20 @@ BEGIN TRY
 	
 	--CHECK IF POSTED
 	IF(EXISTS(SELECT NULL FROM dbo.tblAPBill WHERE intBillId = @intBillId AND ISNULL(ysnPosted,0) = 1))
-		RAISERROR('The transaction is already posted.',16,1)			
+	BEGIN
+		RAISERROR('The transaction is already posted.',16,1);
+		RETURN;
+	END
+
+	--DO NOT ALLOW TO DELETE IF ORIGINAL RECORD FOR REVERSAL IS POSTED
+	--WE WILL HAVE CLEARING/COSTING ISSUE
+	IF((SELECT B.ysnPosted FROM tblAPBill A 
+			INNER JOIN tblAPBill B ON A.intReversalId = B.intBillId
+			WHERE A.intBillId = @intBillId AND A.intTransactionType = 1) = 1)
+	BEGIN
+		RAISERROR('Unable to delete. Transaction reversal is posted.',16,1);
+		RETURN;
+	END			
 
 	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
 	BEGIN
@@ -115,9 +129,17 @@ BEGIN TRY
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
 
-	--EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
+	EXEC uspGRDeleteStorageHistory 'Voucher', @intBillId
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
+
+	DECLARE @billDetailIds AS Id
+	INSERT INTO @billDetailIds
+	SELECT
+		A.intBillDetailId
+	FROM tblAPBillDetail A
+	WHERE A.intBillId = @intBillId
+	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 1
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
@@ -128,13 +150,21 @@ BEGIN TRY
 	DELETE FROM dbo.tblAPAppliedPrepaidAndDebit
 	WHERE intBillId = @intBillId
 
+	--Get intBillBatchId of the deleted Voucher
+	DECLARE @billBatchId INT
+	SET @billBatchId = (SELECT A.intBillBatchId FROM tblAPBill A WHERE A.intBillId = @intBillId)
+
+	--Delete Voucher
 	DELETE FROM dbo.tblAPBill 
 	WHERE intBillId = @intBillId
+
+	--Update the tblAPBillBatch
+	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
 
 	DELETE FROM dbo.tblSMTransaction
 	WHERE intRecordId = @intBillId 
 	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
-
+	
 	--Audit Log          
 	EXEC dbo.uspSMAuditLog 
 		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 

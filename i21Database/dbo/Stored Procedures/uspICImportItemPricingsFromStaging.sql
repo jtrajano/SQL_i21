@@ -87,7 +87,6 @@ USING
 	, dblDefaultGrossPrice	
 	, dtmDateCreated		
 	, intCreatedByUserId
-	, intImportFlagInternal
 	FROM #tmp s
 ) AS source ON target.intItemId = source.intItemId
 	AND target.intItemLocationId = source.intItemLocationId

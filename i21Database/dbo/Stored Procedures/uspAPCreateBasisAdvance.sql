@@ -63,7 +63,8 @@ INSERT INTO @voucherPayables(
     dblPrepayPercentage,
     intPrepayTypeId,
     intStorageLocationId,
-    intAccountId
+    intAccountId,
+    ysnStage
 )
 SELECT
     intPartitionId				    = ROW_NUMBER() OVER(ORDER BY (SELECT 1)) --1 voucher per 1 payable
@@ -96,6 +97,7 @@ SELECT
     ,intPrepayTypeId                = 2
     ,intStorageLocationId           = basisAdvance.intStorageLocationId
     ,intAccountId                   = loc.intAPAccount
+    ,ysnStage                       = 0
 FROM tblAPBasisAdvanceStaging basisStaging
 INNER JOIN vyuAPBasisAdvance basisAdvance 
     ON basisStaging.intTicketId = basisAdvance.intTicketId AND basisStaging.intContractDetailId = basisAdvance.intContractDetailId

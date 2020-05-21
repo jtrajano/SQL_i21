@@ -1395,7 +1395,6 @@ BEGIN
 		SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL') 
 	END 
 
-
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpICInventoryTransaction) 
 	BEGIN 
 		IF ISNULL(@isPeriodic, 0) = 1
@@ -1796,7 +1795,13 @@ BEGIN
 							ON ICTrans.strTransactionId = Header.strTransferNo				
 						INNER JOIN dbo.tblICInventoryTransferDetail Detail
 							ON Detail.intInventoryTransferId = Header.intInventoryTransferId
-							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId 
+							AND Detail.intInventoryTransferDetailId = ICTrans.intTransactionDetailId
+							AND Detail.intItemId = ICTrans.intItemId 
+						INNER JOIN tblICItem i
+							ON i.intItemId = Detail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 						INNER JOIN tblICItemUOM StockUOM
 							ON StockUOM.intItemId = ICTrans.intItemId 
 							AND StockUOM.ysnStockUnit = 1
@@ -1814,6 +1819,7 @@ BEGIN
 								AND intItemLocationId = ICTrans.intItemLocationId
 						) itemPricing
 				WHERE	strBatchId = @strBatchId
+						AND ICTrans.strTransactionId = @strTransactionId
 						AND ICTrans.dblQty < 0 
 
 				EXEC @intReturnValue = dbo.uspICRepostCosting
@@ -1907,7 +1913,7 @@ BEGIN
 					IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 				END
 				ELSE 
-				BEGIN 
+				BEGIN
 					DELETE FROM @ItemsToPost
 					INSERT INTO @ItemsToPost (
 							intItemId  
@@ -1971,6 +1977,7 @@ BEGIN
 								AND TransferSource.strTransactionId = Header.strTransferNo
 								AND TransferSource.strBatchId = @strBatchId
 								AND TransferSource.dblQty < 0
+								AND TransferSource.ysnIsUnposted = 0 
 							LEFT JOIN dbo.tblICItemUOM ItemUOM
 								ON TransferSource.intItemId = ItemUOM.intItemId
 								AND TransferSource.intItemUOMId = ItemUOM.intItemUOMId
@@ -5167,6 +5174,40 @@ BEGIN
 							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
 				WHERE	Adj.strAdjustmentNo = @strTransactionId
 
+				-- Update the last cost used in the inventory count
+				UPDATE	invCountDetail
+				SET		dblLastCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
+												-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, invCountDetail.intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
+											WHEN dbo.fnGetCostingMethod(invCountDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
+												-- It item is using Average Costing, then get the Average Cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, invCountDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
+											ELSE
+												-- Otherwise, get the item's last cost. 
+												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, invCountDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
+									END
+				FROM	dbo.tblICInventoryCount invCount INNER JOIN dbo.tblICInventoryCountDetail invCountDetail
+							ON invCount.intInventoryCountId = invCountDetail.intInventoryCountId 
+						INNER JOIN tblICItem i
+							ON i.intItemId = invCountDetail.intItemId 
+						INNER JOIN #tmpRebuildList list
+							ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+							AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+						LEFT JOIN dbo.tblICItemLocation ItemLocation
+							ON ItemLocation.intLocationId = invCount.intLocationId 
+							AND ItemLocation.intItemId = invCountDetail.intItemId
+						LEFT JOIN dbo.tblICLot Lot
+							ON invCountDetail.intLotId = Lot.intLotId
+						LEFT JOIN dbo.tblICItemUOM ItemUOM
+							ON ItemUOM.intItemUOMId = invCountDetail.intItemUOMId
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = invCountDetail.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+						LEFT JOIN dbo.tblICItemPricing ItemPricing
+							ON ItemPricing.intItemId = invCountDetail.intItemId
+							AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+				WHERE	invCount.strCountNo = @strTransactionId
+
 				INSERT INTO @ItemsToPost (
 						intItemId  
 						,intItemLocationId 
@@ -5222,14 +5263,30 @@ BEGIN
 													)
 											END 
 											
-										WHEN (RebuildInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
+										WHEN (
+											RebuildInvTrans.dblQty > 0 
+											AND (
+												ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0
+												OR ISNULL(invCountDetail.intInventoryCountDetailId, 0) <> 0
+											)
+										) THEN 
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
 														RebuildInvTrans.dblCost
 													ELSE 
 														dbo.fnCalculateCostBetweenUOM( 
-															COALESCE(AdjNewCostUOM.intItemUOMId, ItemUOM.intItemUOMId)
+															COALESCE(
+																AdjNewCostUOM.intItemUOMId
+																, invCountNewCostUOM.intItemUOMId
+																, ItemUOM.intItemUOMId
+															)
 															,ItemUOM.intItemUOMId
-															,COALESCE(AdjDetail.dblNewCost, AdjDetail.dblCost, RebuildInvTrans.dblCost) 
+															,COALESCE(
+																AdjDetail.dblNewCost
+																, AdjDetail.dblCost
+																, invCountDetail.dblNewCost
+																, invCountDetail.dblLastCost
+																, RebuildInvTrans.dblCost
+															) 
 														)
 											END
 										 ELSE 
@@ -5303,6 +5360,23 @@ BEGIN
 							WHERE	intItemId = RebuildInvTrans.intItemId 
 									AND intItemLocationId = RebuildInvTrans.intItemLocationId
 						) itemPricing
+						
+						LEFT JOIN (
+							dbo.tblICInventoryCount invCount INNER JOIN dbo.tblICInventoryCountDetail invCountDetail
+								ON invCount.intInventoryCountId = invCountDetail.intInventoryCountId 
+							INNER JOIN tblICItem i3
+								ON i3.intItemId = invCountDetail.intItemId 
+							INNER JOIN #tmpRebuildList list3
+								ON i3.intItemId  = COALESCE(list3.intItemId, i3.intItemId) 
+								AND i3.intCategoryId = COALESCE(list3.intCategoryId, i3.intCategoryId) 
+							LEFT JOIN dbo.tblICItemUOM invCountNewCostUOM
+								ON invCountNewCostUOM.intItemId = invCountDetail.intItemId
+								AND invCountNewCostUOM.intItemUOMId = invCountDetail.intItemUOMId 
+						)
+							ON invCount.strCountNo = RebuildInvTrans.strTransactionId
+							AND invCount.intInventoryCountId = RebuildInvTrans.intTransactionId
+							AND invCountDetail.intInventoryCountDetailId = RebuildInvTrans.intTransactionDetailId 
+
 				WHERE	RebuildInvTrans.strBatchId = @strBatchId
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 

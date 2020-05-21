@@ -146,6 +146,8 @@ SELECT DISTINCT WC.intWeightClaimId
 	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 	,blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 	,dblFromNet = ISNULL(WCD.dblFromNet, 0)
+	,dblToGross = COALESCE(WCD.dblToGross, WCD.dblToNet, 0)
+	,dblToTare = ISNULL(WCD.dblToTare, 0)
 	,dblToNet = ISNULL(WCD.dblToNet, 0)
 	,dblWeightDifference = (ISNULL(WCD.dblFromNet,0) - ISNULL(WCD.dblToNet,0)) 
 	,strUnitMeasure = isnull(rtWUOMTranslation.strTranslation,WUOM.strUnitMeasure)
@@ -155,7 +157,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,dblTare = ISNULL(LD.dblTare, 0)
 	,dblNet = ISNULL(LD.dblNet, 0)
 	,strLoadWeightUnitMeasure = isnull(rtUMTranslation.strTranslation,UM.strUnitMeasure)
-	,dblFranchise = ISNULL(WCD.dblFranchise, 0)
+	,dblFranchise = ISNULL(WG.dblFranchise, 0)
 	,dblFranchiseWt = ISNULL(WCD.dblFranchiseWt, 0)
 	,dblClaimableWt = ABS(WCD.dblClaimableWt)
 	,WCD.dblUnitPrice
@@ -201,6 +203,7 @@ JOIN (
 	FROM tblLGLoadDetail LOD
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intSContractDetailId
+LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = CASE WHEN LD.intCustomerEntityId <> WCD.intPartyEntityId THEN E.intDefaultLocationId 
 																ELSE ISNULL(LD.intCustomerEntityLocationId, E.intDefaultLocationId) END
 LEFT JOIN tblARInvoice INV ON INV.intInvoiceId = WCD.intInvoiceId
@@ -268,6 +271,8 @@ GROUP BY WC.intWeightClaimId
 	,WCD.intInvoiceId
 	,CP.ysnFullHeaderLogo
 	,WCD.dblFromNet
+	,WCD.dblToGross
+	,WCD.dblToTare
 	,WCD.dblToNet
 	,WUOM.strUnitMeasure
 	,WUOM.strSymbol
@@ -276,7 +281,7 @@ GROUP BY WC.intWeightClaimId
 	,LD.dblNet
 	,UM.strUnitMeasure
 	,WCD.dblFranchise
-	,WCD.dblFranchise
+	,WG.dblFranchise
 	,WCD.dblFranchiseWt
 	,WCD.dblClaimableWt
 	,WCD.dblUnitPrice

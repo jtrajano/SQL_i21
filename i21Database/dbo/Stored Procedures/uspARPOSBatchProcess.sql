@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspARPOSBatchProcess]
 	  @intPOSEndOfDayId	INT
-	, @intEntityUserId	INT
+	, @intPOSId			INT = NULL
+	, @intEntityUserId	INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -26,6 +27,12 @@ DECLARE @PROCESSLOGS TABLE  (
 			, ysnSuccess	BIT
 			, dtmDateProcessed	 DATE
 		)
+
+SET @intPOSId = NULLIF(@intPOSId, 0)
+SET @intEntityUserId = NULLIF(@intEntityUserId, 0)
+
+IF @intEntityUserId IS NULL
+	SELECT TOP 1 @intEntityUserId = intEntityId FROM tblSMUserSecurity
 
 --CREATE DEFAULT PAYMENT METHODS IF DOES NOT EXISTS
 IF NOT EXISTS (SELECT TOP 1 NULL FROM dbo.tblSMPaymentMethod WITH (NOLOCK) WHERE UPPER(strPaymentMethod) = 'CASH')
@@ -156,6 +163,7 @@ WHERE POS.ysnHold = 0
   AND POS.dblTotal > 0
   AND NEGQTY.intPOSId IS NULL
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+  AND (@intPOSId IS NULL OR POS.intPOSId = @intPOSId)
 
 UNION ALL
 
@@ -171,6 +179,7 @@ WHERE ((POS.ysnReturn = 1 AND POS.intOriginalPOSTransactionId IS NOT NULL) OR (P
   AND POS.intCreditMemoId IS NULL
   AND POS.dblTotal < 0
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+  AND (@intPOSId IS NULL OR POS.intPOSId = @intPOSId)
 
 UNION ALL
 
@@ -199,6 +208,7 @@ WHERE POS.ysnReturn = 0
   AND POS.intInvoiceId IS NULL
   AND POS.intCreditMemoId IS NULL
   AND EOD.intPOSEndOfDayId = @intPOSEndOfDayId
+  AND (@intPOSId IS NULL OR POS.intPOSId = @intPOSId)
 
 --CLEAR BATCH PROCESS LOG
 DELETE BP
@@ -583,10 +593,17 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , intPOSPaymentId		= POSP.intPOSPaymentId
 				 , strPaymentMethod		= CASE WHEN POSP.strPaymentMethod = 'Credit Card' THEN 'Manual Credit Card' ELSE POSP.strPaymentMethod END
 				 , strReferenceNo		= POSP.strReferenceNo
-				 , dblAmount			= POSP.dblAmountTendered
+				 , dblAmount			= POSP.dblAmount
 			INTO #POSPAYMENTS
 			FROM tblARPOS POS
-			INNER JOIN tblARInvoiceIntegrationLogDetail I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
+			INNER JOIN 
+			(SELECT DISTINCT intSourceId,
+							 strSourceId, 
+							 intIntegrationLogId, 
+							 ysnHeader, 
+							 ysnSuccess, 
+							 ysnPosted 
+			FROM  tblARInvoiceIntegrationLogDetail) I ON POS.intPOSId = I.intSourceId AND POS.strReceiptNumber = I.strSourceId
 			INNER JOIN tblARPOSPayment POSP ON POS.intPOSId = POSP.intPOSId
 			WHERE intIntegrationLogId = @intInvoiceLogId
 			  AND ISNULL(ysnHeader, 0) = 1
@@ -636,7 +653,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
-				,strNotes						= POS.strReceiptNumber
+				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
 													THEN IFP.dblAmountDue
@@ -877,14 +894,16 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			FROM #POSPAYMENTS POSP
 			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
 			WHERE POSP.strPaymentMethod IN ('Cash', 'Check') 
-			  AND POS.strPOSType = 'Regular'
+			  AND (POS.strPOSType = 'Regular'
+			        OR ( POS.strPOSType = 'Mixed' AND POSP.dblAmount > 0 )
+			  )
 
 			SELECT @dblCashReturn = SUM(POSP.dblAmount)
 			FROM #POSPAYMENTS POSP
 			INNER JOIN #POSTRANSACTIONS POS ON POSP.intPOSId = POS.intPOSId
 			WHERE POSP.strPaymentMethod IN ('Cash', 'Check')
-			   AND POS.strPOSType = 'Returned'
-
+			  AND ( (POS.strPOSType = 'Returned' OR POS.strPOSType = 'Return')
+					OR POS.strPOSType = 'Mixed' AND POSP.dblAmount < 0 )
 			UPDATE tblARPOSEndOfDay
 			SET dblExpectedEndingBalance = ISNULL(dblExpectedEndingBalance, 0) + ISNULL(@dblCashReceipt, 0)
 			  , dblCashReturn			 = ISNULL(dblCashReturn, 0) + ISNULL(@dblCashReturn, 0)

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspIPInterCompanySendEmail @strMessageType NVARCHAR(50)
 	,@strStatus NVARCHAR(50) = ''
+	,@ysnDailyNotification BIT=0
 AS
 DECLARE @strStyle NVARCHAR(MAX)
 	,@strHtml NVARCHAR(MAX)
@@ -915,6 +916,70 @@ BEGIN
 	SET ysnMailSent = 1
 	WHERE ISNULL(strFeedStatus, '') = 'Failed'
 		AND ISNULL(ysnMailSent, 0) = 0
+
+	SELECT @strDetail = @strDetail + '<tr>
+		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+		   '<td>&nbsp;' + 'Success' + '</td>' + 
+			'<td>&nbsp;' + 'Forecast Price' + '</td>
+	</tr>'
+	FROM tblRKFutureMarketStage WITH (NOLOCK)
+	WHERE ISNULL(strFeedStatus, '') = 'Processed'
+		AND ISNULL(ysnMailSent, 0) = 0
+
+	UPDATE tblRKFutureMarketStage
+	SET ysnMailSent = 1
+	WHERE ISNULL(strFeedStatus, '') = 'Processed'
+		AND ISNULL(ysnMailSent, 0) = 0
+	
+	SELECT @strDetail = @strDetail + '<tr>
+		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+			'<td>&nbsp;' + 'Forecast Price' + '</td>
+	</tr>'
+	FROM tblRKFutureMarketStage WITH (NOLOCK)
+	WHERE ISNULL(strFeedStatus, '') = 'Failed'
+		AND ISNULL(ysnMailSent, 0) = 0
+
+	UPDATE tblRKFutureMarketStage
+	SET ysnMailSent = 1
+	WHERE ISNULL(strFeedStatus, '') = 'Failed'
+		AND ISNULL(ysnMailSent, 0) = 0
+END
+
+IF @ysnDailyNotification = 1
+	AND @strMessageType = 'Item'
+BEGIN
+	DECLARE @dtmDate DATETIME
+		,@dtmDate2 DATETIME
+
+	SELECT @dtmDate = Convert(DATETIME, Convert(VARCHAR, GETDATE(), 101))
+
+	SELECT @dtmDate2 = @dtmDate + 1
+		SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Item</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Date</th>
+						<th>&nbsp;User</th>
+					</tr>'
+
+
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intItemId),'') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
+			'<td>&nbsp;' + Ltrim(S.dtmFeedDate) + '</td>' +
+			'<td>&nbsp;' + Ltrim(S.strUserName ) + '</td>' + 
+			'</tr>'
+
+		FROM tblICItemStage S WITH (NOLOCK)
+		WHERE S.dtmFeedDate BETWEEN @dtmDate
+				AND @dtmDate2 
+				AND intMultiCompanyId =4
 END
 
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)

@@ -441,7 +441,15 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							-- Adjust the scheduled quantity based on the ticket scheduled and net units
+							IF(@intTicketContractDetailId = @intContractDetailId)
+							BEGIN
+								IF(@dblScheduleQty < @dblNetUnits AND @dblTicketScheduledQuantity >= @dblNetUnits)
+								BEGIN
+									SET @dblInreaseSchBy = @dblNetUnits - @dblScheduleQty
+								END
+							END
+
+							-- Adjust the scheduled quantity based on the ticket scheduled and net units 
 							IF(@dblInreaseSchBy <> 0)
 							BEGIN
 								EXEC	uspCTUpdateScheduleQuantity 
@@ -452,9 +460,6 @@ BEGIN TRY
 										@strScreenName			=	'Auto - Scale'
 							END
 						END
-
-						
-					
 					END
 					ELSE
 					BEGIN
@@ -531,13 +536,22 @@ BEGIN TRY
 					IF(@intContractDetailId = @intTicketContractDetailId OR @intLoadDetailId IS NOT NULl)
 					BEGIN
 						--compare the scheduled units to the processed units if it is less than then adjust the scheduled 
+						--available is contract balance
 						IF(@dblScheduleQty < @dblNetUnits)
 						BEGIN
-							IF((@dblAvailable) > @dblNetUnits)
+							IF((@dblNetUnits-@dblScheduleQty) <= (@dblAvailable-@dblScheduleQty))
 							BEGIN
 								SET @dblInreaseSchBy  = @dblNetUnits - @dblScheduleQty
+								SET	@dblNetUnits	=	@dblNetUnits - @dblScheduleQty			
 							END
+							ELSE
+							BEGIN
+								SET @dblInreaseSchBy  = (@dblAvailable-@dblScheduleQty)-- use whole available as adjustment
+								SET	@dblNetUnits	=	@dblNetUnits - @dblAvailable
+							END
+						
 						END
+
 					END
 					ELSE
 					BEGIN
@@ -562,7 +576,7 @@ BEGIN TRY
 						,0
 						,@intLoadDetailId
 
-					SELECT	@dblNetUnits	=	@dblNetUnits - @dblAvailable			
+					
 				END
 				ELSE
 				BEGIN
@@ -691,6 +705,7 @@ BEGIN TRY
 					SET @strDistributionOption = 'CNT'
 				END
 			END
+			SET @strDistributionOption = 'CNT'
 		END	
 
 		
@@ -709,6 +724,7 @@ BEGIN TRY
 			AND		CD.ysnEarlyDayPassed	=	1
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			AND		NOT EXISTS (SELECT TOP 1 intId FROM @LoadContractsDetailId WHERE intId = CD.intContractDetailId)
+			AND 	ISNULL(CD.ysnLoad,0) = @ysnLoad
 			ORDER 
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END
@@ -728,6 +744,7 @@ BEGIN TRY
 			AND		CD.ysnEarlyDayPassed	=	1
 			AND		CD.intContractDetailId NOT IN (SELECT intContractDetailId FROM @Processed)
 			AND		NOT EXISTS (SELECT TOP 1  intId FROM @LoadContractsDetailId WHERE intId = CD.intContractDetailId)
+			AND 	ISNULL(CD.ysnLoad,0) = @ysnLoad
 			ORDER 
 			BY		CD.dtmStartDate, CD.intContractDetailId ASC
 		END

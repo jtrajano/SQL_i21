@@ -252,7 +252,7 @@ BEGIN TRY
 					WHERE strItemNo = @strItemNo
 						AND IsNULL(strSubstituteItemNo, '') = IsNULL(@strSubstituteItemNo, IsNULL(strSubstituteItemNo, ''))
 						AND IsNULL(strLocationName, '') = IsNULL(@strLocationName, IsNULL(strLocationName, ''))
-						AND Datepart(mm, dtmDemandDate) = Datepart(mm, @dtmDemandDate)
+						AND Datepart(mm, Convert(datetime,dtmDemandDate,@intConvertYear)) = Datepart(mm, Convert(datetime,@dtmDemandDate,@intConvertYear))
 					) > 1
 			BEGIN
 				IF @strSubstituteItemNo <> ''
@@ -265,8 +265,8 @@ BEGIN TRY
 				END
 			END
 
-			SELECT @dtmMinDemandDate = MIN(Convert(datetime,dtmDemandDate))
-				,@dtmMaxDemandDate = MAX(Convert(datetime,dtmDemandDate))
+			SELECT @dtmMinDemandDate = MIN(Convert(datetime,dtmDemandDate,@intConvertYear))
+				,@dtmMaxDemandDate = MAX(Convert(datetime,dtmDemandDate,@intConvertYear))
 			FROM @tblMFDemandDetailImport
 			WHERE strItemNo = @strItemNo
 				AND IsNULL(strSubstituteItemNo, '') = IsNULL(@strSubstituteItemNo, IsNULL(strSubstituteItemNo, ''))
@@ -297,9 +297,9 @@ BEGIN TRY
 				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity ' + ltrim(@dblQuantity) + ' is invalid. '
 			END
 
-			IF @dblQuantity <= 0
+			IF @dblQuantity < 0
 			BEGIN
-				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity should be greater than zero. '
+				SELECT @strDetailErrorMessage = @strDetailErrorMessage + 'Quantity cannot be negative. '
 			END
 
 			IF @dtmDemandDate IS NULL

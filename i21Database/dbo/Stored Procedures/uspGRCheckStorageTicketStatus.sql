@@ -8,17 +8,11 @@ AS
 BEGIN
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @transCount INT
-
-	IF OBJECT_ID (N'tempdb.dbo.#tmpCustomerStorage') IS NOT NULL
-		DROP TABLE #tmpCustomerStorage
-	CREATE TABLE #tmpCustomerStorage (
-		[intCustomerStorageId] INT PRIMARY KEY,
-		UNIQUE ([intCustomerStorageId])
-	);
+	DECLARE @CustomerStorageIds AS Id
 
 	IF @strTransactionCode = 'SC'
 	BEGIN
-		INSERT INTO #tmpCustomerStorage
+		INSERT INTO @CustomerStorageIds
 		SELECT 
 			intCustomerStorageId
 		FROM tblGRCustomerStorage
@@ -26,7 +20,7 @@ BEGIN
 	END
 	ELSE IF @strTransactionCode = 'DS'
 	BEGIN
-		INSERT INTO #tmpCustomerStorage
+		INSERT INTO @CustomerStorageIds
 		SELECT 
 			intCustomerStorageId
 		FROM tblGRCustomerStorage
@@ -36,14 +30,21 @@ BEGIN
 	--Check if storage has been settled or transferred
 	IF EXISTS(SELECT TOP 1 1 
 		FROM tblGRSettleStorageTicket SST
-		INNER JOIN #tmpCustomerStorage CS
-			ON CS.intCustomerStorageId = SST.intCustomerStorageId
+		INNER JOIN tblGRSettleStorage SS
+			ON SS.intSettleStorageId = SST.intSettleStorageId
+				AND SS.intParentSettleStorageId IS NOT NULL
+				AND SS.ysnReversed = 0
+		INNER JOIN @CustomerStorageIds CS
+			ON CS.intId = SST.intCustomerStorageId
 	)
 	OR
 	EXISTS(SELECT TOP 1 1 
 		FROM tblGRTransferStorageSourceSplit TSS
-		INNER JOIN #tmpCustomerStorage CS
-			ON CS.intCustomerStorageId = TSS.intSourceCustomerStorageId
+		INNER JOIN tblGRTransferStorage TS
+			ON TS.intTransferStorageId = TSS.intTransferStorageId
+				AND TS.ysnReversed = 0
+		INNER JOIN @CustomerStorageIds CS
+			ON CS.intId = TSS.intSourceCustomerStorageId
 	)
 	BEGIN
 		SET @ErrMsg = 'Unable to unpost this transaction. <br/>The Open Balance of one or more Storage Tickets no longer matches its Original Balance.'

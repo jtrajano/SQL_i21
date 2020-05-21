@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspARUpdateInvoiceIntegrations] 
-	 @InvoiceId		INT = NULL
-	,@ForDelete		BIT = 0    
-	,@UserId		INT = NULL     
+	 @InvoiceId			INT = NULL	
+	,@ForDelete			BIT = 0    
+	,@UserId			INT = NULL
+	,@InvoiceDetailId 	INT = NULL     
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -17,9 +18,11 @@ DECLARE @intInvoiceId				INT
 	  , @intSalesOrderId			INT
 	  , @intItemContractHeaderId	INT
 	  , @strTransactionType			NVARCHAR(25)
+	  , @strBatchId     			NVARCHAR(100)
 	  , @ysnFromItemContract		BIT
 	  , @InvoiceIds					InvoiceId
-
+	  , @InvoicesForDelete			InvoiceId
+	  , @InvoicesForContract		InvoiceId
 
 --For Prepaid Contract Update
 DECLARE @dblValueToUpdate NUMERIC(18, 6),
@@ -39,15 +42,13 @@ BEGIN TRY
 	SET @intInvoiceId = @InvoiceId
 	SET @intUserId = @UserId
 
-	SELECT TOP 1 @intOriginalInvoiceId = intOriginalInvoiceId
-			, @intSalesOrderId = intSalesOrderId
-			, @strTransactionType = strTransactionType
-			, @ysnFromItemContract = ISNULL(ysnFromItemContract, 0)
+	SELECT TOP 1 @intOriginalInvoiceId 	= intOriginalInvoiceId
+			   , @intSalesOrderId 		= intSalesOrderId
+			   , @strTransactionType 	= strTransactionType
+			   , @ysnFromItemContract 	= ISNULL(ysnFromItemContract, 0)
+			   , @strBatchId			= strBatchId
 	FROM tblARInvoice 
 	WHERE intInvoiceId = @InvoiceId
-
-
-
 
 	IF @strTransactionType = 'Proforma Invoice'
 		BEGIN
@@ -58,7 +59,6 @@ BEGIN TRY
 		END
 
 	EXEC dbo.[uspARUpdateProvisionalOnStandardInvoice] @intInvoiceId, @ForDelete, @intUserId
-
 	
     --FOR PREPAID ITEM CONTRACT
 	SELECT TOP 1 
@@ -115,14 +115,84 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateGrainOpenBalance] @intInvoiceId, @ForDelete, @intUserId
 	EXEC dbo.[uspARUpdateContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId, @InvoiceIds
 	EXEC dbo.[uspARUpdateItemContractOnInvoice] @intInvoiceId, @ForDelete, @intUserId
-	IF @ForDelete = 1 EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
+	IF @ForDelete = 1 AND @InvoiceDetailId IS NULL EXEC dbo.[uspCTBeforeInvoiceDelete] @intInvoiceId, @intUserId
 	EXEC dbo.[uspARUpdateReturnedInvoice] @intInvoiceId, @ForDelete, @intUserId 
 	EXEC dbo.[uspARUpdateInvoiceAccruals] @intInvoiceId	
+	
+	INSERT INTO @InvoiceIds(
+		  intHeaderId
+		, ysnForDelete
+		, strBatchId
+	) 
+	SELECT intHeaderId 	= @intInvoiceId
+		 , ysnForDelete = ISNULL(@ForDelete, 0)
+		 , strBatchId 	= @strBatchId	
 
-	INSERT INTO @InvoiceIds(intHeaderId) SELECT @intInvoiceId
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
+
+	--CONTRACT SALES BASIS DELIVERIES
+	INSERT INTO @InvoicesForDelete(
+		  intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	)--INVOICE DELETED 
+	SELECT intHeaderId 	= intInvoiceId
+		 , intDetailId	= intInvoiceDetailId
+		 , ysnForDelete = CAST(1 AS BIT)
+		 , strBatchId 	= @strBatchId
+	FROM tblARInvoiceDetail ID
+	WHERE (@ForDelete = 1 AND ID.intInvoiceId = @intInvoiceId AND (@InvoiceDetailId IS NULL OR (@InvoiceDetailId IS NOT NULL AND ID.intInvoiceDetailId = @InvoiceDetailId)))
+
+	UNION
+
+	--INVOICE LINE ITEM DELETED
+	SELECT intHeaderId 	= TD.intTransactionId
+		 , intDetailId	= TD.intTransactionDetailId
+		 , ysnForDelete = CAST(1 AS BIT)
+		 , strBatchId 	= @strBatchId
+	FROM tblARTransactionDetail TD
+	WHERE TD.strTransactionType = 'Invoice'
+	  AND TD.intTransactionId = @intInvoiceId
+	  AND (@ForDelete = 0 AND TD.intTransactionDetailId NOT IN (SELECT intInvoiceDetailId FROM tblARInvoiceDetail ID WHERE ID.intInvoiceId = @intInvoiceId))
+
+	EXEC [dbo].[uspARLogRiskPosition] @InvoicesForDelete, @UserId
+
+	--PRICING LAYER
+	INSERT INTO @InvoicesForContract(
+		  intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	)
+	SELECT intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	FROM @InvoicesForDelete IDD
+	INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDD.intDetailId
+	WHERE ID.intContractDetailId IS NOT NULL
+
+	WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContract)
+		BEGIN
+			DECLARE @intInvoiceToDelete			INT = NULL
+				  , @intInvoiceDetailToDeleteId	INT = NULL
+
+			SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
+				       , @intInvoiceDetailToDeleteId	= intDetailId
+			FROM @InvoicesForContract
+
+			EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
+											   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
+    										   , @strScreen 			= 'Invoice'
+			
+			DELETE FROM @InvoicesForContract WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
+		END
+
 	IF @ForDelete = 1
-	EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice',@InvoiceId
+		BEGIN
+			EXEC [dbo].[uspGRDeleteStorageHistory] 'Invoice', @InvoiceId			
+		END
 
 	DELETE FROM [tblARTransactionDetail] WHERE [intTransactionId] = @intInvoiceId AND [strTransactionType] = (SELECT TOP 1 [strTransactionType] FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId)
 

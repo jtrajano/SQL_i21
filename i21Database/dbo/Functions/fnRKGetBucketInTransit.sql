@@ -27,11 +27,17 @@ RETURNS @returntable TABLE
 	, intContractDetailId INT
 	, intContractHeaderId INT
 	, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strContractSeq NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTicketId INT
 	, strTicketNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, intFutureMarketId INT
+	, strFutureMarket NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, intFutureMonthId INT
 	, strFutureMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strDeliveryDate NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, intCurrencyId INT 
+	, strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -58,11 +64,17 @@ BEGIN
 		, intContractDetailId
 		, intContractHeaderId
 		, strContractNumber
+		, strContractSeq
 		, intTicketId
 		, strTicketNumber
+		, intFutureMarketId
+		, strFutureMarket
+		, intFutureMonthId
 		, strFutureMonth
 		, strDeliveryDate
 		, strType
+		, intCurrencyId
+		, strCurrency
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
 			, c.strBucketType
@@ -86,11 +98,17 @@ BEGIN
 			, c.intContractDetailId
 			, c.intContractHeaderId
 			, c.strContractNumber
+			, c.strContractSeq
 			, c.intTicketId
 			, c.strTicketNumber
+			, c.intFutureMarketId
+			, c.strFutureMarket
+			, c.intFutureMonthId
 			, c.strFutureMonth
 			, strDeliveryDate = dbo.fnRKFormatDate(c.dtmEndDate, 'MMM yyyy')
 			, strType = CASE WHEN strBucketType = 'Sales In-Transit' THEN 'Sales' ELSE 'Purchase' END
+			, intCurrencyId
+			, strCurrency
 		FROM vyuRKGetSummaryLog c
 		WHERE strBucketType IN ('Sales In-Transit', 'Purchase In-Transit') 
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
@@ -98,7 +116,6 @@ BEGIN
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 	) t WHERE intRowNum = 1
-
 
 RETURN
 

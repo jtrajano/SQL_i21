@@ -20,7 +20,7 @@ DECLARE @strItemNo AS NVARCHAR(MAX)
 		,@intDiscountScheduleCodeId AS INT
 		,@total AS DECIMAL(38,20)
 		,@counter AS INT;
-CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),intDiscountScheduleCodeId INT, Amount NUMERIC(38,6),intDecimalPrecision INT,intDeliverySheetId INT,DiscountAmount NUMERIC(38,6))
+CREATE TABLE #DeliverySheetGrade (Item VARCHAR(50),intDiscountScheduleCodeId INT, Amount NUMERIC(38,6),intDecimalPrecision INT,intDeliverySheetId INT,DiscountAmount NUMERIC(38,6), ShrinkPercent NUMERIC(38,6))
 
 INSERT INTO #DeliverySheetGrade (Item, intDiscountScheduleCodeId)
 SELECT DISTINCT IC.strItemNo,GR.intDiscountScheduleCodeId FROM tblSCDeliverySheet SCD
@@ -53,9 +53,11 @@ BEGIN
 	UPDATE #DeliverySheetGrade 
 	SET Amount = A.dblAmount
 		,DiscountAmount = A.dblDiscountAmount	
+        ,ShrinkPercent = A.dblShrinkPercent
 	FROM ( 
 		SELECT dblAmount = ISNULL(SUM(((SCT.dblNetUnits / @total) * QM.dblGradeReading)),0) 
 			,dblDiscountAmount = MAX(QM.dblDiscountAmount)
+            ,dblShrinkPercent = MAX(QM.dblShrinkPercent)
 		FROM 
 		tblSCDeliverySheet SCD
 		INNER JOIN tblSCTicket SCT ON SCT.intDeliverySheetId = SCD.intDeliverySheetId

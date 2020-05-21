@@ -32,7 +32,12 @@ SELECT DISTINCT
 		ON UOM.intItemUOMId = SC.intItemUOMIdTo
 	JOIN tblICUnitMeasure UnitMeasure
 		ON UnitMeasure.intUnitMeasureId = UOM.intUnitMeasureId
-	LEFT JOIN tblICInventoryReceiptItem IRI
+	LEFT JOIN (
+				select A.* from tblICInventoryReceiptItem A
+					join tblICInventoryReceipt B
+						on A.intInventoryReceiptId = B.intInventoryReceiptId
+						 and B.intSourceType = 1
+		) IRI
 		ON IRI.intSourceId = SC.intTicketId
 	LEFT JOIN tblICInventoryShipmentItem ISI
 		ON ISI.intSourceId = SC.intTicketId

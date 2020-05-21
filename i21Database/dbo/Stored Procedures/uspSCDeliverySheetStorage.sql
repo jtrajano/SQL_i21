@@ -349,7 +349,7 @@ BEGIN TRY
 		  @intCustomerStorageId
 		, @intUserId
 		, 1
-		, 53 -- Transaction Type Id for Delivery Sheet
+		, 5 -- Transaction Type Id for Delivery Sheet
 		, 'Generated From Delivery Sheet'
 		, @dblNetUnits
 		, dbo.fnRemoveTimeOnDate((SELECT dtmDeliverySheetDate FROM tblSCDeliverySheet WHERE intDeliverySheetId = @intDeliverySheetId))

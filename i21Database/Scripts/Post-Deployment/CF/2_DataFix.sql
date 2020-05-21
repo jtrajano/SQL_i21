@@ -96,3 +96,14 @@ ON tblCFInvoiceHistoryStagingTable.intAccountId = tblCFAccount.intAccountId
 WHERE tblCFInvoiceHistoryStagingTable.ysnShowDriverPinDescriptionOnly IS NULL 
 AND tblCFInvoiceHistoryStagingTable.ysnShowVehicleDescriptionOnly IS NULL
 --CF-2442
+
+
+--ADD CONSTRAINTS--
+IF NOT EXISTS(SELECT * FROM sys.indexes WHERE name = 'tblCFAccount_UniqueCustomerId' AND object_id = OBJECT_ID('tblCFAccount'))
+BEGIN
+	IF NOT EXISTS ((SELECT TOP 1 intCustomerId FROM tblCFAccount GROUP BY intCustomerId HAVING COUNT(1) > 1)) 
+	BEGIN
+		CREATE UNIQUE NONCLUSTERED INDEX [tblCFAccount_UniqueCustomerId]
+		ON [dbo].[tblCFAccount]([intCustomerId] ASC) WITH (FILLFACTOR = 70);
+	END
+END

@@ -49,6 +49,14 @@ BEGIN TRY
 		,@dblUnitPriceInSupplierContract NUMERIC(18, 6)
 		,@dblClaimAmountInSupplierContract NUMERIC(18, 6)
 
+				,@intCurrentCompanyId INT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+
+
 	--,@strNewWeightClaimReferenceNo nvarchar(50)
 	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
 	FROM tblLGWeightClaimStage
@@ -251,6 +259,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
+					,intCompanyId 
 					)
 				SELECT 1 intConcurrencyId
 					,@strReferenceNumber
@@ -272,6 +281,7 @@ BEGIN TRY
 					,@intSubBookId
 					,@intPaymentMethodId
 					,@intWeightClaimId
+					,@intCurrentCompanyId
 				FROM OPENXML(@idoc, 'vyuIPGetWeightClaims/vyuIPGetWeightClaim', 2) WITH (
 						strReferenceNumber NVARCHAR(50) Collate Latin1_General_CI_AS
 						,dtmTransDate DATETIME
@@ -383,6 +393,8 @@ BEGIN TRY
 				,strCurrency NVARCHAR(50) collate Latin1_General_CI_AS
 				,strPartyName NVARCHAR(100) collate Latin1_General_CI_AS
 				,strPriceUOM NVARCHAR(50) collate Latin1_General_CI_AS
+				,dblToGross NUMERIC(18, 6)
+				,dblToTare NUMERIC(18, 6)
 				)
 			DECLARE @tblLGFinalWeightClaimDetail TABLE (
 				intWeightClaimDetailId INT identity(1, 1)
@@ -412,6 +424,8 @@ BEGIN TRY
 				,intItemRefId INT
 				,dblUnitPriceInSupplierContract NUMERIC(18, 6)
 				,dblClaimAmountInSupplierContract NUMERIC(18, 6)
+				,dblToGross NUMERIC(18, 6)
+				,dblToTare NUMERIC(18, 6)
 				)
 
 			INSERT INTO @tblLGWeightClaimDetail (
@@ -443,6 +457,8 @@ BEGIN TRY
 				,strCurrency
 				,strPartyName
 				,strPriceUOM
+				,dblToGross
+				,dblToTare
 				)
 			SELECT intConcurrencyId
 				,intWeightClaimId
@@ -472,6 +488,8 @@ BEGIN TRY
 				,strCurrency
 				,strPartyName
 				,strPriceUOM
+				,dblToGross
+				,dblToTare
 			FROM OPENXML(@idoc, 'vyuIPGetWeightClaimDetails/vyuIPGetWeightClaimDetail', 2) WITH (
 					intConcurrencyId INT
 					,intWeightClaimId INT
@@ -502,6 +520,8 @@ BEGIN TRY
 					,strCurrency NVARCHAR(50) collate Latin1_General_CI_AS
 					,strPartyName NVARCHAR(100) collate Latin1_General_CI_AS
 					,strPriceUOM NVARCHAR(50) collate Latin1_General_CI_AS
+					,dblToGross NUMERIC(18, 6)
+					,dblToTare NUMERIC(18, 6)
 					)
 
 			DECLARE @intWeightClaimDetailId INT
@@ -705,6 +725,8 @@ BEGIN TRY
 					,intItemRefId
 					,dblUnitPriceInSupplierContract
 					,dblClaimAmountInSupplierContract
+					,dblToGross
+					,dblToTare
 					)
 				SELECT 1 AS intConcurrencyId
 					,@intNewWeightClaimId
@@ -732,6 +754,8 @@ BEGIN TRY
 					,intItemRefId
 					,@dblUnitPriceInSupplierContract
 					,@dblClaimAmountInSupplierContract
+					,dblToGross
+					,dblToTare
 				FROM @tblLGWeightClaimDetail WCD
 				WHERE intWeightClaimDetailId = @intWeightClaimDetailId
 
@@ -768,6 +792,8 @@ BEGIN TRY
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
+				,dblToGross
+				,dblToTare
 				)
 			SELECT [intConcurrencyId]
 				,[intWeightClaimId]
@@ -808,6 +834,8 @@ BEGIN TRY
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
+				,dblToGross
+				,dblToTare
 			FROM @tblLGFinalWeightClaimDetail IA
 
 			DELETE
@@ -879,6 +907,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
+					,intCompanyId
 					)
 				SELECT intConcurrencyId
 					,@strReferenceNumber
@@ -894,6 +923,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,@intNewWeightClaimId
+					,@intCurrentCompanyId
 				FROM tblLGWeightClaim
 				WHERE intWeightClaimId = @intNewWeightClaimId
 
@@ -965,6 +995,8 @@ BEGIN TRY
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
+				,dblToGross
+				,dblToTare
 				)
 			SELECT [intConcurrencyId]
 				,@intNewWeightClaimId2
@@ -976,16 +1008,6 @@ BEGIN TRY
 				,[dblFranchiseWt]
 				,[dblWeightLoss]
 				,[dblClaimableWt]
-				--,(
-				--	SELECT TOP 1 CH.intEntityId
-				--	FROM tblLGAllocationDetail AD
-				--	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-				--	JOIN tblCTContractDetail CD ON CD.intContractDetailId = AD.intSContractDetailId
-				--	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-				--	WHERE AD.intPContractDetailId = WCD.intContractDetailId
-				--		AND AH.intBookId = @intBookId
-				--		AND IsNULL(AH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
-				--	) AS [intPartyEntityId]
 				,(
 					SELECT TOP 1 CH.intEntityId
 					FROM tblCTContractDetail CD
@@ -1000,14 +1022,6 @@ BEGIN TRY
 				,[intPriceItemUOMId]
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
-				--,(
-				--	SELECT TOP 1 AD.intSContractDetailId
-				--	FROM tblLGAllocationDetail AD
-				--	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
-				--	WHERE AD.intPContractDetailId = WCD.intContractDetailId
-				--		AND AH.intBookId = @intBookId
-				--		AND IsNULL(AH.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
-				--	) AS intContractDetailId
 				,(
 					SELECT TOP 1 CD.intContractDetailId
 					FROM tblCTContractDetail CD
@@ -1020,8 +1034,8 @@ BEGIN TRY
 				,[dblFranchise]
 				,[dblSeqPriceConversionFactoryWeightUOM]
 				,[intWeightClaimDetailRefId]
-			--FROM tblLGWeightClaimDetail WCD
-			--WHERE intWeightClaimId = @intNewWeightClaimId
+				,dblToGross
+				,dblToTare
 			FROM @tblLGFinalWeightClaimDetail WCD
 
 			IF @intTransactionCount = 0

@@ -17,6 +17,15 @@ BEGIN TRY
 		,@intBookId INT
 		,@intDeleteBookId INT
 	DECLARE @tblRKDailyAveragePricePreStage TABLE (intDailyAveragePricePreStageId INT)
+	DECLARE @intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblRKDailyAveragePrice
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
 
 	INSERT INTO @tblRKDailyAveragePricePreStage (intDailyAveragePricePreStageId)
 	SELECT intDailyAveragePricePreStageId

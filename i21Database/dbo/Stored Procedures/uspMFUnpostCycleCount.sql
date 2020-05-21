@@ -324,6 +324,7 @@ BEGIN TRY
 				EXEC dbo.uspGLBookEntries @GLEntries
 					,0
 					,1
+					,1
 			END
 			ELSE
 			BEGIN
@@ -422,7 +423,6 @@ BEGIN TRY
 			,0
 
 
-
 		IF EXISTS (
 				SELECT *
 				FROM tblMFWorkOrderRecipeItem WRI
@@ -434,12 +434,13 @@ BEGIN TRY
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
 				,1
+				,1
 		END
 		ELSE
 		BEGIN
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,0
-		END 
+		END
 
 
 		SELECT @intWorkOrderProducedLotTransactionId = MIN(intWorkOrderProducedLotTransactionId)
@@ -527,6 +528,7 @@ BEGIN TRY
 			BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries
 					,0
+					,1
 					,1
 			END
 			ELSE
@@ -710,6 +712,7 @@ BEGIN TRY
 					)
 			BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries
+					,1
 					,1
 					,1
 			END

@@ -69,6 +69,9 @@ BEGIN TRY
 		FROM tblRKCoverageEntryStage
 		WHERE intCoverageEntryStageId = @intCoverageEntryStageId
 
+		-- To transfer acknowledgement to BU
+		SELECT @intMultiCompanyId = @intCompanyId
+
 		BEGIN TRY
 			SELECT @intCoverageEntryRefId = @intCoverageEntryId
 
@@ -452,7 +455,10 @@ BEGIN TRY
 						,dblMonthsCovered
 						,dblAveragePrice
 						,dblOptionsCovered
+						,dblTotalOption
 						,dblFuturesM2M
+						,dblM2MPlus10
+						,dblM2MMinus10
 						,intCoverageEntryDetailRefId
 						,intConcurrencyId
 						)
@@ -467,7 +473,10 @@ BEGIN TRY
 						,dblMonthsCovered
 						,dblAveragePrice
 						,dblOptionsCovered
+						,dblTotalOption
 						,dblFuturesM2M
+						,dblM2MPlus10
+						,dblM2MMinus10
 						,@intCoverageEntryDetailId
 						,1
 					FROM OPENXML(@idoc, 'vyuIPGetCoverageEntryDetails/vyuIPGetCoverageEntryDetail', 2) WITH (
@@ -478,7 +487,10 @@ BEGIN TRY
 							,dblMonthsCovered NUMERIC(18, 6)
 							,dblAveragePrice NUMERIC(18, 6)
 							,dblOptionsCovered NUMERIC(18, 6)
+							,dblTotalOption NUMERIC(18, 6)
 							,dblFuturesM2M NUMERIC(18, 6)
+							,dblM2MPlus10 NUMERIC(18, 6)
+							,dblM2MMinus10 NUMERIC(18, 6)
 							,intCoverageEntryDetailId INT
 							) x
 					WHERE x.intCoverageEntryDetailId = @intCoverageEntryDetailId
@@ -497,7 +509,10 @@ BEGIN TRY
 						,dblMonthsCovered = x.dblMonthsCovered
 						,dblAveragePrice = x.dblAveragePrice
 						,dblOptionsCovered = x.dblOptionsCovered
+						,dblTotalOption = x.dblTotalOption
 						,dblFuturesM2M = x.dblFuturesM2M
+						,dblM2MPlus10 = x.dblM2MPlus10
+						,dblM2MMinus10 = x.dblM2MMinus10
 					FROM OPENXML(@idoc, 'vyuIPGetCoverageEntryDetails/vyuIPGetCoverageEntryDetail', 2) WITH (
 							dblOpenContract NUMERIC(18, 6)
 							,dblInTransit NUMERIC(18, 6)
@@ -506,7 +521,10 @@ BEGIN TRY
 							,dblMonthsCovered NUMERIC(18, 6)
 							,dblAveragePrice NUMERIC(18, 6)
 							,dblOptionsCovered NUMERIC(18, 6)
+							,dblTotalOption NUMERIC(18, 6)
 							,dblFuturesM2M NUMERIC(18, 6)
+							,dblM2MPlus10 NUMERIC(18, 6)
+							,dblM2MMinus10 NUMERIC(18, 6)
 							,intCoverageEntryDetailId INT
 							) x
 					JOIN tblRKCoverageEntryDetail D ON D.intCoverageEntryDetailRefId = x.intCoverageEntryDetailId
@@ -618,9 +636,26 @@ BEGIN TRY
 				,@intTransactionRefId
 				,@intCompanyRefId
 
-			--EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-			--	,@referenceTransactionId = @intTransactionId
-			--	,@referenceCompanyId = @intCompanyId
+			--IF @strRowState <> 'Delete'
+			--BEGIN
+			--	IF @intTransactionRefId IS NULL
+			--	BEGIN
+			--		SELECT @strErrorMessage = 'Current Transaction Id is not available. '
+
+			--		RAISERROR (
+			--					@strErrorMessage
+			--					,16
+			--					,1
+			--					)
+			--	END
+			--	ELSE
+			--	BEGIN
+			--		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+			--			,@referenceTransactionId = @intTransactionId
+			--			,@referenceCompanyId = @intCompanyId
+			--	END
+			--END
+
 			UPDATE tblRKCoverageEntryStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'

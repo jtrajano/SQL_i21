@@ -37,6 +37,7 @@ BEGIN TRY
 		,@intCompanyId int
 		,@intTransactionId int
 		,@intContractScreenId int
+		,@strSubmittedByXML NVARCHAR(MAX)
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -93,9 +94,9 @@ BEGIN TRY
 
 		SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
 
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuCTContractHeaderView></vyuCTContractHeaderViews>'
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
-	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuCTContractHeaderView></vyuCTContractHeaderViews>', @strAdditionalInfo)
+	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
 	
 
 	SELECT @intPContractDetailId = intPContractDetailId
@@ -126,10 +127,10 @@ BEGIN TRY
 
 		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + @strExternalEntity + '</strExternalEntity>'
 
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuCTContractHeaderView></vyuCTContractHeaderViews>'
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
 		IF @strAdditionalInfo <> ''
-			SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuCTContractHeaderView></vyuCTContractHeaderViews>', @strAdditionalInfo)
+			SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
 	END
 
 	SET @intContractStageId = SCOPE_IDENTITY();
@@ -252,6 +253,18 @@ BEGIN TRY
 		,NULL
 		,NULL
 
+---------------------------------------------Submitted By------------------------------------------
+	SELECT @strSubmittedByXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPContractSubmittedByView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strHeaderCondition
+		,@strSubmittedByXML OUTPUT
+		,NULL
+		,NULL
+
 	INSERT INTO tblCTContractStage (
 		intContractHeaderId
 		,strContractNumber
@@ -271,6 +284,7 @@ BEGIN TRY
 		,strAmendmentApprovalXML
 		,intTransactionId 
 		,intCompanyId 
+		,strSubmittedByXML
 		)
 	SELECT intContractHeaderId = @ContractHeaderId
 		,strContractNumber = @strContractNumber
@@ -290,6 +304,7 @@ BEGIN TRY
 		,strAmendmentApprovalXML=@strAmendmentApprovalXML
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
+		,strSubmittedByXML=@strSubmittedByXML
 END TRY
 
 BEGIN CATCH

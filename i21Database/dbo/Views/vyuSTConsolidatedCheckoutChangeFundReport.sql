@@ -10,6 +10,7 @@ SELECT ST.intStoreId
 	, REPLACE(cf.strType, 'Change Fund ', '') AS strType
 	, item.strItemNo
 	, SUM(cf.dblItemAmount) dblItemAmountTotal
+	, cf.intSequence 
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
 	ON ST.intStoreId = CH.intStoreId 
@@ -17,9 +18,8 @@ LEFT JOIN tblARInvoice Inv
 	ON Inv.intInvoiceId = CH.intInvoiceId 
 INNER JOIN vyuSTCheckoutChangeFund cf 
 	ON cf.intCheckoutId = CH.intCheckoutId 
-INNER JOIN tblICItem item 
+LEFT JOIN tblICItem item 
 	ON item.intItemId = cf.intItemId 
-WHERE cf.dblItemAmount > 0	
 GROUP BY ST.intStoreId, 
 		 ST.intStoreNo, 
 		 ST.strRegion, 
@@ -28,4 +28,5 @@ GROUP BY ST.intStoreId,
 		 CH.dtmCheckoutDate, 
 		 ISNULL(Inv.ysnPosted, 0), 
 		 cf.strType,
-		 item.strItemNo
+		 item.strItemNo,
+		 cf.intSequence

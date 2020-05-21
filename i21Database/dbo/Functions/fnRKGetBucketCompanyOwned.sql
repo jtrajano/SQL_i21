@@ -32,6 +32,8 @@ RETURNS @returntable TABLE
 	, strContractNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, dtmEndDate DATETIME
 	, strFutureMonth NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, intCurrencyId INT
+	, strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -63,8 +65,10 @@ BEGIN
 		, strContractNumber
 		, dtmEndDate
 		, strFutureMonth
+		, intCurrencyId
+		, strCurrency
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.intContractHeaderId, c.strInOut, c.ysnNegate, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.intTransactionRecordHeaderId, c.intContractHeaderId, c.strInOut, c.ysnNegate, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
 			, dtmCreatedDate
 			, dtmTransactionDate
 			, dblTotal = c.dblOrigQty
@@ -91,6 +95,8 @@ BEGIN
 			, strContractNumber
 			, dtmEndDate
 			, strFutureMonth
+			, intCurrencyId
+			, strCurrency
 		FROM vyuRKGetSummaryLog c
 		WHERE strBucketType = 'Company Owned'
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)

@@ -37,9 +37,15 @@ SELECT
 	 , dblQtyInvoiced = CASE WHEN iv.ysnPosted = 1 THEN ivd.dblQtyShipped ELSE 0.0 END
 	 , intCurrencyId = currency.intCurrencyID
 	 , strCurrency = currency.strCurrency
+	 , Commodity.strCommodityCode
+	 , Category.strCategoryCode
+	 , Commodity.strDescription strCommodityDescrition
+	 , Category.strDescription strCategoryDescription
 FROM tblICInventoryShipment s
 	 LEFT JOIN tblICInventoryShipmentItem si ON si.intInventoryShipmentId = s.intInventoryShipmentId
 	 LEFT JOIN tblICItem i ON i.intItemId = si.intItemId
+	 LEFT JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+	 LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = i.intCommodityId
 	 LEFT JOIN tblARCustomer c ON c.[intEntityId] = s.intEntityCustomerId
 	 LEFT JOIN tblEMEntity e ON e.intEntityId = c.[intEntityId]
 	 LEFT JOIN [tblEMEntityLocation] l ON l.intEntityLocationId = s.intShipToLocationId

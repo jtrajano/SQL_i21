@@ -4,6 +4,7 @@
     [intInventoryReceiptId] INT            NULL,
     [intStoreId]            INT            NULL,
     [intLotteryGameId]      INT            NULL,
+    [intTicketPerPack]      INT            NULL,
     [strBookNumber]         NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
     [dtmReceiptDate]        DATETIME       NOT NULL,
     [ysnPosted]             BIT            CONSTRAINT [DF_tblSTReceiveLottery_ysnPosted] DEFAULT ((0)) NOT NULL,

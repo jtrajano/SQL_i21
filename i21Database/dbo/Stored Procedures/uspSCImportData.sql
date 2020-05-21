@@ -1089,6 +1089,7 @@ BEGIN TRY
 				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE QM.intTicketId = ERT.intTicketId)
 				ORDER BY QM.intSort ASC
 				
+				--This process is for ticket that does not have delivery sheet
 				INSERT INTO tblSCTicketSplit(
 					[intTicketId], 
 					[intCustomerId], 
@@ -1113,8 +1114,41 @@ BEGIN TRY
 				AND SC.intTicketType = SCT.intTicketType
 				AND SC.strInOutFlag = SCT.strInOutFlag
 				--AND SC.intEntityId = SCT.intEntityId
+				AND SC.intDeliverySheetId IS NULL
 				AND SC.intProcessingLocationId = SCT.intProcessingLocationId
 				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SCS.intTicketId = ERT.intTicketId)
+
+
+				--This is for ticket with delivery sheets
+				INSERT INTO tblSCTicketSplit(
+					[intTicketId], 
+					[intCustomerId], 
+					[dblSplitPercent], 
+					[intStorageScheduleTypeId],
+					[strDistributionOption],
+					[intStorageScheduleId],
+					[intConcurrencyId]
+				)
+				SELECT 
+					[intTicketId]					= SC.intTicketId 
+					,[intCustomerId]				= DSS.intEntityId 
+					,[dblSplitPercent]				= DSS.dblSplitPercent 
+					,[intStorageScheduleTypeId]		= DSS.intStorageScheduleTypeId
+					,[strDistributionOption]		= DSS.strDistributionOption
+					,[intStorageScheduleId]			= DSS.intStorageScheduleRuleId
+					,[intConcurrencyId]				= 1
+										
+				FROM @temp_xml_table SCT --*ON SCT.intTicketId = SCS.intTicketId
+				INNER JOIN tblSCTicket SC ON SC.strTicketNumber = SCT.strTicketNumber 
+				INNER JOIN tblSCDeliverySheetSplit DSS ON SC.intDeliverySheetId = DSS.intDeliverySheetId
+				AND SC.intTicketPoolId = SCT.intTicketPoolId
+				AND SC.intTicketType = SCT.intTicketType
+				AND SC.strInOutFlag = SCT.strInOutFlag
+				--AND SC.intEntityId = SCT.intEntityId
+				AND SC.intProcessingLocationId = SCT.intProcessingLocationId				
+				AND SC.intDeliverySheetId IS NOT NULL
+				WHERE NOT EXISTS (SELECT TOP 1 1 FROM @existingTicketTable ERT WHERE SC.intTicketId = ERT.intTicketId)
+
 
 			END
 			ELSE
@@ -1580,8 +1614,9 @@ BEGIN TRY
 				FROM @temp_xml_splitdstable SCDS
 				INNER JOIN @temp_xml_deliverysheet SCD ON SCD.intDeliverySheetId = SCDS.intDeliverySheetId
 				INNER JOIN tblSCDeliverySheet DS ON DS.strDeliverySheetNumber = SCD.strDeliverySheetNumber 
-				WHERE DS.intDeliverySheetId IS NULL
+				--WHERE DS.intDeliverySheetId IS NULL
 				ORDER BY SCDS.intDeliverySheetSplitId  ASC
+								
 			END
 			ELSE
 			BEGIN

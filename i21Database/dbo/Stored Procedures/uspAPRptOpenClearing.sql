@@ -836,7 +836,7 @@ SELECT * FROM (
  CROSS APPLY tblSMCompanySetup compSetup 
  WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0 
+  -- OR  (dblClearingAmount) != 0 
   UNION ALL  
  --CHARGES  
  SELECT  
@@ -902,7 +902,7 @@ SELECT * FROM (
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0  
+  -- OR  (dblClearingAmount) != 0  
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
@@ -968,7 +968,7 @@ SELECT * FROM (
  CROSS APPLY tblSMCompanySetup compSetup  
   WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0  
+  -- OR  (dblClearingAmount) != 0  
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT  
@@ -1034,7 +1034,7 @@ SELECT * FROM (
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0 
+  -- OR  (dblClearingAmount) != 0 
  UNION ALL
  --LOAD COST TRANSACTION ITEM
  SELECT  
@@ -1100,7 +1100,7 @@ SELECT * FROM (
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0  
+  -- OR  (dblClearingAmount) != 0  
 --  OUTER APPLY  
 --  (  
 --   SELECT strVoucherIds =   
@@ -1230,7 +1230,7 @@ INNER JOIN tblGRSettleStorage SS
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0   
+  -- OR  (dblClearingAmount) != 0   
    UNION ALL 
  --PATRONAGE
  SELECT  
@@ -1292,7 +1292,7 @@ INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 
       (dblClearingQty) != 0 
-  OR  (dblClearingAmount) != 0  
+  -- OR  (dblClearingAmount) != 0  
 ) MainQuery '  
   
 --SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');  

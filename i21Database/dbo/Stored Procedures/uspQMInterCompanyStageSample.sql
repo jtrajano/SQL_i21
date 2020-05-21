@@ -16,6 +16,16 @@ BEGIN TRY
 		,@strRowState NVARCHAR(50) = NULL
 		,@intSamplePreStageId INT
 		,@strFromCompanyName NVARCHAR(150)
+		,@intCompanyId INT
+
+	SELECT @intCompanyId = intCompanyId
+	FROM dbo.tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	UPDATE dbo.tblQMSample
+	SET intCompanyId = @intCompanyId
+	WHERE intCompanyId IS NULL
+
 	DECLARE @tblQMSamplePreStage TABLE (intSamplePreStageId INT)
 
 	INSERT INTO @tblQMSamplePreStage (intSamplePreStageId)
@@ -67,7 +77,11 @@ BEGIN TRY
 				,@strDelete = TC.strDelete
 				,@strToTransactionType = TT1.strTransactionType
 				,@intCompanyLocationId = TC.intCompanyLocationId
-				,@intToBookId = TC.intToBookId
+				,@intToBookId = CASE 
+					WHEN S.ysnParent = 0
+						THEN TC.intFromBookId
+					ELSE TC.intToBookId
+					END
 				,@strFromCompanyName = MC.strCompanyName
 			FROM tblSMInterCompanyTransactionConfiguration TC WITH (NOLOCK)
 			JOIN tblSMInterCompanyTransactionType TT WITH (NOLOCK) ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId

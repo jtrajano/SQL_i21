@@ -289,167 +289,72 @@ BEGIN TRY
 				END
 			END
 
-		INSERT INTO @SummaryLogs
-		(
-			  strBatchId
-			, strTransactionType
-			, intTransactionRecordId
-			, strTransactionNumber
-			, dtmTransactionDate
-			, intContractDetailId
-			, intContractHeaderId
-			, intTicketId
-			, intCommodityId
-			, intCommodityUOMId
-			, intItemId
-			, intBookId
-			, intSubBookId
-			, intLocationId
-			, intFutureMarketId
-			, intFutureMonthId
-			, dblNoOfLots
-			, dblQty
-			, dblPrice
-			, intEntityId
-			, ysnDelete
-			, intUserId
-			, strNotes
-		)
-		SELECT
-			  strBatchId = @strBatchId
-			, strTransactionType = r.intTransactionTypeId
-			, intTransactionRecordId = r.intTransactionId
-			, strTransactionNumber = r.strTransactionId
-			, dtmTransactionDate = r.dtmDate
-			, intContractDetailId = NULL
-			, intContractHeaderId = NULL
-			, intTicketId = @intTicketId
-			, intCommodityId = c.intCommodityId
-			, intCommodityUOMId = r.intItemUOMId
-			, intItemId = r.intItemId
-			, intBookId = NULL
-			, intSubBookId = NULL
-			, intLocationId = @intLocationId
-			, intFutureMarketId = NULL
-			, intFutureMonthId = NULL
-			, dblNoOfLots = NULL
-			, dblQty = r.dblQty
-			, dblPrice = @dblNetUnits
-			, intEntityId = @intEntityId
-			, ysnDelete = 0
-			, intUserId = @intUserId
-			, strNotes = NULL
-		FROM @ItemReservationTableType r
-			INNER JOIN tblICItem i ON i.intItemId = r.intItemId
-			LEFT OUTER JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+		INSERT INTO @SummaryLogs (    
+            strBatchId
+            ,strBucketType
+            ,strTransactionType
+            ,intTransactionRecordId 
+            ,intTransactionRecordHeaderId
+            ,strDistributionType
+            ,strTransactionNumber 
+            ,dtmTransactionDate 
+            ,intContractDetailId 
+            ,intContractHeaderId 
+            ,intTicketId 
+            ,intCommodityId 
+            ,intCommodityUOMId 
+            ,intItemId 
+            ,intBookId 
+            ,intSubBookId 
+            ,intLocationId 
+            ,intFutureMarketId 
+            ,intFutureMonthId 
+            ,dblNoOfLots 
+            ,dblQty 
+            ,dblPrice 
+            ,intEntityId 
+            ,ysnDelete 
+            ,intUserId 
+            ,strNotes     
+        )
+         SELECT
+            strBatchId = NULL
+            ,strBucketType = 'On Hold'
+            ,strTransactionType = 'Scale Ticket'
+            ,intTransactionRecordId = intTicketId
+            ,intTransactionRecordHeaderId = intTicketId
+            ,strDistributionType = strStorageTypeDescription
+            ,strTransactionNumber = strTicketNumber
+            ,dtmTransactionDate  = dtmTicketDateTime
+            ,intContractDetailId = intContractId
+            ,intContractHeaderId = intContractSequence
+            ,intTicketId  = intTicketId
+            ,intCommodityId  = TV.intCommodityId
+            ,intCommodityUOMId  = CUM.intCommodityUnitMeasureId
+            ,intItemId = TV.intItemId
+            ,intBookId = NULL
+            ,intSubBookId = NULL
+            ,intLocationId = intProcessingLocationId
+            ,intFutureMarketId = NULL
+            ,intFutureMonthId = NULL
+            ,dblNoOfLots = 0
+            ,dblQty = CASE WHEN @ysnPost = 1
+						THEN 
+							(CASE WHEN strInOutFlag = 'I' THEN dblNetUnits ELSE dblNetUnits * -1 END )
+						ELSE
+							(CASE WHEN strInOutFlag = 'I' THEN dblNetUnits * -1 ELSE dblNetUnits END )
+						END
 
-		INSERT INTO @SummaryLogs
-		(
-			  strBatchId
-			, strTransactionType
-			, intTransactionRecordId
-			, strTransactionNumber
-			, dtmTransactionDate
-			, intContractDetailId
-			, intContractHeaderId
-			, intTicketId
-			, intCommodityId
-			, intCommodityUOMId
-			, intItemId
-			, intBookId
-			, intSubBookId
-			, intLocationId
-			, intFutureMarketId
-			, intFutureMonthId
-			, dblNoOfLots
-			, dblQty
-			, dblPrice
-			, intEntityId
-			, ysnDelete
-			, intUserId
-			, strNotes
-		)
-		SELECT
-			  strBatchId = @strBatchId
-			, strTransactionType = r.intTransactionTypeId
-			, intTransactionRecordId = r.intTransactionId
-			, strTransactionNumber = r.strTransactionId
-			, dtmTransactionDate = r.dtmTransactionDate
-			, intContractDetailId = NULL
-			, intContractHeaderId = NULL
-			, intTicketId = @intTicketId
-			, intCommodityId = c.intCommodityId
-			, intCommodityUOMId = r.intItemUOMId
-			, intItemId = r.intItemId
-			, intBookId = NULL
-			, intSubBookId = NULL
-			, intLocationId = @intLocationId
-			, intFutureMarketId = NULL
-			, intFutureMonthId = NULL
-			, dblNoOfLots = NULL
-			, dblQty = r.dblQty
-			, dblPrice = @dblNetUnits
-			, intEntityId = @intEntityId
-			, ysnDelete = 0
-			, intUserId = @intUserId
-			, strNotes = NULL
-		FROM @InTransitTableType r
-			INNER JOIN tblICItem i ON i.intItemId = r.intItemId
-			LEFT OUTER JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
-
-		INSERT INTO @SummaryLogs
-		(
-			  strBatchId
-			, strTransactionType
-			, intTransactionRecordId
-			, strTransactionNumber
-			, dtmTransactionDate
-			, intContractDetailId
-			, intContractHeaderId
-			, intTicketId
-			, intCommodityId
-			, intCommodityUOMId
-			, intItemId
-			, intBookId
-			, intSubBookId
-			, intLocationId
-			, intFutureMarketId
-			, intFutureMonthId
-			, dblNoOfLots
-			, dblQty
-			, dblPrice
-			, intEntityId
-			, ysnDelete
-			, intUserId
-			, strNotes
-		)
-		SELECT
-		      strBatchId = @strBatchId
-			, strTransactionType = r.intTransactionTypeId
-			, intTransactionRecordId = r.intTransactionId
-			, strTransactionNumber = r.strTransactionId
-			, dtmTransactionDate = r.dtmDate
-			, intContractDetailId = NULL
-			, intContractHeaderId = NULL
-			, intTicketId = r.intTransactionId
-			, intCommodityId = c.intCommodityId
-			, intCommodityUOMId = r.intItemUOMId
-			, intItemId = r.intItemId
-			, intBookId = NULL
-			, intSubBookId = NULL
-			, intLocationId = @intLocationId
-			, intFutureMarketId = NULL
-			, intFutureMonthId = NULL
-			, dblNoOfLots = NULL
-			, dblQty = r.dblQty
-			, dblPrice = @dblNetUnits
-			, intEntityId = @intEntityId
-			, ysnDelete = 0
-			, intUserId = @intUserId
-			, strNotes = NULL
-		FROM @ItemsForInTransitCosting r
-			INNER JOIN tblICItem i ON i.intItemId = r.intItemId
-			LEFT OUTER JOIN tblICCommodity c ON c.intCommodityId = i.intCommodityId
+            ,dblPrice = dblUnitPrice
+            ,intEntityId 
+            ,ysnDelete = 0
+            ,intUserId = NULL
+            ,strNotes = strTicketComment
+        FROM tblSCTicket TV
+        LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
+        LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo
+        LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = IUM.intUnitMeasureId AND CUM.intCommodityId = TV.intCommodityId
+        WHERE TV.intTicketId = @intTicketId
 
 		EXEC uspRKLogRiskPosition @SummaryLogs
 	END

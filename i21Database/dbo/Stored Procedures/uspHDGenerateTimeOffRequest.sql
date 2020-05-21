@@ -14,7 +14,11 @@ declare @queryResult cursor
 		,@dtmPRDate datetime
 		
 		,@intI int
-		,@intFixEightHours int = 8;
+		,@intFixEightHours int = 8
+
+		,@intScreenId int
+		,@strApprovalStatus nvarchar(100)
+		,@intHDTimeOffRequestId int;
 
 if (@intEntityId = 0)
 begin
@@ -68,10 +72,41 @@ begin
 		,@strRequestId
 		,@dblRequest
 		,@intNoOfDays
+
+	select @intScreenId = intScreenId from tblSMScreen where strNamespace = 'Payroll.view.TimeOffRequest'
 end
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
+
+	--check if time off was rejected in approval
+	--if rejescted, do not insert, or remove it from tblHDTimeOffRequest
+	select @strApprovalStatus = strApprovalStatus from tblSMTransaction where intScreenId = @intScreenId and intRecordId = @intTimeOffRequestId
+	if ISNULL(@strApprovalStatus, '') <> ''
+	begin
+		if @strApprovalStatus = 'Rejected' or @strApprovalStatus = 'Closed'
+		begin
+			--check if already inserted to tblHDTimeOffRequest to delete it
+			select @intHDTimeOffRequestId = intTimeOffRequestId from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId
+			if ISNULL(@intHDTimeOffRequestId, 0) <> 0
+			begin
+				DELETE from [dbo].[tblHDTimeOffRequest] where intTimeOffRequestId = @intHDTimeOffRequestId
+			end
+
+			--continue
+			FETCH NEXT FROM @queryResult
+			INTO @intTimeOffRequestId
+				,@dtmDateFrom
+				,@intEntityEmployeeId
+				,@strRequestId
+				,@dblRequest
+				,@intNoOfDays
+
+			continue
+		end
+	end
+	
+
 
 	if (@intNoOfDays > 1)
 	begin
@@ -130,13 +165,15 @@ BEGIN
 		if (@strPRDayName <> 'Saturday' and @strPRDayName <> 'Sunday')
 		begin
 			--time off was edited, update the record
-			if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId and dtmPRDate != @dtmPRDate)
+			if exists (select 1 from tblHDTimeOffRequest where intPREntityEmployeeId = @intEntityEmployeeId and intPRTimeOffRequestId = @intTimeOffRequestId and (
+				dtmPRDate != @dtmPRDate or dblPRRequest != @dblRequest
+			))
 			begin
 				UPDATE [dbo].[tblHDTimeOffRequest] 
 				SET 
 					[dtmPRDate] = @dtmPRDate,
 					[strPRDayName] = @strPRDayName,
-					[dblPRRequest] = @intFixEightHours,
+					[dblPRRequest] = @dblRequest,
 					[intPRNoOfDays] = @intNoOfDays,
 					[intConcurrencyId] = [intConcurrencyId] + 1
 				WHERE 

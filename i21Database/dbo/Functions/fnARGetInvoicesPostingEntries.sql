@@ -789,7 +789,12 @@ BEGIN
 			,strBatchID					= @BatchId
 			,intAccountId				= (CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType IN ('Non-Inventory','Service'))) 
 												THEN
-													IST.intGeneralAccountId												
+												    CASE WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE  strType IN ('Non-Inventory')))
+													THEN
+														IST.intSalesAccountId
+													ELSE 
+													    IST.intGeneralAccountId
+													END												
 												WHEN (EXISTS(SELECT NULL FROM tblICItem WHERE intItemId = B.intItemId AND strType = 'Other Charge')) 
 												THEN
 													IST.intOtherChargeIncomeAccountId

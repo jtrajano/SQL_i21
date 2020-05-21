@@ -21,18 +21,29 @@ BEGIN TRY
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 	DECLARE @ysnAllowBlankGLEntries AS BIT = 1
 	DECLARE @dummyGLEntries AS RecapTableType
-	DECLARE @intSalesContractId INT
+	DECLARE @intPContractDetailId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intDestinationFOBPointId INT
+	DECLARE @ysnCancel BIT
+	DECLARE @ysnIsReturn BIT = 0
+	DECLARE @strCMActualCostId NVARCHAR(100)
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
 		,@strFOBPoint = FT.strFobPoint
-		,@intFOBPointId = FP.intFobPointId
+		,@ysnCancel = ISNULL(L.ysnCancelled, 0)
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
 	WHERE intLoadId = @intLoadId
+
+	SELECT TOP 1 @ysnIsReturn = 1, @strCMActualCostId = I.strInvoiceNumber
+	FROM tblLGLoad L 
+		JOIN tblARInvoice CM ON L.intLoadId = CM.intLoadId
+		JOIN tblARInvoice I ON I.intInvoiceId = CM.intOriginalInvoiceId
+	WHERE L.intLoadId = @intLoadId
+		AND CM.strTransactionType = 'Credit Memo'
+		AND CM.ysnPosted = 1
 
 	SELECT @intDestinationFOBPointId = intFobPointId
 	FROM tblICFobPoint
@@ -116,26 +127,9 @@ BEGIN TRY
 						LD.dblNet
 					ELSE 
 						LD.dblQuantity
-				END 
+				END * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 			,dblUOMQty = IU.dblUnitQty
-			,dblCost = ISNULL(
-							dbo.fnMultiply( --Priced
-								dbo.fnCalculateCostBetweenUOM(
-									LD.intPriceUOMId
-									, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-									, (LD.dblUnitPrice / CASE WHEN (LSC.ysnSubCurrency = 1) THEN LSC.intCent ELSE 1 END)
-								), 
-								CASE --if contract FX tab is setup
-									WHEN AD.ysnValidFX = 1 THEN 
-									CASE WHEN (ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) <> @DefaultCurrencyId AND CD.intInvoiceCurrencyId <> @DefaultCurrencyId)
-											THEN ISNULL(FX.dblFXRate, 1) --foreign price to foreign FX, use master FX rate
-										ELSE 1 END
-									ELSE  --if contract FX tab is not setup
-									CASE WHEN (@DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)) 
-										THEN ISNULL(FX.dblFXRate, 1)
-										ELSE 1 END
-									END)
-							,dbo.fnMultiply( --Unpriced or Dropship
+			,dblCost = dbo.fnMultiply(
 								dbo.fnCalculateCostBetweenUOM(
 									AD.intSeqPriceUOMId
 									, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
@@ -164,7 +158,7 @@ BEGIN TRY
 											ELSE 1 END
 									 END
 								) 
-							)
+							
 			,dblValue = 0
 			,dblSalesPrice = 0.0
 			,intCurrencyId = CASE WHEN AD.ysnValidFX = 1 THEN CD.intInvoiceCurrencyId ELSE ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) END
@@ -175,7 +169,7 @@ BEGIN TRY
 			,intTransactionTypeId = 22
 			,intLotId = NULL
 			,intSourceTransactionId = L.intLoadId
-			,strSourceTransactionId = L.strLoadNumber
+			,strSourceTransactionId = CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN @strCMActualCostId ELSE L.strLoadNumber END
 			,intSourceTransactionDetailId = LD.intLoadDetailId
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
@@ -209,8 +203,7 @@ BEGIN TRY
 									 END
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId
-			AND LD.intPCompanyLocationId = IL.intLocationId
+		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
 		JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
@@ -395,6 +388,85 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
 	END
+
+
+--Update Contract Balance and Scheduled Qty for Drop Ship
+IF (@intPurchaseSale = 3)
+BEGIN 
+	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
+	INSERT INTO @ItemsFromInventoryReceipt (
+		-- Header
+		[intInventoryReceiptId] 
+		,[strInventoryReceiptId] 
+		,[strReceiptType] 
+		,[intSourceType] 
+		,[dtmDate] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		-- Detail 
+		,[intInventoryReceiptDetailId] 
+		,[intItemId] 
+		,[intLocationId] 
+		,[intItemLocationId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[intItemUOMId] 
+		,[intWeightUOMId] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[intLineNo] 
+		,[ysnLoad]
+		,[intLoadReceive]
+	)
+	SELECT 
+		-- Header
+		[intInventoryReceiptId] = L.intLoadId
+		,[strInventoryReceiptId]  = L.strLoadNumber
+		,[strReceiptType] = 'Purchase Contract'
+		,[intSourceType] = -1
+		,[dtmDate] = GETDATE()
+		,[intCurrencyId] = NULL
+		,[dblExchangeRate] = 1
+		-- Detail 
+		,[intInventoryReceiptDetailId] = LD.intLoadDetailId
+		,[intItemId] = LD.intItemId
+		,[intLocationId] = LD.intPCompanyLocationId
+		,[intItemLocationId] = (SELECT TOP 1 ITL.intItemLocationId
+									FROM tblICItemLocation ITL
+									WHERE ITL.intItemId = LD.intItemId
+										AND ITL.intLocationId = CD.intCompanyLocationId)
+		,[intSubLocationId] = LD.intSSubLocationId
+		,[intStorageLocationId] = NULL
+		,[intItemUOMId] = LD.intItemUOMId
+		,[intWeightUOMId] = LD.intWeightItemUOMId
+		,[dblQty] = CASE 
+					WHEN @ysnPost = 1 AND ISNULL(L.ysnCancelled, 0) = 0
+						THEN LD.dblQuantity
+					ELSE -1 * LD.dblQuantity
+					END
+					--* CASE WHEN (L.ysnCancelled = 1) THEN -1 ELSE 1 END
+		,[dblUOMQty] = IU.dblUnitQty
+		,[dblCost] = CD.dblCashPrice
+		,[intLineNo] = ISNULL(LD.intPContractDetailId, 0)
+		,[ysnLoad] = CH.ysnLoad
+		,[intLoadReceive] = CASE WHEN CH.ysnLoad = 1 THEN 
+								CASE WHEN @ysnPost = 1 THEN -1 ELSE 1 END
+							ELSE NULL END
+	FROM tblLGLoad L
+		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblICItemUOM IU ON IU.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
+	WHERE L.intLoadId = @intLoadId
+
+	EXEC dbo.uspCTReceived @ItemsFromInventoryReceipt
+		,@intEntityUserSecurityId
+		,@ysnPost
+END
+
+
 END TRY
 
 BEGIN CATCH

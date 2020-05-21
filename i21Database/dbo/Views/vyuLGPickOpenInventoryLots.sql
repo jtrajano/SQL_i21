@@ -114,10 +114,10 @@ FROM (
 	   ,dblTotalCost = CTDetail.dblTotalCost
 	   ,intWeightItemUOMId = LD.intWeightItemUOMId
 	   ,strPosition = PO.strPosition
-	   ,intBookId = CTDetail.intBookId
-	   ,strBook = BO.strBook COLLATE Latin1_General_CI_AS
-	   ,intSubBookId = CTDetail.intSubBookId
-	   ,strSubBook = SB.strSubBook COLLATE Latin1_General_CI_AS 
+	   ,intBookId = ISNULL(Lot.intBookId, CTDetail.intBookId)
+	   ,strBook = ISNULL(LBO.strBook, BO.strBook)
+	   ,intSubBookId = ISNULL(Lot.intSubBookId, CTDetail.intSubBookId)
+	   ,strSubBook = ISNULL(LSB.strSubBook, SB.strSubBook)
 	   ,intCropYear = CAST (0 AS int)
 	   ,intFutureMarketId = FM.intFutureMarketId
 	   ,intDefaultCurrencyId = C.intCurrencyID
@@ -163,6 +163,8 @@ FROM (
 		LEFT JOIN tblCTPosition PO ON PO.intPositionId = L.intPositionId
 		LEFT JOIN tblCTBook BO ON BO.intBookId = CTDetail.intBookId
 		LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CTDetail.intSubBookId
+		LEFT JOIN tblCTBook LBO ON LBO.intBookId = Lot.intBookId
+		LEFT JOIN tblCTSubBook LSB ON LSB.intSubBookId = Lot.intSubBookId
 		LEFT JOIN tblICItemUOM CTDetailUOM ON CTDetailUOM.intItemUOMId = CTDetail.intItemUOMId
 		LEFT JOIN tblICUnitMeasure UOM2 ON UOM2.intUnitMeasureId = CTDetailUOM.intUnitMeasureId
 		LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = COM.intFutureMarketId

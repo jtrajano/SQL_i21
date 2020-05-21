@@ -71,6 +71,27 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Missing AR Account Category.'
+    FROM
+	 #ARPostPaymentHeader P
+	INNER JOIN
+    vyuGLAccountDetail GLAD
+        ON P.[intUndepositedFundsId] = GLAD.[intAccountId]
+	WHERE GLAD.[strAccountCategory] IS NULL
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--Payment without payment on detail (get all detail that has 0 payment)
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
@@ -776,31 +797,31 @@ BEGIN
         AND P.[intUndepositedFundsId] IS NOT NULL
         AND GLA.[ysnActive] != @OneBit
 
-	INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	-- GL Account Does not Exist
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Undeposited Funds Account : ' + GLA.[strAccountId] + ' does not exist.'
-	FROM
-		#ARPostPaymentHeader P
-    LEFT OUTER JOIN 
-		#ARPaymentAccount GLA
-			ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
-    WHERE
-            P.[ysnPost] = @OneBit
-        AND P.[intCompanyLocationId] IS NOT NULL
-        AND P.[intUndepositedFundsId] IS NOT NULL
-        AND GLA.[intAccountId] IS NULL
+	-- INSERT INTO #ARInvalidPaymentData
+    --     ([intTransactionId]
+    --     ,[strTransactionId]
+    --     ,[strTransactionType]
+    --     ,[intTransactionDetailId]
+    --     ,[strBatchId]
+    --     ,[strError])
+	-- -- GL Account Does not Exist
+	-- SELECT
+    --      [intTransactionId]         = P.[intTransactionId]
+    --     ,[strTransactionId]         = P.[strTransactionId]
+    --     ,[strTransactionType]       = @TransType
+    --     ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+    --     ,[strBatchId]               = P.[strBatchId]
+    --     ,[strError]                 = 'Undeposited Funds Account : ' + GLA.[strAccountId] + ' does not exist.'
+	-- FROM
+	-- 	#ARPostPaymentHeader P
+    -- LEFT OUTER JOIN 
+	-- 	#ARPaymentAccount GLA
+	-- 		ON P.[intUndepositedFundsId] = GLA.[intAccountId] 
+    -- WHERE
+    --         P.[ysnPost] = @OneBit
+    --     AND P.[intCompanyLocationId] IS NOT NULL
+    --     AND P.[intUndepositedFundsId] IS NOT NULL
+    --     AND GLA.[intAccountId] IS NULL
 
 	INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
@@ -854,7 +875,7 @@ BEGIN
         AND (CMBA.[ysnActive] != @OneBit OR  CMBA.[intGLAccountId] IS NULL)
 
 
-INSERT INTO #ARInvalidPaymentData
+    INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
         ,[strTransactionId]
         ,[strTransactionType]
@@ -924,7 +945,37 @@ INSERT INTO #ARInvalidPaymentData
      OR ((P.[dblAmountPaid]) <> @ZeroDecimal --Prepayment
 		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId]), @ZeroDecimal) = @ZeroDecimal	
 		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = P.[intTransactionId] AND [dblPayment] <> @ZeroDecimal))
-     )	
+    )
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--INVALID VOUCHER AMOUNT DUE
+    SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Unable to post payment ' + P.[strTransactionId] + ', ' + BILL.strBillId + ' has invalid amount due.'
+	FROM #ARPostPaymentDetail P
+    INNER JOIN tblAPBill BILL ON P.intBillId = BILL.intBillId
+    WHERE P.[ysnPost] = @OneBit
+      AND P.intBillId IS NOT NULL
+      AND (
+            --amount due should be total less payment
+            (BILL.dblAmountDue != (BILL.dblTotal - BILL.dblPayment))
+            OR
+            --amount due cannot be greater than the total
+            (BILL.dblAmountDue > BILL.dblTotal)
+            OR
+            --amount due cannot be negative
+            (BILL.dblAmountDue < 0)
+        )
 
     IF(OBJECT_ID('tempdb..#DUPLICATEINVOICES') IS NOT NULL)
     BEGIN

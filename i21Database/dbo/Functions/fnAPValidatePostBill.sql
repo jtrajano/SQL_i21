@@ -507,11 +507,86 @@ BEGIN
 			OR	C.intBillId IS NULL --DELETED
 			)
 		)--Prepay and Debit Memo transactions
-		
+
+		--VALIDATE THE AMOUNT DUE
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			A.strBillId + ' has invalid amount due.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			34
+		FROM tblAPBill A
+		WHERE 
+		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND 
+		(
+			--amount due should be total less payment
+			(A.dblAmountDue != (A.dblTotal - A.dblPayment))
+			OR
+			--amount due cannot be greater than the total
+			(A.dblAmountDue > A.dblTotal)
+			OR
+			--amount due cannot be negative
+			(A.dblAmountDue < 0)
+		)
+
+		--VALIDATE TAX AMOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			ISNULL(item.strItemNo, A2.strMiscDescription) + ' has invalid tax total.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			36
+		FROM tblAPBill A
+		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
+		LEFT JOIN tblICItem item ON A2.intItemId = item.intItemId
+		OUTER APPLY
+		(
+			SELECT SUM(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax)) AS dblTaxTotal FROM tblAPBillDetailTax B
+			WHERE B.intBillDetailId = A2.intBillDetailId
+		) taxDetails
+		WHERE 
+		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND
+		(
+			(A2.dblTax != ISNULL(taxDetails.dblTaxTotal,0))
+		)
 
 	END
 	ELSE
 	BEGIN
+
+		--BILL WAS POSTED FROM ORIGIN
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT 
+			CASE 
+				WHEN A.intTransactionType = 2 THEN 'Prepayment'
+				WHEN A.intTransactionType = 3 THEN 'Debit Memo'
+				WHEN A.intTransactionType = 13 THEN 'Basis Advance'
+			ELSE ''
+			END
+			+ ' cannot be unpost because it is applied to voucher ' + applied.strBillId,
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			33
+		FROM tblAPBill A 
+		OUTER APPLY (
+			SELECT TOP 1
+				C.strBillId
+			FROM tblAPAppliedPrepaidAndDebit B 
+			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+			WHERE 
+				B.intTransactionId = A.intBillId
+			AND C.ysnPosted = 1
+		) applied
+		WHERE  
+			A.[intBillId] IN (SELECT [intBillId] FROM @tmpBills) 
+		AND A.intTransactionType IN (2, 3, 13)
+		AND A.ysnPosted = 1
+		AND applied.strBillId IS NOT NULL
 
 		--BILL WAS POSTED FROM ORIGIN
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)

@@ -19,7 +19,7 @@ SELECT DISTINCT
 									END COLLATE Latin1_General_CI_AS as strTransaction
 	,intEntityId				  	= CS.intEntityId
 	,strName					  	= E.strName  
-	,strStorageTicketNumber		  = CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
+	,strStorageTicketNumber			= CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
 	,intStorageTypeId			  	= CS.intStorageTypeId
 	,strStorageTypeDescription	  	= ST.strStorageTypeDescription
 	,intCommodityId				  	= CS.intCommodityId
@@ -100,12 +100,14 @@ SELECT DISTINCT
 									)
 	,Category.strCategoryCode
 	,strTransactionStatus           = CASE 
-										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DeliverySheet.ysnPost = 1 THEN 'Posted'
+										WHEN CS.ysnTransferStorage = 1 OR (CS.intTicketId IS NOT NULL AND SC.strTicketStatus = 'C') OR DeliverySheet.ysnPost = 1 THEN 'Posted'
 										ELSE 'Open'
 									END
 	,TSR.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
-	,strStorageTransactionNumber = CASE WHEN CS.ysnTransferStorage = 1 THEN CS.strStorageTicketNumber ELSE TS.strTransferStorageTicket END
+	,strStorageTransactionNumber = CS.strStorageTicketNumber
+	,CS.dblBasis
+	,CS.dblSettlementPrice
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -152,19 +154,20 @@ LEFT JOIN (
 		LEFT JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
 	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+		AND TS.strTransferStorageTicket NOT LIKE '%-R'
 LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
 		AND CS.ysnTransferStorage = 1
 LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
-left join 
-    (
-        select GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId from tblGRStorageHistory GSH
-	join tblCTContractHeader GCH
-		on GCH.intContractHeaderId = GSH.intContractHeaderId
-	join tblCTContractDetail GCD
-		on GCH.intContractHeaderId = GCD.intContractHeaderId
-    
-    )GHistory
+LEFT JOIN (
+	SELECT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
+	FROM tblGRStorageHistory GSH
+	JOIN tblCTContractHeader GCH
+		ON GCH.intContractHeaderId = GSH.intContractHeaderId
+	JOIN tblCTContractDetail GCD
+		ON GCH.intContractHeaderId = GCD.intContractHeaderId
+	WHERE GSH.intTransactionTypeId IN (1,3,5) --Scale, Transfer, Delivery Sheet
+) GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
-        and CS.intStorageTypeId = 2
+        and ST.ysnDPOwnedType = 1

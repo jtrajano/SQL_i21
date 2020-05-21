@@ -18,6 +18,7 @@
 	[ysnShowTotals]				BIT NULL,
 	[strSearchId]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL, 
 	[ysnGroupedColumns]			BIT NULL,
+	[ysnCollapse]				BIT NULL,
     [intConcurrencyId]			INT NOT NULL, 
     CONSTRAINT [PK_tblSMGridLayout] PRIMARY KEY CLUSTERED ([intGridLayoutId] ASC) 
 )
