@@ -140,7 +140,7 @@ BEGIN
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
 	INNER JOIN (tblCTContractDetail cd INNER JOIN tblCTContractHeader ct ON ct.intContractHeaderId = cd.intContractHeaderId)
-		ON cd.intContractDetailId = cd.intContractDetailId
+		ON cd.intContractDetailId = bd.intContractDetailId
 	INNER JOIN @voucherDetailIds bb
 		on bb.intId = bd.intBillDetailId
 	CROSS APPLY (
