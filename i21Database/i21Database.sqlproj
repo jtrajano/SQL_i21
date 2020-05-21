@@ -8684,6 +8684,7 @@
     <Build Include="dbo\Stored Procedures\uspLGGetEntryFormReportContainer.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetInboundShipmentPickedSalesReport.sql" />
     <Build Include="dbo\Views\vyuAPFiscalPeriod.sql" />
+    <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
