@@ -76,6 +76,8 @@ BEGIN
 	INSERT INTO @contractBalance
 	(
 		strTransactionType
+		, intTransactionReferenceId
+		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
 		, intContractTypeId
@@ -105,6 +107,8 @@ BEGIN
 	)
 	SELECT 
 		 strTransactionType = 'Bill'
+		, b.intBillId
+		, b.strBillId
 		, intContractDetailId = bd.intContractDetailId
 		, intContractHeaderId = bd.intContractHeaderId
 		, intContractTypeId = ct.intContractTypeId
@@ -142,7 +146,7 @@ BEGIN
 	) c
 	INNER JOIN tblICItemUOM iuom ON iuom.intItemUOMId = bd.intUnitOfMeasureId
 	INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = c.intCommodityId AND cum.intUnitMeasureId = iuom.intUnitMeasureId
-	WHERE bd.intItemId > 0
+	WHERE bd.intItemId > 0 AND bd.intContractDetailId > 0
 
 	EXEC uspCTLogContractBalance @contractBalance, 0
 
