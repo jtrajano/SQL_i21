@@ -1,7 +1,7 @@
 ﻿PRINT N'START- IC Add Constraint'
 GO
 
--- Add the CHECK CONSTRAINTS in tblICItemUOM
+-- Add the CHECK CONSTRAINTS in tblICItem 
 IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_AllowLotTrackingChange' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItem', 'U'))
 BEGIN
 	EXEC('

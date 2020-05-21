@@ -8181,6 +8181,7 @@
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
+    <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
