@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspICGenerateStockMovementReport]
 	@strResetType AS NVARCHAR(500) = 'Commodity',
-	@intUserId INT
+	@intUserId INT,
+	@ysnAutoRebuild BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -8,6 +9,31 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
+
+-- Check auto-rebuild should continue or not.
+IF @ysnAutoRebuild = 1 
+BEGIN 
+	--If there is log, do the auto rebuild. 
+	--If the last rebuild is more than one day old, do the auto rebuild. 
+	IF NOT (
+		EXISTS (SELECT TOP 1 1 FROM tblICInventoryStockMovementReportRebuildLog WHERE FLOOR(CAST(dtmCreated AS FLOAT)) - FLOOR(CAST(GETDATE() AS FLOAT)) >= 1) 
+		OR NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryStockMovementReportRebuildLog) 
+	)
+	BEGIN 
+		RETURN; 
+	END 
+END 
+
+BEGIN 
+	TRUNCATE TABLE tblICInventoryStockMovementReportRebuildLog
+	INSERT INTO tblICInventoryStockMovementReportRebuildLog (
+		dtmCreated
+		,intCreatedEntityId
+	)
+	SELECT 
+		GETDATE()
+		,@intUserId
+END 
 
 DECLARE @intReturnValue AS INT = 0; 
 DECLARE @Ownership_Own AS INT = 1
