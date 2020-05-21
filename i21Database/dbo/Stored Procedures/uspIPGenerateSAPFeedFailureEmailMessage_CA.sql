@@ -101,6 +101,41 @@ BEGIN TRY
 		SET ysnMailSent = 1
 		WHERE ISNULL(ysnMailSent, 0) = 0
 			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+
+		SELECT @strDetail = @strDetail + 
+		'<tr>
+			<td>&nbsp;' + CASE 
+				WHEN UPPER(strTransactionType) = 'SHIPPINGINSTRUCTION'
+					THEN 'LSI'
+				WHEN UPPER(strTransactionType) = 'SHIPMENT'
+					THEN 'LS'
+				WHEN UPPER(strTransactionType) = 'LSI_CANCEL'
+					THEN 'LSI Cancel'
+				ELSE ISNULL(strTransactionType, '')
+				END + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strCustomerReference, '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strERPPONumber, '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strLoadNumber, '') + '</td>' + 
+			'<td>&nbsp;' + CASE 
+				WHEN UPPER(strAction) = 'ADDED'
+					THEN 'Create'
+				WHEN UPPER(strAction) = 'MODIFIED'
+					THEN 'Update'
+				WHEN UPPER(strAction) = 'CANCEL'
+					THEN 'Cancel'
+				ELSE ISNULL(strAction, '')
+				END + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strImportStatus, '') + '</td>' + 
+			'<td>&nbsp;' + ISNULL(strInternalErrorMessage, '') + '</td>
+		</tr>'
+		FROM tblIPLoadArchive t WITH (NOLOCK)
+		WHERE ISNULL(ysnInternalMailSent, 0) = 0
+			AND ISNULL(strInternalErrorMessage, '') NOT IN ('')
+
+		UPDATE tblIPLoadArchive
+		SET ysnInternalMailSent = 1
+		WHERE ISNULL(ysnInternalMailSent, 0) = 0
+			AND ISNULL(strInternalErrorMessage, '') NOT IN ('')
 	END
 
 	IF @strMessageType = 'LSI'

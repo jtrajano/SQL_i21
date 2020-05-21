@@ -33,6 +33,8 @@
 	strSessionId				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmTransactionDate			DATETIME DEFAULT(GETDATE()),
 	ysnMailSent					BIT DEFAULT 0,
+	strInternalErrorMessage		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	ysnInternalMailSent			BIT DEFAULT 0,
 
 	CONSTRAINT [PK_tblIPLoadArchive_intStageLoadId] PRIMARY KEY ([intStageLoadId])
 )

@@ -59,6 +59,7 @@ BEGIN TRY
 		,@intLocationId INT
 		,@ysnPosted BIT
 		,@intLoadShippingInstructionId INT
+		,@strContainerErrMsg NVARCHAR(MAX)
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
 		,@intOldPositionId INT
@@ -224,6 +225,7 @@ BEGIN TRY
 				,@intLocationId = NULL
 				,@ysnPosted = NULL
 				,@intLoadShippingInstructionId = NULL
+				,@strContainerErrMsg = ''
 
 			SELECT @strDescription = NULL
 				,@intOldPurchaseSale = NULL
@@ -1868,6 +1870,60 @@ BEGIN TRY
 				END
 			END
 
+			IF ISNULL(@ysnPosted, 0) = 1
+				AND EXISTS (
+					SELECT 1
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
+			BEGIN
+				SELECT @strContainerErrMsg = ''
+
+				-- Container table with Staging container table
+				IF EXISTS (
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblLGLoadContainer LC
+					WHERE LC.intLoadId = @intLoadId
+
+					EXCEPT
+
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
+				BEGIN
+					SELECT @strContainerErrMsg = 'Container mismatch is there. '
+				END
+
+				-- Staging container table with Container table
+				IF EXISTS (
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+
+					EXCEPT
+
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblLGLoadContainer LC
+					WHERE LC.intLoadId = @intLoadId
+					)
+				BEGIN
+					SELECT @strContainerErrMsg = 'Container mismatch is there. '
+				END
+			END
+
 			-- To set Contract Planned Availability Date and send Contract feed to SAP
 			-- Also it sends Shipment feed to SAP
 			IF @strRowState = 'Added'
@@ -1904,6 +1960,7 @@ BEGIN TRY
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
+				,strInternalErrorMessage
 				)
 			SELECT strCustomerReference
 				,strERPPONumber
@@ -1929,6 +1986,7 @@ BEGIN TRY
 				,''
 				,'Success'
 				,strSessionId
+				,@strContainerErrMsg
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
 
@@ -2015,6 +2073,7 @@ BEGIN TRY
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
+				,strInternalErrorMessage
 				)
 			SELECT strCustomerReference
 				,strERPPONumber
@@ -2040,6 +2099,7 @@ BEGIN TRY
 				,@ErrMsg
 				,'Failed'
 				,strSessionId
+				,@strContainerErrMsg
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
 
