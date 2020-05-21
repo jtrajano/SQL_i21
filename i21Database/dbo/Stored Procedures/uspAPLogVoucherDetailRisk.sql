@@ -129,7 +129,7 @@ BEGIN
 		, intPriceUOMId = bd.intCostUOMId--cd.intPriceItemUOMId
 		, cd.dtmStartDate
 		, cd.dtmEndDate
-		, dblQty = CASE WHEN @remove = 1 THEN -bd.dblQtyReceived ELSE bd.dblQtyReceived END
+		, dblQty = CASE WHEN @remove = 1 THEN bd.dblQtyReceived ELSE -bd.dblQtyReceived END
 		, cd.intContractStatusId
 		, cd.intBookId
 		, cd.intSubBookId
