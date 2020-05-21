@@ -159,6 +159,8 @@ SELECT
 	,dblCost						= MAX(t.dblCost)
 	,Lot.strWarehouseRefNo
 	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition) 
+	,Lot.strCargoNo
+	,Lot.strWarrantNo
 FROM 
 	@tblInventoryTransaction t 
 	INNER JOIN tblICItem i 
@@ -223,5 +225,7 @@ GROUP BY i.intItemId
 		,CostMethod.strCostingMethod
 		,Lot.strWarehouseRefNo
 		,Lot.strCondition
+		,Lot.strCargoNo
+		,Lot.strWarrantNo
 HAVING	(@ysnHasStockOnly = 1 AND (SUM(t.dblQty) <> 0 OR SUM(t.dblUnitStorage) <> 0))
 		OR @ysnHasStockOnly = 0 
