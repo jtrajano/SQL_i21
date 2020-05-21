@@ -7732,6 +7732,7 @@
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
+    <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
