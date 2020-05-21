@@ -423,6 +423,7 @@ BEGIN TRY
 			FROM tblARInvoice a
 			INNER JOIN tblARInvoiceDetail b on a.intInvoiceId = b.intInvoiceId
 			WHERE b.strPricing = 'Subsystem - Direct'
+			AND a.ysnPosted = 1
 			AND dbo.fnRemoveTimeOnDate(a.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(a.dtmPostDate) END
 			AND b.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId 
 		) OVR 
@@ -680,6 +681,7 @@ BEGIN TRY
 	AND CD.intContractHeaderId = CH.intContractHeaderId
 	WHERE dbo.fnRemoveTimeOnDate(Invoice.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Invoice.dtmPostDate) END
 	AND InvoiceDetail.strPricing = 'Subsystem - Direct'
+	AND Invoice.ysnPosted = 1
 	GROUP BY 
 	CH.intContractTypeId
 	,CH.intContractHeaderId
