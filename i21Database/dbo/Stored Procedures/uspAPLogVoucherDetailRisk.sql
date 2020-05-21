@@ -78,6 +78,7 @@ BEGIN
 		strTransactionType
 		, intTransactionReferenceId
 		, strTransactionReferenceNo
+		, strTransactionReference
 		, intContractDetailId
 		, intContractHeaderId
 		, intContractTypeId
@@ -109,6 +110,7 @@ BEGIN
 		 strTransactionType = 'Bill'
 		, b.intBillId
 		, b.strBillId
+		, 'Purchase Basis Deliveries'
 		, intContractDetailId = bd.intContractDetailId
 		, intContractHeaderId = bd.intContractHeaderId
 		, intContractTypeId = ct.intContractTypeId
