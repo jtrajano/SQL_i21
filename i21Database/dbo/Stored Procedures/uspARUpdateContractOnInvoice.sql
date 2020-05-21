@@ -331,7 +331,7 @@ BEGIN TRY
 				@strPricing						=	ID.[strPricing],
 				@intLoadDetailId				=	P.[intLoadDetailId]
 		FROM	@tblToProcess P
-		INNER JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId
+		LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId
 
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
