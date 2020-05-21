@@ -4,7 +4,8 @@ AS
 WITH DETAIL AS(
 	SELECT A.intAccountId,A.intAccountGroupId, F.intFiscalYearId, 
 		F.dtmDateFrom FiscalStart, P.intGLFiscalYearPeriodId,
-		P.dtmStartDate PeriodStart, P.dtmEndDate PeriodEnd 
+		P.dtmStartDate PeriodStart, P.dtmEndDate PeriodEnd,
+		P.strPeriod
 	FROM 
 		tblGLAccount A,
 		tblGLFiscalYear F 
@@ -20,6 +21,7 @@ WITH DETAIL AS(
 SELECT
 	A.intAccountId, A.intFiscalYearId,A.intGLFiscalYearPeriodId
 	,A.PeriodStart
+	,A.strPeriod
 	,ISNULL(YTD.beginningBalance,0) YTD
 	,ISNULL(MTD.beginningBalance,0) MTD  
 FROM 
