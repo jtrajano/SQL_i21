@@ -344,9 +344,9 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 
 			strWarehouseAddressInfo = '',
 			strWarehouseContractInfo = '',
-			intContractBasisId = CASE WHEN (PL.intSContractDetailId IS NOT NULL OR L.intPurchaseSale = 2) THEN SCH.intFreightTermId ELSE NULL END,
-			strContractBasis = CASE WHEN (PL.intSContractDetailId IS NOT NULL OR L.intPurchaseSale = 2) THEN SCB.strContractBasis ELSE '' END,
-			strContractBasisDescription = CASE WHEN (PL.intSContractDetailId IS NOT NULL OR L.intPurchaseSale = 2) THEN SCB.strDescription ELSE '' END,
+			intContractBasisId = CASE WHEN (ISNULL(PL.intSContractDetailId, LD.intSContractDetailId) IS NOT NULL) THEN SCH.intFreightTermId ELSE NULL END,
+			strContractBasis = CASE WHEN (ISNULL(PL.intSContractDetailId, LD.intSContractDetailId) IS NOT NULL) THEN SCB.strContractBasis ELSE '' END,
+			strContractBasisDescription = CASE WHEN (ISNULL(PL.intSContractDetailId, LD.intSContractDetailId) IS NOT NULL) THEN SCB.strDescription ELSE '' END,
 			strWeightTerms = '',
 			strUserEmailId = '',
 			strUserPhoneNo = '',
