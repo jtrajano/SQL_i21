@@ -73,6 +73,7 @@ Declare @strShipTo nvarchar(max)
 Declare @strCustomerComments nvarchar(max)
 Declare @strFooterComments nvarchar(max)
 Declare @ysnShowCostInSalesOrderPickList bit=0
+Declare @ysnShowAddOnItemQtyInSalesOrderPickList bit=0
 Declare @intMaxOtherChargeId int
 Declare @ysnIncludeEntityName bit=0
 Declare @strCustomerName nvarchar(250)
@@ -333,6 +334,8 @@ Begin --Sales Order Pick List
 
 	Select TOP 1 @intPickListId=ISNULL(intPickListId,0),@dblBatchSize=ISNULL(dblBatchSize,0) From tblMFPickList Where intSalesOrderId=@intSalesOrderId
 
+	SELECT TOP 1 @ysnShowAddOnItemQtyInSalesOrderPickList = ISNULL(ysnShowAddOnItemQtyInSalesOrderPickList, 0) FROM tblMFCompanyPreference
+
 	--Printing from Recipe Guide screen 
 	if @intRecipeGuideId>0
 		Set @intPickListId=0
@@ -441,7 +444,22 @@ Begin --Sales Order Pick List
 					l.strLotAlias,
 					sl.strName AS strStorageLocationName,
 					i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
-					ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+					--ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+					CASE 
+						WHEN ISNULL(sd.strAddonDetailKey, '') <> ''
+							AND ISNULL(sd.ysnAddonParent, 0) = 0
+							AND @ysnShowAddOnItemQtyInSalesOrderPickList = 1
+							THEN ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '') + (
+									SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
+									FROM tblSOSalesOrderDetail sd1
+									JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+										AND sd1.strAddonDetailKey = sd.strAddonDetailKey
+										AND sd1.ysnAddonParent = 1
+									JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
+									JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
+									)
+						ELSE ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '')
+						END COLLATE Latin1_General_CI_AS AS strDescription,
 					dbo.fnRemoveTrailingZeroes(pld.dblPickQuantity) AS dblPickQuantity,
 					um.strUnitMeasure AS strPickUOM,
 					l.strGarden,
@@ -549,7 +567,22 @@ Begin --Sales Order Pick List
 			'' strLotAlias,
 			sl.strName AS strStorageLocationName,
 			i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
-			ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+			--ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+			CASE 
+				WHEN ISNULL(sd.strAddonDetailKey, '') <> ''
+					AND ISNULL(sd.ysnAddonParent, 0) = 0
+					AND @ysnShowAddOnItemQtyInSalesOrderPickList = 1
+					THEN ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '') + (
+							SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
+							FROM tblSOSalesOrderDetail sd1
+							JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+								AND sd1.strAddonDetailKey = sd.strAddonDetailKey
+								AND sd1.ysnAddonParent = 1
+							JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
+							JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
+							)
+				ELSE ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '')
+				END COLLATE Latin1_General_CI_AS AS strDescription,
 			dbo.fnRemoveTrailingZeroes(sd.dblQtyOrdered) AS dblPickQuantity,
 			um.strUnitMeasure AS strPickUOM,
 			'' strGarden,
@@ -795,7 +828,22 @@ Begin --Sales Order Pick List
 								l.strLotAlias,
 								sl.strName AS strStorageLocationName,
 								i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
-								ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+								--ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+								CASE 
+									WHEN ISNULL(sd.strAddonDetailKey, '') <> ''
+										AND ISNULL(sd.ysnAddonParent, 0) = 0
+										AND @ysnShowAddOnItemQtyInSalesOrderPickList = 1
+										THEN ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '') + (
+												SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
+												FROM tblSOSalesOrderDetail sd1
+												JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+													AND sd1.strAddonDetailKey = sd.strAddonDetailKey
+													AND sd1.ysnAddonParent = 1
+												JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
+												JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
+												)
+									ELSE ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '')
+									END COLLATE Latin1_General_CI_AS AS strDescription,
 								dbo.fnRemoveTrailingZeroes(@dblRequiredQty) AS dblPickQuantity,
 								um.strUnitMeasure AS strPickUOM,
 								l.strGarden,
@@ -889,7 +937,22 @@ Begin --Sales Order Pick List
 								l.strLotAlias,
 								sl.strName AS strStorageLocationName,
 								i.strItemNo COLLATE Latin1_General_CI_AS AS strItemNo,
-								ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+								--ISNULL(i.strDescription,'') + CHAR(13) + ISNULL(i.strPickListComments,'') COLLATE Latin1_General_CI_AS AS strDescription,
+								CASE 
+									WHEN ISNULL(sd.strAddonDetailKey, '') <> ''
+										AND ISNULL(sd.ysnAddonParent, 0) = 0
+										AND @ysnShowAddOnItemQtyInSalesOrderPickList = 1
+										THEN ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '') + (
+												SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
+												FROM tblSOSalesOrderDetail sd1
+												JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+													AND sd1.strAddonDetailKey = sd.strAddonDetailKey
+													AND sd1.ysnAddonParent = 1
+												JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
+												JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
+												)
+									ELSE ISNULL(i.strDescription, '') + CHAR(13) + ISNULL(i.strPickListComments, '')
+									END COLLATE Latin1_General_CI_AS AS strDescription,
 								dbo.fnRemoveTrailingZeroes(@dblAvailableQty) AS dblPickQuantity,
 								um.strUnitMeasure AS strPickUOM,
 								l.strGarden,
