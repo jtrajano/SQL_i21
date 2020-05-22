@@ -274,7 +274,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intContractSeq
 		,dblTransactionQty = dblQty 
 		,strTransactionUOM = origUM.strUnitMeasure
-		,dblStockQty = dbo.fnCTConvertQtyToTargetItemUOM(SD.intQtyUOMId ,stckUOM.intItemUOMId, dblQty)
+		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(SD.intQtyUOMId,stckUOM.intCommodityUnitMeasureId, dblQty)
 		,strStockUOM = stckUM.strUnitMeasure
 		,strLocationName
 		,strEntityName 
@@ -289,8 +289,8 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strUserName 
 		,strAction
 	from dbo.fnRKGetBucketBasisDeliveries(getdate(),null,null) SD
-	left join tblICItemUOM stckUOM on stckUOM.intItemId = SD.intItemId AND stckUOM.ysnStockUnit = 1
-	left join tblICItemUOM origUOM ON origUOM.intItemUOMId = SD.intQtyUOMId
+	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SD.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
+	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SD.intQtyUOMId
 	left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
 	left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
 )t

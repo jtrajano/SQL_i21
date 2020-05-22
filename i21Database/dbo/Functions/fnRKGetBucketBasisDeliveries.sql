@@ -58,35 +58,35 @@ BEGIN
 		strHeaderUnitMeasure NVARCHAR(100)
 	)
 
-	INSERT INTO @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure)
-	SELECT CD.intContractDetailId,
-		CH.intContractHeaderId,
-		intSequenceUnitMeasureId = CDUM.intUnitMeasureId,
-		strSequenceUnitMeasure = CDUM.strUnitMeasure,
-		intHeaderUnitMeasureId = CHUM.intUnitMeasureId,
-		strHeaderUnitMeasure = CHUM.strUnitMeasure
-	FROM tblCTContractHeader CH
-	INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
-	LEFT JOIN tblICUnitMeasure CDUM ON CDUM.intUnitMeasureId = CD.intUnitMeasureId
-	LEFT JOIN tblICCommodityUnitMeasure CHCUM ON CHCUM.intCommodityId = CH.intCommodityId AND CHCUM.ysnStockUnit = 1
-	LEFT JOIN tblICUnitMeasure CHUM ON CHUM.intUnitMeasureId = CHCUM.intUnitMeasureId
-	LEFT JOIN 
-	(
-		SELECT intRowId = ROW_NUMBER() OVER(PARTITION BY SH.intContractHeaderId, SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC)
-			, SH.intPricingTypeId
-			, SH.intContractHeaderId
-			, SH.intContractDetailId
-			, dtmHistoryCreated
-			, intContractStatusId
-		FROM tblCTSequenceHistory SH
-			INNER JOIN tblCTContractHeader ET
-				ON SH.intContractHeaderId = ET.intContractHeaderId
-		WHERE dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
-	) tbl ON tbl.intContractDetailId = CD.intContractDetailId
-		AND tbl.intContractHeaderId = CD.intContractHeaderId
-		AND tbl.intRowId = 1
-	WHERE tbl.intPricingTypeId = 2
-	AND tbl.intContractStatusId = 1
+	--INSERT INTO @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure)
+	--SELECT CD.intContractDetailId,
+	--	CH.intContractHeaderId,
+	--	intSequenceUnitMeasureId = CDUM.intUnitMeasureId,
+	--	strSequenceUnitMeasure = CDUM.strUnitMeasure,
+	--	intHeaderUnitMeasureId = CHUM.intUnitMeasureId,
+	--	strHeaderUnitMeasure = CHUM.strUnitMeasure
+	--FROM tblCTContractHeader CH
+	--INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
+	--LEFT JOIN tblICUnitMeasure CDUM ON CDUM.intUnitMeasureId = CD.intUnitMeasureId
+	--LEFT JOIN tblICCommodityUnitMeasure CHCUM ON CHCUM.intCommodityId = CH.intCommodityId AND CHCUM.ysnStockUnit = 1
+	--LEFT JOIN tblICUnitMeasure CHUM ON CHUM.intUnitMeasureId = CHCUM.intUnitMeasureId
+	--LEFT JOIN 
+	--(
+	--	SELECT intRowId = ROW_NUMBER() OVER(PARTITION BY SH.intContractHeaderId, SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC)
+	--		, SH.intPricingTypeId
+	--		, SH.intContractHeaderId
+	--		, SH.intContractDetailId
+	--		, dtmHistoryCreated
+	--		, intContractStatusId
+	--	FROM tblCTSequenceHistory SH
+	--		INNER JOIN tblCTContractHeader ET
+	--			ON SH.intContractHeaderId = ET.intContractHeaderId
+	--	WHERE dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
+	--) tbl ON tbl.intContractDetailId = CD.intContractDetailId
+	--	AND tbl.intContractHeaderId = CD.intContractHeaderId
+	--	AND tbl.intRowId = 1
+	--WHERE tbl.intPricingTypeId = 2
+	--AND tbl.intContractStatusId = 1
 
 	INSERT @returntable	
 	SELECT
@@ -177,7 +177,7 @@ BEGIN
 			, strUserName = u.strName
 			, cb.strAction
 		FROM tblCTContractBalanceLog cb
-		INNER JOIN @OpenBasisContract obc ON cb.intContractDetailId = obc.intContractDetailId
+		--INNER JOIN @OpenBasisContract obc ON cb.intContractDetailId = obc.intContractDetailId
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblICItem i ON i.intItemId = cb.intItemId
 		INNER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
