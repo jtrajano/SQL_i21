@@ -8156,6 +8156,9 @@
     <Build Include="dbo\Stored Procedures\uspARLogRiskPosition.sql" />
     <Build Include="dbo\Views\vyuRKGetMatchDerivativesFromSummaryLog.sql" />
     <Build Include="dbo\Functions\fnRKGetMiscFieldTable.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketCollateral.sql" />
+    <Build Include="dbo\Functions\fnRKGetBucketDerivatives.sql" />
+    <Build Include="dbo\Functions\fnRKGetMiscFieldPivotDerivative.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

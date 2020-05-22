@@ -52,6 +52,7 @@ BEGIN
 				, intContractHeaderId
 				, intCommodityId
 				, intItemId
+				, intCommodityUOMId
 				, intLocationId
 				, dblQty
 				, intEntityId
@@ -64,13 +65,14 @@ BEGIN
 			SELECT strBucketType = 'Collateral'
 				, strTransactionType = 'Collateral'
 				, intTransactionRecordId = intCollateralId
-				, intTransactionRecordHeaderId = NULL
+				, intTransactionRecordHeaderId = intCollateralId
 				, strDistributionType = strType
 				, strTransactionNumber = strReceiptNo
 				, dtmTransactionDate = dtmOpenDate
 				, intContractHeaderId = intContractHeaderId
-				, intCommodityId = intCommodityId
+				, intCommodityId = C.intCommodityId
 				, intItemId = intItemId
+				, intCommodityUOMId =  CUM.intCommodityUnitMeasureId
 				, intLocationId = intLocationId
 				, dblQty = dblOriginalQuantity
 				, intEntityId = intEntityId
@@ -79,7 +81,8 @@ BEGIN
 				, intFutureMarketId
 				, intFutureMonthId
 				, intActionId = 35
-			FROM #tmpCollateral
+			FROM #tmpCollateral C
+			LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
 		END
 
 		-- Collateral Adjustments
@@ -94,6 +97,7 @@ BEGIN
 			, intContractHeaderId
 			, intCommodityId
 			, intItemId
+			, intCommodityUOMId
 			, intLocationId
 			, dblQty
 			, intUserId
@@ -111,8 +115,9 @@ BEGIN
 			, dtmTransactionDate = dtmAdjustmentDate
 			, intContractDetailId = NULL
 			, intContractHeaderId = C.intContractHeaderId
-			, intCommodityId = intCommodityId
+			, intCommodityId = C.intCommodityId
 			, intItemId = intItemId
+			, intCommodityUOMId =  CUM.intCommodityUnitMeasureId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
 			, intUserId = @intUserId
@@ -123,6 +128,7 @@ BEGIN
 			, intActionId = 38
 		FROM tblRKCollateralAdjustment CA
 		JOIN #tmpCollateral C ON C.intCollateralId = CA.intCollateralId
+		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
 		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
 				FROM tblRKCollateralAdjustment adj
 				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'

@@ -1658,6 +1658,8 @@ BEGIN TRY
 			, dtmTransactionDate
 			, intContractHeaderId
 			, intCommodityId
+			, intItemId
+			, intCommodityUOMId
 			, intLocationId
 			, dblQty
 			, intUserId
@@ -1672,7 +1674,9 @@ BEGIN TRY
 			, strTransactionNumber = strReceiptNo
 			, dtmTransactionDate = dtmOpenDate
 			, intContractHeaderId = intContractHeaderId
-			, intCommodityId = intCommodityId
+			, intCommodityId = a.intCommodityId
+			, intItemId
+			, intOrigUOMId = CUM.intCommodityUnitMeasureId
 			, intLocationId = intLocationId
 			, dblQty = dblOriginalQuantity
 			, intUserId = (SELECT TOP 1 e.intEntityId
@@ -1681,6 +1685,7 @@ BEGIN TRY
 			, strNotes = strType + ' Collateral'
 			, intActionId  = 1 --Rebuild
 		FROM tblRKCollateral a
+		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = a.intUnitMeasureId AND CUM.intCommodityId = a.intCommodityId
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1693,6 +1698,7 @@ BEGIN TRY
 			, intContractDetailId
 			, intContractHeaderId
 			, intCommodityId
+			, intItemId
 			, intLocationId
 			, dblQty
 			, intCommodityUOMId
@@ -1710,6 +1716,7 @@ BEGIN TRY
 			, intContractDetailId = CA.intCollateralAdjustmentId
 			, intContractHeaderId = C.intContractHeaderId
 			, intCommodityId = C.intCommodityId
+			, intItemId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
 			, intOrigUOMId = CUM.intCommodityUnitMeasureId
