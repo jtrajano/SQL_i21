@@ -139,9 +139,18 @@ BEGIN
 			OPEN c;
 
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
+		END
+		CLOSE c; DEALLOCATE c;
+
+		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
+		BEGIN			
+			UPDATE SIR SET ysnUnposted = 1
+			FROM tblGRStorageInventoryReceipt SIR 
+			INNER JOIN tblGRTransferStorageReference SR ON SR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId
+			WHERE SR.intTransferStorageId = @intTransferStorageId
+		END
 			if @d_a_v = 1 and 1 = 0
 			begin
-		
 				select 'check contract details transfercontractdetail,transferunits,customerstorageid,sourceitemuom', @intTransferContractDetailId,@dblTransferUnits,@intCustomerStorageId,@intSourceItemUOMId
 			end
 
@@ -295,14 +304,15 @@ BEGIN
 					WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 					ORDER BY dtmTransferStorageDate
 
-					DECLARE @cursorId INT
+					DECLARE @cursorId INT					
+					DECLARE @intTransactionDetailId INT
 
 					DECLARE _CURSOR CURSOR
 					FOR
-					SELECT intId FROM @ItemsToPost
+					SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 					OPEN _CURSOR
-					FETCH NEXT FROM _CURSOR INTO @cursorId
+					FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 					WHILE @@FETCH_STATUS = 0
 					BEGIN		
 							DECLARE @GLEntries AS RecapTableType;
@@ -485,7 +495,7 @@ BEGIN
 
 						
 			
-					FETCH NEXT FROM _CURSOR INTO @cursorId
+					FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 					END
 					CLOSE _CURSOR;
 					DEALLOCATE _CURSOR;

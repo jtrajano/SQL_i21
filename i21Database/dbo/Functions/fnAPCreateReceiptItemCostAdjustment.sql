@@ -388,8 +388,8 @@ BEGIN
 		-- AND H.strSourceType = 'Storage'
 
 		UNION ALL
-		--TRANSFER STORAGE
-		--ITEM
+		--TRANSFER STORAGE (from ticket only)
+		--ITEM 
 		SELECT
 			[intItemId]							=	C.intItemId
 			,[intItemLocationId]				=	E.intItemLocationId

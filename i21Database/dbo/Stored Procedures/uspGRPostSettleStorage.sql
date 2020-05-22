@@ -1898,8 +1898,17 @@ BEGIN TRY
 
 				end
 				
+				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
+				IF @ysnFromPriceBasisContract = 0 AND @ysnDPOwnedType = 1
+				BEGIN
+					EXEC uspGRStorageInventoryReceipt 
+						@SettleVoucherCreate = @SettleVoucherCreate
+						,@intCustomerStorageId = @intCustomerStorageId
+						,@intSettleStorageId = @intSettleStorageId
+						,@ysnUnpost = 0
 
-				-- we need to delete item in the contract detail
+					--SELECT '@StorageInventoryReceipt',* FROM tblGRStorageInventoryReceipt
+				END
 								
 				--Inventory Item and Discounts
 				INSERT INTO @voucherPayable
@@ -2618,12 +2627,7 @@ BEGIN TRY
 									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
 
 					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
-					BEGIN
-
-
-
-							if @ysnFromPriceBasisContract = 1
-							begin
+					BEGIN							
 							
 								UPDATE tblGRSettleStorage
 									SET intBillId = @createdVouchersId
