@@ -141,9 +141,14 @@
 [intShipmentType] INT NULL,
 [intLoadShippingInstructionId]  INT NULL,
 [strExternalShipmentNumber]  NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+
 [ysn4cRegistration] [bit] NULL,
 [ysnInvoice] [bit] NULL,
 [ysnProvisionalInvoice] [bit] NULL,
+[strCourierTrackingNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[str4CLicenseNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+[strExternalERPReferenceNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+
 [ysnQuantityFinal] [bit] NULL,
 [ysnCancelled] [bit] NULL,
 [intShippingModeId] INT NULL,

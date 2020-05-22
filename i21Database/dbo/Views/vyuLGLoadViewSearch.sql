@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuLGLoadViewSearch
+﻿ALTER VIEW vyuLGLoadViewSearch
 AS
 SELECT L.intLoadId
 	,L.intGenerateLoadId
@@ -104,6 +104,9 @@ SELECT L.intLoadId
 	,strShippingLine = ShippingLine.strName
 	,strInsurer = Insurer.strName
 	,strTerminal = Terminal.strName
+	,L.strCourierTrackingNumber
+	,L.str4CLicenseNumber
+	,L.strExternalERPReferenceNumber
 	,strBLDraftToBeSent = BLDraftToBeSent.strName
 	,strDocPresentationVal = DocPresentation.strName
 	,strInsuranceCurrency = Currency.strCurrency
