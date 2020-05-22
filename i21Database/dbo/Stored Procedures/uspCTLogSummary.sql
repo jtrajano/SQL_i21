@@ -1506,7 +1506,7 @@ BEGIN TRY
 				FROM
 				(
 					SELECT intTransactionReferenceId = pfd.intPriceFixationDetailId
-					, dtmTransactionDate = pfd.dtmFixationDate + cast(getdate() as time)
+					, dtmTransactionDate = cast((convert(VARCHAR(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -1639,7 +1639,7 @@ BEGIN TRY
 				FROM
 				(
 					SELECT intTransactionReferenceId = pfd.intPriceFixationDetailId
-					, dtmTransactionDate = pfd.dtmFixationDate + cast(getdate() as time)
+					, dtmTransactionDate = cast((convert(varchar(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
