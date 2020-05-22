@@ -31,6 +31,8 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@strCustomerName			AS NVARCHAR(MAX)
 		,@strCustomerIds			AS NVARCHAR(MAX)
 		,@strCustomerIdsLocal		AS NVARCHAR(MAX)
+		,@strCustomerNumber			AS NVARCHAR(MAX)
+		,@conditionCustomerNumber   AS NVARCHAR(20)
 		,@ysnEmailOnly				AS BIT
 		
 -- Create a table variable to hold the XML data. 		
@@ -148,6 +150,11 @@ SELECT @strCustomerIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCustomerIds'
 
+SELECT @strCustomerNumber = REPLACE(ISNULL([from], ''), '''''', ''''), 
+	   @conditionCustomerNumber = [condition]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strCustomerNumber'
+
 SELECT @intEntityUserId = [from]
 FROM @temp_xml_table
 WHERE [fieldname] = 'intSrCurrentUserId'
@@ -213,6 +220,94 @@ ELSE IF ISNULL(@strCustomerIds, '') <> ''
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
 	END
+ELSE IF ISNULL(@strCustomerNumber, '') <> ''
+	BEGIN
+		IF ISNULL(@conditionCustomerNumber, '') = 'Starts With'
+		BEGIN
+			INSERT INTO #CUSTOMERS
+			SELECT intEntityCustomerId	= C.intEntityId 
+					, strCustomerNumber		= C.strCustomerNumber
+					, strCustomerName		= EC.strName
+					, dblCreditLimit         = C.dblCreditLimit
+					, dblARBalance           = C.dblARBalance        
+			FROM tblARCustomer C WITH (NOLOCK)
+			INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			) EC ON C.intEntityId = EC.intEntityId
+			WHERE C.ysnActive = 1
+			 	 AND C.strCustomerNumber LIKE @strCustomerNumber+'%'
+		END 
+		IF ISNULL(@conditionCustomerNumber, '') = 'Ends With'
+		BEGIN
+			INSERT INTO #CUSTOMERS
+			SELECT  intEntityCustomerId	= C.intEntityId 
+					, strCustomerNumber		= C.strCustomerNumber
+					, strCustomerName		= EC.strName
+					, dblCreditLimit         = C.dblCreditLimit
+					, dblARBalance           = C.dblARBalance        
+			FROM tblARCustomer C WITH (NOLOCK)
+			INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			) EC ON C.intEntityId = EC.intEntityId
+			WHERE C.ysnActive = 1
+			 	 AND C.strCustomerNumber LIKE '%'+@strCustomerNumber
+		END 
+		IF ISNULL(@conditionCustomerNumber, '') = 'Equal To'
+		BEGIN
+			INSERT INTO #CUSTOMERS
+			SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
+					, strCustomerNumber		= C.strCustomerNumber
+					, strCustomerName		= EC.strName
+					, dblCreditLimit         = C.dblCreditLimit
+					, dblARBalance           = C.dblARBalance        
+			FROM tblARCustomer C WITH (NOLOCK)
+			INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			) EC ON C.intEntityId = EC.intEntityId
+			WHERE C.ysnActive = 1
+			 	 AND C.strCustomerNumber = @strCustomerNumber
+		END 
+		IF ISNULL(@conditionCustomerNumber, '') = 'Not Equal To'
+		BEGIN
+			INSERT INTO #CUSTOMERS
+			SELECT intEntityCustomerId	= C.intEntityId 
+					, strCustomerNumber		= C.strCustomerNumber
+					, strCustomerName		= EC.strName
+					, dblCreditLimit         = C.dblCreditLimit
+					, dblARBalance           = C.dblARBalance        
+			FROM tblARCustomer C WITH (NOLOCK)
+			INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			) EC ON C.intEntityId = EC.intEntityId
+			WHERE C.ysnActive = 1
+			 	 --AND C.strCustomerNumber <> @strCustomerNumber
+		END 
+		IF ISNULL(@conditionCustomerNumber, '') = 'Like'
+		BEGIN
+			INSERT INTO #CUSTOMERS
+			SELECT intEntityCustomerId	= C.intEntityId 
+					, strCustomerNumber		= C.strCustomerNumber
+					, strCustomerName		= EC.strName
+					, dblCreditLimit         = C.dblCreditLimit
+					, dblARBalance           = C.dblARBalance        
+			FROM tblARCustomer C WITH (NOLOCK)
+			INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity WITH (NOLOCK)
+			) EC ON C.intEntityId = EC.intEntityId
+			WHERE C.ysnActive = 1
+			 	 AND C.strCustomerNumber LIKE '%'+@strCustomerNumber+'%'
+		END 
+	END
 ELSE
 	BEGIN
 		INSERT INTO #CUSTOMERS
@@ -248,15 +343,15 @@ IF @ysnEmailOnly IS NOT NULL
 		WHERE CASE WHEN ISNULL(EMAILSETUP.intEmailSetupCount, 0) > 0 THEN CONVERT(BIT, 1) ELSE CONVERT(BIT, 0) END <> @ysnEmailOnly
 	END
 
-IF ISNULL(@strCustomerName, '') <> '' AND ISNULL(@strCustomerIds, '') = ''
-	BEGIN
+--IF ISNULL(@strCustomerName, '') <> '' AND ISNULL(@strCustomerIds, '') = ''
+--	BEGIN
 		SELECT @strCustomerIdsLocal = LEFT(intEntityCustomerId, LEN(intEntityCustomerId) - 1)
 		FROM (
 			SELECT DISTINCT CAST(intEntityCustomerId AS VARCHAR(MAX))  + ', '
 			FROM #CUSTOMERS
 			FOR XML PATH ('')
 		) C (intEntityCustomerId)
-	END
+--	END
 
 EXEC dbo.[uspARCustomerAgingAsOfDateReport] @dtmDateTo			= @dtmDateTo
 										  , @intEntityUserId	= @intEntityUserId
