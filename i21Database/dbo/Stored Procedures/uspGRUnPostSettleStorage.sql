@@ -108,6 +108,22 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			--DELETE FROM @GLEntries
+			SELECT TOP 1 @intCustomerStorageId = intCustomerStorageId FROM tblGRStorageHistory
+			WHERE intSettleStorageId = @intSettleStorageId
+
+			SELECT 
+				@dblUOMQty						= dblUnitQty
+				,@intInventoryItemStockUOMId	= intItemUOMId
+			FROM tblICItemUOM 
+			WHERE intItemId = @ItemId
+				AND ysnStockUnit = 1
+
+			SELECT @ItemLocationId = intItemLocationId
+			FROM tblICItemLocation
+			WHERE intItemId = @ItemId 
+				AND intLocationId = @LocationId
+				
 			IF NOT EXISTS (SELECT TOP 1 1 FROM @billList WHERE intId = @BillId) AND @BillId IS NOT NULL
 				INSERT INTO @billList SELECT @BillId
 			-- this will loop to all the voucher associated in the settlement
@@ -173,9 +189,6 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
 					AND SST.intSettleStorageId = UH.intExternalHeaderId
-			-- JOIN tblGRStorageHistory SH 
-			-- 	ON SH.intContractHeaderId = UH.intContractHeaderId 
-			-- 		AND SH.intCustomerStorageId = SST.intCustomerStorageId
 			OUTER APPLY (
 				SELECT DISTINCT
 					intContractHeaderId
@@ -188,7 +201,6 @@ BEGIN TRY
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
-				--AND SH.strType IN ('From Scale','From Delivery Sheet')
 				AND SH.intContractHeaderId IS NOT NULL
 
 			UNION ALL
@@ -297,6 +309,9 @@ BEGIN TRY
 				--BEGIN 
 				--	EXEC dbo.uspGLBookEntries @GLEntries, 0 
 				--END
+				DELETE FROM @ItemsToStorage
+				DELETE FROM @ItemsToPost
+				DELETE FROM @GLEntries
 
 				-- Unpost storage stocks. 
 				 EXEC	
@@ -325,7 +340,7 @@ BEGIN TRY
 				BEGIN
 					INSERT INTO @GLEntries
 					(	 
-							[dtmDate] 
+						[dtmDate] 
 						,[strBatchId]
 						,[intAccountId]
 						,[dblDebit]
@@ -534,6 +549,15 @@ BEGIN TRY
 					--DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId			
 					EXEC [uspGRDeleteStorageHistoryWithLog] @intParentSettleStorageId, @UserId
 				END
+			END
+
+			--reverse logged data in tblGRStorageInventoryReceipt when unposting a settlement
+			DECLARE @ysnDPOwnedType BIT
+			SELECT @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) FROM tblGRCustomerStorage CS INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
+			IF @ysnDPOwnedType = 1
+			BEGIN
+				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
+				UPDATE tblGRStorageInventoryReceipt SET ysnUnposted = 1 WHERE intSettleStorageId = @intSettleStorageId
 			END
 
 			--5. Removing Voucher

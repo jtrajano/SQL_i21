@@ -33,6 +33,8 @@ BEGIN
 	DECLARE @StorageHistoryStagingTable2 AS StorageHistoryStagingTable
 	DECLARE @intIdentityId INT
 	DECLARE @HistoryIds AS Id
+	DECLARE @dblBasisCost DECIMAL(18,6)
+	DECLARE @dblSettlementPrice DECIMAL(18,6)
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -535,6 +537,55 @@ BEGIN
 				ORDER BY dtmTransferStorageDate
 				
 				DECLARE @cursorId INT, @intTransactionDetailId INT
+				--DP TO DP TRANSFER
+				--DP TRANSFER STORAGE SHOULD HAVE dblBasis AND dblSettlementPrice
+				--SET @intTransferStorageReferenceId = NULL
+				IF NOT EXISTS(SELECT TOP 1 1 FROM @ItemsToPost)
+				BEGIN
+					DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+					FOR
+					WITH storageTransfers (
+						intTranferStorageReferenceId
+					) AS (
+						SELECT SR.intTransferStorageReferenceId
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
+						WHERE SR.intTransferStorageId = @intTransferStorageId
+					)
+					SELECT
+						intTranferStorageReferenceId
+					FROM ( SELECT * FROM storageTransfers ) params
+					OPEN c;
+
+					FETCH c INTO @intTransferStorageReferenceId
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+			
+						SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),1,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
+							,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),2,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+						INNER JOIN tblGRCustomerStorage CS_TO ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
+						INNER JOIN tblGRStorageType ST_TO ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId AND ST_TO.ysnDPOwnedType = 1
+						INNER JOIN tblICItem I ON CS_TO.intItemId = I.intItemId
+						INNER JOIN tblICCommodity ICC ON CS_TO.intCommodityId = I.intCommodityId
+						WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+
+						--update the Basis and Settlement Price of the new customer storage
+						UPDATE CS
+						SET dblBasis = ISNULL(@dblBasisCost,0)
+							,dblSettlementPrice = ISNULL(@dblSettlementPrice,0)
+						FROM tblGRCustomerStorage CS
+						INNER JOIN tblGRTransferStorageReference SR ON SR.intToCustomerStorageId = CS.intCustomerStorageId
+						WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+
+						FETCH c INTO @intTransferStorageReferenceId
+					END
+					CLOSE c; DEALLOCATE c;						
+				END
 
 				DECLARE _CURSOR CURSOR
 				FOR
@@ -584,9 +635,7 @@ BEGIN
 							,@intSubLocationId INT
 							,@intStorageLocationId INT
 							,@dtmDate DATETIME
-							,@intOwnerShipId INT				   
-							,@dblBasisCost DECIMAL(18,6)
-							,@dblSettlementPrice DECIMAL(18,6)
+							,@intOwnerShipId INT							
 							,@strRKError VARCHAR(MAX)
 							,@ysnDPtoOtherStorage BIT
 
@@ -1372,7 +1421,7 @@ BEGIN
 		--strTransferTicket is being used by RM, we need to update the strTransferTicket so that they won't to look at our table just to get its corresponding string
 		UPDATE tblGRStorageHistory 
 		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
-		WHERE intTransferStorageId = @intTransferStorageId
+		WHERE intTransferStorageId = @intTransferStorageId		
 		
 		--RISK SUMMARY LOG
 		SET @intStorageHistoryId = NULL
