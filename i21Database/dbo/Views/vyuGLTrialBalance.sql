@@ -21,7 +21,8 @@ ISNULL(strUOMCode,'') COLLATE Latin1_General_CI_AS strUOMCode,
 ISNULL(A.ysnActive,0) ysnActive,
 TBSum.dtmDateFrom,
 TBSum.dtmDateTo,
-TBSum.intGLFiscalYearPeriodId
+TBSum.intGLFiscalYearPeriodId,
+TBSum.strPeriod
 FROM vyuGLAccountDetail A
 LEFT JOIN tblGLCOACrossReference coa ON A.intAccountId =coa.inti21Id 
 outer APPLY(
@@ -39,9 +40,10 @@ OUTER APPLY (
 	SUM(ISNULL(YTDBalance,0))YTDBalance,
 	dtmStartDate dtmDateFrom, 
 	dtmEndDate dtmDateTo,
-	TB.intGLFiscalYearPeriodId
+	TB.intGLFiscalYearPeriodId,
+	TB.strPeriod
 	FROM tblGLTrialBalance TB
 	JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = TB.intGLFiscalYearPeriodId
 	WHERE intAccountId = A.intAccountId
-	GROUP BY intAccountId, TB.intGLFiscalYearPeriodId,dtmStartDate,dtmEndDate
+	GROUP BY intAccountId, TB.intGLFiscalYearPeriodId,dtmStartDate,dtmEndDate, TB.strPeriod
 )TBSum

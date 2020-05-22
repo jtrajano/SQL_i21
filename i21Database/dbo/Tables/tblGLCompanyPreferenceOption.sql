@@ -10,6 +10,7 @@
 	[intDefaultVisibleOldAccountSystemId] INT NULL,
 	[intDBVersion] INT NULL,
 	[ysnHistoricalJournalImported] BIT NULL,
+	[ysnShowAccountingPeriod] BIT NULL,
     CONSTRAINT [PK_tblGLCompanyPreferenceOption] PRIMARY KEY ([intCompanyPreferenceOptionId])
 )
 GO
