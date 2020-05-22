@@ -40,13 +40,19 @@ BEGIN
 		@dtmDateFrom = [from],
 		@dtmDateTo =  [to]
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and condition in ('Equal To' , 'Between')
+
+	SELECT @dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900'),
+		@dtmDateTo = isnull( @dtmDateTo , @dtmDateFrom)
+
+	SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
+
+	SELECT * FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo)
+
 END
 
-SELECT @dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900'),
-		@dtmDateTo = isnull( @dtmDateTo , '01/01/2099')
 
-SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
 
-SELECT * FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo)
+
+
 
 
