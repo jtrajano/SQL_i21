@@ -1679,7 +1679,6 @@
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchDetail.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
-    <Build Include="dbo\Tables\tblApiUserAccount.sql" />
     <Build Include="dbo\Views\vyuTRRackItems.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
