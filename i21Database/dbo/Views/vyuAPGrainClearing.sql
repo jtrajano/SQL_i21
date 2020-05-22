@@ -120,6 +120,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				AND SS.intParentSettleStorageId IS NOT NULL
 				AND SS.dblSpotUnits = 0)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
+		and billDetail.intSettleStorageId = SS.intSettleStorageId
 		--AND SS.intBillId = bill.intBillId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -258,6 +259,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				AND IM.strCostType = 'Storage Charge' 
 				AND (IM.intCommodityId = CO.intCommodityId OR IM.intCommodityId IS NULL))
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = IM.intItemId
+		and billDetail.intSettleStorageId = SS.intSettleStorageId
 	--AND SS.intBillId = bill.intBillId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -417,6 +419,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			-- 	ON CD.intContractDetailId = SC.intContractDetailId
 			)
 	ON CS.intCustomerStorageId = billDetail.intCustomerStorageId
+		and billDetail.intSettleStorageId = SS.intSettleStorageId
 	--AND SS.intBillId = bill.intBillId
 	-- AND CD.intContractDetailId = billDetail.intContractDetailId
 INNER JOIN vyuGLAccountDetail glAccnt
