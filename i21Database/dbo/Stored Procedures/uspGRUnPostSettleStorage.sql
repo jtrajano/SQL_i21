@@ -96,7 +96,6 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
-
 			SELECT 
 				@dblUOMQty						= dblUnitQty
 				,@intInventoryItemStockUOMId	= intItemUOMId
@@ -104,8 +103,7 @@ BEGIN TRY
 			WHERE intItemId = @ItemId
 				AND ysnStockUnit = 1
 
-			SELECT @ItemLocationId = intItemLocationId
-			FROM tblICItemLocation
+			SELECT @ItemLocationId = intItemLocationId FROM tblICItemLocation
 			WHERE intItemId = @ItemId 
 				AND intLocationId = @LocationId
 
@@ -161,9 +159,6 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
 					AND SST.intSettleStorageId = UH.intExternalHeaderId
-			-- JOIN tblGRStorageHistory SH 
-			-- 	ON SH.intContractHeaderId = UH.intContractHeaderId 
-			-- 		AND SH.intCustomerStorageId = SST.intCustomerStorageId
 			OUTER APPLY (
 				SELECT DISTINCT
 					intContractHeaderId
@@ -176,7 +171,6 @@ BEGIN TRY
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
 				AND UH.strFieldName = 'Balance' 
-				--AND SH.strType IN ('From Scale','From Delivery Sheet')
 				AND SH.intContractHeaderId IS NOT NULL
 
 			UNION ALL
@@ -286,19 +280,9 @@ BEGIN TRY
 				IF @@ERROR <> 0
 					GOTO SettleStorage_Exit;
 
-				DELETE
-				FROM @ItemsToStorage
-
-				DELETE
-				FROM @ItemsToPost
-
-				DELETE 
-				FROM @GLEntries				
-
-				--IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
-				--BEGIN 
-				--	EXEC dbo.uspGLBookEntries @GLEntries, 0 
-				--END
+				DELETE FROM @ItemsToStorage
+				DELETE FROM @ItemsToPost
+				DELETE FROM @GLEntries
 
 				-- Unpost storage stocks. 
 				 EXEC	
@@ -327,7 +311,7 @@ BEGIN TRY
 				BEGIN
 					INSERT INTO @GLEntries
 					(	 
-							[dtmDate] 
+						[dtmDate] 
 						,[strBatchId]
 						,[intAccountId]
 						,[dblDebit]
@@ -468,7 +452,6 @@ BEGIN TRY
 				WHERE intSettleStorageId = @intSettleStorageId
 
 				UPDATE tblGRStorageHistory SET intSettleStorageId = NULL,intBillId = NULL WHERE intSettleStorageId = @intSettleStorageId
-
 			END
 
 			--get first the parent settle storage id before the deletion
@@ -502,18 +485,11 @@ BEGIN TRY
 				WHERE intSettleStorageId = @intParentSettleStorageId
 
 				UPDATE tblGRSettleContract SET dblUnits = dblUnits - ABS(@dblUnits) WHERE intSettleStorageId = @intParentSettleStorageId
-			END
-
-			
+			END			
 
 			IF NOT EXISTS(SELECT 1 FROM tblGRSettleStorage WHERE intParentSettleStorageId = @intParentSettleStorageId)
 			BEGIN
 				DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
-			END
-			ELSE IF (SELECT COUNT(*) FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId) = 2
-			BEGIN
-				--if child settle storage; delete the customer storage id in tblGRSettleStorageTicket table		
-				DELETE FROM tblGRSettleStorageTicket WHERE intCustomerStorageId = @intCustomerStorageId AND intSettleStorageId = (SELECT intParentSettleStorageId FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId)
 			END
 
 			DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId
@@ -525,6 +501,15 @@ BEGIN TRY
 				BEGIN				
 					DELETE FROM tblGRSettleStorage WHERE intSettleStorageId = @intParentSettleStorageId
 				END
+			END
+
+			--reverse logged data in tblGRStorageInventoryReceipt when unposting a settlement
+			DECLARE @ysnDPOwnedType BIT
+			SELECT @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) FROM tblGRCustomerStorage CS INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
+			IF @ysnDPOwnedType = 1
+			BEGIN
+				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
+				UPDATE tblGRStorageInventoryReceipt SET ysnUnposted = 1 WHERE intSettleStorageId = @intSettleStorageId
 			END
 
 			--5. Removing Voucher
