@@ -107,7 +107,7 @@ a.strUserName,
 c.strTransactionId,
 ysnPosted,
 c.dtmDate,
-(case when c.strTransactionId like 'BWD%' and c.dtmDate >= DATEADD( DAY, 1, @dtmDateTo)
+(case when c.strTransactionId like 'BWD%' and c.dtmDate >= DATEADD( SECOND, 1, @dtmDateTo)
 --DATEADD(DAY,1, a.dtmDate) 
 then a.dblAmount*0
 else a.dblAmount end) as total
@@ -117,7 +117,7 @@ left outer join tblCMBankTransactionDetail b on a.intUndepositedFundId = b.intUn
 left outer join tblCMBankTransaction c on c.intTransactionId = b.intTransactionId
 where a.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo ---Sales Payment Date
 and ysnPosted = 1 --- bank dep
-and c.dtmDate >=   DATEADD( DAY, 1, @dtmDateTo) ---bank Post Date
+and c.dtmDate >=   DATEADD( SECOND, 1, @dtmDateTo)---bank Post Date
 --DATEADD(DAY,1, a.dtmDate)
 group by
 a.dtmDate,
@@ -136,7 +136,7 @@ ysnPosted,
 c.dtmDate,
 a.dblAmount
 having (case when c.strTransactionId like 'BWD%' or c.strTransactionId like 'BTRN%' and
-c.dtmDate >= DATEADD( DAY, 1, @dtmDateTo)
+c.dtmDate >= DATEADD( SECOND, 1, @dtmDateTo)
 then a.dblAmount*0
 else a.dblAmount end) <>0
 )
