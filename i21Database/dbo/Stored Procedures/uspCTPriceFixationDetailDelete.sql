@@ -221,7 +221,7 @@ BEGIN TRY
 			CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 			CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 			CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
-			CD.dblFutures			=	NULL,
+			CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE NULL END,
 			CD.dblCashPrice			=	NULL,
 			CD.dblTotalCost			=	NULL,
 			CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
