@@ -1,15 +1,21 @@
 ﻿CREATE VIEW vyuLGDeliveredNotInvoiced
 AS
-SELECT   Load.intLoadId
-		,Load.[strLoadNumber]
+SELECT   L.intLoadId
+		,L.strLoadNumber
+		,L.dtmScheduledDate
 		,ALH.strAllocationNumber
 		,ALD.strAllocationDetailRefNo
 		,strPContractNumber = PHeader.strContractNumber
 		,intPContractSeq = PDetail.intContractSeq
         ,strSContractNumber = SHeader.strContractNumber
         ,intSContractSeq = SDetail.intContractSeq
+		,strCustomerName = Cust.strName
+		,strCustomerReference = SHeader.strCustomerContract
+		,SDetail.dtmStartDate
+		,SDetail.dtmEndDate
 		,Lot.strLotNumber
-		,'' COLLATE Latin1_General_CI_AS AS strWarehouseCargo
+		,strWarehouseCargo = Lot.strCargoNo
+		,Lot.strWarrantNo
 
 		,LoadDetail.dblQuantity
 		,LoadDetail.intItemUOMId
@@ -18,23 +24,24 @@ SELECT   Load.intLoadId
 		,LoadDetail.dblNet
 
 		,Item.strItemNo
-		,Item.strDescription AS strItemDescription
-		,UOM.strUnitMeasure AS strItemUOM
-		,WeightUOM.strUnitMeasure AS strWeightItemUOM
+		,strItemDescription = Item.strDescription
+		,strItemUOM = UOM.strUnitMeasure
+		,strWeightItemUOM = WeightUOM.strUnitMeasure
 		,PLH.strPickLotNumber 
 		,CLSL.strSubLocationName
 		,CLSL.strSubLocationDescription
-		,Load.intBookId
+		,L.intBookId
 		,BO.strBook
-		,Load.intSubBookId
+		,L.intSubBookId
 		,SB.strSubBook
 FROM tblLGLoadDetail LoadDetail
-JOIN tblLGLoad Load ON Load.intLoadId = LoadDetail.intLoadId
-LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = Load.intGenerateLoadId
+JOIN tblLGLoad L ON L.intLoadId = LoadDetail.intLoadId
+LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
 LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LoadDetail.intPContractDetailId
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LoadDetail.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+LEFT JOIN tblEMEntity Cust ON Cust.intEntityId = SHeader.intEntityId
 LEFT JOIN tblICItem Item On Item.intItemId = LoadDetail.intItemId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LoadDetail.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
@@ -46,11 +53,11 @@ LEFT JOIN tblLGPickLotDetail PLD ON PLD.intPickLotDetailId= LoadDetail.intPickLo
 LEFT JOIN tblLGPickLotHeader PLH ON PLH.intPickLotHeaderId = PLD.intPickLotHeaderId
 LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = LoadDetail.intAllocationDetailId
 LEFT JOIN tblLGAllocationHeader ALH ON ALH.intAllocationHeaderId = ALD.intAllocationHeaderId
-LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = Load.intLoadId
+LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
-LEFT JOIN tblCTBook BO ON BO.intBookId = Load.intBookId
-LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = Load.intSubBookId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 WHERE LoadDetail.intLoadDetailId NOT IN (SELECT ISNULL(tblARInvoiceDetail.intLoadDetailId,0) FROM tblARInvoiceDetail)
-  AND Load.intPurchaseSale IN (2,3)
-  AND Load.intShipmentType = 1
-  AND Load.ysnPosted = 1
+  AND L.intPurchaseSale IN (2,3)
+  AND L.intShipmentType = 1
+  AND L.ysnPosted = 1
