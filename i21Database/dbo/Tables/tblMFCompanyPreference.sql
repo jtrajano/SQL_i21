@@ -25,6 +25,7 @@
 	[strDefaultRecipeCost] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,--Not used
     [ysnLotHistoryByStorageLocation] BIT NULL, 
 	[ysnShowCostInSalesOrderPickList] BIT NULL DEFAULT 0, 
+	ysnShowAddOnItemQtyInSalesOrderPickList BIT NULL DEFAULT 0,
 	intWastageWorkOrderDuration INT NULL,
 	[intDefaultShipmentStagingLocation] INT,
 	[intDefaultShipmentDockDoorLocation] INT,
