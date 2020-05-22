@@ -7727,7 +7727,8 @@
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
