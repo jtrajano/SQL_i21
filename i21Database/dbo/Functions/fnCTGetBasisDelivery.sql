@@ -517,11 +517,12 @@ BEGIN
 	,C.strCommodityCode
 	,C.intCommodityId
 	,InvTran.dtmDate
-	,dblQuantity = (case
-					when OC.ysnDestinationWeightGrade = convert(bit,0)
-					then SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
-					else SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(ShipmentItem.dblDestinationQuantity,0))     ),0))
-					end)
+	,dblQuantity = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(ShipmentItem.dblDestinationQuantity,isnull(InvTran.dblQty,0)))),0))
+	-- ,dblQuantity = (case
+	-- 				when OC.ysnDestinationWeightGrade = convert(bit,0)
+	-- 				then SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))),0))
+	-- 				else SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(ShipmentItem.dblDestinationQuantity,0))),0))
+	-- 				end)
 	--,dblQuantity = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit( InvTran.intItemId, InvTran.intItemUOMId, isnull(InvTran.dblQty,0))     ),0)) --dblQuantity = SUM(ISNULL(ABS(InvTran.dblQty),0))
 	,'Inventory Shipment'
 	,CAST(replace(convert(varchar, InvTran.dtmDate,101),'/','') + replace(convert(varchar, InvTran.dtmDate,108),':','')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
@@ -551,7 +552,7 @@ BEGIN
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 	where InvTran.dtmDate is not null and dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= @dtmDate
-	and (OC.ysnDestinationWeightGrade = convert(bit,0) or (OC.ysnDestinationWeightGrade = convert(bit,1) and isnull(ShipmentItem.dblDestinationQuantity,0) > 0))
+	--and (OC.ysnDestinationWeightGrade = convert(bit,0) or (OC.ysnDestinationWeightGrade = convert(bit,1) and isnull(ShipmentItem.dblDestinationQuantity,0) > 0))
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,Shipment.intInventoryShipmentId
