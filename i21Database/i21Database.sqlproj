@@ -8253,6 +8253,8 @@
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

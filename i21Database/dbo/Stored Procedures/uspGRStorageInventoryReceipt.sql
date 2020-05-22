@@ -14,7 +14,6 @@ BEGIN
 	DECLARE @intId INT
 	DECLARE @intTransferToCustomerStorageId INT
 	DECLARE @ysnTransferStorage BIT
-	--SELECT '@intTransferStorageReferenceId',@intTransferStorageReferenceId
 	DECLARE @SettleVoucher AS TABLE
 	(
 		intSettleVoucherKey INT IDENTITY(1,1)
