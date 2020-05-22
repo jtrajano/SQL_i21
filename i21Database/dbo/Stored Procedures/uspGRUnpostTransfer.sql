@@ -194,7 +194,15 @@ BEGIN
 
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 		END
-		CLOSE c; DEALLOCATE c;				
+		CLOSE c; DEALLOCATE c;
+
+		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
+		BEGIN			
+			UPDATE SIR SET ysnUnposted = 1
+			FROM tblGRStorageInventoryReceipt SIR 
+			INNER JOIN tblGRTransferStorageReference SR ON SR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId
+			WHERE SR.intTransferStorageId = @intTransferStorageId
+		END
 		
 		--DELETE HISTORY
 		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
@@ -305,7 +313,7 @@ BEGIN
 					, ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
-					,intTransactionDetailId = SR.intTransferStorageSplitId
+					,intTransactionDetailId = SR.intTransferStorageReferenceId
 					,strTransactionId = TS.strTransferStorageTicket
 					,intTransactionTypeId = 56
 					,intLotId = NULL
@@ -332,15 +340,15 @@ BEGIN
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
 
-
 				DECLARE @cursorId INT
+				DECLARE @intTransactionDetailId INT
 
 				DECLARE _CURSOR CURSOR
 				FOR
-				SELECT intId FROM @ItemsToPost
+				SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 				OPEN _CURSOR
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
@@ -385,7 +393,6 @@ BEGIN
 							,@dblSettlementPrice DECIMAL(18,6)
 							,@strRKError VARCHAR(MAX)
 
-
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
 							
 						FROM @ItemsToPost ITP
@@ -395,8 +402,7 @@ BEGIN
 							ON ICC.intCommodityId = I.intCommodityId
 						INNER JOIN tblICItemLocation IL
 							ON IL.intItemLocationId = ITP.intItemLocationId
-						WHERE intId = @cursorId
-						
+						WHERE intId = @cursorId					
 						
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
@@ -518,23 +524,12 @@ BEGIN
 
 						
 			
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
 
 		/* END REVERSAL */
-
-		--UPDATE A
-		--SET A.dblOpenBalance 	= ROUND(A.dblOpenBalance + ISNULL(dblUnitQty,B.dblDeductedUnits),@intDecimalPrecision)
-		--FROM tblGRCustomerStorage A 
-		--INNER JOIN tblGRTransferStorageSourceSplit B 
-		--	ON B.intSourceCustomerStorageId = A.intCustomerStorageId
-		--LEFT JOIN tblGRTransferStorageReference TSR
-		--	ON TSR.intSourceCustomerStorageId = B.intSourceCustomerStorageId
-		--LEFT JOIN tblGRTransferStorageSplit TSS
-		--	ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
-		--WHERE B.intTransferStorageId = @intTransferStorageId AND ISNULL(TSR.intTransferStorageId, @intTransferStorageId) = @intTransferStorageId
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
