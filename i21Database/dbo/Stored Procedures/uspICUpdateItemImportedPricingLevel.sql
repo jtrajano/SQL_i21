@@ -32,6 +32,7 @@ SET pl.dblUnitPrice =
 FROM tblICItemPricingLevel pl
 	INNER JOIN tblICItemPricing p ON p.intItemLocationId = pl.intItemLocationId
 		AND p.intItemId = pl.intItemId
+		AND pl.dtmEffectiveDate >= p.dtmEffectiveCostDate
 	LEFT JOIN tblSMCompanyPreference cp ON cp.intDefaultCurrencyId = pl.intCurrencyId
 	INNER JOIN tblICItem i ON i.intItemId = p.intItemId
 WHERE p.intImportFlagInternal = 1

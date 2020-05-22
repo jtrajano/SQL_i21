@@ -7,6 +7,7 @@ AS
 		,strItemNo,strLocationName,strLocationType,strLongUPCCode,strLotTracking,strName,strPricingMethod,strPricingType,strPromotionType,strStatus,strType,strUPC
 		,strUnitMeasure,strUnitType,strUpcCode,strVendorId,strVendorName,ysnAllowPurchase,ysnAllowSale,ysnStockUnit, strFamily, strClass, ysnSaleable, strProductCode
 		,dblGrossMargin = CASE WHEN dblSalePrice = 0 AND dblLastCost = 0 THEN 0 ELSE (dblSalePrice - dblLastCost) / ISNULL(NULLIF(dblSalePrice, 0), dblLastCost) END * 100.00
+		,dtmEffectiveCostDate,dtmEffectiveRetailDate
 	FROM (
 		SELECT 'Item Pricing' COLLATE Latin1_General_CI_AS strPricingCategory,
 			dblAccumulatedAmount = NULL, dblAccumulatedQty = NULL, p.dblAmountPercent, p.dblAverageCost, dblDiscount = NULL, dblDiscountThruAmount = NULL, dblDiscountThruQty = NULL, dblDiscountedPrice = NULL
@@ -17,6 +18,7 @@ AS
 		, p.strItemNo, p.strLocationName, p.strLocationType, p.strLongUPCCode, strLotTracking = NULL, strName = NULL, p.strPricingMethod, strPricingType = NULL, strPromotionType = NULL
 		, i.strStatus, i.strType, strUPC = p.strLongUPCCode, p.strUnitMeasure, p.strUnitType, p.strUpcCode, p.strVendorId, p.strVendorName, p.ysnAllowPurchase, p.ysnAllowSale, p.ysnStockUnit
 		, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, il.ysnSaleable, strProductCode = sp.strRegProdCode
+		, p.dtmEffectiveCostDate, p.dtmEffectiveRetailDate
 		FROM vyuICGetItemPricing p
 			INNER JOIN tblICItem i ON i.intItemId = p.intItemId
 			LEFT OUTER JOIN tblICCategory cr ON cr.intCategoryId = i.intCategoryId
@@ -38,6 +40,7 @@ AS
 		, p.strItemNo, strLocationName = NULL, strLocationType = NULL, strLongUPCCode = NULL, strLotTracking = i.strLotTracking, strName = NULL, strPricingMethod = NULL, strPricingType = NULL, strPromotionType = NULL
 		, strStatus = i.strStatus, strType = i.strType, strUPC = NULL, p.strUnitMeasure, strUnitType = NULL, strUpcCode = NULL, strVendorId = NULL, strVendorName = strName, ysnAllowPurchase = NULL, ysnAllowSale = NULL, ysnStockUnit = NULL
 		, strFamily = NULL, strClass = NULL, ysnSaleable = NULL, strProductCode = NULL
+		, dtmEffectiveCostDate = NULL, dtmEffectiveRetailDate = NULL
 		FROM vyuICGetItemVendorPricing p
 			INNER JOIN tblICItem i ON i.intItemId = p.intItemId
 			LEFT OUTER JOIN tblICCategory cr ON cr.intCategoryId = i.intCategoryId
@@ -56,6 +59,7 @@ AS
 			, p.strLotTracking, strName = NULL, p.strPricingMethod, strPricingType = NULL, strPromotionType = NULL, p.strStatus, p.strType, p.strUPC, p.strUnitMeasure
 			, strUnitType = um.strUnitType, strUpcCode = p.strUPC, strVendorId = NULL, strVendorName = NULL, ysnAllowPurchase = u.ysnAllowPurchase, ysnAllowSale = u.ysnAllowSale, ysnStockUnit = u.ysnStockUnit
 			, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, ysnSaleable = il.ysnSaleable, strProductCode = sp.strRegProdCode
+			, dtmEffectiveCostDate = NULL, dtmEffectiveRetailDate = NULL
 		FROM vyuICGetItemPricingLevel p
 			LEFT OUTER JOIN tblICItemLocation il ON il.intItemId = p.intItemId AND p.intLocationId = il.intLocationId
 			LEFT OUTER JOIN tblICItemPricing pr ON pr.intItemLocationId = il.intItemLocationId
@@ -77,6 +81,7 @@ AS
 			, strPricingMethod = pr.strPricingMethod, strPricingType = NULL, p.strPromotionType, p.strStatus, p.strType, p.strUPC, p.strUnitMeasure, strUnitType = um.strUnitType
 			, strUpcCode = u.strLongUPCCode, strVendorId = NULL, strVendorName = NULL, ysnAllowPurchase = u.ysnAllowPurchase, ysnAllowSale = u.ysnAllowSale, ysnStockUnit = u.ysnStockUnit
 			, strFamily = sf.strSubcategoryId, strClass = sc.strSubcategoryId, ysnSaleable = il.ysnSaleable, strProductCode = sp.strRegProdCode
+			, dtmEffectiveCostDate = NULL, dtmEffectiveRetailDate = NULL
 		FROM vyuICGetItemSpecialPricing p
 			LEFT OUTER JOIN tblICItemLocation il ON il.intItemId = p.intItemId AND p.intLocationId = il.intLocationId
 			LEFT OUTER JOIN tblICItemPricing pr ON pr.intItemLocationId = il.intItemLocationId

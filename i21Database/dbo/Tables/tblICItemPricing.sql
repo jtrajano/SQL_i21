@@ -27,6 +27,8 @@ Type the overview for the table here.
 		[intSort] INT NULL, 
 		[ysnIsPendingUpdate] BIT NULL, 
 		[dtmDateChanged] DATETIME NULL,
+		[dtmEffectiveCostDate] DATETIME NULL,
+		[dtmEffectiveRetailDate] DATETIME NULL,
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
         [dtmDateModified] DATETIME NULL,

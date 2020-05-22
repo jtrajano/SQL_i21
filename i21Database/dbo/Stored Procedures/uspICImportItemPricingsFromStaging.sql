@@ -24,6 +24,8 @@ CREATE TABLE #tmp (
 	, dblStandardCost NUMERIC(38, 20) NULL
 	, dblAverageCost NUMERIC(38, 20) NULL
 	, dblDefaultGrossPrice NUMERIC(38, 20) NULL
+	, dtmEffectiveCostDate DATETIME NULL
+	, dtmEffectiveRetailDate DATETIME NULL
 	, dtmDateCreated DATETIME NULL
 	, intCreatedByUserId INT NULL
 )
@@ -40,24 +42,28 @@ INSERT INTO #tmp
 	, dblLastCost			
 	, dblStandardCost		
 	, dblAverageCost		
-	, dblDefaultGrossPrice	
+	, dblDefaultGrossPrice
+	, dtmEffectiveCostDate
+	, dtmEffectiveRetailDate	
 	, dtmDateCreated		
 	, intCreatedByUserId	
 )
 SELECT
-	  intItemId				= i.intItemId
-	, intItemLocationId		= il.intItemLocationId
-	, intCompanyLocationId	= c.intCompanyLocationId
-	, dblAmountPercent		= s.dblAmountPercent
-	, dblSalePrice			= s.dblRetailPrice
-	, dblMSRPPrice			= s.dblMSRP		
-	, strPricingMethod		= s.strPricingMethod		
-	, dblLastCost			= s.dblLastCost			
-	, dblStandardCost		= s.dblStandardCost		
-	, dblAverageCost		= s.dblAverageCost			
-	, dblDefaultGrossPrice	= s.dblDefaultGrossPrice	
-	, dtmDateCreated		= s.dtmDateCreated		
-	, intCreatedByUserId	= s.intCreatedByUserId	
+	  intItemId				 = i.intItemId
+	, intItemLocationId		 = il.intItemLocationId
+	, intCompanyLocationId	 = c.intCompanyLocationId
+	, dblAmountPercent		 = s.dblAmountPercent
+	, dblSalePrice			 = s.dblRetailPrice
+	, dblMSRPPrice			 = s.dblMSRP		
+	, strPricingMethod		 = s.strPricingMethod		
+	, dblLastCost			 = s.dblLastCost			
+	, dblStandardCost		 = s.dblStandardCost		
+	, dblAverageCost		 = s.dblAverageCost			
+	, dblDefaultGrossPrice	 = s.dblDefaultGrossPrice	
+	, dtmEffectiveCostDate   = s.dtmEffectiveCostDate
+	, dtmEffectiveRetailDate = s.dtmEffectiveRetailDate
+	, dtmDateCreated		 = s.dtmDateCreated		
+	, intCreatedByUserId	 = s.intCreatedByUserId	
 FROM tblICImportStagingItemPricing s
 	INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
 	INNER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
@@ -84,7 +90,9 @@ USING
 	, dblLastCost			
 	, dblStandardCost		
 	, dblAverageCost		
-	, dblDefaultGrossPrice	
+	, dblDefaultGrossPrice
+	, dtmEffectiveCostDate
+	, dtmEffectiveRetailDate
 	, dtmDateCreated		
 	, intCreatedByUserId
 	FROM #tmp s
@@ -92,16 +100,18 @@ USING
 	AND target.intItemLocationId = source.intItemLocationId
 WHEN MATCHED THEN
 	UPDATE SET
-		  intItemId				= source.intItemId
-		, intItemLocationId		= source.intItemLocationId
-		, dblAmountPercent		= source.dblAmountPercent
-		, dblSalePrice			= source.dblSalePrice
-		, dblMSRPPrice			= source.dblMSRPPrice
-		, strPricingMethod		= source.strPricingMethod
-		, dblLastCost			= source.dblLastCost
-		, dblStandardCost		= source.dblStandardCost
-		, dblAverageCost		= source.dblAverageCost
-		, dblDefaultGrossPrice	= source.dblDefaultGrossPrice
+		  intItemId				 = source.intItemId
+		, intItemLocationId		 = source.intItemLocationId
+		, dblAmountPercent		 = source.dblAmountPercent
+		, dblSalePrice			 = source.dblSalePrice
+		, dblMSRPPrice			 = source.dblMSRPPrice
+		, strPricingMethod		 = source.strPricingMethod
+		, dblLastCost			 = source.dblLastCost
+		, dblStandardCost		 = source.dblStandardCost
+		, dblAverageCost		 = source.dblAverageCost
+		, dblDefaultGrossPrice	 = source.dblDefaultGrossPrice
+		, dtmEffectiveCostDate   = source.dtmEffectiveCostDate
+	    , dtmEffectiveRetailDate = source.dtmEffectiveRetailDate
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 		, intImportFlagInternal = 1
@@ -118,6 +128,8 @@ WHEN NOT MATCHED THEN
 		, dblStandardCost		
 		, dblAverageCost		
 		, dblDefaultGrossPrice	
+		, dtmEffectiveCostDate
+	    , dtmEffectiveRetailDate
 		, dtmDateCreated		
 		, intCreatedByUserId
 		, intDataSourceId
@@ -135,6 +147,8 @@ WHEN NOT MATCHED THEN
 		, dblStandardCost		
 		, dblAverageCost		
 		, dblDefaultGrossPrice	
+		, dtmEffectiveCostDate
+	    , dtmEffectiveRetailDate
 		, dtmDateCreated		
 		, intCreatedByUserId
 		, @intDataSourceId

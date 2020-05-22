@@ -12,6 +12,8 @@ CREATE TABLE [dbo].[tblICImportStagingItemPricing]
     [dblRetailPrice] NUMERIC(38, 20) NULL,
     [dblMSRP] NUMERIC(38, 20) NULL,
     [dblDefaultGrossPrice] NUMERIC(38, 20) NULL,
+    [dtmEffectiveCostDate] DATETIME NULL,
+    [dtmEffectiveRetailDate] DATETIME NULL,
     [dtmDateModified] DATETIME NULL,
     [dtmDateCreated] DATETIME NULL,
     [intModifiedByUserId] INT NULL,
