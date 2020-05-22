@@ -528,10 +528,14 @@ BEGIN
 		
 	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
-	UPDATE tblCMBankTransaction
+	UPDATE 	A 
 	SET		ysnPosted = @ysnPost
+			,strPeriod = F.strPeriod
 			,intConcurrencyId += 1 
+	FROM tblCMBankTransaction A
+	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
 	WHERE	strTransactionId = @strTransactionId
+	
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
 END --@ysnRecap = 0

@@ -49,7 +49,8 @@ strPayee =
 CM.strReferenceNo,
 CM.strTransactionId,
 CM.ysnCheckVoid,
-CM.ysnClr
+CM.ysnClr,
+CM.strPeriod
 FROM tblCMBankTransaction CM 
 JOIN cteOrdered Ordered ON CM.intTransactionId= Ordered.intTransactionId
 JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId AND Total.intBankAccountId = Ordered.intBankAccountId

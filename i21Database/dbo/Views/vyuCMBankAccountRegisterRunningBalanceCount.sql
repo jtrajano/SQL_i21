@@ -24,7 +24,8 @@ dblDeposit = CASE WHEN CM.intBankTransactionTypeId IN ( 1, 10, 11, 18, 19, 103, 
 CM.strReferenceNo,
 CM.strTransactionId,
 CM.ysnCheckVoid,
-CM.ysnClr
+CM.ysnClr,
+CM.strPeriod
 FROM tblCMBankTransaction CM 
 LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId
 LEFT JOIN tblSMCompanyLocation L on L.intCompanyLocationId = CM.intCompanyLocationId

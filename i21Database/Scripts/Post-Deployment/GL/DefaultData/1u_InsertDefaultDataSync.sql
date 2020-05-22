@@ -1,22 +1,26 @@
+
 GO
-	PRINT N'BEGIN INSERT DEFAULT DATA SYNC FOR GL'
-GO
-    IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataSync WHERE strSyncName = 'tblGLDetail_FiscalPeriod')
+    IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataFix WHERE strDescription = 'tblGLDetail_FiscalPeriod')
     BEGIN
-        UPDATE T set strPeriod = F.strPeriod FROM tblGLDetail T join tblGLFiscalYearPeriod F on T.dtmDate between F.dtmStartDate and F.dtmEndDate
-        INSERT INTO tblGLDataSync VALUES( 'tblGLDetail_FiscalPeriod', 1)
-        PRINT N'UPDATED tblGLDetail Fiscal Period'
+        PRINT N'BEGIN INSERTING DEFAULT DATA SYNC FOR GL'
+        UPDATE T set strPeriod = F.strPeriod FROM tblGLDetail T 
+        CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
+        WHERE T.ysnIsUnposted = 0
+
+        INSERT INTO tblGLDataFix VALUES( 'tblGLDetail_FiscalPeriod')
+        PRINT N'FINISHED INSERTING DEFAULT DATA SYNC FOR GL'
     END
 
-    IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataSync WHERE strSyncName = 'tblGLTrialBalance_FiscalPeriod')	
+    IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataFix WHERE strDescription = 'tblGLTrialBalance_FiscalPeriod')	
     BEGIN
+        PRINT N'BEGIN UPDATEING tblGLTrialBalance Fiscal Period'
         UPDATE T SET strPeriod = F.strPeriod 
         FROM tblGLTrialBalance T JOIN
             tblGLFiscalYearPeriod F 
         ON T.intGLFiscalYearPeriodId = F.intGLFiscalYearPeriodId
 
-        INSERT INTO tblGLDataSync VALUES( 'tblGLTrialBalance_FiscalPeriod', 1 )
-        PRINT N'UPDATED tblGLTrialBalance Fiscal Period'
+        INSERT INTO tblGLDataFix VALUES( 'tblGLTrialBalance_FiscalPeriod')
+        PRINT N'FINISHED UPDATEING tblGLTrialBalance Fiscal Period'
     END
 GO
 	PRINT N'END INSERT DEFAULT DATA SYNC FOR GL'
