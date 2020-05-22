@@ -8940,10 +8940,9 @@
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
     <Build Include="dbo\Functions\fnGLGetFiscalPeriod.sql" />
-    <Build Include="dbo\Tables\tblGLDataSync.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1u_InsertDefaultDataSync.sql" />
     <None Include="Scripts\Post-Deployment\CM\6_InsertDefaultDataSync.sql" />
-    <Build Include="dbo\Tables\tblCMDataSync.sql" />
+    <Build Include="dbo\Tables\tblCMDataFixLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
