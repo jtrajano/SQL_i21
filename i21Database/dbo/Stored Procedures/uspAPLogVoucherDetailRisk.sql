@@ -78,9 +78,11 @@ BEGIN
 		strTransactionType
 		, intTransactionReferenceId
 		, strTransactionReferenceNo
+		, dtmTransactionDate
 		, strTransactionReference
 		, intContractDetailId
 		, intContractHeaderId
+		, strContractNumber
 		, intContractTypeId
 		, intContractSeq
 		, intEntityId
@@ -110,9 +112,11 @@ BEGIN
 		 strTransactionType = 'Bill'
 		, b.intBillId
 		, b.strBillId
+		, dtmTransactionDate = b.dtmDate
 		, 'Purchase Basis Deliveries'
 		, intContractDetailId = bd.intContractDetailId
 		, intContractHeaderId = bd.intContractHeaderId
+		, strContractNumber = ct.strContractNumber
 		, intContractTypeId = ct.intContractTypeId
 		, intContractSeq	=	bd.intContractSeq
 		, intEntityId		=	b.intEntityVendorId
