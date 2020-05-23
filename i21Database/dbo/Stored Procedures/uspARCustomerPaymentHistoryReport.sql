@@ -136,7 +136,7 @@ FROM (
 		 , dblAmountPaid		= ISNULL(PAYMENTS.dblAmountPaid, 0)
 		 , dblAmountApplied		= ISNULL(PAYMENTS.dblAmountApplied, 0)
 		 , dblInvoiceTotal		= dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal
-		 , dblAmountDue			= (dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal) - ISNULL(PAYMENTS.dblAmountApplied, 0)  -- CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END	 
+		 , dblAmountDue			= (dbo.fnARGetInvoiceAmountMultiplier(I.strTransactionType) * I.dblInvoiceTotal) - (ISNULL(PAYMENTS.dblAmountApplied, 0) + ISNULL(PAYMENTS.dblDiscount, 0) - ISNULL(PAYMENTS.dblInterest, 0)) -- CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(PAYMENTS.dblAmountDue, 0) * -1 ELSE ISNULL(PAYMENTS.dblAmountDue, 0) END
 		 , intPaymentId			= PAYMENTS.intPaymentId	 
 		 , strReferenceNumber	= PAYMENTS.strPaymentInfo
 		 , strPaymentMethod		= PAYMENTS.strPaymentMethod
@@ -147,7 +147,9 @@ FROM (
 		SELECT strRecordNumber	= P.strRecordNumber
 			 , P.dtmDatePaid
 			 , P.dblAmountPaid			 
-			 , dblAmountApplied	= PD.dblPayment + PD.dblDiscount - PD.dblInterest
+			 , dblAmountApplied	= PD.dblPayment
+			 , PD.dblDiscount
+			 , PD.dblInterest
 			 , P.intPaymentId
 			 , P.intPaymentMethodId
 			 , P.strPaymentInfo
@@ -176,7 +178,9 @@ FROM (
 		SELECT strRecordNumber		= APP.strPaymentRecordNum
 			 , APP.dtmDatePaid
 			 , APP.dblAmountPaid
-			 , dblAmountApplied		= APPD.dblPayment + APPD.dblDiscount - APPD.dblInterest
+			 , dblAmountApplied		= APPD.dblPayment
+			 , APPD.dblDiscount
+			 , APPD.dblInterest
 			 , APP.intPaymentId
 			 , APP.intPaymentMethodId
 			 , APP.strPaymentInfo
