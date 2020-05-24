@@ -57,14 +57,15 @@ SET @strHeader = '<tr>
 					</tr>'
 
 SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + strContractNumber + '</td>' + '<td>&nbsp;' + ISNULL(strThirdPartyMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(intContractDetailId) + '</td>
+		   <td>&nbsp;' + CF.strContractNumber + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strThirdPartyMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractDetailId) + '</td>
 	</tr>'
-FROM tblCTContractFeed
+FROM tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
+JOIN tblCTContractFeed CF WITH (NOLOCK) on CF.intContractFeedId=TPCF.intContractFeedId 
 WHERE strThirdPartyFeedStatus = (Case When @ysnNotifyExternalUser=1 Then 'Ack Rcvd' Else 'Failed' End)
-	AND ISNULL(strThirdPartyMessage, '') <> ''
-	AND ISNULL(ysnThirdPartyMailSent, 0) = 0
+	AND ISNULL(TPCF.strThirdPartyMessage, '') <> ''
+	AND ISNULL(TPCF.ysnThirdPartyMailSent, 0) = 0
 
-UPDATE tblCTContractFeed
+UPDATE tblIPThirdPartyContractFeed
 SET ysnThirdPartyMailSent = 1
 WHERE strThirdPartyFeedStatus = (Case When @ysnNotifyExternalUser=1 Then 'Ack Rcvd' Else 'Failed' End)
 	AND ISNULL(strThirdPartyMessage, '') <> ''
