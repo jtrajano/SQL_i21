@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (@ysnCancel BIT = 0)
+﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (
+	@ysnCancel BIT = 0
+	,@ysnDebug BIT = 0
+	)
 AS
 BEGIN
 	DECLARE @strVendorAccountNum NVARCHAR(50)
@@ -29,6 +32,9 @@ BEGIN
 		,@strShipperVendorAccountNum NVARCHAR(50)
 		,@intContractDetailId INT
 		,@strSeq NVARCHAR(50)
+		,@dtmCurrentDate DATETIME
+		,@dtmStartDate DATETIME
+		,@dtmEndDate DATETIME
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -39,35 +45,58 @@ BEGIN
 		,strPONo NVARCHAR(100)
 		)
 
+	SELECT @dtmCurrentDate = GetDATE()
+
 	SELECT @intThirdPartyContractWaitingPeriod = IsNULL(intThirdPartyContractWaitingPeriod, 60)
-	FROM tblIPCompanyPreference
+	FROM dbo.tblIPCompanyPreference
 
 	IF @ysnCancel = 1
 	BEGIN
-		INSERT INTO @tblCTContractFeed (intContractFeedId)
-		SELECT intContractFeedId
-		FROM dbo.tblCTContractFeed
-		WHERE strThirdPartyFeedStatus IS NULL
-			AND strERPPONumber <> ''
-			AND dtmStartDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
-			AND strCommodityCode = 'Coffee'
-			AND strRowState = 'Delete'
-			AND strContractBasis = 'FOB'
-		ORDER BY intContractFeedId ASC
+		INSERT INTO dbo.tblIPThirdPartyContractFeed (
+			intContractFeedId
+			,strERPPONumber
+			)
+		SELECT CF.intContractFeedId
+			,CF.strERPPONumber
+		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
+		WHERE CF.strERPPONumber <> ''
+			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
+			AND CF.strCommodityCode = 'Coffee'
+			AND CF.strRowState = 'Delete'
+			AND CF.strContractBasis = 'FOB'
+			AND NOT EXISTS (
+				SELECT *
+				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
+				WHERE TPCF.intContractFeedId = CF.intContractFeedId
+				)
+		ORDER BY CF.intContractFeedId ASC
 	END
 	ELSE
 	BEGIN
-		INSERT INTO @tblCTContractFeed (intContractFeedId)
-		SELECT intContractFeedId
-		FROM dbo.tblCTContractFeed
-		WHERE strThirdPartyFeedStatus IS NULL
-			AND strERPPONumber <> ''
-			AND dtmStartDate - GetDATE() <= @intThirdPartyContractWaitingPeriod
-			AND strCommodityCode = 'Coffee'
-			AND strRowState <> 'Delete'
-			AND strContractBasis = 'FOB'
-		ORDER BY intContractFeedId ASC
+		INSERT INTO tblIPThirdPartyContractFeed (
+			intContractFeedId
+			,strERPPONumber
+			)
+		SELECT CF.intContractFeedId
+			,CF.strERPPONumber
+		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
+		WHERE CF.strERPPONumber <> ''
+			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
+			AND CF.strCommodityCode = 'Coffee'
+			AND CF.strRowState <> 'Delete'
+			AND CF.strContractBasis = 'FOB'
+			AND NOT EXISTS (
+				SELECT *
+				FROM dbo.tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
+				WHERE TPCF.intContractFeedId = CF.intContractFeedId
+				)
+		ORDER BY CF.intContractFeedId ASC
 	END
+
+	INSERT INTO @tblCTContractFeed (intContractFeedId)
+	SELECT intContractFeedId
+	FROM dbo.tblIPThirdPartyContractFeed WITH (NOLOCK)
+	WHERE strThirdPartyFeedStatus IS NULL
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
@@ -91,6 +120,8 @@ BEGIN
 			,@dtmFeedCreated = NULL
 			,@strShipperVendorAccountNum = NULL
 			,@strSeq = NULL
+			,@dtmStartDate = NULL
+			,@dtmEndDate = NULL
 
 		SELECT @strError = ''
 
@@ -107,31 +138,35 @@ BEGIN
 			,@dtmFeedCreated = dtmFeedCreated
 			,@intContractDetailId = intContractDetailId
 			,@strSeq = intContractSeq
-		FROM tblCTContractFeed
+			,@dtmStartDate = dtmStartDate
+			,@dtmEndDate = dtmEndDate
+		FROM dbo.tblCTContractFeed WITH (NOLOCK)
 		WHERE intContractFeedId = @intContractFeedId
+
+		SELECT @dtmEndDate = Convert(DATETIME, Convert(NVARCHAR, @dtmEndDate, 101))
 
 		SELECT @intEntityId = intEntityId
 			,@strVendorRefNo = strCustomerContract
 			,@strContractNo = strContractNumber
-		FROM tblCTContractHeader
+		FROM dbo.tblCTContractHeader WITH (NOLOCK)
 		WHERE intContractHeaderId = @intContractHeaderId
 
 		SELECT @intShipperId = intShipperId
 			,@intDestinationCityId = intDestinationCityId
 			,@intDestinationPortId = intDestinationPortId
-		FROM tblCTContractDetail
+		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
 		SELECT @strVendorName = strName
-		FROM tblEMEntity
+		FROM dbo.tblEMEntity WITH (NOLOCK)
 		WHERE intEntityId = @intEntityId
 
 		SELECT @strShipperName = strName
-		FROM tblEMEntity
+		FROM dbo.tblEMEntity WITH (NOLOCK)
 		WHERE intEntityId = @intShipperId
 
 		SELECT @strShipperVendorAccountNum = strVendorAccountNum
-		FROM tblAPVendor
+		FROM dbo.tblAPVendor WITH (NOLOCK)
 		WHERE intEntityId = @intShipperId
 
 		IF @strShipperVendorAccountNum IS NULL
@@ -141,7 +176,7 @@ BEGIN
 		END
 
 		SELECT @strDestinationPoint = strCity
-		FROM tblSMCity
+		FROM dbo.tblSMCity WITH (NOLOCK)
 		WHERE intCityId = IsNULl(@intDestinationCityId, @intDestinationPortId)
 
 		IF @strRowState <> 'Delete'
@@ -178,7 +213,7 @@ BEGIN
 
 		IF @strError <> ''
 		BEGIN
-			UPDATE tblCTContractFeed
+			UPDATE dbo.tblIPThirdPartyContractFeed
 			SET strThirdPartyMessage = @strError
 				,strThirdPartyFeedStatus = 'Failed'
 			WHERE intContractFeedId = @intContractFeedId
@@ -251,6 +286,10 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(30), @dtmPlannedAvailabilityDate, 126) + '</Eta>'
 
+			SELECT @strXML = @strXML + '<StartDate>' + CONVERT(VARCHAR(30), @dtmStartDate, 126) + '</StartDate>'
+
+			SELECT @strXML = @strXML + '<EndDate>' + CONVERT(VARCHAR(30), @dtmEndDate, 126) + '</EndDate>'
+
 			SELECT @strXML = @strXML + '<CommodityItems>'
 
 			SELECT @strXML = @strXML + '<CommodityItem>'
@@ -289,11 +328,35 @@ BEGIN
 				,ISNULL(@strERPPONumber, '')
 				)
 
-			UPDATE tblCTContractFeed
-			SET strThirdPartyFeedStatus = 'Awt Ack'
-				,ysnThirdPartyMailSent = 0
-				,strThirdPartyMessage = NULL
-			WHERE intContractFeedId = @intContractFeedId
+			IF @ysnDebug = 0
+			BEGIN
+				UPDATE dbo.tblIPThirdPartyContractFeed
+				SET strThirdPartyFeedStatus = 'Awt Ack'
+					,ysnThirdPartyMailSent = 0
+					,strThirdPartyMessage = NULL
+				WHERE intContractFeedId = @intContractFeedId
+
+				DELETE
+				FROM dbo.tblIPContractFeedLog
+				WHERE intContractDetailId = @intContractDetailId
+
+				INSERT INTO dbo.tblIPContractFeedLog (
+					intContractHeaderId
+					,intContractDetailId
+					--,intEntityId
+					,strCustomerContract
+					,intShipperId
+					,intDestinationCityId
+					,intDestinationPortId
+					)
+				SELECT @intContractHeaderId
+					,@intContractDetailId
+					--,@intEntityId
+					,@strVendorRefNo
+					,@intShipperId
+					,@intDestinationCityId
+					,@intDestinationPortId
+			END
 		END
 
 		IF EXISTS (

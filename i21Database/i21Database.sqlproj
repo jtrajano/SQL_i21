@@ -871,7 +871,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnGetDebit.sql" />
     <Build Include="dbo\Functions\fnGetCredit.sql" />
-	<Build Include="dbo\Functions\fnGetItemCostUomConversions.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostUomConversions.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateBill.sql" />
     <Build Include="dbo\Tables\tblICReadingPoint.sql" />
     <Build Include="dbo\Tables\tblICMeasurement.sql" />
@@ -8221,6 +8221,14 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
     <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
+    <Build Include="dbo\Tables\tblIPThirdPartyContractFeed.sql" />
+    <Build Include="dbo\Tables\tblIPContractFeedLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPValidateContractFeed_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcesBulkSAPAcknowledgement.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPAcknowledgement.sql" />
+    <Build Include="dbo\Tables\tblIPAcknowledgementStage.sql" />
+    <Build Include="dbo\Tables\tblIPAcknowledgementError.sql" />
+    <Build Include="dbo\Tables\tblIPAcknowledgementArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
