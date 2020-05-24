@@ -462,7 +462,7 @@
     <Build Include="dbo\Tables\tblGLDataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
-    <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql"/>
+    <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedPayments.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedDeposits.sql" />
@@ -7739,6 +7739,9 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementTaxDetailsSubReportForView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementInboundSubReportForView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementOutboundSubReportForView.sql" />
+    <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

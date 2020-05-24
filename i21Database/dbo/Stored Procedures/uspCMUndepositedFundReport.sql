@@ -32,16 +32,27 @@ WITH (
 	, [datatype] nvarchar(50)
 )
 
-DECLARE @asOfDate DATETIME
+DECLARE @dtmDateFrom DATETIME,@dtmDateTo DATETIME
+
 IF EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT 
-		@asOfDate =  [from] 
-	FROM @temp_xml_table WHERE [fieldname] = 'As Of' AND condition ='Equal To'
+		@dtmDateFrom = [from],
+		@dtmDateTo =  [to]
+	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and condition in ('Equal To' , 'Between')
+
+	SELECT @dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900'),
+		@dtmDateTo = isnull( @dtmDateTo , @dtmDateFrom)
+
+	SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
+
+	SELECT * FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo)
+
 END
-SELECT @asOfDate = isnull(@asOfDate,'01/01/2099')
 
 
-SELECT * FROM dbo.fnCMUndepositedFundReport(@asOfDate)
+
+
+
 
 
