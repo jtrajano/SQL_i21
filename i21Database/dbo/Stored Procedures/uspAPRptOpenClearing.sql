@@ -44,6 +44,8 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)  
 DECLARE @endgroup NVARCHAR(50)  
 DECLARE @datatype NVARCHAR(50)  
+DECLARE @strPeriod NVARCHAR(50)
+DECLARE @strPeriodTo NVARCHAR(50)
   
  -- Sanitize the @xmlParam   
 IF LTRIM(RTRIM(@xmlParam)) = ''   
@@ -89,7 +91,9 @@ BEGIN
   0 AS dblAmountToVoucher,  
   0 AS dblChargeAmount,   
   NULL as dtmCurrentDate,  
-  NULL AS strLocationName  
+  NULL AS strLocationName,  
+  NULL AS strPeriod,
+  NULL AS strPeriodTo
   
 END  
   
@@ -206,7 +210,7 @@ SET @innerQuery =
      ,dblReceiptQty  
      ,intLocationId  
      ,strLocationName  
-    FROM vyuAPReceiptClearing  
+    FROM vyuAPReceiptClearing
     ';  
   
 IF @dateFrom IS NOT NULL  
@@ -288,6 +292,34 @@ BEGIN
   END
 END
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'strAccountId'  
+
+SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
+
+IF @strPeriod IS NOT NULL
+BEGIN 
+	IF @condition = 'Equal To' OR @condition = 'Like' OR @condition = 'Starts With' OR @condition = 'Ends With'
+	BEGIN
+		SET @innerQueryFilter = @innerQueryFilter + CASE
+											 WHEN NULLIF(@innerQueryFilter, '') IS NOT NULL
+											 THEN ' AND strPeriod = ''' + @strPeriod + '''' 
+											 ELSE ' WHERE strPeriod = ''' + @strPeriod + '''' END
+	END
+	ELSE IF @condition = 'Between'
+	BEGIN
+	SET @innerQueryFilter = @innerQueryFilter + CASE
+											 WHEN NULLIF(@innerQueryFilter, '') IS NOT NULL
+											 THEN ' AND strPeriod BETWEEN ''' + @strPeriod + ''' AND '''  + @strPeriodTo + ''''
+											 ELSE ' WHERE strPeriod BETWEEN ''' + @strPeriod + ''' AND '''  + @strPeriodTo + '''' END
+	END
+	ELSE
+	BEGIN
+		SET @innerQueryFilter = @innerQueryFilter + CASE
+											 WHEN NULLIF(@innerQueryFilter, '') IS NOT NULL
+											 THEN ' AND strPeriod != ''' + @strPeriod + '''' 
+											 ELSE ' WHERE strPeriod != ''' + @strPeriod + '''' END
+	END
+END
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strPeriod'  
 
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)  
 BEGIN  
@@ -372,7 +404,8 @@ SET @cteQuery = N';WITH forClearing
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intInventoryReceiptId  
@@ -387,14 +420,17 @@ SET @cteQuery = N';WITH forClearing
       ,dblReceiptQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPReceiptClearing  
+     FROM vyuAPReceiptClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
     chargesForClearing  
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intInventoryReceiptId  
@@ -409,14 +445,17 @@ SET @cteQuery = N';WITH forClearing
       ,dblReceiptChargeQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPReceiptChargeClearing  
+     FROM vyuAPReceiptChargeClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
     shipmentChargesForClearing  
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intInventoryShipmentId  
@@ -431,14 +470,17 @@ SET @cteQuery = N';WITH forClearing
       ,dblReceiptChargeQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPShipmentChargeClearing  
+     FROM vyuAPShipmentChargeClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
     loadForClearing  
     AS  
     (  
 	SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intLoadId  
@@ -453,14 +495,17 @@ SET @cteQuery = N';WITH forClearing
       ,dblLoadDetailQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPLoadClearing  
+     FROM vyuAPLoadClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
     loadCostForClearing  
     AS  
     (  
 	SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intLoadId  
@@ -475,14 +520,17 @@ SET @cteQuery = N';WITH forClearing
       ,dblLoadCostDetailQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPLoadCostClearing  
+     FROM vyuAPLoadCostClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
     grainClearing  
     AS  
     (  
 	SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intSettleStorageId  
@@ -497,14 +545,17 @@ SET @cteQuery = N';WITH forClearing
       ,dblSettleStorageQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPGrainClearing  
+     FROM vyuAPGrainClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
     patClearing  
     AS  
     (  
 	SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intRefundId  
@@ -519,7 +570,9 @@ SET @cteQuery = N';WITH forClearing
       ,dblRefundQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPPatClearing  
+     FROM vyuAPPatClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     )';  
 END  
@@ -529,7 +582,8 @@ BEGIN
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,strTransactionNumber  
       ,intEntityVendorId  
       ,intInventoryReceiptId  
@@ -544,13 +598,16 @@ BEGIN
       ,dblReceiptQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPReceiptClearing  
+     FROM vyuAPReceiptClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
     ),  
     chargesForClearing  
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,strTransactionNumber  
       ,intEntityVendorId  
       ,intInventoryReceiptId  
@@ -565,13 +622,16 @@ BEGIN
       ,dblReceiptChargeQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPReceiptChargeClearing  
+     FROM vyuAPReceiptChargeClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
     ),  
     shipmentChargesForClearing  
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intInventoryShipmentId  
@@ -586,13 +646,16 @@ BEGIN
       ,dblReceiptChargeQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPShipmentChargeClearing  
+     FROM vyuAPShipmentChargeClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
     ),  
     loadForClearing  
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate 
+	  ,FP.strPeriod 
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intLoadId  
@@ -607,13 +670,16 @@ BEGIN
       ,dblLoadDetailQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPLoadClearing   
+     FROM vyuAPLoadClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
     ),  
     loadCostForClearing  
     AS  
     (  
      SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod  
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intLoadId  
@@ -628,13 +694,16 @@ BEGIN
       ,dblLoadCostDetailQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPLoadCostClearing   
+     FROM vyuAPLoadCostClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
     ),
     grainClearing
     AS
     (
       SELECT  
-      dtmDate  
+      dtmDate 
+	  ,FP.strPeriod 
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intSettleStorageId  
@@ -649,13 +718,16 @@ BEGIN
       ,dblSettleStorageQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPGrainClearing  
+     FROM vyuAPGrainClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
     ),
     patClearing  
     AS  
     (  
 	SELECT  
-      dtmDate  
+      dtmDate
+	  ,FP.strPeriod
       ,intEntityVendorId  
       ,strTransactionNumber  
       ,intRefundId  
@@ -670,7 +742,9 @@ BEGIN
       ,dblRefundQty  
       ,intLocationId  
       ,strLocationName  
-     FROM vyuAPPatClearing 
+     FROM vyuAPPatClearing A
+	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
     )';  
 END  
   

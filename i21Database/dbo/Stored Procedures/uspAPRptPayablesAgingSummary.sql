@@ -55,6 +55,8 @@ DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
 DECLARE @ysnFilter NVARCHAR(50) = 0
 DECLARE @dtmDateFilter NVARCHAR(50)
+DECLARE @strPeriod NVARCHAR(50)
+DECLARE @strPeriodTo NVARCHAR(50)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -92,7 +94,9 @@ BEGIN
 		0 AS dbl30,
 		0 AS dbl60,
 		0 AS dbl90,
-		0 AS intAging
+		0 AS intAging,
+		NULL AS strPeriod,
+		NULL AS strPeriodTo
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -130,16 +134,20 @@ WITH (
 --CREATE date filter
 SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SELECT @dtmDueDate = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDueDate';
+SELECT @strPeriod = [from], @strPeriodTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'strPeriod';
 SET @innerQuery = 'SELECT --DISTINCT
-			intBillId
-			,dblTotal
-			,dblAmountDue
-			,dblAmountPaid
-			,dblDiscount
-			,dblInterest
-			,dtmDate
-			,dtmDueDate
-		FROM dbo.vyuAPPayables'
+				   intBillId
+				   ,dblTotal
+				   ,dblAmountDue
+				   ,dblAmountPaid
+				   ,dblDiscount
+				   ,dblInterest
+				   ,dtmDate
+				   ,dtmDueDate
+				   ,FP.strPeriod
+				FROM dbo.vyuAPPayables A
+				LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+				ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
 
 SET @deletedQuery = 'SELECT --DISTINCT 
 					intBillId
@@ -150,8 +158,11 @@ SET @deletedQuery = 'SELECT --DISTINCT
 					,dblDiscount
 					,dblInterest
 					,dtmDate
+					,FP.strPeriod
 					,intCount
-				  FROM dbo.vyuAPPayablesAgingDeleted'
+				  FROM dbo.vyuAPPayablesAgingDeleted A
+				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+				  ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
 
 SET @prepaidInnerQuery = 'SELECT --DISTINCT 
 					intBillId
@@ -161,8 +172,11 @@ SET @prepaidInnerQuery = 'SELECT --DISTINCT
 					,dblDiscount
 					,dblInterest
 					,dtmDate
+					,FP.strPeriod
 					,intPrepaidRowType
-				  FROM dbo.vyuAPPrepaidPayables'
+				  FROM dbo.vyuAPPrepaidPayables A
+				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+				  ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
 
 SET @arQuery = 'SELECT --DISTINCT 
 					intInvoiceId
@@ -172,7 +186,10 @@ SET @arQuery = 'SELECT --DISTINCT
 					,dblDiscount
 					,dblInterest
 					,dtmDate
-				  FROM dbo.vyuAPSalesForPayables'
+					,FP.strPeriod
+				  FROM dbo.vyuAPSalesForPayables A
+				  LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+				  ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate'
 
 IF @dateFrom IS NOT NULL
 BEGIN
@@ -224,7 +241,69 @@ BEGIN
     
 END
 
+IF @strPeriod IS NOT NULL
+BEGIN 
+	IF @condition = 'Equal To' OR @condition = 'Like' OR @condition = 'Starts With' OR @condition = 'Ends With'
+	BEGIN 
+		SET @innerQuery =  @innerQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod = ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod = ''' + @strPeriod + '''' END
+		SET @deletedQuery = @deletedQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod = ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod = ''' + @strPeriod + '''' END
+		SET @prepaidInnerQuery = @prepaidInnerQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod = ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod = ''' + @strPeriod + '''' END
+		SET @arQuery = @arQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod = ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod = ''' + @strPeriod + '''' END
+	END
+	ELSE IF @condition = 'Between'
+	BEGIN
+	SET @innerQuery =  @innerQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +''''
+										 ELSE  ' WHERE strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +'''' END
+		SET @deletedQuery = @deletedQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +''''
+										 ELSE  ' WHERE strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +'''' END
+		SET @prepaidInnerQuery = @prepaidInnerQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +''''
+										 ELSE  ' WHERE strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +'''' END
+		SET @arQuery = @arQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +''''
+										 ELSE  ' WHERE strPeriod BETWEEN ''' + @strPeriod + ''' AND ''' + @strPeriodTo +'''' END
+	END
+	ELSE
+	BEGIN
+		SET @innerQuery =  @innerQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod != ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod != ''' + @strPeriod + '''' END
+		SET @deletedQuery = @deletedQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod != ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod != ''' + @strPeriod + '''' END
+		SET @prepaidInnerQuery = @prepaidInnerQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod != ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod != ''' + @strPeriod + '''' END
+		SET @arQuery = @arQuery + CASE
+										 WHEN @dateFrom IS NOT NULL AND @dateFrom <> '1/1/1900' OR @dtmDueDate IS NOT NULL
+										 THEN ' AND strPeriod != ''' + @strPeriod + ''''
+										 ELSE  ' WHERE strPeriod != ''' + @strPeriod + '''' END
+	END
+END
+
 DELETE FROM @temp_xml_table WHERE [fieldname] = 'dtmDate'
+DELETE FROM @temp_xml_table WHERE [fieldname] = 'strPeriod'
 DELETE FROM @temp_xml_table  where [condition] = 'Dummy'
 WHILE EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
