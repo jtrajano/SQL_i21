@@ -71,21 +71,6 @@ BEGIN TRY
 		,intEntityVendorId INT
 		)
 
-	INSERT INTO @receiptData
-	SELECT IR.intInventoryReceiptId
-		,IR.strReceiptNumber
-		,IRI.intInventoryReceiptItemId
-		,IR.intSourceType
-		,CD.dblSeqPrice
-		,IR.intEntityVendorId
-	FROM tblICInventoryReceipt IR
-	JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId
-	CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(LD.intPContractDetailId) CD
-	WHERE LD.intLoadId = @intLoadId
-		AND IR.ysnPosted = 1
-		AND IR.intSourceType = 2
-
 	SELECT @strLoadNumber = strLoadNumber
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
@@ -98,10 +83,22 @@ BEGIN TRY
 	WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0 
 	OPTION (OPTIMIZE FOR ( @xmlLoadCosts = NULL ))
 
-	--SELECT RTRIM(LTRIM(T.value('.', 'INT'))) AS intLoadCostId
-	--INTO @loadCosts
-	--FROM @xmlLoadCosts.nodes('/A') AS X(T) 
-	--WHERE RTRIM(LTRIM(T.value('.', 'INT'))) > 0 
+	INSERT INTO @receiptData
+	SELECT IR.intInventoryReceiptId
+		,IR.strReceiptNumber
+		,IRI.intInventoryReceiptItemId
+		,IR.intSourceType
+		,CD.dblSeqPrice
+		,IR.intEntityVendorId
+	FROM tblICInventoryReceipt IR
+	JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+	JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = IRI.intSourceId
+	JOIN vyuLGAdditionalColumnForContractDetailView CD ON CD.intContractDetailId = LD.intPContractDetailId
+	JOIN tblICInventoryReceiptCharge IRC ON IR.intInventoryReceiptId = IRC.intInventoryReceiptId AND IRC.intContractDetailId = CD.intContractDetailId
+	JOIN tblLGLoadCost LC ON LC.intItemId = IRC.intChargeId AND LC.intLoadId = @intLoadId
+	WHERE LD.intLoadId = @intLoadId
+		AND IR.ysnPosted = 1
+		AND IR.intSourceType = 2
 
 	IF NOT EXISTS (SELECT TOP 1 1 FROM tblLGLoadCost WHERE intLoadId = @intLoadId AND intBillId IS NULL 
 			AND (intLoadCostId IN (SELECT intLoadCostId FROM @loadCosts) OR NOT EXISTS (SELECT TOP 1 1 FROM @loadCosts)))
