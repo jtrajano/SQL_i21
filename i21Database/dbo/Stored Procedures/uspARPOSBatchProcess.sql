@@ -637,7 +637,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
-				,strNotes						= CASE  WHEN RT.strPOSType = 'Mixed' THEN 'POS Settle Amount Due of Exchange Transaction' ELSE CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END END
+				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,intEntityId					= @intEntityUserId
@@ -673,122 +673,123 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			  AND ISNULL(II.ysnHeader, 0) = 1
 			  AND ISNULL(II.ysnSuccess, 0) = 1
 			  AND ISNULL(II.ysnPosted, 0) = 1
-			--   AND RT.strPOSType <> 'Mixed'
+			  AND RT.strPOSType <> 'Mixed'
+
 
 			-- --GET POS PAYMENTS (FOR MIXED TRANSACTIONS)
 			-- --IF INV > CM = 2 RCVs (OFFSET [DEBIT MEMO] AND + AMOUNT DUE [CASH])
 			-- --IF CM > INV = 2 RCVs (OFFSET [DEBIT MEMO] AND - AMOUNT DUE [CASH])
-			-- INSERT INTO @EntriesForPayment (
-			-- 	   intId
-			-- 	 , strSourceTransaction
-			-- 	 , intSourceId
-			-- 	 , strSourceId
-			-- 	 , intEntityCustomerId
-			-- 	 , intCompanyLocationId
-			-- 	 , intCurrencyId
-			-- 	 , dtmDatePaid
-			-- 	 , intPaymentMethodId
-			-- 	 , strPaymentMethod
-			-- 	 , strPaymentInfo
-			-- 	 , strNotes
-			-- 	 , intBankAccountId
-			-- 	 , dblAmountPaid
-			-- 	 , intEntityId
-			-- 	 , intInvoiceId
-			-- 	 , strTransactionType
-			-- 	 , strTransactionNumber
-			-- 	 , intTermId
-			-- 	 , intInvoiceAccountId
-			-- 	 , dblInvoiceTotal
-			-- 	 , dblBaseInvoiceTotal
-			-- 	 , dblPayment
-			-- 	 , dblAmountDue
-			-- 	 , dblBaseAmountDue
-			-- 	 , strInvoiceReportNumber
-			-- 	 , dblCurrencyExchangeRate
-			-- 	 , ysnPost
-			-- )
-			-- SELECT intId							= POS.intPOSId
-			-- 	 , strSourceTransaction				= 'Direct'
-			-- 	 , intSourceId						= INV.intInvoiceId
-			-- 	 , strSourceId						= INV.strInvoiceNumber
-			-- 	 , intEntityCustomerId				= INV.intEntityCustomerId
-			-- 	 , intCompanyLocationId				= INV.intCompanyLocationId
-			-- 	 , intCurrencyId					= INV.intCurrencyId
-			-- 	 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
-			-- 	 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
-			-- 	 , strPaymentMethod					= 'Debit Memos and Payments'
-			-- 	 , strPaymentInfo					= 'POS Exchange Item Transaction'
-			-- 	 , strNotes							= POS.strReceiptNumber
-			-- 	 , intBankAccountId					= BA.intBankAccountId
-			-- 	 , dblAmountPaid					= 0.00
-			-- 	 , intEntityId						= @intEntityUserId
-			-- 	 , intInvoiceId						= INV.intInvoiceId
-			-- 	 , strTransactionType				= INV.strTransactionType
-			-- 	 , strTransactionNumber				= INV.strInvoiceNumber
-			-- 	 , intTermId						= INV.intTermId
-			-- 	 , intInvoiceAccountId				= INV.intAccountId
-			-- 	 , dblInvoiceTotal					= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
-			-- 	 , dblBaseInvoiceTotal				= INV.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
-			-- 	 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN CM.dblAmountDue ELSE INV.dblAmountDue END
-			-- 	 , dblAmountDue						= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
-			-- 	 , dblBaseAmountDue					= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
-			-- 	 , strInvoiceReportNumber			= INV.strInvoiceNumber
-			-- 	 , dblCurrencyExchangeRate			= INV.dblCurrencyExchangeRate
-			-- 	 , ysnPost							= CAST(1 AS BIT)
-			-- FROM tblARPOS POS 
-			-- INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
-			-- INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
-			-- INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
-			-- INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
-			-- LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
-			-- WHERE POS.intCreditMemoId IS NOT NULL
-			--   AND POS.intInvoiceId IS NOT NULL
-			--   AND INV.ysnPosted = 1
-			--   AND INV.ysnPaid = 0
-			--   AND RT.strPOSType = 'Mixed'
+			INSERT INTO @EntriesForPayment (
+				   intId
+				 , strSourceTransaction
+				 , intSourceId
+				 , strSourceId
+				 , intEntityCustomerId
+				 , intCompanyLocationId
+				 , intCurrencyId
+				 , dtmDatePaid
+				 , intPaymentMethodId
+				 , strPaymentMethod
+				 , strPaymentInfo
+				 , strNotes
+				 , intBankAccountId
+				 , dblAmountPaid
+				 , intEntityId
+				 , intInvoiceId
+				 , strTransactionType
+				 , strTransactionNumber
+				 , intTermId
+				 , intInvoiceAccountId
+				 , dblInvoiceTotal
+				 , dblBaseInvoiceTotal
+				 , dblPayment
+				 , dblAmountDue
+				 , dblBaseAmountDue
+				 , strInvoiceReportNumber
+				 , dblCurrencyExchangeRate
+				 , ysnPost
+			)
+			SELECT intId							= POS.intPOSId
+				 , strSourceTransaction				= 'Direct'
+				 , intSourceId						= INV.intInvoiceId
+				 , strSourceId						= INV.strInvoiceNumber
+				 , intEntityCustomerId				= INV.intEntityCustomerId
+				 , intCompanyLocationId				= INV.intCompanyLocationId
+				 , intCurrencyId					= INV.intCurrencyId
+				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
+				 , strPaymentMethod					= 'Debit Memos and Payments'
+				 , strPaymentInfo					= 'POS Exchange Item Transaction'
+				 , strNotes							= POS.strReceiptNumber
+				 , intBankAccountId					= BA.intBankAccountId
+				 , dblAmountPaid					= 0.00
+				 , intEntityId						= @intEntityUserId
+				 , intInvoiceId						= INV.intInvoiceId
+				 , strTransactionType				= INV.strTransactionType
+				 , strTransactionNumber				= INV.strInvoiceNumber
+				 , intTermId						= INV.intTermId
+				 , intInvoiceAccountId				= INV.intAccountId
+				 , dblInvoiceTotal					= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblBaseInvoiceTotal				= INV.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN CM.dblAmountDue ELSE INV.dblAmountDue END
+				 , dblAmountDue						= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblBaseAmountDue					= INV.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , strInvoiceReportNumber			= INV.strInvoiceNumber
+				 , dblCurrencyExchangeRate			= INV.dblCurrencyExchangeRate
+				 , ysnPost							= CAST(1 AS BIT)
+			FROM tblARPOS POS 
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
+			INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
+			WHERE POS.intCreditMemoId IS NOT NULL
+			  AND POS.intInvoiceId IS NOT NULL
+			  AND INV.ysnPosted = 1
+			  AND INV.ysnPaid = 0
+			  AND RT.strPOSType = 'Mixed'
 
-			-- UNION ALL
+			UNION ALL
 
-			-- SELECT intId							= POS.intPOSId
-			-- 	 , strSourceTransaction				= 'Direct'
-			-- 	 , intSourceId						= CM.intInvoiceId
-			-- 	 , strSourceId						= CM.strInvoiceNumber
-			-- 	 , intEntityCustomerId				= CM.intEntityCustomerId
-			-- 	 , intCompanyLocationId				= CM.intCompanyLocationId
-			-- 	 , intCurrencyId					= CM.intCurrencyId
-			-- 	 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
-			-- 	 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
-			-- 	 , strPaymentMethod					= 'Debit Memos and Payments'
-			-- 	 , strPaymentInfo					= 'POS Exchange Item Transaction'
-			-- 	 , strNotes							= POS.strReceiptNumber
-			-- 	 , intBankAccountId					= BA.intBankAccountId
-			-- 	 , dblAmountPaid					= 0.00
-			-- 	 , intEntityId						= @intEntityUserId
-			-- 	 , intInvoiceId						= CM.intInvoiceId
-			-- 	 , strTransactionType				= CM.strTransactionType
-			-- 	 , strTransactionNumber				= CM.strInvoiceNumber
-			-- 	 , intTermId						= CM.intTermId
-			-- 	 , intInvoiceAccountId				= CM.intAccountId
-			-- 	 , dblInvoiceTotal					= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
-			-- 	 , dblBaseInvoiceTotal				= CM.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
-			-- 	 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN CM.dblAmountDue ELSE INV.dblAmountDue END
-			-- 	 , dblAmountDue						= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
-			-- 	 , dblBaseAmountDue					= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
-			-- 	 , strInvoiceReportNumber			= CM.strInvoiceNumber
-			-- 	 , dblCurrencyExchangeRate			= CM.dblCurrencyExchangeRate
-			-- 	 , ysnPost							= CAST(1 AS BIT)
-			-- FROM tblARPOS POS 
-			-- INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
-			-- INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
-			-- INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
-			-- INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
-			-- LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
-			-- WHERE POS.intCreditMemoId IS NOT NULL
-			--   AND POS.intInvoiceId IS NOT NULL
-			--   AND INV.ysnPosted = 1
-			--   AND INV.ysnPaid = 0
-			--   AND RT.strPOSType = 'Mixed'
+			SELECT intId							= POS.intPOSId
+				 , strSourceTransaction				= 'Direct'
+				 , intSourceId						= CM.intInvoiceId
+				 , strSourceId						= CM.strInvoiceNumber
+				 , intEntityCustomerId				= CM.intEntityCustomerId
+				 , intCompanyLocationId				= CM.intCompanyLocationId
+				 , intCurrencyId					= CM.intCurrencyId
+				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
+				 , strPaymentMethod					= 'Debit Memos and Payments'
+				 , strPaymentInfo					= 'POS Exchange Item Transaction'
+				 , strNotes							= POS.strReceiptNumber
+				 , intBankAccountId					= BA.intBankAccountId
+				 , dblAmountPaid					= 0.00
+				 , intEntityId						= @intEntityUserId
+				 , intInvoiceId						= CM.intInvoiceId
+				 , strTransactionType				= CM.strTransactionType
+				 , strTransactionNumber				= CM.strInvoiceNumber
+				 , intTermId						= CM.intTermId
+				 , intInvoiceAccountId				= CM.intAccountId
+				 , dblInvoiceTotal					= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
+				 , dblBaseInvoiceTotal				= CM.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
+				 , dblPayment						= CASE WHEN INV.dblAmountDue > CM.dblAmountDue THEN CM.dblAmountDue ELSE INV.dblAmountDue END
+				 , dblAmountDue						= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
+				 , dblBaseAmountDue					= CM.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(CM.strTransactionType)
+				 , strInvoiceReportNumber			= CM.strInvoiceNumber
+				 , dblCurrencyExchangeRate			= CM.dblCurrencyExchangeRate
+				 , ysnPost							= CAST(1 AS BIT)
+			FROM tblARPOS POS 
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoice INV ON POS.intInvoiceId = INV.intInvoiceId AND INV.strTransactionType = 'Invoice'
+			INNER JOIN tblARInvoice CM ON POS.intCreditMemoId = CM.intInvoiceId AND CM.strTransactionType = 'Credit Memo'
+			INNER JOIN tblSMCompanyLocation CL ON POS.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId			
+			WHERE POS.intCreditMemoId IS NOT NULL
+			  AND POS.intInvoiceId IS NOT NULL
+			  AND INV.ysnPosted = 1
+			  AND INV.ysnPaid = 0
+			  AND RT.strPOSType = 'Mixed'
 
 			-- UNION ALL
 
@@ -832,6 +833,181 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			--   AND INV.ysnPaid = 0
 			--   AND CM.dblAmountDue <> INV.dblAmountDue 
 			--   AND RT.strPOSType = 'Mixed'
+			
+
+			--GET PAYMENTS for SETTLE AMOUNT DUE FOR INVOICE > CREDIT MEMO
+			INSERT INTO @EntriesForPayment (
+				 intId
+				,strSourceTransaction
+				,intSourceId
+				,strSourceId
+				,intEntityCustomerId
+				,intCompanyLocationId
+				,intCurrencyId
+				,dtmDatePaid
+				,intPaymentMethodId
+				,strPaymentMethod
+				,strPaymentInfo
+				,strNotes
+				,intBankAccountId
+				,dblAmountPaid
+				,intEntityId
+				,intInvoiceId
+				,strTransactionType
+				,strTransactionNumber
+				,intTermId
+				,intInvoiceAccountId
+				,dblInvoiceTotal
+				,dblBaseInvoiceTotal
+				,dblPayment
+				,dblAmountDue
+				,dblBaseAmountDue
+				,strInvoiceReportNumber
+				,dblCurrencyExchangeRate
+				,ysnPost
+			)
+			SELECT intId						= POSPAYMENTS.intPOSPaymentId
+			    ,strSourceTransaction			= 'Direct'
+				,intSourceId					= IFP.intInvoiceId
+				,strSourceId					= IFP.strInvoiceNumber
+				,intEntityCustomerId			= IFP.intEntityCustomerId
+				,intCompanyLocationId			= IFP.intCompanyLocationId
+				,intCurrencyId					= IFP.intCurrencyId
+				,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				,intPaymentMethodId				= PM.intPaymentMethodID
+				,strPaymentMethod				= PM.strPaymentMethod
+				,strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
+				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
+				,intBankAccountId				= BA.intBankAccountId
+				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,intEntityId					= @intEntityUserId
+				,intInvoiceId					= IFP.intInvoiceId
+				,strTransactionType				= IFP.strTransactionType
+				,strTransactionNumber			= IFP.strInvoiceNumber
+				,intTermId						= IFP.intTermId
+				,intInvoiceAccountId			= IFP.intAccountId
+				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblPayment						= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblAmountDue					= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblBaseAmountDue				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,strInvoiceReportNumber			= IFP.strInvoiceNumber
+				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
+				,ysnPost						= CAST(1 AS BIT)
+			FROM #POSPAYMENTS POSPAYMENTS
+			INNER JOIN tblARPOS POS ON POSPAYMENTS.intPOSId = POS.intPOSId
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoiceIntegrationLogDetail II ON POS.intPOSId = II.intSourceId AND POS.strReceiptNumber = II.strSourceId
+			INNER JOIN (SELECT * FROM tblARInvoice WHERE strTransactionType = 'Invoice' ) IFP ON IFP.intInvoiceId =  POS.intInvoiceId 
+			OUTER APPLY (
+				SELECT * FROM tblARInvoice 
+				WHERE strTransactionType = 'Credit Memo'
+				AND intInvoiceId = POS.intCreditMemoId
+			) CREDITMEMO
+			INNER JOIN tblSMCompanyLocation CL ON IFP.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			CROSS APPLY (
+				SELECT TOP 1 intPaymentMethodID
+						   , strPaymentMethod
+				FROM tblSMPaymentMethod WITH (NOLOCK)
+				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
+			) PM
+			WHERE IFP.ysnPosted = 1
+			  AND IFP.ysnPaid = 0
+			  AND II.intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(II.ysnHeader, 0) = 1
+			  AND ISNULL(II.ysnSuccess, 0) = 1
+			  AND ISNULL(II.ysnPosted, 0) = 1
+			  AND IFP.dblInvoiceTotal > CREDITMEMO.dblInvoiceTotal
+			  AND RT.strPOSType = 'Mixed'
+
+			--GET PAYMENTS for SETTLE AMOUNT DUE FOR INVOICE < CREDIT MEMO
+		    INSERT INTO @EntriesForPayment (
+				 intId
+				,strSourceTransaction
+				,intSourceId
+				,strSourceId
+				,intEntityCustomerId
+				,intCompanyLocationId
+				,intCurrencyId
+				,dtmDatePaid
+				,intPaymentMethodId
+				,strPaymentMethod
+				,strPaymentInfo
+				,strNotes
+				,intBankAccountId
+				,dblAmountPaid
+				,intEntityId
+				,intInvoiceId
+				,strTransactionType
+				,strTransactionNumber
+				,intTermId
+				,intInvoiceAccountId
+				,dblInvoiceTotal
+				,dblBaseInvoiceTotal
+				,dblPayment
+				,dblAmountDue
+				,dblBaseAmountDue
+				,strInvoiceReportNumber
+				,dblCurrencyExchangeRate
+				,ysnPost
+			)
+			SELECT intId						= POSPAYMENTS.intPOSPaymentId
+			    ,strSourceTransaction			= 'Direct'
+				,intSourceId					= IFP.intInvoiceId
+				,strSourceId					= IFP.strInvoiceNumber
+				,intEntityCustomerId			= IFP.intEntityCustomerId
+				,intCompanyLocationId			= IFP.intCompanyLocationId
+				,intCurrencyId					= IFP.intCurrencyId
+				,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
+				,intPaymentMethodId				= PM.intPaymentMethodID
+				,strPaymentMethod				= PM.strPaymentMethod
+				,strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
+				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
+				,intBankAccountId				= BA.intBankAccountId
+				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,intEntityId					= @intEntityUserId
+				,intInvoiceId					= IFP.intInvoiceId
+				,strTransactionType				= IFP.strTransactionType
+				,strTransactionNumber			= IFP.strInvoiceNumber
+				,intTermId						= IFP.intTermId
+				,intInvoiceAccountId			= IFP.intAccountId
+				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblPayment						= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblAmountDue					= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,dblBaseAmountDue				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
+				,strInvoiceReportNumber			= IFP.strInvoiceNumber
+				,dblCurrencyExchangeRate		= IFP.dblCurrencyExchangeRate
+				,ysnPost						= CAST(1 AS BIT)
+			FROM #POSPAYMENTS POSPAYMENTS
+			INNER JOIN tblARPOS POS ON POSPAYMENTS.intPOSId = POS.intPOSId
+			INNER JOIN #POSTRANSACTIONS RT ON POS.intPOSId = RT.intPOSId
+			INNER JOIN tblARInvoiceIntegrationLogDetail II ON POS.intPOSId = II.intSourceId AND POS.strReceiptNumber = II.strSourceId
+			INNER JOIN (SELECT * FROM tblARInvoice WHERE strTransactionType = 'Credit Memo' ) IFP ON IFP.intInvoiceId =  POS.intCreditMemoId 
+			OUTER APPLY (
+				SELECT * FROM tblARInvoice 
+				WHERE strTransactionType = 'Invoice'
+				AND intInvoiceId = POS.intInvoiceId
+			) INVOICES
+			INNER JOIN tblSMCompanyLocation CL ON IFP.intCompanyLocationId = CL.intCompanyLocationId
+			LEFT JOIN tblCMBankAccount BA ON CL.intCashAccount = BA.intGLAccountId
+			CROSS APPLY (
+				SELECT TOP 1 intPaymentMethodID
+						   , strPaymentMethod
+				FROM tblSMPaymentMethod WITH (NOLOCK)
+				WHERE ((POSPAYMENTS.strPaymentMethod = 'Debit Card' AND strPaymentMethod = 'Debit Card') OR (POSPAYMENTS.strPaymentMethod <> 'Debit Card' AND strPaymentMethod = POSPAYMENTS.strPaymentMethod))
+			) PM
+			WHERE IFP.ysnPosted = 1
+			  AND IFP.ysnPaid = 0
+			  AND II.intIntegrationLogId = @intInvoiceLogId
+			  AND ISNULL(II.ysnHeader, 0) = 1
+			  AND ISNULL(II.ysnSuccess, 0) = 1
+			  AND ISNULL(II.ysnPosted, 0) = 1
+			  AND IFP.dblInvoiceTotal > INVOICES.dblInvoiceTotal
+			  AND RT.strPOSType = 'Mixed'
+			
+		
 
 			--PROCESS TO RCV
 			EXEC [dbo].[uspARProcessPayments] @PaymentEntries	= @EntriesForPayment
