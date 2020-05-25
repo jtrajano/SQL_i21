@@ -861,7 +861,7 @@ IF(OBJECT_ID('tempdb..#ARPaymentGLEntries') IS NOT NULL)
 																						
 		IF @RaiseError = @OneBit
 		BEGIN
-			SELECT TOP 1 @ErrorMerssage = strError FROM #ARInvalidPaymentData
+			SELECT TOP 1 @ErrorMerssage = strText FROM @InvalidGLEntries
 			RAISERROR(@ErrorMerssage, 11, 1)							
 			GOTO Post_Exit
 		END													
