@@ -490,6 +490,9 @@ BEGIN
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 
+		--DELETE IN SUMMARY LOG
+		--DELETE FROM tblRKSummaryLog WHERE intTransactionRecordHeaderId = @intTransferStorageId
+
 		DONE:
 		IF @transCount = 0 COMMIT TRANSACTION
 	

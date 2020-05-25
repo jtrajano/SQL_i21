@@ -759,8 +759,8 @@ BEGIN
 						IF(SELECT dblQty FROM @Entry) > 0
 						BEGIN
 						
-							--UPDATE @Entry
-							--SET dblQty = 0--dblQty*-1
+							UPDATE @Entry
+							SET dblQty = 0--dblQty*-1
 							
 							INSERT INTO @DummyGLEntries 
 							(

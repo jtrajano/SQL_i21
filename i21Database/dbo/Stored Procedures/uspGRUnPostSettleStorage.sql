@@ -63,6 +63,11 @@ BEGIN TRY
 		where intSettleStorageId = @intSettleStorageId and intBillId is not null
 
 	BEGIN
+		--check first if the settle storage being deleted is the parent, then its children should be deleted first
+		SELECT @isParentSettleStorage = CASE WHEN MIN(intSettleStorageId) > 0 THEN 1 ELSE 0 END
+		FROM tblGRSettleStorage
+		WHERE intParentSettleStorageId = @intParentSettleStorageId
+		
 		--1. Unpost the Voucher
 		SELECT 
 			@BillId					= intBillId

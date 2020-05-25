@@ -179,6 +179,8 @@ BEGIN TRY
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
+	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
+	DECLARE @intStorageHistoryId AS INT
 
 	/*	intItemType
 		------------
@@ -3336,17 +3338,61 @@ BEGIN TRY
 			--7. HiStory Creation
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
-				INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- INSERT INTO [dbo].[tblGRStorageHistory] 
+				-- (
+				-- 	[intConcurrencyId]
+				-- 	,[intCustomerStorageId]
+				-- 	,[intContractHeaderId]
+				-- 	,[dblUnits]
+				-- 	,[dtmHistoryDate]
+				-- 	,[strType]
+				-- 	,[strUserName]
+				-- 	,[intUserId]
+				-- 	,[intEntityId]
+				-- 	,[strSettleTicket]
+				-- 	,[intTransactionTypeId]
+				-- 	,[dblPaidAmount]
+				-- 	,[intBillId]
+				-- 	,[intSettleStorageId]
+				-- 	,[strVoucher]
+				-- 	,[dblOldCost]
+				-- )
+				-- SELECT 
+				-- 	 [intConcurrencyId]     = 1 
+				-- 	,[intCustomerStorageId] = SV.[intCustomerStorageId]
+				-- 	,[intContractHeaderId]  = SV.[intContractHeaderId]
+				-- 	,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])--case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
+				-- 	,[dtmHistoryDate]		= GETDATE()
+				-- 	,[strType]				= 'Settlement'
+				-- 	,[strUserName]			= NULL
+				-- 	,[intUserId]		 	= @intCreatedUserId
+				-- 	,[intEntityId]			= @EntityId
+				-- 	,[strSettleTicket]		= @TicketNo
+				-- 	,[intTransactionTypeId]	= 4 
+				-- 	,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
+				-- 	,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
+				-- 	,intSettleStorageId		= @intSettleStorageId
+				-- 	,strVoucher				= @strVoucher
+				-- 	,dblOldCost				= (select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0)
+				-- FROM @SettleVoucherCreate SV
+				-- JOIN tblGRCustomerStorage CS 
+				-- 	ON CS.intCustomerStorageId = SV.intCustomerStorageId
+				-- -- JOIN tblICCommodityUnitMeasure CU 
+				-- -- 	ON CU.intCommodityId = CS.intCommodityId 
+				-- -- 		AND CU.ysnStockUnit = 1
+				-- JOIN tblICItemUOM IU
+				-- 	ON IU.intItemId = CS.intItemId
+				-- 		AND IU.ysnStockUnit = 1
+				-- WHERE SV.intItemType = 1
+
+				INSERT INTO @StorageHistoryStagingTable
 				(
-					[intConcurrencyId]
-					,[intCustomerStorageId]
+					[intCustomerStorageId]
 					,[intContractHeaderId]
 					,[dblUnits]
 					,[dtmHistoryDate]
 					,[strType]
-					,[strUserName]
 					,[intUserId]
-					,[intEntityId]
 					,[strSettleTicket]
 					,[intTransactionTypeId]
 					,[dblPaidAmount]
@@ -3356,15 +3402,12 @@ BEGIN TRY
 					,[dblOldCost]
 				)
 				SELECT 
-					 [intConcurrencyId]     = 1 
-					,[intCustomerStorageId] = SV.[intCustomerStorageId]
+					 [intCustomerStorageId] = SV.[intCustomerStorageId]
 					,[intContractHeaderId]  = SV.[intContractHeaderId]
 					,[dblUnits]				= dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits])--case when @doPartialHistory = 1 then @dblSelectedUnits else  dbo.fnCTConvertQuantityToTargetItemUOM(CS.intItemId,IU.intUnitMeasureId,CS.intUnitMeasureId,SV.[dblUnits]) end
 					,[dtmHistoryDate]		= GETDATE()
 					,[strType]				= 'Settlement'
-					,[strUserName]			= NULL
 					,[intUserId]		 	= @intCreatedUserId
-					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4 
 					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
@@ -3382,6 +3425,8 @@ BEGIN TRY
 					ON IU.intItemId = CS.intItemId
 						AND IU.ysnStockUnit = 1
 				WHERE SV.intItemType = 1
+
+				EXEC dbo.uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
 
 				if @doPartialHistory = 1
 				begin
