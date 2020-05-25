@@ -55,9 +55,11 @@ BEGIN
 		INSERT INTO dbo.tblIPThirdPartyContractFeed (
 			intContractFeedId
 			,strERPPONumber
+			,strRowState
 			)
 		SELECT CF.intContractFeedId
 			,CF.strERPPONumber
+			,CF.strRowState
 		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
 		WHERE CF.strERPPONumber <> ''
 			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
@@ -70,15 +72,23 @@ BEGIN
 				WHERE TPCF.intContractFeedId = CF.intContractFeedId
 				)
 		ORDER BY CF.intContractFeedId ASC
+
+		INSERT INTO @tblCTContractFeed (intContractFeedId)
+		SELECT intContractFeedId
+		FROM dbo.tblIPThirdPartyContractFeed WITH (NOLOCK)
+		WHERE strThirdPartyFeedStatus IS NULL
+			AND strRowState = 'Delete'
 	END
 	ELSE
 	BEGIN
 		INSERT INTO tblIPThirdPartyContractFeed (
 			intContractFeedId
 			,strERPPONumber
+			,strRowState
 			)
 		SELECT CF.intContractFeedId
 			,CF.strERPPONumber
+			,CF.strRowState
 		FROM dbo.tblCTContractFeed CF WITH (NOLOCK)
 		WHERE CF.strERPPONumber <> ''
 			AND CF.dtmStartDate - @dtmCurrentDate <= @intThirdPartyContractWaitingPeriod
@@ -91,12 +101,13 @@ BEGIN
 				WHERE TPCF.intContractFeedId = CF.intContractFeedId
 				)
 		ORDER BY CF.intContractFeedId ASC
-	END
 
-	INSERT INTO @tblCTContractFeed (intContractFeedId)
-	SELECT intContractFeedId
-	FROM dbo.tblIPThirdPartyContractFeed WITH (NOLOCK)
-	WHERE strThirdPartyFeedStatus IS NULL
+		INSERT INTO @tblCTContractFeed (intContractFeedId)
+		SELECT intContractFeedId
+		FROM dbo.tblIPThirdPartyContractFeed WITH (NOLOCK)
+		WHERE strThirdPartyFeedStatus IS NULL
+			AND strRowState <> 'Delete'
+	END
 
 	SELECT @intContractFeedId = MIN(intContractFeedId)
 	FROM @tblCTContractFeed
