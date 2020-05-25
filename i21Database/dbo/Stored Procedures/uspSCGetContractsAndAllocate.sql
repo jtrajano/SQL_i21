@@ -754,11 +754,17 @@ BEGIN TRY
 	
 	UPDATE	@Processed SET dblUnitsRemaining = @dblNetUnits
 
-	IF	((SELECT	MAX(dblUnitsRemaining) 
-		 FROM	@Processed	PR
-		 JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
-		 WHERE	ISNULL(ysnIgnore,0) <> 1) > 0
-		OR NOT EXISTS(SELECT TOP 1 1 FROM @Processed WHERE ISNULL(ysnIgnore,0) <> 1)) 
+	IF	(
+			EXISTS ( SELECT TOP 1 1 FROM @Processed )
+			AND 
+			(
+				(SELECT	MAX(dblUnitsRemaining) 
+					FROM	@Processed	PR
+						JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	PR.intContractDetailId
+					WHERE	ISNULL(ysnIgnore,0) <> 1) > 0	
+				OR NOT EXISTS(SELECT TOP 1 1 FROM @Processed WHERE ISNULL(ysnIgnore,0) <> 1)
+			)
+		) 
 		AND @ysnAutoDistribution = 1
 	BEGIN
 		RAISERROR ('The entire ticket quantity cannot be applied to the contract.',16,1,'WITH NOWAIT') 
