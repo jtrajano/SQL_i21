@@ -1,4 +1,4 @@
-﻿ALTER VIEW vyuLGLoadViewSearch
+﻿CREATE VIEW vyuLGLoadViewSearch
 AS
 SELECT L.intLoadId
 	,L.intGenerateLoadId
