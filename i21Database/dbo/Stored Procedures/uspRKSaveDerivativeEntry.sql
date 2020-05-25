@@ -148,10 +148,10 @@ BEGIN
 			, intSubBookId = der.intSubBookId
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
-			, dblNoOfLots = der.dblNoOfLots
+			, dblNoOfLots = CASE WHEN UPPER(strBuySell) = 'BUY' THEN der.dblNoOfLots ELSE der.dblNoOfLots * -1 END 
 			, dblPrice = der.dblPrice
 			, dblContractSize = der.dblContractSize
-			, dblQty = der.dblNoOfLots * dblContractSize
+			, dblQty = (CASE WHEN UPPER(strBuySell) = 'BUY' THEN der.dblNoOfLots ELSE der.dblNoOfLots * -1 END ) * dblContractSize
 			, intEntityId = der.intEntityId
 			, intUserId = @intUserId
 			, strNotes = der.strNotes
