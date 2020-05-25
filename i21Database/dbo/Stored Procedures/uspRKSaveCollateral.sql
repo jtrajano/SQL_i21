@@ -15,7 +15,7 @@ BEGIN
 		, con.*
 	INTO #tmpCollateral
 	FROM tblRKCollateral col
-	CROSS APPLY (SELECT TOP 1 CD.intFutureMarketId
+	OUTER APPLY (SELECT TOP 1 CD.intFutureMarketId
 					, CD.intFutureMonthId
 					, CH.intEntityId
 				FROM tblCTContractDetail CD
