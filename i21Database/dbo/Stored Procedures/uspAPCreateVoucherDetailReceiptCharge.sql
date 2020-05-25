@@ -147,7 +147,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 										END,
 		[intScaleTicketId]				=	CASE WHEN IR.intSourceType = 1 THEN A.intScaleTicketId ELSE NULL END,
 		[intLocationId]					=	IR.intLocationId,
-		[ysnStage] = 1
+		[ysnStage] = 0
 	FROM [vyuICChargesForBilling] A
 	INNER JOIN @voucherDetailReceiptCharge charges
 		ON A.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
