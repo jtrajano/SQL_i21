@@ -8159,6 +8159,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketCollateral.sql" />
     <Build Include="dbo\Functions\fnRKGetBucketDerivatives.sql" />
     <Build Include="dbo\Functions\fnRKGetMiscFieldPivotDerivative.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
