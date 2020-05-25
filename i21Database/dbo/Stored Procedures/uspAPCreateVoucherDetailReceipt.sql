@@ -985,7 +985,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 		[dblBundleUnitQty],
 		[strBundleDescription],
 		[dblBundleTotal],
-		[ysnStage] = 1
+		[ysnStage] = 0
 	FROM #tempBillDetail
 
 	--ADD TAXES
