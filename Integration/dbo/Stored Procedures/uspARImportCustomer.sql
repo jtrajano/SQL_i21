@@ -1235,7 +1235,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
 				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
 				(SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255),
-				Ent.strEntityNo
+				Ent.strName
 				--Cus.strDPAContract,
 				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
 				--Cus.strGBReceiptNumber,
@@ -1267,7 +1267,7 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				WHERE Ent.strEntityNo =  @CustomerId
 
 				UPDATE Loc 
-					SET strOriginLinkCustomer = Ent.strEntityNo
+					SET strOriginLinkCustomer = Ent.strName
 					FROM tblEMEntity Ent
 						INNER JOIN tblEMEntityLocation Loc 
 							ON Ent.intEntityId = Loc.intEntityId 
