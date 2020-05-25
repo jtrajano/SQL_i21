@@ -137,7 +137,8 @@ BEGIN TRY
 			, [intContractDetailId]	= I.[intContractDetailId]
 			, [intContractHeaderId]	= I.[intContractHeaderId]
 			, [intItemUOMId]		= I.[intItemUOMId]
-			, [dblQty]				= SUM(I.[dblQtyShipped])
+			--, [dblQty]				= SUM(I.[dblQtyShipped])
+			, [dblQty]				= SUM(isnull(S.dblDestinationQuantity, S.dblQuantity))
 			, [intTicketId]			= I.[intTicketId]
 			, [ysnDestWtGrd]		= 1
 			, [dblShippedQty]		= AVG(ISNULL(S.dblQuantity, ID.dblQtyShipped))
