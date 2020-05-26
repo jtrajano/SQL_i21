@@ -8160,6 +8160,7 @@
     <Build Include="dbo\Functions\fnRKGetBucketDerivatives.sql" />
     <Build Include="dbo\Functions\fnRKGetMiscFieldPivotDerivative.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
