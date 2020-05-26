@@ -8559,6 +8559,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

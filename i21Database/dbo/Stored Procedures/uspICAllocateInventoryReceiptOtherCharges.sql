@@ -100,5 +100,12 @@ BEGIN
 	END 
 END
 
+-- Validate the Other charges -> ysnInventoryCost = true. 
+-- Check if the charge was properly allocated or not. 
+BEGIN 
+	EXEC [uspICValidateAllocateInventoryReceiptOtherCharges] @intInventoryReceiptId
+	IF @@ERROR <> 0 GOTO _Exit;
+END 
+
 -- Exit point
 _Exit:
