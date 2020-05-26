@@ -6,8 +6,8 @@
 )
 RETURNS @returntable TABLE
 (
-	 dtmCreateDate DATETIME
-	, dtmTransactionDate DATETIME
+	dtmTransactionDate DATETIME
+	,dtmCreateDate DATETIME
 	, strTransactionType  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionReference   NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
