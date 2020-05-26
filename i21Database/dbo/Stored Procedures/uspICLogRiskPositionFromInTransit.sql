@@ -141,6 +141,7 @@ BEGIN
 						END 	
 					WHEN t.strTransactionForm = 'Inbound Shipments' THEN 31			
 					WHEN t.strTransactionForm = 'Outbound Shipment' THEN 32
+					WHEN t.strTransactionForm = 'Invoice' THEN 48
 					ELSE 
 						NULL
 				 END 

@@ -129,6 +129,10 @@ BEGIN
 		UNION ALL SELECT 42, 'Created Contract', 'Created contract'
 		UNION ALL SELECT 43, 'Updated Contract', 'Updated contract when there was changes in quantity, slice, and status'
 		UNION ALL SELECT 44, 'Removed Sequence', 'When a sequence removed.'
+		UNION ALL SELECT 45, 'Receipt on DP Contract', 'Inventory increasing from receipt on a purchase dp contract'
+		UNION ALL SELECT 46, 'Inventory Shipped on Priced Delivery', 'Shipment is invoiced.'
+		UNION ALL SELECT 47, 'Inventory Received on Priced Delivery', 'Receipt is vouchered.'
+		UNION ALL SELECT 48, 'Posted Invoice', 'Sales In-Transit decreasing when Invoice is posted'
 	
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
