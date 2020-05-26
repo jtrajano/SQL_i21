@@ -102,8 +102,8 @@ BEGIN TRY
 				, dtmTransactionDate
 				, strTransactionType = 'Contract Balance'
 				, strTransactionReference = strTransactionType
-				, intTransactionReferenceId = -1
-				, strTransactionReferenceNo = ''
+				, intTransactionReferenceId = intContractDetailId
+				, strTransactionReferenceNo = strContractNumber
 				, intContractDetailId
 				, intContractHeaderId
 				, strContractNumber		
@@ -217,8 +217,8 @@ BEGIN TRY
 				, dtmTransactionDate
 				, strTransactionType = 'Contract Balance'
 				, strTransactionReference = strTransactionType
-				, intTransactionReferenceId = -1
-				, strTransactionReferenceNo = ''
+				, intTransactionReferenceId = intContractDetailId
+				, strTransactionReferenceNo = strContractNumber
 				, intContractDetailId
 				, intContractHeaderId
 				, strContractNumber		
