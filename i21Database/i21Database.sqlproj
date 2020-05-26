@@ -8161,6 +8161,7 @@
     <Build Include="dbo\Tables\tblIPAcknowledgementArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
