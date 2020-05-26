@@ -20,7 +20,7 @@ BEGIN TRY
 			,strTransactionNumber 		
 			,dtmTransactionDate 		
 			,intContractHeaderId
-			--,intContractDetailId
+			,intContractDetailId
 			,intTicketId			
 			,intCommodityId			
 			,intCommodityUOMId		
@@ -69,6 +69,7 @@ BEGIN TRY
 											END
 			,dtmTransactionDate 			= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId				
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -157,6 +158,7 @@ BEGIN TRY
 											END
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId 					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId			
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -206,6 +208,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractHeaderId = sh.intContractHeaderId
 		WHERE sh.intStorageHistoryId = @intStorageHistoryId
 			AND sh.intTransactionTypeId <> 3
 		--STORAGE SETTELEMENT AND TRANSFER FROM OP TO DP
@@ -219,6 +223,7 @@ BEGIN TRY
 			,strTransactionNumber 			= sh.strSettleTicket
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -260,6 +265,7 @@ BEGIN TRY
 			,strTransactionNumber 			= sh.strTransferTicket
 			,dtmTransactionDate 			= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId				
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -313,6 +319,7 @@ BEGIN TRY
 			,strTransactionNumber			= sh.strTransferTicket
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId 					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId			
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -353,6 +360,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractHeaderId = sh.intContractHeaderId
 		WHERE sh.intStorageHistoryId = @intStorageHistoryId
 			AND sh.intTransactionTypeId = 3
 		--STORAGE SETTELEMENT AND TRANSFER FROM OP TO DP
@@ -366,6 +375,7 @@ BEGIN TRY
 			,strTransactionNumber 			= sh.strTransferTicket
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -396,6 +406,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractHeaderId = sh.intContractHeaderId
 		WHERE sh.intStorageHistoryId = @intStorageHistoryId
 			AND (sh.intTransactionTypeId = 3 AND st.ysnDPOwnedType = 1)
 
