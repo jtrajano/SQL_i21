@@ -11,6 +11,7 @@ BEGIN TRY
 	SET ANSI_WARNINGS OFF
 
 	DECLARE @intInvoiceDetailId				INT
+	      , @intInvoiceId					INT
 		  , @intContractDetailId			INT
 		  , @intFromItemUOMId				INT
 		  , @intFromItemOrderedUOMId		INT
@@ -21,6 +22,7 @@ BEGIN TRY
 		  , @intTicketTypeId				INT = NULL
 		  , @intTicketType					INT = NULL
 		  , @strInOutFlag					NVARCHAR(MAX) = NULL
+		  , @strPricing						NVARCHAR(200) = NULL
 		  , @dblQty							NUMERIC(18,6)
 		  , @dblQtyOrdered					NUMERIC(18,6)
 		  , @dblConvertedQty				NUMERIC(18,6)
@@ -47,6 +49,7 @@ BEGIN TRY
 	DECLARE @tblToProcess TABLE (
 		  intUniqueId				INT IDENTITY
 		, intInvoiceDetailId		INT
+		, intInvoiceId				INT
 		, intContractDetailId		INT
 		, intContractHeaderId		INT
 		, intItemUOMId				INT
@@ -58,11 +61,13 @@ BEGIN TRY
 		, ysnDestWtGrd				BIT
 		, dblShippedQty				NUMERIC(18,6)
 		, intShippedQtyUOMId		INT
-		, ysnFromReturn				BIT	
+		, ysnFromReturn				BIT
+		, strPricing				NVARCHAR(200)	COLLATE Latin1_General_CI_AS    NULL
 	)
 
 	INSERT INTO @tblToProcess (
 		  [intInvoiceDetailId]
+		, [intInvoiceId]
 		, [intContractDetailId]
 		, [intContractHeaderId]
 		, [intItemUOMId]
@@ -73,8 +78,10 @@ BEGIN TRY
 		, [intTicketId]
 		, [intLoadDetailId]
 		, [ysnFromReturn]
+		, [strPricing]
 	)
 	SELECT [intInvoiceDetailId] 	= I.[intInvoiceDetailId]
+	    , [intInvoiceId]			= INV.[intInvoiceId]
 		, [intContractDetailId]		= I.[intContractDetailId]
 		, [intContractHeaderId]		= I.[intContractHeaderId]
 		, [intItemUOMId]			= I.[intItemUOMId]
@@ -85,6 +92,7 @@ BEGIN TRY
 		, [intTicketId]				= NULL
 		, [intLoadDetailId]			= ID.[intLoadDetailId]
 		, [ysnFromReturn]			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+		, [strPricing]				= ID.[strPricing]
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
@@ -113,6 +121,7 @@ BEGIN TRY
 	BEGIN
 		INSERT INTO @tblToProcess (
 			  [intInvoiceDetailId]
+			, [intInvoiceId]
 			, [intContractDetailId]
 			, [intContractHeaderId]
 			, [intItemUOMId]
@@ -121,21 +130,26 @@ BEGIN TRY
 			, [ysnDestWtGrd]
 			, [dblShippedQty]
 			, [intShippedQtyUOMId]
+			, [strPricing]
 		)
-		SELECT I.[intInvoiceDetailId]
-			, I.[intContractDetailId]
-			, I.[intContractHeaderId]
-			, I.[intItemUOMId]
-			, I.[dblQtyShipped]
-			, I.[intTicketId]
-			, 1
-			, S.dblQuantity
-			, S.intItemUOMId
+		SELECT [intInvoiceDetailId]	= MIN(I.[intInvoiceDetailId])
+			, [intInvoiceId]		= I.[intInvoiceId]
+			, [intContractDetailId]	= I.[intContractDetailId]
+			, [intContractHeaderId]	= I.[intContractHeaderId]
+			, [intItemUOMId]		= I.[intItemUOMId]
+			--, [dblQty]				= SUM(I.[dblQtyShipped])
+			, [dblQty]				= SUM(isnull(S.dblDestinationQuantity, S.dblQuantity))
+			, [intTicketId]			= I.[intTicketId]
+			, [ysnDestWtGrd]		= 1
+			, [dblShippedQty]		= AVG(ISNULL(S.dblQuantity, ID.dblQtyShipped))
+			, [intShippedQtyUOMId]	= ISNULL(S.intItemUOMId, ID.intItemUOMId)
+			, [strPricing]			= ID.[strPricing]			
 		FROM @ItemsFromInvoice	I
+		JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 		JOIN tblSCTicket T ON T.intTicketId	= I.intTicketId
 		JOIN tblCTWeightGrade W	ON W.intWeightGradeId =	T.intWeightId
 		JOIN tblCTWeightGrade G	ON G.intWeightGradeId =	T.intGradeId
-		JOIN tblICInventoryShipmentItem	S ON S.intSourceId =	I.intTicketId
+		LEFT JOIN tblICInventoryShipmentItem S ON S.intSourceId =	I.intTicketId
 										 AND S.intLineNo IS NOT NULL
 										 AND I.intContractDetailId =	S.intLineNo
 		WHERE I.intTicketId IS NOT NULL AND (W.strWhereFinalized	= 'Destination' 
@@ -144,6 +158,7 @@ BEGIN TRY
 		AND	I.[intShipmentPurchaseSalesContractId] IS NULL
 		AND	ISNULL(I.[intLoadDetailId],0) = 0
 		AND	ISNULL(I.[intTransactionId],0) = 0
+		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId
 	END
 
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
@@ -157,6 +172,7 @@ BEGIN TRY
 				@dblQtyOrdered					=	NULL,
 				@dblConvertedQtyOrdered			=	NULL,
 				@intInvoiceDetailId				=	NULL,
+				@intInvoiceId					= 	NULL,
 				@intTicketId					=   NULL,
 				@intTicketTypeId				=	NULL,
 				@intTicketType					=   NULL,
@@ -168,7 +184,8 @@ BEGIN TRY
 				@intLoadDetailId				=	NULL,
 				@intPurchaseSale				=	NULL,
 				@ysnFromReturn					=	CAST(0 AS BIT),
-				@ysnLoad						=	CAST(0 AS BIT)
+				@ysnLoad						=	CAST(0 AS BIT),
+				@strPricing						=	NULL
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
@@ -176,6 +193,7 @@ BEGIN TRY
 				@dblQty							=	P.[dblQty],
 				@dblQtyOrdered					=	P.[dblQtyOrdered],
 				@intInvoiceDetailId				=	P.[intInvoiceDetailId],
+				@intInvoiceId					=	P.[intInvoiceId],
 				@ysnDestWtGrd					=	P.[ysnDestWtGrd],
 				@dblShippedQty					=	P.[dblShippedQty],
 				@intShippedQtyUOMId				=	P.[intShippedQtyUOMId],
@@ -195,7 +213,8 @@ BEGIN TRY
 				@intPriceItemUOMId				=	CD.intPriceItemUOMId,
 				@ysnBestPriceOnly				=	CH.ysnBestPriceOnly,
 				@dblCashPrice					=	CD.dblCashPrice,
-				@ysnLoad						=	ISNULL(CH.ysnLoad, 0)
+				@ysnLoad						=	ISNULL(CH.ysnLoad, 0),
+				@strPricing						=	P.strPricing
 
 		FROM	@tblToProcess P
 		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	P.intContractDetailId
@@ -234,7 +253,7 @@ BEGIN TRY
 		SELECT @dblSchQuantityToUpdate = CASE WHEN ABS(@dblQtyOrdered) > 0 AND ABS(@dblQty) > ABS(@dblQtyOrdered) THEN -@dblConvertedQtyOrdered ELSE -@dblConvertedQty END
 		SELECT @dblRemainingSchedQty = @dblConvertedQtyOrdered - @dblConvertedQty
 
-		IF	ISNULL(@ysnDestWtGrd,0) = 0 AND
+		IF	(ISNULL(@ysnDestWtGrd,0) = 0 AND
 			(
 				(
 					ISNULL(@intTicketTypeId, 0) <> 9 AND 
@@ -244,7 +263,7 @@ BEGIN TRY
 					ISNULL(@intTicketTypeId, 0) = 2 AND 
 					(ISNULL(@intTicketType, 0) =1 AND ISNULL(@strInOutFlag, '') = 'O')
 				)
-			)
+			) OR (ISNULL(@ysnDestWtGrd,0) = 1 AND @strPricing = 'Subsystem - Direct'))
 		BEGIN
 				IF	@ReduceBalance	=	1
 				BEGIN
@@ -266,7 +285,7 @@ BEGIN TRY
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
 				
-					IF ISNULL(@dblRemainingSchedQty, 0) > 0 AND ISNULL(@dblConvertedQtyOrdered, 0) > 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty > 0 AND ISNULL(@ysnLoad, 0) = 0
+					IF ISNULL(@dblRemainingSchedQty, 0) <> 0 AND ISNULL(@dblConvertedQtyOrdered, 0) <> 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty <> 0 AND ISNULL(@ysnLoad, 0) = 0
 						BEGIN
 							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
 
@@ -288,7 +307,7 @@ BEGIN TRY
 				END
 		END
 
-		IF @ysnDestWtGrd = 1
+		IF @ysnDestWtGrd = 1 AND @strPricing <> 'Subsystem - Direct'
 		BEGIN
 			IF @dblQty > 0 -- Post
 			BEGIN
@@ -304,6 +323,7 @@ BEGIN TRY
 					INNER JOIN tblARInvoice I ON IID.intInvoiceId = I.intInvoiceId
 					WHERE I.ysnPosted = 1
 					  AND IID.intInvoiceDetailId <> @intInvoiceDetailId
+					  AND I.intInvoiceId <> @intInvoiceId
 				)
 				BEGIN								
 					SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) * -1	
@@ -350,6 +370,7 @@ BEGIN TRY
 					) ISS ON IID.intInventoryShipmentItemId = ISS.intInventoryShipmentItemId
 					INNER JOIN tblARInvoice I ON IID.intInvoiceId = I.intInvoiceId
 					WHERE IID.intInvoiceDetailId <> @intInvoiceDetailId
+					  AND I.intInvoiceId <> @intInvoiceId
 				)
 				BEGIN		
 					SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	

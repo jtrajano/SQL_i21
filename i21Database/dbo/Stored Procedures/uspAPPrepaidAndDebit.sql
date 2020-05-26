@@ -54,7 +54,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN 
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -75,7 +76,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,	
+									ELSE 0 END
+									,2),	
 	-- [dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -150,7 +152,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]		=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -171,7 +174,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -254,7 +258,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/O ITEM
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -275,7 +280,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                       
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -351,7 +357,8 @@ SELECT
 	[intPrepayType]			=	B.intPrepayTypeId,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION W/ ITEM		
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -371,7 +378,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]		=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -484,7 +492,8 @@ SELECT
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal + ISNULL(CurrentBill.dblDiscountTotal,0),
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -504,7 +513,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -584,7 +594,8 @@ SELECT
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -604,7 +615,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 
@@ -679,7 +691,8 @@ SELECT
 	--[dblAmountApplied]		=	0,
 	[dblTotal]				=	(B.dblTotal + B.dblTax),
 	[dblBillAmount]			=	CurrentBill.dblTotal,
-	[dblBalance]			=	CASE B.intPrepayTypeId 
+	[dblBalance]			=	ROUND(
+								CASE B.intPrepayTypeId 
 									--STANDARD ALLOCATION COMPUTATION 
 									WHEN 1 THEN
 											CurrentBill.allocatedAmount * A.dblAmountDue 
@@ -699,7 +712,8 @@ SELECT
 													  ELSE (((B.dblPrepayPercentage / 100) * CurrentBill.dblTotal) * CurrentBill.allocatedAmount) 
 												 END  
 										END                                        
-									ELSE 0 END,
+									ELSE 0 END
+									,2),
 	-- [dblAmountApplied]			=	(B.dblTotal + B.dblTax) - (CASE B.intPrepayTypeId 
 	-- 								WHEN 1 THEN
 	-- 										A.dblAmountDue 

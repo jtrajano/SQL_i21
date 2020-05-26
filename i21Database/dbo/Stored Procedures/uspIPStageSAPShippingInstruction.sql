@@ -20,10 +20,13 @@ BEGIN TRY
 		,strERPPONumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strDestinationPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,dtmETAPOD DATETIME
+		,dtmETAPOL DATETIME
 		,dtmETSPOL DATETIME
 		,dtmDeadlineCargo DATETIME
 		,strBookingReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strShippingLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strMVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strMVoyageNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -77,10 +80,13 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -93,19 +99,32 @@ BEGIN TRY
 				,Pol
 				,Pod
 				,CASE 
+					WHEN ISDATE(Ata) = 0
+						OR Ata = '1900-01-01 00:00:00.000'
+						THEN NULL
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Ata, 101))
+					END
+				,CASE 
+					WHEN ISDATE(Atd) = 0
+						OR Atd = '1900-01-01 00:00:00.000'
+						THEN NULL
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Atd, 101))
+					END
+				,CASE 
 					WHEN ISDATE(Etd) = 0
 						OR Etd = '1900-01-01 00:00:00.000'
 						THEN NULL
-					ELSE Etd
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Etd, 101))
 					END
 				,CASE 
 					WHEN ISDATE(Eta) = 0
 						OR Eta = '1900-01-01 00:00:00.000'
 						THEN NULL
-					ELSE Eta
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Eta, 101))
 					END
 				,BookingNumber
 				,BLNumber
+				,CarrierCode
 				,Vessel
 				,Voyage
 				,LoadingType
@@ -121,10 +140,13 @@ BEGIN TRY
 					,OrderReference NVARCHAR(100)
 					,Pol NVARCHAR(200)
 					,Pod NVARCHAR(200)
+					,Ata NVARCHAR(50)
+					,Atd NVARCHAR(50)
 					,Etd NVARCHAR(50)
 					,Eta NVARCHAR(50)
 					,BookingNumber NVARCHAR(100)
 					,BLNumber NVARCHAR(100)
+					,CarrierCode NVARCHAR(100)
 					,Vessel NVARCHAR(200)
 					,Voyage NVARCHAR(100)
 					,LoadingType NVARCHAR(100)
@@ -179,10 +201,13 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -195,10 +220,13 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode

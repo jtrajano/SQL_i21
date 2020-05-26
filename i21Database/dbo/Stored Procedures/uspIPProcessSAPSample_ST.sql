@@ -323,12 +323,22 @@ BEGIN TRY
 				SELECT @intEntityId = t.intEntityId
 				FROM tblEMEntity t WITH (NOLOCK)
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
+				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
 				WHERE ET.strType IN (
 						'Vendor'
 						,'Customer'
 						)
-					AND t.strName = @strVendor
+					AND V.strVendorAccountNum = @strVendor
 					AND t.strEntityNo <> ''
+			END
+
+			IF ISNULL(@intEntityId, 0) = 0
+			BEGIN
+				RAISERROR (
+						'Invalid Vendor. '
+						,16
+						,1
+						)
 			END
 
 			IF ISNULL(@strQuantityUOM, '') <> ''
@@ -399,28 +409,29 @@ BEGIN TRY
 					AND t.strName = @strCreatedBy
 					AND t.strEntityNo <> ''
 
-				IF ISNULL(@intCreatedUserId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Invalid Created User. '
-							,16
-							,1
-							)
-				END
-						--IF @intCreatedUserId IS NULL
-						--BEGIN
-						--	IF EXISTS (
-						--			SELECT 1
-						--			FROM tblSMUserSecurity WITH (NOLOCK)
-						--			WHERE strUserName = 'irelyadmin'
-						--			)
-						--		SELECT TOP 1 @intCreatedUserId = intEntityId
-						--		FROM tblSMUserSecurity WITH (NOLOCK)
-						--		WHERE strUserName = 'irelyadmin'
-						--	ELSE
-						--		SELECT TOP 1 @intCreatedUserId = intEntityId
-						--		FROM tblSMUserSecurity WITH (NOLOCK)
-						--END
+				--IF ISNULL(@intCreatedUserId, 0) = 0
+				--BEGIN
+				--	RAISERROR (
+				--			'Invalid Created User. '
+				--			,16
+				--			,1
+				--			)
+				--END
+			END
+
+			IF ISNULL(@intCreatedUserId, 0) = 0
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblSMUserSecurity WITH (NOLOCK)
+						WHERE strUserName = 'irelyadmin'
+						)
+					SELECT TOP 1 @intCreatedUserId = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intCreatedUserId = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
 			END
 
 			IF @strTransactionType NOT IN (

@@ -229,8 +229,9 @@ LEFT JOIN (
 		FROM tblTMSite
 	) SITE
 		ON SITE.intSiteID = ID.intSiteId
-	WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
+	--WHERE ID.ysnAddonParent IS NULL OR ID.ysnAddonParent = 1
 ) INVOICEDETAIL ON INV.intInvoiceId = INVOICEDETAIL.intInvoiceId
+	 AND (INVOICEDETAIL.ysnAddonParent IS NULL OR INVOICEDETAIL.ysnAddonParent = 1 OR INV.strTransactionType='Credit Memo') 
 LEFT JOIN (
 	SELECT intCurrencyID
 		 , strCurrency

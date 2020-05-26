@@ -537,6 +537,7 @@ BEGIN
 						, intContractTypeId
 					FROM @tblGetOpenContractDetail cd
 					WHERE cd.intContractTypeId in(1,2) and cd.intCommodityId = @intCommodityId
+						AND cd.intContractStatusId <> 3  
 						AND cd.intCompanyLocationId = ISNULL(@intLocationId, cd.intCompanyLocationId)
 				) t
 				WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)

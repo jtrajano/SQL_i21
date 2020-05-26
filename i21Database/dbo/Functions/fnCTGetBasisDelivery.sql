@@ -38,7 +38,8 @@ RETURNS @Transaction TABLE
 	intSequenceUnitMeasureId INT,
 	strSequenceUnitMeasure nvarchar(100),
 	intHeaderUnitMeasureId INT,
-	strHeaderUnitMeasure nvarchar(100)
+	strHeaderUnitMeasure nvarchar(100),
+ 	ysnDeletedBillDetail bit
 )
 AS
 BEGIN
@@ -115,6 +116,7 @@ BEGIN
 		,intHeaderUnitMeasureId
 		,strHeaderUnitMeasure
 		,ysnOpenGetBasisDelivery
+		,ysnDeletedBillDetail
 	)
 	SELECT CBL1.intContractHeaderId
 	,CBL1.intContractDetailId
@@ -146,6 +148,7 @@ BEGIN
 	,OBC.intHeaderUnitMeasureId
 	,OBC.strHeaderUnitMeasure
 	,ysnOpenGetBasisDelivery = 1--CASE WHEN @dtmDate IS NULL OR CBL1.dtmTransactionDate <= @dtmDate AND CBL1.dblQty > 0 THEN 1 ELSE 0 END
+	,ysnDeletedBillDetail = (case when CBL1.strTransactionReference = 'Voucher' and isnull(bd.intBillDetailId,0) = 0 then convert(bit,1) else convert(bit,0) end) 
 	FROM tblCTContractBalanceLog CBL1
 	INNER JOIN tblCTContractBalanceLog CBL2 ON CBL1.intContractBalanceLogId >= CBL2.intContractBalanceLogId
 		AND CBL1.intContractHeaderId = CBL2.intContractHeaderId
@@ -158,6 +161,7 @@ BEGIN
 	INNER JOIN tblCTContractHeader CH ON CBL1.intContractHeaderId = CH.intContractHeaderId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId AND CUM.ysnStockUnit=1
 	INNER JOIN @OpenBasisContract OBC ON CBL1.intContractDetailId = OBC.intContractDetailId AND CBL1.intContractHeaderId = OBC.intContractHeaderId
+ 	left join tblAPBillDetail bd on bd.intContractHeaderId = CBL1.intContractHeaderId and bd.intContractDetailId = CBL1.intContractDetailId
 	WHERE CBL1.strTransactionType LIKE '%Basis Deliveries'
 	AND CBL1.dtmTransactionDate < DATEADD(DAY, 1, @dtmDate)
 	GROUP BY CBL1.dtmCreatedDate
@@ -192,7 +196,10 @@ BEGIN
 	,OBC.strSequenceUnitMeasure
 	,OBC.intHeaderUnitMeasureId
 	,OBC.strHeaderUnitMeasure
+ 	,bd.intBillDetailId
 	ORDER BY CBL1.dtmCreatedDate, CBL1.intContractBalanceLogId ASC
+ 
+ 	delete from @Transaction where ysnDeletedBillDetail = convert(bit,1);
 
 	DELETE FROM @Transaction
 	WHERE intContractDetailId IN (

@@ -59,6 +59,7 @@ BEGIN TRY
 		,@intLocationId INT
 		,@ysnPosted BIT
 		,@intLoadShippingInstructionId INT
+		,@strContainerErrMsg NVARCHAR(MAX)
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
 		,@intOldPositionId INT
@@ -110,6 +111,7 @@ BEGIN TRY
 		,@intPNumberOfContainers INT
 		,@intLoadDetailId INT
 		,@dblOldDetailQuantity NUMERIC(18, 6)
+		,@intContractHeaderId INT
 	DECLARE @tblLGLoadDetailChanges TABLE (
 		dblOldQuantity NUMERIC(18, 6)
 		,dblNewQuantity NUMERIC(18, 6)
@@ -223,6 +225,7 @@ BEGIN TRY
 				,@intLocationId = NULL
 				,@ysnPosted = NULL
 				,@intLoadShippingInstructionId = NULL
+				,@strContainerErrMsg = ''
 
 			SELECT @strDescription = NULL
 				,@intOldPurchaseSale = NULL
@@ -846,6 +849,7 @@ BEGIN TRY
 						,@intPNumberOfContainers = NULL
 						,@intLoadDetailId = NULL
 						,@dblOldDetailQuantity = NULL
+						,@intContractHeaderId = NULL
 
 					SELECT @strCommodityCode = strCommodityCode
 						,@strItemNo = strItemNo
@@ -911,6 +915,7 @@ BEGIN TRY
 						AND IL.intLocationId = @intLocationId
 						AND t.intItemId = @intItemId
 						AND t.strContractItemName = @strContractItemName
+						AND t.strStatus = 'Active'
 
 					IF ISNULL(@intItemContractId, 0) = 0
 					BEGIN
@@ -968,6 +973,7 @@ BEGIN TRY
 						,@strVendorReference = CH.strCustomerContract
 						,@intPSubLocationId = CD.intSubLocationId
 						,@intPNumberOfContainers = CD.intNumberOfContainers
+						,@intContractHeaderId = CD.intContractHeaderId
 					FROM tblCTContractDetail CD WITH (NOLOCK)
 					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 						AND CD.intContractDetailId = @intContractDetailId
@@ -1030,6 +1036,28 @@ BEGIN TRY
 							,@intExternalId = @intLoadDetailId
 							,@strScreenName = 'Load Schedule'
 							,@intSourceItemUOMId = @intItemUOMId
+
+						INSERT INTO tblLGLoadDocuments (
+							intConcurrencyId
+							,intLoadId
+							,intDocumentId
+							,strDocumentType
+							,intOriginal
+							,intCopies
+							)
+						SELECT 1
+							,@intLoadId
+							,CD.intDocumentId
+							,CASE WHEN ID.intDocumentType = 1 THEN 'Contract'
+									WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
+									WHEN ID.intDocumentType = 3	THEN 'Container'
+									ELSE ''
+								END COLLATE Latin1_General_CI_AS
+							,ISNULL(ID.intOriginal, 0)
+							,ISNULL(ID.intCopies, 0)
+						FROM tblCTContractDocument CD
+						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
+							AND CD.intContractHeaderId = @intContractHeaderId
 					END
 					ELSE
 					BEGIN
@@ -1842,6 +1870,60 @@ BEGIN TRY
 				END
 			END
 
+			IF ISNULL(@ysnPosted, 0) = 1
+				AND EXISTS (
+					SELECT 1
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
+			BEGIN
+				SELECT @strContainerErrMsg = ''
+
+				-- Container table with Staging container table
+				IF EXISTS (
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblLGLoadContainer LC
+					WHERE LC.intLoadId = @intLoadId
+
+					EXCEPT
+
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
+				BEGIN
+					SELECT @strContainerErrMsg = 'Container mismatch is there. '
+				END
+
+				-- Staging container table with Container table
+				IF EXISTS (
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+
+					EXCEPT
+
+					SELECT strContainerNumber
+						,ISNULL(dblQuantity, 0) dblQuantity
+						,ISNULL(dblGrossWt, 0) dblGrossWt
+						,ISNULL(dblTareWt, 0) dblTareWt
+					FROM tblLGLoadContainer LC
+					WHERE LC.intLoadId = @intLoadId
+					)
+				BEGIN
+					SELECT @strContainerErrMsg = 'Container mismatch is there. '
+				END
+			END
+
 			-- To set Contract Planned Availability Date and send Contract feed to SAP
 			-- Also it sends Shipment feed to SAP
 			IF @strRowState = 'Added'
@@ -1878,6 +1960,7 @@ BEGIN TRY
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
+				,strInternalErrorMessage
 				)
 			SELECT strCustomerReference
 				,strERPPONumber
@@ -1903,6 +1986,7 @@ BEGIN TRY
 				,''
 				,'Success'
 				,strSessionId
+				,@strContainerErrMsg
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
 
@@ -1989,6 +2073,7 @@ BEGIN TRY
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
+				,strInternalErrorMessage
 				)
 			SELECT strCustomerReference
 				,strERPPONumber
@@ -2014,6 +2099,7 @@ BEGIN TRY
 				,@ErrMsg
 				,'Failed'
 				,strSessionId
+				,@strContainerErrMsg
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
 

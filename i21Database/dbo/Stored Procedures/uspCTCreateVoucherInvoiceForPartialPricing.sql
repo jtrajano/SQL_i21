@@ -1358,6 +1358,12 @@ BEGIN TRY
 				WHILE @@FETCH_STATUS = 0
 				BEGIN
 
+					if (@dblShipped = 0)
+					begin
+						UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
+						goto SkipShipmentLoop;
+					end
+
 					if (@intActiveShipmentId <> @intInventoryShipmentId)
 					begin
 						set @intShipmentCount = @intShipmentCount + 1;
@@ -1707,6 +1713,12 @@ BEGIN TRY
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 
+				if (@dblShipped = 0)
+				begin
+					UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
+					goto SkipQtyShipmentLoop;
+				end
+				
 				set @dblInvoicedShipped = (
 											SELECT
 												SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
@@ -1927,6 +1939,8 @@ BEGIN TRY
 
 							print 'add detail to existing invoice';
 
+							UPDATE  tblICInventoryShipmentItem SET ysnAllowInvoice = 1 WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId;
+
 							EXEC uspCTCreateInvoiceDetail
 								@intInvoiceDetailId
 								,@intInventoryShipmentId
@@ -1965,7 +1979,8 @@ BEGIN TRY
 					DEALLOCATE @pricing
 					/*---End Loop Pricing---*/
 				end
-				
+
+				SkipQtyShipmentLoop:				
 							
 				FETCH NEXT
 				FROM

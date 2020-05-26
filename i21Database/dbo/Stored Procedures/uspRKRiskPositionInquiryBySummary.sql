@@ -31,6 +31,7 @@ AS
 -- , @strUomType NVARCHAR(100)  = 'By Quantity'
 
 	DECLARE @dtmToDate DATETIME
+	SET @intDecimal = 4
 
 	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmPositionAsOf, 110), 110)
 

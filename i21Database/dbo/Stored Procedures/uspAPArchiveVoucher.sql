@@ -127,10 +127,17 @@ USING
 		--IF DATE OF VOUCHER IS GREATER THAN THE CURRENT DATE, USE SAME DATE WITH VOUCHER
 		--CURRENT DATE CANNOT BET LESS THAN THE DATE OF VOUCHER
 		--THIS ARCHIVE ONLY OCCURS IF THERE IS VOIDED PAYMENT
-		,CASE WHEN GETDATE() < A.dtmDate THEN A.dtmDate ELSE GETDATE() END AS dtmDateDeleted
+		,LP.dtmDateDeleted
 		,A.dtmExportedDate
 		,A.dtmDateCreated
+		,CASE WHEN GETDATE() < A.dtmDate THEN A.dtmDate ELSE GETDATE() END AS dtmOrigDateDeleted
 	FROM tblAPBill A
+	OUTER APPLY (
+		SELECT TOP 1 MAX(P.dtmDatePaid) AS dtmDateDeleted
+		FROM tblAPPayment P
+		LEFT JOIN tblAPPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
+		WHERE PD.intOrigBillId = A.intBillId
+	) LP
 	WHERE A.intBillId = @billId
 )
 AS SourceData
@@ -227,6 +234,7 @@ INSERT
 	,dtmDateDeleted
 	,dtmExportedDate
 	,dtmDateCreated
+	,dtmOrigDateDeleted
 )
 VALUES
 (
@@ -319,6 +327,7 @@ VALUES
 	,SourceData.dtmDateDeleted
 	,SourceData.dtmExportedDate
 	,SourceData.dtmDateCreated
+	,SourceData.dtmOrigDateDeleted
 );
 
 MERGE INTO tblAPBillDetailArchive AS destination

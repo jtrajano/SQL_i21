@@ -289,16 +289,20 @@ SELECT
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
                     WHEN billDetail.intWeightUOMId > 0 
-                        THEN CAST(receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1)  * billDetail.dblNetWeight * billDetail.dblWeightUnitQty / ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1) AS DECIMAL(18,2)) --Formula With Weight UOM
+                        THEN CAST(receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1)  
+                        * billDetail.dblNetWeight * dbo.fnDivide(billDetail.dblWeightUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2)) --Formula With Weight UOM
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
-                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  * (billDetail.dblUnitQty/ ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  
+                        * dbo.fnDivide(billDetail.dblUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
                     ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             ELSE (CASE 
                     WHEN billDetail.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-                        THEN CAST(receiptItem.dblUnitCost  * billDetail.dblNetWeight * billDetail.dblWeightUnitQty / ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1) AS DECIMAL(18,2)) --Formula With Weight UOM
+                        THEN CAST(receiptItem.dblUnitCost  * billDetail.dblNetWeight 
+                        * dbo.fnDivide(billDetail.dblWeightUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2)) --Formula With Weight UOM
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
-                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  * (billDetail.dblUnitQty/ ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  
+                        * dbo.fnDivide(billDetail.dblUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
                     ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             END),0)	

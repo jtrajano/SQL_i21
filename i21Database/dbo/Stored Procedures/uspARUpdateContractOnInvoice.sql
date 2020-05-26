@@ -22,6 +22,7 @@ BEGIN TRY
 	DECLARE		@intInvoiceDetailId				INT,
 				@intTicketId					INT,
 				@intInventoryShipmentItemId		INT,
+				@strPricing						NVARCHAR(200),
 				@intContractDetailId			INT,
 				@intFromItemUOMId				INT,
 				@intToItemUOMId					INT,
@@ -274,7 +275,7 @@ BEGIN TRY
 		Detail.intInvoiceId = @TransactionId 
 		AND Header.strTransactionType = 'Invoice'
 		AND Detail.intContractDetailId IS NOT NULL
-		AND Detail.[intInventoryShipmentItemId] IS NULL
+		AND (Detail.[intInventoryShipmentItemId] IS NULL OR (Detail.[intInventoryShipmentItemId] IS NOT NULL AND Detail.strPricing = 'Subsystem - Direct'))
 		AND Detail.[intSalesOrderDetailId] IS NULL
 		AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
@@ -318,16 +319,20 @@ BEGIN TRY
 				@intInvoiceDetailId				=	NULL,
 				@intTicketId					=	NULL,
 				@intInventoryShipmentItemId		=	NULL,
+				@strPricing						=	NULL,
 				@intLoadDetailId				=	NULL
 
-		SELECT	@intContractDetailId			=	[intContractDetailId],
-				@intFromItemUOMId				=	[intItemUOMId],
-				@dblQty							=	[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
-				@intInvoiceDetailId				=	[intInvoiceDetailId],
-				@intTicketId					=   [intTicketId],
-				@intInventoryShipmentItemId		=   [intInventoryShipmentItemId],
-				@intLoadDetailId				=	[intLoadDetailId]
-		FROM	@tblToProcess 
+		SELECT	@intContractDetailId			=	P.[intContractDetailId],
+				@intFromItemUOMId				=	P.[intItemUOMId],
+				@dblQty							=	P.[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
+				@intInvoiceDetailId				=	P.[intInvoiceDetailId],
+				@intTicketId					=   P.[intTicketId],
+				@intInventoryShipmentItemId		=   P.[intInventoryShipmentItemId],
+				@strPricing						=	ID.[strPricing],
+				@intLoadDetailId				=	P.[intLoadDetailId]
+		FROM	@tblToProcess P
+		LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId
+
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -348,7 +353,7 @@ BEGIN TRY
 					 , @strInOutFlag	= strInOutFlag
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END		
-		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND ISNULL(@intInventoryShipmentItemId, 0) = 0 AND ISNULL(@intLoadDetailId,0) = 0
+		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0 OR (@intInventoryShipmentItemId IS NOT NULL AND @strPricing = 'Subsystem - Direct')
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,

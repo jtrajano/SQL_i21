@@ -393,7 +393,8 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixPostHistoryGroupings.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
+    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
@@ -466,6 +467,7 @@
     <Build Include="dbo\Tables\tblGLDataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
+    <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
     <Build Include="dbo\Functions\fnGetBankGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedPayments.sql" />
     <Build Include="dbo\Functions\fnGetUnclearedDeposits.sql" />
@@ -876,6 +878,7 @@
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntries.sql" />
     <Build Include="dbo\Functions\fnGetDebit.sql" />
     <Build Include="dbo\Functions\fnGetCredit.sql" />
+    <Build Include="dbo\Functions\fnGetItemCostUomConversions.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDuplicateBill.sql" />
     <Build Include="dbo\Tables\tblICReadingPoint.sql" />
     <Build Include="dbo\Tables\tblICMeasurement.sql" />
@@ -1268,6 +1271,7 @@
     <Build Include="dbo\Stored Procedures\uspRKGenerateFuturesMonthList.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetFuturesMonthList.sql" />
     <Build Include="dbo\Functions\fnCalculateQtyBetweenUOM.sql" />
+    <Build Include="dbo\Functions\fnCalculateQtyBetweenUoms.sql" />
     <Build Include="dbo\Functions\fnGetItemUnitType.sql" />
     <Build Include="dbo\Stored Procedures\uspPOUpdateStatusFromInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateInventoryRecieptwithPO.sql" />
@@ -1686,6 +1690,7 @@
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchDetail.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointProductSearchHeader.sql" />
     <Build Include="dbo\Tables\tblTRSupplyPointRackPriceEquation.sql" />
+    <Build Include="dbo\Tables\tblApiUserAccount.sql" />
     <Build Include="dbo\Views\vyuTRRackItems.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
@@ -8652,6 +8657,10 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPLSICancel_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetBackDatedTransaction.sql" />
     <Build Include="dbo\Functions\fnMonthName.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementTaxDetailsSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementInboundSubReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementOutboundSubReportForView.sql" />
     <Build Include="dbo\Tables\tblSCImportEntityLog.sql" />
     <Build Include="dbo\Tables\tblSCEntityGeneratedLog.sql" />
     <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
@@ -8667,6 +8676,16 @@
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDestinationWeightVarianceVarianceReport.sql" />
     <Build Include="dbo\Views\vyuGRDestinationWeightVarianceReportView.sql" />
+    <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
+    <Build Include="dbo\Tables\tblICInventoryStockMovementReportRebuildLog.sql" />
+    <Build Include="dbo\Tables\tblIPThirdPartyContractFeed.sql" />
+    <Build Include="dbo\Tables\tblIPContractFeedLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPValidateContractFeed_CA.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcesBulkSAPAcknowledgement.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPAcknowledgement.sql" />
+    <Build Include="dbo\Tables\tblIPAcknowledgementStage.sql" />
+    <Build Include="dbo\Tables\tblIPAcknowledgementError.sql" />
+    <Build Include="dbo\Tables\tblIPAcknowledgementArchive.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8916,6 +8935,8 @@
     <None Include="Scripts\Post-Deployment\AP\UpdateOriginDMFor20_1.sql" />
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogRiskPosition.sql" />
+    <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

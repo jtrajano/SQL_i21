@@ -22,7 +22,14 @@ AS
 		--,CASE WHEN Cus.ysnTaxExempt = 1 THEN 'Y' ELSE 'N' END AS tax
 
 		,CASE WHEN Cus.strCustomerNumber = '' THEN Entity.strEntityNo ELSE Cus.strCustomerNumber END AS cust_id
-		,'' COLLATE Latin1_General_CI_AS AS lien
+		,CASE WHEN Cus.strLevel LIKE '%1%' THEN '1' 
+			 WHEN  Cus.strLevel LIKE '%2%' THEN '2' 
+			 WHEN  Cus.strLevel LIKE '%3%' THEN '3' 
+			 WHEN  Cus.strLevel LIKE '%4%' THEN '4' 
+			 WHEN  Cus.strLevel LIKE '%5%' THEN '5' 
+			 WHEN  Cus.strLevel LIKE '%6%' THEN '6' 
+			 ELSE ''
+		END COLLATE Latin1_General_CI_AS AS lien
 		,'N' COLLATE Latin1_General_CI_AS AS cshonl
 		,Entity.strName AS alphasort		
 		,Con.strPhone2 AS SecondPhoneNo
@@ -46,4 +53,4 @@ AS
 		LEFT JOIN tblSMTerm as SMTerm ON  Cus.intTermsId = SMTerm.intTermID 
 		LEFT JOIN tblARAccountStatus AS AcctStat ON AcctStat.intAccountStatusId = Cus.intAccountStatusId
 		LEFT JOIN tblEMEntityPhoneNumber AS EMPhone ON CusToCon.intEntityContactId = EMPhone.intEntityId
-		LEFT JOIN tblSMTaxCode TaxCode on Cus.intTaxCodeId = TaxCode.intTaxCodeId
+		LEFT JOIN tblSMTaxCode TaxCode on Cus.intTaxCodeId = TaxCode.intTaxCodeId	

@@ -712,6 +712,7 @@ BEGIN
 						, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), cd.dtmEndDate, 106), 8) COLLATE Latin1_General_CI_AS
 					FROM @tblGetOpenContractDetail cd
 					WHERE cd.intContractTypeId IN (1,2) AND cd.intCommodityId = @intCommodityId
+						AND cd.intContractStatusId <> 3 
 						AND cd.intCompanyLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN cd.intCompanyLocationId ELSE @intLocationId END
 				) t WHERE intCompanyLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				

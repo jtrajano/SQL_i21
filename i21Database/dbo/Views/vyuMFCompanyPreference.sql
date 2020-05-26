@@ -25,6 +25,7 @@ SELECT CP.intCompanyPreferenceId
 	,CP.strDefaultRecipeCost
 	,CP.ysnLotHistoryByStorageLocation
 	,CP.ysnShowCostInSalesOrderPickList
+	,CP.ysnShowAddOnItemQtyInSalesOrderPickList
 	,CP.intWastageWorkOrderDuration
 	,CP.intDefaultShipmentStagingLocation
 	,CP.intDefaultShipmentDockDoorLocation

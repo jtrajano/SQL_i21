@@ -152,6 +152,7 @@ BEGIN
 			END
 			ELSE
 			BEGIN
+				--SET @intCurrentMonthInterval = @intDaysInMonth 
 				SET @intDaysLeftInMonth = 	@intDaysInMonth
 			END
 

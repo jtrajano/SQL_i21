@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [uspETTranslateSDToInvoice]
+﻿CREATE  PROCEDURE [uspETTranslateSDToInvoice]
 	@StagingTable ETTranslateSDToInvoiceTable READONLY
 	,@EntityUserId			INT
 	,@strAllErrorMessage	NVARCHAR(MAX) = '' OUTPUT	
@@ -168,6 +168,14 @@ BEGIN
 			AND dtmDate = @dtmInvoiceDate
 			AND strDetailType <> 'D'
 
+		DECLARE @ysnARCompute AS BIT
+		--Check if has negative taxcode id (workaround) for tagging that ET app not sending yet taxcode id
+		select TOP 1 @intTaxCodeId = intTaxCodeId FROM #tmpCustomerInvoiceTaxDetail where ISNULL(intTaxCodeId,0) = -1
+		
+		IF @intTaxCodeId = -1 
+		set @ysnARCompute  = 1 
+		ELSE 
+		set @ysnARCompute = 0
 		------------------------------------------------------------------------------------------------------------------
 
 		--BEGIN TRANSACTION
@@ -387,7 +395,7 @@ BEGIN
 						,@InvoiceOriginId         = @strInvoiceNumber
 						,@PONumber				   =@strPONumber
 						,@RefreshPrice = @getARPrice
-						,@RecomputeTax	= 0
+						,@RecomputeTax	= @ysnARCompute
 						,@ShipViaId = @ShipViaId
 						,@TruckDriverId = @intDriverEntityId
 
@@ -431,7 +439,7 @@ BEGIN
 						,@ItemContractDetailId     = @intContractDetailId
 						,@ItemCurrencyExchangeRateTypeId = NULL            
                         ,@ItemCurrencyExchangeRateId = NULL            
-						,@RecomputeTax			   = 0
+						,@RecomputeTax			   = @ysnARCompute
 						,@RefreshPrice = @getARPrice
 
 				LOGDETAILENTRY:
@@ -448,7 +456,7 @@ BEGIN
 
 			/*Insert Taxes*/
 			------------------------------------
-			IF EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceTaxDetail)
+			IF EXISTS(SELECT TOP 1 1 FROM #tmpCustomerInvoiceTaxDetail) AND @ysnARCompute = 0
 			BEGIN
 				--Check for Detail Tax
 				IF(@intLineItem <> 0)
@@ -503,12 +511,14 @@ BEGIN
 						--SET @intTaxCodeId = NULL
 						--SET @intTaxClassId = NULL
 						--SET @intTaxGroupId = NULL
-						
-						SELECT TOP 1 
-							@intTaxCodeId = intTaxCodeId 
-						--	,@intTaxClassId = intTaxClassId
-						FROM tblSMTaxCode 
-						WHERE intTaxCodeId = @intTaxCodeId
+						IF(ISNULL(@intTaxCodeId,0) <> -1)
+						BEGIN
+							SELECT TOP 1 
+								@intTaxCodeId = intTaxCodeId 
+							--	,@intTaxClassId = intTaxClassId
+							FROM tblSMTaxCode 
+							WHERE intTaxCodeId = @intTaxCodeId
+						END
 
 						IF (ISNULL(@intTaxCodeId,0) = 0)
 							BEGIN
@@ -525,7 +535,7 @@ BEGIN
 								END
 				
 							END
-						ELSE
+					    ELSE
 							BEGIN
 							EXEC [uspARAddInvoiceTaxDetail]
 								 @InvoiceDetailId		= @intNewInvoiceDetailId
@@ -662,7 +672,7 @@ BEGIN
 				END
 			END TRY
 			BEGIN CATCH
-				ROLLBACK TRANSACTION 
+				--ROLLBACK TRANSACTION 
 
 				--DELETE FROM #tmpCustomerInvoiceDetail WHERE intImportSDToInvoiceId = @intImportSDToInvoiceId
 				INSERT INTO @ResultTableLog ( strCustomerNumber ,strInvoiceNumber ,strSiteNumber ,dtmDate ,intLineItem ,strFileName ,strStatus ,ysnSuccessful ,intInvoiceId ,strTransactionType )

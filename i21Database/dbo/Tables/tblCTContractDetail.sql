@@ -594,6 +594,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	declare @dblSequenceQuantity numeric(18,6) = 0.00;
 	declare @intPricingStatus int = 0;
 	declare @intPricingTypeId int = 0;
+	declare @intPricingNumber int = 0;
 
 	begin transaction;
 	begin try
@@ -671,6 +672,9 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 		while @@FETCH_STATUS = 0
 		begin
+
+			set @intPricingNumber = @intPricingNumber + 1;
+
 			if (@intActivePriceFixationId <> @intPriceFixationId)
 			begin
 				set @dblRunningDetailQuantityApplied = 0.00;
@@ -688,14 +692,14 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 					if (@dblRunningDetailQuantityApplied <= @dblDetailLoadApplied)
 					begin
 						print @dblLoadPriced;
-						update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = @dblLoadPriced where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = @dblLoadPriced, intNumber = @intPricingNumber where intPriceFixationDetailId = @intPriceFixationDetailId;
 					end
 					else
 					begin
 						set @dblComputedQuantity = @dblLoadPriced - (@dblRunningDetailQuantityApplied-@dblDetailLoadApplied);
 						set @dblComputedQuantity = (case when @dblComputedQuantity < 1 then 0.00 else @dblComputedQuantity end);
 						print @dblComputedQuantity;
-						update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = @dblComputedQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = @dblComputedQuantity, intNumber = @intPricingNumber where intPriceFixationDetailId = @intPriceFixationDetailId;
 					end
 				end
 				else
@@ -705,13 +709,13 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 					if (@dblRunningDetailQuantityApplied <= @dblDetailQuantityApplied)
 					begin
 						print @dblQuantity;
-						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = @dblQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = @dblQuantity, intNumber = @intPricingNumber where intPriceFixationDetailId = @intPriceFixationDetailId;
 					end
 					else
 					begin
 						set @dblComputedQuantity = @dblQuantity - (@dblRunningDetailQuantityApplied-@dblDetailQuantityApplied);
 						print @dblComputedQuantity;
-						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = case when @dblComputedQuantity < 0 then 0 else @dblComputedQuantity end where intPriceFixationDetailId = @intPriceFixationDetailId;
+						update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = case when @dblComputedQuantity < 0 then 0 else @dblComputedQuantity end, intNumber = @intPricingNumber where intPriceFixationDetailId = @intPriceFixationDetailId;
 					end
 				end
 

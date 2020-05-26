@@ -206,6 +206,7 @@ BEGIN
 		,[ysnSeparateOnInvoice]
 		,[ysnCheckoffTax]
 		,[strTaxCode]
+		,[ysnTaxExempt]
 		,[dblQty]
 		,[dblCost]
 		,[intUnitMeasureId]
@@ -274,6 +275,7 @@ BEGIN
 			,[ysnSeparateOnInvoice]			= vendorTax.[ysnSeparateOnInvoice]
 			,[ysnCheckoffTax]				= vendorTax.[ysnCheckoffTax]
 			,[strTaxCode]					= vendorTax.[strTaxCode]
+			,[ysnTaxExempt]					= vendorTax.[ysnTaxExempt]
 			,[dblQty]						= @Qty
 			,[dblCost]						= @Amount
 			,[intUnitMeasureId]				= @TaxUOMId

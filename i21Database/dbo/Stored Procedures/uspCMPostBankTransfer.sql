@@ -87,6 +87,7 @@ DECLARE
 	,@ysnFunctionalToForeign BIT
 	,@ysnForeignToFunctional BIT
 	,@ysnForeignToForeign BIT
+	,@ysnDefaultTransfer BIT
 	
 	-- Table Variables
 	,@RecapTable AS RecapTableType	
@@ -122,7 +123,15 @@ SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPrefe
 SELECT @ysnForeignToFunctional = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdFrom AND @intCurrencyIdTo = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
 SELECT @ysnFunctionalToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom = @intDefaultCurrencyId THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
 SELECT @ysnForeignToForeign = CASE WHEN @intDefaultCurrencyId <> @intCurrencyIdTo AND @intCurrencyIdFrom <> @intDefaultCurrencyId AND  @intCurrencyIdFrom = @intCurrencyIdTo THEN CAST(1 AS BIT) ELSE CAST (0 AS BIT) END
-SELECT @dblHistoricRate = CASE WHEN @ysnFunctionalToForeign = 1 THEN  @dblRate ELSE dbo.fnCMGetBankAccountHistoricRate(@intBankAccountIdFrom, @dtmDate ) END
+SELECT @ysnDefaultTransfer = CASE WHEN @intDefaultCurrencyId = @intCurrencyIdTo AND @intCurrencyIdFrom = @intCurrencyIdTo THEN 1 ELSE 0 END
+
+SELECT @dblHistoricRate = 
+	CASE 
+	WHEN @ysnDefaultTransfer = 1 THEN 1
+	WHEN @ysnForeignToFunctional = 1 THEN dbo.fnCMGetBankAccountHistoricRate(@intBankAccountIdFrom, @dtmDate ) 
+	WHEN @ysnFunctionalToForeign = 1 THEN @dblRate
+	ELSE
+	1 END
 
 
 IF @@ERROR <> 0	GOTO Post_Rollback	

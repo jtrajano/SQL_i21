@@ -1,4 +1,14 @@
-﻿IF EXISTS (SELECT 1 FROM dbo.tblRKFutOptTransactionHeader WHERE dtmTransactionDate is null)
+﻿IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKCompanyPreference')
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference)
+	BEGIN
+		INSERT INTO tblRKCompanyPreference(intConcurrencyId, dblDecimals, dblRefreshRate, strM2MView, strDateTimeFormat, strEvaluationBy, strEvaluationByZone)
+		SELECT 1, 2, 60, 'Processor', 'MM DD YYYY HH:MI', 'Item', 'Location'
+	END
+END
+GO
+
+IF EXISTS (SELECT 1 FROM dbo.tblRKFutOptTransactionHeader WHERE dtmTransactionDate is null)
 BEGIN
 	UPDATE tblRKFutOptTransactionHeader
 	SET dtmTransactionDate = B.dtmTransactionDate,intSelectedInstrumentTypeId = B.intSelectedInstrumentTypeId,
@@ -13,7 +23,7 @@ END
 
 GO
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKDateFilterFor360')
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKDateFilterFor360')
 BEGIN
 	IF NOT EXISTS(SELECT 1 FROM tblRKDateFilterFor360)
 BEGIN
@@ -40,19 +50,19 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKDPRHedgeDailyPositionDetail')
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKDPRHedgeDailyPositionDetail')
 BEGIN
 	EXEC ('DROP VIEW vyuRKDPRHedgeDailyPositionDetail')
 END
 GO
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKDPRInvDailyPositionDetail')
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKDPRInvDailyPositionDetail')
 BEGIN
 	EXEC ('DROP VIEW vyuRKDPRInvDailyPositionDetail')
 END
 GO
 
-IF EXISTS (SELECT * FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKGetSequenceMonth')
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = N'vyuRKGetSequenceMonth')
 BEGIN
 	EXEC ('DROP VIEW vyuRKGetSequenceMonth')
 END

@@ -14,6 +14,7 @@
 		FT.intPositionId,
 		FT.strINCOLocationType,
 		FT.intConcurrencyId,
+		FT.ysnInsuranceCertificateNoRequired,
 
 		IB.strInsuranceBy,
 		IT.strInvoiceType,

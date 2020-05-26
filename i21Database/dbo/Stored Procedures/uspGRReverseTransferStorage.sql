@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRReverseTransfer]
 (
 	@intTransferStorageId INT,
-	@intUserId INT
+	@intUserId INT,
+	@dtmTransferStorageDate DATETIME
 )
 AS
  
@@ -89,7 +90,7 @@ BEGIN
 			,intItemId
 			,intItemUOMId
 			,dblTotalUnits				= dblTotalUnits * -1
-			,dtmTransferStorageDate		= GETDATE()
+			,dtmTransferStorageDate		= @dtmTransferStorageDate
 			,intConcurrencyId
 			,intUserId					= @intUserId
 			,intTransferLocationId

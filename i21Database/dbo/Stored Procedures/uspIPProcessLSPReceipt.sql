@@ -64,6 +64,12 @@ Begin
 					AND strDeliveryItemNo not in (Select isnull(strExternalContainerId,'') from tblLGLoadDetailContainerLink where intLoadId=@intLoadId))
 			RaisError('Invalid Delivery Item (90000 series) No',16,1)
 
+		--check if container already received
+		If EXISTS (Select 1 from tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND dblQuantity>0 
+					AND strDeliveryItemNo IN 
+					(Select isnull(strExternalContainerId,'') from tblLGLoadDetailContainerLink where intLoadId=@intLoadId and ISNULL(dblReceivedQty,0) > 0))
+			RaisError('Container Delivery Item No already received.',16,1)
+
 		Begin Tran
 
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT

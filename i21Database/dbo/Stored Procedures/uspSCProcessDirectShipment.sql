@@ -43,6 +43,15 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intDirectLoadId INT
 DECLARE @ysnTicketMatchContractLoadBased BIT
 DECLARE @ysnTicketContractLoadBased BIT
+DECLARE @intTicketLoadDetailId BIT
+DECLARE @intMatchTicketLoadDetailId BIT
+DECLARE @intMatchTicketStorageScheduleTypeId INT
+DECLARE @dblMatchTicketScheduleQty NUMERIC(18,6)
+DECLARE @_dblAllocatedUnits NUMERIC(38, 20)
+DECLARE @_dblLoadQuantity NUMERIC(18,6)
+DECLARE @_dblContractScheduleQuantity NUMERIC(18,6)
+DECLARE @_dblContractAvailQuantity NUMERIC(18,6)
+DECLARE @_dblScheduleAdjustment NUMERIC(18,6)
 
 BEGIN TRY
 	IF ISNULL(@ysnPostDestinationWeight, 0) = 1
@@ -54,6 +63,7 @@ BEGIN TRY
 				, @intContractDetailId = intContractId
 				, @intTicketItemUOMId = intItemUOMIdTo
 				, @dblContractUnits = dblNetUnits
+				, @intTicketLoadDetailId = intLoadDetailId
 			FROM vyuSCTicketScreenView WHERE intTicketId = @intTicketId
 
 			SELECT @strWhereFinalizedMatchWeight = strWeightFinalized
@@ -63,7 +73,11 @@ BEGIN TRY
 				, @dtmScaleDate = dtmTicketDateTime 
 				, @intMatchContractDetailId = intContractId
 				, @dblMatchContractUnits = dblNetUnits
-			FROM vyuSCTicketScreenView where intTicketId = @intMatchTicketId 
+				, @intMatchTicketLoadDetailId = intLoadDetailId
+				, @intMatchTicketStorageScheduleTypeId = intStorageScheduleTypeId
+				, @dblMatchTicketScheduleQty = ISNULL(dblScheduleQty,0)
+			FROM vyuSCTicketScreenView 
+			WHERE intTicketId = @intMatchTicketId 
 
 			IF ISNULL(@strWhereFinalizedWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedGrade, 'Origin') = 'Destination'
 			BEGIN
@@ -175,9 +189,16 @@ BEGIN TRY
 				BEGIN
 					EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
 
+					SET @_dblScheduleAdjustment = 0
+
 					IF ISNULL(@intMatchContractDetailId,0) != 0
 					BEGIN
-						SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchContractUnits) FROM tblCTContractDetail WHERE intContractDetailId = @intMatchContractDetailId
+						SELECT 
+							@dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractUnits) 
+						FROM tblCTContractDetail WHERE intContractDetailId = @intMatchContractDetailId
+
+						SET @_dblAllocatedUnits = @dblContractAvailableQty
+						
 						
 						SELECT TOP 1 @ysnTicketMatchContractLoadBased = ISNULl(A.ysnLoad,0)
 						FROM tblCTContractHeader A
@@ -187,7 +208,82 @@ BEGIN TRY
 						
 						IF(@ysnTicketMatchContractLoadBased = 1)
 						BEGIN
-							SET @dblContractAvailableQty = 1
+							SET @_dblAllocatedUnits = 1
+						END
+						ELSE
+						BEGIN
+							SELECT	
+								@_dblContractAvailQuantity = ISNULL(dblBalance,0) - ISNULL(dblScheduleQty,0)
+								,@_dblContractScheduleQuantity = ISNULL(dblScheduleQty,0)
+							FROM tblCTContractDetail
+							WHERE intContractDetailId = @intMatchContractDetailId
+
+							IF(@intMatchTicketStorageScheduleTypeId = -6) ---Load
+							BEGIN
+								SELECT
+									@_dblLoadQuantity = dblQuantity
+								FROM tblLGLoadDetail
+								WHERE intLoadDetailId = @intMatchTicketLoadDetailId
+
+								
+
+								IF(@_dblAllocatedUnits <= @_dblLoadQuantity AND @_dblLoadQuantity <= @_dblContractScheduleQuantity)
+								BEGIN
+									SET @_dblAllocatedUnits = @_dblLoadQuantity
+								END
+
+								IF(@_dblAllocatedUnits > @_dblContractScheduleQuantity)
+								BEGIN
+									IF(@_dblAllocatedUnits > (@_dblContractScheduleQuantity + @_dblContractAvailQuantity))	
+									BEGIN
+										RAISERROR('Contract does not enough balance to process this transaction.', 11, 1);
+									END
+									ELSE
+									BEGIN
+										SET @_dblScheduleAdjustment =  @_dblAllocatedUnits - (@_dblContractScheduleQuantity + @_dblContractAvailQuantity)
+									END
+								END
+							END
+							ELSE--- Contract
+							BEGIN 
+								IF(@dblMatchTicketScheduleQty <> @_dblAllocatedUnits)
+								BEGIN
+									SET @_dblScheduleAdjustment = @_dblAllocatedUnits - @dblMatchTicketScheduleQty
+								END
+
+								IF(@_dblScheduleAdjustment > 0) 
+								BEGIN
+									IF(@_dblAllocatedUnits > @_dblContractScheduleQuantity)
+									BEGIN
+										SET @_dblScheduleAdjustment = @_dblAllocatedUnits - @_dblContractScheduleQuantity 
+									END
+									IF(@_dblScheduleAdjustment > @_dblContractAvailQuantity)
+									BEGIN
+										RAISERROR('Contract does not enough balance to process this transaction.', 11, 1);
+									END
+								END
+
+								IF(@_dblScheduleAdjustment < 0)
+								BEGIN
+									IF(ABS(@_dblScheduleAdjustment) > @_dblContractScheduleQuantity)
+									BEGIN
+										SET @_dblScheduleAdjustment = ABS(@_dblScheduleAdjustment) - @_dblContractScheduleQuantity
+									END
+								END
+								
+								
+							END
+						END
+
+						----Adjustment to schedule
+						IF(@_dblScheduleAdjustment <> 0)
+						BEGIN
+							EXEC uspCTUpdateScheduleQuantity
+								@intContractDetailId	=	@intMatchContractDetailId,
+								@dblQuantityToUpdate	=	@_dblScheduleAdjustment,
+								@intUserId				=	@intUserId,
+								@intExternalId			=	@intMatchTicketId,
+								@strScreenName			=	'Auto - Scale'	
 						END
 
 						EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'

@@ -20,11 +20,14 @@ BEGIN TRY
 		,@strDestinationPort NVARCHAR(200)
 		,@dtmETSPOL DATETIME
 		,@dtmDeadlineCargo DATETIME
+		,@dtmETAPOD DATETIME
+		,@dtmETAPOL DATETIME
 		,@strBookingReference NVARCHAR(100)
 		,@strBLNumber NVARCHAR(100)
 		,@strMVessel NVARCHAR(200)
 		,@strMVoyageNumber NVARCHAR(100)
 		,@strShippingMode NVARCHAR(100)
+		,@strShippingLine NVARCHAR(100)
 		,@intNumberOfContainers INT
 		,@strContainerType NVARCHAR(50)
 	DECLARE @strLoadNumber NVARCHAR(100)
@@ -33,6 +36,7 @@ BEGIN TRY
 		,@intOriginPortId INT
 		,@intDestinationPortId INT
 		,@intShippingModeId INT
+		,@intShippingLineEntityId INT
 		,@intContainerTypeId INT
 		,@intShipmentType INT
 		,@intShipmentStatus INT
@@ -59,11 +63,15 @@ BEGIN TRY
 		,@strOldDestinationPort NVARCHAR(200)
 		,@dtmOldETSPOL DATETIME
 		,@dtmOldDeadlineCargo DATETIME
+		,@dtmOldETAPOD DATETIME
+		,@dtmOldETAPOL DATETIME
 		,@strOldBookingReference NVARCHAR(100)
 		,@strOldBLNumber NVARCHAR(100)
 		,@strOldMVessel NVARCHAR(200)
 		,@strOldMVoyageNumber NVARCHAR(100)
 		,@strOldShippingMode NVARCHAR(100)
+		,@strOldShippingLine NVARCHAR(100)
+		,@intOldShippingLineEntityId INT
 		,@intOldNumberOfContainers INT
 		,@intOldContainerTypeId INT
 		,@strOldContainerType NVARCHAR(50)
@@ -97,6 +105,7 @@ BEGIN TRY
 		,@intPSubLocationId INT
 		,@intPNumberOfContainers INT
 		,@dblOldDetailQuantity NUMERIC(18, 6)
+		,@intContractHeaderId INT
 	DECLARE @tblLGLoadDetailChanges TABLE (
 		dblOldQuantity NUMERIC(18, 6)
 		,dblNewQuantity NUMERIC(18, 6)
@@ -128,11 +137,14 @@ BEGIN TRY
 				,@strDestinationPort = NULL
 				,@dtmETSPOL = NULL
 				,@dtmDeadlineCargo = NULL
+				,@dtmETAPOD = NULL
+				,@dtmETAPOL = NULL
 				,@strBookingReference = NULL
 				,@strBLNumber = NULL
 				,@strMVessel = NULL
 				,@strMVoyageNumber = NULL
 				,@strShippingMode = NULL
+				,@strShippingLine = NULL
 				,@intNumberOfContainers = NULL
 				,@strContainerType = NULL
 
@@ -142,6 +154,7 @@ BEGIN TRY
 				,@intOriginPortId = NULL
 				,@intDestinationPortId = NULL
 				,@intShippingModeId = NULL
+				,@intShippingLineEntityId = NULL
 				,@intContainerTypeId = NULL
 				,@intShipmentType = NULL
 				,@intShipmentStatus = NULL
@@ -169,11 +182,15 @@ BEGIN TRY
 				,@strOldDestinationPort = NULL
 				,@dtmOldETSPOL = NULL
 				,@dtmOldDeadlineCargo = NULL
+				,@dtmOldETAPOD = NULL
+				,@dtmOldETAPOL = NULL
 				,@strOldBookingReference = NULL
 				,@strOldBLNumber = NULL
 				,@strOldMVessel = NULL
 				,@strOldMVoyageNumber = NULL
 				,@strOldShippingMode = NULL
+				,@strOldShippingLine = NULL
+				,@intOldShippingLineEntityId = NULL
 				,@intOldNumberOfContainers = NULL
 				,@intOldContainerTypeId = NULL
 				,@strOldContainerType = NULL
@@ -192,11 +209,14 @@ BEGIN TRY
 				,@strDestinationPort = strDestinationPort
 				,@dtmETSPOL = dtmETSPOL
 				,@dtmDeadlineCargo = dtmDeadlineCargo
+				,@dtmETAPOD = dtmETAPOD
+				,@dtmETAPOL = dtmETAPOL
 				,@strBookingReference = strBookingReference
 				,@strBLNumber = strBLNumber
 				,@strMVessel = strMVessel
 				,@strMVoyageNumber = strMVoyageNumber
 				,@strShippingMode = strShippingMode
+				,@strShippingLine = strShippingLine
 				,@intNumberOfContainers = ISNULL(intNumberOfContainers, 0)
 				,@strContainerType = strContainerType
 			FROM tblIPLoadStage WITH (NOLOCK)
@@ -269,6 +289,37 @@ BEGIN TRY
 						,16
 						,1
 						)
+			END
+
+			-- If Ata(dtmETAPOD) is empty, take Eta(dtmDeadlineCargo)
+			--IF @dtmETAPOD IS NULL
+			--BEGIN
+			--	SELECT @dtmETAPOD = @dtmDeadlineCargo
+			--END
+
+			--IF @dtmETAPOL IS NULL
+			--BEGIN
+			--	RAISERROR (
+			--			'Invalid Act. ETD. '
+			--			,16
+			--			,1
+			--			)
+			--END
+
+			IF ISNULL(@strShippingLine, '') <> ''
+			BEGIN
+				SELECT @intShippingLineEntityId = t.intEntityId
+				FROM tblEMEntity t WITH (NOLOCK)
+				WHERE t.strName = @strShippingLine
+
+				IF ISNULL(@intShippingLineEntityId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Shipping Line. '
+							,16
+							,1
+							)
+				END
 			END
 
 			SELECT @intShippingModeId = t.intShippingModeId
@@ -420,8 +471,12 @@ BEGIN TRY
 					,dtmETSPOL
 					,dtmETSPOL1
 					,dtmDeadlineCargo
+					,dtmETAPOD
+					,dtmETAPOL
+					,dtmETAPOD1
 					,strBookingReference
 					,strBLNumber
+					,intShippingLineEntityId
 					,strMVessel
 					,strMVoyageNumber
 					,strShippingMode
@@ -454,8 +509,12 @@ BEGIN TRY
 					,@dtmETSPOL
 					,@dtmETSPOL
 					,@dtmDeadlineCargo
+					,@dtmETAPOD
+					,@dtmETAPOL
+					,@dtmETAPOD
 					,@strBookingReference
 					,@strBLNumber
+					,@intShippingLineEntityId
 					,@strMVessel
 					,@strMVoyageNumber
 					,@strShippingMode
@@ -487,11 +546,14 @@ BEGIN TRY
 					,@strOldDestinationPort = strDestinationPort
 					,@dtmOldETSPOL = dtmETSPOL
 					,@dtmOldDeadlineCargo = dtmDeadlineCargo
+					,@dtmOldETAPOD = dtmETAPOD
+					,@dtmOldETAPOL = dtmETAPOL
 					,@strOldBookingReference = strBookingReference
 					,@strOldBLNumber = strBLNumber
 					,@strOldMVessel = strMVessel
 					,@strOldMVoyageNumber = strMVoyageNumber
 					,@strOldShippingMode = strShippingMode
+					,@intOldShippingLineEntityId = intShippingLineEntityId
 					,@intOldNumberOfContainers = intNumberOfContainers
 					,@intOldContainerTypeId = intContainerTypeId
 					,@strOldPackingDescription = strPackingDescription
@@ -505,6 +567,10 @@ BEGIN TRY
 				SELECT @strOldContainerType = t.strContainerType
 				FROM tblLGContainerType t WITH (NOLOCK)
 				WHERE t.intContainerTypeId = @intOldContainerTypeId
+
+				SELECT @strOldShippingLine = t.strName
+				FROM tblEMEntity t WITH (NOLOCK)
+				WHERE t.intEntityId = @intOldShippingLineEntityId
 
 				UPDATE tblLGLoad
 				SET intConcurrencyId = intConcurrencyId + 1
@@ -521,8 +587,12 @@ BEGIN TRY
 					,dtmETSPOL = @dtmETSPOL
 					,dtmETSPOL1 = @dtmETSPOL
 					,dtmDeadlineCargo = @dtmDeadlineCargo
+					,dtmETAPOD = @dtmETAPOD
+					,dtmETAPOL = @dtmETAPOL
+					,dtmETAPOD1 = @dtmETAPOD
 					,strBookingReference = @strBookingReference
 					,strBLNumber = @strBLNumber
+					,intShippingLineEntityId = @intShippingLineEntityId
 					,strMVessel = @strMVessel
 					,strMVoyageNumber = @strMVoyageNumber
 					,strShippingMode = @strShippingMode
@@ -557,6 +627,12 @@ BEGIN TRY
 					IF (@dtmOldDeadlineCargo <> @dtmDeadlineCargo)
 						SET @strDetails += '{"change":"dtmDeadlineCargo","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldDeadlineCargo, '')) + '","to":"' + LTRIM(ISNULL(@dtmDeadlineCargo, '')) + '","leaf":true,"changeDescription":"Instr ETA"},'
 
+					IF (@dtmOldETAPOD <> @dtmETAPOD)
+						SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOD, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOD, '')) + '","leaf":true,"changeDescription":"Act. ETA"},'
+
+					IF (@dtmOldETAPOL <> @dtmETAPOL)
+						SET @strDetails += '{"change":"dtmETAPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOL, '')) + '","leaf":true,"changeDescription":"Act. ETD"},'
+
 					IF (@strOldBookingReference <> @strBookingReference)
 						SET @strDetails += '{"change":"strBookingReference","iconCls":"small-gear","from":"' + LTRIM(@strOldBookingReference) + '","to":"' + LTRIM(@strBookingReference) + '","leaf":true,"changeDescription":"Booking Ref."},'
 
@@ -571,6 +647,9 @@ BEGIN TRY
 
 					IF (@strOldShippingMode <> @strShippingMode)
 						SET @strDetails += '{"change":"strShippingMode","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingMode) + '","to":"' + LTRIM(@strShippingMode) + '","leaf":true,"changeDescription":"Shipping Mode"},'
+
+					IF (@intOldShippingLineEntityId <> @intShippingLineEntityId)
+						SET @strDetails += '{"change":"strShippingLine","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingLine) + '","to":"' + LTRIM(@strShippingLine) + '","leaf":true,"changeDescription":"Shipping Line"},'
 
 					IF (@intOldNumberOfContainers <> @intNumberOfContainers)
 						SET @strDetails += '{"change":"intNumberOfContainers","iconCls":"small-gear","from":"' + LTRIM(@intOldNumberOfContainers) + '","to":"' + LTRIM(@intNumberOfContainers) + '","leaf":true,"changeDescription":"No. of Containers"},'
@@ -672,6 +751,7 @@ BEGIN TRY
 						,@intPSubLocationId = NULL
 						,@intPNumberOfContainers = NULL
 						,@dblOldDetailQuantity = NULL
+						,@intContractHeaderId = NULL
 
 					SELECT @strCommodityCode = strCommodityCode
 						,@strItemNo = strItemNo
@@ -737,6 +817,7 @@ BEGIN TRY
 						AND IL.intLocationId = @intLocationId
 						AND t.intItemId = @intItemId
 						AND t.strContractItemName = @strContractItemName
+						AND t.strStatus = 'Active'
 
 					IF ISNULL(@intItemContractId, 0) = 0
 					BEGIN
@@ -794,6 +875,7 @@ BEGIN TRY
 						,@strVendorReference = CH.strCustomerContract
 						,@intPSubLocationId = CD.intSubLocationId
 						,@intPNumberOfContainers = CD.intNumberOfContainers
+						,@intContractHeaderId = CD.intContractHeaderId
 					FROM tblCTContractDetail CD WITH (NOLOCK)
 					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 						AND CD.intContractDetailId = @intContractDetailId
@@ -851,6 +933,28 @@ BEGIN TRY
 						EXEC uspLGUpdateContractShippingInstructionQty @intContractDetailId = @intContractDetailId
 							,@dblQuantityToUpdate = @dblQuantity
 							,@intUserId = @intEntityId
+
+						INSERT INTO tblLGLoadDocuments (
+							intConcurrencyId
+							,intLoadId
+							,intDocumentId
+							,strDocumentType
+							,intOriginal
+							,intCopies
+							)
+						SELECT 1
+							,@intLoadId
+							,CD.intDocumentId
+							,CASE WHEN ID.intDocumentType = 1 THEN 'Contract'
+									WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
+									WHEN ID.intDocumentType = 3	THEN 'Container'
+									ELSE ''
+								END COLLATE Latin1_General_CI_AS
+							,ISNULL(ID.intOriginal, 0)
+							,ISNULL(ID.intCopies, 0)
+						FROM tblCTContractDocument CD
+						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
+							AND CD.intContractHeaderId = @intContractHeaderId
 					END
 					ELSE
 					BEGIN
@@ -1007,16 +1111,28 @@ BEGIN TRY
 				END
 			END
 
+			-- To set Contract Planned Availability Date and send Contract feed to SAP
+			IF @strRowState = 'Added'
+				OR @strRowState = 'Modified'
+			BEGIN
+				EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
+					,@strRowState = @strRowState
+					,@intShipmentType = 2 -- LSI
+			END
+
 			--Move to Archive
 			INSERT INTO tblIPLoadArchive (
 				strCustomerReference
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -1034,10 +1150,13 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -1097,10 +1216,13 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode
@@ -1118,10 +1240,13 @@ BEGIN TRY
 				,strERPPONumber
 				,strOriginPort
 				,strDestinationPort
-				,dtmETSPOL
+				,dtmETAPOD
+				,dtmETAPOL
 				,dtmDeadlineCargo
+				,dtmETSPOL
 				,strBookingReference
 				,strBLNumber
+				,strShippingLine
 				,strMVessel
 				,strMVoyageNumber
 				,strShippingMode

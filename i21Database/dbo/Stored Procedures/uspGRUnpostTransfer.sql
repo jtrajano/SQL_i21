@@ -2,7 +2,8 @@
 (
 	@intTransferStorageId INT,
 	@intUserId INT,
-	@ysnReverse BIT
+	@ysnReverse BIT,
+	@dtmTransferStorageDate DATETIME = NULL
 )
 AS
 BEGIN
@@ -511,7 +512,9 @@ BEGIN
 		END
 		ELSE
 		BEGIN
-			EXEC uspGRReverseTransfer @intTransferStorageId, @intUserId
+			IF @dtmTransferStorageDate IS NULL
+				RAISERROR ('Reversal date is required.',16,1);
+			EXEC uspGRReverseTransfer @intTransferStorageId, @intUserId, @dtmTransferStorageDate
 		END
 	
 	END TRY

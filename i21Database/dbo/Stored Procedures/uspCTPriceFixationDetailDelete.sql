@@ -101,8 +101,11 @@ BEGIN TRY
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
 			DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 			
-			INSERT INTO @voucherIds			
-			SELECT @DetailId
+			if not exists (select top 1 1 from @voucherIds where intId = @DetailId)
+			begin
+				INSERT INTO @voucherIds			
+				SELECT @DetailId
+			end
 
 			EXEC uspAPUpdateVoucherTotal @voucherIds
 
@@ -218,7 +221,7 @@ BEGIN TRY
 			CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
 			CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
 			CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
-			CD.dblFutures			=	NULL,
+			CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE NULL END,
 			CD.dblCashPrice			=	NULL,
 			CD.dblTotalCost			=	NULL,
 			CD.intConcurrencyId		=	CD.intConcurrencyId + 1,

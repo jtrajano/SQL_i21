@@ -194,19 +194,21 @@ Begin
 	SET @strHeader = '<tr>
 						<th>&nbsp;Delivery No</th>
 						<th>&nbsp;Message</th>
+						<th>&nbsp;Partner</th>
 					</tr>'
 	
 	Select @strDetail=@strDetail + 
 	'<tr>
 		   <td>&nbsp;'  + ISNULL(strDeliveryNo,'') + '</td>'
-		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>
+		+ '<td>&nbsp;' + ISNULL(strErrorMessage,'') + '</td>'
+		+ '<td>&nbsp;' + CASE WHEN strPartnerNo='0012XI01' THEN 'MBN' When strPartnerNo='JMWPO01' THEN 'JMW' Else '' End + '</td>
 	</tr>'
 	From tblIPReceiptError r
-	Where strPartnerNo='0012XI01'
+	Where strPartnerNo IN ('0012XI01','JMWPO01')
 	AND ISNULL(ysnMailSent,0)=0 AND ISNULL(strErrorMessage,'') <>'Success'
 
 	Update tblIPReceiptError Set ysnMailSent=1
-	Where strPartnerNo='0012XI01' AND ISNULL(strErrorMessage,'') <>'Success'
+	Where strPartnerNo IN ('0012XI01','JMWPO01') AND ISNULL(strErrorMessage,'') <>'Success'
 	AND ISNULL(ysnMailSent,0)=0
 End
 

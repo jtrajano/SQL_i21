@@ -122,6 +122,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				AND SS.intParentSettleStorageId IS NOT NULL
 				AND SS.dblSpotUnits = 0)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
+		and billDetail.intSettleStorageId = SS.intSettleStorageId
 		--AND SS.intBillId = bill.intBillId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -166,8 +167,8 @@ SELECT
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
-	,GD.intAccountId
-	,AD.strAccountId
+	,GLDetail.intAccountId
+	,GLDetail.strAccountId
 FROM tblGRCustomerStorage CS
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
@@ -183,14 +184,26 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.dblSpotUnits = 0
-INNER JOIN tblGLDetail GD
-	ON GD.strTransactionId = SS.strStorageTicket
-		AND GD.intTransactionId = SS.intSettleStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND GD.ysnIsUnposted = 0
-		--AND GD.strCode = 'STR'
-INNER JOIN vyuGLAccountDetail AD
-	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+OUTER APPLY  
+(  
+ SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit  
+ FROM tblGLDetail GD  
+ INNER JOIN vyuGLAccountDetail AD  
+  ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45  
+ WHERE GD.strTransactionId = SS.strStorageTicket  
+  AND GD.intTransactionId = SS.intSettleStorageId  
+  AND GD.strCode = 'STR'  
+  AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo  
+  AND GD.ysnIsUnposted = 0  
+) GLDetail 
+-- INNER JOIN tblGLDetail GD
+-- 	ON GD.strTransactionId = SS.strStorageTicket
+-- 		AND GD.intTransactionId = SS.intSettleStorageId
+-- 		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
+-- 		AND GD.ysnIsUnposted = 0
+-- 		--AND GD.strCode = 'STR'
+-- INNER JOIN vyuGLAccountDetail AD
+-- 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
 LEFT JOIN 
 (
     tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
@@ -258,6 +271,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 				AND IM.strCostType = 'Storage Charge' 
 				AND (IM.intCommodityId = CO.intCommodityId OR IM.intCommodityId IS NULL))
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = IM.intItemId
+		and billDetail.intSettleStorageId = SS.intSettleStorageId
 	--AND SS.intBillId = bill.intBillId
 INNER JOIN vyuGLAccountDetail glAccnt
 	ON glAccnt.intAccountId = billDetail.intAccountId
@@ -429,6 +443,7 @@ INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
 			-- 	ON CD.intContractDetailId = SC.intContractDetailId
 			)
 	ON CS.intCustomerStorageId = billDetail.intCustomerStorageId
+		and billDetail.intSettleStorageId = SS.intSettleStorageId
 	--AND SS.intBillId = bill.intBillId
 	-- AND CD.intContractDetailId = billDetail.intContractDetailId
 INNER JOIN vyuGLAccountDetail glAccnt

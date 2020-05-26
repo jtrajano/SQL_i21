@@ -98,6 +98,8 @@ DECLARE @intTicketDeliverySheetId INT
 DECLARE @intDeliverySheetEntityId INT
 DECLARE @intDeliverySheetItemId INT
 DECLARE @intDeliverySheetLocationId INT
+DECLARE @strTicketStatus NVARCHAR(5)
+DECLARE @_strReceiptNumber NVARCHAR(50)
    
 
 DECLARE @ErrMsg              NVARCHAR(MAX),
@@ -126,6 +128,7 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
 		, @intTicketItemUOMId = ST.intItemUOMIdTo
 		, @intTicketEntityId = ST.intEntityId
 		, @intTicketDeliverySheetId = intDeliverySheetId
+		,@strTicketStatus = strTicketStatus
 FROM dbo.tblSCTicket ST WHERE
 ST.intTicketId = @intTicketId
 
@@ -135,6 +138,32 @@ ST.strStorageTypeCode = @strDistributionOption
 
 
 BEGIN TRY
+		--Validation
+		BEGIN
+
+			IF @strTicketStatus = 'C' OR  @strTicketStatus = 'V'
+			BEGIN
+				RAISERROR('Cannot distribute closed ticket.', 11, 1);
+			END
+
+			---Check existing IS and Invoice
+			
+			SELECT TOP 1 
+				@_strReceiptNumber = ISNULL(B.strReceiptNumber,'')
+			FROM tblICInventoryReceiptItem A
+			INNER JOIN tblICInventoryReceipt B
+				ON A.intInventoryReceiptId = B.intInventoryReceiptId
+			WHERE B.intSourceType = 1
+				AND A.intSourceId = @intTicketId
+
+			IF ISNULL(@_strReceiptNumber,'') <> ''
+			BEGIN
+				SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a receipt ' + @_strReceiptNumber + '.'
+				RAISERROR(@ErrMsg, 11, 1);
+			END
+
+		END
+
 		IF @strDistributionOption = 'LOD' AND @intLoadId IS NULL
 		BEGIN
 			RAISERROR('Unable to find load details. Try Again.', 11, 1);

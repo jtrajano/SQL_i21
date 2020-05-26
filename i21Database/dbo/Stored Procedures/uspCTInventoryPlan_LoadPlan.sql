@@ -207,9 +207,7 @@ BEGIN
 
 	SET @Cnt = 1
 
-	SELECT @intNoOfMonths = intNoOfMonths
-	FROM dbo.tblCTInvPlngReportMaster
-	WHERE intInvPlngReportMasterID = @intInvPlngReportMasterID
+	SELECT @intNoOfMonths = 12
 
 	SET @SQL = ''
 	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50)'

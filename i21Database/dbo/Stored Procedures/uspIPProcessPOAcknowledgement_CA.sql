@@ -1,4 +1,8 @@
-﻿CREATE PROCEDURE uspIPProcessPOAcknowledgement_CA
+﻿CREATE PROCEDURE uspIPProcessPOAcknowledgement_CA (
+	@strInfo1 NVARCHAR(MAX) = '' OUTPUT
+	,@strInfo2 NVARCHAR(MAX) = '' OUTPUT
+	,@intNoOfRowsAffected INT = 0 OUTPUT
+	)
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -17,7 +21,9 @@ BEGIN TRY
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
 		,@intMinRowNo INT
-		,@intContractFeedId INT
+		,@strContractSeq NVARCHAR(50)
+		,@intContractHeaderId INT
+		,@strContractNumber NVARCHAR(50)
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -25,14 +31,16 @@ BEGIN TRY
 		,strReference NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @tblMessage AS TABLE (
-		strMessageType NVARCHAR(50)
+		intRowNo INT identity(1, 1)
+		,strMessageType NVARCHAR(50)
 		,strMessage NVARCHAR(MAX)
 		,strInfo1 NVARCHAR(50)
 		,strInfo2 NVARCHAR(50)
+		,strXml NVARCHAR(MAX)
 		)
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
-	FROM tblIPIDOCXMLStage
+	FROM tblIPIDOCXMLStage WITH (NOLOCK)
 	WHERE strType = 'POAcknowledgement'
 
 	WHILE @intRowNo IS NOT NULL
@@ -44,7 +52,7 @@ BEGIN TRY
 				,@idoc = NULL
 
 			SELECT @strXml = strXml
-			FROM tblIPIDOCXMLStage
+			FROM tblIPIDOCXMLStage WITH (NOLOCK)
 			WHERE intIDOCXMLStageId = @intRowNo
 
 			SET @strXml = REPLACE(@strXml, 'utf-8' COLLATE Latin1_General_CI_AS, 'utf-16' COLLATE Latin1_General_CI_AS)
@@ -77,7 +85,9 @@ BEGIN TRY
 				SELECT @strCode = NULL
 					,@strDescription = NULL
 					,@strReference = NULL
-					,@intContractFeedId = NULL
+					,@strContractSeq = NULL
+					,@intContractHeaderId = NULL
+					,@strContractNumber = NULL
 
 				SELECT @strCode = strCode
 					,@strDescription = strDescription
@@ -85,26 +95,34 @@ BEGIN TRY
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				SELECT TOP 1 @intContractFeedId = intContractFeedId
-				FROM tblCTContractFeed
-				WHERE strERPPONumber = @strReference
-					AND strThirdPartyFeedStatus = 'Awt Ack'
-				ORDER BY intContractFeedId
-
-				UPDATE tblCTContractFeed
+				UPDATE tblIPThirdPartyContractFeed
 				SET strThirdPartyFeedStatus = 'Ack Rcvd'
 					,strThirdPartyMessage = CASE 
 						WHEN @strCode = '200'
 							THEN 'Success'
 						ELSE @strDescription
 						END
-				WHERE intContractFeedId = @intContractFeedId
+				WHERE strERPPONumber = @strReference
+					AND strThirdPartyFeedStatus IN (
+						'Awt Ack'
+						,'Ack Rcvd'
+						)
+
+				SELECT TOP 1 @strContractSeq = CONVERT(VARCHAR, intContractSeq)
+					,@intContractHeaderId = intContractHeaderId
+				FROM tblCTContractDetail WITH (NOLOCK)
+				WHERE strERPPONumber = @strReference
+
+				SELECT @strContractNumber = strContractNumber
+				FROM tblCTContractHeader WITH (NOLOCK)
+				WHERE intContractHeaderId = @intContractHeaderId
 
 				INSERT INTO @tblMessage (
 					strMessageType
 					,strMessage
 					,strInfo1
 					,strInfo2
+					,strXml
 					)
 				VALUES (
 					'Contract Create/Update'
@@ -113,8 +131,9 @@ BEGIN TRY
 							THEN 'Success'
 						ELSE @strDescription
 						END
-					,''
+					,@strContractNumber + ' / ' + ISNULL(@strContractSeq, '')
 					,@strReference
+					,@strXml
 					)
 
 				SELECT @intMinRowNo = MIN(intRowNo)
@@ -131,7 +150,7 @@ BEGIN TRY
 			SELECT strXml
 				,strType
 				,dtmCreatedDate
-			FROM tblIPIDOCXMLStage
+			FROM tblIPIDOCXMLStage WITH (NOLOCK)
 			WHERE intIDOCXMLStageId = @intRowNo
 
 			DELETE
@@ -161,7 +180,7 @@ BEGIN TRY
 				,strType
 				,@ErrMsg
 				,dtmCreatedDate
-			FROM tblIPIDOCXMLStage
+			FROM tblIPIDOCXMLStage WITH (NOLOCK)
 			WHERE intIDOCXMLStageId = @intRowNo
 
 			DELETE
@@ -170,16 +189,36 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
-		FROM tblIPIDOCXMLStage
+		FROM tblIPIDOCXMLStage WITH (NOLOCK)
 		WHERE intIDOCXMLStageId > @intRowNo
 			AND strType = 'POAcknowledgement'
 	END
 
-	SELECT strMessageType
-		,strMessage
-		,ISNULL(strInfo1, '') AS strInfo1
-		,ISNULL(strInfo2, '') AS strInfo2
+	--SELECT intRowNo AS id
+	--	,strXml AS strXml
+	--	,ISNULL(strInfo1, '') AS strInfo1
+	--	,ISNULL(strInfo2, '') AS strInfo2
+	--	,'' AS strOnFailureCallbackSql
+	--FROM @tblMessage
+	--ORDER BY intRowNo
+	SELECT @strInfo1 = ''
+		,@strInfo2 = ''
+
+	SELECT @strInfo1 = @strInfo1 + IsNULL(strInfo1, '') + ','
+		,@strInfo2 = @strInfo2 + ISNULL(strInfo2, '') + ','
 	FROM @tblMessage
+
+	IF (ISNULL(@strInfo1, '')) <> ''
+		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)
+
+	IF (ISNULL(@strInfo2, '')) <> ''
+		SELECT @strInfo2 = LEFT(@strInfo2, LEN(@strInfo2) - 1)
+
+	IF Len(@strInfo1) > 0
+		OR Len(@strInfo2) > 0
+	BEGIN
+		SELECT @intNoOfRowsAffected = 1
+	END
 END TRY
 
 BEGIN CATCH

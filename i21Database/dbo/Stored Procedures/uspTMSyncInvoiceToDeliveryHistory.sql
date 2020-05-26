@@ -701,6 +701,8 @@ BEGIN
 						--END
 				
 					END
+
+					EXEC uspTMUpdateNextJulianDeliveryBySite @intSiteId
 				END
 			END
 			ELSE
@@ -996,10 +998,11 @@ BEGIN
 				
 			
 					----Update Next Julian Calendar Date of the site
-					UPDATE tblTMSite
-					SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
-						,intConcurrencyId = intConcurrencyId + 1
-					WHERE intSiteID = @intSiteId
+					--TM-3174 - Remove this part that cause a blank for next julian calendar
+					--UPDATE tblTMSite
+					--SET dtmNextDeliveryDate = (CASE WHEN intFillMethodId = @intJulianCalendarFillId THEN dbo.fnTMGetNextJulianDeliveryDate(intSiteID) ELSE NULL END)
+					--	,intConcurrencyId = intConcurrencyId + 1
+					--WHERE intSiteID = @intSiteId
 					
 					---- Update forecasted nad estimated % left
 					EXEC uspTMUpdateEstimatedValuesBySite @intSiteId

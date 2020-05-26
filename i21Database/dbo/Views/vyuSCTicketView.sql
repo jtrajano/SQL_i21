@@ -121,7 +121,8 @@ AS
        ,SCT.ysnHasGeneratedTicketNumber
 	   ,CASE 
 			WHEN SCT.ysnDestinationWeightGradePost = 1 THEN 'Posted' 
-			WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Unposted' 
+			WHEN lower(isnull(CTWGH.strWeightGradeDesc, '')) = 'destination' or lower(isnull(CTWGG.strWeightGradeDesc, '')) = 'destination' then 'Unposted'
+			--WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Unposted' 
 		END AS strWeightGradePostStatus   
       ,CASE WHEN CTH.intWeightId is not null OR CTH.intGradeId is not null 
          THEN isnull(CTWGH.strWeightGradeDesc, '') +'/' + isnull(CTWGG.strWeightGradeDesc, '') END AS strWeightGradeDest
