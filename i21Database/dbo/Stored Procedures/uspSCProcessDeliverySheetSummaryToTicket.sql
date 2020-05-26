@@ -60,6 +60,10 @@ BEGIN TRY
 		,[dblFreight] NUMERIC(38,20) NULL
 		,[dblFees] NUMERIC(38,20) NULL
 	)
+	declare @skipValidation bit
+	declare @processedTicket Table(
+		[intTicketId] INT
+	)
 
 	DECLARE @dsSplitTable TABLE(
 		[intEntityId] INT NOT NULL, 
@@ -143,7 +147,6 @@ BEGIN TRY
 	--None reversal
 	BEGIN
 		SET @TicketCurrentRowCount = 1
-		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
 
 		INSERT INTO @processTicket(
 			[intTicketId]
@@ -163,6 +166,8 @@ BEGIN TRY
 		FROM tblSCTicket 
 		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
 			AND ysnReversed = 0
+		
+		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
 
 		WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
 		BEGIN
@@ -267,9 +272,23 @@ BEGIN TRY
 				SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
 			ELSE
 				SET @dblFinalSplitQty = @dblTempSplitQty
-
-			EXEC [dbo].[uspSCProcessToItemReceipt] @intTicketId, @intUserId, @dblFinalSplitQty, 0, @intSplitEntityId, 0 , @strDistributionOption, @intStorageScheduleId, @intInventoryReceiptId OUTPUT, @intBillId OUTPUT
 			
+			set @skipValidation = 0
+			if exists(select top 1 1 from @processedTicket where intTicketId = @intTicketId)
+			begin
+				set @skipValidation = 1
+			end
+
+			EXEC [dbo].[uspSCProcessToItemReceipt] @intTicketId, @intUserId, @dblFinalSplitQty, 0, @intSplitEntityId, 0 , @strDistributionOption, @intStorageScheduleId, @intInventoryReceiptId OUTPUT, @intBillId OUTPUT, @skipValidation			
+
+			
+			if not exists(select top 1 1 from @processedTicket where intTicketId = @intTicketId)
+			begin
+				insert into @processedTicket values (@intTicketId)
+			end
+
+
+
 			FETCH NEXT FROM splitCursor INTO @intSplitEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;
 		END
 		CLOSE splitCursor;  
