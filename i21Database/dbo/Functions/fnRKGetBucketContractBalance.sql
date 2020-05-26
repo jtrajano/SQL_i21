@@ -7,8 +7,8 @@
 RETURNS @returntable TABLE
 (
 	 intContractBalanceLogId INT
-	, dtmCreateDate DATETIME
 	, dtmTransactionDate DATETIME
+	, dtmCreateDate DATETIME
 	, strTransactionType  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionReference   NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
