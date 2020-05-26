@@ -22,8 +22,10 @@ SELECT ETO.intEntityEmployeeId
 	,ETO.dblPerPeriod
 	,ETO.strPeriod
 	,EMP.intRank
-	,dblHoursUsed = (ETO.dblHoursUsed + ISNULL(TOYTD.dblHoursUsedYTD,0))
+	,dblHoursUsed = ISNULL(TOYTD.dblHoursUsedYTD,0)
 	,dblBalance = (ETO.dblHoursCarryover + ETO.dblHoursEarned) - ETO.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)
+	,ETO.dblHoursCarryover  
+	,dblAdjustments =  ETO.dblHoursUsed 
 FROM tblPREmployeeTimeOff ETO
 LEFT JOIN(
 	SELECT intEntityId
