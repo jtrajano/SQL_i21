@@ -33,41 +33,86 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@ysnPosted BIT
 		,@ysnRecap BIT
 		,@intContractDetailId INT
-		,@dblContractQty INT
+		,@dblContractQty NUMERIC(18,6)
 		,@intTicketItemUOMId INT
 		,@dblContractAvailableQty NUMERIC(38,20);
+DECLARE @ysnTicketContractLoadBased BIT
+DECLARE @ysnContractLoadBased BIT
+DECLARE @intMatchTicketContractDetailId INT
+DECLARE @strTicketWeightFinalizedWhere NVARCHAR(20)
+DECLARE @strTicketGradeFinalizedWhere NVARCHAR(20)
+DECLARE @intMatchTicketStorageScheduleTypeId AS INT
+DECLARE @dblMatchTicketScheduleQty NUMERIC(38,20)
+DECLARE @intMatchTicketItemUOMIdTo INT
+DECLARE @dblMatchTicketNetUnits NUMERIC(38,20)
+DECLARE @dblUnits NUMERIC(38,20)
 
 BEGIN TRY
 	IF @strTicketType = 'Direct'
 	BEGIN
 		IF ISNULL(@intMatchTicketId, 0) > 0
 		BEGIN
-			SELECT @intTicketItemUOMId = intItemUOMIdTo
-				, @intContractDetailId = intContractId
-				, @dblContractQty = dblNetUnits
-			FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
-		END
+			SELECT @intTicketItemUOMId = SC.intItemUOMIdTo
+				, @intContractDetailId = SC.intContractId
+				, @dblContractQty = SC.dblNetUnits
+				, @intMatchTicketContractDetailId = SC.intContractId
+				, @intMatchTicketStorageScheduleTypeId = SC.intStorageScheduleTypeId
+				,@strTicketWeightFinalizedWhere = CTWeight.strWhereFinalized
+				,@strTicketGradeFinalizedWhere = CTGrade.strWhereFinalized
+				, @dblMatchTicketScheduleQty = ISNULL(SC.dblScheduleQty,0)
+				,@dblMatchTicketNetUnits = SC.dblNetUnits
+			FROM tblSCTicket SC
+			LEFT JOIN tblCTWeightGrade CTGrade 
+				ON CTGrade.intWeightGradeId = SC.intGradeId
+			LEFT JOIN tblCTWeightGrade CTWeight 
+				ON CTWeight.intWeightGradeId = SC.intWeightId
+			WHERE intTicketId = @intMatchTicketId
+		
+			IF(ISNULL(@strTicketWeightFinalizedWhere,'Origin') = 'Destination' OR ISNULL(@strTicketGradeFinalizedWhere,'Origin') = 'Destination')
+			BEGIN
+				SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId
+				SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+				IF @ysnPosted = 1
+				BEGIN
+					EXEC [dbo].[uspAPPostBill]
+					@post = 0
+					,@recap = 0
+					,@isBatch = 0
+					,@param = @intBillId
+					,@userId = @intUserId
+					,@success = @success OUTPUT
+				END
+				IF ISNULL(@intBillId, 0) > 0
+					EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 
-		SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId
-		SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
-		IF @ysnPosted = 1
-		BEGIN
-			EXEC [dbo].[uspAPPostBill]
-			@post = 0
-			,@recap = 0
-			,@isBatch = 0
-			,@param = @intBillId
-			,@userId = @intUserId
-			,@success = @success OUTPUT
-		END
-		IF ISNULL(@intBillId, 0) > 0
-			EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
 
-		IF ISNULL(@intContractDetailId,0) != 0
-		BEGIN
-			SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
-			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
+				IF ISNULL(@intMatchTicketContractDetailId,0) != 0
+				BEGIN
+					SELECT TOP 1
+						@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
+					FROM tblCTContractDetail A
+					INNER JOIN tblCTContractHeader B
+						ON A.intContractHeaderId = B.intContractHeaderId
+					WHERE A.intContractDetailId = @intMatchTicketContractDetailId 
+
+					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchTicketScheduleQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+					IF(ISNULL(@ysnContractLoadBased,0) = 1)
+					BEGIN
+						SET @dblContractAvailableQty = 1
+					END
+					
+
+					SET @dblUnits = (@dblMatchTicketNetUnits * -1)
+					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblUnits, @intUserId, @intMatchTicketId, 'Scale'
+					EXEC uspCTUpdateScheduleQuantity
+											@intContractDetailId	=	@intContractDetailId,
+											@dblQuantityToUpdate	=	@dblContractAvailableQty,
+											@intUserId				=	@intUserId,
+											@intExternalId			=	@intMatchTicketId,
+											@strScreenName			=	'Scale'	
+				END
+			END
 		END
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
@@ -94,11 +139,13 @@ BEGIN TRY
 				@accrueLicense		= 0,
 				@raiseError			= 1
 		END
+		
 		IF ISNULL(@intInvoiceId, 0) > 0
 		BEGIN
-			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @intInvoiceId;
 			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 		END
+
+		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
 	END
 	ELSE
 	BEGIN
