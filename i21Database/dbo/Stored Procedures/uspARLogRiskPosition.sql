@@ -349,6 +349,7 @@ BEGIN
 	INNEr JOIN tblCTContractDetail CD ON SL.intContractDetailId = CD.intContractDetailId
 	WHERE SL.intContractDetailId IS NOT NULL
 	  AND SL.strTransactionType = 'Invoice'
+    AND CH.intPricingTypeId = 2
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
         BEGIN
