@@ -256,6 +256,17 @@ BEGIN
 		WHEN @msgId = 80240 THEN 'Inventory Count is ongoing and is locked for item %s in storage unit %s.'
 		WHEN @msgId = 80241 THEN 'Inventory Count is ongoing and is locked for item %s in lot number %s.'
 		WHEN @msgId = 80242 THEN 'Unable to update the Other Charge. The Inventory Receipt total is going to be negative.'
+		WHEN @msgId = 80243 THEN 'Cannot process %s because it is already included in the Add Payables by %s.'
+		WHEN @msgId = 80244 THEN 'Reverse can only be used on posted transaction.'
+		WHEN @msgId = 80245 THEN '%s failed to create its transaction id.'
+		WHEN @msgId = 80246 THEN 'Entity user id is invalid.'
+		WHEN @msgId = 80247 THEN '%s already has an existing reversal.'
+		WHEN @msgId = 80248 THEN 'Back-dated reversal is not allowed.'
+		WHEN @msgId = 80249 THEN 'Shipment reversal is not allowed. It already has a credit memo. See %s.'
+		WHEN @msgId = 80250 THEN 'Inventory Account is set to %s for item %s.'
+		WHEN @msgId = 80251 THEN 'Work In Progress Account is set to %s for item %s.'
+		WHEN @msgId = 80252 THEN 'There are backdated transactions made in %s %i. Do you want to rebuild from %s %i?'
+		WHEN @msgId = 80253 THEN '%s charges is not linked to any items. Please check if Charges Link in %s were properly assigned.'
 	END 
 
 	RETURN @msg
