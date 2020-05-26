@@ -2365,15 +2365,15 @@ BEGIN TRY
 						@_balance		NUMERIC(24, 10) = 0;
 
 				IF ISNULL(@dblPriced,0) > 0
-				BEGIN			
+				BEGIN		
 					SET @_priced = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) THEN ISNULL(@dblPriced,0) ELSE @dblQty END)
-					UPDATE @cbLogSpecific SET dblQty = @_priced * -1, intPricingTypeId = 1
+					UPDATE @cbLogSpecific SET dblQty = @_priced * -1, intPricingTypeId = 1, intActionId = CASE WHEN intContractTypeId = 1 THEN 47 ELSE 46 END
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 				END
 				IF ISNULL(@dblBasis,0) > 0
 				BEGIN	
 					SET @_basis = (CASE WHEN @dblQty > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblQty END)
-					UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2
+					UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2, intActionId = CASE WHEN intContractTypeId = 1 THEN 19 ELSE 18 END
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 				END
 				--UPDATE @cbLogSpecific SET dblQty = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) 
@@ -2383,12 +2383,12 @@ BEGIN TRY
 				--									 intPricingTypeId = CASE WHEN ISNULL(@dblPriced,0) <> 0 THEN 1 ELSE 2 END
 				--EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 			END
-			IF @ysnDirect <> 1
+			IF @ysnDirect <> 1 AND @_basis > 0
 			BEGIN  
 				-- Basis Deliveries  
-				UPDATE @cbLogSpecific SET dblQty = @dblQty,
+				UPDATE @cbLogSpecific SET dblQty = @_basis,
 										  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
-										  intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END
+										  intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END, intActionId = CASE WHEN intContractTypeId = 1 THEN 19 ELSE 18 END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 			END  
 		END
