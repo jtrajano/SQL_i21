@@ -266,6 +266,7 @@ BEGIN
 		WHEN @msgId = 80250 THEN 'Inventory Account is set to %s for item %s.'
 		WHEN @msgId = 80251 THEN 'Work In Progress Account is set to %s for item %s.'
 		WHEN @msgId = 80252 THEN 'There are backdated transactions made in %s %i. Do you want to rebuild from %s %i?'
+		WHEN @msgId = 80253 THEN '%s charges is not linked to any items. Please check if Charges Link in %s were properly assigned.'
 	END 
 
 	RETURN @msg
