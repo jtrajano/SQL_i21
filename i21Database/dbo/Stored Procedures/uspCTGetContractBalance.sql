@@ -200,7 +200,31 @@ BEGIN TRY
 		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS) 
- 
+
+	DECLARE @tblCTContractDetail TABLE(intContractHeaderId INT
+		,intContractDetailId INT
+		,intContractSeq INT
+		,dblQuantity NUMERIC(38,20)
+		,intNoOfLoad INT
+		,intItemUOMId INT
+		,intContractStatusId INT
+		,intItemId INT
+		,intBasisUOMId INT
+		,intPricingTypeId INT
+		,intPriceItemUOMId INT
+		,intFreightTermId INT
+		,intCurrencyId INT
+		,intFutureMarketId INT
+		,intFutureMonthId INT
+		,intCompanyLocationId INT
+		,dtmCreated DATETIME
+		,dtmStartDate DATETIME
+		,dtmEndDate DATETIME
+		,dblBasis numeric(18, 6)
+		,dblFutures numeric(18, 6)
+		,dblQuantityPerLoad NUMERIC(18, 6)
+	) 
+
 	IF @dtmEndDate IS NOT NULL
 		SET @dtmEndDate = dbo.fnRemoveTimeOnDate(@dtmEndDate)
 
@@ -217,6 +241,67 @@ BEGIN TRY
 	--Delete the data from tblCTContractBalance table with the passed param dtmEndDate
 	--This is to make sure we are regenerating the data real time
 	DELETE FROM tblCTContractBalance WHERE dtmEndDate = @dtmEndDate
+
+	INSERT INTO @tblCTContractDetail (intContractHeaderId
+		,intContractDetailId
+		,intContractSeq
+		,dblQuantity
+		,intNoOfLoad
+		,intItemUOMId
+		,intContractStatusId
+		,intItemId
+		,intBasisUOMId
+		,intPricingTypeId
+		,intPriceItemUOMId
+		,intFreightTermId
+		,intCurrencyId
+		,intFutureMarketId
+		,intFutureMonthId
+		,intCompanyLocationId
+		,dtmCreated
+		,dtmStartDate
+		,dtmEndDate
+		,dblBasis
+		,dblFutures
+		,dblQuantityPerLoad)
+	SELECT DISTINCT CD.intContractHeaderId
+		,CD.intContractDetailId
+		,CD.intContractSeq
+		,CD.dblQuantity
+		,CD.intNoOfLoad
+		,CD.intItemUOMId
+		,CD.intContractStatusId
+		,CD.intItemId
+		,CD.intBasisUOMId
+		,CD.intPricingTypeId
+		,CD.intPriceItemUOMId
+		,CD.intFreightTermId
+		,CD.intCurrencyId
+		,CD.intFutureMarketId
+		,CD.intFutureMonthId
+		,CD.intCompanyLocationId
+		,CD.dtmCreated
+		,CD.dtmStartDate
+		,CD.dtmEndDate
+		,CD.dblBasis
+		,CD.dblFutures
+		,CD.dblQuantityPerLoad
+	FROM tblCTContractDetail CD
+	INNER JOIN 
+	(
+		SELECT intRowNumber, intContractDetailId, intContractStatusId, dtmHistoryCreated
+		FROM
+		(
+			SELECT intRowNumber = ROW_NUMBER() OVER(PARTITION BY intContractDetailId ORDER BY dtmHistoryCreated DESC)
+				,intContractDetailId
+				,intContractStatusId
+				,dtmHistoryCreated
+			FROM tblCTSequenceHistory 
+		) tbl
+		WHERE intRowNumber = 1
+	) SH ON CD.intContractDetailId = SH.intContractDetailId
+	WHERE dbo.fnRemoveTimeOnDate(SH.dtmHistoryCreated)	<= @dtmEndDate 
+	AND SH.intContractStatusId NOT IN (3,5,6)
 
 	INSERT INTO @Shipment
 	 (
@@ -254,7 +339,7 @@ BEGIN TRY
 	 AND Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 	 AND ShipmentItem.intInventoryShipmentItemId = InvTran.intTransactionDetailId
 	 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
-	 JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
+	 JOIN @tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo 
 	 AND CD.intContractHeaderId = CH.intContractHeaderId
 	 LEFT JOIN 
 	 (
@@ -308,7 +393,7 @@ BEGIN TRY
 	 AND Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
 	 AND InvoiceDetail.intInvoiceDetailId = InvTran.intTransactionDetailId
 	 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = InvoiceDetail.intContractHeaderId
-	 JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvoiceDetail.intContractDetailId
+	 JOIN @tblCTContractDetail CD ON CD.intContractDetailId = InvoiceDetail.intContractDetailId
 	 LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = InvoiceDetail.intSalesOrderDetailId
 	 AND CD.intContractHeaderId = CH.intContractHeaderId
 	 WHERE InvTran.strTransactionForm = 'Invoice'
@@ -349,7 +434,7 @@ BEGIN TRY
 	 ,'Outbound Shipment'
 	 FROM tblICInventoryTransaction InvTran
 	 JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
-	 JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+	 JOIN @tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 	 JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 	 AND CD.intContractHeaderId = CH.intContractHeaderId
 	 WHERE
@@ -391,7 +476,7 @@ BEGIN TRY
 	 AND ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
 	 AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 	 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ReceiptItem.intOrderId
-	 JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
+	 JOIN @tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
 	 AND CD.intContractHeaderId = CH.intContractHeaderId
 	 WHERE strTransactionForm = 'Inventory Receipt'
 	 	AND ysnIsUnposted = 0
@@ -428,7 +513,7 @@ BEGIN TRY
 		,'Storage'
 		FROM tblGRSettleContract SC
 		JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
-		JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
+		JOIN @tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
 		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		AND CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE SS.ysnPosted = 1
@@ -463,7 +548,7 @@ BEGIN TRY
 		,'Import Balance'
 	FROM tblCTImportBalance IB
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = IB.intContractHeaderId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
+	JOIN @tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
 	WHERE dbo.fnRemoveTimeOnDate(IB.dtmImported) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IB.dtmImported) END
 	GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,IB.dtmImported,IB.intImportBalanceId
 		 	
@@ -496,7 +581,7 @@ BEGIN TRY
 	FROM	tblCTPriceFixationDetail FD
 	JOIN	vyuCTPriceFixationContractDetail PF	ON	PF.intPriceFixationId =	FD.intPriceFixationId
 	JOIN tblCTContractHeader		 CH ON CH.intContractHeaderId = PF.intContractHeaderId
-	JOIN tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
+	JOIN @tblCTContractDetail		 CD ON CD.intContractDetailId = PF.intContractDetailId
 	AND dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
 	GROUP BY CH.intContractTypeId,PF.intContractHeaderId,PF.intContractDetailId,FD.dtmFixationDate,FD.dblFutures,FD.dblBasis,FD.dblCashPrice,CD.dblQuantityPerLoad
 	
@@ -767,7 +852,7 @@ BEGIN TRY
 		,strCategory			= Category.strCategoryCode
 		,strPricingStatus		= CASE WHEN ISNULL(PF.dblQuantity, 0) = 0 THEN ISNULL(HT.strPricingStatus, 'Unpriced') ELSE 'Partially Priced' END
 	
-		FROM tblCTContractDetail					CD
+		FROM @tblCTContractDetail					CD
 		JOIN tblCTContractStatus					CS	ON CS.intContractStatusId			=	CD.intContractStatusId
 		JOIN tblCTContractHeader					CH ON CH.intContractHeaderId		 = CD.intContractHeaderId
 		LEFT JOIN @BalanceTotal BL ON CH.intContractHeaderId = BL.intContractHeaderId
@@ -1018,7 +1103,7 @@ BEGIN TRY
 	,strFutMarketName			= FM.strFutMarketName
 	,strCategory 				= Category.strCategoryCode
 	,strPricingStatus			= 'Priced'
-	FROM tblCTContractDetail					CD
+	FROM @tblCTContractDetail					CD
 	JOIN tblCTContractHeader					CH ON CH.intContractHeaderId		 = CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal BL ON CH.intContractHeaderId = BL.intContractHeaderId
 	AND												 CD.intContractDetailId = BL.intContractDetailId
