@@ -110,7 +110,7 @@ BEGIN
 						CASE 
 							WHEN contractDetail.strPricingType = 'Priced' THEN 5
 							WHEN contractDetail.strPricingType = 'Basis' THEN 6
-							--WHEN contractDetail.strPricingType = 'DP (Priced Later)' THEN 1
+							WHEN contractDetail.strPricingType = 'DP (Priced Later)' THEN 45
 							ELSE 8 -- Spot Priced
 						END
 					WHEN t.strTransactionForm = 'Inventory Shipment' THEN 
