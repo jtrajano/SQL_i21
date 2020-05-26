@@ -244,7 +244,7 @@ BEGIN
 		EXEC [dbo].[uspAPCreateVoucher]
 			@voucherPayables = @voucherItems
 			,@voucherPayableTax = @voucherItemsTax
-			,@userId = @intEntityVendorId
+			,@userId = @intEntityUserSecurityId
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
 			,@createdVouchersId = @intBillId OUTPUT
