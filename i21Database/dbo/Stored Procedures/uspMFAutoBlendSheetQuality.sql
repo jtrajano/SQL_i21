@@ -1094,7 +1094,7 @@ BEGIN TRY
 						,@intRecipeItemId AS intRecipeItemId
 						,CASE 
 							WHEN @ysnShowAvailableLotsByStorageLocation = 1
-								THEN @intStorageLocationId
+								THEN L.intStorageLocationId
 							ELSE 0
 							END AS intStorageLocationId
 						,L.dblWeightPerQty
@@ -1300,7 +1300,7 @@ BEGIN TRY
 							,@intRecipeItemId AS intRecipeItemId
 							,CASE 
 								WHEN @ysnShowAvailableLotsByStorageLocation = 1
-									THEN @intStorageLocationId
+									THEN L.intStorageLocationId
 								ELSE 0
 								END AS intStorageLocationId
 							,L.dblWeightPerQty
