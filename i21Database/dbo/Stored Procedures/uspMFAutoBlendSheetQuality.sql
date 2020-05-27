@@ -84,6 +84,7 @@ BEGIN TRY
 	--DECLARE @strPropertName NVARCHAR(50),
     --DECLARE @Count decimal(38,0)
     DECLARE @strTblName nvarchar(MAX)
+			,@intControlPointId int
 
 	DECLARE @intRCount int ,
             @intSeq int,
@@ -352,6 +353,13 @@ BEGIN TRY
 					)
 		END
 
+		SELECT @intControlPointId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute pa
+		JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+		WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
+		AND pa.intLocationId = @intLocationId
+		AND at.strAttributeName = 'Control Point'
+
 		INSERT INTO #tblProductProperty(intPropertyId,strPropertyName,intProductId,dblMinValue,dblMaxValue,dblMedian,intSequenceNo)
 		SELECT DISTINCT pt.intPropertyId,pt.strPropertyName,p.intProductValueId,pv.dblMinValue,pv.dblMaxValue,
 		((ISNULL(pv.dblMinValue,0)+ISNULL(pv.dblMaxValue,0))/2) as dblMedian,pp.intSequenceNo
@@ -359,8 +367,10 @@ BEGIN TRY
 		JOIN tblQMProductProperty pp ON pp.intProductId=p.intProductId
 		JOIN tblQMProductPropertyValidityPeriod pv ON pv.intProductPropertyId=pp.intProductPropertyId
 		JOIN tblQMProperty pt ON pt.intPropertyId=pp.intPropertyId
+		JOIN tblQMProductControlPoint c on c.intProductId=p.intProductId
 		WHERE p.intProductValueId=@intBlendItemId
 		AND p.intProductTypeId=2 AND pt.intDataTypeId in (1,2,6)
+		AND c.intControlPointId=@intControlPointId
 		AND p.ysnActive = 1
 		ORDER BY pp.intSequenceNo
 
