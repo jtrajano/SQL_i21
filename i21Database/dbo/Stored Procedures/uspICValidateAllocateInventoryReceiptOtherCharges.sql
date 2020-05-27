@@ -78,7 +78,8 @@ FROM
 			and ac.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId
 	) a
 WHERE
-	rc.ysnInventoryCost = 1
+	r.intInventoryReceiptId = @intInventoryReceiptId
+	AND rc.ysnInventoryCost = 1
 	AND ISNULL(rc.dblAmount, 0) <> 0 
 	AND 1 = 
 		CASE 
