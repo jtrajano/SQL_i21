@@ -1016,7 +1016,6 @@ BEGIN
 		@strBatchId
 		,@strTransactionId
 		,@intEntityUserSecurityId
-		,1
 
 	IF @intReturnValue < 0 RETURN @intReturnValue
 END 

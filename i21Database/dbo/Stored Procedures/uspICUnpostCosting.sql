@@ -916,7 +916,6 @@ BEGIN
 		@strBatchId
 		,@strTransactionId
 		,@intEntityUserSecurityId
-		,0
 END 
 
 -----------------------------------------
@@ -928,5 +927,4 @@ BEGIN
 		@strBatchId
 		,@strTransactionId
 		,@intEntityUserSecurityId
-		,0
 END 

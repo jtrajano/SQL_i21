@@ -267,6 +267,7 @@ BEGIN
 		WHEN @msgId = 80251 THEN 'Work In Progress Account is set to %s for item %s.'
 		WHEN @msgId = 80252 THEN 'There are backdated transactions made in %s %i. Do you want to rebuild from %s %i?'
 		WHEN @msgId = 80253 THEN '%s charges is not linked to any items. Please check if Charges Link in %s were properly assigned.'
+		WHEN @msgId = 80254 THEN 'Rebuild is not allowed because it will impact the DPR Summary Log.'
 	END 
 
 	RETURN @msg

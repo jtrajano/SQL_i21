@@ -434,5 +434,4 @@ BEGIN
 		@strBatchId
 		,@strTransactionId
 		,@intEntityUserSecurityId
-		,1
 END 

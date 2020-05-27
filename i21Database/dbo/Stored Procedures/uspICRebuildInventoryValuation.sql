@@ -191,6 +191,23 @@ BEGIN
 	SELECT intItemId = NULL, intCategoryId = NULL 
 END 
 
+-- Check if the item/category to rebuild will impact the DPR Summary log. 
+-- If there will be an imnpact, do not continue with the rebuild. 
+IF EXISTS (
+	SELECT TOP 1 i.intCommodityId
+	FROM 
+		tblICItem i INNER JOIN #tmpRebuildList list
+			ON i.intItemId = COALESCE(list.intItemId, i.intItemId) 
+			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+		LEFT JOIN tblRKSummaryLog rlog
+			ON rlog.intCommodityId = i.intCommodityId
+)
+BEGIN 
+	-- 'Rebuild is not allowed because it will impact the DPR summary log.'
+	EXEC uspICRaiseError 80254
+	RETURN -1; 
+END 
+
 -- Backup Inventory transactions 
 BEGIN 
 	EXEC dbo.uspICBackupInventory 

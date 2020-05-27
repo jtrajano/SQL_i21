@@ -2,7 +2,6 @@
 	@strBatchId AS NVARCHAR(40)
 	,@strTransactionId AS NVARCHAR(50) = NULL 
 	,@intEntityUserSecurityId AS INT
-	,@ysnPost AS BIT = 1
 AS
 	
 SET QUOTED_IDENTIFIER OFF
@@ -37,6 +36,18 @@ DECLARE @strBucketType AS NVARCHAR(50) = 'Company Owned'
 --		WHEN @intActionType = 11 THEN 'Delivery on Sales Basis Contract (SBD)'
 --		WHEN @intActionType = 12 THEN 'Shipment on Spot Priced'
 --	END
+
+-- Create the temp table to skip a batch id from logging into the summary log. 
+IF OBJECT_ID('tempdb..#tmpICLogRiskPositionFromOnHandSkipList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpICLogRiskPositionFromOnHandSkipList (
+		strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
+	)
+END 
+
+-- Exist immediately if 
+IF EXISTS (SELECT TOP 1 1 FROM #tmpICLogRiskPositionFromOnHandSkipList WHERE strBatchId = @strBatchId)
+	RETURN;
 
 -----------------------------------------
 -- Call Risk Module's Summary Log sp
