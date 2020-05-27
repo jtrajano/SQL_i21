@@ -2213,15 +2213,20 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where strCurrency = @default_currency )
+				IF(TRY_PARSE(@default_currency AS INT) IS NULL )
+				BEGIN
+					SET @IsValid = 0
+					SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id should be numeric''
+				END
+				ELSE 
+				BEGIN
+					SET @defaultcurrencyId = CONVERT(INT,@default_currency)
+					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where intCurrencyID = @defaultcurrencyId )
 					BEGIN
 						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency :''+@default_currency+'' is not Exist''
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id :''+@defaultcurrencyId+'' is not Exist''
 					END
-					ELSE
-					BEGIN
-						Select TOP 1 defaultcurrencyId = intCurrencyID from tblSMCurrency Where strCurrency = @default_currency
-					END
+				END
 			END
 
 			IF(@vendor_link = '''')
@@ -2235,7 +2240,7 @@ UPDATE tblSMCSVDynamicImport SET
 
 			IF(@farm_acres = '''')
 			BEGIN
-				SET @farmacresNo = 0
+				SET @farmacresNo = NULL
 			END
 			ELSE
 			BEGIN
