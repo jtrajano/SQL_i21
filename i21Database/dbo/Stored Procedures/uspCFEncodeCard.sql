@@ -135,6 +135,7 @@ BEGIN
 		DECLARE @strFullDisplayCard NVARCHAR(MAX)
 		DECLARE @strDisplayCard		NVARCHAR(MAX)
 		DECLARE @strDateMMYY		NVARCHAR(MAX)
+		DECLARE @strDateYYMM		NVARCHAR(MAX)
 		DECLARE @strEncode1			NVARCHAR(MAX)
 		DECLARE @strEncode2			NVARCHAR(MAX)
 		DECLARE @strCardNotation	NVARCHAR(MAX)
@@ -164,11 +165,14 @@ BEGIN
 		BEGIN
 			SET @strExpirationDate = CAST(MONTH(@dtmCardExpiratioYearMonth) AS NVARCHAR(2)) + '/' + CAST(RIGHT(YEAR(@dtmCardExpiratioYearMonth),2) AS NVARCHAR(2)) --FORMAT(@dtmCardExpiratioYearMonth,'MM/yy') 
 			SET @strDateMMYY =  CAST(MONTH(@dtmCardExpiratioYearMonth) AS NVARCHAR(2)) + CAST(RIGHT(YEAR(@dtmCardExpiratioYearMonth),2) AS NVARCHAR(2)) 
+			SET @strDateYYMM = CAST(RIGHT(YEAR(@dtmCardExpiratioYearMonth),2) AS NVARCHAR(2)) + CAST(dbo.fnCFPadString(MONTH(@dtmCardExpiratioYearMonth) , 2, '0', 'left')  AS NVARCHAR(2)) 
+	
 		END
 		ELSE
 		BEGIN
 			SET @strExpirationDate = CAST(MONTH(@dtmGlobalCardExpirationDate) AS NVARCHAR(2)) + '/' + CAST(RIGHT(YEAR(@dtmGlobalCardExpirationDate),2) AS NVARCHAR(2))
 			SET @strDateMMYY =  CAST(MONTH(@dtmGlobalCardExpirationDate) AS NVARCHAR(2)) + '/' + CAST(RIGHT(YEAR(@dtmGlobalCardExpirationDate),2) AS NVARCHAR(2))
+			SET @strDateYYMM = CAST(RIGHT(YEAR(@dtmGlobalCardExpirationDate),2) AS NVARCHAR(2)) + CAST(dbo.fnCFPadString(MONTH(@dtmGlobalCardExpirationDate) , 2, '0', 'left')  AS NVARCHAR(2)) 
 		END
 
 		--ENTRY CODE--
@@ -202,8 +206,9 @@ BEGIN
 		DECLARE @strCustomerNameNoSpecialCharSubstring NVARCHAR(MAX)
 		SET @strCustomerNameNoSpecialCharSubstring = SUBSTRING(@strCustomerNameNoSpecialCharPadded,0,26)
 
-		SET @strEncode1 = @strFullDisplayCard +  '^' +  @strCustomerNameNoSpecialCharSubstring + '^' +  dbo.fnCFPadString(@strDateMMYY,26,' ', 'right')
-		SET @strEncode2 = @strFullDisplayCard +  '=' +  @strDateMMYY
+		SET @strEncode2 = @strFullDisplayCard +  '=' +  @strDateYYMM
+		SET @strEncode1 = @strFullDisplayCard +  '^' +  @strCustomerNameNoSpecialCharSubstring + '^' +  dbo.fnCFPadString(@strDateYYMM,26,' ', 'right')
+		SET @strEncode2 = @strFullDisplayCard +  '=' +  @strDateYYMM
 
 		INSERT INTO tblCFEncodingPrinterSoftware
 		(
