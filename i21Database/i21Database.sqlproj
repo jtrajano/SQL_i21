@@ -8173,6 +8173,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
+    <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
