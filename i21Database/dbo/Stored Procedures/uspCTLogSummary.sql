@@ -1632,7 +1632,7 @@ BEGIN TRY
 					, intContractStatusId
 					, intBookId
 					, intSubBookId
-					, strNotes = ''
+					, strNotes = 'Priced Quantity is ' + CAST(dblQty AS NVARCHAR(20))
 					, intUserId
 					, intActionId
 					, strProcess = @strProcess
@@ -2230,45 +2230,45 @@ BEGIN TRY
 			END
 			ELSE IF @dblBasisDel > 0
 			BEGIN			
-					SET @_dblQty = (@_dblQty + @dblQty)
-					IF @_dblQty > @dblBasisDel
-					BEGIN
-						-- Negate basis using the current priced quantities
-						UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE @dblQty END) * -1, intPricingTypeId = 2,
-												   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				SET @_dblQty = (@_dblQty + @dblQty)
+				IF @_dblQty > @dblBasisDel
+				BEGIN					
+					-- Negate basis using the current priced quantities
+					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE @dblQty END) * -1, intPricingTypeId = 2,
+											   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-						-- Negate basis using the current priced quantities
-						UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE @dblQty END), intPricingTypeId = 1,
-												   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
-					END
-					ELSE
-					BEGIN
-						-- Negate basis using the current priced quantities
-						UPDATE  @cbLogSpecific SET dblQty = 0, intPricingTypeId = 2,
-												   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					-- Negate basis using the current priced quantities
+					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE @dblQty END), intPricingTypeId = 1,
+												dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				ELSE
+				BEGIN
+					-- Negate basis using the current priced quantities
+					UPDATE  @cbLogSpecific SET dblQty = 0, intPricingTypeId = 2,
+												dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-						-- Negate basis using the current priced quantities
-						UPDATE  @cbLogSpecific SET dblQty = 0, intPricingTypeId = 1,
-												   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
-						EXEC uspCTLogContractBalance @cbLogSpecific, 0
-						--declare @_count INT
-						--SELECT @_count = COUNT(1) FROM @cbLogCurrent
-						--IF @_count > 1
-						--BEGIN
-						--	-- Add create price event/log
-						--	UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
-						--	EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					-- Negate basis using the current priced quantities
+					UPDATE  @cbLogSpecific SET dblQty = 0, intPricingTypeId = 1,
+												dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					--declare @_count INT
+					--SELECT @_count = COUNT(1) FROM @cbLogCurrent
+					--IF @_count > 1
+					--BEGIN
+					--	-- Add create price event/log
+					--	UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
+					--	EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
-						--END
+					--END
 												
-					END
-					-- Add current priced quantities
-					--UPDATE  @cbLogSpecific SET dblQty = CASE WHEN @dblQtys > @dblQty THEN @dblQty ELSE @dblQtys END, intPricingTypeId = 1,
-					--						   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
-					--EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				-- Add current priced quantities
+				--UPDATE  @cbLogSpecific SET dblQty = CASE WHEN @dblQtys > @dblQty THEN @dblQty ELSE @dblQtys END, intPricingTypeId = 1,
+				--						   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
+				--EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE
 			BEGIN
