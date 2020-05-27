@@ -79,7 +79,7 @@ BEGIN TRY
 
 	SELECT @intDayOfYear = DATEPART(dy, @dtmCurrentDateTime)
 
-	IF @strLotNumber LIKE '%[@~$\`^&*()%?/<>!|\+;:",.{}'']%'
+	IF @strLotNumber LIKE '%[@~$\`^&*()%?<>!|\+;:",.{}'']%'
 	BEGIN
 		RAISERROR (
 				'Special characters are not allowed for LotID.'

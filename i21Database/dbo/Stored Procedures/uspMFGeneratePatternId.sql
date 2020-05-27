@@ -46,6 +46,7 @@ BEGIN
 		,@ysnPaddingZero BIT
 		,@ysnMaxSize BIT
 		,@intIRParentLotNumberPatternId INT
+		,@intContractHeaderId int
 
 	IF @strParentLotNumber IS NULL
 	BEGIN
@@ -122,6 +123,10 @@ BEGIN
 
 			RETURN
 		END
+
+		Select @intContractHeaderId=intContractHeaderId
+		from tblICInventoryReceiptItem
+		Where intInventoryReceiptItemId = @intInventoryReceiptItemId
 	END
 
 	IF OBJECT_ID('tempdb..##tblMFRecord') IS NOT NULL
@@ -351,6 +356,10 @@ BEGIN
 						THEN @intShiftId
 					WHEN @strTableName = 'tblICCommodity'
 						THEN @intCommodityId
+						WHEN @strTableName = 'tblCTContractHeader'
+						THEN @intContractHeaderId
+						WHEN @strTableName = 'tblICInventoryReceiptItemLot'
+						THEN @intInventoryReceiptItemLotId
 					END
 
 			IF @intPrimaryColumnId IS NULL
