@@ -2463,6 +2463,7 @@
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
+    <Build Include="dbo\Functions\fnICGetConcatenatedInvoiceNumbersByCustomer.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
