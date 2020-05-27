@@ -10,10 +10,13 @@ CREATE TABLE [dbo].[tblFRArchive] (
 	[strGUID]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strStatus]			NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[strType]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+	[strHierarchyName]	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intRowId]			INT NULL,
 	[intColumnId]		INT NULL,
+	[intHierarchyId]	INT NULL,
 	[intRowConcurrencyId]		INT NULL,
 	[intColumnConcurrencyId]	INT NULL,
+	[intHierarchyConcurrencyId]	INT NULL,
 	[intEntityId]		INT NULL,
 	[intConcurrencyId]	INT NOT NULL,
     CONSTRAINT [PK_tblFRArchive] PRIMARY KEY CLUSTERED ([intArchiveId] ASC)

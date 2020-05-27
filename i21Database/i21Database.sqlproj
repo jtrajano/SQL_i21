@@ -8548,6 +8548,9 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPAcknowledgement_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspIPNotifySAPPOIDOC_ST.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchy.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchyDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDBuildHierarchyFilterString.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
