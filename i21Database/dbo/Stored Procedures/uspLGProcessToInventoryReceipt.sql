@@ -452,6 +452,28 @@ BEGIN TRY
 			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 			WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
 		END
+
+		/* Update LS Unit Cost for Unpriced Contracts */
+		UPDATE LD 
+		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+			,dblAmount = dbo.fnCalculateCostBetweenUOM(
+								LD.intPriceUOMId
+								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+								,(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+							) * CASE WHEN (LD.intWeightItemUOMId IS NOT NULL) THEN LD.dblNet ELSE LD.dblQuantity END		
+		FROM tblLGLoadDetail LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
+			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+		BEGIN
+			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
+		END
 	
 		IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink LDCL 
 					INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
