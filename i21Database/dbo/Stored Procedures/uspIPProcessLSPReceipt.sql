@@ -70,6 +70,22 @@ Begin
 					(Select isnull(strExternalContainerId,'') from tblLGLoadDetailContainerLink where intLoadId=@intLoadId and ISNULL(dblReceivedQty,0) > 0))
 			RaisError('Container Delivery Item No already received.',16,1)
 
+		-- To check whether combination of position no and container no is matching in LS
+		IF EXISTS (
+				SELECT ISNULL(strDeliveryItemNo, '') strDeliveryItemNo, ISNULL(strBatchNo, '') strBatchNo
+				FROM tblIPReceiptItemStage
+				WHERE intStageReceiptId = @intMinRowNo AND dblQuantity > 0
+		
+				EXCEPT
+		
+				SELECT ISNULL(LC.strExternalContainerId, '') strDeliveryItemNo, ISNULL(C.strContainerNumber, '') strBatchNo
+				FROM tblLGLoadDetailContainerLink LC
+				JOIN tblLGLoadContainer C ON C.intLoadContainerId = LC.intLoadContainerId AND LC.intLoadId = @intLoadId
+				)
+		BEGIN
+			RAISERROR ('Container No and Position No combination is not matching.',16,1)
+		END
+
 		Begin Tran
 
 			EXEC dbo.uspSMGetStartingNumber 23, @strReceiptNo OUTPUT
