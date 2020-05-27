@@ -223,6 +223,16 @@ BEGIN TRY
 			,intSpecialPalletLotId INT
 			)
 
+	IF @intLotStatusId IS NULL
+	BEGIN
+		SELECT @intLotStatusId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute pa
+		WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
+			AND pa.intLocationId = @intLocationId
+			and pa.intAttributeId=6--Produce Lot Status
+	END
+
+
 	IF @dblProduceQty IS NULL
 		AND @intProduceUnitMeasureId IS NULL
 	BEGIN
