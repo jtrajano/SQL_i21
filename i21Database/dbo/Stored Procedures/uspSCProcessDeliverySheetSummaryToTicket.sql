@@ -169,41 +169,6 @@ BEGIN TRY
 														ORDER BY intStorageHistoryId),0)
 				END
 			END
-
-		END
-	END
-
-	--None reversal
-	BEGIN
-		SET @TicketCurrentRowCount = 1
-
-		INSERT INTO @processTicket(
-			[intTicketId]
-			,[intDeliverySheetId]
-			,[intEntityId]
-			,[dblNetUnits]
-			,[dblFreight] 
-			,[dblFees] 
-		)
-		SELECT 
-			[intTicketId]			= intTicketId
-			,[intDeliverySheetId]	= intDeliverySheetId
-			,[intEntityId]			= intEntityId
-			,[dblNetUnits]			= dblNetUnits
-			,[dblFreight]			= dblFreightRate
-			,[dblFees]				= dblTicketFees
-		FROM tblSCTicket 
-		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-			--AND ysnReversed = 0
-		
-		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
-
-		WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
-		BEGIN
-			SELECT TOP 1 @intTicketId = intTicketId 
-			FROM @processTicket
-			WHERE cntId = @TicketCurrentRowCount
-
 			--loop iterator
 			BEGIN
 				SET @_intInventoryReceiptId = ISNULL((SELECT TOP 1 intInventoryReceiptId 
