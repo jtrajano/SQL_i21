@@ -1126,7 +1126,7 @@ BEGIN
 		, intRefSummaryLogId
 		, strMiscField)
 	SELECT strBatchId
-		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
 		, strBucketType
 		, intActionId
 		, strAction = A.strActionIn 

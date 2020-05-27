@@ -33,7 +33,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
 	left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
 	left join tblICUnitMeasure origUM on origUM.intUnitMeasureId = origUOM.intUnitMeasureId
-	where strBucketType not in ('Derivatives', 'Collateral')
+	where strBucketType not in ('Derivatives', 'Collateral', 'Accounts Payables')
 
 
 	union all
