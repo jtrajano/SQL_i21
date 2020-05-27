@@ -2030,7 +2030,14 @@ BEGIN TRY
 						ORDER BY intSequenceHistoryId DESC
 					) b	
 
-					EXEC uspCTLogContractBalance @cbLogPrev, 0
+					-- Negate previous if the value is not 0
+					IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+					BEGIN		
+						declare @_dtmCurrent datetime
+						select @_dtmCurrent = dtmTransactionDate from @cbLogSpecific			
+						UPDATE @cbLogPrev SET strBatchId = NULL, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+						EXEC uspCTLogContractBalance @cbLogPrev, 0
+					END
 					
 					-- Add current record
 					IF @ysnDeleted = 0
