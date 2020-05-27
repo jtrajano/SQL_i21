@@ -172,7 +172,7 @@ BEGIN TRY
 
 		END
 	END
-	ELSE
+
 	--None reversal
 	BEGIN
 		SET @TicketCurrentRowCount = 1
@@ -194,7 +194,7 @@ BEGIN TRY
 			,[dblFees]				= dblTicketFees
 		FROM tblSCTicket 
 		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-			AND ysnReversed = 0
+			--AND ysnReversed = 0
 		
 		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
 

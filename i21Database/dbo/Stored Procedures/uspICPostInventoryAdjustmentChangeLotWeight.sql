@@ -22,6 +22,20 @@ DECLARE @INVENTORY_ADJUSTMENT_ChangeLotWeight AS INT = 48
 
 DECLARE @OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2;
+
+-- Create the temp table to skip a batch id from logging into the summary log. 
+IF OBJECT_ID('tempdb..#tmpICLogRiskPositionFromOnHandSkipList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpICLogRiskPositionFromOnHandSkipList (
+		strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
+	)
+END 
+
+-- insert into the temp table
+BEGIN 
+	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
+
 --------------------------------------------------------------------------------
 -- VALIDATIONS
 --------------------------------------------------------------------------------
@@ -244,6 +258,8 @@ BEGIN
 	-------------------------------------------
 	IF EXISTS(SELECT TOP 1 1 FROM @AddToTarget)
 	BEGIN
+		DELETE FROM #tmpICLogRiskPositionFromOnHandSkipList
+
 		EXEC	dbo.uspICPostCosting  
 				@AddToTarget
 				,@strBatchId  

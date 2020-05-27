@@ -23,6 +23,19 @@ DECLARE @INVENTORY_ADJUSTMENT_UOMChange AS INT = 14
 DECLARE @OWNERSHIP_TYPE_Own AS INT = 1
 		,@OWNERSHIP_TYPE_Storage AS INT = 2
 
+-- Create the temp table to skip a batch id from logging into the summary log. 
+IF OBJECT_ID('tempdb..#tmpICLogRiskPositionFromOnHandSkipList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpICLogRiskPositionFromOnHandSkipList (
+		strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
+	)
+END 
+  
+-- insert into the temp table
+BEGIN 
+	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
+
 --------------------------------------------------------------------------------
 -- VALIDATIONS
 --------------------------------------------------------------------------------
@@ -118,7 +131,7 @@ BEGIN
 			,intItemLocationId		= Lot.intItemLocationId
 			,intItemUOMId			= Lot.intWeightUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= Lot.dblWeight * -1--dbo.fnCalculateQtyBetweenUOM(Detail.intWeightUOMId, Lot.intWeightUOMId, Detail.dblQuantity) * -1
+			,dblQty					= -Lot.dblWeight --dbo.fnCalculateQtyBetweenUOM(Detail.intWeightUOMId, Lot.intWeightUOMId, Detail.dblQuantity) * -1
 			,dblUOMQty				= Detail.dblWeightPerQty
 			,dblCost				= Lot.dblLastCost
 			,dblSalesPrice			= 0
@@ -148,7 +161,8 @@ BEGIN
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-		AND Detail.dblNewQuantity > 0 
+		--AND Detail.dblNewQuantity > 0 
+		AND Detail.dblAdjustByQuantity <> 0 
 		AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Own -- process only company-owned stocks 
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
@@ -194,7 +208,8 @@ BEGIN
 				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
 	WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 		AND Item.strLotTracking = 'No'
-		AND Detail.dblNewQuantity > 0 
+		--AND Detail.dblNewQuantity > 0 
+		AND Detail.dblAdjustByQuantity <> 0 
 		AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own -- process only company-owned stocks 
 	
 
@@ -241,7 +256,7 @@ BEGIN
 			,intItemLocationId		= Lot.intItemLocationId
 			,intItemUOMId			= Lot.intWeightUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= Lot.dblWeight * -1--dbo.fnCalculateQtyBetweenUOM(Detail.intWeightUOMId, Lot.intWeightUOMId, Detail.dblQuantity) * -1
+			,dblQty					= -Lot.dblWeight --dbo.fnCalculateQtyBetweenUOM(Detail.intWeightUOMId, Lot.intWeightUOMId, Detail.dblQuantity) * -1
 			,dblUOMQty				= Detail.dblWeightPerQty
 			,dblCost				= Lot.dblLastCost
 			,dblSalesPrice			= 0
@@ -271,14 +286,15 @@ BEGIN
 				ON ItemPricing.intItemId = Detail.intItemId
 				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
-		AND Detail.dblNewQuantity > 0 
+		--AND Detail.dblNewQuantity > 0 
+		AND Detail.dblAdjustByQuantity <> 0 
 		AND ISNULL(Detail.intOwnershipType, Lot.intOwnershipType) = @OWNERSHIP_TYPE_Storage -- process only storage stocks 
 	UNION ALL
 	SELECT 	intItemId				= Detail.intItemId
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= dbo.fnCalculateQtyBetweenUOM(Detail.intNewItemUOMId, Detail.intItemUOMId, Detail.dblNewQuantity) * -1
+			,dblQty					= -dbo.fnCalculateQtyBetweenUOM(Detail.intNewItemUOMId, Detail.intItemUOMId, Detail.dblAdjustByQuantity) 
 			,dblUOMQty				= ItemUOM.dblUnitQty
 			,dblCost				= Detail.dblCost
 			,dblSalesPrice			= 0
@@ -309,7 +325,8 @@ BEGIN
 				AND ItemPricing.intItemLocationId = dbo.fnICGetItemLocation(Detail.intItemId, Header.intLocationId)
 	WHERE Header.intInventoryAdjustmentId = @intTransactionId 
 		AND Item.strLotTracking = 'No'
-		AND Detail.dblNewQuantity > 0 
+		--AND Detail.dblNewQuantity > 0 
+		AND Detail.dblAdjustByQuantity <> 0 
 		AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Storage -- process only storage stocks 
 	
 
@@ -369,7 +386,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intWeightUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= SourceTransaction.dblQty * -1
+			,dblQty					= -SourceTransaction.dblQty
 			,dblUOMQty				= WeightUOM.dblUnitQty
 			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
@@ -412,7 +429,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intNewItemUOMId, SourceTransaction.dblQty) * -1
+			,dblQty					= -dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intNewItemUOMId, SourceTransaction.dblQty) 
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
@@ -448,7 +465,8 @@ BEGIN
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Item.strLotTracking = 'No'
-			AND Detail.dblNewQuantity > 0
+			--AND Detail.dblNewQuantity > 0
+			AND Detail.dblAdjustByQuantity <> 0 
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Own -- process only company-owned stocks
 	
 	-------------------------------------------
@@ -456,6 +474,8 @@ BEGIN
 	-------------------------------------------
 	IF EXISTS(SELECT TOP 1 1 FROM @AddToTargetUOM)
 	BEGIN
+		DELETE FROM #tmpICLogRiskPositionFromOnHandSkipList
+
 		EXEC	dbo.uspICPostCosting  
 				@AddToTargetUOM  
 				,@strBatchId  
@@ -494,7 +514,7 @@ BEGIN
 			,intItemLocationId		= ItemLocation.intItemLocationId
 			,intItemUOMId			= Detail.intWeightUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= SourceTransaction.dblQty * -1
+			,dblQty					= -SourceTransaction.dblQty
 			,dblUOMQty				= WeightUOM.dblUnitQty
 			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
@@ -537,7 +557,7 @@ BEGIN
 			,intItemLocationId		= NewItemLocation.intItemLocationId
 			,intItemUOMId			= NewItemUOM.intItemUOMId
 			,dtmDate				= Header.dtmAdjustmentDate
-			,dblQty					= dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intNewItemUOMId, SourceTransaction.dblQty) * -1
+			,dblQty					= -dbo.fnCalculateQtyBetweenUOM(Detail.intItemUOMId, Detail.intNewItemUOMId, SourceTransaction.dblQty)
 			,dblUOMQty				= NewItemUOM.dblUnitQty
 			,dblCost				= Detail.dblNewCost
 			,dblValue				= 0
@@ -573,7 +593,8 @@ BEGIN
 
 	WHERE	Header.intInventoryAdjustmentId = @intTransactionId
 			AND Item.strLotTracking = 'No'
-			AND Detail.dblNewQuantity > 0
+			--AND Detail.dblNewQuantity > 0
+			AND Detail.dblAdjustByQuantity <> 0 
 			AND Detail.intOwnershipType = @OWNERSHIP_TYPE_Storage -- process only storage stocks
 	
 	-------------------------------------------
