@@ -138,7 +138,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = cd.dtmCreated
+					, dtmTransactionDate = getdate() --cd.dtmCreated
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
@@ -253,7 +253,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = sh.dtmHistoryCreated--cd.dtmCreated
+					, dtmTransactionDate = cd.dtmCreated--sh.dtmHistoryCreated
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
