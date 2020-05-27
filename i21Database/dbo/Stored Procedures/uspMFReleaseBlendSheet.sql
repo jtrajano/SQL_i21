@@ -799,7 +799,7 @@ End
 		Where l.intItemId NOT IN (Select intItemId From tblMFWorkOrderRecipeItem 
 		Where intWorkOrderId=@intWorkOrderId AND intRecipeItemTypeId=1 
 		Union
-		Select intItemId From tblMFWorkOrderRecipeSubstituteItem Where intWorkOrderId=@intWorkOrderId)
+		Select intSubstituteItemId From tblMFWorkOrderRecipeSubstituteItem Where intWorkOrderId=@intWorkOrderId)
 
 		If ISNULL(@strInActiveItems,'')<>''
 		Begin
