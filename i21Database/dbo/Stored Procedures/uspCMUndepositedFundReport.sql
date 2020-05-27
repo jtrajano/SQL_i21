@@ -42,28 +42,23 @@ BEGIN
 		@dtmDateTo =  [to]
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and condition in ('Equal To' , 'Between')
 
+	DECLARE @dtmDateCurrent DATETIME
+	select @dtmDateCurrent = CAST(CONVERT(nvarchar(20), GETDATE(), 101) AS DATETIME)
 
+	SELECT
+		@dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900')
+		,@dtmDateTo =
+		CASE WHEN @dtmTemp IS NULL
+			THEN @dtmDateCurrent
+			ELSE ISNULL(@dtmDateTo,@dtmDateFrom)
+		END
 
-	SELECT @dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900'),
-		@dtmDateTo = case when @dtmTemp is null THEN '01-01-2099' ELSE isnull(@dtmDateTo,@dtmDateFrom) END
-		
-		
-
-	SELECT @dtmCMDate = CASE WHEN 	@dtmDateTo = '01/01/2099' THEN '01/01/1900' ELSE DATEADD( DAY, 1, @dtmDateTo) END
-
+	SELECT @dtmCMDate = DATEADD( DAY, 1, @dtmDateTo) 
 	SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
 
 
-
 	DECLARE @strLocation NVARCHAR(50)
-	SELECT 
-		@strLocation = [from]
-		
-	FROM @temp_xml_table WHERE [fieldname] = 'strLocationName' --and condition in ('Equal To' , 'Between')
-
-
-	
-
+	SELECT @strLocation = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName' --and condition in ('Equal To' , 'Between')
 
 	select
 	0 as rowId,
@@ -105,7 +100,7 @@ BEGIN
 	a.strUserName,
 	a.strTransactionId,
 	a.ysnPosted,
-	a.dtmDate dtmCMDate,
+	a.dtmCMDate,
 	a.dblAmount 
 	FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo,@dtmCMDate) a
 	WHERE ISNULL(@strLocation, a.strLocationName) = a.strLocationName
@@ -134,10 +129,3 @@ BEGIN
 	null AS dtmCMDate,
 	0 AS dblAmount
 END
-
-
-
-
-
-
-

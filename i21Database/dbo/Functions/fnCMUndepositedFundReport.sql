@@ -3,7 +3,7 @@
 -- Create date: 13-05-2020
 -- Description:	Triaggered by uspCMUndepositedFundReport
 -- =============================================
-CREATE FUNCTION fnCMUndepositedFundReport
+CREATE FUNCTION [dbo].[fnCMUndepositedFundReport]
 (	
 	@dtmDateFrom DATETIME,
 	@dtmDateTo DATETIME,
@@ -28,8 +28,8 @@ a.strLocationName strLocationName,
 a.strUserName,
 c.strTransactionId,
 ysnPosted,
-c.dtmDate,
-a.dblAmount [Amount]
+c.dtmDate dtmCMDate,
+a.dblAmount 
 from vyuCMUndepositedFund a
 inner join tblCMUndepositedFund d on d.intUndepositedFundId = a.intUndepositedFundId
 left outer join tblCMBankTransactionDetail b on a.intUndepositedFundId = b.intUndepositedFundId
@@ -54,8 +54,8 @@ a.strLocationName strLocationName,
 a.strUserName,
 c.strTransactionId,
 ysnPosted,
-c.dtmDate,
-a.dblAmount [Amount]
+c.dtmDate dtmCMDate,
+a.dblAmount 
 from vyuCMUndepositedFund a
 inner join tblCMUndepositedFund d on d.intUndepositedFundId = a.intUndepositedFundId
 left outer join tblCMBankTransactionDetail b on a.intUndepositedFundId = b.intUndepositedFundId
@@ -82,7 +82,7 @@ a.strLocationName strLocationName,
 a.strUserName,
 c.strTransactionId,
 ysnPosted,
-c.dtmDate,
+c.dtmDate dtmCMDate,
 (case when c.strTransactionId like 'BWD%' and c.dtmDate >= @dtmCMDate -- DATEADD( SECOND, 1, @dtmDateTo)
 --DATEADD(DAY,1, a.dtmDate) 
 then a.dblAmount*0
@@ -117,6 +117,5 @@ then a.dblAmount*0
 else a.dblAmount end) <>0
 )
 
-select ROW_NUMBER() OVER( ORDER BY [Payment Date]) rowId, * from mainTable
+select ROW_NUMBER() OVER( ORDER BY dtmDate) rowId, * from mainTable
 )
-GO
