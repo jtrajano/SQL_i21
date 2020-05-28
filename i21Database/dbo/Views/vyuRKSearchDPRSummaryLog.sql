@@ -224,7 +224,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName 
 		,strAction
-	from dbo.fnRKGetBucketCollateral(GETDATE(),NULL,NULL) C
+	from dbo.fnRKGetBucketCollateral(getutcdate(),NULL,NULL) C
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = C.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = C.intCommodityUnitMeasureId
 	left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
@@ -247,7 +247,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strLocationName
 		,strEntityName 
 		,CB.intCommodityId
-		,intTransactionRecordId = intTransactionReferenceId
+		,intTransactionRecordId = intTransactionReferenceDetailId
 		,intTransactionRecordHeaderId = intTransactionReferenceId
 		,intContractHeaderId
 		,intContractDetailId
@@ -256,7 +256,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName
 		,strAction
-	from dbo.fnRKGetBucketContractBalance(getdate(),null,null) CB
+	from dbo.fnRKGetBucketContractBalance(getutcdate(),null,null) CB
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = CB.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = CB.intQtyUOMId
 	left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId
@@ -279,7 +279,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strLocationName
 		,strEntityName 
 		,SD.intCommodityId
-		,intTransactionRecordId = intTransactionReferenceId
+		,intTransactionRecordId = intTransactionReferenceDetailId
 		,intTransactionRecordHeaderId = intTransactionReferenceId
 		,intContractHeaderId
 		,intContractDetailId 
@@ -288,7 +288,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName 
 		,strAction
-	from dbo.fnRKGetBucketBasisDeliveries(getdate(),null,null) SD
+	from dbo.fnRKGetBucketBasisDeliveries(getutcdate(),null,null) SD
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SD.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SD.intQtyUOMId
 	left join tblICUnitMeasure stckUM on stckUM.intUnitMeasureId = stckUOM.intUnitMeasureId

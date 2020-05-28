@@ -67,6 +67,7 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionReference
 				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
 				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
@@ -102,7 +103,8 @@ BEGIN TRY
 				, dtmTransactionDate
 				, strTransactionType = 'Contract Balance'
 				, strTransactionReference = strTransactionType
-				, intTransactionReferenceId = intContractDetailId
+				, intTransactionReferenceId = intContractHeaderId
+				, intTransactionReferenceDetailId = intContractDetailId
 				, strTransactionReferenceNo = strContractNumber
 				, intContractDetailId
 				, intContractHeaderId
@@ -182,6 +184,7 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionReference
 				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
 				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
@@ -217,7 +220,8 @@ BEGIN TRY
 				, dtmTransactionDate
 				, strTransactionType = 'Contract Balance'
 				, strTransactionReference = strTransactionType
-				, intTransactionReferenceId = intContractDetailId
+				, intTransactionReferenceId = intContractHeaderId
+				, intTransactionReferenceDetailId = intContractDetailId
 				, strTransactionReferenceNo = strContractNumber
 				, intContractDetailId
 				, intContractHeaderId
@@ -308,6 +312,7 @@ BEGIN TRY
 			, strTransactionType
 			, strTransactionReference
 			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
@@ -344,6 +349,7 @@ BEGIN TRY
 		, strTransactionType = 'Contract Balance'
 		, strTransactionReference = strTransactionType
 		, intTransactionReferenceId = intTransactionId
+		, intTransactionReferenceDetailId = intTransactionDetailId
 		, strTransactionReferenceNo = strTransactionId
 		, intContractDetailId
 		, intContractHeaderId
@@ -380,9 +386,10 @@ BEGIN TRY
 		FROM 
 		(
 			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
-			, dtmTransactionDate = CASE WHEN strScreenName = 'Transfer Storage' THEN suh.dtmTransactionDate ELSE (CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END) END
+			, dtmTransactionDate = (CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END)
 			, strTransactionType = strScreenName
-			, intTransactionId = suh.intExternalId -- or intExternalHeaderId since this was used by basis deliveries on search screen
+			, intTransactionId = suh.intExternalHeaderId -- or intExternalHeaderId since this was used by basis deliveries on search screen
+			, intTransactionDetailId = suh.intExternalId
 			, strTransactionId = suh.strNumber
 			, sh.intContractDetailId
 			, sh.intContractHeaderId				
@@ -438,6 +445,7 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionReference
 				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
 				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
@@ -474,6 +482,7 @@ BEGIN TRY
 				, strTransactionType = 'Contract Balance'
 				, strTransactionReference = strTransactionType
 				, intTransactionReferenceId = intTransactionId
+				, intTransactionReferenceDetailId = intTransactionDetailId
 				, strTransactionReferenceNo = strTransactionId
 				, intContractDetailId
 				, intContractHeaderId
@@ -513,7 +522,8 @@ BEGIN TRY
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, dtmTransactionDate = (dtmTransactionDate)
 					, strTransactionType = strScreenName
-					, intTransactionId = suh.intExternalId -- or intExternalHeaderId since this was used by basis deliveries on search screen
+					, intTransactionId = suh.intExternalHeaderId -- or intExternalHeaderId since this was used by basis deliveries on search screen
+					, intTransactionDetailId = suh.intExternalId
 					, strTransactionId = suh.strNumber
 					, sh.intContractDetailId
 					, sh.intContractHeaderId				
@@ -1437,6 +1447,7 @@ BEGIN TRY
 					, strTransactionType
 					, strTransactionReference
 					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
 					, strTransactionReferenceNo
 					, intContractDetailId
 					, intContractHeaderId
@@ -1473,7 +1484,8 @@ BEGIN TRY
 					, strTransactionType = 'Contract Balance'
 					, strTransactionReference = strTransactionType
 					, intTransactionReferenceId
-					, strTransactionReferenceNo = ''
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
 					, intContractDetailId
 					, intContractHeaderId
 					, strContractNumber		
@@ -1505,7 +1517,9 @@ BEGIN TRY
 					, strProcess = @strProcess
 				FROM
 				(
-					SELECT intTransactionReferenceId = pfd.intPriceFixationDetailId
+					SELECT intTransactionReferenceId = pc.intPriceContractId
+					, intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
+					, strTransactionReferenceNo = pc.strPriceContractNo
 					, dtmTransactionDate = cast((convert(VARCHAR(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
 					, sh.intContractHeaderId
 					, ch.strContractNumber
@@ -1539,6 +1553,7 @@ BEGIN TRY
 					, sh.intUserId
 					FROM tblCTPriceFixationDetail pfd
 					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
 					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 					OUTER APPLY
@@ -1570,6 +1585,7 @@ BEGIN TRY
 					, strTransactionType
 					, strTransactionReference
 					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
 					, strTransactionReferenceNo
 					, intContractDetailId
 					, intContractHeaderId
@@ -1606,7 +1622,8 @@ BEGIN TRY
 					, strTransactionType = 'Contract Balance'
 					, strTransactionReference = strTransactionType
 					, intTransactionReferenceId
-					, strTransactionReferenceNo = ''
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
 					, intContractDetailId
 					, intContractHeaderId
 					, strContractNumber		
@@ -1632,13 +1649,15 @@ BEGIN TRY
 					, intContractStatusId
 					, intBookId
 					, intSubBookId
-					, strNotes = 'Priced Quantity is ' + CAST(dblQty AS NVARCHAR(20))
+					, strNotes = ''
 					, intUserId
 					, intActionId
 					, strProcess = @strProcess
 				FROM
 				(
-					SELECT intTransactionReferenceId = pfd.intPriceFixationDetailId
+					SELECT  intTransactionReferenceId = pc.intPriceContractId
+					, intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
+					, strTransactionReferenceNo = pc.strPriceContractNo
 					, dtmTransactionDate = cast((convert(varchar(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
 					, sh.intContractHeaderId
 					, ch.strContractNumber
@@ -1673,6 +1692,7 @@ BEGIN TRY
 					, intActionId = 17
 					FROM tblCTPriceFixationDetail pfd
 					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
 					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 					OUTER APPLY
@@ -1807,6 +1827,7 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionReference
 				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
 				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId
@@ -1841,6 +1862,7 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionReference
 				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
 				, strTransactionReferenceNo
 				, intContractDetailId
 				, intContractHeaderId

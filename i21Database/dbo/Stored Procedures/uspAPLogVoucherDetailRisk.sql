@@ -77,6 +77,7 @@ BEGIN
 	(
 		strTransactionType
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 		, strTransactionReferenceNo
 		, dtmTransactionDate
 		, strTransactionReference
@@ -111,6 +112,7 @@ BEGIN
 	SELECT 
 		 strTransactionType = 'Purchase Basis Deliveries'
 		, b.intBillId
+		, bd.intBillDetailId
 		, b.strBillId
 		, dtmTransactionDate = b.dtmDate
 		, 'Voucher'

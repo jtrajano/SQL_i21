@@ -5,6 +5,7 @@
 	, strTransactionType NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionReference NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, intTransactionReferenceId INT NOT NULL
+	, intTransactionReferenceDetailId INT NULL
 	, strTransactionReferenceNo NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 	, intContractDetailId INT NOT NULL
 	, intContractHeaderId INT NOT NULL

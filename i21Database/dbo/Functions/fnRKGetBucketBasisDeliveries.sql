@@ -11,6 +11,7 @@ RETURNS @returntable TABLE
 	, strTransactionType  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionReference   NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
+	, intTransactionReferenceDetailId INT
 	, strTransactionReferenceNo  NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, intContractDetailId INT
 	, intContractHeaderId INT
@@ -95,6 +96,7 @@ BEGIN
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
@@ -135,6 +137,7 @@ BEGIN
 			, strTransactionType
 			, strTransactionReference
 			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
 			, strTransactionReferenceNo
 			, cb.intContractDetailId
 			, cb.intContractHeaderId

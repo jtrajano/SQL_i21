@@ -306,6 +306,7 @@ BEGIN
         , intPriceUOMId
 		    , intPricingTypeId		
 		    , intTransactionReferenceId
+			, intTransactionReferenceDetailId
 	    	, strTransactionReferenceNo
 	    	, intFutureMarketId
 	    	, intFutureMonthId
@@ -339,6 +340,7 @@ BEGIN
         , intPriceUOMId             = SL.intCommodityUOMId
 		    , intPricingTypeId		      = CD.intPricingTypeId		
 		    , intTransactionReferenceId = SL.intTransactionRecordHeaderId
+			, intTransactionReferenceDetailId = SL.intTransactionRecordId
 		    , strTransactionReferenceNo = SL.strTransactionNumber
 		    , intFutureMarketId	        = SL.intFutureMarketId
 		    , intFutureMonthId		      = SL.intFutureMonthId
