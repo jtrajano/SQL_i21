@@ -240,7 +240,7 @@ BEGIN TRY
 							
 							UPDATE tblSCTicket
 							SET dblScheduleQty = @dblTicketNetUnits
-							WHERE intContractId = @intMatchTicketId
+							WHERE intTicketId = @intMatchTicketId
 							
 						END
 
