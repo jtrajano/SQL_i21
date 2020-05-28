@@ -303,12 +303,9 @@ BEGIN
 											--   END AS strMultiPackIndicator	
 											-- OLD CODE--
 											-- NEW CODE-- ST-1717
-											,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID) > 0
-											THEN 
-												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+											,CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
 												THEN 'Y'
 												ELSE 'N'
-												END
 											END AS strMultiPackIndicator	
 											-- NEW CODE-- ST-1717
 
@@ -324,14 +321,14 @@ BEGIN
 											-- OLD CODE--
 											-- NEW CODE-- ST-1717
 											,
-											CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID) > 0
+											CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID) > 0
 											THEN 
-												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
-												THEN (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID)
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												THEN (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID)
 												ELSE NULL
 												END
 											ELSE
-												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
 												THEN 2 
 												ELSE NULL
 												END
@@ -350,20 +347,20 @@ BEGIN
 											--   END as dblMultiPackDiscountAmount
 											-- OLD CODE--
 											-- NEW CODE-- ST-1717
-											,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID) > 0
+											,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID) > 0
 											THEN 
-												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
 												THEN 
-													CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID AND intPromoUnits = dblTrlMatchLineTrlMatchQuantity) > 0
+													CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID AND intPromoUnits = dblTrlMatchLineTrlMatchQuantity) > 0
 													THEN 
 														dblTrlMatchLineTrlPromoAmount
 													ELSE
-														dblTrlMatchLineTrlPromoAmount * (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesListId = strTrlMatchLineTrlPromotionID)
+														dblTrlMatchLineTrlPromoAmount * (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID)
 													END
 												ELSE NULL
 												END
 											ELSE
-												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [tblSTTranslogRebates].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+												CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
 												THEN 
 													CASE WHEN dblTrlMatchLineTrlMatchQuantity = 2
 													THEN dblTrlMatchLineTrlPromoAmount
