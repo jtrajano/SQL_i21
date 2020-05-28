@@ -814,6 +814,7 @@ BEGIN TRY
 				CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 			) CNT ON CNT.intContractDetailId = SC.intContractId
 			WHERE SC.intTicketId = @intTicketId
+				AND QM.dblDiscountAmount <> 0
 	END
 
 	SELECT @recCount = COUNT(*) FROM @invoiceIntegrationStagingTable;
