@@ -255,7 +255,7 @@ BEGIN TRY
 							
 						END
 
-						EXEC uspCTUpdateSequenceBalance @intMatchContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+						EXEC uspCTUpdateSequenceBalance @intMatchTicketContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
 						SET @dblContractAvailableQty = @dblContractAvailableQty * -1
 						IF(@intMatchTicketStorageScheduleTypeId = -6) ---Load Distribution
 						BEGIN
