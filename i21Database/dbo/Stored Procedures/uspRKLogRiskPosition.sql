@@ -697,7 +697,7 @@ BEGIN
 		------------------------------------
 		------------- Voucher --------------
 		------------------------------------
-		ELSE IF @strTransactionType = 'Bill'
+		ELSE IF @strTransactionType = 'Voucher'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
