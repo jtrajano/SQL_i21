@@ -138,6 +138,7 @@ BEGIN
 		UNION ALL SELECT 51, 'Inventory Shipped on Cash Delivery', 'Inventory Shipment shipped cash quantities.'
 		UNION ALL SELECT 52, 'Inventory Received on Cash Delivery', 'Inventory receipt received cash quantities.'
 		UNION ALL SELECT 53, 'Settle Storage on Basis Delivery', 'Settle Storage settled basis quantities.'
+		UNION ALL SELECT 54, 'Canceled Sequence', 'Canceled Sequence.'
 	
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
