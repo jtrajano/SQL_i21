@@ -17,7 +17,8 @@ BEGIN TRY
 			@cbLogCurrent			AS CTContractBalanceLog,
 			@ysnDeleted				BIT = 0,
 			@ysnMatched				BIT,
-			@ysnDirect				BIT = 0
+			@ysnDirect				BIT = 0,
+			@dblBasisDelOrig		NUMERIC(24, 10)
 
 	-- SELECT @strSource, @strProcess
 
@@ -386,7 +387,7 @@ BEGIN TRY
 		FROM 
 		(
 			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
-			, dtmTransactionDate = (CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END)
+			, dtmTransactionDate = CASE WHEN strScreenName = 'Transfer Storage' THEN suh.dtmTransactionDate ELSE (CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END) END
 			, strTransactionType = strScreenName
 			, intTransactionId = suh.intExternalHeaderId -- or intExternalHeaderId since this was used by basis deliveries on search screen
 			, intTransactionDetailId = suh.intExternalId
@@ -1649,7 +1650,7 @@ BEGIN TRY
 					, intContractStatusId
 					, intBookId
 					, intSubBookId
-					, strNotes = ''
+					, strNotes = 'Priced Quantity is ' + CAST(dblQty AS NVARCHAR(20))
 					, intUserId
 					, intActionId
 					, strProcess = @strProcess
@@ -2264,10 +2265,18 @@ BEGIN TRY
 				--EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @dblBasisDel > 0
-			BEGIN			
+			BEGIN
+
+				-- Get the original basis delivery quantities
+				IF @dblBasisDelOrig IS NULL
+				BEGIN
+					SET @dblBasisDelOrig = @dblBasisDel
+				END
+
+				-- Check if the running priced quantity less than basis delivery total
 				SET @_dblQty = (@_dblQty + @dblQty)
-				IF @_dblQty > @dblBasisDel
-				BEGIN					
+				IF @_dblQty > @dblBasisDelOrig
+				BEGIN
 					-- Negate basis using the current priced quantities
 					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE @dblQty END) * -1, intPricingTypeId = 2,
 											   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
@@ -2298,8 +2307,25 @@ BEGIN TRY
 					--	EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 					--END
-												
 				END
+
+				-- Check if the contract is destination weights and grades
+				IF EXISTS 
+				(
+					select top 1 1 
+					from tblCTContractHeader ch
+					inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+						and wg.strWhereFinalized = 'Destination'
+					where intContractHeaderId = @intContractHeaderId
+				)
+				BEGIN
+					-- Basis Deliveries  
+					UPDATE @cbLogSpecific SET dblQty = @dblQty * -1,
+											  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END--,
+											  --intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				END
+				  
 				-- Add current priced quantities
 				--UPDATE  @cbLogSpecific SET dblQty = CASE WHEN @dblQtys > @dblQty THEN @dblQty ELSE @dblQtys END, intPricingTypeId = 1,
 				--						   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
