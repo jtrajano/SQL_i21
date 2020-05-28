@@ -13,6 +13,7 @@ BEGIN
 		, @strTransactionType NVARCHAR(100)
 		, @strTransactionReference NVARCHAR(100)
 		, @intTransactionReferenceId INT
+		, @intTransactionReferenceDetailId INT
 		, @strTransactionReferenceNo NVARCHAR(100)
 		, @intContractDetailId INT
 		, @intContractHeaderId INT
@@ -58,6 +59,7 @@ BEGIN
 		, [strTransactionType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [strTransactionReference] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intTransactionReferenceId] INT NOT NULL
+		, [intTransactionReferenceDetailId] INT NULL
 		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
@@ -134,6 +136,7 @@ BEGIN
 			, @strTransactionType = strTransactionType
 			, @strTransactionReference = strTransactionReference
 			, @intTransactionReferenceId = intTransactionReferenceId
+			, @intTransactionReferenceDetailId = intTransactionReferenceDetailId
 			, @strTransactionReferenceNo = strTransactionReferenceNo
 			, @intContractDetailId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
@@ -297,6 +300,7 @@ BEGIN
 			, strTransactionType
 			, strTransactionReference
 			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
@@ -332,6 +336,7 @@ BEGIN
 			, strTransactionType
 			, strTransactionReference
 			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
@@ -377,6 +382,7 @@ BEGIN
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
@@ -416,6 +422,7 @@ BEGIN
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
