@@ -8706,6 +8706,7 @@
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />    
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
