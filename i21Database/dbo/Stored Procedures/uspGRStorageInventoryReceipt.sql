@@ -14,7 +14,7 @@ BEGIN
 	DECLARE @intId INT
 	DECLARE @intTransferToCustomerStorageId INT
 	DECLARE @ysnTransferStorage BIT
-
+	--SELECT '@intTransferStorageReferenceId',@intTransferStorageReferenceId
 	DECLARE @SettleVoucher AS TABLE
 	(
 		intSettleVoucherKey INT IDENTITY(1,1)
@@ -80,9 +80,6 @@ BEGIN
 			SELECT TOP 1
 				intInventoryReceiptId
 				,intInventoryReceiptItemId
-				--,dblReceiptRunningUnits = SUM(dblReceiptRunningUnits)
-				--,dblTransactionUnits = SUM(dblTransactionUnits)
-				--,dblShrinkage = SUM(dblShrinkage)
 				,dblReceiptRunningUnits
 				,dblTransactionUnits
 				,dblShrinkage
@@ -90,10 +87,9 @@ BEGIN
 			WHERE ysnUnposted = 0
 				AND intInventoryReceiptId = SH.intInventoryReceiptId
 				AND intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
+				AND intCustomerStorageId = @intCustomerStorageId
 			ORDER BY intStorageInventoryReceipt DESC
 		) IR_Used
-			--ON IR_Used.intInventoryReceiptId = SH.intInventoryReceiptId
-			--	AND IR_Used.intInventoryReceiptItemId = IRI.intInventoryReceiptItemId
 		WHERE SH.intCustomerStorageId = @intCustomerStorageId
 			AND SH.intTransactionTypeId = 5 --From Delivery Sheet/ IR
 			AND ((ISNULL(IR_Used.dblTransactionUnits,0) + ABS(ISNULL(dblShrinkage,0))) <> SH.dblUnits OR IR_Used.dblReceiptRunningUnits IS NULL)
@@ -106,13 +102,57 @@ BEGIN
 			,intInventoryReceiptItemId
 			,dblTransactionUnits-- = SUM(dblTransactionUnits)
 		FROM tblGRStorageInventoryReceipt
-		WHERE ysnUnposted = 1
+		WHERE ysnUnposted = 1 AND intCustomerStorageId = @intCustomerStorageId
 		ORDER BY intStorageInventoryReceipt DESC
 		--GROUP BY intInventoryReceiptId,intInventoryReceiptItemId
 	) IR_Unposted
 		ON IR_Unposted.intInventoryReceiptId = IR.intInventoryReceiptId 
 			AND IR_Unposted.intInventoryReceiptItemId = IR.intInventoryReceiptItemId
 	ORDER BY IR.dtmHistoryDate
+
+	--DP Transferred that will be settled will be pulled from tblGRStorageInventoryReceipt to get the IRs
+	IF (@intSettleStorageId IS NOT NULL OR @intTransferToCustomerStorageId IS NOT NULL) AND NOT EXISTS(SELECT TOP 1 1 FROM @IR_Units)
+	BEGIN
+		INSERT INTO @IR_Units
+		--FIRST SETTLEMENT OR TRANSFER OF A DP TRANSFER STORAGE		
+		SELECT SIR.intInventoryReceiptId
+			,SIR.intInventoryReceiptItemId
+			,SIR.dblTransactionUnits
+			,0
+		FROM tblGRStorageInventoryReceipt SIR
+		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId AND TSR.intToCustomerStorageId = @intCustomerStorageId
+		WHERE (CASE WHEN (SELECT TOP 1 1 FROM tblGRStorageInventoryReceipt WHERE intCustomerStorageId = @intId) = 1 THEN 1 ELSE 0 END) = 0
+		UNION ALL
+
+		--SUCCEEDING SETTLEMENTS OR TRANSFERS OF DP TRANSFER STORAGES
+		SELECT SIR.intInventoryReceiptId
+			,SIR.intInventoryReceiptItemId
+			,SIR.dblReceiptRunningUnits
+			,1
+		FROM tblGRStorageInventoryReceipt SIR
+		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId AND TSR.intToCustomerStorageId = @intCustomerStorageId
+		WHERE (CASE WHEN (SELECT TOP 1 1 FROM tblGRStorageInventoryReceipt WHERE intCustomerStorageId = @intId) = 1 THEN 1 ELSE 0 END) = 1
+
+	END
+
+	--SELECT 'TEST', SIR.intInventoryReceiptId
+	--		,SIR.intInventoryReceiptItemId
+	--		,SIR.dblTransactionUnits
+	--		,0
+	--	FROM tblGRStorageInventoryReceipt SIR
+	--	INNER JOIN tblGRTransferStorageReference TSR ON TSR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId AND TSR.intToCustomerStorageId = @intCustomerStorageId
+	--	WHERE (CASE WHEN (SELECT TOP 1 1 FROM tblGRStorageInventoryReceipt WHERE intCustomerStorageId = @intId) = 1 THEN 1 ELSE 0 END) = 0
+
+	--	UNION ALL
+
+	--	--SUCCEEDING SETTLEMENTS OR TRANSFERS OF DP TRANSFER STORAGES
+	--	SELECT 'TEST', SIR.intInventoryReceiptId
+	--		,SIR.intInventoryReceiptItemId
+	--		,SIR.dblReceiptRunningUnits
+	--		,1
+	--	FROM tblGRStorageInventoryReceipt SIR
+	--	INNER JOIN tblGRTransferStorageReference TSR ON TSR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId AND TSR.intToCustomerStorageId = @intCustomerStorageId
+	--	WHERE (CASE WHEN (SELECT TOP 1 1 FROM tblGRStorageInventoryReceipt WHERE intCustomerStorageId = @intId) = 1 THEN 1 ELSE 0 END) = 1
 
 	--SELECT '@IR_Units',* FROM @IR_Units	
 
@@ -194,35 +234,39 @@ BEGIN
 								WHERE intInventoryReceiptId = A.intInventoryReceiptId
 									AND intInventoryReceiptItemId = A.intInventoryReceiptItemId
 									AND ysnUnposted = 0
+									AND intCustomerStorageId = @intCustomerStorageId
 								ORDER BY intStorageInventoryReceipt DESC
 							) R
 						) C
 					) D					
 
-					INSERT INTO tblGRStorageInventoryReceipt
-					(
-						[intCustomerStorageId]
-						,[intInventoryReceiptId]
-						,[intInventoryReceiptItemId]
-						,[intContractDetailId]
-						,[dblUnits]
-						,[dblShrinkage]
-						,[dblNetUnits]
-						,[intSettleStorageId]
-						,[dblTransactionUnits]
-						,[dblReceiptRunningUnits]
-					)
-					SELECT [intCustomerStorageId]
-						,[intInventoryReceiptId]
-						,[intInventoryReceiptItemId]
-						,[intContractDetailId]
-						,[dblUnits]
-						,[dblShrinkage]
-						,[dblNetUnits]
-						,[intSettleStorageId]
-						,[dblTransactionUnits]
-						,[dblReceiptRunningUnits]
-					FROM @StorageInventoryReceipt
+					IF(SELECT dblUnits FROM @StorageInventoryReceipt) > 0 AND (SELECT dblTransactionUnits FROM @StorageInventoryReceipt) > 0
+					BEGIN
+						INSERT INTO tblGRStorageInventoryReceipt
+						(
+							[intCustomerStorageId]
+							,[intInventoryReceiptId]
+							,[intInventoryReceiptItemId]
+							,[intContractDetailId]
+							,[dblUnits]
+							,[dblShrinkage]
+							,[dblNetUnits]
+							,[intSettleStorageId]
+							,[dblTransactionUnits]
+							,[dblReceiptRunningUnits]
+						)
+						SELECT [intCustomerStorageId]
+							,[intInventoryReceiptId]
+							,[intInventoryReceiptItemId]
+							,[intContractDetailId]
+							,[dblUnits]
+							,[dblShrinkage]
+							,[dblNetUnits]
+							,@intSettleStorageId
+							,[dblTransactionUnits]
+							,[dblReceiptRunningUnits]
+						FROM @StorageInventoryReceipt
+					END
 				END
 
 				UPDATE @SettleVoucher SET dblUnits = dblUnits - (SELECT dblNetUnits FROM @StorageInventoryReceipt) WHERE intSettleVoucherKey = @intSettleVoucherKey
@@ -251,7 +295,8 @@ BEGIN
 			WHILE EXISTS(SELECT TOP 1 1 FROM @IR_Units)
 			BEGIN
 				SELECT TOP 1 @intId = intId FROM @IR_Units ORDER BY intId
-				
+				--SELECT 'TEST1',ISNULL(SUM(dblTransactionUnits),0) FROM tblGRStorageInventoryReceipt WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+				--SELECT 'TEST2',dblUnitQty FROM tblGRTransferStorageReference WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
 				IF @intId IS NOT NULL AND (SELECT ISNULL(SUM(dblTransactionUnits),0) FROM tblGRStorageInventoryReceipt WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId) < (SELECT dblUnitQty FROM tblGRTransferStorageReference WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId)
 				BEGIN				
 					DELETE FROM @StorageInventoryReceipt
@@ -267,7 +312,7 @@ BEGIN
 						,[dblTransactionUnits]
 						,[dblReceiptRunningUnits]
 					)
-					SELECT 
+					SELECT DISTINCT
 						@intCustomerStorageId
 						,intInventoryReceiptId
 						,intInventoryReceiptItemId
@@ -297,13 +342,14 @@ BEGIN
 								SELECT * FROM @IR_Units WHERE intId = @intId
 							) A
 							OUTER APPLY (
-								SELECT SR.dblUnitQty FROM tblGRTransferStorageReference SR WHERE intSourceCustomerStorageId = @intCustomerStorageId
+								SELECT SR.dblUnitQty FROM tblGRTransferStorageReference SR WHERE intSourceCustomerStorageId = @intCustomerStorageId AND intTransferStorageReferenceId = @intTransferStorageReferenceId
 							) B
 							OUTER APPLY (
 								SELECT TOP 1 dblReceiptRunningUnits FROM tblGRStorageInventoryReceipt
 								WHERE intInventoryReceiptId = A.intInventoryReceiptId
 									AND intInventoryReceiptItemId = A.intInventoryReceiptItemId
 									AND ysnUnposted = 0
+									AND intCustomerStorageId = @intCustomerStorageId
 								ORDER BY intStorageInventoryReceipt DESC
 							) R
 							OUTER APPLY (
@@ -312,35 +358,86 @@ BEGIN
 							) TotalTransfer
 						) C
 					) D
-					
-					INSERT INTO tblGRStorageInventoryReceipt
-					(
-						[intCustomerStorageId]
-						,[intInventoryReceiptId]
-						,[intInventoryReceiptItemId]
-						,[intContractDetailId]
-						,[dblUnits]
-						,[dblShrinkage]
-						,[dblNetUnits]
-						,[intTransferStorageReferenceId]
-						,[dblTransactionUnits]
-						,[dblReceiptRunningUnits]
-					)
-					SELECT [intCustomerStorageId]
-						,[intInventoryReceiptId]
-						,[intInventoryReceiptItemId]
-						,[intContractDetailId]
-						,[dblUnits]
-						,[dblShrinkage]
-						,[dblNetUnits]
-						,@intTransferStorageReferenceId
-						,[dblTransactionUnits]
-						,[dblReceiptRunningUnits]
-					FROM @StorageInventoryReceipt
 
+					--SELECT DISTINCT 'TEST2',
+					--	@intCustomerStorageId
+					--	,intInventoryReceiptId
+					--	,intInventoryReceiptItemId
+					--	,dblUnits
+					--	,dblShrinkage
+					--	,dblNetUnits
+					--	,@intSettleStorageId
+					--	,dblTransactionUnits = CASE WHEN dblTransferredUnits > dblNetUnits THEN dblNetUnits ELSE dblTransferredUnits END
+					--	,dblReceiptRunningUnits = dblNetUnits - (CASE WHEN dblTransferredUnits > dblNetUnits THEN dblNetUnits ELSE dblTransferredUnits END)
+					--FROM (
+					--	SELECT 
+					--		intInventoryReceiptId
+					--		,intInventoryReceiptItemId
+					--		,dblUnits = ISNULL(CASE WHEN ISNULL(dblReceiptRunningUnits,0) = 0 THEN dblUnits ELSE dblReceiptRunningUnits END,0)
+					--		,dblShrinkage = ISNULL(CASE WHEN ISNULL(dblReceiptRunningUnits,0) = 0 THEN dblShrinkage ELSE 0 END,0)
+					--		,dblNetUnits = (CASE WHEN ISNULL(dblReceiptRunningUnits,0) = 0 THEN dblUnits ELSE dblReceiptRunningUnits END) - ISNULL(ABS(CASE WHEN ISNULL(dblReceiptRunningUnits,0) = 0 THEN dblShrinkage ELSE 0 END),0)
+					--		,dblTransferredUnits
+					--	FROM (
+					--		SELECT 					
+					--			A.intInventoryReceiptId
+					--			,A.intInventoryReceiptItemId
+					--			,A.dblUnits
+					--			,dblShrinkage = CASE WHEN A.ysnExists = 0 THEN (@dblShrinkage / (@dblOriginalBalance + ABS(@dblShrinkage))) * A.dblUnits ELSE NULL END
+					--			,dblTransferredUnits = B.dblUnitQty - ISNULL(TotalTransfer.dblTotalTransactionUnits,0)
+					--			,R.dblReceiptRunningUnits
+					--		FROM (
+					--			SELECT * FROM @IR_Units WHERE intId = @intId
+					--		) A
+					--		OUTER APPLY (
+					--			SELECT SR.dblUnitQty FROM tblGRTransferStorageReference SR WHERE intSourceCustomerStorageId = @intCustomerStorageId AND intTransferStorageReferenceId = @intTransferStorageReferenceId
+					--		) B
+					--		OUTER APPLY (
+					--			SELECT TOP 1 dblReceiptRunningUnits FROM tblGRStorageInventoryReceipt
+					--			WHERE intInventoryReceiptId = A.intInventoryReceiptId
+					--				AND intInventoryReceiptItemId = A.intInventoryReceiptItemId
+					--				AND ysnUnposted = 0
+					--			ORDER BY intStorageInventoryReceipt DESC
+					--		) R
+					--		OUTER APPLY (
+					--			SELECT dblTotalTransactionUnits = SUM(dblTransactionUnits) FROM tblGRStorageInventoryReceipt
+					--			WHERE intTransferStorageReferenceId = @intTransferStorageReferenceId
+					--		) TotalTransfer
+					--	) C
+					--) D
+
+					IF(SELECT dblUnits FROM @StorageInventoryReceipt) > 0 AND (SELECT dblTransactionUnits FROM @StorageInventoryReceipt) > 0
+					BEGIN
+						INSERT INTO tblGRStorageInventoryReceipt
+						(
+							[intCustomerStorageId]
+							,[intInventoryReceiptId]
+							,[intInventoryReceiptItemId]
+							,[intContractDetailId]
+							,[dblUnits]
+							,[dblShrinkage]
+							,[dblNetUnits]
+							,[intTransferStorageReferenceId]
+							,[dblTransactionUnits]
+							,[dblReceiptRunningUnits]
+						)
+						SELECT [intCustomerStorageId]
+							,[intInventoryReceiptId]
+							,[intInventoryReceiptItemId]
+							,[intContractDetailId]
+							,[dblUnits]
+							,[dblShrinkage]
+							,[dblNetUnits]
+							,@intTransferStorageReferenceId
+							,[dblTransactionUnits]
+							,[dblReceiptRunningUnits]
+						FROM @StorageInventoryReceipt
+					END
 					--SELECT 'tblGRStorageInventoryReceipt',* FROM tblGRStorageInventoryReceipt
 				END
-									
+				ELSE
+				BEGIN
+				DELETE FROM @IR_Units WHERE intId = @intId
+				END
 				IF (SELECT dblReceiptRunningUnits FROM @StorageInventoryReceipt) <= (SELECT dblUnits FROM @IR_Units WHERE intId = @intId)
 				BEGIN
 					DELETE FROM @IR_Units WHERE intId = @intId
@@ -350,71 +447,7 @@ BEGIN
 					UPDATE @IR_Units SET dblUnits = dblUnits - (SELECT dblUnits FROM @StorageInventoryReceipt) WHERE intId = @intId
 				END
 			END
-		END
-		ELSE
-		BEGIN --IF THE TRANSFER IS ALSO A TRANSFER STORAGE
-			DELETE FROM @StorageInventoryReceipt
-			INSERT INTO @StorageInventoryReceipt
-			(
-				[intCustomerStorageId]
-				,[dblUnits]
-				,[dblShrinkage]
-				,[dblNetUnits]
-				,[intSettleStorageId]
-				,[dblTransactionUnits]
-				,[dblReceiptRunningUnits]
-			)
-			SELECT 
-				@intCustomerStorageId
-				,dblUnits
-				,0
-				,dblUnits
-				,@intSettleStorageId
-				,dblTransactionUnits = CASE WHEN dblTransferUnits > dblUnits THEN dblUnits ELSE dblTransferUnits END
-				,dblReceiptRunningUnits = dblUnits - (CASE WHEN dblTransferUnits > dblUnits THEN dblUnits ELSE dblTransferUnits END)
-			FROM (
-				SELECT 
-					dblUnits = CASE WHEN dblReceiptRunningUnits IS NULL THEN dblTransferUnits ELSE dblReceiptRunningUnits END
-					,dblTransferUnits
-				FROM (
-					SELECT
-						dblTransferUnits = A.dblUnitQty
-						,R.dblReceiptRunningUnits
-					FROM (
-						SELECT SR.dblUnitQty FROM tblGRTransferStorageReference SR WHERE intSourceCustomerStorageId = @intCustomerStorageId
-					) A
-					OUTER APPLY (
-						SELECT TOP 1 dblReceiptRunningUnits FROM tblGRStorageInventoryReceipt
-						WHERE intCustomerStorageId = @intCustomerStorageId
-						ORDER BY intStorageInventoryReceipt DESC
-					) R
-				) C
-			) D
-
-			INSERT INTO tblGRStorageInventoryReceipt
-			(
-				[intCustomerStorageId]
-				,[intInventoryReceiptId]
-				,[intInventoryReceiptItemId]
-				,[intContractDetailId]
-				,[dblUnits]
-				,[dblShrinkage]
-				,[dblNetUnits]
-				,[intSettleStorageId]
-				,[dblTransactionUnits]
-				,[dblReceiptRunningUnits]
-			)
-			SELECT [intCustomerStorageId]
-				,[intInventoryReceiptId]
-				,[intInventoryReceiptItemId]
-				,[intContractDetailId]
-				,[dblUnits]
-				,[dblShrinkage]
-				,[dblNetUnits]
-				,[intSettleStorageId]
-				,[dblTransactionUnits]
-				,[dblReceiptRunningUnits]
-			FROM @StorageInventoryReceipt
-		END
+		END		
 	END
+	--select 'tblGRStorageInventoryReceipt',* from tblGRStorageInventoryReceipt
 END
