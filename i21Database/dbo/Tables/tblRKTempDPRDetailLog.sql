@@ -43,4 +43,12 @@
 	, ysnPreCrush BIT
 	, strTransactionReferenceId NVARCHAR(100)
 	, intTransactionReferenceId INT
+	CONSTRAINT [PK_tblRKTempDPRDetailLog_intTempDPRDetailLogId] PRIMARY KEY ([intTempDPRDetailLogId])
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblRKTempDPRDetailLog_forDPR]
+	ON [dbo].[tblRKTempDPRDetailLog] ([intRunNumber])
+	INCLUDE ([strType],[dblTotal])
+
+GO
