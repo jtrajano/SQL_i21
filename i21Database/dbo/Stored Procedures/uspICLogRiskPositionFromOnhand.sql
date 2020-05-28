@@ -93,8 +93,16 @@ BEGIN
 			,intTransactionRecordId = t.intTransactionDetailId
 			,strTransactionNumber = t.strTransactionId
 			,dtmTransactionDate = t.dtmDate
-			,intContractDetailId = COALESCE(receipt.intContractDetailId, shipment.intContractDetailId)
-			,intContractHeaderId = COALESCE(receipt.intContractHeaderId, shipment.intContractHeaderId)
+			,intContractDetailId = COALESCE(
+				receipt.intContractDetailId
+				, shipment.intContractDetailId
+				, invoice.intContractDetailId
+			)
+			,intContractHeaderId = COALESCE(
+				receipt.intContractHeaderId
+				, shipment.intContractHeaderId
+				, invoice.intContractHeaderId
+			)
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
 			,intCommodityUOMId = commodityUOM.intCommodityUnitMeasureId
@@ -193,6 +201,20 @@ BEGIN
 
 			OUTER APPLY (
 				SELECT 
+					intContractDetailId = invD.intContractDetailId
+					,intContractHeaderId = invD.intContractHeaderId
+				FROM 
+					tblARInvoice inv INNER JOIN tblARInvoiceDetail invD
+						ON inv.intInvoiceId = invD.intInvoiceId
+				WHERE
+					t.strTransactionForm = 'Invoice'
+					AND inv.strInvoiceNumber = t.strTransactionId
+					AND inv.intInvoiceId = t.intTransactionId
+					AND invD.intInvoiceDetailId = t.intTransactionDetailId
+			) invoice
+
+			OUTER APPLY (
+				SELECT 
 					cd.intPricingTypeId
 					,cPricingType.strPricingType
 				FROM 
@@ -201,8 +223,16 @@ BEGIN
 					INNER JOIN tblCTPricingType cPricingType
 						ON cPricingType.intPricingTypeId = cd.intPricingTypeId
 				WHERE
-					ch.intContractHeaderId = COALESCE(receipt.intContractHeaderId, shipment.intContractHeaderId)
-					AND cd.intContractDetailId = COALESCE(receipt.intContractDetailId, shipment.intContractDetailId)
+					ch.intContractHeaderId = COALESCE(
+						receipt.intContractHeaderId
+						, shipment.intContractHeaderId
+						, invoice.intContractHeaderId
+					)
+					AND cd.intContractDetailId = COALESCE(
+						receipt.intContractDetailId
+						, shipment.intContractDetailId
+						, invoice.intContractDetailId 
+					)
 			) contractDetail
 
 		WHERE
