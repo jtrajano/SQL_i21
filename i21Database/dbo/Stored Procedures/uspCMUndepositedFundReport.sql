@@ -32,27 +32,100 @@ WITH (
 	, [datatype] nvarchar(50)
 )
 
-DECLARE @dtmDateFrom DATETIME,@dtmDateTo DATETIME
+DECLARE @dtmDateFrom DATETIME,@dtmDateTo DATETIME,@dtmCMDate DATETIME, @dtmTemp DATETIME
 
 IF EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
 	SELECT 
 		@dtmDateFrom = [from],
+		@dtmTemp = [from],
 		@dtmDateTo =  [to]
 	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and condition in ('Equal To' , 'Between')
 
-	SELECT @dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900'),
-		@dtmDateTo = isnull( @dtmDateTo , @dtmDateFrom)
+	DECLARE @dtmDateCurrent DATETIME
+	select @dtmDateCurrent = CAST(CONVERT(nvarchar(20), GETDATE(), 101) AS DATETIME)
 
+	SELECT
+		@dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900')
+		,@dtmDateTo =
+		CASE WHEN @dtmTemp IS NULL
+			THEN @dtmDateCurrent
+			ELSE ISNULL(@dtmDateTo,@dtmDateFrom)
+		END
+
+	SELECT @dtmCMDate = DATEADD( DAY, 1, @dtmDateTo)
 	SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
 
-	SELECT * FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo)
+
+	DECLARE @strLocation NVARCHAR(50)
+	SELECT @strLocation = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName' --and condition in ('Equal To' , 'Between')
+
+	select
+	0 as rowId,
+	@dtmDateFrom as dtmDateFrom,
+	@dtmDateTo as dtmDateTo,
+	@dtmCMDate as dtmCMDateParam,
+	null as dtmDate,
+	'' AS strName,
+	'' AS strSourceTransactionId,
+	'' AS strPaymentMethod,
+	'' AS strSourceSystem,
+	'' AS strEODNumber,
+	'' AS strEODDrawer,
+	cast(0 as bit) AS ysnEODComplete,
+	'' AS strCardType,
+	'' AS strLocationName,
+	'' AS strUserName,
+	'' AS strTransactionId,
+	cast(0 as bit)  AS ysnPosted,
+	null AS dtmCMDate,
+	0 AS dblAmount
+	UNION
+
+	SELECT
+	a.rowId,
+	@dtmDateFrom as dtmDateFrom,
+	@dtmDateTo as dtmDateTo,
+	@dtmCMDate as dtmCMDateParam,
+	a.dtmDate,
+	a.strName,
+	a.strSourceTransactionId,
+	a.strPaymentMethod,
+	a.strSourceSystem,
+	a.strEODNumber,
+	a.strEODDrawer ,
+	a.ysnEODComplete ,
+	a.strCardType,
+	a.strLocationName strLocationName,
+	a.strUserName,
+	a.strTransactionId,
+	a.ysnPosted,
+	a.dtmCMDate,
+	a.dblAmount
+	FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo,@dtmCMDate) a
+	WHERE ISNULL(@strLocation, a.strLocationName) = a.strLocationName
 
 END
-
-
-
-
-
-
-
+ELSE
+BEGIN
+	select
+	0 as rowId,
+	@dtmDateFrom as [dtmDateFrom],
+	@dtmDateTo as [dtmDateTo],
+	@dtmCMDate as dtmCMDateParam,
+	null as dtmDate,
+	'' AS strName,
+	'' AS strSourceTransactionId,
+	'' AS strPaymentMethod,
+	'' AS strSourceSystem,
+	'' AS strEODNumber,
+	'' AS strEODDrawer,
+	cast(0 as bit) AS ysnEODComplete,
+	'' AS strCardType,
+	'' AS strLocationName,
+	'' AS strUserName,
+	'' AS strTransactionId,
+	cast(0 as bit)  AS ysnPosted,
+	null AS dtmCMDate,
+	0 AS dblAmount
+END
