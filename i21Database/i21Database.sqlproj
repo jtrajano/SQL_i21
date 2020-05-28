@@ -8245,6 +8245,7 @@
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
