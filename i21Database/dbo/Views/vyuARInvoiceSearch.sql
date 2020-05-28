@@ -80,6 +80,9 @@ SELECT
 	,blbSignature					= I.blbSignature
 	,intTicketId					= SCALETICKETID.intTicketId
 	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
+	,dtmAccountingPeriod            = CASE WHEN I.ysnPosted = 1 
+									  THEN DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, I.dtmPostDate) + 1, 0))
+									  ELSE NULL END
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
