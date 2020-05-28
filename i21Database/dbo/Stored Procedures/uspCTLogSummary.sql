@@ -1893,6 +1893,8 @@ BEGIN TRY
 				@dblBasisDel 	NUMERIC(24, 10),
 				@dblPricedDel 	NUMERIC(24, 10),
 				@dblBasis 		NUMERIC(24, 10),
+				@dblDP 			NUMERIC(24, 10),
+				@dblCash		NUMERIC(24, 10),
 				@dblQty 		NUMERIC(24, 10),
 				@dblAvrgFutures	NUMERIC(24, 10),
 				@total 			NUMERIC(24, 10)
@@ -1923,6 +1925,17 @@ BEGIN TRY
 		FROM @cbLogPrev
 		WHERE intPricingTypeId = 2
 		AND strTransactionType NOT LIKE '%Basis Deliveries'
+		GROUP BY intPricingTypeId
+
+		SELECT @dblDP = SUM(dblQty)
+		FROM @cbLogPrev
+		WHERE intPricingTypeId = 5
+		AND strTransactionType NOT LIKE '%Basis Deliveries'
+		GROUP BY intPricingTypeId
+
+		SELECT @dblCash = SUM(dblQty)
+		FROM @cbLogPrev
+		WHERE intPricingTypeId = 6
 		GROUP BY intPricingTypeId
 
 		SELECT @dblQty = dblQty
@@ -2358,10 +2371,28 @@ BEGIN TRY
 		END
 		ELSE IF @strSource = 'Inventory'
 		BEGIN
+			-- If DP disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 AND @strProcess = 'Update Sequence Balance')
+			BEGIN
+				RETURN
+			END
 			-- Unposted IS/IR with 0 basis
 			IF @dblQtys = 0 AND @dblQty < 0
 			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intPricingTypeId = 2
+				-- DP
+				IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)
+				BEGIN
+					UPDATE a SET intActionId = CASE WHEN a.intContractTypeId = 1 THEN 49 ELSE 50 END
+					FROM @cbLogSpecific a
+				END
+				-- Cash
+				ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 6)
+				BEGIN
+					UPDATE a SET intActionId = CASE WHEN a.intContractTypeId = 1 THEN 52 ELSE 51 END
+					FROM @cbLogSpecific a
+				END
+
+				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intPricingTypeId = CASE WHEN intPricingTypeId IN (1,2) THEN 2 ELSE intPricingTypeId END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 			END
 			ELSE
@@ -2369,6 +2400,8 @@ BEGIN TRY
 				-- Get previous totals
 				DECLARE @_basis 		NUMERIC(24, 10) = 0,
 						@_priced 		NUMERIC(24, 10) = 0,
+						@_dp	 		NUMERIC(24, 10) = 0,
+						@_cash	 		NUMERIC(24, 10) = 0,
 						@_balance		NUMERIC(24, 10) = 0;
 
 				IF ISNULL(@dblPriced,0) > 0
@@ -2380,8 +2413,22 @@ BEGIN TRY
 				IF ISNULL(@dblBasis,0) > 0
 				BEGIN	
 					SET @_basis = (CASE WHEN @dblQty > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblQty END)
-					UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2, intActionId = CASE WHEN intContractTypeId = 1 THEN 19 ELSE 18 END
+					UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2, intActionId = CASE WHEN intContractTypeId = 1 THEN 0 ELSE 0 END
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				END
+				IF ISNULL(@dblDP,0) > 0
+				BEGIN
+					SET @_dp = (CASE WHEN @dblQty > ISNULL(@dblDP,0) THEN ISNULL(@dblDP,0) ELSE @dblQty END)
+					UPDATE a SET dblQty = @_dp * -1, intActionId = CASE WHEN a.intContractTypeId = 1 THEN 49 ELSE 50 END
+					FROM @cbLogSpecific a
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				END
+				IF ISNULL(@dblCash,0) > 0
+				BEGIN
+					SET @_cash = (CASE WHEN @dblQty > ISNULL(@dblCash,0) THEN ISNULL(@dblCash,0) ELSE @dblQty END)
+					UPDATE a SET dblQty = @_cash * -1, intActionId = CASE WHEN a.intContractTypeId = 1 THEN 52 ELSE 51 END
+					FROM @cbLogSpecific a
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 				--UPDATE @cbLogSpecific SET dblQty = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) 
 				--											THEN ISNULL(@dblPriced,0) 
