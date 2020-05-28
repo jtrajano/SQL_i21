@@ -190,6 +190,8 @@ BEGIN TRY
 		3-Discount
 		4-Fee
    */
+
+   DECLARE @ysnDeliverySheet AS BIT
 	
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
@@ -243,12 +245,6 @@ BEGIN TRY
 			JOIN vyuGRGetContracts CD 
 				ON CD.intContractDetailId = SSC.intContractDetailId
 			WHERE intSettleStorageId = @intSettleStorageId
-
-	
-
-
-	
-
 
 	WHILE @intSettleStorageId > 0
 	BEGIN		
@@ -2084,6 +2080,7 @@ BEGIN TRY
 				
 				---
 				SELECT TOP 1 @ysnDPOwnedType = ISNULL(ST.ysnDPOwnedType,0) 
+					,@ysnDeliverySheet = CAST(CASE WHEN CS.intDeliverySheetId IS NULL THEN 0 ELSE 1 END AS BIT)
 				FROM @SettleVoucherCreate A
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = A.intCustomerStorageId
@@ -2178,7 +2175,7 @@ BEGIN TRY
 				end
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
-				IF @ysnFromPriceBasisContract = 0 AND @ysnDPOwnedType = 1
+				IF @ysnFromPriceBasisContract = 0 AND @ysnDPOwnedType = 1 AND @ysnDeliverySheet = 1
 				BEGIN
 					EXEC uspGRStorageInventoryReceipt 
 						@SettleVoucherCreate = @SettleVoucherCreate

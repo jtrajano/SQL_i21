@@ -387,7 +387,8 @@ BEGIN
 		) AS (
 			SELECT SR.intTransferStorageReferenceId
 			FROM tblGRTransferStorageReference SR
-			INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+			INNER JOIN tblGRCustomerStorage CS 
+				ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId AND CS.intDeliverySheetId IS NOT NULL
 			INNER JOIN tblGRStorageType ST
 				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 					AND ST.ysnDPOwnedType = 1
