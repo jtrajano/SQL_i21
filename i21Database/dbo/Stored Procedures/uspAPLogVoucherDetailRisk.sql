@@ -39,7 +39,7 @@ BEGIN
 	SELECT 
 		strBatchId = NULL
 		, strBucketType = 'Accounts Payables'
-		, strTransactionType = 'Bill'
+		, strTransactionType = 'Voucher'
 		, intTransactionRecordId = bd.intBillDetailId
 		, intTransactionRecordHeaderId = bd.intBillId
 		, intContractDetailId = bd.intContractDetailId
@@ -109,11 +109,11 @@ BEGIN
 		, intActionId
 	)
 	SELECT 
-		 strTransactionType = 'Bill'
+		 strTransactionType = 'Purchase Basis Deliveries'
 		, b.intBillId
 		, b.strBillId
 		, dtmTransactionDate = b.dtmDate
-		, 'Purchase Basis Deliveries'
+		, 'Voucher'
 		, intContractDetailId = bd.intContractDetailId
 		, intContractHeaderId = bd.intContractHeaderId
 		, strContractNumber = ct.strContractNumber
