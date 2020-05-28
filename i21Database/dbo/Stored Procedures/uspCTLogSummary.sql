@@ -2370,50 +2370,61 @@ BEGIN TRY
 			
 		END
 		ELSE IF @strSource = 'Inventory'
-		BEGIN
+		BEGIN		
+			-- Get previous totals
+			DECLARE @_basis 		NUMERIC(24, 10) = 0,
+					@_priced 		NUMERIC(24, 10) = 0,
+					@_dp	 		NUMERIC(24, 10) = 0,
+					@_cash	 		NUMERIC(24, 10) = 0,
+					@_balance		NUMERIC(24, 10) = 0,
+					@_action		INT,
+					@_unpost		BIT;
+			
+			-- Get action types for Settle Storeage, IR and IS transactions	
+			select @_action = case when strTransactionReference = 'Settle Storage' then 53 else (case when intContractTypeId = 1 then 19 else 18 end) end
+			from @cbLogSpecific
+
 			-- If DP disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
 			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 AND @strProcess = 'Update Sequence Balance')
 			BEGIN
 				RETURN
 			END
-			-- Unposted IS/IR with 0 basis
+			-- Unposted IS/IR/Settle Storage with 0 basis
 			IF @dblQtys = 0 AND @dblQty < 0
 			BEGIN
 				-- DP
 				IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)
 				BEGIN
-					UPDATE a SET intActionId = CASE WHEN a.intContractTypeId = 1 THEN 49 ELSE 50 END
+					SELECT @_action = CASE WHEN a.intContractTypeId = 1 THEN 49 ELSE 50 END
 					FROM @cbLogSpecific a
 				END
 				-- Cash
 				ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 6)
 				BEGIN
-					UPDATE a SET intActionId = CASE WHEN a.intContractTypeId = 1 THEN 52 ELSE 51 END
+					SELECT @_action = CASE WHEN a.intContractTypeId = 1 THEN 52 ELSE 51 END
 					FROM @cbLogSpecific a
 				END
 
-				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intPricingTypeId = CASE WHEN intPricingTypeId IN (1,2) THEN 2 ELSE intPricingTypeId END
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				-- Basis deliveries to be negated
+				SET @_basis = (CASE WHEN @dblBasisDel > 0 THEN @dblQty ELSE 0 END) * -1
+				SET @_unpost = 1
+				
+				-- Negate previous record
+				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intPricingTypeId = CASE WHEN intPricingTypeId IN (1,2) THEN 2 ELSE intPricingTypeId END, intActionId = @_action
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
-			ELSE
-			BEGIN
-				-- Get previous totals
-				DECLARE @_basis 		NUMERIC(24, 10) = 0,
-						@_priced 		NUMERIC(24, 10) = 0,
-						@_dp	 		NUMERIC(24, 10) = 0,
-						@_cash	 		NUMERIC(24, 10) = 0,
-						@_balance		NUMERIC(24, 10) = 0;
-
+			ELSE -- Posted IS/IR/Settle Storage
+			BEGIN						
 				IF ISNULL(@dblPriced,0) > 0
-				BEGIN		
+				BEGIN	
 					SET @_priced = (CASE WHEN @dblQty > ISNULL(@dblPriced,0) THEN ISNULL(@dblPriced,0) ELSE @dblQty END)
 					UPDATE @cbLogSpecific SET dblQty = @_priced * -1, intPricingTypeId = 1, intActionId = CASE WHEN intContractTypeId = 1 THEN 47 ELSE 46 END
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 				END
 				IF ISNULL(@dblBasis,0) > 0
-				BEGIN	
+				BEGIN
 					SET @_basis = (CASE WHEN @dblQty > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblQty END)
-					UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2, intActionId = CASE WHEN intContractTypeId = 1 THEN 0 ELSE 0 END
+					UPDATE @cbLogSpecific SET dblQty = @_basis * -1, intPricingTypeId = 2, intActionId = @_action
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 				END
 				IF ISNULL(@dblDP,0) > 0
@@ -2437,12 +2448,13 @@ BEGIN TRY
 				--									 intPricingTypeId = CASE WHEN ISNULL(@dblPriced,0) <> 0 THEN 1 ELSE 2 END
 				--EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 			END
+
 			IF @ysnDirect <> 1 AND @_basis > 0
-			BEGIN  
+			BEGIN
 				-- Basis Deliveries  
-				UPDATE @cbLogSpecific SET dblQty = @_basis,
+				UPDATE @cbLogSpecific SET dblQty = CASE WHEN @_unpost = 1 THEN @_basis * -1 ELSE @_basis END,
 										  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
-										  intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END, intActionId = CASE WHEN intContractTypeId = 1 THEN 19 ELSE 18 END
+										  intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 			END  
 		END
