@@ -535,7 +535,7 @@ BEGIN
 
 		UNION ALL
 
-		--TRANSFER STORAGE
+		--TRANSFER STORAGE (OP >> DP)
 		--ITEM
 		SELECT
 			[intItemId]							=	C.intItemId
@@ -593,11 +593,101 @@ BEGIN
 			ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM
+			ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM
+			ON ST.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST.ysnDPOwnedType = 0
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E 
 			ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F 
 			ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
+		LEFT JOIN tblICItemUOM voucherCostUOM ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) 
+			AND B.intCustomerStorageId > 0 
+			AND D.strType = 'Inventory'
+
+		UNION ALL
+		--TRANSFER STORAGE (DP >> DP)
+		SELECT
+			[intItemId]							=	C.intItemId
+			,[intItemLocationId]				=	E.intItemLocationId
+			,[intItemUOMId]						=	F.intItemUOMId
+			,[dtmDate]							=	A.dtmDate
+			,[dblQty] 							=	SIR.dblTransactionUnits
+			,[dblUOMQty] 						=	F.dblUnitQty
+			,[intCostUOMId]						=	B.intUnitOfMeasureId 
+			,[dblNewValue]						=	CAST(
+													dbo.fnMultiply(
+														SIR.dblTransactionUnits --[Voucher Qty]
+														,B.dblCost --[Voucher Cost]
+													) AS DECIMAL(18,2))
+													-
+												CAST(
+													dbo.fnMultiply(
+														SIR.dblTransactionUnits --[Voucher Qty]
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Receipt Cost]
+													)
+												AS DECIMAL(18,2))
+			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
+			,[intTransactionId]					=	A.intBillId
+			,[intTransactionDetailId] 			=	B.intBillDetailId
+			,[strTransactionId] 				=	A.strBillId
+			,[intTransactionTypeId] 			=	27
+			,[intLotId] 						=	NULL 
+			,[intSubLocationId] 				=	C.intCompanyLocationSubLocationId
+			,[intStorageLocationId] 			=	C.intStorageLocationId
+			,[ysnIsStorage] 					=	0
+			,[strActualCostId] 					=	SIR.strActualCostId
+			,[intSourceTransactionId] 			=	SIR.intInventoryReceiptId
+			,[intSourceTransactionDetailId] 	=	SIR.intInventoryReceiptItemId
+			,[strSourceTransactionId] 			=	SIR.strReceiptNumber
+			,[intFobPointId]					=	NULL
+			,[intInTransitSourceLocationId]		=	NULL
+		FROM @voucherIds ids
+		INNER JOIN tblAPBill A ON A.intBillId = ids.intId 
+		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
+		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
+		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1
+		INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
+		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
+		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
+		INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+		INNER JOIN tblGRStorageType ST_FROM ON ST.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+--		INNER JOIN tblGRStorageInventoryReceipt SIR ON SIR.intCustomerStorageId = C.intCustomerStorageId AND SIR.intSettleStorageId = C3.intSettleStorageId
+		OUTER APPLY (
+			SELECT 
+				SIR.intInventoryReceiptId
+				,SIR.intInventoryReceiptItemId
+				,SIR.dblTransactionUnits
+				,sourceLocation.intItemLocationId
+				,fp.intFobPointId
+				,IR.strReceiptNumber
+				,IRI.intStorageLocationId
+				,IRI.intSubLocationId
+				,IRI.strActualCostId
+				,IRI.intCostUOMId
+				,IRI.intUnitMeasureId
+				,IR.intCurrencyId
+				,IRI.dblForexRate
+				,IRI.ysnSubCurrency
+				,IR.intSubCurrencyCents
+				,IRI.dblUnitCost
+				,IRI.intWeightUOMId
+			FROM tblGRStorageInventoryReceipt SIR
+			INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = SIR.intInventoryReceiptId
+			INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = SIR.intInventoryReceiptItemId
+			LEFT JOIN tblICItemLocation sourceLocation ON sourceLocation.intItemId = IRI.intItemId AND sourceLocation.intLocationId = IR.intLocationId
+			LEFT JOIN tblSMFreightTerms ft ON ft.intFreightTermId = IR.intFreightTermId
+			LEFT JOIN tblICFobPoint fp ON fp.strFobPoint = ft.strFreightTerm
+			WHERE SIR.intCustomerStorageId = C.intCustomerStorageId
+				AND C3.intSettleStorageId = SIR.intSettleStorageId
+				AND (SIR.intContractDetailId = B.intContractDetailId OR SIR.intContractDetailId IS NULL)
+		) SIR
+		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
+		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
+		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
 		LEFT JOIN tblICItemUOM voucherCostUOM ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) 
 			AND B.intCustomerStorageId > 0 
