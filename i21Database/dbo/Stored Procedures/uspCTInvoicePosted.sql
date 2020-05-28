@@ -137,18 +137,18 @@ BEGIN TRY
 			, [intContractDetailId]	= I.[intContractDetailId]
 			, [intContractHeaderId]	= I.[intContractHeaderId]
 			, [intItemUOMId]		= I.[intItemUOMId]
-			, [dblQty]				= SUM(I.[dblQtyShipped])
-			--, [dblQty]				= SUM(isnull(S.dblDestinationQuantity, S.dblQuantity))
+			--, [dblQty]				= SUM(I.[dblQtyShipped])
+			, [dblQty]				= SUM(isnull(S.dblDestinationQuantity, S.dblQuantity))
 			, [intTicketId]			= I.[intTicketId]
 			, [ysnDestWtGrd]		= 1
 			, [dblShippedQty]		= AVG(ISNULL(S.dblQuantity, ID.dblQtyShipped))
 			, [intShippedQtyUOMId]	= ISNULL(S.intItemUOMId, ID.intItemUOMId)
 			, [strPricing]			= ID.[strPricing]			
 		FROM @ItemsFromInvoice	I
-		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
-		INNER JOIN tblSCTicket T ON T.intTicketId	= I.intTicketId
-		INNER JOIN tblCTWeightGrade W	ON W.intWeightGradeId =	T.intWeightId
-		INNER JOIN tblCTWeightGrade G	ON G.intWeightGradeId =	T.intGradeId
+		JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
+		JOIN tblSCTicket T ON T.intTicketId	= I.intTicketId
+		JOIN tblCTWeightGrade W	ON W.intWeightGradeId =	T.intWeightId
+		JOIN tblCTWeightGrade G	ON G.intWeightGradeId =	T.intGradeId
 		LEFT JOIN tblICInventoryShipmentItem S ON S.intSourceId =	I.intTicketId
 										 AND S.intLineNo IS NOT NULL
 										 AND I.intContractDetailId =	S.intLineNo
@@ -305,7 +305,86 @@ BEGIN TRY
 														, @strScreenName			= 'Invoice' 
 						END
 				END
-		END		
+		END
+
+		IF @ysnDestWtGrd = 1 AND @strPricing <> 'Subsystem - Direct'
+		BEGIN
+			IF @dblQty > 0 -- Post
+			BEGIN
+				IF NOT EXISTS (
+					SELECT TOP 1 I.intInvoiceId 
+					FROM tblARInvoiceDetail IID 
+					INNER JOIN (
+						SELECT intInventoryShipmentItemId 
+						FROM tblARInvoiceDetail ID 
+						WHERE ID.intInvoiceDetailId = @intInvoiceDetailId 
+						  AND ID.intInventoryShipmentItemId IS NOT NULL
+					) ISS ON IID.intInventoryShipmentItemId = ISS.intInventoryShipmentItemId
+					INNER JOIN tblARInvoice I ON IID.intInvoiceId = I.intInvoiceId
+					WHERE I.ysnPosted = 1
+					  AND IID.intInvoiceDetailId <> @intInvoiceDetailId
+					  AND I.intInvoiceId <> @intInvoiceId
+				)
+				BEGIN								
+					SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) * -1	
+
+					EXEC	uspCTUpdateSequenceBalance
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblConvertedQty,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInvoiceDetailId,
+							@strScreenName			=	'Invoice',
+							@ysnFromInvoice 		= 	1
+				END
+
+				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice',
+						@ysnFromInvoice 		= 	1  	
+			END
+			ELSE --Unpost
+			BEGIN
+				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
+
+				EXEC	uspCTUpdateSequenceBalance
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblConvertedQty,
+						@intUserId				=	@intUserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice',
+						@ysnFromInvoice 		= 	1  	
+
+				IF NOT EXISTS (
+					SELECT TOP 1 I.intInvoiceId 
+					FROM tblARInvoiceDetail IID 
+					INNER JOIN (
+						SELECT intInventoryShipmentItemId 
+						FROM tblARInvoiceDetail ID 
+						WHERE ID.intInvoiceDetailId = @intInvoiceDetailId 
+						  AND ID.intInventoryShipmentItemId IS NOT NULL
+					) ISS ON IID.intInventoryShipmentItemId = ISS.intInventoryShipmentItemId
+					INNER JOIN tblARInvoice I ON IID.intInvoiceId = I.intInvoiceId
+					WHERE IID.intInvoiceDetailId <> @intInvoiceDetailId
+					  AND I.intInvoiceId <> @intInvoiceId
+				)
+				BEGIN		
+					SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	
+
+					EXEC	uspCTUpdateSequenceBalance
+							@intContractDetailId	=	@intContractDetailId,
+							@dblQuantityToUpdate	=	@dblConvertedQty,
+							@intUserId				=	@intUserId,
+							@intExternalId			=	@intInvoiceDetailId,
+							@strScreenName			=	'Invoice',
+							@ysnFromInvoice 		= 	1
+				END  	
+			END
+		END
 
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
@@ -318,3 +397,4 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
+ 
