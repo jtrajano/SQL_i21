@@ -102,6 +102,11 @@ Type the overview for the table here.
 		ON [dbo].[tblICInventoryReceiptItem] ([intLineNo])
 		INCLUDE ([intInventoryReceiptId],[intSourceId])
 	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItem_forDPR]
+		ON [dbo].[tblICInventoryReceiptItem] ([intInventoryTransferId])
+
+	GO
 		
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Inventory Receipt Id',

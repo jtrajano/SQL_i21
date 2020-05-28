@@ -76,6 +76,11 @@
 
 GO
 
+CREATE NONCLUSTERED INDEX [IX_tblRKFutOptTransaction_forDPR]
+	ON [dbo].[tblRKFutOptTransaction] ([intFutOptTransactionHeaderId],[strInternalTradeNo])
+
+GO
+
 CREATE TRIGGER trgAfterInsertDerivativeEntry
    ON  tblRKFutOptTransaction
    AFTER  INSERT
