@@ -1861,69 +1861,69 @@ BEGIN
 					, strEntityName
 					, strDeliveryDate
 				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference)
-				SELECT @strCommodityCode
-					, strType = 'Net Payable ($)' COLLATE Latin1_General_CI_AS
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost1
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference
-				FROM (
-					SELECT DISTINCT B.intBillId
-						, strBillId
-						, strLocationName
-						, t.strTicketNumber
-						, t.dtmTicketDateTime
-						, strDistributionOption
-						, dblUnitCost = dblCost
-						, dblQtyReceived = SUM(BD.dblQtyReceived) OVER (PARTITION BY B.intBillId)
-						, dblTotal = SUM(B.dblTotal) OVER (PARTITION BY B.intBillId)
-						, BD.dblCost
-						, dblAmountDue
-						, dblCost dblUnitCost1
-						, c.intCommodityId
-						, intContractHeaderId = NULL
-						, strContractNumber = NULL
-						, Cur.strCurrency
-						, strCustomerReference = strName
-					FROM tblAPBill B
-					JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
-					JOIN tblICCommodity c ON I.intCommodityId = c.intCommodityId
-					JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
-					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = B.intShipToId
-					LEFT JOIN tblSCTicket t ON BD.intScaleTicketId = t.intTicketId
-					LEFT JOIN tblEMEntity e ON t.intEntityId = e.intEntityId
-					WHERE B.ysnPosted = 1 AND c.intCommodityId = @intCommodityId AND ISNULL(strTicketStatus, '') <> 'V'
-						AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				)t WHERE dblTotal <> 0
+				--INSERT INTO @tempFinal (strCommodityCode
+				--	, strType
+				--	, dblTotal
+				--	, intContractHeaderId
+				--	, strContractNumber
+				--	, strLocationName
+				--	, strTicketNumber
+				--	, dtmTicketDateTime
+				--	, strDistributionOption
+				--	, dblUnitCost
+				--	, dblQtyReceived
+				--	, intCommodityId
+				--	, strCurrency
+				--	, intBillId
+				--	, strBillId
+				--	, strCustomerReference)
+				--SELECT @strCommodityCode
+				--	, strType = 'Net Payable ($)' COLLATE Latin1_General_CI_AS
+				--	, dblTotal
+				--	, intContractHeaderId
+				--	, strContractNumber
+				--	, strLocationName
+				--	, strTicketNumber
+				--	, dtmTicketDateTime
+				--	, strDistributionOption
+				--	, dblUnitCost1
+				--	, dblQtyReceived
+				--	, intCommodityId
+				--	, strCurrency
+				--	, intBillId
+				--	, strBillId
+				--	, strCustomerReference
+				--FROM (
+				--	SELECT DISTINCT B.intBillId
+				--		, strBillId
+				--		, strLocationName
+				--		, t.strTicketNumber
+				--		, t.dtmTicketDateTime
+				--		, strDistributionOption
+				--		, dblUnitCost = dblCost
+				--		, dblQtyReceived = SUM(BD.dblQtyReceived) OVER (PARTITION BY B.intBillId)
+				--		, dblTotal = SUM(B.dblTotal) OVER (PARTITION BY B.intBillId)
+				--		, BD.dblCost
+				--		, dblAmountDue
+				--		, dblCost dblUnitCost1
+				--		, c.intCommodityId
+				--		, intContractHeaderId = NULL
+				--		, strContractNumber = NULL
+				--		, Cur.strCurrency
+				--		, strCustomerReference = strName
+				--	FROM tblAPBill B
+				--	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+				--	JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
+				--	JOIN tblICCommodity c ON I.intCommodityId = c.intCommodityId
+				--	JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
+				--	JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = B.intShipToId
+				--	LEFT JOIN tblSCTicket t ON BD.intScaleTicketId = t.intTicketId
+				--	LEFT JOIN tblEMEntity e ON t.intEntityId = e.intEntityId
+				--	WHERE B.ysnPosted = 1 AND c.intCommodityId = @intCommodityId AND ISNULL(strTicketStatus, '') <> 'V'
+				--		AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
+				--		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				--		AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				--)t WHERE dblTotal <> 0
 				
 				INSERT INTO @tempFinal (strCommodityCode
 					, strType
@@ -2478,83 +2478,83 @@ BEGIN
 						AND cd.intEntityId = @intVendorId
 				) t WHERE intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				
-				INSERT INTO @tempFinal (strCommodityCode
-					, strType
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory)
-				SELECT @strCommodityCode
-					, strType = 'Net Payable ($)' COLLATE Latin1_General_CI_AS
-					, dblTotal
-					, intContractHeaderId
-					, strContractNumber
-					, strLocationName
-					, strTicketNumber
-					, dtmTicketDateTime
-					, strDistributionOption
-					, dblUnitCost1
-					, dblQtyReceived
-					, intCommodityId
-					, strCurrency
-					, intBillId
-					, strBillId
-					, strCustomerReference
-					, intItemId
-					, strItemNo
-					, intCategoryId
-					, strCategory
-				FROM (
-					SELECT DISTINCT B.intBillId
-						, B.strBillId
-						, strLocationName
-						, t.strTicketNumber
-						, t.dtmTicketDateTime
-						, strDistributionOption
-						, dblUnitCost = dblCost
-						, dblQtyReceived = SUM(BD.dblQtyReceived) OVER (PARTITION BY B.intBillId)
-						, dblTotal = SUM(B.dblTotal) OVER (PARTITION BY B.intBillId)
-						, BD.dblCost
-						, dblAmountDue
-						, dblUnitCost1 = dblCost
-						, c.intCommodityId
-						, intContractHeaderId = NULL
-						, strContractNumber = NULL
-						, Cur.strCurrency
-						, strCustomerReference = strName
-						, I.intItemId
-						, I.strItemNo
-						, Category.intCategoryId
-						, strCategory = Category.strCategoryCode
-					FROM tblAPBill B
-					JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-					JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
-					JOIN tblICCategory Category ON Category.intCategoryId = I.intCategoryId
-					JOIN tblICCommodity c ON I.intCommodityId = c.intCommodityId
-					JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
-					JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = B.intShipToId
-					LEFT JOIN tblSCTicket t ON BD.intScaleTicketId = t.intTicketId
-					LEFT JOIN tblEMEntity e ON t.intEntityId = e.intEntityId
-					WHERE c.intCommodityId = @intCommodityId AND ISNULL(strTicketStatus,'') <> 'V'
-						AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
-						AND B.intEntityVendorId = @intVendorId
-						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-						AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
-				) t WHERE dblTotal <> 0
+				--INSERT INTO @tempFinal (strCommodityCode
+				--	, strType
+				--	, dblTotal
+				--	, intContractHeaderId
+				--	, strContractNumber
+				--	, strLocationName
+				--	, strTicketNumber
+				--	, dtmTicketDateTime
+				--	, strDistributionOption
+				--	, dblUnitCost
+				--	, dblQtyReceived
+				--	, intCommodityId
+				--	, strCurrency
+				--	, intBillId
+				--	, strBillId
+				--	, strCustomerReference
+				--	, intItemId
+				--	, strItemNo
+				--	, intCategoryId
+				--	, strCategory)
+				--SELECT @strCommodityCode
+				--	, strType = 'Net Payable ($)' COLLATE Latin1_General_CI_AS
+				--	, dblTotal
+				--	, intContractHeaderId
+				--	, strContractNumber
+				--	, strLocationName
+				--	, strTicketNumber
+				--	, dtmTicketDateTime
+				--	, strDistributionOption
+				--	, dblUnitCost1
+				--	, dblQtyReceived
+				--	, intCommodityId
+				--	, strCurrency
+				--	, intBillId
+				--	, strBillId
+				--	, strCustomerReference
+				--	, intItemId
+				--	, strItemNo
+				--	, intCategoryId
+				--	, strCategory
+				--FROM (
+				--	SELECT DISTINCT B.intBillId
+				--		, B.strBillId
+				--		, strLocationName
+				--		, t.strTicketNumber
+				--		, t.dtmTicketDateTime
+				--		, strDistributionOption
+				--		, dblUnitCost = dblCost
+				--		, dblQtyReceived = SUM(BD.dblQtyReceived) OVER (PARTITION BY B.intBillId)
+				--		, dblTotal = SUM(B.dblTotal) OVER (PARTITION BY B.intBillId)
+				--		, BD.dblCost
+				--		, dblAmountDue
+				--		, dblUnitCost1 = dblCost
+				--		, c.intCommodityId
+				--		, intContractHeaderId = NULL
+				--		, strContractNumber = NULL
+				--		, Cur.strCurrency
+				--		, strCustomerReference = strName
+				--		, I.intItemId
+				--		, I.strItemNo
+				--		, Category.intCategoryId
+				--		, strCategory = Category.strCategoryCode
+				--	FROM tblAPBill B
+				--	JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
+				--	JOIN tblICItem I ON BD.intItemId = I.intItemId AND BD.intInventoryReceiptChargeId IS NULL AND I.strType = 'Inventory'
+				--	JOIN tblICCategory Category ON Category.intCategoryId = I.intCategoryId
+				--	JOIN tblICCommodity c ON I.intCommodityId = c.intCommodityId
+				--	JOIN tblSMCurrency Cur ON B.intCurrencyId = Cur.intCurrencyID
+				--	JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = B.intShipToId
+				--	LEFT JOIN tblSCTicket t ON BD.intScaleTicketId = t.intTicketId
+				--	LEFT JOIN tblEMEntity e ON t.intEntityId = e.intEntityId
+				--	WHERE c.intCommodityId = @intCommodityId AND ISNULL(strTicketStatus,'') <> 'V'
+				--		AND cl.intCompanyLocationId = ISNULL(@intLocationId, cl.intCompanyLocationId)
+				--		AND B.intEntityVendorId = @intVendorId
+				--		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), B.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+				--		AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				--) t WHERE dblTotal <> 0
 				
 				INSERT INTO @tempFinal (strCommodityCode
 					, strType
