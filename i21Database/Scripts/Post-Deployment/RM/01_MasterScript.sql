@@ -133,6 +133,11 @@ BEGIN
 		UNION ALL SELECT 46, 'Inventory Shipped on Priced Delivery', 'Shipment is invoiced.'
 		UNION ALL SELECT 47, 'Inventory Received on Priced Delivery', 'Receipt is vouchered.'
 		UNION ALL SELECT 48, 'Posted Invoice', 'Sales In-Transit decreasing when Invoice is posted'
+		UNION ALL SELECT 49, 'Distribution (receipt) to DP Contract', 'Quantities increase/decrease in ticket distribution to Purchase DP contract.'
+		UNION ALL SELECT 50, 'Distribution (shipment) to DP Contract', 'Quantities increase/decrease in ticket distribution to Sale DP contract.'
+		UNION ALL SELECT 51, 'Inventory Shipped on Cash Delivery', 'Inventory Shipment shipped cash quantities.'
+		UNION ALL SELECT 52, 'Inventory Received on Cash Delivery', 'Inventory receipt received cash quantities.'
+		UNION ALL SELECT 53, 'Settle Storage on Basis Delivery', 'Settle Storage settled basis quantities.'
 	
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
