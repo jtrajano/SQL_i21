@@ -407,7 +407,7 @@ BEGIN
 				,@intTransferStorageReferenceId = @intTransferStorageReferenceId2
 				,@ysnUnpost = 0
 
-			FETCH c INTO @intTransferStorageReferenceId
+			FETCH c INTO @intTransferStorageReferenceId2
 		END
 		CLOSE c; DEALLOCATE c;
 		--
