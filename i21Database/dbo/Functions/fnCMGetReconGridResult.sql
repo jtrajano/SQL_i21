@@ -43,7 +43,7 @@ BEGIN
 		AS
 		( 
 		SELECT
-			dblAmount
+			  ABS(dblAmount) dblAmount
 			, dtmCheckPrinted 
 			, dtmClr 
 			, dtmDate
@@ -66,7 +66,7 @@ BEGIN
 		UNION
 				--DEPOSIT
 		SELECT
-			dblAmount
+			  dblAmount
 			, dtmCheckPrinted 
 			, dtmClr 
 			, dtmDate
@@ -89,7 +89,7 @@ BEGIN
 		UNION
 				--PAYMENT
 		SELECT
-			dblAmount
+			  ABS(dblAmount) dblAmount
 			, dtmCheckPrinted 
 			, dtmClr 
 			, dtmDate 
