@@ -42,6 +42,9 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strCurrency				= CUR.strCurrency
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , strNotes					= P.strNotes
+	, dtmAccountingPeriod		= CASE WHEN ISNULL(I.ysnPosted,0) = 1 
+								  THEN DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, I.dtmPostDate) + 1, 0))
+								  ELSE NULL END
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 LEFT JOIN (
 	SELECT AP.intPaymentId

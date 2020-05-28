@@ -66,6 +66,9 @@ SELECT
 	,strStatus						= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured.' END	COLLATE Latin1_General_CI_AS
 	,dtmForgiveDate					= I.dtmForgiveDate
 	,strSalesOrderNumber			= SO.strSalesOrderNumber
+	,dtmAccountingPeriod			= CASE WHEN ISNULL(I.ysnPosted,0) = 1 
+									  THEN DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, I.dtmPostDate) + 1, 0))
+									  ELSE NULL END
 
 	, intRecurringId = RECUR.intRecurringId
 	, strFrequency = RECUR.strFrequency
