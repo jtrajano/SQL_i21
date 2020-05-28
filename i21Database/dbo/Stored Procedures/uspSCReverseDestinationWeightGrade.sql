@@ -96,14 +96,14 @@ BEGIN TRY
 					WHERE A.intContractDetailId = @intMatchTicketContractDetailId 
 
 					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblMatchTicketScheduleQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+					SET @dblUnits = (@dblMatchTicketNetUnits * -1)
 
 					IF(ISNULL(@ysnContractLoadBased,0) = 1)
 					BEGIN
 						SET @dblContractAvailableQty = 1
+						SET @dblUnits = (@dblMatchTicketNetUnits / @dblMatchTicketNetUnits) * -1
 					END
 					
-
-					SET @dblUnits = (@dblMatchTicketNetUnits * -1)
 					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblUnits, @intUserId, @intMatchTicketId, 'Scale'
 					EXEC uspCTUpdateScheduleQuantity
 											@intContractDetailId	=	@intContractDetailId,
