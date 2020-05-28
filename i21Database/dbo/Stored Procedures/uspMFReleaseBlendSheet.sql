@@ -228,12 +228,15 @@ Declare @strInputLotNumber nvarchar(50)
 
 Select @intLocationId=intLocationId From @tblBlendSheet
 
+SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+FROM tblMFCompanyPreference
+
 INSERT INTO @tblLotSummary(intLotId,intItemId,dblQty)
 Select intLotId,intItemId,SUM(dblQty) From @tblLot GROUP BY intLotId,intItemId
 
 Declare @intMinLot INT
 Select @intMinLot=Min(intRowNo) From @tblLotSummary
-While(@intMinLot is not null)
+While(@intMinLot is not null) and @ysnEnableParentLot=0
 Begin
 	Select @intInputLotId=intLotId,@dblInputReqQty=dblQty,@intInputItemId=intItemId From @tblLotSummary Where intRowNo=@intMinLot
 	Select @dblInputAvlQty=CASE WHEN isnull(l.dblWeight,0)>0 Then l.dblWeight Else dbo.fnMFConvertQuantityToTargetItemUOM(l.intItemUOMId,tl.intItemUOMId,l.dblQty) End 
@@ -285,9 +288,6 @@ End
 	UPDATE @tblLot
 	SET intStorageLocationId = NULL
 	WHERE intStorageLocationId = 0
-
-	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
-	FROM tblMFCompanyPreference
 
 	SELECT @dblQtyToProduce = dblQtyToProduce
 		,@intUserId = intUserId
@@ -799,7 +799,7 @@ End
 		Where l.intItemId NOT IN (Select intItemId From tblMFWorkOrderRecipeItem 
 		Where intWorkOrderId=@intWorkOrderId AND intRecipeItemTypeId=1 
 		Union
-		Select intItemId From tblMFWorkOrderRecipeSubstituteItem Where intWorkOrderId=@intWorkOrderId)
+		Select intSubstituteItemId From tblMFWorkOrderRecipeSubstituteItem Where intWorkOrderId=@intWorkOrderId)
 
 		If ISNULL(@strInActiveItems,'')<>''
 		Begin
