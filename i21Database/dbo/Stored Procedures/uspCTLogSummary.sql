@@ -1970,12 +1970,19 @@ BEGIN TRY
 		BEGIN		
 			IF @ysnDeleted = 1
 			BEGIN
-				UPDATE @cbLogCurrent SET dblQty = dblQty * -1
-				EXEC uspCTLogContractBalance @cbLogCurrent, 0
+				UPDATE @cbLogSpecific SET dblQty = dblQty * -1
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
+			
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 3)
+			BEGIN
+				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intActionId = 54
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END			
+			
 			-- No changes with dblQty
 			ELSE IF @total = 0
-			BEGIN								
+			BEGIN											
 				-- Delete records not equals to 'Contract Balance'
 				DELETE FROM @cbLogPrev   
 				WHERE strTransactionType <> 'Contract Balance'
@@ -1984,68 +1991,71 @@ BEGIN TRY
 				WHERE intId <> (SELECT TOP 1 intId FROM @cbLogPrev ORDER BY intId DESC)
 
 				-- Compare previous AND current except the qty				
-				SELECT @ysnMatched = CASE WHEN COUNT(dtmTransactionDate) = 1 THEN 1 ELSE 0 END
+				SELECT @ysnMatched = CASE WHEN COUNT(intPricingTypeId) = 1 THEN 1 ELSE 0 END
 				FROM
 				(
-					SELECT dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
-					, strTransactionType
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
+					SELECT --dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+					--, strTransactionType
+					--, intContractDetailId
+					--, intContractHeaderId
+					--, strContractNumber
+					--, intContractSeq
+					--, intContractTypeId
+					--, intEntityId
+					--, intCommodityId
+					--, intItemId
+					--, intLocationId
+					--, 
+					intPricingTypeId
+					--, intFutureMarketId
+					--, intFutureMonthId
+					--, dblBasis
+					--, dblFutures
+					--, intQtyUOMId
+					--, intQtyCurrencyId
+					--, intBasisUOMId
+					--, intBasisCurrencyId
+					--, intPriceUOMId
+					--, dtmStartDate
+					--, dtmEndDate
+					--, intContractStatusId
+					--, intBookId
+					--, intSubBookId
 					, strNotes FROM @cbLogPrev
 					UNION
-					SELECT dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
-					, strTransactionType				
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, intContractStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes FROM @cbLogCurrent
+					SELECT 
+					--dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+					--, strTransactionType				
+					--, intContractDetailId
+					--, intContractHeaderId
+					--, strContractNumber
+					--, intContractSeq
+					--, intContractTypeId
+					--, intEntityId
+					--, intCommodityId
+					--, intItemId
+					--, intLocationId
+					--, 
+					intPricingTypeId
+					--, intFutureMarketId
+					--, intFutureMonthId
+					--, dblBasis
+					--, dblFutures
+					--, intQtyUOMId
+					--, intQtyCurrencyId
+					--, intBasisUOMId
+					--, intBasisCurrencyId
+					--, intPriceUOMId
+					--, dtmStartDate
+					--, dtmEndDate
+					--, intContractStatusId
+					--, intBookId
+					--, intSubBookId
+					, strNotes FROM @cbLogSpecific
 				) tbl
 
 				IF @ysnMatched <> 1
-				BEGIN					
+				BEGIN		
 					-- Negate AND add previous record
 					UPDATE a
 					SET dblQty = CASE
@@ -2056,7 +2066,8 @@ BEGIN TRY
 						a.intPricingTypeId = CASE 
 												WHEN @strProcess = 'Price Fixation' THEN 2
 												ELSE a.intPricingTypeId
-											END
+											END,
+						intActionId = 43
 					FROM @cbLogPrev a
 					OUTER APPLY
 					(
@@ -2087,7 +2098,7 @@ BEGIN TRY
 												WHEN @strProcess = 'Price Fixation' THEN 1 
 												ELSE a.intPricingTypeId
 											END
-						FROM @cbLogCurrent a				
+						FROM @cbLogSpecific a				
 						OUTER APPLY
 						(
 							SELECT TOP 1 dblQtyPriced 
@@ -2096,9 +2107,29 @@ BEGIN TRY
 							ORDER BY intSequenceHistoryId DESC
 						) b	
 
-						EXEC uspCTLogContractBalance @cbLogCurrent, 0
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
-				END			
+				END		
+				ELSE
+				BEGIN
+					-- Check if the changes is with either Basis or Futures
+					SELECT @ysnMatched = CASE WHEN COUNT(dblBasis) = 1 THEN 1 ELSE 0 END
+					FROM
+					(
+						SELECT dblBasis
+						, dblFutures
+						FROM @cbLogPrev
+						UNION
+						SELECT dblBasis
+						, dblFutures
+						FROM @cbLogSpecific
+					) tbl
+					IF @ysnMatched <> 1
+					BEGIN
+						UPDATE @cbLogSpecific SET dblQty = 0
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
+				END	
 			END
 			ELSE -- With changes with dblQty
 			BEGIN
@@ -2175,7 +2206,7 @@ BEGIN TRY
 					, intContractStatusId
 					, intBookId
 					, intSubBookId
-					, strNotes FROM @cbLogCurrent
+					, strNotes FROM @cbLogSpecific
 				) tbl
 
 				IF @ysnMatched <> 1
@@ -2187,8 +2218,8 @@ BEGIN TRY
 				END
 				
 				-- Add current record
-				UPDATE  @cbLogCurrent SET dblQty = @total
-				EXEC uspCTLogContractBalance @cbLogCurrent, 0		
+				UPDATE  @cbLogSpecific SET dblQty = @total
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0		
 			END
 		END
 		ELSE 
