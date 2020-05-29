@@ -188,7 +188,7 @@ BEGIN
 			,dtmTransactionDate			= ItemTransactions.dtmDate
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-			,ysnIsUnposted				= 1
+			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
@@ -240,7 +240,7 @@ BEGIN
 			,dtmTransactionDate			= ItemTransactions.dtmDate
 			,strJournalLineDescription	= '' 
 			,intJournalLineNo			= ItemTransactions.intInventoryTransactionId
-			,ysnIsUnposted				= 1
+			,ysnIsUnposted				= 0
 			,intUserId					= @intEntityUserSecurityId 
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
@@ -380,7 +380,11 @@ BEGIN
 	FROM	dbo.tblGLDetail GLEntries
 	WHERE	GLEntries.intTransactionId = @intTransactionId
 			AND GLEntries.strTransactionId = @strTransactionId
-			AND strTransactionType <> @AccountCategory_Auto_Negative
+			AND strTransactionType NOT IN (
+				@AccountCategory_Auto_Negative
+				,'Inventory Auto Variance'
+				,'Inventory Auto Variance on Negatively Sold or Used Stock'
+			)
 	;
 	-- Update the ysnPostedFlag for the related transactions
 	UPDATE	GLEntries
@@ -390,6 +394,10 @@ BEGIN
 				AND GLEntries.intTransactionId = ItemTransactions.intRelatedTransactionId
 				AND GLEntries.strTransactionId = ItemTransactions.strRelatedTransactionId
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND GLEntries.strTransactionType <> @AccountCategory_Auto_Negative
+			AND GLEntries.strTransactionType NOT IN (
+				@AccountCategory_Auto_Negative
+				,'Inventory Auto Variance'
+				,'Inventory Auto Variance on Negatively Sold or Used Stock'
+			)
 	;
 END 
