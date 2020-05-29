@@ -129,6 +129,7 @@
 	[strNutrientAnalysis]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
 	[strBillingMethod]					NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL,
 	[strApplicatorLicense]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
+	[dtmAccountingPeriod]				DATETIME
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
