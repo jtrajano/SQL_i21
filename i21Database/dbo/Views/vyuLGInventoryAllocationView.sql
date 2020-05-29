@@ -64,7 +64,7 @@ FROM (
 		,strStockUOM = Shipment.strItemUOM
 
 		,strVendor = Shipment.strVendor
-		,strCustomer = Shipment.strCustomer
+		,strCustomer = ISNULL(Shipment.strCustomer, Cus.strName)
 
 		,strCommodity = Shipment.strCommodity
 		,strItemNo = Shipment.strItemNo
@@ -90,6 +90,7 @@ FROM (
 		
 		,strWarehouse = Shipment.strSubLocationName
 		,strLocationName = Shipment.strLocationName
+		,dtmReceiptDate = Shipment.dtmReceiptDate
 
 		,strSampleNumber
 		,dtmSampleReceived
@@ -112,6 +113,7 @@ FROM (
 		LEFT JOIN tblLGAllocationDetail ALD ON ALD.intPContractDetailId = Shipment.intContractDetailId
 		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = ALD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
+		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblLGPickLotDetail PLD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId AND PLD.intContainerId = Shipment.intLoadContainerId
 		OUTER APPLY 
 			(SELECT TOP 1 ysnHasPickContainers = CAST(1 AS BIT) 
@@ -177,7 +179,7 @@ FROM (
 		,strStockUOM = Spot.strItemUOM
 
 		,strVendor = Spot.strVendor
-		,strCustomer = Spot.strCustomer
+		,strCustomer = ISNULL(Spot.strCustomer, Cus.strName)
 
 		,strCommodity = Spot.strCommodity
 		,strItemNo = Spot.strItemNo
@@ -203,6 +205,7 @@ FROM (
 		
 		,strWarehouse = Spot.strSubLocationName
 		,strLocationName = Spot.strLocationName
+		,dtmReceiptDate = Spot.dtmReceiptDate
 
 		,strSampleNumber
 		,dtmSampleReceived
@@ -231,6 +234,7 @@ FROM (
 		LEFT JOIN tblLGAllocationDetail ALD ON ALD.intAllocationDetailId = PLD.intAllocationDetailId
 		LEFT JOIN tblCTContractDetail SCD ON SCD.intContractDetailId = ALD.intSContractDetailId
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
+		LEFT JOIN tblEMEntity Cus ON Cus.intEntityId = SCH.intEntityId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Spot.intContractDetailId
 		OUTER APPLY 
 			(SELECT TOP 1
@@ -319,6 +323,7 @@ FROM (
 		
 		,strWarehouse = SLOC.strSubLocationName
 		,strLocationName = CLOC.strLocationName
+		,dtmReceiptDate = CAST(NULL AS DATETIME)
 
 		,strSampleNumber
 		,dtmSampleReceived
