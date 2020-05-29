@@ -851,7 +851,7 @@ BEGIN TRY
         ,@PostDate 		= @PostDate
         ,@BatchId  		= @BatchIdUsed
         ,@UserId   		= @UserId
-		,@raiseError	= @raiseError
+		,@raiseError	= @RaiseError
 
 	INSERT INTO @GLEntries
 		([dtmDate]
