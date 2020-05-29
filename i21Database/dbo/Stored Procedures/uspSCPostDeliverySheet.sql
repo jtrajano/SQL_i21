@@ -552,6 +552,14 @@ BEGIN TRY
 	) SC
 	WHERE CS.intDeliverySheetId = @intDeliverySheetId
 		
+	UPDATE A
+	SET dblOpenBalance = B.dblQty
+		,dblOriginalBalance = B.dblQty
+	FROM tblGRCustomerStorage A
+	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
+	WHERE intDeliverySheetId = @intDeliverySheetId 
+
+
 	UPDATE GRS SET GRS.dblGrossQuantity = ((GRS.dblOpenBalance / SCD.dblNet) * SCD.dblGross)
 	FROM tblSCDeliverySheet SCD
 	INNER JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
@@ -560,12 +568,7 @@ BEGIN TRY
 	AND SCDS.intStorageScheduleTypeId = GRS.intStorageTypeId  
 	where SCDS.intDeliverySheetId = @intDeliverySheetId and GRS.ysnTransferStorage = 0
 
-	UPDATE A
-	SET dblOpenBalance = B.dblQty
-		,dblOriginalBalance = B.dblQty
-	FROM tblGRCustomerStorage A
-	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
-	WHERE intDeliverySheetId = @intDeliverySheetId 
+	
 
 
 
