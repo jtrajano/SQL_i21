@@ -8162,6 +8162,8 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
+    <Build Include="dbo\Views\vyuRKDPRRun.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
