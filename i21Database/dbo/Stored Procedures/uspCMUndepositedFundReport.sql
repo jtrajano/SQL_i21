@@ -79,7 +79,8 @@ BEGIN
 	'' AS strTransactionId,
 	cast(0 as bit)  AS ysnPosted,
 	null AS dtmCMDate,
-	0 AS dblAmount
+	0 AS dblAmount,
+	'' AS strBatchId
 	UNION
 
 	SELECT 
@@ -101,8 +102,16 @@ BEGIN
 	a.strTransactionId,
 	a.ysnPosted,
 	a.dtmCMDate,
-	a.dblAmount 
+	a.dblAmount,
+	GL.strBatchId
 	FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo,@dtmCMDate) a
+	OUTER APPLY(
+		SELECT TOP 1 replace(strBatchId, 'BATCH-','') FROM tblGLDetail 
+		WHERE strTransactionId = a.strSourceTransactionId 
+		AND strTransactionType = 'Receive Payments'
+		AND ysnIsUnposted = 0
+	)GL
+
 	WHERE ISNULL(@strLocation, a.strLocationName) = a.strLocationName
 
 END
@@ -127,5 +136,6 @@ BEGIN
 	'' AS strTransactionId,
 	cast(0 as bit)  AS ysnPosted,
 	null AS dtmCMDate,
-	0 AS dblAmount
+	0 AS dblAmount,
+	'' AS strBatchId
 END
