@@ -722,7 +722,7 @@ BEGIN
 					,[strBatchId]							= @strBatchId
 					,[intTransactionTypeId]					= @AUTO_NEGATIVE
 					,[intLotId]								= NULL 
-					,[ysnIsUnposted]						= 1
+					,[ysnIsUnposted]						= 0
 					,[intRelatedInventoryTransactionId]		= NULL 
 					,[intRelatedTransactionId]				= NULL 
 					,[strRelatedTransactionId]				= NULL 
