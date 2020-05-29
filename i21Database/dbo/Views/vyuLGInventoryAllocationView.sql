@@ -83,6 +83,8 @@ FROM (
 		,strBLNumber = Shipment.strBLNumber
 		,dtmBLDate = Shipment.dtmBLDate
 		,strBLReceived = CASE WHEN (L.dtmDeadlineBL IS NOT NULL) THEN 'Y' ELSE 'N' END
+		,dtmLastFreeDate = Shipment.dtmLastFreeDate
+		,dtmEmptyContainerReturn = Shipment.dtmEmptyContainerReturn
 		,strCourierTrackingNumber = L.strCourierTrackingNumber
 		,strComments = L.strComments
 		
@@ -194,6 +196,8 @@ FROM (
 		,strBLNumber = Spot.strBLNumber
 		,dtmBLDate = Spot.dtmBLDate
 		,strBLReceived = CASE WHEN (L.dtmDeadlineBL IS NOT NULL) THEN 'Y' ELSE 'N' END
+		,dtmLastFreeDate = LW.dtmLastFreeDate
+		,dtmEmptyContainerReturn = LW.dtmEmptyContainerReturn
 		,strCourierTrackingNumber = L.strCourierTrackingNumber
 		,strComments = IRI.strComments
 		
@@ -219,6 +223,7 @@ FROM (
 		LEFT JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = IRI.intContainerId
 		LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
+		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
 		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
 		LEFT JOIN tblEMEntity TM ON TM.intEntityId = L.intTerminalEntityId
@@ -307,6 +312,8 @@ FROM (
 		,strBLNumber = L.strBLNumber
 		,dtmBLDate = L.dtmBLDate
 		,strBLReceived = CASE WHEN (L.dtmDeadlineBL IS NOT NULL) THEN 'Y' ELSE 'N' END
+		,dtmLastFreeDate = LW.dtmLastFreeDate
+		,dtmEmptyContainerReturn = LW.dtmEmptyContainerReturn
 		,strCourierTrackingNumber = L.strCourierTrackingNumber
 		,strComments = L.strComments
 		
