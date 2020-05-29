@@ -788,6 +788,19 @@ END CATCH
 -- If POST, call the post routines  
 --------------------------------------------------------------------------------------------
 BEGIN TRY
+	IF(OBJECT_ID('tempdb..#ARInvalidInventories') IS NOT NULL)
+    BEGIN
+        DROP TABLE #ARInvalidInventories
+    END
+
+	CREATE TABLE #ARInvalidInventories (
+		 [strMessage]			NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL
+		,[strTransactionType]	NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
+		,[strTransactionId]		NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
+		,[strBatchNumber]		NVARCHAR (200)   COLLATE Latin1_General_CI_AS NULL
+		,[intTransactionId]		INT              NULL
+	)
+
     IF(OBJECT_ID('tempdb..#ARInvoiceGLEntries') IS NOT NULL)
     BEGIN
         DROP TABLE #ARInvoiceGLEntries
@@ -843,11 +856,12 @@ BEGIN TRY
 	EXEC dbo.[uspARGenerateEntriesForAccrual] 
 
     EXEC [dbo].[uspARGenerateGLEntries]
-         @Post     = @post
-	    ,@Recap    = @recap
-        ,@PostDate = @PostDate
-        ,@BatchId  = @batchIdUsed
-        ,@UserId   = @userId
+         @Post     		= @post
+	    ,@Recap    		= @recap
+        ,@PostDate 		= @PostDate
+        ,@BatchId  		= @batchIdUsed
+        ,@UserId   		= @userId
+		,@raiseError	= @raiseError
 	
 	INSERT INTO @GLEntries
 		([dtmDate]
@@ -958,6 +972,19 @@ BEGIN TRY
     FROM
         [dbo].[fnGetGLEntriesErrors](@GLEntries, @post)
 
+	INSERT INTO @InvalidGLEntries (
+		  [strTransactionId]
+        , [strText]
+        , [intErrorCode]
+        , [strModuleName]
+	)
+	SELECT DISTINCT
+		 [strTransactionId]
+		,[strMessage]
+		,100
+		,'Accounts Receivable'
+	FROM #ARInvalidInventories
+
     DECLARE @invalidGLCount INT
 	SET @invalidGLCount = ISNULL((SELECT COUNT(DISTINCT[strTransactionId]) FROM @InvalidGLEntries), 0)
     SET @invalidCount = @invalidCount + @invalidGLCount
@@ -975,11 +1002,19 @@ BEGIN TRY
         ,[strTransactionId]     = IGLE.[strTransactionId]
         ,[strBatchNumber]       = GLE.[strBatchId]
         ,[intTransactionId]     = GLE.[intTransactionId] 
-    FROM
-        @InvalidGLEntries IGLE
-    LEFT OUTER JOIN
-        @GLEntries GLE
-        ON IGLE.[strTransactionId] = GLE.[strTransactionId]	
+    FROM @InvalidGLEntries IGLE
+    LEFT OUTER JOIN @GLEntries GLE ON IGLE.[strTransactionId] = GLE.[strTransactionId]	
+	WHERE IGLE.strTransactionId IS NOT NULL
+
+	UNION ALL
+
+	SELECT DISTINCT
+         [strError]             = strMessage
+        ,[strTransactionType]   = strTransactionType
+        ,[strTransactionId]     = strTransactionId
+        ,[strBatchNumber]       = strBatchNumber
+        ,[intTransactionId]     = intTransactionId
+    FROM #ARInvalidInventories
 
 	IF @raiseError = 1 AND ISNULL(@invalidGLCount, 0) > 0
 	BEGIN
@@ -988,16 +1023,13 @@ BEGIN TRY
 	END
 
     DELETE FROM #ARInvoiceGLEntries
-    WHERE
-		[strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+    WHERE [strTransactionId] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
     DELETE FROM #ARPostInvoiceHeader
-    WHERE
-		[strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+    WHERE [strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
     DELETE FROM #ARPostInvoiceDetail
-    WHERE
-		[strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
+    WHERE [strInvoiceNumber] IN (SELECT DISTINCT [strTransactionId] FROM @InvalidGLEntries)
 
     EXEC [dbo].[uspARBookInvoiceGLEntries]
             @Post    = @post
