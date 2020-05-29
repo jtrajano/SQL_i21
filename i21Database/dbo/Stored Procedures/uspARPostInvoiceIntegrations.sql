@@ -77,6 +77,8 @@ BEGIN
        , ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
        , ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
        , ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
+	   , ARI.dtmAccountingPeriod        = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
+									  
     FROM #ARPostInvoiceHeader PID
     INNER JOIN (
 		SELECT intInvoiceId
@@ -105,6 +107,7 @@ BEGIN
 			 , strTransactionType
 			 , dtmDate
 			 , ysnExcludeFromPayment
+			 , dtmAccountingPeriod
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId
 
@@ -478,6 +481,7 @@ BEGIN
 		, ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 		, ARI.ysnExcludeFromPayment		= 0
 		, ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
+		, ARI.dtmAccountingPeriod		= NULL
 	FROM #ARPostInvoiceHeader PID
 	INNER JOIN (
 		SELECT intInvoiceId
@@ -504,6 +508,7 @@ BEGIN
 			 , dblBaseInvoiceTotal
 			 , dtmDate
 			 , ysnExcludeFromPayment
+			 , dtmAccountingPeriod
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
 	CROSS APPLY (

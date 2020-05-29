@@ -58,7 +58,7 @@ FROM
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) <= 90 THEN '61 - 90 Days'    
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 90 THEN 'Over 90' END
 				END
-	 ,dtmAccountingPeriod   = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, I.dtmPostDate) + 1, 0))
+	 ,dtmAccountingPeriod   = I.dtmAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 WHERE ysnPosted = 1
 	AND ysnPaid = 0

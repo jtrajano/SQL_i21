@@ -30,9 +30,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblTotal					= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotal, 0) ELSE ISNULL(ID.dblTotal, 0) * -1 END
 	 , ysnPosted				= ISNULL(I.ysnPosted, 0)
 	 , ysnImpactInventory		= ISNULL(I.ysnImpactInventory, 0)
-	 , dtmAccountingPeriod      = CASE WHEN ISNULL(I.ysnPosted, 0) = 1 
-								  THEN DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, I.dtmPostDate) + 1, 0))
-								  ELSE NULL END
+	 , dtmAccountingPeriod      = I.dtmAccountingPeriod
 
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
