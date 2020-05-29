@@ -32,6 +32,9 @@ SELECT intPaymentId				= P.intPaymentId
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
 	 , strTransactionId			= ISNULL(ARP.strTransactionId, '')
+	 , dtmAccountingPeriod      = CASE WHEN ysnPosted = 1 
+								  THEN DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmDatePaid) + 1, 0))
+								  ELSE NULL END
 FROM (
 	SELECT intPaymentId
 		 , strRecordNumber 
