@@ -284,6 +284,7 @@ BEGIN TRY
 		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intPriceFixationKey				INT
 	)    
 
 	DECLARE @FinalPriceFixation TABLE(
@@ -1193,7 +1194,8 @@ BEGIN TRY
 	,dtmSeqEndDate			
 	,strFutMarketName			
 	,strCategory
-	,strPricingStatus 				
+	,strPricingStatus
+	,intPriceFixationKey		
 	)
 	SELECT DISTINCT
      intContractTypeId		= CH.intContractTypeId
@@ -1272,6 +1274,7 @@ BEGIN TRY
 	,strFutMarketName			= FM.strFutMarketName
 	,strCategory 				= Category.strCategoryCode
 	,strPricingStatus			= 'Priced'
+	,intPriceFixationKey		= PF.intPriceFixationKey
 	FROM tblCTContractDetail					CD
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
