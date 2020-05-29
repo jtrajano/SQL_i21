@@ -883,7 +883,7 @@ BEGIN
 			@strBatchId
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 			,@intEntityUserSecurityId
-			,@strGLDescription
+			,@strGLDescription		
 	END
 END   	
 
@@ -1004,7 +1004,7 @@ END
 IF @ysnRecap = 0
 BEGIN 	
 	IF (@ysnGLEntriesRequired = 1 AND EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock))
-		OR (EXISTS (SELECT TOP 1 1 FROM @GLEntries) AND @ysnPost = 0) 
+		OR (EXISTS (SELECT TOP 1 1 FROM @GLEntries)) 
 	BEGIN 
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 	
 	END
