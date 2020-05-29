@@ -2036,7 +2036,6 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
-    <Build Include="dbo\Views\vyuRKGetSettlementPriceHeader.sql" />
     <Build Include="dbo\Views\vyuSMPortalPermission.sql" />
     <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
@@ -8686,6 +8685,7 @@
     <Build Include="dbo\Tables\tblIPAcknowledgementStage.sql" />
     <Build Include="dbo\Tables\tblIPAcknowledgementError.sql" />
     <Build Include="dbo\Tables\tblIPAcknowledgementArchive.sql" />
+    <Build Include="dbo\Views\vyuRKGetSettlementPriceHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
