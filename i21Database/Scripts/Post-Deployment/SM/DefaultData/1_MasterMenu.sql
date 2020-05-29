@@ -4006,6 +4006,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract 
     VALUES (N'Contract vs Market Differential Analysis', N'Logistics', @LogisticsReportParentMenuId, N'Contract vs Market Differential Analysis', N'Report', N'Screen', N'Logistics.view.ContractVsMarketDifferential', N'small-menu-report', 0, 0, 0, 1, 7, 1)
 ELSE
     UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Logistics.view.ContractVsMarketDifferential' WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Allocated & Unallocated Inventory View' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Allocated & Unallocated Inventory View', N'Logistics', @LogisticsReportParentMenuId, N'Allocated & Unallocated Inventory View', N'Report', N'Screen', N'Logistics.view.InventoryAllocationViewReport?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 8, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Logistics.view.InventoryAllocationViewReport?showSearch=true' WHERE strMenuName = 'Allocated & Unallocated Inventory View' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsReportParentMenuId
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Allocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Unallocated Contracts List' AND strModuleName = 'Logistics' AND intParentMenuID = @LogisticsMaintenanceParentMenuId
