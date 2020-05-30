@@ -130,14 +130,14 @@ BEGIN
 		, cd.intFutureMonthId
 		, 0 --cd.dblBasis
 		, 0 --cd.dblFutures
-		, ISNULL(bd.intWeightUOMId, bd.intUnitOfMeasureId)--cd.intUnitMeasureId
+		, cum.intCommodityUnitMeasureId --ISNULL(bd.intWeightUOMId, bd.intUnitOfMeasureId)--cd.intUnitMeasureId
 		, b.intCurrencyId
 		, NULL--cd.intBasisUOMId
 		, NULL--cd.intBasisCurrencyId
 		, intPriceUOMId = bd.intCostUOMId--cd.intPriceItemUOMId
 		, cd.dtmStartDate
 		, cd.dtmEndDate
-		, dblQty = CASE WHEN @remove = 1 THEN bd.dblQtyReceived ELSE -bd.dblQtyReceived END
+		, dblQty = CASE WHEN @remove = 1 THEN COALESCE(bd.dblNetWeight,bd.dblQtyReceived) ELSE -COALESCE(bd.dblNetWeight,bd.dblQtyReceived) END
 		, cd.intContractStatusId
 		, cd.intBookId
 		, cd.intSubBookId
@@ -152,7 +152,7 @@ BEGIN
 	CROSS APPLY (
 		SELECT * FROM dbo.fnAPGetVoucherCommodity(b.intBillId)
 	) c
-	INNER JOIN tblICItemUOM iuom ON iuom.intItemUOMId = bd.intUnitOfMeasureId
+	INNER JOIN tblICItemUOM iuom ON iuom.intItemUOMId = ISNULL(bd.intWeightUOMId, bd.intUnitOfMeasureId)
 	INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = c.intCommodityId AND cum.intUnitMeasureId = iuom.intUnitMeasureId
 	WHERE bd.intItemId > 0 AND bd.intContractDetailId > 0
 
