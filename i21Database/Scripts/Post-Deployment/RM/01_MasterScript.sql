@@ -118,7 +118,7 @@ BEGIN
 		UNION ALL SELECT 31, 'Inbound Shipment', 'Positive or negative change to inventory based on Load Schedule -> Inbound Shipment'
 		UNION ALL SELECT 32, 'Outbound Shipment', 'Positive or negative change to inventory based on Load Schedule -> Outbound Shipment'
 		UNION ALL SELECT 33, 'Company Owned to Customer Owned storage', 'Unpost Settle Storage (settled customer-owned storage). Transfer storage from Company owned to Customer owned; Unpost of customer owned to company owned storage'
-		UNION ALL SELECT 34, 'Derivatives', 'Created Derivative Entries.'
+		UNION ALL SELECT 34, 'Created Derivative', 'Created Derivative Entries.'
 		UNION ALL SELECT 35, 'Collateral Receipts', 'Created Collateral receipts.'
 		UNION ALL SELECT 36, 'Match Derivatives', 'Created Match Derivatives.'
 		UNION ALL SELECT 37, 'Settle Storage - Company owned storage', 'Company owned storage is settled or reversed'
@@ -140,6 +140,8 @@ BEGIN
 		UNION ALL SELECT 53, 'Settle Storage on Basis Delivery', 'Settle Storage settled basis quantities.'
 		UNION ALL SELECT 54, 'Canceled Sequence', 'Canceled Sequence.'
 		UNION ALL SELECT 55, 'Deleted Pricing', 'Deleted Pricing.'
+		UNION ALL SELECT 56, 'Updated Derivative', 'Updated Derivative Entries.'
+		UNION ALL SELECT 57, 'Deleted Derivative', 'Deleted Derivative Entries.'
 	
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)

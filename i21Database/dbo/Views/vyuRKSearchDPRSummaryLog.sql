@@ -72,9 +72,9 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 					,strTransactionNumber
 					,strContractNumber
 					,intContractSeq
-					,dblTransactionQty = (dblOrigNoOfLots * dblContractSize)
+					,dblTransactionQty = dblOrigQty
 					,strTransactionUOM = origUM.strUnitMeasure
-					,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, (dblOrigNoOfLots * dblContractSize))
+					,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, dblOrigQty)
 					,strStockUOM = stckUM.strUnitMeasure
 					,strLocationName
 					,strEntityName
@@ -96,7 +96,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 				CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(SL.strMiscField) mf
 				WHERE strTransactionType IN ('Derivative Entry')
 				AND ISNULL(mf.ysnPreCrush, 0) = 0
-		) t  WHERE intRowNum = 1
+		) t
 
 		UNION ALL
 		SELECT * FROM (

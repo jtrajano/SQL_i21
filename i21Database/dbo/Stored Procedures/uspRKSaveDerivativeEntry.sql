@@ -57,10 +57,10 @@ BEGIN
 	LEFT JOIN tblSMCurrency cur ON cur.intCurrencyID = m.intCurrencyId
 	WHERE intFutOptTransactionId = @intFutOptTransactionId
 
-	SELECT TOP 1 * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intFutOptTransactionId AND strTransactionType = 'Derivatives' ORDER BY dtmCreatedDate DESC
 
 	DECLARE @SummaryLog AS RKSummaryLog
 	DECLARE @LogHelper AS RKMiscField
+	DECLARE @dblPreviousNoOfLots NUMERIC(24,10)
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpDerivative)
 	BEGIN
@@ -103,6 +103,11 @@ BEGIN
 			UNION ALL SELECT 'ysnPreCrush', CAST(@ysnPreCrush AS NVARCHAR)
 			UNION ALL SELECT 'strBrokerTradeNo', @strBrokerTradeNo
 		) t WHERE ISNULL(strValue, '') != ''
+
+		select @dblPreviousNoOfLots = sum(dblOrigNoOfLots)
+		from tblRKSummaryLog
+		where intTransactionRecordId = @intFutOptTransactionId
+		and strTransactionType = 'Derivative Entry'
 
 		INSERT INTO @SummaryLog(strBucketType
 			, strTransactionType
@@ -148,37 +153,87 @@ BEGIN
 			, intSubBookId = der.intSubBookId
 			, intFutureMarketId = der.intFutureMarketId
 			, intFutureMonthId = der.intFutureMonthId
-			, dblNoOfLots = CASE WHEN UPPER(strBuySell) = 'BUY' THEN der.dblNoOfLots ELSE der.dblNoOfLots * -1 END 
+			, dblNoOfLots = CASE WHEN UPPER(strBuySell) = 'BUY' THEN (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) ELSE (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) * -1 END 
 			, dblPrice = der.dblPrice
 			, dblContractSize = der.dblContractSize
-			, dblQty = (CASE WHEN UPPER(strBuySell) = 'BUY' THEN der.dblNoOfLots ELSE der.dblNoOfLots * -1 END ) * dblContractSize
+			, dblQty = (CASE WHEN UPPER(strBuySell) = 'BUY' THEN (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) ELSE (der.dblNoOfLots - ABS(ISNULL(@dblPreviousNoOfLots,0))) * -1 END ) * dblContractSize
 			, intEntityId = der.intEntityId
 			, intUserId = @intUserId
 			, strNotes = der.strNotes
 			, intCommodityUOMId = der.intCommodityUOMId
 			, strMiscFields = dbo.fnRKConvertMiscFieldString(@LogHelper)
-			, intActionId = 34
+			, intActionId = CASE WHEN @dblPreviousNoOfLots IS NULL THEN 34 ELSE 56 END
 		FROM #tmpDerivative der		
 	END
 	ELSE
 	BEGIN
-		IF EXISTS (SELECT TOP 1 1 FROM #History)
-		BEGIN
-			INSERT INTO @SummaryLog(strTransactionType
-				, intTransactionRecordId
-				, ysnDelete
-				, intUserId
-				, strNotes)
-			SELECT strTransactionType = 'Derivatives'
-				, intTransactionRecordId = @intFutOptTransactionId
-				, ysnDelete = 1
-				, intUserId = @intUserId
-				, strNotes = 'Delete record'
-		END
+		--For Delete
+		select @dblPreviousNoOfLots = sum(dblOrigNoOfLots)
+		from tblRKSummaryLog
+		where intTransactionRecordId = @intFutOptTransactionId
+		and strTransactionType = 'Derivative Entry'
+
+		INSERT INTO @SummaryLog(strBucketType
+			, strTransactionType
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intFutOptTransactionId
+			, intCommodityId
+			, intLocationId
+			, intCurrencyId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblPrice
+			, dblContractSize
+			, dblQty
+			, intEntityId
+			, intUserId
+			, strNotes
+			, intCommodityUOMId
+			, strMiscFields
+			, intActionId)
+		SELECT TOP 1  strBucketType = 'Derivatives'
+			, strTransactionType = 'Derivative Entry'
+			, intTransactionRecordId 
+			, intTransactionRecordHeaderId 
+			, strDistributionType
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intContractDetailId
+			, intContractHeaderId 
+			, intFutOptTransactionId 
+			, intCommodityId 
+			, intLocationId
+			, intCurrencyId 
+			, intBookId 
+			, intSubBookId 
+			, intFutureMarketId 
+			, intFutureMonthId 
+			, dblNoOfLots = ISNULL(@dblPreviousNoOfLots,0) * -1
+			, dblPrice 
+			, dblContractSize
+			, dblQty = (ISNULL(@dblPreviousNoOfLots,0) * -1) * dblContractSize
+			, intEntityId 
+			, intUserId = @intUserId
+			, strNotes 
+			, intOrigUOMId 
+			, strMiscField
+			, intActionId = 57 --Delete Derivative
+		FROM tblRKSummaryLog 
+		WHERE intTransactionRecordId = @intFutOptTransactionId
+		ORDER BY dtmCreatedDate DESC
+		
 	END
 
 	EXEC uspRKLogRiskPosition @SummaryLog
 	
 	DROP TABLE #tmpDerivative
-	DROP TABLE #History
 END
