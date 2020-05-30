@@ -443,11 +443,11 @@ BEGIN TRY
 		WHERE Row_Num = 1
 		AND intContractHeaderId = @intContractHeaderId
 		AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
-
-		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0)
+		
+		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage')
 		BEGIN
 			SET @ysnUnposted = 1
-
+			
 			declare @_transactionDate datetime
 			SELECT @intHeaderId = intTransactionReferenceId, 
 				@intDetailId = intTransactionReferenceDetailId, 
@@ -2671,18 +2671,25 @@ BEGIN TRY
 					@_cash	 		NUMERIC(24, 10) = 0,
 					@_balance		NUMERIC(24, 10) = 0,
 					@_action		INT,
-					@_unpost		BIT;
+					@_unpost		BIT;			
 			
 			-- Get action types for Settle Storeage, IR and IS transactions	
 			select @_action = case when strTransactionReference = 'Settle Storage' then 53 else (case when intContractTypeId = 1 then 19 else 18 end) end
 			from @cbLogSpecific
 
-			-- If DP disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
+			-- If DP/Transfer Storage disregard Update Sequence Balance and consider Update Sequence Quantity "or the other way around"
 			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5 AND @strProcess = 'Update Sequence Balance')
 			BEGIN
 				RETURN
 			END
 
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE strTransactionReference = 'Transfer Storage')
+			BEGIN
+				UPDATE @cbLogSpecific SET dblQty = dblQty * -1, intActionId = 58
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				RETURN
+			END
+			
 			-- Posted: IR/IS/Settle Storage
 			IF @ysnUnposted = 0--@dblQty > 0
 			BEGIN
