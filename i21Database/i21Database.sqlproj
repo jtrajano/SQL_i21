@@ -8164,6 +8164,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
