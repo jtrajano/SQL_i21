@@ -322,6 +322,11 @@ WHERE STAGING.intEntityUserId = @intEntityUserId
 --HONSTEIN TAX DETAILS
 IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
 	BEGIN
+		DECLARE @strRemitToAddress	NVARCHAR(MAX)	= NULL
+
+		SELECT TOP 1 @strRemitToAddress	= dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, NULL, NULL, 0)
+		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+
 		INSERT INTO tblARInvoiceReportStagingTable (
 			  intEntityUserId
 			, strRequestId
@@ -429,4 +434,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 				   , TCODE.strTaxCode
 				   , TCODE.strDescription
 		) TAXES ON STAGING.intInvoiceId = TAXES.intInvoiceId
+
+		UPDATE tblARInvoiceReportStagingTable
+		SET strRemitToAddress 	= @strRemitToAddress
+		  , strOrigin			= CASE WHEN strSource = 'Transport Delivery' THEN NULL ELSE strOrigin END
+		  , dblInvoiceTotal		= CASE WHEN strTransactionType = 'Credit Memo' THEN dblInvoiceTotal * -1 ELSE dblInvoiceTotal END
+		WHERE intEntityUserId = @intEntityUserId
+		  AND strRequestId = @strRequestId
+		  AND strInvoiceFormat = 'Format 5 - Honstein'
 	END
