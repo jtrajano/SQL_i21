@@ -1,7 +1,7 @@
 ﻿CREATE TYPE [dbo].[CTContractBalanceLog] AS TABLE (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED
 	, strBatchId NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	, dtmTransactionDate DATETIME
+	, dtmTransactionDate DATETIME NOT NULL
 	, strTransactionType NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionReference NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, intTransactionReferenceId INT NOT NULL
