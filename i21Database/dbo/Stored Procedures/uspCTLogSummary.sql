@@ -2188,16 +2188,19 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			
-			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 3)
-			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intActionId = 54
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId IN (3,6))
+			BEGIN				
+				IF ISNULL(@dblBasis,0) > 0
+				BEGIN
+					UPDATE @cbLogSpecific SET dblQty = @dblBasis * -1, intPricingTypeId = 2, intActionId = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				IF ISNULL(@dblPriced,0) > 0
+				BEGIN
+					UPDATE @cbLogSpecific SET dblQty = @dblPriced * -1, intPricingTypeId = 1, intActionId = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
 			END			
-			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 6)
-			BEGIN
-				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intActionId = 59
-				EXEC uspCTLogContractBalance @cbLogSpecific, 0
-			END
 			ELSE IF @total = 0-- No changes with dblQty
 			BEGIN	
 				-- Delete records not equals to 'Contract Balance'
