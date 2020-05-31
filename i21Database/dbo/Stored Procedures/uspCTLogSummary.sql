@@ -2193,10 +2193,13 @@ BEGIN TRY
 				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intActionId = 54
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END			
-			
-			-- No changes with dblQty
-			ELSE IF @total = 0
-			BEGIN											
+			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 6)
+			BEGIN
+				UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, intActionId = 59
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END
+			ELSE IF @total = 0-- No changes with dblQty
+			BEGIN	
 				-- Delete records not equals to 'Contract Balance'
 				DELETE FROM @cbLogPrev   
 				WHERE strTransactionType <> 'Contract Balance'

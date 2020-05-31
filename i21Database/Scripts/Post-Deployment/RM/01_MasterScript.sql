@@ -143,7 +143,7 @@ BEGIN
 		UNION ALL SELECT 56, 'Updated Derivative', 'Updated Derivative Entries.'
 		UNION ALL SELECT 57, 'Deleted Derivative', 'Deleted Derivative Entries.'
 		UNION ALL SELECT 58, 'Transfer Storage to DP (Price Later)', 'Transfer Storage to DP (Price Later)'
-	
+		UNION ALL SELECT 59, 'Short Closed Sequence', 'Short Closed Sequence.'	
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 
