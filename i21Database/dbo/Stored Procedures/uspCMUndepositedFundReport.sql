@@ -106,7 +106,7 @@ BEGIN
 	GL.strBatchId
 	FROM dbo.fnCMUndepositedFundReport(@dtmDateFrom,@dtmDateTo,@dtmCMDate) a
 	OUTER APPLY(
-		SELECT TOP 1 trBatchId FROM tblGLDetail 
+		SELECT TOP 1 strBatchId FROM tblGLDetail 
 		WHERE strTransactionId = a.strSourceTransactionId 
 		AND strTransactionType = 'Receive Payments'
 		AND ysnIsUnposted = 0
