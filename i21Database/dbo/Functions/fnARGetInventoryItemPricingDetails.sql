@@ -77,6 +77,8 @@ BEGIN
 	FROM tblICItemPricing P
 	WHERE P.intItemId = @ItemId
 	  AND P.intItemLocationId = @ItemLocationId
+	  AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
+	ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC
 					
 	--Item Promotional Pricing 
 	SELECT TOP 1

@@ -210,24 +210,28 @@ DECLARE	 @Price							NUMERIC(18,6)
 					SET @UOMQuantity = 1
 				SET @Price = @UOMQuantity *	
 									( 
-										SELECT
+										SELECT TOP 1
 											P.dblSalePrice
 										FROM
 											tblICItemPricing P
-										WHERE
-											P.intItemId = @ItemId
+										WHERE 
+											P.intItemId = @ItemId 
 											AND P.intItemLocationId = @ItemLocationId
+											AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
+											ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC
 										)
 
 				SET @OriginalGrossPrice = @UOMQuantity *	
 									( 
-										SELECT
+										SELECT TOP 1
 											P.dblDefaultGrossPrice
 										FROM
 											tblICItemPricing P
 										WHERE
 											P.intItemId = @ItemId
 											AND P.intItemLocationId = @ItemLocationId
+											AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
+											ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC
 										)
 
 				IF @Price < @ContractPrice
@@ -725,9 +729,15 @@ DECLARE	 @Price							NUMERIC(18,6)
 		END	
 	
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
-	SET @Price = @UOMQuantity *	(SELECT P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+	SET @Price = @UOMQuantity *	(SELECT TOP 1 P.dblSalePrice FROM tblICItemPricing P 
+								WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
+								AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
+								ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC)
 	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
-	SET @OriginalGrossPrice = @UOMQuantity * (SELECT P.dblDefaultGrossPrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)	
+	SET @OriginalGrossPrice = @UOMQuantity * (SELECT TOP 1 P.dblDefaultGrossPrice FROM tblICItemPricing P 
+												WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
+												AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
+											    ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC)	
 	SET @OriginalGrossPrice = (CASE WHEN @ysnToBse = 1 THEN @OriginalGrossPrice / @dblCalculatedExchangeRate ELSE @OriginalGrossPrice * @dblCalculatedExchangeRate END)
 
 	IF(@Price IS NOT NULL)
