@@ -263,6 +263,7 @@ BEGIN
 	SELECT TOP 1 @billRecord = del.strBillId, @billId = del.intBillId, @intTransactionReversed = del.intTransactionReversed FROM tblGLDetail glDetail
 					INNER JOIN DELETED del ON glDetail.strTransactionId = del.strBillId AND glDetail.intTransactionId = del.intBillId
 				WHERE glDetail.ysnIsUnposted = 0
+				AND glDetail.strCode <> 'ICA'
 
 	IF @billId > 0
 	BEGIN
