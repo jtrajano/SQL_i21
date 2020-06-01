@@ -197,6 +197,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intContractId
 			,@intDirectionId
+			,NULL
 			,@intLocationId
 
 		UPDATE @tblNodeData
@@ -258,6 +259,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intContractId
 			,@intDirectionId
+			,NULL
 			,@intLocationId
 
 		UPDATE @tblNodeData
@@ -535,6 +537,7 @@ BEGIN
 				)
 			EXEC uspMFGetTraceabilityContractDetail @intContractId
 				,@intDirectionId
+				,NULL
 				,@intLocationId
 
 			UPDATE @tblNodeData
@@ -632,6 +635,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityContractDetail @intContractId
 					,@intDirectionId
+					,NULL
 					,@intLocationId
 
 				UPDATE @tblNodeData
@@ -2140,6 +2144,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityLotMergeDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,0
 					,@intLocationId
 
 				IF EXISTS (
@@ -2285,6 +2290,7 @@ BEGIN
 						)
 					EXEC uspMFGetTraceabilityContractDetail @intContractId
 						,@intDirectionId
+						,NULL
 						,@intLocationId
 				END
 				ELSE
@@ -2365,6 +2371,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityContractDetail @intContractId
 					,@intDirectionId
+					,NULL
 					,@intLocationId
 			END
 
