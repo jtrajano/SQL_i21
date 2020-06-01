@@ -9,6 +9,8 @@
 	, @intSubBookId INT = NULL
 	, @strPositionBy NVARCHAR(100) = NULL
 	, @intUserId INT  = NULL
+	, @ysnRefresh BIT = 0
+	, @ysnLogDPR BIT = 0
 AS
 
 BEGIN
@@ -2187,28 +2189,34 @@ WHERE intOrderId IS NOT NULL
 --==================================
 -- Insert into temporary log table
 --==================================
-
---Get the Run Number
-DECLARE @intRunNumber INT
-		,@strVendorCustomer NVARCHAR(200)
-		,@ysnStoreDPRDetail BIT
-
-SELECT @ysnStoreDPRDetail = ysnStoreDPRDetail
-FROM tblSMUserSecurity
-WHERE intEntityId = @intUserId
-
-IF @ysnStoreDPRDetail = 1
+IF (ISNULL(@ysnLogDPR, 0) = 1)
 BEGIN
-	SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
-	FROM tblRKTempDPRDetailLog
-
+--Get the Run Number
+	DECLARE @intRunNumber INT
+		, @strVendorCustomer NVARCHAR(200)
+	
 	IF @intVendorId IS NOT NULL 
 	BEGIN
 		SELECT @strVendorCustomer = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
 	END
 
-	INSERT INTO tblRKTempDPRDetailLog (
-		 intRunNumber 
+	---- Delete Previous Log of same instance. This is just a refresh of the screen.
+	--IF (ISNULL(@ysnRefresh, 0) = 1)
+	--BEGIN
+	--	SELECT * FROM tblRKTempDPRDetailLog
+	--	WHERE CAST(FLOOR(CAST(dtmRunDateTime AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+	--		AND intUserId = @intUserId
+	--		AND dtmDPRDate = @dtmToDate
+	--		AND strDPRPositionIncludes = @strPositionIncludes
+	--		AND strDPRPositionBy = @strPositionBy
+	--		AND strDPRPurchaseSale = @strPurchaseSales
+	--		AND strDPRVendorCustomer = @strVendorCustomer
+	--END
+
+	SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
+	FROM tblRKTempDPRDetailLog
+
+	INSERT INTO tblRKTempDPRDetailLog (intRunNumber 
 		, dtmRunDateTime
 		, intUserId
 		, dtmDPRDate	
@@ -2252,7 +2260,7 @@ BEGIN
 		, intTransactionReferenceId
 	)
 	select 
-		 intRunNumber = @intRunNumber
+			intRunNumber = @intRunNumber
 		, dtmRunDateTime = GETDATE()
 		, intUserId = @intUserId
 		, dtmDPRDate = @dtmToDate	
