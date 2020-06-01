@@ -1124,9 +1124,10 @@ BEGIN
 		-- END
 
 		UPDATE tblGLDetail
-			SET ysnIsUnposted = 1
-		WHERE tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN 
-				(SELECT intBillId FROM #tmpPostBillData))
+		SET ysnIsUnposted = 1
+		WHERE 
+			tblGLDetail.[strTransactionId] IN (SELECT strBillId FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
+			AND strCode <> 'ICA'
 
 		--Update Inventory Item Receipt
 		 UPDATE A
