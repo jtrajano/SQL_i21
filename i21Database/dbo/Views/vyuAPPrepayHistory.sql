@@ -21,7 +21,9 @@ FROM (
     JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
 	  JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
-    WHERE (b.intTransactionType IN (13,2) AND b.ysnPosted = 1) OR (b.intTransactionType IN (3) AND b.ysnPosted = 1 AND b.dblAmountDue != 0)
+    --WHERE (b.intTransactionType IN (13,2) AND b.ysnPosted = 1) OR (b.intTransactionType IN (3) AND b.ysnPosted = 1 AND b.dblAmountDue != 0)
+    WHERE b.intTransactionType IN (13, 2, 3)
+    AND b.ysnPosted = 1
     GROUP BY b.intEntityVendorId, v.strVendorId, e.strName, b.intBillId, b.strBillId, b.dtmDate
 
     UNION
@@ -44,6 +46,7 @@ FROM (
 		ON b.intEntityVendorId = v.intEntityId
     WHERE pd.ysnOffset = 0
     AND p.ysnPosted = 1
+    AND b.intTransactionType IN (13, 2, 3)
 
     UNION
     --Applied to Payments
@@ -65,7 +68,7 @@ FROM (
 		ON b.intEntityVendorId = v.intEntityId
     WHERE pd.ysnOffset = 1
     AND p.ysnPosted = 1
-    AND b.intTransactionType IN (13,2)
+    AND b.intTransactionType IN (13, 2, 3)
 
     UNION
     --Applied to voucher
@@ -86,6 +89,7 @@ FROM (
     JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
     WHERE b.ysnPosted = 1
+    AND b.intTransactionType IN (13, 2, 3)
 
     UNION
     --Applied to AR Receive Payments
@@ -106,4 +110,5 @@ FROM (
     JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
     WHERE p.ysnPosted = 1
+    AND b.intTransactionType IN (13, 2, 3)
 ) h
