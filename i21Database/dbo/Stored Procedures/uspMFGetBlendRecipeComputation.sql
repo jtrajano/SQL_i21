@@ -61,8 +61,8 @@ AS
 	SELECT DISTINCT PRT.intPropertyId
 		,PRT.strPropertyName
 		,PRD.intProductValueId
-		,PPV.dblMinValue
-		,PPV.dblMaxValue
+		,MIN(PPV.dblMinValue)
+		,MAX(PPV.dblMaxValue)
 		,TST.intTestId
 		,TST.strTestName
 		,PP.intSequenceNo
@@ -76,6 +76,12 @@ AS
 	AND PRD.ysnActive = 1
 	AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 	AND DATEPART(dy, PPV.dtmValidTo)
+	Group by PRT.intPropertyId
+		,PRT.strPropertyName
+		,PRD.intProductValueId
+		,TST.intTestId
+		,TST.strTestName
+		,PP.intSequenceNo
 	ORDER BY PP.intSequenceNo
 
 	If @ysnEnableParentLot=0
