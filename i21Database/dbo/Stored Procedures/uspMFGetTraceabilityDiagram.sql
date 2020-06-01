@@ -162,7 +162,7 @@ BEGIN
 			,strType
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intLotId
-			,@intDirectionId,@intLocationId
+			,@intDirectionId,NULL,@intLocationId
 
 		UPDATE @tblNodeData
 		SET intRecordId = 1
@@ -196,6 +196,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intContractId
 			,@intDirectionId
+			,NULL
 			,@intLocationId
 
 		UPDATE @tblNodeData
@@ -257,6 +258,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intContractId
 			,@intDirectionId
+			,NULL
 			,@intLocationId
 
 		UPDATE @tblNodeData
@@ -533,6 +535,7 @@ BEGIN
 				)
 			EXEC uspMFGetTraceabilityContractDetail @intContractId
 				,@intDirectionId
+				,NULL
 				,@intLocationId
 
 			UPDATE @tblNodeData
@@ -630,6 +633,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityContractDetail @intContractId
 					,@intDirectionId
+					,NULL
 					,@intLocationId
 
 				UPDATE @tblNodeData
@@ -2119,6 +2123,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityLotMergeDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,0
 					,@intLocationId
 
 				IF EXISTS (
@@ -2230,6 +2235,7 @@ BEGIN
 						)
 					EXEC uspMFGetTraceabilityContractDetail @intContractId
 						,@intDirectionId
+						,NULL
 						,@intLocationId
 				ELSE
 					--Get Container
@@ -2309,6 +2315,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityContractDetail @intContractId
 					,@intDirectionId
+					,NULL
 					,@intLocationId
 			END
 
