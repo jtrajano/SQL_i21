@@ -8690,6 +8690,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
