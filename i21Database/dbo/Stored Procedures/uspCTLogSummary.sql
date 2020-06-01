@@ -393,7 +393,11 @@ BEGIN TRY
 		FROM 
 		(
 			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
-			, dtmTransactionDate = CASE WHEN strScreenName = 'Transfer Storage' THEN suh.dtmTransactionDate ELSE (CASE WHEN ch.intContractTypeId = 1 THEN receipt.dtmReceiptDate ELSE shipment.dtmShipDate END) END
+			, dtmTransactionDate = CASE 
+									WHEN strScreenName = 'Inventory Shipment' THEN shipment.dtmShipDate
+									WHEN strScreenName = 'Inventory Receipt' THEN receipt.dtmReceiptDate
+									ELSE suh.dtmTransactionDate 
+								   END
 			, strTransactionType = strScreenName
 			, intTransactionId = suh.intExternalHeaderId -- or intExternalHeaderId since this was used by basis deliveries on search screen
 			, intTransactionDetailId = suh.intExternalId
