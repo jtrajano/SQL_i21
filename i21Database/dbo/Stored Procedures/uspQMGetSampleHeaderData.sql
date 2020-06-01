@@ -252,9 +252,24 @@ BEGIN
 		,L.intStorageLocationId
 		,SL.strName AS strStorageLocationName
 		,CL.intCompanyLocationSubLocationId
-		,CL.strSubLocationName
+		,CL.strSubLocationName		
+		,S.intLoadId
+		,S.intLoadDetailId
+		,S.intLoadContainerId
+		,S.intLoadDetailContainerLinkId
+		,S.strLoadNumber
+		,C.intContractDetailId
+		,C.strSequenceNumber
+		,C.intItemContractId
+		,C.strContractItemName
+		,ISNULL(C.intEntityId, R.intEntityVendorId) AS intEntityId
+		,ISNULL(C.strEntityName, E.strName) AS strPartyName
+		,S.strMarks
+		,C.intContractTypeId
+		,C.strItemSpecification
 	FROM tblICLot L
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = L.intLotStatusId
+		AND L.intLotId = @intProductValueId
 	JOIN tblICItem I ON I.intItemId = L.intItemId
 	JOIN tblICItemUOM IU ON IU.intItemId = I.intItemId
 		AND IU.ysnStockUnit = 1
@@ -262,6 +277,13 @@ BEGIN
 	JOIN tblICStorageLocation SL ON SL.intStorageLocationId = L.intStorageLocationId
 	JOIN tblSMCompanyLocationSubLocation CL ON CL.intCompanyLocationSubLocationId = L.intSubLocationId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+		AND L.strLotNumber = @strLotNumber
+	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	LEFT JOIN vyuCTContractDetailView C ON C.intContractDetailId = RI.intContractDetailId
+	LEFT JOIN vyuLGLoadContainerReceiptContracts S ON S.intPContractDetailId = C.intContractDetailId
+	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
 	WHERE L.intLotId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 11 -- Parent Lot  
@@ -323,10 +345,32 @@ BEGIN
 		,@strWorkOrderNo AS strWorkOrderNo
 		,@strReceiptNumber AS strReceiptNumber
 		,@strContainerNumber AS strContainerNumber
+		,S.intLoadId
+		,S.intLoadDetailId
+		,S.intLoadContainerId
+		,S.intLoadDetailContainerLinkId
+		,S.strLoadNumber
+		,C.intContractDetailId
+		,C.strSequenceNumber
+		,C.intItemContractId
+		,C.strContractItemName
+		,ISNULL(C.intEntityId, R.intEntityVendorId) AS intEntityId
+		,ISNULL(C.strEntityName, E.strName) AS strPartyName
+		,S.strMarks
+		,C.intContractTypeId
+		,C.strItemSpecification
 	FROM tblICParentLot PL
 	JOIN tblICLotStatus LS ON LS.intLotStatusId = PL.intLotStatusId
 	JOIN tblICItem I ON I.intItemId = PL.intItemId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+	LEFT JOIN tblICLot L ON L.intParentLotId = PL.intParentLotId
+		AND L.intParentLotId = @intProductValueId
+	LEFT JOIN tblICInventoryReceiptItemLot RIL ON RIL.intLotId = L.intLotId
+	LEFT JOIN tblICInventoryReceiptItem RI ON RI.intInventoryReceiptItemId = RIL.intInventoryReceiptItemId
+	LEFT JOIN tblICInventoryReceipt R ON R.intInventoryReceiptId = RI.intInventoryReceiptId
+	LEFT JOIN vyuCTContractDetailView C ON C.intContractDetailId = RI.intContractDetailId
+	LEFT JOIN vyuLGLoadContainerReceiptContracts S ON S.intPContractDetailId = C.intContractDetailId
+	LEFT JOIN tblEMEntity E ON E.intEntityId = R.intEntityVendorId
 	WHERE PL.intParentLotId = @intProductValueId
 END
 ELSE IF @intProductTypeId = 12 -- Work Order
