@@ -141,7 +141,7 @@ BEGIN
 		, cd.intContractStatusId
 		, cd.intBookId
 		, cd.intSubBookId
-		, b.intUserId
+		, b.intEntityId
 		, intActionId = 15
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
