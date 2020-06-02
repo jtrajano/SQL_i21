@@ -8728,9 +8728,10 @@
     <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
     <Build Include="dbo\Tables\tblRKLogAction.sql" />
     <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
-	<Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8987,6 +8988,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1u_InsertDefaultDataSync.sql" />
     <None Include="Scripts\Post-Deployment\CM\6_InsertDefaultDataSync.sql" />
     <Build Include="dbo\Tables\tblCMDataFixLog.sql" />
+    <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
