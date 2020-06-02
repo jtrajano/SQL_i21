@@ -390,7 +390,7 @@ BEGIN
 	IF(LOWER(@strSPName) = 'uspstcheckoutcommandertranslog')
 	BEGIN
 			
-		SET @FROMNODES = REPLACE(@FROMNODES,'OUTER APPLY trPaylines.nodes(''trPayline'') trPayline(trPayline)','OUTER APPLY trPaylines.nodes(''trPayline[0]'') trPayline(trPayline)')
+		SET @FROMNODES = REPLACE(@FROMNODES,'OUTER APPLY trPaylines.nodes(''trPayline'') trPayline(trPayline)','OUTER APPLY trPaylines.nodes(''trPayline[1]'') trPayline(trPayline)')
 
 	END
 
