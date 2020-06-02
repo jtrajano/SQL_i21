@@ -1958,6 +1958,164 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+
+				/*CT-4833*/
+
+				INSERT INTO @cbLogCurrent (strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+				    , intUserId
+					, intActionId
+					, strProcess
+				)
+				SELECT strBatchId = NULL
+					, dtmTransactionDate
+					, strTransactionType = 'Contract Balance'
+					, strTransactionReference = strTransactionType
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber		
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intCompanyLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId = NULL
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes = (case when dblQty = 0 then 'Change futures price.' else null end)
+					, intUserId
+					, intActionId
+					, strProcess = @strProcess
+				FROM
+				(
+					SELECT  intTransactionReferenceId = pc.intPriceContractId
+					, intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
+					, strTransactionReferenceNo = pc.strPriceContractNo
+					, dtmTransactionDate = cast((convert(varchar(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
+					, sh.intContractHeaderId
+					, ch.strContractNumber
+					, sh.intContractDetailId
+					, cd.intContractSeq
+					, ch.intContractTypeId
+					, dblQty = (
+								case
+								when pfd.dblQuantity > extQty.dblQty
+								then pfd.dblQuantity - extQty.dblQty
+								when pfd.dblQuantity < extQty.dblQty
+								then (extQty.dblQty - pfd.dblQuantity) * -1
+								else 0
+								end
+							   )
+					, intQtyUOMId = ch.intCommodityUOMId
+					, intPricingTypeId = 1
+					, strPricingType = 'Priced'
+					, strTransactionType = 'Price Fixation'--CASE WHEN @strProcess = 'Price Delete' THEN 'Price Fixation' ELSE @strProcess END
+					, intTransactionId = sh.intContractDetailId
+					, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+					, dblFutures = pfd.dblFutures
+					, sh.dblBasis
+					, cd.intBasisUOMId
+					, cd.intBasisCurrencyId
+					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
+					, sh.intContractStatusId
+					, sh.intEntityId
+					, sh.intCommodityId
+					, sh.intItemId
+					, sh.intCompanyLocationId
+					, sh.intFutureMarketId
+					, sh.intFutureMonthId
+					, sh.dtmStartDate
+					, sh.dtmEndDate
+					, sh.intBookId
+					, sh.intSubBookId
+					, intOrderBy = 1
+					, sh.intUserId
+					, intActionId = 17
+					FROM tblCTPriceFixationDetail pfd
+					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
+					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
+					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
+					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+					INNER JOIN
+					(
+						SELECT intTransactionReferenceDetailId, dblQty = sum(dblQty)
+						FROM tblCTContractBalanceLog
+						WHERE strProcess = 'Price Fixation'
+						and intPricingTypeId = 1
+						group by intTransactionReferenceDetailId
+					) extQty on extQty.intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
+					OUTER APPLY
+					(
+						SELECT TOP 1 *
+						FROM tblCTSequenceHistory
+						WHERE intContractHeaderId = pf.intContractHeaderId
+						AND intContractDetailId = pf.intContractDetailId
+						AND intSequenceUsageHistoryId IS NULL
+						ORDER BY dtmHistoryCreated DESC
+					) sh
+					WHERE pfd.intPriceFixationDetailId IN
+					(
+						SELECT intTransactionReferenceDetailId
+						FROM tblCTContractBalanceLog
+						WHERE strProcess = 'Price Fixation'
+						AND intContractHeaderId = @intContractHeaderId
+						AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
+						AND (pfd.dblQuantity <> dblQty or pfd.dblFutures <> dblFutures)
+					)
+				) tbl
+				WHERE intContractHeaderId = @intContractHeaderId
+				AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
+
+				/*End of CT-4833*/
+
 				INSERT INTO @cbLogCurrent (strBatchId
 					, dtmTransactionDate
 					, strTransactionType
