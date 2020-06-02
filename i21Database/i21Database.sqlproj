@@ -8133,4 +8133,7 @@
   <ItemGroup>
     <Build Include="dbo\Stored Procedures\uspCTSyncPriceAndDerivative.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\TN_Tennessee.sql" />
+  </ItemGroup>
 </Project>
