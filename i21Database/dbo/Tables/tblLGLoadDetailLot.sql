@@ -13,6 +13,9 @@
 	[intSort] INT NULL,
 	[intConcurrencyId] INT NULL DEFAULT ((0)),
 	[intLoadDetailLotRefId] INT NULL,
+	[strID1] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strID2] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[strID3] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 
 	CONSTRAINT [PK_tblLGLoadDetailLot_intLoadDetailLotId] PRIMARY KEY CLUSTERED ([intLoadDetailLotId] ASC),
 	CONSTRAINT [FK_tblLGLoadDetailLot_tblICLoadDetail] FOREIGN KEY([intLoadDetailId]) REFERENCES [dbo].[tblLGLoadDetail] ([intLoadDetailId]) ON DELETE CASCADE, 
