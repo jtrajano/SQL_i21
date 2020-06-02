@@ -309,11 +309,16 @@ BEGIN
 													WHEN @decreaseQty = 0 THEN 
 														-ROUND(
 															dbo.fnMultiply(
-																dbo.fnCalculateCostBetweenUOM(
-																	ISNULL(A.intCostUOMId, A.intQtyToBillUOMId)
-																	,A.intQtyToBillUOMId
-																	,A.dblCost
-																)
+																CASE 
+																	WHEN ISNULL(A.intCostUOMId, A.intQtyToBillUOMId) IS NOT NULL THEN 
+																		dbo.fnCalculateCostBetweenUOM(
+																			ISNULL(A.intCostUOMId, A.intQtyToBillUOMId)
+																			,A.intQtyToBillUOMId
+																			,A.dblCost
+																		)
+																	ELSE 
+																		A.dblCost
+																END
 																,ABS(A.dblQuantityToBill)
 															)
 															,2 
@@ -321,11 +326,16 @@ BEGIN
 													ELSE 
 														ROUND(
 															dbo.fnMultiply(
-																dbo.fnCalculateCostBetweenUOM(
-																	ISNULL(A.intCostUOMId, A.intQtyToBillUOMId)
-																	,A.intQtyToBillUOMId
-																	,A.dblCost
-																)
+																CASE 
+																	WHEN ISNULL(A.intCostUOMId, A.intQtyToBillUOMId) IS NOT NULL THEN
+																		dbo.fnCalculateCostBetweenUOM(
+																			ISNULL(A.intCostUOMId, A.intQtyToBillUOMId)
+																			,A.intQtyToBillUOMId
+																			,A.dblCost
+																		)
+																	ELSE 
+																		A.dblCost
+																END 
 																,ABS(A.dblQuantityToBill)
 															)
 															,2 
