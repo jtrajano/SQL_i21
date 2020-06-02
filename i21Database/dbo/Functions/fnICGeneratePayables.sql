@@ -161,13 +161,36 @@ SELECT DISTINCT
 	,[strItemNo]				=	C.strItemNo
 	,[strDescription]			=	C.strDescription
 	,[intPurchaseTaxGroupId]	=	B.intTaxGroupId
-	,[dblOrderQty]				=	CASE WHEN Contracts.intContractDetailId > 0 THEN ROUND(Contracts.dblQuantity,2) ELSE B.dblOpenReceive END
+	,[dblOrderQty]				=	
+		--CASE WHEN Contracts.intContractDetailId > 0 THEN ROUND(Contracts.dblQuantity,2) ELSE B.dblOpenReceive END
+		CASE 
+			WHEN @billTypeToUse = @type_DebitMemo THEN 
+				-CASE WHEN Contracts.intContractDetailId > 0 THEN ROUND(Contracts.dblQuantity,2) ELSE B.dblOpenReceive END
+			ELSE 
+				CASE WHEN Contracts.intContractDetailId > 0 THEN ROUND(Contracts.dblQuantity,2) ELSE B.dblOpenReceive END
+		END 
+
 	,[dblPOOpenReceive]			=	B.dblReceived
-	,[dblOpenReceive]			=	B.dblOpenReceive 
-	,[dblQuantityToBill]		=	B.dblOpenReceive - ISNULL(B.dblBillQty, 0) 
+	,[dblOpenReceive]			=	
+		--B.dblOpenReceive 
+		CASE 
+			WHEN @billTypeToUse = @type_DebitMemo THEN -B.dblOpenReceive 
+			ELSE B.dblOpenReceive 
+		END 
+	,[dblQuantityToBill]		=	
+		-- B.dblOpenReceive - ISNULL(B.dblBillQty, 0) 
+		CASE 
+			WHEN @billTypeToUse = @type_DebitMemo THEN -(B.dblOpenReceive - ISNULL(B.dblBillQty, 0) )
+			ELSE B.dblOpenReceive - ISNULL(B.dblBillQty, 0) 
+		END 
 	,[dblQtyToBillUnitQty]		=	ISNULL(ItemUOM.dblUnitQty, 1)
 	,[intQtyToBillUOMId]		=	B.intUnitMeasureId
-	,[dblQuantityBilled]		=	B.dblBillQty
+	,[dblQuantityBilled]		=	
+		--B.dblBillQty
+		CASE 
+			WHEN @billTypeToUse = @type_DebitMemo THEN -B.dblBillQty
+			ELSE B.dblBillQty
+		END 
 	,[intLineNo]				=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptItemId]=	B.intInventoryReceiptItemId
 	,[intInventoryReceiptChargeId]	= NULL
@@ -257,7 +280,13 @@ SELECT DISTINCT
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[intTaxGroupId]							=	B.intTaxGroupId
-	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
+	,[ysnReturn]								=	
+		CAST(
+			CASE 
+				WHEN A.strReceiptType = 'Inventory Return' OR @billTypeToUse = @type_DebitMemo THEN 1 
+				ELSE 0 
+			END
+		AS BIT)
 	,[strTaxGroup]								=	TG.strTaxGroup
 	,intShipViaId                               =	E.intEntityId
 	,intShipFromId = A.intShipFromId
@@ -528,10 +557,28 @@ SELECT DISTINCT
 		,[strItemNo]								=	A.strItemNo
 		,[strDescription]							=	A.strDescription
 		,[intPurchaseTaxGroupId]					=	A.intTaxGroupId
-		,[dblOrderQty]								=	A.dblOrderQty
+		,[dblOrderQty]								=	
+			--A.dblOrderQty
+			CASE 
+				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblOrderQty
+				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblOrderQty
+				ELSE A.dblOrderQty
+			END 
 		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
-		,[dblOpenReceive]							=	A.dblOpenReceive
-		,[dblQuantityToBill]						=	A.dblQuantityToBill
+		,[dblOpenReceive]							=	
+			--A.dblOpenReceive
+			CASE 
+				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblOpenReceive
+				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblOpenReceive
+				ELSE A.dblOpenReceive
+			END 
+		,[dblQuantityToBill]						=	
+			--A.dblQuantityToBill
+			CASE 
+				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblQuantityToBill
+				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblQuantityToBill
+				ELSE A.dblQuantityToBill
+			END 
 		,[dblQtyToBillUnitQty]						=	1
 		,[intQtyToBillUOMId]						=	NULL
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
@@ -618,7 +665,16 @@ SELECT DISTINCT
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	A.intTaxGroupId
-		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
+		,[ysnReturn]								=			
+			--CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
+			CAST(
+				CASE 
+					WHEN A.strReceiptType = 'Inventory Return' THEN 1 
+					WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN 1 
+					WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN 1 
+					ELSE 0 
+				END
+			AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
 		,intShipViaId								=   NULL 
 		,intShipFromId								=	NULL 
