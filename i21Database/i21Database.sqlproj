@@ -8165,6 +8165,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8407,6 +8408,7 @@
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
+    <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
