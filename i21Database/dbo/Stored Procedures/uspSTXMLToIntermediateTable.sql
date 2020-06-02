@@ -405,8 +405,14 @@ BEGIN
 	-- ===========================================================================================================
 
 
+	--TEMPORARY FIX--
+	--ALTER THIS LINE "OUTER APPLY trPaylines.nodes('trPayline') trPayline(trPayline)" to become this "OUTER APPLY trPaylines.nodes('trPayline[0]') trPayline(trPayline)"
+	IF(LOWER(@strSPName) = 'uspstcheckoutcommandertranslog')
+	BEGIN
+			
+		SET @FROMNODES = REPLACE(@FROMNODES,'OUTER APPLY trPaylines.nodes(''trPayline'') trPayline(trPayline)','OUTER APPLY trPaylines.nodes(''trPayline[1]'') trPayline(trPayline)')
 
-
+	END
 
 	-- ===========================================================================================================
 	-- START - ORIGINAL CODE
