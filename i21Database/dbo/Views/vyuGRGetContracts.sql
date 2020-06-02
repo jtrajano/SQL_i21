@@ -62,6 +62,7 @@ SELECT
 	,FT.strFreightTerm
 	,CD.dtmEndDate
 	,intGetContractDetailFutureMonthId = CD.intFutureMonthId
+	,ysnLoad = ISNULL(CH.ysnLoad,0)
 FROM tblCTContractDetail CD
 CROSS JOIN tblCTCompanyPreference CP	
 JOIN tblSMCompanyLocation CL 
