@@ -7,5 +7,6 @@
 	[intEntityVendorId] INT NULL,
 	[intItemId] INT NOT NULL,
 	[intToBillUOMId] INT NULL,
-	[dblToBillQty] NUMERIC(38, 20) NULL DEFAULT((0))
+	[dblToBillQty] NUMERIC(38, 20) NULL DEFAULT((0)),
+	[ysnStoreDebitMemo] BIT NULL
 )
