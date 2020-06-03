@@ -26,7 +26,7 @@ CM.strTransactionId,
 CM.ysnCheckVoid,
 CM.ysnClr,
 CM.strPeriod
-FROM tblCMBankTransaction CM 
+FROM vyuCMGetBankTransaction CM 
 LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId
 LEFT JOIN tblSMCompanyLocation L on L.intCompanyLocationId = CM.intCompanyLocationId
 OUTER APPLY 
