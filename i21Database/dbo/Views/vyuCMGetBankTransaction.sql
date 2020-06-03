@@ -15,4 +15,4 @@ LEFT JOIN tblSMCompanyLocation CL on CL.intCompanyLocationId = BT.intCompanyLoca
 LEFT JOIN tblSMCurrency CU on CU.intCurrencyID = BT.intCurrencyId
 LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = BT.intCurrencyExchangeRateTypeId
 LEFT JOIN tblCMBankLoan BL ON BL.intBankLoanId = BT.intBankLoanId
-LEFT JOIN tblGLFiscalPeriod FP on FP.intFiscalPeriodId = BT.intFiscalPeriodId
+LEFT JOIN tblGLFiscalPeriod FP on FP.intGLFiscalYearPeriodId = BT.intFiscalPeriodId
