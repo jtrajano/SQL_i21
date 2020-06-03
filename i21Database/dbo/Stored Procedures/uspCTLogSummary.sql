@@ -267,7 +267,7 @@ BEGIN TRY
 				SELECT 
 					ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 					, sh.intSequenceHistoryId
-					, dtmTransactionDate = DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated)--sh.dtmHistoryCreated
+					, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
 					, sh.intContractHeaderId
 					, ch.strContractNumber
 					, sh.intContractDetailId
