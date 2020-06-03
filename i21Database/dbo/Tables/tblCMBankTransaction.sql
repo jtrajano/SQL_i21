@@ -22,7 +22,6 @@
     [strAmountInWords]         NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
     [strMemo]                  NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
     [strReferenceNo]           NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
-    [strPeriod]                NVARCHAR (30)    COLLATE Latin1_General_CI_AS NULL,
     [dtmCheckPrinted]          DATETIME         NULL,
     [ysnCheckToBePrinted]      BIT              DEFAULT 0 NOT NULL,
     [ysnCheckVoid]             BIT              DEFAULT 0 NOT NULL,
