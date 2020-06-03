@@ -8692,6 +8692,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
