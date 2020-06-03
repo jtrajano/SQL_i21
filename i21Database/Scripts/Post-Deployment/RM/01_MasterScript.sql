@@ -144,6 +144,7 @@ BEGIN
 		UNION ALL SELECT 57, 'Deleted Derivative', 'Deleted Derivative Entries.'
 		UNION ALL SELECT 58, 'Transfer Storage to DP (Price Later)', 'Transfer Storage to DP (Price Later)'
 		UNION ALL SELECT 59, 'Short Closed Sequence', 'Short Closed Sequence.'	
+		UNION ALL SELECT 60, 'Unposted Invoice', 'Sales In-Transit return when Invoice is unposted'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

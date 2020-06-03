@@ -160,7 +160,8 @@ BEGIN
 						END 	
 					WHEN t.strTransactionForm = 'Inbound Shipments' THEN 31			
 					WHEN t.strTransactionForm = 'Outbound Shipment' THEN 32
-					WHEN t.strTransactionForm = 'Invoice' THEN 48
+					WHEN t.strTransactionForm = 'Invoice' AND  t.ysnIsUnposted = 0 THEN 48 --Posted Invoice
+					WHEN t.strTransactionForm = 'Invoice' AND  t.ysnIsUnposted = 1 THEN 60 --Unposted Invoice
 					ELSE 
 						NULL
 				 END 
