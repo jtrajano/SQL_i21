@@ -1,6 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKSaveDerivativeEntry]
-	@intFutOptTransactionId INT
+	@intFutOptTransactionId INT = NULL
+	, @intFutOptTransactionHeaderId INT = NULL
 	, @intUserId INT
+	, @action NVARCHAR(20)
 
 AS
 
@@ -12,6 +14,100 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 BEGIN
+
+DECLARE @SummaryLog AS RKSummaryLog
+DECLARE @LogHelper AS RKMiscField
+DECLARE @dblPreviousNoOfLots NUMERIC(24,10)
+
+IF @action = 'HEADER DELETE' --This scenario is when you delete the entire derivative entry. 
+BEGIN
+	
+	SELECT  dblPreviousNoOfLots = sum(dblOrigNoOfLots), intTransactionRecordId
+	INTO #tempLogsToDelete
+	FROM tblRKSummaryLog
+	WHERE intTransactionRecordHeaderId = @intFutOptTransactionHeaderId
+		and strTransactionType = 'Derivative Entry'
+	GROUP BY intTransactionRecordId
+
+	DELETE FROM #tempLogsToDelete WHERE dblPreviousNoOfLots = 0
+
+	WHILE EXISTS (SELECT TOP 1 * FROM #tempLogsToDelete)
+	BEGIN
+		SELECT TOP 1 @dblPreviousNoOfLots = dblPreviousNoOfLots
+			, @intFutOptTransactionId = intTransactionRecordId
+		FROM #tempLogsToDelete
+
+		INSERT INTO @SummaryLog(strBucketType
+			, strTransactionType
+			, intTransactionRecordId
+			, intTransactionRecordHeaderId
+			, strDistributionType
+			, strTransactionNumber
+			, dtmTransactionDate
+			, intContractDetailId
+			, intContractHeaderId
+			, intFutOptTransactionId
+			, intCommodityId
+			, intLocationId
+			, intCurrencyId
+			, intBookId
+			, intSubBookId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblNoOfLots
+			, dblPrice
+			, dblContractSize
+			, dblQty
+			, intEntityId
+			, intUserId
+			, strNotes
+			, intCommodityUOMId
+			, strMiscFields
+			, intActionId)
+		SELECT TOP 1  strBucketType = 'Derivatives'
+			, strTransactionType = 'Derivative Entry'
+			, intTransactionRecordId 
+			, intTransactionRecordHeaderId 
+			, strDistributionType
+			, strTransactionNumber 
+			, dtmTransactionDate 
+			, intContractDetailId
+			, intContractHeaderId 
+			, intFutOptTransactionId 
+			, intCommodityId 
+			, intLocationId
+			, intCurrencyId 
+			, intBookId 
+			, intSubBookId 
+			, intFutureMarketId 
+			, intFutureMonthId 
+			, dblNoOfLots = ISNULL(@dblPreviousNoOfLots,0) * -1
+			, dblPrice 
+			, dblContractSize
+			, dblQty = (ISNULL(@dblPreviousNoOfLots,0) * -1) * dblContractSize
+			, intEntityId 
+			, intUserId = @intUserId
+			, strNotes 
+			, intOrigUOMId 
+			, strMiscField
+			, intActionId = 57 --Delete Derivative
+		FROM tblRKSummaryLog 
+		WHERE intTransactionRecordId = @intFutOptTransactionId
+		ORDER BY dtmCreatedDate DESC
+
+
+		DELETE FROM #tempLogsToDelete WHERE intTransactionRecordId = @intFutOptTransactionId
+
+
+	END
+
+	DROP TABLE #tempLogsToDelete
+
+END
+ELSE
+BEGIN
+
+
 	SELECT strTransactionType = 'Derivatives'
 		, intTransactionRecordId = der.intFutOptTransactionId
 		, strTransactionNumber = der.strInternalTradeNo
@@ -58,9 +154,7 @@ BEGIN
 	WHERE intFutOptTransactionId = @intFutOptTransactionId
 
 
-	DECLARE @SummaryLog AS RKSummaryLog
-	DECLARE @LogHelper AS RKMiscField
-	DECLARE @dblPreviousNoOfLots NUMERIC(24,10)
+
 
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpDerivative)
 	BEGIN
@@ -69,7 +163,6 @@ BEGIN
 			, @strOptionMonth NVARCHAR(50)
 			, @dblStrike NUMERIC(24, 10)
 			, @strOptionType NVARCHAR(50)
-			, @intFutOptTransactionHeaderId INT
 			, @dblContractSize NUMERIC(24, 10)
 			, @strInstrumentType NVARCHAR(50)
 			, @intBrokerageAccountId INT
@@ -233,7 +326,11 @@ BEGIN
 		
 	END
 
-	EXEC uspRKLogRiskPosition @SummaryLog
+	
 	
 	DROP TABLE #tmpDerivative
+END
+
+EXEC uspRKLogRiskPosition @SummaryLog
+
 END
