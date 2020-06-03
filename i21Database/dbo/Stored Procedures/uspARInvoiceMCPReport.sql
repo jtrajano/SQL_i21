@@ -435,6 +435,55 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 				   , TCODE.strDescription
 		) TAXES ON STAGING.intInvoiceId = TAXES.intInvoiceId
 
+		UPDATE STAGING		
+		SET intCompanyLocationId 	= ORIG.intCompanyLocationId
+		  , intEntityCustomerId		= ORIG.intEntityCustomerId
+		  , intTruckDriverId		= ORIG.intTruckDriverId
+		  , intBillToLocationId		= ORIG.intBillToLocationId
+		  , intShipToLocationId		= ORIG.intShipToLocationId
+		  , intTermId				= ORIG.intTermId
+		  , intItemId				= ORIG.intItemId
+		  , intShipViaId			= ORIG.intShipViaId
+		  , intTicketId				= ORIG.intTicketId
+		  , strCompanyName			= ORIG.strCompanyName
+		  , strCompanyAddress		= ORIG.strCompanyAddress
+		  , strCompanyLocation		= ORIG.strCompanyLocation
+		  , strTicketType			= ORIG.strTicketType
+		  , strLocationNumber		= ORIG.strLocationNumber
+		  , strInvoiceNumber		= ORIG.strInvoiceNumber
+		  , strBillToLocationName	= ORIG.strBillToLocationName
+		  , strShipToLocationName	= ORIG.strShipToLocationName
+		  , strBillTo				= ORIG.strBillTo
+		  , strShipTo				= ORIG.strShipTo
+		  , strShipVia				= ORIG.strShipVia
+		  , strPONumber				= ORIG.strPONumber
+		  , strBOLNumber			= ORIG.strBOLNumber
+		  , strPaymentInfo			= ORIG.strPaymentInfo
+		  , strTerm					= ORIG.strTerm
+		  , strTransactionType		= ORIG.strTransactionType
+		  , strSource				= ORIG.strSource
+		  , strOrigin				= ORIG.strOrigin
+		  , dblInvoiceTax			= ORIG.dblInvoiceTax
+		  , dblPriceWithTax			= ORIG.dblPriceWithTax
+		  , dblTotalPriceWithTax	= ORIG.dblTotalPriceWithTax
+		  , ysnStretchLogo			= ORIG.ysnStretchLogo
+		  , dtmDate					= ORIG.dtmDate
+		  , dtmDueDate				= ORIG.dtmDueDate
+		  , blbLogo					= ORIG.blbLogo
+		FROM tblARInvoiceReportStagingTable STAGING
+		INNER JOIN (
+			SELECT *
+			FROM tblARInvoiceReportStagingTable
+			WHERE intEntityUserId = @intEntityUserId
+		  	  AND strRequestId = @strRequestId
+		      AND strInvoiceFormat = 'Format 5 - Honstein'
+			  AND blbLogo IS NOT NULL
+		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.intInvoiceDetailId = 99999999)
+		WHERE STAGING.intEntityUserId = @intEntityUserId
+		  AND STAGING.strRequestId = @strRequestId
+		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strItemNo IN ('Tax', 'State Sales Tax')
+
 		UPDATE tblARInvoiceReportStagingTable
 		SET strRemitToAddress 	= @strRemitToAddress
 		  , strOrigin			= CASE WHEN strSource = 'Transport Delivery' THEN NULL ELSE strOrigin END
