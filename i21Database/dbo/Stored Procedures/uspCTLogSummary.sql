@@ -23,7 +23,9 @@ BEGIN TRY
 			@intHeaderId			INT,
 			@intDetailId			INT,
 			@ysnUnposted			BIT = 0,
-			@ysnLoadBased			BIT = 0
+			@ysnLoadBased			BIT = 0,
+			@ysnReopened			BIT = 0,
+			@_transactionDate		DATETIME
 
 	-- SELECT @strSource, @strProcess
 
@@ -54,7 +56,6 @@ BEGIN TRY
 
 	IF @strSource = 'Contract'
 	BEGIN
-	
 		-- Contract Sequence:
 		-- 1. Create contract
 		-- 	1.1. Increase balance
@@ -189,7 +190,7 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN -- Contract Balance
-			INSERT INTO @cbLogCurrent (strBatchId
+			INSERT INTO @cbLogTemp (strBatchId
 				, dtmTransactionDate
 				, strTransactionType
 				, strTransactionReference
@@ -306,6 +307,182 @@ BEGIN TRY
 			WHERE Row_Num = 1
 			AND intContractHeaderId = @intContractHeaderId
 			AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+
+			IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intContractStatusId = 4)
+			BEGIN
+				SET @ysnReopened = 1
+				
+				SELECT @intHeaderId = intTransactionReferenceId, 
+					@intDetailId = intTransactionReferenceDetailId, 
+					@_transactionDate = dtmTransactionDate, 
+					@intUserId = intUserId 
+				FROM @cbLogTemp
+			
+				INSERT INTO @cbLogCurrent (strBatchId
+					, dtmTransactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId
+					, intActionId
+					, strProcess
+				)		
+				SELECT strBatchId = NULL
+					, dtmTransactionDate = @_transactionDate
+					, strTransactionType
+					, strTransactionReference
+					, intTransactionReferenceId
+					, intTransactionReferenceDetailId
+					, strTransactionReferenceNo
+					, intContractDetailId
+					, intContractHeaderId
+					, strContractNumber		
+					, intContractSeq
+					, intContractTypeId
+					, intEntityId
+					, intCommodityId
+					, intItemId
+					, intLocationId
+					, intPricingTypeId
+					, intFutureMarketId
+					, intFutureMonthId
+					, dblBasis
+					, dblFutures
+					, intQtyUOMId
+					, intQtyCurrencyId
+					, intBasisUOMId
+					, intBasisCurrencyId
+					, intPriceUOMId
+					, dtmStartDate
+					, dtmEndDate
+					, dblQty
+					, intContractStatusId = 4
+					, intBookId
+					, intSubBookId
+					, strNotes
+					, intUserId = @intUserId
+					, intActionId
+					, strProcess = @strProcess
+				FROM tblCTContractBalanceLog 
+				WHERE intTransactionReferenceId = @intHeaderId
+				AND intTransactionReferenceDetailId = @intDetailId
+				AND intContractHeaderId = @intContractHeaderId
+				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+				AND intContractStatusId = 6
+
+				UPDATE CBL SET strNotes = 'Re-opened'
+				FROM tblCTContractBalanceLog CBL
+				WHERE intTransactionReferenceId = @intHeaderId
+				AND intTransactionReferenceDetailId = @intDetailId
+				AND intContractHeaderId = @intContractHeaderId
+				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+				AND intContractStatusId = 6
+			END
+			ELSE
+			BEGIN
+				INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess
+				)
+				SELECT strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess
+				FROM @cbLogTemp
+			END
 		END
 	END
 	ELSE IF @strSource = 'Inventory'
@@ -456,15 +633,12 @@ BEGIN TRY
 		BEGIN
 			SET @ysnUnposted = 1
 			
-			declare @_transactionDate datetime
 			SELECT @intHeaderId = intTransactionReferenceId, 
 				@intDetailId = intTransactionReferenceDetailId, 
 				@_transactionDate = dtmTransactionDate, 
 				@intUserId = intUserId 
 			FROM @cbLogTemp
 			
-			DELETE FROM @cbLogCurrent
-
 			INSERT INTO @cbLogCurrent (strBatchId
 				, dtmTransactionDate
 				, strTransactionType
@@ -534,7 +708,7 @@ BEGIN TRY
 				, intContractStatusId
 				, intBookId
 				, intSubBookId
-				, strNotes = 'Unposted'
+				, strNotes-- = 'Unposted'
 				, intUserId = @intUserId
 				, intActionId
 				, strProcess = @strProcess
@@ -2301,7 +2475,8 @@ BEGIN TRY
 				@dblQty 		NUMERIC(24, 10),
 				@dblAvrgFutures	NUMERIC(24, 10),
 				@total 			NUMERIC(24, 10),
-				@dblActual		NUMERIC(24, 10)
+				@dblActual		NUMERIC(24, 10),
+				@_action		INT
 
 		SELECT @dblQtys = SUM(dblQty)
 		FROM @cbLogPrev
@@ -2357,18 +2532,38 @@ BEGIN TRY
 			END
 			
 			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId IN (3,6))
-			BEGIN				
+			BEGIN								
 				IF ISNULL(@dblBasis,0) > 0
 				BEGIN
-					UPDATE @cbLogSpecific SET dblQty = @dblBasis * -1, intPricingTypeId = 2, intActionId = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					FROM @cbLogSpecific
+
+					UPDATE @cbLogSpecific SET dblQty = @dblBasis * -1, intPricingTypeId = 2, intActionId = @_action
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 				IF ISNULL(@dblPriced,0) > 0
 				BEGIN
-					UPDATE @cbLogSpecific SET dblQty = @dblPriced * -1, intPricingTypeId = 1, intActionId = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					FROM @cbLogSpecific
+
+					UPDATE @cbLogSpecific SET dblQty = @dblPriced * -1, intPricingTypeId = 1, intActionId = @_action
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
+				
+				-- Reverse Basis Deliveries
+				IF @dblBasisDel > 0
+				BEGIN
+					UPDATE @cbLogSpecific SET dblQty = @dblBasisDel * -1,
+								strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
+								intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+				END
 			END			
+			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 4)
+			BEGIN
+				UPDATE @cbLogSpecific SET dblQty = dblQty * -1, intActionId = 61
+				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+			END
 			ELSE IF @total = 0-- No changes with dblQty
 			BEGIN	
 				-- Delete records not equals to 'Contract Balance'
@@ -2845,7 +3040,7 @@ BEGIN TRY
 					@_cash	 		NUMERIC(24, 10) = 0,
 					@_balance		NUMERIC(24, 10) = 0,
 					@_actual 		NUMERIC(24, 10) = 0,
-					@_action		INT,
+					--@_action		INT,
 					@_unpost		BIT;			
 			
 			-- Get action types for Settle Storeage, IR and IS transactions	
