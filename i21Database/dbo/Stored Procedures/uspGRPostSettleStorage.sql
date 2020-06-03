@@ -2164,7 +2164,7 @@ BEGIN TRY
 							and isnull(availableQtyForVoucher.intPricingTypeId, 0) = 1)
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
-				and (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType = 1))
+				--and (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType = 1))
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
 				 
