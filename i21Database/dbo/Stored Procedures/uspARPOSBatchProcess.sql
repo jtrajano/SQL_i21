@@ -1021,8 +1021,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 			UPDATE POSPAYMENT
 			SET intPaymentId = IP.intPaymentId
 			FROM tblARPOSPayment POSPAYMENT
-			INNER JOIN tblARPOS POS ON POSPAYMENT.intPOSId = POS.intPOSId			
-			INNER JOIN tblARPayment P ON CASE WHEN P.strPaymentMethod = 'Manual Credit Card' THEN 'Credit Card' ELSE P.strPaymentMethod END = POSPAYMENT.strPaymentMethod AND P.strNotes = POS.strReceiptNumber
+			INNER JOIN tblARPOS POS ON POSPAYMENT.intPOSId = POS.intPOSId		
+			INNER JOIN tblARInvoice I ON POS.intInvoiceId = I.intInvoiceId OR POS.intCreditMemoId = I.intInvoiceId
+            INNER JOIN tblARPaymentDetail PD ON PD.intInvoiceId = I.intInvoiceId
+            INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId	
+			--INNER JOIN tblARPayment P ON CASE WHEN P.strPaymentMethod = 'Manual Credit Card' THEN 'Credit Card' ELSE P.strPaymentMethod END = POSPAYMENT.strPaymentMethod AND P.strNotes = POS.strReceiptNumber
 			INNER JOIN tblARPaymentIntegrationLogDetail IP ON IP.intPaymentId = P.intPaymentId			
 			WHERE IP.intIntegrationLogId = @intPaymentLogId
 			  AND ISNULL(IP.ysnHeader, 0) = 1
