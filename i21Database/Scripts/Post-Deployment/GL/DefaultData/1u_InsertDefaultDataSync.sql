@@ -3,7 +3,7 @@ GO
     IF NOT EXISTS (SELECT TOP 1 1 FROM tblGLDataFix WHERE strDescription = 'tblGLDetail_FiscalPeriod')
     BEGIN
         PRINT N'BEGIN INSERTING DEFAULT DATA FOR GL'
-        UPDATE T set intFiscalPeriodId = F.intFiscalPeriodId FROM tblGLDetail T 
+        UPDATE T set intFiscalPeriodId = F.intGLFiscalYearPeriodId FROM tblGLDetail T 
         CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
         WHERE T.ysnIsUnposted = 0
 

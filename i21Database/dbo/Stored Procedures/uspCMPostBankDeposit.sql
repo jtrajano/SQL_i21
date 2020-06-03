@@ -541,7 +541,7 @@ FROM #tmpGLDetail
 
 	UPDATE 	A 
 	SET		ysnPosted = @ysnPost
-			,intFiscalPeriodId = F.intFiscalPeriodId
+			,intFiscalPeriodId = F.intGLFiscalYearPeriodId
 			,intConcurrencyId += 1 
 	FROM tblCMBankTransaction A
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F

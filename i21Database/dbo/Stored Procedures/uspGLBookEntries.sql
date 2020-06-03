@@ -135,7 +135,7 @@ BEGIN
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
 			,ISNULL(strSourceDocumentId,'')
-			,F.intFiscalPeriodId
+			,F.intGLFiscalYearPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,ISNULL(dblSourceUnitDebit,0)

@@ -572,7 +572,7 @@ FROM #tmpGLDetail
 				,ysnCheckVoid				= 0
 				,ysnPosted					= 1
 				,strLink					= A.strTransactionId
-				,intFiscalPeriodId			= F.intFiscalPeriodId
+				,intFiscalPeriodId			= F.intGLFiscalYearPeriodId
 				,ysnClr						= 0
 				,intEntityId				= A.intEntityId
 				,dtmDateReconciled			= NULL
@@ -619,7 +619,7 @@ FROM #tmpGLDetail
 				,ysnCheckVoid				= 0
 				,ysnPosted					= 1
 				,strLink					= A.strTransactionId
-				,intFiscalPeriodId			= F.intFiscalPeriodId
+				,intFiscalPeriodId			= F.intGLFiscalYearPeriodId
 				,ysnClr						= 0
 				,intEntityId				= A.intEntityId
 				,dtmDateReconciled			= NULL
