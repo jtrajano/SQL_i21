@@ -330,6 +330,7 @@ SELECT intEntityCustomerId		= I.intEntityCustomerId
 	 , dtmDueDate				= I.dtmDueDate
 	 , ysnImportedFromOrigin	= I.ysnImportedFromOrigin
 	 , strLocationName			= CL.strLocationName
+	 , strPONumber				= I.strPONumber
 INTO #INVOICES
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON C.intEntityCustomerId = I.intEntityCustomerId
@@ -342,7 +343,11 @@ WHERE I.ysnPosted  = 1
 
 --MAIN STATEMENT
 SELECT strReferenceNumber			= CASE WHEN ISNULL(I.ysnImportedFromOrigin, 0) = 0 THEN I.strInvoiceNumber ELSE ISNULL(I.strInvoiceOriginId, I.strInvoiceNumber) END
-	 , strTransactionType			= CASE WHEN I.strType = 'Service Charge' THEN 'Service Charge' ELSE I.strTransactionType END
+	 , strTransactionType			= CASE WHEN I.strType = 'Service Charge' THEN 'Service Charge'
+	 									   WHEN I.strTransactionType = 'Customer Prepayment' THEN 'Prepayment' 
+	 									   ELSE I.strTransactionType 
+									  END
+	 , strPONumber					= I.strPONumber
 	 , intEntityCustomerId			= C.intEntityCustomerId
 	 , dtmDueDate					= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Credit Memo', 'Debit Memo') THEN NULL ELSE I.dtmDueDate END
 	 , dtmDate						= I.dtmDate
@@ -415,6 +420,7 @@ SET @strFinalQuery = CAST('' AS NVARCHAR(MAX)) + '
 INSERT INTO tblARCustomerStatementStagingTable (
 	   strReferenceNumber
 	 , strTransactionType
+	 , strPONumber
 	 , intEntityCustomerId
 	 , dtmDueDate
 	 , dtmDate
