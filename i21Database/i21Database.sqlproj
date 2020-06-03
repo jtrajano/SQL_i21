@@ -8126,6 +8126,7 @@
     <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
