@@ -38,8 +38,8 @@ Ordered.intBankAccountId,
 CM.dtmDateReconciled,
 CM.intBankTransactionTypeId,
 CM.intCompanyLocationId,
-T.strBankTransactionTypeName,
-L.strLocationName,
+CM.strBankTransactionTypeName,
+CM.strLocationName,
 strMemo = 
 	CASE WHEN CM.strMemo = '' AND CM.ysnCheckVoid = 1 THEN 'Void' 
 	ELSE ISNULL(CM.strMemo, '') END,
@@ -54,8 +54,6 @@ CM.strPeriod
 FROM vyuCMGetBankTransaction CM 
 JOIN cteOrdered Ordered ON CM.intTransactionId= Ordered.intTransactionId
 JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId AND Total.intBankAccountId = Ordered.intBankAccountId
-LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId
-LEFT JOIN tblSMCompanyLocation L on L.intCompanyLocationId = CM.intCompanyLocationId
 OUTER APPLY 
 (
     SELECT TOP 1 ysnMaskEmployeeName 
