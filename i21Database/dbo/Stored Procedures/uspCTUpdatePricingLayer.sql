@@ -49,60 +49,14 @@ BEGIN
 		where
 			intInvoiceDetailId = @intInvoiceDetailId;
 
-		select
-			@dblPricedQuantity = dblQuantity
-			,@intPriceFixationId = intPriceFixationId
-		from
-			tblCTPriceFixationDetail
-		where
-			intPriceFixationDetailId = @intPriceFixationDetailId
-
-		select @intContractPriceId = intPriceContractId,@intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-
-		set @dblPricedQuantity = isnull(@dblPricedQuantity,0)
 		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
 
-		if (@dblPricedQuantity > @dblInvoiceDetailQuantity)
-		begin
-			update
-				tblCTPriceFixationDetail
-			set
-				dblNoOfLots = dblNoOfLots - ((@dblPricedQuantity - @dblInvoiceDetailQuantity)/(dblQuantity / case when isnull(dblNoOfLots,0) = 0 then 1 else dblNoOfLots end))
-				,dblQuantity = @dblPricedQuantity - @dblInvoiceDetailQuantity
-			where
-				intPriceFixationDetailId = @intPriceFixationDetailId;
-		end
-		else
-		begin
-			if ((select count(*) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId) = 1)
-			begin
-				delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-				if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
-				begin
-					-- Summary Log
-					select @intContractHeaderId = intContractHeaderId, 
-						   @intContractDetailId = intContractDetailId 
-					from tblCTPriceFixation 
-					where intPriceFixationId = @intPriceFixationId
-					exec	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
-														@intContractDetailId 	= @intContractDetailId, 
-														@strSource 			 	= 'Pricing',
-														@strProcess 			= 'Price Delete',
-														@intUserId				= @intUserId
-
-					delete from tblCTPriceContract where intPriceContractId = @intContractPriceId;
-				end
-			end
-			else
-			begin
-				delete from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
-			end
-		end
+		exec uspCTProcessInvoiceDelete
+			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+			,@intPriceFixationDetailId = @intPriceFixationDetailId
 
 		set @intInvoiceDetailId = (select min(intInvoiceDetailId) from @InvoiceDetails where intInvoiceDetailId > @intInvoiceDetailId);
 	end
 
-	update tblCTContractDetail set intPricingTypeId = 2,dblFutures = null, dblCashPrice = null,intConcurrencyId = (intConcurrencyId + 1) where intContractDetailId = @intContractDetailId;
-    
 
 END

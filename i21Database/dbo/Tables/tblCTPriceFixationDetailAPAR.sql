@@ -95,46 +95,11 @@ BEGIN
 		intTransactionDetailId = @intInvoiceDetailId
 	ORDER BY intId DESC
 
-	select
-		@dblPricedQuantity = dblQuantity
-		,@intPriceFixationId = intPriceFixationId
-	from
-		tblCTPriceFixationDetail
-	where
-		intPriceFixationDetailId = @intPriceFixationDetailId
-
-	select @intContractPriceId = intPriceContractId,@intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-
-	set @dblPricedQuantity = isnull(@dblPricedQuantity,0)
 	set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
 
-	if (@dblPricedQuantity > @dblInvoiceDetailQuantity)
-	begin
-		update
-			tblCTPriceFixationDetail
-		set
-			dblNoOfLots = dblNoOfLots - ((@dblPricedQuantity - @dblInvoiceDetailQuantity)/(dblQuantity / case when isnull(dblNoOfLots,0) = 0 then 1 else dblNoOfLots end))
-			,dblQuantity = @dblPricedQuantity - @dblInvoiceDetailQuantity
-		where
-			intPriceFixationDetailId = @intPriceFixationDetailId;
-	end
-	else
-	begin
-		if ((select count(*) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId) = 1)
-		begin
-			delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-			if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
-			begin
-				delete from tblCTPriceFixation where intPriceContractId = @intContractPriceId;
-			end
-		end
-		else
-		begin
-			delete from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
-		end
-	end
-	
-	update tblCTContractDetail set intPricingTypeId = 2,dblFutures = null, dblCashPrice = null,intConcurrencyId = (intConcurrencyId + 1) where intContractDetailId = @intContractDetailId;
+	exec uspCTProcessInvoiceDelete
+		@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+		,@intPriceFixationDetailId = @intPriceFixationDetailId
 
 END
 
