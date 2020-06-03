@@ -59,7 +59,7 @@ FROM (
 		,strBucketType =  a.strType
 		,dblDPRRun1 = a.dblTotal
 		,dblDPRRun2 = b.dblTotal
-		,dblDifference =  a.dblTotal -  b.dblTotal
+		,dblDifference =  b.dblTotal - a.dblTotal
 	from #temp1 a
 	inner join #temp2 b on b.strType = a.strType
 ) t

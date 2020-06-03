@@ -8166,6 +8166,7 @@
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
