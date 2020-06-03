@@ -444,7 +444,7 @@ BEGIN
 	
 	UPDATE 	A 
 	SET		ysnPosted = @ysnPost
-			,strPeriod = F.strPeriod
+			,intFiscalPeriodId = F.intFiscalPeriodId
 			,intConcurrencyId += 1 
 	FROM tblCMBankTransaction A
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F

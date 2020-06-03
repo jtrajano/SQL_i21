@@ -6,7 +6,7 @@ GO
 
         UPDATE 	A 
         SET		
-        strPeriod = F.strPeriod
+        intFiscalPeriodId = F.intGLFiscalPeriodId
         FROM tblCMBankTransaction A
         CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
         WHERE	A.ysnPosted = 1

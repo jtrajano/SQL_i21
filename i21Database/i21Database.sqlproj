@@ -600,6 +600,7 @@
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
     <Build Include="dbo\Views\vyuCMBankTransaction.sql" />
+    <Build Include="dbo\Views\vyuCMGetBankTransaction.sql" />
     <Build Include="dbo\Tables\tblEMEntityCredential.sql" />
     <Build Include="dbo\Tables\tblCMAptrxmstArchive.sql" />
     <Build Include="dbo\Tables\tblCMApchkmstArchive.sql" />

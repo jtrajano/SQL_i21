@@ -51,7 +51,7 @@ CM.strTransactionId,
 CM.ysnCheckVoid,
 CM.ysnClr,
 CM.strPeriod
-FROM tblCMBankTransaction CM 
+FROM vyuCMGetBankTransaction CM 
 JOIN cteOrdered Ordered ON CM.intTransactionId= Ordered.intTransactionId
 JOIN cteRunningTotal Total ON Ordered.rowId = Total.rowId AND Total.intBankAccountId = Ordered.intBankAccountId
 LEFT JOIN tblCMBankTransactionType T on T.intBankTransactionTypeId = CM.intBankTransactionTypeId

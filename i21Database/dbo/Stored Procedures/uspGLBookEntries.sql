@@ -88,7 +88,7 @@ BEGIN
             ,[dblForeignRate]
 			,[dblReportingRate]
 			,strSourceDocumentId
-			,strPeriod
+			,intFiscalPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,dblSourceUnitDebit
@@ -135,7 +135,7 @@ BEGIN
             ,[dblForeignRate]
 			,ISNULL([dblReportingRate],0)
 			,ISNULL(strSourceDocumentId,'')
-			,F.strPeriod
+			,F.intFiscalPeriodId
 			,intSourceLocationId
 			,intSourceUOMId
 			,ISNULL(dblSourceUnitDebit,0)

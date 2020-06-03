@@ -4,4 +4,4 @@
 RETURNS TABLE 
 AS 
 RETURN 
-SELECT TOP 1 strPeriod FROM tblGLFiscalYearPeriod WHERE @dtmDate BETWEEN dtmStartDate AND dtmEndDate
+SELECT TOP 1 intGLFiscalYearPeriodId, strPeriod FROM tblGLFiscalYearPeriod WHERE @dtmDate BETWEEN dtmStartDate AND dtmEndDate

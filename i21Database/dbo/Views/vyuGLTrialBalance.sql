@@ -41,7 +41,7 @@ OUTER APPLY (
 	dtmStartDate dtmDateFrom, 
 	dtmEndDate dtmDateTo,
 	TB.intGLFiscalYearPeriodId,
-	TB.strPeriod
+	FYP.strPeriod
 	FROM tblGLTrialBalance TB
 	JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = TB.intGLFiscalYearPeriodId
 	WHERE intAccountId = A.intAccountId

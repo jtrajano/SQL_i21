@@ -431,7 +431,7 @@ BEGIN
 	IF @@ERROR <> 0	 OR @PostResult <> 0 GOTO Post_Rollback
 	UPDATE 	A 
 	SET		ysnPosted = @ysnPost
-			,strPeriod = F.strPeriod
+			,intFiscalPeriodId = F.intFiscalPeriodId
 			,intConcurrencyId += 1 
 	FROM tblCMBankTransaction A
 	CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
