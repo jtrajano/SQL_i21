@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspICAddSubLedgerReportEntries]
+CREATE PROCEDURE [dbo].[uspICRemoveSubLedgerEntries]
   @strSourceTransactionType NVARCHAR(100),                      -- Transaction name, screen, module or anything that can be an identifier where the data came from
   @strSourceTransactionId INT,                                  -- The transaction no to remove
   @intUserId AS INT NULL                                        -- Security User Id (optional) 
