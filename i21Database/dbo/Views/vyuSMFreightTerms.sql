@@ -8,6 +8,7 @@
 		FT.ysnActive,
 		FT.strContractBasis,
 		FT.strDescription,
+		FT.strInstructions,
 		FT.ysnDefault,
 		FT.intInsuranceById,
 		FT.intInvoiceTypeId,
