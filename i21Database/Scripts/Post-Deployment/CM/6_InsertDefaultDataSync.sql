@@ -9,7 +9,14 @@ GO
         intFiscalPeriodId = F.intGLFiscalYearPeriodId
         FROM tblCMBankTransaction A
         CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
-        WHERE	A.ysnPosted = 1
+
+
+        UPDATE 	A 
+        SET	
+        intFiscalPeriodId = F.intGLFiscalYearPeriodId
+        FROM tblCMBankTransfer A
+        CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
+
 
         INSERT INTO tblCMDataFixLog VALUES(GETDATE(), 'tblCMBankTransaction_FiscalPeriod', @@ROWCOUNT)
         PRINT N'UPDATED tblCMBankTransaction Fiscal Period'
