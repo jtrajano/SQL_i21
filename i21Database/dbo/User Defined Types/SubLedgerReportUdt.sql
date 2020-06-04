@@ -14,7 +14,7 @@ CREATE TYPE [dbo].[SubLedgerReportUdt] AS TABLE
 	  - Inventory Adjustment
   */
   strInvoiceType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
-  strInvoiceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,                  -- The transaction no, ex: Invoice No., Adjustment No., etc.
+  strInvoiceNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,                  -- a.k.a strSourceTransactionNo. The transaction no, ex: Invoice No., Adjustment No., etc.
 
   dblInvoiceAmount NUMERIC(38, 20) NOT NULL,                                         -- The amount of the transaction.
   dblQty NUMERIC(38, 20) NOT NULL,                                                   -- (required) The qty of the item
