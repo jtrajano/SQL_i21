@@ -45,5 +45,5 @@ OUTER APPLY (
 	FROM tblGLTrialBalance TB
 	JOIN tblGLFiscalYearPeriod FYP ON FYP.intGLFiscalYearPeriodId = TB.intGLFiscalYearPeriodId
 	WHERE intAccountId = A.intAccountId
-	GROUP BY intAccountId, TB.intGLFiscalYearPeriodId,dtmStartDate,dtmEndDate, TB.strPeriod
+	GROUP BY intAccountId, TB.intGLFiscalYearPeriodId,dtmStartDate,dtmEndDate, FYP.strPeriod
 )TBSum
