@@ -1,5 +1,5 @@
-CREATE PROCEDURE [dbo].[uspICRemoveSubLedgerEntries]
-  @strSourceTransactionType NVARCHAR(100),                      -- Transaction name, screen, module or anything that can be an identifier where the data came from
+CREATE PROCEDURE [dbo].[uspICSubLedgerRemoveEntries]
+  @strSourceTransactionType NVARCHAR(100),                      -- Transaction form ex: Invoice, Inventory Adjustment, etc.
   @strSourceTransactionId INT,                                  -- The transaction no to remove
   @intUserId AS INT NULL                                        -- Security User Id (optional) 
 AS
