@@ -2619,6 +2619,12 @@
     <Build Include="dbo\Views\vyuEMSearchEntityUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMLetter.sql" />
     <Build Include="dbo\User Defined Types\InvoiceIntegrationStagingTable.sql" />
+
+    <Build Include="dbo\User Defined Types\SubLedgerReportUdt.sql" />
+    <Build Include="dbo\Tables\tblICInventorySubLedgerReport.sql" />
+	<Build Include="dbo\Stored Procedures\uspICAddSubLedgerReportEntries.sql" />
+	<Build Include="dbo\Stored Procedures\uspICRemoveSubLedgerEntries.sql" />
+	
     <Build Include="dbo\Stored Procedures\uspARAddItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessShipmentToInvoice.sql" />
