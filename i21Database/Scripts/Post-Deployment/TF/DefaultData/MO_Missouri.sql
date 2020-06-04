@@ -44,7 +44,7 @@ BEGIN
     UNION ALL SELECT intProductCodeId = 0, strProductCode = '231', strDescription = 'Dyed Diesel - No 1 Diesel', strProductCodeGroup = 'Diesel - Dyed', strNote = NULL, intMasterId = 253301
     UNION ALL SELECT intProductCodeId = 0, strProductCode = '160', strDescription = 'Undyed Diesel', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 253302
     UNION ALL SELECT intProductCodeId = 0, strProductCode = '161', strDescription = 'Undyed Diesel - Low Sulfur Diesel #1', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 253303
-    UNION ALL SELECT intProductCodeId = 0, strProductCode = '162', strDescription = 'Undyed Diesel - Low Sulfur Diesel #2', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 253304
+    UNION ALL SELECT intProductCodeId = 0, strProductCode = '167', strDescription = 'Undyed Diesel - Low Sulfur Diesel #2', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 253304
     UNION ALL SELECT intProductCodeId = 0, strProductCode = '150', strDescription = 'Undyed Diesel - No 1 Fuel Oil', strProductCodeGroup = 'Diesel - Undyed', strNote = NULL, intMasterId = 253305
     UNION ALL SELECT intProductCodeId = 0, strProductCode = '124', strDescription = 'Gasohol', strProductCodeGroup = 'Gasohol', strNote = NULL, intMasterId = 253306
     UNION ALL SELECT intProductCodeId = 0, strProductCode = '139', strDescription = 'Gasohol 10%', strProductCodeGroup = 'Gasohol', strNote = NULL, intMasterId = 253307
@@ -479,7 +479,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510413
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510414
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510415
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510416
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510416
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510417
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510418
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '1', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510419
@@ -505,7 +505,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510421
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510422
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510423
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510424
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510424
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510425
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510426
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '10A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510427
@@ -524,7 +524,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510429
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510430
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510431
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510432
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510432
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510433
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510434
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '10G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510435
@@ -540,7 +540,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510437
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510438
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510439
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510440
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510440
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510441
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510442
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '10J', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510443
@@ -555,7 +555,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510445
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510446
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510447
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510448
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510448
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510449
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510450
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '1B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510451
@@ -582,7 +582,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510453
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510454
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510455
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510456
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510456
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510457
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510458
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '1C', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510459
@@ -609,7 +609,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510461
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510462
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510463
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510464
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510464
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510465
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510466
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '1E', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510467
@@ -636,7 +636,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510469
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510470
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510471
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510472
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510472
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510473
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510474
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510475
@@ -662,7 +662,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510477
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510478
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510479
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510480
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510480
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510481
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510482
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '2B', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510483
@@ -679,7 +679,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510485
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510486
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510487
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510488
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510488
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510489
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510490
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '2G', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510491
@@ -698,7 +698,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510493
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510494
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510495
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510496
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510496
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510497
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510498
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '5W', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510499
@@ -718,7 +718,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510501
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510502
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510503
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510504
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510504
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510505
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510506
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7AAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510507
@@ -745,7 +745,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510509
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510510
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510511
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510512
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510512
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510513
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510514
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7AIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510515
@@ -772,7 +772,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510517
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510518
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510519
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510520
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510520
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510521
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510522
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7AIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510523
@@ -799,7 +799,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510525
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510526
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510527
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510528
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510528
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510529
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510530
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7AKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510531
@@ -826,7 +826,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510533
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510534
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510535
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510536
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510536
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510537
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510538
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7AKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510539
@@ -853,7 +853,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510541
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510542
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510543
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510544
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510544
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510545
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510546
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7ANE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510547
@@ -880,7 +880,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510549
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510550
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510551
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510552
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510552
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510553
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510554
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7AOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510555
@@ -907,7 +907,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510557
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510558
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510559
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510560
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510560
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510561
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510562
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7ATN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510563
@@ -934,7 +934,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510565
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510566
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510567
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510568
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510568
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510569
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510570
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BAR', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510571
@@ -961,7 +961,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510573
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510574
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510575
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510576
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510576
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510577
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510578
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BIA', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510579
@@ -988,7 +988,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510581
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510582
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510583
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510584
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510584
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510585
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510586
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BIL', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510587
@@ -1015,7 +1015,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510589
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510590
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510591
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510592
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510592
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510593
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510594
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BKS', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510595
@@ -1042,7 +1042,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510597
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510598
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510599
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510600
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510600
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510601
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510602
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BKY', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510603
@@ -1069,7 +1069,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510605
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510606
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510607
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510608
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510608
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510609
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510610
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BNE', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510611
@@ -1096,7 +1096,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510613
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510614
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510615
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510616
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510616
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510617
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510618
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BOK', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510619
@@ -1123,7 +1123,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510621
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510622
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510623
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510624
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510624
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510625
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510626
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4757', strScheduleCode = '7BTN', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510627
@@ -1150,7 +1150,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510629
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510630
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510631
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510632
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510632
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510633
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510634
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4782', strScheduleCode = '1A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510635
@@ -1177,7 +1177,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510637
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510638
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510639
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510640
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510640
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510641
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510642
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4782', strScheduleCode = '2A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510643
@@ -1204,7 +1204,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '284', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510645
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510646
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '161', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510647
-    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '162', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510648
+    UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '167', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510648
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510649
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510650
     UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = '4782', strScheduleCode = '3A', strType = 'Clear Diesel/Clear Kerosene', intMasterId = 2510651
