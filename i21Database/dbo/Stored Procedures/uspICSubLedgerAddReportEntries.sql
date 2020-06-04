@@ -1,6 +1,5 @@
 CREATE PROCEDURE [dbo].[uspICSubLedgerAddReportEntries]
   @SubLedgerReportEntries SubLedgerReportUdt READONLY,          -- The raw data that will be transformed and inserted into the actual report table
-  @strSourceTransactionType NVARCHAR(100),                      -- Transaction name similar to tblICInventoryTransactionType. Ex. Inventory Adjustment, etc.
   @intUserId AS INT NULL                                        -- Security User Id (optional) 
 AS
 

@@ -1,6 +1,5 @@
-CREATE PROCEDURE [dbo].[uspICSubLedgerRemoveEntries]
-  @strSourceTransactionType NVARCHAR(100),                      -- Transaction form ex: Invoice, Inventory Adjustment, etc.
-  @strSourceTransactionId INT,                                  -- The transaction no to remove
+CREATE PROCEDURE [dbo].[uspICSubLedgerRemoveReportEntries]
+  @SubLedgerTransactions SubLedgerTransactionsUdt READONLY,
   @intUserId AS INT NULL                                        -- Security User Id (optional) 
 AS
 
