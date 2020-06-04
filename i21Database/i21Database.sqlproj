@@ -8169,6 +8169,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
