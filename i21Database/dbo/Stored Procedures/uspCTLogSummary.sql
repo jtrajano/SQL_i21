@@ -2110,7 +2110,7 @@ BEGIN TRY
 						AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
 						AND 
 						(
-							pfd.dblQuantity <> CAST(REPLACE('Priced Quantity is 3000.000000', 'Priced Quantity is ', '') AS NUMERIC(24, 10)) 
+							pfd.dblQuantity <> CAST(REPLACE(strNotes, 'Priced Quantity is ', '') AS NUMERIC(24, 10)) 
 							OR 
 							pfd.dblFutures <> dblFutures
 						)
