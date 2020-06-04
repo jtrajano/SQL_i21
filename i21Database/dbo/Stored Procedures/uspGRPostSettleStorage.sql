@@ -3043,7 +3043,13 @@ BEGIN TRY
 
 					end
 
-
+					if @ysnDPOwnedType = 1 and exists(select top 1 1 from @voucherPayable where isnull(intInventoryReceiptItemId, 0) > 0)
+						update 
+							voucherPayable
+								set dblOldCost = ReceiptItem.dblUnitCost
+						from @voucherPayable voucherPayable
+							join tblICInventoryReceiptItem ReceiptItem
+								on voucherPayable.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 
 
 
