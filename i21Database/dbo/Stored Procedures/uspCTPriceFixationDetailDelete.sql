@@ -146,7 +146,6 @@ BEGIN TRY
 			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
 			BEGIN
 			
-				SELECT 'Delete 1', * FROM tblAPBill ORDER BY intBillId DESC
 				EXEC uspAPDeleteVoucher @Id,@intUserId,4
 		
 				--Audit Log
