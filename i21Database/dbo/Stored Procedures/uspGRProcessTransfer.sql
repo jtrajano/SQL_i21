@@ -542,8 +542,8 @@ BEGIN
 							ON IL.intItemLocationId = ITP.intItemLocationId
 						WHERE intId = @cursorId
 						
-						SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),1,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
-							,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),2,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+						SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+							,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -569,14 +569,16 @@ BEGIN
 
 						IF @ysnDPtoOtherStorage = 0
 						SELECT @strRKError = CASE 
-												WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' 
-												WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' 
-												WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' 
-											END +  ' in risk management is not available.'
+												WHEN @dblBasisCost IS NULL AND @dblSettlementPrice > 0 THEN 'Basis in Risk Management is not available.'
+												WHEN @dblSettlementPrice IS NULL AND @dblBasisCost > 0 THEN 'Settlement Price in Risk Management is not available.'
+												WHEN @dblBasisCost IS NULL AND @dblSettlementPrice IS NULL THEN 'Basis and Settlement Price in Risk Management are not available.'
+												WHEN @dblSettlementPrice = 0 THEN 'Settlement Price is 0. Please update its price in Risk Management.'
+											END
 
 						IF @strRKError IS NOT NULL
 						BEGIN
 							RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+							RETURN;
 						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
