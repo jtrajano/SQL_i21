@@ -4,13 +4,9 @@
 	@intUserId INT
 )
 AS
- 
-BEGIN
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
+BEGIN TRY
+	--return	
 	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]	
@@ -73,8 +69,6 @@ BEGIN
 		RETURN;
 	END
 	
-	BEGIN TRANSACTION
-	BEGIN TRY
 		DECLARE @cnt INT = 0
 
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
@@ -694,14 +688,16 @@ BEGIN
 
 						IF @ysnDPtoOtherStorage = 0
 						SELECT @strRKError = CASE 
-												WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' 
-												WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' 
-												WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' 
-											END +  ' in risk management is not available.'
-
+							WHEN @dblBasisCost IS NULL AND @dblSettlementPrice > 0 THEN 'Basis in Risk Management is not available.'
+							WHEN @dblSettlementPrice IS NULL AND @dblBasisCost > 0 THEN 'Settlement Price in Risk Management is not available.'
+							WHEN @dblBasisCost IS NULL AND @dblSettlementPrice IS NULL THEN 'Basis and Settlement Price in Risk Management are not available.'
+							WHEN @dblSettlementPrice = 0 THEN 'Settlement Price is 0. Please update its price in Risk Management.'
+							END
+					
 						IF @strRKError IS NOT NULL
 						BEGIN
-							RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+						RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+						RETURN;
 						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
@@ -1438,27 +1434,8 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 
-		DONE:
-		COMMIT TRANSACTION
-	
 	END TRY
 	BEGIN CATCH
-		DECLARE @ErrorSeverity INT,
-				@ErrorNumber   INT,
-				@ErrorMessage nvarchar(4000),
-				@ErrorState INT,
-				@ErrorLine  INT,
-				@ErrorProc nvarchar(200);
-		-- Grab error information from SQL functions
-		SET @ErrorSeverity = ERROR_SEVERITY()
-		SET @ErrorNumber   = ERROR_NUMBER()
-		SET @ErrorMessage  = ERROR_MESSAGE()
-		SET @ErrorState    = ERROR_STATE()
-		SET @ErrorLine     = ERROR_LINE()
-	
-		ROLLBACK TRANSACTION
-	
-		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	SET @ErrMsg = ERROR_MESSAGE()
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 	END CATCH	
-	
-END
