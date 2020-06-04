@@ -427,6 +427,8 @@ BEGIN
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
+								,[intSourceEntityId]
+								,[intCommodityId]
 							)
 							EXEC dbo.uspICUnpostCosting @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0	
 							 							
