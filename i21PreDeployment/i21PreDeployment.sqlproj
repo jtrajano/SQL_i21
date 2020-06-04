@@ -393,4 +393,7 @@
     <None Include="Scripts\Pre-Deployment\11_IC\ImproveValuationReport.sql" />
     <None Include="Scripts\Pre-Deployment\11_IC\FixFKItemPricingLevel.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\4_SM\12_MigrateRecentlyViewed.sql" />
+  </ItemGroup>
 </Project>
