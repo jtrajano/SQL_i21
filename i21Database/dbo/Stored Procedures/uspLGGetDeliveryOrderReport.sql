@@ -3,6 +3,7 @@
 AS
 BEGIN
 	DECLARE @strLoadNumber			NVARCHAR(MAX),
+			@strUserName			NVARCHAR(MAX),
 			@xmlDocumentId			INT,
 			@strCompanyName			NVARCHAR(100),
 			@strCompanyAddress		NVARCHAR(100),
@@ -19,7 +20,10 @@ BEGIN
 			@strHaulerCity			NVARCHAR(MAX), 
 			@strHaulerCountry		NVARCHAR(MAX), 
 			@strHaulerState			NVARCHAR(MAX), 
-			@strHaulerZip			NVARCHAR(MAX)
+			@strHaulerZip			NVARCHAR(MAX),
+			@strUserFullName		NVARCHAR(100),
+			@strUserEmailId			NVARCHAR(100),
+			@strUserPhoneNo			NVARCHAR(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -56,6 +60,10 @@ BEGIN
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'strLoadNumber' 
 
+	SELECT	@strUserName = [from]
+	FROM	@temp_xml_table   
+	WHERE	[fieldname] = 'strUserName' 
+
 	SELECT TOP 1 @strCompanyName = strCompanyName
 		,@strCompanyAddress = strAddress
 		,@strContactName = strContactName
@@ -68,6 +76,17 @@ BEGIN
 		,@strFax = strFax
 		,@strWeb = strWebSite
 	FROM tblSMCompanySetup
+
+	SELECT 
+		@strUserFullName = E.strName
+		,@strUserEmailId = ETC.strEmail
+		,@strUserPhoneNo = EPN.strPhone  
+	FROM tblSMUserSecurity S
+	JOIN tblEMEntity E ON E.intEntityId = S.intEntityId
+	JOIN tblEMEntityToContact EC ON EC.intEntityId = E.intEntityId
+	JOIN tblEMEntity ETC ON ETC.intEntityId = EC.intEntityContactId
+	JOIN tblEMEntityPhoneNumber EPN ON EPN.intEntityId = ETC.intEntityId
+	WHERE S.strUserName = @strUserName
 
 	SELECT
 		@strHaulerAddress = (SELECT EL.strAddress from tblEMEntityLocation EL JOIN tblEMEntity E On E.intDefaultLocationId = EL.intEntityLocationId Where EL.intEntityId=L.intHaulerEntityId),
@@ -130,7 +149,10 @@ BEGIN
 		  ,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
 		  ,ysnFullHeaderLogo = CASE WHEN ISNULL(CP.ysnFullHeaderLogo,0) = 1 THEN 'true' ELSE 'false' END
 		  ,intReportLogoHeight = ISNULL(CP.intReportLogoHeight,0)
-		  ,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0) 
+		  ,intReportLogoWidth = ISNULL(CP.intReportLogoWidth,0)
+		  ,strUserFullName = @strUserFullName
+		  ,strUserEmailId = @strUserEmailId
+		  ,strUserPhoneNo = @strUserPhoneNo
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
