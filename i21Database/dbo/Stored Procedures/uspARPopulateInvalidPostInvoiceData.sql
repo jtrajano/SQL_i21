@@ -129,27 +129,6 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--INACTIVE GL ACCOUNT PROFIT CENTER
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Unable to post with an inactive account ' + GLA.strAccountId
-	FROM #ARPostInvoiceHeader I
-	INNER JOIN tblGLAccount GLA ON GLA.intAccountId = dbo.fnGetGLAccountIdFromProfitCenter(I.intAccountId, I.intProfitCenter) 
-	WHERE GLA.ysnActive = 0
-
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
 	--If ysnAllowUserSelfPost is True in User Role
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
