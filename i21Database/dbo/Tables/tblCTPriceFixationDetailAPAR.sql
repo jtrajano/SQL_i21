@@ -7,6 +7,7 @@
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
 	ysnReverse						BIT NULL,
+	ysnMarkDelete					BIT,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
