@@ -49,6 +49,7 @@ BEGIN
 
 	UPDATE A
 	SET A.intCurrentStatus = 5
+       ,A.dtmAccountingPeriod = NULL
 	FROM tblARPayment A
 	INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
 
@@ -165,10 +166,15 @@ ELSE
 BEGIN
 
     UPDATE A
-    SET A.intCurrentStatus = 4
+    SET A.intCurrentStatus = 4,
+        A.dtmAccountingPeriod = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmDatePaid) + 1, 0))
     FROM tblARPayment A
     INNER JOIN #ARPostPaymentHeader P ON A.[intPaymentId] = P.[intTransactionId]
-	WHERE P.[ysnPost] = @OneBit
+  	WHERE P.[ysnPost] = @OneBit
+
+
+
+
 
 	-- Delete Invoice with Zero Payment
     DELETE FROM tblARPaymentDetail
