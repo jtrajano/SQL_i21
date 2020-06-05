@@ -43,6 +43,7 @@
 	, ysnPreCrush BIT
 	, strTransactionReferenceId NVARCHAR(100)
 	, intTransactionReferenceId INT
+	, intTransactionReferenceDetailId INT
 	CONSTRAINT [PK_tblRKTempDPRDetailLog_intTempDPRDetailLogId] PRIMARY KEY ([intTempDPRDetailLogId])
 )
 GO
