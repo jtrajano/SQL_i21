@@ -50,7 +50,7 @@ END) AS strName
 ,cfCard.intSalesPersonId
 
 
-,ROUND(cfTransaction.dblQuantity,3) AS dblQuantity
+,cfTransaction.dblQuantity AS dblQuantity
 ,ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) AS dblTaxCalculatedAmount
 ,ISNULL(cfTransaction.dblCalculatedGrossPrice,0) AS dblGrossPrice
 ,ISNULL(cfTransaction.dblCalculatedNetPrice,0) AS dblNetPrice
@@ -64,9 +64,9 @@ END) AS strName
 ,(CASE  
 		WHEN cfTransaction.strTransactionType IN ('Local/Network','Foreign Sale','Foreign Sales') AND ISNULL(cfTransaction.dblInventoryCost,0) > 0
 		THEN 
-			ROUND(ISNULL(cfTransaction.dblInventoryCost,0) * ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) ,2)
+			ROUND(ISNULL(cfTransaction.dblInventoryCost,0) * cfTransaction.dblQuantity + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0) ,2)
 		ELSE
-			ROUND(ISNULL(cfTransaction.dblNetTransferCost,0) * ROUND(cfTransaction.dblQuantity,3) + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0),2) 
+			ROUND(ISNULL(cfTransaction.dblNetTransferCost,0) * cfTransaction.dblQuantity + ISNULL(tblCFTransactionTax_1.dblTaxCalculatedAmount,0),2) 
 
 END) AS dblCost
 
