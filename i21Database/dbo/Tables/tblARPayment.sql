@@ -3,6 +3,7 @@
     [intEntityCustomerId]   INT             NOT NULL,
     [intCurrencyId]			INT             NOT NULL,
     [dtmDatePaid]			DATETIME        NULL,
+	[dtmAccountingPeriod]	DATETIME		NULL,
     [intAccountId]			INT             NULL,
 	[intBankAccountId]		INT             NULL,
     [intPaymentMethodId]	INT             NOT NULL,
@@ -139,12 +140,13 @@ BEGIN
 
 	SET @ysnPosted = ISNULL(@ysnPosted,0)
 	SET @ysnPostedNew = ISNULL(@ysnPostedNew,0)
-	IF((@ysnPosted = 1 and @ysnPostedNew = 0 and @currentStatus = 5) OR (@ysnPosted = 0 and @ysnPostedNew = 0) OR (@ysnPosted = 0 and @ysnPostedNew = 1) OR UPDATE(intCurrentStatus) OR @currentStatus = 5)
+	IF((@ysnPosted = 1 and @ysnPostedNew = 0 and @currentStatus = 5) OR (@ysnPosted = 0 and @ysnPostedNew = 0) OR (@ysnPosted = 0 and @ysnPostedNew = 1) OR UPDATE(intCurrentStatus) OR UPDATE(dtmAccountingPeriod) OR @currentStatus = 5)
 	BEGIN
 		UPDATE p
 		SET  p.intEntityCustomerId            = i.intEntityCustomerId           
 			,p.intCurrencyId                  = i.intCurrencyId                 
-			,p.dtmDatePaid                    = i.dtmDatePaid                   
+			,p.dtmDatePaid                    = i.dtmDatePaid   
+			,p.dtmAccountingPeriod            = i.dtmAccountingPeriod   
 			,p.intAccountId                   = i.intAccountId                  
 			,p.intBankAccountId               = i.intBankAccountId              
 			,p.intPaymentMethodId             = i.intPaymentMethodId            
