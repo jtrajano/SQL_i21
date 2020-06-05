@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspICSubLedgerRemoveReportEntries]
   @SubLedgerTransactions SubLedgerTransactionsUdt READONLY,
-  @intUserId AS INT NULL                                        -- Security User Id (optional) 
+  @intUserId AS INT                                        -- Security User Id (optional) 
 AS
 
 /*

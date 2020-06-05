@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspICSubLedgerAddReportEntries]
   @SubLedgerReportEntries SubLedgerReportUdt READONLY,          -- The raw data that will be transformed and inserted into the actual report table
-  @intUserId AS INT NULL                                        -- Security User Id (optional) 
+  @intUserId AS INT                                        -- Security User Id (optional) 
 AS
 
 /*
