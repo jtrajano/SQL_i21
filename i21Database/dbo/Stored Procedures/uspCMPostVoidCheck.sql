@@ -7,6 +7,7 @@ CREATE PROCEDURE uspCMPostVoidCheck
 	,@intEntityId			INT		= NULL
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
+	,@ysnBatch				BIT		= 0
 
 AS
 
@@ -535,7 +536,7 @@ Recap_Rollback:
 	SET @isSuccessful = 1
 	ROLLBACK TRANSACTION 		
 	
-	EXEC dbo.uspCMPostRecap @RecapTable
+	EXEC dbo.uspCMPostRecap @RecapTable,@intEntityId,@ysnBatch
 	GOTO Post_Exit
 
 Audit_Log:

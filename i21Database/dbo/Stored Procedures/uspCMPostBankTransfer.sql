@@ -8,6 +8,7 @@
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
     ,@outBatchId 			NVARCHAR(40) = NULL OUTPUT
+	,@ysnBatch				BIT		= 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -753,6 +754,7 @@ Recap_Rollback:
 	EXEC dbo.uspGLPostRecap 
 			@RecapTable
 			,@intEntityId
+			,@ysnBatch
 	GOTO Post_Exit
 
 Audit_Log:
