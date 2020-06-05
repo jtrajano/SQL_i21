@@ -9,6 +9,7 @@
 	,@isSuccessful			BIT		= 0 OUTPUT 
 	,@message_id			INT		= 0 OUTPUT 
 	,@outBatchId 			NVARCHAR(40) = NULL OUTPUT
+	,@ysnBatch				BIT		= 0
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -625,7 +626,7 @@ Post_Rollback:
 Recap_Rollback: 
 	SET @isSuccessful = 1
 	ROLLBACK TRANSACTION 
-	EXEC dbo.uspGLPostRecap  @RecapTable,@intEntityId
+	EXEC dbo.uspGLPostRecap  @RecapTable,@intEntityId,@ysnBatch
 	GOTO Post_Exit
 
 Audit_Log:
