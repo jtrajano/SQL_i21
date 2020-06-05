@@ -881,6 +881,8 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 			END
 			ELSE
 			BEGIN
@@ -932,6 +934,8 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 			END
 
 
