@@ -80,7 +80,7 @@ SELECT
 	,blbSignature					= I.blbSignature
 	,intTicketId					= SCALETICKETID.intTicketId
 	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
-	,dtmAccountingPeriod            = I.dtmAccountingPeriod
+	,dtmAccountingPeriod            = AccPeriod.dtmAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -258,5 +258,9 @@ FROM
 		FOR XML PATH ('')
 	) C (strPaymentMethod)
 ) PAYMETHODS
+OUTER APPLY(
+	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
+) AccPeriod
 
 GO
