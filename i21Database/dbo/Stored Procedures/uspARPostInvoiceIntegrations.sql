@@ -77,7 +77,7 @@ BEGIN
        , ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
        , ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
        , ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
-	   , ARI.dtmAccountingPeriod        = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
+	   , ARI.intPeriodId       		    = ACCPERIOD.intGLFiscalYearPeriodId
 									  
     FROM #ARPostInvoiceHeader PID
     INNER JOIN (
@@ -107,9 +107,13 @@ BEGIN
 			 , strTransactionType
 			 , dtmDate
 			 , ysnExcludeFromPayment
-			 , dtmAccountingPeriod
+			 , intPeriodId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId
+	Outer Apply (
+		SELECT P.intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod P
+		WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
+	) ACCPERIOD
 
     UPDATE ARPD
     SET ARPD.dblInvoiceTotal		= ARI.dblInvoiceTotal * dbo.[fnARGetInvoiceAmountMultiplier](ARI.strTransactionType)
@@ -481,7 +485,7 @@ BEGIN
 		, ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 		, ARI.ysnExcludeFromPayment		= 0
 		, ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
-		, ARI.dtmAccountingPeriod		= NULL
+		, ARI.intPeriodId				= NULL
 	FROM #ARPostInvoiceHeader PID
 	INNER JOIN (
 		SELECT intInvoiceId
@@ -508,7 +512,7 @@ BEGIN
 			 , dblBaseInvoiceTotal
 			 , dtmDate
 			 , ysnExcludeFromPayment
-			 , dtmAccountingPeriod
+			 , intPeriodId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
 	CROSS APPLY (
@@ -516,6 +520,7 @@ BEGIN
 		FROM tblARPrepaidAndCredit 
 		WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
 	) PPC
+	
 												
 	--UPDATE HD TICKET HOURS
 	UPDATE HDTHW						

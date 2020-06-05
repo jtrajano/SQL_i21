@@ -42,7 +42,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strCurrency				= CUR.strCurrency
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , strNotes					= P.strNotes
-	, dtmAccountingPeriod		= I.dtmAccountingPeriod
+	 , dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 LEFT JOIN (
 	SELECT AP.intPaymentId
@@ -142,4 +142,8 @@ LEFT OUTER JOIN (
 		 , strName 
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) USERENTERED ON USERENTERED.intEntityId = I.intPostedById
+OUTER APPLY(
+	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
+) AccPeriod
 WHERE ((P.intPaymentId IS NOT NULL AND I.strTransactionType <> 'Cash') OR I.strTransactionType = 'Cash')

@@ -166,7 +166,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod	    = ARI.dtmAccountingPeriod
+		, dtmAccountingPeriod	    = AccPeriod.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -247,6 +247,10 @@ FROM
 	           AND ARI.strType = 'CF Tran'
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 		AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		AND ISNULL(ICI.strType, '') NOT IN ('Software', 'Bundle')
@@ -304,7 +308,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod	    = ARI.dtmAccountingPeriod
+		, dtmAccountingPeriod	    = AccPeriod.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -378,6 +382,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
@@ -567,7 +575,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod		= ARI.dtmAccountingPeriod
+		, dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -641,6 +649,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -830,7 +842,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod		= ARI.dtmAccountingPeriod
+		, dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -903,6 +915,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -1092,7 +1108,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod		= ARI.dtmAccountingPeriod
+		, dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -1165,6 +1181,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ICI.strType, '') = 'Software'

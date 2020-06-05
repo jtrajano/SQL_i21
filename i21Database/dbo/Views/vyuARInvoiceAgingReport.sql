@@ -58,8 +58,12 @@ FROM
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) <= 90 THEN '61 - 90 Days'    
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 90 THEN 'Over 90' END
 				END
-	 ,dtmAccountingPeriod   = I.dtmAccountingPeriod
+	 ,dtmAccountingPeriod   = AccPeriod.dtmAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
+OUTER APPLY(
+	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
+) AccPeriod
 WHERE ysnPosted = 1
 	AND ysnPaid = 0
 	AND ysnCancelled = 0

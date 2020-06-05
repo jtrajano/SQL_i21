@@ -30,8 +30,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblTotal					= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotal, 0) ELSE ISNULL(ID.dblTotal, 0) * -1 END
 	 , ysnPosted				= ISNULL(I.ysnPosted, 0)
 	 , ysnImpactInventory		= ISNULL(I.ysnImpactInventory, 0)
-	 , dtmAccountingPeriod      = I.dtmAccountingPeriod
-
+	 , dtmAccountingPeriod      = AccPeriod.dtmAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
@@ -90,3 +89,7 @@ LEFT JOIN (SELECT CTH.intContractHeaderId
 LEFT OUTER JOIN(
 	SELECT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation WITH (NOLOCK)
 ) L ON I.intCompanyLocationId = L.intCompanyLocationId
+OUTER APPLY(
+	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
+) AccPeriod
