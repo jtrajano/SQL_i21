@@ -18,7 +18,7 @@ IF (@ysnBatch = 0)
 BEGIN
 	DELETE FROM tblGLPostRecap WHERE strBatchId IN (SELECT strBatchId FROM @RecapTable)
 	DELETE FROM tblGLPostRecap WHERE strTransactionId IN (SELECT strTransactionId FROM @RecapTable)
-	DELETE	FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
+	DELETE FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
 END
 
 
