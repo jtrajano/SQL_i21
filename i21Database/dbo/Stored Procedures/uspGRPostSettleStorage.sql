@@ -3168,14 +3168,16 @@ BEGIN TRY
 							end
 							----- DEBUG POINT -----
 
-							EXEC [dbo].[uspAPPostBill] 
-								 @post = 1
-								,@recap = 0
-								,@isBatch = 0
-								,@param = @intVoucherId
-								,@userId = @intCreatedUserId
-								,@transactionType = 'Settle Storage'
-								,@success = @success OUTPUT
+							--IF @ysnFromTransferStorage = 0
+							
+							-- EXEC [dbo].[uspAPPostBill] 
+							-- 	 @post = 1
+							-- 	,@recap = 0
+							-- 	,@isBatch = 0
+							-- 	,@param = @intVoucherId
+							-- 	,@userId = @intCreatedUserId
+							-- 	,@transactionType = 'Settle Storage'
+							-- 	,@success = @success OUTPUT
 							
 							----- DEBUG POINT -----
 							if @debug_awesome_ness = 1	 AND 1 = 0
@@ -3203,12 +3205,12 @@ BEGIN TRY
 					end
 					----- DEBUG POINT -----
 
-					IF(@success = 0)
-					BEGIN
-						SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
-						RAISERROR (@ErrMsg, 16, 1);
-						GOTO SettleStorage_Exit;
-					END
+					-- IF(@success = 0)
+					-- BEGIN
+					-- 	SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+					-- 	RAISERROR (@ErrMsg, 16, 1);
+					-- 	GOTO SettleStorage_Exit;
+					-- END
 					
 					
 					
@@ -3425,6 +3427,22 @@ BEGIN TRY
 	UPDATE tblGRStorageHistory
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
+
+	EXEC [dbo].[uspAPPostBill] 
+		@post = 1
+		,@recap = 0
+		,@isBatch = 0
+		,@param = @intVoucherId
+		,@userId = @intCreatedUserId
+		,@transactionType = 'Settle Storage'
+		,@success = @success OUTPUT
+
+	IF(@success = 0)
+	BEGIN
+		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+		RAISERROR (@ErrMsg, 16, 1);
+		GOTO SettleStorage_Exit;
+	END
 	
 	----- DEBUG POINT -----
 	if @debug_awesome_ness = 1	and 1 = 0
