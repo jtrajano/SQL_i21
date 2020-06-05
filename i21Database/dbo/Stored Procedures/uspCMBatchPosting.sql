@@ -36,7 +36,15 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostBankDeposit @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostBankDeposit 
+		@ysnPost=@ysnPost, 
+		@ysnRecap =@ysnRecap, 
+		@strTransactionId=@strTransactionId,
+		@strBatchId= @BatchId, 
+		@intUserId=@intUserId, 
+		@intEntityId=@intEntityId, 
+		@isSuccessful=@isSuccessful OUTPUT
+		,@ysnBatch =1
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
@@ -72,7 +80,8 @@ BEGIN
 			@strBatchId=@BatchId, 
 			@intUserId=@intUserId, 
 			@intEntityId=@intEntityId, 
-			@isSuccessful=@isSuccessful OUTPUT
+			@isSuccessful=@isSuccessful OUTPUT,
+			@ysnBatch = 1
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
@@ -101,7 +110,15 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransaction WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostMiscChecks @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostMiscChecks  
+		@ysnPost=@ysnPost, 
+		@ysnRecap=@ysnRecap,
+		@strTransactionId =@strTransactionId, 
+		@strBatchId=@BatchId, 
+		@intUserId=@intUserId, 
+		@intEntityId=@intEntityId, 
+		@isSuccessful=@isSuccessful OUTPUT,
+		@ysnBatch = 1
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
@@ -130,7 +147,15 @@ BEGIN
 
 		SELECT @strTransactionId = strTransactionId FROM tblCMBankTransfer WHERE intTransactionId = @intTransactionId
 
-		EXEC uspCMPostBankTransfer @ysnPost, @ysnRecap, @strTransactionId, @BatchId, @intUserId, @intEntityId, @isSuccessful OUTPUT
+		EXEC uspCMPostBankTransfer 
+		@ysnPost=@ysnPost, 
+		@ysnRecap= @ysnRecap, 
+		@strTransactionId=@strTransactionId, 
+		@strBatchId=@BatchId,
+		@intUserId =@intUserId, 
+		@intEntityId=@intEntityId, 
+		@isSuccessful=@isSuccessful OUTPUT,
+		@ysnBatch = 1
 
 		IF @@ERROR = 0 AND @isSuccessful = 1
 		BEGIN
