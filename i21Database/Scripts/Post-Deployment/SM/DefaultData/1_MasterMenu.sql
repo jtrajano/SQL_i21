@@ -9,9 +9,9 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-		 	
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'DPR Compare' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DPRCompare')
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebuild Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Tools' AND strModuleName = 'Inventory') AND strCommand = N'Inventory.view.RebuildInventory?action=new&modal=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -1504,6 +1504,15 @@ ELSE
 DECLARE @InventoryReportParentMenuId INT
 SELECT @InventoryReportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Tools' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
+    INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+    VALUES (N'Tools', N'Inventory', @InventoryParentMenuId, N'Tools', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 1)
+ELSE
+    UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 3 WHERE strMenuName = 'Tools' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+
+DECLARE @InventoryToolParentMenuId INT
+SELECT @InventoryToolParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Tools' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */ 
 UPDATE tblSMMasterMenu SET intParentMenuID = @InventoryActivitiesParentMenuId WHERE intParentMenuID =  @InventoryParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @InventoryMaintenanceParentMenuId WHERE intParentMenuID =  @InventoryParentMenuId AND strCategory = 'Maintenance'
@@ -1668,6 +1677,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Det
 	VALUES (N'Blend Details', N'Inventory', @InventoryReportParentMenuId, N'Blend Details', N'Report', N'Screen', N'Inventory.view.BlendDetail?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 5, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.BlendDetail?showSearch=true', intSort = 5 WHERE strMenuName = 'Blend Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebuild Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryToolParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Rebuild Inventory', N'Inventory', @InventoryToolParentMenuId, N'Rebuild Inventory', N'Screen', N'Screen', N'Inventory.view.RebuildInventory?action=new&modal=true', N'small-menu-report', 1, 0, 0, 1, 5, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.RebuildInventory?action=new&modal=true', intSort = 5 WHERE strMenuName = 'Rebuild Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryToolParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Build Assemblies' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
