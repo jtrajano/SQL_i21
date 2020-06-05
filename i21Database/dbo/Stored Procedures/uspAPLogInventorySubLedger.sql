@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPLogInventorySubLedger]
-	@billIds AS Id,
+	@billIds AS Id READONLY,
 	@remove BIT = 0,
 	@userId INT
 AS
@@ -83,8 +83,8 @@ BEGIN
 		,strBLNo					= NULL
 		,strOrigin					= NULL
 	FROM tblAPBill Bill
-	INNER JOIN @billIds
-		ON @billIds.intId = Bill.intBillId
+	INNER JOIN @billIds ids
+		ON ids.intId = Bill.intBillId
 	INNER JOIN tblAPBillDetail BillDetail
 		ON Bill.intBillId = BillDetail.intBillId
 	LEFT JOIN (tblCTContractDetail ctd INNER JOIN tblCTContractHeader ct ON ct.intContractHeaderId = ctd.intContractHeaderId)
@@ -115,8 +115,8 @@ BEGIN
 		END,
 		Bill.strBillId
 	FROM tblAPBill Bill
-	INNER JOIN @billIds
-		ON @billIds.intId = Bill.intBillId
+	INNER JOIN @billIds ids
+		ON ids.intId = Bill.intBillId
 
 	EXEC [dbo].[uspICSubLedgerRemoveReportEntries]
 		@SubLedgerTransactions = @transactionIds,
