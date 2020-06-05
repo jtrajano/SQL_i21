@@ -69,6 +69,7 @@ DECLARE @billIds NVARCHAR(MAX)
 DECLARE @totalRecords INT
 DECLARE @costAdjustmentResult INT;
 DECLARE @voucherPayables AS VoucherPayable;
+DECLARE @billIdsInventoryLog AS Id;
 
 -- Get the functional currency
 BEGIN 
@@ -1269,6 +1270,10 @@ BEGIN
 			GROUP BY intContractCostId
 		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
 
+		INSERT INTO @billIdsInventoryLog
+		SELECT intBillId FROM #tmpPostBillData
+		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 0, @userId = @userId
+
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT
@@ -1399,6 +1404,10 @@ BEGIN
 			GROUP BY intContractCostId
 		) tblBilled ON tblBilled.intContractCostId = CC.intContractCostId
 
+		INSERT INTO @billIdsInventoryLog
+		SELECT intBillId FROM #tmpPostBillData
+		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 0, @userId = @userId
+		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
 		SELECT 

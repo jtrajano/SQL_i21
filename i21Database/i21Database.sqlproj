@@ -8712,6 +8712,7 @@
     <Build Include="dbo\Stored Procedures\uspAPRptPostPreviewPayVoucherDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptPostPreviewPayVoucherSummary.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPLogInventorySubLedger.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
