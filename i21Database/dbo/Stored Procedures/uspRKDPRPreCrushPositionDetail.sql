@@ -9,6 +9,8 @@
 	, @intSubBookId INT = NULL
 	, @strPositionBy NVARCHAR(100) = NULL
 	, @intUserId INT  = NULL
+	, @ysnRefresh BIT = 0
+	, @ysnLogDPR BIT = 0
 AS
 
 BEGIN
@@ -99,7 +101,8 @@ BEGIN
 		, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, ysnPreCrush BIT
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intTransactionReferenceId INT)
+		, intTransactionReferenceId INT
+		, intTransactionReferenceDetailId INT)
 	DECLARE @FinalList AS TABLE (intRowNumber INT IDENTITY
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -139,7 +142,8 @@ BEGIN
 		, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, ysnPreCrush BIT
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intTransactionReferenceId INT)
+		, intTransactionReferenceId INT
+		, intTransactionReferenceDetailId INT)
 	DECLARE @InventoryStock AS TABLE (strCommodityCode NVARCHAR(100)
 		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCategory NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -151,7 +155,8 @@ BEGIN
 		, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId int
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intTransactionReferenceId INT)
+		, intTransactionReferenceId INT
+		, intTransactionReferenceDetailId INT)
 
 
 	DECLARE @mRowNumber INT
@@ -732,7 +737,8 @@ BEGIN
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
 				, strTransactionReferenceId
-				, intTransactionReferenceId)
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
@@ -743,6 +749,7 @@ BEGIN
 				, strInventoryType
 				, strTransactionId
 				, intTransactionId
+				, intTransactionDetailId
 			FROM (
 				SELECT strCommodityCode
 					, i.strItemNo
@@ -754,6 +761,7 @@ BEGIN
 					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
 					, s.strTransactionId
 					, s.intTransactionId
+					, s.intTransactionDetailId
 				FROM vyuRKGetInventoryValuation s
 				JOIN tblICItem i ON i.intItemId = s.intItemId
 				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
@@ -832,7 +840,9 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
-					, strInventoryType)
+					, strInventoryType
+					, strTransactionReferenceId
+					, intTransactionReferenceId)
 				SELECT strCommodityCode
 					, strItemNo
 					, strCategory
@@ -841,6 +851,8 @@ BEGIN
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
 					, 'Company Titled' COLLATE Latin1_General_CI_AS
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 				FROM (
 					SELECT intTicketId
 						, strTicketType
@@ -856,6 +868,8 @@ BEGIN
 						, intCategoryId
 						, strCategory
 						, strCommodityCode
+						, strTransactionReferenceId = CASE WHEN ISNULL(ch.strReceiptNumber,'')  <> '' THEN ch.strReceiptNumber ELSE ch.strShipmentNumber END
+						, intTransactionReferenceId = ISNULL(ch.intInventoryReceiptId, ch.intInventoryShipmentId)
 					FROM #tblGetStorageDetailByDate ch
 					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
@@ -877,7 +891,9 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
-					, strInventoryType)
+					, strInventoryType
+					, strTransactionReferenceId
+					, intTransactionReferenceId)
 				SELECT strCommodityCode
 					, strItemNo
 					, strCategory
@@ -886,6 +902,8 @@ BEGIN
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
 					, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 				FROM (
 					SELECT intTicketId
 						, strTicketType
@@ -901,6 +919,8 @@ BEGIN
 						, intCategoryId
 						, strCategory
 						, strCommodityCode
+						, strTransactionReferenceId = CASE WHEN ISNULL(ch.strReceiptNumber,'')  <> '' THEN ch.strReceiptNumber ELSE ch.strShipmentNumber END
+						, intTransactionReferenceId = ISNULL(ch.intInventoryReceiptId, ch.intInventoryShipmentId)
 					FROM #tblGetStorageDetailByDate ch
 					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
@@ -1421,7 +1441,9 @@ INSERT INTO @List (strCommodityCode
 	, intFromCommodityUnitMeasureId
 	, intOrderId
 	, strType
-	, strInventoryType)
+	, strInventoryType
+	, strTransactionReferenceId
+	, intTransactionReferenceId)
 SELECT strCommodityCode
 	, strItemNo
 	, strCategory
@@ -1433,6 +1455,8 @@ SELECT strCommodityCode
 	, intOrderId = 7
 	, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
 	, strInventoryType
+	, strTransactionReferenceId
+	, intTransactionReferenceId
 FROM @InventoryStock
 WHERE strInventoryType IN ('Delayed Pricing')
 
@@ -1448,7 +1472,8 @@ INSERT INTO @List (strCommodityCode
 	, strType
 	, strInventoryType
 	, strTransactionReferenceId
-	, intTransactionReferenceId)
+	, intTransactionReferenceId
+	, intTransactionReferenceDetailId)
 SELECT strCommodityCode
 	, strItemNo
 	, strCategory
@@ -1462,6 +1487,7 @@ SELECT strCommodityCode
 	, strInventoryType
 	, strTransactionReferenceId
 	, intTransactionReferenceId
+	, intTransactionReferenceDetailId
 FROM @InventoryStock
 WHERE strInventoryType IN ('Company Titled', 'Collateral','Purchase In-Transit','Sales In-Transit')
 
@@ -1927,6 +1953,7 @@ DECLARE @ListFinal AS TABLE (intRowNumber1 INT IDENTITY
 	, ysnPreCrush BIT
 	, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
+	, intTransactionReferenceDetailId INT
 	)
 
 DECLARE @MonthOrderList AS TABLE (		
@@ -1995,7 +2022,8 @@ INSERT INTO @ListFinal(intSeqNo
 	, strNotes
 	, ysnPreCrush
 	, strTransactionReferenceId
-	, intTransactionReferenceId)
+	, intTransactionReferenceId
+	, intTransactionReferenceDetailId)
 SELECT intSeqNo
 	, intRowNumber
 	, strCommodityCode
@@ -2031,6 +2059,7 @@ SELECT intSeqNo
 	, ysnPreCrush
 	, strTransactionReferenceId
 	, intTransactionReferenceId
+	, intTransactionReferenceDetailId
 FROM @List
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') AND strContractEndMonth = 'Near By'
 
@@ -2068,7 +2097,8 @@ INSERT INTO @ListFinal(intSeqNo
 	, strNotes
 	, ysnPreCrush
 	, strTransactionReferenceId
-	, intTransactionReferenceId)
+	, intTransactionReferenceId
+	, intTransactionReferenceDetailId)
 SELECT intSeqNo
 	, intRowNumber
 	, strCommodityCode
@@ -2104,6 +2134,7 @@ SELECT intSeqNo
 	, ysnPreCrush
 	, strTransactionReferenceId
 	, intTransactionReferenceId
+	, intTransactionReferenceDetailId
 FROM @List 
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
@@ -2187,28 +2218,34 @@ WHERE intOrderId IS NOT NULL
 --==================================
 -- Insert into temporary log table
 --==================================
-
---Get the Run Number
-DECLARE @intRunNumber INT
-		,@strVendorCustomer NVARCHAR(200)
-		,@ysnStoreDPRDetail BIT
-
-SELECT @ysnStoreDPRDetail = ysnStoreDPRDetail
-FROM tblSMUserSecurity
-WHERE intEntityId = @intUserId
-
-IF @ysnStoreDPRDetail = 1
+IF (ISNULL(@ysnLogDPR, 0) = 1)
 BEGIN
-	SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
-	FROM tblRKTempDPRDetailLog
-
+--Get the Run Number
+	DECLARE @intRunNumber INT
+		, @strVendorCustomer NVARCHAR(200)
+	
 	IF @intVendorId IS NOT NULL 
 	BEGIN
 		SELECT @strVendorCustomer = strName FROM tblEMEntity WHERE intEntityId = @intVendorId
 	END
 
-	INSERT INTO tblRKTempDPRDetailLog (
-		 intRunNumber 
+	---- Delete Previous Log of same instance. This is just a refresh of the screen.
+	--IF (ISNULL(@ysnRefresh, 0) = 1)
+	--BEGIN
+	--	SELECT * FROM tblRKTempDPRDetailLog
+	--	WHERE CAST(FLOOR(CAST(dtmRunDateTime AS FLOAT)) AS DATETIME) = CAST(FLOOR(CAST(GETDATE() AS FLOAT)) AS DATETIME)
+	--		AND intUserId = @intUserId
+	--		AND dtmDPRDate = @dtmToDate
+	--		AND strDPRPositionIncludes = @strPositionIncludes
+	--		AND strDPRPositionBy = @strPositionBy
+	--		AND strDPRPurchaseSale = @strPurchaseSales
+	--		AND strDPRVendorCustomer = @strVendorCustomer
+	--END
+
+	SELECT TOP 1 @intRunNumber = ISNULL(MAX(intRunNumber),0) + 1 
+	FROM tblRKTempDPRDetailLog
+
+	INSERT INTO tblRKTempDPRDetailLog (intRunNumber 
 		, dtmRunDateTime
 		, intUserId
 		, dtmDPRDate	
@@ -2250,9 +2287,10 @@ BEGIN
 		, ysnPreCrush
 		, strTransactionReferenceId
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 	)
 	select 
-		 intRunNumber = @intRunNumber
+			intRunNumber = @intRunNumber
 		, dtmRunDateTime = GETDATE()
 		, intUserId = @intUserId
 		, dtmDPRDate = @dtmToDate	
@@ -2294,6 +2332,7 @@ BEGIN
 		, ysnPreCrush
 		, strTransactionReferenceId
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 	FROM @ListFinal
 	WHERE intOrderId IS NOT NULL
 		AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
