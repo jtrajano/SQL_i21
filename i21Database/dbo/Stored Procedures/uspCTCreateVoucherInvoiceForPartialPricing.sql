@@ -275,7 +275,7 @@ BEGIN TRY
 					INSERT INTO @tblReceipt
 					SELECT  RI.intInventoryReceiptId,
 							RI.intInventoryReceiptItemId,
-							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
+							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblOpenReceive) dblReceived,
 							IR.strReceiptNumber,
 							(
 								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
@@ -306,7 +306,7 @@ BEGIN TRY
 					INSERT INTO @tblReceipt
 					SELECT  RI.intInventoryReceiptId,
 							RI.intInventoryReceiptItemId,
-							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
+							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblOpenReceive) dblReceived,
 							IR.strReceiptNumber,
 							(
 								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
