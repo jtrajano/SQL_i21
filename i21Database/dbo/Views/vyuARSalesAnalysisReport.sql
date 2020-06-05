@@ -112,6 +112,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	 , dblRebateAmount			= SAR.dblRebateAmount
 	 , dblBuybackAmount			= SAR.dblBuybackAmount
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+     , dtmAccountingPeriod	    = SAR.dtmAccountingPeriod
 FROM
 (
 	--INVOICE/NORMAL ITEMS
@@ -165,6 +166,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, dtmAccountingPeriod	    = ARI.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -302,6 +304,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, dtmAccountingPeriod	    = ARI.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -427,6 +430,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.000000
+		, dtmAccountingPeriod		    = NULL
 	FROM tblSOSalesOrder SO 
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -563,6 +567,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, dtmAccountingPeriod		= ARI.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -687,8 +692,9 @@ FROM
 		, strCurrencyDescription		= SMC.strDescription
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
-		, dblBuybackAmount				= 0.000000
-	FROM tblSOSalesOrder SO 
+		, dblBuybackAmount				= 0.
+		, dtmAccountingPeriod		    = NULL
+	FROM tblSOSalesOrder SO
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
 			 , strCurrency
@@ -824,6 +830,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, dtmAccountingPeriod		= ARI.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -948,6 +955,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.000000
+		, dtmAccountingPeriod			= NULL
 	FROM tblSOSalesOrder SO 
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -1084,6 +1092,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, dtmAccountingPeriod		= ARI.dtmAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
