@@ -1,26 +1,25 @@
 GO
-	PRINT N'BEGIN INSERT DEFAULT DATA SYNC FOR CM'
-GO
-    IF NOT EXISTS (SELECT TOP 1 1 FROM tblCMDataFixLog WHERE strDescription = 'tblCMBankTransaction_FiscalPeriod')
-    BEGIN
-
-        UPDATE 	A 
-        SET		
-        intFiscalPeriodId = F.intGLFiscalYearPeriodId
-        FROM tblCMBankTransaction A
-        CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
-
-
-        UPDATE 	A 
-        SET	
-        intFiscalPeriodId = F.intGLFiscalYearPeriodId
-        FROM tblCMBankTransfer A
-        CROSS APPLY dbo.fnGLGetFiscalPeriod(A.dtmDate) F
-
-
-        INSERT INTO tblCMDataFixLog VALUES(GETDATE(), 'tblCMBankTransaction_FiscalPeriod', @@ROWCOUNT)
-        PRINT N'UPDATED tblCMBankTransaction Fiscal Period'
-    END
-GO
-	PRINT N'END INSERT DEFAULT DATA SYNC FOR CM'
+    DECLARE @rowUpdated  NVARCHAR(20)
+    WHILE EXISTS(SELECT TOP 1 1 FROM tblCMBankTransaction WHERE intFiscalPeriodId IS NULL)
+	  BEGIN
+		;WITH cte as(
+		    SELECT TOP 1000 intTransactionId from tblCMBankTransaction WHERE intFiscalPeriodId IS NULL
+		)
+        UPDATE T SET intFiscalPeriodId = F.intGLFiscalYearPeriodId FROM tblCMBankTransaction T 
+		JOIN cte C ON C.intTransactionId = T.intTransactionId
+        CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
+        SELECT  @rowUpdated = CONVERT( NVARCHAR(20) , @@ROWCOUNT )
+		PRINT ('Updated fiscal period of ' +  @rowUpdated +  ' records in tblCMBankTransaction')
+	END
+    WHILE EXISTS(SELECT TOP 1 1 FROM tblCMBankTransfer WHERE intFiscalPeriodId IS NULL)
+	  BEGIN
+		;WITH cte as(
+		    SELECT TOP 1000 intTransactionId from tblCMBankTransfer WHERE intFiscalPeriodId IS NULL
+		)
+        UPDATE T SET intFiscalPeriodId = F.intGLFiscalYearPeriodId FROM tblCMBankTransfer T 
+		JOIN cte C ON C.intTransactionId = T.intTransactionId
+        CROSS APPLY dbo.fnGLGetFiscalPeriod(T.dtmDate) F
+        SELECT  @rowUpdated = CONVERT( NVARCHAR(20) , @@ROWCOUNT )
+		PRINT ('Updated fiscal period of ' +  @rowUpdated +  ' records in tblCMBankTransfer')
+	END
 GO
