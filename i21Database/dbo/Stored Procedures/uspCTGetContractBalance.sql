@@ -14,27 +14,29 @@ AS
 
 BEGIN TRY
 
-	BEGIN TRAN
-
-	DECLARE @ErrMsg					NVARCHAR(MAX)
-	DECLARE @blbHeaderLogo			VARBINARY(MAX)
-	DECLARE @intContractDetailId	INT
-	DECLARE @intShipmentKey			INT
-	DECLARE @intReceiptKey			INT
-	DECLARE @intPriceFixationKey	INT
-	DECLARE @dblShipQtyToAllocate	NUMERIC(38,20)
-	DECLARE @dblAllocatedQty		NUMERIC(38,20)
-	DECLARE @dblPriceQtyToAllocate  NUMERIC(38,20)
-	DECLARE @intShipmentNoOfLoad	INT
-	DECLARE @intPriceNoOfLoad		INT
+	DECLARE @ysnContractBalanceInProgress	BIT = 0
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnContractBalanceInProgress = 1)
 	BEGIN
-		SET @ErrMsg = '"Contract summary is being accumulated, please wait...'
-		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+		SET @ysnContractBalanceInProgress = 1
+		RAISERROR ('Contract summary is being accumulated, please wait...',18,1,'WITH NOWAIT')
 	END
 	-- SET "CONTRACT BALANCE" STATUS IN-PROGRESS TO AVOID SIMULTANEOUS REPORT BUILDING 
 	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 1
+
+	BEGIN TRAN
+
+	DECLARE @ErrMsg							NVARCHAR(MAX)
+	DECLARE @blbHeaderLogo					VARBINARY(MAX)
+	DECLARE @intContractDetailId			INT
+	DECLARE @intShipmentKey					INT
+	DECLARE @intReceiptKey					INT
+	DECLARE @intPriceFixationKey			INT
+	DECLARE @dblShipQtyToAllocate			NUMERIC(38,20)
+	DECLARE @dblAllocatedQty				NUMERIC(38,20)
+	DECLARE @dblPriceQtyToAllocate			NUMERIC(38,20)
+	DECLARE @intShipmentNoOfLoad			INT
+	DECLARE @intPriceNoOfLoad				INT
 
 	DECLARE @SequenceHistory TABLE
 	(
@@ -1879,6 +1881,8 @@ BEGIN TRY
 	DELETE FROM tblCTContractBalance
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM @SequenceHistory)
 
+	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
+
 	COMMIT TRAN
 
     IF ISNULL(@strCallingApp,'') <> 'DPR'
@@ -1943,12 +1947,15 @@ BEGIN TRY
 	AND dtmEndDate			=  @dtmEndDate
 	END
  
-	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
-
 END TRY
 
 BEGIN CATCH
-	ROLLBACK TRAN
+	IF @ysnContractBalanceInProgress <> 1 
+	BEGIN
+		ROLLBACK TRAN
+		UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
+	END
+	
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
