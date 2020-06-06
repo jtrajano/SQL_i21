@@ -376,7 +376,13 @@ FROM tblICInventoryReceipt A INNER JOIN tblICInventoryReceiptItem B
 	OUTER APPLY 
 	(
 		SELECT 
-			SUM(ISNULL(billDetail.dblQtyReceived,0)) AS dblQty 
+			--SUM(ISNULL(billDetail.dblQtyReceived,0)) AS dblQty 
+			dblQty = SUM(
+				CASE 
+					WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(billDetail.dblQtyReceived,0)
+					ELSE ISNULL(billDetail.dblQtyReceived,0)
+				END 
+			)
 		FROM 
 			tblAPBillDetail billDetail INNER JOIN tblAPBill bill
 				ON billDetail.intBillId = bill.intBillId 
