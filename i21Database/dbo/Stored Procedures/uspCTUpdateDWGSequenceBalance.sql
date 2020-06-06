@@ -6,7 +6,7 @@ BEGIN TRY
 	
 	DECLARE
 		@ErrMsg NVARCHAR(MAX)
-		,@intId int
+		,@intId int = 0
 		,@dblConvertedQty numeric(24,10)
 		,@dblCalculatedQty numeric(24,10)
 
@@ -22,6 +22,8 @@ BEGIN TRY
 		,@intUserId int
 		,@ysnFromInvoice bit = convert(bit,0)
 		,@dblCurrentBalanceQuantity numeric (18,6);
+		,@dblCurrentlyApplied numeric (18,6);
+		,@dblBalanceLessOtherShipmentItem numeric (18,6);
 
 	declare @ContractSequenceBalanceSummary table (
 		intId int 
@@ -65,7 +67,7 @@ BEGIN TRY
 		,dblOldQuantity = cb.dblOldQuantity
 		,dblQuantity = cb.dblQuantity
 		,intFromItemUOMId = cb.intItemUOMId
-		,strScreenName = cb.strScreenName
+		,strScreenName = (case when cb.strScreenName = 'Inventory' then 'Inventory Shipment' else cb.strScreenName end)
 		,intUserId = cb.intUserId
 		,ysnFromInvoice = (case when cb.strScreenName = 'Invoice' then convert(bit,1) else convert(bit,0) end)
 	from
@@ -95,6 +97,15 @@ BEGIN TRY
 			intId = @intId
 
 		/*Return the Shipment quantity*/
+		--Get all quantity applied to other Shipment Item
+		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
+		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied) from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+
+		if (@dblBalanceLessOtherShipmentItem < @dblOldQuantity)
+		begin
+			set @dblOldQuantity = @dblBalanceLessOtherShipmentItem;
+		end
+
 		SELECT @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblOldQuantity) * -1);
 
 		EXEC	uspCTUpdateSequenceBalance
@@ -106,7 +117,7 @@ BEGIN TRY
 				@ysnFromInvoice 		= 	@ysnFromInvoice
 
 		/*Calculate if the sequence remaining balance is enough for the DWG quantity*/
-		select @dblCurrentBalanceQuantity = (dblQuantity - dblBalance) from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		select @dblCurrentBalanceQuantity = dblBalance from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 		set @dblCalculatedQty = (case when @dblCurrentBalanceQuantity > @dblQuantity then @dblQuantity else @dblCurrentBalanceQuantity end);
 
 		/*Apply the DWG quantity (or the remianing sequence balance) to sequence balance*/
