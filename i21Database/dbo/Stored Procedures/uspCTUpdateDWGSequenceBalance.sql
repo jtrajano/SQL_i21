@@ -21,8 +21,8 @@ BEGIN TRY
 		,@strScreenName nvarchar(50)
 		,@intUserId int
 		,@ysnFromInvoice bit = convert(bit,0)
-		,@dblCurrentBalanceQuantity numeric (18,6);
-		,@dblCurrentlyApplied numeric (18,6);
+		,@dblCurrentBalanceQuantity numeric (18,6)
+		,@dblCurrentlyApplied numeric (18,6)
 		,@dblBalanceLessOtherShipmentItem numeric (18,6);
 
 	declare @ContractSequenceBalanceSummary table (
