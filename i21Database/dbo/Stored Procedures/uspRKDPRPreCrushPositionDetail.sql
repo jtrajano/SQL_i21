@@ -101,7 +101,8 @@ BEGIN
 		, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, ysnPreCrush BIT
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intTransactionReferenceId INT)
+		, intTransactionReferenceId INT
+		, intTransactionReferenceDetailId INT)
 	DECLARE @FinalList AS TABLE (intRowNumber INT IDENTITY
 		, intContractHeaderId INT
 		, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -141,7 +142,8 @@ BEGIN
 		, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, ysnPreCrush BIT
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intTransactionReferenceId INT)
+		, intTransactionReferenceId INT
+		, intTransactionReferenceDetailId INT)
 	DECLARE @InventoryStock AS TABLE (strCommodityCode NVARCHAR(100)
 		, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strCategory NVARCHAR(100) COLLATE Latin1_General_CI_AS
@@ -151,9 +153,12 @@ BEGIN
 		, intFromCommodityUnitMeasureId int
 		, strType nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strTranType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId int
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
-		, intTransactionReferenceId INT)
+		, intTransactionReferenceId INT
+		, intTransactionReferenceDetailId INT)
 
 
 	DECLARE @mRowNumber INT
@@ -733,8 +738,11 @@ BEGIN
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
+				, strTranType
+				, strEntityName 
 				, strTransactionReferenceId
-				, intTransactionReferenceId)
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
@@ -743,8 +751,11 @@ BEGIN
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
+				, strTransactionType
+				, strEntity
 				, strTransactionId
 				, intTransactionId
+				, intTransactionDetailId
 			FROM (
 				SELECT strCommodityCode
 					, i.strItemNo
@@ -754,8 +765,11 @@ BEGIN
 					, intCommodityId = @intCommodityId
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
+					, strTransactionType
+					, strEntity
 					, s.strTransactionId
 					, s.intTransactionId
+					, s.intTransactionDetailId
 				FROM vyuRKGetInventoryValuation s
 				JOIN tblICItem i ON i.intItemId = s.intItemId
 				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
@@ -834,7 +848,9 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
-					, strInventoryType)
+					, strInventoryType
+					, strTransactionReferenceId
+					, intTransactionReferenceId)
 				SELECT strCommodityCode
 					, strItemNo
 					, strCategory
@@ -843,6 +859,8 @@ BEGIN
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
 					, 'Company Titled' COLLATE Latin1_General_CI_AS
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 				FROM (
 					SELECT intTicketId
 						, strTicketType
@@ -858,6 +876,8 @@ BEGIN
 						, intCategoryId
 						, strCategory
 						, strCommodityCode
+						, strTransactionReferenceId = CASE WHEN ISNULL(ch.strReceiptNumber,'')  <> '' THEN ch.strReceiptNumber ELSE ch.strShipmentNumber END
+						, intTransactionReferenceId = ISNULL(ch.intInventoryReceiptId, ch.intInventoryShipmentId)
 					FROM #tblGetStorageDetailByDate ch
 					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
@@ -869,6 +889,8 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 			END
 			ELSE
 			BEGIN
@@ -879,7 +901,9 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
-					, strInventoryType)
+					, strInventoryType
+					, strTransactionReferenceId
+					, intTransactionReferenceId)
 				SELECT strCommodityCode
 					, strItemNo
 					, strCategory
@@ -888,6 +912,8 @@ BEGIN
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
 					, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 				FROM (
 					SELECT intTicketId
 						, strTicketType
@@ -903,6 +929,8 @@ BEGIN
 						, intCategoryId
 						, strCategory
 						, strCommodityCode
+						, strTransactionReferenceId = CASE WHEN ISNULL(ch.strReceiptNumber,'')  <> '' THEN ch.strReceiptNumber ELSE ch.strShipmentNumber END
+						, intTransactionReferenceId = ISNULL(ch.intInventoryReceiptId, ch.intInventoryShipmentId)
 					FROM #tblGetStorageDetailByDate ch
 					WHERE ch.intCommodityId  = @intCommodityId
 						AND ysnDPOwnedType = 1
@@ -914,6 +942,8 @@ BEGIN
 					, strLocationName
 					, intCommodityId
 					, intFromCommodityUnitMeasureId
+					, strTransactionReferenceId
+					, intTransactionReferenceId
 			END
 
 
@@ -1423,7 +1453,9 @@ INSERT INTO @List (strCommodityCode
 	, intFromCommodityUnitMeasureId
 	, intOrderId
 	, strType
-	, strInventoryType)
+	, strInventoryType
+	, strTransactionReferenceId
+	, intTransactionReferenceId)
 SELECT strCommodityCode
 	, strItemNo
 	, strCategory
@@ -1435,6 +1467,8 @@ SELECT strCommodityCode
 	, intOrderId = 7
 	, 'Delayed Pricing' COLLATE Latin1_General_CI_AS
 	, strInventoryType
+	, strTransactionReferenceId
+	, intTransactionReferenceId
 FROM @InventoryStock
 WHERE strInventoryType IN ('Delayed Pricing')
 
@@ -1449,8 +1483,11 @@ INSERT INTO @List (strCommodityCode
 	, intOrderId
 	, strType
 	, strInventoryType
+	, strTranType
+	, strEntityName
 	, strTransactionReferenceId
-	, intTransactionReferenceId)
+	, intTransactionReferenceId
+	, intTransactionReferenceDetailId)
 SELECT strCommodityCode
 	, strItemNo
 	, strCategory
@@ -1462,8 +1499,11 @@ SELECT strCommodityCode
 	, intOrderId = 8
 	, 'Company Titled' COLLATE Latin1_General_CI_AS
 	, strInventoryType
+	, strTranType
+	, strEntityName
 	, strTransactionReferenceId
 	, intTransactionReferenceId
+	, intTransactionReferenceDetailId
 FROM @InventoryStock
 WHERE strInventoryType IN ('Company Titled', 'Collateral','Purchase In-Transit','Sales In-Transit')
 
@@ -1929,6 +1969,7 @@ DECLARE @ListFinal AS TABLE (intRowNumber1 INT IDENTITY
 	, ysnPreCrush BIT
 	, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
+	, intTransactionReferenceDetailId INT
 	)
 
 DECLARE @MonthOrderList AS TABLE (		
@@ -1997,7 +2038,8 @@ INSERT INTO @ListFinal(intSeqNo
 	, strNotes
 	, ysnPreCrush
 	, strTransactionReferenceId
-	, intTransactionReferenceId)
+	, intTransactionReferenceId
+	, intTransactionReferenceDetailId)
 SELECT intSeqNo
 	, intRowNumber
 	, strCommodityCode
@@ -2033,6 +2075,7 @@ SELECT intSeqNo
 	, ysnPreCrush
 	, strTransactionReferenceId
 	, intTransactionReferenceId
+	, intTransactionReferenceDetailId
 FROM @List
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') AND strContractEndMonth = 'Near By'
 
@@ -2070,7 +2113,8 @@ INSERT INTO @ListFinal(intSeqNo
 	, strNotes
 	, ysnPreCrush
 	, strTransactionReferenceId
-	, intTransactionReferenceId)
+	, intTransactionReferenceId
+	, intTransactionReferenceDetailId)
 SELECT intSeqNo
 	, intRowNumber
 	, strCommodityCode
@@ -2106,6 +2150,7 @@ SELECT intSeqNo
 	, ysnPreCrush
 	, strTransactionReferenceId
 	, intTransactionReferenceId
+	, intTransactionReferenceDetailId
 FROM @List 
 WHERE (ISNULL(dblTotal,0) <> 0 OR strType = 'Crush') and strContractEndMonth not in ( 'Near By') order by CONVERT(DATETIME, '01 ' + strContractEndMonth) 
 
@@ -2258,6 +2303,7 @@ BEGIN
 		, ysnPreCrush
 		, strTransactionReferenceId
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 	)
 	select 
 			intRunNumber = @intRunNumber
@@ -2302,6 +2348,7 @@ BEGIN
 		, ysnPreCrush
 		, strTransactionReferenceId
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 	FROM @ListFinal
 	WHERE intOrderId IS NOT NULL
 		AND ((dblTotal IS NULL OR dblTotal <> 0) OR strType = 'Crush')
