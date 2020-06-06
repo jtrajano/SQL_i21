@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTProcessToInventoryShipment]
 
 		@intContractDetailId	INT,
-		@intUserId				INT		
+		@intUserId				INT,
+		@dtmLocalDate			DATETIME
 AS
 
 	SET QUOTED_IDENTIFIER OFF
@@ -16,7 +17,7 @@ AS
 			@InventoryReceiptId		INT,
 			@ErrMsg					NVARCHAR(MAX),
 			@intInventoryShipmentId	INT,
-			@dtmShipDate			DATETIME = GETDATE()
+			@dtmShipDate			DATETIME = @dtmLocalDate--GETDATE()
 
 	DECLARE @ShipmentStagingTable	ShipmentStagingTable,
 			@OtherCharges			ShipmentChargeStagingTable,
