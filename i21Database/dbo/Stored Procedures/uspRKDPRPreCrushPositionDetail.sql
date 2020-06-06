@@ -153,6 +153,8 @@ BEGIN
 		, intFromCommodityUnitMeasureId int
 		, strType nvarchar(100) COLLATE Latin1_General_CI_AS
 		, strInventoryType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		, strTranType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intPricingTypeId int
 		, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, intTransactionReferenceId INT
@@ -736,6 +738,8 @@ BEGIN
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
+				, strTranType
+				, strEntityName 
 				, strTransactionReferenceId
 				, intTransactionReferenceId
 				, intTransactionReferenceDetailId)
@@ -747,6 +751,8 @@ BEGIN
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
 				, strInventoryType
+				, strTransactionType
+				, strEntity
 				, strTransactionId
 				, intTransactionId
 				, intTransactionDetailId
@@ -759,6 +765,8 @@ BEGIN
 					, intCommodityId = @intCommodityId
 					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
+					, strTransactionType
+					, strEntity
 					, s.strTransactionId
 					, s.intTransactionId
 					, s.intTransactionDetailId
@@ -1475,6 +1483,8 @@ INSERT INTO @List (strCommodityCode
 	, intOrderId
 	, strType
 	, strInventoryType
+	, strTranType
+	, strEntityName
 	, strTransactionReferenceId
 	, intTransactionReferenceId
 	, intTransactionReferenceDetailId)
@@ -1489,6 +1499,8 @@ SELECT strCommodityCode
 	, intOrderId = 8
 	, 'Company Titled' COLLATE Latin1_General_CI_AS
 	, strInventoryType
+	, strTranType
+	, strEntityName
 	, strTransactionReferenceId
 	, intTransactionReferenceId
 	, intTransactionReferenceDetailId
