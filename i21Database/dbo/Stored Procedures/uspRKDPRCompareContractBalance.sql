@@ -15,7 +15,18 @@ DECLARE @strCommodityCode NVARCHAR(100)
 		,@strEntityName NVARCHAR(150)
 		,@strLocationName NVARCHAR(150)
 
+SELECT TOP 1 
+	@strCommodityCode = strCommodityCode
+	,@dtmRunDateTime1 = dtmRunDateTime
+	,@dtmDPRDate1 = dtmDPRDate
+FROM tblRKTempDPRDetailLog a
+WHERE intRunNumber = @intDPRRun1
 
+SELECT TOP 1 
+	@dtmRunDateTime2 = dtmRunDateTime
+	,@dtmDPRDate2 = dtmDPRDate
+FROM tblRKTempDPRDetailLog a
+WHERE intRunNumber = @intDPRRun2
 
 SELECT *
 INTO #FirstRun
@@ -28,16 +39,6 @@ INTO #SecondRun
 FROM tblRKTempDPRDetailLog a
 WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
-SELECT TOP 1 
-	@strCommodityCode = strCommodityCode
-	,@dtmRunDateTime1 = dtmRunDateTime
-	,@dtmDPRDate1 = dtmDPRDate
-FROM #FirstRun
-
-SELECT TOP 1 
-	@dtmRunDateTime2 = dtmRunDateTime
-	,@dtmDPRDate2 = dtmDPRDate
-FROM #SecondRun
 
 
 SELECT * INTO #tempFirstToSecond FROM (
