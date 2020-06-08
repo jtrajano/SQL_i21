@@ -81,6 +81,10 @@ SELECT
 	,intTicketId					= SCALETICKETID.intTicketId
 	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
 	,dtmAccountingPeriod            = AccPeriod.dtmAccountingPeriod
+	,intDaysOld						= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
+	,intDaysToPay					= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
+										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
+									  END
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -244,23 +248,30 @@ OUTER APPLY (
 	WHERE ID.intInvoiceId = I.intInvoiceId
 	  AND ID.intTicketId IS NOT NULL
 ) SCALETICKETID
-OUTER APPLY
-(
-SELECT strPOSPayMethods = LEFT(strPaymentMethod, LEN(strPaymentMethod) - 1)
-FROM
-	(SELECT DISTINCT CAST(PAYM.strPaymentMethod AS VARCHAR(200))  + ', '  
-		FROM tblARPaymentDetail PAYD
-		INNER JOIN tblARPayment PAY
-		ON PAYD.intPaymentId = PAY.intPaymentId
-		INNER JOIN tblSMPaymentMethod PAYM
-		ON PAY.intPaymentMethodId = PAYM.intPaymentMethodID
-		WHERE PAYD.intInvoiceId = I.intInvoiceId AND I.strType = 'POS'
-		FOR XML PATH ('')
-	) C (strPaymentMethod)
+OUTER APPLY (
+	SELECT strPOSPayMethods = LEFT(strPaymentMethod, LEN(strPaymentMethod) - 1)
+	FROM
+		(SELECT DISTINCT CAST(PAYM.strPaymentMethod AS VARCHAR(200))  + ', '  
+			FROM tblARPaymentDetail PAYD
+			INNER JOIN tblARPayment PAY
+			ON PAYD.intPaymentId = PAY.intPaymentId
+			INNER JOIN tblSMPaymentMethod PAYM
+			ON PAY.intPaymentMethodId = PAYM.intPaymentMethodID
+			WHERE PAYD.intInvoiceId = I.intInvoiceId AND I.strType = 'POS'
+			FOR XML PATH ('')
+		) C (strPaymentMethod)
 ) PAYMETHODS
 OUTER APPLY(
 	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
 	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
 ) AccPeriod
-
+OUTER APPLY (
+	SELECT TOP 1 P.dtmDatePaid
+	FROM tblARPaymentDetail PD
+	INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+	WHERE PD.intInvoiceId = I.intInvoiceId
+	  AND P.ysnPosted = 1
+	  AND P.ysnInvoicePrepayment = 0
+	ORDER BY P.dtmDatePaid DESC
+) FULLPAY
 GO
