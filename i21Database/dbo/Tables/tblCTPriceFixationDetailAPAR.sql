@@ -87,19 +87,26 @@ BEGIN
 	from
 		DELETED;
 
-	SELECT top 1
-		@dblInvoiceDetailQuantity = dblQtyShipped
-	FROM
-		tblARTransactionDetail
-	where
-		intTransactionDetailId = @intInvoiceDetailId
-	ORDER BY intId DESC
+	if (@intInvoiceDetailId is not null)
+	BEGIN
 
-	set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+		SELECT top 1
+			@dblInvoiceDetailQuantity = dblQtyShipped
+		FROM
+			tblARTransactionDetail
+		where
+			intTransactionDetailId = @intInvoiceDetailId
+		ORDER BY intId DESC
 
-	exec uspCTProcessInvoiceDelete
-		@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
-		,@intPriceFixationDetailId = @intPriceFixationDetailId
+		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+
+		exec uspCTProcessInvoiceDelete
+			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+			,@intPriceFixationDetailId = @intPriceFixationDetailId
+	
+	END
+
+
 
 END
 
