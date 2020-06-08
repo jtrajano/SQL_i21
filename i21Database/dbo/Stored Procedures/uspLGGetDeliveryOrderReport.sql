@@ -163,6 +163,13 @@ BEGIN
 	LEFT JOIN tblEMEntity EM ON EM.intEntityId = LD.intCustomerEntityId
 	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = LD.intCustomerEntityLocationId
 	LEFT JOIN tblEMEntity HEM ON HEM.intEntityId = LW.intHaulerEntityId
+	OUTER APPLY (SELECT TOP 1 PCD.intContractDetailId FROM tblLGLoadDetailLot LDL
+					INNER JOIN tblICInventoryReceiptItemLot IRIL ON IRIL.intLotId = LDL.intLotId
+					INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptItemId = IRIL.intInventoryReceiptItemId
+					INNER JOIN tblICInventoryReceipt IR ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = IRI.intLineNo
+				 WHERE LDL.intLoadDetailId = LD.intLoadDetailId
+					AND IR.strReceiptType = 'Purchase Contract') PCH
 	OUTER APPLY (SELECT TOP 1 
 						CH.strCustomerContract
 						,CH.strContractNumber
@@ -192,9 +199,9 @@ BEGIN
 					FROM tblQMSample SMP 
 					INNER JOIN tblQMSampleType SMPT ON SMPT.intSampleTypeId = SMP.intSampleTypeId
 					LEFT JOIN tblQMSampleStatus SMPS ON SMPS.intSampleStatusId = SMP.intSampleStatusId 
-					WHERE SMP.intContractDetailId = SCH.intContractDetailId 
+					WHERE SMP.intContractDetailId = PCH.intContractDetailId 
 						AND SMPS.strStatus = 'Approved'
-						AND ISNULL(SMPT.ysnFinalApproval, 0) = 1) SMPL
+						AND LOWER(SMPT.strSampleTypeName) IN ('arrival sample', 'approval sample', 'stock sample')) SMPL
 	CROSS APPLY tblLGCompanyPreference CP
 	WHERE strLoadNumber = @strLoadNumber
 END
