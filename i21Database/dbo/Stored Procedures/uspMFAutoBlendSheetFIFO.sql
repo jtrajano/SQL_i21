@@ -1596,11 +1596,7 @@ BEGIN TRY
 								,dblWeightPerQty
 								,dblUnitCost
 								)
-<<<<<<< HEAD
-							SELECT L.intParentLotId
-=======
-							SELECT TOP 1 L.intParentLotId
->>>>>>> 7a27283aad... MFG-4225
+							SELECT Top 1 L.intParentLotId
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
