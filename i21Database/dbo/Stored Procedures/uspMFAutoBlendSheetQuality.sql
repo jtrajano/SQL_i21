@@ -326,7 +326,7 @@ BEGIN TRY
 		UNION
 	
 		SELECT @intRecipeId
-			,rs.intRecipeSubstituteItemId
+			,ri.intRecipeItemId
 			,rs.intSubstituteItemId AS intItemId
 			,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 			,1
@@ -339,7 +339,7 @@ BEGIN TRY
 		JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
 		WHERE r.intRecipeId = @intRecipeId
 			AND rs.intRecipeItemTypeId = 1
-		ORDER BY ysnMinorIngredient
+		ORDER BY 5,6
 
 		IF (
 				SELECT ISNULL(COUNT(1), 0)
@@ -1140,8 +1140,8 @@ BEGIN TRY
 			AND a.name <> 'Lot' + CONVERT(varchar,@intInputItemId)
 
 			DECLARE @strSQL2 NVARCHAR(MAX)
-			SET @strSQL2='SELECT a.Lot'+ltrim(@intInputItemId) +', a.##tblItem' +ltrim(@intInputItemId) +','
-			+'a.##tblItem'+ltrim(@intInputItemId)+'Qty ' + ' INTO ##tblNextBestLot FROM ##tblResult a,##tblBestResultFinal b'++' WHERE a.##tblItem'+ltrim(@intInputItemId) +' = '
+			SET @strSQL2='SELECT a.Lot'+ltrim(@intInputItemId) +' as intLotId, a.##tblItem' +ltrim(@intInputItemId) +' as intItemId,'
+			+'a.##tblItem'+ltrim(@intInputItemId)+'Qty as dblAvailableQty' + ' INTO ##tblNextBestLot FROM ##tblResult a,##tblBestResultFinal b'++' WHERE a.##tblItem'+ltrim(@intInputItemId) +' = '
 			+ltrim(str(@intRawItemId))+' AND a.Lot'+ltrim(@intInputItemId)+'<>'''+ltrim(@intLotId) +''''+ @strJoinClause
 
 			EXEC(@strSQL2)
