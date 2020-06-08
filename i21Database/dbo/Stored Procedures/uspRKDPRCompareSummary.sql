@@ -23,7 +23,7 @@ group by strType
 
 
 SELECT
-	intRowNumber  = row_number() OVER(ORDER BY intOrderId , strBucketType)
+	intRowNumber  = CONVERT(INT, row_number() OVER(ORDER BY intOrderId , strBucketType))
 	,*
 FROM (
 	select

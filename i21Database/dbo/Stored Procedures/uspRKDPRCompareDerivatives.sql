@@ -55,7 +55,8 @@ SELECT * INTO #tempSecondToFirst FROM (
 
 
 SELECT
-	strBucketType = @strBucketType
+	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strInternalTradeNo ASC))
+	,strBucketType = @strBucketType
 	,strTransactionId = strInternalTradeNo
 	,dblTotalRun1
 	,dblTotalRun2
