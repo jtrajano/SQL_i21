@@ -648,6 +648,8 @@ BEGIN TRY
 								WHERE 
 									intBillDetailId = @intBillDetailId
 
+								update l set l.dblQty = @dblQtyToBill from tblCTContractBalanceLog l where l.intTransactionReferenceDetailId = @intBillDetailId and l.strTransactionType = 'Purchase Basis Deliveries' and l.strAction = 'Created Voucher' and l.strTransactionReference = 'Voucher';
+
 								IF @dblQtyToBill <> @total
 								BEGIN
 									DELETE FROM @receiptDetails
