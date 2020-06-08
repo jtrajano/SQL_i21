@@ -1591,7 +1591,7 @@ BEGIN TRY
 								,intStorageLocationId
 								,dblWeightPerQty
 								)
-							SELECT L.intParentLotId
+							SELECT Top 1 L.intParentLotId
 								,L.intItemId
 								,CASE 
 									WHEN @intIssuedUOMTypeId = 2
