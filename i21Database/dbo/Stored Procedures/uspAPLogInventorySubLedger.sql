@@ -95,7 +95,7 @@ BEGIN
 		
 	EXEC uspICSubLedgerAddReportEntries 
 		@SubLedgerReportEntries = @inventorySubLedger
-		,@userId = @userId
+		,@intUserId = @userId
 
 	END
 ELSE
