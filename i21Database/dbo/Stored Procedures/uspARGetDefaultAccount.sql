@@ -33,7 +33,9 @@ IF ISNULL(@strErrorMsg,'') <> ''
 		WHERE intCompanyLocationId = @intCompanyLocationId
 		
 		IF @intARAccountId IS NULL AND @strTransactionType NOT IN ('Customer Prepayment', 'Cash', 'Cash Refund')
-			SET @intARAccountId = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0)		
+			SET @intARAccountId = (SELECT TOP 1 [intARAccountId] FROM tblARCompanyPreference WHERE [intARAccountId] IS NOT NULL AND intARAccountId <> 0)
+		
+		SET @intARAccountId = (SELECT TOP 1 intAccountId FROM tblGLAccount WHERE intAccountId = @intARAccountId AND ysnActive = 1)
 	END
 
 SELECT @intAccountId	= intAccountId
