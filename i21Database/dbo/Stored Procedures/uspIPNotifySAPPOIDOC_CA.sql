@@ -1,11 +1,10 @@
-﻿CREATE PROCEDURE uspIPNotifySAPPOIDOC_CA(@ysnNotifyExternalUser BIT=0)
+﻿CREATE PROCEDURE [dbo].[uspIPNotifySAPPOIDOC_CA] (@ysnNotifyExternalUser BIT = 0)
 AS
 DECLARE @strStyle NVARCHAR(MAX)
 	,@strHtml NVARCHAR(MAX)
 	,@strHeader NVARCHAR(MAX)
 	,@strDetail NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
-
 
 SET @strStyle = '<style type="text/css" scoped>
 					table.GeneratedTable {
@@ -50,6 +49,7 @@ SET @strHtml = '<html>
 				</html>'
 SET @strHeader = '<tr>
 						<th>&nbsp;Contract No</th>
+						<th>&nbsp;ERP PO Number</th>
 						<th>&nbsp;Message</th>
 						<th>&nbsp;Contract Feed Id</th>
 						<th>&nbsp;Contract Header Id</th>
@@ -57,18 +57,30 @@ SET @strHeader = '<tr>
 					</tr>'
 
 SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + CF.strContractNumber + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strThirdPartyMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractDetailId) + '</td>
+		   <td>&nbsp;' + CF.strContractNumber  + ' / ' + Ltrim(ISNULL(intContractSeq, '')) + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strERPPONumber, '') + '</td>'+ '<td>&nbsp;' + ISNULL(TPCF.strThirdPartyMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractDetailId) + '</td>
 	</tr>'
 FROM tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
-JOIN tblCTContractFeed CF WITH (NOLOCK) on CF.intContractFeedId=TPCF.intContractFeedId 
-WHERE strThirdPartyFeedStatus = (Case When @ysnNotifyExternalUser=1 Then 'Ack Rcvd' Else 'Failed' End)
-	AND ISNULL(TPCF.strThirdPartyMessage, '') <> ''
+JOIN tblCTContractFeed CF WITH (NOLOCK) ON CF.intContractFeedId = TPCF.intContractFeedId
+WHERE strThirdPartyFeedStatus = (
+		CASE 
+			WHEN @ysnNotifyExternalUser = 1
+				THEN 'Ack Rcvd'
+			ELSE 'Failed'
+			END
+		)
+	AND ISNULL(TPCF.strThirdPartyMessage, '') <> 'Success'
 	AND ISNULL(TPCF.ysnThirdPartyMailSent, 0) = 0
 
 UPDATE tblIPThirdPartyContractFeed
 SET ysnThirdPartyMailSent = 1
-WHERE strThirdPartyFeedStatus = (Case When @ysnNotifyExternalUser=1 Then 'Ack Rcvd' Else 'Failed' End)
-	AND ISNULL(strThirdPartyMessage, '') <> ''
+WHERE strThirdPartyFeedStatus = (
+		CASE 
+			WHEN @ysnNotifyExternalUser = 1
+				THEN 'Ack Rcvd'
+			ELSE 'Failed'
+			END
+		)
+	AND ISNULL(strThirdPartyMessage, '') <> 'Success'
 	AND ISNULL(ysnThirdPartyMailSent, 0) = 0
 
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
