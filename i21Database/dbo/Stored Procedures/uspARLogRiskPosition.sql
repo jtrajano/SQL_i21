@@ -71,7 +71,7 @@ BEGIN
         , dblQty						            = -((ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END) * CASE WHEN ISNULL(II.ysnForDelete, 0) = 1 THEN -1 ELSE 1 END)
         , dblPrice						          = ISNULL(ID.dblPrice, 0)
         , dblContractSize				        = NULL
-        , intEntityId					          = I.intEntityId
+        , intEntityId					          = I.intEntityCustomerId
         , ysnDelete						          = ISNULL(II.ysnForDelete, 0)
         , intUserId						          = @intUserId
         , strNotes						          = NULL
@@ -89,6 +89,7 @@ BEGIN
     WHERE ID.intItemId IS NOT NULL
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND TD.intTransactionId IS NULL
+      AND ITEM.strType != 'Other Charge'
 
     UNION ALL
 
@@ -117,7 +118,7 @@ BEGIN
         , dblQty						            = -(ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
         , dblPrice						          = ISNULL(ID.dblPrice, 0)
         , dblContractSize				        = NULL
-        , intEntityId					          = I.intEntityId
+        , intEntityId					          = I.intEntityCustomerId
         , ysnDelete						          = ISNULL(II.ysnForDelete, 0)
         , intUserId						          = @intUserId
         , strNotes						          = NULL
@@ -136,6 +137,7 @@ BEGIN
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail TDD WHERE I.intInvoiceId = TDD.intTransactionId AND ID.intInvoiceDetailId = TDD.intTransactionDetailId AND I.strTransactionType = TDD.strTransactionType) 
+      AND ITEM.strType != 'Other Charge'
 
     UNION ALL
 
@@ -164,7 +166,7 @@ BEGIN
         , dblQty						            = TD.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END
         , dblPrice						          = ISNULL(TD.dblPrice, 0)
         , dblContractSize			        	= NULL
-        , intEntityId				          	= I.intEntityId
+        , intEntityId				          	= I.intEntityCustomerId
         , ysnDelete				          		= ISNULL(II.ysnForDelete, 0)
         , intUserId					          	= @intUserId
         , strNotes					            = NULL
@@ -183,6 +185,7 @@ BEGIN
       AND TD.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId IS NULL
+      AND ITEM.strType != 'Other Charge'
 
     UNION ALL
 
@@ -211,7 +214,7 @@ BEGIN
         , dblQty					            	= TD.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END
         , dblPrice				          		= ISNULL(ID.dblPrice, 0)
         , dblContractSize		        		= NULL
-        , intEntityId				          	= I.intEntityId
+        , intEntityId				          	= I.intEntityCustomerId
         , ysnDelete				          		= ISNULL(II.ysnForDelete, 0)
         , intUserId				          		= @intUserId
         , strNotes					          	= NULL
@@ -230,6 +233,7 @@ BEGIN
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.dblQtyShipped <> TD.dblQtyShipped
+      AND ITEM.strType != 'Other Charge'
 
     UNION ALL
 
@@ -258,7 +262,7 @@ BEGIN
         , dblQty					             	= -(ID.dblQtyShipped * CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
         , dblPrice			        	  		= ISNULL(ID.dblPrice, 0)
         , dblContractSize		        		= NULL
-        , intEntityId			          		= I.intEntityId
+        , intEntityId			          		= I.intEntityCustomerId
         , ysnDelete				          		= ISNULL(II.ysnForDelete, 0)
         , intUserId			           			= @intUserId
         , strNotes			          			= NULL
@@ -277,6 +281,7 @@ BEGIN
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.dblQtyShipped <> TD.dblQtyShipped
+      AND ITEM.strType != 'Other Charge'
 
     --CONTRACT BALANCE LOG
     INSERT INTO @tblContractBalanceLog (
@@ -306,11 +311,11 @@ BEGIN
         , intPriceUOMId
 		    , intPricingTypeId		
 		    , intTransactionReferenceId
+			  , intTransactionReferenceDetailId
 	    	, strTransactionReferenceNo
 	    	, intFutureMarketId
 	    	, intFutureMonthId
-	    	, intUserId
-        
+	    	, intUserId        
         , intActionId
     )
     SELECT strTransactionType	      = 'Sales Basis Deliveries'
@@ -339,10 +344,11 @@ BEGIN
         , intPriceUOMId             = SL.intCommodityUOMId
 		    , intPricingTypeId		      = CD.intPricingTypeId		
 		    , intTransactionReferenceId = SL.intTransactionRecordHeaderId
+			  , intTransactionReferenceDetailId = SL.intTransactionRecordId
 		    , strTransactionReferenceNo = SL.strTransactionNumber
 		    , intFutureMarketId	        = SL.intFutureMarketId
 		    , intFutureMonthId		      = SL.intFutureMonthId
-		    , intUserId			            = SL.intEntityId
+		    , intUserId			            = SL.intUserId
         , intActionId					      = 16--CREATE INVOICE
   FROM @tblSummaryLog SL
 	INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId
