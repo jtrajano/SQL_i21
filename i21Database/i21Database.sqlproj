@@ -8128,6 +8128,11 @@
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareDerivatives.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareContractBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
