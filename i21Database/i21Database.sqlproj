@@ -7742,6 +7742,7 @@
     <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFGenerateMO_4757.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
