@@ -1272,7 +1272,7 @@ BEGIN
 
 		INSERT INTO @billIdsInventoryLog
 		SELECT intBillId FROM #tmpPostBillData
-		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 0, @userId = @userId
+		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 1, @userId = @userId
 
 		--Insert Successfully unposted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)
@@ -1406,7 +1406,7 @@ BEGIN
 
 		INSERT INTO @billIdsInventoryLog
 		SELECT intBillId FROM #tmpPostBillData
-		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 1, @userId = @userId
+		EXEC uspAPLogInventorySubLedger @billIds = @billIdsInventoryLog, @remove = 0, @userId = @userId
 		
 		--Insert Successfully posted transactions.
 		INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, strBatchNumber, intTransactionId)

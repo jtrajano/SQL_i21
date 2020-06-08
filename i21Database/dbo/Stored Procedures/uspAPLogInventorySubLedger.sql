@@ -68,7 +68,7 @@ BEGIN
 		,intPriceUOMId				= BillDetail.intCostUOMId
 		,intPurchaseContractId		= BillDetail.intContractHeaderId
 		,strPurchaseContractNo		= ct.strContractNumber
-		,strContractSequenceNo		= NULL
+		,strContractSequenceNo		= ctd.intContractSeq
 		,strFuturesMarket			= NULL
 		,intFuturesMarketId			= NULL
 		,strCounterParty			= NULL

@@ -15,4 +15,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
---- <!--------- TBD -------------->
+DELETE r
+FROM tblICInventorySubLedgerReport r
+INNER JOIN @SubLedgerTransactions t ON t.strSourceTransactionNo = r.strTransactionNo
+	AND t.strSourceTransactionType = r.strModule
