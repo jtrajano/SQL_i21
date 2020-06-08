@@ -342,7 +342,7 @@ BEGIN TRY
 		AND (
 			@strLotTracking = 'Yes - Manual'
 			OR @strLotTracking = 'Yes - Manual/Serial Number'
-			)
+			) and @intProductionTypeId <>1
 	BEGIN
 		IF @strParentLotNumber IS NULL
 			OR @strParentLotNumber = ''
