@@ -43,6 +43,8 @@ BEGIN TRY
 	DECLARE @strLotAlias NVARCHAR(50)
 		,@strWarehouseRefNo NVARCHAR(50)
 		,@intParentLotId INT
+	DECLARE @ysnEnableParentLot BIT = 0
+		,@strChildLotNumber NVARCHAR(50)
 
 	SELECT @intSampleId = intSampleId
 		,@intProductTypeId = intProductTypeId
@@ -64,6 +66,9 @@ BEGIN TRY
 	SELECT @ysnChangeLotStatusOnApproveforPreSanitizeLot = ysnChangeLotStatusOnApproveforPreSanitizeLot
 	FROM dbo.tblQMCompanyPreference
 
+	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
+	FROM tblMFCompanyPreference
+
 	BEGIN TRAN
 
 	SELECT @intContractDetailId = S.intContractDetailId
@@ -75,6 +80,7 @@ BEGIN TRY
 		,@intCurrentLotStatusId = S.intLotStatusId
 		,@strApprovalBase = ISNULL(ST.strApprovalBase, '')
 		,@strContainerNumber = S.strContainerNumber
+		,@strChildLotNumber = strChildLotNumber
 	FROM tblQMSample S
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 	WHERE S.intSampleId = @intSampleId
@@ -91,11 +97,22 @@ BEGIN TRY
 	FROM tblICLot
 	WHERE intLotId = @intProductValueId
 
-	SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
-		,@intParentLotId = L.intParentLotId
-	FROM dbo.tblICLot L
-	JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
-	WHERE L.strLotNumber = @strLotNumber
+	if @intProductTypeId=11
+	Begin
+		SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
+			,@intParentLotId = L.intParentLotId
+		FROM dbo.tblICLot L
+		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+		WHERE L.strLotNumber = @strChildLotNumber
+	End
+	Else
+	Begin
+		SELECT @strWarehouseRefNo = LI.strWarehouseRefNo
+			,@intParentLotId = L.intParentLotId
+		FROM dbo.tblICLot L
+		JOIN dbo.tblMFLotInventory LI ON LI.intLotId = L.intLotId
+		WHERE L.strLotNumber = @strLotNumber
+	End
 
 	IF @intProductTypeId = 6
 		AND @intSampleControlPointId = 14
@@ -271,9 +288,16 @@ BEGIN TRY
 
 		IF @strApprovalBase = 'Lot'
 		BEGIN
-			SELECT @strMainLotNumber = strLotNumber
-			FROM tblICLot
-			WHERE intLotId = @intProductValueId
+			IF @ysnEnableParentLot = 0
+			BEGIN
+				SELECT @strMainLotNumber = strLotNumber
+				FROM tblICLot
+				WHERE intLotId = @intProductValueId
+			END
+			ELSE
+			BEGIN
+				SELECT @strMainLotNumber = @strChildLotNumber
+			END
 
 			INSERT INTO @LotData (
 				intLotId
