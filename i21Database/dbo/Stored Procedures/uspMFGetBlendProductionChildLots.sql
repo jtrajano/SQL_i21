@@ -259,7 +259,7 @@ Begin
 	)
 
 	Insert Into @tblPickedLots
-	Exec uspMFAutoBlendSheetFIFO @intLocationId,0,@dblQtyToProduce,@strRecipeXml,0,'','',@intItemId
+	Exec uspMFAutoBlendSheetFIFO @intLocationId,0,@dblQtyToProduce,@strRecipeXml,1,'','',@intItemId
 
 	Select tpl.intWorkOrderInputLotId AS intWorkOrderConsumedLotId,
 	0 AS intWorkOrderId,

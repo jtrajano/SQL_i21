@@ -13,8 +13,8 @@ IF ISNULL(@ysnProduced, 0) = 0
 		,w.strWorkOrderNo
 		,i.strItemNo
 		,i.strDescription
-		,w.dblQuantity
-		,w.dblPlannedQuantity
+		,ISNULL(w.dblQuantity, 0.0) AS dblQuantity
+		,ISNULL(w.dblPlannedQuantity, 0.0) AS dblPlannedQuantity
 		,w.intItemUOMId
 		,um.strUnitMeasure AS strUOM
 		,w.intStatusId

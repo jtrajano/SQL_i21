@@ -99,7 +99,7 @@ Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
 	mc.strCellName AS strManufacturingCell,
 	br.strDemandNo,
 	w.dtmExpectedDate AS dtmDueDate ,
-	w.dblQuantity,
+	IsNULL(w.dblQuantity,0) AS dblQuantity,
 	um.strUnitMeasure AS strUOM,
 	w.strWorkOrderNo AS strBlendSheetNo
 	FROM tblMFWorkOrder w       
@@ -115,20 +115,20 @@ Set @dblBlenderSize=@dblDensity * @dblBlenderCapacity
   --Lots At Storage
   SELECT DISTINCT pl.intParentLotId AS intLotId 
 				 ,pl.strParentLotNumber  AS strLotNo    
-				 ,pl.strParentLotAlias AS strLotAlias
+				 ,IsNULL(pl.strParentLotAlias,'') AS strLotAlias
 				 ,sub.strSubLocationName AS strSubLocation
-			     ,sum(l.dblWeight)  dblQuantity
+			     ,sum(l.dblQty)  dblQuantity
 				 ,um.strUnitMeasure AS strUOM
 				 ,sl.strName AS strStorageLocation
  FROM tblICLot l      
  JOIN tblICItem i ON i.intItemId=l.intItemId AND l.intLocationId=@intLocationId
- JOIN tblICItemUOM iu ON iu.intItemUOMId = l.intWeightUOMId
+ JOIN tblICItemUOM iu ON iu.intItemUOMId = IsNULL(l.intWeightUOMId,l.intItemUOMId)
  JOIN tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
  JOIN tblICStorageLocation sl On sl.intStorageLocationId = l.intStorageLocationId
  JOIN tblICStorageUnitType sut ON sut.intStorageUnitTypeId = sl.intStorageUnitTypeId
  JOIN tblSMCompanyLocationSubLocation sub ON sub.intCompanyLocationSubLocationId=l.intSubLocationId
  JOIN tblICParentLot pl ON pl.intParentLotId=l.intParentLotId
- WHERE sut.strInternalCode='STORAGE' AND l.intItemId=@intItemId AND ISNULL(l.dblWeight,0) <> 0      
+ WHERE sut.strInternalCode='STORAGE' AND l.intItemId=@intItemId AND ISNULL(l.dblQty,0) <> 0      
  group by pl.intParentLotId,pl.strParentLotNumber,pl.strParentLotAlias,sub.strSubLocationName,um.strUnitMeasure,sl.strName
  Order by pl.strParentLotNumber
 
