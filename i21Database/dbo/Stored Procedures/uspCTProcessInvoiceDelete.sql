@@ -363,6 +363,10 @@ BEGIN
     
 	end try
 	begin catch
+
+		SET @ErrMsg = ERROR_MESSAGE()  
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT') 
+
 	end catch
 
 	
