@@ -46,6 +46,11 @@ BEGIN TRY
 		FROM tblIPAcknowledgementError WITH (NOLOCK)
 		WHERE intDeadLock BETWEEN 1
 				AND 5
+
+		DELETE
+		FROM tblIPAcknowledgementError
+		WHERE intDeadLock BETWEEN 1
+				AND 5
 	END
 
 	SELECT @intRowNo = MIN(intAcknowledgementStageId)
@@ -132,7 +137,7 @@ BEGIN TRY
 				,(
 					CASE 
 						WHEN ERROR_NUMBER() = 1205
-							THEN intDeadLock + 1
+							THEN IsNull(intDeadLock,0) + 1
 						ELSE 0
 						END
 					)
