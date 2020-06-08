@@ -11,21 +11,15 @@ SET XACT_ABORT ON
 
 DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
 SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
-<<<<<<< HEAD
-
-IF EXISTS(SELECT TOP 1 1 FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101))
-	DELETE FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
-=======
 -- DELETE OLD RECAP DATA (IF IT EXISTS)
 
 IF (@ysnBatch = 0)
 BEGIN
 	DELETE FROM tblGLPostRecap WHERE strBatchId IN (SELECT strBatchId FROM @RecapTable)
 	DELETE FROM tblGLPostRecap WHERE strTransactionId IN (SELECT strTransactionId FROM @RecapTable)
-	DELETE FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
+	DELETE	FROM tblGLPostRecap WHERE dtmDateEntered < convert(nvarchar(20), GETDATE(), 101)
 END
 
->>>>>>> c94be58a90... GL-7669
 
 IF NOT EXISTS (SELECT TOP 1 1 FROM @RecapTable)
 BEGIN 
