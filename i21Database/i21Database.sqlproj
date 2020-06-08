@@ -8716,6 +8716,7 @@
     <Build Include="dbo\Tables\tblSCDisconnectedImportLog.sql" />
     <Build Include="dbo\Tables\tblSCDisconnectedGeneratedLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGenerateMO_4757.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
