@@ -13,7 +13,6 @@ SET XACT_ABORT ON
 DECLARE @strTransactionId NVARCHAR(50), @strBatchId NVARCHAR(50)
 SELECT TOP 1 @strBatchId = strBatchId, @strTransactionId = strTransactionId FROM @RecapTable 
 
--- DELETE OLD RECAP ONLY WHEN COMING FROM
 IF (@ysnBatch = 0)
 BEGIN
 	DELETE FROM tblGLPostRecap WHERE strBatchId IN (SELECT strBatchId FROM @RecapTable)
