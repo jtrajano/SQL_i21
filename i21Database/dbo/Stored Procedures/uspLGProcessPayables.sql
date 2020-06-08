@@ -147,6 +147,7 @@ BEGIN
 					ORDER BY RD.dtmValidFromDate DESC) FX
 		LEFT JOIN dbo.tblGLAccount apClearing ON apClearing.intAccountId = itemAccnt.intAccountId
 		WHERE L.intLoadId = @intLoadId
+			AND CT.intPricingTypeId IN (1, 6)
 			AND LD.intLoadDetailId NOT IN (SELECT IsNull(BD.intLoadDetailId, 0) FROM tblAPBillDetail BD JOIN tblICItem Item ON Item.intItemId = BD.intItemId
 										  WHERE BD.intItemId = LD.intItemId AND Item.strType <> 'Other Charge')
 		
