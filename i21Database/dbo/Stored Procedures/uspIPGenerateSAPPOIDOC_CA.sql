@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (
+﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPPOIDOC_CA] (
 	@ysnCancel BIT = 0
 	,@ysnDebug BIT = 0
 	)
@@ -268,7 +268,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
 
-			SELECT @strXML = @strXML + '<Name>' + @strVendorName + '</Name>'
+			SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(@strVendorName) + '</Name>'
 
 			SELECT @strXML = @strXML + '<Type>SUP</Type>'
 
@@ -282,7 +282,7 @@ BEGIN
 
 				SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strShipperVendorAccountNum, '') + '</Alias>'
 
-				SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
+				SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(IsNULL(@strShipperName, '')) + '</Name>'
 
 				SELECT @strXML = @strXML + '<Type>CZ</Type>'
 
@@ -291,9 +291,9 @@ BEGIN
 
 			SELECT @strXML = @strXML + '</Parties>'
 
-			SELECT @strXML = @strXML + '<Pol>' + IsNULL(@strLoadingPoint, '') + '</Pol>'
+			SELECT @strXML = @strXML + '<Pol>' + dbo.fnEscapeXML(IsNULL(@strLoadingPoint, '')) + '</Pol>'
 
-			SELECT @strXML = @strXML + '<Pod>' + IsNULL(@strDestinationPoint, '') + '</Pod>'
+			SELECT @strXML = @strXML + '<Pod>' + dbo.fnEscapeXML(IsNULL(@strDestinationPoint, '')) + '</Pod>'
 
 			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(30), @dtmPlannedAvailabilityDate, 126) + '</Eta>'
 
@@ -307,7 +307,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<ArticleCode>' + @strItemNo + '</ArticleCode>'
 
-			SELECT @strXML = @strXML + '<ArticleDescription>' + IsNULL(@strContractItemNo, '') + '</ArticleDescription>'
+			SELECT @strXML = @strXML + '<ArticleDescription>' + dbo.fnEscapeXML(IsNULL(@strContractItemNo, '')) + '</ArticleDescription>'
 
 			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
