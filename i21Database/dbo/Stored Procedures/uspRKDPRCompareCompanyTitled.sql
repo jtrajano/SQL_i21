@@ -54,6 +54,7 @@ SELECT * INTO #tempSecondToFirst FROM (
 
 
 SELECT F.* 
+,dblShipReceiveQty = COALESCE(receiptItem.dblReceived,shipmentItem.dblQuantity)
 ,dtmShipReceiptDate = COALESCE(receipt.dtmReceiptDate,shipment.dtmShipDate)
 ,dtmContractDate = CH.dtmContractDate
 ,strContractNumber = CH.strContractNumber+'-'+CAST(CD.intContractSeq as varchar)
@@ -88,6 +89,7 @@ LEFT JOIN tblCTPricingType ptCD on ptCD.intPricingTypeId = CD.intPricingTypeId
 
 
 SELECT S.* 
+,dblShipReceiveQty = COALESCE(receiptItem.dblReceived,shipmentItem.dblQuantity)
 ,dtmShipReceiptDate = COALESCE(receipt.dtmReceiptDate,shipment.dtmShipDate)
 ,dtmContractDate = CH.dtmContractDate
 ,strContractNumber = CH.strContractNumber+'-'+CAST(CD.intContractSeq as varchar)
@@ -122,7 +124,8 @@ LEFT JOIN tblCTPricingType ptCD on ptCD.intPricingTypeId = CD.intPricingTypeId
 
 
 SELECT
-	strBucketType = @strBucketType
+	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strTransactionReferenceId ASC))
+	,strBucketType = @strBucketType
 	,strTransactionId = strTransactionReferenceId
 	,dblTotalRun1
 	,dblTotalRun2
@@ -131,6 +134,8 @@ SELECT
 	,strCommodityCode = @strCommodityCode
 	,strVendorCustomer = strEntityName 
 	,strLocationName 
+	,dblShipReceiveQty
+	,dblVariance = ABS(dblShipReceiveQty) - ABS(ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0))
 	,dtmShipReceiptDate
 	,dtmContractDate
 	,strContractNumber
@@ -153,6 +158,7 @@ FROM (
 		, strComment = 'Balance Difference'
 		, a.strEntityName
 		, a.strLocationName
+		, a.dblShipReceiveQty
 		, a.dtmShipReceiptDate
 		, a.dtmContractDate
 		, a.strContractNumber
@@ -173,6 +179,7 @@ FROM (
 		, strComment = 'Missing in Run 2'
 		, a.strEntityName
 		, a.strLocationName
+		, a.dblShipReceiveQty
 		, a.dtmShipReceiptDate
 		, a.dtmContractDate
 		, a.strContractNumber
@@ -192,6 +199,7 @@ FROM (
 		, strComment = 'Missing in Run 1'
 		, b.strEntityName
 		, b.strLocationName
+		, b.dblShipReceiveQty
 		, b.dtmShipReceiptDate
 		, b.dtmContractDate
 		, b.strContractNumber
