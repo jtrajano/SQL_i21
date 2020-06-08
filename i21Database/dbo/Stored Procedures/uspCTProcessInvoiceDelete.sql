@@ -18,7 +18,8 @@ BEGIN
 		,@dblOverQuantity numeric(18,6)
 		,@dblPricedLots numeric(18,6)
 		,@dblForRemoveLots numeric(18,6)
-		,@intCurrentPriceContractId int;
+		,@intCurrentPriceContractId int
+		,@ErrMsg nvarchar(max);
 
 	declare @PriceDetailToProcess table (
 		intId int
@@ -204,6 +205,10 @@ BEGIN
     
 	end try
 	begin catch
+
+		SET @ErrMsg = ERROR_MESSAGE()  
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT') 
+
 	end catch
 
 	
