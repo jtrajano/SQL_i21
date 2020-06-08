@@ -2,7 +2,7 @@
 (
 	[intDPIHeaderId] INT IDENTITY NOT NULL, 
     [imgReportId] UNIQUEIDENTIFIER NOT NULL, 
-    [strPositionIncludes] NVARCHAR(50) NULL, 
+    [strPositionIncludes] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [dtmStartDate] DATETIME NULL, 
     [dtmEndDate] DATETIME NULL, 
     [intCommodityId] INT NULL, 
