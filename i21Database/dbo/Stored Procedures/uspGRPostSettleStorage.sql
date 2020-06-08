@@ -3428,14 +3428,15 @@ BEGIN TRY
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
 
-	EXEC [dbo].[uspAPPostBill] 
-		@post = 1
-		,@recap = 0
-		,@isBatch = 0
-		,@param = @intVoucherId
-		,@userId = @intCreatedUserId
-		,@transactionType = 'Settle Storage'
-		,@success = @success OUTPUT
+	if isnull(@intVoucherId, 0) > 0 
+		EXEC [dbo].[uspAPPostBill] 
+			@post = 1
+			,@recap = 0
+			,@isBatch = 0
+			,@param = @intVoucherId
+			,@userId = @intCreatedUserId
+			,@transactionType = 'Settle Storage'
+			,@success = @success OUTPUT
 
 	IF(@success = 0)
 	BEGIN
