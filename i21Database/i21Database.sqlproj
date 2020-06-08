@@ -8693,6 +8693,7 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFGenerateMO_4757.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
