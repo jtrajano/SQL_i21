@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPItemProcessStgXML
+﻿CREATE PROCEDURE [dbo].[uspIPItemProcessStgXML]
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -3173,6 +3173,502 @@ BEGIN TRY
 
 			DELETE
 			FROM @tblICFinalItemCertification
+
+			EXEC sp_xml_removedocument @idoc
+
+			------------------Item UOM------------------------------------------------------
+			DECLARE @strWeightUnitMeasure NVARCHAR(50)
+				,@intVolumeUOMId INT
+				,@strVolumeUnitMeasure NVARCHAR(50)
+				,@strDimensionUnitMeasure NVARCHAR(50)
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemUOMXML
+
+			DECLARE @tblICItemUOM TABLE (
+				intItemUOMId INT identity(1, 1)
+				,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,dblUnitQty NUMERIC(18, 6)
+				,dblWeight NUMERIC(18, 6)
+				,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strLongUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,ysnStockUnit BIT
+				,ysnAllowPurchase BIT
+				,ysnAllowSale BIT
+				,dblLength NUMERIC(18, 6)
+				,dblWidth NUMERIC(18, 6)
+				,dblHeight NUMERIC(18, 6)
+				,strDimensionUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,dblVolume NUMERIC(18, 6)
+				,intVolumeUOMId INT
+				,strVolumeUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,dblMaxQty NUMERIC(18, 6)
+				,ysnStockUOM BIT
+				,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+				,intUpcCode BIGINT
+				,intSort INT
+				,intConcurrencyId INT
+				,dtmDateCreated DATETIME
+				,dtmDateModified DATETIME
+				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+				)
+			DECLARE @tblICFinalItemUOM TABLE (
+				intItemId INT NOT NULL
+				,intUnitMeasureId INT NOT NULL
+				,dblUnitQty NUMERIC(38, 20) NULL DEFAULT((0))
+				,dblWeight NUMERIC(18, 6) NULL DEFAULT((0))
+				,intWeightUOMId INT NULL
+				,strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,strLongUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+				,ysnStockUnit BIT NULL DEFAULT((0))
+				,ysnAllowPurchase BIT NULL DEFAULT((0))
+				,ysnAllowSale BIT NULL DEFAULT((0))
+				,dblLength NUMERIC(18, 6) NULL DEFAULT((0))
+				,dblWidth NUMERIC(18, 6) NULL DEFAULT((0))
+				,dblHeight NUMERIC(18, 6) NULL DEFAULT((0))
+				,intDimensionUOMId INT NULL
+				,dblVolume NUMERIC(18, 6) NULL DEFAULT((0))
+				,intVolumeUOMId INT NULL
+				,dblMaxQty NUMERIC(18, 6) NULL DEFAULT((0))
+				,ysnStockUOM BIT NULL
+				,intSort INT NULL
+				,intConcurrencyId INT NULL DEFAULT((0))
+				,dtmDateCreated DATETIME NULL
+				,dtmDateModified DATETIME NULL
+				,intCreatedByUserId INT NULL
+				,intModifiedByUserId INT NULL
+				,intDataSourceId TINYINT NULL
+				,intUpcCode BIGINT
+				)
+
+			INSERT INTO @tblICItemUOM (
+				strUnitMeasure
+				,dblUnitQty
+				,dblWeight
+				,strWeightUnitMeasure
+				,strUpcCode
+				,strLongUPCCode
+				,ysnStockUnit
+				,ysnAllowPurchase
+				,ysnAllowSale
+				,dblLength
+				,dblWidth
+				,dblHeight
+				,strDimensionUnitMeasure
+				,dblVolume
+				,intVolumeUOMId
+				,strVolumeUnitMeasure
+				,dblMaxQty
+				,ysnStockUOM
+				,strSourceName
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,strCreatedBy
+				,strModifiedBy
+				)
+			SELECT strUnitMeasure
+				,dblUnitQty
+				,dblWeight
+				,strWeightUnitMeasure
+				,strUpcCode
+				,strLongUPCCode
+				,ysnStockUnit
+				,ysnAllowPurchase
+				,ysnAllowSale
+				,dblLength
+				,dblWidth
+				,dblHeight
+				,strDimensionUnitMeasure
+				,dblVolume
+				,intVolumeUOMId
+				,strVolumeUnitMeasure
+				,dblMaxQty
+				,ysnStockUOM
+				,strSourceName
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,strCreatedBy
+				,strModifiedBy
+			FROM OPENXML(@idoc, 'vyuIPGetItemUOMs/vyuIPGetItemUOM', 2) WITH (
+					strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,dblUnitQty NUMERIC(18, 6)
+					,dblWeight NUMERIC(18, 6)
+					,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strLongUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,ysnStockUnit BIT
+					,ysnAllowPurchase BIT
+					,ysnAllowSale BIT
+					,dblLength NUMERIC(18, 6)
+					,dblWidth NUMERIC(18, 6)
+					,dblHeight NUMERIC(18, 6)
+					,strDimensionUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,dblVolume NUMERIC(18, 6)
+					,intVolumeUOMId INT
+					,strVolumeUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,dblMaxQty NUMERIC(18, 6)
+					,ysnStockUOM BIT
+					,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
+					,intSort INT
+					,intConcurrencyId INT
+					,dtmDateCreated DATETIME
+					,dtmDateModified DATETIME
+					,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					)
+
+			SELECT @intItemUOMId = min(intItemUOMId)
+			FROM @tblICItemUOM
+
+			WHILE @intItemUOMId IS NOT NULL
+			BEGIN
+				SELECT @strUnitMeasure = NULL
+					,@strWeightUnitMeasure = NULL
+					,@strVolumeUnitMeasure = NULL
+					,@strDimensionUnitMeasure = NULL
+					,@strCreatedBy = NULL
+					,@strModifiedBy = NULL
+					,@strErrorMessage = ''
+
+				SELECT @strUnitMeasure = strUnitMeasure
+					,@strWeightUnitMeasure = strWeightUnitMeasure
+					,@strVolumeUnitMeasure = strVolumeUnitMeasure
+					,@strDimensionUnitMeasure = strDimensionUnitMeasure
+					,@strCreatedBy = strCreatedBy
+					,@strModifiedBy = strModifiedBy
+				FROM @tblICItemUOM
+				WHERE intItemUOMId = @intItemUOMId
+
+				SELECT @intUnitMeasureId = NULL
+
+				SELECT @intUnitMeasureId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strUnitMeasure
+
+				IF @strUnitMeasure IS NOT NULL
+					AND @intUnitMeasureId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
+					END
+				END
+
+				SELECT @intWeightUOMId = NULL
+
+				SELECT @intWeightUOMId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strWeightUnitMeasure
+
+				IF @strWeightUnitMeasure IS NOT NULL
+					AND @intWeightUOMId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
+					END
+				END
+
+				SELECT @intVolumeUOMId = NULL
+
+				SELECT @intVolumeUOMId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strVolumeUnitMeasure
+
+				IF @strVolumeUnitMeasure IS NOT NULL
+					AND @intVolumeUOMId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
+					END
+				END
+
+				SELECT @intDimensionUOMId = NULL
+
+				SELECT @intDimensionUOMId = intUnitMeasureId
+				FROM tblICUnitMeasure
+				WHERE strUnitMeasure = @strDimensionUOM
+
+				IF @strDimensionUOM IS NOT NULL
+					AND @intDimensionUOMId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
+					END
+				END
+
+				SELECT @intDataSourceId = NULL
+
+				SELECT @intDataSourceId = intDataSourceId
+				FROM tblICDataSource
+				WHERE strSourceName = @strSourceName
+
+				IF @strSourceName IS NOT NULL
+					AND @intDataSourceId IS NULL
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Source Name ' + @strSourceName + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
+					END
+				END
+
+				IF @strErrorMessage <> ''
+				BEGIN
+					RAISERROR (
+							@strErrorMessage
+							,16
+							,1
+							)
+				END
+
+				SELECT @intCreatedById = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strCreatedBy
+
+				SELECT @intModifiedById = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strModifiedBy
+
+				INSERT INTO @tblICFinalItemUOM (
+					intItemId
+					,intUnitMeasureId
+					,dblUnitQty
+					,dblWeight
+					,intWeightUOMId
+					,strUpcCode
+					,strLongUPCCode
+					,ysnStockUnit
+					,ysnAllowPurchase
+					,ysnAllowSale
+					,dblLength
+					,dblWidth
+					,dblHeight
+					,intDimensionUOMId
+					,dblVolume
+					,intVolumeUOMId
+					,dblMaxQty
+					,ysnStockUOM
+					,intSort
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,intCreatedByUserId
+					,intModifiedByUserId
+					,intDataSourceId
+					)
+				SELECT @intNewItemId
+					,@intUnitMeasureId
+					,dblUnitQty
+					,dblWeight
+					,@intWeightUOMId
+					,strUpcCode
+					,strLongUPCCode
+					,ysnStockUnit
+					,ysnAllowPurchase
+					,ysnAllowSale
+					,dblLength
+					,dblWidth
+					,dblHeight
+					,@intDimensionUOMId
+					,dblVolume
+					,@intVolumeUOMId
+					,dblMaxQty
+					,ysnStockUOM
+					,intSort
+					,intConcurrencyId
+					,dtmDateCreated
+					,dtmDateModified
+					,@intCreatedById
+					,@intModifiedById
+					,@intDataSourceId
+				FROM @tblICItemUOM
+				WHERE intItemUOMId = @intItemUOMId
+
+				SELECT @intItemUOMId = min(intItemUOMId)
+				FROM @tblICItemUOM
+				WHERE intItemUOMId > @intItemUOMId
+			END
+
+			DELETE IA
+			FROM tblICItemUOM IA
+			WHERE IA.intItemId = @intNewItemId
+				AND NOT EXISTS (
+					SELECT *
+					FROM @tblICFinalItemUOM IA1
+					WHERE IA1.intItemId = IA.intItemId
+						AND IA1.intUnitMeasureId = IA.intUnitMeasureId
+					)
+
+			UPDATE IA1
+			SET dblUnitQty = IA.dblUnitQty
+				,dblWeight = IA.dblWeight
+				,intWeightUOMId = IA.intWeightUOMId
+				,strUpcCode = IA.strUpcCode
+				,strLongUPCCode = IA.strLongUPCCode
+				,ysnStockUnit = IA.ysnStockUnit
+				,ysnAllowPurchase = IA.ysnAllowPurchase
+				,ysnAllowSale = IA.ysnAllowSale
+				,dblLength = IA.dblLength
+				,dblWidth = IA.dblWidth
+				,dblHeight = IA.dblHeight
+				,intDimensionUOMId = IA.intDimensionUOMId
+				,dblVolume = IA.dblVolume
+				,intVolumeUOMId = IA.intVolumeUOMId
+				,dblMaxQty = IA.dblMaxQty
+				,ysnStockUOM = IA.ysnStockUOM
+				,intSort = IA.intSort
+				,intConcurrencyId = IA.intConcurrencyId
+				,dtmDateCreated = IA.dtmDateCreated
+				,dtmDateModified = IA.dtmDateModified
+				,intCreatedByUserId = IA.intCreatedByUserId
+				,intModifiedByUserId = IA.intModifiedByUserId
+				,intDataSourceId = IA.intDataSourceId
+			FROM @tblICFinalItemUOM IA
+			JOIN tblICItemUOM IA1 ON IA1.intItemId = IA.intItemId
+				AND IA1.intUnitMeasureId = IA.intUnitMeasureId
+
+			INSERT INTO tblICItemUOM (
+				intItemId
+				,intUnitMeasureId
+				,dblUnitQty
+				,dblWeight
+				,intWeightUOMId
+				,strUpcCode
+				,strLongUPCCode
+				,ysnStockUnit
+				,ysnAllowPurchase
+				,ysnAllowSale
+				,dblLength
+				,dblWidth
+				,dblHeight
+				,intDimensionUOMId
+				,dblVolume
+				,intVolumeUOMId
+				,dblMaxQty
+				,ysnStockUOM
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				,intDataSourceId
+				)
+			SELECT intItemId
+				,intUnitMeasureId
+				,dblUnitQty
+				,dblWeight
+				,intWeightUOMId
+				,strUpcCode
+				,strLongUPCCode
+				,ysnStockUnit
+				,ysnAllowPurchase
+				,ysnAllowSale
+				,dblLength
+				,dblWidth
+				,dblHeight
+				,intDimensionUOMId
+				,dblVolume
+				,intVolumeUOMId
+				,dblMaxQty
+				,ysnStockUOM
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				,intDataSourceId
+			FROM @tblICFinalItemUOM IA
+			WHERE NOT EXISTS (
+					SELECT *
+					FROM tblICItemUOM IA1
+					WHERE IA1.intItemId = IA.intItemId
+						AND IA1.intUnitMeasureId = IA.intUnitMeasureId
+					)
+
+			DELETE
+			FROM @tblICItemUOM
+
+			DELETE
+			FROM @tblICFinalItemUOM
+
+			EXEC sp_xml_removedocument @idoc
+
+			------------------Item UOM UPC------------------------------------------------------
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strItemUPCXML
+
+			DELETE
+			FROM tblICItemUPC
+			WHERE intItemId = @intNewItemId
+
+			INSERT INTO tblICItemUPC (
+				[intItemId]
+				,[intItemUnitMeasureId]
+				,[dblUnitQty]
+				,strUPCCode
+				,intSort
+				,intConcurrencyId
+				,dtmDateCreated
+				,dtmDateModified
+				,intCreatedByUserId
+				,intModifiedByUserId
+				)
+			SELECT @intNewItemId
+				,IU.intItemUOMId
+				,x.[dblUnitQty]
+				,strUPCCode
+				,x.intSort
+				,x.intConcurrencyId
+				,x.dtmDateCreated
+				,x.dtmDateModified
+				,US.intEntityId AS intCreatedByUserId
+				,US1.intEntityId AS intModifiedByUserId
+			FROM OPENXML(@idoc, 'vyuIPGetItemUomUpcs/vyuIPGetItemUomUpc', 2) WITH (
+					strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+					,dblUnitQty NUMERIC(18, 6)
+					,strUPCCode NVARCHAR(50) Collate Latin1_General_CI_AS
+					,intSort INT
+					,intConcurrencyId INT
+					,dtmDateCreated DATETIME
+					,dtmDateModified DATETIME
+					,strCreatedBy NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
+					) x
+			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
+			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
+			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
+			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intNewItemId
+				AND IU.intUnitMeasureId = UM.intUnitMeasureId
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -7075,8 +7571,6 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			
-
 			------------------Item UOM UPC------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strItemUOMUpcXML
@@ -7108,502 +7602,6 @@ BEGIN TRY
 					strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strUpcCode NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strLongUpcCode NVARCHAR(50) Collate Latin1_General_CI_AS
-					,intConcurrencyId INT
-					,dtmDateCreated DATETIME
-					,dtmDateModified DATETIME
-					,strCreatedBy NVARCHAR(100) Collate Latin1_General_CI_AS
-					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
-					) x
-			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
-			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
-			LEFT JOIN tblICUnitMeasure UM ON UM.strUnitMeasure = x.strUnitMeasure
-			LEFT JOIN tblICItemUOM IU ON IU.intItemId = @intNewItemId
-				AND IU.intUnitMeasureId = UM.intUnitMeasureId
-
-			EXEC sp_xml_removedocument @idoc
-
-			------------------Item UOM------------------------------------------------------
-			DECLARE @strWeightUnitMeasure NVARCHAR(50)
-				,@intVolumeUOMId INT
-				,@strVolumeUnitMeasure NVARCHAR(50)
-				,@strDimensionUnitMeasure NVARCHAR(50)
-
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strItemUOMXML
-
-			DECLARE @tblICItemUOM TABLE (
-				intItemUOMId INT identity(1, 1)
-				,strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,dblUnitQty NUMERIC(18, 6)
-				,dblWeight NUMERIC(18, 6)
-				,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strLongUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,ysnStockUnit BIT
-				,ysnAllowPurchase BIT
-				,ysnAllowSale BIT
-				,dblLength NUMERIC(18, 6)
-				,dblWidth NUMERIC(18, 6)
-				,dblHeight NUMERIC(18, 6)
-				,strDimensionUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,dblVolume NUMERIC(18, 6)
-				,intVolumeUOMId INT
-				,strVolumeUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,dblMaxQty NUMERIC(18, 6)
-				,ysnStockUOM BIT
-				,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-				,intUpcCode BIGINT
-				,intSort INT
-				,intConcurrencyId INT
-				,dtmDateCreated DATETIME
-				,dtmDateModified DATETIME
-				,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
-				)
-			DECLARE @tblICFinalItemUOM TABLE (
-				intItemId INT NOT NULL
-				,intUnitMeasureId INT NOT NULL
-				,dblUnitQty NUMERIC(38, 20) NULL DEFAULT((0))
-				,dblWeight NUMERIC(18, 6) NULL DEFAULT((0))
-				,intWeightUOMId INT NULL
-				,strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,strLongUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-				,ysnStockUnit BIT NULL DEFAULT((0))
-				,ysnAllowPurchase BIT NULL DEFAULT((0))
-				,ysnAllowSale BIT NULL DEFAULT((0))
-				,dblLength NUMERIC(18, 6) NULL DEFAULT((0))
-				,dblWidth NUMERIC(18, 6) NULL DEFAULT((0))
-				,dblHeight NUMERIC(18, 6) NULL DEFAULT((0))
-				,intDimensionUOMId INT NULL
-				,dblVolume NUMERIC(18, 6) NULL DEFAULT((0))
-				,intVolumeUOMId INT NULL
-				,dblMaxQty NUMERIC(18, 6) NULL DEFAULT((0))
-				,ysnStockUOM BIT NULL
-				,intSort INT NULL
-				,intConcurrencyId INT NULL DEFAULT((0))
-				,dtmDateCreated DATETIME NULL
-				,dtmDateModified DATETIME NULL
-				,intCreatedByUserId INT NULL
-				,intModifiedByUserId INT NULL
-				,intDataSourceId TINYINT NULL
-				,intUpcCode BIGINT
-				)
-
-			INSERT INTO @tblICItemUOM (
-				strUnitMeasure
-				,dblUnitQty
-				,dblWeight
-				,strWeightUnitMeasure
-				,strUpcCode
-				,strLongUPCCode
-				,ysnStockUnit
-				,ysnAllowPurchase
-				,ysnAllowSale
-				,dblLength
-				,dblWidth
-				,dblHeight
-				,strDimensionUnitMeasure
-				,dblVolume
-				,intVolumeUOMId
-				,strVolumeUnitMeasure
-				,dblMaxQty
-				,ysnStockUOM
-				,strSourceName
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,strCreatedBy
-				,strModifiedBy
-				)
-			SELECT strUnitMeasure
-				,dblUnitQty
-				,dblWeight
-				,strWeightUnitMeasure
-				,strUpcCode
-				,strLongUPCCode
-				,ysnStockUnit
-				,ysnAllowPurchase
-				,ysnAllowSale
-				,dblLength
-				,dblWidth
-				,dblHeight
-				,strDimensionUnitMeasure
-				,dblVolume
-				,intVolumeUOMId
-				,strVolumeUnitMeasure
-				,dblMaxQty
-				,ysnStockUOM
-				,strSourceName
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,strCreatedBy
-				,strModifiedBy
-			FROM OPENXML(@idoc, 'vyuIPGetItemUOMs/vyuIPGetItemUOM', 2) WITH (
-					strUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,dblUnitQty NUMERIC(18, 6)
-					,dblWeight NUMERIC(18, 6)
-					,strWeightUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strUpcCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strLongUPCCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,ysnStockUnit BIT
-					,ysnAllowPurchase BIT
-					,ysnAllowSale BIT
-					,dblLength NUMERIC(18, 6)
-					,dblWidth NUMERIC(18, 6)
-					,dblHeight NUMERIC(18, 6)
-					,strDimensionUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,dblVolume NUMERIC(18, 6)
-					,intVolumeUOMId INT
-					,strVolumeUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,dblMaxQty NUMERIC(18, 6)
-					,ysnStockUOM BIT
-					,strSourceName NVARCHAR(200) COLLATE Latin1_General_CI_AS
-					,intSort INT
-					,intConcurrencyId INT
-					,dtmDateCreated DATETIME
-					,dtmDateModified DATETIME
-					,strCreatedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					,strModifiedBy NVARCHAR(50) COLLATE Latin1_General_CI_AS
-					)
-
-			SELECT @intItemUOMId = min(intItemUOMId)
-			FROM @tblICItemUOM
-
-			WHILE @intItemUOMId IS NOT NULL
-			BEGIN
-				SELECT @strUnitMeasure = NULL
-					,@strWeightUnitMeasure = NULL
-					,@strVolumeUnitMeasure = NULL
-					,@strDimensionUnitMeasure = NULL
-					,@strCreatedBy = NULL
-					,@strModifiedBy = NULL
-					,@strErrorMessage = ''
-
-				SELECT @strUnitMeasure = strUnitMeasure
-					,@strWeightUnitMeasure = strWeightUnitMeasure
-					,@strVolumeUnitMeasure = strVolumeUnitMeasure
-					,@strDimensionUnitMeasure = strDimensionUnitMeasure
-					,@strCreatedBy = strCreatedBy
-					,@strModifiedBy = strModifiedBy
-				FROM @tblICItemUOM
-				WHERE intItemUOMId = @intItemUOMId
-
-				SELECT @intUnitMeasureId = NULL
-
-				SELECT @intUnitMeasureId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strUnitMeasure
-
-				IF @strUnitMeasure IS NOT NULL
-					AND @intUnitMeasureId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'UnitMeasure ' + @strUnitMeasure + ' is not available.'
-					END
-				END
-
-				SELECT @intWeightUOMId = NULL
-
-				SELECT @intWeightUOMId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strWeightUnitMeasure
-
-				IF @strWeightUnitMeasure IS NOT NULL
-					AND @intWeightUOMId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Weight Unit Measure ' + @strWeightUnitMeasure + ' is not available.'
-					END
-				END
-
-				SELECT @intVolumeUOMId = NULL
-
-				SELECT @intVolumeUOMId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strVolumeUnitMeasure
-
-				IF @strVolumeUnitMeasure IS NOT NULL
-					AND @intVolumeUOMId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Volume Unit Measure ' + @strVolumeUnitMeasure + ' is not available.'
-					END
-				END
-
-				SELECT @intDimensionUOMId = NULL
-
-				SELECT @intDimensionUOMId = intUnitMeasureId
-				FROM tblICUnitMeasure
-				WHERE strUnitMeasure = @strDimensionUOM
-
-				IF @strDimensionUOM IS NOT NULL
-					AND @intDimensionUOMId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Dimension Unit Measure ' + @strDimensionUnitMeasure + ' is not available.'
-					END
-				END
-
-				SELECT @intDataSourceId = NULL
-
-				SELECT @intDataSourceId = intDataSourceId
-				FROM tblICDataSource
-				WHERE strSourceName = @strSourceName
-
-				IF @strSourceName IS NOT NULL
-					AND @intDataSourceId IS NULL
-				BEGIN
-					IF @strErrorMessage <> ''
-					BEGIN
-						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Source Name ' + @strSourceName + ' is not available.'
-					END
-					ELSE
-					BEGIN
-						SELECT @strErrorMessage = 'Source Name ' + @strSourceName + ' is not available.'
-					END
-				END
-
-				IF @strErrorMessage <> ''
-				BEGIN
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
-
-				SELECT @intCreatedById = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strCreatedBy
-
-				SELECT @intModifiedById = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strModifiedBy
-
-				INSERT INTO @tblICFinalItemUOM (
-					intItemId
-					,intUnitMeasureId
-					,dblUnitQty
-					,dblWeight
-					,intWeightUOMId
-					,strUpcCode
-					,strLongUPCCode
-					,ysnStockUnit
-					,ysnAllowPurchase
-					,ysnAllowSale
-					,dblLength
-					,dblWidth
-					,dblHeight
-					,intDimensionUOMId
-					,dblVolume
-					,intVolumeUOMId
-					,dblMaxQty
-					,ysnStockUOM
-					,intSort
-					,intConcurrencyId
-					,dtmDateCreated
-					,dtmDateModified
-					,intCreatedByUserId
-					,intModifiedByUserId
-					,intDataSourceId
-					)
-				SELECT @intNewItemId
-					,@intUnitMeasureId
-					,dblUnitQty
-					,dblWeight
-					,@intWeightUOMId
-					,strUpcCode
-					,strLongUPCCode
-					,ysnStockUnit
-					,ysnAllowPurchase
-					,ysnAllowSale
-					,dblLength
-					,dblWidth
-					,dblHeight
-					,@intDimensionUOMId
-					,dblVolume
-					,@intVolumeUOMId
-					,dblMaxQty
-					,ysnStockUOM
-					,intSort
-					,intConcurrencyId
-					,dtmDateCreated
-					,dtmDateModified
-					,@intCreatedById
-					,@intModifiedById
-					,@intDataSourceId
-				FROM @tblICItemUOM
-				WHERE intItemUOMId = @intItemUOMId
-
-				SELECT @intItemUOMId = min(intItemUOMId)
-				FROM @tblICItemUOM
-				WHERE intItemUOMId > @intItemUOMId
-			END
-
-			DELETE IA
-			FROM tblICItemUOM IA
-			WHERE IA.intItemId = @intNewItemId
-				AND NOT EXISTS (
-					SELECT *
-					FROM @tblICFinalItemUOM IA1
-					WHERE IA1.intItemId = IA.intItemId
-						AND IA1.intUnitMeasureId = IA.intUnitMeasureId
-					)
-
-			UPDATE IA1
-			SET dblUnitQty = IA.dblUnitQty
-				,dblWeight = IA.dblWeight
-				,intWeightUOMId = IA.intWeightUOMId
-				,strUpcCode = IA.strUpcCode
-				,strLongUPCCode = IA.strLongUPCCode
-				,ysnStockUnit = IA.ysnStockUnit
-				,ysnAllowPurchase = IA.ysnAllowPurchase
-				,ysnAllowSale = IA.ysnAllowSale
-				,dblLength = IA.dblLength
-				,dblWidth = IA.dblWidth
-				,dblHeight = IA.dblHeight
-				,intDimensionUOMId = IA.intDimensionUOMId
-				,dblVolume = IA.dblVolume
-				,intVolumeUOMId = IA.intVolumeUOMId
-				,dblMaxQty = IA.dblMaxQty
-				,ysnStockUOM = IA.ysnStockUOM
-				,intSort = IA.intSort
-				,intConcurrencyId = IA.intConcurrencyId
-				,dtmDateCreated = IA.dtmDateCreated
-				,dtmDateModified = IA.dtmDateModified
-				,intCreatedByUserId = IA.intCreatedByUserId
-				,intModifiedByUserId = IA.intModifiedByUserId
-				,intDataSourceId = IA.intDataSourceId
-			FROM @tblICFinalItemUOM IA
-			JOIN tblICItemUOM IA1 ON IA1.intItemId = IA.intItemId
-				AND IA1.intUnitMeasureId = IA.intUnitMeasureId
-
-			INSERT INTO tblICItemUOM (
-				intItemId
-				,intUnitMeasureId
-				,dblUnitQty
-				,dblWeight
-				,intWeightUOMId
-				,strUpcCode
-				,strLongUPCCode
-				,ysnStockUnit
-				,ysnAllowPurchase
-				,ysnAllowSale
-				,dblLength
-				,dblWidth
-				,dblHeight
-				,intDimensionUOMId
-				,dblVolume
-				,intVolumeUOMId
-				,dblMaxQty
-				,ysnStockUOM
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				,intDataSourceId
-				)
-			SELECT intItemId
-				,intUnitMeasureId
-				,dblUnitQty
-				,dblWeight
-				,intWeightUOMId
-				,strUpcCode
-				,strLongUPCCode
-				,ysnStockUnit
-				,ysnAllowPurchase
-				,ysnAllowSale
-				,dblLength
-				,dblWidth
-				,dblHeight
-				,intDimensionUOMId
-				,dblVolume
-				,intVolumeUOMId
-				,dblMaxQty
-				,ysnStockUOM
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				,intDataSourceId
-			FROM @tblICFinalItemUOM IA
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblICItemUOM IA1
-					WHERE IA1.intItemId = IA.intItemId
-						AND IA1.intUnitMeasureId = IA.intUnitMeasureId
-					)
-
-			DELETE
-			FROM @tblICItemUOM
-
-			DELETE
-			FROM @tblICFinalItemUOM
-
-			EXEC sp_xml_removedocument @idoc
-
-			------------------Item UOM UPC------------------------------------------------------
-			EXEC sp_xml_preparedocument @idoc OUTPUT
-				,@strItemUPCXML
-
-			DELETE
-			FROM tblICItemUPC
-			WHERE intItemId = @intNewItemId
-
-			INSERT INTO tblICItemUPC (
-				[intItemId]
-				,[intItemUnitMeasureId]
-				,[dblUnitQty]
-				,strUPCCode
-				,intSort
-				,intConcurrencyId
-				,dtmDateCreated
-				,dtmDateModified
-				,intCreatedByUserId
-				,intModifiedByUserId
-				)
-			SELECT @intNewItemId
-				,IU.intItemUOMId
-				,x.[dblUnitQty]
-				,strUPCCode
-				,x.intSort
-				,x.intConcurrencyId
-				,x.dtmDateCreated
-				,x.dtmDateModified
-				,US.intEntityId AS intCreatedByUserId
-				,US1.intEntityId AS intModifiedByUserId
-			FROM OPENXML(@idoc, 'vyuIPGetItemUomUpcs/vyuIPGetItemUomUpc', 2) WITH (
-					strUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
-					,dblUnitQty NUMERIC(18, 6)
-					,strUPCCode NVARCHAR(50) Collate Latin1_General_CI_AS
-					,intSort INT
 					,intConcurrencyId INT
 					,dtmDateCreated DATETIME
 					,dtmDateModified DATETIME
