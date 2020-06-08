@@ -184,7 +184,7 @@ BEGIN TRY
 		,[intAccountId] = apClearing.intAccountId
 		,[strBillOfLading] = L.strBLNumber
 		,[ysnReturn] = CAST(0 AS BIT)
-		,[ysnStage] = CAST(1 AS BIT)
+		,[ysnStage] = CAST(CASE WHEN (CT.intPricingTypeId IN (1,6)) THEN 0 ELSE 1 END AS BIT)
 		,[intStorageLocationId] = ISNULL(LW.intSubLocationId, CT.intSubLocationId)
 		,[intSubLocationId] = ISNULL(LW.intStorageLocationId, CT.intStorageLocationId)
 	FROM tblLGLoad L
