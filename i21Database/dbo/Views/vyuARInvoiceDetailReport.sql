@@ -31,6 +31,10 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , ysnPosted				= ISNULL(I.ysnPosted, 0)
 	 , ysnImpactInventory		= ISNULL(I.ysnImpactInventory, 0)
 	 , dtmAccountingPeriod      = AccPeriod.dtmAccountingPeriod
+	 , intDaysOld				= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
+	 , intDaysToPay				= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
+								   	   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
+							  	  END
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
@@ -64,32 +68,42 @@ INNER JOIN (
 		FROM tblARCustomer WITH (NOLOCK)
 	) ARC ON EME.intEntityId = ARC.intEntityId
 ) C ON I.intEntityCustomerId = C.intEntityId
-LEFT JOIN (SELECT intItemId
-				, strItemNo
-				, strDescription
-		   FROM 
-			dbo.tblICItem WITH (NOLOCK)
-			) ITEM ON ID.intItemId = ITEM.intItemId
-LEFT JOIN (SELECT CTH.intContractHeaderId
-				, CTH.strContractNumber
-				, CTD.intContractDetailId
-				, CTD.intContractSeq
-				, CTD.dblCashPrice
-		   FROM 
-			dbo.tblCTContractHeader CTH WITH (NOLOCK)
-		   INNER JOIN (SELECT intContractHeaderId
-							, intContractDetailId
-							, intContractSeq
-							, dblCashPrice
-					   FROM 
-						dbo.tblCTContractDetail WITH (NOLOCK)
-					 ) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
-			) CT ON ID.intContractHeaderId = CT.intContractHeaderId
-				AND ID.intContractDetailId = CT.intContractDetailId
-LEFT OUTER JOIN(
-	SELECT intCompanyLocationId, strLocationName FROM tblSMCompanyLocation WITH (NOLOCK)
-) L ON I.intCompanyLocationId = L.intCompanyLocationId
-OUTER APPLY(
-	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+LEFT JOIN (
+	SELECT intItemId
+		 , strItemNo
+		 , strDescription
+	FROM dbo.tblICItem WITH (NOLOCK)
+) ITEM ON ID.intItemId = ITEM.intItemId
+LEFT JOIN (
+	SELECT CTH.intContractHeaderId
+		 , CTH.strContractNumber
+		 , CTD.intContractDetailId
+		 , CTD.intContractSeq
+	FROM dbo.tblCTContractHeader CTH WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intContractHeaderId
+			 , intContractDetailId
+			 , intContractSeq
+		FROM dbo.tblCTContractDetail WITH (NOLOCK)
+	) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
+) CT ON ID.intContractHeaderId = CT.intContractHeaderId
+	AND ID.intContractDetailId = CT.intContractDetailId
+OUTER APPLY (
+	SELECT dtmAccountingPeriod = dtmEndDate 
+	FROM tblGLFiscalYearPeriod P
 	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
 ) AccPeriod
+INNER JOIN (
+	SELECT intCompanyLocationId
+		 , strLocationName 
+	FROM tblSMCompanyLocation WITH (NOLOCK)
+) L ON I.intCompanyLocationId = L.intCompanyLocationId
+OUTER APPLY (
+	SELECT TOP 1 P.dtmDatePaid
+	FROM tblARPaymentDetail PD
+	INNER JOIN tblARPayment P ON PD.intPaymentId = P.intPaymentId
+	WHERE PD.intInvoiceId = I.intInvoiceId
+	  AND P.ysnPosted = 1
+	  AND P.ysnInvoicePrepayment = 0
+	ORDER BY P.dtmDatePaid DESC
+) FULLPAY
