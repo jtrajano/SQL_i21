@@ -218,6 +218,12 @@ BEGIN
 			ON A.intVoucherPayableId = B.intVoucherPayableId
 	END
 
+	IF @recordCountDeleted = 0
+	BEGIN
+		RAISERROR('No payables record to delete.', 16, 1);
+		RETURN;
+	END
+
 	IF @recordCountDeleted > 0 AND @recordCountToDelete != @recordCountDeleted
 	BEGIN
 		RAISERROR('Record count deleted mismatch.', 16, 1);
