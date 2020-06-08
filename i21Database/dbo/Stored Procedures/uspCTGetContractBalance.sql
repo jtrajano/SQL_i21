@@ -19,7 +19,7 @@ BEGIN TRY
 	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnContractBalanceInProgress = 1)
 	BEGIN
 		SET @ysnContractBalanceInProgress = 1
-		RAISERROR ('Contract summary is being accumulated, please wait...',18,1,'WITH NOWAIT')
+		RAISERROR ('Contract Balance generation is ongoing for other users. Please try again after a few minutes.',18,1,'WITH NOWAIT')
 	END
 	-- SET "CONTRACT BALANCE" STATUS IN-PROGRESS TO AVOID SIMULTANEOUS REPORT BUILDING 
 	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 1
