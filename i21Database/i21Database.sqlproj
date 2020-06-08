@@ -8663,8 +8663,8 @@
     <Build Include="dbo\Stored Procedures\uspGRSettlementTaxDetailsSubReportForView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementInboundSubReportForView.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementOutboundSubReportForView.sql" />
-    <Build Include="dbo\Tables\tblSCImportEntityLog.sql" />
-    <Build Include="dbo\Tables\tblSCEntityGeneratedLog.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedImportLog.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedGeneratedLog.sql" />
     <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspSCProcessShipmentToInvoice.sql" />
