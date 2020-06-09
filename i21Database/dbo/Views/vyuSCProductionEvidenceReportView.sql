@@ -126,7 +126,7 @@
 		,dblLineNetWeight = ((IRD.dblNet / SC.dblNetUnits) * (SC.dblTareWeight + SC.dblTareWeight1 + SC.dblTareWeight2)) 
 		,tblGRDiscountId.strDiscountId
 		-- ,dtmReceiptDate = ISNULL(Voucher.dtmDate, IR.dtmReceiptDate)
-		,dtmReceiptDate = Voucher.dtmDate
+		,dtmReceiptDate = ISNULL(VOUCHER_STORAGE.dtmDate, VOUCHER_IR.dtmDate)
 		,DS.strSplitDescription
 		,DS.intDeliverySheetId
 		,DS.strDeliverySheetNumber
@@ -222,37 +222,29 @@
             ,GRCS2.intEntityId
             ,GRCS2.intItemId
         FROM tblGRCustomerStorage GRCS2
-        WHERE (
-			-- Match customer storage to scale ticket if delivery sheet does not exist
-            (
-                DS.intDeliverySheetId IS NULL
-                AND GRCS2.intTicketId = SC.intTicketId
-            ) 
-			-- Match customer storage to delivery sheet if it exsists
-            OR (
-                DS.intDeliverySheetId IS NOT NULL
-                AND GRCS2.intDeliverySheetId = DS.intDeliverySheetId
-            )
-		)
+        WHERE DS.intDeliverySheetId IS NOT NULL
+		AND GRCS2.intDeliverySheetId = DS.intDeliverySheetId
         AND GRCS2.intEntityId = EM.intEntityId
-    ) GRCS
+    ) STORAGE_DS
+    OUTER APPLY (
+        SELECT 
+            GRCS2.intCustomerStorageId
+            ,GRCS2.intEntityId
+            ,GRCS2.intItemId
+        FROM tblGRCustomerStorage GRCS2
+        WHERE GRCS2.intTicketId = SC.intTicketId
+        AND GRCS2.intEntityId = EM.intEntityId
+    ) STORAGE_TICKET
+    OUTER APPLY(
+		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
+		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
+		WHERE APD.intInventoryReceiptItemId = IRD.intInventoryReceiptItemId
+	) VOUCHER_IR
 	OUTER APPLY(
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
 		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
-		WHERE
-			-- Match voucher to IR if there's no customer storage
-            (
-                GRCS.intCustomerStorageId IS NULL
-                AND APD.intInventoryReceiptItemId = IRD.intInventoryReceiptItemId
-            )
-			-- Match voucher to customer storage if storage exists
-            OR (
-                GRCS.intCustomerStorageId IS NOT NULL
-                AND APD.intCustomerStorageId = GRCS.intCustomerStorageId
-                AND AP.intEntityVendorId = GRCS.intEntityId
-                AND APD.intItemId = GRCS.intItemId
-            )
-	) Voucher
+		WHERE APD.intCustomerStorageId = ISNULL(STORAGE_DS.intCustomerStorageId, STORAGE_TICKET.intCustomerStorageId)
+	) VOUCHER_STORAGE
 	,(	SELECT TOP 1
 			strCompanyName
 			,strAddress AS strCompanyAddress
