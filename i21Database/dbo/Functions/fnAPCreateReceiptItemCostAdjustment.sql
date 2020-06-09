@@ -491,7 +491,7 @@ BEGIN
 		INNER JOIN tblAPBill A ON A.intBillId = ids.intId
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN tblGRCustomerStorage CS
-			ON CS.intCustomerStorageId = B.intCustomerStorageId AND CS.ysnTransferStorage = 0
+			ON CS.intCustomerStorageId = B.intCustomerStorageId AND CS.ysnTransferStorage = 0 AND CS.intDeliverySheetId IS NOT NULL
 		INNER JOIN tblGRStorageType ST
 			ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
 		OUTER APPLY (
@@ -588,7 +588,7 @@ BEGIN
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C 
-			ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1
+			ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1 AND C.intDeliverySheetId IS NOT NULL
 		INNER JOIN tblGRStorageType ST 
 			ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
@@ -649,7 +649,7 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
-		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1
+		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId AND C.ysnTransferStorage = 1 AND C.intDeliverySheetId IS NOT NULL
 		INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = C.intStorageTypeId AND ST.ysnDPOwnedType = 1
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
