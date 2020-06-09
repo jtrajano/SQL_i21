@@ -971,7 +971,8 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate
 				, strTransactionReferenceId
-				, intTransactionReferenceId)
+				, intTransactionReferenceId
+				, strTranType)
 			SELECT intContractHeaderId
 				, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR, BD.intContractSeq) COLLATE Latin1_General_CI_AS 
 				, BD.intCommodityId
@@ -996,6 +997,7 @@ BEGIN
 				, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
 				, strTransactionId
 				, intTransactionId
+				, strTransactionType
 			FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
 				INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
 				INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
@@ -1125,7 +1127,8 @@ BEGIN
 				, strFutureMonth
 				, strDeliveryDate
 				, strTransactionReferenceId
-				, intTransactionReferenceId)
+				, intTransactionReferenceId
+				, strTranType)
 			SELECT intContractHeaderId
 				, strContractNumber = strContractNumber + '-' + CONVERT(NVARCHAR, BD.intContractSeq) COLLATE Latin1_General_CI_AS 
 				, BD.intCommodityId
@@ -1151,6 +1154,7 @@ BEGIN
 				, strDeliveryDate = dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy')
 				, strTransactionId
 				, intTransactionId
+				, strTransactionType
 			FROM dbo.fnCTGetBasisDelivery(@dtmToDate) BD
 				INNER JOIN tblRKFutureMarket fm ON BD.intFutureMarketId = fm.intFutureMarketId
 				INNER JOIN tblRKFuturesMonth mnt ON BD.intFutureMonthId = mnt.intFutureMonthId
@@ -1267,7 +1271,10 @@ INSERT INTO @List(intContractHeaderId
 	, strFutMarketName
 	, intFutureMonthId
 	, strFutureMonth
-	, strDeliveryDate)
+	, strDeliveryDate
+	, strTransactionReferenceId
+	, intTransactionReferenceId
+	, strTranType)
 SELECT intContractHeaderId
 	, strContractNumber
 	, intCommodityId
@@ -1291,6 +1298,9 @@ SELECT intContractHeaderId
 	, intFutureMonthId
 	, strFutureMonth
 	, strDeliveryDate
+	, strTransactionReferenceId
+	, intTransactionReferenceId
+	, strTranType
 FROM @FinalList
 WHERE strType IN ('Sales Basis Deliveries', 'Purchase Basis Deliveries')
 
