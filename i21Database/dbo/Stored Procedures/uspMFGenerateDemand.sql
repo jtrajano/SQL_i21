@@ -332,7 +332,7 @@ BEGIN TRY
 			)
 		SELECT intItemId
 			,intItemId
-			,0
+			,(Case When Exists(Select 1 from tblICItemBundle IB Where IB.intItemId = I.intItemId) then 0 Else 1 End)
 			,1
 		FROM @tblMFItem I
 		WHERE NOT EXISTS (
