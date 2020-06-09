@@ -42,15 +42,15 @@ WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 
 SELECT * INTO #tempFirstToSecond FROM (
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strContractNumber, intContractHeaderId, dblTotal, strEntityName, strLocationName from #FirstRun
 	except
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strContractNumber, intContractHeaderId, dblTotal, strEntityName, strLocationName from #SecondRun
 )t
 
 SELECT * INTO #tempSecondToFirst FROM (
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strContractNumber, intContractHeaderId, dblTotal, strEntityName, strLocationName from #SecondRun
 	except
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strContractNumber, intContractHeaderId, dblTotal, strEntityName, strLocationName from #FirstRun
 ) t
 
 
@@ -58,6 +58,7 @@ SELECT
 	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strContractNumber ASC))
 	,strBucketType = @strBucketType
 	,strContractNumber
+	,intContractHeaderId
 	,dblTotalRun1
 	,dblTotalRun2
 	,dblDifference = ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0)
@@ -74,6 +75,7 @@ FROM (
 
 	SELECT 
 		a.strContractNumber
+		, a.intContractHeaderId
 		, dblTotalRun1 =  a.dblTotal 
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Balance Difference'
@@ -86,6 +88,7 @@ FROM (
 	UNION ALL
 	SELECT 
 		 a.strContractNumber
+		, a.intContractHeaderId
 		, dblTotalRun1 = a.dblTotal
 		, dblTotalRun2 = NULL
 		, strComment = 'Missing in Run 2'
@@ -97,6 +100,7 @@ FROM (
 	UNION ALL
 	SELECT 
 		 b.strContractNumber
+		, b.intContractHeaderId
 		, dblTotalRun1 = NULL
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Missing in Run 1'

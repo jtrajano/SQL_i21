@@ -42,22 +42,23 @@ WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 
 SELECT * INTO #tempFirstToSecond FROM (
-	select strInternalTradeNo, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #FirstRun
+	select strInternalTradeNo, intFutOptTransactionHeaderId, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #FirstRun
 	except
-	select strInternalTradeNo, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #SecondRun
+	select strInternalTradeNo, intFutOptTransactionHeaderId, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #SecondRun
 )t
 
 SELECT * INTO #tempSecondToFirst FROM (
-	select strInternalTradeNo, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #SecondRun
+	select strInternalTradeNo, intFutOptTransactionHeaderId, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #SecondRun
 	except
-	select strInternalTradeNo, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #FirstRun
+	select strInternalTradeNo, intFutOptTransactionHeaderId, dblTotal, strAccountNumber, strFutureMonth, strBrokerTradeNo, strNotes, strLocationName from #FirstRun
 ) t
 
 
 SELECT
 	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strInternalTradeNo ASC))
 	,strBucketType = @strBucketType
-	,strTransactionId = strInternalTradeNo
+	,strInternalTradeNo
+	,intFutOptTransactionHeaderId
 	,dblTotalRun1
 	,dblTotalRun2
 	,dblDifference = ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0)
@@ -77,9 +78,10 @@ FROM (
 
 	SELECT 
 		a.strInternalTradeNo
+		, a.intFutOptTransactionHeaderId
 		, dblTotalRun1 =  a.dblTotal 
 		, dblTotalRun2 = b.dblTotal
-		, strComment = ''
+		, strComment = 'Balance Difference'
 		, a.strAccountNumber
 		, a.strFutureMonth
 		, a.strBrokerTradeNo
@@ -92,6 +94,7 @@ FROM (
 	UNION ALL
 	SELECT 
 		 a.strInternalTradeNo
+		, a.intFutOptTransactionHeaderId
 		, dblTotalRun1 = a.dblTotal
 		, dblTotalRun2 = NULL
 		, strComment = 'Missing in Run 2'
@@ -106,6 +109,7 @@ FROM (
 	UNION ALL
 	SELECT 
 		 b.strInternalTradeNo
+		, b.intFutOptTransactionHeaderId
 		, dblTotalRun1 = NULL
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Missing in Run 1'
