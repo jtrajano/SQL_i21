@@ -351,12 +351,15 @@ BEGIN TRY
 	END
 
 	------ Call Reassign of Match Derivatives to fix matched derivatives that were reassigned
-	DECLARE @Ids Id
-	INSERT INTO @Ids(intId)
-	SELECT @intDeductedFutOptTransactionId
-	UNION ALL SELECT @intNewFutOptTransactionId
+	IF ISNULL(@intDeductedFutOptTransactionId, 0) <> 0 AND ISNULL(@intNewFutOptTransactionId, 0) <> 0
+	BEGIN
+		DECLARE @Ids Id
+		INSERT INTO @Ids(intId)
+		SELECT @intDeductedFutOptTransactionId
+		UNION ALL SELECT @intNewFutOptTransactionId
 
-	EXEC uspRKReassignMatchDerivatives @Ids, @intUserId
+		EXEC uspRKReassignMatchDerivatives @Ids, @intUserId
+	END
 
 	UPDATE	PF
 	SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
