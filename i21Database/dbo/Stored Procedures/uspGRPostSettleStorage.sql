@@ -2422,30 +2422,14 @@ BEGIN TRY
 					,[intContractHeaderId]			= case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= a.[intContractDetailId] -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] = 
-														--CASE 
-														--    WHEN ST.ysnDPOwnedType = 0 THEN NULL
-														--    ELSE
-														--        CASE
-														--            WHEN a.intItemType = 1 THEN
-														--                (
-														--                    SELECT intInventoryReceiptItemId 
-														--                    FROM tblICInventoryReceiptItem RI
-														--                    INNER JOIN tblGRStorageHistory SH
-														--                        ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-														--                    WHERE RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
-														--                        AND SH.intCustomerStorageId = CS.intCustomerStorageId
-														--                )
-														--            ELSE NULL
-														--        END
-														--END
-																CASE 
-																		WHEN ST.ysnDPOwnedType = 0 THEN NULL
-																		ELSE 
-																				CASE 
-																						WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
-																						ELSE NULL
-																				END
-																END
+													CASE 
+															WHEN ST.ysnDPOwnedType = 0 THEN NULL
+															ELSE 
+																	CASE 
+																			WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
+																			ELSE NULL
+																	END
+													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
@@ -2508,7 +2492,7 @@ BEGIN TRY
 															END
 														end					
 															
-					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
+					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
 														else 
 															case 
 															when (a.intContractHeaderId is not null and a.intPricingTypeId = 1 and CH.intPricingTypeId <> 2) or
@@ -2531,7 +2515,7 @@ BEGIN TRY
 																	where IT.intTransactionTypeId = 56
 																		and IT.intItemId = a.intItemId)
 															else null end
-														end								
+														end
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
 					,[intCostUOMId]					= CASE
 														WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
