@@ -874,7 +874,7 @@ BEGIN
 	EXEC uspAPUpdateVoucherHistory @paymentDetailIds = @voucherHistory, @post = @post
 
 	DECLARE @remove BIT = ~@post;
-	EXEC uspAPLogPaymentRisk @payVoucherDetailIds = voucherHistory, @remove = @remove
+	EXEC uspAPLogPaymentRisk @payVoucherDetailIds = @voucherHistory, @remove = @remove
 END
 
 IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPayablePostData')) DROP TABLE #tmpPayablePostData
