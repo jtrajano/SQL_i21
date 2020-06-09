@@ -1486,13 +1486,13 @@ GO
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 153
-			,[strTransactionType]	= N'Load Container'
-			,[strPrefix]			= N'LC-'
+			,[strTransactionType]	= N'Container ID'
+			,[strPrefix]			= N''
 			,[intNumber]			= 1
 			,[strModule]			= 'Logistics'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
 
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
