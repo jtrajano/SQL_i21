@@ -202,6 +202,24 @@ BEGIN
 			end
 
 		end
+
+		update
+			pf
+		set
+			pf.dblLotsFixed = tbl.dblLotsFixed
+		from tblCTPriceFixation pf
+			left join
+			(
+			select
+				pfd.intPriceFixationId
+				,dblLotsFixed = sum(pfd.dblNoOfLots)
+			from
+				tblCTPriceFixationDetail pfd
+			group by
+				pfd.intPriceFixationId
+			) tbl on tbl.intPriceFixationId = pf.intPriceFixationId
+		where
+			pf.intPriceFixationId = @intPriceFixationId;
     
 	end try
 	begin catch
