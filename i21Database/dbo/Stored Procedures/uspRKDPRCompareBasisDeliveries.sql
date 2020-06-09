@@ -45,15 +45,15 @@ WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 
 SELECT * INTO #tempFirstToSecond FROM (
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
 	except
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
 )t
 
 SELECT * INTO #tempSecondToFirst FROM (
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
 	except
-	select strContractNumber, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
 ) t
 
 
@@ -61,6 +61,7 @@ SELECT
 	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strContractNumber ASC))
 	,strBucketType = @strBucketType
 	,strContractNumber
+	,intContractHeaderId
 	,dblTotalRun1
 	,dblTotalRun2
 	,dblDifference = ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0)
@@ -68,6 +69,9 @@ SELECT
 	,strCommodityCode = @strCommodityCode
 	,strVendorCustomer = strEntityName 
 	,strLocationName 
+	,strTransactionId = strTransactionReferenceId
+	,intTransactionReferenceId
+	,strTranType
 	,dtmRunDateTime1 = @dtmRunDateTime1
 	,dtmRunDateTime2 = @dtmRunDateTime2
 	,dtmDPRDate1 = @dtmDPRDate1
@@ -77,11 +81,15 @@ FROM (
 
 	SELECT 
 		a.strContractNumber
+		, a.intContractHeaderId
 		, dblTotalRun1 =  a.dblTotal 
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Balance Difference'
 		, a.strEntityName
 		, a.strLocationName
+		, a.strTransactionReferenceId
+		, a.intTransactionReferenceId
+		, a.strTranType
 	FROM #tempFirstToSecond a
 	INNER JOIN #tempSecondToFirst b ON b.strContractNumber = a.strContractNumber
 
@@ -89,22 +97,30 @@ FROM (
 	UNION ALL
 	SELECT 
 		 a.strContractNumber
+		, a.intContractHeaderId
 		, dblTotalRun1 = a.dblTotal
 		, dblTotalRun2 = NULL
 		, strComment = 'Missing in Run 2'
 		, a.strEntityName
 		, a.strLocationName
+		, a.strTransactionReferenceId
+		, a.intTransactionReferenceId
+		, a.strTranType
 	FROM #tempFirstToSecond  a
 	WHERE a.strContractNumber NOT IN (SELECT strContractNumber FROM #tempSecondToFirst)
 
 	UNION ALL
 	SELECT 
 		 b.strContractNumber
+		 , b.intContractHeaderId
 		, dblTotalRun1 = NULL
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Missing in Run 1'
 		, b.strEntityName
 		, b.strLocationName
+		, b.strTransactionReferenceId
+		, b.intTransactionReferenceId
+		, b.strTranType
 	FROM #tempSecondToFirst b
 	WHERE b.strContractNumber NOT IN (SELECT strContractNumber FROM #tempFirstToSecond)
 ) t

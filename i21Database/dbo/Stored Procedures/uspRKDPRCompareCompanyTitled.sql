@@ -62,6 +62,7 @@ SELECT F.*
 ,strHeaderPricing = ptCH.strPricingType
 ,strSeqPricing = ptCD.strPricingType
 ,strTicketNumber = COALESCE(receiptItemSource.strSourceNumber,shipmentItemSource.strSourceNumber)
+,intTicketId = COALESCE(receiptItem.intSourceId,shipmentItem.intSourceId)
 INTO #tempFinalFirstRun
 FROM #tempFirstToSecond F
 LEFT JOIN tblICInventoryReceiptItem receiptItem 
@@ -97,6 +98,7 @@ SELECT S.*
 ,strHeaderPricing = ptCH.strPricingType
 ,strSeqPricing = ptCD.strPricingType
 ,strTicketNumber = COALESCE(receiptItemSource.strSourceNumber,shipmentItemSource.strSourceNumber)
+,intTicketId = COALESCE(receiptItem.intSourceId,shipmentItem.intSourceId)
 INTO #tempFinalSecondRun
 FROM #tempSecondToFirst S
 LEFT JOIN tblICInventoryReceiptItem receiptItem 
@@ -127,6 +129,9 @@ SELECT
 	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strTransactionReferenceId ASC))
 	,strBucketType = @strBucketType
 	,strTransactionId = strTransactionReferenceId
+	,intTransactionReferenceId
+	,intTransactionReferenceDetailId
+	,strTranType
 	,dblTotalRun1
 	,dblTotalRun2
 	,dblDifference = ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0)
@@ -143,16 +148,18 @@ SELECT
 	,strHeaderPricing
 	,strSeqPricing
 	,strTicketNumber
+	,intTicketId
 	,dtmRunDateTime1 = @dtmRunDateTime1
 	,dtmRunDateTime2 = @dtmRunDateTime2
 	,dtmDPRDate1 = @dtmDPRDate1
 	,dtmDPRDate2 = @dtmDPRDate2
-	,intTransactionReferenceDetailId
 FROM (
 
 	SELECT 
 		a.strTransactionReferenceId
+		, a.intTransactionReferenceId
 		, a.intTransactionReferenceDetailId
+		, a.strTranType
 		, dblTotalRun1 =  a.dblTotal 
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Balance Difference'
@@ -166,6 +173,7 @@ FROM (
 		, a.strHeaderPricing
 		, a.strSeqPricing
 		, a.strTicketNumber
+		, a.intTicketId
 	FROM #tempFinalFirstRun a
 	INNER JOIN #tempFinalSecondRun b ON b.strTransactionReferenceId = a.strTransactionReferenceId
 
@@ -173,7 +181,9 @@ FROM (
 	UNION ALL
 	SELECT 
 		 a.strTransactionReferenceId
+		, a.intTransactionReferenceId
 		, a.intTransactionReferenceDetailId
+		, a.strTranType
 		, dblTotalRun1 = a.dblTotal
 		, dblTotalRun2 = NULL
 		, strComment = 'Missing in Run 2'
@@ -187,13 +197,16 @@ FROM (
 		, a.strHeaderPricing
 		, a.strSeqPricing
 		, a.strTicketNumber
+		, a.intTicketId
 	FROM #tempFinalFirstRun  a
 	WHERE a.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFinalSecondRun)
 
 	UNION ALL
 	SELECT 
 		 b.strTransactionReferenceId
+		, b.intTransactionReferenceId
 		, b.intTransactionReferenceDetailId
+		, b.strTranType
 		, dblTotalRun1 = NULL
 		, dblTotalRun2 = b.dblTotal
 		, strComment = 'Missing in Run 1'
@@ -207,6 +220,7 @@ FROM (
 		, b.strHeaderPricing
 		, b.strSeqPricing
 		, b.strTicketNumber
+		, b.intTicketId
 	FROM #tempFinalSecondRun b
 	WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFinalFirstRun)
 ) t
