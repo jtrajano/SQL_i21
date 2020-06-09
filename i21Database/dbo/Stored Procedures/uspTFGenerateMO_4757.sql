@@ -328,66 +328,66 @@ BEGIN TRY
 		SELECT @dtmTo = MAX(dtmReportingPeriodEnd) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid
 
 		-- Line 1
-		SELECT @dblReceiptLine1_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Gasoline'
-		SELECT @dblReceiptLine1_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = '100% Ethyl Alcohol'
-		SELECT @dblReceiptLine1_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Gasohol'
-		SELECT @dblReceiptLine1_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Aviation Gas'
-		SELECT @dblReceiptLine1_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblReceiptLine1_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Jet Fuel'
-		SELECT @dblReceiptLine1_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'LNG'
-		SELECT @dblReceiptLine1_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblReceiptLine1_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Gasoline'
+		SELECT @dblReceiptLine1_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = '100% Ethyl Alcohol'
+		SELECT @dblReceiptLine1_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Gasohol'
+		SELECT @dblReceiptLine1_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Aviation Gas'
+		SELECT @dblReceiptLine1_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine1_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Jet Fuel'
+		SELECT @dblReceiptLine1_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'LNG'
+		SELECT @dblReceiptLine1_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 2
-		SELECT @dblReceiptLine2_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Gasoline'
-		SELECT @dblReceiptLine2_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = '100% Ethyl Alcohol'
-		SELECT @dblReceiptLine2_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Gasohol'
-		SELECT @dblReceiptLine2_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Aviation Gas'
-		SELECT @dblReceiptLine2_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblReceiptLine2_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Jet Fuel'
-		SELECT @dblReceiptLine2_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'LNG'
-		SELECT @dblReceiptLine2_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblReceiptLine2_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Gasoline'
+		SELECT @dblReceiptLine2_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = '100% Ethyl Alcohol'
+		SELECT @dblReceiptLine2_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Gasohol'
+		SELECT @dblReceiptLine2_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Aviation Gas'
+		SELECT @dblReceiptLine2_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine2_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Jet Fuel'
+		SELECT @dblReceiptLine2_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'LNG'
+		SELECT @dblReceiptLine2_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1B' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 3
-		SELECT @dblReceiptLine3_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Gasoline'
-		SELECT @dblReceiptLine3_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = '100% Ethyl Alcohol'
-		SELECT @dblReceiptLine3_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Gasohol'
-		SELECT @dblReceiptLine3_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Aviation Gas'
-		SELECT @dblReceiptLine3_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblReceiptLine3_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Jet Fuel'
-		SELECT @dblReceiptLine3_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'LNG'
-		SELECT @dblReceiptLine3_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblReceiptLine3_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Gasoline'
+		SELECT @dblReceiptLine3_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = '100% Ethyl Alcohol'
+		SELECT @dblReceiptLine3_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Gasohol'
+		SELECT @dblReceiptLine3_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Aviation Gas'
+		SELECT @dblReceiptLine3_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine3_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Jet Fuel'
+		SELECT @dblReceiptLine3_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'LNG'
+		SELECT @dblReceiptLine3_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1C' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 4
-		SELECT @dblReceiptLine4_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Gasoline'
-		SELECT @dblReceiptLine4_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = '100% Ethyl Alcohol'
-		SELECT @dblReceiptLine4_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Gasohol'
-		SELECT @dblReceiptLine4_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Aviation Gas'
-		SELECT @dblReceiptLine4_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblReceiptLine4_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Jet Fuel'
-		SELECT @dblReceiptLine4_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'LNG'
-		SELECT @dblReceiptLine4_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblReceiptLine4_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Gasoline'
+		SELECT @dblReceiptLine4_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = '100% Ethyl Alcohol'
+		SELECT @dblReceiptLine4_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Gasohol'
+		SELECT @dblReceiptLine4_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Aviation Gas'
+		SELECT @dblReceiptLine4_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine4_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Jet Fuel'
+		SELECT @dblReceiptLine4_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'LNG'
+		SELECT @dblReceiptLine4_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '1E' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 5
-		SELECT @dblReceiptLine5_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Gasoline'
-		SELECT @dblReceiptLine5_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Gasohol'
-		SELECT @dblReceiptLine5_D = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'CNG/Propane'
-		SELECT @dblReceiptLine5_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Aviation Gas'
-		SELECT @dblReceiptLine5_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblReceiptLine5_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Jet Fuel'
-		SELECT @dblReceiptLine5_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'LNG'
-		SELECT @dblReceiptLine5_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblReceiptLine5_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Gasoline'
+		SELECT @dblReceiptLine5_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Gasohol'
+		SELECT @dblReceiptLine5_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'CNG/Propane'
+		SELECT @dblReceiptLine5_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Aviation Gas'
+		SELECT @dblReceiptLine5_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine5_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Jet Fuel'
+		SELECT @dblReceiptLine5_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'LNG'
+		SELECT @dblReceiptLine5_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 
 		-- Line 5a
 	
 		-- Line 6
-		SELECT @dblReceiptLine6_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Gasoline'	
-		SELECT @dblReceiptLine6_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Aviation Gas'
-		SELECT @dblReceiptLine6_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblReceiptLine6_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblReceiptLine6_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Gasoline'	
+		SELECT @dblReceiptLine6_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Aviation Gas'
+		SELECT @dblReceiptLine6_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine6_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 7
-		SELECT @dblReceiptLine7_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2G' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblReceiptLine7_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2G' and strType = 'Clear Diesel/Clear Kerosene'
 
 		-- Line 8
 
@@ -404,56 +404,68 @@ BEGIN TRY
 
 
 		-- DISBURSEMENT
-		-- Line 10
-
 
 		-- Line 11
-		SELECT @dblDisbLine11_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblDisbLine11_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 12
-		SELECT @dblDisbLine12_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10G' and strType = '100% Ethyl Alcohol'
-		SELECT @dblDisbLine12_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10G' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblDisbLine12_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10G' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblDisbLine12_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10G' and strType = '100% Ethyl Alcohol'
+		SELECT @dblDisbLine12_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10G' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblDisbLine12_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10G' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 13
-		SELECT @dblDisbLine13_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Gasoline'
-		SELECT @dblDisbLine13_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = '100% Ethyl Alcohol'
-		SELECT @dblDisbLine13_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Gasohol'
-		SELECT @dblDisbLine13_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Aviation Gas'
-		SELECT @dblDisbLine13_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblDisbLine13_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Jet Fuel'
-		SELECT @dblDisbLine13_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'LNG'
-		SELECT @dblDisbLine13_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblDisbLine13_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Gasoline'
+		SELECT @dblDisbLine13_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = '100% Ethyl Alcohol'
+		SELECT @dblDisbLine13_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Gasohol'
+		SELECT @dblDisbLine13_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Aviation Gas'
+		SELECT @dblDisbLine13_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblDisbLine13_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Jet Fuel'
+		SELECT @dblDisbLine13_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'LNG'
+		SELECT @dblDisbLine13_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7A%' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 14
-		SELECT @dblDisbLine14_A = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Gasoline'
-		SELECT @dblDisbLine14_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = '100% Ethyl Alcohol'
-		SELECT @dblDisbLine14_C = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Gasohol'
-		SELECT @dblDisbLine14_E = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Aviation Gas'
-		SELECT @dblDisbLine14_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblDisbLine14_G = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Jet Fuel'
-		SELECT @dblDisbLine14_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'LNG'
-		SELECT @dblDisbLine14_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblDisbLine14_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Gasoline'
+		SELECT @dblDisbLine14_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = '100% Ethyl Alcohol'
+		SELECT @dblDisbLine14_C = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Gasohol'
+		SELECT @dblDisbLine14_E = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Aviation Gas'
+		SELECT @dblDisbLine14_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblDisbLine14_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Jet Fuel'
+		SELECT @dblDisbLine14_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'LNG'
+		SELECT @dblDisbLine14_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode LIKE '7B%' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 15
-		SELECT @dblDisbLine14_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10J' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblDisbLine14_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10J' and strType = 'Clear Diesel/Clear Kerosene'
 
-		-- Line 16
+		-- Line 10
+		SET @dblDisbLine10_A = @dblDisbLine13_A + @dblDisbLine14_A
+		SET @dblDisbLine10_B = @dblDisbLine12_B + @dblDisbLine13_B + @dblDisbLine14_B
+		SET @dblDisbLine10_C = @dblDisbLine13_C + @dblDisbLine14_C
+		SET @dblDisbLine10_E = @dblDisbLine13_E + @dblDisbLine14_E
+		SET @dblDisbLine10_F = @dblDisbLine12_F + @dblDisbLine13_F + @dblDisbLine14_F
+		SET @dblDisbLine10_G = @dblDisbLine13_G + @dblDisbLine14_G
+		SET @dblDisbLine10_H = @dblDisbLine13_H + @dblDisbLine14_H
+		SET @dblDisbLine10_I = @dblDisbLine11_I + @dblDisbLine12_I + @dblDisbLine13_I + @dblDisbLine14_I
 
 		-- Line 17
-		SELECT @dblDisbLine17_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = '100% Ethyl Alcohol'
-		SELECT @dblDisbLine17_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblDisbLine17_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblDisbLine17_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = '100% Ethyl Alcohol'
+		SELECT @dblDisbLine17_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblDisbLine17_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 17a
-		SELECT @dblDisbLine17a_B = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = '100% Ethyl Alcohol'
-		SELECT @dblDisbLine17a_F = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'Clear Diesel/Clear Kerosene'
-		SELECT @dblDisbLine17a_I = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'Dyed Diesel/Dyed Kerosene'
+		SELECT @dblDisbLine17a_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = '100% Ethyl Alcohol'
+		SELECT @dblDisbLine17a_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'Clear Diesel/Clear Kerosene'
+		SELECT @dblDisbLine17a_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'Dyed Diesel/Dyed Kerosene'
 
 		-- Line 18
-		SELECT @dblDisbLine18_D = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'CNG/Propane'
-		SELECT @dblDisbLine18_H = SUM(ISNULL(dblGross,0)) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'LNG'
+		SELECT @dblDisbLine18_D = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'CNG/Propane'
+		SELECT @dblDisbLine18_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10A' and strType = 'LNG'
 
+		-- Line 16
+		SET @dblDisbLine16_B = @dblDisbLine17_B + @dblDisbLine17a_B
+		SET @dblDisbLine16_D = @dblDisbLine18_D
+		SET @dblDisbLine16_F = @dblDisbLine17_F + @dblDisbLine17a_F
+		SET @dblDisbLine16_H = @dblDisbLine18_H
+		SET @dblDisbLine16_I = @dblDisbLine17_I + @dblDisbLine17a_I
 
 		-- Page 1
 		-- Part 1
@@ -486,13 +498,13 @@ BEGIN TRY
 		SET @dblLine6_F = @dblDisbLine14_F 
 		SET @dblLine6_G = @dblDisbLine14_H
 
-		SELECT @strLine7_A_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7a'
-		SELECT @strLine7_B_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7b'
-		SELECT @strLine7_C_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7c'
-		SELECT @strLine7_D_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7d'
-		SELECT @strLine7_E_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7e'
-		SELECT @strLine7_F_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7f'
-		SELECT @strLine7_G_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7g'
+		SELECT @strLine7_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7a'
+		SELECT @strLine7_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7b'
+		SELECT @strLine7_C_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7c'
+		SELECT @strLine7_D_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7d'
+		SELECT @strLine7_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7e'
+		SELECT @strLine7_F_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7f'
+		SELECT @strLine7_G_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln7g'
 
 		SET @dblLine7_A_Rate = CONVERT(NUMERIC(18, 6), @strLine7_A_Rate)
 		SET @dblLine7_B_Rate = CONVERT(NUMERIC(18, 6), @strLine7_B_Rate)
@@ -527,13 +539,13 @@ BEGIN TRY
 		SET @dblLine9_G = @dblLine5_G - @dblLine8_G
 
 		-- PART 2
-		SELECT @strLine10_A_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10a'
-		SELECT @strLine10_B_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10b'
-		SELECT @strLine10_C_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10c'
-		SELECT @strLine10_D_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10d'
-		SELECT @strLine10_E_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10e'
-		SELECT @strLine10_F_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10f'
-		SELECT @strLine10_G_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10g'
+		SELECT @strLine10_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10a'
+		SELECT @strLine10_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10b'
+		SELECT @strLine10_C_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10c'
+		SELECT @strLine10_D_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10d'
+		SELECT @strLine10_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10e'
+		SELECT @strLine10_F_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10f'
+		SELECT @strLine10_G_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10g'
 
 		SET @strLine10_A_Rate = CONVERT(NUMERIC(18, 6), @strLine10_A_Rate)
 		SET @strLine10_B_Rate = CONVERT(NUMERIC(18, 6), @strLine10_B_Rate)
@@ -551,13 +563,13 @@ BEGIN TRY
 		SET @dblLine10_F = @dblLine9_F * @strLine10_F_Rate
 		SET @dblLine10_G = @dblLine9_G * @strLine10_G_Rate
 
-		SELECT @strLine11_A_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11a'
-		SELECT @strLine11_B_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11b'
-		SELECT @strLine11_C_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11c'
-		SELECT @strLine11_D_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11d'
-		SELECT @strLine11_E_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11e'
-		SELECT @strLine11_F_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11f'
-		SELECT @strLine11_G_Rate = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11g'
+		SELECT @strLine11_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11a'
+		SELECT @strLine11_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11b'
+		SELECT @strLine11_C_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11c'
+		SELECT @strLine11_D_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11d'
+		SELECT @strLine11_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11e'
+		SELECT @strLine11_F_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11f'
+		SELECT @strLine11_G_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11g'
 
 		SET @dblLine11_A_Rate = CONVERT(NUMERIC(18, 6), @strLine11_A_Rate)
 		SET @dblLine11_B_Rate = CONVERT(NUMERIC(18, 6), @strLine11_B_Rate)
@@ -580,25 +592,25 @@ BEGIN TRY
 		SET @dblLine14 = @dblDisbLine14_A + @dblDisbLine14_B + @dblDisbLine14_C + @dblDisbLine14_E + @dblDisbLine14_F + @dblDisbLine14_G + @dblDisbLine14_H + @dblDisbLine14_I
 		SET @dblLine15 = @dblLine13 - @dblLine14
 
-		SELECT @strLine16a = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln16'
+		SELECT @strLine16a = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln16'
 	
 		SET @dblLine16a = CONVERT(NUMERIC(18, 6), @strLine16a)
 
 		SET @dblLine16 = @dblLine15 * @dblLine16a
 
-		SELECT @strLine17 = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln17'
+		SELECT @strLine17 = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln17'
 		SET @dblLine17 = CONVERT(NUMERIC(18, 6), @strLine17)
 
 		SET @dblLine18 = @dblLine16 - @dblLine17
 		SET @dblLine19 = @dblLine15
 		SET @dblLine21 = @dblLine19 - @dblLine20	
 
-		SELECT @strLine22a = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln22'
+		SELECT @strLine22a = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln22'
 		SET @dblLine22a = CONVERT(NUMERIC(18, 6), @strLine22a)
 
 		SET @dblLine22 = @dblLine21 * @dblLine22a
 
-		SELECT @strLine23 = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln23'
+		SELECT @strLine23 = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln23'
 		SET @dblLine23 = CONVERT(NUMERIC(18, 6), @strLine23)
 
 		SET @dblLine24 = @dblLine22 - @dblLine23
@@ -610,15 +622,15 @@ BEGIN TRY
 		SET @dblLine28 = @dblLine24
 		SET @dblLine29 = @dblLine25 + @dblLine26 + @dblLine27 + @dblLine28
 
-		SELECT @strLine30 = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln30'
+		SELECT @strLine30 = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln30'
 		SET @dblLine30 = CONVERT(NUMERIC(18, 6), @strLine30)
 
-		SELECT @strLine31 = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln31'
+		SELECT @strLine31 = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln31'
 		SET @dblLine31 = CONVERT(NUMERIC(18, 6), @strLine31)
 		
 		SET @dblLine32 = @dblLine29 + @dblLine30 + @dblLine31
 
-		SELECT @strLine33 = ISNULL(strConfiguration, '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln33'
+		SELECT @strLine33 = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln33'
 		SET @dblLine33 = CONVERT(NUMERIC(18, 6), @strLine33)
 
 		SET @dblLine34 = @dblLine32 + @dblLine33
