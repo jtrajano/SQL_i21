@@ -341,12 +341,6 @@ BEGIN
 
 			IF @ysnDebug = 0
 			BEGIN
-				UPDATE dbo.tblIPThirdPartyContractFeed
-				SET strThirdPartyFeedStatus = 'Awt Ack'
-					,ysnThirdPartyMailSent = 0
-					,strThirdPartyMessage = NULL
-				WHERE intContractFeedId = @intContractFeedId
-
 				DELETE
 				FROM dbo.tblIPContractFeedLog
 				WHERE intContractDetailId = @intContractDetailId
@@ -367,6 +361,25 @@ BEGIN
 					,@intShipperId
 					,@intDestinationCityId
 					,@intDestinationPortId
+
+				IF EXISTS (
+						SELECT 1
+						FROM dbo.tblIPThirdPartyContractFeed
+						WHERE intContractFeedId = @intContractFeedId
+							AND strThirdPartyFeedStatus IS NULL
+						)
+				BEGIN
+					UPDATE dbo.tblIPThirdPartyContractFeed
+					SET strThirdPartyFeedStatus = 'Awt Ack'
+						,ysnThirdPartyMailSent = 0
+						,strThirdPartyMessage = NULL
+					WHERE intContractFeedId = @intContractFeedId
+				END
+				ELSE
+				BEGIN
+					DELETE
+					FROM @tblOutput
+				END
 			END
 		END
 
