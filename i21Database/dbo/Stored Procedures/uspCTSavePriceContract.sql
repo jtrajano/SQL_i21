@@ -145,7 +145,7 @@ BEGIN TRY
 						SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
 					SET @strXML = @strXML +  '</root>'
 
-					EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
+					EXEC uspRKAutoHedge @strXML,@intUserId,@intOutputId OUTPUT
 
 					IF ISNULL(@intFutOptTransactionId,0) = 0
 					BEGIN
