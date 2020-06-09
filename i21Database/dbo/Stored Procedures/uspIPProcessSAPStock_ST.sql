@@ -172,7 +172,7 @@ BEGIN TRY
 				,@strQuantityUOM = strQuantityUOM
 				,@dblNetWeight = ISNULL(dblNetWeight, 0)
 				,@strNetWeightUOM = strNetWeightUOM
-				,@strLotNumber = strLotNumber
+				,@strLotNumber = ISNULL(strLotNumber, '')
 				,@dblCost = ISNULL(dblCost, 0)
 				,@strCostUOM = strCostUOM
 				,@strCostCurrency = strCostCurrency
