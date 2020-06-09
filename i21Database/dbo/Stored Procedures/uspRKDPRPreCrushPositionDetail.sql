@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspRKDPRPreCrushPositionDetail]
+﻿CREATE PROCEDURE [dbo].[uspRKDPRPreCrushPositionDetail]
 	@intCommodityId NVARCHAR(max)
 	, @intLocationId NVARCHAR(max) = NULL
 	, @intVendorId INT = NULL
