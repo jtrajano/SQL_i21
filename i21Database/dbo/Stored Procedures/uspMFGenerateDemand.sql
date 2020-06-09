@@ -825,7 +825,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		MERGE #tblMFDemand AS target
+		/*MERGE #tblMFDemand AS target
 		USING (
 			SELECT intItemId
 				,[strName]
@@ -984,7 +984,24 @@ BEGIN TRY
 					WHERE EI.intItemId = I.intItemId
 					)
 					group by IsNULL(DD.intSubstituteItemId, DD.intItemId),DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth 
-		END
+		END*/
+
+		INSERT INTO #tblMFDemand (
+			intItemId
+			,intMonthId
+			,dblQty
+			,intAttributeId
+			)
+		SELECT intItemId
+			,[strName]
+			,[strValue]
+			,8
+		FROM #TempForecastedConsumption FC
+		WHERE EXISTS (
+				SELECT *
+				FROM @tblMFRefreshtemStock EI
+				WHERE EI.intItemId = FC.intItemId
+				)
 	END
 
 	IF IsNULL(@OpenPurchaseXML, '') = ''
