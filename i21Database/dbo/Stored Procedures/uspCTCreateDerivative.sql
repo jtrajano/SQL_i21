@@ -29,6 +29,7 @@ BEGIN TRY
 			,@dtmFixationDate			DATETIME
 			,@ysnFreezed				BIT
 			,@ysnAA						BIT
+			,@intUserId					INT
 				
 
 	SELECT	 @intBrokerId				=	CH.intBrokerId
@@ -46,6 +47,7 @@ BEGIN TRY
 			,@intSubBookId				=	CH.intSubBookId
 			,@dtmFixationDate			=	GETDATE()
 			,@ysnAA						=	0
+			,@intUserId					=	CH.intCreatedById
 
 	FROM	tblCTContractHeader	CH
 	CROSS	APPLY	dbo.fnCTGetTopOneSequence(CH.intContractHeaderId,NULL) TS
@@ -81,7 +83,7 @@ BEGIN TRY
 		SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
 	SET @strXML = @strXML +  '</root>'
 
-	EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
+	EXEC uspRKAutoHedge @strXML,@intUserId,@intOutputId OUTPUT
 	
 	COMMIT TRAN
 END TRY
