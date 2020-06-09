@@ -749,8 +749,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
 				 , strPaymentMethod					= 'Debit Memos and Payments'
-				 , strPaymentInfo					= 'POS Exchange Item Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= ''
+				 , strNotes							= 'POS Exchange Item Transaction'--POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= 0.00
 				 , intEntityId						= @intEntityUserId
@@ -791,8 +791,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				 , dtmDatePaid						= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				 , intPaymentMethodId				= @intDebitMemoPaymentMethodId
 				 , strPaymentMethod					= 'Debit Memos and Payments'
-				 , strPaymentInfo					= 'POS Exchange Item Transaction'
-				 , strNotes							= POS.strReceiptNumber
+				 , strPaymentInfo					= ''
+				 , strNotes							= 'POS Exchange Item Transaction'--POS.strReceiptNumber
 				 , intBankAccountId					= BA.intBankAccountId
 				 , dblAmountPaid					= 0.00
 				 , intEntityId						= @intEntityUserId
@@ -906,8 +906,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
-				,strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
-				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
+				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
+				,strNotes						= 'POS Settle Amount Due of Exchange Transaction'--CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,intEntityId					= @intEntityUserId
@@ -992,8 +992,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,dtmDatePaid					= DATEADD(dd, DATEDIFF(dd, 0, POS.dtmDate), 0)
 				,intPaymentMethodId				= PM.intPaymentMethodID
 				,strPaymentMethod				= PM.strPaymentMethod
-				,strPaymentInfo					= 'POS Settle Amount Due of Exchange Transaction'
-				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
+				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
+				,strNotes						= 'POS Settle Amount Due of Exchange Transaction'--CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
 				,intBankAccountId				= BA.intBankAccountId
 				,dblAmountPaid					= ABS(ISNULL(POSPAYMENTS.dblAmount, 0)) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,intEntityId					= @intEntityUserId
