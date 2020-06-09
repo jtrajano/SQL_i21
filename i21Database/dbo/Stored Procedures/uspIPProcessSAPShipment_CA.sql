@@ -668,8 +668,8 @@ BEGIN TRY
 					,intPurchaseSale = @intPurchaseSale
 					,intPositionId = @intPositionId
 					,strPackingDescription = @strPackingDescription
-					,dtmStartDate = @dtmStartDate
-					,dtmEndDate = @dtmEndDate
+					--,dtmStartDate = @dtmStartDate
+					--,dtmEndDate = @dtmEndDate
 					,dtmPlannedAvailabilityDate = @dtmPlannedAvailabilityDate
 					,strOriginPort = @strOriginPort
 					,strDestinationPort = @strDestinationPort
@@ -756,11 +756,11 @@ BEGIN TRY
 					IF (@strOldPackingDescription <> @strPackingDescription)
 						SET @strDetails += '{"change":"strPackingDescription","iconCls":"small-gear","from":"' + LTRIM(@strOldPackingDescription) + '","to":"' + LTRIM(@strPackingDescription) + '","leaf":true,"changeDescription":"Packing Description"},'
 
-					IF (@dtmOldStartDate <> @dtmStartDate)
-						SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
+					--IF (@dtmOldStartDate <> @dtmStartDate)
+					--	SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
 
-					IF (@dtmOldEndDate <> @dtmEndDate)
-						SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
+					--IF (@dtmOldEndDate <> @dtmEndDate)
+					--	SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
 
 					IF (@dtmOldPlannedAvailabilityDate <> @dtmPlannedAvailabilityDate)
 						SET @strDetails += '{"change":"dtmPlannedAvailabilityDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldPlannedAvailabilityDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmPlannedAvailabilityDate, '')) + '","leaf":true,"changeDescription":"Planned Availability"},'
@@ -1053,8 +1053,10 @@ BEGIN TRY
 									WHEN ID.intDocumentType = 3	THEN 'Container'
 									ELSE ''
 								END COLLATE Latin1_General_CI_AS
-							,ISNULL(ID.intOriginal, 0)
-							,ISNULL(ID.intCopies, 0)
+							--,ISNULL(ID.intOriginal, 0)
+							--,ISNULL(ID.intCopies, 0)
+							,0
+							,0
 						FROM tblCTContractDocument CD
 						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
 							AND CD.intContractHeaderId = @intContractHeaderId
