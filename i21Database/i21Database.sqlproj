@@ -2625,6 +2625,8 @@
     <Build Include="dbo\User Defined Types\SubLedgerTransactionsUdt.sql" />
 	<Build Include="dbo\Stored Procedures\uspICSubLedgerAddReportEntries.sql" />
 	<Build Include="dbo\Stored Procedures\uspICSubLedgerRemoveReportEntries.sql" />
+	<Build Include="dbo\Stored Procedures\uspARLogInventorySubLedger.sql" />
+	<Build Include="dbo\Views\vyuICInventorySubLedgerReport.sql" />
 
     <Build Include="dbo\Stored Procedures\uspARAddItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessInvoices.sql" />

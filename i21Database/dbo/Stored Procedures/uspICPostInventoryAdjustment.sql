@@ -665,6 +665,77 @@ BEGIN
 
 END   
 
+-- Log to SubLedger
+IF @ysnRecap = 0
+BEGIN
+	DECLARE @InventorySubLedger SubLedgerReportUdt
+	DECLARE @strAdjustmentType NVARCHAR(100)
+	SELECT @strAdjustmentType = CASE @adjustmentType
+		WHEN 1 THEN 'Inventory Adjustment - Quantity Change'
+		WHEN 2 THEN 'Inventory Adjustment - UOM Change'
+		WHEN 3 THEN 'Inventory Adjustment - Item Change'
+		WHEN 4 THEN 'Inventory Adjustment - Lot Status Change'
+		WHEN 5 THEN 'Inventory Adjustment - Split Lot'
+		WHEN 6 THEN 'Inventory Adjustment - Expiry Date Change'
+		WHEN 7 THEN 'Inventory Adjustment - Lot Merge'
+		WHEN 8 THEN 'Inventory Adjustment - Lot Move'
+		WHEN 9 THEN 'Inventory Adjustment - Lot Owner Change'
+		WHEN 10 THEN 'Inventory Adjustment - Opening Inventory'
+		WHEN 11 THEN 'Inventory Adjustment - Change Lot Weight'
+		ELSE NULL END
+	IF @ysnPost = 1
+	BEGIN
+		INSERT INTO @InventorySubLedger
+		(
+			intItemId
+			,strSourceTransactionType
+			,dtmDate
+			,strInvoiceType
+			,strInvoiceNo
+			,dblInvoiceAmount
+			,dblQty
+			,dblPricePerUOM
+			,dblNetWeight
+			,intItemUOMId
+		)
+		SELECT
+			  d.intItemId
+			, @strAdjustmentType
+			, a.dtmAdjustmentDate
+			, 'Inventory Adjustment'
+			, a.strAdjustmentNo
+			, COALESCE(d.dblNewCost, d.dblCost, u.dblUnitQty, 1) * COALESCE(d.dblNewQuantity, d.dblQuantity)
+			, COALESCE(d.dblNewQuantity, d.dblQuantity)
+			, COALESCE(d.dblNewWeight, d.dblWeight)
+			, COALESCE(d.dblNewCost, d.dblCost)
+			, d.intItemUOMId
+		FROM tblICInventoryAdjustment a
+		INNER JOIN tblICInventoryAdjustmentDetail d ON d.intInventoryAdjustmentId = a.intInventoryAdjustmentId
+		INNER JOIN tblICItem i ON i.intItemId = d.intItemId
+		LEFT OUTER JOIN tblICItemUOM u ON u.intItemUOMId = d.intItemUOMId
+		OUTER APPLY (
+			SELECT TOP 1 fp.strPeriod
+			FROM tblGLFiscalYearPeriod fp
+			WHERE a.dtmAdjustmentDate BETWEEN fp.dtmStartDate AND fp.dtmEndDate
+		) fiscal
+		WHERE a.strAdjustmentNo = @strTransactionId
+
+		EXEC uspICSubLedgerAddReportEntries @SubLedgerReportEntries = @InventorySubLedger, @intUserId = @intEntityUserSecurityId
+	END
+	ELSE
+	BEGIN
+		DECLARE @transactionIds SubLedgerTransactionsUdt;
+		INSERT INTO @TransactionIds
+		(
+			strSourceTransactionType,
+			strSourceTransactionNo
+		)
+		SELECT @strAdjustmentType, @strTransactionId
+
+		EXEC [dbo].[uspICSubLedgerRemoveReportEntries] @SubLedgerTransactions = @TransactionIds, @intUserId = @intEntityUserSecurityId
+	END
+END
+
 --------------------------------------------------------------------------------------------  
 -- If RECAP is TRUE, 
 -- 1. Store all the GL entries in a holding table. It will be used later as data  

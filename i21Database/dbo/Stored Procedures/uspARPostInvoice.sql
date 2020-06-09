@@ -745,6 +745,12 @@ BEGIN TRY
 	IF @post = 1
     EXEC dbo.[uspARUpdateTransactionAccountOnPost]  	
 
+	IF @recap = 0
+	BEGIN
+		-- Log to inventory sub-ledger	
+		EXEC [dbo].[uspARLogInventorySubLedger] @post, @userId
+	END
+
 END TRY
 BEGIN CATCH
 	SELECT @ErrorMerssage = ERROR_MESSAGE()					
