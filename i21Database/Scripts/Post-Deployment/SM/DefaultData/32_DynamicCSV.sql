@@ -2213,20 +2213,15 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				IF(TRY_PARSE(@default_currency AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @defaultcurrencyId = CONVERT(INT,@default_currency)
-					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where intCurrencyID = @defaultcurrencyId )
+					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where strCurrency = @default_currency )
 					BEGIN
 						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id :''+@defaultcurrencyId+'' is not Exist''
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency :''+@default_currency+'' is not Exist''
 					END
-				END
+					ELSE
+					BEGIN
+						Select TOP 1 defaultcurrencyId = intCurrencyID from tblSMCurrency Where strCurrency = @default_currency
+					END
 			END
 
 			IF(@vendor_link = '''')
