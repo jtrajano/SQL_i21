@@ -69,6 +69,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , dblInvoiceTax
+	 , dblTotalTax
 	 , strComments
 	 , strItemComments
 	 , strOrigin
@@ -125,7 +126,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intInvoiceDetailId		= INVOICEDETAIL.intInvoiceDetailId
 	 , intSiteId				= INVOICEDETAIL.intSiteId
 	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
-	 , intItemId				= INVOICEDETAIL.intItemId
+	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein' THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
 	 , strItemNo				= INVOICEDETAIL.strItemNo
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strContractNo			= INVOICEDETAIL.strContractNo
@@ -137,6 +138,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
+	 , dblTotalTax				= INVOICEDETAIL.dblTotalTax
 	 , strComments				= CASE WHEN INV.strType = 'Tank Delivery'
 	 									THEN dbo.fnEliminateHTMLTags(ISNULL(INV.strComments, ''), 0)
 	   								  	ELSE dbo.fnEliminateHTMLTags(ISNULL(INV.strFooterComments, ''), 0)
@@ -177,6 +179,7 @@ LEFT JOIN (
 		 , dblTotal				= ID.dblTotal
 		 , dblPriceWithTax		= ID.dblPrice + ISNULL(CASE WHEN ID.dblTotalTax <> 0 AND ID.dblQtyShipped <> 0 THEN ID.dblTotalTax/ID.dblQtyShipped ELSE 0 END, 0)
 		 , dblTotalPriceWithTax = ID.dblTotal + ID.dblTotalTax
+		 , dblTotalTax			= ID.dblTotalTax
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intItemId
@@ -396,7 +399,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 			, blbSignature			= STAGING.blbSignature
 			, strComments			= STAGING.strComments
 			, intInvoiceId			= STAGING.intInvoiceId
-			, intInvoiceDetailId	= 99999999--NULL
+			, intInvoiceDetailId	= 9999999 + TAXES.intTaxCodeId
 			, strUnitMeasure		= NULL
 			, strItemNo				= 'State Sales Tax' 
 			, strItemDescription	= TAXES.strTaxCode
@@ -422,6 +425,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 				 , strTaxDescription	= TCODE.strDescription
 				 , dblRate				= SUM(IDT.dblRate)
 				 , dblAdjustedTax		= SUM(IDT.dblAdjustedTax)
+				 , intTaxCodeId			= TCODE.intTaxCodeId
 			FROM tblARInvoiceDetail ID 
 			INNER JOIN tblARInvoiceDetailTax IDT ON ID.intInvoiceDetailId = IDT.intInvoiceDetailId
 			INNER JOIN tblSMTaxCode TCODE ON IDT.intTaxCodeId = TCODE.intTaxCodeId
@@ -433,6 +437,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 			GROUP BY ID.intInvoiceId				   
 				   , TCODE.strTaxCode
 				   , TCODE.strDescription
+				   , TCODE.intTaxCodeId
 		) TAXES ON STAGING.intInvoiceId = TAXES.intInvoiceId
 
 		UPDATE STAGING		
@@ -442,7 +447,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , intBillToLocationId		= ORIG.intBillToLocationId
 		  , intShipToLocationId		= ORIG.intShipToLocationId
 		  , intTermId				= ORIG.intTermId
-		  , intItemId				= ORIG.intItemId
+		  , intItemId				= NULL
 		  , intShipViaId			= ORIG.intShipViaId
 		  , intTicketId				= ORIG.intTicketId
 		  , strCompanyName			= ORIG.strCompanyName
@@ -470,6 +475,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , dtmDate					= ORIG.dtmDate
 		  , dtmDueDate				= ORIG.dtmDueDate
 		  , blbLogo					= ORIG.blbLogo
+		  , strUnitMeasure			= ORIG.strUnitMeasure
 		FROM tblARInvoiceReportStagingTable STAGING
 		INNER JOIN (
 			SELECT *
@@ -478,7 +484,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  	  AND strRequestId = @strRequestId
 		      AND strInvoiceFormat = 'Format 5 - Honstein'
 			  AND blbLogo IS NOT NULL
-		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.intInvoiceDetailId = 99999999)
+		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.strItemNo = 'State Sales Tax')
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
 		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
