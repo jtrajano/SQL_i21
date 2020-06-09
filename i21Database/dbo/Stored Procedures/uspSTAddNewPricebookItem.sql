@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]			
+﻿
+CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]			
 	@strDescription						NVARCHAR(250)
 	, @intCategoryId					INT	
 	, @strItemNo						NVARCHAR(100)
@@ -397,7 +398,7 @@ BEGIN
 									END
 								ELSE
 									BEGIN
-										SET @strResultMessage = 'Short UPC of ' + dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry) + ' already exists.'  
+										SET @strResultMessage = 'Invalid UPC Code ' + dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry)   
 
 										GOTO ExitWithRollback
 									END
@@ -825,5 +826,3 @@ ExitWithRollback:
 
 		
 ExitPost:
-		
-
