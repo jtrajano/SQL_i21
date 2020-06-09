@@ -1,15 +1,15 @@
 ﻿CREATE TABLE [dbo].[tblCMImportLog](
 	[intImportLogId] [int] IDENTITY(1,1) NOT NULL,
-	[strEvent] [nvarchar](200) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
-	[strMessage] [nvarchar](200) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
-	[strVersion] [nvarchar](50) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
+	[strEvent] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strMessage] [nvarchar](200) COLLATE Latin1_General_CI_AS NULL,
+	[strVersion] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intEntityId] [int] NULL,
 	[dtmDate] [datetime] NULL,
 	[intSuccessCount] [int] NULL,
 	[intErrorCount] [int] NULL,
-	[strFilePath] [nvarchar](300) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
+	[strFilePath] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NOT NULL,
-	[strImportLogId] [nvarchar](20) COLLATE SQL_Latin1_General_CP1_CS_AS NULL,
+	[strImportLogId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblCMImportLog] PRIMARY KEY CLUSTERED 
 (
 	[intImportLogId] ASC

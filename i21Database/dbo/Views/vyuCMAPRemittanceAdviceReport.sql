@@ -8,17 +8,17 @@ SELECT CHK.dtmDate
 		, strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress
 		, COMPANY.strCity
 		, COMPANY.strState
-		, COMPANY.strZip)
+		, COMPANY.strZip) COLLATE Latin1_General_CI_AS
 		, strBank = UPPER (Bank.strBankName)
-		, strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress, Bank.strCity, Bank.strState, Bank.strZipCode)
+		, strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress, Bank.strCity, Bank.strState, Bank.strZipCode) COLLATE Latin1_General_CI_AS
 		, strVendorId = ISNULL (VENDOR.strVendorId, '--')
 		, strVendorName = ISNULL (ENTITY.strName, CHK.strPayee)
-		, strVendorAccount = ISNULL (F.strAccountNumber, '')
+		, strVendorAccount = ISNULL (F.strAccountNumber, '') COLLATE Latin1_General_CI_AS
 		, strVendorAddress = 
 			CASE WHEN ISNULL (dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState,LOCATION.strZipCode), '') <> '' 
 			THEN dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState,LOCATION.strZipCode) 
 			ELSE dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
-	       END
+	       END COLLATE Latin1_General_CI_AS
 		, CHK.intBankTransactionTypeId --DETAIL PART
 		, strBillId = BILL.strBillId
 		, strInvoice = BILL.strVendorOrderNumber
