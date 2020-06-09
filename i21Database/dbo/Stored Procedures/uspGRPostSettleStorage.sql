@@ -2241,30 +2241,14 @@ BEGIN TRY
 					,[intContractHeaderId]			= case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= a.[intContractDetailId] -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] = 
-														--CASE 
-														--    WHEN ST.ysnDPOwnedType = 0 THEN NULL
-														--    ELSE
-														--        CASE
-														--            WHEN a.intItemType = 1 THEN
-														--                (
-														--                    SELECT intInventoryReceiptItemId 
-														--                    FROM tblICInventoryReceiptItem RI
-														--                    INNER JOIN tblGRStorageHistory SH
-														--                        ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
-														--                    WHERE RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId)
-														--                        AND SH.intCustomerStorageId = CS.intCustomerStorageId
-														--                )
-														--            ELSE NULL
-														--        END
-														--END
-																CASE 
-																		WHEN ST.ysnDPOwnedType = 0 THEN NULL
-																		ELSE 
-																				CASE 
-																						WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
-																						ELSE NULL
-																				END
-																END
+													CASE 
+															WHEN ST.ysnDPOwnedType = 0 THEN NULL
+															ELSE 
+																	CASE 
+																			WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
+																			ELSE NULL
+																	END
+													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
@@ -2327,7 +2311,7 @@ BEGIN TRY
 															END
 														end				
 															
-					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 and CS.intStorageTypeId != 2 then null 
+					,[dblOldCost]					=  case when @ysnFromPriceBasisContract = 0 then null 
 														else 
 															case 
 															when (a.intContractHeaderId is not null and a.intPricingTypeId = 1 and CH.intPricingTypeId <> 2) or
@@ -2335,20 +2319,14 @@ BEGIN TRY
 															WHEN a.[intContractHeaderId] IS NOT NULL AND @ysnFromPriceBasisContract = 1 
 															--and (@dblQtyFromCt = @dblSelectedUnits) 
 															THEN 															
-																(select top 1 dblCost from tblICInventoryTransaction IT
+																(select dblCost from tblICInventoryTransaction IT
 																	where IT.intTransactionId = @intSettleStorageId
 																		and IT.intTransactionTypeId = 44
 																		and IT.intItemId = a.intItemId
 																)
 																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
-																WHEN CS.intStorageTypeId = 2 THEN 
-																(select  top 1 dblCost from tblICInventoryTransaction IT
-																inner join tblGRStorageHistory STH
-																	on STH.intTransferStorageId = IT.intTransactionId
-																	where IT.intTransactionTypeId = 56
-																		and IT.intItemId = a.intItemId)
 															else null end
-														end								
+														end
 					,[dblCostUnitQty]				= ISNULL(a.dblCostUnitQty,1)
 					,[intCostUOMId]					= CASE
 														WHEN @origdblSpotUnits > 0 THEN @intCashPriceUOMId 
@@ -2415,7 +2393,8 @@ BEGIN TRY
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
-								and (RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)
+								and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null) or (
+												(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
