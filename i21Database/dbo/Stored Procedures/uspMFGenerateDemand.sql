@@ -528,12 +528,14 @@ BEGIN TRY
 			)
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
-			,- [Value]
+			,- SUM([Value])
 		FROM OPENXML(@idoc, 'root/FC', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
 				)
+		GROUP BY [intItemId]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0')
 
 		EXEC sp_xml_removedocument @idoc
 	END
@@ -807,7 +809,7 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT IsNULL(DD.intSubstituteItemId, DD.intItemId)
-				,- dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity)
+				,- SUM(dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity))
 				,8 AS intAttributeId --Forecasted Consumption
 				,DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItem I
@@ -817,6 +819,8 @@ BEGIN TRY
 			JOIN tblICItemUOM IU ON IU.intItemId = DD.intItemId
 				AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE DD.dtmDemandDate >= @dtmStartOfMonth
+			GROUP BY IsNULL(DD.intSubstituteItemId, DD.intItemId)
+				,DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth
 		END
 	END
 	ELSE
@@ -964,7 +968,7 @@ BEGIN TRY
 				,intMonthId
 				)
 			SELECT IsNULL(DD.intSubstituteItemId, DD.intItemId)
-				,- dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity)
+				,- SUM(dbo.fnMFConvertQuantityToTargetItemUOM(DD.intItemUOMId, IU.intItemUOMId, DD.dblQuantity))
 				,8 AS intAttributeId --Forecasted Consumption
 				,DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItem I
@@ -979,6 +983,7 @@ BEGIN TRY
 					FROM @tblMFRefreshtemStock EI
 					WHERE EI.intItemId = I.intItemId
 					)
+					group by IsNULL(DD.intSubstituteItemId, DD.intItemId),DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth 
 		END
 	END
 
@@ -1480,8 +1485,8 @@ BEGIN TRY
 		BEGIN
 			SELECT @intItemId = min(intItemId)
 			FROM @tblMFEndInventory
-			WHERE dblQty > 0
 
+			--WHERE dblQty > 0
 			WHILE @intItemId IS NOT NULL
 			BEGIN
 				SELECT @dblEndInventory = 0
@@ -1549,7 +1554,7 @@ BEGIN TRY
 					,intMonthId
 					)
 				SELECT @intItemId
-					,@dblEndInventory - @dblTotalConsumptionQty
+					,@dblEndInventory - IsNULL(@dblTotalConsumptionQty,0)
 					,12 --Short/Excess Inventory
 					,@intMonthId
 
@@ -1698,7 +1703,7 @@ BEGIN TRY
 				SELECT @intItemId = min(intItemId)
 				FROM @tblMFEndInventory
 				WHERE intItemId > @intItemId
-					AND dblQty > 0
+					--AND dblQty > 0
 			END
 		END
 
