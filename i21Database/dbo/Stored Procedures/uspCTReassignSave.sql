@@ -320,7 +320,7 @@ BEGIN TRY
 				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT, 1
+				EXEC uspRKAutoHedge @strXML,@intUserId,@intNewFutOptTransactionId OUTPUT, 1
 
 				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intNewFutOptTransactionId WHERE intPriceFixationDetailId = @intNewPriceFixationDetailId
 
@@ -341,7 +341,7 @@ BEGIN TRY
 				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-				EXEC uspRKAutoHedge @strXML,@intDeductedFutOptTransactionId OUTPUT, 1
+				EXEC uspRKAutoHedge @strXML,@intUserId,@intDeductedFutOptTransactionId OUTPUT, 1
 
 				/*End of CT-3724*/
 			END
@@ -463,7 +463,7 @@ BEGIN TRY
 			SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 			SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-			EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT, 1
+			EXEC uspRKAutoHedge @strXML,@intUserId,@intNewFutOptTransactionId OUTPUT, 1
 
 			SET @strXML = '<root><Transaction>';
 			SET @strXML = @strXML + '<intContractHeaderId>' + LTRIM(@intRecipientHeaderId) + '</intContractHeaderId>'
