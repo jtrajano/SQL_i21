@@ -196,7 +196,14 @@ INNER JOIN @tblCustomers C ON P.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON P.intLocationId = CL.intCompanyLocationId
 WHERE ysnPosted = 1
 	AND ysnProcessedToNSF = 0
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+	OR intPaymentId IN (SELECT D.intPaymentId
+		FROM tblARPaymentDetail D
+		INNER JOIN tblARInvoice I
+		ON D.strTransactionNumber = I.strInvoiceNumber
+		WHERE dtmDate =@dtmDateToLocal
+		AND dtmDate <> dtmPostDate)
+	)
 
 --WRITE OFF FILTER
 IF (@ysnIncludeWriteOffPaymentLocal = 1)
