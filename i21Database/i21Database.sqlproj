@@ -8133,6 +8133,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareContractBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
+    <Build Include="dbo\Tables\tblCTMiscellaneous.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
