@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblSTCompanyPreference] (
     [intCompanyPreferenceId]     INT            IDENTITY (1, 1) NOT NULL,
-    [strDailySecurityCode]       NVARCHAR (MAX) NULL,
+    [strDailySecurityCode]       NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
     [dtmDateEntered]             DATETIME       NULL,
     [ysnUnlockedLotteryModule]   BIT            NULL,
     [ysnEnableLotteryManagement] BIT            NULL,

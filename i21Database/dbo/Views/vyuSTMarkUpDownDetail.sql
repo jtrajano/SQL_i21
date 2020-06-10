@@ -21,7 +21,7 @@ SELECT
 						--WHEN (mark.strType = 'Department Level' AND markDetail.dblTotalRetailAmount < ISNULL(catPricing.dblTotalRetailValue, 0))
 						--	THEN 'Mark Down'
 						ELSE ''
-					END,
+					END COLLATE Latin1_General_CI_AS,
 	markDetail.strRetailShrinkRS,
 	markDetail.intQty, 
     markDetail.dblRetailPerUnit, 
