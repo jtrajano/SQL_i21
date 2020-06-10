@@ -11,6 +11,7 @@ SELECT   L.intLoadId
 		,LD.strLoadDirectionMsg
 		,LC.intLoadContainerId
 		,LC.strComments
+		,LC.strContainerId
 		,LC.strContainerNumber
 		,LC.strCustomsComments
 		,LC.strFDAComments

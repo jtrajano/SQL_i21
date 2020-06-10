@@ -58,6 +58,7 @@ SELECT DISTINCT
 
 	,LC.intLoadContainerId
 	,LC.strComments
+	,LC.strContainerId
 	,LC.strContainerNumber
 	,LC.dtmUnloading
 	,LC.strCustomsComments

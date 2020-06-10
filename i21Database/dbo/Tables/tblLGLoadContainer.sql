@@ -3,7 +3,7 @@
 [intLoadContainerId] INT NOT NULL IDENTITY (1, 1),
 [intConcurrencyId] INT NOT NULL, 
 [intLoadId] INT NOT NULL,
-
+[strContainerId] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [strContainerNumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 [dblQuantity] NUMERIC(18, 6) NULL,
 [intUnitMeasureId] INT NULL,
