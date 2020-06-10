@@ -22,7 +22,13 @@ UPDATE A
 						AND B.ysnPosted = 1
 						AND B.intBillId > 0
 						AND A.dblPayment <= B.dblAmountDue
-						THEN NULL
+						THEN 
+							(
+								CASE 
+								WHEN A.dblPayment < 0 AND B.intTransactionType = 1
+								THEN 'Invalid amount.'
+								ELSE NULL END
+							)
 					WHEN 
 						A.intCurrencyId != B.intCurrencyId
 					THEN 'Currency is different on current selected currency.'
@@ -44,7 +50,7 @@ UPDATE A
 FROM tblAPImportPaidVouchersForPayment A
 LEFT JOIN tblAPBill B
 ON 
-	B.strVendorOrderNumber = A.strVendorOrderNumber
+	B.strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber
 AND B.intEntityVendorId = A.intEntityVendorId
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
