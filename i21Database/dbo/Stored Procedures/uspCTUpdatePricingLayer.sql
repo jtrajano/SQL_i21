@@ -51,6 +51,7 @@ BEGIN
 
 		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
 
+		update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intInvoiceDetailId = @intInvoiceDetailId;
 		exec uspCTProcessInvoiceDelete
 			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
 			,@intPriceFixationDetailId = @intPriceFixationDetailId
