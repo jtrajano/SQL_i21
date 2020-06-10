@@ -8231,6 +8231,7 @@
     <Build Include="dbo\Tables\tblIPAcknowledgementError.sql" />
     <Build Include="dbo\Tables\tblIPAcknowledgementArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementSummaryReportForView.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
