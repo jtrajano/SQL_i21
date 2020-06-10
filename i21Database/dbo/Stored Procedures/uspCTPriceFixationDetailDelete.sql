@@ -3,7 +3,8 @@
 	@intPriceFixationId			INT = NULL,
 	@intPriceFixationDetailId	INT = NULL,
 	@intPriceFixationTicketId	INT = NULL,
-	@intUserId					INT
+	@intUserId					INT,
+	@ysnDeleteFromInvoice bit = 0
 	
 AS
 BEGIN TRY
@@ -215,6 +216,7 @@ BEGIN TRY
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	--AND		ISNULL(IV.ysnPosted,0) = 0
+	AND @ysnDeleteFromInvoice = 0
 
 	
 	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
