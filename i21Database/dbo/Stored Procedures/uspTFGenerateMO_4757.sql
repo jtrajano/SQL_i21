@@ -219,8 +219,8 @@ BEGIN TRY
 		, @dblReceiptLine5_H NUMERIC(18, 6) = 0.00
 		, @dblReceiptLine5_I NUMERIC(18, 6) = 0.00
 		, @dblReceiptLine5a_B NUMERIC(18, 6) = 0.00
-		, @dblReceiptLine5a_F NUMERIC(18, 6) = 0.00
-		, @dblReceiptLine5a_I NUMERIC(18, 6) = 0.00
+		-- , @dblReceiptLine5a_F NUMERIC(18, 6) = 0.00
+		-- , @dblReceiptLine5a_I NUMERIC(18, 6) = 0.00
 		, @dblReceiptLine6_A NUMERIC(18, 6) = 0.00
 		, @dblReceiptLine6_E NUMERIC(18, 6) = 0.00
 		, @dblReceiptLine6_F NUMERIC(18, 6) = 0.00
@@ -243,15 +243,15 @@ BEGIN TRY
 		, @dblReceiptLine9_I NUMERIC(18, 6) = 0.00
 
 		-- DISBURSEMENT LINE
-		, @dblDisbLine10_A NUMERIC(18, 6) = 0.00
-		, @dblDisbLine10_B NUMERIC(18, 6) = 0.00	
-		, @dblDisbLine10_C NUMERIC(18, 6) = 0.00	
-		, @dblDisbLine10_D NUMERIC(18, 6) = 0.00	
-		, @dblDisbLine10_E NUMERIC(18, 6) = 0.00	
-		, @dblDisbLine10_F NUMERIC(18, 6) = 0.00
-		, @dblDisbLine10_G NUMERIC(18, 6) = 0.00
-		, @dblDisbLine10_H NUMERIC(18, 6) = 0.00
-		, @dblDisbLine10_I NUMERIC(18, 6) = 0.00		
+		-- , @dblDisbLine10_A NUMERIC(18, 6) = 0.00
+		-- , @dblDisbLine10_B NUMERIC(18, 6) = 0.00	
+		-- , @dblDisbLine10_C NUMERIC(18, 6) = 0.00	
+		-- , @dblDisbLine10_D NUMERIC(18, 6) = 0.00	
+		-- , @dblDisbLine10_E NUMERIC(18, 6) = 0.00	
+		-- , @dblDisbLine10_F NUMERIC(18, 6) = 0.00
+		-- , @dblDisbLine10_G NUMERIC(18, 6) = 0.00
+		-- , @dblDisbLine10_H NUMERIC(18, 6) = 0.00
+		-- , @dblDisbLine10_I NUMERIC(18, 6) = 0.00		
 		, @dblDisbLine11_I NUMERIC(18, 6) = 0.00
 		, @dblDisbLine12_B NUMERIC(18, 6) = 0.00
 		, @dblDisbLine12_F NUMERIC(18, 6) = 0.00
@@ -376,9 +376,6 @@ BEGIN TRY
 		SELECT @dblReceiptLine5_G = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Jet Fuel'
 		SELECT @dblReceiptLine5_H = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'LNG'
 		SELECT @dblReceiptLine5_I = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2A' and strType = 'Dyed Diesel/Dyed Kerosene'
-
-
-		-- Line 5a
 	
 		-- Line 6
 		SELECT @dblReceiptLine6_A = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '2B' and strType = 'Gasoline'	
@@ -397,10 +394,10 @@ BEGIN TRY
 		SET @dblReceiptLine9_C = @dblReceiptLine1_C + @dblReceiptLine2_C + @dblReceiptLine3_C + @dblReceiptLine4_C + @dblReceiptLine5_C 
 		SET @dblReceiptLine9_D = @dblReceiptLine5_D
 		SET @dblReceiptLine9_E = @dblReceiptLine1_E + @dblReceiptLine2_E + @dblReceiptLine3_E + @dblReceiptLine4_E + @dblReceiptLine5_E + @dblReceiptLine6_E 
-		SET @dblReceiptLine9_F = @dblReceiptLine1_F + @dblReceiptLine2_F + @dblReceiptLine3_F + @dblReceiptLine4_F + @dblReceiptLine5_F + @dblReceiptLine5a_F + @dblReceiptLine6_F + @dblReceiptLine7_F + + @dblReceiptLine8_F 
+		SET @dblReceiptLine9_F = @dblReceiptLine1_F + @dblReceiptLine2_F + @dblReceiptLine3_F + @dblReceiptLine4_F + @dblReceiptLine5_F + @dblReceiptLine6_F + @dblReceiptLine7_F + + @dblReceiptLine8_F 
 		SET @dblReceiptLine9_G = @dblReceiptLine1_G + @dblReceiptLine2_G + @dblReceiptLine3_G + @dblReceiptLine4_G + @dblReceiptLine5_G
 		SET @dblReceiptLine9_H = @dblReceiptLine1_H + @dblReceiptLine2_H + @dblReceiptLine3_H + @dblReceiptLine4_H + @dblReceiptLine5_H
-		SET @dblReceiptLine9_I = @dblReceiptLine1_I + @dblReceiptLine2_I + @dblReceiptLine3_I + @dblReceiptLine4_I + @dblReceiptLine5_I + @dblReceiptLine5a_I + @dblReceiptLine6_I
+		SET @dblReceiptLine9_I = @dblReceiptLine1_I + @dblReceiptLine2_I + @dblReceiptLine3_I + @dblReceiptLine4_I + @dblReceiptLine5_I + @dblReceiptLine6_I
 
 
 		-- DISBURSEMENT
@@ -437,14 +434,14 @@ BEGIN TRY
 		SELECT @dblDisbLine14_F = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '10J' and strType = 'Clear Diesel/Clear Kerosene'
 
 		-- Line 10
-		SET @dblDisbLine10_A = @dblDisbLine13_A + @dblDisbLine14_A
-		SET @dblDisbLine10_B = @dblDisbLine12_B + @dblDisbLine13_B + @dblDisbLine14_B
-		SET @dblDisbLine10_C = @dblDisbLine13_C + @dblDisbLine14_C
-		SET @dblDisbLine10_E = @dblDisbLine13_E + @dblDisbLine14_E
-		SET @dblDisbLine10_F = @dblDisbLine12_F + @dblDisbLine13_F + @dblDisbLine14_F
-		SET @dblDisbLine10_G = @dblDisbLine13_G + @dblDisbLine14_G
-		SET @dblDisbLine10_H = @dblDisbLine13_H + @dblDisbLine14_H
-		SET @dblDisbLine10_I = @dblDisbLine11_I + @dblDisbLine12_I + @dblDisbLine13_I + @dblDisbLine14_I
+		-- SET @dblDisbLine10_A = @dblDisbLine13_A + @dblDisbLine14_A
+		-- SET @dblDisbLine10_B = @dblDisbLine12_B + @dblDisbLine13_B + @dblDisbLine14_B
+		-- SET @dblDisbLine10_C = @dblDisbLine13_C + @dblDisbLine14_C
+		-- SET @dblDisbLine10_E = @dblDisbLine13_E + @dblDisbLine14_E
+		-- SET @dblDisbLine10_F = @dblDisbLine12_F + @dblDisbLine13_F + @dblDisbLine14_F
+		-- SET @dblDisbLine10_G = @dblDisbLine13_G + @dblDisbLine14_G
+		-- SET @dblDisbLine10_H = @dblDisbLine13_H + @dblDisbLine14_H
+		-- SET @dblDisbLine10_I = @dblDisbLine11_I + @dblDisbLine12_I + @dblDisbLine13_I + @dblDisbLine14_I
 
 		-- Line 17
 		SELECT @dblDisbLine17_B = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = '4757' AND strScheduleCode = '5W' and strType = '100% Ethyl Alcohol'
@@ -799,8 +796,8 @@ BEGIN TRY
 		, dblReceiptLine5_H = @dblReceiptLine5_H 
 		, dblReceiptLine5_I = @dblReceiptLine5_I 
 		, dblReceiptLine5a_B = @dblReceiptLine5a_B 
-		, dblReceiptLine5a_F = @dblReceiptLine5a_F 
-		, dblReceiptLine5a_I = @dblReceiptLine5a_I 
+		--, dblReceiptLine5a_F = @dblReceiptLine5a_F 
+		--, dblReceiptLine5a_I = @dblReceiptLine5a_I 
 		, dblReceiptLine6_A = @dblReceiptLine6_A 
 		, dblReceiptLine6_E = @dblReceiptLine6_E 
 		, dblReceiptLine6_F = @dblReceiptLine6_F 
@@ -822,15 +819,15 @@ BEGIN TRY
 		, dblReceiptLine9_H = @dblReceiptLine9_H 
 		, dblReceiptLine9_I = @dblReceiptLine9_I 
 		-- DISBURSEMENT
-		, dblDisbLine10_A = @dblDisbLine10_A 
-		, dblDisbLine10_B = @dblDisbLine10_B 
-		, dblDisbLine10_C = @dblDisbLine10_C 
-		, dblDisbLine10_D = @dblDisbLine10_D 
-		, dblDisbLine10_E = @dblDisbLine10_E 
-		, dblDisbLine10_F = @dblDisbLine10_F 
-		, dblDisbLine10_G = @dblDisbLine10_G 
-		, dblDisbLine10_H = @dblDisbLine10_H 
-		, dblDisbLine10_I = @dblDisbLine10_I 
+		-- , dblDisbLine10_A = @dblDisbLine10_A 
+		-- , dblDisbLine10_B = @dblDisbLine10_B 
+		-- , dblDisbLine10_C = @dblDisbLine10_C 
+		-- , dblDisbLine10_D = @dblDisbLine10_D 
+		-- , dblDisbLine10_E = @dblDisbLine10_E 
+		-- , dblDisbLine10_F = @dblDisbLine10_F 
+		-- , dblDisbLine10_G = @dblDisbLine10_G 
+		-- , dblDisbLine10_H = @dblDisbLine10_H 
+		-- , dblDisbLine10_I = @dblDisbLine10_I 
 		, dblDisbLine11_I = @dblDisbLine11_I 
 		, dblDisbLine12_B = @dblDisbLine12_B 
 		, dblDisbLine12_F = @dblDisbLine12_F 
