@@ -1156,7 +1156,10 @@ BEGIN
 	IF(ISNUMERIC(@strVehicleId) = 1)
 	BEGIN
 		SET @strVehicleId = CAST(@strVehicleId AS BIGINT)
-		IF(@strVehicleId = 0)
+		DECLARE @bgIntVehicleId BIGINT
+		SET @bgIntVehicleId = CAST(@strVehicleId AS BIGINT)
+
+		IF(@bgIntVehicleId = 0)
 		BEGIN
 			SET @ysnIgnoreVehicleError = 1
 		END
