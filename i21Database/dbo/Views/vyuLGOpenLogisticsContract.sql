@@ -1,44 +1,44 @@
-﻿CREATE VIEW vyuLGOpenLogisticsContract  ("TERM", "ALLOC_STATUS", "PO_NUMBER", "PODATE", "SELLER_NAME", "ITEM_SHORTNAME", "DESCRIPTION", "ORIGIN", "CONTRACT_TERM",
- "START_DATE", "END_DATE", "QTY", "PO_UNIT", "PO_QTY_IN_MT", "CONTRACT_TYPE", "CURRENCY", "PRICE", "UNIT", "PRICE_IN_KG", "PO_VALUE", "INT_TRACK_NO", "SHIP_QTY_MT", "ALLOC_QTY_MT", "INV_QTY", "INVOICE_STATUS") AS 
-SELECT CASE WHEN CAST(DATEDIFF(day,GETDATE(),CD.dtmEndDate) AS FLOAT)/365> 1 THEN 'LongTerm' ELSE 'ShortTerm' END TERM
-,CASE WHEN ISNULL (PAlloc.QTY_ALLOC, 0)=  0 THEN 'UNSOLD' ELSE 'SOLD' END ALLOC_STATUS
-,CH.strContractNumber
-  +'-'
-  +cast(CD.intContractSeq as nvarchar(10)) PO_NUMBER
-,CONVERT(VARCHAR(10),CH.dtmContractDate,105) PODATE
-,EV.strName SELLER_NAME
-,Item.strItemNo ITEM_SHORTNAME
-,Item.strDescription DESCRIPTION
-,ItemOrigin.strDescription ORIGIN
-,CB.strContractBasis CONTRACT_TERM
-,CD.dtmStartDate START_DATE
-,CD.dtmEndDate END_DATE
-,CD.dblQuantity QTY
-,UnitMeasure.strUnitMeasure PO_UNIT
-,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) PO_QTY_IN_MT
-,CASE WHEN CT.strPricingType ='Priced' THEN 'OT' WHEN CT.strPricingType ='Basis' THEN 'FX' ELSE 'UF' END CONTRACT_TYPE
-,CASE WHEN CT.strPricingType ='Basis' THEN CRB.strCurrency ELSE CR.strCurrency END CURRENCY
-,dbo.fnCTGetSequencePrice(CD.intContractDetailId,null) PRICE
-,CASE WHEN CT.strPricingType ='Basis' THEN ISNULL(UnitMeasureBasis.strUnitMeasure,UnitMeasurePrice.strUnitMeasure) ELSE UnitMeasurePrice.strUnitMeasure END UNIT
-,CASE 
-	WHEN CT.strPricingType ='Basis' 
-	THEN (dbo.fnCTGetSequencePrice(CD.intContractDetailId,null))*dbo.fnCTCalculateAmountBetweenCurrency(ISNULL(CD.intBasisCurrencyId,CD.intCurrencyId),CRUSD.intCurrencyID,1,0)/(ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,ISNULL(BasisItemUOM.intUnitMeasureId,PriceItemUOM.intUnitMeasureId),MTUnit.intUnitMeasureId,1)*1000,1))
-	ELSE CD.dblCashPrice*dbo.fnCTCalculateAmountBetweenCurrency(CD.intCurrencyId,CRUSD.intCurrencyID,1,0)/(ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,PriceItemUOM.intUnitMeasureId,MTUnit.intUnitMeasureId,1)*1000,1))
- END PRICE_IN_KG
-,CAST(CASE 
-	WHEN CT.strPricingType ='Basis'
-	THEN CD.dblQuantity*dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intBasisUOMId,CD.intPriceItemUOMId),1)*dbo.fnCTGetSequencePrice(CD.intContractDetailId,null)*dbo.fnCTCalculateAmountBetweenCurrency(ISNULL(CD.intBasisCurrencyId,CD.intCurrencyId),CompanyDfltCR.intDefaultCurrencyId,1,0)
-	ELSE
-	((CD.dblQuantity*CD.dblCashPrice)*dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,1))*dbo.fnCTCalculateAmountBetweenCurrency(CD.intCurrencyId,CompanyDfltCR.intDefaultCurrencyId,1,0)
- END AS nvarchar)+'*'+(SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID=CompanyDfltCR.intDefaultCurrencyId) PO_VALUE
-,LGLoad.strLoadNumber INT_TRACK_NO
-,LGLoad.LDQty SHIP_QTY_MT
-,dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,PAlloc.QTY_ALLOC) ALLOC_QTY_MT
-,ARInv.INV_QTY
-,CASE WHEN ISNULL(ARInv.INV_QTY,0) = 0 THEN 'NOT INVOICED' 
-	  WHEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) - ISNULL(ARInv.INV_QTY,0)<=0 THEN 'FULLY INVOICED'
-	  ELSE 'PARTIALLY INVOICED' 
- END INVOICE_STATUS
+﻿CREATE VIEW vyuLGOpenLogisticsContract  
+AS 
+SELECT 
+	[TERM] = CASE WHEN CAST(DATEDIFF(DAY,GETDATE(),CD.dtmEndDate) AS FLOAT)/365> 1 THEN 'LongTerm' ELSE 'ShortTerm' END COLLATE Latin1_General_CI_AS
+	,[ALLOC_STATUS] = CASE WHEN ISNULL (PAlloc.QTY_ALLOC, 0)=  0 THEN 'UNSOLD' ELSE 'SOLD' END COLLATE Latin1_General_CI_AS
+	,[PO_NUMBER] = CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+	,[PODATE] = CONVERT(VARCHAR(10),CH.dtmContractDate,105) COLLATE Latin1_General_CI_AS
+	,[SELLER_NAME] = EV.strName 
+	,[ITEM_SHORTNAME] = Item.strItemNo 
+	,[DESCRIPTION] = Item.strDescription 
+	,[ORIGIN] = ItemOrigin.strDescription 
+	,[CONTRACT_TERM] = CB.strContractBasis 
+	,[START_DATE] = CD.dtmStartDate 
+	,[END_DATE] = CD.dtmEndDate 
+	,[QTY] = CD.dblQuantity
+	,[PO_UNIT] = UnitMeasure.strUnitMeasure
+	,[PO_QTY_IN_MT] = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) 
+	,[CONTRACT_TYPE] = CASE WHEN CT.strPricingType ='Priced' THEN 'OT' WHEN CT.strPricingType ='Basis' THEN 'FX' ELSE 'UF' END COLLATE Latin1_General_CI_AS
+	,[CURRENCY] = CASE WHEN CT.strPricingType ='Basis' THEN CRB.strCurrency ELSE CR.strCurrency END 
+	,[PRICE] = dbo.fnCTGetSequencePrice(CD.intContractDetailId,null) 
+	,[UNIT] = CASE WHEN CT.strPricingType ='Basis' THEN ISNULL(UnitMeasureBasis.strUnitMeasure,UnitMeasurePrice.strUnitMeasure) ELSE UnitMeasurePrice.strUnitMeasure END 
+	,[PRICE_IN_KG] = CASE WHEN CT.strPricingType ='Basis' 
+		THEN (dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)) 
+			* dbo.fnCTCalculateAmountBetweenCurrency(ISNULL(CD.intBasisCurrencyId,CD.intCurrencyId),CRUSD.intCurrencyID,1,0) 
+				/ (ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,ISNULL(BasisItemUOM.intUnitMeasureId,PriceItemUOM.intUnitMeasureId),MTUnit.intUnitMeasureId,1)*1000,1))
+		ELSE CD.dblCashPrice*dbo.fnCTCalculateAmountBetweenCurrency(CD.intCurrencyId,CRUSD.intCurrencyID,1,0) 
+			/ (ISNULL(dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,PriceItemUOM.intUnitMeasureId,MTUnit.intUnitMeasureId,1)*1000,1))
+		END 
+	,[PO_VALUE] = CAST(CASE WHEN CT.strPricingType ='Basis'
+		THEN CD.dblQuantity * dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,ISNULL(CD.intBasisUOMId,CD.intPriceItemUOMId),1)
+			* dbo.fnCTGetSequencePrice(CD.intContractDetailId,null) * dbo.fnCTCalculateAmountBetweenCurrency(ISNULL(CD.intBasisCurrencyId,CD.intCurrencyId),CompanyDfltCR.intDefaultCurrencyId,1,0)
+		ELSE ((CD.dblQuantity*CD.dblCashPrice) * dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,1)) 
+			* dbo.fnCTCalculateAmountBetweenCurrency(CD.intCurrencyId,CompanyDfltCR.intDefaultCurrencyId,1,0)
+		END AS NVARCHAR) + '*' + (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID=CompanyDfltCR.intDefaultCurrencyId) 
+	,[INT_TRACK_NO] = LGLoad.strLoadNumber 
+	,[SHIP_QTY_MT] = LGLoad.LDQty 
+	,[ALLOC_QTY_MT] = dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,PAlloc.QTY_ALLOC) 
+	,[INV_QTY] = ARInv.INV_QTY
+	,[INVOICE_STATUS] = CASE WHEN ISNULL(ARInv.INV_QTY,0) = 0 THEN 'NOT INVOICED' 
+		  WHEN dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) - ISNULL(ARInv.INV_QTY,0)<=0 THEN 'FULLY INVOICED'
+		  ELSE 'PARTIALLY INVOICED' END COLLATE Latin1_General_CI_AS
 FROM tblCTContractDetail CD JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId AND CH.intContractTypeId=1
 JOIN tblEMEntity EV ON CH.intEntityId = EV.intEntityId
 JOIN tblICItem Item ON CD.intItemId = Item.intItemId
@@ -69,8 +69,7 @@ LEFT JOIN tblICUnitMeasure UnitMeasureBasis ON ItemUOMBasis.intUnitMeasureId = U
 LEFT JOIN (SELECT intPContractDetailId,SUM (dblPAllocatedQty) QTY_ALLOC FROM tblLGAllocationDetail GROUP BY intPContractDetailId) PAlloc ON CD.intContractDetailId = PAlloc.intPContractDetailId
 LEFT JOIN (SELECT RP.intFutureMarketId,RPM.intFutureMonthId,RPM.dblLastSettle
            FROM tblRKFutSettlementPriceMarketMap RPM JOIN tblRKFuturesSettlementPrice RP ON RPM.intFutureSettlementPriceId = RP.intFutureSettlementPriceId
-		   JOIN
-		  (SELECT RP.intFutureMarketId,RPM.intFutureMonthId,MAX (RP.dtmPriceDate) dtmPriceDate
+		   JOIN (SELECT RP.intFutureMarketId,RPM.intFutureMonthId,MAX (RP.dtmPriceDate) dtmPriceDate
 		  FROM tblRKFutSettlementPriceMarketMap RPM JOIN tblRKFuturesSettlementPrice RP ON RPM.intFutureSettlementPriceId = RP.intFutureSettlementPriceId
 		  WHERE ISNULL (dblLastSettle, 0) <> 0
 		  GROUP BY RP.intFutureMarketId,RPM.intFutureMonthId)RK ON RP.intFutureMarketId=RK.intFutureMarketId 
@@ -107,4 +106,4 @@ LEFT JOIN (SELECT CD.intContractDetailId
 		   JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId AND CH.intContractTypeId=1
 		   JOIN tblICItemUOM ItemUOM ON CD.intBasisUOMId = ItemUOM.intItemUOMId)PF ON CD.intContractDetailId = PF.intContractDetailId
 WHERE dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) - ISNULL(ARInv.INV_QTY,0) >0
-AND dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) - ISNULL(LGLoad.LDQty,0) >0
+	AND dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,MTUOM.intItemUOMId,CD.dblQuantity) - ISNULL(LGLoad.LDQty,0) >0
