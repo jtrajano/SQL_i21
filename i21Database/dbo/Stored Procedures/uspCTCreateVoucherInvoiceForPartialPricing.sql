@@ -628,8 +628,17 @@ BEGIN TRY
 									WHERE 
 										intBillId = @intNewBillId
 
-									update l set l.dtmTransactionDate = cast((convert(VARCHAR(10), @dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime) from tblCTContractBalanceLog l where l.intTransactionReferenceDetailId = @intNewBillId and l.strTransactionType = 'Purchase Basis Deliveries' and l.strAction = 'Created Voucher' and l.strTransactionReference = 'Voucher';
-									update l set l.dtmTransactionDate = cast((convert(VARCHAR(10), @dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime) from tblRKSummaryLog l where l.intTransactionRecordId = @intNewBillId and l.strBucketType = 'Accounts Payables' and l.strAction = 'Created Voucher' and l.strTransactionType = 'Voucher';
+									SELECT TOP 1 
+										@intBillDetailId = intBillDetailId
+									FROM 
+										tblAPBillDetail 
+									WHERE 
+										intBillId = @intNewBillId 
+										AND intInventoryReceiptChargeId IS NULL
+									ORDER BY intBillDetailId DESC 
+
+									update l set l.dtmTransactionDate = cast((convert(VARCHAR(10), @dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime) from tblCTContractBalanceLog l where l.intTransactionReferenceDetailId = @intBillDetailId and l.strTransactionType = 'Purchase Basis Deliveries' and l.strAction = 'Created Voucher' and l.strTransactionReference = 'Voucher';
+									update l set l.dtmTransactionDate = cast((convert(VARCHAR(10), @dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime) from tblRKSummaryLog l where l.intTransactionRecordId = @intBillDetailId and l.strBucketType = 'Accounts Payables' and l.strAction = 'Created Voucher' and l.strTransactionType = 'Voucher';
 								END
 							
 								DECLARE @total DECIMAL(18,6)
