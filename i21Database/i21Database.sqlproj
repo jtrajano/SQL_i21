@@ -7747,6 +7747,7 @@
     <Build Include="dbo\Tables\tblSCImportEntityLog.sql" />
     <Build Include="dbo\Tables\tblSCEntityGeneratedLog.sql" />
     <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRSettlementSummaryReportForView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
