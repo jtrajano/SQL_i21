@@ -4174,9 +4174,9 @@ BEGIN TRY
 				,intShipViaId = @intShipViaId
 				,intNegativeInventory = IA.intNegativeInventory
 				,dblReorderPoint = IA.dblReorderPoint
-				,dblMinOrder = IA.dblMinOrder
+				--,dblMinOrder = IA.dblMinOrder
 				,dblSuggestedQty = IA.dblSuggestedQty
-				,dblLeadTime = IA.dblLeadTime
+				--,dblLeadTime = IA.dblLeadTime
 				,strCounted = IA.strCounted
 				,intCountGroupId = @intCountGroupId
 				,ysnCountedDaily = IA.ysnCountedDaily
