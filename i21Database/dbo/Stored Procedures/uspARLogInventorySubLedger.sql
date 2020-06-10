@@ -41,7 +41,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	DECLARE @transactionIds SubLedgerTransactionsUdt;
+	DECLARE @TransactionIds SubLedgerTransactionsUdt;
 	INSERT INTO @TransactionIds
 	(
 		strSourceTransactionType,
