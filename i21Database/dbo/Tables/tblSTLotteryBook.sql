@@ -9,7 +9,7 @@
     [dtmSoldDate]            DATETIME         NULL,
     [dblQuantityRemaining]   NUMERIC (18, 6) NULL,
     [dtmActivateDate]        DATETIME         NULL,
-    [strStatus]              NVARCHAR (MAX)   NULL,
+    [strStatus]              NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [dblTicketValue]         NUMERIC (18, 6) NULL,
     [dblTicketCost]          NUMERIC (18, 6) NULL,
     [dblTotalInventoryValue] NUMERIC (18, 6) NULL,

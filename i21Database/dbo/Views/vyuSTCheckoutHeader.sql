@@ -173,7 +173,7 @@ SELECT
 												THEN 'Gross'
 											WHEN st.strReportDepartmentAtGrossOrNet = 'N'
 												THEN 'Net'
-										END
+										END  COLLATE Latin1_General_CI_AS
 	  ,strAllowRegisterMarkUpDown = CASE	
 										WHEN st.strAllowRegisterMarkUpDown = 'I'
 											THEN 'Item Price Differences'
@@ -181,7 +181,7 @@ SELECT
 											THEN 'Department Discounts'
 										WHEN st.strReportDepartmentAtGrossOrNet = 'N'
 											THEN 'None'
-									END
+									END  COLLATE Latin1_General_CI_AS
 	  ,intCompanyLocationId = st.intCompanyLocationId
 	  ,strLocationName = cl.strLocationName
 	  ,strSubLocationName = cls.strSubLocationName

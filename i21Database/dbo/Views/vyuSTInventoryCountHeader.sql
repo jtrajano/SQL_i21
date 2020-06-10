@@ -2,8 +2,8 @@
 AS
 SELECT 
 	   InvCount.intInventoryCountId
-	   , InvCount.strCountNo
-	   , CONVERT(NVARCHAR(10), InvCount.dtmCountDate, 111) AS strCountDate
+	   , InvCount.strCountNo COLLATE Latin1_General_CI_AS AS strCountNo
+	   , CONVERT(NVARCHAR(10), InvCount.dtmCountDate, 111) COLLATE Latin1_General_CI_AS AS strCountDate
 	   , InvCount.intLocationId
 	   , InvCount.ysnPosted
 	   , CASE 
@@ -15,7 +15,7 @@ SELECT
 				THEN 'Inventory Locked'
 			WHEN InvCount.intStatus = 4
 				THEN 'Closed' 
-		END AS strCountStatus
+		END COLLATE Latin1_General_CI_AS AS strCountStatus
 		, CL.strLocationName
 		, Store.intStoreId
 		, Store.intStoreNo

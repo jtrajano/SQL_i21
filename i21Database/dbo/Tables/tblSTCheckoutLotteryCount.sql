@@ -5,7 +5,7 @@
     [intEndingCount]            INT             NULL,
     [intTotalPack]              INT             NULL,
     [intConcurrencyId]          INT             CONSTRAINT [DF_tblSTCheckoutLotteryCount_intConcurrencyId] DEFAULT ((1)) NULL,
-    [strSoldOut]                NVARCHAR (50)   NULL,
+    [strSoldOut]                NVARCHAR (50)	COLLATE Latin1_General_CI_AS   NULL,
     [intBeginCount]             INT             NULL,
     [dblTicketValue]            NUMERIC (18, 6) NULL,
     [dblQuantitySold]           NUMERIC (18, 6) NULL,
