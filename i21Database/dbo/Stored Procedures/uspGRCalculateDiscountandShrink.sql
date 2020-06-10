@@ -89,6 +89,7 @@ BEGIN TRY
 		,intDiscountUOMId				= @intDiscountUOMId 
 	END
 	ELSE IF NOT EXISTS(SELECT 1 FROM tblGRDiscountScheduleLine WHERE intDiscountScheduleCodeId = @intDiscountScheduleCodeId)
+	OR (@dblReading = 0 and @ysnZeroIsValid = 1)
 	BEGIN
 		  SELECT
 		  intExtendedKey				 = 1 
