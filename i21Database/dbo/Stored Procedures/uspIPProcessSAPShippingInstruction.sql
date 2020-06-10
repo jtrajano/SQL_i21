@@ -621,16 +621,16 @@ BEGIN TRY
 					IF (@strOldDestinationPort <> @strDestinationPort)
 						SET @strDetails += '{"change":"strDestinationPort","iconCls":"small-gear","from":"' + LTRIM(@strOldDestinationPort) + '","to":"' + LTRIM(@strDestinationPort) + '","leaf":true,"changeDescription":"Destination Port"},'
 
-					IF (@dtmOldETSPOL <> @dtmETSPOL)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETSPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETSPOL, 101)))
 						SET @strDetails += '{"change":"dtmETSPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETSPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETSPOL, '')) + '","leaf":true,"changeDescription":"Instr ETD"},'
 
-					IF (@dtmOldDeadlineCargo <> @dtmDeadlineCargo)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldDeadlineCargo, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmDeadlineCargo, 101)))
 						SET @strDetails += '{"change":"dtmDeadlineCargo","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldDeadlineCargo, '')) + '","to":"' + LTRIM(ISNULL(@dtmDeadlineCargo, '')) + '","leaf":true,"changeDescription":"Instr ETA"},'
 
-					IF (@dtmOldETAPOD <> @dtmETAPOD)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETAPOD, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETAPOD, 101)))
 						SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOD, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOD, '')) + '","leaf":true,"changeDescription":"Act. ETA"},'
 
-					IF (@dtmOldETAPOL <> @dtmETAPOL)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETAPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETAPOL, 101)))
 						SET @strDetails += '{"change":"dtmETAPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOL, '')) + '","leaf":true,"changeDescription":"Act. ETD"},'
 
 					IF (@strOldBookingReference <> @strBookingReference)
