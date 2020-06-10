@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTBeforeSavePriceContract]
 		
 	@intPriceContractId INT,
-	@strXML				NVARCHAR(MAX)
+	@strXML				NVARCHAR(MAX),
+	@ysnDeleteFromInvoice bit = 0
 	
 AS
 
@@ -118,8 +119,8 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
-				EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
-			END		
+				EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
+			END	
 		END
 
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
@@ -177,8 +178,8 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
-				EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
-			END		
+				EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
+			END	
 		END
 
 		IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
@@ -218,7 +219,7 @@ BEGIN TRY
 			ELSE
 			BEGIN
 				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
-				EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
+				EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 			END
 		END
 				

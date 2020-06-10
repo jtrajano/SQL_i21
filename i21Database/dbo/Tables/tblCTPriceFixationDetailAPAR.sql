@@ -7,6 +7,7 @@
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
 	ysnReverse						BIT NULL,
+	ysnMarkDelete					BIT,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
@@ -87,7 +88,8 @@ BEGIN
 		@intInvoiceDetailId = intInvoiceDetailId
 		,@intPriceFixationDetailId = intPriceFixationDetailId
 	from
-		DELETED;
+		DELETED
+	where isnull(ysnMarkDelete,0) <> 1;
 
 	SELECT top 1
 		@dblInvoiceDetailQuantity = dblQtyShipped
