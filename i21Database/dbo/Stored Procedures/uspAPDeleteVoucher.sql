@@ -103,6 +103,8 @@ BEGIN TRY
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
+	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
+
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
 
