@@ -14,17 +14,15 @@ AS
 
 BEGIN TRY
 
-	DECLARE @ysnContractBalanceInProgress	BIT = 0
+	BEGIN TRAN
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnContractBalanceInProgress = 1)
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTMiscellaneous WITH (NOLOCK) WHERE ysnContractBalanceInProgress = 1)
 	BEGIN
-		SET @ysnContractBalanceInProgress = 1
 		RAISERROR ('Contract Balance generation is ongoing for other users. Please try again after a few minutes.',18,1,'WITH NOWAIT')
 	END
-	-- SET "CONTRACT BALANCE" STATUS IN-PROGRESS TO AVOID SIMULTANEOUS REPORT BUILDING 
-	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 1
 
-	BEGIN TRAN
+	-- SET "CONTRACT BALANCE" STATUS IN-PROGRESS TO AVOID SIMULTANEOUS REPORT BUILDING 
+	UPDATE tblCTMiscellaneous SET ysnContractBalanceInProgress = 1
 
 	DECLARE @ErrMsg							NVARCHAR(MAX)
 	DECLARE @blbHeaderLogo					VARBINARY(MAX)
@@ -1870,7 +1868,7 @@ BEGIN TRY
 	DELETE FROM tblCTContractBalance
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM @SequenceHistory)
 
-	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
+	UPDATE tblCTMiscellaneous SET ysnContractBalanceInProgress = 0
 
 	COMMIT TRAN
 
@@ -1939,12 +1937,8 @@ BEGIN TRY
 END TRY
 
 BEGIN CATCH
-	IF @ysnContractBalanceInProgress <> 1 
-	BEGIN
-		ROLLBACK TRAN
-		UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
-	END
 	
+	ROLLBACK TRAN
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
