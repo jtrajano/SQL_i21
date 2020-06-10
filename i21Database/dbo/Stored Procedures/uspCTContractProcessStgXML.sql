@@ -4008,7 +4008,7 @@ BEGIN TRY
 				SELECT @strContractDetailAllId = STUFF((
 							SELECT DISTINCT ',' + LTRIM(intContractDetailId)
 							FROM tblCTContractDetail
-							WHERE intContractHeaderId = @NewContractHeaderId
+							WHERE intContractHeaderId = @intNewContractHeaderId
 							FOR XML PATH('')
 							), 1, 1, '')
 
