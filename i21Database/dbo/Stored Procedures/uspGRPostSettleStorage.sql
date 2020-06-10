@@ -3023,7 +3023,13 @@ BEGIN TRY
 
 								if @cur_bid is not null
 								begin
-									exec uspAPUpdateCost @billDetailId = @cur_bid,  @cost = @cur_cost
+									declare @ysn_have_receipt_item_id bit 
+									set @ysn_have_receipt_item_id = 0 
+									if exists(select top 1 1 from @voucherPayable where isnull(intInventoryReceiptItemId, 0) > 0)
+										set @ysn_have_receipt_item_id = 1
+										
+									exec uspAPUpdateCost @billDetailId = @cur_bid,  @cost = @cur_cost, @costAdjustment = @ysn_have_receipt_item_id
+
 									insert into @used_bill_id(id) values(@cur_bid)
 								end
 								

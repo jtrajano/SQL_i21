@@ -57,18 +57,22 @@ JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblSMCompanyLocationSubLocation SLOC 
     ON SLOC.intCompanyLocationSubLocationId = CS.intCompanyLocationSubLocationId
-left join 
-    (
-        select GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId from tblGRStorageHistory GSH
-	join tblCTContractHeader GCH
-		on GCH.intContractHeaderId = GSH.intContractHeaderId
-	join tblCTContractDetail GCD
-		on GCH.intContractHeaderId = GCD.intContractHeaderId
-    
-    )GHistory
+LEFT JOIN 
+(
+    SELECT 
+		GSH.intCustomerStorageId
+		,GCH.intContractHeaderId
+		,GCH.strContractNumber
+		,GCD.intContractDetailId 
+	FROM tblGRStorageHistory GSH
+	INNER JOIN tblCTContractHeader GCH
+		ON GCH.intContractHeaderId = GSH.intContractHeaderId
+	INNER JOIN tblCTContractDetail GCD
+		ON GCH.intContractHeaderId = GCD.intContractHeaderId
+	WHERE GSH.strType IN ('From Transfer','From Delivery Sheet','From Scale')
+)GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
-        --and CS.intStorageTypeId = 2
-		AND ST.ysnDPOwnedType = 1 
+        and ST.ysnDPOwnedType = 1
 LEFT JOIN tblSCTicket SC
 	ON SC.intTicketId = CS.intTicketId
 --LEFT JOIN tblCTContractDetail CD_Ticket
