@@ -1493,6 +1493,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 154
+			,[strTransactionType]	= N'Payable Batch'
+			,[strPrefix]			= N'BPAY-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Accounts Payable'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable Batch' and strModule = 'Accounts Payable')
 
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 

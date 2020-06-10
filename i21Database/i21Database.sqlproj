@@ -8722,6 +8722,9 @@
     <Build Include="dbo\Tables\tblSMDataEventLog.sql" />
     <Build Include="dbo\Tables\tblSMControlEventLog.sql" />
     <Build Include="dbo\Tables\tblSMMessageLog.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentBatch.sql" />
+    <Build Include="dbo\Tables\tblAPPaymentBatchDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreatePaymentBatch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
