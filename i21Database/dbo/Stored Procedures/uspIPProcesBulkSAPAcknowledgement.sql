@@ -136,7 +136,7 @@ BEGIN TRY
 				,dtmCreatedDate
 				,(
 					CASE 
-						WHEN ERROR_NUMBER() = 1205
+						WHEN @ErrMsg like '%was deadlocked on%'
 							THEN IsNull(intDeadLock,0) + 1
 						ELSE 0
 						END
