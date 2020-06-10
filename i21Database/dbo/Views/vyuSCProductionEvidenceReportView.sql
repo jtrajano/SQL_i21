@@ -240,6 +240,7 @@
 		SELECT TOP 1 AP.dtmDate from tblAPBillDetail APD 
 		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId
 		WHERE APD.intCustomerStorageId = ISNULL(STORAGE_DS.intCustomerStorageId, STORAGE_TICKET.intCustomerStorageId)
+		AND APD.intItemId = ISNULL(STORAGE_DS.intItemId, STORAGE_TICKET.intItemId)
 	) VOUCHER_STORAGE
 	,(	SELECT TOP 1
 			strCompanyName
