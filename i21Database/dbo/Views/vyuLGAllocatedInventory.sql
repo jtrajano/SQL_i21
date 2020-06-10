@@ -27,11 +27,11 @@ SELECT SCH.intContractHeaderId
        ,LC.strContainerNumber
        ,LDCL.dblQuantity AS dblContainerQty
        ,L.dtmETAPOD
-       ,CASE 
+       ,strStatus = CASE 
               WHEN ISNULL(IR.ysnPosted, 0) = 1
                      THEN 'Spot'
               ELSE 'In-Transit'
-              END strStatus
+              END COLLATE Latin1_General_CI_AS
        ,S.strSampleStatus
        ,S.dtmSampleReceivedDate
 FROM tblLGAllocationDetail ALD 
@@ -116,7 +116,7 @@ SELECT
        ,'' strContainerNumber
        ,0.0 dblContainerQty
        ,L.dtmETAPOD
-       ,'In-Transit' strStatus
+       ,strStatus = 'In-Transit' COLLATE Latin1_General_CI_AS
        ,S.strSampleStatus
        ,S.dtmSampleReceivedDate
 FROM tblLGAllocationDetail ALD 
