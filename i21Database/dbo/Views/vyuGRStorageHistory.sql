@@ -14,7 +14,7 @@ SELECT DISTINCT TOP 100 PERCENT
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.strEntityName
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.strName
 											ELSE E.strName
-										END
+										END COLLATE Latin1_General_CI_AS
 	,intCompanyLocationId				= CASE 
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'Transfer' THEN TSplit.intCompanyLocationId
 											WHEN SH.intTransactionTypeId = 3 AND SH.strType = 'From Transfer' THEN TSource.intCompanyLocationId
@@ -115,7 +115,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	, 1
 	, 1
 	, ''
-	), ' ', '') strVoucherNumbers
+	), ' ', '')  COLLATE Latin1_General_CI_AS AS  strVoucherNumbers
 	,REPLACE(STUFF
 	(
 		(
@@ -129,7 +129,7 @@ SELECT DISTINCT TOP 100 PERCENT
 	, 1
 	, 1
 	, ''
-	), ' ', '') strBillIds
+	), ' ', '')  COLLATE Latin1_General_CI_AS AS strBillIds  
 FROM tblGRStorageHistory SH
 JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = SH.intCustomerStorageId
