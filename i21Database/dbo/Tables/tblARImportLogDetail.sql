@@ -4,6 +4,7 @@
     [intImportLogId]			INT			  NOT NULL,
 	[strEventResult]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionNumber]		NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
+	[strSourceType]				NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionType]		NVARCHAR(30)  COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
 	[strLocationName]			NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,	
