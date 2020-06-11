@@ -524,7 +524,8 @@ SELECT DISTINCT
 				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblOrderQty
 				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblOrderQty
 				ELSE A.dblOrderQty
-			END 
+			END 				
+
 		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
 		,[dblOpenReceive]							=	
 			--A.dblOpenReceive
@@ -632,6 +633,7 @@ SELECT DISTINCT
 				CASE 
 					WHEN A.strReceiptType = 'Inventory Return' THEN 1 
 					WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN 1 
+					WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN 1 
 					ELSE 0 
 				END
 			AS BIT)

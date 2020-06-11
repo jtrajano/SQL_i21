@@ -179,8 +179,8 @@ SELECT
 		CASE 
 			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
 				CASE
-					WHEN ReceiptCharge.ysnPrice = 1 THEN 1
 					WHEN UpdateTbl.intEntityVendorId = r.intEntityVendorId THEN 1 
+					WHEN ReceiptCharge.ysnPrice = 1 THEN 1
 					ELSE 
 						0
 				END
@@ -239,6 +239,8 @@ BEGIN
 				ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = u.intItemId
+		WHERE 
+			u.intEntityVendorId = Receipt.intEntityVendorId
 
 		SELECT TOP 1 
 			@TransactionNo = Receipt.strReceiptNumber
@@ -254,19 +256,15 @@ BEGIN
 			INNER JOIN tblICItem Item
 				ON Item.intItemId = ReceiptChargesToBill.intItemId
 		WHERE 
-			(
+			ABS(
 				ReceiptCharge.dblQuantityBilled +
 				CASE 
 					WHEN ReceiptCharge.ysnPrice = 1 THEN -ReceiptChargesToBill.dblToBillQty
 					ELSE ReceiptChargesToBill.dblToBillQty 
 				END
-			) > ReceiptCharge.dblQuantity -- Throw error if Bill Qty is greater than Receipt Qty
+			) > ABS(ReceiptCharge.dblQuantity) -- Throw error if Bill Qty is greater than Receipt Qty
 			AND ReceiptChargesToBill.intInventoryReceiptChargeId IS NOT NULL
-			AND ReceiptChargesToBill.intEntityVendorId = 
-				CASE 
-					WHEN ReceiptCharge.ysnPrice = 1 THEN Receipt.intEntityVendorId 
-					ELSE ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
-				END
+			AND ReceiptChargesToBill.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) 
 
 		IF (ISNULL(@TransactionNo,'') <> '')
 		BEGIN
