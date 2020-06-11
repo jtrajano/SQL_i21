@@ -143,33 +143,33 @@ BEGIN TRY
 	AND TARGET.intBillId NOT IN (SELECT intBillId FROM @tmpPaymentBatchDetail) THEN
 	DELETE;
 
-	--Generate Payment Transactions
-	DECLARE @tmpPartitionedVouchers AS TABLE
-	(
-		[intPartionId] INT NULL,
-    	[strBillIds] NVARCHAR(MAX) NULL
-	);
+	-- --Generate Payment Transactions
+	-- DECLARE @tmpPartitionedVouchers AS TABLE
+	-- (
+	-- 	[intPartionId] INT NULL,
+    -- 	[strBillIds] NVARCHAR(MAX) NULL
+	-- );
 
-	INSERT INTO @tmpPartitionedVouchers
-	SELECT intPartitionId, STRING_AGG(intBillId, ', ') AS strBillIds
-	FROM fnAPPartitonPaymentOfVouchers(@ids)
-	GROUP BY intPartitionId
+	-- INSERT INTO @tmpPartitionedVouchers
+	-- SELECT intPartitionId, STRING_AGG(intBillId, ', ') AS strBillIds
+	-- FROM fnAPPartitonPaymentOfVouchers(@ids)
+	-- GROUP BY intPartitionId
 
-	DECLARE @strBillIds NVARCHAR(MAX);
-	DECLARE @csrPartitionedVouchers CURSOR;
+	-- DECLARE @strBillIds NVARCHAR(MAX);
+	-- DECLARE @csrPartitionedVouchers CURSOR;
 	
-	SET @csrPartitionedVouchers = CURSOR FORWARD_ONLY FOR
-	SELECT strBillIds FROM @tmpPartitionedVouchers
+	-- SET @csrPartitionedVouchers = CURSOR FORWARD_ONLY FOR
+	-- SELECT strBillIds FROM @tmpPartitionedVouchers
 	
-	OPEN @csrPartitionedVouchers;
-	FETCH NEXT FROM @csrPartitionedVouchers INTO @strBillIds
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-		EXEC uspAPCreatePayment @userId = @userId, @bankAccount = @intBankAccountId, @billId = @strBillIds
-		FETCH NEXT FROM @csrPartitionedVouchers INTO @strBillIds
-	END;
-	CLOSE @csrPartitionedVouchers;
-	DEALLOCATE @csrPartitionedVouchers;
+	-- OPEN @csrPartitionedVouchers;
+	-- FETCH NEXT FROM @csrPartitionedVouchers INTO @strBillIds
+	-- WHILE @@FETCH_STATUS = 0
+	-- BEGIN
+	-- 	EXEC uspAPCreatePayment @userId = @userId, @bankAccount = @intBankAccountId, @billId = @strBillIds
+	-- 	FETCH NEXT FROM @csrPartitionedVouchers INTO @strBillIds
+	-- END;
+	-- CLOSE @csrPartitionedVouchers;
+	-- DEALLOCATE @csrPartitionedVouchers;
 
 	--Return intPaymentBatchId used
 	SET @intPaymentBatchIdUsed = (SELECT TOP 1 intId FROM @batchId)
