@@ -181,7 +181,7 @@ BEGIN
 		,dblNewStorageDue = SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit --New Storage Due (unpaid + additional)
 		,dblOldStorageBilled = ISNULL(CS.dblStoragePaid,0) --Old Storage Billed (storage due paid)
 		,dblNewStorageBilled = ISNULL(CS.dblStoragePaid,0) + SV.dblStorageDuePerUnit --New Storage Billed (storage paid + additional charge)
-		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * MagicalOpenBalance.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
+		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * CS.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
 		,SV.dblFlatFeeTotal
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 	FROM tblGRCustomerStorage CS
