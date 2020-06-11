@@ -147,8 +147,11 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
-		AND @post != 0
 	BEGIN
+		--ADD PAYABLES IN CASE IF NOT EXISTS
+		--THIS IS USEFUL WHEN DELETING VOUCHER BUT THERE IS NO RECORD IN tblAPVoucherPayableCompleted
+		--THAT WAY, WE WILL HAVE PAYABLE RECORDS THAT WOULD ALLOW USER TO CREATE VOUCHER VIA 'Add Payables' SCREEN
+		--IN THIS CASE tblAPBillDetail.ysnStage IS 0 BUT IT IS A VALID PAYABLES
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
 		
 		IF @transCount = 0
@@ -1076,6 +1079,7 @@ ELSE SAVE TRAN @SavePoint
 			-- 	RETURN;
 			-- END
 
+			--CALL REMOVE, TO CLEAN UP THE PAYABLES
 			EXEC uspAPRemoveVoucherPayable @voucherPayable = @validPayables, @throwError = 1
 			EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax,  @throwError = 1
 		END
