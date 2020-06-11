@@ -372,14 +372,14 @@ BEGIN TRY
 					END
 				END
 
-				IF @dblGrossWeight = 0
-					SELECT @dblGrossWeight = @dblNetWeight
+				--IF @dblGrossWeight = 0
+				--	SELECT @dblGrossWeight = @dblNetWeight
 
-				IF @dblGrossWeight > 0
-					AND @dblGrossWeight <> @dblNetWeight
-				BEGIN
-					SELECT @dblTareWeight = @dblGrossWeight - @dblNetWeight
-				END
+				--IF @dblGrossWeight > 0
+				--	AND @dblGrossWeight <> @dblNetWeight
+				--BEGIN
+				--	SELECT @dblTareWeight = @dblGrossWeight - @dblNetWeight
+				--END
 
 				IF @dblCost >= 0
 					AND ISNULL(@strCostUOM, '') <> ''
@@ -598,7 +598,7 @@ BEGIN TRY
 					,CL.intItemUOMId
 					,IU.intItemUOMId
 					,@dblCost
-					,@dblGrossWeight
+					,RI.dblNetWeight + ISNULL(C.dblTareWt, 0)
 					,RI.dblNetWeight
 					,1
 					,(dbo.[fnCTConvertQtyToTargetItemUOM](IU.intItemUOMId, @intCostItemUOMId, RI.dblNetWeight)) * (
@@ -634,6 +634,7 @@ BEGIN TRY
 				JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
 				JOIN tblLGLoadDetailContainerLink CL ON CL.intLoadDetailId = LD.intLoadDetailId
 					AND CL.intLoadContainerId = @intLoadContainerId
+				JOIN tblLGLoadContainer C ON C.intLoadContainerId = CL.intLoadContainerId
 				--Join tblSMCurrency cr on ct.intCurrencyId=cr.intCurrencyID
 				WHERE RI.intStageReceiptItemId = @intStageReceiptItemId
 
@@ -673,7 +674,7 @@ BEGIN TRY
 					,RI.intUnitMeasureId
 					,RI.dblUnitCost
 					,RI.dblGross
-					,@dblTareWeight
+					,ISNULL(C.dblTareWt, 0)
 					,1
 					,C.strContainerNumber
 					,GETUTCDATE()
