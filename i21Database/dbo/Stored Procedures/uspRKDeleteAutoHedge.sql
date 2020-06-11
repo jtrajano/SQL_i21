@@ -41,6 +41,7 @@ BEGIN TRY
 
 	EXEC uspRKFutOptTransactionHistory @intFutOptTransactionId, @intFutOptTransactionHeaderId, 'Price Contracts', @intUserId, 'HEADER DELETE'
 	DELETE FROM tblRKFutOptTransactionHeader WHERE intFutOptTransactionHeaderId = @intFutOptTransactionHeaderId
+	EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, @intFutOptTransactionHeaderId, @intUserId, 'HEADER DELETE'
 END TRY
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()

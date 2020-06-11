@@ -15,7 +15,7 @@ BEGIN
 		, con.*
 	INTO #tmpCollateral
 	FROM tblRKCollateral col
-	CROSS APPLY (SELECT TOP 1 CD.intFutureMarketId
+	OUTER APPLY (SELECT TOP 1 CD.intFutureMarketId
 					, CD.intFutureMonthId
 					, CH.intEntityId
 				FROM tblCTContractDetail CD
@@ -27,7 +27,7 @@ BEGIN
 	SELECT * INTO #History FROM tblRKSummaryLog WHERE intTransactionRecordId = @intCollateralId AND strTransactionType = 'Collateral'
 	DECLARE @SummaryLog AS RKSummaryLog
 
-	
+	select * from #tmpCollateral
 	
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpCollateral)
 	BEGIN
@@ -39,8 +39,6 @@ BEGIN
 				AND d.intFutureMarketId = h.intFutureMarketId
 				AND d.intFutureMonthId = h.intFutureMonthId
 				AND d.dblOriginalQuantity = h.dblOrigQty
-				AND d.dblPrice = h.dblPrice
-				AND d.intContractDetailId = h.intContractDetailId
 				AND d.intContractHeaderId = h.intContractHeaderId
 				AND d.intItemId = h.intItemId)
 		BEGIN
@@ -54,6 +52,7 @@ BEGIN
 				, intContractHeaderId
 				, intCommodityId
 				, intItemId
+				, intCommodityUOMId
 				, intLocationId
 				, dblQty
 				, intEntityId
@@ -61,17 +60,19 @@ BEGIN
 				, strNotes
 				, intFutureMarketId
 				, intFutureMonthId
-				, intEntityId)
+				, intActionId
+				)
 			SELECT strBucketType = 'Collateral'
 				, strTransactionType = 'Collateral'
 				, intTransactionRecordId = intCollateralId
-				, intTransactionRecordHeaderId = NULL
+				, intTransactionRecordHeaderId = intCollateralId
 				, strDistributionType = strType
 				, strTransactionNumber = strReceiptNo
 				, dtmTransactionDate = dtmOpenDate
 				, intContractHeaderId = intContractHeaderId
-				, intCommodityId = intCommodityId
+				, intCommodityId = C.intCommodityId
 				, intItemId = intItemId
+				, intCommodityUOMId =  CUM.intCommodityUnitMeasureId
 				, intLocationId = intLocationId
 				, dblQty = dblOriginalQuantity
 				, intEntityId = intEntityId
@@ -79,8 +80,9 @@ BEGIN
 				, strComments
 				, intFutureMarketId
 				, intFutureMonthId
-				, intEntityId
-			FROM #tmpCollateral
+				, intActionId = 35
+			FROM #tmpCollateral C
+			LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
 		END
 
 		-- Collateral Adjustments
@@ -95,13 +97,15 @@ BEGIN
 			, intContractHeaderId
 			, intCommodityId
 			, intItemId
+			, intCommodityUOMId
 			, intLocationId
 			, dblQty
 			, intUserId
 			, strNotes
 			, intFutureMarketId
 			, intFutureMonthId
-			, intEntityId)
+			, intEntityId
+			, intActionId)
 		SELECT strBucketType = 'Collateral'
 			, strTransactionType = 'Collateral Adjustments'
 			, intTransactionRecordId = CA.intCollateralAdjustmentId
@@ -111,8 +115,9 @@ BEGIN
 			, dtmTransactionDate = dtmAdjustmentDate
 			, intContractDetailId = NULL
 			, intContractHeaderId = C.intContractHeaderId
-			, intCommodityId = intCommodityId
+			, intCommodityId = C.intCommodityId
 			, intItemId = intItemId
+			, intCommodityUOMId =  CUM.intCommodityUnitMeasureId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
 			, intUserId = @intUserId
@@ -120,8 +125,10 @@ BEGIN
 			, intFutureMarketId
 			, intFutureMonthId
 			, intEntityId
+			, intActionId = 38
 		FROM tblRKCollateralAdjustment CA
 		JOIN #tmpCollateral C ON C.intCollateralId = CA.intCollateralId
+		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
 		WHERE intCollateralAdjustmentId NOT IN (SELECT DISTINCT adj.intCollateralAdjustmentId
 				FROM tblRKCollateralAdjustment adj
 				JOIN tblRKSummaryLog history ON history.intTransactionRecordId = adj.intCollateralId AND strTransactionType = 'Collateral Adjustments'

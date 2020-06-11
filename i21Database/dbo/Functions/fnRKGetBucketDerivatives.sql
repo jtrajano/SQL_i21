@@ -37,6 +37,11 @@ RETURNS @returntable TABLE
 	, intFutOptTransactionHeaderId INT
 	, intCurrencyId INT
 	, strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, dtmCreatedDate DATETIME
+	, dtmTransactionDate DATETIME
+	, intUserId INT
+	, strUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -108,6 +113,11 @@ BEGIN
 		, intFutOptTransactionHeaderId
 		, intCurrencyId
 		, strCurrency
+		, dtmCreatedDate
+		, dtmTransactionDate
+		, intUserId
+		, strUserName
+		, strAction
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
@@ -141,6 +151,11 @@ BEGIN
 			, mf.intFutOptTransactionHeaderId
 			, c.intCurrencyId
 			, c.strCurrency
+			, dtmCreatedDate
+			, dtmTransactionDate
+			, intUserId
+			, strUserName
+			, strAction
 		FROM vyuRKGetSummaryLog c
 		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
 		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId

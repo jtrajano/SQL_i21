@@ -1,7 +1,7 @@
 ﻿CREATE PROCEDURE uspRKAutoHedge
 	@XML NVARCHAR(MAX)
+	, @intUserId INT = NULL
 	, @intFutOptTransactionId INT OUTPUT
-	, @ysnReassign BIT = 0
 
 AS
 
@@ -69,6 +69,7 @@ BEGIN TRY
 		, @intContractDetailId = intContractDetailId
 		, @intSelectedInstrumentTypeId = intSelectedInstrumentTypeId
 	FROM OPENXML(@idoc, 'root', 2)
+	
 	WITH (intFutOptTransactionId INT
 		, dtmTransactionDate DATETIME
 		, intEntityId INT
@@ -136,12 +137,9 @@ BEGIN TRY
 		SELECT @intMatchedLots = ISNULL(SUM(ISNULL(dblLots, 0.00)), 0.00) FROM tblRKOptionsPnSExercisedAssigned WHERE intFutOptTransactionId = @intFutOptTransactionId
 		SELECT @intMatchedLots += ISNULL(SUM(ISNULL(dblMatchQty, 0.00)), 0.00) FROM tblRKMatchFuturesPSDetail WHERE intLFutOptTransactionId = @intFutOptTransactionId OR intSFutOptTransactionId = @intFutOptTransactionId
 		
-		IF (@ysnReassign = 0)
+		IF (@dblNoOfContract - @intMatchedLots) <= 0 
 		BEGIN
-			IF (@dblNoOfContract - @intMatchedLots) <= 0 
-			BEGIN
-				RAISERROR('Cannot change number of hedged lots as it is used in Match Futures Purchase and sales.', 16, 1)
-			END
+			RAISERROR('Cannot change number of hedged lots as it is used in Match Futures Purchase and sales.', 16, 1)
 		END
 
 		UPDATE tblRKFutOptTransaction
@@ -162,8 +160,6 @@ BEGIN TRY
 		BEGIN
 			UPDATE tblRKAssignFuturesToContractSummary SET dblHedgedLots = @dblNoOfContract WHERE intContractHeaderId = @intContractHeaderId AND intFutOptTransactionId = @intFutOptTransactionId
 		END
-
-		
 	END
 	ELSE
 	BEGIN
@@ -227,6 +223,8 @@ BEGIN TRY
 			, GETDATE())
 		
 		SET @intFutOptTransactionId = SCOPE_IDENTITY()
+
+		EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, NULL, @intUserId, ''
 		
 		SET @strXml = '<root><Transaction>';
 		IF ISNULL(@ysnMultiplePriceFixation, 0) = 1

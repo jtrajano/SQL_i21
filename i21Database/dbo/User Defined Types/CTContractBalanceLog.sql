@@ -1,10 +1,11 @@
 ﻿CREATE TYPE [dbo].[CTContractBalanceLog] AS TABLE (
 	intId INT IDENTITY PRIMARY KEY CLUSTERED
 	, strBatchId NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	, dtmTransactionDate DATETIME
+	, dtmTransactionDate DATETIME NOT NULL
 	, strTransactionType NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionReference NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, intTransactionReferenceId INT NOT NULL
+	, intTransactionReferenceDetailId INT NULL
 	, strTransactionReferenceNo NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL
 	, intContractDetailId INT NOT NULL
 	, intContractHeaderId INT NOT NULL
@@ -32,4 +33,7 @@
 	, intBookId INT NULL
 	, intSubBookId INT NULL
 	, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, intUserId INT NULL
+	, intActionId INT NULL
+	, strProcess NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 )

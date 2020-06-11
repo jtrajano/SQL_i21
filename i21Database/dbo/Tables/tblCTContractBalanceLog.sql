@@ -2,11 +2,14 @@
 (
 	[intContractBalanceLogId] INT IDENTITY NOT NULL, 
 	[strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[intActionId] INT NULL,
+	[strAction] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[dtmTransactionDate] DATETIME,
 	[dtmCreatedDate] DATETIME,
 	[strTransactionType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strTransactionReference] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[intTransactionReferenceId] INT NOT NULL,
+	[intTransactionReferenceDetailId] INT NULL,
 	[strTransactionReferenceNo] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
 	[intContractDetailId] INT NOT NULL,
 	[intContractHeaderId] INT NOT NULL,
@@ -36,5 +39,8 @@
 	[strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnNegated] BIT DEFAULT((0)) NULL,
 	[intRefContractBalanceId] INT NULL,
+	intUserId INT NULL, 
+	[intRefSummaryLogId] INT NULL, 
+	[strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
     CONSTRAINT [PK_tblCTContractBalanceLog] PRIMARY KEY ([intContractBalanceLogId]) 
 )

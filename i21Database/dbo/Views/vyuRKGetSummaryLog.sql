@@ -6,6 +6,8 @@ SELECT SL.intSummaryLogId
 	, SL.strBatchId
 	, SL.dtmCreatedDate
 	, SL.strBucketType
+	, SL.intActionId
+	, SL.strAction
 	, SL.strTransactionType
 	, SL.intTransactionRecordId
 	, SL.intTransactionRecordHeaderId
@@ -15,7 +17,8 @@ SELECT SL.intSummaryLogId
 	, SL.intContractDetailId
 	, SL.intContractHeaderId
 	, CH.strContractNumber
-	, strContractSeq = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR(10))
+	, CD.intContractSeq
+	, strContractSeq = CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
 	, SL.intFutureMarketId
 	, strFutureMarket = fMar.strFutMarketName
 	, SL.intFutureMonthId
@@ -48,6 +51,7 @@ SELECT SL.intSummaryLogId
 	, SL.intTicketId
 	, t.strTicketNumber
 	, SL.intUserId
+	, strUserName = U.strName
 	, SL.strNotes
 	, SL.ysnNegate
 	, SL.intRefSummaryLogId
@@ -68,6 +72,7 @@ LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = SL.intContractDetai
 LEFT JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = SL.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth fMon ON fMon.intFutureMonthId = SL.intFutureMonthId
 LEFT JOIN tblEMEntity E ON E.intEntityId = SL.intEntityId
+LEFT JOIN tblEMEntity U ON U.intEntityId = SL.intUserId
 LEFT JOIN tblSCTicket t ON t.intTicketId = SL.intTicketId
 LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = cUOM.intUnitMeasureId

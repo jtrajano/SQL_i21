@@ -8699,6 +8699,9 @@
     <Build Include="dbo\Tables\tblSMDataEventLog.sql" />
     <Build Include="dbo\Tables\tblSMControlEventLog.sql" />
     <Build Include="dbo\Tables\tblSMMessageLog.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
+    <Build Include="dbo\Tables\tblRKLogAction.sql" />
+    <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
