@@ -327,7 +327,7 @@ SET ANSI_WARNINGS OFF
 			SELECT @error = ERROR_NUMBER(), @message = ERROR_MESSAGE(), @xstate = XACT_STATE()
 
 			-- Hack this error. 
-			IF @message = 'Record count deleted mismatch.' 
+			IF @message IN ('Record count deleted mismatch.', 'No payables record to delete.')
 			BEGIN 
 				-- Regenerate the missing/bad payable record. 
 				IF @intReceiptId IS NOT NULL 
