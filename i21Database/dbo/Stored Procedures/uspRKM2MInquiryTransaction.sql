@@ -37,6 +37,8 @@ BEGIN
 	DECLARE @intMarkExpiredMonthPositionId INT
 	DECLARE @ysnIncludeDerivatives BIT
 	DECLARE @ysnIncludeInTransitM2M BIT
+	DECLARE @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
+	DECLARE @strEvaluationByZone NVARCHAR(50)
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
 
@@ -47,6 +49,8 @@ BEGIN
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
 		, @ysnIncludeDerivatives = ysnIncludeDerivatives
 		, @ysnIncludeInTransitM2M = ysnIncludeInTransitM2M
+		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
+		, @strEvaluationByZone = strEvaluationByZone
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmSettlemntPriceDate = dtmPriceDate FROM tblRKFuturesSettlementPrice WHERE intFutureSettlementPriceId = @intFutureSettlementPriceId
