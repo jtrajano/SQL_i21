@@ -11,7 +11,6 @@ SET XACT_ABORT ON
 
 BEGIN
 
-
 DECLARE @SplitOn			NVARCHAR(10) = ':'
 DECLARE @Formula			NVARCHAR(MAX) = ''
 Declare @SORT				INT			 = 1
@@ -102,101 +101,106 @@ INSERT INTO #TempSUMRows ([RowDetailId],[RefNo],[Formula],[Sort])
 
 WHILE EXISTS(SELECT 1 FROM #TempSUMRows)
 BEGIN
-	DECLARE @counter_position INT = 1
-	DECLARE @position_1_value INT = 0
-	DECLARE @position_2_value INT = 0
+	DECLARE @MainFormula NVARCHAR(MAX)
+	DECLARE @sumCount INT = 0
 
-	SELECT TOP 1 @intRowDetailId = [RowDetailId], @Formula = [Formula], @intRefNoCurrent = [RefNo], @SORT = [Sort] FROM #TempSUMRows ORDER BY [Sort]
-	SET @Formula = SUBSTRING(@Formula,CHARINDEX('S',@Formula),CHARINDEX(')',@Formula))
-	SET @Formula = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@Formula,' ',''),'SUM(',''),')',''),'R',''), CHAR(13), ''), CHAR(10), '') + ':'
+	SELECT TOP 1 @intRowDetailId = [RowDetailId], @Formula = [Formula], @MainFormula = [Formula], @intRefNoCurrent = [RefNo], @SORT = [Sort] FROM #TempSUMRows ORDER BY [Sort]
 
-	SELECT @Formula
+	SET @sumCount = CHARINDEX(')',@MainFormula)
 
-	WHILE (CHARINDEX(@SplitOn,@Formula)>0)
+	WHILE (CHARINDEX('SUM',@MainFormula)>0)
 	BEGIN
-		DECLARE @new_intRefNo INT
-		
-		--SELECT LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))) + ' - SUM'
-		--SELECT * FROM #TempRowDesign2
-		--SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))
+		DECLARE @counter_position INT = 1
+		DECLARE @position_1_value INT = 0
+		DECLARE @position_2_value INT = 0
 
-		IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))) = 1)
-		BEGIN						
-			SET @new_intRefNo = (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowDetailId = (SELECT TOP 1 RowDetailId FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))))
+		SET @Formula = SUBSTRING(@MainFormula,CHARINDEX('S',@MainFormula),(CHARINDEX(')',@MainFormula)-CHARINDEX('S',@MainFormula))+1)
+		SET @Formula = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@Formula,' ',''),'SUM(',''),')',''),'R',''), CHAR(13), ''), CHAR(10), '') + ':'
 
-			IF(@counter_position = 1)
-			BEGIN
-				IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+		WHILE (CHARINDEX(@SplitOn,@Formula)>0)
+		BEGIN
+			DECLARE @new_intRefNo INT
+
+			IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))) = 1)
+			BEGIN						
+				SET @new_intRefNo = (SELECT TOP 1 intRefNo FROM tblFRRowDesign WHERE intRowDetailId = (SELECT TOP 1 RowDetailId FROM #TempRowDesign2 WHERE RefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))))
+
+				IF(@counter_position = 1)
 				BEGIN
-					SET @new_intRefNo = @new_intRefNo + 1
-					SET @position_1_value = @new_intRefNo
-
-					--PRINT 'counter pos 1 A'
 					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
-						BEGIN
-							--PRINT 'counter pos 1 - A'
-							SET @position_1_value = 0				
-						END
+					BEGIN
+						SET @new_intRefNo = @new_intRefNo + 1
+						SET @position_1_value = @new_intRefNo
+
+						--PRINT 'counter pos 1 A'
+						IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+							BEGIN
+								--PRINT 'counter pos 1 - A'
+								SET @position_1_value = 0				
+							END
+						ELSE
+							BEGIN
+								--PRINT 'counter pos 1 - B'
+								UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+							END
+					END
 					ELSE
 						BEGIN
-							--PRINT 'counter pos 1 - B'
-							UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+							UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId					
 						END
+					SET @intRefNo_1 = @new_intRefNo
 				END
-				ELSE
-					BEGIN
-						UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId					
-					END
-				SET @intRefNo_1 = @new_intRefNo
-			END
-			IF(@counter_position = 2)
-			BEGIN				
+				IF(@counter_position = 2)
+				BEGIN				
 
-				--PRINT 'counter pos 2'
-				IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
-				BEGIN
-					SET @new_intRefNo = @new_intRefNo - 1
-					SET @position_2_value = @new_intRefNo
-
-					--PRINT 'counter pos 2 - A'
-
+					--PRINT 'counter pos 2'
 					IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
 					BEGIN
-						--PRINT 'counter pos 2 - A1'
-						SET @position_2_value = 0
-						UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo - 1 as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+						SET @new_intRefNo = @new_intRefNo - 1
+						SET @position_2_value = @new_intRefNo
+
+						--PRINT 'counter pos 2 - A'
+
+						IF((SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NULL)
+						BEGIN
+							--PRINT 'counter pos 2 - A1'
+							SET @position_2_value = 0
+							UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo - 1 as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+						END
+						ELSE
+							BEGIN
+								--PRINT 'counter pos 2 - A2'
+								UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+							END
 					END
 					ELSE
 						BEGIN
-							--PRINT 'counter pos 2 - A2'
+							--PRINT 'counter pos 2 - B'
 							UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
 						END
-				END
-				ELSE
-					BEGIN
-						--PRINT 'counter pos 2 - B'
-						UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
-					END
-			END			
-		END
-		ELSE
-		BEGIN
-			SET @new_intRefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))
-			WHILE (@new_intRefNo >= @intRefNo_1)
-			BEGIN
-				IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = @new_intRefNo) = 1 AND (SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo 
-						AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NOT NULL)
-				BEGIN
-					UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
-					SET @new_intRefNo = @intRefNo_1
-				END
-				
-				SET @new_intRefNo =  @new_intRefNo- 1
+				END			
 			END
+			ELSE
+			BEGIN
+				SET @new_intRefNo = LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1)))
+				WHILE (@new_intRefNo >= @intRefNo_1)
+				BEGIN
+					IF((SELECT TOP 1 1 FROM #TempRowDesign2 WHERE RefNo = @new_intRefNo) = 1 AND (SELECT TOP 1 1 FROM tblFRRowDesign WHERE intRowId = @RowId AND intRefNo = @new_intRefNo 
+							AND strRowType IN ('Filter Accounts','Hidden','Cash Flow Activity','Current Year Earnings','Retained Earnings','Percentage','Row Calculation')) IS NOT NULL)
+					BEGIN
+						UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,':R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),':R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+						SET @new_intRefNo = @intRefNo_1
+					END
+				
+					SET @new_intRefNo =  @new_intRefNo- 1
+				END
+			END
+
+			SET @Formula = SUBSTRING(@Formula,CHARINDEX(@SplitOn,@Formula)+1,LEN(@Formula))
+			SET @counter_position = 2
 		END
 
-		SET @Formula = SUBSTRING(@Formula,CHARINDEX(@SplitOn,@Formula)+1,LEN(@Formula))
-		SET @counter_position = 2
+		SET @MainFormula = REPLACE(@MainFormula, SUBSTRING(@MainFormula,0, @sumCount+1), '')
 	END
 
 	DELETE #TempSUMRows WHERE RowDetailId = @intRowDetailId	
@@ -204,8 +208,10 @@ END
 
 DROP TABLE #TempRowDesign
 
+
 UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'X','R') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '%SUM%'
 UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'++','') WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and (strRelatedRows like '%+SUM%' or strRelatedRows like '%-SUM%' or strRelatedRows like '%*SUM%' or strRelatedRows like '%/SUM%')
+UPDATE tblFRRowDesign SET strRelatedRows = SUBSTRING(strRelatedRows,2,LEN(strRelatedRows)) WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and (strRelatedRows like '+SUM%' or strRelatedRows like '-SUM%' or strRelatedRows like '*SUM%' or strRelatedRows like '/SUM%')
 UPDATE tblFRRowDesign SET strRelatedRows = RIGHT(strRelatedRows, LEN(strRelatedRows) - 1) WHERE intRowId = @RowId and strRowType IN ('Row Calculation') and strRelatedRows like '+R%' 
 and (strRelatedRows like '%+SUM%' or strRelatedRows like '%-SUM%' or strRelatedRows like '%*SUM%' or strRelatedRows like '%/SUM%')
 
