@@ -13,6 +13,12 @@
 	BEGIN TRY
 		IF @intTransactionId IS NOT NULL
 		BEGIN
+
+			--DELETING TRANSACTIONS FOR RECEIPTS WITHOUT RECORDS ON tblAPVoucherPayableCompleted, WE ARE FORCED TO ADD 
+			--WHAT WE HAVE ON tblAPBillDetail, IN THIS WAY USER WOULD ABLE TO CREATE VOUCHER VIA 'ADD PAYABLES'
+			--IN THAT WAY, WE DON'T HAVE INFORMATION FOR strSourceNumber
+			--IN THIS CASE, tblAPVoucherPayable.strSourceNumber IS BLANK
+
 			--GET intId and strId OF WILL BE DELETED PAYABLE
 			DECLARE @intPayableIds AS TABLE (
 				intVoucherPayableId INT NOT NULL
@@ -35,6 +41,7 @@
 			);
 
 			INSERT INTO @intPayableIds
+			--ADD RECEIPT ITEM
 			SELECT P.intVoucherPayableId, IR.strReceiptNumber, P.dblQuantityToBill
 				--START PAYABLE LINKS TO VOUCHER
 				,P.intEntityVendorId
@@ -51,8 +58,31 @@
 				,P.intItemId
 				,P.intTransactionType
 			FROM tblAPVoucherPayable P 
-			INNER JOIN tblICInventoryReceipt IR ON P.strSourceNumber = IR.strReceiptNumber
-			WHERE IR.intInventoryReceiptId = @intTransactionId
+			INNER JOIN (tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptItem IRItem ON IR.intInventoryReceiptId = IRItem.intInventoryReceiptId)
+				ON P.intInventoryReceiptItemId = IRItem.intInventoryReceiptItemId
+			WHERE IR.intInventoryReceiptId = @intTransactionId AND P.intInventoryReceiptChargeId IS NULL
+
+			--ADD RECEIPT CHARGE
+			INSERT INTO @intPayableIds
+			SELECT P.intVoucherPayableId, IR.strReceiptNumber, P.dblQuantityToBill
+				--START PAYABLE LINKS TO VOUCHER
+				,P.intEntityVendorId
+				,P.intPurchaseDetailId
+				,P.intContractDetailId
+				,P.intScaleTicketId
+				,P.intInventoryReceiptChargeId
+				,P.intInventoryReceiptItemId
+				,P.intInventoryShipmentChargeId
+				,P.intLoadShipmentDetailId
+				,P.intLoadShipmentCostId
+				,P.intCustomerStorageId
+				,P.intSettleStorageId
+				,P.intItemId
+				,P.intTransactionType
+			FROM tblAPVoucherPayable P 
+			INNER JOIN (tblICInventoryReceipt IR INNER JOIN tblICInventoryReceiptCharge IRCharge ON IR.intInventoryReceiptId = IRCharge.intInventoryReceiptId)
+				ON P.intInventoryReceiptChargeId = IRCharge.intInventoryReceiptChargeId
+			WHERE IR.intInventoryReceiptId = @intTransactionId AND P.intInventoryReceiptChargeId > 0
 
 			--VALIDATE IF PAYABLE IS ALREADY VOUCHERED
 			DECLARE @vouchers AS TABLE(
@@ -117,7 +147,7 @@
 				--DELETE VOUCHER PAYABLE AND TAX STAGING
 				DELETE P
 				FROM tblAPVoucherPayable P
-				WHERE P.strSourceNumber IN (SELECT strReceiptNumber FROM @intPayableIds)
+				WHERE P.intVoucherPayableId IN (SELECT intVoucherPayableId FROM @intPayableIds)
 
 				DELETE T
 				FROM tblAPVoucherPayableTaxStaging T
