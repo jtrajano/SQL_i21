@@ -8,9 +8,9 @@ CHK.strRecordNo,
 CHK.intTransactionId,
 CHK.intBankAccountId, 
 strCompanyName = COMPANY.strCompanyName,
-strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity,COMPANY.strState,COMPANY.strZip),
+strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity,COMPANY.strState,COMPANY.strZip) COLLATE Latin1_General_CI_AS,
 strBank = UPPER (Bank.strBankName),
-strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress,Bank.strCity, Bank.strState, Bank.strZipCode),
+strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress,Bank.strCity, Bank.strState, Bank.strZipCode) COLLATE Latin1_General_CI_AS,
 strCustomerId = ISNULL (CHK.strEntityNo, '--'),
 strCustomerName = CHK.strName, 
 strCustomerAccount = ISNULL(RIGHT (CHK.strPayeeBankAccountNumber, 4), ''),
@@ -19,7 +19,7 @@ strCustomerAddress =
         LOCATION.strZipCode),'') <> '' 
     THEN dbo.fnConvertToFullAddress (LOCATION.strAddress,LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode) 
     ELSE '' 
-    END, 
+    END COLLATE Latin1_General_CI_AS, 
 CHK.intBankTransactionTypeId, 
 INV.strInvoiceNumber,dtmDetailDate = INV.dtmDate, 
 strComment = INV.strComments,
