@@ -629,8 +629,9 @@ BEGIN TRY
 		AND intContractHeaderId = @intContractHeaderId
 		AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
 		
-		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage')
-		BEGIN
+		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage' AND intPricingTypeId <> 5) 
+			OR EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0 AND intPricingTypeId = 5 AND strTransactionReference <> 'Settle Storage')
+		BEGIN			
 			SET @ysnUnposted = 1
 			
 			SELECT @intHeaderId = intTransactionReferenceId, 
@@ -3132,7 +3133,7 @@ BEGIN TRY
 						SET @_actual = (CASE WHEN @dblActual > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblActual END)
 					END
 				END
-				IF ISNULL(@dblDP,0) > 0
+				IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)--ISNULL(@dblDP,0) > 0
 				BEGIN
 					-- Balance
 					SET @_dp = (CASE WHEN @dblQty > ISNULL(@dblDP,0) THEN ISNULL(@dblDP,0) ELSE @dblQty END)
