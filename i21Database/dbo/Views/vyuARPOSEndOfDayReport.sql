@@ -33,6 +33,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 			  , intReturnCount			= ISNULL(POS.intTotalReturn,0)
 			  , dblCashPaymentReceived	= ISNULL(EOD.dblCashPaymentReceived, 0)
 			  , dblDrawerBalance		= ISNULL(EOD.dblFinalEndingBalance, 0) --ISNULL(EOD.dblExpectedEndingBalance, 0) + ISNULL(EOD.dblCashPaymentReceived, 0)
+	 		  , strEODNo				= EOD.strEODNo
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
