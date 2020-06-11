@@ -31,6 +31,7 @@ SELECT DISTINCT intPOSEndOfDayId		= EOD.intPOSEndOfDayId
 	 , dblCashReturn		= ISNULL(CASHRETURN.dblReturnAmount,0)
 	 , dblCashSales			= ISNULL(CASHSALES.dblCashAmount, 0) + ISNULL(CASHSALES.dblCheckAmount, 0)
 	 , intReturnCount		= ISNULL(POS.intTotalReturn,0)
+	 , strEODNo				= EOD.strEODNo
 FROM tblARPOSEndOfDay EOD WITH (NOLOCK)
 INNER JOIN (
 	SELECT 
