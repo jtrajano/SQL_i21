@@ -272,7 +272,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Type>SUP</Type>'
 
-			SELECT @strXML = @strXML + '<Reference>' + IsNULL(@strVendorRefNo, '') + '</Reference>'
+			SELECT @strXML = @strXML + '<Reference>' + dbo.fnEscapeXML(IsNULL(@strVendorRefNo, '')) + '</Reference>'
 
 			SELECT @strXML = @strXML + '</Party>'
 
