@@ -195,7 +195,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @TermId						= C.intTermsId
 					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
 					, @TransactionType				= ILD.strTransactionType
-					, @Type							= @Type
+					, @Type							= ISNULL(ILD.strSourceType,@Type)
 					, @Comment						= @IMPORTFORMAT_CARQUEST + ' ' + ILD.strTransactionType + ' ' + ILD.strTransactionNumber
 					, @OriginId						= ILD.strTransactionNumber
 					, @DiscountAmount				= ISNULL(ABS(ILD.dblDiscount), @ZeroDecimal)
@@ -288,7 +288,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@CalculatedDate				= D.dtmCalculated
 					,@PostDate						= D.dtmPostDate 
 					,@TransactionType				= D.strTransactionType
-					,@Type							= @Type
+					,@Type							= ISNULL(D.strSourceType,@Type)
 					,@Comment						= D.strTransactionNumber
 					,@OriginId						= D.strTransactionNumber
 					,@PONumber						= D.strPONumber
