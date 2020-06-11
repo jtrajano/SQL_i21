@@ -163,3 +163,19 @@ GO
 GO
 	print 'End fixing Freight Basis';
 GO
+	print 'Begin add default record to tblCTMiscellaneous';
+GO
+
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblCTMiscellaneous)
+	BEGIN
+		INSERT INTO tblCTMiscellaneous([ysnContractBalanceInProgress])
+		VALUES(0)
+	END
+	ELSE
+	BEGIN
+		UPDATE tblCTMiscellaneous SET [ysnContractBalanceInProgress] = 0
+	END
+
+GO
+	print 'End add default record to tblCTMiscellaneous';
+GO

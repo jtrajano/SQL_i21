@@ -314,12 +314,13 @@ SET ANSI_WARNINGS OFF
 	END
 	
 	ELSE IF @ysnPost = 0 
-		AND EXISTS (SELECT TOP 1 1 FROM @voucherPayable) 
+		--AND EXISTS (SELECT TOP 1 1 FROM @voucherPayable) 
 	BEGIN	
 		_Retry: 
 		
 		BEGIN TRY 		
-			EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+			--EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+			EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intEntityUserSecurityId
 		END TRY 
 		BEGIN CATCH					
 			DECLARE @error INT, @message VARCHAR(4000), @xstate INT 

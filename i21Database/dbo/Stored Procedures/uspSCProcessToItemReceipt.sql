@@ -9,6 +9,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@intStorageScheduleId AS INT = NULL
 	,@InventoryReceiptId AS INT OUTPUT
 	,@intBillId AS INT OUTPUT
+	,@ysnSkipValidation as BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -140,19 +141,23 @@ BEGIN TRY
 
 			---Check existing IS and Invoice
 			
-			SELECT TOP 1 
-				@_strReceiptNumber = ISNULL(B.strReceiptNumber,'')
-			FROM tblICInventoryReceiptItem A
-			INNER JOIN tblICInventoryReceipt B
-				ON A.intInventoryReceiptId = B.intInventoryReceiptId
-			WHERE B.intSourceType = 1
-				AND A.intSourceId = @intTicketId
+			if isnull(@ysnSkipValidation, 0) = 0
+			begin
+				SELECT TOP 1 
+					@_strReceiptNumber = ISNULL(B.strReceiptNumber,'')
+				FROM tblICInventoryReceiptItem A
+				INNER JOIN tblICInventoryReceipt B
+					ON A.intInventoryReceiptId = B.intInventoryReceiptId
+				WHERE B.intSourceType = 1
+					AND A.intSourceId = @intTicketId
 
-			IF ISNULL(@_strReceiptNumber,'') <> ''
-			BEGIN
-				SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a receipt ' + @_strReceiptNumber + '.'
-				RAISERROR(@ErrMsg, 11, 1);
-			END
+				IF ISNULL(@_strReceiptNumber,'') <> ''
+				BEGIN
+					SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a receipt ' + @_strReceiptNumber + '.'
+					RAISERROR(@ErrMsg, 11, 1);
+				END
+			end
+			
 
 		END
 

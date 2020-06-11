@@ -2454,6 +2454,7 @@
       <SuppressTSqlWarnings>71005</SuppressTSqlWarnings>
     </Build>
     <Build Include="dbo\Functions\fnICGetRunningBalance.sql" />
+    <Build Include="dbo\Functions\fnICGetConcatenatedInvoiceNumbersByCustomer.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
@@ -8124,6 +8125,15 @@
     <Build Include="dbo\Tables\tblSMErrorLog.sql" />
     <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
+    <Build Include="dbo\Views\vyuRKDPRRun.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareDerivatives.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareContractBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
+    <Build Include="dbo\Tables\tblCTMiscellaneous.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8364,6 +8374,7 @@
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

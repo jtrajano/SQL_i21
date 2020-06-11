@@ -53,3 +53,10 @@
 	,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractBalance_forDPR]
+	ON [dbo].[tblCTContractBalance] ([intContractDetailId])
+	INCLUDE (dtmContractDate,dtmEndDate)
+
+GO

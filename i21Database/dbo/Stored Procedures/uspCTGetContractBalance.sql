@@ -16,25 +16,25 @@ BEGIN TRY
 
 	BEGIN TRAN
 
-	DECLARE @ErrMsg					NVARCHAR(MAX)
-	DECLARE @blbHeaderLogo			VARBINARY(MAX)
-	DECLARE @intContractDetailId	INT
-	DECLARE @intShipmentKey			INT
-	DECLARE @intReceiptKey			INT
-	DECLARE @intPriceFixationKey	INT
-	DECLARE @dblShipQtyToAllocate	NUMERIC(38,20)
-	DECLARE @dblAllocatedQty		NUMERIC(38,20)
-	DECLARE @dblPriceQtyToAllocate  NUMERIC(38,20)
-	DECLARE @intShipmentNoOfLoad	INT
-	DECLARE @intPriceNoOfLoad		INT
-
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnContractBalanceInProgress = 1)
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTMiscellaneous WITH (NOLOCK) WHERE ysnContractBalanceInProgress = 1)
 	BEGIN
-		SET @ErrMsg = '"Contract summary is being accumulated, please wait...'
-		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
+		RAISERROR ('Contract Balance generation is ongoing for other users. Please try again after a few minutes.',18,1,'WITH NOWAIT')
 	END
+
 	-- SET "CONTRACT BALANCE" STATUS IN-PROGRESS TO AVOID SIMULTANEOUS REPORT BUILDING 
-	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 1
+	UPDATE tblCTMiscellaneous SET ysnContractBalanceInProgress = 1
+
+	DECLARE @ErrMsg							NVARCHAR(MAX)
+	DECLARE @blbHeaderLogo					VARBINARY(MAX)
+	DECLARE @intContractDetailId			INT
+	DECLARE @intShipmentKey					INT
+	DECLARE @intReceiptKey					INT
+	DECLARE @intPriceFixationKey			INT
+	DECLARE @dblShipQtyToAllocate			NUMERIC(38,20)
+	DECLARE @dblAllocatedQty				NUMERIC(38,20)
+	DECLARE @dblPriceQtyToAllocate			NUMERIC(38,20)
+	DECLARE @intShipmentNoOfLoad			INT
+	DECLARE @intPriceNoOfLoad				INT
 
 	DECLARE @SequenceHistory TABLE
 	(
@@ -283,6 +283,7 @@ BEGIN TRY
 		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intPriceFixationKey				INT
 	)    
 
 	DECLARE @FinalPriceFixation TABLE(
@@ -1189,7 +1190,8 @@ BEGIN TRY
 	,dtmSeqEndDate			
 	,strFutMarketName			
 	,strCategory
-	,strPricingStatus 				
+	,strPricingStatus
+	,intPriceFixationKey		
 	)
 	SELECT DISTINCT
      intContractTypeId		= CH.intContractTypeId
@@ -1268,6 +1270,7 @@ BEGIN TRY
 	,strFutMarketName			= FM.strFutMarketName
 	,strCategory 				= Category.strCategoryCode
 	,strPricingStatus			= 'Priced'
+	,intPriceFixationKey		= PF.intPriceFixationKey
 	FROM tblCTContractDetail					CD
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
@@ -1865,6 +1868,8 @@ BEGIN TRY
 	DELETE FROM tblCTContractBalance
 	WHERE intContractDetailId IN (SELECT intContractDetailId FROM @SequenceHistory)
 
+	UPDATE tblCTMiscellaneous SET ysnContractBalanceInProgress = 0
+
 	COMMIT TRAN
 
     IF ISNULL(@strCallingApp,'') <> 'DPR'
@@ -1929,11 +1934,10 @@ BEGIN TRY
 	AND dtmEndDate			=  @dtmEndDate
 	END
  
-	UPDATE tblCTCompanyPreference SET ysnContractBalanceInProgress = 0
-
 END TRY
 
 BEGIN CATCH
+	
 	ROLLBACK TRAN
 	SET @ErrMsg = ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  

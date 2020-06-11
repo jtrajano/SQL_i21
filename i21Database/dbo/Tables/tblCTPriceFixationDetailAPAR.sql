@@ -15,3 +15,44 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoice_intInvoiceId] FOREIGN KEY (intInvoiceId) REFERENCES tblARInvoice(intInvoiceId),
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId) ON DELETE CASCADE
 )
+
+GO
+
+CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsertDelete]
+	ON [dbo].[tblCTPriceFixationDetailAPAR]
+    AFTER DELETE
+AS
+BEGIN	
+    SET NOCOUNT ON;
+
+    declare @intPriceFixationId int;
+    declare @intContractPriceId int;
+    declare @intPriceFixationDetailId int;
+    declare @intInvoiceDetailId int;
+	declare @dblPricedQuantity numeric(18,6);
+	declare @dblInvoiceDetailQuantity numeric(18,6);
+	declare @intContractDetailId int;
+
+	select
+		@intInvoiceDetailId = intInvoiceDetailId
+		,@intPriceFixationDetailId = intPriceFixationDetailId
+	from
+		DELETED;
+
+	SELECT top 1
+		@dblInvoiceDetailQuantity = dblQtyShipped
+	FROM
+		tblARTransactionDetail
+	where
+		intTransactionDetailId = @intInvoiceDetailId
+	ORDER BY intId DESC
+
+	set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+
+	exec uspCTProcessInvoiceDelete
+		@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+		,@intPriceFixationDetailId = @intPriceFixationDetailId
+
+END
+
+GO

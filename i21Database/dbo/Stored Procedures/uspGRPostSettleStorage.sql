@@ -3023,7 +3023,13 @@ BEGIN TRY
 
 								if @cur_bid is not null
 								begin
-									exec uspAPUpdateCost @billDetailId = @cur_bid,  @cost = @cur_cost
+									declare @ysn_have_receipt_item_id bit 
+									set @ysn_have_receipt_item_id = 0 
+									if exists(select top 1 1 from @voucherPayable where isnull(intInventoryReceiptItemId, 0) > 0)
+										set @ysn_have_receipt_item_id = 1
+										
+									exec uspAPUpdateCost @billDetailId = @cur_bid,  @cost = @cur_cost, @costAdjustment = @ysn_have_receipt_item_id
+
 									insert into @used_bill_id(id) values(@cur_bid)
 								end
 								
@@ -3162,14 +3168,16 @@ BEGIN TRY
 							end
 							----- DEBUG POINT -----
 
-							EXEC [dbo].[uspAPPostBill] 
-								 @post = 1
-								,@recap = 0
-								,@isBatch = 0
-								,@param = @intVoucherId
-								,@userId = @intCreatedUserId
-								,@transactionType = 'Settle Storage'
-								,@success = @success OUTPUT
+							--IF @ysnFromTransferStorage = 0
+							
+							-- EXEC [dbo].[uspAPPostBill] 
+							-- 	 @post = 1
+							-- 	,@recap = 0
+							-- 	,@isBatch = 0
+							-- 	,@param = @intVoucherId
+							-- 	,@userId = @intCreatedUserId
+							-- 	,@transactionType = 'Settle Storage'
+							-- 	,@success = @success OUTPUT
 							
 							----- DEBUG POINT -----
 							if @debug_awesome_ness = 1	 AND 1 = 0
@@ -3197,12 +3205,12 @@ BEGIN TRY
 					end
 					----- DEBUG POINT -----
 
-					IF(@success = 0)
-					BEGIN
-						SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
-						RAISERROR (@ErrMsg, 16, 1);
-						GOTO SettleStorage_Exit;
-					END
+					-- IF(@success = 0)
+					-- BEGIN
+					-- 	SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+					-- 	RAISERROR (@ErrMsg, 16, 1);
+					-- 	GOTO SettleStorage_Exit;
+					-- END
 					
 					
 					
@@ -3419,6 +3427,22 @@ BEGIN TRY
 	UPDATE tblGRStorageHistory
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
+
+	EXEC [dbo].[uspAPPostBill] 
+		@post = 1
+		,@recap = 0
+		,@isBatch = 0
+		,@param = @intVoucherId
+		,@userId = @intCreatedUserId
+		,@transactionType = 'Settle Storage'
+		,@success = @success OUTPUT
+
+	IF(@success = 0)
+	BEGIN
+		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+		RAISERROR (@ErrMsg, 16, 1);
+		GOTO SettleStorage_Exit;
+	END
 	
 	----- DEBUG POINT -----
 	if @debug_awesome_ness = 1	and 1 = 0

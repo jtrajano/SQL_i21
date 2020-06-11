@@ -95,12 +95,12 @@ SELECT DISTINCT
 									)
 	,Category.strCategoryCode
 	,strTransactionStatus           = CASE 
-										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DeliverySheet.ysnPost = 1 THEN 'Posted'
+										WHEN CS.ysnTransferStorage = 1 OR (CS.intTicketId IS NOT NULL AND SC.strTicketStatus = 'C') OR DeliverySheet.ysnPost = 1 THEN 'Posted'
 										ELSE 'Open'
 									END
 	,TSR.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
-	,strStorageTransactionNumber = CASE WHEN CS.ysnTransferStorage = 1 THEN CS.strStorageTicketNumber ELSE TS.strTransferStorageTicket END
+	,strStorageTransactionNumber = CS.strStorageTicketNumber
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
@@ -152,14 +152,14 @@ LEFT JOIN tblCTContractDetail CD_Transfer
 		AND CS.ysnTransferStorage = 1
 LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
-left join 
-    (
-        select GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId from tblGRStorageHistory GSH
-	join tblCTContractHeader GCH
-		on GCH.intContractHeaderId = GSH.intContractHeaderId
-	join tblCTContractDetail GCD
-		on GCH.intContractHeaderId = GCD.intContractHeaderId
-    
-    )GHistory
+LEFT JOIN (
+	SELECT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
+	FROM tblGRStorageHistory GSH
+	JOIN tblCTContractHeader GCH
+		ON GCH.intContractHeaderId = GSH.intContractHeaderId
+	JOIN tblCTContractDetail GCD
+		ON GCH.intContractHeaderId = GCD.intContractHeaderId
+	WHERE GSH.intTransactionTypeId IN (1,3,5) --Scale, Transfer, Delivery Sheet
+) GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
-        and CS.intStorageTypeId = 2
+        and ST.ysnDPOwnedType = 1
