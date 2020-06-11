@@ -106,6 +106,8 @@ BEGIN TRY
 		,@intLocationId INT
 		,@strPhysicalItemNo NVARCHAR(50)
 		,@intPhysicalItemId INT
+		,@strNewLotTracking NVARCHAR(50)
+		,@strOldLotTracking NVARCHAR(50)
 
 	SELECT @intItemStageId = MIN(intItemStageId)
 	FROM tblICItemStage
@@ -1268,335 +1270,680 @@ BEGIN TRY
 
 			IF @strRowState = 'Modified'
 			BEGIN
-				UPDATE tblICItem
-				SET strItemNo = x.strItemNo
-					,strShortName = x.strShortName
-					,strType = x.strType
-					,strBundleType = x.strBundleType
-					,strDescription = x.strDescription
-					,intManufacturerId = @intManufacturerId
-					,intBrandId = @intBrandId
-					,intCategoryId = @intCategoryId
-					,strStatus = x.strStatus
-					,strModelNo = x.strModelNo
-					,strInventoryTracking = x.strInventoryTracking
-					,strLotTracking = x.strLotTracking
-					,ysnRequireCustomerApproval = x.ysnRequireCustomerApproval
-					,intRecipeId = x.intRecipeId
-					,ysnSanitationRequired = x.ysnSanitationRequired
-					,intLifeTime = x.intLifeTime
-					,strLifeTimeType = x.strLifeTimeType
-					,intReceiveLife = x.intReceiveLife
-					,strGTIN = x.strGTIN
-					,strRotationType = x.strRotationType
-					,intNMFCId = x.intNMFCId
-					,ysnStrictFIFO = x.ysnStrictFIFO
-					,intDimensionUOMId = @intDimensionUOMId
-					,dblHeight = x.dblHeight
-					,dblWidth = x.dblWidth
-					,dblDepth = x.dblDepth
-					,intWeightUOMId = @intWeightUOMId
-					,dblWeight = x.dblWeight
-					,intMaterialPackTypeId = @intMaterialPackTypeId
-					,strMaterialSizeCode = x.strMaterialSizeCode
-					,intInnerUnits = x.intInnerUnits
-					,intLayerPerPallet = x.intLayerPerPallet
-					,intUnitPerLayer = x.intUnitPerLayer
-					,dblStandardPalletRatio = x.dblStandardPalletRatio
-					,strMask1 = x.strMask1
-					,strMask2 = x.strMask2
-					,strMask3 = x.strMask3
-					,dblMaxWeightPerPack = x.dblMaxWeightPerPack
-					,intPatronageCategoryId = @intPatronageCategoryId
-					,intPatronageCategoryDirectId = x.intPatronageCategoryDirectId
-					,ysnStockedItem = x.ysnStockedItem
-					,ysnDyedFuel = x.ysnDyedFuel
-					,strBarcodePrint = x.strBarcodePrint
-					,ysnMSDSRequired = x.ysnMSDSRequired
-					,strEPANumber = x.strEPANumber
-					,ysnInboundTax = x.ysnInboundTax
-					,ysnOutboundTax = x.ysnOutboundTax
-					,ysnRestrictedChemical = x.ysnRestrictedChemical
-					,ysnFuelItem = x.ysnFuelItem
-					,ysnTankRequired = x.ysnTankRequired
-					,ysnAvailableTM = x.ysnAvailableTM
-					,dblDefaultFull = x.dblDefaultFull
-					,strFuelInspectFee = x.strFuelInspectFee
-					,strRINRequired = x.strRINRequired
-					,intRINFuelTypeId = x.intRINFuelTypeId
-					,dblDenaturantPercent = x.dblDenaturantPercent
-					,ysnTonnageTax = x.ysnTonnageTax
-					,ysnLoadTracking = x.ysnLoadTracking
-					,dblMixOrder = x.dblMixOrder
-					,ysnHandAddIngredient = x.ysnHandAddIngredient
-					,intMedicationTag = @intMedicationTag
-					,intIngredientTag = @intIngredientTag
-					,intHazmatTag = x.intHazmatTag
-					,strVolumeRebateGroup = x.strVolumeRebateGroup
-					,intPhysicalItem = @intPhysicalItemId
-					,ysnExtendPickTicket = x.ysnExtendPickTicket
-					,ysnExportEDI = x.ysnExportEDI
-					,ysnHazardMaterial = x.ysnHazardMaterial
-					,ysnMaterialFee = x.ysnMaterialFee
-					,ysnAutoBlend = x.ysnAutoBlend
-					,dblUserGroupFee = x.dblUserGroupFee
-					,dblWeightTolerance = x.dblWeightTolerance
-					,dblOverReceiveTolerance = x.dblOverReceiveTolerance
-					,strMaintenanceCalculationMethod = x.strMaintenanceCalculationMethod
-					,dblMaintenanceRate = x.dblMaintenanceRate
-					,ysnListBundleSeparately = x.ysnListBundleSeparately
-					,intModuleId = x.intModuleId
-					,strNACSCategory = x.strNACSCategory
-					,strWICCode = x.strWICCode
-					,intAGCategory = x.intAGCategory
-					,ysnReceiptCommentRequired = x.ysnReceiptCommentRequired
-					,strCountCode = x.strCountCode
-					,ysnLandedCost = x.ysnLandedCost
-					,strLeadTime = x.strLeadTime
-					,ysnTaxable = x.ysnTaxable
-					,strKeywords = x.strKeywords
-					,dblCaseQty = x.dblCaseQty
-					,dtmDateShip = x.dtmDateShip
-					,dblTaxExempt = x.dblTaxExempt
-					,ysnDropShip = x.ysnDropShip
-					,ysnCommisionable = x.ysnCommisionable
-					,ysnSpecialCommission = x.ysnSpecialCommission
-					,intCommodityId = @intCommodityId
-					,intCommodityHierarchyId = x.intCommodityHierarchyId
-					,dblGAShrinkFactor = x.dblGAShrinkFactor
-					,intOriginId = @intOriginId
-					,intProductTypeId = x.intProductTypeId
-					,intRegionId = x.intRegionId
-					,intSeasonId = x.intSeasonId
-					,intClassVarietyId = x.intClassVarietyId
-					,intProductLineId = x.intProductLineId
-					,intGradeId = x.intGradeId
-					,strMarketValuation = x.strMarketValuation
-					,ysnInventoryCost = x.ysnInventoryCost
-					,ysnAccrue = x.ysnAccrue
-					,ysnMTM = x.ysnMTM
-					,ysnPrice = x.ysnPrice
-					,strCostMethod = x.strCostMethod
-					,strCostType = x.strCostType
-					,intOnCostTypeId = x.intOnCostTypeId
-					,dblAmount = x.dblAmount
-					,intCostUOMId = x.intCostUOMId
-					,intPackTypeId = x.intPackTypeId
-					,strWeightControlCode = x.strWeightControlCode
-					,dblBlendWeight = x.dblBlendWeight
-					,dblNetWeight = x.dblNetWeight
-					,dblUnitPerCase = x.dblUnitPerCase
-					,dblQuarantineDuration = x.dblQuarantineDuration
-					,intOwnerId = @intOwnerId
-					,intCustomerId = @intCustomerId
-					,dblCaseWeight = x.dblCaseWeight
-					,strWarehouseStatus = x.strWarehouseStatus
-					,ysnKosherCertified = x.ysnKosherCertified
-					,ysnFairTradeCompliant = x.ysnFairTradeCompliant
-					,ysnOrganic = x.ysnOrganic
-					,ysnRainForestCertified = x.ysnRainForestCertified
-					,dblRiskScore = x.dblRiskScore
-					,dblDensity = x.dblDensity
-					,dtmDateAvailable = x.dtmDateAvailable
-					,ysnMinorIngredient = x.ysnMinorIngredient
-					,ysnExternalItem = x.ysnExternalItem
-					,strExternalGroup = x.strExternalGroup
-					,ysnSellableItem = x.ysnSellableItem
-					,dblMinStockWeeks = x.dblMinStockWeeks
-					,dblFullContainerSize = x.dblFullContainerSize
-					,ysnHasMFTImplication = x.ysnHasMFTImplication
-					,intBuyingGroupId = @intBuyingGroupId
-					,intAccountManagerId = @intAccountManagerId
-					,intConcurrencyId = x.intConcurrencyId
-					,ysnItemUsedInDiscountCode = x.ysnItemUsedInDiscountCode
-					,ysnUsedForEnergyTracExport = x.ysnUsedForEnergyTracExport
-					,strInvoiceComments = x.strInvoiceComments
-					,strPickListComments = x.strPickListComments
-					,intLotStatusId = @intLotStatusId
-					,strRequired = x.strRequired
-					,ysnBasisContract = x.ysnBasisContract
-					,intM2MComputationId = @intM2MComputationId
-					,intTonnageTaxUOMId = @intTonnageTaxUOMId
-					,ysn1099Box3 = x.ysn1099Box3
-					,ysnUseWeighScales = x.ysnUseWeighScales
-					,ysnLotWeightsRequired = x.ysnLotWeightsRequired
-					,ysnBillable = x.ysnBillable
-					,ysnSupported = x.ysnSupported
-					,ysnDisplayInHelpdesk = x.ysnDisplayInHelpdesk
-					,intHazmatMessage = x.intHazmatMessage
-					,strOriginStatus = x.strOriginStatus
-					,intCompanyId = x.intCompanyId
-					,dtmDateCreated = x.dtmDateCreated
-					,dtmDateModified = x.dtmDateModified
-					,intCreatedByUserId = x.intCreatedByUserId
-					,intModifiedByUserId = x.intModifiedByUserId
-					,strServiceType = x.strServiceType
-					,intDataSourceId = @intDataSourceId
-				FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
-						strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strShortName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strBundleType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
-						,intManufacturerId INT
-						,intBrandId INT
-						,intCategoryId INT
-						,strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strModelNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnRequireCustomerApproval BIT
-						,intRecipeId INT
-						,ysnSanitationRequired BIT
-						,intLifeTime INT
-						,strLifeTimeType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intReceiveLife INT
-						,strGTIN NVARCHAR(100) COLLATE Latin1_General_CI_AS
-						,strRotationType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intNMFCId INT
-						,ysnStrictFIFO BIT
-						,intDimensionUOMId INT
-						,dblHeight NUMERIC(18, 6)
-						,dblWidth NUMERIC(18, 6)
-						,dblDepth NUMERIC(18, 6)
-						,intWeightUOMId INT
-						,dblWeight NUMERIC(18, 6)
-						,intMaterialPackTypeId INT
-						,strMaterialSizeCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intInnerUnits INT
-						,intLayerPerPallet INT
-						,intUnitPerLayer INT
-						,dblStandardPalletRatio NUMERIC(18, 6)
-						,strMask1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strMask2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strMask3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,dblMaxWeightPerPack NUMERIC(18, 6)
-						,intPatronageCategoryId INT
-						,intPatronageCategoryDirectId INT
-						,ysnStockedItem BIT
-						,ysnDyedFuel BIT
-						,strBarcodePrint NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnMSDSRequired BIT
-						,strEPANumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnInboundTax BIT
-						,ysnOutboundTax BIT
-						,ysnRestrictedChemical BIT
-						,ysnFuelItem BIT
-						,ysnTankRequired BIT
-						,ysnAvailableTM BIT
-						,dblDefaultFull NUMERIC(18, 6)
-						,strFuelInspectFee NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strRINRequired NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intRINFuelTypeId INT
-						,dblDenaturantPercent NUMERIC(18, 6)
-						,ysnTonnageTax BIT
-						,ysnLoadTracking BIT
-						,dblMixOrder NUMERIC(18, 6)
-						,ysnHandAddIngredient BIT
-						,intMedicationTag INT
-						,intIngredientTag INT
-						,intHazmatTag INT
-						,strVolumeRebateGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnExtendPickTicket BIT
-						,ysnExportEDI BIT
-						,ysnHazardMaterial BIT
-						,ysnMaterialFee BIT
-						,ysnAutoBlend BIT
-						,dblUserGroupFee NUMERIC(18, 6)
-						,dblWeightTolerance NUMERIC(18, 6)
-						,dblOverReceiveTolerance NUMERIC(18, 6)
-						,strMaintenanceCalculationMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,dblMaintenanceRate NUMERIC(18, 6)
-						,ysnListBundleSeparately BIT
-						,intModuleId INT
-						,strNACSCategory NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strWICCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intAGCategory INT
-						,ysnReceiptCommentRequired BIT
-						,strCountCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnLandedCost BIT
-						,strLeadTime NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnTaxable BIT
-						,strKeywords NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
-						,dblCaseQty NUMERIC(18, 6)
-						,dtmDateShip DATETIME
-						,dblTaxExempt NUMERIC(18, 6)
-						,ysnDropShip BIT
-						,ysnCommisionable BIT
-						,ysnSpecialCommission BIT
-						,intCommodityId INT
-						,intCommodityHierarchyId INT
-						,dblGAShrinkFactor NUMERIC(18, 6)
-						,intOriginId INT
-						,intProductTypeId INT
-						,intRegionId INT
-						,intSeasonId INT
-						,intClassVarietyId INT
-						,intProductLineId INT
-						,intGradeId INT
-						,strMarketValuation NVARCHAR(50)
-						,ysnInventoryCost BIT
-						,ysnAccrue BIT
-						,ysnMTM BIT
-						,ysnPrice BIT
-						,strCostMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intOnCostTypeId INT
-						,dblAmount NUMERIC(18, 6)
-						,intCostUOMId INT
-						,intPackTypeId INT
-						,strWeightControlCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,dblBlendWeight NUMERIC(18, 6)
-						,dblNetWeight NUMERIC(18, 6)
-						,dblUnitPerCase NUMERIC(18, 6)
-						,dblQuarantineDuration NUMERIC(18, 6)
-						,intOwnerId INT
-						,intCustomerId INT
-						,dblCaseWeight NUMERIC(18, 6)
-						,strWarehouseStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnKosherCertified BIT
-						,ysnFairTradeCompliant BIT
-						,ysnOrganic BIT
-						,ysnRainForestCertified BIT
-						,dblRiskScore NUMERIC(18, 6)
-						,dblDensity NUMERIC(18, 6)
-						,dtmDateAvailable DATETIME
-						,ysnMinorIngredient BIT
-						,ysnExternalItem BIT
-						,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnSellableItem BIT
-						,dblMinStockWeeks NUMERIC(18, 6)
-						,dblFullContainerSize NUMERIC(18, 6)
-						,ysnHasMFTImplication BIT
-						,intBuyingGroupId INT
-						,intAccountManagerId INT
-						,intConcurrencyId INT
-						,ysnItemUsedInDiscountCode BIT
-						,ysnUsedForEnergyTracExport BIT
-						,strInvoiceComments NVARCHAR(500) COLLATE Latin1_General_CI_AS
-						,strPickListComments NVARCHAR(500) COLLATE Latin1_General_CI_AS
-						,intLotStatusId INT
-						,strRequired NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,ysnBasisContract BIT
-						,intM2MComputationId INT
-						,intTonnageTaxUOMId INT
-						,ysn1099Box3 BIT
-						,ysnUseWeighScales BIT
-						,ysnLotWeightsRequired BIT
-						,ysnBillable BIT
-						,ysnSupported BIT
-						,ysnDisplayInHelpdesk BIT
-						,intHazmatMessage INT
-						,strOriginStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intCompanyId INT
-						,dtmDateCreated DATETIME
-						,dtmDateModified DATETIME
-						,intCreatedByUserId INT
-						,intModifiedByUserId INT
-						,strServiceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
-						,intDataSourceId TINYINT
-						) x
-				WHERE tblICItem.intItemRefId = @intItemId
+				SELECT @strNewLotTracking = NULL
+
+				SELECT @strOldLotTracking = NULL
+
+				SELECT @strNewLotTracking = strLotTracking
+				FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS)
+
+				SELECT @strOldLotTracking = strLotTracking
+				FROM tblICItem
+				WHERE intItemRefId = @intItemId
+
+				IF @strOldLotTracking = @strNewLotTracking
+				BEGIN
+					UPDATE tblICItem
+					SET strItemNo = x.strItemNo
+						,strShortName = x.strShortName
+						,strType = x.strType
+						,strBundleType = x.strBundleType
+						,strDescription = x.strDescription
+						,intManufacturerId = @intManufacturerId
+						,intBrandId = @intBrandId
+						,intCategoryId = @intCategoryId
+						,strStatus = x.strStatus
+						,strModelNo = x.strModelNo
+						,strInventoryTracking = x.strInventoryTracking
+						,ysnRequireCustomerApproval = x.ysnRequireCustomerApproval
+						,intRecipeId = x.intRecipeId
+						,ysnSanitationRequired = x.ysnSanitationRequired
+						,intLifeTime = x.intLifeTime
+						,strLifeTimeType = x.strLifeTimeType
+						,intReceiveLife = x.intReceiveLife
+						,strGTIN = x.strGTIN
+						,strRotationType = x.strRotationType
+						,intNMFCId = x.intNMFCId
+						,ysnStrictFIFO = x.ysnStrictFIFO
+						,intDimensionUOMId = @intDimensionUOMId
+						,dblHeight = x.dblHeight
+						,dblWidth = x.dblWidth
+						,dblDepth = x.dblDepth
+						,intWeightUOMId = @intWeightUOMId
+						,dblWeight = x.dblWeight
+						,intMaterialPackTypeId = @intMaterialPackTypeId
+						,strMaterialSizeCode = x.strMaterialSizeCode
+						,intInnerUnits = x.intInnerUnits
+						,intLayerPerPallet = x.intLayerPerPallet
+						,intUnitPerLayer = x.intUnitPerLayer
+						,dblStandardPalletRatio = x.dblStandardPalletRatio
+						,strMask1 = x.strMask1
+						,strMask2 = x.strMask2
+						,strMask3 = x.strMask3
+						,dblMaxWeightPerPack = x.dblMaxWeightPerPack
+						,intPatronageCategoryId = @intPatronageCategoryId
+						,intPatronageCategoryDirectId = x.intPatronageCategoryDirectId
+						,ysnStockedItem = x.ysnStockedItem
+						,ysnDyedFuel = x.ysnDyedFuel
+						,strBarcodePrint = x.strBarcodePrint
+						,ysnMSDSRequired = x.ysnMSDSRequired
+						,strEPANumber = x.strEPANumber
+						,ysnInboundTax = x.ysnInboundTax
+						,ysnOutboundTax = x.ysnOutboundTax
+						,ysnRestrictedChemical = x.ysnRestrictedChemical
+						,ysnFuelItem = x.ysnFuelItem
+						,ysnTankRequired = x.ysnTankRequired
+						,ysnAvailableTM = x.ysnAvailableTM
+						,dblDefaultFull = x.dblDefaultFull
+						,strFuelInspectFee = x.strFuelInspectFee
+						,strRINRequired = x.strRINRequired
+						,intRINFuelTypeId = x.intRINFuelTypeId
+						,dblDenaturantPercent = x.dblDenaturantPercent
+						,ysnTonnageTax = x.ysnTonnageTax
+						,ysnLoadTracking = x.ysnLoadTracking
+						,dblMixOrder = x.dblMixOrder
+						,ysnHandAddIngredient = x.ysnHandAddIngredient
+						,intMedicationTag = @intMedicationTag
+						,intIngredientTag = @intIngredientTag
+						,intHazmatTag = x.intHazmatTag
+						,strVolumeRebateGroup = x.strVolumeRebateGroup
+						,intPhysicalItem = @intPhysicalItemId
+						,ysnExtendPickTicket = x.ysnExtendPickTicket
+						,ysnExportEDI = x.ysnExportEDI
+						,ysnHazardMaterial = x.ysnHazardMaterial
+						,ysnMaterialFee = x.ysnMaterialFee
+						,ysnAutoBlend = x.ysnAutoBlend
+						,dblUserGroupFee = x.dblUserGroupFee
+						,dblWeightTolerance = x.dblWeightTolerance
+						,dblOverReceiveTolerance = x.dblOverReceiveTolerance
+						,strMaintenanceCalculationMethod = x.strMaintenanceCalculationMethod
+						,dblMaintenanceRate = x.dblMaintenanceRate
+						,ysnListBundleSeparately = x.ysnListBundleSeparately
+						,intModuleId = x.intModuleId
+						,strNACSCategory = x.strNACSCategory
+						,strWICCode = x.strWICCode
+						,intAGCategory = x.intAGCategory
+						,ysnReceiptCommentRequired = x.ysnReceiptCommentRequired
+						,strCountCode = x.strCountCode
+						,ysnLandedCost = x.ysnLandedCost
+						,strLeadTime = x.strLeadTime
+						,ysnTaxable = x.ysnTaxable
+						,strKeywords = x.strKeywords
+						,dblCaseQty = x.dblCaseQty
+						,dtmDateShip = x.dtmDateShip
+						,dblTaxExempt = x.dblTaxExempt
+						,ysnDropShip = x.ysnDropShip
+						,ysnCommisionable = x.ysnCommisionable
+						,ysnSpecialCommission = x.ysnSpecialCommission
+						,intCommodityId = @intCommodityId
+						,intCommodityHierarchyId = x.intCommodityHierarchyId
+						,dblGAShrinkFactor = x.dblGAShrinkFactor
+						,intOriginId = @intOriginId
+						,intProductTypeId = x.intProductTypeId
+						,intRegionId = x.intRegionId
+						,intSeasonId = x.intSeasonId
+						,intClassVarietyId = x.intClassVarietyId
+						,intProductLineId = x.intProductLineId
+						,intGradeId = x.intGradeId
+						,strMarketValuation = x.strMarketValuation
+						,ysnInventoryCost = x.ysnInventoryCost
+						,ysnAccrue = x.ysnAccrue
+						,ysnMTM = x.ysnMTM
+						,ysnPrice = x.ysnPrice
+						,strCostMethod = x.strCostMethod
+						,strCostType = x.strCostType
+						,intOnCostTypeId = x.intOnCostTypeId
+						,dblAmount = x.dblAmount
+						,intCostUOMId = x.intCostUOMId
+						,intPackTypeId = x.intPackTypeId
+						,strWeightControlCode = x.strWeightControlCode
+						,dblBlendWeight = x.dblBlendWeight
+						,dblNetWeight = x.dblNetWeight
+						,dblUnitPerCase = x.dblUnitPerCase
+						,dblQuarantineDuration = x.dblQuarantineDuration
+						,intOwnerId = @intOwnerId
+						,intCustomerId = @intCustomerId
+						,dblCaseWeight = x.dblCaseWeight
+						,strWarehouseStatus = x.strWarehouseStatus
+						,ysnKosherCertified = x.ysnKosherCertified
+						,ysnFairTradeCompliant = x.ysnFairTradeCompliant
+						,ysnOrganic = x.ysnOrganic
+						,ysnRainForestCertified = x.ysnRainForestCertified
+						,dblRiskScore = x.dblRiskScore
+						,dblDensity = x.dblDensity
+						,dtmDateAvailable = x.dtmDateAvailable
+						,ysnMinorIngredient = x.ysnMinorIngredient
+						,ysnExternalItem = x.ysnExternalItem
+						,strExternalGroup = x.strExternalGroup
+						,ysnSellableItem = x.ysnSellableItem
+						,dblMinStockWeeks = x.dblMinStockWeeks
+						,dblFullContainerSize = x.dblFullContainerSize
+						,ysnHasMFTImplication = x.ysnHasMFTImplication
+						,intBuyingGroupId = @intBuyingGroupId
+						,intAccountManagerId = @intAccountManagerId
+						,intConcurrencyId = x.intConcurrencyId
+						,ysnItemUsedInDiscountCode = x.ysnItemUsedInDiscountCode
+						,ysnUsedForEnergyTracExport = x.ysnUsedForEnergyTracExport
+						,strInvoiceComments = x.strInvoiceComments
+						,strPickListComments = x.strPickListComments
+						,intLotStatusId = @intLotStatusId
+						,strRequired = x.strRequired
+						,ysnBasisContract = x.ysnBasisContract
+						,intM2MComputationId = @intM2MComputationId
+						,intTonnageTaxUOMId = @intTonnageTaxUOMId
+						,ysn1099Box3 = x.ysn1099Box3
+						,ysnUseWeighScales = x.ysnUseWeighScales
+						,ysnLotWeightsRequired = x.ysnLotWeightsRequired
+						,ysnBillable = x.ysnBillable
+						,ysnSupported = x.ysnSupported
+						,ysnDisplayInHelpdesk = x.ysnDisplayInHelpdesk
+						,intHazmatMessage = x.intHazmatMessage
+						,strOriginStatus = x.strOriginStatus
+						,intCompanyId = x.intCompanyId
+						,dtmDateCreated = x.dtmDateCreated
+						,dtmDateModified = x.dtmDateModified
+						,intCreatedByUserId = x.intCreatedByUserId
+						,intModifiedByUserId = x.intModifiedByUserId
+						,strServiceType = x.strServiceType
+						,intDataSourceId = @intDataSourceId
+					FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
+							strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strShortName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strBundleType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+							,intManufacturerId INT
+							,intBrandId INT
+							,intCategoryId INT
+							,strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strModelNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnRequireCustomerApproval BIT
+							,intRecipeId INT
+							,ysnSanitationRequired BIT
+							,intLifeTime INT
+							,strLifeTimeType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intReceiveLife INT
+							,strGTIN NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strRotationType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intNMFCId INT
+							,ysnStrictFIFO BIT
+							,intDimensionUOMId INT
+							,dblHeight NUMERIC(18, 6)
+							,dblWidth NUMERIC(18, 6)
+							,dblDepth NUMERIC(18, 6)
+							,intWeightUOMId INT
+							,dblWeight NUMERIC(18, 6)
+							,intMaterialPackTypeId INT
+							,strMaterialSizeCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intInnerUnits INT
+							,intLayerPerPallet INT
+							,intUnitPerLayer INT
+							,dblStandardPalletRatio NUMERIC(18, 6)
+							,strMask1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strMask2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strMask3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,dblMaxWeightPerPack NUMERIC(18, 6)
+							,intPatronageCategoryId INT
+							,intPatronageCategoryDirectId INT
+							,ysnStockedItem BIT
+							,ysnDyedFuel BIT
+							,strBarcodePrint NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnMSDSRequired BIT
+							,strEPANumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnInboundTax BIT
+							,ysnOutboundTax BIT
+							,ysnRestrictedChemical BIT
+							,ysnFuelItem BIT
+							,ysnTankRequired BIT
+							,ysnAvailableTM BIT
+							,dblDefaultFull NUMERIC(18, 6)
+							,strFuelInspectFee NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strRINRequired NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intRINFuelTypeId INT
+							,dblDenaturantPercent NUMERIC(18, 6)
+							,ysnTonnageTax BIT
+							,ysnLoadTracking BIT
+							,dblMixOrder NUMERIC(18, 6)
+							,ysnHandAddIngredient BIT
+							,intMedicationTag INT
+							,intIngredientTag INT
+							,intHazmatTag INT
+							,strVolumeRebateGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnExtendPickTicket BIT
+							,ysnExportEDI BIT
+							,ysnHazardMaterial BIT
+							,ysnMaterialFee BIT
+							,ysnAutoBlend BIT
+							,dblUserGroupFee NUMERIC(18, 6)
+							,dblWeightTolerance NUMERIC(18, 6)
+							,dblOverReceiveTolerance NUMERIC(18, 6)
+							,strMaintenanceCalculationMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,dblMaintenanceRate NUMERIC(18, 6)
+							,ysnListBundleSeparately BIT
+							,intModuleId INT
+							,strNACSCategory NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strWICCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intAGCategory INT
+							,ysnReceiptCommentRequired BIT
+							,strCountCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnLandedCost BIT
+							,strLeadTime NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnTaxable BIT
+							,strKeywords NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+							,dblCaseQty NUMERIC(18, 6)
+							,dtmDateShip DATETIME
+							,dblTaxExempt NUMERIC(18, 6)
+							,ysnDropShip BIT
+							,ysnCommisionable BIT
+							,ysnSpecialCommission BIT
+							,intCommodityId INT
+							,intCommodityHierarchyId INT
+							,dblGAShrinkFactor NUMERIC(18, 6)
+							,intOriginId INT
+							,intProductTypeId INT
+							,intRegionId INT
+							,intSeasonId INT
+							,intClassVarietyId INT
+							,intProductLineId INT
+							,intGradeId INT
+							,strMarketValuation NVARCHAR(50)
+							,ysnInventoryCost BIT
+							,ysnAccrue BIT
+							,ysnMTM BIT
+							,ysnPrice BIT
+							,strCostMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intOnCostTypeId INT
+							,dblAmount NUMERIC(18, 6)
+							,intCostUOMId INT
+							,intPackTypeId INT
+							,strWeightControlCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,dblBlendWeight NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(18, 6)
+							,dblUnitPerCase NUMERIC(18, 6)
+							,dblQuarantineDuration NUMERIC(18, 6)
+							,intOwnerId INT
+							,intCustomerId INT
+							,dblCaseWeight NUMERIC(18, 6)
+							,strWarehouseStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnKosherCertified BIT
+							,ysnFairTradeCompliant BIT
+							,ysnOrganic BIT
+							,ysnRainForestCertified BIT
+							,dblRiskScore NUMERIC(18, 6)
+							,dblDensity NUMERIC(18, 6)
+							,dtmDateAvailable DATETIME
+							,ysnMinorIngredient BIT
+							,ysnExternalItem BIT
+							,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnSellableItem BIT
+							,dblMinStockWeeks NUMERIC(18, 6)
+							,dblFullContainerSize NUMERIC(18, 6)
+							,ysnHasMFTImplication BIT
+							,intBuyingGroupId INT
+							,intAccountManagerId INT
+							,intConcurrencyId INT
+							,ysnItemUsedInDiscountCode BIT
+							,ysnUsedForEnergyTracExport BIT
+							,strInvoiceComments NVARCHAR(500) COLLATE Latin1_General_CI_AS
+							,strPickListComments NVARCHAR(500) COLLATE Latin1_General_CI_AS
+							,intLotStatusId INT
+							,strRequired NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnBasisContract BIT
+							,intM2MComputationId INT
+							,intTonnageTaxUOMId INT
+							,ysn1099Box3 BIT
+							,ysnUseWeighScales BIT
+							,ysnLotWeightsRequired BIT
+							,ysnBillable BIT
+							,ysnSupported BIT
+							,ysnDisplayInHelpdesk BIT
+							,intHazmatMessage INT
+							,strOriginStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intCompanyId INT
+							,dtmDateCreated DATETIME
+							,dtmDateModified DATETIME
+							,intCreatedByUserId INT
+							,intModifiedByUserId INT
+							,strServiceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intDataSourceId TINYINT
+							) x
+					WHERE tblICItem.intItemRefId = @intItemId
+				END
+				ELSE
+				BEGIN
+					UPDATE tblICItem
+					SET strItemNo = x.strItemNo
+						,strShortName = x.strShortName
+						,strType = x.strType
+						,strBundleType = x.strBundleType
+						,strDescription = x.strDescription
+						,intManufacturerId = @intManufacturerId
+						,intBrandId = @intBrandId
+						,intCategoryId = @intCategoryId
+						,strStatus = x.strStatus
+						,strModelNo = x.strModelNo
+						,strInventoryTracking = x.strInventoryTracking
+						,strLotTracking = x.strLotTracking
+						,ysnRequireCustomerApproval = x.ysnRequireCustomerApproval
+						,intRecipeId = x.intRecipeId
+						,ysnSanitationRequired = x.ysnSanitationRequired
+						,intLifeTime = x.intLifeTime
+						,strLifeTimeType = x.strLifeTimeType
+						,intReceiveLife = x.intReceiveLife
+						,strGTIN = x.strGTIN
+						,strRotationType = x.strRotationType
+						,intNMFCId = x.intNMFCId
+						,ysnStrictFIFO = x.ysnStrictFIFO
+						,intDimensionUOMId = @intDimensionUOMId
+						,dblHeight = x.dblHeight
+						,dblWidth = x.dblWidth
+						,dblDepth = x.dblDepth
+						,intWeightUOMId = @intWeightUOMId
+						,dblWeight = x.dblWeight
+						,intMaterialPackTypeId = @intMaterialPackTypeId
+						,strMaterialSizeCode = x.strMaterialSizeCode
+						,intInnerUnits = x.intInnerUnits
+						,intLayerPerPallet = x.intLayerPerPallet
+						,intUnitPerLayer = x.intUnitPerLayer
+						,dblStandardPalletRatio = x.dblStandardPalletRatio
+						,strMask1 = x.strMask1
+						,strMask2 = x.strMask2
+						,strMask3 = x.strMask3
+						,dblMaxWeightPerPack = x.dblMaxWeightPerPack
+						,intPatronageCategoryId = @intPatronageCategoryId
+						,intPatronageCategoryDirectId = x.intPatronageCategoryDirectId
+						,ysnStockedItem = x.ysnStockedItem
+						,ysnDyedFuel = x.ysnDyedFuel
+						,strBarcodePrint = x.strBarcodePrint
+						,ysnMSDSRequired = x.ysnMSDSRequired
+						,strEPANumber = x.strEPANumber
+						,ysnInboundTax = x.ysnInboundTax
+						,ysnOutboundTax = x.ysnOutboundTax
+						,ysnRestrictedChemical = x.ysnRestrictedChemical
+						,ysnFuelItem = x.ysnFuelItem
+						,ysnTankRequired = x.ysnTankRequired
+						,ysnAvailableTM = x.ysnAvailableTM
+						,dblDefaultFull = x.dblDefaultFull
+						,strFuelInspectFee = x.strFuelInspectFee
+						,strRINRequired = x.strRINRequired
+						,intRINFuelTypeId = x.intRINFuelTypeId
+						,dblDenaturantPercent = x.dblDenaturantPercent
+						,ysnTonnageTax = x.ysnTonnageTax
+						,ysnLoadTracking = x.ysnLoadTracking
+						,dblMixOrder = x.dblMixOrder
+						,ysnHandAddIngredient = x.ysnHandAddIngredient
+						,intMedicationTag = @intMedicationTag
+						,intIngredientTag = @intIngredientTag
+						,intHazmatTag = x.intHazmatTag
+						,strVolumeRebateGroup = x.strVolumeRebateGroup
+						,intPhysicalItem = @intPhysicalItemId
+						,ysnExtendPickTicket = x.ysnExtendPickTicket
+						,ysnExportEDI = x.ysnExportEDI
+						,ysnHazardMaterial = x.ysnHazardMaterial
+						,ysnMaterialFee = x.ysnMaterialFee
+						,ysnAutoBlend = x.ysnAutoBlend
+						,dblUserGroupFee = x.dblUserGroupFee
+						,dblWeightTolerance = x.dblWeightTolerance
+						,dblOverReceiveTolerance = x.dblOverReceiveTolerance
+						,strMaintenanceCalculationMethod = x.strMaintenanceCalculationMethod
+						,dblMaintenanceRate = x.dblMaintenanceRate
+						,ysnListBundleSeparately = x.ysnListBundleSeparately
+						,intModuleId = x.intModuleId
+						,strNACSCategory = x.strNACSCategory
+						,strWICCode = x.strWICCode
+						,intAGCategory = x.intAGCategory
+						,ysnReceiptCommentRequired = x.ysnReceiptCommentRequired
+						,strCountCode = x.strCountCode
+						,ysnLandedCost = x.ysnLandedCost
+						,strLeadTime = x.strLeadTime
+						,ysnTaxable = x.ysnTaxable
+						,strKeywords = x.strKeywords
+						,dblCaseQty = x.dblCaseQty
+						,dtmDateShip = x.dtmDateShip
+						,dblTaxExempt = x.dblTaxExempt
+						,ysnDropShip = x.ysnDropShip
+						,ysnCommisionable = x.ysnCommisionable
+						,ysnSpecialCommission = x.ysnSpecialCommission
+						,intCommodityId = @intCommodityId
+						,intCommodityHierarchyId = x.intCommodityHierarchyId
+						,dblGAShrinkFactor = x.dblGAShrinkFactor
+						,intOriginId = @intOriginId
+						,intProductTypeId = x.intProductTypeId
+						,intRegionId = x.intRegionId
+						,intSeasonId = x.intSeasonId
+						,intClassVarietyId = x.intClassVarietyId
+						,intProductLineId = x.intProductLineId
+						,intGradeId = x.intGradeId
+						,strMarketValuation = x.strMarketValuation
+						,ysnInventoryCost = x.ysnInventoryCost
+						,ysnAccrue = x.ysnAccrue
+						,ysnMTM = x.ysnMTM
+						,ysnPrice = x.ysnPrice
+						,strCostMethod = x.strCostMethod
+						,strCostType = x.strCostType
+						,intOnCostTypeId = x.intOnCostTypeId
+						,dblAmount = x.dblAmount
+						,intCostUOMId = x.intCostUOMId
+						,intPackTypeId = x.intPackTypeId
+						,strWeightControlCode = x.strWeightControlCode
+						,dblBlendWeight = x.dblBlendWeight
+						,dblNetWeight = x.dblNetWeight
+						,dblUnitPerCase = x.dblUnitPerCase
+						,dblQuarantineDuration = x.dblQuarantineDuration
+						,intOwnerId = @intOwnerId
+						,intCustomerId = @intCustomerId
+						,dblCaseWeight = x.dblCaseWeight
+						,strWarehouseStatus = x.strWarehouseStatus
+						,ysnKosherCertified = x.ysnKosherCertified
+						,ysnFairTradeCompliant = x.ysnFairTradeCompliant
+						,ysnOrganic = x.ysnOrganic
+						,ysnRainForestCertified = x.ysnRainForestCertified
+						,dblRiskScore = x.dblRiskScore
+						,dblDensity = x.dblDensity
+						,dtmDateAvailable = x.dtmDateAvailable
+						,ysnMinorIngredient = x.ysnMinorIngredient
+						,ysnExternalItem = x.ysnExternalItem
+						,strExternalGroup = x.strExternalGroup
+						,ysnSellableItem = x.ysnSellableItem
+						,dblMinStockWeeks = x.dblMinStockWeeks
+						,dblFullContainerSize = x.dblFullContainerSize
+						,ysnHasMFTImplication = x.ysnHasMFTImplication
+						,intBuyingGroupId = @intBuyingGroupId
+						,intAccountManagerId = @intAccountManagerId
+						,intConcurrencyId = x.intConcurrencyId
+						,ysnItemUsedInDiscountCode = x.ysnItemUsedInDiscountCode
+						,ysnUsedForEnergyTracExport = x.ysnUsedForEnergyTracExport
+						,strInvoiceComments = x.strInvoiceComments
+						,strPickListComments = x.strPickListComments
+						,intLotStatusId = @intLotStatusId
+						,strRequired = x.strRequired
+						,ysnBasisContract = x.ysnBasisContract
+						,intM2MComputationId = @intM2MComputationId
+						,intTonnageTaxUOMId = @intTonnageTaxUOMId
+						,ysn1099Box3 = x.ysn1099Box3
+						,ysnUseWeighScales = x.ysnUseWeighScales
+						,ysnLotWeightsRequired = x.ysnLotWeightsRequired
+						,ysnBillable = x.ysnBillable
+						,ysnSupported = x.ysnSupported
+						,ysnDisplayInHelpdesk = x.ysnDisplayInHelpdesk
+						,intHazmatMessage = x.intHazmatMessage
+						,strOriginStatus = x.strOriginStatus
+						,intCompanyId = x.intCompanyId
+						,dtmDateCreated = x.dtmDateCreated
+						,dtmDateModified = x.dtmDateModified
+						,intCreatedByUserId = x.intCreatedByUserId
+						,intModifiedByUserId = x.intModifiedByUserId
+						,strServiceType = x.strServiceType
+						,intDataSourceId = @intDataSourceId
+					FROM OPENXML(@idoc, 'vyuIPGetItems/vyuIPGetItem', 2) WITH (
+							strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strShortName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strBundleType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strDescription NVARCHAR(250) COLLATE Latin1_General_CI_AS
+							,intManufacturerId INT
+							,intBrandId INT
+							,intCategoryId INT
+							,strStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strModelNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strInventoryTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnRequireCustomerApproval BIT
+							,intRecipeId INT
+							,ysnSanitationRequired BIT
+							,intLifeTime INT
+							,strLifeTimeType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intReceiveLife INT
+							,strGTIN NVARCHAR(100) COLLATE Latin1_General_CI_AS
+							,strRotationType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intNMFCId INT
+							,ysnStrictFIFO BIT
+							,intDimensionUOMId INT
+							,dblHeight NUMERIC(18, 6)
+							,dblWidth NUMERIC(18, 6)
+							,dblDepth NUMERIC(18, 6)
+							,intWeightUOMId INT
+							,dblWeight NUMERIC(18, 6)
+							,intMaterialPackTypeId INT
+							,strMaterialSizeCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intInnerUnits INT
+							,intLayerPerPallet INT
+							,intUnitPerLayer INT
+							,dblStandardPalletRatio NUMERIC(18, 6)
+							,strMask1 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strMask2 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strMask3 NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,dblMaxWeightPerPack NUMERIC(18, 6)
+							,intPatronageCategoryId INT
+							,intPatronageCategoryDirectId INT
+							,ysnStockedItem BIT
+							,ysnDyedFuel BIT
+							,strBarcodePrint NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnMSDSRequired BIT
+							,strEPANumber NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnInboundTax BIT
+							,ysnOutboundTax BIT
+							,ysnRestrictedChemical BIT
+							,ysnFuelItem BIT
+							,ysnTankRequired BIT
+							,ysnAvailableTM BIT
+							,dblDefaultFull NUMERIC(18, 6)
+							,strFuelInspectFee NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strRINRequired NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intRINFuelTypeId INT
+							,dblDenaturantPercent NUMERIC(18, 6)
+							,ysnTonnageTax BIT
+							,ysnLoadTracking BIT
+							,dblMixOrder NUMERIC(18, 6)
+							,ysnHandAddIngredient BIT
+							,intMedicationTag INT
+							,intIngredientTag INT
+							,intHazmatTag INT
+							,strVolumeRebateGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnExtendPickTicket BIT
+							,ysnExportEDI BIT
+							,ysnHazardMaterial BIT
+							,ysnMaterialFee BIT
+							,ysnAutoBlend BIT
+							,dblUserGroupFee NUMERIC(18, 6)
+							,dblWeightTolerance NUMERIC(18, 6)
+							,dblOverReceiveTolerance NUMERIC(18, 6)
+							,strMaintenanceCalculationMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,dblMaintenanceRate NUMERIC(18, 6)
+							,ysnListBundleSeparately BIT
+							,intModuleId INT
+							,strNACSCategory NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strWICCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intAGCategory INT
+							,ysnReceiptCommentRequired BIT
+							,strCountCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnLandedCost BIT
+							,strLeadTime NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnTaxable BIT
+							,strKeywords NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+							,dblCaseQty NUMERIC(18, 6)
+							,dtmDateShip DATETIME
+							,dblTaxExempt NUMERIC(18, 6)
+							,ysnDropShip BIT
+							,ysnCommisionable BIT
+							,ysnSpecialCommission BIT
+							,intCommodityId INT
+							,intCommodityHierarchyId INT
+							,dblGAShrinkFactor NUMERIC(18, 6)
+							,intOriginId INT
+							,intProductTypeId INT
+							,intRegionId INT
+							,intSeasonId INT
+							,intClassVarietyId INT
+							,intProductLineId INT
+							,intGradeId INT
+							,strMarketValuation NVARCHAR(50)
+							,ysnInventoryCost BIT
+							,ysnAccrue BIT
+							,ysnMTM BIT
+							,ysnPrice BIT
+							,strCostMethod NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,strCostType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intOnCostTypeId INT
+							,dblAmount NUMERIC(18, 6)
+							,intCostUOMId INT
+							,intPackTypeId INT
+							,strWeightControlCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,dblBlendWeight NUMERIC(18, 6)
+							,dblNetWeight NUMERIC(18, 6)
+							,dblUnitPerCase NUMERIC(18, 6)
+							,dblQuarantineDuration NUMERIC(18, 6)
+							,intOwnerId INT
+							,intCustomerId INT
+							,dblCaseWeight NUMERIC(18, 6)
+							,strWarehouseStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnKosherCertified BIT
+							,ysnFairTradeCompliant BIT
+							,ysnOrganic BIT
+							,ysnRainForestCertified BIT
+							,dblRiskScore NUMERIC(18, 6)
+							,dblDensity NUMERIC(18, 6)
+							,dtmDateAvailable DATETIME
+							,ysnMinorIngredient BIT
+							,ysnExternalItem BIT
+							,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnSellableItem BIT
+							,dblMinStockWeeks NUMERIC(18, 6)
+							,dblFullContainerSize NUMERIC(18, 6)
+							,ysnHasMFTImplication BIT
+							,intBuyingGroupId INT
+							,intAccountManagerId INT
+							,intConcurrencyId INT
+							,ysnItemUsedInDiscountCode BIT
+							,ysnUsedForEnergyTracExport BIT
+							,strInvoiceComments NVARCHAR(500) COLLATE Latin1_General_CI_AS
+							,strPickListComments NVARCHAR(500) COLLATE Latin1_General_CI_AS
+							,intLotStatusId INT
+							,strRequired NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,ysnBasisContract BIT
+							,intM2MComputationId INT
+							,intTonnageTaxUOMId INT
+							,ysn1099Box3 BIT
+							,ysnUseWeighScales BIT
+							,ysnLotWeightsRequired BIT
+							,ysnBillable BIT
+							,ysnSupported BIT
+							,ysnDisplayInHelpdesk BIT
+							,intHazmatMessage INT
+							,strOriginStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intCompanyId INT
+							,dtmDateCreated DATETIME
+							,dtmDateModified DATETIME
+							,intCreatedByUserId INT
+							,intModifiedByUserId INT
+							,strServiceType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+							,intDataSourceId TINYINT
+							) x
+					WHERE tblICItem.intItemRefId = @intItemId
+				END
 
 				SELECT @intNewItemId = intItemId
 					,@strItemNo = strItemNo
@@ -4120,7 +4467,7 @@ BEGIN TRY
 					FROM @tblICFinalItemLocation IA1
 					WHERE IA1.intItemId = IA.intItemId
 						AND IA1.intLocationId = IA.intLocationId
-					)
+					) and IA.intLocationId is not null
 
 			UPDATE IA1
 			SET intVendorId = @intVendorId
@@ -7209,8 +7556,6 @@ BEGIN TRY
 
 			EXEC sp_xml_removedocument @idoc
 
-			
-
 			------------------Item UOM UPC------------------------------------------------------
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strItemUOMUpcXML
@@ -7255,8 +7600,6 @@ BEGIN TRY
 				AND IU.intUnitMeasureId = UM.intUnitMeasureId
 
 			EXEC sp_xml_removedocument @idoc
-
-			
 
 			---******************************** Item Substitute ********************************************
 			DECLARE @intItemSubstituteId INT
@@ -7748,9 +8091,10 @@ BEGIN TRY
 					,strModifiedBy NVARCHAR(100) Collate Latin1_General_CI_AS
 					) x
 			LEFT JOIN tblSMUserSecurity US ON US.strUserName = x.strCreatedBy
-			LEFT JOIN tblSMUserSecurity US1 ON US.strUserName = x.strModifiedBy
+			LEFT JOIN tblSMUserSecurity US1 ON US1.strUserName = x.strModifiedBy
 			LEFT JOIN tblCTBook B ON B.strBook = x.strBook
 			LEFT JOIN tblCTSubBook SB ON SB.strSubBook = x.strSubBook
+				AND B.intBookId = SB.intBookId
 
 			EXEC sp_xml_removedocument @idoc
 
@@ -7765,9 +8109,13 @@ BEGIN TRY
 			WHERE intRecordId = @intNewItemId
 				AND intScreenId = @intItemScreenId
 
-			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-				,@referenceTransactionId = @intTransactionId
-				,@referenceCompanyId = @intCompanyId
+			IF @intTransactionRefId IS NOT NULL
+				AND @intTransactionId IS NOT NULL
+			BEGIN
+				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+					,@referenceTransactionId = @intTransactionId
+					,@referenceCompanyId = @intCompanyId
+			END
 
 			INSERT INTO tblICItemAcknowledgementStage (
 				intItemId
