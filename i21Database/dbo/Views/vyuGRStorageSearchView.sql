@@ -102,7 +102,7 @@ SELECT DISTINCT
 	,strTransactionStatus           = CASE 
 										WHEN CS.ysnTransferStorage = 1 OR (CS.intTicketId IS NOT NULL AND SC.strTicketStatus = 'C') OR DeliverySheet.ysnPost = 1 THEN 'Posted'
 										ELSE 'Open'
-									END
+									END COLLATE Latin1_General_CI_AS
 	,TSR.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
 	,strStorageTransactionNumber = CS.strStorageTicketNumber

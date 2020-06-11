@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSCDisconnectedImportLog]
 (
     [intDisconnectedImportLogId] INT IDENTITY(1,1) NOT NULL,
-    [strFileName] NVARCHAR(MAX) NULL,
+    [strFileName] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS  NULL ,
     [intRecordId] INT NULL,
     [dtmDate] DATETIME NOT NULL,
     [intConcurrencyId] INT NOT NULL DEFAULT(0)

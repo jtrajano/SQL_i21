@@ -14,7 +14,7 @@
 				WHEN 'SPT' THEN 'Spot Sale' 
 				WHEN 'SPL' THEN 'Split' 
 				WHEN 'HLD' THEN 'Hold' 
-			END
+			END   COLLATE Latin1_General_CI_AS  
 		,CUSTOMER.strName AS [strCustomerName]
 		,SPLIT.strName AS [strSplitCustomerName]
 		,SC.dtmTicketDateTime

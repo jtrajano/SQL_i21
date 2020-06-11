@@ -20,7 +20,7 @@
 	[intUnitMeasureId] INT NULL, 
     [ysnShowOpenContract] BIT NOT NULL DEFAULT 1, 
     [ysnShowStorage] BIT NOT NULL DEFAULT 1, 
-	[strRemoteExportFilePath] NVARCHAR(MAX) DEFAULT('') NULL,
+	[strRemoteExportFilePath] NVARCHAR(MAX) DEFAULT('')  COLLATE Latin1_General_CI_AS NULL,
 	[intScaleRemoteFrequencyCheck] INT NOT NULL DEFAULT 1800, 
 	[ysnIsRemote] BIT NOT NULL DEFAULT 0,
 	[ysnDisconnectedEnabled] BIT NOT NULL DEFAULT(0), 

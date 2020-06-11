@@ -4,6 +4,6 @@
 	intSettleStorageId int not null,
 	intEntityId int not null,
 	dtmAction datetime not null,
-	strColumnRecord nvarchar(max),
-	strRowRecord nvarchar(max)
+	strColumnRecord nvarchar(max) COLLATE Latin1_General_CI_AS,
+	strRowRecord nvarchar(max) COLLATE Latin1_General_CI_AS
 )
