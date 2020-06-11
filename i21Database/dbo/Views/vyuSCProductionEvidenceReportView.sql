@@ -170,7 +170,7 @@
 					WHERE QMD2.dblGradeReading > 0 and SC2.intTicketId = SC.intTicketId
 					FOR XML PATH('')
 				),2,1000)
-		END strGradeReading
+		END COLLATE Latin1_General_CI_AS AS strGradeReading
 		,1 ysnDisplayGradeReading
 		,SC.intCropYearId
 		,CYR.strCropYear
