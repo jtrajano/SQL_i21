@@ -569,7 +569,8 @@ SELECT DISTINCT
 				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblOrderQty
 				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblOrderQty
 				ELSE A.dblOrderQty
-			END 
+			END 				
+
 		,[dblPOOpenReceive]							=	A.dblPOOpenReceive
 		,[dblOpenReceive]							=	
 			--A.dblOpenReceive
