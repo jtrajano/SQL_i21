@@ -118,13 +118,7 @@ BEGIN TRY
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
-	DECLARE @billDetailIds AS Id
-	INSERT INTO @billDetailIds
-	SELECT
-		A.intBillDetailId
-	FROM tblAPBillDetail A
-	WHERE A.intBillId = @intBillId
-	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 1
+	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
