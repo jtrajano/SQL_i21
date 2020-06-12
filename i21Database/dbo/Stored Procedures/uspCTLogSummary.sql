@@ -1890,9 +1890,9 @@ BEGIN TRY
 					, intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
 					, strTransactionReferenceNo = pc.strPriceContractNo
 					, dtmTransactionDate = cast((convert(VARCHAR(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
-					, sh.intContractHeaderId
+					, ch.intContractHeaderId
 					, ch.strContractNumber
-					, sh.intContractDetailId
+					, cd.intContractDetailId
 					, cd.intContractSeq
 					, ch.intContractTypeId
 					, dblQty = cbl.dblQty --pfd.dblQuantity
@@ -1900,31 +1900,33 @@ BEGIN TRY
 					, intPricingTypeId = 1
 					, strPricingType = 'Priced'
 					, strTransactionType = 'Price Fixation'--CASE WHEN @strProcess = 'Price Delete' THEN 'Price Fixation' ELSE @strProcess END
-					, intTransactionId = sh.intContractDetailId
-					, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+					, intTransactionId = cd.intContractDetailId
+					, strTransactionId = ch.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 					, dblFutures = pfd.dblFutures
-					, sh.dblBasis
+					, cd.dblBasis
 					, cd.intBasisUOMId
 					, cd.intBasisCurrencyId
-					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-					, sh.intContractStatusId
-					, sh.intEntityId
-					, sh.intCommodityId
-					, sh.intItemId
-					, sh.intCompanyLocationId
-					, sh.intFutureMarketId
-					, sh.intFutureMonthId
-					, sh.dtmStartDate
-					, sh.dtmEndDate
-					, sh.intBookId
-					, sh.intSubBookId
+					, intPriceUOMId = qu.intCommodityUnitMeasureId
+					, cd.intContractStatusId
+					, ch.intEntityId
+					, ch.intCommodityId
+					, cd.intItemId
+					, cd.intCompanyLocationId
+					, cd.intFutureMarketId
+					, cd.intFutureMonthId
+					, cd.dtmStartDate
+					, cd.dtmEndDate
+					, cd.intBookId
+					, cd.intSubBookId
 					, intOrderBy = 1
-					, sh.intUserId
+					, intUserId = @intUserId
 					FROM tblCTPriceFixationDetail pfd
 					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
 					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+					LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = ch.intCommodityId
+						AND qu.intUnitMeasureId = cd.intUnitMeasureId
 					OUTER APPLY
 					(
 						SELECT TOP 1 *
@@ -2041,9 +2043,9 @@ BEGIN TRY
 					, intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
 					, strTransactionReferenceNo = pc.strPriceContractNo
 					, dtmTransactionDate = cast((convert(varchar(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
-					, sh.intContractHeaderId
+					, ch.intContractHeaderId
 					, ch.strContractNumber
-					, sh.intContractDetailId
+					, cd.intContractDetailId
 					, cd.intContractSeq
 					, ch.intContractTypeId
 					, dblQty = (
@@ -2059,32 +2061,34 @@ BEGIN TRY
 					, intPricingTypeId = 1
 					, strPricingType = 'Priced'
 					, strTransactionType = 'Price Fixation'--CASE WHEN @strProcess = 'Price Delete' THEN 'Price Fixation' ELSE @strProcess END
-					, intTransactionId = sh.intContractDetailId
-					, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+					, intTransactionId = cd.intContractDetailId
+					, strTransactionId = ch.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 					, dblFutures = pfd.dblFutures
-					, sh.dblBasis
+					, cd.dblBasis
 					, cd.intBasisUOMId
 					, cd.intBasisCurrencyId
-					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-					, sh.intContractStatusId
-					, sh.intEntityId
-					, sh.intCommodityId
-					, sh.intItemId
-					, sh.intCompanyLocationId
-					, sh.intFutureMarketId
-					, sh.intFutureMonthId
-					, sh.dtmStartDate
-					, sh.dtmEndDate
-					, sh.intBookId
-					, sh.intSubBookId
+					, intPriceUOMId = qu.intCommodityUnitMeasureId
+					, cd.intContractStatusId
+					, ch.intEntityId
+					, ch.intCommodityId
+					, cd.intItemId
+					, cd.intCompanyLocationId
+					, cd.intFutureMarketId
+					, cd.intFutureMonthId
+					, cd.dtmStartDate
+					, cd.dtmEndDate
+					, cd.intBookId
+					, cd.intSubBookId
 					, intOrderBy = 1
-					, sh.intUserId
+					, intUserId = @intUserId
 					, intActionId = 17
 					FROM tblCTPriceFixationDetail pfd
 					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
 					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+					LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = ch.intCommodityId
+						AND qu.intUnitMeasureId = cd.intUnitMeasureId
 					INNER JOIN
 					(
 						SELECT intTransactionReferenceDetailId, dblQty = sum(dblQty)
@@ -2201,9 +2205,9 @@ BEGIN TRY
 					, intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
 					, strTransactionReferenceNo = pc.strPriceContractNo
 					, dtmTransactionDate = cast((convert(varchar(10), pfd.dtmFixationDate, 111) + ' ' + convert(varchar(20), getdate(), 114)) as datetime)--cast((pfd.dtmFixationDate + convert(varchar(20), getdate(), 114)) as datetime)
-					, sh.intContractHeaderId
+					, ch.intContractHeaderId
 					, ch.strContractNumber
-					, sh.intContractDetailId
+					, cd.intContractDetailId
 					, cd.intContractSeq
 					, ch.intContractTypeId
 					, dblQty = pfd.dblQuantity
@@ -2211,26 +2215,26 @@ BEGIN TRY
 					, intPricingTypeId = 1
 					, strPricingType = 'Priced'
 					, strTransactionType = 'Price Fixation'--CASE WHEN @strProcess = 'Price Delete' THEN 'Price Fixation' ELSE @strProcess END
-					, intTransactionId = sh.intContractDetailId
-					, strTransactionId = sh.strContractNumber + '-' + CAST(sh.intContractSeq AS NVARCHAR(10))
+					, intTransactionId = cd.intContractDetailId
+					, strTransactionId = ch.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 					, dblFutures = pfd.dblFutures
-					, sh.dblBasis
+					, cd.dblBasis
 					, cd.intBasisUOMId
 					, cd.intBasisCurrencyId
-					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
-					, sh.intContractStatusId
-					, sh.intEntityId
-					, sh.intCommodityId
-					, sh.intItemId
-					, sh.intCompanyLocationId
-					, sh.intFutureMarketId
-					, sh.intFutureMonthId
-					, sh.dtmStartDate
-					, sh.dtmEndDate
-					, sh.intBookId
-					, sh.intSubBookId
+					, intPriceUOMId = qu.intCommodityUnitMeasureId
+					, cd.intContractStatusId
+					, ch.intEntityId
+					, ch.intCommodityId
+					, cd.intItemId
+					, cd.intCompanyLocationId
+					, cd.intFutureMarketId
+					, cd.intFutureMonthId
+					, cd.dtmStartDate
+					, cd.dtmEndDate
+					, cd.intBookId
+					, cd.intSubBookId
 					, intOrderBy = 1
-					, sh.intUserId
+					, intUserId = @intUserId
 					, intActionId = 17
 					, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
 					FROM tblCTPriceFixationDetail pfd
@@ -2238,6 +2242,8 @@ BEGIN TRY
 					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
 					INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
 					INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+					LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = ch.intCommodityId
+						AND qu.intUnitMeasureId = cd.intUnitMeasureId
 					OUTER APPLY
 					(
 						SELECT TOP 1 *
@@ -2832,8 +2838,8 @@ BEGIN TRY
 					AND intTransactionReferenceId = @_id
 					ORDER BY intId DESC
 				)
-				IF @dblPriced <> 0
-				BEGIN
+				--IF @dblPriced <> 0
+				--BEGIN
 					-- Negate all the priced quantities
 					UPDATE @cbLogSpecific SET dblQty = @dblQty *-1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation', strBatchId = null
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
@@ -2841,7 +2847,7 @@ BEGIN TRY
 					-- Add all the basis quantities
 					UPDATE @cbLogSpecific SET dblQty = @dblQty, intPricingTypeId = 2
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
-				END
+				--END
 
 
 				--IF ISNULL(@dblQtys,0) = 0
@@ -2853,10 +2859,11 @@ BEGIN TRY
 			END
 			ELSE IF @strProcess = 'Fixation Detail Delete'
 			BEGIN
+				
 				-- 	1.1. Increase basis
 				-- 	1.2. Decrease priced				
-				IF @dblQtys <> 0
-				BEGIN
+				--IF @dblQtys <> 0
+				--BEGIN
 					-- Get the previous record					
 					--DELETE FROM @cbLogPrev 
 					--WHERE intId <>
@@ -2877,7 +2884,7 @@ BEGIN TRY
 					---- Add all the basis quantities
 					--UPDATE @cbLogPrev SET dblQty = CASE WHEN @dblQtys > @dblQty THEN @dblQty ELSE @dblQtys END, strTransactionReference = 'Price Fixation', strBatchId = null, intActionId = 17
 					--EXEC uspCTLogContractBalance @cbLogPrev, 0
-				END
+				--END
 
 				---- Add create price event/log
 				--UPDATE @cbLogSpecific SET strTransactionType = @strSource, dblQty = 0, intActionId = 17
