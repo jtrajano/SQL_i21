@@ -146,7 +146,7 @@ SELECT TOP 1
 	,@SourceId							= 0
 		
 	,@ItemId							= NULL
-	,@ItemPrepayTypeId					= 0
+	,@ItemPrepayTypeId					= 1
 	,@ItemPrepayRate					= @ZeroDecimal
 	,@ItemIsInventory					= 0
 	,@ItemDocumentNumber				= NULL			
