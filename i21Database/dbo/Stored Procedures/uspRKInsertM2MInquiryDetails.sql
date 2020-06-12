@@ -344,7 +344,8 @@ BEGIN
 		, dblCashOrFuture
 		, dblBasisOrDiscount
 		, dblRatio
-		, intUnitMeasureId)
+		, intUnitMeasureId
+		, intM2MBasisDetailId)
 	SELECT @intM2MInquiryId
 		, 1
 		, intCommodityId
@@ -363,6 +364,7 @@ BEGIN
 		, dblBasisOrDiscount
 		, dblRatio
 		, intUnitMeasureId
+		, intM2MBasisDetailId
 	FROM @#tempInquiryBasisDetail
 	
 	--================================================================
