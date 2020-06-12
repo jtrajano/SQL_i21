@@ -110,7 +110,7 @@ BEGIN
 		AND A.ysnPosted = 1
 		UNION ALL
 		SELECT
-			'You cannot unpost a prepaid that has a reversal.'
+			'You cannot unpost a prepaid that has a reversal.',
 			'Bill',
 			C.strBillId,
 			C.intBillId,
