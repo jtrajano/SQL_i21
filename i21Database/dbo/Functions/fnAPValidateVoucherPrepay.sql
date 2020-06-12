@@ -74,6 +74,56 @@ BEGIN
 		WHERE
 			A.ysnPosted = 1
 	END
+	ELSE
+	BEGIN
+		INSERT INTO @returntable
+		SELECT
+			'You cannot unpost this prepaid. ' + A.strPaymentRecordNum + ' payment was already made on this prepaid. You must delete the payment first.',
+			'Bill',
+			C.strBillId,
+			C.intBillId,
+			28
+		FROM tblAPPayment A
+			INNER JOIN tblAPPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+			LEFT JOIN tblCMBankTransaction D
+				ON A.strPaymentRecordNum = D.strTransactionId
+		WHERE  C.[intBillId] IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND 1 = CASE WHEN D.intTransactionId IS NOT NULL
+					THEN CASE WHEN D.ysnCheckVoid = 0 THEN 1 ELSE 0 END
+				ELSE 1 END
+		UNION ALL
+		SELECT
+			'You cannot unpost this prepaid. ' + A.strRecordNumber + ' payment was already made on this prepaid. You must delete the payment first.',
+			'Bill',
+			C.strBillId,
+			C.intBillId,
+			29
+		FROM tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  C.[intBillId] IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND A.ysnPosted = 1
+		UNION ALL
+		SELECT
+			'You cannot unpost a prepaid that has a reversal.'
+			'Bill',
+			C.strBillId,
+			C.intBillId,
+			30
+		FROM tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  C.[intBillId] IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND A.ysnPosted = 1
+		AND C.intTransactionReversed > 0
+	END
 	
 	RETURN;
 END
