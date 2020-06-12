@@ -221,11 +221,11 @@ SELECT	intItemId = DetailItem.intItemId
 								CASE 
 									WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
 										dbo.fnDivide(
-											dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) 
+											dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
 											,DetailItem.dblForexRate
 										)
 									ELSE 												
-										dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+										dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
 								END 									
 							)										
 						ELSE 
@@ -261,11 +261,11 @@ SELECT	intItemId = DetailItem.intItemId
 								CASE 
 									WHEN ISNULL(Header.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(DetailItem.dblForexRate, 0) <> 0 THEN 
 										dbo.fnDivide(
-											dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId) 
+											dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT) 
 											,DetailItem.dblForexRate
 										)
 									ELSE 
-										dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId)
+										dbo.fnICGetAddToCostTaxFromInventoryReceipt(DetailItem.intInventoryReceiptItemId, DEFAULT)
 								END
 							)							
 					END

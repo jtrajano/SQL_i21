@@ -3790,11 +3790,11 @@ BEGIN
 														CASE 
 															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
 																dbo.fnDivide(
-																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId) 
+																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
 																	,ReceiptItem.dblForexRate
 																)
 															ELSE 												
-																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
 														END 									
 													)										
 												ELSE 
@@ -3831,11 +3831,11 @@ BEGIN
 														CASE 
 															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
 																dbo.fnDivide(
-																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId) 
+																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
 																	,ReceiptItem.dblForexRate
 																)
 															ELSE 
-																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
 														END
 													)							
 											END
