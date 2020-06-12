@@ -17,36 +17,6 @@ BEGIN
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
-	-- Get Vendor Tax Exemptions
-	DECLARE @TaxExemptions TABLE(strTaxCode NVARCHAR(200), ysnAddToCost BIT, 
-		intPurchaseTaxExemptionAccountId INT, intPurchaseAccountId INT,
-		intItemId INT, intReceiptId INT, intReceiptItemId INT)
-	INSERT INTO @TaxExemptions
-	SELECT tc.strTaxCode, tc.ysnAddToCost,
-		tc.intPurchaseTaxExemptionAccountId, tc.intPurchaseTaxAccountId,
-		i.intItemId, r.intInventoryReceiptId, ri.intInventoryReceiptItemId
-	FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
-	INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
-	INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
-	CROSS APPLY (
-		SELECT *
-		FROM dbo.fnGetVendorTaxCodeExemption(
-			r.intEntityVendorId, 
-			r.dtmReceiptDate, 
-			tgc.intTaxGroupId, 
-			tc.intTaxCodeId,
-			tc.intTaxClassId,
-			tc.strState,
-			i.intItemId,
-			i.intCategoryId,
-			r.intShipFromId)
-	) ex
-	WHERE r.intInventoryReceiptId = @intInventoryReceiptId
-		AND ex.ysnTaxExempt = 1
-		AND tc.intPurchaseTaxExemptionAccountId IS NOT NULL
-
 	INSERT INTO @GLAccounts (
 		intItemId 
 		,intItemLocationId 
@@ -55,29 +25,17 @@ BEGIN
 	)
 	SELECT	Query.intItemId
 			,Query.intItemLocationId
-			,intContraInventoryId = 
-			CASE WHEN Query.intPurchaseTaxExemptionAccountId IS NOT NULL THEN Query.intPurchaseTaxExemptionAccountId
-			ELSE dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_APClearing) END
+			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_APClearing) 
 			,@intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
 						ReceiptItem.intItemId
 						,ItemLocation.intItemLocationId
-						,ex.intPurchaseTaxExemptionAccountId
-						,ex.intPurchaseAccountId
-						,ex.ysnAddToCost
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 						INNER JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = ReceiptItem.intItemId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
-						OUTER APPLY (
-							SELECT TOP 1 * 
-							FROM @TaxExemptions e
-							WHERE Receipt.intInventoryReceiptId = e.intReceiptId
-								AND ReceiptItem.intInventoryReceiptItemId = e.intReceiptItemId
-								AND ReceiptItem.intItemId = e.intItemId
-						) ex
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
 
@@ -89,32 +47,22 @@ BEGIN
 	)
 	SELECT	Query.intChargeId
 			,Query.intItemLocationId
-			,intContraInventoryId = 
-			CASE WHEN Query.intPurchaseTaxExemptionAccountId IS NOT NULL THEN Query.intPurchaseTaxExemptionAccountId
-			ELSE dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @AccountCategory_APClearing) END
+			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @AccountCategory_APClearing) 
 			,@intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
 						ReceiptCharge.intChargeId
 						,ItemLocation.intItemLocationId
-						,ex.intPurchaseTaxExemptionAccountId
-						,ex.intPurchaseAccountId
-						,ex.ysnAddToCost
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 							ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 						INNER JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = ReceiptCharge.intChargeId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
-				OUTER APPLY (
-					SELECT TOP 1 * 
-					FROM @TaxExemptions e
-					WHERE Receipt.intInventoryReceiptId = e.intReceiptId
-						AND ReceiptCharge.intChargeId = e.intItemId
-				) ex
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
 END
 
+-- Log the g/l account used in this batch. 
 BEGIN 
 	INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
 			intItemId
