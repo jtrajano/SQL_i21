@@ -120,11 +120,31 @@ BEGIN
 	IF @strShipmentNumber IS NOT NULL 
 	BEGIN
 		-- 'Unable to Post the Destination Qty because {Shipment Number} is already posted.'
-		EXEC uspICRaiseError 80194, @strShipmentNumber; 
+		EXEC uspICRaiseError 80194, 'Post', @strShipmentNumber, 'posted'; 
 		GOTO _ExitWithError
 	END
 END
 
+-- Validate if the shipment is already posted. 
+IF @ysnPost = 0 AND @ysnRecap = 0 
+BEGIN 
+	SET @strInvoiceNumber = NULL 
+	SET @strShipmentNumber = NULL 
+	SELECT	TOP 1 
+			@strShipmentNumber = s.strShipmentNumber
+	FROM	@DestinationItems d INNER JOIN tblICInventoryShipment s 
+				ON d.intInventoryShipmentId = s.intInventoryShipmentId
+			INNER JOIN tblICInventoryShipmentItem si
+				ON si.intInventoryShipmentId = s.intInventoryShipmentId
+	WHERE	s.ysnDestinationPosted = 0
+	
+	IF @strShipmentNumber IS NOT NULL 
+	BEGIN
+		-- 'Unable to Unpost the Destination Qty because {Shipment Number} is already unposted.'
+		EXEC uspICRaiseError 80194, 'Unpost', @strShipmentNumber, 'unposted'; 
+		GOTO _ExitWithError
+	END
+END
  
 -- Get the functional currency and default Forex Rate Type Id 
 BEGIN 
@@ -342,6 +362,13 @@ BEGIN
 
 	CLOSE shipments
 	DEALLOCATE shipments 
+
+
+	-- Call the Integration sp
+	EXEC uspICPostDestinationInventoryShipmentIntegration
+		@DestinationItems
+		,@ysnPost
+		,@intEntityUserSecurityId
 END 
 
 --------------------------------------------------------------------------------------------  
@@ -466,6 +493,12 @@ BEGIN
 	CLOSE unpostShipment
 	DEALLOCATE unpostShipment 
 
+	-- Call the Integration sp
+	EXEC uspICPostDestinationInventoryShipmentIntegration
+		@DestinationItems
+		,@ysnPost
+		,@intEntityUserSecurityId
+
 	-- Clear the existing other charges
 	DELETE	sCharge
 	FROM	tblICInventoryShipment s INNER JOIN tblICInventoryShipmentCharge sCharge
@@ -480,7 +513,6 @@ BEGIN
 				ON s.intInventoryShipmentId = si.intInventoryShipmentId
 			INNER JOIN @DestinationItems d
 				ON s.intInventoryShipmentId = d.intInventoryShipmentId
-
 END   
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
