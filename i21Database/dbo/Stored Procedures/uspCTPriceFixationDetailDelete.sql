@@ -236,12 +236,16 @@ BEGIN TRY
 
 	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 
-	IF ISNULL(@intPriceFixationId,0) = 0
+	IF ISNULL(@intPriceFixationId,0) = 0 AND ISNULL(@intPriceFixationDetailId, 0) <> 0
 	BEGIN
+		UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
+		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+
 		exec uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
 								  @intContractDetailId 	= @intContractDetailId, 
 								  @strSource 			= 'Pricing',
-								  @strProcess 			= 'Fixation Detail Delete'
+								  @strProcess 			= 'Fixation Detail Delete',
+								  @intUserId			=  @intUserId
 	END
 	
 	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))

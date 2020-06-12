@@ -4,8 +4,9 @@
 	@strComment				   NVARCHAR(100) = NULL,
 	@intSequenceUsageHistoryId INT = NULL,
 	@ysnUseContractDate		   BIT = 0,
-	@strSource				   NVARCHAR(50) = '',
-	@strProcess				   NVARCHAR(50) = ''
+	@strSource				   NVARCHAR(50),
+	@strProcess				   NVARCHAR(50),
+	@intUserId				   INT
 AS	   
 
 BEGIN TRY
@@ -152,7 +153,7 @@ BEGIN TRY
 			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus,			intContractBasisId			
 			,intGradeId,					intItemUOMId,					intPositionId,						intPriceItemUOMId,			intTermId			
 			,intWeightId,					intBookId,						intSubBookId,						dblRatio,					strBook
-			,strSubBook,					intSequenceUsageHistoryId,		dtmDateAdded
+			,strSubBook,					intSequenceUsageHistoryId,		dtmDateAdded,						intUserId
 		)
 		OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 		SELECT   
@@ -208,6 +209,7 @@ BEGIN TRY
 						THEN GETDATE()
 					ELSE NULL
 			END
+			,intUserId = @intUserId
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId

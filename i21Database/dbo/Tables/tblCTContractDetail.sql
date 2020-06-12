@@ -766,8 +766,8 @@ BEGIN
 
 	EXEC uspCTLogSummary @intContractHeaderId 	= 	NULL,
     					 @intContractDetailId 	= 	NULL,
-						 @strSource			 	= 	NULL,
-						 @strProcess		 	= 	NULL,
+						 @strSource			 	= 	'Contract',
+						 @strProcess		 	= 	'Detail Delete',
 						 @contractDetail 		= 	@contractDetails
 
 	DELETE sh

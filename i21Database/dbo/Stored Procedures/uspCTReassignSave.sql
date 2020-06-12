@@ -564,8 +564,16 @@ BEGIN TRY
 	
 	---------------------------------------End Allocation-------------------------
 
-	EXEC	uspCTCreateDetailHistory	NULL, @intDonorId
-	EXEC	uspCTCreateDetailHistory	NULL, @intRecipientId
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL, 
+										@intContractDetailId = @intDonorId,
+										@strSource			 = 'Contract',
+										@strProcess		     = 'Reassign Save',
+										@intUserId			 = @intUserId
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL, 
+										@intContractDetailId = @intRecipientId,
+										@strSource			 = 'Contract',
+										@strProcess		  	 = 'Reassign Save',
+										@intUserId			 = @intUserId
 	--COMMIT TRAN
 END TRY
 BEGIN CATCH

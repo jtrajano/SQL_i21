@@ -20,91 +20,101 @@
 
 GO
 
-CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsert]
-    ON [dbo].[tblCTPriceFixationDetailAPAR]
-    AFTER INSERT
-AS
-BEGIN
-       SET NOCOUNT ON;
+-- CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsert]
+--     ON [dbo].[tblCTPriceFixationDetailAPAR]
+--     AFTER INSERT
+-- AS
+-- BEGIN
+--        SET NOCOUNT ON;
 
-	   DECLARE @ysnVoucher BIT
-	   DECLARE @intDetailId INT
-	   DECLARE @intContractHeaderId INT
-	   DECLARE @intContractDetailId INT
-	   DECLARE @strProcess NVARCHAR(20)
-	   DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+-- 	   DECLARE @ysnVoucher BIT
+-- 	   DECLARE @intDetailId INT
+-- 	   DECLARE @intContractHeaderId INT
+-- 	   DECLARE @intContractDetailId INT
+-- 	   DECLARE @strProcess NVARCHAR(20)
+-- 	   DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
-       SELECT @ysnVoucher = CASE WHEN intBillId IS NOT NULL THEN 1 ELSE 0 END
-       FROM INSERTED
+--        SELECT @ysnVoucher = CASE WHEN intBillId IS NOT NULL THEN 1 ELSE 0 END
+--        FROM INSERTED
 
-	   IF @ysnVoucher = 1
-	   BEGIN
-			SELECT @intDetailId = intBillDetailId
-			FROM INSERTED
+-- 	   IF @ysnVoucher = 1
+-- 	   BEGIN
+-- 			SELECT @intDetailId = intBillDetailId
+-- 			FROM INSERTED
 
-			SELECT @intContractHeaderId = intContractHeaderId
-				  ,@intContractDetailId = intContractDetailId 
-			FROM tblAPBillDetail
-			WHERE intBillDetailId = @intDetailId
-	   END
-	   ELSE
-	   BEGIN
-			SELECT @intDetailId = intInvoiceDetailId
-			FROM INSERTED
+-- 			SELECT @intContractHeaderId = intContractHeaderId
+-- 				  ,@intContractDetailId = intContractDetailId 
+-- 			FROM tblAPBillDetail
+-- 			WHERE intBillDetailId = @intDetailId
+-- 	   END
+-- 	   ELSE
+-- 	   BEGIN
+-- 			SELECT @intDetailId = intInvoiceDetailId
+-- 			FROM INSERTED
 
-			SELECT @intContractHeaderId = intContractHeaderId
-				  ,@intContractDetailId = intContractDetailId 
-			FROM tblARInvoiceDetail
-			WHERE intInvoiceDetailId = @intDetailId
-	   END
+-- 			SELECT @intContractHeaderId = intContractHeaderId
+-- 				  ,@intContractDetailId = intContractDetailId 
+-- 			FROM tblARInvoiceDetail
+-- 			WHERE intInvoiceDetailId = @intDetailId
+-- 	   END
 
-	   SELECT @strProcess = CASE WHEN @ysnVoucher = 1 THEN 'Voucher' ELSE 'Invoice' END
+-- 	   SELECT @strProcess = CASE WHEN @ysnVoucher = 1 THEN 'Voucher' ELSE 'Invoice' END
 
-	   EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess			 	= 	@strProcess,
-							@contractDetail 		= 	@contractDetails
-END
+-- 	   EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+-- 							@intContractDetailId 	= 	@intContractDetailId,
+-- 							@strSource			 	= 	'Pricing',
+-- 							@strProcess			 	= 	@strProcess,
+-- 							@contractDetail 		= 	@contractDetails
+-- END
 
-GO
+-- GO
 
-CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsertDelete]
-	ON [dbo].[tblCTPriceFixationDetailAPAR]
-    AFTER DELETE
-AS
-BEGIN	
-    SET NOCOUNT ON;
+-- CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsertDelete]
+-- 	ON [dbo].[tblCTPriceFixationDetailAPAR]
+--     AFTER DELETE
+-- AS
+-- BEGIN	
+--        SET NOCOUNT ON;
 
-    declare @intPriceFixationId int;
-    declare @intContractPriceId int;
-    declare @intPriceFixationDetailId int;
-    declare @intInvoiceDetailId int;
-	declare @dblPricedQuantity numeric(18,6);
-	declare @dblInvoiceDetailQuantity numeric(18,6);
-	declare @intContractDetailId int;
+-- 	   DECLARE @ysnVoucher BIT
+-- 	   DECLARE @intDetailId INT
+-- 	   DECLARE @intContractHeaderId INT
+-- 	   DECLARE @intContractDetailId INT
+-- 	   DECLARE @strProcess NVARCHAR(20)
+-- 	   DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 
-	select
-		@intInvoiceDetailId = intInvoiceDetailId
-		,@intPriceFixationDetailId = intPriceFixationDetailId
-	from
-		DELETED
-	where isnull(ysnMarkDelete,0) <> 1;
+-- 	   IF NOT EXISTS (SELECT TOP 1 1 FROM DELETED)
+-- 	   BEGIN
+-- 			RETURN
+-- 	   END
 
-	SELECT top 1
-		@dblInvoiceDetailQuantity = dblQtyShipped
-	FROM
-		tblARTransactionDetail
-	where
-		intTransactionDetailId = @intInvoiceDetailId
-	ORDER BY intId DESC
+--        SELECT @ysnVoucher = CASE WHEN intBillId IS NOT NULL THEN 1 ELSE 0 END
+--        FROM DELETED
 
-	set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+-- 	   IF @ysnVoucher = 1
+-- 	   BEGIN
+-- 			SELECT @intContractHeaderId = 	c.intContractHeaderId
+-- 				  ,@intContractDetailId = 	c.intContractDetailId
+-- 			FROM DELETED a
+-- 			INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationDetailId = b.intPriceFixationDetailId
+-- 			INNER JOIN tblCTPriceFixation c ON b.intPriceFixationId = c.intPriceFixationId
+-- 	   END
+-- 	   ELSE
+-- 	   BEGIN
+-- 	   		SELECT @intContractHeaderId = 	c.intContractHeaderId
+-- 				  ,@intContractDetailId = 	c.intContractDetailId
+-- 			FROM DELETED a
+-- 			INNER JOIN tblCTPriceFixationDetail b ON a.intPriceFixationDetailId = b.intPriceFixationDetailId
+-- 			INNER JOIN tblCTPriceFixation c ON b.intPriceFixationId = c.intPriceFixationId
+-- 	   END
 
-	exec uspCTProcessInvoiceDelete
-		@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
-		,@intPriceFixationDetailId = @intPriceFixationDetailId
+-- 	   SELECT @strProcess = CASE WHEN @ysnVoucher = 1 THEN 'Voucher Delete' ELSE 'Invoice Delete' END
 
-END
+-- 	   EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+-- 							@intContractDetailId 	= 	@intContractDetailId,
+-- 							@strSource			 	= 	'Pricing',
+-- 							@strProcess			 	= 	@strProcess,
+-- 							@contractDetail 		= 	@contractDetails
+-- END
 
 GO

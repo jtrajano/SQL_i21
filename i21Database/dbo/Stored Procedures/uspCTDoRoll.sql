@@ -141,7 +141,11 @@ BEGIN TRY
 
 			SELECT @ContractHeaderId = intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @ContractDetailId
 
-			EXEC uspCTCreateDetailHistory	@ContractHeaderId, @ContractDetailId
+			EXEC uspCTCreateDetailHistory	@intContractHeaderId = @ContractHeaderId, 
+											@intContractDetailId = @ContractDetailId, 
+											@strSource			 = 'Contract',
+										    @strProcess		 	 = 'Do Roll',
+											@intUserId			 = @intUserId
 
 			SELECT @ContractSeq = intContractSeq FROM tblCTContractDetail WHERE intContractDetailId = @ContractDetailId 
 

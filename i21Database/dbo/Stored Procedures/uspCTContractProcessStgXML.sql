@@ -3405,8 +3405,11 @@ BEGIN TRY
 							AND intContractSeq = @intContractSeq
 					END
 
-					EXEC uspCTCreateDetailHistory NULL
-						,@intContractDetailId
+					EXEC uspCTCreateDetailHistory @intContractHeaderId = NULL,
+												  @intContractDetailId = @intContractDetailId,
+												  @strSource	 	   = 'Contract',
+										 		  @strProcess		   = 'Contract Process Stg XML',
+												  @intUserId		   = @intUserId
 
 					SELECT @intRecordId = min(intContractDetailId)
 					FROM #tmpContractDetail
