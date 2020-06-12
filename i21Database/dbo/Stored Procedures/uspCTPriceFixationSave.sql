@@ -57,7 +57,8 @@ BEGIN TRY
 			@intMarketUnitMeasureId		INT,
 			@intMarketCurrencyId		INT,
 			@intPriceContractId			INT,
-			@ysnSeqSubCurrency			BIT
+			@ysnSeqSubCurrency			BIT,
+			@contractDetails 			AS [dbo].[ContractDetailTable]
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -198,16 +199,23 @@ BEGIN TRY
 				
 			END
 
+			UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
+			WHERE  intPriceFixationId = @intPriceFixationId
+
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 		= 	'Price Delete',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId
+
 			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 1
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
-			UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
-			WHERE  intPriceFixationId = @intPriceFixationId
-
 			EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
 												@intContractDetailId 	= @intContractDetailId, 
-												@strSource 			 	= 'Pricing',
+												@strSource 			 	= 'Pricing-Old',
 												@strProcess 			= 'Price Delete',
 												@intUserId				= @intUserId
 
@@ -592,14 +600,21 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
-
 		DECLARE @process NVARCHAR(20)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
+		
+		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+							 @intContractDetailId 	= 	@intContractDetailId,
+							 @strSource			 	= 	'Pricing',
+							 @strProcess		 	= 	@process,
+							 @contractDetail 		= 	@contractDetails,
+							 @intUserId				= 	@intUserId	
+
+		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
 											@intContractDetailId 	= @intContractDetailId, 
-											@strSource				= 'Pricing',
+											@strSource				= 'Pricing-Old',
 											@strProcess 			= @process,
 											@intUserId				= @intUserId
 		
