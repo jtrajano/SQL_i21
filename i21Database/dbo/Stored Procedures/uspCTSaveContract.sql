@@ -413,7 +413,8 @@ BEGIN TRY
 
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId 	= @intContractHeaderId,
 											@strSource 				= 'Contract',
-											@strProcess 			= 'Contract Sequence'
+											@strProcess 			= 'Save Contract',
+											@intUserId				= @userId	
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
 
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true

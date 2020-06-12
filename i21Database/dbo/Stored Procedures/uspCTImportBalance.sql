@@ -116,7 +116,11 @@ BEGIN TRY
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	'Import'
 
-	EXEC uspCTCreateDetailHistory NULL, @intContractDetailId
+	EXEC uspCTCreateDetailHistory @intContractHeaderId = NULL, 
+								  @intContractDetailId = @intContractDetailId,
+								  @strSource 		   = 'Contract',
+								  @strProcess		   = 'Import Balance',
+								  @intUserId		   = @intUserId
 
 END TRY      
 BEGIN CATCH       

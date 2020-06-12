@@ -84,21 +84,6 @@ BEGIN TRY
 
 		UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
-		-- Log summary	
-		DECLARE @intContractHeaderId INT,
-				@intContractDetailId INT,
-				@contractDetails AS [dbo].[ContractDetailTable]
-		SELECT @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId
-		FROM tblAPBillDetail
-		WHERE intBillId = @intBillId
-
-	    EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess			 	= 	'Voucher Delete',
-							@contractDetail 		= 	@contractDetails,
-							@intUserId				=	@UserId
-
 		-- we need to set this to null so that it will not be deleted
 		-- the only time we will not delete this is when a pricing is deleted,
 		-- other scenario SHOULD delete the history
