@@ -108,6 +108,21 @@ BEGIN
 				ON B.intBillId = C.intBillId
 		WHERE  C.[intBillId] IN (SELECT [intId] FROM @voucherPrepayIds)
 		AND A.ysnPosted = 1
+		UNION ALL
+		SELECT
+			'You cannot unpost a prepaid that has a reversal.'
+			'Bill',
+			C.strBillId,
+			C.intBillId,
+			30
+		FROM tblARPayment A
+			INNER JOIN tblARPaymentDetail B 
+				ON A.intPaymentId = B.intPaymentId
+			INNER JOIN tblAPBill C
+				ON B.intBillId = C.intBillId
+		WHERE  C.[intBillId] IN (SELECT [intId] FROM @voucherPrepayIds)
+		AND A.ysnPosted = 1
+		AND C.intTransactionReversed > 0
 	END
 	
 	RETURN;
