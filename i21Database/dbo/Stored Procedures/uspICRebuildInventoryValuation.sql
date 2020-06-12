@@ -3779,12 +3779,12 @@ BEGIN
 															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
 																-- Convert the other charge to the currency used by the detail item. 
 																dbo.fnDivide(
-																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId) 
+																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
 																	,ReceiptItem.dblForexRate
 																)
 															ELSE 
 																-- No conversion. Detail item is already in functional currency. 
-																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
 														END 									
 														+
 														CASE 
@@ -3820,12 +3820,12 @@ BEGIN
 															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
 																-- Convert the other charge to the currency used by the detail item. 
 																dbo.fnDivide(
-																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId) 
+																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
 																	,ReceiptItem.dblForexRate
 																)
 															ELSE 
 																-- No conversion. Detail item is already in functional currency. 
-																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId)
+																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
 														END	 									
 														+
 														CASE 
@@ -4336,7 +4336,7 @@ BEGIN
 											t.dblValue 
 											, owned_total.dblQty
 										)
-										+ dbo.fnGetOtherChargesFromInventoryReceipt(owned.intTransactionDetailId) -- If applicable, add the other charge to the item cost. 
+										+ dbo.fnGetOtherChargesFromInventoryReceipt(owned.intTransactionDetailId, owned.intItemUOMId) -- If applicable, add the other charge to the item cost. 
 								END 
 					FROM	@ItemsToPost owned CROSS APPLY (
 								SELECT 
