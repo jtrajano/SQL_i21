@@ -242,17 +242,7 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= 
-					CASE 
-															WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
-																dbo.fnGetItemGLAccount(
-																	ReceiptItem.intItemId
-																	, ItemLocation.intItemLocationId
-																	, @AccountCategory_OtherChargeExpense
-																) 
-															ELSE 
-																CASE WHEN TaxCode.ysnAddToCost = 1 THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') ELSE TaxCode.intPurchaseTaxAccountId END
-														END
+				,intPurchaseTaxAccountId			= CASE WHEN TaxCode.ysnAddToCost = 1 THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') ELSE TaxCode.intPurchaseTaxAccountId END
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
