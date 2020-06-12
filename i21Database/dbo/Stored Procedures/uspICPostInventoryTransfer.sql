@@ -13,6 +13,14 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
+
+-- Create the temp table to skip a batch id from logging into the summary log. 
+IF OBJECT_ID('tempdb..#tmpICLogRiskPositionFromOnHandSkipList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpICLogRiskPositionFromOnHandSkipList (
+		strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
+	)
+END 
   
 --------------------------------------------------------------------------------------------  
 -- Initialize   
@@ -260,6 +268,11 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 END 
 
+-- insert into the temp table
+BEGIN 
+	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
+
 -- Check the locations if GL entries will be required. 
 SELECT	@ysnGLEntriesRequired = 1
 FROM	tblICInventoryTransfer 
@@ -394,7 +407,7 @@ BEGIN
 			AND Detail.intOwnershipType = @ownershipType_Storage
 
 		-------------------------------------------
-		-- Call the costing SP	
+		-- Call the costing SP (FROM stock)
 		-------------------------------------------
 		IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStock)
 		BEGIN 
@@ -604,10 +617,12 @@ BEGIN
 			AND Detail.intOwnershipType = @ownershipType_Storage
 
 		-------------------------------------------
-		-- Call the costing SP
+		-- Call the costing SP (TO stock)
 		-------------------------------------------
 		IF EXISTS (SELECT TOP 1 1 FROM @TransferCompanyOwnedStock)
 		BEGIN 
+			DELETE FROM #tmpICLogRiskPositionFromOnHandSkipList 
+
 			EXEC	@intReturnValue = dbo.uspICPostCosting  
 					@TransferCompanyOwnedStock  
 					,@strBatchId  

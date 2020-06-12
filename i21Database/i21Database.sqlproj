@@ -8728,6 +8728,9 @@
     <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
     <Build Include="dbo\Tables\tblRKLogAction.sql" />
     <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
+	<Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnHand.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" /> 
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
