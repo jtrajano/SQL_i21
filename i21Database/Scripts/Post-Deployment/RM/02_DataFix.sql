@@ -339,5 +339,29 @@ BEGIN
 	WHERE ISNULL(intPostToGLId, 0) = 0
 END
 
+IF EXISTS(SELECT TOP 1 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tblRKM2MInquiryBasisDetail' AND COLUMN_NAME = 'intM2MBasisDetailId')
+BEGIN
+	UPDATE tblRKM2MInquiryBasisDetail
+	SET intM2MBasisDetailId  = tblPatch.intM2MBasisDetailId
+	FROM (
+		SELECT ibd.intM2MInquiryBasisDetailId
+			, bd.intM2MBasisDetailId
+		FROM tblRKM2MInquiryBasisDetail ibd
+		JOIN tblRKM2MInquiry inq ON inq.intM2MInquiryId = ibd.intM2MInquiryId
+		JOIN tblRKM2MBasisDetail bd ON bd.intM2MBasisId = inq.intM2MBasisId
+			AND ISNULL(bd.intCommodityId, 0) = ISNULL(ibd.intCommodityId, 0)
+			AND ISNULL(bd.intItemId, 0) = ISNULL(ibd.intItemId, 0)
+			AND ISNULL(bd.strOriginDest, '') = ISNULL(ibd.strOriginDest, '')
+			AND ISNULL(bd.intFutureMarketId, 0) = ISNULL(ibd.intFutureMarketId, 0)
+			AND ISNULL(bd.intFutureMonthId, 0) = ISNULL(ibd.intFutureMonthId, 0)
+			AND ISNULL(bd.strPeriodTo, '') = ISNULL(ibd.strPeriodTo, '')
+			AND ISNULL(bd.intCompanyLocationId, 0) = ISNULL(ibd.intCompanyLocationId, 0)
+			AND ISNULL(bd.intMarketZoneId, 0) = ISNULL(ibd.intMarketZoneId, 0)
+			AND ISNULL(bd.strContractInventory, 0) = ISNULL(ibd.strContractInventory, 0)
+		WHERE ibd.intM2MBasisDetailId IS NULL
+	) tblPatch
+	WHERE tblPatch.intM2MInquiryBasisDetailId = tblRKM2MInquiryBasisDetail.intM2MInquiryBasisDetailId
+END
+
 print('/*******************  END Risk Management Data Fixess *******************/')
 GO
