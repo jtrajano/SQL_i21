@@ -2108,7 +2108,12 @@ BEGIN TRY
 						WHERE strProcess = 'Price Fixation'
 						AND intContractHeaderId = @intContractHeaderId
 						AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
-						AND (pfd.dblQuantity <> dblQty or pfd.dblFutures <> dblFutures)
+						AND 
+						(
+							pfd.dblQuantity <> CAST(REPLACE(strNotes, 'Priced Quantity is ', '') AS NUMERIC(24, 10)) 
+							OR 
+							pfd.dblFutures <> dblFutures
+						)
 					)
 				) tbl
 				WHERE intContractHeaderId = @intContractHeaderId
