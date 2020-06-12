@@ -155,7 +155,7 @@ BEGIN
 	INNER JOIN tblICItemUOM iuom ON iuom.intItemUOMId = ISNULL(bd.intWeightUOMId, bd.intUnitOfMeasureId)
 	INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = c.intCommodityId AND cum.intUnitMeasureId = iuom.intUnitMeasureId
 	WHERE bd.intItemId > 0 AND bd.intContractDetailId > 0
-	AND dbo.fnCTCheckIfBasisDeliveries(bd.intContractDetailId, bd.intInventoryReceiptItemId, 'Purchase Basis Deliveries') = 1
+	AND dbo.fnCTCheckIfBasisDeliveries(bd.intContractDetailId, ISNULL(bd.intInventoryReceiptItemId, bd.intSettleStorageId), 'Purchase Basis Deliveries') = 1
 
 	EXEC uspCTLogContractBalance @contractBalance, 0
 
