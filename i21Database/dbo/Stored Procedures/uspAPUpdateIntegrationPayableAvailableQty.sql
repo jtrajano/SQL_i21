@@ -287,7 +287,8 @@ BEGIN
 			[intItemId],
 			[intToBillUOMId],
 			[dblToBillQty],
-			[intEntityVendorId]
+			[intEntityVendorId],
+			[dblAmountToBill]
 		)
 		SELECT
 			[intInventoryReceiptItemId]		=	A.intInventoryReceiptItemId,
@@ -302,7 +303,45 @@ BEGIN
 														THEN -A.dblQuantityToBill
 													ELSE A.dblQuantityToBill
 													END),
-			[intEntityVendorId]				=	B.intEntityVendorId
+			[intEntityVendorId]				=	B.intEntityVendorId,
+			[dblAmountToBill]				=   
+												CASE 
+													WHEN @decreaseQty = 0 THEN 
+														-ROUND(
+															dbo.fnMultiply(
+																CASE 
+																	WHEN ISNULL(A.intCostUOMId, A.intQtyToBillUOMId) IS NOT NULL THEN 
+																		dbo.fnCalculateCostBetweenUOM(
+																			ISNULL(A.intCostUOMId, A.intQtyToBillUOMId)
+																			,A.intQtyToBillUOMId
+																			,A.dblCost
+																		)
+																	ELSE 
+																		A.dblCost
+																END
+																,ABS(A.dblQuantityToBill)
+															)
+															,2 
+														)														
+													ELSE 
+														ROUND(
+															dbo.fnMultiply(
+																CASE 
+																	WHEN ISNULL(A.intCostUOMId, A.intQtyToBillUOMId) IS NOT NULL THEN
+																		dbo.fnCalculateCostBetweenUOM(
+																			ISNULL(A.intCostUOMId, A.intQtyToBillUOMId)
+																			,A.intQtyToBillUOMId
+																			,A.dblCost
+																		)
+																	ELSE 
+																		A.dblCost
+																END 
+																,ABS(A.dblQuantityToBill)
+															)
+															,2 
+														)
+												END
+
 		FROM #tmpInventoryReceipt A
 		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
 
