@@ -598,7 +598,7 @@ BEGIN TRY
 		AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 	
 	SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY t.intCollateralId ORDER BY t.dtmOpenDate DESC)
-		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intUnitMeasureId, @intCommodityUnitMeasureId, dblRemainingQuantity)
+		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, dblRemainingQuantity)
 		, t.intCollateralId
 		, t.strLocationName
 		, t.intItemId
@@ -609,11 +609,11 @@ BEGIN TRY
 		, t.intContractHeaderId
 		, strContractNumber
 		, t.dtmOpenDate
-		, dblOriginalQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intUnitMeasureId, @intCommodityUnitMeasureId, dblOriginalQuantity)
-		, dblRemainingQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intUnitMeasureId, @intCommodityUnitMeasureId, dblRemainingQuantity)
+		, dblOriginalQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, dblOriginalQuantity)
+		, dblRemainingQuantity = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intCommodityUnitMeasureId, @intCommodityUnitMeasureId, dblRemainingQuantity)
 		, intCommodityId = @intCommodityId
 		, strCommodityCode = @strCommodityCode
-		, t.intUnitMeasureId
+		, t.intCommodityUnitMeasureId
 		, intCompanyLocationId
 		, intContractTypeId
 		, t.intLocationId

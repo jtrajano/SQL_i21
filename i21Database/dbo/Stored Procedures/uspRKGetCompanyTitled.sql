@@ -261,7 +261,7 @@ BEGIN
 				 select
 					strCommodityCode
 					,dtmDate = dtmOpenDate
-					,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intUnitMeasureId, @intCommodityUnitMeasureId, dblTotal)
+					,dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intCommodityUnitMeasureId, @intCommodityUnitMeasureId, dblTotal)
 					,strLocationName
 					,intCommodityId
 					,intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId

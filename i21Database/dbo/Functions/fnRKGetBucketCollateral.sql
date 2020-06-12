@@ -8,30 +8,37 @@ RETURNS @returntable TABLE
 (
 	dblTotal NUMERIC(24, 10)
 	, intCollateralId INT
-	, strLocationName NVARCHAR(100)
+	, strLocationName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
-	, strItemNo NVARCHAR(100)
-	, strCategory NVARCHAR(100)
-	, strEntityName NVARCHAR(100)
-	, strReceiptNo NVARCHAR(100)
+	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strCategory NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strReceiptNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intContractHeaderId INT
-	, strContractNumber NVARCHAR(100)
+	, intContractDetailId INT
+	, strContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intContractSeq INT
 	, dtmOpenDate DATETIME
 	, dblOriginalQuantity NUMERIC(24, 10)
 	, dblRemainingQuantity NUMERIC(24, 10)
 	, intCommodityId INT
-	, strCommodityCode NVARCHAR(100)
-	, intUnitMeasureId INT
+	, strCommodityCode NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intCommodityUnitMeasureId INT
 	, intCompanyLocationId INT
 	, intContractTypeId INT
 	, intLocationId INT
 	, intEntityId INT
 	, intFutureMarketId INT
 	, intFutureMonthId INT
-	, strFutureMarket NVARCHAR(100)
-	, strFutureMonth NVARCHAR(100)
+	, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dtmEndDate DATETIME
 	, ysnIncludeInPriceRiskAndCompanyTitled BIT
+	, dtmCreatedDate DATETIME
+	, intUserId INT
+	, strUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	, strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -46,7 +53,7 @@ BEGIN
 		FROM tblCTContractDetail CD
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId  
 		WHERE intContractStatusId <> 3
-			AND intCommodityId = @intCommodityId
+			AND ISNULL(intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(intCommodityId, 0)) 
 		GROUP BY CH.intContractHeaderId
 	)
 
@@ -60,7 +67,9 @@ BEGIN
 		, strEntityName
 		, strReceiptNo
 		, intContractHeaderId
+		, intContractDetailId
 		, strContractNumber
+		, intContractSeq
 		, dtmTransactionDate
 		, dblOriginalQuantity
 		, dblRemainingQuantity
@@ -77,9 +86,14 @@ BEGIN
 		, strFutureMonth
 		, dtmEndDate
 		, ysnIncludeInPriceRiskAndCompanyTitled 
+		, dtmCreatedDate
+		, intUserId
+		, strUserName
+		, strAction
+		, strTransactionType
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
-			, dblTotal = c.dblOrigQty - ISNULL(ca.dblAdjustmentAmount, 0)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strTransactionType ORDER BY c.intSummaryLogId DESC)
+			, dblTotal = c.dblOrigQty
 			, intCollateralId = c.intTransactionRecordId
 			, c.strLocationName
 			, c.intItemId
@@ -88,10 +102,12 @@ BEGIN
 			, c.strEntityName
 			, strReceiptNo = strTransactionNumber
 			, c.intContractHeaderId
+			, c.intContractDetailId
 			, strContractNumber
+			, intContractSeq
 			, c.dtmTransactionDate
 			, dblOriginalQuantity = ISNULL(c.dblOrigQty, 0)
-			, dblRemainingQuantity = c.dblOrigQty - ISNULL(ca.dblAdjustmentAmount, 0)
+			, dblRemainingQuantity = c.dblOrigQty
 			, c.intCommodityId
 			, c.strCommodityCode
 			, intCommodityUnitMeasureId = c.intOrigUOMId
@@ -105,28 +121,18 @@ BEGIN
 			, c.strFutureMonth
 			, Cnt.dtmEndDate
 			, Col.ysnIncludeInPriceRiskAndCompanyTitled
+			, dtmCreatedDate
+			, intUserId
+			, strUserName
+			, strAction
+			, strTransactionType
 		FROM vyuRKGetSummaryLog c
-		LEFT JOIN (
-			SELECT intCollateralId
-				, dblAdjustmentAmount = SUM(dblAdjustmentAmount)
-			FROM (
-				SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY Adj.intTransactionRecordId ORDER BY Adj.intSummaryLogId DESC)
-					, intCollateralAdjustmentId = intTransactionRecordId
-					, intCollateralId = intTransactionRecordHeaderId
-					, dblAdjustmentAmount = dblOrigQty
-				FROM vyuRKGetSummaryLog Adj
-				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
-					AND strTransactionType = 'Collateral Adjustment'
-			) t WHERE intRowNum = 1		
-			GROUP BY intCollateralId
-		) ca ON c.intTransactionRecordHeaderId = ca.intCollateralId
 		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
 		LEFT JOIN Contracts Cnt ON Cnt.intContractHeaderId = c.intContractHeaderId
-		WHERE strTransactionType = 'Collateral'
+		WHERE strTransactionType IN ( 'Collateral', 'Collateral Adjustments')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
-			AND c.intCommodityId = @intCommodityId
+			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 	) a WHERE a.intRowNum = 1
 

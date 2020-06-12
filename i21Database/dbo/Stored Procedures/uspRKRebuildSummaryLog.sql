@@ -50,6 +50,7 @@ BEGIN TRY
 			, SH.intContractStatusId
 			, CH.intEntityId
 			, CH.intCommodityId
+			, intUserId = CD.intCreatedById
 		into #tmpContract
 		from tblCTContractHeader CH 
 		inner join tblCTContractDetail CD on CD.intContractHeaderId = CH.intContractHeaderId
@@ -81,6 +82,7 @@ BEGIN TRY
 			,ysnLoad
 			,dblQuantityPerLoad
 			,intEntityId
+			,intUserId
 		INTO #tmpContractUsage
 		FROM (
 			SELECT CH.intContractTypeId
@@ -113,6 +115,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, intUserId = Shipment.intEntityId
 			FROM tblICInventoryShipment Shipment
 			JOIN tblICInventoryShipmentItem ShipmentItem ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
@@ -150,6 +153,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, Shipment.intEntityId
 
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -170,6 +174,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, intUserId = InvTran.intCreatedEntityId
 			FROM tblICInventoryTransaction InvTran
 			JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvTran.intTransactionId
 			JOIN tblARInvoiceDetail InvoiceDetail ON InvoiceDetail.intInvoiceId = InvTran.intTransactionId
@@ -197,6 +202,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, InvTran.intCreatedEntityId
 	
 			UNION ALL 
 			SELECT CH.intContractTypeId
@@ -222,6 +228,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, intUserId = InvTran.intCreatedEntityId
 			FROM tblICInventoryTransaction InvTran
 			JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
@@ -244,6 +251,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, InvTran.intCreatedEntityId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -264,6 +272,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, intUserId = InvTran.intCreatedEntityId
 			FROM tblICInventoryTransaction InvTran
 			JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
 				AND strReceiptType = 'Purchase Contract'
@@ -293,6 +302,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, InvTran.intCreatedEntityId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -313,6 +323,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, intUserId = SS.intCreatedUserId
 			FROM tblGRSettleContract SC
 			JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
 			JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
@@ -333,6 +344,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, SS.intCreatedUserId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -353,6 +365,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, intUserdId = IB.intImportedById
 			FROM tblCTImportBalance IB
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = IB.intContractHeaderId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = IB.intContractDetailId
@@ -369,6 +382,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
+				, IB.intImportedById
 
 		) tbl
 
@@ -392,6 +406,7 @@ BEGIN TRY
 			, strSourceId = PC.strPriceContractNo
 			, CH.intEntityId
 			, CH.intCommodityId
+			, intUserId = PC.intCreatedById
 		INTO #tmpPriceFixation
 		FROM tblCTPriceFixationDetail FD
 		INNER JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = FD.intPriceFixationId
@@ -418,6 +433,7 @@ BEGIN TRY
 			,strSourceId = I.strInvoiceNumber
 			,CU.intEntityId
 			,CU.intCommodityId
+			,intUserId = I.intEntityId
 		into #tmpInvoice 
 		from #tmpContractUsage CU
 		inner join tblARInvoiceDetail ID on ID.intInventoryShipmentItemId = CU.intSourceDetailId and ID.intInventoryShipmentChargeId is null
@@ -438,6 +454,7 @@ BEGIN TRY
 			,strSourceId = B.strBillId
 			,CU.intEntityId
 			,CU.intCommodityId
+			,intUserId = B.intUserId
 		into #tmpVoucher
 		from #tmpContractUsage CU
 		inner join tblAPBillDetail BD on BD.intInventoryReceiptItemId = CU.intSourceDetailId and BD.intInventoryReceiptChargeId is null
@@ -459,6 +476,7 @@ BEGIN TRY
 			,intEntityId int
 			,intCommodityId int
 			,intOrderBy int
+			,intUserId int
 		)
 
 		insert into @tblRawContractBalance(
@@ -475,6 +493,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy
+			,intUserId
 		)
 		select 
 			dtmDate
@@ -490,6 +509,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy
+			,intUserId
 		 from (
 		select 
 			dtmDate = dtmCreated
@@ -505,6 +525,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy = 1
+			,intUserId
 		from #tmpContract C
 	
 		union all
@@ -522,6 +543,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy = 2
+			,intUserId
 		from #tmpContractUsage
 
 		union all
@@ -539,6 +561,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy = 2
+			,intUserId
 		from #tmpPriceFixation
 
 		union all
@@ -556,6 +579,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy = 2
+			,intUserId
 		from #tmpInvoice
 
 		union all
@@ -573,6 +597,7 @@ BEGIN TRY
 			,intEntityId
 			,intCommodityId
 			,intOrderBy = 2
+			,intUserId
 		from #tmpVoucher
 
 
@@ -614,6 +639,7 @@ BEGIN TRY
 			,intBookId int
 			,intSubBookId int
 			,strNotes nvarchar(50)
+			,intUserId int
 		)
 
 		declare @intRawCBId as int
@@ -658,6 +684,7 @@ BEGIN TRY
 				,intBookId 
 				,intSubBookId 
 				,strNotes
+				,intUserId
 			)
 			SELECT
 				dtmTransactionDate = dtmDate
@@ -699,6 +726,7 @@ BEGIN TRY
 				,intBookId 
 				,intSubBookId 
 				,strNotes = ''
+				,intUserId
 			FROM (
 				SELECT 
 					dtmDate
@@ -754,6 +782,7 @@ BEGIN TRY
 					,CD.intContractStatusId 
 					,CD.intBookId 
 					,CD.intSubBookId 
+					,CB.intUserId
 				FROM @tblRawContractBalance CB
 				inner join tblCTContractDetail CD on CD.intContractDetailId = CB.intContractDetailId
 				inner join tblCTPricingType PT on PT.intPricingTypeId = CD.intPricingTypeId
@@ -819,6 +848,7 @@ BEGIN TRY
 			,intBookId 
 			,intSubBookId 
 			,strNotes
+			,intUserId
 		)
 		select 
 			dtmTransactionDate = CTE.dtmHistoryCreated
@@ -854,6 +884,7 @@ BEGIN TRY
 			,CB.intBookId 
 			,CB.intSubBookId 
 			,strNotes = 'Manual status change'
+			,CB.intUserId
 		from @tblContractBalance CB
 		inner join CTE ON CB.intContractDetailId = CTE.intContractDetailId
 		group by
@@ -883,6 +914,7 @@ BEGIN TRY
 			,CB.intContractStatusId 
 			,CB.intBookId 
 			,CB.intSubBookId 
+			,CB.intUserId
 
 		--clean up all quantity with zero quantity
 		delete from @tblContractBalance where dblQuantity = 0
@@ -924,7 +956,9 @@ BEGIN TRY
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
-			, strNotes)
+			, strNotes
+			, intUserId
+			, intActionId)
 		SELECT strBatchId = NULL
 			, dtmTransactionDate
 			, strTransactionType
@@ -956,7 +990,9 @@ BEGIN TRY
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
-			, strNotes 		
+			, strNotes
+			, intUserId
+			, intActionId  = 1 --Rebuild 		
 		FROM @tblContractBalance
 		ORDER BY dtmTransactionDate,  intContractDetailId
 
@@ -983,7 +1019,7 @@ BEGIN TRY
 			, sh.intCompanyLocationId
 			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
 							else suh.dblTransactionQuantity * si.dblQuantity end) * -1
-			, intQtyUOMId = ch.intCommodityUOMId
+			, intQtyUOMId = si.intItemUOMId
 			, sh.intPricingTypeId
 			, sh.strPricingType
 			, strTransactionType = strScreenName
@@ -993,6 +1029,7 @@ BEGIN TRY
 			, ch.intContractTypeId
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
+			, intUserId = si.intCreatedByUserId
 		into #tblBasisDeliveries
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
@@ -1017,7 +1054,7 @@ BEGIN TRY
 			, sh.intCompanyLocationId
 			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
 							else suh.dblTransactionQuantity * ri.dblReceived end) * -1
-			, intQtyUOMId = ch.intCommodityUOMId
+			, intQtyUOMId = ri.intUnitMeasureId
 			, sh.intPricingTypeId
 			, sh.strPricingType
 			, strTransactionType = strScreenName
@@ -1027,6 +1064,7 @@ BEGIN TRY
 			, ch.intContractTypeId
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
+			, intUserId = ri.intCreatedByUserId
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -1060,6 +1098,7 @@ BEGIN TRY
 			, ch.intContractTypeId
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
+			, intUserId = sh.intUserId
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -1096,6 +1135,7 @@ BEGIN TRY
 				, strTransactionReferenceNo = strTransactionId
 				, intFutureMarketId
 				, intFutureMonthId
+				, intUserId
 			from #tblBasisDeliveries
 
 			union all
@@ -1117,10 +1157,11 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Voucher'
-				, intTransactionId = bd.intBillDetailId
+				, intTransactionId = b.intBillId
 				, strTransactionId = b.strBillId
 				, intFutureMarketId
 				, intFutureMonthId
+				, intUserId = b.intUserId
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
@@ -1144,10 +1185,11 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Voucher'
-				, intTransactionId = bd.intBillDetailId
+				, intTransactionId = b.intBillId
 				, strTransactionId = b.strBillId
 				, intFutureMarketId
 				, intFutureMonthId
+				, intUserId = b.intUserId
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 1
@@ -1171,10 +1213,11 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Invoice'
-				, intTransactionId = id.intInvoiceDetailId
+				, intTransactionId = i.intInvoiceId
 				, strTransactionId = i.strInvoiceNumber
 				, intFutureMarketId
 				, intFutureMonthId
+				, intUserId = i.intEntityId 
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
@@ -1198,10 +1241,11 @@ BEGIN TRY
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
 				, strTransactionType = 'Invoice'
-				, intTransactionId = id.intInvoiceDetailId
+				, intTransactionId = i.intInvoiceId
 				, strTransactionId = i.strInvoiceNumber
 				, intFutureMarketId
 				, intFutureMonthId
+				, intUserId = i.intEntityId 
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
@@ -1229,6 +1273,8 @@ BEGIN TRY
 			, intContractStatusId
 			, intFutureMarketId
 			, intFutureMonthId
+			, intUserId
+			, intActionId
 		)
 		SELECT 
 			strBatch = NULL
@@ -1252,6 +1298,8 @@ BEGIN TRY
 			, intContractStatusId
 			, intFutureMarketId
 			, intFutureMonthId
+			, intUserId
+			, intActionId  = 1 --Rebuild
 		FROM #tblFinalBasisDeliveries 
 
 		EXEC uspCTLogContractBalance @cbLog, 1
@@ -1287,7 +1335,8 @@ BEGIN TRY
 			, intLocationId
 			, intCommodityUOMId
 			, strNotes
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType = 'Derivative Entry'
@@ -1323,6 +1372,7 @@ BEGIN TRY
 								+ ' {strBuySell = "' + ISNULL(strNewBuySell, '') +'"}'
 								+ ' {ysnPreCrush = "' + CAST(ISNULL(ysnPreCrush,0) AS NVARCHAR) +'"}'
 								+ ' {strBrokerTradeNo = "' + ISNULL(strBrokerTradeNo, '') +'"}'
+			, intActionId  = 1 --Rebuild
 		FROM vyuRKGetFutOptTransactionHistory der
 		JOIN tblRKFutureMarket m ON m.intFutureMarketId = der.intFutureMarketId
 		LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = der.intCommodityId AND cUOM.intUnitMeasureId = m.intUnitMeasureId
@@ -1362,7 +1412,8 @@ BEGIN TRY
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives'
 			, strTransactionType
@@ -1388,6 +1439,7 @@ BEGIN TRY
 			, intUserId
 			, intCommodityUOMId
 			, strMiscFields
+			, intActionId  = 1 --Rebuild
 		FROM (
 			SELECT strTransactionType = 'Match Derivatives'
 				, intTransactionRecordId = history.intLFutOptTransactionId
@@ -1465,7 +1517,7 @@ BEGIN TRY
 		) tbl
 		ORDER BY intMatchDerivativeHistoryId
 
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Match Derivatives'
 		DELETE FROM @ExistingHistory
@@ -1499,7 +1551,8 @@ BEGIN TRY
 			, intEntityId
 			, intUserId
 			, intCommodityUOMId
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT
 			  strBucketType = 'Derivatives' 
 			, strTransactionType
@@ -1525,6 +1578,7 @@ BEGIN TRY
 			, intUserId
 			, intCommodityUOMId
 			, strMiscFields
+			, intActionId  = 1 --Rebuild
 		FROM (
 			SELECT strTransactionType = 'Expired Options'
 				, intTransactionRecordId = detail.intFutOptTransactionId
@@ -1585,7 +1639,7 @@ BEGIN TRY
 			LEFT JOIN tblICCommodityUnitMeasure cUOM ON cUOM.intCommodityId = de.intCommodityId AND cUOM.intUnitMeasureId = FutMarket.intUnitMeasureId
 		) tbl
 
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Option Derivatives'
 		DELETE FROM @ExistingHistory
@@ -1605,10 +1659,13 @@ BEGIN TRY
 			, dtmTransactionDate
 			, intContractHeaderId
 			, intCommodityId
+			, intItemId
+			, intCommodityUOMId
 			, intLocationId
 			, dblQty
 			, intUserId
-			, strNotes)
+			, strNotes
+			, intActionId)
 		SELECT
 			  strBucketType = 'Collateral' 
 			, strTransactionType = 'Collateral'
@@ -1618,14 +1675,18 @@ BEGIN TRY
 			, strTransactionNumber = strReceiptNo
 			, dtmTransactionDate = dtmOpenDate
 			, intContractHeaderId = intContractHeaderId
-			, intCommodityId = intCommodityId
+			, intCommodityId = a.intCommodityId
+			, intItemId
+			, intOrigUOMId = CUM.intCommodityUnitMeasureId
 			, intLocationId = intLocationId
 			, dblQty = dblOriginalQuantity
 			, intUserId = (SELECT TOP 1 e.intEntityId
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
 							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = a.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
+			, intActionId  = 1 --Rebuild
 		FROM tblRKCollateral a
+		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = a.intUnitMeasureId AND CUM.intCommodityId = a.intCommodityId
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1638,11 +1699,13 @@ BEGIN TRY
 			, intContractDetailId
 			, intContractHeaderId
 			, intCommodityId
+			, intItemId
 			, intLocationId
 			, dblQty
 			, intCommodityUOMId
 			, intUserId
-			, strNotes)
+			, strNotes
+			, intActionId)
 		SELECT
 			  strBucketType = 'Collateral'  
 			, strTransactionType = 'Collateral Adjustments'
@@ -1654,6 +1717,7 @@ BEGIN TRY
 			, intContractDetailId = CA.intCollateralAdjustmentId
 			, intContractHeaderId = C.intContractHeaderId
 			, intCommodityId = C.intCommodityId
+			, intItemId
 			, intLocationId = intLocationId
 			, dblQty = CA.dblAdjustmentAmount
 			, intOrigUOMId = CUM.intCommodityUnitMeasureId
@@ -1661,6 +1725,7 @@ BEGIN TRY
 							FROM (tblEMEntity e LEFT JOIN tblEMEntityType et ON et.intEntityId = e.intEntityId AND et.strType = 'User')
 							INNER JOIN tblRKCollateralHistory colhis ON colhis.strUserName = e.strName where colhis.intCollateralId = C.intCollateralId and colhis.strAction = 'ADD')
 			, strNotes = strType + ' Collateral'
+			, intActionId  = 1 --Rebuild
 		FROM tblRKCollateralAdjustment CA
 		JOIN tblRKCollateral C ON C.intCollateralId = CA.intCollateralId
 		LEFT JOIN tblICCommodityUnitMeasure CUM ON CUM.intUnitMeasureId = C.intUnitMeasureId AND CUM.intCommodityId = C.intCommodityId
@@ -1672,7 +1737,7 @@ BEGIN TRY
 					AND adj.dblAdjustmentAmount = history.dblOrigQty
 				WHERE adj.intCollateralId = C.intCollateralId)
 		
-		EXEC uspRKLogRiskPosition @ExistingHistory, 1
+		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
 		PRINT 'End Populate RK Summary Log - Collateral'
 		DELETE FROM @ExistingHistory
@@ -1709,6 +1774,7 @@ BEGIN TRY
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,intActionId
 		)
 		SELECT
 			strBatchId
@@ -1737,6 +1803,7 @@ BEGIN TRY
 			,ysnDelete 
 			,intUserId 
 			,strNotes 	
+			,intActionId  = 1 --Rebuild
 		FROM (
 			SELECT 
 				strBatchId = t.strBatchId
@@ -2106,6 +2173,7 @@ BEGIN TRY
 			, st.strStorageTypeDescription
 			, st.ysnActive
 			, sl.ysnExternal
+			, sh.intUserId
 		INTO #tmpCustomerOwned
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -2163,6 +2231,7 @@ BEGIN TRY
 			, st.strStorageTypeDescription
 			, st.ysnActive
 			, sl.ysnExternal
+			, sh.intUserId
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
 		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
@@ -2213,6 +2282,7 @@ BEGIN TRY
 			, st.strStorageTypeDescription
 			, st.ysnActive
 			, sl.ysnExternal
+			, sh.intUserId
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs ON cs.intCustomerStorageId = sh.intCustomerStorageId
 		JOIN tblGRStorageType st ON st.intStorageScheduleTypeId = cs.intStorageTypeId 
@@ -2242,7 +2312,8 @@ BEGIN TRY
 			, intEntityId 
 			, intUserId 
 			, strNotes
-			, strMiscFields)
+			, strMiscFields
+			, intActionId)
 		SELECT strBatchId = NULL
 			, strBucketType
 			, strTransactionType
@@ -2259,7 +2330,7 @@ BEGIN TRY
 			, intCompanyLocationId
 			, dblQty
 			, intEntityId
-			, @intCurrentUserId
+			, intUserId
 			, strNotes = (CASE WHEN intTransactionRecordId IS NULL THEN 'Actual transaction was deleted historically.' ELSE NULL END)
 			, strMiscFields = CASE WHEN ISNULL(strStorageTypeCode, '') = '' THEN '' ELSE '{ strStorageTypeCode = "' + strStorageTypeCode + '" }' END
 								+ CASE WHEN ISNULL(ysnReceiptedStorage, '') = '' THEN '' ELSE '{ ysnReceiptedStorage = "' + CAST(ysnReceiptedStorage AS NVARCHAR) + '" }' END
@@ -2271,6 +2342,7 @@ BEGIN TRY
 								+ CASE WHEN ISNULL(strStorageTypeDescription, '') = '' THEN '' ELSE '{ strStorageTypeDescription = "' + strStorageTypeDescription + '" }' END
 								+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 								+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
+			, intActionId  = 1 --Rebuild
 		FROM #tmpCustomerOwned co
 		ORDER BY dtmDeliveryDate, intStorageHistoryId
 	
@@ -2310,7 +2382,8 @@ BEGIN TRY
             ,intEntityId 
             ,ysnDelete 
             ,intUserId 
-            ,strNotes     
+            ,strNotes
+			,intActionId     
         )
          SELECT
             strBatchId = NULL
@@ -2337,8 +2410,9 @@ BEGIN TRY
             ,dblPrice = dblUnitPrice
             ,intEntityId 
             ,ysnDelete = 0
-            ,intUserId = NULL
+            ,intUserId = TV.intEntityScaleOperatorId
             ,strNotes = strTicketComment
+			,intActionId  = 1 --Rebuild
         FROM tblSCTicket TV
         LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
         LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = TV.intItemUOMIdTo

@@ -8725,6 +8725,9 @@
     <Build Include="dbo\Tables\tblAPPaymentBatch.sql" />
     <Build Include="dbo\Tables\tblAPPaymentBatchDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreatePaymentBatch.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfBasisDeliveries.sql" />
+    <Build Include="dbo\Tables\tblRKLogAction.sql" />
+    <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
