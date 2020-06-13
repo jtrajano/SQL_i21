@@ -1022,7 +1022,7 @@ BEGIN TRY
 			LEFT JOIN tblICItemUOM	PriceUOM  ON PriceUOM.intItemUOMId = SH.intPriceItemUOMId			
 		) HT ON HT.intContractDetailId = CD.intContractDetailId
 
-		WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(CD.dtmCreated) END AND CS.strContractStatus <> 'Unconfirmed'
+		WHERE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1) END AND CS.strContractStatus <> 'Unconfirmed'
 	) t
 	WHERE dblQuantity > 0
 
@@ -1317,9 +1317,9 @@ BEGIN TRY
 		JOIN tblCTSequenceHistory SH ON SH.intSequenceHistoryId = C.intSequenceHistoryId		
 	) HT ON HT.intContractDetailId = CD.intContractDetailId
 	
-	WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE 
+	WHERE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1)	<= CASE 
 														WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate		  
-														ELSE	   dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
+														ELSE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1) 
 												   END
 
 	-- AVERAGE AND REMOVE USED PRICE FIXATION
