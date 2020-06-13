@@ -192,6 +192,7 @@ BEGIN
 	WHERE	ISNULL(OtherCharge.ysnPrice, 0) = 1 
 			AND OtherCharge.intCurrencyId IS NOT NULL 
 			AND OtherCharge.intCurrencyId <> Receipt.intCurrencyId
+			AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
 
 	IF @intChargeItemId IS NOT NULL 
 	BEGIN 
