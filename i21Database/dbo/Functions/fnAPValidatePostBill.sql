@@ -531,6 +531,35 @@ BEGIN
 			(A.dblAmountDue < 0)
 		)
 
+		--VALIDATE TAX AMOUNT
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			ISNULL(item.strItemNo, A2.strMiscDescription) + ' has invalid tax total.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			36
+		FROM tblAPBill A
+		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
+		LEFT JOIN tblICItem item ON A2.intItemId = item.intItemId
+		LEFT JOIN tblICInventoryReceiptCharge D ON A2.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
+		OUTER APPLY
+		(
+			SELECT 
+				SUM(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax)) 
+			AS dblTaxTotal 
+			FROM tblAPBillDetailTax B
+			WHERE B.intBillDetailId = A2.intBillDetailId
+		) taxDetails
+		WHERE 
+		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND
+		(
+			(A2.dblTax != (ISNULL(taxDetails.dblTaxTotal,0)
+							 * (CASE WHEN ((D.intInventoryReceiptChargeId IS NOT NULL AND D.intEntityVendorId = A.intEntityVendorId) 
+								OR D.intEntityVendorId IS NULL) AND D.ysnPrice = 1 THEN -1 ELSE 1 END)))
+		)
+
 	END
 	ELSE
 	BEGIN
