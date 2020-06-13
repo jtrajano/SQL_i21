@@ -19,8 +19,11 @@ RETURNS TABLE AS RETURN
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
-		,CASE WHEN (B.intInventoryReceiptItemId IS NOT NULL AND receiptItem.intTaxGroupId > 0)
-				 OR B.intInventoryReceiptChargeId IS NOT NULL OR B.intInventoryShipmentChargeId IS NOT NULL
+		,CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL 
+						AND receiptItem.intTaxGroupId > 0 
+						AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
+				 OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
+				 OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL))
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
 			ELSE D.intAccountId
 		END AS intAccountId
@@ -47,6 +50,18 @@ RETURNS TABLE AS RETURN
 		ON detailloc.intItemId = B.intItemId AND detailloc.intLocationId = B.intLocationId
 	LEFT JOIN tblICItem F
 		ON B.intItemId = F.intItemId
+	OUTER APPLY (
+		SELECT TOP 1 intInventoryReceiptItemTaxId FROM tblICInventoryReceiptItemTax receiptTax
+		WHERE receiptTax.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+	) receiptTax
+	OUTER APPLY (
+		SELECT TOP 1 intInventoryReceiptChargeId FROM tblICInventoryReceiptChargeTax receiptChargeTax
+		WHERE receiptChargeTax.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
+	) chargeTax
+	OUTER APPLY (
+		SELECT TOP 1 intInventoryShipmentChargeId FROM tblICInventoryShipmentChargeTax shipmentChargeTax
+		WHERE shipmentChargeTax.intInventoryShipmentChargeId = B.intInventoryShipmentChargeId
+	) shipmentChargeTax
 	WHERE A.intBillId = @billId
 	AND A.intTransactionType IN (1,3)
 	-- AND D.dblTax != 0
