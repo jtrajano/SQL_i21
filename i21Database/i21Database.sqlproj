@@ -8242,6 +8242,7 @@
     <Build Include="dbo\Tables\tblSMMessageLog.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
     <Build Include="dbo\Tables\tblCTMiscellaneous.sql" />
+    <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
