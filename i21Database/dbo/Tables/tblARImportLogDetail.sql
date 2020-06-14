@@ -21,6 +21,7 @@
 	[strBOLNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strPONumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strComment]				NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
+	[strItemDescription]		NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strTaxGroup]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strSiteNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	[strItemNumber]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
