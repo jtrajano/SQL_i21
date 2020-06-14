@@ -302,7 +302,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 													   END)
 					,@ItemQtyShipped				= 1.000000
 					,@ItemPrice						= ISNULL(D.[dblSubtotal], @ZeroDecimal)
-					,@ItemDescription				= D.strComment
+					,@ItemDescription				= D.strItemDescription
 					,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.strTaxGroup) ELSE 0 END
 					,@AmountDue						= CASE WHEN D.strTransactionType <> 'Sales Order' THEN ISNULL(D.dblAmountDue, @ZeroDecimal) ELSE @ZeroDecimal END
 					,@TaxAmount						= ISNULL(D.dblTax, @ZeroDecimal)
