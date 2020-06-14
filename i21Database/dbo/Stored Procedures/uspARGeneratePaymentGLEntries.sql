@@ -938,7 +938,7 @@ BEGIN
 	SELECT
 		 [dtmDate]                      = P.[dtmDatePaid]
 		,[strBatchId]                   = P.[strBatchId]
-		,[intAccountId]                 = P.[intARAccountId]
+		,[intAccountId]                 = P.[intTransactionAccountId]
 		,[dblDebit]                     = CASE WHEN P.[dblBaseWriteOffAmount] < 0 THEN ABS(P.[dblBaseWriteOffAmount]) ELSE 0 END
 		,[dblCredit]                    = CASE WHEN P.[dblBaseWriteOffAmount] > 0 THEN P.[dblBaseWriteOffAmount] ELSE 0 END
 		,[dblDebitUnit]                 = @ZeroDecimal
