@@ -92,12 +92,10 @@ BEGIN
 							,Charge.strChargesLink
 				) CalculatedCharges 
 					ON CalculatedCharges.intContractId = ShipmentItem.intOrderId
-					AND 1 = 
-						CASE 
-							WHEN CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo THEN 1
-							WHEN CalculatedCharges.strChargesLink = ShipmentItem.strChargesLink THEN 1 
-							ELSE 0 
-						END	
+					AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo
+					AND (
+						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
+					)
 				LEFT JOIN (
 					SELECT	dblTotalCost = SUM(dbo.fnMultiply(ISNULL(ShipmentItem.dblQuantity, 0) , ISNULL(ShipmentItem.dblUnitPrice, 0)))
 							,ShipmentItem.intOrderId 
@@ -111,12 +109,10 @@ BEGIN
 					GROUP BY ShipmentItem.intOrderId, ShipmentItem.intLineNo, ShipmentItem.strChargesLink 
 				) TotalCostOfItemsPerContract 
 					ON TotalCostOfItemsPerContract.intOrderId = ShipmentItem.intOrderId 
-					AND 1 = 
-						CASE 
-							WHEN TotalCostOfItemsPerContract.intLineNo = ShipmentItem.intLineNo THEN 1
-							WHEN TotalCostOfItemsPerContract.strChargesLink = ShipmentItem.strChargesLink THEN 1 
-							ELSE 0 
-						END	
+					AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo
+					AND (
+						ISNULL(TotalCostOfItemsPerContract.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
+					)
 	) AS Source_Query  
 		ON ShipmentItemAllocatedCharge.intInventoryShipmentId = Source_Query.intInventoryShipmentId
 		AND ShipmentItemAllocatedCharge.intEntityVendorId = Source_Query.intEntityVendorId
