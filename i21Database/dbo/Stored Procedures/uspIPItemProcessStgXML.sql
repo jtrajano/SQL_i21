@@ -109,9 +109,24 @@ BEGIN TRY
 		,@strNewLotTracking NVARCHAR(50)
 		,@strOldLotTracking NVARCHAR(50)
 
-	SELECT @intItemStageId = MIN(intItemStageId)
+	DECLARE @tblICItemStage TABLE (intItemStageId INT)
+
+	INSERT INTO @tblICItemStage (intItemStageId)
+	SELECT intItemStageId
 	FROM tblICItemStage
 	WHERE strFeedStatus IS NULL
+	Order by intItemStageId
+
+	UPDATE tblICItemStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intItemStageId IN (
+			SELECT S.intItemStageId
+			FROM @tblICItemStage S
+			)
+
+
+	SELECT @intItemStageId = MIN(intItemStageId)
+	FROM @tblICItemStage
 
 	WHILE @intItemStageId IS NOT NULL
 	BEGIN
@@ -8179,10 +8194,19 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intItemStageId = MIN(intItemStageId)
-		FROM tblICItemStage
+		FROM @tblICItemStage
 		WHERE intItemStageId > @intItemStageId
-			AND strFeedStatus IS NULL
+
 	END
+
+	UPDATE tblICItemStage
+	SET strFeedStatus = NULL
+	WHERE intItemStageId IN (
+			SELECT S.intItemStageId
+			FROM @tblICItemStage S
+			)
+	AND IsNULL(strFeedStatus,'') = 'In-Progress'
+
 END TRY
 
 BEGIN CATCH

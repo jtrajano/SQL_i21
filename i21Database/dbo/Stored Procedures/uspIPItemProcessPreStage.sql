@@ -30,6 +30,14 @@ BEGIN TRY
 	FROM tblICItemPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
+	UPDATE tblICItemPreStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intItemPreStageId IN (
+			SELECT PS.intItemPreStageId
+			FROM @tblICItemPreStage PS
+			)
+
+
 	SELECT @intItemPreStageId = MIN(intItemPreStageId)
 	FROM @tblICItemPreStage
 
@@ -58,6 +66,14 @@ BEGIN TRY
 		FROM @tblICItemPreStage
 		WHERE intItemPreStageId > @intItemPreStageId
 	END
+	UPDATE tblICItemPreStage
+	SET strFeedStatus = NULL
+	WHERE intItemPreStageId IN (
+			SELECT PS.intItemPreStageId
+			FROM @tblICItemPreStage PS
+			)
+	And IsNULL(strFeedStatus,'') = 'In-Progress'
+
 END TRY
 
 BEGIN CATCH
