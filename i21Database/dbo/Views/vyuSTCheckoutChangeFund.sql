@@ -9,7 +9,7 @@ SELECT DISTINCT
 				THEN 'Change Fund End Balance'
 			WHEN REPLACE(ITEM, '_ItemId', '') = 'Replenishment'
 				THEN 'Change Fund Replenishment'
-		END AS strType,
+		END COLLATE Latin1_General_CI_AS AS strType,
 		intItemId, 
 		dblItemAmount
 FROM 

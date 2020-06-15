@@ -13,7 +13,7 @@ SELECT DISTINCT
 				THEN 'ATM End Balance'
 			WHEN REPLACE(ITEM, '_ItemId', '') = 'Variance'
 				THEN 'ATM Variance'
-		END AS strType,
+		END COLLATE Latin1_General_CI_AS AS strType,
 		intItemId, 
 		dblItemAmount
 FROM 

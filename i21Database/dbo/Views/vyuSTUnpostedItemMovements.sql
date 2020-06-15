@@ -2,7 +2,7 @@
 AS
 
 SELECT 
-	strType			= 'tblSTCheckoutItemMovements',
+	strType			= 'tblSTCheckoutItemMovements' COLLATE Latin1_General_CI_AS,
 	intKeyId		= tblSTCheckoutItemMovements.intItemMovementId,
 	strDescription	= tblSTCheckoutItemMovements.strDescription,
 	ysnPosted		= tblSTCheckoutHeader.ysnPosted,

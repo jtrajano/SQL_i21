@@ -17,7 +17,7 @@ SELECT DT.intDepartmentTotalId
 				THEN 'PumpTotals'
 			WHEN IM.intCheckoutId IS NOT NULL
 				THEN 'ItemMovements'
-		END AS strSubType
+		END COLLATE Latin1_General_CI_AS AS strSubType
 	   , CASE
 			WHEN PT.intCheckoutId IS NOT NULL
 				THEN PT.dblQty
