@@ -2973,11 +2973,7 @@ BEGIN
 		, intCompanyLocationId
 		, intMarketZoneId
 		, strMarketZoneCode
-		, strLocationName 
-		, strPricingType
-		, dblMarketPrice
-		, dblAdjustedContractPrice
-		, dblOpenQty
+		, strLocationName
 		, dblResult = case when strPricingType='Cash' THEN 
 								ROUND(dblResultCash,2) 
 							else 
