@@ -819,6 +819,7 @@ BEGIN
 					IF(ISNULL(@CardNumberForDualCard,'') != '')
 					BEGIN
 						SET @strCardId = @CardNumberForDualCard
+						SET @strVehicleId = null
 					END
 					ELSE
 					BEGIN
@@ -834,6 +835,7 @@ BEGIN
 						IF(ISNULL(@CardNumberForDualCard,'') != '')
 						BEGIN
 							SET @strCardId = @CardNumberForDualCard
+							SET @strVehicleId = null
 						END
 						ELSE
 						BEGIN
