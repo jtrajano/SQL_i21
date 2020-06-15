@@ -414,7 +414,11 @@ BEGIN
 														END 													
 													)
 													AS DECIMAL(18,2)) 
-													- (sh.dblPaidAmount)
+													- CAST(
+													dbo.fnMultiply(
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END --[Voucher Qty]
+														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Transfer Cost]
+													) AS DECIMAL(18,2)) 
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
@@ -426,7 +430,7 @@ BEGIN
 			,[ysnIsStorage] 					=	0
 			,[strActualCostId] 					=	NULL
 			,[intSourceTransactionId] 			=	TS.intTransferStorageId
-			,[intSourceTransactionDetailId] 	=	TSS.intTransferStorageSplitId
+			,[intSourceTransactionDetailId] 	=	TSR.intTransferStorageReferenceId
 			,[strSourceTransactionId] 			=	TS.strTransferStorageTicket
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
@@ -436,8 +440,6 @@ BEGIN
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
-		INNER JOIN tblGRStorageHistory sh 
-			ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
 		INNER JOIN tblGRTransferStorageSplit TSS on TSS.intTransferStorageId = TS.intTransferStorageId
@@ -447,7 +449,7 @@ BEGIN
 		INNER JOIN tblSCTicket G ON C.intTicketId = G.intTicketId
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-		WHERE (sh.dblOldCost is not null and sh.dblOldCost != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
+		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
 
 		--DP STORAGES FROM THE DELIVERY SHEET
 		UNION ALL
@@ -596,7 +598,8 @@ BEGIN
 		INNER JOIN tblGRCustomerStorage CS_FROM
 			ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
 		INNER JOIN tblGRStorageType ST_FROM
-			ON ST.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST.ysnDPOwnedType = 0
+			ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId 
+				AND ST_FROM.ysnDPOwnedType = 0
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E 
 			ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
