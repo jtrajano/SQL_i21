@@ -17,7 +17,7 @@ DECLARE @UserEntityID	INT = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity 
 	  , @ZeroDecimal	NUMERIC(18, 6) = 0
 		
 UPDATE ARI						
-SET	ARI.[dblPayment] = ISNULL(ARI.[dblPayment], @ZeroDecimal) + (APPD.[dblPayment] * (CASE WHEN @post = 0 THEN 1 ELSE -1 END)) 
+SET	ARI.[dblPayment] = ISNULL(ARI.[dblPayment], @ZeroDecimal) + ((CASE WHEN ARI.strTransactionType = 'Cash Refund' THEN APPD.[dblPayment] * -1 ELSE APPD.[dblPayment] END) * (CASE WHEN @post = 0 THEN 1 ELSE -1 END)) 
 FROM @PaymentDetailId PID
 INNER JOIN tblAPPaymentDetail APPD ON PID.[intId] = APPD.[intPaymentDetailId]
 INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
