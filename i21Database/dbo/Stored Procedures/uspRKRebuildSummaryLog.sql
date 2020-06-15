@@ -994,7 +994,7 @@ BEGIN TRY
 			, intUserId
 			, intActionId  = 1 --Rebuild 		
 		FROM @tblContractBalance
-		ORDER BY dtmTransactionDate,  intContractDetailId
+		ORDER BY intContractDetailId
 
 
 		EXEC uspCTLogContractBalance @cbLog, 1
