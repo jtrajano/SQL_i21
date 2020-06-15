@@ -92,12 +92,10 @@ BEGIN
 						,Charge.strChargesLink
 				) CalculatedCharges 
 					ON ShipmentItem.intOrderId = CalculatedCharges.intContractId
-					AND 1 = 
-						CASE 
-							WHEN CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo THEN 1
-							WHEN CalculatedCharges.strChargesLink = ShipmentItem.strChargesLink THEN 1 
-							ELSE 0 
-						END					
+					AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo
+					AND (
+						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
+					)				
 				LEFT JOIN (
 					SELECT  dblTotalStockUnit = SUM(dbo.fnCalculateStockUnitQty(ShipmentItem.dblQuantity, ItemUOM.dblUnitQty))
 							,ShipmentItem.intOrderId 
@@ -115,12 +113,10 @@ BEGIN
 					GROUP BY ShipmentItem.intOrderId, ShipmentItem.intLineNo, ShipmentItem.strChargesLink
 				) TotalStockUnitOfItemsPerContract 
 					ON TotalStockUnitOfItemsPerContract.intOrderId = ShipmentItem.intOrderId 
-					AND 1 = 
-						CASE 
-							WHEN TotalStockUnitOfItemsPerContract.intLineNo = ShipmentItem.intLineNo THEN 1
-							WHEN TotalStockUnitOfItemsPerContract.strChargesLink = ShipmentItem.strChargesLink THEN 1 
-							ELSE 0 
-						END	
+					AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo
+					AND (
+						ISNULL(TotalStockUnitOfItemsPerContract.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
+					)
 
 				LEFT JOIN dbo.tblICItemUOM ItemUOM	
 					ON ItemUOM.intItemUOMId = ShipmentItem.intItemUOMId 
