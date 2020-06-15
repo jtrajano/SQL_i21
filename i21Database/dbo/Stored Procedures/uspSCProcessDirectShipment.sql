@@ -222,13 +222,14 @@ BEGIN TRY
 					,@intUserId = @intUserId
 					,@intInvoiceId = @intInvoiceId OUTPUT 
 					,@dtmClientDate = @dtmClientDate
+					,@ysnDWG = 1
 				
 
 				IF(@intInvoiceId IS NOT NULL and @dblNetUnits > (SELECT CAST(SUM(dbo.fnCalculateQtyBetweenUOM(ISI.intItemUOMId,@intTicketItemUOMId,ISI.dblQuantity)) AS DECIMAL(18,6))  FROM tblICInventoryShipment ICIS
 					INNER JOIN tblICInventoryShipmentItem ISI ON ICIS.intInventoryShipmentId = ISI.intInventoryShipmentId
-					WHERE intSourceId = @intTicketId))
+					WHERE intSourceId = @intTicketId AND ICIS.intSourceType = 1))
 				BEGIN
-					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,@intTicketId
+					
 
 					declare @InAdj as InventoryAdjustmentIntegrationId
 					insert into @InAdj(intInventoryShipmentId, intTicketId, intInvoiceId)
