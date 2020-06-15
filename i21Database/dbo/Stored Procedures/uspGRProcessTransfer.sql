@@ -474,7 +474,7 @@ BEGIN
 					,ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
-					,intTransactionDetailId = SR.intTransferStorageReferenceId
+					,intTransactionDetailId = SR.intTransferStorageSplitId
 					,strTransactionId = TS.strTransferStorageTicket
 					,intTransactionTypeId = 56
 					,intLotId = NULL
