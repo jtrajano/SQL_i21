@@ -34,7 +34,7 @@ SELECT DISTINCT
 	 , R.strRegisterClass
 	 , R.strSapphireIpAddress
 	 , R.strSAPPHIREUserName
-	 , strSAPPHIREPassword = dbo.fnAESDecryptASym(R.strSAPPHIREPassword)
+	 , strSAPPHIREPassword = dbo.fnAESDecryptASym(R.strSAPPHIREPassword)  COLLATE Latin1_General_CI_AS 
 	 , ISNULL(R.intSAPPHIRECheckoutPullTimePeriodId, 0) AS intSAPPHIRECheckoutPullTimePeriodId
 	 , CASE
 			WHEN R.intSAPPHIRECheckoutPullTimePeriodId = 1
@@ -42,7 +42,7 @@ SELECT DISTINCT
 			WHEN R.intSAPPHIRECheckoutPullTimePeriodId = 2
 				THEN 'Day Close'
 			ELSE ''
-	 END AS strSAPPHIRECheckoutPullTimePeriod
+	 END COLLATE Latin1_General_CI_AS AS strSAPPHIRECheckoutPullTimePeriod
 	 , ISNULL(R.intSAPPHIRECheckoutPullTimeSetId, 0) AS intSAPPHIRECheckoutPullTimeSetId
 	 , CASE
 			WHEN R.intSAPPHIRECheckoutPullTimeSetId = 1
@@ -54,7 +54,7 @@ SELECT DISTINCT
 			WHEN R.intSAPPHIRECheckoutPullTimeSetId = 4
 				THEN 'Last Close Data - 2 and on through 9'
 			ELSE ''
-	 END AS strSAPPHIRECheckoutPullTimeSet
+	 END COLLATE Latin1_General_CI_AS AS strSAPPHIRECheckoutPullTimeSet
 
 	 , usec_uRole.strName			AS strDefaultUserRoleName
 	 , usec_uRole.strRoleType		AS strDefaultUserRoleType

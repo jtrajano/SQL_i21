@@ -108,10 +108,10 @@ SELECT Item.intItemId
 							END
 					END
 			ELSE ''
-	   END AS strUPCwthOrwthOutCheckDigit
+	   END COLLATE Latin1_General_CI_AS AS strUPCwthOrwthOutCheckDigit
 
 	   , UOM.ysnHasCheckDigit
-	   , UOM.intCheckDigit
+	   , UOM.intCheckDigit COLLATE Latin1_General_CI_AS AS intCheckDigit
 	   , CASE
 			WHEN UOM.dblUPCwthOrwthOutCheckDigit <= 99999
 				THEN 'plu'
@@ -140,7 +140,7 @@ SELECT Item.intItemId
 							THEN 'gtin'
 					END
 			ELSE ''
-	   END AS strPosCodeFormat
+	   END COLLATE Latin1_General_CI_AS AS strPosCodeFormat
 FROM 
 (
 	SELECT 

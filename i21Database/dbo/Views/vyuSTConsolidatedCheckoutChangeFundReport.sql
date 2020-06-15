@@ -7,7 +7,7 @@ SELECT ST.intStoreId
 	, ST.strDescription strStoreDescription
 	, CH.dtmCheckoutDate
 	, ISNULL(Inv.ysnPosted, 0) ysnPosted
-	, REPLACE(cf.strType, 'Change Fund ', '') AS strType
+	, REPLACE(cf.strType, 'Change Fund ', '') COLLATE Latin1_General_CI_AS AS strType
 	, item.strItemNo
 	, SUM(cf.dblItemAmount) dblItemAmountTotal
 	, cf.intSequence 

@@ -11,7 +11,7 @@ SELECT DISTINCT
 				THEN 'Change Fund Replenishment'
 			WHEN REPLACE(ITEM, '_ItemId', '') = 'FundIncreaseDecrease'
 				THEN 'Change Fund Increase/Decrease'
-		END AS strType,
+		END COLLATE Latin1_General_CI_AS AS strType,
 		CASE
 			WHEN ITEM = 'BegBalance_ItemId'
 				THEN 1

@@ -7,7 +7,7 @@ SELECT ST.intStoreId
 	, ST.strDescription strStoreDescription
 	, CH.dtmCheckoutDate
 	, ISNULL(Inv.ysnPosted, 0) ysnPosted
-	, REPLACE(atm.strType, 'ATM ', '') AS strType
+	, REPLACE(atm.strType, 'ATM ', '') COLLATE Latin1_General_CI_AS AS strType
 	, item.strItemNo
 	, SUM(atm.dblItemAmount) dblItemAmountTotal
 	, atm.intSequence

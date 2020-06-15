@@ -3,7 +3,7 @@ CREATE VIEW [dbo].[vyuSTUnpostedItemSales]
 AS
 
 SELECT 
-strType			= 'tblSTCheckoutPumpTotals',
+strType			= 'tblSTCheckoutPumpTotals' COLLATE Latin1_General_CI_AS,
 intKeyId			= tblSTCheckoutPumpTotals.intPumpTotalsId,
 strDescription	= tblSTCheckoutPumpTotals.strDescription,
 ysnPosted		= tblSTCheckoutHeader.ysnPosted,

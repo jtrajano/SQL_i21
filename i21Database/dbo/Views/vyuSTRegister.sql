@@ -48,14 +48,14 @@ SELECT reg.intRegisterId
 								WHEN (reg.strSAPPHIREPassword IS NOT NULL AND reg.strSAPPHIREPassword != '')
 									THEN dbo.fnAESDecryptASym(reg.strSAPPHIREPassword)
 								ELSE NULL
-							END
+							END COLLATE Latin1_General_CI_AS
 	, reg.intSAPPHIRECheckoutPullTimePeriodId
 	, strSAPPHIRECheckoutPullTimePeriodId = CASE
 												WHEN (reg.intSAPPHIRECheckoutPullTimePeriodId = 1)
 													THEN 'Shift Close'
 												WHEN (reg.intSAPPHIRECheckoutPullTimePeriodId = 2)
 													THEN 'Day Close'
-											END
+											END COLLATE Latin1_General_CI_AS
 	, reg.intSAPPHIRECheckoutPullTimeSetId
 	, strSAPPHIRECheckoutPullTimeSetId = CASE
 											WHEN (reg.intSAPPHIRECheckoutPullTimeSetId = 1)
@@ -76,7 +76,7 @@ SELECT reg.intRegisterId
 												THEN 'Last Close Data - 6'
 											WHEN (reg.intSAPPHIRECheckoutPullTimeSetId = 9)
 												THEN 'Last Close Data - 7'
-										END
+										END COLLATE Latin1_General_CI_AS
 	, reg.strSAPPHIRECheckoutPullTime
 	, reg.ysnSAPPHIREAutoUpdatePassword
 	, reg.dtmSAPPHIRELastPasswordChangeDate
@@ -84,7 +84,7 @@ SELECT reg.intRegisterId
 									WHEN (reg.strSAPPHIREBasePassword IS NOT NULL AND reg.strSAPPHIREBasePassword != '')
 										THEN dbo.fnAESDecryptASym(reg.strSAPPHIREBasePassword)
 									ELSE NULL
-								END
+								END COLLATE Latin1_General_CI_AS
 	, reg.intSAPPHIREPasswordIntervalDays
 	, reg.intSAPPHIREPasswordIncrementNo
 	, ysnHasStore = CASE
