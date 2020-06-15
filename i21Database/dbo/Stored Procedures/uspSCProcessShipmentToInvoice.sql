@@ -4,6 +4,7 @@
 	,@intUserId INT
 	,@intInvoiceId AS INT OUTPUT
 	,@dtmClientDate DATETIME = NULL
+	,@ysnDWG BIT = 0
 AS
 BEGIN
 
@@ -22,6 +23,8 @@ BEGIN
 	DECLARE @_intContractDetailId INT 
 	DECLARE @ysnTicketDestinationWGPosted BIT
 	DECLARE @intTicketContractDetailId INT
+	DECLARE @intTicketItemUOMId INT
+	DECLARE @dblNetUnits NUMERIC(18,6)
 
 
 	BEGIN TRY
@@ -31,6 +34,8 @@ BEGIN
 				,@strWhereFinalizedGrade = CTGrade.strWhereFinalized
 				,@strWhereFinalizedWeight = CTWeight.strWhereFinalized
 				,@intTicketContractDetailId = intContractId
+				,@intTicketItemUOMId = A.intItemUOMIdTo
+				, @dblNetUnits = A.dblNetUnits
 			FROM tblSCTicket A
 			LEFT JOIN tblCTContractDetail B
 				ON A.intContractId = B.intContractDetailId
@@ -47,6 +52,11 @@ BEGIN
 				IF ISNULL(@intInventoryShipmentId, 0) != 0 AND  EXISTS(SELECT TOP 1 1 FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @intInventoryShipmentId AND ysnAllowInvoice = 1)
 				BEGIN
 					EXEC @intInvoiceId = dbo.uspARCreateInvoiceFromShipment @intInventoryShipmentId, @intUserId, @intInvoiceId , 0, 1 ,@dtmShipmentDate = @dtmClientDate;
+
+					IF(ISNULL(@intInvoiceId,0) <> 0 AND @ysnDWG = 1)
+					BEGIN
+						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,@intTicketId
+					END
 				END
 
 				SELECT 
