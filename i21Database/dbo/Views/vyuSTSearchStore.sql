@@ -7,7 +7,7 @@ SELECT DISTINCT
 	   , R.strRegisterClass
 	   , R.strSapphireIpAddress
 	   , R.strSAPPHIREUserName
-	   , strSAPPHIREPassword = dbo.fnAESDecryptASym(R.strSAPPHIREPassword)
+	   , strSAPPHIREPassword = dbo.fnAESDecryptASym(R.strSAPPHIREPassword) COLLATE Latin1_General_CI_AS
 	   , ISNULL(R.intSAPPHIRECheckoutPullTimePeriodId, 0) AS intSAPPHIRECheckoutPullTimePeriodId
 	   , CASE
 			WHEN R.intSAPPHIRECheckoutPullTimePeriodId = 1

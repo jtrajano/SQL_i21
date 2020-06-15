@@ -24,7 +24,7 @@ SELECT
 			THEN 'Input Item'
 		 WHEN RI.intRecipeItemTypeId = 2
 			THEN 'Output Item'
-	 END AS strRecipeType
+	 END COLLATE Latin1_General_CI_AS AS strRecipeType
 	 , Item.strItemNo
 	 , Item.strDescription AS strItemDesciption
 	 , ItemStock.dblUnitOnHand AS dblItemStockUnitOnHand
