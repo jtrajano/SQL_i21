@@ -604,7 +604,7 @@ BEGIN
 						INNER JOIN tblGRTransferStorageReference SR
 							ON SR.intToCustomerStorageId = CS.intCustomerStorageId
 						INNER JOIN @ItemsToPost IC
-							ON IC.intTransactionDetailId = SR.intTransferStorageReferenceId
+							ON IC.intTransactionDetailId = SR.intTransferStorageSplitId
 						INNER JOIN tblGRStorageType ST
 							ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 								AND ST.ysnDPOwnedType = 1
