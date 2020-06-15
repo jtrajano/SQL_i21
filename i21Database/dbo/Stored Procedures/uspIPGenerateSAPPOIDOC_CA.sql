@@ -4,11 +4,11 @@
 	)
 AS
 BEGIN
-	DECLARE @strVendorAccountNum NVARCHAR(50)
-		,@strERPPONumber NVARCHAR(50)
-		,@strItemNo NVARCHAR(50)
-		,@strContractItemNo NVARCHAR(50)
-		,@strLoadingPoint NVARCHAR(50)
+	DECLARE @strVendorAccountNum NVARCHAR(100)
+		,@strERPPONumber NVARCHAR(100)
+		,@strItemNo NVARCHAR(100)
+		,@strContractItemNo NVARCHAR(100)
+		,@strLoadingPoint NVARCHAR(100)
 		,@dblQuantity NUMERIC(18, 6)
 		,@dblNetWeight NUMERIC(18, 6)
 		,@dtmPlannedAvailabilityDate DATETIME
@@ -18,18 +18,18 @@ BEGIN
 		,@intContractFeedId INT
 		,@strVendorRefNo NVARCHAR(50)
 		,@strXML NVARCHAR(MAX)
-		,@strContractNo NVARCHAR(50)
+		,@strContractNo NVARCHAR(100)
 		,@strRowState NVARCHAR(50)
 		,@intShipperId INT
-		,@strShipperName NVARCHAR(50)
+		,@strShipperName NVARCHAR(100)
 		,@intDestinationCityId INT
-		,@strDestinationPoint NVARCHAR(50)
+		,@strDestinationPoint NVARCHAR(100)
 		,@intDestinationPortId INT
 		,@intRecordId INT
 		,@intThirdPartyContractWaitingPeriod INT
 		,@strError NVARCHAR(MAX) = ''
 		,@dtmFeedCreated DATETIME
-		,@strShipperVendorAccountNum NVARCHAR(50)
+		,@strShipperVendorAccountNum NVARCHAR(100)
 		,@intContractDetailId INT
 		,@strSeq NVARCHAR(50)
 		,@dtmCurrentDate DATETIME
