@@ -141,6 +141,8 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
 							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ShipmentItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
@@ -148,6 +150,7 @@ BEGIN
 							Shipment.intOrderType = 1 -- Sales Contract 
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
 							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
@@ -304,6 +307,9 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
 							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ShipmentItem.strChargesLink IS NULL 
+
 						THEN 
 							1
 						
@@ -311,6 +317,7 @@ BEGIN
 							Shipment.intOrderType = 1 -- Sales Contract 
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
 							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
@@ -461,6 +468,8 @@ BEGIN
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
 							AND ShipmentItem.intLineNo = Charge.intContractDetailId
+							AND Charge.strChargesLink IS NULL 
+							AND ShipmentItem.strChargesLink IS NULL 
 						THEN 
 							1
 						
@@ -468,6 +477,7 @@ BEGIN
 							Shipment.intOrderType = 1 -- Sales Contract 
 							AND Charge.intContractId IS NOT NULL 
 							AND ShipmentItem.intOrderId = Charge.intContractId
+							AND ShipmentItem.intLineNo = Charge.intContractDetailId
 							AND Charge.strChargesLink = ShipmentItem.strChargesLink
 						THEN 
 							1
