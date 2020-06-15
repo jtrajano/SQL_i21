@@ -11,116 +11,38 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF
 
-
-DECLARE @UserEntityID	INT
-		,@ActionType	NVARCHAR(50)
-		,@InvoiceIds	NVARCHAR(MAX)
-		,@ZeroDecimal	NUMERIC(18, 6)
+DECLARE @UserEntityID	INT = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
+	  , @ActionType		NVARCHAR(50) = CASE WHEN @post = 1 THEN 'Post Settlement' ELSE 'UnPost Settlement' END
+	  , @InvoiceIds		NVARCHAR(MAX) = NULL
+	  , @ZeroDecimal	NUMERIC(18, 6) = 0
 		
-SET @ZeroDecimal = 0.000000	
-SET @UserEntityID = ISNULL((SELECT [intEntityId] FROM tblSMUserSecurity WHERE [intEntityId] = @userId),@userId) 
-SET @ActionType = CASE WHEN @post = 1 THEN 'Post Settlement' ELSE 'UnPost Settlement' END
+UPDATE ARI						
+SET	ARI.[dblPayment] = ISNULL(ARI.[dblPayment], @ZeroDecimal) + ((CASE WHEN ARI.strTransactionType = 'Cash Refund' THEN APPD.[dblPayment] * -1 ELSE APPD.[dblPayment] END) * (CASE WHEN @post = 0 THEN 1 ELSE -1 END)) 
+FROM @PaymentDetailId PID
+INNER JOIN tblAPPaymentDetail APPD ON PID.[intId] = APPD.[intPaymentDetailId]
+INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
+INNER JOIN tblAPPayment APP ON APPD.[intPaymentId] = APP.[intPaymentId]
+WHERE ARI.[ysnPosted] = 1
+  AND APPD.[dblPayment] <> @ZeroDecimal
 
 UPDATE ARI						
-SET	
-	 ARI.[dblPayment]		= ISNULL(ARI.[dblPayment], @ZeroDecimal) + (APPD.[dblPayment] * (CASE WHEN @post = 1 THEN 1 ELSE -1 END)) 
-	--,ARI.[dblDiscount]		= ISNULL(ARI.[dblDiscount], @ZeroDecimal) + APPD.[dblDiscount]
-	--,ARI.[dblInterest]		= ISNULL(ARI.[dblInterest], @ZeroDecimal) + APPD.[dblInterest]
-FROM
-	@PaymentDetailId PID
-INNER JOIN
-	tblAPPaymentDetail APPD
-		ON PID.[intId] = APPD.[intPaymentDetailId]
-INNER JOIN
-	tblARInvoice ARI
-		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
-INNER JOIN
-	tblAPPayment APP
-		ON APPD.[intPaymentId] = APP.[intPaymentId]
-WHERE
-	--APP.[ysnPosted] = 1
-	--AND 
-	ARI.[ysnPosted] = 1
-	AND APPD.[dblPayment] <> @ZeroDecimal
+SET	ARI.dblAmountDue 		= (ARI.dblInvoiceTotal + ARI.dblInterest) - (ARI.dblPayment + ARI.dblDiscount)
+  , ARI.[ysnPaid] 			= CASE WHEN (ARI.dblInvoiceTotal + ARI.dblInterest) - (ARI.dblPayment + ARI.dblDiscount) = @ZeroDecimal THEN 1 ELSE 0 END
+  , ARI.[intConcurrencyId]	= ISNULL(ARI.intConcurrencyId,0) + 1	
+FROM @PaymentDetailId PID
+INNER JOIN tblAPPaymentDetail APPD ON PID.[intId] = APPD.[intPaymentDetailId]
+INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
+INNER JOIN tblAPPayment APP ON APPD.[intPaymentId] = APP.[intPaymentId]
+WHERE ARI.[ysnPosted] = 1
+  AND APPD.[dblPayment] <> @ZeroDecimal
 
-
-UPDATE ARI						
-SET	
-	 ARI.dblAmountDue = (ARI.dblInvoiceTotal + ARI.dblInterest) - (ARI.dblPayment + ARI.dblDiscount)
-	,ARI.[ysnPaid] = CASE WHEN (ARI.dblInvoiceTotal + ARI.dblInterest) - (ARI.dblPayment + ARI.dblDiscount) = @ZeroDecimal THEN 1 ELSE 0 END
-	,ARI.[intConcurrencyId]	= ISNULL(ARI.intConcurrencyId,0) + 1	
-FROM
-	@PaymentDetailId PID
-INNER JOIN
-	tblAPPaymentDetail APPD
-		ON PID.[intId] = APPD.[intPaymentDetailId]
-INNER JOIN
-	tblARInvoice ARI
-		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
-INNER JOIN
-	tblAPPayment APP
-		ON APPD.[intPaymentId] = APP.[intPaymentId]
-WHERE
-	--APP.[ysnPosted] = 1
-	--AND 
-	ARI.[ysnPosted] = 1
-	AND APPD.[dblPayment] <> @ZeroDecimal
-
-
-DECLARE @CustomerIds TABLE (intCustomerId INT)
-	
-INSERT INTO @CustomerIds
-SELECT DISTINCT ARI.intEntityCustomerId
-FROM
-	@PaymentDetailId PID
-INNER JOIN
-	tblAPPaymentDetail APPD
-		ON PID.[intId] = APPD.[intPaymentDetailId]
-INNER JOIN
-	tblARInvoice ARI
-		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
-INNER JOIN
-	tblAPPayment APP
-		ON APPD.[intPaymentId] = APP.[intPaymentId]
-WHERE
-	--APP.[ysnPosted] = 1
-	--AND 
-	ARI.[ysnPosted] = 1
-	AND APPD.[dblPayment] <> @ZeroDecimal
-
-----Update Customer's AR Balance
---UPDATE CUSTOMER
---SET dblARBalance = dblARBalance - (CASE WHEN @post = 1 THEN ISNULL(PAYMENT.dblTotalPayment, 0) ELSE ISNULL(PAYMENT.dblTotalPayment, 0) * -1 END)
---FROM dbo.tblARCustomer CUSTOMER WITH (NOLOCK)
---INNER JOIN (SELECT intEntityCustomerId
---				 , dblTotalPayment = SUM(PD.dblPayment)
---			FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
---				INNER JOIN (SELECT intInvoiceId
---								 , intEntityCustomerId
---							FROM dbo.tblARInvoice WITH (NOLOCK)
---				) I ON I.intInvoiceId = (CASE WHEN @void = 0 THEN PD.intInvoiceId ELSE PD.intOrigInvoiceId END)
---			WHERE PD.intPaymentDetailId IN (SELECT intId FROM @PaymentDetailId)
---			GROUP BY intEntityCustomerId
---) PAYMENT ON CUSTOMER.intEntityId = PAYMENT.intEntityCustomerId
-
-SELECT
-	@InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))
-FROM
-	@PaymentDetailId PID
-INNER JOIN
-	tblAPPaymentDetail APPD
-		ON PID.[intId] = APPD.[intPaymentDetailId]
-INNER JOIN
-	tblARInvoice ARI
-		ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
-INNER JOIN
-	tblAPPayment APP
-		ON APPD.[intPaymentId] = APP.[intPaymentId]
-WHERE
-	--APP.[ysnPosted] = 1
-	--AND 
-	ARI.[ysnPosted] = 1
-	AND APPD.[dblPayment] <> @ZeroDecimal
+SELECT @InvoiceIds = COALESCE(@InvoiceIds + ',' ,'') + CAST(ARI.[intInvoiceId] AS NVARCHAR(250))
+FROM @PaymentDetailId PID
+INNER JOIN tblAPPaymentDetail APPD ON PID.[intId] = APPD.[intPaymentDetailId]
+INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = (CASE WHEN @void = 0 THEN APPD.intInvoiceId ELSE APPD.intOrigInvoiceId END)
+INNER JOIN tblAPPayment APP ON APPD.[intPaymentId] = APP.[intPaymentId]
+WHERE ARI.[ysnPosted] = 1
+  AND APPD.[dblPayment] <> @ZeroDecimal
 
 --Audit Log          
 EXEC dbo.uspSMAuditLog 
