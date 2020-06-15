@@ -489,6 +489,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]
 							,[intSubCurrencyId]
 							,[dblSubCurrencyRate]
+							,[ysnUseOriginIdAsInvoiceNumber] 
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -591,7 +592,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
-				
+							,[ysnUseOriginIdAsInvoiceNumber] =   CASE WHEN  (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN CAST(1 AS BIT) ELSE CAST(1 AS BIT) END
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
 								INSERT INTO @TaxDetails(
