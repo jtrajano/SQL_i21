@@ -8707,6 +8707,7 @@
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />    
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
