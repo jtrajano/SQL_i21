@@ -2663,6 +2663,7 @@
     <Build Include="dbo\Stored Procedures\uspMFSaveBudget.sql" />
     <Build Include="dbo\Tables\tblMFBudgetLog.sql" />
     <Build Include="dbo\Tables\tblMFBudget.sql" />
+    <Build Include="dbo\Tables\tblICLocationBinsReport.sql" />
     <Build Include="dbo\Tables\tblMFBudgetType.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MGetClosingPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspRKGetM2MBasisOnDate.sql" />
@@ -2946,6 +2947,7 @@
     <Build Include="dbo\Tables\tblICStagingReorderPoint.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningStockQty.sql" />
     <Build Include="dbo\Functions\fnICGetItemRunningCost.sql" />
+    <Build Include="dbo\Stored Procedures\uspICUpdateLocationBinsReport.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateReorderPointFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportAdjustmentsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportCountsFromStaging.sql" />
