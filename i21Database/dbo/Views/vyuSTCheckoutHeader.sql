@@ -48,15 +48,15 @@ SELECT
       ,chk.[dblTotalRefundCount]
       ,chk.[dblTotalRefundAmount]
       
-	  --,chk.[dblATMBegBalance]
-      ,dblATMBegBalance = (
-							ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceActual
-							FROM tblSTCheckoutHeader _chk
-							WHERE _chk.intStoreId = vst.intStoreId
-								AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
-								OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
-							ORDER BY _chk.dtmCheckoutDate DESC), 0)
-						)
+	  ,chk.[dblATMBegBalance]
+    --   ,dblATMBegBalance = (
+	-- 						ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceActual
+	-- 						FROM tblSTCheckoutHeader _chk
+	-- 						WHERE _chk.intStoreId = vst.intStoreId
+	-- 							AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+	-- 							OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+	-- 						ORDER BY _chk.dtmCheckoutDate DESC), 0)
+	-- 					)
 	  
 	  ,chk.[dblATMReplenished]
       ,chk.[dblATMWithdrawal]
