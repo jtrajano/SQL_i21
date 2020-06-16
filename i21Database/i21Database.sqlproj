@@ -8556,6 +8556,7 @@
     <Build Include="dbo\User Defined Types\StagingCommanderPlu.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderSummary.sql" />
     <Build Include="dbo\User Defined Types\StagingCommanderTax.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
