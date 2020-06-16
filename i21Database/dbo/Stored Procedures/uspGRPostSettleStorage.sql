@@ -225,7 +225,7 @@ BEGIN TRY
 				AND a.dblUnitsSummed > b.dblOriginalBalance
 	)
 	begin
-		RAISERROR('The record has changed. Please refresh screen.',16,1,1)
+		RAISERROR('There is no more open units available for settlement. Please check the available units for settlement and try again.',16,1,1)
 		RETURN;
 	end
 	
