@@ -3,7 +3,7 @@ CREATE PROCEDURE [uspCMFindMatchingRecordsForBankRecon]
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@intBankAccountId INT,
 	@dtmStatementDate DATETIME,
-	@intEntityId INT NULL = NULL,
+	@intEntityId INT,
 	@ysnSuccess AS BIT = 0 OUTPUT
 AS
 
