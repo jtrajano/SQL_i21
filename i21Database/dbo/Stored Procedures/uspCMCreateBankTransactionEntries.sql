@@ -30,6 +30,7 @@ BEGIN
 		[intCurrencyId],
 		[dblExchangeRate],
 		[dtmDate],
+		[intFiscalPeriodId],
 		[strPayee],
 		[intPayeeId],
 		[strAddress],
@@ -63,6 +64,7 @@ BEGIN
 		[intCurrencyId],
 		[dblExchangeRate],
 		[dtmDate],
+		[intFiscalPeriodId]	= F.intGLFiscalYearPeriodId, -- remove this in 20.1
 		[strPayee],
 		[intPayeeId],
 		[strAddress],
@@ -71,7 +73,7 @@ BEGIN
 		[strState],
 		[strCountry],
 		[dblAmount],
-		dbo.fnConvertNumberToWord([dblAmount]),
+		[strAmountInWords]	= dbo.fnConvertNumberToWord([dblAmount]),
 		[strMemo],
 		[strReferenceNo],
 		[ysnCheckToBePrinted],
@@ -89,6 +91,7 @@ BEGIN
 		[dtmLastModified],
 		[intConcurrencyId]
 	FROM @BankTransactionEntries BankTransactionEntries
+	CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F  -- remove this in 20.1
 
 	SET @intTransactionId = SCOPE_IDENTITY()
 END

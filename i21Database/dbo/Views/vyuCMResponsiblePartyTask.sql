@@ -1,48 +1,28 @@
-CREATE VIEW [dbo].[vyuCMResponsiblePartyTask] 
+CREATE VIEW vyuCMResponsiblePartyTask
 AS
-
-WITH Transactions AS
-(
-   SELECT
-      strTransactionId,
-      intBankStatementImportId 
-   FROM
-      tblCMBankTransfer 
-)
-SELECT
-   f.intBankStatementImportId,
-   f.strBankStatementImportId,
-   f.strBankDescription,
-   f.dblAmount,
-   f.intTaskStatus,
-   f.dtmDate,
-   CASE
-      WHEN
-         ISNULL(f.intTaskStatus , 0) = 0 
-      THEN
-         CAST(0 AS BIT)
-      ELSE
-         CAST(1 AS BIT)
-   END ysnTaskStatus, 
-   f.strPayee, 
-   f.strReferenceNo, 
-   f.dtmCreated, 
-   f.intResponsibleBankAccountId, 
-   e.strName strResponsibleEntity,
-   d.strBankAccountNo  strResponsibleBankAccount,
-   t.strTransactionId strRelatedTransaction,
-   f.intConcurrencyId
-FROM
-   tblCMBankStatementImport f 
-   JOIN
-      vyuCMBankAccount d 
-      ON f.intResponsibleBankAccountId = d.intBankAccountId 
-   JOIN
-      tblEMEntity e 
-      ON d.intResponsibleEntityId = e.intEntityId 
-    JOIN
-      tblCMBankTransfer t 
-      ON t.intBankStatementImportId = f.intBankStatementImportId 
-WHERE
-   f.intTaskStatus IS NULL
-GO
+SELECT 
+   S.intBankStatementImportId,
+   S.strBankStatementImportId,
+   S.strBankDescription,
+   S.dblAmount,
+   S.dtmDate,
+   T.ysnStatus,
+   S.strPayee,
+   S.strReferenceNo,
+   S.dtmCreated,
+   T.intResponsibleBankAccountId,
+   E.strName strResponsibleEntity,
+   S.strBankAccountNo strResponsibleBankAccount,
+   T.strTransactionId strRelatedTransaction,
+   S.intBankAccountId,
+   S.strRTN,
+   S.dblDepositAmount,
+   S.dblWithdrawalAmount,
+   S.intImportStatus,
+   S.strDebitCredit,
+   T.intEntityId,
+   T.intTaskId,
+   T.intConcurrencyId
+FROM tblCMResponsiblePartyTask T
+JOIN tblCMBankStatementImport S ON S.intBankStatementImportId = T.intBankStatementImportId
+JOIN tblEMEntity E on E.intEntityId = T.intEntityId

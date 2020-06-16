@@ -3,6 +3,7 @@ CREATE PROCEDURE [uspCMFindMatchingRecordsForBankRecon]
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@intBankAccountId INT,
 	@dtmStatementDate DATETIME,
+	@intEntityId INT NULL = NULL,
 	@ysnSuccess AS BIT = 0 OUTPUT
 AS
 
@@ -257,11 +258,18 @@ BEGIN
 
 	DELETE FROM #tmp_list_of_imported_record
 	WHERE intBankStatementImportId = @intBankStatementImportId
+
+
+
 	IF @@ERROR <> 0	GOTO _ROLLBACK
 END
 
+
+
+IF @@ERROR <> 0	GOTO _ROLLBACK
 _COMMIT:
 	COMMIT TRANSACTION 
+	
 	SET @ysnSuccess = 1
 	GOTO _EXIT
 
@@ -270,3 +278,16 @@ _ROLLBACK:
 	SET @ysnSuccess = 0	
 	
 _EXIT:
+
+DECLARE @rCount INT 
+EXEC uspCMImportBTransferFromBStmnt 
+	@strBankStatementImportId = @strBankStatementImportId, 
+	@intEntityId = @intEntityId,
+	@rCount = @rCount OUT
+
+EXEC uspCMImportBTransactionFromBStmnt
+	@strBankStatementImportId = @strBankStatementImportId, 
+	@intEntityId = @intEntityId,
+	@rCount = @rCount OUT
+
+
