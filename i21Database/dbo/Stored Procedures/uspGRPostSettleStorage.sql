@@ -204,17 +204,27 @@ BEGIN TRY
 		from tblGRSettleStorageTicket 
 			where intSettleStorageId = @intParentSettleStorageId
 
-	if @ysnFromPriceBasisContract = 0 and exists(select 1 from (
-			select sum(a.dblUnits) as dblUnitsSummed, a.intCustomerStorageId from tblGRSettleStorageTicket  a
-				join tblGRSettleStorage b
-					on a.intSettleStorageId= b.intSettleStorageId 
-						and b.intParentSettleStorageId is null	
-				where a.intCustomerStorageId = @intCustomerStorageId 
-			group by a.intCustomerStorageId
+	IF @ysnFromPriceBasisContract = 0 AND EXISTS(SELECT 1 FROM (
+			SELECT SUM(a.dblUnits) AS dblUnitsSummed
+				,a.intCustomerStorageId 
+			FROM tblGRSettleStorageTicket  a
+			JOIN tblGRSettleStorage b
+				ON a.intSettleStorageId= b.intSettleStorageId 
+					AND b.intParentSettleStorageId IS NULL
+			WHERE a.intCustomerStorageId = @intCustomerStorageId 
+			GROUP BY a.intCustomerStorageId
 		) a
-		join tblGRCustomerStorage b 
-			on a.intCustomerStorageId = b.intCustomerStorageId 
-			and a.dblUnitsSummed > b.dblOriginalBalance
+		JOIN (
+			SELECT
+				SUM(dblUnits) AS dblOriginalBalance
+				,intCustomerStorageId
+			FROM tblGRStorageHistory
+			WHERE intTransactionTypeId IN (5,1,9)
+				AND intCustomerStorageId = @intCustomerStorageId
+			GROUP BY intCustomerStorageId
+		) b
+			ON a.intCustomerStorageId = b.intCustomerStorageId 
+				AND a.dblUnitsSummed > b.dblOriginalBalance
 	)
 	begin
 		RAISERROR('There is no more open units available for settlement. Please check the available units for settlement and try again.',16,1,1)
