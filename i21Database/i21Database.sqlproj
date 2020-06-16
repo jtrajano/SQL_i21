@@ -8736,6 +8736,11 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBTransferFromBStmnt.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMImportBTransactionFromBStmnt.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
