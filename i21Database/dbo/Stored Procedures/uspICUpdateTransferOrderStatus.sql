@@ -11,22 +11,43 @@ IF @intStatusId = 3
 	DECLARE @PostedTransferOrder VARCHAR(50) = NULL
 	DECLARE @PostedTransferOrderReceipt VARCHAR(50) = NULL
 
-	SELECT TOP 1 @PostedTransferOrder = rt.strTransferNo, @PostedTransferOrderReceipt = rr.strReceiptNumber
-	FROM tblICInventoryReceipt r
-		INNER JOIN tblICInventoryReceiptItem i ON i.intInventoryReceiptId = r.intInventoryReceiptId
-		INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = i.intOrderId
-		LEFT OUTER JOIN tblICInventoryTransfer rt ON rt.intInventoryTransferId = t.intInventoryTransferId
-			AND rt.ysnShipmentRequired = 1
-			AND rt.intStatusId = 3
-			AND rt.ysnPosted = 1
-		LEFT OUTER JOIN tblICInventoryReceipt rr ON rr.intInventoryReceiptId <> r.intInventoryReceiptId
-			AND rr.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
-			AND rr.ysnPosted = 1
-	WHERE r.intInventoryReceiptId = @ReceiptId
+	SELECT TOP 1 
+		@PostedTransferOrder = t.strTransferNo
+		, @PostedTransferOrderReceipt = postedReceipt.strReceiptNumber
+	FROM 
+		tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem i 
+			ON i.intInventoryReceiptId = r.intInventoryReceiptId
+
+		INNER JOIN tblICInventoryTransfer t 
+			ON 
+			r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+			AND (
+				(t.intInventoryTransferId = i.intSourceId AND i.intSourceId IS NOT NULL)
+				OR (t.intInventoryTransferId = i.intInventoryTransferId AND i.intInventoryTransferId IS NOT NULL) 
+			)			
+			AND t.ysnShipmentRequired = 1
+			AND t.intStatusId = 3
+			AND t.ysnPosted = 1
+
+		LEFT JOIN (
+			tblICInventoryReceipt postedReceipt INNER JOIN tblICInventoryReceiptItem postedReceiptItem
+				ON postedReceipt.intInventoryReceiptId = postedReceiptItem.intInventoryReceiptId
+		)
+			ON postedReceipt.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+			AND (
+				(t.intInventoryTransferId = postedReceiptItem.intSourceId AND postedReceiptItem.intSourceId IS NOT NULL)
+				OR (t.intInventoryTransferId = postedReceiptItem.intInventoryTransferId AND postedReceiptItem.intInventoryTransferId IS NOT NULL) 
+			)						
+			AND postedReceipt.ysnPosted = 1
+			AND postedReceipt.intInventoryReceiptId <> r.intInventoryReceiptId
+
+	WHERE 
+		r.intInventoryReceiptId = @ReceiptId
 		AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 
 	IF @PostedTransferOrder IS NOT NULL
 	BEGIN
+		-- 'Cannot post this Inventory Receipt. The transfer order "{Transfer No}" was already posted in "{Inventory Receipt}".'
 		EXEC uspICRaiseError 80086, @PostedTransferOrder, @PostedTransferOrderReceipt;
 		GOTO Post_Exit
 	END
