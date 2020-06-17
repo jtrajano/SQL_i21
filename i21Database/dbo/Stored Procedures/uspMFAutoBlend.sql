@@ -58,6 +58,7 @@ BEGIN TRY
 	DECLARE @intMaxWorkOrderId INT
 	DECLARE @intRecipeItemUOMId INT
 	DECLARE @strOrderType nvarchar(50)
+			,@intLotItemUOMId int
 
 	DECLARE @tblInputItem TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -545,21 +546,28 @@ BEGIN TRY
 			SELECT 
 					0
 					,''
-					,t.intItemId
-					,t.dblRequiredQty
+					,S.intItemId
+					,S.dblOnHand - S.dblUnitReserved 
 					,@intLocationId
-					,NULL
-					,NULL
+					,S.intStorageLocationId
+					,S.intSubLocationId
 					,NULL
 					,NULL
 					,0
 					,1
 					,''
 					,0
-					,t.intItemUOMId
+					,S.intItemUOMId
 					,0 
-			FROM	@tblInputItem t
-			WHERE t.intItemId=@intRawItemId
+			FROM dbo.tblICItemStockUOM S
+			JOIN dbo.tblICItemLocation IL ON IL.intItemLocationId = S.intItemLocationId
+				AND S.intItemId = IL.intItemId
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = S.intItemUOMId
+				AND IU.ysnStockUnit = 1
+			WHERE S.intItemId = @intRawItemId
+				AND IL.intLocationId = @intLocationId
+				AND S.dblOnHand - S.dblUnitReserved > 0
+	
 		END
 		ELSE
 		BEGIN 
@@ -584,7 +592,7 @@ BEGIN TRY
 					L.intLotId
 					,L.strLotNumber
 					,L.intItemId
-					,ISNULL(L.dblWeight,0) - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=L.intLotId AND ISNULL(ysnPosted,0)=0) AS dblQty
+					,(Case When L.intWeightUOMId is null Then L.dblQty Else ISNULL(L.dblWeight,0) End) - (Select ISNULL(SUM(ISNULL(dblQty,0)),0) From tblICStockReservation Where intLotId=L.intLotId AND ISNULL(ysnPosted,0)=0) AS dblQty
 					,L.intLocationId
 					,L.intSubLocationId
 					,L.intStorageLocationId
@@ -594,7 +602,7 @@ BEGIN TRY
 					,L.dblWeightPerQty
 					,US.strUserName
 					,L.intParentLotId
-					,L.intWeightUOMId
+					,IsNULL(L.intWeightUOMId,L.intItemUOMId)
 					,L.intItemUOMId
 			FROM	tblICLot L LEFT JOIN tblSMUserSecurity US 
 						ON L.intCreatedEntityId = US.intEntityId
@@ -606,7 +614,7 @@ BEGIN TRY
 					AND L.intLocationId = @intLocationId
 					AND LS.strPrimaryStatus IN ('Active')
 					AND (L.dtmExpiryDate IS NULL OR L.dtmExpiryDate >= GETDATE())
-					AND ISNULL(L.dblWeight,0) - (
+					AND (Case When L.intWeightUOMId is null Then L.dblQty Else ISNULL(L.dblWeight,0) End) - (
 							SELECT	ISNULL(SUM(ISNULL(dblQty,0)),0) 
 							FROM	tblICStockReservation 
 							WHERE	intLotId=L.intLotId 
@@ -646,12 +654,14 @@ BEGIN TRY
 	
 		WHILE	@intMinLot IS NOT NULL
 		BEGIN
+			Select @intLotItemUOMId=NULL
 			SELECT	@intLotId=intLotId
 					,@dblAvailableQty=dblQty 
+					,@intLotItemUOMId=intItemUOMId
 			FROM	@tblLot 
 			WHERE	intRowNo = @intMinLot
 
-			IF @dblAvailableQty >= @dblRequiredQty 
+			IF @dblAvailableQty >= [dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intLotItemUOMId, @dblRequiredQty) 
 			BEGIN
 				INSERT INTO @tblPickedLot(
 						intLotId
@@ -665,7 +675,7 @@ BEGIN TRY
 				SELECT 
 						@intLotId
 						,@intRawItemId
-						,@dblRequiredQty
+						,[dbo].[fnMFConvertQuantityToTargetItemUOM](@intRecipeItemUOMId, @intLotItemUOMId, @dblRequiredQty)
 						,intItemUOMId
 						,intLocationId
 						,intSubLocationId
@@ -697,7 +707,7 @@ BEGIN TRY
 				FROM	@tblLot 
 				WHERE	intRowNo = @intMinLot
 
-				SET	@dblRequiredQty = @dblRequiredQty - @dblAvailableQty
+				SET	@dblRequiredQty = @dblRequiredQty - [dbo].[fnMFConvertQuantityToTargetItemUOM](@intLotItemUOMId, @intRecipeItemUOMId, @dblAvailableQty)
 			END
 
 			SELECT	@intMinLot = MIN(intRowNo) 
