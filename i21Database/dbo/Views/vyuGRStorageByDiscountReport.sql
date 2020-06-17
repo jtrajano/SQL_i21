@@ -11,6 +11,7 @@ WITH cte as (
 		,dblSubTotal = CS.dblOriginalBalance
 		,YEAR(CS.dtmDeliveryDate) dtmDeliveryYear
 		,IM.strDescription
+		,IM.strItemNo
 		,QM.dblGradeReading
 	FROM tblQMTicketDiscount QM
 	INNER JOIN tblGRDiscountScheduleCode DSC
@@ -29,14 +30,14 @@ WITH cte as (
 	WHERE	QM.strSourceType = 'Storage'
 ) ,
 cte1 as (
-	SELECT	A.intCompanyLocationId, RR.strReadingRange ,strCommodityCode,ysnLicensed,strLocationName,dblSubTotal,dtmDeliveryYear,'TEST WEIGHT' COLLATE Latin1_General_CI_AS as strDiscountCode 
+	SELECT	A.intCompanyLocationId, RR.strReadingRange ,strCommodityCode,ysnLicensed,strLocationName,dblSubTotal,dtmDeliveryYear,'TEST WEIGHT' COLLATE Latin1_General_CI_AS as strDiscountCode, A.strItemNo
 		FROM cte A	
 		LEFT JOIN tblGRReadingRanges RR
 		ON A.dblGradeReading BETWEEN RR.intMinValue AND RR.intMaxValue
 			AND RR.intReadingType = 1
 		WHERE A.strDescription = 'TEST WEIGHT' 
 	UNION
-	SELECT A.intCompanyLocationId, RR.strReadingRange,strCommodityCode,ysnLicensed,strLocationName,dblSubTotal,dtmDeliveryYear,'DOCKAGE' COLLATE Latin1_General_CI_AS as strDiscountCode 
+	SELECT A.intCompanyLocationId, RR.strReadingRange,strCommodityCode,ysnLicensed,strLocationName,dblSubTotal,dtmDeliveryYear,'DOCKAGE' COLLATE Latin1_General_CI_AS as strDiscountCode, A.strItemNo
 		FROM cte A
 		LEFT JOIN tblGRReadingRanges RR
 		ON (A.dblGradeReading BETWEEN RR.intMinValue AND RR.intMaxValue)
@@ -54,6 +55,7 @@ SELECT
 	,strCommodityCode + cast(dtmDeliveryYear as nvarchar(4)) CommodityYear
 	,SUM(ISNULL(TW.dblSubTotal,0)) dblSubTotalByLocation
 	,TW.strDiscountCode strDiscountCode
+	,TW.strItemNo
 	from cte1 TW
 GROUP BY TW.intCompanyLocationId
 		,TW.strReadingRange
@@ -62,4 +64,5 @@ GROUP BY TW.intCompanyLocationId
 		,TW.ysnLicensed
 		,TW.dtmDeliveryYear
 		,TW.strDiscountCode
+		,TW.strItemNo
 GO
