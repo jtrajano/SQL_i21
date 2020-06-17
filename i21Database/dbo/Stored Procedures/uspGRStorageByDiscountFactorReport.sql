@@ -85,7 +85,7 @@ BEGIN TRY
 		,ysnLicensed
 	FROM vyuGRStorageByDiscountReport 
 	WHERE strCommodityCode = ISNULL(@strCommodityCode,strCommodityCode)
-		AND strDiscountCode = ISNULL(@strDiscountCode,strDiscountCode)
+		AND strItemNo = ISNULL(@strDiscountCode,strItemNo)
 		AND ysnLicensed = ISNULL(@ysnLicensed,ysnLicensed)
 
 	--pivoting process
@@ -109,7 +109,7 @@ BEGIN TRY
 	SELECT @cnt = (COUNT(DISTINCT [PivotColumn]))
 	FROM ##StorageDiscounts
 
-	IF @cnt > 1
+	IF @cnt >= 1
 	BEGIN
 		-- Loop through each Discount Code/Commodity Code header
 		DECLARE @strCommodityCodeHeader NVARCHAR(40)
