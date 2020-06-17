@@ -968,7 +968,8 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE tblAPBill
-			SET ysnPosted = 1, intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			SET ysnPosted = 1,
+				intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF EXISTS(SELECT TOP 1 intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
