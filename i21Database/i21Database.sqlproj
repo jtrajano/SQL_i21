@@ -8741,6 +8741,7 @@
     <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

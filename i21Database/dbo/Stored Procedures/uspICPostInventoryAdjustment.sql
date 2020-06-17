@@ -55,6 +55,7 @@ DECLARE @ADJUSTMENT_TYPE_QuantityChange AS INT = 1
 		,@ADJUSTMENT_TYPE_LotOwnerChange AS INT = 9
 		,@ADJUSTMENT_TYPE_OpeningInventory AS INT = 10
 		,@ADJUSTMENT_TYPE_ChangeLotWeight AS INT = 11
+		,@ADJUSTMENT_TYPE_ClosingBalance AS INT = 12
 
 -- Read the transaction info   
 BEGIN   
@@ -179,6 +180,7 @@ WHERE 	@adjustmentType IN (
 			, @ADJUSTMENT_TYPE_ItemChange
 			, @ADJUSTMENT_TYPE_UOMChange
 			, @ADJUSTMENT_TYPE_ChangeLotWeight
+			, @ADJUSTMENT_TYPE_ClosingBalance
 		)
 
 --------------------------------------------------------------------------------------------  
@@ -216,9 +218,9 @@ BEGIN
 			AND ad.dblNewQuantity IS NOT NULL 	
 			AND a.ysnPosted = 0 
 
-	-----------------------------------
+	-----------------------------------------------------
 	--  Call Quantity Change 
-	-----------------------------------
+	-----------------------------------------------------
 	IF @adjustmentType = @ADJUSTMENT_TYPE_QuantityChange
 	BEGIN 
 		INSERT INTO @ItemsForAdjust (  
@@ -242,6 +244,38 @@ BEGIN
 				,intStorageLocationId
 		)  	
 		EXEC	dbo.uspICPostInventoryAdjustmentQtyChange
+				@intTransactionId
+				,@strBatchId
+				,@intEntityUserSecurityId
+				,@ysnPost
+	END 
+
+	-----------------------------------------------------
+	--  Call Closing Balance
+	-----------------------------------------------------
+	IF @adjustmentType = @ADJUSTMENT_TYPE_ClosingBalance
+	BEGIN 
+		INSERT INTO @ItemsForAdjust (  
+				intItemId  
+				,intItemLocationId 
+				,intItemUOMId  
+				,dtmDate  
+				,dblQty  
+				,dblUOMQty  
+				,dblCost  
+				,dblValue 
+				,dblSalesPrice  
+				,intCurrencyId  
+				,dblExchangeRate  
+				,intTransactionId  
+				,intTransactionDetailId  
+				,strTransactionId  
+				,intTransactionTypeId  
+				,intLotId 
+				,intSubLocationId
+				,intStorageLocationId
+		)  	
+		EXEC	dbo.uspICPostInventoryAdjustmentClosingBalance
 				@intTransactionId
 				,@strBatchId
 				,@intEntityUserSecurityId
@@ -582,6 +616,7 @@ BEGIN
 		, @ADJUSTMENT_TYPE_UOMChange
 		, @ADJUSTMENT_TYPE_OpeningInventory
 		, @ADJUSTMENT_TYPE_ChangeLotWeight
+		, @ADJUSTMENT_TYPE_ClosingBalance
 	)
 	BEGIN 
 		-- Call the post routine 

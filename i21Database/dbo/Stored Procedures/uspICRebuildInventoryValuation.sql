@@ -103,6 +103,7 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@AdjustmentTypeLotOwnerChange AS INT = 9
 		,@AdjustmentTypeOpeningInventory AS INT = 10
 		,@AdjustmentTypeChangeLotWeight AS INT = 11
+		,@AdjustmentTypeChangeClosingBalance AS INT = 12
 
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
@@ -818,6 +819,7 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
+						WHEN intTransactionTypeId = 58 THEN 8 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.
 						WHEN dblQty > 0 AND ty.strName IN ('Inventory Adjustment - Opening Inventory') THEN 2 
 						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
 						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
@@ -827,7 +829,7 @@ BEGIN
 						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
 						WHEN dblValue <> 0 THEN 8
 						ELSE 9
-					END 
+					END
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -882,6 +884,7 @@ BEGIN
 			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
+				WHEN intTransactionTypeId = 58 THEN 8 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.
 				WHEN dblQty > 0 AND ty.strName IN ('Inventory Adjustment - Opening Inventory') THEN 2 
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
 				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
@@ -891,7 +894,7 @@ BEGIN
 				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
 				WHEN dblValue <> 0 THEN 8
 				ELSE 9
-			END  
+			END    
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 
@@ -2712,7 +2715,7 @@ BEGIN
 				END
 			END
 
-			-- Repost the Inventory Adjustment - Item Change. 
+			-- Repost the Inventory Adjustment - Item Change or Closing Balance
 			/*
 				Important Note: 
 				Item Change rebuild does not work well if you are rebuilding one item. 

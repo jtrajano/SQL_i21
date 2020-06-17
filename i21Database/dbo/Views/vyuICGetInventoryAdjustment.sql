@@ -19,6 +19,7 @@ SELECT
 			WHEN Adj.intAdjustmentType = 9 THEN 'Lot Owner'
 			WHEN Adj.intAdjustmentType = 10 THEN 'Opening Inventory'
 			WHEN Adj.intAdjustmentType = 11 THEN 'Lot Weight'
+			WHEN Adj.intAdjustmentType = 12 THEN 'Closing Balance'
 		END) COLLATE Latin1_General_CI_AS
 	, Adj.strAdjustmentNo
 	, Adj.strDescription
