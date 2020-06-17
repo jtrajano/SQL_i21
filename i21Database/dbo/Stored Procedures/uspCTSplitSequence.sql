@@ -58,6 +58,27 @@ SET NOCOUNT ON
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT
 
+		-- No of Lots AND Total Costs
+        IF @strScreenName = 'Split'
+		BEGIN
+			UPDATE cd SET dblNoOfLots = ((dbo.fnCTConvertQuantityToTargetItemUOM(cd.intItemId, cd.intUnitMeasureId, ma.intUnitMeasureId, (CASE WHEN isnull(ch.ysnLoad,0) = 1 THEN cd.intNoOfLoad * cd.dblQuantityPerLoad ELSE cd.dblQuantity END)) / ma.dblContractSize) * CASE WHEN ch.intPricingTypeId = 8 THEN cd.dblRatio ELSE 1 END)
+			,dblTotalCost = (cnv.dblConversionFactor * (CASE WHEN isnull(ch.ysnLoad,0) = 1 THEN cd.intNoOfLoad * cd.dblQuantityPerLoad ELSE cd.dblQuantity END) * cd.dblCashPrice / (CASE WHEN isnull(cu.ysnSubCurrency,0) = 1 THEN cu.intCent ELSE 1 END))
+			FROM tblCTContractDetail cd
+			INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			LEFT JOIN tblRKFutureMarket ma ON ma.intFutureMarketId = cd.intFutureMarketId
+			LEFT JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
+			OUTER APPLY
+			(
+				SELECT dblConversionFactor = a.dblUnitQty / b.dblUnitQty
+				FROM tblICItemUOM a
+				INNER JOIN tblICItemUOM b ON a.intItemId = b.intItemId
+				WHERE a.intItemId = cd.intItemId
+				AND a.intItemUOMId = cd.intItemUOMId
+				AND b.intItemUOMId = cd.intPriceItemUOMId
+			) cnv
+			WHERE cd.intContractDetailId = @intNewContractDetailId
+		END
+
 		SET @XML = NULL
 
 		IF OBJECT_ID('tempdb..#tblCTContractCost') IS NOT NULL  					
