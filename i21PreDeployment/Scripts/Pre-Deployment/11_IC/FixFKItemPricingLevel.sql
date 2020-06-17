@@ -111,10 +111,10 @@ GO
 
 IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[tblICItemPricingLevel]') AND type in (N'U')) 
 BEGIN 
-	EXEC('
-		IF EXISTS (SELECT TOP 1 1 FROM tblICItemPricingLevel WHERE intCompanyLocationPricingLevelId IS NULL)
-			RAISERROR(''Please contact IC team. Auto data fix for item pricing failed. It needs a custom data fix before upgrading to this build.'', 16, 1);
-	
-	')
-END 
-END 
+	EXEC(
+		'IF EXISTS (SELECT TOP 1 1 FROM tblICItemPricingLevel WHERE intCompanyLocationPricingLevelId IS NULL)
+		RAISERROR(''Please contact IC team. Auto data fix for item pricing failed. It needs a custom data fix before upgrading to this build.'', 16, 1);'
+	)
+END
+
+GO
