@@ -15,7 +15,7 @@
 	[intPositionId]									[int] NULL,
 	[strINCOLocationType]							NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
 
-	[strInstructions]								[nvarchar](MAX) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strInstructions]								[nvarchar](MAX) COLLATE Latin1_General_CI_AS NULL,
 
 	--From Contract Basis
 	[intConcurrencyId]	 INT				DEFAULT (1)						NOT NULL,
