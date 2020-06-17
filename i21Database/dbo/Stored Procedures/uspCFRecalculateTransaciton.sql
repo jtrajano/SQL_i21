@@ -6930,10 +6930,14 @@ BEGIN
 
 		IF (ISNULL(@dblCalculatedNetPrice,0) <= 0)
 		BEGIN		
-			SET @ysnInvalid = 1
-			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+		
+			IF(ISNULL(@PostedCSV,0) = 0) 
+			BEGIN
+				SET @ysnInvalid = 1
+				--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid calculated price.')
+			END
 		END
 
 	
@@ -6943,8 +6947,14 @@ BEGIN
 
 		IF (ISNULL(@dblOriginalNetPrice,0) <= 0)
 		BEGIN
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+			IF(ISNULL(@PostedCSV,0) = 0) 
+			BEGIN
+				SET @ysnInvalid = 1
+				--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Invalid original price.')
+			END
+			
 		END
 
 	END
@@ -6979,11 +6989,13 @@ BEGIN
 
 	IF (ISNULL(@ysnActive,0) = 0)
 	BEGIN
-
-			SET @ysnInvalid = 1
-			--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
-			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
-			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Customer is invalid.')
+			IF(ISNULL(@PostedCSV,0) = 0) 
+			BEGIN
+				SET @ysnInvalid = 1
+				--UPDATE tblCFTransaction SET ysnInvalid = 1 WHERE intTransactionId = @intTransactionId
+				INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+				VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Customer is invalid.')
+			END
 
 	END
 
