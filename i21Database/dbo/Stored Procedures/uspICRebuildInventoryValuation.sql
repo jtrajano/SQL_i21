@@ -801,14 +801,17 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-						WHEN intTransactionTypeId = 57 THEN 8 -- 'Inventory Adjustment - Closing Balance' is last in the sorting. 
-						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5						
-						WHEN dblValue <> 0 THEN 6						
-						ELSE 7
-					END    
+						WHEN intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.
+						WHEN dblQty > 0 AND intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
+						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+						WHEN dblValue <> 0 THEN 8
+						ELSE 9
+					END
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -860,14 +863,17 @@ BEGIN
 			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-				WHEN intTransactionTypeId = 57 THEN 8 -- 'Inventory Adjustment - Closing Balance' is last in the sorting. 
-				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5				
-				WHEN dblValue <> 0 THEN 6
-				ELSE 7
-			END   
+				WHEN intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.
+				WHEN dblQty > 0 AND intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
+				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+				WHEN dblValue <> 0 THEN 8
+				ELSE 9
+			END    
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 

@@ -236,6 +236,10 @@ USING	(
 				,form = 'Transfer Storage'
 		UNION ALL
 		SELECT id = 57
+				,name = 'Inventory Count By Category'
+				,form = 'Inventory Count By Category'
+		UNION ALL
+		SELECT id = 58
 				,name = 'Inventory Adjustment - Closing Balance'
 				,form = 'Inventory Adjustment'
 		/****************************************************************************************************
