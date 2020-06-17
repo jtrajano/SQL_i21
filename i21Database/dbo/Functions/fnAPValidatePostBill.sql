@@ -409,7 +409,6 @@ BEGIN
 			WHERE B.intBillId = A.intBillId
 		) details
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND details.dblTotal < 0
-		AND A.intTransactionType = 1
 			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
