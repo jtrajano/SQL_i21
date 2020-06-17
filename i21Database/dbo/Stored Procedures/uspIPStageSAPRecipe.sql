@@ -151,13 +151,10 @@ BEGIN TRY
 					,SEQUENCE_NO INT
 					) x
 
-			UPDATE tblMFRecipeItemStage
-			SET strRecipeHeaderItemNo = x.ITEM_NO
-			FROM OPENXML(@idoc, 'ROOT_RECIPE/HEADER', 2) WITH (
-					ITEM_NO NVARCHAR(50)
-					,DOC_NO NVARCHAR(50) '../CTRL_POINT/DOC_NO'
-					) x
-			JOIN tblMFRecipeItemStage RI ON RI.strSessionId = x.DOC_NO collate Latin1_General_CI_AS
+			UPDATE RI
+			SET strRecipeHeaderItemNo = R.strItemNo 
+			FROM tblMFRecipeStage R
+			JOIN tblMFRecipeItemStage RI ON RI.strRecipeName =R.strRecipeName and RI.strSessionId =R.strSessionId 
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
