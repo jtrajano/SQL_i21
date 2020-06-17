@@ -58,11 +58,6 @@ SET NOCOUNT ON
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT
 
-		IF @strScreenName = 'Split'
-		BEGIN
-			UPDATE tblCTContractDetail SET ysnCreatedFromSplit = 1 WHERE intContractDetailId = @intNewContractDetailId
-		END		
-
 		SET @XML = NULL
 
 		IF OBJECT_ID('tempdb..#tblCTContractCost') IS NOT NULL  					

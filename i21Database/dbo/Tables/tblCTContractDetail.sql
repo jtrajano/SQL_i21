@@ -147,7 +147,6 @@ CREATE TABLE [dbo].[tblCTContractDetail]
     dtmProvisionalPNL DATETIME NULL,
     dtmFinalPNL DATETIME NULL,
 	intPricingStatus INT,
-	ysnCreatedFromSplit BIT NOT NULL DEFAULT 0,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 
