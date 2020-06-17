@@ -238,7 +238,10 @@ USING	(
 		SELECT id = 57
 				,name = 'Inventory Count By Category'
 				,form = 'Inventory Count By Category'
-
+		UNION ALL
+		SELECT id = 58
+				,name = 'Inventory Adjustment - Closing Balance'
+				,form = 'Inventory Adjustment'
 		/****************************************************************************************************
 		IMPORTANT! When adding a new transaction type, create a new jira to include it in the Stock Rebuild. 
 		We don't want to lose those transaction types after the stock has been rebuilt.
