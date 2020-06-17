@@ -106,8 +106,6 @@ BEGIN
 
 	SELECT TOP 1 @intRowDetailId = [RowDetailId], @Formula = [Formula], @MainFormula = [Formula], @intRefNoCurrent = [RefNo], @SORT = [Sort] FROM #TempSUMRows ORDER BY [Sort]
 
-	SET @sumCount = CHARINDEX(')',@MainFormula)
-
 	WHILE (CHARINDEX('SUM',@MainFormula)>0)
 	BEGIN
 		DECLARE @counter_position INT = 1
@@ -116,6 +114,7 @@ BEGIN
 
 		SET @Formula = SUBSTRING(@MainFormula,CHARINDEX('S',@MainFormula),(CHARINDEX(')',@MainFormula)-CHARINDEX('S',@MainFormula))+1)
 		SET @Formula = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@Formula,' ',''),'SUM(',''),')',''),'R',''), CHAR(13), ''), CHAR(10), '') + ':'
+		SET @sumCount = CHARINDEX(')',@MainFormula)
 
 		WHILE (CHARINDEX(@SplitOn,@Formula)>0)
 		BEGIN
@@ -141,12 +140,12 @@ BEGIN
 						ELSE
 							BEGIN
 								--PRINT 'counter pos 1 - B'
-								UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
+								UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'(R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'(R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId
 							END
 					END
 					ELSE
 						BEGIN
-							UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId					
+							UPDATE tblFRRowDesign SET strRelatedRows = REPLACE(strRelatedRows,'(R' + LTRIM(RTRIM(SUBSTRING(@Formula,1,CHARINDEX(@SplitOn,@Formula)-1))),'(R' + CAST(@new_intRefNo as NVARCHAR(50))) WHERE intRowDetailId = @intRowDetailId					
 						END
 					SET @intRefNo_1 = @new_intRefNo
 				END
