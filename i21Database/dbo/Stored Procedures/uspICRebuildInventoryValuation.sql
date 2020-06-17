@@ -103,6 +103,7 @@ DECLARE	@AdjustmentTypeQtyChange AS INT = 1
 		,@AdjustmentTypeLotOwnerChange AS INT = 9
 		,@AdjustmentTypeOpeningInventory AS INT = 10
 		,@AdjustmentTypeChangeLotWeight AS INT = 11
+		,@AdjustmentTypeChangeClosingBalance AS INT = 12
 
 		,@FOB_ORIGIN AS INT = 1
 		,@FOB_DESTINATION AS INT = 2
@@ -800,11 +801,12 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
+						WHEN intTransactionTypeId = 57 THEN 8 -- 'Inventory Adjustment - Closing Balance' is last in the sorting. 
 						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
 						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
 						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-						WHEN dblValue <> 0 THEN 6
+						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5						
+						WHEN dblValue <> 0 THEN 6						
 						ELSE 7
 					END    
 				,intItemId
@@ -858,10 +860,11 @@ BEGIN
 			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
+				WHEN intTransactionTypeId = 57 THEN 8 -- 'Inventory Adjustment - Closing Balance' is last in the sorting. 
 				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
 				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
 				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
+				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5				
 				WHEN dblValue <> 0 THEN 6
 				ELSE 7
 			END   
@@ -2668,7 +2671,7 @@ BEGIN
 				END
 			END
 
-			-- Repost the Inventory Adjustment - Item Change. 
+			-- Repost the Inventory Adjustment - Item Change or Closing Balance
 			/*
 				Important Note: 
 				Item Change rebuild does not work well if you are rebuilding one item. 
