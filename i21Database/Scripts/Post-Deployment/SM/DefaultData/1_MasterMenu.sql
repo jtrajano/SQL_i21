@@ -1650,7 +1650,7 @@ DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Count Name' AND strMo
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Stock Report' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName IN ('View Stock Details', 'View Lot Details') AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Inventory Valuation Summary' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId
-DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Pack Type' and strModuleName = 'Inventory' AND intParentMenuID = InventoryMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Pack Type' and strModuleName = 'Inventory' AND intParentMenuID = @InventoryMaintenanceParentMenuId
 IF EXISTS(SELECT strMenuName FROM tblSMMasterMenu WHERE strMenuName =  'Blend Production' AND strModuleName = 'Inventory' AND (SELECT COUNT(strMenuName) FROM tblSMMasterMenu WHERE strMenuName =  'Blend Production' AND strModuleName = 'Inventory') > 1)
 BEGIN
 	DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Blend Production' AND strModuleName = 'Inventory' AND intMenuID NOT IN
