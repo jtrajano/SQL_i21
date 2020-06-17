@@ -14,6 +14,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
+:r .\SetInLineToOff.sql
 :r .\EncryptionDataFix.sql
 
 -- System Manager Default Data
