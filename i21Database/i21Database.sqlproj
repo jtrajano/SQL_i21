@@ -8171,7 +8171,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixReceiptAPClearingDiscrepancy.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
-    <Build Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
+    <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
