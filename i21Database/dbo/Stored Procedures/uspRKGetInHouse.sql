@@ -53,6 +53,7 @@ BEGIN
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
 			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN 'CNT'
 			WHEN CompOwn.strTransactionType = 'Inventory Adjustment' THEN 'ADJ'
+			WHEN CompOwn.strTransactionType IN ('Inventory Receipt','Inventory Shipment') AND CompOwn.intContractHeaderId IS NULL AND CompOwn.intTicketId IS NULL THEN ''
 			ELSE 'SPT' END
 		,strOwnership = 'Company Owned'
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
