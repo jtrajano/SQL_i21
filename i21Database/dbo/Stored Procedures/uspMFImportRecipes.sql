@@ -285,7 +285,10 @@ BEGIN
 
 	UPDATE tblMFRecipeStage
 	SET strManufacturingProcess=(Select Top 1 strProcessName  from tblMFManufacturingProcess )
-	WHERE ISNULL(strManufacturingProcess, '') = 'Process'
+	WHERE strManufacturingProcess NOT IN (
+			SELECT strProcessName
+			FROM tblMFManufacturingProcess
+			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 
