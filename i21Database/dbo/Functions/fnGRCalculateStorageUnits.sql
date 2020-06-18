@@ -9,7 +9,8 @@ BEGIN
 		SELECT
 			SUM(dblUnits)
 		FROM tblGRStorageHistory
-		WHERE intCustomerStorageId = @intCustomerStorageId
+		WHERE intTransactionTypeId IN (5,1,9)
+			AND intCustomerStorageId = @intCustomerStorageId
 		GROUP BY intCustomerStorageId
 	)
 END
