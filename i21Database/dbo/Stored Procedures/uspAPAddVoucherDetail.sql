@@ -572,15 +572,16 @@ INNER JOIN @payablesKey B
 INNER JOIN @voucherDetailsInfo C
 	ON B.intOldPayableId = C.intVoucherPayableId
 
---GENERATE TAXES FOR ysnStage = 0
+--GENERATE TAXES FOR ysnStage = 0, AND NO TAX DETAILS
 DECLARE @idetailIds AS Id
 INSERT INTO @idetailIds
-SELECT
+SELECT DISTINCT
 	A.intBillDetailId
 FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
-WHERE A.ysnStage = 0
+LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
