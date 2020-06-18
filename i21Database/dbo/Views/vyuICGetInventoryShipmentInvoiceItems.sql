@@ -48,10 +48,13 @@ FROM	tblICInventoryShipment Shipment
 			ON toLocation.intEntityLocationId = Shipment.intShipToLocationId
 
 		OUTER APPLY (
-			SELECT	QtyShipped = d.dblQuantity
+			SELECT	QtyShipped = 						
+						ISNULL(NULLIF(d.dblDestinationQuantity, 0), d.dblQuantity)
 					,QtyInvoiced = ISNULL(InvoicedItem.dblQuantity, 0) 
 					,ShipmentCost = ShipmentBasedOnInventoryTransaction.dblShipmentCost
-					,ShipmentItemTotal = d.dblQuantity * ShipmentBasedOnInventoryTransaction.dblShipmentCost
+					,ShipmentItemTotal = 
+						ISNULL(NULLIF(d.dblDestinationQuantity, 0), d.dblQuantity)
+						* ShipmentBasedOnInventoryTransaction.dblShipmentCost
 					,InvoiceItemTotal = ISNULL(InvoicedItem.dblQuantity, 0) * ShipmentBasedOnInventoryTransaction.dblShipmentCost
 					,OpenQty = 					
 						CASE 
@@ -61,7 +64,12 @@ FROM	tblICInventoryShipment Shipment
 							ELSE d.dblQuantity 
 						END 
 					,d.intInventoryShipmentItemId
-					,dblItemsReceivable = (d.dblQuantity - ISNULL(InvoicedItem.dblQuantity, 0)) * ShipmentBasedOnInventoryTransaction.dblShipmentCost
+					,dblItemsReceivable = 
+						(
+							ISNULL(NULLIF(d.dblDestinationQuantity, 0), d.dblQuantity)
+							- ISNULL(InvoicedItem.dblQuantity, 0)
+						) 
+						* ShipmentBasedOnInventoryTransaction.dblShipmentCost
 			FROM	tblICInventoryShipmentItem d 
 					CROSS APPLY (
 						SELECT	dblShipmentQty = SUM(ISNULL(-t.dblQty, 0)) 
