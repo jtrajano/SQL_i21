@@ -179,3 +179,88 @@ GO
 GO
 	print 'End add default record to tblCTMiscellaneous';
 GO
+	print 'Begin updating posted DWG but unposted invoice';
+GO
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblCTMiscellaneous WHERE ysnDestinationWeightsAndGradesFixed = 0)
+	BEGIN
+
+		DECLARE @table TABLE
+		(
+			intId				INT IDENTITY(1,1),
+			intContractDetailId	INT,
+			dblOldQuantity		NUMERIC(18,6),
+			dblDestinationQuantity	NUMERIC(18,6),
+			intUserId			INT,
+			intExternalId		INT,
+			strScreenName		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+		)
+
+		DECLARE @id						INT,
+				@intContractDetailId	INT,
+				@dblOldQuantity			NUMERIC(18,6),
+				@dblDestinationQuantity	NUMERIC(18,6),
+				@dblNewBalance			NUMERIC(18,6),
+				@intUserId				INT,
+				@intExternalId			INT,
+				@strScreenName			NVARCHAR(50),
+				@userId					INT
+
+		SELECT @userId = intEntityId FROM tblEMEntityCredential WHERE UPPER(strUserName) = 'IRELYADMIN'
+
+		INSERT INTO @table 
+		(
+			intContractDetailId
+			,dblOldQuantity
+			,dblDestinationQuantity
+			,intUserId
+			,intExternalId
+			,strScreenName
+		)
+		SELECT intContractDetailId	= contractDetail.intContractDetailId
+		,dblOldQuantity				= shipmentItem.dblQuantity * -1
+		,dblDestinationQuantity		= shipmentItem.dblDestinationQuantity
+		,intUserId					= @userId
+		,intExternalId				= shipmentItem.intInventoryShipmentItemId
+		,strScreenName				= 'Inventory Shipment'
+		FROM tblICInventoryShipment shipment
+		INNER JOIN tblICInventoryShipmentItem shipmentItem ON shipment.intInventoryShipmentId = shipmentItem.intInventoryShipmentId
+		INNER JOIN tblCTContractDetail contractDetail ON shipmentItem.intLineNo = contractDetail.intContractDetailId
+		INNER JOIN tblCTContractHeader contractHeader ON contractDetail.intContractHeaderId = contractHeader.intContractHeaderId
+		LEFT JOIN tblARInvoiceDetail invoiceDetail ON shipmentItem.intInventoryShipmentItemId = invoiceDetail.intInventoryShipmentItemId
+		LEFT JOIN tblARInvoice invoice ON invoiceDetail.intInvoiceId = invoice.intInvoiceId
+		WHERE ISNULL(contractHeader.ysnLoad, 0) = 0
+		AND shipment.ysnDestinationPosted = 1
+		AND ISNULL(invoice.ysnPosted,0) = 0
+
+		SELECT @id = MIN(intId) FROM @table
+
+		WHILE @id > 0 
+		BEGIN
+
+			SELECT 
+			@intContractDetailId		= intContractDetailId
+			,@dblOldQuantity			= dblOldQuantity
+			,@dblDestinationQuantity	= dblDestinationQuantity
+			,@intUserId					= intUserId
+			,@intExternalId				= intExternalId
+			,@strScreenName				= strScreenName
+			FROM @table 
+			WHERE intId = @id
+
+			-- Revert IS original quantity
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblOldQuantity, @intUserId, @intExternalId, @strScreenName			
+
+			-- Update using IS destination quantity
+			SELECT @dblNewBalance = (CASE WHEN @dblDestinationQuantity > dblBalance THEN dblBalance ELSE @dblDestinationQuantity END) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblNewBalance, @intUserId, @intExternalId, @strScreenName			
+
+			SELECT @id = MIN(intId) FROM @table WHERE intId > @id	
+
+		END
+
+		UPDATE tblCTMiscellaneous SET ysnDestinationWeightsAndGradesFixed = 1
+	END
+GO
+	print 'End updating posted DWG but unposted invoice';
+GO

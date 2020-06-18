@@ -386,7 +386,7 @@ BEGIN TRY
 						ELSE
 							ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
 							CASE
-								WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL
+								WHEN Shipment.ysnDestinationPosted = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL--ISNULL(INV.ysnPosted, 0) = 1 AND 
 								THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN (ShipmentItem.dblDestinationNet * 1) - ISNULL(OVR.dblOverage,0)  ELSE 0 END)
 								ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN ShipmentItem.dblQuantity ELSE 0 END)
 							END)
@@ -404,13 +404,13 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ShipmentItem.intOrderId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = ShipmentItem.intLineNo
 		AND CD.intContractHeaderId = CH.intContractHeaderId
-		LEFT JOIN 
-		(
-			SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
-			FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
-			AND  IV.ysnPosted = 1
-			AND dbo.fnRemoveTimeOnDate(IV.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IV.dtmPostDate) END
-		) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
+		--LEFT JOIN 
+		--(
+		--	SELECT DISTINCT ID.intInventoryShipmentItemId, IV.ysnPosted
+		--	FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+		--	AND  IV.ysnPosted = 1
+		--	AND dbo.fnRemoveTimeOnDate(IV.dtmPostDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(IV.dtmPostDate) END
+		--) INV ON INV.intInventoryShipmentItemId = ShipmentItem.intInventoryShipmentItemId      
 		LEFT JOIN 
 		(
 			SELECT DISTINCT ID.intInventoryShipmentItemId
@@ -439,7 +439,7 @@ BEGIN TRY
 		  ,CD.intContractDetailId
 		  ,Shipment.dtmShipDate
 		  ,Shipment.intInventoryShipmentId
-		  ,INV.ysnPosted
+		  ,Shipment.ysnDestinationPosted--,INV.ysnPosted
 		  ,ShipmentItem.dblDestinationNet
 		  ,CD.intItemUOMId
 		  ,ShipmentItem.intPriceUOMId
