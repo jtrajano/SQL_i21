@@ -16,6 +16,9 @@ SELECT
 															)
 								)
 	,blterm    = SMT.[strTermCode]  
+	,dblFuture = ISNULL(ARCI.[dblFuture], 0.000000)  -- Future
+	,dbl10Days	= ISNULL(ARCI.[dbl10Days], 0.000000)  -- 1 to 10 days
+	,dbl30Days = ISNULL(ARCI.[dbl30Days], 0.000000)  -- 11 to 30 days
 	,blov30    = ISNULL(ARCI.[dbl60Days], 0.000000)  
 	,blov60    = ISNULL(ARCI.[dbl90Days], 0.000000)  
 	,blov90    = ISNULL(ARCI.[dbl91Days], 0.000000)  
