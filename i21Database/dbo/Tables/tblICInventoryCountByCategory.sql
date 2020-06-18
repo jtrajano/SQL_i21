@@ -2,7 +2,7 @@
     [intInventoryCountByCategoryId] INT           IDENTITY (1, 1) NOT NULL,
     [intLocationId]                 INT           NOT NULL,
     [dtmCountDate]                  DATETIME      NULL,
-    [strCountNo]                    NVARCHAR (50) NULL,
+    [strCountNo]                    NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL,
     [ysnPosted]                     BIT           CONSTRAINT [DF__tblICInve__ysnPo__27586B36] DEFAULT ((0)) NOT NULL,
     [dtmPosted]                     DATETIME      NULL,
     [intCompanyId]                  INT           NULL,
