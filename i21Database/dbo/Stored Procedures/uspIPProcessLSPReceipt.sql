@@ -25,7 +25,8 @@ Declare @intMinRowNo int,
 		@intLoadId INT,
 		@dtmDate DateTime,
 		@strJson NVARCHAR(MAX),
-		@intEntityId INT
+		@intEntityId INT,
+		@intShipmentStatus INT
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
@@ -55,9 +56,13 @@ Begin
 		Else
 			Select TOP 1 @intUserId=[intEntityId] From tblSMUserSecurity
 
-		Select @intLoadId=intLoadId From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
+		Select @intLoadId=intLoadId,@intShipmentStatus=intShipmentStatus From tblLGLoad Where strExternalShipmentNumber=@strDeliveryNo AND intShipmentType=1
 		If ISNULL(@intLoadId,0)=0
 			RaisError('Invalid Delivery No',16,1)
+
+		-- LS cancelled check
+		If ISNULL(@intShipmentStatus,0) = 10
+			RaisError('LS is already cancelled.',16,1)
 
 		--check if Delivery Item No exists in the load or not
 		If Exists (Select 1 from tblIPReceiptItemStage Where intStageReceiptId=@intMinRowNo AND dblQuantity>0 
