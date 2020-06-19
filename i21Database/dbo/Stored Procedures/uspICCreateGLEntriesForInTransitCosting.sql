@@ -64,6 +64,7 @@ FROM	(
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 					AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+					AND t.intInTransitSourceLocationId IS NOT NULL 
 		) Query
 
 -- Validate the GL Accounts
