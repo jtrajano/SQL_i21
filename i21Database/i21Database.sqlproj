@@ -464,7 +464,6 @@
     <None Include="Scripts\Post-Deployment\Optional Run\2_Reports\1_UpdateConnection.sql" />
     <Build Include="dbo\Stored Procedures\uspGLReverseGLEntries.sql" />
     <Build Include="dbo\Tables\tblCMBankStatementImport.sql" />
-    <Build Include="dbo\Tables\tblGLDataFix.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankRecon.sql" />
     <Build Include="dbo\Functions\fnGetBankBalance.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
