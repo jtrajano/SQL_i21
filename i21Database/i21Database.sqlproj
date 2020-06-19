@@ -4966,6 +4966,7 @@
     <Build Include="dbo\Tables\tblGLRevalue.sql" />
     <Build Include="dbo\Tables\tblGLRevalueDetails.sql" />
     <Build Include="dbo\Functions\fnARGetCustomerAccountStatusCodes.sql" />
+    <Build Include="dbo\Functions\fnARGetItemGLAccount.sql" />
     <Build Include="dbo\Views\vyuCTMultiCurrencyRevalue.sql" />
     <Build Include="dbo\Views\vyuEMEntityOnGroup.sql" />
     <Build Include="dbo\Views\vyuQMSampleStaticPropertiesResult.sql" />
