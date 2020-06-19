@@ -389,12 +389,9 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeBankReconciliation.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForCheckPrint.sql" />
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
-    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
-    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql">
-      <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
-    </Build>
+    <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLFixPostHistoryGroupings.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMCheckPrint_QueuePrintJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCheckPrint_ValidatePrintJobs.sql" />
     <Build Include="dbo\Stored Procedures\uspCMCommitPrintCheckVerification.sql" />
     <Build Include="dbo\Stored Procedures\uspCMGenerateCheckNumbers.sql" />
@@ -8179,6 +8176,7 @@
     <Build Include="dbo\Tables\tblSMMessageLog.sql" />
     <Build Include="dbo\Tables\tblCTMiscellaneous.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1u_PostHistoryGroupings.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
