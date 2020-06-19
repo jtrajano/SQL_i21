@@ -79,6 +79,7 @@ FROM	(
 			WHERE	t.strBatchId = @strBatchId
 					AND t.strTransactionId = ISNULL(@strRebuildTransactionId, t.strTransactionId) 
 					AND (dbo.fnDateEquals(t.dtmDate, @dtmRebuildDate) = 1 OR @dtmRebuildDate IS NULL) 
+					AND t.intInTransitSourceLocationId IS NOT NULL 
 		) Query
 
 -- Validate the GL Accounts
