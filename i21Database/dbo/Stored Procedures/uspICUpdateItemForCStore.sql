@@ -254,7 +254,7 @@ BEGIN
 					WHEN MATCHED THEN 
 						UPDATE 
 						SET		
-							strUpcCode = ISNULL(@strUpcCode, itemUom.strUpcCode) 
+							strUpcCode = @strUpcCode 
 							,strLongUPCCode = ISNULL(@strLongUpcCode, itemUom.strLongUPCCode) 							
 					OUTPUT 
 						$action
