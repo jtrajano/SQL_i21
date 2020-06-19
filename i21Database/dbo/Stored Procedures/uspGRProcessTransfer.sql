@@ -410,41 +410,7 @@ BEGIN
 
 			FETCH c INTO @intTransferStorageReferenceId
 		END
-		CLOSE c; DEALLOCATE c;
-
-		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
-		DECLARE @SettleVoucherCreate AS SettleVoucherCreate
-		DECLARE @intTransferStorageReferenceId2 INT
-		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-		FOR
-		WITH storageTransfers (
-			intTranferStorageReferenceId
-		) AS (
-			SELECT SR.intTransferStorageReferenceId
-			FROM tblGRTransferStorageReference SR
-			INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
-			INNER JOIN tblGRStorageType ST
-				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-					AND ST.ysnDPOwnedType = 1
-			WHERE SR.intTransferStorageId = @intTransferStorageId
-		)
-		SELECT
-			intTranferStorageReferenceId
-		FROM ( SELECT * FROM storageTransfers ) params
-		OPEN c;
-
-		FETCH c INTO @intTransferStorageReferenceId2
-
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			EXEC uspGRStorageInventoryReceipt 
-				@SettleVoucherCreate = @SettleVoucherCreate
-				,@intTransferStorageReferenceId = @intTransferStorageReferenceId2
-				,@ysnUnpost = 0
-
-			FETCH c INTO @intTransferStorageReferenceId2
-		END
-		CLOSE c; DEALLOCATE c;
+		CLOSE c; DEALLOCATE c;		
 		--
 		IF(ISNULL(@intTransferStorageReferenceId,0) > 0)
 		BEGIN
