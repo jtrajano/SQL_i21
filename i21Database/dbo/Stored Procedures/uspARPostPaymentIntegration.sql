@@ -166,12 +166,16 @@ ELSE
 BEGIN
 
     UPDATE A
-    SET A.intCurrentStatus = 4,
-        A.dtmAccountingPeriod = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmDatePaid) + 1, 0))
+    SET A.intCurrentStatus = 4
     FROM tblARPayment A
     INNER JOIN #ARPostPaymentHeader P ON A.[intPaymentId] = P.[intTransactionId]
   	WHERE P.[ysnPost] = @OneBit
 
+    UPDATE A
+    SET A.dtmAccountingPeriod = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmDatePaid) + 1, 0))
+    FROM tblARPayment A
+    INNER JOIN #ARPostPaymentHeader P ON A.[intPaymentId] = P.[intTransactionId]
+  	WHERE P.[ysnPost] = @OneBit
 
 
 
