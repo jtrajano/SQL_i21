@@ -28,6 +28,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName 
 		,strAction
+		,strNotes
 	from vyuRKGetSummaryLog SL
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
@@ -61,6 +62,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName 
 		,strAction
+		,strNotes
 	FROM (
 		SELECT * FROM  (
 			SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC)
@@ -88,6 +90,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 					,intUserId
 					,strUserName 
 					,strAction
+					,strNotes
 				FROM vyuRKGetSummaryLog SL
 				left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 				left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
@@ -125,6 +128,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 					,intUserId
 					,strUserName 
 					,strAction
+					,strNotes
 				FROM vyuRKGetSummaryLog SL
 				left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 				left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
@@ -161,7 +165,9 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intLocationId
 		,intUserId
 		,strUserName 
-		,strAction FROM  (
+		,strAction 
+		,strNotes
+		FROM  (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY SL.intTransactionRecordId ORDER BY SL.intSummaryLogId DESC)
 				,dtmTransactionDate
 				,dtmCreatedDate
@@ -187,6 +193,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 				,intUserId
 				,strUserName 
 				,strAction
+				,strNotes
 			FROM vyuRKGetSummaryLog SL
 			left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SL.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 			left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SL.intOrigUOMId
@@ -224,6 +231,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName 
 		,strAction
+		,strNotes
 	from dbo.fnRKGetBucketCollateral(getutcdate(),NULL,NULL) C
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = C.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = C.intCommodityUnitMeasureId
@@ -256,6 +264,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName
 		,strAction
+		,strNotes
 	from dbo.fnRKGetBucketContractBalance(getutcdate(),null,null) CB
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = CB.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = CB.intQtyUOMId
@@ -288,6 +297,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,intUserId
 		,strUserName 
 		,strAction
+		,strNotes
 	from dbo.fnRKGetBucketBasisDeliveries(getutcdate(),null,null) SD
 	left join tblICCommodityUnitMeasure stckUOM on stckUOM.intCommodityId = SD.intCommodityId AND stckUOM.ysnDefault = 1 AND stckUOM.ysnStockUnit = 1
 	left join tblICCommodityUnitMeasure origUOM on origUOM.intCommodityUnitMeasureId = SD.intQtyUOMId

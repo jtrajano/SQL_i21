@@ -39,6 +39,7 @@ RETURNS @returntable TABLE
 	, strUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -91,6 +92,7 @@ BEGIN
 		, strUserName
 		, strAction
 		, strTransactionType
+		, strNotes
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strTransactionType ORDER BY c.intSummaryLogId DESC)
 			, dblTotal = c.dblOrigQty
@@ -126,6 +128,7 @@ BEGIN
 			, strUserName
 			, strAction
 			, strTransactionType
+			, strNotes
 		FROM vyuRKGetSummaryLog c
 		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
 		LEFT JOIN Contracts Cnt ON Cnt.intContractHeaderId = c.intContractHeaderId
