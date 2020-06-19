@@ -116,6 +116,7 @@
 	
 	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
 	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
+	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
 
 
@@ -814,36 +815,38 @@ BEGIN
 				--SET @i = '0000000'
 				--SELECT CONVERT(BIGINT, @i)
 
-				IF(ISNULL(@strCardId,'') = '')
-				BEGIN
+				-- IF(ISNULL(@strCardId,'') = '')
+				-- BEGIN
+
+
 					IF(ISNULL(@CardNumberForDualCard,'') != '')
 					BEGIN
 						SET @strCardId = @CardNumberForDualCard
-						SET @strVehicleId = null
 					END
 					ELSE
 					BEGIN
-						SET @strCardId = @strVehicleId
+						SET @strCardId = @VehicleNumberForDualCard
 						SET @strVehicleId = null
 					END
-				END
 
-				IF (ISNUMERIC(@strCardId) = 1)
-				BEGIN
-					IF (CONVERT(BIGINT, @strCardId) = 0)
-					BEGIN
-						IF(ISNULL(@CardNumberForDualCard,'') != '')
-						BEGIN
-							SET @strCardId = @CardNumberForDualCard
-							SET @strVehicleId = null
-						END
-						ELSE
-						BEGIN
-							SET @strCardId = @strVehicleId
-							SET @strVehicleId = null
-						END
-					END
-				END
+				-- END
+
+				-- IF (ISNUMERIC(@strCardId) = 1)
+				-- BEGIN
+				-- 	IF (CONVERT(BIGINT, @strCardId) = 0)
+				-- 	BEGIN
+					--	IF(ISNULL(@CardNumberForDualCard,'') != '')
+					--	BEGIN
+					--		SET @strCardId = @CardNumberForDualCard
+					--		-- SET @strVehicleId = null
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SET @strCardId = @strVehicleId
+					--		SET @strVehicleId = null
+					--	END
+					---- END
+				-- END
 			END
 		END
 	END
