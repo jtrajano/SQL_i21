@@ -446,9 +446,6 @@ BEGIN
   WHERE (@strItemNo IS NULL OR [strItemNo] LIKE '%' + @strItemNo + '%')
 END
 
-SELECT @strItemNo AS strItemFrom, @strItemNoTo AS strItemTo
-SELECT * FROM @ITEMS
-
 --IF(OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL)
 --BEGIN
 --    DROP TABLE #CATEGORIES
