@@ -552,7 +552,7 @@ BEGIN
 	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
 	where InvTran.dtmDate is not null and dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= @dtmDate
-	--and (OC.ysnDestinationWeightGrade = convert(bit,0) or (OC.ysnDestinationWeightGrade = convert(bit,1) and isnull(ShipmentItem.dblDestinationQuantity,0) > 0))
+    and (OC.ysnDestinationWeightGrade = convert(bit,0) or (OC.ysnDestinationWeightGrade = convert(bit,1) and isnull(ShipmentItem.dblDestinationQuantity,0) = 0))  
 	GROUP BY CH.intContractHeaderId
 	,CD.intContractDetailId
 	,Shipment.intInventoryShipmentId
@@ -571,7 +571,74 @@ BEGIN
 		,OC.strSequenceUnitMeasure
 		,OC.intHeaderUnitMeasureId
 		,OC.strHeaderUnitMeasure
-		,OC.ysnDestinationWeightGrade
+	
+	union all
+	
+		SELECT CH.intContractHeaderId
+	,CD.intContractDetailId
+	,Shipment.intInventoryShipmentId
+	,Shipment.strShipmentNumber
+	,CT.strContractType
+	,CH.strContractNumber
+	,CD.intContractSeq
+	,E.intEntityId
+	,E.strEntityName
+	,C.strCommodityCode
+	,C.intCommodityId
+	,Shipment.dtmCreated
+	,dblQuantity = SUM(
+						ISNULL(
+							ABS(
+								dbo.fnICConvertUOMtoStockUnit(
+									(case when isnull(ShipmentItem.dblDestinationQuantity,0) > isnull(CD.dblQuantity,0) then CD.intItemId else ShipmentItem.intItemId end)
+									,(case when isnull(ShipmentItem.dblDestinationQuantity,0) > isnull(CD.dblQuantity,0) then CD.intItemUOMId else ShipmentItem.intItemUOMId end)
+									,(case when isnull(ShipmentItem.dblDestinationQuantity,0) > isnull(CD.dblQuantity,0) then isnull(CD.dblQuantity,0) else isnull(ShipmentItem.dblDestinationQuantity,0) end)
+								)
+							)
+							,0
+						)
+					)
+	,'Inventory Shipment'
+	,CAST(replace(convert(varchar, Shipment.dtmCreated,101),'/','') + replace(convert(varchar, Shipment.dtmCreated,108),':','')	 AS BIGINT) + CAST( Shipment.intInventoryShipmentId AS BIGINT)
+	,CH.intCommodityUOMId
+	,m.intUnitMeasureId
+		,OC.intSequenceUnitMeasureId
+		,OC.strSequenceUnitMeasure
+		,OC.intHeaderUnitMeasureId
+		,OC.strHeaderUnitMeasure
+	FROM tblCTContractDetail CD
+	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId 
+		AND intContractTypeId = 2
+	JOIN @OpenBasisContract OC
+		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
+	INNER JOIN tblICInventoryShipmentItem ShipmentItem ON ShipmentItem.intLineNo = CD.intContractDetailId
+		AND CH.intContractHeaderId = ShipmentItem.intOrderId
+	INNER JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId	
+		AND Shipment.intOrderType = 1
+	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
+	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
+	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
+	where Shipment.dtmCreated is not null and dbo.fnRemoveTimeOnDate(Shipment.dtmCreated) <= @dtmDate
+	and OC.ysnDestinationWeightGrade = convert(bit,1) and isnull(ShipmentItem.dblDestinationQuantity,0) <> 0
+	GROUP BY CH.intContractHeaderId
+	,CD.intContractDetailId
+	,Shipment.intInventoryShipmentId
+	,Shipment.strShipmentNumber
+	,CT.strContractType
+	,CH.strContractNumber
+	,CD.intContractSeq
+	,E.intEntityId
+	,E.strEntityName
+	,C.strCommodityCode
+	,C.intCommodityId
+	,Shipment.dtmCreated
+	,CH.intCommodityUOMId
+	,m.intUnitMeasureId
+	,OC.intSequenceUnitMeasureId
+	,OC.strSequenceUnitMeasure
+	,OC.intHeaderUnitMeasureId
+	,OC.strHeaderUnitMeasure
 
 	-- INVOICE
 	INSERT INTO @TemporaryTable
@@ -725,60 +792,6 @@ BEGIN
 	,C.strCommodityCode
 	,C.intCommodityId
 	,pfd.dtmFixationDate
-	,CH.intCommodityUOMId
-	,m.intUnitMeasureId
-	,OC.intSequenceUnitMeasureId
-	,OC.strSequenceUnitMeasure
-	,OC.intHeaderUnitMeasureId
-	,OC.strHeaderUnitMeasure
-
-	union all
-
-	SELECT CH.intContractHeaderId
-	,CD.intContractDetailId
-	,intPriceFixationDetailId = null
-	,strPriceContractNo = null
-	,CT.strContractType
-	,CH.strContractNumber
-	,CD.intContractSeq
-	,E.intEntityId
-	,E.strEntityName
-	,C.strCommodityCode
-	,C.intCommodityId
-	,CD.dtmCreated
-	,SUM(dbo.fnICConvertUOMtoStockUnit( CD.intItemId, CD.intItemUOMId, CD.dblQuantity)) * -1
-	,'Pricing'
-	,CAST(replace(convert(varchar, CD.dtmCreated,101),'/','') + replace(convert(varchar, CD.dtmCreated,108),':','')	AS BIGINT) + CAST(CD.dtmCreated AS BIGINT)
-	,CH.intCommodityUOMId
-	,m.intUnitMeasureId
-	,OC.intSequenceUnitMeasureId
-	,OC.strSequenceUnitMeasure
-	,OC.intHeaderUnitMeasureId
-	,OC.strHeaderUnitMeasure
-	FROM tblCTContractDetail CD
-	INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		AND CH.intContractTypeId = 2
-	JOIN @OpenBasisContract OC
-		ON CD.intContractDetailId = OC.intContractDetailId and CD.intContractHeaderId = OC.intContractHeaderId
-	INNER JOIN tblICCommodity C ON CH.intCommodityId = C.intCommodityId
-	INNER JOIN tblCTContractType CT ON CH.intContractTypeId = CT.intContractTypeId
-	INNER JOIN vyuCTEntity E ON E.intEntityId = CH.intEntityId and E.strEntityType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-	inner join tblICCommodityUnitMeasure m on m.intCommodityId = CH.intCommodityId and m.ysnStockUnit=1
-	where CD.dtmCreated is not null and  dbo.fnRemoveTimeOnDate(CD.dtmCreated) <= @dtmDate
-	and CD.intPricingTypeId = 1
-	and CD.dblCashPrice is not null
-	and OC.ysnDestinationWeightGrade = convert(bit,1)
-	and not exists (select top 1 pf.intPriceFixationId from tblCTPriceFixation pf where pf.intContractDetailId = CD.intContractDetailId)
-	GROUP BY CH.intContractHeaderId
-	,CD.intContractDetailId
-	,CT.strContractType
-	,CH.strContractNumber
-	,CD.intContractSeq
-	,E.intEntityId
-	,E.strEntityName
-	,C.strCommodityCode
-	,C.intCommodityId
-	,CD.dtmCreated
 	,CH.intCommodityUOMId
 	,m.intUnitMeasureId
 	,OC.intSequenceUnitMeasureId
