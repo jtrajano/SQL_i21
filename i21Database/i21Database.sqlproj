@@ -8745,6 +8745,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
