@@ -16,7 +16,7 @@ BEGIN
 		AND		EY.strEntityType = 'Producer'
 		AND		EY.ysnActive	 =	1
 		AND		EY.ysnVendor	 =	1
-		AND		EY.strEntityName	LIKE	'%' + @strEntityName + '%'
+		AND		EY.strEntityName	LIKE	'%' + @strEntityName COLLATE Latin1_General_CI_AS + '%'
 	END		
 	ELSE
 	BEGIN
@@ -27,6 +27,6 @@ BEGIN
 		WHERE	EY.strEntityType = 'Producer'
 		AND		EY.ysnActive	 =	1
 		AND		EY.ysnVendor	 =	1
-		AND		EY.strEntityName	LIKE	'%' + @strEntityName + '%'
+		AND		EY.strEntityName	LIKE	'%' + @strEntityName COLLATE Latin1_General_CI_AS + '%'
 	END
 END
