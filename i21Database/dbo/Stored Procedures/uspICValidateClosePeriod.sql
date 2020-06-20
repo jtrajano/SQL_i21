@@ -86,7 +86,7 @@ ORDER BY
 IF @strTransactionId IS NOT NULL 
 BEGIN 
 	-- '%s is a back-dated transaction. Please do a Rebuild Inventory from %d before closing the fiscal month.'
-	EXEC uspICRaiseError 80253, @strTransactionId, @dtmDate; 
+	EXEC uspICRaiseError 80254, @strTransactionId, @dtmDate; 
 
-	RETURN -80253;
+	RETURN -80254;
 END 
