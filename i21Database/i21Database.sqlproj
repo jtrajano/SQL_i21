@@ -9393,6 +9393,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPStockFeed.sql" />
     <None Include="Scripts\Post-Deployment\DropEncryptionCertificateAndSymmetricKey.sql" />
     <Build Include="dbo\Views\vyuAGApplicationMethod.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
