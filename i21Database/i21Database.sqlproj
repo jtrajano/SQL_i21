@@ -7744,6 +7744,7 @@
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspGRSettlementSummaryReportForView.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
