@@ -521,7 +521,6 @@ SELECT DISTINCT
 		,[dblOrderQty]								=	
 			--A.dblOrderQty
 			CASE 
-				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblOrderQty
 				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblOrderQty
 				ELSE A.dblOrderQty
 			END 				
@@ -530,14 +529,12 @@ SELECT DISTINCT
 		,[dblOpenReceive]							=	
 			--A.dblOpenReceive
 			CASE 
-				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblOpenReceive
 				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblOpenReceive
 				ELSE A.dblOpenReceive
 			END 
 		,[dblQuantityToBill]						=	
 			--A.dblQuantityToBill
 			CASE 
-				WHEN @billTypeToUse = @type_DebitMemo AND A.ysnPrice = 1 THEN -A.dblQuantityToBill
 				WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblQuantityToBill
 				ELSE A.dblQuantityToBill
 			END 
@@ -548,9 +545,7 @@ SELECT DISTINCT
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	CASE WHEN A.dblOrderQty > 1 -- PER UNIT
-														THEN CASE WHEN A.ysnSubCurrency > 0 THEN CAST(A.dblUnitCost AS DECIMAL(38,20)) / ISNULL(A.intSubCurrencyCents,100) ELSE CAST(A.dblUnitCost AS DECIMAL(38,20))  END
-														ELSE CAST(A.dblUnitCost AS DECIMAL(38,20)) END
+		,[dblUnitCost]								=	CAST(A.dblUnitCost AS DECIMAL(38,20))
 		,[dblDiscount]								=	0
 		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) <> IR.intEntityVendorId
 																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
