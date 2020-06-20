@@ -594,6 +594,9 @@ EXEC uspAPUpdateVoucherPayable @voucherDetailIds = @voucherDetailIds, @decrease 
 --UPDATE AVAILABLE QTY
 EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
 
+--LOG RISK
+EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherDetailIds, @remove = 0
+
 IF @transCount = 0
 	BEGIN
 		IF (XACT_STATE()) = -1
