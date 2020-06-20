@@ -8250,6 +8250,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
