@@ -107,11 +107,11 @@ AS
 			FD.dblHedgeNoOfLots AS dblHedgeNoOfLots,
 			FD.intDailyAveragePriceDetailId as  intDailyAveragePriceDetailId,
 			ysnInvoiced = FDI.ysnInvoiced,
-			strInvoiceIds = FDI.strInvoiceIds,
-			strInvoices = FDI.strInvoices,
+			strInvoiceIds = FDI.strInvoiceIds COLLATE Latin1_General_CI_AS,
+			strInvoices = FDI.strInvoices COLLATE Latin1_General_CI_AS,
 			ysnBilled = FDV.ysnBilled,
-			strBillIds = FDV.strBillIds,
-			strBills = FDV.strBills
+			strBillIds = FDV.strBillIds COLLATE Latin1_General_CI_AS,
+			strBills = FDV.strBills COLLATE Latin1_General_CI_AS
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId

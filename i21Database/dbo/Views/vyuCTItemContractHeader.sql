@@ -22,7 +22,7 @@ AS
 						OP.strName					AS strOpportunityName,
 						ysnIsUsed = CONVERT(BIT, CASE WHEN (SELECT TOP 1 1 FROM tblARInvoiceDetail WHERE intItemContractHeaderId = CH.intItemContractHeaderId) = 1 THEN 1 ELSE 0 END),
 						ysnPrepaid = CAST(CASE WHEN ISNULL(dbo.fnCTGetPrepaidIdsItemContract(CH.intItemContractHeaderId),'') = '' THEN 0 ELSE 1 END AS BIT),
-						strPrepaidIds = ISNULL(dbo.fnCTGetPrepaidIdsItemContract(CH.intItemContractHeaderId),''),  
+						strPrepaidIds = ISNULL(dbo.fnCTGetPrepaidIdsItemContract(CH.intItemContractHeaderId),'') COLLATE Latin1_General_CI_AS,  
 						CH.*						
 						
 

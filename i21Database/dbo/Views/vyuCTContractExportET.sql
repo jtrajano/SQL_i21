@@ -20,10 +20,10 @@ AS
 				TM.strTermCode			AS bkterm,
 			
 				null					AS bkdelt,
-				'N'						AS chrTaxable,
+				'N'						COLLATE Latin1_General_CI_AS AS chrTaxable,
 				strContractNumber		AS bknum,
-				REPLACE(CONVERT(NVARCHAR(50),dtmStartDate,101),'/','')		AS bkstart,
-				REPLACE(CONVERT(NVARCHAR(50),dtmEndDate,101),'/','')		AS bkend
+				REPLACE(CONVERT(NVARCHAR(50),dtmStartDate,101),'/','')		COLLATE Latin1_General_CI_AS AS bkstart,
+				REPLACE(CONVERT(NVARCHAR(50),dtmEndDate,101),'/','')		COLLATE Latin1_General_CI_AS AS bkend
 
 		FROM	tblCTContractDetail		CD
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId		LEFT	

@@ -16,9 +16,9 @@
 			UPPER(A.strContractNumber) as strContractNumber,			
 			UPPER(A.strLocationName) as strLocationName,			
 			UPPER(B.strEntityNo) as strEntityNo,
-			CONVERT(VARCHAR(10), A.dtmContractDate, 101) as dtmContractDate,
-			CONVERT(VARCHAR(10), A.dtmContractDate, 101) as dtmLineShipDate,
-			CONVERT(VARCHAR(10), A.dtmExpirationDate, 101) as dtmLineDueDate,
+			CONVERT(VARCHAR(10), A.dtmContractDate, 101) COLLATE Latin1_General_CI_AS as dtmContractDate,
+			CONVERT(VARCHAR(10), A.dtmContractDate, 101) COLLATE Latin1_General_CI_AS as dtmLineShipDate,
+			CONVERT(VARCHAR(10), A.dtmExpirationDate, 101) COLLATE Latin1_General_CI_AS as dtmLineDueDate,
 			UPPER(E.strCategoryCode + ' CATEGORY') as strLineCategoryCode,
 			CAST(ROUND(F.dblTotal,2) as NUMERIC(36,2)) as dblLineTotal,
 			E.* 
