@@ -8177,6 +8177,8 @@
     <Build Include="dbo\Tables\tblCTMiscellaneous.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1u_PostHistoryGroupings.sql" />
+    <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
