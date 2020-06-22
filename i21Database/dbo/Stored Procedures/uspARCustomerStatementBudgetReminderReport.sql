@@ -473,8 +473,7 @@ LEFT JOIN (
 		SELECT intInvoiceId
 			 , dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
 		FROM #PAYMENTDETAILS
-		WHERE ysnInvoicePrepayment = 0
-		  AND dtmDatePaid <= @dtmDateTo
+		WHERE dtmDatePaid <= @dtmDateTo
 		GROUP BY intInvoiceId
 	) TOTALPAYMENT ON DETAILS.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	WHERE P.ysnInvoicePrepayment = 0
