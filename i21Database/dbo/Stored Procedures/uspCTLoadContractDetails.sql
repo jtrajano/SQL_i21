@@ -37,11 +37,12 @@ BEGIN TRY
 							END)),0)
 		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, 
 		CASE
-			WHEN CM.intInventoryShipmentItemId IS NULL THEN 
-				(CASE			
-					WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) 
-					ELSE ShipmentItem.dblQuantity 
-				END)
+			WHEN CM.intInventoryShipmentItemId IS NULL THEN
+			ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity)
+				-- (CASE			
+				-- 	WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) 
+				-- 	ELSE ShipmentItem.dblQuantity 
+				-- END)
 			ELSE 0
 		END)),0)
 	FROM tblICInventoryShipmentItem ShipmentItem  
