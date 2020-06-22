@@ -8706,7 +8706,7 @@
     <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnHand.sql" />
-    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />    
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
@@ -8716,6 +8716,12 @@
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
     <Build Include="dbo\Tables\tblRKDPRRunLog.sql" />
     <Build Include="dbo\Tables\tblRKDPRRunLogDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareDerivatives.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareContractBalance.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
+    <Build Include="dbo\Views\vyuRKDPRRun.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
