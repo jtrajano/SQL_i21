@@ -247,7 +247,7 @@ BEGIN TRY
 			--SELECT	@intBillId = NULL, @intBillDetailId = NULL, @intInvoiceId = NULL, @intInvoiceDetailId = NULL
 
 			SELECT	@dblPriceFixedQty	=	FD.dblQuantity,
-					@dblPriceFxdQty		=	FD.dblQuantity, 
+					@dblPriceFxdQty		=	FD.dblQuantity - ISNULL(SS.dblQtyReceived,0),
 					@intBillId			=	FD.intBillId,
 					@intBillDetailId	=	FD.intBillDetailId, 
 					--@intInvoiceId		=	FD.intInvoiceId, 
@@ -263,9 +263,17 @@ BEGIN TRY
 			JOIN	tblICCommodityUnitMeasure	CO	ON	CO.intCommodityUnitMeasureId	=	FD.intPricingUOMId
 			JOIN	tblICItemUOM				IU	ON	IU.intItemId					=	CD.intItemId 
 													AND IU.intUnitMeasureId				=	CO.intUnitMeasureId
+			OUTER APPLY
+			(
+				SELECT	dblQtyReceived = SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived))
+				FROM	tblCTPriceFixationDetailAPAR	AA
+				JOIN	tblAPBillDetail					AD	ON	AD.intBillDetailId	=	AA.intBillDetailId
+				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+				AND		ISNULL(AD.intSettleStorageId,0) <> 0
+			) SS
 			WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
 
-			IF @intContractTypeId = 1 
+			IF @intContractTypeId = 1 AND @dblPriceFxdQty > 0
 			BEGIN
 			
 				DELETE FROM @tblReceipt
@@ -348,6 +356,7 @@ BEGIN TRY
 					FROM	tblCTPriceFixationDetailAPAR	AA
 					JOIN	tblAPBillDetail					AD	ON	AD.intBillDetailId	=	AA.intBillDetailId
 					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+					AND		ISNULL(AD.intSettleStorageId,0) = 0
 
 					SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)
 
