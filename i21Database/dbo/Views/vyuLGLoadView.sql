@@ -1,9 +1,9 @@
-﻿CREATE VIEW [vyuLGLoadView]
+﻿CREATE VIEW vyuLGLoadView
 AS
 SELECT -- Load Header
 	L.intLoadId
 	,L.intConcurrencyId
-	,L.[strLoadNumber]
+	,L.strLoadNumber
 	,L.intPurchaseSale
 	,L.intEquipmentTypeId
 	,L.intHaulerEntityId
@@ -41,6 +41,8 @@ SELECT -- Load Header
 		WHEN 3 THEN 'Transport Load'
 		END COLLATE Latin1_General_CI_AS
 	,strPosition = P.strPosition
+	,strPositionType = P.strPositionType 
+	,strCurrency = Cur.strCurrency
 	,intGenerateReferenceNumber = GLoad.intReferenceNumber
 	,intGenerateSequence = L.intGenerateSequence
 	,L.ysnLoadBased
@@ -100,7 +102,7 @@ SELECT -- Load Header
 		WHEN 10 THEN 'Cancelled'
 		WHEN 11 THEN 'Invoiced'
 		ELSE '' END COLLATE Latin1_General_CI_AS
-	,strCalenderInfo = L.[strLoadNumber] 
+	,strCalenderInfo = L.strLoadNumber 
 		+ CASE L.intTransportationMode 
 			WHEN 1 THEN '(T)'
 			WHEN 2 THEN '(V)'
@@ -139,100 +141,112 @@ SELECT -- Load Header
 			WHEN 11 THEN 'Invoiced'
 			ELSE '' END 
 		+ CASE WHEN ISNULL(L.strExternalLoadNumber, '') <> '' THEN ' - ' + '(S) ' + L.strExternalLoadNumber ELSE '' END 
-		+ CASE WHEN ISNULL(L.strCustomerReference, '') <> '' THEN ' - ' + '(C) ' + L.strCustomerReference ELSE '' END COLLATE Latin1_General_CI_AS,
-		L.intPositionId,
-		L.[intWeightUnitMeasureId],
-		strWeightUnitMeasure = [strUnitMeasure],
-		[strBLNumber] = ISNULL(L.[strBLNumber],''),
-		L.[dtmBLDate],
-		L.[strOriginPort],
-		L.[strDestinationPort],
-		intLeadTime = ISNULL(DPort.intLeadTime, 0),
-		L.[strDestinationCity],
-		L.[intTerminalEntityId],
-		[strTerminal] =  Terminal.strName,
-		L.[intShippingLineEntityId],
-		[strShippingLine] =  ShippingLine.strName,
-		L.[strServiceContractNumber],
-		strServiceContractOwner = SLSC.strOwner,
-		L.[strPackingDescription],
-		L.[strMVessel],
-		L.[strMVoyageNumber],
-		L.[strFVessel],
-		L.[strFVoyageNumber],
-		L.[intForwardingAgentEntityId],
-		[strForwardingAgent] = ForwardingAgent.strName,
-		L.[strForwardingAgentRef],
-		L.[intInsurerEntityId],
-		[strInsurer] = Insurer.strName,
-		L.[dblInsuranceValue],
-		L.[intInsuranceCurrencyId],
-		[strInsuranceCurrency] = Currency.strCurrency,
-		L.[dtmDocsToBroker],
-		L.[strMarks],
-		L.[strMarkingInstructions],
-		L.[strShippingMode],
-		L.[intNumberOfContainers],
-		L.[intContainerTypeId],
-		[strContainerType] = CT.strContainerType,
-		L.[intBLDraftToBeSentId],
-		L.[strBLDraftToBeSentType],
-		[strBLDraftToBeSent] = BLDraftToBeSent.strName,
-		L.[strDocPresentationType],
-		[strDocPresentationVal] = NP.strName,
-		L.[intDocPresentationId],
-		L.[ysnPosted],
-		L.[dtmPostedDate],
-		L.[dtmDocsReceivedDate],
-		L.[dtmETAPOL],
-		L.[dtmETSPOL],
-		L.[dtmETAPOD],
-		L.[dtmDeadlineCargo],
-		L.[dtmDeadlineBL],
-		L.[dtmISFReceivedDate],
-		L.[dtmISFFiledDate],
-		L.[ysnArrivedInPort],
-		L.[ysnDocumentsApproved],
-		L.[ysnCustomsReleased],
-		L.[dtmArrivedInPort],
-		L.[dtmDocumentsApproved],
-		L.[dtmCustomsReleased],
-		L.[strVessel1],
-		L.[strOriginPort1],
-		L.[strDestinationPort1],
-		L.[dtmETSPOL1],
-		L.[dtmETAPOD1],
-		L.[strVessel2],
-		L.[strOriginPort2],
-		L.[strDestinationPort2],
-		L.[dtmETSPOL2],
-		L.[dtmETAPOD2],
-		L.[strVessel3],
-		L.[strOriginPort3],
-		L.[strDestinationPort3],
-		L.[dtmETSPOL3],
-		L.[dtmETAPOD3],
-		L.[strVessel4],
-		L.[strOriginPort4],
-		L.[strDestinationPort4],
-		L.[dtmETSPOL4],
-		L.[dtmETAPOD4],
-		L.[dblDemurrage],
-		L.[intDemurrageCurrencyId],
-		L.[dblDespatch],
-		L.[intDespatchCurrencyId],
-		L.[dblLoadingRate],
-		L.[intLoadingUnitMeasureId],
-		L.[strLoadingPerUnit],
-		L.[dblDischargeRate],
-		L.[intDischargeUnitMeasureId],
-		L.[strDischargePerUnit],
-		L.[intTransportationMode],
-		L.[intShipmentStatus],
-		L.intShipmentType,
-		L.strExternalShipmentNumber,
-		strShippingInstructionNumber = LOADSI.strLoadNumber,
-		L.dtmStuffingDate
+		+ CASE WHEN ISNULL(L.strCustomerReference, '') <> '' THEN ' - ' + '(C) ' + L.strCustomerReference ELSE '' END COLLATE Latin1_General_CI_AS
+		,L.intPositionId
+		,L.intWeightUnitMeasureId
+		,strWeightUnitMeasure = UM.strUnitMeasure
+		,strBLNumber = ISNULL(L.strBLNumber,'')
+		,L.dtmBLDate
+		,L.strOriginPort
+		,L.strDestinationPort
+		,intLeadTime = ISNULL(DPort.intLeadTime, 0)
+		,L.strDestinationCity
+		,L.intTerminalEntityId
+		,strTerminal =  Terminal.strName
+		,L.intShippingLineEntityId
+		,strShippingLine =  ShippingLine.strName
+		,L.strServiceContractNumber
+		,strServiceContractOwner = SLSC.strOwner
+		,L.strPackingDescription
+		,L.strMVessel
+		,L.strMVoyageNumber
+		,L.strFVessel
+		,L.strFVoyageNumber
+		,L.intForwardingAgentEntityId
+		,strForwardingAgent = ForwardingAgent.strName
+		,L.strForwardingAgentRef
+		,L.intInsurerEntityId
+		,strInsurer = Insurer.strName
+		,L.dblInsuranceValue
+		,L.intInsuranceCurrencyId
+		,strInsuranceCurrency = InsCur.strCurrency
+		,L.dtmDocsToBroker
+		,L.strMarks
+		,L.strMarkingInstructions
+		,L.strShippingMode
+		,L.intNumberOfContainers
+		,L.intContainerTypeId
+		,strContainerType = CT.strContainerType
+		,L.intBLDraftToBeSentId
+		,L.strBLDraftToBeSentType
+		,strBLDraftToBeSent = BLDraftToBeSent.strName
+		,L.strDocPresentationType
+		,strDocPresentationVal = NP.strName
+		,L.intDocPresentationId
+		,L.ysnPosted
+		,L.dtmPostedDate
+		,L.dtmDocsReceivedDate
+		,L.dtmETAPOL
+		,L.dtmETSPOL
+		,L.dtmETAPOD
+		,L.dtmDeadlineCargo
+		,L.dtmDeadlineBL
+		,L.dtmISFReceivedDate
+		,L.dtmISFFiledDate
+		,L.ysnArrivedInPort
+		,L.ysnDocumentsApproved
+		,L.ysnCustomsReleased
+		,L.dtmArrivedInPort
+		,L.dtmDocumentsApproved
+		,L.dtmCustomsReleased
+		,L.strVessel1
+		,L.strOriginPort1
+		,L.strDestinationPort1
+		,L.dtmETSPOL1
+		,L.dtmETAPOD1
+		,L.strVessel2
+		,L.strOriginPort2
+		,L.strDestinationPort2
+		,L.dtmETSPOL2
+		,L.dtmETAPOD2
+		,L.strVessel3
+		,L.strOriginPort3
+		,L.strDestinationPort3
+		,L.dtmETSPOL3
+		,L.dtmETAPOD3
+		,L.strVessel4
+		,L.strOriginPort4
+		,L.strDestinationPort4
+		,L.dtmETSPOL4
+		,L.dtmETAPOD4
+		,L.dblDemurrage
+		,L.intDemurrageCurrencyId
+		,L.dblDespatch
+		,L.intDespatchCurrencyId
+		,L.dblLoadingRate
+		,L.intLoadingUnitMeasureId
+		,L.strLoadingPerUnit
+		,L.dblDischargeRate
+		,L.intDischargeUnitMeasureId
+		,L.strDischargePerUnit
+		,L.intTransportationMode
+		,L.intShipmentStatus
+		,L.intShipmentType
+		,L.strExternalShipmentNumber
+		,strShippingInstructionNumber = LOADSI.strLoadNumber
+		,FT.strFreightTerm
+		,FT.strFobPoint
+		,strETAPODReasonCode = ETAPODRC.strReasonCodeDescription
+		,strETAPOLReasonCode = ETAPOLRC.strReasonCodeDescription
+		,strETSPOLReasonCode = ETSPOLRC.strReasonCodeDescription
+		,strDemurrageCurrency = DemCur.strCurrency
+		,strDespatchCurrency = DesCur.strCurrency
+		,strLoadingUnitMeasure = LUM.strUnitMeasure
+		,strDischargeUnitMeasure = DUM.strUnitMeasure
+		,BO.strBook
+		,SB.strSubBook
+		,INC.intInsuranceCalculatorId
+		,L.dtmStuffingDate
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -244,14 +258,26 @@ LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForw
 LEFT JOIN tblEMEntity Insurer ON Insurer.intEntityId = L.intInsurerEntityId
 LEFT JOIN tblEMEntity BLDraftToBeSent ON BLDraftToBeSent.intEntityId = L.intBLDraftToBeSentId
 LEFT JOIN vyuLGNotifyParties NP ON NP.intEntityId = L.intDocPresentationId AND NP.strEntity = L.strDocPresentationType
-LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN tblSMCurrency Cur ON Cur.intCurrencyID = L.intCurrencyId
+LEFT JOIN tblSMCurrency InsCur ON InsCur.intCurrencyID = L.intInsuranceCurrencyId
+LEFT JOIN tblSMCurrency DemCur ON DemCur.intCurrencyID = L.intDemurrageCurrencyId
+LEFT JOIN tblSMCurrency DesCur ON DesCur.intCurrencyID = L.intDespatchCurrencyId
 LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
 LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
-LEFT JOIN tblSMUserSecurity US ON US.[intEntityId] = L.intDispatcherId
+LEFT JOIN tblSMUserSecurity US ON US.intEntityId = L.intDispatcherId
 LEFT JOIN tblCTPosition P ON L.intPositionId = P.intPositionId
+LEFT JOIN tblICUnitMeasure LUM ON LUM.intUnitMeasureId = L.intLoadingUnitMeasureId
+LEFT JOIN tblICUnitMeasure DUM ON DUM.intUnitMeasureId = L.intDischargeUnitMeasureId
+LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
+LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGLoad LOADSI ON LOADSI.intLoadId = L.intLoadShippingInstructionId
+LEFT JOIN tblLGReasonCode ETAPODRC ON ETAPODRC.intReasonCodeId = L.intETAPODReasonCodeId
+LEFT JOIN tblLGReasonCode ETAPOLRC ON ETAPOLRC.intReasonCodeId = L.intETAPOLReasonCodeId
+LEFT JOIN tblLGReasonCode ETSPOLRC ON ETSPOLRC.intReasonCodeId = L.intETSPOLReasonCodeId
+LEFT JOIN tblLGInsuranceCalculator INC ON INC.intLoadId = L.intLoadId
 OUTER APPLY (SELECT TOP 1 intLeadTime FROM tblSMCity DPort 
 						 WHERE DPort.strCity = L.strDestinationPort AND DPort.ysnPort = 1) DPort
 OUTER APPLY (SELECT TOP 1 strOwner FROM tblLGShippingLineServiceContractDetail SLSCD
