@@ -146,7 +146,6 @@ BEGIN
 		SET  p.intEntityCustomerId            = i.intEntityCustomerId           
 			,p.intCurrencyId                  = i.intCurrencyId                 
 			,p.dtmDatePaid                    = i.dtmDatePaid   
-			,p.dtmAccountingPeriod            = i.dtmAccountingPeriod   
 			,p.intAccountId                   = i.intAccountId                  
 			,p.intBankAccountId               = i.intBankAccountId              
 			,p.intPaymentMethodId             = i.intPaymentMethodId            
@@ -182,6 +181,7 @@ BEGIN
 			,p.intPostedById                  = i.intPostedById                 
 			,p.intConcurrencyId               = i.intConcurrencyId 
 			,p.intCurrentStatus				  = i.intCurrentStatus
+			,p.dtmAccountingPeriod            = i.dtmAccountingPeriod   
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId
