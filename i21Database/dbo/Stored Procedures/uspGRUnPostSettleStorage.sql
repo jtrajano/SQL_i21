@@ -24,6 +24,9 @@ BEGIN TRY
 	DECLARE @DummyGLEntries AS RecapTableType
 	DECLARE @intReturnValue AS INT
 	DECLARE @strOwnedPhysicalStock NVARCHAR(20)	
+	DECLARE @ItemLocationId INT
+	DECLARE @dblUOMQty DECIMAL(24, 10)
+	DECLARE @intInventoryItemStockUOMId INT
 	DECLARE @isParentSettleStorage AS BIT
 	DECLARE @success BIT
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
