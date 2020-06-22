@@ -178,6 +178,63 @@ BEGIN
 
 END 
 
+
+--- Validate Override Expense Account
+DECLARE @OverrideAccountId INT
+DECLARE @OverrideTaxCodeId INT
+SELECT @OverrideAccountId = dbo.fnGetItemGLAccount(ReceiptItem.intItemId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense), 
+	@OverrideTaxCodeId = TaxCode.intTaxCodeId
+FROM dbo.tblICInventoryReceipt Receipt 
+INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ReceiptItem.intItemId
+	AND ItemLocation.intLocationId = Receipt.intLocationId		
+INNER JOIN tblICItem item ON item.intItemId = ReceiptItem.intItemId 
+INNER JOIN dbo.tblICInventoryReceiptItemTax ReceiptTaxes ON ReceiptItem.intInventoryReceiptItemId = ReceiptTaxes.intInventoryReceiptItemId
+INNER JOIN dbo.tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
+LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
+WHERE Receipt.intInventoryReceiptId = @intInventoryReceiptId
+	AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+	AND TaxCode.ysnExpenseAccountOverride = 1
+				
+IF (@OverrideAccountId IS NULL AND @OverrideTaxCodeId IS NOT NULL)
+BEGIN
+	-- Validate the GL Accounts
+DECLARE @strItemNo AS NVARCHAR(50)
+DECLARE @intItemId AS INT 
+DECLARE @strLocationName AS NVARCHAR(50)
+
+-- Check for missing Inventory Account Id
+BEGIN 
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intInventoryId IS NULL 
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intInventoryId IS NULL 
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_OtherChargeExpense;
+		RETURN -1;
+	END 
+END 
+;
+END
+		
+
+
 ---- Get Total Value of Other Charges Taxes
 --BEGIN
 --	DECLARE @OtherChargeTaxes AS NUMERIC(18, 6);
