@@ -139,8 +139,8 @@ BEGIN
 			OPEN c;
 
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
-		END
-		CLOSE c; DEALLOCATE c;
+		--END
+		--CLOSE c; DEALLOCATE c;
 
 		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
 		BEGIN			

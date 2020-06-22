@@ -2650,7 +2650,6 @@ BEGIN TRY
 										where strType = 'Settlement'										
 
 								
-							end
 							--IF @ysnFromTransferStorage = 0
 							
 							EXEC [dbo].[uspAPPostBill] 
