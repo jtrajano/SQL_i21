@@ -155,7 +155,7 @@
 	,GRStorage.strStorageTypeDescription
 	,GRDiscountId.strDiscountId
 	,GRSSR.strScheduleId
-	,GRSSR.strScheduleDescription
+	,strScheduleDescription = ISNULL(GRSSR.strScheduleDescription,'')
 	,ISNULL(GRStorage.ysnDPOwnedType, CAST(0 AS BIT)) AS ysnDPOwnedType
 	,ISNULL(GRStorage.ysnCustomerStorage, CAST(0 AS BIT)) AS ysnCustomerStorage
 
