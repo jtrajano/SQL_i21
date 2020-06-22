@@ -122,6 +122,7 @@ BEGIN
 
 
 		EXEC uspGLAccountOriginSync @intUserId
+		EXEC dbo.uspGLInsertOriginCrossReferenceMapping
 
 		UPDATE account
 		SET account.strOldAccountId = cref.strOldAccountId
