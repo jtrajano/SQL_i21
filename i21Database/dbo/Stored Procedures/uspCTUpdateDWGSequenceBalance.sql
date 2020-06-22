@@ -23,7 +23,9 @@ BEGIN TRY
 		,@ysnFromInvoice bit = convert(bit,0)
 		,@dblCurrentBalanceQuantity numeric (18,6)
 		,@dblCurrentlyApplied numeric (18,6)
-		,@dblBalanceLessOtherShipmentItem numeric (18,6);
+		,@dblBalanceLessOtherShipmentItem numeric (18,6)
+		,@intContractHeaderId int
+		,@ysnLoad bit = convert(bit,0);
 
 	declare @ContractSequenceBalanceSummary table (
 		intId int 
@@ -99,7 +101,8 @@ BEGIN TRY
 		/*Return the Shipment quantity*/
 		--Get all quantity applied to other Shipment Item
 		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
-		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied) from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied), @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		select @ysnLoad = ysnLoad from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
 
 		if (@dblBalanceLessOtherShipmentItem < @dblOldQuantity)
 		begin
@@ -107,6 +110,10 @@ BEGIN TRY
 		end
 
 		SELECT @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblOldQuantity) * -1);
+		if (@ysnLoad = convert(bit,1))
+		begin
+			set @dblConvertedQty = -1;
+		end
 
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,
@@ -122,6 +129,10 @@ BEGIN TRY
 
 		/*Apply the DWG quantity (or the remianing sequence balance) to sequence balance*/
 		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblCalculatedQty);
+		if (@ysnLoad = convert(bit,1))
+		begin
+			set @dblConvertedQty = 1;
+		end
 
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,
