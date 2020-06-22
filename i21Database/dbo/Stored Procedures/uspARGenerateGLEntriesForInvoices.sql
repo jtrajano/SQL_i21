@@ -1008,7 +1008,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId]), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
@@ -1109,7 +1109,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId]), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1208,7 +1208,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId]), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1306,7 +1306,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId]), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblDebitUnit]                 = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
