@@ -345,6 +345,11 @@ BEGIN TRY
 
 					SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)
 
+					IF EXISTS(SELECT TOP 1 1 FROM @tblReceipt HAVING MIN(intReceiptUniqueId) = @intReceiptUniqueId AND @dblRemainingQty = 0)
+					BEGIN
+						SET @dblRemainingQty = @dblPriceFxdQty - @dblTotalIVForPFQty
+					END
+
 					SELECT	@strVendorOrderNumber = strTicketNumber, @intTicketId = intTicketId 
 						FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
 
