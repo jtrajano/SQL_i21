@@ -8723,6 +8723,7 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
+	<Build Include="dbo\Views\vyuSTLotteryCountSheetReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
