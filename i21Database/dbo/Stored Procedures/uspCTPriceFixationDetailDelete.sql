@@ -90,73 +90,88 @@ BEGIN TRY
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(BL.ysnPosted,0) = 0
 
-
-	SELECT @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill	
+	SELECT @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill
 	WHILE ISNULL(@DetailId,0) > 0
 	BEGIN
 		
 		SELECT @Id = Id FROM #ItemBill WHERE ISNULL(DetailId, BillDetailId) = @DetailId
-		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillDetailId = @DetailId
+		SELECT @Count = COUNT(1) FROM tblCTPriceFixationDetailAPAR WHERE intBillDetailId = @DetailId
+
+		DECLARE @ysnDeleteVoucher BIT = 0
+		IF ISNULL(@intPriceFixationDetailId,0) <> 0
+		BEGIN
+			DECLARE @totalAPAR INT,
+					@totalBill INT
+
+			SELECT @totalAPAR = COUNT(1) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
+			SELECT @totalBill = COUNT(1) FROM #ItemBill WHERE Id = @Id
+
+			IF @totalAPAR = @totalBill
+				SET @ysnDeleteVoucher = 1
+			ELSE
+				SET @ysnDeleteVoucher = 0
+		END
 		
-		IF @Count > 0--@intPriceFixationTicketId IS NOT NULL AND @Count > 1
+		IF @Count > 0 AND ISNULL(@intPriceFixationId,0) = 0 AND @ysnDeleteVoucher = 0--@Count > 0 AND @intPriceFixationTicketId IS NOT NULL AND @Count > 1
 		BEGIN	
-		
-			-- UPDATE ITEM BILL QTY
-			SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived
-			FROM tblAPBillDetail 
-			WHERE intBillDetailId = @DetailId
+			-- -- UPDATE ITEM BILL QTY
+			-- SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived
+			-- FROM tblAPBillDetail 
+			-- WHERE intBillDetailId = @DetailId
 
-			DECLARE @receiptDetails AS InventoryUpdateBillQty
-			DELETE FROM @receiptDetails
-			INSERT INTO @receiptDetails
-			(
-				[intInventoryReceiptItemId],
-				[intInventoryReceiptChargeId],
-				[intInventoryShipmentChargeId],
-				[intSourceTransactionNoId],
-				[strSourceTransactionNo],
-				[intItemId],
-				[intToBillUOMId],
-				[dblToBillQty]
-			)
-			SELECT * FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
+			-- DECLARE @receiptDetails AS InventoryUpdateBillQty
+			-- DELETE FROM @receiptDetails
+			-- INSERT INTO @receiptDetails
+			-- (
+			-- 	[intInventoryReceiptItemId],
+			-- 	[intInventoryReceiptChargeId],
+			-- 	[intInventoryShipmentChargeId],
+			-- 	[intSourceTransactionNoId],
+			-- 	[strSourceTransactionNo],
+			-- 	[intItemId],
+			-- 	[intToBillUOMId],
+			-- 	[dblToBillQty]
+			-- )
+			-- SELECT * FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
 
-			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
-			-----------------------------------------
-			-- CT-4094	
+			-- EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
+			-- -----------------------------------------
+			-- -- CT-4094	
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
-			DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
+			--DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 			
 			INSERT INTO @voucherIds			
 			SELECT @DetailId
 
-			EXEC uspAPUpdateVoucherTotal @voucherIds
+			-- EXEC uspAPUpdateVoucherTotal @voucherIds
 
-			--Audit Log
-			DECLARE @details NVARCHAR(max) = '{"change": "tblAPBillDetails", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@DetailId as varchar(15))+'", "keyValue": '+CAST(@DetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
+			-- --Audit Log
+			-- DECLARE @details NVARCHAR(max) = '{"change": "tblAPBillDetails", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@DetailId as varchar(15))+'", "keyValue": '+CAST(@DetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
 
-			EXEC uspSMAuditLog
-			@screenName = 'AccountsPayable.view.Voucher',
-			@entityId = @intUserId,
-			@actionType = 'Updated',
-			@actionIcon = 'small-tree-modified',
-			@keyValue = @Id,
-			@details = @details
+			-- EXEC uspSMAuditLog
+			-- @screenName = 'AccountsPayable.view.Voucher',
+			-- @entityId = @intUserId,
+			-- @actionType = 'Updated',
+			-- @actionIcon = 'small-tree-modified',
+			-- @keyValue = @Id,
+			-- @details = @details
 
-			-- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
-			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
-			BEGIN
+			EXEC uspAPDeleteVoucherDetail @voucherIds, @intUserId
+
+			---- DELETE VOUCHER IF ALL TICKETS WHERE DELETED
+			--IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
+			--BEGIN
 			
-				EXEC uspAPDeleteVoucher @Id,@intUserId,4
+			--	EXEC uspAPDeleteVoucher @Id,@intUserId,4
 		
-				--Audit Log
-				EXEC uspSMAuditLog
-				@screenName = 'AccountsPayable.view.Voucher',
-				@entityId = @intUserId,
-				@actionType = 'Deleted',
-				@actionIcon = 'small-tree-deleted',
-				@keyValue = @Id
-			END	
+			--	--Audit Log
+			--	EXEC uspSMAuditLog
+			--	@screenName = 'AccountsPayable.view.Voucher',
+			--	@entityId = @intUserId,
+			--	@actionType = 'Deleted',
+			--	@actionIcon = 'small-tree-deleted',
+			--	@keyValue = @Id
+			--END	
 		END
 		ELSE
 		BEGIN
@@ -198,6 +213,8 @@ BEGIN TRY
 			----------------------------------------
 			EXEC uspAPDeleteVoucher @Id,@intUserId,4
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
+			DELETE FROM #ItemBill WHERE Id = @Id
+
 		END
 		SELECT @DetailId = MIN(ISNULL(DetailId, BillDetailId)) FROM #ItemBill WHERE ISNULL(DetailId, BillDetailId) > @DetailId
 	END
