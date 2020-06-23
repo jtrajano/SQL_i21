@@ -54,6 +54,7 @@ BEGIN
 				, intContractHeaderId = ch.intContractHeaderId
 				, strContractNumber = ch.strContractNumber
 				, strFutureMonth = fmnt.strFutureMonth
+				, s.intInventoryTransactionId
 			INTO #invQty
 			FROM vyuRKGetInventoryValuation s
 			JOIN tblICItem i ON i.intItemId = s.intItemId
@@ -320,18 +321,28 @@ BEGIN
 
 			UNION ALL
 			SELECT 
-				CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
+				dtmDate
 				,dblTotal
 				,strTransactionType
 				,strTransactionId 
 				,intTransactionId
-				,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN STFr.strStorageTypeCode ELSE STTo.strStorageTypeCode END
-			FROM #invQty Inv
-			inner join vyuGRTransferStorageSearchView SS ON Inv.intTransactionId = SS.intTransferStorageId
-			left join tblGRStorageType STFr ON SS.intFromStorageTypeId = STFr.intStorageScheduleTypeId
-			left join tblGRStorageType STTo ON SS.intToStorageTypeId = STTo.intStorageScheduleTypeId
-			WHERE Inv.strTransactionType = 'Transfer Storage'
-			
+				,strStorageTypeCode
+			FROM (
+				SELECT DISTINCT
+					dtmDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmDate, 110), 110)
+					,dblTotal
+					,strTransactionType
+					,strTransactionId 
+					,intTransactionId
+					,strStorageTypeCode = CASE WHEN dblTotal < 0 THEN STFr.strStorageTypeCode ELSE STTo.strStorageTypeCode END
+					,Inv.intInventoryTransactionId
+				FROM #invQty Inv
+				inner join vyuGRTransferStorageSearchView SS ON Inv.intTransactionId = SS.intTransferStorageId
+				left join tblGRStorageType STFr ON SS.intFromStorageTypeId = STFr.intStorageScheduleTypeId
+				left join tblGRStorageType STTo ON SS.intToStorageTypeId = STTo.intStorageScheduleTypeId
+				WHERE Inv.strTransactionType = 'Transfer Storage'
+			) t
+
 
 			INSERT INTO @tblResult (
 				dtmDate
