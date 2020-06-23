@@ -584,7 +584,7 @@ BEGIN
 					,I.intInvoiceId
 					,strDistribution = TV.strDistributionOption
 					,Inv.intTransactionDetailId
-					,Inv.strTransactionType
+					,strTransactionType = 'Invoice'
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
 				inner join tblICInventoryShipmentItem ISI ON ISI.intInventoryShipmentId = S.intInventoryShipmentId AND ISI.intInventoryShipmentItemId = Inv.intTransactionDetailId
