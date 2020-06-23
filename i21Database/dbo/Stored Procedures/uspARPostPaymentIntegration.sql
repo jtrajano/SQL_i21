@@ -49,7 +49,7 @@ BEGIN
 
 	UPDATE A
 	SET A.intCurrentStatus = 5
-       ,A.dtmAccountingPeriod = NULL
+       ,A.intPeriodId = NULL
 	FROM tblARPayment A
 	INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
 
@@ -172,9 +172,13 @@ BEGIN
   	WHERE P.[ysnPost] = @OneBit
 
     UPDATE A
-    SET A.dtmAccountingPeriod = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmDatePaid) + 1, 0))
+    SET A.intPeriodId = ACCPERIOD.intGLFiscalYearPeriodId
     FROM tblARPayment A
     INNER JOIN #ARPostPaymentHeader P ON A.[intPaymentId] = P.[intTransactionId]
+    Outer Apply (
+		 SELECT P.intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod P
+		 WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, A.dtmDatePaid) + 1, 0))
+	 ) ACCPERIOD
   	WHERE P.[ysnPost] = @OneBit
 
 
