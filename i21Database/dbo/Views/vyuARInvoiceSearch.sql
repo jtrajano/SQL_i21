@@ -80,7 +80,7 @@ SELECT
 	,blbSignature					= I.blbSignature
 	,intTicketId					= SCALETICKETID.intTicketId
 	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
-	,dtmAccountingPeriod            = AccPeriod.dtmAccountingPeriod
+	,strAccountingPeriod            = AccPeriod.strAccountingPeriod
 	,intDaysOld						= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
 	,intDaysToPay					= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
@@ -262,7 +262,7 @@ OUTER APPLY (
 		) C (strPaymentMethod)
 ) PAYMETHODS
 OUTER APPLY(
-	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy')  from tblGLFiscalYearPeriod P
 	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
 ) AccPeriod
 OUTER APPLY (
