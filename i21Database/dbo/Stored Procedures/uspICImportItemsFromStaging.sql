@@ -254,6 +254,7 @@ FROM tblICImportStagingItem s
 	LEFT OUTER JOIN tblICTag ing ON ing.strTagNumber = s.strIngredientTag AND ing.strType = 'Ingredient Tag'
 	LEFT OUTER JOIN tblICRinFuelCategory rin ON rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(s.strFuelCategory)))
 WHERE s.strImportIdentifier = @strIdentifier
+	AND LTRIM(RTRIM(LOWER(s.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType)))
 
 ;MERGE INTO tblICItem AS target
 USING
@@ -525,12 +526,13 @@ WHEN NOT MATCHED THEN
 	)
 	OUTPUT deleted.strItemNo, $action, inserted.strItemNo INTO #output;
 ;
-
 UPDATE l
 SET l.intRowsImported = (SELECT COUNT(*) FROM #output WHERE strAction = 'INSERT')
 	, l.intRowsUpdated = (SELECT COUNT(*) FROM #output WHERE strAction = 'UPDATE')
 FROM tblICImportLog l
 WHERE l.strUniqueId = @strIdentifier
+
+/* LOGS */
 
 DECLARE @TotalImported INT
 DECLARE @LogId INT
@@ -539,10 +541,30 @@ SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + IS
 FROM tblICImportLog 
 WHERE strUniqueId = @strIdentifier
 
+-- Validate Incompatible inventory types of items vs. categories
+INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+SELECT @LogId, 1, 'Category', 'Import Failed.', ISNULL(c.strCategoryCode, ''), 'Invalid category type "' + ISNULL(c.strInventoryType, '') + '" for item "' + ISNULL(s.strItemNo, '') + '"', 'Failed', 'Error', 1
+FROM tblICImportStagingItem s
+	LEFT OUTER JOIN tblICCategory c ON LOWER(c.strCategoryCode) = LTRIM(RTRIM(LOWER(s.strCategory)))
+WHERE s.strImportIdentifier = @strIdentifier
+	AND LTRIM(RTRIM(LOWER(s.strType))) <> LTRIM(RTRIM(LOWER(c.strInventoryType)))
+
+UPDATE l
+SET l.intTotalErrors = x.Errors
+FROM tblICImportLog l
+INNER JOIN (
+	SELECT l.intImportLogId, COUNT(d.intImportLogDetailId) Errors
+	FROM tblICImportLog l
+		INNER JOIN tblICImportLogDetail d ON d.intImportLogId = l.intImportLogId
+	WHERE l.strUniqueId = @strIdentifier
+		AND d.strType = 'Error'
+	GROUP BY l.intImportLogId 
+) x ON l.intImportLogId = x.intImportLogId
+
 IF @TotalImported = 0 AND @LogId IS NOT NULL
 BEGIN
 	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Success', 'Warning', 1
+	SELECT @LogId, 0, 'Import finished.', ' ', 'Nothing was imported', 'Finished', 'Warning', 1
 END
 
 DROP TABLE #tmp
