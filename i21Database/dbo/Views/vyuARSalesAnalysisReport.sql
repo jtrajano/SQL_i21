@@ -112,7 +112,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	 , dblRebateAmount			= SAR.dblRebateAmount
 	 , dblBuybackAmount			= SAR.dblBuybackAmount
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
-     , dtmAccountingPeriod	    = SAR.dtmAccountingPeriod
+     , strAccountingPeriod	    = SAR.strAccountingPeriod
 FROM
 (
 	--INVOICE/NORMAL ITEMS
@@ -166,7 +166,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod	    = AccPeriod.dtmAccountingPeriod
+		, strAccountingPeriod	    = AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -248,7 +248,7 @@ FROM
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
 	OUTER APPLY(
-	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	    SELECT  strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
 		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
 	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
@@ -308,7 +308,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod	    = AccPeriod.dtmAccountingPeriod
+		, strAccountingPeriod	    = AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -383,7 +383,7 @@ FROM
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
 	OUTER APPLY(
-	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
 		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
 	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
@@ -438,7 +438,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.000000
-		, dtmAccountingPeriod		    = NULL
+		, strAccountingPeriod		    = NULL
 	FROM tblSOSalesOrder SO 
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -575,7 +575,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
+		, strAccountingPeriod		= AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -650,7 +650,7 @@ FROM
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
 	OUTER APPLY(
-	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
 		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
 	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
@@ -705,7 +705,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.
-		, dtmAccountingPeriod		    = NULL
+		, strAccountingPeriod		    = NULL
 	FROM tblSOSalesOrder SO
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -842,7 +842,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
+		, strAccountingPeriod		= AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -916,7 +916,7 @@ FROM
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
 	OUTER APPLY(
-	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
 		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
 	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
@@ -971,7 +971,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.000000
-		, dtmAccountingPeriod			= NULL
+		, strAccountingPeriod			= NULL
 	FROM tblSOSalesOrder SO 
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -1108,7 +1108,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
-		, dtmAccountingPeriod		= AccPeriod.dtmAccountingPeriod
+		, strAccountingPeriod		= AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -1182,7 +1182,7 @@ FROM
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
 	OUTER APPLY(
-	    SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
 		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
 	) AccPeriod
 	WHERE ARI.ysnPosted = 1 

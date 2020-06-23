@@ -3,7 +3,8 @@
     [intEntityCustomerId]   INT             NOT NULL,
     [intCurrencyId]			INT             NOT NULL,
     [dtmDatePaid]			DATETIME        NULL,
-	[dtmAccountingPeriod]	DATETIME		NULL,
+    [dtmAccountingPeriod]   DATETIME        NULL,
+	[intPeriodId]			INT				NULL,
     [intAccountId]			INT             NULL,
 	[intBankAccountId]		INT             NULL,
     [intPaymentMethodId]	INT             NOT NULL,
@@ -140,7 +141,7 @@ BEGIN
 
 	SET @ysnPosted = ISNULL(@ysnPosted,0)
 	SET @ysnPostedNew = ISNULL(@ysnPostedNew,0)
-	IF((@ysnPosted = 1 and @ysnPostedNew = 0 and @currentStatus = 5) OR (@ysnPosted = 0 and @ysnPostedNew = 0) OR (@ysnPosted = 0 and @ysnPostedNew = 1) OR UPDATE(intCurrentStatus) OR UPDATE(dtmAccountingPeriod) OR @currentStatus = 5)
+	IF((@ysnPosted = 1 and @ysnPostedNew = 0 and @currentStatus = 5) OR (@ysnPosted = 0 and @ysnPostedNew = 0) OR (@ysnPosted = 0 and @ysnPostedNew = 1) OR UPDATE(intCurrentStatus) OR UPDATE(intPeriodId) OR @currentStatus = 5)
 	BEGIN
 		UPDATE p
 		SET  p.intEntityCustomerId            = i.intEntityCustomerId           
@@ -181,7 +182,7 @@ BEGIN
 			,p.intPostedById                  = i.intPostedById                 
 			,p.intConcurrencyId               = i.intConcurrencyId 
 			,p.intCurrentStatus				  = i.intCurrentStatus
-			,p.dtmAccountingPeriod            = i.dtmAccountingPeriod   
+			,p.intPeriodId                    = i.intPeriodId   
 		FROM tblARPayment p
 		INNER JOIN inserted i
 			ON i.intPaymentId = p.intPaymentId
