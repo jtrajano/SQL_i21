@@ -533,7 +533,7 @@ SELECT DISTINCT
 		,[dblOpenReceive]							=	A.dblOpenReceive
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
 		,[dblQtyToBillUnitQty]						=	1
-		,[intQtyToBillUOMId]						=	IRT.intUnitMeasureId
+		,[intQtyToBillUOMId]						=	A.intItemUOMId
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
@@ -633,7 +633,6 @@ FROM [vyuICChargesForBilling] A
 	INNER JOIN  (tblAPVendor D1 INNER JOIN tblEMEntity D2 ON D1.[intEntityId] = D2.intEntityId) ON A.[intEntityVendorId] = D1.[intEntityId]
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = A.intForexRateTypeId
 	LEFT JOIN dbo.tblICInventoryReceipt IR ON IR.intInventoryReceiptId = A.intInventoryReceiptId
-	LEFT JOIN dbo.tblICInventoryReceiptItem IRT ON IRT.intInventoryReceiptId = IR.intInventoryReceiptId
 	LEFT JOIN tblICItemLocation ItemLoc ON ItemLoc.intItemId = A.intItemId 
 		 AND ItemLoc.intLocationId = A.intLocationId
 	LEFT JOIN tblICItem item ON item.intItemId = A.intItemId
