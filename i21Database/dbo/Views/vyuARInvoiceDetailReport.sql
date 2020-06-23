@@ -30,7 +30,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblTotal					= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblTotal, 0) ELSE ISNULL(ID.dblTotal, 0) * -1 END
 	 , ysnPosted				= ISNULL(I.ysnPosted, 0)
 	 , ysnImpactInventory		= ISNULL(I.ysnImpactInventory, 0)
-	 , dtmAccountingPeriod      = AccPeriod.dtmAccountingPeriod
+	 , strAccountingPeriod      = AccPeriod.strAccountingPeriod
 	 , intDaysOld				= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
 	 , intDaysToPay				= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 								   	   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
@@ -89,7 +89,7 @@ LEFT JOIN (
 ) CT ON ID.intContractHeaderId = CT.intContractHeaderId
 	AND ID.intContractDetailId = CT.intContractDetailId
 OUTER APPLY (
-	SELECT dtmAccountingPeriod = dtmEndDate 
+	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy')
 	FROM tblGLFiscalYearPeriod P
 	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
 ) AccPeriod

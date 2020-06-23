@@ -37,7 +37,7 @@ FROM
 	 , intCompanyLocationId	= A.intCompanyLocationId
 	 , strTransactionType	= A.strTransactionType
 	 , intAccountId			= A.intAccountId
-	 , dtmAccountingPeriod  = A.dtmAccountingPeriod
+	 , strAccountingPeriod  = A.strAccountingPeriod
 FROM
 
 (SELECT dtmDate				= I.dtmPostDate
@@ -58,10 +58,10 @@ FROM
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) <= 90 THEN '61 - 90 Days'    
 						  WHEN DATEDIFF(DAYOFYEAR, I.dtmDueDate, GETDATE()) > 90 THEN 'Over 90' END
 				END
-	 ,dtmAccountingPeriod   = AccPeriod.dtmAccountingPeriod
+	 ,strAccountingPeriod   = AccPeriod.strAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 OUTER APPLY(
-	SELECT dtmAccountingPeriod = dtmEndDate from tblGLFiscalYearPeriod P
+	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
 	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
 ) AccPeriod
 WHERE ysnPosted = 1
@@ -342,7 +342,7 @@ AND A.intInvoiceId		 = B.intInvoiceId
 
 WHERE B.dblTotalDue - B.dblAvailableCredit - B.dblPrepayments <> 0
 
-GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId, A.strTransactionType, A.intAccountId,A.dtmAccountingPeriod) AS AGING
+GROUP BY A.strInvoiceNumber, A.intInvoiceId, A.strBOLNumber, A.intEntityCustomerId, A.dtmDate, A.dtmDueDate, A.intCompanyLocationId, A.strTransactionType, A.intAccountId,A.strAccountingPeriod) AS AGING
 INNER JOIN (
 	SELECT C.intEntityId
 		 , E.strName
