@@ -1614,7 +1614,7 @@ BEGIN TRY
 					IF @dblRemainingConsumptionQty IS NULL
 						SELECT @dblRemainingConsumptionQty = 0
 
-					IF @dblRemainingConsumptionQty = 0
+					IF (@dblRemainingConsumptionQty = 0 or @dblEndInventory>@dblRemainingConsumptionQty)
 						AND @intConsumptionMonth = @intMonthId + 1
 					BEGIN
 						IF NOT EXISTS (
