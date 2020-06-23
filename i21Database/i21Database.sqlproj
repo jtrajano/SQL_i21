@@ -8179,6 +8179,7 @@
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1u_PostHistoryGroupings.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
