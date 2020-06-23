@@ -97,7 +97,7 @@ SELECT
 																	) + ISNULL(chk.dblATMReplenished, 0)
 																 )
 
-      --,chk.[dblChangeFundBegBalance]
+    ,chk.[dblChangeFundBegBalance]
 	  --,dblChangeFundBegBalance = (
 			--						ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
 			--						FROM tblSTCheckoutHeader _chk
@@ -106,14 +106,14 @@ SELECT
 			--						ORDER BY _chk.intCheckoutId DESC), 0)
 			--					)
 
-	,dblChangeFundBegBalance = (
-									ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
-									FROM tblSTCheckoutHeader _chk
-									WHERE _chk.intStoreId = vst.intStoreId
-										AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
-										OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
-									ORDER BY _chk.dtmCheckoutDate DESC), 0)
-								)
+	-- ,dblChangeFundBegBalance = (
+	-- 								ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
+	-- 								FROM tblSTCheckoutHeader _chk
+	-- 								WHERE _chk.intStoreId = vst.intStoreId
+	-- 									AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+	-- 									OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+	-- 								ORDER BY _chk.dtmCheckoutDate DESC), 0)
+	-- 							)
 
       --,chk.[dblChangeFundEndBalance]
       ,dblChangeFundEndBalance = (SELECT SUM(ISNULL(cf.dblValue, 0))
