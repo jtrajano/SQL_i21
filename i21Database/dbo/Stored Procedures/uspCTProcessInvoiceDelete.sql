@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTProcessInvoiceDelete]
 	@dblInvoiceDetailQuantity numeric(18,6)
 	,@intPriceFixationDetailId int
+	,@UserId int = null
 AS
 BEGIN
 

@@ -8252,6 +8252,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

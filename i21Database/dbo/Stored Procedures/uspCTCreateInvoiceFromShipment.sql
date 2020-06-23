@@ -420,6 +420,10 @@ EXEC    [dbo].[uspARProcessInvoicesByBatch]
              
 SELECT @NewInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
 
+exec uspCTUpdateSequenceStatus
+     @intContractDetailId = @intContractDetailId
+     ,@intUserId = @UserId
+
 END	TRY
 
 BEGIN CATCH
