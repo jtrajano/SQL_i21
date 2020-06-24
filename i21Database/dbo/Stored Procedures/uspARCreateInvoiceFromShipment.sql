@@ -873,19 +873,27 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 
 		WHILE EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 			BEGIN
-				DECLARE @dblQtyShipped			NUMERIC(18, 6) = 0
-					  , @dblOriginalQtyShipped	NUMERIC(18, 6) = 0			  
-					  , @intInvoiceEntriesId	INT = NULL
-					  , @intPriceFixationId		INT = NULL
-					  , @ysnLoad				BIT = 0
+				DECLARE @dblQtyShipped					NUMERIC(18, 6) = 0
+					  , @dblOriginalQtyShipped			NUMERIC(18, 6) = 0			  
+					  , @intInvoiceEntriesId			INT = NULL
+					  , @intPriceFixationId				INT = NULL
+					  , @intContractDetailToDeleteId    INT = NULL
+					  , @ysnLoad						BIT = 0
 
-				SELECT TOP 1 @intInvoiceEntriesId		= intInvoiceEntriesId 
-						   , @dblQtyShipped				= dblQtyShipped
-						   , @dblOriginalQtyShipped		= dblQtyShipped				   
-						   , @intPriceFixationId		= intPriceFixationId
-						   , @ysnLoad					= ysnLoad
+				SELECT TOP 1 @intInvoiceEntriesId			= intInvoiceEntriesId 
+						   , @dblQtyShipped					= dblQtyShipped
+						   , @dblOriginalQtyShipped			= dblQtyShipped				   
+						   , @intPriceFixationId			= intPriceFixationId
+						   , @intContractDetailToDeleteId	= intContractDetailId
+						   , @ysnLoad						= ysnLoad
 				FROM #CONTRACTSPRICING 
 				ORDER BY intInvoiceEntriesId
+
+				IF NOT EXISTS(SELECT TOP 1 NULL FROM #FIXATION)
+                    BEGIN
+                        DELETE FROM @EntriesForInvoice 
+                        WHERE intContractDetailId = @intContractDetailToDeleteId
+                    END
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
 					BEGIN
