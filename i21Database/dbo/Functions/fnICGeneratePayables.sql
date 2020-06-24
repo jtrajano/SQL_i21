@@ -533,7 +533,7 @@ SELECT DISTINCT
 		,[dblOpenReceive]							=	A.dblOpenReceive
 		,[dblQuantityToBill]						=	A.dblQuantityToBill
 		,[dblQtyToBillUnitQty]						=	1
-		,[intQtyToBillUOMId]						=	NULL
+		,[intQtyToBillUOMId]						=	A.intCostUnitMeasureId
 		,[dblQuantityBilled]						=	A.dblQuantityBilled
 		,[intLineNo]								=	A.intLineNo
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
@@ -567,7 +567,7 @@ SELECT DISTINCT
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
 		,[intContractDetailId]						=	A.intContractDetailId
-		,[intContractSequence]						=	NULL
+		,[intContractSequence]						=	A.intContractSeq
 		,[intContractCostId]						= 	NULL
 		,[intScaleTicketId]							=	A.intScaleTicketId
 		,[strScaleTicketNumber]						=	A.strScaleTicketNumber
