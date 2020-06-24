@@ -6,6 +6,14 @@ BEGIN
 	SELECT @dtmDate = CONVERT(VARCHAR(10), GETDATE() - @intNoOfDay, 126) + ' 00:00:00'
 
 	DELETE
+	FROM tblIPIDOCXMLError
+	WHERE dtmCreatedDate < @dtmDate
+
+	DELETE
+	FROM tblIPIDOCXMLArchive
+	WHERE dtmCreatedDate < @dtmDate
+	
+	DELETE
 	FROM tblCTContractPreStage
 	WHERE dtmFeedDate < @dtmDate
 		AND strFeedStatus = 'Processed'
