@@ -4,6 +4,7 @@ CREATE PROCEDURE [dbo].[uspGRCreateGLEntriesForTransferStorage]
 	,@dblCost DECIMAL(18,6)
 	,@ysnPost AS BIT
 	,@intTransactionTypeId INT = 56
+	,@intTransferStorageReferenceId INT = NULL
 AS
 BEGIN TRY
 BEGIN
@@ -67,6 +68,11 @@ BEGIN
 			AND intCommodityId IS NULL
 	END
 
+	select  @intInventoryItemUOMId = intItemUOMId 
+		from tblICInventoryTransaction 
+			where intItemId = @InventoryItemId 
+				and strBatchId = @strBatchId
+
 	--Inventory Item
 	SELECT 
 		 @LocationId			= CS.intCompanyLocationId
@@ -76,18 +82,21 @@ BEGIN
 		,@intCurrencyId			= CS.intCurrencyId
 		,@InventoryItemId		= CS.intItemId  
 		,@dblUnits				= SR.dblUnitQty--dbo.fnCalculateQtyBetweenUOM(CS.intItemUOMId, isnull(@intInventoryItemUOMId, CS.intItemUOMId) , SST.dblUnits) 
-		,@dblGrossUnits			= CS.dblGrossQuantity
+		,@dblGrossUnits			= ( 
+									dbo.fnMultiply(
+											case when @intInventoryItemUOMId is not null then dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), CS.dblGrossQuantity) else  CS.dblGrossQuantity end
+										, dbo.fnDivide(isnull(SR.dblSplitPercent, 100),	100)
+										)
+									)
 		,@intCSInventoryItemUOMId = CS.intItemUOMId
 	FROM tblGRTransferStorageReference SR
 	JOIN tblGRCustomerStorage CS 
 		ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
 	WHERE SR.intTransferStorageId = @intTransferStorageId
+		 AND SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 	
-
-	select  @intInventoryItemUOMId = intItemUOMId 
-		from tblICInventoryTransaction 
-			where intItemId = @InventoryItemId 
-				and strBatchId = @strBatchId
+	
+	
 			
 	
 	if @intInventoryItemUOMId is not null
@@ -219,7 +228,9 @@ BEGIN
 	ON DCO.intDiscountCalculationOptionId = DSC.intDiscountCalculationOptionId
 	JOIN tblICItem DItem 
 	ON DItem.intItemId = DSC.intItemId
-	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId
+	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 
+		and SR.intTransferStorageId = @intTransferStorageId
+		AND SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 
 
 	UNION
@@ -369,7 +380,8 @@ BEGIN
 	LEFT JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = CS.intItemId 
 			AND ItemLocation.intLocationId = CS.intCompanyLocationId 
-	WHERE SR.intTransferStorageId = @intTransferStorageId
+	WHERE SR.intTransferStorageId = @intTransferStorageId		
+		 AND SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 	UNION
 	--Discounts
 	SELECT DISTINCT 
@@ -396,8 +408,8 @@ BEGIN
 		LEFT JOIN tblICItemLocation ItemLocation 
 		ON ItemLocation.intItemId = DItem.intItemId
 			AND ItemLocation.intLocationId = @LocationId
-	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId
-
+	WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0 and SR.intTransferStorageId = @intTransferStorageId		
+		 AND SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 	UNION
 	--Storage Charge
 	SELECT  

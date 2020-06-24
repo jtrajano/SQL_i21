@@ -277,7 +277,7 @@ BEGIN
 			ON Y.intCustomerStorageId = X.intCustomerStorageId
 
 		/* REVERSE TRANSACTION POSTED TO Inventory */
-
+				DECLARE @GLEntries AS RecapTableType;
 				DECLARE @ItemsToPost AS ItemCostingTableType
 				INSERT INTO @ItemsToPost 
 				(
@@ -343,6 +343,10 @@ BEGIN
 				DECLARE @cursorId INT
 				DECLARE @intTransactionDetailId INT
 
+				
+				DECLARE @strBatchId AS NVARCHAR(40);
+				EXEC uspSMGetStartingNumber 3, @strBatchId OUT
+
 				DECLARE _CURSOR CURSOR
 				FOR
 				SELECT intId, intTransactionDetailId FROM @ItemsToPost
@@ -351,10 +355,9 @@ BEGIN
 				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
-						DECLARE @GLEntries AS RecapTableType;
+						
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
-						DECLARE @strBatchId AS NVARCHAR(40);
 
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -381,7 +384,6 @@ BEGIN
 						, dblCost DECIMAL(32,20)
 						)
 						
-						EXEC uspSMGetStartingNumber 3, @strBatchId OUT
 
 						DECLARE @intItemId INT
 							,@intLocationId INT
@@ -405,7 +407,7 @@ BEGIN
 						WHERE intId = @cursorId					
 						
 						DELETE FROM @Entry
-						DELETE FROM @GLEntries
+						--DELETE FROM @GLEntries
 						INSERT INTO @Entry 
 						(
 							intItemId
@@ -466,59 +468,21 @@ BEGIN
 								,[dblForeignRate]
 								,[strRateType]
 							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,0,1,@intEntityId
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,0,1,@intEntityId,@intTransferStorageReferenceId = @intTransactionDetailId
 
-							IF(select dblQty from @Entry) < 0
-							BEGIN
-								UPDATE @GLEntries 
-								SET dblDebit		= dblCredit
-									,dblDebitUnit	= dblCreditUnit
-									,dblCredit		= dblDebit
-										,dblCreditUnit  = dblDebitUnit
-							END
-
-							INSERT INTO @GLEntries 
-							(
-								 [dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
-								,[intCurrencyId]
-								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
-								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-							)
-							EXEC dbo.uspICUnpostCosting @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0	
-							 							
-							EXEC dbo.uspICUnpostStorage @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0
-							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
-							BEGIN 
-									EXEC dbo.uspGLBookEntries @GLEntries, 1 
-							END
+							
+							--IF(select dblQty from @Entry) < 0
+							--BEGIN
+							--	UPDATE @GLEntries 
+							--	SET dblDebit		= dblCredit
+							--		,dblDebitUnit	= dblCreditUnit
+							--		,dblCredit		= dblDebit
+							--			,dblCreditUnit  = dblDebitUnit
+							--END
+							----debug point
+							--select * from @Entry
+							----debug point
+							
 							
 							/*UNPOST STORAGE*/
 
@@ -530,6 +494,65 @@ BEGIN
 				DEALLOCATE _CURSOR;
 
 		/* END REVERSAL */
+
+		UPDATE @GLEntries 
+			SET dblDebit		= dblCredit
+				,dblDebitUnit	= dblCreditUnit
+				,dblCredit		= dblDebit
+					,dblCreditUnit  = dblDebitUnit
+
+		INSERT INTO @GLEntries 
+		(
+				[dtmDate] 
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]	
+			,[dblDebitReport]	
+			,[dblCreditForeign]	
+			,[dblCreditReport]	
+			,[dblReportingRate]	
+			,[dblForeignRate]
+			,[strRateType]
+		)
+		EXEC dbo.uspICUnpostCosting @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0	
+							 							
+		EXEC dbo.uspICUnpostStorage @intTransferStorageId,@strTransferStorageId,@strBatchId,@intUserId,0
+		--DEBUG POINT
+		SELECT * FROM @GLEntries
+		--DEBUG POINT
+		IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+		BEGIN 
+				EXEC dbo.uspGLBookEntries @GLEntries, 1 
+		END
+
+							
+
+
+
+
+
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
