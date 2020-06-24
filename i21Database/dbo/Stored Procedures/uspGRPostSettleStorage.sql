@@ -2852,6 +2852,20 @@ BEGIN TRY
 		--
 	end
 
+		-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
+		-- Posting of voucher
+		update a
+			set dblPaidAmount = dblPaidAmountRaw
+				from tblGRStorageHistory a
+					join @voucherPayable b 
+						on a.intContractHeaderId = b.intContractHeaderId
+						and a.intCustomerStorageId = b.intCustomerStorageId
+			where strType = 'Settlement'
+				and (dblPaidAmountRaw is not null 
+						and round(dblPaidAmountRaw, 2) = dblPaidAmount)
+		--
+	end
+
 	IF(@success = 0)
 	BEGIN
 		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
