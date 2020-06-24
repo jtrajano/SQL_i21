@@ -269,6 +269,8 @@ BEGIN
 		WHEN @msgId = 80253 THEN '%s charges is not linked to any items. Please check if Charges Link in %s were properly assigned.'
 		WHEN @msgId = 80254 THEN 'Rebuild is not allowed because it will impact the DPR Summary Log.'
 		WHEN @msgId = 80255 THEN '%s is a back-dated transaction. Please rebuild the stock from %d before closing the fiscal month.'
+		WHEN @msgId = 80256 THEN 'The "to" storage location in %s is invalid.'
+		WHEN @msgId = 80257 THEN 'The "to" storage unit in %s is invalid.'
 	END 
 
 	RETURN @msg
