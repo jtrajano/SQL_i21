@@ -89,6 +89,7 @@ BEGIN
 	DECLARE @intSiteId						INT
 	DECLARE @dblTransferCost				NUMERIC(18,6)
 	DECLARE @dblOriginalPrice				NUMERIC(18,6)
+	DECLARE @dblOriginalPriceForCalculation NUMERIC(18,6)
 	DECLARE @intCardId						INT
 	DECLARE @intVehicleId					INT
 	DECLARE @intTaxGroupId					INT
@@ -571,6 +572,14 @@ BEGIN
 	
 	DECLARE @ysnReRunCalcTax BIT
 	SET @ysnReRunCalcTax = 0;
+
+	
+	DECLARE @ysnReRunForSpecialTax BIT
+	SET @ysnReRunForSpecialTax = 0;
+
+	
+	DECLARE @dblSpecialTax			NUMERIC(16,8)
+	DECLARE @dblSpecialTaxZeroQty	NUMERIC(16,8)
 
 
 	TAXCOMPUTATION:
@@ -1297,7 +1306,7 @@ BEGIN
 				END
 
 				-- COMPUTE TAX > BASE ON PRICE BASIS  = (BACKOUT TAX) > -- PATH > REMOTE TAX COMPUTATION> IMPORT FILE
-				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+				IF  (@ysnReRunForSpecialTax = 0 OR @ysnReRunCalcTax = 1) AND (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
@@ -2578,7 +2587,7 @@ BEGIN
 					GOTO PRICECALCULATION
 				END
 
-				IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+				IF (@ysnReRunForSpecialTax = 0 OR @ysnReRunCalcTax = 1) AND (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
 				OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 				OR @strPriceMethod = 'Import File Price' 
@@ -4178,7 +4187,7 @@ BEGIN
 				GOTO PRICECALCULATION
 			END
 
-			IF (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
+			IF (@ysnReRunForSpecialTax = 0 OR @ysnReRunCalcTax = 1) AND (CHARINDEX('retail',LOWER(@strPriceBasis)) > 0 
 			OR CHARINDEX('pump price adjustment',LOWER(@strPriceBasis)) > 0 
 			OR CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 
 			OR @strPriceMethod = 'Import File Price' 
@@ -5794,8 +5803,6 @@ BEGIN
 			,[ysnApplyTaxRule]			BIT NULL
 		)
 
-		DECLARE @dblSpecialTax			NUMERIC(16,8)
-		DECLARE @dblSpecialTaxZeroQty	NUMERIC(16,8)
 
 		DELETE FROM @tblCFTaxCodeList
 
@@ -5845,19 +5852,29 @@ BEGIN
 			SELECT '@tblCFTransactionTaxZeroQuantity',* FROM @tblCFTransactionTaxZeroQuantity
 		END
 
-		SELECT @dblSpecialTaxZeroQty = SUM(ISNULL([dblOriginalTax],0))
-		FROM @tblCFTransactionTaxZeroQuantity
-		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1)  AND ISNULL(ysnInvalidSetup,0) = 0
+		IF(@ysnReRunCalcTax = 0)
+		BEGIN
+
+			SELECT @dblSpecialTaxZeroQty = SUM(ISNULL([dblOriginalTax],0))
+			FROM @tblCFTransactionTaxZeroQuantity
+			WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1)  AND ISNULL(ysnInvalidSetup,0) = 0
+		
+		END 
 
 		IF(ISNULL(@DevMode,0) = 1)
 		BEGIN
 			SELECT '@tblCFTransactionTaxZeroQuantity',* FROM @tblCFTransactionTax
 		END
 
-		SELECT @dblSpecialTax = SUM(ISNULL([dblOriginalTax],0))
-		FROM @tblCFTransactionTax
-		WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1) AND ISNULL(ysnInvalidSetup,0) = 0
+		IF(@ysnReRunCalcTax = 0)
+		BEGIN
+
+			SELECT @dblSpecialTax = SUM(ISNULL([dblOriginalTax],0))
+			FROM @tblCFTransactionTax
+			WHERE intTaxCodeId IN (SELECT intTaxCodeId FROM @tblCFTaxCodeList WHERE ISNULL(ysnApplyTaxRule,0) = 1) AND ISNULL(ysnInvalidSetup,0) = 0
 		
+		END 
+
 		IF(ISNULL(@DevMode,0) = 1)
 		BEGIN
 			SELECT '@tblCFTransactionTax',* FROM @tblCFTransactionTax
@@ -6122,69 +6139,70 @@ BEGIN
 
 	--SELECT '@totalCalculatedTaxExempt','@tblCFTransactionTax', * FROM @tblCFTransactionTax -- TEMP ME --
 	
-
-	SELECT 
-	 @totalCalculatedTax = ISNULL(SUM([dbo].fnRoundBanker(dblCalculatedTax,2)),0)
-	,@totalOriginalTax = ISNULL(SUM([dbo].fnRoundBanker(dblOriginalTax,2)),0)
-	FROM
-	@tblCFTransactionTax
-	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+	IF(@ysnReRunForSpecialTax = 0 OR @ysnReRunCalcTax = 1 )
+	BEGIN
+		SELECT 
+		@totalCalculatedTax = ISNULL(SUM([dbo].fnRoundBanker(dblCalculatedTax,2)),0)
+		,@totalOriginalTax = ISNULL(SUM([dbo].fnRoundBanker(dblOriginalTax,2)),0)
+		FROM
+		@tblCFTransactionTax
+		WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+	
 
 	--SELECT '@tblCFCalculatedTaxExempt', * FROM @tblCFCalculatedTaxExempt -- TEMP ME --
 
-	SELECT 
-	 @totalCalculatedTaxExempt = ISNULL(SUM([dbo].fnRoundBanker(cftx.dblTax,2)),0)
-	FROM
-	@tblCFTransactionTax as cft
-	INNER JOIN @tblCFCalculatedTaxExempt as cftx
-	ON cft.intTaxClassId = cftx.intTaxClassId
-	AND cft.intTaxCodeId = cftx.intTaxCodeId
-	WHERE cft.ysnTaxExempt = 1 AND 
-	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
+		SELECT 
+		@totalCalculatedTaxExempt = ISNULL(SUM([dbo].fnRoundBanker(cftx.dblTax,2)),0)
+		FROM
+		@tblCFTransactionTax as cft
+		INNER JOIN @tblCFCalculatedTaxExempt as cftx
+		ON cft.intTaxClassId = cftx.intTaxClassId
+		AND cft.intTaxCodeId = cftx.intTaxCodeId
+		WHERE cft.ysnTaxExempt = 1 AND 
+		(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
 	-------------------NORMAL QTY TAX CALC------------------------
 
 	-------------------ZERO QTY TAX CALC------------------------
-	DECLARE @totalCalculatedTaxZeroQuantity					NUMERIC(18,6) = 0
-	DECLARE @totalCalculatedTaxExemptZeroQuantity			NUMERIC(18,6) = 0
+		DECLARE @totalCalculatedTaxZeroQuantity					NUMERIC(18,6) = 0
+		DECLARE @totalCalculatedTaxExemptZeroQuantity			NUMERIC(18,6) = 0
 
 	
-	SELECT 
-	 @totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblTax),0) 
-	FROM
-	@tblCFTransactionTaxZeroQuantity as cft
-	INNER JOIN @tblCFCalculatedTaxExemptZeroQuantity as cftx
-	ON cft.intTaxClassId = cftx.intTaxClassId
-	AND cft.intTaxCodeId = cftx.intTaxCodeId
-	WHERE cft.ysnTaxExempt = 1 AND 
-	(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
+		SELECT 
+		@totalCalculatedTaxExemptZeroQuantity = ISNULL(SUM(cftx.dblTax),0) 
+		FROM
+		@tblCFTransactionTaxZeroQuantity as cft
+		INNER JOIN @tblCFCalculatedTaxExemptZeroQuantity as cftx
+		ON cft.intTaxClassId = cftx.intTaxClassId
+		AND cft.intTaxCodeId = cftx.intTaxCodeId
+		WHERE cft.ysnTaxExempt = 1 AND 
+		(cft.ysnInvalidSetup = 0 OR cft.ysnInvalidSetup IS NULL)
 
 
-	SELECT 
-	 @totalCalculatedTaxZeroQuantity = ISNULL(SUM(dblCalculatedTax),0)
-	FROM
-	@tblCFTransactionTaxZeroQuantity
-	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+		SELECT 
+		@totalCalculatedTaxZeroQuantity = ISNULL(SUM(dblCalculatedTax),0)
+		FROM
+		@tblCFTransactionTaxZeroQuantity
+		WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 
 
-	DECLARE @totalOriginalTaxZeroQuantity					NUMERIC(18,6) = 0
+		DECLARE @totalOriginalTaxZeroQuantity					NUMERIC(18,6) = 0
 
-	SELECT 
-	 @totalOriginalTaxZeroQuantity = ISNULL(SUM(dblOriginalTax),0)
-	FROM
-	@tblCFTransactionTaxZeroQuantity
-	WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
+		SELECT 
+		@totalOriginalTaxZeroQuantity = ISNULL(SUM(dblOriginalTax),0)
+		FROM
+		@tblCFTransactionTaxZeroQuantity
+		WHERE ysnInvalidSetup = 0 OR ysnInvalidSetup IS NULL
 
 
-	UPDATE @tblCFTransactionTax 
-	SET  [@tblCFTransactionTax].dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblTax,2)
-	FROM @tblCFCalculatedTaxExempt cftx
-	WHERE [@tblCFTransactionTax].intTaxClassId = cftx.intTaxClassId
-	AND  [@tblCFTransactionTax].intTaxCodeId = cftx.intTaxCodeId
-	AND  [@tblCFTransactionTax].ysnTaxExempt = 1 
-	AND ([@tblCFTransactionTax].ysnInvalidSetup = 0 OR  [@tblCFTransactionTax].ysnInvalidSetup IS NULL)
+		UPDATE @tblCFTransactionTax 
+		SET  [@tblCFTransactionTax].dblTaxCalculatedExemptAmount = [dbo].fnRoundBanker(cftx.dblTax,2)
+		FROM @tblCFCalculatedTaxExempt cftx
+		WHERE [@tblCFTransactionTax].intTaxClassId = cftx.intTaxClassId
+		AND  [@tblCFTransactionTax].intTaxCodeId = cftx.intTaxCodeId
+		AND  [@tblCFTransactionTax].ysnTaxExempt = 1 
+		AND ([@tblCFTransactionTax].ysnInvalidSetup = 0 OR  [@tblCFTransactionTax].ysnInvalidSetup IS NULL)
 	
-	
-	--select * from @tblCFTransactionTax
+	END
 
 	-------------------ZERO QTY TAX CALC------------------------
 
@@ -6209,22 +6227,24 @@ BEGIN
 	DECLARE @dblQuoteGrossPrice			 numeric(18,6)
 	DECLARE @dblImportFileGrossPrice	 NUMERIC(18,6)
 
+	
+	
+
 
 	IF (@strPriceMethod = 'Import File Price' 
 	OR @strPriceMethod = 'Credit Card' 
 	OR @strPriceMethod = 'Origin History')
 		BEGIN
 
-		
+			DECLARE @dblImportFileGrossPriceZeroQty NUMERIC(18,6)
+			SET @dblImportFileGrossPriceZeroQty = ROUND(ISNULL(@dblPrice,0) + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
+
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0)
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
-
-			DECLARE @dblImportFileGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblImportFileGrossPriceZeroQty = ROUND(ISNULL(@dblPrice,0) + ROUND((@totalCalculatedTaxZeroQuantity / @dblZeroQuantity),6), 6)
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -6246,9 +6266,12 @@ BEGIN
 	
 	ELSE IF @strPriceMethod = 'Posted Trans from CSV'
 	BEGIN
+
+
 			DECLARE @dblPostedTranGrossPrice NUMERIC(18,6)
 			SET @dblPostedTranGrossPrice =  ROUND (ROUND((ROUND(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0) + ROUND((ISNULL(@totalCalculatedTax,0) / @dblQuantity),6),6)
 			SET @dblImportFileGrossPrice = @dblPostedTranGrossPrice
+
 
 			IF(ISNULL(@ysnForceRounding,0) = 1) 
 			BEGIN
@@ -6268,6 +6291,20 @@ BEGIN
 	END
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
+
+		IF(@ysnReRunForSpecialTax = 1)
+		BEGIN
+			SET @dblOriginalPrice	= @dblOriginalPriceForCalculation
+		END
+
+		IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
+		BEGIN
+			SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
+			SET @dblOriginalPrice					=Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @ysnReRunForSpecialTax				= 1
+			GOTO TAXCOMPUTATION
+		END
+
 		IF(@ysnReRunCalcTax = 0)
 		BEGIN
 			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
@@ -6332,22 +6369,22 @@ BEGIN
 		
 
 		IF(@ysnReRunCalcTax = 0)
-			BEGIN
+		BEGIN
 				
-				SET @dblLocalIndexRetailGrossPrice = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6)),6)
-				SET @dblLocalIndexRetailGrossPriceZeroQty = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)),6)
+			SET @dblLocalIndexRetailGrossPrice = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6)),6)
+			SET @dblLocalIndexRetailGrossPriceZeroQty = ROUND((@dblAdjustmentWithIndex - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6)),6)
 
-				SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
-				SET @dblPriceQty = @dblLocalIndexRetailGrossPrice
-				SET @dblPrice = @dblLocalIndexRetailGrossPrice
-				SET @ysnReRunCalcTax = 1
-				GOTO TAXCOMPUTATION
-			END
-			ELSE
-			BEGIN
-				SET @dblLocalIndexRetailGrossPrice = @dblPriceQty
-				SET @dblLocalIndexRetailGrossPriceZeroQty  = @dblPrice100kQty
-			END
+			SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
+			SET @dblPriceQty = @dblLocalIndexRetailGrossPrice
+			SET @dblPrice = @dblLocalIndexRetailGrossPrice
+			SET @ysnReRunCalcTax = 1
+			GOTO TAXCOMPUTATION
+		END
+		ELSE
+		BEGIN
+			SET @dblLocalIndexRetailGrossPrice = @dblPriceQty
+			SET @dblLocalIndexRetailGrossPriceZeroQty  = @dblPrice100kQty
+		END
 
 		
 
@@ -6405,6 +6442,11 @@ BEGIN
 
 		IF (@strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
 		BEGIN
+			
+			IF(@ysnReRunForSpecialTax = 1)
+			BEGIN
+				SET @dblOriginalPrice	= @dblOriginalPriceForCalculation
+			END
 
 			DECLARE @dblPumpPriceAdjustmentGrossPrice NUMERIC(18,6)
 			SET @dblPumpPriceAdjustmentGrossPrice = ROUND(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
@@ -6412,6 +6454,14 @@ BEGIN
 			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
 			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = ROUND(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
 
+			
+			IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
+			BEGIN
+				SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
+				SET @dblOriginalPrice					=	   Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+				SET @ysnReRunForSpecialTax				= 1
+				GOTO TAXCOMPUTATION
+			END
 
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
@@ -6445,6 +6495,7 @@ BEGIN
 			SET @dblQuoteGrossPrice			 =	 @dblCalculatedGrossPrice
 			SET @dblQuoteNetPrice			 =   ROUND((ROUND((@dblQuoteGrossPrice * @dblZeroQuantity),2) -  (ISNULL(@totalCalculatedTaxZeroQuantity,0))) / @dblZeroQuantity,6)
 		
+
 		END
 	END
 	ELSE IF (CHARINDEX('transfer cost',LOWER(@strPriceBasis)) > 0 )
@@ -6452,7 +6503,7 @@ BEGIN
 		IF (@strTransactionType = 'Remote' OR @strTransactionType = 'Extended Remote' OR @strTransactionType = 'Local/Network')
 		BEGIN
 			
-
+		
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = ISNULL(@dblNetTransferCostZeroQuantity,0) + ISNULL(@dblAdjustments,0)
