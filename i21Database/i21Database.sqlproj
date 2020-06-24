@@ -8180,6 +8180,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspAPDeleteVoucherDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
+    <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
