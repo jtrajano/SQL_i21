@@ -7755,6 +7755,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
+    <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
