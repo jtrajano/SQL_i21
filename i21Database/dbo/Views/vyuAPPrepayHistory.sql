@@ -57,7 +57,7 @@ FROM (
     ,b.intBillId
     ,b.strBillId
     ,b.dtmDate
-    ,pd.dblPayment
+    ,pd.dblPayment*-1
     ,p.strPaymentRecordNum
     ,p.dtmDateCreated
     ,3
