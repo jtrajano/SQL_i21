@@ -39,7 +39,15 @@ SELECT ShipmentCharge.intInventoryShipmentChargeId
 	, Charge.strCostType
 	, strTaxGroup = SMTaxGroup.strTaxGroup
 	, ShipmentCharge.intConcurrencyId
+	, Shipment.strShipmentNumber
+	, Shipment.strShipFromLocation
+	, Shipment.strBOLNumber
+	, Shipment.strCustomerName
+	, Shipment.strCustomerNumber
+	, Charge.ysnInventoryCost
+	, Shipment.dtmShipDate
 FROM tblICInventoryShipmentCharge ShipmentCharge
+	INNER JOIN vyuICGetInventoryShipment Shipment ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
 	LEFT JOIN vyuICGetOtherCharges Charge ON Charge.intItemId = ShipmentCharge.intChargeId
 	LEFT JOIN tblICItemUOM CostUOM ON CostUOM.intItemUOMId = ShipmentCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CostUOM.intUnitMeasureId
