@@ -3528,7 +3528,8 @@ BEGIN TRY
 								if @ysnFromPriceBasisContract = 1
 							begin
 								update a
-									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
+									set dblPaidAmount = round((b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits , 2),
+										dblPaidAmountRaw = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
 										dblOldCost = b.dblOldCost
 										from tblGRStorageHistory a
 											join @voucherPayable b 
@@ -3602,6 +3603,9 @@ BEGIN TRY
 							----- DEBUG POINT -----
 
 					END
+
+					
+
 					----- DEBUG POINT -----
 					if @debug_awesome_ness = 1 and 1 = 0
 					begin
@@ -3889,6 +3893,20 @@ BEGIN TRY
 
 	if isnull(@intVoucherId, 0) > 0 
 	begin
+		-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
+		-- Posting of voucher
+		update a
+			set dblPaidAmount = dblPaidAmountRaw
+				from tblGRStorageHistory a
+					join @voucherPayable b 
+						on a.intContractHeaderId = b.intContractHeaderId
+						and a.intCustomerStorageId = b.intCustomerStorageId
+			where strType = 'Settlement'
+				and (dblPaidAmountRaw is not null 
+						and round(dblPaidAmountRaw, 2) = dblPaidAmount)
+		--
+	end
+
 		-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
 		-- Posting of voucher
 		update a
