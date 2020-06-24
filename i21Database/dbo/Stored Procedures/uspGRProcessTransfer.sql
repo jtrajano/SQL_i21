@@ -509,7 +509,7 @@ BEGIN
 					,ToStorage.intCurrencyId
 					,dblExchangeRate = 1
 					,intTransactionId = SR.intTransferStorageId
-					,intTransactionDetailId = SR.intTransferStorageSplitId
+					,intTransactionDetailId = SR.intTransferStorageReferenceId
 					,strTransactionId = TS.strTransferStorageTicket
 					,intTransactionTypeId = 56
 					,intLotId = NULL
@@ -686,7 +686,7 @@ BEGIN
 						INNER JOIN tblGRTransferStorageReference SR
 							ON SR.intToCustomerStorageId = CS.intCustomerStorageId
 						INNER JOIN @ItemsToPost IC
-							ON IC.intTransactionDetailId = SR.intTransferStorageSplitId
+							ON IC.intTransactionDetailId = SR.intTransferStorageReferenceId
 						INNER JOIN tblGRStorageType ST
 							ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 								AND ST.ysnDPOwnedType = 1
