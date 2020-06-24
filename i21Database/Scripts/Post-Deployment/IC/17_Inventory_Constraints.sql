@@ -24,6 +24,19 @@ BEGIN
 	);
 
 END
+GO
+
+---- Add the CHECK CONSTRAINTS in tblICItemStockUOM
+--IF NOT EXISTS(SELECT TOP 1 1 FROM sys.objects WHERE name = 'CK_IsValidStorageLocation' AND type = 'C' AND parent_object_id = OBJECT_ID('tblICItemStockUOM', 'U'))
+--BEGIN
+--	EXEC('
+--		ALTER TABLE tblICItemStockUOM
+--		WITH NOCHECK ADD CONSTRAINT CK_IsValidStorageLocation
+--		CHECK (dbo.fnICIsValidStorageLocation(intItemLocationId, intSubLocationId, intStorageLocationId) = 1)'
+--	);
+
+--END
+--GO
 
 PRINT N'END - IC Add Constraint'
 GO
