@@ -8560,6 +8560,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
+    <Build Include="dbo\Tables\tblMFItemExclude.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

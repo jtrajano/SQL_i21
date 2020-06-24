@@ -189,9 +189,14 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			INSERT INTO @tblMFItem (intItemId)
-			SELECT intItemId
-			FROM tblICItem
-			WHERE intCategoryId = @intCategoryId
+			SELECT I.intItemId
+			FROM tblICItem I
+			WHERE I.intCategoryId = @intCategoryId
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFItemExclude IE
+					WHERE IE.intItemId = I.intItemId and IE.ysnExcludeInDemandView=1
+					)
 		END
 	END
 
@@ -332,7 +337,17 @@ BEGIN TRY
 			)
 		SELECT intItemId
 			,intItemId
-			,(Case When Exists(Select 1 from tblICItemBundle IB Where IB.intItemId = I.intItemId) then 0 Else 1 End)
+			,(
+				CASE 
+					WHEN EXISTS (
+							SELECT 1
+							FROM tblICItemBundle IB
+							WHERE IB.intItemId = I.intItemId
+							)
+						THEN 0
+					ELSE 1
+					END
+				)
 			,1
 		FROM @tblMFItem I
 		WHERE NOT EXISTS (
@@ -985,7 +1000,6 @@ BEGIN TRY
 					)
 					group by IsNULL(DD.intSubstituteItemId, DD.intItemId),DATEDIFF(mm, 0, DD.dtmDemandDate) + 1 - @intCurrentMonth 
 		END*/
-
 		INSERT INTO #tblMFDemand (
 			intItemId
 			,intMonthId
@@ -1571,7 +1585,7 @@ BEGIN TRY
 					,intMonthId
 					)
 				SELECT @intItemId
-					,@dblEndInventory - IsNULL(@dblTotalConsumptionQty,0)
+					,@dblEndInventory - IsNULL(@dblTotalConsumptionQty, 0)
 					,12 --Short/Excess Inventory
 					,@intMonthId
 
@@ -1614,7 +1628,10 @@ BEGIN TRY
 					IF @dblRemainingConsumptionQty IS NULL
 						SELECT @dblRemainingConsumptionQty = 0
 
-					IF (@dblRemainingConsumptionQty = 0 or @dblEndInventory>@dblRemainingConsumptionQty)
+					IF (
+							@dblRemainingConsumptionQty = 0
+							OR @dblEndInventory > @dblRemainingConsumptionQty
+							)
 						AND @intConsumptionMonth = @intMonthId + 1
 					BEGIN
 						IF NOT EXISTS (
@@ -1676,7 +1693,7 @@ BEGIN TRY
 								WHERE intItemId = @intItemId
 									AND intMonthId > @intConsumptionMonth
 									AND intAttributeId = 8
-									AND ABS(dblQty)>0
+									AND ABS(dblQty) > 0
 								)
 						BEGIN
 							INSERT INTO #tblMFDemand (
