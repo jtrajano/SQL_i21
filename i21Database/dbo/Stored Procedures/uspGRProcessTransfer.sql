@@ -22,6 +22,7 @@ BEGIN
 	DECLARE @intStorageHistoryId INT = 0
 	DECLARE @intDecimalPrecision INT = 20
 	DECLARE @intTransferStorageSplitId INT
+	DECLARE @intTransactionDetailId INT
 	DECLARE @XML NVARCHAR(MAX)
 	DECLARE @strScreenName NVARCHAR(50)
 	DECLARE @intNewContractHeaderId INT
@@ -373,9 +374,10 @@ BEGIN
 			--SourceData.
 		INTO @newCustomerStorageIds;
 
+
 		INSERT INTO tblGRTransferStorageReference
 		SELECT intSourceCustomerStorageId,intToCustomerStorageId,intTransferStorageSplitId,@intTransferStorageId,dblUnitQty,dblSplitPercent,dtmProcessDate FROM @newCustomerStorageIds
-		SET @intTransferStorageReferenceId = @@ROWCOUNT
+		SET @intTransferStorageReferenceId = SCOPE_IDENTITY()
 
 		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
 		DECLARE @SettleVoucherCreate AS SettleVoucherCreate
@@ -475,7 +477,7 @@ BEGIN
 					ON SR.intTransferStorageId = TS.intTransferStorageId
 				WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId
 				ORDER BY dtmTransferStorageDate
-				
+								
 				--DP TO DP TRANSFER
 				--DP TRANSFER STORAGE SHOULD HAVE dblBasis AND dblSettlementPrice
 				--SET @intTransferStorageReferenceId = NULL
@@ -528,19 +530,23 @@ BEGIN
 					CLOSE c; DEALLOCATE c;						
 				END
 
+
+
 				DECLARE _CURSOR CURSOR
 				FOR
-				SELECT intId FROM @ItemsToPost
+				SELECT intId, intTransactionDetailId FROM @ItemsToPost
 	
 				OPEN _CURSOR
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				WHILE @@FETCH_STATUS = 0
 				BEGIN		
 						DECLARE @GLEntries AS RecapTableType;
 						DECLARE @DummyGLEntries AS RecapTableType;
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
+						DECLARE @dblOriginalCost AS DECIMAL(24,10);						
 						DECLARE @dblDiscountCost AS DECIMAL(24,10);
+						DECLARE @dblUnits AS DECIMAL(24,10);
 						DECLARE @strBatchId AS NVARCHAR(40);
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -598,7 +604,7 @@ BEGIN
 						ORDER BY dtmTransferStorageDate						
 
 						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
-							
+							,@dblUnits = ITP.dblQty	
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -647,6 +653,8 @@ BEGIN
 						WHERE IC.intId = @cursorId
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
+						set @dblOriginalCost = @dblCost
+
 						
 						DECLARE @OtherChargesDetail AS TABLE(
 							intOtherChargesDetailId INT IDENTITY(1, 1)
@@ -661,7 +669,9 @@ BEGIN
 							,IsProcessed BIT
 							,intTicketDiscountId INT NULL
 							,ysnDiscountFromGrossWeight BIT NULL
+							,ysnIsPercent bit null
 						)
+						delete from @OtherChargesDetail
 						INSERT INTO @OtherChargesDetail
 						(
 							intCustomerStorageId
@@ -674,6 +684,7 @@ BEGIN
 							,IsProcessed
 							,intTicketDiscountId
 							,ysnDiscountFromGrossWeight
+							,ysnIsPercent
 						)
 						SELECT 
 							 intCustomerStorageId		= CS.intCustomerStorageId
@@ -682,7 +693,8 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
 																CASE WHEN CS.dblGrossQuantity IS NULL THEN SR.dblUnitQty
 																ELSE
-																	ROUND((SR.dblUnitQty / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)
+																	--ROUND((SR.dblUnitQty / CS.dblOriginalBalance) * CS.dblGrossQuantity,10)
+																	ROUND((CS.dblGrossQuantity  * (isnull(SR.dblSplitPercent, 100) / 100)) ,10)
 																END
 															ELSE SR.dblUnitQty
 														END
@@ -703,10 +715,11 @@ BEGIN
 															WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 1
 															ELSE 0
 														END
+							,ysnIsPercent				=  CASE WHEN QM.strDiscountChargeType = 'Percent' THEN 1 ELSE 0 END							
 							FROM @ItemsToPost ITP
 							JOIN tblGRTransferStorageReference SR
 							  ON ITP.intTransactionId = SR.intTransferStorageId
-							 AND ITP. intTransactionDetailId = SR.intTransferStorageSplitId
+							 AND ITP. intTransactionDetailId = SR.intTransferStorageReferenceId
 							JOIN tblGRCustomerStorage CS
 								ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
 							JOIN tblICItemUOM IU
@@ -722,6 +735,8 @@ BEGIN
 							JOIN tblICItem DItem 
 							ON DItem.intItemId = DSC.intItemId
 							WHERE (ISNULL(QM.dblDiscountDue, 0) - ISNULL(QM.dblDiscountPaid, 0)) <> 0
+								and ITP.intId = @cursorId
+							
 							
 						SELECT @dblCost = @dblCost + ISNULL(SUM(dblCashPrice),0) FROM @OtherChargesDetail OCD 
 						INNER JOIN tblICItem IC
@@ -731,12 +746,17 @@ BEGIN
 
 						update @OtherChargesDetail set dblExactCashPrice = ROUND(dblUnits*dblCashPrice,2)
 
-						SELECT @dblDiscountCost = ISNULL(SUM(dblExactCashPrice),0) FROM @OtherChargesDetail OCD 
+						SELECT @dblDiscountCost = ISNULL(SUM(round(dblUnits*dblCashPrice, 2)),0) FROM @OtherChargesDetail OCD 
+						
 						INNER JOIN tblICItem IC
 							ON IC.intItemId = OCD.intItemId
 						WHERE IC.ysnInventoryCost = 1
+
+
+
 						DELETE FROM @Entry
 						DELETE FROM @GLEntries
+						DELETE FROM @GLForItem
 						INSERT INTO @Entry 
 						(
 							intItemId
@@ -759,8 +779,9 @@ BEGIN
 							,ysnIsStorage
 							,intStorageScheduleTypeId
 						)
-						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
+						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,@dblOriginalCost,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
+
 
 						INSERT INTO @GLForItem
 						(
@@ -828,51 +849,50 @@ BEGIN
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
 
-							--do not book GL entries for the discounts if the storage is from the delivery sheet
-							IF @ysnFromDS = 0
-							BEGIN
-								INSERT INTO @GLEntries 
-								(
-									[dtmDate] 
-									,[strBatchId]
-									,[intAccountId]
-									,[dblDebit]
-									,[dblCredit]
-									,[dblDebitUnit]
-									,[dblCreditUnit]
-									,[strDescription]
-									,[strCode]
-									,[strReference]
-									,[intCurrencyId]
-									,[dblExchangeRate]
-									,[dtmDateEntered]
-									,[dtmTransactionDate]
-									,[strJournalLineDescription]
-									,[intJournalLineNo]
-									,[ysnIsUnposted]
-									,[intUserId]
-									,[intEntityId]
-									,[strTransactionId]
-									,[intTransactionId]
-									,[strTransactionType]
-									,[strTransactionForm]
-									,[strModuleName]
-									,[intConcurrencyId]
-									,[dblDebitForeign]	
-									,[dblDebitReport]	
-									,[dblCreditForeign]	
-									,[dblCreditReport]	
-									,[dblReportingRate]	
-									,[dblForeignRate]
-									,[strRateType]
-								)
-								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
-								UPDATE @GLEntries 
-								SET dblDebit		= dblCredit
-									,dblDebitUnit	= dblCreditUnit
-									,dblCredit		= dblDebit
-										,dblCreditUnit  = dblDebitUnit
-							END
+						IF @ysnFromDS = 0
+						BEGIN	
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1,@intTransferStorageReferenceId = @intTransactionDetailId
+							UPDATE @GLEntries 
+							SET dblDebit		= dblCredit
+								,dblDebitUnit	= dblCreditUnit
+								,dblCredit		= dblDebit
+									,dblCreditUnit  = dblDebitUnit
+						END
 
 							INSERT INTO @GLEntries 
 							(
@@ -1011,48 +1031,47 @@ BEGIN
 								,@GLForItem
 								,'AP Clearing'
 								,1
-							
-							--do not book GL entries for the discounts if the storage is from the delivery sheet
-							IF @ysnFromDS = 0
-							BEGIN
-								INSERT INTO @GLEntries 
-								(
-									[dtmDate] 
-									,[strBatchId]
-									,[intAccountId]
-									,[dblDebit]
-									,[dblCredit]
-									,[dblDebitUnit]
-									,[dblCreditUnit]
-									,[strDescription]
-									,[strCode]
-									,[strReference]
-									,[intCurrencyId]
-									,[dblExchangeRate]
-									,[dtmDateEntered]
-									,[dtmTransactionDate]
-									,[strJournalLineDescription]
-									,[intJournalLineNo]
-									,[ysnIsUnposted]
-									,[intUserId]
-									,[intEntityId]
-									,[strTransactionId]
-									,[intTransactionId]
-									,[strTransactionType]
-									,[strTransactionForm]
-									,[strModuleName]
-									,[intConcurrencyId]
-									,[dblDebitForeign]	
-									,[dblDebitReport]	
-									,[dblCreditForeign]	
-									,[dblCreditReport]	
-									,[dblReportingRate]	
-									,[dblForeignRate]
-									,[strRateType]
-								)
-								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
-							END
 
+						IF @ysnFromDS = 0
+						BEGIN
+							INSERT INTO @GLEntries 
+							(
+								 [dtmDate] 
+								,[strBatchId]
+								,[intAccountId]
+								,[dblDebit]
+								,[dblCredit]
+								,[dblDebitUnit]
+								,[dblCreditUnit]
+								,[strDescription]
+								,[strCode]
+								,[strReference]
+								,[intCurrencyId]
+								,[dblExchangeRate]
+								,[dtmDateEntered]
+								,[dtmTransactionDate]
+								,[strJournalLineDescription]
+								,[intJournalLineNo]
+								,[ysnIsUnposted]
+								,[intUserId]
+								,[intEntityId]
+								,[strTransactionId]
+								,[intTransactionId]
+								,[strTransactionType]
+								,[strTransactionForm]
+								,[strModuleName]
+								,[intConcurrencyId]
+								,[dblDebitForeign]	
+								,[dblDebitReport]	
+								,[dblCreditForeign]	
+								,[dblCreditReport]	
+								,[dblReportingRate]	
+								,[dblForeignRate]
+								,[strRateType]
+							)
+							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblOriginalCost,1, @intTransferStorageReferenceId = @intTransactionDetailId
+						END
+							
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
 									EXEC dbo.uspGLBookEntries @GLEntries, 1 
@@ -1060,7 +1079,7 @@ BEGIN
 						END
 
 			
-				FETCH NEXT FROM _CURSOR INTO @cursorId
+				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
