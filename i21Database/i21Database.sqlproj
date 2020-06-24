@@ -8725,6 +8725,7 @@
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
     <Build Include="dbo\Views\vyuSTLotteryCountSheetReport.sql" />
     <Build Include="dbo\Tables\tblMFItemExclude.sql" />
+    <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

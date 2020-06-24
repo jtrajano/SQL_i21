@@ -574,7 +574,7 @@ BEGIN
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICLot SourceLot
@@ -624,7 +624,7 @@ BEGIN
 				ON Item.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICInventoryTransaction SourceTransaction
@@ -705,7 +705,7 @@ BEGIN
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)  
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICLot SourceLot
@@ -755,7 +755,7 @@ BEGIN
 				ON Item.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)  
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICInventoryTransactionStorage SourceTransaction

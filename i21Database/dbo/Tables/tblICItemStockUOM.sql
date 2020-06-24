@@ -60,6 +60,7 @@ It only tracks the qty of those non-'Stock UOM's.
 		[intConcurrencyId] INT NULL DEFAULT ((1)), 
 		CONSTRAINT [PK_tblICItemStockUOM] PRIMARY KEY ([intItemStockUOMId]), 
 		CONSTRAINT [FK_tblICItemStockUOM_tblICItemUOM] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId])
+		--CONSTRAINT [CK_IsValidStorageLocation] CHECK (dbo.fnICIsValidStorageLocation(intItemLocationId, intSubLocationId, intStorageLocationId) = 1), -- See the post deployment. 
 	)
 	GO
 	CREATE NONCLUSTERED INDEX [IX_tblICItemStockUOM_intItemId_intLocationId_intItemUOMId]
