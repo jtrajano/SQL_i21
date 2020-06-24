@@ -39,6 +39,7 @@ DECLARE @INVENTORY_TRANSFER_TYPE AS INT = 12
 -- Get the default currency ID and other variables. 
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 		,@strItemNo AS NVARCHAR(50)
+		,@intItemId AS INT 
 
 -- Create the gl entries variable 
 DECLARE	@GLEntries AS RecapTableType 
@@ -130,7 +131,7 @@ IF @ysnPost = 0 AND @ysnTransactionPostedFlag = 0
 BEGIN   
 	-- The transaction is already unposted.  
 	EXEC uspICRaiseError 80170; 
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END
 
 -- Don't allow unpost when there's a receipt
@@ -162,7 +163,7 @@ BEGIN
 			AND t.intInventoryTransferId = @intTransactionId
 
 		EXEC uspICRaiseError 80107, @TR, @R;
-		GOTO Post_Exit	
+		GOTO With_Rollback_Exit	
 	END
 END
 
@@ -193,7 +194,7 @@ IF EXISTS(
 		AND ISNULL(i.strLotTracking, 'No') <> 'No')
 BEGIN
 	EXEC uspICRaiseError 80085, @strTransactionId;
-	GOTO Post_Exit
+	GOTO With_Rollback_Exit
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM #tempValidateItemLocation)
@@ -211,7 +212,7 @@ BEGIN
 	
 	-- Item %s is not available on location %s.
 	EXEC uspICRaiseError 80026, @LocationId, @ItemId;
-	GOTO Post_Exit  
+	GOTO With_Rollback_Exit  
 END
 
 IF EXISTS(SELECT TOP 1 1 FROM sys.tables WHERE object_id = object_id('tempValidateItemLocation')) DROP TABLE #tempValidateItemLocation
@@ -225,16 +226,69 @@ BEGIN
 	IF @ysnPost = 1   
 	BEGIN   
 		EXEC uspICRaiseError 80172, 'Post';
-		GOTO Post_Exit  
+		GOTO With_Rollback_Exit  
 	END   
 
 	IF @ysnPost = 0  
 	BEGIN  
 		EXEC uspICRaiseError 80172, 'Unpost';
-		GOTO Post_Exit    
+		GOTO With_Rollback_Exit    
 	END  
 END   
 
+-- Validate the "to" storage unit. 
+BEGIN 
+	SET @intItemId = NULL 
+	SET @strItemNo = NULL 
+
+	SELECT TOP 1 
+		@intItemId = i.intItemId
+		,@strItemNo = i.strItemNo
+	FROM 
+		tblICInventoryTransfer tf INNER JOIN tblICInventoryTransferDetail tfd
+			ON tf.intInventoryTransferId = tfd.intInventoryTransferId
+		INNER JOIN tblICItem i 
+			ON i.intItemId = tfd.intItemId
+		INNER JOIN tblICStorageLocation storageUnit
+			ON storageUnit.intStorageLocationId = tfd.intToStorageLocationId
+	WHERE
+		tf.strTransferNo = @strTransferNo
+		AND storageUnit.intLocationId <> tf.intToLocationId
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- The "to" storage location in {Item No} is invalid.
+		EXEC uspICRaiseError 80256, @strItemNo; 
+		GOTO With_Rollback_Exit  		
+	END 
+END 
+
+-- Validate the "to" storage location. 
+BEGIN 
+	SET @intItemId = NULL 
+	SET @strItemNo = NULL 
+
+	SELECT TOP 1 
+		@intItemId = i.intItemId
+		,@strItemNo = i.strItemNo
+	FROM 
+		tblICInventoryTransfer tf INNER JOIN tblICInventoryTransferDetail tfd
+			ON tf.intInventoryTransferId = tfd.intInventoryTransferId
+		INNER JOIN tblICItem i 
+			ON i.intItemId = tfd.intItemId
+		INNER JOIN tblSMCompanyLocationSubLocation storageLocation
+			ON storageLocation.intCompanyLocationSubLocationId = tfd.intToSubLocationId
+	WHERE
+		tf.strTransferNo = @strTransferNo
+		AND storageLocation.intCompanyLocationId <> tf.intToLocationId
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- 'The "to" storage unit in {Item No} is invalid.'
+		EXEC uspICRaiseError 80256, @strItemNo; 
+		GOTO With_Rollback_Exit  		
+	END 
+END 
 
 -- Create and validate the lot numbers
 IF @ysnPost = 1
