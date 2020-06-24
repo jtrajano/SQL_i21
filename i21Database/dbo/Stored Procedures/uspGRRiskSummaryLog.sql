@@ -19,7 +19,7 @@ BEGIN TRY
 			,strTransactionNumber 		
 			,dtmTransactionDate 		
 			,intContractHeaderId
-			--,intContractDetailId
+			,intContractDetailId
 			,intTicketId			
 			,intCommodityId			
 			,intCommodityUOMId		
