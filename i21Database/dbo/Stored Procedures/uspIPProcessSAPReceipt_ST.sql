@@ -462,6 +462,7 @@ BEGIN TRY
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intShipmentType = 1
 					AND LD.intPContractDetailId = @intContractDetailId
+					AND L.intShipmentStatus <> 10
 
 				IF ISNULL(@intLoadId, 0) = 0
 				BEGIN

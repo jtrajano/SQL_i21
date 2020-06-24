@@ -176,8 +176,8 @@ BEGIN TRY
 				,@strOldComment = NULL
 				,@strNewContractNumber = NULL
 
-			SELECT @strERPPONumber = strERPPONumber
-				,@strERPItemNumber = strERPItemNumber
+			SELECT @strERPPONumber = ISNULL(strERPPONumber, '')
+				,@strERPItemNumber = ISNULL(strERPItemNumber, '')
 				,@strSampleNumber = strSampleNumber
 				,@strSampleTypeName = strSampleTypeName
 				,@strItemNo = strItemNo
@@ -242,6 +242,36 @@ BEGIN TRY
 						)
 			END
 
+			IF ISNULL(@strQuantityUOM, '') <> ''
+			BEGIN
+				SELECT @intRepresentingUOMId = t.intUnitMeasureId
+				FROM tblICUnitMeasure t WITH (NOLOCK)
+				WHERE t.strUnitMeasure = @strQuantityUOM
+
+				IF ISNULL(@intRepresentingUOMId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid UOM. '
+							,16
+							,1
+							)
+				END
+
+				IF NOT EXISTS (
+						SELECT 1
+						FROM tblICItemUOM t WITH (NOLOCK)
+						WHERE t.intUnitMeasureId = @intRepresentingUOMId
+							AND t.intItemId = @intItemId
+						)
+				BEGIN
+					RAISERROR (
+							'Invalid Item UOM. '
+							,16
+							,1
+							)
+				END
+			END
+
 			IF LOWER(@strSampleTypeName) = LOWER('Offer Sample')
 			BEGIN
 				SELECT @intContractDetailId = NULL
@@ -268,13 +298,58 @@ BEGIN TRY
 							)
 				END
 
-				IF ISNULL(@strERPItemNumber, '') = ''
+				SELECT @intContractDetailId = CD.intContractDetailId
+				FROM tblCTContractDetail CD WITH (NOLOCK)
+				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+				WHERE ISNULL(CH.strExternalContractNumber, '') = (@strERPPONumber + ' / ' + @strERPItemNumber)
+
+				IF ISNULL(@intContractDetailId, 0) = 0
 				BEGIN
-					RAISERROR (
-							'Invalid ERP Item No. '
-							,16
-							,1
-							)
+					IF (
+							SELECT COUNT(1)
+							FROM tblCTContractDetail CD WITH (NOLOCK)
+							JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+								AND CD.intItemId = @intItemId
+								AND CD.dblQuantity = @dblQuantity
+								AND CD.intUnitMeasureId = @intRepresentingUOMId
+							WHERE (
+									CASE 
+										WHEN CHARINDEX('/', CH.strExternalContractNumber) > 1
+											THEN RTRIM(SUBSTRING(CH.strExternalContractNumber, 0, CHARINDEX('/', CH.strExternalContractNumber)))
+										ELSE CH.strExternalContractNumber
+										END
+									) = @strERPPONumber
+							) > 1
+					BEGIN
+						RAISERROR (
+								'Multiple Contracts are matching. '
+								,16
+								,1
+								)
+					END
+
+					SELECT @intContractDetailId = CD.intContractDetailId
+					FROM tblCTContractDetail CD WITH (NOLOCK)
+					JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
+						AND CD.intItemId = @intItemId
+						AND CD.dblQuantity = @dblQuantity
+						AND CD.intUnitMeasureId = @intRepresentingUOMId
+					WHERE (
+							CASE 
+								WHEN CHARINDEX('/', CH.strExternalContractNumber) > 1
+									THEN RTRIM(SUBSTRING(CH.strExternalContractNumber, 0, CHARINDEX('/', CH.strExternalContractNumber)))
+								ELSE CH.strExternalContractNumber
+								END
+							) = @strERPPONumber
+
+					IF ISNULL(@intContractDetailId, 0) = 0
+					BEGIN
+						RAISERROR (
+								'Invalid Contract. '
+								,16
+								,1
+								)
+					END
 				END
 
 				SELECT @intContractDetailId = CD.intContractDetailId
@@ -288,21 +363,11 @@ BEGIN TRY
 					,@intSubBookId = CD.intSubBookId
 				FROM tblCTContractDetail CD WITH (NOLOCK)
 				JOIN tblICItem IM WITH (NOLOCK) ON IM.intItemId = CD.intItemId
+					AND CD.intContractDetailId = @intContractDetailId
 				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
 				LEFT JOIN tblICItemContract IC WITH (NOLOCK) ON IC.intItemContractId = CD.intItemContractId
 				LEFT JOIN tblSMCountry CG WITH (NOLOCK) ON CG.intCountryID = IC.intCountryId
-				WHERE CD.strERPPONumber = @strERPPONumber
-					AND CD.strERPItemNumber = @strERPItemNumber
 
-				IF ISNULL(@intContractDetailId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Invalid Contract. '
-							,16
-							,1
-							)
-				END
-				
 				IF NOT EXISTS (
 						SELECT 1
 						FROM tblCTContractDetail t WITH (NOLOCK)
@@ -339,36 +404,6 @@ BEGIN TRY
 						,16
 						,1
 						)
-			END
-
-			IF ISNULL(@strQuantityUOM, '') <> ''
-			BEGIN
-				SELECT @intRepresentingUOMId = t.intUnitMeasureId
-				FROM tblICUnitMeasure t WITH (NOLOCK)
-				WHERE t.strUnitMeasure = @strQuantityUOM
-
-				IF ISNULL(@intRepresentingUOMId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Invalid UOM. '
-							,16
-							,1
-							)
-				END
-
-				IF NOT EXISTS (
-						SELECT 1
-						FROM tblICItemUOM t WITH (NOLOCK)
-						WHERE t.intUnitMeasureId = @intRepresentingUOMId
-							AND t.intItemId = @intItemId
-						)
-				BEGIN
-					RAISERROR (
-							'Invalid Item UOM. '
-							,16
-							,1
-							)
-				END
 			END
 
 			SELECT @intSampleStatusId = t.intSampleStatusId
@@ -409,14 +444,14 @@ BEGIN TRY
 					AND t.strName = @strCreatedBy
 					AND t.strEntityNo <> ''
 
-				--IF ISNULL(@intCreatedUserId, 0) = 0
-				--BEGIN
-				--	RAISERROR (
-				--			'Invalid Created User. '
-				--			,16
-				--			,1
-				--			)
-				--END
+					--IF ISNULL(@intCreatedUserId, 0) = 0
+					--BEGIN
+					--	RAISERROR (
+					--			'Invalid Created User. '
+					--			,16
+					--			,1
+					--			)
+					--END
 			END
 
 			IF ISNULL(@intCreatedUserId, 0) = 0
