@@ -12,6 +12,8 @@
     [dblUnits] NUMERIC(18, 6) NULL, 
     [dtmHistoryDate] DATETIME NULL, 
     [dblPaidAmount] NUMERIC(18, 6) NULL, 
+    [dblPaidAmountRaw] NUMERIC(18, 6) NULL,  --- Dev Note -- MonGonzales -- I need another column to put the raw value of dblPaidAmount 
+	--During the creation of voucher they need a rounded value
     [strPaidDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblCurrencyRate] NUMERIC(18, 8) NULL, 
     [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
