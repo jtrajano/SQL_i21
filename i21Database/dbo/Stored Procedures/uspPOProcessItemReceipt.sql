@@ -2,6 +2,7 @@
 	@poId INT
 	,@userId INT
 	,@receiveNonInventory BIT = 0
+	,@dtmDate DATETIME
 	,@receiptNumber NVARCHAR(50) OUTPUT
 AS
 
@@ -152,7 +153,7 @@ BEGIN
 			,intItemUOMId			= ItemUOM.intItemUOMId
 			,intContractHeaderId	= (CASE WHEN PODetail.intContractHeaderId IS NOT NULL THEN PODetail.intContractHeaderId ELSE PODetail.intPurchaseId END)    -- Shown in the Order Id column. 
 			,intContractDetailId	= (CASE WHEN PODetail.intContractDetailId IS NOT NULL THEN PODetail.intContractDetailId ELSE PODetail.intPurchaseDetailId END) -- As intLineNo. Link between PO Detail id and IR detail. 
-			,dtmDate				= dbo.fnRemoveTimeOnDate(GETDATE())
+			,dtmDate				= dbo.fnRemoveTimeOnDate(@dtmDate)
 			,intShipViaId			= PO.intShipViaId
 			,dblQty					= ISNULL(PODetail.dblQtyOrdered,0) - ISNULL(PODetail.dblQtyReceived,0)
 			,intGrossNetUOMId		= NULL
