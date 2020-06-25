@@ -374,13 +374,11 @@ BEGIN TRY
 
 				--IF @dblGrossWeight = 0
 				--	SELECT @dblGrossWeight = @dblNetWeight
-
 				--IF @dblGrossWeight > 0
 				--	AND @dblGrossWeight <> @dblNetWeight
 				--BEGIN
 				--	SELECT @dblTareWeight = @dblGrossWeight - @dblNetWeight
 				--END
-
 				IF @dblCost >= 0
 					AND ISNULL(@strCostUOM, '') <> ''
 					AND ISNULL(@strCostCurrency, '') <> ''
@@ -664,6 +662,7 @@ BEGIN TRY
 					,dblTareWeight
 					,intConcurrencyId
 					,strContainerNo
+					,strCondition
 					,dtmDateCreated
 					,intCreatedByUserId
 					)
@@ -678,6 +677,13 @@ BEGIN TRY
 					,ISNULL(C.dblTareWt, 0)
 					,1
 					,C.strContainerNumber
+					,(
+						CASE 
+							WHEN RI.dblNet > C.dblNetWt
+								THEN 'Clean Wgt'
+							ELSE NULL
+							END
+						)
 					,GETUTCDATE()
 					,@intEntityId
 				FROM tblICInventoryReceiptItem RI
