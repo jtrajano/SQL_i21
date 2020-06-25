@@ -139,6 +139,20 @@ BEGIN
 	)
 END 
 
+-- Create the temp config table. 
+IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpLogRiskPosition (
+		ysnSkip BIT 
+	)
+
+	INSERT INTO #tmpLogRiskPosition (
+		ysnSkip
+	)
+	SELECT 
+		ysnSkip = 1
+END 
+
 IF @intItemId IS NOT NULL 
 BEGIN 
 	INSERT INTO #tmpRebuildList (
@@ -191,22 +205,22 @@ BEGIN
 	SELECT intItemId = NULL, intCategoryId = NULL 
 END 
 
--- Check if the item/category to rebuild will impact the DPR Summary log. 
--- If there will be an imnpact, do not continue with the rebuild. 
-IF EXISTS (
-	SELECT TOP 1 i.intCommodityId
-	FROM 
-		tblICItem i INNER JOIN #tmpRebuildList list
-			ON i.intItemId = COALESCE(list.intItemId, i.intItemId) 
-			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-		LEFT JOIN tblRKSummaryLog rlog
-			ON rlog.intCommodityId = i.intCommodityId
-)
-BEGIN 
-	-- 'Rebuild is not allowed because it will impact the DPR summary log.'
-	EXEC uspICRaiseError 80254
-	RETURN -1; 
-END 
+---- Check if the item/category to rebuild will impact the DPR Summary log. 
+---- If there will be an imnpact, do not continue with the rebuild. 
+--IF EXISTS (
+--	SELECT TOP 1 i.intCommodityId
+--	FROM 
+--		tblICItem i INNER JOIN #tmpRebuildList list
+--			ON i.intItemId = COALESCE(list.intItemId, i.intItemId) 
+--			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+--		INNER JOIN tblRKSummaryLog rlog
+--			ON rlog.intCommodityId = i.intCommodityId
+--)
+--BEGIN 
+--	-- 'Rebuild is not allowed because it will impact the DPR summary log.'
+--	EXEC uspICRaiseError 80254
+--	RETURN -1; 
+--END 
 
 -- Backup Inventory transactions 
 BEGIN 
@@ -5520,6 +5534,12 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#tmpAutoVarianceBatchesForAVGCosting') IS NOT NULL  
 		DROP TABLE #tmpAutoVarianceBatchesForAVGCosting
+
+	IF OBJECT_ID('tempdb..#tmpRebuildList') IS NOT NULL 
+		DROP TABLE #tmpRebuildList
+
+	IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NOT NULL 
+		DROP TABLE #tmpLogRiskPosition		
 END 
 
 RETURN @intReturnValue; 
