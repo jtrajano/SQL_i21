@@ -24,6 +24,7 @@ DECLARE @intItemId AS INT
 		,@intEntityId AS INT 
 		,@intBackupId INT 
 		,@dtmDate AS DATETIME 
+		,@intProduceItemWIPAccountId AS INT 
 
 DECLARE @ShipmentPostScenario AS TINYINT = NULL 
 		,@ShipmentPostScenario_FreightBased AS TINYINT = 1
@@ -1717,6 +1718,75 @@ BEGIN
 				-- Produce and Consume transactions typically shares a batch but hold different transaction ids. 
 				DELETE	FROM #tmpICInventoryTransaction
 				WHERE	strBatchId = @strBatchId
+
+				-- Generate the GL entries. 
+				-- The consume must use the WIP account id from the Produce item. 	
+				INSERT INTO @GLEntries (
+					[dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					)
+				EXEC dbo.uspICCreateGLEntries 
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+
+				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+				BEGIN 
+					SET @intProduceItemWIPAccountId = NULL 
+					SELECT TOP 1 
+						@intProduceItemWIPAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, @strAccountToCounterInventory) 
+					FROM 
+						@ItemsToPost t 
+					WHERE
+						t.intTransactionTypeId = 9 -- Produce						
+						AND t.dblQty > 0 
+
+					-- Replace all the 'wip' related intAccountId with the produce item's wip account id. 
+					UPDATE glEntries
+					SET
+						glEntries.intAccountId = 
+							CASE 
+								WHEN dblDebitUnit > 0 AND strTransactionForm = 'Consume' THEN @intProduceItemWIPAccountId
+								WHEN dblDebitUnit < 0 AND strTransactionForm = 'Produce' THEN @intProduceItemWIPAccountId
+								ELSE intAccountId
+							END						
+					FROM	
+						@GLEntries glEntries
+					WHERE
+						@intProduceItemWIPAccountId IS NOT NULL 
+				END 
 			END
 
 			-- Repost 'Inventory Transfer'
@@ -5324,7 +5394,22 @@ BEGIN
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END 
 
-			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, Credit Memo, 'Inventory Transfer') AND Contra-Account is NOT NULL 
+			/*	Re-create the Post g/l entries 
+				Except for:
+					'Cost Adjustment'
+					, 'Inventory Shipment'
+					, 'Invoice'
+					, 'Credit Memo'
+					, 'Inventory Receipt'
+					, 'Inventory Return'
+					, 'Inventory Transfer'
+					, 'Inventory Transfer with Shipment'
+					, 'Outbound Shipment'
+					, 'Inventory Adjustment - Opening Inventory'
+					, 'Storage Settlement'
+					, 'Consume'
+					, 'Produce'					
+			*/
 			IF EXISTS (
 				SELECT	TOP 1 1 
 				WHERE	@strTransactionType NOT IN (
@@ -5339,6 +5424,8 @@ BEGIN
 							, 'Outbound Shipment'
 							, 'Inventory Adjustment - Opening Inventory'
 							, 'Storage Settlement'
+							, 'Consume'
+							, 'Produce'
 						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
