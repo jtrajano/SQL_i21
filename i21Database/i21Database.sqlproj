@@ -8255,6 +8255,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
