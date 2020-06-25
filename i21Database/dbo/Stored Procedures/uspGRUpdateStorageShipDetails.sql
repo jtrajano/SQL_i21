@@ -7,10 +7,18 @@ BEGIN TRY
 		,@intShipFromLocationId INT
 
 	SELECT 
-		@intShipFromEntityId = intEntityId
-		,@intShipFromLocationId = intFarmFieldId
-	FROM tblSCDeliverySheet 
-	WHERE intDeliverySheetId = @intDeliverySheetId
+		@intShipFromEntityId = SCD.intEntityId
+		,@intShipFromLocationId = COALESCE(SCD.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)
+	FROM tblSCDeliverySheetSplit SDS
+	INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SDS.intDeliverySheetId
+	LEFT JOIN tblEMEntityLocation FRM
+		ON SCD.intFarmFieldId = FRM.intEntityLocationId
+	LEFT JOIN tblAPVendor VND
+		ON SCD.intEntityId = VND.intEntityId
+	LEFT JOIN tblEMEntityLocation VNDL
+		ON VND.intEntityId = VNDL.intEntityId
+			AND VNDL.ysnDefaultLocation = 1
+	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
 
 	IF @intShipFromEntityId IS NOT NULL
 	BEGIN
