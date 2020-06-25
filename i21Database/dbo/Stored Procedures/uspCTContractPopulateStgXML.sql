@@ -38,6 +38,7 @@ BEGIN TRY
 		,@intTransactionId int
 		,@intContractScreenId int
 		,@strSubmittedByXML NVARCHAR(MAX)
+		,@intPContractSeq int
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -107,11 +108,11 @@ BEGIN TRY
 			WHERE intContractHeaderId = @ContractHeaderId
 			)
 
-	SELECT @intPContractHeaderId = intContractHeaderId
+	SELECT @intPContractHeaderId = intContractHeaderId,@intPContractSeq=intContractSeq
 	FROM tblCTContractDetail
 	WHERE intContractDetailId = @intPContractDetailId
 
-	SELECT @strExternalContractNumber = strContractNumber
+	SELECT @strExternalContractNumber = strContractNumber +' / '+Ltrim(@intPContractSeq)
 		,@intEntityId = intEntityId
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @intPContractHeaderId
