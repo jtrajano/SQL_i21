@@ -103,7 +103,7 @@ BEGIN TRY
 			DELETE FROM tblAPBillDetail WHERE intBillDetailId = @DetailId
 			
 			INSERT INTO @voucherIds			
-			SELECT @DetailId
+			SELECT @Id
 
 			EXEC uspAPUpdateVoucherTotal @voucherIds
 
