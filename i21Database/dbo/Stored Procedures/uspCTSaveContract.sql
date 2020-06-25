@@ -401,7 +401,7 @@ BEGIN TRY
 	END
 
 	--Slice
-	EXEC uspQMSampleContractSlice @intContractHeaderId
+	--EXEC uspQMSampleContractSlice @intContractHeaderId --Please do not uncomment this one. This is related to jira CT-4391
 	EXEC uspLGLoadContractSlice @intContractHeaderId
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 
