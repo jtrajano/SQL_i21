@@ -19,6 +19,7 @@
 	,@ysnRefreshContract BIT = 0
 	,@ysnRefreshStock BIT = 0
 	,@strRefreshItemStock NVARCHAR(MAX) = ''
+	,@ShortExcessXML VARCHAR(MAX) = NULL
 	)
 AS
 BEGIN TRY
@@ -130,6 +131,15 @@ BEGIN TRY
 		,[strValue] DECIMAL(24, 6)
 		)
 
+	IF OBJECT_ID('tempdb..#TempShortExcess') IS NOT NULL
+		DROP TABLE #TempShortExcess
+
+	CREATE TABLE #TempShortExcess (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
 	IF OBJECT_ID('tempdb..#TempWeeksOfSupplyTarget') IS NOT NULL
 		DROP TABLE #TempWeeksOfSupplyTarget
 
@@ -195,7 +205,8 @@ BEGIN TRY
 				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFItemExclude IE
-					WHERE IE.intItemId = I.intItemId and IE.ysnExcludeInDemandView=1
+					WHERE IE.intItemId = I.intItemId
+						AND IE.ysnExcludeInDemandView = 1
 					)
 		END
 	END
@@ -551,6 +562,30 @@ BEGIN TRY
 				)
 		GROUP BY [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0')
+
+		EXEC sp_xml_removedocument @idoc
+	END
+
+	IF @ShortExcessXML <> ''
+		AND @ysnCalculatePlannedPurchases = 1
+	BEGIN
+		EXEC sp_xml_preparedocument @idoc OUTPUT
+			,@ShortExcessXML
+
+		INSERT INTO #TempShortExcess (
+			[intItemId]
+			,[strName]
+			,[strValue]
+			)
+		SELECT [intItemId]
+			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
+			,[Value]
+		FROM OPENXML(@idoc, 'root/SE', 2) WITH (
+				[intItemId] INT
+				,[Name] NVARCHAR(50)
+				,[Value] DECIMAL(24, 6)
+				)
+		WHERE [Value] < 0
 
 		EXEC sp_xml_removedocument @idoc
 	END
@@ -1453,31 +1488,17 @@ BEGIN TRY
 			UPDATE D
 			SET dblQty = (
 					CASE 
-						WHEN (
-								SELECT sum(OpenInv.dblQty)
-								FROM #tblMFDemand OpenInv
-								WHERE OpenInv.intItemId = D.intItemId
-									AND OpenInv.intMonthId = @intMonthId
-									AND (
-										intAttributeId IN (
-											2
-											,4
-											,8
-											) --Opening Inventory, Existing Purchases,Forecasted Consumption
-										)
-								) < 0
+						WHEN IsNULL((
+									SELECT sum(SE.strValue)
+									FROM #TempShortExcess SE
+									WHERE SE.intItemId = D.intItemId
+										AND SE.strName = @intMonthId
+									), 0) < 0
 							THEN (
-									SELECT sum(OpenInv.dblQty)
-									FROM #tblMFDemand OpenInv
-									WHERE OpenInv.intItemId = D.intItemId
-										AND OpenInv.intMonthId = @intMonthId
-										AND (
-											intAttributeId IN (
-												2
-												,4
-												,8
-												) --Opening Inventory, Existing Purchases,Forecasted Consumption
-											)
+									SELECT sum(SE.strValue)
+									FROM #TempShortExcess SE
+									WHERE SE.intItemId = D.intItemId
+										AND SE.strName = @intMonthId
 									) * - 1
 						ELSE 0
 						END
