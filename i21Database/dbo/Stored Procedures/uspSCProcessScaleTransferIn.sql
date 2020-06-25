@@ -419,10 +419,10 @@ _PostOrUnPost:
 				@strLotNumberDifference = 'e',
 				@intOwnershipTypeDifference = 1,
 				@intItemUOMIdDifference = intItemUOMIdTo,
-				@strTicketNumberIn	= strTicketNumber
+				@strTicketNumberOut	= strTicketNumber
 				from tblSCTicket where intTicketId = @intMatchTicketId
 
-			select @strTicketNumberOut = strTicketNumber from tblSCTicket where intTicketId = @intMatchTicketId
+			select @strTicketNumberIn = strTicketNumber from tblSCTicket where intTicketId = @intTicketId
 			declare @message nvarchar(200)
 			set @message = 'Inventory adjustment for Transfer Out-' +  @strTicketNumberOut + ' and Transfer In-' + @strTicketNumberIn 
 			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]
