@@ -9,8 +9,7 @@ BEGIN TRY
 	SELECT 
 		@intShipFromEntityId = SCD.intEntityId
 		,@intShipFromLocationId = COALESCE(SCD.intFarmFieldId, VND.intShipFromId, VNDL.intEntityLocationId)
-	FROM tblSCDeliverySheetSplit SDS
-	INNER JOIN tblSCDeliverySheet SCD ON SCD.intDeliverySheetId = SDS.intDeliverySheetId
+	FROM tblSCDeliverySheet SCD
 	LEFT JOIN tblEMEntityLocation FRM
 		ON SCD.intFarmFieldId = FRM.intEntityLocationId
 	LEFT JOIN tblAPVendor VND
@@ -18,7 +17,7 @@ BEGIN TRY
 	LEFT JOIN tblEMEntityLocation VNDL
 		ON VND.intEntityId = VNDL.intEntityId
 			AND VNDL.ysnDefaultLocation = 1
-	WHERE SDS.intDeliverySheetId = @intDeliverySheetId
+	WHERE SCD.intDeliverySheetId = @intDeliverySheetId
 
 	IF @intShipFromEntityId IS NOT NULL
 	BEGIN
