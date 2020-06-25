@@ -260,21 +260,16 @@ BEGIN
 
 		--update the source's customer storage open balance
 
-		UPDATE X
-		SET X.dblOpenBalance = Y.dblQty
-		FROM
-		tblGRCustomerStorage X
-		INNER JOIN  (SELECT A.intCustomerStorageId,B.intSourceCustomerStorageId,TSS.intTransferStorageId,  ROUND(A.dblOpenBalance + SUM(ISNULL(TSR.dblUnitQty,B.dblDeductedUnits)),6) dblQty
-		FROM tblGRCustomerStorage A 
-		INNER JOIN tblGRTransferStorageSourceSplit B 
-			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
-		LEFT JOIN tblGRTransferStorageReference TSR
-			ON TSR.intSourceCustomerStorageId = B.intSourceCustomerStorageId
-		LEFT JOIN tblGRTransferStorageSplit TSS
-			ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
-		WHERE B.intTransferStorageId = @intTransferStorageId AND (CASE WHEN (TSR.intTransferStorageId IS NULL) THEN 1 ELSE CASE WHEN TSR.intTransferStorageId = @intTransferStorageId THEN 1 ELSE 0 END END) = 1
-		GROUP BY  A.intCustomerStorageId,B.intSourceCustomerStorageId, TSS.intTransferStorageId,A.dblOpenBalance) Y
-			ON Y.intCustomerStorageId = X.intCustomerStorageId
+		UPDATE CS
+		SET dblOpenBalance = CS.dblOpenBalance + TS.dblDeductedUnits
+		FROM tblGRCustomerStorage CS
+		INNER JOIN  (
+			SELECT intSourceCustomerStorageId
+				,dblDeductedUnits 
+			FROM tblGRTransferStorageSourceSplit 
+			WHERE intTransferStorageId = @intTransferStorageId
+		) TS
+			ON TS.intSourceCustomerStorageId = CS.intCustomerStorageId
 
 		/* REVERSE TRANSACTION POSTED TO Inventory */
 				DECLARE @GLEntries AS RecapTableType;
