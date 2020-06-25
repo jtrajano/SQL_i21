@@ -8,4 +8,4 @@
 
 CREATE VIEW vyuAPOriginCCDTransaction
 AS
-SELECT  '' stub WHERE 0 = 1
+SELECT  '' COLLATE Latin1_General_CI_AS AS stub WHERE 0 = 1

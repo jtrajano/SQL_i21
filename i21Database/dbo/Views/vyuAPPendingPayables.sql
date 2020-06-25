@@ -2,7 +2,7 @@
 AS 
 
 SELECT 
-	 ISNULL(A2.strVoucherIds, 'New Voucher') AS strVoucherIds
+	 ISNULL(A2.strVoucherIds, 'New Voucher') COLLATE Latin1_General_CI_AS AS strVoucherIds
 	--A2.strVoucherIds
 	,ISNULL((CASE WHEN A.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
 	THEN (CASE 

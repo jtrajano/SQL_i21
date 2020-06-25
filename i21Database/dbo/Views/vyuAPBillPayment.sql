@@ -20,15 +20,15 @@ intId
 ,Payments.ysnVoid
 ,Payments.ysnPrepay
 ,Payments.ysnPosted AS ysnPaymentPosted
-,Payments.strPaymentInfo
-,Payments.strBankAccountNo
+,Payments.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo
+,Payments.strBankAccountNo COLLATE Latin1_General_CI_AS AS strBankAccountNo
 ,Payments.intPaymentId
 ,Payments.intARPaymentId
 ,Payments.dtmDatePaid
 ,Payments.ysnCleared
 ,Payments.dtmDateReconciled
 ,Payments.strBatchId
-,A2.strPaymentInfoKey
+,A2.strPaymentInfoKey COLLATE Latin1_General_CI_AS AS strPaymentInfoKey
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
 	ON A2.intBillId = A.intBillId

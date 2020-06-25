@@ -2,7 +2,7 @@
 AS
 
 SELECT DISTINCT
-	 A.strVendorId
+	 A.strVendorId COLLATE Latin1_General_CI_AS AS strVendorId
 	, A.intYear
 	, CASE WHEN SUM(A.dbl1099B) >= MIN(C.dbl1099B) THEN SUM(A.dbl1099B) ELSE 0 END AS dbl1099B
 FROM vyuAP1099 A

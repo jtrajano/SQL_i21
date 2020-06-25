@@ -11,7 +11,7 @@ SELECT
 	, [dtmRecordDate] = r.dtmReceiptDate 
 	, r.strBillOfLading
 	, [strOrderType] = r.strReceiptType
-	, [strRecordType] = 'Receipt'
+	, [strRecordType] = 'Receipt' COLLATE Latin1_General_CI_AS
 	, ri.strOrderNumber			
 	, ri.strItemDescription
 	, ri.dblUnitCost

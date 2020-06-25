@@ -54,7 +54,7 @@ SELECT
 			,ysnACHActive				= EFT.ysnActive
 			,dblInvoiceDiscountAvailable= CAST(0 AS DECIMAL(18,6))
 			,intCurrencyExchangeRateTypeId	= NULL
-			,strCurrencyExchangeRateType	= ''
+			,strCurrencyExchangeRateType	= '' COLLATE Latin1_General_CI_AS
 			,[dblCurrencyExchangeRate]		= 1.000000
 		FROM
 			tblAPBill APB

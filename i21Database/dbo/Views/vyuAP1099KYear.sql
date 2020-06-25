@@ -2,7 +2,7 @@
 AS
 
 SELECT DISTINCT
-	 A.strVendorId
+	 A.strVendorId COLLATE Latin1_General_CI_AS AS strVendorId
 	, A.intYear
 	, SUM(A.dbl1099K) AS dbl1099B
 FROM vyuAP1099 A

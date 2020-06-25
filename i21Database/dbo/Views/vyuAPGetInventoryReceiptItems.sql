@@ -25,8 +25,8 @@ SELECT	Receipt.intEntityVendorId
 		,dtmLastVoucherDate = topVoucher.dtmBillDate		
 		,receiptAndVoucheredItems.intCurrencyId
 		,receiptAndVoucheredItems.strCurrency
-		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
-		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		,strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
+		,strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS 
 		,lc.intLoadContainerId
 		,lc.strContainerNumber
 		,intItemUOMId = COALESCE(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId)
