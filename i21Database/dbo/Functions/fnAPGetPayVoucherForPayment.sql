@@ -81,7 +81,6 @@ RETURNS TABLE AS RETURN
 		AND ISNULL(payDetail.intPayScheduleId,-1) = ISNULL(forPay.intPayScheduleId,-1)
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
-	AND forPay.ysnDeferredPay = @showDeferred
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
 			ELSE 
 				(CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) 
