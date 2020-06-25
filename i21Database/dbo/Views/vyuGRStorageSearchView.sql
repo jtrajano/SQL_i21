@@ -100,7 +100,8 @@ SELECT DISTINCT
 									)
 	,Category.strCategoryCode
 	,strTransactionStatus           = CASE 
-										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DeliverySheet.ysnPost = 1 THEN 'Posted'
+										WHEN CS.ysnTransferStorage = 1 OR CS.intTicketId IS NOT NULL OR DeliverySheet.ysnPost = 1 OR DS2.ysnPost = 1 										
+										THEN 'Posted'
 										ELSE 'Open'
 									END COLLATE Latin1_General_CI_AS
 	,TSR.intSourceCustomerStorageId
@@ -135,6 +136,8 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			AND DSS.intEntityId = E.intEntityId
 			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
 			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
+LEFT JOIN tblSCDeliverySheet DS2
+	 on DS2.intDeliverySheetId = CS.intDeliverySheetId
 LEFT JOIN tblSCTicket SC 
 	ON SC.intTicketId = CS.intTicketId
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
