@@ -14,7 +14,7 @@ SELECT
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
-		,strConcern				=	'Weight Claim'
+		,strConcern				=	'Weight Claim' COLLATE Latin1_General_CI_AS
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
 		,strClaimUOM			=	QtyUOMDetails.strUnitMeasure
 		,strCostUOM				=	CASE 

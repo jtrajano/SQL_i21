@@ -10,7 +10,7 @@ AS
 	Item.strItemNo,
 	strCommodity = (SELECT strCommodityCode FROM tblICCommodity WHERE intCommodityId = Item.intCommodityId),
 	dtmPaymentDate = PYMT.dtmDatePaid,
-	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber),
+	strAccountNumber = dbo.fnAESDecryptASym(EFT.strAccountNumber) COLLATE Latin1_General_CI_AS ,
 	strCheckNo = BNKTRN.strReferenceNo,
 	strVendorName = ENTITY.strName,
 	strVendorAddress = dbo.fnConvertToFullAddress(NULL, Bill.strShipFromCity, Bill.strShipFromState, NULL) COLLATE Latin1_General_CI_AS,
@@ -49,7 +49,7 @@ AS
 		 WHEN INVRCPT.intSourceType IS NULL
 		 THEN 'Settlement'
 	     ELSE 'None'
-		END),
+		END) COLLATE Latin1_General_CI_AS,
 	strSplitNumber = 
 		(CASE WHEN INVRCPT.intSourceType = 4 THEN
 		(SELECT TOP 1 EM.strSplitNumber
@@ -125,7 +125,7 @@ AS
 	CASE WHEN BillDtl.intInventoryReceiptItemId IS NULL AND BillDtl.intInventoryReceiptChargeId IS NULL 
 		THEN 'True'
 		ELSE 'False'
-		END as IsAdjustment 
+		END COLLATE Latin1_General_CI_AS as IsAdjustment 
 	FROM tblCMBankTransaction BNKTRN
 	INNER JOIN tblAPPayment PYMT ON BNKTRN.strTransactionId =  PYMT.strPaymentRecordNum
 	INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId

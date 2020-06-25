@@ -5,7 +5,7 @@ SELECT
 	Purchase.strPurchaseOrderNumber,
 	Item.strItemNo,
 	B.intPrepayTypeId,
-	Prepay.strText strPrepayType,
+	Prepay.strText COLLATE Latin1_General_CI_AS AS strPrepayType,
 	B.strMiscDescription,
 	ItemUOM.strUnitMeasure strUOM,
 	B.dblQtyContract,
@@ -36,8 +36,8 @@ CostUOM.strUnitMeasure strCostUOM,
 	B.dblVolume,
 	B.dtmExpectedDate,
 	SN.strSourceNumber,
-	Form1099.strText str1099Form,
-	Category1099.strText str1099Category,
+	Form1099.strText COLLATE Latin1_General_CI_AS AS str1099Form,
+	Category1099.strText COLLATE Latin1_General_CI_AS AS str1099Category,
 	A.intBillId
 	
 FROM dbo.tblAPBill A

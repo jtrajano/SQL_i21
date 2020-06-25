@@ -29,7 +29,7 @@ SELECT TOP 100 PERCENT
 										ORDER BY B.intPaymentId DESC
 									) paymentData
 									FOR XML PATH('')),1,1,''
-								),
+								) COLLATE Latin1_General_CI_AS,
 		strPaymentInfoKey	=	STUFF((
 									SELECT ',' + CAST(paymentData.intPaymentId AS NVARCHAR)
 									FROM
@@ -54,7 +54,7 @@ SELECT TOP 100 PERCENT
 										ORDER BY B.intPaymentId DESC
 									) paymentData
 									FOR XML PATH('')),1,1,''
-								),
+								) COLLATE Latin1_General_CI_AS,
 		dtmPaymentDateReconciled=	latestPay.dtmDateReconciled,
 		ysnClr =	latestPay.ysnClr,
 		dtmClr =	latestPay.dtmClr

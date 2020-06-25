@@ -33,7 +33,7 @@ SELECT
 	,
 	b.dtmOriginationDate,
 	a.intVendorType, --get the actual text
-	strVendorType = case when a.intVendorType = 1 then 'Person' when a.intVendorType = '0' then 'Company' else '' end,
+	strVendorType = case when a.intVendorType = 1 then 'Person' when a.intVendorType = '0' then 'Company' else '' end COLLATE Latin1_General_CI_AS,
 	a.intGLAccountExpenseId, -- get the actual text
 	aa.strAccountId,
 	a.intCurrencyId, -- get the actual text,

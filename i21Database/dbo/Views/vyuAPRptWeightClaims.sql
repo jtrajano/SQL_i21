@@ -4,13 +4,13 @@ AS
 SELECT 
 CAST(ROW_NUMBER() OVER(ORDER BY intContractDetailId) AS INT) AS intClaimId,
 (SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup) AS strCompanyName,
-(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) as strCompanyAddress,
+(SELECT TOP 1 dbo.[fnAPFormatAddress](strCompanyName, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL) FROM tblSMCompanySetup) COLLATE Latin1_General_CI_AS as strCompanyAddress,
 CASE WHEN Claim.ysnSubCurrency > 0 THEN (Claim.dblWeightLoss - Claim.dblFranchiseWeight) * Claim.dblCost / ISNULL(Claim.intCent,1)  ELSE (Claim.dblWeightLoss - Claim.dblFranchiseWeight) * Claim.dblCost END AS dblClaim,
 ((Claim.dblWeightLoss - Claim.dblFranchiseWeight) * (Claim.dblCost / NULLIF(ISNULL(Claim.intCent,1), 0))  - Claim.dblTotalClaimAmount) * -1 AS  dblFranchiseAmount,
 (Claim.dblWeightLoss - Claim.dblFranchiseWeight) AS dblQtyToBill ,
 ISNULL(ItemContractCountry.strCountry,CommodityAttr.strDescription) AS strCountryOrigin,
-strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](Claim.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone)),
-strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone)),
+strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](Claim.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone)) COLLATE Latin1_General_CI_AS,
+strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone)) COLLATE Latin1_General_CI_AS,
 CreatedBy.strName AS strContactName,
 CreatedBy.strEmail AS strContactEmail,
 strDateLocation = VoucherLocation.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 107),
@@ -20,7 +20,7 @@ Bank.strBankName,
 BankAccount.strBankAccountHolder,
 BankAccount.strIBAN,
 BankAccount.strSWIFT,
-Bank.strCountry + ', ' + Bank.strCity + ' ' + Bank.strState AS strBankAddress,
+Bank.strCountry + ', ' + Bank.strCity + ' ' + Bank.strState COLLATE Latin1_General_CI_AS AS strBankAddress,
 (SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 	(	
 	  SELECT TOP 1

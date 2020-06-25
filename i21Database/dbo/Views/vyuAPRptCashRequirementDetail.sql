@@ -22,7 +22,7 @@ SELECT DISTINCT
 							 WHEN SC.strTicketStatus = 'R' THEN 'Reopen'
 							 WHEN SC.strTicketStatus = 'H' THEN 'Hold'
 						ELSE ''
-						END)
+						END) COLLATE Latin1_General_CI_AS
 	,strSourceType = 
 		(CASE 
 		 WHEN IR.intSourceType = 5 
@@ -38,8 +38,8 @@ SELECT DISTINCT
 		 WHEN IR.intSourceType IS NULL
 		 THEN 'Settlement'
 	     ELSE 'None'
-		END)
-	,strLocation = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL))
+		END) COLLATE Latin1_General_CI_AS
+	,strLocation = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,NULL, NULL, NULL, APB.strShipToCity, APB.strShipToState,NULL, NULL, NULL)) COLLATE Latin1_General_CI_AS
 	,ISNULL(IR.strReceiptNumber,IR2.strReceiptNumber) AS strReceiptNumber
 	,APB.intBillId
 	,APB.strBillId
@@ -62,7 +62,7 @@ SELECT DISTINCT
 	,dblTotal = (APBD.dblTotal + APBD.dblTax)
 	,GETDATE() as dtmCurrentDate
 	,C.strCompanyName
-	,strCompanyAddress = dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState,C.strZip)
+	,strCompanyAddress = dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState,C.strZip) COLLATE Latin1_General_CI_AS
 	,ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode
 	FROM  tblAPBill APB 
 	INNER JOIN tblAPBillDetail APBD 

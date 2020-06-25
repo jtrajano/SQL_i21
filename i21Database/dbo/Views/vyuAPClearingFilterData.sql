@@ -6,7 +6,7 @@ SELECT DISTINCT
 	receiptItems.dtmDate
 	,receiptItems.strTransactionNumber
 	,item.strItemNo
-	,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+	,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
 	,receiptItems.strAccountId
 	,compLoc.strLocationName
 FROM 

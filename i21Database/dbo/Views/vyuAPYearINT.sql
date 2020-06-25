@@ -4,7 +4,7 @@ AS
 
 	SELECT
 		 A.intYear,
-		 A.strVendorId
+		 A.strVendorId COLLATE Latin1_General_CI_AS AS strVendorId
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
 	CROSS JOIN tblAP1099Threshold C
