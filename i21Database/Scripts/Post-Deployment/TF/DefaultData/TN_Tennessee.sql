@@ -163,21 +163,23 @@ left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCat
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
 where RC.intTaxAuthorityId = @TaxAuthorityId 
 */
-	DECLARE @TaxCriteria AS TFTaxCriteria
+	-- DECLARE @TaxCriteria AS TFTaxCriteria
 
-	INSERT INTO @TaxCriteria(
-		intTaxCriteriaId
-		, strTaxCategory
-		, strState
-		, strFormCode
-		, strScheduleCode
-		, strType
-		, strCriteria
-		, intMasterId
-	)
+	-- INSERT INTO @TaxCriteria(
+	-- 	intTaxCriteriaId
+	-- 	, strTaxCategory
+	-- 	, strState
+	-- 	, strFormCode
+	-- 	, strScheduleCode
+	-- 	, strType
+	-- 	, strCriteria
+	-- 	, intMasterId
+	-- )
+	-- SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Gasoline Gasohol Ethanol', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 26689
+	-- UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Gasoline Gasohol Ethanol', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Gasohol', strCriteria = '<> 0', intMasterId = 26690
 	
 
-	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
+	-- EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
 
 -- Reporting Component - Base
