@@ -348,7 +348,7 @@ BEGIN TRY
             ,dblPrice = dblUnitPrice
             ,intEntityId 
             ,ysnDelete = 0
-            ,intUserId = NULL
+            ,intUserId = @intUserId
             ,strNotes = strTicketComment
         FROM tblSCTicket TV
         LEFT JOIN tblGRStorageType ST on ST.intStorageScheduleTypeId = TV.intStorageScheduleTypeId 
