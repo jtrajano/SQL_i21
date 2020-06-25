@@ -181,6 +181,9 @@ BEGIN TRY
 		DEALLOCATE splitCursor;
 	END
 */
+	----------------------------------------------------------------------------------------------------------
+
+
 
 	DECLARE @ysnDPOwned as BIT = 0;
 	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
@@ -551,6 +554,7 @@ BEGIN TRY
 		FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
 	) SC
 	WHERE CS.intDeliverySheetId = @intDeliverySheetId
+		AND CS.ysnTransferStorage = 0
 		
 	UPDATE A
 	SET dblOpenBalance = B.dblQty
@@ -558,6 +562,7 @@ BEGIN TRY
 	FROM tblGRCustomerStorage A
 	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
 	WHERE intDeliverySheetId = @intDeliverySheetId 
+		AND A.ysnTransferStorage = 0
 
 
 	UPDATE GRS SET GRS.dblGrossQuantity = ((GRS.dblOpenBalance / SCD.dblNet) * SCD.dblGross)
@@ -567,9 +572,11 @@ BEGIN TRY
 	AND SCDS.intEntityId = GRS.intEntityId
 	AND SCDS.intStorageScheduleTypeId = GRS.intStorageTypeId  
 	where SCDS.intDeliverySheetId = @intDeliverySheetId and GRS.ysnTransferStorage = 0
+		AND GRS.ysnTransferStorage = 0
 
 	
 
+	EXEC uspGRUpdateStorageShipDetails @intDeliverySheetId 
 
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
