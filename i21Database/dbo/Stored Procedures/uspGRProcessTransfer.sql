@@ -125,7 +125,7 @@ BEGIN
 
 		--update the source's customer storage open balance
 		UPDATE A
-		SET A.dblOpenBalance 	= ROUND(B.dblOriginalUnits - B.dblDeductedUnits,@intDecimalPrecision)
+		SET A.dblOpenBalance 	= ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6)
 		FROM tblGRCustomerStorage A 
 		INNER JOIN tblGRTransferStorageSourceSplit B 
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
