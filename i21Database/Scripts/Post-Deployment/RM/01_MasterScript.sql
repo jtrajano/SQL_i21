@@ -201,6 +201,7 @@ BEGIN
 		UNION ALL SELECT 59, 'Short Closed Sequence', 'Short Closed Sequence.'	
 		UNION ALL SELECT 60, 'Unposted Invoice', 'Sales In-Transit return when Invoice is unposted'
 		UNION ALL SELECT 61, 'Re-opened Sequence', 'Re-opened Sequence.'
+		UNION ALL SELECT 62, 'Deleted Voucher', 'Deleted Voucher.'
 	) tbl
 	WHERE intActionId NOT IN (SELECT intLogActionId FROM tblRKLogAction)
 

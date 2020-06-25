@@ -78,6 +78,7 @@ AS
 		WHERE   NOT (LO.intPurchaseSale	    =   1 AND LO.intShipmentStatus    IN(4,11,7))
 		AND	LD.intPContractDetailId IS NOT NULL
 		AND isnull(LO.ysnCancelled,convert(bit,0)) = convert(bit,0)
+		AND LO.intShipmentType = 1
 
 		UNION ALL
 
@@ -89,6 +90,7 @@ AS
 		WHERE   NOT (LO.intPurchaseSale	    =   2 AND LO.intShipmentStatus    IN(6,11,7))
 		AND	LD.intSContractDetailId IS NOT NULL
 		AND isnull(LO.ysnCancelled,convert(bit,0)) = convert(bit,0)
+		AND LO.intShipmentType = 1
 
 		UNION ALL
 

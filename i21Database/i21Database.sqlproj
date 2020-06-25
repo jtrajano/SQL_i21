@@ -8756,6 +8756,9 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
 	<Build Include="dbo\Views\vyuSTLotteryCountSheetReport.sql" />
+    <Build Include="dbo\Tables\tblMFItemExclude.sql" />
+    <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -32,29 +32,46 @@ WITH (
 	, [datatype] nvarchar(50)
 )
 
-DECLARE @dtmDateFrom DATETIME,@dtmDateTo DATETIME,@dtmCMDate DATETIME, @dtmTemp DATETIME
+DECLARE @dtmDateFrom DATETIME,@dtmDateTo DATETIME,@dtmCMDate DATETIME, @dtmTemp DATETIME,@condition NVARCHAR(40)
 
 IF EXISTS(SELECT 1 FROM @temp_xml_table)
 BEGIN
+	
+
 	SELECT 
 		@dtmDateFrom = [from],
 		@dtmTemp = [from],
-		@dtmDateTo =  [to]
-	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and condition in ('Equal To' , 'Between')
+		@dtmDateTo =  [to],
+		@condition  = condition 
+	FROM @temp_xml_table WHERE [fieldname] = 'dtmDate' --and @condition <> 'Equal To'
 
-	DECLARE @dtmDateCurrent DATETIME
-	select @dtmDateCurrent = CAST(CONVERT(nvarchar(20), GETDATE(), 101) AS DATETIME)
+	IF @condition IS NULL RETURN;
 
-	SELECT
-		@dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900')
-		,@dtmDateTo =
-		CASE WHEN @dtmTemp IS NULL
-			THEN @dtmDateCurrent
-			ELSE ISNULL(@dtmDateTo,@dtmDateFrom)
-		END
 
-	SELECT @dtmCMDate = DATEADD( DAY, 1, @dtmDateTo) 
-	SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
+	IF @condition <> 'Equal To'
+	BEGIN
+		
+
+		DECLARE @dtmDateCurrent DATETIME
+		select @dtmDateCurrent = CAST(CONVERT(nvarchar(20), GETDATE(), 101) AS DATETIME)
+
+		SELECT
+			@dtmDateFrom = isnull(@dtmDateFrom,'01/01/1900')
+			,@dtmDateTo =
+			CASE WHEN @dtmTemp IS NULL
+				THEN @dtmDateCurrent
+				ELSE ISNULL(@dtmDateTo,@dtmDateFrom)
+			END
+
+		SELECT @dtmCMDate = DATEADD( DAY, 1, @dtmDateTo) 
+		SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateTo))
+	END
+	ELSE
+
+	BEGIN
+		SELECT @dtmDateTo = DATEADD( SECOND,-1, DATEADD(DAY, 1 ,@dtmDateFrom))
+		SELECT @dtmCMDate = DATEADD( SECOND, 1, @dtmDateTo) 
+	END
 
 
 	DECLARE @strLocation NVARCHAR(50)

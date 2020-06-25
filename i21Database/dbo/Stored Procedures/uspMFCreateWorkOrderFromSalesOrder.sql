@@ -671,7 +671,7 @@ BEGIN TRY
 				,@intLocationId
 				,@intUserId
 				,@intWokrOrderId
-
+				Select @strWorkOrderNo=''
 			SELECT @intMinWO = Min(intRowNo)
 			FROM @tblWO
 			WHERE intRowNo > @intMinWO

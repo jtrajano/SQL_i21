@@ -58,8 +58,13 @@ SELECT
 	,[intCurrencyExchangeRateId]		= ARIFP.[intCurrencyExchangeRateId]
 	,[dblCurrencyExchangeRate]			= ARIFP.[dblCurrencyExchangeRate]
 	,[dtmDiscountDate]					= CASE WHEN ISNULL(ARIFP.dblDiscountAvailable, 0) = 0
-												  THEN NULL
-												  ELSE [dbo].[fnGetDiscountDateBasedOnTerm](ARIFP.[dtmDate], SMT.[intTermID], GETDATE())
+											THEN NULL
+											ELSE
+											(CASE WHEN ARIFP.[strType] = 'CF Invoice' THEN
+												(SELECT CAST(DATEADD(DAY, intDiscountDay, GETDATE()) AS DATE) FROM tblSMTerm WHERE intTermID = ARIFP.[intTermId])
+											ELSE
+												[dbo].[fnGetDiscountDateBasedOnTerm](ARIFP.[dtmDate], ARIFP.[intTermId], GETDATE())
+											END)
 										  END
 	,[ysnACHActive]						=  ISNULL(ysnACHActive, 0)
 	,[dblInvoiceDiscountAvailable]		= ARIFP.[dblInvoiceDiscountAvailable]

@@ -2634,7 +2634,8 @@ BEGIN TRY
 										WHERE intSettleStorageId = @intSettleStorageId  and @createdVouchersId is not null
 										
 								update a
-									set dblPaidAmount = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
+									set dblPaidAmount = round((b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits , 2),
+										dblPaidAmountRaw = (b.dblOldCost + isnull(@sum_e, 0)) * a.dblUnits,
 										dblOldCost = b.dblOldCost
 										from tblGRStorageHistory a
 											join @voucherPayable b 
@@ -2660,6 +2661,20 @@ BEGIN TRY
 								,@userId = @intCreatedUserId
 								,@transactionType = 'Settle Storage'
 								,@success = @success OUTPUT
+
+							-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
+							-- Posting of voucher
+							--Note that 19.2 Dev Ithaca is different from this one
+							update a
+								set dblPaidAmount = dblPaidAmountRaw
+									from tblGRStorageHistory a
+										join @voucherPayable b 
+											on a.intContractHeaderId = b.intContractHeaderId
+											and a.intCustomerStorageId = b.intCustomerStorageId
+								where strType = 'Settlement'
+									and (dblPaidAmountRaw is not null 
+											and round(dblPaidAmountRaw, 2) = dblPaidAmount)
+							--
 
 					END
 

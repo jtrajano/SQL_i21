@@ -10,6 +10,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Create the temp config table. 
+IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpLogRiskPosition (
+		ysnSkip BIT 
+	)
+END 
+
+-- Check if the logging needs to be skipped
+IF EXISTS (SELECT TOP 1 1 FROM #tmpLogRiskPosition WHERE ysnSkip = 1) 
+BEGIN 
+	RETURN;
+END 
+
 DECLARE @strBucketType AS NVARCHAR(50) = 'Company Owned'
 		,@strActionType AS NVARCHAR(500)
 
@@ -45,7 +59,7 @@ BEGIN
 	)
 END 
 
--- Exist immediately if 
+-- Exit immediately if the batch id is in the list.  
 IF EXISTS (SELECT TOP 1 1 FROM #tmpICLogRiskPositionFromOnHandSkipList WHERE strBatchId = @strBatchId)
 	RETURN;
 
