@@ -6,7 +6,6 @@
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
-	DECLARE @intShipmentType INT
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
 	DECLARE @GLEntries AS RecapTableType
@@ -14,15 +13,9 @@ BEGIN TRY
 	DECLARE @STARTING_NUMBER_BATCH INT = 3
 	DECLARE @strBatchId NVARCHAR(20)
 	DECLARE @strBatchIdUsed NVARCHAR(20)
-	DECLARE @intLocationId INT
-	DECLARE @strFOBPoint NVARCHAR(50)
 	DECLARE @intFOBPointId INT
-	DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 5
+	DECLARE @INBOUND_SHIPMENT_TYPE AS INT = 22
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
-	DECLARE @ysnAllowBlankGLEntries AS BIT = 1
-	DECLARE @dummyGLEntries AS RecapTableType
-	DECLARE @intPContractDetailId INT
-	DECLARE @intItemLocationId INT
 	DECLARE @intDestinationFOBPointId INT
 	DECLARE @ysnCancel BIT
 	DECLARE @ysnIsReturn BIT = 0
@@ -30,7 +23,6 @@ BEGIN TRY
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
-		,@strFOBPoint = FT.strFobPoint
 		,@ysnCancel = ISNULL(L.ysnCancelled, 0)
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
@@ -59,11 +51,11 @@ BEGIN TRY
 
 		IF (@intPurchaseSale = 3) 
 		BEGIN
-			IF (EXISTS (SELECT TOP 1 1 FROM tblLGLoadDetail LD 
+			IF (EXISTS (SELECT 1 FROM tblLGLoadDetail LD 
 					INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
 					INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId IN (LD.intPContractDetailId, LD.intSContractDetailId)
 					INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-					WHERE L.intLoadId = @intLoadId AND CH.intPricingTypeId = 2 AND ISNULL(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL), 0) <= 0))
+					WHERE L.intLoadId = @intLoadId AND CH.intPricingTypeId = 2 AND CD.intPricingStatus = 1))
 				RAISERROR('One or more contracts is not yet priced. Please price the contracts to proceed.', 16, 1);
 		END
 		ELSE
@@ -121,13 +113,12 @@ BEGIN TRY
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 			,dtmDate = GETDATE()
-			,dblQty = 
-				CASE 
-					WHEN LD.intWeightItemUOMId IS NOT NULL THEN 
-						LD.dblNet
-					ELSE 
-						LD.dblQuantity
-				END * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
+			,dblQty = CASE WHEN LD.intWeightItemUOMId IS NOT NULL THEN 
+							LD.dblNet
+						ELSE 
+							LD.dblQuantity
+						END 
+					* CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = dbo.fnMultiply(
 								dbo.fnCalculateCostBetweenUOM(
@@ -166,7 +157,7 @@ BEGIN TRY
 			,intTransactionId = L.intLoadId
 			,intTransactionDetailId = LD.intLoadDetailId
 			,strTransactionId = L.strLoadNumber
-			,intTransactionTypeId = 22
+			,intTransactionTypeId = @INBOUND_SHIPMENT_TYPE
 			,intLotId = NULL
 			,intSourceTransactionId = L.intLoadId
 			,strSourceTransactionId = CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN @strCMActualCostId ELSE L.strLoadNumber END
@@ -202,71 +193,28 @@ BEGIN TRY
 											ELSE ISNULL(LD.dblForexRate,1) END
 									 END
 		FROM tblLGLoad L
-		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
-		JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
-		JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
-		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-		JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
-		LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
-		LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
-		LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
-		LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
-		LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
-		OUTER APPLY (SELECT	TOP 1  
+			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
+			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+			JOIN tblICItemUOM IU ON IU.intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CD.intContractDetailId
+			LEFT JOIN tblICItemUOM WU ON WU.intItemUOMId = LD.intWeightItemUOMId
+			LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
+			LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FT.strFobPoint
+			LEFT JOIN tblSMCurrency LSC ON LSC.intCurrencyID = LD.intPriceCurrencyId
+			LEFT JOIN tblSMCurrency SC ON SC.intCurrencyID = CD.intCurrencyId
+			OUTER APPLY (SELECT	TOP 1  
 						intForexRateTypeId = RD.intRateTypeId
 						,dblFXRate = CASE WHEN ER.intFromCurrencyId = @DefaultCurrencyId  
 									THEN 1/RD.[dblRate] 
 									ELSE RD.[dblRate] END 
-						FROM tblSMCurrencyExchangeRate ER
-						JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+						FROM tblSMCurrencyExchangeRate ER JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
 						WHERE @DefaultCurrencyId <> ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)
 							AND ((ER.intFromCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID) AND ER.intToCurrencyId = @DefaultCurrencyId) 
 								OR (ER.intFromCurrencyId = @DefaultCurrencyId AND ER.intToCurrencyId = ISNULL(SC.intMainCurrencyId, SC.intCurrencyID)))
 						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId
-		GROUP BY LD.intItemId
-			,IL.intItemLocationId
-			,LD.intItemUOMId
-			,LD.dblQuantity
-			,LD.dblNet
-			,IU.dblUnitQty
-			,WU.dblUnitQty
-			,AD.dblSeqPrice
-			,AD.intSeqPriceUOMId
-			,L.intLoadId
-			,L.intCurrencyId
-			,AD.dblNetWtToPriceUOMConvFactor
-			,LD.intLoadDetailId
-			,L.strLoadNumber
-			,FP.intFobPointId
-			,AD.dblQtyToPriceUOMConvFactor
-			,AD.ysnSeqSubCurrency
-			,CD.intContractDetailId
-			,CD.intInvoiceCurrencyId
-			,CD.intRateTypeId
-			,CD.dblRate
-			,AD.ysnValidFX
-			,LD.strPriceStatus
-			,LD.intWeightItemUOMId
-			,LD.intPriceUOMId
-			,LD.dblUnitPrice
-			,LSC.intMainCurrencyId
-			,LSC.intCurrencyID
-			,LSC.ysnSubCurrency
-			,LSC.intCent
-			,LD.intForexRateTypeId
-			,LD.dblForexRate
-			,LD.intForexCurrencyId
-			,LD.dblAmount
-			,L.intPurchaseSale
-			,CD.dblTotalCost
-			,CD.dblCashPrice
-			,AD.intSeqCurrencyId
-			,SC.intMainCurrencyId
-			,SC.intCurrencyID
-			,FX.intForexRateTypeId
-			,FX.dblFXRate
 
 		BEGIN
 			INSERT INTO @GLEntries (
@@ -321,18 +269,7 @@ BEGIN TRY
 				RAISERROR (@strErrMsg,16,1)
 			END
 
-			EXEC dbo.uspGLBookEntries @GLEntries
-				,@ysnPost
-
-			--SELECT TOP 1 @intItemLocationId = intItemLocationId
-			--FROM @ItemsToPost
-			--WHERE strTransactionId = @strLoadNumber
-			--	AND intTransactionId = @intLoadId
-
-			--UPDATE tblICInventoryTransaction
-			--SET intItemLocationId = @intItemLocationId
-			--WHERE intTransactionId = @intLoadId
-			--	AND strTransactionId = @strLoadNumber
+			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
 		END
 	END
 	ELSE
@@ -374,7 +311,7 @@ BEGIN TRY
 				,[intCommodityId]
 		)
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
-					@intLoadId
+				@intLoadId
 				,@strLoadNumber
 				,@strBatchIdUsed
 				,@intEntityUserSecurityId	
@@ -388,7 +325,6 @@ BEGIN TRY
 		EXEC dbo.uspGLBookEntries @GLEntries
 			,@ysnPost
 	END
-
 
 --Update Contract Balance and Scheduled Qty for Drop Ship
 IF (@intPurchaseSale = 3)
@@ -445,7 +381,6 @@ BEGIN
 						THEN LD.dblQuantity
 					ELSE -1 * LD.dblQuantity
 					END
-					--* CASE WHEN (L.ysnCancelled = 1) THEN -1 ELSE 1 END
 		,[dblUOMQty] = IU.dblUnitQty
 		,[dblCost] = CD.dblCashPrice
 		,[intLineNo] = ISNULL(LD.intPContractDetailId, 0)
