@@ -1300,23 +1300,23 @@ BEGIN TRY
 					FROM tblIPLoadContainerStage
 					WHERE intStageLoadContainerId = @intStageLoadContainerId
 
-					IF @strRowState = 'Added'
-					BEGIN
-						IF EXISTS (
-								SELECT 1
-								FROM tblLGLoadContainer t WITH (NOLOCK)
-								WHERE t.strContainerNumber = @strContainerNumber
-								)
-						BEGIN
-							SET @ErrMsg = 'Container No. ' + @strContainerNumber + ' already exists. '
+					--IF @strRowState = 'Added'
+					--BEGIN
+					--	IF EXISTS (
+					--			SELECT 1
+					--			FROM tblLGLoadContainer t WITH (NOLOCK)
+					--			WHERE t.strContainerNumber = @strContainerNumber
+					--			)
+					--	BEGIN
+					--		SET @ErrMsg = 'Container No. ' + @strContainerNumber + ' already exists. '
 
-							RAISERROR (
-									@ErrMsg
-									,16
-									,1
-									)
-						END
-					END
+					--		RAISERROR (
+					--				@ErrMsg
+					--				,16
+					--				,1
+					--				)
+					--	END
+					--END
 
 					IF @dblGrossWt <= 0
 					BEGIN
