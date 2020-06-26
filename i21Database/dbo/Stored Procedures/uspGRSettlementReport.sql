@@ -701,7 +701,12 @@ BEGIN
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry 
-				ON Bill.intBillId = StrgHstry.intBillId
+				ON ( 
+						Bill.intBillId = StrgHstry.intBillId
+						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
+							and StrgHstry.strType = 'Settlement'
+							)
+				)
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
 			JOIN tblSCTicket SC 
@@ -973,7 +978,12 @@ BEGIN
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	
 			JOIN tblGRStorageHistory StrgHstry 
-				ON Bill.intBillId = StrgHstry.intBillId
+				ON ( 
+						Bill.intBillId = StrgHstry.intBillId
+						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
+							and StrgHstry.strType = 'Settlement'
+							)
+				)
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
