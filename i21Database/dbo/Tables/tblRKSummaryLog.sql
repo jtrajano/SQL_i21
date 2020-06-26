@@ -24,7 +24,7 @@
 	intBookId INT NULL,
 	intSubBookId INT NULL,
 	intLocationId INT NULL,
-	strInOut NVARCHAR(20) NULL,
+	strInOut NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	dblOrigNoOfLots DECIMAL(24, 10) NULL DEFAULT((0)),
 	dblContractSize DECIMAL(24, 10) NULL DEFAULT((0)),
 	dblOrigQty DECIMAL(24, 10) NULL DEFAULT((0)),

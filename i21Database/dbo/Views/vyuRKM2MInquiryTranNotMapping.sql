@@ -14,9 +14,9 @@ SELECT DISTINCT bd.intM2MInquiryId
 	, cd.dtmStartDate
 	, cd.dtmEndDate
 	, strSpreadMonth = smo.strFutureMonth
-	, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8)
-	, strStartDate = CONVERT(NVARCHAR(20),cd.dtmStartDate,106)
-	, strEndDate = CONVERT(NVARCHAR(20),cd.dtmEndDate,106)
+	, strPeriodTo = SUBSTRING(CONVERT(NVARCHAR(20),cd.dtmEndDate,106),4,8) COLLATE Latin1_General_CI_AS
+	, strStartDate = CONVERT(NVARCHAR(20),cd.dtmStartDate,106) COLLATE Latin1_General_CI_AS
+	, strEndDate = CONVERT(NVARCHAR(20),cd.dtmEndDate,106) COLLATE Latin1_General_CI_AS
 FROM tblRKM2MInquiryTransaction bd
 JOIN tblRKM2MInquiry mb ON mb.intM2MInquiryId = bd.intM2MInquiryId
 JOIN tblICCommodity c ON c.intCommodityId = bd.intCommodityId

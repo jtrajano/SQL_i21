@@ -29,15 +29,15 @@ SELECT A.*
 	, GL22.strAccountId strFuturesGainOrLossRealizedOffsetId
 	, strDefaultInstrument = CASE WHEN intDefaultInstrumentId = 1 THEN 'Exchange Traded'
 								WHEN intDefaultInstrumentId = 2 THEN 'OTC'
-								WHEN intDefaultInstrumentId = 3 THEN 'OTC - Others' END
+								WHEN intDefaultInstrumentId = 3 THEN 'OTC - Others' END COLLATE Latin1_General_CI_AS
 	, strDefaultInstrumentType = CASE WHEN intDefaultInstrumentTypeId = 1 THEN 'Futures'
 									WHEN intDefaultInstrumentTypeId = 2 THEN 'Options'
-									WHEN intDefaultInstrumentTypeId = 3 THEN 'Currency Contract' END
+									WHEN intDefaultInstrumentTypeId = 3 THEN 'Currency Contract' END COLLATE Latin1_General_CI_AS
 	, strPostToGL = CASE WHEN intPostToGLId = 1 THEN 'Company Configurations'
-						WHEN intPostToGLId = 2 THEN 'Commodity GL' END
+						WHEN intPostToGLId = 2 THEN 'Commodity GL' END COLLATE Latin1_General_CI_AS
 	, strMarkExpiredMonthPosition = CASE WHEN intMarkExpiredMonthPositionId = 1 THEN 'Validate Expired'
 								WHEN intMarkExpiredMonthPositionId = 2 THEN 'Spot Month'
-								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END
+								WHEN intMarkExpiredMonthPositionId = 3 THEN 'Nearby by Roll' END COLLATE Latin1_General_CI_AS
 	, rv.strRiskView
 	, strTonnageUOM = UOM.strUnitMeasure
 FROM tblRKCompanyPreference A
