@@ -24,6 +24,7 @@
 	[intCurrencyExchangeRateTypeId] INT	NULL,
 	[dblHistoricRate]          DECIMAL (18, 6) DEFAULT 1 NULL,
     [intFiscalPeriodId]        INT             NULL, 
+    [intTaskId]                INT             NULL,
     [intConcurrencyId]         INT             DEFAULT 1 NOT NULL,
     CONSTRAINT [PK_tblCMBankTransfer] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransfer_From] FOREIGN KEY ([intBankAccountIdFrom]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),

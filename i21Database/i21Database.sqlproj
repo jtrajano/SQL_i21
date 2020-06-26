@@ -2620,15 +2620,13 @@
     <Build Include="dbo\Views\vyuEMSearchEntityUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMLetter.sql" />
     <Build Include="dbo\User Defined Types\InvoiceIntegrationStagingTable.sql" />
-
     <Build Include="dbo\Tables\tblICInventorySubLedgerReport.sql" />
     <Build Include="dbo\User Defined Types\SubLedgerReportUdt.sql" />
     <Build Include="dbo\User Defined Types\SubLedgerTransactionsUdt.sql" />
-	<Build Include="dbo\Stored Procedures\uspICSubLedgerAddReportEntries.sql" />
-	<Build Include="dbo\Stored Procedures\uspICSubLedgerRemoveReportEntries.sql" />
-	<Build Include="dbo\Stored Procedures\uspARLogInventorySubLedger.sql" />
-	<Build Include="dbo\Views\vyuICInventorySubLedgerReport.sql" />
-
+    <Build Include="dbo\Stored Procedures\uspICSubLedgerAddReportEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSubLedgerRemoveReportEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspARLogInventorySubLedger.sql" />
+    <Build Include="dbo\Views\vyuICInventorySubLedgerReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddItemToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARProcessInvoices.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessShipmentToInvoice.sql" />
@@ -8735,7 +8733,7 @@
     <Build Include="dbo\Views\vyuRKSearchDPRSummaryLog.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromOnHand.sql" />
-    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" /> 
+    <Build Include="dbo\Stored Procedures\uspICLogRiskPositionFromInTransit.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPFeedFailureEmailMessage_ST.sql" />
@@ -8755,10 +8753,16 @@
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareCompanyTitled.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareBasisDeliveries.sql" />
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
-	<Build Include="dbo\Views\vyuSTLotteryCountSheetReport.sql" />
+    <Build Include="dbo\Views\vyuSTLotteryCountSheetReport.sql" />
     <Build Include="dbo\Tables\tblMFItemExclude.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
+    <Build Include="dbo\Views\vyuSTLotteryCountSheetReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMSyncBankDepositTaskDetail.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyTaskDetail.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyTaskDetail.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyTaskSequence.sql" />
+    <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

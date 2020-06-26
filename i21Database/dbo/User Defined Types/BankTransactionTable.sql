@@ -1,5 +1,6 @@
 ﻿CREATE TYPE [dbo].[BankTransactionTable] AS TABLE (
 	[intTransactionId]         INT              IDENTITY (1, 1) NOT NULL,
+    [intTaskId]                INT              NULL,
     [strTransactionId]         NVARCHAR (40)    COLLATE Latin1_General_CI_AS NOT NULL,
     [intBankTransactionTypeId] INT              NOT NULL,
     [intBankAccountId]         INT              NOT NULL,

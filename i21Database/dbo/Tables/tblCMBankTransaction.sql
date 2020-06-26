@@ -7,7 +7,6 @@
 	[intCurrencyId]            INT              NULL,
     [dblExchangeRate]          DECIMAL (38, 20) DEFAULT 1 NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
-
     [dtmDate]                  DATETIME         NOT NULL,
     [strPayee]                 NVARCHAR (300)   COLLATE Latin1_General_CI_AS NULL,
     [intPayeeId]               INT              NULL,
@@ -50,6 +49,7 @@
     [ysnHasDetailOverflow]     BIT              NULL,
     [ysnHasBasisPrepayOverflow]BIT              NULL,
     [intFiscalPeriodId]        INT              NULL,
+    [intTaskId]                INT              NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 	CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),

@@ -291,25 +291,20 @@ BEGIN
 			insert into tblCMBankStatementImportLog(strTransactionId, dtmDateCreated,intEntityId,intBankStatementImportId,strBankStatementImportId)
 			select @strID, @dtmCurrent, @intEntityId, @intBankStatementImportId,@strBankStatementImportId
 			
-			
-			
-			Exit_here:
-
-			
-			DELETE FROM @tblTempMacReportXRef
-			DELETE FROM @tblTempMacReportXRef2
-
-			
-			DELETE FROM @tblTemp WHERE @intBankStatementImportId =intBankStatementImportId
-			
 			END TRY
 			BEGIN CATCH
 			
 					SET  @ErrorMessage = ERROR_MESSAGE() 
 					insert into @ErrorTable select @ErrorMessage, @intBankStatementImportId
-
+					GOTO End_here;
 				
 			END CATCH
+			
+			Exit_here:
+				
+			DELETE FROM @tblTempMacReportXRef
+			DELETE FROM @tblTempMacReportXRef2
+			DELETE FROM @tblTemp WHERE @intBankStatementImportId =intBankStatementImportId
 
 		END
 
