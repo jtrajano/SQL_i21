@@ -101,7 +101,7 @@
 					AND tbl.intContractHeaderId = CD.intContractHeaderId
 					AND tbl.intRowId = 1
 				where tbl.intPricingTypeId = 2
-				and tbl.strContractStatus = ''Open''
+				and tbl.strContractStatus in (''Open'', ''Re-open'')
 
 				DECLARE @TemporaryTable TABLE 
 				(  
