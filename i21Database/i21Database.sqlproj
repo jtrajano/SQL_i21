@@ -8763,6 +8763,7 @@
     <Build Include="dbo\Tables\tblCMResponsiblePartyTaskDetail.sql" />
     <Build Include="dbo\Tables\tblCMResponsiblePartyTaskSequence.sql" />
     <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
