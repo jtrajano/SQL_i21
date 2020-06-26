@@ -163,23 +163,48 @@ left join tblTFTaxCategory TaxCat ON TaxCat.intTaxCategoryId = TaxCrit.intTaxCat
 left join tblTFReportingComponent RC ON RC.intReportingComponentId = TaxCrit.intReportingComponentId
 where RC.intTaxAuthorityId = @TaxAuthorityId 
 */
-	-- DECLARE @TaxCriteria AS TFTaxCriteria
+	DECLARE @TaxCriteria AS TFTaxCriteria
 
-	-- INSERT INTO @TaxCriteria(
-	-- 	intTaxCriteriaId
-	-- 	, strTaxCategory
-	-- 	, strState
-	-- 	, strFormCode
-	-- 	, strScheduleCode
-	-- 	, strType
-	-- 	, strCriteria
-	-- 	, intMasterId
-	-- )
-	-- SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Gasoline Gasohol Ethanol', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 26689
-	-- UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'MT Excise Tax Gasoline Gasohol Ethanol', strState = 'MT', strFormCode = 'MF-32', strScheduleCode = '1', strType = 'Gasohol', strCriteria = '<> 0', intMasterId = 26690
-	
+	INSERT INTO @TaxCriteria(
+		intTaxCriteriaId
+		, strTaxCategory
+		, strState
+		, strFormCode
+		, strScheduleCode
+		, strType
+		, strCriteria
+		, intMasterId
+	)
+	SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '1IN', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 421
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '1IN', strType = 'Diesel Undyed', strCriteria = '<> 0', intMasterId = 422
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '1IN', strType = 'Kerosene', strCriteria = '<> 0', intMasterId = 423
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '1IN', strType = 'Jet Fuel', strCriteria = '<> 0', intMasterId = 424
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '1IN', strType = 'Aviation Gas', strCriteria = '<> 0', intMasterId = 425
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '1KY', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 426
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '1KY', strType = 'Diesel Dyed', strCriteria = '<> 0', intMasterId = 427
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Diesel Clear', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '1KY', strType = 'Diesel Undyed', strCriteria = '<> 0', intMasterId = 428
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '1KY', strType = 'Kerosene', strCriteria = '<> 0', intMasterId = 429
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '1KY', strType = 'Jet Fuel', strCriteria = '<> 0', intMasterId = 4210
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '1KY', strType = 'Aviation Gas', strCriteria = '<> 0', intMasterId = 4211
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '2IN', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 4212
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '2IN', strType = 'Diesel Undyed', strCriteria = '= 0', intMasterId = 4213
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '2IN', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 4214
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Diesel Clear', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '2IN', strType = 'Jet Fuel', strCriteria = '= 0', intMasterId = 4215
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'IN Excise Tax Gasoline', strState = 'IN', strFormCode = 'PET377', strScheduleCode = '2IN', strType = 'Aviation Gas', strCriteria = '= 0', intMasterId = 4216
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '2KY', strType = 'Gasoline', strCriteria = '= 0', intMasterId = 4217
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '2KY', strType = 'Diesel Dyed', strCriteria = '= 0', intMasterId = 4218
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Diesel Clear', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '2KY', strType = 'Diesel Undyed', strCriteria = '= 0', intMasterId = 4219
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '2KY', strType = 'Kerosene', strCriteria = '= 0', intMasterId = 4220
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Special Fuels', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '2KY', strType = 'Jet Fuel', strCriteria = '= 0', intMasterId = 4221
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'KY Excise Tax Gasoline', strState = 'KY', strFormCode = 'PET377', strScheduleCode = '2KY', strType = 'Aviation Gas', strCriteria = '= 0', intMasterId = 4222
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'TN Excise Tax Gasoline', strState = 'TN', strFormCode = 'PET377', strScheduleCode = '4', strType = 'Gasoline', strCriteria = '<> 0', intMasterId = 4223
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'TN Excise Tax Diesel Dyed', strState = 'TN', strFormCode = 'PET377', strScheduleCode = '4', strType = 'Diesel Dyed', strCriteria = '<> 0', intMasterId = 4224
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'TN Excise Tax Diesel Clear', strState = 'TN', strFormCode = 'PET377', strScheduleCode = '4', strType = 'Diesel Undyed', strCriteria = '<> 0', intMasterId = 4225
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'TN Excise Tax Diesel Dyed', strState = 'TN', strFormCode = 'PET377', strScheduleCode = '4', strType = 'Kerosene', strCriteria = '<> 0', intMasterId = 4226
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'TN Excise Tax Diesel Dyed', strState = 'TN', strFormCode = 'PET377', strScheduleCode = '4', strType = 'Jet Fuel', strCriteria = '<> 0', intMasterId = 4227
+	UNION ALL SELECT intTaxCriteriaId = 0, strTaxCategory = 'TN Excise Tax Gasoline', strState = 'TN', strFormCode = 'PET377', strScheduleCode = '4', strType = 'Aviation Gas', strCriteria = '<> 0', intMasterId = 4228	
 
-	-- EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
+	EXEC uspTFUpgradeTaxCriteria @TaxAuthorityCode = @TaxAuthorityCode, @TaxCriteria = @TaxCriteria
 
 
 -- Reporting Component - Base
