@@ -47,13 +47,13 @@ SELECT DE.intFutOptTransactionId
 									AND intFutOptTransactionId = DE.intFutOptTransactionId), 0) AS BIT)
 	, strHedgeType = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN 'Price Contract'
 							WHEN CF.intContractFuturesId IS NOT NULL THEN 'Contract Futures'
-							ELSE NULL END
+							ELSE NULL END COLLATE Latin1_General_CI_AS
 	, intHedgeContractId = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PFD.intPriceFixationId
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.intContractHeaderId
 							ELSE NULL END
 	, strHedgeContract = CASE WHEN PFD.intPriceFixationId IS NOT NULL THEN PriceHeader.strContractNumber + '-' + CAST(PriceDetail.intContractSeq AS NVARCHAR(10))
 							WHEN CF.intContractFuturesId IS NOT NULL THEN CFHeader.strContractNumber + '-' + CAST(CFDetail.intContractSeq AS NVARCHAR(10))
-							ELSE NULL END
+							ELSE NULL END COLLATE Latin1_General_CI_AS
 FROM tblRKFutOptTransaction DE
 LEFT JOIN tblEMEntity AS e ON DE.intEntityId = e.intEntityId
 LEFT JOIN tblEMEntity AS Trader ON DE.intTraderId = Trader.intEntityId
