@@ -29,7 +29,7 @@ SELECT DISTINCT
     ,strReceiptNumber					= IR.strReceiptNumber
     ,ysnReadyForTransfer				= CAST(
 											CASE 
-												WHEN DS.ysnPost = 1 THEN 1
+												WHEN DeliverySheet.ysnPost = 1 THEN 1
 												WHEN CS.intTicketId IS NOT NULL THEN 1
 												ELSE 0
 											END AS BIT
@@ -90,8 +90,13 @@ LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
-LEFT JOIN tblSCDeliverySheet DS
-    ON DS.intDeliverySheetId = CS.intDeliverySheetId
+LEFT JOIN (tblSCDeliverySheet DeliverySheet 
+			INNER JOIN tblSCDeliverySheetSplit DSS	
+				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
+			AND DSS.intEntityId = E.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
 LEFT JOIN tblGRTransferStorageReference TSR
 	ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblGRTransferStorage TS
