@@ -9,8 +9,8 @@ RETURNS	@returntable	TABLE
 (
     dblBulkQuantity	    NUMERIC(18,6),
     dblBagQuantity	    NUMERIC(18,6),
-    strContainerType    NVARCHAR(200),
-    strContainerUOM	    NVARCHAR(100)
+    strContainerType    NVARCHAR(200) COLLATE Latin1_General_CI_AS,
+    strContainerUOM	    NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 
 AS
