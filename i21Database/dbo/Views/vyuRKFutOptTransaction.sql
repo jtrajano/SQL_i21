@@ -74,7 +74,7 @@ FROM (
 		, ft.intFutureMarketId
 		, ft.intFutureMonthId
 		, Contract.strContractNumber
-		, strSequenceNo = CAST(ContractDetail.intContractSeq AS NVARCHAR(50))
+		, strSequenceNo = CAST(ContractDetail.intContractSeq AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
 		, ft.strRefSwapTradeNo
 		, ft.dtmCreateDateTime
 		, ft.ysnFreezed

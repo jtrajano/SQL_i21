@@ -5,23 +5,23 @@
 RETURNS @FinalTable TABLE
 (
 	intBookId INT
-	, strBook NVARCHAR(100)
+	, strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intSubBookId INT
-	, strSubBook NVARCHAR(100)
+	, strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intProductTypeId INT
-	, strProductType NVARCHAR(100)
-	, strTransactionType NVARCHAR(100)
-	, strTransactionStatus NVARCHAR(100)
-	, strTransactionNo NVARCHAR(100)
+	, strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strTransactionStatus NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strTransactionNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intBundleItemId INT
-	, strBundle NVARCHAR(100)
+	, strBundle NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intItemId INT
-	, strItemNo NVARCHAR(100)
+	, strItemNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dtmAvailability DATETIME
 	, intFutureMarketId INT
-	, strFutureMarket NVARCHAR(100)
+	, strFutureMarket NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intFutureMonthId INT
-	, strFutureMonth NVARCHAR(100)
+	, strFutureMonth NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, dblQty NUMERIC(24, 10)
 	, dblTransactionPrice NUMERIC(24, 10)
 	, dblContractDifferential NUMERIC(24, 10)
@@ -130,8 +130,8 @@ BEGIN
 			, L.intBookId
 			, L.intSubBookId
 			, Item.intProductTypeId
-			, strTransactionType = 'Physical'
-			, strTransactionStatus = 'In-Transit'
+			, strTransactionType = 'Physical' COLLATE Latin1_General_CI_AS
+			, strTransactionStatus = 'In-Transit' COLLATE Latin1_General_CI_AS
 			, strTransactionNo = CH.strContractNumber + ' - ' + CAST(CD.intContractSeq AS NVARCHAR(10)) COLLATE Latin1_General_CI_AS
 			, Item.intItemId
 			, strItemDescription = Item.strDescription
@@ -169,8 +169,8 @@ BEGIN
 			, Lots.intBookId
 			, Lots.intSubBookId
 			, Item.intProductTypeId
-			, strTransactionType = 'Physical'
-			, strTransactionStatus = 'Stock'
+			, strTransactionType = 'Physical' COLLATE Latin1_General_CI_AS
+			, strTransactionStatus = 'Stock' COLLATE Latin1_General_CI_AS
 			, strTransactionNo = Header.strContractNumber + ' - ' + CAST(Detail.intContractSeq AS NVARCHAR(10)) COLLATE Latin1_General_CI_AS
 			, Item.intItemId
 			, strItemDescription = Item.strDescription
@@ -224,8 +224,8 @@ BEGIN
 			, DAP.intBookId
 			, DAP.intSubBookId
 			, intProductTypeId = NULL
-			, strTransactionType = 'Futures'
-			, strTransactionStatus = ''
+			, strTransactionType = 'Futures' COLLATE Latin1_General_CI_AS
+			, strTransactionStatus = '' COLLATE Latin1_General_CI_AS
 			, strTransactionNo = DAP.strAverageNo
 			, intItemId = NULL
 			, strItemDescription = NULL
@@ -258,8 +258,8 @@ BEGIN
 			, DH.intBookId
 			, DH.intSubBookId
 			, intProductTypeId = i.intProductTypeId
-			, strTransactionType = 'Demand'
-			, strTransactionStatus = ''
+			, strTransactionType = 'Demand' COLLATE Latin1_General_CI_AS
+			, strTransactionStatus = '' COLLATE Latin1_General_CI_AS
 			, strTransactionNo = DH.strDemandNo
 			, intItemId = i.intItemId
 			, strItemDescription = i.strDescription

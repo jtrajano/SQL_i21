@@ -7,7 +7,7 @@
     [intBookId] INT NULL, 
     [intSubBookId] INT NULL, 
     [intCommodityId] INT NULL, 
-    [strUOMType] NVARCHAR(50) NULL, 
+    [strUOMType] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
     [intDecimal] INT NULL, 
 	[ysnPosted] BIT NULL DEFAULT ((0)),
 	[intCoverageEntryRefId] INT NULL,
