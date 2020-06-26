@@ -529,3 +529,23 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WA', @TaxCategories = @TaxCa
 DELETE @TaxCategoryWA
 
 GO
+
+PRINT ('Deploying TN Tax Category')
+
+DECLARE @TaxCategoryTN AS TFTaxCategory
+
+INSERT INTO @TaxCategoryTN(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Gasoline', intMasterId = 421
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Clear', intMasterId = 422
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Excise Tax Diesel Dyed', intMasterId = 423
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
+
+DELETE @TaxCategoryTN
+
+GO
