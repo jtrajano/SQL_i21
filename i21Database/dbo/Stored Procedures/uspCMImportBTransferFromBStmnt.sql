@@ -1,4 +1,4 @@
-ALTER PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]  
+CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]  
     @strBankStatementImportId NVARCHAR(40),  
     @intEntityId INT,  
     @rCount INT = 0 OUTPUT  
