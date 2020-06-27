@@ -186,7 +186,7 @@ AS (
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
-									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END
+									,t.intItemUOMId								
 								)
 								,2 
 							)

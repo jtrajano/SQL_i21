@@ -201,7 +201,7 @@ SELECT	intItemId = DetailItem.intItemId
 									,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 									,DetailItem.ysnSubCurrency
 									,Header.intSubCurrencyCents
-									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END  
+									,DEFAULT 
 								)
 								--/ Header.intSubCurrencyCents 
 
@@ -244,7 +244,7 @@ SELECT	intItemId = DetailItem.intItemId
 									,AggregrateItemLots.dblTotalNet
 									,NULL--DetailItem.ysnSubCurrency
 									,NULL--Header.intSubCurrencyCents
-									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END  
+									,DEFAULT 
 								)
 								-- (B) Other Charge
 								+ 
@@ -300,7 +300,7 @@ SELECT	intItemId = DetailItem.intItemId
 				,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 				,NULL--DetailItem.ysnSubCurrency
 				,NULL--Header.intSubCurrencyCents
-				,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END   
+				,DEFAULT 
 			)
 FROM	dbo.tblICInventoryReceipt Header INNER JOIN dbo.tblICInventoryReceiptItem DetailItem 
 			ON Header.intInventoryReceiptId = DetailItem.intInventoryReceiptId 
