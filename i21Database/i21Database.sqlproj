@@ -7370,6 +7370,7 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
