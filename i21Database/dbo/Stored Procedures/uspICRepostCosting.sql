@@ -73,6 +73,7 @@ DECLARE @ItemsToPost AS ItemCostingTableType
 -- If stocks are all negative, group the records by Qty regardless of cost. 
 IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
 	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strBatchId = @strBatchId AND dblQty < 0) 
 BEGIN 
 	INSERT INTO @ItemsToPost (
 		[intItemId] 
@@ -208,8 +209,10 @@ BEGIN
 			) lastCost
 
 END
--- Group the records by Qty. 
-ELSE 
+-- If stocks are all positive, group the records by cost. 
+ELSE IF	EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty > 0) 
+	AND NOT EXISTS (SELECT TOP 1 1 FROM @ItemsToPostRaw WHERE dblQty < 0) 
+	AND NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryTransaction t WHERE t.strBatchId = @strBatchId AND dblQty < 0) 
 BEGIN 
 	INSERT INTO @ItemsToPost (
 		[intItemId] 
@@ -316,6 +319,81 @@ BEGIN
 		,[ysnAllowVoucher] 
 		,[intSourceEntityId] 
 END
+ELSE 
+BEGIN 
+	INSERT INTO @ItemsToPost (
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[dblCost] 
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+	)
+	SELECT 
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty]
+		,[dblUOMQty] 
+		,[dblCost]
+		,[dblValue] 
+		,[dblSalesPrice] 
+		,[intCurrencyId] 
+		,[dblExchangeRate] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[strSourceTransactionId] 
+		,[intInTransitSourceLocationId] 
+		,[intForexRateTypeId] 
+		,[dblForexRate] 
+		,[intStorageScheduleTypeId] 
+		,[dblUnitRetail] 
+		,[intCategoryId] 
+		,[dblAdjustCostValue] 
+		,[dblAdjustRetailValue] 
+		,[intCostingMethod] 
+		,[ysnAllowVoucher] 
+		,[intSourceEntityId] 
+	FROM 
+		@ItemsToPostRaw
+END 
+
 -----------------------------------------------------------------------------------------------------------------------------
 -- Do the Validation
 -----------------------------------------------------------------------------------------------------------------------------

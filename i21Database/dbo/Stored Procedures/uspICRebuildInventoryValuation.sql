@@ -3838,97 +3838,108 @@ BEGIN
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 						,dblCost  = 
-									CASE 
-										WHEN (RebuildInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL) THEN
-											CASE	
-												WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN 
-													(
-														-- (A) Item Cost
-														dbo.fnCalculateReceiptUnitCost(
-															ReceiptItem.intItemId
-															,ReceiptItem.intUnitMeasureId		
-															,ReceiptItem.intCostUOMId
-															,ReceiptItem.intWeightUOMId
-															,ReceiptItem.dblUnitCost
-															,ReceiptItem.dblNet
-															,ReceiptItemLot.intLotId
-															,ReceiptItemLot.intItemUnitMeasureId
-															,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
-															,ReceiptItem.ysnSubCurrency
-															,Receipt.intSubCurrencyCents
-															,DEFAULT
-														)
-														--/ Receipt.intSubCurrencyCents 
-
-														-- (B) Other Charge
-														+ 
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																-- Convert the other charge to the currency used by the detail item. 
-																dbo.fnDivide(
-																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 
-																-- No conversion. Detail item is already in functional currency. 
-																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END 									
-														+
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																dbo.fnDivide(
-																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 												
-																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END 									
-													)										
-												ELSE 
-													(
-														-- (A) Item Cost
-														dbo.fnCalculateReceiptUnitCost(
-															ReceiptItem.intItemId
-															,ReceiptItem.intUnitMeasureId		
-															,ReceiptItem.intCostUOMId
-															,ReceiptItem.intWeightUOMId
-															,ReceiptItem.dblUnitCost
-															,ReceiptItem.dblNet
-															,ReceiptItemLot.intLotId
-															,ReceiptItemLot.intItemUnitMeasureId
-															,AggregrateItemLots.dblTotalNet
-															,NULL--ReceiptItem.ysnSubCurrency
-															,NULL--Receipt.intSubCurrencyCents
-															,DEFAULT
-														)
-														-- (B) Other Charge
-														+ 
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																-- Convert the other charge to the currency used by the detail item. 
-																dbo.fnDivide(
-																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 
-																-- No conversion. Detail item is already in functional currency. 
-																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END	 									
-														+
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																dbo.fnDivide(
-																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 
-																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END
-													)							
-											END
-										 ELSE 
-											RebuildInvTrans.dblCost
+							dbo.fnCalculateCostBetweenUOM(
+								ISNULL( 
+									ReceiptItem.intWeightUOMId, 
+									CASE	WHEN ISNULL(ReceiptItemLot.intLotId, 0) <> 0 AND dbo.fnGetItemLotType(ReceiptItem.intItemId) <> 0 THEN 
+												ReceiptItemLot.intItemUnitMeasureId
+											ELSE 
+												ReceiptItem.intUnitMeasureId
 									END 
+								)								
+								,RebuildInvTrans.intItemUOMId
+								,CASE 
+									WHEN (RebuildInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL) THEN
+										CASE	
+											WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN 
+												(
+													-- (A) Item Cost
+													dbo.fnCalculateReceiptUnitCost(
+														ReceiptItem.intItemId
+														,ReceiptItem.intUnitMeasureId		
+														,ReceiptItem.intCostUOMId
+														,ReceiptItem.intWeightUOMId
+														,ReceiptItem.dblUnitCost
+														,ReceiptItem.dblNet
+														,ReceiptItemLot.intLotId
+														,ReceiptItemLot.intItemUnitMeasureId
+														,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
+														,ReceiptItem.ysnSubCurrency
+														,Receipt.intSubCurrencyCents
+														,DEFAULT
+													)
+													--/ Receipt.intSubCurrencyCents 
+
+													-- (B) Other Charge
+													+ 
+													CASE 
+														WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+															-- Convert the other charge to the currency used by the detail item. 
+															dbo.fnDivide(
+																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+																,ReceiptItem.dblForexRate
+															)
+														ELSE 
+															-- No conversion. Detail item is already in functional currency. 
+															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+													END 									
+													+
+													CASE 
+														WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+															dbo.fnDivide(
+																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+																,ReceiptItem.dblForexRate
+															)
+														ELSE 												
+															dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+													END 									
+												)										
+											ELSE 
+												(
+													-- (A) Item Cost
+													dbo.fnCalculateReceiptUnitCost(
+														ReceiptItem.intItemId
+														,ReceiptItem.intUnitMeasureId		
+														,ReceiptItem.intCostUOMId
+														,ReceiptItem.intWeightUOMId
+														,ReceiptItem.dblUnitCost
+														,ReceiptItem.dblNet
+														,ReceiptItemLot.intLotId
+														,ReceiptItemLot.intItemUnitMeasureId
+														,AggregrateItemLots.dblTotalNet
+														,NULL--ReceiptItem.ysnSubCurrency
+														,NULL--Receipt.intSubCurrencyCents
+														,DEFAULT
+													)
+													-- (B) Other Charge
+													+ 
+													CASE 
+														WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+															-- Convert the other charge to the currency used by the detail item. 
+															dbo.fnDivide(
+																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+																,ReceiptItem.dblForexRate
+															)
+														ELSE 
+															-- No conversion. Detail item is already in functional currency. 
+															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+													END	 									
+													+
+													CASE 
+														WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+															dbo.fnDivide(
+																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+																,ReceiptItem.dblForexRate
+															)
+														ELSE 
+															dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+													END
+												)							
+										END
+										ELSE 
+										RebuildInvTrans.dblCost
+								END 
+								)
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
