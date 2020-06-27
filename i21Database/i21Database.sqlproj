@@ -7757,6 +7757,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
