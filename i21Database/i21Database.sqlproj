@@ -7371,6 +7371,7 @@
     <Build Include="dbo\Views\vyuICGetInvalidBundleItemUom.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
