@@ -337,7 +337,7 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
-							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+							,t.intItemUOMId
 						)	
 					)
 			--,dblAddOnCostFromOtherCharge = t.dblQty * dbo.fnGetOtherChargesFromInventoryReceipt(ri.intInventoryReceiptItemId)		
@@ -437,7 +437,7 @@ AS
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
-									,DEFAULT
+									,t.intItemUOMId
 								)
 								,2 
 							)
@@ -543,7 +543,7 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
-							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+							,t.intItemUOMId
 						)						
 					)
 					,2
@@ -573,7 +573,7 @@ AS
 							,AggregrateItemLots.dblTotalNet
 							,ri.ysnSubCurrency
 							,r.intSubCurrencyCents
-							,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+							,t.intItemUOMId
 						)	
 						, t.dblCost
 						, (
@@ -598,7 +598,7 @@ AS
 									,AggregrateItemLots.dblTotalNet
 									,ri.ysnSubCurrency
 									,r.intSubCurrencyCents
-									,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+									,t.intItemUOMId
 								)
 								,2
 							)
@@ -678,7 +678,7 @@ AS
 						,AggregrateItemLots.dblTotalNet
 						,ri.ysnSubCurrency
 						,r.intSubCurrencyCents
-						,CASE WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 THEN stockUOM.intItemUOMId ELSE NULL END 
+						,t.intItemUOMId
 					)
 					,2 
 				)
