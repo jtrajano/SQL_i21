@@ -7370,6 +7370,7 @@
     <Build Include="dbo\Tables\tblARInvoiceTaxReportStagingTable.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
