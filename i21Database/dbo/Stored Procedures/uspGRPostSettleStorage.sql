@@ -2807,6 +2807,7 @@ BEGIN TRY
 			BEGIN
 				DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
 				DECLARE @intStorageHistoryId INT
+				DELETE FROM @StorageHistoryStagingTable
 				INSERT INTO @StorageHistoryStagingTable
 				(
 					  intCustomerStorageId
