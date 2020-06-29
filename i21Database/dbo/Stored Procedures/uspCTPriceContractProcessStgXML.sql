@@ -53,6 +53,7 @@ BEGIN TRY
 		,@intPriceItemUOMId INT
 		,@intPriceUnitMeasureId INT
 		,@strPriceItemUOM NVARCHAR(50)
+		,@config AS ApprovalConfigurationType
 	DECLARE @intNewPriceContractId INT
 		,@strFinalPriceUOM NVARCHAR(50)
 		,@strAgreedItemUOM NVARCHAR(50)
@@ -117,6 +118,8 @@ BEGIN TRY
 		,@strDescription NVARCHAR(100)
 		,@strApproverXML NVARCHAR(MAX)
 		,@strSubmittedByXML NVARCHAR(MAX)
+		,@strApprover NVARCHAR(100)
+		,@intCurrentUserEntityId INT
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -1638,6 +1641,32 @@ BEGIN TRY
 					,@strPriceFixationDetailXML OUTPUT
 					,NULL
 					,NULL
+
+				INSERT INTO @config (
+					strApprovalFor
+					,strValue
+					)
+				SELECT 'Contract Type'
+					,'Purchase'
+
+				SELECT @strApprover = strApprover
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyRefId
+
+				SELECT @intCurrentUserEntityId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strApprover
+
+				IF @intCurrentUserEntityId IS NULL
+					SELECT @intCurrentUserEntityId = @intCreatedById
+
+				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.PriceContracts'
+					,@recordId = @intNewPriceContractId
+					,@transactionNo = @strNewPriceContractNo
+					,@transactionEntityId = @intEntityId
+					,@currentUserEntityId = @intCurrentUserEntityId
+					,@amount = 0
+					,@approverConfiguration = @config
 
 				x:
 

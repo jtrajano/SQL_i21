@@ -48,14 +48,11 @@ BEGIN TRY
 		,@intContractDetailId INT
 		,@dblUnitPriceInSupplierContract NUMERIC(18, 6)
 		,@dblClaimAmountInSupplierContract NUMERIC(18, 6)
-
-				,@intCurrentCompanyId INT
+		,@intCurrentCompanyId INT
 
 	SELECT @intCurrentCompanyId = intCompanyId
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
-
-
 
 	--,@strNewWeightClaimReferenceNo nvarchar(50)
 	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
@@ -259,7 +256,7 @@ BEGIN TRY
 					,intSubBookId
 					,intPaymentMethodId
 					,intWeightClaimRefId
-					,intCompanyId 
+					,intCompanyId
 					)
 				SELECT 1 intConcurrencyId
 					,@strReferenceNumber
@@ -665,13 +662,13 @@ BEGIN TRY
 				END
 
 				SELECT @dblUnitPriceInSupplierContract = AD.dblSeqPrice
-					,@dblClaimAmountInSupplierContract =  (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice / (
-								CASE 
-									WHEN ysnSeqSubCurrency = 1
-										THEN 100
-									ELSE 1
-									END
-								)
+					,@dblClaimAmountInSupplierContract = (WUI.dblUnitQty / PUI.dblUnitQty) * AD.dblSeqPrice / (
+						CASE 
+							WHEN ysnSeqSubCurrency = 1
+								THEN 100
+							ELSE 1
+							END
+						)
 				FROM tblLGLoad L
 				JOIN tblICUnitMeasure WUOM ON WUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 					AND L.intLoadRefId = @intLoadId
@@ -812,12 +809,12 @@ BEGIN TRY
 					JOIN tblCTContractDetail CD1 ON CD1.intContractDetailId = AD.intPContractDetailId
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD1.intContractHeaderId
 					WHERE CD.intContractDetailRefId = IA.intContractDetailId
-					AND CD.intBookId = @intBookId
-					AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+						AND CD.intBookId = @intBookId
+						AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS [intPartyEntityId]
 				,dblUnitPriceInSupplierContract
 				,[intCurrencyId]
-				,ABS(Round([dblClaimableWt] * dblClaimAmountInSupplierContract,2))
+				,ABS(Round([dblClaimableWt] * dblClaimAmountInSupplierContract, 2))
 				,[intPriceItemUOMId]
 				,[dblAdditionalCost]
 				,[ysnNoClaim]
@@ -826,8 +823,8 @@ BEGIN TRY
 					FROM tblCTContractDetail CD
 					JOIN tblLGAllocationDetail AD ON AD.intSContractDetailId = CD.intContractDetailId
 					WHERE CD.intContractDetailRefId = IA.intContractDetailId
-					AND CD.intBookId = @intBookId
-					AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+						AND CD.intBookId = @intBookId
+						AND IsNULL(CD.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 					) AS intContractDetailId
 				,[intBillId]
 				,[intInvoiceId]
@@ -856,9 +853,17 @@ BEGIN TRY
 			WHERE intRecordId = @intNewWeightClaimId
 				AND intScreenId = @intWeightClaimScreenId
 
-			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-				,@referenceTransactionId = @intTransactionId
-				,@referenceCompanyId = @intCompanyId
+			IF @intTransactionRefId IS NOT NULL
+				AND @intTransactionId IS NOT NULL
+			BEGIN
+				BEGIN TRY
+					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+						,@referenceTransactionId = @intTransactionId
+						,@referenceCompanyId = @intCompanyId
+				END TRY
+				BEGIN CATCH
+				END CATCH
+			END
 
 			INSERT INTO tblLGWeightClaimAcknowledgementStage (
 				intWeightClaimId
