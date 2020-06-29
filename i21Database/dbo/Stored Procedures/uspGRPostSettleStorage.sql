@@ -3396,7 +3396,8 @@ BEGIN TRY
 				-- 	ON IU.intItemId = CS.intItemId
 				-- 		AND IU.ysnStockUnit = 1
 				-- WHERE SV.intItemType = 1
-
+				
+				delete from @StorageHistoryStagingTable
 				INSERT INTO @StorageHistoryStagingTable
 				(
 					[intCustomerStorageId]
