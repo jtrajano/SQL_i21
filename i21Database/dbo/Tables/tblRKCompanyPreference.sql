@@ -70,7 +70,6 @@
 	[ysnIncludeDerivatives] BIT NULL DEFAULT((1)),
 	[ysnUseBoardMonth] BIT NULL DEFAULT((0)),
 	[ysnAllowEditAvgLongPrice] BIT NULL DEFAULT((0)),
-	[ysnImposeReversalTransaction] BIT NULL DEFAULT((0)),
 	[ysnUseM2MDate] BIT NULL DEFAULT((0)),
 	[ysnDisableHistoricalDerivative] BIT NULL DEFAULT((0)),
 	[intTonnageUOMId] INT NULL,
