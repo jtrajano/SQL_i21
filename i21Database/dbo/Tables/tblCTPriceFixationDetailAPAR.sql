@@ -6,7 +6,6 @@
 	intBillDetailId					INT,
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
-	ysnReverse						BIT NULL,
 	ysnMarkDelete					BIT,
 	[intConcurrencyId]				INT NOT NULL,
 
