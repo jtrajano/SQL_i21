@@ -4,7 +4,7 @@ AS
 SELECT 
 	ic.* 
 	-- Get the company preference from the other modules that is related with IC. 
-	,rk.ysnImposeReversalTransaction
+	,ysnImposeReversalTransaction = CAST(0 AS BIT) --rk.ysnImposeReversalTransaction
 FROM 
 	tblICCompanyPreference ic
 	OUTER APPLY (
