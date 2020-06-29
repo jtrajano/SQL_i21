@@ -71,7 +71,7 @@ BEGIN TRY
 			LEFT JOIN tblCTWeightGrade CTWeight 
 				ON CTWeight.intWeightGradeId = SC.intWeightId
 			WHERE intTicketId = @intMatchTicketId
-				AND ysnReversed = 0
+				
 
 			
 			BEGIN
