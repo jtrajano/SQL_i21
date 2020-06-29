@@ -1,8 +1,9 @@
 ﻿
-CREATE PROCEDURE [uspCMFindMatchingRecordsForBankRecon]
+CREATE PROCEDURE [uspCMFindMatchingRecordsForBankReconWithTask]
 	@strBankStatementImportId NVARCHAR(40) = NULL,
 	@intBankAccountId INT,
 	@dtmStatementDate DATETIME,
+	@intEntityId INT,
 	@ysnSuccess AS BIT = 0 OUTPUT
 AS
 
@@ -85,6 +86,7 @@ DECLARE @BANK_DEPOSIT INT = 1
 --					ELSE 1
 --			END 		
 --		)
+BEGIN TRY
 
 SELECT	A.intTransactionId
 		,A.intBankTransactionTypeId
@@ -111,14 +113,12 @@ WHERE	 A.intBankAccountId = @intBankAccountId
 					ELSE 1
 			END 		
 		)
-IF @@ERROR <> 0	GOTO _ROLLBACK
-
 -- Temporary table of the imported records		
 SELECT  *
 INTO	#tmp_list_of_imported_record
 FROM	dbo.tblCMBankStatementImport B
 WHERE	B.strBankStatementImportId = @strBankStatementImportId
-IF @@ERROR <> 0	GOTO _ROLLBACK
+
 		
 WHILE EXISTS (SELECT TOP 1 1 FROM #tmp_list_of_imported_record)
 BEGIN
@@ -129,11 +129,11 @@ BEGIN
 			,@strPayee = strPayee
 			,@strReferenceNumber = strReferenceNo
 	FROM	#tmp_list_of_imported_record
-	IF @@ERROR <> 0	GOTO _ROLLBACK
+	
 	
 	UPDATE #tmp_list_of_transactions
 	SET ysnTagged = 0
-	IF @@ERROR <> 0	GOTO _ROLLBACK
+	
 	
 	DECLARE @Count AS INT = 0
 
@@ -156,13 +156,11 @@ BEGIN
 			UPDATE	dbo.tblCMBankStatementImport
 			SET		intImportStatus = @IMPORT_STATUS_MULTIPLEENTRY
 			WHERE	intBankStatementImportId = @intBankStatementImportId
-			IF @@ERROR <> 0	GOTO _ROLLBACK		
 
 	END
 	ELSE
 	BEGIN	
 		SET @ysnMatchFound = 0
-		IF @@ERROR <> 0	GOTO _ROLLBACK
 	
 		SELECT  @ysnMatchFound = 1, @intTransactionId = A.intTransactionId
 		FROM	#tmp_list_of_transactions A
@@ -203,7 +201,6 @@ BEGIN
 						ELSE 0
 						END
 
-		IF @@ERROR <> 0	GOTO _ROLLBACK
 					
 		IF (@ysnMatchFound = 1 AND @intTransactionId IS NOT NULL)
 		BEGIN 	
@@ -217,24 +214,14 @@ BEGIN
 			WHERE	A.intTransactionId = @intTransactionId
 					AND A.ysnPosted = 1
 					AND A.ysnClr = 0
-			IF @@ERROR <> 0	GOTO _ROLLBACK
 			
 			-- Update the status of the Bank Statement Import
 			UPDATE	dbo.tblCMBankStatementImport
 			SET		intImportStatus = @IMPORT_STATUS_MATCHFOUND
 			WHERE	intBankStatementImportId = @intBankStatementImportId
-			IF @@ERROR <> 0	GOTO _ROLLBACK
 			
 			DELETE FROM #tmp_list_of_transactions
 			WHERE intTransactionId = @intTransactionId		
-			IF @@ERROR <> 0	GOTO _ROLLBACK
-
-			--DELETE FROM #tmp_list_of_imported_record
-			--WHERE intBankStatementImportId = @intBankStatementImportId
-			--IF @@ERROR <> 0	GOTO _ROLLBACK
-			
-			--SET @intBankStatementImportId = NULL
-			--IF @@ERROR <> 0	GOTO _ROLLBACK
 		END
 		ELSE 
 		BEGIN 
@@ -242,31 +229,77 @@ BEGIN
 			UPDATE	dbo.tblCMBankStatementImport
 			SET		intImportStatus = @IMPORT_STATUS_NOMATCHFOUND
 			WHERE	intBankStatementImportId = @intBankStatementImportId
-			IF @@ERROR <> 0	GOTO _ROLLBACK		
 		END
-		
-	--	UPDATE	#tmp_list_of_transactions
-	--	SET		ysnTagged = 1
-	--	WHERE	intTransactionId = @intTransactionId
-	--	IF @@ERROR <> 0	GOTO _ROLLBACK
-	--END
-		
-	
-
 	END
 
 	DELETE FROM #tmp_list_of_imported_record
 	WHERE intBankStatementImportId = @intBankStatementImportId
-	IF @@ERROR <> 0	GOTO _ROLLBACK
 END
 
-_COMMIT:
-	COMMIT TRANSACTION 
-	SET @ysnSuccess = 1
-	GOTO _EXIT
 
-_ROLLBACK:
-	ROLLBACK TRANSACTION 
-	SET @ysnSuccess = 0	
+	DECLARE @dtmCurrent DATETIME = GETDATE()
+	DECLARE @rCount INT 
+	EXEC uspCMImportBTransferFromBStmnt 
+		@strBankStatementImportId = @strBankStatementImportId, 
+		@intEntityId = @intEntityId,
+		@dtmCurrent = @dtmCurrent,
+		@rCount = @rCount OUT
+
+	EXEC uspCMImportBTransactionFromBStmnt
+		@strBankStatementImportId = @strBankStatementImportId, 
+		@intEntityId = @intEntityId,
+		@dtmCurrent = @dtmCurrent,
+		@rCount = @rCount OUT
+
+	DECLARE @TaskCount INT, @BTCount INT,@TaskResult NVARCHAR(200), @BTResult NVARCHAR(200)
+
+	SELECT @TaskCount = COUNT(1) FROM vyuCMResponsiblePartyTask WHERE @strBankStatementImportId = strBankStatementImportId
+	SELECT @BTCount  =COUNT(1) FROM tblCMBankStatementImportLog WHERE strTransactionId IS NOT NULL AND @strBankStatementImportId  = strBankStatementImportId
+
+	IF (@TaskCount = 0)
+		SELECT  @TaskResult = strError FROM tblCMBankStatementImportLog WHERE @strBankStatementImportId  = strBankStatementImportId 
+		AND strCategory = 'Bank Transfer creation' 
+		AND strError IS NOT NULL
+		IF(@TaskResult IS NULL)
+			SET @TaskResult = 'No Task Created'
+	ELSE
+		SELECT @TaskResult = CONVERT(NVARCHAR(20) , @TaskCount) + ' Bank Transfer Task created.'
+	IF (@BTCount = 0)
+		SELECT  @BTResult = strError FROM tblCMBankStatementImportLog 
+		WHERE @strBankStatementImportId  = strBankStatementImportId 
+		AND strCategory = 'Bank Transaction creation' AND strError IS NOT NULL
+		
+		IF(@BTResult IS NULL)
+			SET @TaskResult = 'No Bank Transaction Created'
+	ELSE
+		SELECT @BTResult = CONVERT(NVARCHAR(20) , @BTCount) + ' Bank Transaction created.'
+
+
+	INSERT INTO tblCMBankStatementImportLogSummary (strBankStatementImportId,strTaskCreationResult,strBankTransactionCreationResult,dtmDate,intConcurrencyId)
+	SELECT
+	strBankStatementImportId=@strBankStatementImportId,
+	strTaskCreationResult = @TaskResult,
+	strBankTransactionCreationResult = @BTResult,
+	dtmDate =@dtmCurrent,
+	intConcurrencyId=1
 	
-_EXIT:
+	if(@@TRANCOUNT > 0)
+		COMMIT TRANSACTION 
+	SET @ysnSuccess = 1
+
+END TRY
+BEGIN CATCH
+	IF (@@TRANCOUNT > 0)
+		ROLLBACK TRANSACTION 
+
+	
+	INSERT INTO tblCMBankStatementImportLogSummary (strBankStatementImportId,strTaskCreationResult,strBankTransactionCreationResult,dtmDate,intConcurrencyId)
+	SELECT
+	strBankStatementImportId=@strBankStatementImportId,
+	strTaskCreationResult =ERROR_MESSAGE(),
+	strBankTransactionCreationResult = ERROR_MESSAGE(),
+	dtmDate =@dtmCurrent,
+	intConcurrencyId=1
+	SET @ysnSuccess = 0	
+END CATCH
+

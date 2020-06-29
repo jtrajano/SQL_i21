@@ -8764,6 +8764,8 @@
     <Build Include="dbo\Tables\tblCMResponsiblePartyTaskSequence.sql" />
     <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLogSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankReconWithTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

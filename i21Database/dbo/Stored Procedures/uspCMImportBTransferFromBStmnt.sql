@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]  
     @strBankStatementImportId NVARCHAR(40),  
     @intEntityId INT,  
+    @dtmCurrent DATETIME,
     @rCount INT = 0 OUTPUT  
     AS  
     BEGIN   
@@ -38,8 +39,8 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
             intBankStatementImportId int  
         )  
         DECLARE @ErrorMessage nvarchar(500)  
-        DECLARE @dtmCurrentDate DATETIME   
-        SET @dtmCurrentDate = GETDATE()   
+        
+        
   
         BEGIN TRANSACTION;  
   
@@ -187,7 +188,7 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
                     [ysnPosted]                 = 0,   
                     [intEntityId]               = @intEntityId,   
                     [intCreatedUserId]          = @intEntityId,   
-                    [dtmCreated]                = @dtmCurrentDate,   
+                    [dtmCreated]                = @dtmCurrent,   
                     [ysnRecurring]              = 0,   
                     [dblRate]                   = 1,   
                     [intFiscalPeriodId]         = F.intGLFiscalYearPeriodId, -- remove this in 20.1  
@@ -206,7 +207,7 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
                 SELECT @ErrorMessage, intBankStatementImportId  
                 FROM @tblTemp B   
                 WHERE @intTransactionIdTemp = intTransactionId  
-
+                GOTO ExitHere;
             END CATCH  
             
             DELETE FROM  @tblTemp WHERE @intTransactionIdTemp  = intTransactionId  
@@ -221,7 +222,7 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
           ROLLBACK TRANSACTION;  
   
             INSERT INTO tblCMBankStatementImportLog(strCategory, strError,intEntityId,intBankStatementImportId, dtmDateCreated, strBankStatementImportId)  
-            SELECT 'Bank Transfer creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrentDate, @strBankStatementImportId from @ErrorTable  
+            SELECT 'Bank Transfer creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrent, @strBankStatementImportId from @ErrorTable  
     END  
     ELSE  
     BEGIN   

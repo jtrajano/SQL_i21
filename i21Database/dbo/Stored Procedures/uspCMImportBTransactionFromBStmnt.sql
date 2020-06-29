@@ -1,6 +1,7 @@
 CREATE PROCEDURE [dbo].[uspCMImportBTransactionFromBStmnt]
 @strBankStatementImportId NVARCHAR(40),
 @intEntityId INT,
+@dtmCurrent DATETIME,
 @rCount INT = 0 OUTPUT
 AS
 BEGIN
@@ -31,7 +32,6 @@ BEGIN
 		DECLARE @count INT
 		DECLARE @bankTransaction AS BankTransactionTable;
 		DECLARE @BankTransactionDetailEntries BankTransactionDetailTable
-		DECLARE @dtmCurrent DATETIME
 		DECLARE @strGLAccountId nvarchar(30)
 		DECLARE @_Type nvarchar(50),@ReferenceNumber nvarchar(50)
 		DECLARE @Loc table (Loc int)
@@ -72,9 +72,6 @@ BEGIN
 			strError NVARCHAR(MAX),
 			intBankStatementImportId int
 		)
-
-		
-		SELECT  @dtmCurrent = GETDATE() 
 
 		BEGIN TRANSACTION
 
