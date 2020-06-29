@@ -17,13 +17,11 @@ BEGIN TRY
 	DECLARE @INBOUND_SHIPMENT_TYPE AS INT = 22
 	DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 	DECLARE @intDestinationFOBPointId INT
-	DECLARE @ysnCancel BIT
 	DECLARE @ysnIsReturn BIT = 0
 	DECLARE @strCMActualCostId NVARCHAR(100)
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
-		,@ysnCancel = ISNULL(L.ysnCancelled, 0)
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
@@ -113,12 +111,13 @@ BEGIN TRY
 			,intItemLocationId = IL.intItemLocationId
 			,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
 			,dtmDate = GETDATE()
-			,dblQty = CASE WHEN LD.intWeightItemUOMId IS NOT NULL THEN 
-							LD.dblNet
-						ELSE 
-							LD.dblQuantity
-						END 
-					* CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
+			,dblQty = 
+				CASE 
+					WHEN LD.intWeightItemUOMId IS NOT NULL THEN 
+						LD.dblNet
+					ELSE 
+						LD.dblQuantity
+				END
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = dbo.fnMultiply(
 								dbo.fnCalculateCostBetweenUOM(
@@ -160,7 +159,7 @@ BEGIN TRY
 			,intTransactionTypeId = @INBOUND_SHIPMENT_TYPE
 			,intLotId = NULL
 			,intSourceTransactionId = L.intLoadId
-			,strSourceTransactionId = CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN @strCMActualCostId ELSE L.strLoadNumber END
+			,strSourceTransactionId = L.strLoadNumber
 			,intSourceTransactionDetailId = LD.intLoadDetailId
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
@@ -377,7 +376,7 @@ BEGIN
 		,[intItemUOMId] = LD.intItemUOMId
 		,[intWeightUOMId] = LD.intWeightItemUOMId
 		,[dblQty] = CASE 
-					WHEN @ysnPost = 1 AND ISNULL(L.ysnCancelled, 0) = 0
+					WHEN @ysnPost = 1
 						THEN LD.dblQuantity
 					ELSE -1 * LD.dblQuantity
 					END

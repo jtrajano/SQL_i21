@@ -44,7 +44,6 @@ BEGIN
 	DECLARE @intCreatedEntityId AS INT
 	DECLARE @ysnTransactionPostedFlag AS BIT
 	DECLARE @ysnDirectShip BIT;
-	DECLARE @ysnCancel BIT;
 	DECLARE @ysnIsReturn BIT = 0
 	DECLARE @strCreditMemo NVARCHAR(50)
 	DECLARE @strFOBPoint NVARCHAR(50)
@@ -57,7 +56,6 @@ BEGIN
 		,@intCreatedEntityId = intEntityId
 		,@strFOBPoint = FT.strFobPoint
 		,@intFOBPointId = FP.intFobPointId
-		,@ysnCancel = ISNULL(L.ysnCancelled, 0)
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
@@ -87,7 +85,7 @@ BEGIN
 END
 
 -- Check if the transaction is already posted  
-IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1 AND @ysnCancel = 0
+IF @ysnPost = 1 AND @ysnTransactionPostedFlag = 1
 BEGIN
 	-- The transaction is already posted.  
 	RAISERROR ('The transaction is already posted.',11,1)
@@ -220,10 +218,7 @@ SAVE TRAN @TransactionName
 IF @ysnPost = 1
 BEGIN
 	-- Mark stock reservation as posted (or unposted)
-	IF (@ysnCancel = 1)
-		EXEC dbo.uspICPostStockReservation @intTransactionId, @INVENTORY_SHIPMENT_TYPE, 0
-	ELSE
-		EXEC dbo.uspICPostStockReservation @intTransactionId, @INVENTORY_SHIPMENT_TYPE, @ysnPost
+	EXEC dbo.uspICPostStockReservation @intTransactionId, @INVENTORY_SHIPMENT_TYPE, @ysnPost
 
 	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
 	BEGIN 
@@ -477,7 +472,7 @@ BEGIN
 			,[intTransactionTypeId]
 			,[intLotId]
 			,[intTransactionId]
-			,CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN NULL ELSE [strTransactionId] END
+			,[strTransactionId]
 			,[intTransactionDetailId]
 			,[intFobPointId] = @intFOBPointId
 			,[intInTransitSourceLocationId] = t.intItemLocationId
@@ -489,8 +484,7 @@ BEGIN
 			AND t.ysnIsUnposted = 0
 			AND t.strBatchId = @strBatchId
 			AND @intFOBPointId = 2
-			AND ((@ysnCancel = 0 AND t.dblQty < 0)
-				OR (@ysnCancel = 1 AND t.dblQty > 0))
+			AND t.dblQty < 0 -- Ensure the Qty is negative. Credit Memo are positive Qtys.  Credit Memo does not ship out but receives stock. 
 
 		IF EXISTS (
 				SELECT TOP 1 1
@@ -735,7 +729,6 @@ SELECT
 					ELSE
 						CASE WHEN LDL.intLotId IS NULL THEN -LD.dblQuantity ELSE -LDL.dblGross END
 					END
-				 * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 	,[intTransactionId] = LD.intLoadId
 	,[strTransactionId] = CAST(L.strLoadNumber AS VARCHAR(100))
 	,[intTransactionTypeId] = @INVENTORY_SHIPMENT_TYPE
@@ -803,18 +796,18 @@ BEGIN
 	UPDATE dbo.tblLGLoad
 	SET ysnPosted = @ysnPost
 		,intConcurrencyId = ISNULL(intConcurrencyId, 0) + 1
-		,intShipmentStatus = CASE WHEN (@ysnCancel = 1) THEN 10 ELSE 6 END
+		,intShipmentStatus = 6
 		,dtmPostedDate = GETDATE()
-		,dblDeliveredQuantity = CASE WHEN (@ysnPost = 1 AND @ysnCancel = 0) THEN 
+		,dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN 
 									(SELECT SUM(dblDeliveredQuantity) FROM tblLGLoadDetail WHERE intLoadId = tblLGLoad.intLoadId)
 								ELSE 0 END
 	WHERE intLoadId = @intTransactionId
 
 	UPDATE Detail
-	SET dblDeliveredQuantity = CASE WHEN (@ysnPost = 1 AND @ysnCancel = 0) THEN Detail.dblQuantity ELSE 0 END
-		,dblDeliveredGross = CASE WHEN (@ysnPost = 1 AND @ysnCancel = 0) THEN Detail.dblGross ELSE 0 END
-		,dblDeliveredTare = CASE WHEN (@ysnPost = 1 AND @ysnCancel = 0) THEN Detail.dblTare ELSE 0 END
-		,dblDeliveredNet = CASE WHEN (@ysnPost = 1 AND @ysnCancel = 0) THEN Detail.dblNet ELSE 0 END
+	SET dblDeliveredQuantity = CASE WHEN (@ysnPost = 1) THEN Detail.dblQuantity ELSE 0 END
+		,dblDeliveredGross = CASE WHEN (@ysnPost = 1) THEN Detail.dblGross ELSE 0 END
+		,dblDeliveredTare = CASE WHEN (@ysnPost = 1) THEN Detail.dblTare ELSE 0 END
+		,dblDeliveredNet = CASE WHEN (@ysnPost = 1) THEN Detail.dblNet ELSE 0 END
 	FROM dbo.tblLGLoadDetail Detail
 		INNER JOIN dbo.tblLGLoad Header ON Detail.intLoadId = Header.intLoadId 
 	WHERE Header.intLoadId = @intTransactionId
@@ -874,7 +867,6 @@ BEGIN
 						THEN - 1 * LD.dblQuantity
 					ELSE LD.dblQuantity
 					END
-					* CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
 		,[dblUOMQty] = IU.dblUnitQty
 		,[dblSalesPrice] = ISNULL(CD.dblCashPrice, 0)
 		,[intDockDoorId] = NULL
@@ -906,7 +898,7 @@ BEGIN
 END
 
 -- Create an Audit Log
-IF @ysnRecap = 0 AND @ysnCancel = 0
+IF @ysnRecap = 0
 BEGIN
 	DECLARE @strDescription AS NVARCHAR(100)
 		,@actionType AS NVARCHAR(50)
