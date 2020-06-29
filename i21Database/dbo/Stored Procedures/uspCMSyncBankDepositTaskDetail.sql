@@ -25,7 +25,7 @@ declare
 	@intEntityId INT,
 	@strTransactionId NVARCHAR(40),
 	@intStartingNumberId INT,
-	@BankTransaction	BankTransactionTable1,
+	@BankTransaction BankTransactionTable,
 	@BankTransactionDetail	BankTransactionDetailTable,
 	@intNewTransactionId INT,
 	@intTaskId INT
