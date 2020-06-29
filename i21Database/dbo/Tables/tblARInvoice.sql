@@ -144,7 +144,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblARInvoice_tblARPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [tblARPayment]([intPaymentId]),
 	CONSTRAINT [FK_tblARInvoice_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
-	CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]),-- ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoice_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
 	CONSTRAINT [FK_tblARInvoice_tblCFTransaction_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [tblCFTransaction]([intTransactionId]),
 	CONSTRAINT [FK_tblARInvoice_tblMBMeterReading_intMeterReadingId] FOREIGN KEY ([intMeterReadingId]) REFERENCES [tblMBMeterReading]([intMeterReadingId]),
@@ -258,4 +258,32 @@ INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoice
 GO
 CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
 
+GO
+CREATE TRIGGER trg_tblARInvoiceDelete
+ON dbo.tblARInvoice
+INSTEAD OF DELETE 
+AS
+BEGIN
+	DECLARE @strInvoiceNumber 	NVARCHAR(50) = NULL
+		  , @strError 			NVARCHAR(500) = NULL
+		  , @intInvoiceId 		INT = NULL
+		  , @ysnPosted			BIT = 0	      
 
+	SELECT @intInvoiceId 		= intInvoiceId
+	     , @strInvoiceNumber 	= strInvoiceNumber
+		 , @ysnPosted			= ysnPosted 
+	FROM DELETED 	
+	
+	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND intTransactionId = @intInvoiceId AND strTransactionId = @strInvoiceNumber)
+		SET @strError = 'You cannot delete invoice ' + @strInvoiceNumber + '. It has existing posted GL entries.';
+
+	IF @ysnPosted = 1
+		SET @strError = 'You cannot delete posted invoice (' + @strInvoiceNumber + ')';			
+
+	IF ISNULL(@strError, '') <> ''
+		RAISERROR(@strError, 16, 1);
+	ELSE
+		DELETE A
+		FROM tblARInvoice A
+		INNER JOIN DELETED B ON A.intInvoiceId = B.intInvoiceId
+END
