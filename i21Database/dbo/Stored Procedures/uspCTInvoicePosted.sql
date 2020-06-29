@@ -79,7 +79,7 @@ BEGIN TRY
 		, [intItemUOMId]			= I.[intItemUOMId]
 		, [intOrderUOMId]			= ID.[intOrderUOMId]
 		, [dblQty]					= I.[dblQtyShipped]
-		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR ID.intTicketId IS NOT NULL THEN ID.[dblQtyOrdered] ELSE 0 END
+		, [dblQtyOrdered]			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(intTicketType, 0) <> 6 AND ISNULL(strInOutFlag, '') <> 'O') THEN ID.[dblQtyOrdered] ELSE 0 END
 		, [ysnDestWtGrd]			= CAST(0 AS BIT)
 		, [intTicketId]				= NULL
 		, [intLoadDetailId]			= ID.[intLoadDetailId]
@@ -93,6 +93,7 @@ BEGIN TRY
 		FROM tblLGLoadDetail LGD 
 		INNER JOIN tblLGLoad LG ON LG.intLoadId = LGD.intLoadId	
 	) LG ON ID.intLoadDetailId = LG.intLoadDetailId
+	LEFT JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 	OUTER APPLY (
 		SELECT TOP 1 intInvoiceId 
 		FROM tblARInvoice I
