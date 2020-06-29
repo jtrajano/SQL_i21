@@ -17,7 +17,6 @@ SELECT
     , strScheduleDescription		= SR.strScheduleDescription
 	, strContractNumber				= CH.strContractNumber
     , CS.strStorageTicketNumber
-    , TS.ysnReversed
 FROM tblGRTransferStorageSplit TSS
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSS.intTransferStorageId

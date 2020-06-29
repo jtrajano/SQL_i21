@@ -8603,7 +8603,7 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPStock_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRecalculateReturnLottery.sql" />
     <Build Include="dbo\Tables\tblGRSettledDiscountsAndCharges.sql" />
-    <Build Include="dbo\Tables\tblGRSettledItemsToStorage.sql" />
+    <None Include="dbo\Tables\tblGRSettledItemsToStorage.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractS2018.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationStrauss.sql" />
@@ -8624,7 +8624,7 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceQuantity.sql" />
     <Build Include="dbo\User Defined Types\SCTicketDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\User Defined Types\SCDiscountDestinationWeightsAndGradesPosting.sql" />
-    <Build Include="dbo\Stored Procedures\uspGRReverseTransferStorage.sql" />
+    <None Include="dbo\Stored Procedures\uspGRReverseTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\PriorPeriodTransactions.sql" />
     <Build Include="dbo\Tables\tblRKM2MUnrealized.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
