@@ -8271,6 +8271,7 @@
     <Build Include="dbo\Views\vyuAPUnknownPayables.sql" />
     <Build Include="dbo\Views\vyuCTEntityContainer.sql" />
     <None Include="Scripts\Post-Deployment\IC\22_InventoryValuationPerformance.sql" />
+    <None Include="Scripts\Post-Deployment\IC\23_DisablePricingUniqueIndex.sql" />
     <Build Include="dbo\Functions\fnICGetCompanyLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityGroup.sql" />
     <Build Include="dbo\Stored Procedures\uspEMUpdateEntityGroupForVendor.sql" />
