@@ -13,8 +13,8 @@ BEGIN
 	DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
 	DECLARE @ysnImposeReversalTransaction BIT = 0
 
-	SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
-	FROM tblRKCompanyPreference
+	--SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
+	--FROM tblRKCompanyPreference
 	
 	INSERT INTO @tblItemsToUpdate (
 		  [intItemId]
