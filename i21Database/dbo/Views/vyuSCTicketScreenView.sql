@@ -247,9 +247,9 @@
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
 	,SCT.strTrailerId
-	,SCT.intParentTicketId
-    ,SCT.intTicketTransactionType
-	,SCT.ysnReversed
+	
+    
+	
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId

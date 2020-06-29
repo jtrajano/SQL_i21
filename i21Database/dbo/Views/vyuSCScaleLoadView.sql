@@ -47,7 +47,7 @@ OUTER APPLY (
 	INNER JOIN tblSCTicket BB
 		ON AA.intTicketId = BB.intTicketId
 	WHERE AA.intLoadDetailId = A.intLoadDetailId
-		AND BB.ysnReversed = 0
+		
 	UNION ALL
 
 	SELECT TOP 1
@@ -55,7 +55,7 @@ OUTER APPLY (
 		,intTicketId
 	FROM tblSCTicket 
 	WHERE intLoadDetailId = A.intLoadDetailId
-		AND ysnReversed = 0
+		
 	)A1
 )B
 
