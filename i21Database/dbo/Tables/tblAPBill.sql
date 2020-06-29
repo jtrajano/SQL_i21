@@ -4,7 +4,6 @@
     [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intTermsId]           INT             NOT NULL DEFAULT 0,
     [intTransactionReversed]				INT             NULL ,
-	[intReversalId]			INT	NULL,
 	[intCommodityId]				INT             NULL ,
 	[intInvoiceRefId]				INT             NULL ,
 	[intCompanyId]				INT             NULL ,
