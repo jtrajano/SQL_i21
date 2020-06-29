@@ -54,6 +54,7 @@ BEGIN
 				INNER JOIN dbo.tblICUnitMeasure UOM
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0
+				AND Header.intInventoryAdjustmentId = @intTransactionId
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
