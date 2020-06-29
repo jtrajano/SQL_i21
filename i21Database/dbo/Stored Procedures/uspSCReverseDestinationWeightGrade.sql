@@ -46,16 +46,11 @@ DECLARE @dblMatchTicketScheduleQty NUMERIC(38,20)
 DECLARE @intMatchTicketItemUOMIdTo INT
 DECLARE @dblMatchTicketNetUnits NUMERIC(38,20)
 DECLARE @dblUnits NUMERIC(38,20)
-DECLARE @ysnImposeReversalTransaction BIT
 DECLARE @intReversedBillId INT
 
 BEGIN TRY
 
-	SELECT TOP 1 
-		@ysnImposeReversalTransaction  = ysnImposeReversalTransaction 
-	FROM tblRKCompanyPreference
 
-	SET	@ysnImposeReversalTransaction = ISNULL(@ysnImposeReversalTransaction,0)
 
 	IF @strTicketType = 'Direct'
 	BEGIN
@@ -78,7 +73,7 @@ BEGIN TRY
 			WHERE intTicketId = @intMatchTicketId
 				AND ysnReversed = 0
 
-			IF(@ysnImposeReversalTransaction = 0)
+			
 			BEGIN
 		
 				IF(ISNULL(@strTicketWeightFinalizedWhere,'Origin') = 'Destination' OR ISNULL(@strTicketGradeFinalizedWhere,'Origin') = 'Destination')
@@ -128,33 +123,7 @@ BEGIN TRY
 				END
 				
 			END
-			ELSE
-			---------------REversal Process
-			BEGIN
-
-				--Reverse voucher of match ticket
-				EXEC uspSCReverseInventoryReceiptVoucher @intMatchTicketId, @intUserId
-
-				
-				IF ISNULL(@intContractDetailId,0) != 0
-				BEGIN
-					SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
-					SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
-
-					EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intTicketId, 'Scale'
-					EXEC uspCTUpdateScheduleQuantity
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblContractAvailableQty,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Scale'	
-
-				END
-
-				--Reverse Invoice
-				EXEC uspSCReverseInventoryShipmentInvoice @intTicketId,@intUserId
 			
-			END
 		END
 
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
@@ -191,8 +160,7 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		IF(@ysnImposeReversalTransaction = 0)
-		BEGIN
+		
 			SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId;
 			SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 			IF @ysnPosted = 1
@@ -220,11 +188,7 @@ BEGIN TRY
 			IF ISNULL(@intInvoiceId, 0) > 0
 				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
 			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
-		END
-		ELSE ----Reverse Invoice
-		BEGIN
-			EXEC uspSCReverseInventoryShipmentInvoice @intTicketId,@intUserId
-		END
+	
 	END
 
 	EXEC dbo.uspSMAuditLog 
@@ -253,3 +217,4 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
+GO
