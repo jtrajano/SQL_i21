@@ -67,7 +67,11 @@ BEGIN TRY
 					@toValue				= '',
 					@details				= @details 		
 
-			EXEC	uspCTCreateDetailHistory	NULL, @intContractDetailId
+			EXEC	uspCTCreateDetailHistory	@intContractHeaderId 	= NULL,--@intContractHeaderId,
+												@intContractDetailId	= @intContractDetailId,
+												@strSource 				= 'Contract',
+												@strProcess 			= 'Update Sequence Status',
+												@intUserId				= @intUserId
 
 		end
 
