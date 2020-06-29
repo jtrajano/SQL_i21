@@ -13,7 +13,6 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
-DECLARE @ysnImposeReversalTransaction BIT = 0
 
 DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 DECLARE @Invoices AS dbo.[InvoiceId]
@@ -25,11 +24,6 @@ DECLARE  @InitTranCount				INT
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
-
-SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
-FROM tblRKCompanyPreference
-
-SET @ysnImposeReversalTransaction = ISNULL(@ysnImposeReversalTransaction, 0)
 
 IF @InitTranCount = 0
 	BEGIN TRANSACTION
@@ -393,12 +387,10 @@ BEGIN
 		--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnP, 0) = 1 AND @LoadIDP IS NOT NULL
 			BEGIN
-				IF @ysnImposeReversalTransaction = 0
-					BEGIN
-						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
-													   , @ysnPost				 	= 0
-													   , @intEntityUserSecurityId  	= @UserId
-					END
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+											   , @ysnPost				 	= 0
+											   , @intEntityUserSecurityId  	= @UserId
+
 				IF ISNULL(@intPurchaseSaleIDP, 0) <> 3
 					BEGIN
 						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
