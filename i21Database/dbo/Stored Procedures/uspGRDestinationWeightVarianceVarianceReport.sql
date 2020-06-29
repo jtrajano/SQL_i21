@@ -97,7 +97,7 @@ BEGIN TRY
 	SELECT
 		*
 		-- This flag will be used internally to check if there's still a need to check the audit log
-		,[ysnHasOriginWeight] = CAST((CASE WHEN RESULT.intParentTicketId IS NULL THEN 0 ELSE 1 END) AS BIT)
+		-- ,[ysnHasOriginWeight] = CAST((CASE WHEN RESULT.intParentTicketId IS NULL THEN 0 ELSE 1 END) AS BIT)
 	INTO ##tmpTblGRDestinationWeightVariance
 	FROM vyuGRDestinationWeightVarianceReportView RESULT
 	WHERE
@@ -135,7 +135,7 @@ BEGIN TRY
 		ON TR.intTransactionId = AULOG.intTransactionId
 	INNER JOIN tblSMAudit AL
 		ON AULOG.intLogId = AL.intLogId	
-	WHERE RES.ysnHasOriginWeight = 0;
+	-- WHERE RES.ysnHasOriginWeight = 0;
 		-- AND AL.strChange IN ('Inventory Shipment', 'dblGrossWeight', 'dblGrossWeight1', 'dblGrossWeight2', 'dblTareWeight', 'dblTareWeight1', 'dblTareWeight2')
 
 	-- Retrieve final result
@@ -169,29 +169,13 @@ BEGIN TRY
 		FROM ( -- TMP2
 			SELECT
 				*,
-				[dblOriginNetWeight] = CASE WHEN TMP.ysnHasOriginWeight = 1
-					-- Compute total origin net weight from origin ticket
-					THEN (TMP.dblOriginGrossWeight + TMP.dblOriginGrossWeight1 + TMP.dblOriginGrossWeight2)
-						- (TMP.dblOriginTareWeight + TMP.dblOriginTareWeight1 + TMP.dblOriginTareWeight2)
-					-- Compute total origin net weight from audit logs
-					ELSE (TMP.dblOriginLogGrossWeight + TMP.dblOriginLogGrossWeight1 + TMP.dblOriginLogGrossWeight2)
+				[dblOriginNetWeight] = (TMP.dblOriginLogGrossWeight + TMP.dblOriginLogGrossWeight1 + TMP.dblOriginLogGrossWeight2)
 						- (TMP.dblOriginLogTareWeight + TMP.dblOriginLogTareWeight1 + TMP.dblOriginLogTareWeight2)
-					END
 					-- Compute total destination net weight
 				,[dblDestinationNetWeight] = (TMP.dblDestinationGrossWeight + TMP.dblDestinationGrossWeight1 + TMP.dblDestinationGrossWeight2)
 						- (TMP.dblDestinationTareWeight + TMP.dblDestinationTareWeight1 + TMP.dblDestinationTareWeight2)
-				,[dblOriginGrossWeightTotal] = CASE WHEN TMP.ysnHasOriginWeight = 1
-					-- Compute total origin gross weight from origin ticket
-					THEN (TMP.dblOriginGrossWeight + TMP.dblOriginGrossWeight1 + TMP.dblOriginGrossWeight2)
-					-- Compute total origin gross weight from audit logs
-					ELSE (TMP.dblOriginLogGrossWeight + TMP.dblOriginLogGrossWeight1 + TMP.dblOriginLogGrossWeight2)
-					END
-				,[dblOriginTareWeightTotal] = CASE WHEN TMP.ysnHasOriginWeight = 1
-					-- Compute total origin tare weight from origin ticket
-					THEN (TMP.dblOriginTareWeight + TMP.dblOriginTareWeight1 + TMP.dblOriginTareWeight2)
-					-- Compute total origin tare weight from audit logs
-					ELSE (TMP.dblOriginLogTareWeight + TMP.dblOriginLogTareWeight1 + TMP.dblOriginLogTareWeight2)
-					END
+				,[dblOriginGrossWeightTotal] = (TMP.dblOriginLogGrossWeight + TMP.dblOriginLogGrossWeight1 + TMP.dblOriginLogGrossWeight2)
+				,[dblOriginTareWeightTotal] = (TMP.dblOriginLogTareWeight + TMP.dblOriginLogTareWeight1 + TMP.dblOriginLogTareWeight2)
 			FROM ( -- TMP
 				SELECT 
 					RES.*
