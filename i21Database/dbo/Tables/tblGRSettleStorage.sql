@@ -26,8 +26,7 @@
 	[intBillId] INT NULL,
 	[dtmCreated] DATETIME NULL,
 	[intParentSettleStorageId] INT NULL,
-	[intItemUOMId] INT NULL,
-	[ysnReversed] BIT DEFAULT((0)),
+	[intItemUOMId] INT NULL
     CONSTRAINT [PK_tblGRSettleStorage_intCustomerStorageId] PRIMARY KEY ([intSettleStorageId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
 	CONSTRAINT [FK_tblGRSettleStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
