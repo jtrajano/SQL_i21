@@ -8567,7 +8567,6 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPSample_ST.sql" />
     <Build Include="dbo\Stored Procedures\uspCTLogSummary.sql" />
     <Build Include="dbo\User Defined Types\ContractDetailTable.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPReverseTransaction.sql" />
     <Build Include="dbo\Tables\tblARInvoiceStage.sql" />
     <Build Include="dbo\Views\vyuIPGetInvoice.sql" />
     <Build Include="dbo\Views\vyuIPGetInvoiceDetail.sql" />
