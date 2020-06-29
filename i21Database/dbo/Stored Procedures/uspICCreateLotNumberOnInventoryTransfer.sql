@@ -47,9 +47,9 @@ BEGIN
 				@strItemNo = Item.strItemNo
 				,@intItemId = Item.intItemId
 				,@strUnitMeasure = UOM.strUnitMeasure
-		FROM	dbo.tblICInventoryTransfer Transfer
+		FROM	dbo.tblICInventoryTransfer [Transfer]
 				INNER JOIN dbo.tblICInventoryTransferDetail TransferItem
-					ON Transfer.intInventoryTransferId = TransferItem.intInventoryTransferId
+					ON [Transfer].intInventoryTransferId = TransferItem.intInventoryTransferId
 				INNER JOIN dbo.tblICItem Item
 					ON TransferItem.intItemId = Item.intItemId
 				INNER JOIN dbo.tblICItemUOM ItemUOM
@@ -57,6 +57,7 @@ BEGIN
 				INNER JOIN dbo.tblICUnitMeasure UOM
 					ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
 		WHERE	ISNULL(ItemUOM.dblUnitQty, 0) <= 0
+				AND [Transfer].strTransferNo = @strTransactionId
 
 		IF @intItemId IS NOT NULL 
 		BEGIN 
