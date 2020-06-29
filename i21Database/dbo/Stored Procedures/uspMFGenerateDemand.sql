@@ -55,6 +55,7 @@ BEGIN TRY
 		,@intIntegerPart INT
 		,@dblTotalConsumptionQty NUMERIC(18, 6)
 		,@intConsumptionAvlMonth INT
+		,@intPrevUnitMeasureId int
 	DECLARE @tblMFContainerWeight TABLE (
 		intItemId INT
 		,dblWeight NUMERIC(18, 6)
@@ -182,7 +183,7 @@ BEGIN TRY
 	END
 
 	--To get a previously saved demand view
-	SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+	SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID,@intPrevUnitMeasureId=intUnitMeasureId
 	FROM tblCTInvPlngReportMaster
 	WHERE ysnPost = 1
 		AND dtmDate <= @dtmDate
@@ -1453,7 +1454,7 @@ BEGIN TRY
 		,CASE 
 			WHEN strValue = ''
 				THEN NULL
-			ELSE strValue
+			ELSE dbo.fnCTConvertQuantityToTargetItemUOM(intItemId, @intPrevUnitMeasureId, @intUnitMeasureId,strValue)
 			END --Previous Planned Purchases
 		,6
 		,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
@@ -1680,8 +1681,8 @@ BEGIN TRY
 					SET dblQty = IsNULL((
 								SELECT CASE 
 										WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
-											THEN Floor((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight)) * Max(CW.dblWeight)
-										ELSE (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
+											THEN Ceiling(abs((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight))) * Max(CW.dblWeight)
+										ELSE abs(sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
 										END
 								FROM #tblMFDemand OpenInv
 								LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
@@ -1694,12 +1695,8 @@ BEGIN TRY
 											,8
 											) --Opening Inventory, Existing Purchases,Forecasted Consumption
 										)
-								HAVING CASE 
-										WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
-											THEN Floor((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight)) * Max(CW.dblWeight)
-										ELSE (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
-										END < 0
-								), 0) * - 1
+								HAVING (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) < 0
+								), 0) 
 					FROM #tblMFDemand D
 					WHERE intAttributeId = 5 --Planned Purchases -
 						AND intMonthId = @intMonthId
@@ -2315,7 +2312,7 @@ BEGIN TRY
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
 						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN Floor(IsNULL(D.dblQty / CW.dblWeight, 0)) * CW.dblWeight
+						THEN Ceiling(IsNULL(D.dblQty / CW.dblWeight, 0)) * CW.dblWeight
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
