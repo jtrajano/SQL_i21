@@ -7758,6 +7758,7 @@
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
