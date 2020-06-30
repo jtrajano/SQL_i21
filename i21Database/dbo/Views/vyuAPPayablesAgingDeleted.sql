@@ -1,6 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuAPPayablesAgingDeleted]
 AS
 
+SELECT payables.*
+FROM (
 SELECT 
 	A.dtmDate	
 	, A.intBillId 
@@ -23,6 +25,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 1 AS intCount
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
@@ -55,6 +58,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 2 AS intCount
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBillArchive A
@@ -106,6 +110,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 3 AS intCount
 	-- ,'Payment' AS [Info]
 FROM dbo.tblAPPayment  A
@@ -144,6 +149,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 4 AS intCount
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
@@ -176,6 +182,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	, 5 AS intCount
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBillArchive A
@@ -186,3 +193,6 @@ LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId
 --INNER JOIN dbo.tblAPBillDetailTax C ON B.intBillDetailId = C.intBillDetailId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId	
 WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
+) payables
+CROSS APPLY tblSMCompanyPreference compPref
+WHERE payables.intCurrencyId = compPref.intDefaultCurrencyId
