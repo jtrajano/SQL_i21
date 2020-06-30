@@ -129,30 +129,77 @@ LEFT JOIN tblCTPricingType ptCH on ptCH.intPricingTypeId = CH.intPricingTypeId
 LEFT JOIN tblCTPricingType ptCD on ptCD.intPricingTypeId = CD.intPricingTypeId
 
 
+
+
+SELECT 
+	strTransactionReferenceId
+	,ysnPurchaseBasis = CAST([Purchase Basis] AS BIT)
+	,ysnPurchasePriced = CAST([Purchase Priced] AS BIT)
+	,ysnPurchaseBasisDeliveries = CAST([Purchase Basis Deliveries] AS BIT)
+	,ysnSaleBasis = CAST([Sale Basis] AS BIT)
+	,ysnSalePriced = CAST([Sale Priced] AS BIT)
+	,ysnSalesBasisDeliveries = CAST([Sales Basis Deliveries] AS BIT)
+INTO #tempPivotTable
+FROM (
+	select
+		intValue = (case when count(strTransactionReferenceId) > 1 then 1 else 0 end)
+		,strTransactionReferenceId
+		,strType 
+	from tblRKDPRRunLogDetail LD
+	inner join tblRKDPRRunLog L on L.intDPRRunLogId = LD.intDPRRunLogId
+	where strType in( 'Purchase Basis','Purchase Priced','Purchase Basis Deliveries','Sale Basis','Sale Priced','Sales Basis Deliveries') 
+		and L.intDPRRunLogId = @intDPRRun2
+	group by strTransactionReferenceId,strType
+) t
+PIVOT (
+	COUNT(intValue)
+	FOR strType IN (
+		[Purchase Basis]
+		,[Purchase Priced]
+		,[Purchase Basis Deliveries]
+		,[Sale Basis]
+		,[Sale Priced]
+		,[Sales Basis Deliveries]
+	)
+
+) AS pivot_table
+
+
 SELECT
-	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strTransactionReferenceId ASC))
+	 intRowNumber = CONVERT(INT, ROW_NUMBER() OVER (ORDER BY t.strTransactionReferenceId ASC))
 	,strBucketType = @strBucketType
-	,strTransactionId = strTransactionReferenceId
-	,intTransactionReferenceId
-	,intTransactionReferenceDetailId
-	,strTranType
+	,strTransactionId = t.strTransactionReferenceId
+	,t.intTransactionReferenceId
+	,t.intTransactionReferenceDetailId
+	,t.strTranType
 	,dblTotalRun1
 	,dblTotalRun2
 	,dblDifference = ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0)
 	,strComment
 	,strCommodityCode = @strCommodityCode
-	,strVendorCustomer = strEntityName 
-	,strLocationName 
+	,strVendorCustomer = t.strEntityName 
+	,t.strLocationName 
 	,dblShipReceiveQty
 	,dblVariance = ABS(dblShipReceiveQty) - ABS(ISNULL(dblTotalRun2,0) - ISNULL(dblTotalRun1,0))
 	,dtmShipReceiptDate
 	,dtmContractDate
-	,strContractNumber
-	,intContractHeaderId
+	,t.strContractNumber
+	,t.intContractHeaderId
 	,strHeaderPricing
-	,strSeqPricing
+	,strSeqPricing = (CASE WHEN ysnPurchaseBasis = 1 OR ysnSaleBasis = 1 
+							THEN 'Basis' 
+						WHEN ysnPurchasePriced = 1 OR ysnSalePriced = 1
+							THEN 'Priced'
+						ELSE strSeqPricing
+					END)
 	,strTicketNumber
 	,intTicketId
+	,ysnPurchaseBasis
+	,ysnPurchasePriced
+	,ysnPurchaseBasisDeliveries
+	,ysnSaleBasis
+	,ysnSalePriced
+	,ysnSalesBasisDeliveries
 	,dtmRunDateTime1 = @dtmRunDateTime1
 	,dtmRunDateTime2 = @dtmRunDateTime2
 	,dtmDPRDate1 = @dtmDPRDate1
@@ -228,7 +275,7 @@ FROM (
 	FROM #tempFinalSecondRun b
 	WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFinalFirstRun)
 ) t
-
+INNER JOIN #tempPivotTable PT ON PT.strTransactionReferenceId = t.strTransactionReferenceId
 
 
 DROP TABLE #FirstRun
@@ -237,5 +284,6 @@ DROP TABLE #tempFirstToSecond
 DROP TABLE #tempSecondToFirst
 DROP TABLE #tempFinalFirstRun
 DROP TABLE #tempFinalSecondRun
+DROP TABLE #tempPivotTable
 
 END
