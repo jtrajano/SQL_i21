@@ -3781,7 +3781,6 @@
     <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetAPGLBalance.sql" />
     <Build Include="dbo\Tables\tblSMCustomGrid.sql" />
