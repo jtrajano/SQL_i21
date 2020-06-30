@@ -32,6 +32,16 @@ WITH payables (
 		) tmpAPPayables 
 		GROUP BY intBillId
 		UNION ALL
+		SELECT   
+		intBillId  
+		,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue  
+		FROM   
+		(  
+		SELECT * FROM dbo.vyuAPPayablesForeign
+		WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @start AND @end  
+		) tmpAPPayables   
+		GROUP BY intBillId  
+		UNION ALL
 		SELECT 
 		intBillId
 		,CAST((SUM(tmpAPPayables2.dblTotal) + SUM(tmpAPPayables2.dblInterest) - SUM(tmpAPPayables2.dblAmountPaid) - SUM(tmpAPPayables2.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPBalance]
+﻿﻿CREATE PROCEDURE [dbo].[uspAPBalance]
 	@UserId INT,
 	@dateFrom DATETIME = NULL,
 	@dateTo DATETIME = NULL,
@@ -53,6 +53,15 @@ SELECT * FROM (
 			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 			FROM (
 				SELECT * FROM dbo.vyuAPPayables
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
+			) tmpAPPayables 
+			GROUP BY intBillId
+			UNION ALL
+			SELECT 
+			intBillId
+			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM (
+				SELECT * FROM dbo.vyuAPPayablesForeign
 				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
 			) tmpAPPayables 
 			GROUP BY intBillId
