@@ -7369,6 +7369,8 @@
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Views\vyuICGetInvalidBundleItemUom.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
