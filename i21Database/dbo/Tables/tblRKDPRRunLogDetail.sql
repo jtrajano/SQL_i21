@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblRKDPRRunLogDetail]
 (
-	intDPRunLogDetailId INT IDENTITY NOT NULL 
-	, intDPRunLogId INT NOT NULL
+	intDPRRunLogDetailId INT IDENTITY NOT NULL 
+	, intDPRRunLogId INT NOT NULL
 	, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, intSeqNo INT
 	, intContractHeaderId INT
@@ -36,6 +36,6 @@
 	, strTransactionReferenceId NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
 	, intTransactionReferenceDetailId INT
-	CONSTRAINT [PK_tblRKDPRRunLogDetail_intDPRunLogDetailId] PRIMARY KEY ([intDPRunLogDetailId])
-	CONSTRAINT [FK_tblRKDPRRunLogDetail_tblRKDPRRunLog_intDPRunLogId] FOREIGN KEY([intDPRunLogId])REFERENCES [dbo].[tblRKDPRRunLog] ([intDPRunLogId]) ON DELETE CASCADE 
+	CONSTRAINT [PK_tblRKDPRRunLogDetail_intDPRRunLogDetailId] PRIMARY KEY ([intDPRRunLogDetailId])
+	CONSTRAINT [FK_tblRKDPRRunLogDetail_tblRKDPRRunLog_intDPRRunLogId] FOREIGN KEY([intDPRRunLogId])REFERENCES [dbo].[tblRKDPRRunLog] ([intDPRRunLogId]) ON DELETE CASCADE 
 )

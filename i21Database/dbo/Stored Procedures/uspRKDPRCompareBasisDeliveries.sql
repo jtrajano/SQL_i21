@@ -21,28 +21,28 @@ SELECT TOP 1
 	,@dtmRunDateTime1 = dtmRunDateTime
 	,@dtmDPRDate1 = dtmDPRDate
 FROM tblRKDPRRunLogDetail LD
-INNER JOIN tblRKDPRRunLog L ON L.intDPRunLogId = LD.intDPRunLogId
+INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun1
 
 SELECT TOP 1 
 	@dtmRunDateTime2 = dtmRunDateTime
 	,@dtmDPRDate2 = dtmDPRDate
 FROM tblRKDPRRunLogDetail LD
-INNER JOIN tblRKDPRRunLog L ON L.intDPRunLogId = LD.intDPRunLogId
+INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun2
 
 
 SELECT LD.*
 INTO #FirstRun
 FROM tblRKDPRRunLogDetail LD
-INNER JOIN tblRKDPRRunLog L ON L.intDPRunLogId = LD.intDPRunLogId
+INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun1 and strType = @strBucketType
 
 
 SELECT LD.*
 INTO #SecondRun
 FROM tblRKDPRRunLogDetail LD
-INNER JOIN tblRKDPRRunLog L ON L.intDPRunLogId = LD.intDPRunLogId
+INNER JOIN tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 

@@ -10,7 +10,7 @@ select
  ,dblTotal = sum(isnull(dblTotal,0)) 
  into #temp1
 from tblRKDPRRunLogDetail LD
-inner join tblRKDPRRunLog L ON L.intDPRunLogId = LD.intDPRunLogId
+inner join tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 where intRunNumber = @intDPRRun1
 group by strType
 
@@ -19,7 +19,7 @@ select
  ,dblTotal = sum(isnull(dblTotal,0)) 
  into #temp2
 from tblRKDPRRunLogDetail LD
-inner join tblRKDPRRunLog L ON L.intDPRunLogId = LD.intDPRunLogId
+inner join tblRKDPRRunLog L ON L.intDPRRunLogId = LD.intDPRRunLogId
 where intRunNumber = @intDPRRun2
 group by strType
 
