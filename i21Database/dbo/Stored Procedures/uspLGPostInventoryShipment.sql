@@ -301,7 +301,6 @@ BEGIN
 								END
 			,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 			,dblQty = -1 * COALESCE(DetailLot.dblLotQuantity, LoadDetail.dblQuantity, 0)
-						* CASE WHEN @ysnCancel = 1 THEN -1 ELSE 1 END
 			,dblUOMQty = ISNULL(LotItemUOM.dblUnitQty, ItemUOM.dblUnitQty)
 			,dblCost = ISNULL(CASE 
 					WHEN Lot.dblLastCost IS NULL
