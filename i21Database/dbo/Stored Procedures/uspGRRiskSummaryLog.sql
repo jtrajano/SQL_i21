@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRRiskSummaryLog]
 (
 	@intStorageHistoryId INT
+	,@strAction NVARCHAR(50) = NULL
 )
 AS
 BEGIN TRY
@@ -31,6 +32,7 @@ BEGIN TRY
 			,intUserId
 			,strMiscFields
 			,strNotes
+			,intActionId
 		)
 		--CUSTOMER OWNED STORAGE
 		SELECT
@@ -67,12 +69,16 @@ BEGIN TRY
 											END
 			,dtmTransactionDate 			= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId				
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId			
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+			,dblQty 						= CASE 
+												WHEN ISNULL(@strAction,'') = '' THEN (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+												ELSE sh.dblUnits * -1
+											END									
 			,intEntityId					= cs.intEntityId			
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
@@ -87,6 +93,17 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
 			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,intActionId					= CASE 
+												WHEN intTransactionTypeId IN (1, 5)
+													THEN CASE 
+															WHEN sh.intInventoryReceiptId IS NOT NULL THEN 40
+															WHEN sh.intInventoryShipmentId IS NOT NULL THEN 41
+															ELSE NULL
+														END
+												WHEN sh.strType = 'Settlement' THEN 9
+												WHEN sh.strType = 'Reverse Settlement' THEN 33
+												WHEN intTransactionTypeId = 9 THEN 20
+											END
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -141,12 +158,16 @@ BEGIN TRY
 											END
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId 					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId			
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId
 			,intLocationId					= sh.intCompanyLocationId
-			,dblQty 						= (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)			
+			,dblQty 						= CASE 
+												WHEN ISNULL(@strAction,'') = '' THEN (CASE WHEN sh.strType ='Reduced By Inventory Shipment' OR sh.strType = 'Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
+												ELSE sh.dblUnits * -1
+											END
 			,intEntityId					=  cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
@@ -161,6 +182,16 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
 			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,intActionId					= CASE 
+												WHEN intTransactionTypeId IN (1, 5)
+													THEN CASE 
+															WHEN sh.intInventoryReceiptId IS NOT NULL THEN 7
+															WHEN sh.intInventoryShipmentId IS NOT NULL THEN 41
+															ELSE NULL
+														END
+												WHEN intTransactionTypeId = 4 THEN 37
+												WHEN intTransactionTypeId = 9 THEN 20
+											END
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -177,6 +208,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractHeaderId = sh.intContractHeaderId
 		WHERE sh.intStorageHistoryId = @intStorageHistoryId
 			AND sh.intTransactionTypeId <> 3
 		--STORAGE SETTELEMENT AND TRANSFER FROM OP TO DP
@@ -190,6 +223,7 @@ BEGIN TRY
 			,strTransactionNumber 			= sh.strSettleTicket
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
@@ -201,6 +235,7 @@ BEGIN TRY
 			,intUserId						= sh.intUserId
 			,strMiscFields 					= NULL
 			,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,intActionId					= 37
 		FROM vyuGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -230,12 +265,13 @@ BEGIN TRY
 			,strTransactionNumber 			= sh.strTransferTicket
 			,dtmTransactionDate 			= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId				
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId			
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= sh.dblUnits
+			,dblQty 						= CASE WHEN ISNULL(@strAction,'') = '' THEN sh.dblUnits ELSE (sh.dblUnits * -1) END
 			,intEntityId					= cs.intEntityId			
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
@@ -250,6 +286,10 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
 			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,intActionId					= CASE 
+												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
+												ELSE CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
+											END
 		FROM tblGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -279,12 +319,13 @@ BEGIN TRY
 			,strTransactionNumber			= sh.strTransferTicket
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId 					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId			
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= sh.dblUnits
+			,dblQty 						= CASE WHEN ISNULL(@strAction,'') = '' THEN sh.dblUnits ELSE (sh.dblUnits * -1) END
 			,intEntityId					= cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
@@ -299,6 +340,10 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(ysnActive, '') = '' THEN '' ELSE '{ ysnActive = "' + CAST(ysnActive AS NVARCHAR) + '" }' END
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
 			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
+			,intActionId					= CASE 
+												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
+												ELSE CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
+											END
 		FROM tblGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
@@ -315,6 +360,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractHeaderId = sh.intContractHeaderId
 		WHERE sh.intStorageHistoryId = @intStorageHistoryId
 			AND sh.intTransactionTypeId = 3
 		--STORAGE SETTELEMENT AND TRANSFER FROM OP TO DP
@@ -328,18 +375,23 @@ BEGIN TRY
 			,strTransactionNumber 			= sh.strTransferTicket
 			,dtmTransactionDate				= sh.dtmDistributionDate
 			,intContractHeaderId			= sh.intContractHeaderId
+			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId					= sh.intTicketId
 			,intCommodityId					= cs.intCommodityId
 			,intCommodityUOMId				= cum.intCommodityUnitMeasureId
 			,intItemId						= cs.intItemId			
 			,intLocationId					= cs.intCompanyLocationId
-			,dblQty 						= sh.dblUnits
+			,dblQty 						= CASE WHEN ISNULL(@strAction,'') = '' THEN sh.dblUnits ELSE (sh.dblUnits * -1 ) END
 			,intEntityId					= cs.intEntityId
 			,ysnDelete						= 0
 			,intUserId						= sh.intUserId
 			,strMiscFields 					= NULL
 			,strNotes						= 'intStorageHistoryId = ' + CAST(sh.intStorageHistoryId AS NVARCHAR)
-		FROM tblGRStorageHistory sh
+			,intActionId					= CASE 
+												WHEN ISNULL(@strAction,'') = '' THEN CASE WHEN sh.dblUnits > -1 THEN 9 ELSE 33 END 
+												ELSE CASE WHEN sh.dblUnits > -1 THEN 33 ELSE 9 END 
+											END
+ 		FROM tblGRStorageHistory sh
 		JOIN tblGRCustomerStorage cs 
 			ON cs.intCustomerStorageId = sh.intCustomerStorageId
 		JOIN tblGRStorageType st 
@@ -354,6 +406,8 @@ BEGIN TRY
 		LEFT JOIN tblSMCompanyLocationSubLocation sl 
 			ON sl.intCompanyLocationSubLocationId = t.intSubLocationId 
 				AND sl.intCompanyLocationId = t.intProcessingLocationId
+		LEFT JOIN tblCTContractDetail CD
+			ON CD.intContractHeaderId = sh.intContractHeaderId
 		WHERE sh.intStorageHistoryId = @intStorageHistoryId
 			AND (sh.intTransactionTypeId = 3 AND st.ysnDPOwnedType = 1)
 
