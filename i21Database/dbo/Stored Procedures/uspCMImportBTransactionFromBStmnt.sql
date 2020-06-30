@@ -72,8 +72,16 @@ BEGIN
 			strError NVARCHAR(MAX),
 			intBankStatementImportId int
 		)
+  		DECLARE @trancount int;
+		DECLARE @xstate int;
+		SET @trancount = @@trancount;
+		
 
-		BEGIN TRANSACTION
+		if @trancount = 0
+            BEGIN TRANSACTION
+        else
+            SAVE TRANSACTION uspCMImportBXfer;
+		
 
 		-- GET UNMATCHED RECORD IN BANK STATEMENT TABLE ( NOT IN TASK)
 
@@ -290,10 +298,13 @@ BEGIN
 			
 			END TRY
 			BEGIN CATCH
-			
-					SET  @ErrorMessage = ERROR_MESSAGE() 
-					insert into @ErrorTable select @ErrorMessage, @intBankStatementImportId
-					GOTO End_here;
+				
+				SELECT  @ErrorMessage = ERROR_MESSAGE() ,@xstate = XACT_STATE()
+				insert into @ErrorTable select @ErrorMessage, @intBankStatementImportId
+
+				
+
+				GOTO End_here;
 				
 			END CATCH
 			
@@ -308,18 +319,26 @@ BEGIN
 
         End_here:
 
+		
+
 		IF EXISTS (SELECT TOP 1 1 FROM @ErrorTable)
 		BEGIN
+			if @xstate = -1
+				ROLLBACK;
+			if @xstate = 1 and @trancount = 0
+				ROLLBACK
+			if @xstate = 1 and @trancount > 0
+				ROLLBACK TRANSACTION uspCMImportBXfer;
 
-			IF @@TRANCOUNT > 0 
-				ROLLBACK TRANSACTION;
+			
+			
 
 			INSERT INTO tblCMBankStatementImportLog(strCategory, strError,intEntityId,intBankStatementImportId, dtmDateCreated,strBankStatementImportId)
 				SELECT 'Bank Transaction creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrent,@strBankStatementImportId from @ErrorTable
 		END
 		ELSE
 		BEGIN 
-			IF @@TRANCOUNT > 0 
+			IF @trancount = 0 
 				COMMIT TRANSACTION;
 		END
 

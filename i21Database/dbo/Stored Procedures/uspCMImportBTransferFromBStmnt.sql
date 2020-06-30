@@ -40,9 +40,16 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
         )  
         DECLARE @ErrorMessage nvarchar(500)  
         
-        
+        DECLARE @trancount int;
+		DECLARE @xstate int;
+		SET @trancount = @@trancount;
+		
   
-        BEGIN TRANSACTION;  
+        IF @trancount = 0
+            BEGIN TRANSACTION
+        ELSE
+            SAVE TRANSACTION uspCMImportBXAction;
+		 
   
           
       
@@ -202,7 +209,7 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
     
             END TRY  
             BEGIN CATCH  
-                SELECT  @ErrorMessage = ERROR_MESSAGE()   
+                SELECT  @ErrorMessage = ERROR_MESSAGE(),@xstate = XACT_STATE()   
                 INSERT INTO @ErrorTable (strError,intBankStatementImportId)   
                 SELECT @ErrorMessage, intBankStatementImportId  
                 FROM @tblTemp B   
@@ -218,16 +225,20 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
   
     IF EXISTS (SELECT TOP 1 1 FROM @ErrorTable)  
     BEGIN  
-       IF @@TRANCOUNT > 0   
-          ROLLBACK TRANSACTION;  
+       if @xstate = -1
+			ROLLBACK;
+        if @xstate = 1 and @trancount = 0
+            ROLLBACK
+        if @xstate = 1 and @trancount > 0
+            ROLLBACK TRANSACTION uspCMImportBXAction;
   
-            INSERT INTO tblCMBankStatementImportLog(strCategory, strError,intEntityId,intBankStatementImportId, dtmDateCreated, strBankStatementImportId)  
-            SELECT 'Bank Transfer creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrent, @strBankStatementImportId from @ErrorTable  
+        INSERT INTO tblCMBankStatementImportLog(strCategory, strError,intEntityId,intBankStatementImportId, dtmDateCreated, strBankStatementImportId)  
+        SELECT 'Bank Transfer creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrent, @strBankStatementImportId from @ErrorTable  
     END  
     ELSE  
     BEGIN   
-        IF @@TRANCOUNT > 0   
-        COMMIT TRANSACTION;  
+        IF @trancount = 0 
+			COMMIT TRANSACTION;
     END  
   
     SELECT @rCount = COUNT(1) FROM tblCMResponsiblePartyTask WHERE strBankStatementImportId = @strBankStatementImportId  

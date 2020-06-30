@@ -13,7 +13,14 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRANSACTION
+DECLARE @trancount int;
+DECLARE @xstate int;
+SET @trancount = @@trancount;
+
+IF @trancount = 0
+    BEGIN TRANSACTION
+ELSE
+	SAVE TRANSACTION uspCMFindMatch;
 		
 		-- Declare the constant variables
 DECLARE @BANK_DEPOSIT INT = 1
@@ -257,20 +264,25 @@ END
 	SELECT @BTCount  =COUNT(1) FROM tblCMBankStatementImportLog WHERE strTransactionId IS NOT NULL AND @strBankStatementImportId  = strBankStatementImportId
 
 	IF (@TaskCount = 0)
+	BEGIN
 		SELECT  @TaskResult = strError FROM tblCMBankStatementImportLog WHERE @strBankStatementImportId  = strBankStatementImportId 
 		AND strCategory = 'Bank Transfer creation' 
 		AND strError IS NOT NULL
 		IF(@TaskResult IS NULL)
 			SET @TaskResult = 'No Task Created'
+	END
 	ELSE
 		SELECT @TaskResult = CONVERT(NVARCHAR(20) , @TaskCount) + ' Bank Transfer Task created.'
+
 	IF (@BTCount = 0)
+	BEGIN
 		SELECT  @BTResult = strError FROM tblCMBankStatementImportLog 
 		WHERE @strBankStatementImportId  = strBankStatementImportId 
 		AND strCategory = 'Bank Transaction creation' AND strError IS NOT NULL
 		
 		IF(@BTResult IS NULL)
 			SET @TaskResult = 'No Bank Transaction Created'
+	END
 	ELSE
 		SELECT @BTResult = CONVERT(NVARCHAR(20) , @BTCount) + ' Bank Transaction created.'
 
@@ -283,21 +295,29 @@ END
 	dtmDate =@dtmCurrent,
 	intConcurrencyId=1
 	
-	if(@@TRANCOUNT > 0)
-		COMMIT TRANSACTION 
+	 IF @trancount = 0 
+		COMMIT TRANSACTION;
+
 	SET @ysnSuccess = 1
 
 END TRY
 BEGIN CATCH
-	IF (@@TRANCOUNT > 0)
-		ROLLBACK TRANSACTION 
+	DECLARE @ErrorMessage nvarchar(500)  
+	SELECT  @ErrorMessage = ERROR_MESSAGE(),@xstate = XACT_STATE()   
+
+	if @xstate = -1
+		ROLLBACK;
+    if @xstate = 1 and @trancount = 0
+        ROLLBACK
+    if @xstate = 1 and @trancount > 0
+        ROLLBACK TRANSACTION uspCMFindMatch;
 
 	
 	INSERT INTO tblCMBankStatementImportLogSummary (strBankStatementImportId,strTaskCreationResult,strBankTransactionCreationResult,dtmDate,intConcurrencyId)
 	SELECT
 	strBankStatementImportId=@strBankStatementImportId,
-	strTaskCreationResult =ERROR_MESSAGE(),
-	strBankTransactionCreationResult = ERROR_MESSAGE(),
+	strTaskCreationResult =@ErrorMessage,
+	strBankTransactionCreationResult = @@ErrorMessage,
 	dtmDate =@dtmCurrent,
 	intConcurrencyId=1
 	SET @ysnSuccess = 0	
