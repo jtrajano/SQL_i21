@@ -38,7 +38,6 @@ WITH payables (
 		FROM   
 		(  
 		SELECT * FROM dbo.vyuAPPayablesForeign
-		WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @start AND @end  
 		) tmpAPPayables   
 		GROUP BY intBillId  
 		UNION ALL
