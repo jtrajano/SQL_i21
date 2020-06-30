@@ -7371,6 +7371,7 @@
     <Build Include="dbo\Stored Procedures\uspARInvoiceDetailTaxReport.sql" />
     <Build Include="dbo\Views\vyuAPReceiptClearingGL.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
