@@ -43,7 +43,7 @@ BEGIN TRY
 
 	IF @InvoiceDetailId IS NOT NULL
 		BEGIN
-			EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @InvoiceId
+			EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @InvoiceId, @UserId = @UserId
 
 			DELETE FROM tblARInvoiceDetailTax 
 			WHERE intInvoiceDetailId = @InvoiceDetailId

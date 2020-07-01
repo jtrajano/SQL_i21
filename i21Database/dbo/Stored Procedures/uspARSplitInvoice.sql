@@ -552,7 +552,7 @@ BEGIN
 		END		
 	
 	EXEC dbo.uspARReComputeInvoiceTaxes @NewInvoiceId
-	EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId
+	EXEC dbo.uspARInsertTransactionDetail @NewInvoiceId, @UserId
 	--EXEC dbo.[uspSOUpdateOrderShipmentStatus] @NewInvoiceId, 'Invoice', 1
 	EXEC dbo.uspARUpdateInvoiceIntegrations @NewInvoiceId, 0, @UserId		
 
