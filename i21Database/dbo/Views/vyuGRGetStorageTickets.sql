@@ -100,4 +100,5 @@ LEFT JOIN tblGRTransferStorageReference TSR
 	ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSR.intTransferStorageId
+        AND TS.ysnReversed = 0
 WHERE CS.dblOpenBalance > 0

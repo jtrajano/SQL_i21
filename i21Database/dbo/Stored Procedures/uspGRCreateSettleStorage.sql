@@ -327,6 +327,7 @@ BEGIN TRY
 			,dtmCreated
 			,intParentSettleStorageId
 			,intItemUOMId
+			,ysnReversed
 		)
 		SELECT 
 			intConcurrencyId			= 1
@@ -354,6 +355,7 @@ BEGIN TRY
 			,dtmCreated					= dtmCreated
 			,intParentSettleStorageId	= @intSettleStorageId
 			,intItemUOMId				= intItemUOMId
+			,ysnReversed				= 0
 		FROM tblGRSettleStorage
 		WHERE intSettleStorageId = @intSettleStorageId
 

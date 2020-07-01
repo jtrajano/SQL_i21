@@ -31,6 +31,7 @@ SELECT
 	,UOM.strUnitMeasure
 	,SS.intConcurrencyId
 	,ysnBillIsPaid	= dbo.fnGRCheckBillPaymentOfSettleStorage(SS.intSettleStorageId)
+	,ysnReversed	= ISNULL(SS.ysnReversed,R.ysnReversed)
 FROM tblGRSettleStorage SS
 JOIN tblEMEntity E 
 	ON E.intEntityId = SS.intEntityId
@@ -42,4 +43,7 @@ JOIN tblICItemUOM ItemUOM
 	ON ISNULL(SS.intItemUOMId, SS.intCommodityStockUomId) = ItemUOM.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM 
 	ON ItemUOM.intUnitMeasureId = UOM.intUnitMeasureId
+OUTER APPLY (
+	SELECT ysnReversed = CAST(CASE WHEN (SELECT COUNT(*) FROM tblGRSettleStorage WHERE intParentSettleStorageId = SS.intSettleStorageId AND ysnReversed = 0) = 0 THEN 1 ELSE 0 END AS BIT)
+) R
 --select

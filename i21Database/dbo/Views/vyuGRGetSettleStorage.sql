@@ -99,6 +99,7 @@ SELECT DISTINCT
 								END COLLATE Latin1_General_CI_AS AS strTransactionCode
 	, strCommodityCode
 	, strCategoryCode	= Category.strCategoryCode
+	, SS.ysnReversed
 FROM tblGRSettleStorage SS
 JOIN tblGRSettleStorageTicket ST
 	ON ST.intSettleStorageId = SS.intSettleStorageId

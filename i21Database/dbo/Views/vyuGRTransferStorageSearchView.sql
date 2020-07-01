@@ -71,6 +71,7 @@ FROM (
 			ON Commodity.intCommodityId = CSSource.intCommodityId
 		INNER JOIN tblSMUserSecurity US
 			ON US.intEntityId = TS.intUserId
+		WHERE TS.ysnReversed = 0
 		UNION ALL
 		SELECT
 			 TS.intTransferStorageId
@@ -112,6 +113,7 @@ FROM (
 			ON Commodity.intCommodityId = CS.intCommodityId
 		INNER JOIN tblSMUserSecurity US
 			ON US.intEntityId = TS.intUserId
+		WHERE TS.ysnReversed = 1
 	) SourceTransfer
 INNER JOIN (
 		SELECT

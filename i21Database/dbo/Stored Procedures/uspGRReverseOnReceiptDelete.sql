@@ -52,6 +52,7 @@ BEGIN TRY
 								FROM tblGRStorageHistory SH
 								INNER JOIN tblGRTransferStorage TS
 									ON TS.intTransferStorageId = SH.intTransferStorageId
+										AND TS.ysnReversed = 0
 								WHERE SH.intCustomerStorageId = @intCustomerStorageId 
 									AND SH.strType = 'Transfer')
 				BEGIN
@@ -63,6 +64,7 @@ BEGIN TRY
 						INNER JOIN tblGRTransferStorageSourceSplit T_SOURCE
 							ON T_SOURCE.intSourceCustomerStorageId = @intCustomerStorageId
 								AND T_SOURCE.intTransferStorageId = TS.intTransferStorageId
+						WHERE TS.ysnReversed = 0
 						FOR XML PATH('')
 					),1,1,'')
 

@@ -19,6 +19,7 @@ SELECT
 	,strItemNo 					= Item.strItemNo
 	,strUnitMeasure 			= UOM.strUnitMeasure
 	,strTransferLocationName 	= (SELECT strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = TS.intTransferLocationId)
+	,ysnReversed				= TS.ysnReversed
 FROM tblGRTransferStorage TS
 INNER JOIN tblEMEntity EM
 	ON EM.intEntityId = TS.intEntityId
