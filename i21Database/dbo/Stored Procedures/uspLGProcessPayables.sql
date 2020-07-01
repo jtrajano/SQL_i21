@@ -232,7 +232,7 @@ BEGIN
 
 	IF (@ysnPost = 1)
 	BEGIN
-		EXEC uspAPUpdateVoucherPayableQty @voucherPayable, DEFAULT
+		EXEC uspAPUpdateVoucherPayableQty @voucherPayable, DEFAULT, 1
 	END
 	ELSE
 	BEGIN
