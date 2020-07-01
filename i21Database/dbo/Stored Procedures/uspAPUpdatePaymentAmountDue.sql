@@ -21,7 +21,17 @@ BEGIN
 	UPDATE tblAPPaymentDetail
 	SET --compute discount/interest if there is any
 		@discount = CASE WHEN C.intTransactionType = 1 
-						THEN dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, (C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest))
+						THEN 
+							CASE WHEN B.intPayScheduleId IS NULL
+							THEN
+							dbo.fnGetDiscountBasedOnTerm(A.dtmDatePaid, C.dtmBillDate, C.intTermsId, 
+								(
+									--GET THE AMOUNT DUE ON VOUCHER FOR ACCURACY OF VALUE
+									(C.dblAmountDue * (CASE WHEN B.ysnOffset = 1 THEN -1 ELSE 1 END)) 
+									+ B.dblPayment + B.dblDiscount - B.dblInterest)
+								)
+							ELSE B.dblDiscount
+							END
 					ELSE 0 END,
 		@interest = CASE WHEN C.intTransactionType = 1
 						THEN dbo.fnGetInterestBasedOnTerm((C.dblAmountDue + B.dblPayment + B.dblDiscount - B.dblInterest), C.dtmBillDate, A.dtmDatePaid, NULL, C.intTermsId)
