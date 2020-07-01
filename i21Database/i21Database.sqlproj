@@ -8764,6 +8764,7 @@
     <Build Include="dbo\Tables\tblCMBankStatementImportLogSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankReconWithTask.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
+    <Build Include="dbo\Views\vyuCMCashProjection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
