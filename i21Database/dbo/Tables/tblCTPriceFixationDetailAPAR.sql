@@ -33,6 +33,7 @@ BEGIN
 	declare @dblPricedQuantity numeric(18,6);
 	declare @dblInvoiceDetailQuantity numeric(18,6);
 	declare @intContractDetailId int;
+	declare @UserId int = null;
 
 	select
 		@intInvoiceDetailId = intInvoiceDetailId
@@ -40,20 +41,27 @@ BEGIN
 	from
 		DELETED
 	where isnull(ysnMarkDelete,0) <> 1;
+	
+	if (@intInvoiceDetailId is not null)
+	BEGIN
 
-	SELECT top 1
-		@dblInvoiceDetailQuantity = dblQtyShipped
-	FROM
-		tblARTransactionDetail
-	where
-		intTransactionDetailId = @intInvoiceDetailId
-	ORDER BY intId DESC
+		SELECT top 1
+			@dblInvoiceDetailQuantity = dblQtyShipped
+			,@UserId = null
+		FROM
+			tblARTransactionDetail
+		where
+			intTransactionDetailId = @intInvoiceDetailId
+		ORDER BY intId DESC
 
-	set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
 
-	exec uspCTProcessInvoiceDelete
-		@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
-		,@intPriceFixationDetailId = @intPriceFixationDetailId
+		exec uspCTProcessInvoiceDelete
+			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+			,@intPriceFixationDetailId = @intPriceFixationDetailId
+			,@UserId = @UserId
+	
+	END
 
 END
 
