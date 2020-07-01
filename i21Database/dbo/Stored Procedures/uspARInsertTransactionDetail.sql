@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspARInsertTransactionDetail]
-	@InvoiceId	INT
+	  @InvoiceId	INT
+	, @UserId		INT = NULL
 AS
 BEGIN
 	DECLARE @strTransactionType		NVARCHAR(25) = NULL
@@ -45,7 +46,8 @@ BEGIN
 		,[intCurrencyId]
 		,[intSubCurrencyId]
 		,[dblAmountDue]
-		,[intCompanyLocationId])
+		,[intCompanyLocationId]
+		,[intEntityUserId])
 	SELECT
 		 [intTransactionDetailId]				= [intInvoiceDetailId]
 		,[intTransactionId]						= [intInvoiceId] 
@@ -76,6 +78,7 @@ BEGIN
 		,[intSubCurrencyId] 					= [intSubCurrencyId]
 		,[dblAmountDue]							= @dblAmountDue
 		,[intCompanyLocationId]					= @intCompanyLocationId
+		,[intEntityUserId]						= @UserId
 	FROM [tblARInvoiceDetail]
 	WHERE [intInvoiceId] = @InvoiceId	
 END

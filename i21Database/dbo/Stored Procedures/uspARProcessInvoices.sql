@@ -1605,7 +1605,7 @@ BEGIN TRY
 
 		IF ISNULL(@ExistingInvoiceId, 0) <> 0
 			BEGIN			
-				EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @ExistingInvoiceId
+				EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @ExistingInvoiceId, @UserId = @UserId
 			END	
 			
 
