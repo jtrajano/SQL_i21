@@ -123,7 +123,7 @@ BEGIN TRY
 			EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
 											   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
     										   , @strScreen 			= 'Invoice'
-											   , @intUserId 			= @UserId
+    										   , @intUserId				= @UserId
 			
 			DELETE FROM @InvoicesForContractDelete WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
 		END
