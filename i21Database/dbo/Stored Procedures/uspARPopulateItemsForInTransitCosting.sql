@@ -15,8 +15,8 @@ SELECT	@INVENTORY_INVOICE_TYPE = [intTransactionTypeId]
 FROM	tblICInventoryTransactionType WITH (NOLOCK)
 WHERE	[strName] = 'Invoice'
 
---SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
---FROM tblRKCompanyPreference
+SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
+FROM tblRKCompanyPreference
 
 DECLARE @ZeroDecimal DECIMAL(18,6)
 SET @ZeroDecimal = 0.000000			
