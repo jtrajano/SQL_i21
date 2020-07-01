@@ -147,7 +147,6 @@ ELSE SAVE TRAN @SavePoint
 				AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 				AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
 		)
-		AND @post != 0
 	BEGIN
 		EXEC uspAPAddVoucherPayable @voucherPayable = @validPayables, @voucherPayableTax = @validPayablesTax, @throwError = 1
 		
