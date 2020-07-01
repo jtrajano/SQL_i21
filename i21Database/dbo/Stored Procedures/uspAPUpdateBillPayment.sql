@@ -38,8 +38,8 @@ BEGIN
 									+ 	ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount)
 									),
 			tblAPBill.dtmDatePaid = NULL,
-			tblAPBill.dblDiscount = ISNULL(paySchedDetails.dblDiscount, payDetails.dblDiscount),
-			tblAPBill.dblInterest = C.dblInterest - ISNULL(payDetails.dblInterest,0),
+			tblAPBill.dblDiscount = C.dblDiscount - ISNULL(paySchedDetails.dblDiscount, ABS(payDetails.dblDiscount)),
+			tblAPBill.dblInterest = C.dblInterest - ABS(ISNULL(payDetails.dblInterest,0)),
 			tblAPBill.dtmInterestDate = ISNULL(latestPay.dtmDatePaid, NULL),
 			tblAPBill.dblWithheld = 0
 	FROM tblAPPayment A
