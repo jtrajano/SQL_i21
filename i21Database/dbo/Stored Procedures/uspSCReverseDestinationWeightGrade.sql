@@ -59,22 +59,13 @@ BEGIN TRY
 		
 		IF ISNULL(@intMatchTicketId, 0) > 0
 		BEGIN
-			SELECT @intTicketItemUOMId = SC.intItemUOMIdTo
-				, @intContractDetailId = SC.intContractId
-				, @dblContractQty = SC.dblNetUnits
-				, @intMatchTicketContractDetailId = SC.intContractId
-				, @intMatchTicketStorageScheduleTypeId = SC.intStorageScheduleTypeId
-				,@strTicketWeightFinalizedWhere = CTWeight.strWhereFinalized
-				,@strTicketGradeFinalizedWhere = CTGrade.strWhereFinalized
-				, @dblMatchTicketScheduleQty = ISNULL(SC.dblScheduleQty,0)
-				,@dblMatchTicketNetUnits = SC.dblNetUnits
-			FROM tblSCTicket SC
-			LEFT JOIN tblCTWeightGrade CTGrade 
-				ON CTGrade.intWeightGradeId = SC.intGradeId
-			LEFT JOIN tblCTWeightGrade CTWeight 
-				ON CTWeight.intWeightGradeId = SC.intWeightId
-			WHERE intTicketId = @intMatchTicketId
-				
+			SELECT @intTicketItemUOMId = intItemUOMIdTo
+				, @intContractDetailId = intContractId
+				, @dblContractQty = dblNetUnits
+				, @dblTicketMatchScheduleQty = dblScheduleQty
+			FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
+				AND ysnReversed = 0
+		END
 
 			
 			BEGIN
