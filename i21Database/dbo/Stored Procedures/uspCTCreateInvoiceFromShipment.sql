@@ -244,7 +244,8 @@ SELECT
     ,[strDocumentNumber]                    = ARSI.[strTransactionNumber]
     ,[strItemDescription]                   = ARSI.[strItemDescription]
     ,[intOrderUOMId]                        = ARSI.[intOrderUOMId]
-    ,[dblQtyOrdered]                        = ICISI.dblQuantity
+    --,[dblQtyOrdered]                        = ICISI.dblQuantity
+    ,[dblQtyOrdered]                        = dbo.fnCTConvertQtyToTargetItemUOM(ICISI.intItemUOMId,ARSI.[intItemUOMId],ICISI.dblQuantity)
     ,[intItemUOMId]                         = ARSI.[intItemUOMId]
     ,[intPriceUOMId]                        = ARSI.[intPriceUOMId]
     ,[dblContractPriceUOMQty]               = ARSI.[dblPriceUOMQuantity]
