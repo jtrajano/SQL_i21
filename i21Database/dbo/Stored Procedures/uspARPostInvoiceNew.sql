@@ -854,11 +854,12 @@ BEGIN TRY
 	EXEC dbo.[uspARGenerateEntriesForAccrual] 
 
     EXEC [dbo].[uspARGenerateGLEntries]
-         @Post     = @Post
-	    ,@Recap    = @Recap
-        ,@PostDate = @PostDate
-        ,@BatchId  = @BatchIdUsed
-        ,@UserId   = @UserId
+         @Post     		= @Post
+	    ,@Recap    		= @Recap
+        ,@PostDate 		= @PostDate
+        ,@BatchId  		= @BatchIdUsed
+        ,@UserId   		= @UserId
+		,@raiseError	= @RaiseError
 
 	INSERT INTO @GLEntries
 		([dtmDate]

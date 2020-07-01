@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblRKDPRRunLog]
 (
-	intDPRunLogId INT IDENTITY NOT NULL 
+	intDPRRunLogId INT IDENTITY NOT NULL 
 	, intRunNumber INT
 	, dtmRunDateTime DATETIME
 	, dtmDPRDate DATETIME	
@@ -10,5 +10,5 @@
 	, strDPRVendorCustomer NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, strCommodityCode NVARCHAR(200) COLLATE Latin1_General_CI_AS
 	, intUserId INT
-	CONSTRAINT [PK_tblRKDPRRunLog_intDPRunLogId] PRIMARY KEY ([intDPRunLogId])
+	CONSTRAINT [PK_tblRKDPRRunLog_intDPRRunLogId] PRIMARY KEY ([intDPRRunLogId])
 )
