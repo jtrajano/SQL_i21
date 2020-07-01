@@ -423,7 +423,14 @@ BEGIN
 			DECLARE @dblSalesInTransit  NUMERIC(18,6)
 			DECLARE @dblSalesInTransitBeginBal  NUMERIC(18,6)
 
-			select @dblSalesInTransitBeginBal =  sum(isnull(dblQuantityInStockUOM,0))  from vyuICGetInventoryValuation where ysnInTransit = 1 and intCommodityId = 3 and dtmDate <= DATEADD(day, -1, convert(date, @dtmFromTransactionDate))
+			select @dblSalesInTransitBeginBal =  sum(isnull(dblQuantityInStockUOM,0))  
+			from vyuICGetInventoryValuation 
+			where ysnInTransit = 1 
+			and intItemId = ISNULL(@intItemId, intItemId)
+			and intLocationId = ISNULL(@intLocationId, intLocationId)
+			and intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+			and intCommodityId = @intCommodityId 
+			and dtmDate <= DATEADD(day, -1, convert(date, @dtmFromTransactionDate))
 			
 			
 			While (Select Count(*) From #tempDateRange) > 0
