@@ -62,6 +62,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
