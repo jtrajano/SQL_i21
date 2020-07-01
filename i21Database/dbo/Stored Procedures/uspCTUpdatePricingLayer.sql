@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdatePricingLayer]
 	@intInvoiceId int = null, --> can be null - means detail delete only NOTE: If NULL, @intInvoiceDetailId parameter should have its value
 	@intInvoiceDetailId int = null, --> can be null - means header delete NOTE: If NULL, @intInvoiceId parameter should have its value
-	@strScreen nvarchar(50) = null --> possible values are 'Invoice', 'Voucher', etc...
+	@strScreen nvarchar(50) = null, --> possible values are 'Invoice', 'Voucher', etc...
+	@UserId int = null
 AS
 BEGIN
 
@@ -52,6 +53,7 @@ BEGIN
 		exec uspCTProcessInvoiceDelete
 			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
 			,@intPriceFixationDetailId = @intPriceFixationDetailId
+			,@UserId = null
 
 		set @intInvoiceDetailId = (select min(intInvoiceDetailId) from @InvoiceDetails where intInvoiceDetailId > @intInvoiceDetailId);
 	end
