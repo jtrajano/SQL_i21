@@ -81,6 +81,7 @@ BEGIN
 	declare @dblPricedQuantity numeric(18,6);
 	declare @dblInvoiceDetailQuantity numeric(18,6);
 	declare @intContractDetailId int;
+	declare @UserId int = null;
 
 	select
 		@intInvoiceDetailId = intInvoiceDetailId
@@ -94,6 +95,7 @@ BEGIN
 
 		SELECT top 1
 			@dblInvoiceDetailQuantity = dblQtyShipped
+			,@UserId = null
 		FROM
 			tblARTransactionDetail
 		where
@@ -105,6 +107,7 @@ BEGIN
 		exec uspCTProcessInvoiceDelete
 			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
 			,@intPriceFixationDetailId = @intPriceFixationDetailId
+			,@UserId = @UserId
 	
 	END
 
