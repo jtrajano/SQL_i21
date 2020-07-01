@@ -36,23 +36,18 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@dblContractQty NUMERIC(18,6)
 		,@intTicketItemUOMId INT
 		,@dblContractAvailableQty NUMERIC(38,20);
-DECLARE @ysnTicketContractLoadBased BIT
-DECLARE @ysnContractLoadBased BIT
-DECLARE @intMatchTicketContractDetailId INT
-DECLARE @strTicketWeightFinalizedWhere NVARCHAR(20)
-DECLARE @strTicketGradeFinalizedWhere NVARCHAR(20)
-DECLARE @intMatchTicketStorageScheduleTypeId AS INT
-DECLARE @dblMatchTicketScheduleQty NUMERIC(38,20)
-DECLARE @intMatchTicketItemUOMIdTo INT
-DECLARE @dblMatchTicketNetUnits NUMERIC(38,20)
-DECLARE @dblUnits NUMERIC(38,20)
+DECLARE @ysnImposeReversalTransaction BIT
 DECLARE @intReversedBillId INT
 DECLARE @ysnTicketContractLoadBased BIT
 DECLARE @dblTicketMatchScheduleQty NUMERIC(18,6)
 
 BEGIN TRY
 
+	SELECT TOP 1 
+		@ysnImposeReversalTransaction  = ysnImposeReversalTransaction 
+	FROM tblRKCompanyPreference
 
+	SET	@ysnImposeReversalTransaction = ISNULL(@ysnImposeReversalTransaction,0)
 
 	IF @strTicketType = 'Direct'
 	BEGIN
@@ -67,7 +62,11 @@ BEGIN TRY
 				AND ysnReversed = 0
 		END
 
-			
+		IF(@ysnImposeReversalTransaction = 0)
+		BEGIN
+			SELECT TOP 1 @intBillId = intBillId FROM tblAPBillDetail WHERE intScaleTicketId = @intMatchTicketId
+			SELECT @ysnPosted = ysnPosted  FROM tblAPBill WHERE intBillId = @intBillId
+			IF @ysnPosted = 1
 			BEGIN
 				EXEC [dbo].[uspAPPostBill]
 				@post = 0
@@ -77,7 +76,35 @@ BEGIN TRY
 				,@userId = @intUserId
 				,@success = @success OUTPUT
 			END
-			
+			IF ISNULL(@intBillId, 0) > 0
+				EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId, 2
+
+		IF ISNULL(@intContractDetailId,0) != 0
+		BEGIN
+			SELECT TOP 1 @ysnTicketContractLoadBased = ISNULl(A.ysnLoad,0)
+			FROM tblCTContractHeader A
+			INNER JOIN tblCTContractDetail B	
+				ON A.intContractHeaderId = B.intContractHeaderId
+			WHERE B.intContractDetailId = @intContractDetailId
+
+			SELECT @dblContractAvailableQty = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, intItemUOMId, @dblContractQty) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+
+			IF(@ysnTicketContractLoadBased = 1)
+			BEGIN
+				SET @dblContractAvailableQty = 1
+			END
+
+			SET @dblContractAvailableQty = (@dblContractAvailableQty * -1)
+			EXEC uspCTUpdateSequenceBalance @intContractDetailId, @dblContractAvailableQty, @intUserId, @intMatchTicketId, 'Scale'
+			IF(ISNULL(@dblTicketMatchScheduleQty,0) <> 0)
+			BEGIN
+				EXEC uspCTUpdateScheduleQuantity
+											@intContractDetailId	=	@intContractDetailId,
+											@dblQuantityToUpdate	=	@dblTicketMatchScheduleQty,
+											@intUserId				=	@intUserId,
+											@intExternalId			=	@intMatchTicketId,
+											@strScreenName			=	'Scale'	
+			END
 		END
 
 			SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId
@@ -140,7 +167,8 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		
+		IF(@ysnImposeReversalTransaction = 0)
+		BEGIN
 			SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId;
 			SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 			IF @ysnPosted = 1
@@ -167,8 +195,14 @@ BEGIN TRY
 			END
 			IF ISNULL(@intInvoiceId, 0) > 0
 				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
-			EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
-	
+		END
+		ELSE
+		BEGIN
+			--Reverse Invoice
+			EXEC uspSCReverseInventoryShipmentInvoice @intTicketId,@intUserId
+		END
+
+		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
 	END
 
 
@@ -198,4 +232,3 @@ BEGIN CATCH
 		@ErrorState -- State.
 	);
 END CATCH
-GO
