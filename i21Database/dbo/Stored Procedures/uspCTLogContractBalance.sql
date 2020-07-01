@@ -418,7 +418,7 @@ BEGIN
 		, intActionId
 		, strAction = A.strActionIn 
 		, dtmTransactionDate
-		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId
