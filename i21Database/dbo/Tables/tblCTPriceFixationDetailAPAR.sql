@@ -47,7 +47,7 @@ BEGIN
 
 		SELECT top 1
 			@dblInvoiceDetailQuantity = dblQtyShipped
-			,@UserId = null
+			,@UserId = intEntityUserId
 		FROM
 			tblARTransactionDetail
 		where
