@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICReverseInventoryShipment_PPT_OnHold
+﻿CREATE PROCEDURE uspICReverseInventoryShipment
 	@strShipmentNumber NVARCHAR(40) = NULL 
 	,@intInventoryShipmentId INT = NULL 
 	,@intEntityUserSecurityId AS INT = NULL 	

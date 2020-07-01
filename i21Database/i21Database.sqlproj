@@ -8378,8 +8378,8 @@
     <Build Include="dbo\Stored Procedures\uspIPSettlementPriceTransferStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPSettlementPriceProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPSettlementPricePopulateStgXML.sql" />
-    <None Include="dbo\Stored Procedures\uspICReverseInventoryReceipt.sql" />
-    <None Include="dbo\Stored Procedures\uspICReverseInventoryShipment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReverseInventoryReceipt.sql" />
+    <Build Include="dbo\Stored Procedures\uspICReverseInventoryShipment.sql" />
     <Build Include="dbo\Functions\fnRKGetAveragePriceReport.sql" />
     <Build Include="dbo\Views\vyuRKGetAveragePriceReport.sql" />
     <Build Include="dbo\Views\vyuIPGetFutOptTransaction.sql" />
