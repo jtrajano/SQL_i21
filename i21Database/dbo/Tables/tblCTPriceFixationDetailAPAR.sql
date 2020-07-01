@@ -116,4 +116,50 @@ GO
 -- 							@contractDetail 		= 	@contractDetails
 -- END
 
+CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsertDelete]
+	ON [dbo].[tblCTPriceFixationDetailAPAR]
+    AFTER DELETE
+AS
+BEGIN	
+    SET NOCOUNT ON;
+
+    declare @intPriceFixationId int;
+    declare @intContractPriceId int;
+    declare @intPriceFixationDetailId int;
+    declare @intInvoiceDetailId int;
+	declare @dblPricedQuantity numeric(18,6);
+	declare @dblInvoiceDetailQuantity numeric(18,6);
+	declare @intContractDetailId int;
+	declare @UserId int = null;
+
+	select
+		@intInvoiceDetailId = intInvoiceDetailId
+		,@intPriceFixationDetailId = intPriceFixationDetailId
+	from
+		DELETED
+	where isnull(ysnMarkDelete,0) <> 1;
+	
+	if (@intInvoiceDetailId is not null)
+	BEGIN
+
+		SELECT top 1
+			@dblInvoiceDetailQuantity = dblQtyShipped
+			,@UserId = intEntityUserId
+		FROM
+			tblARTransactionDetail
+		where
+			intTransactionDetailId = @intInvoiceDetailId
+		ORDER BY intId DESC
+
+		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+
+		exec uspCTProcessInvoiceDelete
+			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+			,@intPriceFixationDetailId = @intPriceFixationDetailId
+			,@UserId = @UserId
+	
+	END
+
+END
+
 GO

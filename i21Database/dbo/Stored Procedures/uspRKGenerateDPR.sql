@@ -1557,6 +1557,8 @@ BEGIN TRY
 		, strTransactionNumber
 		, intTransactionRecordHeaderId
 		, intTransactionRecordId
+		, intContractHeaderId
+		, strContractNumber
 	INTO #tblDelayedPricing
 	FROM dbo.fnRKGetBucketDelayedPricing(@dtmToDate, @intCommodityId, @intVendorId) t
 
@@ -1582,7 +1584,9 @@ BEGIN TRY
 		, strTransactionType
 		, strTransactionNumber
 		, intTransactionRecordHeaderId
-		, intTransactionRecordId)
+		, intTransactionRecordId
+		, intContractHeaderId
+		, strContractNumber)
 	SELECT DISTINCT * FROM (
 		SELECT intSeqId = 12
 			, strDistributionType
@@ -1607,6 +1611,8 @@ BEGIN TRY
 			, strTransactionNumber
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber
 		FROM #tblDelayedPricing r
 	)t WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
@@ -2113,7 +2119,9 @@ BEGIN TRY
 			, strTransactionType
 			, strTransactionNumber
 			, intTransactionRecordHeaderId
-			, intTransactionRecordId)
+			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber)
 		SELECT intSeqId = 15
 			, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 			, @strCommodityCode
@@ -2134,6 +2142,8 @@ BEGIN TRY
 			, strTransactionNumber
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber
 		FROM (
 			SELECT DISTINCT intTicketId
 				, strTicketType = strDistributionType
@@ -2152,6 +2162,8 @@ BEGIN TRY
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
 				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber
 			FROM #tblDelayedPricing ch
 		)t
 		WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
@@ -2170,6 +2182,8 @@ BEGIN TRY
 			, strTransactionNumber
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber
 	END
 		
 	INSERT INTO @ListInventory(intSeqId
@@ -5474,7 +5488,7 @@ BEGIN TRY
 			BEGIN
 		
 				INSERT INTO tblRKDPRRunLogDetail (
-					intDPRunLogId
+					intDPRRunLogId
 					, strContractNumber
 					, intSeqNo
 					, intContractHeaderId
@@ -5511,7 +5525,7 @@ BEGIN TRY
 					, intTransactionReferenceDetailId 
 				)
 				SELECT 
-					intDPRunLogId = @intDPRRunLogId
+					intDPRRunLogId = @intDPRRunLogId
 					, strContractNumber
 					, intSeqNo
 					, intContractHeaderId
@@ -5638,7 +5652,7 @@ BEGIN TRY
 			BEGIN
 		
 				INSERT INTO tblRKDPRRunLogDetail (
-					intDPRunLogId
+					intDPRRunLogId
 					, strContractNumber
 					, intSeqNo
 					, intContractHeaderId
@@ -5675,7 +5689,7 @@ BEGIN TRY
 					, intTransactionReferenceDetailId 
 				)
 				SELECT 
-					intDPRunLogId = @intDPRRunLogId
+					intDPRRunLogId = @intDPRRunLogId
 					, strContractNumber
 					, intSeqNo
 					, intContractHeaderId
@@ -5824,7 +5838,9 @@ BEGIN TRY
 			, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, intTransactionRecordHeaderId INT
 			, intTransactionRecordId INT
-			, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+			, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			, intContractHeaderId INT
+			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS)
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
 			, intCommodityId
@@ -5993,7 +6009,9 @@ BEGIN TRY
 			, strTransactionType
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
-			, strTransactionNumber)
+			, strTransactionNumber
+			, intContractHeaderId
+			, strContractNumber)
 		SELECT strCommodityCode = @strCommodityCode
 			, strItemNo
 			, strCategoryCode
@@ -6006,6 +6024,8 @@ BEGIN TRY
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
 			, strTransactionNumber
+			, intContractHeaderId
+			, strContractNumber
 		FROM #invQty
 
 	 
@@ -6016,18 +6036,24 @@ BEGIN TRY
 			, strLocationName
 			, intCommodityId
 			, intFromCommodityUnitMeasureId
-			, strInventoryType)
+			, strInventoryType
+			, intContractHeaderId
+			, strContractNumber)
 		SELECT strCommodityCode
 			, dblTotal = SUM(dblTotal)
 			, strLocationName
 			, intCommodityId
 			, @intCommodityUnitMeasureId
 			, strInventoryType = 'Collateral' COLLATE Latin1_General_CI_AS
+			, intContractHeaderId
+			, strContractNumber
 		FROM #tempCollateral
 		WHERE ysnIncludeInPriceRiskAndCompanyTitled = 1
 		GROUP BY strCommodityCode
 			, strLocationName
 			, intCommodityId
+			, intContractHeaderId
+			, strContractNumber
 	
 			
 		--=========================================
@@ -6046,7 +6072,9 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
-				, intTransactionRecordId)
+				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
@@ -6059,6 +6087,8 @@ BEGIN TRY
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
 				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber
 			FROM (
 				SELECT DISTINCT intTicketId
 					, strTicketType = strDistributionType
@@ -6078,6 +6108,8 @@ BEGIN TRY
 					, strTransactionNumber
 					, intTransactionRecordHeaderId
 					, intTransactionRecordId
+					, intContractHeaderId
+					, strContractNumber
 				FROM #tblDelayedPricing ch
 				)t
 			GROUP BY strCommodityCode
@@ -6090,6 +6122,8 @@ BEGIN TRY
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
 				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber
 		END
 		ELSE
 		BEGIN
@@ -6104,7 +6138,9 @@ BEGIN TRY
 				, strTransactionType
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
-				, intTransactionRecordId)
+				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber)
 			SELECT strCommodityCode
 				, strItemNo
 				, strCategoryCode
@@ -6117,6 +6153,8 @@ BEGIN TRY
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
 				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber
 			FROM (
 				SELECT DISTINCT intTicketId
 					, strTicketType = strDistributionType
@@ -6136,6 +6174,8 @@ BEGIN TRY
 					, strTransactionNumber
 					, intTransactionRecordHeaderId
 					, intTransactionRecordId
+					, intContractHeaderId
+					, strContractNumber
 				FROM #tblDelayedPricing ch
 				)t
 			GROUP BY strCommodityCode
@@ -6148,6 +6188,8 @@ BEGIN TRY
 				, strTransactionNumber
 				, intTransactionRecordHeaderId
 				, intTransactionRecordId
+				, intContractHeaderId
+				, strContractNumber
 		END
 		
 		INSERT INTO @ListCrushAll(intContractHeaderId
@@ -6537,7 +6579,9 @@ BEGIN TRY
 			, strTranType
 			, strTransactionNumber
 			, intTransactionRecordHeaderId
-			, intTransactionRecordId)
+			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber)
 		SELECT strCommodityCode
 			, strItemNo
 			, strCategory
@@ -6553,6 +6597,8 @@ BEGIN TRY
 			, strTransactionNumber
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
+			, intContractHeaderId
+			, strContractNumber
 		FROM @InventoryStock
 		WHERE strInventoryType IN ('Delayed Pricing')
 
@@ -6571,6 +6617,8 @@ BEGIN TRY
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
 			, strTransactionNumber
+			, intContractHeaderId
+			, strContractNumber
 			)
 		SELECT strCommodityCode
 			, strItemNo
@@ -6587,6 +6635,8 @@ BEGIN TRY
 			, intTransactionRecordHeaderId
 			, intTransactionRecordId
 			, strTransactionNumber
+			, intContractHeaderId
+			, strContractNumber
 		FROM @InventoryStock
 		WHERE strInventoryType IN ('Company Titled', 'Collateral','Purchase In-Transit','Sales In-Transit')
 
@@ -7370,7 +7420,7 @@ BEGIN TRY
 		BEGIN
 		
 			INSERT INTO tblRKDPRRunLogDetail (
-				intDPRunLogId
+				intDPRRunLogId
 				, strContractNumber
 				, intSeqNo
 				, intContractHeaderId
@@ -7407,7 +7457,7 @@ BEGIN TRY
 				, intTransactionReferenceDetailId 
 			)
 			SELECT 
-				intDPRunLogId = @intDPRRunLogId
+				intDPRRunLogId = @intDPRRunLogId
 				, strContractNumber
 				, intSeqNo
 				, intContractHeaderId

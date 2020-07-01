@@ -8718,6 +8718,7 @@
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
+    <Build Include="dbo\Views\vyuCMCashProjection.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
