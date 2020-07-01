@@ -411,7 +411,7 @@ BEGIN
 			ADDITEM:
 				IF ISNULL(@intNewInvoiceId, 0) <> 0
 				BEGIN			
-					EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @intNewInvoiceId
+					EXEC [dbo].[uspARInsertTransactionDetail] @InvoiceId = @intNewInvoiceId, @UserId = @EntityUserId
 				END	
 				---- Add as line Item to Existing Invoice
 				EXEC [dbo].[uspARAddInventoryItemToInvoice]

@@ -182,7 +182,7 @@ BEGIN TRY
 		WHERE	intInvoiceDetailId = @intInvoiceDetailId
 
 
-		EXEC [uspARInsertTransactionDetail] @InvoiceId
+		EXEC [uspARInsertTransactionDetail] @InvoiceId, @intUserId
 
 
 		EXEC	[uspARAddItemToInvoice]
