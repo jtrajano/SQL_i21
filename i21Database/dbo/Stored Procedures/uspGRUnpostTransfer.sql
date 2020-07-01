@@ -2,6 +2,7 @@
 (
 	@intTransferStorageId INT,
 	@intUserId INT,
+	@ysnReverse BIT,
 	@dtmTransferStorageDate DATETIME = NULL
 )
 AS
@@ -21,8 +22,6 @@ BEGIN
 	DECLARE @strTransferStorageId VARCHAR(MAX)	
 	DECLARE @intEntityId INT
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
-
-	DECLARE @HistoryIds AS Id
 
 	SELECT @strTransferStorageId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 	IF OBJECT_ID (N'tempdb.dbo.#tmpTransferCustomerStorage') IS NOT NULL
@@ -101,7 +100,7 @@ BEGIN
 	END
 
 	BEGIN TRY
-		--IF @ysnReverse = 0
+		IF @ysnReverse = 0
 		BEGIN
 			DECLARE @transCount INT = @@TRANCOUNT;
 			IF @transCount = 0 BEGIN TRANSACTION
@@ -514,48 +513,19 @@ BEGIN
 			--	ON TSS.intTransferStorageSplitId = TSR.intTransferStorageSplitId
 			--WHERE B.intTransferStorageId = @intTransferStorageId AND ISNULL(TSR.intTransferStorageId, @intTransferStorageId) = @intTransferStorageId
 
-			--risk summary log
-			INSERT INTO @HistoryIds
-			SELECT intStorageHistoryId FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
-
-			DECLARE @intStorageHistoryId INT 
-
-			SET @intStorageHistoryId = NULL
-			DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-			FOR
-				SELECT intId FROM @HistoryIds
-			OPEN c;
-			FETCH NEXT FROM c INTO @intStorageHistoryId
-
-			WHILE @@FETCH_STATUS = 0
-			BEGIN
-				EXEC uspGRRiskSummaryLog @intStorageHistoryId,'UNPOST'
-				FETCH NEXT FROM c INTO @intStorageHistoryId
-			END
-			CLOSE c; DEALLOCATE c;
-
-			--DELETE HISTORY
-			DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
-			DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
-			--DELETE DISCOUNTS
-			DELETE FROM tblQMTicketDiscount WHERE intTicketFileId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage) AND strSourceType = 'Storage'
-
 			DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 			DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 			DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 
-			--DELETE IN SUMMARY LOG
-			--DELETE FROM tblRKSummaryLog WHERE intTransactionRecordHeaderId = @intTransferStorageId
-
 			DONE:
 			IF @transCount = 0 COMMIT TRANSACTION
 		END
-		--ELSE
-		--BEGIN
-		--	IF @dtmTransferStorageDate IS NULL
-		--		RAISERROR ('Reversal date is required.',16,1);
-		--	EXEC uspGRReverseTransfer @intTransferStorageId, @intUserId, @dtmTransferStorageDate
-		--END
+		ELSE
+		BEGIN
+			IF @dtmTransferStorageDate IS NULL
+				RAISERROR ('Reversal date is required.',16,1);
+			EXEC uspGRReverseTransfer @intTransferStorageId, @intUserId, @dtmTransferStorageDate
+		END
 	
 	END TRY
 	BEGIN CATCH
