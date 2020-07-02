@@ -84,6 +84,7 @@ SELECT
 	,intDaysToPay					= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 									  END
+	,ysnProcessedToNSF				= (CASE WHEN I.ysnProcessedToNSF = 1 OR strComments LIKE 'NSF Cash Sale from%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
