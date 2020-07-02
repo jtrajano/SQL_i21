@@ -8726,6 +8726,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
