@@ -8772,6 +8772,8 @@
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
     <Build Include="dbo\Views\vyuAPOpenPayables.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
+    <None Include="Scripts\Post-Deployment\CT\6_DPContractJobScheduler.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -27,6 +27,17 @@ BEGIN TRY
 			ysnOpenLoad				BIT
 	)
 
+	IF EXISTS (SELECT TOP 1 1 FROM vyuCTCompanyPreference WHERE ysnAutoCompleteDPDeliveryDate = 1)
+	BEGIN
+		UPDATE CD SET intContractStatusId = 5
+		FROM tblCTContractDetail CD
+		WHERE dblBalance = 0
+		AND intPricingTypeId = 5
+		AND intContractStatusId = 1
+		AND intContractHeaderId = @intContractHeaderId
+		AND GETDATE() > dtmEndDate
+	END
+
 	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity)
 	SELECT intContractHeaderId  = ShipmentItem.intOrderId  
 		,intContractDetailId = ShipmentItem.intLineNo  
