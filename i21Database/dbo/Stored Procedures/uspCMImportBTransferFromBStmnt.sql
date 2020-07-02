@@ -205,7 +205,12 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
                 CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F -- remove this in 20.1  
                 WHERE @intTransactionIdTemp = intTransactionId  
         
-              
+                INSERT INTO tblCMBankStatementImportLog(strTransactionId, 
+                dtmDateCreated,intEntityId,intBankStatementImportId,strBankStatementImportId, intTaskId)
+			    SELECT @strID, @dtmCurrent, @intEntityId, intBankStatementImportId,@strBankStatementImportId,@intTaskId
+                FROM
+                @tblTemp  A   
+                WHERE @intTransactionIdTemp = intTransactionId 
     
             END TRY  
             BEGIN CATCH  

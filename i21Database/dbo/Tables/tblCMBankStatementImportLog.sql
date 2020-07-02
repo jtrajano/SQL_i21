@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblCMBankStatementImportLog](
 	[strBankStatementImportId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strCategory] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL,
+	[intTaskId] INT NULL,
  CONSTRAINT [PK_tblCMBankStatementImportLog] PRIMARY KEY CLUSTERED 
 (
 	[intId] ASC
