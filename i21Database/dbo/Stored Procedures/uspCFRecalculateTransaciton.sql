@@ -7826,6 +7826,22 @@ BEGIN
 	END
 
 
+	IF(EXISTS(SELECT  
+				 [intTaxCodeId]
+				,[strTaxCode]
+				,COUNT(*)
+	FROM @tblCFTransactionTax
+	GROUP BY 
+		 [intTaxCodeId]
+		,[strTaxCode]
+	HAVING COUNT(*) > 1 ))
+	BEGIN
+			INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
+			VALUES ('Calculation',@runDate,@guid, @intTransactionId, 'Duplicate tax code detected.')
+			SET @ysnInvalid = 1
+	END
+
+
 	--SELECT * FROM @tblCFTransactionTax 
 
 	
