@@ -8731,6 +8731,7 @@
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
+    <Build Include="dbo\Views\vyuAPOpenPayables.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
