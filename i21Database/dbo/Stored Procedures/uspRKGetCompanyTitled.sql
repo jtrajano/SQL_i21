@@ -617,7 +617,7 @@ BEGIN
 					,dblQtyShipped = Inv.dblTotal
 					,S.strShipmentNumber
 					,Inv.intTransactionId
-					,strDistribution = ISNULL(TV.strDistributionOption,'IS')
+					,strDistribution = ISNULL(TV.strDistributionOption,'')
 					,Inv.strTransactionType
 				from @InventoryStock Inv
 				inner join tblICInventoryShipment S on Inv.intTransactionId = S.intInventoryShipmentId
