@@ -543,6 +543,7 @@ BEGIN TRY
 		SELECT @strLine10_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10e'
 		SELECT @strLine10_F_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10f'
 		SELECT @strLine10_G_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10g'
+		SELECT @strLine10_H_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln10h'
 
 		SET @strLine10_A_Rate = CONVERT(NUMERIC(18, 6), @strLine10_A_Rate)
 		SET @strLine10_B_Rate = CONVERT(NUMERIC(18, 6), @strLine10_B_Rate)
@@ -551,6 +552,7 @@ BEGIN TRY
 		SET @dblLine10_E_Rate = CONVERT(NUMERIC(18, 6), @strLine10_E_Rate)
 		SET @dblLine10_F_Rate = CONVERT(NUMERIC(18, 6), @strLine10_F_Rate)
 		SET @dblLine10_G_Rate = CONVERT(NUMERIC(18, 6), @strLine10_G_Rate)
+		SET @dblLine10_H_Rate = CONVERT(NUMERIC(18, 6), @strLine10_H_Rate)
 
 		SET @dblLine10_A = @dblLine9_A * @strLine10_A_Rate
 		SET @dblLine10_B = @dblLine9_B * @strLine10_B_Rate
@@ -559,6 +561,7 @@ BEGIN TRY
 		SET @dblLine10_E = @dblLine9_E * @strLine10_E_Rate
 		SET @dblLine10_F = @dblLine9_F * @strLine10_F_Rate
 		SET @dblLine10_G = @dblLine9_G * @strLine10_G_Rate
+		SET @dblLine10_H = @dblLine9_H * @dblLine10_H_Rate
 
 		SELECT @strLine11_A_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11a'
 		SELECT @strLine11_B_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11b'
@@ -567,6 +570,7 @@ BEGIN TRY
 		SELECT @strLine11_E_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11e'
 		SELECT @strLine11_F_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11f'
 		SELECT @strLine11_G_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11g'
+		SELECT @strLine11_H_Rate = ISNULL(NULLIF(strConfiguration,''), '0') FROM tblTFReportingComponentConfiguration WHERE strTemplateItemId = 'MO4757-Ln11h'
 
 		SET @dblLine11_A_Rate = CONVERT(NUMERIC(18, 6), @strLine11_A_Rate)
 		SET @dblLine11_B_Rate = CONVERT(NUMERIC(18, 6), @strLine11_B_Rate)
@@ -575,6 +579,7 @@ BEGIN TRY
 		SET @dblLine11_E_Rate = CONVERT(NUMERIC(18, 6), @strLine11_E_Rate)
 		SET @dblLine11_F_Rate = CONVERT(NUMERIC(18, 6), @strLine11_F_Rate)
 		SET @dblLine11_G_Rate = CONVERT(NUMERIC(18, 6), @strLine11_G_Rate)
+		SET @dblLine11_H_Rate = CONVERT(NUMERIC(18, 6), @strLine11_H_Rate)
 
 		SET @dblLine12_A = @dblLine10_A - @dblLine11_A_Rate
 		SET @dblLine12_B = @dblLine10_B - @dblLine11_B_Rate
@@ -583,7 +588,8 @@ BEGIN TRY
 		SET @dblLine12_E = @dblLine10_E - @dblLine11_E_Rate
 		SET @dblLine12_F = @dblLine10_F - @dblLine11_F_Rate
 		SET @dblLine12_G = @dblLine10_G - @dblLine11_G_Rate
-
+		SET @dblLine12_H = @dblLine10_H - @dblLine11_H_Rate
+		
 		-- PART 3
 		SET @dblLine13 = (@dblReceiptLine5_A + @dblReceiptLine5_C + @dblReceiptLine5_D + @dblReceiptLine5_E + @dblReceiptLine5_F + @dblReceiptLine5_G + @dblReceiptLine5_H + @dblReceiptLine5_I + @dblReceiptLine6_A + @dblReceiptLine6_E + @dblReceiptLine6_F + @dblReceiptLine6_I + @dblDisbLine17_B + @dblDisbLine17_F + @dblDisbLine17_I + @dblDisbLine17a_B + @dblDisbLine17a_F + @dblDisbLine17a_I) - (@dblDisbLine18_D + @dblDisbLine18_H) 	
 		SET @dblLine14 = @dblDisbLine14_A + @dblDisbLine14_B + @dblDisbLine14_C + @dblDisbLine14_E + @dblDisbLine14_F + @dblDisbLine14_G + @dblDisbLine14_H + @dblDisbLine14_I
