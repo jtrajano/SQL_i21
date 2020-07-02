@@ -317,7 +317,10 @@ SELECT
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END)) *  -1
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount)
 		WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * -1)
-	END * (CASE WHEN QM.strCalcMethod = 3 THEN CS.dblGrossQuantity ELSE SST.dblUnits END) AS DECIMAL(18,2))
+	END * (CASE WHEN QM.strCalcMethod = 3 THEN 
+				(CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))
+	
+			ELSE SST.dblUnits END) AS DECIMAL(18,2))
 	
 	,ROUND(CASE WHEN QM.strCalcMethod = 3 
 		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
