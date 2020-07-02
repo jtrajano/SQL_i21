@@ -494,6 +494,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		SET strRemitToAddress 	= @strRemitToAddress
 		  , strOrigin			= CASE WHEN strSource = 'Transport Delivery' THEN NULL ELSE strOrigin END
 		  , dblInvoiceTotal		= CASE WHEN strTransactionType = 'Credit Memo' THEN dblInvoiceTotal * -1 ELSE dblInvoiceTotal END
+		  , dblAmountDue		= CASE WHEN strTransactionType = 'Credit Memo' THEN dblAmountDue * -1 ELSE dblAmountDue END
 		WHERE intEntityUserId = @intEntityUserId
 		  AND strRequestId = @strRequestId
 		  AND strInvoiceFormat = 'Format 5 - Honstein'
