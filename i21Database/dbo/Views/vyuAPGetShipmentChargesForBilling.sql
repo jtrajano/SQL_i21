@@ -14,8 +14,8 @@ SELECT DISTINCT
 													  		WHEN IIS.intOrderType = 2 THEN 'Sales Order'
 													  		WHEN IIS.intOrderType = 3 THEN 'Transfer Order'
 													  		ELSE 'Direct' --A.intOrderType = 4
-													END
-	, strRecordType								=	'Shipment'
+													END COLLATE Latin1_General_CI_AS
+	, strRecordType								=	'Shipment' COLLATE Latin1_General_CI_AS 
 	, strOrderNumber							=	A.strContractNumber
 	, strItemNo									=	A.strItemNo
 	, strItemDescription						=	A.strDescription
@@ -38,8 +38,8 @@ SELECT DISTINCT
 		 													THEN (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID IN (SELECT ISNULL(intMainCurrencyId, A.intCurrencyId) FROM dbo.tblSMCurrency WHERE intCurrencyID = ISNULL(A.intCurrencyId,0)))
 		 													ELSE  (SELECT TOP 1 strCurrency FROM dbo.tblSMCurrency WHERE intCurrencyID = A.intCurrencyId)
 		 											END
-	, strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
-	, strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+	, strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS 
+	, strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS   
 	, strItemUOM = ItemUOMName.strUnitMeasure
 	, strCostUOM = ItemUOMName.strUnitMeasure
 FROM vyuAPShipmentChargesForBilling A

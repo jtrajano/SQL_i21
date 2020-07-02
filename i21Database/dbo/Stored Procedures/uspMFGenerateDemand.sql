@@ -19,6 +19,7 @@
 	,@ysnRefreshContract BIT = 0
 	,@ysnRefreshStock BIT = 0
 	,@strRefreshItemStock NVARCHAR(MAX) = ''
+	,@ShortExcessXML VARCHAR(MAX) = NULL
 	)
 AS
 BEGIN TRY
@@ -130,6 +131,24 @@ BEGIN TRY
 		,[strValue] DECIMAL(24, 6)
 		)
 
+	IF OBJECT_ID('tempdb..#TempShortExcess') IS NOT NULL
+		DROP TABLE #TempShortExcess
+
+	CREATE TABLE #TempShortExcess (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
+	IF OBJECT_ID('tempdb..#TempFinalShortExcess') IS NOT NULL
+		DROP TABLE #TempFinalShortExcess
+
+	CREATE TABLE #TempFinalShortExcess (
+		[intItemId] INT
+		,[strName] NVARCHAR(50)
+		,[strValue] DECIMAL(24, 6)
+		)
+
 	IF OBJECT_ID('tempdb..#TempWeeksOfSupplyTarget') IS NOT NULL
 		DROP TABLE #TempWeeksOfSupplyTarget
 
@@ -195,7 +214,8 @@ BEGIN TRY
 				AND NOT EXISTS (
 					SELECT *
 					FROM tblMFItemExclude IE
-					WHERE IE.intItemId = I.intItemId and IE.ysnExcludeInDemandView=1
+					WHERE IE.intItemId = I.intItemId
+						AND IE.ysnExcludeInDemandView = 1
 					)
 		END
 	END
@@ -555,6 +575,52 @@ BEGIN TRY
 		EXEC sp_xml_removedocument @idoc
 	END
 
+	--IF @ShortExcessXML <> ''
+	--	AND @ysnCalculatePlannedPurchases = 1
+	--BEGIN
+	--	EXEC sp_xml_preparedocument @idoc OUTPUT
+	--		,@ShortExcessXML
+	--	INSERT INTO #TempShortExcess (
+	--		[intItemId]
+	--		,[strName]
+	--		,[strValue]
+	--		)
+	--	SELECT [intItemId]
+	--		,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
+	--		,[Value]
+	--	FROM OPENXML(@idoc, 'root/SE', 2) WITH (
+	--			[intItemId] INT
+	--			,[Name] NVARCHAR(50)
+	--			,[Value] DECIMAL(24, 6)
+	--			)
+	--	WHERE [Value] < 0
+	--	INSERT INTO #TempFinalShortExcess (
+	--		[intItemId]
+	--		,[strName]
+	--		,[strValue]
+	--		)
+	--	SELECT DT.[intItemId]
+	--		,DT.[strName]
+	--		,CASE 
+	--			WHEN IsNULL(CW.dblWeight, 0) <> 0
+	--				THEN Floor(DT.strValue / CW.dblWeight) * CW.dblWeight
+	--			ELSE DT.strValue
+	--			END
+	--	FROM (
+	--		SELECT [intItemId]
+	--			,[strName]
+	--			,[strValue] - IsNULL((
+	--					SELECT TOP 1 [strValue]
+	--					FROM #TempShortExcess b
+	--					WHERE b.intItemId = a.intItemId
+	--						AND b.strName < a.strName
+	--					ORDER BY b.strName DESC
+	--					), 0) [strValue]
+	--		FROM #TempShortExcess a
+	--		) AS DT
+	--	LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = DT.intItemId
+	--	EXEC sp_xml_removedocument @idoc
+	--END
 	IF @WeeksOfSupplyTargetXML <> ''
 	BEGIN
 		EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -1419,54 +1485,43 @@ BEGIN TRY
 
 	WHILE @intMonthId <= @intMonthsToView
 	BEGIN
-		UPDATE D
-		SET dblQty = CASE 
-				WHEN @intMonthId = 1
-					THEN (
-							SELECT sum(OpenInv.dblQty)
-							FROM #tblMFDemand OpenInv
-							WHERE OpenInv.intItemId = D.intItemId
-								AND intMonthId IN (
-									- 1 --Opening Inventory
-									,0 --Past Due
-									)
-								AND intAttributeId IN (
-									2 --Opening Inventory
-									,13 --Open Purchases
-									,14 --In-transit Purchases
-									)
-							)
-				ELSE (
-						SELECT sum(OpenInv.dblQty)
-						FROM #tblMFDemand OpenInv
-						WHERE OpenInv.intItemId = D.intItemId
-							AND intMonthId = @intMonthId - 1
-							AND intAttributeId = 9 --Ending Inventory
-						)
-				END
-		FROM #tblMFDemand D
-		WHERE intAttributeId = 2 --Opening Inventory
-			AND intMonthId = @intMonthId
-
-		IF @ysnCalculatePlannedPurchases = 1
+		IF @ysnSupplyTargetbyAverage = 1
 		BEGIN
 			UPDATE D
-			SET dblQty = (
-					CASE 
-						WHEN (
+			SET dblQty = CASE 
+					WHEN @intMonthId = 1
+						THEN (
 								SELECT sum(OpenInv.dblQty)
 								FROM #tblMFDemand OpenInv
 								WHERE OpenInv.intItemId = D.intItemId
-									AND OpenInv.intMonthId = @intMonthId
-									AND (
-										intAttributeId IN (
-											2
-											,4
-											,8
-											) --Opening Inventory, Existing Purchases,Forecasted Consumption
+									AND intMonthId IN (
+										- 1 --Opening Inventory
+										,0 --Past Due
 										)
-								) < 0
-							THEN (
+									AND intAttributeId IN (
+										2 --Opening Inventory
+										,13 --Open Purchases
+										,14 --In-transit Purchases
+										)
+								)
+					ELSE (
+							SELECT sum(OpenInv.dblQty)
+							FROM #tblMFDemand OpenInv
+							WHERE OpenInv.intItemId = D.intItemId
+								AND intMonthId = @intMonthId - 1
+								AND intAttributeId = 9 --Ending Inventory
+							)
+					END
+			FROM #tblMFDemand D
+			WHERE intAttributeId = 2 --Opening Inventory
+				AND intMonthId = @intMonthId
+
+			IF @ysnCalculatePlannedPurchases = 1
+			BEGIN
+				UPDATE D
+				SET dblQty = (
+						CASE 
+							WHEN (
 									SELECT sum(OpenInv.dblQty)
 									FROM #tblMFDemand OpenInv
 									WHERE OpenInv.intItemId = D.intItemId
@@ -1478,57 +1533,97 @@ BEGIN TRY
 												,8
 												) --Opening Inventory, Existing Purchases,Forecasted Consumption
 											)
-									) * - 1
-						ELSE 0
-						END
+									) < 0
+								THEN (
+										SELECT sum(OpenInv.dblQty)
+										FROM #tblMFDemand OpenInv
+										WHERE OpenInv.intItemId = D.intItemId
+											AND OpenInv.intMonthId = @intMonthId
+											AND (
+												intAttributeId IN (
+													2
+													,4
+													,8
+													) --Opening Inventory, Existing Purchases,Forecasted Consumption
+												)
+										) * - 1
+							ELSE 0
+							END
+						)
+				FROM #tblMFDemand D
+				WHERE intAttributeId = 5 --Planned Purchases -
+					AND intMonthId = @intMonthId
+			END
+
+			DELETE
+			FROM @tblMFEndInventory
+
+			UPDATE D
+			SET dblQty = (
+					SELECT sum(OpenInv.dblQty)
+					FROM #tblMFDemand OpenInv
+					WHERE OpenInv.intItemId = D.intItemId
+						AND OpenInv.intMonthId = @intMonthId
+						AND (
+							intAttributeId IN (
+								2
+								,4
+								,5
+								,8
+								) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
+							)
 					)
+			OUTPUT inserted.intItemId
+				,inserted.dblQty
+			INTO @tblMFEndInventory
 			FROM #tblMFDemand D
-			WHERE intAttributeId = 5 --Planned Purchases -
+			WHERE intAttributeId = 9 --Ending Inventory
 				AND intMonthId = @intMonthId
 		END
-
-		DELETE
-		FROM @tblMFEndInventory
-
-		UPDATE D
-		SET dblQty = (
-				SELECT sum(OpenInv.dblQty)
-				FROM #tblMFDemand OpenInv
-				WHERE OpenInv.intItemId = D.intItemId
-					AND OpenInv.intMonthId = @intMonthId
-					AND (
-						intAttributeId IN (
-							2
-							,4
-							,5
-							,8
-							) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
-						)
-				)
-		OUTPUT inserted.intItemId
-			,inserted.dblQty
-		INTO @tblMFEndInventory
-		FROM #tblMFDemand D
-		WHERE intAttributeId = 9 --Ending Inventory
-			AND intMonthId = @intMonthId
-
-		IF @ysnSupplyTargetbyAverage = 0
+		ELSE
 		BEGIN
+			DELETE
+			FROM @tblMFEndInventory
+
+			UPDATE D
+			SET dblQty = CASE 
+					WHEN @intMonthId = 1
+						THEN (
+								SELECT sum(OpenInv.dblQty)
+								FROM #tblMFDemand OpenInv
+								WHERE OpenInv.intItemId = D.intItemId
+									AND intMonthId IN (
+										- 1 --Opening Inventory
+										,0 --Past Due
+										)
+									AND intAttributeId IN (
+										2 --Opening Inventory
+										,13 --Open Purchases
+										,14 --In-transit Purchases
+										)
+								)
+					ELSE (
+							SELECT sum(OpenInv.dblQty)
+							FROM #tblMFDemand OpenInv
+							WHERE OpenInv.intItemId = D.intItemId
+								AND intMonthId = @intMonthId - 1
+								AND intAttributeId = 9 --Ending Inventory
+							)
+					END
+			OUTPUT inserted.intItemId
+				,inserted.dblQty
+			INTO @tblMFEndInventory
+			FROM #tblMFDemand D
+			WHERE intAttributeId = 2 --Opening Inventory
+				AND intMonthId = @intMonthId
+
 			SELECT @intItemId = min(intItemId)
 			FROM @tblMFEndInventory
 
-			--WHERE dblQty > 0
 			WHILE @intItemId IS NOT NULL
 			BEGIN
 				SELECT @dblEndInventory = 0
 					,@dblWeeksOfSsupply = 0
-
-				SELECT @dblEndInventory = dblQty
-				FROM @tblMFEndInventory
-				WHERE intItemId = @intItemId
-
-				IF @dblEndInventory IS NULL
-					SELECT @dblEndInventory = 0
 
 				--Calculate Excess or shortage
 				SELECT @dblSupplyTarget = NULL
@@ -1575,6 +1670,73 @@ BEGIN TRY
 							AND intAttributeId = 8
 					END
 				END
+
+				---************************************
+				---************************************
+				---************************************
+				IF @ysnCalculatePlannedPurchases = 1
+				BEGIN
+					UPDATE D
+					SET dblQty = IsNULL((
+								SELECT CASE 
+										WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
+											THEN Floor((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight)) * Max(CW.dblWeight)
+										ELSE (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
+										END
+								FROM #tblMFDemand OpenInv
+								LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
+								WHERE OpenInv.intItemId = D.intItemId
+									AND OpenInv.intMonthId = @intMonthId
+									AND (
+										intAttributeId IN (
+											2
+											,4
+											,8
+											) --Opening Inventory, Existing Purchases,Forecasted Consumption
+										)
+								HAVING CASE 
+										WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
+											THEN Floor((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight)) * Max(CW.dblWeight)
+										ELSE (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
+										END < 0
+								), 0) * - 1
+					FROM #tblMFDemand D
+					WHERE intAttributeId = 5 --Planned Purchases -
+						AND intMonthId = @intMonthId
+						AND intItemId = @intItemId
+				END
+
+				UPDATE D
+				SET dblQty = (
+						SELECT sum(OpenInv.dblQty)
+						FROM #tblMFDemand OpenInv
+						WHERE OpenInv.intItemId = D.intItemId
+							AND OpenInv.intMonthId = @intMonthId
+							AND (
+								intAttributeId IN (
+									2
+									,4
+									,5
+									,8
+									) --Opening Inventory,Existing Purchases,Planned Purchases - ,Forecasted Consumption
+								)
+						)
+				FROM #tblMFDemand D
+				WHERE intAttributeId = 9 --Ending Inventory
+					AND intMonthId = @intMonthId
+					AND intItemId = @intItemId
+
+				---************************************
+				---************************************
+				---************************************
+				SELECT @dblEndInventory = dblQty
+				FROM #tblMFDemand D
+				WHERE intAttributeId = 9 --Ending Inventory
+					AND intMonthId = @intMonthId
+					AND intItemId = @intItemId
+
+				IF @dblEndInventory IS NULL
+					SELECT @dblEndInventory = 0
 
 				SELECT @intConsumptionMonth = @intMonthId + 1
 
@@ -2153,7 +2315,7 @@ BEGIN TRY
 					WHEN A.intReportAttributeID = 5
 						AND @intContainerTypeId IS NOT NULL
 						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN Round(IsNULL(D.dblQty / CW.dblWeight, 0), 0) * CW.dblWeight
+						THEN Floor(IsNULL(D.dblQty / CW.dblWeight, 0)) * CW.dblWeight
 					WHEN DL.intMonthId IN (
 							- 1
 							,0

@@ -57,7 +57,7 @@ BEGIN
 		, intUserId = b.intEntityId
 		, intTicketId = bd.intScaleTicketId
 		, strMiscFields = '{intInventoryReceiptItemId = "'+ CAST(ISNULL(bd.intInventoryReceiptItemId,'') AS NVARCHAR) +'"} {intLoadDetailId = "' + CAST(ISNULL(bd.intLoadDetailId,'') AS NVARCHAR) +'"}'
-		, intActionId = 15
+		, intActionId = CASE WHEN @remove = 1 THEN 62 ELSE 15 END
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
 	INNER JOIN @voucherDetailIds bb
@@ -142,7 +142,7 @@ BEGIN
 		, cd.intBookId
 		, cd.intSubBookId
 		, b.intEntityId
-		, intActionId = 15
+		, intActionId = CASE WHEN @remove = 1 THEN 62 ELSE 15 END
 	FROM tblAPBill b
 	INNER JOIN tblAPBillDetail bd ON bd.intBillId = b.intBillId
 	INNER JOIN (tblCTContractDetail cd INNER JOIN tblCTContractHeader ct ON ct.intContractHeaderId = cd.intContractHeaderId)

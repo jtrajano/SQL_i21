@@ -24,7 +24,7 @@ AS
 (
 	SELECT
 		 
-		  A.strVendorId
+		  A.strVendorId COLLATE Latin1_General_CI_AS AS strVendorId
 		, A.intYear
 		, CASE WHEN SUM(A.dblBoatsProceeds) >= MIN(C.dbl1099MISCFishing) AND SUM(A.dblBoatsProceeds) != 0 THEN SUM(dblBoatsProceeds) ELSE NULL END AS dblBoatsProceeds
 		, CASE WHEN SUM(A.dblCropInsurance) >= MIN(C.dbl1099MISCCrop) AND SUM(A.dblCropInsurance) != 0 THEN SUM(dblCropInsurance) ELSE NULL END AS dblCropInsurance

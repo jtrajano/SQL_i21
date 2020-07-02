@@ -24,6 +24,7 @@ DECLARE @intItemId AS INT
 		,@intEntityId AS INT 
 		,@intBackupId INT 
 		,@dtmDate AS DATETIME 
+		,@intProduceItemWIPAccountId AS INT 
 
 DECLARE @ShipmentPostScenario AS TINYINT = NULL 
 		,@ShipmentPostScenario_FreightBased AS TINYINT = 1
@@ -140,6 +141,20 @@ BEGIN
 	)
 END 
 
+-- Create the temp config table. 
+IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpLogRiskPosition (
+		ysnSkip BIT 
+	)
+
+	INSERT INTO #tmpLogRiskPosition (
+		ysnSkip
+	)
+	SELECT 
+		ysnSkip = 1
+END 
+
 IF @intItemId IS NOT NULL 
 BEGIN 
 	INSERT INTO #tmpRebuildList (
@@ -192,22 +207,22 @@ BEGIN
 	SELECT intItemId = NULL, intCategoryId = NULL 
 END 
 
--- Check if the item/category to rebuild will impact the DPR Summary log. 
--- If there will be an imnpact, do not continue with the rebuild. 
-IF EXISTS (
-	SELECT TOP 1 i.intCommodityId
-	FROM 
-		tblICItem i INNER JOIN #tmpRebuildList list
-			ON i.intItemId = COALESCE(list.intItemId, i.intItemId) 
-			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
-		LEFT JOIN tblRKSummaryLog rlog
-			ON rlog.intCommodityId = i.intCommodityId
-)
-BEGIN 
-	-- 'Rebuild is not allowed because it will impact the DPR summary log.'
-	EXEC uspICRaiseError 80254
-	RETURN -1; 
-END 
+---- Check if the item/category to rebuild will impact the DPR Summary log. 
+---- If there will be an imnpact, do not continue with the rebuild. 
+--IF EXISTS (
+--	SELECT TOP 1 i.intCommodityId
+--	FROM 
+--		tblICItem i INNER JOIN #tmpRebuildList list
+--			ON i.intItemId = COALESCE(list.intItemId, i.intItemId) 
+--			AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId)
+--		INNER JOIN tblRKSummaryLog rlog
+--			ON rlog.intCommodityId = i.intCommodityId
+--)
+--BEGIN 
+--	-- 'Rebuild is not allowed because it will impact the DPR summary log.'
+--	EXEC uspICRaiseError 80254
+--	RETURN -1; 
+--END 
 
 -- Backup Inventory transactions 
 BEGIN 
@@ -1744,6 +1759,75 @@ BEGIN
 				-- Produce and Consume transactions typically shares a batch but hold different transaction ids. 
 				DELETE	FROM #tmpICInventoryTransaction
 				WHERE	strBatchId = @strBatchId
+
+				-- Generate the GL entries. 
+				-- The consume must use the WIP account id from the Produce item. 	
+				INSERT INTO @GLEntries (
+					[dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+					,[intSourceEntityId]
+					,[intCommodityId]
+					)
+				EXEC dbo.uspICCreateGLEntries 
+					@strBatchId
+					,@strAccountToCounterInventory
+					,@intEntityUserSecurityId
+
+				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+				BEGIN 
+					SET @intProduceItemWIPAccountId = NULL 
+					SELECT TOP 1 
+						@intProduceItemWIPAccountId = dbo.fnGetItemGLAccount(t.intItemId, t.intItemLocationId, @strAccountToCounterInventory) 
+					FROM 
+						@ItemsToPost t 
+					WHERE
+						t.intTransactionTypeId = 9 -- Produce						
+						AND t.dblQty > 0 
+
+					-- Replace all the 'wip' related intAccountId with the produce item's wip account id. 
+					UPDATE glEntries
+					SET
+						glEntries.intAccountId = 
+							CASE 
+								WHEN dblDebitUnit > 0 AND strTransactionForm = 'Consume' THEN @intProduceItemWIPAccountId
+								WHEN dblDebitUnit < 0 AND strTransactionForm = 'Produce' THEN @intProduceItemWIPAccountId
+								ELSE intAccountId
+							END						
+					FROM	
+						@GLEntries glEntries
+					WHERE
+						@intProduceItemWIPAccountId IS NOT NULL 
+				END 
 			END
 
 			-- Repost 'Inventory Transfer'
@@ -2321,7 +2405,12 @@ BEGIN
 							,RebuildInvTrans.dtmDate  
 							,RebuildInvTrans.dblQty  
 							,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-							,dblCost = AdjDetail.dblCost
+							,dblCost = 
+								dbo.fnCalculateCostBetweenUOM(
+									AdjDetail.intItemUOMId
+									, RebuildInvTrans.intItemUOMId
+									, AdjDetail.dblCost
+								)								
 							,RebuildInvTrans.dblSalesPrice  
 							,RebuildInvTrans.intCurrencyId  
 							,RebuildInvTrans.dblExchangeRate  
@@ -2799,7 +2888,12 @@ BEGIN
 							,RebuildInvTrans.dtmDate  
 							,RebuildInvTrans.dblQty  
 							,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
-							,dblCost = AdjDetail.dblCost
+							,dblCost = 
+								dbo.fnCalculateCostBetweenUOM(
+									AdjDetail.intItemUOMId
+									, RebuildInvTrans.intItemUOMId
+									, AdjDetail.dblCost
+								)							
 							,RebuildInvTrans.dblSalesPrice  
 							,RebuildInvTrans.intCurrencyId  
 							,RebuildInvTrans.dblExchangeRate  
@@ -2889,7 +2983,7 @@ BEGIN
 										ELSE
 											dbo.fnCalculateCostBetweenUOM( 
 												dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
-												,dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+												,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
 												,AdjDetail.dblNewCost
 											)
 									END
@@ -2983,7 +3077,7 @@ BEGIN
 											ELSE
 												dbo.fnCalculateCostBetweenUOM( 
 													dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
-													,dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
+													,NewItemUOM.intItemUOMId--dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
 													,AdjDetail.dblNewCost
 												)
 										END
@@ -3754,97 +3848,98 @@ BEGIN
 						,RebuildInvTrans.dblQty  
 						,ISNULL(ItemUOM.dblUnitQty, RebuildInvTrans.dblUOMQty) 
 						,dblCost  = 
-									CASE 
-										WHEN (RebuildInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL) THEN
-											CASE	
-												WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN 
-													(
-														-- (A) Item Cost
-														dbo.fnCalculateReceiptUnitCost(
-															ReceiptItem.intItemId
-															,ReceiptItem.intUnitMeasureId		
-															,ReceiptItem.intCostUOMId
-															,ReceiptItem.intWeightUOMId
-															,ReceiptItem.dblUnitCost
-															,ReceiptItem.dblNet
-															,ReceiptItemLot.intLotId
-															,ReceiptItemLot.intItemUnitMeasureId
-															,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
-															,ReceiptItem.ysnSubCurrency
-															,Receipt.intSubCurrencyCents
-															,DEFAULT
-														)
-														--/ Receipt.intSubCurrencyCents 
+							CASE 
+								WHEN (RebuildInvTrans.dblQty > 0 AND Receipt.intInventoryReceiptId IS NOT NULL) THEN
+									CASE	
+										WHEN ReceiptItem.ysnSubCurrency = 1 AND ISNULL(Receipt.intSubCurrencyCents, 1) <> 0 THEN 
+											(
+												-- (A) Item Cost
+												dbo.fnCalculateReceiptUnitCost(
+													ReceiptItem.intItemId
+													,ReceiptItem.intUnitMeasureId		
+													,ReceiptItem.intCostUOMId
+													,ReceiptItem.intWeightUOMId
+													,ReceiptItem.dblUnitCost
+													,ReceiptItem.dblNet
+													,ReceiptItemLot.intLotId
+													,ReceiptItemLot.intItemUnitMeasureId
+													,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
+													,ReceiptItem.ysnSubCurrency
+													,Receipt.intSubCurrencyCents
+													,RebuildInvTrans.intItemUOMId
+												)
+												--/ Receipt.intSubCurrencyCents 
 
-														-- (B) Other Charge
-														+ 
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																-- Convert the other charge to the currency used by the detail item. 
-																dbo.fnDivide(
-																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 
-																-- No conversion. Detail item is already in functional currency. 
-																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END 									
-														+
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																dbo.fnDivide(
-																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 												
-																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END 									
-													)										
-												ELSE 
-													(
-														-- (A) Item Cost
-														dbo.fnCalculateReceiptUnitCost(
-															ReceiptItem.intItemId
-															,ReceiptItem.intUnitMeasureId		
-															,ReceiptItem.intCostUOMId
-															,ReceiptItem.intWeightUOMId
-															,ReceiptItem.dblUnitCost
-															,ReceiptItem.dblNet
-															,ReceiptItemLot.intLotId
-															,ReceiptItemLot.intItemUnitMeasureId
-															,AggregrateItemLots.dblTotalNet
-															,NULL--ReceiptItem.ysnSubCurrency
-															,NULL--Receipt.intSubCurrencyCents
-															,DEFAULT
+												-- (B) Other Charge
+												+ 
+												CASE 
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														-- Convert the other charge to the currency used by the detail item. 
+														dbo.fnDivide(
+															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+															,ReceiptItem.dblForexRate
 														)
-														-- (B) Other Charge
-														+ 
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																-- Convert the other charge to the currency used by the detail item. 
-																dbo.fnDivide(
-																	dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 
-																-- No conversion. Detail item is already in functional currency. 
-																dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END	 									
-														+
-														CASE 
-															WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
-																dbo.fnDivide(
-																	dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
-																	,ReceiptItem.dblForexRate
-																)
-															ELSE 
-																dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
-														END
-													)							
-											END
-										 ELSE 
-											RebuildInvTrans.dblCost
-									END 
+													ELSE 
+														-- No conversion. Detail item is already in functional currency. 
+														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												END 									
+												+
+												CASE 
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														dbo.fnDivide(
+															dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+															,ReceiptItem.dblForexRate
+														)
+													ELSE 												
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												END 									
+											)										
+										ELSE 
+											(
+												-- (A) Item Cost
+												dbo.fnCalculateReceiptUnitCost(
+													ReceiptItem.intItemId
+													,ReceiptItem.intUnitMeasureId		
+													,ReceiptItem.intCostUOMId
+													,ReceiptItem.intWeightUOMId
+													,ReceiptItem.dblUnitCost
+													,ReceiptItem.dblNet
+													,ReceiptItemLot.intLotId
+													,ReceiptItemLot.intItemUnitMeasureId
+													,AggregrateItemLots.dblTotalNet
+													,NULL--ReceiptItem.ysnSubCurrency
+													,NULL--Receipt.intSubCurrencyCents
+													,RebuildInvTrans.intItemUOMId
+												)
+												-- (B) Other Charge
+												+ 
+												CASE 
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														-- Convert the other charge to the currency used by the detail item. 
+														dbo.fnDivide(
+															dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+															,ReceiptItem.dblForexRate
+														)
+													ELSE 
+														-- No conversion. Detail item is already in functional currency. 
+														dbo.fnGetOtherChargesFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												END	 									
+												+
+												CASE 
+													WHEN ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) <> @intFunctionalCurrencyId AND ISNULL(ReceiptItem.dblForexRate, 0) <> 0 THEN 
+														dbo.fnDivide(
+															dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId) 
+															,ReceiptItem.dblForexRate
+														)
+													ELSE 
+														dbo.fnICGetAddToCostTaxFromInventoryReceipt(ReceiptItem.intInventoryReceiptItemId, RebuildInvTrans.intItemUOMId)
+												END
+											)							
+									END
+									ELSE 
+									RebuildInvTrans.dblCost
+							END
+
 						,RebuildInvTrans.dblSalesPrice  
 						,RebuildInvTrans.intCurrencyId  
 						,RebuildInvTrans.dblExchangeRate  
@@ -3872,7 +3967,7 @@ BEGIN
 								,AggregrateItemLots.dblTotalNet --Lot Net Wgt or Volume
 								,NULL--DetailItem.ysnSubCurrency
 								,NULL--Header.intSubCurrencyCents
-								,DEFAULT
+								,RebuildInvTrans.intItemUOMId
 							)
 						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
@@ -4994,8 +5089,6 @@ BEGIN
 						,dblCost  = CASE 
 										WHEN RebuildInvTrans.dblQty < 0 THEN 
 											CASE	
-												WHEN Adj.intAdjustmentType = @AdjustmentTypeOpeningInventory THEN 
-													ISNULL(AdjDetail.dblNewCost, RebuildInvTrans.dblCost) 
 												WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 													dbo.fnGetItemAverageCost(
 														RebuildInvTrans.intItemId
@@ -5004,25 +5097,10 @@ BEGIN
 													) 
 												ELSE
 													COALESCE(
-														dbo.fnCalculateCostBetweenUOM ( 
-															COALESCE(StockUnit.intItemUOMId, ItemUOM.intItemUOMId)
-															,ItemUOM.intItemUOMId
-															,COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
-														)
+														dbo.fnCalculateCostBetweenUOM (StockUnit.intItemUOMId, RebuildInvTrans.intItemUOMId, COALESCE(lot.dblLastCost, itemPricing.dblLastCost))
 														,RebuildInvTrans.dblCost
 													)
 											END 
-											
-										WHEN (RebuildInvTrans.dblQty > 0 AND ISNULL(Adj.intInventoryAdjustmentId, 0) <> 0) THEN 
-											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
-														RebuildInvTrans.dblCost
-													ELSE 
-														dbo.fnCalculateCostBetweenUOM( 
-															COALESCE(AdjNewCostUOM.intItemUOMId, ItemUOM.intItemUOMId)
-															,ItemUOM.intItemUOMId
-															,COALESCE(AdjDetail.dblNewCost, AdjDetail.dblCost, RebuildInvTrans.dblCost) 
-														)
-											END
 										 ELSE 
 											RebuildInvTrans.dblCost
 									END 
@@ -5046,47 +5124,14 @@ BEGIN
 						,RebuildInvTrans.intCostingMethod
 				FROM	#tmpICInventoryTransaction RebuildInvTrans INNER JOIN tblICItemLocation ItemLocation 
 							ON RebuildInvTrans.intItemLocationId = ItemLocation.intItemLocationId 
-						LEFT JOIN dbo.tblICInventoryReceipt Receipt
-							ON Receipt.intInventoryReceiptId = RebuildInvTrans.intTransactionId
-							AND Receipt.strReceiptNumber = RebuildInvTrans.strTransactionId			
-						LEFT JOIN (
-							dbo.tblICInventoryReceiptItem ReceiptItem INNER JOIN tblICItem i1
-								ON i1.intItemId = ReceiptItem.intItemId
-							INNER JOIN #tmpRebuildList list
-								ON i1.intItemId  = COALESCE(list.intItemId, i1.intItemId) 
-								AND i1.intCategoryId = COALESCE(list.intCategoryId, i1.intCategoryId) 
-						)
-							ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
-							AND ReceiptItem.intInventoryReceiptItemId = RebuildInvTrans.intTransactionDetailId 
-						LEFT JOIN dbo.tblICInventoryReceiptItemLot ReceiptItemLot
-							ON ReceiptItemLot.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
-							AND ReceiptItemLot.intLotId = RebuildInvTrans.intLotId 
-						LEFT JOIN dbo.tblICInventoryAdjustment Adj
-							ON Adj.strAdjustmentNo = RebuildInvTrans.strTransactionId
-							AND Adj.intInventoryAdjustmentId = RebuildInvTrans.intTransactionId
-						LEFT JOIN (
-							dbo.tblICInventoryAdjustmentDetail AdjDetail INNER JOIN tblICItem i2
-								ON i2.intItemId = AdjDetail.intItemId 
-							INNER JOIN #tmpRebuildList list2
-								ON i2.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
-								AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
-						)
-							ON AdjDetail.intInventoryAdjustmentId = Adj.intInventoryAdjustmentId
-							AND AdjDetail.intInventoryAdjustmentDetailId = RebuildInvTrans.intTransactionDetailId 
-						LEFT JOIN dbo.tblICItemUOM AdjItemUOM
-							ON AdjItemUOM.intItemId = AdjDetail.intItemId
-							AND AdjItemUOM.intItemUOMId = ISNULL(AdjDetail.intItemUOMId, AdjDetail.intNewItemUOMId) 
 						LEFT JOIN dbo.tblICItemUOM ItemUOM
 							ON RebuildInvTrans.intItemId = ItemUOM.intItemId
 							AND RebuildInvTrans.intItemUOMId = ItemUOM.intItemUOMId
-						LEFT JOIN dbo.tblICItemUOM AdjNewCostUOM
-							ON AdjNewCostUOM.intItemId = AdjDetail.intItemId
-							AND AdjNewCostUOM.intItemUOMId = ISNULL(AdjDetail.intNewItemUOMId, AdjDetail.intItemUOMId) 
-						LEFT JOIN dbo.tblICItemUOM StockUnit
-							ON StockUnit.intItemId = AdjDetail.intItemId
-							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
 						LEFT JOIN dbo.tblICLot lot
 							ON lot.intLotId = RebuildInvTrans.intLotId 
+						LEFT JOIN dbo.tblICItemUOM StockUnit
+							ON StockUnit.intItemId = RebuildInvTrans.intItemId
+							AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
 						OUTER APPLY (
 							SELECT TOP 1 
 									dblLastCost 
@@ -5265,7 +5310,11 @@ BEGIN
 										WHEN RebuildInvTrans.dblQty < 0 THEN 
 											CASE	
 												WHEN Adj.intAdjustmentType = @AdjustmentTypeOpeningInventory THEN 
-													ISNULL(AdjDetail.dblNewCost, RebuildInvTrans.dblCost) 
+													COALESCE(
+														dbo.fnCalculateCostBetweenUOM(AdjNewCostUOM.intItemUOMId, RebuildInvTrans.intItemUOMId, AdjDetail.dblNewCost)
+														,RebuildInvTrans.dblCost
+													)
+
 												WHEN dbo.fnGetCostingMethod(RebuildInvTrans.intItemId, RebuildInvTrans.intItemLocationId) = @AVERAGECOST THEN 
 													dbo.fnGetItemAverageCost(
 														RebuildInvTrans.intItemId
@@ -5274,11 +5323,7 @@ BEGIN
 													) 
 												ELSE
 													COALESCE(
-														dbo.fnCalculateCostBetweenUOM ( 
-															COALESCE(StockUnit.intItemUOMId, ItemUOM.intItemUOMId)
-															,ItemUOM.intItemUOMId
-															,COALESCE(lot.dblLastCost, itemPricing.dblLastCost) 
-														)
+														dbo.fnCalculateCostBetweenUOM (StockUnit.intItemUOMId, RebuildInvTrans.intItemUOMId, COALESCE(lot.dblLastCost, itemPricing.dblLastCost))
 														,RebuildInvTrans.dblCost
 													)
 											END 
@@ -5293,20 +5338,12 @@ BEGIN
 											CASE	WHEN Adj.intAdjustmentType = @AdjustmentTypeLotMerge THEN 
 														RebuildInvTrans.dblCost
 													ELSE 
-														dbo.fnCalculateCostBetweenUOM( 
-															COALESCE(
-																AdjNewCostUOM.intItemUOMId
-																, invCountNewCostUOM.intItemUOMId
-																, ItemUOM.intItemUOMId
-															)
-															,ItemUOM.intItemUOMId
-															,COALESCE(
-																AdjDetail.dblNewCost
-																, AdjDetail.dblCost
-																, invCountDetail.dblNewCost
-																, invCountDetail.dblLastCost
-																, RebuildInvTrans.dblCost
-															) 
+														COALESCE(
+															dbo.fnCalculateCostBetweenUOM(AdjNewCostUOM.intItemUOMId, RebuildInvTrans.intItemUOMId, AdjDetail.dblNewCost)
+															,dbo.fnCalculateCostBetweenUOM(AdjNewCostUOM.intItemUOMId, RebuildInvTrans.intItemUOMId, AdjDetail.dblCost)
+															,dbo.fnCalculateCostBetweenUOM(invCountNewCostUOM.intItemUOMId, RebuildInvTrans.intItemUOMId, invCountDetail.dblNewCost)
+															,dbo.fnCalculateCostBetweenUOM(invCountNewCostUOM.intItemUOMId, RebuildInvTrans.intItemUOMId, invCountDetail.dblLastCost)
+															,RebuildInvTrans.dblCost
 														)
 											END
 										 ELSE 
@@ -5412,7 +5449,22 @@ BEGIN
 				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END 
 
-			-- Re-create the Post g/l entries (except for Cost Adjustments, Inventory Shipment, Invoice, Credit Memo, 'Inventory Transfer') AND Contra-Account is NOT NULL 
+			/*	Re-create the Post g/l entries 
+				Except for:
+					'Cost Adjustment'
+					, 'Inventory Shipment'
+					, 'Invoice'
+					, 'Credit Memo'
+					, 'Inventory Receipt'
+					, 'Inventory Return'
+					, 'Inventory Transfer'
+					, 'Inventory Transfer with Shipment'
+					, 'Outbound Shipment'
+					, 'Inventory Adjustment - Opening Inventory'
+					, 'Storage Settlement'
+					, 'Consume'
+					, 'Produce'					
+			*/
 			IF EXISTS (
 				SELECT	TOP 1 1 
 				WHERE	@strTransactionType NOT IN (
@@ -5427,6 +5479,8 @@ BEGIN
 							, 'Outbound Shipment'
 							, 'Inventory Adjustment - Opening Inventory'
 							, 'Storage Settlement'
+							, 'Consume'
+							, 'Produce'
 						)
 			) AND @strAccountToCounterInventory IS NOT NULL 
 			BEGIN 
@@ -5593,6 +5647,12 @@ BEGIN
 
 	IF OBJECT_ID('tempdb..#tmpAutoVarianceBatchesForAVGCosting') IS NOT NULL  
 		DROP TABLE #tmpAutoVarianceBatchesForAVGCosting
+
+	IF OBJECT_ID('tempdb..#tmpRebuildList') IS NOT NULL 
+		DROP TABLE #tmpRebuildList
+
+	IF OBJECT_ID('tempdb..#tmpLogRiskPosition') IS NOT NULL 
+		DROP TABLE #tmpLogRiskPosition		
 END 
 
 RETURN @intReturnValue; 

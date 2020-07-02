@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAP1099]
 AS
 SELECT
-      dbo.fnTrim(C.strVendorId) AS strVendorId
+      dbo.fnTrim(C.strVendorId) COLLATE Latin1_General_CI_AS AS strVendorId
 	, C.[intEntityId]
     , strVendorCompanyName = dbo.fnAPRemoveSpecialChars(REPLACE((CASE WHEN ISNULL(C2.str1099Name,'') <> '' THEN dbo.fnTrimX(C2.str1099Name) ELSE dbo.fnTrimX(C2.strName) END), '&', 'and'))  COLLATE Latin1_General_CI_AS 
     , strAddress = SUBSTRING(REPLACE(REPLACE(dbo.fnTrimX(D.strAddress), CHAR(10), ' ') , CHAR(13), ' '),0,40) COLLATE Latin1_General_CI_AS  --max char 40       

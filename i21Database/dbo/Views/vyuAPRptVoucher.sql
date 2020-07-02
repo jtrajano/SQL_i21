@@ -23,14 +23,14 @@ SELECT
 									THEN SubCurrency.strCurrency
 								ELSE MainCurrency.strCurrency
 								END
-	,strConcern				=	''
+	,strConcern				=	'' COLLATE Latin1_General_CI_AS
 	,strUOM					=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
 									WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 											THEN NULL 
 									WHEN ContractCost.intContractCostId > 0 THEN ContractCostItemMeasure.strUnitMeasure
 									ELSE QtyUOMDetails.strUnitMeasure
 									END
-	,strClaimUOM			=	''
+	,strClaimUOM			=	'' COLLATE Latin1_General_CI_AS
 	,strCostUOM				=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN NULL 
 									WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 											THEN NULL

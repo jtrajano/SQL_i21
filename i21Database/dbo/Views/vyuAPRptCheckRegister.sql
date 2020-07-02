@@ -4,7 +4,7 @@
 			APP.strPaymentRecordNum,
 			CMBT.ysnCheckVoid,
 			CMBT.ysnClr,
-			'AP' AS strSystem,
+			'AP' COLLATE Latin1_General_CI_AS AS strSystem,
 			CMBA.intBankId,
 			CMBTT.strBankTransactionTypeName,
 			dtmDateReconciled AS dtmClearedDate,

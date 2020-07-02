@@ -11,16 +11,16 @@ A.intBillId
 				 + ISNULL(RTRIM(companySetup.strPhone)+ CHAR(13) + char(10), '')
 ,strShipFrom = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone) COLLATE Latin1_General_CI_AS
 ,strShipTo = [dbo].[fnAPFormatAddress](NULL,companySetup.strCompanyName, A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone) COLLATE Latin1_General_CI_AS
-,dbo.fnTrim(ISNULL(B.strVendorId, B2.strEntityNo) + ' - ' + ISNULL(B2.strName,'')) as strVendorIdName 
-,ISNULL(B2.strName,'') AS strVendorName 
-,ISNULL(B.strVendorId, B2.strEntityNo) AS strVendorId
+,dbo.fnTrim(ISNULL(B.strVendorId, B2.strEntityNo) + ' - ' + ISNULL(B2.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
+,ISNULL(B2.strName,'') COLLATE Latin1_General_CI_AS AS strVendorName 
+,ISNULL(B.strVendorId, B2.strEntityNo) COLLATE Latin1_General_CI_AS AS strVendorId
 ,ContactEntity.strName AS strContactName
 ,ContactEntity.strEmail AS strContactEmail
 ,strDateLocation = TranLoc.strLocationName + ', ' + CONVERT(VARCHAR(12), GETDATE(), 106)
 ,strLocationName = TranLoc.strLocationName
 ,Bank.strBankName
 ,BankAccount.strBankAccountHolder
-,dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(BankAccount.strBankAccountNo)) AS strBankAccountNo
+,dbo.fnAPMaskBankAccountNos(dbo.fnAESDecryptASym(BankAccount.strBankAccountNo)) COLLATE Latin1_General_CI_AS AS strBankAccountNo
 ,BankAccount.strIBAN
 ,BankAccount.strSWIFT
 ,Term.strTerm

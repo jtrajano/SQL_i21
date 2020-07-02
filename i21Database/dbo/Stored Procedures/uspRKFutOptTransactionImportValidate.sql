@@ -236,6 +236,13 @@ BEGIN TRY
 				END
 			END
 
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblRKFutureMarket fm
+						JOIN tblSMCurrency cur ON cur.intCurrencyID = fm.intCurrencyId
+						WHERE strFutMarketName = @strFutMarketName AND strCurrency = @strCurrency)
+			BEGIN
+				SET @ErrMsg = @ErrMsg + ' Currency used must be the Future Market Currency.'
+			END
+
 			IF NOT EXISTS(SELECT * FROM tblRKBrokerageAccount WHERE strAccountNumber = @strAccountNumber)
 			BEGIN
 				SET @ErrMsg = @ErrMsg + ' Broker Account does not exists in the system.'

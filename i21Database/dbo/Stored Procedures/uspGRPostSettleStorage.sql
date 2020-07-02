@@ -1966,12 +1966,12 @@ BEGIN TRY
 					,[intContractDetailId]			= a.[intContractDetailId] -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] = 
 													CASE 
-															WHEN ST.ysnDPOwnedType = 0 THEN NULL
-															ELSE 
-																	CASE 
-																			WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
-																			ELSE NULL
-																	END
+														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														ELSE 
+																CASE 
+																		WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
+																		ELSE NULL
+																END
 													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
@@ -2125,8 +2125,11 @@ BEGIN TRY
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
-								and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
-												(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
+								/*RI.intContractDetailId and a.intContractDetailId will never be equal
+								RI.intContractDetailId - DP contract
+								a.intContractDetailId - Contract used during the settlement*/
+								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
+								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2807,6 +2810,7 @@ BEGIN TRY
 			BEGIN
 				DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
 				DECLARE @intStorageHistoryId INT
+				DELETE FROM @StorageHistoryStagingTable
 				INSERT INTO @StorageHistoryStagingTable
 				(
 					  intCustomerStorageId

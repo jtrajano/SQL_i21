@@ -66,7 +66,7 @@ AS
 		, CASE WHEN SUM(A.dblRoyalties) >= MIN(C.dbl1099MISCRoyalties) AND SUM(A.dblRoyalties) != 0 THEN SUM(dblRoyalties) ELSE NULL END AS dblRoyalties
 		, CASE WHEN SUM(A.dblSubstitutePayments) >= MIN(C.dbl1099MISCSubstitute) AND SUM(A.dblSubstitutePayments) != 0 THEN SUM(dblSubstitutePayments) ELSE NULL END AS dblSubstitutePayments
 		, CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN SUM(A.dblDirectSales) ELSE NULL END AS dblDirectSales
-		, (CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN 'X' ELSE NULL END) AS strDirectSales
+		, (CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN 'X' ELSE NULL END) COLLATE Latin1_General_CI_AS AS strDirectSales
 		, A.[intEntityId]
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B

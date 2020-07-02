@@ -11,7 +11,7 @@ A.intBillId
 	WHEN A.intTransactionType = 3 THEN 'Debit Memo'
 	WHEN A.intTransactionType = 12 THEN 'Prepayment Reversal'
 	WHEN A.intTransactionType = 13 THEN 'Basis Advance'
-	ELSE 'Unknown Type' END AS TransactionType
+	ELSE 'Unknown Type' END COLLATE Latin1_General_CI_AS AS TransactionType
 ,A.ysnOrigin
 ,A.ysnPosted
 FROM tblAPBill A

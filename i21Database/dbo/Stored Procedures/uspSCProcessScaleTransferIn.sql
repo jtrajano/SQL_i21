@@ -113,14 +113,12 @@ BEGIN TRY
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
-			,dblQty						= SCMatch.dblNetUnits --abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end
-			,dblCost					= ICTran.dblCost
-											/*
-												 ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
+			,dblQty						= abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end  --- SCMatch.dblNetUnits --
+			,dblCost					= ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
 																*
 																((ICTran.dblCost) * abs(((SC.dblNetUnits - SCMatch.dblNetUnits)/SC.dblNetUnits))) 
 											)
-											*/
+											--ICTran.dblCost
 			,dblExchangeRate			= 1 -- Need to check this
 			,intLotId					= SC.intLotId
 			,intSubLocationId			= SC.intSubLocationId
@@ -418,10 +416,10 @@ _PostOrUnPost:
 				@strLotNumberDifference = 'e',
 				@intOwnershipTypeDifference = 1,
 				@intItemUOMIdDifference = intItemUOMIdTo,
-				@strTicketNumberIn	= strTicketNumber
+				@strTicketNumberOut	= strTicketNumber
 				from tblSCTicket where intTicketId = @intMatchTicketId
 
-			select @strTicketNumberOut = strTicketNumber from tblSCTicket where intTicketId = @intMatchTicketId
+			select @strTicketNumberIn = strTicketNumber from tblSCTicket where intTicketId = @intTicketId
 			declare @message nvarchar(200)
 			set @message = 'Inventory adjustment for Transfer Out-' +  @strTicketNumberOut + ' and Transfer In-' + @strTicketNumberIn 
 			EXEC [dbo].[uspICInventoryAdjustment_CreatePostQtyChange]

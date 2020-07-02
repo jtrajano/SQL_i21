@@ -25,7 +25,7 @@ SELECT
 	CAST(CASE WHEN E.dtmCheckPrinted IS NOT NULL THEN 1 ELSE 0 END AS BIT) AS ysnPrinted,
 	ISNULL(E.ysnCheckVoid,0) AS ysnVoid,
 	C.strBankName,
-	dbo.[fnAESDecryptASym](B.strBankAccountNo) AS strBankAccountNo,
+	dbo.[fnAESDecryptASym](B.strBankAccountNo) COLLATE Latin1_General_CI_AS AS strBankAccountNo,
 	ISNULL(D.dblCreditLimit,0) AS dblCredit,
 	D.strVendorId,
 	D1.strName,

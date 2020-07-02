@@ -567,8 +567,24 @@ BEGIN
 		intInventoryCountId = @intInventoryCountId
 		, intItemId = il.intItemId
 		, intItemLocationId = COALESCE(stock.intItemLocationId, il.intItemLocationId)
-		, intSubLocationId = CASE WHEN hasExistingStock.intItemId IS NULL THEN il.intSubLocationId ELSE stock.intSubLocationId END 
-		, intStorageLocationId = CASE WHEN hasExistingStock.intItemId IS NULL THEN il.intStorageLocationId ELSE stock.intStorageLocationId END
+		, intSubLocationId = 
+			CASE 
+				WHEN hasExistingStock.intItemId IS NULL THEN il.intSubLocationId 
+				ELSE 
+					CASE 
+						WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN stock.intSubLocationId  
+						ELSE stockUnit.intSubLocationId
+					END 
+			END 
+		, intStorageLocationId = 
+			CASE 
+				WHEN hasExistingStock.intItemId IS NULL THEN il.intStorageLocationId 
+				ELSE 
+					CASE 
+						WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN stock.intStorageLocationId  
+						ELSE stockUnit.intStorageLocationId
+					END 
+			END
 		, intLotId = NULL
 		, dblSystemCount = 		
 			CASE
@@ -616,7 +632,11 @@ BEGIN
 
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-		, stock.intItemUOMId
+		, intItemUOMId = 
+			CASE 
+				WHEN ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 THEN stock.intItemUOMId
+				ELSE stockUOM.intItemUOMId
+			END 
 		, ysnRecount = 0
 		, ysnFetched = 1
 		, intEntityUserSecurityId = @intEntityUserSecurityId
@@ -651,8 +671,7 @@ BEGIN
 		) stock 
 			ON stock.intItemId = i.intItemId
 			AND stock.intItemLocationId = il.intItemLocationId
-			--AND stock.intItemUOMId = stockUOM.intItemUOMId 
-			AND i.ysnSeparateStockForUOMs = 1
+			AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 1
 		-- Get the stocks as 'Stock Unit'. 
 		LEFT JOIN (
 			SELECT	 
@@ -724,13 +743,16 @@ BEGIN
 				t.intInventoryTransactionId DESC 		
 		) lastTransaction 
 		OUTER APPLY (
-			SELECT	TOP 1 v.intItemId
-			FROM	vyuICGetItemStockSummary v
-			WHERE	dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
-					AND v.intItemId = i.intItemId
-					AND v.intItemLocationId = il.intItemLocationId
-					AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
-					AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL) 			
+			SELECT TOP 1 
+				v.intItemId
+			FROM 
+				vyuICGetItemStockSummary v
+			WHERE 
+				dbo.fnDateLessThanEquals(v.dtmDate, @AsOfDate) = 1
+				AND v.intItemId = i.intItemId
+				AND v.intItemLocationId = il.intItemLocationId
+				AND (v.intSubLocationId = il.intSubLocationId OR il.intSubLocationId IS NULL)
+				AND (v.intStorageLocationId = il.intStorageLocationId OR il.intStorageLocationId IS NULL)    
 		) hasExistingStock 
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
