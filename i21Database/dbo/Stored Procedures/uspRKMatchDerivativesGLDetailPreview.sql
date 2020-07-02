@@ -13,7 +13,7 @@ BEGIN
 		EXEC uspRKMatchDerivativesPostRecap @intMatchFuturesPSHeaderId, 1
 	END
 	
-	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY strAccountId ASC)) intRowNum
+	SELECT CONVERT(INT, ROW_NUMBER() OVER (ORDER BY intMatchDerivativesPostRecapId ASC)) intRowNum
 		, intAccountId
 		, strAccountId
 		, strAccountDescription
@@ -26,5 +26,5 @@ BEGIN
 		, strTransactionId
 		, intTransactionId
 	FROM tblRKMatchDerivativesPostRecap
-	WHERE intTransactionId = @intMatchFuturesPSHeaderId ORDER BY strTransactionId,strTransactionType
+	WHERE intTransactionId = @intMatchFuturesPSHeaderId
 END
