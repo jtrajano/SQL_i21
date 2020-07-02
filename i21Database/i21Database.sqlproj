@@ -8770,6 +8770,7 @@
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
