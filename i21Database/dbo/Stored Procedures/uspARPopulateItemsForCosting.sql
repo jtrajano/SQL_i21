@@ -62,7 +62,8 @@ SELECT
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
-								   END) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
+								   END 
+								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
 	-- Otherwise, it must use the last cost value of the item. 
