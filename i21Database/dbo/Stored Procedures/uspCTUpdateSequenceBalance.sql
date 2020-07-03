@@ -23,7 +23,10 @@ BEGIN TRY
 			@ysnLoad				BIT,
 			@intSequenceUsageHistoryId	INT,  
 			@dblQuantityPerLoad NUMERIC(18,6),
-   			@intAllocatedPurchaseContractDetailId int
+   			@intAllocatedPurchaseContractDetailId int,
+			@intPostedTicketDestinationWeightsAndGrades int,
+			@intUnPostedTicketDestinationWeightsAndGrades int
+			
 	
 	BEGINING:
 
@@ -94,6 +97,40 @@ BEGIN TRY
 	ELSE IF @intPricingTypeId IN (1,6,7) AND @dblNewBalance = 0 
 	BEGIN
 		SET @ysnCompleted = 1
+	END
+
+	/*
+		Check if the Contract is DWG.
+		If the sequence balance = 0 and all tickets DWG associated with it is already posted, mark the sequence as complete.
+	*/
+	IF @intPricingTypeId = 2 AND @dblNewBalance = 0 
+	BEGIN
+		if exists (
+				select
+					top 1 1
+				from
+					tblCTContractDetail cd
+					join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+					left join tblCTWeightGrade w on w.intWeightGradeId = ch.intWeightId
+					left join tblCTWeightGrade g on g.intWeightGradeId = ch.intGradeId
+				where
+					cd.intContractDetailId = @intContractDetailId
+					and (w.strWhereFinalized = 'Destination' or g.strWhereFinalized = 'Destination')
+			)
+		BEGIN
+			select @intPostedTicketDestinationWeightsAndGrades = count(intContractId)
+			from tblSCTicket
+			where isnull(ysnDestinationWeightGradePost,0) = 1 and intContractId = @intContractDetailId
+
+			select @intUnPostedTicketDestinationWeightsAndGrades = count(intContractId)
+			from tblSCTicket
+			where isnull(ysnDestinationWeightGradePost,0) = 0 and intContractId = @intContractDetailId
+
+			if (@intPostedTicketDestinationWeightsAndGrades > 0 and @intUnPostedTicketDestinationWeightsAndGrades = 0)
+			begin
+				SET @ysnCompleted = 1
+			end
+		END
 	END
 
 	UPDATE	tblCTContractDetail
