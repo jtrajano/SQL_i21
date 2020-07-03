@@ -531,7 +531,7 @@ BEGIN TRY
 				from (
 						select distinct intContractDetailId, ContractEntityId, dblContractUnits from @SettleContract
 					) a
-				left join vyuCTAvailableQuantityForVoucher b
+				join vyuCTAvailableQuantityForVoucher b
 					on b.intContractDetailId = a.intContractDetailId 
 				left join vyuGRGetContracts c
 					on c.intContractDetailId = a.intContractDetailId 
