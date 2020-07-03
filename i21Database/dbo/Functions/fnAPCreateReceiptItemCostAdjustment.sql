@@ -303,7 +303,14 @@ BEGIN
 														END 													
 													)
 													AS DECIMAL(18,2)) 
-													- isnull(sh.dblPaidAmount, 0)
+													- (CAST(
+													dbo.fnMultiply(
+														--[Voucher Qty]
+														CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+														--[Voucher Cost]
+														,sh.dblOldCost													
+													)
+													AS DECIMAL(18,2))  )
 			,[intCurrencyId] 					=	@intFunctionalCurrencyId -- It is always in functional currency. 
 			,[intTransactionId]					=	A.intBillId
 			,[intTransactionDetailId] 			=	B.intBillDetailId
