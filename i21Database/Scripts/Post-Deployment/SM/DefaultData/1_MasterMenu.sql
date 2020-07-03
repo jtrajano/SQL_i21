@@ -10,21 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 		 
-	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Currency Exposure' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.CurrencyExposure?showSearch=true')
-	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NotesReceivable?showSearch=true')
-	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Intercompany Transaction Configuration' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Utilities' AND strModuleName = 'System Manager') AND strCommand = N'i21.view.InterCompanyTransactionConfiguration')
-	-- IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Adjustment Type' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteAdjustmentType') OR
-	--    EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Note Description' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteDescription') OR
-	--    EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Calculate Monthly Interest' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.NoteCalculateMonthlyInterest')
-	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Quote Report' AND strModuleName = 'Transports' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Reports' AND strModuleName = 'Transports') AND strCommand = N'AccountsReceivable.view.BatchPrinting') 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Producer Map' AND strModuleName = 'Contract Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.EntityProducerMap') 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Daily Average Price' AND strModuleName = 'Risk Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Derivative' AND strModuleName = 'Risk Management') AND strCommand = N'RiskManagement.view.DailyAveragePrice') 
-	-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Vs Sale Variance' AND strModuleName = 'Store' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Purchase Vs Sale Variance' AND strModuleName = 'Store') AND strCommand = N'Store.view.PurchaseVsVarianceReport') 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Contract vs Market Differential Analysis' AND strModuleName = 'Logistics') AND strCommand = N'Logistics.view.ContractVsMarketDifferential') 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Blend Demand' AND strModuleName = 'Contract Management') AND strCommand = N'ContractManagement.view.ItemContract?showSearch=true') 
-	--IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Comment Maintenance' AND strModuleName = 'Accounts Receivable') AND strCommand = N'AccountsReceivable.view.StatementFooterMessage') 
-	--IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Purchase-Wise P&L Report by Allocation' AND strModuleName = 'Logistics' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Report' AND strModuleName = 'Logistics') AND strCommand = N'Reporting.view.ReportManager?group=Logistics&report=PurchaseWisePnL&direct=true') 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Hierarchy' AND strModuleName = 'Financial Report Designer' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Report Hierarchy' AND strModuleName = 'Financial Report Designer') AND strCommand = N'FinancialReportDesigner.view.ReportHierarchy?showSearch=true') 
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Business Insights' AND strModuleName = 'Dashboard' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System' AND strModuleName = 'Dashboard') AND strCommand = N'Dashboard.view.BusinessInsights') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -411,15 +398,16 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Schedule
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Dashboard.view.Schedule?showSearch=true' WHERE strMenuName = N'Schedule' AND strModuleName = N'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'System Dashboard' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardSystemParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Business Insights' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardSystemParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'System Dashboard', N'Dashboard', @DashboardSystemParentMenuId, N'System Dashboard', N'System', N'Home', N'GlobalComponentEngine.view.SystemDashboard', N'small-menu-system', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Business Insights', N'Dashboard', @DashboardSystemParentMenuId, N'Business Insights', N'System', N'Home', N'Dashboard.view.BusinessInsights', N'small-menu-system', 0, 0, 0, 1, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.SystemDashboard', strIcon = 'small-menu-dashboard' WHERE strMenuName = 'System Dashboard' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardSystemParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Dashboard.view.BusinessInsights', strIcon = 'small-menu-dashboard' WHERE strMenuName = 'Business Insights' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardSystemParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = N'Add Panel' AND strModuleName = N'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Display Dashboard' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardMaintenanceParentMenuId
+DELETE FROM tblSMMasterMenu WHERE strMenuName = 'System Dashboard' AND strModuleName = 'Dashboard' AND intParentMenuID = @DashboardSystemParentMenuId
 /* END OF DELETING */
 
 /* SYSTEM MANAGER */
