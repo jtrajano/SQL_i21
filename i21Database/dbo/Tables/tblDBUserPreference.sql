@@ -20,5 +20,6 @@
     [ysnRefreshTab] BIT NULL DEFAULT ((0)), 
     [ysnSaveGridLayout] BIT NULL DEFAULT ((1)), 
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
-    [ysnSaveDashboardLayout] BIT NULL DEFAULT ((1))
+    [ysnSaveDashboardLayout] BIT NULL DEFAULT ((1)),
+	[ysnOpenBusinessInsights] BIT NULL DEFAULT ((1))
 )

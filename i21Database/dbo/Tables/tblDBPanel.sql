@@ -58,6 +58,8 @@
 	[intGridLayoutId]			INT				NULL,
 	[strTableName]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strColumnName]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[ysnSystemPanel]			BIT				DEFAULT ((0)) NULL,
+	[ysnSystemPanelChild]		BIT				DEFAULT ((0)) NULL,
 
     CONSTRAINT [PK_dbo.tblDBPanel] PRIMARY KEY CLUSTERED ([intPanelId] ASC),
     CONSTRAINT [FK_dbo.tblDBPanelFilter_dbo.tblDBPanel_intFilterId] FOREIGN KEY ([intFilterId]) REFERENCES [dbo].[tblDBPanelFilter] ([intFilterId]),
