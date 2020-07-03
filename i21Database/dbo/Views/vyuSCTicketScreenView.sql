@@ -316,10 +316,15 @@
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN (
-		SELECT TOP 1 * FROM vyuAPBasisAdvanceTicket
+		SELECT TOP 1  
+			intBillId 
+			,ysnRestricted
+			,intScaleTicketId
+		FROM vyuAPBasisAdvanceTicket
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
 	LEFT JOIN (
-		SELECT dblPayment = SUM(ISNULL(AP.dblPayment,0.0)), intScaleTicketId = APD.intScaleTicketId FROM tblAPBillDetail APD
+		SELECT dblPayment = SUM(ISNULL(AP.dblPayment,0.0)), intScaleTicketId = APD.intScaleTicketId 
+		FROM tblAPBillDetail APD WITH (NOLOCK)
 		INNER JOIN tblAPBill AP ON AP.intBillId = APD.intBillId --AND AP.dblPayment > 0
 		INNER JOIN tblAPPaymentDetail APPayDtl ON AP.intBillId = APPayDtl.intBillId
 		INNER JOIN tblAPPayment APPay ON APPayDtl.intPaymentId = APPay.intPaymentId
