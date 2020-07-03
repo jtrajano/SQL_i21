@@ -81,7 +81,7 @@
 		--3 = Operator
 
 		-- Create JOB
-		IF NOT EXISTS(SELECT TOP 1 1 FROM msdb.dbo.syscategories WHERE NAME = @strContractSchedulerName AND category_class = 1)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM msdb.dbo.syscategories WHERE name = @strContractSchedulerName AND category_class = 1)
 		BEGIN
 			EXEC @ReturnCode	=	msdb.dbo.sp_add_category 
 				 @class			=	N'JOB', 
@@ -128,7 +128,7 @@
 		DECLARE @jobId BINARY(16)
 		DECLARE @serverName VARCHAR(250)
 
-		SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE NAME = @strContractJobName
+		SELECT @jobId = job_id FROM msdb.dbo.sysjobs WHERE name = @strContractJobName
 		SELECT @serverName = Convert(VARCHAR(250), SERVERPROPERTY('ServerName'))
 
 		IF @jobId IS NULL
