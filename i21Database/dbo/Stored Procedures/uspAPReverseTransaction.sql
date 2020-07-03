@@ -46,7 +46,7 @@ SET
 	,A.dblAmountDue = A.dblTotal
 	,A.dtmDatePaid = NULL
 	,A.ysnPaid = 0
-	,A.intTransactionReversed = @billId
+	,A.intReversalId = @billId
 FROM #tmpDuplicateBill A
 
 INSERT INTO tblAPBill
@@ -202,6 +202,11 @@ BEGIN
 		RETURN;
 	END
 END
+
+UPDATE A
+SET A.intReversalId = @billCreatedId
+FROM tblAPBill A
+WHERE A.intBillId = @billId
 
 IF @transCount = 0 COMMIT TRANSACTION
 
