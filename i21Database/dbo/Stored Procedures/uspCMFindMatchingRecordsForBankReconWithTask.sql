@@ -317,7 +317,7 @@ BEGIN CATCH
 	SELECT
 	strBankStatementImportId=@strBankStatementImportId,
 	strTaskCreationResult =@ErrorMessage,
-	strBankTransactionCreationResult = @@ErrorMessage,
+	strBankTransactionCreationResult = @ErrorMessage,
 	dtmDate =@dtmCurrent,
 	intConcurrencyId=1
 	SET @ysnSuccess = 0	
