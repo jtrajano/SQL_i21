@@ -316,20 +316,6 @@ BEGIN TRY
 						)
 			END
 
-			--IF NOT EXISTS (
-			--		SELECT 1
-			--		FROM tblLGLoad L WITH (NOLOCK)
-			--		WHERE intLoadId = @intLoadShippingInstructionId
-			--			AND strCustomerReference = @strCustomerReference
-			--		)
-			--BEGIN
-			--	RAISERROR (
-			--			'Customer Reference is not matching with Shipping Instruction. '
-			--			,16
-			--			,1
-			--			)
-			--END
-
 			SELECT @intOriginPortId = t.intCityId
 			FROM tblSMCity t WITH (NOLOCK)
 			WHERE t.strCity = @strOriginPort
@@ -472,7 +458,7 @@ BEGIN TRY
 					,@intBookId = CH.intBookId
 					,@intSubBookId = CH.intSubBookId
 					,@ysnLoadBased = CH.ysnLoad
-					,@strPackingDescription = CD.strPackingDescription
+					--,@strPackingDescription = CD.strPackingDescription
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
@@ -492,7 +478,7 @@ BEGIN TRY
 					,@intBookId = CH.intBookId
 					,@intSubBookId = CH.intSubBookId
 					,@ysnLoadBased = CH.ysnLoad
-					,@strPackingDescription = CD.strPackingDescription
+					--,@strPackingDescription = CD.strPackingDescription
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
@@ -504,6 +490,10 @@ BEGIN TRY
 				JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			END
+
+			SELECT @strPackingDescription = L.strPackingDescription
+			FROM tblLGLoad L WITH (NOLOCK)
+			WHERE L.intLoadId = @intLoadShippingInstructionId
 
 			UPDATE tblIPLoadStage
 			SET strAction = @strRowState
@@ -1047,19 +1037,12 @@ BEGIN TRY
 							)
 						SELECT 1
 							,@intLoadId
-							,CD.intDocumentId
-							,CASE WHEN ID.intDocumentType = 1 THEN 'Contract'
-									WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
-									WHEN ID.intDocumentType = 3	THEN 'Container'
-									ELSE ''
-								END COLLATE Latin1_General_CI_AS
-							--,ISNULL(ID.intOriginal, 0)
-							--,ISNULL(ID.intCopies, 0)
-							,0
-							,0
-						FROM tblCTContractDocument CD
-						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
-							AND CD.intContractHeaderId = @intContractHeaderId
+							,LD.intDocumentId
+							,LD.strDocumentType
+							,LD.intOriginal
+							,LD.intCopies
+						FROM tblLGLoadDocuments LD WITH (NOLOCK)
+						WHERE LD.intLoadId = @intLoadShippingInstructionId
 					END
 					ELSE
 					BEGIN
@@ -1955,6 +1938,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -1981,6 +1967,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -2068,6 +2057,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -2094,6 +2086,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
