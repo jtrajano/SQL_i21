@@ -8734,6 +8734,7 @@
     <Build Include="dbo\Views\vyuAPOpenPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
     <None Include="Scripts\Post-Deployment\CT\6_DPContractJobScheduler.sql" />
+    <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
