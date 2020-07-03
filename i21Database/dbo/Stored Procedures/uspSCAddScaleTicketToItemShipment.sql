@@ -697,7 +697,7 @@ END
 									--Charges
 									,[intContractId]					= SE.intOrderId
 									,[intContractDetailId]				= SE.intLineNo
-									,[intCurrencyId]  					= SE.intCurrencyId
+									,[intCurrencyId]  					= isnull(ContractCost.intCurrencyId, SE.intCurrencyId)
 									,[intChargeId]						= ContractCost.intItemId
 									,[strCostMethod]					= SC.strCostMethod
 									,[dblRate]							= CASE
@@ -760,7 +760,7 @@ END
 									--Charges
 									,[intContractId]					= SE.intOrderId
 									,[intContractDetailId]				= SE.intLineNo
-									,[intCurrencyId]  					= SE.intCurrencyId
+									,[intCurrencyId]  					= isnull(ContractCost.intCurrencyId, SE.intCurrencyId)
 									,[intChargeId]						= ContractCost.intItemId
 									,[strCostMethod]					= ContractCost.strCostMethod
 									,[dblRate]							= CASE
@@ -888,7 +888,7 @@ END
 									--Charges
 									,[intContractId]					= SE.intOrderId
 									,[intContractDetailId]				= SE.intLineNo
-									,[intCurrencyId]  					= SE.intCurrencyId
+									,[intCurrencyId]  					= isnull(ContractCost.intCurrencyId, SE.intCurrencyId)
 									,[intChargeId]						= ContractCost.intItemId
 									,[strCostMethod]					= ContractCost.strCostMethod
 									,[dblRate]							= CASE
@@ -1019,7 +1019,7 @@ END
 									--Charges
 									,[intContractId]					= SE.intOrderId
 									,[intContractDetailId]				= SE.intLineNo
-									,[intCurrencyId]  					= SE.intCurrencyId
+									,[intCurrencyId]  					= isnull(ContractCost.intCurrencyId, SE.intCurrencyId)
 									,[intChargeId]						= ContractCost.intItemId
 									,[strCostMethod]					= ContractCost.strCostMethod
 									,[dblRate]							= CASE
@@ -1156,7 +1156,7 @@ END
 								--Charges
 								,[intContractId]			= SE.intOrderId
 								,[intContractDetailId]		= SE.intLineNo
-								,[intCurrencyId]  			= SE.intCurrencyId
+								,[intCurrencyId]  			= isnull(CT.intCurrencyId, SE.intCurrencyId)
 								,[intChargeId]				= SCS.intFreightItemId
 								,[strCostMethod]			= SC.strCostMethod
 								,[dblRate]					= CASE
@@ -1232,7 +1232,7 @@ END
 								--Charges
 								,[intContractId]					= SE.intOrderId
 								,[intContractDetailId]				= SE.intLineNo
-								,[intCurrencyId]  					= SE.intCurrencyId
+								,[intCurrencyId]  					= isnull(ContractCost.intCurrencyId, SE.intCurrencyId)
 								,[intChargeId]						= ContractCost.intItemId
 								,[strCostMethod]					= SC.strCostMethod
 								,[dblRate]							= CASE
@@ -1362,7 +1362,7 @@ END
 					--Charges
 					,[intContractId]					= SE.intOrderId
 					,[intContractDetailId]				= SE.intLineNo
-					,[intCurrencyId]  					= SE.intCurrencyId
+					,[intCurrencyId]  					= isnull(ContractCost.intCurrencyId, SE.intCurrencyId)
 					,[intChargeId]						= ContractCost.intItemId
 					,[strCostMethod]					= ContractCost.strCostMethod
 					,[dblRate]							= CASE
