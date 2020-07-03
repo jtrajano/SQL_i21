@@ -8,14 +8,20 @@ WITH BankBalances AS (
     FROM tblCMBankAccount
 ),
 WeekQuery as(
-		SELECT  CAST(DATEPART (YEAR, getdate())AS NVARCHAR(4)) + CAST(DATEPART (WEEK, getdate())as nvarchar(3))   WeekNo
+		SELECT  
+		DATEADD(wk, 0, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
+		CAST(DATEPART (YEAR, getdate())AS NVARCHAR(4)) + CAST(DATEPART (WEEK, getdate())as nvarchar(3))   WeekNo
 		UNION SELECT 
+		DATEADD(wk, -1, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
 		CAST(DATEPART (YEAR, DATEADD( DAY, -7, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -7, getdate()))as nvarchar(3))  WeekNo
 		UNION SELECT 
+		DATEADD(wk, -2, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
 		CAST(DATEPART (YEAR, DATEADD( DAY, -14, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -14, getdate()))as nvarchar(3))  WeekNo
 		UNION SELECT 
+		DATEADD(wk, -3, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
 		CAST(DATEPART (YEAR, DATEADD( DAY, -21, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -21, getdate()))as nvarchar(3)) WeekNo
 		UNION SELECT 
+		DATEADD(wk, -4, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
 		CAST(DATEPART (YEAR, DATEADD( DAY, -28, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -28, getdate()))as nvarchar(3)) WeekNo
 )
 ,QueryAR AS
@@ -43,6 +49,7 @@ CombineARAP AS (
 )
 ,JoinInWeeks as(
 	SELECT 
+	B.FirsDayOfWeek,
 	B.WeekNo, 
 	dblAmountDue
 	FROM TotalQuery A right join
@@ -50,6 +57,7 @@ CombineARAP AS (
 )
 ,RunningTotal as(
 	SELECT 
+	FirsDayOfWeek,
 	WeekNo,
 	ISNULL(dblAmountDue,0) dblAmountDue,
 	SUM(dblAmountDue) over(order by WeekNo) RunningTotal
@@ -61,8 +69,3 @@ SELECT
 	,B.Balance + RunningTotal NetAmount
 FROM RunningTotal A,
 BankBalances B
-
-
-
-
-
