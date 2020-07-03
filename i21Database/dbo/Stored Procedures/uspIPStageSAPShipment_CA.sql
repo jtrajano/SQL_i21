@@ -33,6 +33,9 @@ BEGIN TRY
 		,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,intNumberOfContainers INT
 		,strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strPartyAlias NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strPartyName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strPartyType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @tblLoadDetail TABLE (
@@ -105,6 +108,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strTransactionType
 				)
 			SELECT CargooReference
@@ -153,6 +159,9 @@ BEGIN TRY
 					ELSE [Count]
 					END
 				,[Type]
+				,Alias
+				,Name
+				,[PartyType]
 				,'Shipment'
 			FROM OPENXML(@idoc, 'Shipment', 2) WITH (
 					CargooReference NVARCHAR(100)
@@ -172,6 +181,9 @@ BEGIN TRY
 					,LoadingType NVARCHAR(100)
 					,[Count] INT 'PlannedContainers/PlannedContainer/Count'
 					,[Type] NVARCHAR(50) 'PlannedContainers/PlannedContainer/Type'
+					,Alias NVARCHAR(100) 'Party/Alias'
+					,Name NVARCHAR(100) 'Party/Name'
+					,[PartyType] NVARCHAR(50) 'Party/Type'
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strCustomerReference, '') + ','
@@ -270,6 +282,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strFileName
 				,strTransactionType
 				)
@@ -290,6 +305,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,@strFileName
 				,strTransactionType
 			FROM @tblLoad
