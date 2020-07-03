@@ -32,10 +32,10 @@ BEGIN
 		,@strPriceContractNo nvarchar(50)
 
 		,@dblPricedQuantityOld numeric(18,6)
-		,@dblNoOfLotsOld int
+		,@dblNoOfLotsOld numeric(18,6)
 		,@dblLoadPricedOld numeric(18,6)
 		,@dblPricedQuantityNew numeric(18,6)
-		,@dblNoOfLotsNew int
+		,@dblNoOfLotsNew numeric(18,6)
 		,@dblLoadPricedNew numeric(18,6);
 
 	declare @PriceDetailToProcess table (
@@ -235,13 +235,13 @@ BEGIN
 				--set @details = '{"change": "tblCTPriceFixationDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@InvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@InvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
 				set @details = '
 					{
-						"change": "tblCTPriceFixation"
+						"actionType": "Updated"
+						,"change": "tblCTPriceFixation"
 						,"iconCls": "small-tree-grid"
 						,"changeDescription": "Details"
 						,"children": [
 							{
-								"action": "Updated"
-								,"change": "tblCTPriceFixationDetail"
+								"change": "tblCTPriceFixationDetail"
 								,"iconCls": "small-tree-grid"
 								,"changeDescription": "Pricing"
 								,"children": [
@@ -473,14 +473,13 @@ BEGIN
 
 						set @details = '
 							{
-								"action": "Updated"
+								"actionType": "Updated"
 								,"change": "tblCTPriceFixation"
 								,"iconCls": "small-tree-grid"
 								,"changeDescription": "Details"
 								,"children": [
 									{
-										"action": "Updated"
-										,"change": "tblCTPriceFixationDetail"
+										"change": "tblCTPriceFixationDetail"
 										,"iconCls": "small-tree-grid"
 										,"changeDescription": "Pricing"
 										,"children": [
@@ -667,14 +666,13 @@ BEGIN
 
 						set @details = '
 							{
-								"action": "Updated"
+								"actionType": "Updated"
 								,"change": "tblCTPriceFixation"
 								,"iconCls": "small-tree-grid"
 								,"changeDescription": "Details"
 								,"children": [
 									{
-										"action": "Updated"
-										,"change": "tblCTPriceFixationDetail"
+										"change": "tblCTPriceFixationDetail"
 										,"iconCls": "small-tree-grid"
 										,"changeDescription": "Pricing"
 										,"children": [
