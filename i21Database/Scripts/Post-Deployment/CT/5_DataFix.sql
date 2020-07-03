@@ -263,4 +263,66 @@ GO
 	END
 GO
 	print 'End updating posted DWG but unposted invoice';
+	print 'Begin fixing SM Transaction records associated to wrong Pricing Screen ID';
+GO
+
+	IF EXISTS (SELECT TOP 1 1 FROM tblCTMiscellaneous WHERE ysnFixedSMTransactionWithWrongPricingScreenId = 0)
+	BEGIN
+
+		declare @strNameSpace nvarchar(100) = 'ContractManagement.view.PriceContracts';
+		declare @intCorrectPriceContractScreenId int;
+		declare @intLatestTransactionId int;
+
+		declare @tblWrongTransactionId table (
+			intTransactionId int
+		)
+
+		select @intLatestTransactionId = max(intTransactionId) from tblSMTransaction where intScreenId in (
+			select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+		)
+
+		select @intCorrectPriceContractScreenId = intScreenId from tblSMTransaction where intTransactionId = @intLatestTransactionId
+
+		insert into @tblWrongTransactionId
+		SELECT intTransactionId from tblSMTransaction where intScreenId in (
+				select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+			) and intScreenId <> @intCorrectPriceContractScreenId
+
+		update tblSMLog set tblSMLog.intTransactionId = OrigId
+		from tblSMLog
+		INNER JOIN
+		(
+		SELECT Orig.intTransactionId AS OrigId, Wrong.intTransactionId As WrongId FROM (
+		SELECT A.intTransactionId, A.intRecordId, B.intScreenId FROM tblSMTransaction A INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId WHERE A.intScreenId = @intCorrectPriceContractScreenId
+		) Orig
+		INNER JOIN (
+		SELECT A.intTransactionId, A.intRecordId, B.intScreenId FROM tblSMTransaction A INNER JOIN tblSMScreen B ON A.intScreenId = B.intScreenId WHERE A.intScreenId in (
+																																											select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+																																										) and A.intScreenId <> @intCorrectPriceContractScreenId
+		) Wrong
+		ON Orig.intRecordId = Wrong.intRecordId
+		) Map ON tblSMLog.intTransactionId = Map.WrongId
+
+		WHERE tblSMLog.intTransactionId IN
+		(
+		SELECT intTransactionId from tblSMTransaction where intScreenId in (
+				select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+			) and intScreenId <> @intCorrectPriceContractScreenId
+		)
+
+		delete from t
+		from @tblWrongTransactionId wt
+		join tblSMTransaction t on t.intTransactionId = wt.intTransactionId
+
+		delete from tblSMScreen where intScreenId in (
+				select intScreenId from tblSMScreen where strNamespace = @strNameSpace
+			) and intScreenId <> @intCorrectPriceContractScreenId
+
+		UPDATE tblCTMiscellaneous SET ysnFixedSMTransactionWithWrongPricingScreenId = 1
+	END
+
+
+
+GO
+	print 'End fixing SM Transaction records associated to wrong Pricing Screen ID';
 GO
