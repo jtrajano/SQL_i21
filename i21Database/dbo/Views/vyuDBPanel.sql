@@ -60,6 +60,8 @@ SELECT A.[intPanelId]
 	  ,D.[strPanelName] as strDrillDownName
 	  ,A.[strTableName]
 	  ,A.[strColumnName]
+	  ,A.[ysnSystemPanel]
+	  ,A.[ysnSystemPanelChild]
   FROM [dbo].[tblDBPanel] A
   LEFT JOIN [dbo].[tblRMConnection] B ON B.intConnectionId = A.intConnectionId
   LEFT JOIN [dbo].[tblDBPanelFilter] C ON C.intFilterId = A.intFilterId

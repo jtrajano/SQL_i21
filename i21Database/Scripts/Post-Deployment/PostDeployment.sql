@@ -201,7 +201,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\3_CannedPanels_Format.sql
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
-:r .\DB\7_DeleteAllFloatingPanels.sql
+:r .\DB\7_Create_BusinessInsights.sql
 
 -- General Ledger
 :r .\GL\DefaultData\1a_AccountStructure.sql
