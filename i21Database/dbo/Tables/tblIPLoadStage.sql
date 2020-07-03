@@ -20,6 +20,10 @@
 	intNumberOfContainers		INT,
 	strContainerType			NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 
+	strPartyAlias				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strPartyName				NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strPartyType				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+
 	strLoadNumber				NVARCHAR(100),
 	strAction					NVARCHAR(100),
 	strFileName					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
