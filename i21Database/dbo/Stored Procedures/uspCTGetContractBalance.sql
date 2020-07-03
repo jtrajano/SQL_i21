@@ -116,7 +116,7 @@ BEGIN
 		FROM
 		(
 			SELECT  intContractBalanceId			=	intContractBalanceLogId
-				,CBL.dtmTransactionDate
+				,dtmTransactionDate					=	CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END--dtmTransactionDate
 				,CBL.intContractHeaderId
 				,strType							=	CASE WHEN CBL.intPricingTypeId = 1 THEN 'PriceFixation' ELSE 'Basis' END	
 				,CBL.intContractDetailId
@@ -287,7 +287,7 @@ BEGIN
 		FROM
 		(
 			SELECT  intContractBalanceId			=	intContractBalanceLogId
-				,CBL.dtmTransactionDate
+				,dtmTransactionDate					=	CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END--dtmTransactionDate
 				,CBL.intContractHeaderId
 				,strType							=	CASE WHEN CBL.intPricingTypeId = 1 THEN 'PriceFixation' ELSE 'Basis' END	
 				,CBL.intContractDetailId
