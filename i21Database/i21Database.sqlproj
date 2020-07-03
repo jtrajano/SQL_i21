@@ -8775,6 +8775,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
     <None Include="Scripts\Post-Deployment\CT\6_DPContractJobScheduler.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
+    <Build Include="dbo\Tables\tblCTMiscellaneous.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
