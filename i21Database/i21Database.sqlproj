@@ -7759,6 +7759,9 @@
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
     <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
