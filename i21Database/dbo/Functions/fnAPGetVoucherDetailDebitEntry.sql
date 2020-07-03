@@ -13,7 +13,7 @@ RETURNS TABLE AS RETURN
 						CASE	WHEN B.intCustomerStorageId > 0 THEN  --COST ADJUSTMENT FOR SETTLE STORAGE ITEM
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
-										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE storageOldCost.dblPaidAmount END
+										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE (storageOldCost.dblOldCost * B.dblQtyReceived) END
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
@@ -34,7 +34,7 @@ RETURNS TABLE AS RETURN
 						CASE	WHEN B.intCustomerStorageId > 0 THEN 
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
-										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE storageOldCost.dblPaidAmount END
+										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE (storageOldCost.dblOldCost * B.dblQtyReceived) END
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
@@ -113,6 +113,7 @@ RETURNS TABLE AS RETURN
 	OUTER APPLY (
 		SELECT TOP 1
 			storageHistory.dblPaidAmount
+			,storageHistory.dblOldCost
 		FROM tblGRSettleStorage storage 
 		INNER JOIN tblGRSettleStorageTicket storageTicket ON storage.intSettleStorageId = storageTicket.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage customerStorage ON storageTicket.intCustomerStorageId = customerStorage.intCustomerStorageId 

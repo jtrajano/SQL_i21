@@ -2443,7 +2443,7 @@ BEGIN TRY
 					,a.intItemType				
 				 
 
-							 
+				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
 				 ---we should delete priced contracts that has a voucher already
 					delete from @voucherPayable 
 						where intVoucherPayableId in (
