@@ -60,7 +60,17 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('The transaction is already posted.',16,1);
 		RETURN;
-	END	
+	END
+
+	--DO NOT ALLOW TO DELETE IF ORIGINAL RECORD FOR REVERSAL IS POSTED
+	--WE WILL HAVE CLEARING/COSTING ISSUE
+	IF((SELECT B.ysnPosted FROM tblAPBill A 
+			INNER JOIN tblAPBill B ON A.intReversalId = B.intBillId
+			WHERE A.intBillId = @intBillId AND A.intTransactionType = 1) = 1)
+	BEGIN
+		RAISERROR('Unable to delete. Transaction reversal is posted.',16,1);
+		RETURN;
+	END			
 
 	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
 	BEGIN
