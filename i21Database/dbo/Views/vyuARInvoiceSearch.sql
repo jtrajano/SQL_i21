@@ -85,7 +85,7 @@ SELECT
 	,intDaysToPay					= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 									  END
-	,ysnProcessedToNSF				= (CASE WHEN I.ysnProcessedToNSF = 1 OR strComments LIKE 'NSF Cash Sale from%' THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END)
+	,ysnProcessedToNSF				= (CASE WHEN strComments LIKE 'NSF Cash Sale from%' THEN CAST(1 AS BIT) ELSE ISNULL(PAYMENT.ysnProcessedToNSF, I.ysnProcessedToNSF) END)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intEntityId
@@ -150,8 +150,8 @@ LEFT OUTER JOIN (
 	FROM dbo.tblCTSubBook WITH (NOLOCK)
 ) SUBBOOK ON SUBBOOK.intSubBookId = I.intSubBookId
 OUTER APPLY (
-	SELECT TOP 1 strBatchId 
-	FROM (select intPaymentId from dbo.tblARPayment WITH (NOLOCK))A 
+	SELECT TOP 1 strBatchId, A.ysnProcessedToNSF 
+	FROM (select intPaymentId, ysnProcessedToNSF from dbo.tblARPayment WITH (NOLOCK))A 
 	INNER JOIN (SELECT intPaymentId
 					 , intInvoiceId 
 				FROM dbo.tblARPaymentDetail WITH (NOLOCK)
