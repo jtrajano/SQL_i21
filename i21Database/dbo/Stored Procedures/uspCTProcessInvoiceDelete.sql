@@ -36,7 +36,11 @@ BEGIN
 		,@dblLoadPricedOld numeric(18,6)
 		,@dblPricedQuantityNew numeric(18,6)
 		,@dblNoOfLotsNew numeric(18,6)
-		,@dblLoadPricedNew numeric(18,6);
+		,@dblLoadPricedNew numeric(18,6)
+		,@strLoadPricedChange nvarchar(max)
+		,@dblLoadAppliedAndPricedOld numeric(18,6)
+		,@dblLoadAppliedAndPricedNew numeric(18,6)
+		,@intRemovedInvoice int = 0;
 
 	declare @PriceDetailToProcess table (
 		intId int
@@ -97,9 +101,11 @@ BEGIN
 				@dblNoOfLotsOld = dblNoOfLots
 				,@dblPricedQuantityOld = dblQuantity
 				,@dblLoadPricedOld = dblLoadPriced
+				,@dblLoadAppliedAndPricedOld = dblLoadAppliedAndPriced
 				,@dblNoOfLotsNew = (dblQuantity - @dblInvoiceDetailQuantity) / (dblQuantity / (case when isnull(dblNoOfLots,0) = 0 then 1 else dblNoOfLots end))
 				,@dblPricedQuantityNew = dblQuantity - @dblInvoiceDetailQuantity
 				,@dblLoadPricedNew = (case when @ysnLoad = convert(bit,1) then dblLoadPriced - 1 else dblLoadPriced end)
+				,@dblLoadAppliedAndPricedNew = (case when @ysnLoad = convert(bit,1) then dblLoadAppliedAndPriced - 1 else dblLoadAppliedAndPriced end)
 			from
 				tblCTPriceFixationDetail
 			where
@@ -111,10 +117,36 @@ BEGIN
 				dblNoOfLots = @dblNoOfLotsNew				--dblNoOfLots - (@dblInvoiceDetailQuantity / (dblQuantity / case when isnull(dblNoOfLots,0) = 0 then 1 else dblNoOfLots end))
 				,dblQuantity = @dblPricedQuantityNew		--dblQuantity - @dblInvoiceDetailQuantity
 				,dblLoadPriced = @dblLoadPricedNew			--(case when @ysnLoad = convert(bit,1) then dblLoadPriced - 1 else dblLoadPriced end)
+				,dblLoadAppliedAndPriced = @dblLoadAppliedAndPricedNew
 			where
 				intPriceFixationDetailId = @intPriceFixationDetailId;
 
 			EXEC uspCTSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
+
+			set @strLoadPricedChange = '';
+
+			if (@ysnLoad = convert(bit,1))
+			begin
+				set @intRemovedInvoice = 1; --this will used if there's a priced quantity that's no invoice yet.
+				set @strLoadPricedChange = '
+					,
+					{
+						"change": "Load Priced"
+						,"from": "' + convert(nvarchar(50),@dblLoadPricedOld) + '"
+						,"to": "' + convert(nvarchar(50),@dblLoadPricedNew) + ' "
+						,"leaf": true
+						,"iconCls": "small-gear"
+					},
+					{
+						"change": "Load Applied & Priced"
+						,"from": "' + convert(nvarchar(50),@dblLoadAppliedAndPricedOld) + '"
+						,"to": "' + convert(nvarchar(50),@dblLoadAppliedAndPricedNew) + ' "
+						,"leaf": true
+						,"iconCls": "small-gear"
+					}
+				';
+			end
+
 
 			set @details = '
 				{
@@ -145,7 +177,7 @@ BEGIN
 											,"to": "' + convert(nvarchar(50),@dblPricedQuantityNew) + ' "
 											,"leaf": true
 											,"iconCls": "small-gear"
-										}
+										}' + @strLoadPricedChange + '
 									]
 								}
 							]
@@ -538,7 +570,7 @@ BEGIN
 				,pfd.dblQuantity
 				,pfd.dblLoadPriced
 				,dblQuantityPerLoad = @dblQuantityPerLoad
-				,intNoOfInvoices = count(ar.intPriceFixationDetailAPARId)
+				,intNoOfInvoices = count(ar.intPriceFixationDetailAPARId) - @intRemovedInvoice
 				,intNumber = pfd.intNumber
 				,strPriceContractNo = pc.strPriceContractNo
 			from
@@ -581,16 +613,93 @@ BEGIN
 
 				if (@dblLoadPriced > @dblForRemoveLoad and @dblForRemoveLoad > 0)
 				begin
+
+					select
+						@dblNoOfLotsOld = dblNoOfLots
+						,@dblPricedQuantityOld = dblQuantity
+						,@dblLoadPricedOld = dblLoadPriced
+						,@dblLoadAppliedAndPricedOld = dblLoadAppliedAndPriced
+						,@dblNoOfLotsNew = dblNoOfLots - @dblForRemoveLots
+						,@dblPricedQuantityNew = dblQuantity - @dblOverQuantity
+						,@dblLoadPricedNew = dblLoadPriced - @dblForRemoveLoad
+						,@dblLoadAppliedAndPricedNew = dblLoadAppliedAndPriced - @dblForRemoveLoad
+					from
+						tblCTPriceFixationDetail
+					where
+						intPriceFixationDetailId = @intDetailId;
+
 					update
 						tblCTPriceFixationDetail
 					set
-						dblNoOfLots = dblNoOfLots - @dblForRemoveLots
-						,dblQuantity = dblQuantity - @dblOverQuantity
-						,dblLoadPriced = dblLoadPriced - @dblForRemoveLoad
+						dblNoOfLots = @dblNoOfLotsNew 				--dblNoOfLots - @dblForRemoveLots
+						,dblQuantity = @dblPricedQuantityNew 		--dblQuantity - @dblOverQuantity
+						,dblLoadPriced = @dblLoadPricedNew 			--dblLoadPriced - @dblForRemoveLoad
+						,dblLoadAppliedAndPriced = @dblLoadAppliedAndPricedNew
 					where
 						intPriceFixationDetailId = @intDetailId;
 
 					EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
+
+					set @details = '
+						{
+							"change": "tblCTPriceFixation"
+							,"iconCls":"small-tree-grid"
+							,"changeDescription": "Details"
+							,"children": [
+								{
+									"change": "tblCTPriceFixationDetail"
+									,"iconCls":"small-tree-grid"
+									,"changeDescription": "Pricing"
+									,"children": [
+										{
+											"action": "Updated"
+											,"change": "Updated - Record: Price Layer ' + convert(nvarchar(20),@intPriceLayer)+ '"
+											,"iconCls": "small-tree-modified"
+											,"children": [
+												{
+													"change": "No. of Lots"
+													,"from": "' + convert(nvarchar(50),@dblNoOfLotsOld) + '"
+													,"to": "' + convert(nvarchar(50),@dblNoOfLotsNew) + ' "
+													,"leaf": true
+													,"iconCls": "small-gear"
+												},
+												{
+													"change": "Quantity"
+													,"from": "' + convert(nvarchar(50),@dblPricedQuantityOld) + '"
+													,"to": "' + convert(nvarchar(50),@dblPricedQuantityNew) + ' "
+													,"leaf": true
+													,"iconCls": "small-gear"
+												},
+												{
+													"change": "Load Priced"
+													,"from": "' + convert(nvarchar(50),@dblLoadPricedOld) + '"
+													,"to": "' + convert(nvarchar(50),@dblLoadPricedNew) + ' "
+													,"leaf": true
+													,"iconCls": "small-gear"
+												},
+												{
+													"change": "Load Applied & Priced"
+													,"from": "' + convert(nvarchar(50),@dblLoadAppliedAndPricedOld) + '"
+													,"to": "' + convert(nvarchar(50),@dblLoadAppliedAndPricedNew) + ' "
+													,"leaf": true
+													,"iconCls": "small-gear"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					'
+
+					EXEC uspSMAuditLog
+					@screenName = 'ContractManagement.view.PriceContracts',
+					@entityId = @UserId,
+					@actionType = 'Updated',
+					@actionIcon = 'small-tree-modified',
+					@keyValue = @intContractPriceId,
+					@details = @details
+
 				end
 				else
 				begin
