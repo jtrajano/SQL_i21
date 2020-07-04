@@ -29,7 +29,7 @@ BEGIN
 		WHERE B.strTransactionId = A.strBillId
 	) glEntries
 	WHERE
-		A.dblAmountDue != ISNULL(glEntries.dblTotal,0)
+		A.dblTotal != ISNULL(glEntries.dblTotal,0)
 	GROUP BY A.intBillId, A.strBillId
 	RETURN;
 END
