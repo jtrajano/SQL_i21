@@ -1075,7 +1075,6 @@ BEGIN
 		,@batchId
 		,A.intTransactionId
 	FROM dbo.fnAPValidateBillGLEntries(@GLEntries, @billIdGL) A
-	WHERE 1 = 0
 
 	--DELETE INVALID
 	DELETE A
