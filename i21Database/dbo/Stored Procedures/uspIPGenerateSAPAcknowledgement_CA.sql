@@ -49,6 +49,11 @@ BEGIN TRY
 		,strInfo2 NVARCHAR(MAX)
 		)
 
+	UPDATE tblIPLoadError
+	SET strAckStatus = 'Ack Sent'
+	WHERE ISNULL(strAckStatus, '') <> 'Ack Sent'
+		AND ISNULL(strErrorMessage, '') LIKE '%deadlock%'
+
 	IF @strMsgType = 'LSI'
 	BEGIN
 		IF @strImportStatus = 'Success'
