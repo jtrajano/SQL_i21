@@ -31,7 +31,7 @@ BEGIN
 			AND C.intAccountCategoryId IN (1, 53)
 	) glEntries
 	WHERE
-		A.dblAmountDue != ISNULL(glEntries.dblTotal,0)
+		A.dblTotal != ISNULL(glEntries.dblTotal,0)
 	GROUP BY A.intBillId, A.strBillId
 	RETURN;
 END
