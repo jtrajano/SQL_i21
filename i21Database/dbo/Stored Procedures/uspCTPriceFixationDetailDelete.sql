@@ -51,6 +51,18 @@ BEGIN TRY
 	WHILE EXISTS(SELECT 1 FROM #ItemBillPosted)
 	BEGIN
 		SELECT TOP 1 @Id = intBillId FROM #ItemBillPosted
+
+		if exists (
+				SELECT 1
+				FROM vyuAPBillPayment a
+				JOIN tblAPPayment b on b.intPaymentId = a.intPaymentId
+				JOIN tblSMPaymentMethod c on c.intPaymentMethodID = b.intPaymentMethodId
+				WHERE a.intBillId = @Id and a.ysnPrinted = 0 and c.strPaymentMethod = 'Check'
+			)
+		begin
+			EXEC uspAPDeletePayment @Id, @intUserId
+		end
+
 		EXEC [dbo].[uspAPPostBill] @transactionType = 'Contract', @post = 0,@recap = 0,@isBatch = 0,@param = @Id,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 		DELETE #ItemBillPosted WHERE intBillId = @Id
 	END
