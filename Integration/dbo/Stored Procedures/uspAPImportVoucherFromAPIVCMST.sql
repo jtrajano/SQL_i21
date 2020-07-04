@@ -134,14 +134,14 @@ SELECT
 	[ysnPaid]				=	CASE WHEN A.apivc_status_ind = 'P' THEN 1 ELSE 0 END,
 	[intTransactionType]	=	(CASE WHEN A.apivc_trans_type = 'I' AND A.apivc_orig_amt > 0 THEN 1
 										WHEN A.apivc_trans_type = 'O' AND A.apivc_orig_amt > 0 THEN 1
-									WHEN A.apivc_trans_type = 'A' THEN 2
+									WHEN A.apivc_trans_type = 'A' THEN 3
 									WHEN A.apivc_trans_type = 'C' OR A.apivc_orig_amt < 0 THEN 3
 									ELSE 
 										CASE WHEN A.apivc_orig_amt = 0 THEN 
 											CASE A.apivc_trans_type 
 												WHEN 'I' THEN 1
 												WHEN 'O' THEN 1
-												WHEN 'A' THEN 2
+												WHEN 'A' THEN 3
 												WHEN 'C' THEN 3
 											ELSE 1
 											END
