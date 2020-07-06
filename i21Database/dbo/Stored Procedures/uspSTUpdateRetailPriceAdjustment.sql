@@ -14,7 +14,6 @@ SET XACT_ABORT ON
 
 BEGIN
 
-
     DECLARE @InitTranCount INT;
     SET @InitTranCount = @@TRANCOUNT
 	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTUpdateRetailPriceAdjustment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -64,7 +63,6 @@ BEGIN
 						ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
 
 					WHERE pad.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
-					AND intCompanyLocationId IS NULL
 					AND intCategoryId IS NULL
 					AND intFamilyId IS NULL
 					AND intClassId IS NULL
@@ -110,10 +108,14 @@ BEGIN
 					intClassId							INT NULL,
 					intEntityId							INT NULL,
 					strRegion							NVARCHAR(100) NULL,
+					strPriceMethod						NVARCHAR(100) NULL,
+					strRoundPrice						NVARCHAR(10) NULL,
+					strPriceEndingDigit					NVARCHAR(10) NULL,
 					strDistrict							NVARCHAR(100) NULL,
 					intItemUOMId						INT NULL,
  					dblPrice							NUMERIC(18,6) NULL, 
-					dblLastCost							NUMERIC(18,6) NULL
+					dblLastCost							NUMERIC(18,6) NULL,
+					dblFactor						NUMERIC(18,6) NULL
 				)
 
 				-- INSERT to Temp Table
@@ -127,10 +129,14 @@ BEGIN
 					intClassId,
 					intEntityId,
 					strRegion,
+					strPriceMethod,		
+					strRoundPrice,		
+					strPriceEndingDigit,
 					strDistrict,
 					intItemUOMId,
  					dblPrice, 
-					dblLastCost
+					dblLastCost,
+					dblFactor
 				)
 				SELECT
 					pad.intRetailPriceAdjustmentDetailId,
@@ -141,10 +147,14 @@ BEGIN
 					intClassId,
 					pad.intEntityId,
 					strRegion,
+					pad.strPriceMethod,		
+					pad.strRoundPrice,		
+					pad.strPriceEndingDigit,
 					strDistrict,
 					intItemUOMId,
  					dblPrice, 
-					dblLastCost
+					dblLastCost,
+					pad.dblFactor
 				FROM tblSTRetailPriceAdjustmentDetail pad
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
@@ -164,15 +174,18 @@ BEGIN
 							, @intItemUOMId							INT = NULL
 							, @intRetailPriceAdjustmentDetailId		INT = NULL
 							, @dblRetailPrice						DECIMAL(18,6) = NULL
-							, @dblLastCost							DECIMAL(18,6) = NULL
+							, @dblLastCostPrice						DECIMAL(18,6) = NULL
+							, @dblFactor							DECIMAL(18,6) = NULL
 							, @intSavedUserId						INT = NULL
 							, @ysnOneTimeUse						BIT = NULL 
 							, @strRegion							NVARCHAR(100) = NULL
+							, @strPriceMethod						NVARCHAR(100) = NULL
+							, @strRoundPrice						NVARCHAR(100) = NULL
+							, @strPriceEndingDigit					NVARCHAR(100) = NULL
 							, @strDistrict							NVARCHAR(100) = NULL
 
 						WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 							BEGIN
-								
 								-- Get Primary Id
 								SELECT TOP 1 
 									@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
@@ -183,14 +196,18 @@ BEGIN
 									@intClassId							= intClassId,
 									@intVendorId						= intEntityId,
 									@strRegion							= ISNULL(strRegion, ''),
+									@strPriceMethod						= strPriceMethod,
+									@strRoundPrice						= strRoundPrice,
+									@strPriceEndingDigit				= strPriceEndingDigit,
 									@strDistrict						= ISNULL(strDistrict, ''),
 									@intItemUOMId						= intItemUOMId,
  									@dblRetailPrice						= dblPrice, 
-									@dblLastCost						= dblLastCost
+									@dblLastCostPrice					= dblLastCost,
+									@dblFactor							= dblFactor
 								FROM @tblRetailPriceAdjustmentDetailIds
 
 								DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
-								DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCost AS NUMERIC(38, 20))
+								DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCostPrice AS NUMERIC(38, 20))
 
 								SET @intCurrentUserId = ISNULL(@intCurrentUserId, @intSavedUserId)
 
@@ -200,6 +217,9 @@ BEGIN
 									, itemPricing.intItemPricingId
 									, UOM.strLongUPCCode
 									, I.strDescription
+									, itemPricing.dblStandardCost
+									, itemPricing.dblSalePrice
+									, itemPricing.dblLastCost
 								FROM tblICItem I
 								INNER JOIN tblICItemLocation itemLoc ON itemLoc.intItemId = I.intItemId
 								INNER JOIN tblICItemPricing itemPricing ON I.intItemId	= itemPricing.intItemId
@@ -222,18 +242,66 @@ BEGIN
 								AND UOM.strLongUPCCode IS NOT NULL
 								AND itemPricing.intItemPricingId IS NOT NULL
 
-								DECLARE @strProcessLongUpcCode NVARCHAR(100) = NULL,
+
+								DECLARE @strProcessLongUpcCode NVARCHAR(50) = NULL,
 									 @intProcessItemId INT = NULL,
 									 @intProcessLocationId INT = NULL,
 									 @intProcessItemPricingId INT = NULL,
-									 @strProcessDescription NVARCHAR(500) = NULL
+									 @strProcessDescription NVARCHAR(500) = NULL,
+									 @dblStandardCost NVARCHAR(500) = NULL,
+									 @dblSalePrice NVARCHAR(500) = NULL,
+									 @dblLastCost NVARCHAR(500) = NULL,
+									 @dblFirst NVARCHAR(500) = NULL,
+									 @intSecond NVARCHAR(500) = NULL,
+									 @dblRetailPriceConvCopy  AS NUMERIC(38, 20) = @dblRetailPriceConv
 
 								OPEN @CursorTran
-								FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription
+								FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
 								WHILE @@FETCH_STATUS = 0
 								BEGIN
 									-- ITEM PRICING
 									BEGIN TRY
+
+
+									SET @dblFactor = ISNULL(@dblFactor, 0);
+									SET @dblSalePrice = ROUND(@dblSalePrice, 2)
+									
+									IF ISNULL(@dblRetailPriceConvCopy, 0) = 0
+										BEGIN
+											SET @dblRetailPriceConv = CASE WHEN @strPriceMethod = 'Sell + Amount'
+																			  THEN @dblSalePrice + @dblFactor
+																		   WHEN @strPriceMethod = 'Sell + Percent'
+																		      THEN @dblSalePrice * (1 +(@dblFactor / 100))
+																		   WHEN @strPriceMethod = 'Gross Margin' AND @dblStandardCost > 0 
+																		      THEN @dblStandardCost / (1 - (@dblFactor / 100))
+																		   WHEN @strPriceMethod = 'Gross Margin' AND @dblStandardCost = 0 
+																		      THEN @dblLastCost / (1 - (@dblFactor / 100))
+
+																	  END
+											SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
+
+											IF @strRoundPrice = 'Yes'
+												BEGIN
+													SET @intSecond = SUBSTRING(CONVERT(VARCHAR, @dblRetailPriceConv), LEN(@dblSalePrice), 1);
+													SET @dblFirst = SUBSTRING(CONVERT(VARCHAR, @dblRetailPriceConv), 1, LEN(@dblSalePrice) - 1);
+													
+													IF @intSecond <= @strPriceEndingDigit
+														BEGIN 
+															SET @intSecond = @strPriceEndingDigit
+														END
+													ELSE 
+														BEGIN
+															SET @dblFirst = CONVERT(DECIMAL(38, 1), @dblFirst)  + .1;
+															SET @intSecond = @strPriceEndingDigit
+														END
+
+													--Final value for Retail Price
+													SET @dblRetailPriceConv = CONVERT(VARCHAR,@dblFirst) + CONVERT(VARCHAR, @intSecond)
+												END
+										END
+
+
+										SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
 										EXEC [uspICUpdateItemPricingForCStore]
 											-- filter params
 											@strUpcCode					= @strProcessLongUpcCode 
@@ -242,10 +310,10 @@ BEGIN
 											,@intItemPricingId			= @intProcessItemPricingId 
 											-- update params
 											,@dblStandardCost			= NULL 
-											,@dblRetailPrice			= @dblRetailPriceConv 
+											,@dblRetailPrice			= @dblRetailPriceConv
 											,@dblLastCost				= @dblLastCostConv
 											,@intEntityUserSecurityId	= @intCurrentUserId
-	
+			
 										-- Check if Successfull
 										IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intProcessItemPricingId)
 										BEGIN 
@@ -263,7 +331,7 @@ BEGIN
 										GOTO ExitWithRollback
 									END CATCH
 
-									FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription
+									FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
 								END
 								
 								CLOSE @CursorTran  
@@ -273,7 +341,6 @@ BEGIN
 								DELETE FROM @tblRetailPriceAdjustmentDetailIds
 								WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 							END
-
 						
 						IF(@intSuccessPostCount > 0)
 							BEGIN
@@ -512,9 +579,8 @@ ExitWithRollback:
 			END
 			
 				
-		
-		
 	
 
 		
 ExitPost:
+GO
