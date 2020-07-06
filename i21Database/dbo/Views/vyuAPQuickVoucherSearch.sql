@@ -36,7 +36,8 @@ SELECT
 	A.ysnPosted,
 	EL.strCheckPayeeName AS strPayeeName,
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
-	A.ysnPrepayHasPayment
+	A.ysnPrepayHasPayment,
+	A.intShipToId
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 

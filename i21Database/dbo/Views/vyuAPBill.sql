@@ -74,7 +74,8 @@ SELECT
 	B.strVendorId,
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
-	A.ysnPrepayHasPayment
+	A.ysnPrepayHasPayment,
+	A.intShipToId
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 

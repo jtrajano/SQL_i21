@@ -87,7 +87,8 @@ SELECT
 	A2.dtmPaymentDateReconciled,
 	ISNULL(A2.dblPayment,0) AS dblPayment,
 	ISNULL(A2.ysnClr,0) AS ysnClr,
-	A2.dtmClr
+	A2.dtmClr,
+	A.intShipToId
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 
