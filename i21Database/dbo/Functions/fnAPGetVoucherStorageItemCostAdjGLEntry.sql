@@ -8,10 +8,10 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,B.strMiscDescription
 		,CAST((CASE	WHEN A.intTransactionType IN (1) 
-				THEN (B.dblTotal  - (storageOldCost.dblOldCost * B.dblQtyReceived)  * ISNULL(NULLIF(B.dblRate,0),1)) 
+				THEN (B.dblTotal  - round((storageOldCost.dblOldCost * B.dblQtyReceived), 2)  * ISNULL(NULLIF(B.dblRate,0),1)) 
 			ELSE 0 END) AS  DECIMAL(18, 2)) AS dblTotal
 		,CAST((CASE	WHEN A.intTransactionType IN (1) 
-				THEN (B.dblTotal - (storageOldCost.dblOldCost * B.dblQtyReceived) ) 
+				THEN (B.dblTotal - round((storageOldCost.dblOldCost * B.dblQtyReceived), 2) ) 
 			ELSE 0 END) AS  DECIMAL(18, 2)) AS dblForeignTotal
 		,0 as dblTotalUnits
 		,[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing') AS intAccountId
