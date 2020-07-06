@@ -5,9 +5,19 @@ AS
 
 DECLARE @RECEIPT_TYPE_TRANSFER_ORDER VARCHAR(50) = 'Transfer Order'
 
+--1	Open
+--2	In Transit
+--3	Closed
+--4	Short Closed
+
+DECLARE @STATUS_OPEN AS TINYINT = 1
+		,@STATUS_IN_TRANSIT AS TINYINT = 2
+		,@STATUS_CLOSED AS TINYINT = 3
+		,@STATUS_SHORT_CLOSED AS TINYINT = 4 
+
 -- Validate if any of the transfer orders was already closed in other transactions.
-IF @intStatusId = 3
-	BEGIN
+IF @intStatusId = @STATUS_CLOSED
+BEGIN
 	DECLARE @PostedTransferOrder VARCHAR(50) = NULL
 	DECLARE @PostedTransferOrderReceipt VARCHAR(50) = NULL
 
@@ -26,7 +36,7 @@ IF @intStatusId = 3
 				OR (t.intInventoryTransferId = i.intInventoryTransferId AND i.intInventoryTransferId IS NOT NULL) 
 			)			
 			AND t.ysnShipmentRequired = 1
-			AND t.intStatusId = 3
+			AND t.intStatusId = @STATUS_CLOSED
 			AND t.ysnPosted = 1
 
 		LEFT JOIN (
@@ -49,109 +59,97 @@ IF @intStatusId = 3
 	BEGIN
 		-- 'Cannot post this Inventory Receipt. The transfer order "{Transfer No}" was already posted in "{Inventory Receipt}".'
 		EXEC uspICRaiseError 80086, @PostedTransferOrder, @PostedTransferOrderReceipt;
+		RETURN -80086;
 		GOTO Post_Exit
 	END
 END
 
--- IF Status is updated in Posting
--- t.intStatusId = CASE WHEN ri.dblOrderQty = (ISNULL(tf.dblReceiptQty, 0) + ri.dblOpenReceive) THEN @intStatusId ELSE 2 END
 /*
-
-UPDATE t
-SET t.intStatusId = CASE WHEN ri.dblOrderQty = (ISNULL(tf.dblReceiptQty, 0) ) THEN @intStatusId ELSE 2 END
-FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
-	LEFT OUTER JOIN (
-		SELECT st.intInventoryTransferId, SUM(ISNULL(st.dblReceiptQty, 0)) dblReceiptQty 
-		FROM vyuICGetItemStockTransferred st
-		GROUP BY st.intInventoryTransferId
-	) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
-WHERE r.intInventoryReceiptId = @ReceiptId
-	AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+	Check for partially received transfer orders. 
+	If the received stock is partial, keep the transfer order status as 'In-Transit'
+	Otherwise, update the status from the argument in @intStatusId
 */
----
 
-declare @tally_table table( ysnDone bit, intTransferId int)
-  --current receipt transaction for the transfer
-insert into @tally_table( ysnDone, intTransferId)
-select case when a.dblTotal = b.dblTotal then 1 else 0 end, a.intInventoryTransferId from (
---select * from (
-	select 
-		dblTotal = sum(dbo.fnICConvertUOMtoStockUnit(st.intItemId, st.intReceiptGrossUOMId, st.dblReceiptGross)), 
-		st.intItemId, 
-		st.intInventoryTransferId, 
-		st.intInventoryTransferDetailId
-		FROM vyuICGetItemStockTransferred st 
-			join 		
-			(
-		
-				select distinct 					
-					intInventoryTransferId =  isnull(intInventoryTransferId, intOrderId) 
-				from tblICInventoryReceiptItem where intInventoryReceiptId = @ReceiptId
-			)	su	 on st.intInventoryTransferId = su.intInventoryTransferId
-			join tblICInventoryTransferDetail sv
-						on st.intInventoryTransferDetailId = sv.intInventoryTransferDetailId
-		
-		group by st.intItemId, st.intInventoryTransferId, st.intInventoryTransferDetailId
-	) a
-	join 
-		( 
-			select dblTotal = dbo.fnICConvertUOMtoStockUnit(intItemId, intItemUOMId, dblQuantity),  intItemId, intInventoryTransferId, intInventoryTransferDetailId
-				from tblICInventoryTransferDetail --where intInventoryTransferId = 529
-			)b 
-			on a.intInventoryTransferId = b.intInventoryTransferId and a.intInventoryTransferDetailId  = b.intInventoryTransferDetailId
-
-
-
-update a
-	SET a.intStatusId = CASE WHEN b.ysnDone = 1 THEN @intStatusId ELSE 2 END
-from tblICInventoryTransfer  a
-	join (
-		select distinct 
-			ysnDone = ISNULL((select top 1 0 from @tally_table  where ysnDone = 0 and intTransferId = A.intTransferId), A.ysnDone), 
-			intTransferId
-		from @tally_table  A
-	) b
-	on a.intInventoryTransferId = b.intTransferId
-
-
-
----
-
-
-
-DECLARE @Count INT
-SELECT @Count = COUNT(*)
-FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICInventoryTransfer t ON t.intInventoryTransferId = ri.intOrderId
-WHERE r.intInventoryReceiptId = @ReceiptId
-	AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
+BEGIN 
+	DECLARE @tally_table TABLE( 
+		ysnDone bit
+		, intInventoryTransferId int
+	)
 	
-IF(@Count = 0)
-BEGIN
+	INSERT INTO @tally_table( 
+		ysnDone
+		,intInventoryTransferId
+	)
+	SELECT 
+		ysnDone = 
+			CASE 
+				WHEN dbo.fnCalculateQtyBetweenUOM(receiptItems.intUnitMeasureId, transferItems.intItemUOMId, receiptItems.dblTotal) = transferItems.dblTransferQty THEN 1 
+				ELSE 0
+			END
+		,transferItems.intInventoryTransferId 
+	FROM 
+		tblICInventoryReceipt r 
+		CROSS APPLY (
+			SELECT 
+				intInventoryTransferDetailId = ISNULL(ri.intInventoryTransferDetailId, ri.intSourceId)
+				,ri.intUnitMeasureId
+				,dblTotal = SUM(ri.dblOpenReceive) 
+			FROM 
+				tblICInventoryReceiptItem ri
+			WHERE
+				r.intInventoryReceiptId = ri.intInventoryReceiptId
+			GROUP BY
+				ISNULL(ri.intInventoryTransferDetailId, ri.intSourceId)
+				,ri.intUnitMeasureId
+		) receiptItems 
+		CROSS APPLY (
+			SELECT 
+				tf.intInventoryTransferId
+				,tfd.intItemUOMId
+				,dblTransferQty = tfd.dblQuantity
+			FROM 
+				tblICInventoryTransfer tf INNER JOIN tblICInventoryTransferDetail tfd
+					ON tf.intInventoryTransferId = tfd.intInventoryTransferId
+			WHERE
+				tfd.intInventoryTransferDetailId = receiptItems.intInventoryTransferDetailId
+		) transferItems
+	WHERE
+		r.intInventoryReceiptId = @ReceiptId
+		AND r.strReceiptType = @RECEIPT_TYPE_TRANSFER_ORDER
 
-	DECLARE @TransferId INT
-	SELECT TOP 1 @TransferId = ar.intOrderId
-	FROM #tmpBeforeSaveReceiptItems ar
-	WHERE ar.intInventoryReceiptId = @ReceiptId
-
-	UPDATE t
-	SET t.intStatusId = 2
-	FROM tblICInventoryTransfer t
-	WHERE t.intInventoryTransferId = @TransferId
-
-	-- UPDATE t
-	-- SET t.intStatusId = CASE WHEN ISNULL(tf.dblReceiptQty, 0) > 0 THEN 2 ELSE 1 END
-	-- FROM tblICInventoryTransfer t
-	-- 	LEFT OUTER JOIN (
-	-- 		SELECT st.intInventoryTransferId, SUM(ISNULL(st.dblReceiptQty, 0)) dblReceiptQty 
-	-- 		FROM vyuICGetItemStockTransferred st
-	-- 		GROUP BY st.intInventoryTransferId
-	-- 	) tf ON tf.intInventoryTransferId = t.intInventoryTransferId
-	-- WHERE t.intInventoryTransferId = @TransferId
-END
-
+	UPDATE tf 
+	SET 
+		tf.intStatusId = 
+			CASE 
+				WHEN done_tally.dblGroupCount = total_tally.dblTotal THEN @intStatusId 
+				ELSE @STATUS_IN_TRANSIT 
+			END
+	FROM 
+		tblICInventoryTransfer tf 
+		CROSS APPLY (
+			SELECT DISTINCT intInventoryTransferId 
+			FROM 
+				@tally_table tally 
+			WHERE 
+				tf.intInventoryTransferId = tally.intInventoryTransferId
+		) unique_tally
+		OUTER APPLY (
+			SELECT 
+				dblGroupCount = COUNT(1) 
+			FROM 
+				@tally_table tally
+			WHERE
+				tally.intInventoryTransferId = tf.intInventoryTransferId
+				AND ysnDone = 1
+		) done_tally
+		OUTER APPLY (
+			SELECT 
+				dblTotal = COUNT(1) 
+			FROM 
+				@tally_table tally
+			WHERE
+				tally.intInventoryTransferId = tf.intInventoryTransferId		
+		) total_tally			
+END 
 
 Post_Exit:
