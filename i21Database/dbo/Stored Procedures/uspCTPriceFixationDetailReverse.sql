@@ -62,7 +62,8 @@ BEGIN TRY
 	EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
 								@intContractDetailId 	= @intContractDetailId, 
 								@strSource 				= 'Pricing',
-								@strProcess 			= 'Reverse'
+								@strProcess 			= 'Reverse',
+								@intUserId				= @intUserId
 
 END TRY
 
