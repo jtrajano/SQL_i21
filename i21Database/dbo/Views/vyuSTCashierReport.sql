@@ -23,6 +23,9 @@ SELECT
 	, ISNULL(SUM(CC.dblTotalDeposit) - SUM(CC.dblTotalSales) + SUM(CC.dblTotalPaymentOption),0) as dblOverShort
 	, ISNULL(CC.intNumberOfRefunds,0) as intNumberOfRefunds
 	, ISNULL(CC.intNumberOfVoids,0) as intNumberOfVoids
+	, ISNULL(CC.intNoSalesCount,0) as intNoSalesCount
+	, ISNULL(CC.intCustomerCount,0) as intCustomerCount
+	, ISNULL(CC.intOverrideCount,0) as intOverrideCount
 FROM tblSTCheckoutHeader CH 
 INNER JOIN tblSTStore ST 
 	ON ST.intStoreId = CH.intStoreId 
@@ -49,4 +52,7 @@ C.strCashierNumber,
 C.strCashierName, 
 CC.intNumberOfRefunds, 
 CC.intNumberOfVoids, 
+CC.intNoSalesCount,
+CC.intCustomerCount,
+CC.intOverrideCount,
 ISNULL(Inv.ysnPosted, 0)
