@@ -24,7 +24,8 @@ BEGIN TRY
 			,BL.intBillId AS Id
 			,FT.intDetailId AS DetailId
 			,DA.intBillDetailId AS BillDetailId
-			,FD.dblQuantityAppliedAndPriced AS Quantity
+			--,FD.dblQuantityAppliedAndPriced AS Quantity
+   			,sum(BLD.dblQtyReceived) AS Quantity 
 			,PF.intContractHeaderId AS ContractHeaderId
 			,PF.intContractDetailId AS ContractDetailId
 	INTO	#ItemBill
@@ -33,11 +34,19 @@ BEGIN TRY
 	JOIN	tblCTPriceFixationDetail		FD	ON	FD.intPriceFixationDetailId =	DA.intPriceFixationDetailId
 	JOIN	tblCTPriceFixation				PF	ON	PF.intPriceFixationId		=	FD.intPriceFixationId
 	JOIN	tblAPBill						BL	ON	BL.intBillId				=	DA.intBillId
+ 	JOIN 	tblAPBillDetail      			BLD ON BLD.intBillId    			= BL.intBillId
 	WHERE	PF.intPriceFixationId		=	ISNULL(@intPriceFixationId, PF.intPriceFixationId)
 	AND		FD.intPriceFixationDetailId	=	ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
-	
+	group by
+	 	DA.intPriceFixationDetailAPARId  
+	   ,BL.intBillId
+	   ,FT.intDetailId
+	   ,DA.intBillDetailId
+	   ,PF.intContractHeaderId
+	   ,PF.intContractDetailId
+
 	-- Loop through Voucher
 	SELECT DISTINCT @Id = MIN(Id) FROM #ItemBill
 	WHILE ISNULL(@Id,0) > 0
