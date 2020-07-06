@@ -13,7 +13,7 @@ RETURNS TABLE AS RETURN
 						CASE	WHEN B.intCustomerStorageId > 0 THEN  --COST ADJUSTMENT FOR SETTLE STORAGE ITEM
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
-										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE (storageOldCost.dblOldCost * B.dblQtyReceived) END
+										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((storageOldCost.dblOldCost * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
@@ -34,7 +34,7 @@ RETURNS TABLE AS RETURN
 						CASE	WHEN B.intCustomerStorageId > 0 THEN 
 									CASE WHEN B.dblOldCost IS NOT NULL
 									THEN
-										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE (storageOldCost.dblOldCost * B.dblQtyReceived) END
+										CASE WHEN B.dblOldCost = 0 THEN 0 ELSE round((storageOldCost.dblOldCost * B.dblQtyReceived), 2) END
 									ELSE B.dblTotal
 									END
 								WHEN B.intInventoryReceiptItemId IS NULL THEN B.dblTotal 
