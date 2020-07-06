@@ -571,7 +571,7 @@ BEGIN TRY
 					end					
 
 				end
-
+				delete from @avqty where dblAvailableQuantity < 0.01
 				delete from @avqty where not ( dblAvailableQuantity > abs(dblContractUnitGuard) or dblContractUnitGuard >= 0 )
 				update @avqty set dblAvailableQuantity = case when dblContractUnitGuard >= 0 then dblAvailableQuantity else dblAvailableQuantity + dblContractUnitGuard end
 
