@@ -386,6 +386,9 @@ GO
 
 		UPDATE tblGLAccountCategory SET ysnRestricted = 1
 			WHERE strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds')
+		
+		UPDATE tblGLAccountCategory SET ysnGLRestricted  = 
+			case when strAccountCategory IN('Cash Account','AP Account','AR Account','Inventory') THEN 1 ELSE 0 END
 
 		UPDATE tblGLAccountCategory SET ysnRestricted = 0 WHERE ysnRestricted IS NULL
 	END
