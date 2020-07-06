@@ -35,6 +35,7 @@ AS
 			CP.strReference,
 			CY.strCommodityCode,
 			CY.ysnExchangeTraded,
+			CY.intFutureMarketId,
 			SP.strName					AS	strSalesperson,
 			PO.strPosition,
 			PT.strPricingType,
