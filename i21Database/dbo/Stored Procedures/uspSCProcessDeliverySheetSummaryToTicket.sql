@@ -37,6 +37,8 @@ DECLARE @DeliverySheetTicketIds		Id
 DECLARE @ysnImposeReversalTransaction BIT
 DECLARE @_intTicketId INT
 DECLARE @_intReversedTicketId INT
+DECLARE @_intInventoryReceiptId  	INT
+DECLARE @_intStorageHistoryId  		INT
 
 BEGIN TRY
 
@@ -191,6 +193,77 @@ BEGIN TRY
 	-- 	,dblOpenBalance = 0
 	-- WHERE intDeliverySheetId = @intDeliverySheetId
 
+
+	---SUMMARY LOG 
+	BEGIN
+		IF OBJECT_ID (N'tempdb.dbo.#SCReceiptIds') IS NOT NULL
+			DROP TABLE #SCReceiptIds
+
+		SELECT DISTINCT
+			B.intInventoryReceiptId
+		INTO #SCReceiptIds
+		FROM tblICInventoryReceiptItem A
+		INNER JOIN tblICInventoryReceipt B
+			ON A.intInventoryReceiptId = B.intInventoryReceiptId
+		INNER JOIN tblSCTicket C
+			ON A.intSourceId = C.intTicketId
+		INNER JOIN tblSCDeliverySheet D
+			ON C.intDeliverySheetId = C.intDeliverySheetId
+		WHERE B.intSourceType = 1
+
+		SET @_intInventoryReceiptId = ISNULL((SELECT MIN(intInventoryReceiptId) FROM #SCReceiptIds),0)
+
+		WHILE (ISNULL(@_intInventoryReceiptId,0) > 0)
+		BEGIN
+
+			IF OBJECT_ID (N'tempdb.dbo.#tmpSCStorageHistory') IS NOT NULL
+				DROP TABLE #tmpSCStorageHistory
+
+			SELECT 
+				*
+			INTO #tmpSCStorageHistory
+			FROM tblGRStorageHistory 
+			WHERE intInventoryReceiptId = @_intInventoryReceiptId 
+			ORDER BY intStorageHistoryId
+
+			SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 MIN(intStorageHistoryId) 
+												FROM #tmpSCStorageHistory 
+												WHERE intInventoryReceiptId = @_intInventoryReceiptId 
+												ORDER BY intInventoryReceiptId),0)
+		
+			WHILE ISNULL(@_intStorageHistoryId,0) > 0
+			BEGIN
+				IF(@_intStorageHistoryId > 0)
+				BEGIN
+					EXEC [dbo].[uspGRRiskSummaryLog]
+						@intStorageHistoryId = @_intStorageHistoryId
+						,@strAction = 'UNPOST'
+				END
+
+				--LOOP Iterator
+				BEGIN
+					SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 ISNULL(intStorageHistoryId,0) 
+														FROM #tmpSCStorageHistory 
+														WHERE intInventoryReceiptId = @_intInventoryReceiptId 
+															AND intStorageHistoryId > @_intStorageHistoryId
+														ORDER BY intStorageHistoryId),0)
+				END
+			END
+
+
+			--loop iterator
+			BEGIN
+				SET @_intInventoryReceiptId = ISNULL((SELECT TOP 1 intInventoryReceiptId 
+													FROM #SCReceiptIds 
+													WHERE intInventoryReceiptId > @_intInventoryReceiptId
+													ORDER BY intInventoryReceiptId),0)
+			END
+		END
+
+	END
+
+	DELETE FROM tblGRCustomerStorage
+	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	DELETE FROM @splitTable
 		
