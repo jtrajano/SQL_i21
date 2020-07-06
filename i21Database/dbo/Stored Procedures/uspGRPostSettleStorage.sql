@@ -609,7 +609,7 @@ BEGIN TRY
 					end					
 
 				end
-
+				delete from @avqty where dblAvailableQuantity < 0.01
 				
 				----- DEBUG POINT -----
 				if @debug_awesome_ness = 1 AND 1 = 0
