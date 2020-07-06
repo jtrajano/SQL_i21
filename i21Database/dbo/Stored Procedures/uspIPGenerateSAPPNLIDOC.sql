@@ -63,6 +63,21 @@ Begin
 	   @strUserName					=	strUserName
 	From tblRKStgMatchPnS Where intStgMatchPnSId=@intMinStageId
 
+	IF ISNULL((
+			SELECT TOP 1 ISNULL(ysnPost, 0)
+			FROM tblRKStgMatchPnS
+			WHERE intMatchNo = @intMatchNo
+				AND intStgMatchPnSId < @intMinStageId
+			ORDER BY intStgMatchPnSId DESC
+			), 0) = 1
+	BEGIN
+		UPDATE tblRKStgMatchPnS
+		SET strStatus = 'IGNORE'
+		WHERE intStgMatchPnSId = @intMinStageId
+
+		GOTO NEXT_GL
+	END
+
 	Begin
 		Set @strXml =  '<ACC_DOCUMENT03>'
 		Set @strXml += '<IDOC BEGIN="1">'
@@ -125,6 +140,9 @@ Begin
 		INSERT INTO @tblOutput(strStgMatchPnSId,strRowState,strXml,strMatchNo)
 		VALUES(@intMinStageId,'CREATE',@strXml,@intMatchNo)
 	End
+	
+	NEXT_GL:
+
 	Select @intMinStageId=Min(intStgMatchPnSId) From tblRKStgMatchPnS Where intStgMatchPnSId>@intMinStageId and ISNULL(strStatus,'')=''AND IsNULL(ysnPost,0)=1
 End
 
