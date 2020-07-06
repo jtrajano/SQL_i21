@@ -2274,7 +2274,7 @@ UPDATE tblSMCSVDynamicImport SET
 
 			IF(@farm_acres = '''')
 			BEGIN
-				SET @farmacresNo = NULL
+				SET @farmacresNo = 0
 			END
 			ELSE
 			BEGIN
