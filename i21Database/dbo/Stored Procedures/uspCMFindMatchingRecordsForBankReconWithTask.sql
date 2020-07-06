@@ -4,7 +4,7 @@ CREATE PROCEDURE [uspCMFindMatchingRecordsForBankReconWithTask]
 	@intBankAccountId INT,
 	@dtmStatementDate DATETIME,
 	@intEntityId INT,
-	@ysnSuccess AS BIT = 0 OUTPUT
+	@intImportLogId AS INT = 0 OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -17,10 +17,24 @@ DECLARE @trancount int;
 DECLARE @xstate int;
 SET @trancount = @@trancount;
 
-IF @trancount = 0
-    BEGIN TRANSACTION
-ELSE
-	SAVE TRANSACTION uspCMFindMatch;
+DECLARE @dtmCurrent DATETIME = GETDATE()
+
+INSERT INTO tblCMBankStatementImportLog (strBankStatementImportId,strDescription, intEntityId,dtmDate,intConcurrencyId)
+SELECT
+strBankStatementImportId=@strBankStatementImportId,
+strDescription = 'Started Importing ..',
+intEntityId = @intEntityId,
+dtmDate =@dtmCurrent,
+intConcurrencyId=1
+
+SELECT @intImportLogId = SCOPE_IDENTITY()
+
+SELECT * INTO #tblCMBankStatementImportLogDetail FROM tblCMBankStatementImportLogDetail WHERE 1 = 0 
+
+-- IF @trancount = 0
+BEGIN TRANSACTION
+-- ELSE
+-- 	SAVE TRANSACTION uspCMFindMatch;
 		
 		-- Declare the constant variables
 DECLARE @BANK_DEPOSIT INT = 1
@@ -242,84 +256,85 @@ BEGIN
 	DELETE FROM #tmp_list_of_imported_record
 	WHERE intBankStatementImportId = @intBankStatementImportId
 END
+	
 
-
-	DECLARE @dtmCurrent DATETIME = GETDATE()
+	
 	DECLARE @rCount INT 
 	EXEC uspCMImportBTransferFromBStmnt 
 		@strBankStatementImportId = @strBankStatementImportId, 
 		@intEntityId = @intEntityId,
 		@dtmCurrent = @dtmCurrent,
-		@rCount = @rCount OUT
+		@intImportLogId = @intImportLogId
 
 	EXEC uspCMImportBTransactionFromBStmnt
 		@strBankStatementImportId = @strBankStatementImportId, 
 		@intEntityId = @intEntityId,
 		@dtmCurrent = @dtmCurrent,
-		@rCount = @rCount OUT
-
-	DECLARE @TaskCount INT, @BTCount INT,@TaskResult NVARCHAR(200), @BTResult NVARCHAR(200)
-
-	SELECT @TaskCount = COUNT(1) FROM vyuCMResponsiblePartyTask WHERE @strBankStatementImportId = strBankStatementImportId
-	SELECT @BTCount  =COUNT(1) FROM tblCMBankStatementImportLog WHERE strTransactionId IS NOT NULL AND @strBankStatementImportId  = strBankStatementImportId
-
-	IF (@TaskCount = 0)
-	BEGIN
-		SELECT  @TaskResult = strError FROM tblCMBankStatementImportLog WHERE @strBankStatementImportId  = strBankStatementImportId 
-		AND strCategory = 'Bank Transfer creation' 
-		AND strError IS NOT NULL
-		IF(@TaskResult IS NULL)
-			SET @TaskResult = 'No Task Created'
-	END
-	ELSE
-		SELECT @TaskResult = CONVERT(NVARCHAR(20) , @TaskCount) + ' Bank Transfer Task created.'
-
-	IF (@BTCount = 0)
-	BEGIN
-		SELECT  @BTResult = strError FROM tblCMBankStatementImportLog 
-		WHERE @strBankStatementImportId  = strBankStatementImportId 
-		AND strCategory = 'Bank Transaction creation' AND strError IS NOT NULL
-		
-		IF(@BTResult IS NULL)
-			SET @TaskResult = 'No Bank Transaction Created'
-	END
-	ELSE
-		SELECT @BTResult = CONVERT(NVARCHAR(20) , @BTCount) + ' Bank Transaction created.'
-
-
-	INSERT INTO tblCMBankStatementImportLogSummary (strBankStatementImportId,strTaskCreationResult,strBankTransactionCreationResult,dtmDate,intConcurrencyId)
-	SELECT
-	strBankStatementImportId=@strBankStatementImportId,
-	strTaskCreationResult = @TaskResult,
-	strBankTransactionCreationResult = @BTResult,
-	dtmDate =@dtmCurrent,
-	intConcurrencyId=1
+		@intImportLogId = @intImportLogId
 	
-	 IF @trancount = 0 
-		COMMIT TRANSACTION;
+	DECLARE  @tblCMBankStatementImportLogDetail TABLE(
+		[strTransactionId] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
+		[intBankStatementImportId] [int] NULL,
+		[strError] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
+		[strCategory] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL
+	)
 
-	SET @ysnSuccess = 1
+	
+	IF EXISTS(SELECT TOP 1 1 FROM #tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId =@intImportLogId)
+	BEGIN
+		INSERT INTO @tblCMBankStatementImportLogDetail (intBankStatementImportId,strError,strCategory)
+			SELECT intBankStatementImportId,strError,strCategory from ##tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId = @intImportLogId
+
+		RAISERROR('Import Detail Error', 16, 1);
+		
+		
+	
+			
+		
+
+	END
+	ELSE
+	BEGIN
+		UPDATE A SET strDescription ='Successfully Imported'
+		, intTaskCount = Task.Qty
+		, intBTransactionCount = BT.Qty
+		FROM  tblCMBankStatementImportLog A
+		OUTER APPLY (
+			SELECT COUNT(1)Qty FROM tblCMBankStatementImportLogDetail WHERE strTaskId IS NOT NULL AND strTransactionId IS NOT NULL
+			AND intImportBankStatementLogId = A.intImportBankStatementLogId
+		)Task
+		OUTER APPLY (
+			SELECT COUNT(1)Qty FROM tblCMBankStatementImportLogDetail WHERE strTransactionId IS NOT NULL AND strTaskId IS NULL
+			AND intImportBankStatementLogId = A.intImportBankStatementLogId
+		)BT
+
+		WHERE intImportBankStatementLogId = @intImportLogId
+
+		IF @@TRANCOUNT > 0 
+			COMMIT TRANSACTION;
+	END
+
+	
 
 END TRY
 BEGIN CATCH
-	DECLARE @ErrorMessage nvarchar(500)  
-	SELECT  @ErrorMessage = ERROR_MESSAGE(),@xstate = XACT_STATE()   
+	DECLARE @ErrorMessage nvarchar(500)
+	SELECT  @ErrorMessage = ERROR_MESSAGE()
+    if @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION --uspCMFindMatch;
+	
+	INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
+	SELECT @intImportLogId, strCategory, strError, intBankStatementImportId from @tblCMBankStatementImportLogDetail
+	
+	INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strError)
+		SELECT @intImportLogId, @ErrorMessage 
+	
 
-	if @xstate = -1
-		ROLLBACK;
-    if @xstate = 1 and @trancount = 0
-        ROLLBACK
-    if @xstate = 1 and @trancount > 0
-        ROLLBACK TRANSACTION uspCMFindMatch;
+	UPDATE A SET strDescription ='Failed Importing'
+	FROM  tblCMBankStatementImportLog A
+	WHERE intImportBankStatementLogId = @intImportLogId
 
 	
-	INSERT INTO tblCMBankStatementImportLogSummary (strBankStatementImportId,strTaskCreationResult,strBankTransactionCreationResult,dtmDate,intConcurrencyId)
-	SELECT
-	strBankStatementImportId=@strBankStatementImportId,
-	strTaskCreationResult =@ErrorMessage,
-	strBankTransactionCreationResult = @ErrorMessage,
-	dtmDate =@dtmCurrent,
-	intConcurrencyId=1
-	SET @ysnSuccess = 0	
+	
 END CATCH
 

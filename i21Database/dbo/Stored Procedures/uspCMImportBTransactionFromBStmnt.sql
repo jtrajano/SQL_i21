@@ -1,8 +1,8 @@
 CREATE PROCEDURE [dbo].[uspCMImportBTransactionFromBStmnt]
 @strBankStatementImportId NVARCHAR(40),
 @intEntityId INT,
-@dtmCurrent DATETIME,
-@rCount INT = 0 OUTPUT
+@intImportLogId INT,
+@dtmCurrent DATETIME
 AS
 BEGIN
 
@@ -11,8 +11,6 @@ BEGIN
 		SET NOCOUNT ON
 		SET XACT_ABORT ON
 		SET ANSI_WARNINGS ON
- 		
- 		SET  @rCount = 0;
 
         DECLARE @tblTemp TABLE(
             intBankStatementImportId INT,
@@ -72,15 +70,16 @@ BEGIN
 			strError NVARCHAR(MAX),
 			intBankStatementImportId int
 		)
-  		DECLARE @trancount int;
-		DECLARE @xstate int;
-		SET @trancount = @@trancount;
+		DECLARE @strError NVARCHAR(100)
+  		--DECLARE @trancount int;
+		--DECLARE @xstate int;
+		--SET @trancount = @@trancount;
 		
 
-		if @trancount = 0
-            BEGIN TRANSACTION
-        else
-            SAVE TRANSACTION uspCMImportBXfer;
+		-- if @trancount = 0
+        --     BEGIN TRANSACTION
+        -- else
+        --     SAVE TRANSACTION uspCMImportBXfer;
 		
 
 		-- GET UNMATCHED RECORD IN BANK STATEMENT TABLE ( NOT IN TASK)
@@ -104,17 +103,13 @@ BEGIN
 
 
         IF NOT EXISTS (SELECT TOP 1 1 FROM @tblTemp)
-        BEGIN
-            INSERT into @ErrorTable(strError)
-            SELECT 'No match found' 
-            GOTO End_here;
-        END
+			GOTO EndProcedure;
 
 		
-
+		
 		WHILE EXISTS(SELECT TOP 1 1 FROM @tblTemp)
 		BEGIN 
-		BEGIN TRY
+		
 			SELECT TOP 1 
 			@intBankStatementImportId= A.intBankStatementImportId , 
 			@strBankDescription = strBankDescription, 
@@ -126,9 +121,11 @@ BEGIN
 			SELECT @intBankAccountId = intBankAccountId FROM vyuCMBankAccount  WHERE strBankAccountNo = @strBankAccountNo
 
 			IF @intBankAccountId IS NULL 
+			BEGIN
+				-- SET @strError = @strBankAccountNo + ' is not an existing bank account'
 				insert into @ErrorTable select @strBankAccountNo + ' is not an existing bank account', @intBankStatementImportId
-			
-
+			 	GOTO NextLoop;
+			END
 
 			insert into @tblTempMacReportXRef(_Type,[Description_Contains],AccountNumber,_Reference,CR_DR_Equals,GL_Primary,Bank_Acct,X_Ref_Field,X_Ref_Position,X_Ref_Length,_ReferenceNot)
 			SELECT [Type],[Description_Contains],AccountNumber,Reference,CR_DR_Equals,GL_Primary,Bank_Acct,X_Ref_Field,X_Ref_Position,X_Ref_Length,ReferenceNot FROM tblCMMacReportXRef 
@@ -136,7 +133,7 @@ BEGIN
 			
 			select @count=count(1) from @tblTempMacReportXRef
 
-			IF @count  = 0 GOTO Exit_here;
+			IF @count  = 0 GOTO NextLoop;
 			IF @count  = 1 GOTO Proceed_Here;
 
 			
@@ -150,7 +147,7 @@ BEGIN
 
 				select @count=count(1) from @tblTempMacReportXRef2
 
-				IF @count  = 0 GOTO Exit_here;
+				IF @count  = 0 GOTO NextLoop;
 				IF @count  = 1 GOTO Proceed_Here2;
 								
 				DELETE FROM @tblTempMacReportXRef
@@ -161,7 +158,7 @@ BEGIN
 				
 				select @count=count(1) from @tblTempMacReportXRef
 
-				IF @count  = 0 GOTO Exit_here;
+				IF @count  = 0 GOTO NextLoop;
 				IF @count  = 1 GOTO Proceed_Here;
 				
 				DELETE FROM @tblTempMacReportXRef WHERE
@@ -169,7 +166,7 @@ BEGIN
 
 				select @count=count(1) from @tblTempMacReportXRef
 
-				IF @count  = 0 GOTO Exit_here;
+				IF @count  = 0 GOTO NextLoop;
 				IF @count  = 1 GOTO Proceed_Here;
 
 				DELETE FROM @tblTempMacReportXRef2
@@ -181,10 +178,8 @@ BEGIN
 
 				select @count=count(1) from @tblTempMacReportXRef2
 					
-				IF @count  = 0 or @count > 1 GOTO Exit_here;
+				IF @count  = 0 or @count > 1 GOTO NextLoop;
 				IF @count  = 1 GOTO Proceed_Here2;
-				
-
 			
 			END
 
@@ -211,11 +206,12 @@ BEGIN
 			
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount where strAccountId = @strGLAccountId)
+			BEGIN
 				INSERT INTO @ErrorTable select @strGLAccountId +' is not an existing GL account id', @intBankStatementImportId
-			--stopped here 
-			 --creation of bank transaction / deposit
-
-			IF EXISTS(SELECT TOP 1 1 FROM @ErrorTable) GOTO Exit_here;
+				GOTO NextLoop;
+				--SET @strError = @strGLAccountId +' is not an existing GL account id'
+			END
+			
 
 			EXEC uspSMGetStartingNumber @intStartingNumberId = 13, @intCompanyLocationId = null, @strID = @strID OUT 
 
@@ -293,53 +289,26 @@ BEGIN
 			DELETE FROM @bankTransaction
 			DELETE FROM @BankTransactionDetailEntries
 
-			insert into tblCMBankStatementImportLog(strTransactionId, dtmDateCreated,intEntityId,intBankStatementImportId,strBankStatementImportId)
-			select @strID, @dtmCurrent, @intEntityId, @intBankStatementImportId,@strBankStatementImportId
-			
-			END TRY
-			BEGIN CATCH
-				
-				SELECT  @ErrorMessage = ERROR_MESSAGE() ,@xstate = XACT_STATE()
-				insert into @ErrorTable select @ErrorMessage, @intBankStatementImportId
+			insert into tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strTransactionId,intBankStatementImportId)
+			select @intImportLogId, @strID, @intBankStatementImportId
 
-				
-
-				GOTO End_here;
-				
-			END CATCH
-			
-			Exit_here:
-				
+			NextLoop:
 			DELETE FROM @tblTempMacReportXRef
 			DELETE FROM @tblTempMacReportXRef2
 			DELETE FROM @tblTemp WHERE @intBankStatementImportId =intBankStatementImportId
 
-		END
-
-
-        End_here:
-
+		END -- END WHILE
 		
+		IF EXISTS(SELECT TOP 1 1 FROM @ErrorTable)
+			INSERT INTO #tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
+			SELECT @intImportLogId, 'Bank Transaction creation', strError, intBankStatementImportId from @ErrorTable
 
-		IF EXISTS (SELECT TOP 1 1 FROM @ErrorTable)
-		BEGIN
-			if @xstate = -1
-				ROLLBACK;
-			if @xstate = 1 and @trancount = 0
-				ROLLBACK
-			if @xstate = 1 and @trancount > 0
-				ROLLBACK TRANSACTION uspCMImportBXfer;
+		-- IF( @ErrorMessage <> 'Error Details')
+		-- 	INSERT INTO ##tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
+		-- 	SELECT @intImportLogId, 'Bank Transaction creation', @ErrorMessage,  @intBankStatementImportId
+	
 
-			
-			
+		EndProcedure:
 
-			INSERT INTO tblCMBankStatementImportLog(strCategory, strError,intEntityId,intBankStatementImportId, dtmDateCreated,strBankStatementImportId)
-				SELECT 'Bank Transaction creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrent,@strBankStatementImportId from @ErrorTable
-		END
-		ELSE
-		BEGIN 
-			IF @trancount = 0 
-				COMMIT TRANSACTION;
-		END
 
 END

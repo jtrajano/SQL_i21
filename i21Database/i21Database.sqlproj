@@ -8740,7 +8740,7 @@
     <Build Include="dbo\Stored Procedures\uspCMImportBTransferFromBStmnt.sql" />
     <Build Include="dbo\Stored Procedures\uspCMImportBTransactionFromBStmnt.sql" />
     <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
-    <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryAdjustmentClosingBalance.sql" />
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
@@ -8764,7 +8764,7 @@
     <Build Include="dbo\Tables\tblCMResponsiblePartyTaskSequence.sql" />
     <Build Include="dbo\Triggers\trgCMInsertUpdateResponsiblePartyTaskDetail.sql" />
     <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
-    <Build Include="dbo\Tables\tblCMBankStatementImportLogSummary.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCMFindMatchingRecordsForBankReconWithTask.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />

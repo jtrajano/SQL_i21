@@ -1,8 +1,9 @@
 CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]  
     @strBankStatementImportId NVARCHAR(40),  
     @intEntityId INT,  
-    @dtmCurrent DATETIME,
-    @rCount INT = 0 OUTPUT  
+    @intImportLogId INT,
+    @dtmCurrent DATETIME
+    
     AS  
     BEGIN   
           
@@ -15,7 +16,6 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
         DECLARE @IMPORT_STATUS_NOMATCHFOUND AS INT = 2,  
                 @IMPORT_STATUS_MATCHFOUND AS INT = 1  
   
-        SET  @rCount = 0;  
   
         DECLARE @tblTemp TABLE(  
             intTransactionId int IDENTITY(1,1),  
@@ -38,21 +38,8 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
             strError NVARCHAR(MAX),  
             intBankStatementImportId int  
         )  
-        DECLARE @ErrorMessage nvarchar(500)  
-        
-        DECLARE @trancount int;
-		DECLARE @xstate int;
-		SET @trancount = @@trancount;
-		
-  
-        IF @trancount = 0
-            BEGIN TRANSACTION
-        ELSE
-            SAVE TRANSACTION uspCMImportBXAction;
-		 
-  
-          
-      
+        DECLARE @ErrorMessage nvarchar(500);  
+         
         WITH UnmatchedTrans AS (  
         SELECT   
             intBankStatementImportId,   
@@ -87,11 +74,7 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
       
         -- Exit when no match found  
         IF NOT EXISTS(SELECT TOP 1 1 FROM @tblTemp)  
-        BEGIN  
-            INSERT INTO @ErrorTable(strError)  
-            SELECT 'No match found'   
             GOTO ExitHere;  
-        END  
   
        
         UPDATE @tblTemp  
@@ -113,11 +96,6 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
         ) CMBankFrom   
       
         DELETE FROM @tblTemp WHERE intResponsibleEntityId IS NULL  
-          
-          
-        IF EXISTS(SELECT TOP 1 1 FROM @ErrorTable)  
-            GOTO ExitHere;  
-          
       
         DECLARE @intTransactionIdTemp INT   
         DECLARE @strID VARCHAR(50)   
@@ -126,10 +104,10 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
         INSERT INTO @tblTemp1(intBankStatementImportId)  
         SELECT intBankStatementImportId FROM @tblTemp  
 		declare @intTaskId int
-    
+       
         WHILE EXISTS (SELECT TOP 1 1 FROM @tblTemp)   
         BEGIN   
-            BEGIN TRY  
+             BEGIN TRY  
                 EXEC uspSMGetStartingNumber @intStartingNumberId = 12, @intCompanyLocationId = null, @strID = @strID OUT   
 
                 SELECT TOP 1 @intTransactionIdTemp = intTransactionId FROM @tblTemp  
@@ -205,49 +183,23 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
                 CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F -- remove this in 20.1  
                 WHERE @intTransactionIdTemp = intTransactionId  
         
-                INSERT INTO tblCMBankStatementImportLog(strTransactionId, 
-                dtmDateCreated,intEntityId,intBankStatementImportId,strBankStatementImportId, intTaskId)
-			    SELECT @strID, @dtmCurrent, @intEntityId, intBankStatementImportId,@strBankStatementImportId,@intTaskId
-                FROM
-                @tblTemp  A   
+                INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strTransactionId,intBankStatementImportId, strTaskId)
+			    SELECT @intImportLogId, @strID, intBankStatementImportId,'Task-' +  CONVERT(nvarchar(20), @intTaskId)
+                FROM @tblTemp  A   
                 WHERE @intTransactionIdTemp = intTransactionId 
-    
+
+                DELETE FROM  @tblTemp WHERE @intTransactionIdTemp  = intTransactionId 
             END TRY  
             BEGIN CATCH  
-                SELECT  @ErrorMessage = ERROR_MESSAGE(),@xstate = XACT_STATE()   
-                INSERT INTO @ErrorTable (strError,intBankStatementImportId)   
-                SELECT @ErrorMessage, intBankStatementImportId  
+                INSERT INTO #tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)  
+                SELECT @intImportLogId, 'Bank Transfer creation', ERROR_MESSAGE(), intBankStatementImportId
                 FROM @tblTemp B   
-                WHERE @intTransactionIdTemp = intTransactionId  
-                GOTO ExitHere;
-            END CATCH  
-            
-            DELETE FROM  @tblTemp WHERE @intTransactionIdTemp  = intTransactionId  
+                WHERE @intTransactionIdTemp = intTransactionId 
+            END CATCH   
+        END   --END WHILE
     
-        END   
-  
     ExitHere:  
-  
-    IF EXISTS (SELECT TOP 1 1 FROM @ErrorTable)  
-    BEGIN  
-       if @xstate = -1
-			ROLLBACK;
-        if @xstate = 1 and @trancount = 0
-            ROLLBACK
-        if @xstate = 1 and @trancount > 0
-            ROLLBACK TRANSACTION uspCMImportBXAction;
-  
-        INSERT INTO tblCMBankStatementImportLog(strCategory, strError,intEntityId,intBankStatementImportId, dtmDateCreated, strBankStatementImportId)  
-        SELECT 'Bank Transfer creation', strError, @intEntityId, intBankStatementImportId,@dtmCurrent, @strBankStatementImportId from @ErrorTable  
-    END  
-    ELSE  
-    BEGIN   
-        IF @trancount = 0 
-			COMMIT TRANSACTION;
-    END  
-  
-    SELECT @rCount = COUNT(1) FROM tblCMResponsiblePartyTask WHERE strBankStatementImportId = @strBankStatementImportId  
-  
+
     -- Mark matched so that the next procedure will not select it ignoring error  
     IF EXISTS(SELECT TOP 1 1 FROM @tblTemp1)  
     UPDATE BS   
