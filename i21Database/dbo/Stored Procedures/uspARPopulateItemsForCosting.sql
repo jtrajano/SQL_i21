@@ -57,7 +57,7 @@ INSERT INTO #ARItemsForCosting
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= ARID.[intItemUOMId]
+	,[intItemUOMId]				= CASE WHEN ISNULL(ICI.[ysnSeparateStockForUOMs], 0) = 0 AND ISNULL(ICI.[strLotTracking], 'No') = 'No' THEN ICIUOM.[intItemUOMId] ELSE ARID.[intItemUOMId] END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
@@ -111,6 +111,12 @@ SELECT
 	,[ysnForValidation]         = @OneBit
 FROM
     #ARPostInvoiceDetail ARID
+INNER JOIN
+	(SELECT [intItemId], [ysnSeparateStockForUOMs], [strLotTracking] FROM tblICItem WITH (NOLOCK)) ICI
+		ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN
+	(SELECT [intItemId], [intItemUOMId], [ysnStockUnit] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
+		ON ARID.[intItemId] = ICIUOM.[intItemId] AND ICIUOM.[ysnStockUnit] = 1
 LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
