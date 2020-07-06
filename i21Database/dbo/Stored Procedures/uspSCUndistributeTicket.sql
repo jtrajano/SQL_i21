@@ -89,6 +89,7 @@ DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @intInventoryShipmentItemUsed INT
 DECLARE @intInventoryReceiptItemUsed INT
 DECLARE @intShipmentReceiptItemId INT
+DECLARE @_intStorageHistoryId INT
 
 DECLARE @strMatchTicketDistributionOption NVARCHAR(5)
 DECLARE @strTicketDistributionOption NVARCHAR(5)
@@ -266,6 +267,45 @@ BEGIN TRY
 							
 							IF ISNULL(@ysnIRPosted, 0) = 1
 								EXEC [dbo].[uspICPostInventoryReceipt] 0, 0, @strTransactionId, @intUserId
+
+
+							---Summary Log
+							BEGIN
+								IF OBJECT_ID (N'tempdb.dbo.#tmpSCStorageHistory') IS NOT NULL
+									DROP TABLE #tmpSCStorageHistory
+
+								SELECT 
+									*
+								INTO #tmpSCStorageHistory
+								FROM tblGRStorageHistory 
+								WHERE intInventoryReceiptId = @InventoryReceiptId 
+								ORDER BY intStorageHistoryId
+
+								SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 MIN(intStorageHistoryId) 
+																	FROM #tmpSCStorageHistory 
+																	WHERE intInventoryReceiptId = @InventoryReceiptId 
+																	ORDER BY intInventoryReceiptId),0)
+							
+								WHILE ISNULL(@_intStorageHistoryId,0) > 0
+								BEGIN
+									IF(@_intStorageHistoryId > 0)
+									BEGIN
+										EXEC [dbo].[uspGRRiskSummaryLog]
+											@intStorageHistoryId = @_intStorageHistoryId
+											,@strAction = 'UNPOST'
+									END
+
+									--LOOP Iterator
+									BEGIN
+										SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 ISNULL(intStorageHistoryId,0) 
+																			FROM #tmpSCStorageHistory 
+																			WHERE intInventoryReceiptId = @InventoryReceiptId 
+																				AND intStorageHistoryId > @_intStorageHistoryId
+																			ORDER BY intStorageHistoryId),0)
+									END
+								END
+							END
+
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 
@@ -1317,6 +1357,44 @@ BEGIN TRY
 						,NULL
 						,NULL
 						,@newBalance OUTPUT
+
+					
+
+					---Summary Log
+					BEGIN
+						IF OBJECT_ID (N'tempdb.dbo.#tmpSCStorageHistory1') IS NOT NULL
+							DROP TABLE #tmpSCStorageHistory1
+
+						SELECT 
+							*
+						INTO #tmpSCStorageHistory1
+						FROM tblGRStorageHistory 
+						WHERE intInventoryReceiptId = @InventoryReceiptId 
+						ORDER BY intStorageHistoryId
+
+						SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 MIN(intStorageHistoryId) 
+															FROM #tmpSCStorageHistory1 
+															WHERE intInventoryReceiptId = @InventoryReceiptId ),0)
+					
+						WHILE ISNULL(@_intStorageHistoryId,0) > 0
+						BEGIN
+							IF(@_intStorageHistoryId > 0)
+							BEGIN
+								EXEC [dbo].[uspGRRiskSummaryLog]
+									@intStorageHistoryId = @_intStorageHistoryId
+									,@strAction = 'UNPOST'
+							END
+
+							--LOOP Iterator
+							BEGIN
+								SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 ISNULL(intStorageHistoryId,0) 
+																	FROM #tmpSCStorageHistory1 
+																	WHERE intInventoryReceiptId = @InventoryReceiptId 
+																		AND intStorageHistoryId > @_intStorageHistoryId
+																	ORDER BY intStorageHistoryId),0)
+							END
+						END
+					END
 
 					IF ISNULL(ROUND(ISNULL(@newBalance,0), @currencyDecimal), 0) > 0
 						DELETE FROM tblGRStorageHistory WHERE intInventoryReceiptId = @InventoryReceiptId
