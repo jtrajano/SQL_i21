@@ -42,20 +42,25 @@ BEGIN
 			tblCTPriceFixationDetailAPAR
 		where intInvoiceDetailId = @intInvoiceDetailId;
 
-		select
-			@dblInvoiceDetailQuantity = dblQtyShipped
-		from
-			tblARInvoiceDetail
-		where
-			intInvoiceDetailId = @intInvoiceDetailId;
+		if (isnull(@intPriceFixationDetailId,0) > 0)
+		begin
 
-		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+			select
+				@dblInvoiceDetailQuantity = dblQtyShipped
+			from
+				tblARInvoiceDetail
+			where
+				intInvoiceDetailId = @intInvoiceDetailId;
 
-		update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intInvoiceDetailId = @intInvoiceDetailId;
-		exec uspCTProcessInvoiceDelete
-			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
-			,@intPriceFixationDetailId = @intPriceFixationDetailId
-			,@UserId = @intUserId
+			set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+
+			update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intInvoiceDetailId = @intInvoiceDetailId;
+			exec uspCTProcessInvoiceDelete
+				@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+				,@intPriceFixationDetailId = @intPriceFixationDetailId
+				,@UserId = @intUserId
+
+		end
 
 		set @intInvoiceDetailId = (select min(intInvoiceDetailId) from @InvoiceDetails where intInvoiceDetailId > @intInvoiceDetailId);
 	end
