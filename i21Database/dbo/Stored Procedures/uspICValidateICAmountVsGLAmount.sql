@@ -89,14 +89,13 @@ IF EXISTS (
 		t.intInTransitSourceLocationId IS NULL 
 )
 BEGIN 
-	DECLARE @strAccountId AS NVARCHAR(50)
+	DECLARE @strAccountCategory AS NVARCHAR(50)
 	DECLARE @strItemNo AS NVARCHAR(50)
-	DECLARE @strAccountCategory AS NVARCHAR(500) 
 
 	-- Check the 'Inventory' Account
 	SELECT 
 		TOP 1 
-		@strAccountId = ga.strAccountId
+		@strAccountCategory = ac.strAccountCategory
 		,@strItemNo = i.strItemNo
 		,@strAccountCategory = ac.strAccountCategory
 	FROM	
@@ -122,7 +121,7 @@ BEGIN
 		AND ac.strAccountCategory NOT IN ('Inventory')
 		AND t.intInTransitSourceLocationId IS NULL 
 
-	IF @strAccountId IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
+	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
 		-- 'Inventory Account is set to <Category> for item <Item No>.'
 		EXEC uspICRaiseError 80250, @strAccountCategory, @strItemNo
@@ -384,8 +383,10 @@ BEGIN
 				1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+
 						ELSE 0 
 					END 
 			GROUP BY 				
@@ -451,7 +452,8 @@ BEGIN
 				AND 1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
@@ -517,7 +519,8 @@ BEGIN
 				1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
@@ -585,7 +588,8 @@ BEGIN
 				AND 1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
@@ -622,7 +626,54 @@ IF @ysnThrowError = 1
 		HAVING 
 			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)) <> 0 
 	)
-BEGIN 
+BEGIN
+
+	/** for debugging purposes
+	select 
+		't'
+		,t.intInventoryTransactionId
+		,t.strTransactionId
+		,t.strBatchId
+		,t.dtmDate
+		,v = round(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2) 
+		,t.dblQty
+		,t.dblCost
+		,t.dblValue
+		,t.strDescription
+		,t.ysnIsUnposted
+		,t.intTransactionTypeId
+	from 
+		tblICInventoryTransaction t 
+	where 
+		t.strTransactionId = @strTransactionId
+	order by
+		t.intInventoryTransactionId
+	
+	select 
+		'gd'
+		,gd.intJournalLineNo
+		,gd.strTransactionId
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.dblDebit
+		,gd.dblCredit	
+	from tblGLDetail gd 
+	where gd.strTransactionId = @strTransactionId
+	order by gd.intJournalLineNo
+
+	select 
+		'@GLEntries'
+		,gd.intJournalLineNo
+		,gd.strTransactionId
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.dblDebit
+		,gd.dblCredit	
+	from @GLEntries gd 
+	where gd.strTransactionId = @strTransactionId
+	order by gd.intJournalLineNo
+	**/
+ 
 	DECLARE @difference AS NUMERIC(18, 6) 
 			,@strItemDescription NVARCHAR(500) 
 			,@strAccountDescription NVARCHAR(500)
