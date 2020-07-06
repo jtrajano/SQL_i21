@@ -356,7 +356,7 @@ BEGIN TRY
 					, intActionId
 					, strProcess
 				)		
-				SELECT strBatchId = NULL
+				SELECT TOP 1 strBatchId = NULL
 					, dtmTransactionDate = @_transactionDate
 					, strTransactionType
 					, strTransactionReference
@@ -397,7 +397,8 @@ BEGIN TRY
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
 				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
-				AND intContractStatusId = 6
+				AND intContractStatusId IN (3,6)
+				ORDER BY dtmCreatedDate DESC
 
 				UPDATE CBL SET strNotes = 'Re-opened'
 				FROM tblCTContractBalanceLog CBL
@@ -405,7 +406,7 @@ BEGIN TRY
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
 				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
-				AND intContractStatusId = 6
+				AND intContractStatusId IN (3,6)				
 			END
 			ELSE
 			BEGIN
