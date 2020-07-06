@@ -67,7 +67,7 @@ BEGIN TRY
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 												WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo 
 											END
-			,dtmTransactionDate 			= sh.dtmDistributionDate
+			,dtmTransactionDate 			= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId				
@@ -156,7 +156,7 @@ BEGIN TRY
 												WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
 												WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo 
 											END
-			,dtmTransactionDate				= sh.dtmDistributionDate
+			,dtmTransactionDate				= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId 					= sh.intTicketId
@@ -221,7 +221,7 @@ BEGIN TRY
 			,intTransactionRecordHeaderId	= sh.intCustomerStorageId
 			,strDistributionType 			= st.strStorageTypeDescription
 			,strTransactionNumber 			= sh.strSettleTicket
-			,dtmTransactionDate				= sh.dtmDistributionDate
+			,dtmTransactionDate				= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId
@@ -263,7 +263,7 @@ BEGIN TRY
 			,intTransactionRecordHeaderId	= sh.intTransferStorageId
 			,strDistributionType 			= st.strStorageTypeDescription
 			,strTransactionNumber 			= sh.strTransferTicket
-			,dtmTransactionDate 			= sh.dtmDistributionDate
+			,dtmTransactionDate 			= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intContractDetailId			= NULL
 			,intTicketId					= sh.intTicketId				
@@ -317,7 +317,7 @@ BEGIN TRY
 			,intTransactionRecordHeaderId	= sh.intTransferStorageId
 			,strDistributionType 			= st.strStorageTypeDescription
 			,strTransactionNumber			= sh.strTransferTicket
-			,dtmTransactionDate				= sh.dtmDistributionDate
+			,dtmTransactionDate				= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId 					= sh.intTicketId
@@ -373,7 +373,7 @@ BEGIN TRY
 			,intTransactionRecordHeaderId	= sh.intTransferStorageId
 			,strDistributionType 			= st.strStorageTypeDescription
 			,strTransactionNumber 			= sh.strTransferTicket
-			,dtmTransactionDate				= sh.dtmDistributionDate
+			,dtmTransactionDate				= sh.dtmHistoryDate
 			,intContractHeaderId			= sh.intContractHeaderId
 			,intContractDetailId			= CD.intContractDetailId
 			,intTicketId					= sh.intTicketId
