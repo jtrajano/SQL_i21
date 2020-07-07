@@ -119,8 +119,49 @@ USING (
 			, StockUOM.intItemUOMId 
 			, o.intSubLocationId
 			, o.intStorageLocationId
+) AS Source_Query  
+	ON ItemStockUOM.intItemId = Source_Query.intItemId
+	AND ItemStockUOM.intItemLocationId = Source_Query.intItemLocationId
+	AND ItemStockUOM.intItemUOMId = Source_Query.intItemUOMId
+	AND ISNULL(ItemStockUOM.intSubLocationId, 0) = ISNULL(Source_Query.intSubLocationId, 0)
+	AND ISNULL(ItemStockUOM.intStorageLocationId, 0) = ISNULL(Source_Query.intStorageLocationId, 0)
+
+-- If matched, update the On-Order qty 
+WHEN MATCHED THEN 
+	UPDATE 
+	SET		dblOnOrder = CASE WHEN ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty < 0 THEN 0 ELSE ISNULL(ItemStockUOM.dblOnOrder, 0) + Source_Query.Aggregrate_OnOrderQty END 
+
+-- If none is found, insert a new item stock record
+WHEN NOT MATCHED THEN 
+	INSERT (
+		intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,intSubLocationId
+		,intStorageLocationId
+		,dblOnHand
+		,dblOnOrder
+		,intConcurrencyId
+	)
+	VALUES (
+		Source_Query.intItemId
+		,Source_Query.intItemLocationId
+		,Source_Query.intItemUOMId
+		,Source_Query.intSubLocationId
+		,Source_Query.intStorageLocationId
+		,0
+		,CASE WHEN Source_Query.Aggregrate_OnOrderQty < 0 THEN 0 ELSE Source_Query.Aggregrate_OnOrderQty END
+		,1	
+	)
+;
+
+-- Do an upsert for the Item Stock UOM table when updating the On Order Qty
+MERGE	
+INTO	dbo.tblICItemStockUOM
+WITH	(HOLDLOCK) 
+AS		ItemStockUOM
+USING (
 		-- If separate UOMs is enabled, don't convert the qty. Track it using the same uom. 
-		UNION ALL 
 		SELECT	o.intItemId
 				,o.intItemLocationId
 				,o.intItemUOMId 
