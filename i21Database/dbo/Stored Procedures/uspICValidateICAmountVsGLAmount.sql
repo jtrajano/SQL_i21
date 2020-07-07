@@ -135,6 +135,7 @@ BEGIN
 		TOP 1 
 		@strAccountCategory = ac.strAccountCategory
 		,@strItemNo = i.strItemNo
+		,@strAccountCategory = ac.strAccountCategory
 	FROM	
 		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 			ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -163,7 +164,7 @@ BEGIN
 
 	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
-		-- 'Inventory Account is set to <Account Category> for item <Item No>.'
+		-- 'Inventory Account is set to <Category> for item <Item No>.'
 		EXEC uspICRaiseError 80250, @strAccountCategory, @strItemNo
 		RETURN 80250
 	END 
@@ -245,42 +246,42 @@ BEGIN
 			,t.strBatchId
 			,icGLAccount.intInventoryAccountId
 
-		-- Get the Consume Inventory Transactions 
-		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
-			strTransactionType 
-			,strTransactionId
-			,strBatchId
-			,dblICAmount
-			,intAccountId  
-		)
-		SELECT	
-			[strTransactionType] = ty.strName
-			,[strTransactionId] = t.strTransactionId
-			,[strBatchId] = t.strBatchId			
-			,[dblICAmount] = 
-				SUM (
-					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
-				)
-			,[intAccountId] = icGLAccount.intWIPAccountId
-		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
-			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId 
-			INNER JOIN @glTransactions gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
-			INNER JOIN @icGLAccounts icGLAccount
-				ON icGLAccount.intItemId = t.intItemId
-				AND icGLAccount.intItemLocationId = t.intItemLocationId
-		WHERE	
-			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Consume', 'Produce')
-		GROUP BY 
-			ty.strName 
-			,t.strTransactionId
-			,t.strBatchId
-			,icGLAccount.intWIPAccountId
+		---- Get the Consume Inventory Transactions 
+		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
+		--	strTransactionType 
+		--	,strTransactionId
+		--	,strBatchId
+		--	,dblICAmount
+		--	,intAccountId  
+		--)
+		--SELECT	
+		--	[strTransactionType] = ty.strName
+		--	,[strTransactionId] = t.strTransactionId
+		--	,[strBatchId] = t.strBatchId			
+		--	,[dblICAmount] = 
+		--		SUM (
+		--			-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+		--		)
+		--	,[intAccountId] = icGLAccount.intWIPAccountId
+		--FROM	
+		--	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+		--		ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		--	INNER JOIN tblICItem i
+		--		ON i.intItemId = t.intItemId 
+		--	INNER JOIN @glTransactions gl
+		--		ON t.strTransactionId = gl.strTransactionId 
+		--		AND t.strBatchId = gl.strBatchId
+		--	INNER JOIN @icGLAccounts icGLAccount
+		--		ON icGLAccount.intItemId = t.intItemId
+		--		AND icGLAccount.intItemLocationId = t.intItemLocationId
+		--WHERE	
+		--	t.intInTransitSourceLocationId IS NULL 
+		--	AND ty.strName IN ('Consume', 'Produce')
+		--GROUP BY 
+		--	ty.strName 
+		--	,t.strTransactionId
+		--	,t.strBatchId
+		--	,icGLAccount.intWIPAccountId
 
 		---- Get the Produce Inventory Transactions 
 		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
