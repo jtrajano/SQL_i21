@@ -76,7 +76,7 @@ BEGIN
 		, intCurrencyId
 		, strCurrency
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber, c.strInOut ORDER BY c.intSummaryLogId DESC)
 			, c.strBucketType
 			, c.dtmCreatedDate
 			, c.dtmTransactionDate
