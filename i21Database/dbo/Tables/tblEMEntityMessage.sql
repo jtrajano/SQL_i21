@@ -10,3 +10,7 @@
 	CONSTRAINT [FK_tblEMEntityMessage_tblEMEntity] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 
 )
+
+GO
+
+CREATE INDEX [IX_tblEMEntityMessage_intEntityId] ON [dbo].[tblEMEntityMessage] ([intEntityId])
