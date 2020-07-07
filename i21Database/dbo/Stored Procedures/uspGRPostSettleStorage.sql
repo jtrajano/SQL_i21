@@ -173,7 +173,10 @@ BEGIN TRY
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
-
+	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
+	DECLARE @intStorageHistoryId AS INT
+	DECLARE @VoucherIds AS Id
+	
 	/*	intItemType
 		------------
 		1-Inventory
@@ -2607,29 +2610,19 @@ BEGIN TRY
 
 								
 							--IF @ysnFromTransferStorage = 0
-							
-							EXEC [dbo].[uspAPPostBill] 
-								 @post = 1
-								,@recap = 0
-								,@isBatch = 0
-								,@param = @intVoucherId
-								,@userId = @intCreatedUserId
-								,@transactionType = 'Settle Storage'
-								,@success = @success OUTPUT
-
-							-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
-							-- Posting of voucher
-							--Note that 19.2 Dev Ithaca is different from this one
-							update a
-								set dblPaidAmount = dblPaidAmountRaw
-									from tblGRStorageHistory a
-										join @voucherPayable b 
-											on a.intContractHeaderId = b.intContractHeaderId
-											and a.intCustomerStorageId = b.intCustomerStorageId
-								where strType = 'Settlement'
-									and (dblPaidAmountRaw is not null 
-											and round(dblPaidAmountRaw, 2) = dblPaidAmount)
-							--
+							IF ISNULL(@intVoucherId,0) > 0
+							BEGIN
+								INSERT INTO @VoucherIds
+								SELECT @intVoucherId
+							END
+							-- EXEC [dbo].[uspAPPostBill] 
+							-- 	 @post = 1
+							-- 	,@recap = 0
+							-- 	,@isBatch = 0
+							-- 	,@param = @intVoucherId
+							-- 	,@userId = @intCreatedUserId
+							-- 	,@transactionType = 'Settle Storage'
+							-- 	,@success = @success OUTPUT
 
 					END
 
@@ -2821,6 +2814,44 @@ BEGIN TRY
 	UPDATE tblGRStorageHistory
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
+
+	DECLARE @intVoucherId2 AS INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
+	BEGIN 
+		SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
+		EXEC [dbo].[uspAPPostBill] 
+			@post = 1
+			,@recap = 0
+			,@isBatch = 0
+			,@param = @intVoucherId2
+			,@userId = @intCreatedUserId
+			,@transactionType = 'Settle Storage'
+			,@success = @success OUTPUT
+		DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+	END
+
+	if isnull(@intVoucherId, 0) > 0 
+	begin
+		-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
+		-- Posting of voucher
+		update a
+			set dblPaidAmount = dblPaidAmountRaw
+				from tblGRStorageHistory a
+					join @voucherPayable b 
+						on a.intContractHeaderId = b.intContractHeaderId
+						and a.intCustomerStorageId = b.intCustomerStorageId
+			where strType = 'Settlement'
+				and (dblPaidAmountRaw is not null 
+						and round(dblPaidAmountRaw, 2) = dblPaidAmount)
+		--
+	end
+
+	IF(@success = 0)
+	BEGIN
+		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
+		RAISERROR (@ErrMsg, 16, 1);
+		GOTO SettleStorage_Exit;
+	END
 
 	SettleStorage_Exit:
 END TRY
