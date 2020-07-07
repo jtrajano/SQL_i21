@@ -57,6 +57,7 @@ DECLARE @QtyOffset AS NUMERIC(38,20);
 DECLARE @TotalQtyOffset AS NUMERIC(38,20);
 
 DECLARE @InventoryTransactionIdentityId AS INT
+		,@intTransactionItemUOMId AS INT = @intItemUOMId 
 
 DECLARE @NewLIFOStorageId AS INT
 DECLARE @UpdatedLIFOStorageId AS INT 
@@ -150,6 +151,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@intSourceEntityId = @intSourceEntityId
+					,@intTransactionItemUOMId = @intTransactionItemUOMId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -213,6 +215,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@intSourceEntityId = @intSourceEntityId
+				,@intTransactionItemUOMId = @intTransactionItemUOMId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -304,6 +307,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
 							,@intSourceEntityId = @intSourceEntityId
+							,@intTransactionItemUOMId = @intTransactionItemUOMId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

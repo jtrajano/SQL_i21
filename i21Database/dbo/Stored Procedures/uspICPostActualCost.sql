@@ -42,6 +42,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@ACTUALCOST AS INT = 5
 
 DECLARE @strDescription AS NVARCHAR(255)
+		,@intTransactionItemUOMId AS INT = @intItemUOMId 
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;
@@ -184,6 +185,7 @@ BEGIN
 					,@strActualCostId = @strActualCostId
 					,@dblUnitRetail = @dblUnitRetail
 					,@intSourceEntityId = @intSourceEntityId
+					,@intTransactionItemUOMId = @intTransactionItemUOMId
 					,@dtmCreated = @dtmCreated OUTPUT 
 
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -249,6 +251,7 @@ BEGIN
 				,@strActualCostId = @strActualCostId		
 				,@dblUnitRetail = @dblUnitRetail
 				,@intSourceEntityId = @intSourceEntityId
+				,@intTransactionItemUOMId = @intTransactionItemUOMId
 				,@dtmCreated = @dtmCreated OUTPUT 
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -341,6 +344,7 @@ BEGIN
 							,@dblUnitRetail = @dblUnitRetail
 							,@strDescription = @strDescription
 							,@intSourceEntityId = @intSourceEntityId
+							,@intTransactionItemUOMId = @intTransactionItemUOMId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

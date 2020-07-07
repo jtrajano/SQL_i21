@@ -66,6 +66,7 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 		[intCategoryId] INT NULL,
 		[intSourceEntityId] INT NULL,
 		[intCompanyLocationId] INT NULL,
+		[intTransactionItemUOMId] INT NULL,
 		[intConcurrencyId] INT NOT NULL DEFAULT 1, 	
 		-- AUDIT (UTC)---
 		[dtmDateCreated] DATETIME2 NULL,

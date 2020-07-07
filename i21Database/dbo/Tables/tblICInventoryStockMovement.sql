@@ -39,6 +39,7 @@
 	[intCategoryId]	INT	NULL,
 	[intLocationId]	INT	NULL,
 	[intSourceEntityId]	INT	NULL,
+	[intTransactionItemUOMId] INT NULL,
 	CONSTRAINT [PK_tblICInventoryStockMovement] PRIMARY KEY NONCLUSTERED([intInventoryStockMovementId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblICInventoryStockMovement_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]),
