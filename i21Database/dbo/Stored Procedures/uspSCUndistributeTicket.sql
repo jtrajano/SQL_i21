@@ -269,8 +269,7 @@ BEGIN TRY
 
 								SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 MIN(intStorageHistoryId) 
 																	FROM #tmpSCStorageHistory 
-																	WHERE intInventoryReceiptId = @InventoryReceiptId 
-																	ORDER BY intInventoryReceiptId),0)
+																	WHERE intInventoryReceiptId = @InventoryReceiptId),0)
 							
 								WHILE ISNULL(@_intStorageHistoryId,0) > 0
 								BEGIN
