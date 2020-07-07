@@ -179,7 +179,10 @@ BEGIN TRY
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
-
+	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
+	DECLARE @intStorageHistoryId AS INT
+	DECLARE @VoucherIds AS Id
+	
 	/*	intItemType
 		------------
 		1-Inventory
@@ -3176,7 +3179,11 @@ BEGIN TRY
 							----- DEBUG POINT -----
 
 							--IF @ysnFromTransferStorage = 0
-							
+							IF ISNULL(@intVoucherId,0) > 0
+							BEGIN
+								INSERT INTO @VoucherIds
+								SELECT @intVoucherId
+							END
 							-- EXEC [dbo].[uspAPPostBill] 
 							-- 	 @post = 1
 							-- 	,@recap = 0
@@ -3438,17 +3445,23 @@ BEGIN TRY
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
 
-	if isnull(@intVoucherId, 0) > 0 
-	begin
+	DECLARE @intVoucherId2 AS INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
+	BEGIN 
+		SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
 		EXEC [dbo].[uspAPPostBill] 
 			@post = 1
 			,@recap = 0
 			,@isBatch = 0
-			,@param = @intVoucherId
+			,@param = @intVoucherId2
 			,@userId = @intCreatedUserId
 			,@transactionType = 'Settle Storage'
 			,@success = @success OUTPUT
+		DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+	END
 
+	if isnull(@intVoucherId, 0) > 0 
+	begin
 		-- We need to set the Paid Amount back to the raw again the purpose of rounding the Paid Amount to 2 decimal is for the
 		-- Posting of voucher
 		update a
