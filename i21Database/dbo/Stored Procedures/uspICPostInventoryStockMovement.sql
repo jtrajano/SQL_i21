@@ -90,6 +90,7 @@ WHEN NOT MATCHED THEN
 		,intCategoryId
 		,intLocationId
 		,intSourceEntityId
+		,intTransactionItemUOMId
 	) VALUES (
 		t.intItemId
 		,t.intItemLocationId
@@ -129,6 +130,7 @@ WHEN NOT MATCHED THEN
 		,t.intCategoryId
 		,t.intLocationId 
 		,t.intSourceEntityId
+		,t.intTransactionItemUOMId
 	)
 ;
 -- Get the stock movement id. 
@@ -215,6 +217,7 @@ WHEN NOT MATCHED THEN
 		,intCategoryId
 		,intLocationId
 		,intSourceEntityId
+		,intTransactionItemUOMId
 	) VALUES (
 		s.intItemId
 		,s.intItemLocationId
@@ -254,6 +257,7 @@ WHEN NOT MATCHED THEN
 		,s.intCategoryId
 		,s.intLocationId
 		,s.intSourceEntityId
+		,s.intTransactionItemUOMId
 	)
 ;
 

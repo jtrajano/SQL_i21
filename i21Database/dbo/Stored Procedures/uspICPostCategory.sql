@@ -53,6 +53,8 @@ DECLARE @AdjustTypeCategorySales AS INT = 1
 		,@AdjustTypeCategoryWriteOff AS INT --= 4
 		,@AdjustTypeInventoryCountByCategory AS INT
 
+DECLARE @intTransactionItemUOMId AS INT = @intItemUOMId 
+
 SELECT	TOP 1 @AdjustTypeCategorySales = intTransactionTypeId
 FROM	tblICInventoryTransactionType 
 WHERE	strName = 'Invoice'
@@ -266,6 +268,7 @@ BEGIN
 		,@dblCategoryCostValue = @dblCostValue
 		,@dblCategoryRetailValue = @dblRetailValue 
 		,@intSourceEntityId = @intSourceEntityId 
+		,@intTransactionItemUOMId = @intTransactionItemUOMId
 		,@dtmCreated = @dtmCreated OUTPUT 
 END 
 
