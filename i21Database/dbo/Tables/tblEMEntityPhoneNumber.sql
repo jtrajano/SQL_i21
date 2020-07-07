@@ -23,9 +23,6 @@ CREATE TABLE [dbo].[tblEMEntityPhoneNumber] (
     CONSTRAINT [PK_tblEMEntityPhoneNumber] PRIMARY KEY CLUSTERED ([intEntityPhoneNumberId] ASC)
 );
 
+GO
 
-
-
-
-
-
+CREATE INDEX [IX_tblEMEntityPhoneNumber_intEntityId] ON [dbo].[tblEMEntityPhoneNumber] ([intEntityId])
