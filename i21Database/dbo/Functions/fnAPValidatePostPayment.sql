@@ -587,13 +587,13 @@ BEGIN
 		FROM tblAPPayment A 
 		OUTER APPLY (
 			SELECT
-				SUM(B.dblPayment * 
-					(CASE 
-						WHEN C.intTransactionType IN (3) THEN -1
-						WHEN C.intTransactionType IN (2, 13) AND (C.ysnPrepayHasPayment = 1 OR B.ysnOffset = 1) THEN -1
-						ELSE 1
-						END
-					)
+				SUM(B.dblPayment --* 
+					-- (CASE 
+					-- 	WHEN C.intTransactionType IN (3) THEN -1
+					-- 	WHEN C.intTransactionType IN (2, 13) AND (C.ysnPrepayHasPayment = 1 OR B.ysnOffset = 1) THEN -1
+					-- 	ELSE 1
+					-- 	END
+					-- )
 				) AS dblPayment
 			FROM tblAPPaymentDetail B
 			INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
