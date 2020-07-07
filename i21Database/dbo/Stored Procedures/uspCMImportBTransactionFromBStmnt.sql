@@ -13,6 +13,7 @@ BEGIN
 		SET ANSI_WARNINGS ON
 
         DECLARE @tblTemp TABLE(
+			intLineNo INT,
             intBankStatementImportId INT,
             intResponsibleBankAccountId INT,
 			strBankDescription NVARCHAR(max) COLLATE Latin1_General_CI_AS NULL,
@@ -37,7 +38,8 @@ BEGIN
 		DECLARE @GL_Primary NVARCHAR(20)
 		DECLARE @intBankAccountId INT
 		DECLARE @ErrorMessage nvarchar(500)
-		DECLARE  @IMPORT_STATUS_NOMATCHFOUND AS INT = 2 
+		DECLARE @IMPORT_STATUS_NOMATCHFOUND AS INT = 2 
+		DECLARE @intLineNo INT
 
 		DECLARE @tblTempMacReportXRef table(
 			_Type nvarchar(50),
@@ -67,8 +69,9 @@ BEGIN
 		)
 		DECLARE @ErrorTable TABLE(
 			intId INT IDENTITY(1,1),
+			intLineNo INT,
 			strError NVARCHAR(MAX),
-			intBankStatementImportId int
+			intBankStatementImportId INT
 		)
 		DECLARE @strError NVARCHAR(100)
   		--DECLARE @trancount int;
@@ -84,8 +87,9 @@ BEGIN
 
 		-- GET UNMATCHED RECORD IN BANK STATEMENT TABLE ( NOT IN TASK)
 
-		INSERT INTO @tblTemp (intBankStatementImportId, strBankDescription,strBankAccountNo, strReferenceNo, strDebitCredit, dtmDate, dblAmount)
+		INSERT INTO @tblTemp (intLineNo,intBankStatementImportId, strBankDescription,strBankAccountNo, strReferenceNo, strDebitCredit, dtmDate, dblAmount)
         SELECT 
+			S.intLineNo,
 			S.intBankStatementImportId,
             S.strBankDescription,
 			S.strBankAccountNo,
@@ -111,6 +115,7 @@ BEGIN
 		BEGIN 
 		
 			SELECT TOP 1 
+			@intLineNo = A.intLineNo,
 			@intBankStatementImportId= A.intBankStatementImportId , 
 			@strBankDescription = strBankDescription, 
 			@strBankAccountNo = A.strBankAccountNo,
@@ -123,7 +128,7 @@ BEGIN
 			IF @intBankAccountId IS NULL 
 			BEGIN
 				-- SET @strError = @strBankAccountNo + ' is not an existing bank account'
-				insert into @ErrorTable select @strBankAccountNo + ' is not an existing bank account', @intBankStatementImportId
+				insert into @ErrorTable select @intLineNo, @strBankAccountNo + ' is not an existing bank account', @intBankStatementImportId
 			 	GOTO NextLoop;
 			END
 
@@ -207,7 +212,7 @@ BEGIN
 
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccount where strAccountId = @strGLAccountId)
 			BEGIN
-				INSERT INTO @ErrorTable select @strGLAccountId +' is not an existing GL account id', @intBankStatementImportId
+				INSERT INTO @ErrorTable select @intLineNo, @strGLAccountId +' is not an existing GL account id', @intBankStatementImportId
 				GOTO NextLoop;
 				--SET @strError = @strGLAccountId +' is not an existing GL account id'
 			END
@@ -289,8 +294,8 @@ BEGIN
 			DELETE FROM @bankTransaction
 			DELETE FROM @BankTransactionDetailEntries
 
-			insert into tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strTransactionId,intBankStatementImportId)
-			select @intImportLogId, @strID, @intBankStatementImportId
+			insert into tblCMBankStatementImportLogDetail(intLineNo, intImportBankStatementLogId, strTransactionId,intBankStatementImportId)
+			select @intLineNo, @intImportLogId, @strID, @intBankStatementImportId
 
 			NextLoop:
 			DELETE FROM @tblTempMacReportXRef
@@ -300,8 +305,8 @@ BEGIN
 		END -- END WHILE
 		
 		IF EXISTS(SELECT TOP 1 1 FROM @ErrorTable)
-			INSERT INTO #tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
-			SELECT @intImportLogId, 'Bank Transaction creation', strError, intBankStatementImportId from @ErrorTable
+			INSERT INTO #tblCMBankStatementImportLogDetail(intLineNo, intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
+			SELECT intLineNo, @intImportLogId, 'Bank Transaction creation', strError, intBankStatementImportId from @ErrorTable
 
 		-- IF( @ErrorMessage <> 'Error Details')
 		-- 	INSERT INTO ##tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)

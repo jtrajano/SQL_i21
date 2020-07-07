@@ -18,6 +18,7 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
   
   
         DECLARE @tblTemp TABLE(  
+            intLineNo int,
             intTransactionId int IDENTITY(1,1),  
             intBankStatementImportId INT,  
             intResponsibleBankAccountId INT,  
@@ -53,8 +54,9 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
   
   
   
-        INSERT INTO @tblTemp (intResponsibleBankAccountId ,intBankStatementImportId,dtmDate,dblAmount,strBankDescription)  
+        INSERT INTO @tblTemp (intLineNo,intResponsibleBankAccountId ,intBankStatementImportId,dtmDate,dblAmount,strBankDescription)  
         SELECT  
+        intLineNo,
         intResponsibleBankAccountId =  CASE WHEN CHARINDEX(W.strContainText, ISNULL(U.strBankDescription, '')) > 0  
             THEN W.intBankAccountId ELSE NULL END   
         ,CM.intBankStatementImportId  
@@ -183,16 +185,16 @@ CREATE PROCEDURE [dbo].[uspCMImportBTransferFromBStmnt]
                 CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F -- remove this in 20.1  
                 WHERE @intTransactionIdTemp = intTransactionId  
         
-                INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strTransactionId,intBankStatementImportId, strTaskId)
-			    SELECT @intImportLogId, @strID, intBankStatementImportId,'Task-' +  CONVERT(nvarchar(20), @intTaskId)
+                INSERT INTO tblCMBankStatementImportLogDetail(intLineNo, intImportBankStatementLogId, strTransactionId,intBankStatementImportId, strTaskId)
+			    SELECT intLineNo, @intImportLogId, @strID, intBankStatementImportId,'Task-' +  CONVERT(nvarchar(20), @intTaskId)
                 FROM @tblTemp  A   
                 WHERE @intTransactionIdTemp = intTransactionId 
 
                 DELETE FROM  @tblTemp WHERE @intTransactionIdTemp  = intTransactionId 
             END TRY  
             BEGIN CATCH  
-                INSERT INTO #tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)  
-                SELECT @intImportLogId, 'Bank Transfer creation', ERROR_MESSAGE(), intBankStatementImportId
+                INSERT INTO #tblCMBankStatementImportLogDetail(intLineNo,intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)  
+                SELECT intLineNo,@intImportLogId, 'Bank Transfer creation', ERROR_MESSAGE(), intBankStatementImportId
                 FROM @tblTemp B   
                 WHERE @intTransactionIdTemp = intTransactionId 
             END CATCH   

@@ -17,6 +17,7 @@
     [intCreatedUserId] INT NULL DEFAULT 0, 
     [dtmCreated] DATETIME NULL, 
     [intTaskStatus] INT NULL,
+    [intLineNo] INT NULL,
     [intLastModifiedUserId] INT NULL, 
     [dtmLastModified] DATETIME NULL, 
     [intConcurrencyId] INT NULL,

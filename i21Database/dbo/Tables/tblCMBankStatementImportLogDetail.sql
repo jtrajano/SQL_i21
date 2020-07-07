@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[tblCMBankStatementImportLogDetail](
 	[strError] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strBankStatementImportId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strCategory] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
+	intLineNo INT NULL,
 	[intConcurrencyId] [int] NULL,
 	[strTaskId] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblCMBankStatementImportLogDetail] PRIMARY KEY CLUSTERED 

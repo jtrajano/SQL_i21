@@ -273,6 +273,7 @@ END
 		@intImportLogId = @intImportLogId
 	
 	DECLARE  @tblCMBankStatementImportLogDetail TABLE(
+		[intLineNo] INT,
 		[strTransactionId] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
 		[intBankStatementImportId] [int] NULL,
 		[strError] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
@@ -282,8 +283,8 @@ END
 	
 	IF EXISTS(SELECT TOP 1 1 FROM #tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId =@intImportLogId)
 	BEGIN
-		INSERT INTO @tblCMBankStatementImportLogDetail (intBankStatementImportId,strError,strCategory)
-			SELECT intBankStatementImportId,strError,strCategory from #tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId = @intImportLogId
+		INSERT INTO @tblCMBankStatementImportLogDetail (intLineNo, intBankStatementImportId,strError,strCategory)
+			SELECT intLineNo, intBankStatementImportId,strError,strCategory from #tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId = @intImportLogId
 		RAISERROR('Import Detail Error', 16, 1);
 	END
 	ELSE
@@ -316,8 +317,8 @@ BEGIN CATCH
     if @@TRANCOUNT > 0
         ROLLBACK TRANSACTION --uspCMFindMatch;
 	
-	INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
-	SELECT @intImportLogId, strCategory, strError, intBankStatementImportId from @tblCMBankStatementImportLogDetail
+	INSERT INTO tblCMBankStatementImportLogDetail(intLineNo, intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
+	SELECT intLineNo, @intImportLogId, strCategory, strError, intBankStatementImportId from @tblCMBankStatementImportLogDetail
 	
 	IF @ErrorMessage <> 'Import Detail Error'
 		INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strError)
