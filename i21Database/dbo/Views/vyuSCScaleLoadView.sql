@@ -8,6 +8,7 @@ SELECT
 	,A.strVendor
 	,A.strCustomerReference
 	,A.strCustomer
+	,A.strShipTo
 	,A.strItemNo
 	,A.strSLocationName
 	,A.strPLocationName
