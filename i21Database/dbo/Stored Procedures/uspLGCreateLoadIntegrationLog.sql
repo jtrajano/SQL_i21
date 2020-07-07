@@ -107,7 +107,7 @@ BEGIN TRY
 				,strRowState
 				,dtmFeedCreated
 				)
-			SELECT intLoadId
+			SELECT L.intLoadId
 				,strShipmentType = CASE L.intShipmentType
 					WHEN 1
 						THEN 'Shipment'
@@ -117,33 +117,15 @@ BEGIN TRY
 						THEN 'Vessel Nomination'
 					ELSE ''
 					END COLLATE Latin1_General_CI_AS
-				,strLoadNumber
-				,CASE 
-					WHEN ISNULL(L.strShippingInstructionNumber, '') = ''
-						THEN L.strLoadNumber
-					ELSE L.strShippingInstructionNumber
-					END
-				,strContractBasis = (
-					SELECT TOP 1 CB.strContractBasis
-					FROM tblCTContractHeader CH
-					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					)
-				,strContractBasisDesc = (
-					SELECT TOP 1 CB.strDescription
-					FROM tblCTContractHeader CH
-					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					)
+				,L.strLoadNumber
+				,strShippingInstructionNumber = ISNULL(LSI.strLoadNumber, L.strLoadNumber)
+				,strContractBasis = CB.strContractBasis
+				,strContractBasisDesc = CB.strDescription
 				,L.strBLNumber
-				,L.strShippingLine
+				,strShippingLine = E.strName
 				,V.strVendorAccountNum
 				,L.strExternalShipmentNumber
-				,'015' AS strDateQualifier
+				,strDateQualifier = '015'
 				,L.dtmScheduledDate
 				,L.strMVessel
 				,L.strMVoyageNumber
@@ -155,10 +137,19 @@ BEGIN TRY
 				,L.dtmBLDate
 				,@strRowState
 				,GETDATE()
-			FROM vyuLGLoadView L
+			FROM tblLGLoad L
 			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
+			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
-			WHERE intLoadId = @intLoadId
+			OUTER APPLY (
+					SELECT TOP 1 CB.strContractBasis, CB.strDescription
+					FROM tblCTContractHeader CH
+					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
+					WHERE LD.intLoadId = L.intLoadId
+					) CB
+			WHERE L.intLoadId = @intLoadId
 
 			SELECT @intLoadStgId = SCOPE_IDENTITY()
 
@@ -191,75 +182,51 @@ BEGIN TRY
 				,strRowState
 				,dtmFeedCreated
 				,strCommodityCode)
-			SELECT @intLoadStgId
-				,@intLoadId
-				,CASE 
-					WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
-						THEN LD.intLoadDetailId
-					ELSE LSID.intLoadDetailId
-					END AS intSIDetailId
+			SELECT intLoadStgId = @intLoadStgId
+				,intLoadId = @intLoadId
+				,intSIDetailId = ISNULL(LSID.intLoadDetailId, LD.intLoadDetailId)
 				,LD.intLoadDetailId
-				,Row_NUMBER() OVER (
+				,intRowNumber = Row_NUMBER() OVER (
 					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
-					) AS intRowNumber
-				,LD.strItemNo
-				,strSubLocationName = (
-					SELECT CLSL.strSubLocationName AS strStorageLocationName
-					FROM tblCTContractDetail CD
-					JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
-					WHERE CD.intContractDetailId = CASE 
-							WHEN LD.intPurchaseSale = 1
-								THEN LD.intPContractDetailId
-							ELSE LD.intSContractDetailId
-							END
 					)
-				,strStorageLocationName = (
-					SELECT SL.strName AS strStorageLocationName
-					FROM tblCTContractDetail CD
-					JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
-					WHERE CD.intContractDetailId = CASE 
-							WHEN LD.intPurchaseSale = 1
-								THEN LD.intPContractDetailId
-							ELSE LD.intSContractDetailId
-							END
-					)
-				,LD.strLoadNumber
-				,LD.dblQuantity
-				,LD.strItemUOM
+				,I.strItemNo
+				,strSubLocationName = CLSL.strSubLocationName
+				,strStorageLocationName = SL.strName
+				,strBatchNumber = L.strLoadNumber
+				,dblDeliveredQty = LD.dblQuantity
+				,strItemUOM = IU.strUnitMeasure
 				,LD.dblGross
 				,LD.dblNet
-				,LD.strWeightItemUOM
-				,Row_NUMBER() OVER (
+				,strWeightItemUOM = WU.strUnitMeasure
+				,intHigherPositionRef = Row_NUMBER() OVER (
 					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
 					)
-				,'C' AS strDocumentCategory
-				,'001' AS strRefDataInfo
-				,0 AS strSeq
-				,LD.strLoadNumber
-				,CD.strERPPONumber
-				,CD.strERPItemNumber
-				,CD.strERPBatchNumber
-				,D.strExternalShipmentItemNumber
-				,D.strExternalBatchNo
-				,'QUA' AS strChangeType
-				,@strRowState AS strRowState
-				,GETDATE()
+				,strDocumentCategory = 'C'
+				,strRefDataInfo = '001'
+				,strSeq = 0
+				,L.strLoadNumber
+				,strExternalPONumber = CD.strERPPONumber
+				,strExternalPOItemNumber = CD.strERPItemNumber
+				,strExternalPOBatchNumber = CD.strERPBatchNumber
+				,strExternalShipmentItemNumber = LD.strExternalShipmentItemNumber
+				,strExternalBatchNo = LD.strExternalBatchNo
+				,strChangeType = 'QUA'
+				,strRowState = @strRowState
+				,dtmFeedCreated = GETDATE()
 				,C.strCommodityCode
-			FROM vyuLGLoadDetailView LD
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-					WHEN LD.intPurchaseSale = 1
-						THEN LD.intPContractDetailId
-					ELSE LD.intSContractDetailId
-					END
-			JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
-			JOIN tblICCommodity C ON C.intCommodityId = CASE 
-					WHEN LD.intPurchaseSale = 1
-						THEN LD.intPCommodityId
-					ELSE LD.intSCommodityId
-					END
-			LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+			FROM tblLGLoadDetail LD
+			LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
+			LEFT JOIN tblICItem I ON I.intItemId = LD.intItemId
+			LEFT JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICUnitMeasure IU ON IU.intUnitMeasureId = IUOM.intUnitMeasureId
+			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LD.intWeightItemUOMId
+			LEFT JOIN tblICUnitMeasure WU ON WU.intUnitMeasureId = WUOM.intUnitMeasureId
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
-			LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND D.intPContractDetailId = LSID.intPContractDetailId
+			LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId AND LD.intPContractDetailId = LSID.intPContractDetailId
 			WHERE LD.intLoadId = @intLoadId
 
 			INSERT INTO tblLGLoadContainerStg(
