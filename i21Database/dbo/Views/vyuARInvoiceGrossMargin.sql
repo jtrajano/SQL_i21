@@ -15,4 +15,4 @@ ON ARID.intInvoiceDetailId = SA.intInvoiceDetailId
 JOIN tblARInvoice ARI ON ARI.intInvoiceId = ARID.intInvoiceId
 WHERE ARI.ysnPosted =1 and ysnPaid = 1
 and ARI.dblInvoiceTotal <> 0
-GROUP by ARI.intInvoiceId, ARI.strInvoiceNumber, ARI.dblPayment
+GROUP by ARI.intInvoiceId, ARI.strInvoiceNumber, ARI.dblPayment, ARI.dtmDate
