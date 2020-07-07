@@ -48,6 +48,7 @@ BEGIN
 		0 AS dbl30,
 		0 AS dbl60,
 		0 AS dbl90,
+    0 AS dblTotal,
 		NULL as dtmCurrentDate
 END
 
@@ -563,6 +564,7 @@ SELECT
 	,SUM(resultData.dbl30) AS dbl30
 	,SUM(resultData.dbl60) AS dbl60
 	,SUM(resultData.dbl90) AS dbl90
+  ,SUM(resultData.dbl1 + resultData.dbl30 + resultData.dbl60 + resultData.dbl90) AS dblTotal
 	,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
 FROM (   
  SELECT  
