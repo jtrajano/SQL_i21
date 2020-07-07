@@ -2,6 +2,7 @@ CREATE VIEW vyuARInvoiceGrossMargin
 AS
 SELECT  
 ARI.intInvoiceId,
+ARI.dtmDate,
 ARI.strInvoiceNumber, 
 ARI.dblPayment dblRevenue,
 SUM( dblTotalCost)dblExpense,
