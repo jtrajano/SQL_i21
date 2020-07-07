@@ -195,11 +195,17 @@ BEGIN TRY
 			OUTER APPLY (
 				SELECT DISTINCT
 					intContractHeaderId
-				FROM tblGRStorageHistory
-				WHERE intCustomerStorageId = SST.intCustomerStorageId
-					AND intContractHeaderId IS NOT NULL
-					AND intInventoryReceiptId IS NOT NULL
-					AND intContractHeaderId = UH.intContractHeaderId
+				FROM tblGRStorageHistory SH
+				INNER JOIN tblGRCustomerStorage CS
+					ON CS.intCustomerStorageId = SH.intCustomerStorageId
+				INNER JOIN tblGRStorageType ST
+					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+						AND ST.ysnDPOwnedType = 1
+				WHERE SH.intCustomerStorageId = SST.intCustomerStorageId
+					AND SH.intContractHeaderId IS NOT NULL
+					--AND intInventoryReceiptId IS NOT NULL
+					AND SH.intContractHeaderId = UH.intContractHeaderId
+					AND SH.strType IN ('From Scale','From Delivery Sheet','From Transfer')
 			) SH
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
