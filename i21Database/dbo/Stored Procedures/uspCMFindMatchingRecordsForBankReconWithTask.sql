@@ -283,15 +283,8 @@ END
 	IF EXISTS(SELECT TOP 1 1 FROM #tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId =@intImportLogId)
 	BEGIN
 		INSERT INTO @tblCMBankStatementImportLogDetail (intBankStatementImportId,strError,strCategory)
-			SELECT intBankStatementImportId,strError,strCategory from ##tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId = @intImportLogId
-
+			SELECT intBankStatementImportId,strError,strCategory from #tblCMBankStatementImportLogDetail WHERE intImportBankStatementLogId = @intImportLogId
 		RAISERROR('Import Detail Error', 16, 1);
-		
-		
-	
-			
-		
-
 	END
 	ELSE
 	BEGIN
@@ -326,8 +319,9 @@ BEGIN CATCH
 	INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strCategory, strError,intBankStatementImportId)
 	SELECT @intImportLogId, strCategory, strError, intBankStatementImportId from @tblCMBankStatementImportLogDetail
 	
-	INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strError)
-		SELECT @intImportLogId, @ErrorMessage 
+	IF @ErrorMessage <> 'Import Detail Error'
+		INSERT INTO tblCMBankStatementImportLogDetail(intImportBankStatementLogId, strError)
+			SELECT @intImportLogId, @ErrorMessage 
 	
 
 	UPDATE A SET strDescription ='Failed Importing'
