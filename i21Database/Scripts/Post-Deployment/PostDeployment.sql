@@ -336,7 +336,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\20_Remove_Duplicate_UPCs.sql
 :r .\IC\21_Refresh_IR_Details.sql
 :r .\IC\22_InventoryValuationPerformance.sql
-:r .\IC\23_PopuldateTransactionUOM.sql 
+:r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 

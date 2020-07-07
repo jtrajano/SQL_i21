@@ -8740,7 +8740,7 @@
     <Build Include="dbo\Views\vyuCFEntityCustomerSearch.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
-    <None Include="Scripts\Post-Deployment\IC\23_PopuldateTransactionUOM.sql" />
+    <None Include="Scripts\Post-Deployment\IC\24_PopulateTransactionUOM.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
