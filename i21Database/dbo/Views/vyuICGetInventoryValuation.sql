@@ -108,6 +108,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,ysnInTransit				= CAST(CASE WHEN t.intInTransitSourceLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 		,t.dtmCreated
 		,ScaleView.intTicketId
+		,strTransactionUOM			= transactionUOM.strUnitMeasure 
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
@@ -291,6 +292,16 @@ FROM 	tblICInventoryTransaction t
 														ELSE NULL
 													END
 			AND (receipt.intSourceType = 5 OR shipment.intSourceType = 4)	
+
+		OUTER APPLY (
+			SELECT 
+				u.strUnitMeasure
+			FROM
+				tblICItemUOM iu INNER JOIN tblICUnitMeasure u
+					ON iu.intUnitMeasureId = u.intUnitMeasureId
+			WHERE
+				iu.intItemUOMId = t.intTransactionItemUOMId 
+		) transactionUOM
 
 
 WHERE	i.strType NOT IN (

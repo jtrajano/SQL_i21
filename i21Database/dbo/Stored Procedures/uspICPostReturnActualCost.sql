@@ -65,6 +65,7 @@ DECLARE @intInventoryActualCostOutId AS INT
 
 DECLARE @intReturnValue AS INT 
 		,@dtmCreated AS DATETIME 
+		,@intTransactionItemUOMId AS INT = @intItemUOMId 
 
 IF EXISTS (SELECT 1 FROM tblICItem i WHERE i.intItemId = @intItemId AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0) 
 BEGIN 	
@@ -152,6 +153,7 @@ BEGIN
 						,@dblForexRate = @dblForexRate
 						,@strActualCostId = @strActualCostId
 						,@intSourceEntityId = @intSourceEntityId
+						,@intTransactionItemUOMId = @intTransactionItemUOMId
 						,@dtmCreated = @dtmCreated OUTPUT 
 
 				IF @intReturnValue < 0 GOTO _Exit_With_Error

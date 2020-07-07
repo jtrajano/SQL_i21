@@ -35,6 +35,7 @@
 	,@dblCategoryCostValue NUMERIC(38,20) = NULL  
 	,@dblCategoryRetailValue NUMERIC(38,20) = NULL  
 	,@intSourceEntityId INT = NULL  
+	,@intTransactionItemUOMId INT = NULL 
 	,@dtmCreated DATETIME = NULL OUTPUT 
 AS
 
@@ -109,6 +110,8 @@ INSERT INTO dbo.tblICInventoryTransaction (
 		,[intCategoryId]
 		,[intSourceEntityId]
 		,[intCompanyLocationId]
+		,[dtmDateCreated]
+		,[intTransactionItemUOMId]
 )
 SELECT	[intItemId]							= @intItemId
 		,[intItemLocationId]				= @intItemLocationId
@@ -150,6 +153,8 @@ SELECT	[intItemId]							= @intItemId
 		,[intCategoryId]					= i.intCategoryId
 		,[intSourceEntityId]				= @intSourceEntityId
 		,[intCompanyLocationId]				= [location].intCompanyLocationId
+		,[dtmDateCreated]					= GETUTCDATE()
+		,[intTransactionItemUOMId]			= @intTransactionItemUOMId
 FROM	tblICItem i 
 		CROSS APPLY [dbo].[fnICGetCompanyLocation](@intItemLocationId, @intInTransitSourceLocationId) [location]
 WHERE	i.intItemId = @intItemId
