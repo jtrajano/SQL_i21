@@ -498,4 +498,22 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		WHERE intEntityUserId = @intEntityUserId
 		  AND strRequestId = @strRequestId
 		  AND strInvoiceFormat = 'Format 5 - Honstein'
+
+		UPDATE STAGING
+		SET dblTotalTax = STAGING.dblTotalTax - SST.dblTotalSST
+		FROM tblARInvoiceReportStagingTable STAGING
+		INNER JOIN (
+			SELECT IDT.intInvoiceDetailId
+				 , dblTotalSST = SUM(dblAdjustedTax) 
+			FROM tblARInvoiceDetailTax IDT
+			INNER JOIN tblSMTaxClass TCLASS ON IDT.intTaxClassId = TCLASS.intTaxClassId
+			INNER JOIN tblSMTaxReportType TREPORT ON TCLASS.intTaxReportTypeId = TREPORT.intTaxReportTypeId
+			WHERE ISNULL(TREPORT.strType, '') = 'State Sales Tax'
+			  AND IDT.dblAdjustedTax <> 0			  
+			GROUP BY IDT.intInvoiceDetailId
+		) SST ON STAGING.intInvoiceDetailId = SST.intInvoiceDetailId
+		WHERE STAGING.intEntityUserId = @intEntityUserId
+		  AND STAGING.strRequestId = @strRequestId
+		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strItemNo <> 'State Sales Tax'
 	END
