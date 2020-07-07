@@ -2766,6 +2766,7 @@ BEGIN TRY
 		GROUP BY intParentSettleStorageId
 	) A ON A.intParentSettleStorageId = SS.intSettleStorageId
 	WHERE SS.intSettleStorageId = @intParentSettleStorageId
+	
 	DECLARE @intVoucherId2 AS INT
 	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
 	BEGIN 
