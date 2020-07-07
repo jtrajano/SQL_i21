@@ -102,7 +102,10 @@ BEGIN
 		, intTicketId = intTransactionRecordId
 		, 'HLD'
 		, 'HOLD'
-	FROM dbo.fnRKGetBucketOnHold(@dtmToTransactionDate,@intCommodityId, NULL)
+	FROM dbo.fnRKGetBucketOnHold(@dtmToTransactionDate,@intCommodityId, NULL) OnHold
+	WHERE OnHold.intItemId = ISNULL(@intItemId, OnHold.intItemId)
+		AND OnHold.intLocationId = ISNULL(@intLocationId, OnHold.intLocationId)
+		AND OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 	DECLARE @tblResultInventory TABLE (Id INT IDENTITY
 		, dtmDate DATETIME
