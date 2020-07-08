@@ -252,25 +252,25 @@ BEGIN TRY
 					END
 				)
 
-		IF EXISTS (
-				SELECT *
-				FROM @tblMFItem I
-				WHERE NOT EXISTS (
-						SELECT *
-						FROM @tblMFItemDetail ID
-						WHERE ID.intItemId = I.intItemId
-						)
-				)
-		BEGIN
-			RAISERROR (
-					'There is no matching recipe found.'
-					,16
-					,1
-					,'WITH NOWAIT'
-					)
+		--IF EXISTS (
+		--		SELECT *
+		--		FROM @tblMFItem I
+		--		WHERE NOT EXISTS (
+		--				SELECT *
+		--				FROM @tblMFItemDetail ID
+		--				WHERE ID.intItemId = I.intItemId
+		--				)
+		--		)
+		--BEGIN
+		--	RAISERROR (
+		--			'There is no matching recipe found.'
+		--			,16
+		--			,1
+		--			,'WITH NOWAIT'
+		--			)
 
-			RETURN
-		END
+		--	RETURN
+		--END
 	END
 	ELSE
 	BEGIN
@@ -1078,11 +1078,11 @@ BEGIN TRY
 			,[strValue]
 			,8
 		FROM #TempForecastedConsumption FC
-		WHERE EXISTS (
-				SELECT *
-				FROM @tblMFRefreshtemStock EI
-				WHERE EI.intItemId = FC.intItemId
-				)
+		--WHERE EXISTS (
+		--		SELECT *
+		--		FROM @tblMFRefreshtemStock EI
+		--		WHERE EI.intItemId = FC.intItemId
+		--		)
 	END
 
 	IF IsNULL(@OpenPurchaseXML, '') = ''
@@ -2251,14 +2251,14 @@ BEGIN TRY
 								WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
 									THEN (
 											CASE 
-												WHEN I.intItemId = MI.intItemId
+												WHEN I.intItemId = MI.intItemId or MI.intItemId is null
 													THEN I.strItemNo + ' - ' + I.strDescription
 												ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'
 												END
 											)
 								ELSE (
 										CASE 
-											WHEN I.intItemId = MI.intItemId
+											WHEN I.intItemId = MI.intItemId or MI.intItemId is null
 												THEN I.strItemNo
 											ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
 											END
@@ -2270,7 +2270,7 @@ BEGIN TRY
 							WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
 								THEN (
 										CASE 
-											WHEN I.intItemId = MI.intItemId
+											WHEN I.intItemId = MI.intItemId or MI.intItemId is null
 												THEN I.strItemNo + ' - ' + I.strDescription
 											WHEN I.intItemId <> MI.intItemId
 												AND strBook IS NULL
@@ -2280,7 +2280,7 @@ BEGIN TRY
 										)
 							ELSE (
 									CASE 
-										WHEN I.intItemId = MI.intItemId
+										WHEN I.intItemId = MI.intItemId or MI.intItemId is null
 											THEN I.strItemNo
 										WHEN I.intItemId <> MI.intItemId
 											AND strBook IS NULL
@@ -2343,7 +2343,7 @@ BEGIN TRY
 			,DL.intMainItemId
 			,MI.strItemNo AS strMainItemNo
 			,CASE 
-				WHEN I.intItemId = MI.intItemId
+				WHEN I.intItemId = MI.intItemId or MI.intItemId is null
 					THEN I.strItemNo
 				ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]'
 				END AS strGroupByColumn
