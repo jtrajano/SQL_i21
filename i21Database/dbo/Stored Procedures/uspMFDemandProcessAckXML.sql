@@ -35,6 +35,10 @@ BEGIN TRY
 		FROM tblMFDemandAcknowledgementStage
 		WHERE intDemandAcknowledgementStageId = @intDemandAcknowledgementStageId
 
+		Update tblMFDemandAcknowledgementStage
+		Set strFeedStatus='Ack Processed'
+		Where intDemandAcknowledgementStageId = @intDemandAcknowledgementStageId
+
 		UPDATE tblCTInvPlngReportMaster
 		SET intInvPlngReportMasterRefID = @intInvPlngReportMasterId
 		WHERE intInvPlngReportMasterID = @intInvPlngReportMasterRefId
