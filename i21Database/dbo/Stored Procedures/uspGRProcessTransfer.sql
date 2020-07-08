@@ -770,7 +770,7 @@ BEGIN
 							FROM @ItemsToPost ITP
 							JOIN tblGRTransferStorageReference SR
 							  ON ITP.intTransactionId = SR.intTransferStorageId
-							 AND ITP. intTransactionDetailId = SR.intTransferStorageSplitId
+							 AND ITP. intTransactionDetailId = SR.intTransferStorageReferenceId
 							JOIN tblGRCustomerStorage CS
 								ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
 							JOIN tblICItemUOM IU
