@@ -24,6 +24,7 @@ BEGIN TRY
 			@intDetailId			INT,
 			@ysnUnposted			BIT = 0,
 			@ysnLoadBased			BIT = 0,
+			@dblQuantityPerLoad		NUMERIC(24, 10),
 			@ysnReopened			BIT = 0,
 			@_transactionDate		DATETIME
 
@@ -52,7 +53,7 @@ BEGIN TRY
 	-- END
 
 	-- Get if load based and quantity per load
-	SELECT @ysnLoadBased = ISNULL(ysnLoad,0) FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @ysnLoadBased = ISNULL(ysnLoad,0), @dblQuantityPerLoad = dblQuantityPerLoad FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
 	IF @strSource = 'Contract'
 	BEGIN
@@ -1931,13 +1932,13 @@ BEGIN TRY
 				IF @_dblQty > @dblBasisDelOrig
 				BEGIN					
 					-- Negate basis using the current priced quantities
-					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END) * -1, 
+					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - (CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblBasisDel END)) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END) * -1, 
 												intPricingTypeId = 2,
 											   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 					-- Negate basis using the current priced quantities
-					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - @dblBasisDel) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END), 
+					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - (CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblBasisDel END)) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END), 
 												intPricingTypeId = 1,
 												dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
@@ -1966,7 +1967,7 @@ BEGIN TRY
 				)
 				BEGIN
 					-- Basis Deliveries  
-					UPDATE @cbLogSpecific SET dblQty = @dblQty * -1,
+					UPDATE @cbLogSpecific SET dblQty = @dblBasisDel * -1,
 											  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END--,
 											  --intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
