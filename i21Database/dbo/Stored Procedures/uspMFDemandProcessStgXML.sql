@@ -57,7 +57,7 @@ BEGIN TRY
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblMFDemandStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE strFeedStatus is null
 
 	WHILE @intDemandStageId > 0
 	BEGIN
@@ -686,7 +686,7 @@ BEGIN TRY
 		SELECT @intDemandStageId = MIN(intDemandStageId)
 		FROM tblMFDemandStage
 		WHERE intDemandStageId > @intDemandStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			AND strFeedStatus is null
 	END
 END TRY
 

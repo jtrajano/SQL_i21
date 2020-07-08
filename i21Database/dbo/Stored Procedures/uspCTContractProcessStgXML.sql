@@ -182,7 +182,7 @@ BEGIN TRY
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM tblCTContractStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE strFeedStatus IS NULL
 
 	DECLARE @tblCTAmendmentApproval TABLE (
 		strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -4150,7 +4150,7 @@ BEGIN TRY
 		SELECT @intContractStageId = MIN(intContractStageId)
 		FROM tblCTContractStage
 		WHERE intContractStageId > @intContractStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			AND strFeedStatus IS NULL
 			--AND strRowState = 'Added'
 	END
 END TRY
