@@ -8,9 +8,9 @@ BEGIN TRY
 
 	SELECT *
 	FROM tblCTPriceContractStage
-	WHERE intMultiCompanyId = @intToCompanyId AND ISNULL(strFeedStatus, '') = ''
+	WHERE intMultiCompanyId = @intToCompanyId AND strFeedStatus IS NULL
 
-	UPDATE tblCTPriceContractStage SET strFeedStatus='Awt Ack' WHERE intMultiCompanyId = @intToCompanyId
+	UPDATE tblCTPriceContractStage SET strFeedStatus='Awt Ack' WHERE intMultiCompanyId = @intToCompanyId AND strFeedStatus IS NULL
 
 END TRY
 

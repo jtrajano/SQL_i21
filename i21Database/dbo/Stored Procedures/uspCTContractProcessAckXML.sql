@@ -35,7 +35,7 @@ BEGIN TRY
 	SELECT @intContractAcknowledgementStageId = MIN(intContractAcknowledgementStageId)
 	FROM tblCTContractAcknowledgementStage
 	WHERE strMessage = 'Success'
-		AND ISNULL(strFeedStatus, '') = ''
+		AND strFeedStatus IS NULL
 
 	WHILE @intContractAcknowledgementStageId > 0
 	BEGIN
@@ -196,7 +196,7 @@ BEGIN TRY
 		FROM tblCTContractAcknowledgementStage
 		WHERE intContractAcknowledgementStageId > @intContractAcknowledgementStageId
 			AND strMessage = 'Success'
-			AND ISNULL(strFeedStatus, '') = ''
+			AND strFeedStatus IS NULL
 	END
 END TRY
 
