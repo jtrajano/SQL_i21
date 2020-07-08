@@ -39,8 +39,8 @@ BEGIN
 		,@dblLoadPricedNew numeric(18,6)
 		,@strLoadPricedChange nvarchar(max)
 		,@dblLoadAppliedAndPricedOld numeric(18,6)
-		,@dblLoadAppliedAndPricedNew numeric(18,6)
-		,@intRemovedInvoice int = 0;
+		,@dblLoadAppliedAndPricedNew numeric(18,6);
+		--,@intRemovedInvoice int = 0;
 
 	declare @PriceDetailToProcess table (
 		intId int
@@ -127,7 +127,7 @@ BEGIN
 
 			if (@ysnLoad = convert(bit,1))
 			begin
-				set @intRemovedInvoice = 1; --this will used if there's a priced quantity that's no invoice yet.
+				--set @intRemovedInvoice = 1; --this will used if there's a priced quantity that's no invoice yet.
 				set @strLoadPricedChange = '
 					,
 					{
@@ -200,6 +200,7 @@ BEGIN
 
 			if ((select count(*) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId) = 1)
 			begin
+				update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = @intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
 				set @strXML = '<tblCTPriceFixations>
 									<tblCTPriceFixation>
 										<intPriceFixationId>' + convert(nvarchar(20),@intPriceFixationId) + '</intPriceFixationId>
@@ -237,6 +238,7 @@ BEGIN
 
 				if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
 				begin
+					update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pf.intPriceContractId = @intContractPriceId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
 					EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1;
 					delete from tblCTPriceContract where intPriceContractId = @intContractPriceId;
 					EXEC uspCTSavePriceContract @intPriceContractId = @intContractPriceId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
@@ -254,6 +256,7 @@ BEGIN
 			end
 			else
 			begin
+				update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intPriceFixationDetailId = @intPriceFixationDetailId;
 				set @strXML = '<tblCTPriceFixationDetails>
 									<tblCTPriceFixationDetail>
 										<intPriceFixationDetailId>' + convert(nvarchar(20),@intPriceFixationDetailId) + '</intPriceFixationDetailId>
@@ -439,6 +442,7 @@ BEGIN
 					begin
 						if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intCurrentPriceContractId) = 1)
 						begin
+							update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pf.intPriceContractId = @intCurrentPriceContractId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
 							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1;
 							delete from tblCTPriceContract where intPriceContractId = @intCurrentPriceContractId;
 							EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
@@ -455,6 +459,7 @@ BEGIN
 						end
 						else
 						begin
+							update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = @intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
 							set @strXML = '<tblCTPriceFixations>
 												<tblCTPriceFixation>
 													<intPriceFixationId>' + convert(nvarchar(20),@intPriceFixationId) + '</intPriceFixationId>
@@ -493,6 +498,7 @@ BEGIN
 					end
 					else
 					begin
+						update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intPriceFixationDetailId = @intDetailId;
 						set @strXML = '<tblCTPriceFixationDetails>
 											<tblCTPriceFixationDetail>
 												<intPriceFixationDetailId>' + convert(nvarchar(20),@intDetailId) + '</intPriceFixationDetailId>
@@ -570,7 +576,7 @@ BEGIN
 				,pfd.dblQuantity
 				,pfd.dblLoadPriced
 				,dblQuantityPerLoad = @dblQuantityPerLoad
-				,intNoOfInvoices = count(ar.intPriceFixationDetailAPARId) - @intRemovedInvoice
+				,intNoOfInvoices = count(ar.intPriceFixationDetailAPARId) --- @intRemovedInvoice
 				,intNumber = pfd.intNumber
 				,strPriceContractNo = pc.strPriceContractNo
 			from
@@ -707,6 +713,7 @@ BEGIN
 					begin
 						if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intCurrentPriceContractId) = 1)
 						begin
+							update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pf.intPriceContractId = @intCurrentPriceContractId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
 							EXEC uspCTBeforeSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = 'Delete', @ysnDeleteFromInvoice = 1;
 							delete from tblCTPriceContract where intPriceContractId = @intCurrentPriceContractId;
 							EXEC uspCTSavePriceContract @intPriceContractId = @intCurrentPriceContractId, @strXML = '', @ysnApprove = 0, @ysnProcessPricing = 0;
@@ -724,6 +731,7 @@ BEGIN
 						end
 						else
 						begin
+							update ar set ar.ysnMarkDelete = 1 from tblCTPriceFixationDetailAPAR ar, tblCTPriceFixationDetail pfd where pfd.intPriceFixationId = @intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationId;
 							set @strXML = '<tblCTPriceFixations>
 												<tblCTPriceFixation>
 													<intPriceFixationId>' + convert(nvarchar(20),@intPriceFixationId) + '</intPriceFixationId>
@@ -763,6 +771,7 @@ BEGIN
 					end
 					else
 					begin
+						update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intPriceFixationDetailId = @intDetailId;
 						set @strXML = '<tblCTPriceFixationDetails>
 											<tblCTPriceFixationDetail>
 												<intPriceFixationDetailId>' + convert(nvarchar(20),@intDetailId) + '</intPriceFixationDetailId>
