@@ -8,9 +8,9 @@ BEGIN TRY
 	
 	SELECT *
 	FROM tblCTContractAcknowledgementStage
-	WHERE ISNULL(strFeedStatus,'')='' --intMultiCompanyId = @intToCompanyId
+	WHERE strFeedStatus IS NULL --intMultiCompanyId = @intToCompanyId
 
-	UPDATE tblCTContractAcknowledgementStage SET strFeedStatus='Ack Sent' WHERE ISNULL(strFeedStatus,'')='' --intMultiCompanyId = @intToCompanyId
+	UPDATE tblCTContractAcknowledgementStage SET strFeedStatus='Ack Sent' WHERE strFeedStatus IS NULL --intMultiCompanyId = @intToCompanyId
 
 END TRY
 

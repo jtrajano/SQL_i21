@@ -7,5 +7,9 @@
 	[intBookId] INT
 	,strApprover nvarchar(100) COLLATE Latin1_General_CI_AS
 	,ysnCurrentCompany BIT
+	,strServerName nvarchar(max)
+	,strDatabaseName nvarchar(max)
+	,strUserName nvarchar(max)
+	,strPassword nvarchar(max)
 	,CONSTRAINT [PK_tblIPMultiCompany] PRIMARY KEY ([intMultiCompanyId])
 )
