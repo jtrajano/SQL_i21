@@ -542,22 +542,27 @@ BEGIN
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
 		LEFT JOIN tblICItem item ON A2.intItemId = item.intItemId
-		LEFT JOIN tblICInventoryReceiptCharge D ON A2.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
+		LEFT JOIN (tblICInventoryReceiptCharge D INNER JOIN tblICInventoryReceipt D2 ON D.intInventoryReceiptId = D2.intInventoryReceiptId)
+			ON A2.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 		OUTER APPLY
 		(
-			SELECT 
-				SUM(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax)) 
-			AS dblTaxTotal 
-			FROM tblAPBillDetailTax B
-			WHERE B.intBillDetailId = A2.intBillDetailId
+			SELECT SUM(dblTax) AS dblTaxTotal
+			FROM (
+				SELECT 
+					(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax) 
+						* (CASE WHEN (D.intInventoryReceiptChargeId IS NOT NULL 
+										AND A.intEntityVendorId = D2.intEntityVendorId 
+										AND D.ysnPrice = 1) THEN -1 ELSE 1 END)) 
+				AS dblTax
+				FROM tblAPBillDetailTax B
+				WHERE B.intBillDetailId = A2.intBillDetailId
+			) tmp
 		) taxDetails
 		WHERE 
 		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND
 		(
-			(A2.dblTax <> (ISNULL(taxDetails.dblTaxTotal,0)
-								* (CASE WHEN ((D.intInventoryReceiptChargeId IS NOT NULL AND A.intEntityVendorId <> ISNULL(NULLIF(D.intEntityVendorId,0), A.intEntityVendorId)) 
-								AND D.ysnPrice = 1) THEN -1 ELSE 1 END)))
+			A2.dblTax <> ISNULL(taxDetails.dblTaxTotal,0)
 		)
 
 
