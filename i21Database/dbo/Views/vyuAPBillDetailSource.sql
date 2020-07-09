@@ -38,6 +38,21 @@ AS
 	voucherDetail.intBillDetailId
 	,intInventoryReceiptItemId = NULL
 	,intPurchaseDetailId = NULL
+	,strSourceNumber = charge.strReceiptNumber
+	FROM tblAPBillDetail voucherDetail
+	OUTER APPLY (
+		SELECT TOP 1
+			strReceiptNumber
+		FROM tblICInventoryReceipt receipt
+		INNER JOIN tblICInventoryReceiptCharge receiptChrage ON receipt.intInventoryReceiptId = receiptChrage.intInventoryReceiptId
+		WHERE receiptChrage.intInventoryReceiptChargeId = voucherDetail.intInventoryReceiptChargeId
+	) charge
+	WHERE voucherDetail.intInventoryReceiptChargeId > 0 AND voucherDetail.intInventoryReceiptItemId IS NULL AND voucherDetail.intInventoryShipmentChargeId IS NULL
+	UNION ALL
+	SELECT
+	voucherDetail.intBillDetailId
+	,intInventoryReceiptItemId = NULL
+	,intPurchaseDetailId = NULL
 	,strSourceNumber = shipment.strShipmentNumber
 	FROM tblAPBillDetail voucherDetail
 	OUTER APPLY (
