@@ -181,11 +181,12 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin
 
 --all items are imported with type 'Inventory'
 --update items Inventory type from Category table
-update	tblICItem 
-set		strType = C.strInventoryType
-from	tblICCategory C
-where	C.intCategoryId = tblICItem.intCategoryId
-		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
+-- In latest versions, changing type is not allowed.
+-- update	tblICItem 
+-- set		strType = C.strInventoryType
+-- from	tblICCategory C
+-- where	C.intCategoryId = tblICItem.intCategoryId
+-- 		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
 --====Delete obsolete items. It is not required in i21 as history is not imported===
 --Delete from tblICItem where strStatus = 'Discontinued'
