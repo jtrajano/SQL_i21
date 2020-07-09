@@ -237,7 +237,6 @@ BEGIN TRY
 	INNER JOIN tblCTPriceFixationDetail PFD ON PF.intPriceFixationId = PFD.intPriceFixationId
 	INNER JOIN tblCTPriceFixationDetailAPAR APAR ON PFD.intPriceFixationDetailId = APAR.intPriceFixationDetailId
 	WHERE PF.intContractDetailId = @intContractDetailId
-	AND ISNULL(APAR.ysnReverse,0) = 0
 
     IF @intContractTypeId = 1 
     BEGIN
@@ -289,11 +288,9 @@ BEGIN TRY
 							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
 							IR.strReceiptNumber,
 							(
-								SELECT SUM(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,@intItemUOMId,BD.dblQtyReceived)) 
-								FROM tblAPBill B 
-								LEFT JOIN tblAPBill B1 ON B.intBillId = B1.intBillId
-								INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-								WHERE B.intTransactionType = 1 AND BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND BD.intInventoryReceiptChargeId IS NULL AND B.intBillId IS NULL
+								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
+								FROM	tblAPBillDetail ID 
+								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
 							) AS dblTotalIVForSHQty,
 							FT.dblQuantity,
 							RI.intLoadReceive
@@ -305,13 +302,6 @@ BEGIN TRY
 					JOIN	tblCTPriceFixationTicket	FT	ON	FT.intInventoryReceiptId		=	RI.intInventoryReceiptId 
 															AND	FT.intPricingId					=	@intPriceFixationDetailId
 					WHERE	RI.intLineNo	=   @intContractDetailId
-					AND		IR.strDataSource <> 'Reverse'
-					AND 	IR.intInventoryReceiptId NOT IN 
-							(
-								SELECT intSourceInventoryReceiptId
-								FROM tblICInventoryReceipt 
-								WHERE strDataSource = 'Reverse'
-							)
 					ORDER BY dblTotalIVForSHQty DESC
 
 					SET @ysnTicketBased = 1
@@ -329,15 +319,9 @@ BEGIN TRY
 							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
 							IR.strReceiptNumber,
 							(
-								SELECT SUM(dbo.fnCTConvertQtyToTargetItemUOM(BD.intUnitOfMeasureId,@intItemUOMId,BD.dblQtyReceived)) 
-								FROM tblAPBill B 
-								LEFT JOIN tblAPBill B1 ON B.intBillId = B1.intBillId
-								INNER JOIN tblAPBillDetail BD ON B.intBillId = BD.intBillId
-								WHERE
-									B.intTransactionType = 1
-									AND BD.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
-									AND BD.intInventoryReceiptChargeId IS NULL
-									--AND B.intBillId IS NULL
+								SELECT  SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
+								FROM	tblAPBillDetail ID 
+								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
 							) AS dblTotalIVForSHQty,
 							0,
 							RI.intLoadReceive
@@ -346,14 +330,7 @@ BEGIN TRY
 															AND IR.strReceiptType				=   'Purchase Contract'
 					JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
 					WHERE	RI.intLineNo	=  @intContractDetailId 
-						AND (ISNULL(@ysnLoad,0) = 0 or RI.dblBillQty <> dblOpenReceive)
-							AND	IR.strDataSource <> 'Reverse'
-							AND IR.intInventoryReceiptId NOT IN 
-							(
-								SELECT intSourceInventoryReceiptId
-								FROM tblICInventoryReceipt 
-								WHERE strDataSource = 'Reverse'
-							)
+						AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
 				END
 				
 				SELECT	@dblRemainingQty = 0
@@ -381,7 +358,6 @@ BEGIN TRY
 					FROM	tblCTPriceFixationDetailAPAR	AA
 					JOIN	tblAPBillDetail					AD	ON	AD.intBillDetailId	=	AA.intBillDetailId
 					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
-					AND		ISNULL(AA.ysnReverse,0) = 0
 					AND		ISNULL(AD.intSettleStorageId,0) = 0
 
 					SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)

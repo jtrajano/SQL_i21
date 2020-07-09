@@ -8444,7 +8444,6 @@
     <Build Include="dbo\Stored Procedures\uspIPOptionsPnSProcessStgXML.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDeleteLog.sql" />
     <Build Include="dbo\Stored Procedures\uspIPDeleteStageLog.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTRebuildContractHistory.sql" />
     <Build Include="dbo\Tables\tblRKFutOptTransactionHeaderBook.sql" />
     <Build Include="dbo\Tables\tblRKOptionsMatchPnSHeaderBook.sql" />
     <Build Include="dbo\Stored Procedures\uspMFProcessRecipes.sql" />
@@ -8628,10 +8627,8 @@
     <Build Include="dbo\Stored Procedures\uspGRReverseTransferStorage.sql" />
     <None Include="Scripts\Post-Deployment\GR\PriorPeriodTransactions.sql" />
     <Build Include="dbo\Tables\tblRKM2MUnrealized.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTPriceFixationDetailReverse.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixMissingReceiptGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractStrauss.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTValidatePriceFixationDetailReverse.sql" />
     <Build Include="dbo\Views\vyuSTConsolidatedCheckoutChangeFundDetailReport.sql" />
     <Build Include="dbo\Tables\tblSCTicketDiscountHistory.sql" />
     <Build Include="dbo\Tables\tblRKFutureMarketStage.sql" />
