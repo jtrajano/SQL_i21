@@ -5761,7 +5761,6 @@
     <None Include="Scripts\Post-Deployment\SM\1710_to_1730_UpdateHomePanelDashboard.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUnpostDeliverySheet.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetStatus.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCReverseScheduleQty.sql" />
     <Build Include="dbo\Tables\tblAPSearchRecordVoucher.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucher.sql" />
     <Build Include="dbo\Views\vyuAPGetInventoryReceiptVoucher2.sql" />
@@ -8597,10 +8596,6 @@
     <Build Include="dbo\Tables\tblIPLoadDetailArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageSAPShippingInstruction.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessSAPShippingInstruction.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCReverseTicket.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCReverseInventoryShipmentInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCReverseInventoryReceiptVoucher.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCReverseDeliverySheet.sql" />
     <Build Include="dbo\Views\vyuHDTicketForExport.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateReturnGLEntriesForNonStockItems.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRCommodityLocation.sql" />
@@ -8608,7 +8603,6 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessPOAcknowledgement_CA.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateItemContractSequenceQuantity.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCPostDestinationWeightsAndGradesReversalProcess.sql" />
     <Build Include="dbo\User Defined Types\SCTicketDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\User Defined Types\SCDiscountDestinationWeightsAndGradesPosting.sql" />
     <Build Include="dbo\Stored Procedures\uspGRReverseTransferStorage.sql" />

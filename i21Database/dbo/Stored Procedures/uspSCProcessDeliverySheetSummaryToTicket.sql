@@ -34,7 +34,6 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@intBillId					INT
 DECLARE @dblInitialSplitQty			NUMERIC (38,20)
 DECLARE @DeliverySheetTicketIds		Id
-DECLARE @ysnImposeReversalTransaction BIT
 DECLARE @_intTicketId INT
 DECLARE @_intReversedTicketId INT
 DECLARE @_intInventoryReceiptId  	INT
@@ -80,72 +79,6 @@ BEGIN TRY
 	DECLARE @TicketRowMaxCount INT
 
 	
-
-
-	SET @ysnImposeReversalTransaction = 0
-	
-	SELECT TOP 1
-		@ysnImposeReversalTransaction = ysnImposeReversalTransaction
-	FROM tblRKCompanyPreference
-	
-	IF(@ysnImposeReversalTransaction = 1)
-	--REversal
-	BEGIN
-		INSERT INTO @DeliverySheetTicketIds
-		SELECT 
-			intTicketId
-		FROM tblSCTicket 
-		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-			AND ysnReversed = 0
-
-		SELECT 
-			@_intTicketId = MIN(intId) 
-		FROM @DeliverySheetTicketIds
-
-		DELETE FROM @processTicket
-
-		WHILE (ISNULL(@_intTicketId,0) > 0)
-		BEGIN
-			EXEC uspSCReverseTicket @_intTicketId, @intUserId, @_intReversedTicketId OUTPUT
-
-			INSERT INTO @processTicket(
-				[intTicketId]
-				,[intDeliverySheetId]
-				,[intEntityId]
-				,[dblNetUnits]
-				,[dblFreight] 
-				,[dblFees] 
-			)
-			SELECT 
-				[intTicketId]			= intTicketId
-				,[intDeliverySheetId]	= intDeliverySheetId
-				,[intEntityId]			= intEntityId
-				,[dblNetUnits]			= dblNetUnits
-				,[dblFreight]			= dblFreightRate
-				,[dblFees]				= dblTicketFees
-			FROM tblSCTicket 
-			WHERE intTicketId = @_intReversedTicketId
-				AND ysnReversed = 0
-
-			SET @_intReversedTicketId = 0
-			--Loop Iterator
-			BEGIN
-				IF EXISTS(SELECT TOP 1 1 FROM @DeliverySheetTicketIds WHERE intId > @_intTicketId)
-				BEGIN
-					SELECT 
-						@_intTicketId = MIN(intId) 
-					FROM @DeliverySheetTicketIds
-					WHERE intId > @_intTicketId
-				END
-				ELSE
-				BEGIN
-					SET @_intTicketId =  0
-				END
-			END
-
-		END
-	END
-	ELSE
 	--None reversal
 	BEGIN
 		SET @TicketCurrentRowCount = 1
@@ -167,7 +100,7 @@ BEGIN TRY
 			,[dblFees]				= dblTicketFees
 		FROM tblSCTicket 
 		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-			AND ysnReversed = 0
+			
 		
 		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
 
@@ -294,7 +227,7 @@ BEGIN TRY
 	WHERE intTicketId IN (SELECT intTicketId 
 						FROM tblSCTicket 
 						WHERE intDeliverySheetId = @intDeliverySheetId
-							AND ysnReversed = 0)
+							)
 		
 
 	IF EXISTS(SELECT NULL FROM @splitTable)
