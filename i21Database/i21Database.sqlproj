@@ -8728,6 +8728,7 @@
     <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
     <None Include="Scripts\Post-Deployment\IC\24_PopulateTransactionUOM.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
+    <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
