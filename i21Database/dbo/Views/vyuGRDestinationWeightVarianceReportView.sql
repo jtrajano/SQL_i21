@@ -3,7 +3,6 @@
 	SELECT
 		SC.intTicketId
 		,SC.strTicketNumber
-		,[intParentTicketId] = ORIGIN_SC.intTicketId
         ,CUSTOMER.intEntityId
 		,SPLIT.intTicketId AS [intTicketSplit]
 		,SPLIT.intTicketSplitId
@@ -41,14 +40,6 @@
 		,[dblDestinationTareWeight] = SC.dblTareWeight
 		,[dblDestinationTareWeight1] = SC.dblTareWeight1
 		,[dblDestinationTareWeight2] = SC.dblTareWeight2
-
-		,[dblOriginGrossWeight] = ORIGIN_SC.dblGrossWeight
-		,[dblOriginGrossWeight1] = ORIGIN_SC.dblGrossWeight1
-		,[dblOriginGrossWeight2] = ORIGIN_SC.dblGrossWeight2
-
-		,[dblOriginTareWeight] = ORIGIN_SC.dblTareWeight
-		,[dblOriginTareWeight1] = ORIGIN_SC.dblTareWeight1
-		,[dblOriginTareWeight2] = ORIGIN_SC.dblTareWeight2
 		-- ,dbo.fnDivide(ICIS.dblGross, SC.dblConvertedUOMQty) AS [dblOriginNetWeight]
 		-- ,dbo.fnDivide(ICIS.dblDestinationGross, SC.dblConvertedUOMQty) AS [dblDestinationNetWeight]
 		-- ,dbo.fnDivide((ICIS.dblDestinationGross - ICIS.dblGross), SC.dblConvertedUOMQty) AS [dblVarianceWeight]
@@ -90,8 +81,6 @@
 	-- 		AND SC.intItemId = ISD.intItemId
 	-- 	GROUP BY LOT.intWeightUOMId
 	-- ) ICIS
-	LEFT JOIN tblSCTicket ORIGIN_SC
-		ON ORIGIN_SC.intTicketId = SC.intParentTicketId
 	LEFT JOIN tblGRStorageType tblGRStorageType
 		ON tblGRStorageType.strStorageTypeCode = SC.strDistributionOption
 	OUTER APPLY (
