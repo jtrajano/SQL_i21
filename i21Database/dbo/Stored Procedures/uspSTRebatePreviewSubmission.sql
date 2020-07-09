@@ -275,7 +275,43 @@ BEGIN
 
 				DELETE FROM @tblTempRJR
 				INSERT INTO @tblTempRJR
-				SELECT DISTINCT (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
+								SELECT 
+									strOutletName
+									,intOutletNumber
+									,strOutletAddressOne
+									,strOutletAddressTwo
+									,strOutletCity
+									,strOutletState
+									,strOutletZipCode
+									,strTransactionDateTime
+									,strMarketBasketTransactionId
+									,strScanTransactionId
+									,strRegisterId
+									,intQuantity
+									,dblPrice
+									,strUpcCode
+									,strUpcDescription
+									,strUnitOfMeasure
+									,strPromotionFlag
+									,strOutletMultipackFlag
+									,intOutletMultipackQuantity
+									,dblOutletMultipackDiscountAmount
+									,strAccountPromotionName
+									,dblAccountDiscountAmount
+									,dblManufacturerDiscountAmount
+									,strCouponPid
+									,dblCouponAmount
+									,strManufacturerMultipackFlag
+									,intManufacturerMultipackQuantity
+									,dblManufacturerMultipackDiscountAmount
+									,strManufacturerPromotionDescription
+									,strManufacturerBuydownDescription
+									,dblManufacturerBuydownAmount
+									,strManufacturerMultiPackDescription
+									,strAccountLoyaltyIDNumber
+									,strCouponDescription
+								FROM ( 
+								SELECT DISTINCT intScanTransactionId, (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 								, ST.intStoreNo as intOutletNumber
 								, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 								, '' as strOutletAddressTwo
@@ -408,7 +444,7 @@ BEGIN
 					(   
 						SELECT * FROM
 						(   
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId,intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
 						) TRR 
 						WHERE TRR.rn = 1		
@@ -433,6 +469,7 @@ BEGIN
 					-- WHERE TR.strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
 
 				--SELECT * FROM @tblTempRJR RJ
+				) as innerQuery
 				
 				DELETE FROM @tempTable
 				INSERT INTO @tempTable
