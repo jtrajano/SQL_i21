@@ -7761,7 +7761,7 @@
     <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
-
+    <Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
