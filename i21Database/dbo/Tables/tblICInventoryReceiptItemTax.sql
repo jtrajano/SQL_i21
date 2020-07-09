@@ -29,7 +29,7 @@ Type the overview for the table here.
 		[ysnCheckoffTax] BIT NULL DEFAULT ((0)),
 		[ysnTaxExempt] BIT NULL DEFAULT ((0)),
 		[strTaxCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-		[dblQty] NUMERIC(38, 20) NULL DEFAULT ((1)),
+		[dblQty] NUMERIC(38, 15) NULL DEFAULT ((1)),
 		[dblCost] NUMERIC(18, 6) NULL DEFAULT ((0)),
 		[intUnitMeasureId] INT NULL,
 		[intSort] INT NULL, 
