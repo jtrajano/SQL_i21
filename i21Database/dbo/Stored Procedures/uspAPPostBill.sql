@@ -131,6 +131,26 @@ SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
 ORDER BY intBillId
 
+DECLARE @idForPost As Id;
+--INSERT BILL THAT IS NOT YET IN tblAPBillForPosting
+INSERT INTO tblAPBillForPosting(intBillId, ysnIsPost)
+OUTPUT inserted.intBillId INTO @idForPost
+SELECT 
+	A.intBillId 
+	,@post
+FROM #tmpPostBillData A
+LEFT JOIN tblAPBillForPosting B ON A.intBillId = B.intBillId
+WHERE B.intId IS NULL
+
+--GET ALL intBillId WHICH IS ALREADY IN tblAPBillForPosting
+--BUT uspAPPostBill calls again for the same intBillId
+--DELETE THE intBillId ON THE LIST OF FOR POST VOUCHERS
+--THAT IS ALREADY PART OF tblAPBillForPosting
+DELETE A
+FROM #tmpPostBillData A
+LEFT JOIN @idForPost B ON A.intBillId = B.intId
+WHERE B.intId IS NULL
+
 --Update the prepay and debit memo
 EXEC uspAPUpdatePrepayAndDebitMemo @billIds, @post
 --=====================================================================================================================================
@@ -262,6 +282,10 @@ BEGIN
 		SET A.strBatchNumber = @batchId
 	FROM tblAPPostResult A
 	INNER JOIN @postResult B ON A.intId = B.id
+
+	--CLEAN UP TRACKER FOR POSTING
+	DELETE A
+	FROM tblAPBillForPosting A
 
 	SET @successfulCount = 0;
 	SET @success = 0
@@ -1582,11 +1606,17 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
+
 	ROLLBACK TRANSACTION	
 	SET @success = 0
 	GOTO Post_Exit
 
 Post_Cleanup:
+
+	--CLEAN UP TRACKER FOR POSTING
+	DELETE A
+	FROM tblAPBillForPosting A
+
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
 
