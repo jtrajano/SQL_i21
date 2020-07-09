@@ -69,7 +69,6 @@
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
-    ,[ysnReversal]                          BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
     ,[intItemId]                            INT             NULL
@@ -147,8 +146,6 @@
     ,[intStorageLocationId]                 INT             NULL
     ,[ysnAutoBlend]                         BIT             NULL
     ,[ysnBlended]                           BIT             NULL    
-    ,[ysnItemReturned]    					BIT             NULL
-	,[ysnReversed]							BIT             NULL
     ,[dblQuantity]                          NUMERIC(18,6)   NULL
     ,[dblMaxQuantity]                       NUMERIC(18,6)   NULL	
     ,[strOptionType]                        NVARCHAR(30)    COLLATE Latin1_General_CI_AS    NULL
