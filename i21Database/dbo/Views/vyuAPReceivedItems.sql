@@ -92,6 +92,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	tblReceived.intTaxGroupId
+		,[intFreightTermId]							=	tblReceived.intFreightTermId
 		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	tblReceived.strTaxGroup
 	FROM tblPOPurchase A
@@ -146,6 +147,7 @@ FROM
 				,intLocationId = A1.intLocationId
 				,strReceiptLocation = (SELECT strLocationName FROM dbo.tblSMCompanyLocation WHERE intCompanyLocationId = A1.intLocationId)
 				,B1.intTaxGroupId
+				,A1.intFreightTermId
 				,TG.strTaxGroup
 				,item.ysn1099Box3
 			FROM tblICInventoryReceipt A1
@@ -187,6 +189,7 @@ FROM
 				,loc.intItemLocationId
 				,B1.dblTax
 				,B1.intTaxGroupId
+				,A1.intFreightTermId
 				,B1.intUnitMeasureId
 				,UOM.strUnitMeasure
 				,B1.intWeightUOMId
@@ -323,6 +326,7 @@ FROM
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[intTaxGroupId]							=	B.intTaxGroupId
+	,[intFreightTermId]							=	A.intFreightTermId
 	,[ysnReturn]								=	CAST(0 AS BIT)
 	,[strTaxGroup]								=	TG.strTaxGroup
 	FROM tblPOPurchase A
@@ -467,6 +471,7 @@ FROM
 	,[intInventoryShipmentItemId]				=   NULL
 	,[intInventoryShipmentChargeId]				=	NULL
 	,[intTaxGroupId]							=	B.intTaxGroupId
+	,[intFreightTermId]							=	A.intFreightTermId
 	,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 	,[strTaxGroup]								=	TG.strTaxGroup
 	FROM tblICInventoryReceipt A
@@ -636,6 +641,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
+		,[intFreightTermId]							=	NULL
 		,[ysnReturn]								=	CAST((CASE WHEN A.strReceiptType = 'Inventory Return' THEN 1 ELSE 0 END) AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM [vyuICChargesForBilling] A
@@ -791,6 +797,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
+		,[intFreightTermId]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
@@ -929,6 +936,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
+		,[intFreightTermId]							=	NULL
 		,[ysnReturn]								=	CAST(RT.Item AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM		vyuCTContractCostView		CC
@@ -1052,6 +1060,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
+		,[intFreightTermId]							=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM vyuLGLoadPurchaseContracts A
@@ -1152,6 +1161,7 @@ FROM
 		,[intInventoryShipmentItemId]				=   NULL
 		,[intInventoryShipmentChargeId]				=	NULL
 		,[intTaxGroupId]							=	NULL
+		,[intFreightTermId]							=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM vyuLGLoadCostForVendor A
@@ -1267,6 +1277,7 @@ FROM
 		,[intInventoryShipmentItemId]				=	A.intInventoryShipmentItemId
 		,[intInventoryShipmentChargeId]				=	A.intInventoryShipmentChargeId
 		,[intTaxGroupId]							=	NULL
+		,[intFreightTermId]							=	NULL
 		,[ysnReturn]								=	CAST(0 AS BIT)
 		,[strTaxGroup]								=	NULL
 	FROM vyuICShipmentChargesForBilling A
@@ -1384,6 +1395,7 @@ FROM
 	  ,[intInventoryShipmentItemId]				= NULL
 	  ,[intInventoryShipmentChargeId]			= NULL
 	  ,[intTaxGroupId]							= NULL
+	  ,[intFreightTermId]						= NULL
 	  ,[ysnReturn]								= CAST(0 AS BIT)
 	  ,[strTaxGroup]							= NULL
 	FROM tblARInvoice I

@@ -74,6 +74,7 @@
 	[ysnStage] BIT NOT NULL DEFAULT 0 ,
     [intLineNo] INT NOT NULL DEFAULT 1,
     [intTaxGroupId] INT NULL, 
+	[intFreightTermId] INT NULL, 
 	[intInventoryShipmentChargeId] INT NULL,
 	[intCurrencyExchangeRateTypeId] INT NULL,
 	[intCurrencyId] INT NULL,
