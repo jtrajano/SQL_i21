@@ -1,4 +1,4 @@
-﻿CREATE FUNCTION [dbo].[fnAPGetPayVoucherForPayment]
+﻿CREATE FUNCTION [dbo].[fnAPGetPayVoucherForPaymentPayVoucher]
 (
 	@currencyId INT,
 	@paymentMethodId INT = 0,
@@ -90,9 +90,10 @@ RETURNS TABLE AS RETURN
 	) entityGroup
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
+	AND forPay.ysnDeferredPay = @showDeferred
 	AND 1 = (CASE WHEN @showDeferred = 1 THEN 1
 			ELSE 
-				(CASE WHEN forPay.intTransactionType = 14 THEN 0 ELSE 1 END) 
+				(CASE WHEN forPay.intTransactionType = 14 THEN 1 ELSE 1 END) 
 			END)
 	AND 1 = (CASE WHEN @payToAddress > 0
 					THEN (CASE WHEN forPay.intPayToAddressId = @payToAddress THEN 1 ELSE 0 END)
@@ -104,29 +105,4 @@ RETURNS TABLE AS RETURN
 					THEN 
 						(CASE WHEN payDetail.intPaymentDetailId > 0 AND payDetail.intPaymentId = @paymentId THEN 1 ELSE 0 END)
 					ELSE 1 END)
-	-- UNION ALL
-	-- SELECT
-	-- 	CAST(ROW_NUMBER() OVER (ORDER BY (SELECT 1)) AS INT) AS intForPaymentId
-	-- 	,NULL
-	-- 	,A.intInvoiceId
-	-- 	,A.intEntityCustomerId
-	-- 	,NULL
-	-- 	,strTransactionType
-	-- 	,NULL
-	-- 	,NULL
-	-- FROM vyuARInvoicesForPayment A
-	-- LEFT JOIN tblAPPaymentDetail payDetail
-	-- 	ON A.intInvoiceId = payDetail.intInvoiceId
-	-- WHERE 
-	-- 	A.strTransactionType IN ('Invoice','Debit Memo','Cash','Cash Refund')
-	-- AND A.dblAmountDue != 0
-	-- AND A.intCurrencyId = @currencyId
-	-- AND 1 = (CASE WHEN @vendorId > 0
-	-- 				THEN (CASE WHEN A.intEntityCustomerId = @vendorId THEN 1 ELSE 0 END)
-	-- 		ELSE 1 END)
-	-- AND 1 = (CASE WHEN @paymentId > 0 
-	-- 				THEN 
-	-- 					(CASE WHEN payDetail.intPaymentDetailId > 0 THEN 1 ELSE 0 END)
-	-- 				ELSE 0 END)
-
 )

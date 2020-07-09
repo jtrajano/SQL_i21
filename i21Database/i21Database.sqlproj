@@ -8257,6 +8257,7 @@
     <Build Include="dbo\Tables\tblGRStorageInventoryReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
