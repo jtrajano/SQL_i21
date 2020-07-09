@@ -125,8 +125,8 @@ BEGIN TRY
 		declare @ysnDestinationWeightsGrades bit = convert(bit,0);
 		declare @intWeightGradeId int = 0;
 		declare @ContractPriceItemUOMId int = null;
-		declare @ContractPriceUnitMeasureId int = null;
-		declare @ContractDetailItemId int = null;
+		--declare @ContractPriceUnitMeasureId int = null;
+		--declare @ContractDetailItemId int = null;
 
 		declare @InvShp table (
 			intInventoryShipmentId int
@@ -846,8 +846,8 @@ BEGIN TRY
 				,b.intPriceFixationDetailId
 				,dblQuantity = b.dblLoadPriced
 				,dblFinalPrice = dbo.fnCTConvertToSeqFXCurrency(a.intContractDetailId,c.intFinalCurrencyId,f.intItemUOMId,b.dblFinalPrice)
-				,ContractPriceItemUOMId = intPricingUOMId
-				,ContractDetailItemId = d.intItemId
+				,ContractPriceItemUOMId = b.intQtyItemUOMId
+				--,ContractDetailItemId = d.intItemId
 			from
 				tblCTPriceFixation a
 				,tblCTPriceFixationDetail b
@@ -876,8 +876,9 @@ BEGIN TRY
 			,@intPriceFixationDetailId
 			,@dblPriced
 			,@dblFinalPrice
-			,@ContractPriceUnitMeasureId
-			,@ContractDetailItemId
+			,@ContractPriceItemUOMId
+			--,@ContractPriceUnitMeasureId
+			--,@ContractDetailItemId
 
 		WHILE @@FETCH_STATUS = 0
 		BEGIN			
@@ -1054,7 +1055,7 @@ BEGIN TRY
 									@intEntityId		=	@intUserId, 
 									@dblQtyShipped		=	@dblQuantityForInvoice
 
-							select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
+							--select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
 							set @dblFinalPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@ContractPriceItemUOMId,@dblFinalPrice);
 
 							EXEC	uspARUpdateInvoicePrice 
@@ -1258,8 +1259,9 @@ BEGIN TRY
 				,@intPriceFixationDetailId
 				,@dblPriced
 				,@dblFinalPrice
-				,@ContractPriceUnitMeasureId
-				,@ContractDetailItemId
+				,@ContractPriceItemUOMId
+				--,@ContractPriceUnitMeasureId
+				--,@ContractDetailItemId
 
 		END
 
@@ -1422,8 +1424,8 @@ BEGIN TRY
 							,b.intPriceFixationDetailId
 							,b.dblQuantity
 							,dblFinalPrice = dbo.fnCTConvertToSeqFXCurrency(a.intContractDetailId,c.intFinalCurrencyId,f.intItemUOMId,b.dblFinalPrice)
-							,ContractPriceItemUOMId = b.intPricingUOMId
-							,ContractDetailItemId = d.intItemId
+							,ContractPriceItemUOMId = b.intQtyItemUOMId
+							--,ContractDetailItemId = d.intItemId
 						from
 							tblCTPriceFixation a
 							,tblCTPriceFixationDetail b
@@ -1452,8 +1454,9 @@ BEGIN TRY
 						,@intPriceFixationDetailId
 						,@dblPriced
 						,@dblFinalPrice
-						,@ContractPriceUnitMeasureId
-						,@ContractDetailItemId
+						,@ContractPriceItemUOMId
+						--,@ContractPriceUnitMeasureId
+						--,@ContractDetailItemId
 
 					WHILE @@FETCH_STATUS = 0
 					BEGIN
@@ -1544,7 +1547,7 @@ BEGIN TRY
 										@intEntityId		=	@intUserId, 
 										@dblQtyShipped		=	@dblQuantityForInvoice
 
-							select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
+							--select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
 							set @dblFinalPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@ContractPriceItemUOMId,@dblFinalPrice);
 
 								EXEC	uspARUpdateInvoicePrice 
@@ -1628,8 +1631,9 @@ BEGIN TRY
 							,@intPriceFixationDetailId
 							,@dblPriced
 							,@dblFinalPrice
-							,@ContractPriceUnitMeasureId
-							,@ContractDetailItemId
+							,@ContractPriceItemUOMId
+							--,@ContractPriceUnitMeasureId
+							--,@ContractDetailItemId
 
 					END
 
