@@ -14,7 +14,7 @@ IF(EXISTS(SELECT NULL FROM sys.tables WHERE name = N'tblEMEntity')
 			AND EXISTS(SELECT NULL FROM sys.columns WHERE [name] = N'ysnDefaultContact' AND [object_id] = OBJECT_ID(N'tblEMEntityToContact'))
 			AND EXISTS(SELECT NULL FROM sys.columns WHERE [name] = N'intEntityId' AND [object_id] = OBJECT_ID(N'tblEMEntityToContact'))
 			AND EXISTS(SELECT NULL FROM sys.tables WHERE name = N'tblARCustomer') 
-			AND EXISTS(SELECT NULL FROM sys.columns WHERE [name] = N'intEntityCustomerId' AND [object_id] = OBJECT_ID(N'tblARCustomer')))
+			AND EXISTS(SELECT NULL FROM sys.columns WHERE [name] = N'intEntityId' AND [object_id] = OBJECT_ID(N'tblARCustomer')))
 BEGIN
 	EXEC('
 	CREATE FUNCTION [dbo].[fnARGetCustomerDefaultContact]
@@ -33,7 +33,7 @@ BEGIN
 						INNER JOIN dbo.tblEMEntity AS D 
 								ON C.[intEntityContactId] = D.[intEntityId] 
 						INNER JOIN tblARCustomer F
-							ON F.intEntityCustomerId = B.intEntityId
+							ON F.intEntityId = B.intEntityId
 					WHERE
 						B.intEntityId = @EntityCustomerId
 						AND C.ysnDefaultContact = 1
