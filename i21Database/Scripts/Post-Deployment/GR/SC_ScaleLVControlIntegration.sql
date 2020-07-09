@@ -309,7 +309,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_tic_type = (''T'')       THEN 4
 					ELSE 5
 				END) AS intTicketType
-				,''LS-'' + replace(gasct_load_no,''S '', '''') as strLoadNumber
+				,''LS-'' + replace(gasct_load_no,''S '', '''') COLLATE Latin1_General_CI_AS as strLoadNumber
 				, CASE WHEN gasct_in_out_ind = ''I'' THEN 1 ELSE 2 END AS intLoadPurchaseSale
 			from gasctmst a
 				left join (
