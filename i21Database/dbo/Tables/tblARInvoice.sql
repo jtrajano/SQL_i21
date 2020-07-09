@@ -71,7 +71,6 @@
     [ysnPaidCPP]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPaidCPP] DEFAULT ((0)),
 	[ysnProcessed]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnProcessed] DEFAULT ((0)),
 	[ysnReturned]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnReturned] DEFAULT ((0)),
-	[ysnReversal]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnReversal] DEFAULT ((0)),
 	[ysnRecurring]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)),
 	[ysnForgiven]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)),
 	[ysnCalculated]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)),
@@ -161,43 +160,49 @@
 	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 GO
 CREATE TRIGGER trgInvoiceNumber
 ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100), intCompanyLocationId INT, ysnReversal BIT)
-DECLARE @count 					INT = 0
-DECLARE @intInvoiceId 			INT
-DECLARE @intCompanyLocationId 	INT
-DECLARE @InvoiceNumber 			NVARCHAR(50)
-DECLARE @strTransactionType 	NVARCHAR(25)
-DECLARE @strType 				NVARCHAR(100)
-DECLARE @intMaxCount 			INT = 0
-DECLARE @intStartingNumberId 	INT = 0
-DECLARE @ysnReversal			BIT = 0
+DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100), intCompanyLocationId INT)
+DECLARE @count INT = 0
+DECLARE @intInvoiceId INT
+DECLARE @intCompanyLocationId INT
+DECLARE @InvoiceNumber NVARCHAR(50)
+DECLARE @strTransactionType NVARCHAR(25)
+DECLARE @strType NVARCHAR(100)
+DECLARE @intMaxCount INT = 0
+DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId
-	 , strTransactionType
-	 , strType
-	 , intCompanyLocationId
-	 , ysnReversal = ISNULL(ysnReversal, 0)
-FROM INSERTED 
-WHERE ISNULL(RTRIM(LTRIM(strInvoiceNumber)), '') = '' 
-ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType, intCompanyLocationId FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strInvoiceNumber)), '') = '' ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId 			= intInvoiceId
-			   , @strTransactionType 	= strTransactionType
-			   , @strType 				= strType
-			   , @intCompanyLocationId 	= intCompanyLocationId 
-			   , @ysnReversal			= ysnReversal
-	FROM @inserted
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType, @intCompanyLocationId = intCompanyLocationId FROM @inserted
 
 	UPDATE tblARInvoice SET dtmDateCreated = GETDATE() WHERE intInvoiceId = @intInvoiceId
 
@@ -218,11 +223,9 @@ BEGIN
 			BEGIN
 				SET @InvoiceNumber = NULL
 				
+				-- UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
-
-		IF (@ysnReversal = 1 AND @strTransactionType = 'Credit Memo')
-			SET @InvoiceNumber = @InvoiceNumber + '-R'
 
 		UPDATE tblARInvoice
 			SET tblARInvoice.strInvoiceNumber = @InvoiceNumber

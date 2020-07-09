@@ -101,8 +101,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 	,[ysnImportedFromOrigin]				BIT												NULL
 	,[ysnImportedAsPosted]					BIT												NULL
 	,[ysnFromProvisional]					BIT												NULL
-	,[ysnServiceChargeCredit]				BIT												NULL		-- For Credit Memo from Forgiven service charge	
-	,[ysnReversal]							BIT												NULL
+	,[ysnServiceChargeCredit]				BIT												NULL		-- For Credit Memo from Forgiven service charge
 
 	--Detail																																															
 	,[intInvoiceDetailId]					INT												NULL		-- Invoice Detail Id(Insert new Invoice if NULL, else Update existing)
