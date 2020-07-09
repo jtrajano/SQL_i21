@@ -57,23 +57,9 @@ DECLARE @intDSContractAdjusmentContractDetailId INT
 DECLARE @intDSContractAdjusmentEntityId INT
 DECLARE @dblDSContractAdjusmentQuantity NUMERIC(38,20)
 DECLARE @intDSContractAdjusmentItemUOMId INT
-DECLARE @ysnImposeReversalTransaction BIT
+
 
 BEGIN TRY
-
-		SET @ysnImposeReversalTransaction = 0
-		
-		SELECT TOP 1
-			@ysnImposeReversalTransaction = ysnImposeReversalTransaction
-		FROM tblRKCompanyPreference
-		
-		IF(@ysnImposeReversalTransaction = 1)
-		BEGIN
-			EXEC uspSCReverseDeliverySheet @intDeliverySheetId, @intUserId
-			GOTO _Exit
-		END
-
-
 
 		-- SELECT @currencyDecimal = intCurrencyDecimal from tblSMCompanyPreference
 		SET @currencyDecimal = 20

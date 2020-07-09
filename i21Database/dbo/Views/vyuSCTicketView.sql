@@ -173,9 +173,9 @@ AS
      ,SCT.dtmImportedDate
 	 ,ContractsApplied.strContractsApplied COLLATE Latin1_General_CI_AS AS strContractsApplied
     ,SCT.strTrailerId
-    ,SCT.intParentTicketId
-    ,SCT.intTicketTransactionType
-    ,SCT.ysnReversed
+    
+    
+    
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
   from tblSCTicket SCT
