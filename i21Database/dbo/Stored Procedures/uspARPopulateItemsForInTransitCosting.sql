@@ -99,7 +99,7 @@ LEFT JOIN (
 WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
     AND ARID.[intTicketId] IS NULL
 	AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-	AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
+	AND ARID.[strTransactionType] <> 'Credit Memo'
     AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
 	
 UNION ALL
@@ -177,7 +177,7 @@ WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
   AND ARID.[intTicketId] IS NULL
   AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0
   AND ((ARID.[strType] <> 'Provisional' AND ARID.[ysnFromProvisional] = 0) OR (ARID.[strType] = 'Provisional' AND ARID.[ysnProvisionalWithGL] = 1))
-  AND (ARID.[strTransactionType] <> 'Credit Memo' OR (ARID.[strTransactionType] = 'Credit Memo' AND ARID.[ysnReversal] = 1))
+  AND ARID.[strTransactionType] <> 'Credit Memo'
   
 	
 UNION ALL
