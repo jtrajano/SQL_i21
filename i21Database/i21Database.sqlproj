@@ -8172,6 +8172,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixICvsGLAmountDisrecpany.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <None Include="Scripts\Post-Deployment\SetInlineToOff.sql" />
+    <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
