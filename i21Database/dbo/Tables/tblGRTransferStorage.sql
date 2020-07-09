@@ -12,7 +12,6 @@ CREATE TABLE [dbo].[tblGRTransferStorage]
     [intConcurrencyId] INT NOT NULL DEFAULT 1,
     [intUserId] INT NULL,
     [intTransferLocationId] INT NULL,
-    [ysnReversed] BIT NOT NULL DEFAULT 0
     CONSTRAINT [PK_tblGRTransferStorage_intTransferStorageId] PRIMARY KEY CLUSTERED ([intTransferStorageId] ASC), 
     CONSTRAINT [FK_tblGRTransferStorage_intEntityId_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),
     CONSTRAINT [FK_tblGRTransferStorage_intCompanyLocationId_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].tblSMCompanyLocation ([intCompanyLocationId]),    
