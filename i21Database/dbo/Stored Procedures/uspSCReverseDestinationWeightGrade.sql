@@ -59,7 +59,7 @@ BEGIN TRY
 				, @dblContractQty = dblNetUnits
 				, @dblTicketMatchScheduleQty = dblScheduleQty
 			FROM tblSCTicket WHERE intTicketId = @intMatchTicketId
-				AND ysnReversed = 0
+				
 		END
 
 		IF(@ysnImposeReversalTransaction = 0)
