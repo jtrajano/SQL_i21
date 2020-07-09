@@ -288,12 +288,30 @@ BEGIN TRY
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
-			EXEC uspLGUpdateCompanyLocation @intContractDetailId
-			-- Update Shipping Intruction Quantity
-			UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
-			FROM tblCTContractDetail T 
+			DECLARE @previousQty NUMERIC(18, 6)
+				, @previousLocation INT
+				, @curQty NUMERIC(18, 6)
+				, @curLocation INT
+
+			SELECT TOP 1 @previousQty = dblQuantity
+				, @previousLocation = intCompanyLocationId
+			FROM tblCTSequenceHistory
 			WHERE intContractDetailId = @intContractDetailId
-			AND dblShippingInstructionQty > 0
+			ORDER BY dtmHistoryCreated DESC
+
+			SELECT TOP 1 @curQty = dblQuantity
+				, @curLocation = intCompanyLocationId
+			FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractDetailId = @intContractDetailId
+			
+			IF (@previousQty != @curQty OR @previousLocation != @curLocation)
+			BEGIN
+				EXEC uspLGUpdateCompanyLocation @intContractDetailId
+				-- Update Shipping Intruction Quantity
+				UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
+				FROM tblCTContractDetail T 
+				WHERE intContractDetailId = @intContractDetailId
+				AND dblShippingInstructionQty > 0
+			END
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
