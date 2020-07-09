@@ -33,7 +33,6 @@ BEGIN
 		INNER JOIN tblGRSettleStorage SS
 			ON SS.intSettleStorageId = SST.intSettleStorageId
 				AND SS.intParentSettleStorageId IS NOT NULL
-				AND SS.ysnReversed = 0
 		INNER JOIN @CustomerStorageIds CS
 			ON CS.intId = SST.intCustomerStorageId
 	)
@@ -42,7 +41,6 @@ BEGIN
 		FROM tblGRTransferStorageSourceSplit TSS
 		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
-				AND TS.ysnReversed = 0
 		INNER JOIN @CustomerStorageIds CS
 			ON CS.intId = TSS.intSourceCustomerStorageId
 	)

@@ -395,7 +395,6 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
-:R .\GR\PriorPeriodTransactions.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
