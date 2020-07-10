@@ -492,10 +492,71 @@ BEGIN TRY
 								EXEC [dbo].[uspAPPostBill] @post = 0,@recap = 0,@isBatch = 0,@param = @intBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
 							END
 
-							INSERT	INTO @voucherDetailReceipt([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
-							SELECT	2,@intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice
+							-- INSERT	INTO @voucherDetailReceipt([intInventoryReceiptType], [intInventoryReceiptItemId], [dblQtyReceived], [dblCost])
+							-- SELECT	2,@intInventoryReceiptItemId, @dblQtyToBill, @dblFinalPrice
 					    
-							EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
+							-- EXEC	uspAPCreateVoucherDetailReceipt @intBillId,@voucherDetailReceipt
+
+							DECLARE @voucherPayablesData AS VoucherPayable
+							DECLARE @voucherPayableTax AS VoucherDetailTax
+							DELETE FROM @voucherPayablesData
+
+							INSERT INTO @voucherPayablesData(
+								 [intBillId]
+								,[intEntityVendorId]			
+								,[intTransactionType]		
+								,[intLocationId]	
+								,[intShipToId]	
+								,[intShipFromId]			
+								,[intShipFromEntityId]
+								,[intPayToAddressId]
+								,[intCurrencyId]					
+								,[dtmDate]				
+								,[strVendorOrderNumber]			
+								,[strReference]						
+								,[intPurchaseDetailId]				
+								,[intContractHeaderId]				
+								,[intContractDetailId]				
+								,[intContractSeqId]					
+								,[intScaleTicketId]					
+								,[intInventoryReceiptItemId]		
+								,[intInventoryReceiptChargeId]		
+								,[intInventoryShipmentChargeId]
+								,[intLoadShipmentCostId]			
+								,[intItemId]						
+								,[intPurchaseTaxGroupId]
+								,[strMiscDescription]				
+								,[dblOrderQty]
+								,[dblOrderUnitQty]
+								,[intOrderUOMId]
+								,[dblQuantityToBill]
+								,[dblQtyToBillUnitQty]
+								,[intQtyToBillUOMId]
+								,[dblCost]							
+								,[dblCostUnitQty]					
+								,[intCostUOMId]						
+								,[dblNetWeight]						
+								,[dblWeightUnitQty]					
+								,[intWeightUOMId]					
+								,[intCostCurrencyId]
+								,[dblTax]							
+								,[dblDiscount]
+								,[intCurrencyExchangeRateTypeId]	
+								,[ysnSubCurrency]					
+								,[intSubCurrencyCents]				
+								,[intAccountId]						
+								,[intShipViaId]						
+								,[intTermId]
+								,[strBillOfLading]					
+								,[dtmVoucherDate]
+								,[intStorageLocationId]
+								,[intSubLocationId]
+								,[ysnStage]
+							)
+							SELECT *
+							FROM dbo.[fnCTCreateVoucherDetail](@intBillId, @dblQtyToBill, @dblFinalPrice)
+
+							EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 					    
 							-- Get the intBillDetailId of the newly inserted voucher item. 
 							SELECT	TOP 1	
@@ -572,20 +633,20 @@ BEGIN TRY
 							-- WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId AND BD.intBillId = @intBillId
 							-- GROUP BY BD.intInventoryReceiptItemId
 
-							INSERT INTO @receiptDetails
-							(
-								[intInventoryReceiptItemId],
-								[intInventoryReceiptChargeId],
-								[intInventoryShipmentChargeId],
-								[intSourceTransactionNoId],
-								[strSourceTransactionNo],
-								[intItemId],
-								[intToBillUOMId],
-								[dblToBillQty]
-							)
-							SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intBillId, @intBillDetailId, @dblQtyToBill, 0)
-
-							EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+							--INSERT INTO @receiptDetails
+							--(
+							--	[intInventoryReceiptItemId],
+							--	[intInventoryReceiptChargeId],
+							--	[intInventoryShipmentChargeId],
+							--	[intSourceTransactionNoId],
+							--	[strSourceTransactionNo],
+							--	[intItemId],
+							--	[intToBillUOMId],
+							--	[dblToBillQty]
+							--)
+							--SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intBillId, @intBillDetailId, @dblQtyToBill, 0)
+							
+							--EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 
 							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
 							SELECT @intPriceFixationDetailId,@intBillId,@intBillDetailId,1
