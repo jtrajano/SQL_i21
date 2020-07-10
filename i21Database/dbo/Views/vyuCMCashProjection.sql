@@ -2,7 +2,7 @@ CREATE VIEW dbo.vyuCMCashProjection
 AS
 WITH BankBalances AS (
 	SELECT SUM([dbo].[fnCMGetBankBalance] (intBankAccountId, GETDATE())) Balance
-	FROM tblCMBankAccount
+	FROM dbo.tblCMBankAccount
 ),
 WeekQuery AS(
 		SELECT  
@@ -26,14 +26,14 @@ WeekQuery AS(
 	SELECT 
 		dtmDueDate,
 		dblAmountDue
-	FROM tblARInvoice 
+	FROM dbo.tblARInvoice 
 	WHERE ysnPosted = 1
 	AND ysnPaid = 0
 	AND strTransactionType IN ('Invoice', 'Debit Memo') 
 ),
 CombineARAP AS (
 	SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) WeekNo , dblAmountDue * -1 dblAmountDue 
-	FROM vyuAPOpenPayables 
+	FROM dbo.vyuAPPayablesAmountDue 
 	UNION ALL
 	SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) WeekNo , dblAmountDue dblAmountDue FROM QueryAR 
 )

@@ -8561,7 +8561,7 @@
     <Build Include="dbo\Tables\tblARPostingQueue.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Tables\tblMFItemExclude.sql" />
-    <Build Include="dbo\Views\vyuAPOpenPayables.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <None Include="Scripts\Post-Deployment\IC\24_PopulateTransactionUOM.sql" />
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
