@@ -1,28 +1,25 @@
---alter VIEW vyuAPGetPayablesPerWeek
---AS
 CREATE VIEW vyuCMCashProjection
 AS
-
 WITH BankBalances AS (
-    SELECT SUM([dbo].[fnCMGetBankBalance] (intBankAccountId, getdate())) Balance
-    FROM tblCMBankAccount
+	SELECT SUM([dbo].[fnCMGetBankBalance] (intBankAccountId, GETDATE())) Balance
+	FROM tblCMBankAccount
 ),
-WeekQuery as(
+WeekQuery AS(
 		SELECT  
 		DATEADD(wk, 0, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
-		CAST(DATEPART (YEAR, getdate())AS NVARCHAR(4)) + CAST(DATEPART (WEEK, getdate())as nvarchar(3))   WeekNo
+		CAST(DATEPART (YEAR, GETDATE())AS NVARCHAR(4)) + CAST(DATEPART (WEEK, GETDATE())AS NVARCHAR(3))   WeekNo
 		UNION SELECT 
 		DATEADD(wk, -1, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
-		CAST(DATEPART (YEAR, DATEADD( DAY, -7, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -7, getdate()))as nvarchar(3))  WeekNo
+		CAST(DATEPART (YEAR, DATEADD( DAY, -7, GETDATE()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -7, GETDATE()))AS NVARCHAR(3))  WeekNo
 		UNION SELECT 
 		DATEADD(wk, -2, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
-		CAST(DATEPART (YEAR, DATEADD( DAY, -14, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -14, getdate()))as nvarchar(3))  WeekNo
+		CAST(DATEPART (YEAR, DATEADD( DAY, -14, GETDATE()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -14, GETDATE()))AS NVARCHAR(3))  WeekNo
 		UNION SELECT 
 		DATEADD(wk, -3, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
-		CAST(DATEPART (YEAR, DATEADD( DAY, -21, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -21, getdate()))as nvarchar(3)) WeekNo
+		CAST(DATEPART (YEAR, DATEADD( DAY, -21, GETDATE()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -21, GETDATE()))AS NVARCHAR(3)) WeekNo
 		UNION SELECT 
 		DATEADD(wk, -4, DATEADD(DAY, 1-DATEPART(WEEKDAY, GETDATE()), DATEDIFF(dd, 0, GETDATE()))) FirsDayOfWeek,
-		CAST(DATEPART (YEAR, DATEADD( DAY, -28, getdate()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -28, getdate()))as nvarchar(3)) WeekNo
+		CAST(DATEPART (YEAR, DATEADD( DAY, -28, GETDATE()))AS NVARCHAR(4)) + CAST(DATEPART (WEEK, DATEADD( DAY, -28, GETDATE()))AS NVARCHAR(3)) WeekNo
 )
 ,QueryAR AS
 (
@@ -35,19 +32,19 @@ WeekQuery as(
 	AND strTransactionType IN ('Invoice', 'Debit Memo') 
 ),
 CombineARAP AS (
-	SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) as nvarchar(3)),2) WeekNo , dblAmountDue * -1 dblAmountDue 
+	SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) WeekNo , dblAmountDue * -1 dblAmountDue 
 	FROM vyuAPOpenPayables 
 	UNION ALL
-	SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) as nvarchar(3)),2) WeekNo , dblAmountDue dblAmountDue FROM QueryAR 
+	SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT('0' + CAST(DATEPART (WEEK, dtmDueDate) AS NVARCHAR(3)),2) WeekNo , dblAmountDue dblAmountDue FROM QueryAR 
 )
-,TotalQuery as(
+,TotalQuery AS(
 	SELECT  
 	SUM(dblAmountDue)dblAmountDue
 	, WeekNo
 	FROM CombineARAP A
 	group by WeekNo
 )
-,JoinInWeeks as(
+,JoinInWeeks AS(
 	SELECT 
 	B.FirsDayOfWeek,
 	B.WeekNo, 
@@ -55,14 +52,19 @@ CombineARAP AS (
 	FROM TotalQuery A right join
 	WeekQuery B ON B.WeekNo = A.WeekNo
 )
-,RunningTotal as(
+,RunningTotal AS(
 	SELECT 
 	FirsDayOfWeek,
 	WeekNo,
 	ISNULL(dblAmountDue,0) dblAmountDue,
-	SUM(dblAmountDue) over(order by WeekNo) RunningTotal
+	RunningTotal.Val RunningTotal
 FROM
-JoinInWeeks
+JoinInWeeks T1
+OUTER APPLY (
+	SELECT SUM(dblAmountDue) Val from JoinInWeeks T2
+	WHERE T2.WeekNo<=T1.WeekNo
+)RunningTotal
+
 )
 SELECT 
 	A.*
