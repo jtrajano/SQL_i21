@@ -24,7 +24,8 @@ BEGIN
 		  , @filterValue			VARCHAR(MAX)	
 		  , @intSourceLetterId		INT
 		  , @intEntityUserId		INT
-		  , @strTableSource VARCHAR(MAX);
+		  , @strTableSource VARCHAR(MAX)
+		  , @dtmDateFrom			DATETIME = NULL;
 		
 	EXEC sp_xml_preparedocument @idoc OUTPUT, @xmlParam
 	DECLARE @temp_params TABLE (
@@ -245,7 +246,29 @@ BEGIN
 				FOR XML PATH ('')
 			) C (intEntityCustomerId)
 
-			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @ysnInclude120Days = 1
+			IF @strLetterName = '1 Day Overdue Collection Letter'		
+				BEGIN		
+					SET @dtmDateFrom = DATEADD(day, -10, GETDATE())
+				END		
+			ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
+				BEGIN		
+					SET @dtmDateFrom = DATEADD(day, -30, GETDATE())
+				END
+			ELSE IF @strLetterName = '30 Day Overdue Collection Letter' OR @strLetterName = 'Recent Overdue Collection Letter'
+				BEGIN						
+					SET @dtmDateFrom = DATEADD(day, -60, GETDATE())
+				END
+			ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
+				BEGIN						
+					SET @dtmDateFrom = DATEADD(day, -90, GETDATE())
+				END
+			ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
+				BEGIN
+					SET @dtmDateFrom = DATEADD(day, -120, GETDATE())
+				END
+
+			EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
+														  , @ysnInclude120Days = 1
 														  , @strCustomerIds = @strCustomerLocalIds
 														  , @intEntityUserId = @intEntityUserId
 
