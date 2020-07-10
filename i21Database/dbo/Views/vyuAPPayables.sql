@@ -3,7 +3,7 @@
 	Note: Origin transaction do not have multi currency implementation, also to handle issue (see 792717-000, CISCO transaction of COPP)
 	Note: Handle negative quantity received
 */
-CREATE VIEW dbo.vyuAPPayables
+CREATE VIEW vyuAPPayables
 --WITH SCHEMABINDING
 AS 
 SELECT 
