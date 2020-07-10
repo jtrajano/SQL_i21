@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspICReverseInventoryReceipt
+﻿CREATE PROCEDURE uspICReverseInventoryReceipt_PPT_OnHold
 	@strReceiptNumber NVARCHAR(40) = NULL 
 	,@intInventoryReceipt INT = NULL 
 	,@intEntityUserSecurityId AS INT = NULL 	
