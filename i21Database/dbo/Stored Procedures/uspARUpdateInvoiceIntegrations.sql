@@ -130,37 +130,37 @@ BEGIN TRY
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
 	EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
 
-	--PRICING LAYER
-	INSERT INTO @InvoicesForContractDelete(
-		  intHeaderId
-		, intDetailId
-		, ysnForDelete
-		, strBatchId
-	)--INVOICE HEADER DELETED 
-	SELECT intHeaderId 	= intInvoiceId
-		 , intDetailId	= intInvoiceDetailId
-		 , ysnForDelete = CAST(1 AS BIT)
-		 , strBatchId 	= @strBatchId
-	FROM tblARInvoiceDetail ID
-	WHERE (@ForDelete = 1 AND ID.intInvoiceId = @intInvoiceId)
-	   AND ID.intContractDetailId IS NOT NULL
+	-- --PRICING LAYER
+	-- INSERT INTO @InvoicesForContractDelete(
+	-- 	  intHeaderId
+	-- 	, intDetailId
+	-- 	, ysnForDelete
+	-- 	, strBatchId
+	-- )--INVOICE HEADER DELETED 
+	-- SELECT intHeaderId 	= intInvoiceId
+	-- 	 , intDetailId	= intInvoiceDetailId
+	-- 	 , ysnForDelete = CAST(1 AS BIT)
+	-- 	 , strBatchId 	= @strBatchId
+	-- FROM tblARInvoiceDetail ID
+	-- WHERE (@ForDelete = 1 AND ID.intInvoiceId = @intInvoiceId)
+	--    AND ID.intContractDetailId IS NOT NULL
 	   
-	WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContractDelete)
-		BEGIN
-			DECLARE @intInvoiceToDelete			INT = NULL
-				  , @intInvoiceDetailToDeleteId	INT = NULL
+	-- WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContractDelete)
+	-- 	BEGIN
+	-- 		DECLARE @intInvoiceToDelete			INT = NULL
+	-- 			  , @intInvoiceDetailToDeleteId	INT = NULL
 
-			SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
-				       , @intInvoiceDetailToDeleteId	= intDetailId
-			FROM @InvoicesForContractDelete
+	-- 		SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
+	-- 			       , @intInvoiceDetailToDeleteId	= intDetailId
+	-- 		FROM @InvoicesForContractDelete
 
-			EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
-											   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
-    										   , @strScreen 			= 'Invoice'
-    										   , @intUserId				= @UserId
+	-- 		EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
+	-- 										   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
+    -- 										   , @strScreen 			= 'Invoice'
+    -- 										   , @intUserId				= @UserId
 			
-			DELETE FROM @InvoicesForContractDelete WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
-		END
+	-- 		DELETE FROM @InvoicesForContractDelete WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
+	-- 	END
 
 	IF @ForDelete = 1
 		BEGIN
