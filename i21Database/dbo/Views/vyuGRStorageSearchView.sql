@@ -137,7 +137,13 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
 LEFT JOIN tblSCDeliverySheet DS2
 	 on DS2.intDeliverySheetId = CS.intDeliverySheetId
-LEFT JOIN tblSCTicket SC 
+LEFT JOIN (
+	tblSCTicket SC 		
+	LEFT JOIN tblGRStorageHistory SH
+		ON SH.intTicketId = SC.intTicketId
+	LEFT JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
+	) 
 	ON SC.intTicketId = CS.intTicketId
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
