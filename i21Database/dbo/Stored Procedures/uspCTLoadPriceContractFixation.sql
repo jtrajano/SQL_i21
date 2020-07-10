@@ -122,6 +122,7 @@ BEGIN TRY
 				CD.strFutureMonth,
 				CD.intContractSeq,
 				CD.strContractType,
+				CH.intEntityId,
 				CD.strEntityName,
 				CD.strContractNumber,
 				-- dbo.fnCTConvertQuantityToTargetCommodityUOM( CD.intPriceCommodityUOMId,BU.intCommodityUnitMeasureId,CD.dblBasis) / 
@@ -226,6 +227,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				MO.strFutureMonth,
 				CAST(NULL AS INT)		AS	intContractSeq,
 				CT.strContractType,
+				CH.intEntityId,
 				EY.strName				AS	strEntityName,
 				CH.strContractNumber,
 				CAST(NULL AS NUMERIC(18,6))	AS	dblConvertedBasis,
