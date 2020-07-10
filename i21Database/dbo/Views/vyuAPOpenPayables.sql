@@ -1,7 +1,7 @@
 /*
 For Cash Projection (DASH-2443)
 */	
-CREATE VIEW vyuAPOpenPayables
+CREATE VIEW dbo.vyuAPOpenPayables
 AS
     SELECT
 		A.dtmDueDate		
