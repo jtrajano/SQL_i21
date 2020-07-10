@@ -130,6 +130,8 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			AND DSS.intEntityId = E.intEntityId
 			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
 			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
+LEFT JOIN tblSCDeliverySheet DS2
+	 on DS2.intDeliverySheetId = CS.intDeliverySheetId
 LEFT JOIN (
 	tblSCTicket SC 		
 	LEFT JOIN tblGRStorageHistory SH
