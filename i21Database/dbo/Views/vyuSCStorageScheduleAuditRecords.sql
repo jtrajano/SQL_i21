@@ -1,4 +1,4 @@
-﻿CREATE VIEW vyuSCStorageScheduleAuditRecords
+﻿CREATE VIEW [dbo].[vyuSCStorageScheduleAuditRecords]
 AS 
 WITH cte   
 AS (  
