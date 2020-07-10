@@ -67,6 +67,7 @@ BEGIN
 					AND intFamilyId IS NULL
 					AND intClassId IS NULL
 					AND pad.intEntityId IS NULL
+					AND pad.intItemUOMId IS NULL
 					AND ISNULL(strRegion, '')  =  ''
 					AND ISNULL(strDistrict, '')  =  '')
 				BEGIN
