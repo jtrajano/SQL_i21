@@ -1,4 +1,4 @@
-CREATE VIEW vyuCMCashProjection
+CREATE VIEW dbo.vyuCMCashProjection
 AS
 WITH BankBalances AS (
 	SELECT SUM([dbo].[fnCMGetBankBalance] (intBankAccountId, GETDATE())) Balance
