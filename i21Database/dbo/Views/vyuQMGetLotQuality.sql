@@ -3,7 +3,7 @@
 SELECT intProductValueId AS intLotId
 	,intSampleId
 	,Moisture
-	,case when ISNULL(Density,0)='' then 0 else ISNULL(Density,0) end AS Density
+	,case when ISNULL(Density,0)='' then 0.0 else isnull(CONVERT(DECIMAL(24,2),Density), 0.0) end AS Density
 	,Color
 	,Brightness
 	,Thickness
@@ -67,12 +67,12 @@ FROM (
 			,'Thickness'
 			,'Taste'
 			)
-	WHERE TR.intProductTypeId = 6
+	WHERE TR.intProductTypeId = (CASE WHEN (Select TOP 1 ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference) = 1 THEN 11 ELSE 6 END)
 		AND TR.intSampleId = (
 			SELECT MAX(intSampleId)
 			FROM tblQMTestResult
 			WHERE intProductValueId = TR.intProductValueId
-				AND intProductTypeId = 6
+				AND intProductTypeId = (CASE WHEN (Select TOP 1 ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference) = 1 THEN 11 ELSE 6 END)
 			)
 	GROUP BY P.strPropertyName
 		,TR.intProductTypeId
