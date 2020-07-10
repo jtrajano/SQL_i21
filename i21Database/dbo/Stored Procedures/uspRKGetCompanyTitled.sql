@@ -221,6 +221,7 @@ BEGIN
 				, intTransactionId
 				, strTransactionId
 				, intTransactionDetailId
+				, intSourceId
 				)
 			SELECT
 				strCommodityCode
@@ -235,6 +236,7 @@ BEGIN
 				,intTransactionRecordHeaderId
 				,strTransactionNumber
 				,intTransactionRecordId
+				,intTicketId
 			FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
 			WHERE CompOwn.intItemId = ISNULL(@intItemId, CompOwn.intItemId)
 				AND CompOwn.intLocationId = ISNULL(@intLocationId, CompOwn.intLocationId)
@@ -394,7 +396,7 @@ BEGIN
 			FROM (
 				select
 					 dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-					,Inv.dblTotal
+					,dblTotal  = SUM(ISNULL(Inv.dblTotal,0))
 					,IR.strReceiptNumber
 					,Inv.intTransactionId
 					,TV.strDistributionOption
@@ -408,6 +410,11 @@ BEGIN
 					AND BD.intBillDetailId IS NULL
 					AND ISNULL(TV.strDistributionOption,'NULL') <>  CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '' ELSE 'DP' END
 					--AND TV.intDeliverySheetId IS NULL
+				group by Inv.dtmDate
+					,IR.strReceiptNumber
+					,Inv.intTransactionId
+					,TV.strDistributionOption
+					,Inv.strTransactionType
 			) t
 			UNION ALL
 			SELECT --INVENTORY RECEIPT W/O VOUCHER (DELIVERY SHEET)
