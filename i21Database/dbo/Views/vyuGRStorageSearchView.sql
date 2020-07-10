@@ -62,7 +62,7 @@ SELECT
 										ELSE NULL
 									END
     ,intContractDetailId			= CASE 
-										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN SC.intContractId 
+										WHEN CS.ysnTransferStorage = 0 AND ST.ysnDPOwnedType = 1 THEN CD.intContractDetailId
 										WHEN CS.ysnTransferStorage = 1 AND ST.ysnDPOwnedType = 1 THEN CD_Transfer.intContractDetailId 
 										ELSE NULL
 									END
@@ -129,8 +129,15 @@ LEFT JOIN (tblSCDeliverySheet DeliverySheet
 			AND DSS.intEntityId = E.intEntityId
 			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
 			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
-LEFT JOIN tblSCTicket SC 
+LEFT JOIN (
+	tblSCTicket SC 		
+	LEFT JOIN tblGRStorageHistory SH
+		ON SH.intTicketId = SC.intTicketId
+	LEFT JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
+	) 
 	ON SC.intTicketId = CS.intTicketId
+		AND SH.intCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblSCTicketSplit SCTicketSplit	
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
 		AND SCTicketSplit.intCustomerId = CS.intEntityId
@@ -138,7 +145,7 @@ LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId
 LEFT JOIN tblCTContractDetail CD
-    ON CD.intContractDetailId = SC.intContractId  
+	ON CD.intContractDetailId = IRI.intContractDetailId
 LEFT JOIN tblCTContractHeader CH 
     ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN (
@@ -152,4 +159,4 @@ LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
 		AND CS.ysnTransferStorage = 1
 LEFT JOIN tblCTContractHeader CH_Transfer
-    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
+    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId
