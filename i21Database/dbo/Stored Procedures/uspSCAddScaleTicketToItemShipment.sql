@@ -691,8 +691,16 @@ END
 									,[intShipFromLocationId]			= SE.intShipFromLocationId
 									,[intShipToLocationId]				= SE.intShipToLocationId
 									,[intFreightTermId]					= SE.intFreightTermId
-									,[intForexRateTypeId]				= SE.intForexRateTypeId
-									,[dblForexRate]						= SE.dblForexRate
+									,[intForexRateTypeId]				= case when ContractCost.intCurrencyId is null 
+																			then SE.intForexRateTypeId 
+																			else 
+																				ContractCost.intRateTypeId
+																			end
+									,[dblForexRate]						= case when ContractCost.intCurrencyId is null 
+																			then SE.dblForexRate 
+																			else 
+																				ContractCost.dblFX
+																			end
 
 									--Charges
 									,[intContractId]					= SE.intOrderId
@@ -754,8 +762,16 @@ END
 									,[intShipFromLocationId]			= SE.intShipFromLocationId
 									,[intShipToLocationId]				= SE.intShipToLocationId
 									,[intFreightTermId]					= SE.intFreightTermId
-									,[intForexRateTypeId]				= SE.intForexRateTypeId
-									,[dblForexRate]						= SE.dblForexRate
+									,[intForexRateTypeId]				= case when ContractCost.intCurrencyId is null 
+																			then SE.intForexRateTypeId 
+																			else 
+																				ContractCost.intRateTypeId
+																			end
+									,[dblForexRate]						= case when ContractCost.intCurrencyId is null 
+																			then SE.dblForexRate 
+																			else 
+																				ContractCost.dblFX
+																			end
 
 									--Charges
 									,[intContractId]					= SE.intOrderId
@@ -882,8 +898,16 @@ END
 									,[intShipFromLocationId]			= SE.intShipFromLocationId
 									,[intShipToLocationId]				= SE.intShipToLocationId
 									,[intFreightTermId]					= SE.intFreightTermId
-									,[intForexRateTypeId]				= SE.intForexRateTypeId
-									,[dblForexRate]						= SE.dblForexRate
+									,[intForexRateTypeId]				= case when ContractCost.intCurrencyId is null 
+																			then SE.intForexRateTypeId 
+																			else 
+																				ContractCost.intRateTypeId
+																			end
+									,[dblForexRate]						= case when ContractCost.intCurrencyId is null 
+																			then SE.dblForexRate 
+																			else 
+																				ContractCost.dblFX
+																			end
 
 									--Charges
 									,[intContractId]					= SE.intOrderId
@@ -1013,8 +1037,16 @@ END
 									,[intShipFromLocationId]			= SE.intShipFromLocationId
 									,[intShipToLocationId]				= SE.intShipToLocationId
 									,[intFreightTermId]					= SE.intFreightTermId
-									,[intForexRateTypeId]				= SE.intForexRateTypeId
-									,[dblForexRate]						= SE.dblForexRate
+									,[intForexRateTypeId]				= case when ContractCost.intCurrencyId is null 
+																			then SE.intForexRateTypeId 
+																			else 
+																				ContractCost.intRateTypeId
+																			end
+									,[dblForexRate]						= case when ContractCost.intCurrencyId is null 
+																			then SE.dblForexRate 
+																			else 
+																				ContractCost.dblFX
+																			end
 
 									--Charges
 									,[intContractId]					= SE.intOrderId
@@ -1150,8 +1182,16 @@ END
 								,[intShipFromLocationId]	= SE.intShipFromLocationId
 								,[intShipToLocationId]		= SE.intShipToLocationId
 								,[intFreightTermId]			= SE.intFreightTermId
-								,[intForexRateTypeId]		= SE.intForexRateTypeId
-								,[dblForexRate]				= SE.dblForexRate
+								,[intForexRateTypeId]		= case when CT.intCurrencyId is null 
+																then SE.intForexRateTypeId 
+																else 
+																	CT.intRateTypeId
+																end
+								,[dblForexRate]				= case when CT.intCurrencyId is null 
+																then SE.dblForexRate 
+																else 
+																	CT.dblFX
+																end
 				
 								--Charges
 								,[intContractId]			= SE.intOrderId
@@ -1226,8 +1266,16 @@ END
 								,[intShipFromLocationId]			= SE.intShipFromLocationId
 								,[intShipToLocationId]				= SE.intShipToLocationId
 								,[intFreightTermId]					= SE.intFreightTermId
-								,[intForexRateTypeId]				= SE.intForexRateTypeId
-								,[dblForexRate]						= SE.dblForexRate
+								,[intForexRateTypeId]				= case when ContractCost.intCurrencyId is null 
+																		then SE.intForexRateTypeId 
+																		else 
+																			ContractCost.intRateTypeId
+																		end
+								,[dblForexRate]						= case when ContractCost.intCurrencyId is null 
+																		then SE.dblForexRate 
+																		else 
+																			ContractCost.dblFX
+																		end
 				
 								--Charges
 								,[intContractId]					= SE.intOrderId
@@ -1356,8 +1404,16 @@ END
 					,[intShipFromLocationId]			= SE.intShipFromLocationId
 					,[intShipToLocationId]				= SE.intShipToLocationId
 					,[intFreightTermId]					= SE.intFreightTermId
-					,[intForexRateTypeId]				= SE.intForexRateTypeId
-					,[dblForexRate]						= SE.dblForexRate
+					,[intForexRateTypeId]				= case when ContractCost.intCurrencyId is null 
+															then SE.intForexRateTypeId 
+															else 
+																ContractCost.intRateTypeId
+															end
+					,[dblForexRate]						= case when ContractCost.intCurrencyId is null 
+															then SE.dblForexRate 
+															else 
+																ContractCost.dblFX
+															end
 				
 					--Charges
 					,[intContractId]					= SE.intOrderId
