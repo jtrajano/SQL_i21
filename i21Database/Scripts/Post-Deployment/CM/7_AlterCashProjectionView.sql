@@ -1,6 +1,7 @@
 /*
     Avoid the error of over clause in sql version 2008 (unsupported)
 */
+GO
 IF SUBSTRING(CONVERT (NVARCHAR(20), SERVERPROPERTY('ProductVersion')),1,2) > 10
 BEGIN
     EXEC (
