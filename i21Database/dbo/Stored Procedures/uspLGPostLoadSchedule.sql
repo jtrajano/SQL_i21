@@ -14,12 +14,10 @@ BEGIN TRY
 	DECLARE @intSourceType INT
 	DECLARE @strInvoiceNo NVARCHAR(1000)
 	DECLARE @strMsg NVARCHAR(MAX)
-	DECLARE @ysnCancel BIT
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
 		  ,@intSourceType = intSourceType
-		  ,@ysnCancel = ISNULL(ysnCancelled, 0)
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -86,18 +84,17 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
 			END
 			ELSE 
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 			END
 
-			IF (@ysnCancel = 1) 
-				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
-			ELSE
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN	
 				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
-
+			END
 		END
 		ELSE IF @intPurchaseSale = 2
 		BEGIN
@@ -129,14 +126,13 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 			END
 
-			IF (@ysnCancel = 1) 
-				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
-			ELSE
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN	
 				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
-
+			END
 		END
 		ELSE IF @intPurchaseSale = 3
 		BEGIN
@@ -162,12 +158,11 @@ BEGIN TRY
 					ELSE 1
 					END
 			WHERE intLoadId = @intLoadId
-				AND @ysnCancel = 0
 
-			IF (@ysnCancel = 1) 
-				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
-			ELSE
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN	
 				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			END
 		END
 	END
 END TRY
