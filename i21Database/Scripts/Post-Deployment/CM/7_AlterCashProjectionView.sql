@@ -5,11 +5,11 @@ GO
 IF SUBSTRING(CONVERT (NVARCHAR(20), SERVERPROPERTY('ProductVersion')),1,2) > 10
 BEGIN
     EXEC (
-        'ALTER VIEW vyuCMCashProjection
+        'ALTER VIEW dbo.vyuCMCashProjection
         AS
         WITH BankBalances AS (
             SELECT SUM([dbo].[fnCMGetBankBalance] (intBankAccountId, getdate())) Balance
-            FROM tblCMBankAccount
+            FROM dbo.tblCMBankAccount
         ),
         WeekQuery as(
                 SELECT  
@@ -33,14 +33,14 @@ BEGIN
             SELECT 
                 dtmDueDate,
                 dblAmountDue
-            FROM tblARInvoice 
+            FROM dbo.tblARInvoice 
             WHERE ysnPosted = 1
             AND ysnPaid = 0
             AND strTransactionType IN (''Invoice'', ''Debit Memo'') 
         ),
         CombineARAP AS (
             SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT(''0'' + CAST(DATEPART (WEEK, dtmDueDate) as nvarchar(3)),2) WeekNo , dblAmountDue * -1 dblAmountDue 
-            FROM vyuAPOpenPayables 
+            FROM dbo.vyuAPPayablesAmountDue 
             UNION ALL
             SELECT CAST(DATEPART (YEAR, dtmDueDate)AS NVARCHAR(4)) + RIGHT(''0'' + CAST(DATEPART (WEEK, dtmDueDate) as nvarchar(3)),2) WeekNo , dblAmountDue dblAmountDue FROM QueryAR 
         )

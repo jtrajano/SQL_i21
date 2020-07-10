@@ -8758,7 +8758,6 @@
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
-    <Build Include="dbo\Views\vyuAPOpenPayables.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
     <None Include="Scripts\Post-Deployment\CT\6_DPContractJobScheduler.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
@@ -8770,6 +8769,7 @@
     <Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
