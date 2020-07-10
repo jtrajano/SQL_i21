@@ -8564,6 +8564,7 @@
     <Build Include="dbo\Views\vyuAPOpenPayables.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <None Include="Scripts\Post-Deployment\IC\24_PopulateTransactionUOM.sql" />
+    <Build Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
