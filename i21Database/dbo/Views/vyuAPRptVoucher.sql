@@ -7,7 +7,7 @@ SELECT
 											AND ContractDetail.intItemContractId > 0
 											AND DMDetails.intContractCostId IS NULL
 									THEN ItemContract.strContractItemName
-									ELSE ISNULL(Item.strDescription,'')
+									ELSE ISNULL(Item.strDescription, CASE WHEN DMDetails.ysnStage = 0 THEN ISNULL(DMDetails.strMiscDescription, '') ELSE '' END)
 								END
 	,strItemNo				=	CASE WHEN Item.strType = 'Other Charge' THEN '' ELSE Item.strItemNo END --AP-3233
 	,strBillOfLading		=	Receipt.strBillOfLading
