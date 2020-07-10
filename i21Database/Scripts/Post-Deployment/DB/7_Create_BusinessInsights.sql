@@ -92,10 +92,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@cashProjectionChartPanelId, 1, @panelTabId, 1, @entityId, 1
+						@cashProjectionChartPanelId, 1, @panelTabId, 1, @entityId, 1, 1
 					)
 				END
 
@@ -184,10 +184,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, 2, @panelTabId, 1, @entityId, 1
+						@cashProjectionGridPanelId, 2, @panelTabId, 1, @entityId, 1, 1
 					)
 
 					--UPDATE strConfigurator for Pivot Grid
@@ -298,10 +298,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@grossMarginChartPanelId, 1, @panelTabId, 2, @entityId, 1
+						@grossMarginChartPanelId, 1, @panelTabId, 2, @entityId, 1, 1
 					)
 				END
 
@@ -380,10 +380,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@grossMarginGridPanelId, 2, @panelTabId, 2, @entityId, 1
+						@grossMarginGridPanelId, 2, @panelTabId, 2, @entityId, 1, 1
 					)
 				END
 
@@ -442,10 +442,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@customerAgingChartPanelId, 3, @panelTabId, 1, @entityId, 1
+						@customerAgingChartPanelId, 3, @panelTabId, 1, @entityId, 1, 1
 					)
 				END
 
@@ -505,10 +505,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@customerAgingGridPanelId, 4, @panelTabId, 1, @entityId, 1
+						@customerAgingGridPanelId, 4, @panelTabId, 1, @entityId, 1, 1
 					)
 				END
 
@@ -567,10 +567,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@salesChartPanelId, 3, @panelTabId, 2, @entityId, 1
+						@salesChartPanelId, 3, @panelTabId, 2, @entityId, 1, 1
 					)
 				END
 
@@ -629,10 +629,10 @@ BEGIN
 
 					--INSERT PANEL LAYOUT
 					INSERT INTO tblDBPanelUser (
-						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [intConcurrencyId ]
+						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@salesGridPanelId, 4, @panelTabId, 2, @entityId, 1
+						@salesGridPanelId, 4, @panelTabId, 2, @entityId, 1, 1
 					)
 				END
 
