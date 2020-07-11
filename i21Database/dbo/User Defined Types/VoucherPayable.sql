@@ -102,6 +102,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intCurrencyExchangeRateTypeId]	INT NULL,
 	[dblExchangeRate]				DECIMAL(18,6) DEFAULT(1),
 	/*Tax info*/
+	[intFreightTermId]				INT NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
 	[dblTax]						DECIMAL(18,2) NOT NULL DEFAULT(0), --IF THIS IS NOT 0, PLEASE PROVIDE DATA FOR VoucherDetailTax
 	/*Discount Info*/
