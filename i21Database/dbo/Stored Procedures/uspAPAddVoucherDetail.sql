@@ -233,6 +233,7 @@ SELECT TOP 100 PERCENT
 	,dblBundleTotal						=	0
 	,dblQtyBundleReceived				=	0
 	,dblBundleUnitQty					=	0
+	,intFreightTermId					=	A.intFreightTermId
 	,ysnStage							=	A.ysnStage
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
@@ -434,7 +435,8 @@ INSERT
 	,intItemBundleId					
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
-	,dblBundleUnitQty			
+	,dblBundleUnitQty		
+	,intFreightTermId	
 	,ysnStage		
 )
 VALUES
@@ -523,6 +525,7 @@ VALUES
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
+	,intFreightTermId
 	,ysnStage
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
