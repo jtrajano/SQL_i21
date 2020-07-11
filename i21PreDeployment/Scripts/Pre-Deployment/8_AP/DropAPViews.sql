@@ -25,6 +25,9 @@ GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayablesSummary')
 	DROP VIEW vyuAPPayablesSummary
 GO
+IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayablesAmountDue')
+	DROP VIEW vyuAPPayablesAmountDue
+GO
 IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuAPPayables')
 	DROP VIEW vyuAPPayables
 GO
