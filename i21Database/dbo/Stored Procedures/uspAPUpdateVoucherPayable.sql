@@ -110,6 +110,7 @@ INSERT
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
 	,[dblDifference]  
+	,[intFreightTermId]
 )
 VALUES
 (	
@@ -190,6 +191,7 @@ VALUES
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
 	,[dblDifference]
+	,[intFreightTermId]
 )
 OUTPUT SourceData.intBillDetailId, inserted.intVoucherPayableId INTO @primaryKeys;
 
