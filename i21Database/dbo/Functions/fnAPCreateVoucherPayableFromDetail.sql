@@ -81,6 +81,7 @@ RETURNS TABLE AS RETURN
 		,[dblFranchiseAmount]				=	B.dblFranchiseAmount
 		,[dblActual]						=	B.dblActual
 		,[dblDifference]					=	B.dblDifference
+		,[intFreightTermId]					=	B.intFreightTermId
 		,[ysnStage]							=	B.ysnStage
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
