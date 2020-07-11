@@ -100,6 +100,7 @@ INSERT INTO @voucherPayables(
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
 	,[dblDifference]  
+	,[intFreightTermId]
 )
 SELECT
 	[intBillId]
@@ -179,7 +180,45 @@ SELECT
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
 	,[dblDifference]
+	,[intFreightTermId]
 FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+
+INSERT INTO @voucherPayableTax
+(
+	[intVoucherPayableId]       
+	,[intTaxGroupId]				
+	,[intTaxCodeId]				
+	,[intTaxClassId]				
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[intAccountId]				
+	,[dblTax]					
+	,[dblAdjustedTax]			
+	,[ysnTaxAdjusted]			
+	,[ysnSeparateOnBill]			
+	,[ysnCheckOffTax]			
+	,[ysnTaxExempt]              
+	,[ysnTaxOnly]				
+)
+SELECT
+	B.[intVoucherPayableId]       
+	,A.[intTaxGroupId]				
+	,A.[intTaxCodeId]				
+	,A.[intTaxClassId]				
+	,A.[strTaxableByOtherTaxes]	
+	,A.[strCalculationMethod]		
+	,A.[dblRate]					
+	,A.[intAccountId]				
+	,A.[dblTax]					
+	,A.[dblAdjustedTax]			
+	,A.[ysnTaxAdjusted]			
+	,A.[ysnSeparateOnBill]			
+	,A.[ysnCheckOffTax]			
+	,A.[ysnTaxExempt]              
+	,A.[ysnTaxOnly]
+FROM dbo.fnAPCreateVoucherPayableTaxFromDetail(@voucherDetailIds) A
+INNER JOIN @primaryKeys B ON A.intBillDetailId = B.intBillDetailId
 WHERE ysnStage = 1
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables) RETURN;
