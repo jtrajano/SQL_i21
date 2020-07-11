@@ -82,6 +82,7 @@ RETURNS TABLE AS RETURN
 		,[dblFranchiseAmount]				=	B.dblFranchiseAmount
 		,[dblActual]						=	B.dblActual
 		,[dblDifference]					=	B.dblDifference
+		,[intFreightTermId]					=	B.intFreightTermId
 		,[ysnStage]							=	B.ysnStage
 		,[intBillDetailId]					=	B.intBillDetailId
 	FROM tblAPBill A
