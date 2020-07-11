@@ -8505,6 +8505,7 @@
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
     <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
