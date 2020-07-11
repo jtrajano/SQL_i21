@@ -3410,7 +3410,7 @@ BEGIN TRY
 							update @avqty set ysnApplied = 1, intBillDetailId = @cur_bid where id = @cur_id
 						end
 
-						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+						--EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 					end
 
