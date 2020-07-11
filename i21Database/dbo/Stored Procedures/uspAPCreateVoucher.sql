@@ -115,7 +115,7 @@ BEGIN TRY
 	-- 	WHERE filteredPayables.intVoucherPayableId = A.intVoucherPayableId
 	-- )
 
-	SELECT
+	SELECT TOP 1
 		@error = strError
 	FROM dbo.fnAPValidateVoucherPayable(@voucherPayables, @voucherPayableTax)
 

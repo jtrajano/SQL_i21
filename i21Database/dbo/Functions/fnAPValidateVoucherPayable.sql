@@ -13,7 +13,14 @@ BEGIN
 
 	INSERT INTO @returnTable
 	--DO NOT ALLOW ZERO COST
-
+	--CHECK IF ENTITY IS A VENDOR
+	SELECT TOP 1
+		A.intVoucherPayableId
+		,'Entity id(' + CAST(A.intEntityVendorId AS NVARCHAR) + ') is not a vendor.'
+	FROM @voucherPayables A
+	LEFT JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityId
+	WHERE B.intEntityId IS NULL
+	UNION ALL
 	--DO NOT ALLOW THE intItemId TO BE NULL IF UOM PROVIDED
 	SELECT TOP 1
 		A.intVoucherPayableId
