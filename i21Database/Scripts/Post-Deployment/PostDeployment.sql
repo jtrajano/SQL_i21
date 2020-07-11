@@ -306,6 +306,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdatePrepayDetailAccount.sql
 :r .\AP\UpdateVoucherPayableTranType.sql
 :r .\AP\PurgePayableCompleted.sql
+:r .\AP\UpdatePayableFreightTerm.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

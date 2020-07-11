@@ -7999,6 +7999,7 @@
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
