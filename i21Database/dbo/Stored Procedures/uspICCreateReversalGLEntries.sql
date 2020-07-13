@@ -13,6 +13,7 @@ SET ANSI_WARNINGS OFF
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @InventoryTransactionTypeId_AutoVariance AS INT = 1
+		,@InventoryTransactionTypeId_Inventory_AutoVarianceOnNegativelySoldOrUsedStock AS INT = 35
 		,@InventoryTransactionTypeId_CostAdjustment AS INT = 26;
 
 --DECLARE @InventoryTransactionTypeId_WriteOffSold AS INT = 2;
@@ -33,6 +34,9 @@ DECLARE @AccountCategory_Inventory AS NVARCHAR(30) = 'Inventory'
 		,@AccountCategory_Write_Off_Sold AS NVARCHAR(30) = 'Write-Off Sold'
 		,@AccountCategory_Revalue_Sold AS NVARCHAR(30) = 'Revalue Sold'
 		,@AccountCategory_Auto_Negative AS NVARCHAR(30) = 'Inventory Adjustment' -- 'Auto-Variance'
+		
+		,@TransactionType_AutoVariance AS NVARCHAR(50) = 'Inventory Auto Variance'
+		,@TransactionType_Inventory_AutoVarianceOnNegativelySoldOrUsedStock AS NVARCHAR(100) = 'Inventory Auto Variance on Negatively Sold or Used Stock'
 
 		,@AccountCategory_Cost_Adjustment AS NVARCHAR(30) = 'Inventory Adjustment' -- 'Auto-Variance' -- 'Cost Adjustment' -- As per Ajith, the system should re-use Auto-Negative. 
 		,@AccountCategory_Revalue_WIP AS NVARCHAR(30) = 'Work In Progress' -- 'Revalue WIP' -- As per Ajith, we should not add another category. Thus, I'm diverting it to reuse 'Work In Progress'. 
@@ -165,7 +169,11 @@ BEGIN
 			LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType
 				ON currencyRateType.intCurrencyExchangeRateTypeId = Reversal.intForexRateTypeId
 	WHERE	Reversal.strBatchId = @strBatchId			
-			AND Reversal.intTransactionTypeId NOT IN (@InventoryTransactionTypeId_AutoVariance, @InventoryTransactionTypeId_CostAdjustment)	
+			AND Reversal.intTransactionTypeId NOT IN (
+				@InventoryTransactionTypeId_AutoVariance
+				,@InventoryTransactionTypeId_CostAdjustment
+				,@InventoryTransactionTypeId_Inventory_AutoVarianceOnNegativelySoldOrUsedStock
+			)	
 			
 	-----------------------------------------------------------------------------------
 	-- Create the Auto-Negative G/L Entries
@@ -180,7 +188,7 @@ BEGIN
 			,dblDebitUnit				= DebitUnit.Value 
 			,dblCreditUnit				= CreditUnit.Value 
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= 'IAN' 
+			,strCode					= 'IAV'
 			,strReference				= '' 
 			,intCurrencyId				= ItemTransactions.intCurrencyId
 			,dblExchangeRate			= ItemTransactions.dblExchangeRate
@@ -193,7 +201,11 @@ BEGIN
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= @AccountCategory_Auto_Negative
+			,strTransactionType			= 
+					CASE 
+						WHEN ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_Inventory_AutoVarianceOnNegativelySoldOrUsedStock THEN @TransactionType_Inventory_AutoVarianceOnNegativelySoldOrUsedStock
+						ELSE @TransactionType_AutoVariance
+					END 
 			,strTransactionForm			= ItemTransactions.strTransactionForm
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -219,8 +231,14 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
 			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
-			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
+			AND ItemTransactions.intTransactionTypeId IN (
+				@InventoryTransactionTypeId_AutoVariance
+				,@InventoryTransactionTypeId_CostAdjustment
+				,@InventoryTransactionTypeId_Inventory_AutoVarianceOnNegativelySoldOrUsedStock
+			)	
+			AND ROUND(
+				dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblCost, 0)) + ISNULL(ItemTransactions.dblValue, 0)
+			, 2) <> 0
 
 	UNION ALL 
 	SELECT	
@@ -232,7 +250,7 @@ BEGIN
 			,dblDebitUnit				= CreditUnit.Value 
 			,dblCreditUnit				= DebitUnit.Value 
 			,strDescription				= tblGLAccount.strDescription
-			,strCode					= 'IAN' 
+			,strCode					= 'IAV'
 			,strReference				= '' 
 			,intCurrencyId				= ItemTransactions.intCurrencyId
 			,dblExchangeRate			= ItemTransactions.dblExchangeRate
@@ -245,7 +263,12 @@ BEGIN
 			,intEntityId				= @intEntityUserSecurityId 
 			,strTransactionId			= ItemTransactions.strTransactionId
 			,intTransactionId			= ItemTransactions.intTransactionId
-			,strTransactionType			= @AccountCategory_Auto_Negative
+			,strTransactionType			= 
+					CASE 
+						WHEN ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_Inventory_AutoVarianceOnNegativelySoldOrUsedStock THEN @TransactionType_Inventory_AutoVarianceOnNegativelySoldOrUsedStock
+						ELSE @TransactionType_AutoVariance
+					END 
+
 			,strTransactionForm			= ItemTransactions.strTransactionForm 
 			,strModuleName				= @ModuleName
 			,intConcurrencyId			= 1
@@ -271,8 +294,15 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebitUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) DebitUnit 
 			CROSS APPLY dbo.fnGetCreditUnit(dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblUOMQty, 0))) CreditUnit 
 	WHERE	ItemTransactions.strBatchId = @strBatchId
-			AND ItemTransactions.intTransactionTypeId = @InventoryTransactionTypeId_AutoVariance
-			AND ROUND(ISNULL(ItemTransactions.dblQty, 0) * ISNULL(ItemTransactions.dblUOMQty, 0) * ISNULL(ItemTransactions.dblCost, 0) + ISNULL(ItemTransactions.dblValue, 0), 2) <> 0
+			AND ItemTransactions.intTransactionTypeId IN (
+				@InventoryTransactionTypeId_AutoVariance
+				,@InventoryTransactionTypeId_CostAdjustment
+				,@InventoryTransactionTypeId_Inventory_AutoVarianceOnNegativelySoldOrUsedStock
+			)	
+			AND ROUND(
+				dbo.fnMultiply(ISNULL(ItemTransactions.dblQty, 0), ISNULL(ItemTransactions.dblCost, 0)) + ISNULL(ItemTransactions.dblValue, 0)
+			, 2) <> 0
+
 
 	-------------------------------------------------------------------------------------
 	-- Reverse the Cost Adjustments
@@ -400,4 +430,4 @@ BEGIN
 				,'Inventory Auto Variance on Negatively Sold or Used Stock'
 			)
 	;
-END 
+END
