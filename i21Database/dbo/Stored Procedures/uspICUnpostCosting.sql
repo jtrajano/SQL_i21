@@ -113,18 +113,19 @@ BEGIN
 			)
 
 	-- Get the unpost date. 
-	SELECT TOP 1 
-		@dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
-	FROM
-		tblICInventoryTransaction t
-	WHERE	
-		intTransactionId = @intTransactionId
-		AND strTransactionId = @strTransactionId
-		AND ISNULL(ysnIsUnposted, 0) = 0
-		AND (
-			ISNULL(t.dblQty, 0) <> 0 
-			OR t.intCostingMethod = 6
-		)
+	SET @dtmDate = dbo.fnRemoveTimeOnDate(GETDATE()) 
+	--SELECT TOP 1 
+	--	@dtmDate = dbo.fnRemoveTimeOnDate(dtmDate) 
+	--FROM
+	--	tblICInventoryTransaction t
+	--WHERE	
+	--	intTransactionId = @intTransactionId
+	--	AND strTransactionId = @strTransactionId
+	--	AND ISNULL(ysnIsUnposted, 0) = 0
+	--	AND (
+	--		ISNULL(t.dblQty, 0) <> 0 
+	--		OR t.intCostingMethod = 6
+	--	)
 
 END 
 
