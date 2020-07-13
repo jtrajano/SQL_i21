@@ -25,7 +25,7 @@ SELECT CHK.dtmDate
 		, dtmDetailDate = BILL.dtmBillDate
 		, strComment = BILL.strComment
 		, dblDetailAmount = 
-			CASE WHEN BILL.intTransactionType IN (2,3) -- Debit Memo , Prepayment (DM, VPRE)
+			CASE WHEN BILL.intTransactionType IN (3) OR ISNULL(ysnOffset,0) = 1 -- Debit Memo , Prepayment (DM, VPRE with ysnOffset =1)
 			THEN BILL.dblTotal * - 1 
 			ELSE BILL.dblTotal END
 		, dblDiscount = PYMTDTL.dblDiscount
