@@ -49,7 +49,7 @@ BEGIN
 		, strTransactionType
 		, strTransactionId  = strTransactionNumber
 		, intTransactionId = intTransactionRecordHeaderId
-		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'CNT'
+		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
 			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN (SELECT strDistributionOption FROM vyuSCTicketView WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId)
 			WHEN CompOwn.strTransactionType = 'Inventory Adjustment' THEN 'ADJ'
