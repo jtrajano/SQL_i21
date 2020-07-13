@@ -74,7 +74,7 @@ begin
 								    end + stuff((SELECT ', ' + strMessage FROM @AffectedVoucherInvoice FOR XML PATH ('')), 1, 1, '') + ' is using the price. '
 									+ case when @strContractType = 'Purchase' 
 										then 'Price cannot be edited.' 
-										else 'Please delete that first.'
+										else 'Please delete this price then price it again with the correct details.'
 								    end
 	from
 		@AffectedVoucherInvoice
