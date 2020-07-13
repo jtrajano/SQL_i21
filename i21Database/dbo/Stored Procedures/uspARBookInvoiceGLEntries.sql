@@ -162,6 +162,7 @@ IF @Post = 0
             AND [intItemId] IS NOT NULL
             AND ISNULL([strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
 
+		DELETE FROM @GLPost
         WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
         BEGIN				
 					
@@ -177,7 +178,41 @@ IF @Post = 0
             SELECT @WOStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
             IF @WOStorageCount > 0
             BEGIN
-                -- Unpost onhand stocks. 
+				-- Unpost onhand stocks. 
+				INSERT INTO @GLPost (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]	
+						,[dblDebitReport]	
+						,[dblCreditForeign]	
+						,[dblCreditReport]	
+						,[dblReportingRate]	
+						,[dblForeignRate]
+						,[strRateType]
+				)
                 EXEC dbo.uspICUnpostCosting
                          @intTransactionIdIC
                         ,@strTransactionIdIC
@@ -201,6 +236,15 @@ IF @Post = 0
             WHERE	intInvoiceId = @intTransactionIdIC 
 				AND strTransactionId = @strTransactionIdIC 												
         END
+
+		IF EXISTS (SELECT TOP 1 1 FROM @GLPost) 
+		BEGIN
+			EXEC dbo.uspGLBookEntries
+					 @GLEntries         = @GLPost
+					,@ysnPost           = @Post
+					,@SkipGLValidation	= 1
+					,@SkipICValidation	= 1
+		END 
 
   --      --Recap = 1
 		--DELETE FROM  @UnPostICInvoiceData
