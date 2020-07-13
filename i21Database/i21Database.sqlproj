@@ -8126,7 +8126,6 @@
     <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <Build Include="dbo\Stored Procedures\uspSCCreateInvoiceForPostedDestinationWeightsAndGrades.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRemoveVoucherPayableTransaction.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
     <Build Include="dbo\Views\vyuRKDPRRun.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspRKDPRCompareDerivatives.sql" />
@@ -8138,6 +8137,8 @@
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8378,7 +8379,6 @@
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
     <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
   </ItemGroup>
