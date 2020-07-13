@@ -864,26 +864,30 @@ BEGIN TRY
 
 						IF(@strTicketType = 'Direct Out' and ((LOWER(ISNULL(@strGrade,'Origin')) <> 'destination') AND LOWER(ISNULL(@strWght,'Origin')) <> 'destination'))
 						BEGIN
-							IF(ISNULL(@dblScheduleQty,0) = 0)
-							BEGIN
-								SELECT @dblScheduleQty = -dblScheduleQty  FROM tblSCTicket WHERE intTicketId = @intTicketId
-							END
+							--No updating of Schedule and balances since unposting of invoice updates the contract schedule and balances
+							
+							SET @dblScheduleQty  = 0
 
-							IF((SELECT strPricingType FROM vyuCTContractDetailView WHERE intContractDetailId = @_intContractDetailId) <> 'Basis')
-							BEGIN
-								EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
-								SET @dblScheduleQty = @dblScheduleQty *-1
-								IF(@_strDistributionOption = 'LOD')
-								BEGIN
-									EXEC uspCTUpdateScheduleQuantity
-														@intContractDetailId	=	@_intContractDetailId,
-														@dblQuantityToUpdate	=	@dblScheduleQty,
-														@intUserId				=	@intUserId,
-														@intExternalId			=	@intTicketId,
-														@strScreenName			=	'Scale'		
+							-- IF(ISNULL(@dblScheduleQty,0) = 0)
+							-- BEGIN
+							-- 	SELECT @dblScheduleQty = -dblScheduleQty  FROM tblSCTicket WHERE intTicketId = @intTicketId
+							-- END
+
+							-- IF((SELECT strPricingType FROM vyuCTContractDetailView WHERE intContractDetailId = @_intContractDetailId) <> 'Basis')
+							-- BEGIN
+							-- 	EXEC uspCTUpdateSequenceBalance @_intContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
+							-- 	SET @dblScheduleQty = @dblScheduleQty *-1
+							-- 	IF(@_strDistributionOption = 'LOD')
+							-- 	BEGIN
+							-- 		EXEC uspCTUpdateScheduleQuantity
+							-- 							@intContractDetailId	=	@_intContractDetailId,
+							-- 							@dblQuantityToUpdate	=	@dblScheduleQty,
+							-- 							@intUserId				=	@intUserId,
+							-- 							@intExternalId			=	@intTicketId,
+							-- 							@strScreenName			=	'Scale'		
 																								
-								END
-							END
+							-- 	END
+							-- END
 						END
 						ELSE
 						BEGIN
