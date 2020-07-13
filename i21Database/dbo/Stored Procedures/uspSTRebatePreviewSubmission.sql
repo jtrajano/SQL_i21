@@ -123,7 +123,47 @@ BEGIN
 														 )
 				DELETE FROM @tblTempPMM
 				INSERT INTO @tblTempPMM
-				SELECT DISTINCT @intVendorAccountNumber intRCN
+				SELECT 
+					intRCN
+					,dtmWeekEndingDate
+					,dtmTransactionDate
+					,strTransactionTime
+					,strTransactionIdCode
+					,strStoreNumber
+					,strStoreName
+					,strStoreAddress
+					,strStoreCity
+					,strStoreState
+					,intStoreZipCode
+					,strCategory
+					,strManufacturerName
+					,strSKUCode
+					,strUpcCode
+					,strSkuUpcDescription
+					,strUnitOfMeasure
+					,intQuantitySold
+					,intConsumerUnits
+					,strMultiPackIndicator
+					,intMultiPackRequiredQuantity
+					,dblMultiPackDiscountAmount
+					,strRetailerFundedDiscountName
+					,dblRetailerFundedDiscountAmount
+					,strMFGDealNameONE
+					,dblMFGDealDiscountAmountONE
+					,strMFGDealNameTWO
+					,dblMFGDealDiscountAmountTWO
+					,strMFGDealNameTHREE
+					,dblMFGDealDiscountAmountTHREE
+					,dblFinalSalesPrice
+					,intStoreTelephone
+					,strStoreContactName
+					,strStoreContactEmail
+					,strProductGroupingCode
+					,strProductGroupingName
+					,strLoyaltyIDRewardsNumber
+				FROM (
+				SELECT DISTINCT intScanTransactionId
+								, @intVendorAccountNumber intRCN
 								, replace(convert(NVARCHAR, @dtmEndingDate, 111), '/', '') as dtmWeekEndingDate
 								, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
 								, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
@@ -223,7 +263,7 @@ BEGIN
 				(
 					SELECT * FROM
 						(   
-							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+							SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 							FROM tblSTTranslogRebates
 							WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 						) TRR 
@@ -251,6 +291,8 @@ BEGIN
 					AND TR.strTrpPaycode != 'Change' --ST-680
 					AND TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10)))) -- ST-1358
 					-- AND strTrlDept COLLATE DATABASE_DEFAULT IN (SELECT strCategoryCode FROM tblICCategory WHERE intCategoryId IN (SELECT Item FROM dbo.fnSTSeparateStringToColumns(ST.strDepartment, ',')))
+
+				) as innerquery
 
 				DELETE FROM @tempTable
 				INSERT INTO @tempTable
