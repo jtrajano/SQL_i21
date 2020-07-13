@@ -13,6 +13,7 @@ BEGIN TRY
 			@List			NVARChAR(MAX),
 			@Id				INT,
 			@DetailId		INT,
+			@ParamDetailId		INT,
 			@Count			INT,
 			@voucherIds		AS Id,
 			@BillDetailId	INT,
@@ -238,7 +239,7 @@ BEGIN TRY
 	AND		FD.intPriceFixationDetailId	=	ISNULL(@intPriceFixationDetailId,FD.intPriceFixationDetailId)
 	-- Perfomance hit
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
-	--AND		ISNULL(IV.ysnPosted,0) = 0
+	AND		ISNULL(IV.ysnPosted,0) = 0
 	AND @ysnDeleteFromInvoice = 0
 
 	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
@@ -278,63 +279,24 @@ BEGIN TRY
 	
 	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
 	if EXISTS (select top 1 1 from #ItemInvoice)
+	select @DetailId = MIN(DetailId) FROM #ItemInvoice
+	while (@DetailId is not null)
 	begin
+		
+		set @ParamDetailId = @DetailId;
 
-		if (@intPriceFixationDetailId is not null)
+		select @Id = Id FROM #ItemInvoice where DetailId = @ParamDetailId;
+		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @Id
+		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
+		
+		if (@Count = 1)
 		begin
-			insert into @AffectedInvoices
-			select
-			strMessage = d.strInvoiceNumber + ' line item ' + convert(nvarchar(20),t.intInvoiceLineItemId) 
-			from
-			tblCTPriceFixationDetailAPAR c
-			left join 
-			(
-			select
-			intInvoiceLineItemId = ROW_NUMBER() over (partition by b.intInvoiceId order by b.intInvoiceDetailId)
-			,a.intPriceFixationDetailId
-			,b.intInvoiceId
-			,b.intInvoiceDetailId
-			from tblCTPriceFixationDetailAPAR a
-			,tblARInvoiceDetail b
-			where a.intPriceFixationDetailId = @intPriceFixationDetailId
-			and b.intInvoiceId = a.intInvoiceId
-			)t on t.intInvoiceId = c.intInvoiceId and t.intInvoiceDetailId = c.intInvoiceDetailId
-			left join tblARInvoice d on d.intInvoiceId = c.intInvoiceId
-			where c.intPriceFixationDetailId = @intPriceFixationDetailId
-
-			select
-			top 1 @strFinalMessage = 'Invoice/s' + stuff((SELECT ', ' + strMessage FROM @AffectedInvoices FOR XML PATH ('')), 1, 1, '') + ' is using the price. Please delete that first.'
-			from @AffectedInvoices
-		end
-		ELSE
-		begin
-			set @strFinalMessage = 'Invoice/s exists for the price. Please try to delete them first to delete the pricing.';
+			set @ParamDetailId = null
 		end
 
-		SET @ErrMsg = @strFinalMessage
-		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
-	END
-	DECLARE @dId INT
-	SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice
-	WHILE ISNULL(@DetailId,0) > 0
-	BEGIN
-		SELECT @Id = intInvoiceId FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @DetailId
-		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceId = @Id
-
-		IF @Count > 1
-		BEGIN
-			SELECT @dId = @DetailId
-		END
-		ELSE
-		BEGIN
-			SELECT @dId = NULL
-		END
-
-		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @DetailId
-		EXEC uspARDeleteInvoice @Id,@intUserId, @dId
-
-		SELECT @DetailId = MIN(DetailId) FROM #ItemInvoice WHERE DetailId > @DetailId
-	END
+		EXEC uspARDeleteInvoice @Id,@intUserId,@ParamDetailId
+		select @DetailId = MIN(DetailId) FROM #ItemInvoice where DetailId > @DetailId;
+	end
 
 END TRY
 

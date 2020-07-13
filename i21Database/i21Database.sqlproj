@@ -8685,7 +8685,6 @@
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMO_4757.sql" />
     <Build Include="dbo\Tables\tblSMMenuNavigationLog.sql" />
     <Build Include="dbo\Tables\tblSMDataEventLog.sql" />
@@ -8747,6 +8746,8 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8997,7 +8998,6 @@
     <Build Include="dbo\Functions\fnCTGetPricingDetailVoucherInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogRiskPosition.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
-    <Build Include="dbo\Stored Procedures\uspCTUpdatePricingLayer.sql" />
     <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
   </ItemGroup>
