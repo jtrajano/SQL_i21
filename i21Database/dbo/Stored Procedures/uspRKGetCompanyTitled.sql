@@ -467,7 +467,7 @@ BEGIN
 					,dblPaidBalance = dblPartialPaidQty
 					,strTransactionId = ISNULL(CS.strVoucher,Inv.strTransactionId)
 					,intTransactionId = ISNULL(CS.intBillId,Inv.intTransactionId)
-					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionId) = 1 THEN 'CNT' ELSE 'SPT' END
+					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionDetailId) = 1 THEN 'CNT' ELSE 'SPT' END
 					,intTransactionDetailId = ISNULL(CS.intBillId,Inv.intTransactionDetailId)
 					,strTransactionType =  CASE WHEN CS.intBillId IS NOT NULL THEN 'Bill'  ELSE 'Storage Settlement' END
 				from @InventoryStock Inv
