@@ -21,7 +21,7 @@ SELECT DISTINCT
     ,dblOpenBalance						= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance), 6)
     ,ysnDPOwnedType						= ST.ysnDPOwnedType
     ,intContractHeaderId                = case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END end
-    ,intContractDetailId				= case when (CS.intStorageTypeId = 2 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN SC.intContractId ELSE CD_Transfer.intContractDetailId END end
+    ,intContractDetailId				= case when (CS.intStorageTypeId = 2 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN CD_Ticket.intContractDetailId ELSE CD_Transfer.intContractDetailId END end
     ,strContractNumber					= case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
     ,intTicketId						= ISNULL(SC.intTicketId,0)
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
@@ -73,10 +73,18 @@ LEFT JOIN
 )GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
         and CS.intStorageTypeId = 2
-LEFT JOIN tblSCTicket SC
+LEFT JOIN (
+	tblSCTicket SC 		
+	LEFT JOIN tblGRStorageHistory SH
+		ON SH.intTicketId = SC.intTicketId
+	LEFT JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
+	) 
 	ON SC.intTicketId = CS.intTicketId
+		AND SH.intCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblCTContractDetail CD_Ticket
-    ON CD_Ticket.intContractDetailId = SC.intContractId
+    --ON CD_Ticket.intContractDetailId = SC.intContractId
+	ON CD_Ticket.intContractDetailId = IRI.intContractDetailId
 		AND CS.ysnTransferStorage = 0
 LEFT JOIN tblCTContractHeader CH_Ticket 
     ON CH_Ticket.intContractHeaderId = CD_Ticket.intContractHeaderId
