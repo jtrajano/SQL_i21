@@ -9,9 +9,11 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-		 
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notifications' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'System Manager') AND strCommand = N'GlobalComponentEngine.view.NotificationList') 
+
+
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recently Viewed' AND strModuleName = 'System Manager' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'System Manager' AND intParentMenuID = (
+	SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Common Info' AND strModuleName = 'System Manager' AND intParentMenuID = 0)) AND strCommand = N'GlobalComponentEngine.view.RecentlyViewedList') 
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -962,6 +964,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notificat
 	VALUES (N'Notifications', N'System Manager', @CommonInfoActivitiesParentMenuId, N'Notifications', N'Notifications', N'Screen', N'GlobalComponentEngine.view.NotificationList', N'small-menu-maintenance', 0, 0, 0, 1, 3, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'GlobalComponentEngine.view.NotificationList', intSort = 3 WHERE strMenuName = 'Notifications' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Recently Viewed' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Recently Viewed', N'System Manager', @CommonInfoMaintenanceParentMenuId, N'Recently Viewed', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.RecentlyViewedList', N'small-menu-maintenance', 0, 0, 0, 1, 17, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCommand = N'GlobalComponentEngine.view.RecentlyViewedList', intSort = 17 WHERE strMenuName = 'Recently Viewed' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
 
 /* Start Delete */
 --DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Freight Terms' AND strModuleName = 'System Manager' AND intParentMenuID = @CommonInfoMaintenanceParentMenuId
