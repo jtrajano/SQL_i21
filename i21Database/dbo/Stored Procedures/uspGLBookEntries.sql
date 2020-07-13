@@ -14,6 +14,9 @@ SET ANSI_WARNINGS OFF
 -- 	VALIDATION
 ------------------------------------------------------------------------------------------------------------------------------------
 DECLARE @errorCode INT
+DECLARE @dtmDateEntered DATETIME = GETDATE()
+
+
 
 IF (ISNULL(@SkipGLValidation,0)  = 0)
 BEGIN
@@ -46,7 +49,7 @@ BEGIN
 	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
 	tblSMMultiCompany MC JOIN tblSMCompanySetup C ON C.intMultiCompanyId = MC.intMultiCompanyId
 
-	DECLARE @dtmDateEntered DATETIME = GETDATE(),@dtmDateEnteredMin DATETIME = NULL ,@strBatchId NVARCHAR(50)
+	DECLARE @dtmDateEnteredMin DATETIME = NULL ,@strBatchId NVARCHAR(50)
 
 	SELECT TOP 1 @strBatchId =strBatchId FROM @GLEntries 
 
@@ -99,7 +102,10 @@ BEGIN
 			,dtmDateEnteredMin
 	)
 	SELECT 
-			dbo.fnRemoveTimeOnDate([dtmDate])
+			dbo.fnRemoveTimeOnDate(
+				CASE WHEN  (PastGLEntry.Cnt > 0 AND @ysnPost = 1 ) OR @ysnPost = 0 THEN @dtmDateEntered -- repost / unpost, current date is applied GL-7717
+				 ELSE [dtmDate] END
+			)
 			,[strBatchId]
 			,@intMultCompanyId
 			,[intAccountId]
@@ -148,6 +154,9 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
+			OUTER APPLY(
+				SELECT Cnt = COUNT(*) FROM tblGLDetail WHERE strTransactionId = GLEntries.strTransactionId
+			)PastGLEntry
 
 END
 ;
