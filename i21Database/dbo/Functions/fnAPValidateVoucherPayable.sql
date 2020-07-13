@@ -16,8 +16,9 @@ BEGIN
 	--CHECK IF ENTITY IS A VENDOR
 	SELECT TOP 1
 		A.intVoucherPayableId
-		,'Entity id(' + CAST(A.intEntityVendorId AS NVARCHAR) + ') is not a vendor.'
+		,'Entity ' + A2.strName + ' is not a vendor.'
 	FROM @voucherPayables A
+	INNER JOIN tblEMEntity A2 ON A.intEntityVendorId = A2.intEntityId
 	LEFT JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityId
 	WHERE B.intEntityId IS NULL
 	UNION ALL
