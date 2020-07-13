@@ -24,7 +24,10 @@ SELECT CHK.dtmDate
 		, strInvoice = BILL.strVendorOrderNumber
 		, dtmDetailDate = BILL.dtmBillDate
 		, strComment = BILL.strComment
-		, dblDetailAmount = PYMTDTL.dblTotal
+		, dblDetailAmount = 
+			CASE WHEN BILL.intTransactionType IN (3) OR ISNULL(ysnOffset,0) = 1 -- Debit Memo , Prepayment (DM, VPRE with ysnOffset =1)
+			THEN BILL.dblTotal * - 1 
+			ELSE BILL.dblTotal END
 		, dblDiscount = PYMTDTL.dblDiscount
 		, dblNet = PYMTDTL.dblPayment
 		, strBankAccountNo = STUFF(ACCT.strBankAccountNo, 1, LEN (ACCT.strBankAccountNo) - 4
