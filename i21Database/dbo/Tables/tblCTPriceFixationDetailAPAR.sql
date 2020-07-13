@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
+CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 (
 	intPriceFixationDetailAPARId	INT IDENTITY NOT NULL,
 	intPriceFixationDetailId		INT	NOT NULL,
@@ -16,7 +16,6 @@
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoice_intInvoiceId] FOREIGN KEY (intInvoiceId) REFERENCES tblARInvoice(intInvoiceId),
 	CONSTRAINT [FK_tblCTPriceFixationDetailAPAR_tblARInvoiceDetail_intInvoiceDetailId] FOREIGN KEY (intInvoiceDetailId) REFERENCES tblARInvoiceDetail(intInvoiceDetailId) ON DELETE CASCADE
 )
-
 GO
 
 CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsertDelete]
@@ -64,5 +63,4 @@ BEGIN
 	END
 
 END
-
 GO
