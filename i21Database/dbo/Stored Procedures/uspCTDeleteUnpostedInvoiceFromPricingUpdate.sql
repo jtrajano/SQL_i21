@@ -5,6 +5,7 @@ AS
 begin try
 	declare @strErrorMessage nvarchar(max);
 	declare @intInvoiceDetailId int;
+	declare @intInvoiceDetailParamId int;
 	declare @intInvoiceId int;
 	declare @Count int;
 
@@ -17,16 +18,18 @@ begin try
 	select @intInvoiceDetailId = MIN(intInvoiceDetailId) FROM #ItemInvoice
 	while (@intInvoiceDetailId is not null)
 	begin
-		select @intInvoiceId = intInvoiceId FROM #ItemInvoice where intInvoiceDetailId = @intInvoiceDetailId;
+
+		set @intInvoiceDetailParamId = @intInvoiceDetailId;
+		select @intInvoiceId = intInvoiceId FROM #ItemInvoice where intInvoiceDetailId = @intInvoiceDetailParamId;
 		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @intInvoiceId
-		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @intInvoiceDetailId
+		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @intInvoiceDetailParamId
 		
 		if (@Count = 1)
 		begin
-			set @intInvoiceDetailId = null
+			set @intInvoiceDetailParamId = null
 		end
 
-		EXEC uspARDeleteInvoice @intInvoiceId,@intUserId,@intInvoiceDetailId
+		EXEC uspARDeleteInvoice @intInvoiceId,@intUserId,@intInvoiceDetailParamId
 
 		select @intInvoiceDetailId = MIN(intInvoiceDetailId) FROM #ItemInvoice where intInvoiceDetailId > @intInvoiceDetailId;
 	end
