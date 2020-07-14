@@ -24,7 +24,7 @@
 		EXEC uspCTCreateDetailHistory	@intContractHeaderId 	= @currentId,
 										@ysnUseContractDate 	= 1,
 										@strSource 				= 'Contract',
-										@strProcess 			= 'Save Contract',
+										@strProcess 			= 'Missing History',
 										@intUserId				= @userId	
 
 		DELETE FROM #TempContractHeaders WHERE intContractHeaderId = @currentId
