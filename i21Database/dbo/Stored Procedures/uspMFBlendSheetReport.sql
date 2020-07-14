@@ -232,13 +232,13 @@ AS
 	Begin
 		Insert Into @tblBlendSheet(intWorkOrderId,strLotNumber,strLotAlias,strRawItemNo,strRawItemDesc,
 		dblQuantity,strUOM,dblIssuedQuantity,strIssuedUOM,strVendor,dblBSPercentage,strStorageLocation)
-		Select @intWorkOrderId,PL.strParentLotNumber,l.strLotAlias,i.strItemNo,i.strDescription ,
-		wcl.dblQuantity,um.strUnitMeasure,wcl.dblIssuedQuantity,um1.strUnitMeasure,l.strMarkings,
+		Select @intWorkOrderId,PL.strParentLotNumber,'' as strLotAlias,i.strItemNo,i.strDescription ,
+		wcl.dblQuantity,um.strUnitMeasure,wcl.dblIssuedQuantity,um1.strUnitMeasure,'' as strMarkings,
 		ROUND(100 * (wcl.dblQuantity / SUM(wcl.dblQuantity) OVER()),2) AS dblBSPercentage,sl.strName
 		From tblMFWorkOrderInputParentLot wcl 
-		Join tblICLot l on wcl.intParentLotId=l.intParentLotId 
+		--Join tblICLot l on wcl.intParentLotId=l.intParentLotId 
 		JOIN tblICParentLot PL on PL.intParentLotId=wcl.intParentLotId
-		Join tblICItem i on l.intItemId=i.intItemId
+		Join tblICItem i on wcl.intItemId=i.intItemId
 		Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICItemUOM iu1 on wcl.intItemIssuedUOMId=iu1.intItemUOMId
