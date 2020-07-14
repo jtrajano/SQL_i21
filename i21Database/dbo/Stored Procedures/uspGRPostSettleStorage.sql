@@ -2753,8 +2753,6 @@ BEGIN TRY
 			--7. HiStory Creation
 			IF(@ysnFromPriceBasisContract = 0)	
 			BEGIN
-				DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]
-				DECLARE @intStorageHistoryId INT
 				DELETE FROM @StorageHistoryStagingTable
 				INSERT INTO @StorageHistoryStagingTable
 				(
