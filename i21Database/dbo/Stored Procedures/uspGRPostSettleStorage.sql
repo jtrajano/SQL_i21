@@ -225,6 +225,7 @@ BEGIN TRY
 		) b
 			ON a.intCustomerStorageId = b.intCustomerStorageId 
 				AND a.dblUnitsSummed > b.dblOriginalBalance
+				AND ABS(a.dblUnitsSummed - b.dblOriginalBalance) > 0.01
 	)
 	begin
 		RAISERROR('There is no more open units available for settlement. Please check the available units for settlement and try again.',16,1,1)
