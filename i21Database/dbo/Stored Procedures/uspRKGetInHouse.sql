@@ -54,9 +54,10 @@ BEGIN
 			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN (SELECT strDistributionOption FROM vyuSCTicketView WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId)
 			WHEN CompOwn.strTransactionType = 'Inventory Adjustment' THEN 'ADJ'
 			WHEN CompOwn.strTransactionType IN ('Inventory Receipt','Inventory Shipment') AND CompOwn.intContractHeaderId IS NULL AND CompOwn.intTicketId IS NULL THEN ''
-			ELSE 'SPT' END
+			ELSE ST.strStorageTypeCode END
 		,strOwnership = 'Company Owned'
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
+	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
 	WHERE CompOwn.intItemId = ISNULL(@intItemId, CompOwn.intItemId)
 		AND CompOwn.intLocationId = ISNULL(@intLocationId, CompOwn.intLocationId)
 		AND CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
