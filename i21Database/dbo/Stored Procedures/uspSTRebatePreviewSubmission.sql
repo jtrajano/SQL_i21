@@ -163,6 +163,7 @@ BEGIN
 								,strProductGroupingCode
 								,strProductGroupingName
 								,strLoyaltyIDRewardsNumber
+								,strDepartment
 							FROM (
 							SELECT DISTINCT intScanTransactionId
 									, @intVendorAccountNumber intRCN
