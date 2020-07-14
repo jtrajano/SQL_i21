@@ -33,3 +33,8 @@
 	CONSTRAINT [FK_tblGRSettleStorage_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRSettleStorage_intParentSettleStorageId] ON [dbo].[tblGRSettleStorage](
+	[intParentSettleStorageId] ASC
+);
+GO
