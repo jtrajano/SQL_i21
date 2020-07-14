@@ -467,7 +467,7 @@ BEGIN
 					,dblPaidBalance = dblPartialPaidQty
 					,strTransactionId = ISNULL(CS.strVoucher,Inv.strTransactionId)
 					,intTransactionId = ISNULL(CS.intBillId,Inv.intTransactionId)
-					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionDetailId) = 1 THEN 'CNT' ELSE 'SPT' END
+					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionDetailId) = 1 THEN 'CNT' ELSE strDistribution END
 					,intTransactionDetailId = ISNULL(CS.intBillId,Inv.intTransactionDetailId)
 					,strTransactionType =  CASE WHEN CS.intBillId IS NOT NULL THEN 'Bill'  ELSE 'Storage Settlement' END
 				from @InventoryStock Inv
@@ -477,12 +477,14 @@ BEGIN
 						,intBillId
 						,dblUnits = sum(dblUnits)
 						,dblPartialPaidQty = sum(dblPartialPaidQty)
+						,strDistribution = strStorageTypeCode
 					 from (	
 					select 
 							strVoucher = B.strBillId
 							, B.intBillId
 							, dblUnits =  BD.dblQtyReceived
 							, dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+							, ST.strStorageTypeCode
 						from tblGRSettleStorage S 
 						inner join tblGRSettleStorageBillDetail SBD on SBD.intSettleStorageId = S.intSettleStorageId
 						inner join tblAPBill B on SBD.intBillId = B.intBillId
@@ -490,9 +492,11 @@ BEGIN
 											AND BD.intItemId = S.intItemId 
 						left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
 						left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+						left join tblGRCustomerStorage CS ON CS.intCustomerStorageId = BD.intCustomerStorageId
+						left join tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 						where S.intSettleStorageId = Inv.intTransactionDetailId 
 					) t
-					group by strVoucher, intBillId
+					group by strVoucher, intBillId, strStorageTypeCode
 	
 				) CS
 				where 
@@ -508,7 +512,7 @@ BEGIN
 					,dblPaidBalance = NULL
 					,strTransactionId = Inv.strTransactionId
 					,intTransactionId = Inv.intTransactionId
-					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionId) = 1 THEN 'CNT' ELSE 'SPT' END
+					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionDetailId) = 1 THEN 'CNT' ELSE 'SPT' END
 					,intTransactionDetailId = Inv.intTransactionDetailId
 					,strTransactionType =   'Storage Settlement'
 				from @InventoryStock Inv
@@ -524,7 +528,7 @@ BEGIN
 					,dblPaidBalance = dblPartialPaidQty
 					,strTransactionId = Inv.strTransactionId
 					,intTransactionId = Inv.intTransactionId
-					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionId) = 1 THEN 'CNT' ELSE 'SPT' END
+					,strDistribution = CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = Inv.intTransactionDetailId) = 1 THEN 'CNT' ELSE 'SPT' END
 					,intTransactionDetailId = Inv.intTransactionDetailId
 					,strTransactionType = Inv.strTransactionType
 				from @InventoryStock Inv
