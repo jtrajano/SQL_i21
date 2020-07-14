@@ -42,7 +42,7 @@ BEGIN
 			,dtmDate
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
-			AND @intTransactionTypeId = @intTransactionTypeId
+			AND intInventoryTransactionType = @intTransactionTypeId
 			AND ysnPosted = 0 
 
 	-- Call this SP to decrease the reserved qty. 
@@ -85,7 +85,7 @@ BEGIN
 			,dtmDate
 	FROM	dbo.tblICStockReservation Reservations 
 	WHERE	intTransactionId = @intTransactionId
-			AND @intTransactionTypeId = @intTransactionTypeId
+			AND intInventoryTransactionType = @intTransactionTypeId
 			AND ysnPosted = 1
 
 	-- Call this SP to decrease the reserved qty. 
