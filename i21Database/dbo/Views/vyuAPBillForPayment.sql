@@ -50,7 +50,6 @@ FROM (
 		,commodity.strCommodityCode
 		,term.strTerm
 		,term.intTermID AS intTermsId
-		,term.ysnDeferredPay
 		,entity.strName
 		,payTo.strLocationName AS strCheckPayeeName
 		,NULL AS intPayScheduleId
@@ -127,7 +126,6 @@ FROM (
 		,commodity.strCommodityCode
 		,term.strTerm
 		,term.intTermID AS intTermsId
-		,term.ysnDeferredPay
 		,entity.strName
 		,payTo.strLocationName AS strCheckPayeeName
 		,paySched.intId AS intPayScheduleId
