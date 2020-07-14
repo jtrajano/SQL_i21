@@ -23,9 +23,10 @@ SELECT DISTINCT  F.intDiscountScheduleId as 'intRecordId' ,A.intLogId, A.dtmDate
 INNER JOIN tblSMAudit E ON E.intLogId  = A.intLogId  
 INNER JOIN tblSMTransaction B ON B.intTransactionId = A.intTransactionId
 INNER JOIN tblGRDiscountScheduleCode F ON F.intDiscountScheduleCodeId = B.intRecordId
+INNER JOIN tblGRDiscountSchedule G ON G.intDiscountScheduleId = F.intDiscountScheduleId
 INNER JOIN tblSMScreen C ON C.intScreenId = B.intScreenId  
 WHERE C.strNamespace = 'Grain.view.DiscountCode' 
-AND F.ysnSent = 0
+AND G.ysnSent = 0
 )
 
    
