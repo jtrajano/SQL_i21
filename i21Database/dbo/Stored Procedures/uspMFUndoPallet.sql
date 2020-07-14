@@ -42,6 +42,7 @@ BEGIN TRY
 		,@intPhysicalItemUOMId INT
 		,@dtmProductionDate DATETIME
 
+
 	DECLARE @GLEntriesForOtherCost TABLE (
 		dtmDate DATETIME
 		,intItemId INT
@@ -108,6 +109,12 @@ BEGIN TRY
 		,@intManufacturingProcessId = intManufacturingProcessId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+		SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 20 --Is Instant Consumption
 
 	SELECT @dblQuantity = dblQuantity
 		,@intItemUOMId = intItemUOMId
@@ -295,6 +302,7 @@ BEGIN TRY
 
 	IF @dblOtherCharges IS NOT NULL
 		AND @dblOtherCharges > 0
+		AND @strInstantConsumption='True'
 	BEGIN
 		INSERT INTO @OtherChargesGLAccounts (
 			intChargeId
@@ -537,11 +545,7 @@ BEGIN TRY
 		AND IsNULL(intMachineId, 0) = IsNULL(@intMachineId, 0)
 		AND dblOutputQuantity = 0
 
-	SELECT @strInstantConsumption = strAttributeValue
-	FROM tblMFManufacturingProcessAttribute
-	WHERE intManufacturingProcessId = @intManufacturingProcessId
-		AND intLocationId = @intLocationId
-		AND intAttributeId = 20 --Is Instant Consumption
+
 
 	DECLARE @tblMFWorkOrderConsumedLot TABLE (
 		intWorkOrderId INT
