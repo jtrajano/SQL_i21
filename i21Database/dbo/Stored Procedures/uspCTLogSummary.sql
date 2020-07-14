@@ -31,7 +31,7 @@ BEGIN TRY
 
 	-- SELECT @strSource, @strProcess
 
-	IF @strProcess = 'Update Scheduled Quantity' OR @strProcess = 'Update Sequence Status'
+	IF @strProcess = 'Update Scheduled Quantity' OR @strProcess = 'Update Sequence Status' OR @strProcess = 'Missing History' 
 	BEGIN
 		RETURN
 	END
