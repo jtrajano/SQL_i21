@@ -1,4 +1,4 @@
-﻿ALTER VIEW [dbo].[vyuICGetStorageBinDetails]
+﻿CREATE VIEW [dbo].[vyuICGetStorageBinDetails]
 AS
 SELECT
 	  intItemId					= sm.intItemId
