@@ -673,3 +673,51 @@ SELECT
 	,intCreatedEntityId
 FROM 
 	#tmp_tblICBackupDetailInventoryTransactionStorage_category
+
+IF OBJECT_ID('tempdb..#tmp_tblICRebuildValuationGLSnapshot_all') IS NOT NULL DROP TABLE #tmp_tblICRebuildValuationGLSnapshot_all
+
+SELECT t.* 
+INTO #tmp_tblICRebuildValuationGLSnapshot_all
+FROM 
+	tblICRebuildValuationGLSnapshot t 		
+	CROSS APPLY (
+		SELECT 
+			DISTINCT deleteList.dtmDate
+		FROM 
+			tblICBackup deleteList 				
+		WHERE
+			deleteList.intBackupId IN (
+				SELECT TOP 2 
+					topBackup.intBackupId
+				FROM 
+					tblICBackup topBackup
+				WHERE
+					topBackup.strRemarks <> 'Stock is up to date.'
+				ORDER BY 
+					topBackup.intBackupId DESC 				
+			)
+	) deleteBackup
+WHERE
+	dbo.fnDateEquals(deleteBackup.dtmDate, t.dtmRebuildDate) = 1
+
+TRUNCATE TABLE tblICRebuildValuationGLSnapshot
+
+INSERT INTO tblICRebuildValuationGLSnapshot (
+	intAccountId
+	,dblDebit
+	,dblCredit
+	,intYear
+	,intMonth
+	,dtmRebuildDate
+	,intCompanyId
+)
+SELECT 
+	intAccountId
+	,dblDebit
+	,dblCredit
+	,intYear
+	,intMonth
+	,dtmRebuildDate
+	,intCompanyId
+FROM 
+	#tmp_tblICRebuildValuationGLSnapshot_all
