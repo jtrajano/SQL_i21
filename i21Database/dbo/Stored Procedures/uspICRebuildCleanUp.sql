@@ -366,3 +366,310 @@ SELECT
 	,[intCompanyId] 
 FROM 
 	#tmp_tblICBackupDetailInventoryTransaction_category
+
+IF OBJECT_ID('tempdb..#tmp_tblICBackupDetailInventoryTransactionStorage_all') IS NOT NULL DROP TABLE #tmp_tblICBackupDetailInventoryTransactionStorage_all
+IF OBJECT_ID('tempdb..#tmp_tblICBackupDetailInventoryTransactionStorage_item') IS NOT NULL DROP TABLE #tmp_tblICBackupDetailInventoryTransactionStorage_item
+IF OBJECT_ID('tempdb..#tmp_tblICBackupDetailInventoryTransactionStorage_catgegory') IS NOT NULL DROP TABLE #tmp_tblICBackupDetailInventoryTransactionStorage_category
+
+SELECT t.* 
+INTO #tmp_tblICBackupDetailInventoryTransactionStorage_all
+FROM 
+	tblICBackup b INNER JOIN tblICBackupDetailInventoryTransactionStorage t 
+		ON b.intBackupId = t.intBackupId
+	CROSS APPLY (
+		SELECT deleteList.intBackupId
+		FROM 
+			tblICBackup deleteList 				
+		WHERE
+			deleteList.intBackupId = b.intBackupId
+			AND deleteList.strItemNo IS NULL 
+			AND deleteList.strCategoryCode IS NULL 
+			AND deleteList.intBackupId IN (
+				SELECT TOP 2 
+					topBackup.intBackupId
+				FROM 
+					tblICBackup topBackup
+				WHERE
+					topBackup.strItemNo IS NULL 
+					AND topBackup.strCategoryCode IS NULL 
+					AND topBackup.strRemarks <> 'Stock is up to date.'
+				ORDER BY 
+					topBackup.intBackupId DESC 				
+			)
+	) deleteBackup
+WHERE
+	b.strItemNo IS NULL 
+	AND b.strCategoryCode IS NULL 
+
+SELECT t.* 
+INTO #tmp_tblICBackupDetailInventoryTransactionStorage_item
+FROM 
+	tblICBackup b INNER JOIN tblICBackupDetailInventoryTransactionStorage t 
+		ON b.intBackupId = t.intBackupId
+	CROSS APPLY (
+		SELECT topBackup.intBackupId
+		FROM (
+				SELECT TOP 2 
+					topBackup.intBackupId
+				FROM 
+					tblICBackup topBackup
+				WHERE
+					topBackup.strItemNo IS NOT NULL
+					AND topBackup.strRemarks <> 'Stock is up to date.'
+				ORDER BY 
+					topBackup.intBackupId DESC 				
+			) topBackup
+		WHERE
+			topBackup.intBackupId = b.intBackupId
+	) deleteBackup
+WHERE
+	b.strItemNo IS NOT NULL 
+
+SELECT t.* 
+INTO #tmp_tblICBackupDetailInventoryTransactionStorage_category
+FROM 
+	tblICBackup b INNER JOIN tblICBackupDetailInventoryTransactionStorage t 
+		ON b.intBackupId = t.intBackupId
+	CROSS APPLY (
+		SELECT topBackup.intBackupId
+		FROM (
+				SELECT TOP 2 
+					topBackup.intBackupId
+				FROM 
+					tblICBackup topBackup
+				WHERE
+					topBackup.strCategoryCode IS NOT NULL
+					AND topBackup.strRemarks <> 'Stock is up to date.'
+				ORDER BY 
+					topBackup.intBackupId DESC 				
+			) topBackup
+		WHERE
+			topBackup.intBackupId = b.intBackupId
+	) deleteBackup
+WHERE
+	b.strCategoryCode IS NOT NULL 
+
+TRUNCATE TABLE tblICBackupDetailInventoryTransactionStorage
+
+INSERT INTO tblICBackupDetailInventoryTransactionStorage (
+	intBackupId
+	,intIdentityId
+	,intItemId
+	,intItemLocationId
+	,intItemUOMId
+	,intSubLocationId
+	,intStorageLocationId
+	,intLotId
+	,dtmDate
+	,dblQty
+	,dblUOMQty
+	,dblCost
+	,dblValue
+	,dblSalesPrice
+	,intCurrencyId
+	,dblExchangeRate
+	,intTransactionId
+	,intTransactionDetailId
+	,strTransactionId
+	,intInventoryCostBucketStorageId
+	,strBatchId
+	,intTransactionTypeId
+	,ysnIsUnposted
+	,strTransactionForm
+	,intRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
+	,intCostingMethod
+	,intForexRateTypeId
+	,dblForexRate
+	,intCompanyId
+	,dtmCreated
+	,intCreatedUserId
+	,intCreatedEntityId
+)
+SELECT 
+	intBackupId
+	,intIdentityId
+	,intItemId
+	,intItemLocationId
+	,intItemUOMId
+	,intSubLocationId
+	,intStorageLocationId
+	,intLotId
+	,dtmDate
+	,dblQty
+	,dblUOMQty
+	,dblCost
+	,dblValue
+	,dblSalesPrice
+	,intCurrencyId
+	,dblExchangeRate
+	,intTransactionId
+	,intTransactionDetailId
+	,strTransactionId
+	,intInventoryCostBucketStorageId
+	,strBatchId
+	,intTransactionTypeId
+	,ysnIsUnposted
+	,strTransactionForm
+	,intRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
+	,intCostingMethod
+	,intForexRateTypeId
+	,dblForexRate
+	,intCompanyId
+	,dtmCreated
+	,intCreatedUserId
+	,intCreatedEntityId
+FROM 
+	#tmp_tblICBackupDetailInventoryTransactionStorage_all
+
+INSERT INTO tblICBackupDetailInventoryTransactionStorage (
+	intBackupId
+	,intIdentityId
+	,intItemId
+	,intItemLocationId
+	,intItemUOMId
+	,intSubLocationId
+	,intStorageLocationId
+	,intLotId
+	,dtmDate
+	,dblQty
+	,dblUOMQty
+	,dblCost
+	,dblValue
+	,dblSalesPrice
+	,intCurrencyId
+	,dblExchangeRate
+	,intTransactionId
+	,intTransactionDetailId
+	,strTransactionId
+	,intInventoryCostBucketStorageId
+	,strBatchId
+	,intTransactionTypeId
+	,ysnIsUnposted
+	,strTransactionForm
+	,intRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
+	,intCostingMethod
+	,intForexRateTypeId
+	,dblForexRate
+	,intCompanyId
+	,dtmCreated
+	,intCreatedUserId
+	,intCreatedEntityId
+)
+SELECT 
+	intBackupId
+	,intIdentityId
+	,intItemId
+	,intItemLocationId
+	,intItemUOMId
+	,intSubLocationId
+	,intStorageLocationId
+	,intLotId
+	,dtmDate
+	,dblQty
+	,dblUOMQty
+	,dblCost
+	,dblValue
+	,dblSalesPrice
+	,intCurrencyId
+	,dblExchangeRate
+	,intTransactionId
+	,intTransactionDetailId
+	,strTransactionId
+	,intInventoryCostBucketStorageId
+	,strBatchId
+	,intTransactionTypeId
+	,ysnIsUnposted
+	,strTransactionForm
+	,intRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
+	,intCostingMethod
+	,intForexRateTypeId
+	,dblForexRate
+	,intCompanyId
+	,dtmCreated
+	,intCreatedUserId
+	,intCreatedEntityId
+FROM 
+	#tmp_tblICBackupDetailInventoryTransactionStorage_item
+
+
+INSERT INTO tblICBackupDetailInventoryTransactionStorage (
+	intBackupId
+	,intIdentityId
+	,intItemId
+	,intItemLocationId
+	,intItemUOMId
+	,intSubLocationId
+	,intStorageLocationId
+	,intLotId
+	,dtmDate
+	,dblQty
+	,dblUOMQty
+	,dblCost
+	,dblValue
+	,dblSalesPrice
+	,intCurrencyId
+	,dblExchangeRate
+	,intTransactionId
+	,intTransactionDetailId
+	,strTransactionId
+	,intInventoryCostBucketStorageId
+	,strBatchId
+	,intTransactionTypeId
+	,ysnIsUnposted
+	,strTransactionForm
+	,intRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
+	,intCostingMethod
+	,intForexRateTypeId
+	,dblForexRate
+	,intCompanyId
+	,dtmCreated
+	,intCreatedUserId
+	,intCreatedEntityId
+)
+SELECT 
+	intBackupId
+	,intIdentityId
+	,intItemId
+	,intItemLocationId
+	,intItemUOMId
+	,intSubLocationId
+	,intStorageLocationId
+	,intLotId
+	,dtmDate
+	,dblQty
+	,dblUOMQty
+	,dblCost
+	,dblValue
+	,dblSalesPrice
+	,intCurrencyId
+	,dblExchangeRate
+	,intTransactionId
+	,intTransactionDetailId
+	,strTransactionId
+	,intInventoryCostBucketStorageId
+	,strBatchId
+	,intTransactionTypeId
+	,ysnIsUnposted
+	,strTransactionForm
+	,intRelatedInventoryTransactionId
+	,intRelatedTransactionId
+	,strRelatedTransactionId
+	,intCostingMethod
+	,intForexRateTypeId
+	,dblForexRate
+	,intCompanyId
+	,dtmCreated
+	,intCreatedUserId
+	,intCreatedEntityId
+FROM 
+	#tmp_tblICBackupDetailInventoryTransactionStorage_category
