@@ -98,7 +98,7 @@ AS
 				,PP.strTestName
 				,PP.intPropertyId
 				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,CAST(SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS DECIMAL(18,4)) AS dblComputedValue
 				,PP.dblMinValue
 				,PP.dblMaxValue
 				,MIN(@strMethod) AS strMethodName
@@ -127,7 +127,7 @@ AS
 				,PP.strTestName
 				,PP.intPropertyId
 				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,CAST(SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS DECIMAL(18,4)) AS dblComputedValue
 				,PP.dblMinValue
 				,PP.dblMaxValue
 				,MIN(@strMethod) AS strMethodName
