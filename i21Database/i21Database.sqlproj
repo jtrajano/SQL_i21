@@ -8756,6 +8756,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
+    <Build Include="dbo\Views\vyuARCustomerAging_DashBoard.sql" />
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCheckDPContract.sql" />
