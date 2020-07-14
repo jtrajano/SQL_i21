@@ -188,13 +188,16 @@ BEGIN TRY
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	SET @dtmDate = GETDATE()
-	SET @intParentSettleStorageId = @intSettleStorageId	
-
+	SET @intParentSettleStorageId = @intSettleStorageId
+	
 	/*avoid the oversettling of storages*/
 	IF(@ysnFromPriceBasisContract = 0)
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
+		DECLARE @dblTotalUnits AS DECIMAL(24,10)
+
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
 		SELECT intCustomerStorageId FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intSettleStorageId
@@ -203,23 +206,25 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
 
-			IF (
-			SELECT SUM(dblUnits) 
+			SELECT @dblSettlementTotal = SUM(dblUnits) 
 			FROM tblGRSettleStorageTicket A
 			INNER JOIN tblGRSettleStorage B
 				ON B.intSettleStorageId = A.intSettleStorageId
 				AND B.intParentSettleStorageId IS NULL
-			WHERE intCustomerStorageId = @intId ) > 
-			(SELECT dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId)
+			WHERE intCustomerStorageId = @intId
+
+			SELECT @dblTotalUnits = SUM(dblUnits)
+			FROM tblGRStorageHistory
+			WHERE intTransactionTypeId IN (5,1,9)
+				AND intCustomerStorageId = @intCustomerStorageId
+			GROUP BY intCustomerStorageId
+
+			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.01
 			BEGIN
-				DELETE FROM @CustomerStorageIds WHERE intId = @intId
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
 			END
-			ELSE
-			BEGIN
-				DELETE FROM @CustomerStorageIds WHERE intId = @intId
-			END			
+			DELETE FROM @CustomerStorageIds WHERE intId = @intId
 		END	
 	END
 
