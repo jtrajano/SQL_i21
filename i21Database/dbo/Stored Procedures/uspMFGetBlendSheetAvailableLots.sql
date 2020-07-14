@@ -120,7 +120,7 @@ Join tblICUnitMeasure u1 on iu1.intUnitMeasureId=u1.intUnitMeasureId
 Left Join tblMFRecipeItem ri on ri.intItemId=i.intItemId and ri.intRecipeItemId=@intRecipeItemId
 Left Join tblICItemUOM iu2 on ri.intItemUOMId=iu2.intItemUOMId
 Left Join tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId 
-Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
+Left Join vyuQMGetLotQuality q on (CASE WHEN (Select TOP 1 ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference) = 1 THEN l.intParentLotId ELSE l.intLotId END)=q.intLotId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 Where l.intItemId=@intItemId and l.dblQty>0 and ls.intLotStatusId in (Select intLotStatusId From @tblLotStatus)
 And l.intLocationId = Case When @ysnShowOtherFactoryLots=1 Then l.intLocationId Else @intLocationId End 

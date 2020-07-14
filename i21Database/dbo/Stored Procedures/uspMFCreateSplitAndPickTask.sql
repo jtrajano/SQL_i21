@@ -39,13 +39,14 @@ BEGIN TRY
 
 	IF @intLotId IS NOT NULL
 	BEGIN
-		SELECT @dblSplitAndPickQty = @dblSplitAndPickWeight / (
-				CASE 
-					WHEN dblWeightPerQty = 0
-						THEN 1
-					ELSE dblWeightPerQty
-					END
-				)
+		SELECT @dblSplitAndPickQty = dbo.fnMFConvertQuantityToTargetItemUOM(IsNULL(intWeightUOMId,intItemUOMId), intItemUOMId, @dblSplitAndPickWeight)
+		--@dblSplitAndPickWeight / (
+		--		CASE 
+		--			WHEN dblWeightPerQty = 0
+		--				THEN 1a
+		--			ELSE dblWeightPerQty
+		--			END
+		--		)
 			,@intItemUOMId = intItemUOMId
 			,@intWeightUOMId = intWeightUOMId
 			,@dblWeightPerQty = dblWeightPerQty
