@@ -18,7 +18,7 @@ BEGIN
 			  dtmDate DATETIME
 			, dtmTime NVARCHAR(20)
 			, strStoreName NVARCHAR(150)
-			, intTermMsgSN BIGINT
+			, intTermMsgSN INT
 			, dblQty DECIMAL(18, 2)
 			, dblPrice DECIMAL(18, 2)
 			, strDepartment NVARCHAR(100)
