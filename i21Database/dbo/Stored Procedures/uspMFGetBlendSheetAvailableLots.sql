@@ -153,11 +153,13 @@ Begin
 		MAX(tl.strGarden) AS strGarden, tl.intLocationId, tl.strLocationName, MAX(tl.strSubLocationName) AS strSubLocationName, tl.strStorageLocationName AS strStorageLocationName,tl.intStorageLocationId, 
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId
+		,tl.strPhysicalItemUOM
 		into #tempParentLotByStorageLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,
 		tl.intItemUOMId,tl.strUOM, tl.strWeightPerUnitUOM,
 		tl.intPhysicalItemUOMId,tl.intLocationId, tl.strLocationName,tl.strStorageLocationName,tl.intStorageLocationId
+		,tl.strPhysicalItemUOM
 
 		Select tpl.*,
 		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
@@ -173,11 +175,13 @@ Begin
 		MAX(tl.strGarden) AS strGarden, tl.intLocationId, tl.strLocationName, '' AS strSubLocationName, '' AS strStorageLocationName,0 AS intStorageLocationId,
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId 
+		,tl.strPhysicalItemUOM
 		into #tempParentLotByLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,tl.strLotAlias,
 		tl.intItemUOMId,tl.strUOM,tl.strWeightPerUnitUOM,
 		tl.intPhysicalItemUOMId, tl.intLocationId, tl.strLocationName
+		,tl.strPhysicalItemUOM
 
 		Select tpl.*,
 		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
