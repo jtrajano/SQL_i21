@@ -550,7 +550,7 @@ End
 			,13
 			)
 
-	WHILE (@intNoOfSheet > 0)
+	WHILE (@intNoOfSheet > 0 and @dblQtyToProduce>1)
 	BEGIN
 		SET @intWorkOrderId = NULL
 

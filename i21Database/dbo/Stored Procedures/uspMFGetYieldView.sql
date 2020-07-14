@@ -51,12 +51,11 @@ BEGIN TRY
 		,@intPackagingCategoryId INT
 		,@intCategoryId INT
 		,@intOwnerId INT
-		,@intItemUOMId int
-		,@intInputItemUOMId int
-		,@intFromUnitMeasureId int
-		,@intToUnitMeasureId int
+		,@intItemUOMId INT
+		,@intInputItemUOMId INT
+		,@intFromUnitMeasureId INT
+		,@intToUnitMeasureId INT
 		,@dblConversionToStock NUMERIC(18, 6)
-
 	DECLARE @tblMFWorkOrder TABLE (
 		intWorkOrderId INT
 		,dtmPlannedDate DATETIME
@@ -174,20 +173,28 @@ BEGIN TRY
 		,'INPUT' COLLATE Latin1_General_CI_AS AS strTransactionType
 		,WI.intWorkOrderInputLotId AS intTransactionId
 		,WI.intItemId
-		,WI.dblQuantity AS dblQuantity
-		,WI.intItemUOMId
+		,dbo.fnMFConvertQuantityToTargetItemUOM(WI.intEnteredItemUOMId, IsNULL(RI.intItemUOMId, RS.intItemUOMId), WI.dblEnteredQty) AS dblQuantity
+		,IsNULL(RI.intItemUOMId, RS.intItemUOMId) AS intItemUOMId
 		,WI.intWorkOrderId
 		,W.intItemId
 		,I.intCategoryId
 	FROM dbo.tblMFWorkOrderInputLot WI
-	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId AND WI.ysnConsumptionReversed  = 0
+	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WI.intWorkOrderId
+		AND WI.ysnConsumptionReversed = 0
 	JOIN dbo.tblICItem I ON I.intItemId = WI.intItemId
-	Where WI.intWorkOrderInputLotId Not in (Select x.intTransactionId
-	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
-			intTransactionId int
-			,strTransactionType nvarchar(50)
-) x Where x.strTransactionType='INPUT')
-
+	LEFT JOIN tblMFWorkOrderRecipeItem RI ON RI.intWorkOrderId = W.intWorkOrderId
+		AND RI.intItemId = WI.intItemId
+		AND RI.intRecipeItemTypeId = 1
+	LEFT JOIN tblMFWorkOrderRecipeSubstituteItem RS ON RS.intWorkOrderId = W.intWorkOrderId
+		AND RS.intSubstituteItemId = WI.intItemId
+	WHERE WI.intWorkOrderInputLotId NOT IN (
+			SELECT x.intTransactionId
+			FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+					intTransactionId INT
+					,strTransactionType NVARCHAR(50)
+					) x
+			WHERE x.strTransactionType = 'INPUT'
+			)
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -215,12 +222,14 @@ BEGIN TRY
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WP.intWorkOrderId
 		AND WP.ysnProductionReversed = 0
 	JOIN dbo.tblICItem I ON I.intItemId = WP.intItemId
-	Where WP.intWorkOrderProducedLotId Not in (Select x.intTransactionId
-	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
-			intTransactionId int
-			,strTransactionType nvarchar(50)
-) x Where x.strTransactionType='OUTPUT')
-
+	WHERE WP.intWorkOrderProducedLotId NOT IN (
+			SELECT x.intTransactionId
+			FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+					intTransactionId INT
+					,strTransactionType NVARCHAR(50)
+					) x
+			WHERE x.strTransactionType = 'OUTPUT'
+			)
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -257,11 +266,20 @@ BEGIN TRY
 	JOIN dbo.tblICItemUOM IU ON IU.intItemId = UnPvt.intItemId
 		AND IU.ysnStockUnit = 1
 	JOIN dbo.tblICItem I ON I.intItemId = UnPvt.intItemId
-	Where UnPvt.strTransactionType Not in (Select x.strTransactionType
-	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
-			intTransactionId int
-			,strTransactionType nvarchar(50)
-) x Where x.strTransactionType in ('dblOpeningQuantity','dblCountQuantity','dblOpeningOutputQuantity','dblCountOutputQuantity') and x.intTransactionId=UnPvt.intProductionSummaryId)
+	WHERE UnPvt.strTransactionType NOT IN (
+			SELECT x.strTransactionType
+			FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+					intTransactionId INT
+					,strTransactionType NVARCHAR(50)
+					) x
+			WHERE x.strTransactionType IN (
+					'dblOpeningQuantity'
+					,'dblCountQuantity'
+					,'dblOpeningOutputQuantity'
+					,'dblCountOutputQuantity'
+					)
+				AND x.intTransactionId = UnPvt.intProductionSummaryId
+			)
 
 	INSERT INTO ##tblMFTransaction (
 		dtmDate
@@ -288,11 +306,17 @@ BEGIN TRY
 	FROM tblMFWorkOrderProducedLotTransaction WLT
 	JOIN @tblMFWorkOrder W ON W.intWorkOrderId = WLT.intWorkOrderId
 	JOIN dbo.tblICItem I ON I.intItemId = WLT.intItemId
-	Where WLT.intWorkOrderProducedLotTransactionId Not in (Select x.intTransactionId
-	FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
-			intTransactionId int
-			,strTransactionType nvarchar(50)
-) x Where x.strTransactionType in ('Queued Qty Adj','Cycle Count Adj'))
+	WHERE WLT.intWorkOrderProducedLotTransactionId NOT IN (
+			SELECT x.intTransactionId
+			FROM OPENXML(@idoc, 'root/Transactions/Transaction', 2) WITH (
+					intTransactionId INT
+					,strTransactionType NVARCHAR(50)
+					) x
+			WHERE x.strTransactionType IN (
+					'Queued Qty Adj'
+					,'Cycle Count Adj'
+					)
+			)
 
 	SELECT @intPackagingCategoryId = intAttributeId
 	FROM tblMFAttribute
@@ -303,7 +327,7 @@ BEGIN TRY
 	WHERE intLocationId = @intLocationId
 		AND intAttributeId = @intPackagingCategoryId
 		AND strAttributeValue <> ''
-	
+
 	IF @strMode = 'Run'
 		AND @ysnIncludeIngredientItem = 0
 	BEGIN
@@ -518,7 +542,7 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,isNULL(PS.dblRequiredQty,0)  AS dblRequiredQty
+			,isNULL(PS.dblRequiredQty, 0) AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
@@ -530,7 +554,8 @@ BEGIN TRY
 		INTO ##tblMFInputItemYield
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
-		JOIN dbo.tblMFProductionSummary PS on PS.intWorkOrderId =W.intWorkOrderId and PS.intItemId = TR.intInputItemId 
+		JOIN dbo.tblMFProductionSummary PS ON PS.intWorkOrderId = W.intWorkOrderId
+			AND PS.intItemId = TR.intInputItemId
 		--JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
 		--LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
 		--	AND RS.intWorkOrderId = W.intWorkOrderId
@@ -615,7 +640,6 @@ BEGIN TRY
 		--		,'OUTPUT'
 		--		,'dblOpeningQuantity'
 		--		)
-
 		SELECT intWorkOrderId
 			,strWorkOrderNo
 			,intItemId
@@ -674,8 +698,8 @@ BEGIN TRY
 					,@dblQueuedQtyAdj = NULL
 					,@dblCycleCountAdj = NULL
 					,@dblEmptyOutAdj = NULL
-					,@intInputItemUOMId=NULL
-					,@intItemUOMId=NULL
+					,@intInputItemUOMId = NULL
+					,@intItemUOMId = NULL
 
 				SELECT @intItemId = intItemId
 				FROM ##tblMFFinalInputItemYield
@@ -684,7 +708,8 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SELECT @dblInput = SUM(dblQuantity),@intInputItemUOMId =MIN(intItemUOMId)
+					SELECT @dblInput = SUM(dblQuantity)
+						,@intInputItemUOMId = MIN(intItemUOMId)
 					FROM ##tblMFTransaction
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND strTransactionType = 'Input'
@@ -699,7 +724,8 @@ BEGIN TRY
 						AND strTransactionType = 'Input'
 				END
 
-				SELECT @dblOutput = SUM(dblQuantity),@intItemUOMId=MIN(intItemUOMId)
+				SELECT @dblOutput = SUM(dblQuantity)
+					,@intItemUOMId = MIN(intItemUOMId)
 				FROM ##tblMFTransaction
 				WHERE intWorkOrderId = @intWorkOrderId
 					AND intInputItemId = @intInputItemId
@@ -818,26 +844,30 @@ BEGIN TRY
 					--WHERE intWorkOrderId = @intWorkOrderId
 					--	AND intCategoryId <> @intCategoryId
 					--	AND strTransactionType ='INPUT'
-
 					SELECT @dblRequiredQty = SUM(dblQuantity)
 					FROM ##tblMFTransaction
 					WHERE intWorkOrderId = @intWorkOrderId
-					AND intCategoryId <> @intCategoryId
-					AND strTransactionType = 'dblConsumedQuantity'
+						AND intCategoryId <> @intCategoryId
+						AND strTransactionType = 'dblConsumedQuantity'
 
-					Select @intFromUnitMeasureId=intUnitMeasureId 
-					from tblICItemUOM Where intItemUOMId=@intInputItemUOMId
+					SELECT @intFromUnitMeasureId = intUnitMeasureId
+					FROM tblICItemUOM
+					WHERE intItemUOMId = @intInputItemUOMId
 
-					Select @intToUnitMeasureId=intUnitMeasureId 
-					from tblICItemUOM Where intItemUOMId=@intItemUOMId
+					SELECT @intToUnitMeasureId = intUnitMeasureId
+					FROM tblICItemUOM
+					WHERE intItemUOMId = @intItemUOMId
 
-					Select @dblConversionToStock=NULL
+					SELECT @dblConversionToStock = NULL
 
-					If @intFromUnitMeasureId<>@intToUnitMeasureId
-					Select @dblConversionToStock=dblConversionToStock from tblICUnitMeasureConversion  Where intUnitMeasureId=@intFromUnitMeasureId and intStockUnitMeasureId =@intToUnitMeasureId
+					IF @intFromUnitMeasureId <> @intToUnitMeasureId
+						SELECT @dblConversionToStock = dblConversionToStock
+						FROM tblICUnitMeasureConversion
+						WHERE intUnitMeasureId = @intFromUnitMeasureId
+							AND intStockUnitMeasureId = @intToUnitMeasureId
 
-					If @dblConversionToStock is null
-					Select @dblConversionToStock=1
+					IF @dblConversionToStock IS NULL
+						SELECT @dblConversionToStock = 1
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
@@ -847,7 +877,7 @@ BEGIN TRY
 
 					UPDATE ##tblMFFinalInputItemYield
 					SET dblActualYield = @dblYieldP * 100
-						,dblTotalInput = @dblTInput*@dblConversionToStock
+						,dblTotalInput = @dblTInput * @dblConversionToStock
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = 100
 					WHERE intWorkOrderId = @intWorkOrderId
@@ -857,28 +887,35 @@ BEGIN TRY
 				BEGIN
 					SELECT @dblRequiredQty = 0
 
-					Select @dblRequiredQty = dblRequiredQty
-					from tblMFProductionSummary 
-					Where intWorkOrderId = @intWorkOrderId
-						AND intItemId = @intInputItemId
-					
-					if @dblRequiredQty=0 or @dblRequiredQty is null
 					SELECT @dblRequiredQty = dblRequiredQty
-					FROM ##tblMFFinalInputItemYield
+					FROM tblMFProductionSummary
 					WHERE intWorkOrderId = @intWorkOrderId
-						AND intInputItemId = @intInputItemId
+						AND intItemId = @intInputItemId
+
+					IF @dblRequiredQty = 0
+						OR @dblRequiredQty IS NULL
+						SELECT @dblRequiredQty = dblRequiredQty
+						FROM ##tblMFFinalInputItemYield
+						WHERE intWorkOrderId = @intWorkOrderId
+							AND intInputItemId = @intInputItemId
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL((@dblTInput - @dblTOutput), 0) = 0
 								THEN 1
 							ELSE (@dblTInput - @dblTOutput)
 							END
+
 					UPDATE ##tblMFFinalInputItemYield
 					SET dblActualYield = @dblYieldP * 100
 						,dblTotalInput = @dblTInput
 						,dblTotalOutput = @dblTOutput
-						,dblStandardYield = Case When @dblRequiredQty=0 or @dblRequiredQty is null then 0 else 100 End
-						,dblRequiredQty=@dblRequiredQty
+						,dblStandardYield = CASE 
+							WHEN @dblRequiredQty = 0
+								OR @dblRequiredQty IS NULL
+								THEN 0
+							ELSE 100
+							END
+						,dblRequiredQty = @dblRequiredQty
 					WHERE intWorkOrderId = @intWorkOrderId
 						AND intInputItemId = @intInputItemId
 				END
@@ -937,7 +974,7 @@ BEGIN TRY
 						,IY.intShiftId
 						,(
 							CASE 
-								WHEN intRecipeItemTypeId=2
+								WHEN intRecipeItemTypeId = 2
 									THEN 'Output'
 								ELSE 'Input'
 								END
@@ -959,7 +996,7 @@ BEGIN TRY
 			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,CASE 
-				WHEN intRecipeItemTypeId=2
+				WHEN intRecipeItemTypeId = 2
 					THEN 'Output'
 				ELSE 'Input'
 				END AS strTransaction
@@ -1236,7 +1273,11 @@ BEGIN TRY
 			,TR.intShiftId
 			,TR.intInputItemId
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalInput
-			,isNULL(PS.dblRequiredQty,0) AS dblRequiredQty
+			,isNULL(SUM(CASE 
+						WHEN strTransactionType = 'INPUT'
+							THEN PS.dblRequiredQty
+						ELSE 0
+						END), 0) AS dblRequiredQty
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblTotalOutput
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblActualYield
 			,CAST(0.0 AS NUMERIC(18, 6)) AS dblStandardYield
@@ -1250,7 +1291,8 @@ BEGIN TRY
 		FROM ##tblMFTransaction TR
 		JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = TR.intWorkOrderId
 		JOIN dbo.tblICItem I ON I.intItemId = TR.intInputItemId
-		JOIN dbo.tblMFProductionSummary PS on PS.intWorkOrderId =W.intWorkOrderId and PS.intItemId =TR.intInputItemId
+		JOIN dbo.tblMFProductionSummary PS ON PS.intWorkOrderId = W.intWorkOrderId
+			AND PS.intItemId = TR.intInputItemId
 		--LEFT JOIN dbo.tblMFWorkOrderRecipeSubstituteItem RS ON RS.intSubstituteItemId  = TR.intInputItemId
 		--	AND RS.intWorkOrderId = W.intWorkOrderId
 		--JOIN dbo.tblMFWorkOrderRecipeItem RI ON (RI.intItemId = TR.intInputItemId or RI.intItemId = RS.intItemId)
@@ -1263,6 +1305,15 @@ BEGIN TRY
 				,'OUTPUT'
 				,'dblOpeningQuantity'
 				)
+		GROUP BY TR.intItemId
+			,TR.dtmDate
+			,TR.intShiftId
+			,TR.intInputItemId
+			,TR.intItemUOMId
+			,W.intItemId
+			,strTransactionType
+			,TR.intCategoryId
+			,PS.intItemTypeId
 
 		--INSERT INTO ##tblMFInputItemYieldByDate
 		--SELECT DISTINCT Dense_Rank() OVER (
@@ -1338,7 +1389,6 @@ BEGIN TRY
 		--		,'OUTPUT'
 		--		,'dblOpeningQuantity'
 		--		)
-
 		SELECT intYieldId
 			,intItemId
 			,dtmDate
@@ -1354,7 +1404,7 @@ BEGIN TRY
 			,intPrimaryItemId
 			,strTransactionType
 			,intCategoryId
-			,intRecipeItemTypeId 
+			,intRecipeItemTypeId
 		INTO ##tblMFFinalInputItemYieldByDate
 		FROM ##tblMFInputItemYieldByDate
 		GROUP BY intYieldId
@@ -1401,8 +1451,8 @@ BEGIN TRY
 					,@dblCycleCountAdj = NULL
 					,@dblEmptyOutAdj = NULL
 					,@intPrimaryItemId = NULL
-					,@intInputItemUOMId=NULL
-					,@intItemUOMId=NULL
+					,@intInputItemUOMId = NULL
+					,@intItemUOMId = NULL
 
 				SELECT @intItemId = intItemId
 					,@dtmDate = dtmDate
@@ -1414,7 +1464,8 @@ BEGIN TRY
 
 				IF @intInputItemId = @intItemId
 				BEGIN
-					SELECT @dblInput = SUM(dblQuantity),@intInputItemUOMId =MIN(intItemUOMId)
+					SELECT @dblInput = SUM(dblQuantity)
+						,@intInputItemUOMId = MIN(intItemUOMId)
 					FROM ##tblMFTransaction
 					WHERE intItemId = @intPrimaryItemId
 						AND dtmDate = @dtmDate
@@ -1442,7 +1493,8 @@ BEGIN TRY
 						AND strTransactionType = 'Input'
 				END
 
-				SELECT @dblOutput = SUM(dblQuantity),@intItemUOMId=MIN(intItemUOMId)
+				SELECT @dblOutput = SUM(dblQuantity)
+					,@intItemUOMId = MIN(intItemUOMId)
 				FROM ##tblMFTransaction
 				WHERE intItemId = @intItemId
 					AND dtmDate = @dtmDate
@@ -1593,29 +1645,32 @@ BEGIN TRY
 					--	AND intShiftId = IsNULL(@intShiftId, intShiftId)
 					--	AND intCategoryId <> @intCategoryId
 					--	AND strTransactionType ='INPUT'
-
 					SELECT @dblRequiredQty = SUM(dblQuantity)
 					FROM ##tblMFTransaction
 					WHERE intItemId = @intPrimaryItemId
 						AND dtmDate = @dtmDate
-						AND intShiftId = IsNULL(@intShiftId, intShiftId) 
-						and intCategoryId <> @intCategoryId
-					AND strTransactionType = 'dblConsumedQuantity'
+						AND intShiftId = IsNULL(@intShiftId, intShiftId)
+						AND intCategoryId <> @intCategoryId
+						AND strTransactionType = 'dblConsumedQuantity'
 
+					SELECT @intFromUnitMeasureId = intUnitMeasureId
+					FROM tblICItemUOM
+					WHERE intItemUOMId = @intInputItemUOMId
 
-					Select @intFromUnitMeasureId=intUnitMeasureId 
-					from tblICItemUOM Where intItemUOMId=@intInputItemUOMId
+					SELECT @intToUnitMeasureId = intUnitMeasureId
+					FROM tblICItemUOM
+					WHERE intItemUOMId = @intItemUOMId
 
-					Select @intToUnitMeasureId=intUnitMeasureId 
-					from tblICItemUOM Where intItemUOMId=@intItemUOMId
+					SELECT @dblConversionToStock = NULL
 
-					Select @dblConversionToStock=NULL
+					IF @intFromUnitMeasureId <> @intToUnitMeasureId
+						SELECT @dblConversionToStock = dblConversionToStock
+						FROM tblICUnitMeasureConversion
+						WHERE intUnitMeasureId = @intFromUnitMeasureId
+							AND intStockUnitMeasureId = @intToUnitMeasureId
 
-					If @intFromUnitMeasureId<>@intToUnitMeasureId
-					Select @dblConversionToStock=dblConversionToStock from tblICUnitMeasureConversion  Where intUnitMeasureId=@intFromUnitMeasureId and intStockUnitMeasureId =@intToUnitMeasureId
-
-					If @dblConversionToStock is null
-					Select @dblConversionToStock=1
+					IF @dblConversionToStock IS NULL
+						SELECT @dblConversionToStock = 1
 
 					SET @dblYieldP = @dblRequiredQty / CASE 
 							WHEN ISNULL(@dblTInput, 0) = 0
@@ -1629,12 +1684,11 @@ BEGIN TRY
 								THEN ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
 							ELSE ((@dblYieldP * 100) / @dblCalculatedQuantity) * 100
 							END
-						,dblTotalInput = @dblTInput*@dblConversionToStock
+						,dblTotalInput = @dblTInput * @dblConversionToStock
 						,dblTotalOutput = @dblTOutput
 						,dblStandardYield = 100
 					WHERE intYieldId = @intYieldId
-					AND intInputItemId = @intInputItemId
-
+						AND intInputItemId = @intInputItemId
 				END
 				ELSE
 				BEGIN
@@ -1658,7 +1712,12 @@ BEGIN TRY
 							END
 						,dblTotalInput = @dblTInput
 						,dblTotalOutput = @dblTOutput
-						,dblStandardYield = Case When @dblRequiredQty is null or @dblRequiredQty=0 Then 0 else 100 end
+						,dblStandardYield = CASE 
+							WHEN @dblRequiredQty IS NULL
+								OR @dblRequiredQty = 0
+								THEN 0
+							ELSE 100
+							END
 					WHERE intYieldId = @intYieldId
 						AND intInputItemId = @intInputItemId
 				END
@@ -1720,7 +1779,7 @@ BEGIN TRY
 						,IY.intShiftId
 						,(
 							CASE 
-								WHEN intRecipeItemTypeId=2
+								WHEN intRecipeItemTypeId = 2
 									THEN 'Output'
 								ELSE 'Input'
 								END
@@ -1742,7 +1801,7 @@ BEGIN TRY
 			,ROUND(IY.dblStandardYield, @dblDecimal) dblStandardYield
 			,ROUND(IY.dblActualYield - dblStandardYield, @dblDecimal) dblVariance
 			,CASE 
-				WHEN intRecipeItemTypeId=2
+				WHEN intRecipeItemTypeId = 2
 					THEN 'Output'
 				ELSE 'Input'
 				END AS strTransaction

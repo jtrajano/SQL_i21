@@ -135,9 +135,9 @@ BEGIN
 		,RI.intItemId
 		,SUM((
 				CASE 
-					WHEN intMarginById = 2
-						THEN ISNULL(P.dblStandardCost, 0) + ISNULL(RI.dblMargin, 0)
-					ELSE ISNULL(P.dblStandardCost, 0) + (ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblMargin, 0) / 100)
+					WHEN intCostDriverId = 2
+						THEN ISNULL(P.dblStandardCost, 0)
+					ELSE ISNULL(P.dblStandardCost, 0) * ISNULL(RI.dblCostRate, 0)
 					END
 				) / R.dblQuantity)
 	FROM dbo.tblMFWorkOrderRecipeItem RI
