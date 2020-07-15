@@ -8733,6 +8733,7 @@
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
