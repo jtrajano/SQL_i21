@@ -68,6 +68,10 @@ DECLARE @dblLoopItemContractId int
 DECLARE @loopLoadDetailId INT
 DECLARE @strTicketStatus NVARCHAR(3)
 DECLARE @_strShipmentNumber NVARCHAR(50)
+DECLARE @strOwnedPhysicalStock NVARCHAR(20)
+DECLARE @OWNERSHIP_CUSTOMER NVARCHAR(20)
+
+SET @OWNERSHIP_CUSTOMER = 'CUSTOMER'
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -82,7 +86,8 @@ SELECT @intLoadId = intLoadId
 	,@strTicketStatus = strTicketStatus
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
-SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
+SELECT	@ysnDPStorage = ST.ysnDPOwnedType
+	,@strOwnedPhysicalStock = UPPER(strOwnedPhysicalStock)
 FROM dbo.tblGRStorageType ST WHERE 
 ST.strStorageTypeCode = @strDistributionOption
 
@@ -550,6 +555,14 @@ BEGIN TRY
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 					SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
+
+					IF @strOwnedPhysicalStock = @OWNERSHIP_CUSTOMER AND ABS(@dblRemainingUnits) > 0 
+						and  @dblNetUnits > ISNULL(@dblRemainingUnitStorage, 0)
+					BEGIN
+						SET @ErrMsg  = 'Cannot distribute ticket. Not enough storage unit.'
+						RAISERROR(@ErrMsg, 11, 1);	
+					END
+
 					SET @dblRemainingUnits = (@dblRemainingUnits + ISNULL(@dblRemainingUnitStorage, 0)) * -1
 					IF (@dblRemainingUnits > 0)
 					BEGIN
