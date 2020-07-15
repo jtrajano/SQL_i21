@@ -7768,6 +7768,7 @@
     <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
