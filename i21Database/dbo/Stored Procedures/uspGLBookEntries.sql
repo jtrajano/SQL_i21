@@ -102,10 +102,7 @@ BEGIN
 			,dtmDateEnteredMin
 	)
 	SELECT 
-			dbo.fnRemoveTimeOnDate(
-				CASE WHEN  (PastGLEntry.Cnt > 0 AND @ysnPost = 1 ) OR @ysnPost = 0 THEN @dtmDateEntered -- repost / unpost, current date is applied GL-7717
-				 ELSE [dtmDate] END
-			)
+			dbo.fnRemoveTimeOnDate(ISNULL(PastGLEntry.dtmCurrentDate, dtmDate))
 			,[strBatchId]
 			,@intMultCompanyId
 			,[intAccountId]
@@ -155,7 +152,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
 			OUTER APPLY(
-				SELECT Cnt = COUNT(*) FROM tblGLDetail WHERE strTransactionId = GLEntries.strTransactionId
+				SELECT TOP 1 dtmCurrentDate = @dtmDateEntered  FROM tblGLDetail WHERE strTransactionId = GLEntries.strTransactionId
 			)PastGLEntry
 
 END
