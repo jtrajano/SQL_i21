@@ -8569,6 +8569,7 @@
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARCustomerAging_Dashboard.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
