@@ -85,6 +85,8 @@ declare @strAdjustmentNo AS NVARCHAR(40)
 DECLARE @ysnAllInvoiceHasCreditMemo BIT
 DECLARE @strInvoiceNumber AS NVARCHAR(50)
 DECLARE @NeedCreditMemoMessage NVARCHAR(200)
+DECLARE @ysnCreditMemoPosted BIT
+DECLARE @strCreditMemoNumber AS NVARCHAR(50)
 DECLARE @ysnTicketHasSpecialDiscount BIT
 DECLARE @intInventoryShipmentItemUsed INT
 DECLARE @intInventoryReceiptItemUsed INT
@@ -1077,7 +1079,18 @@ BEGIN TRY
 												RETURN;
 											end
 
+											SELECT @ysnCreditMemoPosted = C.ysnPosted, @strCreditMemoNumber = C.strInvoiceNumber
+											FROM tblARInvoice I
+											LEFT JOIN tblARInvoice C
+												ON C.intOriginalInvoiceId = I.intInvoiceId
+											WHERE I.intInvoiceId = @intInvoiceId;
 
+											IF @ysnCreditMemoPosted IS NOT NULL AND @ysnCreditMemoPosted = 0
+											BEGIN
+												SET @NeedCreditMemoMessage = 'Cannot undistribute ticket. Credit memo ' + @strCreditMemoNumber + ' has not been posted yet.'
+												RAISERROR(@NeedCreditMemoMessage, 11, 1);
+												RETURN;
+											END
 
 											-- EXEC [dbo].[uspARPostInvoice]
 											-- 	@batchId			= NULL,
