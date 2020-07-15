@@ -1017,7 +1017,10 @@ BEGIN TRY
 											LEFT JOIN tblARInvoice C
 												ON B.intInvoiceId = C.intInvoiceId
 											WHERE A.intInvoiceDetailId IS NOT NULL
-												AND B.intInvoiceDetailId IS NULL
+												AND (
+													B.intInvoiceDetailId IS NULL
+													OR C.ysnPosted = 0
+													)
 												-- AND C.strTransactionType = 'Credit Memo'
 												)
 
@@ -1035,7 +1038,10 @@ BEGIN TRY
 												LEFT JOIN tblARInvoice C
 													ON B.intInvoiceId = C.intInvoiceId
 												WHERE A.intInvoiceDetailId IS NOT NULL
-													AND B.intInvoiceDetailId IS NULL
+													AND (
+														B.intInvoiceDetailId IS NULL
+														OR C.ysnPosted = 0
+													)
 													-- AND C.strTransactionType = 'Credit Memo'
 													)
 
