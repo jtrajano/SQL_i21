@@ -153,6 +153,7 @@ BEGIN
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
+			CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F
 			OUTER APPLY(
 				SELECT TOP 1 dtmCurrentDate = @dtmDateEntered  FROM tblGLDetail WHERE strTransactionId = GLEntries.strTransactionId
 			)PastGLEntry
