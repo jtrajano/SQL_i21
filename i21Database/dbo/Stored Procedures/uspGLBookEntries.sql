@@ -1,7 +1,5 @@
-﻿--ALTER table tblGLDetail add [intMultiCompanyId] [int]   NULL
-
+﻿
 CREATE PROCEDURE uspGLBookEntries
-
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
 	,@SkipGLValidation BIT = 0
@@ -21,99 +19,18 @@ DECLARE @dtmDateEntered DATETIME = GETDATE()
 DECLARE @GLEntries2 AS RecapTableType;
 
 INSERT INTO @GLEntries2
-			(
-				dtmDate
-				,strBatchId
-				,intAccountId
-				,dblDebit
-				,dblCredit
-				,dblDebitUnit
-				,dblCreditUnit
-				,strDescription
-				,strCode
-				,strReference
-				,intCurrencyId
-				,dblExchangeRate
-				,dtmDateEntered
-				,dtmTransactionDate
-				,strJournalLineDescription
-				,intJournalLineNo
-				,ysnIsUnposted
-				,intUserId
-				,intEntityId
-				,strTransactionId
-				,intTransactionId
-				,strTransactionType
-				,strTransactionForm
-				,strModuleName
-				,intConcurrencyId
-				,dblDebitForeign
-				,dblDebitReport
-				,dblCreditForeign
-				,dblCreditReport
-				,dblReportingRate
-				,dblForeignRate
-				,intCurrencyExchangeRateTypeId
-				,strRateType
-				,strDocument
-				,strComments
-				,strSourceDocumentId
-				,intSourceLocationId
-				,intSourceUOMId
-				,dblSourceUnitDebit
-				,dblSourceUnitCredit
-				,intCommodityId
-				,intSourceEntityId
-				,ysnRebuild
-			)
-SELECT 
-			 ISNULL(PastGLEntry.dtmCurrentDate,[dtmDate])
-			,strBatchId
-			,intAccountId
-			,dblDebit
-			,dblCredit
-			,dblDebitUnit
-			,dblCreditUnit
-			,strDescription
-			,strCode
-			,strReference
-			,intCurrencyId
-			,dblExchangeRate
-			,dtmDateEntered
-			,dtmTransactionDate
-			,strJournalLineDescription
-			,intJournalLineNo
-			,ysnIsUnposted
-			,intUserId
-			,intEntityId
-			,strTransactionId
-			,intTransactionId
-			,strTransactionType
-			,strTransactionForm
-			,strModuleName
-			,intConcurrencyId
-			,dblDebitForeign
-			,dblDebitReport
-			,dblCreditForeign
-			,dblCreditReport
-			,dblReportingRate
-			,dblForeignRate
-			,intCurrencyExchangeRateTypeId
-			,strRateType
-			,strDocument
-			,strComments
-			,strSourceDocumentId
-			,intSourceLocationId
-			,intSourceUOMId
-			,dblSourceUnitDebit
-			,dblSourceUnitCredit
-			,intCommodityId
-			,intSourceEntityId
-			,ysnRebuild
-FROM @GLEntries GLEntries
-OUTER APPLY(
-				SELECT TOP 1 dtmCurrentDate = @dtmDateEntered  FROM tblGLDetail WHERE strTransactionId = GLEntries.strTransactionId
-)PastGLEntry
+SELECT * FROM @GLEntries
+
+UPDATE
+GL SET
+dtmDate = @dtmDateEntered
+FROM
+@GLEntries2 GL
+WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
+
+--OUTER APPLY(
+--	SELECT TOP 1 1 FROM tblGLDetail where strTransactionId = GL.strTransactionId
+--)
 
 
 
