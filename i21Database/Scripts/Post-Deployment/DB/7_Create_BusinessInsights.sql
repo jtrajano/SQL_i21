@@ -402,7 +402,7 @@ BEGIN
 					VALUES (
 						5, 7, 100, 400, @entityId, 0, 0, 0,	0, 1,	
 						0,	N'Master', N'Customer Aging Chart', N'Chart', N'', N'Customer Aging', N'3D Pie', N'rotate', N'Base', NULL, N'None',
-						N'None', N'', N'', N'select top 5 strCustomerName, strEntityNo, intEntityCustomerId, dblTotalDue from [vyuARCustomerAgingReport] order by dblTotalDue desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						N'None', N'', N'', N'select top 5 strCustomerName, intEntityCustomerId, dblTotalDue from vyuARCustomerAging_DashBoard', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, NULL
@@ -464,7 +464,7 @@ BEGIN
 					VALUES (
 						0, 5, 100, 250, @entityId, 0, 0, 0,	0, 1,	
 						0,	N'Master', N'Customer Aging Grid', N'Grid', N'', N'Customer Aging', N'3D Pie', N'rotate', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select distinct a.strCustomerNumber, a.strInvoiceNumber, b.dblTotalDue  from vyuARCustomerAgingInvoice a  inner join [vyuARCustomerAgingReport] b on a.intEntityCustomerId = b.intEntityCustomerId order by b.dblTotalDue desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						N'None', N'', N'', N'select distinct a.strCustomerNumber, a.strInvoiceNumber, b.dblTotalDue  from vyuARCustomerAgingInvoice a  inner join vyuARCustomerAging_DashBoard b on a.intEntityCustomerId = b.intEntityCustomerId order by b.dblTotalDue desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, 1
