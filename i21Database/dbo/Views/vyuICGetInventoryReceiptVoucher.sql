@@ -43,13 +43,26 @@ FROM	tblICInventoryReceipt r
 					,b.strBillId
 					,b.dtmBillDate
 					,b.intBillId
-					,dblQtyVouchered = CASE WHEN bd.intWeightUOMId IS NULL THEN ISNULL(bd.dblQtyReceived, 0) ELSE ISNULL(bd.dblNetWeight, 0) END
+					,dblQtyVouchered = 
+							CASE 
+								WHEN b.intTransactionType = 3 /*Debit Memo*/ AND r.strReceiptType <> 'Inventory Return' THEN 
+									-CASE WHEN bd.intWeightUOMId IS NULL THEN ISNULL(bd.dblQtyReceived, 0) ELSE ISNULL(bd.dblNetWeight, 0) END
+								ELSE 
+									CASE WHEN bd.intWeightUOMId IS NULL THEN ISNULL(bd.dblQtyReceived, 0) ELSE ISNULL(bd.dblNetWeight, 0) END
+							END 
+						
 					,dblVoucherAmount = 
 									ISNULL(
-										CASE	WHEN ri.intWeightUOMId IS NULL THEN 
-													bd.dblQtyReceived 										
-												ELSE 
-													bd.dblNetWeight
+										CASE	WHEN ri.intWeightUOMId IS NULL THEN											
+													CASE 
+														WHEN b.intTransactionType = 3 /*Debit Memo*/ AND r.strReceiptType <> 'Inventory Return' THEN -bd.dblQtyReceived
+														ELSE bd.dblQtyReceived
+													END 													
+												ELSE 													
+													CASE 
+														WHEN b.intTransactionType = 3 /*Debit Memo*/ AND r.strReceiptType <> 'Inventory Return' THEN -bd.dblNetWeight
+														ELSE bd.dblNetWeight
+													END 							
 										END 	
 										* 
 										CASE	WHEN ri.intCostUOMId IS NULL THEN 
@@ -60,11 +73,15 @@ FROM	tblICInventoryReceipt r
 										,0
 									)
 					,dblQtyToVoucher =	CASE WHEN ri.intWeightUOMId IS NULL THEN ISNULL(ri.dblOpenReceive, 0) ELSE ISNULL(ri.dblNet, 0) END
-										- ISNULL(totalFromVouchers.totalQtyVouchered, 0) 
+										- 
+										CASE 
+											WHEN b.intTransactionType = 3 /*Debit Memo*/ AND r.strReceiptType <> 'Inventory Return' THEN -ISNULL(totalFromVouchers.totalQtyVouchered, 0) 
+											ELSE ISNULL(totalFromVouchers.totalQtyVouchered, 0) 
+										END 
 					,dblAmountToVoucher = 
 									ISNULL(
 										CASE	WHEN ri.intWeightUOMId IS NULL THEN 
-													ri.dblOpenReceive
+													ri.dblOpenReceive													
 												ELSE 
 													ri.dblNet
 										END 	
@@ -76,7 +93,11 @@ FROM	tblICInventoryReceipt r
 										END
 										,0
 									)
-									- ISNULL(totalFromVouchers.totalAmountVouchered, 0) 
+									- 
+									CASE 
+										WHEN b.intTransactionType = 3 /*Debit Memo*/ AND r.strReceiptType <> 'Inventory Return' THEN -ISNULL(totalFromVouchers.totalAmountVouchered, 0) 
+										ELSE ISNULL(totalFromVouchers.totalAmountVouchered, 0) 
+									END 
 				
 			FROM	tblICInventoryReceiptItem ri OUTER APPLY (
 						SELECT	totalQtyVouchered = 
