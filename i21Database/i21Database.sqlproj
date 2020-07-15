@@ -8734,6 +8734,8 @@
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
+    <Build Include="dbo\Views\vyuLGClearingItemGL.sql" />
+    <Build Include="dbo\Views\vyuLGClearingItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
