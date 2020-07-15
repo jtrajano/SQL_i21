@@ -176,7 +176,8 @@ BEGIN TRY
 	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
 	DECLARE @intStorageHistoryId AS INT
 	DECLARE @VoucherIds AS Id
-	
+	DECLARE @dblTotalUnits AS DECIMAL(24,10)
+
 	/*	intItemType
 		------------
 		1-Inventory
@@ -195,8 +196,7 @@ BEGIN TRY
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
-		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
-		DECLARE @dblTotalUnits AS DECIMAL(24,10)
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)		
 
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
@@ -1799,8 +1799,6 @@ BEGIN TRY
 			 BEGIN
 												
 				begin
-					-- must update the qty for the discounts
-					declare @dblTotalUnits DECIMAL(24, 10)
 				
 					select @dblTotalUnits = sum(case when @doPartialHistory = 1 then
 												case WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
