@@ -8571,6 +8571,7 @@
     <Build Include="dbo\Views\vyuARCustomerAging_Dashboard.sql" />
     <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
