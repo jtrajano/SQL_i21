@@ -596,11 +596,6 @@ BEGIN TRY
 
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-							IF (ISNULL(@intBillDetailId, 0) <> 0)
-							BEGIN
-								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-							END
-
 							-- CT-3983
 							DELETE @detailCreated
 
@@ -617,6 +612,11 @@ BEGIN TRY
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 							--
 
 							IF ISNULL(@ysnBillPosted,0) = 1
@@ -878,11 +878,6 @@ BEGIN TRY
 					    
 								--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-								IF (ISNULL(@intBillDetailId, 0) <> 0)
-								BEGIN
-									EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-								END
-
 								-- CT-3983
 								DELETE FROM @detailCreated
 							
@@ -899,6 +894,11 @@ BEGIN TRY
 								WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+								IF (ISNULL(@intBillDetailId, 0) <> 0)
+								BEGIN
+									EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+								END
 								--
 
 								IF ISNULL(@ysnBillPosted,0) = 1
