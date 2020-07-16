@@ -493,7 +493,7 @@ BEGIN
 													(
 														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
 															ELSE
-															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+															dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment 
 															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 															- B.dblInterest, voucher.dblTotal)
 															END
@@ -533,7 +533,7 @@ BEGIN
 													(
 														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
 															ELSE
-															dbo.fnAPGetPaymentAmountFactor(B.dblTotal, B.dblPayment 
+															dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment 
 															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 															- B.dblInterest, voucher.dblTotal)
 															END
