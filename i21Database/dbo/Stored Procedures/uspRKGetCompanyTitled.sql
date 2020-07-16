@@ -271,6 +271,9 @@ BEGIN
 					,intCollateralId
 				 from dbo.fnRKGetBucketCollateral(@dtmToTransactionDate,@intCommodityId,null)
 				 where ysnIncludeInPriceRiskAndCompanyTitled = 1
+					and intItemId = ISNULL(@intItemId, intItemId)
+					and intLocationId = ISNULL(@intLocationId, intLocationId)
+					and intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			) t GROUP BY strCommodityCode
 				, strLocationName
 				, intCommodityId
