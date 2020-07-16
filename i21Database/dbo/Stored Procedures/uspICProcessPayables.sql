@@ -320,7 +320,7 @@ SET ANSI_WARNINGS OFF
 		
 		BEGIN TRY 		
 			--EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
-			EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intEntityUserSecurityId
+			EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intShipmentId, @intEntityUserSecurityId
 		END TRY 
 		BEGIN CATCH					
 			DECLARE @error INT, @message VARCHAR(4000), @xstate INT 
