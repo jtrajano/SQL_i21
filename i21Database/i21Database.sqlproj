@@ -8736,6 +8736,7 @@
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
     <Build Include="dbo\Views\vyuLGClearingItemGL.sql" />
     <Build Include="dbo\Views\vyuLGClearingItem.sql" />
+    <None Include="Scripts\Post-Deployment\IC\25_TransactionTypeRename.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
