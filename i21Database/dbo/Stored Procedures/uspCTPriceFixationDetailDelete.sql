@@ -37,6 +37,36 @@ BEGIN TRY
 		dblReceived					NUMERIC(26,16)
 	)
 
+	if (@intPriceFixationId is null or @intPriceFixationId < 1)
+	begin
+		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = (select top 1 intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId))
+	end
+	ELSE
+	begin
+		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId)
+	end
+
+	declare @intDWGIdId int
+			,@ysnDestinationWeightsAndGrades bit;
+
+	select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
+			
+	select
+		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
+	from
+		tblCTContractDetail cd
+		,tblCTContractHeader ch
+	where
+		cd.intContractDetailId = @intContractDetailId
+		and ch.intContractHeaderId = cd.intContractHeaderId
+
+	if (@ysnDestinationWeightsAndGrades = 0)
+	begin
+		UPDATE	tblCTContractDetail
+		SET		intContractStatusId	=	case when intContractStatusId = 5 then 1 else intContractStatusId end
+		where intContractDetailId = @intContractDetailId
+	end
+
 	-- UNPOST BILL
 	SELECT  DISTINCT BL.intBillId
 	INTO	#ItemBillPosted
@@ -256,7 +286,7 @@ BEGIN TRY
 			CD.dblCashPrice			=	NULL,
 			CD.dblTotalCost			=	NULL,
 			CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-			CD.intContractStatusId	=	case when CD.intContractStatusId = 5 then 1 else CD.intContractStatusId end
+			CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId

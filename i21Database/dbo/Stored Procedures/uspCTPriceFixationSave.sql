@@ -152,6 +152,20 @@ BEGIN TRY
 		IF @strAction = 'Delete'
 		BEGIN
 
+		declare @intDWGIdId int
+				,@ysnDestinationWeightsAndGrades bit;
+
+		select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
+			
+		select
+			@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
+		from
+			tblCTContractDetail cd
+			,tblCTContractHeader ch
+		where
+			cd.intContractDetailId = @intContractDetailId
+			and ch.intContractHeaderId = cd.intContractHeaderId
+
 			UPDATE	CD
 			SET		CD.dblBasis				=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblOriginalBasis,0) END,
 					CD.dblFreightBasisBase	=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblFreightBasisBase,0) END,
@@ -162,7 +176,7 @@ BEGIN TRY
 					CD.dblCashPrice			=	NULL,
 					CD.dblTotalCost			=	NULL,
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-					CD.intContractStatusId	=	case when CD.intContractStatusId = 5 then 1 else CD.intContractStatusId end
+					CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
