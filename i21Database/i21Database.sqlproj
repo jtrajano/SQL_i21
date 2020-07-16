@@ -8565,6 +8565,9 @@
     <Build Include="dbo\Views\vyuCMCashProjection.sql" />
     <None Include="Scripts\Post-Deployment\IC\24_PopulateTransactionUOM.sql" />
     <None Include="Scripts\Post-Deployment\CM\7_AlterCashProjectionView.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceSalesDWM.sql" />
+    <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
+    <Build Include="dbo\Views\vyuARCustomerAging_Dashboard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
