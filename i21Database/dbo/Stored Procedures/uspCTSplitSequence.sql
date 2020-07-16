@@ -77,6 +77,8 @@ SET NOCOUNT ON
 				AND b.intItemUOMId = cd.intPriceItemUOMId
 			) cnv
 			WHERE cd.intContractDetailId = @intNewContractDetailId
+
+			UPDATE tblCTContractDetail SET dblNoOfLots = 0 WHERE intContractDetailId = @intContractDetailId
 		END
 
 		SET @XML = NULL
