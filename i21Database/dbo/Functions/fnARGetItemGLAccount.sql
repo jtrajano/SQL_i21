@@ -1,12 +1,11 @@
 CREATE FUNCTION [dbo].[fnARGetItemGLAccount]
 (
-	@intItemId INT 
+	  @intItemId 		INT
+	, @intProfitCenter	INT
 )
 RETURNS INT
 AS 
 BEGIN 
-	
-
 	DECLARE @intGLAccountId AS INT
 
 	--Hierarchy:
@@ -74,5 +73,5 @@ BEGIN
 			)CategoryGeneralAccount
 
 	
-	RETURN @intGLAccountId
+	RETURN dbo.fnGetGLAccountIdFromProfitCenter(@intGLAccountId, @intProfitCenter)
 END
