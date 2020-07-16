@@ -154,6 +154,7 @@ FROM
 			tblICInventoryTransaction t
 		WHERE
 			t.strTransactionId = p.strTransactionId	
+			AND t.strBatchId <> @strBatchId 
 		ORDER BY 
 			t.intInventoryTransactionId DESC 
 	) lastTransaction
