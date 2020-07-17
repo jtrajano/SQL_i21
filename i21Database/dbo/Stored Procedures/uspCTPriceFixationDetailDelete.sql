@@ -45,26 +45,9 @@ BEGIN TRY
 		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId)
 	end
 
-	declare @intDWGIdId int
-			,@ysnDestinationWeightsAndGrades bit;
-
-	select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
-			
-	select
-		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
-	from
-		tblCTContractDetail cd
-		,tblCTContractHeader ch
-	where
-		cd.intContractDetailId = @intContractDetailId
-		and ch.intContractHeaderId = cd.intContractHeaderId
-
-	if (@ysnDestinationWeightsAndGrades = 0)
-	begin
-		UPDATE	tblCTContractDetail
-		SET		intContractStatusId	=	case when intContractStatusId = 5 then 1 else intContractStatusId end
-		where intContractDetailId = @intContractDetailId
-	end
+	UPDATE	tblCTContractDetail
+	SET		intContractStatusId	=	case when intContractStatusId = 5 then 1 else intContractStatusId end
+	where intContractDetailId = @intContractDetailId
 
 
 	-- UNPOST BILL
