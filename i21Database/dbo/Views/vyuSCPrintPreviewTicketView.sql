@@ -129,7 +129,7 @@ AS SELECT
 		SC.strDistributionOption = 'SPT' THEN 'Spot Sale' WHEN
 		SC.strDistributionOption = 'SPL' THEN 'Split' WHEN
 		SC.strDistributionOption = 'HLD' THEN 'Hold' END
-	)) AS strStorageTypeDescription
+	)) COLLATE Latin1_General_CI_AS AS strStorageTypeDescription
 	,tblSCListTicketTypes.strTicketType
 
 	,tblSCScaleSetup.strStationShortDescription
@@ -212,12 +212,12 @@ AS SELECT
 										,tblSCScaleSetup.strState
 										,tblSCScaleSetup.strZipCode
 										,null))
-					END 
+					END  COLLATE Latin1_General_CI_AS
 	,SMS.blbDetail AS blbSignature
 	,SMS.intEntityId AS intUserId
 	,(SELECT intCurrencyDecimal FROM tblSMCompanyPreference) AS intDecimalPrecision
 	,tblSCTicketFormat.ysnSuppressCashPrice
-	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'')
+	,strSealNumbers = ISNULL(SUBSTRING(SealNumber.strSealNumbers,3, LEN(SealNumber.strSealNumbers)-2),'') COLLATE Latin1_General_CI_AS
 	,EMScaleOps.strTimezone
 	,SC.strTrailerId
   FROM tblSCTicket SC
