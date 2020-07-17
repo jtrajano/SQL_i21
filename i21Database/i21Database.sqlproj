@@ -8261,6 +8261,7 @@
     <Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
     <Build Include="dbo\Views\vyuLGClearingItemGL.sql" />
     <Build Include="dbo\Views\vyuLGClearingItem.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceReportStagingTableCopy.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
