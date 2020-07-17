@@ -12,6 +12,7 @@ BEGIN
 		,@dtmToDate datetime = null
 		,@ysnIsCrushPosition bit = NULL
 		,@strPositionBy nvarchar(50) = NULL
+		,@intDPRHeaderId int
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -73,6 +74,10 @@ SELECT *
 	SELECT @strPositionBy = [from]
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'strPositionBy'
+
+	SELECT @intDPRHeaderId = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'intDPRHeaderId'
 	
 
 DECLARE @strCommodityCode NVARCHAR(50)
@@ -150,8 +155,7 @@ END
 		, strNotes NVARCHAR(100)
 		, ysnPreCrush BIT)
 	
-	IF @ysnIsCrushPosition = 1
-	BEGIN
+
 		INSERT INTO @List (
 			intSeqNo
 			, intRowNumber
@@ -187,13 +191,8 @@ END
 			, strNotes
 			, ysnPreCrush
 		)
-		EXEC uspRKDPRPreCrushPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate, NULL, NULL, @strPositionBy 
-
-	END
-	ELSE
-	BEGIN
-		INSERT INTO @List (
-			  intSeqNo
+		SELECT
+			intSeqNo
 			, intRowNumber
 			, strCommodityCode
 			, strContractNumber
@@ -202,7 +201,7 @@ END
 			, intFutOptTransactionHeaderId
 			, strType
 			, strLocationName
-			, strContractEndMonth 
+			, strContractEndMonth
 			, strContractEndMonthNearBy
 			, dblTotal
 			, strUnitMeasure
@@ -213,21 +212,22 @@ END
 			, intBrokerageAccountId
 			, strInstrumentType
 			, strEntityName
+			, intOrderId = intSeqNo
 			, intItemId
 			, strItemNo
 			, intCategoryId
 			, strCategory
 			, intFutureMarketId
-			, strFutMarketName
+			, strFutMarketName = strFutureMarket
 			, intFutureMonthId
 			, strFutureMonth
 			, strDeliveryDate
 			, strBrokerTradeNo
 			, strNotes
-			, ysnPreCrush
-		)
-		EXEC uspRKDPRHedgeDailyPositionDetailByMonth @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate 
-	END
+			, ysnPreCrush = ysnCrush
+		FROM tblRKDPRContractHedgeByMonth
+		WHERE intDPRHeaderId = @intDPRHeaderId
+
 
 
 
