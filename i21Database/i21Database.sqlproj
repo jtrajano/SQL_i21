@@ -8772,6 +8772,7 @@
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceReportStagingTableCopy.sql" />
     <None Include="Scripts\Post-Deployment\IC\25_TransactionTypeRename.sql" />
   </ItemGroup>
   <ItemGroup>
