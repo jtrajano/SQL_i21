@@ -18,49 +18,157 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 )
 GO
 
-CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARInsertDelete]
-	ON [dbo].[tblCTPriceFixationDetailAPAR]
-    AFTER DELETE
-AS
-BEGIN	
-    SET NOCOUNT ON;
+CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
+    ON [dbo].[tblCTPriceFixationDetailAPAR]
+    FOR INSERT
+    AS
+    BEGIN
+        SET NoCount ON
 
-    declare @intPriceFixationId int;
-    declare @intContractPriceId int;
-    declare @intPriceFixationDetailId int;
-    declare @intInvoiceDetailId int;
-	declare @dblPricedQuantity numeric(18,6);
-	declare @dblInvoiceDetailQuantity numeric(18,6);
-	declare @intContractDetailId int;
-	declare @UserId int = null;
-
-	select
-		@intInvoiceDetailId = intInvoiceDetailId
-		,@intPriceFixationDetailId = intPriceFixationDetailId
-	from
-		DELETED
-	where isnull(ysnMarkDelete,0) <> 1;
+		declare @intActiveContractDetailId int = 0;
+		declare @intPricingTypeId int = 0;
+		declare @dblSequenceQuantity numeric(18,6) = 0.00;
+		declare @intPricingStatus int = 0;
+		declare @dblPricedQuantity numeric(18,6) = 0.00;
 	
-	if (@intInvoiceDetailId is not null)
-	BEGIN
+		declare @intActiveId int = 0;
+		declare @dblCommulativeAppliedAndPrice numeric(18,6) = 0;
+		declare @dblActivelAppliedQuantity numeric(18,6);
+		declare @dblRemainingAppliedQuantity numeric(18,6) = 0;
+		declare @ysnLoad bit;
+		declare @ErrMsg nvarchar(max);
 
-		SELECT top 1
-			@dblInvoiceDetailQuantity = dblQtyShipped
-			,@UserId = intEntityUserId
-		FROM
-			tblARTransactionDetail
+		declare @Pricing table (
+			intId int
+			,intContractHeaderId int
+			,ysnLoad bit
+			,intContractDetailId int
+			,dblSequenceQuantity numeric(18,6)
+			,dblBalance numeric(18,6)
+			,dblAppliedQuantity numeric(18,6)
+			,intNoOfLoad int null
+			,dblBalanceLoad numeric(18,6)
+			,dblAppliedLoad numeric(18,6)
+			,intPriceFixationId int
+			,intPriceFixationDetailId int
+			,intPricingNumber int
+			,intNumber int
+			,dblPricedQuantity numeric(18,6)
+			,dblQuantityAppliedAndPriced numeric(18,6)
+			,dblLoadPriced numeric(18,6)
+			,dblLoadAppliedAndPriced numeric(18,6)
+			,dblCorrectAppliedAndPriced numeric(18,6) null
+		)
+		
+		begin try
+
+		select top 1 @intActiveContractDetailId = pf.intContractDetailId from inserted i, tblCTPriceFixationDetail pfd, tblCTPriceFixation pf where pfd.intPriceFixationDetailId = i.intPriceFixationDetailId and pf.intPriceFixationId = pfd.intPriceFixationId;
+
+		insert into @Pricing
+		select
+			intId = convert(int,ROW_NUMBER() over (order by pfd.intPriceFixationDetailId))
+			,ch.intContractHeaderId
+			,ch.ysnLoad
+			,cd.intContractDetailId
+			,dblSequenceQuantity = cd.dblQuantity
+			,cd.dblBalance
+			,dblAppliedQuantity = cd.dblQuantity - cd.dblBalance
+			,cd.intNoOfLoad
+			,cd.dblBalanceLoad
+			,dblAppliedLoad = cd.intNoOfLoad - cd.dblBalanceLoad
+			,pf.intPriceFixationId
+			,pfd.intPriceFixationDetailId
+			,intPricingNumber = ROW_NUMBER() over (partition by pf.intPriceFixationId order by pfd.intPriceFixationDetailId)
+			,pfd.intNumber
+			,dblPricedQuantity = isnull(invoiced.dblQtyShipped, pfd.dblQuantity)
+			,pfd.dblQuantityAppliedAndPriced
+			,pfd.dblLoadPriced
+			,pfd.dblLoadAppliedAndPriced
+			,dblCorrectAppliedAndPriced = null
+		from tblCTPriceFixation pf
+		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+		join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
+		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		left join (
+			select 
+				ar.intPriceFixationDetailId, dblQtyShipped = sum(di.dblQtyShipped)
+			from
+				tblCTPriceFixationDetailAPAR ar
+				join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId
+			group by
+				ar.intPriceFixationDetailId
+		) invoiced on invoiced.intPriceFixationDetailId = pfd.intPriceFixationDetailId
+		where pf.intContractDetailId = @intActiveContractDetailId
+		order by pfd.intPriceFixationDetailId
+
+		select @intActiveId = min(intId) from @Pricing
+		while (@intActiveId is not null)
+		begin
+			select
+				@dblActivelAppliedQuantity = (case when ysnLoad = 1 then dblAppliedLoad else dblAppliedQuantity end)
+				,@dblPricedQuantity = (case when ysnLoad = 1 then dblLoadPriced else dblPricedQuantity end)
+				,@ysnLoad = isnull(ysnLoad,0)
+			from
+				@Pricing
+			where
+				intId = @intActiveId;
+
+			set @dblCommulativeAppliedAndPrice += @dblPricedQuantity;
+			if (@dblRemainingAppliedQuantity = 0)
+			begin
+				set @dblRemainingAppliedQuantity = @dblActivelAppliedQuantity;
+			end
+
+			if (@dblCommulativeAppliedAndPrice < @dblActivelAppliedQuantity)
+			begin
+				update @Pricing
+				set dblCorrectAppliedAndPriced = @dblPricedQuantity
+				where intId = @intActiveId
+
+				set @dblRemainingAppliedQuantity -= @dblPricedQuantity;
+			end
+			else
+			begin
+				update @Pricing
+				set dblCorrectAppliedAndPriced = @dblRemainingAppliedQuantity
+				where intId = @intActiveId
+
+				set @dblRemainingAppliedQuantity -= @dblRemainingAppliedQuantity;
+			end
+
+
+
+			select @intActiveId = min(intId) from @Pricing where intId > @intActiveId;
+		end
+
+		update
+			b
+		set
+			b.intNumber = (case when b.intNumber <> a.intPricingNumber then a.intPricingNumber else b.intNumber end)
+			,b.dblQuantityAppliedAndPriced = (case when b.dblQuantityAppliedAndPriced <> a.dblCorrectAppliedAndPriced then a.dblCorrectAppliedAndPriced else b.dblQuantityAppliedAndPriced end)
+			,b.dblLoadAppliedAndPriced = (case when @ysnLoad = 1 then a.dblCorrectAppliedAndPriced else null end)
+		from
+			@Pricing a
+			,tblCTPriceFixationDetail b
 		where
-			intTransactionDetailId = @intInvoiceDetailId
-		ORDER BY intId DESC
+			(
+				a.intNumber <> a.intPricingNumber
+				or a.dblCorrectAppliedAndPriced <> (
+					case
+					when a.ysnLoad = 1
+					then a.dblLoadAppliedAndPriced
+					else a.dblQuantityAppliedAndPriced
+					end
+				)
+			 )
+			and b.intPriceFixationDetailId = a.intPriceFixationDetailId
+		end try
+		begin catch
+			SET @ErrMsg = ERROR_MESSAGE();
+			RAISERROR (@ErrMsg,18,1,'WITH NOWAIT');
+		end catch
 
-		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
 
-		exec uspCTProcessInvoiceDelete
-			@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
-			,@intPriceFixationDetailId = @intPriceFixationDetailId
-			,@UserId = @UserId
-	
-	END
+    END
 
-END
 GO
