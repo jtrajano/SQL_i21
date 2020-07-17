@@ -11,6 +11,7 @@ BEGIN
 		,@strPurchaseSales nvarchar(50) = NULL
 		,@strPositionIncludes nvarchar(50) = NULL
 		,@dtmToDate datetime = null
+		,@intDPRHeaderId int
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -64,6 +65,10 @@ SELECT *
 	SELECT @dtmToDate = [from]
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'dtmToDate'
+
+	SELECT @intDPRHeaderId = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'intDPRHeaderId'
 
 	 DECLARE @Commodity AS TABLE 
 	 (
@@ -187,7 +192,56 @@ INSERT INTO @FinalTable(
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush)
-EXEC uspRKDPRInvDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate
+SELECT   intRow
+			, intSeqId
+			, strSeqHeader
+			, strCommodityCode
+			, strType
+			, dblTotal
+			, strUnitMeasure
+			, intCollateralId
+			, strLocationName
+			, strCustomerName
+			, strReceiptNo
+			, intContractHeaderId
+			, strContractNumber
+			, dtmOpenDate
+			, dblOriginalQuantity
+			, dblRemainingQuantity
+			, intCommodityId
+			, strCustomerReference
+			, strDistributionOption
+			, strDPAReceiptNo
+			, dblDiscDue
+			, dblStorageDue
+			, dtmLastStorageAccrueDate
+			, strScheduleId
+			, intTicketId
+			, strTicketType
+			, strTicketNumber 
+			, strContractEndMonth
+			, strDeliveryDate
+			, dtmTicketDateTime
+			, intItemId
+			, strItemNo
+			, strTruckName
+			, strDriverName
+			, intInventoryReceiptId
+			, strReceiptNumber 
+			, strShipmentNumber 
+			, intInventoryShipmentId
+			, strTransactionType
+			, intCategoryId
+			, strCategory
+			, intFutureMarketId
+			, strFutMarketName = strFutureMarket
+			, intFutureMonthId
+			, strFutureMonth
+			, strBrokerTradeNo
+			, strNotes
+			, ysnPreCrush = ysnCrush
+FROM tblRKDPRInventory
+WHERE intDPRHeaderId = @intDPRHeaderId 
 
 SELECT intSeqId
 	, strSeqHeader
