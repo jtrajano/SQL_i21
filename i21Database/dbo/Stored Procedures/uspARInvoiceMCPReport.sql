@@ -322,6 +322,8 @@ WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId
   AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
 
+INSERT INTO tblARInvoiceReportStagingTableCopy SELECT *, GETDATE() FROM tblARInvoiceReportStagingTable
+
 --HONSTEIN TAX DETAILS
 IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
 	BEGIN
@@ -516,4 +518,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  AND STAGING.strRequestId = @strRequestId
 		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
 		  AND STAGING.strItemNo <> 'State Sales Tax'
+
+		INSERT INTO tblARInvoiceReportStagingTableCopy SELECT *, GETDATE() FROM tblARInvoiceReportStagingTable
 	END
