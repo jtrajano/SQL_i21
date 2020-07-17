@@ -5,7 +5,7 @@
 	[intFieldNameId] INT NOT NULL, 
     [strFieldName] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
     [intFieldColumnNumber] INT NOT NULL, 
-    [strCellColumn] NVARCHAR(MAX) NOT NULL, 
+    [strCellColumn] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intItemId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCDeliverySheetImportingTemplateDetail_intImportingTemplateDetailId] PRIMARY KEY ([intImportingTemplateDetailId]),
