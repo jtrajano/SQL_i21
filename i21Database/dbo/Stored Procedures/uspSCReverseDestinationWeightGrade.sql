@@ -31,6 +31,8 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@intInvoiceId INT
 		,@intBillId INT
 		,@ysnPosted BIT
+		,@strInvoiceNumber AS NVARCHAR(50)
+		,@intInventoryShipmentId INT
 		,@ysnRecap BIT
 		,@intContractDetailId INT
 		,@dblContractQty INT
@@ -103,31 +105,56 @@ BEGIN TRY
 	ELSE
 	BEGIN
 		SELECT TOP 1 @intInvoiceId = intInvoiceId FROM tblARInvoiceDetail WHERE intTicketId = @intTicketId;
-		SELECT @ysnPosted = ysnPosted FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
+		SELECT @ysnPosted = ysnPosted, @strInvoiceNumber = strInvoiceNumber FROM tblARInvoice WHERE intInvoiceId = @intInvoiceId;
 		IF @ysnPosted = 1
 		BEGIN
-			EXEC [dbo].[uspARPostInvoice]
-				@batchId			= NULL,
-				@post				= 0,
-				@recap				= 0,
-				@param				= @intInvoiceId,
-				@userId				= @intUserId,
-				@beginDate			= NULL,
-				@endDate			= NULL,
-				@beginTransaction	= NULL,
-				@endTransaction		= NULL,
-				@exclude			= NULL,
-				@successfulCount	= @successfulCount OUTPUT,
-				@invalidCount		= @invalidCount OUTPUT,
-				@success			= @success OUTPUT,
-				@batchIdUsed		= @batchIdUsed OUTPUT,
-				@recapId			= @recapId OUTPUT,
-				@transType			= N'all',
-				@accrueLicense		= 0,
-				@raiseError			= 1
+			SET @ErrMsg = 'Unpost invoice ' + @strInvoiceNumber + ' before unposting Destination Weight/Grade.';
+			RAISERROR(@ErrMsg, 11, 1);
+			RETURN;
+			-- EXEC [dbo].[uspARPostInvoice]
+			-- 	@batchId			= NULL,
+			-- 	@post				= 0,
+			-- 	@recap				= 0,
+			-- 	@param				= @intInvoiceId,
+			-- 	@userId				= @intUserId,
+			-- 	@beginDate			= NULL,
+			-- 	@endDate			= NULL,
+			-- 	@beginTransaction	= NULL,
+			-- 	@endTransaction		= NULL,
+			-- 	@exclude			= NULL,
+			-- 	@successfulCount	= @successfulCount OUTPUT,
+			-- 	@invalidCount		= @invalidCount OUTPUT,
+			-- 	@success			= @success OUTPUT,
+			-- 	@batchIdUsed		= @batchIdUsed OUTPUT,
+			-- 	@recapId			= @recapId OUTPUT,
+			-- 	@transType			= N'all',
+			-- 	@accrueLicense		= 0,
+			-- 	@raiseError			= 1
 		END
 		IF ISNULL(@intInvoiceId, 0) > 0
-			EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+		BEGIN
+			---Check if there are multiple IS on the invoice.
+			IF (SELECT COUNT(DISTINCT strDocumentNumber)
+				FROM tblARInvoiceDetail
+				WHERE intInvoiceId = @intInvoiceId) > 1
+			BEGIN
+				-- Fetch inventory shipment ID
+				SELECT TOP 1 @intInventoryShipmentId = ISH.intInventoryShipmentId
+				FROM tblICInventoryShipmentItem ISD
+				INNER JOIN tblICInventoryShipment ISH
+					ON ISH.intInventoryShipmentId = ISD.intInventoryShipmentId
+				WHERE ISD.intSourceId = @intTicketId
+					AND ISH.intSourceType = 1
+				-- Update invoice
+				EXEC uspARDeleteInvoice @intInvoiceId, @intUserId, NULL, @intInventoryShipmentId
+				EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceId, 0, @intUserId
+				EXEC dbo.uspARReComputeInvoiceTaxes @intInvoiceId
+			END
+			ELSE
+			BEGIN
+				EXEC [dbo].[uspARDeleteInvoice] @intInvoiceId, @intUserId
+			END
+		END
 		EXEC dbo.uspSCInsertDestinationInventoryShipment @intTicketId, @intUserId, 0
 	END
 
