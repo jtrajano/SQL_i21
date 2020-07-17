@@ -133,7 +133,13 @@ BEGIN TRY
 			ext:
 
 			---UPDATE Feed Status in Staging
-			UPDATE tblQMSampleStage
+			--UPDATE tblQMSampleStage
+			--SET strFeedStatus = 'Ack Rcvd'
+			--	,strMessage = 'Success'
+			--WHERE intSampleId = @intSampleRefId
+			--	AND strFeedStatus = 'Awt Ack'
+
+			UPDATE tblQMSamplePreStage
 			SET strFeedStatus = 'Ack Rcvd'
 				,strMessage = 'Success'
 			WHERE intSampleId = @intSampleRefId

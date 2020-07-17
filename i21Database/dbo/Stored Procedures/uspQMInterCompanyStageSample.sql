@@ -26,12 +26,28 @@ BEGIN TRY
 	SET intCompanyId = @intCompanyId
 	WHERE intCompanyId IS NULL
 
+	UPDATE ST1
+	SET ST1.strFeedStatus = 'HOLD'
+	FROM tblQMSamplePreStage ST
+	JOIN tblQMSamplePreStage ST1 ON ST1.intSampleId = ST.intSampleId
+		AND ISNULL(ST1.strFeedStatus, '') = ''
+	WHERE ISNULL(ST.strFeedStatus, '') = 'Awt Ack'
+		--AND UPPER(ST.strRowState) = 'ADDED'
+
+	UPDATE ST1
+	SET ST1.strFeedStatus = NULL
+	FROM tblQMSamplePreStage ST
+	JOIN tblQMSamplePreStage ST1 ON ST1.intSampleId = ST.intSampleId
+		AND ISNULL(ST1.strFeedStatus, '') = 'HOLD'
+	WHERE ISNULL(ST.strFeedStatus, '') = 'Ack Rcvd'
+		--AND UPPER(ST.strRowState) = 'ADDED'
+
 	DECLARE @tblQMSamplePreStage TABLE (intSamplePreStageId INT)
 
 	INSERT INTO @tblQMSamplePreStage (intSamplePreStageId)
 	SELECT intSamplePreStageId
 	FROM tblQMSamplePreStage WITH (NOLOCK)
-	WHERE strFeedStatus = ''
+	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intSamplePreStageId = MIN(intSamplePreStageId)
 	FROM @tblQMSamplePreStage
@@ -165,10 +181,10 @@ BEGIN TRY
 		END
 
 		UPDATE tblQMSamplePreStage
-		SET strFeedStatus = 'Processed'
+		SET strFeedStatus = 'Awt Ack'
 			,strMessage = 'Success'
 		WHERE intSamplePreStageId = @intSamplePreStageId
-			AND strFeedStatus = ''
+			AND ISNULL(strFeedStatus, '') = ''
 
 		SELECT @intSamplePreStageId = MIN(intSamplePreStageId)
 		FROM @tblQMSamplePreStage
