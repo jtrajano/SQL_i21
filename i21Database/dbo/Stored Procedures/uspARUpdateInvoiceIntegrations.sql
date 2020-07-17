@@ -124,36 +124,36 @@ BEGIN TRY
 
 	--EXEC [dbo].[uspARLogRiskPosition] @InvoicesForDelete, @UserId
 
-	-- --PRICING LAYER
-	-- INSERT INTO @InvoicesForContract(
-	-- 	  intHeaderId
-	-- 	, intDetailId
-	-- 	, ysnForDelete
-	-- 	, strBatchId
-	-- )
-	-- SELECT intHeaderId
-	-- 	, intDetailId
-	-- 	, ysnForDelete
-	-- 	, strBatchId
-	-- FROM @InvoicesForDelete IDD
-	-- INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDD.intDetailId
-	-- WHERE ID.intContractDetailId IS NOT NULL
+	--PRICING LAYER
+	INSERT INTO @InvoicesForContract(
+		  intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	)
+	SELECT intHeaderId
+		, intDetailId
+		, ysnForDelete
+		, strBatchId
+	FROM @InvoicesForDelete IDD
+	INNER JOIN tblARInvoiceDetail ID ON ID.intInvoiceDetailId = IDD.intDetailId
+	WHERE ID.intContractDetailId IS NOT NULL
 
-	-- WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContract)
-	-- 	BEGIN
-	-- 		DECLARE @intInvoiceToDelete			INT = NULL
-	-- 			  , @intInvoiceDetailToDeleteId	INT = NULL
+	WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoicesForContract)
+		BEGIN
+			DECLARE @intInvoiceToDelete			INT = NULL
+				  , @intInvoiceDetailToDeleteId	INT = NULL
 
-	-- 		SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
-	-- 			       , @intInvoiceDetailToDeleteId	= intDetailId
-	-- 		FROM @InvoicesForContract
+			SELECT TOP 1 @intInvoiceToDelete			= intHeaderId
+				       , @intInvoiceDetailToDeleteId	= intDetailId
+			FROM @InvoicesForContract
 
-	-- 		EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
-	-- 										   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
-    -- 										   , @strScreen 			= 'Invoice'
+			EXEC [dbo].[uspCTUpdatePricingLayer] @intInvoiceId 			= @intInvoiceToDelete
+											   , @intInvoiceDetailId 	= @intInvoiceDetailToDeleteId
+    										   , @strScreen 			= 'Invoice'
 			
-	-- 		DELETE FROM @InvoicesForContract WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
-	-- 	END
+			DELETE FROM @InvoicesForContract WHERE intHeaderId = @intInvoiceToDelete AND intDetailId = @intInvoiceDetailToDeleteId
+		END
 
 	IF @ForDelete = 1
 		BEGIN
