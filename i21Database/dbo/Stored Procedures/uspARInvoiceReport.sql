@@ -557,4 +557,13 @@ WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId 
   AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
 
+INSERT INTO tblARInvoiceReportStagingTableCopy SELECT *, GETDATE() FROM tblARInvoiceReportStagingTable
+
 EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId
+
+DELETE FROM tblARInvoiceTaxReportStagingTable 
+WHERE intEntityUserId = @intEntityUserId 
+  AND strRequestId = @strRequestId 
+  AND ysnIncludeInvoicePrice = 1
+  AND strInvoiceType = 'Transport Delivery'
+  AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
