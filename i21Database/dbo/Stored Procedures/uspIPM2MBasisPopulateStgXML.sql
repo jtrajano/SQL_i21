@@ -80,32 +80,87 @@ BEGIN TRY
 
 	SET @intM2MBasisStageId = SCOPE_IDENTITY();
 
-	INSERT INTO tblRKM2MBasisStage (
-		intM2MBasisId
-		,strDisplayName
-		,strHeaderXML
-		,strBasisDetailXML
-		,strRowState
-		,strUserName
-		,intMultiCompanyId
-		,intEntityId
-		,intCompanyLocationId
-		,strTransactionType
-		,intToBookId
-		)
-	SELECT intM2MBasisId = @intM2MBasisId
-		,strDisplayName = @strDisplayName
-		,strHeaderXML = @strHeaderXML
-		,strBasisDetailXML = @strDetailXML
-		,strRowState = @strRowState
-		,strUserName = @strLastModifiedUser
-		,intMultiCompanyId = intCompanyId
-		,intEntityId = @intToEntityId
-		,intCompanyLocationId = @intCompanyLocationId
-		,strTransactionType = @strToTransactionType
-		,intToBookId = @intToBookId
-	FROM tblIPMultiCompany
+	DECLARE @tblIPMultiCompany TABLE (intCompanyId INT)
+	DECLARE @intCompanyId INT
+
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	INSERT INTO @tblIPMultiCompany (intCompanyId)
+	SELECT intCompanyId
+	FROM tblIPMultiCompany WITH (NOLOCK)
 	WHERE ysnParent = 0
+
+	WHILE EXISTS (
+			SELECT TOP 1 NULL
+			FROM @tblIPMultiCompany
+			)
+	BEGIN
+		SELECT TOP 1 @intCompanyId = intCompanyId
+		FROM @tblIPMultiCompany
+
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany WITH (NOLOCK)
+		WHERE intCompanyId = @intCompanyId
+
+		IF EXISTS (SELECT 1 FROM master.dbo.sysdatabases WHERE name = @strDatabaseName)
+		BEGIN
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKM2MBasisStage (
+				intM2MBasisId
+				,strDisplayName
+				,strHeaderXML
+				,strBasisDetailXML
+				,strRowState
+				,strUserName
+				,intMultiCompanyId
+				,intEntityId
+				,intCompanyLocationId
+				,strTransactionType
+				,intToBookId
+				)
+			SELECT intM2MBasisId = @intM2MBasisId
+				,strDisplayName = @strDisplayName
+				,strHeaderXML = @strHeaderXML
+				,strBasisDetailXML = @strDetailXML
+				,strRowState = @strRowState
+				,strUserName = @strLastModifiedUser
+				,intMultiCompanyId = @intCompanyId
+				,intEntityId = @intToEntityId
+				,intCompanyLocationId = @intCompanyLocationId
+				,strTransactionType = @strToTransactionType
+				,intToBookId = @intToBookId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intM2MBasisId INT
+					,@strDisplayName NVARCHAR(100)
+					,@strHeaderXML NVARCHAR(MAX)
+					,@strDetailXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(100)
+					,@strLastModifiedUser NVARCHAR(100)
+					,@intCompanyId INT
+					,@intToEntityId INT
+					,@intCompanyLocationId INT
+					,@strToTransactionType NVARCHAR(100)
+					,@intToBookId INT'
+				,@intM2MBasisId
+				,@strDisplayName
+				,@strHeaderXML
+				,@strDetailXML
+				,@strRowState
+				,@strLastModifiedUser
+				,@intCompanyId
+				,@intToEntityId
+				,@intCompanyLocationId
+				,@strToTransactionType
+				,@intToBookId
+		END
+
+		DELETE
+		FROM @tblIPMultiCompany
+		WHERE intCompanyId = @intCompanyId
+	END
 END TRY
 
 BEGIN CATCH

@@ -605,7 +605,16 @@ BEGIN TRY
 			WHERE intRecordId = @intNewCoverageEntryId
 				AND intScreenId = @intScreenId
 
-			INSERT INTO tblRKCoverageEntryAckStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKCoverageEntryAckStage (
 				intCoverageEntryId
 				,strAckBatchName
 				,dtmAckDate
@@ -628,14 +637,40 @@ BEGIN TRY
 				,@strAckDetailXML
 				,@strRowState
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@intMultiCompanyId
+				,@strTransactionType
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewCoverageEntryId INT
+					,@strBatchName NVARCHAR(50)
+					,@dtmDate DATETIME
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckDetailXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strTransactionType NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewCoverageEntryId
+				,@strBatchName
+				,@dtmDate
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strRowState
 				,@intMultiCompanyId
 				,@strTransactionType
 				,@intTransactionId
 				,@intCompanyId
 				,@intTransactionRefId
 				,@intCompanyRefId
-
+			
 			--IF @strRowState <> 'Delete'
 			--BEGIN
 			--	IF @intTransactionRefId IS NULL
