@@ -196,6 +196,8 @@ BEGIN
 	DECLARE @ysnDualCard				BIT				= 0
 	DECLARE @ysnConvertMiscToVehicle	BIT				= 0
 	DECLARE @ysnInvoiced				BIT				= 0
+	DECLARE @ysnExpensed				BIT				= 0
+	
 
 	--DECLARE @strSiteType				NVARCHAR(MAX)
 
@@ -1760,6 +1762,7 @@ BEGIN
 		,@dblGrossTransferCost			= dblGrossTransferCost
 		,@dblNetTransferCost			= dblNetTransferCost
 		,@dblAdjustmentRate				= dblAdjustmentRate
+		,@ysnExpensed					= ysnExpensed
 		FROM tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1768,6 +1771,11 @@ BEGIN
 		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
 		--END
+		
+		UPDATE tblCFTransaction 
+		SET @ysnExpensed = ysnExpensed
+		WHERE intTransactionId = @Pk
+		
 
 		IF(@ysnRecalculateInvalid = 1)
 		BEGIN 
