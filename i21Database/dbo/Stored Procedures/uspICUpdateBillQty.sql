@@ -131,8 +131,8 @@ BEGIN
 	INSERT INTO @ReceiptToBills
 	SELECT
 		r.strReceiptNumber
-		,dblOpenReceive = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ri.dblOpenReceive ELSE ri.dblOpenReceive END
-		,dblBillQty = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ri.dblBillQty ELSE ri.dblBillQty END
+		,dblOpenReceive = ri.dblOpenReceive --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ri.dblOpenReceive ELSE ri.dblOpenReceive END
+		,dblBillQty = ri.dblBillQty --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ri.dblBillQty ELSE ri.dblBillQty END
 		,ri.intItemId
 		,ri.intInventoryReceiptItemId
 		,ri.intUnitMeasureId
