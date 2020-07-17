@@ -47,7 +47,7 @@ RETURNS TABLE AS RETURN
 								THEN
 									dbo.fnGetInterestBasedOnTerm(forPay.dblAmountDue, voucher.dtmBillDate, @datePaid, voucher.dtmInterestDate, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
-		,forPay.dblAmountDue
+		,CASE WHEN forPay.dblPaymentTemp <> 0 THEN (forPay.dblTotal - forPay.dblPaymentTemp) ELSE forPay.dblAmountDue END AS dblAmountDue
 		,forPay.dblPayment
 		,forPay.dblTempPayment
 		,forPay.dblWithheld

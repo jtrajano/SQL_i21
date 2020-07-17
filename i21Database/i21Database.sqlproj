@@ -7764,6 +7764,7 @@
     <Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
     <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

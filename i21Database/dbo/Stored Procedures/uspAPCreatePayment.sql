@@ -234,6 +234,17 @@ BEGIN
 		SET @amountPaid = @amountPaid + @interest - @discount;
 	END
 
+	--SUBTRACT THE ALREADY SAVED PAYMENTS
+	DECLARE @ysnInPayment AS BIT = 0;
+	SELECT @ysnInPayment =  ysnInPayment
+	FROM tblAPBill
+	WHERE intBillId IN (SELECT intID FROM #tmpBillsId)
+	IF @ysnInPayment = 1
+	BEGIN
+		RAISERROR('This transaction is already saved in other payments.', 16, 1);
+		RETURN;
+	END
+
 	--Compute Withheld Here
 	--Compute only if the payment that will create is posted
 	IF @vendorWithhold = 1 AND @isPost = 0
@@ -358,7 +369,7 @@ BEGIN
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
 								),
 				[dblPayment]	= ISNULL(C.dblPayment,
-									A.dblAmountDue
+									(A.dblTotal - A.dblPaymentTemp)
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
 								  ),
 				[dblInterest]	= A.dblInterest,
@@ -469,4 +480,6 @@ BEGIN
 	JOIN #tmpBillsId C ON C.intID = B.intBillId
 
 	 SET @createdPaymentId = @paymentId
+
+	 EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
 END
