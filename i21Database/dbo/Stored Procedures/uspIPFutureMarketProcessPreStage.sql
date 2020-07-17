@@ -36,7 +36,7 @@ BEGIN TRY
 
 		IF NOT EXISTS (
 				SELECT 1
-				FROM tblRKFutureMarketStage
+				FROM tblRKFutureMarketStage WITH (NOLOCK)
 				WHERE strFutMarketName = @strFutMarketName
 				)
 		BEGIN
@@ -49,15 +49,48 @@ BEGIN TRY
 				,0
 				,@intToBookId
 				,@intUserId
+
+			INSERT INTO tblRKFutureMarketStage (
+				intFutureMarketId
+				,strFutMarketName
+				,dblForecastPrice
+				,strRowState
+				,intMultiCompanyId
+				)
+			SELECT intFutureMarketId = @intFutureMarketId
+				,strFutureMarketName = @strFutMarketName
+				,dblForecastPrice = @dblForecastPrice
+				,strRowState = @strRowState
+				,intMultiCompanyId = intCompanyId
+			FROM tblIPMultiCompany
+			WHERE ysnParent = 1
 		END
 		ELSE
 		BEGIN
-			UPDATE tblRKFutureMarketStage
-			SET dblForecastPrice = @dblForecastPrice
-				,strFeedStatus = NULL
-				,strMessage = NULL
-			WHERE strFutMarketName = @strFutMarketName
-				AND ISNULL(dblForecastPrice, 0) <> @dblForecastPrice
+			IF EXISTS (
+					SELECT 1
+					FROM tblRKFutureMarketStage WITH (NOLOCK)
+					WHERE strFutMarketName = @strFutMarketName
+					AND ISNULL(dblForecastPrice, 0) <> @dblForecastPrice
+					)
+			BEGIN
+				UPDATE tblRKFutureMarketStage
+				SET dblForecastPrice = @dblForecastPrice
+					,strFeedStatus = NULL
+					,strMessage = NULL
+				WHERE strFutMarketName = @strFutMarketName
+					AND ISNULL(dblForecastPrice, 0) <> @dblForecastPrice
+
+				EXEC uspIPFutureMarketPopulateStgXML @intFutureMarketId
+					,@intToEntityId
+					,@intCompanyLocationId
+					,@strToTransactionType
+					,@intToCompanyId
+					,@strRowState
+					,0
+					,@intToBookId
+					,@intUserId
+			END
 		END
 
 		SELECT @intFutureMarketId = MIN(intFutureMarketId)

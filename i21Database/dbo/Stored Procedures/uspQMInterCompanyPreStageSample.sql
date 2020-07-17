@@ -8,7 +8,7 @@ BEGIN TRY
 
 	DELETE
 	FROM tblQMSamplePreStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE ISNULL(strFeedStatus, '') IN ('', 'HOLD')
 		AND intSampleId = @intSampleId
 
 	INSERT INTO tblQMSamplePreStage (
