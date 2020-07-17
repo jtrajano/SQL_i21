@@ -59,3 +59,5 @@ INNER JOIN tblSMTaxCode SMT ON IDT.intTaxCodeId = SMT.intTaxCodeId
 INNER JOIN tblSMTaxClass TC ON SMT.intTaxClassId = TC.intTaxClassId	
 WHERE ((IDT.ysnTaxExempt = 1 AND ISNULL(ID.dblComputedGrossPrice, 0) <> 0) OR (IDT.ysnTaxExempt = 0 AND IDT.dblAdjustedTax <> 0))
 	AND ID.intItemId <> ISNULL(@intItemForFreightId, 0)
+
+INSERT INTO tblARInvoiceReportStagingTableCopy SELECT *, GETDATE() FROM tblARInvoiceReportStagingTable
