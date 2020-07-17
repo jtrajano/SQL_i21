@@ -1419,6 +1419,7 @@
     <Build Include="dbo\Tables\tblCTContractAdjustment.sql" />
     <Build Include="dbo\Tables\tblSMGridLayout.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccount.sql" />
+    <Build Include="dbo\Triggers\trgCMDeleteResponsiblePartTaskDetail.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
