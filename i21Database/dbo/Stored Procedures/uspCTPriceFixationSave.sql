@@ -85,6 +85,20 @@ BEGIN TRY
 
 	SELECT	@ysnPartialPricing = ysnPartialPricing, @strPricingQuantity = strPricingQuantity FROM tblCTCompanyPreference
 
+	declare @intDWGIdId int
+			,@ysnDestinationWeightsAndGrades bit;
+
+	select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
+		
+	select
+		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
+	from
+		tblCTContractDetail cd
+		,tblCTContractHeader ch
+	where
+		cd.intContractDetailId = @intContractDetailId
+		and ch.intContractHeaderId = cd.intContractHeaderId
+
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
 		ProcessContractDetail:
@@ -151,20 +165,6 @@ BEGIN TRY
 
 		IF @strAction = 'Delete'
 		BEGIN
-
-		declare @intDWGIdId int
-				,@ysnDestinationWeightsAndGrades bit;
-
-		select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
-			
-		select
-			@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
-		from
-			tblCTContractDetail cd
-			,tblCTContractHeader ch
-		where
-			cd.intContractDetailId = @intContractDetailId
-			and ch.intContractHeaderId = cd.intContractHeaderId
 
 			UPDATE	CD
 			SET		CD.dblBasis				=	CASE WHEN CH.intPricingTypeId = 3 THEN NULL ELSE ISNULL(CD.dblOriginalBasis,0) END,
@@ -567,7 +567,7 @@ BEGIN TRY
 												)/
 												CASE WHEN ISNULL(CY.ysnSubCurrency,0) = 0 THEN 1 ELSE CY.intCent END,	
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
+					CD.intContractStatusId	=	CASE WHEN CD.dblBalance = 0 AND ISNULL(@ysnUnlimitedQuantity,0) = 0 and isnull(@ysnDestinationWeightsAndGrades,0) = 0 THEN 5 ELSE CD.intContractStatusId END,
 					CD.dblBasis				=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,
 					CD.dblFreightBasisBase	=	CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblFreightBasisBase END
 			FROM	tblCTContractDetail	CD
