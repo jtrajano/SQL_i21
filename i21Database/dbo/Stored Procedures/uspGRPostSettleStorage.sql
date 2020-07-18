@@ -1283,7 +1283,15 @@ BEGIN TRY
 				SELECT 
 					 [intCustomerStorageId]		= a.[intCustomerStorageId]
 					,[intItemId]				= a.[intItemId]
-					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, CASE WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 'AP Clearing' ELSE 'Other Charge Expense' END)
+					,[intAccountId]				= [dbo].[fnGetItemGLAccount](a.intItemId,@ItemLocationId, 
+												CASE 
+													WHEN ((a.intItemType = 3 AND DSC.strDiscountChargeType = 'Dollar') OR a.intItemType = 2) AND @ysnDPOwnedType = 0 THEN 
+														case when @ysnFromPriceBasisContract = 1 and a.intItemType = 2 then 'Other Charge Expense' else  'AP Clearing' end 
+													WHEN a.intItemType = 1 THEN 'AP Clearing'
+													WHEN @ysnDPOwnedType = 1 and a.intItemType = 3  AND CS.intTicketId IS NOT NULL then 'AP Clearing'
+													ELSE 'Other Charge Expense' 
+												END
+													)
 					-- ,[dblQtyReceived]			= CASE 
 					-- 								WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 					-- 								ELSE a.dblUnits 
