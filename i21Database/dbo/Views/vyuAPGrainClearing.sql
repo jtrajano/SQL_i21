@@ -31,6 +31,9 @@ SELECT
 	,GD.intAccountId
 	,AD.strAccountId
 FROM tblGRCustomerStorage CS
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICItem IM
 	ON IM.intItemId = CS.intItemId
 INNER JOIN tblICCommodity CO
@@ -170,6 +173,9 @@ SELECT
 	,GLDetail.intAccountId
 	,GLDetail.strAccountId
 FROM tblGRCustomerStorage CS
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
 INNER JOIN tblICItem IM
@@ -336,6 +342,9 @@ INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = QM.intTicketFileId
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
 INNER JOIN tblGRDiscountSchedule DS
