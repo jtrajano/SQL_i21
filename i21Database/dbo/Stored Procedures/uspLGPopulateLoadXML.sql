@@ -50,29 +50,29 @@ BEGIN TRY
 	DECLARE @strLoadWarehouseId NVARCHAR(100)
 	DECLARE @intSourceType INT
 		,@strObjectName NVARCHAR(50)
-		        ,@intCompanyId int
-        ,@intTransactionId int
-        ,@intLoadScreenId int
-		,@intBookId int
-		,@intSubBookId int
-		,@strBook nvarchar(50)
-		,@strSubBook nvarchar(50)
+		,@intCompanyId INT
+		,@intTransactionId INT
+		,@intLoadScreenId INT
+		,@intBookId INT
+		,@intSubBookId INT
+		,@strBook NVARCHAR(50)
+		,@strSubBook NVARCHAR(50)
 
 	SELECT @strLoadNumber = strLoadNumber
 		,@intSourceType = intSourceType
-		,@intCompanyId=intCompanyId
-		,@intBookId=intBookId
-		,@intSubBookId=intSubBookId
+		,@intCompanyId = intCompanyId
+		,@intBookId = intBookId
+		,@intSubBookId = intSubBookId
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
-	Select @strBook=strBook
-	from tblCTBook
-	Where intBookId=@intBookId
+	SELECT @strBook = strBook
+	FROM tblCTBook
+	WHERE intBookId = @intBookId
 
-	Select @strSubBook=strSubBook
-	from tblCTSubBook
-	Where intSubBookId=@intSubBookId
+	SELECT @strSubBook = strSubBook
+	FROM tblCTSubBook
+	WHERE intSubBookId = @intSubBookId
 
 	IF (@intSourceType = 7)
 		RETURN;
@@ -311,15 +311,32 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	SELECT    @intLoadScreenId    =    intScreenId FROM tblSMScreen WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
+	SELECT @intLoadScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Logistics.view.ShipmentSchedule'
 
-    Select @intTransactionId=intTransactionId 
-    from tblSMTransaction
-    Where intRecordId =@intLoadId
-    and intScreenId =@intLoadScreenId
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intRecordId = @intLoadId
+		AND intScreenId = @intLoadScreenId
 
-	-- LOAD HEADER TABLE
-	INSERT INTO tblLGIntrCompLogisticsStg (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany
+	WHERE intBookId = @intToBookId
+
+	IF EXISTS (
+			SELECT 1
+			FROM master.dbo.sysdatabases
+			WHERE name = @strDatabaseName
+			)
+	BEGIN
+		SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
+			'.dbo.tblLGIntrCompLogisticsStg (
 		intLoadId
 		,strLoadNumber
 		,strLoad
@@ -366,7 +383,56 @@ BEGIN TRY
 		,@intTransactionId
         ,@intCompanyId
 		,@strBook
-		,@strSubBook
+		,@strSubBook'
+
+		EXEC sp_executesql @strSQL
+			,N'@intLoadId int
+		,@strLoadNumber nvarchar(50)
+		,@strLoadXML nvarchar(MAX)
+		,@strRowState nvarchar(50)
+		,@strLoadDetailXML nvarchar(MAX)
+		,@strLoadDetailLotXML nvarchar(MAX)
+		,@strLoadDocumentXML nvarchar(MAX)
+		,@strLoadNotifyPartyXML nvarchar(MAX)
+		,@strLoadContainerXML nvarchar(MAX)
+		,@strLoadDetailContainerLinkXML nvarchar(MAX)
+		,@strLoadWarehouseXML nvarchar(MAX)
+		,@strLoadWarehouseServicesXML nvarchar(MAX)
+		,@strLoadWarehouseContainerXML nvarchar(MAX)
+		,@strLoadCostXML nvarchar(MAX)
+		,@strLoadStorageCostXML nvarchar(MAX)
+		,@strToTransactionType nvarchar(50)
+		,@intToCompanyId int
+		,@intToCompanyLocationId int
+		,@intToBookId int
+		,@intTransactionId int
+        ,@intCompanyId int
+		,@strBook nvarchar(50)
+		,@strSubBook nvarchar(50)'
+			,@intLoadId
+			,@strLoadNumber
+			,@strLoadXML
+			,@strRowState
+			,@strLoadDetailXML
+			,@strLoadDetailLotXML
+			,@strLoadDocumentXML
+			,@strLoadNotifyPartyXML
+			,@strLoadContainerXML
+			,@strLoadDetailContainerLinkXML
+			,@strLoadWarehouseXML
+			,@strLoadWarehouseServicesXML
+			,@strLoadWarehouseContainerXML
+			,@strLoadCostXML
+			,@strLoadStorageCostXML
+			,@strToTransactionType
+			,@intToCompanyId
+			,@intToCompanyLocationId
+			,@intToBookId
+			,@intTransactionId
+			,@intCompanyId
+			,@strBook
+			,@strSubBook
+	END
 END TRY
 
 BEGIN CATCH

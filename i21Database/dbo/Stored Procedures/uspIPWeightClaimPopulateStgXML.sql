@@ -30,7 +30,7 @@ BEGIN TRY
 	SELECT @strHeaderCondition = 'intWeightClaimId = ' + LTRIM(@intWeightClaimId)
 
 	SELECT @strReferenceNumber = strReferenceNumber
-			,@intCompanyId=intCompanyId
+		,@intCompanyId = intCompanyId
 	FROM tblLGWeightClaim
 	WHERE intWeightClaimId = @intWeightClaimId
 
@@ -59,7 +59,23 @@ BEGIN TRY
 	WHERE intRecordId = @intWeightClaimId
 		AND intScreenId = @intWeightClaimScreenId
 
-	INSERT INTO tblLGWeightClaimStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany
+	WHERE ysnParent=1
+
+	IF EXISTS (
+			SELECT 1
+			FROM master.dbo.sysdatabases
+			WHERE name = @strDatabaseName
+			)
+	BEGIN
+		SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
+			'.dbo.tblLGWeightClaimStage (
 		intWeightClaimId
 		,strReferenceNumber
 		,strWeightClaimXML
@@ -74,7 +90,24 @@ BEGIN TRY
 		,strWeightClaimDetailXML = @strWeightClaimDetailXML
 		,strRowState = @strRowState
 		,intTransactionId = @intTransactionId
-		,intCompanyId = @intCompanyId
+		,intCompanyId = @intCompanyId'
+
+		EXEC sp_executesql @strSQL
+			,N'@intWeightClaimId int
+		,@strReferenceNumber nvarchar(50)
+		,@strWeightClaimXML nvarchar(MAX)
+		,@strWeightClaimDetailXML nvarchar(MAX)
+		,@strRowState nvarchar(50)
+		,@intTransactionId int
+		,@intCompanyId int'
+			,@intWeightClaimId
+			,@strReferenceNumber
+			,@strWeightClaimXML
+			,@strWeightClaimDetailXML
+			,@strRowState
+			,@intTransactionId
+			,@intCompanyId
+	END
 END TRY
 
 BEGIN CATCH

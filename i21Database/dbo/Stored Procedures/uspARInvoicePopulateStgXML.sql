@@ -89,7 +89,22 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	INSERT INTO tblARInvoiceStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany
+	WHERE intBookId = @intToBookId
+
+	IF EXISTS (
+			SELECT 1
+			FROM master.dbo.sysdatabases
+			WHERE name = @strDatabaseName
+			)
+	BEGIN
+		SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblARInvoiceStage (
 		intInvoiceId
 		,strInvoiceNumber
 		,strHeaderXML
@@ -114,7 +129,34 @@ BEGIN TRY
 		,intMultiCompanyId = @intToCompanyId
 		,intToBookId = @intToBookId
 		,intTransactionId = @intTransactionId
-		,intCompanyId = @intCompanyId
+		,intCompanyId = @intCompanyId'
+
+		EXEC sp_executesql @strSQL
+			,N'@intInvoiceId int
+		,@strInvoiceNumber nvarchar(50)
+		,@strHeaderXML nvarchar(MAX)
+		,@strRowState nvarchar(50)
+		,@strDetailXML nvarchar(MAX)
+		,@intToEntityId int
+		,@intCompanyLocationId int
+		,@strToTransactionType nvarchar(50)
+		,@intToCompanyId int
+		,@intToBookId int
+		,@intTransactionId int
+		,@intCompanyId int'
+			,@intInvoiceId
+			,@strInvoiceNumber
+			,@strHeaderXML
+			,@strRowState
+			,@strDetailXML
+			,@intToEntityId
+			,@intCompanyLocationId
+			,@strToTransactionType
+			,@intToCompanyId
+			,@intToBookId
+			,@intTransactionId
+			,@intCompanyId
+	END
 END TRY
 
 BEGIN CATCH
