@@ -99,8 +99,8 @@ SELECT
 	,dtmLastPurchaseDate = ItemStock.dtmLastPurchaseDate
 	,dtmLastSaleDate = ItemStock.dtmLastSaleDate
 	,strEntityVendor = VendorEntity.strName
-	,dblAverageUsagePerPeriod = CAST(ISNULL(AvgUsagePerPeriod.dblAvgUsagePerPeriod, 0.00) AS NUMERIC(38, 7))
-	,dblInTransitDirect = ISNULL(ItemStock.dblInTransitDirect, 0)
+	,dblAverageUsagePerPeriod = usage.dblAvgUsagePerPeriod 
+	,dblInTransitDirect = ISNULL(ItemStockUOM.dblInTransitDirect, 0)
 FROM	
 	tblICItem Item 
 	LEFT JOIN tblICCategory Category 
@@ -146,64 +146,41 @@ FROM
 		WHERE	ItemStock.intItemId = Item.intItemId 
 				AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		GROUP BY 
-				ItemStock.intItemId
-				,ItemStock.intItemLocationId
-	) ItemStock
-
+				ItemStockUOM.intItemId
+				,ItemStockUOM.intItemLocationId
+	) ItemStockUOM
 	OUTER APPLY (
 		SELECT 
-			dblCapacity = SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0))
-		FROM 
-			tblICStorageLocation sl
-		WHERE
-			sl.intItemId = Item.intItemId
-			AND sl.intLocationId = ItemLocation.intLocationId
-	
-	) StorageLocation
-
-	OUTER APPLY(
-		SELECT dblAvgUsagePerPeriod = dbo.fnDivide(SUM([dbo].[fnICConvertUOMtoStockUnit](Details.intItemId, Details.intItemUOMId, Details.dblQty)), MONTH(GETDATE()))
-		FROM (
-			SELECT	InvDet.intItemId
-					,InvDet.intItemUOMId
-					,ItemLocation.intItemLocationId
-					,dblQty = CASE WHEN Inv.strTransactionType = 'Credit Memo'
-							THEN -InvDet.dblQtyShipped
-							ELSE InvDet.dblQtyShipped
-						END
-			FROM tblARInvoice Inv
-			INNER JOIN tblARInvoiceDetail InvDet
-				ON InvDet.intInvoiceId = Inv.intInvoiceId
-			INNER JOIN tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = InvDet.intItemId
-				AND ItemLocation.intLocationId = Inv.intCompanyLocationId
-			WHERE Inv.ysnPosted = 1 
-				AND Inv.strTransactionType IN(
-					'Invoice'
-					,'Cash'
-					,'Credit Memo'
-					,'Debit Memo'
+			dblAvgUsagePerPeriod = 
+				dbo.fnDivide(
+					stockUsagePerPeriod.dblQty
+					,fyCount.dblCount
 				)
-				AND YEAR(Inv.dtmDate) = YEAR(GETDATE())
-			UNION ALL
-			SELECT	PrepaidDetail.intItemId
-					,PrepaidDetail.intItemUOMId
-					,ItemLocation.intItemLocationId
-					,dblQty = -PrepaidDetail.dblQtyShipped
-			FROM tblARInvoice Inv
-			INNER JOIN tblARPrepaidAndCredit Prepaid
-				ON Prepaid.intInvoiceId = Inv.intInvoiceId
-			INNER JOIN tblARInvoiceDetail PrepaidDetail
-				ON PrepaidDetail.intInvoiceId = Prepaid.intPrepaymentId
-			INNER JOIN tblICItemLocation ItemLocation
-				ON ItemLocation.intItemId = PrepaidDetail.intItemId
-				AND ItemLocation.intLocationId = Inv.intCompanyLocationId
-			WHERE Inv.ysnPosted = 1 
-				AND Inv.strTransactionType IN(
-					'Cash Refund'
-				)	
-				AND YEAR(Inv.dtmDate) = YEAR(GETDATE())
-		) Details
-		WHERE Details.intItemId = ItemStock.intItemId
-			AND Details.intItemLocationId = ItemStock.intItemLocationId
-	) AvgUsagePerPeriod
+		FROM 			
+			tblGLFiscalYearPeriod fyp 
+			-- Get the total fiscal year period. 
+			CROSS APPLY (
+				SELECT 
+					dblCount = COUNT(fyc.intGLFiscalYearPeriodId) 
+				FROM
+					tblGLFiscalYearPeriod fyc
+				WHERE
+					fyc.intFiscalYearId = fyp.intFiscalYearId
+					AND fyc.intGLFiscalYearPeriodId <= fyp.intGLFiscalYearPeriodId
+			) fyCount 
+			-- Get the total stocks consumed 
+			OUTER APPLY (
+				SELECT 
+					dblQty = SUM(dblQty) 
+				FROM 
+					tblICItemStockUsagePerPeriod u
+				WHERE
+					u.intItemId = ItemStockUOM.intItemId
+					AND u.intItemLocationId = ItemStockUOM.intItemLocationId					
+					AND u.intGLFiscalYearPeriodId = fyp.intGLFiscalYearPeriodId
+			) stockUsagePerPeriod
+		WHERE	
+			-- Get the current fiscal period
+			GETDATE() BETWEEN fyp.dtmStartDate AND fyp.dtmEndDate
+	) usage
+	) usage
