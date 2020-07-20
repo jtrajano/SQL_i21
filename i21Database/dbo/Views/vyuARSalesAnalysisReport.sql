@@ -1284,3 +1284,4 @@ GROUP BY
 	, SAR.strCurrencyDescription
 	, SAR.intInvoiceDetailId
 	, STATUSCODES.strAccountStatusCode
+	, SAR.strAccountingPeriod
