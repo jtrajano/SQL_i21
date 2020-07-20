@@ -734,9 +734,128 @@ BEGIN
 			END	
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
-	END
-																	
+	END																	
 END
+
+--UPDATE THE STOCK USAGE
+BEGIN 
+	DECLARE @UsageItems AS ItemCostingTableType
+	INSERT INTO @UsageItems (
+		intTransactionId
+		,strTransactionId
+		,intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,intSubLocationId
+		,intStorageLocationId
+		,intTransactionTypeId
+	)
+
+	SELECT	
+		Inv.intInvoiceId
+		,Inv.strInvoiceNumber
+		,InvDet.intItemId
+		,ItemLocation.intItemLocationId
+		,iu.intItemUOMId
+		,Inv.dtmDate
+		,dblQty = 
+			CASE 
+				WHEN Inv.strTransactionType = 'Credit Memo' THEN 
+					-InvDet.dblQtyShipped
+								
+				ELSE
+					InvDet.dblQtyShipped								
+			END
+		,iu.dblUnitQty
+		,InvDet.intSubLocationId
+		,InvDet.intStorageLocationId
+		,intTransactionTypeId = 
+			CASE 
+				WHEN Inv.strTransactionType = 'Credit Memo' THEN 
+					45								
+				ELSE
+					33
+			END
+	FROM 
+		#ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
+			ON I.strInvoiceNumber = Inv.strInvoiceNumber
+		INNER JOIN tblARInvoiceDetail InvDet
+			ON InvDet.intInvoiceId = Inv.intInvoiceId
+		INNER JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemId = InvDet.intItemId
+			AND ItemLocation.intLocationId = Inv.intCompanyLocationId
+		INNER JOIN tblICItemUOM iu
+			ON iu.intItemId = InvDet.intItemId
+			AND iu.intItemUOMId = InvDet.intItemUOMId
+	WHERE 				
+		Inv.strTransactionType IN(
+			'Invoice'
+			,'Cash'
+			,'Credit Memo'
+			,'Debit Memo'
+		)				
+
+	INSERT INTO @UsageItems (
+		intTransactionId
+		,strTransactionId
+		,intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,intSubLocationId
+		,intStorageLocationId
+		,intTransactionTypeId
+	)
+	SELECT	
+		Inv.intInvoiceId
+		,Inv.strInvoiceNumber
+		,PrepaidDetail.intItemId
+		,ItemLocation.intItemLocationId
+		,iu.intItemUOMId
+		,Inv.dtmDate
+		,dblQty = -PrepaidDetail.dblQtyShipped
+		,iu.dblUnitQty
+		,PrepaidDetail.intSubLocationId
+		,PrepaidDetail.intStorageLocationId
+		,intTransactionTypeId = 
+			CASE 
+				WHEN Inv.strTransactionType = 'Credit Memo' THEN 
+					45								
+				ELSE
+					33
+			END
+	FROM 
+		#ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
+			ON I.strInvoiceNumber = Inv.strInvoiceNumber
+		INNER JOIN tblARPrepaidAndCredit Prepaid
+			ON Prepaid.intInvoiceId = Inv.intInvoiceId
+		INNER JOIN tblARInvoiceDetail PrepaidDetail
+			ON PrepaidDetail.intInvoiceId = Prepaid.intPrepaymentId
+		INNER JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemId = PrepaidDetail.intItemId
+			AND ItemLocation.intLocationId = Inv.intCompanyLocationId
+		INNER JOIN tblICItemUOM iu
+			ON iu.intItemId = PrepaidDetail.intItemId
+			AND iu.intItemUOMId = PrepaidDetail.intItemUOMId
+	WHERE 
+		Inv.strTransactionType IN (
+			'Cash Refund'
+		)	
+
+	UPDATE u
+	SET u.dblQty = CASE WHEN @Post = 1 THEN u.dblQty ELSE -u.dblQty END 
+	FROM @UsageItems u
+
+	EXEC uspICIncreaseUsageQty 
+		@UsageItems	
+		,@UserId
+END 
+
 
 --UPDATE CUSTOMER CREDIT LIMIT REACHED
 UPDATE CUSTOMER
