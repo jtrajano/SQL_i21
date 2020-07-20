@@ -586,11 +586,9 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	declare @dblActivelAppliedQuantity numeric(18,6);
 	declare @dblRemainingAppliedQuantity numeric(18,6) = 0;
 	declare @ysnLoad bit;
+	declare @ErrMsg nvarchar(max);
 
-	begin transaction;
 	begin try
-
-		select trgCTContractDetail = 'triggered';
 
 		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity from inserted i;
 
@@ -743,11 +741,10 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			 )
 			and b.intPriceFixationDetailId = a.intPriceFixationDetailId
 
-
-	commit transaction;
 	end try
 	begin catch
-		rollback transaction;
+		SET @ErrMsg = ERROR_MESSAGE()  
+		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT') 
 	end catch
 GO
 
