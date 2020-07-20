@@ -188,6 +188,7 @@
     <Folder Include="Scripts\Post-Deployment\PAT\18.3\" />
     <Folder Include="Scripts\Post-Deployment\MB" />
     <Folder Include="Scripts\Post-Deployment\ET" />
+    <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -7734,6 +7735,10 @@
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
+    <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseUsageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARFixStockUsage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
