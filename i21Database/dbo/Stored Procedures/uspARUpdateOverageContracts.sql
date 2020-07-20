@@ -70,8 +70,10 @@ INTO #INVOICEDETAILS
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
   AND (ISNULL(@intTicketId, 0) = 0 OR (ISNULL(@intTicketId, 0) <> 0 AND @intTicketId = ISNULL(ID.intTicketId, 0)))
+  AND ISNULL(CH.ysnLoad, 0) = 0
 
 -- IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
 -- 	BEGIN
