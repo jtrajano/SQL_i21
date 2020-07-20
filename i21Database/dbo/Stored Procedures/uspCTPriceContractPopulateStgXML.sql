@@ -19,11 +19,11 @@ BEGIN TRY
 		,@intPriceContractStageId INT
 		,@intMultiCompanyId INT
 		,@strObjectName NVARCHAR(50)
-		,@intCompanyId int
-		,@intTransactionId int
-		,@intContractScreenId int
-		,@strApproverXML nvarchar(MAX)
-		,@strSubmittedByXML nvarchar(MAX)
+		,@intCompanyId INT
+		,@intTransactionId INT
+		,@intContractScreenId INT
+		,@strApproverXML NVARCHAR(MAX)
+		,@strSubmittedByXML NVARCHAR(MAX)
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
@@ -49,16 +49,19 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @strPriceContractNo = strPriceContractNo,@intCompanyId=intCompanyId 
+	SELECT @strPriceContractNo = strPriceContractNo
+		,@intCompanyId = intCompanyId
 	FROM tblCTPriceContract
 	WHERE intPriceContractId = @intPriceContractId
 
-	SELECT	@intContractScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+	SELECT @intContractScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 
-	Select @intTransactionId=intTransactionId 
-	from tblSMTransaction
-	Where intRecordId =@intPriceContractId
-	and intScreenId =@intContractScreenId
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intRecordId = @intPriceContractId
+		AND intScreenId = @intContractScreenId
 
 	-------------------------PriceContract-----------------------------------------------------------
 	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
@@ -104,7 +107,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-		---------------------------------------------Submitted By------------------------------------------
+	---------------------------------------------Submitted By------------------------------------------
 	SELECT @strSubmittedByXML = NULL
 		,@strObjectName = NULL
 
@@ -115,8 +118,6 @@ BEGIN TRY
 		,@strSubmittedByXML OUTPUT
 		,NULL
 		,NULL
-
-
 
 	---------------------------------------------PriceFixationDetail-----------------------------------------------
 	SET @strPriceFixationDetailXML = NULL
@@ -144,7 +145,22 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	INSERT INTO tblCTPriceContractStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany
+	WHERE intCompanyId = @intToCompanyId
+
+	IF EXISTS (
+			SELECT 1
+			FROM master.dbo.sysdatabases
+			WHERE name = @strDatabaseName
+			)
+	BEGIN
+		SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblCTPriceContractStage (
 		intPriceContractId
 		,strPriceContractNo
 		,strPriceContractXML
@@ -171,7 +187,36 @@ BEGIN TRY
 		,intMultiCompanyId = @intToCompanyId
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
-		,strSubmittedByXML=@strSubmittedByXML
+		,strSubmittedByXML=@strSubmittedByXML'
+
+		EXEC sp_executesql @strSQL
+			,N'@intPriceContractId int, 
+			@strPriceContractNo nvarchar(50),
+			@strPriceContractXML nvarchar(MAX),
+			@strRowState nvarchar(50),
+			@strPriceFixationXML nvarchar(MAX),
+			@strPriceFixationDetailXML nvarchar(MAX),
+			@strApproverXML nvarchar(MAX),
+			@intToEntityId int,
+			@strToTransactionType nvarchar(50),
+			@intToCompanyId int,
+			@intTransactionId int,
+			@intCompanyId int,
+			@strSubmittedByXML nvarchar(MAX)'
+			,@intPriceContractId
+			,@strPriceContractNo
+			,@strPriceContractXML
+			,@strRowState
+			,@strPriceFixationXML
+			,@strPriceFixationDetailXML
+			,@strApproverXML
+			,@intToEntityId
+			,@strToTransactionType
+			,@intToCompanyId
+			,@intTransactionId
+			,@intCompanyId
+			,@strSubmittedByXML
+	END
 END TRY
 
 BEGIN CATCH
