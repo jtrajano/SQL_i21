@@ -937,6 +937,14 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 		--================================================
 		IF(@Update = 1 AND @CustomerId IS NOT NULL)
 		BEGIN
+			UPDATE Loc 
+				SET strOriginLinkCustomer = Ent.strName
+				FROM tblEMEntity Ent
+					INNER JOIN tblEMEntityLocation Loc 
+						ON Ent.intEntityId = Loc.intEntityId 
+							and Loc.ysnDefaultLocation = 1
+			WHERE Ent.strEntityNo =  @CustomerId
+
 			--UPDATE IF EXIST IN THE ORIGIN
 			IF(EXISTS(SELECT 1 FROM ptcusmst WHERE ptcus_cus_no = SUBSTRING(@CustomerId,1,10)))
 			BEGIN
