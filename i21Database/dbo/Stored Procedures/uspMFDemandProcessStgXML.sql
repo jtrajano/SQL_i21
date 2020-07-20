@@ -57,7 +57,7 @@ BEGIN TRY
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
 	FROM tblMFDemandStage
-	WHERE strFeedStatus is null
+	WHERE strFeedStatus IS NULL
 
 	WHILE @intDemandStageId > 0
 	BEGIN
@@ -644,7 +644,23 @@ BEGIN TRY
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
 
-			INSERT INTO tblMFDemandAcknowledgementStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany
+			WHERE intCompanyId = @intCompanyId
+
+			IF EXISTS (
+					SELECT 1
+					FROM master.dbo.sysdatabases
+					WHERE name = @strDatabaseName
+					)
+			BEGIN
+				SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
+			'.dbo.tblMFDemandAcknowledgementStage (
 				intInvPlngReportMasterId
 				,strInvPlngReportName
 				,intInvPlngReportMasterRefId
@@ -657,11 +673,28 @@ BEGIN TRY
 			SELECT @intNewInvPlngReportMasterID
 				,@strInvPlngReportName
 				,@intInvPlngReportMasterID
-				,'Success'
+				,''Success''
 				,@intTransactionId
 				,@intCompanyId
 				,@intTransactionRefId
-				,@intCompanyRefId
+				,@intCompanyRefId'
+
+				EXEC sp_executesql @strSQL
+					,N'@intNewInvPlngReportMasterID int
+				,@strInvPlngReportName nvarchar(50)
+				,@intInvPlngReportMasterID int
+				,@intTransactionId int
+				,@intCompanyId int
+				,@intTransactionRefId int
+				,@intCompanyRefId int'
+					,@intNewInvPlngReportMasterID
+					,@strInvPlngReportName
+					,@intInvPlngReportMasterID
+					,@intTransactionId
+					,@intCompanyId
+					,@intTransactionRefId
+					,@intCompanyRefId
+			END
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION
@@ -686,7 +719,7 @@ BEGIN TRY
 		SELECT @intDemandStageId = MIN(intDemandStageId)
 		FROM tblMFDemandStage
 		WHERE intDemandStageId > @intDemandStageId
-			AND strFeedStatus is null
+			AND strFeedStatus IS NULL
 	END
 END TRY
 

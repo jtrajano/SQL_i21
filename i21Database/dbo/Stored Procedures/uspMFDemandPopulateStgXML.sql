@@ -103,7 +103,22 @@ BEGIN TRY
 
 	SELECT @strItemSupplyTargetXML = Replace(@strItemSupplyTargetXML, '</vyuMFGetItemSupplyTargets>', @strAdditionalInfo)
 
-	INSERT INTO tblMFDemandStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany
+	WHERE ysnParent = 1
+
+	IF EXISTS (
+			SELECT 1
+			FROM master.dbo.sysdatabases
+			WHERE name = @strDatabaseName
+			)
+	BEGIN
+		SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblMFDemandStage (
 		intInvPlngReportMasterID
 		,strInvPlngReportName
 		,strReportMasterXML
@@ -122,7 +137,28 @@ BEGIN TRY
 		,strRowState = @strRowState
 		,intTransactionId = @intTransactionId
 		,intCompanyId = @intCompanyId
-		,strItemSupplyTarget = @strItemSupplyTargetXML
+		,strItemSupplyTarget = @strItemSupplyTargetXML'
+
+		EXEC sp_executesql @strSQL
+			,N'@intInvPlngReportMasterID int
+		,@strInvPlngReportName nvarchar(50)
+		,@strReportMasterXML nvarchar(MAX)
+		,@strReportMaterialXML nvarchar(MAX)
+		,@strReportAttributeValueXML nvarchar(MAX)
+		,@strRowState  nvarchar(50)
+		,@intTransactionId int
+		,@intCompanyId int
+		,@strItemSupplyTargetXML nvarchar(MAX)'
+			,@intInvPlngReportMasterID
+			,@strInvPlngReportName
+			,@strReportMasterXML
+			,@strReportMaterialXML
+			,@strReportAttributeValueXML
+			,@strRowState
+			,@intTransactionId
+			,@intCompanyId
+			,@strItemSupplyTargetXML
+	END
 END TRY
 
 BEGIN CATCH

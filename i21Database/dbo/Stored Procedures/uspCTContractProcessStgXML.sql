@@ -3405,11 +3405,11 @@ BEGIN TRY
 							AND intContractSeq = @intContractSeq
 					END
 
-					EXEC uspCTCreateDetailHistory @intContractHeaderId = NULL,
-												  @intContractDetailId = @intContractDetailId,
-												  @strSource	 	   = 'Contract',
-										 		  @strProcess		   = 'Contract Process Stg XML',
-												  @intUserId		   = @intUserId
+					EXEC uspCTCreateDetailHistory @intContractHeaderId = NULL
+						,@intContractDetailId = @intContractDetailId
+						,@strSource = 'Contract'
+						,@strProcess = 'Contract Process Stg XML'
+						,@intUserId = @intUserId
 
 					SELECT @intRecordId = min(intContractDetailId)
 					FROM #tmpContractDetail
@@ -4076,7 +4076,22 @@ BEGIN TRY
 				WHERE intRecordId = @intNewContractHeaderId
 					AND intScreenId = @intContractScreenId
 
-				INSERT INTO tblCTContractAcknowledgementStage (
+				DECLARE @strSQL NVARCHAR(MAX)
+					,@strServerName NVARCHAR(50)
+					,@strDatabaseName NVARCHAR(50)
+
+				SELECT @strServerName = strServerName
+					,@strDatabaseName = strDatabaseName
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyId
+
+				IF EXISTS (
+						SELECT 1
+						FROM master.dbo.sysdatabases
+						WHERE name = @strDatabaseName
+						)
+				BEGIN
+					SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblCTContractAcknowledgementStage (
 					intContractHeaderId
 					,strContractAckNumber
 					,dtmFeedDate
@@ -4097,7 +4112,7 @@ BEGIN TRY
 				SELECT @intNewContractHeaderId
 					,@strNewContractNumber
 					,GETDATE()
-					,'Success'
+					,''Success''
 					,@strTransactionType
 					,@intMultiCompanyId
 					,@strAckHeaderXML
@@ -4109,13 +4124,45 @@ BEGIN TRY
 					,@intTransactionId
 					,@intCompanyId
 					,@intTransactionRefId
-					,@intCompanyRefId
+					,@intCompanyRefId'
 
-				SELECT @intContractAcknowledgementStageId = SCOPE_IDENTITY();
+					EXEC sp_executesql @strSQL
+						,N'@intNewContractHeaderId int
+					,@strNewContractNumber nvarchar(50)
+					,@strTransactionType nvarchar(50)
+					,@intMultiCompanyId int
+					,@strAckHeaderXML nvarchar(MAX)
+					,@strAckDetailXML nvarchar(MAX)
+					,@strAckCostXML nvarchar(MAX)
+					,@strAckDocumentXML nvarchar(MAX)
+					,@strAckCertificationXML nvarchar(MAX)
+					,@strAckConditionXML nvarchar(MAX)
+					,@intTransactionId int
+					,@intCompanyId int
+					,@intTransactionRefId int
+					,@intCompanyRefId int'
+						,@intNewContractHeaderId
+						,@strNewContractNumber
+						,@strTransactionType
+						,@intMultiCompanyId
+						,@strAckHeaderXML
+						,@strAckDetailXML
+						,@strAckCostXML
+						,@strAckDocumentXML
+						,@strAckCertificationXML
+						,@strAckConditionXML
+						,@intTransactionId
+						,@intCompanyId
+						,@intTransactionRefId
+						,@intCompanyRefId
+				END
 
-				EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-					,@referenceTransactionId = @intTransactionId
-					,@referenceCompanyId = @intCompanyId
+				IF @strRowState <> 'Delete'
+				BEGIN
+					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+						,@referenceTransactionId = @intTransactionId
+						,@referenceCompanyId = @intCompanyId
+				END
 
 				--------------------------------------------------------------------------------------------------------------------------
 				EXEC sp_xml_removedocument @idoc
