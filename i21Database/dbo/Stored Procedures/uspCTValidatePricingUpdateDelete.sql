@@ -22,7 +22,7 @@ begin try
 	declare @dblCommulativeQtyShipped numeric(18,6);
 
 	declare @strPostedInvoices nvarchar(max) = '';
-	declare @strErrorMessageForDeletingWithPostedInvoice nvarchar(1000) = 'Unable to delete the price layer. Posted invoice/s (X0) is/are exists in the price. Try to unpost them and delete the price again.';
+	declare @strErrorMessageForDeletingWithPostedInvoice nvarchar(1000) = 'X0';
 
 	declare @ysnLoad bit = 0;
 
