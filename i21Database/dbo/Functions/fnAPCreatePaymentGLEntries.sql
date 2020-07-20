@@ -138,72 +138,105 @@ BEGIN
 	-- FROM
 	-- (
 		SELECT		--DISTINCT
-					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	ROUND(
-															ROUND(
-															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
-																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-																paymentDetail.dblPayment, voucher.dblTotal) 
-															,2) 
-															* ISNULL(NULLIF(A.dblExchangeRate,0),1)
-														,2)
-														* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
-					[dblCreditForeign]				=	ROUND(
+				[intPaymentId]					=	A.intPaymentId,
+				[dblCredit]	 					=	ROUND(
+														ROUND(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-															paymentDetail.dblPayment, voucher.dblTotal)
-														,2) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
-			FROM	[dbo].tblAPPayment A 
-			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
-			-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON paymentDetail.intBillId = paymentForex.intBillId
-			INNER JOIN tblAPBill voucher ON paymentDetail.intBillId = voucher.intBillId
-			CROSS APPLY
-			(
-				SELECT R.dblTotal + R.dblTax AS dblTotal 
-				FROM dbo.tblAPBillDetail R
-				WHERE R.intBillId = voucher.intBillId
-			) Details
-			OUTER APPLY (
-				SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
-			) withHoldData
-			-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
-			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
-			-- GROUP BY 
-			-- A.intPaymentId, 
-			-- A.dblAmountPaid,
-			-- Details.dblTotal, 
-			-- voucher.dblTotal,
-			-- withHoldData.dblWithholdPercent,
-			-- A.ysnPrepay , 
-			-- A.dblWithheld,
-			-- paymentDetail.dblPayment, 
-			-- paymentDetail.dblWithheld,
-			-- paymentDetail.dblDiscount,
-			-- intTransactionType , 
-			-- A.dblExchangeRate
-			-- ) AS tmpSummaryPayment
-			-- GROUP BY tmpSummaryPayment.intPaymentId
-			-- UNION ALL
-			-- SELECT		DISTINCT
-			-- 		[intPaymentId]					=	A.intPaymentId,
-			-- 		[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-			-- 		[dblCreditForeign]				=	paymentDetail.dblPayment
-			-- FROM	[dbo].tblAPPayment A 
-			-- INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
-			-- WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			-- AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
-
-			UNION ALL
-			SELECT		DISTINCT
-					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
-					[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
-			FROM	[dbo].tblAPPayment A 
-			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
-			INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
-			WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
-			AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
+															paymentDetail.dblPayment, voucher.dblTotal) 
+														,2) 
+														* ISNULL(NULLIF(A.dblExchangeRate,0),1)
+													,2)
+													* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+				[dblCreditForeign]				=	ROUND(
+													dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+														- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+														paymentDetail.dblPayment, voucher.dblTotal)
+													,2) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
+		FROM	[dbo].tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+		-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON paymentDetail.intBillId = paymentForex.intBillId
+		INNER JOIN tblAPBill voucher ON paymentDetail.intBillId = voucher.intBillId
+		CROSS APPLY
+		(
+			SELECT R.dblTotal AS dblTotal 
+			FROM dbo.tblAPBillDetail R
+			WHERE R.intBillId = voucher.intBillId
+		) Details
+		OUTER APPLY (
+			SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
+		) withHoldData
+		-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
+		-- GROUP BY 
+		-- A.intPaymentId, 
+		-- A.dblAmountPaid,
+		-- Details.dblTotal, 
+		-- voucher.dblTotal,
+		-- withHoldData.dblWithholdPercent,
+		-- A.ysnPrepay , 
+		-- A.dblWithheld,
+		-- paymentDetail.dblPayment, 
+		-- paymentDetail.dblWithheld,
+		-- paymentDetail.dblDiscount,
+		-- intTransactionType , 
+		-- A.dblExchangeRate
+		-- ) AS tmpSummaryPayment
+		-- GROUP BY tmpSummaryPayment.intPaymentId
+		-- UNION ALL
+		-- SELECT		DISTINCT
+		-- 		[intPaymentId]					=	A.intPaymentId,
+		-- 		[dblCredit]	 					=	CAST(paymentDetail.dblPayment * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+		-- 		[dblCreditForeign]				=	paymentDetail.dblPayment
+		-- FROM	[dbo].tblAPPayment A 
+		-- INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+		-- WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		-- AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
+		UNION ALL --TAXES
+		SELECT		--DISTINCT
+				[intPaymentId]					=	A.intPaymentId,
+				[dblCredit]	 					=	ROUND(
+														ROUND(
+														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+															paymentDetail.dblPayment, voucher.dblTotal) 
+														,2) 
+														* ISNULL(NULLIF(A.dblExchangeRate,0),1)
+													,2)
+													* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+				[dblCreditForeign]				=	ROUND(
+													dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+														- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+														paymentDetail.dblPayment, voucher.dblTotal)
+													,2) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
+		FROM	[dbo].tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+		-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON paymentDetail.intBillId = paymentForex.intBillId
+		INNER JOIN tblAPBill voucher ON paymentDetail.intBillId = voucher.intBillId
+		CROSS APPLY
+		(
+			SELECT COALESCE(R2.dblAdjustedTax,R2.dblTax) AS dblTotal 
+			FROM dbo.tblAPBillDetail R
+			INNER JOIN dbo.tblAPBillDetailTax R2 ON R.intBillDetailId = R2.intBillDetailId
+			WHERE R.intBillId = voucher.intBillId
+		) Details
+		OUTER APPLY (
+			SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
+		) withHoldData
+		-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
+		UNION ALL
+		SELECT		DISTINCT
+				[intPaymentId]					=	A.intPaymentId,
+				[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
+				[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
+		FROM	[dbo].tblAPPayment A 
+		INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
+		INNER JOIN tblARInvoice E ON E.intInvoiceId = paymentDetail.intInvoiceId
+		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId > 0
 	)MainQuery	
 	INNER JOIN tblAPPayment P on P.intPaymentId = MainQuery.intPaymentId
 	INNER JOIN tblAPVendor C ON P.intEntityVendorId = C.[intEntityId]
