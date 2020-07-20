@@ -979,6 +979,7 @@ BEGIN TRY
 					if (@intActiveShipmentId <> @intInventoryShipmentId)
 					begin
 						set @intShipmentCount = @intShipmentCount + 1;
+						set @intActiveShipmentId = @intInventoryShipmentId;
 					end
 
 					set @intPricedLoad = (
@@ -987,6 +988,11 @@ BEGIN TRY
 								select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId
 							) uniqueInvoice
 						)
+
+					if (@intPricedLoad >= @dblPriced) 
+	  				begin
+						goto SkipShipmentLoop; 
+					end
 
 					select @intTotalLoadPriced = sum(df.dblLoadPriced) from tblCTPriceFixation f, tblCTPriceFixationDetail df where f.intContractDetailId = @intContractDetailId and df.intPriceFixationId = f.intPriceFixationId;
 
