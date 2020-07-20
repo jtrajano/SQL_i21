@@ -216,6 +216,12 @@ BEGIN TRY
 					FROM tblMFItemExclude IE
 					WHERE IE.intItemId = I.intItemId
 						AND IE.ysnExcludeInDemandView = 1
+						AND NOT EXISTS (
+							SELECT *
+							FROM tblMFDemandDetail DD
+							WHERE IE.intItemId = IsNULL(DD.intSubstituteItemId,DD.intItemId)
+								AND DD.intDemandHeaderId = @intDemandHeaderId
+							)
 					)
 		END
 	END
@@ -250,26 +256,24 @@ BEGIN TRY
 					ELSE @intCompanyLocationId
 					END
 				)
-
-		--IF EXISTS (
-		--		SELECT *
-		--		FROM @tblMFItem I
-		--		WHERE NOT EXISTS (
-		--				SELECT *
-		--				FROM @tblMFItemDetail ID
-		--				WHERE ID.intItemId = I.intItemId
-		--				)
-		--		)
-		--BEGIN
-		--	RAISERROR (
-		--			'There is no matching recipe found.'
-		--			,16
-		--			,1
-		--			,'WITH NOWAIT'
-		--			)
-
-		--	RETURN
-		--END
+			--IF EXISTS (
+			--		SELECT *
+			--		FROM @tblMFItem I
+			--		WHERE NOT EXISTS (
+			--				SELECT *
+			--				FROM @tblMFItemDetail ID
+			--				WHERE ID.intItemId = I.intItemId
+			--				)
+			--		)
+			--BEGIN
+			--	RAISERROR (
+			--			'There is no matching recipe found.'
+			--			,16
+			--			,1
+			--			,'WITH NOWAIT'
+			--			)
+			--	RETURN
+			--END
 	END
 	ELSE
 	BEGIN
@@ -1077,11 +1081,11 @@ BEGIN TRY
 			,[strValue]
 			,8
 		FROM #TempForecastedConsumption FC
-		--WHERE EXISTS (
-		--		SELECT *
-		--		FROM @tblMFRefreshtemStock EI
-		--		WHERE EI.intItemId = FC.intItemId
-		--		)
+			--WHERE EXISTS (
+			--		SELECT *
+			--		FROM @tblMFRefreshtemStock EI
+			--		WHERE EI.intItemId = FC.intItemId
+			--		)
 	END
 
 	IF IsNULL(@OpenPurchaseXML, '') = ''
@@ -2254,14 +2258,16 @@ BEGIN TRY
 								WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
 									THEN (
 											CASE 
-												WHEN I.intItemId = MI.intItemId or MI.intItemId is null
+												WHEN I.intItemId = MI.intItemId
+													OR MI.intItemId IS NULL
 													THEN I.strItemNo + ' - ' + I.strDescription
 												ELSE I.strItemNo + ' - ' + I.strDescription + ' [ ' + MI.strItemNo + ' - ' + MI.strDescription + ' ]'
 												END
 											)
 								ELSE (
 										CASE 
-											WHEN I.intItemId = MI.intItemId or MI.intItemId is null
+											WHEN I.intItemId = MI.intItemId
+												OR MI.intItemId IS NULL
 												THEN I.strItemNo
 											ELSE I.strItemNo + ' [ ' + MI.strItemNo + ' ]'
 											END
@@ -2273,7 +2279,8 @@ BEGIN TRY
 							WHEN @ysnDisplayDemandWithItemNoAndDescription = 1
 								THEN (
 										CASE 
-											WHEN I.intItemId = MI.intItemId or MI.intItemId is null
+											WHEN I.intItemId = MI.intItemId
+												OR MI.intItemId IS NULL
 												THEN I.strItemNo + ' - ' + I.strDescription
 											WHEN I.intItemId <> MI.intItemId
 												AND strBook IS NULL
@@ -2283,7 +2290,8 @@ BEGIN TRY
 										)
 							ELSE (
 									CASE 
-										WHEN I.intItemId = MI.intItemId or MI.intItemId is null
+										WHEN I.intItemId = MI.intItemId
+											OR MI.intItemId IS NULL
 											THEN I.strItemNo
 										WHEN I.intItemId <> MI.intItemId
 											AND strBook IS NULL
@@ -2312,10 +2320,10 @@ BEGIN TRY
 				END AS strAttributeName
 			,(
 				CASE 
-					WHEN A.intReportAttributeID = 5
-						AND @intContainerTypeId IS NOT NULL
-						AND IsNULL(CW.dblWeight, 0) > 0
-						THEN Floor(IsNULL(D.dblQty / CW.dblWeight, 0)) * CW.dblWeight
+					--WHEN A.intReportAttributeID = 5
+					--	AND @intContainerTypeId IS NOT NULL
+					--	AND IsNULL(CW.dblWeight, 0) > 0
+					--	THEN Floor(IsNULL(D.dblQty / CW.dblWeight, 0)) * CW.dblWeight
 					WHEN DL.intMonthId IN (
 							- 1
 							,0
@@ -2346,7 +2354,8 @@ BEGIN TRY
 			,DL.intMainItemId
 			,MI.strItemNo AS strMainItemNo
 			,CASE 
-				WHEN I.intItemId = MI.intItemId or MI.intItemId is null
+				WHEN I.intItemId = MI.intItemId
+					OR MI.intItemId IS NULL
 					THEN I.strItemNo
 				ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]'
 				END AS strGroupByColumn
