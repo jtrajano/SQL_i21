@@ -2933,7 +2933,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dblOpenQty dblOpenQty
+		, dblOpenQty
 		, strCommodityCode
 		, intCommodityId
 		, intItemId
@@ -2974,10 +2974,6 @@ BEGIN
 		, intMarketZoneId
 		, strMarketZoneCode
 		, strLocationName 
-		, strPricingType
-		, dblMarketPrice
-		, dblAdjustedContractPrice
-		, dblOpenQty
 		, dblResult = case when strPricingType='Cash' THEN 
 								ROUND(dblResultCash,2) 
 							else 
