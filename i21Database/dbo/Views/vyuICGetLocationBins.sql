@@ -100,7 +100,7 @@ SELECT
 	,dtmLastSaleDate = ItemStock.dtmLastSaleDate
 	,strEntityVendor = VendorEntity.strName
 	,dblAverageUsagePerPeriod = usage.dblAvgUsagePerPeriod 
-	,dblInTransitDirect = ISNULL(ItemStockUOM.dblInTransitDirect, 0)
+	,dblInTransitDirect = ISNULL(ItemStock.dblInTransitDirect, 0)
 FROM	
 	tblICItem Item 
 	LEFT JOIN tblICCategory Category 
@@ -146,9 +146,19 @@ FROM
 		WHERE	ItemStock.intItemId = Item.intItemId 
 				AND ItemStock.intItemLocationId = ItemLocation.intItemLocationId
 		GROUP BY 
-				ItemStockUOM.intItemId
-				,ItemStockUOM.intItemLocationId
-	) ItemStockUOM
+				ItemStock.intItemId
+				,ItemStock.intItemLocationId
+	) ItemStock
+	OUTER APPLY (
+		SELECT 
+			dblCapacity = SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0))
+		FROM 
+			tblICStorageLocation sl
+		WHERE
+			sl.intItemId = Item.intItemId
+			AND sl.intLocationId = ItemLocation.intLocationId
+	
+	) StorageLocation
 	OUTER APPLY (
 		SELECT 
 			dblAvgUsagePerPeriod = 
@@ -175,12 +185,11 @@ FROM
 				FROM 
 					tblICItemStockUsagePerPeriod u
 				WHERE
-					u.intItemId = ItemStockUOM.intItemId
-					AND u.intItemLocationId = ItemStockUOM.intItemLocationId					
+					u.intItemId = ItemStock.intItemId
+					AND u.intItemLocationId = ItemStock.intItemLocationId					
 					AND u.intGLFiscalYearPeriodId = fyp.intGLFiscalYearPeriodId
 			) stockUsagePerPeriod
 		WHERE	
 			-- Get the current fiscal period
 			GETDATE() BETWEEN fyp.dtmStartDate AND fyp.dtmEndDate
-	) usage
 	) usage
