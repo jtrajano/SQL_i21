@@ -125,7 +125,6 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
-
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
 	FROM tblCTPriceContractStage
 	WHERE ISNULL(strFeedStatus, '') = ''
@@ -155,7 +154,7 @@ BEGIN TRY
 			,@strPriceFixationXML = strPriceFixationXML
 			,@strPriceFixationDetailXML = strPriceFixationDetailXML
 			,@strApproverXML = strApproverXML
-			,@strSubmittedByXML=strSubmittedByXML
+			,@strSubmittedByXML = strSubmittedByXML
 			,@strReference = strReference
 			,@strRowState = strRowState
 			,@strFeedStatus = strFeedStatus
@@ -714,6 +713,7 @@ BEGIN TRY
 						,1 AS intConcurrencyId
 						,@intPriceContractId
 						,@intCompanyRefId
+
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
@@ -745,7 +745,6 @@ BEGIN TRY
 				--SELECT @intCompanyRefId = intCompanyId
 				--FROM tblCTPriceContract
 				--WHERE intPriceContractId = @intNewPriceContractId
-
 				EXEC sp_xml_removedocument @idoc
 
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -1557,7 +1556,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intPriceFixationId = @intPriceFixationId
-					AND ysnApproval=1
+					AND ysnApproval = 1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -1583,14 +1582,14 @@ BEGIN TRY
 
 				EXEC sp_xml_removedocument @idoc
 
-				
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strSubmittedByXML
+
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intPriceFixationId = @intPriceFixationId
-					AND ysnApproval=0
+					AND ysnApproval = 0
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -1613,6 +1612,7 @@ BEGIN TRY
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
 						) x
+
 				EXEC sp_xml_removedocument @idoc
 
 				SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intNewPriceContractId)
@@ -1679,7 +1679,22 @@ BEGIN TRY
 				WHERE intRecordId = @intNewPriceContractId
 					AND intScreenId = @intContractScreenId
 
-				INSERT INTO tblCTPriceContractAcknowledgementStage (
+				DECLARE @strSQL NVARCHAR(MAX)
+					,@strServerName NVARCHAR(50)
+					,@strDatabaseName NVARCHAR(50)
+
+				SELECT @strServerName = strServerName
+					,@strDatabaseName = strDatabaseName
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyId
+
+				IF EXISTS (
+						SELECT 1
+						FROM master.dbo.sysdatabases
+						WHERE name = @strDatabaseName
+						)
+				BEGIN
+					SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblCTPriceContractAcknowledgementStage (
 					intAckPriceContractId
 					,strAckPriceContracNo
 					,dtmFeedDate
@@ -1697,7 +1712,7 @@ BEGIN TRY
 				SELECT @intNewPriceContractId
 					,@strNewPriceContractNo
 					,GETDATE()
-					,'Success'
+					,''Success''
 					,@strTransactionType
 					,@intMultiCompanyId
 					,@strAckPriceContractXML
@@ -1706,7 +1721,32 @@ BEGIN TRY
 					,@intTransactionId
 					,@intCompanyId
 					,@intTransactionRefId
-					,@intCompanyRefId
+					,@intCompanyRefId'
+
+					EXEC sp_executesql @strSQL
+						,N'@intNewPriceContractId int
+					,@strNewPriceContractNo nvarchar(50)
+					,@strTransactionType nvarchar(50)
+					,@intMultiCompanyId int
+					,@strAckPriceContractXML nvarchar(MAX)
+					,@strAckPriceFixationXML nvarchar(MAX)
+					,@strAckPriceFixationDetailXML nvarchar(MAX)
+					,@intTransactionId int
+					,@intCompanyId int
+					,@intTransactionRefId int
+					,@intCompanyRefId int'
+						,@intNewPriceContractId
+						,@strNewPriceContractNo
+						,@strTransactionType
+						,@intMultiCompanyId
+						,@strAckPriceContractXML
+						,@strAckPriceFixationXML
+						,@strAckPriceFixationDetailXML
+						,@intTransactionId
+						,@intCompanyId
+						,@intTransactionRefId
+						,@intCompanyRefId
+				END
 
 				IF @strRowState <> 'Delete'
 				BEGIN
