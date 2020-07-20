@@ -2884,7 +2884,7 @@ BEGIN
 		, strFutMarketName
 		, intFutureMonthId
 		, strFutureMonth
-		, dblOpenQty dblOpenQty
+		, dblOpenQty
 		, strCommodityCode
 		, intCommodityId
 		, intItemId
