@@ -127,32 +127,32 @@ BEGIN TRY
 			FROM tblMFInvPlngSummaryDetail PSD
 			WHERE PSD.intInvPlngSummaryId = @intInvPlngSummaryId
 				AND intAttributeId = 1
-				AND PSD.strFieldName = x.strFieldName
+				AND PSD.strFieldName = x.N
 			)
 		,B.strBook + IsNULL(' - ' + SB.strSubBook, '') + ' - ' + I.strItemNo + IsNULL(' - [ ' + MI.strItemNo +' ] ', '') + ' - ' + Replace(Replace(RA.strAttributeName, '<a>+ ', ''), '</a>', '') 
 		,SD.strValue
-		,x.strValue
-	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
-			intAttributeId INT
-			,intItemId INT
-			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			,intMainItemId INT
-			,intBookId INT
-			,intSubBookId INT
+		,x.V
+	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/SD', 2) WITH (
+			A INT
+			,I INT
+			,N NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,V NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			,MI INT
+			,B INT
+			,SB INT
 			) x
-	JOIN tblMFInvPlngSummaryDetail SD ON x.intAttributeId = SD.intAttributeId
-		AND x.intItemId = SD.intItemId
-		AND x.strFieldName = SD.strFieldName
-		AND IsNULL(x.intMainItemId,0) = IsNULL(SD.intMainItemId,0)
-		AND x.intBookId = SD.intBookId
+	JOIN tblMFInvPlngSummaryDetail SD ON x.A = SD.intAttributeId
+		AND x.I = SD.intItemId
+		AND x.N = SD.strFieldName
+		AND IsNULL(x.MI,0) = IsNULL(SD.intMainItemId,0)
+		AND x.B = SD.intBookId
 		--AND IsNUll(x.intSubBookId,0) = IsNULL(SD.intSubBookId,0)
-	JOIN tblICItem I ON I.intItemId = x.intItemId
-	LEFT JOIN tblICItem MI ON MI.intItemId = x.intMainItemId
-	JOIN tblCTBook B ON B.intBookId = x.intBookId
-	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = x.intSubBookId
-	JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.intAttributeId
-	WHERE x.strValue <> SD.strValue
+	JOIN tblICItem I ON I.intItemId = x.I
+	LEFT JOIN tblICItem MI ON MI.intItemId = x.MI
+	JOIN tblCTBook B ON B.intBookId = x.B
+	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = x.SB
+	JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = x.A
+	WHERE x.V <> SD.strValue
 		AND SD.intInvPlngSummaryId = @intInvPlngSummaryId
 		And SD.intAttributeId in (4,9)
 
@@ -170,22 +170,22 @@ BEGIN TRY
 		,intSubBookId
 		,intInvPlngSummaryId
 		)
-	SELECT intAttributeId
-		,intItemId
-		,strFieldName
-		,strValue
-		,intMainItemId
-		,intBookId
-		,intSubBookId
+	SELECT A
+		,I
+		,N
+		,V
+		,MI
+		,B
+		,SB
 		,@intInvPlngSummaryId
-	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/InvPlngSummaryDetail', 2) WITH (
-			intAttributeId INT
-			,intItemId INT
-			,strFieldName NVARCHAR(50) COLLATE Latin1_General_CI_AS
-			,strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
-			,intMainItemId INT
-			,intBookId INT
-			,intSubBookId INT
+	FROM OPENXML(@idoc, 'root/InvPlngSummaryDetails/SD', 2) WITH (
+			A INT
+			,I INT
+			,N NVARCHAR(50) COLLATE Latin1_General_CI_AS
+			,V NVARCHAR(100) COLLATE Latin1_General_CI_AS
+			,MI INT
+			,B INT
+			,SB INT
 			)
 
 	IF EXISTS (
