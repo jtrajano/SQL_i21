@@ -80,62 +80,67 @@ END
 
 --UPDATE THE TAX
 --EXEC uspAPUpdateVoucherDetailTax @billDetailIds
-DELETE A
-FROM tblAPBillDetailTax A
-WHERE A.intBillDetailId = @billDetailId
+--DELETE ONLY IF DETAIL IS ASSOCIATED TO RECEIPT
+IF (SELECT intInventoryReceiptItemId FROM tblAPBillDetail WHERE intBillDetailId = @billDetailId) > 0
+BEGIN 
+	DELETE A
+	FROM tblAPBillDetailTax A
+	WHERE A.intBillDetailId = @billDetailId
 
-INSERT INTO tblAPBillDetailTax(
-	[intBillDetailId]		, 
-	[intTaxGroupId]			, 
-	[intTaxCodeId]			, 
-	[intTaxClassId]			, 
-	[strTaxableByOtherTaxes], 
-	[strCalculationMethod]	, 
-	[dblRate]				, 
-	[intAccountId]			, 
-	[dblTax]				, 
-	[dblAdjustedTax]		, 
-	[ysnTaxAdjusted]		, 
-	[ysnSeparateOnBill]		, 
-	[ysnCheckOffTax]
-)
-SELECT
-	[intBillDetailId]		=	B.intBillDetailId, 
-	[intTaxGroupId]			=	C.intTaxGroupId, 
-	[intTaxCodeId]			=	C.intTaxCodeId, 
-	[intTaxClassId]			=	C.intTaxClassId, 
-	[strTaxableByOtherTaxes]=	C.strTaxableByOtherTaxes, 
-	[strCalculationMethod]	=	C.strCalculationMethod, 
-	[dblRate]				=	C.dblRate, 
-	[intAccountId]			=	C.intTaxAccountId, 
-	[dblTax]				=	CASE WHEN @differentCost = 1 AND @costAdjustment = 1 THEN C.dblTax 
-									ELSE CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)) 
-								END,
-	[dblAdjustedTax]		=	CAST(CASE WHEN @costAdjustment = 1 AND C.strCalculationMethod = 'UNIT' THEN ((C.dblTax * D.dblLineTotal) / (D.dblLineTotal))
-										ELSE ((C.dblTax * B.dblTotal) / (D.dblLineTotal)) END AS DECIMAL(18,2)), 
-	[ysnTaxAdjusted]		=	CASE WHEN @differentCost = 1 AND @costAdjustment = 1 THEN 1 ELSE 0 END, 
-	[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
-	[ysnCheckOffTax]		=	C.ysnCheckoffTax
-FROM tblAPBillDetail B
-INNER JOIN tblICInventoryReceiptItemTax C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
-INNER JOIN tblICInventoryReceiptItem D ON B.intInventoryReceiptItemId = D.intInventoryReceiptItemId
-WHERE B.intBillDetailId = @billDetailId
+	INSERT INTO tblAPBillDetailTax(
+		[intBillDetailId]		, 
+		[intTaxGroupId]			, 
+		[intTaxCodeId]			, 
+		[intTaxClassId]			, 
+		[strTaxableByOtherTaxes], 
+		[strCalculationMethod]	, 
+		[dblRate]				, 
+		[intAccountId]			, 
+		[dblTax]				, 
+		[dblAdjustedTax]		, 
+		[ysnTaxAdjusted]		, 
+		[ysnSeparateOnBill]		, 
+		[ysnCheckOffTax]
+	)
+	SELECT
+		[intBillDetailId]		=	B.intBillDetailId, 
+		[intTaxGroupId]			=	C.intTaxGroupId, 
+		[intTaxCodeId]			=	C.intTaxCodeId, 
+		[intTaxClassId]			=	C.intTaxClassId, 
+		[strTaxableByOtherTaxes]=	C.strTaxableByOtherTaxes, 
+		[strCalculationMethod]	=	C.strCalculationMethod, 
+		[dblRate]				=	C.dblRate, 
+		[intAccountId]			=	C.intTaxAccountId, 
+		[dblTax]				=	CASE WHEN @differentCost = 1 AND @costAdjustment = 1 THEN C.dblTax 
+										ELSE CAST(((C.dblTax * B.dblTotal) / (D.dblLineTotal)) AS DECIMAL(18,2)) 
+									END,
+		[dblAdjustedTax]		=	CAST(CASE WHEN @costAdjustment = 1 AND C.strCalculationMethod <> 'UNIT' THEN ((C.dblTax * D.dblLineTotal) / (D.dblLineTotal))
+											ELSE ((C.dblTax * B.dblTotal) / (D.dblLineTotal)) END AS DECIMAL(18,2)), 
+		[ysnTaxAdjusted]		=	CASE WHEN @differentCost = 1 AND @costAdjustment = 1 THEN 1 ELSE 0 END, 
+		[ysnSeparateOnBill]		=	C.ysnSeparateOnInvoice, 
+		[ysnCheckOffTax]		=	C.ysnCheckoffTax
+	FROM tblAPBillDetail B
+	INNER JOIN tblICInventoryReceiptItemTax C ON B.intInventoryReceiptItemId = C.intInventoryReceiptItemId
+	INNER JOIN tblICInventoryReceiptItem D ON B.intInventoryReceiptItemId = D.intInventoryReceiptItemId
+	WHERE B.intBillDetailId = @billDetailId
 
-UPDATE voucherDetails
-	SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
-FROM tblAPBillDetail voucherDetails
-OUTER APPLY (
-	SELECT SUM(ISNULL(NULLIF(dblAdjustedTax,0), dblTax)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
-) taxes
-WHERE voucherDetails.intBillDetailId = @billDetailId
+	UPDATE voucherDetails
+		SET voucherDetails.dblTax = ISNULL(taxes.dblTax,0)
+	FROM tblAPBillDetail voucherDetails
+	OUTER APPLY (
+		SELECT SUM(ISNULL(NULLIF(dblAdjustedTax,0), dblTax)) dblTax FROM tblAPBillDetailTax WHERE intBillDetailId = voucherDetails.intBillDetailId
+	) taxes
+	WHERE voucherDetails.intBillDetailId = @billDetailId
 
-EXEC uspAPUpdateVoucherTotal @billIds
+	EXEC uspAPUpdateVoucherTotal @billIds
 
---UPDATE DISCOUNT
-UPDATE Voucher
-	SET Voucher.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), Voucher.dtmBillDate, Voucher.intTermsId, Voucher.dblTotal)
-FROM tblAPBill Voucher
-WHERE Voucher.intBillId = @voucherId
+	--UPDATE DISCOUNT
+	UPDATE Voucher
+		SET Voucher.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), Voucher.dtmBillDate, Voucher.intTermsId, Voucher.dblTotal)
+	FROM tblAPBill Voucher
+	WHERE Voucher.intBillId = @voucherId
+
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 
