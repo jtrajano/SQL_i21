@@ -57,6 +57,7 @@ BEGIN
 				,[ysnInvalidSetup]
 				,[strTaxGroup]
 				,[strNotes]
+				,[ysnBookToExemptionAccount] = 0
 			FROM
 				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, @IncludeInvalidCodes, NULL, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, NULL, @LocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
 					
@@ -87,6 +88,7 @@ BEGIN
 				,[ysnAddToCost]
 				,[strTaxGroup]
 				,[strNotes]
+				,[ysnBookToExemptionAccount]
 			FROM
 				[dbo].[fnGetTaxGroupTaxCodesForVendor](@TaxGroupId, @EntityId, @TransactionDate, @ItemId, @BillShipToLocationId, @IncludeExemptedCodes, @IncludeInvalidCodes, @UOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate, @LocationId)
 					
