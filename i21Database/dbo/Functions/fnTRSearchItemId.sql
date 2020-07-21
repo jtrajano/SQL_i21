@@ -20,14 +20,14 @@ BEGIN
 	INNER JOIN (
 		SELECT H.intSupplyPointProductSearchHeaderId,  Condition = COUNT(H.intSupplyPointProductSearchHeaderId) FROM tblTRSupplyPointProductSearchDetail D
 		INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId  
-		WHERE strSearchValue LIKE '%' + @SupplierName + '%'
-		OR strSearchValue LIKE '%' + @SupplyPoint + '%'
-		OR strSearchValue LIKE '%' + @Item + '%'
+		WHERE strSearchValue LIKE @SupplierName + '%'
+		OR strSearchValue LIKE @SupplyPoint + '%'
+		OR strSearchValue LIKE @Item + '%'
 		GROUP BY  H.intSupplyPointProductSearchHeaderId
 	) A ON A.intSupplyPointProductSearchHeaderId = H.intSupplyPointProductSearchHeaderId
-	WHERE strSearchValue LIKE '%' + @SupplierName + '%'
-		OR strSearchValue LIKE '%' + @SupplyPoint + '%'
-		OR strSearchValue LIKE '%' + @Item + '%'
+	WHERE strSearchValue LIKE @SupplierName + '%'
+		OR strSearchValue LIKE @SupplyPoint + '%'
+		OR strSearchValue LIKE @Item + '%'
 	ORDER BY A.Condition DESC, H.intSupplyPointProductSearchHeaderId ASC
 
 	-- DECLARE @Location NVARCHAR(50)
