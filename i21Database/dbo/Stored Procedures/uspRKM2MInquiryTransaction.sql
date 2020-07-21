@@ -866,8 +866,8 @@ BEGIN
 			, dblFutures = CASE WHEN cd.intPricingTypeId = 2 AND strPricingStatus IN ('Unpriced', 'Partially Priced') THEN 0
 								ELSE CASE WHEN cd.intPricingTypeId IN (1, 3) THEN ISNULL(cd.dblFutures, 0) ELSE ISNULL(cd.dblFutures, 0) END END
 			, dblMarketRatio = ISNULL((SELECT TOP 1 dblRatio FROM #tmpM2MBasisDetail tmp
-										WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-											AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 											AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -879,8 +879,8 @@ BEGIN
 																		ELSE tmp.strPeriodTo END
 											AND tmp.strContractInventory = 'Contract'), 0)
 			, dblMarketBasis1 = ISNULL((SELECT TOP 1 dblMarketBasis FROM #tmpM2MBasisDetail tmp
-										WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-											AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 											AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -892,8 +892,8 @@ BEGIN
 																		ELSE tmp.strPeriodTo END
 											AND tmp.strContractInventory = 'Contract' AND cd.strPricingType <> 'HTA'), 0)
 			, dblMarketCashPrice = ISNULL((SELECT TOP 1 dblMarketBasis FROM #tmpM2MBasisDetail tmp
-										WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-											AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 											AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -905,8 +905,8 @@ BEGIN
 																		ELSE tmp.strPeriodTo END
 											AND tmp.strContractInventory = 'Contract' AND cd.strPricingType <> 'HTA'), 0)
 			, intMarketBasisUOM = ISNULL((SELECT TOP 1 intMarketBasisUOM FROM #tmpM2MBasisDetail tmp
-										WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-											AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 											AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -918,8 +918,8 @@ BEGIN
 																		ELSE tmp.strPeriodTo END
 											AND tmp.strContractInventory = 'Contract'), 0)
 			, intMarketBasisCurrencyId = ISNULL((SELECT TOP 1 intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
-										WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-											AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+										WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+											AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 											AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
 														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
@@ -1271,8 +1271,8 @@ BEGIN
 						, cd.dblFutures
 						, dblCash = CASE WHEN cd.intPricingTypeId = 6 THEN dblCashPrice ELSE NULL END
 						, dblMarketRatio = ISNULL((SELECT TOP 1 dblRatio FROM #tmpM2MBasisDetail tmp
-											WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-												AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+											WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+												AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 												AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 															THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
 															ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
@@ -1284,8 +1284,8 @@ BEGIN
 																			ELSE tmp.strPeriodTo END
 												AND tmp.strContractInventory = 'Contract'), 0)
 						, dblMarketBasis1 = ISNULL((SELECT TOP 1 dblMarketBasis FROM #tmpM2MBasisDetail tmp
-													WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-														AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+													WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+														AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 														AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 																	THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
 																	ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
@@ -1297,8 +1297,8 @@ BEGIN
 																					ELSE tmp.strPeriodTo END
 														AND tmp.strContractInventory = 'Contract'), 0)
 						, intMarketBasisUOM = ISNULL((SELECT TOP 1 intMarketBasisUOM FROM #tmpM2MBasisDetail tmp
-													WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-														AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+													WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+														AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 														AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 																	THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
 																	ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
@@ -1310,8 +1310,8 @@ BEGIN
 																					ELSE tmp.strPeriodTo END
 														AND tmp.strContractInventory = 'Contract'), 0)
 						, intMarketBasisCurrencyId = ISNULL((SELECT TOP 1 intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
-													WHERE ISNULL(tmp.intFutureMarketId, cd.intFutureMarketId) = cd.intFutureMarketId
-														AND ISNULL(tmp.intItemId, cd.intItemId) = cd.intItemId
+													WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
+														AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
 														AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
 																	THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
 																	ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
