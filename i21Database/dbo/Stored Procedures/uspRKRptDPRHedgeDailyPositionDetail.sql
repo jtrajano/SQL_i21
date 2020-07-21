@@ -11,6 +11,7 @@ DECLARE @idoc INT
 		,@dtmToDate datetime = null
 		,@ysnIsCrushPosition bit = NULL
 		,@strPositionBy NVARCHAR(50) = NULL
+		,@intDPRHeaderId int
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -72,6 +73,10 @@ SELECT *
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'strPositionBy'
 
+	SELECT @intDPRHeaderId = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'intDPRHeaderId'
+
 IF isnull(@strPurchaseSales,'') <> ''
 BEGIN
                 if @strPurchaseSales='Purchase'
@@ -93,4 +98,11 @@ intCommodity  INT
 INSERT INTO @Commodity(intCommodity)
 SELECT Item Collate Latin1_General_CI_AS FROM [dbo].[fnSplitString](@intCommodityId, ',')  
                  
-EXEC uspRKDPRHedgeDailyPositionDetail @intCommodityId, @intLocationId, @intVendorId, @strPurchaseSales, @strPositionIncludes, @dtmToDate, '',@strPositionBy
+SELECT
+	dblTotal
+	,intSeqNo
+	,strCommodityCode
+	,strType
+	,strUnitMeasure
+FROM tblRKDPRContractHedge
+WHERE intDPRHeaderId = @intDPRHeaderId

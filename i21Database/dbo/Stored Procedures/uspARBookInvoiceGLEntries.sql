@@ -231,6 +231,8 @@ IF @Post = 0
 						,[dblReportingRate]	
 						,[dblForeignRate]
 						,[strRateType]
+                        ,[intSourceEntityId]
+						,[intCommodityId]
 				)
                 EXEC dbo.uspICUnpostCosting
                          @intTransactionIdIC

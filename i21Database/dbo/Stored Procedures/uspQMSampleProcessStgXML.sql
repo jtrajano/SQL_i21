@@ -2370,7 +2370,16 @@ BEGIN TRY
 				SELECT @intMultiCompanyId = @intCompanyId
 			END
 
-			INSERT INTO tblQMSampleAcknowledgementStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblQMSampleAcknowledgementStage (
 				intSampleId
 				,strSampleAckNumber
 				,dtmFeedDate
@@ -2389,7 +2398,33 @@ BEGIN TRY
 			SELECT @intNewSampleId
 				,@strNewSampleNumber
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@strTransactionType
+				,@intMultiCompanyId
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strAckTestResultXML
+				,@strRowState
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewSampleId INT
+					,@strNewSampleNumber NVARCHAR(MAX)
+					,@strTransactionType NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckDetailXML NVARCHAR(MAX)
+					,@strAckTestResultXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewSampleId
+				,@strNewSampleNumber
 				,@strTransactionType
 				,@intMultiCompanyId
 				,@strAckHeaderXML

@@ -80,7 +80,16 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	INSERT INTO tblQMSampleStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany WITH (NOLOCK)
+	WHERE intCompanyId = @intToCompanyId
+
+	SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblQMSampleStage (
 		intSampleId
 		,strSampleNumber
 		,strHeaderXML
@@ -109,7 +118,37 @@ BEGIN TRY
 		,intToBookId = @intToBookId
 		,strFromCompanyName = @strFromCompanyName
 		,intTransactionId = @intTransactionId
-		,intCompanyId = @intCompanyId
+		,intCompanyId = @intCompanyId'
+
+	EXEC sp_executesql @strSQL
+		,N'@intSampleId INT
+			,@strSampleNumber NVARCHAR(100)
+			,@strHeaderXML NVARCHAR(MAX)
+			,@strRowState NVARCHAR(100)
+			,@strDetailXML NVARCHAR(MAX)
+			,@strTestResultXML NVARCHAR(MAX)
+			,@intToEntityId INT
+			,@intCompanyLocationId INT
+			,@strToTransactionType NVARCHAR(100)
+			,@intToCompanyId INT
+			,@intToBookId INT
+			,@strFromCompanyName NVARCHAR(150)
+			,@intTransactionId INT
+			,@intCompanyId INT'
+		,@intSampleId
+		,@strSampleNumber
+		,@strHeaderXML
+		,@strRowState
+		,@strDetailXML
+		,@strTestResultXML
+		,@intToEntityId
+		,@intCompanyLocationId
+		,@strToTransactionType
+		,@intToCompanyId
+		,@intToBookId
+		,@strFromCompanyName
+		,@intTransactionId
+		,@intCompanyId
 END TRY
 
 BEGIN CATCH

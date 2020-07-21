@@ -2606,7 +2606,11 @@ BEGIN TRY
 			SELECT 1 AS [intConcurrencyId]
 				,@intNewLoadId
 				,x.[strNotifyOrConsignee]
-				,Case When x.[strType]='Customer' Then 'Company' Else x.[strType] End
+				,CASE 
+					WHEN x.[strType] = 'Customer'
+						THEN 'Company'
+					ELSE x.[strType]
+					END
 				,NULL
 				,C.[intCompanySetupID]
 				,B.[intBankId]
@@ -2645,7 +2649,11 @@ BEGIN TRY
 			UPDATE NP
 			SET [intConcurrencyId] = NP.[intConcurrencyId] + 1
 				,[strNotifyOrConsignee] = NP.[strNotifyOrConsignee]
-				,[strType] = Case When x.[strType]='Customer' Then 'Company' Else x.[strType] End
+				,[strType] = CASE 
+					WHEN x.[strType] = 'Customer'
+						THEN 'Company'
+					ELSE x.[strType]
+					END
 				--,[intEntityId] = E.[intEntityId]
 				,[intCompanySetupID] = C.[intCompanySetupID]
 				,[intBankId] = B.[intBankId]
@@ -3975,7 +3983,23 @@ BEGIN TRY
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
 
-			INSERT INTO tblLGIntrCompLogisticsAck (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany
+			WHERE intCompanyId = @intCompanyId
+
+			IF EXISTS (
+					SELECT 1
+					FROM master.dbo.sysdatabases
+					WHERE name = @strDatabaseName
+					)
+			BEGIN
+				SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
+					'.dbo.tblLGIntrCompLogisticsAck (
 				intLoadId
 				,strLoadNumber
 				,dtmFeedDate
@@ -4001,7 +4025,47 @@ BEGIN TRY
 			SELECT @intNewLoadId
 				,@strNewLoadNumber
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@strTransactionType
+				,@intMultiCompanyId
+				,@strAckLoadXML
+				,@strAckLoadDetailXML
+				,@strAckLoadNotifyPartyXML
+				,@strAckLoadDocumentXML
+				,@strAckLoadContainerXML
+				,@strAckLoadDetailContainerLinkXML
+				,@strAckLoadCostXML
+				,@strAckLoadStorageCostXML
+				,@strAckLoadWarehouseXML
+				,@strAckLoadWarehouseServicesXML
+				,@strAckLoadWarehouseContainerXML
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+				EXEC sp_executesql @strSQL
+					,N'@intNewLoadId int
+				,@strNewLoadNumber nvarchar(50)
+				,@strTransactionType nvarchar(50)
+				,@intMultiCompanyId int
+				,@strAckLoadXML nvarchar(MAX)
+				,@strAckLoadDetailXML nvarchar(MAX)
+				,@strAckLoadNotifyPartyXML nvarchar(MAX)
+				,@strAckLoadDocumentXML nvarchar(MAX)
+				,@strAckLoadContainerXML nvarchar(MAX)
+				,@strAckLoadDetailContainerLinkXML nvarchar(MAX)
+				,@strAckLoadCostXML nvarchar(MAX)
+				,@strAckLoadStorageCostXML nvarchar(MAX)
+				,@strAckLoadWarehouseXML nvarchar(MAX)
+				,@strAckLoadWarehouseServicesXML nvarchar(MAX)
+				,@strAckLoadWarehouseContainerXML nvarchar(MAX)
+				,@intTransactionId int
+				,@intCompanyId int
+				,@intTransactionRefId int
+				,@intCompanyRefId int'
+				,@intNewLoadId
+				,@strNewLoadNumber
 				,@strTransactionType
 				,@intMultiCompanyId
 				,@strAckLoadXML
@@ -4019,6 +4083,7 @@ BEGIN TRY
 				,@intCompanyId
 				,@intTransactionRefId
 				,@intCompanyRefId
+			END
 
 			NextTransaction:
 

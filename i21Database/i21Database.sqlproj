@@ -190,6 +190,7 @@
     <Folder Include="Scripts\Post-Deployment\ET" />
     <Folder Include="Scripts\Post-Deployment\SC\" />
     <Folder Include="Scripts\Post-Deployment\GL\StoredProcedures\" />
+    <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -8773,7 +8774,13 @@
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceReportStagingTableCopy.sql" />
     <None Include="Scripts\Post-Deployment\IC\25_TransactionTypeRename.sql" />
+    <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseUsageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARFixStockUsage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -36,6 +36,7 @@ RETURNS @returntable TABLE
 	,[ysnAddToCost]					BIT
 	,[strTaxGroup]					NVARCHAR(100)
 	,[strNotes]						NVARCHAR(500)
+	,[ysnBookToExemptionAccount]	BIT
 )
 AS
 BEGIN
@@ -80,6 +81,7 @@ BEGIN
 		,[ysnAddToCost]					= TC.[ysnAddToCost]
 		,[strTaxGroup]					= TG.[strTaxGroup]
 		,[strNotes]						= CASE WHEN ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @OneBit THEN 'No Valid Tax Code Detail!' ELSE E.[strExemptionNotes] END
+		,[ysnBookToExemptionAccount]	= CASE WHEN TC.intPurchaseTaxExemptionAccountId IS NOT NULL AND ISNULL(E.ysnTaxExempt, @ZeroBit) = @OneBit THEN @OneBit ELSE @ZeroBit END
 	FROM
 		tblSMTaxCode TC
 	INNER JOIN
@@ -94,7 +96,7 @@ BEGIN
 		[dbo].[fnGetTaxCodeRateDetails](TC.[intTaxCodeId], @TransactionDate, @UOMId, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) R		
 	WHERE
 		TG.intTaxGroupId = @TaxGroupId
-		AND (ISNULL(E.ysnTaxExempt, @ZeroBit) = @ZeroBit OR ISNULL(@IncludeExemptedCodes, @ZeroBit) = @OneBit)
+		AND (ISNULL(E.ysnTaxExempt, @ZeroBit) = @ZeroBit OR ISNULL(@IncludeExemptedCodes, @ZeroBit) = @OneBit OR TC.intPurchaseTaxExemptionAccountId IS NOT NULL)
 		AND ((ISNULL(E.[ysnInvalidSetup], @ZeroBit) = @ZeroBit AND ISNULL(R.[ysnInvalidSetup], @ZeroBit) = @ZeroBit) OR ISNULL(@IncludeInvalidCodes, @ZeroBit) = @OneBit)
 	ORDER BY
 		TGC.[intTaxGroupCodeId]
