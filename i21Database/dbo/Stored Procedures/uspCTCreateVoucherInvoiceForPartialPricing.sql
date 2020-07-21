@@ -418,7 +418,7 @@ BEGIN TRY
 							WHERE	intPriceFixationId = @intPriceFixationId 
 							AND		intPriceFixationDetailId < @intPriceFixationDetailId
 
-							IF @dblRemainingQty <= @dblReceived
+							IF @dblRemainingQty <= (@dblReceived - @dblTotalIVForSHQty) 
 							BEGIN						
 								INSERT	INTO @tblToProcess
 								SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId
@@ -463,6 +463,12 @@ BEGIN TRY
 					WHILE	ISNULL(@intUniqueId,0) > 0 
 					BEGIN
 						SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId
+
+						IF @dblQtyToBill = 0
+						BEGIN
+							SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
+							CONTINUE
+						END
 
 						SET @allowAddDetail = 0
 
