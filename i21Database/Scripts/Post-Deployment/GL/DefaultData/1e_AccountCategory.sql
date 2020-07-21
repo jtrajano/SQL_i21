@@ -377,13 +377,18 @@ GO
 		JOIN CTE B ON A.strAccountGroup = B.strAccountGroup
 		JOIN tblGLAccountCategory C ON C.strAccountCategory = B.strAccountCategory
 
-		UPDATE tblGLAccountCategory SET ysnRestricted = 1
-			WHERE strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds')
+		UPDATE tblGLAccountCategory SET ysnRestricted = CASE 
+			WHEN strAccountCategory IN('Cash Account','AP Account','AR Account','Undeposited Funds') THEN 1 ELSE 0 END
 		
+		--FOR GL ACCOUNT COMBO BOX FILTERING
 		UPDATE tblGLAccountCategory SET ysnGLRestricted  = 
 			case when strAccountCategory IN('Cash Account','AP Account','AR Account','Inventory') THEN 1 ELSE 0 END
+		
+		-- FOR AP ACCOUNT COMBO BOX FILTERING
+		UPDATE tblGLAccountCategory SET ysnAPRestricted = CASE WHEN strAccountCategory IN('AP Account','AR Account', 'Cash Account', 'Inventory', 'AP Clearing', ' Inventory In-Transit', 'Inventory Adjustment', 'Vendor Prepayments')
+		THEN 1 ELSE 0 END
 
-		UPDATE tblGLAccountCategory SET ysnRestricted = 0 WHERE ysnRestricted IS NULL
+		
 	END
 GO
 	PRINT 'Finished updating account group category ids'

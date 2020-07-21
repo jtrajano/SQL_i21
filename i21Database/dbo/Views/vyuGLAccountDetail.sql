@@ -24,11 +24,12 @@ AS
 				coa.strCurrentExternalId COLLATE Latin1_General_CI_AS strCurrentExternalId, 
 				sg.strCode COLLATE Latin1_General_CI_AS strCode, 
 				cast(0.00 as numeric(18,2)) as dblBalance,
-				sg.ysnGLRestricted 
+				sg.ysnGLRestricted, 
+				sg.ysnAPRestricted
 FROM            dbo.tblGLAccount account 
 				OUTER APPLY (
 				SELECT  top 1 intAccountId,strCode, struc.intAccountStructureId
-					,cat.intAccountCategoryId, cat.strAccountCategory, cat.ysnGLRestricted
+					,cat.intAccountCategoryId, cat.strAccountCategory, cat.ysnGLRestricted, cat.ysnAPRestricted
 					FROM dbo.tblGLAccountSegmentMapping mapping 
 					LEFT JOIN dbo.tblGLAccountSegment segment ON segment.intAccountSegmentId = mapping.intAccountSegmentId
 					LEFT JOIN dbo.tblGLAccountCategory cat ON segment.intAccountCategoryId = cat.intAccountCategoryId
