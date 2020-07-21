@@ -166,7 +166,7 @@ SELECT TOP 100 PERCENT
 												)
 											ELSE A.dblQtyToBillUnitQty END
 	/*Ordered and Received should always the same*/
-	,dblQtyOrdered						=	A.dblOrderQty
+	,dblQtyOrdered						=	CASE WHEN A.dblQuantityToBill < 0 THEN ABS(A.dblOrderQty) * -1 ELSE ABS(A.dblOrderQty) END
 	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 												THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 														THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
