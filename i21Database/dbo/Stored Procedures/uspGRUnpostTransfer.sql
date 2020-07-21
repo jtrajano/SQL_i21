@@ -20,6 +20,7 @@ BEGIN
 	DECLARE @intDecimalPrecision INT	
 	DECLARE @strTransferStorageId VARCHAR(MAX)	
 	DECLARE @intEntityId INT
+	DECLARE @_intStorageHistoryId INT
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	SELECT @strTransferStorageId = strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
@@ -165,7 +166,23 @@ BEGIN
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 		END
 		CLOSE c; DEALLOCATE c;				
-		
+
+		-- Reverse original	risk summary logs
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+		SELECT intStorageHistoryId FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
+		OPEN c;
+		FETCH c INTO @_intStorageHistoryId;
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC [dbo].[uspGRRiskSummaryLog]
+				@intStorageHistoryId = @_intStorageHistoryId
+				,@strAction = 'UNPOST';
+			FETCH c INTO @_intStorageHistoryId;
+		END
+		CLOSE c; DEALLOCATE c;	
+
 		--DELETE HISTORY
 		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRStorageHistory WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
