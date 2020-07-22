@@ -93,11 +93,26 @@ BEGIN TRY
 		,intOrderItemUOMId INT
 		,intAccountId INT
 		)
+	DECLARE @tblARInvoiceStage TABLE (intInvoiceStageId INT)
 
-	SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
+	INSERT INTO @tblARInvoiceStage (intInvoiceStageId)
+	SELECT intInvoiceStageId
 	FROM tblARInvoiceStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intMultiCompanyId
+
+	SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
+	FROM @tblARInvoiceStage
+
+	IF @intInvoiceStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.strFeedStatus = 'In-Progress'
+	FROM tblARInvoiceStage S
+	JOIN @tblARInvoiceStage TS ON TS.intInvoiceStageId = S.intInvoiceStageId
 
 	WHILE @intInvoiceStageId > 0
 	BEGIN
@@ -695,8 +710,8 @@ BEGIN TRY
 			IF @strTransactionType = 'Invoice'
 			BEGIN
 				UPDATE tblAPBillDetail
-				SET dblCost = dblCost 
-					,dblTotal = dblTotal 
+				SET dblCost = dblCost
+					,dblTotal = dblTotal
 				WHERE intBillId = @intBillInvoiceId
 			END
 			ELSE
@@ -797,11 +812,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intInvoiceStageId = MIN(intInvoiceStageId)
-		FROM tblARInvoiceStage
+		FROM @tblARInvoiceStage
 		WHERE intInvoiceStageId > @intInvoiceStageId
-			AND intMultiCompanyId = @intMultiCompanyId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE S
+	SET strFeedStatus = NULL
+	FROM tblARInvoiceStage S
+	JOIN @tblARInvoiceStage TS ON TS.intInvoiceStageId = S.intInvoiceStageId
+	WHERE S.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

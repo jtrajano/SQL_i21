@@ -14,10 +14,26 @@ BEGIN TRY
 		,@intPriceContractId INT
 		,@intContractHeaderId INT
 
-
-	SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
+	Declare @tblCTPriceContractPreStage table(intPriceContractPreStageId int)
+	Insert into @tblCTPriceContractPreStage
+	SELECT intPriceContractPreStageId
 	FROM tblCTPriceContractPreStage
 	WHERE strFeedStatus IS NULL
+
+	SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
+	FROM @tblCTPriceContractPreStage
+
+	IF @intPriceContractPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblCTPriceContractPreStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intPriceContractPreStageId IN (
+			SELECT PS.intPriceContractPreStageId
+			FROM @tblCTPriceContractPreStage PS
+			)
 
 	WHILE @intPriceContractPreStageId IS NOT NULL
 	BEGIN
@@ -109,10 +125,17 @@ BEGIN TRY
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
 
 		SELECT @intPriceContractPreStageId = MIN(intPriceContractPreStageId)
-		FROM tblCTPriceContractPreStage
-		WHERE strFeedStatus IS NULL
-			AND intPriceContractPreStageId > @intPriceContractPreStageId
+		FROM @tblCTPriceContractPreStage
+		WHERE intPriceContractPreStageId > @intPriceContractPreStageId
 	END
+
+	UPDATE tblCTPriceContractPreStage
+	SET strFeedStatus = NULL
+	WHERE intPriceContractPreStageId IN (
+			SELECT PS.intPriceContractPreStageId
+			FROM @tblCTPriceContractPreStage PS
+			)
+		AND strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
