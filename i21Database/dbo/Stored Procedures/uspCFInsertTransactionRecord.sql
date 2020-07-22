@@ -1783,7 +1783,7 @@ BEGIN
 		--END
 		
 		UPDATE tblCFTransaction 
-		SET @ysnExpensed = ysnExpensed
+		SET ysnExpensed = @ysnExpensed
 		WHERE intTransactionId = @Pk
 		
 
