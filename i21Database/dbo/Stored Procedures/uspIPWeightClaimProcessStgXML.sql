@@ -54,10 +54,25 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
-	--,@strNewWeightClaimReferenceNo nvarchar(50)
-	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
+	DECLARE @tblLGWeightClaimStage TABLE (intWeightClaimStageId INT)
+
+	INSERT INTO @tblLGWeightClaimStage (intWeightClaimStageId)
+	SELECT intWeightClaimStageId
 	FROM tblLGWeightClaimStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE strFeedStatus IS NULL
+
+	SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
+	FROM @tblLGWeightClaimStage
+
+	IF @intWeightClaimStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET S.strFeedStatus = 'In-Progress'
+	FROM tblLGWeightClaimStage S
+	JOIN @tblLGWeightClaimStage TS ON TS.intWeightClaimStageId = S.intWeightClaimStageId
 
 	WHILE @intWeightClaimStageId > 0
 	BEGIN
@@ -861,6 +876,7 @@ BEGIN TRY
 						,@referenceTransactionId = @intTransactionId
 						,@referenceCompanyId = @intCompanyId
 				END TRY
+
 				BEGIN CATCH
 				END CATCH
 			END
@@ -1066,10 +1082,15 @@ BEGIN TRY
 		x:
 
 		SELECT @intWeightClaimStageId = MIN(intWeightClaimStageId)
-		FROM tblLGWeightClaimStage
+		FROM @tblLGWeightClaimStage
 		WHERE intWeightClaimStageId > @intWeightClaimStageId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE S
+	SET S.strFeedStatus = NULL
+	FROM tblLGWeightClaimStage S
+	JOIN @tblLGWeightClaimStage TS ON TS.intWeightClaimStageId = S.intWeightClaimStageId
+	WHERE S.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

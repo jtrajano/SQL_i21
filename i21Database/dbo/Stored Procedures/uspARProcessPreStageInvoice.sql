@@ -46,10 +46,13 @@ BEGIN TRY
 			SELECT intInvoiceId
 			FROM tblARInvoice
 			WHERE ysnPosted = 1
-				AND (strTransactionType NOT IN (
-					'Invoice'
-					,'Credit Memo'
-					) or intOriginalInvoiceId is not null)
+				AND (
+					strTransactionType NOT IN (
+						'Invoice'
+						,'Credit Memo'
+						)
+					OR intOriginalInvoiceId IS NOT NULL
+					)
 			)
 
 	DECLARE @tblARInvoicePreStage TABLE (
@@ -77,6 +80,16 @@ BEGIN TRY
 
 	SELECT @intInvoicePreStageId = MIN(intInvoicePreStageId)
 	FROM @tblARInvoicePreStage
+
+	IF @intInvoicePreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	FROM tblARInvoicePreStage S
+	JOIN @tblARInvoicePreStage TS ON TS.intInvoicePreStageId = S.intInvoicePreStageId
 
 	WHILE @intInvoicePreStageId IS NOT NULL
 	BEGIN
@@ -122,6 +135,12 @@ BEGIN TRY
 		FROM @tblARInvoicePreStage
 		WHERE intInvoicePreStageId > @intInvoicePreStageId
 	END
+
+	UPDATE S
+	SET strFeedStatus = NULL
+	FROM tblARInvoicePreStage S
+	JOIN @tblARInvoicePreStage TS ON TS.intInvoicePreStageId = S.intInvoicePreStageId
+	WHERE S.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
