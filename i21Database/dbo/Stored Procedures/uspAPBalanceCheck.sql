@@ -205,6 +205,39 @@ BEGIN
 			-- 						OR (B.ysnOrigin = 1 AND EXISTS (SELECT 1 FROM tblGLDetail D WHERE D.strTransactionId = B.strBillId AND D.intTransactionId = B.intBillId AND D.ysnIsUnposted = 0)) --posted in i21
 			-- 						THEN 1 ELSE 0 END)
 			-- 		END)
+			UNION ALL
+			SELECT
+				B1.dtmDate
+				,B1.intBillId
+				,B1.strBillId
+				,B1.dblAmountPaid
+				,B1.dblTotal
+				,B1.dblAmountDue
+				,B1.dblWithheld
+				,B1.dblDiscount
+				,B1.dblInterest
+				,B1.dblPrepaidAmount
+				,B1.strVendorId
+				,B1.strVendorIdName
+				,B1.dtmDueDate
+				,B1.ysnPosted
+				,B1.ysnPaid
+				,B1.intAccountId
+				,B1.strClass
+			FROM vyuAPPayablesForeign B1
+			INNER JOIN tblAPBill B ON B1.intBillId = B.intBillId
+			WHERE CONVERT(DATE, CAST(B1.dtmDate AS CHAR(12)), 112) BETWEEN @beginDate AND @currentEndDate
+			-- AND 1 = (CASE WHEN @isOriginTransaction = 0 THEN 1
+			-- 		WHEN @isOriginTransaction = 1 
+			-- 				THEN (CASE WHEN B.ysnOrigin = 1 AND
+			-- 							NOT EXISTS (SELECT 1 FROM tblGLDetail D WHERE D.strTransactionId = B.strBillId AND D.intTransactionId = B.intBillId AND D.ysnIsUnposted = 0)
+			-- 							THEN 1 
+			-- 							ELSE 0 END)
+			-- 		WHEN @isOriginTransaction = 2
+			-- 				THEN (CASE WHEN B.ysnOrigin = 0  
+			-- 						OR (B.ysnOrigin = 1 AND EXISTS (SELECT 1 FROM tblGLDetail D WHERE D.strTransactionId = B.strBillId AND D.intTransactionId = B.intBillId AND D.ysnIsUnposted = 0)) --posted in i21
+			-- 						THEN 1 ELSE 0 END)
+			-- 		END)
 		) A
 		INNER JOIN tblAPBill B ON B.intBillId = A.intBillId
 		INNER JOIN tblGLAccount C ON B.intAccountId = C.intAccountId
