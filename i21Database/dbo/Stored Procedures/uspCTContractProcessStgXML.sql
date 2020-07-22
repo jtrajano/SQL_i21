@@ -179,10 +179,27 @@ BEGIN TRY
 	WHERE ysnCurrentCompany = 1
 
 	DECLARE @tblCTContractCost TABLE (intContractCostId INT)
+	DECLARE @tblCTContractStage TABLE (intContractStageId INT)
 
-	SELECT @intContractStageId = MIN(intContractStageId)
+	INSERT INTO @tblCTContractStage (intContractStageId)
+	SELECT intContractStageId
 	FROM tblCTContractStage
 	WHERE strFeedStatus IS NULL
+
+	SELECT @intContractStageId = MIN(intContractStageId)
+	FROM @tblCTContractStage
+
+	IF @intContractStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblCTContractStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intContractStageId IN (
+			SELECT PS.intContractStageId
+			FROM @tblCTContractStage PS
+			)
 
 	DECLARE @tblCTAmendmentApproval TABLE (
 		strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -4195,11 +4212,17 @@ BEGIN TRY
 		END
 
 		SELECT @intContractStageId = MIN(intContractStageId)
-		FROM tblCTContractStage
+		FROM @tblCTContractStage
 		WHERE intContractStageId > @intContractStageId
-			AND strFeedStatus IS NULL
-			--AND strRowState = 'Added'
 	END
+
+	UPDATE tblCTContractStage
+	SET strFeedStatus = NULL
+	WHERE intContractStageId IN (
+			SELECT PS.intContractStageId
+			FROM @tblCTContractStage PS
+			)
+		AND IsNULL(strFeedStatus, '') = 'In-Progress'
 END TRY
 
 BEGIN CATCH

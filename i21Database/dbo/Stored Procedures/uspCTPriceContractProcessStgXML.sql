@@ -125,9 +125,27 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
-	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
+	DECLARE @tblCTPriceContractStage TABLE (intPriceContractStageId INT)
+
+	INSERT INTO @tblCTPriceContractStage (intPriceContractStageId)
+	SELECT intPriceContractStageId
 	FROM tblCTPriceContractStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE strFeedStatus IS NULL
+
+	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
+	FROM @tblCTPriceContractStage
+
+	IF @intPriceContractStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblCTPriceContractStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intPriceContractStageId IN (
+			SELECT PS.intPriceContractStageId
+			FROM @tblCTPriceContractStage PS
+			)
 
 	WHILE @intPriceContractStageId > 0
 	BEGIN
@@ -1781,10 +1799,17 @@ BEGIN TRY
 		END
 
 		SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
-		FROM tblCTPriceContractStage
+		FROM @tblCTPriceContractStage
 		WHERE intPriceContractStageId > @intPriceContractStageId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE tblCTPriceContractStage
+	SET strFeedStatus = NULL
+	WHERE intPriceContractStageId IN (
+			SELECT PS.intPriceContractStageId
+			FROM @tblCTPriceContractStage PS
+			)
+		AND strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

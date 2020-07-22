@@ -3,46 +3,63 @@ AS
 BEGIN TRY
 	SET NOCOUNT ON
 
-	DECLARE @idoc									INT
-	DECLARE @ErrMsg									NVARCHAR(MAX)
+	DECLARE @idoc INT
+	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @intPriceContractAcknowledgementStageId INT
-	DECLARE @strHeaderCondition						NVARCHAR(MAX)
-	DECLARE @strCostCondition						NVARCHAR(MAX)
-	DECLARE @strContractDetailAllId					NVARCHAR(MAX)
-	DECLARE @strAckPriceContractXML					NVARCHAR(MAX)
-	DECLARE @strAckPriceFixationXML					NVARCHAR(MAX)
-	DECLARE @strAckPriceFixationDetailXML			NVARCHAR(MAX)
-	DECLARE @strTransactionType						NVARCHAR(MAX)
-	DECLARE @intPriceContractId						INT
-	DECLARE @intPriceContractRefId					INT
-	DECLARE @intPriceFixationId						INT
-	DECLARE @intPriceFixationRefId					INT
-		,@intTransactionId int
-	,@intCompanyId int
-	,@intTransactionRefId int
-	,@intCompanyRefId int
-	
+	DECLARE @strHeaderCondition NVARCHAR(MAX)
+	DECLARE @strCostCondition NVARCHAR(MAX)
+	DECLARE @strContractDetailAllId NVARCHAR(MAX)
+	DECLARE @strAckPriceContractXML NVARCHAR(MAX)
+	DECLARE @strAckPriceFixationXML NVARCHAR(MAX)
+	DECLARE @strAckPriceFixationDetailXML NVARCHAR(MAX)
+	DECLARE @strTransactionType NVARCHAR(MAX)
+	DECLARE @intPriceContractId INT
+	DECLARE @intPriceContractRefId INT
+	DECLARE @intPriceFixationId INT
+	DECLARE @intPriceFixationRefId INT
+		,@intTransactionId INT
+		,@intCompanyId INT
+		,@intTransactionRefId INT
+		,@intCompanyRefId INT
+	DECLARE @tblCTPriceContractAcknowledgementStage TABLE (intPriceContractAcknowledgementStageId INT)
 
-	SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)
+	INSERT INTO @tblCTPriceContractAcknowledgementStage (intPriceContractAcknowledgementStageId)
+	SELECT intPriceContractAcknowledgementStageId
 	FROM tblCTPriceContractAcknowledgementStage
 	WHERE strMessage = 'Success'
-		AND ISNULL(strFeedStatus, '') = ''
+		AND strFeedStatus IS NULL
+
+	SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)
+	FROM @tblCTPriceContractAcknowledgementStage
+
+	IF @intPriceContractAcknowledgementStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblCTPriceContractAcknowledgementStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intPriceContractAcknowledgementStageId IN (
+			SELECT PS.intPriceContractAcknowledgementStageId
+			FROM @tblCTPriceContractAcknowledgementStage PS
+			)
 
 	WHILE @intPriceContractAcknowledgementStageId > 0
 	BEGIN
-		SET @strAckPriceContractXML		  = NULL
-		SET @strAckPriceFixationXML		  = NULL
+		SET @strAckPriceContractXML = NULL
+		SET @strAckPriceFixationXML = NULL
 		SET @strAckPriceFixationDetailXML = NULL
-		SET @strTransactionType			  = NULL
-				Select @intTransactionId = NULL
-	,@intCompanyId = NULL
-	,@intTransactionRefId = NULL
-	,@intCompanyRefId = NULL
+		SET @strTransactionType = NULL
 
-		SELECT @strAckPriceContractXML	    = strAckPriceContractXML
-			,@strAckPriceFixationXML	    = strAckPriceFixationXML
-			,@strAckPriceFixationDetailXML  = strAckPriceFixationDetailXML
-			,@strTransactionType			= strTransactionType
+		SELECT @intTransactionId = NULL
+			,@intCompanyId = NULL
+			,@intTransactionRefId = NULL
+			,@intCompanyRefId = NULL
+
+		SELECT @strAckPriceContractXML = strAckPriceContractXML
+			,@strAckPriceFixationXML = strAckPriceFixationXML
+			,@strAckPriceFixationDetailXML = strAckPriceFixationDetailXML
+			,@strTransactionType = strTransactionType
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
 			,@intTransactionRefId = intTransactionRefId
@@ -50,10 +67,11 @@ BEGIN TRY
 		FROM tblCTPriceContractAcknowledgementStage
 		WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 
-		IF @strTransactionType = 'Sales Price Fixation' 
+		IF @strTransactionType = 'Sales Price Fixation'
 		BEGIN
 			-------------------------PriceContract-----------------------------------------------------------
-			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceContractXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckPriceContractXML
 
 			SELECT @intPriceContractId = intPriceContractId
 				,@intPriceContractRefId = intPriceContractRefId
@@ -61,7 +79,7 @@ BEGIN TRY
 					intPriceContractId INT
 					,intPriceContractRefId INT
 					)
-			
+
 			UPDATE tblCTPriceContract
 			SET intPriceContractRefId = @intPriceContractId
 			WHERE intPriceContractId = @intPriceContractRefId
@@ -70,7 +88,8 @@ BEGIN TRY
 			---------------------------------------------PriceFixation------------------------------------------
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckPriceFixationXML
 
 			UPDATE PriceFixation
 			SET PriceFixation.intPriceFixationRefId = XMLDetail.intPriceFixationId
@@ -85,29 +104,27 @@ BEGIN TRY
 			---------------------------------------------PriceFixationDetail-----------------------------------------------
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationDetailXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckPriceFixationDetailXML
 
-			SELECT * FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH 
-			(
+			SELECT *
+			FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH (
 					intPriceFixationDetailId INT
 					,intPriceFixationDetailRefId INT
 					,intPriceFixationId INT
-			) XMLCost
+					) XMLCost
 
 			UPDATE PFD
 			SET PFD.intPriceFixationDetailRefId = XMLCost.intPriceFixationDetailId
-			FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH 
-			(
+			FROM OPENXML(@idoc, 'tblCTPriceFixationDetails/tblCTPriceFixationDetail', 2) WITH (
 					intPriceFixationDetailId INT
 					,intPriceFixationDetailRefId INT
 					,intPriceFixationId INT
-			) XMLCost
+					) XMLCost
 			JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationDetailId = XMLCost.intPriceFixationDetailRefId
 			--JOIN tblCTPriceFixation PF ON PF.intPriceFixationId = PFD.intPriceFixationId
 			--					       AND PF.intPriceFixationRefId = XMLCost.intPriceFixationId
 			WHERE PFD.intPriceFixationDetailRefId IS NULL
-
-			
 
 			---UPDATE Feed Status in Staging
 			UPDATE tblCTPriceContractStage
@@ -122,10 +139,11 @@ BEGIN TRY
 			WHERE intPriceContractAcknowledgementStageId = intPriceContractAcknowledgementStageId
 		END
 
-		IF @strTransactionType = 'Purchase Price Fixation' 
+		IF @strTransactionType = 'Purchase Price Fixation'
 		BEGIN
 			-------------------------PriceContract-----------------------------------------------------------
-			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceContractXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckPriceContractXML
 
 			SELECT @intPriceContractId = intPriceContractId
 				,@intPriceContractRefId = intPriceContractRefId
@@ -133,7 +151,7 @@ BEGIN TRY
 					intPriceContractId INT
 					,intPriceContractRefId INT
 					)
-			
+
 			UPDATE tblCTPriceContract
 			SET intPriceContractRefId = @intPriceContractId
 			WHERE intPriceContractId = @intPriceContractRefId
@@ -142,7 +160,8 @@ BEGIN TRY
 			---------------------------------------------PriceFixation------------------------------------------
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckPriceFixationXML
 
 			UPDATE PriceFixation
 			SET PriceFixation.intPriceFixationRefId = XMLDetail.intPriceFixationId
@@ -157,20 +176,18 @@ BEGIN TRY
 			---------------------------------------------PriceFixationDetail-----------------------------------------------
 			EXEC sp_xml_removedocument @idoc
 
-			EXEC sp_xml_preparedocument @idoc OUTPUT,@strAckPriceFixationDetailXML
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAckPriceFixationDetailXML
 
 			UPDATE PFD
 			SET PFD.intPriceFixationDetailRefId = XMLCost.intPriceFixationDetailId
-			FROM OPENXML(@idoc, 'vyuIPPriceFixationDetailAcks/vyuIPPriceFixationDetailAck', 2) WITH 
-			(
+			FROM OPENXML(@idoc, 'vyuIPPriceFixationDetailAcks/vyuIPPriceFixationDetailAck', 2) WITH (
 					intPriceFixationDetailId INT
 					,intPriceFixationDetailRefId INT
 					,intPriceFixationId INT
-			) XMLCost
+					) XMLCost
 			JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationDetailId = XMLCost.intPriceFixationDetailRefId
 			WHERE PFD.intPriceFixationDetailRefId IS NULL
-
-			
 
 			---UPDATE Feed Status in Staging
 			UPDATE tblCTPriceContractStage
@@ -184,20 +201,36 @@ BEGIN TRY
 			SET strFeedStatus = 'Ack Processed'
 			WHERE intPriceContractAcknowledgementStageId = @intPriceContractAcknowledgementStageId
 		END
-		
-		EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId, @referenceTransactionId = @intTransactionRefId,@referenceCompanyId=@intCompanyRefId
+
+		IF @intTransactionId IS NOT NULL
+			AND @intTransactionRefId IS NOT NULL
+		BEGIN
+			EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionId
+				,@referenceTransactionId = @intTransactionRefId
+				,@referenceCompanyId = @intCompanyRefId
+		END
 
 		SELECT @intPriceContractAcknowledgementStageId = MIN(intPriceContractAcknowledgementStageId)
-		FROM tblCTPriceContractAcknowledgementStage
+		FROM @tblCTPriceContractAcknowledgementStage
 		WHERE intPriceContractAcknowledgementStageId > @intPriceContractAcknowledgementStageId
-			AND strMessage = 'Success'
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE tblCTPriceContractAcknowledgementStage
+	SET strFeedStatus = NULL
+	WHERE intPriceContractAcknowledgementStageId IN (
+			SELECT PS.intPriceContractAcknowledgementStageId
+			FROM @tblCTPriceContractAcknowledgementStage PS
+			)
+		AND strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
 	SET @ErrMsg = ERROR_MESSAGE()
 
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
-
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
 END CATCH

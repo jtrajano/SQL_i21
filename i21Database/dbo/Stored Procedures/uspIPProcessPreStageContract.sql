@@ -42,6 +42,18 @@ BEGIN TRY
 	SELECT @intContractPreStageId = MIN(intContractPreStageId)
 	FROM @tblCTContractPreStage
 
+	IF @intContractPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblCTContractPreStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intContractPreStageId IN (
+			SELECT PS.intContractPreStageId
+			FROM @tblCTContractPreStage PS
+			)
+
 	WHILE @intContractPreStageId IS NOT NULL
 	BEGIN
 		SELECT @intContractHeaderId = NULL
@@ -90,6 +102,14 @@ BEGIN TRY
 		FROM @tblCTContractPreStage
 		WHERE intContractPreStageId > @intContractPreStageId
 	END
+
+	UPDATE tblCTContractPreStage
+	SET strFeedStatus = NULL
+	WHERE intContractPreStageId IN (
+			SELECT PS.intContractPreStageId
+			FROM @tblCTContractPreStage PS
+			)
+		AND strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

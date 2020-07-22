@@ -34,9 +34,24 @@ BEGIN TRY
 		,@intBookId INT
 		,@intSubBookId INT
 
-	SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
+	Declare @tblLGIntrCompLogisticsAck table(intAcknowledgementId int)
+	Insert into @tblLGIntrCompLogisticsAck(intAcknowledgementId)
+	SELECT intAcknowledgementId
 	FROM tblLGIntrCompLogisticsAck
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE strFeedStatus IS NULL
+
+	SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
+	FROM @tblLGIntrCompLogisticsAck
+
+	if @intAcknowledgementStageId is null
+	Begin
+		Return
+	End
+		UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	From tblLGIntrCompLogisticsAck S
+	JOIN @tblLGIntrCompLogisticsAck PS on PS.intAcknowledgementId=S.intAcknowledgementId
+
 
 	WHILE @intAcknowledgementStageId > 0
 	BEGIN
@@ -293,10 +308,14 @@ BEGIN TRY
 		EXEC sp_xml_removedocument @idoc
 
 		SELECT @intAcknowledgementStageId = MIN(intAcknowledgementId)
-		FROM tblLGIntrCompLogisticsAck
+		FROM @tblLGIntrCompLogisticsAck
 		WHERE intAcknowledgementId > @intAcknowledgementStageId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+			UPDATE S
+	SET strFeedStatus = NULL
+	From tblLGIntrCompLogisticsAck S
+	JOIN @tblLGIntrCompLogisticsAck PS on PS.intAcknowledgementId=S.intAcknowledgementId
+	Where strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
