@@ -338,7 +338,7 @@ BEGIN
 		INNER JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblAPBill C
-			ON B.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
+			ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	UPDATE B
@@ -357,7 +357,7 @@ BEGIN
 		INNER JOIN tblAPPaymentDetail B
 			ON A.intPaymentId = B.intPaymentId
 		INNER JOIN tblARInvoice C
-			ON B.intInvoiceId = ISNULL(B.intOrigInvoiceId, C.intInvoiceId)
+			ON C.intInvoiceId = ISNULL(B.intOrigInvoiceId, B.intInvoiceId)
 	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--Update dblAmountDue, dtmDatePaid and ysnPaid on tblAPBill
@@ -373,7 +373,7 @@ BEGIN
 				INNER JOIN tblAPPaymentDetail B 
 						ON A.intPaymentId = B.intPaymentId
 				INNER JOIN tblAPBill C
-						ON C.intBillId = ISNULL(B.intOrigBillId, C.intBillId)
+						ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
 	--UPDATE INVOICES
