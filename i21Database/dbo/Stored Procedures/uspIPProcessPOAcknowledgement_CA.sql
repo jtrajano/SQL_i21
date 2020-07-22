@@ -102,6 +102,7 @@ BEGIN TRY
 							THEN 'Success'
 						ELSE @strDescription
 						END
+						,ysnThirdPartyMailSent=0
 				WHERE strERPPONumber = @strReference
 					AND strThirdPartyFeedStatus IN (
 						'Awt Ack'
