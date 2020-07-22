@@ -214,10 +214,26 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
-	SELECT @intId = MIN(intId)
+	DECLARE @tblLGIntrCompLogisticsStg TABLE (intId INT)
+
+	INSERT INTO @tblLGIntrCompLogisticsStg (intId)
+	SELECT intId
 	FROM tblLGIntrCompLogisticsStg
 	WHERE strFeedStatus IS NULL
 		AND intMultiCompanyId = @intMultiCompanyId
+
+	SELECT @intId = MIN(intId)
+	FROM @tblLGIntrCompLogisticsStg
+
+	if @intId is null
+	Begin
+		Return
+	End
+
+	UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	From tblLGIntrCompLogisticsStg S
+	JOIN @tblLGIntrCompLogisticsStg PS on PS.intId=S.intId
 
 	WHILE @intId > 0
 	BEGIN
@@ -4064,25 +4080,25 @@ BEGIN TRY
 				,@intCompanyId int
 				,@intTransactionRefId int
 				,@intCompanyRefId int'
-				,@intNewLoadId
-				,@strNewLoadNumber
-				,@strTransactionType
-				,@intMultiCompanyId
-				,@strAckLoadXML
-				,@strAckLoadDetailXML
-				,@strAckLoadNotifyPartyXML
-				,@strAckLoadDocumentXML
-				,@strAckLoadContainerXML
-				,@strAckLoadDetailContainerLinkXML
-				,@strAckLoadCostXML
-				,@strAckLoadStorageCostXML
-				,@strAckLoadWarehouseXML
-				,@strAckLoadWarehouseServicesXML
-				,@strAckLoadWarehouseContainerXML
-				,@intTransactionId
-				,@intCompanyId
-				,@intTransactionRefId
-				,@intCompanyRefId
+					,@intNewLoadId
+					,@strNewLoadNumber
+					,@strTransactionType
+					,@intMultiCompanyId
+					,@strAckLoadXML
+					,@strAckLoadDetailXML
+					,@strAckLoadNotifyPartyXML
+					,@strAckLoadDocumentXML
+					,@strAckLoadContainerXML
+					,@strAckLoadDetailContainerLinkXML
+					,@strAckLoadCostXML
+					,@strAckLoadStorageCostXML
+					,@strAckLoadWarehouseXML
+					,@strAckLoadWarehouseServicesXML
+					,@strAckLoadWarehouseContainerXML
+					,@intTransactionId
+					,@intCompanyId
+					,@intTransactionRefId
+					,@intCompanyRefId
 			END
 
 			NextTransaction:
@@ -4114,11 +4130,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intId = MIN(intId)
-		FROM tblLGIntrCompLogisticsStg
+		FROM @tblLGIntrCompLogisticsStg
 		WHERE intId > @intId
-			AND IsNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intMultiCompanyId
 	END
+
+	UPDATE S
+	SET strFeedStatus = NULL
+	From tblLGIntrCompLogisticsStg S
+	JOIN @tblLGIntrCompLogisticsStg PS on PS.intId=S.intId
+	Where S.strFeedStatus = 'In-Progress'
 
 	IF @strTransactionType IN (
 			'Outbound Shipment'

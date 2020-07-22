@@ -54,10 +54,25 @@ BEGIN TRY
 		,@intNewInvPlngReportMasterID INT
 		,@strItemSupplyTargetXML NVARCHAR(MAX)
 		,@dtmPostDate DATETIME
+	DECLARE @tblMFDemandStage TABLE (intDemandStageId INT)
 
-	SELECT @intDemandStageId = MIN(intDemandStageId)
+	INSERT INTO @tblMFDemandStage (intDemandStageId)
+	SELECT intDemandStageId
 	FROM tblMFDemandStage
 	WHERE strFeedStatus IS NULL
+
+	SELECT @intDemandStageId = MIN(intDemandStageId)
+	FROM @tblMFDemandStage
+
+	IF @intDemandStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	FROM tblMFDemandStage S
+	JOIN @tblMFDemandStage TS ON TS.intDemandStageId = S.intDemandStageId
 
 	WHILE @intDemandStageId > 0
 	BEGIN
@@ -659,8 +674,7 @@ BEGIN TRY
 					WHERE name = @strDatabaseName
 					)
 			BEGIN
-				SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
-			'.dbo.tblMFDemandAcknowledgementStage (
+				SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblMFDemandAcknowledgementStage (
 				intInvPlngReportMasterId
 				,strInvPlngReportName
 				,intInvPlngReportMasterRefId
@@ -717,10 +731,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intDemandStageId = MIN(intDemandStageId)
-		FROM tblMFDemandStage
+		FROM @tblMFDemandStage
 		WHERE intDemandStageId > @intDemandStageId
-			AND strFeedStatus IS NULL
 	END
+
+	UPDATE S
+	SET strFeedStatus = NULL
+	FROM tblMFDemandStage S
+	JOIN @tblMFDemandStage TS ON TS.intDemandStageId = S.intDemandStageId
+	WHERE strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

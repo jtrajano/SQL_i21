@@ -50,6 +50,18 @@ BEGIN TRY
 	SELECT @intLoadPreStageId = MIN(intLoadPreStageId)
 	FROM @tblLGIntrCompLogisticsPreStg
 
+	IF @intLoadPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblLGIntrCompLogisticsPreStg
+	SET strFeedStatus = 'In-Progress'
+	WHERE intLoadPreStageId IN (
+			SELECT PS.intLoadPreStageId
+			FROM @tblLGIntrCompLogisticsPreStg PS
+			)
+
 	WHILE @intLoadPreStageId IS NOT NULL
 	BEGIN
 		SELECT @intLoadId = NULL
@@ -84,6 +96,14 @@ BEGIN TRY
 		FROM @tblLGIntrCompLogisticsPreStg
 		WHERE intLoadPreStageId > @intLoadPreStageId
 	END
+
+	UPDATE tblLGIntrCompLogisticsPreStg
+	SET strFeedStatus = NULL
+	WHERE intLoadPreStageId IN (
+			SELECT PS.intLoadPreStageId
+			FROM @tblLGIntrCompLogisticsPreStg PS
+			)
+		AND strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
