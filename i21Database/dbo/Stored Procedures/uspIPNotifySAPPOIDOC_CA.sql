@@ -5,6 +5,22 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strHeader NVARCHAR(MAX)
 	,@strDetail NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
+	,@dtmCurrentDate DATETIME
+
+SELECT @dtmCurrentDate = GETDATE()
+
+DECLARE @tblIPThirdPartyContractFeed TABLE (intThirdPartyContractFeedId INT)
+
+INSERT INTO @tblIPThirdPartyContractFeed (intThirdPartyContractFeedId)
+SELECT intThirdPartyContractFeedId
+FROM tblIPThirdPartyContractFeed
+WHERE strThirdPartyFeedStatus = 'Awt Ack'
+	AND Datediff(d, dtmProcessedDate, @dtmCurrentDate) = 1
+	AND ISNULL(ysnThirdPartyMailSent, 0) = 0
+	AND strRowState IN (
+		'Added'
+		,'Delete'
+		)
 
 SET @strStyle = '<style type="text/css" scoped>
 					table.GeneratedTable {
@@ -57,37 +73,53 @@ SET @strHeader = '<tr>
 					</tr>'
 
 SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + CF.strContractNumber + ' / ' + Ltrim(ISNULL(intContractSeq, '')) + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strERPPONumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strThirdPartyMessage, '') + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractDetailId) + '</td>
+		   <td>&nbsp;' + CF.strContractNumber + ' / ' + Ltrim(ISNULL(intContractSeq, '')) + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strERPPONumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(TPCF.strThirdPartyMessage, 'Awt Ack') + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractFeedId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractHeaderId) + '</td>' + '<td>&nbsp;' + Ltrim(CF.intContractDetailId) + '</td>
 	</tr>'
 FROM tblIPThirdPartyContractFeed TPCF WITH (NOLOCK)
 JOIN tblCTContractFeed CF WITH (NOLOCK) ON CF.intContractFeedId = TPCF.intContractFeedId
-WHERE strThirdPartyFeedStatus = (
-		CASE 
-			WHEN @ysnNotifyExternalUser = 1
-				THEN 'Ack Rcvd'
-			ELSE 'Failed'
-			END
+WHERE (
+		(
+			strThirdPartyFeedStatus = (
+				CASE 
+					WHEN @ysnNotifyExternalUser = 1
+						THEN 'Ack Rcvd'
+					ELSE 'Failed'
+					END
+				)
+			AND ISNULL(TPCF.strThirdPartyMessage, '') NOT IN (
+				''
+				,'Success'
+				)
+			AND ISNULL(TPCF.ysnThirdPartyMailSent, 0) = 0
+			)
+		OR TPCF.intThirdPartyContractFeedId IN (
+			SELECT intThirdPartyContractFeedId
+			FROM @tblIPThirdPartyContractFeed
+			)
 		)
-	AND ISNULL(TPCF.strThirdPartyMessage, '') NOT IN (
-		''
-		,'Success'
-		)
-	AND ISNULL(TPCF.ysnThirdPartyMailSent, 0) = 0
 
 UPDATE tblIPThirdPartyContractFeed
 SET ysnThirdPartyMailSent = 1
-WHERE strThirdPartyFeedStatus = (
-		CASE 
-			WHEN @ysnNotifyExternalUser = 1
-				THEN 'Ack Rcvd'
-			ELSE 'Failed'
-			END
+WHERE (
+		(
+			strThirdPartyFeedStatus = (
+				CASE 
+					WHEN @ysnNotifyExternalUser = 1
+						THEN 'Ack Rcvd'
+					ELSE 'Failed'
+					END
+				)
+			AND ISNULL(strThirdPartyMessage, '') NOT IN (
+				''
+				,'Success'
+				)
+			AND ISNULL(ysnThirdPartyMailSent, 0) = 0
+			)
+		OR intThirdPartyContractFeedId IN (
+			SELECT intThirdPartyContractFeedId
+			FROM @tblIPThirdPartyContractFeed
+			)
 		)
-	AND ISNULL(strThirdPartyMessage, '') NOT IN (
-		''
-		,'Success'
-		)
-	AND ISNULL(ysnThirdPartyMailSent, 0) = 0
 
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
