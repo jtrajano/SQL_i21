@@ -396,3 +396,17 @@ BEGIN
 		WHERE	ISNULL(i.ysnPosted, 0) = 0 
 	END 
 END
+GO
+
+CREATE TRIGGER trg_tblICInventoryReceipt 
+   ON [dbo].[tblICInventoryReceipt]
+   INSTEAD OF DELETE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	DELETE FROM tblICInventoryReceiptItem WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM DELETED)
+	DELETE FROM tblICInventoryReceiptCharge WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM DELETED)
+	DELETE FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM DELETED)
+END
+
+GO
