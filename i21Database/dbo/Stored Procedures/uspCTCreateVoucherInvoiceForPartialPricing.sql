@@ -757,6 +757,7 @@ BEGIN TRY
 								IF @ysnLoad = 1
 								BEGIN
 									--Update the load applied and priced
+		 							set @dblPriceFixationLoadApplied = isnull(@dblPriceFixationLoadApplied,0) + 1;
 									update tblCTPriceFixationDetail 
 										set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
 											dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
