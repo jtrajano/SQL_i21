@@ -1319,7 +1319,7 @@ BEGIN TRY
 			AND strOwnedPhysicalStock = 'Customer'
 	) t
 			
-	--Collatral Sale
+	--Collateral Sale
 	INSERT INTO @ListInventory(intSeqId
 		, strSeqHeader
 		, strCommodityCode
@@ -4910,7 +4910,7 @@ BEGIN TRY
 				, intTransactionReferenceDetailId
 			FROM #tmpContractBalance CD
 			WHERE intContractTypeId IN (1,2) AND CD.intCommodityId = @intCommodityId
-				AND CD.intContractStatusId <> 3
+				--AND CD.intContractStatusId <> 3
 				AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				AND intLocationId = CASE WHEN ISNULL(@intLocationId, 0) = 0 THEN intLocationId ELSE @intLocationId END
 				AND CD.intEntityId = CASE WHEN ISNULL(@intVendorId, 0) = 0 THEN CD.intEntityId ELSE @intVendorId END
@@ -5918,7 +5918,7 @@ BEGIN TRY
 				, intTransactionReferenceDetailId
 			FROM #tmpContractBalance CD
 			WHERE intContractTypeId IN (1, 2) AND CD.intCommodityId = @intCommodityId
-				AND CD.intContractStatusId <> 3
+				--AND CD.intContractStatusId <> 3
 				AND CD.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 				AND CD.intLocationId = ISNULL(@intLocationId, CD.intLocationId)
 				AND CD.intEntityId = ISNULL(@intVendorId, CD.intEntityId)

@@ -130,7 +130,7 @@ BEGIN
 			, strTransactionType
 			, strNotes
 		FROM vyuRKGetSummaryLog c
-		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordId
+		JOIN tblRKCollateral Col ON Col.intCollateralId = c.intTransactionRecordHeaderId
 		LEFT JOIN Contracts Cnt ON Cnt.intContractHeaderId = c.intContractHeaderId
 		WHERE strTransactionType IN ( 'Collateral', 'Collateral Adjustments')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
