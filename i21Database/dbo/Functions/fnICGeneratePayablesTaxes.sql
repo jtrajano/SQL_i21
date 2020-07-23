@@ -38,8 +38,16 @@ BEGIN
 				,strCalculationMethod		= ItemTax.strCalculationMethod
 				,dblRate					= ItemTax.dblRate
 				,intAccountId				= ItemTax.intTaxAccountId
-				,dblTax						= ItemTax.dblTax
-				,dblAdjustedTax				= ISNULL(ItemTax.dblAdjustedTax, 0)
+				,dblTax						= 
+					CASE 
+						WHEN voucherItems.ysnReturn = 1 THEN -ItemTax.dblTax
+						ELSE ItemTax.dblTax
+					END
+				,dblAdjustedTax				= 
+					CASE 
+						WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
+						ELSE ISNULL(ItemTax.dblAdjustedTax, 0)
+					END
 				,ysnTaxAdjusted				= ItemTax.ysnTaxAdjusted
 				,ysnSeparateOnBill			= ItemTax.ysnSeparateOnInvoice
 				,ysnCheckoffTax				= ItemTax.ysnCheckoffTax
@@ -63,8 +71,16 @@ BEGIN
 				,strCalculationMethod		= ChargeTax.strCalculationMethod
 				,dblRate					= ChargeTax.dblRate
 				,intAccountId				= ChargeTax.intTaxAccountId
-				,dblTax						= ChargeTax.dblTax
-				,dblAdjustedTax				= ISNULL(ChargeTax.dblAdjustedTax, 0)
+				,dblTax						= 
+					CASE 
+						WHEN voucherItems.ysnReturn = 1 THEN -ChargeTax.dblTax
+						ELSE ChargeTax.dblTax
+					END 
+				,dblAdjustedTax				= 
+					CASE 
+						WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
+						ELSE ISNULL(ChargeTax.dblAdjustedTax, 0)
+					END 
 				,ysnTaxAdjusted				= ChargeTax.ysnTaxAdjusted
 				,ysnSeparateOnBill			= 0
 				,ysnCheckoffTax				= ChargeTax.ysnCheckoffTax
