@@ -199,6 +199,8 @@ BEGIN
 	DECLARE @ysnConvertMiscToVehicle	BIT				= 0
 	DECLARE @ysnInvoiced				BIT				= 0
 	DECLARE @ysnExpensed				BIT				= 0
+	DECLARE @intExpensedItemId			INT				= 0
+	
 	
 
 	--DECLARE @strSiteType				NVARCHAR(MAX)
@@ -1773,6 +1775,7 @@ BEGIN
 		,@dblNetTransferCost			= dblNetTransferCost
 		,@dblAdjustmentRate				= dblAdjustmentRate
 		,@ysnExpensed					= ysnExpensed
+		,@intExpensedItemId				= intExpensedItemId
 		FROM tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1783,7 +1786,7 @@ BEGIN
 		--END
 		
 		UPDATE tblCFTransaction 
-		SET ysnExpensed = @ysnExpensed
+		SET ysnExpensed = @ysnExpensed , intExpensedItemId = @intExpensedItemId
 		WHERE intTransactionId = @Pk
 		
 
