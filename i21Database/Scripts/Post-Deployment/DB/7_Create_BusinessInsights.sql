@@ -1,6 +1,6 @@
 ﻿PRINT '*Start Create BUSINESS INSIGHTS DASHBOARD*'
-IF NOT EXISTS (SELECT TOP 1 1 FROM tblDBPanelTab WHERE strTabName = 'Business Insights' AND ysnSystemTab = 1)
-BEGIN
+--IF NOT EXISTS (SELECT TOP 1 1 FROM tblDBPanelTab WHERE strTabName = 'Business Insights' AND ysnSystemTab = 1)
+--BEGIN
 	BEGIN TRY
 		BEGIN TRANSACTION
 			DECLARE @entityId INT
@@ -24,21 +24,27 @@ BEGIN
 
 			IF ISNULL(@entityId, 0) <> 0
 			BEGIN
-				INSERT INTO tblDBPanelTab (
-					[intSort], [intUserId], [intColumn1Width], [intColumn2Width], [intColumn3Width], [intColumn4Width], [intColumn5Width], [intColumn6Width], [intColumnCount], [strTabName], 
-					[strRenameTabName], [intConcurrencyId ], [ysnDefaultTab], [ysnSystemTab]
-				)
-				VALUES (
-					0, @entityId, 300, 300, 300, 300, 300, 300, 2, 
-					N'Business Insights', N'', 1, 0, 1
-				)
+				IF NOT EXISTS (SELECT TOP 1 1 FROM tblDBPanelTab WHERE strTabName = 'Business Insights' AND ysnSystemTab = 1)
+				BEGIN
+					INSERT INTO tblDBPanelTab (
+						[intSort], [intUserId], [intColumn1Width], [intColumn2Width], [intColumn3Width], [intColumn4Width], [intColumn5Width], [intColumn6Width], [intColumnCount], [strTabName], 
+						[strRenameTabName], [intConcurrencyId ], [ysnDefaultTab], [ysnSystemTab]
+					)
+					VALUES (
+						0, @entityId, 300, 300, 300, 300, 300, 300, 2, 
+						N'Business Insights', N'', 1, 0, 1
+					)
 
-
-				SELECT @panelTabId = SCOPE_IDENTITY()
+					SELECT @panelTabId = SCOPE_IDENTITY()
+				END
+				ELSE
+				BEGIN
+					SELECT TOP 1 @panelTabId = intPanelTabId FROM tblDBPanelTab WHERE strTabName = 'Business Insights' AND ysnSystemTab = 1
+				END
 
 				--CREATE ALL 8 PANELS--
 				--Cash Projection Chart
-				IF NOT EXISTS(SELECT TOP 1 1 FROM tblDBPanel WHERE strPanelName = 'Cash Projection Cahrt' AND ysnSystemPanel = 1)
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblDBPanel WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1)
 				BEGIN
 					INSERT INTO tblDBPanel (
 						[intRowsReturned], [intRowsVisible], [intChartZoom], [intChartHeight], [intUserId], [intDefaultColumn], [intDefaultRow], [intDefaultWidth], [intSourcePanelId], [intConnectionId],
@@ -54,8 +60,9 @@ BEGIN
 						0, N'Master', N'Cash Projection Chart', N'Chart', N'', N'Cash Projection', N'Line', N'over', N'Base', NULL,	N'None',
 						N'None', N'', N'', N'select * from vyuCMCashProjection', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',	
-						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
-						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, NULL
+						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
+						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
+						NULL, NULL, NULL, 1, NULL
 					)
 
 					SELECT @cashProjectionChartPanelId = SCOPE_IDENTITY()
@@ -97,6 +104,10 @@ BEGIN
 					VALUES (
 						@cashProjectionChartPanelId, 1, @panelTabId, 1, @entityId, 1, 1
 					)
+				END
+				ELSE
+				BEGIN
+					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1
 				END
 
 				--Cash Projection Grid
@@ -260,8 +271,9 @@ BEGIN
 						0,	N'Master', N'Gross Margin Chart', N'Chart', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
 						N'None', N'', N'', N'select *  from vyuARInvoiceGrossMargin order by dblNet desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
-						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
-						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, NULL
+						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
+						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
+						NULL, NULL, NULL, 1, NULL
 					)
 
 					SELECT @grossMarginChartPanelId = SCOPE_IDENTITY()
@@ -303,6 +315,10 @@ BEGIN
 					VALUES (
 						@grossMarginChartPanelId, 1, @panelTabId, 2, @entityId, 1, 1
 					)
+				END
+				ELSE
+				BEGIN
+					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
 				END
 
 				--Gross Margin Grid
@@ -404,8 +420,9 @@ BEGIN
 						0,	N'Master', N'Customer Aging Chart', N'Chart', N'', N'Customer Aging', N'3D Pie', N'rotate', N'Base', NULL, N'None',
 						N'None', N'', N'', N'select top 5 strCustomerName, intEntityCustomerId, dblTotalDue from vyuARCustomerAging_DashBoard', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
-						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
-						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, NULL
+						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
+						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
+						NULL, NULL, NULL, 1, NULL
 					)
 
 					SELECT @customerAgingChartPanelId = SCOPE_IDENTITY()
@@ -447,6 +464,10 @@ BEGIN
 					VALUES (
 						@customerAgingChartPanelId, 3, @panelTabId, 1, @entityId, 1, 1
 					)
+				END
+				ELSE
+				BEGIN
+					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
 				END
 
 				--Customer Aging Grid
@@ -529,8 +550,9 @@ BEGIN
 						0,	N'Master', N'Sales Chart', N'Chart', N'', N'Sales', N'Column Stacked', N'insideEnd', N'Blue', NULL, N'None',
 						N'None', N'', N'', N'select SUM(dblTotal) as Total, strItemNo from vyuARInvoiceSalesDWM group by strItemNo order by Total desc, strItemNo asc', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
-						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
-						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, NULL
+						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
+						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
+						NULL, NULL, NULL, 1, NULL
 					)
 
 					SELECT @salesChartPanelId = SCOPE_IDENTITY()
@@ -572,6 +594,10 @@ BEGIN
 					VALUES (
 						@salesChartPanelId, 3, @panelTabId, 2, @entityId, 1, 1
 					)
+				END
+				ELSE
+				BEGIN
+					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Sales Chart' AND ysnSystemPanel = 1
 				END
 
 				--Sales Grid
@@ -650,5 +676,5 @@ BEGIN
 		SELECT @ErrorMerssage = ERROR_MESSAGE()									
 		RAISERROR(@ErrorMerssage, 11, 1);
 	END CATCH	
-END
+--END
 PRINT '*End Create BUSINESS INSIGHTS DASHBOARD*'
