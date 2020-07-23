@@ -7767,6 +7767,7 @@
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
