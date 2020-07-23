@@ -68,7 +68,7 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
-
+AND SS.ysnPosted = 1
 UNION ALL
 SELECT
 	bill.intEntityVendorId
@@ -223,7 +223,7 @@ LEFT JOIN tblCTContractDetail CT
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
 where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
-
+AND SS.ysnPosted = 1
 	--WHERE SS.strStorageTicket = 'STR-49/3'
 
 
@@ -391,6 +391,7 @@ WHERE
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
 AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+AND SS.ysnPosted = 1
 --AND SS.strStorageTicket = 'STR-49/3'
 
 

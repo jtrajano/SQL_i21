@@ -111,3 +111,4 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = C.intItemUOMId
+WHERE bill.ysnPosted = 1
