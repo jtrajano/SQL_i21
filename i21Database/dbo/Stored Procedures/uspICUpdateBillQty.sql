@@ -90,7 +90,7 @@ SELECT
 	,UpdateTbl.[dblAmountToBill]
 	,[ysnStoreDebitMemo] = 
 		CASE 
-			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 THEN -- AND r.intSourceType = @SourceType_STORE THEN 
 				1
 			ELSE
 				0
@@ -246,7 +246,7 @@ SELECT
 	,UpdateTbl.[dblAmountToBill]
 	,[ysnStoreDebitMemo] = 
 		CASE 
-			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 THEN -- AND r.intSourceType = @SourceType_STORE THEN 
 				CASE
 					WHEN ReceiptCharge.ysnPrice = 1 THEN 1
 					WHEN UpdateTbl.intEntityVendorId = r.intEntityVendorId THEN 1 
@@ -272,6 +272,7 @@ WHERE
 DECLARE @ReceiptChargesToBill TABLE(
 	strReceiptNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 	,dblQuantity NUMERIC(38, 20)
+	,dblAmount NUMERIC(38, 20)
 	,dblQuantityBilled NUMERIC(38, 20)
 	,dblAmountBilled NUMERIC(38, 20)
 	,intItemId INT
@@ -286,14 +287,21 @@ DECLARE @ReceiptChargesToBill TABLE(
 INSERT INTO @ReceiptChargesToBill
 SELECT
 	Receipt.strReceiptNumber
-	,dblQuantity = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblQuantity ELSE ReceiptCharge.dblQuantity END
-	,dblQuantityBilled = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblQuantityBilled ELSE ReceiptCharge.dblQuantityBilled END
-	,dblAmountBilled = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblAmountBilled ELSE ReceiptCharge.dblAmountBilled END
+	,dblQuantity = ReceiptCharge.dblQuantity --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblQuantity ELSE ReceiptCharge.dblQuantity END
+	,dblAmount = ReceiptCharge.dblAmount --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblAmount ELSE ReceiptCharge.dblAmount END
+	,dblQuantityBilled = ReceiptCharge.dblQuantityBilled --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblQuantityBilled ELSE ReceiptCharge.dblQuantityBilled END
+	,dblAmountBilled = ReceiptCharge.dblAmountBilled --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -ReceiptCharge.dblAmountBilled ELSE ReceiptCharge.dblAmountBilled END
 	,Item.intItemId
 	,ReceiptCharge.intInventoryReceiptChargeId
 	,u.intSourceTransactionNoId 
 	,dblToBillQty = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -u.dblToBillQty ELSE u.dblToBillQty END 
-	,dblAmountToBill = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -u.dblAmountToBill ELSE u.dblAmountToBill END 
+	,dblAmountToBill = 
+		CASE 
+			WHEN u.ysnStoreDebitMemo = 1 THEN 
+				CASE WHEN SIGN(ReceiptCharge.dblAmount) = -1 THEN u.dblAmountToBill ELSE -u.dblAmountToBill END 
+			ELSE 
+				u.dblAmountToBill 
+		END 
 	,intEntityVendorId = u.intEntityVendorId
 	,u.intSourceTransactionNoId
 FROM 
@@ -338,8 +346,10 @@ BEGIN
 		AND ReceiptCharge.intEntityVendorId = ReceiptChargesToBill.intEntityVendorId
 		AND 1 = 
 			CASE 
-				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
-				WHEN ISNULL(ReceiptCharge.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) > ISNULL(ReceiptCharge.dblQuantity, 0) THEN 1 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptChargesToBill.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) = 0 THEN 0
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptChargesToBill.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) > ISNULL(ReceiptChargesToBill.dblAmount, 0) THEN 1 
+				WHEN ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) = 0 THEN 0 
+				WHEN ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) > ISNULL(ReceiptChargesToBill.dblQuantity, 0) THEN 1 
 				ELSE 
 					0
 			END 
@@ -396,6 +406,7 @@ DECLARE @ReceiptDiscountChargesToBill TABLE(
 	strReceiptNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 	,dblQuantity NUMERIC(38, 20)
 	,dblQuantityPriced NUMERIC(38, 20)
+	,dblAmount NUMERIC(38, 20)
 	,intItemId INT
 	,intInventoryReceiptChargeId INT
 	,ReceiptChargesToBill INT
@@ -408,8 +419,9 @@ DECLARE @ReceiptDiscountChargesToBill TABLE(
 INSERT INTO @ReceiptDiscountChargesToBill
 SELECT
 	Receipt.strReceiptNumber
-	,dblQuantity = CASE WHEN u.ysnStoreDebitMemo = 1 THEN ReceiptCharge.dblQuantity ELSE -ReceiptCharge.dblQuantity END
-	,dblQuantityPriced = CASE WHEN u.ysnStoreDebitMemo = 1 THEN ReceiptCharge.dblQuantityPriced ELSE -ReceiptCharge.dblQuantityPriced END
+	,dblQuantity = ReceiptCharge.dblQuantity --CASE WHEN u.ysnStoreDebitMemo = 1 THEN ReceiptCharge.dblQuantity ELSE -ReceiptCharge.dblQuantity END
+	,dblQuantityPriced = ReceiptCharge.dblQuantityPriced -- CASE WHEN u.ysnStoreDebitMemo = 1 THEN ReceiptCharge.dblQuantityPriced ELSE -ReceiptCharge.dblQuantityPriced END
+	,dblAmount = ReceiptCharge.dblAmount
 	,Item.intItemId
 	,ReceiptCharge.intInventoryReceiptChargeId
 	,u.intSourceTransactionNoId 
@@ -459,7 +471,9 @@ BEGIN
 		AND Receipt.intEntityVendorId = u.intEntityVendorId
 		AND 1 = 
 			CASE 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) = 0 THEN 0
 				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+				WHEN ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0) = 0 THEN 0
 				WHEN ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0) > ISNULL(ReceiptCharge.dblQuantity, 0) THEN 1 
 				ELSE 
 					0
