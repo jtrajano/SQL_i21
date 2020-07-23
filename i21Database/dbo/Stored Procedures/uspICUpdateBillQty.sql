@@ -90,7 +90,7 @@ SELECT
 	,UpdateTbl.[dblAmountToBill]
 	,[ysnStoreDebitMemo] = 
 		CASE 
-			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 THEN -- AND r.intSourceType = @SourceType_STORE THEN 
 				1
 			ELSE
 				0
@@ -246,7 +246,7 @@ SELECT
 	,UpdateTbl.[dblAmountToBill]
 	,[ysnStoreDebitMemo] = 
 		CASE 
-			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 THEN -- AND r.intSourceType = @SourceType_STORE THEN 
 				CASE
 					WHEN ReceiptCharge.ysnPrice = 1 THEN 1
 					WHEN UpdateTbl.intEntityVendorId = r.intEntityVendorId THEN 1 
