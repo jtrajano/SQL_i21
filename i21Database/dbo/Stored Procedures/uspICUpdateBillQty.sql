@@ -293,7 +293,7 @@ SELECT
 	,ReceiptCharge.intInventoryReceiptChargeId
 	,u.intSourceTransactionNoId 
 	,dblToBillQty = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -u.dblToBillQty ELSE u.dblToBillQty END 
-	,dblAmountToBill = CASE WHEN u.ysnStoreDebitMemo = 1 THEN -u.dblAmountToBill ELSE u.dblAmountToBill END 
+	,dblAmountToBill = u.dblAmountToBill --CASE WHEN u.ysnStoreDebitMemo = 1 THEN -u.dblAmountToBill ELSE u.dblAmountToBill END 
 	,intEntityVendorId = u.intEntityVendorId
 	,u.intSourceTransactionNoId
 FROM 
@@ -414,7 +414,7 @@ SELECT
 	,ReceiptCharge.intInventoryReceiptChargeId
 	,u.intSourceTransactionNoId 
 	,dblToBillQty = CASE WHEN u.ysnStoreDebitMemo = 1 THEN u.dblToBillQty ELSE -u.dblToBillQty END 
-	,dblAmountToBill = CASE WHEN u.ysnStoreDebitMemo = 1 THEN u.dblAmountToBill ELSE -u.dblAmountToBill END 
+	,dblAmountToBill = u.dblAmountToBill --CASE WHEN u.ysnStoreDebitMemo = 1 THEN u.dblAmountToBill ELSE -u.dblAmountToBill END 
 	,intEntityVendorId = u.intEntityVendorId
 	,u.intSourceTransactionNoId
 FROM 
