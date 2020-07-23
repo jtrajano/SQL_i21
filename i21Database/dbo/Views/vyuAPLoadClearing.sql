@@ -117,3 +117,4 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = ld.intItemUOMId
 WHERE 
     billDetail.intLoadDetailId IS NOT NULL
+AND bill.ysnPosted = 1
