@@ -1912,6 +1912,7 @@ BEGIN TRY
 					,[dblNetWeight]
 					,[dblWeightUnitQty]
 					,[intWeightUOMId]
+					,[intPurchaseTaxGroupId]
 					,[dtmDate]
 				 )
 				SELECT 
@@ -2072,6 +2073,18 @@ BEGIN TRY
 														WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 														ELSE NULL
 													END	
+					,[intPurchaseTaxGroupId]		= 
+													CASE 
+														WHEN RI.intTaxGroupId IS NULL THEN dbo.fnGetTaxGroupIdForVendor(
+																								CASE WHEN @shipFromEntityId != @EntityId THEN @shipFromEntityId ELSE @EntityId END,
+																								@LocationId,
+																								a.intItemId,
+																								@intShipFrom,
+																								EM.intFreightTermId
+																							)
+														ELSE RI.intTaxGroupId
+													END
+													--NULL
 					,[dtmDate]						= @dtmClientPostDate
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
@@ -2095,7 +2108,7 @@ BEGIN TRY
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
 										AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
-				) 
+				)  
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
 								/*RI.intContractDetailId and a.intContractDetailId will never be equal
@@ -2108,18 +2121,18 @@ BEGIN TRY
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
 					ON CD.intContractHeaderId = CH.intContractHeaderId
-				left join (
+				LEFT JOIN (
 					select						
 						intContractDetailId,	intPriceFixationDetailId, dblCashPrice, dblAvailableQuantity, dblContractUnits, intPricingTypeId						
 						from @avqty  			
 						--from vyuCTAvailableQuantityForVoucher 					
 				) availableQtyForVoucher
 					on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
-
 				left join tblGRSettleContract CC
 					on CC.intSettleStorageId = SST.intSettleStorageId
 						and CC.intContractDetailId = availableQtyForVoucher.intContractDetailId
-							
+				LEFT JOIN tblEMEntityLocation EM 
+					ON EM.intEntityId = @EntityId
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
@@ -2333,6 +2346,7 @@ BEGIN TRY
 					,[intCostUOMId]
 					,[dblNetWeight]
 					,[dblWeightUnitQty]
+					,[intPurchaseTaxGroupId]
 					,[dtmDate]
 				)
 				SELECT 
@@ -2404,6 +2418,7 @@ BEGIN TRY
 											END
 					,[dblNetWeight]		  	= 0
 				 	,[dblWeightUnitQty]	  	= 1
+					,[intPurchaseTaxGroupId] = NULL
 					,[dtmDate]				= @dtmClientPostDate
 				 FROM tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD 
@@ -2476,21 +2491,29 @@ BEGIN TRY
 								ELSE 1 
 							END = 1)
 
-					UPDATE APD
-					SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
-							CASE WHEN APB.intShipFromEntityId != APB.intEntityVendorId THEN APB.intShipFromEntityId ELSE APB.intEntityVendorId END,
-							APB.intShipToId,
-							APD.intItemId,
-							APB.intShipFromId,
-							EM.intFreightTermId
-						)
-					FROM tblAPBillDetail APD 
-					INNER JOIN tblAPBill APB
-						ON APD.intBillId = APB.intBillId
-					LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
-					INNER JOIN @detailCreated ON intBillDetailId = intId
-					WHERE APD.intTaxGroupId IS NULL AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
-					
+					--UPDATE APD
+					--SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(
+					--		CASE WHEN APB.intShipFromEntityId != APB.intEntityVendorId THEN APB.intShipFromEntityId ELSE APB.intEntityVendorId END,
+					--		APB.intShipToId,
+					--		APD.intItemId,
+					--		APB.intShipFromId,
+					--		EM.intFreightTermId
+					--	)
+					--FROM tblAPBillDetail APD 
+					--INNER JOIN tblAPBill APB
+					--	ON APD.intBillId = APB.intBillId
+					--LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
+					--INNER JOIN @detailCreated ON intBillDetailId = intId
+					--WHERE APD.intTaxGroupId IS NULL 
+					--	AND (CASE 
+					--			WHEN @ysnDPOwnedType = 1 
+					--				THEN CASE 
+					--						WHEN intInventoryReceiptChargeId IS NULL THEN 1 
+					--						ELSE 0 
+					--					END 
+					--			ELSE 1 
+					--		END) = 1
+
 					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 
