@@ -115,7 +115,7 @@ DECLARE @SourceType_STORE AS INT = 7
 
 SELECT TOP 1 @billTypeToUse = 
 		CASE 
-			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 AND r.intSourceType = @SourceType_STORE THEN 
+			WHEN dbo.fnICGetReceiptTotals(r.intInventoryReceiptId, 6) < 0 THEN --AND r.intSourceType = @SourceType_STORE THEN 
 				@type_DebitMemo
 			ELSE 
 				@type_Voucher
