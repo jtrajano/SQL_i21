@@ -414,26 +414,26 @@ BEGIN
 		GOTO With_Rollback_Exit 	
 	END
 
-	/*Do not allow receiving of negative qty.*/ 
-	SET @intItemId = NULL
+	--/*Do not allow receiving of negative qty.*/ 
+	--SET @intItemId = NULL
 
-	SELECT	@strItemNo = i.strItemNo
-			,@intItemId = i.intItemId
-	FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
-				ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-			INNER JOIN tblICItem i 
-				ON i.intItemId = ri.intItemId
-	WHERE	r.intInventoryReceiptId = @intTransactionId
-			AND ISNULL(ri.dblOpenReceive, 0) < 0 
-			AND r.strReceiptType <> 'Inventory Return'
-			AND r.intSourceType <> @SOURCE_TYPE_Store
+	--SELECT	@strItemNo = i.strItemNo
+	--		,@intItemId = i.intItemId
+	--FROM	tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri 
+	--			ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	--		INNER JOIN tblICItem i 
+	--			ON i.intItemId = ri.intItemId
+	--WHERE	r.intInventoryReceiptId = @intTransactionId
+	--		AND ISNULL(ri.dblOpenReceive, 0) < 0 
+	--		AND r.strReceiptType <> 'Inventory Return'
+	--		AND r.intSourceType <> @SOURCE_TYPE_Store
 
-	IF @intItemId IS NOT NULL
-	BEGIN
-		-- 'Receiving a negative stock for {Item} is not allowed.'
-		EXEC uspICRaiseError 80223, @strItemNo
-		GOTO With_Rollback_Exit 	
-	END
+	--IF @intItemId IS NOT NULL
+	--BEGIN
+	--	-- 'Receiving a negative stock for {Item} is not allowed.'
+	--	EXEC uspICRaiseError 80223, @strItemNo
+	--	GOTO With_Rollback_Exit 	
+	--END
 
 	-- Check if company-owned item and the location that doesn't allow zero cost
 	-- 1 or NULL: No
@@ -575,15 +575,16 @@ BEGIN
 			
 	END 
 
-	-- Validate the receipt total. Do not allow negative receipt total. 
-	IF	(dbo.fnICGetReceiptTotals(@intTransactionId, 6) < 0) 
-		AND ISNULL(@ysnRecap, 0) = 0
-		AND @intSourceType <> @SOURCE_TYPE_Store
-	BEGIN
-		-- Unable to Post {Receipt Number}. The Inventory Receipt total is negative.
-		EXEC uspICRaiseError 80181, @strTransactionId;
-		GOTO With_Rollback_Exit;
-	END
+	---- Validate the receipt total. Do not allow negative receipt total. 
+	--IF	(dbo.fnICGetReceiptTotals(@intTransactionId, 6) < 0) 
+	--	AND ISNULL(@ysnRecap, 0) = 0
+	--	AND @intSourceType <> @SOURCE_TYPE_Store	
+	--	--AND @strDataSource <> 'Reverse'
+	--BEGIN
+	--	-- Unable to Post {Receipt Number}. The Inventory Receipt total is negative.
+	--	EXEC uspICRaiseError 80181, @strTransactionId;
+	--	GOTO With_Rollback_Exit;
+	--END
 
 	-- Get the items to post. 
 	BEGIN 
@@ -1007,8 +1008,9 @@ BEGIN
 					,intCategoryId
 					,dblUnitRetail
 			FROM	@ItemsForPost
-			WHERE	dblQty > 0 
-					OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
+			--WHERE	dblQty > 0 
+			--		OR (dblQty < 0 AND @intSourceType = @SOURCE_TYPE_Store) -- Allow stock to reduce if source type is 'Store'
+			--		--OR (dblQty < 0 AND @strDataSource = 'Reverse') 
 		
 			-- Call the post routine for posting the company owned items 
 			IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedItemsForPost)

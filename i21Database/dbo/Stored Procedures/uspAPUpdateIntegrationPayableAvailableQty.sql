@@ -319,7 +319,7 @@ BEGIN
 																	ELSE 
 																		A.dblCost
 																END
-																,ABS(A.dblQuantityToBill)
+																,A.dblQuantityToBill --ABS(A.dblQuantityToBill)
 															)
 															,2 
 														)														
@@ -336,7 +336,7 @@ BEGIN
 																	ELSE 
 																		A.dblCost
 																END 
-																,ABS(A.dblQuantityToBill)
+																,A.dblQuantityToBill --ABS(A.dblQuantityToBill)
 															)
 															,2 
 														)
