@@ -92,11 +92,13 @@ BEGIN
 													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
 															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
 																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
+																(B.dblCost - CAST(B.dblCost * (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(38,20))
+															)) * ISNULL(B.dblRate, 0) 
 														ELSE 
 															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
 																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+																(B.dblCost - CAST(B.dblCost * (ISNULL(B.dblDiscount,0) / 100) AS DECIMAL(38,20))
+															))
 													END 													
 												)
 												AS DECIMAL(18,2))
@@ -199,7 +201,7 @@ BEGIN
 			dbo.fnCalculateCostBetweenUOM(
 				voucherCostUOM.intItemUOMId
 				,receiptCostUOM.intItemUOMId
-				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+				,B.dblCost - CAST((B.dblCost * (B.dblDiscount / 100)) AS DECIMAL(38,20))
 				) <> E2.dblUnitCost
 			OR E2.dblForexRate <> B.dblRate
 		) 
