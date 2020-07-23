@@ -5,6 +5,7 @@ BEGIN
 		,@intLoadDetailId INT
 		,@intLoadId INT
 		,@intNewWeightClaimId INT
+		,@intInventoryReceiptWeightClaimId INT
 	DECLARE @tblIPInventoryReceipt TABLE (intInventoryReceiptId INT)
 
 	INSERT INTO @tblIPInventoryReceipt (intInventoryReceiptId)
@@ -28,6 +29,8 @@ BEGIN
 
 		SELECT @intNewWeightClaimId = NULL
 
+		SELECT @intInventoryReceiptWeightClaimId = NULL
+
 		SELECT @intLoadDetailId = intSourceId
 		FROM tblICInventoryReceiptItem
 		WHERE intInventoryReceiptId = @intInventoryReceiptId
@@ -35,6 +38,15 @@ BEGIN
 		SELECT @intLoadId = intLoadId
 		FROM tblLGLoadDetail
 		WHERE intLoadDetailId = @intLoadDetailId
+
+		INSERT INTO tblIPInventoryReceiptWeightClaim (
+			intInventoryReceiptId
+			,intLoadId
+			)
+		SELECT @intInventoryReceiptId
+			,@intLoadId
+
+		SELECT @intInventoryReceiptWeightClaimId = SCOPE_IDENTITY()
 
 		IF EXISTS (
 				SELECT *
@@ -49,16 +61,11 @@ BEGIN
 
 			EXEC [dbo].[uspIPWeightClaimPopulateStgXML] @intWeightClaimId = @intNewWeightClaimId
 				,@strRowState = 'Added'
-		END
 
-		INSERT INTO tblIPInventoryReceiptWeightClaim (
-			intInventoryReceiptId
-			,intLoadId
-			,intWeightClaimId
-			)
-		SELECT @intInventoryReceiptId
-			,@intLoadId
-			,@intNewWeightClaimId
+			UPDATE tblIPInventoryReceiptWeightClaim
+			SET intWeightClaimId = @intNewWeightClaimId
+			WHERE intInventoryReceiptWeightClaimId = @intInventoryReceiptWeightClaimId
+		END
 
 		SELECT @intInventoryReceiptId = MIN(intInventoryReceiptId)
 		FROM @tblIPInventoryReceipt
