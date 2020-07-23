@@ -102,47 +102,46 @@ BEGIN TRY
 	/*
 		Check if the Contract is DWG.
 		If the sequence balance = 0 and all tickets DWG associated with it is already posted, mark the sequence as complete.
-	*/
-	IF @intPricingTypeId = 2 AND @dblNewBalance = 0 
-	BEGIN
-		if exists (
-				select
-					top 1 1
-				from
-					tblCTContractDetail cd
-					join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-					left join tblCTWeightGrade w on w.intWeightGradeId = ch.intWeightId
-					left join tblCTWeightGrade g on g.intWeightGradeId = ch.intGradeId
-				where
-					cd.intContractDetailId = @intContractDetailId
-					and (w.strWhereFinalized = 'Destination' or g.strWhereFinalized = 'Destination')
-			)
+	*/	
+	
+	IF @dblNewBalance = 0 
+	BEGIN	
+		IF EXISTS 
+		(
+			SELECT
+				TOP 1 1
+			FROM
+				tblCTContractDetail cd
+				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+				LEFT JOIN tblCTWeightGrade w ON w.intWeightGradeId = ch.intWeightId
+				LEFT JOIN tblCTWeightGrade g ON g.intWeightGradeId = ch.intGradeId
+			WHERE
+				cd.intContractDetailId = @intContractDetailId
+				AND (w.strWhereFinalized = 'Destination' OR g.strWhereFinalized = 'Destination')
+		)
 		BEGIN
-			select @intPostedTicketDestinationWeightsAndGrades = count(intContractId)
-			from tblSCTicket
-			where isnull(ysnDestinationWeightGradePost,0) = 1 and intContractId = @intContractDetailId
+			SELECT @intPostedTicketDestinationWeightsAndGrades = COUNT(intContractId)
+			FROM tblSCTicket
+			WHERE ISNULL(ysnDestinationWeightGradePost,0) = 1 AND intContractId = @intContractDetailId
 
-			select @intUnPostedTicketDestinationWeightsAndGrades = count(intContractId)
-			from tblSCTicket
-			where isnull(ysnDestinationWeightGradePost,0) = 0 and intContractId = @intContractDetailId
+			SELECT @intUnPostedTicketDestinationWeightsAndGrades = COUNT(intContractId)
+			FROM tblSCTicket
+			WHERE ISNULL(ysnDestinationWeightGradePost,0) = 0 AND intContractId = @intContractDetailId
 
-			if (@intPostedTicketDestinationWeightsAndGrades > 0 and @intUnPostedTicketDestinationWeightsAndGrades = 0)
-			begin
-				SET @ysnCompleted = 1
-			end
+			SELECT @ysnCompleted = CASE WHEN @intPostedTicketDestinationWeightsAndGrades > 0 AND @intUnPostedTicketDestinationWeightsAndGrades = 0 THEN 1 ELSE 0 END
 		END
 	END
 
 	UPDATE	tblCTContractDetail
 	SET		intConcurrencyId	=	intConcurrencyId + 1,
-			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END, 
-			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END, 
-			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0  
-											THEN	CASE	WHEN intContractStatusId = 5 
-															THEN 1 
-															ELSE intContractStatusId 
-													END 
-											ELSE 5 
+			dblBalance			=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN @dblNewBalance ELSE @dblNewBalance * dblQuantityPerLoad END,
+			dblBalanceLoad		=	CASE WHEN ISNULL(@ysnLoad,0) = 0 THEN NULL ELSE @dblNewBalance END,
+			intContractStatusId	=	CASE	WHEN @ysnCompleted = 0
+											THEN	(CASE	WHEN intContractStatusId = 5
+															THEN 1
+															ELSE intContractStatusId
+													END)
+											ELSE 5
 									END
 	WHERE	intContractDetailId =	@intContractDetailId
 
