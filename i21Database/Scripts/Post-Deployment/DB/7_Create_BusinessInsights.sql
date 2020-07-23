@@ -84,7 +84,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionChartPanelId, N'NetAmount', N'Net Amount', 0, N'Series1AxisY', N'', N'', N'Number', 1, N'', N'', N'',
+						@cashProjectionChartPanelId, N'NetAmount', N'Net Amount', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'', N'', NULL
 					)
@@ -107,7 +107,10 @@
 				END
 				ELSE
 				BEGIN
+					SELECT @cashProjectionChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @cashProjectionChartPanelId AND strAlignment = 'Series1AxisY'
 				END
 
 				--Cash Projection Grid
@@ -295,7 +298,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginChartPanelId, N'dblNet', N'Net', 0, N'Series1AxisY', N'', N'', N'Number', 1, N'', N'', N'',
+						@grossMarginChartPanelId, N'dblNet', N'Net', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -318,7 +321,10 @@
 				END
 				ELSE
 				BEGIN
+					SELECT @grossMarginChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisY'
 				END
 
 				--Gross Margin Grid
@@ -444,7 +450,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@customerAgingChartPanelId, N'dblTotalDue', N'Total Due', 0, N'Series1AxisY', N'', N'', N'Number', 1, N'', N'', N'',
+						@customerAgingChartPanelId, N'dblTotalDue', N'Total Due', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -467,7 +473,10 @@
 				END
 				ELSE
 				BEGIN
+					SELECT @customerAgingChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @customerAgingChartPanelId AND strAlignment = 'Series1AxisY'
 				END
 
 				--Customer Aging Grid
@@ -574,7 +583,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@salesChartPanelId, N'Total', N'Revenue', 0, N'Series1AxisY', N'', N'', N'Currency', 1, N'', N'', N'',
+						@salesChartPanelId, N'Total', N'Revenue', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.String', N'', NULL
 					)
@@ -597,7 +606,10 @@
 				END
 				ELSE
 				BEGIN
+					SELECT @salesChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Sales Chart' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Sales Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @salesChartPanelId AND strAlignment = 'Series1AxisY'
 				END
 
 				--Sales Grid
