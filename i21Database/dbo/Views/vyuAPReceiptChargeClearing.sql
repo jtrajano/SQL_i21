@@ -218,7 +218,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId
 WHERE     
     billDetail.intInventoryReceiptChargeId IS NOT NULL    
--- AND bill.ysnPosted = 1
+AND bill.ysnPosted = 1
 ) charges
 OUTER APPLY (  
  SELECT TOP 1  
