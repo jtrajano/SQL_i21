@@ -153,7 +153,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'dblAmountDue', N'Amount Due', 100, N'Left', N'Data', N'', N'', 2, N'', N'', N'',
+						@cashProjectionGridPanelId, N'dblAmountDue', N'Amount Due', 100, N'Left', N'Data', N'', N'###0.00', 2, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -163,7 +163,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'RunningTotal', N'Running Total', 100, N'Left', N'Data', N'', N'', 3, N'', N'', N'',
+						@cashProjectionGridPanelId, N'RunningTotal', N'Running Total', 100, N'Left', N'Data', N'', N'###0.00', 3, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -173,7 +173,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'NetAmount', N'Net Amount', 100, N'Left', N'Data', N'', N'', 4, N'', N'', N'',
+						@cashProjectionGridPanelId, N'NetAmount', N'Net Amount', 100, N'Left', N'Data', N'', N'###0.00', 4, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -255,6 +255,12 @@
 						}]
 					}';
 					UPDATE tblDBPanel SET strConfigurator = @aggregator WHERE intPanelId = @cashProjectionGridPanelId
+				END
+				ELSE
+				BEGIN
+					SELECT @cashProjectionGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Cash Projection Grid' AND ysnSystemPanel = 1
+
+					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @cashProjectionGridPanelId AND strColumn IN ('dblAmountDue', 'RunningTotal', 'NetAmount')
 				END
 
 				--Gross Margin Chart
@@ -367,7 +373,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'dblRevenue', N'Revenue', 100, N'Left', N'', N'', N'', 1, N'', N'', N'',
+						@grossMarginGridPanelId, N'dblRevenue', N'Revenue', 100, N'Left', N'', N'', N'###0.00', 1, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -377,7 +383,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'dblExpense', N'Expense', 100, N'Left', N'', N'', N'', 2, N'', N'', N'',
+						@grossMarginGridPanelId, N'dblExpense', N'Expense', 100, N'Left', N'', N'', N'###0.00', 2, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -387,7 +393,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'dblNet', N'Net', 100, N'Left', N'', N'', N'', 3, N'', N'', N'',
+						@grossMarginGridPanelId, N'dblNet', N'Net', 100, N'Left', N'', N'', N'###0.00', 3, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -407,6 +413,12 @@
 					VALUES (
 						@grossMarginGridPanelId, 2, @panelTabId, 2, @entityId, 1, 1
 					)
+				END
+				ELSE
+				BEGIN
+					SELECT @grossMarginGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
+
+					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblRevenue', 'dblExpense', 'dblNet')
 				END
 
 				--Customer Aging Chart
@@ -672,6 +684,12 @@
 					VALUES (
 						@salesGridPanelId, 4, @panelTabId, 2, @entityId, 1, 1
 					)
+				END
+				ELSE
+				BEGIN
+					SELECT @salesGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Sales Grid' AND ysnSystemPanel = 1
+
+					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @salesGridPanelId AND strColumn IN ('Total')
 				END
 
 			END
