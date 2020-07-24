@@ -71,8 +71,10 @@ FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
 LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+LEFT JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 WHERE I.intInvoiceId = @intInvoiceId
   AND ISNULL(CH.ysnLoad, 0) = 0
+  AND ISNULL(T.strDistributionOption, '') <> 'LOD'
 
 IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
 	BEGIN
