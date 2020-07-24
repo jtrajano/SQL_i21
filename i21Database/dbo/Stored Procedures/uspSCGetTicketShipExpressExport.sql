@@ -44,7 +44,7 @@ SET ANSI_WARNINGS OFF
 				Actuals_Id = 0 
 				,actual_Id = 0
 				,[CarPrefix] = ISNULL(AA.strTruckName,'''')
-				,[CarNumber] = ISNULL(AA.strTrailerLicenseNumber,'''')
+				,[CarNumber] = ISNULL(AA.strTrailerId,'''')
 				,[BOLNumber] = ISNULL(AA.strTicketNumber,'''')
 				,[TemplateName] = ISNULL(AA.strDriverName,'''')
 				,[BOLType] = ''S''
