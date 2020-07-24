@@ -157,6 +157,6 @@ AS
 										AND	TR.intRecordId		=   CH.intContractHeaderId
 		JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
 		WHERE	SC.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments')
-		ORDER BY AP.intApprovalId DESC
+		AND		AP.ysnCurrent = 1
 	) AP
 	LEFT JOIN tblCTPosition P ON CH.intPositionId = P.intPositionId
