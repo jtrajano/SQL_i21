@@ -139,14 +139,12 @@ BEGIN
 	-- (
 		SELECT		--DISTINCT
 				[intPaymentId]					=	A.intPaymentId,
-				--INCLUDE THE MULTIPLICATION OF RATE ON ROUND
-				--DO NOT CHANGE AS THIS WILL CAUSE OUT OF BALANCE WITH vyuAPPayables/vyuAPPayablesForeign
 				[dblCredit]	 					=	ROUND(
-														(
+														ROUND(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 															paymentDetail.dblPayment, voucher.dblTotal) 
-														) 
+														,2) 
 														* ISNULL(NULLIF(A.dblExchangeRate,0),1)
 													,2)
 													* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
@@ -199,11 +197,11 @@ BEGIN
 		SELECT		--DISTINCT
 				[intPaymentId]					=	A.intPaymentId,
 				[dblCredit]	 					=	ROUND(
-														(
+														ROUND(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 															paymentDetail.dblPayment, voucher.dblTotal) 
-														) 
+														,2) 
 														* ISNULL(NULLIF(A.dblExchangeRate,0),1)
 													,2)
 													* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
@@ -224,7 +222,7 @@ BEGIN
 			WHERE R.intBillId = voucher.intBillId
 		) Details
 		OUTER APPLY (
-			SELECT ISNULL(dblWithholdPercent,0) / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
+			SELECT dblWithholdPercent / 100 AS dblWithholdPercent FROM tblSMCompanyLocation WHERE intCompanyLocationId = voucher.intShipToId
 		) withHoldData
 		-- LEFT JOIN tblSMCurrencyExchangeRateType rateType ON A.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
@@ -244,7 +242,7 @@ BEGIN
 	INNER JOIN tblAPVendor C ON P.intEntityVendorId = C.[intEntityId]
 	INNER JOIN tblAPPaymentDetail paymentDetail ON P.intPaymentId = paymentDetail.intPaymentId
 	LEFT JOIN tblSMCurrencyExchangeRateType rateType ON P.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
-	WHERE MainQuery.dblCredit <> 0
+
 	UNION ALL
 	--GAIN LOSS
 	SELECT	
@@ -477,7 +475,7 @@ BEGIN
 			[dtmDateEntered]				=	GETDATE(),
 			[dtmTransactionDate]			=	NULL,
 			[strJournalLineDescription]		=	'Discount',
-			[intJournalLineNo]				=	B.intPaymentDetailId,
+			[intJournalLineNo]				=	3,
 			[ysnIsUnposted]					=	0,
 			[intUserId]						=	@intUserId,
 			[intEntityId]					=	@intUserId,
@@ -519,10 +517,10 @@ BEGIN
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (ROUND(
-												(
+												ROUND(
 													dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal)) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1)
+														- B.dblInterest, voucher.dblTotal) ,2) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1)
 											,2)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -595,10 +593,10 @@ BEGIN
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (ROUND(
-												(
+												ROUND(
 													dbo.fnAPGetPaymentAmountFactor(ISNULL(taxes.dblAdjustedTax, taxes.dblTax), B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal)) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1)
+														- B.dblInterest, voucher.dblTotal) ,2)*  ISNULL(NULLIF(voucherDetail.dblRate,0),1)
 											,2)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -725,7 +723,7 @@ BEGIN
 		[dtmDateEntered]				=	GETDATE(),
 		[dtmTransactionDate]			=	NULL,
 		[strJournalLineDescription]		=	'Interest',
-		[intJournalLineNo]				=	B.intPaymentDetailId,
+		[intJournalLineNo]				=	3,
 		[ysnIsUnposted]					=	0,
 		[intUserId]						=	@intUserId,
 		[intEntityId]					=	@intUserId,

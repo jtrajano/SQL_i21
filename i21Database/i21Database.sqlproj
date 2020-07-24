@@ -7372,7 +7372,6 @@
     <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
     <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateGLEntriesForNegativeStockVariance.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPCreateForeignPaymentAdjustment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
