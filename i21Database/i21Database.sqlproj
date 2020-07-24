@@ -1922,6 +1922,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetBlendRequests.sql" />
     <Build Include="dbo\Tables\tblHDReminder.sql" />
     <Build Include="dbo\Tables\tblGRCompanyPreference.sql" />
+    <Build Include="dbo\Tables\tblICStagingReceiptChargePerItem.sql" />
     <Build Include="dbo\Tables\tblICInventoryReceiptChargePerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICCalculateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Functions\fnGetItemStockUOM.sql" />
@@ -5271,6 +5272,7 @@
     <Build Include="dbo\Views\vyuICStockDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportBondedPalletTag.sql" />
     <Build Include="dbo\Stored Procedures\uspMFReportUCCPalletLabel.sql" />
+    <Build Include="dbo\Stored Procedures\uspICSaveReceiptCleanChargesPerItem.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnReceiptSave.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteChargePerItemOnShipmentSave.sql" />
     <Build Include="dbo\Views\vyuSMCompanyLocation.sql" />
