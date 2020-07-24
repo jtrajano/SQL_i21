@@ -62,41 +62,53 @@ BEGIN
 	)
 
 	insert into @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure,ysnDestinationWeightGrade)
-	select 		
-		CD.intContractDetailId,
-		CH.intContractHeaderId,
-		intSequenceUnitMeasureId = CDUM.intUnitMeasureId,
-		strSequenceUnitMeasure = CDUM.strUnitMeasure,
-		intHeaderUnitMeasureId = CHUM.intUnitMeasureId,
-		strHeaderUnitMeasure = CHUM.strUnitMeasure,
-		ysnDestinationWeightGrade = (case when w.strWhereFinalized = 'Destination' or g.strWhereFinalized = 'Destination' then convert(bit,1) else convert(bit,0) end)
-	from tblCTContractHeader CH
-	join tblCTContractDetail CD on CH.intContractHeaderId = CD.intContractHeaderId
-	left join tblCTWeightGrade w on w.intWeightGradeId = CH.intWeightId
-	left join tblCTWeightGrade g on g.intWeightGradeId = CH.intGradeId
-	left join tblICUnitMeasure CDUM on CDUM.intUnitMeasureId = CD.intUnitMeasureId
-	left join tblICCommodityUnitMeasure CHCUM on CHCUM.intCommodityId = CH.intCommodityId and CHCUM.ysnStockUnit = 1
-	left join tblICUnitMeasure CHUM on CHUM.intUnitMeasureId = CHCUM.intUnitMeasureId
+	select intContractDetailId,
+		intContractHeaderId,
+		intSequenceUnitMeasureId,
+		strSequenceUnitMeasure,
+		intHeaderUnitMeasureId,
+		strHeaderUnitMeasure,
+		ysnDestinationWeightGrade
+	from
+	(
+		select 		
+			CD.intContractDetailId,
+			CH.intContractHeaderId,
+			intSequenceUnitMeasureId = CDUM.intUnitMeasureId,
+			strSequenceUnitMeasure = CDUM.strUnitMeasure,
+			intHeaderUnitMeasureId = CHUM.intUnitMeasureId,
+			strHeaderUnitMeasure = CHUM.strUnitMeasure,
+			ysnDestinationWeightGrade = (case when w.strWhereFinalized = 'Destination' or g.strWhereFinalized = 'Destination' then convert(bit,1) else convert(bit,0) end),
+			strContractStatus = tbl.strContractStatus,
+			intPricingTypeId = tbl.intPricingTypeId
+		from tblCTContractHeader CH
+		join tblCTContractDetail CD on CH.intContractHeaderId = CD.intContractHeaderId
+		left join tblCTWeightGrade w on w.intWeightGradeId = CH.intWeightId
+		left join tblCTWeightGrade g on g.intWeightGradeId = CH.intGradeId
+		left join tblICUnitMeasure CDUM on CDUM.intUnitMeasureId = CD.intUnitMeasureId
+		left join tblICCommodityUnitMeasure CHCUM on CHCUM.intCommodityId = CH.intCommodityId and CHCUM.ysnStockUnit = 1
+		left join tblICUnitMeasure CHUM on CHUM.intUnitMeasureId = CHCUM.intUnitMeasureId
 
-	left JOIN (
+		left JOIN (
 		
-		SELECT intRowId = ROW_NUMBER() OVER(PARTITION BY a.intContractHeaderId, a.intContractDetailId ORDER BY a.dtmHistoryCreated DESC)
-			, a.intPricingTypeId
-			, a.intContractHeaderId
-			, a.intContractDetailId
-			, dtmHistoryCreated
-			, stat.strContractStatus
-		from tblCTSequenceHistory a
-			join tblCTContractStatus stat on stat.intContractStatusId = a.intContractStatusId
-			join tblCTContractHeader b
-				on a.intContractHeaderId = b.intContractHeaderId
-		where dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
+			SELECT intRowId = ROW_NUMBER() OVER(PARTITION BY a.intContractHeaderId, a.intContractDetailId ORDER BY a.dtmHistoryCreated DESC)
+				, a.intPricingTypeId
+				, a.intContractHeaderId
+				, a.intContractDetailId
+				, dtmHistoryCreated
+				, stat.strContractStatus
+			from tblCTSequenceHistory a
+				join tblCTContractStatus stat on stat.intContractStatusId = a.intContractStatusId
+				join tblCTContractHeader b
+					on a.intContractHeaderId = b.intContractHeaderId
+			where dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
 		
-	) tbl ON tbl.intContractDetailId = CD.intContractDetailId
-		AND tbl.intContractHeaderId = CD.intContractHeaderId
-		AND tbl.intRowId = 1
-	where tbl.intPricingTypeId = 2
-	and tbl.strContractStatus in ('Open','Re-open')
+		) tbl ON tbl.intContractDetailId = CD.intContractDetailId
+			AND tbl.intContractHeaderId = CD.intContractHeaderId
+			AND tbl.intRowId = 1
+		where tbl.intPricingTypeId = 2
+	)t
+	where t.strContractStatus in ('Open', 'Re-open') or (t.ysnDestinationWeightGrade = 1 and t.strContractStatus = 'Complete' and t.intPricingTypeId = 2)
 
 	DECLARE @TemporaryTable TABLE 
 	(  
