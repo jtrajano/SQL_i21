@@ -905,7 +905,7 @@ BEGIN TRY
 						AND IL.intLocationId = @intLocationId
 						AND t.intItemId = @intItemId
 						AND t.strContractItemName = @strContractItemName
-						AND t.strStatus = 'Active'
+						--AND t.strStatus = 'Active'
 
 					IF ISNULL(@intItemContractId, 0) = 0
 					BEGIN
