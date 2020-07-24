@@ -384,7 +384,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Producer'
-					AND t.ysnActive = 1
+					--AND t.ysnActive = 1
 					AND t.strEntityNo <> ''
 					AND t.strName = @strPartyName
 
@@ -880,7 +880,7 @@ BEGIN TRY
 						AND IL.intLocationId = @intLocationId
 						AND t.intItemId = @intItemId
 						AND t.strContractItemName = @strContractItemName
-						AND t.strStatus = 'Active'
+						--AND t.strStatus = 'Active'
 
 					IF ISNULL(@intItemContractId, 0) = 0
 					BEGIN
