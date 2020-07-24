@@ -131,28 +131,24 @@ BEGIN
 		,[dblForeignRate]				=	P.dblExchangeRate
 		,[strRateType]					=	rateType.strCurrencyExchangeRateType
 	FROM (
-	-- SELECT		
-	-- 		tmpSummaryPayment.intPaymentId
-	-- 		,ROUND(SUM([dblCredit]),2) as [dblCredit]
-	-- 		,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
-	-- FROM
-	-- (
+	SELECT		
+			tmpSummaryPayment.intPaymentId
+			,ROUND(SUM([dblCredit]),2) as [dblCredit]
+			,ROUND(SUM([dblCreditForeign]),2) as [dblCreditForeign]	
+	FROM
+	(
 		SELECT		--DISTINCT
 					[intPaymentId]					=	A.intPaymentId,
-					[dblCredit]	 					=	ROUND(
-															ROUND(
-															dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
-																- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
-																paymentDetail.dblPayment, voucher.dblTotal) 
-															,2) 
-															* ISNULL(NULLIF(A.dblExchangeRate,0),1)
-														,2)
-														* (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
-					[dblCreditForeign]				=	ROUND(
+					[dblCredit]	 					=	CAST(
+														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
+															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
+															paymentDetail.dblPayment, voucher.dblTotal) * ISNULL(NULLIF(A.dblExchangeRate,0),1) 
+														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
+					[dblCreditForeign]				=	CAST(
 														dbo.fnAPGetPaymentAmountFactor((Details.dblTotal 
 															- (CASE WHEN paymentDetail.dblWithheld > 0 THEN (Details.dblTotal * ISNULL(withHoldData.dblWithholdPercent,1)) ELSE 0 END)), 
 															paymentDetail.dblPayment, voucher.dblTotal)
-														,2) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
+														AS DECIMAL(18,6)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END)
 			FROM	[dbo].tblAPPayment A 
 			INNER JOIN tblAPPaymentDetail paymentDetail ON A.intPaymentId = paymentDetail.intPaymentId
 			-- INNER JOIN dbo.fnAPGetPaymentForexRate() paymentForex ON paymentDetail.intBillId = paymentForex.intBillId
@@ -182,8 +178,8 @@ BEGIN
 			-- paymentDetail.dblDiscount,
 			-- intTransactionType , 
 			-- A.dblExchangeRate
-			-- ) AS tmpSummaryPayment
-			-- GROUP BY tmpSummaryPayment.intPaymentId
+			) AS tmpSummaryPayment
+			GROUP BY tmpSummaryPayment.intPaymentId
 			-- UNION ALL
 			-- SELECT		DISTINCT
 			-- 		[intPaymentId]					=	A.intPaymentId,
@@ -484,10 +480,10 @@ BEGIN
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (ROUND(
-												ROUND(
+												(
 													dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal) ,2) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1)
+														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1))
 											,2)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
@@ -560,10 +556,10 @@ BEGIN
 		[strBatchId]					=	@batchId,
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (ROUND(
-												ROUND(
+												(
 													dbo.fnAPGetPaymentAmountFactor(ISNULL(taxes.dblAdjustedTax, taxes.dblTax), B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
-														- B.dblInterest, voucher.dblTotal) ,2)*  ISNULL(NULLIF(voucherDetail.dblRate,0),1)
+														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1))
 											,2)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
