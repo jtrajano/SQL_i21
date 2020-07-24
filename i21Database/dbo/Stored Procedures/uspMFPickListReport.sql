@@ -453,8 +453,10 @@ Begin --Sales Order Pick List
 									SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
 									FROM tblSOSalesOrderDetail sd1
 									JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+										AND Ad.intAddOnItemId = sd.intItemId
 										AND sd1.strAddonDetailKey = sd.strAddonDetailKey
 										AND sd1.ysnAddonParent = 1
+										AND Ad.dblQuantity = sd.dblAddOnQuantity
 									JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
 									JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
 									)
@@ -576,8 +578,10 @@ Begin --Sales Order Pick List
 							SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
 							FROM tblSOSalesOrderDetail sd1
 							JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+								AND Ad.intAddOnItemId = sd.intItemId
 								AND sd1.strAddonDetailKey = sd.strAddonDetailKey
 								AND sd1.ysnAddonParent = 1
+								AND Ad.dblQuantity = sd.dblAddOnQuantity
 							JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
 							JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
 							)
@@ -837,8 +841,10 @@ Begin --Sales Order Pick List
 												SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
 												FROM tblSOSalesOrderDetail sd1
 												JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+													AND Ad.intAddOnItemId = sd.intItemId
 													AND sd1.strAddonDetailKey = sd.strAddonDetailKey
 													AND sd1.ysnAddonParent = 1
+													AND Ad.dblQuantity = sd.dblAddOnQuantity
 												JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
 												JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
 												)
@@ -946,8 +952,10 @@ Begin --Sales Order Pick List
 												SELECT ' ' + CONVERT(NVARCHAR, CONVERT(NUMERIC(38, 2), (ISNULL(Ad.dblQuantity, 0)))) + ' ' + um.strUnitMeasure + '/' + UOM1.strUnitMeasure
 												FROM tblSOSalesOrderDetail sd1
 												JOIN tblICItemAddOn Ad ON Ad.intItemId = sd1.intItemId
+													AND Ad.intAddOnItemId = sd.intItemId
 													AND sd1.strAddonDetailKey = sd.strAddonDetailKey
 													AND sd1.ysnAddonParent = 1
+													AND Ad.dblQuantity = sd.dblAddOnQuantity
 												JOIN tblICItemUOM IUOM1 ON IUOM1.intItemUOMId = sd1.intItemUOMId
 												JOIN tblICUnitMeasure UOM1 ON UOM1.intUnitMeasureId = IUOM1.intUnitMeasureId
 												)

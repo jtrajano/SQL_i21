@@ -10,7 +10,7 @@ AS
 (
 	SELECT DISTINCT
 		 A.intYear
-		 , A.strVendorId
+		 , A.strVendorId COLLATE Latin1_General_CI_AS AS strVendorId
 	FROM vyuAP1099 A
 	WHERE A.int1099Form = 1
 	

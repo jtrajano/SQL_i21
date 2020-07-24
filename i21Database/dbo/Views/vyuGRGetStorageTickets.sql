@@ -20,16 +20,16 @@ SELECT DISTINCT
     ,strDPARecieptNumber				= ISNULL(CS.strDPARecieptNumber,'')
     ,dblOpenBalance						= ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CS.intItemUOMId, ItemUOM.intItemUOMId, CS.dblOpenBalance), 6)
     ,ysnDPOwnedType						= ST.ysnDPOwnedType
-    ,intContractHeaderId                = case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END end
-    ,intContractDetailId				= case when (CS.intStorageTypeId = 2 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN SC.intContractId ELSE CD_Transfer.intContractDetailId END end
-    ,strContractNumber					= case when (CS.intStorageTypeId = 2 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
+    ,intContractHeaderId                = case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END end
+    ,intContractDetailId				= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN CD_Ticket.intContractDetailId ELSE CD_Transfer.intContractDetailId END end
+    ,strContractNumber					= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
     ,intTicketId						= ISNULL(SC.intTicketId,0)
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
     ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
     ,strReceiptNumber					= IR.strReceiptNumber
     ,ysnReadyForTransfer				= CAST(
 											CASE 
-												WHEN DS.ysnPost = 1 THEN 1
+												WHEN DeliverySheet.ysnPost = 1 THEN 1
 												WHEN CS.intTicketId IS NOT NULL THEN 1
 												ELSE 0
 											END AS BIT
@@ -71,12 +71,20 @@ LEFT JOIN
 		ON GCH.intContractHeaderId = GCD.intContractHeaderId
 	WHERE GSH.strType IN ('From Transfer','From Delivery Sheet','From Scale')
 )GHistory
-    on GHistory.intCustomerStorageId = CS.intCustomerStorageId 
-        and CS.intStorageTypeId = 2
-LEFT JOIN tblSCTicket SC
+    on GHistory.intCustomerStorageId = CS.intCustomerStorageId
+		AND ST.ysnDPOwnedType = 1 
+LEFT JOIN (
+	tblSCTicket SC 		
+	LEFT JOIN tblGRStorageHistory SH
+		ON SH.intTicketId = SC.intTicketId
+	LEFT JOIN tblICInventoryReceiptItem IRI
+		ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
+	) 
 	ON SC.intTicketId = CS.intTicketId
+		AND SH.intCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblCTContractDetail CD_Ticket
-    ON CD_Ticket.intContractDetailId = SC.intContractId
+    --ON CD_Ticket.intContractDetailId = SC.intContractId
+	ON CD_Ticket.intContractDetailId = IRI.intContractDetailId
 		AND CS.ysnTransferStorage = 0
 LEFT JOIN tblCTContractHeader CH_Ticket 
     ON CH_Ticket.intContractHeaderId = CD_Ticket.intContractHeaderId
@@ -89,11 +97,15 @@ LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
-LEFT JOIN tblSCDeliverySheet DS
-    ON DS.intDeliverySheetId = CS.intDeliverySheetId
+LEFT JOIN (tblSCDeliverySheet DeliverySheet 
+			INNER JOIN tblSCDeliverySheetSplit DSS	
+				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
+			AND DSS.intEntityId = E.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
 LEFT JOIN tblGRTransferStorageReference TSR
 	ON TSR.intToCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSR.intTransferStorageId
-        AND TS.ysnReversed = 0
 WHERE CS.dblOpenBalance > 0

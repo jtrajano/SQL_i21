@@ -21,8 +21,8 @@ DECLARE @strRawType NVARCHAR(600)
 SET @strRawType = @strType
 
 SET @strType = SUBSTRING(@strType, 0, CHARINDEX(':', @strType))
-DECLARE @strStates NVARCHAR(600)
-SET @strStates = SUBSTRING(@strRawType, CHARINDEX(':', @strRawType)+1, LEN(@strRawType))
+-- DECLARE @strStates NVARCHAR(600)
+-- SET @strStates = SUBSTRING(@strRawType, CHARINDEX(':', @strRawType)+1, LEN(@strRawType))
 
 DECLARE @Checking BIT
 DECLARE @StartDate DATETIME
@@ -126,8 +126,10 @@ BEGIN
 	EXEC dbo.uspICImportInventoryReceipts @Checking, @intEntityUserSecurityId, @Total OUTPUT, @StartDate, @EndDate 	
 END
 
+-- UPDATE tblICCompanyPreference
+-- SET strOriginLastTask = @strStates,
+-- 	strOriginLineOfBusiness = @strLineOfBusiness
 UPDATE tblICCompanyPreference
-SET strOriginLastTask = @strStates,
-	strOriginLineOfBusiness = @strLineOfBusiness
+SET strOriginLineOfBusiness = @strLineOfBusiness
 
 _Exit:

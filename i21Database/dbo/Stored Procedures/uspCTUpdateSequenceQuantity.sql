@@ -111,7 +111,8 @@ BEGIN TRY
 	@strComment				    =	NULL,
 	@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
 	@strSource	 				= 	'Inventory',
-	@strProcess 				= 	'Sequence Quantity'
+	@strProcess 				= 	'Update Sequence Quantity',
+	@intUserId					= 	@intUserId
 
 END TRY
 

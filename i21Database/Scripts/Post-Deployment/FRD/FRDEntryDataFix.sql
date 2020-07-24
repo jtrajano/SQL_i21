@@ -753,3 +753,23 @@ END
 GO
 	PRINT N'Insert Budget Data'
 GO
+
+--=====================================================================================================================================
+-- 	ROW DESIGNER: UPDATE NULL AND EMPTY
+---------------------------------------------------------------------------------------------------------------------------------------
+
+GO
+	PRINT N'UPDATE Default Value'
+GO
+
+
+UPDATE tblFRRowDesign SET strAccountsType = 'BS'
+WHERE (strAccountsType = '' or strAccountsType IS NULL) and strRowType IN ('Filter Accounts', 'Cash Flow Activity')
+
+UPDATE tblFRRowDesign SET strSource = 'Column' 
+WHERE (strSource = '' or strSource IS NULL) and strRowType IN ('Filter Accounts', 'Cash Flow Activity')
+
+
+GO
+	PRINT N'UPDATE Default Value'
+GO

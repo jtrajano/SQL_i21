@@ -8,7 +8,7 @@ SELECT
 	,strDiscountCodeDescription
 	,strTaxClass
 	,SUM(dblDiscountAmount) dblDiscountAmount
-	,SUM(dblShrinkPercent) dblShrinkPercent
+	,(dblShrinkPercent) dblShrinkPercent
 	,ISNULL(dblGradeReading,'N/A') dblGradeReading
 	,SUM(dblAmount) dblAmount
 	,SUM(dblTax) dblTax
@@ -313,4 +313,5 @@ GROUP BY
 	,strDiscountCode
 	,strDiscountCodeDescription
 	,dblGradeReading
+	,dblShrinkPercent
 	,strTaxClass

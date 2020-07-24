@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCCImportDealerCreditCardRecon]
 	@guidImportIdentifier UNIQUEIDENTIFIER,
+	@ysnAdjustment BIT = 0,
 	@return INT OUTPUT
 AS
 
@@ -17,23 +18,30 @@ BEGIN
 
 	BEGIN TRY
 
+	
 		DECLARE @intImportDealerCreditCardReconId INT,
 			@intImportDealerCreditCardReconDetailId AS INT = NULL, 
 			@strSiteNumber AS NVARCHAR(100) = NULL,
 			@intVendorDefaultId INT = NULL
-			--, 
-			--@dtmTransactionDate AS DATE = NULL,
-			--@dblGross AS NUMERIC(18,6) = NULL,
-			--@dblNet AS NUMERIC(18,6) = NULL,
-			--@dblFee AS NUMERIC(18,6) = NULL
-		
+
 		DECLARE @CursorTran AS CURSOR
 
-		SET @CursorTran = CURSOR FOR
-		SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCC.intVendorDefaultId
-		FROM tblCCImportDealerCreditCardReconDetail DCCD
-		INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
-		WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1 
+		IF(@ysnAdjustment = 0)
+		BEGIN
+			SET @CursorTran = CURSOR FOR
+			SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCC.intVendorDefaultId
+			FROM tblCCImportDealerCreditCardReconDetail DCCD
+			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
+			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1 AND DCCD.intSubImportFileHeaderId IS NULL
+		END
+		ELSE
+		BEGIN
+			SET @CursorTran = CURSOR FOR
+			SELECT DCCD.intImportDealerCreditCardReconDetailId, DCCD.strSiteNumber, DCC.intVendorDefaultId
+			FROM tblCCImportDealerCreditCardReconDetail DCCD
+			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
+			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1 AND DCCD.intSubImportFileHeaderId IS NOT NULL
+		END
 
 		BEGIN TRANSACTION
 
@@ -54,7 +62,26 @@ BEGIN
 			END
 			ELSE
 			BEGIN
-				UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+				IF(@ysnAdjustment = 0)
+				BEGIN
+					UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+				END
+				ELSE
+				BEGIN
+					IF EXISTS(SELECT TOP 1 1 FROM tblCCImportDealerCreditCardReconDetail WHERE strSiteNumber = @strSiteNumber)
+					BEGIN
+						DECLARE @dtmAdjProcessDate DATETIME
+						SELECT TOP 1 @dtmAdjProcessDate = dtmTransactionDate FROM tblCCImportDealerCreditCardReconDetail 
+						WHERE strSiteNumber = @strSiteNumber
+						
+						UPDATE tblCCImportDealerCreditCardReconDetail SET intSiteId = @intSiteId, dtmTransactionDate = @dtmAdjProcessDate 
+						WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+					END
+					ELSE
+					BEGIN
+						UPDATE tblCCImportDealerCreditCardReconDetail SET strMessage = 'Invalid Adjustment', ysnValid = 0 WHERE intImportDealerCreditCardReconDetailId = @intImportDealerCreditCardReconDetailId
+					END
+				END
 			END
 
 			FETCH NEXT FROM @CursorTran INTO @intImportDealerCreditCardReconDetailId, @strSiteNumber, @intVendorDefaultId
@@ -62,34 +89,37 @@ BEGIN
 		CLOSE @CursorTran
 		DEALLOCATE @CursorTran
 
-		-- CHECK IF HAS DIFFERENT TRANSACTION DATE
-		IF ((SELECT COUNT(*) FROM (SELECT COUNT(DCCD.dtmTransactionDate) CNT FROM tblCCImportDealerCreditCardReconDetail DCCD INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId WHERE DCC.guidImportIdentifier = @guidImportIdentifier) A) > 1)
+		IF(@ysnAdjustment = 0)
 		BEGIN
-			UPDATE DCCD SET DCCD.strMessage = ', Has different date with other transaction' FROM tblCCImportDealerCreditCardReconDetail DCCD 
-			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId 
-			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 0
+			-- CHECK IF HAS DIFFERENT TRANSACTION DATE
+			IF ((SELECT COUNT(*) FROM (SELECT COUNT(DCCD.dtmTransactionDate) CNT FROM tblCCImportDealerCreditCardReconDetail DCCD INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId WHERE DCC.guidImportIdentifier = @guidImportIdentifier) A) > 1)
+			BEGIN
+				UPDATE DCCD SET DCCD.strMessage = ', Has different date with other transaction' FROM tblCCImportDealerCreditCardReconDetail DCCD 
+				INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId 
+				WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 0
 
-			UPDATE DCCD SET DCCD.strMessage = 'Has different date with other transaction', DCCD.ysnValid = 0 
-			FROM tblCCImportDealerCreditCardReconDetail DCCD 
-			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId 
-			WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1
+				UPDATE DCCD SET DCCD.strMessage = 'Has different date with other transaction', DCCD.ysnValid = 0 
+				FROM tblCCImportDealerCreditCardReconDetail DCCD 
+				INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId 
+				WHERE DCC.guidImportIdentifier = @guidImportIdentifier AND DCCD.ysnValid = 1
+			END
 		END
 
 		-- SUM the Batches to get the Gross, Net, Fees - Applicable for Conoco Philips and DCC - Citgo Format only
 		IF EXISTS(SELECT TOP 1 1 FROM tblCCImportDealerCreditCardRecon DCC 
 		INNER JOIN tblSMImportFileHeader FH ON FH.intImportFileHeaderId = DCC.intImportFileHeaderId
 		WHERE DCC.guidImportIdentifier = @guidImportIdentifier 
-		AND FH.strLayoutTitle IN ('DCC - Conoco Philips Format', 'DCC - Citgo Format'))
+		AND FH.strLayoutTitle IN ('DCC - Conoco Philips Format', 'DCC - Citgo Format', 'DCC - Marathon Format', 'DCC - Marathon Adjustment Format'))
 		BEGIN
 			UPDATE D SET D.dblGross = A.dblGross, D.dblNet = A.dblNet, D.dblFee = A.dblFee  
 			FROM tblCCImportDealerCreditCardReconDetail D INNER JOIN
-			(
-			SELECT DCCD.intImportDealerCreditCardReconId, DCCD.intSiteId, DCCD.dtmTransactionDate, SUM(DCCD.dblBatchGross) dblGross, SUM(DCCD.dblBatchNet) dblNet, SUM(DCCD.dblBatchFee) dblFee
-			FROM tblCCImportDealerCreditCardReconDetail DCCD
-			INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
-			WHERE DCC.guidImportIdentifier = @guidImportIdentifier 
-			GROUP BY DCCD.intImportDealerCreditCardReconId, DCCD.intSiteId, DCCD.dtmTransactionDate
-			) A ON A.intImportDealerCreditCardReconId = D.intImportDealerCreditCardReconId
+				(
+				SELECT DCCD.intImportDealerCreditCardReconId, DCCD.intSiteId, DCCD.dtmTransactionDate, SUM(DCCD.dblBatchGross) dblGross, SUM(DCCD.dblBatchNet) dblNet, SUM(DCCD.dblBatchFee) dblFee
+				FROM tblCCImportDealerCreditCardReconDetail DCCD
+				INNER JOIN tblCCImportDealerCreditCardRecon DCC ON DCC.intImportDealerCreditCardReconId = DCCD.intImportDealerCreditCardReconId
+				WHERE DCC.guidImportIdentifier = @guidImportIdentifier 
+				GROUP BY DCCD.intImportDealerCreditCardReconId, DCCD.intSiteId, DCCD.dtmTransactionDate
+				) A ON A.intImportDealerCreditCardReconId = D.intImportDealerCreditCardReconId
 			AND A.intSiteId = D.intSiteId
 			AND A.dtmTransactionDate = D.dtmTransactionDate
 		END

@@ -14,7 +14,7 @@ with lgLoad1 as
       LO.strBLNumber,
 	  strLoadShippingLine = SL.strName,
 	  LO.intShipmentType,
-	  strShipmentType = 'Shipment',
+	  strShipmentType = 'Shipment' COLLATE Latin1_General_CI_AS,
 	  strContainerNumber = LD.strContainerNumbers,
 	  LO.dtmStuffingDate,
       LO.dtmETAPOL, 

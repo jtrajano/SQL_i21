@@ -4,6 +4,8 @@
 	strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL,
 	dtmCreatedDate DATETIME NULL DEFAULT(GETDATE()),
 	strBucketType NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	intActionId INT NULL,
+	strAction NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
 	intTransactionRecordId INT NULL,
 	intTransactionRecordHeaderId INT NULL,
@@ -22,7 +24,7 @@
 	intBookId INT NULL,
 	intSubBookId INT NULL,
 	intLocationId INT NULL,
-	strInOut NVARCHAR(20) NULL,
+	strInOut NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
 	dblOrigNoOfLots DECIMAL(24, 10) NULL DEFAULT((0)),
 	dblContractSize DECIMAL(24, 10) NULL DEFAULT((0)),
 	dblOrigQty DECIMAL(24, 10) NULL DEFAULT((0)),
@@ -34,7 +36,7 @@
 	strNotes NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	strMiscField NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
     [ysnNegate] BIT NULL DEFAULT ((0)), 
-    [intRefSummaryLogId] INT NULL, 
+    [intRefSummaryLogId] INT NULL,
     [intConcurrencyId] INT NULL DEFAULT ((1)), 
     CONSTRAINT [PK_tblRKSummaryLog] PRIMARY KEY ([intSummaryLogId])
 )

@@ -372,15 +372,13 @@ BEGIN TRY
 					END
 				END
 
-				IF @dblGrossWeight = 0
-					SELECT @dblGrossWeight = @dblNetWeight
-
-				IF @dblGrossWeight > 0
-					AND @dblGrossWeight <> @dblNetWeight
-				BEGIN
-					SELECT @dblTareWeight = @dblGrossWeight - @dblNetWeight
-				END
-
+				--IF @dblGrossWeight = 0
+				--	SELECT @dblGrossWeight = @dblNetWeight
+				--IF @dblGrossWeight > 0
+				--	AND @dblGrossWeight <> @dblNetWeight
+				--BEGIN
+				--	SELECT @dblTareWeight = @dblGrossWeight - @dblNetWeight
+				--END
 				IF @dblCost >= 0
 					AND ISNULL(@strCostUOM, '') <> ''
 					AND ISNULL(@strCostCurrency, '') <> ''
@@ -462,6 +460,7 @@ BEGIN TRY
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
 					AND L.intShipmentType = 1
 					AND LD.intPContractDetailId = @intContractDetailId
+					AND L.intShipmentStatus <> 10
 
 				IF ISNULL(@intLoadId, 0) = 0
 				BEGIN
@@ -598,7 +597,7 @@ BEGIN TRY
 					,CL.intItemUOMId
 					,IU.intItemUOMId
 					,@dblCost
-					,@dblGrossWeight
+					,RI.dblNetWeight + ISNULL(C.dblTareWt, 0)
 					,RI.dblNetWeight
 					,1
 					,(dbo.[fnCTConvertQtyToTargetItemUOM](IU.intItemUOMId, @intCostItemUOMId, RI.dblNetWeight)) * (
@@ -634,6 +633,7 @@ BEGIN TRY
 				JOIN tblCTContractDetail CT ON CT.intContractDetailId = LD.intPContractDetailId
 				JOIN tblLGLoadDetailContainerLink CL ON CL.intLoadDetailId = LD.intLoadDetailId
 					AND CL.intLoadContainerId = @intLoadContainerId
+				JOIN tblLGLoadContainer C ON C.intLoadContainerId = CL.intLoadContainerId
 				--Join tblSMCurrency cr on ct.intCurrencyId=cr.intCurrencyID
 				WHERE RI.intStageReceiptItemId = @intStageReceiptItemId
 
@@ -662,6 +662,7 @@ BEGIN TRY
 					,dblTareWeight
 					,intConcurrencyId
 					,strContainerNo
+					,strCondition
 					,dtmDateCreated
 					,intCreatedByUserId
 					)
@@ -673,9 +674,16 @@ BEGIN TRY
 					,RI.intUnitMeasureId
 					,RI.dblUnitCost
 					,RI.dblGross
-					,@dblTareWeight
+					,ISNULL(C.dblTareWt, 0)
 					,1
 					,C.strContainerNumber
+					,(
+						CASE 
+							WHEN RI.dblNet > C.dblNetWt
+								THEN 'Clean Wgt'
+							ELSE NULL
+							END
+						)
 					,GETUTCDATE()
 					,@intEntityId
 				FROM tblICInventoryReceiptItem RI

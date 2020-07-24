@@ -939,7 +939,16 @@ BEGIN TRY
 			WHERE intRecordId = @intNewFutOptTransactionHeaderId
 				AND intScreenId = @intScreenId
 
-			INSERT INTO tblRKFutOptTransactionHeaderAckStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKFutOptTransactionHeaderAckStage (
 				intFutOptTransactionHeaderId
 				,dtmTransactionDate
 				,strAckHeaderXML
@@ -960,7 +969,31 @@ BEGIN TRY
 				,@strAckFutOptTransactionXML
 				,@strRowState
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@intMultiCompanyId
+				,@strTransactionType
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewFutOptTransactionHeaderId INT
+					,@dtmTransactionDate DATETIME
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckFutOptTransactionXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strTransactionType NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewFutOptTransactionHeaderId
+				,@dtmTransactionDate
+				,@strAckHeaderXML
+				,@strAckFutOptTransactionXML
+				,@strRowState
 				,@intMultiCompanyId
 				,@strTransactionType
 				,@intTransactionId

@@ -36,7 +36,7 @@ FROM
     A
  CROSS APPLY 
  (
-	SELECT strTransactionId , abs(dblAmount) dblAmount
+	SELECT strTransactionId , dblAmount
     FROM dbo.fnCMGetReconGridResult(@intBankAccountId,@dtmStatementDate,A.ysnPayment,A.ysnCheckVoid,A.ysnClr,ysnClrOrig, ysnCheckVoidOrig) 
  )B
 

@@ -5,7 +5,7 @@ CHK.strRecordNo,
 CHK.intTransactionId,
 CHK.intBankAccountId, 
 strCompanyName = COMPANY.strCompanyName,
-strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity,COMPANY.strState,COMPANY.strZip),
+strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress, COMPANY.strCity,COMPANY.strState,COMPANY.strZip) COLLATE Latin1_General_CI_AS,
 strBank = UPPER (Bank.strBankName),
 strCustomerName = CHK.strName, 
 strCustomerAddress = 
@@ -13,7 +13,7 @@ strCustomerAddress =
         LOCATION.strZipCode),'') <> '' 
     THEN dbo.fnConvertToFullAddress (LOCATION.strAddress,LOCATION.strCity, LOCATION.strState, LOCATION.strZipCode) 
     ELSE '' 
-    END, 
+    END COLLATE Latin1_General_CI_AS, 
 INV.strInvoiceNumber,
 dtmDetailDate = INV.dtmDate, 
 strComment = INV.strComments,

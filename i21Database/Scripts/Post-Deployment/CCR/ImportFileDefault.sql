@@ -694,3 +694,147 @@ END
 
 GO
 
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
+
+-- Marathon Format
+SET @LayoutTitle = 'DCC - Marathon Format'
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	PRINT ('DCC - Marathon Format')
+
+	INSERT INTO tblSMImportFileHeader (strLayoutTitle
+		, strFileType
+		, strFieldDelimiter
+		, ysnActive
+		, intConcurrencyId)
+	VALUES (@LayoutTitle
+		, 'Delimiter'
+		, 'Comma'
+		, 1
+		, 1)
+
+	SET @FileHeaderId = SCOPE_IDENTITY()
+
+	-- Site Number
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Site Number', 1, 0, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 1, 'tblCCImportDealerCreditCardReconDetail', 'strSiteNumber', 1, 1)
+
+	-- Transaction Date
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Transaction Date', 1, 6, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 2, 'tblCCImportDealerCreditCardReconDetail', 'dtmTransactionDate', 1, 1)
+
+	-- Batch Number
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Number', 1, 5, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 3, 'tblCCImportDealerCreditCardReconDetail', 'strBatchNumber', 1, 1)
+
+	-- Batch Gross
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Gross', 1, 8, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 4, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchGross', 1, 1)
+
+	-- Batch Fee
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Fee', 1, 9, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 5, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchFee', 1, 1)
+
+	-- Batch Net
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Net', 1, 10, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 6, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchNet', 1, 1)
+
+END
+
+GO
+
+DECLARE @LayoutTitle NVARCHAR(100)
+	, @FileHeaderId INT = NULL
+	, @DetailId INT = NULL
+	
+-- Marathon Adjustment Format 
+SET @LayoutTitle = 'DCC - Marathon Adjustment Format'
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle)
+BEGIN
+	PRINT ('DCC - Marathon Adjustment Format')
+
+	INSERT INTO tblSMImportFileHeader (strLayoutTitle
+		, strFileType
+		, strFieldDelimiter
+		, ysnActive
+		, intConcurrencyId)
+	VALUES (@LayoutTitle
+		, 'Delimiter'
+		, 'Comma'
+		, 1
+		, 1)
+
+	SET @FileHeaderId = SCOPE_IDENTITY()
+
+	-- Site Number
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Site Number', 1, 0, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 1, 'tblCCImportDealerCreditCardReconDetail', 'strSiteNumber', 1, 1)
+
+	-- Batch Number
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Number', 1, 8, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 2, 'tblCCImportDealerCreditCardReconDetail', 'strBatchNumber', 1, 1)
+
+	-- Batch Gross
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Gross', 1, 2, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 3, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchGross', 1, 1)
+
+	-- Batch Net
+	INSERT INTO tblSMImportFileRecordMarker (intImportFileHeaderId, strRecordMarker, intRowsToSkip, intPosition, intConcurrencyId) 
+	VALUES (@FileHeaderId, 'Batch Net', 1, 2, 1)
+
+	SET @DetailId = SCOPE_IDENTITY()
+
+	INSERT INTO tblSMImportFileColumnDetail (intImportFileHeaderId, intImportFileRecordMarkerId, intLevel, strTable, strColumnName, ysnActive, intConcurrencyId)
+	VALUES (@FileHeaderId, @DetailId, 4, 'tblCCImportDealerCreditCardReconDetail', 'dblBatchNet', 1, 1)
+
+END
+
+GO
+

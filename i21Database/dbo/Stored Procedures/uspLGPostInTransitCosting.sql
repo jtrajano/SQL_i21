@@ -24,14 +24,12 @@ BEGIN TRY
 	DECLARE @intPContractDetailId INT
 	DECLARE @intItemLocationId INT
 	DECLARE @intDestinationFOBPointId INT
-	DECLARE @ysnCancel BIT
 	DECLARE @ysnIsReturn BIT = 0
 	DECLARE @strCMActualCostId NVARCHAR(100)
 
 	SELECT @strBatchIdUsed = strBatchId
 		,@strLoadNumber = strLoadNumber
 		,@strFOBPoint = FT.strFobPoint
-		,@ysnCancel = ISNULL(L.ysnCancelled, 0)
 	FROM dbo.tblLGLoad L
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 	LEFT JOIN tblICFobPoint FP ON FP.strFobPoint = FP.strFobPoint
@@ -127,7 +125,7 @@ BEGIN TRY
 						LD.dblNet
 					ELSE 
 						LD.dblQuantity
-				END * CASE WHEN (@ysnCancel = 1) THEN -1 ELSE 1 END
+				END
 			,dblUOMQty = IU.dblUnitQty
 			,dblCost = dbo.fnMultiply(
 								dbo.fnCalculateCostBetweenUOM(
@@ -169,7 +167,7 @@ BEGIN TRY
 			,intTransactionTypeId = 22
 			,intLotId = NULL
 			,intSourceTransactionId = L.intLoadId
-			,strSourceTransactionId = CASE WHEN (@ysnIsReturn = 1 AND @ysnCancel = 1) THEN @strCMActualCostId ELSE L.strLoadNumber END
+			,strSourceTransactionId = L.strLoadNumber
 			,intSourceTransactionDetailId = LD.intLoadDetailId
 			,intFobPointId = CASE WHEN L.intPurchaseSale = 3 THEN @intDestinationFOBPointId ELSE FP.intFobPointId END
 			,intInTransitSourceLocationId = IL.intItemLocationId
@@ -323,16 +321,6 @@ BEGIN TRY
 
 			EXEC dbo.uspGLBookEntries @GLEntries
 				,@ysnPost
-
-			--SELECT TOP 1 @intItemLocationId = intItemLocationId
-			--FROM @ItemsToPost
-			--WHERE strTransactionId = @strLoadNumber
-			--	AND intTransactionId = @intLoadId
-
-			--UPDATE tblICInventoryTransaction
-			--SET intItemLocationId = @intItemLocationId
-			--WHERE intTransactionId = @intLoadId
-			--	AND strTransactionId = @strLoadNumber
 		END
 	END
 	ELSE
@@ -441,11 +429,10 @@ BEGIN
 		,[intItemUOMId] = LD.intItemUOMId
 		,[intWeightUOMId] = LD.intWeightItemUOMId
 		,[dblQty] = CASE 
-					WHEN @ysnPost = 1 AND ISNULL(L.ysnCancelled, 0) = 0
+					WHEN @ysnPost = 1
 						THEN LD.dblQuantity
 					ELSE -1 * LD.dblQuantity
 					END
-					--* CASE WHEN (L.ysnCancelled = 1) THEN -1 ELSE 1 END
 		,[dblUOMQty] = IU.dblUnitQty
 		,[dblCost] = CD.dblCashPrice
 		,[intLineNo] = ISNULL(LD.intPContractDetailId, 0)

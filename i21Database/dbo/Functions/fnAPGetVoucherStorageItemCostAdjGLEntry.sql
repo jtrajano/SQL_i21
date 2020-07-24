@@ -8,10 +8,10 @@ RETURNS TABLE AS RETURN
 		B.intBillDetailId
 		,B.strMiscDescription
 		,CAST((CASE	WHEN A.intTransactionType IN (1) 
-				THEN (B.dblTotal - storageOldCost.dblPaidAmount * ISNULL(NULLIF(B.dblRate,0),1)) 
+				THEN (B.dblTotal  - round((storageOldCost.dblOldCost * B.dblQtyReceived), 2)  * ISNULL(NULLIF(B.dblRate,0),1)) 
 			ELSE 0 END) AS  DECIMAL(18, 2)) AS dblTotal
 		,CAST((CASE	WHEN A.intTransactionType IN (1) 
-				THEN (B.dblTotal - storageOldCost.dblPaidAmount) 
+				THEN (B.dblTotal - round((storageOldCost.dblOldCost * B.dblQtyReceived), 2) ) 
 			ELSE 0 END) AS  DECIMAL(18, 2)) AS dblForeignTotal
 		,0 as dblTotalUnits
 		,[dbo].[fnGetItemGLAccount](B.intItemId, loc.intItemLocationId, 'AP Clearing') AS intAccountId
@@ -31,7 +31,8 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
 	OUTER APPLY (
 		SELECT TOP 1
-			storageHistory.dblPaidAmount
+			storageHistory.dblPaidAmount,
+			storageHistory.dblOldCost
 		FROM tblGRSettleStorage storage 
 		INNER JOIN tblGRSettleStorageTicket storageTicket ON storage.intSettleStorageId = storageTicket.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage customerStorage ON storageTicket.intCustomerStorageId = customerStorage.intCustomerStorageId 

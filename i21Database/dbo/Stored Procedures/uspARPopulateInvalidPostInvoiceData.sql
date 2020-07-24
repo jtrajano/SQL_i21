@@ -32,6 +32,49 @@ BEGIN
 	DECLARE @ItemsForStoragePosting [ItemCostingTableType]
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting]
 	
+	INSERT INTO #ARInvalidInvoiceData (
+		  [intInvoiceId]
+		, [strInvoiceNumber]
+		, [strTransactionType]
+		, [intInvoiceDetailId]
+		, [intItemId]
+		, [strBatchId]
+		, [strPostingError]
+	)
+	SELECT [intInvoiceId]			= I.[intInvoiceId]
+		 , [strInvoiceNumber]		= I.[strInvoiceNumber]		
+		 , [strTransactionType]		= I.[strTransactionType]
+		 , [intInvoiceDetailId]		= I.[intInvoiceDetailId] 
+		 , [intItemId]				= I.[intItemId] 
+		 , [strBatchId]				= I.[strBatchId]
+		 , [strPostingError]		= 'Negative stock quantity is not allowed for Negative Stock at In-Transit Location.'
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN (
+		SELECT DISTINCT COSTING.intTransactionId
+		     		  , COSTING.strTransactionId
+		FROM #ARItemsForInTransitCosting COSTING
+		INNER JOIN (
+			SELECT ICT.strTransactionId
+				 , ICT.intTransactionId
+				 , ICT.intTransactionDetailId
+				 , ICT.intLotId
+				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
+			FROM tblICInventoryTransaction ICT 
+			LEFT JOIN tblICInventoryActualCost IAC ON ICT.strTransactionId = IAC.strTransactionId AND ICT.intTransactionId = IAC.intTransactionId AND ICT.intTransactionDetailId = IAC.intTransactionDetailId
+			LEFT JOIN tblICInventoryLot IL ON ICT.strTransactionId = IL.strTransactionId AND ICT.intTransactionId = IL.intTransactionId AND ICT.intTransactionDetailId = IL.intTransactionDetailId AND ICT.intLotId = IL.intLotId
+			WHERE ICT.ysnIsUnposted = 0
+			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
+  			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
+			  AND ICT.intInTransitSourceLocationId IS NOT NULL
+			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intTransactionDetailId, ICT.intLotId
+		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
+		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
+			 AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
+			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
+			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
+	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
+	WHERE I.strTransactionType = 'Invoice'
+
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]

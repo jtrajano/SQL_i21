@@ -195,7 +195,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @TermId						= C.intTermsId
 					, @DueDate						= dbo.fnGetDueDateBasedOnTerm(ILD.dtmDate, C.intTermsId)
 					, @TransactionType				= ILD.strTransactionType
-					, @Type							= @Type
+					, @Type							= ISNULL(ILD.strSourceType,@Type)
 					, @Comment						= @IMPORTFORMAT_CARQUEST + ' ' + ILD.strTransactionType + ' ' + ILD.strTransactionNumber
 					, @OriginId						= ILD.strTransactionNumber
 					, @DiscountAmount				= ISNULL(ABS(ILD.dblDiscount), @ZeroDecimal)
@@ -288,7 +288,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					,@CalculatedDate				= D.dtmCalculated
 					,@PostDate						= D.dtmPostDate 
 					,@TransactionType				= D.strTransactionType
-					,@Type							= @Type
+					,@Type							= ISNULL(D.strSourceType,@Type)
 					,@Comment						= D.strTransactionNumber
 					,@OriginId						= D.strTransactionNumber
 					,@PONumber						= D.strPONumber
@@ -302,7 +302,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 													   END)
 					,@ItemQtyShipped				= 1.000000
 					,@ItemPrice						= ISNULL(D.[dblSubtotal], @ZeroDecimal)
-					,@ItemDescription				= D.strComment
+					,@ItemDescription				= D.strItemDescription
 					,@TaxGroupId					= CASE WHEN ISNULL(D.strTaxGroup, '') <> '' THEN (SELECT TOP 1 intTaxGroupId FROM tblSMTaxGroup WHERE strTaxGroup = D.strTaxGroup) ELSE 0 END
 					,@AmountDue						= CASE WHEN D.strTransactionType <> 'Sales Order' THEN ISNULL(D.dblAmountDue, @ZeroDecimal) ELSE @ZeroDecimal END
 					,@TaxAmount						= ISNULL(D.dblTax, @ZeroDecimal)
@@ -490,6 +490,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intSubCurrencyId]
 							,[dblSubCurrencyRate]
 							,[ysnUseOriginIdAsInvoiceNumber]
+
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -592,8 +593,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
-							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN @ImportFormat = @IMPORTFORMAT_CARQUEST AND (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN 1 ELSE 0 END
-				
+							,[ysnUseOriginIdAsInvoiceNumber] =   CASE WHEN  (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN CAST(1 AS BIT) ELSE CAST(1 AS BIT) END
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
 								INSERT INTO @TaxDetails(

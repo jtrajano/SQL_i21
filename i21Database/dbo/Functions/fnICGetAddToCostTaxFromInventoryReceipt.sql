@@ -1,6 +1,7 @@
 ﻿CREATE FUNCTION [dbo].[fnICGetAddToCostTaxFromInventoryReceipt] 
 ( 
 	@intInventoryReceiptItemId AS INT
+	,@intStockUOMId AS INT = NULL 
 )
 RETURNS NUMERIC(38,20)
 AS
@@ -8,6 +9,9 @@ BEGIN
 	DECLARE @totalOtherCharges AS NUMERIC(18,6)
 			,@units AS NUMERIC(18,6)
 			,@intFunctionalCurrencyId AS INT 
+			,@intItemUOMId AS INT 
+			,@intItemId AS INT 
+
 
 	-- Get the functional currency. 
 	BEGIN 
@@ -31,6 +35,8 @@ BEGIN
 					CASE	WHEN ri.intWeightUOMId IS NOT NULL THEN ISNULL(AggregrateItemLots.dblTotalNet, ri.dblNet)
 							ELSE ISNULL(ri.dblOpenReceive, 0)
 					END 
+			,@intItemUOMId = ISNULL(ri.intWeightUOMId, ri.intUnitMeasureId) 
+			,@intItemId = ri.intItemId
 	FROM	dbo.tblICInventoryReceiptItem ri 
 			OUTER APPLY (
 				SELECT  dblTotalNet = SUM(
@@ -45,6 +51,15 @@ BEGIN
 				WHERE	ReceiptItem.intInventoryReceiptItemId = ri.intInventoryReceiptItemId
 			) AggregrateItemLots
 	WHERE	ri.intInventoryReceiptItemId = @intInventoryReceiptItemId
+
+	SELECT @units = dbo.fnCalculateQtyBetweenUOM (
+				@intItemUOMId
+				,COALESCE(@intStockUOMId, @intItemUOMId)
+				,@units
+			)
+	FROM	dbo.tblICItemUOM iu
+	WHERE	iu.intItemUOMId = @intStockUOMId
+			AND iu.intItemId = @intItemId
 
 	IF ISNULL(@units, 0) <> 0 
 		RETURN 

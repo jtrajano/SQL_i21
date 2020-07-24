@@ -59,11 +59,20 @@ AS BEGIN
 					--			ELSE 1
 					--	   END intMultiplyBy
 					--	 , intDigitToCheck = SUBSTRING(@CheckString, n, 1)
-					SELECT CASE	
-							WHEN (B.n % 2) = 0
-								THEN SUBSTRING(@strUpcCode, B.n, 1) * 3
-							ELSE SUBSTRING(@strUpcCode, B.n, 1) * 1
-					   END intTotal
+					SELECT CASE
+							WHEN LEN(@strUpcCode) = 13 THEN
+							CASE
+								WHEN (B.n % 2) = 0
+									THEN SUBSTRING(@strUpcCode, B.n, 1) * 1
+								ELSE SUBSTRING(@strUpcCode, B.n, 1) * 3
+							END 
+							ELSE 
+							CASE
+								WHEN (B.n % 2) = 0
+									THEN SUBSTRING(@strUpcCode, B.n, 1) * 3
+								ELSE SUBSTRING(@strUpcCode, B.n, 1) * 1
+							END 
+						END AS intTotal
 					FROM 
 					(
 						SELECT TOP (LEN(@strUpcCode))

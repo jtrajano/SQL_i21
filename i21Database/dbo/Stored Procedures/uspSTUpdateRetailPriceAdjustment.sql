@@ -7,9 +7,13 @@
 	@ysnSuccess						BIT				OUTPUT,
 	@strMessage						NVARCHAR(1000)	OUTPUT
 AS
+
+SET ANSI_NULLS, QUOTED_IDENTIFIER ON
+SET NOCOUNT ON
+SET XACT_ABORT ON
+
 BEGIN
-	
-	SET NOCOUNT ON;
+
     DECLARE @InitTranCount INT;
     SET @InitTranCount = @@TRANCOUNT
 	DECLARE @Savepoint NVARCHAR(32) = SUBSTRING(('uspSTUpdateRetailPriceAdjustment' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
@@ -52,6 +56,25 @@ BEGIN
 					)
 			BEGIN
 				
+				-- VALIDATION
+				IF EXISTS( SELECT TOP 1 1
+					FROM tblSTRetailPriceAdjustmentDetail pad
+					INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
+						ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
+
+					WHERE pad.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
+					AND intCategoryId IS NULL
+					AND intFamilyId IS NULL
+					AND intClassId IS NULL
+					AND pad.intEntityId IS NULL
+					AND pad.intItemUOMId IS NULL
+					AND ISNULL(strRegion, '')  =  ''
+					AND ISNULL(strDistrict, '')  =  '')
+				BEGIN
+					GOTO ExitWithRollback
+				END
+
+
 				--TEST
 				--SELECT 'GETDATE()', CAST(GETDATE() AS DATE)
 
@@ -79,161 +102,246 @@ BEGIN
 				DECLARE @tblRetailPriceAdjustmentDetailIds TABLE 
 				(
 					intRetailPriceAdjustmentDetailId	INT,
-					ysnOneTimeUse						BIT
+					ysnOneTimeUse						BIT,
+					intCompanyLocationId				INT NULL,
+					intCategoryId						INT NULL,
+				    intFamilyId							INT NULL,
+					intClassId							INT NULL,
+					intEntityId							INT NULL,
+					strRegion							NVARCHAR(100) NULL,
+					strPriceMethod						NVARCHAR(100) NULL,
+					strRoundPrice						NVARCHAR(10) NULL,
+					strPriceEndingDigit					NVARCHAR(10) NULL,
+					strDistrict							NVARCHAR(100) NULL,
+					intItemUOMId						INT NULL,
+ 					dblPrice							NUMERIC(18,6) NULL, 
+					dblLastCost							NUMERIC(18,6) NULL,
+					dblFactor						NUMERIC(18,6) NULL
 				)
-
-
 
 				-- INSERT to Temp Table
 				INSERT INTO @tblRetailPriceAdjustmentDetailIds
 				(
 					intRetailPriceAdjustmentDetailId,
-					ysnOneTimeUse
+					ysnOneTimeUse,
+					intCompanyLocationId,
+					intCategoryId,
+				    intFamilyId,
+					intClassId,
+					intEntityId,
+					strRegion,
+					strPriceMethod,		
+					strRoundPrice,		
+					strPriceEndingDigit,
+					strDistrict,
+					intItemUOMId,
+ 					dblPrice, 
+					dblLastCost,
+					dblFactor
 				)
-				SELECT DISTINCT
-					intRetailPriceAdjustmentDetailId	= pad.intRetailPriceAdjustmentDetailId,
-					ysnOneTimeUse						= rpa.ysnOneTimeUse
+				SELECT
+					pad.intRetailPriceAdjustmentDetailId,
+					ysnOneTimeUse,
+					intCompanyLocationId,
+					intCategoryId,
+				    intFamilyId,
+					intClassId,
+					pad.intEntityId,
+					strRegion,
+					pad.strPriceMethod,		
+					pad.strRoundPrice,		
+					pad.strPriceEndingDigit,
+					strDistrict,
+					intItemUOMId,
+ 					dblPrice, 
+					dblLastCost,
+					pad.dblFactor
 				FROM tblSTRetailPriceAdjustmentDetail pad
 				INNER JOIN dbo.tblSTRetailPriceAdjustment rpa
 					ON pad.intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
 				WHERE pad.intRetailPriceAdjustmentId = @intRetailPriceAdjustmentId
-					AND rpa.ysnPosted = CAST(0 AS BIT) -- (pad.ysnPosted = CAST(0 AS BIT) OR pad.ysnPosted IS NULL)
-
-				--TEST
-				--SELECT '@tblRetailPriceAdjustmentDetailIds', * FROM @tblRetailPriceAdjustmentDetailIds
+					AND rpa.ysnPosted = CAST(0 AS BIT)
 
 				IF EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 					BEGIN
 
-						DECLARE @intLocationId						INT
-							, @intVendorId							INT
-							, @intCategoryId						INT
-							, @intFamilyId							INT
-							, @intClassId							INT
-							, @strUpcCode							NVARCHAR(20)
-							, @intItemId							INT
-							, @intRecordCount						INT
-							, @strDescription						NVARCHAR(250)
-							, @intItemPricingId						INT
-							, @intRetailPriceAdjustmentDetailId		INT
-							, @intItemUOMId							INT
-							, @dblRetailPrice						DECIMAL(18,6)
-							, @dblLastCost							DECIMAL(18,6)
-							, @intSavedUserId						INT
-							, @ysnOneTimeUse						BIT
-
+						DECLARE @intLocationId						INT = NULL
+							, @intVendorId							INT = NULL
+							, @intCategoryId						INT = NULL
+							, @intFamilyId							INT = NULL
+							, @intClassId							INT = NULL
+							, @intItemId							INT = NULL
+							, @intRecordCount						INT = NULL
+							, @intItemUOMId							INT = NULL
+							, @intRetailPriceAdjustmentDetailId		INT = NULL
+							, @dblRetailPrice						DECIMAL(18,6) = NULL
+							, @dblLastCostPrice						DECIMAL(18,6) = NULL
+							, @dblFactor							DECIMAL(18,6) = NULL
+							, @intSavedUserId						INT = NULL
+							, @ysnOneTimeUse						BIT = NULL 
+							, @strRegion							NVARCHAR(100) = NULL
+							, @strPriceMethod						NVARCHAR(100) = NULL
+							, @strRoundPrice						NVARCHAR(100) = NULL
+							, @strPriceEndingDigit					NVARCHAR(100) = NULL
+							, @strDistrict							NVARCHAR(100) = NULL
 
 						WHILE EXISTS(SELECT TOP 1 1 FROM @tblRetailPriceAdjustmentDetailIds)
 							BEGIN
-								
 								-- Get Primary Id
 								SELECT TOP 1 
 									@intRetailPriceAdjustmentDetailId	= intRetailPriceAdjustmentDetailId,
-									@ysnOneTimeUse						= ysnOneTimeUse
-								FROM @tblRetailPriceAdjustmentDetailIds 
-
-								--TEST
-								--SELECT TOP 1 'LOOP', * FROM @tblRetailPriceAdjustmentDetailIds 
-
-								-- GET params
-								SELECT TOP 1
-										 --@intRetailPriceAdjustmentDetailId  = PAD.intRetailPriceAdjustmentDetailId
-									   @intLocationId						= PAD.intCompanyLocationId
-									   , @intVendorId						= PAD.intEntityId
-									   , @intCategoryId						= PAD.intCategoryId
-									   , @intFamilyId						= PAD.intFamilyId
-									   , @intClassId						= PAD.intClassId
-									   , @intSavedUserId					= PAD.intModifiedByUserId
-									   , @ysnOneTimeUse						= ysnOneTimeUse
-									   , @strUpcCode						= CASE 
-																				WHEN ISNULL(UOM.strLongUPCCode, '') != ''
-																					THEN UOM.strLongUPCCode
-																				WHEN ISNULL(UOM.strUpcCode, '') != ''
-																					THEN UOM.strUpcCode
-																				ELSE NULL
-																		   END
-									   , @intItemUOMId						= UOM.intItemUOMId
-									   , @dblRetailPrice					= PAD.dblPrice 
-									   , @dblLastCost						= PAD.dblLastCost
-									   , @intItemId							= UOM.intItemId
-									   , @strDescription					= I.strDescription
-									   , @intItemPricingId					= itemPricing.intItemPricingId
-								FROM tblSTRetailPriceAdjustmentDetail PAD
-								INNER JOIN @tblRetailPriceAdjustmentDetailIds temp
-									ON PAD.intRetailPriceAdjustmentDetailId = temp.intRetailPriceAdjustmentDetailId
-								INNER JOIN tblICItemUOM UOM
-									ON PAD.intItemUOMId = UOM.intItemUOMId
-								INNER JOIN tblICItem I
-									ON UOM.intItemId = I.intItemId
-								INNER JOIN tblICItemLocation itemLoc
-									ON I.intItemId = itemLoc.intItemId
-										AND PAD.intCompanyLocationId = itemLoc.intLocationId
-								INNER JOIN tblICItemPricing itemPricing
-									ON I.intItemId	= itemPricing.intItemId
-										AND itemLoc.intItemLocationId = itemPricing.intItemLocationId
-								WHERE PAD.intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
-
-				
+									@ysnOneTimeUse						= ysnOneTimeUse,
+									@intLocationId						= intCompanyLocationId,
+									@intCategoryId						= intCategoryId,
+									@intFamilyId						= intFamilyId,
+									@intClassId							= intClassId,
+									@intVendorId						= intEntityId,
+									@strRegion							= ISNULL(strRegion, ''),
+									@strPriceMethod						= strPriceMethod,
+									@strRoundPrice						= strRoundPrice,
+									@strPriceEndingDigit				= strPriceEndingDigit,
+									@strDistrict						= ISNULL(strDistrict, ''),
+									@intItemUOMId						= intItemUOMId,
+ 									@dblRetailPrice						= dblPrice, 
+									@dblLastCostPrice					= dblLastCost,
+									@dblFactor							= dblFactor
+								FROM @tblRetailPriceAdjustmentDetailIds
 
 								DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@dblRetailPrice AS NUMERIC(38, 20))
-								DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCost AS NUMERIC(38, 20))
+								DECLARE @dblLastCostConv AS NUMERIC(38, 20) = CAST(@dblLastCostPrice AS NUMERIC(38, 20))
 
 								SET @intCurrentUserId = ISNULL(@intCurrentUserId, @intSavedUserId)
 
-								-- ITEM PRICING
-								BEGIN TRY
-									EXEC [uspICUpdateItemPricingForCStore]
-										-- filter params
-										@strUpcCode					= @strUpcCode 
-										,@strDescription			= @strDescription 
-										,@intItemId					= @intItemId 
-										,@intItemPricingId			= @intItemPricingId 
-										-- update params
-										,@dblStandardCost			= NULL 
-										,@dblRetailPrice			= @dblRetailPriceConv 
-										,@dblLastCost				= @dblLastCostConv
-										,@intEntityUserSecurityId	= @intCurrentUserId
+								DECLARE @CursorTran AS CURSOR
+								SET @CursorTran = CURSOR FOR
+								SELECT DISTINCT I.intItemId
+									, itemPricing.intItemPricingId
+									, UOM.strLongUPCCode
+									, I.strDescription
+									, itemPricing.dblStandardCost
+									, itemPricing.dblSalePrice
+									, itemPricing.dblLastCost
+								FROM tblICItem I
+								INNER JOIN tblICItemLocation itemLoc ON itemLoc.intItemId = I.intItemId
+								INNER JOIN tblICItemPricing itemPricing ON I.intItemId	= itemPricing.intItemId
+									AND itemLoc.intItemLocationId = itemPricing.intItemLocationId
+								INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = itemLoc.intLocationId
+								INNER JOIN tblAPVendor Vendor ON Vendor.intEntityId = itemLoc.intVendorId
+								INNER JOIN tblSTStore ST ON ST.intCompanyLocationId = itemLoc.intLocationId
+								INNER JOIN tblICItemUOM UOM ON UOM.intItemId = I.intItemId
+								INNER JOIN tblICCategory CAT ON CAT.intCategoryId = I.intCategoryId
+								LEFT JOIN tblSTSubcategory FAMILY ON FAMILY.intSubcategoryId = itemLoc.intFamilyId
+								LEFT JOIN tblSTSubcategory CLASS ON CLASS.intSubcategoryId = itemLoc.intClassId
+								WHERE (@intLocationId IS NULL OR (CL.intCompanyLocationId = @intLocationId))
+								AND (@intVendorId IS NULL OR (Vendor.intEntityId = @intVendorId))
+								AND (@strRegion = '' OR (ST.strRegion = @strRegion))
+								AND (@strDistrict = '' OR (ST.strDistrict = @strDistrict))
+								AND (@intItemUOMId IS NULL OR (UOM.intItemUOMId = @intItemUOMId))
+								AND (@intCategoryId IS NULL OR (CAT.intCategoryId = @intCategoryId))
+								AND (@intFamilyId IS NULL OR (FAMILY.intSubcategoryId = @intFamilyId))
+								AND (@intClassId IS NULL OR (CLASS.intSubcategoryId = @intClassId))
+								AND UOM.strLongUPCCode IS NOT NULL
+								AND itemPricing.intItemPricingId IS NOT NULL
 
-									-- TEST
-									--SELECT '@intItemPricingId', * FROM tblICItemPricing WHERE intItemPricingId = @intItemPricingId
-									--SELECT '#tmpUpdateItemPricingForCStore_ItemPricingAuditLog', * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 
-									-- Check if Successfull
-									IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intItemPricingId)
-										BEGIN 
+								DECLARE @strProcessLongUpcCode NVARCHAR(50) = NULL,
+									 @intProcessItemId INT = NULL,
+									 @intProcessLocationId INT = NULL,
+									 @intProcessItemPricingId INT = NULL,
+									 @strProcessDescription NVARCHAR(500) = NULL,
+									 @dblStandardCost NVARCHAR(500) = NULL,
+									 @dblSalePrice NVARCHAR(500) = NULL,
+									 @dblLastCost NVARCHAR(500) = NULL,
+									 @dblFirst NVARCHAR(500) = NULL,
+									 @intSecond NVARCHAR(500) = NULL,
+									 @dblRetailPriceConvCopy  AS NUMERIC(38, 20) = @dblRetailPriceConv
 
-											--SET @ysnSuccess = CAST(1 AS BIT)
-											SET @intSuccessPostCount = @intSuccessPostCount + 1
+								OPEN @CursorTran
+								FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
+								WHILE @@FETCH_STATUS = 0
+								BEGIN
+									-- ITEM PRICING
+									BEGIN TRY
 
-											--IF(@ysnOneTimeUse = CAST(1 AS BIT))
-											--	BEGIN
 
-											--		UPDATE tblSTRetailPriceAdjustmentDetail
-											--		SET ysnPosted = 1
-											--		WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
+									SET @dblFactor = ISNULL(@dblFactor, 0);
+									SET @dblSalePrice = ROUND(@dblSalePrice, 2)
+									
+									IF ISNULL(@dblRetailPriceConvCopy, 0) = 0
+										BEGIN
+											SET @dblRetailPriceConv = CASE WHEN @strPriceMethod = 'Sell + Amount'
+																			  THEN @dblSalePrice + @dblFactor
+																		   WHEN @strPriceMethod = 'Sell + Percent'
+																		      THEN @dblSalePrice * (1 +(@dblFactor / 100))
+																		   WHEN @strPriceMethod = 'Gross Margin' AND @dblStandardCost > 0 
+																		      THEN @dblStandardCost / (1 - (@dblFactor / 100))
+																		   WHEN @strPriceMethod = 'Gross Margin' AND @dblStandardCost = 0 
+																		      THEN @dblLastCost / (1 - (@dblFactor / 100))
 
-											--	END
-										
+																	  END
+											SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
+
+											IF @strRoundPrice = 'Yes'
+												BEGIN
+													SET @intSecond = SUBSTRING(CONVERT(VARCHAR, @dblRetailPriceConv), LEN(@dblSalePrice), 1);
+													SET @dblFirst = SUBSTRING(CONVERT(VARCHAR, @dblRetailPriceConv), 1, LEN(@dblSalePrice) - 1);
+													
+													IF @intSecond <= @strPriceEndingDigit
+														BEGIN 
+															SET @intSecond = @strPriceEndingDigit
+														END
+													ELSE 
+														BEGIN
+															SET @dblFirst = CONVERT(DECIMAL(38, 1), @dblFirst)  + .1;
+															SET @intSecond = @strPriceEndingDigit
+														END
+
+													--Final value for Retail Price
+													SET @dblRetailPriceConv = CONVERT(VARCHAR,@dblFirst) + CONVERT(VARCHAR, @intSecond)
+												END
 										END
-									ELSE
+
+
+										SET @dblRetailPriceConv = ROUND(@dblRetailPriceConv, 2)
+										EXEC [uspICUpdateItemPricingForCStore]
+											-- filter params
+											@strUpcCode					= @strProcessLongUpcCode 
+											,@strDescription			= @strProcessDescription 
+											,@intItemId					= @intProcessItemId
+											,@intItemPricingId			= @intProcessItemPricingId 
+											-- update params
+											,@dblStandardCost			= NULL 
+											,@dblRetailPrice			= @dblRetailPriceConv
+											,@dblLastCost				= @dblLastCostConv
+											,@intEntityUserSecurityId	= @intCurrentUserId
+			
+										-- Check if Successfull
+										IF EXISTS(SELECT TOP 1 1 FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog WHERE intItemPricingId = @intProcessItemPricingId)
+										BEGIN 
+											SET @intSuccessPostCount = @intSuccessPostCount + 1
+										END
+										ELSE
 										BEGIN
 											SET @intFailedPostCount = @intFailedPostCount + 1
-										END
+										END				
 
-								END TRY
-								BEGIN CATCH
-									SET @ysnSuccess = CAST(0 AS BIT)
+									END TRY
+									BEGIN CATCH
+										SET @ysnSuccess = CAST(0 AS BIT)
+										SET @strMessage = 'uspICUpdateItemPricingForCStore: ' + ERROR_MESSAGE()
+										GOTO ExitWithRollback
+									END CATCH
 
-									SET @strMessage = 'uspICUpdateItemPricingForCStore: ' + ERROR_MESSAGE()
-
-									GOTO ExitWithRollback
-								END CATCH
+									FETCH NEXT FROM @CursorTran INTO @intProcessItemId, @intProcessItemPricingId, @strProcessLongUpcCode, @strProcessDescription, @dblStandardCost, @dblSalePrice, @dblLastCost
+								END
+								
+								CLOSE @CursorTran  
+								DEALLOCATE @CursorTran
 
 								-- Flag as processed
 								DELETE FROM @tblRetailPriceAdjustmentDetailIds
 								WHERE intRetailPriceAdjustmentDetailId = @intRetailPriceAdjustmentDetailId
 							END
-
 						
 						IF(@intSuccessPostCount > 0)
 							BEGIN
@@ -472,9 +580,8 @@ ExitWithRollback:
 			END
 			
 				
-		
-		
 	
 
 		
 ExitPost:
+GO

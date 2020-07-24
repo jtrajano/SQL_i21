@@ -18,22 +18,28 @@ BEGIN
 				-- CREATE
 				DECLARE @tempRetailPriceAdjustment TABLE 
 				(
-					intRetailPriceAdjustmentId INT
+					intRetailPriceAdjustmentId INT,
+					intModifiedByUserId INT
 				)
 
 
 				-- INSERT
 				INSERT INTO @tempRetailPriceAdjustment
 				(
-					intRetailPriceAdjustmentId
+					intRetailPriceAdjustmentId,
+					intModifiedByUserId
 				)
 				SELECT DISTINCT
-					intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId
-				FROM tblSTRetailPriceAdjustment rpa
+					intRetailPriceAdjustmentId = rpa.intRetailPriceAdjustmentId,
+					intModifiedByUserId = rpad.intModifiedByUserId
+				FROM tblSTRetailPriceAdjustment rpa 
+					INNER JOIN tblSTRetailPriceAdjustmentDetail rpad 
+						ON rpa.intRetailPriceAdjustmentId = rpad.intRetailPriceAdjustmentId
 				WHERE CAST(rpa.dtmEffectiveDate AS DATE) = @dtmDateNow
 
 
 				DECLARE @intRetailPriceAdjustmentId		INT 
+				DECLARE @intModifiedByUserId		INT 
 
 
 				WHILE EXISTS(SELECT TOP 1 1 FROM @tempRetailPriceAdjustment)
@@ -41,12 +47,13 @@ BEGIN
 						
 						---- GET PRIMARY KEY
 						SELECT TOP 1 
-							@intRetailPriceAdjustmentId = intRetailPriceAdjustmentId
+							@intRetailPriceAdjustmentId = intRetailPriceAdjustmentId,
+							@intModifiedByUserId = intModifiedByUserId
 						FROM @tempRetailPriceAdjustment
 
 						EXEC [uspSTUpdateRetailPriceAdjustment]
 							@intRetailPriceAdjustmentId		= @intRetailPriceAdjustmentId,
-							@intCurrentUserId				= NULL,
+							@intCurrentUserId				= @intModifiedByUserId,
 							@ysnHasPreviewReport			= 0,
 							@ysnRecap						= 0,
 							@ysnBatchPost					= 1,

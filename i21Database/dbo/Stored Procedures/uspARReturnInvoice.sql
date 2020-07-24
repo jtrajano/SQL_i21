@@ -5,7 +5,6 @@
 	,@ysnRaiseError			BIT				= 0
 	,@intNewInvoiceId		INT				= NULL	OUTPUT
 	,@strErrorMessage		NVARCHAR(250)	= NULL	OUTPUT
-	,@ysnReversal			BIT				= 0
 AS
 
 SET QUOTED_IDENTIFIER OFF  
@@ -89,7 +88,6 @@ BEGIN TRY
 		,[ysnResetDetails]
 		,[ysnRecap]
 		,[ysnPost]
-		,[ysnReversal]
 		,[ysnUpdateAvailableDiscount]
 		--Detail																																															
 		,[intInvoiceDetailId]
@@ -225,7 +223,6 @@ BEGIN TRY
 		,[ysnResetDetails]						= 0
 		,[ysnRecap]								= NULL
 		,[ysnPost]								= NULL
-		,[ysnReversal]							= ISNULL(@ysnReversal, 0)
 		,[ysnUpdateAvailableDiscount]			= 0
 		--Detail																																															
 		,[intInvoiceDetailId]					= NULL
@@ -417,8 +414,7 @@ IF ISNULL(@strInvoiceDetailIds, '') = ''
 	END
 
 UPDATE ARID 
-SET ysnReturned = 1
-  , ysnReversed = ISNULL(@ysnReversal, 0) 
+SET ysnReturned = 1 
 FROM tblARInvoiceDetail ARID
 INNER JOIN @InvoiceDetails ID ON ARID.intInvoiceDetailId = ID.intInvoiceDetailId
 WHERE ARID.intInvoiceId = @intInvoiceId

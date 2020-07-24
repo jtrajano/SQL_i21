@@ -133,6 +133,7 @@ FROM	tblGLFiscalYearPeriod f
 		) ItemLocation
 		LEFT JOIN tblICItemPricing ItemPricing 
 			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+			AND ItemPricing.intItemId = Item.intItemId
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL 
-	AND (f.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL)
+	AND (f.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 

@@ -13,6 +13,7 @@ BEGIN
 		, @strTransactionType NVARCHAR(100)
 		, @strTransactionReference NVARCHAR(100)
 		, @intTransactionReferenceId INT
+		, @intTransactionReferenceDetailId INT
 		, @strTransactionReferenceNo NVARCHAR(100)
 		, @intContractDetailId INT
 		, @intContractHeaderId INT
@@ -38,6 +39,9 @@ BEGIN
 		, @intBookId INT
 		, @intSubBookId INT
 		, @strNotes NVARCHAR(100)
+		, @intUserId INT
+		, @intActionId INT
+		, @strProcess NVARCHAR(100)
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpLogItems WHERE ISNULL(strBatchId, '') = '')
@@ -55,6 +59,7 @@ BEGIN
 		, [strTransactionType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [strTransactionReference] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intTransactionReferenceId] INT NOT NULL
+		, [intTransactionReferenceDetailId] INT NULL
 		, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [intContractDetailId] INT NOT NULL
 		, [intContractHeaderId] INT NOT NULL
@@ -83,7 +88,10 @@ BEGIN
 		, [intSubBookId] INT NULL
 		, [strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 		, [ysnNegated] BIT DEFAULT((0)) NULL
-		, [intRefContractBalanceId] INT NULL)
+		, [intRefContractBalanceId] INT NULL
+		, [intUserId] INT NULL
+		, [intActionId] INT NULL
+		, [strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL)
 
 	--DECLARE @PrevLog AS TABLE ([intContractBalanceLogId] INT
 	--	, [strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
@@ -128,6 +136,7 @@ BEGIN
 			, @strTransactionType = strTransactionType
 			, @strTransactionReference = strTransactionReference
 			, @intTransactionReferenceId = intTransactionReferenceId
+			, @intTransactionReferenceDetailId = intTransactionReferenceDetailId
 			, @strTransactionReferenceNo = strTransactionReferenceNo
 			, @intContractDetailId = intContractDetailId
 			, @intContractHeaderId = intContractHeaderId
@@ -153,6 +162,9 @@ BEGIN
 			, @intBookId = intBookId
 			, @intSubBookId = intSubBookId
 			, @strNotes = strNotes
+			, @intUserId = intUserId
+			, @intActionId = intActionId
+			, @strProcess = strProcess
 		FROM #tmpLogItems
 
 		--SELECT * INTO #tmpPrevLogList
@@ -288,38 +300,7 @@ BEGIN
 			, strTransactionType
 			, strTransactionReference
 			, intTransactionReferenceId
-			, strTransactionReferenceNo
-			, intContractDetailId
-			, intContractHeaderId
-			, strContractNumber
-			, intContractSeq
-			, intContractTypeId
-			, intEntityId
-			, intCommodityId
-			, intItemId
-			, intLocationId
-			, intPricingTypeId
-			, intFutureMarketId
-			, intFutureMonthId
-			, dblBasis
-			, dblFutures
-			, intQtyUOMId
-			, intQtyCurrencyId
-			, intBasisUOMId
-			, intBasisCurrencyId
-			, intPriceUOMId
-			, dtmStartDate
-			, dtmEndDate
-			, dblQty
-			, intContractStatusId
-			, intBookId
-			, intSubBookId
-			, strNotes)
-		SELECT strBatchId
-			, dtmTransactionDate
-			, strTransactionType
-			, strTransactionReference
-			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
@@ -347,6 +328,45 @@ BEGIN
 			, intBookId
 			, intSubBookId
 			, strNotes
+			, intUserId
+			, intActionId
+			, strProcess)
+		SELECT strBatchId
+			, dtmTransactionDate
+			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblBasis
+			, dblFutures
+			, intQtyUOMId
+			, intQtyCurrencyId
+			, intBasisUOMId
+			, intBasisCurrencyId
+			, intPriceUOMId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQty
+			, intContractStatusId
+			, intBookId
+			, intSubBookId
+			, strNotes
+			, intUserId
+			, intActionId
+			, strProcess
 		FROM #tmpLogItems WHERE intId = @Id
 
 		--DROP TABLE #tmpPrevLogList
@@ -355,46 +375,14 @@ BEGIN
 	END
 
 	INSERT INTO tblCTContractBalanceLog(strBatchId
+		, intActionId
+		, strAction 
 		, dtmTransactionDate
 		, dtmCreatedDate
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId
-		, strTransactionReferenceNo
-		, intContractDetailId
-		, intContractHeaderId
-		, strContractNumber
-		, intContractSeq
-		, intContractTypeId
-		, intEntityId
-		, intCommodityId
-		, intItemId
-		, intLocationId
-		, intPricingTypeId
-		, intFutureMarketId
-		, intFutureMonthId
-		, dblBasis
-		, dblFutures
-		, intQtyUOMId
-		, intQtyCurrencyId
-		, intBasisUOMId
-		, intBasisCurrencyId
-		, intPriceUOMId
-		, dtmStartDate
-		, dtmEndDate
-		, dblQty
-		, intContractStatusId
-		, intBookId
-		, intSubBookId
-		, strNotes
-		, ysnNegated
-		, intRefContractBalanceId)
-	SELECT strBatchId
-		, dtmTransactionDate
-		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
-		, strTransactionType
-		, strTransactionReference
-		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
@@ -424,7 +412,50 @@ BEGIN
 		, strNotes
 		, ysnNegated
 		, intRefContractBalanceId
-	FROM @FinalTable
+		, intUserId
+		, strProcess)
+	SELECT strBatchId
+		, intActionId
+		, strAction = A.strActionIn 
+		, dtmTransactionDate
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
+		, strTransactionType
+		, strTransactionReference
+		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
+		, strTransactionReferenceNo
+		, intContractDetailId
+		, intContractHeaderId
+		, strContractNumber
+		, intContractSeq
+		, intContractTypeId
+		, intEntityId
+		, intCommodityId
+		, intItemId
+		, intLocationId
+		, intPricingTypeId
+		, intFutureMarketId
+		, intFutureMonthId
+		, dblBasis
+		, dblFutures
+		, intQtyUOMId
+		, intQtyCurrencyId
+		, intBasisUOMId
+		, intBasisCurrencyId
+		, intPriceUOMId
+		, dtmStartDate
+		, dtmEndDate
+		, dblQty
+		, intContractStatusId
+		, intBookId
+		, intSubBookId
+		, strNotes
+		, ysnNegated
+		, intRefContractBalanceId
+		, intUserId
+		, strProcess
+	FROM @FinalTable F
+	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 
 	DROP TABLE #tmpLogItems
 END

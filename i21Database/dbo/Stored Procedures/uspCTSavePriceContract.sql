@@ -2,7 +2,8 @@
 	
 	@intPriceContractId INT,
 	@strXML				NVARCHAR(MAX),
-	@ysnApprove			BIT = 0
+	@ysnApprove			BIT = 0,
+	@ysnProcessPricing	BIT = 1
 	
 AS
 
@@ -144,7 +145,7 @@ BEGIN TRY
 						SET @strXML = @strXML +  '<intSubBookId>' + LTRIM(@intSubBookId) + '</intSubBookId>'
 					SET @strXML = @strXML +  '</root>'
 
-					EXEC uspRKAutoHedge @strXML,@intOutputId OUTPUT
+					EXEC uspRKAutoHedge @strXML,@intUserId,@intOutputId OUTPUT
 
 					IF ISNULL(@intFutOptTransactionId,0) = 0
 					BEGIN
@@ -233,7 +234,10 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
-				EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
+				if (@ysnProcessPricing = 1)
+				begin
+					EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 1
+				end
 			END			
 		END
 

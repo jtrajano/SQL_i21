@@ -9,7 +9,7 @@ FROM
     --Receipt Item
     SELECT
         A.*
-        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN A.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN A.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) COLLATE Latin1_General_CI_AS AS strVoucherIds
         -- ,vouchersInfo.strFilter
         ,1 AS intClearingType
     FROM 
@@ -35,7 +35,7 @@ FROM
             ,item.intItemId
             ,receiptItems.intItemUOMId
             ,receiptItems.strUOM
-            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
             ,receiptItems.strAccountId
             ,receiptItems.intAccountId
             ,receiptItems.intLocationId
@@ -115,7 +115,7 @@ FROM
     UNION ALL
     SELECT
         B.*
-        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN B.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN B.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) COLLATE Latin1_General_CI_AS AS strVoucherIds
         --,vouchersInfo.strFilter
         ,2 AS intClearingType
     FROM
@@ -141,7 +141,7 @@ FROM
             ,item.intItemId
             ,receiptChargeItems.intItemUOMId
             ,receiptChargeItems.strUOM
-            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
             ,receiptChargeItems.strAccountId
             ,receiptChargeItems.intAccountId
             ,receiptChargeItems.intLocationId
@@ -220,7 +220,7 @@ FROM
     UNION ALL--SHIPMENT CHARGE
     SELECT
         C.*
-        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN C.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN C.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) COLLATE Latin1_General_CI_AS AS strVoucherIds
         --,vouchersInfo.strFilter
         ,3 AS intClearingType
     FROM
@@ -246,7 +246,7 @@ FROM
             ,item.intItemId
             ,shipmentCharges.intItemUOMId
             ,shipmentCharges.strUOM
-            ,dbo.fnTrim(ISNULL(B.strCustomerNumber, C.strEntityNo) + ' - ' + isnull(C.strName,'')) AS strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strCustomerNumber, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS AS strVendorIdName 
             ,shipmentCharges.strAccountId
             ,shipmentCharges.intAccountId
             ,shipmentCharges.intLocationId
@@ -324,7 +324,7 @@ FROM
     UNION ALL--LOAD TRANSACTION
     SELECT
         D.*
-        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN D.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN D.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) COLLATE Latin1_General_CI_AS AS strVoucherIds
         --,vouchersInfo.strFilter
         ,4 AS intClearingType
     FROM
@@ -350,7 +350,7 @@ FROM
             ,item.intItemId
             ,loadTran.intItemUOMId
             ,loadTran.strUOM
-            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
             ,loadTran.strAccountId
             ,loadTran.intAccountId
             ,loadTran.intLocationId
@@ -428,7 +428,7 @@ FROM
     UNION ALL --LOAD COST
     SELECT
         E.*
-        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN E.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, (CASE WHEN E.ysnAllowVoucher = 1 THEN 'New Voucher' ELSE NULL END)) COLLATE Latin1_General_CI_AS AS strVoucherIds
         --,vouchersInfo.strFilter
         ,5 AS intClearingType
     FROM
@@ -454,7 +454,7 @@ FROM
             ,item.intItemId
             ,loadCost.intItemUOMId
             ,loadCost.strUOM
-            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
             ,loadCost.strAccountId
             ,loadCost.intAccountId
             ,loadCost.intLocationId
@@ -533,7 +533,7 @@ FROM
     UNION ALL --SETTLE STORAGE
     SELECT
         F.*
-        ,ISNULL(vouchersInfo.strVoucherIds, NULL) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, NULL) COLLATE Latin1_General_CI_AS AS strVoucherIds
         --,vouchersInfo.strFilter
         ,6 AS intClearingType
     FROM
@@ -559,7 +559,7 @@ FROM
             ,item.intItemId
             ,settleStorage.intItemUOMId
             ,settleStorage.strUOM
-            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
             ,settleStorage.strAccountId
             ,settleStorage.intAccountId
             ,settleStorage.intLocationId
@@ -637,7 +637,7 @@ FROM
     UNION ALL --PATRONAGE
     SELECT
         G.*
-        ,ISNULL(vouchersInfo.strVoucherIds, NULL) AS strVoucherIds
+        ,ISNULL(vouchersInfo.strVoucherIds, NULL) COLLATE Latin1_General_CI_AS AS strVoucherIds
         --,vouchersInfo.strFilter
         ,7 AS intClearingType
     FROM
@@ -663,7 +663,7 @@ FROM
             ,NULL AS intItemId
             ,NULL AS intItemUOMId
             ,NULL AS strUOM
-            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) as strVendorIdName 
+            ,dbo.fnTrim(ISNULL(B.strVendorId, C.strEntityNo) + ' - ' + isnull(C.strName,'')) COLLATE Latin1_General_CI_AS as strVendorIdName 
             ,pat.strAccountId
             ,pat.intAccountId
             ,NULL AS intLocationId

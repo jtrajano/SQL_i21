@@ -104,7 +104,16 @@ BEGIN TRY
 
 	SET @intFutOptTransactionHeaderStageId = SCOPE_IDENTITY();
 
-	INSERT INTO tblRKFutOptTransactionHeaderStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany WITH (NOLOCK)
+	WHERE intCompanyId = @intToCompanyId
+
+	SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKFutOptTransactionHeaderStage (
 		intFutOptTransactionHeaderId
 		,dtmTransactionDate
 		,strHeaderXML
@@ -133,7 +142,37 @@ BEGIN TRY
 		,intToBookId = @intToBookId
 		,strFromCompanyName = @strFromCompanyName
 		,intTransactionId = @intTransactionId
-		,intCompanyId = @intCompanyId
+		,intCompanyId = @intCompanyId'
+
+	EXEC sp_executesql @strSQL
+		,N'@intFutOptTransactionHeaderId INT
+			,@dtmTransactionDate DATETIME
+			,@strHeaderXML NVARCHAR(MAX)
+			,@strFutOptTransactionXML NVARCHAR(MAX)
+			,@strRowState NVARCHAR(100)
+			,@strLastModifiedUser NVARCHAR(100)
+			,@intToCompanyId INT
+			,@intToEntityId INT
+			,@intCompanyLocationId INT
+			,@strToTransactionType NVARCHAR(100)
+			,@intToBookId INT
+			,@strFromCompanyName NVARCHAR(150)
+			,@intTransactionId INT
+			,@intCompanyId INT'
+		,@intFutOptTransactionHeaderId
+		,@dtmTransactionDate
+		,@strHeaderXML
+		,@strFutOptTransactionXML
+		,@strRowState
+		,@strLastModifiedUser
+		,@intToCompanyId
+		,@intToEntityId
+		,@intCompanyLocationId
+		,@strToTransactionType
+		,@intToBookId
+		,@strFromCompanyName
+		,@intTransactionId
+		,@intCompanyId
 END TRY
 
 BEGIN CATCH

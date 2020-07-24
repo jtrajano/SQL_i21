@@ -43,7 +43,6 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , dblSubCurrencyRate					= INV.dblSubCurrencyRate
 	 , ysnRestricted						= INV.ysnRestricted
 	 , ysnReturned							= INV.ysnReturned
-	 , ysnReversed							= INV.ysnReversed
 	 , intAccountId							= INV.intAccountId
 	 , intCOGSAccountId						= INV.intCOGSAccountId
 	 , intSalesAccountId					= INV.intSalesAccountId
@@ -176,6 +175,7 @@ SELECT intInvoiceDetailId					= INV.intInvoiceDetailId
 	 , strBOLNumberDetail					= INV.strBOLNumberDetail
 	 , strCategoryCode						= ICATEGORY.strCategoryCode
 	 , strCategoryDescription				= ICATEGORY.strDescription
+	 , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceDetailId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 FROM tblARInvoice PINV WITH(NOLOCK)
 JOIN tblARInvoiceDetail INV ON INV.intInvoiceId = PINV.intInvoiceId 
 LEFT JOIN (
@@ -321,3 +321,9 @@ LEFT JOIN (
 		 , strDescription
 	FROM tblICCategory WITH(NOLOCK)
 ) ICATEGORY ON INV.intCategoryId = ICATEGORY.intCategoryId
+LEFT JOIN (
+	SELECT intInvoiceDetailId
+	FROM tblCTPriceFixationDetailAPAR WITH (NOLOCK)	
+	WHERE intInvoiceDetailId IS NOT NULL
+	GROUP BY intInvoiceDetailId
+) APAR ON INV.intInvoiceDetailId = APAR.intInvoiceDetailId

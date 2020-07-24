@@ -37,7 +37,8 @@ FROM vyuICItemStockUOM sm
 	)
 		ON il.intItemId = sm.intItemId
 		AND il.intItemLocationId = sm.intItemLocationId
-	LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+	INNER JOIN tblICStorageLocation sl ON sl.intStorageLocationId = sm.intStorageLocationId
+		AND sl.intLocationId = il.intLocationId
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sc ON sc.intCompanyLocationSubLocationId = sm.intSubLocationId
 	LEFT OUTER JOIN tblICCommodity cd ON cd.intCommodityId = i.intCommodityId
 	

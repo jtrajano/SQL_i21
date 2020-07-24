@@ -278,7 +278,6 @@ BEGIN
 				EXEC dbo.uspGLBuildOriginAccount  0
 				EXEC dbo.uspGLBuildAccount 0			
 				EXEC dbo.uspGLConvertAccountGroupToCategory		
-				EXEC dbo.uspGLInsertOriginCrossReferenceMapping
 				-- commented until further notice
 				--EXEC uspGLUpdateCategoryFromOrigin		
 			END	

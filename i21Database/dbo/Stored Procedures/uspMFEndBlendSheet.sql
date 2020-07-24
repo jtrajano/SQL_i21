@@ -143,6 +143,7 @@ End
 				,dblMaxValue NUMERIC(18,6)
 				,strMethodName NVARCHAR(50)
 				,intMethodId INT
+				,intSequenceNo int
 			   )
 
 			Select TOP 1 @ysnEnableParentLot=ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference

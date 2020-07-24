@@ -15,14 +15,17 @@ FROM (
     ,b.dtmDate
     ,sum(bd.dblTotal+bd.dblTax) AS dblTotal
     ,b.strBillId AS strTransactionId
-    ,b.dtmDate AS dtmTransactionDate
+    ,b.dtmDateCreated AS dtmTransactionDate
+    ,b.intShipToId
     ,1 intSequence
     FROM tblAPBill b
     JOIN tblAPBillDetail bd ON b.intBillId = bd.intBillId
 	  JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
-    WHERE (b.intTransactionType IN (13,2) AND b.ysnPosted = 1) OR (b.intTransactionType IN (3) AND b.ysnPosted = 1 AND b.dblAmountDue != 0)
-    GROUP BY b.intEntityVendorId, v.strVendorId, e.strName, b.intBillId, b.strBillId, b.dtmDate
+    --WHERE (b.intTransactionType IN (13,2) AND b.ysnPosted = 1) OR (b.intTransactionType IN (3) AND b.ysnPosted = 1 AND b.dblAmountDue != 0)
+    WHERE b.intTransactionType IN (13, 2, 3)
+    AND b.ysnPosted = 1
+    GROUP BY b.intEntityVendorId, v.strVendorId, e.strName, b.intBillId, b.strBillId, b.dtmDate, b.dtmDateCreated, b.intShipToId
 
     UNION
     --Voucher Payment
@@ -35,7 +38,8 @@ FROM (
     ,b.dtmDate
     ,pd.dblPayment
     ,p.strPaymentRecordNum
-    ,p.dtmDatePaid
+    ,p.dtmDateCreated
+    ,b.intShipToId
     ,2
     FROM tblAPPaymentDetail pd 
     JOIN tblAPPayment p ON p.intPaymentId = pd.intPaymentId
@@ -44,6 +48,7 @@ FROM (
 		ON b.intEntityVendorId = v.intEntityId
     WHERE pd.ysnOffset = 0
     AND p.ysnPosted = 1
+    AND b.intTransactionType IN (13, 2, 3)
 
     UNION
     --Applied to Payments
@@ -56,7 +61,8 @@ FROM (
     ,b.dtmDate
     ,pd.dblPayment
     ,p.strPaymentRecordNum
-    ,p.dtmDatePaid
+    ,p.dtmDateCreated
+    ,b.intShipToId
     ,3
     FROM tblAPPaymentDetail pd 
     JOIN tblAPPayment p ON p.intPaymentId = pd.intPaymentId
@@ -65,7 +71,7 @@ FROM (
 		ON b.intEntityVendorId = v.intEntityId
     WHERE pd.ysnOffset = 1
     AND p.ysnPosted = 1
-    AND b.intTransactionType IN (13,2)
+    AND b.intTransactionType IN (13, 2, 3)
 
     UNION
     --Applied to voucher
@@ -78,7 +84,8 @@ FROM (
     ,b.dtmDate
     ,o.dblAmountApplied*-1
     ,b1.strBillId
-    ,b1.dtmDate
+    ,b1.dtmDateCreated
+    ,b.intShipToId
     ,4
     FROM tblAPAppliedPrepaidAndDebit o
     JOIN tblAPBill b ON o.intTransactionId = b.intBillId
@@ -86,6 +93,7 @@ FROM (
     JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
     WHERE b.ysnPosted = 1
+    AND b.intTransactionType IN (13, 2, 3)
 
     UNION
     --Applied to AR Receive Payments
@@ -99,6 +107,7 @@ FROM (
     ,pd.dblPayment*-1
     ,p.strRecordNumber
     ,p.dtmDatePaid
+    ,b.intShipToId
     ,5
     FROM tblARPayment p
     JOIN tblARPaymentDetail pd ON p.intPaymentId = pd.intPaymentId
@@ -106,4 +115,5 @@ FROM (
     JOIN (tblAPVendor v JOIN tblEMEntity e ON v.intEntityId = e.intEntityId)
 		ON b.intEntityVendorId = v.intEntityId
     WHERE p.ysnPosted = 1
+    AND b.intTransactionType IN (13, 2, 3)
 ) h

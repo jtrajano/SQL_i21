@@ -57,12 +57,12 @@ INSERT INTO #ARItemsForCosting
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= ARID.[intItemUOMId]
+	,[intItemUOMId]				= CASE WHEN ISNULL(ICI.[ysnSeparateStockForUOMs], 0) = 0 AND ISNULL(ICI.[strLotTracking], 'No') = 'No' THEN ICIUOM.[intItemUOMId] ELSE ARID.[intItemUOMId] END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
-								   END
+								   END 
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
@@ -111,6 +111,12 @@ SELECT
 	,[ysnForValidation]         = @OneBit
 FROM
     #ARPostInvoiceDetail ARID
+INNER JOIN
+	(SELECT [intItemId], [ysnSeparateStockForUOMs], [strLotTracking] FROM tblICItem WITH (NOLOCK)) ICI
+		ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN
+	(SELECT [intItemId], [intItemUOMId], [ysnStockUnit] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
+		ON ARID.[intItemId] = ICIUOM.[intItemId] AND ICIUOM.[ysnStockUnit] = 1
 LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -137,7 +143,7 @@ WHERE
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
-	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+	AND (ARID.intLoadDetailId IS NULL OR (ARID.intLoadDetailId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND ARID.[strItemManufactureType] <> 'Finished Goods'
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ARID.[intOriginalInvoiceDetailId] IS NULL))
@@ -253,7 +259,7 @@ WHERE
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
-	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+	AND (ARID.intLoadDetailId IS NULL OR (ARID.intLoadDetailId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
 	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ARID.[intOriginalInvoiceDetailId] IS NULL))
 
@@ -349,8 +355,8 @@ WHERE
 	AND ARID.[intItemId] IS NOT NULL
 	AND ISNULL(ARIC.[intComponentItemId],0) <> 0
 	AND ARID.[strTransactionType] <> 'Debit Memo'
-	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
+	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Goods','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
-	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+	AND (ARID.intLoadDetailId IS NULL OR (ARID.intLoadDetailId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
 RETURN 1

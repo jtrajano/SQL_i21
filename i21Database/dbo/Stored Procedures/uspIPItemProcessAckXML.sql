@@ -33,6 +33,10 @@ BEGIN TRY
 			,@referenceTransactionId = @intTransactionRefId
 			,@referenceCompanyId = @intCompanyRefId
 
+		Update tblICItemAcknowledgementStage
+		Set strFeedStatus='Ack Processed'
+		Where intItemAcknowledgementStageId = @intItemAcknowledgementStageId
+
 		SELECT @intItemAcknowledgementStageId = MIN(intItemAcknowledgementStageId)
 		FROM tblICItemAcknowledgementStage
 		WHERE intItemAcknowledgementStageId > @intItemAcknowledgementStageId

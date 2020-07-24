@@ -308,7 +308,7 @@ BEGIN
 		,iu.intItemUOMId
 		,stock.intItemLocationId
 		,stock.intSubLocationId
-		,stock.intSubLocationId
+		,stock.intStorageLocationId
 		,stock.intCostingMethodId
 		,dblQty = dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, stock.dblQty)
 		,dblUnitStorage = dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, stock.dblUnitStorage)

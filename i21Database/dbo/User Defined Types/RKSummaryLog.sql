@@ -7,7 +7,7 @@
 	, intTransactionRecordHeaderId INT NULL
 	, strDistributionType NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, strTransactionNumber NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	, dtmTransactionDate DATETIME
+	, dtmTransactionDate DATETIME NOT NULL
 	, intContractDetailId INT NULL
 	, intContractHeaderId INT NULL
 	, intFutOptTransactionId INT NULL
@@ -30,4 +30,5 @@
 	, intUserId INT NULL
 	, strNotes NVARCHAR(250) NULL
 	, strMiscFields NVARCHAR(MAX) NULL
+	, intActionId INT NULL
 )

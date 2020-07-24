@@ -27,10 +27,14 @@
 	[dtmCreated] DATETIME NULL,
 	[intParentSettleStorageId] INT NULL,
 	[intItemUOMId] INT NULL,
-	[ysnReversed] BIT DEFAULT((0)),
     CONSTRAINT [PK_tblGRSettleStorage_intCustomerStorageId] PRIMARY KEY ([intSettleStorageId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
 	CONSTRAINT [FK_tblGRSettleStorage_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblAPBill_intBillId] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]),
 	CONSTRAINT [FK_tblGRSettleStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRSettleStorage_intParentSettleStorageId] ON [dbo].[tblGRSettleStorage](
+	[intParentSettleStorageId] ASC
+);
+GO

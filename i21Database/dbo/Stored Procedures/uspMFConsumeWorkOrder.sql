@@ -42,6 +42,11 @@ BEGIN
 	SELECT @ConsumeDataKey = MIN(ConsumeDataKey)
 	FROM @ConsumeData
 
+	IF @ConsumeDataKey IS NULL
+	BEGIN
+		RETURN
+	END
+
 	WHILE (@ConsumeDataKey > 0)
 	BEGIN
 		SELECT @intLotId = intLotId

@@ -89,13 +89,17 @@ BEGIN
 							,CalculatedCharge.ysnPrice
 							,Charge.strChargesLink
 				) CalculatedCharges 
-					ON CalculatedCharges.intContractId = ShipmentItem.intOrderId 					
-					AND 1 = 
-						CASE 
-							WHEN CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo THEN 1
-							WHEN CalculatedCharges.strChargesLink = ShipmentItem.strChargesLink THEN 1 
-							ELSE 0 
-						END					
+					ON CalculatedCharges.intContractId = ShipmentItem.intOrderId
+					AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo
+					AND (
+						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
+					)
+					--AND 1 = 
+					--	CASE 
+					--		WHEN CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo THEN 1
+					--		WHEN CalculatedCharges.strChargesLink = ShipmentItem.strChargesLink THEN 1 
+					--		ELSE 0 
+					--	END					
 				LEFT JOIN (
 					SELECT	dblTotalUnits = SUM(ISNULL(ShipmentItem.dblQuantity, 0))
 							,ShipmentItem.intOrderId 
@@ -111,12 +115,16 @@ BEGIN
 					GROUP BY ShipmentItem.intOrderId, ShipmentItem.intLineNo, ShipmentItem.strChargesLink 
 				) TotalUnitsOfItemsPerContract 
 					ON TotalUnitsOfItemsPerContract.intOrderId = ShipmentItem.intOrderId 
-					AND 1 = 
-						CASE 
-							WHEN TotalUnitsOfItemsPerContract.intLineNo = ShipmentItem.intLineNo THEN 1
-							WHEN TotalUnitsOfItemsPerContract.strChargesLink = ShipmentItem.strChargesLink THEN 1 
-							ELSE 0 
-						END 
+					AND CalculatedCharges.intContractDetailId = ShipmentItem.intLineNo
+					AND (
+						ISNULL(TotalUnitsOfItemsPerContract.strChargesLink, '') = ISNULL(ShipmentItem.strChargesLink, '')
+					)
+					--AND 1 = 
+					--	CASE 
+					--		WHEN TotalUnitsOfItemsPerContract.intLineNo = ShipmentItem.intLineNo THEN 1
+					--		WHEN TotalUnitsOfItemsPerContract.strChargesLink = ShipmentItem.strChargesLink THEN 1 
+					--		ELSE 0 
+					--	END 
 
 	) AS Source_Query  
 		ON ShipmentItemAllocatedCharge.intInventoryShipmentId = Source_Query.intInventoryShipmentId

@@ -116,6 +116,7 @@
 	
 	,@strSiteTaxLocation				NVARCHAR(MAX)	= NULL
 	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
+	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
 
 
@@ -197,6 +198,10 @@ BEGIN
 	DECLARE @ysnDualCard				BIT				= 0
 	DECLARE @ysnConvertMiscToVehicle	BIT				= 0
 	DECLARE @ysnInvoiced				BIT				= 0
+	DECLARE @ysnExpensed				BIT				= 0
+	DECLARE @intExpensedItemId			INT				= 0
+	
+	
 
 	--DECLARE @strSiteType				NVARCHAR(MAX)
 
@@ -816,34 +821,38 @@ BEGIN
 				--SET @i = '0000000'
 				--SELECT CONVERT(BIGINT, @i)
 
-				IF(ISNULL(@strCardId,'') = '')
-				BEGIN
+				-- IF(ISNULL(@strCardId,'') = '')
+				-- BEGIN
+
+
 					IF(ISNULL(@CardNumberForDualCard,'') != '')
 					BEGIN
 						SET @strCardId = @CardNumberForDualCard
 					END
 					ELSE
 					BEGIN
-						SET @strCardId = @strVehicleId
+						SET @strCardId = @VehicleNumberForDualCard
 						SET @strVehicleId = null
 					END
-				END
 
-				IF (ISNUMERIC(@strCardId) = 1)
-				BEGIN
-					IF (CONVERT(BIGINT, @strCardId) = 0)
-					BEGIN
-						IF(ISNULL(@CardNumberForDualCard,'') != '')
-						BEGIN
-							SET @strCardId = @CardNumberForDualCard
-						END
-						ELSE
-						BEGIN
-							SET @strCardId = @strVehicleId
-							SET @strVehicleId = null
-						END
-					END
-				END
+				-- END
+
+				-- IF (ISNUMERIC(@strCardId) = 1)
+				-- BEGIN
+				-- 	IF (CONVERT(BIGINT, @strCardId) = 0)
+				-- 	BEGIN
+					--	IF(ISNULL(@CardNumberForDualCard,'') != '')
+					--	BEGIN
+					--		SET @strCardId = @CardNumberForDualCard
+					--		-- SET @strVehicleId = null
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SET @strCardId = @strVehicleId
+					--		SET @strVehicleId = null
+					--	END
+					---- END
+				-- END
 			END
 		END
 	END
@@ -1156,7 +1165,10 @@ BEGIN
 	IF(ISNUMERIC(@strVehicleId) = 1)
 	BEGIN
 		SET @strVehicleId = CAST(@strVehicleId AS BIGINT)
-		IF(@strVehicleId = 0)
+		DECLARE @bgIntVehicleId BIGINT
+		SET @bgIntVehicleId = CAST(@strVehicleId AS BIGINT)
+
+		IF(@bgIntVehicleId = 0)
 		BEGIN
 			SET @ysnIgnoreVehicleError = 1
 		END
@@ -1762,6 +1774,8 @@ BEGIN
 		,@dblGrossTransferCost			= dblGrossTransferCost
 		,@dblNetTransferCost			= dblNetTransferCost
 		,@dblAdjustmentRate				= dblAdjustmentRate
+		,@ysnExpensed					= ysnExpensed
+		,@intExpensedItemId				= intExpensedItemId
 		FROM tblCFTransactionPricingType
 
 		--IF(@ysnDuplicate = 1)
@@ -1770,6 +1784,11 @@ BEGIN
 		--	INSERT INTO tblCFTransactionNote (strProcess,dtmProcessDate,strGuid,intTransactionId ,strNote)
 		--	VALUES ('Import',@strProcessDate,@strGUID, @Pk, 'Duplicate transaction history found.')
 		--END
+		
+		UPDATE tblCFTransaction 
+		SET ysnExpensed = @ysnExpensed , intExpensedItemId = @intExpensedItemId
+		WHERE intTransactionId = @Pk
+		
 
 		IF(@ysnRecalculateInvalid = 1)
 		BEGIN 

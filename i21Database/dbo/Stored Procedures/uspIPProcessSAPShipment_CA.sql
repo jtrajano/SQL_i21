@@ -316,20 +316,6 @@ BEGIN TRY
 						)
 			END
 
-			--IF NOT EXISTS (
-			--		SELECT 1
-			--		FROM tblLGLoad L WITH (NOLOCK)
-			--		WHERE intLoadId = @intLoadShippingInstructionId
-			--			AND strCustomerReference = @strCustomerReference
-			--		)
-			--BEGIN
-			--	RAISERROR (
-			--			'Customer Reference is not matching with Shipping Instruction. '
-			--			,16
-			--			,1
-			--			)
-			--END
-
 			SELECT @intOriginPortId = t.intCityId
 			FROM tblSMCity t WITH (NOLOCK)
 			WHERE t.strCity = @strOriginPort
@@ -472,7 +458,7 @@ BEGIN TRY
 					,@intBookId = CH.intBookId
 					,@intSubBookId = CH.intSubBookId
 					,@ysnLoadBased = CH.ysnLoad
-					,@strPackingDescription = CD.strPackingDescription
+					--,@strPackingDescription = CD.strPackingDescription
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
@@ -492,7 +478,7 @@ BEGIN TRY
 					,@intBookId = CH.intBookId
 					,@intSubBookId = CH.intSubBookId
 					,@ysnLoadBased = CH.ysnLoad
-					,@strPackingDescription = CD.strPackingDescription
+					--,@strPackingDescription = CD.strPackingDescription
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
@@ -504,6 +490,10 @@ BEGIN TRY
 				JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			END
+
+			SELECT @strPackingDescription = L.strPackingDescription
+			FROM tblLGLoad L WITH (NOLOCK)
+			WHERE L.intLoadId = @intLoadShippingInstructionId
 
 			UPDATE tblIPLoadStage
 			SET strAction = @strRowState
@@ -668,8 +658,8 @@ BEGIN TRY
 					,intPurchaseSale = @intPurchaseSale
 					,intPositionId = @intPositionId
 					,strPackingDescription = @strPackingDescription
-					,dtmStartDate = @dtmStartDate
-					,dtmEndDate = @dtmEndDate
+					--,dtmStartDate = @dtmStartDate
+					--,dtmEndDate = @dtmEndDate
 					,dtmPlannedAvailabilityDate = @dtmPlannedAvailabilityDate
 					,strOriginPort = @strOriginPort
 					,strDestinationPort = @strDestinationPort
@@ -714,16 +704,16 @@ BEGIN TRY
 					IF (@strOldDestinationPort <> @strDestinationPort)
 						SET @strDetails += '{"change":"strDestinationPort","iconCls":"small-gear","from":"' + LTRIM(@strOldDestinationPort) + '","to":"' + LTRIM(@strDestinationPort) + '","leaf":true,"changeDescription":"Destination Port"},'
 
-					IF (@dtmOldETSPOL <> @dtmETSPOL)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETSPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETSPOL, 101)))
 						SET @strDetails += '{"change":"dtmETSPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETSPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETSPOL, '')) + '","leaf":true,"changeDescription":"Instr ETD"},'
 
-					IF (@dtmOldDeadlineCargo <> @dtmDeadlineCargo)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldDeadlineCargo, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmDeadlineCargo, 101)))
 						SET @strDetails += '{"change":"dtmDeadlineCargo","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldDeadlineCargo, '')) + '","to":"' + LTRIM(ISNULL(@dtmDeadlineCargo, '')) + '","leaf":true,"changeDescription":"Instr ETA"},'
 
-					IF (@dtmOldETAPOD <> @dtmETAPOD)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETAPOD, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETAPOD, 101)))
 						SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOD, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOD, '')) + '","leaf":true,"changeDescription":"Act. ETA"},'
 
-					IF (@dtmOldETAPOL <> @dtmETAPOL)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETAPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETAPOL, 101)))
 						SET @strDetails += '{"change":"dtmETAPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOL, '')) + '","leaf":true,"changeDescription":"Act. ETD"},'
 
 					IF (@strOldBookingReference <> @strBookingReference)
@@ -741,7 +731,7 @@ BEGIN TRY
 					IF (@strOldShippingMode <> @strShippingMode)
 						SET @strDetails += '{"change":"strShippingMode","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingMode) + '","to":"' + LTRIM(@strShippingMode) + '","leaf":true,"changeDescription":"Shipping Mode"},'
 
-					IF (@dtmOldBLDate <> @dtmBLDate)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldBLDate, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmBLDate, 101)))
 						SET @strDetails += '{"change":"dtmBLDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldBLDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmBLDate, '')) + '","leaf":true,"changeDescription":"BOL Date"},'
 
 					IF (@intOldShippingLineEntityId <> @intShippingLineEntityId)
@@ -756,11 +746,11 @@ BEGIN TRY
 					IF (@strOldPackingDescription <> @strPackingDescription)
 						SET @strDetails += '{"change":"strPackingDescription","iconCls":"small-gear","from":"' + LTRIM(@strOldPackingDescription) + '","to":"' + LTRIM(@strPackingDescription) + '","leaf":true,"changeDescription":"Packing Description"},'
 
-					IF (@dtmOldStartDate <> @dtmStartDate)
-						SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
+					--IF (@dtmOldStartDate <> @dtmStartDate)
+					--	SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
 
-					IF (@dtmOldEndDate <> @dtmEndDate)
-						SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
+					--IF (@dtmOldEndDate <> @dtmEndDate)
+					--	SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
 
 					IF (@dtmOldPlannedAvailabilityDate <> @dtmPlannedAvailabilityDate)
 						SET @strDetails += '{"change":"dtmPlannedAvailabilityDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldPlannedAvailabilityDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmPlannedAvailabilityDate, '')) + '","leaf":true,"changeDescription":"Planned Availability"},'
@@ -1047,17 +1037,12 @@ BEGIN TRY
 							)
 						SELECT 1
 							,@intLoadId
-							,CD.intDocumentId
-							,CASE WHEN ID.intDocumentType = 1 THEN 'Contract'
-									WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
-									WHEN ID.intDocumentType = 3	THEN 'Container'
-									ELSE ''
-								END COLLATE Latin1_General_CI_AS
-							,ISNULL(ID.intOriginal, 0)
-							,ISNULL(ID.intCopies, 0)
-						FROM tblCTContractDocument CD
-						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
-							AND CD.intContractHeaderId = @intContractHeaderId
+							,LD.intDocumentId
+							,LD.strDocumentType
+							,LD.intOriginal
+							,LD.intCopies
+						FROM tblLGLoadDocuments LD WITH (NOLOCK)
+						WHERE LD.intLoadId = @intLoadShippingInstructionId
 					END
 					ELSE
 					BEGIN
@@ -1298,23 +1283,23 @@ BEGIN TRY
 					FROM tblIPLoadContainerStage
 					WHERE intStageLoadContainerId = @intStageLoadContainerId
 
-					IF @strRowState = 'Added'
-					BEGIN
-						IF EXISTS (
-								SELECT 1
-								FROM tblLGLoadContainer t WITH (NOLOCK)
-								WHERE t.strContainerNumber = @strContainerNumber
-								)
-						BEGIN
-							SET @ErrMsg = 'Container No. ' + @strContainerNumber + ' already exists. '
+					--IF @strRowState = 'Added'
+					--BEGIN
+					--	IF EXISTS (
+					--			SELECT 1
+					--			FROM tblLGLoadContainer t WITH (NOLOCK)
+					--			WHERE t.strContainerNumber = @strContainerNumber
+					--			)
+					--	BEGIN
+					--		SET @ErrMsg = 'Container No. ' + @strContainerNumber + ' already exists. '
 
-							RAISERROR (
-									@ErrMsg
-									,16
-									,1
-									)
-						END
-					END
+					--		RAISERROR (
+					--				@ErrMsg
+					--				,16
+					--				,1
+					--				)
+					--	END
+					--END
 
 					IF @dblGrossWt <= 0
 					BEGIN
@@ -1953,6 +1938,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -1979,6 +1967,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -2066,6 +2057,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -2092,6 +2086,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName

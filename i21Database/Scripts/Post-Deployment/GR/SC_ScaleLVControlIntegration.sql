@@ -229,7 +229,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_rev_dt > 1 THEN convert(datetime, convert(char(8), gasct_rev_dt))
 					ELSE NULL
 				END ) AS dtmTicketDateTime
-				,gasct_open_close_ind  COLLATE Latin1_General_CI_AS  as strTicketStatus
+				,ISNULL(gasct_open_close_ind, ''O'')  COLLATE Latin1_General_CI_AS  as strTicketStatus
 				,gasct_cus_no COLLATE Latin1_General_CI_AS AS strEntityNo
 				,gasct_com_cd COLLATE Latin1_General_CI_AS AS strItemNo
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
@@ -280,17 +280,20 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				, (CASE 
 						WHEN gasct_dist_option = ''C'' THEN ''CNT''
 						WHEN gasct_dist_option = ''S'' THEN ''SPT''
+						WHEN isnull(gasct_load_no, '''') <> '''' THEN ''LOD''
+
 						ELSE gasct_dist_option
 				END) COLLATE Latin1_General_CI_AS AS strDistributionOption
 				, (CASE 
 						WHEN gasct_dist_option = ''C'' THEN ''Contract''
 						WHEN gasct_dist_option = ''S'' THEN ''Spot Sale''
+						WHEN	ltrim(rtrim(isnull(gasct_load_no, ''''))) <> '''' THEN ''Load''
 						ELSE gasct_dist_option
 				END) COLLATE Latin1_General_CI_AS  AS strDistributionDescription
 				,gasct_pit_no COLLATE Latin1_General_CI_AS AS strPitNumber
 				,gasct_tic_pool COLLATE Latin1_General_CI_AS AS strTicketPool
 				,gasct_spl_no COLLATE Latin1_General_CI_AS AS strSplitNumber
-				,gasct_loc_no + '''' + gasct_scale_id COLLATE Latin1_General_CI_AS AS strStationShortDescription
+				,coalesce(lb.strStationShortDescription, a.gasct_tic_pool, (a.gasct_loc_no + '''' + a.gasct_scale_id) )  COLLATE Latin1_General_CI_AS  AS strStationShortDescription
 				,CAST(
 				CASE WHEN gasct_split_wgt_yn = ''Y'' THEN 1
 				ELSE 0 END
@@ -306,10 +309,305 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					WHEN gasct_tic_type = (''T'')       THEN 4
 					ELSE 5
 				END) AS intTicketType
-			from gasctmst
+				,''LS-'' + replace(gasct_load_no,''S '', '''') COLLATE Latin1_General_CI_AS as strLoadNumber
+				, CASE WHEN gasct_in_out_ind = ''I'' THEN 1 ELSE 2 END AS intLoadPurchaseSale
+			from gasctmst a
+				left join (
+						select a.strLinkStationShortDescription, b.strStationShortDescription from tblSCScaleSetupOriginLink a 
+							join tblSCScaleSetup b
+								on a.intScaleSetupId = b.intScaleSetupId
+						
+				) as lb
+					on isnull(a.gasct_tic_pool, (a.gasct_loc_no + '''' + a.gasct_scale_id)) COLLATE Latin1_General_CI_AS = lb.strLinkStationShortDescription  COLLATE Latin1_General_CI_AS
 		')
 		PRINT 'End creating vyuSCTicketLVControlView table'
 
+
+		PRINT 'Begin creating fnSCValidateTicketStagingTable '
+		exec ('
+			if object_id(''fnSCValidateTicketStagingTable'') is not null
+			begin
+				exec(''drop function fnSCValidateTicketStagingTable'')
+			end
+
+		')
+		exec('
+			CREATE FUNCTION [dbo].[fnSCValidateTicketStagingTable]
+			(
+				@intTicketLVStagingId int
+			)
+			RETURNS NVARCHAR(MAX)
+			AS
+			BEGIN
+				DECLARE @error_message nvarchar(max)
+
+				declare @msg table(
+					strMessage nvarchar(100)
+				)
+
+				declare 
+						@strDistributionOption			NVARCHAR(30)
+						,@intLoadDetailId				INT
+						,@intTicketType					INT
+						,@intContractId					INT
+						,@intEntityId					INT
+						,@intCurrencyId					INT
+						,@strScaleOperatorUser			NVARCHAR(100)
+						,@strInOutFlag					NVARCHAR(100)
+						,@ysnFarmerPaysFreight			BIT
+						,@intHaulerEntityId				INT
+						,@strTicketType					NVARCHAR(100)
+						,@dblFreightRate				NUMERIC(38, 20)
+						,@intSubLocationId				INT
+						,@strBinNumber					NVARCHAR(100)
+						,@intStorageLocationId			INT
+						,@intAxleCount					INT
+						,@strDriverName					NVARCHAR(100)
+						,@strTruckName					NVARCHAR(100)
+						,@strTicketComment				NVARCHAR(100)
+						,@strCustomerReference			NVARCHAR(100)
+						,@strPitNumber					NVARCHAR(100)
+						,@intCompanyLocationId			INT
+						,@intCommodityId				INT
+						,@intItemId						INT
+						,@intDiscountId					INT 
+						,@dblConvertedUOMQty			NUMERIC(38, 20)
+						,@dblGrossWeight				NUMERIC(38, 20)
+						,@dblGrossWeight1				NUMERIC(38, 20)
+						,@dblGrossWeight2				NUMERIC(38, 20)
+						,@dblTareWeight					NUMERIC(38, 20)
+						,@dblTareWeight1				NUMERIC(38, 20)
+						,@dblTareWeight2				NUMERIC(38, 20)
+						,@intSplitId					INT
+						,@intRequireSpotSalePrice		INT
+						,@dblUnitPrice					NUMERIC(38, 20)
+						,@intScaleSetupId				INT
+
+
+
+
+				SELECT 
+
+					@strDistributionOption		= strDistributionOption
+					,@intLoadDetailId			= intLoadDetailId
+					,@intTicketType				= intTicketType
+					,@intContractId				= intContractId
+					,@intEntityId				= intEntityId
+					,@intCurrencyId				= intCurrencyId
+					,@strScaleOperatorUser		= strScaleOperatorUser
+					,@strInOutFlag				= strInOutFlag
+					,@ysnFarmerPaysFreight		= ysnFarmerPaysFreight
+					--,@intHaulerEntityId			= intHaulerEntityId
+					,@strTicketType				= strTicketType
+					,@dblFreightRate			= dblFreightRate
+					,@strBinNumber				= strBinNumber
+					--,@intStorageLocationId		= intStorageLocationId
+					,@intAxleCount				= intAxleCount
+					,@strDriverName				= strDriverName
+					,@strTruckName				= strTruckName
+					,@strTicketComment			= strTicketComment
+					,@strCustomerReference		= strCustomerReference
+					,@strPitNumber				= strPitNumber
+					,@intCompanyLocationId		= intCompanyLocationId
+					,@intCommodityId			= intCommodityId
+					,@intItemId					= intItemId
+					,@intDiscountId				= intDiscountId
+					,@dblConvertedUOMQty		= dblConvertedUOMQty
+					,@dblGrossWeight			= dblGrossWeight
+					--,@dblGrossWeight1			= dblGrossWeight1
+					--,@dblGrossWeight2			= dblGrossWeight2
+					,@dblTareWeight				= dblTareWeight
+					--,@dblTareWeight1			= dblTareWeight1
+					--,@dblTareWeight2			= dblTareWeight2
+					,@intSplitId				= intSplitId
+					,@dblUnitPrice				= dblUnitPrice
+					,@intScaleSetupId			= intScaleSetupId
+					from tblSCTicketLVStaging
+						where intTicketLVStagingId = @intTicketLVStagingId
+			
+
+				if isnull(@intScaleSetupId, 0) = 0
+					return ''No scale station selected''
+
+				declare @intStoreScaleOperator			INT
+						,@intFreightHaulerIDRequired	INT
+						,@intBinNumberRequired			INT
+						,@intTrackAxleCount				INT
+						,@intDriverNameRequired			INT
+						,@intTruckIDRequired			INT
+						,@ysnTicketCommentRequired		BIT
+						,@ysnReferenceNumberRequired	BIT
+						,@intStorePitInformation		INT
+						,@ysnAllowZeroWeights			BIT
+
+				SELECT 
+					@intStoreScaleOperator			= intStoreScaleOperator 
+					,@intFreightHaulerIDRequired	= intFreightHaulerIDRequired
+					,@intBinNumberRequired			= intBinNumberRequired
+					,@intTrackAxleCount				= intTrackAxleCount
+					,@intTruckIDRequired			= intTruckIDRequired
+					,@ysnTicketCommentRequired		= ysnTicketCommentRequired
+					,@ysnReferenceNumberRequired	= ysnReferenceNumberRequired
+					,@intStorePitInformation		= intStorePitInformation
+					,@ysnAllowZeroWeights			= ysnAllowZeroWeights
+					,@intRequireSpotSalePrice		= intRequireSpotSalePrice
+					from tblSCScaleSetup 
+						where intScaleSetupId = @intScaleSetupId
+
+			
+
+				if @strDistributionOption = ''LOD'' and isnull(@intLoadDetailId, 0) = 0
+					insert into @msg(strMessage)
+						select ''No selected Load Schedule''
+				
+				if @intTicketType = 6 and @strDistributionOption = ''CNT'' and ( isnull(@intContractId, 0) = 0)
+					insert into @msg(strMessage)
+						select ''No selected Contract''
+
+				if isnull(@intTicketType, 0) = 0
+					insert into @msg(strMessage)
+						select ''Ticket Type cannot be blank''
+
+				if isnull(@intEntityId, 0) = 0 and @intTicketType not in (2, 3)
+						insert into @msg(strMessage)
+						select ''Invalid Entity''
+				else
+					if isnull(@intCurrencyId, 0) = 0
+						insert into @msg(strMessage)
+						select ''Currency must be entered on Entity''
+						
+
+				if @intStoreScaleOperator = 1 and LTRIM(RTRIM(@strScaleOperatorUser)) = ''''
+						insert into @msg(strMessage)
+						select ''Invalid Scale Operator''
+
+				--if @strInOutFlag = ''I'' and @ysnFarmerPaysFreight = 1 and @intHaulerEntityId = @intEntityId
+				--        insert into @msg(strMessage)
+				--		select ''Same vendor and hauler is not allowed if the deduct from vendor is checked''
+
+
+				--if @intContractId is null and @intFreightHaulerIDRequired = 1 or @strTicketType = ''Transfer In''
+				--           ( @dblFreightRate > 0 and isnull(intHaulerEntityId, 0) ) or ( isnull(intHaulerEntityId, 0)  and strTicketType = ''Transfer In'' )
+				--               ''Invalid Hauler''
+
+
+				if @intBinNumberRequired = 1 and  isnull(@intSubLocationId, 0) = 0
+						insert into @msg(strMessage)
+						select ''Invalid Storage Location''
+				else if @intBinNumberRequired = 4
+				begin
+					if isnull(@intSubLocationId, 0) > 0 and isnull(@strBinNumber, '''') = ''''
+						insert into @msg(strMessage)
+						select ''Invalid Storage Storage Unit'' 
+					--isnull(intStorageLocationId , 0)
+					--    ''Invalid Storage Location''
+				end
+				--else
+				--begin
+				--    if isnull(@intSubLocationId, 0) = 0  and isnull(@intSubLocationId, 0)
+				--        insert into @msg(strMessage)
+				--		select ''Invalid Storage Location''
+				--end
+
+
+				if @intTrackAxleCount = 1 and isnull(@intAxleCount, 0) < 2
+						insert into @msg(strMessage)
+						select ''Invalid Axles''
+
+
+				if @intDriverNameRequired = 1 and isnull(@strDriverName, '''') = ''''
+						insert into @msg(strMessage)
+						select ''Invalid Driver''
+
+
+				if @intTruckIDRequired = 1 and isnull(@strTruckName, '''') = ''''
+						insert into @msg(strMessage)
+						select ''Invalid Truck ID''
+
+				if @ysnTicketCommentRequired = 1 and isnull(@strTicketComment, '''') = ''''
+						insert into @msg(strMessage)
+						select ''Invalid Comment''
+
+
+				if @ysnReferenceNumberRequired = 1 and isnull(@strCustomerReference, '''') = ''''
+					insert into @msg(strMessage)
+					select ''Invalid Reference''
+			
+				if @intStorePitInformation = 4
+				begin
+					if @intTicketType = 6 and @strInOutFlag = ''O''
+						insert into @msg(strMessage)
+						select ''Invalid Storage Unit''  
+					else if isnull(@strPitNumber, '''') = ''''
+						insert into @msg(strMessage)
+						select ''Invalid Pit''
+				end           
+
+
+				if isnull(@intCompanyLocationId, 0) = 0
+					insert into @msg(strMessage)
+					select ''Invalid Location''
+			
+				if @intTicketType <> 3 and (isnull(@intCommodityId, 0) = 0 or isnull(@intItemId, 0) = 0)
+					insert into @msg(strMessage)
+					select ''Invalid item''
+
+				if @intTicketType <> 5
+				begin
+					if @intDiscountId > 0 and isnull(@dblConvertedUOMQty, 0) <= 0
+						insert into @msg(strMessage)
+						select ''Invalid default item unit of measure''
+					else if (@intCommodityId > 0 or @intItemId > 0 ) and isnull(@intDiscountId, 0) = 0
+						insert into @msg(strMessage)
+						select ''Invalid Discount Schedule''
+				end
+					
+
+
+				if isnull(@dblGrossWeight, 0) = 0
+					insert into @msg(strMessage)
+					select ''Invalid Gross Weight''
+
+
+				if @ysnAllowZeroWeights = 0 and (isnull(@dblTareWeight, 0) = 0)
+					insert into @msg(strMessage)
+					select ''Invalid Tare Weight''
+							--ysnMultipleWeights = 1
+							--    (dblGrossWeight2 > 0 and isnull(dblTareWeight2, 0) = 0) or 
+							--    (dblGrossWeight1 > 0 and isnull(dblTareWeight1, 0) = 0)
+							--        ''Invalid Tare Weight''
+
+
+				if (isnull(@dblGrossWeight, 0) - isnull(@dblTareWeight, 0)) <= 0
+					insert into @msg(strMessage)
+					select ''Invalid Net Weight''  
+
+
+
+				--if @intTicketType not in (5, 2) and isnull(@strDistributionOption, '''') = '''' and isnull(@intSplitId, 0) = 0
+				--	insert into @msg(strMessage)
+				--	select ''Invalid Distribution''
+
+
+
+				if @intRequireSpotSalePrice = 1 and isnull(@dblUnitPrice, 0) = 0 and @strDistributionOption = ''SPT''
+					insert into @msg(strMessage)
+					select ''Invalid Unit Price''
+
+
+
+						--intTicketTypeId <> 5 and isnull(dblConvertedUOMQty, 0) = 0
+						--    ''Invalid Gross, Shrink and Net''
+
+				set @error_message = ''''
+				select @error_message = @error_message + strMessage + '','' from @msg
+				return @error_message
+
+			END
+
+		')
+
+		PRINT 'End creating fnSCValidateTicketStagingTable table'
 		PRINT 'Begin creating trigger'
 		EXEC ('
 			IF EXISTS (SELECT * FROM sys.triggers WHERE object_id = OBJECT_ID(N''[dbo].[trigLVConrolInsert]''))
@@ -325,6 +623,18 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 			BEGIN
 				if exists(select top 1 1 from tblGRCompanyPreference where ysnLVControlIntegration = 1)
 				begin
+					declare @intScaleOperatorId int
+					declare @newLVTicket int
+					declare @IrelyAdminId int
+
+					select @IrelyAdminId = intEntityId from tblEMEntityCredential where strUserName = ''irelyadmin''
+
+					declare @scaleOperator nvarchar(20)
+					set @scaleOperator = ''One Weigh''
+					select @intScaleOperatorId = intScaleOperatorId from tblSCScaleOperator where strName = @scaleOperator
+					if isnull(@intScaleOperatorId, 0) = 0
+						set @scaleOperator = ''iRely Admin''
+
 					INSERT INTO tblSCTicketLVStaging 
 					(
 						[strTicketNumber]
@@ -380,6 +690,11 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[strCostMethod]
 						,[strDiscountComment]
 						,[strSourceType]
+						,[strLoadNumber]
+						,intLoadId
+						,intLoadDetailId
+						,intContractId
+						,strContractLocation
 					)
 					SELECT 
 						[strTicketNumber]				= LTRIM(RTRIM(SC.strTicketNumber))
@@ -398,7 +713,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[dblTareWeight]				= SC.dblTareWeight
 						,[dtmTareDateTime]				= SC.dtmTareDateTime
 						,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
-						,[intDiscountId]				= GRD_CROSS_REF.intDiscountScheduleId -- GRDI.intDiscountId (not being used)
+						,[intDiscountId]				= GRD_CROSS_REF.intDiscountId -- GRDI.intDiscountId (not being used)
 						,[intDiscountScheduleId]		= GRD_CROSS_REF.intDiscountScheduleId -- consider review for redundancy. 
 						,[dblFreightRate]				= SC.dblFreightRate
 						,[dblTicketFees]				= SC.dblTicketFees
@@ -406,9 +721,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[intCurrencyId]				= SMCR.intCurrencyID
 						,[strCurrency]					= LTRIM(RTRIM(SC.strCurrency))
 						,[strBinNumber]					= LTRIM(RTRIM(SC.strBinNumber))
-						,[strContractNumber]			= LTRIM(RTRIM(SC.strContractNumber))
-						,[intContractSequence]			= SC.intContractSequence
-						,[strScaleOperatorUser]			= LTRIM(RTRIM(SC.strScaleOperatorUser))
+						,[strContractNumber]			= case when LG.intLoadId is not null then LG.strContractNumber else LTRIM(RTRIM(SC.strContractNumber)) end 
+						,[intContractSequence]			= case when LG.intLoadId is not null then LG.intContractSeq else SC.intContractSequence end
+						,[strScaleOperatorUser]			= LTRIM(RTRIM(isnull(SC.strScaleOperatorUser, @scaleOperator)))
 						,[strTruckName]					= LTRIM(RTRIM(SC.strTruckName))
 						,[strDriverName]				= LTRIM(RTRIM(SC.strDriverName))
 						,[strCustomerReference]			= LTRIM(RTRIM(SC.strCustomerReference))
@@ -434,7 +749,12 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,[strItemUOM]					= UM.strUnitMeasure
 						,[strCostMethod]				= ''Per Unit''
 						,[strDiscountComment]			= SC.strDiscountComment
-						,[strSourceType]				= ''LV Control''						
+						,[strSourceType]				= ''LV Control''	
+						,SC.strLoadNumber
+						,LG.intLoadId
+						,LG.intLoadDetailId
+						,LG.intContractDetailId		
+						,strLocationName	
 					FROM vyuSCTicketLVControlView SC 
 					INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
 					LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
@@ -454,8 +774,32 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId
 					left join tblGRDiscountSchedule GRDS on GRDS.intCommodityId = IC.intCommodityId
 					left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+					OUTER APPLY (
+						SELECT TOP 1 intLoadId, intLoadDetailId,
+							intContractDetailId = case 
+													when intPurchaseSale = 1 then intPContractDetailId 
+													else intSContractDetailId 
+												end,
+							
+							strContractNumber = case 
+													when intPurchaseSale = 1 then strPContractNumber 
+													else strSContractNumber 
+												end,
 
+							intContractSeq		= case 
+													when intPurchaseSale = 1 then intPContractSeq 
+													else intSContractSeq 
+												end,
 
+							strLocation			= case 
+													when intPurchaseSale = 1 then strPLocationName 
+													else strSLocationName
+												end
+							FROM vyuLGLoadDetailView 
+							where strLoadNumber COLLATE Latin1_General_CI_AS = SC.strLoadNumber COLLATE Latin1_General_CI_AS						
+					) LG
+
+					set @newLVTicket = SCOPE_IDENTITY()
 
 					INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)						
 					SELECT 
@@ -564,15 +908,72 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
 					INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 					
-					
-					INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
-					INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
+					INNER JOIN tblGRDiscountSchedule GRDS on GRDS.intCommodityId = ic.intCommodityId
+					INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+					--dapat di ka nababa dito
+					INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRDS.intDiscountScheduleId AND c.intStorageTypeId = -1
 					INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
+					--INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
+					--INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
+					--INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
 					INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
 					INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
-					WHERE b.gasct_disc_cd is not null
+					WHERE b.gasct_disc_cd is not null 
+						and k.strInOutFlag <> ''O''
 
 
+					INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)					
+					select
+							DiscountScheduleCode.dblDefaultValue as dblGradeReading
+							,ShrinkCalculationOption.strShrinkCalculationOption AS strShrinkWhat
+							,0 AS dblShrinkPercent
+							,DiscountScheduleCode.intDiscountScheduleCodeId
+							,TicketStaging.intTicketLVStagingId
+							,''Scale'' AS strSourceType
+							,''Dollar'' strDiscountChargeType 
+							,TicketStaging.intOriginTicketId
+							,ShrinkCalculationOption.intShrinkCalculationOptionId
+
+						from tblSCTicketLVStaging TicketStaging
+							join tblGRDiscountScheduleCode DiscountScheduleCode
+								on TicketStaging.intDiscountScheduleId = DiscountScheduleCode.intDiscountScheduleId
+							join tblGRShrinkCalculationOption ShrinkCalculationOption
+								on DiscountScheduleCode.intShrinkCalculationOptionId = ShrinkCalculationOption.intShrinkCalculationOptionId	
+
+							where TicketStaging.strInOutFlag = ''O''
+
+					
+					declare @ticket_number nvarchar(100)
+					declare @inserted_ticket_number int
+					declare @validation_message nvarchar(max)
+
+
+					select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket)
+					select @validation_message
+					if @validation_message = ''''
+					begin
+						select @ticket_number = strTicketNumber from tblSCTicketLVStaging where intTicketLVStagingId = @newLVTicket
+
+						begin try
+						
+							
+							update tblSCTicketLVStaging set ysnProcessedData = 1 where intTicketLVStagingId = @newLVTicket
+							if not exists(select top 1 1 from tblSCTicket where strTicketNumber = @ticket_number)	
+								exec uspSCProcessLVControlToTicket @newLVTicket, 1, @IrelyAdminId
+
+						end try
+						begin catch
+						
+							update tblSCTicketLVStaging set ysnProcessedData = 0 where intTicketLVStagingId = @newLVTicket
+							select @inserted_ticket_number = intTicketId from tblSCTicket where strTicketNumber = @ticket_number
+
+							update tblSCTicket set ysnHasGeneratedTicketNumber = 0 where intTicketId = @inserted_ticket_number
+							delete from tblQMTicketDiscount where intTicketId = @inserted_ticket_number
+							delete from tblSCTicket where intTicketId =  @inserted_ticket_number
+
+						end catch
+					end
+					
 					delete from gasctmst where gasct_tic_no in (select gasct_tic_no from INSERTED)
 				end
 				

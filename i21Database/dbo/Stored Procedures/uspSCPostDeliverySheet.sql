@@ -2,6 +2,7 @@
 	@intDeliverySheetId INT
 	,@intUserId INT
 	,@dblNetUnits NUMERIC(38,20)
+	,@dtmClientDate DATETIME = null
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -94,6 +95,10 @@ DECLARE @processTicket TABLE(
 BEGIN TRY
 	SET @dblTempSplitQty = @dblNetUnits;
 
+	IF(@dtmClientDate IS NULL)
+	BEGIN
+		SET @dtmClientDate = GETDATE();
+	END
 
 	SELECT TOP 1 
 		@intDSLocationId = intCompanyLocationId
@@ -181,6 +186,9 @@ BEGIN TRY
 		DEALLOCATE splitCursor;
 	END
 */
+	----------------------------------------------------------------------------------------------------------
+
+
 
 	DECLARE @ysnDPOwned as BIT = 0;
 	SELECT @ysnDPOwned = CASE WHEN CD.intPricingTypeId = 5 AND ISNULL(GR.strOwnedPhysicalStock, 'Company') = 'Company' THEN 1 ELSE 0 END 
@@ -254,7 +262,7 @@ BEGIN TRY
 	)
 	SELECT 
 		[intItemId]							= SCD.intItemId
-		,[dtmDate]							= dbo.fnRemoveTimeOnDate(GETDATE())
+		,[dtmDate]							= dbo.fnRemoveTimeOnDate(@dtmClientDate)
 		,[intLocationId]					= SCD.intCompanyLocationId
 		,[intSubLocationId]					= SC.intSubLocationId
 		,[intStorageLocationId]				= SC.intStorageLocationId
@@ -551,7 +559,17 @@ BEGIN TRY
 		FROM tblSCTicket WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
 	) SC
 	WHERE CS.intDeliverySheetId = @intDeliverySheetId
+		AND CS.ysnTransferStorage = 0
 		
+	UPDATE A
+	SET dblOpenBalance = B.dblQty
+		,dblOriginalBalance = B.dblQty
+	FROM tblGRCustomerStorage A
+	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
+	WHERE intDeliverySheetId = @intDeliverySheetId 
+		AND A.ysnTransferStorage = 0
+
+
 	UPDATE GRS SET GRS.dblGrossQuantity = ((GRS.dblOpenBalance / SCD.dblNet) * SCD.dblGross)
 	FROM tblSCDeliverySheet SCD
 	INNER JOIN tblSCDeliverySheetSplit SCDS ON SCDS.intDeliverySheetId = SCD.intDeliverySheetId
@@ -559,14 +577,11 @@ BEGIN TRY
 	AND SCDS.intEntityId = GRS.intEntityId
 	AND SCDS.intStorageScheduleTypeId = GRS.intStorageTypeId  
 	where SCDS.intDeliverySheetId = @intDeliverySheetId and GRS.ysnTransferStorage = 0
+		AND GRS.ysnTransferStorage = 0
 
-	UPDATE A
-	SET dblOpenBalance = B.dblQty
-		,dblOriginalBalance = B.dblQty
-	FROM tblGRCustomerStorage A
-	OUTER APPLY (SELECT dblQty = dbo.fnGRCalculateStorageUnits(A.intCustomerStorageId)) B
-	WHERE intDeliverySheetId = @intDeliverySheetId 
+	
 
+	EXEC uspGRUpdateStorageShipDetails @intDeliverySheetId 
 
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;

@@ -11,17 +11,17 @@ RETURNS @returnTable TABLE
 (
 	 [intBillStorageKey]			INT
 	,[intCustomerStorageId]			INT					NOT NULL
-	,[strStorageTicketNumber]		NVARCHAR(50)		NULL
+	,[strStorageTicketNumber]		NVARCHAR(50)		COLLATE Latin1_General_CI_AS NULL
 	,[intEntityId]					INT					NULL
-	,[strName]						NVARCHAR(100)		NULL
+	,[strName]						NVARCHAR(100)		COLLATE Latin1_General_CI_AS NULL
 	,[intItemId]					INT					NULL
-	,[strItemNo]					NVARCHAR(100)		NULL
+	,[strItemNo]					NVARCHAR(100)		COLLATE Latin1_General_CI_AS NULL
 	,[intCompanyLocationId]			INT					NULL
-	,[strLocationName]				NVARCHAR(100)		NULL	
+	,[strLocationName]				NVARCHAR(100)		COLLATE Latin1_General_CI_AS NULL	
 	,[dblOpenBalance]				DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[dblUnpaid]					DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[intStorageTypeId]				INT					NULL
-	,[strStorageTypeDescription]	NVARCHAR(30)		NULL
+	,[strStorageTypeDescription]	NVARCHAR(30)		COLLATE Latin1_General_CI_AS NULL
 	,[intStorageScheduleId]			INT					NULL
 	,[strScheduleDescription]		NVARCHAR(50)		NULL
 	,[dtmDeliveryDate]				DATETIME			NULL
@@ -34,7 +34,7 @@ RETURNS @returnTable TABLE
 	,[dblStorageDueAmount]			DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[dblFlatFeeTotal]				DECIMAL(18,6)		NOT NULL	DEFAULT 0
 	,[ysnDSPosted]					BIT 				NOT NULL	DEFAULT 0
-	,[strTransactionNo]				NVARCHAR(150)		NULL
+	,[strTransactionNo]				NVARCHAR(150)		COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
@@ -188,7 +188,7 @@ BEGIN
 		,dblNewStorageDue = SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit --New Storage Due (unpaid + additional)
 		,dblOldStorageBilled = ISNULL(CS.dblStoragePaid,0) --Old Storage Billed (storage due paid)
 		,dblNewStorageBilled = ISNULL(CS.dblStoragePaid,0) + SV.dblStorageDuePerUnit --New Storage Billed (storage paid + additional charge)
-		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * CS.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
+		,dblStorageDueAmount = ((SV.dblStorageDueTotalPerUnit + SV.dblStorageDuePerUnit) * MagicalOpenBalance.dblOpenBalance) + SV.dblFlatFeeTotal --Storage Due Amount ((units x additional storage) + flat fee)
 		,SV.dblFlatFeeTotal
 		,ysnDSPosted = ISNULL(DS.ysnPost, 1)
 		,SSVW.strTransaction

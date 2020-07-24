@@ -13,7 +13,6 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
-DECLARE @ysnImposeReversalTransaction BIT = 0
 
 DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 DECLARE @Invoices AS dbo.[InvoiceId]
@@ -25,11 +24,6 @@ DECLARE  @InitTranCount				INT
 
 SET @InitTranCount = @@TRANCOUNT
 SET @Savepoint = SUBSTRING(('ARPostInvoice' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
-
-SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
-FROM tblRKCompanyPreference
-
-SET @ysnImposeReversalTransaction = ISNULL(@ysnImposeReversalTransaction, 0)
 
 IF @InitTranCount = 0
 	BEGIN TRANSACTION
@@ -77,6 +71,8 @@ BEGIN
        , ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
        , ARI.ysnExcludeFromPayment		= PID.ysnExcludeInvoiceFromPayment
        , ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1	
+	   , ARI.intPeriodId       		    = ACCPERIOD.intGLFiscalYearPeriodId
+									  
     FROM #ARPostInvoiceHeader PID
     INNER JOIN (
 		SELECT intInvoiceId
@@ -105,8 +101,13 @@ BEGIN
 			 , strTransactionType
 			 , dtmDate
 			 , ysnExcludeFromPayment
+			 , intPeriodId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId
+	Outer Apply (
+		SELECT P.intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod P
+		WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
+	) ACCPERIOD
 
     UPDATE ARPD
     SET ARPD.dblInvoiceTotal		= ARI.dblInvoiceTotal * dbo.[fnARGetInvoiceAmountMultiplier](ARI.strTransactionType)
@@ -386,12 +387,10 @@ BEGIN
 		--UNPOST AND CANCEL LOAD SHIPMENT FROM CREDIT MEMO RETURN
 		IF ISNULL(@ysnFromReturnP, 0) = 1 AND @LoadIDP IS NOT NULL
 			BEGIN
-				IF @ysnImposeReversalTransaction = 0
-					BEGIN
-						EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
-													   , @ysnPost				 	= 0
-													   , @intEntityUserSecurityId  	= @UserId
-					END
+				EXEC dbo.[uspLGPostLoadSchedule] @intLoadId 				= @LoadIDP
+											   , @ysnPost				 	= 0
+											   , @intEntityUserSecurityId  	= @UserId
+
 				IF ISNULL(@intPurchaseSaleIDP, 0) <> 3
 					BEGIN
 						EXEC dbo.[uspLGCancelLoadSchedule] @intLoadId 				 = @LoadIDP
@@ -478,6 +477,7 @@ BEGIN
 		, ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
 		, ARI.ysnExcludeFromPayment		= 0
 		, ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
+		, ARI.intPeriodId				= NULL
 	FROM #ARPostInvoiceHeader PID
 	INNER JOIN (
 		SELECT intInvoiceId
@@ -504,6 +504,7 @@ BEGIN
 			 , dblBaseInvoiceTotal
 			 , dtmDate
 			 , ysnExcludeFromPayment
+			 , intPeriodId
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId 					
 	CROSS APPLY (
@@ -511,6 +512,7 @@ BEGIN
 		FROM tblARPrepaidAndCredit 
 		WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
 	) PPC
+	
 												
 	--UPDATE HD TICKET HOURS
 	UPDATE HDTHW						
@@ -732,9 +734,128 @@ BEGIN
 			END	
 
 		DELETE FROM @IdsU WHERE [intInvoiceId] = @InvoiceIDU
-	END
-																	
+	END																	
 END
+
+--UPDATE THE STOCK USAGE
+BEGIN 
+	DECLARE @UsageItems AS ItemCostingTableType
+	INSERT INTO @UsageItems (
+		intTransactionId
+		,strTransactionId
+		,intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,intSubLocationId
+		,intStorageLocationId
+		,intTransactionTypeId
+	)
+
+	SELECT	
+		Inv.intInvoiceId
+		,Inv.strInvoiceNumber
+		,InvDet.intItemId
+		,ItemLocation.intItemLocationId
+		,iu.intItemUOMId
+		,Inv.dtmDate
+		,dblQty = 
+			CASE 
+				WHEN Inv.strTransactionType = 'Credit Memo' THEN 
+					-InvDet.dblQtyShipped
+								
+				ELSE
+					InvDet.dblQtyShipped								
+			END
+		,iu.dblUnitQty
+		,InvDet.intSubLocationId
+		,InvDet.intStorageLocationId
+		,intTransactionTypeId = 
+			CASE 
+				WHEN Inv.strTransactionType = 'Credit Memo' THEN 
+					45								
+				ELSE
+					33
+			END
+	FROM 
+		#ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
+			ON I.strInvoiceNumber = Inv.strInvoiceNumber
+		INNER JOIN tblARInvoiceDetail InvDet
+			ON InvDet.intInvoiceId = Inv.intInvoiceId
+		INNER JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemId = InvDet.intItemId
+			AND ItemLocation.intLocationId = Inv.intCompanyLocationId
+		INNER JOIN tblICItemUOM iu
+			ON iu.intItemId = InvDet.intItemId
+			AND iu.intItemUOMId = InvDet.intItemUOMId
+	WHERE 				
+		Inv.strTransactionType IN(
+			'Invoice'
+			,'Cash'
+			,'Credit Memo'
+			,'Debit Memo'
+		)				
+
+	INSERT INTO @UsageItems (
+		intTransactionId
+		,strTransactionId
+		,intItemId
+		,intItemLocationId
+		,intItemUOMId
+		,dtmDate
+		,dblQty
+		,dblUOMQty
+		,intSubLocationId
+		,intStorageLocationId
+		,intTransactionTypeId
+	)
+	SELECT	
+		Inv.intInvoiceId
+		,Inv.strInvoiceNumber
+		,PrepaidDetail.intItemId
+		,ItemLocation.intItemLocationId
+		,iu.intItemUOMId
+		,Inv.dtmDate
+		,dblQty = -PrepaidDetail.dblQtyShipped
+		,iu.dblUnitQty
+		,PrepaidDetail.intSubLocationId
+		,PrepaidDetail.intStorageLocationId
+		,intTransactionTypeId = 
+			CASE 
+				WHEN Inv.strTransactionType = 'Credit Memo' THEN 
+					45								
+				ELSE
+					33
+			END
+	FROM 
+		#ARPostInvoiceHeader I INNER JOIN tblARInvoice Inv
+			ON I.strInvoiceNumber = Inv.strInvoiceNumber
+		INNER JOIN tblARPrepaidAndCredit Prepaid
+			ON Prepaid.intInvoiceId = Inv.intInvoiceId
+		INNER JOIN tblARInvoiceDetail PrepaidDetail
+			ON PrepaidDetail.intInvoiceId = Prepaid.intPrepaymentId
+		INNER JOIN tblICItemLocation ItemLocation
+			ON ItemLocation.intItemId = PrepaidDetail.intItemId
+			AND ItemLocation.intLocationId = Inv.intCompanyLocationId
+		INNER JOIN tblICItemUOM iu
+			ON iu.intItemId = PrepaidDetail.intItemId
+			AND iu.intItemUOMId = PrepaidDetail.intItemUOMId
+	WHERE 
+		Inv.strTransactionType IN (
+			'Cash Refund'
+		)	
+
+	UPDATE u
+	SET u.dblQty = CASE WHEN @Post = 1 THEN u.dblQty ELSE -u.dblQty END 
+	FROM @UsageItems u
+
+	EXEC uspICIncreaseUsageQty 
+		@UsageItems	
+		,@UserId
+END 
+
 
 --UPDATE CUSTOMER CREDIT LIMIT REACHED
 UPDATE CUSTOMER

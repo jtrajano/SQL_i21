@@ -66,6 +66,7 @@ SELECT
 	,strStatus						= CASE WHEN EMAILSETUP.intEmailSetupCount > 0 THEN 'Ready' ELSE 'Email not Configured.' END	COLLATE Latin1_General_CI_AS
 	,dtmForgiveDate					= I.dtmForgiveDate
 	,strSalesOrderNumber			= SO.strSalesOrderNumber
+	,strAccountingPeriod			= AccPeriod.strAccountingPeriod
 
 	, intRecurringId = RECUR.intRecurringId
 	, strFrequency = RECUR.strFrequency
@@ -210,4 +211,8 @@ LEFT OUTER JOIN (
 	FROM tblSMRecurringTransaction
 	WHERE strTransactionType = 'Invoice'
 ) RECUR ON RECUR.intTransactionId = I.intInvoiceId
+OUTER APPLY(
+	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
+) AccPeriod
 WHERE I.ysnRecurring = 1

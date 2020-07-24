@@ -48,15 +48,15 @@ SELECT
       ,chk.[dblTotalRefundCount]
       ,chk.[dblTotalRefundAmount]
       
-	  --,chk.[dblATMBegBalance]
-      ,dblATMBegBalance = (
-							ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceActual
-							FROM tblSTCheckoutHeader _chk
-							WHERE _chk.intStoreId = vst.intStoreId
-								AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
-								OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
-							ORDER BY _chk.dtmCheckoutDate DESC), 0)
-						)
+	  ,chk.[dblATMBegBalance]
+    --   ,dblATMBegBalance = (
+	-- 						ISNULL((SELECT TOP 1 _chk.dblATMEndBalanceActual
+	-- 						FROM tblSTCheckoutHeader _chk
+	-- 						WHERE _chk.intStoreId = vst.intStoreId
+	-- 							AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+	-- 							OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+	-- 						ORDER BY _chk.dtmCheckoutDate DESC), 0)
+	-- 					)
 	  
 	  ,chk.[dblATMReplenished]
       ,chk.[dblATMWithdrawal]
@@ -97,7 +97,7 @@ SELECT
 																	) + ISNULL(chk.dblATMReplenished, 0)
 																 )
 
-      --,chk.[dblChangeFundBegBalance]
+    ,chk.[dblChangeFundBegBalance]
 	  --,dblChangeFundBegBalance = (
 			--						ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
 			--						FROM tblSTCheckoutHeader _chk
@@ -106,14 +106,14 @@ SELECT
 			--						ORDER BY _chk.intCheckoutId DESC), 0)
 			--					)
 
-	,dblChangeFundBegBalance = (
-									ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
-									FROM tblSTCheckoutHeader _chk
-									WHERE _chk.intStoreId = vst.intStoreId
-										AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
-										OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
-									ORDER BY _chk.dtmCheckoutDate DESC), 0)
-								)
+	-- ,dblChangeFundBegBalance = (
+	-- 								ISNULL((SELECT TOP 1 ISNULL(_chk.dblChangeFundEndBalance, 0)
+	-- 								FROM tblSTCheckoutHeader _chk
+	-- 								WHERE _chk.intStoreId = vst.intStoreId
+	-- 									AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
+	-- 									OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
+	-- 								ORDER BY _chk.dtmCheckoutDate DESC), 0)
+	-- 							)
 
       --,chk.[dblChangeFundEndBalance]
       ,dblChangeFundEndBalance = (SELECT SUM(ISNULL(cf.dblValue, 0))
@@ -173,7 +173,7 @@ SELECT
 												THEN 'Gross'
 											WHEN st.strReportDepartmentAtGrossOrNet = 'N'
 												THEN 'Net'
-										END
+										END  COLLATE Latin1_General_CI_AS
 	  ,strAllowRegisterMarkUpDown = CASE	
 										WHEN st.strAllowRegisterMarkUpDown = 'I'
 											THEN 'Item Price Differences'
@@ -181,7 +181,7 @@ SELECT
 											THEN 'Department Discounts'
 										WHEN st.strReportDepartmentAtGrossOrNet = 'N'
 											THEN 'None'
-									END
+									END  COLLATE Latin1_General_CI_AS
 	  ,intCompanyLocationId = st.intCompanyLocationId
 	  ,strLocationName = cl.strLocationName
 	  ,strSubLocationName = cls.strSubLocationName

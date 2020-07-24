@@ -96,6 +96,8 @@ BEGIN TRY
 			,[intBookId]
 			,[intSubBookId]
 			,[intSort]
+			,[intLoadShipmentId]
+			,[intLoadShipmentDetailId]
 			)
 		SELECT 
 			[strReceiptType] = 'Direct'
@@ -141,6 +143,8 @@ BEGIN TRY
 			,[intBookId] = L.intBookId
 			,[intSubBookId] = L.intSubBookId
 			,[intSort] = ISNULL(LC.intLoadContainerId, 0)
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentDetailId] = LD.intLoadDetailId
 		FROM tblLGLoad L 
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId 
 			JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND IL.intLocationId = LD.intPCompanyLocationId 
@@ -195,27 +199,17 @@ BEGIN TRY
 			,[intShipFromId]
 			,[strBillOfLadding]
 			,[ysnInventoryCost]
+			,[intLoadShipmentId]
+			,[intLoadShipmentCostId]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE ROUND((
-										CV.[dblShipmentUnitPrice] / (
-											SELECT SUM(LOD.dblQuantity)
-											FROM tblLGLoadDetail LOD
-											WHERE LOD.intLoadId = L.intLoadId
-											)
-										) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
+							ELSE ROUND((CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
 							END
-			,[dblAmount] = ROUND((
-					CV.[dblTotal] / (
-						SELECT SUM(LOD.dblQuantity)
-						FROM tblLGLoadDetail LOD
-						WHERE LOD.intLoadId = L.intLoadId
-						)
-					) * LD.dblQuantity, 2)
+			,[dblAmount] = ROUND((CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity, 2)
 			,[intCostUOMId] = CV.intItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -231,6 +225,8 @@ BEGIN TRY
 			,[intShipFromId] = EL.intEntityLocationId
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentCostId] = CV.intLoadCostId
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -238,27 +234,8 @@ BEGIN TRY
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		WHERE CV.intLoadId = @intLoadId
-		GROUP BY CV.intEntityVendorId
-			,CV.intItemId
-			,CV.strCostMethod
-			,CV.dblShipmentUnitPrice
-			,CV.dblTotal
-			,CV.intItemUOMId
-			,CD.intContractHeaderId
-			,LD.intPContractDetailId
-			,CV.intCurrencyId
-			,LD.dblQuantity
-			,L.strBLNumber
-			,I.ysnInventoryCost
-			,CV.intLoadId
-			,L.intLoadId
-			,LD.intVendorEntityId
-			,LD.intPCompanyLocationId
-			,EL.intEntityLocationId
-			,L.intCurrencyId
-			,CUR.ysnSubCurrency
-			,CV.ysnPrice
 
 		UNION ALL
 
@@ -283,6 +260,8 @@ BEGIN TRY
 			,[intShipFromId] = CT.intEntityLocationId
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentCostId] = NULL
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
@@ -452,6 +431,28 @@ BEGIN TRY
 			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 			WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
 		END
+
+		/* Update LS Unit Cost for Unpriced Contracts */
+		UPDATE LD 
+		SET dblUnitPrice = dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL)
+			,dblAmount = dbo.fnCalculateCostBetweenUOM(
+								LD.intPriceUOMId
+								, ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId) 
+								,(dbo.fnCTGetSequencePrice(CD.intContractDetailId,NULL) / CASE WHEN (CUR.ysnSubCurrency = 1) THEN CUR.intCent ELSE 1 END)
+							) * CASE WHEN (LD.intWeightItemUOMId IS NOT NULL) THEN LD.dblNet ELSE LD.dblQuantity END		
+		FROM tblLGLoadDetail LD
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+			JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
+			LEFT JOIN tblSMCurrency CUR ON CUR.intCurrencyID = LD.intPriceCurrencyId
+		WHERE ISNULL(LD.dblUnitPrice, 0) = 0 AND LD.intLoadId = @intLoadId
+
+		IF EXISTS(SELECT TOP 1 1 FROM tblLGLoadDetail LD
+			INNER JOIN tblLGLoad L ON LD.intLoadId = L.intLoadId
+			WHERE L.intPurchaseSale <> 3 AND LD.intLoadId = @intLoadId AND ISNULL(LD.dblUnitPrice, 0) = 0)
+		BEGIN
+			RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
+		END
 	
 		IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink LDCL 
 					INNER JOIN tblLGLoadContainer LC ON LDCL.intLoadContainerId = LC.intLoadContainerId
@@ -495,6 +496,8 @@ BEGIN TRY
 				,[intBookId]
 				,[intSubBookId]
 				,[intSort]
+				,[intLoadShipmentId]
+				,[intLoadShipmentDetailId]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -569,6 +572,8 @@ BEGIN TRY
 				,[intBookId] = L.intBookId
 				,[intSubBookId] = L.intSubBookId
 				,[intSort] = ISNULL(LC.intLoadContainerId,0)
+				,[intLoadShipmentId] = L.intLoadId
+				,[intLoadShipmentDetailId] = LD.intLoadDetailId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -639,6 +644,8 @@ BEGIN TRY
 				,[intBookId]
 				,[intSubBookId]
 				,[intSort]
+				,[intLoadShipmentId]
+				,[intLoadShipmentDetailId]
 				)
 			SELECT [strReceiptType] = 'Purchase Contract'
 				,[intEntityVendorId] = LD.intVendorEntityId
@@ -703,6 +710,8 @@ BEGIN TRY
 				,[intBookId] = L.intBookId
 				,[intSubBookId] = L.intSubBookId
 				,[intSort] = NULL
+				,[intLoadShipmentId] = L.intLoadId
+				,[intLoadShipmentDetailId] = LD.intLoadDetailId
 			FROM tblLGLoad L
 			JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
@@ -763,27 +772,17 @@ BEGIN TRY
 			,[intShipFromId]
 			,[strBillOfLadding]
 			,[ysnInventoryCost]
+			,[intLoadShipmentId]
+			,[intLoadShipmentCostId]
 			)
 		SELECT 
 			[intOtherChargeEntityVendorId] = CV.intEntityVendorId
 			,[intChargeId] = CV.intItemId
 			,[strCostMethod] = CV.strCostMethod
 			,[dblRate] = CASE WHEN CV.strCostMethod = 'Amount' THEN 0
-							ELSE ROUND((
-										CV.[dblShipmentUnitPrice] / (
-											SELECT SUM(LOD.dblQuantity)
-											FROM tblLGLoadDetail LOD
-											WHERE LOD.intLoadId = L.intLoadId
-											)
-										) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
+							ELSE ROUND((CV.[dblShipmentUnitPrice] / LOD.dblQuantityTotal) * CONVERT(NUMERIC(18, 6), LD.dblQuantity), 2)
 							END
-			,[dblAmount] = ROUND((
-					CV.[dblTotal] / (
-						SELECT SUM(LOD.dblQuantity)
-						FROM tblLGLoadDetail LOD
-						WHERE LOD.intLoadId = L.intLoadId
-						)
-					) * LD.dblQuantity, 2)
+			,[dblAmount] = ROUND((CV.[dblTotal] / LOD.dblQuantityTotal) * LD.dblQuantity, 2)
 			,[intCostUOMId] = CV.intItemUOMId
 			,[intContractHeaderId] = CD.intContractHeaderId
 			,[intContractDetailId] = LD.intPContractDetailId
@@ -799,6 +798,8 @@ BEGIN TRY
 			,[intShipFromId] = EL.intEntityLocationId
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentCostId] = CV.intLoadCostId
 		FROM vyuLGLoadCostForVendor CV
 		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = CV.intLoadDetailId
 		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
@@ -806,27 +807,8 @@ BEGIN TRY
 		JOIN tblSMCurrency CUR ON CUR.intCurrencyID = CV.intCurrencyId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
 		LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = LD.intVendorEntityId AND EL.ysnDefaultLocation = 1
+		OUTER APPLY (SELECT dblQuantityTotal = SUM(LOD.dblQuantity) FROM tblLGLoadDetail LOD WHERE LOD.intLoadId = L.intLoadId) LOD
 		WHERE CV.intLoadId = @intLoadId
-		GROUP BY CV.intEntityVendorId
-			,CV.intItemId
-			,CV.strCostMethod
-			,CV.dblShipmentUnitPrice
-			,CV.dblTotal
-			,CV.intItemUOMId
-			,CD.intContractHeaderId
-			,LD.intPContractDetailId
-			,CV.intCurrencyId
-			,LD.dblQuantity
-			,L.strBLNumber
-			,I.ysnInventoryCost
-			,CV.intLoadId
-			,L.intLoadId
-			,LD.intVendorEntityId
-			,LD.intPCompanyLocationId
-			,EL.intEntityLocationId
-			,L.intCurrencyId
-			,CUR.ysnSubCurrency
-			,CV.ysnPrice
 
 		UNION ALL
 
@@ -851,6 +833,8 @@ BEGIN TRY
 			,[intShipFromId] = CT.intEntityLocationId
 			,[strBillOfLadding] = L.strBLNumber
 			,[ysnInventoryCost] = I.ysnInventoryCost
+			,[intLoadShipmentId] = L.intLoadId
+			,[intLoadShipmentCostId] = NULL
 		FROM tblLGLoad L
 		JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		JOIN tblLGLoadWarehouseServices LWS ON LW.intLoadWarehouseId = LWS.intLoadWarehouseId
@@ -943,6 +927,15 @@ BEGIN TRY
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
+
+		--If IR is created, remove LS payables
+		IF (@intInventoryReceiptId IS NOT NULL)
+		BEGIN
+			DELETE VP
+			FROM tblAPVoucherPayable VP
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = VP.intLoadShipmentDetailId AND LD.intPContractDetailId = VP.intContractDetailId
+			WHERE LD.intLoadId = @intLoadId
+		END
 	END
 
 

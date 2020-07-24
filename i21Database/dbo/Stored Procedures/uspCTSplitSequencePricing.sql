@@ -124,11 +124,26 @@ BEGIN TRY
 				FROM	tblCTContractDetail
 				WHERE	intContractDetailId	=	@intChildContractDetailId
 
-				SET @XML =	'<root><toUpdate><dblTotalLots>'+STR(@dblChildSeqLots,18,6)+'</dblTotalLots><dblLotsFixed>'+STR(@dblChildSeqLots,18,6)+'</dblLotsFixed>'+
-							CASE WHEN @ysnHedge = 1 THEN '<intLotsHedged>'+STR(@dblChildSeqLots,18,6)+'</intLotsHedged>' ELSE '' END +
-							'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 
+				select
+					@intNewPriceFixationId = pf.intPriceFixationId
+				from
+					tblCTContractDetail cd
+					,tblCTPriceFixation pf
+				where
+					cd.intContractDetailId = 1129
+					and pf.intContractHeaderId = cd.intContractHeaderId
+					and pf.intContractDetailId = cd.intContractDetailId
 
-				EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId, @intNewPriceFixationId OUTPUT,@XML
+				if (@intNewPriceFixationId is null)
+				BEGIN
+
+					SET @XML =	'<root><toUpdate><dblTotalLots>'+STR(@dblChildSeqLots,18,6)+'</dblTotalLots><dblLotsFixed>'+STR(@dblChildSeqLots,18,6)+'</dblLotsFixed>'+
+								CASE WHEN @ysnHedge = 1 THEN '<intLotsHedged>'+STR(@dblChildSeqLots)+'</intLotsHedged>' ELSE '' END +
+								'<intContractDetailId>'+STR(@intChildContractDetailId)+'</intContractDetailId></toUpdate></root>' 
+
+					EXEC uspCTCreateADuplicateRecord 'tblCTPriceFixation',@intPriceFixationId, @intNewPriceFixationId OUTPUT,@XML
+				
+				end
 				
 				IF @ysnHedge = 1
 				BEGIN

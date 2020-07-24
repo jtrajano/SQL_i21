@@ -1,13 +1,13 @@
 ﻿
 CREATE TABLE [dbo].[tblCMBankLoan](
-	[strBankLoanId] [nvarchar](20) NOT NULL,
+	[strBankLoanId] [nvarchar](20)  COLLATE Latin1_General_CI_AS NOT NULL,
 	[intBankLoanId] [int] IDENTITY(1,1) NOT NULL,
 	[dtmOpened] [date] NOT NULL,
 	[dtmMaturity] [date] NOT NULL,
 	[dtmEntered] [datetime] NOT NULL,
 	[decAnnualInterest] [decimal](8, 4) NOT NULL,
 	[ysnOpen] [bit] NOT NULL,
-	[strComments] [nvarchar](800) NULL,
+	[strComments] [nvarchar](800) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId] [int] NULL,
 	[dblLoanAmount] [decimal](18, 6) NULL,
 	[intCompanyLocationId] [int] NULL,

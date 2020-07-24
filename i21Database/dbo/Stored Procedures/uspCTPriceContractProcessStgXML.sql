@@ -53,6 +53,7 @@ BEGIN TRY
 		,@intPriceItemUOMId INT
 		,@intPriceUnitMeasureId INT
 		,@strPriceItemUOM NVARCHAR(50)
+		,@config AS ApprovalConfigurationType
 	DECLARE @intNewPriceContractId INT
 		,@strFinalPriceUOM NVARCHAR(50)
 		,@strAgreedItemUOM NVARCHAR(50)
@@ -117,15 +118,34 @@ BEGIN TRY
 		,@strDescription NVARCHAR(100)
 		,@strApproverXML NVARCHAR(MAX)
 		,@strSubmittedByXML NVARCHAR(MAX)
+		,@strApprover NVARCHAR(100)
+		,@intCurrentUserEntityId INT
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
+	DECLARE @tblCTPriceContractStage TABLE (intPriceContractStageId INT)
+
+	INSERT INTO @tblCTPriceContractStage (intPriceContractStageId)
+	SELECT intPriceContractStageId
+	FROM tblCTPriceContractStage
+	WHERE strFeedStatus IS NULL
 
 	SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
-	FROM tblCTPriceContractStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	FROM @tblCTPriceContractStage
+
+	IF @intPriceContractStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblCTPriceContractStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intPriceContractStageId IN (
+			SELECT PS.intPriceContractStageId
+			FROM @tblCTPriceContractStage PS
+			)
 
 	WHILE @intPriceContractStageId > 0
 	BEGIN
@@ -152,7 +172,7 @@ BEGIN TRY
 			,@strPriceFixationXML = strPriceFixationXML
 			,@strPriceFixationDetailXML = strPriceFixationDetailXML
 			,@strApproverXML = strApproverXML
-			,@strSubmittedByXML=strSubmittedByXML
+			,@strSubmittedByXML = strSubmittedByXML
 			,@strReference = strReference
 			,@strRowState = strRowState
 			,@strFeedStatus = strFeedStatus
@@ -711,6 +731,7 @@ BEGIN TRY
 						,1 AS intConcurrencyId
 						,@intPriceContractId
 						,@intCompanyRefId
+
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
 					SELECT @strDescription = 'Created from inter-company : ' + @strNewPriceContractNo
@@ -742,7 +763,6 @@ BEGIN TRY
 				--SELECT @intCompanyRefId = intCompanyId
 				--FROM tblCTPriceContract
 				--WHERE intPriceContractId = @intNewPriceContractId
-
 				EXEC sp_xml_removedocument @idoc
 
 				EXEC sp_xml_preparedocument @idoc OUTPUT
@@ -1554,7 +1574,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intPriceFixationId = @intPriceFixationId
-					AND ysnApproval=1
+					AND ysnApproval = 1
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -1580,14 +1600,14 @@ BEGIN TRY
 
 				EXEC sp_xml_removedocument @idoc
 
-				
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strSubmittedByXML
+
 				DELETE
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intContractHeaderId
 					AND intPriceFixationId = @intPriceFixationId
-					AND ysnApproval=0
+					AND ysnApproval = 0
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -1610,6 +1630,7 @@ BEGIN TRY
 						,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
 						) x
+
 				EXEC sp_xml_removedocument @idoc
 
 				SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intNewPriceContractId)
@@ -1639,6 +1660,32 @@ BEGIN TRY
 					,NULL
 					,NULL
 
+				INSERT INTO @config (
+					strApprovalFor
+					,strValue
+					)
+				SELECT 'Contract Type'
+					,'Purchase'
+
+				SELECT @strApprover = strApprover
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyRefId
+
+				SELECT @intCurrentUserEntityId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strApprover
+
+				IF @intCurrentUserEntityId IS NULL
+					SELECT @intCurrentUserEntityId = @intCreatedById
+
+				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.PriceContracts'
+					,@recordId = @intNewPriceContractId
+					,@transactionNo = @strNewPriceContractNo
+					,@transactionEntityId = @intEntityId
+					,@currentUserEntityId = @intCurrentUserEntityId
+					,@amount = 0
+					,@approverConfiguration = @config
+
 				x:
 
 				SELECT @intContractScreenId = intScreenId
@@ -1650,7 +1697,22 @@ BEGIN TRY
 				WHERE intRecordId = @intNewPriceContractId
 					AND intScreenId = @intContractScreenId
 
-				INSERT INTO tblCTPriceContractAcknowledgementStage (
+				DECLARE @strSQL NVARCHAR(MAX)
+					,@strServerName NVARCHAR(50)
+					,@strDatabaseName NVARCHAR(50)
+
+				SELECT @strServerName = strServerName
+					,@strDatabaseName = strDatabaseName
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyId
+
+				IF EXISTS (
+						SELECT 1
+						FROM master.dbo.sysdatabases
+						WHERE name = @strDatabaseName
+						)
+				BEGIN
+					SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblCTPriceContractAcknowledgementStage (
 					intAckPriceContractId
 					,strAckPriceContracNo
 					,dtmFeedDate
@@ -1668,7 +1730,7 @@ BEGIN TRY
 				SELECT @intNewPriceContractId
 					,@strNewPriceContractNo
 					,GETDATE()
-					,'Success'
+					,''Success''
 					,@strTransactionType
 					,@intMultiCompanyId
 					,@strAckPriceContractXML
@@ -1677,7 +1739,32 @@ BEGIN TRY
 					,@intTransactionId
 					,@intCompanyId
 					,@intTransactionRefId
-					,@intCompanyRefId
+					,@intCompanyRefId'
+
+					EXEC sp_executesql @strSQL
+						,N'@intNewPriceContractId int
+					,@strNewPriceContractNo nvarchar(50)
+					,@strTransactionType nvarchar(50)
+					,@intMultiCompanyId int
+					,@strAckPriceContractXML nvarchar(MAX)
+					,@strAckPriceFixationXML nvarchar(MAX)
+					,@strAckPriceFixationDetailXML nvarchar(MAX)
+					,@intTransactionId int
+					,@intCompanyId int
+					,@intTransactionRefId int
+					,@intCompanyRefId int'
+						,@intNewPriceContractId
+						,@strNewPriceContractNo
+						,@strTransactionType
+						,@intMultiCompanyId
+						,@strAckPriceContractXML
+						,@strAckPriceFixationXML
+						,@strAckPriceFixationDetailXML
+						,@intTransactionId
+						,@intCompanyId
+						,@intTransactionRefId
+						,@intCompanyRefId
+				END
 
 				IF @strRowState <> 'Delete'
 				BEGIN
@@ -1712,10 +1799,17 @@ BEGIN TRY
 		END
 
 		SELECT @intPriceContractStageId = MIN(intPriceContractStageId)
-		FROM tblCTPriceContractStage
+		FROM @tblCTPriceContractStage
 		WHERE intPriceContractStageId > @intPriceContractStageId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE tblCTPriceContractStage
+	SET strFeedStatus = NULL
+	WHERE intPriceContractStageId IN (
+			SELECT PS.intPriceContractStageId
+			FROM @tblCTPriceContractStage PS
+			)
+		AND strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

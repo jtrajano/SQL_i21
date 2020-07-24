@@ -16,7 +16,7 @@ SELECT
 		 WHEN 13 THEN 'Basis Advance'
 		 WHEN 14 THEN 'Deferred Interest'
 		 ELSE 'Invalid Type'
-	END AS strTransactionType,
+	END COLLATE Latin1_General_CI_AS AS strTransactionType,
 	G2.strName,
 	G2.strEntityNo,
 	A.strVendorOrderNumber,
@@ -81,12 +81,13 @@ SELECT
 	PG.strName as strPurchasingGroupName,
 	CB.strContractBasis as strINCO,
 	ISNULL(A2.ysnPaid,0) AS ysnPaid,
-	A2.strPaymentInfo,
+	A2.strPaymentInfo COLLATE Latin1_General_CI_AS AS strPaymentInfo,
 	A2.dtmDatePaid,
 	A2.dtmPaymentDateReconciled,
 	ISNULL(A2.dblPayment,0) AS dblPayment,
 	ISNULL(A2.ysnClr,0) AS ysnClr,
-	A2.dtmClr
+	A2.dtmClr,
+	A.intShipToId
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor G INNER JOIN dbo.tblEMEntity G2 ON G.[intEntityId] = G2.intEntityId) ON G.[intEntityId] = A.intEntityVendorId
 INNER JOIN dbo.tblAPBillDetail B 

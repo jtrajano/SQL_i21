@@ -84,6 +84,7 @@ BEGIN TRY
 	--DECLARE @strPropertName NVARCHAR(50),
     --DECLARE @Count decimal(38,0)
     DECLARE @strTblName nvarchar(MAX)
+			,@intControlPointId int
 
 	DECLARE @intRCount int ,
             @intSeq int,
@@ -222,6 +223,7 @@ BEGIN TRY
 		,intRecipeItemId INT
 		,intStorageLocationId INT
 		,dblWeightPerQty NUMERIC(38, 20)
+		,dblUnitCost NUMERIC(38, 20)
 		)
 
 	IF OBJECT_ID('tempdb..#tblBlendSheetLotFinal') IS NOT NULL
@@ -237,6 +239,7 @@ BEGIN TRY
 		,intRecipeItemId INT
 		,intStorageLocationId INT
 		,dblWeightPerQty NUMERIC(38, 20)
+		,dblUnitCost NUMERIC(38, 20)
 		)
 
 		IF OBJECT_ID('tempdb..#tblNames') IS NOT NULL  
@@ -323,7 +326,7 @@ BEGIN TRY
 		UNION
 	
 		SELECT @intRecipeId
-			,rs.intRecipeSubstituteItemId
+			,ri.intRecipeItemId
 			,rs.intSubstituteItemId AS intItemId
 			,(rs.dblQuantity * (@dblQtyToProduce / r.dblQuantity)) dblRequiredQty
 			,1
@@ -336,7 +339,7 @@ BEGIN TRY
 		JOIN tblMFRecipeItem ri on rs.intRecipeItemId=ri.intRecipeItemId
 		WHERE r.intRecipeId = @intRecipeId
 			AND rs.intRecipeItemTypeId = 1
-		ORDER BY ysnMinorIngredient
+		ORDER BY 5,6
 
 		IF (
 				SELECT ISNULL(COUNT(1), 0)
@@ -352,6 +355,13 @@ BEGIN TRY
 					)
 		END
 
+		SELECT @intControlPointId = strAttributeValue
+		FROM tblMFManufacturingProcessAttribute pa
+		JOIN tblMFAttribute at ON pa.intAttributeId = at.intAttributeId
+		WHERE pa.intManufacturingProcessId = @intManufacturingProcessId
+		AND pa.intLocationId = @intLocationId
+		AND at.strAttributeName = 'Control Point'
+
 		INSERT INTO #tblProductProperty(intPropertyId,strPropertyName,intProductId,dblMinValue,dblMaxValue,dblMedian,intSequenceNo)
 		SELECT DISTINCT pt.intPropertyId,pt.strPropertyName,p.intProductValueId,pv.dblMinValue,pv.dblMaxValue,
 		((ISNULL(pv.dblMinValue,0)+ISNULL(pv.dblMaxValue,0))/2) as dblMedian,pp.intSequenceNo
@@ -359,8 +369,10 @@ BEGIN TRY
 		JOIN tblQMProductProperty pp ON pp.intProductId=p.intProductId
 		JOIN tblQMProductPropertyValidityPeriod pv ON pv.intProductPropertyId=pp.intProductPropertyId
 		JOIN tblQMProperty pt ON pt.intPropertyId=pp.intPropertyId
+		JOIN tblQMProductControlPoint c on c.intProductId=p.intProductId
 		WHERE p.intProductValueId=@intBlendItemId
 		AND p.intProductTypeId=2 AND pt.intDataTypeId in (1,2,6)
+		AND c.intControlPointId=@intControlPointId
 		AND p.ysnActive = 1
 		ORDER BY pp.intSequenceNo
 
@@ -872,7 +884,7 @@ BEGIN TRY
 		SET @intSequenceCount = @intSequenceCount + 1
 	END
 
-	IF LEN(@strOrderByFinal) > 0
+	IF LEN(@strOrderByFinal) > 0 and RIGHT(@strOrderByFinal,1)=','
 		SET @strOrderByFinal = LEFT(@strOrderByFinal, LEN(@strOrderByFinal) - 1)
 
       IF RIGHT(@strFromTB,1)=','
@@ -1008,6 +1020,7 @@ BEGIN TRY
 						,intRecipeItemId
 						,intStorageLocationId
 						,dblWeightPerQty
+						,dblUnitCost
 						)
 					SELECT L.intLotId
 						,L.intItemId
@@ -1044,6 +1057,7 @@ BEGIN TRY
 						,@intRecipeItemId AS intRecipeItemId
 						,L.intStorageLocationId AS intStorageLocationId
 						,L.dblWeightPerQty
+						,L.dblLastCost
 					FROM tblICLot L
 					WHERE L.intLotId = @intLotId
 						AND L.dblWeight > 0
@@ -1058,6 +1072,7 @@ BEGIN TRY
 						,intRecipeItemId
 						,intStorageLocationId
 						,dblWeightPerQty
+						,dblUnitCost
 						)
 					SELECT TOP 1 L.intParentLotId
 						,L.intItemId
@@ -1094,10 +1109,11 @@ BEGIN TRY
 						,@intRecipeItemId AS intRecipeItemId
 						,CASE 
 							WHEN @ysnShowAvailableLotsByStorageLocation = 1
-								THEN @intStorageLocationId
+								THEN L.intStorageLocationId
 							ELSE 0
 							END AS intStorageLocationId
 						,L.dblWeightPerQty
+						,L.dblLastCost
 					FROM tblICLot L
 					WHERE L.intParentLotId = @intLotId AND L.dblWeight > 0
 
@@ -1124,8 +1140,8 @@ BEGIN TRY
 			AND a.name <> 'Lot' + CONVERT(varchar,@intInputItemId)
 
 			DECLARE @strSQL2 NVARCHAR(MAX)
-			SET @strSQL2='SELECT a.Lot'+ltrim(@intInputItemId) +', a.##tblItem' +ltrim(@intInputItemId) +','
-			+'a.##tblItem'+ltrim(@intInputItemId)+'Qty ' + ' INTO ##tblNextBestLot FROM ##tblResult a,##tblBestResultFinal b'++' WHERE a.##tblItem'+ltrim(@intInputItemId) +' = '
+			SET @strSQL2='SELECT a.Lot'+ltrim(@intInputItemId) +' as intLotId, a.##tblItem' +ltrim(@intInputItemId) +' as intItemId,'
+			+'a.##tblItem'+ltrim(@intInputItemId)+'Qty as dblAvailableQty' + ' INTO ##tblNextBestLot FROM ##tblResult a,##tblBestResultFinal b'++' WHERE a.##tblItem'+ltrim(@intInputItemId) +' = '
 			+ltrim(str(@intRawItemId))+' AND a.Lot'+ltrim(@intInputItemId)+'<>'''+ltrim(@intLotId) +''''+ @strJoinClause
 
 			EXEC(@strSQL2)
@@ -1214,6 +1230,7 @@ BEGIN TRY
 							,intRecipeItemId
 							,intStorageLocationId
 							,dblWeightPerQty
+							,dblUnitCost
 							)
 						SELECT L.intLotId
 							,L.intItemId
@@ -1250,6 +1267,7 @@ BEGIN TRY
 							,@intRecipeItemId AS intRecipeItemId
 							,L.intStorageLocationId AS intStorageLocationId
 							,L.dblWeightPerQty
+							,L.dblLastCost
 						FROM tblICLot L
 						WHERE L.intLotId = @intLotId
 							AND L.dblWeight > 0
@@ -1264,6 +1282,7 @@ BEGIN TRY
 							,intRecipeItemId
 							,intStorageLocationId
 							,dblWeightPerQty
+							,dblUnitCost
 							)
 						SELECT TOP 1 L.intParentLotId
 							,L.intItemId
@@ -1300,10 +1319,11 @@ BEGIN TRY
 							,@intRecipeItemId AS intRecipeItemId
 							,CASE 
 								WHEN @ysnShowAvailableLotsByStorageLocation = 1
-									THEN @intStorageLocationId
+									THEN L.intStorageLocationId
 								ELSE 0
 								END AS intStorageLocationId
 							,L.dblWeightPerQty
+							,L.dblLastCost
 						FROM tblICLot L
 						WHERE L.intParentLotId = @intLotId AND L.dblWeight > 0
 
@@ -1373,6 +1393,7 @@ BEGIN TRY
 		,intRecipeItemId
 		,intStorageLocationId
 		,dblWeightPerQty
+		,dblUnitCost
 		)
 	SELECT intParentLotId
 		,intItemId
@@ -1383,6 +1404,7 @@ BEGIN TRY
 		,intRecipeItemId
 		,intStorageLocationId
 		,AVG(dblWeightPerQty)
+		,Max(dblUnitCost)
 	FROM #tblBlendSheetLot
 	GROUP BY intParentLotId
 		,intItemId
@@ -1407,24 +1429,22 @@ BEGIN TRY
 			,BS.intItemId
 			,BS.intRecipeItemId
 			,L.dblLastCost AS dblUnitCost
-			--,(
-			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
-			--	FROM dbo.QM_TestResult AS TR
-			--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
-			--	WHERE ProductObjectKey = PL.MainLotKey
-			--		AND TR.ProductTypeKey = 16
-			--		AND P.PropertyName IN (
-			--			SELECT V.SettingValue
-			--			FROM dbo.iMake_AppSettingValue AS V
-			--			INNER JOIN dbo.iMake_AppSetting AS S ON V.SettingKey = S.SettingKey
-			--				AND S.SettingName = '' Average Density ''
-			--			)
-			--		AND PropertyValue IS NOT NULL
-			--		AND PropertyValue <> ''''
-			--		AND isnumeric(tr.PropertyValue) = 1
-			--	ORDER BY TR.LastUpdateOn DESC
-			--	) AS 'Density' --To Review
-			,CAST(0 AS DECIMAL) AS dblDensity
+			,CONVERT(DECIMAL(24, 2), (
+					SELECT TOP 1 (
+							CASE 
+								WHEN ISNULL(TR.strPropertyValue, 0) = ''
+									THEN 0.0
+								ELSE isnull(CONVERT(DECIMAL(24, 2), TR.strPropertyValue), 0.0)
+								END
+							)
+					FROM tblQMTestResult TR
+					INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+						AND ISNUMERIC(TR.strPropertyValue) = 1
+						AND P.strPropertyName = 'Density'
+					WHERE TR.intProductTypeId = 11
+						AND TR.intProductValueId = PL.intParentLotId
+					ORDER BY TR.intSampleId DESC
+					)) AS dblDensity
 			,(BS.dblQuantity / @intEstNoOfSheets) AS dblRequiredQtyPerSheet
 			,L.dblWeightPerQty AS dblWeightPerUnit
 			,ISNULL(I.dblRiskScore, 0) AS dblRiskScore
@@ -1464,25 +1484,23 @@ BEGIN TRY
 			,UM2.strUnitMeasure AS strIssuedUOM
 			,BS.intItemId
 			,BS.intRecipeItemId
-			,0.0 AS dblUnitCost -- Review
-			--,(
-			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
-			--	FROM dbo.QM_TestResult AS TR
-			--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
-			--	WHERE ProductObjectKey = PL.MainLotKey
-			--		AND TR.ProductTypeKey = 16
-			--		AND P.PropertyName IN (
-			--			SELECT V.SettingValue
-			--			FROM dbo.iMake_AppSettingValue AS V
-			--			INNER JOIN dbo.iMake_AppSetting AS S ON V.SettingKey = S.SettingKey
-			--				AND S.SettingName = '' Average Density ''
-			--			)
-			--		AND PropertyValue IS NOT NULL
-			--		AND PropertyValue <> ''''
-			--		AND isnumeric(tr.PropertyValue) = 1
-			--	ORDER BY TR.LastUpdateOn DESC
-			--	) AS 'Density' --To Review
-			,CAST(0 AS DECIMAL) AS dblDensity
+			,BS.dblUnitCost AS dblUnitCost -- Review
+			,CONVERT(DECIMAL(24, 2), (
+					SELECT TOP 1 (
+							CASE 
+								WHEN ISNULL(TR.strPropertyValue, 0) = ''
+									THEN 0.0
+								ELSE isnull(CONVERT(DECIMAL(24, 2), TR.strPropertyValue), 0.0)
+								END
+							)
+					FROM tblQMTestResult TR
+					INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+						AND ISNUMERIC(TR.strPropertyValue) = 1
+						AND P.strPropertyName = 'Density'
+					WHERE TR.intProductTypeId = 11
+						AND TR.intProductValueId = PL.intParentLotId
+					ORDER BY TR.intSampleId DESC
+					)) AS dblDensity
 			,(BS.dblQuantity / @intEstNoOfSheets) AS dblRequiredQtyPerSheet
 			,BS.dblWeightPerQty AS dblWeightPerUnit
 			,ISNULL(I.dblRiskScore, 0) AS dblRiskScore
@@ -1516,25 +1534,23 @@ BEGIN TRY
 			,UM2.strUnitMeasure AS strIssuedUOM
 			,BS.intItemId
 			,BS.intRecipeItemId
-			,0.0 AS dblUnitCost -- Review
-			--,(
-			--	SELECT TOP 1 (CAST(PropertyValue AS NUMERIC(38,20))) AS PropertyValue
-			--	FROM dbo.QM_TestResult AS TR
-			--	INNER JOIN dbo.QM_Property AS P ON P.PropertyKey = TR.PropertyKey
-			--	WHERE ProductObjectKey = PL.MainLotKey
-			--		AND TR.ProductTypeKey = 16
-			--		AND P.PropertyName IN (
-			--			SELECT V.SettingValue
-			--			FROM dbo.iMake_AppSettingValue AS V
-			--			INNER JOIN dbo.iMake_AppSetting AS S ON V.SettingKey = S.SettingKey
-			--				AND S.SettingName = '' Average Density ''
-			--			)
-			--		AND PropertyValue IS NOT NULL
-			--		AND PropertyValue <> ''''
-			--		AND isnumeric(tr.PropertyValue) = 1
-			--	ORDER BY TR.LastUpdateOn DESC
-			--	) AS 'Density' --To Review
-			,CAST(0 AS DECIMAL) AS dblDensity
+			,BS.dblUnitCost AS dblUnitCost -- Review
+			,CONVERT(DECIMAL(24, 2), (
+					SELECT TOP 1 (
+							CASE 
+								WHEN ISNULL(TR.strPropertyValue, 0) = ''
+									THEN 0.0
+								ELSE isnull(CONVERT(DECIMAL(24, 2), TR.strPropertyValue), 0.0)
+								END
+							)
+					FROM tblQMTestResult TR
+					INNER JOIN tblQMProperty P ON P.intPropertyId = TR.intPropertyId
+						AND ISNUMERIC(TR.strPropertyValue) = 1
+						AND P.strPropertyName = 'Density'
+					WHERE TR.intProductTypeId = 11
+						AND TR.intProductValueId = PL.intParentLotId
+					ORDER BY TR.intSampleId DESC
+					)) AS dblDensity
 			,(BS.dblQuantity / @intEstNoOfSheets) AS dblRequiredQtyPerSheet
 			,BS.dblWeightPerQty AS dblWeightPerUnit
 			,ISNULL(I.dblRiskScore, 0) AS dblRiskScore

@@ -63,7 +63,14 @@ BEGIN TRY
 				,@BatchId = @BatchId
 
 			SET @SuccessfulCount = @SuccessfulCount + 1
-			SET @Message = 'Transport Load Posted Successfully'
+			IF @Post = 1 AND @Recap=1
+			BEGIN
+				SET @Message = 'Post Preview is not applicable for Transport Load'
+			END
+			ELSE 
+			BEGIN
+				SET @Message = 'Transport Load Posted Successfully'
+			END
 
 		END TRY
 		BEGIN CATCH	

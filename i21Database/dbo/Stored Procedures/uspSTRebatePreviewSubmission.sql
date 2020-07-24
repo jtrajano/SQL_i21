@@ -125,7 +125,48 @@ BEGIN
 														 )
 				BEGIN TRY
 					INSERT INTO @tblTempPMM
-					SELECT DISTINCT @intVendorAccountNumber intRCN
+					SELECT 
+								intRCN
+								,dtmWeekEndingDate
+								,dtmTransactionDate
+								,strTransactionTime
+								,strTransactionIdCode
+								,strStoreNumber
+								,strStoreName
+								,strStoreAddress
+								,strStoreCity
+								,strStoreState
+								,intStoreZipCode
+								,strCategory
+								,strManufacturerName
+								,strSKUCode
+								,strUpcCode
+								,strSkuUpcDescription
+								,strUnitOfMeasure
+								,intQuantitySold
+								,intConsumerUnits
+								,strMultiPackIndicator
+								,intMultiPackRequiredQuantity
+								,dblMultiPackDiscountAmount
+								,strRetailerFundedDiscountName
+								,dblRetailerFundedDiscountAmount
+								,strMFGDealNameONE
+								,dblMFGDealDiscountAmountONE
+								,strMFGDealNameTWO
+								,dblMFGDealDiscountAmountTWO
+								,strMFGDealNameTHREE
+								,dblMFGDealDiscountAmountTHREE
+								,dblFinalSalesPrice
+								,intStoreTelephone
+								,strStoreContactName
+								,strStoreContactEmail
+								,strProductGroupingCode
+								,strProductGroupingName
+								,strLoyaltyIDRewardsNumber
+								,strDepartment
+							FROM (
+							SELECT DISTINCT intScanTransactionId
+									, @intVendorAccountNumber intRCN
 									, replace(convert(NVARCHAR, @dtmEndingDate, 111), '/', '') as dtmWeekEndingDate
 									, replace(convert(NVARCHAR, dtmDate, 111), '/', '') as dtmTransactionDate 
 									, convert(NVARCHAR, dtmDate, 108) as strTransactionTime
@@ -230,7 +271,7 @@ BEGIN
 					(
 						SELECT * FROM
 							(   
-								SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+								SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId,intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 								FROM tblSTTranslogRebates
 								WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 							) TRR 
@@ -261,6 +302,8 @@ BEGIN
 						AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 						AND TR.strTrpPaycode != 'Change' --ST-680
 						AND TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10))))
+				) as innerQuery
+
 				END TRY		
 				BEGIN CATCH
 					SET @intCountRows = 0
@@ -310,7 +353,44 @@ BEGIN
 				BEGIN TRY
 					
 					INSERT INTO @tblTempRJR
-					SELECT DISTINCT (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
+					SELECT 
+									strOutletName
+									,intOutletNumber
+									,strOutletAddressOne
+									,strOutletAddressTwo
+									,strOutletCity
+									,strOutletState
+									,strOutletZipCode
+									,strTransactionDateTime
+									,strMarketBasketTransactionId
+									,strScanTransactionId
+									,strRegisterId
+									,intQuantity
+									,dblPrice
+									,strUpcCode
+									,strUpcDescription
+									,strUnitOfMeasure
+									,strPromotionFlag
+									,strOutletMultipackFlag
+									,intOutletMultipackQuantity
+									,dblOutletMultipackDiscountAmount
+									,strAccountPromotionName
+									,dblAccountDiscountAmount
+									,dblManufacturerDiscountAmount
+									,strCouponPid
+									,dblCouponAmount
+									,strManufacturerMultipackFlag
+									,intManufacturerMultipackQuantity
+									,dblManufacturerMultipackDiscountAmount
+									,strManufacturerPromotionDescription
+									,strManufacturerBuydownDescription
+									,dblManufacturerBuydownAmount
+									,strManufacturerMultiPackDescription
+									,strAccountLoyaltyIDNumber
+									,strCouponDescription
+									,strDepartment
+								FROM ( 
+								SELECT DISTINCT intScanTransactionId,  (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 									, ST.intStoreNo as intOutletNumber
 									, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 									, '' as strOutletAddressTwo
@@ -448,7 +528,7 @@ BEGIN
 						(   
 							SELECT * FROM
 							(   
-								SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+								SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId, intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 								FROM tblSTTranslogRebates
 							) TRR 
 							WHERE TRR.rn = 1		
@@ -472,7 +552,9 @@ BEGIN
 							ON CONVERT(NUMERIC(32, 0),CAST(TR.strTrlUPCwithoutCheckDigit AS FLOAT)) = CRP.intUpcCode ---->   Always compare UPC without check digit since Inventory UPC has no check digit, use IC intUpcCode
 								AND (CAST(TR.dtmDate AS DATE) BETWEEN CRP.dtmStartDate AND CRP.dtmEndDate)
 						WHERE TR.intTrlDeptNumber IN (SELECT DISTINCT intRegisterDepartmentId FROM fnSTRebateDepartment(CAST(ST.intStoreId AS NVARCHAR(10))))
-						
+								) as innerQuery
+
+
 				END TRY
 				BEGIN CATCH
 					SET @intCountRows = 0

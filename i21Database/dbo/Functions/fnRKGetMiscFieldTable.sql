@@ -4,8 +4,8 @@
 )
 RETURNS @returntable TABLE
 (
-	strFieldName NVARCHAR(100)
-	, strValue NVARCHAR(100)
+	strFieldName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strValue NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN

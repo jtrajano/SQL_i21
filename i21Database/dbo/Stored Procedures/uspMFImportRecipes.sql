@@ -283,6 +283,15 @@ BEGIN
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 
+	UPDATE tblMFRecipeStage
+	SET strManufacturingProcess=(Select Top 1 strProcessName  from tblMFManufacturingProcess )
+	WHERE strManufacturingProcess NOT IN (
+			SELECT strProcessName
+			FROM tblMFManufacturingProcess
+			)
+		AND strSessionId = @strSessionId
+		AND ISNULL(strMessage, '') = ''
+
 	--Invalid Manufacturing Process
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Manufacturing Process'
@@ -413,20 +422,21 @@ BEGIN
 			AND strSessionId = @strSessionId
 			AND ISNULL(strMessage, '') = ''
 
-		UPDATE tblMFRecipeStage
-		SET strMessage = 'Minimum one input item is required to create a recipe.'
-		WHERE strSessionId = @strSessionId
-			AND ISNULL(strMessage, '') = ''
+		UPDATE R
+		SET R.strMessage = 'Minimum one input item is required to create a recipe.'
+		From tblMFRecipeStage R
+		WHERE R.strSessionId = @strSessionId
+			AND ISNULL(R.strMessage, '') = ''
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFRecipeItemStage RI
-				WHERE strSessionId = @strSessionId
-					AND ISNULL(strMessage, '') = ''
-					AND strRecipeItemType = 'INPUT'
-					AND tblMFRecipeStage.strRecipeName = RI.strRecipeName
-					AND tblMFRecipeStage.strVersionNo = RI.strVersionNo
-					AND tblMFRecipeStage.strLocationName = RI.strLocationName
-					AND tblMFRecipeStage.strItemNo  = RI.strRecipeHeaderItemNo 
+				WHERE RI.strSessionId = @strSessionId
+					AND ISNULL(RI.strMessage, '') = ''
+					AND RI.strRecipeItemType = 'INPUT'
+					AND R.strRecipeName = RI.strRecipeName
+					AND R.strVersionNo = RI.strVersionNo
+					AND R.strLocationName = RI.strLocationName
+					AND R.strItemNo  = RI.strRecipeHeaderItemNo 
 				)
 	END
 
@@ -1226,8 +1236,8 @@ BEGIN
 				,iu.intItemUOMId
 				,rt.intRecipeItemTypeId
 				,s.strItemGroupName
-				,s.[strUpperTolerance]
-				,s.[strLowerTolerance]
+				,IsNULL(s.[strUpperTolerance],0)
+				,IsNULL(s.[strLowerTolerance],0)
 				,dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strUpperTolerance], 0))
 				,dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strLowerTolerance], 0))
 				,ISNULL(s.[strShrinkage], 0)
@@ -1290,8 +1300,8 @@ BEGIN
 				,ri.intItemUOMId = t.intItemUOMId
 				,ri.intRecipeItemTypeId = t.intRecipeItemTypeId
 				,ri.strItemGroupName = t.strItemGroupName
-				,ri.dblUpperTolerance = t.[strUpperTolerance]
-				,ri.dblLowerTolerance = t.[strLowerTolerance]
+				,ri.dblUpperTolerance = IsNULL(t.[strUpperTolerance],0)
+				,ri.dblLowerTolerance = IsNULL(t.[strLowerTolerance],0)
 				,ri.dblCalculatedUpperTolerance = t.dblCalculatedUpperTolerance
 				,ri.dblCalculatedLowerTolerance = t.dblCalculatedLowerTolerance
 				,ri.dblShrinkage = t.dblShrinkage
@@ -1332,8 +1342,8 @@ BEGIN
 					,iu.intItemUOMId
 					,rt.intRecipeItemTypeId
 					,s.strItemGroupName
-					,s.[strUpperTolerance]
-					,s.[strLowerTolerance]
+					,IsNULL(s.[strUpperTolerance],0) [strUpperTolerance]
+					,IsNULL(s.[strLowerTolerance],0) [strLowerTolerance]
 					,dbo.fnMFCalculateRecipeItemUpperTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strUpperTolerance], 0)) dblCalculatedUpperTolerance
 					,dbo.fnMFCalculateRecipeItemLowerTolerance(@intRecipeTypeId, s.[strQuantity], ISNULL(s.[strShrinkage], 0), ISNULL(s.[strLowerTolerance], 0)) dblCalculatedLowerTolerance
 					,ISNULL(s.[strShrinkage], 0) dblShrinkage
@@ -1396,7 +1406,15 @@ BEGIN
 				FROM tblMFRecipeItem
 				WHERE intRecipeId = @intRecipeId
 					AND intRecipeItemTypeId = 1
-				) > 1
+				) > 0 
+			AND NOT EXISTS (
+					SELECT *
+					FROM tblMFRecipe
+					WHERE intItemId = @intItemId
+						AND ysnActive = 1
+						AND intLocationId = @intLocationId
+					)
+
 			UPDATE tblMFRecipe
 			SET ysnActive = 1
 			WHERE intRecipeId = @intRecipeId

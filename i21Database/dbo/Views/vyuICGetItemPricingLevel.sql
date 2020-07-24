@@ -39,8 +39,9 @@ INNER JOIN tblICItemLocation ItemLocation
 	ON ItemLocation.intItemLocationId = PricingLevel.intItemLocationId
 INNER JOIN tblSMCompanyLocation CompanyLocation
 	ON CompanyLocation.intCompanyLocationId = ItemLocation.intLocationId
-LEFT OUTER JOIN tblSMCompanyLocationPricingLevel col 
+INNER JOIN tblSMCompanyLocationPricingLevel col 
 	ON col.intCompanyLocationPricingLevelId = PricingLevel.intCompanyLocationPricingLevelId
+		AND col.intCompanyLocationId = CompanyLocation.intCompanyLocationId
 	--ON col.intCompanyLocationId =  CompanyLocation.intCompanyLocationId
 	--AND LOWER(PricingLevel.strPriceLevel) = LOWER(col.strPricingLevelName)
 LEFT JOIN tblSMCurrency Currency

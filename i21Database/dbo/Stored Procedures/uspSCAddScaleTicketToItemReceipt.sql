@@ -157,10 +157,11 @@ SELECT
 		,intItemId					= SC.intItemId
 		,intItemLocationId			= SC.intProcessingLocationId
 		,intItemUOMId				= LI.intItemUOMId
-		,intGrossNetUOMId			= CASE
+		,intGrossNetUOMId			= LI.intItemUOMId
+									/*CASE
 										WHEN IC.ysnLotWeightsRequired = 1 AND @intLotType != 0 THEN SC.intItemUOMIdFrom
 										ELSE LI.intItemUOMId
-									END
+									END*/
 		,intCostUOMId				= LI.intItemUOMId
 		,intContractHeaderId		= CASE 
 										WHEN LI.intTransactionDetailId IS NULL THEN NULL
@@ -1082,7 +1083,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[intChargeId]						= @intFreightItemId
 						,[intForexRateTypeId]				= RE.intForexRateTypeId
 						,[dblForexRate]						= RE.dblForexRate
-						,[ysnInventoryCost]					= CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
+						,[ysnInventoryCost]					= CASE WHEN ISNULL(RE.ysnIsStorage,0) = 0 THEN
+																	CASE WHEN ISNULL(@ysnPrice,0) = 1 THEN 0 ELSE IC.ysnInventoryCost END
+															  ELSE
+																	0 -- should not affect inventory cost for customer storage	
+															  END
 						,[strCostMethod]					= IC.strCostMethod
 						,[dblRate]							= CASE
 																WHEN IC.strCostMethod = 'Amount' THEN 0
@@ -1102,7 +1107,11 @@ IF ISNULL(@intFreightItemId,0) = 0
 						,[ysnAccrue]						= @ysnAccrue
 						,[ysnPrice]							= CASE WHEN RE.ysnIsStorage = 0 THEN @ysnPrice ELSE 0 END
 						,[strChargesLink]					= RE.strChargesLink
-						,[ysnAllowVoucher]				= RE.ysnAllowVoucher
+						,[ysnAllowVoucher]				= CASE WHEN ISNULL(RE.ysnIsStorage,0) = 0 THEN
+																RE.ysnAllowVoucher
+														  ELSE
+																1 -- allow to be added in add payable for customer storage
+														  END
 						,[intLoadShipmentId]			= RE.intLoadShipmentId 
 						,[intLoadShipmentCostId]		= RE.intLoadShipmentDetailId
 						,intTaxGroupId = RE.intTaxGroupId

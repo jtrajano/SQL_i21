@@ -27,6 +27,17 @@ BEGIN TRY
 			ysnOpenLoad				BIT
 	)
 
+	IF EXISTS (SELECT TOP 1 1 FROM vyuCTCompanyPreference WHERE ysnAutoCompleteDPDeliveryDate = 1)
+	BEGIN
+		UPDATE CD SET intContractStatusId = 5
+		FROM tblCTContractDetail CD
+		WHERE dblBalance = 0
+		AND intPricingTypeId = 5
+		AND intContractStatusId = 1
+		AND intContractHeaderId = @intContractHeaderId
+		AND GETDATE() > dtmEndDate
+	END
+
 	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity)
 	SELECT intContractHeaderId  = ShipmentItem.intOrderId  
 		,intContractDetailId = ShipmentItem.intLineNo  
@@ -37,11 +48,12 @@ BEGIN TRY
 							END)),0)
 		,dblDestinationQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(ShipmentItem.intItemUOMId,CD.intItemUOMId, 
 		CASE
-			WHEN CM.intInventoryShipmentItemId IS NULL THEN 
-				(CASE			
-					WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) 
-					ELSE ShipmentItem.dblQuantity 
-				END)
+			WHEN CM.intInventoryShipmentItemId IS NULL THEN
+			ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity)
+				-- (CASE			
+				-- 	WHEN ISNULL(INV.ysnPosted,0) = 1 THEN ISNULL(ShipmentItem.dblDestinationNet,ShipmentItem.dblQuantity) 
+				-- 	ELSE ShipmentItem.dblQuantity 
+				-- END)
 			ELSE 0
 		END)),0)
 	FROM tblICInventoryShipmentItem ShipmentItem  

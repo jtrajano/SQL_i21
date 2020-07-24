@@ -4,7 +4,6 @@
     [strVendorOrderNumber] NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intTermsId]           INT             NOT NULL DEFAULT 0,
     [intTransactionReversed]				INT             NULL ,
-	[intReversalId]			INT	NULL,
 	[intCommodityId]				INT             NULL ,
 	[intInvoiceRefId]				INT             NULL ,
 	[intCompanyId]				INT             NULL ,
@@ -263,6 +262,7 @@ BEGIN
 	SELECT TOP 1 @billRecord = del.strBillId, @billId = del.intBillId, @intTransactionReversed = del.intTransactionReversed FROM tblGLDetail glDetail
 					INNER JOIN DELETED del ON glDetail.strTransactionId = del.strBillId AND glDetail.intTransactionId = del.intBillId
 				WHERE glDetail.ysnIsUnposted = 0
+				AND glDetail.strCode <> 'ICA'
 
 	IF @billId > 0
 	BEGIN

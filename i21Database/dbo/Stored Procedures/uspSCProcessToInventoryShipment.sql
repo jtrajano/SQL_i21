@@ -11,6 +11,7 @@ CREATE PROCEDURE [dbo].[uspSCProcessToInventoryShipment]
 	,@InventoryShipmentId AS INT OUTPUT
 	,@intInvoiceId AS INT = NULL OUTPUT
 	,@dtmClientDate DATETIME = NULL
+	,@ysnSkipValidation as BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -67,6 +68,10 @@ DECLARE @dblLoopItemContractId int
 DECLARE @loopLoadDetailId INT
 DECLARE @strTicketStatus NVARCHAR(3)
 DECLARE @_strShipmentNumber NVARCHAR(50)
+DECLARE @strOwnedPhysicalStock NVARCHAR(20)
+DECLARE @OWNERSHIP_CUSTOMER NVARCHAR(20)
+
+SET @OWNERSHIP_CUSTOMER = 'CUSTOMER'
 
 SELECT @intLoadId = intLoadId
 	, @dblTicketFreightRate = dblFreightRate
@@ -81,7 +86,8 @@ SELECT @intLoadId = intLoadId
 	,@strTicketStatus = strTicketStatus
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
-SELECT	@ysnDPStorage = ST.ysnDPOwnedType 
+SELECT	@ysnDPStorage = ST.ysnDPOwnedType
+	,@strOwnedPhysicalStock = UPPER(strOwnedPhysicalStock)
 FROM dbo.tblGRStorageType ST WHERE 
 ST.strStorageTypeCode = @strDistributionOption
 
@@ -105,29 +111,32 @@ BEGIN TRY
 		END
 
 		---Check existing IS and Invoice
-		
-		SELECT TOP 1 
-			@_strShipmentNumber = ISNULL(B.strShipmentNumber,'')
-		FROM tblICInventoryShipmentItem A
-		INNER JOIN tblICInventoryShipment B
-			ON A.intInventoryShipmentId = B.intInventoryShipmentId
-		LEFT JOIN tblARInvoiceDetail C
-			ON A.intInventoryShipmentItemId = ISNULL(C.intInventoryShipmentItemId,0)
-		LEFT JOIN tblARInvoice D
-			ON ISNULL(D.intInvoiceId,0) = ISNULL(C.intInvoiceId,0)
-		LEFT JOIN tblARInvoiceDetail E
-			ON ISNULL(C.intInvoiceDetailId,0) = ISNULL(E.intOriginalInvoiceDetailId,0)
-		WHERE B.intSourceType = 1
-			AND A.intSourceId = @intTicketId
-			AND D.strTransactionType = 'Invoice'
-			AND E.intInvoiceDetailId IS NULL
+		if isnull(@ysnSkipValidation, 0) = 0
+		begin
+			SELECT TOP 1 
+				@_strShipmentNumber = ISNULL(B.strShipmentNumber,'')
+			FROM tblICInventoryShipmentItem A
+			INNER JOIN tblICInventoryShipment B
+				ON A.intInventoryShipmentId = B.intInventoryShipmentId
+			LEFT JOIN tblARInvoiceDetail C
+				ON A.intInventoryShipmentItemId = ISNULL(C.intInventoryShipmentItemId,0)
+			LEFT JOIN tblARInvoice D
+				ON ISNULL(D.intInvoiceId,0) = ISNULL(C.intInvoiceId,0)
+			LEFT JOIN tblARInvoiceDetail E
+				ON ISNULL(C.intInvoiceDetailId,0) = ISNULL(E.intOriginalInvoiceDetailId,0)
+			WHERE B.intSourceType = 1
+				AND A.intSourceId = @intTicketId
+				AND D.strTransactionType = 'Invoice'
+				AND E.intInvoiceDetailId IS NULL
 
-		IF ISNULL(@_strShipmentNumber,'') <> ''
-		BEGIN
-			SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a shipment ' + @_strShipmentNumber + '.'
-			RAISERROR(@ErrMsg, 11, 1);
-			GOTO _Exit
-		END
+			IF ISNULL(@_strShipmentNumber,'') <> ''
+			BEGIN
+				SET @ErrMsg  = 'Cannot distribute ticket. Ticket already have a shipment ' + @_strShipmentNumber + '.'
+				RAISERROR(@ErrMsg, 11, 1);
+				GOTO _Exit
+			END
+		end
+		
 		
 
  		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1 ELSE 4 END
@@ -546,6 +555,14 @@ BEGIN TRY
 					)
 					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
 					SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
+
+					IF @strOwnedPhysicalStock = @OWNERSHIP_CUSTOMER AND ABS(@dblRemainingUnits) > 0 
+						and  @dblNetUnits > ISNULL(@dblRemainingUnitStorage, 0)
+					BEGIN
+						SET @ErrMsg  = 'Cannot distribute ticket. Not enough storage unit.'
+						RAISERROR(@ErrMsg, 11, 1);	
+					END
+
 					SET @dblRemainingUnits = (@dblRemainingUnits + ISNULL(@dblRemainingUnitStorage, 0)) * -1
 					IF (@dblRemainingUnits > 0)
 					BEGIN

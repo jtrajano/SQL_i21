@@ -8,8 +8,8 @@ SELECT DISTINCT
 				 + ISNULL(RTRIM(strZip),'') + ' ' + ISNULL(RTRIM(strCity), '') + ' ' + ISNULL(RTRIM(strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(strPhone)+ CHAR(13) + char(10), '') FROM tblSMCompanySetup)
-,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone))
-,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone))
+,strShipFrom = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone)) COLLATE Latin1_General_CI_AS
+,strShipTo = (SELECT strFullAddress = [dbo].[fnAPFormatAddress](NULL,(SELECT TOP 1 strCompanyName FROM dbo.tblSMCompanySetup), A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone)) COLLATE Latin1_General_CI_AS
 ,A.strBillId
 ,ContactEntity.strName AS strContactName
 ,ContactEntity.strEmail AS strContactEmail
@@ -20,7 +20,7 @@ SELECT DISTINCT
 ,BankAccount.strSWIFT
 ,Term.strTerm
 ,A.strRemarks
-,CONVERT(VARCHAR(10), A.dtmDueDate, 103) AS dtmDueDate
+,CONVERT(VARCHAR(10), A.dtmDueDate, 103) COLLATE Latin1_General_CI_AS AS dtmDueDate
 ,Bank.strCity + ', ' + Bank.strState +  ' ' + Bank.strCountry AS strBankAddress
 --,(SELECT blbFile FROM tblSMUpload WHERE intAttachmentId = 
 --(	
@@ -82,7 +82,7 @@ FROM
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
 		,strAccountId			=	DetailAccount.strAccountId
 		,strCurrency			=	MainCurrency.strCurrency
-		,strConcern				=	'Weight Claim'
+		,strConcern				=	'Weight Claim' COLLATE Latin1_General_CI_AS
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
 		,strClaimUOM			=	QtyUOMDetails.strUnitMeasure
 		,strCostUOM				=	CASE WHEN WC2Details.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
@@ -136,7 +136,7 @@ FROM
 										THEN  'Container Rejection - Commodity cost' 
 										WHEN DMDetails.intLoadId > 0 THEN 'Weight Claim'
 										ELSE ''
-										END
+										END COLLATE Latin1_General_CI_AS 
 		,strUOM					=	QtyUOMDetails.strUnitMeasure
 		,strClaimUOM			=	''
 		,strCostUOM				=	CASE WHEN DMDetails.intCostUOMId > 0 THEN ItemCostUOMMeasure.strUnitMeasure ELSE QtyUOMDetails.strUnitMeasure END
@@ -251,7 +251,7 @@ FROM
 										THEN SubCurrency.strCurrency
 									ELSE MainCurrency.strCurrency
 									END
-		,strConcern				=	''
+		,strConcern				=	'' COLLATE Latin1_General_CI_AS 
 		,strUOM					=	CASE WHEN DMDetails.intContractDetailId IS NULL AND DMDetails.intInventoryReceiptItemId IS NULL THEN QtyUOMDetails.strUnitMeasure 
 										WHEN ContractCost.intContractCostId > 0 AND ContractCost.strCostMethod IN ('Percentage','Amount') 
 												THEN NULL 

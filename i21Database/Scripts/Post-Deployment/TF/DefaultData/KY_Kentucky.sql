@@ -1354,8 +1354,7 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 		, strStatus
 		, intMasterId
 	)
-	SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '1', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171078
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '10I', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171101
+	SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '10I', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171101
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '2', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171079
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '2A', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171080
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '2B', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171081
@@ -1367,7 +1366,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '7IN', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171093
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '7TN', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171094
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A089', strScheduleCode = '8', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171100
-	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '1', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171082
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10A', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171105
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10G', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171106
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = '72A138', strScheduleCode = '10I', strType = '', strState = 'KY', strStatus = 'Include', intMasterId = 171107

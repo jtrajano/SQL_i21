@@ -1,4 +1,4 @@
-﻿Create PROCEDURE [dbo].[uspCTContractPopulateStgXML] @ContractHeaderId INT
+﻿CREATE PROCEDURE [dbo].[uspCTContractPopulateStgXML] @ContractHeaderId INT
 	,@intToEntityId INT
 	,@intCompanyLocationId INT
 	,@strToTransactionType NVARCHAR(100)
@@ -6,7 +6,7 @@
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
 	,@intToBookId INT = NULL
-	,@ysnApproval BIT=1
+	,@ysnApproval BIT = 1
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -34,10 +34,11 @@ BEGIN TRY
 		,@intEntityId INT
 		,@strAdditionalInfo NVARCHAR(MAX)
 		,@strAmendmentApprovalXML NVARCHAR(MAX)
-		,@intCompanyId int
-		,@intTransactionId int
-		,@intContractScreenId int
+		,@intCompanyId INT
+		,@intTransactionId INT
+		,@intContractScreenId INT
 		,@strSubmittedByXML NVARCHAR(MAX)
+		,@intPContractSeq INT
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -45,16 +46,19 @@ BEGIN TRY
 	SET @strHeaderCondition = NULL
 	SET @strDetailXML = NULL
 
-	SELECT @strContractNumber = strContractNumber,@intCompanyId=intCompanyId 
+	SELECT @strContractNumber = strContractNumber
+		,@intCompanyId = intCompanyId
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @ContractHeaderId
 
-	SELECT	@intContractScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
+	SELECT @intContractScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'ContractManagement.view.Contract'
 
-	Select @intTransactionId=intTransactionId 
-	from tblSMTransaction
-	Where intRecordId =@ContractHeaderId
-	and intScreenId =@intContractScreenId
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intRecordId = @ContractHeaderId
+		AND intScreenId = @intContractScreenId
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -92,12 +96,11 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-		SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
+	SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
 
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
+	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
 	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
-	
 
 	SELECT @intPContractDetailId = intPContractDetailId
 	FROM tblLGAllocationDetail
@@ -108,10 +111,11 @@ BEGIN TRY
 			)
 
 	SELECT @intPContractHeaderId = intContractHeaderId
+		,@intPContractSeq = intContractSeq
 	FROM tblCTContractDetail
 	WHERE intContractDetailId = @intPContractDetailId
 
-	SELECT @strExternalContractNumber = strContractNumber
+	SELECT @strExternalContractNumber = strContractNumber + ' / ' + Ltrim(@intPContractSeq)
 		,@intEntityId = intEntityId
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @intPContractHeaderId
@@ -123,6 +127,7 @@ BEGIN TRY
 	IF @strExternalContractNumber IS NOT NULL
 	BEGIN
 		SELECT @strAdditionalInfo = NULL
+
 		SELECT @strAdditionalInfo = '<strExternalContractNumber>' + @strExternalContractNumber + '</strExternalContractNumber>'
 
 		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + @strExternalEntity + '</strExternalEntity>'
@@ -253,7 +258,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
----------------------------------------------Submitted By------------------------------------------
+	---------------------------------------------Submitted By------------------------------------------
 	SELECT @strSubmittedByXML = NULL
 		,@strObjectName = NULL
 
@@ -265,7 +270,23 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	INSERT INTO tblCTContractStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+
+	SELECT @strServerName = strServerName
+		,@strDatabaseName = strDatabaseName
+	FROM tblIPMultiCompany
+	WHERE intBookId = @intToBookId
+
+	IF EXISTS (
+			SELECT 1
+			FROM master.dbo.sysdatabases
+			WHERE name = @strDatabaseName
+			)
+	BEGIN
+		SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
+			'.dbo.tblCTContractStage (
 		intContractHeaderId
 		,strContractNumber
 		,strHeaderXML
@@ -304,7 +325,48 @@ BEGIN TRY
 		,strAmendmentApprovalXML=@strAmendmentApprovalXML
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
-		,strSubmittedByXML=@strSubmittedByXML
+		,strSubmittedByXML=@strSubmittedByXML'
+
+		EXEC sp_executesql @strSQL
+			,N'@ContractHeaderId int, 
+			@strContractNumber nvarchar(50),
+			@strHeaderXML nvarchar(MAX),
+			@strRowState nvarchar(MAX),
+			@strDetailXML nvarchar(MAX),
+			@strCostXML nvarchar(MAX),
+			@strDocumentXML nvarchar(MAX),
+			@strConditionXML nvarchar(MAX),
+			@strCertificationXML nvarchar(MAX),
+			@intToEntityId int,
+			@intCompanyLocationId int,
+			@strToTransactionType nvarchar(MAX),
+			@intToCompanyId int,
+			@intToBookId int,
+			@strApproverXML nvarchar(MAX),
+			@strAmendmentApprovalXML nvarchar(MAX),
+			@intTransactionId int,
+			@intCompanyId int,
+			@strSubmittedByXML nvarchar(MAX)'
+			,@ContractHeaderId
+			,@strContractNumber
+			,@strHeaderXML
+			,@strRowState
+			,@strDetailXML
+			,@strCostXML
+			,@strDocumentXML
+			,@strConditionXML
+			,@strCertificationXML
+			,@intToEntityId
+			,@intCompanyLocationId
+			,@strToTransactionType
+			,@intToCompanyId
+			,@intToBookId
+			,@strApproverXML
+			,@strAmendmentApprovalXML
+			,@intTransactionId
+			,@intCompanyId
+			,@strSubmittedByXML
+	END
 END TRY
 
 BEGIN CATCH

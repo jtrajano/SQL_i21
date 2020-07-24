@@ -11,10 +11,6 @@ BEGIN
 
 	DECLARE @tblItemsToUpdate InTransitTableType
 	DECLARE @INVENTORY_INVOICE_TYPE AS INT = 33
-	DECLARE @ysnImposeReversalTransaction BIT = 0
-
-	SELECT TOP 1 @ysnImposeReversalTransaction  = ISNULL(ysnImposeReversalTransaction, 0)
-	FROM tblRKCompanyPreference
 	
 	INSERT INTO @tblItemsToUpdate (
 		  [intItemId]
@@ -39,7 +35,7 @@ BEGIN
 		 , dblQty							= CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL 
 												   THEN ROUND(ID.dblQtyShipped/ CASE WHEN ICSI.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICSI.[dblDestinationQuantity], ICSI.[dblQuantity]) ELSE ICSI.[dblQuantity] END, 2) * ICSI.[dblQuantity]
 												   ELSE ID.dblQtyShipped
-											  END * (CASE WHEN I.strTransactionType = 'Credit Memo' THEN -1 ELSE 1 END)
+											  END
 		 , intInvoiceId						= I.intInvoiceId
 		 , strInvoiceNumber					= I.strInvoiceNumber
 		 , intTransactionTypeId				= @INVENTORY_INVOICE_TYPE
@@ -64,7 +60,7 @@ BEGIN
 	WHERE ID.intInvoiceId = @TransactionId 
 	AND (ID.intInventoryShipmentItemId IS NOT NULL OR ID.intLoadDetailId IS NOT NULL)
 	AND (ID.intTicketId IS NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(TICKET.strInOutFlag, '') = 'O'))
-	AND (RI.[intInvoiceId] IS NULL OR (I.ysnReversal = 1 AND I.strTransactionType = 'Credit Memo'))
+	AND RI.[intInvoiceId] IS NULL
 	AND (
 			(I.[strType] <> 'Provisional' AND I.[ysnProvisionalWithGL] = 0)
 		OR

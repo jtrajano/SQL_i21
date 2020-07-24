@@ -30,6 +30,10 @@ BEGIN TRY
 		,@strShippingLine NVARCHAR(100)
 		,@intNumberOfContainers INT
 		,@strContainerType NVARCHAR(50)
+		,@strPartyAlias NVARCHAR(100)
+		,@strPartyName NVARCHAR(100)
+		,@strContractPartyName NVARCHAR(100)
+		,@strPartyType NVARCHAR(50)
 	DECLARE @strLoadNumber NVARCHAR(100)
 		,@intLoadId INT
 		,@intContractDetailId INT
@@ -38,6 +42,10 @@ BEGIN TRY
 		,@intShippingModeId INT
 		,@intShippingLineEntityId INT
 		,@intContainerTypeId INT
+		,@intShipperId INT
+		,@intContractShipperId INT
+		,@intMainContractHeaderId INT
+		,@intContractSeq INT
 		,@intShipmentType INT
 		,@intShipmentStatus INT
 		,@intSourceType INT
@@ -147,6 +155,10 @@ BEGIN TRY
 				,@strShippingLine = NULL
 				,@intNumberOfContainers = NULL
 				,@strContainerType = NULL
+				,@strPartyAlias = NULL
+				,@strPartyName = NULL
+				,@strContractPartyName = NULL
+				,@strPartyType = NULL
 
 			SELECT @strLoadNumber = NULL
 				,@intLoadId = NULL
@@ -156,6 +168,10 @@ BEGIN TRY
 				,@intShippingModeId = NULL
 				,@intShippingLineEntityId = NULL
 				,@intContainerTypeId = NULL
+				,@intShipperId = NULL
+				,@intContractShipperId = NULL
+				,@intMainContractHeaderId = NULL
+				,@intContractSeq = NULL
 				,@intShipmentType = NULL
 				,@intShipmentStatus = NULL
 				,@intSourceType = NULL
@@ -170,6 +186,7 @@ BEGIN TRY
 				,@intWeightUnitMeasureId = NULL
 				,@intCurrencyId = NULL
 				,@strPackingDescription = NULL
+				,@strPackageType = NULL
 				,@dtmStartDate = NULL
 				,@dtmEndDate = NULL
 				,@dtmPlannedAvailabilityDate = NULL
@@ -219,7 +236,14 @@ BEGIN TRY
 				,@strShippingLine = strShippingLine
 				,@intNumberOfContainers = ISNULL(intNumberOfContainers, 0)
 				,@strContainerType = strContainerType
+				,@strPartyAlias = strPartyAlias
+				,@strPartyName = strPartyName
+				,@strPartyType = strPartyType
 			FROM tblIPLoadStage WITH (NOLOCK)
+			WHERE intStageLoadId = @intMinRowNo
+
+			SELECT TOP 1 @strPackageType = strPackageType
+			FROM tblIPLoadDetailStage
 			WHERE intStageLoadId = @intMinRowNo
 
 			IF ISNULL(@strCustomerReference, '') = ''
@@ -296,7 +320,7 @@ BEGIN TRY
 			--BEGIN
 			--	SELECT @dtmETAPOD = @dtmDeadlineCargo
 			--END
-
+			
 			--IF @dtmETAPOL IS NULL
 			--BEGIN
 			--	RAISERROR (
@@ -305,7 +329,7 @@ BEGIN TRY
 			--			,1
 			--			)
 			--END
-
+			
 			IF ISNULL(@strShippingLine, '') <> ''
 			BEGIN
 				SELECT @intShippingLineEntityId = t.intEntityId
@@ -339,7 +363,7 @@ BEGIN TRY
 				SELECT @strContainerType = '20 FT'
 			ELSE IF @strContainerType = '40GP'
 				SELECT @strContainerType = '40 FT'
-			
+
 			SELECT @intContainerTypeId = t.intContainerTypeId
 			FROM tblLGContainerType t WITH (NOLOCK)
 			WHERE t.strContainerType = @strContainerType
@@ -353,6 +377,36 @@ BEGIN TRY
 						)
 			END
 
+			IF ISNULL(@strPartyName, '') <> ''
+			BEGIN
+				SELECT @intShipperId = t.intEntityId
+				FROM tblEMEntity t WITH (NOLOCK)
+				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
+				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
+				WHERE ET.strType = 'Producer'
+					AND t.ysnActive = 1
+					AND t.strEntityNo <> ''
+					AND t.strName = @strPartyName
+
+				IF ISNULL(@intShipperId, 0) = 0
+				BEGIN
+					RAISERROR (
+							'Invalid Shipper. '
+							,16
+							,1
+							)
+				END
+
+				IF ISNULL(@strPartyType, '') <> 'CZ'
+				BEGIN
+					RAISERROR (
+							'Invalid Shipper Type. '
+							,16
+							,1
+							)
+				END
+			END
+
 			-- Should not go based on Customer Ref since it will clash with Slicing logic
 			SELECT TOP 1 @strLoadNumber = L.strLoadNumber
 				,@intLoadId = L.intLoadId
@@ -361,8 +415,8 @@ BEGIN TRY
 				AND L.intShipmentType = 2
 				AND LD.intPContractDetailId = @intContractDetailId
 				AND L.intShipmentStatus <> 10
-				--AND L.strCustomerReference = @strCustomerReference
 
+			--AND L.strCustomerReference = @strCustomerReference
 			SELECT @intShipmentType = 2
 				,@intShipmentStatus = 7
 				,@intSourceType = 2
@@ -391,6 +445,9 @@ BEGIN TRY
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
 					,@intLocationId = CD.intCompanyLocationId
+					,@intContractShipperId = CD.intShipperId
+					,@intMainContractHeaderId = CD.intContractHeaderId
+					,@intContractSeq = CD.intContractSeq
 				FROM tblCTContractDetail CD WITH (NOLOCK)
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 					AND CD.strERPPONumber = @strERPPONumber
@@ -406,11 +463,14 @@ BEGIN TRY
 					,@intBookId = CH.intBookId
 					,@intSubBookId = CH.intSubBookId
 					,@ysnLoadBased = CH.ysnLoad
-					,@strPackingDescription = CD.strPackingDescription
+					,@strPackingDescription = L.strPackingDescription
 					,@dtmStartDate = CD.dtmStartDate
 					,@dtmEndDate = CD.dtmEndDate
 					,@dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
 					,@intLocationId = CD.intCompanyLocationId
+					,@intContractShipperId = CD.intShipperId
+					,@intMainContractHeaderId = CD.intContractHeaderId
+					,@intContractSeq = CD.intContractSeq
 					,@intShipmentStatus = L.intShipmentStatus
 				FROM tblLGLoad L WITH (NOLOCK)
 				JOIN tblLGLoadDetail LD WITH (NOLOCK) ON LD.intLoadId = L.intLoadId
@@ -418,6 +478,9 @@ BEGIN TRY
 				JOIN tblCTContractDetail CD WITH (NOLOCK) ON CD.intContractDetailId = LD.intPContractDetailId
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
 			END
+
+			IF ISNULL(@strPackageType, '') <> ''
+				SELECT @strPackingDescription = @strPackageType
 
 			UPDATE tblIPLoadStage
 			SET strAction = @strRowState
@@ -577,8 +640,8 @@ BEGIN TRY
 					,intPurchaseSale = @intPurchaseSale
 					,intPositionId = @intPositionId
 					,strPackingDescription = @strPackingDescription
-					,dtmStartDate = @dtmStartDate
-					,dtmEndDate = @dtmEndDate
+					--,dtmStartDate = @dtmStartDate
+					--,dtmEndDate = @dtmEndDate
 					,dtmPlannedAvailabilityDate = @dtmPlannedAvailabilityDate
 					,strOriginPort = @strOriginPort
 					,strDestinationPort = @strDestinationPort
@@ -621,16 +684,16 @@ BEGIN TRY
 					IF (@strOldDestinationPort <> @strDestinationPort)
 						SET @strDetails += '{"change":"strDestinationPort","iconCls":"small-gear","from":"' + LTRIM(@strOldDestinationPort) + '","to":"' + LTRIM(@strDestinationPort) + '","leaf":true,"changeDescription":"Destination Port"},'
 
-					IF (@dtmOldETSPOL <> @dtmETSPOL)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETSPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETSPOL, 101)))
 						SET @strDetails += '{"change":"dtmETSPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETSPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETSPOL, '')) + '","leaf":true,"changeDescription":"Instr ETD"},'
 
-					IF (@dtmOldDeadlineCargo <> @dtmDeadlineCargo)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldDeadlineCargo, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmDeadlineCargo, 101)))
 						SET @strDetails += '{"change":"dtmDeadlineCargo","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldDeadlineCargo, '')) + '","to":"' + LTRIM(ISNULL(@dtmDeadlineCargo, '')) + '","leaf":true,"changeDescription":"Instr ETA"},'
 
-					IF (@dtmOldETAPOD <> @dtmETAPOD)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETAPOD, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETAPOD, 101)))
 						SET @strDetails += '{"change":"dtmETAPOD","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOD, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOD, '')) + '","leaf":true,"changeDescription":"Act. ETA"},'
 
-					IF (@dtmOldETAPOL <> @dtmETAPOL)
+					IF (CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmOldETAPOL, 101)) <> CONVERT(DATETIME, CONVERT(NVARCHAR, @dtmETAPOL, 101)))
 						SET @strDetails += '{"change":"dtmETAPOL","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldETAPOL, '')) + '","to":"' + LTRIM(ISNULL(@dtmETAPOL, '')) + '","leaf":true,"changeDescription":"Act. ETD"},'
 
 					IF (@strOldBookingReference <> @strBookingReference)
@@ -660,12 +723,12 @@ BEGIN TRY
 					IF (@strOldPackingDescription <> @strPackingDescription)
 						SET @strDetails += '{"change":"strPackingDescription","iconCls":"small-gear","from":"' + LTRIM(@strOldPackingDescription) + '","to":"' + LTRIM(@strPackingDescription) + '","leaf":true,"changeDescription":"Packing Description"},'
 
-					IF (@dtmOldStartDate <> @dtmStartDate)
-						SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
-
-					IF (@dtmOldEndDate <> @dtmEndDate)
-						SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
-
+					--IF (@dtmOldStartDate <> @dtmStartDate)
+					--	SET @strDetails += '{"change":"dtmStartDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldStartDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmStartDate, '')) + '","leaf":true,"changeDescription":"Start Date"},'
+					
+					--IF (@dtmOldEndDate <> @dtmEndDate)
+					--	SET @strDetails += '{"change":"dtmEndDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldEndDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmEndDate, '')) + '","leaf":true,"changeDescription":"End Date"},'
+					
 					IF (@dtmOldPlannedAvailabilityDate <> @dtmPlannedAvailabilityDate)
 						SET @strDetails += '{"change":"dtmPlannedAvailabilityDate","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@dtmOldPlannedAvailabilityDate, '')) + '","to":"' + LTRIM(ISNULL(@dtmPlannedAvailabilityDate, '')) + '","leaf":true,"changeDescription":"Planned Availability"},'
 
@@ -945,13 +1008,19 @@ BEGIN TRY
 						SELECT 1
 							,@intLoadId
 							,CD.intDocumentId
-							,CASE WHEN ID.intDocumentType = 1 THEN 'Contract'
-									WHEN ID.intDocumentType = 2	THEN 'Bill Of Lading'
-									WHEN ID.intDocumentType = 3	THEN 'Container'
-									ELSE ''
+							,CASE 
+								WHEN ID.intDocumentType = 1
+									THEN 'Contract'
+								WHEN ID.intDocumentType = 2
+									THEN 'Bill Of Lading'
+								WHEN ID.intDocumentType = 3
+									THEN 'Container'
+								ELSE ''
 								END COLLATE Latin1_General_CI_AS
-							,ISNULL(ID.intOriginal, 0)
-							,ISNULL(ID.intCopies, 0)
+							--,ISNULL(ID.intOriginal, 0)
+							--,ISNULL(ID.intCopies, 0)
+							,0
+							,0
 						FROM tblCTContractDocument CD
 						JOIN tblICDocument ID ON ID.intDocumentId = CD.intDocumentId
 							AND CD.intContractHeaderId = @intContractHeaderId
@@ -1120,6 +1189,87 @@ BEGIN TRY
 					,@intShipmentType = 2 -- LSI
 			END
 
+			-- Set Shipper in Contract and add audit log
+			IF ISNULL(@intShipperId, 0) > 0
+			BEGIN
+				IF ISNULL(@intShipperId, 0) <> ISNULL(@intContractShipperId, 0)
+				BEGIN
+					SELECT @strContractPartyName = strName
+					FROM tblEMEntity WITH (NOLOCK)
+					WHERE intEntityId = @intContractShipperId
+
+					UPDATE tblCTContractDetail
+					SET intShipperId = @intShipperId
+						,intConcurrencyId = intConcurrencyId + 1
+					WHERE intContractDetailId = @intContractDetailId
+
+					DECLARE @Shipperdetails NVARCHAR(MAX) = ''
+
+					-- Shipper Audit Log
+					SET @Shipperdetails = '{  
+						"action":"Updated",
+						"change":"Updated - Record: ' + LTRIM(@intMainContractHeaderId) + '",
+						"keyValue":' + LTRIM(@intMainContractHeaderId) + ',
+						"iconCls":"small-tree-modified",
+						"children":[  
+							{  
+								"change":"tblCTContractDetails",
+								"children":[  
+									{  
+									"action":"Updated",
+									"change":"Updated - Record: Sequence - ' + LTRIM(@intContractSeq) + '",
+									"keyValue":' + LTRIM(@intContractDetailId) + ',
+									"iconCls":"small-tree-modified",
+									"children":
+										[   
+											'
+					SET @Shipperdetails = @Shipperdetails + '
+											{  
+											"change":"intShipperId",
+											"from":"' + LTRIM(ISNULL(@intContractShipperId, '')) + '",
+											"to":"' + LTRIM(ISNULL(@intShipperId, '')) + '",
+											"leaf":true,
+											"iconCls":"small-gear",
+											"isField":true,
+											"keyValue":' + LTRIM(@intContractDetailId) + ',
+											"associationKey":"tblCTContractDetails",
+											"hidden":true
+											},'
+					SET @Shipperdetails = @Shipperdetails + '
+											{  
+											"change":"strShipper",
+											"from":"' + LTRIM(ISNULL(@strContractPartyName, '')) + '",
+											"to":"' + LTRIM(@strPartyName) + '",
+											"leaf":true,
+											"iconCls":"small-gear",
+											"isField":true,
+											"keyValue":' + LTRIM(@intContractDetailId) + ',
+											"associationKey":"tblCTContractDetails",
+											"changeDescription":"Shipper",
+											"hidden":false
+											},'
+
+					IF RIGHT(@Shipperdetails, 1) = ','
+						SET @Shipperdetails = SUBSTRING(@Shipperdetails, 0, LEN(@Shipperdetails))
+					SET @Shipperdetails = @Shipperdetails + '
+									]
+								}
+							],
+							"iconCls":"small-tree-grid",
+							"changeDescription":"Details"
+							}
+						]
+						}'
+
+					EXEC uspSMAuditLog @keyValue = @intMainContractHeaderId
+						,@screenName = 'ContractManagement.view.Contract'
+						,@entityId = @intEntityId
+						,@actionType = 'Updated'
+						,@actionIcon = 'small-tree-modified'
+						,@details = @Shipperdetails
+				END
+			END
+
 			--Move to Archive
 			INSERT INTO tblIPLoadArchive (
 				strCustomerReference
@@ -1138,6 +1288,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -1162,6 +1315,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -1228,6 +1384,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName
@@ -1252,6 +1411,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strLoadNumber
 				,strAction
 				,strFileName

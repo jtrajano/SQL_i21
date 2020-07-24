@@ -877,7 +877,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 					  , @dblOriginalQtyShipped			NUMERIC(18, 6) = 0			  
 					  , @intInvoiceEntriesId			INT = NULL
 					  , @intPriceFixationId				INT = NULL
-					  , @intContractDetailToDeleteId	INT = NULL					  
+					  , @intContractDetailToDeleteId    INT = NULL
 					  , @ysnLoad						BIT = 0
 
 				SELECT TOP 1 @intInvoiceEntriesId			= intInvoiceEntriesId 
@@ -890,10 +890,10 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 				ORDER BY intInvoiceEntriesId
 
 				IF NOT EXISTS(SELECT TOP 1 NULL FROM #FIXATION)
-					BEGIN
-						DELETE FROM @EntriesForInvoice 
-						WHERE intContractDetailId = @intContractDetailToDeleteId
-					END
+                    BEGIN
+                        DELETE FROM @EntriesForInvoice 
+                        WHERE intContractDetailId = @intContractDetailToDeleteId
+                    END
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #FIXATION WHERE intPriceFixationId = @intPriceFixationId AND ISNULL(ysnProcessed, 0) = 0) AND @dblQtyShipped > 0
 					BEGIN
@@ -1053,12 +1053,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 				
 				DELETE FROM #CONTRACTSPRICING WHERE intInvoiceEntriesId = @intInvoiceEntriesId
 			END
-	END
-
-IF NOT EXISTS (SELECT TOP 1 NULL FROM @EntriesForInvoice)
-	BEGIN
-		RAISERROR('Could not process Shipment to Invoice. There''s no available pricing for the contract!', 16, 1);
-		RETURN 0;
 	END
 
 --CREATE INVOICE IF THERE's NONE

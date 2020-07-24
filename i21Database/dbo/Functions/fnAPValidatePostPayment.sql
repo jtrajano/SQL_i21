@@ -577,6 +577,49 @@ BEGIN
 			ROUND((A2.dblPayment - A2.dblInterest + A2.dblDiscount),2) < A2.dblTotal
 			)
 		AND A2.ysnOffset = 1
+
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Amount Paid is not equal with the total payment made on details.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		OUTER APPLY (
+			SELECT SUM(dblPayment) dblPayment 
+			FROM (
+				SELECT
+					SUM(B.dblPayment --* 
+						-- (CASE 
+						-- 	WHEN C.intTransactionType IN (3) THEN -1
+						-- 	WHEN C.intTransactionType IN (2, 13) AND (C.ysnPrepayHasPayment = 1 OR B.ysnOffset = 1) THEN -1
+						-- 	ELSE 1
+						-- 	END
+						-- )
+					) AS dblPayment
+				FROM tblAPPaymentDetail B
+				INNER JOIN tblAPBill C ON B.intBillId = C.intBillId
+				WHERE A.intPaymentId = B.intPaymentId
+				AND B.dblPayment <> 0
+				UNION ALL
+				SELECT
+					SUM(
+						B2.dblPayment --*
+						-- (CASE 
+						-- 	WHEN C2.strTransactionType NOT IN ('Cash Refund') THEN -1
+						-- 	ELSE 1
+						-- 	END
+						-- )
+					)
+				FROM tblAPPaymentDetail B2
+				INNER JOIN tblARInvoice C2 ON B2.intInvoiceId = C2.intInvoiceId
+				WHERE A.intPaymentId = B2.intPaymentId
+				AND B2.dblPayment <> 0
+			) tmp
+		) payDetails
+		WHERE 
+			A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+		AND payDetails.dblPayment != A.dblAmountPaid
 	END
 	ELSE
 	BEGIN

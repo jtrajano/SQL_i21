@@ -18,14 +18,14 @@ SELECT
 	,voucher.strComment
 	,item.strItemNo
 	,item.strDescription AS strItemDescription
-	,paymentInfo.strCheckNumbers
+	,paymentInfo.strCheckNumbers COLLATE Latin1_General_CI_AS AS strCheckNumbers
 	,CASE voucherDetail.int1099Form WHEN 0 THEN 'NONE'
 		WHEN 1 THEN '1099 MISC'
 		WHEN 2 THEN '1099 INT'
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
 		WHEN 5 THEN '1099 DIV'
-		ELSE 'NONE' END AS str1099Form
+		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form
 	,CASE voucherDetail.int1099Form 
 			WHEN 1
 			THEN category.strCategory
@@ -36,6 +36,7 @@ SELECT
 			ELSE 'NONE'
 	END AS strCategory
 	,voucher.intEntityVendorId
+	,voucher.intShipToId
 FROM tblAPBill voucher
 INNER JOIN tblAPBillDetail voucherDetail
 	ON voucher.intBillId = voucherDetail.intBillId

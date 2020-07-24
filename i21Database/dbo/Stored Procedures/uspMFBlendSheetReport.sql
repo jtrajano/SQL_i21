@@ -231,16 +231,19 @@ AS
 	If Exists (Select 1 From tblMFWorkOrderInputParentLot Where intWorkOrderId=@intWorkOrderId)
 	Begin
 		Insert Into @tblBlendSheet(intWorkOrderId,strLotNumber,strLotAlias,strRawItemNo,strRawItemDesc,
-		dblQuantity,strUOM,dblIssuedQuantity,strIssuedUOM,strVendor,dblBSPercentage)
-		Select @intWorkOrderId,l.strLotNumber,l.strLotAlias,i.strItemNo,i.strDescription ,
-		wcl.dblQuantity,um.strUnitMeasure,wcl.dblIssuedQuantity,um1.strUnitMeasure,l.strMarkings,
-		ROUND(100 * (wcl.dblQuantity / SUM(wcl.dblQuantity) OVER()),2) AS dblBSPercentage
-		From tblMFWorkOrderInputParentLot wcl Join tblICLot l on wcl.intParentLotId=l.intParentLotId 
-		Join tblICItem i on l.intItemId=i.intItemId
+		dblQuantity,strUOM,dblIssuedQuantity,strIssuedUOM,strVendor,dblBSPercentage,strStorageLocation)
+		Select @intWorkOrderId,PL.strParentLotNumber,'' as strLotAlias,i.strItemNo,i.strDescription ,
+		wcl.dblQuantity,um.strUnitMeasure,wcl.dblIssuedQuantity,um1.strUnitMeasure,'' as strMarkings,
+		ROUND(100 * (wcl.dblQuantity / SUM(wcl.dblQuantity) OVER()),2) AS dblBSPercentage,sl.strName
+		From tblMFWorkOrderInputParentLot wcl 
+		--Join tblICLot l on wcl.intParentLotId=l.intParentLotId 
+		JOIN tblICParentLot PL on PL.intParentLotId=wcl.intParentLotId
+		Join tblICItem i on wcl.intItemId=i.intItemId
 		Join tblICItemUOM iu on wcl.intItemUOMId=iu.intItemUOMId
 		Join tblICUnitMeasure um on iu.intUnitMeasureId=um.intUnitMeasureId
 		Join tblICItemUOM iu1 on wcl.intItemIssuedUOMId=iu1.intItemUOMId
 		Join tblICUnitMeasure um1 on iu1.intUnitMeasureId=um1.intUnitMeasureId
+		Left Join tblICStorageLocation sl on wcl.intStorageLocationId=sl.intStorageLocationId
 		Where wcl.intWorkOrderId=@intWorkOrderId
 
 		GOTO FINAL

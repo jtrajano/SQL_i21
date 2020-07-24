@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCreateBasisAdvance]
     @userId INT,
+    @dtmDate DATETIME,
     @createdBasisAdvance NVARCHAR(MAX) OUTPUT,
     @totalInvalid INT = 0 OUTPUT,
     @batchIdUsed NVARCHAR(40) = NULL OUTPUT
@@ -39,6 +40,8 @@ INSERT INTO @voucherPayables(
     intTransactionType,
     intLocationId,
     intCurrencyId,
+    dtmDate,
+    dtmVoucherDate,
     intShipFromId,
     intScaleTicketId,
     intContractDetailId,
@@ -72,6 +75,8 @@ SELECT
     ,intTransactionType             = 13
     ,intLocationId                  = basisAdvance.intCompanyLocationId
     ,intCurrencyId                  = basisAdvance.intCurrencyId
+    ,dtmDate                        = @dtmDate
+    ,dtmVoucherDate                 = @dtmDate
     ,intShipFromId                  = basisAdvance.intShipFromId
     ,intScaleTicketId               = basisAdvance.intTicketId
     ,intContractDetailId            = basisAdvance.intContractDetailId

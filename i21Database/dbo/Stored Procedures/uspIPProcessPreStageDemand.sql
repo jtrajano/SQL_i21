@@ -33,6 +33,16 @@ BEGIN TRY
 	SELECT @intDemandPreStageId = MIN(intDemandPreStageId)
 	FROM @tblMFDemandPreStage
 
+	IF @intDemandPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	FROM tblMFDemandPreStage S
+	JOIN @tblMFDemandPreStage PS ON PS.intDemandPreStageId = S.intDemandPreStageId
+
 	WHILE @intDemandPreStageId IS NOT NULL
 	BEGIN
 		SELECT @intInvPlngReportMasterID = NULL
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblMFDemandPreStage
 		WHERE intDemandPreStageId > @intDemandPreStageId
 	END
+
+	UPDATE S
+	SET S.strFeedStatus = NULL
+	FROM tblMFDemandPreStage S
+	JOIN @tblMFDemandPreStage PS ON PS.intDemandPreStageId = S.intDemandPreStageId
+	WHERE S.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

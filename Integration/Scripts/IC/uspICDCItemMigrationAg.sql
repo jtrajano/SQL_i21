@@ -181,11 +181,12 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin
 
 --all items are imported with type 'Inventory'
 --update items Inventory type from Category table
-update	tblICItem 
-set		strType = C.strInventoryType
-from	tblICCategory C
-where	C.intCategoryId = tblICItem.intCategoryId
-		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
+-- In latest versions, changing type is not allowed.
+-- update	tblICItem 
+-- set		strType = C.strInventoryType
+-- from	tblICCategory C
+-- where	C.intCategoryId = tblICItem.intCategoryId
+-- 		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
 --====Delete obsolete items. It is not required in i21 as history is not imported===
 --Delete from tblICItem where strStatus = 'Discontinued'
@@ -488,6 +489,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	) (
 SELECT inv.intItemId
@@ -505,6 +507,7 @@ SELECT inv.intItemId
 	else 'None' End PricingMethod
 	,agitm_prc_calc1
 	,agitm_un_prc1
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -523,6 +526,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	) (
 SELECT inv.intItemId
@@ -540,6 +544,7 @@ SELECT inv.intItemId
 	else 'None' End PricingMethod
 	,agitm_prc_calc2
 	,agitm_un_prc2
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -557,6 +562,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	) (
 SELECT inv.intItemId
@@ -574,6 +580,7 @@ SELECT inv.intItemId
 	else 'None' End PricingMethod
 	,agitm_prc_calc3
 	,agitm_un_prc3
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -591,6 +598,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	) (
 SELECT inv.intItemId
@@ -608,6 +616,7 @@ SELECT inv.intItemId
 	else 'None' End PricingMethod
 	,agitm_prc_calc4
 	,agitm_un_prc4
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 
@@ -626,6 +635,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 	,strPricingMethod
 	,dblAmountRate
 	,dblUnitPrice
+	, intCompanyLocationPricingLevelId
 	,[intConcurrencyId]
 	) (
 SELECT inv.intItemId
@@ -643,6 +653,7 @@ SELECT inv.intItemId
 	else 'None' End PricingMethod
 	,agitm_prc_calc5
 	,agitm_un_prc5
+	,PL.intCompanyLocationPricingLevelId
 	,1 ConcurrencyId
 	FROM agitmmst AS itm INNER JOIN tblICItem AS inv ON (itm.agitm_no COLLATE SQL_Latin1_General_CP1_CS_AS = inv.strItemNo COLLATE SQL_Latin1_General_CP1_CS_AS)
 	 INNER JOIN tblSMCompanyLocation AS loc ON (itm.agitm_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS = loc.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS) 

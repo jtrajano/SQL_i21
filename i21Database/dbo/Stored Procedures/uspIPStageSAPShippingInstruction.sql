@@ -32,6 +32,9 @@ BEGIN TRY
 		,strShippingMode NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,intNumberOfContainers INT
 		,strContainerType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strPartyAlias NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strPartyName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strPartyType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		,strTransactionType NVARCHAR(50) COLLATE Latin1_General_CI_AS
 		)
 	DECLARE @tblLoadDetail TABLE (
@@ -92,6 +95,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strTransactionType
 				)
 			SELECT CargooReference
@@ -102,25 +108,25 @@ BEGIN TRY
 					WHEN ISDATE(Ata) = 0
 						OR Ata = '1900-01-01 00:00:00.000'
 						THEN NULL
-					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Ata, 101))
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, CONVERT(DATETIME, Ata), 101))
 					END
 				,CASE 
 					WHEN ISDATE(Atd) = 0
 						OR Atd = '1900-01-01 00:00:00.000'
 						THEN NULL
-					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Atd, 101))
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, CONVERT(DATETIME, Atd), 101))
 					END
 				,CASE 
 					WHEN ISDATE(Etd) = 0
 						OR Etd = '1900-01-01 00:00:00.000'
 						THEN NULL
-					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Etd, 101))
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, CONVERT(DATETIME, Etd), 101))
 					END
 				,CASE 
 					WHEN ISDATE(Eta) = 0
 						OR Eta = '1900-01-01 00:00:00.000'
 						THEN NULL
-					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, Eta, 101))
+					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, CONVERT(DATETIME, Eta), 101))
 					END
 				,BookingNumber
 				,BLNumber
@@ -134,6 +140,9 @@ BEGIN TRY
 					ELSE [Count]
 					END
 				,[Type]
+				,Alias
+				,Name
+				,[PartyType]
 				,'ShippingInstruction'
 			FROM OPENXML(@idoc, 'Shipment', 2) WITH (
 					CargooReference NVARCHAR(100)
@@ -152,6 +161,9 @@ BEGIN TRY
 					,LoadingType NVARCHAR(100)
 					,[Count] INT 'PlannedContainers/PlannedContainer/Count'
 					,[Type] NVARCHAR(50) 'PlannedContainers/PlannedContainer/Type'
+					,Alias NVARCHAR(100) 'Party/Alias'
+					,Name NVARCHAR(100) 'Party/Name'
+					,[PartyType] NVARCHAR(50) 'Party/Type'
 					)
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strCustomerReference, '') + ','
@@ -213,6 +225,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,strFileName
 				,strTransactionType
 				)
@@ -232,6 +247,9 @@ BEGIN TRY
 				,strShippingMode
 				,intNumberOfContainers
 				,strContainerType
+				,strPartyAlias
+				,strPartyName
+				,strPartyType
 				,@strFileName
 				,strTransactionType
 			FROM @tblLoad

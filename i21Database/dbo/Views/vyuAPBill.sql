@@ -60,7 +60,7 @@ SELECT
 	--CASE WHEN A.ysnForApproval = 1 THEN G.strApprovalList ELSE NULL END AS strApprover,
 	Approvals.strName as strApprover,
 	Approvals.dtmApprovalDate,
-	'' AS strBatchId,--GL.strBatchId,
+	'' COLLATE Latin1_General_CI_AS AS strBatchId,--GL.strBatchId,
 	EL.strLocationName AS strVendorLocation,
 	strPayeeName = (SELECT EL2.strCheckPayeeName FROM dbo.tblEMEntityLocation EL2 WHERE EL2.intEntityLocationId = A.intPayToAddressId),
 	A.strComment,
@@ -73,7 +73,8 @@ SELECT
 	B.strVendorId,
 	ISNULL(commodity.strCommodityCode, 'None') AS strCommodityCode,
 	CASE WHEN (A.intTransactionType IN (3,8,11)) OR (A.intTransactionType = 2 AND A.ysnPosted = 1) THEN A.dblPayment * -1 ELSE A.dblPayment END AS dblPayment,
-	A.ysnPrepayHasPayment
+	A.ysnPrepayHasPayment,
+	A.intShipToId
 FROM
 	dbo.tblAPBill A
 	INNER JOIN 

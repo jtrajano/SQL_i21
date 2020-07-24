@@ -15,6 +15,7 @@ BEGIN
 	DECLARE @intId INT
 		, @strBatchId NVARCHAR(100)
 		, @strBucketType NVARCHAR(100)
+		, @intActionId INT
 		, @strTransactionType NVARCHAR(100)
 		, @intTransactionRecordId INT
 		, @intTransactionRecordHeaderId INT
@@ -46,6 +47,7 @@ BEGIN
 
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strBucketType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+		, intActionId INT NULL
 		, strTransactionType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, intTransactionRecordId INT NULL
 		, intTransactionRecordHeaderId INT NULL
@@ -95,6 +97,7 @@ BEGIN
 		SELECT @intId = NULL
 			, @strBatchId = NULL
 			, @strBucketType = NULL
+			, @intActionId = NULL
 			, @strTransactionType = NULL
 			, @intTransactionRecordId = NULL
 			, @intTransactionRecordHeaderId = NULL
@@ -127,6 +130,7 @@ BEGIN
 		SELECT TOP 1 @intId = intId
 			, @strBatchId = strBatchId
 			, @strBucketType = strBucketType
+			, @intActionId = intActionId
 			, @strTransactionType = strTransactionType
 			, @intTransactionRecordId = intTransactionRecordId
 			, @intTransactionRecordHeaderId = intTransactionRecordHeaderId
@@ -173,6 +177,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -203,6 +208,7 @@ BEGIN
 				, strMiscFields)
 			SELECT strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -270,6 +276,7 @@ BEGIN
 			BEGIN
 				INSERT INTO @FinalTable(strBatchId
 					, strBucketType
+					, intActionId
 					, strTransactionType
 					, intTransactionRecordId
 					, intTransactionRecordHeaderId
@@ -302,6 +309,7 @@ BEGIN
 					, strMiscFields)
 				SELECT @strBatchId
 					, strBucketType
+					, intActionId
 					, strTransactionType
 					, intTransactionRecordId
 					, intTransactionRecordHeaderId
@@ -343,6 +351,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -373,6 +382,7 @@ BEGIN
 				, strMiscFields)
 			SELECT @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -410,6 +420,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -439,6 +450,7 @@ BEGIN
 				, strNotes)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -475,6 +487,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -504,6 +517,7 @@ BEGIN
 				, strNotes)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -543,6 +557,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -570,6 +585,7 @@ BEGIN
 				, strNotes)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, strTransactionType = CASE WHEN @strTransactionType LIKE 'Inventory Adjustment%' THEN 'Inventory Adjustment' ELSE @strTransactionType END
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -620,6 +636,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -648,6 +665,7 @@ BEGIN
 				, strMiscFields)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -679,10 +697,11 @@ BEGIN
 		------------------------------------
 		------------- Voucher --------------
 		------------------------------------
-		ELSE IF @strTransactionType = 'Bill'
+		ELSE IF @strTransactionType = 'Voucher'
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -710,6 +729,7 @@ BEGIN
 				, strNotes)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -747,6 +767,7 @@ BEGIN
 		BEGIN
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -774,6 +795,7 @@ BEGIN
 				, strNotes)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -819,6 +841,7 @@ BEGIN
 
 			INSERT INTO @FinalTable(strBatchId
 				, strBucketType
+				, intActionId
 				, strTransactionType
 				, intTransactionRecordId
 				, intTransactionRecordHeaderId
@@ -847,6 +870,7 @@ BEGIN
 				, strMiscFields)
 			SELECT TOP 1 @strBatchId
 				, @strBucketType
+				, @intActionId
 				, @strTransactionType
 				, @intTransactionRecordId
 				, @intTransactionRecordHeaderId
@@ -1069,6 +1093,8 @@ BEGIN
 	INSERT INTO tblRKSummaryLog(strBatchId
 		, dtmCreatedDate
 		, strBucketType
+		, intActionId
+		, strAction
 		, strTransactionType
 		, intTransactionRecordId
 		, intTransactionRecordHeaderId
@@ -1100,8 +1126,10 @@ BEGIN
 		, intRefSummaryLogId
 		, strMiscField)
 	SELECT strBatchId
-		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETDATE() END
+		, dtmCreatedDate = CASE WHEN @Rebuild = 1 THEN dtmTransactionDate ELSE GETUTCDATE() END
 		, strBucketType
+		, intActionId
+		, strAction = A.strActionIn 
 		, strTransactionType
 		, intTransactionRecordId
 		, intTransactionRecordHeaderId
@@ -1132,7 +1160,8 @@ BEGIN
 		, ysnNegate
 		, intRefSummaryLogId
 		, strMiscFields
-	FROM @FinalTable
+	FROM @FinalTable F
+	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 	ORDER BY dtmTransactionDate
 
 	DROP TABLE #tmpSummaryLogs

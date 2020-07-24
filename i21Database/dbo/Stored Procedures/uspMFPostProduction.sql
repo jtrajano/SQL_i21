@@ -66,6 +66,8 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strProduceBatchId NVARCHAR(40)
 	,@intManufacturingCellId INT
 	,@ysnLifeTimeByEndOfMonth INT
+	,@strInstantConsumption NVARCHAR(50)
+	,@intManufacturingProcessId int
 
 SET @strProduceBatchId = ISNULL(@strBatchId, '') + '-P'
 
@@ -120,8 +122,15 @@ BEGIN
 			,@strTransactionId = strWorkOrderNo
 			,@intLocationId = intLocationId
 			,@intManufacturingCellId = intManufacturingCellId
+			,@intManufacturingProcessId = intManufacturingProcessId
 		FROM dbo.tblMFWorkOrder
 		WHERE intWorkOrderId = @intWorkOrderId
+
+	SELECT @strInstantConsumption = strAttributeValue
+	FROM tblMFManufacturingProcessAttribute
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND intAttributeId = 20
 	END
 END
 
@@ -198,7 +207,7 @@ DECLARE @tblMFOtherChargeItem TABLE (
 	,dblOtherCharge NUMERIC(18, 6)
 	)
 
-IF @ysnConsumptionRequired = 1
+IF @ysnConsumptionRequired = 1 AND @strInstantConsumption = 'True'
 BEGIN
 	INSERT INTO @tblMFOtherChargeItem
 	SELECT RI.intRecipeItemId

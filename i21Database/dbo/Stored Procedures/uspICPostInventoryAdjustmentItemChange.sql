@@ -31,6 +31,19 @@ DECLARE @ReduceFromSource AS ItemCostingTableType
 		,@intNewItemNo AS INT
 		,@strNewItemNo AS NVARCHAR(50)
 
+-- Create the temp table to skip a batch id from logging into the summary log. 
+IF OBJECT_ID('tempdb..#tmpICLogRiskPositionFromOnHandSkipList') IS NULL  
+BEGIN 
+	CREATE TABLE #tmpICLogRiskPositionFromOnHandSkipList (
+		strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS 
+	)
+END 
+
+-- insert into the temp table
+BEGIN 
+	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
+
 --------------------------------------------------------------------------------
 -- VALIDATIONS
 --------------------------------------------------------------------------------
@@ -561,7 +574,7 @@ BEGIN
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICLot SourceLot
@@ -611,7 +624,7 @@ BEGIN
 				ON Item.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId) 
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICInventoryTransaction SourceTransaction
@@ -634,6 +647,8 @@ BEGIN
 	-------------------------------------------
 	IF EXISTS(SELECT TOP 1 1 FROM @AddToTarget)
 	BEGIN
+		DELETE FROM #tmpICLogRiskPositionFromOnHandSkipList
+
 		EXEC	dbo.uspICPostCosting  
 				@AddToTarget  
 				,@strBatchId  
@@ -690,7 +705,7 @@ BEGIN
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)  
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICLot SourceLot
@@ -740,7 +755,7 @@ BEGIN
 				ON Item.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICItemLocation NewItemLocation 
-				ON NewItemLocation.intLocationId = Header.intLocationId 
+				ON NewItemLocation.intLocationId = ISNULL(Detail.intNewLocationId, Header.intLocationId)  
 				AND NewItemLocation.intItemId = Detail.intNewItemId
 
 			INNER JOIN dbo.tblICInventoryTransactionStorage SourceTransaction

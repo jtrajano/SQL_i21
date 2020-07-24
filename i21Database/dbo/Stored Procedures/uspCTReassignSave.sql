@@ -320,7 +320,7 @@ BEGIN TRY
 				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-				EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT, 1
+				EXEC uspRKAutoHedge @strXML,@intUserId,@intNewFutOptTransactionId OUTPUT, 1
 
 				UPDATE tblCTPriceFixationDetail SET intFutOptTransactionId = @intNewFutOptTransactionId WHERE intPriceFixationDetailId = @intNewPriceFixationDetailId
 
@@ -341,7 +341,7 @@ BEGIN TRY
 				SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 				SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-				EXEC uspRKAutoHedge @strXML,@intDeductedFutOptTransactionId OUTPUT, 1
+				EXEC uspRKAutoHedge @strXML,@intUserId,@intDeductedFutOptTransactionId OUTPUT, 1
 
 				/*End of CT-3724*/
 			END
@@ -351,12 +351,15 @@ BEGIN TRY
 	END
 
 	------ Call Reassign of Match Derivatives to fix matched derivatives that were reassigned
-	DECLARE @Ids Id
-	INSERT INTO @Ids(intId)
-	SELECT @intDeductedFutOptTransactionId
-	UNION ALL SELECT @intNewFutOptTransactionId
+	IF ISNULL(@intDeductedFutOptTransactionId, 0) <> 0 AND ISNULL(@intNewFutOptTransactionId, 0) <> 0
+	BEGIN
+		DECLARE @Ids Id
+		INSERT INTO @Ids(intId)
+		SELECT @intDeductedFutOptTransactionId
+		UNION ALL SELECT @intNewFutOptTransactionId
 
-	EXEC uspRKReassignMatchDerivatives @Ids, @intUserId
+		EXEC uspRKReassignMatchDerivatives @Ids, @intUserId
+	END
 
 	UPDATE	PF
 	SET		PF.dblPriceWORollArb	=	FD.dblPriceWORollArb,
@@ -460,7 +463,7 @@ BEGIN TRY
 			SELECT @strXML = REPLACE(@strXML,'</tblRKFutOptTransactions>','')
 			SELECT @strXML = REPLACE(@strXML,'tblRKFutOptTransaction','root')
 
-			EXEC uspRKAutoHedge @strXML,@intNewFutOptTransactionId OUTPUT, 1
+			EXEC uspRKAutoHedge @strXML,@intUserId,@intNewFutOptTransactionId OUTPUT, 1
 
 			SET @strXML = '<root><Transaction>';
 			SET @strXML = @strXML + '<intContractHeaderId>' + LTRIM(@intRecipientHeaderId) + '</intContractHeaderId>'
@@ -561,8 +564,16 @@ BEGIN TRY
 	
 	---------------------------------------End Allocation-------------------------
 
-	EXEC	uspCTCreateDetailHistory	NULL, @intDonorId
-	EXEC	uspCTCreateDetailHistory	NULL, @intRecipientId
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL, 
+										@intContractDetailId = @intDonorId,
+										@strSource			 = 'Contract',
+										@strProcess		     = 'Reassign Save',
+										@intUserId			 = @intUserId
+	EXEC	uspCTCreateDetailHistory	@intContractHeaderId = NULL, 
+										@intContractDetailId = @intRecipientId,
+										@strSource			 = 'Contract',
+										@strProcess		  	 = 'Reassign Save',
+										@intUserId			 = @intUserId
 	--COMMIT TRAN
 END TRY
 BEGIN CATCH

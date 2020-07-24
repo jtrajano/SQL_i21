@@ -20,7 +20,6 @@ SELECT
 	, CL.strLocationName
 	, CS.intEntityId
 	, CS.intCompanyLocationId
-	, TS.ysnReversed
 FROM tblGRTransferStorageSourceSplit TSS
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSS.intTransferStorageId

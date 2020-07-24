@@ -55,6 +55,7 @@ DECLARE @Taxes AS TABLE (
 	,[ysnAddToCost]			BIT
 	,[strTaxGroup]			NVARCHAR(100)
 	,[strNotes]				NVARCHAR(500)
+	,[ysnBookToExemptionAccount] BIT
 )
 
 -- Clear the tax details 
@@ -127,6 +128,7 @@ BEGIN
 		,[ysnAddToCost]
 		,[strTaxGroup]
 		,[strNotes]
+		,[ysnBookToExemptionAccount]
 	)
 	EXEC dbo.uspSMGetItemTaxes
 		 @ItemId				= @ItemId

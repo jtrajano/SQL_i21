@@ -34,9 +34,10 @@ DECLARE @CustomerStorageStagingTable AS CustomerStorageStagingTable
 		,@intBillId					INT
 DECLARE @dblInitialSplitQty			NUMERIC (38,20)
 DECLARE @DeliverySheetTicketIds		Id
-DECLARE @ysnImposeReversalTransaction BIT
 DECLARE @_intTicketId INT
 DECLARE @_intReversedTicketId INT
+DECLARE @_intInventoryReceiptId  	INT
+DECLARE @_intStorageHistoryId  		INT
 
 BEGIN TRY
 
@@ -60,6 +61,10 @@ BEGIN TRY
 		,[dblFreight] NUMERIC(38,20) NULL
 		,[dblFees] NUMERIC(38,20) NULL
 	)
+	declare @skipValidation bit
+	declare @processedTicket Table(
+		[intTicketId] INT
+	)
 
 	DECLARE @dsSplitTable TABLE(
 		[intEntityId] INT NOT NULL, 
@@ -74,76 +79,9 @@ BEGIN TRY
 	DECLARE @TicketRowMaxCount INT
 
 	
-
-
-	SET @ysnImposeReversalTransaction = 0
-	
-	SELECT TOP 1
-		@ysnImposeReversalTransaction = ysnImposeReversalTransaction
-	FROM tblRKCompanyPreference
-	
-	IF(@ysnImposeReversalTransaction = 1)
-	--REversal
-	BEGIN
-		INSERT INTO @DeliverySheetTicketIds
-		SELECT 
-			intTicketId
-		FROM tblSCTicket 
-		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-			AND ysnReversed = 0
-
-		SELECT 
-			@_intTicketId = MIN(intId) 
-		FROM @DeliverySheetTicketIds
-
-		DELETE FROM @processTicket
-
-		WHILE (ISNULL(@_intTicketId,0) > 0)
-		BEGIN
-			EXEC uspSCReverseTicket @_intTicketId, @intUserId, @_intReversedTicketId OUTPUT
-
-			INSERT INTO @processTicket(
-				[intTicketId]
-				,[intDeliverySheetId]
-				,[intEntityId]
-				,[dblNetUnits]
-				,[dblFreight] 
-				,[dblFees] 
-			)
-			SELECT 
-				[intTicketId]			= intTicketId
-				,[intDeliverySheetId]	= intDeliverySheetId
-				,[intEntityId]			= intEntityId
-				,[dblNetUnits]			= dblNetUnits
-				,[dblFreight]			= dblFreightRate
-				,[dblFees]				= dblTicketFees
-			FROM tblSCTicket 
-			WHERE intTicketId = @_intReversedTicketId
-				AND ysnReversed = 0
-
-			SET @_intReversedTicketId = 0
-			--Loop Iterator
-			BEGIN
-				IF EXISTS(SELECT TOP 1 1 FROM @DeliverySheetTicketIds WHERE intId > @_intTicketId)
-				BEGIN
-					SELECT 
-						@_intTicketId = MIN(intId) 
-					FROM @DeliverySheetTicketIds
-					WHERE intId > @_intTicketId
-				END
-				ELSE
-				BEGIN
-					SET @_intTicketId =  0
-				END
-			END
-
-		END
-	END
-	ELSE
 	--None reversal
 	BEGIN
 		SET @TicketCurrentRowCount = 1
-		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
 
 		INSERT INTO @processTicket(
 			[intTicketId]
@@ -162,7 +100,9 @@ BEGIN TRY
 			,[dblFees]				= dblTicketFees
 		FROM tblSCTicket 
 		WHERE intDeliverySheetId = @intDeliverySheetId AND strTicketStatus = 'C'
-			AND ysnReversed = 0
+			
+		
+		SELECT @TicketRowMaxCount = COUNT(1) FROM @processTicket
 
 		WHILE (@TicketCurrentRowCount <= @TicketRowMaxCount)
 		BEGIN
@@ -186,6 +126,76 @@ BEGIN TRY
 	-- 	,dblOpenBalance = 0
 	-- WHERE intDeliverySheetId = @intDeliverySheetId
 
+
+	---SUMMARY LOG 
+	BEGIN
+		IF OBJECT_ID (N'tempdb.dbo.#SCReceiptIds') IS NOT NULL
+			DROP TABLE #SCReceiptIds
+
+		SELECT DISTINCT
+			B.intInventoryReceiptId
+		INTO #SCReceiptIds
+		FROM tblICInventoryReceiptItem A
+		INNER JOIN tblICInventoryReceipt B
+			ON A.intInventoryReceiptId = B.intInventoryReceiptId
+		INNER JOIN tblSCTicket C
+			ON A.intSourceId = C.intTicketId
+		INNER JOIN tblSCDeliverySheet D
+			ON C.intDeliverySheetId = C.intDeliverySheetId
+		WHERE B.intSourceType = 1
+
+		SET @_intInventoryReceiptId = ISNULL((SELECT MIN(intInventoryReceiptId) FROM #SCReceiptIds),0)
+
+		WHILE (ISNULL(@_intInventoryReceiptId,0) > 0)
+		BEGIN
+
+			IF OBJECT_ID (N'tempdb.dbo.#tmpSCStorageHistory') IS NOT NULL
+				DROP TABLE #tmpSCStorageHistory
+
+			SELECT 
+				*
+			INTO #tmpSCStorageHistory
+			FROM tblGRStorageHistory 
+			WHERE intInventoryReceiptId = @_intInventoryReceiptId 
+			ORDER BY intStorageHistoryId
+
+			SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 MIN(intStorageHistoryId) 
+												FROM #tmpSCStorageHistory 
+												WHERE intInventoryReceiptId = @_intInventoryReceiptId),0)
+		
+			WHILE ISNULL(@_intStorageHistoryId,0) > 0
+			BEGIN
+				IF(@_intStorageHistoryId > 0)
+				BEGIN
+					EXEC [dbo].[uspGRRiskSummaryLog]
+						@intStorageHistoryId = @_intStorageHistoryId
+						,@strAction = 'UNPOST'
+				END
+
+				--LOOP Iterator
+				BEGIN
+					SET @_intStorageHistoryId = ISNULL((SELECT TOP 1 ISNULL(intStorageHistoryId,0) 
+														FROM #tmpSCStorageHistory 
+														WHERE intInventoryReceiptId = @_intInventoryReceiptId 
+															AND intStorageHistoryId > @_intStorageHistoryId
+														ORDER BY intStorageHistoryId),0)
+				END
+			END
+
+
+			--loop iterator
+			BEGIN
+				SET @_intInventoryReceiptId = ISNULL((SELECT TOP 1 intInventoryReceiptId 
+													FROM #SCReceiptIds 
+													WHERE intInventoryReceiptId > @_intInventoryReceiptId
+													ORDER BY intInventoryReceiptId),0)
+			END
+		END
+
+	END
+
+	DELETE FROM tblGRCustomerStorage
+	WHERE intDeliverySheetId = @intDeliverySheetId
 
 	DELETE FROM @splitTable
 		
@@ -216,7 +226,7 @@ BEGIN TRY
 	WHERE intTicketId IN (SELECT intTicketId 
 						FROM tblSCTicket 
 						WHERE intDeliverySheetId = @intDeliverySheetId
-							AND ysnReversed = 0)
+							)
 		
 
 	IF EXISTS(SELECT NULL FROM @splitTable)
@@ -267,9 +277,23 @@ BEGIN TRY
 				SET @dblTempSplitQty = @dblTempSplitQty - @dblFinalSplitQty;
 			ELSE
 				SET @dblFinalSplitQty = @dblTempSplitQty
-
-			EXEC [dbo].[uspSCProcessToItemReceipt] @intTicketId, @intUserId, @dblFinalSplitQty, 0, @intSplitEntityId, 0 , @strDistributionOption, @intStorageScheduleId, @intInventoryReceiptId OUTPUT, @intBillId OUTPUT
 			
+			set @skipValidation = 0
+			if exists(select top 1 1 from @processedTicket where intTicketId = @intTicketId)
+			begin
+				set @skipValidation = 1
+			end
+
+			EXEC [dbo].[uspSCProcessToItemReceipt] @intTicketId, @intUserId, @dblFinalSplitQty, 0, @intSplitEntityId, 0 , @strDistributionOption, @intStorageScheduleId, @intInventoryReceiptId OUTPUT, @intBillId OUTPUT, @skipValidation			
+
+			
+			if not exists(select top 1 1 from @processedTicket where intTicketId = @intTicketId)
+			begin
+				insert into @processedTicket values (@intTicketId)
+			end
+
+
+
 			FETCH NEXT FROM splitCursor INTO @intSplitEntityId, @dblSplitPercent, @strDistributionOption, @intStorageScheduleId;
 		END
 		CLOSE splitCursor;  

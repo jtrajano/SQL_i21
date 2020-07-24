@@ -141,7 +141,12 @@ SET NOCOUNT ON
 			IF @intNewContractHeaderId IS NOT NULL
 			BEGIN
 				EXEC uspCTUpdateAdditionalCost @intNewContractHeaderId
-				EXEC uspCTCreateDetailHistory @intNewContractHeaderId,NULL,'Split Sequence And Create New Contract' 
+				EXEC uspCTCreateDetailHistory @intContractHeaderId = @intNewContractHeaderId,
+											  @intContractDetailId = NULL,
+											  @strComment		   = 'Split Sequence And Create New Contract',
+											  @strSource		   = 'Contract',
+										      @strProcess		   = 'Split Sequence And Create New Contract',
+											  @intUserId		   = @intUserId
 			END
 
 			SELECT	@intSplitDetailId = MIN(intSplitDetailId) FROM tblEMEntitySplitDetail WHERE intSplitId = @intSplitId AND intSplitDetailId > @intSplitDetailId

@@ -71,7 +71,6 @@
     [ysnPaidCPP]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnPaidCPP] DEFAULT ((0)),
 	[ysnProcessed]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnProcessed] DEFAULT ((0)),
 	[ysnReturned]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnReturned] DEFAULT ((0)),
-	[ysnReversal]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnReversal] DEFAULT ((0)),
 	[ysnRecurring]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnTemplate] DEFAULT ((0)),
 	[ysnForgiven]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnForgiven] DEFAULT ((0)),
 	[ysnCalculated]						BIT												NOT NULL	CONSTRAINT [DF_tblARInvoice_ysnCalculated] DEFAULT ((0)),
@@ -129,6 +128,7 @@
 	[strNutrientAnalysis]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
 	[strBillingMethod]					NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL,
 	[strApplicatorLicense]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
+	[intPeriodId]						INT												NULL,
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
@@ -145,7 +145,7 @@
 	CONSTRAINT [FK_tblARInvoice_tblSMCurrency_intCurrencyId] FOREIGN KEY ([intCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblARInvoice_tblARPayment_intPaymentId] FOREIGN KEY ([intPaymentId]) REFERENCES [tblARPayment]([intPaymentId]),
 	CONSTRAINT [FK_tblARInvoice_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [tblEMEntitySplit]([intSplitId]),
-	CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblARInvoice_tblTRLoadDistributionHeader_intLoadDistributionHeaderId] FOREIGN KEY ([intLoadDistributionHeaderId]) REFERENCES [tblTRLoadDistributionHeader]([intLoadDistributionHeaderId]),-- ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoice_tblLGShipment_intShipmentId] FOREIGN KEY ([intShipmentId]) REFERENCES [tblLGShipment]([intShipmentId]),
 	CONSTRAINT [FK_tblARInvoice_tblCFTransaction_intTransactionId] FOREIGN KEY ([intTransactionId]) REFERENCES [tblCFTransaction]([intTransactionId]),
 	CONSTRAINT [FK_tblARInvoice_tblMBMeterReading_intMeterReadingId] FOREIGN KEY ([intMeterReadingId]) REFERENCES [tblMBMeterReading]([intMeterReadingId]),
@@ -160,43 +160,49 @@
 	CONSTRAINT [FK_tblARInvoice_tblSOSalesOrder_intSalesOrderId] FOREIGN KEY ([intSalesOrderId]) REFERENCES [tblSOSalesOrder]([intSalesOrderId])
 );
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 GO
 CREATE TRIGGER trgInvoiceNumber
 ON dbo.tblARInvoice
 AFTER INSERT
 AS
 
-DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100), intCompanyLocationId INT, ysnReversal BIT)
-DECLARE @count 					INT = 0
-DECLARE @intInvoiceId 			INT
-DECLARE @intCompanyLocationId 	INT
-DECLARE @InvoiceNumber 			NVARCHAR(50)
-DECLARE @strTransactionType 	NVARCHAR(25)
-DECLARE @strType 				NVARCHAR(100)
-DECLARE @intMaxCount 			INT = 0
-DECLARE @intStartingNumberId 	INT = 0
-DECLARE @ysnReversal			BIT = 0
+DECLARE @inserted TABLE(intInvoiceId INT, strTransactionType NVARCHAR(25), strType NVARCHAR(100), intCompanyLocationId INT)
+DECLARE @count INT = 0
+DECLARE @intInvoiceId INT
+DECLARE @intCompanyLocationId INT
+DECLARE @InvoiceNumber NVARCHAR(50)
+DECLARE @strTransactionType NVARCHAR(25)
+DECLARE @strType NVARCHAR(100)
+DECLARE @intMaxCount INT = 0
+DECLARE @intStartingNumberId INT = 0
 
 INSERT INTO @inserted
-SELECT intInvoiceId
-	 , strTransactionType
-	 , strType
-	 , intCompanyLocationId
-	 , ysnReversal = ISNULL(ysnReversal, 0)
-FROM INSERTED 
-WHERE ISNULL(RTRIM(LTRIM(strInvoiceNumber)), '') = '' 
-ORDER BY intInvoiceId
+SELECT intInvoiceId, strTransactionType, strType, intCompanyLocationId FROM INSERTED WHERE ISNULL(RTRIM(LTRIM(strInvoiceNumber)), '') = '' ORDER BY intInvoiceId
 
 WHILE((SELECT TOP 1 1 FROM @inserted) IS NOT NULL)
 BEGIN
 	SET @intStartingNumberId = 19
 	
-	SELECT TOP 1 @intInvoiceId 			= intInvoiceId
-			   , @strTransactionType 	= strTransactionType
-			   , @strType 				= strType
-			   , @intCompanyLocationId 	= intCompanyLocationId 
-			   , @ysnReversal			= ysnReversal
-	FROM @inserted
+	SELECT TOP 1 @intInvoiceId = intInvoiceId, @strTransactionType = strTransactionType, @strType = strType, @intCompanyLocationId = intCompanyLocationId FROM @inserted
 
 	UPDATE tblARInvoice SET dtmDateCreated = GETDATE() WHERE intInvoiceId = @intInvoiceId
 
@@ -217,11 +223,9 @@ BEGIN
 			BEGIN
 				SET @InvoiceNumber = NULL
 				
+				-- UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE intStartingNumberId = @intStartingNumberId
 				EXEC uspSMGetStartingNumber @intStartingNumberId, @InvoiceNumber OUT, @intCompanyLocationId			
 			END
-
-		IF (@ysnReversal = 1 AND @strTransactionType = 'Credit Memo')
-			SET @InvoiceNumber = @InvoiceNumber + '-R'
 
 		UPDATE tblARInvoice
 			SET tblARInvoice.strInvoiceNumber = @InvoiceNumber
@@ -255,4 +259,32 @@ INCLUDE ([intInvoiceId],[strTransactionType],[strType],[dtmPostDate],[dblInvoice
 GO
 CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
 
+GO
+CREATE TRIGGER trg_tblARInvoiceDelete
+ON dbo.tblARInvoice
+INSTEAD OF DELETE 
+AS
+BEGIN
+	DECLARE @strInvoiceNumber 	NVARCHAR(50) = NULL
+		  , @strError 			NVARCHAR(500) = NULL
+		  , @intInvoiceId 		INT = NULL
+		  , @ysnPosted			BIT = 0	      
 
+	SELECT @intInvoiceId 		= intInvoiceId
+	     , @strInvoiceNumber 	= strInvoiceNumber
+		 , @ysnPosted			= ysnPosted 
+	FROM DELETED 	
+	
+	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND intTransactionId = @intInvoiceId AND strTransactionId = @strInvoiceNumber)
+		SET @strError = 'You cannot delete invoice ' + @strInvoiceNumber + '. It has existing posted GL entries.';
+
+	IF @ysnPosted = 1
+		SET @strError = 'You cannot delete posted invoice (' + @strInvoiceNumber + ')';			
+
+	IF ISNULL(@strError, '') <> ''
+		RAISERROR(@strError, 16, 1);
+	ELSE
+		DELETE A
+		FROM tblARInvoice A
+		INNER JOIN DELETED B ON A.intInvoiceId = B.intInvoiceId
+END

@@ -155,7 +155,7 @@
 	,GRStorage.strStorageTypeDescription
 	,GRDiscountId.strDiscountId
 	,GRSSR.strScheduleId
-	,GRSSR.strScheduleDescription
+	,strScheduleDescription = ISNULL(GRSSR.strScheduleDescription,'')
 	,ISNULL(GRStorage.ysnDPOwnedType, CAST(0 AS BIT)) AS ysnDPOwnedType
 	,ISNULL(GRStorage.ysnCustomerStorage, CAST(0 AS BIT)) AS ysnCustomerStorage
 
@@ -247,9 +247,9 @@
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
 	,SCT.strTrailerId
-	,SCT.intParentTicketId
-    ,SCT.intTicketTransactionType
-	,SCT.ysnReversed
+	
+    
+	
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId

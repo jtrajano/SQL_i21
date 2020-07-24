@@ -1,14 +1,14 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPPOIDOC_CA (
+﻿CREATE PROCEDURE [dbo].[uspIPGenerateSAPPOIDOC_CA] (
 	@ysnCancel BIT = 0
 	,@ysnDebug BIT = 0
 	)
 AS
 BEGIN
-	DECLARE @strVendorAccountNum NVARCHAR(50)
-		,@strERPPONumber NVARCHAR(50)
-		,@strItemNo NVARCHAR(50)
-		,@strContractItemNo NVARCHAR(50)
-		,@strLoadingPoint NVARCHAR(50)
+	DECLARE @strVendorAccountNum NVARCHAR(100)
+		,@strERPPONumber NVARCHAR(100)
+		,@strItemNo NVARCHAR(100)
+		,@strContractItemNo NVARCHAR(100)
+		,@strLoadingPoint NVARCHAR(100)
 		,@dblQuantity NUMERIC(18, 6)
 		,@dblNetWeight NUMERIC(18, 6)
 		,@dtmPlannedAvailabilityDate DATETIME
@@ -18,18 +18,18 @@ BEGIN
 		,@intContractFeedId INT
 		,@strVendorRefNo NVARCHAR(50)
 		,@strXML NVARCHAR(MAX)
-		,@strContractNo NVARCHAR(50)
+		,@strContractNo NVARCHAR(100)
 		,@strRowState NVARCHAR(50)
 		,@intShipperId INT
-		,@strShipperName NVARCHAR(50)
+		,@strShipperName NVARCHAR(100)
 		,@intDestinationCityId INT
-		,@strDestinationPoint NVARCHAR(50)
+		,@strDestinationPoint NVARCHAR(100)
 		,@intDestinationPortId INT
 		,@intRecordId INT
 		,@intThirdPartyContractWaitingPeriod INT
 		,@strError NVARCHAR(MAX) = ''
 		,@dtmFeedCreated DATETIME
-		,@strShipperVendorAccountNum NVARCHAR(50)
+		,@strShipperVendorAccountNum NVARCHAR(100)
 		,@intContractDetailId INT
 		,@strSeq NVARCHAR(50)
 		,@dtmCurrentDate DATETIME
@@ -268,11 +268,11 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strVendorAccountNum, '') + '</Alias>'
 
-			SELECT @strXML = @strXML + '<Name>' + @strVendorName + '</Name>'
+			SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(@strVendorName) + '</Name>'
 
 			SELECT @strXML = @strXML + '<Type>SUP</Type>'
 
-			SELECT @strXML = @strXML + '<Reference>' + IsNULL(@strVendorRefNo, '') + '</Reference>'
+			SELECT @strXML = @strXML + '<Reference>' + dbo.fnEscapeXML(IsNULL(@strVendorRefNo, '')) + '</Reference>'
 
 			SELECT @strXML = @strXML + '</Party>'
 
@@ -282,7 +282,7 @@ BEGIN
 
 				SELECT @strXML = @strXML + '<Alias>' + IsNULL(@strShipperVendorAccountNum, '') + '</Alias>'
 
-				SELECT @strXML = @strXML + '<Name>' + IsNULL(@strShipperName, '') + '</Name>'
+				SELECT @strXML = @strXML + '<Name>' + dbo.fnEscapeXML(IsNULL(@strShipperName, '')) + '</Name>'
 
 				SELECT @strXML = @strXML + '<Type>CZ</Type>'
 
@@ -291,9 +291,9 @@ BEGIN
 
 			SELECT @strXML = @strXML + '</Parties>'
 
-			SELECT @strXML = @strXML + '<Pol>' + IsNULL(@strLoadingPoint, '') + '</Pol>'
+			SELECT @strXML = @strXML + '<Pol>' + dbo.fnEscapeXML(IsNULL(@strLoadingPoint, '')) + '</Pol>'
 
-			SELECT @strXML = @strXML + '<Pod>' + IsNULL(@strDestinationPoint, '') + '</Pod>'
+			SELECT @strXML = @strXML + '<Pod>' + dbo.fnEscapeXML(IsNULL(@strDestinationPoint, '')) + '</Pod>'
 
 			SELECT @strXML = @strXML + '<Eta>' + CONVERT(VARCHAR(30), @dtmPlannedAvailabilityDate, 126) + '</Eta>'
 
@@ -307,7 +307,7 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<ArticleCode>' + @strItemNo + '</ArticleCode>'
 
-			SELECT @strXML = @strXML + '<ArticleDescription>' + IsNULL(@strContractItemNo, '') + '</ArticleDescription>'
+			SELECT @strXML = @strXML + '<ArticleDescription>' + dbo.fnEscapeXML(IsNULL(@strContractItemNo, '')) + '</ArticleDescription>'
 
 			SELECT @strXML = @strXML + '<CommodityCode>Coffee</CommodityCode>'
 
@@ -341,12 +341,6 @@ BEGIN
 
 			IF @ysnDebug = 0
 			BEGIN
-				UPDATE dbo.tblIPThirdPartyContractFeed
-				SET strThirdPartyFeedStatus = 'Awt Ack'
-					,ysnThirdPartyMailSent = 0
-					,strThirdPartyMessage = NULL
-				WHERE intContractFeedId = @intContractFeedId
-
 				DELETE
 				FROM dbo.tblIPContractFeedLog
 				WHERE intContractDetailId = @intContractDetailId
@@ -367,6 +361,25 @@ BEGIN
 					,@intShipperId
 					,@intDestinationCityId
 					,@intDestinationPortId
+
+				IF EXISTS (
+						SELECT 1
+						FROM dbo.tblIPThirdPartyContractFeed
+						WHERE intContractFeedId = @intContractFeedId
+							AND strThirdPartyFeedStatus IS NULL
+						)
+				BEGIN
+					UPDATE dbo.tblIPThirdPartyContractFeed
+					SET strThirdPartyFeedStatus = 'Awt Ack'
+						,ysnThirdPartyMailSent = 0
+						,strThirdPartyMessage = NULL
+					WHERE intContractFeedId = @intContractFeedId
+				END
+				ELSE
+				BEGIN
+					DELETE
+					FROM @tblOutput
+				END
 			END
 		END
 

@@ -28,10 +28,22 @@ BEGIN TRY
 	INSERT INTO @tblICItemPreStage (intItemPreStageId)
 	SELECT intItemPreStageId
 	FROM tblICItemPreStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	WHERE strFeedStatus IS NULL
 
 	SELECT @intItemPreStageId = MIN(intItemPreStageId)
 	FROM @tblICItemPreStage
+
+	IF @intItemPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE tblICItemPreStage
+	SET strFeedStatus = 'In-Progress'
+	WHERE intItemPreStageId IN (
+			SELECT PS.intItemPreStageId
+			FROM @tblICItemPreStage PS
+			)
 
 	WHILE @intItemPreStageId IS NOT NULL
 	BEGIN
@@ -58,6 +70,14 @@ BEGIN TRY
 		FROM @tblICItemPreStage
 		WHERE intItemPreStageId > @intItemPreStageId
 	END
+
+	UPDATE tblICItemPreStage
+	SET strFeedStatus = NULL
+	WHERE intItemPreStageId IN (
+			SELECT PS.intItemPreStageId
+			FROM @tblICItemPreStage PS
+			)
+		AND IsNULL(strFeedStatus, '') = 'In-Progress'
 END TRY
 
 BEGIN CATCH

@@ -112,6 +112,7 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	 , dblRebateAmount			= SAR.dblRebateAmount
 	 , dblBuybackAmount			= SAR.dblBuybackAmount
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+     , strAccountingPeriod	    = SAR.strAccountingPeriod
 FROM
 (
 	--INVOICE/NORMAL ITEMS
@@ -165,6 +166,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, strAccountingPeriod	    = AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -245,6 +247,10 @@ FROM
 	           AND ARI.strType = 'CF Tran'
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT  strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 		AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		AND ISNULL(ICI.strType, '') NOT IN ('Software', 'Bundle')
@@ -302,6 +308,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, strAccountingPeriod	    = AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -375,6 +382,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
@@ -427,6 +438,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.000000
+		, strAccountingPeriod		    = NULL
 	FROM tblSOSalesOrder SO 
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -563,6 +575,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, strAccountingPeriod		= AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -636,6 +649,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -687,8 +704,9 @@ FROM
 		, strCurrencyDescription		= SMC.strDescription
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
-		, dblBuybackAmount				= 0.000000
-	FROM tblSOSalesOrder SO 
+		, dblBuybackAmount				= 0.
+		, strAccountingPeriod		    = NULL
+	FROM tblSOSalesOrder SO
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
 			 , strCurrency
@@ -824,6 +842,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, strAccountingPeriod		= AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -896,6 +915,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -948,6 +971,7 @@ FROM
 		, intInvoiceDetailId			= NULL
 		, dblRebateAmount				= 0.000000
 		, dblBuybackAmount				= 0.000000
+		, strAccountingPeriod			= NULL
 	FROM tblSOSalesOrder SO 
 	LEFT OUTER JOIN (
 		SELECT intCurrencyID
@@ -1084,6 +1108,7 @@ FROM
 		, intInvoiceDetailId		= ARID.intInvoiceDetailId
 		, dblRebateAmount			= ARID.dblRebateAmount
 		, dblBuybackAmount			= ARID.dblBuybackAmount
+		, strAccountingPeriod		= AccPeriod.strAccountingPeriod
 	FROM tblARInvoiceDetail ARID 
 	INNER JOIN tblARInvoice ARI ON ARID.intInvoiceId = ARI.intInvoiceId
 	LEFT OUTER JOIN (
@@ -1156,6 +1181,10 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
+	OUTER APPLY(
+	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
+	) AccPeriod
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ICI.strType, '') = 'Software'
@@ -1196,3 +1225,63 @@ OUTER APPLY (
 	  FOR XML PATH ('')
 	 ) SC (strAccountStatusCode)
 ) STATUSCODES
+GROUP BY 
+	  SAR.strRecordNumber
+	, SAR.strInvoiceOriginId
+	, SAR.intSourceId
+	, SAR.intTransactionId
+	, SAR.intAccountId
+	, SAR.dtmDate
+	, SAR.intCompanyLocationId
+	, SAR.intEntityCustomerId
+	, IC.intItemId
+	, UOM.intUnitMeasureId
+	, IC.intManufacturerId
+	, IC.intBrandId
+	, IC.intCommodityId
+	, IC.intCategoryId
+	, SAR.intEntitySalespersonId
+	, SAR.intTicketId
+	, SAR.strTransactionType
+	, SAR.strType
+	, SAR.dblQtyOrdered
+	, SAR.dblQtyShipped
+	, SAR.dblStandardCost
+	, SAR.dblPrice
+	, SAR.dblRebateAmount
+	, SAR.dblBuybackAmount
+	, SAR.dblLineTotal
+	, SAR.dblTax
+	, SAR.dblTotal
+	, C.strCustomerNumber
+	, SAR.intItemAccountId
+	, GA.strAccountId
+	, GA.strDescription
+	, L.strLocationName
+	, IC.strItemNo
+	, IC.strDescription
+	, SAR.strItemDescription
+	, UOM.strUnitMeasure
+	, ICM.strManufacturer
+	, ICB.strBrandName
+	, ICC.strCommodityCode
+	, CAT.strCategoryCode
+	, CAT.strDescription
+	, E.strName
+	, ESP.strName
+	, SAR.strBillToLocationName
+	, SAR.strShipToLocationName
+	, TMS.intSiteNumber
+	, TMS.strDescription
+	, SCT.strTicketNumber
+	, SCT.strCustomerReference
+	, strShipToCity
+	, strShipToState
+	, strShipToCountry
+	, SAR.strShipToZipCode
+	, SAR.intCurrencyId
+	, SAR.strCurrency
+	, SAR.strCurrencyDescription
+	, SAR.intInvoiceDetailId
+	, STATUSCODES.strAccountStatusCode
+	, SAR.strAccountingPeriod

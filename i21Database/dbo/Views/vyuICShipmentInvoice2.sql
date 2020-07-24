@@ -2,18 +2,16 @@
 AS
 
 SELECT	t.intInventoryShipmentId
-		,t.intInventoryShipmentItemId
-		,t.intInventoryShipmentChargeId
 		,t.strShipmentNumber
 		,t.dtmShipDate
 		,t.strCustomer
 		,t.strLocationName
 		,ship.intShipFromLocationId
-		,t.strDestination
 		,t.strBOLNumber
 		,t.strOrderType
 		,t.strItemNo
 		,t.strItemDescription
+		,t.strDestination
 		,dblUnitCost = ROUND(t.dblUnitCost, 2)
 		,dblShipmentQty = ROUND(t.dblShipmentQty, 2) 
 		,dblInTransitQty = ROUND(t.dblInTransitQty, 2)
@@ -25,21 +23,9 @@ SELECT	t.intInventoryShipmentId
 		,dblInvoiceTax = ROUND(t.dblInvoiceTax, 2)
 		,dblOpenQty = ROUND(t.dblOpenQty, 2) 
 		,dblItemsReceivable = ROUND(t.dblItemsReceivable, 2) 
-		,dblTaxesReceivable = ROUND(t.dblTaxesReceivable, 2)
 		,t.dtmLastInvoiceDate
 		,t.strAllVouchers
-		,t.strFilterString
 		,t.dtmCreated
-		,t.intCurrencyId
-		,t.strCurrency
-		,t.strItemUOM
-		,t.intItemUOMId
-		,c.strCategoryCode
-		,c.strDescription strCategoryDescription
-		,cm.strCommodityCode
-		,cm.strDescription strCommodityDescription
 FROM	[tblICSearchShipmentInvoice] t
 	LEFT OUTER JOIN tblICInventoryShipment ship ON ship.intInventoryShipmentId = t.intInventoryShipmentId
 	INNER JOIN tblICItem i ON i.strItemNo = t.strItemNo
-	LEFT OUTER JOIN tblICCategory c ON c.intCategoryId = i.intCategoryId
-	left outer join tblICCommodity cm ON cm.intCommodityId = i.intCommodityId

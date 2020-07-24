@@ -10,7 +10,7 @@ SELECT CRP.intCigaretteRebateProgramId,
  		, 1
  		, 0
  		, '')
-	) strRegionList
+	) COLLATE Latin1_General_CI_AS strRegionList
 FROM tblSTCigaretteRebatePrograms CRP
 GO
 

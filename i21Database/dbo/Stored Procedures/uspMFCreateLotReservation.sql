@@ -180,7 +180,7 @@ End
 	--	,@intInvalidItemId OUTPUT 
 
 	-- If there are enough stocks, let the system create the reservations
-	IF (@intInvalidItemId IS NULL)	
+	IF Exists(Select *from @ItemsToReserve)
 	BEGIN 
 		EXEC dbo.uspICCreateStockReservation
 			@ItemsToReserve

@@ -34,7 +34,7 @@ SELECT
 	strCheckPayeeAddress = CASE WHEN B.intBillToId > 0 
 			THEN ISNULL(dbo.fnConvertToFullAddress(C2.strAddress, C2.strCity, C2.strState, C.strZipCode), '')
 			ELSE ISNULL(dbo.fnConvertToFullAddress(C.strAddress, C.strCity, C.strState, C.strZipCode), '')
-		END,
+		END COLLATE Latin1_General_CI_AS,
 	intBookId,
 	strBook,
 	intSubBookId,

@@ -9,3 +9,8 @@
 	CONSTRAINT [FK_tblGRSettleStorageTicket_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]) ON DELETE CASCADE,	
 	CONSTRAINT [FK_tblGRSettleStorageTicket_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [tblGRCustomerStorage]([intCustomerStorageId]),	
 )
+GO
+CREATE NONCLUSTERED INDEX [IX_tblGRSettleStorageTicket_intSettleStorageId] ON [dbo].[tblGRSettleStorageTicket](
+	[intSettleStorageId] ASC
+);
+GO

@@ -45,6 +45,9 @@ USING	(
 		UNION ALL
 		SELECT id = 11
 				,strName = 'Open Sales Contract'
+		UNION ALL
+		SELECT id = 12
+				,strName = 'Usage Qty'
 
 
 ) AS ValuesForItemStockType

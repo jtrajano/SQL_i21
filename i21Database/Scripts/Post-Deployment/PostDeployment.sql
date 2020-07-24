@@ -199,7 +199,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\DB\3_CannedPanels_Format.sql
 :r .\DB\4_Create_Role_for_DashboardReports.sql
 :r .\DB\6_PanelOwnerMigration.sql
-:r .\DB\7_DeleteAllFloatingPanels.sql
+:r .\DB\7_Create_BusinessInsights.sql
 
 -- General Ledger
 :r .\GL\StoredProcedures\uspGLAccountOriginSync.sql
@@ -234,6 +234,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\3_PopulateSourceSystemData.sql
 :r .\CM\4_DataFix.sql
 :r .\CM\5_UndepositedFund.sql
+:r .\CM\7_AlterCashProjectionView.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
@@ -313,7 +314,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\UpdateVoucherPayableTranType.sql
 :r .\AP\PurgePayableCompleted.sql
 :r .\AP\UpdatePaymentDetailOffset.sql
-:r .\AP\UpdateOriginDMFor20_1.sql
+:r .\AP\UpdatePayableFreightTerm.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
@@ -337,6 +338,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\20_Remove_Duplicate_UPCs.sql
 :r .\IC\21_Refresh_IR_Details.sql
 :r .\IC\22_InventoryValuationPerformance.sql
+:r .\IC\24_PopulateTransactionUOM.sql 
+:r .\IC\25_TransactionTypeRename.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 
@@ -351,6 +354,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\12_PopulateGLEntityForICTransactions.sql
 :r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
+:r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
 
 
 -- Patronage
@@ -377,6 +381,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\CT\1920_Add_Accrued_Payables.sql
 :R .\CT\Create_fnCTFormatNumber.sql
 :R .\CT\2010_AddMissingHistory.sql
+:R .\CT\6_DPContractJobScheduler.sql
 
 --Notes Receivable
 :R .\NR\1_NoteTransType.sql
@@ -394,7 +399,6 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
-:R .\GR\PriorPeriodTransactions.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
@@ -554,6 +558,8 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\AR_Arkansas.sql
 :r .\TF\DefaultData\CO_Colorado.sql
 :r .\TF\DefaultData\TN_Tennessee.sql
+:r .\TF\DefaultData\MO_Missouri.sql
+:r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration
 :R .\IP\1_MasterTables.sql

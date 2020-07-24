@@ -40,6 +40,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@ACTUALCOST AS INT = 5
 
 DECLARE @strDescription AS NVARCHAR(255)
+		,@intTransactionItemUOMId AS INT = @intItemUOMId 
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @Inventory_Auto_Negative AS INT = 1;
@@ -150,6 +151,7 @@ BEGIN
 					,@intForexRateTypeId = @intForexRateTypeId
 					,@dblForexRate = @dblForexRate
 					,@intSourceEntityId = @intSourceEntityId
+					,@intTransactionItemUOMId = @intTransactionItemUOMId
 					,@dtmCreated = @dtmCreated OUTPUT 
 								
 			IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -213,6 +215,7 @@ BEGIN
 				,@intForexRateTypeId = @intForexRateTypeId
 				,@dblForexRate = @dblForexRate
 				,@intSourceEntityId = @intSourceEntityId
+				,@intTransactionItemUOMId = @intTransactionItemUOMId
 				,@dtmCreated = @dtmCreated OUTPUT 				
 
 		IF @intReturnValue < 0 RETURN @intReturnValue;
@@ -302,6 +305,7 @@ BEGIN
 							,@dblForexRate = @dblForexRate
 							,@strDescription = @strDescription
 							,@intSourceEntityId = @intSourceEntityId
+							,@intTransactionItemUOMId = @intTransactionItemUOMId
 							,@dtmCreated = @dtmCreated OUTPUT 
 
 					IF @intReturnValue < 0 RETURN @intReturnValue;

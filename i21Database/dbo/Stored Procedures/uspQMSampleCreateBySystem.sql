@@ -25,13 +25,14 @@ BEGIN TRY
 	DECLARE @dtmBusinessDate DATETIME
 	DECLARE @intLotStatusId INT
 	DECLARE @strLotNumber NVARCHAR(50)
-	DECLARE @dblWeight NUMERIC(18, 6)
-	DECLARE @intWeightUOMId INT
-	DECLARE @intUnitMeasureId INT
 	DECLARE @ysnEnableParentLot BIT
 	DECLARE @dtmCurrentDateTime DATETIME = GETDATE()
 	DECLARE @dtmCurrentDate DATETIME = CONVERT(DATE, GETDATE())
 		,@ysnAdjustInventoryQtyBySampleQty BIT
+		,@strChildLotNumber NVARCHAR(50)
+		,@dblRepresentingQty NUMERIC(18, 6)
+		,@intRepresentingUOMId INT
+		,@intEntityId INT
 
 	-- If no output sample created
 	IF NOT EXISTS (
@@ -205,27 +206,50 @@ BEGIN TRY
 	BEGIN
 		SELECT @intLotStatusId = L.intLotStatusId
 			,@strLotNumber = strLotNumber
-			,@intWeightUOMId = L.intWeightUOMId
-			,@dblWeight = L.dblWeight
 			,@intProductValueId = L.intLotId
+			,@intEntityId = O.intOwnerId
 		FROM tblICLot L
+		LEFT JOIN tblICItemOwner O ON O.intItemId = L.intItemId
+			AND O.ysnDefault = 1
 		WHERE L.intLotId = @intOutputLotId
+
+		SELECT @dblRepresentingQty = (
+			CASE 
+				WHEN IU.intItemUOMId = L.intWeightUOMId
+					THEN ISNULL(L.dblWeight, L.dblQty)
+				ELSE L.dblQty
+				END
+			)
+			,@intRepresentingUOMId = IU.intUnitMeasureId
+		FROM tblICLot L
+		JOIN tblICItemUOM IU ON IU.intItemId = L.intItemId
+			AND IU.ysnStockUnit = 1
+		WHERE L.intLotId = @intProductValueId
 	END
 	ELSE
 	BEGIN
 		SELECT @intLotStatusId = L.intLotStatusId
 			,@strLotNumber = PL.strParentLotNumber
-			,@intWeightUOMId = L.intWeightUOMId
-			,@dblWeight = L.dblWeight
 			,@intProductValueId = L.intParentLotId
+			,@strChildLotNumber = L.strLotNumber
+			,@intEntityId = O.intOwnerId
 		FROM tblICLot L
 		JOIN tblICParentLot PL ON PL.intParentLotId = L.intParentLotId
+		LEFT JOIN tblICItemOwner O ON O.intItemId = L.intItemId
+			AND O.ysnDefault = 1
 		WHERE L.intLotId = @intOutputLotId
-	END
 
-	SELECT @intUnitMeasureId = intUnitMeasureId
-	FROM tblICItemUOM
-	WHERE intItemUOMId = @intWeightUOMId
+		SELECT @dblRepresentingQty = SUM(CASE 
+					WHEN IU.intItemUOMId = L.intWeightUOMId
+						THEN ISNULL(L.dblWeight, L.dblQty)
+					ELSE L.dblQty
+					END)
+			,@intRepresentingUOMId = MAX(IU.intUnitMeasureId)
+		FROM tblICLot L
+		JOIN tblICItemUOM IU ON IU.intItemId = L.intItemId
+			AND IU.ysnStockUnit = 1
+		WHERE L.intParentLotId = @intProductValueId
+	END
 
 	INSERT INTO tblQMSample (
 		intConcurrencyId
@@ -237,12 +261,14 @@ BEGIN TRY
 		,intItemId
 		,intLotStatusId
 		,strLotNumber
+		,strChildLotNumber
 		,strSampleNote
 		,dtmSampleReceivedDate
 		,dtmTestedOn
 		--,intTestedById
 		,dblRepresentingQty
 		,intRepresentingUOMId
+		,intEntityId
 		,dtmTestingStartDate
 		,dtmTestingEndDate
 		,dtmSamplingEndDate
@@ -265,12 +291,14 @@ BEGIN TRY
 		,@intItemId
 		,@intLotStatusId
 		,@strLotNumber
+		,@strChildLotNumber
 		,'Auto populated by the system'
 		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
 		,@dtmCurrentDateTime
 		--,@intUserId
-		,@dblWeight
-		,@intUnitMeasureId
+		,@dblRepresentingQty
+		,@intRepresentingUOMId
+		,@intEntityId
 		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
 		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)
 		,DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), @dtmCurrentDate)

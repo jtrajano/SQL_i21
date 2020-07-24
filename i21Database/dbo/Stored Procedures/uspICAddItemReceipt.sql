@@ -50,6 +50,11 @@ DECLARE @SourceType_NONE AS INT = 0
 		,@SourceType_STORE_LOTTERY_MODULE AS INT = 8
 
 
+DECLARE @STATUS_OPEN AS TINYINT = 1
+		,@STATUS_IN_TRANSIT AS TINYINT = 2
+		,@STATUS_CLOSED AS TINYINT = 3
+		,@STATUS_SHORT_CLOSED AS TINYINT = 4 
+
 DECLARE @PricingType_Basis AS INT = 2
 		,@PricingType_DP_PricedLater AS INT = 5
 
@@ -2123,6 +2128,12 @@ BEGIN
 					,@fromValue = @strSourceId                              -- Previous Value
 					,@toValue = @strReceiptNumber                           -- New Value
 		END
+
+		-- Update the transfer order status
+		IF RTRIM(LTRIM(LOWER(@valueReceiptType))) IN ('transfer order')
+		BEGIN 
+			EXEC uspICUpdateTransferOrderStatus @inventoryReceiptId, @STATUS_CLOSED
+		END 
 
 		-- Fetch the next row from cursor. 
 		FETCH NEXT FROM loopDataForReceiptHeader INTO @intId;

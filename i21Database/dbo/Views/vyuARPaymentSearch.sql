@@ -32,6 +32,7 @@ SELECT intPaymentId				= P.intPaymentId
 	 , strPaymentInfo			= P.strPaymentInfo
 	 , ysnProcessedToNSF		= P.ysnProcessedToNSF
 	 , strTransactionId			= ISNULL(ARP.strTransactionId, '')
+	 , strAccountingPeriod      = AccPeriod.strAccountingPeriod
 FROM (
 	SELECT intPaymentId
 		 , strRecordNumber 
@@ -50,6 +51,7 @@ FROM (
 		 , strBatchId
 		 , strPaymentInfo
 		 , ysnProcessedToNSF
+		 , intPeriodId
 	FROM dbo.tblARPayment WITH (NOLOCK)
 ) P 
 LEFT JOIN (
@@ -179,3 +181,7 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
+OUTER APPLY(
+	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod GLP
+	WHERE P.intPeriodId = GLP.intGLFiscalYearPeriodId
+) AccPeriod

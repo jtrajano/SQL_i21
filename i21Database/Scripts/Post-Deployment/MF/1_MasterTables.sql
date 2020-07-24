@@ -3971,4 +3971,38 @@ GO
 Update tblICItem
 Set strManufactureType='Raw Material'
 Where strManufactureType is null and strType='Raw Material'
+
 GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrderRecipeComputationMethod
+		WHERE strName = 'Weighted Average'
+		)
+	INSERT INTO tblMFWorkOrderRecipeComputationMethod
+	SELECT 1
+		,'Weighted Average'
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrderRecipeComputationType
+		WHERE strName = 'Blend Management'
+		)
+	INSERT INTO tblMFWorkOrderRecipeComputationType
+	SELECT 1
+		,'Blend Management'
+GO
+
+IF NOT EXISTS (
+		SELECT *
+		FROM tblMFWorkOrderRecipeComputationType
+		WHERE strName = 'Blend Production'
+		)
+	INSERT INTO tblMFWorkOrderRecipeComputationType
+	SELECT 2
+		,'Blend Production'
+GO
+
+
+

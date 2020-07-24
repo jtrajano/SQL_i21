@@ -70,7 +70,9 @@ INTO #INVOICEDETAILS
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
+  AND ISNULL(CH.ysnLoad, 0) = 0
 
 IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
 	BEGIN
@@ -214,6 +216,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+				  AND ID.intInvoiceDetailId NOT IN (SELECT DISTINCT intInvoiceDetailId FROM tblCTPriceFixationDetailAPAR)
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
@@ -345,6 +348,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				  AND C.intEntityId = @intEntityCustomerId
 				  AND CD.intCompanyLocationId = @intCompanyLocationId
 				  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
+				  AND C.intPricingTypeId <> 2
 				ORDER BY CD.intContractSeq
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTS)
@@ -405,6 +409,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						  AND CD.intCompanyLocationId = @intCompanyLocationId
 						  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 						  AND C.intContractHeaderId > @intContractHeaderId
+						  AND C.intPricingTypeId <> 2
 						ORDER BY C.intContractHeaderId
 
 						WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTSBYCUSTOMER)

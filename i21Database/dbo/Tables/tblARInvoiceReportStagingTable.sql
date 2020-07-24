@@ -23,6 +23,7 @@
 	[strCompanyPhoneNumber]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyEmail]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCompanyLocation]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
+	[strRemitToAddress]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strType]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strTicketType]						NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerName]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,

@@ -314,19 +314,20 @@ SET ANSI_WARNINGS OFF
 	END
 	
 	ELSE IF @ysnPost = 0 
-		AND EXISTS (SELECT TOP 1 1 FROM @voucherPayable) 
+		--AND EXISTS (SELECT TOP 1 1 FROM @voucherPayable) 
 	BEGIN	
 		_Retry: 
 		
 		BEGIN TRY 		
-			EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+			--EXEC dbo.uspAPRemoveVoucherPayable @voucherPayable
+			EXEC dbo.uspAPRemoveVoucherPayableTransaction @intReceiptId, @intShipmentId, @intEntityUserSecurityId
 		END TRY 
 		BEGIN CATCH					
 			DECLARE @error INT, @message VARCHAR(4000), @xstate INT 
 			SELECT @error = ERROR_NUMBER(), @message = ERROR_MESSAGE(), @xstate = XACT_STATE()
 
 			-- Hack this error. 
-			IF @message = 'Record count deleted mismatch.' 
+			IF @message IN ('Record count deleted mismatch.', 'No payables record to delete.')
 			BEGIN 
 				-- Regenerate the missing/bad payable record. 
 				IF @intReceiptId IS NOT NULL 

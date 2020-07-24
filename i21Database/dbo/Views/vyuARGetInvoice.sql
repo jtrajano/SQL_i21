@@ -73,7 +73,6 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnExcludeFromPayment				= INV.ysnExcludeFromPayment
 	 , ysnFromProvisional					= INV.ysnFromProvisional
      , ysnReturned							= INV.ysnReturned
-     , ysnReversal                          = INV.ysnReversal
      , intPaymentId							= INV.intPaymentId
      , intSplitId							= INV.intSplitId
      , intDistributionHeaderId				= INV.intDistributionHeaderId
@@ -157,6 +156,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnValidCreditCode					= INV.ysnValidCreditCode
 	 , ysnServiceChargeCredit				= INV.ysnServiceChargeCredit
 	 , blbSignature							= INV.blbSignature
+     , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -314,3 +314,9 @@ OUTER APPLY (
     WHERE INV.intInvoiceId = ID.intInvoiceId
       AND (ISNULL(intTicketId, 0) <> 0 OR ISNULL(intInventoryShipmentItemId, 0) <> 0 OR ISNULL(intLoadDetailId, 0) <> 0)
 ) INTEG
+LEFT JOIN (
+    SELECT ID.intInvoiceId
+    FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
+    INNER JOIN tblCTPriceFixationDetailAPAR APAR ON ID.intInvoiceDetailId = APAR.intInvoiceDetailId
+    GROUP BY ID.intInvoiceId
+) APAR ON APAR.intInvoiceId = INV.intInvoiceId

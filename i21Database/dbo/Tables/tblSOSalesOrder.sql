@@ -148,3 +148,6 @@ BEGIN
 	WHERE intSalesOrderId = @intSalesOrderId
 
 END
+GO
+
+CREATE INDEX [IX_tblSOSalesOrder_strTransactionType_ysnQuote] ON [dbo].[tblSOSalesOrder] ([strTransactionType], [ysnQuote]) INCLUDE([intSalesOrderId], [strSalesOrderNumber], [intEntityCustomerId], [dtmDate], [intQuoteTemplateId])

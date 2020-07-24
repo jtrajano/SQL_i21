@@ -37,10 +37,10 @@ AS
 								WHEN APB.intTransactionType = 12 THEN 'Prepayment Reversal'
 								WHEN APB.intTransactionType = 13 THEN 'Basis Advance'
 							ELSE ''
-						  END) AS strTransactionType
-	,'' AS dblAmountPaid
-	,'' AS dblCost--tblAPBatchDetail.dblCost
-	,'' AS strTaxCode --tblAPBatchDetail.strTaxID AS strSalesTaxCode
+						  END) COLLATE Latin1_General_CI_AS AS strTransactionType
+	,'' COLLATE Latin1_General_CI_AS AS dblAmountPaid
+	,'' COLLATE Latin1_General_CI_AS AS dblCost--tblAPBatchDetail.dblCost
+	,'' COLLATE Latin1_General_CI_AS AS strTaxCode --tblAPBatchDetail.strTaxID AS strSalesTaxCode
 	,(SELECT strItemNo FROM dbo.tblICItem WHERE intItemId = APD.intItemId) AS strItem
 	,APD.strMiscDescription
 	,APD.intBillDetailId AS  intBillDetailId

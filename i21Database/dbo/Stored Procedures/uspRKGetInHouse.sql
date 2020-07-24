@@ -49,12 +49,15 @@ BEGIN
 		, strTransactionType
 		, strTransactionId  = strTransactionNumber
 		, intTransactionId = intTransactionRecordHeaderId
-		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'CNT'
+		, CASE WHEN (SELECT TOP 1 1 FROM tblGRSettleContract WHERE intSettleStorageId = CompOwn.intTransactionRecordId) = 1 THEN 'CNT'
 			WHEN (SELECT TOP 1 1 FROM dbo.fnRKGetBucketDelayedPricing(@dtmToTransactionDate,@intCommodityId,NULL) WHERE intTransactionRecordId = CompOwn.intTransactionRecordHeaderId) = 1 THEN 'DP'
-			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN 'CNT'
-			ELSE 'SPT' END
+			WHEN CompOwn.intContractHeaderId IS NOT NULL THEN (SELECT strDistributionOption FROM vyuSCTicketView WHERE intTicketId = CompOwn.intTicketId and intContractId = CompOwn.intContractDetailId)
+			WHEN CompOwn.strTransactionType = 'Inventory Adjustment' THEN 'ADJ'
+			WHEN CompOwn.strTransactionType IN ('Inventory Receipt','Inventory Shipment') AND CompOwn.intContractHeaderId IS NULL AND CompOwn.intTicketId IS NULL THEN ''
+			ELSE ST.strStorageTypeCode END
 		,strOwnership = 'Company Owned'
 	FROM dbo.fnRKGetBucketCompanyOwned(@dtmToTransactionDate,@intCommodityId,NULL) CompOwn
+	LEFT JOIN tblGRStorageType ST ON ST.strStorageTypeDescription = CompOwn.strDistributionType
 	WHERE CompOwn.intItemId = ISNULL(@intItemId, CompOwn.intItemId)
 		AND CompOwn.intLocationId = ISNULL(@intLocationId, CompOwn.intLocationId)
 		AND CompOwn.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
@@ -100,7 +103,10 @@ BEGIN
 		, intTicketId = intTransactionRecordId
 		, 'HLD'
 		, 'HOLD'
-	FROM dbo.fnRKGetBucketOnHold(@dtmToTransactionDate,@intCommodityId, NULL)
+	FROM dbo.fnRKGetBucketOnHold(@dtmToTransactionDate,@intCommodityId, NULL) OnHold
+	WHERE OnHold.intItemId = ISNULL(@intItemId, OnHold.intItemId)
+		AND OnHold.intLocationId = ISNULL(@intLocationId, OnHold.intLocationId)
+		AND OnHold.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 			
 	DECLARE @tblResultInventory TABLE (Id INT IDENTITY
 		, dtmDate DATETIME

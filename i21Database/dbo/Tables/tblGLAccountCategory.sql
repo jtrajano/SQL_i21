@@ -7,6 +7,8 @@
     [strAccountGroupFilter] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL, 
 	[intModuleId] INT NULL,
     [ysnRestricted] BIT NULL,
+	[ysnGLRestricted] BIT NULL,
+	[ysnAPRestricted] BIT NULL
 )
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Account Category Id' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLAccountCategory', @level2type=N'COLUMN',@level2name=N'intAccountCategoryId' 

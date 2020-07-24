@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdatePricingLayer]
 	@intInvoiceId int = null, --> can be null - means detail delete only NOTE: If NULL, @intInvoiceDetailId parameter should have its value
 	@intInvoiceDetailId int = null, --> can be null - means header delete NOTE: If NULL, @intInvoiceId parameter should have its value
-	@strScreen nvarchar(50) = null --> possible values are 'Invoice', 'Voucher', etc...
+	@strScreen nvarchar(50) = null, --> possible values are 'Invoice', 'Voucher', etc...
+	@intUserId int = null
 AS
 BEGIN
 
@@ -39,56 +40,28 @@ BEGIN
 			tblCTPriceFixationDetailAPAR
 		where intInvoiceDetailId = @intInvoiceDetailId;
 
-		select
-			@dblInvoiceDetailQuantity = dblQtyShipped
-		from
-			tblARInvoiceDetail
-		where
-			intInvoiceDetailId = @intInvoiceDetailId;
-
-		select
-			@dblPricedQuantity = dblQuantity
-			,@intPriceFixationId = intPriceFixationId
-		from
-			tblCTPriceFixationDetail
-		where
-			intPriceFixationDetailId = @intPriceFixationDetailId
-
-		select @intContractPriceId = intPriceContractId,@intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-
-		set @dblPricedQuantity = isnull(@dblPricedQuantity,0)
-		set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
-
-		if (@dblPricedQuantity > @dblInvoiceDetailQuantity)
+		if (isnull(@intPriceFixationDetailId,0) > 0)
 		begin
-			update
-				tblCTPriceFixationDetail
-			set
-				dblNoOfLots = dblNoOfLots - ((@dblPricedQuantity - @dblInvoiceDetailQuantity)/(dblQuantity / case when isnull(dblNoOfLots,0) = 0 then 1 else dblNoOfLots end))
-				,dblQuantity = @dblPricedQuantity - @dblInvoiceDetailQuantity
+
+			select
+				@dblInvoiceDetailQuantity = dblQtyShipped
+			from
+				tblARInvoiceDetail
 			where
-				intPriceFixationDetailId = @intPriceFixationDetailId;
-		end
-		else
-		begin
-			if ((select count(*) from tblCTPriceFixationDetail where intPriceFixationId = @intPriceFixationId) = 1)
-			begin
-				delete from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-				if ((select count(*) from tblCTPriceFixation where intPriceContractId = @intContractPriceId) = 0)
-				begin
-					delete from tblCTPriceContract where intPriceContractId = @intContractPriceId;
-				end
-			end
-			else
-			begin
-				delete from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
-			end
+				intInvoiceDetailId = @intInvoiceDetailId;
+
+			set @dblInvoiceDetailQuantity = isnull(@dblInvoiceDetailQuantity,0)
+
+			update tblCTPriceFixationDetailAPAR set ysnMarkDelete = 1 where intInvoiceDetailId = @intInvoiceDetailId;
+			exec uspCTProcessInvoiceDelete
+				@dblInvoiceDetailQuantity = @dblInvoiceDetailQuantity
+				,@intPriceFixationDetailId = @intPriceFixationDetailId
+				,@UserId = @intUserId
+
 		end
 
 		set @intInvoiceDetailId = (select min(intInvoiceDetailId) from @InvoiceDetails where intInvoiceDetailId > @intInvoiceDetailId);
 	end
 
-	update tblCTContractDetail set intPricingTypeId = 2,dblFutures = null, dblCashPrice = null,intConcurrencyId = (intConcurrencyId + 1) where intContractDetailId = @intContractDetailId;
-    
 
 END

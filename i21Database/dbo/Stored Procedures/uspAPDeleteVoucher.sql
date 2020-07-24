@@ -31,11 +31,24 @@ BEGIN TRY
 	DECLARE @transCount INT;
 	DECLARE @voucherBillDetailIds AS Id;
 	DECLARE @vendorOrderNumber NVARCHAR(100);
+
+	IF(NOT EXISTS(SELECT 1 FROM dbo.tblAPBill WHERE intBillId = @intBillId))
+	BEGIN
+		RAISERROR('Voucher already deleted.',16,1)
+		RETURN;
+	END
+
 	SET @transCount = @@TRANCOUNT;
 	IF @transCount = 0 BEGIN TRANSACTION
 
 	INSERT INTO @voucherBillDetailIds
 	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
+
+	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
+	BEGIN
+		RAISERROR('Voucher details already deleted.',16,1)
+		RETURN;
+	END
 
 	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
 
@@ -47,17 +60,7 @@ BEGIN TRY
 	BEGIN
 		RAISERROR('The transaction is already posted.',16,1);
 		RETURN;
-	END
-
-	--DO NOT ALLOW TO DELETE IF ORIGINAL RECORD FOR REVERSAL IS POSTED
-	--WE WILL HAVE CLEARING/COSTING ISSUE
-	IF((SELECT B.ysnPosted FROM tblAPBill A 
-			INNER JOIN tblAPBill B ON A.intReversalId = B.intBillId
-			WHERE A.intBillId = @intBillId AND A.intTransactionType = 1) = 1)
-	BEGIN
-		RAISERROR('Unable to delete. Transaction reversal is posted.',16,1);
-		RETURN;
-	END			
+	END	
 
 	IF EXISTS(SELECT 1 FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId)
 	BEGIN
@@ -84,21 +87,6 @@ BEGIN TRY
 
 		UPDATE tblCTPriceFixationDetailAPAR SET intBillDetailId = NULL , intBillId = NULL WHERE intBillId = @intBillId
 
-		-- Log summary	
-		DECLARE @intContractHeaderId INT,
-				@intContractDetailId INT,
-				@contractDetails AS [dbo].[ContractDetailTable]
-		SELECT @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId
-		FROM tblAPBillDetail
-		WHERE intBillId = @intBillId
-
-	    EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-							@intContractDetailId 	= 	@intContractDetailId,
-							@strSource			 	= 	'Pricing',
-							@strProcess			 	= 	'Voucher Delete',
-							@contractDetail 		= 	@contractDetails,
-							@intUserId				=	@UserId
-
 		-- we need to set this to null so that it will not be deleted
 		-- the only time we will not delete this is when a pricing is deleted,
 		-- other scenario SHOULD delete the history
@@ -109,6 +97,7 @@ BEGIN TRY
 	UPDATE tblAPAppliedPrepaidAndDebit SET intBillDetailApplied = NULL  WHERE intBillId = @intBillId
 	UPDATE tblGRSettleStorage SET intBillId = NULL WHERE intBillId = @intBillId
 	UPDATE tblGRStorageHistory SET intBillId = NULL WHERE intBillId = @intBillId
+	UPDATE tblHDTicketHoursWorked SET intBillId = NULL WHERE intBillId = @intBillId
 	
 	--clear original transaction if this is a reversal
 	UPDATE A
@@ -133,13 +122,7 @@ BEGIN TRY
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
-	DECLARE @billDetailIds AS Id
-	INSERT INTO @billDetailIds
-	SELECT
-		A.intBillDetailId
-	FROM tblAPBillDetail A
-	WHERE A.intBillId = @intBillId
-	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 1
+	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)

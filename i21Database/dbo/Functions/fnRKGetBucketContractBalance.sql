@@ -7,11 +7,12 @@
 RETURNS @returntable TABLE
 (
 	 intContractBalanceLogId INT
-	, dtmCreateDate DATETIME
 	, dtmTransactionDate DATETIME
+	, dtmCreateDate DATETIME
 	, strTransactionType  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strTransactionReference   NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, intTransactionReferenceId INT
+	, intTransactionReferenceDetailId INT
 	, strTransactionReferenceNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, intContractDetailId INT
 	, intContractHeaderId INT
@@ -56,6 +57,9 @@ RETURNS @returntable TABLE
 	, intBasisCurrencyId INT
 	, strBasisCurrency NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strNotes NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, intUserId INT
+	, strUserName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	, strAction  NVARCHAR(100) COLLATE Latin1_General_CI_AS
 )
 AS
 BEGIN
@@ -68,6 +72,7 @@ BEGIN
 		, strTransactionType
 		, strTransactionReference
 		, intTransactionReferenceId
+		, intTransactionReferenceDetailId
 		, strTransactionReferenceNo
 		, intContractDetailId
 		, intContractHeaderId
@@ -112,6 +117,9 @@ BEGIN
 		, intBasisCurrencyId
 		, strBasisCurrency
 		, strNotes
+		, intUserId
+		, strUserName
+		, strAction
 	FROM (
 		SELECT
 			 intContractBalanceLogId 
@@ -120,6 +128,7 @@ BEGIN
 			, strTransactionType
 			, strTransactionReference
 			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
 			, strTransactionReferenceNo
 			, intContractDetailId
 			, intContractHeaderId
@@ -163,7 +172,10 @@ BEGIN
 			, strQtyCurrency = qCur.strCurrency
 			, intBasisCurrencyId
 			, strBasisCurrency = qCur.strCurrency
-			, cb.strNotes			
+			, cb.strNotes
+			, cb.intUserId
+			, strUserName = u.strName
+			, cb.strAction		
 		FROM tblCTContractBalanceLog cb
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblCTPricingType pt ON pt.intPricingTypeId = cb.intPricingTypeId
@@ -178,10 +190,11 @@ BEGIN
 		LEFT  JOIN tblCTBook book ON book.intBookId = cb.intBookId
 		LEFT  JOIN tblCTSubBook subBook ON subBook.intSubBookId = cb.intSubBookId
 		LEFT JOIN tblEMEntity em ON em.intEntityId = cb.intEntityId
+		LEFT JOIN tblEMEntity u ON u.intEntityId = cb.intUserId
 		LEFT JOIN tblCTContractStatus cs ON cs.intContractStatusId = cb.intContractStatusId
 		WHERE strTransactionType IN ('Contract Balance')
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cb.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
-			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cb.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
+			AND cb.dtmCreatedDate <= DATEADD(MI,(DATEDIFF(MI, SYSDATETIME(),SYSUTCDATETIME())), DATEADD(MI,1439,CONVERT(DATETIME, @dtmDate)))
+			--AND CONVERT(DATETIME, CONVERT(VARCHAR(10), cb.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(cb.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(cb.intEntityId, 0))
 	) t

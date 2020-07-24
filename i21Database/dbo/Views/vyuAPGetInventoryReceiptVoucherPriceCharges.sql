@@ -181,7 +181,7 @@ WHERE	Receipt.ysnPosted = 1
 		, strRecordNumber = Receipt.strReceiptNumber 		
 		, strBillOfLading = Receipt.strBillOfLading
 		, strOrderType = Receipt.strReceiptType
-		, strRecordType = 'Receipt'
+		, strRecordType = 'Receipt' COLLATE Latin1_General_CI_AS
 		, strOrderNumber = receiptAndVoucheredCharges.strOrderNumber		
 		, strItemNo = receiptAndVoucheredCharges.strItemNo
 		, strItemDescription = receiptAndVoucheredCharges.strItemDescription
@@ -198,8 +198,8 @@ WHERE	Receipt.ysnPosted = 1
 		, dtmLastVoucherDate = topVoucher.dtmBillDate			
 		, receiptAndVoucheredCharges.intCurrencyId
 		, receiptAndVoucheredCharges.strCurrency
-		, strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) 
-		, strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) 
+		, strAllVouchers = CAST( ISNULL(allLinkedVoucherId.strVoucherIds, 'New Voucher') AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS
+		, strFilterString = CAST(filterString.strFilterString AS NVARCHAR(MAX)) COLLATE Latin1_General_CI_AS 
 		, strItemUOM = ItemUOMName.strUnitMeasure
 		, strCostUOM = ItemUOMName.strUnitMeasure
 FROM	tblICInventoryReceipt Receipt 

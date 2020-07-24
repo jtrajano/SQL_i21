@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE uspRKAutoHedge
 	@XML NVARCHAR(MAX)
+	, @intUserId INT = NULL
 	, @intFutOptTransactionId INT OUTPUT
 	, @ysnReassign BIT = 0
 
@@ -227,6 +228,8 @@ BEGIN TRY
 			, GETDATE())
 		
 		SET @intFutOptTransactionId = SCOPE_IDENTITY()
+
+		EXEC uspRKSaveDerivativeEntry @intFutOptTransactionId, NULL, @intUserId, ''
 		
 		SET @strXml = '<root><Transaction>';
 		IF ISNULL(@ysnMultiplePriceFixation, 0) = 1

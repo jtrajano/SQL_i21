@@ -17,6 +17,36 @@ BEGIN
 		,@OWNERSHIP_TYPE_ConsignedPurchase AS INT = 3
 		,@OWNERSHIP_TYPE_ConsignedSale AS INT = 4
 
+	-- Get Vendor Tax Exemptions
+	DECLARE @TaxExemptions TABLE(strTaxCode NVARCHAR(200), ysnAddToCost BIT, 
+		intPurchaseTaxExemptionAccountId INT, intPurchaseAccountId INT,
+		intItemId INT, intReceiptId INT, intReceiptItemId INT)
+	INSERT INTO @TaxExemptions
+	SELECT tc.strTaxCode, tc.ysnAddToCost,
+		tc.intPurchaseTaxExemptionAccountId, tc.intPurchaseTaxAccountId,
+		i.intItemId, r.intInventoryReceiptId, ri.intInventoryReceiptItemId
+	FROM tblICInventoryReceipt r
+	INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
+	INNER JOIN tblICItem i ON i.intItemId = ri.intItemId
+	INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
+	INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
+	CROSS APPLY (
+		SELECT *
+		FROM dbo.fnGetVendorTaxCodeExemption(
+			r.intEntityVendorId, 
+			r.dtmReceiptDate, 
+			tgc.intTaxGroupId, 
+			tc.intTaxCodeId,
+			tc.intTaxClassId,
+			tc.strState,
+			i.intItemId,
+			i.intCategoryId,
+			r.intShipFromId)
+	) ex
+	WHERE r.intInventoryReceiptId = @intInventoryReceiptId
+		AND ex.ysnTaxExempt = 1
+		AND tc.intPurchaseTaxExemptionAccountId IS NOT NULL
+
 	INSERT INTO @GLAccounts (
 		intItemId 
 		,intItemLocationId 
@@ -25,17 +55,29 @@ BEGIN
 	)
 	SELECT	Query.intItemId
 			,Query.intItemLocationId
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_APClearing) 
+			,intContraInventoryId = 
+			CASE WHEN Query.intPurchaseTaxExemptionAccountId IS NOT NULL THEN Query.intPurchaseTaxExemptionAccountId
+			ELSE dbo.fnGetItemGLAccount(Query.intItemId, Query.intItemLocationId, @AccountCategory_APClearing) END
 			,@intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
 						ReceiptItem.intItemId
 						,ItemLocation.intItemLocationId
+						,ex.intPurchaseTaxExemptionAccountId
+						,ex.intPurchaseAccountId
+						,ex.ysnAddToCost
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 							ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 						INNER JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = ReceiptItem.intItemId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
+						OUTER APPLY (
+							SELECT TOP 1 * 
+							FROM @TaxExemptions e
+							WHERE Receipt.intInventoryReceiptId = e.intReceiptId
+								AND ReceiptItem.intInventoryReceiptItemId = e.intReceiptItemId
+								AND ReceiptItem.intItemId = e.intItemId
+						) ex
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
 
@@ -47,22 +89,32 @@ BEGIN
 	)
 	SELECT	Query.intChargeId
 			,Query.intItemLocationId
-			,intContraInventoryId = dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @AccountCategory_APClearing) 
+			,intContraInventoryId = 
+			CASE WHEN Query.intPurchaseTaxExemptionAccountId IS NOT NULL THEN Query.intPurchaseTaxExemptionAccountId
+			ELSE dbo.fnGetItemGLAccount(Query.intChargeId, Query.intItemLocationId, @AccountCategory_APClearing) END
 			,@intTransactionTypeId
 	FROM	(
 				SELECT	DISTINCT 
 						ReceiptCharge.intChargeId
 						,ItemLocation.intItemLocationId
+						,ex.intPurchaseTaxExemptionAccountId
+						,ex.intPurchaseAccountId
+						,ex.ysnAddToCost
 				FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
 							ON Receipt.intInventoryReceiptId = ReceiptCharge.intInventoryReceiptId
 						INNER JOIN dbo.tblICItemLocation ItemLocation
 							ON ItemLocation.intItemId = ReceiptCharge.intChargeId
 							AND ItemLocation.intLocationId = Receipt.intLocationId
+				OUTER APPLY (
+					SELECT TOP 1 * 
+					FROM @TaxExemptions e
+					WHERE Receipt.intInventoryReceiptId = e.intReceiptId
+						AND ReceiptCharge.intChargeId = e.intItemId
+				) ex
 				WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
 			) Query
 END
 
--- Log the g/l account used in this batch. 
 BEGIN 
 	INSERT INTO dbo.tblICInventoryGLAccountUsedOnPostLog (
 			intItemId
@@ -125,6 +177,63 @@ BEGIN
 	;
 
 END 
+
+
+--- Validate Override Expense Account
+DECLARE @OverrideAccountId INT
+DECLARE @OverrideTaxCodeId INT
+SELECT @OverrideAccountId = dbo.fnGetItemGLAccount(ReceiptItem.intItemId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense), 
+	@OverrideTaxCodeId = TaxCode.intTaxCodeId
+FROM dbo.tblICInventoryReceipt Receipt 
+INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
+INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intItemId = ReceiptItem.intItemId
+	AND ItemLocation.intLocationId = Receipt.intLocationId		
+INNER JOIN tblICItem item ON item.intItemId = ReceiptItem.intItemId 
+INNER JOIN dbo.tblICInventoryReceiptItemTax ReceiptTaxes ON ReceiptItem.intInventoryReceiptItemId = ReceiptTaxes.intInventoryReceiptItemId
+INNER JOIN dbo.tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+LEFT JOIN dbo.tblICInventoryTransactionType TransType ON TransType.intTransactionTypeId = @intTransactionTypeId
+LEFT JOIN tblSMCurrencyExchangeRateType currencyRateType ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptItem.intForexRateTypeId
+WHERE Receipt.intInventoryReceiptId = @intInventoryReceiptId
+	AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own
+	AND TaxCode.ysnExpenseAccountOverride = 1
+				
+IF (@OverrideAccountId IS NULL AND @OverrideTaxCodeId IS NOT NULL)
+BEGIN
+	-- Validate the GL Accounts
+DECLARE @strItemNo AS NVARCHAR(50)
+DECLARE @intItemId AS INT 
+DECLARE @strLocationName AS NVARCHAR(50)
+
+-- Check for missing Inventory Account Id
+BEGIN 
+	SELECT	TOP 1 
+			@intItemId = Item.intItemId 
+			,@strItemNo = Item.strItemNo
+	FROM	tblICItem Item INNER JOIN @GLAccounts ItemGLAccount
+				ON Item.intItemId = ItemGLAccount.intItemId
+	WHERE	ItemGLAccount.intInventoryId IS NULL 
+
+	SELECT	TOP 1 
+			@strLocationName = c.strLocationName
+	FROM	tblICItemLocation il INNER JOIN tblSMCompanyLocation c
+				ON il.intLocationId = c.intCompanyLocationId
+			INNER JOIN @GLAccounts ItemGLAccount
+				ON ItemGLAccount.intItemId = il.intItemId
+				AND ItemGLAccount.intItemLocationId = il.intItemLocationId
+	WHERE	il.intItemId = @intItemId
+			AND ItemGLAccount.intInventoryId IS NULL 
+
+	IF @intItemId IS NOT NULL 
+	BEGIN 
+		-- {Item} in {Location} is missing a GL account setup for {Account Category} account category.
+		EXEC uspICRaiseError 80008, @strItemNo, @strLocationName, @AccountCategory_OtherChargeExpense;
+		RETURN -1;
+	END 
+END 
+;
+END
+		
+
 
 ---- Get Total Value of Other Charges Taxes
 --BEGIN
@@ -190,7 +299,17 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= CASE WHEN TaxCode.ysnAddToCost = 1 THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') ELSE TaxCode.intPurchaseTaxAccountId END
+				,intPurchaseTaxAccountId			= 
+					CASE 
+															WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+																dbo.fnGetItemGLAccount(
+																	ReceiptItem.intItemId
+																	, ItemLocation.intItemLocationId
+																	, @AccountCategory_OtherChargeExpense
+																) 
+															ELSE 
+																CASE WHEN TaxCode.ysnAddToCost = 1 THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') ELSE TaxCode.intPurchaseTaxAccountId END
+														END
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo

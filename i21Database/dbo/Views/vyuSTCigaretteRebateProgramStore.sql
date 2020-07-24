@@ -10,5 +10,5 @@ SELECT CRP.intCigaretteRebateProgramId,
  		, 1
  		, 0
  		, '')
-	) strStoreList
+	) COLLATE Latin1_General_CI_AS strStoreList 
 FROM tblSTCigaretteRebatePrograms CRP

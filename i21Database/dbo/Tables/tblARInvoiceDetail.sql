@@ -45,7 +45,6 @@
 	[ysnRestricted]							BIT				CONSTRAINT [DF_tblARInvoiceDetail_ysnRestricted] DEFAULT ((0)) NULL,
 	[ysnBlended]							BIT				CONSTRAINT [DF_tblARInvoiceDetail_ysnBlended] DEFAULT ((0)) NULL,
 	[ysnReturned]							BIT				CONSTRAINT [DF_tblARInvoiceDetail_ysnReturned] DEFAULT ((0)) NULL,
-	[ysnReversed]							BIT				CONSTRAINT [DF_tblARInvoiceDetail_ysnReversed] DEFAULT ((0)) NULL,
 	[intAccountId]							INT												NULL,
 	[intCOGSAccountId]						INT												NULL,
 	[intSalesAccountId]						INT												NULL,

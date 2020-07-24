@@ -129,7 +129,7 @@ BEGIN TRY
 	-- 	WHERE filteredPayables.intVoucherPayableId = A.intVoucherPayableId
 	-- )
 
-	SELECT
+	SELECT TOP 1
 		@error = strError
 	FROM dbo.fnAPValidateVoucherPayable(@voucherPayables, @voucherPayableTax)
 
@@ -487,20 +487,55 @@ BEGIN TRY
 	EXEC uspAPAddVoucherDetail @voucherDetails = @voucherPayablesData, @voucherPayableTax = @voucherPayableTax, @throwError = 1
 	EXEC uspAPUpdateVoucherTotal @voucherIds
 
-	DECLARE @billDetailIds AS Id
-	INSERT INTO @billDetailIds
-	SELECT
-		A.intBillDetailId
-	FROM tblAPBillDetail A
-	INNER JOIN @voucherIds B ON A.intBillId = B.intId
-	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 0
+	-- DECLARE @billDetailIds AS Id
+	-- INSERT INTO @billDetailIds
+	-- SELECT
+	-- 	A.intBillDetailId
+	-- FROM tblAPBillDetail A
+	-- INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	-- EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @billDetailIds, @remove = 0
 
 	SELECT @idsCreated = COALESCE(@idsCreated + ',', '') +  CONVERT(VARCHAR(12),intBillId) 
 	FROM @createdVouchers
 	
 	SET @createdVouchersId = @idsCreated 
 	SELECT @createdVouchersId
+
 	
+	DECLARE @strDescription AS NVARCHAR(100) 
+	,@actionType AS NVARCHAR(50)
+	,@billDetailId AS NVARCHAR(50);
+	DECLARE @billCounter INT = 0;
+	DECLARE @totalRecords INT;
+	DECLARE @billId INT;
+	DECLARE @tmpBillDetailDelete TABLE(intBillId INT)
+	SELECT @actionType = 'Deleted'
+
+	INSERT INTO @tmpBillDetailDelete
+	SELECT intId FROM @voucherIds
+
+	SELECT @totalRecords = COUNT(*) FROM @tmpBillDetailDelete
+
+	WHILE(@billCounter != (@totalRecords))
+	BEGIN
+
+		SELECT TOP(1) @billId = A.intBillId
+		FROM @tmpBillDetailDelete A
+			
+		EXEC dbo.uspSMAuditLog 
+			@screenName = 'AccountsPayable.view.Voucher'		-- Screen Namespace
+			,@keyValue = @billId								-- Primary Key Value of the Voucher. 
+			,@entityId = @userId									-- Entity Id.
+			,@actionType = 'Created'                        -- Action Type
+			,@changeDescription = 'Integration'				-- Description
+			,@fromValue = ''									-- Previous Value
+			,@toValue = ''									-- New Value
+
+
+	SET @billCounter = @billCounter + 1
+	DELETE FROM @tmpBillDetailDelete WHERE intBillId = @billId
+	END
+
 	IF @transCount = 0 COMMIT TRANSACTION;
 
 END TRY

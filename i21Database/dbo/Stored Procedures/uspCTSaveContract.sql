@@ -163,13 +163,13 @@ BEGIN TRY
 	WHERE	CD.intPricingTypeId	IN (1,6)
 	AND		intContractHeaderId =	@intContractHeaderId
 
-	SELECT	@ErrMsg = COALESCE(@ErrMsg,'') + '#'+ LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) +'^'+ CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
+	SELECT	@ErrMsg = COALESCE(@ErrMsg, '') + '#' + LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) + '^' + CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
 	FROM	vyuCTContractCostView	CC
 	JOIN	vyuCTContractSequence	CD	ON CD.intContractDetailId	=	CC.intContractDetailId
 	WHERE	NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = CC.intItemId AND intUnitMeasureId = CD.intUnitMeasureId)
 	AND		CD.intContractHeaderId	=	@intContractHeaderId AND strCostMethod NOT IN ('Amount','Percentage')
 
-	SELECT @ErrMsg = REPLACE(REPLACE(REPLACE(REPLACE(@ErrMsg,'#','Cost item '),'@',' of sequence '),'^',' don''t have '),'.',' UOM configured for it. Configure the UOM to the cost item to proceed with save.')
+	SELECT @ErrMsg = REPLACE(REPLACE(REPLACE(REPLACE(@ErrMsg, '#', 'Cost item '), '@', ' of sequence '), '^', ' is not configured for sequence UOM "'), '.', '". Configure the Cost Item to have the Sequence UOM and try again.')
 
 	IF	@ErrMsg IS NOT NULL
 		RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')
@@ -288,12 +288,30 @@ BEGIN TRY
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
-			EXEC uspLGUpdateCompanyLocation @intContractDetailId
-			-- Update Shipping Intruction Quantity
-			UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
-			FROM tblCTContractDetail T 
+			DECLARE @previousQty NUMERIC(18, 6)
+				, @previousLocation INT
+				, @curQty NUMERIC(18, 6)
+				, @curLocation INT
+
+			SELECT TOP 1 @previousQty = dblQuantity
+				, @previousLocation = intCompanyLocationId
+			FROM tblCTSequenceHistory
 			WHERE intContractDetailId = @intContractDetailId
-			AND dblShippingInstructionQty > 0
+			ORDER BY dtmHistoryCreated DESC
+
+			SELECT TOP 1 @curQty = dblQuantity
+				, @curLocation = intCompanyLocationId
+			FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractDetailId = @intContractDetailId
+			
+			IF (@previousQty != @curQty OR @previousLocation != @curLocation)
+			BEGIN
+				EXEC uspLGUpdateCompanyLocation @intContractDetailId
+				-- Update Shipping Intruction Quantity
+				UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
+				FROM tblCTContractDetail T 
+				WHERE intContractDetailId = @intContractDetailId
+				AND dblShippingInstructionQty > 0
+			END
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
 
@@ -401,7 +419,7 @@ BEGIN TRY
 	END
 
 	--Slice
-	EXEC uspQMSampleContractSlice @intContractHeaderId
+	--EXEC uspQMSampleContractSlice @intContractHeaderId --Please do not uncomment this one. This is related to jira CT-4391
 	EXEC uspLGLoadContractSlice @intContractHeaderId
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 
@@ -413,7 +431,8 @@ BEGIN TRY
 
 	EXEC	uspCTCreateDetailHistory		@intContractHeaderId 	= @intContractHeaderId,
 											@strSource 				= 'Contract',
-											@strProcess 			= 'Contract Sequence'
+											@strProcess 			= 'Save Contract',
+											@intUserId				= @userId	
 	EXEC	uspCTInterCompanyContract		@intContractHeaderId
 
 	-- Add Payables if Create Other Cost Payable on Save Contract set to true

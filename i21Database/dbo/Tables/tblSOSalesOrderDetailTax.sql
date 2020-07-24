@@ -31,3 +31,9 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblGLAccount_intSalesTaxAccountId] FOREIGN KEY ([intSalesTaxAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),
 	CONSTRAINT [FK_tblSOSalesOrderDetailTax_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [dbo].[tblICUnitMeasure] ([intUnitMeasureId])
 )
+
+GO
+
+CREATE INDEX [IX_tblSOSalesOrderDetailTax_dblAdjustedTax] ON [dbo].[tblSOSalesOrderDetailTax] ([dblAdjustedTax]) INCLUDE([intSalesOrderDetailId], [intTaxCodeId])
+
+GO

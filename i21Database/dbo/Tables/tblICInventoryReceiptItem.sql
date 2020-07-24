@@ -74,7 +74,7 @@ Type the overview for the table here.
 		[ysnAllowVoucher] BIT NULL,
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
-		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]) ON DELETE CASCADE, 
+		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICInventoryReceipt] FOREIGN KEY ([intInventoryReceiptId]) REFERENCES [tblICInventoryReceipt]([intInventoryReceiptId]), -- ON DELETE CASCADE, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblICItemUOM] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_tblSMCompanyLocationSubLocation] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) ON DELETE NO ACTION, 
 		CONSTRAINT [FK_tblICInventoryReceiptItem_WeightUOM] FOREIGN KEY ([intWeightUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]), 
@@ -101,6 +101,11 @@ Type the overview for the table here.
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItem_intLineNo]
 		ON [dbo].[tblICInventoryReceiptItem] ([intLineNo])
 		INCLUDE ([intInventoryReceiptId],[intSourceId])
+	GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceiptItem_forDPR]
+		ON [dbo].[tblICInventoryReceiptItem] ([intInventoryTransferId])
+
 	GO
 		
 	EXEC sp_addextendedproperty @name = N'MS_Description',
@@ -261,3 +266,17 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
     @level1name = N'tblICInventoryReceiptItem',
     @level2type = N'COLUMN',
     @level2name = N'intContainerId'
+
+GO
+
+CREATE TRIGGER trg_tblICInventoryReceiptItem 
+   ON [dbo].[tblICInventoryReceiptItem]
+   INSTEAD OF DELETE
+AS 
+BEGIN
+	SET NOCOUNT ON;
+	DELETE FROM tblICInventoryReceiptChargePerItem WHERE intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM DELETED)
+	DELETE FROM tblICInventoryReceiptItem WHERE intInventoryReceiptItemId IN (SELECT intInventoryReceiptItemId FROM DELETED)
+END
+
+GO

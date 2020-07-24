@@ -18,6 +18,7 @@ SELECT DISTINCT
 	 , I.intEntityCustomerId
 	 , strPaymentMethod		= PM.strPaymentMethod
 	 , I.intInvoiceId
+	 , strPeriod		    = AccPeriod.strPeriod
 FROM tblARInvoice I
 LEFT JOIN (SELECT P.intPaymentId
 				, P.intPaymentMethodId
@@ -59,5 +60,9 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.fnARFormatCustomerAddress(NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, NULL) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+OUTER APPLY(
+	SELECT strPeriod from tblGLFiscalYearPeriod P
+	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
+) AccPeriod
 WHERE I.ysnPosted = 1
   AND I.intAccountId IN (SELECT intAccountId FROM vyuGLAccountDetail WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments', 'Undeposited Funds'))

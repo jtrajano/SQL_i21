@@ -71,49 +71,7 @@ FROM (
 			ON Commodity.intCommodityId = CSSource.intCommodityId
 		INNER JOIN tblSMUserSecurity US
 			ON US.intEntityId = TS.intUserId
-		WHERE TS.ysnReversed = 0
-		UNION ALL
-		SELECT
-			 TS.intTransferStorageId
-			,TS.strTransferStorageTicket
-			,TS.dtmTransferStorageDate
-			,CS.intEntityId
-			,strEntityName				= EMSource.strName
-			,TS.intCompanyLocationId
-			,CLSource.strLocationName
-			,CS.intCommodityId
-			,Commodity.strCommodityCode
-			,TS.intItemId
-			,Item.strItemNo
-			,TSource.intStorageTypeId
-			,STSource.strStorageTypeDescription
-			,intCustomerStorageId		= TSource.intSourceCustomerStorageId
-			,CS.strStorageTicketNumber
-			,TSource.dblOriginalUnits
-			,TSource.dblDeductedUnits
-			,TSource.dblSplitPercent
-			,CS.dblOpenBalance
-			,ysnPosted					= CAST(1 AS BIT) --TS.ysnPosted
-			,TS.intUserId
-			,US.strUserName
-		FROM tblGRTransferStorageSourceSplit TSource
-		INNER JOIN tblGRTransferStorage TS	
-			ON TS.intTransferStorageId = TSource.intTransferStorageId
-		INNER JOIN tblGRCustomerStorage CS
-			ON CS.intCustomerStorageId = TSource.intSourceCustomerStorageId
-		INNER JOIN tblEMEntity EMSource
-			ON EMSource.intEntityId = CS.intEntityId
-		INNER JOIN tblSMCompanyLocation CLSource
-			ON CLSource.intCompanyLocationId = CS.intCompanyLocationId
-		INNER JOIN tblICItem Item
-			ON Item.intItemId = CS.intItemId
-		INNER JOIN tblGRStorageType STSource
-			ON STSource.intStorageScheduleTypeId = CS.intStorageTypeId
-		INNER JOIN tblICCommodity Commodity
-			ON Commodity.intCommodityId = CS.intCommodityId
-		INNER JOIN tblSMUserSecurity US
-			ON US.intEntityId = TS.intUserId
-		WHERE TS.ysnReversed = 1
+		
 	) SourceTransfer
 INNER JOIN (
 		SELECT

@@ -12,26 +12,13 @@ SELECT
     ,NULL AS intBillDetailId
     ,receiptItem.intInventoryReceiptItemId
     ,receiptItem.intItemId
-    ,ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId) AS intItemUOMId
+    ,receiptItem.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
     ,ROUND(
-        CASE	
-            WHEN receiptItem.intWeightUOMId IS NULL THEN 
-                ISNULL(receiptItem.dblOpenReceive, 0) 
-            ELSE 
-                CASE 
-                    WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                        ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
-                    ELSE 
-                        CASE WHEN intSourceType = 2 
-                            THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
-                        ELSE ISNULL(receiptItem.dblNet, 0) 
-                        END
-                END 
-        END
-        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
+        ISNULL(receiptItem.dblOpenReceive, 0) 
+        * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
         * (
             CASE 
                 WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
@@ -53,17 +40,7 @@ SELECT
     +
     receiptItem.dblTax
     AS dblReceiptTotal
-    ,CASE	
-        WHEN receiptItem.intWeightUOMId IS NULL THEN 
-            ISNULL(receiptItem.dblOpenReceive, 0) 
-        ELSE 
-            CASE 
-                WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
-                    ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, ISNULL(receiptItem.dblOpenReceive, 0)), 0)
-                ELSE 
-                    ISNULL(receiptItem.dblNet, 0) 
-            END 
-    END 
+    ,ISNULL(receiptItem.dblOpenReceive, 0)
     *
     (
         CASE
@@ -94,6 +71,7 @@ LEFT JOIN
 LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
+        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
@@ -283,23 +261,17 @@ SELECT
     ,billDetail.intBillDetailId
     ,billDetail.intInventoryReceiptItemId
     ,billDetail.intItemId
-    ,ISNULL(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId) AS intItemUOMId
+    ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,--billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
-                    WHEN billDetail.intWeightUOMId > 0 
-                        THEN CAST(receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1)  
-                        * billDetail.dblNetWeight * dbo.fnDivide(billDetail.dblWeightUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2)) --Formula With Weight UOM
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
                         THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  
                         * dbo.fnDivide(billDetail.dblUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
                     ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             ELSE (CASE 
-                    WHEN billDetail.intWeightUOMId > 0 --CHECK IF SUB-CURRENCY
-                        THEN CAST(receiptItem.dblUnitCost  * billDetail.dblNetWeight 
-                        * dbo.fnDivide(billDetail.dblWeightUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2)) --Formula With Weight UOM
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
                         THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  
                         * dbo.fnDivide(billDetail.dblUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
@@ -317,17 +289,7 @@ SELECT
     +
     receiptItem.dblTax
     AS dblVoucherTotal
-    ,CASE 
-        WHEN billDetail.intWeightUOMId IS NULL THEN 
-            ISNULL(billDetail.dblQtyReceived, 0) 
-        ELSE 
-            CASE 
-                WHEN ISNULL(billDetail.dblNetWeight, 0) = 0 THEN 
-                    ISNULL(dbo.fnCalculateQtyBetweenUOM(billDetail.intUnitOfMeasureId, billDetail.intWeightUOMId, ISNULL(billDetail.dblQtyReceived, 0)), 0)
-                ELSE 
-                    ISNULL(billDetail.dblNetWeight, 0) 
-            END
-    END 
+    ,ISNULL(billDetail.dblQtyReceived, 0) 
     *
     (
         CASE 
@@ -440,7 +402,7 @@ LEFT JOIN
 -- 		AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
-AND bill.ysnPosted = 1
+-- AND bill.ysnPosted = 1
 AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'

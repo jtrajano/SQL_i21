@@ -54,10 +54,25 @@ BEGIN TRY
 		,@intNewInvPlngReportMasterID INT
 		,@strItemSupplyTargetXML NVARCHAR(MAX)
 		,@dtmPostDate DATETIME
+	DECLARE @tblMFDemandStage TABLE (intDemandStageId INT)
+
+	INSERT INTO @tblMFDemandStage (intDemandStageId)
+	SELECT intDemandStageId
+	FROM tblMFDemandStage
+	WHERE strFeedStatus IS NULL
 
 	SELECT @intDemandStageId = MIN(intDemandStageId)
-	FROM tblMFDemandStage
-	WHERE ISNULL(strFeedStatus, '') = ''
+	FROM @tblMFDemandStage
+
+	IF @intDemandStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE S
+	SET strFeedStatus = 'In-Progress'
+	FROM tblMFDemandStage S
+	JOIN @tblMFDemandStage TS ON TS.intDemandStageId = S.intDemandStageId
 
 	WHILE @intDemandStageId > 0
 	BEGIN
@@ -644,7 +659,22 @@ BEGIN TRY
 				,@referenceTransactionId = @intTransactionId
 				,@referenceCompanyId = @intCompanyId
 
-			INSERT INTO tblMFDemandAcknowledgementStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany
+			WHERE intCompanyId = @intCompanyId
+
+			IF EXISTS (
+					SELECT 1
+					FROM master.dbo.sysdatabases
+					WHERE name = @strDatabaseName
+					)
+			BEGIN
+				SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblMFDemandAcknowledgementStage (
 				intInvPlngReportMasterId
 				,strInvPlngReportName
 				,intInvPlngReportMasterRefId
@@ -657,11 +687,28 @@ BEGIN TRY
 			SELECT @intNewInvPlngReportMasterID
 				,@strInvPlngReportName
 				,@intInvPlngReportMasterID
-				,'Success'
+				,''Success''
 				,@intTransactionId
 				,@intCompanyId
 				,@intTransactionRefId
-				,@intCompanyRefId
+				,@intCompanyRefId'
+
+				EXEC sp_executesql @strSQL
+					,N'@intNewInvPlngReportMasterID int
+				,@strInvPlngReportName nvarchar(50)
+				,@intInvPlngReportMasterID int
+				,@intTransactionId int
+				,@intCompanyId int
+				,@intTransactionRefId int
+				,@intCompanyRefId int'
+					,@intNewInvPlngReportMasterID
+					,@strInvPlngReportName
+					,@intInvPlngReportMasterID
+					,@intTransactionId
+					,@intCompanyId
+					,@intTransactionRefId
+					,@intCompanyRefId
+			END
 
 			IF @intTransactionCount = 0
 				COMMIT TRANSACTION
@@ -684,10 +731,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intDemandStageId = MIN(intDemandStageId)
-		FROM tblMFDemandStage
+		FROM @tblMFDemandStage
 		WHERE intDemandStageId > @intDemandStageId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE S
+	SET strFeedStatus = NULL
+	FROM tblMFDemandStage S
+	JOIN @tblMFDemandStage TS ON TS.intDemandStageId = S.intDemandStageId
+	WHERE strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

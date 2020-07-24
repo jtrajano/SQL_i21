@@ -4,13 +4,9 @@
 	@intUserId INT
 )
 AS
- 
-BEGIN
-	SET QUOTED_IDENTIFIER OFF
-	SET ANSI_NULLS ON
+BEGIN TRY
+	--return	
 	SET NOCOUNT ON
-	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
 
 	DECLARE @ErrMsg AS NVARCHAR(MAX)
 	DECLARE @StorageHistoryStagingTable AS [StorageHistoryStagingTable]	
@@ -33,6 +29,8 @@ BEGIN
 	DECLARE @StorageHistoryStagingTable2 AS StorageHistoryStagingTable
 	DECLARE @intIdentityId INT
 	DECLARE @HistoryIds AS Id
+	DECLARE @dblBasisCost DECIMAL(18,6)
+	DECLARE @dblSettlementPrice DECIMAL(18,6)
 
 	DECLARE @newCustomerStorageIds AS TABLE 
 	(
@@ -71,8 +69,6 @@ BEGIN
 		RETURN;
 	END
 	
-	BEGIN TRANSACTION
-	BEGIN TRY
 		DECLARE @cnt INT = 0
 
 		SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSourceSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
@@ -435,6 +431,39 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 
+		--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
+		DECLARE @SettleVoucherCreate AS SettleVoucherCreate
+		DECLARE @intTransferStorageReferenceId2 INT
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+		WITH storageTransfers (
+			intTranferStorageReferenceId
+		) AS (
+			SELECT SR.intTransferStorageReferenceId
+			FROM tblGRTransferStorageReference SR
+			INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+			INNER JOIN tblGRStorageType ST
+				ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+					AND ST.ysnDPOwnedType = 1
+			WHERE SR.intTransferStorageId = @intTransferStorageId
+		)
+		SELECT
+			intTranferStorageReferenceId
+		FROM ( SELECT * FROM storageTransfers ) params
+		OPEN c;
+
+		FETCH c INTO @intTransferStorageReferenceId2
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			EXEC uspGRStorageInventoryReceipt 
+				@SettleVoucherCreate = @SettleVoucherCreate
+				,@intTransferStorageReferenceId = @intTransferStorageReferenceId2
+				,@ysnUnpost = 0
+
+			FETCH c INTO @intTransferStorageReferenceId2
+		END
+		CLOSE c; DEALLOCATE c;
 		--
 		IF(ISNULL(@intTransferStorageReferenceId,0) > 0)
 		BEGIN
@@ -502,6 +531,55 @@ BEGIN
 				ORDER BY dtmTransferStorageDate
 				
 				DECLARE @cursorId INT, @intTransactionDetailId INT
+				--DP TO DP TRANSFER
+				--DP TRANSFER STORAGE SHOULD HAVE dblBasis AND dblSettlementPrice
+				--SET @intTransferStorageReferenceId = NULL
+				IF NOT EXISTS(SELECT TOP 1 1 FROM @ItemsToPost)
+				BEGIN
+					DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+					FOR
+					WITH storageTransfers (
+						intTranferStorageReferenceId
+					) AS (
+						SELECT SR.intTransferStorageReferenceId
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
+						WHERE SR.intTransferStorageId = @intTransferStorageId
+					)
+					SELECT
+						intTranferStorageReferenceId
+					FROM ( SELECT * FROM storageTransfers ) params
+					OPEN c;
+
+					FETCH c INTO @intTransferStorageReferenceId
+
+					WHILE @@FETCH_STATUS = 0
+					BEGIN
+			
+						SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),1,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
+							,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),2,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+						INNER JOIN tblGRCustomerStorage CS_TO ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
+						INNER JOIN tblGRStorageType ST_TO ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId AND ST_TO.ysnDPOwnedType = 1
+						INNER JOIN tblICItem I ON CS_TO.intItemId = I.intItemId
+						INNER JOIN tblICCommodity ICC ON CS_TO.intCommodityId = I.intCommodityId
+						WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+
+						--update the Basis and Settlement Price of the new customer storage
+						UPDATE CS
+						SET dblBasis = ISNULL(@dblBasisCost,0)
+							,dblSettlementPrice = ISNULL(@dblSettlementPrice,0)
+						FROM tblGRCustomerStorage CS
+						INNER JOIN tblGRTransferStorageReference SR ON SR.intToCustomerStorageId = CS.intCustomerStorageId
+						WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+
+						FETCH c INTO @intTransferStorageReferenceId
+					END
+					CLOSE c; DEALLOCATE c;						
+				END
 
 				DECLARE _CURSOR CURSOR
 				FOR
@@ -551,9 +629,7 @@ BEGIN
 							,@intSubLocationId INT
 							,@intStorageLocationId INT
 							,@dtmDate DATETIME
-							,@intOwnerShipId INT				   
-							,@dblBasisCost DECIMAL(18,6)
-							,@dblSettlementPrice DECIMAL(18,6)
+							,@intOwnerShipId INT							
 							,@strRKError VARCHAR(MAX)
 							,@ysnDPtoOtherStorage BIT
 
@@ -612,14 +688,16 @@ BEGIN
 
 						IF @ysnDPtoOtherStorage = 0
 						SELECT @strRKError = CASE 
-												WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' 
-												WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' 
-												WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' 
-											END +  ' in risk management is not available.'
-
+							WHEN @dblBasisCost IS NULL AND @dblSettlementPrice > 0 THEN 'Basis in Risk Management is not available.'
+							WHEN @dblSettlementPrice IS NULL AND @dblBasisCost > 0 THEN 'Settlement Price in Risk Management is not available.'
+							WHEN @dblBasisCost IS NULL AND @dblSettlementPrice IS NULL THEN 'Basis and Settlement Price in Risk Management are not available.'
+							WHEN @dblSettlementPrice = 0 THEN 'Settlement Price is 0. Please update its price in Risk Management.'
+							END
+					
 						IF @strRKError IS NOT NULL
 						BEGIN
-							RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+						RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+						RETURN;
 						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
@@ -688,7 +766,7 @@ BEGIN
 							FROM @ItemsToPost ITP
 							JOIN tblGRTransferStorageReference SR
 							  ON ITP.intTransactionId = SR.intTransferStorageId
-							 AND ITP. intTransactionDetailId = SR.intTransferStorageSplitId
+							 AND ITP. intTransactionDetailId = SR.intTransferStorageReferenceId
 							JOIN tblGRCustomerStorage CS
 								ON SR.intSourceCustomerStorageId = CS.intCustomerStorageId
 							JOIN tblICItemUOM IU
@@ -1339,7 +1417,7 @@ BEGIN
 		--strTransferTicket is being used by RM, we need to update the strTransferTicket so that they won't to look at our table just to get its corresponding string
 		UPDATE tblGRStorageHistory 
 		SET strTransferTicket = (SELECT strTransferStorageTicket FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId) 
-		WHERE intTransferStorageId = @intTransferStorageId
+		WHERE intTransferStorageId = @intTransferStorageId		
 		
 		--RISK SUMMARY LOG
 		SET @intStorageHistoryId = NULL
@@ -1356,27 +1434,8 @@ BEGIN
 		END
 		CLOSE c; DEALLOCATE c;
 
-		DONE:
-		COMMIT TRANSACTION
-	
 	END TRY
 	BEGIN CATCH
-		DECLARE @ErrorSeverity INT,
-				@ErrorNumber   INT,
-				@ErrorMessage nvarchar(4000),
-				@ErrorState INT,
-				@ErrorLine  INT,
-				@ErrorProc nvarchar(200);
-		-- Grab error information from SQL functions
-		SET @ErrorSeverity = ERROR_SEVERITY()
-		SET @ErrorNumber   = ERROR_NUMBER()
-		SET @ErrorMessage  = ERROR_MESSAGE()
-		SET @ErrorState    = ERROR_STATE()
-		SET @ErrorLine     = ERROR_LINE()
-	
-		ROLLBACK TRANSACTION
-	
-		RAISERROR (@ErrorMessage , @ErrorSeverity, @ErrorState, @ErrorNumber)
+	SET @ErrMsg = ERROR_MESSAGE()
+	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')
 	END CATCH	
-	
-END

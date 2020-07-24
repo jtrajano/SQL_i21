@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]			
+﻿
+CREATE PROCEDURE [dbo].[uspSTAddNewPricebookItem]			
 	@strDescription						NVARCHAR(250)
 	, @intCategoryId					INT	
 	, @strItemNo						NVARCHAR(100)
@@ -320,87 +321,76 @@ BEGIN
 					BEGIN		
 						IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strLongUPCCode = @strLongUpcCode OR intUpcCode = CONVERT(NUMERIC(32, 0), CAST(@strLongUpcCode AS FLOAT)))
 							BEGIN
-								IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE strUpcCode = dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry))	
-									BEGIN
-									
-										-- ITEM UOM
-										BEGIN TRY
+								-- ITEM UOM
+								BEGIN TRY
 
-											EXEC [uspICAddItemUOMForCStore]
-												@intUnitMeasureId			= @intUnitMeasureId
-												,@intItemId					= @intNewItemId
-												,@strLongUPCCode			= @strLongUpcCode
-												,@ysnStockUnit				= 1
-												,@intEntityUserSecurityId	= @intEntityId 
-												,@intItemUOMId				= @intNewItemUOMId OUTPUT 
+									EXEC [uspICAddItemUOMForCStore]
+										@intUnitMeasureId			= @intUnitMeasureId
+										,@intItemId					= @intNewItemId
+										,@strLongUPCCode			= @strLongUpcCode
+										,@ysnStockUnit				= 1
+										,@intEntityUserSecurityId	= @intEntityId 
+										,@intItemUOMId				= @intNewItemUOMId OUTPUT 
 
-											-- =================================================================================
-											-- [START] - ADD ITEM UOM DEBUG
-											-- =================================================================================
-											IF(@ysnDebug = 1)
-												BEGIN
-													SELECT 'New Added Item Uom', * FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId
-												END
-											-- =================================================================================
-											-- [END] - ADD ITEM UOM DEBUG
-											-- =================================================================================
+									-- =================================================================================
+									-- [START] - ADD ITEM UOM DEBUG
+									-- =================================================================================
+									IF(@ysnDebug = 1)
+										BEGIN
+											SELECT 'New Added Item Uom', * FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId
+										END
+									-- =================================================================================
+									-- [END] - ADD ITEM UOM DEBUG
+									-- =================================================================================
 
-											IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
-												BEGIN
-													SET @strResultMessage = 'Item UOM is not created successfully'  
-
-													GOTO ExitWithRollback
-												END
-											ELSE
-												BEGIN
-													
-											--TEST
-											IF(@ysnDebug = 1)
-												BEGIN
-													SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
-													SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
-												END
-
-
-													IF(@strUpcCode IS NOT NULL OR @strUpcCode != '')
-														BEGIN
-													
-															DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
-
-															EXEC [dbo].[uspICUpdateItemForCStore]
-																-- filter params	
-																@strDescription				= NULL 
-																,@dblRetailPriceFrom		= NULL  
-																,@dblRetailPriceTo			= NULL 
-																,@intItemId					= @intNewItemId 
-																,@intItemUOMId				= @intItemUOMId 
-																-- update params
-																,@intCategoryId				= NULL
-																,@strCountCode				= NULL
-																,@strItemDescription		= NULL 	
-																,@strItemNo					= NULL
-																,@strShortName				= NULL 
-																,@strUpcCode				= @strUpcCode 
-																,@strLongUpcCode			= NULL 
-																,@intEntityUserSecurityId	= @intEntityId
-
-														END
-												END
-
-										END TRY
-										BEGIN CATCH
-											SET @strResultMessage = 'Error Adding new Item UOM: ' + ERROR_MESSAGE()  
+									IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+										BEGIN
+											SET @strResultMessage = 'Item UOM is not created successfully'  
 
 											GOTO ExitWithRollback
-										END CATCH
+										END
+									ELSE
+										BEGIN
+											
+									--TEST
+									IF(@ysnDebug = 1)
+										BEGIN
+											SELECT 'New Item', *  FROM tblICItem WHERE intItemId = @intNewItemId
+											SELECT 'New Item OUM', * FROM tblICItemUOM WHERE intItemId = @intNewItemId AND ysnStockUnit = 1
+										END
 
-									END
-								ELSE
-									BEGIN
-										SET @strResultMessage = 'Short UPC of ' + dbo.fnUPCAtoUPCE(@strLongUpcCode_Entry) + ' already exists.'  
 
-										GOTO ExitWithRollback
-									END
+											IF(@strUpcCode = '')
+												BEGIN
+													SET @strUpcCode = NULL;
+												END
+											
+													DECLARE @intItemUOMId INT = (SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemUOMId = @intNewItemUOMId)
+
+													EXEC [dbo].[uspICUpdateItemForCStore]
+														-- filter params	
+														@strDescription				= NULL 
+														,@dblRetailPriceFrom		= NULL  
+														,@dblRetailPriceTo			= NULL 
+														,@intItemId					= @intNewItemId 
+														,@intItemUOMId				= @intItemUOMId 
+														-- update params
+														,@intCategoryId				= NULL
+														,@strCountCode				= NULL
+														,@strItemDescription		= NULL 	
+														,@strItemNo					= NULL
+														,@strShortName				= NULL 
+														,@strUpcCode				= @strUpcCode 
+														,@strLongUpcCode			= NULL 
+														,@intEntityUserSecurityId	= @intEntityId
+										END
+
+								END TRY
+								BEGIN CATCH
+									SET @strResultMessage = 'Error Adding new Item UOM: ' + ERROR_MESSAGE()  
+
+									GOTO ExitWithRollback
+								END CATCH
 
 							END
 						ELSE
@@ -475,6 +465,14 @@ BEGIN
 							ON st.intCompanyLocationId = catLoc.intLocationId
 						WHERE st.intCompanyLocationId IS NOT NULL
 							AND catLoc.intCategoryId = @intCategoryId
+							
+							
+						IF NOT EXISTS(SELECT TOP 1 1 FROM @tempCStoreLocation)
+							BEGIN
+								SET @strResultMessage = 'Category Selected does not have POS config setup for 1 or more store locations'
+
+								GOTO ExitWithRollback
+							END
 					END TRY
 					BEGIN CATCH
 						SET @strResultMessage = 'Error creating location table: ' + ERROR_MESSAGE() 
@@ -825,5 +823,3 @@ ExitWithRollback:
 
 		
 ExitPost:
-		
-

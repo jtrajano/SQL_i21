@@ -123,7 +123,7 @@ AS
 			WHEN SCT.ysnDestinationWeightGradePost = 1 THEN 'Posted' 
 			WHEN lower(isnull(CTWGH.strWeightGradeDesc, '')) = 'destination' or lower(isnull(CTWGG.strWeightGradeDesc, '')) = 'destination' then 'Unposted'
 			--WHEN CTH.intWeightId = 2 OR CTH.intGradeId = 2 THEN 'Unposted' 
-		END AS strWeightGradePostStatus   
+		END COLLATE Latin1_General_CI_AS AS strWeightGradePostStatus   
       ,CASE WHEN CTH.intWeightId is not null OR CTH.intGradeId is not null 
          THEN isnull(CTWGH.strWeightGradeDesc, '') +'/' + isnull(CTWGG.strWeightGradeDesc, '') END AS strWeightGradeDest
        ,SCT.intInventoryTransferId
@@ -171,11 +171,11 @@ AS
 	   ,IC.strItemNo AS strItemNumber
 	   --,EMDriver.strName AS strDriverName
      ,SCT.dtmImportedDate
-	 ,ContractsApplied.strContractsApplied
+	 ,ContractsApplied.strContractsApplied COLLATE Latin1_General_CI_AS AS strContractsApplied
     ,SCT.strTrailerId
-    ,SCT.intParentTicketId
-    ,SCT.intTicketTransactionType
-    ,SCT.ysnReversed
+    
+    
+    
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
   from tblSCTicket SCT

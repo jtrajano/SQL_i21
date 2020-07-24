@@ -10,11 +10,11 @@
 	strComments			   NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS NOT NULL, 
 	intVoucherId		   INT,
 	intInvoiceId	       INT,
-	strType				   NVARCHAR(200),
-	strEntityType		   NVARCHAR(200),
-	strEntityName		   NVARCHAR(200),
-	strStatus			   NVARCHAR(200),
-	strContractNumber	   NVARCHAR(200)
+	strType				   NVARCHAR(200)   COLLATE Latin1_General_CI_AS NULL, 
+	strEntityType		   NVARCHAR(200)   COLLATE Latin1_General_CI_AS NULL, 
+	strEntityName		   NVARCHAR(200)   COLLATE Latin1_General_CI_AS NULL, 
+	strStatus			   NVARCHAR(200)   COLLATE Latin1_General_CI_AS NULL, 
+	strContractNumber	   NVARCHAR(200)   COLLATE Latin1_General_CI_AS NULL, 
 
 	CONSTRAINT [PK_tblCTBrkgCommn_intBrkgCommnId] PRIMARY KEY CLUSTERED (intBrkgCommnId ASC),
 	CONSTRAINT [UQ_tblCTBrkgCommn_strBatchNumber] UNIQUE (strBatchNumber)

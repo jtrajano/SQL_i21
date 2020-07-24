@@ -244,7 +244,8 @@ SELECT
     ,[strDocumentNumber]                    = ARSI.[strTransactionNumber]
     ,[strItemDescription]                   = ARSI.[strItemDescription]
     ,[intOrderUOMId]                        = ARSI.[intOrderUOMId]
-    ,[dblQtyOrdered]                        = ICISI.dblQuantity
+    --,[dblQtyOrdered]                        = ICISI.dblQuantity
+    ,[dblQtyOrdered]                        = dbo.fnCTConvertQtyToTargetItemUOM(ICISI.intItemUOMId,ARSI.[intOrderUOMId],ICISI.dblQuantity)
     ,[intItemUOMId]                         = ARSI.[intItemUOMId]
     ,[intPriceUOMId]                        = ARSI.[intPriceUOMId]
     ,[dblContractPriceUOMQty]               = ARSI.[dblPriceUOMQuantity]
@@ -419,6 +420,10 @@ EXEC    [dbo].[uspARProcessInvoicesByBatch]
              ,@LogId                = @LogId OUTPUT
              
 SELECT @NewInvoiceId = intInvoiceId FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId
+
+exec uspCTUpdateSequenceStatus
+     @intContractDetailId = @intContractDetailId
+     ,@intUserId = @UserId
 
 END	TRY
 

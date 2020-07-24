@@ -494,11 +494,11 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = CASE WHEN I.[strItemType] IN ('Non-Inventory') THEN  ISNULL([dbo].fnARGetNonInventoryItemGLAccount(I.[intItemId]), I.[intItemAccountId])  ELSE  I.[intItemAccountId] END
-    ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
-    ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
-    ,[dblDebitUnit]                 = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
-    ,[dblCreditUnit]                = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
+    ,[intAccountId]                 = CASE WHEN I.[strItemType] IN ('Non-Inventory','Inventory') THEN  ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId], I.intProfitCenter), I.[intItemAccountId])  ELSE  I.[intItemAccountId] END
+    ,[dblDebit]                     = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
+    ,[dblCredit]                    = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
+    ,[dblDebitUnit]                 = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
+    ,[dblCreditUnit]                = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN I.[dblUnitQtyShipped] ELSE @ZeroDecimal END
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
@@ -517,10 +517,10 @@ SELECT
     ,[strTransactionForm]           = @SCREEN_NAME
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
-    ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END END
-    ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END END
-    ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
-    ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) OR (I.strTransactionType = 'Credit Memo' AND I.[ysnFromProvisional] = 1) THEN I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
+    ,[dblDebitForeign]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END END
+    ,[dblDebitReport]               = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN @ZeroDecimal ELSE I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END END
+    ,[dblCreditForeign]             = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
+    ,[dblCreditReport]              = CASE WHEN I.strTransactionType IN ('Invoice', 'Cash') OR (I.strTransactionType = 'Debit Memo' AND I.strType IN ('CF Tran', 'CF Invoice', 'Card Fueling Transaction')) THEN I.[dblLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
     ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
     ,[strRateType]                  = I.[strCurrencyExchangeRateType]
@@ -897,7 +897,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId], I.intProfitCenter), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = CASE WHEN I.[strTransactionType] IN ('Invoice', 'Cash') THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END
@@ -950,6 +950,7 @@ WHERE
         OR
 	    (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal)
         )
+
 
 -- --FINAL INVOICE DEBIT
 -- INSERT #ARInvoiceGLEntries
@@ -1050,6 +1051,7 @@ WHERE
 --     AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 --     AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
 
+
 --FINAL INVOICE CREDIT
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
@@ -1097,7 +1099,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId], I.intProfitCenter), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
@@ -1195,7 +1197,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = I.[intSalesAccountId]
+    ,[intAccountId]                 = ISNULL([dbo].fnARGetItemGLAccount(I.[intItemId], I.intProfitCenter), I.[intSalesAccountId]) 
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblDebitUnit]                 = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblUnitQtyShipped] END

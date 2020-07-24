@@ -19,9 +19,8 @@ DECLARE @intNoOfShipRecordCounter INT
 DECLARE @intNoOfShipRecordParentCounter INT
 DECLARE @strTransactionName NVARCHAR(50)
 DECLARE @strLotNumber NVARCHAR(MAX)
-Declare @intItemId int
-Declare @strType1 nvarchar(50)
-
+DECLARE @intItemId INT
+DECLARE @strType1 NVARCHAR(50)
 DECLARE @tblTemp AS TABLE (
 	intRecordId INT
 	,intParentId INT
@@ -162,7 +161,9 @@ BEGIN
 			,strType
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intLotId
-			,@intDirectionId,@intLocationId
+			,@intDirectionId
+			,NULL
+			,@intLocationId
 
 		UPDATE @tblNodeData
 		SET intRecordId = 1
@@ -196,6 +197,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intContractId
 			,@intDirectionId
+			,NULL
 			,@intLocationId
 
 		UPDATE @tblNodeData
@@ -257,6 +259,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityContractDetail @intContractId
 			,@intDirectionId
+			,NULL
 			,@intLocationId
 
 		UPDATE @tblNodeData
@@ -323,17 +326,18 @@ BEGIN
 		SELECT TOP 1 @intContractId = ISNULL(ri.intOrderId, 0)
 			,@intShipmentId = ISNULL(ld.intLoadId, 0)
 			,@intContainerId = ISNULL(ri.intContainerId, 0)
-			,@intItemId=ri.intItemId
+			,@intItemId = ri.intItemId
 		FROM tblICInventoryReceiptItem ri
 		JOIN tblICInventoryReceiptItemLot rl ON ri.intInventoryReceiptItemId = rl.intInventoryReceiptItemId
 		JOIN tblICInventoryReceipt rh ON ri.intInventoryReceiptId = rh.intInventoryReceiptId
 		LEFT JOIN tblLGLoadDetail ld ON ri.intSourceId = ld.intLoadDetailId
 		JOIN tblICLot l ON rl.intLotId = l.intLotId
-		WHERE Exists (
+		WHERE EXISTS (
 				SELECT 1
 				FROM tblICLot L1
-				WHERE L1.intLotId = @intLotId and L1.strLotNumber=l.strLotNumber
-				and L1.intItemId=ri.intItemId
+				WHERE L1.intLotId = @intLotId
+					AND L1.strLotNumber = l.strLotNumber
+					AND L1.intItemId = ri.intItemId
 				)
 			AND rh.strReceiptType = 'Purchase Contract'
 
@@ -533,6 +537,7 @@ BEGIN
 				)
 			EXEC uspMFGetTraceabilityContractDetail @intContractId
 				,@intDirectionId
+				,NULL
 				,@intLocationId
 
 			UPDATE @tblNodeData
@@ -630,6 +635,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityContractDetail @intContractId
 					,@intDirectionId
+					,NULL
 					,@intLocationId
 
 				UPDATE @tblNodeData
@@ -653,7 +659,8 @@ BEGIN
 					,strVendor
 					,strType
 					)
-				EXEC uspMFGetTraceabilityReceiptDetail @intLotId,@intLocationId
+				EXEC uspMFGetTraceabilityReceiptDetail @intLotId
+					,@intLocationId
 
 				UPDATE @tblNodeData
 				SET intRecordId = 2
@@ -682,7 +689,8 @@ BEGIN
 				,strVendor
 				,strType
 				)
-			EXEC uspMFGetTraceabilityReceiptDetail @intLotId,@intLocationId
+			EXEC uspMFGetTraceabilityReceiptDetail @intLotId
+				,@intLocationId
 
 			UPDATE @tblNodeData
 			SET intRecordId = 1
@@ -772,7 +780,8 @@ BEGIN
 					,strVendor
 					,strType
 					)
-				EXEC uspMFGetTraceabilityInboundShipmentFromContract @intId,@intLocationId
+				EXEC uspMFGetTraceabilityInboundShipmentFromContract @intId
+					,@intLocationId
 
 			--Container From Inbound Shipment
 			IF @strType = 'IS'
@@ -814,7 +823,8 @@ BEGIN
 					,strVendor
 					,strType
 					)
-				EXEC uspMFGetTraceabilityReceiptFromContainer @intId,@intLocationId
+				EXEC uspMFGetTraceabilityReceiptFromContainer @intId
+					,@intLocationId
 
 			--Receipt From Contract
 			IF @strType = 'C'
@@ -840,7 +850,8 @@ BEGIN
 					,strVendor
 					,strType
 					)
-				EXEC uspMFGetTraceabilityReceiptFromContract @intId,@intLocationId
+				EXEC uspMFGetTraceabilityReceiptFromContract @intId
+					,@intLocationId
 
 			--Lots From Receipt
 			IF @strType = 'R'
@@ -1017,7 +1028,8 @@ BEGIN
 					,strCustomer
 					,strType
 					)
-				EXEC uspMFGetTraceabilitySalesOrderFromShipment @intId,@intLocationId
+				EXEC uspMFGetTraceabilitySalesOrderFromShipment @intId
+					,@intLocationId
 
 				--Invoice
 				INSERT INTO @tblData (
@@ -1036,7 +1048,8 @@ BEGIN
 					,strCustomer
 					,strType
 					)
-				EXEC uspMFGetTraceabilityInvoiceFromShipment @intId,@intLocationId
+				EXEC uspMFGetTraceabilityInvoiceFromShipment @intId
+					,@intLocationId
 			END
 
 			UPDATE @tblData
@@ -1360,10 +1373,12 @@ BEGIN
 
 			-- Invoice from Shipment
 			BEGIN
-				Select @strType1=''
+				SELECT @strType1 = ''
+
 				--Get ShipmentId to find if invoice exists
 				IF @intId IS NULL
-					SELECT TOP 1 @intId = intLotId,@strType1=strType
+					SELECT TOP 1 @intId = intLotId
+						,@strType1 = strType
 					FROM @tblNodeData
 					WHERE strType IN (
 							'S'
@@ -1371,7 +1386,8 @@ BEGIN
 							)
 					ORDER BY 1
 				ELSE
-					SELECT TOP 1 @intId = intLotId,@strType1=strType
+					SELECT TOP 1 @intId = intLotId
+						,@strType1 = strType
 					FROM @tblNodeData
 					WHERE intLotId > @intId
 						AND strType IN (
@@ -1380,8 +1396,8 @@ BEGIN
 							)
 
 				--Invoice
-				if @strType1='S'
-				Begin
+				IF @strType1 = 'S'
+				BEGIN
 					INSERT INTO @tblData (
 						strTransactionName
 						,intLotId
@@ -1398,10 +1414,11 @@ BEGIN
 						,strCustomer
 						,strType
 						)
-					EXEC uspMFGetTraceabilityInvoiceFromShipment @intId,@intLocationId
-				End
-				Else
-				Begin
+					EXEC uspMFGetTraceabilityInvoiceFromShipment @intId
+						,@intLocationId
+				END
+				ELSE
+				BEGIN
 					INSERT INTO @tblData (
 						strTransactionName
 						,intLotId
@@ -1418,8 +1435,10 @@ BEGIN
 						,strCustomer
 						,strType
 						)
-					EXEC uspMFGetTraceabilityInvoiceFromOutboundShipment @intId,@intLocationId
-				End
+					EXEC uspMFGetTraceabilityInvoiceFromOutboundShipment @intId
+						,@intLocationId
+				END
+
 				--update ShipmentId in intParentLotId for Invoice used in getting ParentId in case Invoice exists
 				UPDATE @tblData
 				SET intParentLotId = @intId
@@ -1650,7 +1669,8 @@ BEGIN
 			,strCustomer
 			,strType
 			)
-		EXEC uspMFGetTraceabilityInvoiceFromShipment @intLotId,@intLocationId
+		EXEC uspMFGetTraceabilityInvoiceFromShipment @intLotId
+			,@intLocationId
 
 		IF EXISTS (
 				SELECT 1
@@ -1681,7 +1701,8 @@ BEGIN
 			,strCustomer
 			,strType
 			)
-		EXEC uspMFGetTraceabilityShipmentDetail @intLotId,@intLocationId 
+		EXEC uspMFGetTraceabilityShipmentDetail @intLotId
+			,@intLocationId
 
 		IF @ysnInvoiceExist = 1
 			UPDATE @tblNodeData
@@ -1758,7 +1779,8 @@ BEGIN
 			,strCustomer
 			,strType
 			)
-		EXEC uspMFGetTraceabilityInvoiceFromOutboundShipment @intLotId,@intLocationId
+		EXEC uspMFGetTraceabilityInvoiceFromOutboundShipment @intLotId
+			,@intLocationId
 
 		IF EXISTS (
 				SELECT 1
@@ -1789,7 +1811,8 @@ BEGIN
 			,strCustomer
 			,strType
 			)
-		EXEC uspMFGetTraceabilityOutboundShipmentDetail @intLotId,@intLocationId
+		EXEC uspMFGetTraceabilityOutboundShipmentDetail @intLotId
+			,@intLocationId
 
 		IF @ysnInvoiceExist1 = 1
 			UPDATE @tblNodeData
@@ -1821,7 +1844,8 @@ BEGIN
 			,intImageTypeId
 			)
 		EXEC uspMFGetTraceabilityOutboundShipmentLots @intLotId
-			,@ysnParentLot,@intLocationId
+			,@ysnParentLot
+			,@intLocationId
 
 		--Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
 		DECLARE @intRecCounter1 INT = CASE 
@@ -1882,7 +1906,8 @@ BEGIN
 				,strCustomer
 				,strType
 				)
-			EXEC uspMFGetTraceabilitySalesOrderFromShipment @intId,@intLocationId 
+			EXEC uspMFGetTraceabilitySalesOrderFromShipment @intId
+				,@intLocationId
 
 			UPDATE @tblNodeData
 			SET intRecordId = @intMaxRecordCount + 1
@@ -2056,7 +2081,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityWorkOrderDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
-					,@intLocationId 
+					,@intLocationId
 					--Remove circular Reference, Remove the WO if exists
 					--IF EXISTS (
 					--		SELECT 1
@@ -2093,7 +2118,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityWorkOrderInputDetail @intId
 					,@ysnParentLot
-					,@intLocationId 
+					,@intLocationId
 
 			-- Lot Merge
 			IF @strType = 'L'
@@ -2119,6 +2144,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityLotMergeDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,0
 					,@intLocationId
 
 				IF EXISTS (
@@ -2201,16 +2227,50 @@ BEGIN
 			--Get Contract/Container if exists for Receipt
 			IF @strType = 'R'
 			BEGIN
+				Declare @intShipmentDetailId int
 				SELECT TOP 1 @intContractId = ISNULL(ri.intOrderId, 0)
 					,@intShipmentId = ISNULL(ri.intSourceId, 0)
+					,@intShipmentDetailId = ISNULL(ri.intSourceId, 0)
 					,@intContainerId = ISNULL(ri.intContainerId, 0)
 				FROM tblICInventoryReceiptItem ri
 				JOIN tblICInventoryReceipt rh ON ri.intInventoryReceiptId = rh.intInventoryReceiptId
 				WHERE rh.intInventoryReceiptId = @intId
 					AND rh.strReceiptType = 'Purchase Contract'
 
+				IF @intContainerId = - 1
+				BEGIN
+					--Shipment
+					IF @intShipmentDetailId > 0
+					BEGIN
+						SELECT TOP 1 @intShipmentId = ld.intLoadId
+						FROM tblLGLoadDetail ld
+						WHERE intLoadDetailId = @intShipmentDetailId
+
+						INSERT INTO @tblData (
+							strTransactionName
+							,intLotId
+							,strLotNumber
+							,strLotAlias
+							,intItemId
+							,strItemNo
+							,strItemDesc
+							,intCategoryId
+							,strCategoryCode
+							,dblQuantity
+							,strUOM
+							,dtmTransactionDate
+							,strVendor
+							,strType
+							)
+						EXEC uspMFGetTraceabilityInboundShipmentDetail @intShipmentId
+							,@intDirectionId
+							,@intLocationId
+					END
+				END
+
 				--Get Contract
 				IF @intContainerId = 0
+				BEGIN
 					INSERT INTO @tblData (
 						strTransactionName
 						,intLotId
@@ -2230,7 +2290,9 @@ BEGIN
 						)
 					EXEC uspMFGetTraceabilityContractDetail @intContractId
 						,@intDirectionId
+						,NULL
 						,@intLocationId
+				END
 				ELSE
 					--Get Container
 					INSERT INTO @tblData (
@@ -2287,7 +2349,7 @@ BEGIN
 			BEGIN
 				SELECT TOP 1 @intContractId = CD.intContractHeaderId
 				FROM tblLGLoadDetail ld
-				JOIN tblCTContractDetail CD on CD.intContractDetailId =ld.intPContractDetailId 
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = ld.intPContractDetailId
 				WHERE intLoadId = @intId
 
 				INSERT INTO @tblData (
@@ -2309,6 +2371,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityContractDetail @intContractId
 					,@intDirectionId
+					,NULL
 					,@intLocationId
 			END
 

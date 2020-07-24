@@ -409,7 +409,6 @@ BEGIN
 			WHERE B.intBillId = A.intBillId
 		) details
 		WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills) AND details.dblTotal < 0
-		AND A.intTransactionType = 1
 			
 		--DO NOT ALLOW TO POST IF BILL HAS CONTRACT ITEMS AND CONTRACT PRICE ON CONTRACT RECORD DID NOT MATCHED
 		--COMPARE THE CASH PRICE
@@ -542,17 +541,29 @@ BEGIN
 		FROM tblAPBill A
 		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
 		LEFT JOIN tblICItem item ON A2.intItemId = item.intItemId
+		LEFT JOIN (tblICInventoryReceiptCharge D INNER JOIN tblICInventoryReceipt D2 ON D.intInventoryReceiptId = D2.intInventoryReceiptId)
+			ON A2.intInventoryReceiptChargeId = D.intInventoryReceiptChargeId
 		OUTER APPLY
 		(
-			SELECT SUM(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax)) AS dblTaxTotal FROM tblAPBillDetailTax B
-			WHERE B.intBillDetailId = A2.intBillDetailId
+			SELECT SUM(dblTax) AS dblTaxTotal
+			FROM (
+				SELECT 
+					(ISNULL(NULLIF(B.dblAdjustedTax,0),B.dblTax) 
+						* (CASE WHEN (D.intInventoryReceiptChargeId IS NOT NULL 
+										AND A.intEntityVendorId = D2.intEntityVendorId 
+										AND D.ysnPrice = 1) THEN -1 ELSE 1 END)) 
+				AS dblTax
+				FROM tblAPBillDetailTax B
+				WHERE B.intBillDetailId = A2.intBillDetailId
+			) tmp
 		) taxDetails
 		WHERE 
 		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND
 		(
-			(A2.dblTax != ISNULL(taxDetails.dblTaxTotal,0))
+			A2.dblTax <> ISNULL(taxDetails.dblTaxTotal,0)
 		)
+
 
 	END
 	ELSE

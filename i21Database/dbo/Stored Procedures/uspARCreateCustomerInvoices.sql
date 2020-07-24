@@ -765,7 +765,7 @@ WHERE
 UPDATE
 	@InvoicesToGenerate
 SET
-	[intEntityContactId] = [dbo].[fnARGetCustomerDefaultContact](intEntityCustomerId)
+	[intEntityContactId] = [dbo].[fnARGetCustomerDefaultContact](intEntityId)
 WHERE
 	ISNULL([intEntityContactId], 0) = 0
 

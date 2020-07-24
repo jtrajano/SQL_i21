@@ -50,7 +50,7 @@ BEGIN
 				,Qty = CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END
 				,dblTotalUnits = 
 					CASE 
-						WHEN CalculatedCharges.strChargesLink IS NULL THEN 
+						WHEN CalculatedCharges.strChargesLink IS NULL AND CalculatedCharges.strCostMethod = 'Amount' THEN
 							TotalUnitsOfAllItems.dblTotalUnits 
 						ELSE 
 							TotalUnitsOfItemsPerContract.dblTotalUnits 
@@ -80,6 +80,7 @@ BEGIN
 							,CalculatedCharge.intInventoryReceiptChargeId
 							,CalculatedCharge.ysnPrice
 							,Charge.strChargesLink 
+							,Charge.strCostMethod
 					FROM	dbo.tblICInventoryReceiptChargePerItem CalculatedCharge INNER JOIN tblICInventoryReceiptCharge Charge
 								ON CalculatedCharge.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId				
 					WHERE	CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
@@ -93,11 +94,12 @@ BEGIN
 						, CalculatedCharge.intInventoryReceiptChargeId
 						, CalculatedCharge.ysnPrice
 						, Charge.strChargesLink 
+						, Charge.strCostMethod
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
 					AND (
 						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
-						OR CalculatedCharges.strChargesLink IS NULL 
+						OR (CalculatedCharges.strChargesLink IS NULL AND CalculatedCharges.strCostMethod = 'Amount') 
 					)
 				LEFT JOIN (
 							SELECT	dblTotalUnits = SUM(

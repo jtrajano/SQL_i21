@@ -21,7 +21,7 @@ SELECT Invoice.intInvoiceId
 	, CASE WHEN InvoiceShift.intShiftNumber IS NULL THEN CONVERT(NVARCHAR(50),InvoiceShift.strShiftNo)  ELSE CONVERT(NVARCHAR(50),InvoiceShift.intShiftNumber) END as strShiftNo
 	, Invoice.strComments
 	, Invoice.strVoidComments
-	, 0.0 as dblTotal
+	, ISNULL(dblTotal,0) as dblTotal
 	, Invoice.intTermId
 	, Term.strTerm
 	, Invoice.ysnPosted

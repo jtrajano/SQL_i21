@@ -120,6 +120,12 @@ BEGIN TRY
 		,@Post = @Post
 		,@intInvoiceId = @InvoiceId
 
+	-- Validate the Price
+	IF EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice WHERE dblPrice < 0)
+	BEGIN
+		RAISERROR('Negative price is not allowed',16, 1)
+	END
+
 	EXEC [dbo].[uspARProcessInvoices]
 		@InvoiceEntries	= @EntriesForInvoice
 		,@UserId			= @UserId

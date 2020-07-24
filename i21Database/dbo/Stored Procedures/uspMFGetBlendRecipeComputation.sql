@@ -43,6 +43,7 @@ AS
 		,dblMaxValue NUMERIC(18,6)
 		,strMethodName NVARCHAR(50)
 		,intMethodId INT
+		,intSequenceNo int
 	   )
 
 		DECLARE @tblLot AS TABLE
@@ -60,8 +61,8 @@ AS
 	SELECT DISTINCT PRT.intPropertyId
 		,PRT.strPropertyName
 		,PRD.intProductValueId
-		,PPV.dblMinValue
-		,PPV.dblMaxValue
+		,MIN(PPV.dblMinValue)
+		,MAX(PPV.dblMaxValue)
 		,TST.intTestId
 		,TST.strTestName
 		,PP.intSequenceNo
@@ -69,12 +70,18 @@ AS
 	JOIN tblQMProductProperty PP ON PP.intProductId=PRD.intProductId
 	JOIN tblQMProductPropertyValidityPeriod PPV ON PPV.intProductPropertyId = PP.intProductPropertyId
 	JOIN tblQMProperty PRT ON PRT.intPropertyId = PP.intPropertyId
-	JOIN tblQMTestProperty TP ON TP.intPropertyId=PRT.intPropertyId
+	JOIN tblQMTestProperty TP ON TP.intPropertyId=PRT.intPropertyId and PP.intTestId =TP.intTestId
 	JOIN tblQMTest TST ON TST.intTestId = TP.intTestId
 	WHERE PRD.intProductValueId = @intProductId AND PRD.intProductTypeId = 2
 	AND PRD.ysnActive = 1
 	AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 	AND DATEPART(dy, PPV.dtmValidTo)
+	Group by PRT.intPropertyId
+		,PRT.strPropertyName
+		,PRD.intProductValueId
+		,TST.intTestId
+		,TST.strTestName
+		,PP.intSequenceNo
 	ORDER BY PP.intSequenceNo
 
 	If @ysnEnableParentLot=0
@@ -91,17 +98,18 @@ AS
 	--Blend Management/Production
 	IF ( @ysnEnableParentLot=0 )
 	BEGIN
-			INSERT INTO @tblComputedValue(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId)
+			INSERT INTO @tblComputedValue(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId,intSequenceNo)
 			SELECT 
 				 PP.intTestId
 				,PP.strTestName
 				,PP.intPropertyId
 				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,CAST(SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS DECIMAL(18,4)) AS dblComputedValue
 				,PP.dblMinValue
 				,PP.dblMaxValue
 				,MIN(@strMethod) AS strMethodName
 				,1 AS intMethodId
+				,MIN(TR.intSequenceNo)
 			FROM @tblProductProperty PP
 			JOIN tblQMTestResult AS TR ON PP.intPropertyId = TR.intPropertyId AND ISNUMERIC(TR.strPropertyValue) = 1
 			JOIN tblICLot lt ON lt.intLotId=TR.intProductValueId
@@ -119,17 +127,18 @@ AS
 	END
 	Else
 	BEGIN
-			INSERT INTO @tblComputedValue(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId)
+			INSERT INTO @tblComputedValue(intTestId,strTestName,intPropertyId,strPropertyName,dblComputedValue,dblMinValue,dblMaxValue,strMethodName,intMethodId,intSequenceNo)
 			SELECT 
 				 PP.intTestId
 				,PP.strTestName
 				,PP.intPropertyId
 				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,CAST(SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS DECIMAL(18,4)) AS dblComputedValue
 				,PP.dblMinValue
 				,PP.dblMaxValue
 				,MIN(@strMethod) AS strMethodName
 				,1 AS intMethodId
+				,MIN(TR.intSequenceNo)
 			FROM @tblProductProperty PP
 			JOIN tblQMTestResult AS TR ON PP.intPropertyId = TR.intPropertyId AND ISNUMERIC(TR.strPropertyValue) = 1
 			JOIN @tblLot AS L ON L.intLotId = TR.intProductValueId
@@ -145,6 +154,6 @@ AS
 				,PP.dblMaxValue
 	END
 
-	SELECT * FROM @tblComputedValue
+	SELECT * FROM @tblComputedValue Order by intSequenceNo
 
 	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc  

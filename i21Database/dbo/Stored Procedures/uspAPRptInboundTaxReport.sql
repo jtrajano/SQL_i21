@@ -61,6 +61,8 @@ DECLARE @dtmDateFrom            DATETIME
       , @UserName               NVARCHAR(150)
 	  , @strCompanyName         NVARCHAR(100)
 	  , @strCompanyAddress      NVARCHAR(500)
+	  , @strItemNoTo			      NVARCHAR(100)
+    , @strItemNoCondition     NVARCHAR(100)
 
 SET @AccountStatusFiltered = @ZeroBit
 SET @strSubTotalBy = 'Tax Group'
@@ -180,6 +182,12 @@ SELECT @dtmDateFrom     = CAST(CASE WHEN ISNULL([from], '') <> '' THEN [from] EL
      , @conditionDate   = [condition]
   FROM @temp_xml_table 
  WHERE [fieldname] = 'dtmDate'
+
+SELECT @strItemNo = [from]
+	 , @strItemNoTo = [to]
+   , @strItemNoCondition = [condition]
+FROM @temp_xml_table
+WHERE [fieldname] = 'strItemNo'
 
 -- SANITIZE THE DATE AND REMOVE THE TIME.
 IF @dtmDateTo IS NOT NULL
@@ -418,10 +426,21 @@ ELSE
 --CREATE TABLE #ITEMS ([intItemId] INT PRIMARY KEY, [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS, [intCategoryId] INT)
 DECLARE @ITEMS AS TABLE ([intItemId] INT PRIMARY KEY, [strItemNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS, [intCategoryId] INT)
 
-INSERT INTO @ITEMS([intItemId], [strItemNo], [intCategoryId])
-SELECT [intItemId], [strItemNo], [intCategoryId]
+IF @strItemNoCondition = 'Between'
+BEGIN
+  INSERT INTO @ITEMS([intItemId], [strItemNo], [intCategoryId])
+  SELECT [intItemId], [strItemNo], [intCategoryId]
   FROM dbo.tblICItem WITH (NOLOCK)
- WHERE (@strItemNo IS NULL OR [strItemNo] LIKE '%' + @strItemNo + '%')
+  WHERE [strItemNo] BETWEEN @strItemNo AND @strItemNoTo
+  ORDER BY [strItemNo]
+END
+ELSE
+BEGIN
+  INSERT INTO @ITEMS([intItemId], [strItemNo], [intCategoryId])
+  SELECT [intItemId], [strItemNo], [intCategoryId]
+  FROM dbo.tblICItem WITH (NOLOCK)
+  WHERE (@strItemNo IS NULL OR [strItemNo] LIKE '%' + @strItemNo + '%')
+END
 
 --IF(OBJECT_ID('tempdb..#CATEGORIES') IS NOT NULL)
 --BEGIN

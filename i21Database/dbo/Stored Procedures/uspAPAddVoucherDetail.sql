@@ -166,7 +166,7 @@ SELECT TOP 100 PERCENT
 												)
 											ELSE A.dblQtyToBillUnitQty END
 	/*Ordered and Received should always the same*/
-	,dblQtyOrdered						=	A.dblOrderQty
+	,dblQtyOrdered						=	CASE WHEN A.dblQuantityToBill < 0 THEN ABS(A.dblOrderQty) * -1 ELSE ABS(A.dblOrderQty) END
 	,dblQtyReceived						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 												THEN (CASE WHEN ctDetail.intContractDetailId IS NOT NULL
 														THEN dbo.fnCalculateQtyBetweenUOM(A.intQtyToBillUOMId, ctDetail.intItemUOMId, A.dblQuantityToBill)
@@ -236,6 +236,7 @@ SELECT TOP 100 PERCENT
 	,dblBundleTotal						=	0
 	,dblQtyBundleReceived				=	0
 	,dblBundleUnitQty					=	0
+	,intFreightTermId					=	A.intFreightTermId
 	,ysnStage							=	A.ysnStage
 INTO #tmpVoucherPayableData
 FROM @voucherDetails A
@@ -438,7 +439,8 @@ INSERT
 	,intItemBundleId					
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
-	,dblBundleUnitQty			
+	,dblBundleUnitQty		
+	,intFreightTermId	
 	,ysnStage		
 )
 VALUES
@@ -528,6 +530,7 @@ VALUES
 	,dblBundleTotal						
 	,dblQtyBundleReceived				
 	,dblBundleUnitQty		
+	,intFreightTermId
 	,ysnStage
 )
 OUTPUT inserted.intBillDetailId, SourceData.intVoucherPayableId INTO @voucherDetailsInfo;
@@ -572,15 +575,16 @@ INNER JOIN @payablesKey B
 INNER JOIN @voucherDetailsInfo C
 	ON B.intOldPayableId = C.intVoucherPayableId
 
---GENERATE TAXES FOR ysnStage = 0
+--GENERATE TAXES FOR ysnStage = 0, AND NO TAX DETAILS
 DECLARE @idetailIds AS Id
 INSERT INTO @idetailIds
-SELECT
+SELECT DISTINCT
 	A.intBillDetailId
 FROM tblAPBillDetail A
 INNER JOIN @voucherDetailsInfo B
 	ON A.intBillDetailId = B.intBillDetailId
-WHERE A.ysnStage = 0
+LEFT JOIN tblAPBillDetailTax C ON A.intBillDetailId = C.intBillDetailId
+WHERE A.ysnStage = 0 OR C.intBillDetailTaxId IS NULL
 
 EXEC uspAPUpdateVoucherDetailTax @idetailIds
 
@@ -592,6 +596,9 @@ EXEC uspAPUpdateVoucherPayable @voucherDetailIds = @voucherDetailIds, @decrease 
 
 --UPDATE AVAILABLE QTY
 EXEC uspAPUpdateIntegrationPayableAvailableQty @billDetailIds = @voucherDetailIds, @decrease = 1
+
+--LOG RISK
+EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherDetailIds, @remove = 0
 
 IF @transCount = 0
 	BEGIN

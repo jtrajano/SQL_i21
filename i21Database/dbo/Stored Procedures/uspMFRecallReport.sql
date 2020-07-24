@@ -49,6 +49,7 @@ DECLARE @intShipmentId INT
 DECLARE @intContainerId INT
 DECLARE @strLotNumber NVARCHAR(50)
 DECLARE @strRecallLotNumber NVARCHAR(50)
+		,@intLocationId int
 
 SELECT @intLotId = [from]
 FROM @temp_xml_table
@@ -56,7 +57,7 @@ WHERE [fieldname] = 'intLotId'
 
 SET @intDirectionId = 2
 
-SELECT @strLotNumber = strLotNumber
+SELECT @strLotNumber = strLotNumber,@intLocationId=intLocationId
 FROM tblICLot
 WHERE intLotId = @intLotId
 
@@ -196,6 +197,7 @@ BEGIN
 	EXEC uspMFGetTraceabilityLotDetail @intLotId
 		,@intDirectionId
 		,@ysnParentLot
+		,@intLocationId
 
 	--Update RecordId, ParentId
 	SELECT @intMaxRecordCount = ISNULL(Max(intRecordId), 0) + 1
@@ -294,6 +296,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityWorkOrderDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,@intLocationId
 
 			-- WorkOrder Output details
 			IF @strType = 'W'
@@ -317,6 +320,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityWorkOrderOutputDetail @intId
 					,@ysnParentLot
+					,@intLocationId
 
 			-- Lot Split
 			IF @strType = 'L'
@@ -340,6 +344,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityLotSplitDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,@intLocationId
 
 			-- Lot Ship
 			IF @strType = 'L'
@@ -361,6 +366,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityLotShipDetail @intId
 					,@ysnParentLot
+					,@intLocationId
 
 			UPDATE @tblData
 			SET intParentId = @intParentId
@@ -584,6 +590,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityLotShipDetail @intLotId
 			,@ysnParentLot
+			,@intLocationId
 
 		UPDATE @tblNodeData
 		SET intRecordId = 1
@@ -609,6 +616,7 @@ BEGIN
 		EXEC uspMFGetTraceabilityLotDetail @intLotId
 			,@intDirectionId
 			,@ysnParentLot
+			,@intLocationId
 
 		UPDATE @tblNodeData
 		SET intRecordId = 2
@@ -638,7 +646,7 @@ BEGIN
 			,strCustomer
 			,strType
 			)
-		EXEC uspMFGetTraceabilityShipmentDetail @intLotId
+		EXEC uspMFGetTraceabilityShipmentDetail @intLotId,@intLocationId
 
 		UPDATE @tblNodeData
 		SET intRecordId = 1
@@ -664,6 +672,7 @@ BEGIN
 			)
 		EXEC uspMFGetTraceabilityShipmentLots @intLotId
 			,@ysnParentLot
+			,@intLocationId
 
 		--Update @tblNodeData Set intRecordId=2,intParentId=1,strType='L' Where intParentId is null
 		DECLARE @intRecCounter INT = 1
@@ -767,6 +776,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityWorkOrderDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,@intLocationId 
 
 			-- WorkOrder Input details
 			IF @strType = 'W'
@@ -790,6 +800,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityWorkOrderInputDetail @intId
 					,@ysnParentLot
+					,@intLocationId 
 
 			IF @strType = 'L'
 			BEGIN
@@ -815,6 +826,7 @@ BEGIN
 					,@intDirectionId
 					,@ysnParentLot
 					,1
+					,@intLocationId
 
 				INSERT INTO @tblMFExlude
 				SELECT intLotId
@@ -877,6 +889,7 @@ BEGIN
 				EXEC uspMFGetTraceabilityLotSplitDetail @intId
 					,@intDirectionId
 					,@ysnParentLot
+					,@intLocationId
 
 			-- Lot Receipt
 			IF @strType = 'L'
@@ -899,6 +912,7 @@ BEGIN
 					)
 				EXEC uspMFGetTraceabilityLotReceiptDetail @intId
 					,@ysnParentLot
+					,@intLocationId
 
 			UPDATE @tblData
 			SET intParentId = @intParentId

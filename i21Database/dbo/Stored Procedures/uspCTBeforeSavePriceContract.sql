@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTBeforeSavePriceContract]
 		
 	@intPriceContractId INT,
-	@strXML				NVARCHAR(MAX)
+	@strXML				NVARCHAR(MAX),
+	@ysnDeleteFromInvoice bit = 0
 	
 AS
 
@@ -109,17 +110,9 @@ BEGIN TRY
 		WHERE	intUniqueId				=	 @intUniqueId
 		
 		IF @strRowState = 'Delete'
-		BEGIN			
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1 AND @intContractTypeId = 1)
-			BEGIN
-				EXEC uspCTValidatePriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId
-				EXEC uspCTPriceFixationDetailReverse @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
-			END	
-			ELSE
-			BEGIN
-				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
-				EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
-			END		
+		BEGIN
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
 		END
 
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
@@ -169,16 +162,8 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1 AND @intContractTypeId = 1)
-			BEGIN
-				EXEC uspCTValidatePriceFixationDetailReverse @intPriceFixationDetailId = @intPriceFixationDetailId
-				EXEC uspCTPriceFixationDetailReverse @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
-			END	
-			ELSE
-			BEGIN
-				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
-				EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
-			END		
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
 		END
 
 		IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
@@ -210,16 +195,8 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			IF EXISTS(SELECT TOP 1 1 FROM tblRKCompanyPreference WHERE ysnImposeReversalTransaction = 1 AND @intContractTypeId = 1)
-			BEGIN
-				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
-				EXEC uspCTPriceFixationDetailReverse @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
-			END
-			ELSE
-			BEGIN
-				EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
-				EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
-			END
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
 		END
 				
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixationTicket WHERE intUniqueId > @intUniqueId

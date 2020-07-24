@@ -165,10 +165,10 @@ BEGIN
 		,GP.[intItemId]						
 		,GP.[intPurchaseTaxGroupId]			
 		,GP.[strMiscDescription]				
-		, CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblOrderQty]	ELSE GP.dblOrderQty END
+		, GP.dblOrderQty --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblOrderQty]	ELSE GP.dblOrderQty END
 		,[dblOrderUnitQty] = 0.00					
 		,[intOrderUOMId] = NULL	 				
-		, CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblQuantityToBill]	ELSE GP.[dblQuantityToBill] END	
+		, GP.[dblQuantityToBill] --CASE WHEN @billTypeToUse = @type_DebitMemo THEN -GP.[dblQuantityToBill]	ELSE GP.[dblQuantityToBill] END	
 		,GP.[dblQtyToBillUnitQty]				
 		,GP.[intQtyToBillUOMId]				
 		,[dblCost] = GP.dblUnitCost							
@@ -244,7 +244,7 @@ BEGIN
 		EXEC [dbo].[uspAPCreateVoucher]
 			@voucherPayables = @voucherItems
 			,@voucherPayableTax = @voucherItemsTax
-			,@userId = @intEntityVendorId
+			,@userId = @intEntityUserSecurityId
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
 			,@createdVouchersId = @intBillId OUTPUT
@@ -335,7 +335,7 @@ BEGIN
 					vyuICGetInventoryReceiptVoucher
 				WHERE 
 					intInventoryReceiptId = @intReceiptId
-					AND dblQtyToVoucher = dblQtyToReceive
+					AND dblQtyToReceive = dblQtyVouchered
 			)
 			BEGIN
 				IF @billTypeToUse = @type_Voucher
