@@ -83,9 +83,9 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			,intPricingNumber = ROW_NUMBER() over (partition by pf.intPriceFixationId order by pfd.intPriceFixationDetailId)
 			,pfd.intNumber
 			,dblPricedQuantity = isnull(invoiced.dblQtyShipped, pfd.dblQuantity)
-			,pfd.dblQuantityAppliedAndPriced
+			,dblQuantityAppliedAndPriced = isnull(pfd.dblQuantityAppliedAndPriced,0)
 			,pfd.dblLoadPriced
-			,pfd.dblLoadAppliedAndPriced
+			,dblLoadAppliedAndPriced = isnull(pfd.dblLoadAppliedAndPriced,0)
 			,dblCorrectAppliedAndPriced = null
 		from tblCTPriceFixation pf
 		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
@@ -147,7 +147,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			b
 		set
 			b.intNumber = (case when b.intNumber <> a.intPricingNumber then a.intPricingNumber else b.intNumber end)
-			,b.dblQuantityAppliedAndPriced = (case when b.dblQuantityAppliedAndPriced <> a.dblCorrectAppliedAndPriced then a.dblCorrectAppliedAndPriced else b.dblQuantityAppliedAndPriced end)
+			,b.dblQuantityAppliedAndPriced = (case when isnull(b.dblQuantityAppliedAndPriced,0) <> a.dblCorrectAppliedAndPriced then a.dblCorrectAppliedAndPriced else b.dblQuantityAppliedAndPriced end)
 			,b.dblLoadAppliedAndPriced = (case when @ysnLoad = 1 then a.dblCorrectAppliedAndPriced else null end)
 		from
 			@Pricing a
