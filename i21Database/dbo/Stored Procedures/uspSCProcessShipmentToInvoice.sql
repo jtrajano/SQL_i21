@@ -55,7 +55,7 @@ BEGIN
 
 					IF(ISNULL(@intInvoiceId,0) <> 0 AND @ysnDWG = 1)
 					BEGIN
-						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,@intTicketId
+						EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits,0,0--@intTicketId
 					END
 				END
 
