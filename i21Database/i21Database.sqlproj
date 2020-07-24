@@ -8275,6 +8275,8 @@
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfPaid.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
+    <Build Include="dbo\Stored Procedures\vyuAPGrainTransferChargesClearing.sql" />
+    <Build Include="dbo\Stored Procedures\vyuAPGrainTransferClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
