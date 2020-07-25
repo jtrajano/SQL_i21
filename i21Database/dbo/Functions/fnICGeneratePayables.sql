@@ -535,7 +535,7 @@ ORDER BY
 INSERT INTO @table
 SELECT DISTINCT
 		[intEntityVendorId]							=	A.intEntityVendorId
-		,[intTransactionType]						=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
+		,[intTransactionType]						=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1) END 
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
 		,[strSourceNumber]							=	A.strSourceNumber
@@ -679,8 +679,8 @@ SELECT DISTINCT
 			AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
 		,intShipViaId								=   NULL 
-		,intShipFromId								=	NULL 
-		,intShipFromEntityId						=	NULL 
+		,intShipFromId								=	IR.intShipFromId 
+		,intShipFromEntityId						=	IR.intShipFromEntityId 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
 		,[intLoadShipmentDetailId]	     			= NULL 
