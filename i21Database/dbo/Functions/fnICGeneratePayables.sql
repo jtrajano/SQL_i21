@@ -5,96 +5,97 @@ CREATE FUNCTION dbo.fnICGeneratePayables (
 )
 RETURNS @table TABLE
 (
-	  [intEntityVendorId]			    INT NULL 
-	, [intTransactionType]				INT NULL
-	, [dtmDate]							DATETIME NULL
-	, [strReference]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strSourceNumber]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strVendorOrderNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
-	, [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intPurchaseDetailId]				INT NULL 
-	, [intItemId]						INT NULL 
-	, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intPurchaseTaxGroupId]			INT NULL 
-	, [dblOrderQty]						NUMERIC(38, 20) NULL 
-	, [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
-	, [dblOpenReceive]					NUMERIC(38, 20) NULL 
-	, [dblQuantityToBill]				NUMERIC(38, 20) NULL 				
-	, [dblQtyToBillUnitQty]				NUMERIC(38, 20) NULL 
-	, [intQtyToBillUOMId]				INT NULL
-	, [dblQuantityBilled]				NUMERIC(38, 20) NULL 
-	, [intLineNo]						INT NULL 
-	, [intInventoryReceiptItemId]		INT NULL 
-	, [intInventoryReceiptChargeId]		INT NULL 
-	, [intContractChargeId]				INT NULL 
-	, [dblUnitCost]						NUMERIC(38, 20) NULL 
-	, [dblDiscount]						NUMERIC(38, 20) NULL 
-	, [dblTax]							NUMERIC(38, 20) NULL 
-	, [dblRate]							NUMERIC(38, 20) NULL 
-	, [strRateType]						NVARCHAR(200) COLLATE Latin1_General_CI_AS
-	, [intCurrencyExchangeRateTypeId]	INT NULL 
-	, [ysnSubCurrency]					BIT NULL 
-	, [intSubCurrencyCents]				INT NULL 
-	, [intAccountId]					INT NULL 
-	, [strAccountId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strAccountDesc]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strName]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strVendorId]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strShipVia]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strTerm]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intTermId]						INT NULL 
-	, [strContractNumber]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strBillOfLading]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intContractHeaderId]				INT NULL 
-	, [intContractDetailId]				INT NULL 
-	, [intContractSequence]				INT NULL 
-	, [intContractCostId]				INT NULL 
-	, [intScaleTicketId]				INT NULL 
-	, [strScaleTicketNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
-	, [intShipmentId]					INT NULL 
-	, [intLoadDetailId]					INT NULL 
-	, [intUnitMeasureId]				INT NULL 
-	, [strUOM]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intWeightUOMId]					INT NULL 
-	, [intCostUOMId]					INT NULL 
-	, [dblNetWeight]					NUMERIC(38, 20) NULL 	
-	, [strCostUOM]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [strgrossNetUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [dblWeightUnitQty]				NUMERIC(38, 20) NULL 
-	, [dblCostUnitQty]					NUMERIC(38, 20) NULL 
-	, [dblUnitQty]						NUMERIC(38, 20) NULL 
-	, [intCurrencyId]					INT NULL 
-	, [strCurrency]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intCostCurrencyId]				INT NULL 				
-	, [strCostCurrency]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 		
-	, [strVendorLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [str1099Form]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 			
-	, [str1099Type]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 				
-	, [intSubLocationId]				INT NULL 
-	, [strSubLocationName]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intStorageLocationId]			INT NULL 
-	, [strStorageLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [dblNetShippedWeight]				NUMERIC(38, 20) NULL 
-	, [dblWeightLoss]					NUMERIC(38, 20) NULL 
-	, [dblFranchiseWeight]				NUMERIC(38, 20) NULL 
-	, [dblClaimAmount]					NUMERIC(38, 20) NULL 			
-	, [intLocationId]					INT NULL 
-	, [strReceiptLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, [intInventoryShipmentItemId]		INT NULL 
-	, [intInventoryShipmentChargeId]	INT NULL 
-	, [intTaxGroupId]					INT NULL 
-	, [ysnReturn]						BIT NULL 
-	, [strTaxGroup]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
-	, intShipViaId						INT NULL
-	, intShipFromId						INT NULL
-	, intShipFromEntityId				INT NULL
-	, intPayToAddressId					INT NULL
-	, [intLoadShipmentId]				INT NULL	
-	, [intLoadShipmentDetailId]			INT NULL	
-	, [intLoadShipmentCostId]			INT NULL	
+  [intEntityVendorId]			    INT NULL 
+, [intTransactionType]				INT NULL
+, [dtmDate]							DATETIME NULL
+, [strReference]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strSourceNumber]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strVendorOrderNumber]			NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+, [strPurchaseOrderNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intPurchaseDetailId]				INT NULL 
+, [intItemId]						INT NULL 
+, [strMiscDescription]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strDescription]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intPurchaseTaxGroupId]			INT NULL 
+, [dblOrderQty]						NUMERIC(38, 20) NULL 
+, [dblPOOpenReceive]				NUMERIC(38, 20) NULL 
+, [dblOpenReceive]					NUMERIC(38, 20) NULL 
+, [dblQuantityToBill]				NUMERIC(38, 20) NULL 				
+, [dblQtyToBillUnitQty]				NUMERIC(38, 20) NULL 
+, [intQtyToBillUOMId]				INT NULL
+, [dblQuantityBilled]				NUMERIC(38, 20) NULL 
+, [intLineNo]						INT NULL 
+, [intInventoryReceiptItemId]		INT NULL 
+, [intInventoryReceiptChargeId]		INT NULL 
+, [intContractChargeId]				INT NULL 
+, [dblUnitCost]						NUMERIC(38, 20) NULL 
+, [dblDiscount]						NUMERIC(38, 20) NULL 
+, [dblTax]							NUMERIC(38, 20) NULL 
+, [dblRate]							NUMERIC(38, 20) NULL 
+, [strRateType]						NVARCHAR(200) COLLATE Latin1_General_CI_AS
+, [intCurrencyExchangeRateTypeId]	INT NULL 
+, [ysnSubCurrency]					BIT NULL 
+, [intSubCurrencyCents]				INT NULL 
+, [intAccountId]					INT NULL 
+, [strAccountId]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strAccountDesc]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strName]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strVendorId]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strShipVia]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strTerm]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intTermId]						INT NULL 
+, [intFreightTermId]					INT NULL 
+, [strContractNumber]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strBillOfLading]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intContractHeaderId]				INT NULL 
+, [intContractDetailId]				INT NULL 
+, [intContractSequence]				INT NULL 
+, [intContractCostId]				INT NULL 
+, [intScaleTicketId]				INT NULL 
+, [strScaleTicketNumber]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strLoadShipmentNumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL 
+, [intShipmentId]					INT NULL 
+, [intLoadDetailId]					INT NULL 
+, [intUnitMeasureId]				INT NULL 
+, [strUOM]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intWeightUOMId]					INT NULL 
+, [intCostUOMId]					INT NULL 
+, [dblNetWeight]					NUMERIC(38, 20) NULL 	
+, [strCostUOM]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [strgrossNetUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [dblWeightUnitQty]				NUMERIC(38, 20) NULL 
+, [dblCostUnitQty]					NUMERIC(38, 20) NULL 
+, [dblUnitQty]						NUMERIC(38, 20) NULL 
+, [intCurrencyId]					INT NULL 
+, [strCurrency]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intCostCurrencyId]				INT NULL 				
+, [strCostCurrency]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 		
+, [strVendorLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [str1099Form]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 			
+, [str1099Type]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 				
+, [intSubLocationId]				INT NULL 
+, [strSubLocationName]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intStorageLocationId]			INT NULL 
+, [strStorageLocationName]			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [dblNetShippedWeight]				NUMERIC(38, 20) NULL 
+, [dblWeightLoss]					NUMERIC(38, 20) NULL 
+, [dblFranchiseWeight]				NUMERIC(38, 20) NULL 
+, [dblClaimAmount]					NUMERIC(38, 20) NULL 			
+, [intLocationId]					INT NULL 
+, [strReceiptLocation]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, [intInventoryShipmentItemId]		INT NULL 
+, [intInventoryShipmentChargeId]	INT NULL 
+, [intTaxGroupId]					INT NULL 
+, [ysnReturn]						BIT NULL 
+, [strTaxGroup]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
+, intShipViaId						INT NULL
+, intShipFromId						INT NULL
+, intShipFromEntityId				INT NULL
+, intPayToAddressId					INT NULL
+, [intLoadShipmentId]				INT NULL	
+, [intLoadShipmentDetailId]			INT NULL	
+, [intLoadShipmentCostId]			INT NULL	
 )
 AS
 BEGIN
@@ -191,6 +192,7 @@ SELECT DISTINCT
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
+	,[inFreightTermId]			=	A.intFreightTermId
 	,[strContractNumber]		=	Contracts.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	Contracts.intContractHeaderId
@@ -547,6 +549,7 @@ SELECT DISTINCT
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
+		,[intFreightTermId]							=	IR.intFreightTermId
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
