@@ -93,7 +93,7 @@ BEGIN
 				UPDATE voucher
 					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
 						--,@amountDue = voucher.dblAmountDue
-						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN (voucher.dblTotal - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
+						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN (voucher.dblAmountDue - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 													ELSE 0 END
@@ -114,7 +114,7 @@ BEGIN
 				UPDATE voucher
 					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
 						--,@amountDue = voucher.dblAmountDue
-						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN (voucher.dblTotal - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
+						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN (voucher.dblAmountDue - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 													ELSE 0 END
@@ -165,7 +165,7 @@ BEGIN
 						ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest
 						END
 					--,@amountDue = voucher.dblAmountDue
-					,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN (voucher.dblTotal - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
+					,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN (voucher.dblAmountDue - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 												ELSE 0 END

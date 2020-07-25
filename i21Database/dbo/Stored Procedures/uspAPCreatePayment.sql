@@ -213,7 +213,7 @@ BEGIN
 							FROM 
 							(
 							SELECT 
-								SUM(A.dblAmountDue) dblAmountDue
+								SUM(A.dblAmountDue) - SUM(A.dblPaymentTemp) dblAmountDue
 							FROM tblAPBill A
 							WHERE 
 								A.intBillId IN (SELECT intID FROM #tmpBillsId)
@@ -369,7 +369,7 @@ BEGIN
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
 								),
 				[dblPayment]	= ISNULL(C.dblPayment,
-									(A.dblTotal - A.dblPaymentTemp)
+									(A.dblAmountDue - A.dblPaymentTemp)
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
 								  ),
 				[dblInterest]	= A.dblInterest,
