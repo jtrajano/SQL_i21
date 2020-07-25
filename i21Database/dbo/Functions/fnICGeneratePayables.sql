@@ -732,8 +732,8 @@ SELECT DISTINCT
 			AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
 		,intShipViaId								=   NULL 
-		,intShipFromId								=	NULL 
-		,intShipFromEntityId						=	NULL 
+		,intShipFromId								=	IR.intShipFromId 
+		,intShipFromEntityId						=	IR.intShipFromEntityId 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
 		,[intLoadShipmentDetailId]	     			= NULL 
