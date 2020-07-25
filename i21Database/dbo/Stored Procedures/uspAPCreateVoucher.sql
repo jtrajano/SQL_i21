@@ -128,7 +128,17 @@ BEGIN TRY
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpVoucherPayables')) DROP TABLE #tmpVoucherPayables
 	--reinsert voucher payables to new VoucherPayable so that we could update the data of intBillId	
 	SELECT 
-		DENSE_RANK() OVER(ORDER BY intEntityVendorId,
+		A.*
+	INTO #tmpVoucherPayables
+	FROM @voucherPayables A
+	
+	--GENERATE PARITION IF NOT PROVIDED
+	UPDATE A
+		SET A.intPartitionId = partitionData.intPartitionId
+	FROM #tmpVoucherPayables A
+	OUTER APPLY (
+		SELECT 
+			DENSE_RANK() OVER(ORDER BY intEntityVendorId,
 									intTransactionType,
 									intLocationId,
 									intShipToId,
@@ -137,35 +147,14 @@ BEGIN TRY
 									intPayToAddressId,
 									intCurrencyId,
 									strVendorOrderNumber,
-									strCheckComment) AS intNewPartitionId,
-		A.*
-	INTO #tmpVoucherPayables
-	FROM @voucherPayables A
-	
-	--GENERATE PARITION IF NOT PROVIDED
-	UPDATE A
-		SET A.intPartitionId = A.intNewPartitionId
-		--partitionData.intPartitionId
-	FROM #tmpVoucherPayables A
-	-- OUTER APPLY (
-	-- 	SELECT 
-	-- 		DENSE_RANK() OVER(ORDER BY intEntityVendorId,
-	-- 								intTransactionType,
-	-- 								intLocationId,
-	-- 								intShipToId,
-	-- 								intShipFromId,
-	-- 								intShipFromEntityId,
-	-- 								intPayToAddressId,
-	-- 								intCurrencyId,
-	-- 								strVendorOrderNumber,
-	-- 								strCheckComment) intPartitionId
-	-- 		,B.intVoucherPayableId
-	-- 	FROM #tmpVoucherPayables B
-	-- 	WHERE B.intVoucherPayableId = A.intVoucherPayableId
-	-- ) partitionData
+									strCheckComment) intPartitionId
+			,B.intVoucherPayableId
+		FROM #tmpVoucherPayables B
+		WHERE B.intVoucherPayableId = A.intVoucherPayableId
+	) partitionData
 	WHERE NULLIF(A.intPartitionId,0) IS NULL
 
-	ALTER TABLE #tmpVoucherPayables DROP COLUMN intVoucherPayableId, intNewPartitionId
+	ALTER TABLE #tmpVoucherPayables DROP COLUMN intVoucherPayableId
 	--THERE SHOULD BE NO CHANGES ON PRIMARY KEY (intVoucherPayableId)
 	INSERT INTO @voucherPayablesData
 	SELECT 
