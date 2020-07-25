@@ -247,7 +247,11 @@ BEGIN
 			,@userId = @intEntityUserSecurityId
 			,@throwError = 0
 			,@error = @throwedError OUTPUT
-			,@createdVouchersId = @intBillId OUTPUT
+			,@createdVouchersId = @strBillIds OUTPUT
+
+
+		--THIS ASSUMES THAT THE VOUCHER CREATED IS ONLY ONE
+		SET @intBillId = CAST(@strBillIds AS INT)
 
 		-- Handle errors thrown by AP
 		IF NULLIF(@throwedError, '') IS NOT NULL
