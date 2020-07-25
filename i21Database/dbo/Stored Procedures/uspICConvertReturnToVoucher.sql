@@ -274,7 +274,10 @@ BEGIN
 				,@userId = @intEntityVendorId
 				,@throwError = 0
 				,@error = @throwedError OUTPUT
-				,@createdVouchersId = @intBillId OUTPUT
+				,@createdVouchersId = @strBillIds OUTPUT
+
+			--THIS ASSUMES THAT THE VOUCHER CREATED IS ONLY ONE
+			SET @intBillId = CAST(@strBillIds AS INT)
 
 			--EXEC [dbo].[uspAPCreateBillData]
 			--	@userId = @intEntityUserSecurityId
