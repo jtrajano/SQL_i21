@@ -232,6 +232,7 @@ BEGIN
 														ELSE A.intTermId END
 			,[strTerm]							=	CASE WHEN contractTerm.intTermID IS NOT NULL THEN contractTerm.strTerm
 														ELSE term.strTerm END
+			,[intFreightTermId]					=	A.intFreightTermId
 			,[strBillOfLading]					=	A.strBillOfLading
 			,[int1099Form]						=	CASE 	WHEN patron.intEntityId IS NOT NULL 
 																AND A.intItemId > 0
@@ -377,7 +378,8 @@ BEGIN
 		,[intShipViaId]					
 		,[strShipVia]					
 		,[intTermId]						
-		,[strTerm]						
+		,[strTerm]	
+		,[intFreightTermId]					
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
@@ -459,7 +461,8 @@ BEGIN
 		,[intShipViaId]					
 		,[strShipVia]					
 		,[intTermId]						
-		,[strTerm]						
+		,[strTerm]		
+		,[intFreightTermId]				
 		,[strBillOfLading]
 		,[int1099Form]
 		,[int1099Category]				
