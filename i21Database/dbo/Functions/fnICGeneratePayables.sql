@@ -45,6 +45,7 @@ RETURNS @table TABLE
 , [strShipVia]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [strTerm]							NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [intTermId]						INT NULL 
+, [intFreightTermId]					INT NULL 
 , [strContractNumber]				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [strBillOfLading]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL 
 , [intContractHeaderId]				INT NULL 
@@ -186,6 +187,7 @@ SELECT DISTINCT
 	,[strShipVia]				=	E.strShipVia
 	,[strTerm]					=	NULL
 	,[intTermId]				=	NULL
+	,[inFreightTermId]			=	A.intFreightTermId
 	,[strContractNumber]		=	Contracts.strContractNumber
 	,[strBillOfLading]			=	A.strBillOfLading
 	,[intContractHeaderId]		=	Contracts.intContractHeaderId
@@ -567,6 +569,7 @@ SELECT DISTINCT
 		,[strShipVia]								=	NULL
 		,[strTerm]									=	NULL
 		,[intTermId]								=	NULL
+		,[intFreightTermId]							=	IR.intFreightTermId
 		,[strContractNumber]						=	A.strContractNumber
 		,[strBillOfLading]							=	NULL
 		,[intContractHeaderId]						=	A.intContractHeaderId
