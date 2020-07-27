@@ -21,10 +21,25 @@ BEGIN TRY
 		,@intTestPropertyId INT
 	DECLARE @strPropertyName NVARCHAR(100)
 		,@intPropertyId INT
+	DECLARE @tblQMTestStage TABLE (intTestStageId INT)
 
-	SELECT @intTestStageId = MIN(intTestStageId)
+	INSERT INTO @tblQMTestStage (intTestStageId)
+	SELECT intTestStageId
 	FROM tblQMTestStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intTestStageId = MIN(intTestStageId)
+	FROM @tblQMTestStage
+
+	IF @intTestStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMTestStage t
+	JOIN @tblQMTestStage pt ON pt.intTestStageId = t.intTestStageId
 
 	WHILE @intTestStageId > 0
 	BEGIN
@@ -378,10 +393,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intTestStageId = MIN(intTestStageId)
-		FROM tblQMTestStage
+		FROM @tblQMTestStage
 		WHERE intTestStageId > @intTestStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMTestStage t
+	JOIN @tblQMTestStage pt ON pt.intTestStageId = t.intTestStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

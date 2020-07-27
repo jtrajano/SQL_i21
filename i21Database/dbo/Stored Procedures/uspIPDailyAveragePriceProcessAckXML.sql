@@ -17,12 +17,27 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKDailyAveragePriceAckStage TABLE (intDailyAveragePriceAckStageId INT)
 
-	SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
-	FROM tblRKDailyAveragePriceAckStage WITH (NOLOCK)
+	INSERT INTO @tblRKDailyAveragePriceAckStage (intDailyAveragePriceAckStageId)
+	SELECT intDailyAveragePriceAckStageId
+	FROM tblRKDailyAveragePriceAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		--AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
+	FROM @tblRKDailyAveragePriceAckStage
+
+	IF @intDailyAveragePriceAckStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKDailyAveragePriceAckStage t
+	JOIN @tblRKDailyAveragePriceAckStage pt ON pt.intDailyAveragePriceAckStageId = t.intDailyAveragePriceAckStageId
 
 	WHILE @intDailyAveragePriceAckStageId > 0
 	BEGIN
@@ -139,12 +154,18 @@ BEGIN TRY
 		END
 
 		SELECT @intDailyAveragePriceAckStageId = MIN(intDailyAveragePriceAckStageId)
-		FROM tblRKDailyAveragePriceAckStage WITH (NOLOCK)
+		FROM @tblRKDailyAveragePriceAckStage
 		WHERE intDailyAveragePriceAckStageId > @intDailyAveragePriceAckStageId
-			AND strMessage = 'Success'
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND strMessage = 'Success'
+			--AND ISNULL(strFeedStatus, '') = ''
 			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKDailyAveragePriceAckStage t
+	JOIN @tblRKDailyAveragePriceAckStage pt ON pt.intDailyAveragePriceAckStageId = t.intDailyAveragePriceAckStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKOptionsMonthPreStage (intOptionMonthPreStageId)
 	SELECT intOptionMonthPreStageId
-	FROM tblRKOptionsMonthPreStage WITH (NOLOCK)
+	FROM tblRKOptionsMonthPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intOptionMonthPreStageId = MIN(intOptionMonthPreStageId)
 	FROM @tblRKOptionsMonthPreStage
+
+	IF @intOptionMonthPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKOptionsMonthPreStage t
+	JOIN @tblRKOptionsMonthPreStage pt ON pt.intOptionMonthPreStageId = t.intOptionMonthPreStageId
 
 	WHILE @intOptionMonthPreStageId IS NOT NULL
 	BEGIN
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblRKOptionsMonthPreStage
 		WHERE intOptionMonthPreStageId > @intOptionMonthPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKOptionsMonthPreStage t
+	JOIN @tblRKOptionsMonthPreStage pt ON pt.intOptionMonthPreStageId = t.intOptionMonthPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

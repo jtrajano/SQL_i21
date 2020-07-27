@@ -19,10 +19,25 @@ BEGIN TRY
 		,@intListRefId INT
 	DECLARE @strListItemXML NVARCHAR(MAX)
 		,@intListItemId INT
+	DECLARE @tblQMListStage TABLE (intListStageId INT)
 
-	SELECT @intListStageId = MIN(intListStageId)
+	INSERT INTO @tblQMListStage (intListStageId)
+	SELECT intListStageId
 	FROM tblQMListStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intListStageId = MIN(intListStageId)
+	FROM @tblQMListStage
+
+	IF @intListStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMListStage t
+	JOIN @tblQMListStage pt ON pt.intListStageId = t.intListStageId
 
 	WHILE @intListStageId > 0
 	BEGIN
@@ -311,10 +326,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intListStageId = MIN(intListStageId)
-		FROM tblQMListStage
+		FROM @tblQMListStage
 		WHERE intListStageId > @intListStageId
-			AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMListStage t
+	JOIN @tblQMListStage pt ON pt.intListStageId = t.intListStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

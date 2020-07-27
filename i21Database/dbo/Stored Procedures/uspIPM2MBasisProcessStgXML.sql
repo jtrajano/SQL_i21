@@ -40,10 +40,25 @@ BEGIN TRY
 		,@intPricingTypeId INT
 		,@intContractTypeId INT
 		,@intUnitMeasureId INT
+	DECLARE @tblRKM2MBasisStage TABLE (intM2MBasisStageId INT)
 
-	SELECT @intM2MBasisStageId = MIN(intM2MBasisStageId)
+	INSERT INTO @tblRKM2MBasisStage (intM2MBasisStageId)
+	SELECT intM2MBasisStageId
 	FROM tblRKM2MBasisStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intM2MBasisStageId = MIN(intM2MBasisStageId)
+	FROM @tblRKM2MBasisStage
+
+	IF @intM2MBasisStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKM2MBasisStage t
+	JOIN @tblRKM2MBasisStage pt ON pt.intM2MBasisStageId = t.intM2MBasisStageId
 
 	WHILE @intM2MBasisStageId > 0
 	BEGIN
@@ -601,10 +616,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intM2MBasisStageId = MIN(intM2MBasisStageId)
-		FROM tblRKM2MBasisStage
+		FROM @tblRKM2MBasisStage
 		WHERE intM2MBasisStageId > @intM2MBasisStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKM2MBasisStage t
+	JOIN @tblRKM2MBasisStage pt ON pt.intM2MBasisStageId = t.intM2MBasisStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
