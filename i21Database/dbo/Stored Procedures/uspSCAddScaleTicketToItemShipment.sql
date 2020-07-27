@@ -135,6 +135,9 @@ BEGIN
 		,ysnDestinationWeightsAndGrades
 		,intLoadShipped
 		,ysnAllowInvoice
+		,intItemContractHeaderId 
+		,intItemContractDetailId
+
 		
 	)
 
@@ -158,7 +161,7 @@ BEGIN
 		,intForexRateTypeId			= NULL
 		,dblForexRate				= NULL
 		,intItemId					= LI.intItemId
-		,intLineNo					= CNT.intContractDetailId
+		,intLineNo					= CASE WHEN ISNULL(@splitDistribution,'') <> 'ICN' THEN CNT.intContractDetailId ELSE NULL END
 		,intOwnershipType			= CASE
 									  WHEN LI.ysnIsStorage = 0 THEN 1
 									  WHEN LI.ysnIsStorage = 1 THEN 2
@@ -248,7 +251,7 @@ BEGIN
 		,intItemLotGroup			= LI.intId
 		,intDestinationGradeId		= SC.intGradeId
 		,intDestinationWeightId		= SC.intWeightId
-		,intOrderId					= CNT.intContractHeaderId
+		,intOrderId					=  CASE WHEN ISNULL(@splitDistribution,'') <> 'ICN' THEN CNT.intContractHeaderId ELSE NULL END
 		,dtmShipDate				= SC.dtmTicketDateTime
 		,intSourceId				= SC.intTicketId
 		,intSourceType				= 1
@@ -278,6 +281,8 @@ BEGIN
 											
 										END
 									END
+		,intItemContractHeaderId = ICT.intItemContractHeaderId
+		,intItemContractDetailId = ICT.intItemContractDetailId
 		FROM @Items LI INNER JOIN  dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId
 		LEFT JOIN (
 			SELECT CTD.intContractHeaderId
@@ -325,6 +330,9 @@ BEGIN
 			) PCDInvoice
 		) CNT ON CNT.intContractDetailId = LI.intTransactionDetailId
 		INNER JOIN tblICItem IC ON IC.intItemId = LI.intItemId
+		LEFT JOIN tblCTItemContractDetail ICT
+			ON LI.intTransactionDetailId = ICT.intItemContractDetailId
+				AND ISNULL(@splitDistribution,'') = 'ICN'
 		LEFT JOIN tblICLot ICL ON ICL.intLotId = SC.intLotId
 		OUTER APPLY(
 			SELECT TOP 1 
@@ -333,12 +341,12 @@ BEGIN
 			WHERE intContractDetailId = LI.intTransactionDetailId
 		)Fixation
 		WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
-			AND ISNULL(SC.intItemContractDetailId,0) = 0
+			
 
 
 
 	----Item Contract
-
+/*
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
 		,intEntityCustomerId
@@ -379,6 +387,7 @@ BEGIN
 		,intItemContractDetailId
 		,intItemContractHeaderId
 	)
+
 
 	SELECT
 		intOrderType					= @intOrderType
@@ -427,7 +436,7 @@ BEGIN
 	INNER JOIN vyuCTItemContractHeader CTH
 		ON CTD.intItemContractHeaderId = CTH.intItemContractHeaderId
 	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
-		AND ISNULL(SC.intItemContractDetailId,0) > 0
+		AND ISNULL(SC.intItemContractDetailId,0) > 0 */
 
 
 	--SELECT * FROM @Items
