@@ -93,8 +93,14 @@ BEGIN
 						else
 								''
 						end
+					+ 
+						CASE 
+							WHEN @strLocationName <> '' AND @strPermission <> '' THEN ' and '
+							WHEN @strLocationName = '' AND @strPermission <> '' THEN ' where '
+							ELSE ''
+						END 
 					+
-						case when @strPermission <> '' then ' where sl.intLocationId in ( ' + @strPermission + ' )'
+						case when @strPermission <> '' then 'sl.intLocationId in ( ' + @strPermission + ' )'
 						else
 								''
 						end
