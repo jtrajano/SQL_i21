@@ -173,6 +173,9 @@ BEGIN TRY
 			RETURN
 		END
 
+		select * into #tempMisMatchPromotionalItem from tblSTPromotionSalesList 
+		where (LOWER(strPromoType) = 'mixmatch' OR Lower(strPromoType) = 'm') and intPromoUnits > 1
+
 		INSERT INTO @tblTempPMM
 							SELECT 
 								intRCN
@@ -232,24 +235,71 @@ BEGIN TRY
 			, CASE WHEN DEPT.ysnTobacco = 1 THEN 'PACKS' ELSE 'CANS' END AS strUnitOfMeasure
 			, CASE WHEN strTrpPaycode != 'Change' THEN CAST(dblTrlQty as INT) ELSE 0 END AS intQuantitySold
 			, 1 AS intConsumerUnits
-			, CASE WHEN DEPT.ysnTobacco = 1 
-				AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-				AND TR.dblTrlQty >= 2 
-			  THEN 'Y' 
-			  ELSE 'N' END AS strMultiPackIndicator
-			, CASE WHEN DEPT.ysnTobacco = 1 
-				AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-				AND TR.dblTrlQty >= 2
-			  THEN 2
-			  ELSE NULL END AS intMultiPackRequiredQuantity
-			, CASE WHEN DEPT.ysnTobacco = 1 
-				AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-				AND TR.dblTrlQty >= 2
-			  THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
-			  ELSE NULL END AS dblMultiPackDiscountAmount
+			-- , CASE WHEN DEPT.ysnTobacco = 1 
+			-- 	AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+			-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+			-- 	AND TR.dblTrlQty >= 2 
+			--   THEN 'Y' 
+			--   ELSE 'N' END AS strMultiPackIndicator
+			-- NEW CODE-- ST-1717
+				,CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 'Y'
+					ELSE 'N'
+				END AS strMultiPackIndicator	
+				-- NEW CODE-- ST-1717
+				-- , CASE WHEN DEPT.ysnTobacco = 1 
+				-- 	AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+				-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+				-- 	AND TR.dblTrlQty >= 2
+				--   THEN 2
+				--   ELSE NULL END AS intMultiPackRequiredQuantity
+					-- NEW CODE-- ST-1717
+				,
+				CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID) > 0
+				THEN 
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID)
+					ELSE NULL
+					END
+				ELSE
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 2 
+					ELSE NULL
+					END
+				END 
+				AS intMultiPackRequiredQuantity	
+				-- NEW CODE-- ST-1717
+				-- , CASE WHEN DEPT.ysnTobacco = 1 
+				-- 	AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+				-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+				-- 	AND TR.dblTrlQty >= 2
+				--   THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
+				--   ELSE NULL END AS dblMultiPackDiscountAmount
+				-- NEW CODE-- ST-1717
+				,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID) > 0
+				THEN 
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 
+						CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID AND intPromoUnits = dblTrlMatchLineTrlMatchQuantity) > 0
+						THEN 
+							dblTrlMatchLineTrlPromoAmount
+						ELSE
+							dblTrlMatchLineTrlPromoAmount * (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID)
+						END
+					ELSE NULL
+					END
+				ELSE
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 
+						CASE WHEN dblTrlMatchLineTrlMatchQuantity = 2
+						THEN dblTrlMatchLineTrlPromoAmount
+						ELSE dblTrlMatchLineTrlPromoAmount * 2
+						END
+					ELSE NULL
+					END
+				END 
+				AS dblMultiPackDiscountAmount	
+				-- NEW CODE-- ST-1717
 			, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
 			, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
 			, CASE WHEN strTrpPaycode = 'COUPONS' THEN 'Coupon' ELSE '' END AS strMFGDealNameONE
