@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKFuturesSettlementPricePreStage (intFutureSettlementPricePreStageId)
 	SELECT intFutureSettlementPricePreStageId
-	FROM tblRKFuturesSettlementPricePreStage WITH (NOLOCK)
+	FROM tblRKFuturesSettlementPricePreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFutureSettlementPricePreStageId = MIN(intFutureSettlementPricePreStageId)
 	FROM @tblRKFuturesSettlementPricePreStage
+
+	IF @intFutureSettlementPricePreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFuturesSettlementPricePreStage t
+	JOIN @tblRKFuturesSettlementPricePreStage pt ON pt.intFutureSettlementPricePreStageId = t.intFutureSettlementPricePreStageId
 
 	WHILE @intFutureSettlementPricePreStageId IS NOT NULL
 	BEGIN
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblRKFuturesSettlementPricePreStage
 		WHERE intFutureSettlementPricePreStageId > @intFutureSettlementPricePreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFuturesSettlementPricePreStage t
+	JOIN @tblRKFuturesSettlementPricePreStage pt ON pt.intFutureSettlementPricePreStageId = t.intFutureSettlementPricePreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

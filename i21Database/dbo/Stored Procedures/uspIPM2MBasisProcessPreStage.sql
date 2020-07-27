@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKM2MBasisPreStage (intM2MBasisPreStageId)
 	SELECT intM2MBasisPreStageId
-	FROM tblRKM2MBasisPreStage WITH (NOLOCK)
+	FROM tblRKM2MBasisPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intM2MBasisPreStageId = MIN(intM2MBasisPreStageId)
 	FROM @tblRKM2MBasisPreStage
+
+	IF @intM2MBasisPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKM2MBasisPreStage t
+	JOIN @tblRKM2MBasisPreStage pt ON pt.intM2MBasisPreStageId = t.intM2MBasisPreStageId
 
 	WHILE @intM2MBasisPreStageId IS NOT NULL
 	BEGIN
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblRKM2MBasisPreStage
 		WHERE intM2MBasisPreStageId > @intM2MBasisPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKM2MBasisPreStage t
+	JOIN @tblRKM2MBasisPreStage pt ON pt.intM2MBasisPreStageId = t.intM2MBasisPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

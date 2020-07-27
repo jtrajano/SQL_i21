@@ -19,11 +19,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKFutOptTransactionHeaderPreStage (intFutOptTransactionHeaderPreStageId)
 	SELECT intFutOptTransactionHeaderPreStageId
-	FROM tblRKFutOptTransactionHeaderPreStage WITH (NOLOCK)
+	FROM tblRKFutOptTransactionHeaderPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFutOptTransactionHeaderPreStageId = MIN(intFutOptTransactionHeaderPreStageId)
 	FROM @tblRKFutOptTransactionHeaderPreStage
+
+	IF @intFutOptTransactionHeaderPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFutOptTransactionHeaderPreStage t
+	JOIN @tblRKFutOptTransactionHeaderPreStage pt ON pt.intFutOptTransactionHeaderPreStageId = t.intFutOptTransactionHeaderPreStageId
 
 	WHILE @intFutOptTransactionHeaderPreStageId IS NOT NULL
 	BEGIN
@@ -175,6 +185,12 @@ BEGIN TRY
 		FROM @tblRKFutOptTransactionHeaderPreStage
 		WHERE intFutOptTransactionHeaderPreStageId > @intFutOptTransactionHeaderPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFutOptTransactionHeaderPreStage t
+	JOIN @tblRKFutOptTransactionHeaderPreStage pt ON pt.intFutOptTransactionHeaderPreStageId = t.intFutOptTransactionHeaderPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

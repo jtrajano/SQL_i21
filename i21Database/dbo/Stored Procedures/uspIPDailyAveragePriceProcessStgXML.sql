@@ -32,11 +32,26 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKDailyAveragePriceStage TABLE (intDailyAveragePriceStageId INT)
 
-	SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
+	INSERT INTO @tblRKDailyAveragePriceStage (intDailyAveragePriceStageId)
+	SELECT intDailyAveragePriceStageId
 	FROM tblRKDailyAveragePriceStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
+	FROM @tblRKDailyAveragePriceStage
+
+	IF @intDailyAveragePriceStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKDailyAveragePriceStage t
+	JOIN @tblRKDailyAveragePriceStage pt ON pt.intDailyAveragePriceStageId = t.intDailyAveragePriceStageId
 
 	WHILE @intDailyAveragePriceStageId > 0
 	BEGIN
@@ -653,11 +668,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
-		FROM tblRKDailyAveragePriceStage
+		FROM @tblRKDailyAveragePriceStage
 		WHERE intDailyAveragePriceStageId > @intDailyAveragePriceStageId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKDailyAveragePriceStage t
+	JOIN @tblRKDailyAveragePriceStage pt ON pt.intDailyAveragePriceStageId = t.intDailyAveragePriceStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

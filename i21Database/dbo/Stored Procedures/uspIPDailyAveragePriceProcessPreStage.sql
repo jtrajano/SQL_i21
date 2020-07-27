@@ -29,11 +29,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKDailyAveragePricePreStage (intDailyAveragePricePreStageId)
 	SELECT intDailyAveragePricePreStageId
-	FROM tblRKDailyAveragePricePreStage WITH (NOLOCK)
+	FROM tblRKDailyAveragePricePreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intDailyAveragePricePreStageId = MIN(intDailyAveragePricePreStageId)
 	FROM @tblRKDailyAveragePricePreStage
+
+	IF @intDailyAveragePricePreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKDailyAveragePricePreStage t
+	JOIN @tblRKDailyAveragePricePreStage pt ON pt.intDailyAveragePricePreStageId = t.intDailyAveragePricePreStageId
 
 	WHILE @intDailyAveragePricePreStageId IS NOT NULL
 	BEGIN
@@ -98,6 +108,12 @@ BEGIN TRY
 		FROM @tblRKDailyAveragePricePreStage
 		WHERE intDailyAveragePricePreStageId > @intDailyAveragePricePreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKDailyAveragePricePreStage t
+	JOIN @tblRKDailyAveragePricePreStage pt ON pt.intDailyAveragePricePreStageId = t.intDailyAveragePricePreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

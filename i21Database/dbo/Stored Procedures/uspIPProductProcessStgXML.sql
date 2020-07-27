@@ -68,10 +68,25 @@ BEGIN TRY
 		,@TestId INT
 		,@PropertyId INT
 		,@ProductPropertyId INT
+	DECLARE @tblQMProductStage TABLE (intProductStageId INT)
 
-	SELECT @intProductStageId = MIN(intProductStageId)
+	INSERT INTO @tblQMProductStage (intProductStageId)
+	SELECT intProductStageId
 	FROM tblQMProductStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intProductStageId = MIN(intProductStageId)
+	FROM @tblQMProductStage
+
+	IF @intProductStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMProductStage t
+	JOIN @tblQMProductStage pt ON pt.intProductStageId = t.intProductStageId
 
 	WHILE @intProductStageId > 0
 	BEGIN
@@ -1423,10 +1438,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intProductStageId = MIN(intProductStageId)
-		FROM tblQMProductStage
+		FROM @tblQMProductStage
 		WHERE intProductStageId > @intProductStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMProductStage t
+	JOIN @tblQMProductStage pt ON pt.intProductStageId = t.intProductStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

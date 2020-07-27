@@ -18,10 +18,25 @@ BEGIN TRY
 		,@intNewFutureMarketId INT
 		,@dblOldForecastPrice NUMERIC(18, 6)
 		,@dblNewForecastPrice NUMERIC(18, 6)
+	DECLARE @tblRKFutureMarketStage TABLE (intFutureMarketStageId INT)
 
-	SELECT @intFutureMarketStageId = MIN(intFutureMarketStageId)
+	INSERT INTO @tblRKFutureMarketStage (intFutureMarketStageId)
+	SELECT intFutureMarketStageId
 	FROM tblRKFutureMarketStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intFutureMarketStageId = MIN(intFutureMarketStageId)
+	FROM @tblRKFutureMarketStage
+
+	IF @intFutureMarketStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFutureMarketStage t
+	JOIN @tblRKFutureMarketStage pt ON pt.intFutureMarketStageId = t.intFutureMarketStageId
 
 	WHILE @intFutureMarketStageId > 0
 	BEGIN
@@ -153,10 +168,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intFutureMarketStageId = MIN(intFutureMarketStageId)
-		FROM tblRKFutureMarketStage
+		FROM @tblRKFutureMarketStage
 		WHERE intFutureMarketStageId > @intFutureMarketStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFutureMarketStage t
+	JOIN @tblRKFutureMarketStage pt ON pt.intFutureMarketStageId = t.intFutureMarketStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
