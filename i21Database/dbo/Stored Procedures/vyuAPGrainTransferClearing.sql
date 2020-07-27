@@ -52,7 +52,7 @@ SELECT
     AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
-    ,0
+    ,CAST(0 AS BIT) ysnAllowVoucher
     ,APClearing.intAccountId
 	,APClearing.strAccountId
 FROM tblICInventoryReceipt receipt 
