@@ -143,6 +143,8 @@ BEGIN
                 ([strTransactionType] <> 'Credit Memo'	AND [dblBaseInvoiceTotal] = 0.000000 AND [dblInvoiceTotal] = 0.000000)
                 OR
                 ([strTransactionType] = 'Credit Memo' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
+				OR
+				([strTransactionType] = 'Invoice' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000 AND [dblAmountDue] <> 0.000000)
 				)
     ) P
     INNER JOIN (
