@@ -26,11 +26,26 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKOptionsMatchPnSHeaderStage TABLE (intOptionsMatchPnSHeaderStageId INT)
 
-	SELECT @intOptionsMatchPnSHeaderStageId = MIN(intOptionsMatchPnSHeaderStageId)
+	INSERT INTO @tblRKOptionsMatchPnSHeaderStage (intOptionsMatchPnSHeaderStageId)
+	SELECT intOptionsMatchPnSHeaderStageId
 	FROM tblRKOptionsMatchPnSHeaderStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intOptionsMatchPnSHeaderStageId = MIN(intOptionsMatchPnSHeaderStageId)
+	FROM @tblRKOptionsMatchPnSHeaderStage
+
+	IF @intOptionsMatchPnSHeaderStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKOptionsMatchPnSHeaderStage t
+	JOIN @tblRKOptionsMatchPnSHeaderStage pt ON pt.intOptionsMatchPnSHeaderStageId = t.intOptionsMatchPnSHeaderStageId
 
 	WHILE @intOptionsMatchPnSHeaderStageId > 0
 	BEGIN
@@ -392,11 +407,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intOptionsMatchPnSHeaderStageId = MIN(intOptionsMatchPnSHeaderStageId)
-		FROM tblRKOptionsMatchPnSHeaderStage
+		FROM @tblRKOptionsMatchPnSHeaderStage
 		WHERE intOptionsMatchPnSHeaderStageId > @intOptionsMatchPnSHeaderStageId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKOptionsMatchPnSHeaderStage t
+	JOIN @tblRKOptionsMatchPnSHeaderStage pt ON pt.intOptionsMatchPnSHeaderStageId = t.intOptionsMatchPnSHeaderStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

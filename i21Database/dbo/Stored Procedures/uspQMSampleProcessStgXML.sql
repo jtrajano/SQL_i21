@@ -130,11 +130,26 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblQMSampleStage TABLE (intSampleStageId INT)
 
-	SELECT @intSampleStageId = MIN(intSampleStageId)
-	FROM tblQMSampleStage WITH (NOLOCK)
+	INSERT INTO @tblQMSampleStage (intSampleStageId)
+	SELECT intSampleStageId
+	FROM tblQMSampleStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intSampleStageId = MIN(intSampleStageId)
+	FROM @tblQMSampleStage
+
+	IF @intSampleStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMSampleStage t
+	JOIN @tblQMSampleStage pt ON pt.intSampleStageId = t.intSampleStageId
 
 	WHILE @intSampleStageId > 0
 	BEGIN
@@ -2492,11 +2507,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intSampleStageId = MIN(intSampleStageId)
-		FROM tblQMSampleStage WITH (NOLOCK)
+		FROM @tblQMSampleStage
 		WHERE intSampleStageId > @intSampleStageId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMSampleStage t
+	JOIN @tblQMSampleStage pt ON pt.intSampleStageId = t.intSampleStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

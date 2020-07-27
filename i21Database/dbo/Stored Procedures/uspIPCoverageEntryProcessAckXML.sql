@@ -17,11 +17,26 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKCoverageEntryAckStage TABLE (intCoverageEntryAckStageId INT)
 
-	SELECT @intCoverageEntryAckStageId = MIN(intCoverageEntryAckStageId)
-	FROM tblRKCoverageEntryAckStage WITH (NOLOCK)
+	INSERT INTO @tblRKCoverageEntryAckStage (intCoverageEntryAckStageId)
+	SELECT intCoverageEntryAckStageId
+	FROM tblRKCoverageEntryAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intCoverageEntryAckStageId = MIN(intCoverageEntryAckStageId)
+	FROM @tblRKCoverageEntryAckStage
+
+	IF @intCoverageEntryAckStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKCoverageEntryAckStage t
+	JOIN @tblRKCoverageEntryAckStage pt ON pt.intCoverageEntryAckStageId = t.intCoverageEntryAckStageId
 
 	WHILE @intCoverageEntryAckStageId > 0
 	BEGIN
@@ -139,11 +154,17 @@ BEGIN TRY
 		--END
 
 		SELECT @intCoverageEntryAckStageId = MIN(intCoverageEntryAckStageId)
-		FROM tblRKCoverageEntryAckStage WITH (NOLOCK)
+		FROM @tblRKCoverageEntryAckStage
 		WHERE intCoverageEntryAckStageId > @intCoverageEntryAckStageId
-			AND strMessage = 'Success'
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND strMessage = 'Success'
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKCoverageEntryAckStage t
+	JOIN @tblRKCoverageEntryAckStage pt ON pt.intCoverageEntryAckStageId = t.intCoverageEntryAckStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
