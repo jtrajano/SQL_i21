@@ -80,10 +80,6 @@ SELECT
 	,blbSignature					= I.blbSignature
 	,intTicketId					= SCALETICKETID.intTicketId
 	,strPOSPayMethods				= PAYMETHODS.strPOSPayMethods
-	,intDaysOld						= DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(GETDATE() AS DATE))
-	,intDaysToPay					= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
-										   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
-									  END
 	,ysnProcessedToNSF				= ISNULL(ISNULL(PAYMENT.ysnProcessedToNSF, I.ysnProcessedToNSF), 0)
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
