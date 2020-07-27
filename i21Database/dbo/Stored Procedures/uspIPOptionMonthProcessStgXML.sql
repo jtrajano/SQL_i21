@@ -23,10 +23,25 @@ BEGIN TRY
 		,@intLastModifiedUserId INT
 		,@intNewOptionMonthId INT
 		,@intOptionMonthRefId INT
+	DECLARE @tblRKOptionsMonthStage TABLE (intOptionMonthStageId INT)
 
-	SELECT @intOptionMonthStageId = MIN(intOptionMonthStageId)
+	INSERT INTO @tblRKOptionsMonthStage (intOptionMonthStageId)
+	SELECT intOptionMonthStageId
 	FROM tblRKOptionsMonthStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intOptionMonthStageId = MIN(intOptionMonthStageId)
+	FROM @tblRKOptionsMonthStage
+
+	IF @intOptionMonthStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKOptionsMonthStage t
+	JOIN @tblRKOptionsMonthStage pt ON pt.intOptionMonthStageId = t.intOptionMonthStageId
 
 	WHILE @intOptionMonthStageId > 0
 	BEGIN
@@ -347,10 +362,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intOptionMonthStageId = MIN(intOptionMonthStageId)
-		FROM tblRKOptionsMonthStage
+		FROM @tblRKOptionsMonthStage
 		WHERE intOptionMonthStageId > @intOptionMonthStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKOptionsMonthStage t
+	JOIN @tblRKOptionsMonthStage pt ON pt.intOptionMonthStageId = t.intOptionMonthStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

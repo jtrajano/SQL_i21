@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblQMListPreStage (intListPreStageId)
 	SELECT intListPreStageId
-	FROM tblQMListPreStage WITH (NOLOCK)
+	FROM tblQMListPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intListPreStageId = MIN(intListPreStageId)
 	FROM @tblQMListPreStage
+
+	IF @intListPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMListPreStage t
+	JOIN @tblQMListPreStage pt ON pt.intListPreStageId = t.intListPreStageId
 
 	WHILE @intListPreStageId IS NOT NULL
 	BEGIN
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblQMListPreStage
 		WHERE intListPreStageId > @intListPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMListPreStage t
+	JOIN @tblQMListPreStage pt ON pt.intListPreStageId = t.intListPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

@@ -19,10 +19,25 @@ BEGIN TRY
 		,@intLastModifiedUserId INT
 		,@intNewAttributeId INT
 		,@intAttributeRefId INT
+	DECLARE @tblQMAttributeStage TABLE (intAttributeStageId INT)
 
-	SELECT @intAttributeStageId = MIN(intAttributeStageId)
+	INSERT INTO @tblQMAttributeStage (intAttributeStageId)
+	SELECT intAttributeStageId
 	FROM tblQMAttributeStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intAttributeStageId = MIN(intAttributeStageId)
+	FROM @tblQMAttributeStage
+
+	IF @intAttributeStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMAttributeStage t
+	JOIN @tblQMAttributeStage pt ON pt.intAttributeStageId = t.intAttributeStageId
 
 	WHILE @intAttributeStageId > 0
 	BEGIN
@@ -263,10 +278,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intAttributeStageId = MIN(intAttributeStageId)
-		FROM tblQMAttributeStage
+		FROM @tblQMAttributeStage
 		WHERE intAttributeStageId > @intAttributeStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMAttributeStage t
+	JOIN @tblQMAttributeStage pt ON pt.intAttributeStageId = t.intAttributeStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

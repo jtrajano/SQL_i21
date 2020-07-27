@@ -28,11 +28,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKOptionsMatchPnSHeaderPreStage (intOptionsMatchPnSHeaderPreStageId)
 	SELECT intOptionsMatchPnSHeaderPreStageId
-	FROM tblRKOptionsMatchPnSHeaderPreStage WITH (NOLOCK)
+	FROM tblRKOptionsMatchPnSHeaderPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intOptionsMatchPnSHeaderPreStageId = MIN(intOptionsMatchPnSHeaderPreStageId)
 	FROM @tblRKOptionsMatchPnSHeaderPreStage
+
+	IF @intOptionsMatchPnSHeaderPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKOptionsMatchPnSHeaderPreStage t
+	JOIN @tblRKOptionsMatchPnSHeaderPreStage pt ON pt.intOptionsMatchPnSHeaderPreStageId = t.intOptionsMatchPnSHeaderPreStageId
 
 	WHILE @intOptionsMatchPnSHeaderPreStageId IS NOT NULL
 	BEGIN
@@ -236,6 +246,12 @@ BEGIN TRY
 		FROM @tblRKOptionsMatchPnSHeaderPreStage
 		WHERE intOptionsMatchPnSHeaderPreStageId > @intOptionsMatchPnSHeaderPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKOptionsMatchPnSHeaderPreStage t
+	JOIN @tblRKOptionsMatchPnSHeaderPreStage pt ON pt.intOptionsMatchPnSHeaderPreStageId = t.intOptionsMatchPnSHeaderPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

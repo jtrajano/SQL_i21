@@ -46,11 +46,21 @@ BEGIN TRY
 
 	INSERT INTO @tblQMSamplePreStage (intSamplePreStageId)
 	SELECT intSamplePreStageId
-	FROM tblQMSamplePreStage WITH (NOLOCK)
+	FROM tblQMSamplePreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intSamplePreStageId = MIN(intSamplePreStageId)
 	FROM @tblQMSamplePreStage
+
+	IF @intSamplePreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMSamplePreStage t
+	JOIN @tblQMSamplePreStage pt ON pt.intSamplePreStageId = t.intSamplePreStageId
 
 	WHILE @intSamplePreStageId IS NOT NULL
 	BEGIN
@@ -184,12 +194,17 @@ BEGIN TRY
 		SET strFeedStatus = 'Awt Ack'
 			,strMessage = 'Success'
 		WHERE intSamplePreStageId = @intSamplePreStageId
-			AND ISNULL(strFeedStatus, '') = ''
 
 		SELECT @intSamplePreStageId = MIN(intSamplePreStageId)
 		FROM @tblQMSamplePreStage
 		WHERE intSamplePreStageId > @intSamplePreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMSamplePreStage t
+	JOIN @tblQMSamplePreStage pt ON pt.intSamplePreStageId = t.intSamplePreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

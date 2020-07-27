@@ -19,12 +19,27 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblQMSampleAcknowledgementStage TABLE (intSampleAcknowledgementStageId INT)
 
-	SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
-	FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
+	INSERT INTO @tblQMSampleAcknowledgementStage (intSampleAcknowledgementStageId)
+	SELECT intSampleAcknowledgementStageId
+	FROM tblQMSampleAcknowledgementStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
+	FROM @tblQMSampleAcknowledgementStage
+
+	IF @intSampleAcknowledgementStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMSampleAcknowledgementStage t
+	JOIN @tblQMSampleAcknowledgementStage pt ON pt.intSampleAcknowledgementStageId = t.intSampleAcknowledgementStageId
 
 	WHILE @intSampleAcknowledgementStageId > 0
 	BEGIN
@@ -172,12 +187,18 @@ BEGIN TRY
 		END
 
 		SELECT @intSampleAcknowledgementStageId = MIN(intSampleAcknowledgementStageId)
-		FROM tblQMSampleAcknowledgementStage WITH (NOLOCK)
+		FROM @tblQMSampleAcknowledgementStage
 		WHERE intSampleAcknowledgementStageId > @intSampleAcknowledgementStageId
-			AND strMessage = 'Success'
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND strMessage = 'Success'
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMSampleAcknowledgementStage t
+	JOIN @tblQMSampleAcknowledgementStage pt ON pt.intSampleAcknowledgementStageId = t.intSampleAcknowledgementStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

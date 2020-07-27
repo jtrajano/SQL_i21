@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblLGFreightRateMatrixPreStage (intFreightRateMatrixPreStageId)
 	SELECT intFreightRateMatrixPreStageId
-	FROM tblLGFreightRateMatrixPreStage WITH (NOLOCK)
+	FROM tblLGFreightRateMatrixPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFreightRateMatrixPreStageId = MIN(intFreightRateMatrixPreStageId)
 	FROM @tblLGFreightRateMatrixPreStage
+
+	IF @intFreightRateMatrixPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblLGFreightRateMatrixPreStage t
+	JOIN @tblLGFreightRateMatrixPreStage pt ON pt.intFreightRateMatrixPreStageId = t.intFreightRateMatrixPreStageId
 
 	WHILE @intFreightRateMatrixPreStageId IS NOT NULL
 	BEGIN
@@ -63,6 +73,12 @@ BEGIN TRY
 		FROM @tblLGFreightRateMatrixPreStage
 		WHERE intFreightRateMatrixPreStageId > @intFreightRateMatrixPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblLGFreightRateMatrixPreStage t
+	JOIN @tblLGFreightRateMatrixPreStage pt ON pt.intFreightRateMatrixPreStageId = t.intFreightRateMatrixPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

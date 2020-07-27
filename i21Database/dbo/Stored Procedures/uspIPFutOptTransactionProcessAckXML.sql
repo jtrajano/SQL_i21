@@ -18,12 +18,27 @@ BEGIN TRY
 		,@intCompanyId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKFutOptTransactionHeaderAckStage TABLE (intFutOptTransactionHeaderAckStageId INT)
 
-	SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
-	FROM tblRKFutOptTransactionHeaderAckStage WITH (NOLOCK)
+	INSERT INTO @tblRKFutOptTransactionHeaderAckStage (intFutOptTransactionHeaderAckStageId)
+	SELECT intFutOptTransactionHeaderAckStageId
+	FROM tblRKFutOptTransactionHeaderAckStage
 	WHERE strMessage = 'Success'
 		AND ISNULL(strFeedStatus, '') = ''
 		--AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
+	FROM @tblRKFutOptTransactionHeaderAckStage
+
+	IF @intFutOptTransactionHeaderAckStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFutOptTransactionHeaderAckStage t
+	JOIN @tblRKFutOptTransactionHeaderAckStage pt ON pt.intFutOptTransactionHeaderAckStageId = t.intFutOptTransactionHeaderAckStageId
 
 	WHILE @intFutOptTransactionHeaderAckStageId > 0
 	BEGIN
@@ -144,12 +159,18 @@ BEGIN TRY
 		END
 
 		SELECT @intFutOptTransactionHeaderAckStageId = MIN(intFutOptTransactionHeaderAckStageId)
-		FROM tblRKFutOptTransactionHeaderAckStage WITH (NOLOCK)
+		FROM @tblRKFutOptTransactionHeaderAckStage
 		WHERE intFutOptTransactionHeaderAckStageId > @intFutOptTransactionHeaderAckStageId
-			AND strMessage = 'Success'
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND strMessage = 'Success'
+			--AND ISNULL(strFeedStatus, '') = ''
 			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFutOptTransactionHeaderAckStage t
+	JOIN @tblRKFutOptTransactionHeaderAckStage pt ON pt.intFutOptTransactionHeaderAckStageId = t.intFutOptTransactionHeaderAckStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
