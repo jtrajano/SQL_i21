@@ -39,7 +39,7 @@ RETURNS TABLE AS RETURN
 	,[dblCost] = @dblFinalPrice							
 	,BD.[dblCostUnitQty]					
 	,BD.[intCostUOMId]						
-	,BD.[dblNetWeight]						
+	,[dblNetWeight] = @dblQtyToBill						
 	,BD.[dblWeightUnitQty]					
 	,BD.[intWeightUOMId]					
 	,[intCostCurrencyId] = BD.intCurrencyId
