@@ -754,8 +754,6 @@ BEGIN
 
 		IF EXISTS (SELECT TOP 1 1 FROM @CompanyOwnedStockInTransit)
 		BEGIN 
-			DELETE FROM #tmpICLogRiskPositionFromOnHandSkipList
-
 			-- Call the post routine for the In-Transit costing. 
 			INSERT INTO @DummyGLEntries (
 					[dtmDate] 
