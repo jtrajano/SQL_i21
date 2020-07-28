@@ -564,7 +564,7 @@ BEGIN TRY
 						,ysnDiscountFromGrossWeight
 					)
 					SELECT 
-							intCustomerStorageId		= CS.intCustomerStorageId
+						intCustomerStorageId		= CS.intCustomerStorageId
 						,intCompanyLocationId		= CS.intCompanyLocationId 
 						,dblUnits					= CASE
 														WHEN DCO.strDiscountCalculationOption = 'Gross Weight' THEN 
@@ -835,12 +835,14 @@ BEGIN TRY
 	--update tblGRTransferStorageSplit's intCustomerStorageId
 	UPDATE A
 	SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
-		,A.intContractDetailId = CT.intContractDetailId
+		,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN CT.intContractDetailId ELSE NULL END
 	FROM tblGRTransferStorageSplit A		
 	INNER JOIN @newCustomerStorageIds B
 		ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
 	INNER JOIN tblGRCustomerStorage CS
 		ON CS.intCustomerStorageId = B.intToCustomerStorageId
+	LEFT JOIN tblGRStorageType ST
+		ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 	OUTER APPLY (
 		SELECT TOP 1 intContractDetailId
 		FROM vyuCTGetContractForScaleTicket
@@ -966,7 +968,7 @@ BEGIN TRY
 		,[intInventoryReceiptId]
 	)
 	SELECT DISTINCT	
-		    [intCustomerStorageId]	= SR.intToCustomerStorageId
+		[intCustomerStorageId]	= SR.intToCustomerStorageId
 		,[intTransferStorageId]	= SR.intTransferStorageId
 		,[intContractHeaderId]	= CD.intContractHeaderId
 		,[dblUnits]				= SR.dblUnitQty
@@ -999,11 +1001,12 @@ BEGIN TRY
 		ON TSS.intTransferStorageSplitId = SR.intTransferStorageSplitId
 	LEFT JOIN tblCTContractDetail CD
 		ON CD.intContractDetailId = TSS.intContractDetailId
-	WHERE  FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
+	WHERE FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 1
 	AND SR.intTransferStorageId = @intTransferStorageId
 
 	EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId
-	--integration to IC
+
+	--integration to CT
 	SET @cnt = 0
 	SET @cnt = (SELECT COUNT(*) FROM tblGRTransferStorageSplit WHERE intTransferStorageId = @intTransferStorageId AND intContractDetailId IS NOT NULL)
 
