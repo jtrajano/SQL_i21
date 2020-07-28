@@ -61,8 +61,8 @@ AS
 	SELECT DISTINCT PRT.intPropertyId
 		,PRT.strPropertyName
 		,PRD.intProductValueId
-		,PPV.dblMinValue
-		,PPV.dblMaxValue
+		,MIN(PPV.dblMinValue)
+		,MAX(PPV.dblMaxValue)
 		,TST.intTestId
 		,TST.strTestName
 		,PP.intSequenceNo
@@ -76,6 +76,12 @@ AS
 	AND PRD.ysnActive = 1
 	AND @intValidDate BETWEEN DATEPART(dy, PPV.dtmValidFrom)
 	AND DATEPART(dy, PPV.dtmValidTo)
+	Group by PRT.intPropertyId
+		,PRT.strPropertyName
+		,PRD.intProductValueId
+		,TST.intTestId
+		,TST.strTestName
+		,PP.intSequenceNo
 	ORDER BY PP.intSequenceNo
 
 	If @ysnEnableParentLot=0
@@ -98,7 +104,7 @@ AS
 				,PP.strTestName
 				,PP.intPropertyId
 				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,CAST(SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS DECIMAL(18,4)) AS dblComputedValue
 				,PP.dblMinValue
 				,PP.dblMaxValue
 				,MIN(@strMethod) AS strMethodName
@@ -127,7 +133,7 @@ AS
 				,PP.strTestName
 				,PP.intPropertyId
 				,PP.strPropertyName
-				,SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS dblComputedValue
+				,CAST(SUM(L.dblQty * ISNULL(TR.strPropertyValue, 0)) / SUM(L.dblQty) AS DECIMAL(18,4)) AS dblComputedValue
 				,PP.dblMinValue
 				,PP.dblMaxValue
 				,MIN(@strMethod) AS strMethodName

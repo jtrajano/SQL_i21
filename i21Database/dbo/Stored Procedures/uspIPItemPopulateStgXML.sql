@@ -43,19 +43,20 @@ BEGIN TRY
 		,@strItemUPCXML NVARCHAR(MAX)
 		,@strItemVendorXrefXML NVARCHAR(MAX)
 		,@strItemBookXML NVARCHAR(MAX)
-		,@intCompanyId int
-        ,@intTransactionId int
-        ,@intItemScreenId int
-		,@strItemNo nvarchar(50)
+		,@intCompanyId INT
+		,@intTransactionId INT
+		,@intItemScreenId INT
+		,@strItemNo NVARCHAR(50)
 
 	SET @strItemXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strLastModifiedUser = NULL
-	SET @strItemNo=NULL
+	SET @strItemNo = NULL
 
-	Select @intCompanyId=intCompanyId,@strItemNo=strItemNo
-	From tblICItem 
-	Where intItemId=@intItemId 
+	SELECT @intCompanyId = intCompanyId
+		,@strItemNo = strItemNo
+	FROM tblICItem
+	WHERE intItemId = @intItemId
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intItemId = ' + LTRIM(@intItemId)
@@ -356,14 +357,39 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	SELECT    @intItemScreenId    =    intScreenId FROM tblSMScreen WHERE strNamespace = 'Inventory.view.Item'
+	SELECT @intItemScreenId = intScreenId
+	FROM tblSMScreen
+	WHERE strNamespace = 'Inventory.view.Item'
 
-    Select @intTransactionId=intTransactionId 
-    from tblSMTransaction
-    Where intRecordId =@intItemId
-    and intScreenId =@intItemScreenId
+	SELECT @intTransactionId = intTransactionId
+	FROM tblSMTransaction
+	WHERE intRecordId = @intItemId
+		AND intScreenId = @intItemScreenId
 
-	INSERT INTO tblICItemStage (
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
+		,@intMultiCompanyId INT
+
+	SELECT @intMultiCompanyId = min(intCompanyId)
+	FROM tblIPMultiCompany
+	WHERE ysnParent = 0
+
+	WHILE @intMultiCompanyId IS NOT NULL
+	BEGIN
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE intCompanyId = @intMultiCompanyId
+
+		IF EXISTS (
+				SELECT 1
+				FROM master.dbo.sysdatabases
+				WHERE name = @strDatabaseName
+				)
+		BEGIN
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + 
+				'.dbo.tblICItemStage (
 		intItemId
 		,strItemNo
 		,strItemXML
@@ -444,11 +470,101 @@ BEGIN TRY
 		,strItemBookXML=@strItemBookXML
 		,strRowState = @strRowState
 		,strUserName = @strLastModifiedUser
-		,intMultiCompanyId = intCompanyId
+		,intMultiCompanyId = @intMultiCompanyId
 		,intTransactionId=@intTransactionId
-        ,intCompanyId=@intCompanyId
-	FROM tblIPMultiCompany
-	WHERE ysnParent = 0
+        ,intCompanyId=@intCompanyId'
+
+			EXEC sp_executesql @strSQL
+				,
+				N'@intItemId int
+		,@strItemNo nvarchar(50)
+		,@strItemXML nvarchar(MAX)
+		,@strItemAccountXML nvarchar(MAX)
+		,@strItemAddOnXML nvarchar(MAX)
+		,@strItemAssemblyXML nvarchar(MAX)
+		,@strItemBundleXML nvarchar(MAX)
+		,@strItemCertificationXML nvarchar(MAX)
+		,@strItemCommodityCostXML nvarchar(MAX)
+		,@strItemContractXML nvarchar(MAX)
+		,@strItemContractDocumentXML nvarchar(MAX)
+		,@strItemCustomerXrefXML nvarchar(MAX)
+		,@strItemFactoryXML nvarchar(MAX)
+		,@strItemFactoryManufacturingCellXML nvarchar(MAX)
+		,@strItemKitXML nvarchar(MAX)
+		,@strItemKitDetailXML nvarchar(MAX)
+		,@strItemLicenseXML nvarchar(MAX)
+		,@strItemLocationXML nvarchar(MAX)
+		,@strItemManufacturingUOMXML nvarchar(MAX)
+		,@strItemMotorFuelTaxXML nvarchar(MAX)
+		,@strItemNoteXML nvarchar(MAX)
+		,@strItemOwnerXML nvarchar(MAX)
+		,@strItemPOSCategoryXML nvarchar(MAX)
+		,@strItemPOSSLAXML nvarchar(MAX)
+		,@strItemPricingXML nvarchar(MAX)
+		,@strItemPricingLevelXML nvarchar(MAX)
+		,@strItemSpecialPricingXML nvarchar(MAX)
+		,@strItemSubLocationXML nvarchar(MAX)
+		,@strItemSubstituteXML nvarchar(MAX)
+		,@strItemSubstitutionXML nvarchar(MAX)
+		,@strItemSubstitutionDetailXML nvarchar(MAX)
+		,@strItemUOMXML nvarchar(MAX)
+		,@strItemUOMUpcXML nvarchar(MAX)
+		,@strItemUPCXML nvarchar(MAX)
+		,@strItemVendorXrefXML nvarchar(MAX)
+		,@strItemBookXML nvarchar(MAX)
+		,@strRowState nvarchar(50)
+		,@strLastModifiedUser nvarchar(50)
+		,@intMultiCompanyId int
+		,@intTransactionId int
+        ,@intCompanyId int'
+				,@intItemId
+				,@strItemNo
+				,@strItemXML
+				,@strItemAccountXML
+				,@strItemAddOnXML
+				,@strItemAssemblyXML
+				,@strItemBundleXML
+				,@strItemCertificationXML
+				,@strItemCommodityCostXML
+				,@strItemContractXML
+				,@strItemContractDocumentXML
+				,@strItemCustomerXrefXML
+				,@strItemFactoryXML
+				,@strItemFactoryManufacturingCellXML
+				,@strItemKitXML
+				,@strItemKitDetailXML
+				,@strItemLicenseXML
+				,@strItemLocationXML
+				,@strItemManufacturingUOMXML
+				,@strItemMotorFuelTaxXML
+				,@strItemNoteXML
+				,@strItemOwnerXML
+				,@strItemPOSCategoryXML
+				,@strItemPOSSLAXML
+				,@strItemPricingXML
+				,@strItemPricingLevelXML
+				,@strItemSpecialPricingXML
+				,@strItemSubLocationXML
+				,@strItemSubstituteXML
+				,@strItemSubstitutionXML
+				,@strItemSubstitutionDetailXML
+				,@strItemUOMXML
+				,@strItemUOMUpcXML
+				,@strItemUPCXML
+				,@strItemVendorXrefXML
+				,@strItemBookXML
+				,@strRowState
+				,@strLastModifiedUser
+				,@intMultiCompanyId
+				,@intTransactionId
+				,@intCompanyId
+		END
+
+		SELECT @intMultiCompanyId = min(intCompanyId)
+		FROM tblIPMultiCompany
+		WHERE ysnParent = 0
+			AND intCompanyId > @intMultiCompanyId
+	END
 END TRY
 
 BEGIN CATCH

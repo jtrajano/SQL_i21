@@ -572,11 +572,7 @@ BEGIN TRY
 					THEN @dblRequiredQuantity
 				ELSE dblCalculatedUpperTolerance * @dblRequiredQuantity / R.dblQuantity
 				END
-			,@dblLowerToleranceQuantity = CASE 
-				WHEN dblCalculatedLowerTolerance = 0
-					THEN @dblRequiredQuantity
-				ELSE dblCalculatedLowerTolerance * @dblRequiredQuantity / R.dblQuantity
-				END
+			,@dblLowerToleranceQuantity = dblCalculatedLowerTolerance * @dblRequiredQuantity / R.dblQuantity
 		FROM dbo.tblMFWorkOrderRecipe R
 		JOIN dbo.tblMFWorkOrderRecipeItem RI ON R.intRecipeId = RI.intRecipeId
 			AND R.intWorkOrderId = RI.intWorkOrderId

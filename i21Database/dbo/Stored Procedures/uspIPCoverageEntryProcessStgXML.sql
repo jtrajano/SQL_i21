@@ -37,10 +37,25 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKCoverageEntryStage TABLE (intCoverageEntryStageId INT)
 
-	SELECT @intCoverageEntryStageId = MIN(intCoverageEntryStageId)
+	INSERT INTO @tblRKCoverageEntryStage (intCoverageEntryStageId)
+	SELECT intCoverageEntryStageId
 	FROM tblRKCoverageEntryStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intCoverageEntryStageId = MIN(intCoverageEntryStageId)
+	FROM @tblRKCoverageEntryStage
+
+	IF @intCoverageEntryStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKCoverageEntryStage t
+	JOIN @tblRKCoverageEntryStage pt ON pt.intCoverageEntryStageId = t.intCoverageEntryStageId
 
 	WHILE @intCoverageEntryStageId > 0
 	BEGIN
@@ -605,7 +620,16 @@ BEGIN TRY
 			WHERE intRecordId = @intNewCoverageEntryId
 				AND intScreenId = @intScreenId
 
-			INSERT INTO tblRKCoverageEntryAckStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKCoverageEntryAckStage (
 				intCoverageEntryId
 				,strAckBatchName
 				,dtmAckDate
@@ -628,14 +652,40 @@ BEGIN TRY
 				,@strAckDetailXML
 				,@strRowState
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@intMultiCompanyId
+				,@strTransactionType
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewCoverageEntryId INT
+					,@strBatchName NVARCHAR(50)
+					,@dtmDate DATETIME
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckDetailXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strTransactionType NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewCoverageEntryId
+				,@strBatchName
+				,@dtmDate
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strRowState
 				,@intMultiCompanyId
 				,@strTransactionType
 				,@intTransactionId
 				,@intCompanyId
 				,@intTransactionRefId
 				,@intCompanyRefId
-
+			
 			--IF @strRowState <> 'Delete'
 			--BEGIN
 			--	IF @intTransactionRefId IS NULL
@@ -682,10 +732,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intCoverageEntryStageId = MIN(intCoverageEntryStageId)
-		FROM tblRKCoverageEntryStage
+		FROM @tblRKCoverageEntryStage
 		WHERE intCoverageEntryStageId > @intCoverageEntryStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKCoverageEntryStage t
+	JOIN @tblRKCoverageEntryStage pt ON pt.intCoverageEntryStageId = t.intCoverageEntryStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

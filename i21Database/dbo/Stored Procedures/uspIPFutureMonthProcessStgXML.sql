@@ -21,10 +21,25 @@ BEGIN TRY
 		,@intLastModifiedUserId INT
 		,@intNewFutureMonthId INT
 		,@intFutureMonthRefId INT
+	DECLARE @tblRKFuturesMonthStage TABLE (intFutureMonthStageId INT)
 
-	SELECT @intFutureMonthStageId = MIN(intFutureMonthStageId)
+	INSERT INTO @tblRKFuturesMonthStage (intFutureMonthStageId)
+	SELECT intFutureMonthStageId
 	FROM tblRKFuturesMonthStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intFutureMonthStageId = MIN(intFutureMonthStageId)
+	FROM @tblRKFuturesMonthStage
+
+	IF @intFutureMonthStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFuturesMonthStage t
+	JOIN @tblRKFuturesMonthStage pt ON pt.intFutureMonthStageId = t.intFutureMonthStageId
 
 	WHILE @intFutureMonthStageId > 0
 	BEGIN
@@ -325,10 +340,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intFutureMonthStageId = MIN(intFutureMonthStageId)
-		FROM tblRKFuturesMonthStage
+		FROM @tblRKFuturesMonthStage
 		WHERE intFutureMonthStageId > @intFutureMonthStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFuturesMonthStage t
+	JOIN @tblRKFuturesMonthStage pt ON pt.intFutureMonthStageId = t.intFutureMonthStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

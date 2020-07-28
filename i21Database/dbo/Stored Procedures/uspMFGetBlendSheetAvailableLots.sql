@@ -120,7 +120,7 @@ Join tblICUnitMeasure u1 on iu1.intUnitMeasureId=u1.intUnitMeasureId
 Left Join tblMFRecipeItem ri on ri.intItemId=i.intItemId and ri.intRecipeItemId=@intRecipeItemId
 Left Join tblICItemUOM iu2 on ri.intItemUOMId=iu2.intItemUOMId
 Left Join tblICUnitMeasure um2 on iu2.intUnitMeasureId=um2.intUnitMeasureId 
-Left Join vyuQMGetLotQuality q on l.intLotId=q.intLotId
+Left Join vyuQMGetLotQuality q on (CASE WHEN (Select TOP 1 ISNULL(ysnEnableParentLot,0) From tblMFCompanyPreference) = 1 THEN l.intParentLotId ELSE l.intLotId END)=q.intLotId
 Join tblICLotStatus ls on l.intLotStatusId=ls.intLotStatusId
 Where l.intItemId=@intItemId and l.dblQty>0 and ls.intLotStatusId in (Select intLotStatusId From @tblLotStatus)
 And l.intLocationId = Case When @ysnShowOtherFactoryLots=1 Then l.intLocationId Else @intLocationId End 
@@ -153,11 +153,13 @@ Begin
 		MAX(tl.strGarden) AS strGarden, tl.intLocationId, tl.strLocationName, MAX(tl.strSubLocationName) AS strSubLocationName, tl.strStorageLocationName AS strStorageLocationName,tl.intStorageLocationId, 
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId
+		,tl.strPhysicalItemUOM
 		into #tempParentLotByStorageLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,
 		tl.intItemUOMId,tl.strUOM, tl.strWeightPerUnitUOM,
 		tl.intPhysicalItemUOMId,tl.intLocationId, tl.strLocationName,tl.strStorageLocationName,tl.intStorageLocationId
+		,tl.strPhysicalItemUOM
 
 		Select tpl.*,
 		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,
@@ -173,11 +175,13 @@ Begin
 		MAX(tl.strGarden) AS strGarden, tl.intLocationId, tl.strLocationName, '' AS strSubLocationName, '' AS strStorageLocationName,0 AS intStorageLocationId,
 		MAX(tl.strRemarks) AS strRemarks, MAX(tl.dblRiskScore) AS dblRiskScore, MAX(tl.dblConfigRatio) AS dblConfigRatio, MAX(tl.dblDensity) AS dblDensity, 
 		MAX(tl.dblScore) AS dblScore,CAST(1 AS bit) AS ysnParentLot,MAX(tl.intCategoryId) AS intCategoryId 
+		,tl.strPhysicalItemUOM
 		into #tempParentLotByLocation
 		From #tempLot tl Join tblICParentLot pl on tl.intParentLotId=pl.intParentLotId 
 		Group By pl.intParentLotId, pl.strParentLotNumber, tl.intItemId, tl.strItemNo, tl.strDescription,tl.strLotAlias,
 		tl.intItemUOMId,tl.strUOM,tl.strWeightPerUnitUOM,
 		tl.intPhysicalItemUOMId, tl.intLocationId, tl.strLocationName
+		,tl.strPhysicalItemUOM
 
 		Select tpl.*,
 		ISNULL(r.dblReservedQty,0) AS dblReservedQty, ISNULL((ISNULL(tpl.dblPhysicalQty,0) - ISNULL(r.dblReservedQty,0)),0) AS dblAvailableQty,

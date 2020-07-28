@@ -130,11 +130,26 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblQMSampleStage TABLE (intSampleStageId INT)
 
-	SELECT @intSampleStageId = MIN(intSampleStageId)
-	FROM tblQMSampleStage WITH (NOLOCK)
+	INSERT INTO @tblQMSampleStage (intSampleStageId)
+	SELECT intSampleStageId
+	FROM tblQMSampleStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intSampleStageId = MIN(intSampleStageId)
+	FROM @tblQMSampleStage
+
+	IF @intSampleStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMSampleStage t
+	JOIN @tblQMSampleStage pt ON pt.intSampleStageId = t.intSampleStageId
 
 	WHILE @intSampleStageId > 0
 	BEGIN
@@ -2370,7 +2385,16 @@ BEGIN TRY
 				SELECT @intMultiCompanyId = @intCompanyId
 			END
 
-			INSERT INTO tblQMSampleAcknowledgementStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblQMSampleAcknowledgementStage (
 				intSampleId
 				,strSampleAckNumber
 				,dtmFeedDate
@@ -2389,7 +2413,33 @@ BEGIN TRY
 			SELECT @intNewSampleId
 				,@strNewSampleNumber
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@strTransactionType
+				,@intMultiCompanyId
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strAckTestResultXML
+				,@strRowState
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewSampleId INT
+					,@strNewSampleNumber NVARCHAR(MAX)
+					,@strTransactionType NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckDetailXML NVARCHAR(MAX)
+					,@strAckTestResultXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewSampleId
+				,@strNewSampleNumber
 				,@strTransactionType
 				,@intMultiCompanyId
 				,@strAckHeaderXML
@@ -2457,11 +2507,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intSampleStageId = MIN(intSampleStageId)
-		FROM tblQMSampleStage WITH (NOLOCK)
+		FROM @tblQMSampleStage
 		WHERE intSampleStageId > @intSampleStageId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMSampleStage t
+	JOIN @tblQMSampleStage pt ON pt.intSampleStageId = t.intSampleStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

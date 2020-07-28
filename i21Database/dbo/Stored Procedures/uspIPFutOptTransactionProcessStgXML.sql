@@ -29,11 +29,26 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKFutOptTransactionHeaderStage TABLE (intFutOptTransactionHeaderStageId INT)
 
-	SELECT @intFutOptTransactionHeaderStageId = MIN(intFutOptTransactionHeaderStageId)
+	INSERT INTO @tblRKFutOptTransactionHeaderStage (intFutOptTransactionHeaderStageId)
+	SELECT intFutOptTransactionHeaderStageId
 	FROM tblRKFutOptTransactionHeaderStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intFutOptTransactionHeaderStageId = MIN(intFutOptTransactionHeaderStageId)
+	FROM @tblRKFutOptTransactionHeaderStage
+
+	IF @intFutOptTransactionHeaderStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFutOptTransactionHeaderStage t
+	JOIN @tblRKFutOptTransactionHeaderStage pt ON pt.intFutOptTransactionHeaderStageId = t.intFutOptTransactionHeaderStageId
 
 	WHILE @intFutOptTransactionHeaderStageId > 0
 	BEGIN
@@ -939,7 +954,16 @@ BEGIN TRY
 			WHERE intRecordId = @intNewFutOptTransactionHeaderId
 				AND intScreenId = @intScreenId
 
-			INSERT INTO tblRKFutOptTransactionHeaderAckStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKFutOptTransactionHeaderAckStage (
 				intFutOptTransactionHeaderId
 				,dtmTransactionDate
 				,strAckHeaderXML
@@ -960,7 +984,31 @@ BEGIN TRY
 				,@strAckFutOptTransactionXML
 				,@strRowState
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@intMultiCompanyId
+				,@strTransactionType
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewFutOptTransactionHeaderId INT
+					,@dtmTransactionDate DATETIME
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckFutOptTransactionXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strTransactionType NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewFutOptTransactionHeaderId
+				,@dtmTransactionDate
+				,@strAckHeaderXML
+				,@strAckFutOptTransactionXML
+				,@strRowState
 				,@intMultiCompanyId
 				,@strTransactionType
 				,@intTransactionId
@@ -1016,11 +1064,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intFutOptTransactionHeaderStageId = MIN(intFutOptTransactionHeaderStageId)
-		FROM tblRKFutOptTransactionHeaderStage
+		FROM @tblRKFutOptTransactionHeaderStage
 		WHERE intFutOptTransactionHeaderStageId > @intFutOptTransactionHeaderStageId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFutOptTransactionHeaderStage t
+	JOIN @tblRKFutOptTransactionHeaderStage pt ON pt.intFutOptTransactionHeaderStageId = t.intFutOptTransactionHeaderStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

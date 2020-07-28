@@ -30,10 +30,25 @@ BEGIN TRY
 		,@intOptSettlementPriceMonthId INT
 	DECLARE @strOptionMonth NVARCHAR(20)
 		,@intOptionMonthId INT
+	DECLARE @tblRKFuturesSettlementPriceStage TABLE (intFutureSettlementPriceStageId INT)
 
-	SELECT @intFutureSettlementPriceStageId = MIN(intFutureSettlementPriceStageId)
+	INSERT INTO @tblRKFuturesSettlementPriceStage (intFutureSettlementPriceStageId)
+	SELECT intFutureSettlementPriceStageId
 	FROM tblRKFuturesSettlementPriceStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intFutureSettlementPriceStageId = MIN(intFutureSettlementPriceStageId)
+	FROM @tblRKFuturesSettlementPriceStage
+
+	IF @intFutureSettlementPriceStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFuturesSettlementPriceStage t
+	JOIN @tblRKFuturesSettlementPriceStage pt ON pt.intFutureSettlementPriceStageId = t.intFutureSettlementPriceStageId
 
 	WHILE @intFutureSettlementPriceStageId > 0
 	BEGIN
@@ -532,10 +547,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intFutureSettlementPriceStageId = MIN(intFutureSettlementPriceStageId)
-		FROM tblRKFuturesSettlementPriceStage
+		FROM @tblRKFuturesSettlementPriceStage
 		WHERE intFutureSettlementPriceStageId > @intFutureSettlementPriceStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFuturesSettlementPriceStage t
+	JOIN @tblRKFuturesSettlementPriceStage pt ON pt.intFutureSettlementPriceStageId = t.intFutureSettlementPriceStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

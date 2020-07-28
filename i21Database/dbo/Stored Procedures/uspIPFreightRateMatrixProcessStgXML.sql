@@ -22,10 +22,25 @@ BEGIN TRY
 		,@intLastModifiedUserId INT
 		,@intNewFreightRateMatrixId INT
 		,@intFreightRateMatrixRefId INT
+	DECLARE @tblLGFreightRateMatrixStage TABLE (intFreightRateMatrixStageId INT)
 
-	SELECT @intFreightRateMatrixStageId = MIN(intFreightRateMatrixStageId)
+	INSERT INTO @tblLGFreightRateMatrixStage (intFreightRateMatrixStageId)
+	SELECT intFreightRateMatrixStageId
 	FROM tblLGFreightRateMatrixStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intFreightRateMatrixStageId = MIN(intFreightRateMatrixStageId)
+	FROM @tblLGFreightRateMatrixStage
+
+	IF @intFreightRateMatrixStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblLGFreightRateMatrixStage t
+	JOIN @tblLGFreightRateMatrixStage pt ON pt.intFreightRateMatrixStageId = t.intFreightRateMatrixStageId
 
 	WHILE @intFreightRateMatrixStageId > 0
 	BEGIN
@@ -346,10 +361,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intFreightRateMatrixStageId = MIN(intFreightRateMatrixStageId)
-		FROM tblLGFreightRateMatrixStage
+		FROM @tblLGFreightRateMatrixStage
 		WHERE intFreightRateMatrixStageId > @intFreightRateMatrixStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblLGFreightRateMatrixStage t
+	JOIN @tblLGFreightRateMatrixStage pt ON pt.intFreightRateMatrixStageId = t.intFreightRateMatrixStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

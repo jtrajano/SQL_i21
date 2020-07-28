@@ -31,10 +31,25 @@ BEGIN TRY
 		,@strFailurePropertyName NVARCHAR(100)
 		,@intOnSuccessPropertyId INT
 		,@intOnFailurePropertyId INT
+	DECLARE @tblQMPropertyStage TABLE (intPropertyStageId INT)
 
-	SELECT @intPropertyStageId = MIN(intPropertyStageId)
+	INSERT INTO @tblQMPropertyStage (intPropertyStageId)
+	SELECT intPropertyStageId
 	FROM tblQMPropertyStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intPropertyStageId = MIN(intPropertyStageId)
+	FROM @tblQMPropertyStage
+
+	IF @intPropertyStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMPropertyStage t
+	JOIN @tblQMPropertyStage pt ON pt.intPropertyStageId = t.intPropertyStageId
 
 	WHILE @intPropertyStageId > 0
 	BEGIN
@@ -610,10 +625,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intPropertyStageId = MIN(intPropertyStageId)
-		FROM tblQMPropertyStage
+		FROM @tblQMPropertyStage
 		WHERE intPropertyStageId > @intPropertyStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMPropertyStage t
+	JOIN @tblQMPropertyStage pt ON pt.intPropertyStageId = t.intPropertyStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

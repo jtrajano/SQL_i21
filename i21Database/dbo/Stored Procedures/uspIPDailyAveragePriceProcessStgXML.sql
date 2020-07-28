@@ -32,11 +32,26 @@ BEGIN TRY
 		,@intScreenId INT
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
+	DECLARE @tblRKDailyAveragePriceStage TABLE (intDailyAveragePriceStageId INT)
 
-	SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
+	INSERT INTO @tblRKDailyAveragePriceStage (intDailyAveragePriceStageId)
+	SELECT intDailyAveragePriceStageId
 	FROM tblRKDailyAveragePriceStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 		AND intMultiCompanyId = @intToCompanyId
+
+	SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
+	FROM @tblRKDailyAveragePriceStage
+
+	IF @intDailyAveragePriceStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKDailyAveragePriceStage t
+	JOIN @tblRKDailyAveragePriceStage pt ON pt.intDailyAveragePriceStageId = t.intDailyAveragePriceStageId
 
 	WHILE @intDailyAveragePriceStageId > 0
 	BEGIN
@@ -545,7 +560,16 @@ BEGIN TRY
 			WHERE intRecordId = @intNewDailyAveragePriceId
 				AND intScreenId = @intScreenId
 
-			INSERT INTO tblRKDailyAveragePriceAckStage (
+			DECLARE @strSQL NVARCHAR(MAX)
+				,@strServerName NVARCHAR(50)
+				,@strDatabaseName NVARCHAR(50)
+
+			SELECT @strServerName = strServerName
+				,@strDatabaseName = strDatabaseName
+			FROM tblIPMultiCompany WITH (NOLOCK)
+			WHERE intCompanyId = @intCompanyId
+
+			SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblRKDailyAveragePriceAckStage (
 				intDailyAveragePriceId
 				,strAckAverageNo
 				,strAckHeaderXML
@@ -566,7 +590,31 @@ BEGIN TRY
 				,@strAckDetailXML
 				,@strRowState
 				,GETDATE()
-				,'Success'
+				,''Success''
+				,@intMultiCompanyId
+				,@strTransactionType
+				,@intTransactionId
+				,@intCompanyId
+				,@intTransactionRefId
+				,@intCompanyRefId'
+
+			EXEC sp_executesql @strSQL
+				,N'@intNewDailyAveragePriceId INT
+					,@strAverageNo NVARCHAR(50)
+					,@strAckHeaderXML NVARCHAR(MAX)
+					,@strAckDetailXML NVARCHAR(MAX)
+					,@strRowState NVARCHAR(MAX)
+					,@intMultiCompanyId INT
+					,@strTransactionType NVARCHAR(MAX)
+					,@intTransactionId INT
+					,@intCompanyId INT
+					,@intTransactionRefId INT
+					,@intCompanyRefId INT'
+				,@intNewDailyAveragePriceId
+				,@strAverageNo
+				,@strAckHeaderXML
+				,@strAckDetailXML
+				,@strRowState
 				,@intMultiCompanyId
 				,@strTransactionType
 				,@intTransactionId
@@ -620,11 +668,17 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intDailyAveragePriceStageId = MIN(intDailyAveragePriceStageId)
-		FROM tblRKDailyAveragePriceStage
+		FROM @tblRKDailyAveragePriceStage
 		WHERE intDailyAveragePriceStageId > @intDailyAveragePriceStageId
-			AND ISNULL(strFeedStatus, '') = ''
-			AND intMultiCompanyId = @intToCompanyId
+			--AND ISNULL(strFeedStatus, '') = ''
+			--AND intMultiCompanyId = @intToCompanyId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKDailyAveragePriceStage t
+	JOIN @tblRKDailyAveragePriceStage pt ON pt.intDailyAveragePriceStageId = t.intDailyAveragePriceStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
