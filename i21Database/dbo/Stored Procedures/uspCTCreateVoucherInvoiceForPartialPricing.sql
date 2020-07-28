@@ -434,11 +434,6 @@ declare @dblQuantityForInvoice numeric(18,6);
 
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
-							IF (ISNULL(@intBillDetailId, 0) <> 0)
-							BEGIN
-								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-							END
-
 							-- CT-3983
 							DELETE @detailCreated
 							
@@ -455,6 +450,11 @@ declare @dblQuantityForInvoice numeric(18,6);
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 							--
 
 							IF ISNULL(@ysnBillPosted,0) = 1
@@ -530,11 +530,6 @@ declare @dblQuantityForInvoice numeric(18,6);
 								EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 							END
 
-							IF (ISNULL(@intBillDetailId, 0) <> 0)
-							BEGIN
-								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-							END
-
 							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
 							SELECT @intPriceFixationDetailId,@intNewBillId,@intBillDetailId,1
 
@@ -576,6 +571,11 @@ declare @dblQuantityForInvoice numeric(18,6);
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
 							--
 
 							EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId,@success = @ysnSuccess OUTPUT
