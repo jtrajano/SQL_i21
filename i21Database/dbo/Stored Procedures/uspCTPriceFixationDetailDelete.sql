@@ -21,7 +21,7 @@ BEGIN TRY
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
 			@intContractHeaderId int,
-			@intCOntractDetailId int;
+			@intContractDetailId int;
 
 			declare @strFinalMessage nvarchar(max);
 			declare @AffectedInvoices table
@@ -245,8 +245,8 @@ BEGIN TRY
 	AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
-	select @intContractHeaderId = intContractHeaderId, @intCOntractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
-	exec uspCTCreateDetailHistory @intContractHeaderId,@intCOntractDetailId,null,null;
+	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
+	exec uspCTCreateDetailHistory @intContractHeaderId,@intContractDetailId,null,null;
 	
 	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
 	if EXISTS (select top 1 1 from #ItemInvoice)
