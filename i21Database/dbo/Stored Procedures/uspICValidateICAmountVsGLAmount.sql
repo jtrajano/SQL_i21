@@ -339,8 +339,10 @@ BEGIN
 				AND t.strBatchId = gl.strBatchId					
 		WHERE	
 			(ty.strName = @strTransactionType OR @strTransactionType IS NULL) 
-			AND (dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-			AND (dbo.fnDateLessThanEquals(t.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+			--AND (dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+			--AND (dbo.fnDateLessThanEquals(t.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+			AND (FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+			AND (FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 			AND t.intInTransitSourceLocationId IS NULL 
 		GROUP BY ty.strName 
 	END 
@@ -446,8 +448,10 @@ BEGIN
 					AND gd.strBatchId = list.strBatchId
 			WHERE 
 				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
-				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				--AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+				--AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 				AND gd.ysnIsUnposted = 0 
 				AND 1 = 
 					CASE 
@@ -583,8 +587,10 @@ BEGIN
 					AND gd.strBatchId = list.strBatchId
 			WHERE 
 				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
-				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				--AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+				--AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 				AND 1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
