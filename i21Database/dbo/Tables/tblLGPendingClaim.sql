@@ -24,6 +24,8 @@
 	[ysnSeqSubCurrency] BIT NULL,
 	[dblSeqPriceInWeightUOM] NUMERIC(18, 6) NULL,
 	[dblSeqPriceConversionFactoryWeightUOM] NUMERIC(18, 6) NULL,
+	[dtmDateAdded] DATETIME NULL,
+	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	
 	CONSTRAINT [PK_tblLGPendingClaim_intPendingClaimId] PRIMARY KEY ([intPendingClaimId]), 
 	CONSTRAINT [FK_tblLGPendingClaim_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
