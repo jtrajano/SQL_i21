@@ -81,7 +81,10 @@ END
 --UPDATE THE TAX
 --EXEC uspAPUpdateVoucherDetailTax @billDetailIds
 --DELETE ONLY IF DETAIL IS ASSOCIATED TO RECEIPT
-IF (SELECT intInventoryReceiptItemId FROM tblAPBillDetail WHERE intBillDetailId = @billDetailId) > 0
+--IC-7609 consideration
+IF (SELECT A.intInventoryReceiptItemId FROM tblAPBillDetail A
+		LEFT JOIN tblICInventoryReceiptItemTax B ON A.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+		WHERE intBillDetailId = @billDetailId AND B.intInventoryReceiptItemTaxId IS NOT NULL) > 0
 BEGIN 
 	DELETE A
 	FROM tblAPBillDetailTax A
