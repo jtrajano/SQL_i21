@@ -240,11 +240,13 @@ IF @transCount = 0 BEGIN TRANSACTION
 --SET BatchId
 IF(@batchId IS NULL)
 BEGIN
-	--DO NOT GENERATE IF UNPOST
-	IF NOT (@post = 0 AND @recap = 0)
-		EXEC uspSMGetStartingNumber 3, @batchId OUT
-	ELSE
-		SET @batchId = NEWID()
+	-- --DO NOT GENERATE IF UNPOST
+	-- IF NOT (@post = 0 AND @recap = 0)
+	-- 	EXEC uspSMGetStartingNumber 3, @batchId OUT
+	-- ELSE
+	-- 	SET @batchId = NEWID()
+
+	EXEC uspSMGetStartingNumber 3, @batchId OUT
 END
 
 SET @batchIdUsed = @batchId
@@ -434,7 +436,7 @@ BEGIN
 		[dblReportingRate],
 		[dblForeignRate],
 		[strRateType]
-		FROM dbo.fnAPReverseGLEntries(@payments, 'Payable', DEFAULT, @userId, NULL)
+		FROM dbo.fnAPReverseGLEntries(@payments, 'Payable', DEFAULT, @userId, @batchId)
 		UNION ALL
 		SELECT 
 		[dtmDate],
@@ -470,7 +472,7 @@ BEGIN
 		[dblReportingRate],
 		[dblForeignRate],
 		[strRateType]
-		FROM dbo.fnAPReverseGLEntries(@prepayIds, 'Payable', DEFAULT, @userId, NULL)
+		FROM dbo.fnAPReverseGLEntries(@prepayIds, 'Payable', DEFAULT, @userId, @batchId)
 	END
 	ELSE
 	BEGIN
