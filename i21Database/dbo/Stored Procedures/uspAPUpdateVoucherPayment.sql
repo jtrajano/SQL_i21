@@ -41,10 +41,10 @@ BEGIN TRY
 									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0))
 								),
-			@ysnInPayment = CASE WHEN B.dblTotal = @dblPaymentTemp
+			@ysnInPayment = CASE WHEN B.dblAmountDue = @dblPaymentTemp
 							THEN 1
 							ELSE
-								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > B.dblTotal
+								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > B.dblAmountDue
 								THEN NULL
 								ELSE 0
 								END
@@ -85,10 +85,10 @@ BEGIN TRY
 									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0))
 								),
-			@ysnInPayment = CASE WHEN B.dblTotal = @dblPaymentTemp
+			@ysnInPayment = CASE WHEN B.dblAmountDue = @dblPaymentTemp
 							THEN 1
 							ELSE
-								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > B.dblTotal
+								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > B.dblAmountDue
 								THEN NULL
 								ELSE 0
 								END
@@ -126,7 +126,7 @@ BEGIN TRY
 	SELECT TOP 1 
 		@nullCheck = B.ysnInPayment,
 		@tempCheck = B.dblPaymentTemp,
-		@totalCheck = B.dblTotal,
+		@totalCheck = B.dblAmountDue,
 		@billCheck = B.strBillId
 	FROM tblAPPayment P
 	INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
