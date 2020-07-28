@@ -23,7 +23,7 @@ SELECT
     ,0 AS dblVoucherQty      
     ,CAST((ISNULL(dblAmount * -1,0) --multiple the amount to reverse if ysnPrice = 1      
         + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
-    ,ISNULL(ReceiptCharge.dblQuantity,0) * -1 AS dblReceiptChargeQty      
+    ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) * -1 AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
     ,CAST(1 AS BIT) ysnAllowVoucher      
@@ -74,7 +74,7 @@ SELECT
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
     ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
-    ,ISNULL(ReceiptCharge.dblQuantity,0) AS dblReceiptChargeQty      
+    ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
     ,CAST(1 AS BIT) ysnAllowVoucher     
@@ -127,7 +127,7 @@ SELECT
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
     ,CAST((ISNULL(dblAmount,0) + ISNULL(dblTax,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
-    ,ISNULL(ReceiptCharge.dblQuantity,0) AS dblReceiptChargeQty      
+    ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
     ,compLoc.strLocationName      
     ,CAST(1 AS BIT) ysnAllowVoucher     
@@ -178,7 +178,7 @@ SELECT
     ,billDetail.intItemId      
     ,billDetail.intUnitOfMeasureId AS intItemUOMId  
     ,unitMeasure.strUnitMeasure AS strUOM  
-    ,ROUND(billDetail.dblTotal + billDetail.dblTax,2) AS dblVoucherTotal      
+    ,ROUND(billDetail.dblTotal + billDetail.dblTax, 2) AS dblVoucherTotal      
     ,ROUND(CASE       
         WHEN billDetail.intWeightUOMId IS NULL THEN       
             ISNULL(billDetail.dblQtyReceived, 0)       
@@ -218,7 +218,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
 WHERE       
     billDetail.intInventoryReceiptChargeId IS NOT NULL      
--- AND bill.ysnPosted = 1  
+AND bill.ysnPosted = 1  
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl
