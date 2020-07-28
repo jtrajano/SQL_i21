@@ -66,6 +66,5 @@
 	[ysnADEnabled] BIT NOT NULL DEFAULT 0,
 	[strADDomain] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strADGroup] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-	[ysnEnableUserActivityLog] BIT NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 1
 )
