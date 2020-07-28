@@ -480,6 +480,7 @@ BEGIN TRY
 					CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 				) CNT ON CNT.intContractDetailId = SC.intContractId
 				WHERE SC.intTicketId = @intTicketId
+					AND QM.strSourceType = 'Scale'
 					AND QM.dblDiscountAmount <> 0
 
 	END
@@ -815,6 +816,7 @@ BEGIN TRY
 				CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
 			) CNT ON CNT.intContractDetailId = SC.intContractId
 			WHERE SC.intTicketId = @intTicketId
+				AND QM.strSourceType = 'Scale'
 				AND QM.dblDiscountAmount <> 0
 	END
 
