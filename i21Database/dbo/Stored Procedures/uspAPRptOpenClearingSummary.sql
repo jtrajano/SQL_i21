@@ -849,7 +849,7 @@ INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntity
  CROSS APPLY tblSMCompanySetup compSetup  '  
   
 
---SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
+SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');
 
 IF NULLIF(@filter,'') IS NOT NULL
 BEGIN
