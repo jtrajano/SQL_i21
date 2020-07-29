@@ -1290,7 +1290,7 @@ INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity
  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
 ) MainQuery '  
   
---SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');  
+SET @query = REPLACE(@query, 'GETDATE()', '''' + CONVERT(VARCHAR(10), @dateTo, 110) + '''');  
   
 IF NULLIF(@filter,'') IS NOT NULL
 BEGIN  
