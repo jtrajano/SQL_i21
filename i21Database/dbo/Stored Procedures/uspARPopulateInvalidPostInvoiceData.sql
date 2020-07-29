@@ -549,6 +549,28 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--CASH TRANSASCTIONS USING OTHER ACCOUNT
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= I.[strInvoiceNumber] + ' is using invalid account. Use Undeposited Fund Account for Cash and Cash Refund transactions.'
+	FROM #ARPostInvoiceHeader I
+	INNER JOIN vyuGLAccountDetail GLA ON ISNULL(I.[intAccountId], 0) = GLA.[intAccountId]		 
+	WHERE I.strTransactionType IN ('Cash', 'Cash Refund')
+	  AND GLA.strAccountCategory <> 'Undeposited Funds'
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--Company Location
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
