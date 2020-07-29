@@ -1,5 +1,7 @@
-CREATE VIEW [dbo].vyuARInvoiceGrossMargin
+
+CREATE VIEW vyuARInvoiceGrossMargin
 AS
+
 WITH Query AS(
     SELECT
             dblTotalCost			= ISNULL(SAR.dblStandardCost, 0) *
@@ -563,17 +565,24 @@ WITH Query AS(
         tblARCustomer C 
         INNER JOIN tblEMEntity E ON C.[intEntityId] = E.intEntityId
     ) ON SAR.intEntityCustomerId = C.[intEntityId]
+),
+totalQuery as (
+    SELECT 
+    SUM(dblTotalCost) Expense,
+    B.dtmDate,
+    B.dblPayment- SUM( dblTotalCost) Net, 
+    A.intInvoiceId, 
+    B.dblPayment Revenue,
+    B.strInvoiceNumber,
+    (B.dblPayment- SUM( dblTotalCost))/B.dblPayment dblGrossMargin
+    FROM Query A 
+    JOIN tblARInvoice B on B.intInvoiceId = A.intInvoiceId
+    WHERE ysnPaid = 1
+    AND B.dblInvoiceTotal <> 0
+    GROUP BY A.intInvoiceId,  B.dblPayment,B.strInvoiceNumber,B.dtmDate
 )
-SELECT 
-SUM(dblTotalCost) dblExpense,
-B.dtmDate,
-B.dblPayment- SUM( dblTotalCost) dblNet, 
-A.intInvoiceId, 
-B.dblPayment dblRevenue,
-B.strInvoiceNumber,
-(B.dblPayment- SUM( dblTotalCost))/B.dblPayment dblGrossMargin
-FROM Query A 
-JOIN tblARInvoice B on B.intInvoiceId = A.intInvoiceId
-WHERE ysnPaid = 1
-AND B.dblInvoiceTotal <> 0
-GROUP BY A.intInvoiceId,  B.dblPayment,B.strInvoiceNumber,B.dtmDate
+SELECT 'Expense' strType , Expense dblAmount, dtmDate  FROM totalQuery 
+UNION
+SELECT 'Revenue'  strType , Revenue dblAmount, dtmDate  FROM totalQuery 
+UNION
+SELECT 'Net' strType , Net dblAmount, dtmDate  FROM totalQuery 
