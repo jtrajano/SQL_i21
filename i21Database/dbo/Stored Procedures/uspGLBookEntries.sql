@@ -207,7 +207,7 @@ BEGIN
 	) AS Source_Query  
 		ON gl_summary.intAccountId = Source_Query.intAccountId
 		AND gl_summary.strCode = Source_Query.strCode 
-		AND dbo.fnDateEquals(gl_summary.dtmDate, Source_Query.dtmDate) = 1
+		AND FLOOR(CAST(gl_summary.dtmDate AS FLOAT)) = FLOOR(CAST(Source_Query.dtmDate AS FLOAT))
 
 	-- Update an existing gl summary record
 	WHEN MATCHED THEN 
