@@ -57,7 +57,7 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnPrice = 1      
-AND ReceiptCharge.ysnInventoryCost = 0
+-- AND ReceiptCharge.ysnInventoryCost = 0
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
 SELECT      
@@ -110,7 +110,7 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
-AND ReceiptCharge.ysnInventoryCost = 0
+-- AND ReceiptCharge.ysnInventoryCost = 0
 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only    
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
@@ -164,7 +164,7 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
-AND ReceiptCharge.ysnInventoryCost = 0
+-- AND ReceiptCharge.ysnInventoryCost = 0
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
 UNION ALL      
@@ -221,7 +221,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = billDetail.intUnitOfMeasureId  
 WHERE       
     billDetail.intInventoryReceiptChargeId IS NOT NULL      
-AND receiptCharge.ysnInventoryCost = 0
+-- AND receiptCharge.ysnInventoryCost = 0
 AND bill.ysnPosted = 1  
 ) charges  
 OUTER APPLY (
