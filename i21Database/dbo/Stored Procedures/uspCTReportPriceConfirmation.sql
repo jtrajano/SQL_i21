@@ -197,7 +197,7 @@ BEGIN TRY
 			strZFSPricedQuantity = dbo.fnCTFormatNumber(PD.dblQuantity,'#,0.00####'),
 			ISNULL(rtrt2.strTranslation,CM.strSymbol) as strUOM,
 			CD.dblBasis,
-			strZFSBasis = dbo.fnCTFormatNumber(CD.dblBasis,'#,0.00####'),
+			strZFSBasis = dbo.fnCTFormatNumber(PD.dblBasis,'#,0.00####'),
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) as dblFuturePrice,
 			LTRIM(CAST(ROUND(ISNULL(PD.dblFutures,0) - ISNULL(CD.dblBasis,0),2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strCashPrice,
 			dbo.fnCTFormatNumber(PD.dblCashPrice,'#,0.00####') + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strZFSCashPrice,
