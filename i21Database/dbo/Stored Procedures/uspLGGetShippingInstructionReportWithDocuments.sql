@@ -243,7 +243,7 @@ BEGIN
 			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
 			,strDestinationPort = ISNULL(L.strDestinationPort, DestinationPort.strCity)
 			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = ISNULL(L.strDestinationPort, DestinationPort.strCity))
-			,strShippingLine = SLEntity.strName
+			,strShippingLine = CASE WHEN (ISNULL(SLEL.strCheckPayeeName, '') <> '') THEN SLEL.strCheckPayeeName ELSE SLEntity.strName END
 			,L.strServiceContractNumber
 			,strServiceContractOwner = SLSC.strOwner
 			,SLSC.strFreightClause
@@ -489,6 +489,7 @@ BEGIN
 		LEFT JOIN tblEMEntityToContact CEC ON CEC.intEntityId = Customer.intEntityId
 		LEFT JOIN tblEMEntity CETC ON CETC.intEntityId = CEC.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = SLEntity.intEntityId AND SLEL.ysnDefaultLocation = 1
 		LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
 		LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
