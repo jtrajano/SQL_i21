@@ -1176,6 +1176,7 @@ CREATE TABLE #CustomerInvoice
 	,[dtmShipDate]					DATETIME										NULL
 	,[dtmPostDate]					DATETIME										NULL
 	,[dtmCalculated]				DATETIME										NULL
+	,[dtmDateCreated]				DATETIME										NULL
 	,[dblInvoiceSubtotal]			NUMERIC(18, 6)									NULL
 	,[dblBaseInvoiceSubtotal]		NUMERIC(18, 6)									NULL
 	,[dblShipping]					NUMERIC(18, 6)									NULL
@@ -1532,7 +1533,7 @@ BEGIN
 		
     EXEC uspSMGetStartingNumber @StartingNumberId, @InvoiceNumber OUT, @CompanyLocationId
 	
-    UPDATE #CustomerInvoice SET [strInvoiceNumber] = @InvoiceNumber WHERE [intRowId] = @RowId
+    UPDATE #CustomerInvoice SET [strInvoiceNumber] = @InvoiceNumber, dtmDateCreated = GETDATE() WHERE [intRowId] = @RowId
 END
 
 BEGIN TRY
@@ -1553,6 +1554,7 @@ USING
 		,[intSourceId]
 		,[intPeriodsToAccrue]
 		,[dtmDate]
+		,[dtmDateCreated]
 		,[dtmDueDate]
 		,[dtmShipDate]
 		,[dtmPostDate]
@@ -1657,6 +1659,7 @@ INSERT(
 	,[intSourceId]
 	,[intPeriodsToAccrue]
 	,[dtmDate]
+	,[dtmDateCreated]
 	,[dtmDueDate]
 	,[dtmShipDate]
 	,[dtmPostDate]
@@ -1748,6 +1751,7 @@ VALUES(
 	,[intSourceId]
 	,[intPeriodsToAccrue]
 	,[dtmDate]
+	,[dtmDateCreated]
 	,[dtmDueDate]
 	,[dtmShipDate]
 	,[dtmPostDate]
