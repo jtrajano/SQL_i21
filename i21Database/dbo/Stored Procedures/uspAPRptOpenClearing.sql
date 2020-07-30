@@ -556,6 +556,50 @@ SET @cteQuery = N';WITH forClearing
 	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate  
      ' + @innerQueryFilter + '  
     ),  
+    grainTransferClearing  
+    AS  
+    (  
+	 SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptItemId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferClearing  
+     ' + @innerQueryFilter + '  
+    ),  
+    grainTransferChargeClearing  
+    AS  
+    (  
+	 SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptChargeId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptChargeTotal  
+        ,dblReceiptChargeQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferChargesClearing   
+     ' + @innerQueryFilter + '  
+    ),  
     patClearing  
     AS  
     (  
@@ -727,6 +771,48 @@ BEGIN
      FROM vyuAPGrainClearing A
 	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
+    ),
+    grainTransferClearing
+    AS
+    (
+      SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptItemId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferClearing  
+    ),
+    grainTransferChargeClearing
+    AS
+    (
+      SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptChargeId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptChargeTotal  
+        ,dblReceiptChargeQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferChargesClearing  
     ),
     patClearing  
     AS  
@@ -1302,6 +1388,131 @@ INNER JOIN tblGRSettleStorage SS
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
+  UNION ALL --TRANSFER
+  SELECT  
+  receipt.strReceiptNumber 
+  ,receipt.dtmReceiptDate
+  ,receiptItem.intInventoryReceiptItemId AS intInventoryReceiptItemId
+  ,NULL AS intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId 
+  ,NULL AS intRefundCustomerId
+  ,NULL strBillOfLading  
+  ,'''' AS strOrderNumber  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
+  ,CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=0   
+   THEN 0  
+  ELSE ISNULL(DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE()),0) END AS intAging  
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
+  ,tmpAPOpenClearing.strLocationName  
+  ,tmpAPOpenClearing.dblReceiptQty AS dblQtyToReceive  
+  ,tmpAPOpenClearing.dblTransferQty AS dblQtyVouchered  
+  ,tmpAPOpenClearing.dblReceiptTotal AS dblTotal  
+  ,tmpAPOpenClearing.dblTransferTotal AS dblVoucherAmount  
+  ,tmpAPOpenClearing.dblClearingQty AS dblQtyToVoucher  
+  ,tmpAPOpenClearing.dblReceiptTotal - tmpAPOpenClearing.dblTransferTotal AS dblAmountToVoucher  
+  ,GETDATE() as dtmCurrentDate  
+  ,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) AS strCompanyAddress  
+  ,compSetup.strCompanyName  
+ FROM    
+ (  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intInventoryReceiptItemId
+   ,B.strTransactionNumber  
+   ,SUM(B.dblTransferTotal) AS dblTransferTotal
+   ,SUM(B.dblTransferQty) AS dblTransferQty  
+   ,SUM(B.dblReceiptTotal) AS dblReceiptTotal  
+   ,SUM(B.dblReceiptQty) AS dblReceiptQty  
+   ,SUM(B.dblReceiptQty) - SUM(B.dblTransferQty)  AS dblClearingQty  
+   ,SUM(B.dblReceiptTotal) - SUM(B.dblTransferTotal) AS dblClearingAmount
+   ,B.intLocationId  
+   ,B.strLocationName
+  FROM grainTransferClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intInventoryReceiptItemId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
+  --  HAVING 
+  --     (SUM(B.dblTransferQty) - SUM(B.dblReceiptQty)) != 0
+  -- OR  (SUM(B.dblTransferTotal) - SUM(B.dblReceiptTotal)) != 0
+ ) tmpAPOpenClearing  
+INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt 
+            ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
+  ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId
+  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
+  ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+ CROSS APPLY tblSMCompanySetup compSetup  
+WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
+   UNION ALL --TRANSFER CHARGE
+  SELECT  
+  r.strReceiptNumber 
+  ,r.dtmReceiptDate
+  ,NULL AS intInventoryReceiptItemId
+  ,rc.intInventoryReceiptChargeId
+  ,NULL AS intInventoryShipmentChargeId
+  ,NULL AS intLoadDetailId
+  ,NULL AS intSettleStorageId 
+  ,NULL AS intRefundCustomerId
+  ,NULL strBillOfLading  
+  ,'''' AS strOrderNumber  
+  -- ,vouchersDate.strVoucherDate AS dtmBillDate  
+  -- ,vouchers.strVoucherIds AS strBillId  
+  -- ,vouchersTerm.strVoucherTerm AS strTerm  
+  ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
+   THEN 0  
+  ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
+  ,dbo.fnTrim(ISNULL(vendor.strVendorId, entity.strEntityNo) + '' - '' + isnull(entity.strName,'''')) as strVendorIdName 
+  ,tmpAPOpenClearing.strLocationName  
+  ,tmpAPOpenClearing.dblReceiptChargeQty AS dblQtyToReceive  
+  ,tmpAPOpenClearing.dblTransferQty AS dblQtyVouchered  
+  ,tmpAPOpenClearing.dblReceiptChargeTotal AS dblTotal  
+  ,tmpAPOpenClearing.dblTransferTotal AS dblVoucherAmount  
+  ,tmpAPOpenClearing.dblClearingQty AS dblQtyToVoucher  
+  ,tmpAPOpenClearing.dblReceiptChargeTotal - tmpAPOpenClearing.dblTransferTotal AS dblAmountToVoucher  
+  ,GETDATE() as dtmCurrentDate  
+  ,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) AS strCompanyAddress  
+  ,compSetup.strCompanyName  
+ FROM    
+ (  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intInventoryReceiptChargeId
+   ,B.strTransactionNumber  
+   ,SUM(B.dblTransferTotal) AS dblTransferTotal
+   ,SUM(B.dblTransferQty) AS dblTransferQty  
+   ,SUM(B.dblReceiptChargeTotal) AS dblReceiptChargeTotal  
+   ,SUM(B.dblReceiptChargeQty) AS dblReceiptChargeQty  
+   ,SUM(B.dblReceiptChargeQty) - SUM(B.dblTransferQty)  AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeTotal) - SUM(B.dblTransferTotal) AS dblClearingAmount
+   ,B.intLocationId  
+   ,B.strLocationName
+  FROM grainTransferChargeClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intInventoryReceiptChargeId
+   ,strTransactionNumber  
+   ,intItemId  
+   ,intLocationId  
+   ,strLocationName
+  --  HAVING 
+  --     (SUM(B.dblTransferQty) - SUM(B.dblReceiptChargeQty)) != 0
+  -- OR  (SUM(B.dblTransferTotal) - SUM(B.dblReceiptChargeTotal)) != 0
+ ) tmpAPOpenClearing  
+INNER JOIN tblICInventoryReceiptCharge rc  
+  ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
+ INNER JOIN tblICInventoryReceipt r  
+  ON r.intInventoryReceiptId = rc.intInventoryReceiptId  
+  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
+  ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+ CROSS APPLY tblSMCompanySetup compSetup  
+WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
    UNION ALL 
  --PATRONAGE
  SELECT  
