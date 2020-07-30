@@ -1,4 +1,6 @@
-﻿WITH cte   
+﻿CREATE VIEW [dbo].[vyuSCStorageScheduleAuditRecords]
+AS 
+WITH cte   
 AS (  
 SELECT DISTINCT    A.intLogId, B.intRecordId, A.dtmDate from tblSMLog A  
 INNER JOIN tblSMAudit E ON E.intLogId  = A.intLogId  
