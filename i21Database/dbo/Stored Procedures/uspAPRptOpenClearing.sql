@@ -900,9 +900,7 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE 
-      (dblClearingQty) != 0 
-  -- OR  (dblClearingAmount) != 0  
+ WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END 
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
@@ -966,9 +964,7 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
-  WHERE 
-      (dblClearingQty) != 0 
-  -- OR  (dblClearingAmount) != 0  
+  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END  
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT  
