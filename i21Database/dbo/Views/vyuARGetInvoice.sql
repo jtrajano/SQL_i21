@@ -33,14 +33,14 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , dblInterest							= INV.dblInterest
      , dblBaseInterest						= INV.dblBaseInterest
      , dblAmountDue							= CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblProvisionalAmount > 0 
-												THEN CASE WHEN INV.dblInvoiceTotal > INV.dblProvisionalAmount OR INV.dblInvoiceTotal = INV.dblProvisionalAmount
+												THEN CASE WHEN INV.dblInvoiceTotal > INV.dblProvisionalAmount OR INV.dblInvoiceTotal > INV.dblProvisionalAmount
 													THEN ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblPayment, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
 													ELSE ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblPayment, 0)  - ISNULL(INV.dblProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
 													END
 												ELSE INV.dblAmountDue 
 											  END 
      , dblBaseAmountDue						= CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblBaseProvisionalAmount > 0 
-												THEN CASE WHEN INV.dblBaseInvoiceTotal > INV.dblBaseProvisionalAmount OR INV.dblInvoiceTotal = INV.dblBaseProvisionalAmount
+												THEN CASE WHEN INV.dblBaseInvoiceTotal > INV.dblBaseProvisionalAmount OR INV.dblInvoiceTotal > INV.dblBaseProvisionalAmount
 													THEN ISNULL(INV.dblBaseInvoiceTotal, 0) - ISNULL(INV.dblBasePayment, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
 													ELSE ISNULL(INV.dblBaseInvoiceTotal, 0) - ISNULL(INV.dblBasePayment, 0)  - ISNULL(INV.dblBaseProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
 													END
