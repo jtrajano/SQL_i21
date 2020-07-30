@@ -113,6 +113,13 @@ BEGIN
 			,[intUserId]
         FROM
 			#ARPostInvoiceHeader
+		OUTER APPLY (
+			SELECT (CASE WHEN FINALINVOICE.dblQtyShipped <> PROVISIONALINVOICE.dblQtyShipped THEN 1 ELSE 0 END) AS ysnFinalInvoiceQtyChanged
+			FROM tblARInvoiceDetail FINALINVOICE
+			INNER JOIN tblARInvoiceDetail PROVISIONALINVOICE
+			ON FINALINVOICE.intOriginalInvoiceDetailId = PROVISIONALINVOICE.intInvoiceDetailId
+			WHERE FINALINVOICE.intInvoiceId = INVOICEHEADER.intInvoiceId
+		) PROVISIONAL
         WHERE
 			[intOriginalInvoiceId] IS NOT NULL
 			AND [ysnFromProvisional] = 1
@@ -121,9 +128,7 @@ BEGIN
 			AND (
                 ([strTransactionType] <> 'Credit Memo'	AND [dblBaseInvoiceTotal] = 0.000000 AND [dblInvoiceTotal] = 0.000000)
                 OR
-                ([strTransactionType] = 'Credit Memo' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
-				OR
-				([strTransactionType] = 'Invoice' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000 AND [dblAmountDue] <> 0.000000)
+                ([strTransactionType] IN ('Credit Memo', 'Invoice') AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
 				)
     ) P
     INNER JOIN (
@@ -160,9 +165,9 @@ BEGIN
 			tblGLDetail WITH (NOLOCK)
         WHERE 
             [ysnIsUnposted] = 0
-            AND [strModuleName] = @MODULE_NAME
     ) GL ON P.[intOriginalInvoiceId] = GL.[intTransactionId]
         AND P.[strInvoiceOriginId] = GL.[strTransactionId]
+		AND ([strModuleName] = @MODULE_NAME OR ([strModuleName] = 'Inventory' AND [ysnFinalInvoiceQtyChanged] = 1))
     ORDER BY GL.intGLDetailId				
 END
 
