@@ -7766,6 +7766,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
