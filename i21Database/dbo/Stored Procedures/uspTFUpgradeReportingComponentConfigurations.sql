@@ -56,6 +56,7 @@ BEGIN TRY
 			, strSegment				= SOURCE.strSegment
 			, intConfigurationSequence	= SOURCE.intSort
 			, ysnOutputDesigner			= SOURCE.ysnOutputDesigner
+			, strInputType				= SOURCE.strInputType
 	WHEN NOT MATCHED BY TARGET THEN 
 		INSERT (
 			intReportingComponentId
@@ -72,6 +73,7 @@ BEGIN TRY
 			, strSegment
 			, intConfigurationSequence
 			, ysnOutputDesigner	
+			, strInputType
 			, intMasterId
 		)
 		VALUES (
@@ -89,6 +91,7 @@ BEGIN TRY
 			, SOURCE.strSegment
 			, SOURCE.intSort
 			, SOURCE.ysnOutputDesigner
+			, SOURCE.strInputType
 			, SOURCE.intMasterId
 		);
 	
