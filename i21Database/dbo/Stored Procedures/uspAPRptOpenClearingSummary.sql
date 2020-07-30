@@ -653,7 +653,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = rc.intInventoryReceiptId  
-  WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) -- OR tmpAPOpenClearing.dblClearingAmount != 0  
+  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END  
   GROUP BY r.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL  
  --SHIPMENT CHARGES  
@@ -690,7 +690,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryShipmentChargeId = rc.intInventoryShipmentChargeId  
  INNER JOIN tblICInventoryShipment r  
   ON r.intInventoryShipmentId = rc.intInventoryShipmentId  
-  WHERE (tmpAPOpenClearing.dblClearingQty != 0) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END  
   GROUP BY r.dtmShipDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD TRANSACTION ITEM
