@@ -213,8 +213,13 @@ BEGIN
 							FROM 
 							(
 							SELECT 
-								SUM(A.dblAmountDue) - SUM(A.dblPaymentTemp) dblAmountDue
+								((SUM(dblTotal) - SUM(appliedPrepays.dblPayment)) - SUM(dblPaymentTemp)) dblAmountDue
 							FROM tblAPBill A
+							OUTER APPLY (
+								SELECT SUM(APD.dblAmountApplied) AS dblPayment
+								FROM tblAPAppliedPrepaidAndDebit APD
+								WHERE APD.intBillId = A.intBillId AND APD.ysnApplied = 1
+							) appliedPrepays
 							WHERE 
 								A.intBillId IN (SELECT intID FROM #tmpBillsId)
 							AND A.ysnIsPaymentScheduled = 0
@@ -369,7 +374,7 @@ BEGIN
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
 								),
 				[dblPayment]	= ISNULL(C.dblPayment,
-									(A.dblAmountDue - A.dblPaymentTemp)
+									((A.dblTotal - appliedPrepays.dblPayment) - A.dblPaymentTemp)
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
 								  ),
 				[dblInterest]	= A.dblInterest,
@@ -392,6 +397,11 @@ BEGIN
 			) details
 			LEFT JOIN tblAPVoucherPaymentSchedule C
 				ON C.intBillId = A.intBillId AND C.ysnPaid = 0
+			OUTER APPLY (
+				SELECT SUM(APD.dblAmountApplied) AS dblPayment
+				FROM tblAPAppliedPrepaidAndDebit APD
+				WHERE APD.intBillId = A.intBillId AND APD.ysnApplied = 1
+			) appliedPrepays
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
 	--GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
