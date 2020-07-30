@@ -289,6 +289,50 @@ SET @cteQuery = N';WITH forClearing
      FROM vyuAPGrainClearing  
      ' + @innerQueryFilter + '  
     ),  
+    grainTransferClearing  
+    AS  
+    (  
+	 SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptItemId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferClearing  
+     ' + @innerQueryFilter + '  
+    ),  
+    grainTransferChargeClearing  
+    AS  
+    (  
+	 SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptChargeId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptChargeTotal  
+        ,dblReceiptChargeQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferChargesClearing   
+     ' + @innerQueryFilter + '  
+    ),  
     patClearing  
     AS  
     (  
@@ -439,6 +483,48 @@ BEGIN
       ,intLocationId  
       ,strLocationName  
      FROM vyuAPGrainClearing  
+    ),
+    grainTransferClearing
+    AS
+    (
+      SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptItemId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferClearing  
+    ),
+    grainTransferChargeClearing
+    AS
+    (
+      SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptChargeId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptChargeTotal  
+        ,dblReceiptChargeQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferChargesClearing  
     ),
     patClearing
     AS
@@ -805,6 +891,79 @@ INNER JOIN tblGRSettleStorage SS
       ON SST.intSettleStorageId = SS.intSettleStorageId
  WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
  GROUP BY CS.dtmDeliveryDate, tmpAPOpenClearing.intEntityVendorId
+  UNION ALL 
+ --TRANSFER
+ SELECT  
+ tmpAPOpenClearing.intEntityVendorId
+  ,	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=30 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
+		ELSE 0 
+	END AS dbl1, 
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>30 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=60
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl30, 
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>60 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=90 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl60,
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>90  
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) ELSE 0 
+	END AS dbl90
+ FROM    
+ (  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intInventoryReceiptItemId
+   ,SUM(B.dblReceiptQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
+   ,SUM(B.dblReceiptTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
+  FROM grainTransferClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intInventoryReceiptItemId
+ ) tmpAPOpenClearing  
+INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt 
+            ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
+  ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId
+ WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ GROUP BY receipt.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
+ UNION ALL 
+ --TRANSFER CHARGE
+ SELECT  
+ tmpAPOpenClearing.intEntityVendorId
+  ,	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=30 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
+		ELSE 0 
+	END AS dbl1, 
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>30 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=60
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl30, 
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>60 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=90 
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
+		ELSE 0 
+	END AS dbl60,
+	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>90  
+		THEN SUM(tmpAPOpenClearing.dblClearingAmount) ELSE 0 
+	END AS dbl90
+ FROM    
+ (  
+  SELECT  
+   B.intEntityVendorId  
+   ,B.intInventoryReceiptChargeId
+   ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
+   ,SUM(B.dblReceiptChargeTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
+  FROM grainTransferChargeClearing B  
+  GROUP BY   
+   intEntityVendorId  
+   ,intInventoryReceiptChargeId
+ ) tmpAPOpenClearing  
+INNER JOIN tblICInventoryReceiptCharge rc  
+  ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
+ INNER JOIN tblICInventoryReceipt receipt  
+  ON receipt.intInventoryReceiptId = rc.intInventoryReceiptId  
+ WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ GROUP BY receipt.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL 
  --PATRONAGE
  SELECT  

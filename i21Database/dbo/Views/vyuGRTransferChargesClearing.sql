@@ -1,6 +1,6 @@
 ﻿/*NOTE: this applies only in dp storages from Scale Tickets; 
 ****charges/discounts don't have GL entries when they were generated from Delivery Sheets****/
-CREATE VIEW [dbo].[vyuAPGrainTransferChargesClearing]
+CREATE VIEW [dbo].[vyuGRTransferChargesClearing]
 AS
 SELECT  
     charges.*  

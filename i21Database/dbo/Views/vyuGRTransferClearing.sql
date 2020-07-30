@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPGrainTransferClearing]
+﻿CREATE VIEW [dbo].[vyuGRTransferClearing]
 AS
 /*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
 --Receipt item
