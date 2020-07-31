@@ -4,12 +4,12 @@
 	,@ysnAddClaim BIT = 1
 AS
 BEGIN
-
 	IF (@ysnAddClaim = 1)
 	BEGIN
 		IF (@intPurchaseSale IN (1, 3))
 		BEGIN
 			--Inbound/Drop Ship side
+			DELETE FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = 1
 			INSERT INTO tblLGPendingClaim 
 				([intPurchaseSale]
 				,[intLoadId]
@@ -24,6 +24,7 @@ BEGIN
 				,[dblReceivedGrossWt]
 				,[dblFranchisePercent]
 				,[dblFranchise]
+				,[dblFranchiseWt]
 				,[dblWeightLoss]
 				,[dblClaimableWt]
 				,[dblClaimableAmount]
@@ -50,6 +51,7 @@ BEGIN
 				,[dblReceivedGrossWt]
 				,[dblFranchisePercent]
 				,[dblFranchise]
+				,[dblFranchiseWt]
 				,[dblWeightLoss]
 				,[dblClaimableWt]
 				,[dblClaimableAmount] = ROUND(CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
@@ -139,7 +141,8 @@ BEGIN
 
 		IF (@intPurchaseSale IN (2, 3))
 		BEGIN
-		--Outbound/Drop Ship side
+			--Outbound/Drop Ship side
+			DELETE FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = 2
 			INSERT INTO tblLGPendingClaim 
 				([intPurchaseSale]
 				,[intLoadId]
@@ -154,6 +157,7 @@ BEGIN
 				,[dblReceivedGrossWt]
 				,[dblFranchisePercent]
 				,[dblFranchise]
+				,[dblFranchiseWt]
 				,[dblWeightLoss]
 				,[dblClaimableWt]
 				,[dblClaimableAmount]
@@ -180,6 +184,7 @@ BEGIN
 				,[dblReceivedGrossWt]
 				,[dblFranchisePercent]
 				,[dblFranchise]
+				,[dblFranchiseWt]
 				,[dblWeightLoss]
 				,[dblClaimableWt]
 				,[dblClaimableAmount] = ROUND(CASE WHEN (((dblClaimableWt * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
@@ -258,7 +263,8 @@ BEGIN
 		END
 	ELSE
 	BEGIN
-		DELETE FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale
+		DELETE FROM tblLGPendingClaim WHERE intLoadId = @intLoadId 
+			AND (@intPurchaseSale = 3 OR intPurchaseSale = @intPurchaseSale)
 	END
 
 END

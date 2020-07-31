@@ -14,10 +14,12 @@ BEGIN TRY
 	DECLARE @intSourceType INT
 	DECLARE @strInvoiceNo NVARCHAR(1000)
 	DECLARE @strMsg NVARCHAR(MAX)
+	DECLARE @ysnCancel BIT
 
 	SELECT @intPurchaseSale = intPurchaseSale
 		  ,@strLoadNumber = strLoadNumber
 		  ,@intSourceType = intSourceType
+		  ,@ysnCancel = ISNULL(ysnCancelled, 0)
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -84,14 +86,17 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 			END
 			ELSE 
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 			END
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF (@ysnCancel = 1) 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+			ELSE
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 
 		END
 		ELSE IF @intPurchaseSale = 2
@@ -124,11 +129,16 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 			END
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF (@ysnCancel = 1) 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+			ELSE
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
 
+			--Insert Pending Claim for Outbound
+			EXEC dbo.uspLGAddPendingClaim @intLoadId, 2, @ysnPost
 		END
 		ELSE IF @intPurchaseSale = 3
 		BEGIN
@@ -154,8 +164,15 @@ BEGIN TRY
 					ELSE 1
 					END
 			WHERE intLoadId = @intLoadId
+				AND @ysnCancel = 0
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF (@ysnCancel = 1) 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+			ELSE
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+
+			--Insert Pending Claim for Inbound and Outbound
+			EXEC dbo.uspLGAddPendingClaim @intLoadId, 3, @ysnPost
 		END
 	END
 END TRY

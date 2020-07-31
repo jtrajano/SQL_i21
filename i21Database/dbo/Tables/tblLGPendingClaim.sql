@@ -14,6 +14,7 @@
 	[dblReceivedGrossWt] NUMERIC(18, 6) NULL,
 	[dblFranchisePercent] NUMERIC(18, 6) NULL,
 	[dblFranchise] NUMERIC(18, 6) NULL,
+	[dblFranchiseWt] NUMERIC(18, 6) NULL,
 	[dblWeightLoss] NUMERIC(18, 6) NULL,
 	[dblClaimableWt] NUMERIC(18, 6) NULL,
 	[dblClaimableAmount] NUMERIC(18, 6) NULL,
