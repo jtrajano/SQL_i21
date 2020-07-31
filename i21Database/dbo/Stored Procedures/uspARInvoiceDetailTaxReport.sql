@@ -318,3 +318,6 @@ SELECT
 	, blbSignature
 	, GETDATE() 
 FROM tblARInvoiceReportStagingTable
+WHERE intEntityUserId = @intEntityUserId 
+	AND strRequestId = @strRequestId 
+	AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
