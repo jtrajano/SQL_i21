@@ -21,8 +21,7 @@ BEGIN TRY
 			@intPriceFixationTicketId	INT,
 			@intFutOptTransactionId		INT,
 			@strAction					NVARCHAR(50) = '',
-			@intFutOptTransactionHeaderId INT = NULL,
-			@strBillIds					nvarchar(1000)
+			@intFutOptTransactionHeaderId INT = NULL
 
 	--IF @strXML = 'Delete'
 	--BEGIN
@@ -76,66 +75,6 @@ BEGIN TRY
 		intPriceFixationDetailId	INT,
 		strRowState					NVARCHAR(50)
 	) 
-
-	/*Validate if paid vouchers created from affected pricing layer is also using other pricing layer*/
-	if exists( select top 1 1 from #ProcessFixationDetail where strRowState = 'Delete')
-	BEGIN
-
-		select
-			@strBillIds = STUFF(
-				(
-				select
-					', ' + tbl.strBillId
-				from
-				(
-					select
-						ap.intBillId
-						,dblPriceBilled = sum(bd.dblQtyReceived)
-						,tb.dblTotalBilled
-						,tb.strBillId
-					from
-						tblCTPriceFixationDetailAPAR ap
-						join tblCTPriceFixationDetail pfd on pfd.intPriceFixationDetailId = ap.intPriceFixationDetailId
-						join tblAPBillDetail bd on bd.intBillDetailId = ap.intBillDetailId
-						left join (
-							select
-								b.intBillId
-								,b.strBillId
-								,ysnPaid = isnull(b.ysnPaid,0)
-								,dblTotalBilled = sum(bbd.dblQtyReceived)
-							from
-								tblAPBill b
-								join tblAPBillDetail bbd on bbd.intBillId = b.intBillId
-							group by
-								b.intBillId
-								,b.strBillId
-								,b.ysnPaid
-						) tb on tb.intBillId = ap.intBillId
-					where
-						ap.intPriceFixationDetailId in (
-								select distinct intPriceFixationDetailId from #ProcessFixationDetail
-							)
-						and tb.ysnPaid = 1
-					group by
-						ap.intBillId
-						,tb.dblTotalBilled
-						,tb.strBillId
-					)tbl
-					where tbl.dblPriceBilled < tbl.dblTotalBilled
-					FOR xml path('')
-				)
-				, 1
-				, 1
-				, ''
-			)
-
-		if (@strBillIds is not null)
-		BEGIN
-			SET @ErrMsg = 'Unable to delete the price.' + @strBillIds + ' voucher(s) also exist in other price layer.';
-			RAISERROR (@ErrMsg,18,1,'WITH NOWAIT');
-		END
-
-	END
 	
 	IF OBJECT_ID('tempdb..#ProcessFixationTicket') IS NOT NULL  	
 	DROP TABLE #ProcessFixationTicket
