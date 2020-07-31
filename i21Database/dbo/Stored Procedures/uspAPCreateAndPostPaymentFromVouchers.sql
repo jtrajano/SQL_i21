@@ -514,7 +514,7 @@ BEGIN
 	INNER JOIN #tmpMultiVouchersCreatedPayment CP ON CP.intCreatePaymentId = P.intPaymentId
 	WHERE P.ysnPosted = 1
 
-	EXEC uspAPUpdateVoucherPayment @paymentIds, 1
+	IF @paymentIds <> '' OR @paymentIds IS NOT NULL EXEC uspAPUpdateVoucherPayment @paymentIds, 1
 
 	DONE:
 	IF @transCount = 0 COMMIT TRANSACTION
