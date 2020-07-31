@@ -7773,6 +7773,7 @@
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
