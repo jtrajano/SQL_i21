@@ -7759,6 +7759,7 @@
     <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
 	<Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
