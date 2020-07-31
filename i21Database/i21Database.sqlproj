@@ -8787,6 +8787,7 @@
     <Build Include="dbo\Stored Procedures\uspCTAllowDPContractClosure.sql" />
     <Build Include="dbo\Tables\tblLGPendingClaim.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddPendingClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
