@@ -27,11 +27,13 @@ SELECT
 								WHEN 2 THEN 'Ocean Vessel' 
 								WHEN 3 THEN 'Rail' END COLLATE Latin1_General_CI_AS
 	,dtmETAPOD = L.dtmETAPOD
+	,dtmLastWeighingDate = L.dtmETAPOD + ISNULL(ASN.intLastWeighingDays, 0)
 	,dtmClaimValidTill = CAST(NULL AS DATETIME)
 	,intClaimValidTill = ISNULL(ASN.intClaimValidTill, 0)
 	,strBLNumber = L.strBLNumber
 	,dtmBLDate = L.dtmBLDate
 	,intWeightUnitMeasureId = L.intWeightUnitMeasureId
+	,strWeightUOM = WUOM.strUnitMeasure
 	,intWeightId = PC.intWeightId
 	,strWeightGradeDesc = WG.strWeightGradeDesc
 	,dblShippedNetWt = PC.dblShippedNetWt
