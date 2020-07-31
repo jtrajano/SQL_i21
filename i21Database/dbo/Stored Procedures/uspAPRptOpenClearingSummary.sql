@@ -31,6 +31,7 @@ DECLARE @endgroup NVARCHAR(50)
 DECLARE @datatype NVARCHAR(50)
 DECLARE @strAccountId NVARCHAR(50)  
 DECLARE @strAccountIdTo NVARCHAR(50)  
+DECLARE @dateCondition NVARCHAR(50)
 
 	-- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
@@ -49,7 +50,9 @@ BEGIN
 		0 AS dbl60,
 		0 AS dbl90,
     0 AS dblTotal,
-		NULL as dtmCurrentDate
+		NULL as dtmCurrentDate,
+    NULL AS dtmStartDate,
+    NULL AS dtmEndDate
 END
 
 DECLARE @xmlDocumentId AS INT;
@@ -85,7 +88,7 @@ WITH (
 
 --select * from @temp_xml_table
 --CREATE date filter
-SELECT @dateFrom = [from], @dateTo = [to],@condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
+SELECT @dateFrom = [from], @dateTo = [to],@condition = condition, @dateCondition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';
 SET @innerQuery = 
 		'SELECT 
 			intInventoryReceiptId
@@ -643,7 +646,9 @@ SELECT
 	TOP 100 PERCENT MainQuery.*
 	,GETDATE() as dtmCurrentDate  
 	,dbo.[fnAPFormatAddress](NULL, NULL, NULL, compSetup.strAddress, compSetup.strCity, compSetup.strState, compSetup.strZip, compSetup.strCountry, NULL) AS strCompanyAddress  
-	,compSetup.strCompanyName  
+	,compSetup.strCompanyName
+  ,dtmStartDate = '''+ CONVERT(NVARCHAR(10), ISNULL(@dateFrom, '1/1/1900'), 101) +'''
+  ,dtmEndDate = '''+ CONVERT(NVARCHAR(10), CASE WHEN @dateCondition = 'Equal To' THEN @dateFrom ELSE ISNULL(@dateTo, GETDATE()) END, 101) +'''
 FROM (
 SELECT 
 	SUM(resultData.dbl1) AS dbl1
