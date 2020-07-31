@@ -55,6 +55,9 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
+DELETE FROM tblARInvoiceReportStagingTable WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
+DELETE FROM tblARInvoiceReportStagingTableCopy WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
+
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
@@ -150,6 +153,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , blbSignature
 	 , ysnStretchLogo
 	 , strSubFormula
+	 , dtmCreated
 )
 SELECT intInvoiceId				= INV.intInvoiceId
 	 , intCompanyLocationId		= INV.intCompanyLocationId
@@ -266,6 +270,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , blbSignature				= INV.blbSignature
 	 , ysnStretchLogo			= ISNULL(SELECTEDINV.ysnStretchLogo, 0)
 	 , strSubFormula			= INVOICEDETAIL.strSubFormula
+	 , dtmCreated				= GETDATE()
 FROM dbo.tblARInvoice INV WITH (NOLOCK)
 INNER JOIN @tblInvoiceReport SELECTEDINV ON INV.intInvoiceId = SELECTEDINV.intInvoiceId
 INNER JOIN (
