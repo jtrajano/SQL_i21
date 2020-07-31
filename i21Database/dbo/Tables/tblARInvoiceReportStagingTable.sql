@@ -118,5 +118,6 @@
 	[dtmLoadedDate]						DATETIME		NULL,
 	[dtmScaleDate]						DATETIME		NULL,
 	[blbLogo]							VARBINARY (MAX) NULL,
-	[blbSignature]						VARBINARY (MAX) NULL
+	[blbSignature]						VARBINARY (MAX) NULL,
+	[dtmCreated]						DATETIME		NULL,
 );
