@@ -162,5 +162,6 @@ FROM (
 	AND voucher.intTransactionReversed IS NULL
 	AND voucher.ysnIsPaymentScheduled = 1 --AP-7092
 	AND paySched.ysnPaid = 0
+	AND paySched.ysnInPayment = 0
 	AND (voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0)
 ) forPayment

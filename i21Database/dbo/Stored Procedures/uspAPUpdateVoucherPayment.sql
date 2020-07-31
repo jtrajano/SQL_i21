@@ -35,16 +35,30 @@ BEGIN TRY
 
 	IF @post IS NULL OR @post = 1
 	BEGIN
+		--UPDATE PAYMENT SCHEDULE
+		UPDATE PS
+		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
+		FROM tblAPVoucherPaymentSchedule PS
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPayScheduleId = PS.intId
+		OUTER APPLY (
+			SELECT SUM(PD2.dblPayment) dblPayment
+			FROM tblAPPaymentDetail PD2
+			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD2.intPaymentId
+			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1
+		) paySched
+		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
+
 		UPDATE tblAPBill 
 		SET
 			@dblPaymentTemp =	(
 									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
-									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0))
+									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
+									ISNULL(payDetails.dblInterest, 0)
 								),
-			@ysnInPayment = CASE WHEN (B.dblTotal - appliedPrepays.dblPayment) = @dblPaymentTemp
+			@ysnInPayment = CASE WHEN (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) = @dblPaymentTemp
 							THEN 1
 							ELSE
-								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > (B.dblTotal - appliedPrepays.dblPayment)
+								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0))
 								THEN NULL
 								ELSE 0
 								END
@@ -54,21 +68,18 @@ BEGIN TRY
 		FROM tblAPPayment P
 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		OUTER APPLY (
-					SELECT SUM(APD.dblAmountApplied) AS dblPayment
-					FROM tblAPAppliedPrepaidAndDebit APD
-					WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
-		) appliedPrepays
 		OUTER APPLY 
 		(
 			SELECT
 				PD.intBillId,
 				SUM(PD.dblPayment) dblPayment,
-				SUM(PD.dblDiscount) dblDiscount
+				SUM(PD.dblDiscount) dblDiscount,
+				SUM(PD.dblInterest) dblInterest
 			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
 			WHERE 
-				PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P.ysnNewFlag = 1
-			GROUP BY PD.intBillId
+				PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
+			GROUP BY PD.intBillId, PD.intPaymentId
 		) payDetails 
 		OUTER APPLY (
 			SELECT 
@@ -76,24 +87,44 @@ BEGIN TRY
 				SUM(PD.dblPayment) dblPayment,
 				SUM(PD.dblDiscount) dblDiscount
 			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
 			WHERE 
-				PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P.ysnNewFlag = 1
+				PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
 			GROUP BY PD.intBillId
 		) paySchedDetails
+		OUTER APPLY (
+			SELECT SUM(APD.dblAmountApplied) AS dblPayment
+			FROM tblAPAppliedPrepaidAndDebit APD
+			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
+		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids)
 	END
 	ELSE IF @post = 0
 	BEGIN
+		--UPDATE PAYMENT SCHEDULE
+		UPDATE PS
+		SET PS.ysnInPayment = CASE WHEN ISNULL(paySched.dblPayment, 0) <> 0 THEN 1 ELSE 0 END
+		FROM tblAPVoucherPaymentSchedule PS
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPayScheduleId = PS.intId
+		OUTER APPLY (
+			SELECT SUM(PD2.dblPayment) dblPayment
+			FROM tblAPPaymentDetail PD2
+			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD2.intPaymentId
+			WHERE PD2.intPayScheduleId = PS.intId AND P2.ysnNewFlag = 1 AND P2.intPaymentId <> PD.intPaymentId
+		) paySched
+		WHERE PD.intPaymentId IN (SELECT intId FROM @ids)
+
 		UPDATE tblAPBill 
 		SET
 			@dblPaymentTemp =	(
 									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
-									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0))
+									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
+									ISNULL(payDetails.dblInterest, 0)
 								),
-			@ysnInPayment = CASE WHEN (B.dblTotal - appliedPrepays.dblPayment) = @dblPaymentTemp
+			@ysnInPayment = CASE WHEN (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) = @dblPaymentTemp
 							THEN 1
 							ELSE
-								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > (B.dblTotal - appliedPrepays.dblPayment)
+								CASE WHEN @dblPaymentTemp < 0 OR @dblPaymentTemp > (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0))
 								THEN NULL
 								ELSE 0
 								END
@@ -103,20 +134,17 @@ BEGIN TRY
 		FROM tblAPPayment P
 		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
-		OUTER APPLY (
-					SELECT SUM(APD.dblAmountApplied) AS dblPayment
-					FROM tblAPAppliedPrepaidAndDebit APD
-					WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
-		) appliedPrepays
 		OUTER APPLY 
 		(
 			SELECT
 				PD.intBillId,
 				SUM(PD.dblPayment) dblPayment,
-				SUM(PD.dblDiscount) dblDiscount
+				SUM(PD.dblDiscount) dblDiscount,
+				SUM(PD.dblInterest) dblInterest
 			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
 			WHERE 
-				PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P.ysnNewFlag = 1
+				PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
 			GROUP BY PD.intBillId
 		) payDetails 
 		OUTER APPLY (
@@ -125,10 +153,16 @@ BEGIN TRY
 				SUM(PD.dblPayment) dblPayment,
 				SUM(PD.dblDiscount) dblDiscount
 			FROM tblAPPaymentDetail PD
+			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
 			WHERE 
-				PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P.ysnNewFlag = 1
+				PD.intPaymentId <> P.intPaymentId AND PD.intPayScheduleId > 0 AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
 			GROUP BY PD.intBillId
 		) paySchedDetails
+		OUTER APPLY (
+			SELECT SUM(APD.dblAmountApplied) AS dblPayment
+			FROM tblAPAppliedPrepaidAndDebit APD
+			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
+		) appliedPrepays
 		WHERE P.intPaymentId IN (SELECT intId FROM @ids)
 	END
 
@@ -136,7 +170,7 @@ BEGIN TRY
 	SELECT TOP 1 
 		@nullCheck = B.ysnInPayment,
 		@tempCheck = B.dblPaymentTemp,
-		@totalCheck = (B.dblTotal - appliedPrepays.dblPayment),
+		@totalCheck = (B.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)),
 		@billCheck = B.strBillId
 	FROM tblAPPayment P
 	INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
