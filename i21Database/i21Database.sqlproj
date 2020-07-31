@@ -8268,6 +8268,7 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
