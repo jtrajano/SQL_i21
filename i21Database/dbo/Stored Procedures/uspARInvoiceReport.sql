@@ -553,3 +553,5 @@ WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strInvoiceFormat <> 'Format 1 - MCP' 
 
 EXEC dbo.uspARInvoiceDetailTaxReport @intEntityUserId, @strRequestId
+
+

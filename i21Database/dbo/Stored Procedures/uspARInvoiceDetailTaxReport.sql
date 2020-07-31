@@ -52,3 +52,4 @@ WHERE ((IDT.ysnTaxExempt = 1 AND ISNULL(ID.dblComputedGrossPrice, 0) <> 0) OR (I
 	AND I.intEntityUserId = @intEntityUserId 
 	AND I.strRequestId = @strRequestId 
 	AND I.strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
+
