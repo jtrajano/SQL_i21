@@ -284,6 +284,209 @@ BEGIN
 				AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
 END 
 
+-- Return all the "In" stock qty back to the negative cost buckets. 
+BEGIN 
+	--UPDATE	LotCostBucket
+	--SET		dblStockIn = dblStockIn - (
+	--			SELECT	ISNULL(SUM(LotOut.dblQty), 0) 
+	--			FROM	dbo.tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+	--						ON LotOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	--					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+	--						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+	--						, @dtmStartDate						
+	--					) d
+	--					INNER JOIN #tmpRebuildList list
+	--						ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
+	--			WHERE	
+	--					LotCostBucket.intInventoryLotId = LotOut.intRevalueLotId
+	--		)
+	--FROM	dbo.tblICInventoryLot LotCostBucket INNER JOIN tblICItem i
+	--			ON LotCostBucket.intItemId = i.intItemId
+	--		INNER JOIN #tmpRebuildList list2
+	--			ON LotCostBucket.intItemId  = COALESCE(list2.intItemId, LotCostBucket.intItemId) 
+	--			AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
+
+	UPDATE	negativeLotCostBucket
+	SET 
+			dblStockIn = dblStockIn - ISNULL(cb.dblQty, 0) 
+	FROM	(
+				SELECT 
+					LotOut.intRevalueLotId
+					,dblQty = SUM(LotOut.dblQty) 
+				FROM 
+					tblICInventoryLotOut LotOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+							ON LotOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+					INNER JOIN tblICInventoryLot LotCostBucket	
+						ON LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId
+					INNER JOIN tblICItem i
+						ON LotCostBucket.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list
+						ON LotCostBucket.intItemId = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+						, @dtmStartDate						
+					) d
+				WHERE 
+					LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId
+					AND LotOut.intRevalueLotId IS NOT NULL 
+				GROUP BY 
+					LotOut.intRevalueLotId
+			) cb
+			INNER JOIN tblICInventoryLot negativeLotCostBucket
+				ON cb.intRevalueLotId = negativeLotCostBucket.intInventoryLotId
+			INNER JOIN tblICItem i2
+				ON i2.intItemId = negativeLotCostBucket.intItemId
+			INNER JOIN #tmpRebuildList list2
+				ON negativeLotCostBucket.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
+				AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
+
+	UPDATE	negativeFIFOCostBucket
+	SET 
+			dblStockIn = dblStockIn - ISNULL(cb.dblQty, 0) 
+	FROM	(
+				SELECT 
+					FIFOOut.intRevalueFifoId
+					,dblQty = SUM(FIFOOut.dblQty) 
+				FROM 
+					tblICInventoryFIFOOut FIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+							ON FIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+					INNER JOIN tblICInventoryFIFO FIFOCostBucket	
+						ON FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId
+					INNER JOIN tblICItem i
+						ON FIFOCostBucket.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list
+						ON FIFOCostBucket.intItemId = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+						, @dtmStartDate						
+					) d
+				WHERE 
+					FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId
+					AND FIFOOut.intRevalueFifoId IS NOT NULL 
+				GROUP BY 
+					FIFOOut.intRevalueFifoId
+			) cb
+			INNER JOIN tblICInventoryFIFO negativeFIFOCostBucket
+				ON cb.intRevalueFifoId = negativeFIFOCostBucket.intInventoryFIFOId
+			INNER JOIN tblICItem i2
+				ON i2.intItemId = negativeFIFOCostBucket.intItemId
+			INNER JOIN #tmpRebuildList list2
+				ON negativeFIFOCostBucket.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
+				AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
+
+	--UPDATE	LIFOCostBucket
+	--SET		dblStockIn = dblStockIn - (
+	--			SELECT	ISNULL(SUM(LIFOOut.dblQty), 0) 
+	--			FROM	dbo.tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+	--						ON LIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	--					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+	--						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+	--						, @dtmStartDate					
+	--					) d
+	--					INNER JOIN #tmpRebuildList list
+	--						ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
+	--			WHERE	
+	--					LIFOCostBucket.intInventoryLIFOId = LIFOOut.intRevalueLifoId
+	--		)
+	--FROM	dbo.tblICInventoryLIFO LIFOCostBucket INNER JOIN tblICItem i
+	--			ON LIFOCostBucket.intItemId = i.intItemId
+	--		INNER JOIN #tmpRebuildList list2
+	--			ON LIFOCostBucket.intItemId  = COALESCE(list2.intItemId, LIFOCostBucket.intItemId) 
+	--			AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
+
+	UPDATE	negativeLIFOCostBucket
+	SET 
+			dblStockIn = dblStockIn - ISNULL(cb.dblQty, 0) 
+	FROM	(
+				SELECT 
+					LIFOOut.intRevalueLifoId
+					,dblQty = SUM(LIFOOut.dblQty) 
+				FROM 
+					tblICInventoryLIFOOut LIFOOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+							ON LIFOOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+					INNER JOIN tblICInventoryLIFO LIFOCostBucket	
+						ON LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId
+					INNER JOIN tblICItem i
+						ON LIFOCostBucket.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list
+						ON LIFOCostBucket.intItemId = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+						, @dtmStartDate						
+					) d
+				WHERE 
+					LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId
+					AND LIFOOut.intRevalueLifoId IS NOT NULL 
+				GROUP BY 
+					LIFOOut.intRevalueLifoId
+			) cb
+			INNER JOIN tblICInventoryLIFO negativeLIFOCostBucket
+				ON cb.intRevalueLifoId = negativeLIFOCostBucket.intInventoryLIFOId
+			INNER JOIN tblICItem i2
+				ON i2.intItemId = negativeLIFOCostBucket.intItemId
+			INNER JOIN #tmpRebuildList list2
+				ON negativeLIFOCostBucket.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
+				AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
+
+	--UPDATE	ActualCostBucket
+	--SET		dblStockIn = dblStockIn - (
+	--			SELECT	ISNULL(SUM(ActualCostOut.dblQty), 0) 
+	--			FROM	dbo.tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+	--						ON ActualCostOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+	--					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+	--						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+	--						, @dtmStartDate				
+	--					) d
+	--					INNER JOIN #tmpRebuildList list
+	--						ON InvTrans.intItemId = COALESCE(list.intItemId, InvTrans.intItemId) 
+	--			WHERE	
+	--					ActualCostBucket.intInventoryActualCostId = ActualCostOut.intRevalueActualCostId
+	--		)
+	--FROM	dbo.tblICInventoryActualCost ActualCostBucket INNER JOIN tblICItem i
+	--			ON ActualCostBucket.intItemId = i.intItemId
+	--		INNER JOIN #tmpRebuildList list2
+	--			ON ActualCostBucket.intItemId  = COALESCE(list2.intItemId, ActualCostBucket.intItemId) 
+	--			AND i.intCategoryId = COALESCE(list2.intCategoryId, i.intCategoryId) 
+
+	UPDATE	negativeActualCostBucket
+	SET 
+			dblStockIn = dblStockIn - ISNULL(cb.dblQty, 0) 
+	FROM	(
+				SELECT 
+					ActualCostOut.intRevalueActualCostId
+					,dblQty = SUM(ActualCostOut.dblQty) 
+				FROM 
+					tblICInventoryActualCostOut ActualCostOut INNER JOIN dbo.tblICInventoryTransaction InvTrans
+							ON ActualCostOut.intInventoryTransactionId = InvTrans.intInventoryTransactionId
+					INNER JOIN tblICInventoryActualCost ActualCostCostBucket	
+						ON ActualCostOut.intInventoryActualCostId = ActualCostCostBucket.intInventoryActualCostId
+					INNER JOIN tblICItem i
+						ON ActualCostCostBucket.intItemId = i.intItemId
+					INNER JOIN #tmpRebuildList list
+						ON ActualCostCostBucket.intItemId = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					CROSS APPLY [dbo].[udfDateGreaterThanEquals] (
+						CASE WHEN @isPeriodic = 0 THEN InvTrans.dtmCreated ELSE InvTrans.dtmDate END
+						, @dtmStartDate						
+					) d
+				WHERE 
+					ActualCostOut.intInventoryActualCostId = ActualCostCostBucket.intInventoryActualCostId
+					AND ActualCostOut.intRevalueActualCostId IS NOT NULL 
+				GROUP BY 
+					ActualCostOut.intRevalueActualCostId
+			) cb
+			INNER JOIN tblICInventoryActualCost negativeActualCostBucket
+				ON cb.intRevalueActualCostId = negativeActualCostBucket.intInventoryActualCostId
+			INNER JOIN tblICItem i2
+				ON i2.intItemId = negativeActualCostBucket.intItemId
+			INNER JOIN #tmpRebuildList list2
+				ON negativeActualCostBucket.intItemId  = COALESCE(list2.intItemId, i2.intItemId) 
+				AND i2.intCategoryId = COALESCE(list2.intCategoryId, i2.intCategoryId) 
+END 
+
 -- If stock is received within the date range, then remove also the "out" stock records. 
 BEGIN 
 	DELETE	LotOut
@@ -597,34 +800,34 @@ BEGIN
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 END 
 
--- Force the clearing of the cost bucket if the flagged
-IF @ysnForceClearTheCostBuckets = 1
-BEGIN 
-	-- Clear the cost buckets if running qty before Nov 2018 is already zero. 
-	UPDATE cb
-	SET	
-		cb.dblStockOut = cb.dblStockIn 
-	FROM 
-		tblICItem i inner join tblICInventoryFIFO cb 
-			on i.intItemId = cb.intItemId
-		OUTER APPLY (
-			SELECT 
-				dblQty = SUM(t.dblQty)
-			FROM	
-				tblICInventoryTransaction t 
-			WHERE	
-				t.intItemId = i.intItemId
-				AND t.intItemLocationId = cb.intItemLocationId
-				AND t.intItemUOMId = cb.intItemUOMId 
-				AND dbo.fnDateLessThan(t.dtmDate, @dtmStartDate) = 1
-			HAVING 
-				SUM(t.dblQty) <> 0 	
-		) t
-	WHERE 
-		(cb.dblStockIn - cb.dblStockOut) <> 0 
-		AND (ROUND(t.dblQty, 6) = 0 OR t.dblQty IS NULL) 
-		AND dbo.fnDateLessThan(cb.dtmDate, @dtmStartDate) = 1
-END 
+---- Force the clearing of the cost bucket if the flagged
+--IF @ysnForceClearTheCostBuckets = 1
+--BEGIN 
+--	-- Clear the cost buckets if running qty is already zero. 
+--	UPDATE cb
+--	SET	
+--		cb.dblStockOut = cb.dblStockIn 
+--	FROM 
+--		tblICItem i inner join tblICInventoryFIFO cb 
+--			on i.intItemId = cb.intItemId
+--		OUTER APPLY (
+--			SELECT 
+--				dblQty = SUM(t.dblQty)
+--			FROM	
+--				tblICInventoryTransaction t 
+--			WHERE	
+--				t.intItemId = i.intItemId
+--				AND t.intItemLocationId = cb.intItemLocationId
+--				AND t.intItemUOMId = cb.intItemUOMId 
+--				AND dbo.fnDateLessThan(t.dtmDate, @dtmStartDate) = 1
+--			HAVING 
+--				SUM(t.dblQty) <> 0 	
+--		) t
+--	WHERE 
+--		(cb.dblStockIn - cb.dblStockOut) <> 0 
+--		AND (ROUND(t.dblQty, 6) = 0 OR t.dblQty IS NULL) 
+--		AND dbo.fnDateLessThan(cb.dtmDate, @dtmStartDate) = 1
+--END 
 
 -- Create the temp table. 
 BEGIN 
@@ -1090,7 +1293,7 @@ BEGIN
 							
 				WHERE	LotOut.intInventoryLotId = LotCostBucket.intInventoryLotId 
 			) cbOut 
-	WHERE	LotCostBucket.dblStockIn <> LotCostBucket.dblStockOut
+	WHERE	LotCostBucket.dblStockIn > LotCostBucket.dblStockOut
 
 	UPDATE	FIFOCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
@@ -1105,7 +1308,7 @@ BEGIN
 							ON FIFOOut.intInventoryTransactionId = t.intInventoryTransactionId
 				WHERE	FIFOOut.intInventoryFIFOId = FIFOCostBucket.intInventoryFIFOId 
 			) cbOut
-	WHERE	FIFOCostBucket.dblStockIn <> FIFOCostBucket.dblStockOut
+	WHERE	FIFOCostBucket.dblStockIn > FIFOCostBucket.dblStockOut
 
 	UPDATE	LIFOCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
@@ -1120,7 +1323,7 @@ BEGIN
 							ON LIFOOut.intInventoryTransactionId = t.intInventoryTransactionId
 				WHERE	LIFOOut.intInventoryLIFOId = LIFOCostBucket.intInventoryLIFOId						
 			) cbOut
-	WHERE	LIFOCostBucket.dblStockIn <> LIFOCostBucket.dblStockOut
+	WHERE	LIFOCostBucket.dblStockIn > LIFOCostBucket.dblStockOut
 
 	UPDATE	ActualCostBucket
 	SET		dblStockOut = ISNULL(cbOut.dblQty, 0) 
@@ -1135,7 +1338,7 @@ BEGIN
 							ON ActualCostOut.intInventoryTransactionId = t.intInventoryTransactionId
 				WHERE	ActualCostOut.intInventoryActualCostId = ActualCostBucket.intInventoryActualCostId 						
 			) cbOut
-	WHERE	ActualCostBucket.dblStockIn <> ActualCostBucket.dblStockOut
+	WHERE	ActualCostBucket.dblStockIn > ActualCostBucket.dblStockOut
 END 
 
 --------------------------------------------------------------------
@@ -5425,6 +5628,96 @@ BEGIN
 					GOTO _EXIT_WITH_ERROR
 				END 
 			END 
+		END 
+
+		-- Clear the cost buckets if inventory adjustment is a Inventory Fix code: 001. 
+		IF	@ysnForceClearTheCostBuckets = 1 
+			AND @strTransactionType IN ('Inventory Adjustment - Closing Balance') 
+			AND EXISTS (
+				SELECT TOP 1 1 FROM tblICInventoryAdjustment a WHERE a.intInventoryAdjustmentId = @intTransactionId AND a.strDescription LIKE '%Inventory Fix code: 001%'
+			)
+		BEGIN 
+			--PRINT 'Clear the cost buckets'
+
+			-- Clear the FIFO table. 
+			UPDATE cb
+			SET 
+				cb.dblStockIn = CASE WHEN cb.dblStockIn > cb.dblStockOut THEN cb.dblStockIn ELSE cb.dblStockOut END 
+				,cb.dblStockOut = CASE WHEN cb.dblStockOut > cb.dblStockIn THEN cb.dblStockOut ELSE cb.dblStockIn END 
+			FROM 
+				tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+				INNER JOIN tblICItem i
+					ON i.intItemId = ad.intItemId
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = i.intItemId
+					AND il.intLocationId = a.intLocationId
+				INNER JOIN tblICInventoryFIFO cb 
+					ON cb.intItemId = ad.intItemId
+					AND cb.intItemLocationId = il.intItemLocationId
+			WHERE
+				a.intInventoryAdjustmentId = @intTransactionId
+				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
+
+			-- Clear the LIFO table. 
+			UPDATE cb
+			SET 
+				cb.dblStockIn = CASE WHEN cb.dblStockIn > cb.dblStockOut THEN cb.dblStockIn ELSE cb.dblStockOut END 
+				,cb.dblStockOut = CASE WHEN cb.dblStockOut > cb.dblStockIn THEN cb.dblStockOut ELSE cb.dblStockIn END 
+			FROM 
+				tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+				INNER JOIN tblICItem i
+					ON i.intItemId = ad.intItemId
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = i.intItemId
+					AND il.intLocationId = a.intLocationId
+				INNER JOIN tblICInventoryLIFO cb 
+					ON cb.intItemId = ad.intItemId
+					AND cb.intItemLocationId = il.intItemLocationId
+			WHERE
+				a.intInventoryAdjustmentId = @intTransactionId
+				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
+
+			-- Clear the Lot table. 
+			UPDATE cb
+			SET 
+				cb.dblStockIn = CASE WHEN cb.dblStockIn > cb.dblStockOut THEN cb.dblStockIn ELSE cb.dblStockOut END 
+				,cb.dblStockOut = CASE WHEN cb.dblStockOut > cb.dblStockIn THEN cb.dblStockOut ELSE cb.dblStockIn END 
+			FROM 
+				tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+				INNER JOIN tblICItem i
+					ON i.intItemId = ad.intItemId
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = i.intItemId
+					AND il.intLocationId = a.intLocationId
+				INNER JOIN tblICInventoryLot cb 
+					ON cb.intItemId = ad.intItemId
+					AND cb.intItemLocationId = il.intItemLocationId
+			WHERE
+				a.intInventoryAdjustmentId = @intTransactionId
+				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
+
+			-- Clear the Actual Cost table. 
+			UPDATE cb
+			SET 
+				cb.dblStockIn = CASE WHEN cb.dblStockIn > cb.dblStockOut THEN cb.dblStockIn ELSE cb.dblStockOut END 
+				,cb.dblStockOut = CASE WHEN cb.dblStockOut > cb.dblStockIn THEN cb.dblStockOut ELSE cb.dblStockIn END 
+			FROM 
+				tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+				INNER JOIN tblICItem i
+					ON i.intItemId = ad.intItemId
+				INNER JOIN tblICItemLocation il
+					ON il.intItemId = i.intItemId
+					AND il.intLocationId = a.intLocationId
+				INNER JOIN tblICInventoryActualCost cb 
+					ON cb.intItemId = ad.intItemId
+					AND cb.intItemLocationId = il.intItemLocationId
+			WHERE
+				a.intInventoryAdjustmentId = @intTransactionId
+				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
 		END 
 
 		-- Book the G/L Entries (except for cost adjustment)

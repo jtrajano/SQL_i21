@@ -7743,6 +7743,7 @@
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
