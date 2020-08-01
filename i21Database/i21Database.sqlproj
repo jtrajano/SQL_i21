@@ -8751,6 +8751,7 @@
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityBookPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAllowDPContractClosure.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
