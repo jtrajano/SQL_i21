@@ -43,8 +43,12 @@ BEGIN
 												ELSE (CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 															THEN 
 																CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) > @ZeroDecimal
-																		THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal))
-																		ELSE ARI.dblAmountDue
+																	THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal))
+																	ELSE 
+																		CASE WHEN ARI.dblInvoiceTotal > ARI.dblProvisionalAmount OR ARI.dblInvoiceTotal = ARI.dblProvisionalAmount
+																		THEN ISNULL(ARI.dblInvoiceTotal, 0) - ISNULL(ARI.dblPayment, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
+																		ELSE ISNULL(ARI.dblInvoiceTotal, 0) - ISNULL(ARI.dblPayment, 0)  - ISNULL(ARI.dblProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
+																		END
 																END
 															ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
 														END) 
@@ -54,8 +58,12 @@ BEGIN
 												ELSE (CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
 															THEN 
 																CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) > @ZeroDecimal
-																		THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
-																		ELSE ARI.dblBaseAmountDue
+																	THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
+																	ELSE 
+																		CASE WHEN ARI.dblBaseInvoiceTotal > ARI.dblBaseProvisionalAmount OR ARI.dblInvoiceTotal = ARI.dblBaseProvisionalAmount
+																		THEN ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
+																		ELSE ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0)  - ISNULL(ARI.dblBaseProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
+																		END
 																END
 															ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
 														END) 
@@ -101,6 +109,16 @@ BEGIN
 			 , ysnExcludeFromPayment
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 	) ARI ON PID.intInvoiceId = ARI.intInvoiceId
+	Outer Apply (
+		SELECT P.intGLFiscalYearPeriodId FROM tblGLFiscalYearPeriod P
+		WHERE DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, P.dtmEndDate) + 1, 0)) = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, ARI.dtmPostDate) + 1, 0))
+	) ACCPERIOD
+	LEFT OUTER JOIN (
+		SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
+		FROM	tblARPaymentDetail PD
+		INNER JOIN tblARPayment P
+		ON PD.intPaymentId = P.intPaymentId
+	) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = ARI.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
 
     UPDATE ARPD
     SET ARPD.dblInvoiceTotal		= ARI.dblInvoiceTotal * dbo.[fnARGetInvoiceAmountMultiplier](ARI.strTransactionType)
@@ -430,7 +448,11 @@ BEGIN
 												THEN 
 													CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) > 0
 															THEN ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal))
-															ELSE ARI.dblAmountDue
+															ELSE 
+																CASE WHEN ARI.dblInvoiceTotal > ARI.dblProvisionalAmount OR ARI.dblInvoiceTotal = ARI.dblProvisionalAmount
+																THEN ISNULL(ARI.dblInvoiceTotal, 0) - ISNULL(ARI.dblPayment, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
+																ELSE ISNULL(ARI.dblInvoiceTotal, 0) - ISNULL(ARI.dblPayment, 0)  - ISNULL(ARI.dblProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
+																END
 													END
 												ELSE 
 													CASE WHEN (ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) = ISNULL(ARI.dblPayment, @ZeroDecimal))
@@ -442,14 +464,18 @@ BEGIN
 												THEN 
 													CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) > 0
 															THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
-															ELSE ARI.dblBaseAmountDue
+															ELSE 
+																CASE WHEN ARI.dblBaseInvoiceTotal > ARI.dblBaseProvisionalAmount OR ARI.dblInvoiceTotal = ARI.dblBaseProvisionalAmount
+																THEN ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
+																ELSE ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0)  - ISNULL(ARI.dblBaseProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
+																END
 													END
 												ELSE 
 													CASE WHEN (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) = ISNULL(ARI.dblBasePayment, @ZeroDecimal))
 															THEN ISNULL(ARI.dblBasePayment, @ZeroDecimal)
 															ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
 														END
-											END												
+											END	
 		, ARI.dblDiscount				= @ZeroDecimal
 		, ARI.dblBaseDiscount			= @ZeroDecimal
 		, ARI.dblDiscountAvailable		= ISNULL(ARI.dblDiscountAvailable, @ZeroDecimal)
@@ -494,6 +520,13 @@ BEGIN
 		FROM tblARPrepaidAndCredit 
 		WHERE intInvoiceId = PID.intInvoiceId AND ysnApplied = 1
 	) PPC
+	LEFT OUTER JOIN (
+		SELECT  intInvoiceId, PD.dblPayment, dblBasePayment, P.ysnPosted
+		FROM	tblARPaymentDetail PD
+		INNER JOIN tblARPayment P
+		ON PD.intPaymentId = P.intPaymentId
+	) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = ARI.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
+	
 												
 	--UPDATE HD TICKET HOURS
 	UPDATE HDTHW						

@@ -113,13 +113,6 @@ BEGIN
 			,[intUserId]
         FROM
 			#ARPostInvoiceHeader
-		OUTER APPLY (
-			SELECT (CASE WHEN FINALINVOICE.dblQtyShipped <> PROVISIONALINVOICE.dblQtyShipped THEN 1 ELSE 0 END) AS ysnFinalInvoiceQtyChanged
-			FROM tblARInvoiceDetail FINALINVOICE
-			INNER JOIN tblARInvoiceDetail PROVISIONALINVOICE
-			ON FINALINVOICE.intOriginalInvoiceDetailId = PROVISIONALINVOICE.intInvoiceDetailId
-			WHERE FINALINVOICE.intInvoiceId = INVOICEHEADER.intInvoiceId
-		) PROVISIONAL
         WHERE
 			[intOriginalInvoiceId] IS NOT NULL
 			AND [ysnFromProvisional] = 1
@@ -165,9 +158,9 @@ BEGIN
 			tblGLDetail WITH (NOLOCK)
         WHERE 
             [ysnIsUnposted] = 0
+			AND [strModuleName] = @MODULE_NAME
     ) GL ON P.[intOriginalInvoiceId] = GL.[intTransactionId]
         AND P.[strInvoiceOriginId] = GL.[strTransactionId]
-		AND ([strModuleName] = @MODULE_NAME OR ([strModuleName] = 'Inventory' AND [ysnFinalInvoiceQtyChanged] = 1))
     ORDER BY GL.intGLDetailId				
 END
 
@@ -303,7 +296,7 @@ DECLARE  @InTransitItems                ItemInTransitCostingTableType
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
 				
-IF @Post = 1
+IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM #ARPostInvoiceDetail WHERE intSourceId = 2))
 INSERT INTO @InTransitItems
     ([intItemId] 
     ,[intItemLocationId] 

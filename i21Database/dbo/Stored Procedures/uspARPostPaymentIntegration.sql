@@ -109,68 +109,31 @@ BEGIN
     SET 
          tblARInvoice.dblAmountDue      = CASE WHEN C.intSourceId = 2 AND C.intOriginalInvoiceId IS NOT NULL
                                                 THEN 
-                                                    CASE WHEN C.strTransactionType = 'Credit Memo'
-                                                            THEN ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)))
-                                                            ELSE (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))) - ISNULL(C.dblProvisionalAmount, @ZeroDecimal)
+                                                    CASE C.strTransactionType 
+														WHEN 'Credit Memo'
+															THEN ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)))
+														WHEN 'Invoice'
+															THEN ISNULL(A.dblAmountPaid, @ZeroDecimal) + ISNULL(C.dblAmountDue, @ZeroDecimal) --(ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))) - ISNULL(C.dblProvisionalAmount, @ZeroDecimal)-- + (ISNULL(C.dblProvisionalAmount, @ZeroDecimal)
+															ELSE (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))) - ISNULL(C.dblProvisionalAmount, @ZeroDecimal)
                                                     END
                                                 ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))
                                           END				
         ,tblARInvoice.dblBaseAmountDue  = CASE WHEN C.intSourceId = 2 AND C.intOriginalInvoiceId IS NOT NULL
                                                 THEN 
-                                                    CASE WHEN C.strTransactionType = 'Credit Memo'
-                                                            THEN ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal)))
-                                                            ELSE (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))) - ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal)
+                                                    CASE C.strTransactionType 
+														WHEN 'Credit Memo'
+															THEN ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal)))
+														WHEN 'Invoice'
+															THEN ISNULL(A.dblBaseAmountPaid, @ZeroDecimal) + ISNULL(C.dblBaseAmountDue, @ZeroDecimal) --(ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))) - ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal)
+															ELSE (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))) - ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal)
                                                     END
                                                 ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
-                                          END	
-    FROM 
-        tblARPayment A
-    INNER JOIN
-        @PaymentIds P
-            ON A.[intPaymentId] = P.[intId] 
-    INNER JOIN
-        tblARPaymentDetail B 
-            ON A.intPaymentId = B.intPaymentId
-    INNER JOIN
-        tblARInvoice C
-            ON B.intInvoiceId = C.intInvoiceId
-    WHERE
-        ISNULL(A.[ysnInvoicePrepayment],0) = 0
-
-    UPDATE 
-        tblARInvoice
-    SET 
-        tblARInvoice.ysnPaid = 0
-    FROM 
-        tblARPayment A
-    INNER JOIN
-        @PaymentIds P
-            ON A.[intPaymentId] = P.[intId] 
-    INNER JOIN
-        tblARPaymentDetail B 
-            ON A.intPaymentId = B.intPaymentId
-    INNER JOIN
-        tblARInvoice C
-            ON B.intInvoiceId = C.intInvoiceId				
-
-    UPDATE 
-        tblARPaymentDetail
-    SET 
-         dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) - ISNULL(A.dblWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
-        ,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00) - ISNULL(A.dblBaseWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblBasePayment)
-    FROM
-        tblARPaymentDetail A
-    INNER JOIN
-        tblARPayment B
-            ON A.intPaymentId = B.intPaymentId
-    INNER JOIN
-        @PaymentIds P
-            ON B.[intPaymentId] = P.[intId] 
-    INNER JOIN 
-        tblARInvoice C
-            ON A.intInvoiceId = C.intInvoiceId
-    WHERE
-        ISNULL(B.[ysnInvoicePrepayment],0) = 0	
+                                          END
+    FROM tblARPayment A
+    INNER JOIN @PaymentIds P ON A.[intPaymentId] = P.[intId] 
+    INNER JOIN tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
+    INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
+    WHERE ISNULL(A.[ysnInvoicePrepayment],0) = 0
 
 			-- UPDATE tblARPaymentDetail
 			-- SET dblPayment = 0,
@@ -399,17 +362,25 @@ BEGIN
     SET 
         C.dblAmountDue = CASE WHEN C.intSourceId = 2 AND C.intOriginalInvoiceId IS NOT NULL
 							THEN 
-								CASE WHEN C.strTransactionType = 'Credit Memo'
+								CASE C.strTransactionType
+                                    WHEN 'Credit Memo'
 										THEN ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)))
-										ELSE (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))) - ISNULL(C.dblProvisionalAmount, @ZeroDecimal)
+							        WHEN 'Invoice'
+									    THEN (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))) - ISNULL(C.dblProvisionalAmount, @ZeroDecimal) 
+                                            + CASE WHEN ISNULL(C.dblInvoiceTotal, @ZeroDecimal) = ISNULL(C.dblPayment, @ZeroDecimal) THEN ISNULL(C.dblPayment, @ZeroDecimal) ELSE 0 END
+                                        ELSE (ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))) - ISNULL(C.dblProvisionalAmount, @ZeroDecimal)
 								END
 							ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal))
 						END				
         ,C.dblBaseAmountDue = CASE WHEN C.intSourceId = 2 AND C.intOriginalInvoiceId IS NOT NULL
 							THEN 
-								CASE WHEN C.strTransactionType = 'Credit Memo'
+								CASE C.strTransactionType 
+                                    WHEN 'Credit Memo'
 										THEN ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal)))
-										ELSE (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))) - ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal)
+									WHEN 'Invoice'
+                                        THEN (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))) - ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) 
+                                            + CASE WHEN ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) = ISNULL(C.dblBasePayment, @ZeroDecimal) THEN ISNULL(C.dblBasePayment, @ZeroDecimal) ELSE 0 END
+                                        ELSE (ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))) - ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal)
 								END
 							ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
 						END	
