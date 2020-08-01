@@ -60,7 +60,7 @@ BEGIN
 																CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) > @ZeroDecimal
 																	THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
 																	ELSE 
-																		CASE WHEN ARI.dblBaseInvoiceTotal > ARI.dblBaseProvisionalAmount OR ARI.dblInvoiceTotal = ARI.dblBaseProvisionalAmount
+																		CASE WHEN ARI.dblBaseInvoiceTotal > ARI.dblBaseProvisionalAmount OR ARI.dblBaseInvoiceTotal = ARI.dblBaseProvisionalAmount
 																		THEN ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
 																		ELSE ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0)  - ISNULL(ARI.dblBaseProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
 																		END
@@ -465,7 +465,7 @@ BEGIN
 													CASE WHEN ARI.strTransactionType = 'Credit Memo' AND ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) > 0
 															THEN ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) - (ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal))
 															ELSE 
-																CASE WHEN ARI.dblBaseInvoiceTotal > ARI.dblBaseProvisionalAmount OR ARI.dblInvoiceTotal = ARI.dblBaseProvisionalAmount
+																CASE WHEN ARI.dblBaseInvoiceTotal > ARI.dblBaseProvisionalAmount OR ARI.dblBaseInvoiceTotal = ARI.dblBaseProvisionalAmount
 																THEN ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
 																ELSE ISNULL(ARI.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBasePayment, 0)  - ISNULL(ARI.dblBaseProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
 																END
