@@ -8806,6 +8806,7 @@
     <Build Include="dbo\Tables\tblSCHReportDistributionDetailGroup.sql" />
     <Build Include="dbo\Tables\tblSCHReportDistributionDetailContact.sql" />
     <Build Include="dbo\Tables\tblSCHScheduleReportDistribitionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
