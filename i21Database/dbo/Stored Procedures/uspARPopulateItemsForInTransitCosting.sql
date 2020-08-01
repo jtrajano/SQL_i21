@@ -637,6 +637,8 @@ FROM
 	, INVD.intCurrencyExchangeRateTypeId
 	, INVD.dblCurrencyExchangeRate
 	, ARPID.intSourceId
+	, ARPID.ysnFromProvisional
+	, ARPID.ysnProvisionalWithGL
 FROM tblARInvoiceDetail INVD
 INNER JOIN #ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -676,6 +678,9 @@ LEFT JOIN (
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 ) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 WHERE ARID.[intSourceId] = 2
+	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
+	AND ARID.[strTransactionType] = 'Invoice'
 
 UNION ALL
 
@@ -685,7 +690,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= -ICIT.[dblQty]
+	,[dblQty]						= -ARID.[dblQtyShipped]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -721,6 +726,9 @@ FROM
 	, INVD.intCurrencyExchangeRateTypeId
 	, INVD.dblCurrencyExchangeRate
 	, ARPID.intSourceId
+	, INVD.dblQtyShipped
+	, ARPID.ysnFromProvisional
+	, ARPID.ysnProvisionalWithGL
 FROM tblARInvoiceDetail INVD
 INNER JOIN #ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -760,6 +768,182 @@ LEFT JOIN (
 	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
 ) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
 WHERE ARID.[intSourceId] = 2
+	
+	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
+	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
+	AND ARID.[strTransactionType] = 'Invoice'
+
+UNION ALL
+--INVENTORY SHIPMENT NON-LOTTED (PROVISIONAL INVOICE REVERSAL)
+SELECT
+	 [intItemId]					= ICIT.[intItemId]
+	,[intItemLocationId]			= ICIT.[intItemLocationId]
+	,[intItemUOMId]					= ICIT.[intItemUOMId]
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	,[dblQty]						= ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICS.dblQuantity)), @ZeroDecimal)
+	,[dblUOMQty]					= ICIT.[dblUOMQty]
+	,[dblCost]						= ICIT.[dblCost]
+	,[dblValue]						= 0
+	,[dblSalesPrice]				= ARID.[dblPrice]
+	,[intCurrencyId]				= ARID.[intCurrencyId]
+	,[dblExchangeRate]				= 1.00
+	,[intTransactionId]				= ARID.[intInvoiceId]
+	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
+	,[strTransactionId]				= ARID.[strInvoiceNumber]
+	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
+	,[intSourceTransactionId]		= ICIT.[intTransactionId]
+	,[strSourceTransactionId]		= ICIT.[strTransactionId]
+	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
+	,[intFobPointId]				= ICIT.[intFobPointId]
+	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
+	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
+	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICS.intChildItemLinkId
+FROM 
+(SELECT 
+	INVD.intInvoiceId
+	, INVD.intLoadDetailId
+	, INVD.intInvoiceDetailId
+	, INVD.intItemId
+	, INVD.intInventoryShipmentItemId
+	, ARPID.dtmPostDate
+	, ARPID.dtmShipDate 
+	, ARPID.strTransactionType
+	, INVD.dblPrice
+	, ARPID.intCurrencyId
+	, ARPID.strInvoiceNumber
+	, INVD.intCurrencyExchangeRateTypeId
+	, INVD.dblCurrencyExchangeRate
+	, ARPID.intSourceId
+	, ARPID.dblQtyShipped
+	, INVD.intLotId
+	, INVD.intItemUOMId
+	, INVD.intTicketId
+	, ARPID.ysnFromProvisional
+	, ARPID.ysnProvisionalWithGL
+FROM tblARInvoiceDetail INVD
+INNER JOIN #ARPostInvoiceDetail ARPID
+ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
+AND INVD.dblQtyShipped <> ARPID.dblQtyShipped) ARID
+INNER JOIN (	
+	SELECT ICIS.[intInventoryShipmentId]		
+		 , ICIS.[strShipmentNumber]		
+		 , ICISI.[intInventoryShipmentItemId]
+		 , ICISI.intChildItemLinkId
+		 , ICISI.dblQuantity  
+	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
+	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+CROSS APPLY (
+	SELECT TOP 1 IT.* 
+	FROM tblICInventoryTransaction IT 
+	WHERE IT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+	  AND IT.[strTransactionId] = ICS.[strShipmentNumber] 
+	  AND IT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+	  AND IT.[intItemId] = ARID.[intItemId]
+	  AND IT.[ysnIsUnposted] = 0			 
+	  AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
+) ICIT
+LEFT JOIN (
+	SELECT [intInvoiceDetailLotId]
+		 , [intInvoiceDetailId]
+		 , [dblQuantityShipped]
+	FROM tblARInvoiceDetailLot ARIDL
+) ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
+    AND ARID.[intTicketId] IS NULL
+	AND ARID.[intSourceId] = 2
+	AND ARID.[ysnFromProvisional] = 1 
+	AND ARID.[ysnProvisionalWithGL] = 1
+	AND ARID.[strTransactionType] = 'Invoice'
+    AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
+
+UNION ALL
+--INVENTORY SHIPMENT NON-LOTTED (FINAL INVOICE)
+SELECT
+	 [intItemId]					= ICIT.[intItemId]
+	,[intItemLocationId]			= ICIT.[intItemLocationId]
+	,[intItemUOMId]					= ICIT.[intItemUOMId]
+	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	,[dblQty]						= -ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICS.dblQuantity)), @ZeroDecimal)
+	,[dblUOMQty]					= ICIT.[dblUOMQty]
+	,[dblCost]						= ICIT.[dblCost]
+	,[dblValue]						= 0
+	,[dblSalesPrice]				= ARID.[dblPrice]
+	,[intCurrencyId]				= ARID.[intCurrencyId]
+	,[dblExchangeRate]				= 1.00
+	,[intTransactionId]				= ARID.[intInvoiceId]
+	,[intTransactionDetailId]		= ARID.[intInvoiceDetailId]
+	,[strTransactionId]				= ARID.[strInvoiceNumber]
+	,[intTransactionTypeId]			= @INVENTORY_INVOICE_TYPE
+	,[intLotId]						= ISNULL(ARID.[intLotId], ICIT.[intLotId])
+	,[intSourceTransactionId]		= ICIT.[intTransactionId]
+	,[strSourceTransactionId]		= ICIT.[strTransactionId]
+	,[intSourceTransactionDetailId]	= ICIT.[intTransactionDetailId]
+	,[intFobPointId]				= ICIT.[intFobPointId]
+	,[intInTransitSourceLocationId]	= ICIT.[intInTransitSourceLocationId]
+	,[intForexRateTypeId]			= ARID.[intCurrencyExchangeRateTypeId]
+	,[dblForexRate]					= ARID.[dblCurrencyExchangeRate]
+	,[intLinkedItem]				= ICS.intChildItemLinkId
+FROM 
+(SELECT 
+	INVD.intInvoiceId
+	, INVD.intLoadDetailId
+	, INVD.intInvoiceDetailId
+	, INVD.intItemId
+	, INVD.intInventoryShipmentItemId
+	, ARPID.dtmPostDate
+	, ARPID.dtmShipDate 
+	, ARPID.strTransactionType
+	, INVD.dblPrice
+	, ARPID.intCurrencyId
+	, ARPID.strInvoiceNumber
+	, INVD.intCurrencyExchangeRateTypeId
+	, INVD.dblCurrencyExchangeRate
+	, ARPID.intSourceId
+	, INVD.dblQtyShipped
+	, INVD.intLotId
+	, INVD.intItemUOMId
+	, INVD.intTicketId
+	, ARPID.ysnFromProvisional
+	, ARPID.ysnProvisionalWithGL
+FROM tblARInvoiceDetail INVD
+INNER JOIN #ARPostInvoiceDetail ARPID
+ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
+AND INVD.dblQtyShipped <> ARPID.dblQtyShipped) ARID
+INNER JOIN (	
+	SELECT ICIS.[intInventoryShipmentId]		
+		 , ICIS.[strShipmentNumber]		
+		 , ICISI.[intInventoryShipmentItemId]
+		 , ICISI.intChildItemLinkId
+		 , ICISI.dblQuantity  
+	FROM tblICInventoryShipmentItem ICISI WITH (NOLOCK)  
+	INNER JOIN tblICInventoryShipment ICIS WITH (NOLOCK) ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+) ICS ON ICS.[intInventoryShipmentItemId] = ARID.[intInventoryShipmentItemId]
+CROSS APPLY (
+	SELECT TOP 1 IT.* 
+	FROM tblICInventoryTransaction IT 
+	WHERE IT.[intTransactionId] = ICS.[intInventoryShipmentId] 
+	  AND IT.[strTransactionId] = ICS.[strShipmentNumber] 
+	  AND IT.[intTransactionDetailId] = ICS.[intInventoryShipmentItemId]
+	  AND IT.[intItemId] = ARID.[intItemId]
+	  AND IT.[ysnIsUnposted] = 0			 
+	  AND ISNULL(IT.[intInTransitSourceLocationId], 0) <> 0 
+) ICIT
+LEFT JOIN (
+	SELECT [intInvoiceDetailLotId]
+		 , [intInvoiceDetailId]
+		 , [dblQuantityShipped]
+	FROM tblARInvoiceDetailLot ARIDL
+) ARIDL ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
+WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
+    AND ARID.[intTicketId] IS NULL
+	AND ARID.[intSourceId] = 2
+	AND ARID.[ysnFromProvisional] = 1 
+	AND ARID.[ysnProvisionalWithGL] = 1
+	AND ARID.[strTransactionType] = 'Invoice'
+    AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
 
 UPDATE A 
 SET intLinkedItemId = B.intItemId
