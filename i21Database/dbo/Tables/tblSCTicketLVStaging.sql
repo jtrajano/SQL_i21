@@ -82,5 +82,6 @@
 	[strScaleStationImport] NVARCHAR(5) COLLATE Latin1_General_CI_AS NULL, 
 	[strLoadNumber] NVARCHAR(8) COLLATE Latin1_General_CI_AS NULL, 	
     [intLoadDetailId] INT NULL, 
+	[strImportFailedReason] [nvarchar](max)  COLLATE Latin1_General_CI_AS NULL,
 	CONSTRAINT [PK_tblSCTicketLVStaging_intTicketId] PRIMARY KEY ([intTicketLVStagingId]) 
 )
