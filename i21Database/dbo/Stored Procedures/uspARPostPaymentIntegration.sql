@@ -137,6 +137,41 @@ BEGIN
     INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
     WHERE ISNULL(A.[ysnInvoicePrepayment],0) = 0
 
+    UPDATE 
+        tblARInvoice
+    SET 
+        tblARInvoice.ysnPaid = 0
+    FROM 
+        tblARPayment A
+    INNER JOIN
+        @PaymentIds P
+            ON A.[intPaymentId] = P.[intId] 
+    INNER JOIN
+        tblARPaymentDetail B 
+            ON A.intPaymentId = B.intPaymentId
+    INNER JOIN
+        tblARInvoice C
+            ON B.intInvoiceId = C.intInvoiceId				
+
+    UPDATE 
+        tblARPaymentDetail
+    SET 
+         dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) - ISNULL(A.dblWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
+        ,dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00) - ISNULL(A.dblBaseWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblBasePayment)
+    FROM
+        tblARPaymentDetail A
+    INNER JOIN
+        tblARPayment B
+            ON A.intPaymentId = B.intPaymentId
+    INNER JOIN
+        @PaymentIds P
+            ON B.[intPaymentId] = P.[intId] 
+    INNER JOIN 
+        tblARInvoice C
+            ON A.intInvoiceId = C.intInvoiceId
+    WHERE
+        ISNULL(B.[ysnInvoicePrepayment],0) = 0
+
 			-- UPDATE tblARPaymentDetail
 			-- SET dblPayment = 0,
 			-- 	dblBasePayment = 0,
