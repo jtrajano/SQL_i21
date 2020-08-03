@@ -97,6 +97,8 @@ BEGIN TRY
 		,@dblQuantity NUMERIC(18, 6)
 		,@dblGrossWeight NUMERIC(18, 6)
 		,@strPackageType NVARCHAR(50)
+		,@strOrgItemNo NVARCHAR(50)
+		,@strOrgContractItemName NVARCHAR(100)
 	DECLARE @intCommodityId INT
 		,@intItemId INT
 		,@intItemContractId INT
@@ -384,7 +386,7 @@ BEGIN TRY
 				JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
 				JOIN tblAPVendor V WITH (NOLOCK) ON V.intEntityId = t.intEntityId
 				WHERE ET.strType = 'Producer'
-					AND t.ysnActive = 1
+					--AND t.ysnActive = 1
 					AND t.strEntityNo <> ''
 					AND t.strName = @strPartyName
 
@@ -797,6 +799,8 @@ BEGIN TRY
 						,@dblQuantity = NULL
 						,@dblGrossWeight = NULL
 						,@strPackageType = NULL
+						,@strOrgItemNo = NULL
+						,@strOrgContractItemName = NULL
 
 					SELECT @intCommodityId = NULL
 						,@intItemId = NULL
@@ -874,15 +878,15 @@ BEGIN TRY
 								)
 					END
 
-					SELECT @intItemContractId = t.intItemContractId
-					FROM tblICItemContract t WITH (NOLOCK)
-					JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
-						AND IL.intLocationId = @intLocationId
-						AND t.intItemId = @intItemId
-						AND t.strContractItemName = @strContractItemName
-						AND t.strStatus = 'Active'
+					SELECT @intItemContractId = CD.intItemContractId
+						,@strOrgContractItemName = IC.strContractItemName
+						,@strOrgItemNo = I.strItemNo
+					FROM tblCTContractDetail CD WITH (NOLOCK)
+					JOIN tblICItem I WITH (NOLOCK) ON I.intItemId = CD.intItemId
+						AND CD.intContractDetailId = @intContractDetailId
+					JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 
-					IF ISNULL(@intItemContractId, 0) = 0
+					IF @strContractItemName <> @strOrgContractItemName
 					BEGIN
 						RAISERROR (
 								'Invalid Contract Item. '
@@ -891,13 +895,8 @@ BEGIN TRY
 								)
 					END
 
-					IF NOT EXISTS (
-							SELECT 1
-							FROM tblCTContractDetail t WITH (NOLOCK)
-							WHERE t.intContractDetailId = @intContractDetailId
-								AND t.intItemId = @intItemId
-								AND t.intItemContractId = @intItemContractId
-							)
+					IF @strItemNo <> @strOrgItemNo
+						AND @strContractItemName <> @strOrgContractItemName
 					BEGIN
 						RAISERROR (
 								'Contract Item is not matching in the Contract Sequence. '

@@ -18,11 +18,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKCoverageEntryPreStage (intCoverageEntryPreStageId)
 	SELECT intCoverageEntryPreStageId
-	FROM tblRKCoverageEntryPreStage WITH (NOLOCK)
+	FROM tblRKCoverageEntryPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intCoverageEntryPreStageId = MIN(intCoverageEntryPreStageId)
 	FROM @tblRKCoverageEntryPreStage
+
+	IF @intCoverageEntryPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKCoverageEntryPreStage t
+	JOIN @tblRKCoverageEntryPreStage pt ON pt.intCoverageEntryPreStageId = t.intCoverageEntryPreStageId
 
 	WHILE @intCoverageEntryPreStageId IS NOT NULL
 	BEGIN
@@ -76,6 +86,12 @@ BEGIN TRY
 		FROM @tblRKCoverageEntryPreStage
 		WHERE intCoverageEntryPreStageId > @intCoverageEntryPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKCoverageEntryPreStage t
+	JOIN @tblRKCoverageEntryPreStage pt ON pt.intCoverageEntryPreStageId = t.intCoverageEntryPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

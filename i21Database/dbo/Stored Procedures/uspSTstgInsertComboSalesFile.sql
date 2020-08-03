@@ -334,6 +334,8 @@ BEGIN
 										       CAST(PSL.dtmPromoBegPeriod AS DATE) >= CAST(@dtmBeginningChangeDate AS DATE)
 										       AND 
 											   CAST(PSL.dtmPromoEndPeriod AS DATE)  <= CAST(@dtmEndingChangeDate AS DATE)
+											   AND 
+											   CAST(PSL.dtmPromoEndPeriod AS DATE)  >= GETDATE()
 											) -- ST-1227
 
 								END
@@ -667,7 +669,9 @@ BEGIN
 					AND (
 							CAST(@dtmBeginningChangeDate AS DATE) >= CAST(PSL.dtmPromoBegPeriod AS DATE)
 							 AND 
-							CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE) 
+							CAST(@dtmEndingChangeDate AS DATE) <= CAST(PSL.dtmPromoEndPeriod AS DATE)  
+							AND 
+							CAST(PSL.dtmPromoEndPeriod AS DATE)  > GETDATE()
 						) -- ST-1227
 				
 
@@ -752,6 +756,8 @@ BEGIN
 								CAST(@dtmBeginningChangeDate AS DATE) >= CAST(SL.dtmPromoBegPeriod AS DATE)
 								 AND 
 								CAST(@dtmEndingChangeDate AS DATE) <= CAST(SL.dtmPromoEndPeriod AS DATE) 
+								AND 
+								CAST(SL.dtmPromoEndPeriod AS DATE)  > GETDATE()
 							) -- ST-1227
 				END
 

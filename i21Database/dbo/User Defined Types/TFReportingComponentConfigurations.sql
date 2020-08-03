@@ -17,4 +17,5 @@
 	, intMasterId INT NULL
 	, intSort INT NULL
 	, ysnOutputDesigner BIT NULL
+	, strInputType NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
 )

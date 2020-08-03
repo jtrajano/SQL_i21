@@ -37,10 +37,25 @@ BEGIN TRY
 		,@intSampleTypeUserRoleId INT
 	DECLARE @strName NVARCHAR(100)
 		,@intUserRoleID INT
+	DECLARE @tblQMSampleTypeStage TABLE (intSampleTypeStageId INT)
 
-	SELECT @intSampleTypeStageId = MIN(intSampleTypeStageId)
+	INSERT INTO @tblQMSampleTypeStage (intSampleTypeStageId)
+	SELECT intSampleTypeStageId
 	FROM tblQMSampleTypeStage
 	WHERE ISNULL(strFeedStatus, '') = ''
+
+	SELECT @intSampleTypeStageId = MIN(intSampleTypeStageId)
+	FROM @tblQMSampleTypeStage
+
+	IF @intSampleTypeStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMSampleTypeStage t
+	JOIN @tblQMSampleTypeStage pt ON pt.intSampleTypeStageId = t.intSampleTypeStageId
 
 	WHILE @intSampleTypeStageId > 0
 	BEGIN
@@ -638,10 +653,16 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intSampleTypeStageId = MIN(intSampleTypeStageId)
-		FROM tblQMSampleTypeStage
+		FROM @tblQMSampleTypeStage
 		WHERE intSampleTypeStageId > @intSampleTypeStageId
-			AND ISNULL(strFeedStatus, '') = ''
+			--AND ISNULL(strFeedStatus, '') = ''
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMSampleTypeStage t
+	JOIN @tblQMSampleTypeStage pt ON pt.intSampleTypeStageId = t.intSampleTypeStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

@@ -19,5 +19,6 @@ SELECT intReportingComponentConfigurationId
 	, strLastIndexOf
 	, strSegment
 	, intConfigurationSequence
+	, strInputType
 FROM tblTFReportingComponentConfiguration RCC
 LEFT JOIN tblTFReportingComponent RC ON RC.intReportingComponentId = RCC.intReportingComponentId

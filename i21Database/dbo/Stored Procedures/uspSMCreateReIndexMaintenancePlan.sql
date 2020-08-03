@@ -147,11 +147,13 @@ BEGIN
 			@job_name = 'i21_ReIndex_Maintenance_Job',   
 			@name = @stepNameSchedule,
 			@enabled = 1, 
-			@freq_type = 16,					-- Monthly
+			--@freq_type = 16,					-- Monthly
+			@freq_type = 32,						-- Monthly, relative to frequency_interval.
 			--@freq_type = 4,						-- Daily
 			@freq_interval = 1,					-- Once / Sunday
 			@freq_subday_type = 1,				-- At the specified time
-			@freq_relative_interval = 0, 
+			-- @freq_relative_interval = 0, 
+			@freq_relative_interval = 1, 		-- FIrst
 			@freq_recurrence_factor = 1, 
 			@active_start_date= @currentDate, 
 			@active_end_date = 99991231, 
@@ -188,7 +190,15 @@ BEGIN
 				 @job_id = @jobId, 
 				 @step_id = @stepId,
 				 @command = @stepCommand
-			IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
+
+		EXEC @ReturnCode = msdb.dbo.sp_update_schedule  
+			@name = @stepNameSchedule,
+			@freq_type = 32,					-- Monthly, relative to frequency_interval.
+			@freq_interval = 1,					-- Once / Sunday
+			@freq_relative_interval = 1 		-- FIrst
+
+		IF (@@ERROR <> 0 OR @ReturnCode <> 0) GOTO QuitWithRollback
 	END
 
 	COMMIT TRANSACTION

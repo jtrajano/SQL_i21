@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblRKFuturesMonthPreStage (intFutureMonthPreStageId)
 	SELECT intFutureMonthPreStageId
-	FROM tblRKFuturesMonthPreStage WITH (NOLOCK)
+	FROM tblRKFuturesMonthPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intFutureMonthPreStageId = MIN(intFutureMonthPreStageId)
 	FROM @tblRKFuturesMonthPreStage
+
+	IF @intFutureMonthPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblRKFuturesMonthPreStage t
+	JOIN @tblRKFuturesMonthPreStage pt ON pt.intFutureMonthPreStageId = t.intFutureMonthPreStageId
 
 	WHILE @intFutureMonthPreStageId IS NOT NULL
 	BEGIN
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblRKFuturesMonthPreStage
 		WHERE intFutureMonthPreStageId > @intFutureMonthPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblRKFuturesMonthPreStage t
+	JOIN @tblRKFuturesMonthPreStage pt ON pt.intFutureMonthPreStageId = t.intFutureMonthPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH

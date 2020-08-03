@@ -133,7 +133,7 @@ FROM tblAPCompanyPreference
 INSERT INTO @table
 SELECT DISTINCT
 	[intEntityVendorId]			=	A.intEntityVendorId
-	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1)	 END 
+	,[intTransactionType]		=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1) END 
 	,[dtmDate]					=	A.dtmReceiptDate
 	,[strReference]				=	A.strVendorRefNo
 	,[strSourceNumber]			=	A.strReceiptNumber
@@ -200,7 +200,11 @@ SELECT DISTINCT
 												 ELSE B.dblUnitCost
 											END AS DECIMAL(38,20))  	
 	,[dblDiscount]				=	0
-	,[dblTax]					=	ISNULL(B.dblTax,0)
+	,[dblTax]					=	
+		CASE 
+			WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(B.dblTax,0)
+			ELSE ISNULL(B.dblTax,0)
+		END 
 	,[dblRate]					=	ISNULL(NULLIF(B.dblForexRate,0),1)
 	,[strRateType]				=	RT.strCurrencyExchangeRateType
 	,[intCurrencyExchangeRateTypeId] =	B.intForexRateTypeId
@@ -229,12 +233,40 @@ SELECT DISTINCT
 	,[strUOM]					=	CASE WHEN Contracts.intContractDetailId > 0 THEN Contracts.strUnitMeasure ELSE UOM.strUnitMeasure END
 	,[intWeightUOMId]			=	B.intWeightUOMId
 	,[intCostUOMId]				=	B.intCostUOMId
-	,[dblNetWeight]				=	CAST(CASE WHEN B.intWeightUOMId > 0 THEN  
-													(CASE WHEN B.dblBillQty > 0 
-															THEN ABS(B.dblOpenReceive - B.dblBillQty) * (ItemUOM.dblUnitQty/ ISNULL(ItemWeightUOM.dblUnitQty ,1)) --THIS IS FOR PARTIAL
-														ELSE B.dblNet --THIS IS FOR NO RECEIVED QTY YET BUT HAS NET WEIGHT DIFFERENT FROM GROSS
-											END)
-									ELSE 0 END AS DECIMAL(38,20))
+	,[dblNetWeight]				=	
+		CASE 
+			WHEN B.intWeightUOMId IS NOT NULL THEN 
+				CASE 
+					-- Re-compute the NET when IR was converted partially. 
+					WHEN ISNULL(B.dblBillQty, 0) <> 0 THEN 
+						CASE 	
+							WHEN @billTypeToUse = @type_DebitMemo THEN 
+								-dbo.fnMultiply(
+									dbo.fnDivide(
+										(B.dblOpenReceive - ISNULL(B.dblBillQty, 0))
+										,B.dblOpenReceive
+									)
+									,B.dblNet
+								) 
+							ELSE 
+								dbo.fnMultiply(
+									dbo.fnDivide(
+										(B.dblOpenReceive - ISNULL(B.dblBillQty, 0))
+										,B.dblOpenReceive
+									)
+									,B.dblNet
+								) 
+						END
+					-- NET is processed from IR to Voucher in full. 
+					ELSE
+						CASE 	
+							WHEN @billTypeToUse = @type_DebitMemo THEN -B.dblNet						
+							ELSE B.dblNet
+						END
+				END
+			ELSE 
+				0
+		END
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
 	,[dblWeightUnitQty]			=	CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
@@ -535,7 +567,7 @@ ORDER BY
 INSERT INTO @table
 SELECT DISTINCT
 		[intEntityVendorId]							=	A.intEntityVendorId
-		,[intTransactionType]						=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE 1 END 
+		,[intTransactionType]						=	CASE WHEN A.strReceiptType = 'Inventory Return' THEN 3 ELSE ISNULL(@billTypeToUse, 1) END 
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
 		,[strSourceNumber]							=	A.strSourceNumber
@@ -590,15 +622,36 @@ SELECT DISTINCT
 		,[intInventoryReceiptItemId]				=	A.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
-		,[dblUnitCost]								=	CAST(A.dblUnitCost AS DECIMAL(38,20))
+		,[dblUnitCost]								=	
+			--CAST(A.dblUnitCost AS DECIMAL(38,20))
+			CASE 
+				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
+					A.dblUnitCost
+				ELSE 
+					CASE 
+						WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
+						ELSE A.dblUnitCost
+					END 
+			END
 		,[dblDiscount]								=	0
-		,[dblTax]									=	ISNULL((CASE WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) <> IR.intEntityVendorId
-																		THEN (CASE WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
-																				ELSE A.dblTax END) --THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
-																	 ELSE (CASE WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 1 THEN A.dblTax * -1 
-																	 		WHEN A.ysnPrice = 1 AND IRCT.ysnCheckoffTax = 0 THEN -A.dblTax --negate, inventory receipt will bring postive tax
-																	 		ELSE A.dblTax END )
-																	  END),0) -- RECEIPT VENDOR: WILL NEGATE THE TAX IF PRCE DOWN 
+		,[dblTax]									=	
+			ISNULL(
+				CASE
+					--THIRD PARTY TAX SHOULD RETAIN NEGATIVE IF CHECK OFF
+					WHEN ISNULL(A.intEntityVendorId, IR.intEntityVendorId) <> IR.intEntityVendorId THEN 
+						CASE 
+							WHEN IRCT.ysnCheckoffTax = 0 THEN ABS(A.dblTax) 
+							ELSE A.dblTax 
+						END 
+					-- RECEIPT VENDOR
+					ELSE 					
+						CASE 
+							WHEN @billTypeToUse = @type_DebitMemo THEN -(CASE WHEN A.ysnPrice = 1 THEN -A.dblTax ELSE A.dblTax END)
+							ELSE (CASE WHEN A.ysnPrice = 1 THEN -A.dblTax ELSE A.dblTax END)
+						END 					
+						
+				END
+			,0) 
 		,[dblRate]									=	ISNULL(NULLIF(A.dblForexRate,0),1)
 		,[strRateType]								=	RT.strCurrencyExchangeRateType
 		,[intCurrencyExchangeRateTypeId]			=	A.intForexRateTypeId
@@ -679,8 +732,8 @@ SELECT DISTINCT
 			AS BIT)
 		,[strTaxGroup]								=	TG.strTaxGroup
 		,intShipViaId								=   NULL 
-		,intShipFromId								=	NULL 
-		,intShipFromEntityId						=	NULL 
+		,intShipFromId								=	IR.intShipFromId 
+		,intShipFromEntityId						=	IR.intShipFromEntityId 
 		,intPaytoAddressId							=	payToAddress.intEntityLocationId
 		,[intLoadShipmentId]			 			= A.intLoadShipmentId     
 		,[intLoadShipmentDetailId]	     			= NULL 

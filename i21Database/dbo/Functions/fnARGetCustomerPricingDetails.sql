@@ -386,7 +386,7 @@ BEGIN
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
 									AND vyuTRGetRackPriceDetail.intItemId = intRackItemId
 									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									AND CAST(@TransactionDate AS DATETIME) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATETIME)
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC) + dblDeviation
 			,dblPriceBasis = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
@@ -396,7 +396,7 @@ BEGIN
 								WHERE tblTRSupplyPoint.intEntityLocationId = intVendorLocationId 
 									AND vyuTRGetRackPriceDetail.intItemId = intRackItemId
 									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intRackItemLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									AND CAST(@TransactionDate AS DATETIME) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATETIME)
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'R'
@@ -415,7 +415,7 @@ BEGIN
 									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
 								WHERE vyuTRGetRackPriceDetail.intItemId = @ItemId
 									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									AND CAST(@TransactionDate AS DATETIME) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATETIME)
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC) + dblDeviation
 			,dblPriceBasis = (SELECT TOP 1 CASE WHEN strCostToUse = 'Vendor' THEN dblVendorRack 
 								    			   WHEN strCostToUse = 'Jobber' THEN dblJobberRack
@@ -424,7 +424,7 @@ BEGIN
 									ON vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(tblTRSupplyPoint.intRackPriceSupplyPointId ,tblTRSupplyPoint.intSupplyPointId) 
 								WHERE vyuTRGetRackPriceDetail.intItemId = @ItemId
 									AND ((vyuTRGetRackPriceDetail.intSupplyPointId = ISNULL(@SupplyPointId,0) AND ISNULL(@SupplyPointId,0) <> 0) OR tblTRSupplyPoint.intEntityLocationId = intVendorLocationId)
-									AND CAST(@TransactionDate AS DATE) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATE)
+									AND CAST(@TransactionDate AS DATETIME) >= CAST(vyuTRGetRackPriceDetail.dtmEffectiveDateTime AS DATETIME)
 									ORDER BY vyuTRGetRackPriceDetail.dtmEffectiveDateTime DESC)									
 		WHERE
 			strPriceBasis = 'O'

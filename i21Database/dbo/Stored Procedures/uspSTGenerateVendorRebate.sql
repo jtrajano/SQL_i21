@@ -173,8 +173,50 @@ BEGIN TRY
 			RETURN
 		END
 
+		select * into #tempMisMatchPromotionalItem from tblSTPromotionSalesList 
+		where (LOWER(strPromoType) = 'mixmatch' OR Lower(strPromoType) = 'm') and intPromoUnits > 1
+
 		INSERT INTO @tblTempPMM
-		SELECT DISTINCT @intVendorAccountNumber intRCN 
+							SELECT 
+								intRCN
+								,dtmWeekEndingDate
+								,dtmTransactionDate
+								,strTransactionTime
+								,strTransactionIdCode
+								,strStoreNumber
+								,strStoreName
+								,strStoreAddress
+								,strStoreCity
+								,strStoreState
+								,intStoreZipCode
+								,strCategory
+								,strManufacturerName
+								,strSKUCode
+								,strUpcCode
+								,strSkuUpcDescription
+								,strUnitOfMeasure
+								,intQuantitySold
+								,intConsumerUnits
+								,strMultiPackIndicator
+								,intMultiPackRequiredQuantity
+								,dblMultiPackDiscountAmount
+								,strRetailerFundedDiscountName
+								,dblRetailerFundedDiscountAmount
+								,strMFGDealNameONE
+								,dblMFGDealDiscountAmountONE
+								,strMFGDealNameTWO
+								,dblMFGDealDiscountAmountTWO
+								,strMFGDealNameTHREE
+								,dblMFGDealDiscountAmountTHREE
+								,dblFinalSalesPrice
+								,intStoreTelephone
+								,strStoreContactName
+								,strStoreContactEmail
+								,strProductGroupingCode
+								,strProductGroupingName
+								,strLoyaltyIDRewardsNumber
+							FROM (
+							SELECT DISTINCT intScanTransactionId, @intVendorAccountNumber intRCN 
 			, REPLACE(CONVERT(NVARCHAR, @dtmEndingDate, 111), '/', '') AS dtmWeekEndingDate
 			, REPLACE(CONVERT(NVARCHAR, dtmDate, 111), '/', '') AS dtmTransactionDate 
 			, CONVERT(NVARCHAR, dtmDate, 108) AS strTransactionTime
@@ -193,24 +235,71 @@ BEGIN TRY
 			, CASE WHEN DEPT.ysnTobacco = 1 THEN 'PACKS' ELSE 'CANS' END AS strUnitOfMeasure
 			, CASE WHEN strTrpPaycode != 'Change' THEN CAST(dblTrlQty as INT) ELSE 0 END AS intQuantitySold
 			, 1 AS intConsumerUnits
-			, CASE WHEN DEPT.ysnTobacco = 1 
-				AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-				AND TR.dblTrlQty >= 2 
-			  THEN 'Y' 
-			  ELSE 'N' END AS strMultiPackIndicator
-			, CASE WHEN DEPT.ysnTobacco = 1 
-				AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-				AND TR.dblTrlQty >= 2
-			  THEN 2
-			  ELSE NULL END AS intMultiPackRequiredQuantity
-			, CASE WHEN DEPT.ysnTobacco = 1 
-				AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-				AND TR.dblTrlQty >= 2
-			  THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
-			  ELSE NULL END AS dblMultiPackDiscountAmount
+			-- , CASE WHEN DEPT.ysnTobacco = 1 
+			-- 	AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+			-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+			-- 	AND TR.dblTrlQty >= 2 
+			--   THEN 'Y' 
+			--   ELSE 'N' END AS strMultiPackIndicator
+			-- NEW CODE-- ST-1717
+				,CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 'Y'
+					ELSE 'N'
+				END AS strMultiPackIndicator	
+				-- NEW CODE-- ST-1717
+				-- , CASE WHEN DEPT.ysnTobacco = 1 
+				-- 	AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+				-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+				-- 	AND TR.dblTrlQty >= 2
+				--   THEN 2
+				--   ELSE NULL END AS intMultiPackRequiredQuantity
+					-- NEW CODE-- ST-1717
+				,
+				CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID) > 0
+				THEN 
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID)
+					ELSE NULL
+					END
+				ELSE
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 2 
+					ELSE NULL
+					END
+				END 
+				AS intMultiPackRequiredQuantity	
+				-- NEW CODE-- ST-1717
+				-- , CASE WHEN DEPT.ysnTobacco = 1 
+				-- 	AND	TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+				-- 	AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+				-- 	AND TR.dblTrlQty >= 2
+				--   THEN (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)
+				--   ELSE NULL END AS dblMultiPackDiscountAmount
+				-- NEW CODE-- ST-1717
+				,CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID) > 0
+				THEN 
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 
+						CASE WHEN (SELECT COUNT(1) FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID AND intPromoUnits = dblTrlMatchLineTrlMatchQuantity) > 0
+						THEN 
+							dblTrlMatchLineTrlPromoAmount
+						ELSE
+							dblTrlMatchLineTrlPromoAmount * (SELECT TOP 1 intPromoUnits FROM #tempMisMatchPromotionalItem WHERE intPromoSalesId = strTrlMatchLineTrlPromotionID)
+						END
+					ELSE NULL
+					END
+				ELSE
+					CASE WHEN strTrlMatchLineTrlMatchName IS NOT NULL AND [TR].strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					THEN 
+						CASE WHEN dblTrlMatchLineTrlMatchQuantity = 2
+						THEN dblTrlMatchLineTrlPromoAmount
+						ELSE dblTrlMatchLineTrlPromoAmount * 2
+						END
+					ELSE NULL
+					END
+				END 
+				AS dblMultiPackDiscountAmount	
+				-- NEW CODE-- ST-1717
 			, REPLACE(CRP.strProgramName, ',','') as strRetailerFundedDiscountName
 			, CRP.dblManufacturerBuyDownAmount as dblRetailerFundedDiscountAmount
 			, CASE WHEN strTrpPaycode = 'COUPONS' THEN 'Coupon' ELSE '' END AS strMFGDealNameONE
@@ -238,7 +327,7 @@ BEGIN TRY
 			, '' strLoyaltyIDRewardsNumber
 		FROM (
 			SELECT * FROM
-			( SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+			( SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ,intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 				FROM tblSTTranslogRebates
 				WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate
 			) TRR 
@@ -266,7 +355,7 @@ BEGIN TRY
 		WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL) -- Filter Store without Address
 		AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
 		AND TR.strTrpPaycode != 'Change' --ST-680
-
+			) as innerquery
 
 		IF EXISTS(SELECT * FROM @tblTempPMM)
 		BEGIN
@@ -284,7 +373,43 @@ BEGIN TRY
 		SET @Delimiter = ','
 
 		INSERT INTO @tblTempRJR
-		SELECT DISTINCT (CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
+								SELECT 
+									strOutletName
+									,intOutletNumber
+									,strOutletAddressOne
+									,strOutletAddressTwo
+									,strOutletCity
+									,strOutletState
+									,strOutletZipCode
+									,strTransactionDateTime
+									,strMarketBasketTransactionId
+									,strScanTransactionId
+									,strRegisterId
+									,intQuantity
+									,dblPrice
+									,strUpcCode
+									,strUpcDescription
+									,strUnitOfMeasure
+									,strPromotionFlag
+									,strOutletMultipackFlag
+									,intOutletMultipackQuantity
+									,dblOutletMultipackDiscountAmount
+									,strAccountPromotionName
+									,dblAccountDiscountAmount
+									,dblManufacturerDiscountAmount
+									,strCouponPid
+									,dblCouponAmount
+									,strManufacturerMultipackFlag
+									,intManufacturerMultipackQuantity
+									,dblManufacturerMultipackDiscountAmount
+									,strManufacturerPromotionDescription
+									,strManufacturerBuydownDescription
+									,dblManufacturerBuydownAmount
+									,strManufacturerMultiPackDescription
+									,strAccountLoyaltyIDNumber
+									,strCouponDescription
+								FROM ( 
+								SELECT DISTINCT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 			, ST.intStoreNo as intOutletNumber
 			, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 			, '' as strOutletAddressTwo
@@ -411,7 +536,7 @@ BEGIN TRY
 		FROM (   
 			SELECT * FROM
 			(   
-				SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId ORDER BY strTrpPaycode DESC) AS rn
+				SELECT *, ROW_NUMBER() OVER (PARTITION BY intTermMsgSN, strTrlUPC, strTrlDesc, strTrlDept, dblTrlQty, dblTrpAmt, strTrpPaycode, intStoreId, intCheckoutId,intScanTransactionId ORDER BY strTrpPaycode DESC) AS rn
 				FROM tblSTTranslogRebates
 				WHERE CAST(dtmDate AS DATE) BETWEEN @dtmBeginningDate AND @dtmEndingDate	
 			) TRR WHERE TRR.rn = 1		
@@ -436,7 +561,7 @@ BEGIN TRY
 		) DEPT ON DEPT.intStoreId = TR.intStoreId AND DEPT.intRegisterDepartmentId = TR.intTrlDeptNumber
 		WHERE (ST.strAddress !='' OR ST.strAddress IS NOT NULL)
 			AND (TR.strTrlUPC != '' AND TR.strTrlUPC IS NOT NULL)
-
+				) as innerquery
 		-- Check if has record
 		IF EXISTS(SELECT * FROM @tblTempRJR)
 		BEGIN

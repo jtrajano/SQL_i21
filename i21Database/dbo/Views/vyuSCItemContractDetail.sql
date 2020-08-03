@@ -17,6 +17,7 @@ AS
 		,strItemDescription = D.strDescription
 		,B.dblPrice
 		,B.intLineNo
+		,B.dblContracted
 	FROM tblCTItemContractHeader A
 	INNER JOIN tblCTItemContractDetail B
 		ON A.intItemContractHeaderId = B.intItemContractHeaderId

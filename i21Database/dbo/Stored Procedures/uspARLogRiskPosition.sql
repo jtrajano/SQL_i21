@@ -283,6 +283,15 @@ BEGIN
       AND ID.dblQtyShipped <> TD.dblQtyShipped
       AND ITEM.strType != 'Other Charge'
 
+    --DWG
+    UPDATE SL
+    SET dblQty    = 0
+      , strNotes  = 'Invoiced Quantity is ' + CONVERT(VARCHAR, CAST(dblQty * -1 AS MONEY), 1)
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
+    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
+
     --CONTRACT BALANCE LOG
     INSERT INTO @tblContractBalanceLog (
           strTransactionType
@@ -317,6 +326,7 @@ BEGIN
 	    	, intFutureMonthId
 	    	, intUserId        
         , intActionId
+        , strNotes
     )
     SELECT strTransactionType	      = 'Sales Basis Deliveries'
         , strTransactionReference   = SL.strTransactionType
@@ -350,6 +360,7 @@ BEGIN
 		    , intFutureMonthId		      = SL.intFutureMonthId
 		    , intUserId			            = SL.intUserId
         , intActionId					      = 16--CREATE INVOICE
+        , strNotes                  = SL.strNotes
   FROM @tblSummaryLog SL
 	INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId
 	INNEr JOIN tblCTContractDetail CD ON SL.intContractDetailId = CD.intContractDetailId

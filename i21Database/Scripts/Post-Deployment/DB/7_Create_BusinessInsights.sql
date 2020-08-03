@@ -57,7 +57,7 @@
 					)
 					VALUES (
 						5, 7, 100, 400, @entityId, 0, 0, 0,	0, 1,	
-						0,	N'Master', N'Customer Aging Chart', N'Chart', N'', N'Customer Aging', N'3D Pie', N'rotate', N'Base', NULL, N'None',
+						0,	N'Master', N'Customer Aging Chart', N'Chart', N'', N'Customer Aging', N'Pie', N'rotate', N'Base', NULL, N'None',
 						N'None', N'', N'', N'select top 5 strCustomerName, intEntityCustomerId, dblTotalDue from vyuARCustomerAging_DashBoard', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
@@ -109,7 +109,7 @@
 				BEGIN
 					SELECT @customerAgingChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanel SET ysnChartLegend = 0, strChart = 'Pie' WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
 					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @customerAgingChartPanelId AND strAlignment = 'Series1AxisY'
 					UPDATE tblDBPanelUser SET intSort = 1 WHERE intPanelId = @customerAgingChartPanelId and intPanelTabId = @panelTabId
 				END
@@ -173,14 +173,14 @@
 						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@customerAgingGridPanelId, 2, @panelTabId, 1, @entityId, 0, 1
+						@customerAgingGridPanelId, 2, @panelTabId, 1, @entityId, 1, 1
 					)
 				END
 				ELSE
 				BEGIN
 					SELECT @customerAgingGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Customer Aging Grid' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 0 WHERE intPanelId = @customerAgingGridPanelId AND intPanelTabId = @panelTabId
+					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @customerAgingGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 2 WHERE intPanelId = @customerAgingGridPanelId and intPanelTabId = @panelTabId
 				END
 
@@ -313,7 +313,7 @@
 						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@salesGridPanelId, 2, @panelTabId, 2, @entityId, 0, 1
+						@salesGridPanelId, 2, @panelTabId, 2, @entityId, 1, 1
 					)
 				END
 				ELSE
@@ -321,7 +321,7 @@
 					SELECT @salesGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Sales Grid' AND ysnSystemPanel = 1
 
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @salesGridPanelId AND strColumn IN ('Total')
-					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 0 WHERE intPanelId = @salesGridPanelId AND intPanelTabId = @panelTabId
+					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @salesGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 2 WHERE intPanelId = @salesGridPanelId and intPanelTabId = @panelTabId
 				END
 
@@ -484,7 +484,7 @@
 						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, 4, @panelTabId, 1, @entityId, 0, 1
+						@cashProjectionGridPanelId, 4, @panelTabId, 1, @entityId, 1, 1
 					)
 
 					--UPDATE strConfigurator for Pivot Grid
@@ -544,7 +544,7 @@
 					SELECT @cashProjectionGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Cash Projection Grid' AND ysnSystemPanel = 1
 
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @cashProjectionGridPanelId AND strColumn IN ('dblAmountDue', 'RunningTotal', 'NetAmount')
-					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 0 WHERE intPanelId = @cashProjectionGridPanelId AND intPanelTabId = @panelTabId
+					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @cashProjectionGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 4 WHERE intPanelId = @cashProjectionGridPanelId and intPanelTabId = @panelTabId
 				END
 
@@ -697,7 +697,7 @@
 						[intPanelId], [intSort], [intPanelTabId], [intColumn], [intUserId], [ysnSystemPanelVisible], [intConcurrencyId ]
 					)
 					VALUES (
-						@grossMarginGridPanelId, 4, @panelTabId, 2, @entityId, 0, 1
+						@grossMarginGridPanelId, 4, @panelTabId, 2, @entityId, 1, 1
 					)
 				END
 				ELSE
@@ -705,7 +705,7 @@
 					SELECT @grossMarginGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
 
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblRevenue', 'dblExpense', 'dblNet')
-					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 0 WHERE intPanelId = @grossMarginGridPanelId AND intPanelTabId = @panelTabId
+					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @grossMarginGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 4 WHERE intPanelId = @grossMarginGridPanelId and intPanelTabId = @panelTabId
 				END
 

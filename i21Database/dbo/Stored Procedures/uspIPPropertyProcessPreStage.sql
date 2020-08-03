@@ -17,11 +17,21 @@ BEGIN TRY
 
 	INSERT INTO @tblQMPropertyPreStage (intPropertyPreStageId)
 	SELECT intPropertyPreStageId
-	FROM tblQMPropertyPreStage WITH (NOLOCK)
+	FROM tblQMPropertyPreStage
 	WHERE ISNULL(strFeedStatus, '') = ''
 
 	SELECT @intPropertyPreStageId = MIN(intPropertyPreStageId)
 	FROM @tblQMPropertyPreStage
+
+	IF @intPropertyPreStageId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strFeedStatus = 'In-Progress'
+	FROM tblQMPropertyPreStage t
+	JOIN @tblQMPropertyPreStage pt ON pt.intPropertyPreStageId = t.intPropertyPreStageId
 
 	WHILE @intPropertyPreStageId IS NOT NULL
 	BEGIN
@@ -54,6 +64,12 @@ BEGIN TRY
 		FROM @tblQMPropertyPreStage
 		WHERE intPropertyPreStageId > @intPropertyPreStageId
 	END
+
+	UPDATE t
+	SET t.strFeedStatus = NULL
+	FROM tblQMPropertyPreStage t
+	JOIN @tblQMPropertyPreStage pt ON pt.intPropertyPreStageId = t.intPropertyPreStageId
+		AND t.strFeedStatus = 'In-Progress'
 END TRY
 
 BEGIN CATCH
