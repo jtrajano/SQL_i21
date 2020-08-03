@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[tblMBILInvoiceItem](
 	[intContractDetailId] INT NULL,
 	[dblQuantity] NUMERIC (18, 6) NULL,
 	[dblPrice] NUMERIC (18, 6) NULL,
+	[dblPercentageFull] NUMERIC (18, 6) NULL,
 	[inti21InvoiceDetailId] INT NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblMBILInvoiceItem] PRIMARY KEY CLUSTERED ([intInvoiceItemId] ASC),
