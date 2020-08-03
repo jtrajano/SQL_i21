@@ -8750,6 +8750,7 @@
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
+    <Build Include="dbo\Tables\tblSTLotteryProcessError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
