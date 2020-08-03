@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspIPInterCompanySendEmail @strMessageType NVARCHAR(50)
 	,@strStatus NVARCHAR(50) = ''
 	,@ysnDailyNotification BIT=0
+	,@intStatusId INT = NULL
 AS
 DECLARE @strStyle NVARCHAR(MAX)
 	,@strHtml NVARCHAR(MAX)
@@ -154,41 +155,28 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
+	IF EXISTS (
+			SELECT *
+			FROM tblCTContractStage S WITH (NOLOCK)
+			WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+				AND ysnMailSent IS NULL
+			)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
+			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
+			   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
+			   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
+			   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
 		</tr>'
 		FROM tblCTContractStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
-		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
+		LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
+		WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+			AND S.ysnMailSent IS NULL
 
 		UPDATE tblCTContractStage
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
-		</tr>'
-		FROM tblCTContractStage S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
-		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
-
-		UPDATE tblCTContractStage
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
 	END
 END
 
