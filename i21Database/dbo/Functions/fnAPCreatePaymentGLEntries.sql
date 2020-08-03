@@ -491,7 +491,9 @@ BEGIN
 		[dblDebit]						=  (ROUND(
 												-- SUM(
 													(
-														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
+														CASE WHEN B.intPayScheduleId > 0 
+															THEN 
+															dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment + B.dblDiscount, voucher.dblTotal)
 															ELSE
 															dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment 
 															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
@@ -531,7 +533,9 @@ BEGIN
 		[dblDebitForeign]				=	ROUND(
 												-- SUM(
 													(
-														CASE WHEN B.intPayScheduleId > 0 THEN B.dblPayment + B.dblDiscount
+														CASE WHEN B.intPayScheduleId > 0 
+															THEN
+															dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment + B.dblDiscount, voucher.dblTotal)
 															ELSE
 															dbo.fnAPGetPaymentAmountFactor(voucherDetail.dblTotal, B.dblPayment 
 															+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
