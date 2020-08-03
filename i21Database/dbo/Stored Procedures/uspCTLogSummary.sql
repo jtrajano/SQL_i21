@@ -1684,7 +1684,16 @@ BEGIN TRY
 			END
 			
 			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId IN (3,6))
-			BEGIN								
+			BEGIN	
+				IF ISNULL(@dblQty,0) = 0
+				BEGIN
+					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					FROM @cbLogSpecific
+
+					UPDATE @cbLogSpecific SET intActionId = @_action
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				
 				IF ISNULL(@dblBasis,0) > 0
 				BEGIN
 					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
