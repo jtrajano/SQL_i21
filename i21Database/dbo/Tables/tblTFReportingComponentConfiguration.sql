@@ -14,6 +14,7 @@
 	[strLastIndexOf] [nvarchar](10) COLLATE Latin1_General_CI_AS NULL,
 	[strSegment] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	[intConfigurationSequence] [int] NULL,
+	[strInputType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intMasterId] INT NULL,
 	[intConcurrencyId] INT DEFAULT((1)) NULL, 
     CONSTRAINT [PK_tblTFReportingComponentConfiguration] PRIMARY KEY ([intReportingComponentConfigurationId] ASC),

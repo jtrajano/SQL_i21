@@ -142,9 +142,7 @@ BEGIN
 			AND (
                 ([strTransactionType] <> 'Credit Memo'	AND [dblBaseInvoiceTotal] = 0.000000 AND [dblInvoiceTotal] = 0.000000)
                 OR
-                ([strTransactionType] = 'Credit Memo' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
-				OR
-				([strTransactionType] = 'Invoice' AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000 AND [dblAmountDue] <> 0.000000)
+                ([strTransactionType] IN ('Credit Memo', 'Invoice') AND [dblBaseInvoiceTotal] <> 0.000000 AND [dblProvisionalAmount] <> 0.000000)
 				)
     ) P
     INNER JOIN (
@@ -181,7 +179,7 @@ BEGIN
 			tblGLDetail WITH (NOLOCK)
         WHERE 
             [ysnIsUnposted] = 0
-            AND [strModuleName] = @MODULE_NAME
+			AND [strModuleName] = @MODULE_NAME
     ) GL ON P.[intOriginalInvoiceId] = GL.[intTransactionId]
         AND P.[strInvoiceOriginId] = GL.[strTransactionId]
     ORDER BY GL.intGLDetailId				
@@ -377,7 +375,7 @@ DECLARE  @InTransitItems                ItemInTransitCostingTableType
 		,@FOB_ORIGIN                    INT = 1
 		,@FOB_DESTINATION               INT = 2	
 				
-IF @Post = 1
+IF @Post = 1 OR (@Post = 0 AND EXISTS(SELECT TOP 1 1 FROM #ARPostInvoiceDetail WHERE intSourceId = 2))
 INSERT INTO @InTransitItems
     ([intItemId] 
     ,[intItemLocationId] 

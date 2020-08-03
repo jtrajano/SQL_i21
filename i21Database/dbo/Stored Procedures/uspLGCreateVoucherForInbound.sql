@@ -151,6 +151,7 @@ BEGIN TRY
 			,[dblWeightUnitQty]
 			,[intWeightUOMId]
 			,[intCostCurrencyId]
+			,[intFreightTermId]
 			,[dblTax]
 			,[dblDiscount]
 			,[dblExchangeRate]
@@ -195,6 +196,7 @@ BEGIN TRY
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
+			,[intFreightTermId] = L.intFreightTermId
 			,[dblTax] = ISNULL(receiptItem.dblTax, 0)
 			,[dblDiscount] = 0
 			,[dblExchangeRate] = CASE --if contract FX tab is setup
@@ -347,6 +349,7 @@ BEGIN TRY
 				,[dblWeightUnitQty]
 				,[intWeightUOMId]
 				,[intCostCurrencyId]
+				,[intFreightTermId]
 				,[dblTax]
 				,[dblDiscount]
 				,[dblExchangeRate]
@@ -391,6 +394,7 @@ BEGIN TRY
 				,[dblWeightUnitQty]
 				,[intWeightUOMId]
 				,[intCostCurrencyId]
+				,[intFreightTermId]
 				,[dblTax]
 				,[dblDiscount]
 				,[dblExchangeRate]
