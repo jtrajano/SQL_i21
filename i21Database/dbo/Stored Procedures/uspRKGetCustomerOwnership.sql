@@ -328,14 +328,14 @@ declare @intColCount int
 declare @SQLBalanceForward nvarchar(max)=''
 declare @SQLFinal nvarchar(max)=''
 
-select @strInsertListBF += CASE WHEN name like '%Distribution%' THEN '['+ name +'],' ELSE 'SUM(ISNULL(['+ name +'],0)),' END from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and  (name like '%_Net' or name like '%Distribution%')
+select @strInsertListBF += CASE WHEN name like '%Distribution%' THEN '['+ name +'],' ELSE 'SUM(ISNULL(['+ name +'],0)),' END from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and  (name like '%_Net' or name like '%Distribution%') ORDER BY column_id ASC
 SELECT @strInsertListBF=  case when LEN(@strInsertListBF)>0 then LEFT(@strInsertListBF,LEN(@strInsertListBF)-1) else @strInsertListBF end  --Remove the comma at the end
 
 select @strInsertListBFGroupBy += '['+ name +'],'  from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') and   name like '%Distribution%'
 SELECT @strInsertListBFGroupBy=  case when LEN(@strInsertListBFGroupBy)>0 then LEFT(@strInsertListBFGroupBy,LEN(@strInsertListBFGroupBy)-1) else @strInsertListBFGroupBy end  --Remove the comma at the end
 
 
-select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
+select @strInsertList+='['+name+'],' from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') ORDER BY column_id ASC
 select @intColCount=count(name) from tempdb.sys.columns where object_id =object_id('tempdb..##tblRKDailyPositionForCustomer1') 
 SELECT @strInsertList=  case when LEN(@strInsertList)>0 then LEFT(@strInsertList,LEN(@strInsertList)-1) else @strInsertList end  --Remove the comma at the end
 
