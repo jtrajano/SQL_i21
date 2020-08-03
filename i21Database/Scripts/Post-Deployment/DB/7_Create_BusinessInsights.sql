@@ -561,9 +561,9 @@
 						[intGridLayoutId], [strTableName], [strColumnName],	[ysnSystemPanel], [ysnSystemPanelChild]
 					)
 					VALUES (
-						10, 5, 100, 300, @entityId, 0, 0, 0,	0, 1,	
+						3, 5, 100, 300, @entityId, 0, 0, 0,	0, 1,	
 						0,	N'Master', N'Gross Margin Chart', N'Chart', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select *  from vyuARInvoiceGrossMargin order by dblNet desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						N'None', N'', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
@@ -579,7 +579,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginChartPanelId, N'strInvoiceNumber', N'Invoice No', 0, N'Series1AxisX', N'', N'', N'General', 0, N'', N'', N'',
+						@grossMarginChartPanelId, N'strType', N'Type', 0, N'Series1AxisX', N'', N'', N'General', 0, N'', N'', N'',
 						1, N'Chart', N'Series1AxisX', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.String', N'', NULL
 					)
@@ -589,7 +589,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginChartPanelId, N'dblNet', N'Net', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
+						@grossMarginChartPanelId, N'dblAmount', N'Amount', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -614,8 +614,23 @@
 				BEGIN
 					SELECT @grossMarginChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
-					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisY'
+					UPDATE tblDBPanel SET 
+					[ysnChartLegend] = 0,
+					[intRowsReturned] = 3,
+					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType'
+					WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
+
+					UPDATE tblDBPanelColumn SET 
+					strFormat = N'Round', 
+					[strColumn] = N'dblAmount',
+					strCaption = 'Amount'
+					WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisY'
+
+					UPDATE tblDBPanelColumn SET 
+					[strColumn] = N'strType' ,
+					strCaption = 'Type'
+					WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisX'
+
 					UPDATE tblDBPanelUser SET intSort = 3 WHERE intPanelId = @grossMarginChartPanelId and intPanelTabId = @panelTabId
 				END
 
@@ -634,7 +649,7 @@
 					VALUES (
 						0, 6, 100, 250, @entityId, 0, 0, 0,	0, 1,	
 						0,	N'Master', N'Gross Margin Grid', N'Grid', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select strInvoiceNumber, dblRevenue, dblExpense, dblNet from vyuARInvoiceGrossMargin order by dblNet desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						N'None', N'', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, 1
@@ -649,7 +664,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'strInvoiceNumber', N'Invoice No', 100, N'Left', N'', N'', N'', 0, N'', N'', N'',
+						@grossMarginGridPanelId, N'strType', N'Type', 100, N'Left', N'', N'', N'', 0, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.String', N'AccountsReceivable.view.Invoice', NULL
 					)
@@ -659,10 +674,11 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'dblRevenue', N'Revenue', 100, N'Left', N'', N'', N'###0.00', 1, N'', N'', N'',
+						@grossMarginGridPanelId, N'dblAmount', N'Amount', 100, N'Left', N'', N'', N'###0.00', 1, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
+
 					INSERT INTO tblDBPanelColumn (
 						[intPanelId], [strColumn], [strCaption], [intWidth], [strAlignment], [strArea], [strFooter], [strFormat], [intSort], [strFormatTrue], [strFormatFalse], [strDrillDownColumn],
 						[ysnVisible], [strType], [strAxis], [strUserName], [intUserId], [intDonut], [intMinInterval], [intMaxInterval], [intStepInterval], [strIntervalFormat], [ysnHiddenColumn],
@@ -704,9 +720,25 @@
 				BEGIN
 					SELECT @grossMarginGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
 
+					UPDATE tblDBPanel SET 
+					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType'
+					WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblRevenue', 'dblExpense', 'dblNet')
 					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @grossMarginGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 4 WHERE intPanelId = @grossMarginGridPanelId and intPanelTabId = @panelTabId
+
+					UPDATE tblDBPanelColumn 
+					SET strColumn = 'dblAmount',
+					strCaption = 'Amount'
+					WHERE intPanelId = @grossMarginGridPanelId AND strColumn = 'dblRevenue' 
+					
+					UPDATE tblDBPanelColumn 
+					SET strColumn = 'strType',
+					strCaption = 'Type'
+					WHERE intPanelId = @grossMarginGridPanelId AND strColumn = 'strInvoiceNumber'
+
+					DELETE FROM tblDBPanelColumn WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblExpense', 'dblNet')
 				END
 
 			END
