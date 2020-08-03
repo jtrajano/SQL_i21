@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
+﻿
+
+CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
 	@intCurrentUserId					INT,
 	@intCheckoutId						INT,
 	@strDirection						NVARCHAR(50),
@@ -5150,6 +5152,468 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				----------------- LOTTERY COUNT  ---------------------
 				------------------------------------------------------
 
+				
+				------------------------------------------------------
+				----------------- TEMP TABLE FOR LOTTERY  ------------
+				------------------------------------------------------
+				
+				IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+				BEGIN 
+					CREATE TABLE #tmpAddItemReceiptResult 
+					(
+						intSourceId INT,
+						intInventoryReceiptId INT
+					)
+				END 
+
+				------------------------------------------------------
+				----------------- RECEIVE LOTTERY  -------------------
+				------------------------------------------------------
+				
+				DECLARE @receiveLotteryId INT
+				DECLARE @inventoryReceiptid INT
+				DECLARE @storeId INT
+				DECLARE @lotterySetupMode BIT
+				DECLARE @Id INT
+				DECLARE @ReceiptStagingTable ReceiptStagingTable
+				,@OtherCharges ReceiptOtherChargesTableType
+				,@defaultCurrency INT
+				,@strReceiptType NVARCHAR(500)
+				,@strSourceScreenName NVARCHAR(500)
+
+				SELECT * INTO #tblSTTempReceiveLottery  
+				FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId
+
+
+				IF((SELECT COUNT(*) FROM #tblSTTempReceiveLottery) > 0)
+				BEGIN
+
+					SELECT TOP 1 @lotterySetupMode = ISNULL(ysnLotterySetupMode,0)
+					FROM tblSTStore WHERE intStoreId = @storeId
+
+					IF (ISNULL(@lotterySetupMode,0) != 1)
+					BEGIN
+			
+
+					SET @strReceiptType = 'Direct'
+					SET @strSourceScreenName = 'Lottery Module'
+
+					DECLARE @loopId INT = 0 
+			
+
+					WHILE EXISTS (SELECT TOP 1 * FROM #tblSTTempReceiveLottery )
+					BEGIN
+
+						SELECT TOP 1 @loopId = intReceiveLotteryId FROM #tblSTTempReceiveLottery
+
+						-- SELECT TOP 1 
+						-- intStoreId,
+						-- strBookNumber,
+						-- 'Low to High',
+						-- intLotteryGameId,
+						-- dtmReceiptDate,
+						-- intTicketPerPack,
+						-- 'Inactive'
+						-- FROM #tblSTTempReceiveLottery
+						-- WHERE intReceiveLotteryId = @loopId
+
+
+						--CREATE LOTTERY BOOK ENTRY--
+						INSERT INTO tblSTLotteryBook
+						(
+							intStoreId
+							,strBookNumber
+							,strCountDirection
+							,intLotteryGameId
+							,dtmReceiptDate
+							,dblQuantityRemaining
+							,strStatus
+							,intConcurrencyId
+						)
+						SELECT TOP 1 
+						intStoreId,
+						strBookNumber,
+						'Low to High',
+						intLotteryGameId,
+						dtmReceiptDate,
+						intTicketPerPack,
+						'Inactive',
+						1
+						FROM #tblSTTempReceiveLottery
+						WHERE intReceiveLotteryId = @loopId
+
+						DECLARE @lotteryBookPK INT
+						SET @lotteryBookPK = SCOPE_IDENTITY() 
+
+						UPDATE tblSTReceiveLottery SET intLotteryBookId = @lotteryBookPK WHERE intReceiveLotteryId = @loopId
+
+
+						-- Validate if there is Item UOM setup
+						IF EXISTS(SELECT TOP 1 1 FROM tblSTReceiveLottery RL
+							INNER JOIN tblSTStore S ON S.intStoreId = RL.intStoreId
+							INNER JOIN tblSTLotteryGame LG ON LG.intLotteryGameId = RL.intLotteryGameId
+							LEFT JOIN tblICItemLocation IL ON IL.intLocationId = S.intCompanyLocationId
+								AND IL.intItemId = LG.intItemId
+							LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = IL.intIssueUOMId
+							WHERE RL.intReceiveLotteryId = @Id
+							AND IU.intItemUOMId IS NULL)
+						BEGIN
+							-- SET @Success = CAST(0 AS BIT)
+							SET @strStatusMsg = 'Missing UOM setup on Item Location.'
+							GOTO EXITWITHROLLBACK
+							RETURN
+						END
+					
+						DELETE FROM #tblSTTempReceiveLottery WHERE intReceiveLotteryId = @loopId
+					END
+
+				
+					--DECLARE @ReceiptStagingTable ReceiptStagingTable 
+					INSERT INTO @ReceiptStagingTable(
+						strReceiptType
+						,strSourceScreenName
+						,intEntityVendorId
+						,intShipFromId
+						,intLocationId
+						,intItemId
+						,intItemLocationId
+						,intItemUOMId
+						,intCostUOMId
+						,strBillOfLadding
+						,intContractHeaderId
+						,intContractDetailId
+						,dtmDate
+						,intShipViaId
+						,dblQty
+						,dblCost
+						,intCurrencyId
+						,dblExchangeRate
+						,intLotId
+						,intSubLocationId
+						,intStorageLocationId
+						,ysnIsStorage
+						,dblFreightRate
+						,intSourceId	
+						,intSourceType		 	
+						,dblGross
+						,dblNet
+						,intInventoryReceiptId
+						,dblSurcharge
+						,ysnFreightInPrice
+						,strActualCostId
+						,intTaxGroupId
+						,strVendorRefNo
+						,strSourceId			
+						,intPaymentOn
+						,strChargesLink
+						,dblUnitRetail
+						,intSort
+						,strDataSource
+					)	
+					SELECT strReceiptType	= @strReceiptType
+					,strSourceScreenName	= @strSourceScreenName
+					,intEntityVendorId		= tblICItemLocation.intVendorId
+					,intShipFromId			= (SELECT TOP 1 intShipFromId FROM tblAPVendor WHERE intEntityId = tblICItemLocation.intVendorId)
+					,intLocationId			= tblSTStore.intCompanyLocationId
+					,intItemId				= tblSTLotteryGame.intItemId
+					,intItemLocationId		= tblICItemLocation.intItemLocationId
+					,intItemUOMId			= tblICItemUOM.intItemUOMId
+					, intCostUOMId			= tblICItemUOM.intUnitMeasureId
+					,strBillOfLadding		= ''
+					,intContractHeaderId	= NULL
+					,intContractDetailId	= NULL
+					,dtmDate				= tblSTReceiveLottery.dtmReceiptDate
+					,intShipViaId			= NULL
+					,dblQty					= tblSTReceiveLottery.intTicketPerPack
+					,dblCost				= tblSTLotteryGame.dblInventoryCost 
+					,intCurrencyId			= @defaultCurrency
+					,dblExchangeRate		= 1
+					,intLotId				= NULL
+					,intSubLocationId		= NULL
+					,intStorageLocationId	= NULL
+					,ysnIsStorage			= 0
+					,dblFreightRate			= 0
+					,intSourceId			= tblSTReceiveLottery.intReceiveLotteryId
+					,intSourceType		 	= 7
+					,dblGross				= NULL
+					,dblNet					= NULL
+					,intInventoryReceiptId	= tblSTReceiveLottery.intInventoryReceiptId 
+					,dblSurcharge			= NULL
+					,ysnFreightInPrice		= NULL
+					,strActualCostId		= NULL
+					,intTaxGroupId			= NULL
+					,strVendorRefNo			= (CAST(ISNULL(tblSTStore.intStoreNo,'') as nvarchar(100)) + '-' + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTReceiveLottery.strBookNumber,''))
+					,strSourceId			= NULL
+					,intPaymentOn			= NULL
+					,strChargesLink			= NULL
+					,dblUnitRetail			= NULL
+					,intSort				= NULL
+					,strDataSource			= @strSourceScreenName
+					FROM tblSTReceiveLottery
+					INNER JOIN tblSTStore 
+					ON tblSTReceiveLottery.intStoreId = tblSTStore.intStoreId
+					INNER JOIN tblSTLotteryGame 
+					ON tblSTReceiveLottery.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+					INNER JOIN tblICItemLocation 
+					ON tblICItemLocation.intLocationId = tblSTStore.intCompanyLocationId
+						AND tblSTLotteryGame.intItemId = tblICItemLocation.intItemId
+					INNER JOIN tblICItemPricing
+						ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
+						AND tblICItemPricing.intItemId = tblICItemLocation.intItemId
+					LEFT JOIN tblAPVendor 
+					ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
+					LEFT JOIN tblICItemUOM 
+					ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+					WHERE tblSTReceiveLottery.intCheckoutId = @intCheckoutId
+
+
+					EXEC dbo.uspICAddItemReceipt 
+						@ReceiptStagingTable
+						, @OtherCharges
+						, @intCurrentUserId;
+				
+					UPDATE tblSTReceiveLottery SET intInventoryReceiptId = tblResult.intInventoryReceiptId FROM #tmpAddItemReceiptResult as tblResult WHERE tblSTReceiveLottery.intReceiveLotteryId = tblResult.intSourceId
+					-- SELECT * FROM #tmpAddItemReceiptResult
+
+					-- Flag Success
+					-- SET @Success = CAST(1 AS BIT)
+					-- SET @StatusMsg = ''
+					END
+
+
+					--POST RECEIVE LOTTERY--
+					DECLARE @receiveLotteryCount INT = 0 
+					SELECT @receiveLotteryCount = COUNT(1) FROM #tmpAddItemReceiptResult
+					DECLARE @receiptNumber NVARCHAR(100)
+
+					IF(ISNULL(@receiveLotteryCount,0) != 0)
+					BEGIN
+						BEGIN TRY
+							DECLARE @loopPostInventoryReceiptId INT = 0 
+							WHILE EXISTS(SELECT TOP 1 * FROM #tmpAddItemReceiptResult)
+							BEGIN
+								SELECT TOP 1 @loopPostInventoryReceiptId = intInventoryReceiptId  FROM #tmpAddItemReceiptResult
+
+								SELECT	@receiptNumber = strReceiptNumber 
+								FROM	tblICInventoryReceipt 
+								WHERE	intInventoryReceiptId = @loopPostInventoryReceiptId
+					
+								EXEC dbo.uspICPostInventoryReceipt 1, 0, @receiptNumber, @intCurrentUserId;		
+						
+								UPDATE tblSTReceiveLottery SET ysnPosted = 1 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	
+
+								-- SET @Success = CAST(1 AS BIT)
+								-- SET @StatusMsg = ''
+
+								DELETE FROM #tmpAddItemReceiptResult WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	
+							END
+						END TRY
+						BEGIN CATCH
+					
+							UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	 
+
+							SET @strStatusMsg = ERROR_MESSAGE()
+							GOTO EXITWITHROLLBACK
+						END CATCH
+					END
+					--POST RECEIVE LOTTERY--
+				END
+				
+				
+				------------------------------------------------------
+				----------------- RECEIVE LOTTERY  -------------------
+				------------------------------------------------------
+
+
+				------------------------------------------------------
+				----------------- RETURN LOTTERY  --------------------
+				------------------------------------------------------
+
+				BEGIN TRY 
+
+				
+					--IF NOT EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpAddItemReceiptResult')) 
+					--BEGIN 
+					--	CREATE TABLE #tmpAddItemReceiptResult 
+					--	(
+					--		intSourceId INT,
+					--		intInventoryReceiptId INT
+					--	)
+					--END 
+
+					DECLARE @intReturnLotteryId INT
+					DECLARE @intRLInventoryReceiptId INT
+					DECLARE @ReturnLotteryReceiptStagingTable ReceiptStagingTable
+					,@returnLotteryOtherCharges ReceiptOtherChargesTableType
+					,@returnLotteryDefaultCurrency INT
+					,@strReturnLotteryReceiptType NVARCHAR(500)
+					,@strReturnLotterySourceScreenName NVARCHAR(500)
+
+					SELECT * INTO #tblSTTempReturnLottery  
+					FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId
+
+					IF((SELECT COUNT(*) FROM #tblSTTempReturnLottery) > 0)
+					BEGIN
+						--UPDATE LOTTERY BOOK--
+						UPDATE tblSTLotteryBook
+						SET 
+						intBinNumber = NULL
+						,dblQuantityRemaining = 0
+						,strStatus = 'Returned'
+						WHERE intLotteryBookId IN (SELECT intLotteryBookId FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId)
+	
+
+						SET @strReceiptType = 'Direct'
+						SET @strSourceScreenName = 'Lottery Module'
+
+
+						--CREATE RETURN RECEIPT--
+						INSERT INTO @ReturnLotteryReceiptStagingTable(
+							 strReceiptType
+							,strSourceScreenName
+							,intEntityVendorId
+							,intShipFromId
+							,intLocationId
+							,intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,intCostUOMId
+							,strBillOfLadding
+							,intContractHeaderId
+							,intContractDetailId
+							,dtmDate
+							,intShipViaId
+							,dblQty
+							,dblCost
+							,intCurrencyId
+							,dblExchangeRate
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId
+							,ysnIsStorage
+							,dblFreightRate
+							,intSourceId	
+							,intSourceType		 	
+							,dblGross
+							,dblNet
+							,intInventoryReceiptId
+							,dblSurcharge
+							,ysnFreightInPrice
+							,strActualCostId
+							,intTaxGroupId
+							,strVendorRefNo
+							,strSourceId			
+							,intPaymentOn
+							,strChargesLink
+							,dblUnitRetail
+							,intSort
+							,strDataSource
+						)	
+						SELECT strReceiptType	= @strReceiptType
+						,strSourceScreenName	= @strSourceScreenName
+						,intEntityVendorId		= tblICItemLocation.intVendorId
+						,intShipFromId			= (SELECT TOP 1 intShipFromId FROM tblAPVendor WHERE intEntityId = tblICItemLocation.intVendorId)
+						,intLocationId			= tblSTStore.intCompanyLocationId
+						,intItemId				= tblSTLotteryGame.intItemId
+						,intItemLocationId		= tblICItemLocation.intItemLocationId
+						,intItemUOMId			= tblICItemUOM.intItemUOMId
+						, intCostUOMId			= tblICItemUOM.intUnitMeasureId
+						,strBillOfLadding		= ''
+						,intContractHeaderId	= NULL
+						,intContractDetailId	= NULL
+						,dtmDate				= tblSTReturnLottery.dtmReturnDate
+						,intShipViaId			= NULL
+						,dblQty					= tblSTReturnLottery.dblQuantity * -1
+						,dblCost				= tblSTLotteryGame.dblInventoryCost 
+						,intCurrencyId			= @defaultCurrency
+						,dblExchangeRate		= 1
+						,intLotId				= NULL
+						,intSubLocationId		= NULL
+						,intStorageLocationId	= NULL
+						,ysnIsStorage			= 0
+						,dblFreightRate			= 0
+						,intSourceId			= tblSTReturnLottery.intReturnLotteryId
+						,intSourceType		 	= 7
+						,dblGross				= NULL
+						,dblNet					= NULL
+						,intInventoryReceiptId	= tblSTReturnLottery.intInventoryReceiptId 
+						,dblSurcharge			= NULL
+						,ysnFreightInPrice		= NULL
+						,strActualCostId		= NULL
+						,intTaxGroupId			= NULL
+						,strVendorRefNo			= (CAST(ISNULL(tblSTStore.intStoreNo,'') as nvarchar(100)) + '-' + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTLotteryBook.strBookNumber,'')) + 'R'
+						,strSourceId			= NULL
+						,intPaymentOn			= NULL
+						,strChargesLink			= NULL
+						,dblUnitRetail			= NULL
+						,intSort				= NULL
+						,strDataSource			= @strSourceScreenName
+						FROM tblSTReturnLottery
+						INNER JOIN tblSTLotteryBook
+						ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+						INNER JOIN tblSTLotteryGame 
+						ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+						INNER JOIN tblSTStore 
+						ON tblSTLotteryBook.intStoreId = tblSTStore.intStoreId
+						INNER JOIN tblICItemLocation 
+							ON tblICItemLocation.intLocationId = tblSTStore.intCompanyLocationId 
+							AND tblSTLotteryGame.intItemId = tblICItemLocation.intItemId
+						INNER JOIN tblICItemPricing
+							ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
+							AND tblICItemPricing.intItemId = tblICItemLocation.intItemId
+						LEFT JOIN tblAPVendor 
+						ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
+						LEFT JOIN tblICItemUOM 
+						ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+						WHERE tblSTReturnLottery.intReturnLotteryId IN (SELECT intReturnLotteryId FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId)
+
+
+						EXEC dbo.uspICAddItemReceipt 
+							 @ReturnLotteryReceiptStagingTable
+							,@OtherCharges
+							,@intCurrentUserId;
+		
+						UPDATE tblSTReturnLottery SET intInventoryReceiptId = tblResult.intInventoryReceiptId FROM #tmpAddItemReceiptResult as tblResult WHERE tblSTReturnLottery.intReturnLotteryId = tblResult.intSourceId
+						--SELECT * FROM #tmpAddItemReceiptResult
+
+						DECLARE @loopPostReturnInventoryReceiptId INT 
+						DECLARE @loopReturnLotteryId INT
+						DECLARE @returnReceiptNumber NVARCHAR(100)
+						WHILE EXISTS(SELECT TOP 1 * FROM #tmpAddItemReceiptResult)
+						BEGIN
+							SELECT TOP 1 
+							@loopPostReturnInventoryReceiptId = intInventoryReceiptId ,
+							@loopReturnLotteryId = intSourceId
+							FROM #tmpAddItemReceiptResult
+						
+							SELECT	@returnReceiptNumber = strReceiptNumber 
+							FROM	tblICInventoryReceipt 
+							WHERE	intInventoryReceiptId = @loopPostReturnInventoryReceiptId
+		
+							EXEC dbo.uspICPostInventoryReceipt 1, 0, @returnReceiptNumber, @intCurrentUserId;		
+			
+							UPDATE tblSTReturnLottery SET ysnPosted = 1 WHERE intReturnLotteryId = @loopReturnLotteryId	
+
+							DELETE FROM #tmpAddItemReceiptResult WHERE intInventoryReceiptId = @loopPostReturnInventoryReceiptId
+
+						END
+					END
+
+				END TRY 
+				BEGIN CATCH
+					
+				-- Flag Success
+					SET @strStatusMsg = ERROR_MESSAGE()
+					GOTO EXITWITHROLLBACK
+
+				END CATCH 
+			
+				------------------------------------------------------
+				----------------- RETURN LOTTERY  --------------------
+				------------------------------------------------------
+
+
+
 			END
 		ELSE IF(@ysnPost = 0)
 			BEGIN
@@ -5945,6 +6409,8 @@ ExitWithRollback:
 			-- PRINT 'Will Rollback'
 			ROLLBACK TRANSACTION 
 		END
+
+	UPDATE tblSTCheckoutHeader SET intCheckoutCurrentProcess = 0 WHERE intCheckoutId = @intCheckoutId
 	
 		
 ExitPost:
