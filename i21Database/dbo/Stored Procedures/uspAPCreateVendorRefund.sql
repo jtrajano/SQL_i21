@@ -144,7 +144,7 @@ SELECT
 	,[ysnAllowPrepayment]				=	0
 	,[ysnPost]							=	0
 	,[ysnRecap]							=	0
-	,[intEntityId]						=	A.intEntityId
+	,[intEntityId]						=	@userId
 	,[intPaymentDetailId]				=	NULL
 	,[intInvoiceId]						=	NULL
 	,[intBillId]						=	A.intBillId
