@@ -95,7 +95,6 @@ BEGIN
   NULL AS strLocationName,  
   NULL AS strPeriod,
   NULL AS strPeriodTo,
-  NULL AS strLocationName,
   NULL AS dtmStartDate,
   NULL AS dtmEndDate
 END  

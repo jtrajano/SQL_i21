@@ -33,7 +33,6 @@ DECLARE @strAccountId NVARCHAR(50)
 DECLARE @strAccountIdTo NVARCHAR(50)
 DECLARE @strPeriod NVARCHAR(50)
 DECLARE @strPeriodTo NVARCHAR(50)
-DECLARE @strAccountIdTo NVARCHAR(50)  
 DECLARE @dateCondition NVARCHAR(50)
 
 	-- Sanitize the @xmlParam 
