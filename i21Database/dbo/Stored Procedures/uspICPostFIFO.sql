@@ -40,6 +40,7 @@ DECLARE @AVERAGECOST AS INT = 1
 		,@ACTUALCOST AS INT = 5
 
 DECLARE @strDescription AS NVARCHAR(255)
+		,@dblLastCost AS NUMERIC(38,20)
 
 -- Create the variables for the internal transaction types used by costing. 
 DECLARE @INVENTORY_AUTO_VARIANCE AS INT = 1;
@@ -87,7 +88,7 @@ BEGIN
 
 		-- Get the item's last cost when reducing stock or standard cost. 
 		-- Except if (1) doing vendor stock returns using Inventory Receipt/Return or (2) if it is an Opening Inventory
-		SELECT	@dblCost = COALESCE(
+		SELECT	@dblLastCost = COALESCE(
 					NULLIF(ItemPricing.dblLastCost, 0)
 					, ItemPricing.dblStandardCost
 				)
@@ -96,16 +97,16 @@ BEGIN
 					@TransactionType_InventoryReceipt
 					,@TransactionType_InventoryReturn
 					,@TransactionType_InventoryAdjustment_OpeningInventory
-
 				)
 				AND ItemPricing.intItemId = @intItemId
 				AND ItemPricing.intItemLocationId = @intItemLocationId
 		
 		-- Convert the Cost from Stock UOM to @intItemUOMId 
-		SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblCost) 
+		SELECT	@dblCost = dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, @intItemUOMId, @dblLastCost) 
 		FROM	tblICItemUOM StockUOM
 		WHERE	StockUOM.intItemId = @intItemId
 				AND StockUOM.ysnStockUnit = 1
+				AND @dblLastCost IS NOT NULL 
 
 		-- Make sure the cost is not null. 
 		SET @dblCost = ISNULL(@dblCost, 0) 
