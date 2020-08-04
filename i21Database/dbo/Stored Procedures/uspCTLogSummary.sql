@@ -1681,6 +1681,13 @@ BEGIN TRY
 			BEGIN
 				UPDATE @cbLogSpecific SET dblQty = dblQty * -1
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				
+				-- DP Contract
+				IF EXISTS (SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)
+				BEGIN
+					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+					CONTINUE
+				END
 			END
 			
 			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId IN (3,6))
