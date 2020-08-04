@@ -103,9 +103,9 @@ BEGIN TRY
 		SELECT 
 			intLocationId = @intLocationId
 			,dtmAdjustmentDate = @dtmDate
-			,intAdjustmentType = 12 -- Closing Balance
+			,intAdjustmentType = 10 -- Opening Inventory 
 			,strAdjustmentNo = @strAdjustmentId_1st
-			,strDescription = 'EOM Closing Balance. Inventory Fix code: 001'
+			,strDescription = 'Opening Balance. Inventory Fix code: 001-A'
 			,ysnPosted = 0 
 			,intEntityId = @intEntityUserSecurityId
 			,intConcurrencyId = 1
@@ -121,11 +121,14 @@ BEGIN TRY
 			intInventoryAdjustmentId 
 			,intSubLocationId
 			,intStorageLocationId
+			,intNewSubLocationId 
+			,intNewStorageLocationId 
 			,intItemId
 			,dblQuantity
 			,dblNewQuantity
 			,dblAdjustByQuantity
 			,intItemUOMId
+			,intNewItemUOMId
 			,dblCost
 			,dblNewCost
 			,dblLineTotal
@@ -139,13 +142,16 @@ BEGIN TRY
 			intInventoryAdjustmentId = @intInventoryAdjustmentId_1st
 			,intSubLocationId = t.intSubLocationId
 			,intStorageLocationId = t.intStorageLocationId
+			,intNewSubLocationId = t.intSubLocationId
+			,intNewStorageLocationId = t.intStorageLocationId
 			,intItemId = eom.intItemId
 			,dblQuantity = ROUND(ISNULL(t.dblQty, 0), 6) 
-			,dblNewQuantity = 0
+			,dblNewQuantity = -ROUND(ISNULL(t.dblQty, 0), 6) 
 			,dblAdjustByQuantity = -ROUND(ISNULL(t.dblQty, 0), 6) 
 			,intItemUOMId = ISNULL(t.intItemUOMId, iu.intItemUOMId) 
+			,intNewItemUOMId = ISNULL(t.intItemUOMId, iu.intItemUOMId) 
 			,dblCost = ISNULL(lastCost.dblCost, lastCost2.dblCost) 
-			,dblNewCost = NULL 
+			,dblNewCost = ISNULL(lastCost.dblCost, lastCost2.dblCost) 
 			,dblLineTotal = ROUND(dbo.fnMultiply(-ISNULL(t.dblQty, 0), lastCost.dblCost), 2) 
 			,intCostingMethod = il.intCostingMethod
 			,intSort = CAST(ROW_NUMBER() OVER (ORDER BY eom.strItemNo, t.intSubLocationId, t.intStorageLocationId) AS INT) 
@@ -170,7 +176,7 @@ BEGIN TRY
 				WHERE
 					t.intItemId = eom.intItemId
 					AND t.intItemLocationId = eom.intItemLocationId
-					AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(@dtmDate AS FLOAT))
 				GROUP BY
 					t.intItemUOMId
 					,t.intItemLocationId
@@ -188,7 +194,7 @@ BEGIN TRY
 					t2.intItemId = eom.intItemId
 					AND t2.intItemLocationId = eom.intItemLocationId
 					AND t2.intItemUOMId = t.intItemUOMId
-					AND FLOOR(CAST(t2.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND FLOOR(CAST(t2.dtmDate AS FLOAT)) < FLOOR(CAST(@dtmDate AS FLOAT))
 					AND t2.dblQty > 0 
 					AND t2.intItemUOMId = t.intItemUOMId
 				ORDER BY
@@ -203,7 +209,7 @@ BEGIN TRY
 					t2.intItemId = eom.intItemId
 					AND t2.intItemLocationId = eom.intItemLocationId
 					AND t2.intItemUOMId = t.intItemUOMId
-					AND FLOOR(CAST(t2.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT))
+					AND FLOOR(CAST(t2.dtmDate AS FLOAT)) < FLOOR(CAST(@dtmDate AS FLOAT))
 					AND t2.dblQty < 0 
 					AND t2.intItemUOMId = t.intItemUOMId
 				ORDER BY
@@ -236,7 +242,7 @@ BEGIN TRY
 		INSERT INTO tblICInventoryAdjustment (
 			intLocationId
 			,dtmAdjustmentDate
-			,intAdjustmentType -- 12: Closing Balance
+			,intAdjustmentType 
 			,strAdjustmentNo
 			,strDescription
 			,ysnPosted
@@ -246,13 +252,14 @@ BEGIN TRY
 			,dtmCreated
 			,dtmDateCreated
 			,intCreatedByUserId
+			,strDataSource
 		)
 		SELECT 
 			intLocationId = @intLocationId
 			,dtmAdjustmentDate = @dtmDate
-			,intAdjustmentType = 12 -- Closing Balance
+			,intAdjustmentType = 10 -- Opening Inventory
 			,strAdjustmentNo = @strAdjustmentId_2nd
-			,strDescription = 'EOM Closing Balance'
+			,strDescription = 'Opening Balance. Inventory Fix code: 001-B'
 			,ysnPosted = 0 
 			,intEntityId = @intEntityUserSecurityId
 			,intConcurrencyId = 1
@@ -260,6 +267,7 @@ BEGIN TRY
 			,dtmCreated = GETDATE()
 			,dtmDateCreated = GETDATE() 
 			,intCreatedByUserId = @intEntityUserSecurityId	
+			,strDataSource = @strAdjustmentId_1st
 
 		SET @intInventoryAdjustmentId_2nd = SCOPE_IDENTITY() 
 
@@ -268,11 +276,14 @@ BEGIN TRY
 			intInventoryAdjustmentId 
 			,intSubLocationId
 			,intStorageLocationId
+			,intNewSubLocationId 
+			,intNewStorageLocationId 
 			,intItemId
 			,dblQuantity
 			,dblNewQuantity
 			,dblAdjustByQuantity
 			,intItemUOMId
+			,intNewItemUOMId
 			,dblCost
 			,dblNewCost
 			,dblLineTotal
@@ -286,13 +297,16 @@ BEGIN TRY
 			intInventoryAdjustmentId = @intInventoryAdjustmentId_2nd
 			,intSubLocationId = adj.intSubLocationId
 			,intStorageLocationId = adj.intStorageLocationId
+			,intNewSubLocationId = adj.intNewSubLocationId
+			,intNewStorageLocationId = adj.intNewStorageLocationId
 			,intItemId = adj.intItemId
 			,dblQuantity = 0
 			,dblNewQuantity = adj.dblQuantity
 			,dblAdjustByQuantity = adj.dblQuantity
 			,intItemUOMId = adj.intItemUOMId
+			,intNewItemUOMId = adj.intNewItemUOMId
 			,dblCost = adj.dblCost
-			,dblNewCost = NULL 
+			,dblNewCost = adj.dblCost 
 			,dblLineTotal = -adj.dblLineTotal
 			,intCostingMethod = adj.intCostingMethod
 			,intSort = adj.intSort
