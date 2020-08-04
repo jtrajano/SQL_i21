@@ -59,7 +59,7 @@ INNER JOIN(
 													END
 											WHEN (T.strAwardPeriod = 'Start of Month') THEN 
 													CASE WHEN (PCTimeOff.dtmDateFrom >= dtmLastAward 
-															AND ( MONTH(PCTimeOff.dtmDateFrom) < MONTH(GETDATE()) 
+															AND ( MONTH(PCTimeOff.dtmDateFrom) <= MONTH(GETDATE()) 
 															AND YEAR(PCTimeOff.dtmDateFrom) = YEAR(GETDATE())	)  
 															) THEN
 														
