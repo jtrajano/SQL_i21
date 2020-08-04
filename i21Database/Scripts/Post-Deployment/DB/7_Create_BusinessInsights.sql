@@ -562,8 +562,8 @@
 					)
 					VALUES (
 						3, 5, 100, 300, @entityId, 0, 0, 0,	0, 1,	
-						0,	N'Master', N'Gross Margin Chart', N'Chart', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						0,	N'Master', N'Gross Margin Chart', N'Chart', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'Last 30 Days',
+						N'None', N'dtmDate', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
@@ -617,7 +617,9 @@
 					UPDATE tblDBPanel SET 
 					[ysnChartLegend] = 0,
 					[intRowsReturned] = 3,
-					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType'
+					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType',
+					[strDateCondition] = N'Last 30 Days',
+					[strDateFieldName] = N'dtmDate'
 					WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
 
 					UPDATE tblDBPanelColumn SET 
@@ -648,8 +650,8 @@
 					)
 					VALUES (
 						0, 6, 100, 250, @entityId, 0, 0, 0,	0, 1,	
-						0,	N'Master', N'Gross Margin Grid', N'Grid', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						0,	N'Master', N'Gross Margin Grid', N'Grid', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'Last 30 Days',
+						N'None', N'dtmDate', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, 1
@@ -721,7 +723,9 @@
 					SELECT @grossMarginGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
 
 					UPDATE tblDBPanel SET 
-					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin group by strType'
+					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType',
+					[strDateCondition] = N'Last 30 Days',
+					[strDateFieldName] = N'dtmDate'
 					WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
 
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblRevenue', 'dblExpense', 'dblNet')
