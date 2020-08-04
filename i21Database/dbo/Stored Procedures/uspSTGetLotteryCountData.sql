@@ -202,11 +202,14 @@ SELECT
 	ON vyuSTItemPricingOnFirstLocation.intItemId = tblSTLotteryGame.intItemId
 	LEFT JOIN tblSTReturnLottery
 	ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-	WHERE ('active' = LOWER(strStatus)
-	OR ( ('sold' = LOWER(strStatus)) AND (dtmSoldDate = @date)) 
-	OR 'returned' = LOWER(strStatus) AND ( tblSTReturnLottery.dtmReturnDate = @date)) 
+	WHERE 
+	tblSTLotteryBook.intStoreId = @storeId 
+	AND ( 
+		'active' = LOWER(strStatus) 
+		OR ( 'sold' = LOWER(strStatus) AND (dtmSoldDate = @date)) 
+		OR ('returned' = LOWER(strStatus) AND  tblSTReturnLottery.dtmReturnDate = @date) 
+		)
 	OR tblSTLotteryBook.intLotteryBookId IN (SELECT intLotteryBookId FROM #tempLotteryCount)
-	AND tblSTLotteryBook.intStoreId = @storeId
 	
 
 ) as tblSTCompileData
