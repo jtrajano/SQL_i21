@@ -79,7 +79,7 @@ BEGIN TRY
 			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
 			WHERE 
 				PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
-			GROUP BY PD.intBillId, PD.intPaymentId
+			GROUP BY PD.intBillId
 		) payDetails 
 		OUTER APPLY (
 			SELECT 
