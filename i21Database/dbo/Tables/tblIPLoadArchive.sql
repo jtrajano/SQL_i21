@@ -39,6 +39,7 @@
 	ysnMailSent					BIT DEFAULT 0,
 	strInternalErrorMessage		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnInternalMailSent			BIT DEFAULT 0,
+	ysnDeadlockError			BIT DEFAULT 0,
 
 	CONSTRAINT [PK_tblIPLoadArchive_intStageLoadId] PRIMARY KEY ([intStageLoadId])
 )
