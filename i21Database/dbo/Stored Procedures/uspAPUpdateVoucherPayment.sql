@@ -52,7 +52,7 @@ BEGIN TRY
 		UPDATE tblAPBill 
 		SET
 			@dblPaymentTemp =	(
-									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
+									ISNULL(paySchedDetails.dblPayment, ISNULL(ABS(payDetails.dblPayment), 0)) +
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
 									ISNULL(payDetails.dblInterest, 0)
 								),
@@ -120,7 +120,7 @@ BEGIN TRY
 		UPDATE tblAPBill 
 		SET
 			@dblPaymentTemp =	(
-									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
+									ISNULL(paySchedDetails.dblPayment, ISNULL(ABS(payDetails.dblPayment), 0)) +
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
 									ISNULL(payDetails.dblInterest, 0)
 								),
@@ -194,7 +194,7 @@ BEGIN TRY
 
 	IF @nullCheck IS NULL AND @tempCheck < 0
 	BEGIN
-		RAISERROR('$s will be underpaid.', 11, 1, @billCheck);
+		RAISERROR('%s will be underpaid.', 11, 1, @billCheck);
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
