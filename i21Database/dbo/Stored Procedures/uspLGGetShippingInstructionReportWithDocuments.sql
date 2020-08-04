@@ -470,7 +470,7 @@ BEGIN
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 2 THEN intSContractDetailId ELSE intPContractDetailId END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
