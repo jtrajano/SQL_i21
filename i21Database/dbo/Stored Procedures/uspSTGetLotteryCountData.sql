@@ -33,6 +33,9 @@ DECLARE @tblSTOuputTable TABLE
 	,strSoldOut				NVARCHAR(MAX)
 )
 
+DECLARE @shiftNo INT 
+SELECT TOP 1 @shiftNo = intShiftNo FROM tblSTCheckoutHeader WHERE intCheckoutId = @checkoutId
+
 
 SELECT tblSTCheckoutLotteryCount.* INTO #tempLotteryCount
 FROM tblSTCheckoutLotteryCount 
@@ -159,8 +162,9 @@ SELECT
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
-		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
+		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+
 	),0),
 	
 	intPriorCheckoutCount = ISNULL((
@@ -169,9 +173,10 @@ SELECT
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
-		
-		),0),
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
+		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+
+	),0),
 	tblSTLotteryBook.dblQuantityRemaining,
 	tblSTLotteryBook.dtmSoldDate,
 	tblSTLotteryBook.strStatus,
