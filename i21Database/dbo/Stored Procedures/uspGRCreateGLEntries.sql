@@ -441,7 +441,7 @@ BEGIN
 		,intChargeItemLocation			 = ChargeItemLocation.intItemLocationId
 		,intTransactionId				 = @intSettleStorageId
 		,strTransactionId				 = @strTransactionId
-		,dblCost						 = case when CS.ysnGross = 1 then ((CS.dblRate / CS.dblUnits) * CS.dblOriginalUnits) else CS.dblRate end
+		,dblCost						 = CS.dblRate --case when CS.ysnGross = 1 then ((CS.dblRate / CS.dblUnits) * CS.dblOriginalUnits) else CS.dblRate end
 		,intTransactionTypeId			 = 44
 		,intCurrencyId					 = CS.intCurrencyId
 		,dblExchangeRate				 = 1
