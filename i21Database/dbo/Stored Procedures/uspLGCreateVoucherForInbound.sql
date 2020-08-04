@@ -17,6 +17,7 @@ BEGIN TRY
 	DECLARE @intAPClearingAccountId INT
 	DECLARE @intShipTo INT
 	DECLARE @intCurrencyId INT
+	DECLARE @intShipmentStatus INT
 	DECLARE @DefaultCurrencyId INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 
 	DECLARE @distinctVendor TABLE 
@@ -66,6 +67,7 @@ BEGIN TRY
 
 	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
 				,@intCurrencyId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
+				,@intShipmentStatus = L.intShipmentStatus
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = ISNULL(LD.intPContractDetailId,LD.intSContractDetailId)
@@ -86,6 +88,34 @@ BEGIN TRY
 		RAISERROR('Please configure ''AP Account'' for the company location.',16,1)
 	END
 
+	IF (@intShipmentStatus = 4)
+	BEGIN
+		--If Shipment is already received, call the IR to Voucher procedure
+		SELECT DISTINCT 
+			receipt.intInventoryReceiptId 
+		INTO
+			#tmpInventoryReceipts
+		FROM 
+			tblICInventoryReceipt receipt 
+			INNER JOIN tblICInventoryReceiptItem receiptItem ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = receiptItem.intSourceId
+		WHERE LD.intLoadId = @intLoadId
+			AND receipt.intSourceType = 2
+			AND receipt.intSourceInventoryReceiptId IS NULL 
+			AND receipt.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
+
+		DECLARE @intInventoryReceiptId INT = NULL
+		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInventoryReceipts)
+		BEGIN
+			SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM #tmpInventoryReceipts
+				
+			EXEC uspICConvertReceiptToVoucher @intInventoryReceiptId, @intEntityUserSecurityId, @intBillId OUTPUT
+
+			DELETE FROM #tmpInventoryReceipts WHERE intInventoryReceiptId = @intInventoryReceiptId
+		END
+	END
+	ELSE
+	BEGIN
 	INSERT INTO @voucherPayable(
 		[intEntityVendorId]
 		,[intTransactionType]
@@ -368,6 +398,7 @@ BEGIN TRY
 		SELECT @intMinRecord = MIN(intRecordId)
 		FROM @distinctVendor
 		WHERE intRecordId > @intMinRecord
+	END
 	END
 END TRY
 

@@ -91,7 +91,10 @@ BEGIN TRY
 				UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 			END
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			END
 		END
 		ELSE IF @intPurchaseSale = 2
 		BEGIN
@@ -126,7 +129,10 @@ BEGIN TRY
 					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId
 				END
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			END
 		END
 		ELSE IF @intPurchaseSale = 3
 		BEGIN
@@ -153,7 +159,10 @@ BEGIN TRY
 					END
 			WHERE intLoadId = @intLoadId
 
-			EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			IF(ISNULL(@strFOBPoint,'') = 'Origin')
+			BEGIN 
+				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+			END
 		END
 	END
 END TRY
