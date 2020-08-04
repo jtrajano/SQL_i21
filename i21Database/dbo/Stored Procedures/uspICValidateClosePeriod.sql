@@ -9,6 +9,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @dtmStartDate AS DATETIME 
+	,@dtmEndDate AS DATETIME 
 	,@strTransactionId AS NVARCHAR(50)
 	,@dtmDate AS DATETIME 
 
@@ -16,6 +17,7 @@ IF @strFYMonth IS NOT NULL
 BEGIN
 	SELECT 
 		@dtmStartDate = fyp.dtmStartDate
+		,@dtmEndDate = fyp.dtmEndDate
 	FROM
 		tblGLFiscalYearPeriod fyp
 	WHERE
@@ -43,9 +45,13 @@ BEGIN
 	RETURN -80178; 
 END 
 
-DECLARE @intInventoryTransactionId AS INT 
+DECLARE 
+	@intInventoryTransactionIdStart AS INT 
+	,@intInventoryTransactionIdEnd AS INT 
+
+-- Get the first transaction id 
 SELECT TOP 1 
-	@intInventoryTransactionId = t.intInventoryTransactionId
+	@intInventoryTransactionIdStart = t.intInventoryTransactionId
 FROM 
 	tblICInventoryTransaction t INNER JOIN tblICItem i 
 		ON t.intItemId = i.intItemId
@@ -58,6 +64,23 @@ WHERE
 ORDER BY
 	t.intInventoryTransactionId ASC 
 
+-- Get the last transaction id 
+SELECT TOP 1 
+	@intInventoryTransactionIdEnd = t.intInventoryTransactionId
+FROM 
+	tblICInventoryTransaction t INNER JOIN tblICItem i 
+		ON t.intItemId = i.intItemId
+	LEFT JOIN tblICCategory c
+		ON c.intCategoryId = i.intCategoryId
+WHERE
+	t.dblQty <> 0 
+	AND t.dblValue = 0  
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmStartDate AS FLOAT))
+	AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmEndDate AS FLOAT))
+ORDER BY
+	t.intInventoryTransactionId DESC
+
+-- Get the transaction that is out of sequence
 SELECT TOP 1
 	@strTransactionId = strTransactionId
 	,@dtmDate = dtmDate
@@ -75,7 +98,8 @@ FROM (
 		WHERE
 			t.dblQty <> 0 
 			AND t.dblValue = 0  
-			AND t.intInventoryTransactionId >= @intInventoryTransactionId
+			AND t.intInventoryTransactionId >= @intInventoryTransactionIdStart
+			AND t.intInventoryTransactionId <= @intInventoryTransactionIdEnd
 	)
 	AS tblSequenced
 WHERE

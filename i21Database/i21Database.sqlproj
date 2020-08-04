@@ -188,6 +188,7 @@
     <Folder Include="Scripts\Post-Deployment\PAT\18.3\" />
     <Folder Include="Scripts\Post-Deployment\MB" />
     <Folder Include="Scripts\Post-Deployment\ET" />
+    <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -7759,6 +7760,14 @@
     <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
 	<Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
+    <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
+    <Build Include="dbo\Stored Procedures\uspICIncreaseUsageQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspARFixStockUsage.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7995,6 +8004,7 @@
     <Build Include="dbo\Views\vyuARPaymentForNSF.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
