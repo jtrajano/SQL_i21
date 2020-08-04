@@ -75,7 +75,30 @@ INSERT INTO @tblSTOuputTable
 	,strSoldOut				
 )
 SELECT 
-*
+ intBeginCount			
+,dtmSoldDate			
+,strStatus				
+,ysnBookSoldOut			
+,intStoreId				
+,intLotteryBookId		
+,intBinNumber			
+,strGame				
+,intLotteryGameId		
+,strBookNumber			
+,strCountDirection		
+,intStartingNumber		
+,dblTicketValue			
+,intTicketPerPack		
+,intEndingNumber		
+,intConcurrencyId		
+,intItemId				
+,strItemDescription		
+,strItemNo				
+,strLongUPCCode			
+,intCategoryId			
+,strCategoryCode		
+,strCategoryDescription	
+,intItemUOMId			
 ,strSoldOut = 
 CASE WHEN LOWER(strStatus) = 'sold' 
 	THEN 'Yes'
@@ -187,13 +210,28 @@ SELECT
 	ON vyuSTItemPricingOnFirstLocation.intItemId = tblSTLotteryGame.intItemId
 	LEFT JOIN tblSTReturnLottery
 	ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-	WHERE ('active' = LOWER(strStatus)
-	OR ( ('sold' = LOWER(strStatus)) AND (dtmSoldDate = @date)) 
-	OR 'returned' = LOWER(strStatus) AND ( tblSTReturnLottery.dtmReturnDate = @date)) 
-	AND tblSTLotteryBook.intStoreId = @storeId
+	WHERE 
+	tblSTLotteryBook.intStoreId = @storeId 
+	AND ( 
+		'active' = LOWER(strStatus) 
+		OR ( 'sold' = LOWER(strStatus) AND (dtmSoldDate = @date)) 
+		OR ('returned' = LOWER(strStatus) AND  tblSTReturnLottery.dtmReturnDate = @date) 
+		)
+	OR tblSTLotteryBook.intLotteryBookId IN (SELECT intLotteryBookId FROM #tempLotteryCount)
 	
 
 ) as tblSTCompileData
 ) as tblSTCompileData1
 ORDER BY 
 intBinNumber ASC
+
+
+UPDATE @tblSTOuputTable 
+SET 
+	 intEndingNumber = [#tempLotteryCount].intLotteryBookId
+,strSoldOut = [#tempLotteryCount].strSoldOut
+FROM #tempLotteryCount
+WHERE [#tempLotteryCount].intLotteryBookId = [@tblSTOuputTable].intLotteryBookId
+
+
+SELECT * FROM @tblSTOuputTable
