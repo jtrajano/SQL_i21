@@ -66,7 +66,9 @@ FROM (
 						WHEN voucher.intTransactionType = 13 AND voucher.ysnPrepayHasPayment = 0 THEN 0
 						ELSE 1 END
 					AS BIT)
-		,voucher.dblPaymentTemp
+		,CASE WHEN voucher.intTransactionType IN (3,8) AND voucher.dblPaymentTemp > 0 THEN voucher.dblPaymentTemp * -1
+			WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1 THEN voucher.dblPaymentTemp * -1
+			ELSE voucher.dblPaymentTemp END AS dblPaymentTemp
 		,voucher.ysnInPayment
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
