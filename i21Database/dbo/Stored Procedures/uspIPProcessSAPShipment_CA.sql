@@ -278,6 +278,11 @@ BEGIN TRY
 			FROM tblIPLoadStage WITH (NOLOCK)
 			WHERE intStageLoadId = @intMinRowNo
 
+			UPDATE tblIPLoadError
+			SET ysnDeadlockError = 0
+			WHERE ysnDeadlockError = 1
+				AND strCustomerReference = @strCustomerReference
+
 			IF ISNULL(@strCustomerReference, '') = ''
 			BEGIN
 				RAISERROR (
@@ -1948,6 +1953,7 @@ BEGIN TRY
 				,strImportStatus
 				,strSessionId
 				,strInternalErrorMessage
+				,ysnDeadlockError
 				)
 			SELECT strCustomerReference
 				,strERPPONumber
@@ -1977,6 +1983,7 @@ BEGIN TRY
 				,'Success'
 				,strSessionId
 				,@strContainerErrMsg
+				,ysnDeadlockError
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
 
