@@ -1201,6 +1201,15 @@ BEGIN TRY
 
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId
 		FROM #tmpAddItemReceiptResult
+
+		--If IR is created, remove LS payables
+		IF (@intInventoryReceiptId IS NOT NULL)
+		BEGIN
+			DELETE VP
+			FROM tblAPVoucherPayable VP
+			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = VP.intLoadShipmentDetailId AND LD.intPContractDetailId = VP.intContractDetailId
+			WHERE LD.intLoadId = @intLoadId
+		END
 	END
 
 
