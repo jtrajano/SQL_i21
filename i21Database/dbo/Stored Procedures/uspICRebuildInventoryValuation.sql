@@ -1003,13 +1003,17 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-						WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-						WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-						WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-						WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-						WHEN dblValue <> 0 THEN 6
-						ELSE 7
-					END    
+						WHEN intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
+						WHEN intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.						
+						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+						WHEN dblValue <> 0 THEN 8
+						ELSE 9
+					END
 				,intItemId
 				,intItemLocationId
 				,intInTransitSourceLocationId
@@ -1061,13 +1065,17 @@ BEGIN
 			END ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-				WHEN dblQty > 0 AND strTransactionForm NOT IN ('Invoice', 'Inventory Shipment') THEN 2 
-				WHEN dblQty < 0 AND strTransactionForm = 'Inventory Shipment' THEN 3
-				WHEN dblQty > 0 AND strTransactionForm = 'Inventory Shipment' THEN 4
-				WHEN dblQty < 0 AND strTransactionForm = 'Invoice' THEN 5
-				WHEN dblValue <> 0 THEN 6
-				ELSE 7
-			END   
+				WHEN intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
+				WHEN intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
+				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
+				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
+				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
+				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
+				WHEN dblValue <> 0 THEN 8
+				ELSE 9
+			END    
 			ASC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NULL THEN 
@@ -5372,19 +5380,244 @@ BEGIN
 				END 
 			END 
 
+			-- Inventory Fix code: 001-B will re-add the stock back. 
+			ELSE IF	@ysnForceClearTheCostBuckets = 1 
+				AND @strTransactionType IN ('Inventory Adjustment - Opening Inventory') 
+				AND EXISTS (
+					SELECT TOP 1 1 FROM tblICInventoryAdjustment a WHERE a.intInventoryAdjustmentId = @intTransactionId AND a.strDescription LIKE '%Inventory Fix code: 001-B%'
+				)
+			BEGIN 								
+				--PRINT 'Inventory Fix code: 001-B'
+
+				-- Update the cost. Use the average cost from the first closing balance. 
+				UPDATE	AdjDetail
+				SET		dblNewCost = COALESCE(
+								priorPeriod.dblCost
+								, dbo.fnCalculateCostBetweenUOM(lastStockReceived.intItemUOMId, AdjDetail.intItemUOMId, lastStockReceived.dblCost) 
+								, dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ItemPricing.dblLastCost) 
+								, AdjDetail.dblNewCost 
+								, AdjDetail.dblCost 
+							) 
+				FROM	
+					tblICInventoryAdjustment Adj INNER JOIN tblICInventoryAdjustmentDetail AdjDetail 
+						ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
+					INNER JOIN tblICItem i
+						ON i.intItemId = AdjDetail.intItemId 
+					INNER JOIN #tmpRebuildList list
+						ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+					LEFT JOIN tblICItemLocation ItemLocation
+						ON ItemLocation.intLocationId = Adj.intLocationId 
+						AND ItemLocation.intItemId = AdjDetail.intItemId
+					OUTER APPLY (
+						SELECT
+							dblCost = 
+								--(
+								--	dbo.fnDivide (
+								--		SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) 
+								--		,SUM(t.dblQty)
+								--	)
+								--)
+								CASE 
+									WHEN SUM(t.dblQty) > 0 AND SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) < 0 THEN 
+										dbo.fnDivide (
+											-SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) 
+											,SUM(t.dblQty)
+										)										
+									ELSE 
+										dbo.fnDivide (
+											SUM(ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2)) 
+											,SUM(t.dblQty)
+										)
+								END 
+						FROM 
+							tblICInventoryTransaction t 
+						WHERE 
+							t.intItemId = AdjDetail.intItemId
+							AND t.intItemLocationId = ItemLocation.intItemLocationId
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(Adj.dtmAdjustmentDate AS FLOAT))
+					) priorPeriod
+					OUTER APPLY (
+						SELECT TOP 1 
+							t.intItemUOMId
+							,t.dblCost
+						FROM 
+							tblICInventoryTransaction t 
+						WHERE 
+							t.intItemId = AdjDetail.intItemId
+							AND t.intItemLocationId = ItemLocation.intItemLocationId
+							AND FLOOR(CAST(t.dtmDate AS FLOAT)) < FLOOR(CAST(Adj.dtmAdjustmentDate AS FLOAT))
+							AND t.dblQty > 0
+						ORDER BY
+							t.intInventoryTransactionId DESC 
+					) lastStockReceived
+
+					LEFT JOIN dbo.tblICItemUOM StockUnit
+						ON StockUnit.intItemId = AdjDetail.intItemId
+						AND ISNULL(StockUnit.ysnStockUnit, 0) = 1
+					LEFT JOIN dbo.tblICItemPricing ItemPricing
+						ON ItemPricing.intItemId = AdjDetail.intItemId
+						AND ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+
+				WHERE	
+					Adj.strAdjustmentNo = @strTransactionId
+					AND Adj.intInventoryAdjustmentId = @intTransactionId		
+
+				INSERT INTO @ItemsToPost (
+						intItemId  
+						,intItemLocationId 
+						,intItemUOMId  
+						,dtmDate  
+						,dblQty  
+						,dblUOMQty  
+						,dblCost  
+						,dblSalesPrice  
+						,intCurrencyId  
+						,dblExchangeRate  
+						,intTransactionId  
+						,intTransactionDetailId  
+						,strTransactionId  
+						,intTransactionTypeId  
+						,intLotId 
+						,intSubLocationId
+						,intStorageLocationId	
+						,strActualCostId 
+						,intForexRateTypeId
+						,dblForexRate
+						,intCategoryId
+						,dblUnitRetail
+						,dblAdjustCostValue
+						,dblAdjustRetailValue
+						,intCostingMethod
+				)
+				SELECT 	adjDetail.intItemId  
+						,il.intItemLocationId 
+						,adjDetail.intItemUOMId  
+						,adj.dtmAdjustmentDate
+						,adjDetail.dblAdjustByQuantity
+						,iu.dblUnitQty
+						,ISNULL(adjDetail.dblNewCost, adjDetail.dblCost) 
+						,0
+						,@intFunctionalCurrencyId
+						,1
+						,adj.intInventoryAdjustmentId
+						,adjDetail.intInventoryAdjustmentDetailId
+						,adj.strAdjustmentNo
+						,47 -- Inventory Adjustment - Opening Inventory
+						,adjDetail.intLotId
+						,ISNULL(adjDetail.intNewSubLocationId, adjDetail.intSubLocationId)
+						,ISNULL(adjDetail.intNewStorageLocationId, adjDetail.intStorageLocationId)
+						,strActualCostId = NULL 
+						,NULL 
+						,1
+						,i.intCategoryId 
+						,dblUnitRetail = NULL 
+						,dblCategoryCostValue = NULL 
+						,dblCategoryRetailValue = NULL 
+						,adjDetail.intCostingMethod
+				FROM 
+					tblICInventoryAdjustment adj INNER JOIN tblICInventoryAdjustmentDetail adjDetail
+						ON adj.intInventoryAdjustmentId = adjDetail.intInventoryAdjustmentId
+					INNER JOIN tblICItem i
+						ON i.intItemId = adjDetail.intItemId 
+					INNER JOIN tblICItemLocation il
+						ON il.intItemId = adjDetail.intItemId
+						AND il.intLocationId = adj.intLocationId
+					INNER JOIN tblICItemUOM iu
+						ON iu.intItemId = adjDetail.intItemId
+						AND iu.intItemUOMId = adjDetail.intItemUOMId
+					INNER JOIN tblICCategory cat
+						ON cat.intCategoryId = i.intCategoryId  
+				WHERE
+					adj.strAdjustmentNo = @strTransactionId
+					AND adj.intInventoryAdjustmentId = @intTransactionId		
+					AND ISNULL(adjDetail.dblAdjustByQuantity, 0) <> 0
+				ORDER BY
+					adjDetail.intInventoryAdjustmentDetailId
+
+				EXEC @intReturnValue = dbo.uspICRepostCosting
+					@strBatchId
+					,NULL
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,@ItemsToPost
+					,@strTransactionId
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
+
+				-- Normally, Opening balance does generate GL entries. 
+				-- It will generate GL entries if it using Inventory Fix code: 001. 
+				SET @intReturnValue = NULL 
+				INSERT INTO @GLEntries (
+						[dtmDate] 
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]					
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm] 
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+				)			
+				EXEC @intReturnValue = dbo.uspICCreateGLEntries
+					@strBatchId 
+					,'Inventory Adjustment'
+					,@intEntityUserSecurityId
+					,@strGLDescription
+					,NULL 
+					,@intItemId -- This is only used when rebuilding the stocks.
+					,@strTransactionId -- This is only used when rebuilding the stocks.
+					,@intCategoryId -- This is only used when rebuilding the stocks.
+			END 
+
 			ELSE 
 			BEGIN 								
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
 				SET		dblCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
 												-- If Lot, then get the Lot's last cost. Otherwise, get the item's last cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0)))
+												dbo.fnCalculateCostBetweenUOM(
+													StockUnit.intItemUOMId
+													, AdjDetail.intItemUOMId
+													, ISNULL(Lot.dblLastCost, ISNULL(ItemPricing.dblLastCost, 0))
+												)
 											WHEN dbo.fnGetCostingMethod(AdjDetail.intItemId, ItemLocation.intItemLocationId) = @AVERAGECOST THEN 
 												-- It item is using Average Costing, then get the Average Cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblAverageCost, 0)) 
+												dbo.fnCalculateCostBetweenUOM(
+													StockUnit.intItemUOMId
+													, AdjDetail.intItemUOMId
+													, ISNULL(ItemPricing.dblAverageCost, 0)
+												) 
 											ELSE
 												-- Otherwise, get the item's last cost. 
-												dbo.fnCalculateCostBetweenUOM(StockUnit.intItemUOMId, AdjDetail.intItemUOMId, ISNULL(ItemPricing.dblLastCost, 0))
+												dbo.fnCalculateCostBetweenUOM(
+													StockUnit.intItemUOMId
+													, AdjDetail.intItemUOMId
+													, ISNULL(ItemPricing.dblLastCost, 0)
+												)
 									END
 				FROM	dbo.tblICInventoryAdjustment Adj INNER JOIN dbo.tblICInventoryAdjustmentDetail AdjDetail 
 							ON Adj.intInventoryAdjustmentId = AdjDetail.intInventoryAdjustmentId 
@@ -5632,12 +5865,59 @@ BEGIN
 
 		-- Clear the cost buckets if inventory adjustment is a Inventory Fix code: 001. 
 		IF	@ysnForceClearTheCostBuckets = 1 
-			AND @strTransactionType IN ('Inventory Adjustment - Closing Balance') 
+			AND @strTransactionType IN ('Inventory Adjustment - Opening Inventory') 
 			AND EXISTS (
-				SELECT TOP 1 1 FROM tblICInventoryAdjustment a WHERE a.intInventoryAdjustmentId = @intTransactionId AND a.strDescription LIKE '%Inventory Fix code: 001%'
+				SELECT TOP 1 1 FROM tblICInventoryAdjustment a WHERE a.intInventoryAdjustmentId = @intTransactionId AND a.strDescription LIKE '%Inventory Fix code: 001-A%'
 			)
 		BEGIN 
 			--PRINT 'Clear the cost buckets'
+
+			-- Normally, Opening balance does generate GL entries. 
+			-- It will generate GL entries if it using Inventory Fix code: 001. 
+			SET @intReturnValue = NULL 
+			INSERT INTO @GLEntries (
+					[dtmDate] 
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]					
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm] 
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+			)			
+			EXEC @intReturnValue = dbo.uspICCreateGLEntries
+				@strBatchId 
+				,'Inventory Adjustment'
+				,@intEntityUserSecurityId
+				,@strGLDescription
+				,NULL 
+				,@intItemId -- This is only used when rebuilding the stocks.
+				,@strTransactionId -- This is only used when rebuilding the stocks.
+				,@intCategoryId -- This is only used when rebuilding the stocks.
 
 			-- Clear the FIFO table. 
 			UPDATE cb
@@ -5657,7 +5937,6 @@ BEGIN
 					AND cb.intItemLocationId = il.intItemLocationId
 			WHERE
 				a.intInventoryAdjustmentId = @intTransactionId
-				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
 
 			-- Clear the LIFO table. 
 			UPDATE cb
@@ -5677,7 +5956,6 @@ BEGIN
 					AND cb.intItemLocationId = il.intItemLocationId
 			WHERE
 				a.intInventoryAdjustmentId = @intTransactionId
-				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
 
 			-- Clear the Lot table. 
 			UPDATE cb
@@ -5697,7 +5975,6 @@ BEGIN
 					AND cb.intItemLocationId = il.intItemLocationId
 			WHERE
 				a.intInventoryAdjustmentId = @intTransactionId
-				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
 
 			-- Clear the Actual Cost table. 
 			UPDATE cb
@@ -5717,7 +5994,6 @@ BEGIN
 					AND cb.intItemLocationId = il.intItemLocationId
 			WHERE
 				a.intInventoryAdjustmentId = @intTransactionId
-				--AND ISNULL(cb.dblStockIn, 0) <> ISNULL(cb.dblStockOut, 0) 
 		END 
 
 		-- Book the G/L Entries (except for cost adjustment)
@@ -5831,3 +6107,4 @@ BEGIN
 END 
 
 RETURN @intReturnValue; 
+
