@@ -557,23 +557,25 @@ BEGIN TRY
 					WHILE @@FETCH_STATUS = 0
 					BEGIN
 			
-						SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),1,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
-							,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),2,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
-						FROM tblGRTransferStorageReference SR
-						INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
-						INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
-						INNER JOIN tblGRCustomerStorage CS_TO ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
-						INNER JOIN tblGRStorageType ST_TO ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId AND ST_TO.ysnDPOwnedType = 1
-						INNER JOIN tblICItem I ON CS_TO.intItemId = I.intItemId
-						INNER JOIN tblICCommodity ICC ON CS_TO.intCommodityId = I.intCommodityId
-						WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
+						-- SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),1,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
+						-- 	,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, SR.dtmProcessDate, 106),8),2,NULL,NULL,CS_TO.intCompanyLocationId,NULL,0,I.intItemId,CS_TO.intCurrencyId))
+						-- FROM tblGRTransferStorageReference SR
+						-- INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
+						-- INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+						-- INNER JOIN tblGRCustomerStorage CS_TO ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
+						-- INNER JOIN tblGRStorageType ST_TO ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId AND ST_TO.ysnDPOwnedType = 1
+						-- INNER JOIN tblICItem I ON CS_TO.intItemId = I.intItemId
+						-- INNER JOIN tblICCommodity ICC ON CS_TO.intCommodityId = I.intCommodityId
+						-- WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 
 						--update the Basis and Settlement Price of the new customer storage
 						UPDATE CS
-						SET dblBasis = ISNULL(@dblBasisCost,0)
-							,dblSettlementPrice = ISNULL(@dblSettlementPrice,0)
+						SET dblBasis = ISNULL(CS_FROM.dblBasis,0)
+							,dblSettlementPrice = ISNULL(CS_FROM.dblSettlementPrice,0)
 						FROM tblGRCustomerStorage CS
 						INNER JOIN tblGRTransferStorageReference SR ON SR.intToCustomerStorageId = CS.intCustomerStorageId
+						INNER JOIN tblGRCustomerStorage CS_FROM	ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
 						WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 
 						FETCH c INTO @intTransferStorageReferenceId
