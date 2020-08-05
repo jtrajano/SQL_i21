@@ -507,6 +507,15 @@ BEGIN
 	WHERE B.strBatchNumber = @batchIdUsed AND B.strMessage LIKE '%successfully%'
 	AND voucher.ysnReadyForPayment = 1
 
+	--UPDATE dblPaymentTemp and ysnInPayment
+	DECLARE @paymentIds AS NVARCHAR(MAX);
+	SELECT @paymentIds =  COALESCE(@paymentIds + ', ', '') + CONVERT(VARCHAR(12), P.intPaymentId)
+	FROM tblAPPayment P
+	INNER JOIN #tmpMultiVouchersCreatedPayment CP ON CP.intCreatePaymentId = P.intPaymentId
+	WHERE P.ysnPosted = 1
+
+	IF @paymentIds <> '' OR @paymentIds IS NOT NULL EXEC uspAPUpdateVoucherPayment @paymentIds, 1
+
 	DONE:
 	IF @transCount = 0 COMMIT TRANSACTION
 	
