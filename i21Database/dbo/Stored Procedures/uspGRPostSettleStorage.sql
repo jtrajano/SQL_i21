@@ -2256,7 +2256,7 @@ BEGIN TRY
 															WHEN ST.ysnDPOwnedType = 0 THEN NULL
 															ELSE 
 																	CASE 
-																			WHEN a.intItemType = 1 THEN RI.intInventoryReceiptItemId
+																			WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
 																			ELSE NULL
 																	END
 													END
@@ -2404,8 +2404,9 @@ BEGIN TRY
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
 								AND a.intItemType = 1
-								and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null) or (
+								AND ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null) or (
 												(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
+								AND CS.intTicketId IS NOT NULL
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
