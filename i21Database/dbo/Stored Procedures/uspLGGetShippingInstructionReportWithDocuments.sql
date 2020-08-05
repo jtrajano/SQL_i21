@@ -211,7 +211,7 @@ BEGIN
 			,L.intPurchaseSale
 			,L.dtmBLDate
 			,L.dtmDeliveredDate
-			,CH.strContractNumber
+			,strContractNumber = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber ELSE CH.strContractNumber END
 			,CH.strCustomerContract
 			,Item.strItemNo
 			,Item.strDescription AS strItemDescription
@@ -470,8 +470,10 @@ BEGIN
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 2 THEN intSContractDetailId ELSE intPContractDetailId END
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
 		LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId AND PEC.ysnDefaultContact = 1
@@ -494,7 +496,7 @@ BEGIN
 		LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
 		LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
 		LEFT JOIN tblEMEntity DocPres ON DocPres.intEntityId = L.intDocPresentationId
-		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
+		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CASE WHEN L.intPurchaseSale = 3 THEN PCD.intShipperId ELSE CD.intShipperId END 
 		LEFT JOIN tblCMBank Bank ON Bank.intBankId = L.intDocPresentationId
 		LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.strNotifyOrConsignee = 'First Notify'
 		LEFT JOIN tblLGLoadNotifyParties SLNP ON L.intLoadId = SLNP.intLoadId AND SLNP.strNotifyOrConsignee = 'Second Notify'
