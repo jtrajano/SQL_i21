@@ -1022,6 +1022,143 @@ CREATE PROCEDURE [dbo].[uspARImportCustomer]
 				WHERE Cus.strCustomerNumber = @CustomerId AND ptcus_cus_no = SUBSTRING(@CustomerId,1,10)
 			END
 
+			--INSERT IF NOT EXIST IN THE ORIGIN
+			ELSE
+				INSERT INTO ptcusmst(
+				--Entity
+				ptcus_last_name,
+				ptcus_first_name,
+				ptcus_mid_init,
+				ptcus_name_suffx,
+				ptcus_comment,
+				--Contact,
+				ptcus_contact,
+				ptcus_phone,
+				ptcus_phone_ext,
+				ptcus_phone2,
+				ptcus_phone_ext2,
+				--Location
+				ptcus_addr,
+				ptcus_addr2,
+				ptcus_city,
+				ptcus_state,
+				ptcus_zip,
+				ptcus_country,
+				--Customer
+				ptcus_cus_no,
+				ptcus_co_per_ind_cp,
+				ptcus_credit_limit,
+				ptcus_sales_tax_id,
+				ptcus_active_yn,
+				ptcus_prt_stmnt_dtl_yn,
+				ptcus_stmt_fmt,
+				ptcus_crd_stop_days,
+				ptcus_local1,
+				ptcus_local2,
+				ptcus_pic_prc_yn,
+				ptcus_sales_tax_yn,
+				ptcus_budget_amt,
+				ptcus_budget_beg_mm,
+				ptcus_budget_end_mm,
+				ptcus_acct_stat_x_1,
+				ptcus_slsmn_id,
+				ptcus_srv_cd,
+				ptcus_terms_code,
+				ptcus_bill_to				
+				--agcus_dpa_cnt
+				--agcus_dpa_rev_dt,
+				--agcus_gb_rcpt_no,
+				--agcus_ckoff_exempt_yn,
+				--agcus_ckoff_vol_yn,
+				--agcus_ga_origin_st,
+				--agcus_mkt_sign_yn,
+				--agcus_dflt_mkt_zone,
+				--agcus_ga_hold_pay_yn ,
+				--agcus_ga_wthhld_yn
+
+			)
+
+			SELECT
+				--Entity
+				ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,1,25) ELSE SUBSTRING(Ent.strName, 1, (CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  -1 ELSE 25 END)) END),'''') AS strLastName,
+				ISNULL((CASE WHEN Cus.strType = ''Company'' THEN SUBSTRING(Ent.strName,26,50) ELSE SUBSTRING(Ent.strName,(CASE WHEN CHARINDEX( '', '', Ent.strName) != 0 THEN CHARINDEX( '', '', Ent.strName)  + 2 ELSE 50 END),50) END),'''') AS strFirsName,
+				'''' as strMiddleInitial,
+				'''' as strNameSuffix,
+				SUBSTRING(Ent.strInternalNotes,1,30) as strInternalNotes,
+				--Ent.str1099Name,
+				--Contact
+				SUBSTRING((Con.strName),1,20) AS strContactName,
+				ISNULL( (CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,15), 0, CHARINDEX(''x'',P.strPhone)) ELSE SUBSTRING(P.strPhone,1,15)END) , '''') as strPhone,
+				(CASE WHEN CHARINDEX(''x'', P.strPhone) > 0 THEN SUBSTRING(SUBSTRING(P.strPhone,1,30),CHARINDEX(''x'',P.strPhone) + 1, LEN(P.strPhone))END) as strPhoneExt,
+				(CASE WHEN CHARINDEX(''x'', M.strPhone) > 0 THEN SUBSTRING(SUBSTRING(M.strPhone,1,15), 0, CHARINDEX(''x'',M.strPhone)) ELSE SUBSTRING(M.strPhone,1,15)END) as strPhone2,
+				(CASE WHEN CHARINDEX(''x'', M.strPhone) > 0 THEN SUBSTRING(SUBSTRING(M.strPhone,1,30),CHARINDEX(''x'',M.strPhone) + 1, LEN(M.strPhone))END) as strPhone2Ext,
+				--Location
+				(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress,1,30), 0, CHARINDEX(CHAR(10),Loc.strAddress)) ELSE SUBSTRING(Loc.strAddress,1,30) END) AS strAddress1,
+				(CASE WHEN CHARINDEX(CHAR(10), Loc.strAddress) > 0 THEN SUBSTRING(SUBSTRING(Loc.strAddress, CHARINDEX(CHAR(10),Loc.strAddress) + 1, LEN(Loc.strAddress)),1,30) ELSE NULL END) AS strAddress2,
+				SUBSTRING(Loc.strCity,1,20) as strCity,
+				SUBSTRING(Loc.strState,1,2) as strState,
+				ISNULL(SUBSTRING(Loc.strZipCode,1,10), '''') as strZipCode,
+				(CASE WHEN LEN(Loc.strCountry) = 10 THEN Loc.strCountry ELSE '''' END)as strCountry,
+				--Customer
+				SUBSTRING(Ent.strEntityNo,1,10) as strCustomerNumber,
+				(CASE WHEN Cus.strType = ''Company'' THEN ''C'' ELSE ''P'' END) AS strType,
+				Cus.dblCreditLimit,
+				SUBSTRING(Cus.strTaxNumber,1,15) as strTaxNumber,
+				(CASE WHEN Cus.ysnActive = 1 THEN ''Y'' ELSE ''N'' END) AS ysnActive,
+				(CASE WHEN Cus.ysnStatementDetail = 1 THEN ''Y'' ELSE ''N'' END) AS ysnStatementDetail,
+				(CASE WHEN Cus.strStatementFormat = ''Open Item'' THEN ''O'' WHEN Cus.strStatementFormat = ''Balance Forward'' THEN ''B'' WHEN Cus.strStatementFormat = ''Budget Reminder'' THEN ''R'' WHEN Cus.strStatementFormat = ''None'' THEN ''N'' WHEN Cus.strStatementFormat IS NULL THEN Null ELSE '''' END) as strStatementFormat ,
+				Cus.intCreditStopDays,
+				SUBSTRING(Cus.strTaxAuthority1,1,3) as strTaxAuthority1,
+				SUBSTRING(Cus.strTaxAuthority2,1,3) as strTaxAuthority2,
+				(CASE WHEN Cus.ysnPrintPriceOnPrintTicket = 1 THEN ''Y'' ELSE ''N'' END) AS ysnPrintPriceOnPrintTicket,
+				(CASE WHEN Cus.ysnApplyPrepaidTax = 1 THEN ''P'' ELSE  CASE WHEN Cus.ysnApplySalesTax = 1 THEN ''Y'' ELSE ''N'' END END) AS ysnApplyPrepaidTax,
+				Cus.dblBudgetAmountForBudgetBilling,
+				SUBSTRING(Cus.strBudgetBillingBeginMonth,1,2) as strBudgetBillingBeginMonth,
+				SUBSTRING(Cus.strBudgetBillingEndMonth,1,2) as strBudgetBillingEndMonth,
+				(SELECT strAccountStatusCode FROM tblARAccountStatus WHERE intAccountStatusId = Cus.intAccountStatusId),
+				(SELECT strSalespersonId FROM tblARSalesperson WHERE intEntityId = Cus.intSalespersonId),
+				(SELECT strServiceChargeCode FROM tblARServiceCharge WHERE intServiceChargeId = Cus.intServiceChargeId),
+				(SELECT case when ISNUMERIC(strTermCode) = 0 then null else strTermCode end  FROM tblSMTerm WHERE intTermID = Cus.intTermsId and cast( (case when isnumeric(strTermCode) = 1 then  strTermCode else 266 end ) as bigint) <= 255),
+				Ent.strName
+				--Cus.strDPAContract,
+				--CONVERT(int,''20'' + CONVERT(nvarchar,Cus.dtmDPADate,12)),
+				--Cus.strGBReceiptNumber,
+				--(CASE WHEN Cus.ysnCheckoffExempt = 1 THEN ''Y'' ELSE ''N'' END) as ysnCheckoffExempt,
+				--(CASE WHEN Cus.ysnVoluntaryCheckoff = 1 THEN ''Y'' ELSE ''N'' END) as ysnVoluntaryCheckoff,
+				--Cus.strCheckoffState,
+				--(CASE WHEN Cus.ysnMarketAgreementSigned = 1 THEN ''Y'' ELSE ''N'' END) as ysnMarketAgreementSigned,
+				--Cus.intMarketZoneId,
+				--(CASE WHEN Cus.ysnHoldBatchGrainPayment = 1 THEN ''Y'' ELSE ''N'' END) as ysnHoldBatchGrainPayment,
+				--(CASE WHEN Cus.ysnFederalWithholding = 1 THEN ''Y'' ELSE ''N'' END) as ysnFederalWithholding
+				FROM tblEMEntity Ent
+				INNER JOIN tblARCustomer Cus 
+					ON Ent.intEntityId = Cus.intEntityId
+				INNER JOIN tblEMEntityToContact CusToCon 
+					ON Cus.intEntityId = CusToCon.intEntityId 
+						and CusToCon.ysnDefaultContact = 1
+				INNER JOIN tblEMEntity Con 
+					ON CusToCon.intEntityContactId = Con.intEntityId
+				INNER JOIN tblEMEntityLocation Loc 
+					ON Ent.intEntityId = Loc.intEntityId 
+						and Loc.ysnDefaultLocation = 1
+				LEFT JOIN tblEMEntityLocation BillToLocation
+					ON Cus.intBillToId = BillToLocation.intEntityLocationId
+						AND BillToLocation.intEntityId = Cus.intEntityId
+				LEFT JOIN tblEMEntityPhoneNumber P
+					ON P.intEntityId = Con.intEntityId
+				LEFT JOIN tblEMEntityMobileNumber M
+					ON M.intEntityId = Con.intEntityId	
+				WHERE Ent.strEntityNo =  @CustomerId
+
+				UPDATE Loc 
+					SET strOriginLinkCustomer = Ent.strName
+					FROM tblEMEntity Ent
+						INNER JOIN tblEMEntityLocation Loc 
+							ON Ent.intEntityId = Loc.intEntityId 
+								and Loc.ysnDefaultLocation = 1
+				WHERE Ent.strEntityNo =  @CustomerId
+
+
 		RETURN;
 		END
 
