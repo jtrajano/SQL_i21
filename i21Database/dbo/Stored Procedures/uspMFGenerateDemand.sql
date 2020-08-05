@@ -401,7 +401,7 @@ BEGIN TRY
 					END)
 		FROM @tblMFItemDetail ID
 		JOIN tblICItem I ON I.intItemId = ID.intItemId
-		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId and CA.intCommodityAttributeId = I.intOriginId
 		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
 			AND CTCQ.intCommodityId = I.intCommodityId
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
@@ -415,7 +415,7 @@ BEGIN TRY
 					END
 				) --From Unit
 			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
-		WHERE ID.ysnSpecificItemDescription = 0
+		WHERE ID.ysnSpecificItemDescription = 0 and ID.intItemId<>ID.intMainItemId
 		GROUP BY ID.intMainItemId
 
 		INSERT INTO @tblMFContainerWeight (
