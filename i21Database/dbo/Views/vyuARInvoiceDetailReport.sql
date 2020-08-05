@@ -21,6 +21,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strItemDescription		= ITEM.strDescription
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
+	 ,[strOrderUnitMeasure] 	= OUOM.[strUnitMeasure]
 	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblItemWeight, 0) ELSE ISNULL(ID.dblItemWeight, 0) * -1 END
 	 , dblUnitCost				= CASE WHEN CT.intContractHeaderId IS NOT NULL THEN ISNUlL(ID.dblUnitPrice,0) ELSE ISNULL( ID.dblPrice,0) END
 	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
@@ -74,6 +75,20 @@ LEFT JOIN (
 		 , strDescription
 	FROM dbo.tblICItem WITH (NOLOCK)
 ) ITEM ON ID.intItemId = ITEM.intItemId
+
+LEFT JOIN (
+	SELECT intItemUOMId
+		 , intItemId
+		 , IU.intUnitMeasureId
+		 , UM.strUnitMeasure
+	FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+	INNER JOIN (
+		SELECT intUnitMeasureId
+			 , strUnitMeasure
+		FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+	) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+) OUOM ON ID.intItemId = OUOM.intItemUOMId	
+
 LEFT JOIN (
 	SELECT CTH.intContractHeaderId
 		 , CTH.strContractNumber
