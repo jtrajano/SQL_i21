@@ -7760,6 +7760,8 @@
     <Build Include="dbo\Stored Procedures\uspGRUpdateStorageShipDetails.sql" />
 	<Build Include="dbo\Stored Procedures\uspTRQuoteCalculate.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
