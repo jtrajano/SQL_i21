@@ -9,6 +9,11 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strDetail NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
 
+IF @strStatus = 'Success'
+	SELECT @intStatusId = 1 -- Processed
+ELSE IF @strStatus = 'Failure'
+	SELECT @intStatusId = 2 -- Failed
+
 SET @strStyle = '<style type="text/css" scoped>
 					table.GeneratedTable {
 						width:80%;
@@ -61,25 +66,12 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(strNewSampleNumber, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strNewSampleTypeName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
-		</tr>'
+	IF EXISTS (
+		SELECT 1
 		FROM tblQMSampleStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-
-		UPDATE tblQMSampleStage
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(strNewSampleNumber, '') + '</td>' + 
@@ -89,13 +81,13 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
 		FROM tblQMSampleStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 
 		UPDATE tblQMSampleStage
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 	END
 END
 
@@ -108,25 +100,12 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strAverageNo, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), DAP.dtmDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
-		</tr>'
-		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
-		JOIN tblRKDailyAveragePrice DAP WITH (NOLOCK) ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-
-		UPDATE tblRKDailyAveragePriceStage
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKDailyAveragePriceStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strAverageNo, '') + '</td>' + 
@@ -136,13 +115,13 @@ BEGIN
 		</tr>'
 		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
 		JOIN tblRKDailyAveragePrice DAP WITH (NOLOCK) ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE S.intStatusId = @intStatusId
+			AND S.ysnMailSent = 0
 
 		UPDATE tblRKDailyAveragePriceStage
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 	END
 END
 
@@ -377,25 +356,12 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
-		</tr>'
-		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName
-		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
-		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-			AND ISNULL(S.ysnMailSent, 0) = 0) t
-
-		UPDATE tblRKFutOptTransactionHeaderStage
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKFutOptTransactionHeaderStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
@@ -405,13 +371,13 @@ BEGIN
 		</tr>'
 		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName,S.strMessage
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
-		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-			AND ISNULL(S.ysnMailSent, 0) = 0) t
+		WHERE S.intStatusId = @intStatusId
+			AND S.ysnMailSent = 0) t
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 	END
 END
 
@@ -425,25 +391,12 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(strBatchName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmDate, 106), '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
-		</tr>'
+	IF EXISTS (
+		SELECT 1
 		FROM tblRKCoverageEntryStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-
-		UPDATE tblRKCoverageEntryStage
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(strBatchName, '') + '</td>' + 
@@ -453,13 +406,13 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
 		FROM tblRKCoverageEntryStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 
 		UPDATE tblRKCoverageEntryStage
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 	END
 END
 
@@ -471,24 +424,12 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intOptionsMatchPnSHeaderId),'') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
-			   '<td>&nbsp;' + 'Success' + '</td>
-		</tr>'
-		FROM (SELECT DISTINCT intOptionsMatchPnSHeaderId, strFromCompanyName
+	IF EXISTS (
+		SELECT 1
 		FROM tblRKOptionsMatchPnSHeaderStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0) t
-
-		UPDATE tblRKOptionsMatchPnSHeaderStage
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intOptionsMatchPnSHeaderId),'') + '</td>' + 
@@ -497,13 +438,13 @@ BEGIN
 		</tr>'
 		FROM (SELECT DISTINCT intOptionsMatchPnSHeaderId, strFromCompanyName, strMessage
 		FROM tblRKOptionsMatchPnSHeaderStage WITH (NOLOCK)
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0) t
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0) t
 
 		UPDATE tblRKOptionsMatchPnSHeaderStage
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent = 0
 	END
 END
 
@@ -519,197 +460,149 @@ BEGIN
 						<th>&nbsp;Screen</th>
 					</tr>'
 
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intAttributeId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strAttributeName, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Attribute' + '</td>
-	</tr>'
-	FROM tblQMAttributeStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMAttributeStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+				<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intAttributeId),'') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strAttributeName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Attribute' + '</td>
+		</tr>'
+		FROM tblQMAttributeStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblQMAttributeStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblQMAttributeStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intAttributeId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strAttributeName, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Attribute' + '</td>
-	</tr>'
-	FROM tblQMAttributeStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMListStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+				<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intListId),'') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strListName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'List' + '</td>
+		</tr>'
+		FROM tblQMListStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblQMAttributeStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblQMListStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intListId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strListName, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'List' + '</td>
-	</tr>'
-	FROM tblQMListStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMSampleTypeStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intSampleTypeId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strSampleTypeName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Sample Type' + '</td>
+		</tr>'
+		FROM tblQMSampleTypeStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblQMListStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-		
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intListId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strListName, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'List' + '</td>
-	</tr>'
-	FROM tblQMListStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	UPDATE tblQMListStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intSampleTypeId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strSampleTypeName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Sample Type' + '</td>
-	</tr>'
-	FROM tblQMSampleTypeStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	UPDATE tblQMSampleTypeStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblQMSampleTypeStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intSampleTypeId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strSampleTypeName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Sample Type' + '</td>
-	</tr>'
-	FROM tblQMSampleTypeStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMPropertyStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intPropertyId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strPropertyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Property' + '</td>
+		</tr>'
+		FROM tblQMPropertyStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblQMSampleTypeStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intPropertyId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strPropertyName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Property' + '</td>
-	</tr>'
-	FROM tblQMPropertyStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblQMPropertyStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblQMPropertyStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intPropertyId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strPropertyName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Property' + '</td>
-	</tr>'
-	FROM tblQMPropertyStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMTestStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intTestId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strTestName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Test' + '</td>
+		</tr>'
+		FROM tblQMTestStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblQMPropertyStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intTestId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strTestName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Test' + '</td>
-	</tr>'
-	FROM tblQMTestStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblQMTestStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblQMTestStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intTestId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strTestName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Test' + '</td>
-	</tr>'
-	FROM tblQMTestStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMProductStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intProductId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strProductName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Template' + '</td>
+		</tr>'
+		FROM tblQMProductStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblQMTestStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intProductId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strProductName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Template' + '</td>
-	</tr>'
-	FROM tblQMProductStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	UPDATE tblQMProductStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intProductId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strProductName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Template' + '</td>
-	</tr>'
-	FROM tblQMProductStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	UPDATE tblQMProductStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblQMProductStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
 -- IC, LG and RM Masters
 
@@ -745,197 +638,149 @@ BEGIN
 	WHERE ISNULL(strFeedStatus, '') = 'Failed'
 		AND ISNULL(ysnMailSent, 0) = 0
 
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFreightRateMatrixId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Freight Rate Matrix' + '</td>
-	</tr>'
-	FROM tblLGFreightRateMatrixStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblLGFreightRateMatrixStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFreightRateMatrixId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Freight Rate Matrix' + '</td>
+		</tr>'
+		FROM tblLGFreightRateMatrixStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblLGFreightRateMatrixStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFreightRateMatrixId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Freight Rate Matrix' + '</td>
-	</tr>'
-	FROM tblLGFreightRateMatrixStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblLGFreightRateMatrixStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblLGFreightRateMatrixStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMonthId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strFutureMonth, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Futures Month' + '</td>
-	</tr>'
-	FROM tblRKFuturesMonthStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKFuturesMonthStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMonthId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strFutureMonth, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Futures Month' + '</td>
+		</tr>'
+		FROM tblRKFuturesMonthStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblRKFuturesMonthStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMonthId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strFutureMonth, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Futures Month' + '</td>
-	</tr>'
-	FROM tblRKFuturesMonthStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblRKFuturesMonthStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblRKFuturesMonthStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intOptionMonthId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strOptionMonth, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Options Month' + '</td>
-	</tr>'
-	FROM tblRKOptionsMonthStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKOptionsMonthStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intOptionMonthId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strOptionMonth, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Options Month' + '</td>
+		</tr>'
+		FROM tblRKOptionsMonthStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblRKOptionsMonthStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intOptionMonthId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strOptionMonth, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Options Month' + '</td>
-	</tr>'
-	FROM tblRKOptionsMonthStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblRKOptionsMonthStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblRKOptionsMonthStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureSettlementPriceId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Settlement Price' + '</td>
-	</tr>'
-	FROM tblRKFuturesSettlementPriceStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKFuturesSettlementPriceStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureSettlementPriceId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Settlement Price' + '</td>
+		</tr>'
+		FROM tblRKFuturesSettlementPriceStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblRKFuturesSettlementPriceStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureSettlementPriceId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Settlement Price' + '</td>
-	</tr>'
-	FROM tblRKFuturesSettlementPriceStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblRKFuturesSettlementPriceStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblRKFuturesSettlementPriceStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intM2MBasisId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Basis Entry' + '</td>
-	</tr>'
-	FROM tblRKM2MBasisStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKM2MBasisStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intM2MBasisId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Basis Entry' + '</td>
+		</tr>'
+		FROM tblRKM2MBasisStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	UPDATE tblRKM2MBasisStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intM2MBasisId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strDisplayName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Basis Entry' + '</td>
-	</tr>'
-	FROM tblRKM2MBasisStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblRKM2MBasisStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 
-	UPDATE tblRKM2MBasisStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	IF EXISTS (
+		SELECT 1
+		FROM tblRKFutureMarketStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Forecast Price' + '</td>
+		</tr>'
+		FROM tblRKFutureMarketStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
 
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Forecast Price' + '</td>
-	</tr>'
-	FROM tblRKFutureMarketStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	UPDATE tblRKFutureMarketStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-	
-	SELECT @strDetail = @strDetail + '<tr>
-		   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutureMarketId),'') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strFutMarketName, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
-		   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Forecast Price' + '</td>
-	</tr>'
-	FROM tblRKFutureMarketStage WITH (NOLOCK)
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
-
-	UPDATE tblRKFutureMarketStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+		UPDATE tblRKFutureMarketStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
 END
 
 IF @ysnDailyNotification = 1
