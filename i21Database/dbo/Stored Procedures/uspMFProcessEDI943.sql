@@ -284,16 +284,18 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT *
 					FROM @tblMFItem I
-					Left JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-					Where IL.ysnOpenPricePLU is null
+					LEFT JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+						AND IL.ysnOpenPricePLU = 1
+					WHERE IL.ysnOpenPricePLU IS NULL
 					)
 			BEGIN
 				SELECT @strItemNo = ''
 
 				SELECT @strItemNo = @strItemNo + strItemNo + ', '
 				FROM @tblMFItem I
-					Left JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-					Where IL.ysnOpenPricePLU is null
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.ysnOpenPricePLU = 1
+				WHERE IL.ysnOpenPricePLU IS NULL
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -304,18 +306,20 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT I.intItemId
 					FROM @tblMFItem I
-					JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-					Group by I.intItemId
-					Having Count(*)>1
+					JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+						AND IL.ysnOpenPricePLU = 1
+					GROUP BY I.intItemId
+					HAVING Count(*) > 1
 					)
 			BEGIN
 				SELECT @strItemNo = ''
 
 				SELECT @strItemNo = @strItemNo + strItemNo + ', '
 				FROM @tblMFItem I
-				JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-				Group by I.strItemNo
-				Having Count(*)>1
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.ysnOpenPricePLU = 1
+				GROUP BY I.strItemNo
+				HAVING Count(*) > 1
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -896,7 +900,8 @@ BEGIN TRY
 			FROM tblMFEDI943 EDI
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU =1
+				AND IL.intLocationId IS NOT NULL
+				AND IL.ysnOpenPricePLU = 1
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1002,7 +1007,8 @@ BEGIN TRY
 			FROM tblMFEDI943 EDI
 			JOIN tblICItem I ON I.strItemNo = EDI.strVendorItemNumber
 			JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-				AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+				AND IL.intLocationId IS NOT NULL
+				AND IL.ysnOpenPricePLU = 1
 			JOIN tblEMEntityLocation EL ON 1 = 1
 				AND EL.intEntityLocationId = @intEntityLocationId
 			JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1261,7 +1267,8 @@ BEGIN TRY
 					,strValue NVARCHAR(50)
 					)
 
-				Delete from @tblCustomTabColumn
+				DELETE
+				FROM @tblCustomTabColumn
 
 				INSERT INTO @tblCustomTabColumn
 				SELECT Extent1.intCustomTabDetailId
@@ -1478,6 +1485,13 @@ BEGIN TRY
 			DELETE
 			FROM tblMFEDI943
 			WHERE strDepositorOrderNumber = @strOrderNo
+
+			INSERT INTO tblMFEDIStage944 (
+				intInventoryReceiptId
+				,intStatusId
+				)
+			SELECT @intInventoryReceiptId
+				,0
 		END TRY
 
 		BEGIN CATCH
