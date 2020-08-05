@@ -305,6 +305,8 @@ BEGIN TRY
 
 			UPDATE tblLGFreightRateMatrixStage
 			SET strFeedStatus = 'Processed'
+				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intFreightRateMatrixStageId = @intFreightRateMatrixStageId
 
 			-- Audit Log
@@ -357,6 +359,7 @@ BEGIN TRY
 			UPDATE tblLGFreightRateMatrixStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intFreightRateMatrixStageId = @intFreightRateMatrixStageId
 		END CATCH
 

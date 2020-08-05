@@ -337,6 +337,7 @@ BEGIN TRY
 			UPDATE tblQMTestStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intTestStageId = @intTestStageId
 
 			-- Audit Log
@@ -389,6 +390,7 @@ BEGIN TRY
 			UPDATE tblQMTestStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intTestStageId = @intTestStageId
 		END CATCH
 
