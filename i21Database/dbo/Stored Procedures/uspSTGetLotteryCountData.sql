@@ -70,19 +70,23 @@ SELECT
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
-		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
+		--GROUP BY tblSTCheckoutHeader.intCheckoutId
+		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+
 	),0),
 	
 	intPriorCheckoutCount = ISNULL((
-	SELECT TOP 1 COUNT(1) FROM tblSTCheckoutHeader 
-			INNER JOIN tblSTCheckoutLotteryCount 
+		SELECT TOP 1 COUNT(1) FROM tblSTCheckoutHeader 
+		INNER JOIN tblSTCheckoutLotteryCount 
 		ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intCheckoutId != @checkoutId))
-		
-		),0),
+		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
+		GROUP BY tblSTCheckoutHeader.intCheckoutId,tblSTCheckoutHeader.intShiftNo
+		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+
+	),0),
 	tblSTLotteryBook.dblQuantityRemaining,
 	tblSTLotteryBook.dtmSoldDate,
 	tblSTLotteryBook.strStatus,
