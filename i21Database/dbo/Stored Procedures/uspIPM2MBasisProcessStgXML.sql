@@ -560,6 +560,7 @@ BEGIN TRY
 			UPDATE tblRKM2MBasisStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intM2MBasisStageId = @intM2MBasisStageId
 
 			-- Audit Log
@@ -612,6 +613,7 @@ BEGIN TRY
 			UPDATE tblRKM2MBasisStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intM2MBasisStageId = @intM2MBasisStageId
 		END CATCH
 
