@@ -47,7 +47,16 @@ RETURNS TABLE AS RETURN
 								THEN
 									dbo.fnGetInterestBasedOnTerm(forPay.dblAmountDue, voucher.dtmBillDate, @datePaid, voucher.dtmInterestDate, forPay.intTermsId)
 								ELSE 0 END AS DECIMAL(18,2))
-		,forPay.dblAmountDue
+		,CASE WHEN forPay.intPayScheduleId IS NOT NULL 
+			THEN 
+				forPay.dblAmountDue
+			ELSE
+				CASE WHEN forPay.dblPaymentTemp <> 0 
+					THEN 
+						((forPay.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - forPay.dblPaymentTemp) 
+					ELSE forPay.dblAmountDue 
+				END
+			END AS dblAmountDue
 		,forPay.dblPayment
 		,forPay.dblTempPayment
 		,forPay.dblWithheld
@@ -88,6 +97,11 @@ RETURNS TABLE AS RETURN
 		INNER JOIN tblEMEntityGroupDetail egd ON eg.intEntityGroupId = egd.intEntityGroupId
 		WHERE egd.intEntityId = forPay.intEntityVendorId
 	) entityGroup
+	OUTER APPLY (
+		SELECT SUM(APD.dblAmountApplied) AS dblPayment
+		FROM tblAPAppliedPrepaidAndDebit APD
+		WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
+	) appliedPrepays
 	WHERE (forPay.intPaymentMethodId = @paymentMethodId OR forPay.intPaymentMethodId IS NULL)
 	AND forPay.intCurrencyId = @currencyId
 	AND forPay.ysnDeferredPay = @showDeferred
