@@ -1,7 +1,8 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
 	@date DATETIME,
 	@storeId INT,
-	@checkoutId INT
+	@checkoutId INT,
+	@shiftNo INT
 AS
 
 DECLARE @tblSTOuputTable TABLE
@@ -33,8 +34,8 @@ DECLARE @tblSTOuputTable TABLE
 	,strSoldOut				NVARCHAR(MAX)
 )
 
-DECLARE @shiftNo INT 
-SELECT TOP 1 @shiftNo = intShiftNo FROM tblSTCheckoutHeader WHERE intCheckoutId = @checkoutId
+-- DECLARE @shiftNo INT 
+-- SELECT TOP 1 @shiftNo = intShiftNo FROM tblSTCheckoutHeader WHERE intCheckoutId = @checkoutId
 
 
 SELECT tblSTCheckoutLotteryCount.* INTO #tempLotteryCount
@@ -164,7 +165,7 @@ SELECT
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
 		--GROUP BY tblSTCheckoutHeader.intCheckoutId
-		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+		ORDER BY tblSTCheckoutHeader.dtmCheckoutDate DESC , tblSTCheckoutHeader.intShiftNo DESC
 
 	),0),
 	
@@ -175,8 +176,8 @@ SELECT
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
-		GROUP BY tblSTCheckoutHeader.intCheckoutId,tblSTCheckoutHeader.intShiftNo
-		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+		GROUP BY tblSTCheckoutHeader.dtmCheckoutDate,tblSTCheckoutHeader.intShiftNo
+		ORDER BY tblSTCheckoutHeader.dtmCheckoutDate DESC , tblSTCheckoutHeader.intShiftNo DESC
 
 	),0),
 	tblSTLotteryBook.dblQuantityRemaining,
