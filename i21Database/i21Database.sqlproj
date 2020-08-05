@@ -8569,6 +8569,8 @@
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARCustomerAging_Dashboard.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
