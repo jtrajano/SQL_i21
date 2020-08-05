@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspIPProcessSAPShippingInstruction @strInfo1 NVARCHAR(MAX) = '' OUT
 	,@strInfo2 NVARCHAR(MAX) = '' OUT
 	,@intNoOfRowsAffected INT = 0 OUT
+	,@ysnProcessDeadLockEntry BIT = 0
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -132,6 +133,80 @@ BEGIN TRY
 		,@intAuditLoadDetailId INT
 		,@strAuditLogInfo NVARCHAR(200)
 
+	-- To reprocess all LSI / LS / LSI_Cancel deadlock feeds
+	IF @ysnProcessDeadLockEntry = 1
+	BEGIN
+		IF NOT EXISTS (SELECT 1 FROM tblIPLoadError WITH (NOLOCK) WHERE ysnDeadlockError = 1)
+		BEGIN
+			RETURN
+		END
+		
+		INSERT INTO tblIPLoadStage (
+			strCustomerReference
+			,strERPPONumber
+			,strOriginPort
+			,strDestinationPort
+			,dtmETAPOD
+			,dtmETAPOL
+			,dtmDeadlineCargo
+			,dtmETSPOL
+			,strBookingReference
+			,strBLNumber
+			,dtmBLDate
+			,strShippingLine
+			,strMVessel
+			,strMVoyageNumber
+			,strShippingMode
+			,intNumberOfContainers
+			,strContainerType
+			,strPartyAlias
+			,strPartyName
+			,strPartyType
+			,strLoadNumber
+			,strAction
+			,strFileName
+			,strCancelStatus
+			,dtmCancelDate
+			,strTransactionType
+			,strSessionId
+			,ysnDeadlockError
+			)
+		SELECT strCustomerReference
+			,strERPPONumber
+			,strOriginPort
+			,strDestinationPort
+			,dtmETAPOD
+			,dtmETAPOL
+			,dtmDeadlineCargo
+			,dtmETSPOL
+			,strBookingReference
+			,strBLNumber
+			,dtmBLDate
+			,strShippingLine
+			,strMVessel
+			,strMVoyageNumber
+			,strShippingMode
+			,intNumberOfContainers
+			,strContainerType
+			,strPartyAlias
+			,strPartyName
+			,strPartyType
+			,strLoadNumber
+			,strAction
+			,strFileName
+			,strCancelStatus
+			,dtmCancelDate
+			,strTransactionType
+			,strSessionId
+			,ysnDeadlockError
+		FROM tblIPLoadError
+		WHERE ysnDeadlockError = 1
+
+		DELETE
+		FROM tblIPLoadError
+		WHERE ysnDeadlockError = 1
+	END
+
 	SELECT @intMinRowNo = Min(intStageLoadId)
 	FROM tblIPLoadStage WITH (NOLOCK)
 	WHERE ISNULL(strTransactionType, '') = 'ShippingInstruction'
@@ -243,6 +318,11 @@ BEGIN TRY
 				,@strPartyType = strPartyType
 			FROM tblIPLoadStage WITH (NOLOCK)
 			WHERE intStageLoadId = @intMinRowNo
+
+			UPDATE tblIPLoadError
+			SET ysnDeadlockError = 0
+			WHERE ysnDeadlockError = 1
+				AND strCustomerReference = @strCustomerReference
 
 			SELECT TOP 1 @strPackageType = strPackageType
 			FROM tblIPLoadDetailStage
@@ -1297,6 +1377,7 @@ BEGIN TRY
 				,strErrorMessage
 				,strImportStatus
 				,strSessionId
+				,ysnDeadlockError
 				)
 			SELECT strCustomerReference
 				,strERPPONumber
@@ -1324,6 +1405,7 @@ BEGIN TRY
 				,''
 				,'Success'
 				,strSessionId
+				,ysnDeadlockError
 			FROM tblIPLoadStage
 			WHERE intStageLoadId = @intMinRowNo
 
