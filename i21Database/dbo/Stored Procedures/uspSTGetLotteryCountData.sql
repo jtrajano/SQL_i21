@@ -1,9 +1,79 @@
 ﻿CREATE PROCEDURE [dbo].[uspSTGetLotteryCountData]
 	@date DATETIME,
 	@storeId INT,
-	@checkoutId INT
+	@checkoutId INT,
+	@shiftNo INT
 AS
 
+DECLARE @tblSTOuputTable TABLE
+(
+	 intBeginCount			INT
+	,dtmSoldDate			DATETIME
+	,strStatus				NVARCHAR(MAX)
+	,ysnBookSoldOut			BIT
+	,intStoreId				INT
+	,intLotteryBookId		INT
+	,intBinNumber			INT
+	,strGame				NVARCHAR(MAX)
+	,intLotteryGameId		INT
+	,strBookNumber			NVARCHAR(MAX)
+	,strCountDirection		NVARCHAR(MAX)
+	,intStartingNumber		INT
+	,dblTicketValue			NUMERIC(18,6)
+	,intTicketPerPack		INT
+	,intEndingNumber		INT
+	,intConcurrencyId		INT
+	,intItemId				INT
+	,strItemDescription		NVARCHAR(MAX)
+	,strItemNo				NVARCHAR(MAX)
+	,strLongUPCCode			NVARCHAR(MAX)
+	,intCategoryId			INT
+	,strCategoryCode		NVARCHAR(MAX)
+	,strCategoryDescription	NVARCHAR(MAX)
+	,intItemUOMId			INT
+	,strSoldOut				NVARCHAR(MAX)
+)
+
+-- DECLARE @shiftNo INT 
+-- SELECT TOP 1 @shiftNo = intShiftNo FROM tblSTCheckoutHeader WHERE intCheckoutId = @checkoutId
+
+
+SELECT tblSTCheckoutLotteryCount.* INTO #tempLotteryCount
+FROM tblSTCheckoutLotteryCount 
+INNER JOIN tblSTReturnLottery ON tblSTCheckoutLotteryCount.intLotteryBookId = tblSTReturnLottery.intLotteryBookId
+INNER JOIN tblSTLotteryBook ON tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+WHERE tblSTCheckoutLotteryCount.intCheckoutId = @checkoutId 
+AND LOWER(tblSTLotteryBook.strStatus) = 'returned' AND tblSTReturnLottery.dtmReturnDate != @date
+
+
+INSERT INTO @tblSTOuputTable
+(
+	 intBeginCount			
+	,dtmSoldDate			
+	,strStatus				
+	,ysnBookSoldOut			
+	,intStoreId				
+	,intLotteryBookId		
+	,intBinNumber			
+	,strGame				
+	,intLotteryGameId		
+	,strBookNumber			
+	,strCountDirection		
+	,intStartingNumber		
+	,dblTicketValue			
+	,intTicketPerPack		
+	,intEndingNumber		
+	,intConcurrencyId		
+	,intItemId				
+	,strItemDescription		
+	,strItemNo				
+	,strLongUPCCode			
+	,intCategoryId			
+	,strCategoryCode		
+	,strCategoryDescription	
+	,intItemUOMId			
+	,strSoldOut				
+)
 SELECT 
 *
 ,strSoldOut = 
@@ -72,7 +142,7 @@ SELECT
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
 		--GROUP BY tblSTCheckoutHeader.intCheckoutId
-		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+		ORDER BY tblSTCheckoutHeader.dtmCheckoutDate DESC , tblSTCheckoutHeader.intShiftNo DESC
 
 	),0),
 	
@@ -83,8 +153,8 @@ SELECT
 		WHERE tblSTCheckoutHeader.intStoreId = @storeId
 		AND tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 		AND ( (tblSTCheckoutHeader.dtmCheckoutDate < @date) OR (tblSTCheckoutHeader.dtmCheckoutDate = @date AND tblSTCheckoutHeader.intShiftNo < @shiftNo))
-		GROUP BY tblSTCheckoutHeader.intCheckoutId,tblSTCheckoutHeader.intShiftNo
-		ORDER BY tblSTCheckoutHeader.intCheckoutId DESC , tblSTCheckoutHeader.intShiftNo DESC
+		GROUP BY tblSTCheckoutHeader.dtmCheckoutDate,tblSTCheckoutHeader.intShiftNo
+		ORDER BY tblSTCheckoutHeader.dtmCheckoutDate DESC , tblSTCheckoutHeader.intShiftNo DESC
 
 	),0),
 	tblSTLotteryBook.dblQuantityRemaining,
