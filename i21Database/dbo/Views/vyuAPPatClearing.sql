@@ -26,7 +26,7 @@ SELECT
 FROM tblPATRefund refund
 INNER JOIN tblPATRefundCustomer refundEntity
 	ON refund.intRefundId = refundEntity.intRefundId
-OUTER APPLY (
+CROSS APPLY (
 	SELECT TOP 1
 		ga.strAccountId
 		,ga.intAccountId
