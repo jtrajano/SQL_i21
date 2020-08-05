@@ -1,4 +1,7 @@
-﻿CREATE PROCEDURE uspMFProcessEDI945 (@strShipmentNumber NVARCHAR(50) = '')
+﻿CREATE PROCEDURE uspMFProcessEDI945 (
+	@strShipmentNumber NVARCHAR(50) = NULL
+	,@ysnForce BIT = 0
+	)
 AS
 BEGIN
 	DECLARE @tblMFOrderNo TABLE (
@@ -22,7 +25,90 @@ BEGIN
 		,@strSCAC NVARCHAR(50)
 		,@strRouting NVARCHAR(50)
 
-	IF @strShipmentNumber = ''
+	--IF @strShipmentNumber = ''
+	--BEGIN
+	--	INSERT INTO @tblMFOrderNo (
+	--		intInventoryShipmentId
+	--		,strOrderNo
+	--		,strShipmentNo
+	--		,intEntityCustomerId
+	--		)
+	--	SELECT TOP 1 InvS.intInventoryShipmentId
+	--		,InvS.strReferenceNumber
+	--		,InvS.strShipmentNumber
+	--		,InvS.intEntityCustomerId
+	--	FROM tblICInventoryShipment InvS
+	--	WHERE ysnPosted = 1
+	--		AND EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI940Archive EDI940
+	--			WHERE EDI940.strDepositorOrderNumber = InvS.strReferenceNumber
+	--			)
+	--		AND NOT EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI945 EDI945
+	--			WHERE EDI945.ysnStatus = 1
+	--				AND EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
+	--			)
+	--		AND NOT EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI945Error E
+	--			WHERE E.strDepositorOrderNumber = InvS.strReferenceNumber
+	--			)
+	--	ORDER BY InvS.intInventoryShipmentId
+	--	IF NOT EXISTS (
+	--			SELECT *
+	--			FROM @tblMFOrderNo
+	--			)
+	--	BEGIN
+	--		INSERT INTO @tblMFOrderNo (
+	--			intInventoryShipmentId
+	--			,strOrderNo
+	--			,strShipmentNo
+	--			,intEntityCustomerId
+	--			)
+	--		SELECT TOP 1 InvS.intInventoryShipmentId
+	--			,InvS.strReferenceNumber
+	--			,InvS.strShipmentNumber
+	--			,InvS.intEntityCustomerId
+	--		FROM tblICInventoryShipment InvS
+	--		WHERE ysnPosted = 1
+	--			AND EXISTS (
+	--				SELECT *
+	--				FROM tblMFEDI940Archive EDI940
+	--				WHERE EDI940.strDepositorOrderNumber = InvS.strReferenceNumber
+	--				)
+	--			AND NOT EXISTS (
+	--				SELECT *
+	--				FROM tblMFEDI945 EDI945
+	--				WHERE EDI945.ysnStatus = 1
+	--					AND EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
+	--				)
+	--		ORDER BY InvS.intInventoryShipmentId
+	--	END
+	--END
+	--ELSE
+	--BEGIN
+	--	INSERT INTO @tblMFOrderNo (
+	--		intInventoryShipmentId
+	--		,strOrderNo
+	--		,strShipmentNo
+	--		,intEntityCustomerId
+	--		)
+	--	SELECT TOP 1 InvS.intInventoryShipmentId
+	--		,InvS.strReferenceNumber
+	--		,InvS.strShipmentNumber
+	--		,InvS.intEntityCustomerId
+	--	FROM tblICInventoryShipment InvS
+	--	WHERE ysnPosted = 1
+	--		AND EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI940Archive EDI940
+	--			WHERE EDI940.strDepositorOrderNumber = InvS.strReferenceNumber
+	--			)
+	--		AND InvS.strShipmentNumber = @strShipmentNumber
+	--END
+	IF @strShipmentNumber IS NULL
 	BEGIN
 		INSERT INTO @tblMFOrderNo (
 			intInventoryShipmentId
@@ -34,24 +120,10 @@ BEGIN
 			,InvS.strReferenceNumber
 			,InvS.strShipmentNumber
 			,InvS.intEntityCustomerId
-		FROM tblICInventoryShipment InvS
-		WHERE ysnPosted = 1
-			AND EXISTS (
-				SELECT *
-				FROM tblMFEDI940Archive EDI940
-				WHERE EDI940.strDepositorOrderNumber = InvS.strReferenceNumber
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFEDI945 EDI945
-				WHERE EDI945.ysnStatus = 1
-					AND EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFEDI945Error E
-				WHERE E.strDepositorOrderNumber = InvS.strReferenceNumber
-				)
+		FROM tblMFEDIStage945 EDI
+		JOIN tblICInventoryShipment InvS ON EDI.intInventoryShipmentId = InvS.intInventoryShipmentId
+		WHERE InvS.ysnPosted = 1
+			AND EDI.intStatusId = 0
 		ORDER BY InvS.intInventoryShipmentId
 
 		IF NOT EXISTS (
@@ -69,19 +141,9 @@ BEGIN
 				,InvS.strReferenceNumber
 				,InvS.strShipmentNumber
 				,InvS.intEntityCustomerId
-			FROM tblICInventoryShipment InvS
-			WHERE ysnPosted = 1
-				AND EXISTS (
-					SELECT *
-					FROM tblMFEDI940Archive EDI940
-					WHERE EDI940.strDepositorOrderNumber = InvS.strReferenceNumber
-					)
-				AND NOT EXISTS (
-					SELECT *
-					FROM tblMFEDI945 EDI945
-					WHERE EDI945.ysnStatus = 1
-						AND EDI945.intInventoryShipmentId = InvS.intInventoryShipmentId
-					)
+			FROM tblMFEDIStage945 EDI
+			JOIN tblICInventoryShipment InvS ON EDI.intInventoryShipmentId = InvS.intInventoryShipmentId
+			WHERE InvS.ysnPosted = 1
 			ORDER BY InvS.intInventoryShipmentId
 		END
 	END
@@ -121,6 +183,9 @@ BEGIN
 		RETURN
 	END
 
+	SELECT @intInventoryShipmentId = intInventoryShipmentId
+	FROM @tblMFOrderNo
+
 	IF EXISTS (
 			SELECT *
 			FROM @tblMFOrderNo O
@@ -128,9 +193,6 @@ BEGIN
 				AND intCustomerLabelTypeId IS NOT NULL
 			)
 	BEGIN
-		SELECT @intInventoryShipmentId = intInventoryShipmentId
-		FROM @tblMFOrderNo
-
 		EXEC dbo.uspMFReassignCustomerLabel @intInventoryShipmentId = @intInventoryShipmentId
 	END
 
@@ -414,6 +476,10 @@ BEGIN
 		SELECT @strShipmentNo = strShipmentNo
 		FROM @tblMFOrderNo
 
+		UPDATE tblMFEDIStage945
+		SET intStatusId = 1
+		WHERE intInventoryShipmentId = @intInventoryShipmentId
+
 		SELECT @strError = 'UOM is missing for the inventory shipment # ' + @strShipmentNo
 
 		RAISERROR (
@@ -447,6 +513,7 @@ BEGIN
 					HAVING dblTotalUnitsShipped = SUM(dblQtyShipped)
 					)
 				)
+			AND @ysnForce = 0
 			--AND EXISTS (
 			--	SELECT *
 			--	FROM @tblMFOrderNo O
@@ -595,6 +662,10 @@ BEGIN
 
 			SELECT @strShipmentNo = strShipmentNo
 			FROM @tblMFOrderNo
+
+			UPDATE tblMFEDIStage945
+			SET intStatusId = 1
+			WHERE intInventoryShipmentId = @intInventoryShipmentId
 
 			SELECT @strError = 'No of SSCC labels are not matching with shipped Qty.' + @strShipmentNo
 
@@ -806,4 +877,8 @@ BEGIN
 			SELECT O.strShipmentNo
 			FROM @tblMFOrderNo O
 			)
+
+	DELETE EDI
+	FROM tblMFEDIStage945 EDI
+	JOIN @tblMFOrderNo O ON EDI.intInventoryShipmentId = O.intInventoryShipmentId
 END

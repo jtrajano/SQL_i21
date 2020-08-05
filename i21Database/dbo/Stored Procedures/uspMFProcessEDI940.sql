@@ -1,4 +1,4 @@
-﻿Create PROCEDURE uspMFProcessEDI940 (@strInfo1 NVARCHAR(MAX) = NULL OUTPUT)
+﻿CREATE PROCEDURE uspMFProcessEDI940 (@strInfo1 NVARCHAR(MAX) = NULL OUTPUT)
 AS
 BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
@@ -334,19 +334,21 @@ BEGIN TRY
 				SELECT @strErrorMessage = @strErrorMessage + ' Inventory Shipment is already posted for the order number ' + @strOrderNo + '. '
 			END
 
-		IF EXISTS (
+			IF EXISTS (
 					SELECT *
 					FROM @tblMFItem I
-					Left JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-					Where IL.ysnOpenPricePLU is null
+					LEFT JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+						AND IL.ysnOpenPricePLU = 1
+					WHERE IL.ysnOpenPricePLU IS NULL
 					)
 			BEGIN
 				SELECT @strItemNo = ''
 
 				SELECT @strItemNo = @strItemNo + strItemNo + ', '
 				FROM @tblMFItem I
-					Left JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-					Where IL.ysnOpenPricePLU is null
+				LEFT JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.ysnOpenPricePLU = 1
+				WHERE IL.ysnOpenPricePLU IS NULL
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -357,18 +359,20 @@ BEGIN TRY
 			IF EXISTS (
 					SELECT I.intItemId
 					FROM @tblMFItem I
-					JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-					Group by I.intItemId
-					Having Count(*)>1
+					JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+						AND IL.ysnOpenPricePLU = 1
+					GROUP BY I.intItemId
+					HAVING Count(*) > 1
 					)
 			BEGIN
 				SELECT @strItemNo = ''
 
 				SELECT @strItemNo = @strItemNo + strItemNo + ', '
 				FROM @tblMFItem I
-				JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.ysnOpenPricePLU =1
-				Group by I.strItemNo
-				Having Count(*)>1
+				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
+					AND IL.ysnOpenPricePLU = 1
+				GROUP BY I.strItemNo
+				HAVING Count(*) > 1
 
 				IF len(@strItemNo) > 0
 					SELECT @strItemNo = Left(@strItemNo, len(@strItemNo) - 1)
@@ -873,7 +877,8 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI
 				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+					AND IL.intLocationId IS NOT NULL
+					AND IL.ysnOpenPricePLU = 1
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -945,7 +950,8 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI
 				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+					AND IL.intLocationId IS NOT NULL
+					AND IL.ysnOpenPricePLU = 1
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1019,7 +1025,8 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI
 				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+					AND IL.intLocationId IS NOT NULL
+					AND IL.ysnOpenPricePLU = 1
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1090,8 +1097,7 @@ BEGIN TRY
 						FROM @FinalShipmentStagingTable
 						)
 				BEGIN
-					EXEC dbo.uspICAddItemShipment 
-						@Items = @FinalShipmentStagingTable
+					EXEC dbo.uspICAddItemShipment @Items = @FinalShipmentStagingTable
 						,@Charges = @OtherCharges
 						,@intUserId = @intUserId;
 
@@ -1199,7 +1205,8 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI
 				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+					AND IL.intLocationId IS NOT NULL
+					AND IL.ysnOpenPricePLU = 1
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1270,7 +1277,8 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI
 				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+					AND IL.intLocationId IS NOT NULL
+					AND IL.ysnOpenPricePLU = 1
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1343,7 +1351,8 @@ BEGIN TRY
 				FROM tblMFEDI940 EDI
 				JOIN tblICItem I ON I.strItemNo = EDI.strCustomerItemNumber
 				JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-					AND IL.intLocationId IS NOT NULL and IL.ysnOpenPricePLU=1
+					AND IL.intLocationId IS NOT NULL
+					AND IL.ysnOpenPricePLU = 1
 				JOIN tblEMEntityLocation EL ON 1 = 1
 					AND EL.intEntityLocationId = @intEntityLocationId
 				JOIN tblICItemUOM IU ON I.intItemId = IU.intItemId
@@ -1633,24 +1642,24 @@ BEGIN TRY
 					WHERE intTabRowId = @intTabRowId
 						AND intCustomTabDetailId = @intCustomTabDetailId3
 				END
-			INSERT dbo.tblSMFieldValue (
-				intTabRowId
-				,intCustomTabDetailId
-				,strValue
-				,intConcurrencyId
-				)
-			SELECT @intTabRowId
-				,C.intCustomTabDetailId
-				,C.strValue
-				,1
-			FROM @tblCustomTabColumn C
-			WHERE NOT EXISTS (
-					SELECT *
-					FROM tblSMFieldValue FV
-					WHERE FV.intTabRowId = @intTabRowId
-						AND FV.intCustomTabDetailId = C.intCustomTabDetailId
-					)
 
+				INSERT dbo.tblSMFieldValue (
+					intTabRowId
+					,intCustomTabDetailId
+					,strValue
+					,intConcurrencyId
+					)
+				SELECT @intTabRowId
+					,C.intCustomTabDetailId
+					,C.strValue
+					,1
+				FROM @tblCustomTabColumn C
+				WHERE NOT EXISTS (
+						SELECT *
+						FROM tblSMFieldValue FV
+						WHERE FV.intTabRowId = @intTabRowId
+							AND FV.intCustomTabDetailId = C.intCustomTabDetailId
+						)
 			END
 
 			INSERT INTO tblMFEDI940Archive (
@@ -1739,6 +1748,13 @@ BEGIN TRY
 			DELETE
 			FROM tblMFEDI940
 			WHERE strDepositorOrderNumber = @strOrderNo
+
+			INSERT INTO tblMFEDIStage945 (
+				intInventoryShipmentId
+				,intStatusId
+				)
+			SELECT @intInventoryShipmentId
+				,0
 		END TRY
 
 		BEGIN CATCH
