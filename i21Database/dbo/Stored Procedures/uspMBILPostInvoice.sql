@@ -1,8 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspMBILPostInvoice]
-	@InvoiceId INT,
-	@Preview BIT,
-	@Post BIT,
-	@UserId INT
+	@Param				AS NVARCHAR(MAX)	= '',	
+	@ysnPost			AS BIT				= 0,
+	@ysnRecap			AS BIT				= 0,
+	@UserId				AS INT					,	
+	@ErrorMessage		AS NVARCHAR(MAX)	= ''	 OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -11,18 +12,40 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @ErrorMessage NVARCHAR(4000)
+BEGIN
+
 DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
 DECLARE @CreatedInvoices NVARCHAR(MAX)
 DECLARE @UpdatedInvoices NVARCHAR(MAX)
+SET @ErrorMessage = NULL
 
-BEGIN TRY
+CREATE TABLE #TempMBILInvoice (
+	[intInvoiceId]		int
+);
 	
+	--=====================================================================================================================================
+	-- 	POPULATE INVOICE TO POST TEMPORARY TABLE
+	---------------------------------------------------------------------------------------------------------------------------------------
+	IF (ISNULL(@Param, '') <> '') 
+		INSERT INTO #TempMBILInvoice EXEC (@Param)
+	ELSE
+		INSERT INTO #TempMBILInvoice SELECT [intInvoiceId] FROM tblMBILInvoice WHERE ysnPosted = 0
+
 	-------------------------------------------------------------
 	------------------- Validate Invoices -----------------------
 	-------------------------------------------------------------
-	--IF EXISTS(SELECT * FROM vyu)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice))
+	BEGIN
+		SET @ErrorMessage = 'Record does not exists.'
+		RETURN
+	END
+
+	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
+	BEGIN
+		SET @ErrorMessage = 'Record already posted.'
+		RETURN
+	END
 	-------------------------------------------------------------
 	------------------- End of Validations ----------------------
 	-------------------------------------------------------------
@@ -30,24 +53,65 @@ BEGIN TRY
 	DECLARE @EntriesForInvoice AS InvoiceIntegrationStagingTable
 	DECLARE @TaxDetails AS LineItemTaxDetailStagingTable
 
-	SELECT [strTransactionType] = 'Invoice'
-		,[strType] = 'Mobile Billing'
+	INSERT INTO @EntriesForInvoice (
+			  [strTransactionType]
+			, [strType]
+			, [strSourceTransaction]
+			, [intSourceId]
+			, [strSourceId]
+			, [intEntityCustomerId]
+			, [intCompanyLocationId]			
+			, [intCurrencyId]
+			, [intEntityId]
+			, [dtmDate]
+			, [dtmDueDate]
+			, [dtmShipDate]
+			, [dtmPostDate]
+			, [strComments]
+			, [ysnPost]
+			, [intSalesAccountId]
+			, [strItemDescription]
+			, [intTaxGroupId]
+			, [intTermId]
+			, [intTruckDriverId]
+			, [strMobileBillingShiftNo]
+			, [ysnRecap]
+
+			, [intInvoiceDetailId]
+			, [intItemId]
+			, [ysnInventory] 
+			, [intItemUOMId]
+			, [dblQtyShipped]
+			, [dblPrice]
+			, [dblUnitPrice]
+			, [ysnRefreshPrice]
+			, [ysnRecomputeTax]
+			, [intContractDetailId]
+			, [intSiteId] 
+		)
+	SELECT 
+		 [strTransactionType] = 'Invoice'
+		,[strType] = 'Tank Delivery'
 		,[strSourceTransaction] = 'Mobile Billing'
 		,[intSourceId] = InvoiceItem.intInvoiceId
 		,[strSourceId] = InvoiceItem.strInvoiceNo
-		,[intInvoiceId] = InvoiceItem.inti21InvoiceId
 		,[intEntityCustomerId] = InvoiceItem.intEntityCustomerId
 		,[intCompanyLocationId] = InvoiceItem.intLocationId
-		,[intTermId] = InvoiceItem.intTermId
-		,[dtmDate] = InvoiceItem.dtmInvoiceDate
-		,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
-		,[intEntitySalespersonId] = InvoiceItem.intDriverId
-		,[strMobileBillingShiftNo] = InvoiceItem.intShiftNumber
-		,[strComments] = InvoiceItem.strComments
+		,[intCurrencyId] = (SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference)
 		,[intEntityId] = InvoiceItem.intEntityCustomerId
-		,[intTruckDriverId] = InvoiceItem.intDriverId
-		,[ysnRecap] = @Preview
-		,[ysnPost] = @Post
+		,[dtmDate] = InvoiceItem.dtmInvoiceDate
+		,[dtmDueDate] = InvoiceItem.dtmInvoiceDate
+		,[dtmShipDate] = InvoiceItem.dtmDeliveryDate
+		,[dtmPostDate] = InvoiceItem.dtmPostedDate
+		,[strComments] = InvoiceItem.strComments
+		,[ysnPost] = @ysnPost
+		,[intEntitySalespersonId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+		,[strItemDescription] = InvoiceItem.strItemDescription
+		,[intTaxGroupId] = NULL
+		,[intTermId] = InvoiceItem.intTermId
+		,[intTruckDriverId] = CONVERT(INT,ISNULL(InvoiceItem.intDriverId,0))
+		,[strMobileBillingShiftNo] = InvoiceItem.intShiftNumber
+		,[ysnRecap] = @ysnRecap
 		
 		--Detail																																															
 		,[intInvoiceDetailId] = InvoiceItem.inti21InvoiceDetailId
@@ -61,7 +125,11 @@ BEGIN TRY
 		,[ysnRecomputeTax] = 1
 		,[intContractDetailId] = InvoiceItem.intContractDetailId
 		,[intSiteId] = InvoiceItem.intSiteId
+
 	FROM vyuMBILInvoiceItem InvoiceItem
+	WHERE inti21InvoiceId IS NULL and intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+
+	select * from @EntriesForInvoice
 
 	EXEC [dbo].[uspARProcessInvoices]
 			 @InvoiceEntries	= @EntriesForInvoice
@@ -74,6 +142,17 @@ BEGIN TRY
 			,@UpdatedIvoices	= @UpdatedInvoices OUTPUT
 
 	DECLARE @i21Invoice INT
+	DECLARE @InvoiceId  INT
+
+	SELECT @CreatedInvoices
+	SELECT @ErrorMessage
+	SELECT @UpdatedInvoices
+
+	--IF (@CreatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
+	--BEGIN
+	--	SET @ErrorMessage = @ErrorMessage
+	--	RETURN
+	--END
 
 	IF (@CreatedInvoices IS NOT NULL AND @ErrorMessage IS NULL)
 	BEGIN
@@ -82,13 +161,15 @@ BEGIN TRY
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpCreated)
 		BEGIN
 			SELECT TOP 1 @i21Invoice = CAST(Item AS INT) FROM #tmpCreated
+			SELECT TOP 1 @InvoiceId = intInvoiceId from #TempMBILInvoice
 
 			UPDATE tblMBILInvoice
 			SET inti21InvoiceId = @i21Invoice
-				, ysnPosted = @Post
+				, ysnPosted = @ysnPost
 			WHERE intInvoiceId = @InvoiceId
 
-			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @InvoiceId
+			DELETE FROM #tmpCreated WHERE CAST(Item AS INT) = @i21Invoice
+			DELETE FROM #TempMBILInvoice WHERE CAST(intInvoiceId AS INT) = @InvoiceId
 		END
 	END
 
@@ -97,30 +178,44 @@ BEGIN TRY
 		SELECT Item INTO #tmpUpdated FROM [fnSplitStringWithTrim](@UpdatedInvoices,',')
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpUpdated)
 		BEGIN
-			SELECT TOP 1 @InvoiceId = CAST(Item AS INT) FROM #tmpUpdated
+			SELECT TOP 1 @i21Invoice = CAST(Item AS INT) FROM #tmpUpdated
+			SELECT TOP 1 @InvoiceId = intInvoiceId from #TempMBILInvoice
 
 			UPDATE tblMBILInvoice
 			SET inti21InvoiceId = @i21Invoice
-				, ysnPosted = @Post
+				, ysnPosted = @ysnPost
 			WHERE intInvoiceId = @InvoiceId
 
-			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @InvoiceId
+			DELETE FROM #tmpUpdated WHERE CAST(Item AS INT) = @i21Invoice
+			DELETE FROM #TempMBILInvoice WHERE CAST(intInvoiceId AS INT) = @InvoiceId
 		END
 	END
 
-END TRY
-BEGIN CATCH
-	SELECT 
-		@ErrorMessage = ERROR_MESSAGE(),
-		@ErrorSeverity = ERROR_SEVERITY(),
-		@ErrorState = ERROR_STATE();
 
-	-- Use RAISERROR inside the CATCH block to return error
-	-- information about the original error that caused
-	-- execution to jump to the CATCH block.
-	RAISERROR (
-		@ErrorMessage, -- Message text.
-		@ErrorSeverity, -- Severity.
-		@ErrorState -- State.
-	);
-END CATCH
+
+END
+
+
+
+
+
+
+--select * from tblICItem where intItemId = 3
+
+--select * from vyuMBILInvoiceItem
+--select * from tblMBILInvoice
+--select * from tblMBILOrder
+--select * from tblMBILOrderItem
+
+--update tblMBILInvoice set inti21InvoiceId = NULL, ysnPosted = 0, ysnVoided = 0
+
+
+--select * from tblMBILInvoice
+--EXEC [uspMBILPostInvoice] 2163, 0, 1, 1
+--select * from tblMBILInvoice
+
+--select * from tblARInvoice where intInvoiceId = 926
+
+
+--update tblMBILInvoice set dtmInvoiceDate = GETDATE()
+
