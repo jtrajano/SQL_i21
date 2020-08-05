@@ -17,10 +17,10 @@ BEGIN
 	GOTO _Exit;
 END
 
-DECLARE @strRawType NVARCHAR(600)
-SET @strRawType = @strType
+--DECLARE @strRawType NVARCHAR(600)
+--SET @strRawType = @strType
 
-SET @strType = SUBSTRING(@strType, 0, CHARINDEX(':', @strType))
+--SET @strType = SUBSTRING(@strType, 0, CHARINDEX(':', @strType))
 -- DECLARE @strStates NVARCHAR(600)
 -- SET @strStates = SUBSTRING(@strRawType, CHARINDEX(':', @strRawType)+1, LEN(@strRawType))
 
