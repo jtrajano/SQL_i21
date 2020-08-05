@@ -45,6 +45,7 @@ DECLARE @InventoryTransactionTypeId_RevalueSold AS INT = 3;
 DECLARE @InventoryTransactionTypeId_Auto_Variance_On_Sold_Or_Used_Stock AS INT = 35;
 
 DECLARE @strTransactionForm NVARCHAR(255)
+declare @EntityNo nvarchar(100)
 
 -- Initialize the module name
 DECLARE @ModuleName AS NVARCHAR(50) = 'Grain';
@@ -79,6 +80,16 @@ FROM (
 		AND ISNULL(i.intCategoryId, 0) = COALESCE(@intRebuildCategoryId, i.intCategoryId, 0) 
 		AND i.strType <> 'Non-Inventory'
 ) Query
+
+
+-- Getting Entity no
+	select top 1 @EntityNo = strEntityNo from  
+		@SettleVoucherCreate VoucherCreate		
+			join tblGRCustomerStorage CustomerStorage
+				on CustomerStorage.intCustomerStorageId = VoucherCreate.intCustomerStorageId			
+			join tblEMEntity Entity
+				on CustomerStorage.intEntityId = Entity.intEntityId
+		where VoucherCreate.intItemType = 1
 
 -- Validate the GL Accounts
 DECLARE @strItemNo AS NVARCHAR(50)
@@ -363,7 +374,7 @@ SELECT
 	,dblCreditUnit				= CreditUnit.Value 
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
 	,strCode					= 'STR' 
-	,strReference				= '' 
+	,strReference				= @EntityNo
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
@@ -427,7 +438,7 @@ SELECT
 	,dblCreditUnit				= DebitUnit.Value
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
 	,strCode					= 'STR' 
-	,strReference				= '' 
+	,strReference				= @EntityNo 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
@@ -494,7 +505,7 @@ SELECT
 	,dblCreditUnit				= CreditUnit.Value 
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
 	,strCode					= 'IAV'
-	,strReference				= ''
+	,strReference				= @EntityNo
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
@@ -554,7 +565,7 @@ SELECT
 	,dblCreditUnit				= DebitUnit.Value 
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
 	,strCode					= 'IAV' 
-	,strReference				= '' 
+	,strReference				= @EntityNo 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
@@ -617,7 +628,7 @@ SELECT
 	,dblCreditUnit				= CreditUnit.Value 
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
 	,strCode					= 'IAN' 
-	,strReference				= '' 
+	,strReference				= @EntityNo 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
@@ -678,7 +689,7 @@ SELECT
 	,dblCreditUnit				= DebitUnit.Value 
 	,strDescription				= ISNULL(@strGLDescription, ISNULL(tblGLAccount.strDescription, '')) + ' ' + dbo.[fnICDescribeSoldStock](strItemNo, dblQty, dblItemCost) 
 	,strCode					= 'IAN' 
-	,strReference				= '' 
+	,strReference				= @EntityNo
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
 	,dblExchangeRate			= ForGLEntries_CTE.dblExchangeRate
 	,dtmDateEntered				= GETDATE()
