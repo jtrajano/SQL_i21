@@ -71,7 +71,7 @@ BEGIN
 			,IRI.intInventoryReceiptItemId
 			,dblUnits = CASE WHEN IR_Used.intInventoryReceiptId IS NULL THEN SH.dblUnits ELSE IR_Used.dblReceiptRunningUnits END
 			,ysnExists = CAST(CASE WHEN IR_Used.intInventoryReceiptId IS NULL THEN 0 ELSE 1 END AS BIT)
-			,SH.dtmHistoryDate
+			,IRI.dtmDateCreated
 		FROM tblGRStorageHistory SH
 		INNER JOIN tblICInventoryReceiptItem IRI
 			ON IRI.intInventoryReceiptId = SH.intInventoryReceiptId
@@ -107,7 +107,7 @@ BEGIN
 	) IR_Unposted
 		ON IR_Unposted.intInventoryReceiptId = IR.intInventoryReceiptId 
 			AND IR_Unposted.intInventoryReceiptItemId = IR.intInventoryReceiptItemId
-	ORDER BY IR.dtmHistoryDate
+	ORDER BY IR.dtmDateCreated
 
 	--DP Transferred that will be settled will be pulled from tblGRStorageInventoryReceipt to get the IRs
 	IF (@intSettleStorageId IS NOT NULL OR @intTransferToCustomerStorageId IS NOT NULL) AND NOT EXISTS(SELECT TOP 1 1 FROM @IR_Units)
