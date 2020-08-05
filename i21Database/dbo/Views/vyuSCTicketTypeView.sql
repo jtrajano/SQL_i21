@@ -20,5 +20,6 @@ AS SELECT
 		ELSE SCList.strTicketType
 	END as strTicketType
 	,SCList.strInOutIndicator
+    ,SCType.intTransferWeight
 FROM tblSCTicketType SCType
 LEFT JOIN tblSCListTicketTypes SCList ON SCType.intListTicketTypeId = SCList.intTicketTypeId
