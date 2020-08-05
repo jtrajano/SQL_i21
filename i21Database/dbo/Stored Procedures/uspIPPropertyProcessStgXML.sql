@@ -569,6 +569,7 @@ BEGIN TRY
 			UPDATE tblQMPropertyStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intPropertyStageId = @intPropertyStageId
 
 			-- Audit Log
@@ -621,6 +622,7 @@ BEGIN TRY
 			UPDATE tblQMPropertyStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intPropertyStageId = @intPropertyStageId
 		END CATCH
 
