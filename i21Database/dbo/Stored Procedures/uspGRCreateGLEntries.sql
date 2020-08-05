@@ -43,6 +43,8 @@ BEGIN
 	,@intInventoryItemUOMId			INT
 	,@intCSInventoryItemUOMId		INT
 	,@StorageChargeItemDescription  NVARCHAR(100)
+	
+	declare @EntityNo nvarchar(100)
 
 	DECLARE 
 	@ACCOUNT_CATEGORY_Inventory				NVARCHAR(30) = 'Inventory'
@@ -106,6 +108,10 @@ BEGIN
 		ON  SST.intCustomerStorageId = CS.intCustomerStorageId
 	WHERE SST.intSettleStorageId = @intSettleStorageId
 	
+
+	select  @EntityNo = strEntityNo 
+		from tblEMEntity 
+			where intEntityId = @intEntityVendorId
 
 	select  @intInventoryItemUOMId = intItemUOMId 
 		from tblICInventoryTransaction 
@@ -589,7 +595,7 @@ BEGIN
 			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
-			,strReference				= 'A'
+			,strReference				= @EntityNo
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -685,7 +691,7 @@ BEGIN
 		 ,[dblCreditUnit]          
 		 ,[strDescription]         
 		 ,[strCode]                
-		 ,[strReference] = ''           
+		 ,[strReference] = @EntityNo           
 		 ,[intCurrencyId]          
 		 ,[dblExchangeRate]        
 		 ,[dtmDateEntered]         
@@ -734,7 +740,7 @@ BEGIN
 			,dblCreditUnit				= InventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
 			,strCode					= @strCode
-			,strReference				= 'A'
+			,strReference				= @EntityNo
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -800,7 +806,7 @@ BEGIN
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'B'
+			,strReference				= @EntityNo
 			,intCurrencyId				= InventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= InventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -869,7 +875,7 @@ BEGIN
 				,dblCreditUnit				= 0
 				,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 				,strCode					= @strCode
-				,strReference				= 'G' 
+				,strReference				= @EntityNo
 				,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 				,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 				,dtmDateEntered				= GETDATE()
@@ -927,7 +933,7 @@ BEGIN
 			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'H' 
+			,strReference				= @EntityNo
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -992,7 +998,7 @@ BEGIN
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'I' 
+			,strReference				= @EntityNo 
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -1049,7 +1055,7 @@ BEGIN
 			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'J' 
+			,strReference				= @EntityNo
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -1113,7 +1119,7 @@ BEGIN
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'K' 
+			,strReference				= @EntityNo 
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -1170,7 +1176,7 @@ BEGIN
 			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'L' 
+			,strReference				= @EntityNo 
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -1227,7 +1233,7 @@ BEGIN
 			,dblCreditUnit				= 0
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge 
 			,strCode					= @strCode
-			,strReference				= 'G' 
+			,strReference				= @EntityNo 
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
@@ -1285,7 +1291,7 @@ BEGIN
 			,dblCreditUnit				= NonInventoryCostCharges.dblUnits
 			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + NonInventoryCostCharges.strCharge
 			,strCode					= @strCode
-			,strReference				= 'H' 
+			,strReference				= @EntityNo
 			,intCurrencyId				= NonInventoryCostCharges.intCurrencyId
 			,dblExchangeRate			= NonInventoryCostCharges.dblForexRate
 			,dtmDateEntered				= GETDATE()
