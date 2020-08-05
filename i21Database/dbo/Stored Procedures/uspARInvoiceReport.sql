@@ -56,7 +56,6 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
 DELETE FROM tblARInvoiceReportStagingTable WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
-DELETE FROM tblARInvoiceReportStagingTableCopy WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
 
 DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 INSERT INTO tblARInvoiceReportStagingTable (
