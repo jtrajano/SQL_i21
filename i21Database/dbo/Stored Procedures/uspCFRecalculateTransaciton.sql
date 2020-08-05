@@ -6298,37 +6298,65 @@ BEGIN
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
 
+		-- Original Net Price = Net Transfer Cost = Round( (Round(Gross Transfer Cost * Quantity,2) - Original Taxes) / Quantity, 6)
+		-- Calc Gross Price = Gross Transfer Cost - Round(Calc Exempt Taxes / Quantity,6) + Round(Special Rule Taxes/Quantity,6) , 6)
+		-- Calc Net Price = Round( (Round(Gross Transfer Cost * Quantity,2) - (Calc Taxes) )/ Quantity,6)
+
+		DECLARE @dblNCPrice100kQty NUMERIC(18,6)
+		DECLARE @dblNCPriceQty NUMERIC(18,6)
+
 		IF(@ysnReRunForSpecialTax = 1)
 		BEGIN
 			SET @dblOriginalPrice	= @dblOriginalPriceForCalculation
 		END
 
+		DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+		DECLARE @dblNetworkCostGrossPriceZeroQty NUMERIC(18,6)
+
+				
 		IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
 		BEGIN
 			SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
-			SET @dblOriginalPrice					=Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @dblOriginalPriceZeroQty			= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
+			SET @dblOriginalPrice					= Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 			SET @ysnReRunForSpecialTax				= 1
 			GOTO TAXCOMPUTATION
 		END
+		
+
+		-- IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
+		-- BEGIN
+		-- 	SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
+		-- 	SET @dblOriginalPrice					=Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+		-- 	SET @ysnReRunForSpecialTax				= 1
+		-- 	GOTO TAXCOMPUTATION
+		-- END
 
 		IF(@ysnReRunCalcTax = 0)
 		BEGIN
-			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-			SET @dblPrice = ISNULL(@TransferCost,0)
-			SET @dblPriceZeroQty = ISNULL(@TransferCost,0)
+			SET @dblNCPriceQty = Round((ISNULL(@TransferCost,0) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+			SET @dblNCPrice100kQty = Round((ISNULL(@TransferCost,0) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+	
+			SET @dblPrice = @dblNCPriceQty
+			SET @dblPriceZeroQty = @dblNCPrice100kQty
 			SET @ysnReRunCalcTax = 1
 			GOTO TAXCOMPUTATION
 		END
-		IF(ISNULL(@ysnForceRounding,0) = 1) 
-		BEGIN
-			SELECT @dblNetworkCostGrossPrice = dbo.fnCFForceRounding(@dblPrice)
-		END
 		ELSE
 		BEGIN
-			SET @dblNetworkCostGrossPrice = @dblPrice
+			SET @dblNetworkCostGrossPrice = Round((ISNULL(@TransferCost,0) - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+			SET @dblNetworkCostGrossPriceZeroQty = Round((ISNULL(@TransferCost,0) - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+			
 		END
 
-		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPrice
+		IF(ISNULL(@ysnForceRounding,0) = 1) 
+		BEGIN
+			SELECT @dblNetworkCostGrossPrice = dbo.fnCFForceRounding(@dblNetworkCostGrossPrice)
+			SELECT @dblNetworkCostGrossPriceZeroQty = dbo.fnCFForceRounding(@dblNetworkCostGrossPriceZeroQty)
+		END
+	
+
+		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblPrice
 		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
