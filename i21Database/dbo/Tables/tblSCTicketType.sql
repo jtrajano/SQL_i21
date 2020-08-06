@@ -14,6 +14,7 @@
     [ysnPrintAtKiosk] BIT NOT NULL, 
     [ynsVerifySplitMethods] BIT NOT NULL, 
     [ysnOverrideSingleTicketSeries] BIT NOT NULL, 
+    [intTransferWeight] INT NOT NULL DEFAULT 1, 
     [intConcurrencyId] INT NULL DEFAULT ((0)), 
     CONSTRAINT [PK_tblSCTicketType_intTicketTypeId] PRIMARY KEY ([intTicketTypeId]), 
     CONSTRAINT [FK_tblSCTicketType_tblSCTicketPool_intTicketPoolId] FOREIGN KEY (intTicketPoolId) REFERENCES tblSCTicketPool(intTicketPoolId),

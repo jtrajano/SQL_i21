@@ -1681,10 +1681,26 @@ BEGIN TRY
 			BEGIN
 				UPDATE @cbLogSpecific SET dblQty = dblQty * -1
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				
+				-- DP Contract
+				IF EXISTS (SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)
+				BEGIN
+					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+					CONTINUE
+				END
 			END
 			
 			IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId IN (3,6))
-			BEGIN								
+			BEGIN	
+				IF ISNULL(@dblQty,0) = 0
+				BEGIN
+					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
+					FROM @cbLogSpecific
+
+					UPDATE @cbLogSpecific SET intActionId = @_action
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+				END
+				
 				IF ISNULL(@dblBasis,0) > 0
 				BEGIN
 					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END

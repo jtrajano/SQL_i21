@@ -247,8 +247,7 @@
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
 	,SCT.strTrailerId
-	
-    
+	,SCT.intTransferWeight
 	
   FROM tblSCTicket SCT
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
