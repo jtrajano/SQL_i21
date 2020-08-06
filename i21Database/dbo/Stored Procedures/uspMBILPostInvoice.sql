@@ -84,6 +84,7 @@ CREATE TABLE #TempMBILInvoice (
 			, [dblQtyShipped]
 			, [dblPrice]
 			, [dblUnitPrice]
+			, [dblPercentFull]
 			, [ysnRefreshPrice]
 			, [ysnRecomputeTax]
 			, [intContractDetailId]
@@ -121,6 +122,7 @@ CREATE TABLE #TempMBILInvoice (
 		,[dblQtyShipped] = InvoiceItem.dblQuantity
 		,[dblPrice] = InvoiceItem.dblPrice
 		,[dblUnitPrice] = (InvoiceItem.dblPrice / InvoiceItem.dblQuantity)
+		,[dblPercentFull] = InvoiceItem.dblPercentageFull
 		,[ysnRefreshPrice] = 0
 		,[ysnRecomputeTax] = 1
 		,[intContractDetailId] = InvoiceItem.intContractDetailId
@@ -200,22 +202,11 @@ END
 
 
 
---select * from tblICItem where intItemId = 3
 
---select * from vyuMBILInvoiceItem
 --select * from tblMBILInvoice
---select * from tblMBILOrder
---select * from tblMBILOrderItem
-
 --update tblMBILInvoice set inti21InvoiceId = NULL, ysnPosted = 0, ysnVoided = 0
 
 
 --select * from tblMBILInvoice
---EXEC [uspMBILPostInvoice] 2163, 0, 1, 1
+--EXEC [uspMBILPostInvoice] 'select intInvoiceId from tblMBILInvoice where intInvoiceId = 6', 0, 1, 1
 --select * from tblMBILInvoice
-
---select * from tblARInvoice where intInvoiceId = 926
-
-
---update tblMBILInvoice set dtmInvoiceDate = GETDATE()
-
