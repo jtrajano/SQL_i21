@@ -23,8 +23,10 @@ SELECT ETO.intEntityEmployeeId
 	,ETO.dblPerPeriod
 	,ETO.strPeriod
 	,EMP.intRank
-	,dblHoursUsed = (ETO.dblHoursUsed + ISNULL(TOYTD.dblHoursUsedYTD,0))
+	,dblHoursUsed = ISNULL(TOYTD.dblHoursUsedYTD,0)
 	,dblBalance = (ETO.dblHoursCarryover + ETO.dblHoursEarned) - ETO.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)
+	,ETO.dblHoursCarryover  
+	,dblAdjustments =  ETO.dblHoursUsed 
 FROM tblPREmployeeTimeOff ETO
 LEFT JOIN(
 	SELECT intEntityId
@@ -54,16 +56,6 @@ INNER JOIN(
 															AND PCTimeOff.dtmDateFrom > ISNULL(T.dtmLastAward, E.dtmDateHired)  
 															) THEN dblHours
 															ELSE 0
-													END
-											WHEN (T.strAwardPeriod = 'Start of Month') THEN 
-													CASE WHEN (PCTimeOff.dtmDateFrom >= dtmLastAward 
-															AND ( MONTH(PCTimeOff.dtmDateFrom) < MONTH(GETDATE()) 
-															AND YEAR(PCTimeOff.dtmDateFrom) = YEAR(GETDATE())	)  
-															) THEN
-														
-														dblHours
-													ELSE
-														0
 													END
 											ELSE 
 												CASE WHEN (PCTimeOff.intYear = YEAR(GETDATE())) THEN
