@@ -1041,6 +1041,7 @@ BEGIN TRY
 			UPDATE tblRKFutOptTransactionHeaderStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intFutOptTransactionHeaderStageId = @intFutOptTransactionHeaderStageId
 
 			IF @intTransactionCount = 0
@@ -1060,6 +1061,7 @@ BEGIN TRY
 			UPDATE tblRKFutOptTransactionHeaderStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intFutOptTransactionHeaderStageId = @intFutOptTransactionHeaderStageId
 		END CATCH
 
