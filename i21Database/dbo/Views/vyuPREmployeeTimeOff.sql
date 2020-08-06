@@ -57,16 +57,6 @@ INNER JOIN(
 															) THEN dblHours
 															ELSE 0
 													END
-											WHEN (T.strAwardPeriod = 'Start of Month') THEN 
-													CASE WHEN (PCTimeOff.dtmDateFrom >= dtmLastAward 
-															AND ( MONTH(PCTimeOff.dtmDateFrom) < MONTH(GETDATE()) 
-															AND YEAR(PCTimeOff.dtmDateFrom) = YEAR(GETDATE())	)  
-															) THEN
-														
-														dblHours
-													ELSE
-														0
-													END
 											ELSE 
 												CASE WHEN (PCTimeOff.intYear = YEAR(GETDATE())) THEN
 													dblHours
