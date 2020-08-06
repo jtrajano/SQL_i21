@@ -68,6 +68,7 @@
 	[ysnDefaultTraderLoggedUser] BIT NULL DEFAULT((0)),
 	[intPostToGLId] INT NULL DEFAULT ((1)),
 	[ysnIncludeDerivatives] BIT NULL DEFAULT((1)),
+	[ysnIncludeCrushDerivatives] BIT NULL DEFAULT((1)),
 	[ysnUseBoardMonth] BIT NULL DEFAULT((0)),
 	[ysnAllowEditAvgLongPrice] BIT NULL DEFAULT((0)),
 	[ysnUseM2MDate] BIT NULL DEFAULT((0)),
