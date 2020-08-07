@@ -271,6 +271,7 @@ LEFT JOIN tblICCommodity Commodity
 LEFT JOIN tblICCategory Category
 	ON Category.intCategoryId = Item.intCategoryId 
 WHERE Commodity.intCommodityId =ISNULL(@intCommodityId,Commodity.intCommodityId)
+	AND OP.intLocationId = ISNULL(@intLocationId, OP.intLocationId)
 GROUP BY Commodity.strCommodityCode
 		,Commodity.intCommodityId
 
