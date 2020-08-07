@@ -9,8 +9,9 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Disconnected Process' AND strModuleName = 'Ticket Management' AND intParentMenuID = (SELECT TOP 1 intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Ticket Management'))
+
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0)
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -7248,6 +7249,59 @@ BEGIN
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRInventoryReceiptsMenuId, 1)
 END
 GO
+
+/* SCHEDULING */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Scheduling', N'Scheduling', 0, N'Scheduling', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 3 WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0
+
+DECLARE @SchedulingParentMenuId INT
+SELECT @SchedulingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0
+
+--ACTIVITIES
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Scheduling', @SchedulingParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+DECLARE @SchedulingActivitiesParentMenuId INT
+SELECT @SchedulingActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Distribution' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Report Distribution', N'Scheduling', @SchedulingActivitiesParentMenuId, N'Report Distribution', N'Activity', N'Screen', N'Scheduling.view.ReportDistribution?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Scheduling.view.ReportDistribution?showSearch=true' WHERE strMenuName = 'Report Distribution' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingActivitiesParentMenuId
+
+--MAINTENANCE
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Scheduling', @SchedulingParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+DECLARE @SchedulingMaintenanceParentMenuId INT
+SELECT @SchedulingMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Report Distribution Group' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Report Distribution Group', N'Scheduling', @SchedulingMaintenanceParentMenuId, N'Report Distribution Group', N'Maintenance', N'Screen', N'Scheduling.view.ReportDistributionGroup?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Scheduling.view.ReportDistributionGroup?showSearch=true' WHERE strMenuName = N'Report Distribution Group' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Schedule' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Schedule', N'Scheduling', @SchedulingMaintenanceParentMenuId, N'Schedule', N'Maintenance', N'Screen', N'Scheduling.view.Schedule?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Scheduling.view.Schedule?showSearch=true' WHERE strMenuName = N'Schedule' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId
+
+
+/* END SCHEDULING */
+
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
