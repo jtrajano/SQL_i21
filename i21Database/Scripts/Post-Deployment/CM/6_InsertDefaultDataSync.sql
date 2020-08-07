@@ -24,9 +24,6 @@ GO
 	END
 GO
 
-DELETE FROM tblCMLocXRef
-DELETE FROM tblCMMacReportXRef
-
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblCMLocXRef )
 BEGIN 
 	INSERT [dbo].[tblCMLocXRef] ([Loc], [ATM Reimb], [ATM Surchg], [Amex-CR], [Amex-DR], [BA Merchant-CR], [BA Merchant-DR], [Telecheck-CR], [Telecheck-CR1], [Store Deps], [Store Chg Orders], [AR Check Deps], [Misc Office Deps], [Subway], [Cust Init ACH], [Clark], [WEX]) VALUES (5, N'83350746', N'83350746', N'3130308364', N'3130308364', N'45010030', N'45010030', N'19028094', N'19028094', N'005', N'005', NULL, NULL, NULL, NULL, NULL, NULL)
