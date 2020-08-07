@@ -11,6 +11,7 @@ SELECT
 	,EMP.strMiddleName
 	,REQ.dtmRequestDate
 	,DEP.strDepartment
+	,EMPRank.strDescription
 	,REQ.dtmDateFrom
 	,REQ.dtmDateTo
 	,TOFF.strTimeOff
@@ -28,6 +29,7 @@ FROM
 	tblPRTimeOffRequest REQ
 	LEFT JOIN tblEMEntity ENT ON REQ.intEntityEmployeeId = ENT.intEntityId
 	LEFT JOIN tblPREmployee EMP ON REQ.intEntityEmployeeId = EMP.intEntityId
+	LEFT JOIN tblPREmployeeRank EMPRank ON EMP.intRank = EMPRank.intRank
 	LEFT JOIN tblPRTypeTimeOff TOFF ON REQ.intTypeTimeOffId = TOFF.intTypeTimeOffId
 	LEFT JOIN tblPRDepartment DEP ON REQ.intDepartmentId = DEP.intDepartmentId 
 	LEFT JOIN 
