@@ -61,6 +61,7 @@ AS SELECT
 	  ,GRD.strDiscountId
 	  ,SCS.strStationShortDescription
       ,SC.ysnProcessedData   
+      ,SC.strImportFailedReason
 FROM tblSCTicketLVStaging SC
 LEFT JOIN tblEMEntity EM ON EM.intEntityId = SC.intEntityId
 LEFT JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId

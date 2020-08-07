@@ -78,6 +78,9 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,[intConcurrencyId]
+
+					,[intSubLocationId]
+					,[intStorageLocationId]
 					)
 				SELECT 
 					[strTicketNumber]
@@ -126,7 +129,7 @@ BEGIN TRY
 					,[strDistributionOption]
 					,[strPitNumber]
 					,[intTicketPoolId]
-					,[intScaleSetupId]
+					,TicketStaging.[intScaleSetupId]
 					,[intSplitId]
 					,[strItemUOM]
 					,[ysnSplitWeightTicket]
@@ -140,7 +143,12 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,1
-				FROM [dbo].[tblSCTicketLVStaging] WHERE intTicketLVStagingId = @intTicketLVStagingId
+					,Setup.[intSubLocationId] 
+					,Setup.[intStorageLocationId]
+				FROM [dbo].[tblSCTicketLVStaging] TicketStaging
+					left join ( select intScaleSetupId,intSubLocationId,intStorageLocationId  from tblSCScaleSetup) Setup
+						on TicketStaging.intScaleSetupId = Setup.intScaleSetupId
+					WHERE intTicketLVStagingId = @intTicketLVStagingId
 
 				SELECT @intTicketId = SCOPE_IDENTITY()
 
