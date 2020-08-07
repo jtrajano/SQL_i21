@@ -6269,11 +6269,11 @@ BEGIN
 	
 
 		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPriceZeroQty
-		SET @dblOriginalGrossPrice		 = 	 @dblPrice
+		SET @dblOriginalGrossPrice		 = 	 @dblOriginalPrice
 		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
-		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
+		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblOriginalPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
 		SET @dblCalculatedTotalPrice	 = 	 ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2)
-		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblPrice * @dblQuantity,2)
+		SET @dblOriginalTotalPrice		 = 	 ROUND(@dblOriginalPrice * @dblQuantity,2)
 
 		SET @dblQuoteGrossPrice			 = @dblCalculatedGrossPrice
 		SET @dblQuoteNetPrice			 = ROUND(((ROUND((@dblQuoteGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
@@ -6404,7 +6404,7 @@ BEGIN
 			IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
 			BEGIN
 				SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
-				SET @dblOriginalPriceZeroQty				= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
+				SET @dblOriginalPriceZeroQty			= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
 				SET @dblOriginalPrice					= Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 				SET @ysnReRunForSpecialTax				= 1
 				GOTO TAXCOMPUTATION
