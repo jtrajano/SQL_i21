@@ -11,7 +11,7 @@ SELECT
 	,EMP.strMiddleName
 	,REQ.dtmRequestDate
 	,DEP.strDepartment
-	,EMPRank.strDescription
+	,strRankDescription = EMPRank.strDescription
 	,REQ.dtmDateFrom
 	,REQ.dtmDateTo
 	,TOFF.strTimeOff
