@@ -42,6 +42,7 @@
 	[ysnRecurring]			   BIT              DEFAULT 0 NOT NULL,
 	[ysnHold]				   BIT				DEFAULT 0 NOT NULL,
 	[ysnPOS]				   BIT				DEFAULT 0 NULL,
+    [ysnCCEntry]               BIT              DEFAULT 0 NULL,
 	[strHoldReason]			   NVARCHAR (250)	COLLATE Latin1_General_CI_AS NULL,
 	[ysnDelete]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
