@@ -8799,6 +8799,13 @@
     <Build Include="dbo\Tables\tblARInvoiceGrossMarginSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMarginSummary.sql" />
     <Build Include="dbo\Index\IX_tblARInvoiceGrossMarginSummary.sql" />
+    <Build Include="dbo\Tables\tblSCHSchedule.sql" />
+    <Build Include="dbo\Tables\tblSCHReportDistributionGroupContact.sql" />
+    <Build Include="dbo\Tables\tblSCHReportDistributionGroup.sql" />
+    <Build Include="dbo\Tables\tblSCHReportDistribution.sql" />
+    <Build Include="dbo\Tables\tblSCHReportDistributionDetailGroup.sql" />
+    <Build Include="dbo\Tables\tblSCHReportDistributionDetailContact.sql" />
+    <Build Include="dbo\Tables\tblSCHScheduleReportDistribitionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
