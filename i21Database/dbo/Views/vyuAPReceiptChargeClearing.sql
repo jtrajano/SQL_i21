@@ -56,7 +56,12 @@ LEFT JOIN
 -- ) APClearing    
 WHERE       
     Receipt.ysnPosted = 1        
-AND ReceiptCharge.ysnPrice = 1      
+AND ReceiptCharge.ysnPrice = 1   
+AND NOT EXISTS (
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing transferClr
+    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+)   
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
 SELECT      
@@ -109,7 +114,12 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
-AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only    
+AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
+AND NOT EXISTS (
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing transferClr
+    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+)     
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
 SELECT      
@@ -164,6 +174,11 @@ WHERE
 AND ReceiptCharge.ysnAccrue = 1      
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
+AND NOT EXISTS (
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing transferClr
+    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+)  
 UNION ALL      
 --Voucher For Receipt Charges      
 SELECT      
@@ -219,6 +234,11 @@ LEFT JOIN
 WHERE       
     billDetail.intInventoryReceiptChargeId IS NOT NULL      
 AND bill.ysnPosted = 1  
+AND NOT EXISTS (
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing transferClr
+    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+)  
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl
