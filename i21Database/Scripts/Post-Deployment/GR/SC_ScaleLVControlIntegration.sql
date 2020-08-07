@@ -396,8 +396,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,@intRequireSpotSalePrice		INT
 						,@dblUnitPrice					NUMERIC(38, 20)
 						,@intScaleSetupId				INT
-
-
+						,@strEntityNo					NVARCHAR(100)
+						,@intOriginTicketId				INT
 
 
 				SELECT 
@@ -436,9 +436,12 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,@intSplitId				= intSplitId
 					,@dblUnitPrice				= dblUnitPrice
 					,@intScaleSetupId			= intScaleSetupId
+					,@intOriginTicketId			= intOriginTicketId
 					from tblSCTicketLVStaging
 						where intTicketLVStagingId = @intTicketLVStagingId
-			
+				
+				select @strEntityNo = strEntityNo from vyuSCTicketLVControlView where intTicketId = @intOriginTicketId	
+				SET @strEntityNo = ISNULL(@strEntityNo, '''')
 
 				if isnull(@intScaleSetupId, 0) = 0
 					return ''No scale station selected''
@@ -484,7 +487,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 
 				if isnull(@intEntityId, 0) = 0 and @intTicketType not in (2, 3)
 						insert into @msg(strMessage)
-						select ''Invalid Entity''
+						select ''Invalid Entity ('' +  @strEntityNo  + '')''
 				else
 					if isnull(@intCurrencyId, 0) = 0
 						insert into @msg(strMessage)
@@ -558,9 +561,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				end           
 
 
-				if isnull(@intCompanyLocationId, 0) = 0
-					insert into @msg(strMessage)
-					select ''Invalid Location''
+				--if isnull(@intCompanyLocationId, 0) = 0
+				--	insert into @msg(strMessage)
+				--	select ''Invalid Location''
 			
 				if @intTicketType <> 3 and (isnull(@intCommodityId, 0) = 0 or isnull(@intItemId, 0) = 0)
 					insert into @msg(strMessage)
@@ -634,7 +637,11 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 			CREATE TRIGGER [dbo].[trigLVConrolInsert] ON [dbo].[gasctmst]
 			AFTER INSERT
 			AS
+
 			BEGIN
+
+			--begin try
+
 				if exists(select top 1 1 from tblGRCompanyPreference where ysnLVControlIntegration = 1)
 				begin
 					declare @intScaleOperatorId int
@@ -648,349 +655,364 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					select @intScaleOperatorId = intScaleOperatorId from tblSCScaleOperator where strName = @scaleOperator
 					if isnull(@intScaleOperatorId, 0) = 0
 						set @scaleOperator = ''iRely Admin''
-
-					INSERT INTO tblSCTicketLVStaging 
-					(
-						[strTicketNumber]
-						,[intTicketType]
-						,[intTicketTypeId]
-						,[strTicketType]
-						,[strInOutFlag]
-						,[dtmTicketDateTime]
-						,[strTicketStatus]
-						,[intEntityId]
-						,[intItemId]
-						,[intCommodityId]
-						,[intCompanyLocationId]
-						,[dblGrossWeight]
-						,[dtmGrossDateTime]
-						,[dblTareWeight]
-						,[dtmTareDateTime]
-						,[strTicketComment]
-						,[intDiscountId]
-						,[intDiscountScheduleId]
-						,[dblFreightRate]
-						,[dblTicketFees]
-						,[ysnFarmerPaysFreight]
-						,[intCurrencyId]
-						,[strCurrency]
-						,[strBinNumber]
-						,[strContractNumber]
-						,[intContractSequence]
-						,[strScaleOperatorUser]
-						,[strTruckName]
-						,[strDriverName]
-						,[strCustomerReference]
-						,[intAxleCount]
-						,[ysnDriverOff]
-						,[ysnGrossManual]
-						,[ysnTareManual]
-						,[intStorageScheduleTypeId]
-						,[strDistributionOption]
-						,[strPitNumber]
-						,[intTicketPoolId]
-						,[strSplitNumber]
-						,[intScaleSetupId]
-						,[dblGrossUnits]
-						,[dblNetUnits]
-						,[dblUnitPrice]
-						,[dblUnitBasis]
-						,[ysnProcessedData]
-						,[intOriginTicketId]
-						,[dblConvertedUOMQty]
-						,[intItemUOMIdFrom]
-						,[intItemUOMIdTo]
-						,[strItemUOM]
-						,[strCostMethod]
-						,[strDiscountComment]
-						,[strSourceType]
-						,[strLoadNumber]
-						,intLoadId
-						,intLoadDetailId
-						,intContractId
-						,strContractLocation
-					)
-					SELECT 
-						[strTicketNumber]				= LTRIM(RTRIM(SC.strTicketNumber))
-						,[intTicketType]				= SC.intTicketType
-						,[intTicketTypeId]				= SCL.intTicketTypeId
-						,[strTicketType]				= LTRIM(RTRIM(SC.strTicketType))
-						,[strInOutFlag]					= LTRIM(RTRIM(SC.strInOutFlag))
-						,[dtmTicketDateTime]			= SC.dtmTicketDateTime
-						,[strTicketStatus]				= LTRIM(RTRIM(SC.strTicketStatus))
-						,[intEntityId]					= EM.intEntityId
-						,[intItemId]					= IC.intItemId
-						,[intCommodityId]				= ICC.intCommodityId
-						,[intCompanyLocationId]			= SM.intCompanyLocationId
-						,[dblGrossWeight] 				= SC.dblGrossWeight
-						,[dtmGrossDateTime]				= SC.dtmGrossDateTime
-						,[dblTareWeight]				= SC.dblTareWeight
-						,[dtmTareDateTime]				= SC.dtmTareDateTime
-						,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
-						,[intDiscountId]				= GRD_CROSS_REF.intDiscountId -- GRDI.intDiscountId (not being used)
-						,[intDiscountScheduleId]		= GRD_CROSS_REF.intDiscountScheduleId -- consider review for redundancy. 
-						,[dblFreightRate]				= SC.dblFreightRate
-						,[dblTicketFees]				= SC.dblTicketFees
-						,[ysnFarmerPaysFreight]			= SC.ysnFarmerPaysFreight
-						,[intCurrencyId]				= SMCR.intCurrencyID
-						,[strCurrency]					= LTRIM(RTRIM(SC.strCurrency))
-						,[strBinNumber]					= LTRIM(RTRIM(SC.strBinNumber))
-						,[strContractNumber]			= case when LG.intLoadId is not null then LG.strContractNumber else LTRIM(RTRIM(SC.strContractNumber)) end 
-						,[intContractSequence]			= case when LG.intLoadId is not null then LG.intContractSeq else SC.intContractSequence end
-						,[strScaleOperatorUser]			= LTRIM(RTRIM(isnull(SC.strScaleOperatorUser, @scaleOperator)))
-						,[strTruckName]					= LTRIM(RTRIM(SC.strTruckName))
-						,[strDriverName]				= LTRIM(RTRIM(SC.strDriverName))
-						,[strCustomerReference]			= LTRIM(RTRIM(SC.strCustomerReference))
-						,[intAxleCount]					= SC.intAxleCount
-						,[ysnDriverOff]					= SC.ysnDriverOff
-						,[ysnGrossManual]				= SC.ysnGrossManual
-						,[ysnTareManual]				= SC.ysnTareManual
-						,[intStorageScheduleTypeId]		= GRS.intStorageScheduleTypeId
-						,[strDistributionOption]		= LTRIM(RTRIM(SC.strDistributionOption))
-						,[strPitNumber]					= LTRIM(RTRIM(SC.strPitNumber))
-						,[intTicketPoolId]				= SCTP.intTicketPoolId
-						,[strSplitNumber]				= LTRIM(RTRIM(SC.strSplitNumber))
-						,[intScaleSetupId]				= SCS.intScaleSetupId
-						,[dblGrossUnits]				= SC.dblGrossUnits
-						,[dblNetUnits]					= SC.dblNetUnits
-						,[dblUnitPrice]					= SC.dblUnitPrice
-						,[dblUnitBasis]					= 0
-						,[ysnProcessedData]				= 0
-						,[intOriginTicketId]			= IR.A4GLIdentity
-						,[dblConvertedUOMQty]			= ICUOM.dblUnitQty
-						,[intItemUOMIdFrom]				= UOM.intItemUOMId
-						,[intItemUOMIdTo]				= ICUOM.intItemUOMId
-						,[strItemUOM]					= UM.strUnitMeasure
-						,[strCostMethod]				= ''Per Unit''
-						,[strDiscountComment]			= SC.strDiscountComment
-						,[strSourceType]				= ''LV Control''	
-						,SC.strLoadNumber
-						,LG.intLoadId
-						,LG.intLoadDetailId
-						,LG.intContractDetailId		
-						,strLocationName	
-					FROM vyuSCTicketLVControlView SC 
-					INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
-					LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
-					LEFT JOIN tblICItem IC ON IC.strShortName COLLATE Latin1_General_CI_AS =  IR.gasct_com_cd COLLATE Latin1_General_CI_AS
-					LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
-					LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
-					LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
-					LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
-					LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
-					LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
-					LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
-					LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUnit = 1
-					LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
-					LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
-					LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
-					--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
-					--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId
-					left join tblGRDiscountSchedule GRDS on GRDS.intCommodityId = IC.intCommodityId
-					left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
-					OUTER APPLY (
-						SELECT TOP 1 intLoadId, intLoadDetailId,
-							intContractDetailId = case 
-													when intPurchaseSale = 1 then intPContractDetailId 
-													else intSContractDetailId 
-												end,
-							
-							strContractNumber = case 
-													when intPurchaseSale = 1 then strPContractNumber 
-													else strSContractNumber 
-												end,
-
-							intContractSeq		= case 
-													when intPurchaseSale = 1 then intPContractSeq 
-													else intSContractSeq 
-												end,
-
-							strLocation			= case 
-													when intPurchaseSale = 1 then strPLocationName 
-													else strSLocationName
-												end
-							FROM vyuLGLoadDetailView 
-							where strLoadNumber COLLATE Latin1_General_CI_AS = SC.strLoadNumber COLLATE Latin1_General_CI_AS						
-					) LG
-
-					set @newLVTicket = SCOPE_IDENTITY()
-
-					INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)						
-					SELECT 
-					DISTINCT 
-						gasct_reading AS dblGradeReading
-						,gasct_shrk_what AS strShrinkWhat
-						,gasct_shrk_pct AS dblShrinkPercent
-						,c.intDiscountScheduleCodeId
-						,intTicketId = k.intTicketLVStagingId
-						,''Scale'' AS strSourceType
-						,''Dollar'' strDiscountChargeType 
-						,b.A4GLIdentity
-						,DCode.intShrinkCalculationOptionId
-					FROM (
-							SELECT	
-								gasct_disc_cd_1		gasct_disc_cd,
-								gasct_reading_1		gasct_reading,
-								gasct_disc_calc_1	gasct_disc_calc,
-								gasct_un_disc_amt_1 gasct_un_disc_amt,
-								gasct_shrk_what_1	gasct_shrk_what,
-								gasct_shrk_pct_1	gasct_shrk_pct,
-								A4GLIdentity		
-								FROM gasctmst 
-								WHERE gasct_disc_cd_1 IS NOT NULL
-
-							UNION ALL
-								SELECT gasct_disc_cd_2,gasct_reading_2,gasct_disc_calc_2,gasct_un_disc_amt_2,gasct_shrk_what_2,gasct_shrk_pct_2,A4GLIdentity      
-								FROM gasctmst  WHERE gasct_disc_cd_2 IS NOT NULL
-							UNION ALL
-			
-								SELECT gasct_disc_cd_3,gasct_reading_3,gasct_disc_calc_3,gasct_un_disc_amt_3,gasct_shrk_what_3,gasct_shrk_pct_3,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_3 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW'' 
-							UNION ALL
-								SELECT gasct_disc_cd_4,gasct_reading_4,gasct_disc_calc_4,gasct_un_disc_amt_4,gasct_shrk_what_4,gasct_shrk_pct_4,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_4 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW''
-							UNION ALL
-								(
-								 SELECT disc_cd
-				 					,SUM(reading)
-				 					,SUM(disc_calc)
-				 					,SUM(un_disc)
-				 					,shrk_what
-				 					,SUM(gasct_shrk_pct)
-				 					,A4GLIdentity
-								 FROM (
-				 						SELECT 
-				 						 gasct_disc_cd_4 disc_cd
-				 						,Convert(FLOAT, gasct_reading_4) reading
-				 						,Convert(FLOAT, gasct_disc_calc_4) disc_calc
-				 						,Convert(FLOAT, gasct_un_disc_amt_4) un_disc
-				 						,gasct_shrk_what_4 shrk_what
-				 						,Convert(FLOAT, gasct_shrk_pct_4) gasct_shrk_pct
-				 						,A4GLIdentity
-				 						FROM gasctmst
-				 						WHERE gasct_disc_cd_4 IS NOT NULL
-				 	    					AND gasct_disc_cd_3 IS NOT NULL
-				 	    					AND gasct_disc_cd_3 = gasct_disc_cd_4
-				 	    					AND gasct_disc_cd_4 = ''TW''
-				 	
-				 					UNION ALL
-				 	
-				 					SELECT 
-				 						gasct_disc_cd_3
-				 						,Convert(FLOAT, gasct_reading_3)
-				 						,Convert(FLOAT, gasct_disc_calc_3)
-				 						,Convert(FLOAT, gasct_un_disc_amt_3)
-				 						,gasct_shrk_what_3
-				 						,Convert(FLOAT, gasct_shrk_pct_3)
-				 						,A4GLIdentity
-				 						FROM gasctmst
-				 						WHERE gasct_disc_cd_3 IS NOT NULL
-				 	    					AND gasct_disc_cd_4 IS NOT NULL
-				 	    					AND gasct_disc_cd_3 = gasct_disc_cd_4
-				 	    					AND gasct_disc_cd_3 = ''TW''
-				 					) t
-								 GROUP BY disc_cd
-				 					,shrk_what
-				 					,A4GLIdentity
-				 
-								) 
-							UNION ALL
-								SELECT gasct_disc_cd_5,gasct_reading_5,gasct_disc_calc_5,gasct_un_disc_amt_5,gasct_shrk_what_5,gasct_shrk_pct_5,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_5 IS NOT NULL 
-							UNION ALL
-								SELECT gasct_disc_cd_6,gasct_reading_6,gasct_disc_calc_6,gasct_un_disc_amt_6,gasct_shrk_what_6,gasct_shrk_pct_6,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_6 IS NOT NULL
-							UNION ALL
-								SELECT gasct_disc_cd_7,gasct_reading_7,gasct_disc_calc_7,gasct_un_disc_amt_7,gasct_shrk_what_7,gasct_shrk_pct_7,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_7 IS NOT NULL 
-							UNION ALL
-								SELECT gasct_disc_cd_8,gasct_reading_8,gasct_disc_calc_8,gasct_un_disc_amt_8,gasct_shrk_what_8,gasct_shrk_pct_8,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_8 IS NOT NULL  
-							UNION ALL
-								SELECT gasct_disc_cd_9,gasct_reading_9,gasct_disc_calc_9,gasct_un_disc_amt_9,gasct_shrk_what_9,gasct_shrk_pct_9,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_9 IS NOT NULL 
-							UNION ALL
-								SELECT gasct_disc_cd_10,gasct_reading_10,gasct_disc_calc_10,gasct_un_disc_amt_10,gasct_shrk_what_10,gasct_shrk_pct_10,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_10 IS NOT NULL 
-							UNION ALL
-								SELECT gasct_disc_cd_11,gasct_reading_11,gasct_disc_calc_11,gasct_un_disc_amt_11,gasct_shrk_what_11,gasct_shrk_pct_11,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_11 IS NOT NULL 
-							UNION ALL
-								SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
-								FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
-					)b 
-					INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
-					INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 					
-					INNER JOIN tblGRDiscountSchedule GRDS on GRDS.intCommodityId = ic.intCommodityId
-					INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
-					--dapat di ka nababa dito
-					INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRDS.intDiscountScheduleId AND c.intStorageTypeId = -1
-					INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
-					--INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
-					--INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
-					--INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
-					INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
-					INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
-					WHERE b.gasct_disc_cd is not null 
-						and k.strInOutFlag <> ''O''
 
+					if not exists ( select top 1 1 from tblSCTicketLVStaging where strTicketNumber  COLLATE Latin1_General_CI_AS = (select top 1 gasct_tic_no COLLATE Latin1_General_CI_AS from INSERTED))
+					begin
+						INSERT INTO tblSCTicketLVStaging 
+						(
+							[strTicketNumber]
+							,[intTicketType]
+							,[intTicketTypeId]
+							,[strTicketType]
+							,[strInOutFlag]
+							,[dtmTicketDateTime]
+							,[strTicketStatus]
+							,[intEntityId]
+							,[intItemId]
+							,[intCommodityId]
+							,[intCompanyLocationId]
+							,[dblGrossWeight]
+							,[dtmGrossDateTime]
+							,[dblTareWeight]
+							,[dtmTareDateTime]
+							,[strTicketComment]
+							,[intDiscountId]
+							,[intDiscountScheduleId]
+							,[dblFreightRate]
+							,[dblTicketFees]
+							,[ysnFarmerPaysFreight]
+							,[intCurrencyId]
+							,[strCurrency]
+							,[strBinNumber]
+							,[strContractNumber]
+							,[intContractSequence]
+							,[strScaleOperatorUser]
+							,[strTruckName]
+							,[strDriverName]
+							,[strCustomerReference]
+							,[intAxleCount]
+							,[ysnDriverOff]
+							,[ysnGrossManual]
+							,[ysnTareManual]
+							,[intStorageScheduleTypeId]
+							,[strDistributionOption]
+							,[strPitNumber]
+							,[intTicketPoolId]
+							,[strSplitNumber]
+							,[intScaleSetupId]
+							,[dblGrossUnits]
+							,[dblNetUnits]
+							,[dblUnitPrice]
+							,[dblUnitBasis]
+							,[ysnProcessedData]
+							,[intOriginTicketId]
+							,[dblConvertedUOMQty]
+							,[intItemUOMIdFrom]
+							,[intItemUOMIdTo]
+							,[strItemUOM]
+							,[strCostMethod]
+							,[strDiscountComment]
+							,[strSourceType]
+							,[strLoadNumber]
+							,intLoadId
+							,intLoadDetailId
+							,intContractId
+							,strContractLocation
+						)
+						SELECT 
+							[strTicketNumber]				= LTRIM(RTRIM(SC.strTicketNumber))
+							,[intTicketType]				= SC.intTicketType
+							,[intTicketTypeId]				= SCL.intTicketTypeId
+							,[strTicketType]				= LTRIM(RTRIM(SC.strTicketType))
+							,[strInOutFlag]					= LTRIM(RTRIM(SC.strInOutFlag))
+							,[dtmTicketDateTime]			= SC.dtmTicketDateTime
+							,[strTicketStatus]				= LTRIM(RTRIM(SC.strTicketStatus))
+							,[intEntityId]					= EM.intEntityId
+							,[intItemId]					= IC.intItemId
+							,[intCommodityId]				= ICC.intCommodityId
+							,[intCompanyLocationId]			= ISNULL(SM.intCompanyLocationId, SCS.intLocationId)
+							,[dblGrossWeight] 				= SC.dblGrossWeight
+							,[dtmGrossDateTime]				= SC.dtmGrossDateTime
+							,[dblTareWeight]				= SC.dblTareWeight
+							,[dtmTareDateTime]				= SC.dtmTareDateTime
+							,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
+							,[intDiscountId]				= GRD_CROSS_REF.intDiscountId -- GRDI.intDiscountId (not being used)
+							,[intDiscountScheduleId]		= GRD_CROSS_REF.intDiscountScheduleId -- consider review for redundancy. 
+							,[dblFreightRate]				= SC.dblFreightRate
+							,[dblTicketFees]				= SC.dblTicketFees
+							,[ysnFarmerPaysFreight]			= SC.ysnFarmerPaysFreight
+							,[intCurrencyId]				= SMCR.intCurrencyID
+							,[strCurrency]					= LTRIM(RTRIM(SC.strCurrency))
+							,[strBinNumber]					= LTRIM(RTRIM(SC.strBinNumber))
+							,[strContractNumber]			= case when LG.intLoadId is not null then LG.strContractNumber else LTRIM(RTRIM(SC.strContractNumber)) end 
+							,[intContractSequence]			= case when LG.intLoadId is not null then LG.intContractSeq else SC.intContractSequence end
+							,[strScaleOperatorUser]			= LTRIM(RTRIM(isnull(nullif(SC.strScaleOperatorUser, ''''), @scaleOperator)))
+							,[strTruckName]					= LTRIM(RTRIM(SC.strTruckName))
+							,[strDriverName]				= case when SC.strDriverName is null or LTRIM(RTRIM(SC.strDriverName)) = '''' then SCS.strDriver else LTRIM(RTRIM(SC.strDriverName)) end
+							,[strCustomerReference]			= LTRIM(RTRIM(SC.strCustomerReference))
+							,[intAxleCount]					= SC.intAxleCount
+							,[ysnDriverOff]					= SC.ysnDriverOff
+							,[ysnGrossManual]				= SC.ysnGrossManual
+							,[ysnTareManual]				= SC.ysnTareManual
+							,[intStorageScheduleTypeId]		= GRS.intStorageScheduleTypeId
+							,[strDistributionOption]		= LTRIM(RTRIM(SC.strDistributionOption))
+							,[strPitNumber]					= LTRIM(RTRIM(SC.strPitNumber))
+							,[intTicketPoolId]				= isnull(SCTP.intTicketPoolId, SCS.intTicketPoolId)
+							,[strSplitNumber]				= LTRIM(RTRIM(SC.strSplitNumber))
+							,[intScaleSetupId]				= SCS.intScaleSetupId
+							,[dblGrossUnits]				= SC.dblGrossUnits
+							,[dblNetUnits]					= SC.dblNetUnits
+							,[dblUnitPrice]					= SC.dblUnitPrice
+							,[dblUnitBasis]					= 0
+							,[ysnProcessedData]				= 0
+							,[intOriginTicketId]			= IR.A4GLIdentity
+							,[dblConvertedUOMQty]			= ICUOM.dblUnitQty
+							,[intItemUOMIdFrom]				= UOM.intItemUOMId
+							,[intItemUOMIdTo]				= ICUOM.intItemUOMId
+							,[strItemUOM]					= UM.strUnitMeasure
+							,[strCostMethod]				= ''Per Unit''
+							,[strDiscountComment]			= SC.strDiscountComment
+							,[strSourceType]				= ''LV Control''	
+							,SC.strLoadNumber
+							,LG.intLoadId
+							,LG.intLoadDetailId
+							,LG.intContractDetailId		
+							,strLocationName	
+						FROM vyuSCTicketLVControlView SC 
+						INNER JOIN INSERTED IR ON SC.intTicketId = IR.A4GLIdentity
+						LEFT JOIN tblEMEntity EM ON EM.strEntityNo = SC.strEntityNo
+						LEFT JOIN tblICItem IC ON IC.strShortName COLLATE Latin1_General_CI_AS =  IR.gasct_com_cd COLLATE Latin1_General_CI_AS
+						LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
+						LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
+						LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
+						LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
+						LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
+						LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
+						LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
+						LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUnit = 1
+						LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
+						LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
+						LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
+						--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
+						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId
+						left join tblGRDiscountSchedule GRDS on GRDS.intCommodityId = IC.intCommodityId
+						left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+						OUTER APPLY (
+							SELECT TOP 1 intLoadId, intLoadDetailId,
+								intContractDetailId = case 
+														when intPurchaseSale = 1 then intPContractDetailId 
+														else intSContractDetailId 
+													end,
+							
+								strContractNumber = case 
+														when intPurchaseSale = 1 then strPContractNumber 
+														else strSContractNumber 
+													end,
 
-					INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)					
-					select
-							DiscountScheduleCode.dblDefaultValue as dblGradeReading
-							,ShrinkCalculationOption.strShrinkCalculationOption AS strShrinkWhat
-							,0 AS dblShrinkPercent
-							,DiscountScheduleCode.intDiscountScheduleCodeId
-							,TicketStaging.intTicketLVStagingId
+								intContractSeq		= case 
+														when intPurchaseSale = 1 then intPContractSeq 
+														else intSContractSeq 
+													end,
+
+								strLocation			= case 
+														when intPurchaseSale = 1 then strPLocationName 
+														else strSLocationName
+													end
+								FROM vyuLGLoadDetailView 
+								where strLoadNumber COLLATE Latin1_General_CI_AS = SC.strLoadNumber COLLATE Latin1_General_CI_AS						
+						) LG
+
+						set @newLVTicket = SCOPE_IDENTITY()
+					
+						INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)						
+						SELECT 
+						DISTINCT 
+							gasct_reading AS dblGradeReading
+							,gasct_shrk_what AS strShrinkWhat
+							,gasct_shrk_pct AS dblShrinkPercent
+							,c.intDiscountScheduleCodeId
+							,intTicketId = k.intTicketLVStagingId
 							,''Scale'' AS strSourceType
 							,''Dollar'' strDiscountChargeType 
-							,TicketStaging.intOriginTicketId
-							,ShrinkCalculationOption.intShrinkCalculationOptionId
+							,b.A4GLIdentity
+							,DCode.intShrinkCalculationOptionId
+						FROM (
+								SELECT	
+									gasct_disc_cd_1		gasct_disc_cd,
+									gasct_reading_1		gasct_reading,
+									gasct_disc_calc_1	gasct_disc_calc,
+									gasct_un_disc_amt_1 gasct_un_disc_amt,
+									gasct_shrk_what_1	gasct_shrk_what,
+									gasct_shrk_pct_1	gasct_shrk_pct,
+									A4GLIdentity		
+									FROM gasctmst 
+									WHERE gasct_disc_cd_1 IS NOT NULL
 
-						from tblSCTicketLVStaging TicketStaging
-							join tblGRDiscountScheduleCode DiscountScheduleCode
-								on TicketStaging.intDiscountScheduleId = DiscountScheduleCode.intDiscountScheduleId
-							join tblGRShrinkCalculationOption ShrinkCalculationOption
-								on DiscountScheduleCode.intShrinkCalculationOptionId = ShrinkCalculationOption.intShrinkCalculationOptionId	
+								UNION ALL
+									SELECT gasct_disc_cd_2,gasct_reading_2,gasct_disc_calc_2,gasct_un_disc_amt_2,gasct_shrk_what_2,gasct_shrk_pct_2,A4GLIdentity      
+									FROM gasctmst  WHERE gasct_disc_cd_2 IS NOT NULL
+								UNION ALL
+			
+									SELECT gasct_disc_cd_3,gasct_reading_3,gasct_disc_calc_3,gasct_un_disc_amt_3,gasct_shrk_what_3,gasct_shrk_pct_3,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_3 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW'' 
+								UNION ALL
+									SELECT gasct_disc_cd_4,gasct_reading_4,gasct_disc_calc_4,gasct_un_disc_amt_4,gasct_shrk_what_4,gasct_shrk_pct_4,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_4 IS NOT NULL AND gasct_disc_cd_3 <> gasct_disc_cd_4 AND gasct_disc_cd_4 <>''TW''
+								UNION ALL
+									(
+									 SELECT disc_cd
+				 						,SUM(reading)
+				 						,SUM(disc_calc)
+				 						,SUM(un_disc)
+				 						,shrk_what
+				 						,SUM(gasct_shrk_pct)
+				 						,A4GLIdentity
+									 FROM (
+				 							SELECT 
+				 							 gasct_disc_cd_4 disc_cd
+				 							,Convert(FLOAT, gasct_reading_4) reading
+				 							,Convert(FLOAT, gasct_disc_calc_4) disc_calc
+				 							,Convert(FLOAT, gasct_un_disc_amt_4) un_disc
+				 							,gasct_shrk_what_4 shrk_what
+				 							,Convert(FLOAT, gasct_shrk_pct_4) gasct_shrk_pct
+				 							,A4GLIdentity
+				 							FROM gasctmst
+				 							WHERE gasct_disc_cd_4 IS NOT NULL
+				 	    						AND gasct_disc_cd_3 IS NOT NULL
+				 	    						AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    						AND gasct_disc_cd_4 = ''TW''
+				 	
+				 						UNION ALL
+				 	
+				 						SELECT 
+				 							gasct_disc_cd_3
+				 							,Convert(FLOAT, gasct_reading_3)
+				 							,Convert(FLOAT, gasct_disc_calc_3)
+				 							,Convert(FLOAT, gasct_un_disc_amt_3)
+				 							,gasct_shrk_what_3
+				 							,Convert(FLOAT, gasct_shrk_pct_3)
+				 							,A4GLIdentity
+				 							FROM gasctmst
+				 							WHERE gasct_disc_cd_3 IS NOT NULL
+				 	    						AND gasct_disc_cd_4 IS NOT NULL
+				 	    						AND gasct_disc_cd_3 = gasct_disc_cd_4
+				 	    						AND gasct_disc_cd_3 = ''TW''
+				 						) t
+									 GROUP BY disc_cd
+				 						,shrk_what
+				 						,A4GLIdentity
+				 
+									) 
+								UNION ALL
+									SELECT gasct_disc_cd_5,gasct_reading_5,gasct_disc_calc_5,gasct_un_disc_amt_5,gasct_shrk_what_5,gasct_shrk_pct_5,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_5 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_6,gasct_reading_6,gasct_disc_calc_6,gasct_un_disc_amt_6,gasct_shrk_what_6,gasct_shrk_pct_6,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_6 IS NOT NULL
+								UNION ALL
+									SELECT gasct_disc_cd_7,gasct_reading_7,gasct_disc_calc_7,gasct_un_disc_amt_7,gasct_shrk_what_7,gasct_shrk_pct_7,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_7 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_8,gasct_reading_8,gasct_disc_calc_8,gasct_un_disc_amt_8,gasct_shrk_what_8,gasct_shrk_pct_8,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_8 IS NOT NULL  
+								UNION ALL
+									SELECT gasct_disc_cd_9,gasct_reading_9,gasct_disc_calc_9,gasct_un_disc_amt_9,gasct_shrk_what_9,gasct_shrk_pct_9,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_9 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_10,gasct_reading_10,gasct_disc_calc_10,gasct_un_disc_amt_10,gasct_shrk_what_10,gasct_shrk_pct_10,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_10 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_11,gasct_reading_11,gasct_disc_calc_11,gasct_un_disc_amt_11,gasct_shrk_what_11,gasct_shrk_pct_11,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_11 IS NOT NULL 
+								UNION ALL
+									SELECT gasct_disc_cd_12,gasct_reading_12,gasct_disc_calc_12,gasct_un_disc_amt_12,gasct_shrk_what_12,gasct_shrk_pct_12,A4GLIdentity
+									FROM gasctmst  WHERE gasct_disc_cd_12 IS NOT NULL
+						)b 
+						INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
+						INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
+					
+						INNER JOIN tblGRDiscountSchedule GRDS on GRDS.intCommodityId = ic.intCommodityId
+						INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+						--dapat di ka nababa dito
+						INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRDS.intDiscountScheduleId AND c.intStorageTypeId = -1
+						INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
+						--INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
+						--INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
+						--INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
+						INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
+						INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
+						WHERE b.gasct_disc_cd is not null 
+							and k.strInOutFlag <> ''O''
 
-							where TicketStaging.strInOutFlag = ''O''
+
+						INSERT INTO tblSCTicketDiscountLVStaging (dblGradeReading, strShrinkWhat, dblShrinkPercent, intDiscountScheduleCodeId, intTicketId, strSourceType, strDiscountChargeType,intOriginTicketDiscountId, strCalcMethod)					
+						select
+								DiscountScheduleCode.dblDefaultValue as dblGradeReading
+								,ShrinkCalculationOption.strShrinkCalculationOption AS strShrinkWhat
+								,0 AS dblShrinkPercent
+								,DiscountScheduleCode.intDiscountScheduleCodeId
+								,TicketStaging.intTicketLVStagingId
+								,''Scale'' AS strSourceType
+								,''Dollar'' strDiscountChargeType 
+								,TicketStaging.intOriginTicketId
+								,ShrinkCalculationOption.intShrinkCalculationOptionId
+
+							from tblSCTicketLVStaging TicketStaging
+								join tblGRDiscountScheduleCode DiscountScheduleCode
+									on TicketStaging.intDiscountScheduleId = DiscountScheduleCode.intDiscountScheduleId
+								join tblGRShrinkCalculationOption ShrinkCalculationOption
+									on DiscountScheduleCode.intShrinkCalculationOptionId = ShrinkCalculationOption.intShrinkCalculationOptionId	
+							
+								INNER JOIN INSERTED IR  ON TicketStaging.intOriginTicketId= IR.A4GLIdentity		
+								where TicketStaging.strInOutFlag = ''O''
 
 					
-					declare @ticket_number nvarchar(100)
-					declare @inserted_ticket_number int
-					declare @validation_message nvarchar(max)
+						declare @ticket_number nvarchar(100)
+						declare @inserted_ticket_number int
+						declare @validation_message nvarchar(max)
 
 
-					select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket)
-					select @validation_message
-					if @validation_message = ''''
-					begin
-						select @ticket_number = strTicketNumber from tblSCTicketLVStaging where intTicketLVStagingId = @newLVTicket
+						select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket)
+						--select @validation_message
+						if @validation_message = ''''
+						begin
+							select @ticket_number = strTicketNumber from tblSCTicketLVStaging where intTicketLVStagingId = @newLVTicket
 
-						begin try
+							begin try
 						
 							
-							update tblSCTicketLVStaging set ysnProcessedData = 1 where intTicketLVStagingId = @newLVTicket
-							if not exists(select top 1 1 from tblSCTicket where strTicketNumber = @ticket_number)	
-								exec uspSCProcessLVControlToTicket @newLVTicket, 1, @IrelyAdminId
+								update tblSCTicketLVStaging set ysnProcessedData = 1 where intTicketLVStagingId = @newLVTicket
+								if not exists(select top 1 1 from tblSCTicket where strTicketNumber = @ticket_number)	
+									exec uspSCProcessLVControlToTicket @newLVTicket, 1, @IrelyAdminId
 
-						end try
-						begin catch
-						
-							update tblSCTicketLVStaging set ysnProcessedData = 0 where intTicketLVStagingId = @newLVTicket
-							select @inserted_ticket_number = intTicketId from tblSCTicket where strTicketNumber = @ticket_number
+							end try
+							begin catch
+							
+								update tblSCTicketLVStaging set ysnProcessedData = 0 where intTicketLVStagingId = @newLVTicket
+								select @inserted_ticket_number = intTicketId from tblSCTicket where strTicketNumber = @ticket_number
+							 
+								update tblSCTicket set ysnHasGeneratedTicketNumber = 0 where intTicketId = @inserted_ticket_number
+								delete from tblQMTicketDiscount where intTicketId = @inserted_ticket_number
+								delete from tblSCTicket where intTicketId =  @inserted_ticket_number
 
-							update tblSCTicket set ysnHasGeneratedTicketNumber = 0 where intTicketId = @inserted_ticket_number
-							delete from tblQMTicketDiscount where intTicketId = @inserted_ticket_number
-							delete from tblSCTicket where intTicketId =  @inserted_ticket_number
+							end catch
+						end
+						else 
+						begin
+							update tblSCTicketLVStaging set strImportFailedReason = @validation_message where intTicketLVStagingId = @newLVTicket
+						end 
+						delete from gasctmst where gasct_tic_no in (select gasct_tic_no from INSERTED)
 
-						end catch
-					end
+					end 
 					
-					delete from gasctmst where gasct_tic_no in (select gasct_tic_no from INSERTED)
 				end
 				
+
+				--end try
+				--begin catch
+				--	--print ERROR_MESSAGE()
+				--end catch
 			END
 		')
 		PRINT 'End creating trigger'

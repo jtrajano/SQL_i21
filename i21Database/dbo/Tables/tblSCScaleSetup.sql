@@ -83,6 +83,12 @@
     [strFTPHostKeyFingerPrint] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strFTPExportValidURL] NVARCHAR (MAX) NULL,
 	[strFTPDirectory] NVARCHAR (MAX) COLLATE Latin1_General_CI_AS NULL,
+
+    [intStorageLocationId] INT NULL,
+    [intSubLocationId] INT NULL,
+    [strDriver] NVARCHAR (40) COLLATE Latin1_General_CI_AS NULL,
+
+
     [intConcurrencyId] INT NULL, 
     CONSTRAINT [PK_tblSCScaleSetup_intScaleSetupId] PRIMARY KEY ([intScaleSetupId]), 
     CONSTRAINT [FK_tblSCScaleSetup_tblSCTicketPool] FOREIGN KEY ([intTicketPoolId]) REFERENCES [tblSCTicketPool]([intTicketPoolId]), 
