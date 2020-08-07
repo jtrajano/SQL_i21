@@ -69,6 +69,5 @@ OUTER APPLY(
 	SELECT SUM([dbo].[fnCMGetBankBalance] (intBankAccountId, GETDATE())) Balance
 	FROM dbo.tblCMBankAccount
 )Bank
-GO
 
 
