@@ -6245,6 +6245,62 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 
 
+				------------------------------------------------------
+				----------------- RECEIVE LOTTERY---------------------
+				------------------------------------------------------
+
+				IF EXISTS(SELECT TOP 1 intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId)
+				BEGIN
+
+				--UNPOST IR--
+				DECLARE @strIRTransactionIds NVARCHAR(MAX) 
+				SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
+				Select @strIRTransactionIds
+
+
+				DECLARE	@intIRLotteryUnpostProcessReturnValue int,
+						@strIRLotteryUnpostBatchId nvarchar(40)
+
+				EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
+						@ysnPost = 0,
+						@ysnRecap = 0,
+						@strTransactionId = @strIRTransactionIds,
+						@intEntityUserSecurityId = @intCurrentUserId,
+						@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
+
+
+				IF(@intIRLotteryUnpostProcessReturnValue = 0)
+				BEGIN
+					SELECT * INTO #tblTempUnpostLotteryIR FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId
+					DECLARE @intLoopDeleteLotteryIRId INT
+					DECLARE @intLoopDeleteLotteryBookId INT
+					WHILE EXISTS(SELECT TOP 1 * FROM #tblTempUnpostLotteryIR)
+					BEGIN
+						SELECT TOP 1 @intLoopDeleteLotteryIRId = intInventoryReceiptId, @intLoopDeleteLotteryBookId = intLotteryBookId  FROM #tblTempUnpostLotteryIR
+
+						EXEC [dbo].[uspICDeleteInventoryReceipt]
+						@InventoryReceiptId = @intLoopDeleteLotteryIRId,
+						@intEntityUserSecurityId = @intCurrentUserId
+
+
+						DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @intLoopDeleteLotteryBookId
+						DELETE FROM #tblTempUnpostLotteryIR WHERE intInventoryReceiptId = @intLoopDeleteLotteryIRId
+
+					END
+
+				END
+
+
+				END
+
+
+				
+				------------------------------------------------------
+				----------------- RECEIVE LOTTERY---------------------
+				------------------------------------------------------
+
+
+
 
 
 			END
