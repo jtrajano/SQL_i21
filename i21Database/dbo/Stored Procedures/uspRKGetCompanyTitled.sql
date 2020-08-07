@@ -781,25 +781,49 @@ BEGIN
 			UNION ALL --TRANSFER STORAGE
 			SELECT
 				dtmDate
-				,dblUnpaidIncrease = CASE WHEN dblQtyShipped < 0 THEN 0 ELSE dblQtyShipped END
-				,dblUnpaidDecrease = CASE WHEN dblQtyShipped < 0 THEN ABS(dblQtyShipped) ELSE 0 END
-				,dblUnpaidBalance = dblQtyShipped
-				,dblPaidBalance = 0
-				,strTransactionId = strTransferStorageTicket
+				,dblUnpaidIncrease 
+				,dblUnpaidDecrease 
+				,dblUnpaidBalance
+				,dblPaidBalance
+				,strTransactionId
 				,intTransactionId
 				,strStorageTypeCode
 				,strTransactionType
 			FROM (
 				SELECT DISTINCT dtmDate =  CONVERT(DATETIME, CONVERT(VARCHAR(10),Inv.dtmDate, 110), 110)
-					  ,dblQtyShipped = Inv.dblTotal
-					  ,TS.strTransferStorageTicket
-					  ,Inv.intTransactionId	
+					  ,dblUnpaidIncrease = Inv.dblTotal
+					  ,dblUnpaidDecrease = dblPartialPaidQty
+					  ,dblUnpaidBalance =  Inv.dblTotal - isnull(dblPartialPaidQty,0)
+					  ,dblPaidBalance = dblPartialPaidQty
+					  ,strTransactionId =  ISNULL(CS.strBillId,TS.strTransferStorageTicket)
+					  ,intTransactionId	= ISNULL(CS.intBillId,Inv.intTransactionId)
 					  ,ST.strStorageTypeCode
 					  ,Inv.strTransactionType
 				FROM @InventoryStock Inv
 				INNER JOIN tblGRTransferStorage TS ON Inv.intTransactionId = TS.intTransferStorageId
 				INNER JOIN tblGRTransferStorageSplit TSS ON Inv.intTransactionDetailId = TSS.intTransferStorageSplitId
 				INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+				CROSS APPLY (
+					select 
+						strBillId
+						,intBillId
+						,dblUnits = sum(dblUnits)
+						,dblPartialPaidQty = sum(dblPartialPaidQty)
+					 from (	
+					select 
+							strBillId
+							,B.intBillId
+							,dblUnits =  BD.dblQtyReceived
+							,dblPartialPaidQty = dbo.fnCalculateQtyBetweenUOM(BD.intUnitOfMeasureId, IUM.intItemUOMId,CASE WHEN ISNULL(B.dblTotal, 0) = 0 THEN 0 ELSE (BD.dblQtyReceived / CASE WHEN B.dblTotal = 0 THEN 1 ELSE B.dblTotal END) * B.dblPayment END)		
+						from tblAPBill B 
+						inner join tblAPBillDetail BD on B.intBillId = BD.intBillId 
+								AND BD.intItemId = TS.intItemId
+						left join tblICCommodityUnitMeasure CUM ON CUM.intCommodityUnitMeasureId = Inv.intFromCommodityUnitMeasureId
+						left join tblICItemUOM IUM ON IUM.intUnitMeasureId = CUM.intUnitMeasureId AND IUM.intItemId = BD.intItemId
+						where BD.intCustomerStorageId = TSS.intTransferToCustomerStorageId 
+					) t
+					group by strBillId, intBillId
+				) CS 
 				WHERE Inv.strTransactionType = 'Transfer Storage'
 			) T
 
