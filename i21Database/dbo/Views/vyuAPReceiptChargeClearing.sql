@@ -237,7 +237,7 @@ AND bill.ysnPosted = 1
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
-    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+    WHERE transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
 )  
 ) charges  
 OUTER APPLY (
