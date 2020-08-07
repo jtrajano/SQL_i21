@@ -17,12 +17,22 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayable';
+DECLARE @primaryKeys TABLE(intBillDetailId INT, intVoucherPayableId INT);
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @voucherPayableTax AS VoucherDetailTax;
 DECLARE @post BIT = ~@decrease;
 DECLARE @transCount INT = @@TRANCOUNT;
 
-INSERT INTO @voucherPayables(
+MERGE INTO @voucherPayables AS destination
+USING
+(
+	SELECT * FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+	WHERE ysnStage = 1
+) AS SourceData
+ON (1=0)
+WHEN NOT MATCHED THEN
+INSERT 
+(
 	[intBillId]
 	,[intEntityVendorId]                
 	,[intTransactionType]                
@@ -102,7 +112,8 @@ INSERT INTO @voucherPayables(
 	,[dblDifference]  
 	,[intFreightTermId]
 )
-SELECT
+VALUES
+(	
 	[intBillId]
 	,[intEntityVendorId]                
 	,[intTransactionType]                
@@ -181,7 +192,8 @@ SELECT
 	,[dblActual]                        
 	,[dblDifference]
 	,[intFreightTermId]
-FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+)
+OUTPUT SourceData.intBillDetailId, inserted.intVoucherPayableId INTO @primaryKeys;
 
 INSERT INTO @voucherPayableTax
 (
