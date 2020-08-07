@@ -3088,6 +3088,8 @@
     <Build Include="dbo\Views\vyuCTContStsDeliverySummary.sql" />
     <Build Include="dbo\Views\vyuCTContStsDeliveryDetail.sql" />
     <Build Include="dbo\Tables\tblSTPumpItem.sql" />
+    <Build Include="dbo\Tables\tblSTImportLog.sql" />
+    <Build Include="dbo\Tables\tblSTImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuMFInventoryReservationByLot.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetShiftActivity.sql" />
     <Build Include="dbo\Views\vyuGRGetSellStorageItems.sql" />
