@@ -118,7 +118,10 @@ SELECT
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
-INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
+INNER JOIN (tblGRCustomerStorage CS 
+		INNER JOIN tblGRStorageType STY 
+			ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId AND STY.ysnDPOwnedType = 0
+		INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
@@ -279,7 +282,11 @@ SELECT
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
-INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
+INNER JOIN (tblGRCustomerStorage CS
+		INNER JOIN tblGRStorageType STY 
+			ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId 
+				AND STY.ysnDPOwnedType = 0
+		INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
@@ -457,7 +464,11 @@ INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
 INNER JOIN tblICItem IM
 	ON billDetail.intItemId = IM.intItemId
-INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
+INNER JOIN (tblGRCustomerStorage CS 
+			INNER JOIN tblGRStorageType STY 
+				ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId 
+					AND STY.ysnDPOwnedType = 0
+			INNER JOIN tblGRSettleStorageTicket SST
 				ON SST.intCustomerStorageId = CS.intCustomerStorageId
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId
