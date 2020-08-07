@@ -130,7 +130,7 @@ group by ptitm_itm_no,ptitm_unit,ptitm_pak_desc
 DELETE u
 FROM @ItemUoms u
 WHERE EXISTS(SELECT * FROM tblICItemUOM x inner join tblICItem z on z.intItemId = x.intItemId
-	WHERE z.strItemNo = u.strItemNo AND u.strUpcCode = x.strUpcCode)
+	WHERE z.strItemNo = u.strItemNo AND LTRIM(RTRIM(LOWER(u.strUpcCode))) = LTRIM(RTRIM(LOWER(x.strUpcCode))))
 
 DECLARE @PackUnits TABLE (
 	intItemId INT,
@@ -219,7 +219,11 @@ VALUES(Source.intItemId, Source.intUnitMeasureId, Source.dblUnitQty, Source.strU
 		INNER JOIN tblICItem inv ON inv.strItemNo = uom.strItemNo
 		INNER JOIN tblICUnitMeasure u ON UPPER(u.strSymbol) = UPPER(uom.strPack)
 	WHERE NULLIF(uom.strPack, '') IS NOT NULL
-		AND NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = inv.intItemId AND intUnitMeasureId = u.intUnitMeasureId)
+		AND NOT EXISTS(
+			SELECT * 
+			FROM tblICItemUOM
+			WHERE intItemId = inv.intItemId AND (intUnitMeasureId = u.intUnitMeasureId OR LTRIM(RTRIM(LOWER(strUpcCode))) = LTRIM(RTRIM(LOWER(uom.strUpcCode))))
+			)
 
 	;WITH CTE AS 
 	(
@@ -529,6 +533,27 @@ SELECT inv.intItemId
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
 UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
+
+-- Fix Items with multiple stock Units
+DECLARE @ItemsWithMultipleStockUnits TABLE (intItemId INT, intItemUOMId INT NULL)
+INSERT INTO @ItemsWithMultipleStockUnits(intItemId)
+SELECT u.intItemId--, i.strItemNo
+FROM tblICItemUOM u
+	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
+WHERE u.ysnStockUnit = 1
+GROUP BY u.intItemId--, i.strItemNo
+HAVING COUNT(*) > 1
+
+update u
+SET u.intItemUOMId = i.intItemUOMId
+FROM @ItemsWithMultipleStockUnits u
+INNER JOIN tblICItemUOM i ON i.intItemId = u.intItemId
+
+UPDATE u
+SET u.ysnStockUnit = 0
+FROM tblICItemUOM u
+INNER JOIN @ItemsWithMultipleStockUnits m ON m.intItemId = u.intItemId
+	AND m.intItemUOMId <> u.intItemUOMId
 
 -- import Storage unit #
 update tblICItemLocation

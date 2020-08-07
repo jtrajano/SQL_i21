@@ -19,6 +19,7 @@ SELECT Invoice.*
 	, UOM.strUnitMeasure
 	, InvoiceItem.dblQuantity
 	, InvoiceItem.dblPrice
+	, InvoiceItem.dblPercentageFull
 	, InvoiceItem.intContractDetailId
 	, ContractHeader.strContractNumber
 	, ContractDetail.intContractSeq

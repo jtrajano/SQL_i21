@@ -30,11 +30,11 @@ AS
 			CS.strContractStatus,																	
 			CAST(CASE WHEN CD.intContractStatusId IN (1,4) THEN 1 ELSE 0 END AS BIT) AS	ysnAllowedToShow,																		
 			CAST(																										
-				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),CD.dtmStartDate) AND CH.intContractTypeId = 1 																							
-						THEN	1																						
-						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),CD.dtmStartDate) AND CH.intContractTypeId = 2																						
-						THEN	1																						
-						ELSE	0																						
+				CASE	WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETUTCDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysPurchase,0),ISNULL(CD.dtmStartDateUTC,CD.dtmStartDate)) AND CH.intContractTypeId = 1
+						THEN	1
+						WHEN	DATEADD(d, 0, DATEDIFF(d, 0, GETUTCDATE())) >= DATEADD(dd,-ISNULL(CP.intEarlyDaysSales,0),ISNULL(CD.dtmStartDateUTC,CD.dtmStartDate)) AND CH.intContractTypeId = 2
+						THEN	1
+						ELSE	0
 				END		AS BIT																							
 			)	AS		ysnEarlyDayPassed,																							
 			CH.intContractTypeId,																				

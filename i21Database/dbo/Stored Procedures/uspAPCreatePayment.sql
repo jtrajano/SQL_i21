@@ -213,8 +213,13 @@ BEGIN
 							FROM 
 							(
 							SELECT 
-								SUM(A.dblAmountDue) dblAmountDue
+								((SUM(dblTotal) - SUM(ISNULL(appliedPrepays.dblPayment, 0))) - SUM(dblPaymentTemp)) dblAmountDue
 							FROM tblAPBill A
+							OUTER APPLY (
+								SELECT SUM(APD.dblAmountApplied) AS dblPayment
+								FROM tblAPAppliedPrepaidAndDebit APD
+								WHERE APD.intBillId = A.intBillId AND APD.ysnApplied = 1
+							) appliedPrepays
 							WHERE 
 								A.intBillId IN (SELECT intID FROM #tmpBillsId)
 							AND A.ysnIsPaymentScheduled = 0
@@ -223,7 +228,7 @@ BEGIN
 							FROM tblAPVoucherPaymentSchedule B
 							WHERE 
 								B.intBillId IN (SELECT intID FROM #tmpBillsId)
-							AND B.ysnPaid = 0
+							AND B.ysnPaid = 0 AND B.ysnInPayment = 0
 							) paymentData
 						) 
 		SET @amountPaid = @amountPaid + @interest - ISNULL(@discount,0)
@@ -232,6 +237,17 @@ BEGIN
 	ELSE
 	BEGIN
 		SET @amountPaid = @amountPaid + @interest - @discount;
+	END
+
+	--SUBTRACT THE ALREADY SAVED PAYMENTS
+	DECLARE @ysnInPayment AS BIT = 0;
+	SELECT @ysnInPayment =  ysnInPayment
+	FROM tblAPBill
+	WHERE intBillId IN (SELECT intID FROM #tmpBillsId)
+	IF @ysnInPayment = 1
+	BEGIN
+		RAISERROR('This transaction is already saved in other payments.', 16, 1);
+		RETURN;
 	END
 
 	--Compute Withheld Here
@@ -358,7 +374,7 @@ BEGIN
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2)) --handle transaction with prepaid
 								),
 				[dblPayment]	= ISNULL(C.dblPayment,
-									A.dblAmountDue
+									((A.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - A.dblPaymentTemp)
 									--CAST((B.dblTotal + B.dblTax) - ((ISNULL(A.dblPayment,0) / A.dblTotal) * (B.dblTotal + B.dblTax)) AS DECIMAL(18,2))
 								  ),
 				[dblInterest]	= A.dblInterest,
@@ -380,7 +396,12 @@ BEGIN
 				SELECT TOP 1 intAccountId, intBillId FROM tblAPBillDetail dtls WHERE dtls.intBillId = A.intBillId
 			) details
 			LEFT JOIN tblAPVoucherPaymentSchedule C
-				ON C.intBillId = A.intBillId AND C.ysnPaid = 0
+				ON C.intBillId = A.intBillId AND C.ysnPaid = 0 AND C.ysnInPayment = 0
+			OUTER APPLY (
+				SELECT SUM(APD.dblAmountApplied) AS dblPayment
+				FROM tblAPAppliedPrepaidAndDebit APD
+				WHERE APD.intBillId = A.intBillId AND APD.ysnApplied = 1
+			) appliedPrepays
 			WHERE A.intBillId IN (SELECT [intID] FROM #tmpBillsId)
 		) vouchers
 	--GROUP BY intPaymentId, intBillId, intAccountId, dblDiscount, dblInterest, dblWithheld, ysnOffset
@@ -469,4 +490,6 @@ BEGIN
 	JOIN #tmpBillsId C ON C.intID = B.intBillId
 
 	 SET @createdPaymentId = @paymentId
+
+	 EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
 END

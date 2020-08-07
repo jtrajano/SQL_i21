@@ -51,8 +51,13 @@ BEGIN TRY
 
 	UPDATE tblIPLoadError
 	SET strAckStatus = 'Ack Sent'
+		,ysnDeadlockError = 1
 	WHERE ISNULL(strAckStatus, '') <> 'Ack Sent'
-		AND ISNULL(strErrorMessage, '') LIKE '%deadlock%'
+		AND (
+			ISNULL(strErrorMessage, '') LIKE '%deadlock%'
+			OR ISNULL(strErrorMessage, '') LIKE '%trigger%'
+			)
+		AND ISNULL(ysnDeadlockError, 0) = 0
 
 	IF @strMsgType = 'LSI'
 	BEGIN

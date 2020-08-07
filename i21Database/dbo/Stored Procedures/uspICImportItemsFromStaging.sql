@@ -78,6 +78,7 @@ CREATE TABLE #tmp (
 	, intMedicationTag INT NULL
 	, intRINFuelTypeId INT NULL
 	, strFuelInspectFee NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, [ysnSeparateStockForUOMs] BIT NULL DEFAULT ((0))
 	, dtmDateCreated DATETIME NULL
 	, intCreatedByUserId INT NULL
 )
@@ -143,6 +144,7 @@ INSERT INTO #tmp(
 	, intMedicationTag
 	, intRINFuelTypeId
 	, strFuelInspectFee
+	, ysnSeparateStockForUOMs
 	, dtmDateCreated
 	, intCreatedByUserId
 )
@@ -207,6 +209,7 @@ SELECT
 	, intMedicationTag				= med.intTagId
 	, intRINFuelTypeId				= rin.intRinFuelCategoryId
 	, strFuelInspectFee				= s.strFuelInspectFee
+	, ysnSeparateStockForUOMs		= s.ysnSeparateStockForUOMs
 	, dtmDateCreated				= s.dtmDateCreated
 	, intCreatedByUserId			= s.intCreatedByUserId
 FROM tblICImportStagingItem s
@@ -254,7 +257,7 @@ FROM tblICImportStagingItem s
 	LEFT OUTER JOIN tblICTag ing ON ing.strTagNumber = s.strIngredientTag AND ing.strType = 'Ingredient Tag'
 	LEFT OUTER JOIN tblICRinFuelCategory rin ON rin.strRinFuelCategoryCode = LTRIM(RTRIM(LOWER(s.strFuelCategory)))
 WHERE s.strImportIdentifier = @strIdentifier
-	AND LTRIM(RTRIM(LOWER(s.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType)))
+	AND (LTRIM(RTRIM(LOWER(s.strType))) = LTRIM(RTRIM(LOWER(c.strInventoryType))) OR c.strInventoryType IS NULL)
 
 ;MERGE INTO tblICItem AS target
 USING
@@ -320,6 +323,7 @@ USING
 		, intMedicationTag
 		, intRINFuelTypeId
 		, strFuelInspectFee
+		, ysnSeparateStockForUOMs
 		, dtmDateCreated
 		, intCreatedByUserId
 	FROM #tmp s
@@ -389,6 +393,7 @@ WHEN MATCHED THEN
 		, intMedicationTag = source.intMedicationTag
 		, intRINFuelTypeId = source.intRINFuelTypeId
 		, strFuelInspectFee = source.strFuelInspectFee
+		, ysnSeparateStockForUOMs = source.ysnSeparateStockForUOMs
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 WHEN NOT MATCHED THEN
@@ -455,6 +460,7 @@ WHEN NOT MATCHED THEN
 		, intMedicationTag
 		, intRINFuelTypeId
 		, strFuelInspectFee
+		, ysnSeparateStockForUOMs
 		, dtmDateCreated
 		, intDataSourceId
 	)
@@ -523,6 +529,7 @@ WHEN NOT MATCHED THEN
 		, intMedicationTag
 		, intRINFuelTypeId
 		, strFuelInspectFee
+		, ysnSeparateStockForUOMs
 		, dtmDateCreated
 		, @intDataSourceId
 	)

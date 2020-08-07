@@ -109,7 +109,12 @@
 				BEGIN
 					SELECT @customerAgingChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0, strChart = 'Pie' WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanel SET 
+					ysnChartLegend = 0, 
+					strChart = 'Pie',
+					intChartHeight = 400
+					WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @customerAgingChartPanelId AND strAlignment = 'Series1AxisY'
 					UPDATE tblDBPanelUser SET intSort = 1 WHERE intPanelId = @customerAgingChartPanelId and intPanelTabId = @panelTabId
 				END
@@ -250,7 +255,10 @@
 				BEGIN
 					SELECT @salesChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Sales Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Sales Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanel SET 
+					ysnChartLegend = 0,
+					intChartHeight = 400 
+					WHERE strPanelName = 'Sales Chart' AND ysnSystemPanel = 1
 					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @salesChartPanelId AND strAlignment = 'Series1AxisY'
 					UPDATE tblDBPanelUser SET intSort = 1 WHERE intPanelId = @salesChartPanelId and intPanelTabId = @panelTabId
 				END
@@ -338,11 +346,11 @@
 						[intGridLayoutId], [strTableName], [strColumnName],	[ysnSystemPanel], [ysnSystemPanelChild]
 					)
 					VALUES (
-						5, 7, 100, 300, @entityId, 0, 0, 0,	0, 1,	
+						5, 7, 100, 400, @entityId, 0, 0, 0,	0, 1,	
 						0, N'Master', N'Cash Projection Chart', N'Chart', N'', N'Cash Projection', N'Line', N'over', N'Base', NULL,	N'None',
 						N'None', N'', N'', N'select * from vyuCMCashProjection', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',	
-						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
+						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
 						NULL, NULL, NULL, 1, NULL
 					)
@@ -366,7 +374,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionChartPanelId, N'NetAmount', N'Net Amount', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
+						@cashProjectionChartPanelId, N'Cash', N'Cash', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'', N'', NULL
 					)
@@ -391,8 +399,17 @@
 				BEGIN
 					SELECT @cashProjectionChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1
-					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @cashProjectionChartPanelId AND strAlignment = 'Series1AxisY'
+					UPDATE tblDBPanel SET 
+					ysnChartLegend = 1, 
+					intChartHeight = 400
+					WHERE strPanelName = 'Cash Projection Chart' AND ysnSystemPanel = 1
+					
+					UPDATE tblDBPanelColumn SET 
+					strFormat = N'Round',
+					strColumn = 'Cash, APAged, ARAged',
+					strCaption = 'Cash'
+					WHERE intPanelId = @cashProjectionChartPanelId AND strAlignment = 'Series1AxisY'
+
 					UPDATE tblDBPanelUser SET intSort = 3 WHERE intPanelId = @cashProjectionChartPanelId and intPanelTabId = @panelTabId
 				END
 
@@ -436,7 +453,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'dblAmountDue', N'Amount Due', 100, N'Left', N'Data', N'', N'###0.00', 2, N'', N'', N'',
+						@cashProjectionGridPanelId, N'Cash', N'Cash', 100, N'Left', N'Data', N'', N'###0.00', 2, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -446,7 +463,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'RunningTotal', N'Running Total', 100, N'Left', N'Data', N'', N'###0.00', 3, N'', N'', N'',
+						@cashProjectionGridPanelId, N'ARAged', N'AR Aged', 100, N'Left', N'Data', N'', N'###0.00', 3, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -456,7 +473,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'NetAmount', N'Net Amount', 100, N'Left', N'Data', N'', N'###0.00', 4, N'', N'', N'',
+						@cashProjectionGridPanelId, N'APAged', N'AP Aged', 100, N'Left', N'Data', N'', N'###0.00', 4, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -466,7 +483,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@cashProjectionGridPanelId, N'FirsDayOfWeek', N'First Day of the Week', 100, N'Left', N'Row', N'', N'Date', 5, N'', N'', N'',
+						@cashProjectionGridPanelId, N'FirstDayOfWeek', N'First Day of the Week', 100, N'Left', N'Row', N'', N'Date', 5, N'', N'', N'',
 						0, N'Pivot Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'', N'', NULL
 					)
@@ -492,9 +509,9 @@
 						"aggregate":[{
 							"align":"Left",
 							"sortable":true,
-							"header":"Amount Due",
-							"dataIndex":"dblAmountDue",
-							"measure":"dblAmountDue",
+							"header":"Cash",
+							"dataIndex":"Cash",
+							"measure":"Cash",
 							"aggregator":"sum",
 							"width":100,
 							"isAggregate":true,
@@ -503,9 +520,9 @@
 						{
 							"align":"Left",
 							"sortable":true,
-							"header":"Running Total",
-							"dataIndex":"RunningTotal",
-							"measure":"RunningTotal",
+							"header":"AR Aged",
+							"dataIndex":"ARAged",
+							"measure":"ARAged",
 							"aggregator":"sum",
 							"width":100,
 							"isAggregate":true,
@@ -514,9 +531,9 @@
 						{
 							"align":"Left",
 							"sortable":true,
-							"header":"Net Amount",
-							"dataIndex":"NetAmount",
-							"measure":"NetAmount",
+							"header":"AP Aged",
+							"dataIndex":"APAged",
+							"measure":"APAged",
 							"aggregator":"sum",
 							"width":100,
 							"isAggregate":true,
@@ -526,7 +543,7 @@
 							"align":"Left",
 							"sortable":true,
 							"header":"First Day of the Week",
-							"dataIndex":"FirsDayOfWeek",
+							"dataIndex":"FirstDayOfWeek",
 							"width":120,
 							"colFormat":"m/d/Y"
 						}],
@@ -546,6 +563,78 @@
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @cashProjectionGridPanelId AND strColumn IN ('dblAmountDue', 'RunningTotal', 'NetAmount')
 					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @cashProjectionGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 4 WHERE intPanelId = @cashProjectionGridPanelId and intPanelTabId = @panelTabId
+
+					UPDATE tblDBPanelColumn SET 
+					strColumn = 'Cash',
+					strCaption = 'Cash' 
+					WHERE intPanelId = @cashProjectionGridPanelId AND strColumn  ='dblAmountDue'
+
+					UPDATE tblDBPanelColumn SET 
+					strColumn = 'ARAged',
+					strCaption = 'AR Aged' 
+					WHERE intPanelId = @cashProjectionGridPanelId AND strColumn  = 'RunningTotal'
+
+					UPDATE tblDBPanelColumn SET 
+					strColumn = 'APAged',
+					strCaption = 'AP Aged' 
+					WHERE intPanelId = @cashProjectionGridPanelId AND strColumn  = 'NetAmount'
+
+					UPDATE tblDBPanelColumn SET 
+					strColumn = 'FirstDayOfWeek',
+					strCaption = 'First Day of the Week' 
+					WHERE intPanelId = @cashProjectionGridPanelId AND strColumn  = 'FirsDayOfWeek'
+
+					--UPDATE strConfigurator for Pivot Grid
+					SET @aggregator = N'{
+						"aggregate":[{
+							"align":"Left",
+							"sortable":true,
+							"header":"Cash",
+							"dataIndex":"Cash",
+							"measure":"Cash",
+							"aggregator":"sum",
+							"width":100,
+							"isAggregate":true,
+							"showZeroAsBlank":false
+						},
+						{
+							"align":"Left",
+							"sortable":true,
+							"header":"AR Aged",
+							"dataIndex":"ARAged",
+							"measure":"ARAged",
+							"aggregator":"sum",
+							"width":100,
+							"isAggregate":true,
+							"showZeroAsBlank":false
+						},
+						{
+							"align":"Left",
+							"sortable":true,
+							"header":"AP Aged",
+							"dataIndex":"APAged",
+							"measure":"APAged",
+							"aggregator":"sum",
+							"width":100,
+							"isAggregate":true,
+							"showZeroAsBlank":false
+						}],
+						"leftAxis":[{
+							"align":"Left",
+							"sortable":true,
+							"header":"First Day of the Week",
+							"dataIndex":"FirstDayOfWeek",
+							"width":120,
+							"colFormat":"m/d/Y"
+						}],
+						"topAxis":[{
+							"align":"Left",
+							"sortable":true,
+							"header":"Week",
+							"dataIndex":"WeekNo"
+						}]
+					}';
+					UPDATE tblDBPanel SET strConfigurator = @aggregator WHERE intPanelId = @cashProjectionGridPanelId
 				END
 
 				--Gross Margin Chart
@@ -561,9 +650,9 @@
 						[intGridLayoutId], [strTableName], [strColumnName],	[ysnSystemPanel], [ysnSystemPanelChild]
 					)
 					VALUES (
-						10, 5, 100, 300, @entityId, 0, 0, 0,	0, 1,	
-						0,	N'Master', N'Gross Margin Chart', N'Chart', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select *  from vyuARInvoiceGrossMargin order by dblNet desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						3, 5, 100, 400, @entityId, 0, 0, 0,	0, 1,	
+						0,	N'Master', N'Gross Margin Chart', N'Chart', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'Last 30 Days',
+						N'None', N'dtmDate', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, 
@@ -579,7 +668,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginChartPanelId, N'strInvoiceNumber', N'Invoice No', 0, N'Series1AxisX', N'', N'', N'General', 0, N'', N'', N'',
+						@grossMarginChartPanelId, N'strType', N'Type', 0, N'Series1AxisX', N'', N'', N'General', 0, N'', N'', N'',
 						1, N'Chart', N'Series1AxisX', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.String', N'', NULL
 					)
@@ -589,7 +678,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginChartPanelId, N'dblNet', N'Net', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
+						@grossMarginChartPanelId, N'dblAmount', N'Amount', 0, N'Series1AxisY', N'', N'', N'Round', 1, N'', N'', N'',
 						1, N'Chart', N'Series1AxisY', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
@@ -614,8 +703,26 @@
 				BEGIN
 					SELECT @grossMarginChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
-					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisY'
+					UPDATE tblDBPanel SET 
+					[ysnChartLegend] = 0,
+					[intRowsReturned] = 3,
+					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType',
+					[strDateCondition] = N'Last 30 Days',
+					[strDateFieldName] = N'dtmDate',
+					intChartHeight = 400
+					WHERE strPanelName = 'Gross Margin Chart' AND ysnSystemPanel = 1
+
+					UPDATE tblDBPanelColumn SET 
+					strFormat = N'Round', 
+					[strColumn] = N'dblAmount',
+					strCaption = 'Amount'
+					WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisY'
+
+					UPDATE tblDBPanelColumn SET 
+					[strColumn] = N'strType' ,
+					strCaption = 'Type'
+					WHERE intPanelId = @grossMarginChartPanelId AND strAlignment = 'Series1AxisX'
+
 					UPDATE tblDBPanelUser SET intSort = 3 WHERE intPanelId = @grossMarginChartPanelId and intPanelTabId = @panelTabId
 				END
 
@@ -633,8 +740,8 @@
 					)
 					VALUES (
 						0, 6, 100, 250, @entityId, 0, 0, 0,	0, 1,	
-						0,	N'Master', N'Gross Margin Grid', N'Grid', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'None',
-						N'None', N'', N'', N'select strInvoiceNumber, dblRevenue, dblExpense, dblNet from vyuARInvoiceGrossMargin order by dblNet desc', N'', N'@DATE@', N'@DATE@', N'', N'',	
+						0,	N'Master', N'Gross Margin Grid', N'Grid', N'', N'Gross Margin', N'Column Stacked', N'insideEnd', N'Red', NULL, N'Last 30 Days',
+						N'None', N'dtmDate', N'', N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 1, 0, NULL, NULL, N'20.1.1',	NULL,
 						1, 0, N'', NULL, NULL, N'@ORDERBY@', N'', 0, NULL, NULL, NULL, 1, 1
@@ -649,7 +756,7 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'strInvoiceNumber', N'Invoice No', 100, N'Left', N'', N'', N'', 0, N'', N'', N'',
+						@grossMarginGridPanelId, N'strType', N'Type', 100, N'Left', N'', N'', N'', 0, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.String', N'AccountsReceivable.view.Invoice', NULL
 					)
@@ -659,10 +766,11 @@
 						[intConcurrencyId ],    [intCannedPanelId], [strDataType], [strDrillDownScreenName], [strDrillDownScreenKey]
 					)
 					VALUES (
-						@grossMarginGridPanelId, N'dblRevenue', N'Revenue', 100, N'Left', N'', N'', N'###0.00', 1, N'', N'', N'',
+						@grossMarginGridPanelId, N'dblAmount', N'Amount', 100, N'Left', N'', N'', N'###0.00', 1, N'', N'', N'',
 						1, N'Grid', N'', N'',	@entityId,	0,	0,	0,	0,	N'', 0,	
 						1,	0,	N'System.Decimal', N'', NULL
 					)
+
 					INSERT INTO tblDBPanelColumn (
 						[intPanelId], [strColumn], [strCaption], [intWidth], [strAlignment], [strArea], [strFooter], [strFormat], [intSort], [strFormatTrue], [strFormatFalse], [strDrillDownColumn],
 						[ysnVisible], [strType], [strAxis], [strUserName], [intUserId], [intDonut], [intMinInterval], [intMaxInterval], [intStepInterval], [strIntervalFormat], [ysnHiddenColumn],
@@ -704,9 +812,27 @@
 				BEGIN
 					SELECT @grossMarginGridPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
 
+					UPDATE tblDBPanel SET 
+					[strDataSource] = N'select sum(dblAmount) dblAmount, strType from vyuARInvoiceGrossMargin where @DATE@ group by strType',
+					[strDateCondition] = N'Last 30 Days',
+					[strDateFieldName] = N'dtmDate'
+					WHERE strPanelName = 'Gross Margin Grid' AND ysnSystemPanel = 1
+
 					UPDATE tblDBPanelColumn SET strFormat = '###0.00' WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblRevenue', 'dblExpense', 'dblNet')
 					UPDATE tblDBPanelUser SET ysnSystemPanelVisible = 1 WHERE intPanelId = @grossMarginGridPanelId AND intPanelTabId = @panelTabId
 					UPDATE tblDBPanelUser SET intSort = 4 WHERE intPanelId = @grossMarginGridPanelId and intPanelTabId = @panelTabId
+
+					UPDATE tblDBPanelColumn 
+					SET strColumn = 'dblAmount',
+					strCaption = 'Amount'
+					WHERE intPanelId = @grossMarginGridPanelId AND strColumn = 'dblRevenue' 
+					
+					UPDATE tblDBPanelColumn 
+					SET strColumn = 'strType',
+					strCaption = 'Type'
+					WHERE intPanelId = @grossMarginGridPanelId AND strColumn = 'strInvoiceNumber'
+
+					DELETE FROM tblDBPanelColumn WHERE intPanelId = @grossMarginGridPanelId AND strColumn IN ('dblExpense', 'dblNet')
 				END
 
 			END

@@ -306,6 +306,7 @@ BEGIN TRY
 			UPDATE tblRKOptionsMonthStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intOptionMonthStageId = @intOptionMonthStageId
 
 			-- Audit Log
@@ -358,6 +359,7 @@ BEGIN TRY
 			UPDATE tblRKOptionsMonthStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intOptionMonthStageId = @intOptionMonthStageId
 		END CATCH
 

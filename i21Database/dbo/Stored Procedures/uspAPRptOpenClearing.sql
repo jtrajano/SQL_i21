@@ -44,6 +44,7 @@ DECLARE @join NVARCHAR(10)
 DECLARE @begingroup NVARCHAR(50)  
 DECLARE @endgroup NVARCHAR(50)  
 DECLARE @datatype NVARCHAR(50)  
+DECLARE @dateCondition NVARCHAR(50)
   
  -- Sanitize the @xmlParam   
 IF LTRIM(RTRIM(@xmlParam)) = ''   
@@ -89,8 +90,9 @@ BEGIN
   0 AS dblAmountToVoucher,  
   0 AS dblChargeAmount,   
   NULL as dtmCurrentDate,  
-  NULL AS strLocationName  
-  
+  NULL AS strLocationName,
+  NULL AS dtmStartDate,
+  NULL AS dtmEndDate
 END  
   
 DECLARE @xmlDocumentId AS INT;  
@@ -128,7 +130,7 @@ WITH (
 --select * from @temp_xml_table  
 --CREATE date filter  
 SELECT @dateFrom = [from], @dateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmReceiptDate';  
-SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';  
+SELECT @dtmDate = [from], @dtmDateTo = [to], @condition = condition, @dateCondition = condition FROM @temp_xml_table WHERE [fieldname] = 'dtmDate';  
 SET @innerQuery2 = 'SELECT DISTINCT  
       intInventoryReceiptId  
       ,strBillId  
@@ -773,7 +775,10 @@ SELECT * FROM (
 ) MainQuery'  
   
 SET @query = @cteQuery + N'  
-SELECT * FROM (   
+SELECT *
+  ,dtmStartDate = '''+ CONVERT(NVARCHAR(10), ISNULL(@dtmDate, '1/1/1900'), 101) +'''
+  ,dtmEndDate = '''+ CONVERT(NVARCHAR(10), CASE WHEN @dateCondition = 'Equal To' THEN @dtmDate ELSE ISNULL(@dtmDateTo, GETDATE()) END, 101) +'''
+ FROM (   
  SELECT  
   r.strReceiptNumber
   ,r.dtmReceiptDate
@@ -900,9 +905,7 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE 
-      (dblClearingQty) != 0 
-  -- OR  (dblClearingAmount) != 0  
+ WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END 
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
@@ -966,9 +969,7 @@ SELECT * FROM (
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
-  WHERE 
-      (dblClearingQty) != 0 
-  -- OR  (dblClearingAmount) != 0  
+  WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END  
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT  

@@ -135,7 +135,7 @@ INSERT INTO #CUSTOMERINQUIRY (
 )
 SELECT intEntityCustomerId          = CUSTOMER.intEntityId
      , intEntityId					= CUSTOMER.intEntityId
-	 , intTermsId					= CUSTOMER.intTermsId
+	 , intTermsId					= ISNULL(CUSTOMER.intTermsId, 0)
 	 , strCustomerName				= CUSTOMER.strName
 	 , strTerm						= CUSTOMER.strTerm
 	 , strCustomerNumber			= CUSTOMER.strCustomerNumber

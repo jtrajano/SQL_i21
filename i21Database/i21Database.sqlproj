@@ -2037,7 +2037,6 @@
     <Build Include="dbo\Stored Procedures\uspMFValidateCreateWorkOrder.sql" />
     <Build Include="dbo\Views\vyuICGetAssemblyItem.sql" />
     <Build Include="dbo\Views\vyuAPRptCheckRegister.sql" />
-    <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceHeader.sql" />
     <Build Include="dbo\Views\vyuSMPortalPermission.sql" />
     <Build Include="dbo\Views\vyuSMMenuPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleUpdate.sql" />
@@ -6282,7 +6281,6 @@
     <Build Include="dbo\Functions\fnICGetTransWeightedAveCost.sql" />
     <Build Include="dbo\Stored Procedures\uspSMUpdateUserPassword.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MValidateInquiryTransaction.sql" />
-    <Build Include="dbo\Views\vyuRKGetFutureSettlementPriceString.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateNM41164.sql" />
     <Build Include="dbo\Tables\tblFRBudgetSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDBudgetSummary.sql" />
@@ -8747,10 +8745,15 @@
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuRKGetSettlementPriceHeader.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityBookPermission.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAllowDPContractClosure.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
+    <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

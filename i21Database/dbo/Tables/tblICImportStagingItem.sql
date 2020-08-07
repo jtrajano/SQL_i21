@@ -63,6 +63,7 @@ CREATE TABLE [dbo].[tblICImportStagingItem] (
 	[strLotTracking] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strBarcodePrint] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[strFuelInspectFee] NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
+	[ysnSeparateStockForUOMs] BIT NULL DEFAULT ((1)),
 	[dtmDateCreated] [datetime] NULL,
 	[dtmDateModified] [datetime] NULL,
 	[intCreatedByUserId] [int] NULL,
