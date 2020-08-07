@@ -89,12 +89,14 @@ BEGIN
 	DECLARE @intSiteId						INT
 	DECLARE @dblTransferCost				NUMERIC(18,6)
 	DECLARE @dblOriginalPrice				NUMERIC(18,6)
+	DECLARE @dblOriginalPriceZeroQty		NUMERIC(18,6)
 	DECLARE @dblOriginalPriceForCalculation NUMERIC(18,6)
 	DECLARE @intCardId						INT
 	DECLARE @intVehicleId					INT
 	DECLARE @intTaxGroupId					INT
 
 	DECLARE @dblPrice						NUMERIC(18,6)
+	DECLARE @dblPriceZeroQty				NUMERIC(18,6)
 	DECLARE @strPriceBasis					NVARCHAR(MAX)
 	DECLARE @strPriceMethod					NVARCHAR(MAX)
 	DECLARE @intContractHeaderId			INT	
@@ -211,6 +213,7 @@ BEGIN
 	SET @intSiteId = @SiteId
 	SET @dblTransferCost =@TransferCost
 	SET @dblOriginalPrice = @OriginalPrice
+	SET @dblOriginalPriceZeroQty = @dblOriginalPrice
 	SET @intTransactionId = @TransactionId
 
 	IF (@intTransactionId > 0 AND @IsImporting = 0)
@@ -435,6 +438,9 @@ BEGIN
 	@CFSiteGroupId				= 	@intSiteGroupId,				
 	@CFPriceRuleGroup			=	@intPriceRuleGroup,
 	@CFAdjustmentRate			=	@dblAdjustmentRate			output
+
+
+	SET @dblPriceZeroQty = @dblPrice
 
 	
 	IF(LOWER(@strPriceMethod) = 'network cost' OR LOWER(@strPriceBasis) = 'transfer cost')
@@ -1349,7 +1355,7 @@ BEGIN
 								,@intCustomerId
 								,@intLocationId
 								,NULL
-								,@dblPrice
+								,@dblPriceZeroQty
 								,@dtmTransactionDate
 								,NULL
 								,1
@@ -1471,7 +1477,7 @@ BEGIN
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							@dblZeroQuantity
-							,(@dblPrice * @dblZeroQuantity)
+							,(@dblPriceZeroQty * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
 							,@intItemId
@@ -1615,7 +1621,7 @@ BEGIN
 						,@intCustomerId
 						,@intLocationId
 						,NULL
-						,@dblPrice
+						,@dblPriceZeroQty
 						,@dtmTransactionDate
 						,NULL
 						,1
@@ -1737,7 +1743,7 @@ BEGIN
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							@dblZeroQuantity
-							,(@dblPrice * @dblZeroQuantity)
+							,(@dblPriceZeroQty * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
 							,@intItemId
@@ -1868,7 +1874,7 @@ BEGIN
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 						@dblZeroQuantity										 
-						,(@dblOriginalPrice * @dblZeroQuantity)					 
+						,(@dblOriginalPriceZeroQty * @dblZeroQuantity)					 
 						,@LineItemTaxDetailStagingTable						 
 						,1													 
 						,@intItemId											 
@@ -1951,7 +1957,7 @@ BEGIN
 							,@intCustomerId
 							,@intLocationId
 							,NULL
-							,@dblPrice
+							,@dblPriceZeroQty
 							,@dtmTransactionDate
 							,NULL
 							,1
@@ -2146,7 +2152,7 @@ BEGIN
 						,@intCustomerId
 						,@intLocationId
 						,NULL
-						,@dblPrice
+						,@dblPriceZeroQty
 						,@dtmTransactionDate
 						,NULL
 						,1
@@ -2276,7 +2282,7 @@ BEGIN
 						,@intCustomerId
 						,@intLocationId
 						,NULL
-						,@dblOriginalPrice
+						,@dblOriginalPriceZeroQty
 						,@dtmTransactionDate
 						,NULL
 						,1
@@ -2614,7 +2620,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 						@dblZeroQuantity
-					,(@dblOriginalPrice * @dblZeroQuantity)
+					,(@dblOriginalPriceZeroQty * @dblZeroQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
@@ -2752,7 +2758,7 @@ BEGIN
 								,@intCustomerId
 								,@intLocationId
 								,@intTaxGroupId
-								,@dblPrice
+								,@dblPriceZeroQty
 								,@dtmTransactionDate
 								,NULL
 								,1
@@ -2874,7 +2880,7 @@ BEGIN
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							@dblZeroQuantity
-							,(@dblPrice * @dblZeroQuantity)
+							,(@dblPriceZeroQty * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
 							,@intItemId
@@ -3018,7 +3024,7 @@ BEGIN
 						,@intCustomerId
 						,@intLocationId
 						,@intTaxGroupId
-						,@dblPrice
+						,@dblPriceZeroQty
 						,@dtmTransactionDate
 						,NULL
 						,1
@@ -3140,7 +3146,7 @@ BEGIN
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 							@dblZeroQuantity
-							,(@dblPrice * @dblZeroQuantity)
+							,(@dblPriceZeroQty * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
 							,@intItemId
@@ -3278,7 +3284,7 @@ BEGIN
 				FROM [fnConstructLineItemTaxDetail] 
 				(
 						@dblZeroQuantity
-					,(@dblOriginalPrice * @dblZeroQuantity)
+					,(@dblOriginalPriceZeroQty * @dblZeroQuantity)
 					,@LineItemTaxDetailStagingTable
 					,1
 					,@intItemId
@@ -3405,7 +3411,7 @@ BEGIN
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 								@dblZeroQuantity
-							,(@dblPrice * @dblZeroQuantity)
+							,(@dblPriceZeroQty * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
 							,@intItemId
@@ -3530,7 +3536,7 @@ BEGIN
 						FROM [fnConstructLineItemTaxDetail] 
 						(
 								@dblZeroQuantity
-							,(@dblPrice * @dblZeroQuantity)
+							,(@dblPriceZeroQty * @dblZeroQuantity)
 							,@LineItemTaxDetailStagingTable
 							,1
 							,@intItemId
@@ -3675,7 +3681,7 @@ BEGIN
 					,@intCustomerId
 					,@intLocationId
 					,@intTaxGroupId
-					,@dblOriginalPrice
+					,@dblOriginalPriceZeroQty
 					,@dtmTransactionDate
 					,@intLocationId
 					,1
@@ -3802,7 +3808,7 @@ BEGIN
 							,@intCustomerId
 							,@intLocationId
 							,@intTaxGroupId
-							,@dblPrice
+							,@dblPriceZeroQty
 							,@dtmTransactionDate
 							,@intLocationId
 							,1
@@ -3927,7 +3933,7 @@ BEGIN
 							,@intCustomerId
 							,@intLocationId
 							,@intTaxGroupId
-							,@dblPrice
+							,@dblPriceZeroQty
 							,@dtmTransactionDate
 							,@intLocationId
 							,1
@@ -4215,7 +4221,7 @@ BEGIN
 			FROM [fnConstructLineItemTaxDetail] 
 			(
 					@dblZeroQuantity
-				,(@dblOriginalPrice * @dblZeroQuantity)
+				,(@dblOriginalPriceZeroQty * @dblZeroQuantity)
 				,@LineItemTaxDetailStagingTable
 				,1
 				,@intItemId
@@ -4352,7 +4358,7 @@ BEGIN
 						,@intCustomerId
 						,@intLocationId
 						,@intTaxGroupId
-						,@dblPrice
+						,@dblPriceZeroQty
 						,@dtmTransactionDate
 						,@intLocationId
 						,1
@@ -4474,7 +4480,7 @@ BEGIN
 			FROM [fnConstructLineItemTaxDetail] 
 			(
 					@dblZeroQuantity
-				,(@dblPrice * @dblZeroQuantity)
+				,(@dblPriceZeroQty * @dblZeroQuantity)
 				,@LineItemTaxDetailStagingTable
 				,1
 				,@intItemId
@@ -4615,7 +4621,7 @@ BEGIN
 						,@intCustomerId
 						,@intLocationId
 						,@intTaxGroupId
-						,@dblPrice
+						,@dblPriceZeroQty
 						,@dtmTransactionDate
 						,@intLocationId
 						,1
@@ -4737,7 +4743,7 @@ BEGIN
 					FROM [fnConstructLineItemTaxDetail] 
 					(
 							@dblZeroQuantity
-						,(@dblPrice * @dblZeroQuantity)
+						,(@dblPriceZeroQty * @dblZeroQuantity)
 						,@LineItemTaxDetailStagingTable
 						,1
 						,@intItemId
@@ -4885,7 +4891,7 @@ BEGIN
 			FROM [fnConstructLineItemTaxDetail] 
 			(
 					@dblZeroQuantity
-				,(@dblOriginalPrice * @dblZeroQuantity)
+				,(@dblOriginalPriceZeroQty * @dblZeroQuantity)
 				,@LineItemTaxDetailStagingTable
 				,1
 				,@intItemId
@@ -5014,7 +5020,7 @@ BEGIN
 			FROM [fnConstructLineItemTaxDetail] 
 			(
 					@dblZeroQuantity
-				,(@dblPrice * @dblZeroQuantity)
+				,(@dblPriceZeroQty * @dblZeroQuantity)
 				,@LineItemTaxDetailStagingTable
 				,1
 				,@intItemId
@@ -5078,7 +5084,7 @@ BEGIN
                     FROM [fnConstructLineItemTaxDetail] 
                     (
                             @dblZeroQuantity
-                        ,(@dblPrice * @dblZeroQuantity)
+                        ,(@dblPriceZeroQty * @dblZeroQuantity)
                         ,@LineItemTaxDetailStagingTable
                         ,1
                         ,@intItemId
@@ -5284,7 +5290,7 @@ BEGIN
 				,@intCustomerId
 				,@intLocationId
 				,@intTaxGroupId
-				,@dblOriginalPrice
+				,@dblOriginalPriceZeroQty
 				,@dtmTransactionDate
 				,@intLocationId
 				,1
@@ -5411,7 +5417,7 @@ BEGIN
 				,@intCustomerId
 				,@intLocationId
 				,@intTaxGroupId
-				,@dblPrice
+				,@dblPriceZeroQty
 				,@dtmTransactionDate
 				,@intLocationId
 				,1
@@ -5536,7 +5542,7 @@ BEGIN
                         ,@intCustomerId
                         ,@intLocationId
                         ,@intTaxGroupId
-                        ,@dblPrice
+                        ,@dblPriceZeroQty
                         ,@dtmTransactionDate
                         ,@intLocationId
                         ,1
@@ -6153,6 +6159,7 @@ BEGIN
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6) + ISNULL(@dblAdjustments,0)
+				SET @dblPriceZeroQty = Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6) + ISNULL(@dblAdjustments,0)
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
@@ -6203,36 +6210,65 @@ BEGIN
 	ELSE IF @strPriceMethod = 'Network Cost'
 		BEGIN
 
+		-- Original Net Price = Net Transfer Cost = Round( (Round(Gross Transfer Cost * Quantity,2) - Original Taxes) / Quantity, 6)
+		-- Calc Gross Price = Gross Transfer Cost - Round(Calc Exempt Taxes / Quantity,6) + Round(Special Rule Taxes/Quantity,6) , 6)
+		-- Calc Net Price = Round( (Round(Gross Transfer Cost * Quantity,2) - (Calc Taxes) )/ Quantity,6)
+
+		DECLARE @dblNCPrice100kQty NUMERIC(18,6)
+		DECLARE @dblNCPriceQty NUMERIC(18,6)
+
 		IF(@ysnReRunForSpecialTax = 1)
 		BEGIN
 			SET @dblOriginalPrice	= @dblOriginalPriceForCalculation
 		END
 
+		DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
+		DECLARE @dblNetworkCostGrossPriceZeroQty NUMERIC(18,6)
+
+				
 		IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
 		BEGIN
 			SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
-			SET @dblOriginalPrice					=Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+			SET @dblOriginalPriceZeroQty			= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
+			SET @dblOriginalPrice					= Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 			SET @ysnReRunForSpecialTax				= 1
 			GOTO TAXCOMPUTATION
 		END
+		
+
+		-- IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
+		-- BEGIN
+		-- 	SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
+		-- 	SET @dblOriginalPrice					=Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+		-- 	SET @ysnReRunForSpecialTax				= 1
+		-- 	GOTO TAXCOMPUTATION
+		-- END
 
 		IF(@ysnReRunCalcTax = 0)
 		BEGIN
-			DECLARE @dblNetworkCostGrossPrice NUMERIC(18,6)
-			SET @dblPrice = ISNULL(@TransferCost,0)
+			SET @dblNCPriceQty = Round((ISNULL(@TransferCost,0) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+			SET @dblNCPrice100kQty = Round((ISNULL(@TransferCost,0) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+	
+			SET @dblPrice = @dblNCPriceQty
+			SET @dblPriceZeroQty = @dblNCPrice100kQty
 			SET @ysnReRunCalcTax = 1
 			GOTO TAXCOMPUTATION
 		END
-		IF(ISNULL(@ysnForceRounding,0) = 1) 
-		BEGIN
-			SELECT @dblNetworkCostGrossPrice = dbo.fnCFForceRounding(@dblPrice)
-		END
 		ELSE
 		BEGIN
-			SET @dblNetworkCostGrossPrice = @dblPrice
+			SET @dblNetworkCostGrossPrice = Round((ISNULL(@TransferCost,0) - ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+			SET @dblNetworkCostGrossPriceZeroQty = Round((ISNULL(@TransferCost,0) - ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+			
 		END
 
-		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPrice
+		IF(ISNULL(@ysnForceRounding,0) = 1) 
+		BEGIN
+			SELECT @dblNetworkCostGrossPrice = dbo.fnCFForceRounding(@dblNetworkCostGrossPrice)
+			SELECT @dblNetworkCostGrossPriceZeroQty = dbo.fnCFForceRounding(@dblNetworkCostGrossPriceZeroQty)
+		END
+	
+
+		SET @dblCalculatedGrossPrice	 = 	 @dblNetworkCostGrossPriceZeroQty
 		SET @dblOriginalGrossPrice		 = 	 @dblPrice
 		SET @dblCalculatedNetPrice		 = 	 ROUND(((ROUND((@dblNetworkCostGrossPrice * @dblQuantity),2) - (ISNULL(@totalCalculatedTax,0))) / @dblQuantity),6)
 		SET @dblOriginalNetPrice		 = 	 ROUND(((ROUND((@dblPrice * @dblQuantity),2) - (ISNULL(@totalOriginalTax,0))) / @dblQuantity),6)
@@ -6288,6 +6324,7 @@ BEGIN
 			SET @dblPrice100kQty = @dblLocalIndexRetailGrossPriceZeroQty
 			SET @dblPriceQty = @dblLocalIndexRetailGrossPrice
 			SET @dblPrice = @dblLocalIndexRetailGrossPrice
+			SET @dblPriceZeroQty = @dblLocalIndexRetailGrossPriceZeroQty
 			SET @ysnReRunCalcTax = 1
 			GOTO TAXCOMPUTATION
 		END
@@ -6360,32 +6397,34 @@ BEGIN
 			END
 
 			DECLARE @dblPumpPriceAdjustmentGrossPrice NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPrice = Round(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
-
+			
 			DECLARE @dblPumpPriceAdjustmentGrossPriceZeroQty NUMERIC(18,6)
-			SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
-
+			
 			
 			IF(@ysnReRunForSpecialTax = 0 AND ISNULL(@dblSpecialTax,0) > 0)
 			BEGIN
 				SET @dblOriginalPriceForCalculation		= @dblOriginalPrice
-				SET @dblOriginalPrice					=	   Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
+				SET @dblOriginalPriceZeroQty				= Round((Round(@dblOriginalPriceZeroQty * @dblZeroQuantity,2) - @totalOriginalTaxZeroQuantity) / @dblZeroQuantity, 6)
+				SET @dblOriginalPrice					= Round((Round(@dblOriginalPrice * @dblQuantity,2) - @totalOriginalTax) / @dblQuantity, 6)
 				SET @ysnReRunForSpecialTax				= 1
 				GOTO TAXCOMPUTATION
 			END
 
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
-				SET @dblPPAPrice100kQty = @dblPumpPriceAdjustmentGrossPriceZeroQty
-				SET @dblPPAPriceQty = @dblPumpPriceAdjustmentGrossPrice
-				SET @dblPrice = @dblPumpPriceAdjustmentGrossPrice
+				SET @dblPPAPriceQty = Round(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0)) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+				SET @dblPPAPrice100kQty = Round(((@dblAdjustments +  @dblOriginalPrice) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+		
+				SET @dblPrice = @dblPPAPriceQty
+				SET @dblPriceZeroQty = @dblPPAPrice100kQty
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
 			ELSE
 			BEGIN
-				SET @dblPumpPriceAdjustmentGrossPrice = @dblPPAPriceQty
-				SET @dblPumpPriceAdjustmentGrossPriceZeroQty  = @dblPPAPrice100kQty
+				SET @dblPumpPriceAdjustmentGrossPrice = Round(((ISNULL(@dblAdjustments,0) +  ISNULL(@dblOriginalPrice,0))- ROUND((@totalCalculatedTaxExempt / @dblQuantity),6) + ROUND((ISNULL(@dblSpecialTax,0) / @dblQuantity),6) ),6)
+				SET @dblPumpPriceAdjustmentGrossPriceZeroQty = Round(((@dblAdjustments +  @dblOriginalPrice)- ROUND((@totalCalculatedTaxExemptZeroQuantity/ @dblZeroQuantity),6) + ROUND((ISNULL(@dblSpecialTaxZeroQty,0) / @dblZeroQuantity),6) ),6)
+				
 			END
 
 
@@ -6418,6 +6457,7 @@ BEGIN
 			IF(@ysnReRunCalcTax = 0)
 			BEGIN
 				SET @dblPrice = ISNULL(@dblNetTransferCostZeroQuantity,0) + ISNULL(@dblAdjustments,0)
+				SET @dblPriceZeroQty = @dblPrice
 				SET @ysnReRunCalcTax = 1
 				GOTO TAXCOMPUTATION
 			END
@@ -6449,6 +6489,7 @@ BEGIN
 			BEGIN
 
 				SELECT @dblPrice = dbo.fnCFForceRounding((@dblPrice + (@totalCalculatedTaxZeroQuantity / @dblQuantity)))
+				SET @dblPriceZeroQty = @dblPrice
 				SET @ysnBackoutDueToRouding  = 1
 				SET @ysnReRunCalcTax = 1
 				SET @ysnForceRounding = 0

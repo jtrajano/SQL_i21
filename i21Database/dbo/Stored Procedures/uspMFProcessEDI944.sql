@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspMFProcessEDI944 (@strReceiptNumber NVARCHAR(50) = '')
+﻿CREATE PROCEDURE uspMFProcessEDI944 (@strReceiptNumber NVARCHAR(50) = NULL)
 AS
 BEGIN
 	DECLARE @tblMFOrderNo TABLE (
@@ -15,7 +15,52 @@ BEGIN
 		,@dtmDate DATETIME
 		,@strError NVARCHAR(MAX)
 
-	IF @strReceiptNumber = ''
+	--IF @strReceiptNumber = ''
+	--BEGIN
+	--	INSERT INTO @tblMFOrderNo (
+	--		intInventoryReceiptId
+	--		,strOrderNo
+	--		,strReceiptNumber
+	--		)
+	--	SELECT TOP 1 IR.intInventoryReceiptId
+	--		,IR.strWarehouseRefNo
+	--		,IR.strReceiptNumber
+	--	FROM tblICInventoryReceipt IR
+	--	WHERE ysnPosted = 1
+	--		AND EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI943Archive EDI943
+	--			WHERE EDI943.strDepositorOrderNumber = IR.strWarehouseRefNo
+	--			)
+	--		AND NOT EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI944 EDI944
+	--			WHERE EDI944.ysnStatus = 1
+	--				AND EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
+	--			)
+	--	ORDER BY IR.intInventoryReceiptId
+	--END
+	--ELSE
+	--BEGIN
+	--	INSERT INTO @tblMFOrderNo (
+	--		intInventoryReceiptId
+	--		,strOrderNo
+	--		,strReceiptNumber
+	--		)
+	--	SELECT TOP 1 IR.intInventoryReceiptId
+	--		,IR.strWarehouseRefNo
+	--		,IR.strReceiptNumber
+	--	FROM tblICInventoryReceipt IR
+	--	WHERE ysnPosted = 1
+	--		AND EXISTS (
+	--			SELECT *
+	--			FROM tblMFEDI943Archive EDI943
+	--			WHERE EDI943.strDepositorOrderNumber = IR.strWarehouseRefNo
+	--			)
+	--		AND IR.strReceiptNumber = @strReceiptNumber
+	--	ORDER BY IR.intInventoryReceiptId
+	--END
+	IF @strReceiptNumber IS NULL
 	BEGIN
 		INSERT INTO @tblMFOrderNo (
 			intInventoryReceiptId
@@ -25,20 +70,30 @@ BEGIN
 		SELECT TOP 1 IR.intInventoryReceiptId
 			,IR.strWarehouseRefNo
 			,IR.strReceiptNumber
-		FROM tblICInventoryReceipt IR
-		WHERE ysnPosted = 1
-			AND EXISTS (
-				SELECT *
-				FROM tblMFEDI943Archive EDI943
-				WHERE EDI943.strDepositorOrderNumber = IR.strWarehouseRefNo
-				)
-			AND NOT EXISTS (
-				SELECT *
-				FROM tblMFEDI944 EDI944
-				WHERE EDI944.ysnStatus = 1
-					AND EDI944.intInventoryReceiptId = IR.intInventoryReceiptId
-				)
+		FROM tblMFEDIStage944 EDI
+		JOIN tblICInventoryReceipt IR ON EDI.intInventoryReceiptId = IR.intInventoryReceiptId
+		WHERE IR.ysnPosted = 1
+			AND EDI.intStatusId = 0
 		ORDER BY IR.intInventoryReceiptId
+
+		IF NOT EXISTS (
+				SELECT *
+				FROM @tblMFOrderNo
+				)
+		BEGIN
+			INSERT INTO @tblMFOrderNo (
+				intInventoryReceiptId
+				,strOrderNo
+				,strReceiptNumber
+				)
+			SELECT TOP 1 IR.intInventoryReceiptId
+				,IR.strWarehouseRefNo
+				,IR.strReceiptNumber
+			FROM tblMFEDIStage944 EDI
+			JOIN tblICInventoryReceipt IR ON EDI.intInventoryReceiptId = IR.intInventoryReceiptId
+			WHERE IR.ysnPosted = 1
+			ORDER BY IR.intInventoryReceiptId
+		END
 	END
 	ELSE
 	BEGIN
@@ -153,10 +208,10 @@ BEGIN
 				ELSE IRL.dblQuantity
 				END) dblReceived
 		,IsNULL(IsNULL(EDI.strUOM, (
-				SELECT TOP 1 Arc.strUOM
-				FROM tblMFEDI943Archive Arc
-				WHERE Arc.strVendorItemNumber = I.strItemNo
-				)),I.strMask3) AS strUOM
+					SELECT TOP 1 Arc.strUOM
+					FROM tblMFEDI943Archive Arc
+					WHERE Arc.strVendorItemNumber = I.strItemNo
+					)), I.strMask3) AS strUOM
 		,IRL.strParentLotNumber
 	FROM dbo.tblICInventoryReceipt IR
 	JOIN dbo.tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
@@ -193,7 +248,8 @@ BEGIN
 	IF EXISTS (
 			SELECT *
 			FROM @tblMFEDI944 EDI
-			WHERE strUOM IS NULL OR LTRIM(RTRIM(strUOM))=''
+			WHERE strUOM IS NULL
+				OR LTRIM(RTRIM(strUOM)) = ''
 			)
 	BEGIN
 		INSERT INTO tblMFEDI944Error (
@@ -228,7 +284,8 @@ BEGIN
 			,[dbo].[fnRemoveTrailingZeroes](dblReceived) AS dblReceived
 			,strUOM
 			,strParentLotNumber
-			,1,0
+			,1
+			,0
 		FROM @tblMFEDI944
 		ORDER BY intRecordId
 
@@ -272,4 +329,8 @@ BEGIN
 		,strOrderNo
 		,1
 	FROM @tblMFOrderNo
+
+	DELETE EDI
+	FROM tblMFEDIStage944 EDI
+	JOIN @tblMFOrderNo O ON EDI.intInventoryReceiptId = O.intInventoryReceiptId
 END
