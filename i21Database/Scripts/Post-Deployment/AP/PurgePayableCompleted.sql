@@ -15,3 +15,11 @@ BEGIN
 
 	SELECT * FROM tblAPVoucherPayableCompleted
 END
+
+--TO CORRECT THE IDENTITY SEQUENCE WHEN THE tblAPVoucherPayable HAS BEEN RESEED ONCE RECREATED
+DECLARE @identitySequence INT = 1;
+SELECT @identitySequence = MAX(intVoucherPayableId) FROM tblAPVoucherPayableTaxStaging
+IF @identitySequence > (SELECT IDENT_CURRENT('tblAPVoucherPayable'))
+BEGIN
+	DBCC CHECKIDENT ('tblAPVoucherPayable', RESEED, @identitySequence)
+END
