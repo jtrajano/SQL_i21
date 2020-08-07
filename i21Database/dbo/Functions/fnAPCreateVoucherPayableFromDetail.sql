@@ -84,6 +84,7 @@ RETURNS TABLE AS RETURN
 		,[dblDifference]					=	B.dblDifference
 		,[intFreightTermId]					=	B.intFreightTermId
 		,[ysnStage]							=	B.ysnStage
+		,[intBillDetailId]					=	B.intBillDetailId
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN @voucherDetailIds C ON B.intBillDetailId = C.intId
