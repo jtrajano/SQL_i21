@@ -69,9 +69,15 @@ BEGIN TRY
 			)
 		from tblCTPriceFixationDetailAPAR a
 		where a.intBillId is not null group by a.intPriceFixationDetailId
+		),			
+		paidVouchers as (
+			SELECT PFD.intPriceFixationDetailId, BP.ysnPaid
+			FROM tblCTPriceFixationDetail PFD
+			INNER JOIN tblCTPriceFixationDetailAPAR APAR ON PFD.intPriceFixationDetailId = APAR.intPriceFixationDetailId AND APAR.intBillId IS NOT NULL
+			INNER JOIN vyuAPBillPayment BP ON APAR.intBillId = BP.intBillId
+			WHERE PFD.intPriceFixationId = @intPriceFixationId
+			GROUP BY PFD.intPriceFixationDetailId, BP.ysnPaid
 		)
-
-
 
 	SELECT	FD.*,
 
@@ -96,7 +102,8 @@ BEGIN TRY
 			ysnBilled = FDV.ysnBilled,
 			strBillIds = FDV.strBillIds,
 			strBills = FDV.strBills,
-			strEditErrorMessage = dbo.fnCTGetPricingDetailVoucherInvoice(FD.intPriceFixationDetailId)
+			strEditErrorMessage = dbo.fnCTGetPricingDetailVoucherInvoice(FD.intPriceFixationDetailId),
+			ysnPaid = CAST((CASE WHEN CH.intContractTypeId = 1 THEN ISNULL(PV.ysnPaid,0) ELSE 0 END) AS BIT)
 
 	FROM	tblCTPriceFixationDetail	FD
 	JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId			=	FD.intPriceFixationId
@@ -111,9 +118,10 @@ BEGIN TRY
 	JOIN	tblRKBrokerageAccount		BA	ON	BA.intBrokerageAccountId		=	FD.intBrokerageAccountId	LEFT
 	JOIN	tblRKFutOptTransaction		TR	ON	TR.intFutOptTransactionId		=	FD.intFutOptTransactionId	LEFT
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	PF.intContractDetailId		LEFT
-	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		
-	LEFT JOIN fixationDetailInvoice FDI ON FDI.intPriceFixationDetailId = FD.intPriceFixationDetailId
-	LEFT JOIN fixationDetailVoucher FDV ON FDV.intPriceFixationDetailId = FD.intPriceFixationDetailId
+	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId		LEFT 
+	JOIN	fixationDetailInvoice		FDI ON	FDI.intPriceFixationDetailId	=	FD.intPriceFixationDetailId	LEFT 
+	JOIN	fixationDetailVoucher		FDV ON	FDV.intPriceFixationDetailId	=	FD.intPriceFixationDetailId	LEFT 
+	JOIN	paidVouchers				PV	ON	PV.intPriceFixationDetailId		=	FD.intPriceFixationDetailId
 
 END TRY
 
