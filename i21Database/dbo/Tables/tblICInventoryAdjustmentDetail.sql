@@ -62,6 +62,13 @@
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryAdjustmentDetail_intInventoryAdjustmentId]
+	ON [dbo].[tblICInventoryAdjustmentDetail]([intInventoryAdjustmentId] ASC)
+
+GO
+
+GO
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Weight Unit of Measure Id',
     @level0type = N'SCHEMA',
