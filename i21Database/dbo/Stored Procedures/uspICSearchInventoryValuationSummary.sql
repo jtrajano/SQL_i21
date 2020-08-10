@@ -89,7 +89,8 @@ FROM	tblGLFiscalYearPeriod f
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
+				--dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
+				FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(f.dtmEndDate AS FLOAT))
 				AND t.intItemId = Item.intItemId
 				AND t.intItemLocationId = Item.intItemLocationId
 			GROUP BY 
