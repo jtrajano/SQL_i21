@@ -93,7 +93,7 @@ BEGIN
 				UPDATE voucher
 					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
 						--,@amountDue = voucher.dblAmountDue
-						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
+						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 													ELSE 0 END
@@ -119,7 +119,7 @@ BEGIN
 				UPDATE voucher
 					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
 						--,@amountDue = voucher.dblAmountDue
-						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
+						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 													ELSE 0 END
@@ -172,10 +172,12 @@ BEGIN
 			UPDATE voucher
 				SET	@updatedPaymentAmt = CASE WHEN @tempPayment != voucher.dblTempPayment --Payment have been edited
 						THEN @tempPayment
-						ELSE ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
+						ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
+							 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
+							 ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest END
 						END
 					--,@amountDue = voucher.dblAmountDue
-					,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
+					,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 												ELSE 0 END

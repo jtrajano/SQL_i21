@@ -92,7 +92,7 @@ FROM (
 	AND voucher.intTransactionType NOT IN (11, 12)
 	AND voucher.intTransactionReversed IS NULL
 	AND voucher.ysnIsPaymentScheduled = 0
-	AND (voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0)
+	AND ((voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0) OR voucher.ysnPrepayHasPayment <> 0)
 	UNION ALL
 	SELECT 
 		voucher.intBillId
@@ -165,5 +165,5 @@ FROM (
 	AND voucher.ysnIsPaymentScheduled = 1 --AP-7092
 	AND paySched.ysnPaid = 0
 	AND paySched.ysnInPayment = 0
-	AND (voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0)
+	AND ((voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0) OR voucher.ysnPrepayHasPayment <> 0)
 ) forPayment
