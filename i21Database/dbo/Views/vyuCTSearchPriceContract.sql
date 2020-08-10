@@ -130,8 +130,11 @@ AS
 					CD.strPricingType,
 					CD.strItemNo,
 					CD.strItemDescription,
-					CD.strShortName strItemShortName
-
+					CD.strShortName strItemShortName,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -199,7 +202,10 @@ AS
 					,strItemNo = NULL --CD.strItemNo
 					,strItemDescription =  NULL --CD.strItemDescription,
 					,strItemShortName = NULL --CD.strShortName 
-
+					,intHeaderBookId
+					,intHeaderSubBookId
+					,intDetailBookId
+					,intDetailSubBookId
 		FROM		vyuCTContractSequence		CD
 		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
@@ -236,7 +242,11 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName
@@ -300,8 +310,11 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					CD.strPricingType,
 					CD.strItemNo,
 					CD.strItemDescription,
-					CD.strShortName strItemShortName
-
+					CD.strShortName strItemShortName,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 		FROM		tblCTPriceFixation			PF
 		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
@@ -372,7 +385,10 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					,strItemNo = NULL --CD.strItemNo
 					,strItemDescription =  NULL --CD.strItemDescription,
 					,strItemShortName = NULL --CD.strShortName 
-
+					,intHeaderBookId
+					,intHeaderSubBookId
+					,intDetailBookId
+					,intDetailSubBookId
 		FROM		tblCTPriceFixation			PF
 		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId			=	PF.intPriceContractId
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId			=	PF.intContractHeaderId
@@ -412,7 +428,11 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					strCurrency,
 					ysnSubCurrency,
 					strMainCurrency,
-					CD.strPricingType
+					CD.strPricingType,
+					intHeaderBookId,
+					intHeaderSubBookId,
+					intDetailBookId,
+					intDetailSubBookId
 					--,CD.strItemNo,
 					--CD.strItemDescription,
 					--CD.strShortName
