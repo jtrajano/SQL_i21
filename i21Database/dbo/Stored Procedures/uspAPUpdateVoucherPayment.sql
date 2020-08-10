@@ -97,7 +97,7 @@ BEGIN TRY
 			FROM tblAPAppliedPrepaidAndDebit APD
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
-		WHERE P.intPaymentId IN (SELECT intId FROM @ids)
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND B.ysnPrepayHasPayment = 0
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -163,7 +163,7 @@ BEGIN TRY
 			FROM tblAPAppliedPrepaidAndDebit APD
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
-		WHERE P.intPaymentId IN (SELECT intId FROM @ids)
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND B.ysnPrepayHasPayment = 0
 	END
 
 	--SELECT NULLED BILLS
