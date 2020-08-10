@@ -25,3 +25,9 @@
     CONSTRAINT [AK_tblICInventoryAdjustment_strAdjustmentNo] UNIQUE ([strAdjustmentNo]), 
     CONSTRAINT [FK_tblICInventoryAdjustment_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryAdjustment_strAdjustmentNo]
+	ON [dbo].[tblICInventoryAdjustment]([strAdjustmentNo] ASC)
+
+GO
