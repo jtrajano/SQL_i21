@@ -105,6 +105,7 @@ AS
        ,SCT.intCommodityId
        ,SCT.intDiscountId
        ,SCT.intContractId
+       ,CTH.intContractHeaderId
        ,SCT.intDiscountLocationId
        ,SCT.intItemId
        ,SCT.intEntityId
