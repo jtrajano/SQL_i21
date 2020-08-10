@@ -4,7 +4,7 @@
     [strBatchId]                NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
 	[strReversalBatchId]        NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NULL,
-    [strAccountId]              NVARCHAR (40)    COLLATE Latin1_General_CI_AS NULL,
+    [strAccountId]              NVARCHAR (MAX)    COLLATE Latin1_General_CI_AS NULL,
     [strAccountGroup]           NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [dblDebit]                  NUMERIC (18, 6)  NULL,
     [dblCredit]                 NUMERIC (18, 6)  NULL,
