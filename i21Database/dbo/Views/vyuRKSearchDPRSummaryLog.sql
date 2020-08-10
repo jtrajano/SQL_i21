@@ -12,6 +12,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strTransactionNumber
 		,strContractNumber
 		,intContractSeq
+		,strContractType
 		,dblTransactionQty = dblOrigQty
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, dblOrigQty)
@@ -46,6 +47,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strTransactionNumber
 		,strContractNumber
 		,intContractSeq
+		,strContractType
 		,dblTransactionQty 
 		,strTransactionUOM 
 		,dblStockQty 
@@ -74,6 +76,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 					,strTransactionNumber
 					,strContractNumber
 					,intContractSeq
+					,strContractType
 					,dblTransactionQty = dblOrigQty
 					,strTransactionUOM = origUM.strUnitMeasure
 					,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, dblOrigQty)
@@ -112,6 +115,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 					,strTransactionNumber
 					,strContractNumber
 					,intContractSeq
+					,strContractType
 					,dblTransactionQty = (dblOrigNoOfLots * dblContractSize)
 					,strTransactionUOM = origUM.strUnitMeasure
 					,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, (dblOrigNoOfLots  * dblContractSize))
@@ -150,6 +154,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strTransactionNumber
 		,strContractNumber
 		,intContractSeq
+		,strContractType
 		,dblTransactionQty 
 		,strTransactionUOM 
 		,dblStockQty 
@@ -177,6 +182,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 				,strTransactionNumber
 				,strContractNumber
 				,intContractSeq
+				,strContractType
 				,dblTransactionQty = (dblOrigNoOfLots * dblContractSize)
 				,strTransactionUOM = origUM.strUnitMeasure
 				,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId,stckUOM.intCommodityUnitMeasureId, (dblOrigNoOfLots * dblContractSize))
@@ -215,6 +221,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strTransactionNumber = strReceiptNo
 		,strContractNumber
 		,intContractSeq
+		,strContractType = NULL
 		,dblTransactionQty = dblTotal
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(C.intCommodityUnitMeasureId,stckUOM.intCommodityUnitMeasureId, dblTotal)
@@ -248,6 +255,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strTransactionNumber = strTransactionReferenceNo
 		,strContractNumber
 		,intContractSeq
+		,strContractType
 		,dblTransactionQty = dblQty 
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(CB.intQtyUOMId,stckUOM.intCommodityUnitMeasureId, dblQty)
@@ -281,6 +289,7 @@ SELECT intRowNumber  = row_number() OVER(ORDER BY dtmCreatedDate DESC), * FROM (
 		,strTransactionNumber = strTransactionReferenceNo
 		,strContractNumber
 		,intContractSeq
+		,strContractType
 		,dblTransactionQty = dblQty 
 		,strTransactionUOM = origUM.strUnitMeasure
 		,dblStockQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(SD.intQtyUOMId,stckUOM.intCommodityUnitMeasureId, dblQty)
