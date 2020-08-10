@@ -76,8 +76,8 @@ BEGIN
 		, intCurrencyId
 		, strCurrency
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber, c.strInOut ORDER BY c.intSummaryLogId DESC)
-			, c.strBucketType
+		SELECT --intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strBucketType, c.strTransactionType, c.strTransactionNumber, c.strInOut ORDER BY c.intSummaryLogId DESC)
+			 c.strBucketType
 			, c.dtmCreatedDate
 			, c.dtmTransactionDate
 			, dblTotal = c.dblOrigQty
@@ -115,7 +115,7 @@ BEGIN
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND ISNULL(c.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(c.intCommodityId, 0)) 
 			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
-	) t WHERE intRowNum = 1
+	) t --WHERE intRowNum = 1
 
 RETURN
 

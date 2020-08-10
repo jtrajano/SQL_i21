@@ -4855,6 +4855,7 @@
     <Build Include="dbo\Tables\tblICImportStagingItem.sql" />
     <Build Include="dbo\Tables\tblICImportStagingItemLocation.sql" />
     <Build Include="dbo\Tables\tblICImportStagingItemPricing.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingOpeningBalance.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroupUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
@@ -4869,6 +4870,7 @@
     <Build Include="dbo\Stored Procedures\uspICImportItemLocationsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemUOMsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemPricingsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportOpeningBalancesFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportVolumeDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspPATImportStockClassification.sql" />
@@ -8754,6 +8756,7 @@
     <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
     <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
+    <Build Include="dbo\Functions\fnCTCheckIfPaid.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

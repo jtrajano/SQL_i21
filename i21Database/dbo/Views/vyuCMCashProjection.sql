@@ -71,4 +71,3 @@ OUTER APPLY(
 )Bank
 
 
-
