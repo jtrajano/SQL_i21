@@ -17,6 +17,14 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 BEGIN TRY
 		IF @ysnPosted = 1
 			BEGIN
+				if exists(select top 1 1 from tblSCTicket a 
+					join tblSCTicketLVStaging b
+						on a.intScaleSetupId = b.intScaleSetupId
+						and a.strTicketNumber = b.strTicketNumber
+						where b.intTicketLVStagingId = @intTicketLVStagingId)
+				BEGIN
+					RAISERROR('Unable to post. Duplicate Ticket', 16, 1);
+				end
 				INSERT INTO tblSCTicket(
 					[strTicketNumber]
 					,[intTicketType]
