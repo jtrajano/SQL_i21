@@ -5227,33 +5227,33 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 
 						--CREATE LOTTERY BOOK ENTRY--
-						INSERT INTO tblSTLotteryBook
-						(
-							intStoreId
-							,strBookNumber
-							,strCountDirection
-							,intLotteryGameId
-							,dtmReceiptDate
-							,dblQuantityRemaining
-							,strStatus
-							,intConcurrencyId
-						)
-						SELECT TOP 1 
-						intStoreId,
-						strBookNumber,
-						'Low to High',
-						intLotteryGameId,
-						dtmReceiptDate,
-						intTicketPerPack,
-						'Inactive',
-						1
-						FROM #tblSTTempReceiveLottery
-						WHERE intReceiveLotteryId = @loopId
+						-- INSERT INTO tblSTLotteryBook
+						-- (
+						-- 	intStoreId
+						-- 	,strBookNumber
+						-- 	,strCountDirection
+						-- 	,intLotteryGameId
+						-- 	,dtmReceiptDate
+						-- 	,dblQuantityRemaining
+						-- 	,strStatus
+						-- 	,intConcurrencyId
+						-- )
+						-- SELECT TOP 1 
+						-- intStoreId,
+						-- strBookNumber,
+						-- 'Low to High',
+						-- intLotteryGameId,
+						-- dtmReceiptDate,
+						-- intTicketPerPack,
+						-- 'Inactive',
+						-- 1
+						-- FROM #tblSTTempReceiveLottery
+						-- WHERE intReceiveLotteryId = @loopId
 
-						DECLARE @lotteryBookPK INT
-						SET @lotteryBookPK = SCOPE_IDENTITY() 
+						-- DECLARE @lotteryBookPK INT
+						-- SET @lotteryBookPK = SCOPE_IDENTITY() 
 
-						UPDATE tblSTReceiveLottery SET intLotteryBookId = @lotteryBookPK WHERE intReceiveLotteryId = @loopId
+						-- UPDATE tblSTReceiveLottery SET intLotteryBookId = @lotteryBookPK WHERE intReceiveLotteryId = @loopId
 
 
 						-- Validate if there is Item UOM setup
@@ -6252,43 +6252,44 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				IF EXISTS(SELECT TOP 1 intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId)
 				BEGIN
 
-				--UNPOST IR--
-				DECLARE @strIRTransactionIds NVARCHAR(MAX) 
-				SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
-				Select @strIRTransactionIds
+					--UNPOST IR--
+					DECLARE @strIRTransactionIds NVARCHAR(MAX) 
+					SELECT @strIRTransactionIds = COALESCE(@strIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId) 
+					Select @strIRTransactionIds
 
 
-				DECLARE	@intIRLotteryUnpostProcessReturnValue int,
-						@strIRLotteryUnpostBatchId nvarchar(40)
+					DECLARE	@intIRLotteryUnpostProcessReturnValue int,
+							@strIRLotteryUnpostBatchId nvarchar(40)
 
-				EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
-						@ysnPost = 0,
-						@ysnRecap = 0,
-						@strTransactionId = @strIRTransactionIds,
-						@intEntityUserSecurityId = @intCurrentUserId,
-						@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
+					EXEC	@intIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
+							@ysnPost = 0,
+							@ysnRecap = 0,
+							@strTransactionId = @strIRTransactionIds,
+							@intEntityUserSecurityId = @intCurrentUserId,
+							@strBatchId = @strIRLotteryUnpostBatchId OUTPUT
+							
 
 
-				IF(@intIRLotteryUnpostProcessReturnValue = 0)
-				BEGIN
-					SELECT * INTO #tblTempUnpostLotteryIR FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId
-					DECLARE @intLoopDeleteLotteryIRId INT
-					DECLARE @intLoopDeleteLotteryBookId INT
-					WHILE EXISTS(SELECT TOP 1 * FROM #tblTempUnpostLotteryIR)
+					IF(@intIRLotteryUnpostProcessReturnValue = 0)
 					BEGIN
-						SELECT TOP 1 @intLoopDeleteLotteryIRId = intInventoryReceiptId, @intLoopDeleteLotteryBookId = intLotteryBookId  FROM #tblTempUnpostLotteryIR
 
-						EXEC [dbo].[uspICDeleteInventoryReceipt]
-						@InventoryReceiptId = @intLoopDeleteLotteryIRId,
-						@intEntityUserSecurityId = @intCurrentUserId
+						UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intCheckoutId = @intCheckoutId
+						-- SELECT * INTO #tblTempUnpostLotteryIR FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId
+						-- DECLARE @intLoopDeleteLotteryIRId INT
+						-- DECLARE @intLoopDeleteLotteryBookId INT
+						-- WHILE EXISTS(SELECT TOP 1 * FROM #tblTempUnpostLotteryIR)
+						-- BEGIN
+						-- 	SELECT TOP 1 @intLoopDeleteLotteryIRId = intInventoryReceiptId, @intLoopDeleteLotteryBookId = intLotteryBookId  FROM #tblTempUnpostLotteryIR
+
+						-- 	EXEC [dbo].[uspICDeleteInventoryReceipt]=@InventoryReceiptId = @intLoopDeleteLotteryIRId,=@intEntityUserSecurityId = @intCurrentUserId
 
 
-						DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @intLoopDeleteLotteryBookId
-						DELETE FROM #tblTempUnpostLotteryIR WHERE intInventoryReceiptId = @intLoopDeleteLotteryIRId
+						-- 	-- DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @intLoopDeleteLotteryBookId
+						-- 	DELETE FROM #tblTempUnpostLotteryIR WHERE intInventoryReceiptId = @intLoopDeleteLotteryIRId
+
+						-- END
 
 					END
-
-				END
 
 
 				END
@@ -6297,6 +6298,61 @@ IF(@ysnDebug = CAST(1 AS BIT))
 				
 				------------------------------------------------------
 				----------------- RECEIVE LOTTERY---------------------
+				------------------------------------------------------
+
+				------------------------------------------------------
+				----------------- RETURN LOTTERY---------------------
+				------------------------------------------------------
+
+				IF EXISTS(SELECT TOP 1 intInventoryReceiptId FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId)
+				BEGIN
+
+					--UNPOST IR--
+					DECLARE @strReturnIRTransactionIds NVARCHAR(MAX) 
+					SELECT @strReturnIRTransactionIds = COALESCE(@strReturnIRTransactionIds + ', ' + strReceiptNumber, strReceiptNumber) FROM tblICInventoryReceipt WHERE intInventoryReceiptId IN (SELECT intInventoryReceiptId FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId) 
+					Select @strReturnIRTransactionIds
+
+
+					DECLARE	@intReturnIRLotteryUnpostProcessReturnValue int,
+							@strReturnIRLotteryUnpostBatchId nvarchar(40)
+
+					EXEC	@intReturnIRLotteryUnpostProcessReturnValue = [dbo].[uspICPostInventoryReceipt]
+							@ysnPost = 0,
+							@ysnRecap = 0,
+							@strTransactionId = @strReturnIRTransactionIds,
+							@intEntityUserSecurityId = @intCurrentUserId,
+							@strBatchId = @strReturnIRLotteryUnpostBatchId OUTPUT
+							
+
+
+					IF(@intReturnIRLotteryUnpostProcessReturnValue = 0)
+					BEGIN
+
+						UPDATE tblSTReturnLottery SET ysnPosted = 0 WHERE intCheckoutId = @intCheckoutId
+						-- SELECT * INTO #tblTempUnpostLotteryIR FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId
+						-- DECLARE @intLoopDeleteLotteryIRId INT
+						-- DECLARE @intLoopDeleteLotteryBookId INT
+						-- WHILE EXISTS(SELECT TOP 1 * FROM #tblTempUnpostLotteryIR)
+						-- BEGIN
+						-- 	SELECT TOP 1 @intLoopDeleteLotteryIRId = intInventoryReceiptId, @intLoopDeleteLotteryBookId = intLotteryBookId  FROM #tblTempUnpostLotteryIR
+
+						-- 	EXEC [dbo].[uspICDeleteInventoryReceipt]=@InventoryReceiptId = @intLoopDeleteLotteryIRId,=@intEntityUserSecurityId = @intCurrentUserId
+
+
+						-- 	-- DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @intLoopDeleteLotteryBookId
+						-- 	DELETE FROM #tblTempUnpostLotteryIR WHERE intInventoryReceiptId = @intLoopDeleteLotteryIRId
+
+						-- END
+
+					END
+
+
+				END
+
+
+				
+				------------------------------------------------------
+				----------------- RETURN LOTTERY---------------------
 				------------------------------------------------------
 
 
