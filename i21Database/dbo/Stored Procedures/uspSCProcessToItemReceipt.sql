@@ -101,6 +101,8 @@ DECLARE @intDeliverySheetItemId INT
 DECLARE @intDeliverySheetLocationId INT
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
+DECLARE @dblTicketUnitPrice NUMERIC(18, 6)
+DECLARE @dblTicketUnitBasis NUMERIC(18, 6)
    
 
 DECLARE @ErrMsg              NVARCHAR(MAX),
@@ -129,7 +131,9 @@ DECLARE @ErrMsg              NVARCHAR(MAX),
 		, @intTicketItemUOMId = ST.intItemUOMIdTo
 		, @intTicketEntityId = ST.intEntityId
 		, @intTicketDeliverySheetId = intDeliverySheetId
-		,@strTicketStatus = strTicketStatus
+		, @strTicketStatus = strTicketStatus
+		, @dblTicketUnitPrice = dblUnitPrice
+		, @dblTicketUnitBasis = dblUnitBasis
 FROM dbo.tblSCTicket ST WHERE
 ST.intTicketId = @intTicketId
 
@@ -166,6 +170,15 @@ BEGIN TRY
 				END
 			end
 			
+
+		END
+
+		IF(@strDistributionOption = 'SPT')
+		BEGIN
+			AND (ISNULL(@dblTicketUnitBasis,0) + ISNULL(@dblTicketUnitPrice,0)) = 0
+
+			SET @ErrMsg  = 'Cannot distribute Zero Spot ticket with destination Weights/Grades'
+			RAISERROR(@ErrMsg, 11, 1);
 
 		END
 

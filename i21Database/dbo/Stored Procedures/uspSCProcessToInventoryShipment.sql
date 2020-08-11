@@ -70,6 +70,8 @@ DECLARE @strTicketStatus NVARCHAR(3)
 DECLARE @_strShipmentNumber NVARCHAR(50)
 DECLARE @strOwnedPhysicalStock NVARCHAR(20)
 DECLARE @OWNERSHIP_CUSTOMER NVARCHAR(20)
+DECLARE @dblTicketUnitPrice NUMERIC(18, 6)
+DECLARE @dblTicketUnitBasis NUMERIC(18, 6)
 
 SET @OWNERSHIP_CUSTOMER = 'CUSTOMER'
 
@@ -84,6 +86,8 @@ SELECT @intLoadId = intLoadId
 	, @intTicketLoadDetailId = intLoadDetailId
 	, @intTicketItemContractDetailId = intItemContractDetailId
 	,@strTicketStatus = strTicketStatus
+	, @dblTicketUnitPrice = dblUnitPrice
+	, @dblTicketUnitBasis = dblUnitBasis
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType
@@ -136,6 +140,14 @@ BEGIN TRY
 				GOTO _Exit
 			END
 		end
+
+		IF(@strDistributionOption = 'SPT'
+			AND (ISNULL(@dblTicketUnitBasis,0) + ISNULL(@dblTicketUnitPrice,0)) = 0
+			AND (ISNULL(@strWhereFinalizedWeight,'') = 'Destination' OR ISNULL(@strWhereFinalizedGrade,'') = 'Destination'))
+		BEGIN
+			SET @ErrMsg  = 'Cannot distribute Zero Spot ticket with destination Weights/Grades'
+			RAISERROR(@ErrMsg, 11, 1);
+		END
 		
 		
 
