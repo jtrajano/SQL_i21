@@ -3,6 +3,7 @@
 	,@intMatchTicketId AS INT
 	,@intUserId AS INT
 AS
+
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -113,12 +114,14 @@ BEGIN TRY
 			,intContractHeaderId		= NULL
 			,intContractDetailId		= NULL
 			,dtmDate					= SC.dtmTicketDateTime
-			,dblQty						= abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end  --- SCMatch.dblNetUnits --
-			,dblCost					= ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
+			,dblQty						= SCMatch.dblNetUnits --abs(ICTran.dblQty) --case when abs(ICTran.dblQty) < SC.dblNetUnits then abs(ICTran.dblQty) else SC.dblNetUnits end
+			,dblCost					= ICTran.dblCost
+											/*
+												 ICTran.dblCost + ( (case when abs(ICTran.dblQty) > SC.dblNetUnits then 1 else -1 end)
 																*
 																((ICTran.dblCost) * abs(((SC.dblNetUnits - SCMatch.dblNetUnits)/SC.dblNetUnits))) 
 											)
-											--ICTran.dblCost
+											*/
 			,dblExchangeRate			= 1 -- Need to check this
 			,intLotId					= SC.intLotId
 			,intSubLocationId			= SC.intSubLocationId

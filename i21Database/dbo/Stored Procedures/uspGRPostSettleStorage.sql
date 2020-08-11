@@ -2093,6 +2093,7 @@ BEGIN TRY
 								a.intContractDetailId - Contract used during the settlement*/
 								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
 								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
+								AND CS.intTicketId IS NOT NULL
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH

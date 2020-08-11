@@ -132,6 +132,10 @@ SELECT 	 SQ.intContractDetailId
 		,SQ.strLocationName
 		,CH.dtmContractDate
 		,IM.strItemNo AS strBundleItemNo
+		,CH.intBookId as intHeaderBookId
+		,CH.intSubBookId as intHeaderSubBookId
+		,CD.intBookId as intDetailBookId
+		,CD.intSubBookId as intDetailSubBookId 
 
 	FROM 		vyuCTContractSequence			 	SQ	WITH (NOLOCK)		
 	JOIN 		tblCTContractDetail				 	CD	WITH (NOLOCK) ON	CD.intContractDetailId				=	SQ.intContractDetailId AND SQ.intContractStatusId NOT IN (1,2,4)

@@ -400,7 +400,11 @@ select
   a.strVessel, 
   strWeight = cl.strWeightGradeDesc, 
   strWeightUOM = cn.strUnitMeasure, 
-  aq.intEntityId 
+  aq.intEntityId ,
+  b.intBookId as intHeaderBookId,
+  b.intSubBookId as intHeaderSubBookId,
+  a.intBookId as intDetailBookId,
+  a.intSubBookId as intDetailSubBookId
 from 
   tblCTContractDetail a 
   join tblCTContractHeader b on b.intContractHeaderId = a.intContractHeaderId 
