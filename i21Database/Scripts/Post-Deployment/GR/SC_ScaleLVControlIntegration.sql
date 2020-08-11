@@ -206,6 +206,7 @@ END
 
 
 GO
+
 IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst') = 1
 	BEGIN
 		PRINT 'Begin creating vyuSCTicketLVControlView '
@@ -217,7 +218,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 			CREATE VIEW [dbo].[vyuSCTicketLVControlView]
 			AS SELECT
 				A4GLIdentity AS intTicketId 
-				,gasct_tic_no COLLATE Latin1_General_CI_AS AS strTicketNumber
+				,case when isnumeric(gasct_tic_no) = 1 then cast(cast(gasct_tic_no as int) as nvarchar) else gasct_tic_no end COLLATE Latin1_General_CI_AS AS strTicketNumber
 				,(CASE 
 					WHEN gasct_tic_type = ''I'' THEN ''Load In''
 					WHEN gasct_tic_type = ''O'' THEN ''Load Out''
@@ -398,6 +399,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						,@intScaleSetupId				INT
 						,@strEntityNo					NVARCHAR(100)
 						,@intOriginTicketId				INT
+						,@strTicketNumber 			NVARCHAR(40)
 
 
 				SELECT 
@@ -437,6 +439,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					,@dblUnitPrice				= dblUnitPrice
 					,@intScaleSetupId			= intScaleSetupId
 					,@intOriginTicketId			= intOriginTicketId
+					,@strTicketNumber 			= strTicketNumber
 					from tblSCTicketLVStaging
 						where intTicketLVStagingId = @intTicketLVStagingId
 				
@@ -445,6 +448,14 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 
 				if isnull(@intScaleSetupId, 0) = 0
 					return ''No scale station selected''
+
+
+				if exists(select top 1 1 from tblSCTicket where intScaleSetupId = @intScaleSetupId and strTicketNumber = @strTicketNumber)
+				begin
+					insert into @msg(strMessage)
+						select ''Duplicate Ticket number(''+ @strTicketNumber + '').''
+				end
+
 
 				declare @intStoreScaleOperator			INT
 						,@intFreightHaulerIDRequired	INT
@@ -971,7 +982,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						declare @ticket_number nvarchar(100)
 						declare @inserted_ticket_number int
 						declare @validation_message nvarchar(max)
-
+						
 
 						select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket)
 						--select @validation_message
@@ -983,18 +994,27 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						
 							
 								update tblSCTicketLVStaging set ysnProcessedData = 1 where intTicketLVStagingId = @newLVTicket
-								if not exists(select top 1 1 from tblSCTicket where strTicketNumber = @ticket_number)	
+								if not exists(select top 1 1 from tblSCTicket where strTicketNumber = @ticket_number and strSourceType = ''LV Control'')	
 									exec uspSCProcessLVControlToTicket @newLVTicket, 1, @IrelyAdminId
 
 							end try
 							begin catch
 							
 								update tblSCTicketLVStaging set ysnProcessedData = 0 where intTicketLVStagingId = @newLVTicket
-								select @inserted_ticket_number = intTicketId from tblSCTicket where strTicketNumber = @ticket_number
+
+								select @inserted_ticket_number = intTicketId 
+									from tblSCTicket 
+										where intTicketLVStagingId = @newLVTicket
 							 
-								update tblSCTicket set ysnHasGeneratedTicketNumber = 0 where intTicketId = @inserted_ticket_number
-								delete from tblQMTicketDiscount where intTicketId = @inserted_ticket_number
-								delete from tblSCTicket where intTicketId =  @inserted_ticket_number
+								update tblSCTicket 
+										set ysnHasGeneratedTicketNumber = 0 
+											where intTicketLVStagingId = @newLVTicket
+
+								delete from tblQMTicketDiscount 
+									where intTicketId = @inserted_ticket_number
+								delete from tblSCTicket 
+									where intTicketId =  @inserted_ticket_number 
+										and intTicketLVStagingId = @newLVTicket
 
 							end catch
 						end
