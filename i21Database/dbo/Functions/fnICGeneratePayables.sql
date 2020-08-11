@@ -512,7 +512,7 @@ SELECT DISTINCT
 		,[dtmDate]									=	A.dtmDate
 		,[strReference]								=	A.strReference
 		,[strSourceNumber]							=	A.strSourceNumber
-		,[strVendorOrderNumber]						=	IR.strBillOfLading
+		,[strVendorOrderNumber]						=	ISNULL(NULLIF(LTRIM(RTRIM(IR.strBillOfLading)), ''), IR.strVendorRefNo) 
 		,[strPurchaseOrderNumber]					=	NULL
 		,[intPurchaseDetailId]						=	NULL
 		,[intItemId]								=	A.intItemId
