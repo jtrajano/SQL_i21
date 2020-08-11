@@ -8796,6 +8796,9 @@
     <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfPaid.sql" />
+    <Build Include="dbo\Tables\tblARInvoiceGrossMarginSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInvoiceGrossMarginSummary.sql" />
+    <Build Include="dbo\Index\IX_tblARInvoiceGrossMarginSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9240,5 +9243,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MO_Missouri.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql" />
   </ItemGroup>
 </Project>
