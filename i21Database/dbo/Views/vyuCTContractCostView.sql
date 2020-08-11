@@ -63,8 +63,11 @@ AS
 						WHEN	CC.strCostMethod = 'Percentage' THEN 
 							dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,QU.intUnitMeasureId,PU.intUnitMeasureId,CD.dblQuantity)*CD.dblCashPrice*CC.dblRate/100
 				END   dblAmount,
-				RT.strCurrencyExchangeRateType				
-
+				RT.strCurrencyExchangeRateType,
+				CH.intBookId AS intHeaderBookId,
+				CH.intSubBookId AS intHeaderSubBookId,
+				CD.intBookId AS intDetailBookId,
+				CD.intSubBookId AS intDetailSubBookId				
 	FROM		tblCTContractCost	CC
 	JOIN		tblCTContractDetail CD ON CD.intContractDetailId	=	CC.intContractDetailId
 	JOIN		tblCTContractHeader CH ON CH.intContractHeaderId	=	CD.intContractHeaderId

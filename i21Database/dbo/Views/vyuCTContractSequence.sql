@@ -47,9 +47,11 @@ AS
 																CH.strCustomerContract	AS	strEntityContract,		
 			--Header Join
 			TP.strContractType,		CO.strCommodityCode,		EY.strName				AS	strEntityName,
-			EY.intEntityId,										CO.strDescription		AS	strCommodityDescription
-			
-			
+			EY.intEntityId,										CO.strDescription		AS	strCommodityDescription,
+			CH.intBookId																AS	intHeaderBookId,
+			CH.intSubBookId																AS	intHeaderSubBookId,
+			CD.intBookId																AS	intDetailBookId,
+			CD.intSubBookId																AS	intDetailSubBookId
 	FROM	tblCTContractDetail			CD	
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId

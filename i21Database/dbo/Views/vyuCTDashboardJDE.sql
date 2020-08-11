@@ -253,7 +253,11 @@ dblShippingInsQty = isnull(LG1.dblQuantity,LG.dblQuantity)
   CD.dtmUpdatedAvailabilityDate, 
   CL.strLocationName, 
   CH.dtmContractDate, 
-  BIM.strItemNo AS strBundleItemNo 
+  BIM.strItemNo AS strBundleItemNo,
+  CH.intBookId as intHeaderBookId,
+  CH.intSubBookId as intHeaderSubBookId,
+  CD.intBookId as intDetailBookId,
+  CD.intSubBookId as intDetailSubBookId  
 FROM 
   tblCTContractDetail CD WITH (NOLOCK) 
   JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId 
