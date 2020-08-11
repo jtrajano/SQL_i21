@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblARInvoiceGrossMarginSummary](
 	[intSummaryId] [int] IDENTITY(1,1) NOT NULL,
 	[strType] [varchar](7) COLLATE Latin1_General_CI_AS NOT NULL,
-	[dblAmount] [numeric](38, 6) NULL,
+	[dblAmount] [decimal](18, 6) NULL,
 	[dtmDate] [datetime] NOT NULL,
 	[intConcurrencyId] [int] NULL,
  CONSTRAINT [PK_tblARInvoiceGrossMarginSummary] PRIMARY KEY CLUSTERED 
