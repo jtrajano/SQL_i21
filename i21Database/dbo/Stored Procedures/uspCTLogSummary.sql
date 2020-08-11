@@ -1177,6 +1177,7 @@ BEGIN TRY
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
 			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
+			AND dblQty <> 0
 		END
 		ELSE
 		BEGIN
