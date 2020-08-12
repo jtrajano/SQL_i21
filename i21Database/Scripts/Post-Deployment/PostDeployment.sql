@@ -237,6 +237,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\5_UndepositedFund.sql
 :r .\CM\6_InsertDefaultDataSync.sql
 :r .\CM\7_AlterCashProjectionView.sql
+:r .\CM\8_FlagCCTransaction.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
