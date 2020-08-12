@@ -388,4 +388,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\11_IC\FixFKItemPricingLevel.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\DropIndexes.sql" />
+  </ItemGroup>
 </Project>
