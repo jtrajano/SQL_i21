@@ -136,6 +136,7 @@
 :r .\11_IC\CreateTempBasketColumn.sql 
 :r .\11_IC\AddDtmCreatedColumn.sql 
 :r .\11_IC\FixFKItemPricingLevel.sql 
+:r .\11_IC\DropIndexes.sql
 
 -- EM
 :r .\12_EM\01_EntitySchemaUpdate.sql

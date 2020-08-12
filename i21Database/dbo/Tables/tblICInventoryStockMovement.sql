@@ -56,9 +56,9 @@ CREATE NONCLUSTERED INDEX [IX_tblICInventoryStockMovement_intItemId_intItemLocat
 	ON [dbo].[tblICInventoryStockMovement]([intItemId] ASC, [intItemLocationId] ASC);
 GO
 
---CREATE CLUSTERED INDEX [IX_tblICInventoryStockMovement_dtmDate]
---	ON [dbo].[tblICInventoryStockMovement]([dtmDate] ASC, [intInventoryStockMovementId] ASC);
---GO
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryStockMovement_intInventoryTransactionId]
+	ON [dbo].[tblICInventoryStockMovement]([intInventoryTransactionId] ASC);
+GO
 
 CREATE CLUSTERED INDEX [IX_tblICInventoryStockMovement_Report]
 	ON [dbo].[tblICInventoryStockMovement](
