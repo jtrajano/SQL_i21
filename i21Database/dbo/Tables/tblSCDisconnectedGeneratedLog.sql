@@ -5,6 +5,9 @@
     [intLogId] INT NULL,
     [strType] NVARCHAR(100)  COLLATE Latin1_General_CI_AS NULL ,
     [dtmDate] DATETIME NULL,
+    [strZipFileName] NVARCHAR(MAX) NULL,
+    [strMessage] NVARCHAR(MAX) NULL,
+    [strStatus] NVARCHAR(15) NULL, 
     [intConcurrencyId] INT DEFAULT(1),
     CONSTRAINT [PK_dbo.tblSCDisconnectedGeneratedLog] PRIMARY KEY CLUSTERED ([intDisconnectedGeneratedLogId] ASC)
 
