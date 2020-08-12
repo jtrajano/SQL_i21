@@ -4,6 +4,7 @@
 	,@intContractDetailId	INT
     ,@LogId					INT = NULL  OUTPUT
 	,@NewInvoiceId			INT OUTPUT
+    ,@dblQuantity           numeric(18,6)
 AS
 
 BEGIN TRY
@@ -249,7 +250,7 @@ SELECT
     ,[intItemUOMId]                         = ARSI.[intItemUOMId]
     ,[intPriceUOMId]                        = ARSI.[intPriceUOMId]
     ,[dblContractPriceUOMQty]               = ARSI.[dblPriceUOMQuantity]
-    ,[dblQtyShipped]                        = ARSI.[dblQtyShipped]
+    ,[dblQtyShipped]                        = @dblQuantity--ARSI.[dblQtyShipped]
     ,[dblDiscount]                          = ARSI.[dblDiscount]
     ,[dblItemTermDiscount]                  = @ZeroDecimal
     ,[strItemTermDiscountBy]                = ''
