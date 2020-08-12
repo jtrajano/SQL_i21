@@ -143,9 +143,9 @@ BEGIN TRY
 			, @dblSurcharge = RT.dblSurcharge
 		FROM #ReceiptList RT
 
-		SELECT TOP 1@intStockUOMId = intStockUOMId
-			, @strItem = strItemNo
-			, @strDescription = REPLACE(strDescription, '%', '')
+		SELECT TOP 1 @strItem = strItemNo, @strDescription = REPLACE(strDescription, '%', '') FROM tblICItem where intItemId = @intItemId
+
+		SELECT TOP 1 @intStockUOMId = intStockUOMId
 		FROM vyuICGetItemStock
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intCompanyLocation
