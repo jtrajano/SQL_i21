@@ -17,7 +17,7 @@ RETURNS TABLE AS RETURN
 		,0 as dblTotalUnits
 		,CASE WHEN ((B.intInventoryReceiptItemId IS NOT NULL 
 						AND receiptItem.intTaxGroupId > 0 
-						AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details
+						AND receiptTax.intInventoryReceiptItemTaxId IS NOT NULL) --has tax details and has matching tax info
 				 OR (B.intInventoryReceiptChargeId IS NOT NULL AND chargeTax.intInventoryReceiptChargeId IS NOT NULL) 
 				 OR (B.intInventoryShipmentChargeId IS NOT NULL AND shipmentChargeTax.intInventoryShipmentChargeId IS NOT NULL))
 			THEN  dbo.[fnGetItemGLAccount](F.intItemId, ISNULL(detailloc.intItemLocationId, loc.intItemLocationId), 'AP Clearing')
@@ -49,6 +49,9 @@ RETURNS TABLE AS RETURN
 	OUTER APPLY (
 		SELECT TOP 1 intInventoryReceiptItemTaxId FROM tblICInventoryReceiptItemTax receiptTax
 		WHERE receiptTax.intInventoryReceiptItemId = B.intInventoryReceiptItemId
+		AND receiptTax.intTaxCodeId = D.intTaxCodeId
+		AND receiptTax.intTaxClassId = D.intTaxClassId
+		AND receiptTax.intTaxGroupId = D.intTaxGroupId
 	) receiptTax
 	OUTER APPLY (
 		SELECT TOP 1 intInventoryReceiptChargeId FROM tblICInventoryReceiptChargeTax receiptChargeTax
