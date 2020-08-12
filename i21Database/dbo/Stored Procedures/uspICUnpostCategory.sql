@@ -82,15 +82,7 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
-					AND (
-						dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY 
-						OR (
-							inventory_transaction.intTransactionTypeId = @INV_TRANS_TYPE_MarkUpOrDown 
-							AND inventory_transaction.dblCategoryRetailValue IS NOT NULL
-						)
-					)
-					AND 
+					ON 
 					(
 						-- Link to the main transaction
 						(	
@@ -102,6 +94,14 @@ FROM	(
 							inventory_transaction.strTransactionId = Source_Query.strTransactionId
 							AND inventory_transaction.intTransactionId = Source_Query.intTransactionId
 							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK)
+						)
+					)
+					AND ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0
+					AND (
+						dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) = @CATEGORY 
+						OR (
+							inventory_transaction.intTransactionTypeId = @INV_TRANS_TYPE_MarkUpOrDown 
+							AND inventory_transaction.dblCategoryRetailValue IS NOT NULL
 						)
 					)
 					

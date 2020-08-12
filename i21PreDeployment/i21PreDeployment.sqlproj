@@ -396,4 +396,7 @@
   <ItemGroup>
     <None Include="Scripts\Pre-Deployment\4_SM\12_MigrateRecentlyViewed.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Pre-Deployment\11_IC\DropIndexes.sql" />
+  </ItemGroup>
 </Project>
