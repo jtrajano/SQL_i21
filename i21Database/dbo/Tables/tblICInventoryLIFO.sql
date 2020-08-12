@@ -104,8 +104,9 @@ Tracks all stocks in a LIFO manner. Records are physically arranged in a LIFO ma
 
 	GO 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO]
-		ON [dbo].[tblICInventoryLIFO]([intItemId] ASC, [intItemLocationId] ASC, [strTransactionId] ASC, [intTransactionId] ASC, [ysnIsUnposted] ASC)
-		INCLUDE (dtmDate, intItemUOMId, dblStockIn, dblStockOut, dblCost);
+		--ON [dbo].[tblICInventoryLIFO]([intItemId] ASC, [intItemLocationId] ASC, [strTransactionId] ASC, [intTransactionId] ASC, [ysnIsUnposted] ASC)
+		ON [dbo].[tblICInventoryLIFO]([strTransactionId] ASC, [intTransactionId] ASC, [ysnIsUnposted] ASC)
+		INCLUDE (dtmDate, intItemId, intItemLocationId, intItemUOMId, dblStockIn, dblStockOut, dblCost);
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryLIFO_Posting]

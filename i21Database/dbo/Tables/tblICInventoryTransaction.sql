@@ -79,10 +79,9 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 	)
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemId]
-		ON [dbo].[tblICInventoryTransaction]([intItemId] ASC);
-
-	GO 
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemId]
+	--	ON [dbo].[tblICInventoryTransaction]([intItemId] ASC);
+	--GO 
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intInventoryTransactionId]
 		ON [dbo].[tblICInventoryTransaction]([intInventoryTransactionId] ASC)
@@ -95,10 +94,25 @@ Outbound (sold) items before the final cost is determined are recomputed to incl
 	GO
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_detail]
-		ON [dbo].[tblICInventoryTransaction]([intTransactionId] ASC, [intTransactionDetailId] ASC, [strTransactionId] ASC);
+		ON [dbo].[tblICInventoryTransaction]([strTransactionId] ASC, [intTransactionId] ASC, [intTransactionDetailId] ASC)
+		INCLUDE (intItemId, intItemLocationId, strBatchId, intTransactionTypeId, intItemUOMId) 
 	GO
 
-	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strTransactionId]
-		ON [dbo].[tblICInventoryTransaction] ([strTransactionId])
-		INCLUDE ([intItemId],[intItemUOMId],[dtmDate],[dblQty],[intTransactionId],[intTransactionDetailId],[intTransactionTypeId],[intInTransitSourceLocationId])
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_related]
+		ON [dbo].[tblICInventoryTransaction]([intRelatedTransactionId] ASC, [strRelatedTransactionId] ASC)
+		INCLUDE (intItemId, intItemLocationId, intTransactionTypeId, ysnIsUnposted) 
+	GO
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_strTransactionId]
+	--	ON [dbo].[tblICInventoryTransaction] ([strTransactionId])
+	--	INCLUDE ([intItemId],[intItemUOMId],[dtmDate],[dblQty],[intTransactionId],[intTransactionDetailId],[intTransactionTypeId],[intInTransitSourceLocationId])
+	--GO
+
+	--CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_intItemLocationId]
+	--	ON [dbo].[tblICInventoryTransaction]([intItemLocationId] ASC);
+
+	GO 
+	CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransaction_forDPR]
+		ON [dbo].[tblICInventoryTransaction] ([intItemId])
+		INCLUDE ([intItemLocationId],[intItemUOMId],[dtmDate],[dblQty],[intCurrencyId],[intTransactionId],[strTransactionId],[intTransactionDetailId],[intTransactionTypeId],[strTransactionForm],[intInTransitSourceLocationId])
+
 	GO
