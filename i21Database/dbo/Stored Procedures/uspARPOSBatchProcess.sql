@@ -655,14 +655,14 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,strPaymentInfo					= CASE WHEN POSPAYMENTS.strPaymentMethod IN ('Check' ,'Debit Card', 'Manual Credit Card') THEN POSPAYMENTS.strReferenceNo ELSE NULL END
 				,strNotes						= CASE WHEN IFP.strTransactionType = 'Credit Memo' THEN 'POS Return' ELSE POS.strReceiptNumber END 
 				,intBankAccountId				= BA.intBankAccountId
-				,dblAmountPaid					= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
-													THEN IFP.dblAmountDue
-													ELSE
+				,dblAmountPaid					= --CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
+													--THEN IFP.dblAmountDue
+													--ELSE
 													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
 													    THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 													    ELSE ISNULL(POSPAYMENTS.dblAmount, 0) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 												      END
-												  END
+												--  END
 				,intEntityId					= @intEntityUserId
 				,intInvoiceId					= IFP.intInvoiceId
 				,strTransactionType				= IFP.strTransactionType
