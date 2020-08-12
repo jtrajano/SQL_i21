@@ -92,7 +92,8 @@ BEGIN
 			BEGIN
 				UPDATE voucher
 					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
-						,@amountDue = voucher.dblAmountDue
+						--,@amountDue = voucher.dblAmountDue
+						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 													ELSE 0 END
@@ -103,6 +104,11 @@ BEGIN
 				INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 				INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
 				INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+				OUTER APPLY (
+					SELECT SUM(APD.dblAmountApplied) AS dblPayment
+					FROM tblAPAppliedPrepaidAndDebit APD
+					WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
+				) appliedPrepays
 				WHERE voucher.ysnPosted = 1
 				AND voucher.ysnPaid = 0
 				AND voucher.dblTotal != 0
@@ -112,7 +118,8 @@ BEGIN
 				--MARK ALL DUE VOUCHERS AS READY FOR PAYMENT
 				UPDATE voucher
 					SET	@updatedPaymentAmt = voucher.dblAmountDue - voucher.dblTempDiscount + voucher.dblTempInterest
-						,@amountDue = voucher.dblAmountDue
+						--,@amountDue = voucher.dblAmountDue
+						,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 						,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 														CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 													ELSE 0 END
@@ -130,6 +137,11 @@ BEGIN
 				INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 				INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
 				INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+				OUTER APPLY (
+					SELECT SUM(APD.dblAmountApplied) AS dblPayment
+					FROM tblAPAppliedPrepaidAndDebit APD
+					WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
+				) appliedPrepays
 				WHERE voucher.ysnPosted = 1
 				AND voucher.ysnPaid = 0
 				AND voucher.dblTotal != 0
@@ -160,9 +172,12 @@ BEGIN
 			UPDATE voucher
 				SET	@updatedPaymentAmt = CASE WHEN @tempPayment != voucher.dblTempPayment --Payment have been edited
 						THEN @tempPayment
-						ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest
+						ELSE CASE WHEN voucher.ysnPrepayHasPayment = 0
+							 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) - @tempDiscount + @tempInterest
+							 ELSE voucher.dblAmountDue - @tempDiscount + @tempInterest END
 						END
-					,@amountDue = voucher.dblAmountDue
+					--,@amountDue = voucher.dblAmountDue
+					,@amountDue = CASE WHEN voucher.dblPaymentTemp <> 0 AND voucher.ysnPrepayHasPayment = 0 THEN ((voucher.dblTotal - ISNULL(appliedPrepays.dblPayment, 0)) - voucher.dblPaymentTemp) ELSE voucher.dblAmountDue END
 					,@updatedWithheld = CASE WHEN vendor.ysnWithholding = 1 THEN
 													CAST(@updatedPaymentAmt * (loc.dblWithholdPercent / 100) AS DECIMAL(18,2))
 												ELSE 0 END
@@ -178,6 +193,11 @@ BEGIN
 			INNER JOIN @ids ids ON voucher.intBillId = ids.intId
 			INNER JOIN tblAPVendor vendor ON voucher.intEntityVendorId = vendor.intEntityId
 			INNER JOIN tblSMCompanyLocation loc ON voucher.intShipToId = loc.intCompanyLocationId
+			OUTER APPLY (
+				SELECT SUM(APD.dblAmountApplied) AS dblPayment
+				FROM tblAPAppliedPrepaidAndDebit APD
+				WHERE APD.intBillId = voucher.intBillId AND APD.ysnApplied = 1
+			) appliedPrepays
 			WHERE voucher.ysnPosted = 1
 			AND voucher.ysnPaid = 0
 			AND voucher.dblTotal != 0
