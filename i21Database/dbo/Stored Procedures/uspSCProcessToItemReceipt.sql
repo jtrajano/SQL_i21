@@ -174,8 +174,8 @@ BEGIN TRY
 		END
 
 		IF(@strDistributionOption = 'SPT')
-		BEGIN
 			AND (ISNULL(@dblTicketUnitBasis,0) + ISNULL(@dblTicketUnitPrice,0)) = 0
+		BEGIN
 
 			SET @ErrMsg  = 'Cannot distribute Zero Spot ticket with destination Weights/Grades'
 			RAISERROR(@ErrMsg, 11, 1);
