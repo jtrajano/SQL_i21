@@ -31,6 +31,7 @@ SELECT S.intSampleId
 			THEN CL1.strLocationName
 		ELSE E2.strName
 		END AS strSentByValue
+	,ST.ysnPartyMandatory
 FROM tblQMSample S
 JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 JOIN tblQMSampleStatus SS ON SS.intSampleStatusId = S.intSampleStatusId

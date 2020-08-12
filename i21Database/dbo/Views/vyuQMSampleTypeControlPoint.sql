@@ -11,6 +11,7 @@ AS (
 		,P.intProductValueId
 		,P.ysnActive
 		,ST.ysnAdjustInventoryQtyBySampleQty
+		,ST.ysnPartyMandatory
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 	JOIN tblQMProduct P ON P.intProductId = PC.intProductId
@@ -35,6 +36,7 @@ FROM (
 		,I.intItemId AS intProductValueId
 		,P.ysnActive
 		,ST.ysnAdjustInventoryQtyBySampleQty
+		,ST.ysnPartyMandatory
 	FROM tblQMProductControlPoint PC
 	JOIN tblQMSampleType ST ON ST.intSampleTypeId = PC.intSampleTypeId
 	JOIN tblQMProduct P ON P.intProductId = PC.intProductId

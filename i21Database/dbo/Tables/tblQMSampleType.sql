@@ -9,6 +9,7 @@
 	strApprovalBase NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	intSampleLabelId INT,
 	ysnAdjustInventoryQtyBySampleQty BIT CONSTRAINT [DF_tblQMSampleType_ysnAdjustInventoryQtyBySampleQty] DEFAULT 0,
+	ysnPartyMandatory BIT CONSTRAINT [DF_tblQMSampleType_ysnPartyMandatory] DEFAULT 1,
 	[intApprovalLotStatusId] INT, 
 	[intRejectionLotStatusId] INT, 
 	[intBondedApprovalLotStatusId] INT, 
