@@ -22,8 +22,11 @@ AS
 				ISNULL(CD.dblQuantity,0) - ISNULL(PA.dblAllocatedQty,0) - ISNULL(SA.dblAllocatedQty,0)							AS	dblUnallocatedQty,
 				ISNULL(PA.intAllocationUOMId,SA.intAllocationUOMId)																AS	intAllocationUOMId,
 				ISNULL(CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.[dblLotsFixed],0),CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN ISNULL(CH.dblNoOfLots,0) ELSE	ISNULL(CD.dblNoOfLots,0) END)	AS NUMERIC(18, 6)),0)		AS	dblUnpricedLots,
-				ISNULL(CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN ISNULL(CH.dblNoOfLots,0) ELSE	ISNULL(CD.dblNoOfLots,0) END)	AS NUMERIC(18, 6)),0)		AS	dblUnhedgedLots
-
+				ISNULL(CAST(ISNULL(PF.[dblTotalLots] - ISNULL(PF.intLotsHedged,0),CASE WHEN CH.ysnMultiplePriceFixation = 1 THEN ISNULL(CH.dblNoOfLots,0) ELSE	ISNULL(CD.dblNoOfLots,0) END)	AS NUMERIC(18, 6)),0)		AS	dblUnhedgedLots,
+				CH.intBookId AS intHeaderBookId,
+				CH.intSubBookId AS intHeaderSubBookId,
+				CD.intBookId AS intDetailBookId,
+				CD.intSubBookId AS intDetailSubBookId
 		FROM	tblCTContractDetail		CD	
 		JOIN	tblCTContractHeader		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
 LEFT	JOIN	tblICItem				IM	ON	IM.intItemId			=	CD.intItemId			
