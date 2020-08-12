@@ -727,28 +727,29 @@ BEGIN
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, A.dtmDate), 0),
 		[strBatchID]					=	@batchId,
 		[intAccountId]					=	D.intAccountId,
-		-- [dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
-		-- 											THEN (CASE WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
-		-- 															THEN 
-		-- 																CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
-		-- 																		* ISNULL(NULLIF(B.dblRate,0), 1) AS DECIMAL(18,2))
-		-- 																	- 
-		-- 																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
-		-- 																* -1
-		-- 												WHEN A.intEntityVendorId != receipts.intEntityVendorId --THIRD PARTY
-		-- 													THEN 
-		-- 														(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
-		-- 																* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
-		-- 															 - CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
-		-- 												END) 
-		-- 										ELSE 
-		-- 											(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
-		-- 														* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) 
-		-- 													- CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
-		-- 										END
-		-- 										* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
-		[dblDebit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
-											* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		[dblDebit]						=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
+													THEN (CASE 
+															--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
+															WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
+															THEN 
+																CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																		* ISNULL(NULLIF(B.dblRate,0), 1) AS DECIMAL(18,2))
+																	- 
+																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																* -1
+															ELSE 
+																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																		* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																	 - CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
+														END) 
+												ELSE 
+													(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)) 
+															- CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
+												END
+												* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
+		-- [dblDebit]						=	CAST((SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax)) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+											-- * (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END),
 		[dblCredit]						=	0,
 		[dblDebitUnit]					=	0,
 		[dblCreditUnit]					=	0,
