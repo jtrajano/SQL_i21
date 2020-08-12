@@ -81,10 +81,7 @@ FROM	(
 					SELECT	strTransactionId = @strTransactionId
 							,intTransactionId = @intTransactionId
 				) AS Source_Query  
-					ON ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
-					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@AVERAGECOST, @FIFO)
-					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE
-					AND 
+					ON  
 					(
 						-- Link to the main transaction
 						(	
@@ -99,7 +96,10 @@ FROM	(
 							AND inventory_transaction.intTransactionTypeId IN (@REVALUE_SOLD, @WRITE_OFF_SOLD, @AUTO_VARIANCE_ON_SOLD_OR_USED_STOCK)
 						)
 					)
-					
+					AND ISNULL(inventory_transaction.ysnIsUnposted, 0) = 0					
+					AND dbo.fnGetCostingMethod(inventory_transaction.intItemId,inventory_transaction.intItemLocationId) IN (@AVERAGECOST, @FIFO)
+					AND inventory_transaction.intTransactionTypeId <> @AUTO_NEGATIVE					
+
 				-- If matched, update the ysnIsUnposted and set it to true (1) 
 				WHEN MATCHED THEN 
 					UPDATE 
