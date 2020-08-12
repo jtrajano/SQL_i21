@@ -2095,6 +2095,7 @@ BEGIN TRY
 									,@UserId				=	@intUserId
 									,@intContractDetailId	=	@intContractDetailId
 									,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
+									,@dblQuantity           =   @dblQuantityForInvoice
 
 							--For some reason, I don't know why there's this code :)
 							DELETE	AD
@@ -2111,10 +2112,10 @@ BEGIN TRY
 
 							IF (ISNULL(@intInvoiceDetailId,0) > 0)
 							BEGIN
-								EXEC	uspARUpdateInvoiceDetails	
-										@intInvoiceDetailId	=	@intInvoiceDetailId,
-										@intEntityId		=	@intUserId, 
-										@dblQtyShipped		=	@dblQuantityForInvoice
+							-- EXEC	uspARUpdateInvoiceDetails	
+							-- 		@intInvoiceDetailId	=	@intInvoiceDetailId,
+							-- 		@intEntityId		=	@intUserId, 
+							-- 		@dblQtyShipped		=	@dblQuantityForInvoice
 
 							--select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
 							select top 1 @ContractPriceItemUOMId = a.intItemUOMId
