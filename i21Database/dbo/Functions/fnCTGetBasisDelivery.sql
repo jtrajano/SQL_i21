@@ -1,6 +1,6 @@
 ﻿-- ANY CHANGES APPLIED HERE MUST BE APPLIED ALSO IN fnCTGetBasisDeliveryAboveR2 POST SCRIPT
 
-ALTER FUNCTION [dbo].[fnCTGetBasisDelivery]
+CREATE FUNCTION [dbo].[fnCTGetBasisDelivery]
 (
 	@dtmDate DATE = NULL
 )

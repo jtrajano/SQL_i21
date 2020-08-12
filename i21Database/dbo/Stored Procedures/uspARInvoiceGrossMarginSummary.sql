@@ -6,10 +6,9 @@ CREATE PROCEDURE uspARInvoiceGrossMarginSummary
 )
 AS
 DECLARE @tblTemp TABLE(
-	strType nvarchar(20),
+	strType nvarchar(20) COLLATE Latin1_General_CI_AS,
 	dblAmount decimal (18,6),
 	dtmDate DATETIME
-
 )
 
 
