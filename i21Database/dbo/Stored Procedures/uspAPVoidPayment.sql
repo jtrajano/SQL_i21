@@ -364,7 +364,7 @@ BEGIN
 			C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment)) END,
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment)) END
 			-- C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
 			-- 							THEN (
 			-- 								CASE WHEN B.ysnOffset = 0
