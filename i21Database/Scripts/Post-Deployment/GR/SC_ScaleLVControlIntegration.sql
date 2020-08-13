@@ -778,7 +778,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							,[dblUnitBasis]					= 0
 							,[ysnProcessedData]				= 0
 							,[intOriginTicketId]			= IR.A4GLIdentity
-							,[dblConvertedUOMQty]			= ICUOM.dblUnitQty
+							,[dblConvertedUOMQty]			= QTYICUOM.dblUnitQty
 							,[intItemUOMIdFrom]				= UOM.intItemUOMId
 							,[intItemUOMIdTo]				= ICUOM.intItemUOMId
 							,[strItemUOM]					= UM.strUnitMeasure
@@ -802,6 +802,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
 						LEFT JOIN tblSMCurrency SMCR ON SMCR.strCurrency = SC.strCurrency
 						LEFT JOIN tblICItemUOM ICUOM ON ICUOM.intItemId = IC.intItemId AND ICUOM.ysnStockUnit = 1
+						LEFT JOIN tblICItemUOM QTYICUOM ON QTYICUOM.intItemId = IC.intItemId AND QTYICUOM.intUnitMeasureId = SCS.intUnitMeasureId
 						LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = ICUOM.intUnitMeasureId
 						LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 						LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
