@@ -30,11 +30,25 @@ BEGIN
 
 	DECLARE @strRecordNumber NVARCHAR(50);
 	DECLARE @intPaymentId INT;
+	DECLARE @strPaidInvoice NVARCHAR(MAX);
 	DECLARE @error NVARCHAR(500);
 
 	SELECT @intPaymentId = intPaymentId, @strRecordNumber = strRecordNumber FROM deleted WHERE ysnPosted = 1 
 
-	IF @intPaymentId > 0
+	SELECT @strPaidInvoice = COALESCE(@strPaidInvoice + ', ' + I.strInvoiceNumber, I.strInvoiceNumber)
+	FROM tblARPaymentDetail PD
+	INNER JOIN DELETED D ON PD.intPaymentId = D.intPaymentId
+	INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
+	WHERE D.ysnPosted = 0
+	AND I.ysnPaid = 1
+	GROUP BY I.strInvoiceNumber
+
+	IF @strPaidInvoice <> ''
+		BEGIN
+			SET @error = 'Invoice (' + @strPaidInvoice + ') has been fully paid. This payment may not be deleted.';
+			RAISERROR(@error, 16, 1);
+		END
+	ELSE IF @intPaymentId <> 0
 		BEGIN
 			SET @error = 'You cannot delete posted payment (' + @strRecordNumber + ')';
 			RAISERROR(@error, 16, 1);
