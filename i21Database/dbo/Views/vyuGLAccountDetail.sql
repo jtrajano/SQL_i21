@@ -27,9 +27,13 @@ AS
 				sg.ysnGLRestricted, 
 				sg.ysnAPRestricted
 FROM            dbo.tblGLAccount account 
-				OUTER APPLY (
-				SELECT  top 1 intAccountId,strCode, struc.intAccountStructureId
-					,cat.intAccountCategoryId, cat.strAccountCategory, cat.ysnGLRestricted, cat.ysnAPRestricted
+				CROSS APPLY (
+					SELECT 
+					strCode, 
+					cat.intAccountCategoryId, 
+					cat.strAccountCategory, 
+					cat.ysnGLRestricted, 
+					cat.ysnAPRestricted
 					FROM dbo.tblGLAccountSegmentMapping mapping 
 					LEFT JOIN dbo.tblGLAccountSegment segment ON segment.intAccountSegmentId = mapping.intAccountSegmentId
 					LEFT JOIN dbo.tblGLAccountCategory cat ON segment.intAccountCategoryId = cat.intAccountCategoryId
@@ -40,8 +44,8 @@ FROM            dbo.tblGLAccount account
 				
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType rtype ON account.intCurrencyExchangeRateTypeId = rtype.intCurrencyExchangeRateTypeId 
 				LEFT JOIN dbo.tblSMCurrency curr ON account.intCurrencyID = curr.intCurrencyID 
-				LEFT JOIN dbo.tblGLAccountUnit u ON account.intAccountUnitId = u.intAccountUnitId 
-				LEFT JOIN dbo.tblGLCOACrossReference coa ON account.intAccountId =coa.inti21Id 
+				LEFT JOIN dbo.tblGLAccountUnit u ON account.intAccountUnitId = u.intAccountUnitId
+				LEFT JOIN dbo.tblGLCOACrossReference coa  on account.intAccountId =inti21Id
 				LEFT JOIN dbo.tblGLAccountGroup grp ON account.intAccountGroupId = grp.intAccountGroupId
 GO
 
