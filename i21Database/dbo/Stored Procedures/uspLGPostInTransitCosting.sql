@@ -76,20 +76,23 @@ BEGIN TRY
 				RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
 			END
 		END
+	END
+		
+	-- Create a unique transaction name. 
+	DECLARE @TransactionName AS VARCHAR(500) = 'Inbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 
-		-- Create a unique transaction name. 
-		DECLARE @TransactionName AS VARCHAR(500) = 'Inbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+	--------------------------------------------------------------------------------------------  
+	-- Begin a transaction and immediately create a save point 
+	--------------------------------------------------------------------------------------------  
+	BEGIN TRAN @TransactionName
 
-		--------------------------------------------------------------------------------------------  
-		-- Begin a transaction and immediately create a save point 
-		--------------------------------------------------------------------------------------------  
-		BEGIN TRAN @TransactionName
+	SAVE TRAN @TransactionName
 
-		SAVE TRAN @TransactionName
+	EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUT
+	SET @strBatchIdUsed = @strBatchId
 
-		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUT
-		SET @strBatchIdUsed = @strBatchId
-
+	IF (ISNULL(@ysnPost, 0) = 1)
+	BEGIN
 		INSERT INTO @ItemsToPost (
 			intItemId
 			,intItemLocationId
@@ -313,7 +316,7 @@ BEGIN TRY
 		EXEC	@intReturnValue = dbo.uspICUnpostCosting
 				@intLoadId
 				,@strLoadNumber
-				,@strBatchIdUsed
+				,@strBatchId
 				,@intEntityUserSecurityId	
 				,0
 
@@ -322,19 +325,6 @@ BEGIN TRY
 			RAISERROR (@strErrMsg,16,1)
 		END
 	END
-
-IF (@ysnPost = 1 AND @ysnRecap = 0)
-BEGIN
-	UPDATE tblLGLoad
-	SET strBatchId = @strBatchIdUsed
-	WHERE intLoadId = @intLoadId AND ISNULL(strBatchId, '') <> @strBatchIdUsed
-END
-ELSE IF (@ysnPost = 0 AND @ysnRecap = 0)
-BEGIN
-	UPDATE tblLGLoad
-	SET strBatchId = NULL
-	WHERE intLoadId = @intLoadId
-END
 
 IF @ysnRecap = 1
 BEGIN 
