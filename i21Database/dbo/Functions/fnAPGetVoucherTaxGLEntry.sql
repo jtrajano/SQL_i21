@@ -10,17 +10,12 @@ RETURNS TABLE AS RETURN
 		,B.strMiscDescription
 		,CAST((D.dblTax * ISNULL(NULLIF(B.dblRate,0),1)) 
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) 
-			--TAXES RECORD IS NOT AFFECTED BY ysnPrice, IT IS ONLY AFFECTED BY ysnCheckOffTax
-			* (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
-				 AND charges.ysnPrice = 1
-				  THEN -1 ELSE 1 END) 
+			-- * (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) 
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblTotal
 		,CAST((D.dblTax) 
 			* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) 
-			* (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
-				 AND charges.ysnPrice = 1
-				 THEN -1 ELSE 1 END)  
+			-- * (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) 
 			-- * (CASE WHEN D.ysnCheckOffTax = 1 THEN -1 ELSE 1 END) 
 			AS DECIMAL(18,2)) AS dblForeignTotal
 		,0 as dblTotalUnits
