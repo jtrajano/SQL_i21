@@ -3,9 +3,9 @@ AS
 SELECT --DISTINCT
 	RHD.intRevertHolderDetailId
 	, RHD.intRevertHolderId
-	, RHD.strTableName
-	, RHD.strTableColumnName
-	, RHD.strTableColumnDataType
+	, RHD.strTableName COLLATE Latin1_General_CI_AS AS strTableName
+	, RHD.strTableColumnName COLLATE Latin1_General_CI_AS AS strTableColumnName
+	, RHD.strTableColumnDataType COLLATE Latin1_General_CI_AS AS strTableColumnDataType
 	, RHD.intPrimaryKeyId
 	, RHD.intItemId
 	, RHD.intItemUOMId
@@ -14,9 +14,9 @@ SELECT --DISTINCT
 	, RHD.intItemSpecialPricingId
 	, RHD.intCompanyLocationId
 	, RHD.dtmDateModified
-	, RHD.strChangeDescription
-	, RHD.strOldData
-	, RHD.strNewData
+	, RHD.strChangeDescription COLLATE Latin1_General_CI_AS AS strChangeDescription
+	, RHD.strOldData COLLATE Latin1_General_CI_AS AS strOldData
+	, RHD.strNewData COLLATE Latin1_General_CI_AS AS strNewData
 	, Item.strItemNo
 	, Item.strDescription AS strItemDescription
 	, Uom.strLongUPCCode
@@ -121,7 +121,7 @@ SELECT --DISTINCT
 
 							ELSE  
 								ISNULL(RHD.strNewData, '')
-					END
+					END COLLATE Latin1_General_CI_AS
 	, strPreviewOldData	= CASE
 								WHEN RHD.strTableColumnDataType = 'DATETIME'
 									THEN CONVERT(VARCHAR(10), CAST(RHD.strOldData AS DATE), 101)
@@ -129,7 +129,7 @@ SELECT --DISTINCT
 								WHEN RHD.strOldData = 'false' THEN 'No'
 								ELSE
 									ISNULL(RHD.strPreviewOldData, RHD.strOldData)
-						END
+						END COLLATE Latin1_General_CI_AS
 --, strPreviewOldData = CASE
 --							WHEN RHD.strTableColumnName = 'intCategoryId'
 --								THEN Category_Old.strCategoryCode
