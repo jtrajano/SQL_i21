@@ -2,6 +2,8 @@
 	 @ysnPost BIT = 0
 	,@strTransactionId NVARCHAR(40) = NULL
 	,@intEntityUserSecurityId AS INT = NULL
+	,@ysnRecap BIT = 0
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -16,14 +18,12 @@ SET ANSI_WARNINGS OFF
 DECLARE @TransactionName AS VARCHAR(500) = 'Outbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
 -- Constants  
 DECLARE @INVENTORY_SHIPMENT_TYPE AS INT = 46
-DECLARE @ysnRecap AS INT = 0
 DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 DECLARE @ENABLE_ACCRUALS_FOR_OUTBOUND BIT = 0
 
 DECLARE @DefaultCurrencyId AS INT = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 -- Get the Inventory Shipment batch number
-DECLARE @strBatchId AS NVARCHAR(40)
-	,@strItemNo AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
 	,@ysnAllowBlankGLEntries AS BIT = 1
 	,@intItemId AS INT
 -- Create the gl entries variable 
@@ -94,7 +94,7 @@ BEGIN
 END
 
 -- Check if the transaction is already posted  
-IF @ysnPost = 0
+IF @ysnPost = 0 AND @ysnRecap = 0
 	AND @ysnTransactionPostedFlag = 0
 BEGIN
 	-- The transaction is already unposted.  
@@ -895,6 +895,20 @@ BEGIN
 
 	COMMIT TRAN @TransactionName
 END
+ELSE
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+
+	-- Save the GL Entries data into the GL Post Recap table by calling uspGLPostRecap. 
+	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN 
+		EXEC dbo.uspGLPostRecap 
+			@GLEntries
+			,@intEntityUserSecurityId
+	END
+
+	COMMIT TRAN @TransactionName
+END  
 
 -- Create an Audit Log
 IF @ysnRecap = 0

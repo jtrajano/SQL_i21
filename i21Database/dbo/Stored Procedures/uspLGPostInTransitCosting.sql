@@ -3,6 +3,8 @@
 	,@ysnPost BIT
 	,@intPurchaseSale INT
 	,@intEntityUserSecurityId INT
+	,@ysnRecap BIT = 0
+	,@strBatchId NVARCHAR(40) = NULL OUTPUT
 AS
 BEGIN TRY
 	DECLARE @strErrMsg NVARCHAR(MAX)
@@ -11,7 +13,6 @@ BEGIN TRY
 	DECLARE @GLEntries AS RecapTableType
 	DECLARE @intReturnValue INT
 	DECLARE @STARTING_NUMBER_BATCH INT = 3
-	DECLARE @strBatchId NVARCHAR(20)
 	DECLARE @strBatchIdUsed NVARCHAR(20)
 	DECLARE @intFOBPointId INT
 	DECLARE @INBOUND_SHIPMENT_TYPE AS INT = 22
@@ -38,11 +39,6 @@ BEGIN TRY
 	SELECT @intDestinationFOBPointId = intFobPointId
 	FROM tblICFobPoint
 	WHERE strFobPoint = 'Destination'
-
-	EXEC dbo.uspSMGetStartingNumber 3
-		,@strBatchId OUT
-
-	SET @strBatchIdUsed = @strBatchId
 
 	IF (ISNULL(@ysnPost, 0) = 1)
 	BEGIN
@@ -80,6 +76,19 @@ BEGIN TRY
 				RAISERROR('One or more contracts is not yet priced. Please price the contracts or provide a provisional price to proceed.', 16, 1);
 			END
 		END
+
+		-- Create a unique transaction name. 
+		DECLARE @TransactionName AS VARCHAR(500) = 'Inbound Shipment Transaction' + CAST(NEWID() AS NVARCHAR(100));
+
+		--------------------------------------------------------------------------------------------  
+		-- Begin a transaction and immediately create a save point 
+		--------------------------------------------------------------------------------------------  
+		BEGIN TRAN @TransactionName
+
+		SAVE TRAN @TransactionName
+
+		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUT
+		SET @strBatchIdUsed = @strBatchId
 
 		INSERT INTO @ItemsToPost (
 			intItemId
@@ -215,60 +224,52 @@ BEGIN TRY
 						ORDER BY RD.dtmValidFromDate DESC) FX
 		WHERE L.intLoadId = @intLoadId
 
+		INSERT INTO @GLEntries (
+			[dtmDate]
+			,[strBatchId]
+			,[intAccountId]
+			,[dblDebit]
+			,[dblCredit]
+			,[dblDebitUnit]
+			,[dblCreditUnit]
+			,[strDescription]
+			,[strCode]
+			,[strReference]
+			,[intCurrencyId]
+			,[dblExchangeRate]
+			,[dtmDateEntered]
+			,[dtmTransactionDate]
+			,[strJournalLineDescription]
+			,[intJournalLineNo]
+			,[ysnIsUnposted]
+			,[intUserId]
+			,[intEntityId]
+			,[strTransactionId]
+			,[intTransactionId]
+			,[strTransactionType]
+			,[strTransactionForm]
+			,[strModuleName]
+			,[intConcurrencyId]
+			,[dblDebitForeign]
+			,[dblDebitReport]
+			,[dblCreditForeign]
+			,[dblCreditReport]
+			,[dblReportingRate]
+			,[dblForeignRate]
+			,[intSourceEntityId]
+			,[intCommodityId]
+			)
+		EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
+			,@strBatchId = @strBatchIdUsed
+			,@strAccountToCounterInventory = 'AP Clearing'
+			,@intEntityUserSecurityId = @intEntityUserSecurityId
+
+		UPDATE @GLEntries
+		SET strCode = 'LG', strModuleName = 'Logistics'
+
+		IF @intReturnValue < 0
 		BEGIN
-			INSERT INTO @GLEntries (
-				[dtmDate]
-				,[strBatchId]
-				,[intAccountId]
-				,[dblDebit]
-				,[dblCredit]
-				,[dblDebitUnit]
-				,[dblCreditUnit]
-				,[strDescription]
-				,[strCode]
-				,[strReference]
-				,[intCurrencyId]
-				,[dblExchangeRate]
-				,[dtmDateEntered]
-				,[dtmTransactionDate]
-				,[strJournalLineDescription]
-				,[intJournalLineNo]
-				,[ysnIsUnposted]
-				,[intUserId]
-				,[intEntityId]
-				,[strTransactionId]
-				,[intTransactionId]
-				,[strTransactionType]
-				,[strTransactionForm]
-				,[strModuleName]
-				,[intConcurrencyId]
-				,[dblDebitForeign]
-				,[dblDebitReport]
-				,[dblCreditForeign]
-				,[dblCreditReport]
-				,[dblReportingRate]
-				,[dblForeignRate]
-				,[intSourceEntityId]
-				,[intCommodityId]
-				)
-			EXEC @intReturnValue = dbo.uspICPostInTransitCosting @ItemsToPost = @ItemsToPost
-				,@strBatchId = @strBatchIdUsed
-				,@strAccountToCounterInventory = 'AP Clearing'
-				,@intEntityUserSecurityId = @intEntityUserSecurityId
-
-			UPDATE @GLEntries
-			SET strCode = 'LG', strModuleName = 'Logistics'
-
-			UPDATE tblLGLoad
-			SET strBatchId = @strBatchIdUsed
-			WHERE intLoadId = @intLoadId
-
-			IF @intReturnValue < 0
-			BEGIN
-				RAISERROR (@strErrMsg,16,1)
-			END
-
-			EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+			RAISERROR (@strErrMsg,16,1)
 		END
 	END
 	ELSE
@@ -320,13 +321,35 @@ BEGIN TRY
 		BEGIN
 			RAISERROR (@strErrMsg,16,1)
 		END
-
-		EXEC dbo.uspGLBookEntries @GLEntries
-			,@ysnPost
 	END
 
+IF (@ysnPost = 1 AND @ysnRecap = 0)
+BEGIN
+	UPDATE tblLGLoad
+	SET strBatchId = @strBatchIdUsed
+	WHERE intLoadId = @intLoadId AND ISNULL(strBatchId, '') <> @strBatchIdUsed
+END
+ELSE IF (@ysnPost = 0 AND @ysnRecap = 0)
+BEGIN
+	UPDATE tblLGLoad
+	SET strBatchId = NULL
+	WHERE intLoadId = @intLoadId
+END
+
+IF @ysnRecap = 1
+BEGIN 
+	ROLLBACK TRAN @TransactionName
+	EXEC dbo.uspGLPostRecap @GLEntries, @intEntityUserSecurityId
+	COMMIT TRAN @TransactionName
+END  
+ELSE
+BEGIN
+	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+	COMMIT TRAN @TransactionName
+END
+
 --Update Contract Balance and Scheduled Qty for Drop Ship
-IF (@intPurchaseSale = 3)
+IF (@intPurchaseSale = 3 AND @ysnRecap = 0)
 BEGIN 
 	DECLARE @ItemsFromInventoryReceipt AS dbo.ReceiptItemTableType
 	INSERT INTO @ItemsFromInventoryReceipt (
@@ -399,12 +422,15 @@ BEGIN
 		,@intEntityUserSecurityId
 		,@ysnPost
 END
-
-
 END TRY
-
 BEGIN CATCH
-	SET @strErrMsg = ERROR_MESSAGE()
+	IF @@TRANCOUNT > 1
+	BEGIN
+		ROLLBACK TRAN @TransactionName
 
+		COMMIT TRAN @TransactionName
+	END
+
+	SET @strErrMsg = ERROR_MESSAGE()
 	RAISERROR (@strErrMsg,16,1,'WITH NOWAIT')
 END CATCH
