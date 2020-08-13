@@ -6,5 +6,6 @@
 	,intShipperId INT
 	,intDestinationCityId INT
 	,intDestinationPortId INT
+	,intNumberOfContainers INT
 	,CONSTRAINT [PK_tblIPContractFeedLog_intContractFeedLogId] PRIMARY KEY CLUSTERED (intContractFeedLogId ASC)
 	)
