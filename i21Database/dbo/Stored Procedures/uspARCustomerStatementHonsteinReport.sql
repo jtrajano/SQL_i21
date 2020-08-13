@@ -274,6 +274,7 @@ INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN #COMPANYLOCATIONS CL ON P.intLocationId = CL.intCompanyLocationId
 WHERE P.ysnPosted = 1
   AND ISNULL(P.ysnProcessedToNSF, 0) = 0
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid))) <= @dtmDateToLocal
 
 --FILTER OUT WRITE OFF PAYMENTS
 IF @ysnIncludeWriteOffPaymentLocal = 1
