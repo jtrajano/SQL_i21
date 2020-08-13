@@ -8165,7 +8165,6 @@
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
-    <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
