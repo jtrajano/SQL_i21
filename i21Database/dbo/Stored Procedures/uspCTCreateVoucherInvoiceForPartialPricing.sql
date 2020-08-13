@@ -363,6 +363,11 @@ BEGIN TRY
 					SELECT	@strVendorOrderNumber = strTicketNumber, @intTicketId = intTicketId 
 						FROM tblSCTicket WHERE intInventoryReceiptId = @intInventoryReceiptId
 
+					if (@strVendorOrderNumber is null)
+					begin
+						select top 1 @strVendorOrderNumber = t.strTicketNumber, @intTicketId = t.intTicketId from tblICInventoryReceiptItem ri, tblSCTicket t where ri.intInventoryReceiptItemId = @intInventoryReceiptItemId and t.intTicketId = ri.intSourceId;
+					end
+
 					IF @ysnLoad = 1
 					BEGIN
 						IF @dblPriceLoadQty = @dblPriceFixationLoadApplied
@@ -459,7 +464,7 @@ BEGIN TRY
 							SELECT TOP 1 1 intBillId
 							FROM tblAPBill BL
 							INNER JOIN tblAPBillDetail BD ON BL.intBillId = BD.intBillId
-							LEFT JOIN @tblCreatedTransaction CT ON CT.intTransactionId = BL.intBillId
+							JOIN @tblCreatedTransaction CT ON CT.intTransactionId = BL.intBillId
 							WHERE BL.intTransactionType <> 13 and  BD.intInventoryReceiptItemId = @intInventoryReceiptItemId
 							AND (BL.ysnPosted = 0 OR ISNULL(CT.intTransactionId, 0) <> 0)
 						)
