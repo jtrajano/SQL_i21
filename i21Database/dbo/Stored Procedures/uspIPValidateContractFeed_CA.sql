@@ -14,15 +14,17 @@ BEGIN
 		,@intDestinationCityId INT
 		,@intDestinationPortId INT
 		,@strVendorRefNo NVARCHAR(50)
+		,@intNumberOfContainers int
 
 	SELECT TOP 1 @intContractDetailId = L.intContractDetailId
 	FROM tblIPContractFeedLog L
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
-	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId and CD.intContractStatusId=1
 	WHERE L.strCustomerContract <> CH.strCustomerContract
 		OR L.intShipperId <> CD.intShipperId
 		OR L.intDestinationCityId <> CD.intDestinationCityId
 		OR L.intDestinationPortId <> CD.intDestinationPortId
+		OR L.intNumberOfContainers <> CD.intNumberOfContainers
 
 	IF @intContractDetailId IS NOT NULL
 	BEGIN
@@ -139,6 +141,7 @@ BEGIN
 			,@intShipperId = intShipperId
 			,@intDestinationCityId = intDestinationCityId
 			,@intDestinationPortId = intDestinationPortId
+			,@intNumberOfContainers=intNumberOfContainers
 		FROM tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -159,6 +162,7 @@ BEGIN
 			,intShipperId
 			,intDestinationCityId
 			,intDestinationPortId
+			,intNumberOfContainers
 			)
 		SELECT @intContractHeaderId
 			,@intContractDetailId
@@ -167,6 +171,7 @@ BEGIN
 			,@intShipperId
 			,@intDestinationCityId
 			,@intDestinationPortId
+			,@intNumberOfContainers
 
 		SELECT @strInfo1 = @strContractNumber + ' / ' + ISNULL(@strContractSeq, '')
 

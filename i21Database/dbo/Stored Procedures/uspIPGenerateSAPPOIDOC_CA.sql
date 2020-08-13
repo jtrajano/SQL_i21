@@ -35,6 +35,7 @@ BEGIN
 		,@dtmCurrentDate DATETIME
 		,@dtmStartDate DATETIME
 		,@dtmEndDate DATETIME
+		,@intNumberOfContainers INT
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -133,6 +134,7 @@ BEGIN
 			,@strSeq = NULL
 			,@dtmStartDate = NULL
 			,@dtmEndDate = NULL
+			,@intNumberOfContainers = NULL
 
 		SELECT @strError = ''
 
@@ -165,6 +167,7 @@ BEGIN
 		SELECT @intShipperId = intShipperId
 			,@intDestinationCityId = intDestinationCityId
 			,@intDestinationPortId = intDestinationPortId
+			,@intNumberOfContainers = intNumberOfContainers
 		FROM dbo.tblCTContractDetail WITH (NOLOCK)
 		WHERE intContractDetailId = @intContractDetailId
 
@@ -234,6 +237,22 @@ BEGIN
 
 		IF @strRowState = 'Delete'
 		BEGIN
+			IF NOT EXISTS (
+					SELECT *
+					FROM tblIPThirdPartyContractFeed
+					WHERE strERPPONumber = @strERPPONumber
+						AND strThirdPartyFeedStatus <> 'Failed'
+						 AND intContractFeedId <> @intContractFeedId
+					)
+			BEGIN
+				UPDATE dbo.tblIPThirdPartyContractFeed
+				SET strThirdPartyMessage = 'Added is not sent to Cargoo.'
+					,strThirdPartyFeedStatus = 'Failed'
+				WHERE intContractFeedId = @intContractFeedId
+
+				GOTO X
+			END
+
 			SELECT @strXML = '<Shipment>'
 
 			SELECT @strXML = @strXML + '<Reference>' + @strERPPONumber + '</Reference>'
@@ -301,6 +320,8 @@ BEGIN
 
 			SELECT @strXML = @strXML + '<EndDate>' + CONVERT(VARCHAR(30), @dtmEndDate, 126) + '</EndDate>'
 
+			SELECT @strXML = @strXML + '<ContainerCount>' + IsNULL(Ltrim(@intNumberOfContainers),'') + '</ContainerCount>'
+
 			SELECT @strXML = @strXML + '<CommodityItems>'
 
 			SELECT @strXML = @strXML + '<CommodityItem>'
@@ -353,6 +374,7 @@ BEGIN
 					,intShipperId
 					,intDestinationCityId
 					,intDestinationPortId
+					,intNumberOfContainers
 					)
 				SELECT @intContractHeaderId
 					,@intContractDetailId
@@ -361,6 +383,7 @@ BEGIN
 					,@intShipperId
 					,@intDestinationCityId
 					,@intDestinationPortId
+					,@intNumberOfContainers
 
 				IF EXISTS (
 						SELECT 1
