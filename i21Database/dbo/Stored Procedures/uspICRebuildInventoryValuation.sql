@@ -1004,8 +1004,8 @@ BEGIN
 				,intSortByQty = 
 					CASE 
 						WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-						WHEN intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
-						WHEN intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.						
+						WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
+						WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.						
 						WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
 						WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
 						WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
@@ -1066,8 +1066,8 @@ BEGIN
 			END DESC 
 			,CASE 
 				WHEN priorityTransaction.strTransactionId IS NOT NULL THEN 1 
-				WHEN intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
-				WHEN intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
+				WHEN t.intTransactionTypeId = 47 THEN 2 -- 'Inventory Adjustment - Opening Inventory'
+				WHEN t.intTransactionTypeId = 58 THEN 99 -- 'Inventory Adjustment - Closing Balance' is last in the sorting.				
 				WHEN dblQty > 0 AND t.strTransactionForm NOT IN ('Invoice', 'Inventory Shipment', 'Inventory Count', 'Credit Memo') THEN 3 
 				WHEN dblQty < 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 4
 				WHEN dblQty > 0 AND t.strTransactionForm = 'Inventory Shipment' THEN 5
