@@ -52,6 +52,7 @@ Type the overview for the table here.
 		[strWarehouseRefNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strCertificateId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 	
 		[strTrackingNumber] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
+		[intLotStatusId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,

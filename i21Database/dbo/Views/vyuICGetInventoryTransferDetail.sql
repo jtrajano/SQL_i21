@@ -143,7 +143,7 @@ AS
 	) COLLATE Latin1_General_CI_AS
 	, TransferDetail.strLotCondition
 	, TransferDetail.intNewLotStatusId
-	, strNewLotStatus = NewLotStatus.strPrimaryStatus
+	, strNewLotStatus = NewLotStatus.strSecondaryStatus
 	, TransferDetail.dblWeightPerQty
 	, TransferDetail.intCostingMethod
 	, TransferDetail.strWarehouseRefNo
