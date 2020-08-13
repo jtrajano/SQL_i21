@@ -299,6 +299,7 @@ BEGIN
 			,strCargoNo
 			,strWarrantNo
 			,intSourceType
+			,intLotStatusId
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -355,6 +356,7 @@ BEGIN
 			,strCargoNo				= ItemLot.strCargoNo
 			,strCargoNo				= ItemLot.strWarrantNo
 			,intSourceType			= Receipt.intSourceType
+			,intLotStatusId			= ItemLot.intLotStatusId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

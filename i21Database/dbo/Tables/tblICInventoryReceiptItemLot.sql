@@ -54,6 +54,7 @@ Type the overview for the table here.
 		[strTrackingNumber] NVARCHAR(255) COLLATE Latin1_General_CI_AS NULL, 	
 		[strCargoNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strWarrantNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+		[intLotStatusId] INT NULL, 
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
