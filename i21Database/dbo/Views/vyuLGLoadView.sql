@@ -232,7 +232,9 @@ SELECT -- Load Header
 		L.intShipmentType,
 		L.strExternalShipmentNumber,
 		strShippingInstructionNumber = LOADSI.strLoadNumber,
-		L.dtmStuffingDate
+		L.dtmStuffingDate,
+		L.intBookId,
+		L.intSubBookId
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
