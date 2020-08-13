@@ -602,6 +602,11 @@ BEGIN TRY
 
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
+							
 							-- CT-3983
 							DELETE @detailCreated
 
@@ -618,11 +623,6 @@ BEGIN TRY
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
-
-							IF (ISNULL(@intBillDetailId, 0) <> 0)
-							BEGIN
-								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-							END
 							--
 
 							IF ISNULL(@ysnBillPosted,0) = 1
@@ -2095,6 +2095,7 @@ BEGIN TRY
 									,@UserId				=	@intUserId
 									,@intContractDetailId	=	@intContractDetailId
 									,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
+									,@dblQuantity           =   @dblQuantityForInvoice
 
 							--For some reason, I don't know why there's this code :)
 							DELETE	AD
@@ -2111,10 +2112,10 @@ BEGIN TRY
 
 							IF (ISNULL(@intInvoiceDetailId,0) > 0)
 							BEGIN
-								EXEC	uspARUpdateInvoiceDetails	
-										@intInvoiceDetailId	=	@intInvoiceDetailId,
-										@intEntityId		=	@intUserId, 
-										@dblQtyShipped		=	@dblQuantityForInvoice
+							-- EXEC	uspARUpdateInvoiceDetails	
+							-- 		@intInvoiceDetailId	=	@intInvoiceDetailId,
+							-- 		@intEntityId		=	@intUserId, 
+							-- 		@dblQtyShipped		=	@dblQuantityForInvoice
 
 							--select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
 							select top 1 @ContractPriceItemUOMId = a.intItemUOMId
