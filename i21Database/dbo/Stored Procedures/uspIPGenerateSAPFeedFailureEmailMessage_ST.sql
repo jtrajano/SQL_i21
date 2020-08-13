@@ -66,23 +66,28 @@ BEGIN TRY
 						<th>&nbsp;Message</th>
 					</tr>'
 
-		SELECT @strDetail = @strDetail + 
-		'<tr>
-			<td>&nbsp;' + 'Sample' + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strSampleNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strERPPONumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strERPItemNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
-		</tr>'
-		FROM tblIPSampleError t WITH (NOLOCK)
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPSampleError WITH (NOLOCK)
+			WHERE ysnMailSent = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + 
+			'<tr>
+				<td>&nbsp;' + 'Sample' + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strSampleNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strERPPONumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strERPItemNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
+			</tr>'
+			FROM tblIPSampleError t WITH (NOLOCK)
+			WHERE ysnMailSent = 0
 
-		UPDATE tblIPSampleError
-		SET ysnMailSent = 1
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+			UPDATE tblIPSampleError
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
 	END
 
 	IF @strMessageType = 'Receipt'
@@ -95,22 +100,27 @@ BEGIN TRY
 						<th>&nbsp;Message</th>
 					</tr>'
 
-		SELECT @strDetail = @strDetail + 
-		'<tr>
-			<td>&nbsp;' + 'Receipt' + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strReceiptNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strBLNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
-		</tr>'
-		FROM tblIPInvReceiptError t WITH (NOLOCK)
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPInvReceiptError WITH (NOLOCK)
+			WHERE ysnMailSent = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + 
+			'<tr>
+				<td>&nbsp;' + 'Receipt' + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strReceiptNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strBLNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
+			</tr>'
+			FROM tblIPInvReceiptError t WITH (NOLOCK)
+			WHERE ysnMailSent = 0
 
-		UPDATE tblIPInvReceiptError
-		SET ysnMailSent = 1
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+			UPDATE tblIPInvReceiptError
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
 	END
 
 	IF @strMessageType = 'Stock'
@@ -125,24 +135,29 @@ BEGIN TRY
 						<th>&nbsp;Message</th>
 					</tr>'
 
-		SELECT @strDetail = @strDetail + 
-		'<tr>
-			<td>&nbsp;' + 'Stock' + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strLotNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strStorageLocationName, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strBook, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strSubBook, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
-		</tr>'
-		FROM tblIPLotError t WITH (NOLOCK)
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPLotError WITH (NOLOCK)
+			WHERE ysnMailSent = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + 
+			'<tr>
+				<td>&nbsp;' + 'Stock' + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strLotNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strStorageLocationName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strBook, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strSubBook, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
+			</tr>'
+			FROM tblIPLotError t WITH (NOLOCK)
+			WHERE ysnMailSent = 0
 
-		UPDATE tblIPLotError
-		SET ysnMailSent = 1
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+			UPDATE tblIPLotError
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
 	END
 
 	IF @strMessageType = 'LS Status'
@@ -157,24 +172,29 @@ BEGIN TRY
 						<th>&nbsp;Message</th>
 					</tr>'
 
-		SELECT @strDetail = @strDetail + 
-		'<tr>
-			<td>&nbsp;' + 'LS Status' + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strContractNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(CONVERT(VARCHAR, intContractSeq), '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strBLNumber, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strStatus, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmETA, 106), '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
-		</tr>'
-		FROM tblIPShipmentStatusError t WITH (NOLOCK)
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+		IF EXISTS (
+			SELECT 1
+			FROM tblIPShipmentStatusError WITH (NOLOCK)
+			WHERE ysnMailSent = 0
+			)
+		BEGIN
+			SELECT @strDetail = @strDetail + 
+			'<tr>
+				<td>&nbsp;' + 'LS Status' + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strContractNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(CONVERT(VARCHAR, intContractSeq), '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strBLNumber, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strStatus, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmETA, 106), '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strErrorMessage, '') + '</td>
+			</tr>'
+			FROM tblIPShipmentStatusError t WITH (NOLOCK)
+			WHERE ysnMailSent = 0
 
-		UPDATE tblIPShipmentStatusError
-		SET ysnMailSent = 1
-		WHERE ISNULL(ysnMailSent, 0) = 0
-			AND ISNULL(strErrorMessage, '') NOT IN ('','Success')
+			UPDATE tblIPShipmentStatusError
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
 	END
 
 	SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)

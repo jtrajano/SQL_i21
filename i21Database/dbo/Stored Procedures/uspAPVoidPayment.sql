@@ -324,6 +324,20 @@ BEGIN
 		ON A.strPaymentRecordNum = C.strTransactionId
 	--WHERE B.intNewPaymentId IS NULL
 
+	--UPDATE dblPaymentTemp and ysnInPayment
+	--WE NEED TO UPDATE THE ysnPrepayHasPayment FIRST TO HANDLE THE CONDITIONS IN uspAPUpdateVoucherPayment
+	UPDATE C
+	SET C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13) 
+								THEN CASE WHEN B.ysnOffset = 0 THEN 0 ELSE 1 END
+								ELSE C.ysnPrepayHasPayment END
+	FROM tblAPPayment A
+	INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+	INNER JOIN tblAPBill C ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
+	WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
+
+	SELECT @paymentIds = COALESCE(@paymentIds + ', ', '') + CONVERT(VARCHAR(12), P.intPaymentId) FROM #tmpPayables P
+	IF @paymentIds <> '' OR @paymentIds IS NOT NULL EXEC uspAPUpdateVoucherPayment @paymentIds, 0
+
 	--Unposting Process
 	UPDATE B
 	SET B.dblAmountDue = CASE WHEN B.ysnOffset = 0 AND C.intTransactionType IN (2, 13) THEN B.dblAmountDue --DO NOTHING IF PREPAYMENT VOIDING
@@ -350,13 +364,13 @@ BEGIN
 			C.ysnPaid = 0,
 			C.dtmDatePaid = NULL,
 			C.dblWithheld = 0,
-			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment)) END,
-			C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
-										THEN (
-											CASE WHEN B.ysnOffset = 0
-											THEN 0 ELSE 1 END
-										)
-										ELSE 0 END
+			C.dblPayment = CASE WHEN (C.dblPayment - ABS(B.dblPayment)) < 0 THEN 0 ELSE (C.dblPayment - ABS(B.dblPayment)) END
+			-- C.ysnPrepayHasPayment = CASE WHEN C.intTransactionType IN (2,13)
+			-- 							THEN (
+			-- 								CASE WHEN B.ysnOffset = 0
+			-- 								THEN 0 ELSE 1 END
+			-- 							)
+			-- 							ELSE 0 END
 			--C.ysnPosted = CASE WHEN A.ysnPrepay = 1 THEN 0 ELSE 1 END
 	FROM tblAPPayment A
 				INNER JOIN tblAPPaymentDetail B 

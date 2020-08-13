@@ -51,7 +51,7 @@ BEGIN TRY
 		UPDATE tblAPBill 
 		SET
 			@dblPaymentTemp =	(
-									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
+									ISNULL(paySchedDetails.dblPayment, ISNULL(ABS(payDetails.dblPayment), 0)) +
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
 									ISNULL(payDetails.dblInterest, 0)
 								),
@@ -79,7 +79,7 @@ BEGIN TRY
 			INNER JOIN tblAPPayment P2 ON P2.intPaymentId = PD.intPaymentId
 			WHERE 
 				PD.intPayScheduleId IS NULL AND PD.intBillId = B.intBillId AND P2.ysnNewFlag = 1
-			GROUP BY PD.intBillId, PD.intPaymentId
+			GROUP BY PD.intBillId
 		) payDetails 
 		OUTER APPLY (
 			SELECT 
@@ -97,7 +97,7 @@ BEGIN TRY
 			FROM tblAPAppliedPrepaidAndDebit APD
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
-		WHERE P.intPaymentId IN (SELECT intId FROM @ids)
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND B.ysnPrepayHasPayment = 0
 	END
 	ELSE IF @post = 0
 	BEGIN
@@ -117,7 +117,7 @@ BEGIN TRY
 		UPDATE tblAPBill 
 		SET
 			@dblPaymentTemp =	(
-									ISNULL(paySchedDetails.dblPayment, ISNULL(payDetails.dblPayment, 0)) +
+									ISNULL(paySchedDetails.dblPayment, ISNULL(ABS(payDetails.dblPayment), 0)) +
 									ISNULL(paySchedDetails.dblDiscount, ISNULL(payDetails.dblDiscount, 0)) -
 									ISNULL(payDetails.dblInterest, 0)
 								),
@@ -163,7 +163,7 @@ BEGIN TRY
 			FROM tblAPAppliedPrepaidAndDebit APD
 			WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 		) appliedPrepays
-		WHERE P.intPaymentId IN (SELECT intId FROM @ids)
+		WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND B.ysnPrepayHasPayment = 0
 	END
 
 	--SELECT NULLED BILLS
@@ -190,7 +190,7 @@ BEGIN TRY
 
 	IF @nullCheck IS NULL AND @tempCheck < 0
 	BEGIN
-		RAISERROR('$s will be underpaid.', 11, 1, @billCheck);
+		RAISERROR('%s will be underpaid.', 11, 1, @billCheck);
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION

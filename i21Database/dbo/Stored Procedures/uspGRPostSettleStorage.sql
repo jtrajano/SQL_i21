@@ -2093,6 +2093,7 @@ BEGIN TRY
 								a.intContractDetailId - Contract used during the settlement*/
 								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
 								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
+								AND CS.intTicketId IS NOT NULL
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2530,7 +2531,13 @@ BEGIN TRY
 
 					end
 
-
+					if @ysnDPOwnedType = 1 and exists(select top 1 1 from @voucherPayable where isnull(intInventoryReceiptItemId, 0) > 0)
+						update 
+							voucherPayable
+								set dblOldCost = ReceiptItem.dblUnitCost
+						from @voucherPayable voucherPayable
+							join tblICInventoryReceiptItem ReceiptItem
+								on voucherPayable.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
 
 
 
@@ -2590,7 +2597,7 @@ BEGIN TRY
 										a.intItemId = b.intItemId
 									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
 
-					IF ISNULL(@dblTotal,0) > 0 AND ISNULL(@requireApproval , 0) = 0
+					IF ISNULL(@dblTotal,0) > 0
 					BEGIN							
 							
 								UPDATE tblGRSettleStorage
@@ -2616,7 +2623,7 @@ BEGIN TRY
 
 								
 							--IF @ysnFromTransferStorage = 0
-							IF ISNULL(@intVoucherId,0) > 0
+							IF ISNULL(@intVoucherId,0) > 0 AND ISNULL(@requireApproval , 0) = 0
 							BEGIN
 								INSERT INTO @VoucherIds
 								SELECT @intVoucherId

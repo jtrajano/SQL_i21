@@ -66,7 +66,9 @@ FROM (
 						WHEN voucher.intTransactionType = 13 AND voucher.ysnPrepayHasPayment = 0 THEN 0
 						ELSE 1 END
 					AS BIT)
-		,voucher.dblPaymentTemp
+		,CASE WHEN voucher.intTransactionType IN (3,8) AND voucher.dblPaymentTemp > 0 THEN voucher.dblPaymentTemp * -1
+			WHEN voucher.intTransactionType IN (2, 13) AND voucher.ysnPrepayHasPayment = 1 THEN voucher.dblPaymentTemp * -1
+			ELSE voucher.dblPaymentTemp END AS dblPaymentTemp
 		,voucher.ysnInPayment
 	FROM tblAPBill voucher
 	INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)
@@ -90,7 +92,7 @@ FROM (
 	AND voucher.intTransactionType NOT IN (11, 12)
 	AND voucher.intTransactionReversed IS NULL
 	AND voucher.ysnIsPaymentScheduled = 0
-	AND (voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0)
+	AND ((voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0) OR voucher.ysnPrepayHasPayment <> 0)
 	UNION ALL
 	SELECT 
 		voucher.intBillId
@@ -163,5 +165,5 @@ FROM (
 	AND voucher.ysnIsPaymentScheduled = 1 --AP-7092
 	AND paySched.ysnPaid = 0
 	AND paySched.ysnInPayment = 0
-	AND (voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0)
+	AND ((voucher.ysnInPayment IS NULL OR voucher.ysnInPayment = 0) OR voucher.ysnPrepayHasPayment <> 0)
 ) forPayment

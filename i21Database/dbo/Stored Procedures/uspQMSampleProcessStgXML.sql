@@ -2481,6 +2481,7 @@ BEGIN TRY
 				,strNewSampleNumber = @strNewSampleNumber
 				,strNewSampleTypeName = @strSampleTypeName
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intSampleStageId = @intSampleStageId
 
 			IF @intTransactionCount = 0
@@ -2503,6 +2504,7 @@ BEGIN TRY
 				,intNewSampleId = @intNewSampleId
 				,strNewSampleNumber = @strNewSampleNumber
 				,strNewSampleTypeName = @strSampleTypeName
+				,intStatusId = 2
 			WHERE intSampleStageId = @intSampleStageId
 		END CATCH
 

@@ -1209,3 +1209,8 @@ UPDATE tblQMSample
 SET ysnParent = 1
 WHERE ysnParent IS NULL
 GO
+
+UPDATE tblQMSampleType
+SET ysnPartyMandatory = 1
+WHERE ysnPartyMandatory IS NULL
+GO

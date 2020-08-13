@@ -78,6 +78,8 @@ AS
 			CH.ysnBrokerage,
 			CH.strBook,
 			CH.strSubBook,
+			CH.intBookId,
+			CH.intSubBookId,
 			CH.intFreightTermId,
 			CH.strFreightTerm,
 			CH.strExternalEntity,

@@ -275,7 +275,7 @@ FROM (
 	FROM #tempFinalSecondRun b
 	WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFinalFirstRun)
 ) t
-INNER JOIN #tempPivotTable PT ON PT.strTransactionReferenceId = t.strTransactionReferenceId
+LEFT JOIN #tempPivotTable PT ON PT.strTransactionReferenceId = t.strTransactionReferenceId
 
 
 DROP TABLE #FirstRun

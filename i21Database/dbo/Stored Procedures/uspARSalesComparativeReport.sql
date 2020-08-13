@@ -6,6 +6,15 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 		
 		SELECT * FROM vyuARTransactionSummary
+
+		
+  		OUTER APPLY (
+		SELECT TOP 1 strCompanyName
+				   , strCompanyAddress = 
+				   dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, 
+				   strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
+		FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+		) COMPANY
 	END
 
 DECLARE @dtmBeginningDateTo				DATETIME
@@ -164,6 +173,9 @@ SELECT
 	 , dblBeginQuantity			= SUM(dblBeginQuantity)
 	 , dblEndSalesAmount		= 0
 	 , dblEndQuantity 			= 0
+	 , strCompanyName		    = strCompanyName
+	 , strCompanyAddress		= strCompanyAddress
+
  FROM (
 
       SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - ' + CONVERT(VARCHAR(10), @dtmBeginningDateTo, 101) 
@@ -242,4 +254,14 @@ WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
   AND (@intCompanyLocationId IS NULL OR intCompanyLocationId = @intCompanyLocationId)
   AND (@strSource IS NULL OR strSource = @strSource)
   ) SUMMARY
-  Group By strName, strCustomerNumber, strItemNo 
+   	OUTER APPLY (
+	SELECT TOP 1 strCompanyName
+			   , strCompanyAddress = 
+			   dbo.[fnARFormatCustomerAddress](NULL, NULL, NULL, strAddress, 
+			   strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
+	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
+	) COMPANY
+
+
+  Group By strName, strCustomerNumber, strItemNo ,strCompanyName,strCompanyAddress
+	

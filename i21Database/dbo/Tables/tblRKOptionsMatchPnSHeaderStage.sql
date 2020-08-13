@@ -18,5 +18,6 @@
 	strFromCompanyName					NVARCHAR(150) COLLATE Latin1_General_CI_AS,
 	ysnMailSent							BIT CONSTRAINT DF_tblRKOptionsMatchPnSHeaderStage_ysnMailSent DEFAULT 0,
 	intTransactionId					INT,
-	intCompanyId						INT
+	intCompanyId						INT,
+	intStatusId							INT
 )

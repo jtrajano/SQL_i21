@@ -98,6 +98,11 @@ BEGIN TRY
 				CD.intSubBookId,
 				CD.dblFutures
 
+				,intHeaderBookId = NULL
+				,intHeaderSubBookId = null
+				,intDetailBookId = NULL
+				,intDetailSubBookId = null
+
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 												AND	CD.dblNoOfLots IS NOT NULL		 
@@ -157,6 +162,11 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				CH.intBookId,	
 				CH.intSubBookId,
 				CD.dblFutures
+				
+				,intHeaderBookId = NULL
+				,intHeaderSubBookId = null
+				,intDetailBookId = NULL
+				,intDetailSubBookId = null
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId

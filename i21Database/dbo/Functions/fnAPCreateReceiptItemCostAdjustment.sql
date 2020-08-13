@@ -259,6 +259,8 @@ BEGIN
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
 		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId
+		INNER JOIN tblGRStorageType StorageType 
+			on C.intStorageTypeId = StorageType.intStorageScheduleTypeId and StorageType.ysnDPOwnedType = 0
 		INNER JOIN tblGRStorageHistory sh 
 			ON sh.intCustomerStorageId = C2.intCustomerStorageId AND sh.intSettleStorageId = C3.intSettleStorageId 
 				AND ISNULL(sh.intContractHeaderId,-1) = ISNULL(B.intContractHeaderId,-1)
@@ -330,7 +332,9 @@ BEGIN
 		INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 		INNER JOIN tblGRSettleStorage C3 ON A.intBillId = C3.intBillId
 		INNER JOIN tblGRSettleStorageTicket C2 ON C3.intSettleStorageId = C2.intSettleStorageId
-		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId		
+		INNER JOIN tblGRCustomerStorage C ON C2.intCustomerStorageId = C.intCustomerStorageId AND B.intCustomerStorageId = C.intCustomerStorageId	
+		INNER JOIN tblGRStorageType StorageType 
+			on C.intStorageTypeId = StorageType.intStorageScheduleTypeId and StorageType.ysnDPOwnedType = 0	
 		INNER JOIN tblICItem D ON B.intItemId = D.intItemId
 		INNER JOIN tblICItemLocation E ON C.intCompanyLocationId = E.intLocationId AND E.intItemId = D.intItemId
 		INNER JOIN tblICItemUOM F ON D.intItemId = F.intItemId AND C.intItemUOMId = F.intItemUOMId
@@ -625,18 +629,20 @@ BEGIN
 			,[intItemLocationId]				=	E.intItemLocationId
 			,[intItemUOMId]						=	F.intItemUOMId
 			,[dtmDate]							=	A.dtmDate
-			,[dblQty] 							=	SIR.dblTransactionUnits
+			,[dblQty] 							=	ISNULL(SIR.dblTransactionUnits,(CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END ))
 			,[dblUOMQty] 						=	F.dblUnitQty
 			,[intCostUOMId]						=	B.intUnitOfMeasureId 
 			,[dblNewValue]						=	CAST(
 													dbo.fnMultiply(
-														SIR.dblTransactionUnits --[Voucher Qty]
+														 --[Voucher Qty]
+														ISNULL(SIR.dblTransactionUnits,(CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END))
 														,B.dblCost --[Voucher Cost]
 													) AS DECIMAL(18,2))
 													-
 												CAST(
 													dbo.fnMultiply(
-														SIR.dblTransactionUnits --[Voucher Qty]
+														--[Voucher Qty]
+														ISNULL(SIR.dblTransactionUnits,(CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END))
 														,ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0) --[Receipt Cost]
 													)
 												AS DECIMAL(18,2))
@@ -650,9 +656,9 @@ BEGIN
 			,[intStorageLocationId] 			=	C.intStorageLocationId
 			,[ysnIsStorage] 					=	0
 			,[strActualCostId] 					=	SIR.strActualCostId
-			,[intSourceTransactionId] 			=	SIR.intInventoryReceiptId
-			,[intSourceTransactionDetailId] 	=	SIR.intInventoryReceiptItemId
-			,[strSourceTransactionId] 			=	SIR.strReceiptNumber
+			,[intSourceTransactionId] 			=	ISNULL(SIR.intInventoryReceiptId,TSR_FROM.intTransferStorageId)
+			,[intSourceTransactionDetailId] 	=	ISNULL(SIR.intInventoryReceiptItemId,TSR_FROM.intTransferStorageReferenceId)
+			,[strSourceTransactionId] 			=	ISNULL(SIR.strReceiptNumber,TS_FROM.strTransferStorageTicket)
 			,[intFobPointId]					=	NULL
 			,[intInTransitSourceLocationId]		=	NULL
 		FROM @voucherIds ids
@@ -665,8 +671,9 @@ BEGIN
 		INNER JOIN tblGRTransferStorageReference TSR ON TSR.intToCustomerStorageId = C.intCustomerStorageId
 		INNER JOIN tblGRTransferStorage TS ON TS.intTransferStorageId = TSR.intTransferStorageId
 		INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+		LEFT JOIN tblGRTransferStorageReference TSR_FROM ON TSR_FROM.intToCustomerStorageId = CS_FROM.intCustomerStorageId
+		LEFT JOIN tblGRTransferStorage TS_FROM ON TS_FROM.intTransferStorageId = TSR_FROM.intTransferStorageId
 		INNER JOIN tblGRStorageType ST_FROM ON ST.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
---		INNER JOIN tblGRStorageInventoryReceipt SIR ON SIR.intCustomerStorageId = C.intCustomerStorageId AND SIR.intSettleStorageId = C3.intSettleStorageId
 		OUTER APPLY (
 			SELECT 
 				SIR.intInventoryReceiptId

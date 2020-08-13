@@ -63,4 +63,24 @@ IF EXISTS(
 		WHERE tr.intRegisterClassId IS NULL 
 	END
 
+	
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTRegister.strRegisterClass from SAPPHIRE to SAPPHIRE/COMMANDER
+----------------------------------------------------------------------------------------------------------------------------------
+IF EXISTS(
+			SELECT TOP 1 1
+			FROM tblSTRegister 
+			WHERE strRegisterClass = N'SAPPHIRE'
+		 )
+	BEGIN
+
+		UPDATE tblSTRegister
+			SET strRegisterClass = 'SAPPHIRE/COMMANDER'
+		WHERE strRegisterClass = 'SAPPHIRE'
+
+	END
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTRegister.strRegisterClass from SAPPHIRE to SAPPHIRE/COMMANDER
+----------------------------------------------------------------------------------------------------------------------------------
+
 GO

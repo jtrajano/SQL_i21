@@ -85,7 +85,6 @@ BEGIN
 			LEFT JOIN	tblSMCurrency		MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
 			WHERE M.intFutureMarketId = @intFutureMarketId
 		END
-		/*
 		ELSE
 		BEGIN
 			SELECT TOP 1 M.intFutureMarketId,M.strFutMarketName,M.intCurrencyId,IU.intItemUOMId,M.dblContractSize,M.intUnitMeasureId,MU.strUnitMeasure,UM.strUnitMeasure AS strPriceUOM,CY.strCurrency,CY.ysnSubCurrency,MY.strCurrency AS strMainCurrency,CY.intCent
@@ -99,7 +98,6 @@ BEGIN
 			LEFT JOIN	tblSMCurrency				MY	ON	MY.intCurrencyID	=	CY.intMainCurrencyId
 			WHERE C.intCommodityId = @intCommodityId  ORDER BY M.intFutureMarketId ASC
 		END
-		*/
 	END
 
 	IF @strType = 'Destination Point'

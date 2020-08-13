@@ -39,7 +39,11 @@ RETURNS @Transaction TABLE
 	strSequenceUnitMeasure nvarchar(100),
 	intHeaderUnitMeasureId INT,
 	strHeaderUnitMeasure nvarchar(100),
- 	ysnDeletedBillDetail bit
+ 	ysnDeletedBillDetail bit,
+	intHeaderBookId			INT NULL,
+	intHeaderSubBookId		INT NULL,
+	intDetailBookId			INT NULL,
+	intDetailSubBookId		INT NULL
 )
 AS
 BEGIN
@@ -51,16 +55,20 @@ BEGIN
 		intSequenceUnitMeasureId INT,
 		strSequenceUnitMeasure nvarchar(100),
 		intHeaderUnitMeasureId INT,
-		strHeaderUnitMeasure NVARCHAR(100)
+		strHeaderUnitMeasure NVARCHAR(100),
+		intBookId			INT NULL,
+		intSubBookId		INT NULL
 	)
 
-	INSERT INTO @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure)
+	INSERT INTO @OpenBasisContract	(intContractDetailId, intContractHeaderId,intSequenceUnitMeasureId,strSequenceUnitMeasure,intHeaderUnitMeasureId,strHeaderUnitMeasure, intBookId, intSubBookId)
 	SELECT CD.intContractDetailId,
 		CH.intContractHeaderId,
 		intSequenceUnitMeasureId = CDUM.intUnitMeasureId,
 		strSequenceUnitMeasure = CDUM.strUnitMeasure,
 		intHeaderUnitMeasureId = CHUM.intUnitMeasureId,
-		strHeaderUnitMeasure = CHUM.strUnitMeasure
+		strHeaderUnitMeasure = CHUM.strUnitMeasure,
+		intDetailBookId = CD.intBookId,
+		intDetailSubBookId = CD.intSubBookId
 	FROM tblCTContractHeader CH
 	INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblICUnitMeasure CDUM ON CDUM.intUnitMeasureId = CD.intUnitMeasureId
@@ -117,6 +125,10 @@ BEGIN
 		,strHeaderUnitMeasure
 		,ysnOpenGetBasisDelivery
 		,ysnDeletedBillDetail
+		,intHeaderBookId
+		,intHeaderSubBookId
+		,intDetailBookId
+		,intDetailSubBookId
 	)
 	SELECT CBL1.intContractHeaderId
 	,CBL1.intContractDetailId
@@ -149,6 +161,10 @@ BEGIN
 	,OBC.strHeaderUnitMeasure
 	,ysnOpenGetBasisDelivery = 1--CASE WHEN @dtmDate IS NULL OR CBL1.dtmTransactionDate <= @dtmDate AND CBL1.dblQty > 0 THEN 1 ELSE 0 END
 	,ysnDeletedBillDetail = (case when CBL1.strTransactionReference = 'Voucher' and isnull(bd.intBillDetailId,0) = 0 then convert(bit,1) else convert(bit,0) end) 
+	,CH.intBookId
+	,CH.intSubBookId
+	,OBC.intBookId
+	,OBC.intSubBookId
 	FROM tblCTContractBalanceLog CBL1
 	INNER JOIN tblCTContractBalanceLog CBL2 ON CBL1.intContractBalanceLogId >= CBL2.intContractBalanceLogId
 		AND CBL1.intContractHeaderId = CBL2.intContractHeaderId
@@ -197,6 +213,10 @@ BEGIN
 	,OBC.intHeaderUnitMeasureId
 	,OBC.strHeaderUnitMeasure
  	,bd.intBillDetailId
+	,CH.intBookId
+	,CH.intSubBookId
+	,OBC.intBookId
+	,OBC.intSubBookId
 	ORDER BY CBL1.dtmCreatedDate, CBL1.intContractBalanceLogId ASC
  
  	delete from @Transaction where ysnDeletedBillDetail = convert(bit,1);

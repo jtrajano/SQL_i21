@@ -25,6 +25,10 @@ SELECT CAST(ROW_NUMBER() OVER (ORDER BY intContractDetailId ASC) AS INT) intUniq
 	  , strInvoiceVoucher
 	  , intContractBasisId
 	  , strContractType
+	  , intHeaderBookId
+	  , intHeaderSubBookId
+	  , intDetailBookId
+	  , intDetailSubBookId
 FROM (SELECT DISTINCT
 		  intPricingTypeId = CH.intPricingTypeId
 		 ,intEntityId = EME.intEntityId
@@ -56,6 +60,10 @@ FROM (SELECT DISTINCT
 		 , strInvoiceVoucher = ISNULL(strInvoiceNumber,strBillId)
 		 , intContractBasisId
 		 , strContractType
+		 , CH.intBookId AS intHeaderBookId
+         , CH.intSubBookId AS intHeaderSubBookId
+	     , CD.intBookId AS intDetailBookId
+	     , CD.intSubBookId AS intDetailSubBookId
 	FROM tblSCTicket SC
 	INNER JOIN tblSCTicketContractUsed SCTC
 		ON SCTC.intTicketId = SC.intTicketId

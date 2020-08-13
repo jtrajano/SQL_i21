@@ -19,6 +19,7 @@ SELECT SL.intSummaryLogId
 	, CH.strContractNumber
 	, CD.intContractSeq
 	, strContractSeq = CH.strContractNumber + '-' + CAST(CD.intContractSeq AS NVARCHAR(10))
+	, strContractType = (CASE WHEN CH.intContractTypeId = 1 THEN 'Purchase' WHEN CH.intContractTypeId  = 2 THEN 'Sale' ELSE NULL END) COLLATE Latin1_General_CI_AS
 	, SL.intFutureMarketId
 	, strFutureMarket = fMar.strFutMarketName
 	, SL.intFutureMonthId

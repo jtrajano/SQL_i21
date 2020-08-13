@@ -35,6 +35,18 @@ AS
 			[begingroup]	NVARCHAR(50),  
 			[endgroup]		NVARCHAR(50),  
 			[datatype]		NVARCHAR(50) 
+	)
+
+	DECLARE @dummy_xml_table TABLE 
+	(  
+			[fieldname]		NVARCHAR(50),  
+			condition		NVARCHAR(20),        
+			[from]			NVARCHAR(MAX), 
+			[to]			NVARCHAR(MAX),  
+			[join]			NVARCHAR(10),  
+			[begingroup]	NVARCHAR(50),  
+			[endgroup]		NVARCHAR(50),  
+			[datatype]		NVARCHAR(50) 
 	)  
   
 	IF ISNULL(@xmlParam,'') = '' OR @xmlParam = '<?xml version="1.0" encoding="utf-16"?><xmlparam>''''</xmlparam>'
@@ -89,7 +101,22 @@ AS
 				[begingroup]	NVARCHAR(50),  
 				[endgroup]		NVARCHAR(50),  
 				[datatype]		NVARCHAR(50)  
+	)
+
+	INSERT INTO @dummy_xml_table  
+	SELECT	*  
+	FROM	OPENXML(@xmlDocumentId, 'xmlparam/dummies/filter', 2)  
+	WITH (  
+				[fieldname]		NVARCHAR(50),  
+				condition		NVARCHAR(20),        
+				[from]			NVARCHAR(MAX), 
+				[to]			NVARCHAR(MAX),  
+				[join]			NVARCHAR(10),  
+				[begingroup]	NVARCHAR(50),  
+				[endgroup]		NVARCHAR(50),  
+				[datatype]		NVARCHAR(50)  
 	)  
+    
     
 	SELECT	@intContractDetailId = [from]
 	FROM	@temp_xml_table   
@@ -112,7 +139,7 @@ AS
 	AND		condition = 'Equal To'
 
 	SELECT	@strReportLogId = [from]
-	FROM	@temp_xml_table   
+	FROM	@dummy_xml_table   
 	WHERE	[fieldname] = 'strReportLogId'
 
 	SELECT	@StartFromDate = [from],
