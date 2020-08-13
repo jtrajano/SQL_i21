@@ -533,11 +533,10 @@ BEGIN
 		A.intBillId IN (SELECT intBillId FROM @tmpBills) 
 		AND
 		(
-			(A2.dblTax <> (ISNULL(taxDetails.dblTaxTotal,0)
-								* (CASE WHEN ((D.intInventoryReceiptChargeId IS NOT NULL AND A.intEntityVendorId <> ISNULL(NULLIF(D.intEntityVendorId,0), A.intEntityVendorId)) 
-								AND D.ysnPrice = 1) THEN -1 ELSE 1 END)))
+			(A2.dblTax != (ISNULL(taxDetails.dblTaxTotal,0)
+							 * (CASE WHEN ((D.intInventoryReceiptChargeId IS NOT NULL AND D.intEntityVendorId = A.intEntityVendorId) 
+								OR D.intEntityVendorId IS NULL) AND D.ysnPrice = 1 THEN -1 ELSE 1 END)))
 		)
-
 
 	END
 	ELSE
