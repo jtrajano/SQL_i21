@@ -43,7 +43,7 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		--AND SS.dblSettleUnits = 0 --OPEN STORAGE ONLY , THIS IS THE ONLY SETTLE STORAGE THAT DO NOT CREATE VOUCHER IMMEDIATELEY
-		AND SS.dblSpotUnits = 0
+		--AND SS.dblSpotUnits = 0
 INNER JOIN tblGLDetail GD
 	ON GD.strTransactionId = SS.strStorageTicket
 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -64,8 +64,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
-AND SS.ysnPosted = 1
+where SS.ysnPosted = 1
 UNION ALL
 SELECT
 	bill.intEntityVendorId
@@ -122,8 +121,7 @@ INNER JOIN (tblGRCustomerStorage CS
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
-				AND SS.intParentSettleStorageId IS NOT NULL
-				AND SS.dblSpotUnits = 0)
+				AND SS.intParentSettleStorageId IS NOT NULL)
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = CS.intItemId
 		and billDetail.intSettleStorageId = SS.intSettleStorageId
 		--AND SS.intBillId = bill.intBillId
@@ -146,7 +144,7 @@ left join tblCTContractHeader CH
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket IN ('STR-56/1')
 AND glAccnt.intAccountCategoryId = 45
-AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+--AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 ------- Charges
 
 UNION ALL
@@ -170,9 +168,25 @@ SELECT
 	,CS.intCompanyLocationId
 	,CL.strLocationName
 	,0
-	,GLDetail.intAccountId
-	,GLDetail.strAccountId
+	,GD.intAccountId
+	,AD.strAccountId
 FROM tblGRCustomerStorage CS
+
+INNER JOIN tblGRSettleStorageTicket SST
+	ON SST.intCustomerStorageId = CS.intCustomerStorageId
+INNER JOIN tblGRSettleStorage SS
+	ON SST.intSettleStorageId = SS.intSettleStorageId
+		AND SS.intParentSettleStorageId IS NOT NULL
+		--AND SS.dblSpotUnits = 0
+
+INNER JOIN tblGLDetail GD
+ 	ON GD.strTransactionId = SS.strStorageTicket
+ 		AND GD.intTransactionId = SS.intSettleStorageId
+ 		AND GD.ysnIsUnposted = 0
+		AND GD.strCode = 'STR'
+INNER JOIN vyuGLAccountDetail AD
+	on AD.intAccountId = GD.intAccountId and AD.intAccountCategoryId = 45
+
 INNER JOIN tblICCommodity CO
 	ON CO.intCommodityId = CS.intCommodityId
 INNER JOIN tblICItem IM
@@ -181,24 +195,24 @@ INNER JOIN tblICItem IM
 		AND (IM.intCommodityId = CO.intCommodityId OR IM.intCommodityId IS NULL)
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = CS.intCompanyLocationId
-INNER JOIN tblGRSettleStorageTicket SST
-	ON SST.intCustomerStorageId = CS.intCustomerStorageId
-INNER JOIN tblGRSettleStorage SS
-	ON SST.intSettleStorageId = SS.intSettleStorageId
-		AND SS.intParentSettleStorageId IS NOT NULL
-		AND SS.dblSpotUnits = 0
-OUTER APPLY  
-(  
- SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit  
- FROM tblGLDetail GD  
- INNER JOIN vyuGLAccountDetail AD  
-  ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45  
- WHERE GD.strTransactionId = SS.strStorageTicket  
-  AND GD.intTransactionId = SS.intSettleStorageId  
-  AND GD.strCode = 'STR'  
-  AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo  
-  AND GD.ysnIsUnposted = 0  
-) GLDetail 
+-- INNER JOIN tblGRSettleStorageTicket SST
+-- 	ON SST.intCustomerStorageId = CS.intCustomerStorageId
+-- INNER JOIN tblGRSettleStorage SS
+-- 	ON SST.intSettleStorageId = SS.intSettleStorageId
+-- 		AND SS.intParentSettleStorageId IS NOT NULL
+-- 		--AND SS.dblSpotUnits = 0
+-- OUTER APPLY  
+-- (  
+--  SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit  
+--  FROM tblGLDetail GD  
+--  INNER JOIN vyuGLAccountDetail AD  
+--   ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45  
+--  WHERE GD.strTransactionId = SS.strStorageTicket  
+--   AND GD.intTransactionId = SS.intSettleStorageId  
+--   AND GD.strCode = 'STR'  
+--   AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo  
+--   AND GD.ysnIsUnposted = 0  
+-- ) GLDetail 
 -- INNER JOIN tblGLDetail GD
 -- 	ON GD.strTransactionId = SS.strStorageTicket
 -- 		AND GD.intTransactionId = SS.intSettleStorageId
@@ -219,8 +233,7 @@ LEFT JOIN tblCTContractDetail CT
 	ON CT.intContractDetailId = ST.intContractDetailId
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
-where (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
-AND SS.ysnPosted = 1
+where SS.ysnPosted = 1
 	--WHERE SS.strStorageTicket = 'STR-49/3'
 
 
@@ -270,13 +283,13 @@ INNER JOIN (tblGRCustomerStorage CS
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
 				AND SS.intParentSettleStorageId IS NOT NULL
-				AND SS.dblSpotUnits = 0
+				--AND SS.dblSpotUnits = 0
 		INNER JOIN tblICCommodity CO
 			ON CO.intCommodityId = CS.intCommodityId
 		INNER JOIN tblICItem IM
 			ON IM.strType = 'Other Charge' 
 				AND IM.strCostType = 'Storage Charge' 
-				AND (IM.intCommodityId = CO.intCommodityId OR IM.intCommodityId IS NULL))
+				AND (IM.intCommodityId = CO.intCommodityId OR isnull(IM.intCommodityId, 0) = 0))
 	ON billDetail.intCustomerStorageId = CS.intCustomerStorageId AND billDetail.intItemId = IM.intItemId
 		and billDetail.intSettleStorageId = SS.intSettleStorageId
 	--AND SS.intBillId = bill.intBillId
@@ -300,7 +313,7 @@ left join tblCTContractHeader CH
 WHERE bill.ysnPosted = 1
 --AND SS.strStorageTicket = 'STR-49/3'
 AND glAccnt.intAccountCategoryId = 45
-AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+--AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 
 --DISCOUNTS
 UNION ALL
@@ -357,7 +370,7 @@ INNER JOIN tblGRSettleStorage SS
 	ON SST.intSettleStorageId = SS.intSettleStorageId
 		AND SS.intParentSettleStorageId IS NOT NULL
 		AND SS.ysnPosted = 1
-		AND SS.dblSpotUnits = 0
+		--AND SS.dblSpotUnits = 0
 LEFT JOIN tblGRSettleContract SC
 		ON SC.intSettleStorageId = SS.intSettleStorageId
 --SETTLE FOR BASIS CONTRACT IS THE ONLY TRANSACTION THAT SHOULD SHOW ON CLEARING TAB
@@ -388,7 +401,7 @@ OUTER APPLY
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
-AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+--AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 AND SS.ysnPosted = 1
 --AND SS.strStorageTicket = 'STR-49/3'
 
@@ -449,7 +462,7 @@ INNER JOIN (tblGRCustomerStorage CS
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId
 					AND SS.intParentSettleStorageId IS NOT NULL
-					AND SS.dblSpotUnits = 0
+					--AND SS.dblSpotUnits = 0
 			-- INNER JOIN tblQMTicketDiscount QM
 			-- 	ON QM.intTicketFileId = CS.intCustomerStorageId
 			-- LEFT JOIN tblGRSettleContract SC
@@ -487,7 +500,7 @@ AND EXISTS (
 		AND billDetail.intCustomerStorageId = QM.intTicketFileId
 )
 AND glAccnt.intAccountCategoryId = 45
-AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
+--AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 
 /*
 -- SELECT 
