@@ -38,7 +38,7 @@ UNION ALL
 SELECT 'Debit Memo' AS strTransactionType,
        intBillId,
        strBillId,
-       dblTotal,
+       dblTotal * -1,
        strVendorOrderNumber,
        intEntityVendorId,
        intEntityId,
