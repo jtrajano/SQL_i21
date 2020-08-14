@@ -117,6 +117,7 @@ BEGIN TRY
 				LEFT JOIN tblCTWeightGrade g ON g.intWeightGradeId = ch.intGradeId
 			WHERE
 				cd.intContractDetailId = @intContractDetailId
+				AND ch.intContractTypeId = 2
 				AND (w.strWhereFinalized = 'Destination' OR g.strWhereFinalized = 'Destination')
 		)
 		BEGIN
