@@ -275,7 +275,7 @@ BEGIN
 		 , @ysnPosted			= ysnPosted 
 	FROM DELETED 	
 	
-	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND intTransactionId = @intInvoiceId AND strTransactionId = @strInvoiceNumber)
+	IF EXISTS (SELECT TOP 1 NULL FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strCode = 'AR' AND intTransactionId = @intInvoiceId AND strTransactionId = @strInvoiceNumber)
 		SET @strError = 'You cannot delete invoice ' + @strInvoiceNumber + '. It has existing posted GL entries.';
 
 	IF @ysnPosted = 1
