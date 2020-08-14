@@ -608,7 +608,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryReceiptItemId = ri.intInventoryReceiptItemId  
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = ri.intInventoryReceiptId  
-  WHERE (tmpAPOpenClearing.dblClearingQty != 0) --OR tmpAPOpenClearing.dblClearingAmount != 0
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY r.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL  
  --CHARGES  
@@ -651,7 +651,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = rc.intInventoryReceiptId  
-  WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) -- OR tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
   GROUP BY r.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL  
  --SHIPMENT CHARGES  
@@ -688,7 +688,7 @@ FROM
   ON tmpAPOpenClearing.intInventoryShipmentChargeId = rc.intInventoryShipmentChargeId  
  INNER JOIN tblICInventoryShipment r  
   ON r.intInventoryShipmentId = rc.intInventoryShipmentId  
-  WHERE (tmpAPOpenClearing.dblClearingQty != 0) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
   GROUP BY r.dtmShipDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD TRANSACTION ITEM
@@ -725,7 +725,7 @@ FROM
   ON tmpAPOpenClearing.intLoadDetailId = loadDetail.intLoadDetailId  
  INNER JOIN tblLGLoad load  
   ON load.intLoadId = loadDetail.intLoadId  
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY load.dtmPostedDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD COST TRANSACTION ITEM
@@ -762,7 +762,7 @@ FROM
   ON tmpAPOpenClearing.intLoadDetailId = loadDetail.intLoadDetailId  
  INNER JOIN tblLGLoad load  
   ON load.intLoadId = loadDetail.intLoadId  
- WHERE (tmpAPOpenClearing.dblClearingQty != 0) -- OR tmpAPOpenClearing.dblClearingAmount != 0
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY load.dtmPostedDate, tmpAPOpenClearing.intEntityVendorId
   UNION ALL 
  --SETTLE STORAGE
@@ -801,7 +801,7 @@ INNER JOIN tblGRSettleStorage SS
  INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST 
 	          ON SST.intCustomerStorageId = CS.intCustomerStorageId)
       ON SST.intSettleStorageId = SS.intSettleStorageId
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY CS.dtmDeliveryDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL 
  --PATRONAGE
@@ -837,7 +837,7 @@ INNER JOIN tblGRSettleStorage SS
 INNER JOIN (tblPATRefund refund INNER JOIN tblPATRefundCustomer refundEntity 
                         ON refund.intRefundId = refundEntity.intRefundId)
                 ON refundEntity.intRefundCustomerId = tmpAPOpenClearing.intRefundCustomerId
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY refund.dtmRefundDate, tmpAPOpenClearing.intEntityVendorId  
 ) resultData 
 INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
