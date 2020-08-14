@@ -127,6 +127,28 @@ BEGIN
 	WHERE EXISTS(SELECT * FROM #tmpBillsExclude B WHERE A.intBillId = B.intID)
 END
 
+DECLARE @idForPost As Id;
+--INSERT BILL THAT IS NOT YET IN tblAPBillForPosting
+--DO NOT ALLOW PARALLEL EXECUTION OF POSTING TO INSERT WHILE INSERT IS NOT DONE
+--THE LOCK WILL RELEASE ON COMMIT/ROLLBACK TRANSACTION
+INSERT INTO tblAPBillForPosting WITH(TABLOCKX)(intBillId, ysnIsPost)
+OUTPUT inserted.intBillId INTO @idForPost
+SELECT 
+	A.intBillId 
+	,@post
+FROM #tmpPostBillData A
+LEFT JOIN tblAPBillForPosting B ON A.intBillId = B.intBillId
+WHERE B.intId IS NULL
+
+--GET ALL intBillId WHICH IS ALREADY IN tblAPBillForPosting
+--BUT uspAPPostBill calls again for the same intBillId
+--DELETE THE intBillId ON THE LIST OF FOR POST VOUCHERS
+--THAT IS ALREADY PART OF tblAPBillForPosting
+DELETE A
+FROM #tmpPostBillData A
+LEFT JOIN @idForPost B ON A.intBillId = B.intId
+WHERE B.intId IS NULL
+
 --SET THE UPDATED @billIds
 SELECT @billIds = COALESCE(@billIds + ',', '') +  CONVERT(VARCHAR(12),intBillId)
 FROM #tmpPostBillData
