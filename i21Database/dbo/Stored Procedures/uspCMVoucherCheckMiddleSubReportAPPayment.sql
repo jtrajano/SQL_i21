@@ -33,7 +33,7 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@AP_ECHECK AS INT = 20
   ,@PAYCHECK AS INT = 21;
 WITH InvoiceType As(
-	select 0 intTransactionType, 'Invoice', strTransactionType UNION ALL
+	select 0 intTransactionType, 'Invoice' strTransactionType UNION ALL
 	select 1 intTransactionType , 'Voucher' strTransactionType UNION ALL
 	select 2 intTransactionType , 'Prepayment' strTransactionType UNION ALL
 	select 3 intTransactionType , 'Debit Memo' strTransactionType UNION ALL
