@@ -846,41 +846,59 @@ BEGIN
 		 END
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
-		 BEGIN
-		--Check first on ptivcmst
-			SELECT @Total = COUNT(ptivc_invc_no)  
-				FROM ptivcmst
+		BEGIN	
+			SELECT  COUNT(pttic_ivc_no)  
+				FROM ptticmst
 			LEFT JOIN tblARInvoice Inv 
-				ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-				AND Inv.[dtmDate] = CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112)
-				AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(ptivc_sold_by_tot, 0), [dbo].[fnARGetDefaultDecimal]())
+				ON ptticmst.pttic_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+				AND Inv.[dtmDate] = CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112)
+				AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(pttic_actual_total, 0), [dbo].[fnARGetDefaultDecimal]())
 				AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 0
-			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptivc_cus_no COLLATE Latin1_General_CI_AS
+			INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = pttic_bill_to_cus_no COLLATE Latin1_General_CI_AS
 			WHERE 
 			Inv.strInvoiceNumber IS NULL 
 				AND Cus.ysnActive = 1
 				AND (
-						((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
+						((CASE WHEN ISDATE(pttic_rev_dt) = 1 THEN CONVERT(DATE, CAST(pttic_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
 						OR
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
-				AND ptivc_type NOT IN ('O','X')
-				and ptivc_bal_due <> 0
+				AND pttic_type NOT IN ('O','X')
+
+			--Check first on ptivcmst	
+			-- SELECT @Total = COUNT(ptivc_invc_no)  
+			-- 	FROM ptivcmst
+			-- LEFT JOIN tblARInvoice Inv 
+			-- 	ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+			-- 	AND Inv.[dtmDate] = CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112)
+			-- 	AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(ptivc_sold_by_tot, 0), [dbo].[fnARGetDefaultDecimal]())
+			-- 	AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 0
+			-- INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptivc_cus_no COLLATE Latin1_General_CI_AS
+			-- WHERE 
+			-- Inv.strInvoiceNumber IS NULL 
+			-- 	AND Cus.ysnActive = 1
+			-- 	AND (
+			-- 			((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
+			-- 			OR
+			-- 			((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
+			-- 		)
+			-- 	AND ptivc_type NOT IN ('O','X')
+			-- 	and ptivc_bal_due <> 0
 			--Add Count of Prepayment
-			SELECT  @Total  +=  COUNT(1) 
-			FROM ptcrdmst CRD
-				INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptcrd_cus_no COLLATE Latin1_General_CI_AS
-				LEFT JOIN tblARInvoice Inv 
-					ON LTRIM(RTRIM(CRD.ptcrd_invc_no))+'_'+CONVERT(CHAR(3),CRD.ptcrd_seq_no) COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-					AND Inv.[dtmDate] = CONVERT(DATE, CAST(CRD.ptcrd_rev_dt AS CHAR(12)), 112)
-					--AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(ptcrd_amt, 0), [dbo].[fnARGetDefaultDecimal]())
-					AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 1 AND Inv.strTransactionType = 'Customer Prepayment'
-				INNER JOIN tblSMCompanyLocation LOC ON strLocationNumber  COLLATE Latin1_General_CI_AS = CRD.ptcrd_loc_no COLLATE Latin1_General_CI_AS
-				LEFT OUTER JOIN [tblSMPaymentMethod] PM	ON CRD.ptcrd_pay_type COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
-			WHERE Inv.strInvoiceNumber IS NULL 
-				AND Cus.ysnActive = 1 
-				AND  CRD.ptcrd_type IN ( 'P','U') --AND ISNULL(CRD.ptcrd_note,'') <> 'xfer PPD to REG'
-				AND ROUND(ISNULL((ptcrd_amt-ptcrd_amt_used), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) <> 0 --[dblAmountDue] NOT EQUAL TO ZERO	
+			-- SELECT  @Total  +=  COUNT(1) 
+			-- FROM ptcrdmst CRD
+			-- 	INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptcrd_cus_no COLLATE Latin1_General_CI_AS
+			-- 	LEFT JOIN tblARInvoice Inv 
+			-- 		ON LTRIM(RTRIM(CRD.ptcrd_invc_no))+'_'+CONVERT(CHAR(3),CRD.ptcrd_seq_no) COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
+			-- 		AND Inv.[dtmDate] = CONVERT(DATE, CAST(CRD.ptcrd_rev_dt AS CHAR(12)), 112)
+			-- 		--AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(ptcrd_amt, 0), [dbo].[fnARGetDefaultDecimal]())
+			-- 		AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 1 AND Inv.strTransactionType = 'Customer Prepayment'
+			-- 	INNER JOIN tblSMCompanyLocation LOC ON strLocationNumber  COLLATE Latin1_General_CI_AS = CRD.ptcrd_loc_no COLLATE Latin1_General_CI_AS
+			-- 	LEFT OUTER JOIN [tblSMPaymentMethod] PM	ON CRD.ptcrd_pay_type COLLATE Latin1_General_CI_AS = PM.strPaymentMethodCode COLLATE Latin1_General_CI_AS
+			-- WHERE Inv.strInvoiceNumber IS NULL 
+			-- 	AND Cus.ysnActive = 1 
+			-- 	AND  CRD.ptcrd_type IN ( 'P','U') --AND ISNULL(CRD.ptcrd_note,'') <> 'xfer PPD to REG'
+			-- 	AND ROUND(ISNULL((ptcrd_amt-ptcrd_amt_used), @ZeroDecimal), [dbo].[fnARGetDefaultDecimal]()) <> 0 --[dblAmountDue] NOT EQUAL TO ZERO	
 		 END		 
 		
 	END
