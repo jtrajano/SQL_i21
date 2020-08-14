@@ -71,6 +71,8 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblGrandTotal
 	, permission.intEntityContactId
 	, Receipt.dtmCreated 
+	, Receipt.intBookId
+	, Receipt.intSubBookId
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId

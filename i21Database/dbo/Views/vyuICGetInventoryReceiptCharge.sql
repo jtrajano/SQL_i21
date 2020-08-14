@@ -51,6 +51,8 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, ReceiptCharge.dblForexRate
 	, Book.strBook
 	, SubBook.strSubBook
+	, Receipt.intBookId
+	, Receipt.intSubBookId
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
