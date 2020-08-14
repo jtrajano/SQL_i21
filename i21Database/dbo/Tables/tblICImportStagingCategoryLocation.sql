@@ -41,5 +41,5 @@ CREATE TABLE [dbo].[tblICImportStagingCategoryLocation]
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,
 	[intModifiedByUserId] INT NULL,
-	CONSTRAINT [PK_tblICImportStagingCategoryLocation] PRIMARY KEY ([intImportCategoryCategoryLocationId])
+	CONSTRAINT [PK_tblICImportStagingCategoryLocation] PRIMARY KEY ([intImportStagingCategoryLocationId])
 )
