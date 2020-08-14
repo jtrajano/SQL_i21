@@ -73,6 +73,9 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dtmCreated
 	, Receipt.strInternalComments
 	, fiscal.strPeriod strAccountingPeriod
+	, Receipt.dtmCreated 
+	, Receipt.intBookId
+	, Receipt.intSubBookId
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
 	LEFT JOIN vyuAPVendor ShipFromEntity ON ShipFromEntity.[intEntityId] = Receipt.intShipFromEntityId

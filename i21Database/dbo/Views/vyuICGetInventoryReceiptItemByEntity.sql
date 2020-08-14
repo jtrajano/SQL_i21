@@ -95,6 +95,8 @@ SELECT ReceiptItem.intInventoryReceiptId
 	, dblPendingVoucherQty = ISNULL(ReceiptItem.dblOpenReceive, 0) - ISNULL(ReceiptItem.dblBillQty, 0) 
 	, strVoucherNo = voucher.strBillId
 	, fiscal.strPeriod strAccountingPeriod
+	, Receipt.intBookId
+	, Receipt.intSubBookId
 FROM tblICInventoryReceiptItem ReceiptItem
 	LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 	LEFT JOIN vyuICGetReceiptItemSource ReceiptItemSource ON ReceiptItemSource.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId

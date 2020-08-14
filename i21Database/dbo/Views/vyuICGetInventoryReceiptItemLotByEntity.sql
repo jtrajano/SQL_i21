@@ -80,6 +80,8 @@ SELECT
 	,receiptItemLot.strCargoNo
 	,receiptItemLot.strWarrantNo
 	, fiscal.strPeriod strAccountingPeriod
+	,receiptItem.intBookId
+	,receiptItem.intSubBookId
 FROM tblICInventoryReceiptItemLot receiptItemLot
 LEFT JOIN vyuICGetInventoryReceiptItem receiptItem ON receiptItem.intInventoryReceiptItemId = receiptItemLot.intInventoryReceiptItemId
 LEFT JOIN vyuICGetInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId

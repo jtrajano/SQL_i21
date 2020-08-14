@@ -52,6 +52,8 @@ SELECT ReceiptCharge.intInventoryReceiptChargeId
 	, SubBook.strSubBook
     , permission.intEntityContactId
 	, fiscal.strPeriod strAccountingPeriod
+	, Receipt.intBookId
+	, Receipt.intSubBookId
 FROM tblICInventoryReceiptCharge ReceiptCharge
 	LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = ReceiptCharge.intCostUOMId
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId

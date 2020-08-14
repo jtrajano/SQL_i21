@@ -72,6 +72,8 @@ SELECT Receipt.intInventoryReceiptId
 	, strShipFromEntityId = ShipFromEntity.strVendorId
 	, strShipFromEntity = ShipFromEntity.strName
 	, Receipt.dtmCreated
+	, Receipt.intBookId
+	, Receipt.intSubBookId
 	--, WeightLoss.dblClaimableWt
 FROM tblICInventoryReceipt Receipt
 	LEFT JOIN vyuAPVendor Vendor ON Vendor.[intEntityId] = Receipt.intEntityVendorId
