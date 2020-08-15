@@ -47,6 +47,7 @@ DECLARE @datatype NVARCHAR(50)
 DECLARE @strPeriod NVARCHAR(50)
 DECLARE @strPeriodTo NVARCHAR(50)
 DECLARE @dateCondition NVARCHAR(50)
+DECLARE @filterCount INT = 0;
   
  -- Sanitize the @xmlParam   
 IF LTRIM(RTRIM(@xmlParam)) = ''   
@@ -130,6 +131,9 @@ WITH (
  , [endgroup] nvarchar(50)  
  , [datatype] nvarchar(50)  
 )  
+  
+--CHECK IF DATE IS THE ONLY FILTER (FOR GL SUMMARY PURPOSE)
+SELECT @filterCount = COUNT(*) FROM @temp_xml_table WHERE [fieldname] != 'dtmDate' AND [condition] != 'Dummy';
   
 --select * from @temp_xml_table  
 --CREATE date filter  
@@ -850,8 +854,8 @@ SELECT * FROM (
   
 SET @query = @cteQuery + N'  
 SELECT *
-  ,dtmStartDate = '''+ CONVERT(NVARCHAR(10), ISNULL(@dtmDate, '1/1/1900'), 101) +'''
-  ,dtmEndDate = '''+ CONVERT(NVARCHAR(10), CASE WHEN @dateCondition = 'Equal To' THEN @dtmDate ELSE ISNULL(@dtmDateTo, GETDATE()) END, 101) +'''
+  ,dtmStartDate = '''+ CASE WHEN @filterCount > 0 THEN '0' ELSE CONVERT(NVARCHAR(10), ISNULL(@dtmDate, '1/1/1900'), 101) END +'''
+  ,dtmEndDate = '''+ CASE WHEN @filterCount > 0 THEN '0' ELSE CONVERT(NVARCHAR(10), CASE WHEN @dateCondition = 'Equal To' THEN @dtmDate ELSE ISNULL(@dtmDateTo, GETDATE()) END, 101) END +'''
  FROM (   
  SELECT  
   r.strReceiptNumber
