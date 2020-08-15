@@ -8770,6 +8770,7 @@
     <Build Include="dbo\Index\IX_tblARInvoiceGrossMarginSummary.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRCommodityVisualization.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTItemContractShipped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
