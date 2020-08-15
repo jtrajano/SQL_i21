@@ -1,7 +1,8 @@
 ﻿	CREATE PROCEDURE [dbo].[uspAPRemoveVoucherPayableTransaction]
 		@intTransactionId INT = NULL,
 		@intShipmentId INT = NULL,
-		@intUserId INT
+		@intPurchaseDetailIds AS Id READONLY,
+		@intUserId INT = NULL
 	AS
 	BEGIN
 
@@ -12,7 +13,7 @@
 	SET ANSI_WARNINGS OFF
 
 	BEGIN TRY
-		IF @intTransactionId IS NOT NULL OR @intShipmentId IS NOT NULL
+		IF @intTransactionId IS NOT NULL OR @intShipmentId IS NOT NULL OR EXISTS(SELECT TOP 1 1 FROM @intPurchaseDetailIds)
 		BEGIN
 
 			--DELETING TRANSACTIONS FOR RECEIPTS WITHOUT RECORDS ON tblAPVoucherPayableCompleted, WE ARE FORCED TO ADD 
@@ -106,6 +107,28 @@
 			INNER JOIN (tblICInventoryShipment IIS INNER JOIN tblICInventoryShipmentCharge ISCharge ON IIS.intInventoryShipmentId = ISCharge.intInventoryShipmentId)
 				ON P.intInventoryShipmentChargeId = ISCharge.intInventoryShipmentChargeId
 			WHERE IIS.intInventoryShipmentId = @intShipmentId AND P.intInventoryShipmentChargeId > 0
+			
+			--ADD PURCHASE ORDER
+			INSERT INTO @intPayableIds
+			SELECT P.intVoucherPayableId, PO.strPurchaseOrderNumber, P.dblQuantityToBill
+				--START PAYABLE LINKS TO VOUCHER
+				,P.intEntityVendorId
+				,P.intPurchaseDetailId
+				,P.intContractDetailId
+				,P.intScaleTicketId
+				,P.intInventoryReceiptChargeId
+				,P.intInventoryReceiptItemId
+				,P.intInventoryShipmentChargeId
+				,P.intLoadShipmentDetailId
+				,P.intLoadShipmentCostId
+				,P.intCustomerStorageId
+				,P.intSettleStorageId
+				,P.intItemId
+				,P.intTransactionType
+			FROM tblAPVoucherPayable P
+			INNER JOIN (tblPOPurchaseDetail POD INNER JOIN tblPOPurchase PO ON POD.intPurchaseId = PO.intPurchaseId)
+				ON P.intPurchaseDetailId = POD.intPurchaseDetailId
+			WHERE POD.intPurchaseDetailId IN (SELECT intId FROM @intPurchaseDetailIds)
 			
 			--VALIDATE IF PAYABLE IS ALREADY VOUCHERED
 			DECLARE @vouchers AS TABLE(
