@@ -96,7 +96,7 @@ BEGIN
 
 	--CREDIT SIDE
 	INSERT INTO @returntable
-	SELECT   DISTINCT
+	SELECT   --DISTINCT
 		[dtmDate]						=	DATEADD(dd, DATEDIFF(dd, 0, P.[dtmDatePaid]), 0) 
 		,[strBatchId]					=	@batchId
 		,[intAccountId]					=	P.intAccountId
@@ -230,7 +230,7 @@ BEGIN
 		WHERE	A.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND paymentDetail.dblPayment != 0 AND paymentDetail.intInvoiceId IS NULL
 		UNION ALL
-		SELECT		DISTINCT
+		SELECT		--DISTINCT
 				[intPaymentId]					=	A.intPaymentId,
 				[dblCredit]	 					=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6)),
 				[dblCreditForeign]				=	 CAST(CASE WHEN E.strTransactionType = 'Invoice' THEN -paymentDetail.dblPayment  ELSE paymentDetail.dblPayment END * ISNULL(NULLIF(A.dblExchangeRate,0),1) AS DECIMAL(18,6))
@@ -242,7 +242,7 @@ BEGIN
 	)MainQuery	
 	INNER JOIN tblAPPayment P on P.intPaymentId = MainQuery.intPaymentId
 	INNER JOIN tblAPVendor C ON P.intEntityVendorId = C.[intEntityId]
-	INNER JOIN tblAPPaymentDetail paymentDetail ON P.intPaymentId = paymentDetail.intPaymentId
+	-- INNER JOIN tblAPPaymentDetail paymentDetail ON P.intPaymentId = paymentDetail.intPaymentId
 	LEFT JOIN tblSMCurrencyExchangeRateType rateType ON P.intCurrencyExchangeRateTypeId = rateType.intCurrencyExchangeRateTypeId
 	WHERE MainQuery.dblCredit <> 0
 	UNION ALL
