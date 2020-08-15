@@ -46,6 +46,8 @@ SELECT
 		,[intStorageScheduleTypeId]		= ShipmentItem.intStorageScheduleTypeId
 		,[ysnLoad]						= ContractView.ysnLoad
 		,[intLoadShipped]				= ShipmentItem.intLoadShipped
+		,ShipmentItem.intItemContractHeaderId
+		,ShipmentItem.intItemContractDetailId
 FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentItem ShipmentItem
 			ON Shipment.intInventoryShipmentId = ShipmentItem.intInventoryShipmentId
 		INNER JOIN dbo.tblICItemLocation ItemLocation

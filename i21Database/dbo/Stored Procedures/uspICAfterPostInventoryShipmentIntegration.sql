@@ -74,6 +74,8 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[ysnLoad]
 		,[intLoadShipped]
+		,[intItemContractHeaderId]
+		,[intItemContractDetailId]
 	)
 	EXEC dbo.uspICGetItemsFromItemShipment
 		@intShipmentId = @intTransactionId
@@ -102,6 +104,11 @@ BEGIN
 	BEGIN   
 		 EXEC dbo.uspCTShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId ,@ysnPost
 	END  
+
+	IF @OrderType = @INT_ORDER_TYPE_ITEM_CONTRACT
+	BEGIN 
+		EXEC dbo.uspCTItemContractShipped @ItemsFromInventoryShipment ,@intEntityUserSecurityId ,@ysnPost
+	END 
 
 	-- Update the shipped quantities back to Account Receivable
 	IF	@OrderType = @INT_ORDER_TYPE_SALES_ORDER AND ISNULL(@SourceType, @INT_SOURCE_TYPE_NONE) = @INT_SOURCE_TYPE_NONE

@@ -71,6 +71,8 @@ BEGIN
 		,[intStorageScheduleTypeId]
 		,[ysnLoad]
 		,[intLoadShipped]
+		,[intItemContractHeaderId]
+		,[intItemContractDetailId]
 	)
 	EXEC dbo.uspICGetItemsFromItemShipment
 		@intShipmentId = @intTransactionId

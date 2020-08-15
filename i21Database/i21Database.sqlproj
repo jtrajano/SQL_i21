@@ -8810,6 +8810,7 @@
     <Build Include="dbo\Tables\tblSCHScheduleReportDistribitionHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRCommodityVisualization.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTItemContractShipped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

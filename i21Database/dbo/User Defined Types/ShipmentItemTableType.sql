@@ -38,4 +38,7 @@ CREATE TYPE [dbo].[ShipmentItemTableType] AS TABLE
 	,[intStorageScheduleTypeId] INT NULL					-- Storage Schedule Id from Grain. 
 	,[ysnLoad] BIT NULL DEFAULT((0))						-- Flag that determines if Load Contract
 	,[intLoadShipped] INT NULL								-- Load Shipped Qty. For Load Contracts
+	,[intItemContractHeaderId] INT NULL								
+	,[intItemContractDetailId] INT NULL								
+
 )
