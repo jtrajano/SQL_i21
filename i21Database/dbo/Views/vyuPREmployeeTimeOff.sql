@@ -58,7 +58,7 @@ INNER JOIN(
 															ELSE 0
 													END
 											ELSE 
-												CASE WHEN (PCTimeOff.intYear = YEAR(GETDATE())) THEN
+												CASE WHEN (PCTimeOff.intYear = YEAR( ISNULL(T.dtmLastAward,GETDATE()) )  ) THEN
 													dblHours
 												ELSE
 													0
