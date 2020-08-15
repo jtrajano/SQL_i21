@@ -774,17 +774,19 @@ BEGIN
 		[strModuleName]					=	@MODULE_NAME,
 		-- [dblDebitForeign]				=	CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) - SUM(D.dblTax) AS DECIMAL(18,2)),
 		[dblDebitForeign]				=	CASE WHEN charges.intInventoryReceiptChargeId > 0 
-													THEN (CASE WHEN A.intEntityVendorId <> ISNULL(NULLIF(charges.intEntityVendorId,0), receipts.intEntityVendorId) 
-															AND charges.ysnPrice = 1 
-																	THEN 
-																		CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) AS DECIMAL(18,2))
-																			- 
-																			CAST(SUM(D.dblTax) AS DECIMAL(18,2))
-																		* -1
-														WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 0 --THIRD PARTY
+													THEN  (CASE 
+															--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
+															WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
 															THEN 
-																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) AS DECIMAL(18,2))
-																	 - CAST(SUM(D.dblTax) AS DECIMAL(18,2)))
+																CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																		* ISNULL(NULLIF(B.dblRate,0), 1) AS DECIMAL(18,2))
+																	- 
+																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																* -1
+															ELSE 
+																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																		* ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																	 - CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
 														END) 
 												ELSE 
 													(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) AS DECIMAL(18,2)) 
