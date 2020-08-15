@@ -5268,7 +5268,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 						BEGIN
 							-- SET @Success = CAST(0 AS BIT)
 							SET @strStatusMsg = 'Missing UOM setup on Item Location.'
-							GOTO EXITWITHROLLBACK
+							GOTO ExitWithRollback
 							RETURN
 						END
 					
@@ -5421,7 +5421,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 							UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	 
 
 							SET @strStatusMsg = ERROR_MESSAGE()
-							GOTO EXITWITHROLLBACK
+							GOTO ExitWithRollback
 						END CATCH
 					END
 					--POST RECEIVE LOTTERY--
@@ -5612,7 +5612,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					
 				-- Flag Success
 					SET @strStatusMsg = ERROR_MESSAGE()
-					GOTO EXITWITHROLLBACK
+					GOTO ExitWithRollback
 
 				END CATCH 
 			
