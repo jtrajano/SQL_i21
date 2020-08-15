@@ -115,6 +115,10 @@ AND payables.dblTax != 0
 
 IF @remove = 0
 BEGIN
+	--WE NEED TO DIRECTLY DELETE PAYABLE WITH THE UPDATED ITEM, uspAPRemoveVoucherPayable CAN'T HANDLE IT BECAUSE THE intItemId IS BEING CHANGED
+	--WITH OUR CURRENT LOGIC IN uspAPUpdateVoucherPayableQty THE PAYABLE IS ALSO REMOVED FIRST BEFORE READDING
+	EXEC uspAPRemoveVoucherPayableTransaction @intPurchaseDetailIds = @poDetailIds
+	
 	EXEC uspAPUpdateVoucherPayableQty @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax
 END
 ELSE
