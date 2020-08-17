@@ -8771,6 +8771,7 @@
     <None Include="Scripts\Post-Deployment\AR\DefaultData\98_UpdateInvoiceGrossMarginSummary.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRCommodityVisualization.sql" />
     <Build Include="dbo\Stored Procedures\uspCTItemContractShipped.sql" />
+    <Build Include="dbo\Tables\tblSTLotteryProcessError.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
