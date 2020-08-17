@@ -131,6 +131,17 @@ BEGIN
     INSERT INTO tblEMEntityPreferences (strPreference,strValue) VALUES ('RM data fix for Future Settlement Price','1')
 END   
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'tblRKCompanyPreference')
+BEGIN
+	IF NOT EXISTS (SELECT TOP 1 1 FROM tblRKCompanyPreference)
+	BEGIN
+		INSERT INTO tblRKCompanyPreference(intConcurrencyId, dblDecimals, dblRefreshRate, strM2MView, strDateTimeFormat, strEvaluationBy, strEvaluationByZone)
+		SELECT 1, 2, 60, 'Processor', 'MM DD YYYY HH:MI', 'Item', 'Location'
+	END
+END
+GO
+
 -- Fix invalid accounts set in company preference (not in correct category)
 UPDATE pref SET intUnrealizedGainOnBasisId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnBasisId AND strAccountCategory = 'Mark to Market P&L'
 UPDATE pref SET intUnrealizedGainOnFuturesId= GL.intAccountId FROM tblRKCompanyPreference pref LEFT JOIN vyuGLAccountDetail GL on GL.intAccountId=pref.intUnrealizedGainOnFuturesId AND strAccountCategory = 'Mark to Market P&L'
