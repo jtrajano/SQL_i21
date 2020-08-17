@@ -614,13 +614,13 @@ BEGIN TRY
 							SELECT @intBillDetailId
 
 							UPDATE APD
-							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,@intSequenceFreightTermId)
 							FROM tblAPBillDetail APD 
 							INNER JOIN tblAPBill APB
 								ON APD.intBillId = APB.intBillId
 							LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 							INNER JOIN @detailCreated ON intBillDetailId = intId
-							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+							WHERE APD.intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
@@ -826,13 +826,13 @@ BEGIN TRY
 								SELECT @intBillDetailId
 
 								UPDATE APD
-								SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,@intSequenceFreightTermId)
 								FROM tblAPBillDetail APD 
 								INNER JOIN tblAPBill APB
 									ON APD.intBillId = APB.intBillId
 								LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 								INNER JOIN @detailCreated ON intBillDetailId = intId
-								WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+								WHERE APD.intInventoryReceiptChargeId IS NULL
 							
 								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 								--
@@ -897,13 +897,13 @@ BEGIN TRY
 								SELECT @intBillDetailId
 
 								UPDATE APD
-								SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,@intSequenceFreightTermId)
 								FROM tblAPBillDetail APD 
 								INNER JOIN tblAPBill APB
 									ON APD.intBillId = APB.intBillId
 								LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 								INNER JOIN @detailCreated ON intBillDetailId = intId
-								WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
+								WHERE APD.intInventoryReceiptChargeId IS NULL
 							
 								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
