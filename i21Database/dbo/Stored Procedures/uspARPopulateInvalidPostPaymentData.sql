@@ -533,33 +533,33 @@ BEGIN
         AND ISNULL(P.[intBankAccountId], 0) = 0
         AND P.[strPaymentMethod] = 'ACH'
 
- --   INSERT INTO #ARInvalidPaymentData
- --       ([intTransactionId]
- --       ,[strTransactionId]
- --       ,[strTransactionType]
- --       ,[intTransactionDetailId]
- --       ,[strBatchId]
- --       ,[strError])
-	----Prepaid Account
-	--SELECT
- --        [intTransactionId]         = P.[intTransactionId]
- --       ,[strTransactionId]         = P.[strTransactionId]
- --       ,[strTransactionType]       = @TransType
- --       ,[intTransactionDetailId]   = NULL
- --       ,[strBatchId]               = P.[strBatchId]
- --       ,[strError]                 = 'The Customer Prepaid account in Company Location - ' + MAX(ISNULL(P.[strLocationName],''))  + ' was not set.'
-	--FROM
-	--	#ARPostPaymentHeader P
- --   WHERE
- --           P.[ysnPost] = @OneBit
- --   GROUP BY
- --        P.[intTransactionId]
- --       ,P.[strTransactionId]
- --       ,P.[strBatchId]
- --   HAVING
- --           MAX(ISNULL(P.[intSalesAdvAcct],0)) = 0
- --       AND AVG(P.[dblAmountPaid]) <> @ZeroDecimal
- --       AND SUM(P.[dblBasePayment]) = @ZeroDecimal
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--Prepaid Account
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = NULL
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'The Customer Prepaid account in Company Location - ' + MAX(ISNULL(P.[strLocationName],''))  + ' was not set.'
+	FROM
+		#ARPostPaymentHeader P
+    WHERE
+            P.[ysnPost] = @OneBit
+    GROUP BY
+         P.[intTransactionId]
+        ,P.[strTransactionId]
+        ,P.[strBatchId]
+    HAVING
+            MAX(ISNULL(P.[intSalesAdvAcct],0)) = 0
+        AND AVG(P.[dblAmountPaid]) <> @ZeroDecimal
+        AND SUM(P.[dblBasePayment]) = @ZeroDecimal
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
