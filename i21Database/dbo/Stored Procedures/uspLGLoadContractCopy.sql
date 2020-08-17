@@ -128,6 +128,29 @@ BEGIN TRY
 		,dtmISFReceivedDate
 		,dtmISFFiledDate
 		,dtmStuffingDate
+		,dtmStartDate
+		,dtmEndDate
+		,dtmPlannedAvailabilityDate
+		,strVessel1
+		,strOriginPort1
+		,strDestinationPort1
+		,dtmETSPOL1
+		,dtmETAPOD1
+		,strVessel2
+		,strOriginPort2
+		,strDestinationPort2
+		,dtmETSPOL2
+		,dtmETAPOD2
+		,strVessel3
+		,strOriginPort3
+		,strDestinationPort3
+		,dtmETSPOL3
+		,dtmETAPOD3
+		,strVessel4
+		,strOriginPort4
+		,strDestinationPort4
+		,dtmETSPOL4
+		,dtmETAPOD4
 		,dblDemurrage
 		,intDemurrageCurrencyId
 		,dblDespatch
@@ -146,6 +169,7 @@ BEGIN TRY
 		,intShipmentType
 		,intLoadShippingInstructionId
 		,strExternalShipmentNumber
+		,ysnLoadBased
 		)
 	SELECT 1
 		,@strLoadSINumber
@@ -225,6 +249,29 @@ BEGIN TRY
 		,dtmISFReceivedDate
 		,dtmISFFiledDate
 		,dtmStuffingDate
+		,dtmStartDate
+		,dtmEndDate
+		,dtmPlannedAvailabilityDate
+		,strVessel1
+		,strOriginPort1
+		,strDestinationPort1
+		,dtmETSPOL1
+		,dtmETAPOD1
+		,strVessel2
+		,strOriginPort2
+		,strDestinationPort2
+		,dtmETSPOL2
+		,dtmETAPOD2
+		,strVessel3
+		,strOriginPort3
+		,strDestinationPort3
+		,dtmETSPOL3
+		,dtmETAPOD3
+		,strVessel4
+		,strOriginPort4
+		,strDestinationPort4
+		,dtmETSPOL4
+		,dtmETAPOD4
 		,dblDemurrage
 		,intDemurrageCurrencyId
 		,dblDespatch
@@ -243,6 +290,7 @@ BEGIN TRY
 		,intShipmentType
 		,intLoadShippingInstructionId
 		,NULL
+		,ysnLoadBased
 	FROM tblLGLoad
 	WHERE intLoadId = @intOldLoadId
 
