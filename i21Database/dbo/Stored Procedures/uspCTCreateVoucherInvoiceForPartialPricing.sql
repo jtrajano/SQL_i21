@@ -441,12 +441,14 @@ declare @dblQuantityForInvoice numeric(18,6);
 							SELECT @intBillDetailId
 
 							UPDATE APD
-							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,intCompanyLocationId,APD.intItemId,EM.intEntityLocationId, CASE WHEN ISNULL(FT.strFobPoint,'') = 'Destination' THEN CD.intFreightTermId ELSE EM.intFreightTermId END)
 							FROM tblAPBillDetail APD 
 							INNER JOIN tblAPBill APB
 								ON APD.intBillId = APB.intBillId
 							LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 							INNER JOIN @detailCreated ON intBillDetailId = intId
+							INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = APD.intContractDetailId
+							LEFT JOIN tblSMFreightTerms FT ON CD.intFreightTermId = FT.intFreightTermId
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
@@ -562,12 +564,14 @@ declare @dblQuantityForInvoice numeric(18,6);
 							SELECT @intBillDetailId
 
 							UPDATE APD
-							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+							SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,intCompanyLocationId,APD.intItemId,EM.intEntityLocationId, CASE WHEN ISNULL(FT.strFobPoint,'') = 'Destination' THEN CD.intFreightTermId ELSE EM.intFreightTermId END)
 							FROM tblAPBillDetail APD 
 							INNER JOIN tblAPBill APB
 								ON APD.intBillId = APB.intBillId
 							LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 							INNER JOIN @detailCreated ON intBillDetailId = intId
+							INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = APD.intContractDetailId
+							LEFT JOIN tblSMFreightTerms FT ON CD.intFreightTermId = FT.intFreightTermId
 							WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
@@ -637,12 +641,14 @@ declare @dblQuantityForInvoice numeric(18,6);
 								SELECT @intBillDetailId
 
 								UPDATE APD
-								SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,@intCompanyLocationId,APD.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+								SET APD.intTaxGroupId = dbo.fnGetTaxGroupIdForVendor(APB.intEntityId,intCompanyLocationId,APD.intItemId,EM.intEntityLocationId, CASE WHEN ISNULL(FT.strFobPoint,'') = 'Destination' THEN CD.intFreightTermId ELSE EM.intFreightTermId END)
 								FROM tblAPBillDetail APD 
 								INNER JOIN tblAPBill APB
 									ON APD.intBillId = APB.intBillId
 								LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = APB.intEntityId
 								INNER JOIN @detailCreated ON intBillDetailId = intId
+								INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = APD.intContractDetailId
+								LEFT JOIN tblSMFreightTerms FT ON CD.intFreightTermId = FT.intFreightTermId
 								WHERE APD.intTaxGroupId IS NULL AND intInventoryReceiptChargeId IS NULL
 							
 								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
