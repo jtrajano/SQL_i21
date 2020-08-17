@@ -240,6 +240,27 @@ BEGIN
 		UPDATE dbo.tblSTCheckoutDepartmetTotals 
 		SET dblRegisterSalesAmountComputed = dblTotalSalesAmountComputed
 		WHERE intCheckoutId = @intCheckoutId
+		
+		  -------------------------------------------------------------------------------------------------------------
+          ---------------------------------------- METRIC TAB ---------------------------------------------------------
+          -------------------------------------------------------------------------------------------------------------
+
+		MERGE tblSTCheckoutMetrics cm  USING tblSTCheckoutDepartmetTotals cdt
+			ON cm.intCheckoutId = @intCheckoutId AND cm.intDepartmentId = cdt.intCategoryId AND cdt.intCheckoutId = @intCheckoutId 
+		WHEN MATCHED
+			THEN UPDATE SET cm.dblAmount = (CASE WHEN cm.intRegisterImportFieldId = 1
+													 THEN CAST(cdt.intItemsSold AS FLOAT)
+												 WHEN cm.intRegisterImportFieldId = 7
+													 THEN CAST(cdt.dblRegisterSalesAmountComputed AS FLOAT)
+												 ELSE 0
+												END);
+												
+		
+		  -------------------------------------------------------------------------------------------------------------
+          ---------------------------------------- END METRIC TAB -----------------------------------------------------
+          -------------------------------------------------------------------------------------------------------------
+
+
 
 		SET @intCountRows = 1
 		SET @strMessage = 'Success'
