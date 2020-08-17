@@ -1,8 +1,8 @@
 ﻿	CREATE PROCEDURE [dbo].[uspAPRemoveVoucherPayableTransaction]
 		@intTransactionId INT = NULL,
 		@intShipmentId INT = NULL,
-		@intUserId INT = NULL,
-		@intPurchaseDetailIds AS Id READONLY
+		@intPurchaseDetailIds AS Id READONLY,
+		@intUserId INT = NULL
 	AS
 	BEGIN
 
