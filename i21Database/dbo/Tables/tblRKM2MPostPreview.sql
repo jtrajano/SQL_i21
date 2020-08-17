@@ -1,6 +1,7 @@
-﻿CREATE TABLE [dbo].[tblRKM2MPostRecap]( 
-	[intM2MTransactionId]       INT              IDENTITY (1, 1) NOT NULL,
-    [dtmDate]                   DATETIME         NOT NULL,
+﻿CREATE TABLE [dbo].[tblRKM2MPostPreview]
+(
+	[intM2MPostPreviewId] INT NOT NULL IDENTITY,
+	[dtmDate]                   DATETIME         NOT NULL,
     [strBatchId]                NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
 	[strReversalBatchId]        NVARCHAR (50)    COLLATE Latin1_General_CI_AS NULL,
     [intAccountId]              INT              NULL,
@@ -31,13 +32,10 @@
     [strModuleName]             NVARCHAR (255)   COLLATE Latin1_General_CI_AS NULL,
 	[strRateType]				NVARCHAR (50)	 COLLATE Latin1_General_CI_AS NULL,
     [intConcurrencyId]          INT              DEFAULT 1 NOT NULL,
-	[intM2MInquiryId]			INT				 NULL,
 	[intM2MHeaderId]			INT				 NULL,
 	[intSourceLocationId]		INT NULL,
 	[intSourceUOMId]			INT NULL,
-	[dblPrice]                  NUMERIC (18, 6)  NULL,
-		
-	CONSTRAINT [PK_tblM2MPostRecap] PRIMARY KEY CLUSTERED ([intM2MTransactionId] ASC),
-	CONSTRAINT [FK_tblRKM2MPostRecap_tblRKM2MInquiry_intM2MInquiryId] FOREIGN KEY([intM2MInquiryId])REFERENCES [dbo].[tblRKM2MInquiry] (intM2MInquiryId) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblRKM2MPostRecap_tblRKM2MHeader_intM2MHeaderId] FOREIGN KEY([intM2MHeaderId])REFERENCES [dbo].[tblRKM2MHeader] (intM2MHeaderId) ON DELETE CASCADE
-);
+	[dblPrice]                  NUMERIC (18, 6)  NULL, 
+    CONSTRAINT [PK_tblRKM2MPostPreview] PRIMARY KEY ([intM2MPostPreviewId]), 
+    CONSTRAINT [FK_tblRKM2MPostPreview_tblRKM2MHeader] FOREIGN KEY ([intM2MHeaderId]) REFERENCES [tblRKM2MHeader]([intM2MHeaderId]) ON DELETE CASCADE,
+)

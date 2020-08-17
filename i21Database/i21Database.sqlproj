@@ -8772,6 +8772,8 @@
     <Build Include="dbo\Views\vyuRKGetDPRCommodityVisualization.sql" />
     <Build Include="dbo\Stored Procedures\uspCTItemContractShipped.sql" />
     <Build Include="dbo\Tables\tblSTLotteryProcessError.sql" />
+    <Build Include="dbo\Tables\tblRKM2MPostPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKM2MPostPreview.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
