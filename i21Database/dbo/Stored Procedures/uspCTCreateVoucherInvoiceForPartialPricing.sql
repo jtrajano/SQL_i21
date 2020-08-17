@@ -127,7 +127,6 @@ BEGIN TRY
   		declare @intSequenceFreightTermId int;
   		declare @strBillDetailChargesId nvarchar(500);
 
-
 		declare @InvShp table (
 			intInventoryShipmentId int
 			,intInventoryShipmentItemId int
