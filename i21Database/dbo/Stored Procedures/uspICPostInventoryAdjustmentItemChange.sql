@@ -552,11 +552,12 @@ BEGIN
 										WHEN Detail.dblNewCost IS NULL THEN 
 											SourceTransaction.dblCost
 										ELSE
-											dbo.fnCalculateCostBetweenUOM ( 
-												dbo.fnGetItemStockUOM(Detail.intNewItemId)
-												,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
-												,Detail.dblNewCost
-											)
+											Detail.dblNewCost
+											--dbo.fnCalculateCostBetweenUOM ( 
+											--	dbo.fnGetItemStockUOM(Detail.intNewItemId)
+											--	,dbo.fnGetMatchingItemUOMId(Detail.intNewItemId, Detail.intItemUOMId)
+											--	,Detail.dblNewCost
+											--)
 									END
 			,dblValue				= 0
 			,dblSalesPrice			= 0
