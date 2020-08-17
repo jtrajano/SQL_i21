@@ -3154,7 +3154,7 @@ BEGIN
 											FromStock.dblCost
 										ELSE
 											dbo.fnCalculateCostBetweenUOM( 
-												dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
+												AdjDetail.intItemUOMId --dbo.fnGetItemStockUOM(AdjDetail.intNewItemId)
 												,NewItemUOM.intItemUOMId --dbo.fnGetMatchingItemUOMId(AdjDetail.intNewItemId, AdjDetail.intItemUOMId)
 												,AdjDetail.dblNewCost
 											)
