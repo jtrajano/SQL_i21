@@ -312,7 +312,7 @@ BEGIN
 		,stock.intCostingMethodId
 		,dblQty = dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, stock.dblQty)
 		,dblUnitStorage = dbo.fnCalculateQtyBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, stock.dblUnitStorage)
-		,dblCost = @dblLastCost
+		,dblCost = dbo.fnCalculateCostBetweenUOM(stock.intItemUOMId, iu.intItemUOMId, @dblLastCost) --@dblLastCost
 	FROM 
 		tblICItem i INNER JOIN tblICItemUOM iu
 			ON i.intItemId = iu.intItemId
