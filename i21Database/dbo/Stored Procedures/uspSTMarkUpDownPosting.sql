@@ -739,4 +739,3 @@ IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))
 
 --EXIT here
 Post_Exit:
-GO
