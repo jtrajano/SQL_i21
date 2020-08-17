@@ -168,6 +168,7 @@ SELECT
 	  ,vst.[intStoreNo]
 	  ,vst.[strRegisterClass]
 	  ,vst.[intEntityId]  
+	  ,vst.[strState]
 	  ,strReportDepartmentAtGrossOrNet = CASE	
 											WHEN st.strReportDepartmentAtGrossOrNet = 'G'
 												THEN 'Gross'
@@ -295,6 +296,7 @@ GROUP BY
 	  ,vst.[intStoreId]
 	  ,vst.[intEntityId]
 	  ,vst.[intStoreNo]
+	  ,vst.[strState]
 	  ,vst.[strRegisterClass]
 	  ,vst.[ysnIsUserStoreManager]
 	  ,st.[strReportDepartmentAtGrossOrNet]
