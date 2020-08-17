@@ -16,27 +16,13 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
---For testing purposes
---DECLARE @intMarkUpDownId	INT
---DECLARE @intCurrentUserId	INT
---DECLARE @ysnRecap			BIT
---DECLARE @ysnPost			BIT
---DECLARE @strStatusMsg		NVARCHAR(1000) 
---DECLARE @strBatchId		NVARCHAR(1000) 
---DECLARE @ysnIsPosted		BIT
-
---SET @intMarkUpDownId	 = 29
---SET @intCurrentUserId	 = 1
---SET @ysnRecap			 = 'false'
---SET @ysnPost			 = 'true'
-
 	--------------------------------------------------------------------------------------------  
 	-- Create Save Point.  
 	--------------------------------------------------------------------------------------------    
 	-- Create a unique transaction name. 
 	DECLARE @SavedPointTransaction AS VARCHAR(500) = 'MarkUpMarkDownPosting' + CAST(NEWID() AS NVARCHAR(100)); 
 	DECLARE @intTransactionCount INT = @@TRANCOUNT;
-	
+
 	IF(@intTransactionCount = 0)
 		BEGIN
 			BEGIN TRAN @SavedPointTransaction
@@ -105,8 +91,7 @@ BEGIN TRY
 			,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY AS NVARCHAR(50) = 'Inventory Adjustment' --'Cost of Goods'
 	
 	DECLARE @intCategoryAdjustmentType AS INT
-	DECLARE @strItemNo AS NVARCHAR(1000) = ''
-	DECLARE @intCommaCount AS INT
+	DECLARE @strCategoryCode AS NVARCHAR(1000) = ''
 
 
 
@@ -127,44 +112,6 @@ BEGIN TRY
 		[intLocationId] INT
 	)
 
-	SELECT @strItemNo = STRING_AGG (Item.strItemNo, ', ') 
-		FROM tblSTMarkUpDownDetail MUD
-		INNER JOIN tblSTMarkUpDown MU 
-			ON MU.intMarkUpDownId = MUD.intMarkUpDownId	
-		JOIN tblICCategory Category
-			ON MUD.intCategoryId = Category.intCategoryId
-		INNER JOIN tblICItem Item
-			ON MUD.intItemId = Item.intItemId
-		INNER JOIN tblICItemUOM ItemUOM
-			ON Item.intItemId = ItemUOM.intItemId
-		INNER JOIN tblICItemLocation ItemLocation
-			ON ItemLocation.intItemId = Item.intItemId 
-			AND ItemLocation.intLocationId = @intLocationId 
-			AND ItemLocation.intCostingMethod != 6
-		WHERE MU.intMarkUpDownId = @intMarkUpDownId
-		
-		
-	--Validate if items to be updated have a Category on Costing Method
-	IF (ISNULL(@strItemNo, '0') != '0')
-		BEGIN
-			IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))  
-				BEGIN 
-					SET @intCommaCount = len(@strItemNo) - LEN(REPLACE(@strItemNo,',',''))
-					
-					IF (@intCommaCount > 0)
-						BEGIN
-							SET @strStatusMsg = 'Item #: ' + @strItemNo + ' have no Category Costing Method on its Location Setup'
-							GOTO With_Rollback_Exit
-						END
-					ELSE
-						SET @strStatusMsg = 'Item #: ' + @strItemNo + ' has no Category Costing Method on its Location Setup'
-						GOTO With_Rollback_Exit
-					
-
-
-				END
-		END
-	
 	--IF(@isRequiredGLEntries = CAST(1 AS BIT))
 	--	BEGIN
 	--		IF(@strType = 'Department Level')
@@ -200,6 +147,8 @@ BEGIN TRY
 	--						JOIN tblICCategory C ON MD.intCategoryId = C.intCategoryId
 	--						WHERE MD.intMarkUpDownId = @intMarkUpDownId
 
+	--						ROLLBACK TRAN @TransactionName
+	--						COMMIT TRAN @TransactionName
 	--						SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item or no Category Costing Method and Sale UOM.'
 	--						RETURN
 	--					END
@@ -244,7 +193,6 @@ BEGIN TRY
 
 	--								ROLLBACK TRAN @TransactionName
 	--								COMMIT TRAN @TransactionName
-	
 	--								SET @strStatusMsg = 'Category ' + @strCategoryCode + ' has no Item Valuation or No Item Costing.'
 	--								RETURN
 	--							END
@@ -252,8 +200,6 @@ BEGIN TRY
 	--				END
 	--			END		
 	---- END VALIDATE @isRequiredGLEntries = true
-
-
 
 
 	-- Check if Post or UnPost
@@ -352,7 +298,6 @@ BEGIN TRY
 						--	WHERE Item.intCategoryId = MUD.intCategoryId
 						--) CategoryItem
 						WHERE MU.intMarkUpDownId = @intMarkUpDownId
-
 
 				END
 			ELSE IF(@strAdjustmentType = @AdjustmentType_WriteOff)
@@ -739,4 +684,3 @@ IF (XACT_STATE() = 1 OR (@intTransactionCount = 0 AND XACT_STATE() <> 0))
 
 --EXIT here
 Post_Exit:
-GO
