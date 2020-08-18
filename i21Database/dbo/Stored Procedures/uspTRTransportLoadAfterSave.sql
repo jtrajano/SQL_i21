@@ -342,6 +342,38 @@ BEGIN
 		WHERE ISNULL(currentSnapshot.intContractDetailId, 0) = ISNULL(previousSnapshot.intContractDetailId, 0) 
 		AND ISNULL(currentSnapshot.dblQuantity, 0) != ISNULL(previousSnapshot.dblQuantity, 0)
 
+		UNION ALL		
+		-- Add row if the distribution is deleted
+		SELECT previousSnapshot.intTransactionId
+		 	, previousSnapshot.intTransactionDetailId
+		 	, previousSnapshot.strSourceType
+		 	, 2 -- UPDATE
+		 	, previousSnapshot.dblQuantity * -1
+		 	, previousSnapshot.intContractDetailId
+		FROM #tmpPreviousSnapshot previousSnapshot
+		LEFT JOIN @tmpCurrentSnapshot currentSnapshot ON previousSnapshot.intTransactionId = currentSnapshot.intTransactionId
+			AND previousSnapshot.strSourceType = currentSnapshot.strSourceType
+		WHERE currentSnapshot.intTransactionDetailLogId IS NULL
+		AND previousSnapshot.dblQuantity > 0
+		AND previousSnapshot.strSourceType = @SourceType_Invoice
+		AND previousSnapshot.intContractDetailId IS NOT NULL
+
+		UNION ALL
+		-- Add row if the receipt is deleted
+		SELECT previousSnapshot.intTransactionId
+		 	, previousSnapshot.intTransactionDetailId
+		 	, previousSnapshot.strSourceType
+		 	, 2 -- UPDATE
+		 	, previousSnapshot.dblQuantity * -1
+		 	, previousSnapshot.intContractDetailId
+		FROM #tmpPreviousSnapshot previousSnapshot
+		LEFT JOIN @tmpCurrentSnapshot currentSnapshot ON previousSnapshot.intTransactionId = currentSnapshot.intTransactionId
+			AND previousSnapshot.strSourceType = currentSnapshot.strSourceType
+		WHERE currentSnapshot.intTransactionDetailLogId IS NULL
+		AND previousSnapshot.dblQuantity > 0
+		AND previousSnapshot.strSourceType = @SourceType_InventoryReceipt
+		AND previousSnapshot.intContractDetailId IS NOT NULL
+
 
 		-- Check first instance of Load Schedule processed load
 		IF EXISTS(SELECT TOP 1 1 FROM tblTRLoadHeader WHERE intLoadHeaderId = @LoadHeaderId AND ISNULL(intLoadId, '') <> '' AND intConcurrencyId <= 1)
