@@ -346,8 +346,14 @@ BEGIN
 		AND ReceiptCharge.intEntityVendorId = ReceiptChargesToBill.intEntityVendorId
 		AND 1 = 
 			CASE 
-				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptChargesToBill.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) = 0 THEN 0
-				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptChargesToBill.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) > ISNULL(ReceiptChargesToBill.dblAmount, 0) THEN 1 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN 
+					--AND ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+					CASE						
+						WHEN ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) = 0 THEN 0
+						WHEN ABS(ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) - ISNULL(ReceiptCharge.dblAmount, 0)) BETWEEN 0.01 AND 0.03 THEN 0 -- tolerate 0.01 to 0.03 discrepancy due to pro-rated charges. 
+						WHEN ISNULL(ReceiptCharge.dblAmountBilled, 0) + ISNULL(ReceiptChargesToBill.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1
+						ELSE 0
+					END 
 				WHEN ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) = 0 THEN 0 
 				WHEN ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) + ISNULL(ReceiptChargesToBill.dblToBillQty, 0) > ISNULL(ReceiptChargesToBill.dblQuantity, 0) THEN 1 
 				ELSE 
@@ -471,8 +477,13 @@ BEGIN
 		AND Receipt.intEntityVendorId = u.intEntityVendorId
 		AND 1 = 
 			CASE 
-				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) = 0 THEN 0
-				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') AND ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN --AND ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(UpdateTbl.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1 
+					CASE						
+						WHEN ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) = 0 THEN 0
+						WHEN ABS(ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) - ISNULL(ReceiptCharge.dblAmount, 0)) BETWEEN 0.01 AND 0.03 THEN 0 -- tolerate 0.01 to 0.03 discrepancy due to pro-rated charges.
+						WHEN ISNULL(ReceiptCharge.dblAmountPriced, 0) + ISNULL(u.dblAmountToBill, 0) > ISNULL(ReceiptCharge.dblAmount, 0) THEN 1
+						ELSE 0
+					END 
 				WHEN ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0) = 0 THEN 0
 				WHEN ISNULL(ReceiptCharge.dblQuantityPriced, 0) + ISNULL(u.dblToBillQty, 0) > ISNULL(ReceiptCharge.dblQuantity, 0) THEN 1 
 				ELSE 
