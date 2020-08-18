@@ -157,6 +157,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , ysnServiceChargeCredit				= INV.ysnServiceChargeCredit
 	 , blbSignature							= INV.blbSignature
      , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+     , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -320,3 +321,22 @@ LEFT JOIN (
     INNER JOIN tblCTPriceFixationDetailAPAR APAR ON ID.intInvoiceDetailId = APAR.intInvoiceDetailId
     GROUP BY ID.intInvoiceId
 ) APAR ON APAR.intInvoiceId = INV.intInvoiceId
+
+OUTER APPLY(
+	SELECT COUNT(ARC.intEntityId) AS intApproverCount
+	FROM dbo.tblARCustomer ARC
+	INNER JOIN dbo.tblEMEntityRequireApprovalFor ERA
+		ON ARC.intEntityId = ERA.[intEntityId]
+	INNER JOIN tblSMScreen SC
+		ON ERA.intScreenId = SC.intScreenId
+		AND SC.strScreenName = 'Invoice'
+	WHERE ARC.intEntityId = INV.intEntityCustomerId
+) CUSTOMERCREDITAPPROVER
+OUTER APPLY(
+	SELECT COUNT(SRA.intEntityUserSecurityId) AS intApproverCount
+	FROM dbo.tblSMUserSecurityRequireApprovalFor SRA
+	INNER JOIN tblSMScreen SC
+	ON SRA.intScreenId = SC.intScreenId
+	AND SC.strScreenName = 'Invoice'
+	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
+) USERCREDITAPPROVER
