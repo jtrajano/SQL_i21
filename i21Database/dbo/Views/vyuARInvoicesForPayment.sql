@@ -155,7 +155,7 @@ FROM
 		SELECT 
 			 [intTransactionId]			= APB.[intBillId]
 			,[strTransactionNumber]		= APB.[strBillId]
-			,[intInvoiceId]				= NULL
+			,[intInvoiceId]				= 0
 			,[strInvoiceNumber]			= ''
 			,[intBillId]				= APB.[intBillId]
 			,[strBillId]				= APB.[strBillId]
