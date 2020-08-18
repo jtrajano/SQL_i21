@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspRKGenerateM2M]
 	@intM2MHeaderId INT OUTPUT
+	, @strRecordName NVARCHAR(50) = NULL
 	, @intCommodityId INT = NULL
 	, @intM2MTypeId INT
 	, @intM2MBasisId INT
@@ -47,11 +48,9 @@ BEGIN TRY
 --	, @dtmLastReversalDate DATETIME = NULL
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-		, @intDPRHeaderId INT
 
 	DECLARE @strM2MView NVARCHAR(50)
 		, @intMarkExpiredMonthPositionId INT
-		, @strRecordName NVARCHAR(50)
 		, @ysnIncludeBasisDifferentialsInResults BIT
 		, @dtmPriceDate DATETIME
 		, @dtmSettlemntPriceDate DATETIME
@@ -101,11 +100,7 @@ BEGIN TRY
 	IF (@intCurrencyId = 0) SET @intCurrencyId = NULL
 	IF (@intCompanyId = 0) SET @intCompanyId = NULL
 
-	IF (ISNULL(@intM2MHeaderId, 0) = 0) SET @intM2MHeaderId = NULL
-	IF NOT EXISTS(SELECT * FROM tblRKM2MHeader WHERE intM2MHeaderId = @intM2MHeaderId) SET @intM2MHeaderId = NULL
-
-	
-	IF (ISNULL(@intM2MHeaderId, 0) = 0)
+	IF (ISNULL(@strRecordName, '') = '')
 	BEGIN		
 		EXEC uspSMGetStartingNumber 133, @strRecordName OUTPUT
 
@@ -153,6 +148,10 @@ BEGIN TRY
 			, intCompanyId = NULL
 
 		SET @intM2MHeaderId = SCOPE_IDENTITY()
+	END
+	ELSE
+	BEGIN
+		SELECT TOP 1 @intM2MHeaderId = intM2MHeaderId FROM tblRKM2MHeader WHERE strRecordName = @strRecordName
 	END
 
 	DELETE FROM tblRKM2MValidateError WHERE intM2MHeaderId = @intM2MHeaderId
