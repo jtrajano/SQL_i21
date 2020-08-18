@@ -171,6 +171,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
      , dblProvisionalPayment				= CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblPayment ELSE 0 END 
 	 , dblProvisionalBasePayment			= CASE WHEN ysnFromProvisional = 1 AND dblBaseProvisionalAmount > 0 THEN PROVISIONALPAYMENT.dblBasePayment ELSE 0 END 
+     , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -340,3 +341,21 @@ LEFT OUTER JOIN (
 	INNER JOIN tblARPayment P
 	ON PD.intPaymentId = P.intPaymentId
 ) PROVISIONALPAYMENT ON PROVISIONALPAYMENT.intInvoiceId = INV.intOriginalInvoiceId AND PROVISIONALPAYMENT.ysnPosted = 1
+OUTER APPLY(
+	SELECT COUNT(ARC.intEntityId) AS intApproverCount
+	FROM dbo.tblARCustomer ARC
+	INNER JOIN dbo.tblEMEntityRequireApprovalFor ERA
+		ON ARC.intEntityId = ERA.[intEntityId]
+	INNER JOIN tblSMScreen SC
+		ON ERA.intScreenId = SC.intScreenId
+		AND SC.strScreenName = 'Invoice'
+	WHERE ARC.intEntityId = INV.intEntityCustomerId
+) CUSTOMERCREDITAPPROVER
+OUTER APPLY(
+	SELECT COUNT(SRA.intEntityUserSecurityId) AS intApproverCount
+	FROM dbo.tblSMUserSecurityRequireApprovalFor SRA
+	INNER JOIN tblSMScreen SC
+	ON SRA.intScreenId = SC.intScreenId
+	AND SC.strScreenName = 'Invoice'
+	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
+) USERCREDITAPPROVER
