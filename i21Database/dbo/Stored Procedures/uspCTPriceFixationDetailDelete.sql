@@ -126,7 +126,17 @@ BEGIN TRY
 				[dblToBillQty],
 				[dblAmountToBill]
 			)
-			SELECT * FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
+			SELECT
+			[intInventoryReceiptItemId],
+			[intInventoryReceiptChargeId],
+			[intInventoryShipmentChargeId],
+			[intSourceTransactionNoId],
+			[strSourceTransactionNo],
+			[intItemId],
+			[intToBillUOMId],
+			[dblToBillQty],
+			[dblAmountToBill] = [dblAmountToBill] * -1
+			FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
 
 			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
 			-----------------------------------------

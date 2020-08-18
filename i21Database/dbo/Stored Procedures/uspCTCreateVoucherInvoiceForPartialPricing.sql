@@ -574,9 +574,20 @@ BEGIN TRY
 								[strSourceTransactionNo],
 								[intItemId],
 								[intToBillUOMId],
-								[dblToBillQty]
+								[dblToBillQty],
+								[dblAmountToBill]
 							)
-							SELECT * FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intBillId, @intBillDetailId, @dblQtyToBill, 0)
+							SELECT
+								[intInventoryReceiptItemId],
+								[intInventoryReceiptChargeId],
+								[intInventoryShipmentChargeId],
+								[intSourceTransactionNoId],
+								[strSourceTransactionNo],
+								[intItemId],
+								[intToBillUOMId],
+								[dblToBillQty],
+								[dblAmountToBill]
+							FROM dbo.fnCTGenerateReceiptDetail(@intInventoryReceiptItemId, @intBillId, @intBillDetailId, @dblQtyToBill, 0)
 
 							EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 
@@ -668,9 +679,19 @@ BEGIN TRY
 										[strSourceTransactionNo],
 										[intItemId],
 										[intToBillUOMId],
-										[dblToBillQty]
+										[dblToBillQty],
+										[dblAmountToBill]
 									)
-									SELECT * 
+									SELECT
+										[intInventoryReceiptItemId],
+										[intInventoryReceiptChargeId],
+										[intInventoryShipmentChargeId],
+										[intSourceTransactionNoId],
+										[strSourceTransactionNo],
+										[intItemId],
+										[intToBillUOMId],
+										[dblToBillQty],
+										[dblAmountToBill]
 									FROM 
 										dbo.fnCTGenerateReceiptDetail(
 											@intInventoryReceiptItemId
