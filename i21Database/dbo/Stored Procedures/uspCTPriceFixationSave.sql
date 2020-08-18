@@ -58,7 +58,11 @@ BEGIN TRY
 			@intMarketCurrencyId		INT,
 			@intPriceContractId			INT,
 			@ysnSeqSubCurrency			BIT,
-			@contractDetails 			AS [dbo].[ContractDetailTable]
+			@contractDetails 			AS [dbo].[ContractDetailTable],
+			@process					NVARCHAR(20),
+			@intInventoryShipmentItemId INT,
+			@intInventoryShipmentId		INT
+
 
 	SET		@ysnMultiplePriceFixation = 0
 
@@ -232,6 +236,35 @@ BEGIN TRY
 												@strSource 			 	= 'Pricing-Old',
 												@strProcess 			= 'Price Delete',
 												@intUserId				= @intUserId
+
+			SELECT @intInventoryShipmentItemId = MIN(RI.intInventoryShipmentItemId)
+				,@intInventoryShipmentId = MIN(RI.intInventoryShipmentId)
+			FROM tblICInventoryShipmentItem RI
+			JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+			WHERE RI.intLineNo = @intContractDetailId	
+
+			WHILE	ISNULL(@intInventoryShipmentItemId,0) > 0
+			BEGIN
+				
+				SELECT @process = CASE WHEN intContractTypeId = 1 THEN 'Delete Voucher' ELSE 'Delete Invoice' END FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 		= 	@process,
+									@intUserId				=	@intUserId,
+									@intTransactionHeaderId	=	@intInventoryShipmentId,
+									@intTransactionDetailId =	@intInventoryShipmentItemId,
+									@contractDetail 		= 	@contractDetails
+
+				SELECT @intInventoryShipmentItemId = MIN(RI.intInventoryShipmentItemId)
+					,@intInventoryShipmentId = MIN(RI.intInventoryShipmentId)
+				FROM tblICInventoryShipmentItem RI
+				JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+				WHERE RI.intLineNo = @intContractDetailId	
+				AND RI.intInventoryShipmentItemId > @intInventoryShipmentItemId
+
+			END
 
 			IF	@ysnMultiplePriceFixation = 1
 			BEGIN
@@ -614,7 +647,6 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		DECLARE @process NVARCHAR(20)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
 		
 		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
@@ -622,7 +654,36 @@ BEGIN TRY
 							 @strSource			 	= 	'Pricing',
 							 @strProcess		 	= 	@process,
 							 @contractDetail 		= 	@contractDetails,
-							 @intUserId				= 	@intUserId	
+							 @intUserId				= 	@intUserId
+
+		SELECT @intInventoryShipmentItemId = MIN(RI.intInventoryShipmentItemId)
+			  ,@intInventoryShipmentId = MIN(RI.intInventoryShipmentId)
+		FROM tblICInventoryShipmentItem RI
+		JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+		WHERE RI.intLineNo = @intContractDetailId	
+
+		WHILE	ISNULL(@intInventoryShipmentItemId,0) > 0
+		BEGIN
+
+			SELECT @process = CASE WHEN intContractTypeId = 1 THEN 'Create Voucher' ELSE 'Create Invoice' END FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 		= 	@process,
+								@intUserId				=	@intUserId,
+								@intTransactionHeaderId	=	@intInventoryShipmentId,
+								@intTransactionDetailId =	@intInventoryShipmentItemId,
+								@contractDetail 		= 	@contractDetails
+
+			SELECT @intInventoryShipmentItemId = MIN(RI.intInventoryShipmentItemId)
+				  ,@intInventoryShipmentId = MIN(RI.intInventoryShipmentId)
+			FROM tblICInventoryShipmentItem RI
+			JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+			WHERE RI.intLineNo = @intContractDetailId	
+			AND RI.intInventoryShipmentItemId > @intInventoryShipmentItemId
+
+		END
 
 		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
 
