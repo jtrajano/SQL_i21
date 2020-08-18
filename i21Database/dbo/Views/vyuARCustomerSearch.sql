@@ -74,7 +74,6 @@ SELECT intEntityId				= ENTITY.intEntityId
 	 , strCreditCode			= CUSTOMER.strCreditCode
 	 , dtmCreditLimitReached	= CUSTOMER.dtmCreditLimitReached
 	 , intCreditLimitReached	= DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
-	 , ysnHasCreditApprover		= CUSTOMER.ysnHasCreditApprover
 FROM tblEMEntity ENTITY
 INNER JOIN (
 	SELECT C.intEntityId
@@ -109,7 +108,6 @@ INNER JOIN (
 		 , intCreditStopDays
 		 , strCreditCode
 		 , dtmCreditLimitReached
-		 , ysnHasCreditApprover		= CAST(CASE WHEN CREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 	FROM dbo.tblARCustomer C WITH (NOLOCK)	
 	LEFT JOIN (
 		SELECT intTermID
@@ -126,16 +124,6 @@ INNER JOIN (
 		FROM dbo.tblARCustomerBudget WITH (NOLOCK)
 		WHERE intEntityCustomerId = C.intEntityId
 	) BUDGET
-	OUTER APPLY(
-		SELECT COUNT(ARC.intEntityId) AS intApproverCount
-		FROM dbo.tblARCustomer ARC
-		INNER JOIN dbo.tblEMEntityRequireApprovalFor ERA
-			ON ARC.intEntityId = ERA.[intEntityId]
-		INNER JOIN tblSMScreen SC
-			ON ERA.intScreenId = SC.intScreenId
-			AND SC.strScreenName = 'Invoice'
-		WHERE ARC.intEntityId = C.intEntityId
-	) CREDITAPPROVER
 ) CUSTOMER ON ENTITY.intEntityId = CUSTOMER.intEntityId
 LEFT JOIN (
 	SELECT intEntityId			= ETC.intEntityId
