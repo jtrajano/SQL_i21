@@ -15,7 +15,8 @@ RETURNS @table TABLE
 	[strSourceTransactionNo]		NVARCHAR(50),
 	[intItemId]						INT,
 	[intToBillUOMId]				INT,
-	[dblToBillQty]					NUMERIC(18,6)
+	[dblToBillQty]					NUMERIC(18,6),
+	[dblAmountToBill]				NUMERIC(18,6)
 )
 AS
 BEGIN
@@ -29,7 +30,8 @@ BEGIN
 		[strSourceTransactionNo],
 		[intItemId],
 		[intToBillUOMId],
-		[dblToBillQty]
+		[dblToBillQty],
+		[dblAmountToBill]
 	)
 	SELECT
 		[intInventoryReceiptItemId]		=	@intInventoryReceiptItemId,
@@ -39,7 +41,8 @@ BEGIN
 		[strSourceTransactionNo]		=	strBillId,
 		[intItemId]						=	B.intItemId,
 		[intToBillUOMId]				=	B.intUnitOfMeasureId,
-		[dblToBillQty]					=	@dblQtyToBill - @total
+		[dblToBillQty]					=	@dblQtyToBill - @total,
+		[dblAmountToBill]				=	B.dblTotal * -1
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	WHERE A.intBillId = @intBillId 
