@@ -134,7 +134,8 @@ BEGIN TRY
 				[strSourceTransactionNo],
 				[intItemId],
 				[intToBillUOMId],
-				[dblToBillQty]
+				[dblToBillQty],
+				[dblAmountToBill]
 			)
 			SELECT * FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
 
