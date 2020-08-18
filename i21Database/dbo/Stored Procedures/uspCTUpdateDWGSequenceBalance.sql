@@ -121,7 +121,8 @@ BEGIN TRY
 				@intUserId				=	@intUserId,
 				@intExternalId			=	@intExternalId,
 				@strScreenName			=	@strScreenName,
-				@ysnFromInvoice 		= 	@ysnFromInvoice
+				@ysnFromInvoice 		= 	@ysnFromInvoice,
+				@ysnDWG					= 	1
 
 		/*Calculate if the sequence remaining balance is enough for the DWG quantity*/
 		select @dblCurrentBalanceQuantity = dblBalance from tblCTContractDetail where intContractDetailId = @intContractDetailId;
@@ -140,7 +141,8 @@ BEGIN TRY
 				@intUserId				=	@intUserId,
 				@intExternalId			=	@intExternalId,
 				@strScreenName			=	@strScreenName,
-				@ysnFromInvoice 		= 	@ysnFromInvoice
+				@ysnFromInvoice 		= 	@ysnFromInvoice,
+				@ysnDWG					= 	1
 
 		select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 
