@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mark To Market' AND strModuleName = 'Risk Management' AND strCommand = 'RiskManagement.view.NewMarkToMarket?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -3474,9 +3474,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Mark To Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Mark To Market', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Mark To Market', N'Derivative', N'Screen', N'RiskManagement.view.MarkToMarket?showSearch=true', N'small-menu-derivative', 0, 0, 0, 1, 2, 1)
+	VALUES (N'Mark To Market', N'Risk Management', @RiskManagementDerivativesParentMenuId, N'Mark To Market', N'Derivative', N'Screen', N'RiskManagement.view.NewMarkToMarket?showSearch=true', N'small-menu-derivative', 0, 0, 0, 1, 2, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'RiskManagement.view.MarkToMarket?showSearch=true' WHERE strMenuName = 'Mark To Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'RiskManagement.view.NewMarkToMarket?showSearch=true' WHERE strMenuName = 'Mark To Market' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Match Derivatives' AND strModuleName = 'Risk Management' AND intParentMenuID = @RiskManagementDerivativesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
