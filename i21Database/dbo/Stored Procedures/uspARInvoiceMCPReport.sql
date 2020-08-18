@@ -447,7 +447,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , intBillToLocationId		= ORIG.intBillToLocationId
 		  , intShipToLocationId		= ORIG.intShipToLocationId
 		  , intTermId				= ORIG.intTermId
-		  , intItemId				= NULL
+		  , intItemId				= CASE WHEN STAGING.strItemNo = 'State Sales Tax' THEN NULL ELSE ORIG.intItemId END
 		  , intShipViaId			= ORIG.intShipViaId
 		  , intTicketId				= ORIG.intTicketId
 		  , strCompanyName			= ORIG.strCompanyName
@@ -476,6 +476,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , dtmDueDate				= ORIG.dtmDueDate
 		  , blbLogo					= ORIG.blbLogo
 		  , strUnitMeasure			= ORIG.strUnitMeasure
+		  , strSalesOrderNumber		= ORIG.strSalesOrderNumber
 		FROM tblARInvoiceReportStagingTable STAGING
 		INNER JOIN (
 			SELECT *
