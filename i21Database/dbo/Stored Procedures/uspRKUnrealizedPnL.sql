@@ -117,7 +117,7 @@ BEGIN
 			SELECT GrossPnL1 = (ISNULL(Long1, 0) - ISNULL(Sell1, 0)) * dblContractSize / CASE WHEN ysnSubCurrency = 1 THEN intCent ELSE 1 END
 				, dblLong = ISNULL(Long1, 0)
 				, dblShort = ISNULL(Sell1, 0)
-				, dblFutCommission2 = CASE WHEN dblFutCommission1 = 0 THEN 0 ELSE ISNULL(Long1, 0) - ISNULL(Sell1, 0) * - dblFutCommission1 / CASE WHEN ComSubCurrency = 1 THEN ComCent ELSE 1 END END
+				, dblFutCommission2 = CASE WHEN dblFutCommission1 = 0 THEN 0 ELSE ((ISNULL(Long1, 0) - ISNULL(Sell1, 0)) * - dblFutCommission1) / CASE WHEN ComSubCurrency = 1 THEN ComCent ELSE 1 END END
 				, dblNet = ISNULL(Long1, 0) - ISNULL(Sell1, 0)
 				, *
 			FROM (
