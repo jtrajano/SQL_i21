@@ -42,7 +42,7 @@ BEGIN
 		[intItemId]						=	B.intItemId,
 		[intToBillUOMId]				=	B.intUnitOfMeasureId,
 		[dblToBillQty]					=	@dblQtyToBill - @total,
-		[dblAmountToBill]				=	B.dblTotal * -1
+		[dblAmountToBill]				=	B.dblTotal
 	FROM tblAPBill A
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	WHERE A.intBillId = @intBillId 
