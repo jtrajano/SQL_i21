@@ -2354,38 +2354,30 @@ BEGIN
 				BEGIN
 
 
-					UPDATE @tblCFCalculatedTaxExemptZeroQuantity
-					SET dblTax = (ISNULL(li.dblTax,0) / @dblQuantity) * @dblZeroQuantity,
-						dblAdjustedTax =  (ISNULL(li.dblAdjustedTax,0) / @dblQuantity) * @dblZeroQuantity
-					FROM @tblCFCalculatedTaxExemptZeroQuantity AS ot
-					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON ot.intTaxGroupId			= li.intTaxGroupId
-					AND ot.intTaxCodeId		= li.intTaxCodeId
-					AND ot.intTaxClassId	= li.intTaxClassId
-					AND ot.dblRate			= li.dblRate
-
-					UPDATE @tblCFCalculatedTaxExempt
-					SET dblTax = li.dblTax,
-						dblAdjustedTax = li.dblAdjustedTax
-					FROM @tblCFCalculatedTaxExempt AS ot
-					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON ot.intTaxGroupId			= li.intTaxGroupId
-					AND ot.intTaxCodeId		= li.intTaxCodeId
-					AND ot.intTaxClassId	= li.intTaxClassId
-					AND ot.dblRate			= li.dblRate
-
 					UPDATE @tblCFOriginalTax 
 					SET dblTax = li.dblTax,
 						dblAdjustedTax = li.dblAdjustedTax
 					FROM @tblCFOriginalTax AS ot
 					INNER JOIN @LineItemTaxDetailStagingTable AS li
-					ON ot.intTaxGroupId			= li.intTaxGroupId
+				    ON ot.intTaxGroupId		= li.intTaxGroupId
 					AND ot.intTaxCodeId		= li.intTaxCodeId
 					AND ot.intTaxClassId	= li.intTaxClassId
 					AND ot.dblRate			= li.dblRate
-					
 					WHERE ISNULL(ot.ysnTaxExempt,0) = 0
 					AND ISNULL(ot.ysnInvalidSetup,0) = 0
+					
+
+					UPDATE @tblCFOriginalTaxZeroQuantity 
+					SET dblTax = (li.dblTax / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax = (li.dblAdjustedTax / @dblQuantity) * @dblZeroQuantity
+					FROM @tblCFOriginalTaxZeroQuantity AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
 
 
 					UPDATE @tblCFCalculatedTax 
@@ -2399,6 +2391,46 @@ BEGIN
 					AND ct.dblRate			= li.dblRate
 					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
 					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+
+
+					UPDATE @tblCFCalculatedTaxExempt 
+					SET dblTax = li.dblTax,
+						dblAdjustedTax = li.dblAdjustedTax
+					FROM @tblCFCalculatedTaxExempt AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 1
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+
+
+					UPDATE @tblCFCalculatedTaxExemptZeroQuantity 
+					SET dblTax = (li.dblTax / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax = (li.dblAdjustedTax / @dblQuantity) * @dblZeroQuantity
+					FROM @tblCFCalculatedTaxExemptZeroQuantity AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 1
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+					
+
+					UPDATE @tblCFCalculatedTaxZeroQuantity 
+					SET dblTax = (li.dblTax / @dblQuantity) * @dblZeroQuantity,
+						dblAdjustedTax = (li.dblAdjustedTax / @dblQuantity) * @dblZeroQuantity
+					FROM @tblCFCalculatedTaxZeroQuantity AS ct
+					INNER JOIN @LineItemTaxDetailStagingTable AS li
+					ON ct.intTaxGroupId		= li.intTaxGroupId
+					AND ct.intTaxCodeId		= li.intTaxCodeId
+					AND ct.intTaxClassId	= li.intTaxClassId
+					AND ct.dblRate			= li.dblRate
+					WHERE ISNULL(ct.ysnTaxExempt,0) = 0
+					AND ISNULL(ct.ysnInvalidSetup,0) = 0
+					
 
 
 					--SELECT  '@tblCFOriginalTax',* FROM @tblCFOriginalTax --TEMP ME--
