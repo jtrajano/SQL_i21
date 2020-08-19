@@ -353,7 +353,7 @@ BEGIN TRY
 					 , @strInOutFlag	= strInOutFlag
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END		
-		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0 OR (@intInventoryShipmentItemId IS NOT NULL AND @strPricing = 'Subsystem - Direct')
+		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing = 'Subsystem - Direct'		
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
