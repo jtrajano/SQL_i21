@@ -109,7 +109,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 												* A.dblQuantityToBill) 
 											/ (CASE WHEN A.ysnSubCurrency > 0 THEN ISNULL(A.intSubCurrencyCents,1) ELSE 1 END)  ,
 		[dblCost]						=	CASE WHEN charges.dblCost > 0 THEN charges.dblCost ELSE ABS((A.dblUnitCost /  ISNULL(A.intSubCurrencyCents,1))) END,
-		[dblOldCost]					=	CASE WHEN charges.dblCost != A.dblUnitCost THEN A.dblUnitCost ELSE NULL END,
+		[dblOldCost]					=	NULL, --CONTRACT IS ONLY USING THIS SP FOR PRO RATED
 		[dblClaimAmount]				=	0,
 		[dblNetWeight]					=	0,
 		[dblNetShippedWeight]			=	0,
