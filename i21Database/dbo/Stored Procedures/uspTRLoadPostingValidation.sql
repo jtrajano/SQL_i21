@@ -63,6 +63,7 @@ BEGIN TRY
 		, @BlendedItem BIT = 0
 		, @dblNonBlendedDistributedQuantity DECIMAL(18, 6) = 0
 		, @strFreightCostMethod NVARCHAR(20) = NULL
+		, @strFreightBilledBy NVARCHAR(30) = NULL
 	
 	SELECT @dtmLoadDateTime = TL.dtmLoadDateTime
 		, @intShipVia = TL.intShipViaId
@@ -93,6 +94,7 @@ BEGIN TRY
 
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
+	SELECT @strFreightBilledBy = strFreightBilledBy FROM tblSMShipVia where intEntityId = @intShipVia
 
 	--IF (NOT EXISTS(SELECT TOP 1 1 FROM vyuICGetOtherCharges WHERE intItemId = @intSurchargeItemId AND intOnCostTypeId = @intFreightItemId) AND @intSurchargeItemId IS NOT NULL)
 	--BEGIN
@@ -149,6 +151,14 @@ BEGIN TRY
 		FROM vyuICGetItemStock
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intCompanyLocation
+
+		IF(@strFreightBilledBy = 'Other' AND (@dblFreight > 0 OR @dblSurcharge > 0))
+		BEGIN
+			IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE intEntityId = @intShipVia)
+			BEGIN
+				RAISERROR('Please set the Ship Via as a Vendor.', 16, 1)
+			END
+		END
 
 		IF (ISNULL(@dblFreight, 0) > 0 AND ISNULL(@intFreightItemId, '') = '')
 		BEGIN
