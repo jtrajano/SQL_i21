@@ -17,7 +17,6 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 -- AL Terminals
 PRINT ('Deploying AL Terminal Control Number')
-
 DECLARE @TerminalAL AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalAL(
@@ -64,6 +63,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T76
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'AL' , @TerminalControlNumbers = @TerminalAL
 
 DELETE @TerminalAL
+
+GO
 
 -- AK Terminals
 PRINT ('Deploying AK Terminal Control Number')
@@ -143,6 +144,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'AK' , @TerminalCont
 
 DELETE @TerminalAK
 
+GO
+
 -- AR Terminals
 PRINT ('Deploying AR Terminal Control Number')
 DECLARE @TerminalAR AS TFTerminalControlNumbers
@@ -181,6 +184,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'AR' , @TerminalCont
 
 DELETE @TerminalAR
 
+GO
+
 -- AZ Terminals
 PRINT ('Deploying AZ Terminal Control Number')
 DECLARE @TerminalAZ AS TFTerminalControlNumbers
@@ -210,6 +215,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T86
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'AZ' , @TerminalControlNumbers = @TerminalAZ
 
 DELETE @TerminalAZ
+
+GO
 
 -- CA Terminals
 PRINT ('Deploying CA Terminal Control Number')
@@ -314,6 +321,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'CA' , @TerminalCont
 
 DELETE @TerminalCA
 
+GO
+
 -- CO Terminals
 PRINT ('Deploying CO Terminal Control Number')
 DECLARE @TerminalCO AS TFTerminalControlNumbers
@@ -347,6 +356,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T84
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'CO' , @TerminalControlNumbers = @TerminalCO
 
 DELETE @TerminalCO
+
+GO
 
 -- CT Terminals
 PRINT ('Deploying CT Terminal Control Number')
@@ -389,6 +400,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'CT' , @TerminalCont
 
 DELETE @TerminalCT
 
+GO
+
 -- DE Terminals
 PRINT ('Deploying DE Terminal Control Number')
 DECLARE @TerminalDE AS TFTerminalControlNumbers
@@ -410,6 +423,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T52
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'DE' , @TerminalControlNumbers = @TerminalDE
 
 DELETE @TerminalDE
+
+GO
 
 -- FL Terminals
 PRINT ('Deploying FL Terminal Control Number')
@@ -473,6 +488,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T59
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'FL' , @TerminalControlNumbers = @TerminalFL
 
 DELETE @TerminalFL
+
+GO
 
 -- GA Terminals
 PRINT ('Deploying GA Terminal Control Number')
@@ -575,6 +592,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'HI' , @TerminalCont
 
 DELETE @TerminalHI
 
+GO
+
 -- IA Terminals
 PRINT ('Deploying IA Terminal Control Number')
 DECLARE @TerminalIA AS TFTerminalControlNumbers
@@ -616,6 +635,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'IA' , @TerminalCont
 
 DELETE @TerminalIA
 
+GO
+
 -- ID Terminals
 PRINT ('Deploying ID Terminal Control Number')
 DECLARE @TerminalID AS TFTerminalControlNumbers
@@ -641,6 +662,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T84
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'ID' , @TerminalControlNumbers = @TerminalID
 
 DELETE @TerminalID
+
+GO
 
 -- IL Terminals
 PRINT ('Deploying IL Terminal Control Number')
@@ -706,6 +729,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'IL', @TerminalContr
 
 DELETE @TerminalIL
 
+GO
+
 -- IN Terminals
 PRINT ('Deploying IN Terminal Control Number')
 DECLARE @TerminalIN AS TFTerminalControlNumbers
@@ -764,6 +789,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'IN' , @TerminalCont
 
 DELETE @TerminalIN
 
+GO
+
 -- KS Terminals
 PRINT ('Deploying KS Terminal Control Number')
 DECLARE @TerminalKS AS TFTerminalControlNumbers
@@ -802,6 +829,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T48
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'KS' , @TerminalControlNumbers = @TerminalKS
 
 DELETE @TerminalKS
+
+GO
 
 -- KY Terminals
 PRINT ('Deploying KY Terminal Control Number')
@@ -844,6 +873,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T61
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'KY' , @TerminalControlNumbers = @TerminalKY
 
 DELETE @TerminalKY
+
+GO
 
 -- LA Terminals
 PRINT ('Deploying LA Terminal Control Number')
@@ -905,6 +936,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'LA', @TerminalContr
 
 DELETE @TerminalLA
 
+GO
+
 -- MA Terminals
 PRINT ('Deploying MA Terminal Control Number')
 DECLARE @TerminalMA AS TFTerminalControlNumbers
@@ -947,6 +980,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MA' , @TerminalCont
 
 DELETE @TerminalMA
 
+GO
+
 -- MD Terminals
 PRINT ('Deploying MD Terminal Control Number')
 DECLARE @TerminalMD AS TFTerminalControlNumbers
@@ -980,6 +1015,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MD' , @TerminalCont
 
 DELETE @TerminalMD
 
+GO
+
 -- ME Terminals
 PRINT ('Deploying ME Terminal Control Number')
 DECLARE @TerminalME AS TFTerminalControlNumbers
@@ -1008,6 +1045,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T01
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'ME' , @TerminalControlNumbers = @TerminalME
 
 DELETE @TerminalME
+
+GO
 
 -- MI Terminals
 PRINT ('Deploying MI Terminal Control Number')
@@ -1066,6 +1105,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MI', @TerminalContr
 
 DELETE @TerminalMI
 
+GO
+
 -- MN Terminals
 PRINT ('Deploying MN Terminal Control Number')
 DECLARE @TerminalMN AS TFTerminalControlNumbers
@@ -1102,6 +1143,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T41
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MN' , @TerminalControlNumbers = @TerminalMN
 
 DELETE @TerminalMN
+
+GO
 
 -- MO Terminals
 PRINT ('Deploying MO Terminal Control Number')
@@ -1141,6 +1184,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T43
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MO' , @TerminalControlNumbers = @TerminalMO
 
 DELETE @TerminalMO
+
+GO
 
 -- MS Terminals
 PRINT ('Deploying MS Terminal Control Number')
@@ -1183,6 +1228,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MS', @TerminalContr
 
 DELETE @TerminalMS
 
+GO
+
 -- MT Terminals
 PRINT ('Deploying MT Terminal Control Number')
 DECLARE @TerminalMT AS TFTerminalControlNumbers
@@ -1217,6 +1264,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T30
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'MT' , @TerminalControlNumbers = @TerminalMT
 
 DELETE @TerminalMT
+
+GO
 
 -- NC Terminals
 PRINT ('Deploying NC Terminal Control Number')
@@ -1278,6 +1327,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NC', @TerminalContr
 
 DELETE @TerminalNC
 
+GO
+
 -- ND Terminals
 PRINT ('Deploying ND Terminal Control Number')
 DECLARE @TerminalND AS TFTerminalControlNumbers
@@ -1305,6 +1356,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T45
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'ND', @TerminalControlNumbers = @TerminalND
 
 DELETE @TerminalND
+
+GO
 
 -- NE Terminals
 PRINT ('Deploying NE Terminal Control Number')
@@ -1340,6 +1393,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NE', @TerminalContr
 
 DELETE @TerminalNE
 
+GO
+
 -- NH Terminals
 PRINT ('Deploying NH Terminal Control Number')
 DECLARE @TerminalNH AS TFTerminalControlNumbers
@@ -1360,6 +1415,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T02
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NH', @TerminalControlNumbers = @TerminalNH
 
 DELETE @TerminalNH
+
+GO
 
 -- NJ Terminals
 PRINT ('Deploying NJ Terminal Control Number')
@@ -1410,6 +1467,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NJ', @TerminalContr
 
 DELETE @TerminalNJ
 
+GO
+
 -- NM Terminals
 PRINT ('Deploying NM Terminal Control Number')
 DECLARE @TerminalNM AS TFTerminalControlNumbers
@@ -1443,6 +1502,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NM', @TerminalContr
 
 DELETE @TerminalNM
 
+GO
+
 -- NV Terminals
 PRINT ('Deploying NV Terminal Control Number')
 DECLARE @TerminalNV AS TFTerminalControlNumbers
@@ -1470,6 +1531,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T88
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NV', @TerminalControlNumbers = @TerminalNV
 
 DELETE @TerminalNV
+
+GO
 
 -- NY Terminals
 PRINT ('Deploying NY Terminal Control Number')
@@ -1549,6 +1612,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'NY', @TerminalContr
 
 DELETE @TerminalNY
 
+GO
+
 -- OH Terminals
 PRINT ('Deploying OH Terminal Control Number')
 DECLARE @TerminalOH AS TFTerminalControlNumbers
@@ -1621,6 +1686,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'OH', @TerminalContr
 
 DELETE @TerminalOH
 
+GO
+
 -- OK Terminals
 PRINT ('Deploying OK Terminal Control Number')
 DECLARE @TerminalOK AS TFTerminalControlNumbers
@@ -1652,6 +1719,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T73
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'OK', @TerminalControlNumbers = @TerminalOK
 
 DELETE @TerminalOK
+
+GO
 
 -- OR Terminals
 PRINT ('Deploying OR Terminal Control Number')
@@ -1685,6 +1754,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T91
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'OR', @TerminalControlNumbers = @TerminalOR
 
 DELETE @TerminalOR
+
+GO
 
 -- PA Terminals
 PRINT ('Deploying PA Terminal Control Number')
@@ -1767,6 +1838,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'PA', @TerminalContr
 
 DELETE @TerminalPA
 
+GO
+
 -- RI Terminals
 PRINT ('Deploying RI Terminal Control Number')
 DECLARE @TerminalRI AS TFTerminalControlNumbers
@@ -1791,6 +1864,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T06
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'RI', @TerminalControlNumbers = @TerminalRI
 
 DELETE @TerminalRI
+
+GO
 
 -- SC Terminals
 PRINT ('Deploying SC Terminal Control Number')
@@ -1827,6 +1902,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'SC', @TerminalContr
 
 DELETE @TerminalSC
 
+GO
+
 -- SD Terminals
 PRINT ('Deploying SD Terminal Control Number')
 DECLARE @TerminalSD AS TFTerminalControlNumbers
@@ -1853,6 +1930,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T46
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'SD', @TerminalControlNumbers = @TerminalSD
 
 DELETE @TerminalSD
+
+GO
 
 -- TN Terminals
 PRINT ('Deploying TN Terminal Control Number')
@@ -1903,6 +1982,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T62
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'TN', @TerminalControlNumbers = @TerminalTN
 
 DELETE @TerminalTN
+
+GO
 
 -- TX Terminals
 PRINT ('Deploying TX Terminal Control Number')
@@ -2064,6 +2145,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'TX', @TerminalContr
 
 DELETE @TerminalTX
 
+GO
+
 -- UT Terminals
 PRINT ('Deploying UT Terminal Control Number')
 DECLARE @TerminalUT AS TFTerminalControlNumbers
@@ -2092,6 +2175,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T84
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'UT', @TerminalControlNumbers = @TerminalUT
 
 DELETE @TerminalUT
+
+GO
 
 -- VA Terminals
 PRINT ('Deploying VA Terminal Control Number')
@@ -2153,6 +2238,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'VA', @TerminalContr
 
 DELETE @TerminalVA
 
+GO
+
 -- WA Terminals
 PRINT ('Deploying WA Terminal Control Number')
 DECLARE @TerminalWA AS TFTerminalControlNumbers
@@ -2200,6 +2287,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T91
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'WA', @TerminalControlNumbers = @TerminalWA
 
 DELETE @TerminalWA
+
+GO
 
 -- WI Terminals
 PRINT ('Deploying WI Terminal Control Number')
@@ -2252,6 +2341,8 @@ EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'WI', @TerminalContr
 
 DELETE @TerminalWI
 
+GO
+
 -- WV Terminals
 PRINT ('Deploying WV Terminal Control Number')
 DECLARE @TerminalWV AS TFTerminalControlNumbers
@@ -2276,6 +2367,8 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T55
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'WV', @TerminalControlNumbers = @TerminalWV
 
 DELETE @TerminalWV
+
+GO
 
 -- WY Terminals
 PRINT ('Deploying WY Terminal Control Number')
@@ -2309,6 +2402,5 @@ UNION ALL SELECT intTerminalControlNumberId = 0, strTerminalControlNumber = 'T84
 EXEC uspTFUpgradeTerminalControlNumbers @TaxAuthorityCode = 'WY', @TerminalControlNumbers = @TerminalWY
 
 DELETE @TerminalWY
-
 
 GO
