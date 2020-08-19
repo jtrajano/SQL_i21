@@ -81,7 +81,7 @@ BEGIN
 			, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intWeightUOMId, AD.dblPAllocatedQty) * -1
 			, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, AD.intPUnitMeasureId, @intUnitMeasureId, AD.dblPAllocatedQty) * -1
 			, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
-													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.[fnCTGetLastSettlementPrice](CD.intFutureMarketId,CD.intFutureMonthId)))))
+													* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId,MA.intUnitMeasureId,dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId,CD.intFutureMonthId)))))
 													/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,@intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
 					ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
 				* CASE WHEN CD.intCurrencyId = CY.intCurrencyID THEN 1
@@ -205,7 +205,7 @@ BEGIN
 				, dblAllocatedQty = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intWeightUOMId, AD.dblPAllocatedQty)
 				, dblAllocatedQtyPrice = dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId,AD.intPUnitMeasureId,@intUnitMeasureId, AD.dblPAllocatedQty)
 				, dblPrice = CASE WHEN CD.dblCashPrice IS NULL THEN (((ISNULL(PF.dblLotsFixed, 0) * ISNULL(FD.dblFutures, 0)) + ((ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) - ISNULL(PF.dblLotsFixed, 0))
-																	* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.[fnCTGetLastSettlementPrice](CD.intFutureMarketId, CD.intFutureMonthId)))))
+																	* dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, MA.intUnitMeasureId, dbo.fnRKGetLastSettlementPrice(CD.intFutureMarketId, CD.intFutureMonthId)))))
 																	/ ISNULL(PF.dblTotalLots, ISNULL(CD.dblNoOfLots, ISNULL(CH.dblNoOfLots, 0))) + dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblConvertedBasis)
 									ELSE dbo.fnCTConvertQuantityToTargetItemUOM(CD.intItemId, @intUnitMeasureId, PU.intUnitMeasureId, CD.dblCashPrice) END
 							* CASE WHEN CD.intCurrencyId = CY.intCurrencyID THEN 1
