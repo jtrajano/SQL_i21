@@ -96,9 +96,9 @@ BEGIN TRY
 						
 			FROM	tblCTPriceFixationDetail	FD
 			JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
-			JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId
-			CROSS	
-			APPLY	fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) TS
+			JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId 
+   			join 	tblCTContractDetail 		TS 	on 	TS.intContractDetailId 	= 	PF.intContractDetailId
+			--CROSS	APPLY	fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) TS
 			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
 			SELECT @ysnFreezed = ysnFreezed FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = ISNULL(@intFutOptTransactionId,0)
