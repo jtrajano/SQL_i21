@@ -280,13 +280,9 @@ BEGIN
 					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1 
 					THEN dbo.fnGetItemGLAccount(ReceiptItem.intItemId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
 					ELSE
-						CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-						THEN ex.intPurchaseTaxExemptionAccountId
-						ELSE
-							CASE WHEN TaxCode.ysnAddToCost = 1 
-							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
-							ELSE TaxCode.intPurchaseTaxAccountId END
-						END
+						CASE WHEN TaxCode.ysnAddToCost = 1 
+						THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
+						ELSE TaxCode.intPurchaseTaxAccountId END
 					END
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
@@ -347,13 +343,9 @@ BEGIN
 					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1 
 					THEN dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
 					ELSE
-						CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-						THEN ex.intPurchaseTaxExemptionAccountId
-						ELSE
-							CASE WHEN TaxCode.ysnAddToCost = 1 
-							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
-							ELSE TaxCode.intPurchaseTaxAccountId END
-						END
+						CASE WHEN TaxCode.ysnAddToCost = 1 
+						THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
+						ELSE TaxCode.intPurchaseTaxAccountId END
 					END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
@@ -511,12 +503,16 @@ BEGIN
 	SELECT	
 			dtmDate						= ForGLEntries_CTE.dtmDate
 			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
+			,intAccountId				= 
+				CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
+					THEN ex.intPurchaseTaxExemptionAccountId
+					ELSE GLAccount.intAccountId
+				END
 			,dblDebit					= Credit.Value
 			,dblCredit					= Debit.Value
 			,dblDebitUnit				= 0
 			,dblCreditUnit				= 0
-			,strDescription				= GLAccount.strDescription + ', ' + ISNULL(strItemNo, '') 
+			,strDescription				= GLAccount.strDescription + ', ' + ISNULL(ForGLEntries_CTE.strItemNo, '') 
 			,strCode					= @strCode
 			,strReference				= '' 
 			,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -546,17 +542,22 @@ BEGIN
 	FROM	ForGLEntries_CTE INNER JOIN @GLAccounts InventoryAccounts
 				ON ForGLEntries_CTE.intItemId = InventoryAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId
-			LEFT JOIN dbo.tblGLAccount GLAccount 
-				ON GLAccount.intAccountId = InventoryAccounts.intContraInventoryId
+			INNER JOIN dbo.vyuICGetInventoryReceiptItemTax ReceiptTaxes
+					ON ForGLEntries_CTE.intReceiptItemTaxId = ReceiptTaxes.intInventoryReceiptItemTaxId
 			OUTER APPLY (
 				SELECT TOP 1 e.*
 				FROM @TaxExemptions e
 				INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = e.intReceiptId
 				INNER JOIN tblICInventoryReceiptItem ReceiptItem
+				INNER JOIN dbo.vyuICGetInventoryReceiptItemTax ReceiptTaxes
+					ON ForGLEntries_CTE.intReceiptItemTaxId = ReceiptTaxes.intInventoryReceiptItemTaxId
 				ON ReceiptItem.intInventoryReceiptItemId = e.intReceiptItemId
 					AND ReceiptItem.intItemId = e.intItemId
 				WHERE e.intReceiptId = @intInventoryReceiptId
+					AND e.intTaxCodeId = ReceiptTaxes.intTaxCodeId
 			) ex
+			LEFT JOIN dbo.tblSMTaxCode TaxCode ON TaxCode.intTaxCodeId = ReceiptTaxes.intTaxCodeId
+			LEFT JOIN dbo.tblGLAccount GLAccount ON GLAccount.intAccountId = InventoryAccounts.intContraInventoryId
 			CROSS APPLY dbo.fnGetDebitFunctional(
 				ForGLEntries_CTE.dblTax
 				,ForGLEntries_CTE.intCurrencyId
