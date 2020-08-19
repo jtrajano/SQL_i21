@@ -28,7 +28,7 @@ BEGIN TRY
     FROM @TerminalControlNumbers B 
     WHERE tblTFTerminalControlNumber.intTaxAuthorityId = @TaxAuthorityId
     AND tblTFTerminalControlNumber.strTerminalControlNumber COLLATE Latin1_General_CI_AS = B.strTerminalControlNumber COLLATE Latin1_General_CI_AS
-    AND tblTFTerminalControlNumber.intMasterId IS NULL
+    AND (tblTFTerminalControlNumber.intMasterId IS NULL OR tblTFTerminalControlNumber.intMasterId = 0)
 
 	MERGE	
 	INTO	tblTFTerminalControlNumber 
@@ -72,7 +72,7 @@ BEGIN TRY
 
 	-- Set insMasterId to 0 for records that are not exist in default data
 	UPDATE tblTFTerminalControlNumber
-	SET intMasterId = 0
+	SET intMasterId = NULL
 	WHERE intTaxAuthorityId = @TaxAuthorityId 
 	AND intMasterId NOT IN (SELECT intMasterId FROM @TerminalControlNumbers)
 		
