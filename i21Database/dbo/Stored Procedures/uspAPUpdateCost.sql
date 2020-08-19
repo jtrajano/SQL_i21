@@ -144,6 +144,17 @@ BEGIN
 	WHERE Voucher.intBillId = @voucherId
 
 END
+ELSE 
+BEGIN
+	--CALCULATE BASE ON NEW COST EVEN IF NO TAX
+	EXEC uspAPUpdateVoucherTotal @billIds
+
+	--UPDATE DISCOUNT
+	UPDATE Voucher
+		SET Voucher.dblDiscount = dbo.fnGetDiscountBasedOnTerm(GETDATE(), Voucher.dtmBillDate, Voucher.intTermsId, Voucher.dblTotal)
+	FROM tblAPBill Voucher
+	WHERE Voucher.intBillId = @voucherId
+END
 
 IF @transCount = 0 COMMIT TRANSACTION
 
