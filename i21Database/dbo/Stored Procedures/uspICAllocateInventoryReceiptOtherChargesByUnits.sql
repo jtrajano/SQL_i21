@@ -47,15 +47,20 @@ BEGIN
 	USING (
 		SELECT	CalculatedCharges.*
 				,ReceiptItem.intInventoryReceiptItemId
-				,Qty = CASE WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN ISNULL(ReceiptItem.dblNet, 0) ELSE ISNULL(ReceiptItem.dblOpenReceive, 0) END
+				,Qty = 
+					COALESCE(
+						CalculatedChargeQty.dblUnit
+						,NULLIF(ReceiptItem.dblNet, 0)
+						,ReceiptItem.dblOpenReceive
+						,0
+					)
 				,dblTotalUnits = 
 					CASE 
-						WHEN CalculatedCharges.strChargesLink IS NULL THEN 
-							TotalUnitsOfAllItems.dblTotalUnits 
+						WHEN CalculatedCharges.strCostMethod = 'Amount' THEN
+							ISNULL(TotalAmountOnSameChargesLink.dblTotalUnits, TotalUnitsOfAllItems.dblTotalUnits) 
 						ELSE 
-							TotalUnitsOfItemsPerContract.dblTotalUnits 
-					END 
-				
+							TotalUnitsOnSameChargesLink.dblTotalUnits 
+					END 				
 		FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 					ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 					AND Receipt.intInventoryReceiptId = @intInventoryReceiptId
@@ -64,15 +69,10 @@ BEGIN
 								 ELSE 0
 							END 					
 					AND ISNULL(ReceiptItem.intOwnershipType, @OWNERSHIP_TYPE_Own) = @OWNERSHIP_TYPE_Own			
-				INNER JOIN dbo.tblICItemUOM ItemUOM	
-					ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 				INNER JOIN (
 					SELECT	dblTotalOtherCharge = 
 								-- Convert the other charge amount to functional currency. 
-								SUM(
-									dblCalculatedAmount
-									--* CASE WHEN ISNULL(Charge.dblForexRate, 0) = 0 AND ISNULL(Charge.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE Charge.dblForexRate END 
-								)								
+								SUM(CalculatedCharge.dblCalculatedAmount)								
 							,CalculatedCharge.ysnAccrue
 							,CalculatedCharge.intEntityVendorId
 							,CalculatedCharge.ysnInventoryCost
@@ -99,42 +99,56 @@ BEGIN
 						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
 						OR CalculatedCharges.strChargesLink IS NULL 
 					)
-				LEFT JOIN (
-							SELECT	dblTotalUnits = SUM(
-										CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-													ISNULL(ReceiptItem.dblNet, 0) 
-												ELSE 
-													ISNULL(ReceiptItem.dblOpenReceive, 0) 
-										END
+				OUTER APPLY (
+					SELECT 
+						dblUnit = CalculatedCharge.dblCalculatedQty
+					FROM
+						tblICInventoryReceiptChargePerItem CalculatedCharge
+					WHERE
+						CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
+						AND CalculatedCharge.intInventoryReceiptItemId = ReceiptItem.intInventoryReceiptItemId
+						AND CalculatedCharge.intInventoryReceiptChargeId = CalculatedCharges.intInventoryReceiptChargeId
+				) CalculatedChargeQty
+				OUTER APPLY (
+					SELECT 
+						dblTotalUnits = SUM(CalculatedCharge.dblCalculatedQty) 
+					FROM
+						tblICInventoryReceiptChargePerItem CalculatedCharge
+					WHERE
+						CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
+						AND CalculatedCharge.intInventoryReceiptChargeId = CalculatedCharges.intInventoryReceiptChargeId
+				) TotalUnitsOnSameChargesLink
+				OUTER APPLY (
+					SELECT	dblTotalUnits = 
+								SUM(
+									COALESCE(
+										NULLIF(ri.dblNet, 0)
+										,ri.dblOpenReceive
+										,0
 									)
-							,ReceiptItem.intInventoryReceiptId 
-							,ReceiptItem.strChargesLink
-					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
-								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-							INNER JOIN dbo.tblICItemUOM ItemUOM
-								ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
-					WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
-					GROUP BY 
-						ReceiptItem.intInventoryReceiptId
-						, ReceiptItem.strChargesLink
-				) TotalUnitsOfItemsPerContract 
-					ON TotalUnitsOfItemsPerContract.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId 
-					AND (
-						ISNULL(TotalUnitsOfItemsPerContract.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')						
-					)
+								)
+							,ReceiptItem.intInventoryReceiptId 						
+					FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
+								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					WHERE	
+						r.intInventoryReceiptId = @intInventoryReceiptId
+						AND 1 = CASE WHEN r.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ri.intOrderId IS NULL THEN 1
+									WHEN r.strReceiptType <> @RECEIPT_TYPE_PurchaseContract THEN 1
+									ELSE 0
+							END 
+						AND ISNULL(ri.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+				) TotalAmountOnSameChargesLink 	
 				LEFT JOIN (
 							SELECT	dblTotalUnits = SUM(
-										CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-													ISNULL(ReceiptItem.dblNet, 0) 
-												ELSE 
-													ISNULL(ReceiptItem.dblOpenReceive, 0) 
-										END
+										COALESCE(
+											NULLIF(ReceiptItem.dblNet, 0)
+											,ReceiptItem.dblOpenReceive
+											,0
+										)
 									)
 							,ReceiptItem.intInventoryReceiptId 						
 					FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 								ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-							INNER JOIN dbo.tblICItemUOM ItemUOM
-								ON ItemUOM.intItemUOMId = ISNULL(ReceiptItem.intWeightUOMId, ReceiptItem.intUnitMeasureId) 
 					WHERE	
 						Receipt.intInventoryReceiptId = @intInventoryReceiptId
 						AND 1 = CASE WHEN Receipt.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ReceiptItem.intOrderId IS NULL THEN 1
@@ -161,15 +175,16 @@ BEGIN
 	-- Add the other charge to an existing allocation. 
 	WHEN MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
 		UPDATE 
-		SET		dblAmount = ROUND (
-								ISNULL(dblAmount, 0) 
-								+ (
-									Source_Query.dblTotalOtherCharge
-									* Source_Query.Qty
-									/ Source_Query.dblTotalUnits 
-								)
-								, 2
-							)
+		SET		dblAmount = 
+					ROUND (
+						ISNULL(dblAmount, 0) 
+						+ (
+							Source_Query.dblTotalOtherCharge
+							* Source_Query.Qty
+							/ Source_Query.dblTotalUnits 
+						)
+						, 2
+					)
 
 	-- Create a new allocation record for the item. 
 	WHEN NOT MATCHED AND ISNULL(Source_Query.dblTotalUnits, 0) <> 0 THEN 
