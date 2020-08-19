@@ -91,6 +91,11 @@ BEGIN TRY
 		RAISERROR('Invalid Driver', 16, 1)
 	END
 
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblAPVendor WHERE intEntityId = @intShipVia)
+	BEGIN
+		RAISERROR('Please set the Ship Via as a Vendor.', 16, 1)
+	END
+
 	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 
