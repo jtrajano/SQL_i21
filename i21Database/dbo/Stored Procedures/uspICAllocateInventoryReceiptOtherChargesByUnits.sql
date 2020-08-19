@@ -56,8 +56,8 @@ BEGIN
 					)
 				,dblTotalUnits = 
 					CASE 
-						WHEN CalculatedCharges.strChargesLink IS NULL AND CalculatedCharges.strCostMethod = 'Amount' THEN
-							TotalUnitsOfAllItems.dblTotalUnits 
+						WHEN CalculatedCharges.strCostMethod = 'Amount' THEN
+							ISNULL(TotalAmountOnSameChargesLink.dblTotalUnits, TotalUnitsOfAllItems.dblTotalUnits) 
 						ELSE 
 							TotalUnitsOnSameChargesLink.dblTotalUnits 
 					END 				
@@ -120,6 +120,26 @@ BEGIN
 						CalculatedCharge.intInventoryReceiptId = @intInventoryReceiptId
 						AND CalculatedCharge.intInventoryReceiptChargeId = CalculatedCharges.intInventoryReceiptChargeId
 				) TotalUnitsOnSameChargesLink
+				OUTER APPLY (
+					SELECT	dblTotalUnits = 
+								SUM(
+									COALESCE(
+										NULLIF(ri.dblNet, 0)
+										,ri.dblOpenReceive
+										,0
+									)
+								)
+							,ReceiptItem.intInventoryReceiptId 						
+					FROM	dbo.tblICInventoryReceipt r INNER JOIN dbo.tblICInventoryReceiptItem ri
+								ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+					WHERE	
+						r.intInventoryReceiptId = @intInventoryReceiptId
+						AND 1 = CASE WHEN r.strReceiptType = @RECEIPT_TYPE_PurchaseContract AND ri.intOrderId IS NULL THEN 1
+									WHEN r.strReceiptType <> @RECEIPT_TYPE_PurchaseContract THEN 1
+									ELSE 0
+							END 
+						AND ISNULL(ri.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+				) TotalAmountOnSameChargesLink 	
 				LEFT JOIN (
 							SELECT	dblTotalUnits = SUM(
 										COALESCE(
