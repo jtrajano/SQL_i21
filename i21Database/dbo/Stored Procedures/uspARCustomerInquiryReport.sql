@@ -340,5 +340,5 @@ SET   @PageSize = @limit
 
 
 SELECT * FROM PageNumbers 
-WHERE   rowId  >= ((@Page - 1) * @PageSize + 1)
-        AND rowId  <= (@Page * @PageSize)
+WHERE   rowId  >= ((@page - 1) * @PageSize + 1)
+        AND rowId  <= (@page * @PageSize)
