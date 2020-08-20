@@ -4,7 +4,7 @@
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
 	,@dblQtyFromCt DECIMAL(24,10) = 0
-	
+	,@dtmClientPostDate DATETIME = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -190,6 +190,7 @@ BEGIN TRY
 
 	SET @dtmDate = GETDATE()
 	SET @intParentSettleStorageId = @intSettleStorageId
+	SET @dtmClientPostDate = ISNULL(@dtmClientPostDate, GETDATE());
 	
 	/*avoid the oversettling of storages*/
 	IF(@ysnFromPriceBasisContract = 0)
@@ -1904,6 +1905,7 @@ BEGIN TRY
 					,[dblNetWeight]
 					,[dblWeightUnitQty]
 					,[intWeightUOMId]
+					,[dtmDate]
 				 )
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2063,6 +2065,7 @@ BEGIN TRY
 														WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 														ELSE NULL
 													END	
+					,[dtmDate]						= @dtmClientPostDate
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -2199,6 +2202,7 @@ BEGIN TRY
 					,[dblWeightUnitQty]
 					,[intWeightUOMId]
 					,[intPurchaseTaxGroupId]
+					,[dtmDate]
 				)
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2248,6 +2252,7 @@ BEGIN TRY
 					,[dblWeightUnitQty] 			= 1
 					,[intWeightUOMId]				= NULL
 					,[intPurchaseTaxGroupId]		= NULL--CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intTaxGroupId END
+					,[dtmDate]						= @dtmClientPostDate
 				FROM tblICInventoryReceiptCharge ReceiptCharge
 				JOIN tblICItem Item 
 					ON Item.intItemId = ReceiptCharge.intChargeId
@@ -2318,6 +2323,7 @@ BEGIN TRY
 					,[intCostUOMId]
 					,[dblNetWeight]
 					,[dblWeightUnitQty]
+					,[dtmDate]
 				)
 				SELECT 
 					[intEntityVendorId]		= @EntityId
@@ -2388,6 +2394,7 @@ BEGIN TRY
 											END
 					,[dblNetWeight]		  	= 0
 				 	,[dblWeightUnitQty]	  	= 1
+					,[dtmDate]				= @dtmClientPostDate
 				 FROM tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD 
 					ON CD.intContractDetailId =  CC.intContractDetailId
