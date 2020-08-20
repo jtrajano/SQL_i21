@@ -393,7 +393,7 @@ BEGIN
 								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
 							FROM tblSMDocumentMaintenanceMessage
 							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-				WHERE [strSource] = @strTransactionType
+				WHERE [strSource] = @strTransactionType AND A.strType=@strType
 				AND intCompanyLocationId IS NULL
 				AND intEntityCustomerId IS NULL		
 			ORDER BY A.[intDocumentMaintenanceId] DESC
