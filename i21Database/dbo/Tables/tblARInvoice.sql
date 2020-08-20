@@ -260,6 +260,13 @@ GO
 CREATE INDEX [IX_tblARInvoice_strType] ON [dbo].[tblARInvoice] ([strType] ASC)
 
 GO
+
+CREATE INDEX [IX_tblARInvoice_strTransactionType] ON [dbo].[tblARInvoice] ([strTransactionType] ASC)
+GO
+
+CREATE INDEX [IX_tblARInvoice_intOriginalInvoiceId] ON [dbo].[tblARInvoice] ([intOriginalInvoiceId] ASC)
+GO
+
 CREATE TRIGGER trg_tblARInvoiceDelete
 ON dbo.tblARInvoice
 INSTEAD OF DELETE 
