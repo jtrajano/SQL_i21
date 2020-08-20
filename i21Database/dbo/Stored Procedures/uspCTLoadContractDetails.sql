@@ -20,6 +20,12 @@ BEGIN TRY
 			intContractDetailId		INT,        
 			dblQuantity				NUMERIC(18,6)
 	)
+	
+	DECLARE @tblInvoice TABLE 
+	(  
+			intContractDetailId		INT,        
+			dblQuantity				NUMERIC(18,6)
+	)	
 
 	DECLARE @OpenLoad TABLE 
 	(  
@@ -84,6 +90,25 @@ BEGIN TRY
 	AND		LO.intShipmentStatus IN (1, 7)
 	AND		LO.intShipmentType <> 2
 	AND		CD.intContractHeaderId	=	@intContractHeaderId
+
+	INSERT INTO @tblInvoice (intContractDetailId, dblQuantity)
+	SELECT CD.intContractDetailId, dblQuantity = ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(InvoiceDetail.intItemUOMId,CD.intItemUOMId,InvoiceDetail.dblQtyShipped)),0) - ISNULL(SUM([dbo].fnCTConvertQtyToTargetItemUOM(InvoiceDetail.intItemUOMId,CD.intItemUOMId,CM.dblQtyShipped)),0)
+	FROM tblARInvoiceDetail InvoiceDetail
+	JOIN tblARInvoice Invoice ON Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+	AND Invoice.intInvoiceId = InvoiceDetail.intInvoiceId
+	JOIN tblCTContractDetail CD ON CD.intContractHeaderId = InvoiceDetail.intContractHeaderId AND CD.intContractDetailId = InvoiceDetail.intContractDetailId
+	LEFT JOIN 
+	(
+		SELECT dblQtyShipped = SUM(ID.dblQtyShipped), ID.intOriginalInvoiceDetailId
+		FROM tblARInvoice IV INNER JOIN tblARInvoiceDetail ID ON IV.intInvoiceId = ID.intInvoiceId
+		WHERE IV.strTransactionType = 'Credit Memo'
+		AND  IV.ysnPosted = 1
+		GROUP BY ID.intOriginalInvoiceDetailId
+	) CM ON CM.intOriginalInvoiceDetailId = InvoiceDetail.intInvoiceDetailId
+	WHERE InvoiceDetail.strPricing = 'Contracts'
+	AND Invoice.ysnPosted = 1
+	AND CD.intContractHeaderId = @intContractHeaderId
+	GROUP BY CD.intContractDetailId
 
 	;With ContractDetail AS (
 	   SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId --1247
@@ -361,8 +386,9 @@ BEGIN TRY
 		END AS dblAppliedQty
 		,dblAppliedLoadQty = 
 		CASE 
-			WHEN Shipment.dblQuantity > 0  THEN Shipment.dblDestinationQuantity
+			WHEN Shipment.dblQuantity > 0  THEN Shipment.dblDestinationQuantity + ISNULL(Invoice.dblQuantity,0)
 			WHEN Bill.dblQuantity > 0  THEN Bill.dblQuantity
+			WHEN Invoice.dblQuantity > 0  THEN Invoice.dblQuantity
 			ELSE -- dblAppliedQty
 				CASE 
 					WHEN CH.ysnLoad = 1
@@ -495,6 +521,7 @@ BEGIN TRY
 														AND	CM.intUnitMeasureId					=		CO.intUnitMeasureId
 	LEFT   JOIN     @tblShipment				Shipment ON Shipment.intContractDetailId        =       CD.intContractDetailId
 	LEFT   JOIN     @tblBill						Bill ON Bill.intContractDetailId			=       CD.intContractDetailId
+	LEFT   JOIN     @tblInvoice						Invoice ON Invoice.intContractDetailId		=       CD.intContractDetailId
 	LEFT   JOIN     @OpenLoad						OL	ON OL.intContractDetailId				=       CD.intContractDetailId
 	OUTER	APPLY	dbo.fnCTGetShipmentStatus(CD.intContractDetailId) LD
 	--OUTER	APPLY	dbo.fnCTGetFinancialStatus(CD.intContractDetailId) FS
