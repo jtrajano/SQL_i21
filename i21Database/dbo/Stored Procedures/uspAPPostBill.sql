@@ -321,6 +321,12 @@ ORDER BY intBillId
 
 BEGIN TRANSACTION
 
+--START LOCKING THE VOUCHER RECORD BEING POSTED
+UPDATE A
+SET A.intConcurrencyId = ISNULL(A.intConcurrencyId,0) + 1
+FROM tblAPBill A
+INNER JOIN #tmpPostBillData B ON A.intBillId = B.intBillId
+
 IF(@batchId IS NULL)
 BEGIN
 	-- --DO NOT GENERATE IF UNPOST
@@ -1220,8 +1226,8 @@ BEGIN
 		END 
 		UPDATE tblAPBill
 			SET ysnPosted = 0,
-				ysnPaid = 0,
-				intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+				ysnPaid = 0
+				-- intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		--UPDATE amount due of vendor prepayment, debit memo once payment has been applied to bill
@@ -1337,7 +1343,7 @@ BEGIN
 	ELSE
 	BEGIN
 		UPDATE tblAPBill
-			SET ysnPosted = 1, intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			SET ysnPosted = 1--, intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
 		WHERE tblAPBill.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 
 		IF EXISTS(SELECT TOP 1 intBillBatchId FROM dbo.tblAPBill WHERE intBillId IN (SELECT intBillId FROM #tmpPostBillData))
