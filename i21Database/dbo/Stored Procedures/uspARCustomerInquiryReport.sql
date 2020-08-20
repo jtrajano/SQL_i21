@@ -2,6 +2,9 @@ CREATE PROCEDURE [dbo].[uspARCustomerInquiryReport]
 	  @intEntityCustomerId	INT	= NULL
 	, @intEntityUserId		INT = NULL
 	, @dtmDate				DATE = NULL
+	, @page					INT = NULL	
+	, @limit				INT = NULL
+	, @start				INT = NULL	
 AS
 
 IF(OBJECT_ID('tempdb..#CUSTOMERINQUIRY') IS NOT NULL)
@@ -324,4 +327,18 @@ SET dblHighestDueAR = ISNULL(dblHighestDueAR, 0)
   , dblLastPayment = ISNULL(dblLastPayment, 0)
   , dblHighestAR = ISNULL(dblHighestAR, 0)
 
-SELECT * FROM #CUSTOMERINQUIRY
+
+DECLARE @PageSize INT
+
+SET   @PageSize = @limit
+
+;WITH PageNumbers AS(
+        SELECT *,
+                ROW_NUMBER() OVER(ORDER BY intEntityCustomerId) rowId
+        FROM    #CUSTOMERINQUIRY
+)
+
+
+SELECT * FROM PageNumbers 
+WHERE   rowId  >= ((@Page - 1) * @PageSize + 1)
+        AND rowId  <= (@Page * @PageSize)
