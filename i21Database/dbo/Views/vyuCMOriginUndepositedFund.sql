@@ -44,6 +44,7 @@ C AS (
 										CAST(1 AS NUMERIC(18,6))
 								  END
 		,intCurrencyExchangeRateTypeId
+		,CMUF.strSourceTransactionId
 	FROM
 		tblCMUndepositedFund CMUF
 	INNER JOIN
@@ -72,7 +73,8 @@ SELECT
 	dtmDate,			
 	intCurrencyId,
 	dblWeightRate,
-	intCurrencyExchangeRateTypeId
+	intCurrencyExchangeRateTypeId,
+	strSourceTransactionId
 	FROM C c
 OUTER APPLY(
 	SELECT GL.strDescription FROM tblGLAccount GL WHERE GL.intAccountId = c.intGLAccountId
