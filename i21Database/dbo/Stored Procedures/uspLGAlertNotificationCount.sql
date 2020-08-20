@@ -7,7 +7,7 @@ BEGIN TRY
 	DECLARE @NotificationTypeEvent TABLE
 	(
 		intEventId	INT,
-		strNotificationType NVARCHAR(50)	
+		strNotificationType NVARCHAR(100)	
 	)
 
 	DECLARE @ErrMsg	NVARCHAR(MAX)
