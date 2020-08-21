@@ -13,6 +13,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @amountDue DECIMAL(18,2);
+SELECT * FROM @paymentIds;
 
 IF @post = 0
 BEGIN
@@ -99,7 +100,7 @@ BEGIN
 		SET A.ysnPaid = 1
 	FROM tblAPVoucherPaymentSchedule A
 	INNER JOIN tblAPPaymentDetail C ON A.intId = C.intPayScheduleId
-	WHERE C.intPaymentId IN (SELECT intId FROM @paymentIds)
+	WHERE C.intPaymentId IN (SELECT intId FROM @paymentIds) AND C.dblPayment <> 0
 
 	UPDATE tblAPBill
 		SET 
