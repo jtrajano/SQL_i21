@@ -1592,6 +1592,11 @@ ELSE
 
 		SET @success = 1
 		SET @successfulCount = @totalRecords
+		
+		--CLEAN UP TRACKER FOR POSTING
+		DELETE A
+		FROM tblAPBillForPosting A
+		
 		RETURN;
 
 	END
@@ -1638,6 +1643,10 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
+
+	--CLEAN UP TRACKER FOR POSTING
+	DELETE A
+	FROM tblAPBillForPosting A
 
 	ROLLBACK TRANSACTION	
 	SET @success = 0
