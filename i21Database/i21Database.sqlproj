@@ -8141,6 +8141,7 @@
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTDeleteBillDetailCharges.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
