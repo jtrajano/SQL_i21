@@ -92,6 +92,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
 		join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
 		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		join tblCTContractType ct on ct.intContractTypeId = ch.intContractTypeId
 		left join (
 			select 
 				ar.intPriceFixationDetailId, dblQtyShipped = sum(di.dblQtyShipped)
@@ -102,6 +103,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 				ar.intPriceFixationDetailId
 		) invoiced on invoiced.intPriceFixationDetailId = pfd.intPriceFixationDetailId
 		where pf.intContractDetailId = @intActiveContractDetailId
+		and ct.strContractType = 'Sale'
 		order by pfd.intPriceFixationDetailId
 
 		select @intActiveId = min(intId) from @Pricing
