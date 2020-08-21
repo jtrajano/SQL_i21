@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
 	ysnMarkDelete					BIT,
+	strBillDetailChargesId			NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
