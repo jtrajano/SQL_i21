@@ -125,6 +125,7 @@ BEGIN TRY
 		declare @ysnDestinationWeightsGrades bit = convert(bit,0);
 		declare @intWeightGradeId int = 0;
   		declare @intSequenceFreightTermId int;
+  		declare @strBillDetailChargesId nvarchar(500);
 
 
 		declare @InvShp table (
@@ -508,6 +509,16 @@ BEGIN TRY
 									@intInventoryReceiptItemId
 									,@intBillId
 									,@intBillDetailId
+
+
+									SELECT @strBillDetailChargesId = STUFF((
+												SELECT DISTINCT ',' + LTRIM(intBillDetailId)
+												FROM tblAPBillDetail
+												where intBillId = @intNewBillId
+												and intBillDetailId > @intBillDetailId
+												and isnull(intInventoryReceiptChargeId,0) > 0
+												FOR XML PATH('')
+												), 1, 1, '')
 							END 
 
 							---- CT-3167: HOLD SINCE THE CURRENT IS STILL WORKING
@@ -590,8 +601,20 @@ BEGIN TRY
 
 							EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 
-							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intBillId,intBillDetailId,intConcurrencyId)
-							SELECT @intPriceFixationDetailId,@intBillId,@intBillDetailId,1
+							INSERT INTO tblCTPriceFixationDetailAPAR
+								(
+									intPriceFixationDetailId
+									,intBillId
+									,intBillDetailId
+									,strBillDetailChargesId
+									,intConcurrencyId
+								)
+							SELECT
+									@intPriceFixationDetailId
+									,@intBillId
+									,@intBillDetailId
+									,@strBillDetailChargesId
+									,1
 							
 							--IF @ysnLoad = 1
 							--BEGIN
@@ -710,18 +733,29 @@ BEGIN TRY
 										@intInventoryReceiptItemId
 										,@intNewBillId
 										,@intBillDetailId
+
+									SELECT @strBillDetailChargesId = STUFF((
+												SELECT DISTINCT ',' + LTRIM(intBillDetailId)
+												FROM tblAPBillDetail
+												where intBillId = @intNewBillId
+												and intBillDetailId > @intBillDetailId
+												and isnull(intInventoryReceiptChargeId,0) > 0
+												FOR XML PATH('')
+												), 1, 1, '')
 								END
 
 								INSERT INTO tblCTPriceFixationDetailAPAR(
 									intPriceFixationDetailId
 									,intBillId
 									,intBillDetailId
+									,strBillDetailChargesId
 									,intConcurrencyId
 								)
 								SELECT 
 									@intPriceFixationDetailId
 									,@intNewBillId
 									,@intBillDetailId
+									,@strBillDetailChargesId
 									,1
 
 								--UPDATE	tblCTPriceFixationDetail SET intBillId = @intNewBillId,intBillDetailId = @intBillDetailId WHERE intPriceFixationDetailId = @intPriceFixationDetailId

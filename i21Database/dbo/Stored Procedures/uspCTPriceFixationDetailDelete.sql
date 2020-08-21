@@ -20,7 +20,8 @@ BEGIN TRY
 			@ItemId			INT,
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
-			@intContractDetailId INT;
+			@intContractDetailId INT,
+			@strBillDetailChargesId nvarchar(500);
 
 			declare @strFinalMessage nvarchar(max);
 			declare @AffectedInvoices table
@@ -149,7 +150,13 @@ BEGIN TRY
 			[dblAmountToBill] = [dblAmountToBill] * -1
 			FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @DetailId, @Quantity * -1, 0)
 
-			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails	
+			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+
+			select @strBillDetailChargesId = strBillDetailChargesId from tblCTPriceFixationDetailAPAR where intBillId = @Id AND intBillDetailId = @DetailId;
+			if (isnull(@strBillDetailChargesId,'') <> '')
+			begin
+				exec uspCTDeleteBillDetailCharges 	@strBillDetailChargesId = @strBillDetailChargesId, @userId = @intUserId;
+			end
 			-----------------------------------------
 			-- CT-4094	
 			DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id AND intBillDetailId = @DetailId
