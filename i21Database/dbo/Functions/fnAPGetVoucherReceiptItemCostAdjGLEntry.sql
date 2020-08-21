@@ -9,16 +9,18 @@ RETURNS TABLE AS RETURN
 		,B.strMiscDescription
 		,CAST((CASE	WHEN A.intTransactionType IN (1) 
 				THEN (B.dblTotal - 
-							usingOldCost.dblTotal * (CASE WHEN B.intInventoryReceiptChargeId > 0 
-																AND A.intEntityVendorId = charges.intEntityVendorId AND F.ysnPrice = 1
-														THEN -1 ELSE 1 END)) 
+							(usingOldCost.dblTotal * (CASE WHEN B.intInventoryReceiptChargeId > 0 
+																AND (A.intEntityVendorId = ISNULL(NULLIF(charges.intEntityVendorId,0),r.intEntityVendorId))
+																AND charges.ysnPrice = 1
+																THEN -1 ELSE 1 END))) 
 												* ISNULL(NULLIF(B.dblRate,0),1) 
 				ELSE 0 END) AS  DECIMAL(18, 2)) AS dblTotal
 		,CAST((CASE	WHEN A.intTransactionType IN (1) 
 				THEN (B.dblTotal - 
-							usingOldCost.dblTotal * (CASE WHEN B.intInventoryReceiptChargeId > 0 
-																AND A.intEntityVendorId = charges.intEntityVendorId AND F.ysnPrice = 1
-														THEN -1 ELSE 1 END)) 
+							(usingOldCost.dblTotal * (CASE WHEN B.intInventoryReceiptChargeId > 0 
+																AND (A.intEntityVendorId = ISNULL(NULLIF(charges.intEntityVendorId,0),r.intEntityVendorId))
+																AND charges.ysnPrice = 1
+														THEN -1 ELSE 1 END)))
 				ELSE 0 END) AS  DECIMAL(18, 2)) AS dblForeignTotal
 		,(CASE WHEN F.intItemId IS NULL THEN B.dblQtyReceived 
 				ELSE
@@ -43,7 +45,7 @@ RETURNS TABLE AS RETURN
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	LEFT JOIN tblICInventoryReceiptItem E
 		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
-	LEFT JOIN tblICInventoryReceiptCharge charges
+	LEFT JOIN (tblICInventoryReceiptCharge charges INNER JOIN tblICInventoryReceipt r ON charges.intInventoryReceiptId = r.intInventoryReceiptId)
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
 	LEFT JOIN tblPOPurchaseDetail poDetail
 		ON B.intPurchaseDetailId = poDetail.intPurchaseDetailId
