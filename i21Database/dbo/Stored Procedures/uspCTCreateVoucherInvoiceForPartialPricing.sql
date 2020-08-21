@@ -153,7 +153,8 @@ BEGIN TRY
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
 			@intContractHeaderId	=	intContractHeaderId,
-			@intCompanyLocationId	=	intCompanyLocationId
+			@intCompanyLocationId	=	intCompanyLocationId,
+			@intSequenceFreightTermId = intFreightTermId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
 	
