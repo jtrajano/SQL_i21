@@ -418,6 +418,10 @@ SELECT
         ELSE 1
         END
     )
+    +
+    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
+    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
+    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
     ,ISNULL(CASE WHEN 
                 receiptItem.dblNet <> 0 AND 
@@ -507,8 +511,7 @@ OUTER APPLY (
     SELECT
         SUM(dblTax) AS dblTax --dblAdjustedTax is the new cost
     FROM tblAPBillDetailTax taxes
-    WHERE 
-        taxes.intBillDetailId = billDetail.intBillDetailId
+    WHERE taxes.intBillDetailId = billDetail.intBillDetailId
     AND EXISTS (
         --MAKE SURE TAX CODE IS ALSO PART OF RECEIPT TAX DETAILS TO DETERMINE IT USES CLEARING
         SELECT 1
