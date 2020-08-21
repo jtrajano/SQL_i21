@@ -233,7 +233,20 @@ SELECT
     ,billDetail.intItemId      
     ,billDetail.intUnitOfMeasureId AS intItemUOMId  
     ,unitMeasure.strUnitMeasure AS strUOM  
-    ,ROUND(billDetail.dblTotal + billDetail.dblTax, 2) AS dblVoucherTotal      
+    ,ROUND(
+        (
+            CASE WHEN ABS(billDetail.dblTotal) <> receiptCharge.dblAmount
+                THEN (
+                   --IF THERE IS OLD COST, ASSUME THIS IS NOT PRORATED
+                   --PRO RATED SHOULD HAVE NO COST ADJUSTMENT
+                   CASE WHEN billDetail.dblOldCost IS NOT NULL
+                   THEN receiptCharge.dblAmount * (CASE WHEN billDetail.dblQtyReceived < 0 THEN -1 ELSE 1 END)
+                   ELSE billDetail.dblTotal
+                   END
+                )
+            ELSE billDetail.dblTotal END
+        )
+    + billDetail.dblTax, 2) AS dblVoucherTotal      
     ,ROUND(CASE       
         WHEN billDetail.intWeightUOMId IS NULL THEN       
             ISNULL(billDetail.dblQtyReceived, 0)       
