@@ -316,7 +316,9 @@ SELECT
         END
     )
     +
-    receiptItem.dblTax
+    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
+    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
+    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
     ,CASE 
         WHEN billDetail.intWeightUOMId IS NULL THEN 
@@ -401,6 +403,12 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
+OUTER APPLY (
+    SELECT
+        SUM(dblTax) AS dblTax --dblAdjustedTax is the new cost
+    FROM tblAPBillDetailTax taxes
+    WHERE taxes.intBillDetailId = billDetail.intBillDetailId
+) oldCostTax
 -- LEFT JOIN vyuAPReceiptClearingGL APClearing
 --     ON APClearing.strTransactionId = receipt.strReceiptNumber
 --         AND APClearing.intItemId = receiptItem.intItemId
@@ -441,7 +449,7 @@ LEFT JOIN
 -- 		AND APClearing.intItemId = receiptItem.intItemId
 WHERE 
     billDetail.intInventoryReceiptItemId IS NOT NULL
--- AND bill.ysnPosted = 1
+AND bill.ysnPosted = 1
 AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
