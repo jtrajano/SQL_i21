@@ -798,7 +798,7 @@ BEGIN
 					  ,strTransactionId =  ISNULL(CS.strBillId,TS.strTransferStorageTicket)
 					  ,intTransactionId	= ISNULL(CS.intBillId,Inv.intTransactionId)
 					  ,ST.strStorageTypeCode
-					  ,Inv.strTransactionType
+					  ,strTransactionType = CASE WHEN CS.intBillId IS NOT NULL THEN 'Bill' ELSE Inv.strTransactionType END
 				FROM @InventoryStock Inv
 				INNER JOIN tblGRTransferStorage TS ON Inv.intTransactionId = TS.intTransferStorageId
 				INNER JOIN tblGRTransferStorageSplit TSS ON Inv.intTransactionDetailId = TSS.intTransferStorageSplitId
