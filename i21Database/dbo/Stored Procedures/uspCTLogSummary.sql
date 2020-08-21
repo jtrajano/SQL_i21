@@ -191,6 +191,7 @@ BEGIN TRY
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				WHERE intSequenceUsageHistoryId IS NULL
 			) tbl
+			WHERE Row_Num = 1
 		END
 		ELSE
 		BEGIN -- Contract Balance
