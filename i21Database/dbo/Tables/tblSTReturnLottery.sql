@@ -5,6 +5,7 @@
     [intInventoryReceiptId] INT             NULL,
     [dtmReturnDate]         DATETIME        NOT NULL,
     [dblQuantity]           NUMERIC (18, 6) NULL,
+    [dblOriginalQuantity]           NUMERIC (18, 6) NULL,
     [ysnPosted]             BIT             CONSTRAINT [DF_tblSTReturnLottery_ysnPosted] DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]      INT             CONSTRAINT [DF_tblSTReturnLottery_intConcurrencyId] DEFAULT ((1)) NULL,
     CONSTRAINT [PK_tblSTReturnLottery] PRIMARY KEY CLUSTERED ([intReturnLotteryId] ASC),

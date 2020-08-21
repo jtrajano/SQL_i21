@@ -250,6 +250,14 @@ BEGIN TRY
 			RETURN
 		END
 
+		DECLARE @dblUnpostedQuantitySold NUMERIC(18,6)
+
+		SELECT @dblUnpostedQuantitySold = ISNULL(SUM(ISNULL(dblQuantitySold,0)),0)
+		FROM tblSTCheckoutLotteryCount
+		INNER JOIN tblSTCheckoutHeader 
+		ON tblSTCheckoutLotteryCount.intCheckoutId = tblSTCheckoutHeader.intCheckoutId
+		WHERE ISNULL(LOWER(tblSTCheckoutHeader.strCheckoutStatus),'') != 'posted' AND tblSTCheckoutLotteryCount.intLotteryBookId = @Id
+
 		--INSERT RETURN LOTTERY ENTRY--
 		-- INSERT INTO tblSTReturnLottery
 		-- (
