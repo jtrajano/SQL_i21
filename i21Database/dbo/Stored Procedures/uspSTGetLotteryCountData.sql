@@ -46,6 +46,14 @@ WHERE tblSTCheckoutLotteryCount.intCheckoutId = @checkoutId
 AND LOWER(tblSTLotteryBook.strStatus) = 'returned' AND tblSTReturnLottery.dtmReturnDate != @date
 
 
+--GET ALL BOOKS WITH SOLD OUT = YES--
+SELECT tblSTCheckoutLotteryCount.* INTO #tempSoldOutLotteryCount
+FROM tblSTCheckoutLotteryCount 
+INNER JOIN tblSTLotteryBook ON tblSTCheckoutLotteryCount.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+INNER JOIN tblSTCheckoutHeader ON tblSTCheckoutHeader.intCheckoutId = tblSTCheckoutLotteryCount.intCheckoutId
+WHERE LOWER(tblSTCheckoutLotteryCount.strSoldOut) = 'yes' and (tblSTCheckoutHeader.dtmCheckoutDate != @date or tblSTCheckoutHeader.intShiftNo != @shiftNo)
+
+
 INSERT INTO @tblSTOuputTable
 (
 	 intBeginCount			
@@ -212,6 +220,7 @@ SELECT
 	ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 	WHERE 
 	tblSTLotteryBook.intStoreId = @storeId 
+	AND tblSTLotteryBook.intLotteryBookId NOT IN (SELECT intLotteryBookId FROM #tempSoldOutLotteryCount)
 	AND ( 
 		'active' = LOWER(strStatus) 
 		OR ( 'sold' = LOWER(strStatus) AND (dtmSoldDate = @date)) 
@@ -228,10 +237,13 @@ intBinNumber ASC
 
 UPDATE @tblSTOuputTable 
 SET 
-	 intEndingNumber = [#tempLotteryCount].intLotteryBookId
+ intEndingNumber = [#tempLotteryCount].intLotteryBookId
 ,strSoldOut = [#tempLotteryCount].strSoldOut
 FROM #tempLotteryCount
 WHERE [#tempLotteryCount].intLotteryBookId = [@tblSTOuputTable].intLotteryBookId
+
+
+--SELECT intLotteryBookId FROM #tempSoldOutLotteryCount
 
 
 SELECT * FROM @tblSTOuputTable
