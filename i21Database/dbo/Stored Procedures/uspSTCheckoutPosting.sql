@@ -6464,10 +6464,10 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					END
 			END
 			--DROP
-			IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
-				BEGIN
-					DROP TABLE #tmpCustomerInvoiceIdList
-				END
+			-- IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+			-- 	BEGIN
+			-- 		DROP TABLE #tmpCustomerInvoiceIdList
+			-- 	END
 
 			-- COMMIT
 			GOTO ExitWithCommit
@@ -6475,10 +6475,10 @@ IF(@ysnDebug = CAST(1 AS BIT))
 
 	BEGIN CATCH
 		--DROP
-		IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
-			BEGIN
-				DROP TABLE #tmpCustomerInvoiceIdList
-			END
+		-- IF OBJECT_ID('tempdb..#tmpCustomerInvoiceIdList') IS NOT NULL  
+		-- 	BEGIN
+		-- 		DROP TABLE #tmpCustomerInvoiceIdList
+		-- 	END
 
 		SET @strStatusMsg = 'Script Error: ' + ERROR_MESSAGE()
 
