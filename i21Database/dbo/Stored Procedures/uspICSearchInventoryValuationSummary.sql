@@ -1,7 +1,59 @@
 ﻿CREATE PROCEDURE dbo.[uspICSearchInventoryValuationSummary]
 	@strPeriod NVARCHAR(50),
-	@intUserId INT
+	@intUserId INT,
+	@ysnForceRebuild AS BIT = 0
 AS
+
+-- If rebuild is in-progress, leave immediately to avoid deadlocks. 
+IF EXISTS (SELECT TOP 1 1 FROM tblICInventoryValuationSummaryLog (NOLOCK) WHERE ysnRebuilding = 1)
+BEGIN 
+	RETURN; 
+END 
+
+-- If fyp is Open and the log is more than a day old, continue with the rebuild. 
+-- Otherwise, exit immediately. Do not rebuild the valuation summary. 
+IF EXISTS (
+	SELECT TOP 1 1 
+	FROM 
+		tblICInventoryValuationSummaryLog (NOLOCK) l INNER JOIN tblGLFiscalYearPeriod fyp
+			ON l.strPeriod = fyp.strPeriod 
+	WHERE 
+		l.strPeriod = @strPeriod
+		AND fyp.ysnINVOpen = 1 
+		AND ABS(DATEDIFF(DAY, l.dtmLastRun, GETDATE())) <= 1
+)
+AND @ysnForceRebuild <> 1
+BEGIN 
+	RETURN; 
+END 
+
+IF NOT EXISTS (SELECT TOP 1 1 FROM tblICInventoryValuationSummaryLog WHERE strPeriod = @strPeriod)
+BEGIN 
+	INSERT INTO tblICInventoryValuationSummaryLog (
+		strPeriod
+		,dtmLastRun
+		,ysnRebuilding
+		,dtmStart
+		,intEntityUserSecurityId
+	)
+	VALUES (
+		@strPeriod
+		,dbo.fnRemoveTimeOnDate(GETDATE()) 
+		,1
+		,GETDATE() 
+		,@intUserId
+	)
+END 
+ELSE 
+BEGIN 
+	UPDATE l
+	SET l.ysnRebuilding = 1
+		,l.dtmLastRun = dbo.fnRemoveTimeOnDate(GETDATE()) 
+		,l.dtmStart = GETDATE() 
+	FROM tblICInventoryValuationSummaryLog l
+	WHERE l.strPeriod = @strPeriod
+END 
+
 
 DELETE FROM tblICInventoryValuationSummary
 WHERE strPeriod = @strPeriod
@@ -138,3 +190,9 @@ FROM	tblGLFiscalYearPeriod f
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL 
 	AND (f.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 
+
+UPDATE l
+SET l.ysnRebuilding = 0
+	,l.dtmEnd = GETDATE() 
+FROM tblICInventoryValuationSummaryLog l
+WHERE l.strPeriod = @strPeriod
