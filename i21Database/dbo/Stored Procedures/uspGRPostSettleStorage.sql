@@ -2072,7 +2072,7 @@ BEGIN TRY
 
 				select @dblCashPriceFromCt = availableQtyForVoucher.dblCashPrice,
 					@dblQtyFromCt = availableQtyForVoucher.dblAvailableQuantity,
-					@doPartialHistory  = 1
+					@doPartialHistory  = case when @ysnFromPriceBasisContract = 1 then 1 else 0 end
 				FROM @SettleVoucherCreate a
 				cross apply(
 					select top 1 
