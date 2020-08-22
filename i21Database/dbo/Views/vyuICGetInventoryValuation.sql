@@ -109,6 +109,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 		,t.dtmCreated
 		,ScaleView.intTicketId
 		,strTransactionUOM			= transactionUOM.strUnitMeasure 
+		,strDescription				= t.strDescription 
 FROM 	tblICInventoryTransaction t 
 		INNER JOIN tblICItem i 
 			ON t.intItemId = i.intItemId
