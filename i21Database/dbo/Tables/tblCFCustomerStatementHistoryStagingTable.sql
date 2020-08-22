@@ -81,5 +81,6 @@
     [strCFInvoiceNumber]           NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceNumberHistory]      NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
 	[dtmDueDateBaseOnTermsHistory] DATETIME		   NULL
+	[dtmDiscountDateBaseOnTermsHistory] DATETIME   NULL
 );
 

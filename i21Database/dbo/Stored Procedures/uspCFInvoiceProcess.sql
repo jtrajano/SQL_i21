@@ -223,7 +223,6 @@ BEGIN TRY
 	END
 
 	--------HISTORY--------
-
 	INSERT INTO tblCFInvoiceProcessHistory
 	(
 		 intCustomerId
@@ -261,6 +260,7 @@ BEGIN TRY
 	FROM tblCFInvoiceProcessResult as ipr
 	INNER JOIN tblEMEntity as ent
 	ON ipr.intCustomerId = ent.intEntityId
+
 
 	INSERT INTO tblCFInvoiceHistoryStagingTable
 	(
@@ -409,6 +409,7 @@ BEGIN TRY
 		,strUserId
 		,strInvoiceNumberHistory
 		,dtmDueDateBaseOnTermsHistory
+		,dtmDiscountDateBaseOnTermsHistory
 		,ysnMPGCalculation
 		,dblAccountTotalDiscountQuantity
 		,strDetailDisplayValue
@@ -568,6 +569,7 @@ BEGIN TRY
 		,strUserId
 		,strTempInvoiceReportNumber
 		,dbo.fnGetDueDateBasedOnTerm(dtmInvoiceDate, intTermID)
+		,dbo.fnGetDiscountDateBasedOnTerm(dtmInvoiceDate, intTermID,NULL) 
 		,ysnMPGCalculation
 		,dblAccountTotalDiscountQuantity
 		,strDetailDisplayValue
@@ -584,7 +586,6 @@ BEGIN TRY
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username
 	AND LOWER(strStatementType) = @statementType
-	
 	
 	INSERT INTO tblCFCustomerStatementHistoryStagingTable
 	(
@@ -670,6 +671,7 @@ BEGIN TRY
 	,strCFInvoiceNumber
 	,strInvoiceNumberHistory
 	,dtmDueDateBaseOnTermsHistory
+	,dtmDiscountDateBaseOnTermsHistory
 	)
 	SELECT 
 	intEntityCustomerId
@@ -754,6 +756,7 @@ BEGIN TRY
 	,strCFTempInvoiceReportNumber
 	,strCFTempInvoiceReportNumber
 	,dbo.fnGetDueDateBasedOnTerm(dtmCFInvoiceDate, intCFTermID)
+	,dbo.fnGetDiscountDateBasedOnTerm(dtmCFInvoiceDate, intCFTermID,NULL) 
 	FROM
 	tblARCustomerStatementStagingTable
 	WHERE intEntityUserId = @entityId

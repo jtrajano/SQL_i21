@@ -146,6 +146,7 @@
     [strUserId]								NVARCHAR (100)  COLLATE Latin1_General_CI_AS NULL,
     [strInvoiceNumberHistory]				NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [dtmDueDateBaseOnTermsHistory]			DATETIME        NULL,
+    [dtmDiscountDateBaseOnTermsHistory]		DATETIME        NULL,
     [strDriverPinNumber]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [strDriverDescription]					NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intDriverPinId]						INT             NULL,
