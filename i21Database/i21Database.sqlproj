@@ -8815,6 +8815,7 @@
     <Build Include="dbo\Tables\tblSTLotteryProcessError.sql" />
     <Build Include="dbo\Tables\tblRKM2MPostPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MPostPreview.sql" />
+    <Build Include="dbo\Tables\tblICInventoryValuationSummaryLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1,6 +1,12 @@
 ﻿CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]
 AS 
-SELECT * FROM tblICInventoryValuationSummary
+
+SELECT 
+	s.* 
+	,sl.dtmLastRun
+FROM
+	tblICInventoryValuationSummary s LEFT JOIN tblICInventoryValuationSummaryLog sl
+		ON s.strPeriod = sl.strPeriod
 
 
 --CREATE VIEW [dbo].[vyuICGetInventoryValuationSummary]
