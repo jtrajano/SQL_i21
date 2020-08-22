@@ -6143,8 +6143,18 @@ ELSE
 DECLARE @FixedAssetsActivitiesParentMenuId INT
 SELECT @FixedAssetsActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Fixed Assets', @FixedAssetsParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId
+
+DECLARE @FixedAssetsMaintenanceParentMenuId INT
+SELECT @FixedAssetsMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsParentMenuId
+
 /* ADD TO RESPECTIVE CATEGORY */ 
 UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsActivitiesParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @FixedAssetsMaintenanceParentMenuId WHERE intParentMenuID =  @FixedAssetsParentMenuId AND strCategory = 'Maintenance'
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
@@ -6152,6 +6162,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Fixed Ass
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.FixedAssets?showSearch=true' WHERE strMenuName = 'Fixed Assets' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsActivitiesParentMenuId
 	
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Depreciation Methods' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Depreciation Methods', N'Fixed Assets', @FixedAssetsMaintenanceParentMenuId, N'Depreciation Methods', N'Maintenance', N'Screen', N'FixedAssets.view.DepreciationMethods?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'FixedAssets.view.DepreciationMethods?showSearch=true' WHERE strMenuName = 'Depreciation Methods' AND strModuleName = 'Fixed Assets' AND intParentMenuID = @FixedAssetsMaintenanceParentMenuId
+
+
 /* VENDOR REBATES */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Vendor Rebates' AND strModuleName = 'Vendor Rebates' AND intParentMenuID = 0)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
