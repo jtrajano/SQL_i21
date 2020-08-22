@@ -51,7 +51,7 @@ SELECT
         END
     )
     +
-    receiptItem.dblTax
+    CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
     AS dblReceiptTotal
     ,CASE	
         WHEN receiptItem.intWeightUOMId IS NULL THEN 
@@ -95,6 +95,15 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
     ON APClearing.strTransactionId = receipt.strReceiptNumber
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+OUTER APPLY (
+    --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
+    --FOR MATCHING WITH GL, WE HAVE DATA FIXES FOR GL
+    SELECT
+        COUNT(*) AS intCount
+    FROM tblAPBillDetail billDetail
+    INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
+    WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+) voucherTax
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
