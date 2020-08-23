@@ -236,12 +236,26 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 				,gasct_loc_no COLLATE Latin1_General_CI_AS AS strLocationNumber
 				,gasct_gross_wgt AS dblGrossWeight
 				,(CASE 
-					WHEN gasct_gross_rev_dt > 1 AND gasct_gross_time > 1 THEN DATEADD(second, gasct_gross_time, convert(datetime, convert(char(8), gasct_gross_rev_dt)))
+					WHEN gasct_gross_rev_dt > 1 AND gasct_gross_time > 1 THEN  
+					convert(
+						datetime, 
+							convert(char(8), gasct_gross_rev_dt) + '' '' 
+							+ substring(convert(char(8),gasct_gross_time), 1, 2) + '':'' 
+							+ substring(convert(char(8),gasct_gross_time), 3, 2) + '':'' 
+							+ substring(convert(char(8),gasct_gross_time), 5, 2)
+					 )
 					ELSE NULL
 				END ) AS dtmGrossDateTime
 				,gasct_tare_wgt AS dblTareWeight
 				,(CASE 
-					WHEN gasct_tare_rev_dt > 1 AND gasct_tare_time > 1 THEN DATEADD(second, gasct_tare_time, convert(datetime, convert(char(8), gasct_tare_rev_dt)))
+					WHEN gasct_tare_rev_dt > 1 AND gasct_tare_time > 1 THEN 
+					convert(
+						datetime, 
+							convert(char(8), gasct_tare_rev_dt) + '' '' 
+							+ substring(convert(char(8),gasct_tare_time), 1, 2) + '':'' 
+							+ substring(convert(char(8),gasct_tare_time), 3, 2) + '':'' 
+							+ substring(convert(char(8),gasct_tare_time), 5, 2)
+					)
 					ELSE NULL
 				END ) AS dtmTareDateTime
 				,LTRIM(RTRIM(gasct_comment)) COLLATE Latin1_General_CI_AS AS strTicketComment
