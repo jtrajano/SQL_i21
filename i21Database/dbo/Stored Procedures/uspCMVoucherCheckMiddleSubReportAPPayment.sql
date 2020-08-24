@@ -123,7 +123,7 @@ Invoices AS(
 			,dtmDate = INV.dtmDate
 			,intTermsId = INV.intTermId
 			,strComment = INV.strComments
-			,dblAmount = INV.dblInvoiceTotal
+			,dblAmount = PYMTDetail.dblTotal
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
 						ELSE  PYMTDetail.dblInterest 
