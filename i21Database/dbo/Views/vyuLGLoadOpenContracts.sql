@@ -116,6 +116,8 @@ SELECT CD.intContractDetailId
 	,FT.strFreightTerm
 	,CD.intShipToId
 	,strShipTo = SH.strLocationName
+	,intHeaderBookId = CH.intBookId
+	,intHeaderSubBookId = CH.intSubBookId
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
@@ -297,6 +299,8 @@ SELECT CD.intContractDetailId
 	,FT.strFreightTerm
 	,CD.intShipToId
 	,strShipTo = SH.strLocationName
+	,intHeaderBookId = CH.intBookId
+	,intHeaderSubBookId = CH.intSubBookId
 FROM tblCTContractHeader CH
 JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
 JOIN vyuLGAdditionalColumnForContractDetailView AD ON CD.intContractDetailId = AD.intContractDetailId
@@ -448,3 +452,5 @@ GROUP BY CD.intContractDetailId
 	,CPCU.ysnSubCurrency
 	,AD.ysnValidFX
 	,DC.intDefaultCurrencyId
+	,CH.intBookId
+	,CH.intSubBookId
