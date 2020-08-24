@@ -2399,7 +2399,7 @@ BEGIN TRY
 																								CASE WHEN @shipFromEntityId != @EntityId THEN @shipFromEntityId ELSE @EntityId END,
 																								@LocationId,
 																								a.intItemId,
-																								@intShipFrom,
+																								coalesce(@intShipFrom, EM.intEntityLocationId),
 																								EM.intFreightTermId
 																							)
 														ELSE RI.intTaxGroupId
@@ -2442,7 +2442,7 @@ BEGIN TRY
 				) availableQtyForVoucher
 					on availableQtyForVoucher.intContractDetailId = a.intContractDetailId
 				LEFT JOIN tblEMEntityLocation EM 
-					ON EM.intEntityId = @EntityId
+					ON EM.intEntityId = @EntityId and EM.ysnDefaultLocation = 1
 				WHERE a.dblCashPrice <> 0 
 					AND a.dblUnits <> 0 
 					AND SST.intSettleStorageId = @intSettleStorageId
