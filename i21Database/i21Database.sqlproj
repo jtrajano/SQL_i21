@@ -8394,6 +8394,8 @@
     <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
+    <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
+    <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
