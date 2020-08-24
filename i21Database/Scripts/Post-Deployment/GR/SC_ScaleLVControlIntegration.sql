@@ -240,9 +240,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					convert(
 						datetime, 
 							convert(char(8), gasct_gross_rev_dt) + '' '' 
-							+ substring(convert(char(8),gasct_gross_time), 1, 2) + '':'' 
-							+ substring(convert(char(8),gasct_gross_time), 3, 2) + '':'' 
-							+ substring(convert(char(8),gasct_gross_time), 5, 2)
+							+ substring(right(''000000'' + convert(nvarchar,gasct_gross_time), 6), 1, 2) + '':'' 
+							+ substring(right(''000000'' + convert(nvarchar,gasct_gross_time), 6), 3, 2) + '':'' 
+							+ substring(right(''000000'' + convert(nvarchar,gasct_gross_time), 6), 5, 2)
 					 )
 					ELSE NULL
 				END ) AS dtmGrossDateTime
@@ -252,9 +252,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 					convert(
 						datetime, 
 							convert(char(8), gasct_tare_rev_dt) + '' '' 
-							+ substring(convert(char(8),gasct_tare_time), 1, 2) + '':'' 
-							+ substring(convert(char(8),gasct_tare_time), 3, 2) + '':'' 
-							+ substring(convert(char(8),gasct_tare_time), 5, 2)
+							+ substring(right(''000000'' + convert(nvarchar,gasct_tare_time), 6), 1, 2) + '':'' 
+							+ substring(right(''000000'' + convert(nvarchar,gasct_tare_time), 6), 3, 2) + '':'' 
+							+ substring(right(''000000'' + convert(nvarchar,gasct_tare_time), 6), 5, 2)
 					)
 					ELSE NULL
 				END ) AS dtmTareDateTime
