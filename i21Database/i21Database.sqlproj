@@ -8817,6 +8817,8 @@
     <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
+    <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
+    <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
