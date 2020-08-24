@@ -11,6 +11,21 @@ AS
 BEGIN
 	DECLARE @Id INT = NULL
 
+	IF @SupplierName = '' 
+	BEGIN
+		SET @SupplierName = NULL
+	END
+
+	IF @SupplyPoint = '' 
+	BEGIN
+		SET @SupplyPoint = NULL
+	END
+
+	IF @Item = '' 
+	BEGIN
+		SET @Item = NULL
+	END
+
 	SELECT TOP 1  @Id = D.intSupplyPointProductSearchHeaderId 
 	FROM tblTRSupplyPointProductSearchDetail D
 	INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId 
@@ -22,12 +37,14 @@ BEGIN
 		INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId  
 		WHERE strSearchValue LIKE @SupplierName + '%'
 		OR strSearchValue LIKE @SupplyPoint + '%'
-		OR strSearchValue LIKE @Item + '%'
+		--OR strSearchValue LIKE @Item + '%'
+		OR strSearchValue = @Item
 		GROUP BY  H.intSupplyPointProductSearchHeaderId
 	) A ON A.intSupplyPointProductSearchHeaderId = H.intSupplyPointProductSearchHeaderId
 	WHERE strSearchValue LIKE @SupplierName + '%'
 		OR strSearchValue LIKE @SupplyPoint + '%'
-		OR strSearchValue LIKE @Item + '%'
+		--OR strSearchValue LIKE @Item + '%'
+		OR strSearchValue = @Item
 	ORDER BY A.Condition DESC, H.intSupplyPointProductSearchHeaderId ASC
 
 	-- DECLARE @Location NVARCHAR(50)
