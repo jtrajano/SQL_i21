@@ -2387,7 +2387,7 @@ BEGIN TRY
 																								CASE WHEN @shipFromEntityId != @EntityId THEN @shipFromEntityId ELSE @EntityId END,
 																								@LocationId,
 																								a.intItemId,
-																								@intShipFrom,
+																								coalesce(@intShipFrom, EM.intEntityLocationId),
 																								EM.intFreightTermId
 																							)
 														ELSE RI.intTaxGroupId
