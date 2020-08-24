@@ -1,9 +1,10 @@
-﻿ALTER VIEW [dbo].[vyuMBILExportCustomerSpecialPricing]
+﻿CREATE VIEW [dbo].[vyuMBILExportCustomerSpecialPricing]
  AS   
 	SELECT   
-	 b.strCustomerNumber
+	ROW_NUMBER() OVER(ORDER BY strCustomerNumber) AS intCustomerPricingId  
+	,b.strCustomerNumber
 	,ICItems.strItemNo
-	,c.dblPrice  
+	,ISNULL(c.dblPrice ,0) as dblPrice
 	,c.strPricing  COLLATE Latin1_General_CI_AS AS strPricing
 	  
 	from tblARCustomerSpecialPrice a  
