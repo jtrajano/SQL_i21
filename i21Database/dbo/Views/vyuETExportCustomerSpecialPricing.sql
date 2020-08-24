@@ -1,9 +1,9 @@
-﻿ALTER VIEW [dbo].[vyuMBILExportCustomerSpecialPricing]
+﻿CREATE VIEW [dbo].[vyuETExportCustomerSpecialPricing]
  AS   
 	SELECT   
-	 b.strCustomerNumber
-	,ICItems.strItemNo
-	,c.dblPrice  
+	patr_no = b.strCustomerNumber,   
+	item_no = CAST(ICItems.strItemNo AS VARCHAR(15)),
+	patr_price = c.dblPrice  
 	,c.strPricing  COLLATE Latin1_General_CI_AS AS strPricing
 	  
 	from tblARCustomerSpecialPrice a  
@@ -21,7 +21,7 @@
 			OR (a.intItemId = ICItems.intItemId
 				AND ICItems.intLocationId = d.intWarehouseId
 				AND a.intItemId IS NOT NULL)   
-	--INNER JOIN (SELECT DISTINCT intItemId FROM [vyuETExportItem]) ETItems ON ICItems.intItemId = ETItems.intItemId
+	INNER JOIN (SELECT DISTINCT intItemId FROM [vyuETExportItem]) ETItems ON ICItems.intItemId = ETItems.intItemId
 	CROSS APPLY dbo.[fnARGetItemPricingDetails](  
 			ICItems.intItemId,  
 			b.[intEntityId],  
@@ -59,4 +59,3 @@
 			0  
 			) c  
 
-			
