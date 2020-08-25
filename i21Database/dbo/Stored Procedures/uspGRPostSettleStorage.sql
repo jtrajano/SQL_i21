@@ -186,6 +186,17 @@ BEGIN TRY
 		4-Fee
    */
 	
+	-- Get the Batch Id 
+	EXEC dbo.uspSMGetStartingNumber 
+		@STARTING_NUMBER_BATCH
+		,@strBatchId OUTPUT
+
+	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+	BEGIN 
+		DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+		EXEC dbo.uspSMGetStartingNumber 152, @strUpdateRIDetail OUTPUT
+	END
+			   
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	SET @dtmDate = GETDATE()
@@ -1156,11 +1167,7 @@ BEGIN TRY
 					BREAK;
 			END
 
-			BEGIN
-				EXEC dbo.uspSMGetStartingNumber 
-					 @STARTING_NUMBER_BATCH
-					,@strBatchId OUTPUT
-				
+			BEGIN			
 				SET @intLotId = NULL
 				
 				SELECT @intLotId = ReceiptItemLot.intLotId
