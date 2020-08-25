@@ -713,11 +713,6 @@ BEGIN TRY
 										,@intBillDetailId
 								END 
 
-								IF (ISNULL(@intBillDetailId, 0) <> 0)
-								BEGIN
-									EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-								END
-
 								INSERT INTO tblCTPriceFixationDetailAPAR(
 									intPriceFixationDetailId
 									,intBillId
@@ -770,6 +765,11 @@ BEGIN TRY
 								EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 								--
 
+								IF (ISNULL(@intBillDetailId, 0) <> 0)
+								BEGIN
+									EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+								END
+								
 								EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intNewBillId,@userId = @intUserId, @isPricingContract = 1,@success = @ysnSuccess OUTPUT
 
 								UPDATE	tblICInventoryReceiptItem SET ysnAllowVoucher = 0 WHERE intInventoryReceiptItemId = @intInventoryReceiptItemId
