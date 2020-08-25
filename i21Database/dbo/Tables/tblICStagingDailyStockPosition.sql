@@ -30,7 +30,16 @@
 	intConcurrencyId INT NULL,
 	dtmDateModified DATETIME NULL,
 	dtmDateCreated DATETIME NULL,
-	intModifiedByUserId INT,
-	intCreatedByUserId INT,
+	intModifiedByUserId INT NULL,
+	intCreatedByUserId INT NULL,
+	ysnBuilding BIT NULL,
 	CONSTRAINT [PK_tblStagingDailyStockPosition_intId] PRIMARY KEY ([intId]),
 )
+
+CREATE NONCLUSTERED INDEX [IX_tblICStagingDailyStockPosition]
+	ON [dbo].[tblICStagingDailyStockPosition]([guidSessionId] ASC)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICStagingDailyStockPosition_Report]
+	ON [dbo].[tblICStagingDailyStockPosition]([ysnBuilding] ASC)
+GO
