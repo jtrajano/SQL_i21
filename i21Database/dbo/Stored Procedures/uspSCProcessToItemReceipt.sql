@@ -101,7 +101,12 @@ DECLARE @intDeliverySheetItemId INT
 DECLARE @intDeliverySheetLocationId INT
 DECLARE @strTicketStatus NVARCHAR(5)
 DECLARE @_strReceiptNumber NVARCHAR(50)
-   
+
+-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+BEGIN
+	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+	EXEC dbo.uspSMGetStartingNumber 152, @strUpdateRIDetail OUTPUT
+END    
 
 DECLARE @ErrMsg              NVARCHAR(MAX),
         @dblBalance          NUMERIC(38, 20),                    
