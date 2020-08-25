@@ -566,11 +566,12 @@ BEGIN
 										ELSE A.dblQuantityToBill END
 		,intTaxGroupId				= CASE 
 									WHEN A.intPurchaseTaxGroupId > 0 THEN A.intPurchaseTaxGroupId
-									ELSE D.intTaxGroupId END 
+									ELSE NULL END 
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1
-		,intFreightTermId			= NULL
+		,intFreightTermId			= ISNULL(A.intFreightTermId,
+										CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN EL_entity.intFreightTermId ELSE EL.intFreightTermId END)
 		,ysnExcludeCheckOff			= 0
 		,intItemUOMId				= CASE WHEN A.intWeightUOMId > 0 AND A.dblNetWeight > 0
 										THEN A.intWeightUOMId
@@ -580,7 +581,9 @@ BEGIN
 		ON A.intVoucherPayableId = B.intOldPayableId
 	LEFT JOIN @voucherPayableTax tax
 		ON A.intVoucherPayableId = tax.intVoucherPayableId
-	LEFT JOIN [tblEMEntityLocation] D ON A.[intEntityVendorId] = D.intEntityId AND D.ysnDefaultLocation = 1
+	-- LEFT JOIN [tblEMEntityLocation] D ON A.[intEntityVendorId] = D.intEntityId AND D.ysnDefaultLocation = 1
+	LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId --GET THE FREIGHT TERM FROM ENTITY LOCATION
+	LEFT JOIN tblEMEntityLocation EL_entity ON EL_entity.intEntityLocationId = A.intShipFromEntityId
 	LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = A.intLocationId
 	WHERE tax.intVoucherPayableId IS NULL --generate only for no tax provided
 
