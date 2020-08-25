@@ -10,6 +10,16 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+-- Check if daily stock is rebuilding. If yes, exit immediately to avoid deadlocks. 
+IF EXISTS (SELECT TOP 1 1 FROM tblICStagingDailyStockPosition WHERE ysnBuilding = 1)
+BEGIN 
+	RETURN; 
+END 
+ELSE
+BEGIN 
+	INSERT INTO tblICStagingDailyStockPosition (guidSessionId, intKey, ysnBuilding) SELECT @guidSessionId, intKey = 1, ysnBuilding = 1
+END 
+
 DECLARE	@InventoryAutoVariance AS INT = 1
 		,@InventoryWriteOffSold AS INT = 2
 		,@InventoryRevalueSold AS INT = 3
@@ -414,7 +424,8 @@ CREATE TABLE #tmpDailyStockPosition
 				dtmDateModified			= NULL,
 				dtmDateCreated			= GETDATE(),
 				intModifiedByUserId		= NULL,
-				intCreatedByUserId		= NULL
+				intCreatedByUserId		= NULL,
+				ysnBuilding				= 0 
 		FROM 
 			tblICItem Item
 				INNER JOIN (tblICItemUOM StockUOM
@@ -491,7 +502,8 @@ CREATE TABLE #tmpDailyStockPosition
 				dtmDateModified			= NULL,
 				dtmDateCreated			= GETDATE(),
 				intModifiedByUserId		= NULL,
-				intCreatedByUserId		= NULL
+				intCreatedByUserId		= NULL,
+				ysnBuilding				= 0 
 		FROM 
 			tblICItem Item
 				INNER JOIN (tblICItemUOM StockUOM
@@ -521,5 +533,3 @@ CREATE TABLE #tmpDailyStockPosition
 			INNER JOIN tblSMCompanyLocation Loc 
 				ON Loc.intCompanyLocationId = tmpDSP.intLocationId
 	END 
-	
-	
