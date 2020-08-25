@@ -186,6 +186,17 @@ BEGIN TRY
 		4-Fee
    */
 	
+	-- Get the Batch Id 
+	EXEC dbo.uspSMGetStartingNumber 
+		@STARTING_NUMBER_BATCH
+		,@strBatchId OUTPUT
+
+	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
+	BEGIN 
+		DECLARE @strUpdateRIDetail AS NVARCHAR(50)
+		EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
+	END
+			   
 	SELECT @intDecimalPrecision = intCurrencyDecimal FROM tblSMCompanyPreference
 
 	SET @dtmDate = GETDATE()
@@ -1156,11 +1167,7 @@ BEGIN TRY
 					BREAK;
 			END
 
-			BEGIN
-				EXEC dbo.uspSMGetStartingNumber 
-					 @STARTING_NUMBER_BATCH
-					,@strBatchId OUTPUT
-				
+			BEGIN			
 				SET @intLotId = NULL
 				
 				SELECT @intLotId = ReceiptItemLot.intLotId
@@ -1941,7 +1948,7 @@ BEGIN TRY
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
-														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intUnitMeasureId, CD.dblQuantity),6) 
+														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
 														WHEN ISNULL(availableQtyForVoucher.dblContractUnits,0) > 0 THEN availableQtyForVoucher.dblContractUnits
 														WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 														ELSE a.dblUnits 
