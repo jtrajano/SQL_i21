@@ -32,22 +32,10 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , dblBaseTotalTermDiscountExemption	= INV.dblBaseTotalTermDiscountExemption
      , dblInterest							= INV.dblInterest
      , dblBaseInterest						= INV.dblBaseInterest
-     , dblAmountDue							= CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblProvisionalAmount > 0 
-												THEN CASE WHEN INV.dblInvoiceTotal > INV.dblProvisionalAmount OR INV.dblInvoiceTotal = INV.dblProvisionalAmount
-													THEN ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblPayment, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
-													ELSE ISNULL(INV.dblInvoiceTotal, 0) - ISNULL(INV.dblPayment, 0)  - ISNULL(INV.dblProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblPayment, 0) 
-													END
-												ELSE INV.dblAmountDue 
-											  END 
-     , dblBaseAmountDue						= CASE WHEN INV.ysnFromProvisional = 1 AND INV.dblBaseProvisionalAmount > 0 
-												THEN CASE WHEN INV.dblBaseInvoiceTotal > INV.dblBaseProvisionalAmount OR INV.dblInvoiceTotal = INV.dblBaseProvisionalAmount
-													THEN ISNULL(INV.dblBaseInvoiceTotal, 0) - ISNULL(INV.dblBasePayment, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
-													ELSE ISNULL(INV.dblBaseInvoiceTotal, 0) - ISNULL(INV.dblBasePayment, 0)  - ISNULL(INV.dblBaseProvisionalAmount, 0) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) 
-													END
-												ELSE INV.dblAmountDue 
-											  END
-     , dblPayment							= INV.dblPayment
-     , dblBasePayment						= INV.dblBasePayment
+     , dblAmountDue							= INV.dblAmountDue
+     , dblBaseAmountDue						= INV.dblBaseAmountDue
+     , dblPayment							= INV.dblPayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN PROVISIONALPAYMENT.dblPayment ELSE 0 END 
+     , dblBasePayment						= INV.dblBasePayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN PROVISIONALPAYMENT.dblBasePayment ELSE 0 END 
      , dblProvisionalAmount					= INV.dblProvisionalAmount
      , dblBaseProvisionalAmount				= INV.dblBaseProvisionalAmount
 	 , dblCurrencyExchangeRate				= INV.dblCurrencyExchangeRate

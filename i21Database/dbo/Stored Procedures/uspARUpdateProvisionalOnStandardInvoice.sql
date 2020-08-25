@@ -33,12 +33,16 @@ WHERE [intInvoiceId] IN (SELECT [intInvoiceId] FROM tblARInvoiceDetail WHERE [in
 	
 UPDATE tblARInvoice
 SET [ysnProcessed]	= 1
+	, dblAmountDue = CASE WHEN ISNULL(@ysnExcludeFromPayment, 0) = 0 THEN 0 ELSE dblAmountDue END 
+	, dblBaseAmountDue = CASE WHEN ISNULL(@ysnExcludeFromPayment, 0) = 0 THEN 0 ELSE dblBaseAmountDue END 
 WHERE [intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
   AND strType = 'Provisional'
   AND @ForDelete = 0
 
 UPDATE tblARInvoice
 SET [ysnProcessed]	= 0
+	, dblAmountDue = CASE WHEN ISNULL(@ysnExcludeFromPayment, 0) = 0 THEN dblInvoiceTotal - dblPayment ELSE dblAmountDue END
+	, dblBaseAmountDue = CASE WHEN ISNULL(@ysnExcludeFromPayment, 0) = 0 THEN dblBaseInvoiceTotal - dblBasePayment ELSE dblBaseAmountDue END 
 WHERE [intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
   AND strType = 'Provisional'
   AND (
@@ -50,7 +54,6 @@ WHERE [intInvoiceId] IN (SELECT [intInvoiceId] FROM @InvoiceIds)
 UPDATE ARI	
 SET ARI.[dblProvisionalAmount]		= PRO.[dblInvoiceTotal]
   , ARI.[dblBaseProvisionalAmount]	= PRO.[dblBaseInvoiceTotal]
-  , ARI.[strTransactionType]		= CASE WHEN PRO.[dblInvoiceTotal] > ARI.[dblInvoiceTotal] THEN 'Credit Memo' ELSE ARI.[strTransactionType] END
   , ARI.[ysnExcludeFromPayment]		= ISNULL(@ysnExcludeFromPayment, 0)
   , ARI.[ysnProvisionalWithGL]     	= PRO.[ysnProvisionalWithGL]
 FROM tblARInvoice ARI
