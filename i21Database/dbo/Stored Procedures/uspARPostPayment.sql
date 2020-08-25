@@ -17,6 +17,7 @@
 	,@transType			AS NVARCHAR(25)		= 'all'
 	,@raiseError		AS BIT				= 0
 	,@bankAccountId	AS INT				= NULL
+	,@ysnForFinalInvoice	AS BIT = 0
 
 WITH RECOMPILE
 AS
@@ -424,7 +425,8 @@ BEGIN
 			ON A.[intPaymentId] = P.[intTransactionId]
 	WHERE
 		(A.[dblAmountPaid]) > (SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId])
-		AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)	
+		AND EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)
+		OR @ysnForFinalInvoice = 1
 					
 	--+prepayment
 	INSERT INTO
@@ -442,7 +444,7 @@ BEGIN
 		(A.[dblAmountPaid]) <> @ZeroDecimal
 		AND ISNULL((SELECT SUM([dblPayment]) FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = A.[intPaymentId]), @ZeroDecimal) = @ZeroDecimal	
 		AND NOT EXISTS(SELECT NULL FROM #ARPostPaymentDetail WHERE [ysnPost] = @OneBit AND ([intInvoiceId] IS NOT NULL OR [intBillId] IS NOT NULL) AND [intTransactionId] = A.[intPaymentId] AND [dblPayment] <> @ZeroDecimal)											
-
+		AND @ysnForFinalInvoice = 0
 						 																
 END
 

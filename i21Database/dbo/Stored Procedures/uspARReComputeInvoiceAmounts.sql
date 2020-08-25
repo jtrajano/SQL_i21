@@ -298,28 +298,26 @@ WHERE
 	
 	
 UPDATE
-	tblARInvoice
+	ARI
 SET
-	 [dblInvoiceTotal]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
-	,[dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblAmountDue]			= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
-									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblProvisionalAmount, @ZeroDecimal) > 0
-												THEN (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END) - (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
-												ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal)) - (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END)
-										END
-									ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
-								  END
-	,[dblBaseAmountDue]		= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
-									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) > 0
-												THEN (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END) - (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
-												ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal)) - (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END)
-										END
-									ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
-								  END
+	 [dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
+	,[dblBaseInvoiceTotal]	= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping])
+	,[dblAmountDue]			= ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)
+								-
+								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
+								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblPayment ELSE 0 END
+								ELSE 0
+								END
+	,[dblBaseAmountDue]		= ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal)
+								-
+								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
+								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblBasePayment ELSE 0 END
+								ELSE 0
+								END
+FROM tblARInvoice ARI
+INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
 WHERE
-	[intInvoiceId] = @InvoiceIdLocal
+	ARI.[intInvoiceId] = @InvoiceIdLocal
 
 END
 
