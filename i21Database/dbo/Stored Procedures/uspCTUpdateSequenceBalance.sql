@@ -4,8 +4,7 @@
 	@intUserId						INT,
 	@intExternalId					INT,
 	@strScreenName					NVARCHAR(50),
-	@ysnFromInvoice					bit = 0,
-	@ysnDWG 						bit = 0
+	@ysnFromInvoice					bit = 0
 AS
 
 BEGIN TRY
@@ -191,16 +190,13 @@ BEGIN TRY
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	@strScreenName
 
-	DECLARE @process NVARCHAR(30)
-	SELECT @process = CASE WHEN @ysnDWG = 1 THEN 'Update Sequence Balance - DWG' ELSE 'Update Sequence Balance' END
-
 	EXEC	uspCTCreateDetailHistory	
 			@intContractHeaderId		=	NULL,
 			@intContractDetailId		=	@intContractDetailId,
 			@strComment				    =	NULL,
 			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
 			@strSource	 				= 	'Inventory',
-			@strProcess 				= 	@process,
+			@strProcess 				= 	'Update Sequence Balance',
 			@intUserId					= 	@intUserId
 
 END TRY
