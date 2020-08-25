@@ -76,7 +76,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 		,intCompanyLocationId		= A.intShipToId
 		,intVendorLocationId		= A.intShipFromId
 		,ysnIncludeExemptedCodes	= 1
-		,intFreightTermId           = EL.intFreightTermId
+		,intFreightTermId           = ISNULL(B.intFreightTermId,
+												CASE WHEN A.intShipFromEntityId != A.intEntityVendorId THEN EL_entity.intFreightTermId ELSE EL.intFreightTermId END)
 		,ysnExcludeCheckOff			= 0
 		,intBillDetailId			= B.intBillDetailId
 		,intItemUOMId				= CASE WHEN B.intWeightUOMId > 0 AND B.dblNetWeight > 0
@@ -86,6 +87,7 @@ IF @transCount = 0 BEGIN TRANSACTION
 	INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 	INNER JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = A.intShipFromId --GET THE FREIGHT TERM FROM ENTITY LOCATION
 	INNER JOIN @billDetailIds C ON B.intBillDetailId = C.intId		
+	LEFT JOIN tblEMEntityLocation EL_entity ON EL_entity.intEntityLocationId = A.intShipFromEntityId
 
 	INSERT INTO tblAPBillDetailTax(
 		[intBillDetailId]		, 
