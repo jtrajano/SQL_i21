@@ -27,7 +27,7 @@ FROM
 		INNER JOIN tblSMScreen F ON E.strTransactionType = F.strNamespace
 	) A LEFT OUTER JOIN 
 	tblSMTransaction B ON A.intScreenId = B.intScreenId AND CAST(A.strRecordNo AS INT) = B.intRecordId 
-WHERE ISNULL(B.intRecordId, '') = '' AND ISNULL(A.strRecordNo, '') <> ''
+WHERE ISNULL(B.intRecordId, '') = '' AND ISNULL(A.strRecordNo, '') <> '' AND ISNULL(A.strRecordNo, '') <> 0
 
 
 DECLARE @tblSMAudit TABLE (
