@@ -1948,7 +1948,7 @@ BEGIN TRY
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
-														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intUnitMeasureId, CD.dblQuantity),6) 
+														WHEN CD.intContractDetailId is not null and intItemType = 1 then ROUND(dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId, b.intItemUOMId, CD.dblQuantity),6) 
 														WHEN ISNULL(availableQtyForVoucher.dblContractUnits,0) > 0 THEN availableQtyForVoucher.dblContractUnits
 														WHEN @origdblSpotUnits > 0 THEN ROUND(dbo.fnCalculateQtyBetweenUOM(b.intItemUOMId,@intCashPriceUOMId,a.dblUnits),6) 
 														ELSE a.dblUnits 
