@@ -495,7 +495,7 @@ END
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
 	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
-	EXEC dbo.uspSMGetStartingNumber 152, @strUpdateRIDetail OUTPUT
+	EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
 	IF @@ERROR <> 0 GOTO With_Rollback_Exit;
 END 
 

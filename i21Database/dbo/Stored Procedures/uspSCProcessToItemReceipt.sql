@@ -107,7 +107,7 @@ DECLARE @dblTicketUnitBasis NUMERIC(18, 6)
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
 	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
-	EXEC dbo.uspSMGetStartingNumber 152, @strUpdateRIDetail OUTPUT
+	EXEC dbo.uspSMGetStartingNumber 155, @strUpdateRIDetail OUTPUT
 END    
 
 DECLARE @ErrMsg              NVARCHAR(MAX),

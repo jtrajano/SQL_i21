@@ -315,7 +315,7 @@ SET @batchIdUsed = @batchId
 -- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 BEGIN
 	DECLARE @strUpdateRIDetail AS NVARCHAR(50)
-	EXEC uspSMGetStartingNumber 152 ,@strUpdateRIDetail OUTPUT
+	EXEC uspSMGetStartingNumber 155 ,@strUpdateRIDetail OUTPUT
 END 
 
 UPDATE A

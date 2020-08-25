@@ -1476,7 +1476,7 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'LSI and LS Acknowledgement' and strModule = 'Manufacturing')
 	UNION ALL
-	SELECT	[intStartingNumberId]	= 152
+	SELECT	[intStartingNumberId]	= 155
 			,[strTransactionType]	= N'Receipt Item and Charge Update'
 			,[strPrefix]			= N'RIDetail-'
 			,[intNumber]			= 1
