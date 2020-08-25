@@ -35,6 +35,7 @@
 	ysnBuilding BIT NULL,
 	CONSTRAINT [PK_tblStagingDailyStockPosition_intId] PRIMARY KEY ([intId]),
 )
+GO
 
 CREATE NONCLUSTERED INDEX [IX_tblICStagingDailyStockPosition]
 	ON [dbo].[tblICStagingDailyStockPosition]([guidSessionId] ASC)
