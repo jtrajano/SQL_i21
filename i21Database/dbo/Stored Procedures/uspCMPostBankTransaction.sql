@@ -358,6 +358,7 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]
 			,[intEntityId]
+			,[intJournalLineNo]
 	)
 	SELECT	[strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= @intTransactionId
@@ -386,6 +387,7 @@ BEGIN
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
+			,[intJournalLineNo]		= NULL
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankAccount BankAccnt
 				ON A.intBankAccountId = BankAccnt.intBankAccountId
 			INNER JOIN vyuGLAccountDetail GLAccnt
@@ -421,6 +423,7 @@ BEGIN
 			,[strTransactionForm]	= @TRANSACTION_FORM
 			,[strModuleName]		= @MODULE_NAME
 			,[intEntityId]			= A.intEntityId
+			,[intJournalLineNo]		= B.intTransactionDetailId
 	FROM	[dbo].tblCMBankTransaction A INNER JOIN [dbo].tblCMBankTransactionDetail B
 				ON A.intTransactionId = B.intTransactionId
 			INNER JOIN vyuGLAccountDetail GLAccnt
