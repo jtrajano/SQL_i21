@@ -84,4 +84,5 @@ END
 
 
 EXEC uspCTUpdateDWGSequenceBalance 
-	@ContractSequenceBalance = @contractSequenceBalance
+	@ContractSequenceBalance = @contractSequenceBalance,
+	@ysnPost = @ysnPost
