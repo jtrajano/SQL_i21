@@ -107,7 +107,7 @@ SELECT
 		,CHK.intTransactionId
 		--,PRINTSPOOL.strBatchId
 		,CHK.intBankAccountId
-		,strCurrency = (SELECT strCurrency FROM tblSMCurrency WHERE intCurrencyID = CHK.intCurrencyId)
+		,strCurrency = CURRENCY.strCurrency
 		
 		-- Bank and company info related fields
 		,strCompanyName = COMPANY.strCompanyName 
@@ -145,12 +145,14 @@ SELECT
 		,strCheckMessage = ISNULL(PYMT.strCheckMessage,'') 
 		,CHK.ysnCheckVoid
 		,BNKACCNT.intPayToDown
+		,strDateFormat = CASE WHEN CURRENCY.strCurrency = 'CAD' THEN NULL ELSE CompanyPref.strReportDateFormat END
 FROM	dbo.tblCMBankTransaction CHK 
 		INNER JOIN tblCMBankAccount BNKACCNT ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
 		INNER JOIN tblCMBank BNK ON BNK.intBankId = BNKACCNT.intBankId
 		LEFT JOIN tblAPPayment PYMT ON CHK.strTransactionId = PYMT.strPaymentRecordNum
 		LEFT JOIN tblAPVendor VENDOR ON VENDOR.[intEntityId] = ISNULL(PYMT.[intEntityVendorId], CHK.intEntityId)
 		LEFT JOIN tblEMEntity ENTITY ON VENDOR.[intEntityId] = ENTITY.intEntityId
+		LEFT JOIN tblSMCurrency CURRENCY ON CURRENCY.intCurrencyID = CHK.intCurrencyId
 		OUTER APPLY (SElECT TOP 1 strCompanyName,ISNULL(dbo.fnConvertToFullAddress(strAddress,strCity,strState,strZip),'') strCompanyAddress FROM tblSMCompanySetup) COMPANY
 		OUTER APPLY (SELECT ISNULL(dbo.fnCMGetBankAccountMICR(CHK.intBankAccountId,CHK.strReferenceNo),'') strText) MICR
 		OUTER APPLY (SELECT ISNULL(dbo.fnConvertToFullAddress(BNK.strAddress, BNK.strCity, BNK.strState, BNK.strZipCode), '') strAddress) BANK
@@ -196,6 +198,7 @@ FROM	dbo.tblCMBankTransaction CHK
 			END
 			Value
 		)Address
+		OUTER APPLY tblSMCompanyPreference CompanyPref
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND CHK.dblAmount != 0 AND PYMT.intPaymentMethodId ! = 3

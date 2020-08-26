@@ -149,8 +149,10 @@ Invoice.*
 ,InvoiceType.strTransactionType
 ,Term.strTermCode
 ,Curr.strCurrency
+,strDateFormat = CASE WHEN Curr.strCurrency = 'CAD' THEN NULL ELSE CompanyPref.strReportDateFormat END
 FROM Invoices Invoice
 LEFT JOIN tblSMTerm Term on Invoice.intTermsId = Term.intTermID
 LEFT JOIN tblSMCurrency Curr ON Invoice.intCurrencyId = Curr.intCurrencyID
 LEFT JOIN InvoiceType ON InvoiceType.intTransactionType = Invoice.intTransactionType
+OUTER APPLY tblSMCompanyPreference CompanyPref
 order by strInvoice, intPaymentDetailId
