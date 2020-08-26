@@ -35,7 +35,10 @@ BEGIN TRY
 			@intScreenId				INT,
 			@intTransactionId			INT,
 			@intSalespersonId			INT,
-			@ContractSalesPersonSign    VARBINARY(MAX)	   
+			@ContractSalesPersonSign    VARBINARY(MAX),	
+			@intPricingDecimals			INT	
+
+	select top 1 @intPricingDecimals = intPricingDecimals from tblCTCompanyPreference	
 
 	SELECT TOP 1 @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId IN (SELECT * FROM dbo.fnSplitString(@strPriceFixationID,',') )
     
@@ -199,9 +202,10 @@ BEGIN TRY
 			CD.dblBasis,
 			strZFSBasis = dbo.fnCTFormatNumber(PD.dblBasis,'#,0.00####'),
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) as dblFuturePrice,
-			dbo.fnCTFormatNumber(PD.dblFutures,'#,0.0000##') as strZFSFuturePrice,
+			SUBSTRING(convert(nvarchar(20),PD.dblFutures),1,(CHARINDEX('.',convert(nvarchar(20),PD.dblFutures)) + @intPricingDecimals)) as strZFSFuturePrice,
 			LTRIM(CAST(ROUND(ISNULL(PD.dblFutures,0) - ISNULL(CD.dblBasis,0),2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strCashPrice,
-			dbo.fnCTFormatNumber(PD.dblCashPrice,'#,0.0000##') + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strZFSCashPrice,
+			--dbo.fnCTFormatNumber(PD.dblCashPrice,'#,0.0000##') + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strZFSCashPrice,
+			SUBSTRING(convert(nvarchar(20),PD.dblCashPrice),1,(CHARINDEX('.',convert(nvarchar(20),PD.dblCashPrice)) + @intPricingDecimals)) + ' ' + CY.strCurrency + ' '+@per+' ' + ISNULL(rtrt2.strTranslation,CM.strUnitMeasure) strZFSCashPrice,
 			MO.strFutureMonth,
 			CV.strFreightTerm,
 			PD.strNotes,
