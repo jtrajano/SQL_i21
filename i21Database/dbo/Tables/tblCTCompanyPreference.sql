@@ -83,6 +83,7 @@
 	ysnForexRatePriceOptionalOnContract BIT NOT NULL DEFAULT 0,
 	ysnAllowSignedWhenContractHasAmendment bit not null default 0,
 	intQuantityDecimals INT NOT NULL DEFAULT 2,
+	intPricingDecimals INT NOT NULL DEFAULT 2,
     CONSTRAINT [PK_tblCTCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblSMCurrency_intCleanCostCurrencyId_intCurrencyId] FOREIGN KEY ([intCleanCostCurrencyId]) REFERENCES [tblSMCurrency]([intCurrencyID]),
 	CONSTRAINT [FK_tblCTCompanyPreference_tblICUnitMeasure_intCleanCostUOMId_intUnitMeasureId] FOREIGN KEY ([intCleanCostUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
