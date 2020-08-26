@@ -38,7 +38,8 @@ IF ISNULL(@ysnPost, 0) = 0
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 			BEGIN
 				SET @Param = (SELECT strAssetId FROM tblFAFixedAsset WHERE intAssetId IN (SELECT intAssetId FROM #AssetID))
-				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AMDPR', NULL, @intEntityId, @intCount	OUT
+				-- TODO REPLACE @Param with the correct sql statement
+				EXEC [dbo].[uspFAReverseGLEntries] @strBatchId,@Param, 0, NULL, @intEntityId, @intCount	OUT
 				SET @successfulCount = @intCount
 				
 				IF(@intCount > 0)
