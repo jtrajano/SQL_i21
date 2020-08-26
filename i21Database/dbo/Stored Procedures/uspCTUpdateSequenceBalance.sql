@@ -4,7 +4,9 @@
 	@intUserId						INT,
 	@intExternalId					INT,
 	@strScreenName					NVARCHAR(50),
-	@ysnFromInvoice					bit = 0
+	@ysnFromInvoice					bit = 0,
+	@ysnDWG 						bit = 0,
+	@ysnPostDWG						bit = 0
 AS
 
 BEGIN TRY
@@ -25,7 +27,10 @@ BEGIN TRY
 			@dblQuantityPerLoad NUMERIC(18,6),
    			@intAllocatedPurchaseContractDetailId int,
 			@intPostedTicketDestinationWeightsAndGrades int,
-			@intUnPostedTicketDestinationWeightsAndGrades int
+			@intUnPostedTicketDestinationWeightsAndGrades int,
+			@ysnLogSequenceHistory	BIT = 1,
+			@intContractHeaderId	INT,
+			@process				NVARCHAR(50)
 			
 	
 	BEGINING:
@@ -35,6 +40,7 @@ BEGIN TRY
 			@ysnUnlimitedQuantity	=	ISNULL(CH.ysnUnlimitedQuantity,0),
 			@intPricingTypeId		=	CD.intPricingTypeId,
 			@ysnLoad				=	CH.ysnLoad,
+			@intContractHeaderId	=	CH.intContractHeaderId,
 			@dblQuantityPerLoad = CH.dblQuantityPerLoad
 
 	FROM	tblCTContractDetail		CD
@@ -45,10 +51,15 @@ BEGIN TRY
 	 begin
 		set @dblQuantityToUpdate = case when @dblQuantityToUpdate < 0 then -1 else 1 end;
 	 end
+
+	IF @ysnLoad = 1 and @ysnDWG = 1
+	BEGIN
+		set @dblQuantityToUpdate = 0
+	END
 	
 	SELECT	@dblTransactionQuantity	=	- @dblQuantityToUpdate
 	SELECT	@dblNewBalance			=	@dblOldBalance - @dblQuantityToUpdate
-
+	
 	IF @dblNewBalance < 0
 	BEGIN
 		IF @ysnUnlimitedQuantity = 1
@@ -171,24 +182,45 @@ BEGIN TRY
 
 	end  
 
-	EXEC	uspCTCreateSequenceUsageHistory 
-			@intContractDetailId	=	@intContractDetailId,
-			@strScreenName			=	@strScreenName,
-			@intExternalId			=	@intExternalId,
-			@strFieldName			=	'Balance',
-			@dblOldValue			=	@dblOldBalance,
-			@dblTransactionQuantity =	@dblTransactionQuantity,
-			@dblNewValue			=	@dblNewBalance,	
-			@intUserId				=	@intUserId,
-			@dblBalance				=   @dblNewBalance,
-			@intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId	OUTPUT
-	
+	IF @ysnLoad = 1 and @ysnDWG = 1
+	BEGIN
+		DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+		SELECT @process = CASE WHEN @ysnPostDWG = 1 THEN 'Post Load-based DWG' ELSE 'Unpost Load-based DWG' END
+
+		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+							 @intContractDetailId 	= 	@intContractDetailId,
+							 @strSource			 	= 	'Inventory',
+							 @strProcess		 	= 	@process,
+							 @contractDetail 		= 	@contractDetails,
+							 @intUserId				= 	@intUserId,
+							 @intTransactionId		= 	@intExternalId
+	END
+	ELSE
+	BEGIN
+		EXEC	uspCTCreateSequenceUsageHistory
+				@intContractDetailId	=	@intContractDetailId,
+				@strScreenName			=	@strScreenName,
+				@intExternalId			=	@intExternalId,
+				@strFieldName			=	'Balance',
+				@dblOldValue			=	@dblOldBalance,
+				@dblTransactionQuantity =	@dblTransactionQuantity,
+				@dblNewValue			=	@dblNewBalance,	
+				@intUserId				=	@intUserId,
+				@dblBalance				=   @dblNewBalance,
+				@intSequenceUsageHistoryId	=	@intSequenceUsageHistoryId	OUTPUT
+	END
+
 	EXEC	uspCTCreateCollateralAdjustment
 			@intContractDetailId	=	@intContractDetailId,
 			@dblQuantityToUpdate	=	@dblQuantityToUpdate,
 			@intUserId				=	@intUserId,
 			@intExternalId			=	@intExternalId,
 			@strScreenName			=	@strScreenName
+	
+	SELECT @process = CASE WHEN @ysnDWG = 1 
+							THEN (CASE WHEN ISNULL(@ysnLoad,0) = 1 THEN 'Update Sequence Balance - DWG (Load-based)' ELSE 'Update Sequence Balance - DWG' END) 
+							ELSE 'Update Sequence Balance'
+					  END
 
 	EXEC	uspCTCreateDetailHistory	
 			@intContractHeaderId		=	NULL,
@@ -196,7 +228,7 @@ BEGIN TRY
 			@strComment				    =	NULL,
 			@intSequenceUsageHistoryId  =	@intSequenceUsageHistoryId,
 			@strSource	 				= 	'Inventory',
-			@strProcess 				= 	'Update Sequence Balance',
+			@strProcess 				= 	@process,
 			@intUserId					= 	@intUserId
 
 END TRY

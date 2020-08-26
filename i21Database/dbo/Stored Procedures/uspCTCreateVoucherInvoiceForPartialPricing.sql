@@ -1576,6 +1576,7 @@ BEGIN TRY
 								@ShipmentId				=	@intInventoryShipmentId
 								,@UserId				=	@intUserId
 								,@intContractDetailId	=	@intContractDetailId
+								,@dblQuantity           =   @dblQuantityForInvoice
 								,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 
 						--For some reason, I don't know why there's this code :)

@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTUpdateDWGSequenceBalance]
-	@ContractSequenceBalance	CTContractSequenceBalanceType readonly
+	@ContractSequenceBalance	CTContractSequenceBalanceType readonly,
+	@ysnPost bit
 AS
 
 BEGIN TRY
@@ -17,6 +18,7 @@ BEGIN TRY
 		,@intExternalId int
 		,@dblOldQuantity NUMERIC(24, 10) 
 		,@dblQuantity NUMERIC(24, 10) 
+		,@dblAdjustment NUMERIC(24, 10) 
 		,@intFromItemUOMId int
 		,@strScreenName nvarchar(50)
 		,@intUserId int
@@ -89,6 +91,7 @@ BEGIN TRY
 			,@intExternalId = intExternalId
 			,@dblOldQuantity = dblOldQuantity
 			,@dblQuantity = dblQuantity
+			,@dblAdjustment = (dblOldQuantity - dblQuantity)
 			,@intFromItemUOMId = intFromItemUOMId
 			,@strScreenName = strScreenName
 			,@intUserId  = intUserId
@@ -104,12 +107,13 @@ BEGIN TRY
 		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied), @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 		select @ysnLoad = ysnLoad from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
 
-		if (@dblBalanceLessOtherShipmentItem < @dblOldQuantity)
+		if (@dblBalanceLessOtherShipmentItem < @dblAdjustment)
 		begin
-			set @dblOldQuantity = @dblBalanceLessOtherShipmentItem;
-		end
+			set @dblAdjustment = @dblBalanceLessOtherShipmentItem;
+		end		
 
-		SELECT @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblOldQuantity) * -1);
+		select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);
+
 		if (@ysnLoad = convert(bit,1))
 		begin
 			set @dblConvertedQty = -1;
@@ -121,26 +125,55 @@ BEGIN TRY
 				@intUserId				=	@intUserId,
 				@intExternalId			=	@intExternalId,
 				@strScreenName			=	@strScreenName,
-				@ysnFromInvoice 		= 	@ysnFromInvoice
+				@ysnFromInvoice 		= 	@ysnFromInvoice,
+				@ysnDWG					=   1,
+				@ysnPostDWG				=   @ysnPost
 
-		/*Calculate if the sequence remaining balance is enough for the DWG quantity*/
-		select @dblCurrentBalanceQuantity = dblBalance from tblCTContractDetail where intContractDetailId = @intContractDetailId;
-		set @dblCalculatedQty = (case when @dblCurrentBalanceQuantity > @dblQuantity then @dblQuantity else @dblCurrentBalanceQuantity end);
 
-		/*Apply the DWG quantity (or the remianing sequence balance) to sequence balance*/
-		SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblCalculatedQty);
-		if (@ysnLoad = convert(bit,1))
-		begin
-			set @dblConvertedQty = 1;
-		end
+		--/*Return the Shipment quantity*/
+		----Get all quantity applied to other Shipment Item
+		--select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
+		--select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied), @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		--select @ysnLoad = ysnLoad from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
 
-		EXEC	uspCTUpdateSequenceBalance
-				@intContractDetailId	=	@intContractDetailId,
-				@dblQuantityToUpdate	=	@dblConvertedQty,
-				@intUserId				=	@intUserId,
-				@intExternalId			=	@intExternalId,
-				@strScreenName			=	@strScreenName,
-				@ysnFromInvoice 		= 	@ysnFromInvoice
+		--if (@dblBalanceLessOtherShipmentItem < @dblOldQuantity)
+		--begin
+		--	set @dblOldQuantity = @dblBalanceLessOtherShipmentItem;
+		--end
+
+		--SELECT @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblOldQuantity) * -1);
+		--if (@ysnLoad = convert(bit,1))
+		--begin
+		--	set @dblConvertedQty = -1;
+		--end
+
+		--EXEC	uspCTUpdateSequenceBalance
+		--		@intContractDetailId	=	@intContractDetailId,
+		--		@dblQuantityToUpdate	=	@dblConvertedQty,
+		--		@intUserId				=	@intUserId,
+		--		@intExternalId			=	@intExternalId,
+		--		@strScreenName			=	@strScreenName,
+		--		@ysnFromInvoice 		= 	@ysnFromInvoice,
+		--		@ysnDWG					=   1
+
+		--/*Calculate if the sequence remaining balance is enough for the DWG quantity*/
+		--select @dblCurrentBalanceQuantity = dblBalance from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		--set @dblCalculatedQty = (case when @dblCurrentBalanceQuantity > @dblQuantity then @dblQuantity else @dblCurrentBalanceQuantity end);
+
+		--/*Apply the DWG quantity (or the remianing sequence balance) to sequence balance*/
+		--SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblCalculatedQty);
+		--if (@ysnLoad = convert(bit,1))
+		--begin
+		--	set @dblConvertedQty = 1;
+		--end
+
+		--EXEC	uspCTUpdateSequenceBalance
+		--		@intContractDetailId	=	@intContractDetailId,
+		--		@dblQuantityToUpdate	=	@dblConvertedQty,
+		--		@intUserId				=	@intUserId,
+		--		@intExternalId			=	@intExternalId,
+		--		@strScreenName			=	@strScreenName,
+		--		@ysnFromInvoice 		= 	@ysnFromInvoice
 
 		select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 
