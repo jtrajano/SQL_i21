@@ -70,7 +70,6 @@ SELECT Receipt.intInventoryReceiptId
 	, Receipt.dblTotalNet
 	, Receipt.dblGrandTotal
 	, permission.intEntityContactId
-	, Receipt.dtmCreated
 	, Receipt.strInternalComments
 	, fiscal.strPeriod strAccountingPeriod
 	, Receipt.dtmCreated 
