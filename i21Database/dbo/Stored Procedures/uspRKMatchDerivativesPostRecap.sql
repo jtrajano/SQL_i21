@@ -144,7 +144,7 @@ BEGIN
 			, dblCredit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblNetPL) ELSE 0.00 END
 			, dblDebitUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN 0.00 ELSE ABS(dblMatchQty) END
 			, dblCreditUnit = CASE WHEN ISNULL(dblNetPL, 0) <= 0 THEN ABS(dblMatchQty) ELSE 0.00 END
-			, strAccountDescription = @strFuturesGainOrLossRealizedDescription
+			, strAccountDescription = @strFuturesGainOrLossRealizedOffsetDescription
 			, intCurrencyId
 			, dblExchangeRate = 1.00
 			, dtmTransactionDate = dtmMatchDate

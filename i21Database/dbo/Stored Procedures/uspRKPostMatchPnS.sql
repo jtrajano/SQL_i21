@@ -103,18 +103,15 @@ BEGIN TRY
 		LEFT JOIN vyuRKMatchedPSTransaction vyu ON vyu.intMatchFuturesPSHeaderId = r.intTransactionId
 
 
-		DECLARE @intFuturesGainOrLossRealized INT
-			, @intFuturesGainOrLossRealizedOffset INT
-			, @strFuturesGainOrLossRealized NVARCHAR(100)
-			, @strFuturesGainOrLossRealizedOffset NVARCHAR(100)
-			, @strFuturesGainOrLossRealizedDescription NVARCHAR(250)
-			, @strFuturesGainOrLossRealizedOffsetDescription NVARCHAR(250)
+		DECLARE @intFuturesGainOrLossAccountId INT
+			, @strFuturesGainOrLossAccountNo NVARCHAR(100)
+			, @strFuturesGainOrLossAccountDescription NVARCHAR(250)
 
 		IF (@strTransactionType = 'Futures Gain or Loss Realized')
 		BEGIN
-			SELECT TOP 1 @intFuturesGainOrLossRealized = rk.intAccountId
-				, @strFuturesGainOrLossRealized = strAccountNo
-				, @strFuturesGainOrLossRealizedDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
+			SELECT TOP 1 @intFuturesGainOrLossAccountId = rk.intAccountId
+				, @strFuturesGainOrLossAccountNo = strAccountNo
+				, @strFuturesGainOrLossAccountDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
 				, @strErrorMessage = strErrorMessage
 				, @ysnHasError = ysnHasError
 			FROM @GLAccounts rk
@@ -123,9 +120,9 @@ BEGIN TRY
 		END
 		ELSE IF (@strTransactionType = 'Futures Gain or Loss Realized Offset')
 		BEGIN
-			SELECT TOP 1 @intFuturesGainOrLossRealizedOffset = rk.intAccountId
-				, @strFuturesGainOrLossRealizedOffset = strAccountNo
-				, @strFuturesGainOrLossRealizedOffsetDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
+			SELECT TOP 1 @intFuturesGainOrLossAccountId = rk.intAccountId
+				, @strFuturesGainOrLossAccountNo = strAccountNo
+				, @strFuturesGainOrLossAccountDescription = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE gl.strDescription END
 				, @strErrorMessage = strErrorMessage
 				, @ysnHasError = ysnHasError
 			FROM @GLAccounts rk
@@ -141,9 +138,9 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE tblRKMatchDerivativesPostRecap
-			SET intAccountId = @intFuturesGainOrLossRealized
-				, strAccountId = @strFuturesGainOrLossRealized
-				, strAccountDescription = @strFuturesGainOrLossRealizedDescription
+			SET intAccountId = @intFuturesGainOrLossAccountId
+				, strAccountId = @strFuturesGainOrLossAccountNo
+				, strAccountDescription = @strFuturesGainOrLossAccountDescription
 			WHERE intMatchDerivativesPostRecapId = @intMatchDerivativesPostRecapId
 		END
 		
