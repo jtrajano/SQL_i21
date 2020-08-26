@@ -261,7 +261,11 @@ BEGIN TRY
 				, CD.intContractDetailId
 				, InvTran.dtmDate
 				, @dtmEndDate AS dtmEndDate
-				, dblQuantity = ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)), 0)
+				, dblQuantity = CASE WHEN CH.ysnLoad = 1 THEN  
+									1 * CH.dblQuantityPerLoad
+								ELSE
+									ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)), 0)
+								END
 				, 0
 				, COUNT(DISTINCT Receipt.intInventoryReceiptId)
 				, Receipt.intInventoryReceiptId
@@ -392,7 +396,11 @@ BEGIN TRY
 			, PF.intContractHeaderId
 			, PF.intContractDetailId
 			, FD.dtmFixationDate
-			, dblQuantity = FD.dblQuantity
+			, dblQuantity = CASE WHEN CH.ysnLoad = 1 THEN 
+							ABS(FD.dblLoadPriced -  (ISNULL(FD.dblLoadAppliedAndPriced,0))) * CH.dblQuantityPerLoad
+						ELSE 
+							ABS(FD.dblQuantity - ISNULL(FD.dblQuantityAppliedAndPriced,0)) --priced are already consumed IS/IR, so we just need unconsumed pricing
+						END
 			, FD.dblFutures
 			, FD.dblBasis
 			, FD.dblCashPrice
@@ -414,6 +422,12 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 			AND dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(FD.dtmFixationDate) END
+		WHERE  (CASE WHEN CH.ysnLoad = 1 THEN 
+							ABS(FD.dblLoadPriced -  (ISNULL(FD.dblLoadAppliedAndPriced,0)))
+						ELSE 
+							ABS(FD.dblQuantity - ISNULL(FD.dblQuantityAppliedAndPriced,0))
+						END) > 0
+		AND CD.intContractStatusId NOT IN (3) --cancelled
 
 		--find the associated invoice
 		select
@@ -550,6 +564,24 @@ BEGIN TRY
 		select
 			dtmDate = dtmFixationDate
 			,dblQuantity
+			,strType 
+			,intContractTypeId
+			,strContractNumber
+			,intContractSeq
+			,intContractHeaderId
+			,intContractDetailId 
+			,intTransactionReferenceId = intSourceId
+			,strTransactionReferenceNo = strSourceId
+			,intEntityId
+			,intCommodityId
+			,intOrderBy = 2
+			,intUserId
+		from #tmpPriceFixation
+
+		union all --This is to add entry for Priced contract
+		select
+			dtmDate = dtmFixationDate
+			,ABS(dblQuantity) * -1
 			,strType 
 			,intContractTypeId
 			,strContractNumber
@@ -703,8 +735,8 @@ BEGIN TRY
 				,strCommodityCode = ''
 				,intItemId
 				,intLocationId
-				,intPricingTypeId
-				,strPricingType 
+				,intPricingTypeId = CASE WHEN strType = 'Price Fixation' AND dblBasis > 0 THEN 1 ELSE intPricingTypeId END --Just to marked Price Fixation Entry Priced
+				,strPricingType = CASE WHEN strType = 'Price Fixation' AND dblBasis > 0 THEN 'Priced' ELSE strPricingType END --Just to marked Price Fixation Entry Priced
 				,intFutureMarketId
 				,intFutureMonthId 
 				,dtmStartDate 
@@ -736,7 +768,7 @@ BEGIN TRY
 								END
 					,dblBasis = CASE WHEN CD.intPricingTypeId = 2 THEN
 									CASE WHEN strType IN( 'Contract Sequence') THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment') THEN CB.dblQuantity * -1
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment','Price Fixation') THEN CB.dblQuantity * -1
 										ELSE 0
 									END
 								ELSE 0
@@ -1029,6 +1061,7 @@ BEGIN TRY
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
 			, intUserId = si.intCreatedByUserId
+			, si.ysnDestinationWeightsAndGrades
 		into #tblBasisDeliveries
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
@@ -1064,6 +1097,7 @@ BEGIN TRY
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
 			, intUserId = ri.intCreatedByUserId
+			, ysnDestinationWeightsAndGrades = 0
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -1098,6 +1132,7 @@ BEGIN TRY
 			, sh.intFutureMarketId
 			, sh.intFutureMonthId
 			, intUserId = sh.intUserId
+			, ysnDestinationWeightsAndGrades = 0
 		from vyuCTSequenceUsageHistory suh
 			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
@@ -1207,7 +1242,7 @@ BEGIN TRY
 				, ba.intItemId
 				, ba.intEntityId
 				, ba.intCompanyLocationId
-				, dblQty =  id.dblQtyShipped  * -1
+				, dblQty = id.dblQtyShipped  * -1 
 				, intItemUOMId = id.intItemUOMId
 				, intPricingTypeId = 2
 				, strPricingType = 'Basis'
@@ -1220,6 +1255,7 @@ BEGIN TRY
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intInventoryShipmentItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 2
+			where i.strTransactionType <> 'Credit Memo' 
 	
 			union all
 			select 
@@ -1248,6 +1284,57 @@ BEGIN TRY
 			from tblARInvoiceDetail id
 			inner join tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
 			inner join #tblBasisDeliveries ba ON ba.intTransactionId = id.intLoadDetailId and ba.strTransactionType = 'Load Schedule' and ba.intContractTypeId = 2
+
+
+			union all
+			select distinct
+				 strType  = 'Sales Basis Deliveries'
+				, dtmDate = FD.dtmFixationDate
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty = FD.dblQuantity  * -1 
+				, intItemUOMId = ba.intQtyUOMId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Price Fixation'
+				, intTransactionId = FD.intPriceFixationId
+				, strTransactionId = PC.strPriceContractNo
+				, FD.intFutureMarketId
+				, FD.intFutureMonthId
+				, intUserId = PC.intCreatedById
+			FROM tblCTPriceFixation PF 
+			INNER JOIN tblCTPriceFixationDetail FD ON PF.intPriceFixationId = FD.intPriceFixationId
+			INNER JOIN tblCTPriceContract PC ON PC.intPriceContractId = PF.intPriceContractId
+			CROSS APPLY (
+				select distinct  
+					intContractHeaderId
+					,intContractDetailId
+					,strContractNumber
+					,intContractSeq
+					,intContractTypeId
+					,intContractStatusId
+					,intCommodityId
+					,intItemId
+					,intEntityId
+					,intCompanyLocationId
+					,intQtyUOMId
+				from #tblBasisDeliveries
+				where intContractDetailId = PF.intContractDetailId
+				and strTransactionType <> 'Load Schedule'
+				and intContractTypeId = 2
+				and ysnDestinationWeightsAndGrades = 1
+			) ba
+			LEFT JOIN tblCTPriceFixationDetailAPAR PFD ON PFD.intPriceFixationDetailId = FD.intPriceFixationDetailId
+			WHERE PFD.intPriceFixationDetailAPARId IS NULL
+			AND ISNULL(FD.dblQuantityAppliedAndPriced,0) <> 0
 
 		) t
 
