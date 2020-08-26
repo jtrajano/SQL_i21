@@ -127,6 +127,7 @@ BEGIN TRY
 		declare @ContractPriceItemUOMId int = null;
 		declare @ContractPriceUnitMeasureId int = null;
 		declare @ContractDetailItemId int = null;
+		declare @intSequenceFreightTermId int;
 
 		declare @InvShp table (
 			intInventoryShipmentId int
