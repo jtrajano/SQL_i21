@@ -427,6 +427,10 @@ BEGIN
 		ELSE IF (@strTransactionType = 'D' OR @strTransactionType = 'C' OR @strTransactionType = 'N')
 		BEGIN
 			SET @strTransactionType = 'Local/Network'
+			IF(ISNULL(@dblTransferCost,0) = 0)-- AND @strTransactionType = 'Local/Network'
+			BEGIN
+				SET @dblTransferCost = @dblOriginalGrossPrice
+			END
 		END
 		ELSE IF (@strTransactionType = 'F')
 		BEGIN
