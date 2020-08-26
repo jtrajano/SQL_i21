@@ -50,7 +50,20 @@ BEGIN
 	SELECT @FileHeaderId, 'Vendor Price', 'Explicit Decimals', 4, 1
 	SET @DetailId = SCOPE_IDENTITY()
 	INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
-	SELECT @FileHeaderId, @DetailId, 4, 'tblTRRackPriceDetail', 'dblVendorRack', 1, 4, 1
+	SELECT @FileHeaderId, @DetailId, 5, 'tblTRRackPriceDetail', 'dblVendorRack', 1, 4, 1
+END
+ELSE
+BEGIN
+
+    SELECT @FileHeaderId = intImportFileHeaderId FROM tblSMImportFileHeader WHERE strLayoutTitle = @LayoutTitle 
+
+     -- Vendor Price
+	UPDATE tblSMImportFileRecordMarker SET intPosition = 5 WHERE intImportFileHeaderId = @FileHeaderId AND strRecordMarker = 'Vendor Price'
+
+	UPDATE DETAIL SET DETAIL.intPosition = 5
+	FROM tblSMImportFileColumnDetail DETAIL 
+	INNER JOIN tblSMImportFileRecordMarker MARKER ON MARKER.intImportFileRecordMarkerId = DETAIL.intImportFileRecordMarkerId
+	WHERE MARKER.intImportFileHeaderId = @FileHeaderId AND MARKER.strRecordMarker = 'Vendor Price'
 END
 
 -- Rack Price - DTN
