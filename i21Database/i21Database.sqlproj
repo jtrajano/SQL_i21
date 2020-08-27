@@ -7011,7 +7011,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPNLIDOC_HE.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILCreateCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILCreateSite.sql" />
-    <Build Include="dbo\Stored Procedures\uspMBILPostInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILProcessInvoices.sql" />
     <Build Include="dbo\Functions\fnMBILGetInvoiceStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCardSycnAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKOptionPostMatchPnS.sql" />

@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspMBILPostInvoice]
+﻿CREATE PROCEDURE [dbo].[uspMBILProcessInvoices]
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				=  0,
 	@ysnRecap			AS BIT				=  0,
