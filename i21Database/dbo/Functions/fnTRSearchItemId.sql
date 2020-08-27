@@ -36,16 +36,28 @@ BEGIN
 		SELECT H.intSupplyPointProductSearchHeaderId,  Condition = COUNT(H.intSupplyPointProductSearchHeaderId) FROM tblTRSupplyPointProductSearchDetail D
 		INNER JOIN tblTRSupplyPointProductSearchHeader H ON H.intSupplyPointProductSearchHeaderId = D.intSupplyPointProductSearchHeaderId  
 		WHERE strSearchValue LIKE @SupplierName + '%'
-		OR strSearchValue LIKE @SupplyPoint + '%'
+		OR strSearchValue = @SupplyPoint 
 		--OR strSearchValue LIKE @Item + '%'
 		OR strSearchValue = @Item
 		GROUP BY  H.intSupplyPointProductSearchHeaderId
 	) A ON A.intSupplyPointProductSearchHeaderId = H.intSupplyPointProductSearchHeaderId
-	WHERE strSearchValue LIKE @SupplierName + '%'
-		OR strSearchValue LIKE @SupplyPoint + '%'
+	INNER JOIN (
+		SELECT D.intSupplyPointProductSearchHeaderId, TotalCondition = COUNT(intSupplyPointProductSearchDetailId)  
+		FROM tblTRSupplyPointProductSearchDetail D
+		GROUP BY D.intSupplyPointProductSearchHeaderId	
+	) B ON B.intSupplyPointProductSearchHeaderId = A.intSupplyPointProductSearchHeaderId
+	WHERE (strSearchValue LIKE @SupplierName + '%'
+		OR strSearchValue = @SupplyPoint 
 		--OR strSearchValue LIKE @Item + '%'
-		OR strSearchValue = @Item
-	ORDER BY A.Condition DESC, H.intSupplyPointProductSearchHeaderId ASC
+		OR strSearchValue = @Item)
+	AND B.TotalCondition = A.Condition
+	ORDER BY H.intSupplyPointProductSearchHeaderId ASC
+
+	-- WHERE strSearchValue LIKE @SupplierName + '%'
+	-- 	OR strSearchValue = @SupplyPoint 
+	-- 	--OR strSearchValue LIKE @Item + '%'
+	-- 	OR strSearchValue = @Item
+	-- ORDER BY A.Condition DESC, H.intSupplyPointProductSearchHeaderId ASC
 
 	-- DECLARE @Location NVARCHAR(50)
 	-- 	, @Supplier NVARCHAR(50)
