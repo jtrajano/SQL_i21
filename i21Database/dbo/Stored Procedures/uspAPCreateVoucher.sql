@@ -4,6 +4,8 @@
 	,@userId INT
 	,@throwError BIT = 1
 	,@error NVARCHAR(1000) = NULL OUTPUT
+	,@tblAPBill NVARCHAR(MAX) = NULL OUTPUT
+	,@tblAPBillDetail NVARCHAR(MAX) = NULL OUTPUT
 	,@createdVouchersId NVARCHAR(MAX) OUT
 AS
 
@@ -548,6 +550,28 @@ BEGIN TRY
 	END
 
 	IF @transCount = 0 COMMIT TRANSACTION;
+
+	--@tblAPBill - How to retrieve records
+	--set compatability to SQL2016
+	/*
+	DECLARE @tblAPBill NVARCHAR(MAX)
+	EXEC testSPAP @tblAPBill OUT;
+	SELECT * 
+	INTO #t1
+	FROM OpenJson(@tblAPBill)
+	WITH (intBillId int '$.intBillId', [strBillId] NVARCHAR(50) '$.strBillId',dblTotal DECIMAL(18,2) '$.dblTotal');
+	SELECT * FROM #t1
+	*/
+	
+	SELECT @tblAPBill = 
+	(SELECT A.* FROM tblAPBill A
+	INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	FOR JSON AUTO)
+	
+	SELECT tblAPBillDetail = (
+	SELECT A.* FROM tblAPBillDetail A
+	INNER JOIN @voucherIds B ON A.intBillId = B.intId
+	FOR JSON AUTO)
 
 END TRY
 BEGIN CATCH
