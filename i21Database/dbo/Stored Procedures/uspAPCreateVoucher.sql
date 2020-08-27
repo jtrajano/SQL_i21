@@ -568,7 +568,7 @@ BEGIN TRY
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	FOR JSON AUTO)
 	
-	SELECT tblAPBillDetail = (
+	SELECT @tblAPBillDetail = (
 	SELECT A.* FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	FOR JSON AUTO)
