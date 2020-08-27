@@ -563,6 +563,7 @@ BEGIN TRY
 	SELECT * FROM #t1
 	*/
 	
+	/*
 	SELECT @tblAPBill = 
 	(SELECT A.* FROM tblAPBill A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
@@ -572,6 +573,7 @@ BEGIN TRY
 	SELECT A.* FROM tblAPBillDetail A
 	INNER JOIN @voucherIds B ON A.intBillId = B.intId
 	FOR JSON AUTO)
+	*/
 
 END TRY
 BEGIN CATCH
