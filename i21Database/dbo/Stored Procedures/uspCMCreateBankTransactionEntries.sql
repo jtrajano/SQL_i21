@@ -54,6 +54,7 @@ BEGIN
 		[dtmCreated],
 		[intLastModifiedUserId],
 		[dtmLastModified],
+		[intPaymentId],
 		[intConcurrencyId]
 	)
 	SELECT 
@@ -87,6 +88,7 @@ BEGIN
 		[dtmCreated],
 		[intLastModifiedUserId],
 		[dtmLastModified],
+		[intPaymentId],
 		[intConcurrencyId]
 	FROM @BankTransactionEntries BankTransactionEntries
 

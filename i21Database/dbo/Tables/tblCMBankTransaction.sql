@@ -17,7 +17,7 @@
     [strState]                 NVARCHAR (60)    COLLATE Latin1_General_CI_AS NULL,
     [strCountry]               NVARCHAR (75)    COLLATE Latin1_General_CI_AS NULL,
     [dblAmount]                DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
-	[dblAmountForeign]                DECIMAL (18, 6)  DEFAULT 0  NULL,
+	[dblAmountForeign]         DECIMAL (18, 6)  DEFAULT 0  NULL,
 	[dblShortAmount]           DECIMAL (18, 6)  DEFAULT 0 NOT NULL,
 	[intShortGLAccountId]      INT				NULL,
     [strAmountInWords]         NVARCHAR (250)   COLLATE Latin1_General_CI_AS NULL,
@@ -48,6 +48,7 @@
 	[ysnDelete]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
 	[dtmClr]				   DATETIME	        NULL,
+    [intPaymentId]             INT              NULL, 
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 	CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
