@@ -56,6 +56,7 @@ DECLARE @STARTING_NUMBER_BATCH AS INT = 3
 	,@strLocationName AS NVARCHAR(50)
 	,@intOtherChargeItemLocationId INT
 	,@intWorkOrderProducedLotId INT
+	,@intProduceItemWIPAccountId AS INT
 DECLARE @tblMFLot TABLE (
 	intRecordId INT Identity(1, 1)
 	,intLotId INT
@@ -111,7 +112,7 @@ WHERE intManufacturingProcessId = @intManufacturingProcessId
 	AND intAttributeId = @intAttributeId
 
 IF @strInstantConsumption = 'False'
-	AND @intAttributeTypeId = 5
+	--AND @intAttributeTypeId = 5
 BEGIN
 	SELECT @dblPercentage = CASE 
 			WHEN ysnConsumptionRequired = 1
@@ -412,6 +413,21 @@ BEGIN
 			)
 		AND ISNULL(@ysnRecap, 0) = 0
 	BEGIN
+		SELECT @intItemLocationId = intItemLocationId
+		FROM tblICItemLocation
+		WHERE intLocationId = @intLocationId
+			AND intItemId = @intItemId
+
+		SELECT @intProduceItemWIPAccountId = dbo.fnGetItemGLAccount(@intItemId, @intItemLocationId, 'Work in Progress')
+
+		UPDATE @GLEntries
+		SET intAccountId = CASE 
+				WHEN dblDebitUnit > 0
+					THEN @intProduceItemWIPAccountId
+				ELSE intAccountId
+				END
+		WHERE @intProduceItemWIPAccountId IS NOT NULL
+
 		IF EXISTS (
 				SELECT *
 				FROM tblMFWorkOrderRecipeItem WRI
@@ -468,7 +484,7 @@ BEGIN
 		IF @dblOtherCharges IS NOT NULL
 			AND @dblOtherCharges > 0
 			AND @strInstantConsumption = 'False'
-			AND @intAttributeTypeId = 5
+			--AND @intAttributeTypeId = 5
 		BEGIN
 			SELECT @intOtherChargeItemLocationId = intItemLocationId
 			FROM tblICItemLocation
