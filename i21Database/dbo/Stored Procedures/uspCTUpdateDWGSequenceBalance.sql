@@ -27,7 +27,8 @@ BEGIN TRY
 		,@dblCurrentlyApplied numeric (18,6)
 		,@dblBalanceLessOtherShipmentItem numeric (18,6)
 		,@intContractHeaderId int
-		,@ysnLoad bit = convert(bit,0);
+		,@ysnLoad bit = convert(bit,0)
+		,@dblBalance numeric(20,12);
 
 	declare @ContractSequenceBalanceSummary table (
 		intId int 
@@ -101,22 +102,25 @@ BEGIN TRY
 		where
 			intId = @intId
 
-		/*Return the Shipment quantity*/
-		--Get all quantity applied to other Shipment Item
-		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
-		select @dblBalanceLessOtherShipmentItem = (dblQuantity - @dblCurrentlyApplied), @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
-		select @ysnLoad = ysnLoad from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;
+		select @dblBalance = dblBalance from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 
-		if (@dblBalanceLessOtherShipmentItem < @dblAdjustment)
+		if @dblBalance = 0
 		begin
-			set @dblAdjustment = @dblBalanceLessOtherShipmentItem;
-		end		
+			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
+			continue
+		end
 
+		if (@dblAdjustment * -1) > @dblBalance
+		begin
+			set @dblAdjustment = @dblBalance;
+		end
+		
 		select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);
 
-		if (@ysnLoad = convert(bit,1))
+		if @dblConvertedQty = 0
 		begin
-			set @dblConvertedQty = -1;
+			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
+			continue
 		end
 
 		EXEC	uspCTUpdateSequenceBalance
