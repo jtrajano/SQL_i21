@@ -65,6 +65,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intContractCostId]				INT NULL,
 	[intContractSeqId]				INT NULL,
 	[intContractDetailId]			INT NULL,
+	[intPriceFixationDetailId] 		INT NULL,
 	[intScaleTicketId]				INT NULL,
 	[intInventoryReceiptItemId]		INT NULL,
 	[intInventoryReceiptChargeId]	INT NULL,

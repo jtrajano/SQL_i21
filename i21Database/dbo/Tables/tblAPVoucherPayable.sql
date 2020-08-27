@@ -23,6 +23,7 @@
 	[strPurchaseOrderNumber]		NVARCHAR(400) COLLATE Latin1_General_CI_AS NULL,
 	[intContractHeaderId]			INT NULL,
 	[intContractDetailId]			INT NULL,
+	[intPriceFixationDetailId]		INT NULL,
 	[intContractSeqId]				INT NULL,
 	[intContractCostId]				INT NULL,
 	[strContractNumber]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
