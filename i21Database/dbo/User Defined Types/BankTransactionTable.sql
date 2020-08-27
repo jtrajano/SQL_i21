@@ -40,5 +40,6 @@
 	[ysnDelete]				   BIT              NULL,
     [ysnPOS]				   BIT              NULL,
 	[dtmDateDeleted]		   DATETIME	        NULL,
+    [intPaymentId]             INT              NULL, 
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 )
