@@ -1412,6 +1412,14 @@ ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Reporting.view.ReportManager?group=Cash Management&report=UndepositedFund&reportDesc=Undeposited Fund Report&direct=true&showCriteria=true' WHERE strMenuName = N'Undeposited Fund' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId
 
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Undeposited Fund - Unmatched Report' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES (N'Undeposited Fund - Unmatched Report', N'Cash Management', @CashManagementReportParentMenuId, N'Undeposited Fund - Unmatched Report', N'Report', N'Screen', N'CashManagement.view.UndepositedFundUMReports?showSearch=true', N'small-menu-report', 1, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.UndepositedFundUMReports?showSearch=true' WHERE strMenuName = N'Undeposited Fund - Unmatched Report' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId
+
+
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Positive Pay Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
