@@ -733,10 +733,10 @@ BEGIN
 															--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
 															WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
 															THEN 
-																CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
 																		* ISNULL(NULLIF(B.dblRate,0), 1) AS DECIMAL(18,2))
 																	- 
-																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
 																* -1
 															ELSE 
 																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
@@ -778,10 +778,10 @@ BEGIN
 															--IF CHARGE IS THE ITEM FOR ysnPrice, REVERSE THE TAX SIGN
 															WHEN A.intEntityVendorId = receipts.intEntityVendorId AND charges.ysnPrice = 1 
 															THEN 
-																CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
+																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
 																		* ISNULL(NULLIF(B.dblRate,0), 1) AS DECIMAL(18,2))
 																	- 
-																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2))
+																	CAST(SUM(D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1) AS DECIMAL(18,2)))
 																* -1
 															ELSE 
 																(CAST(SUM(ISNULL(D.dblAdjustedTax, D.dblTax)) 
