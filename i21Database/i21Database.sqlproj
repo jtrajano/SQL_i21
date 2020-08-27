@@ -7745,6 +7745,7 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspICFixCodeFix001.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
+    <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

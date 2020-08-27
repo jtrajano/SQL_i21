@@ -226,6 +226,7 @@ BEGIN TRY
 		,strFutMarketName					NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strCategory 						NVARCHAR(200) COLLATE Latin1_General_CI_AS
 		,strPricingStatus					NVARCHAR(200) COLLATE Latin1_General_CI_AS
+		,intPriceFixationKey				INT
 	)    
     
 	IF @dtmEndDate IS NOT NULL
@@ -835,10 +836,11 @@ BEGIN TRY
 	LEFT JOIN	tblRKFuturesMonth			FH		  ON FH.intFutureMonthId			=	CD.intFutureMonthId	
 	LEFT JOIN	@Audit						ADT		  ON CH.intContractHeaderId         =   ADT.intContractHeaderId
 														AND CD.intContractDetailId      =   ADT.intContractDetailId
-	WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE 
-														WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate	  
-														ELSE	 dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
-												   END
+
+	WHERE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1) <= CASE 
+																			WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate 
+																			ELSE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1) 
+																		END 
 		AND CS.strContractStatus <> 'Unconfirmed'
 			) t
 		WHERE dblQuantity > 0
@@ -928,7 +930,8 @@ BEGIN TRY
 	,dtmSeqEndDate			
 	,strFutMarketName			
 	,strCategory
-	,strPricingStatus 				
+	,strPricingStatus
+	,intPriceFixationKey		
 	)
 	SELECT DISTINCT
      intContractTypeId		= CH.intContractTypeId
@@ -1021,6 +1024,7 @@ BEGIN TRY
 	,strFutMarketName			= FM.strFutMarketName
 	,strCategory 				= Category.strCategoryCode
 	,strPricingStatus			= 'Priced'
+	,intPriceFixationKey		= PF.intPriceFixationKey
 	FROM tblCTContractDetail					CD
 	JOIN tblCTContractHeader					CH  ON CH.intContractHeaderId		    =   CD.intContractHeaderId
 	LEFT JOIN @BalanceTotal                     BL  ON CH.intContractHeaderId           =   BL.intContractHeaderId
@@ -1064,9 +1068,10 @@ BEGIN TRY
 	LEFT JOIN	tblRKFutureMarket			FM		  ON	FM.intFutureMarketId		=	CD.intFutureMarketId
 	LEFT JOIN	tblRKFuturesMonth			FH		  ON	FH.intFutureMonthId			=	CD.intFutureMonthId
 	
-	WHERE dbo.fnRemoveTimeOnDate(CD.dtmCreated)	<= CASE 
+
+	WHERE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1)	<= CASE 
 														WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate		  
-														ELSE	   dbo.fnRemoveTimeOnDate(CD.dtmCreated) 
+														ELSE dbo.[fnCTConvertDateTime](CD.dtmCreated,'ToServerDate',1) 
 												   END
 
 	-- AVERAGE AND REMOVE USED PRICE FIXATION
