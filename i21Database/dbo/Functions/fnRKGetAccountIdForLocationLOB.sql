@@ -44,10 +44,20 @@ BEGIN
 
 	--Get the account code for Location
 	DECLARE @strLocationAccountCode NVARCHAR(20) = ''
+		, @strLocationName NVARCHAR(50)
 	SELECT @strLocationAccountCode = acctSgmt.strCode
+		, @strLocationName = compLoc.strLocationName
 	FROM tblSMCompanyLocation compLoc
 	LEFT OUTER JOIN tblGLAccountSegment acctSgmt ON compLoc.intProfitCenter = acctSgmt.intAccountSegmentId
 	WHERE intCompanyLocationId = @intLocationId
+
+	IF (ISNULL(@strLocationAccountCode, '') = '')
+	BEGIN
+		SET @ErrMsg = 'Invalid Location on GL Accounts tab of Company Location ' + @strLocationName + '.'
+		INSERT INTO @tblAccount(intAccountId, strAccountNo, ysnHasError, strErrorMessage)
+		VALUES (NULL, NULL, 1, @ErrMsg)
+		RETURN
+	END
 
 	--If LOB is setup on GL Account Structure. intStructureType 5 is equal to Line of Bussiness on default data
 	IF EXISTS (SELECT TOP 1 1 FROM tblGLAccountStructure WHERE intStructureType = 5)
