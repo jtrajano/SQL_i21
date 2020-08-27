@@ -13,7 +13,8 @@ SET ANSI_WARNINGS OFF
 DECLARE @ItemNo NVARCHAR(50);
 DECLARE @TransactionNo NVARCHAR(50);
 DECLARE @ReceiptQty NUMERIC(18,6);
-DECLARE @BilledQty NUMERIC(18,6);
+DECLARE @BilledQty NUMERIC(18,6)
+		,@strCostMethod AS NVARCHAR(50) 
 
 DECLARE @SourceType_STORE AS INT = 7		 
 		, @type_Voucher AS INT = 1
@@ -331,6 +332,7 @@ BEGIN
 				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ReceiptChargesToBill.dblAmountBilled, 0) 
 				ELSE ISNULL(ReceiptChargesToBill.dblQuantityBilled, 0) 
 			END 
+		,@strCostMethod = ReceiptCharge.strCostMethod 
 	FROM 
 		tblICInventoryReceiptCharge ReceiptCharge 
 		INNER JOIN tblICItem Item
@@ -362,9 +364,18 @@ BEGIN
 
 	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
-		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
-		EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
-		GOTO Post_Exit;
+		IF @strCostMethod IN ('Amount', 'Percentage') 
+		BEGIN 
+			--'Bill amount for {Item No} is already {Billed Amount}. You cannot over bill the transaction'
+			EXEC uspICRaiseError 80258, @ItemNo, @BilledQty;
+			GOTO Post_Exit;
+		END 
+		ELSE 
+		BEGIN
+			--'Billed Qty for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
+			EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
+			GOTO Post_Exit;
+		END 
 	END
 
 	UPDATE ReceiptCharge
@@ -462,6 +473,7 @@ BEGIN
 				WHEN ReceiptCharge.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ReceiptCharge.dblAmountPriced, 0) 
 				ELSE ISNULL(ReceiptCharge.dblQuantityPriced, 0) 
 			END 
+		,@strCostMethod = ReceiptCharge.strCostMethod 
 	FROM 
 		tblICInventoryReceipt Receipt 			
 		INNER JOIN tblICInventoryReceiptCharge ReceiptCharge 
@@ -492,10 +504,19 @@ BEGIN
 
 	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
-		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
-		EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
-		GOTO Post_Exit;
-	END
+		IF @strCostMethod IN ('Amount', 'Percentage') 
+		BEGIN 
+			--'Bill Amount as charge (or discount) for {Item No} is already {Billed Amount}. You cannot over bill the transaction'
+			EXEC uspICRaiseError 80259, @ItemNo, @BilledQty;
+			GOTO Post_Exit;
+		END 
+		ELSE 
+		BEGIN
+			--'Bill Quantity for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
+			EXEC uspICRaiseError 80260, @ItemNo, @BilledQty;
+			GOTO Post_Exit;
+		END 
+	END 
 
 	UPDATE ReceiptCharge
 	SET 
@@ -555,6 +576,7 @@ BEGIN
 				WHEN ShipmentCharge.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ShipmentCharge.dblAmountBilled, 0) 
 				ELSE ISNULL(ShipmentCharge.dblQuantityBilled, 0) 
 			END 
+		,@strCostMethod = ShipmentCharge.strCostMethod 
 	FROM 
 		@summarizedUpdateDetails UpdateTbl INNER JOIN tblICInventoryShipmentCharge ShipmentCharge
 			ON ShipmentCharge.intInventoryShipmentChargeId = UpdateTbl.intInventoryShipmentChargeId 
@@ -577,9 +599,18 @@ BEGIN
 
 	IF (ISNULL(@TransactionNo,'') <> '')
 	BEGIN
-		--'Billed Qty for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
-		EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
-		GOTO Post_Exit;
+		IF @strCostMethod IN ('Amount', 'Percentage') 
+		BEGIN 
+			--'Bill Amount for {Item No} is already {Billed Amount}. You cannot over bill the transaction'
+			EXEC uspICRaiseError 80258, @ItemNo, @BilledQty;
+			GOTO Post_Exit;
+		END 
+		ELSE 
+		BEGIN
+			--'Bill Quantity for {Item No} is already {Billed Qty}. You cannot over bill the transaction'
+			EXEC uspICRaiseError 80228, @ItemNo, @BilledQty;
+			GOTO Post_Exit;
+		END 
 	END
 
 	UPDATE ShipmentCharge
