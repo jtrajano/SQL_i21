@@ -57,7 +57,7 @@ BEGIN
   [dtmCreated],    
   [intLastModifiedUserId],    
   [dtmLastModified],    
-  [intPaymentId],
+  [intAPPaymentId],
   [intConcurrencyId]    
  )    
  SELECT     
@@ -94,7 +94,7 @@ BEGIN
   [dtmCreated],    
   [intLastModifiedUserId],    
   [dtmLastModified],    
-  [intPaymentId],
+  [intAPPaymentId],
   [intConcurrencyId]    
  FROM @BankTransactionEntries BankTransactionEntries    
  CROSS APPLY dbo.fnGLGetFiscalPeriod([dtmDate]) F  -- remove this in 20.1    
