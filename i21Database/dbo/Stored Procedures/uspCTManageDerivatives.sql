@@ -80,7 +80,8 @@ BEGIN TRY
 					@intSubBookId			=	TS.intSubBookId,
 					@intLocationId			=	TS.intCompanyLocationId,
 					@ysnAA					=	CF.ysnAA,
-					@dblHedgeNoOfLots		= 	CF.dblHedgeNoOfLots
+					@dblHedgeNoOfLots		= 	CF.dblHedgeNoOfLots,
+					@intUserId				=	CD.intCreatedById
 						
 			FROM	tblCTContractFutures		CF
 			INNER 
@@ -132,14 +133,14 @@ BEGIN TRY
 					UPDATE tblCTContractFutures SET intFutOptTransactionId = @intOutputId WHERE intContractFuturesId = @intContractFuturesId
 					-- DERIVATIVE ENTRY HISTORY						
 					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'ADD'
+					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'ADD', 0
 					-- DERIVATIVE ENTRY AUDIT LOG: EXEC uspSMAuditLog 'RiskManagement.view.DerivativeEntry', @intFutOptTransactionHeaderId, @intUserId, 'Created', 'small-new-plus'
 				END
 				ELSE IF dbo.fnCTCheckIfDuplicateFutOptTransactionHistory(@intOutputId) > 1
 				BEGIN
 					-- DERIVATIVE ENTRY HISTORY
 					SELECT @intFutOptTransactionHeaderId = intFutOptTransactionHeaderId FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = @intOutputId
-					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'UPDATE'
+					EXEC uspRKFutOptTransactionHistory @intOutputId, @intFutOptTransactionHeaderId, 'Priced Contract', @intUserId, 'UPDATE', 0
 				END
 			END
 
