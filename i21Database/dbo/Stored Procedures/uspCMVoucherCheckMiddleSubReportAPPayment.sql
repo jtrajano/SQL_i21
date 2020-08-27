@@ -32,8 +32,18 @@ DECLARE @BANK_DEPOSIT INT = 1
   ,@VOID_CHECK AS INT = 19
   ,@AP_ECHECK AS INT = 20
   ,@PAYCHECK AS INT = 21;
-
-WITH Invoices AS(
+WITH InvoiceType As(
+	select 0  intTransactionType , 'INVOICE' strTransactionType UNION ALL
+	select 1  intTransactionType , 'VOUCHER' strTransactionType UNION ALL
+	select 2  intTransactionType , 'PREPAYMENT' strTransactionType UNION ALL
+	select 3  intTransactionType , 'DEBIT MEMO' strTransactionType UNION ALL
+	select 9  intTransactionType , '1099 ADJUSTMENT' strTransactionType UNION ALL
+	select 11 intTransactionType , 'CLAIM' strTransactionType UNION ALL
+	select 12 intTransactionType , 'PREPAYMENT REVERSAL' strTransactionType UNION ALL
+	select 13 intTransactionType , 'BASIS ADVANCE' strTransactionType UNION ALL
+	select 14 intTransactionType , 'DEFERRED INTEREST' strTransactionType
+),
+Invoices AS(
 	SELECT  
 			intTransactionId = F.intTransactionId
 			,strBillId = BILL.strBillId
@@ -113,13 +123,13 @@ WITH Invoices AS(
 			,dtmDate = INV.dtmDate
 			,intTermsId = INV.intTermId
 			,strComment = INV.strComments
-			,dblAmount = INV.dblInvoiceTotal
+			,dblAmount = PYMTDetail.dblTotal
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
 						ELSE  PYMTDetail.dblInterest 
 						END
 			,dblNet = PYMTDetail.dblPayment
-			,'' AS intTransactionType
+			,0 AS intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
 			,F.strReferenceNo strCheckNumber
@@ -135,10 +145,12 @@ WITH Invoices AS(
 			AND F.intBankTransactionTypeId IN (@AP_PAYMENT, @AP_ECHECK)
 ) 
 SELECT
-a.*
-,b.strTerm
-,c.strCurrency
-FROM Invoices a
-LEFT JOIN tblSMTerm b on a.intTermsId = b.intTermID
-LEFT JOIN tblSMCurrency c ON a.intCurrencyId = c.intCurrencyID
+Invoice.*
+,InvoiceType.strTransactionType
+,Term.strTermCode
+,Curr.strCurrency
+FROM Invoices Invoice
+LEFT JOIN tblSMTerm Term on Invoice.intTermsId = Term.intTermID
+LEFT JOIN tblSMCurrency Curr ON Invoice.intCurrencyId = Curr.intCurrencyID
+LEFT JOIN InvoiceType ON InvoiceType.intTransactionType = Invoice.intTransactionType
 order by strInvoice, intPaymentDetailId
