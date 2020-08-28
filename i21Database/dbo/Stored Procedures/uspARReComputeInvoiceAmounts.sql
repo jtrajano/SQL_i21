@@ -165,26 +165,34 @@ WHERE
 
 --IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
 --BEGIN
-	UPDATE I
-	SET [dblDiscountAvailable]					= CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceSubtotal] + [dblShipping] END)  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END
-		,[dblBaseDiscountAvailable]				= CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceSubtotal] + [dblBaseShipping] END)  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END
+	UPDATE
+		tblARInvoice
+	SET
+		 [dblDiscountAvailable]					= CASE WHEN strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END
+		,[dblBaseDiscountAvailable]				= CASE WHEN strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END
 		,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
 		,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
 		,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
 		,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
-	FROM tblARInvoice I
-	INNER JOIN (
-		SELECT [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
-			,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
-			,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
-			,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
-			,[intInvoiceId]						= [intInvoiceId]
-		FROM tblARInvoiceDetail
-		WHERE [intInvoiceId] = @InvoiceIdLocal
-		GROUP BY [intInvoiceId]
-	) T ON I.[intInvoiceId] = T.[intInvoiceId]
-	   AND I.[intInvoiceId] = @InvoiceIdLocal
-	INNER JOIN tblSMTerm TERM ON I.intTermId = TERM.intTermID		
+	FROM
+		(
+			SELECT 
+				 [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
+				,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
+				,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
+				,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
+				,[intInvoiceId]						= [intInvoiceId]
+			FROM
+				tblARInvoiceDetail
+			WHERE
+				[intInvoiceId] = @InvoiceIdLocal
+			GROUP BY
+				[intInvoiceId]
+		)
+		 T
+	WHERE
+		tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
+		AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
 --END
 
 
@@ -290,28 +298,26 @@ WHERE
 	
 	
 UPDATE
-	tblARInvoice
+	ARI
 SET
-	 [dblInvoiceTotal]		= ([dblInvoiceSubtotal] + [dblTax] + [dblShipping])
-	,[dblBaseInvoiceTotal]	= ([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping])
-	,[dblAmountDue]			= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
-									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblProvisionalAmount, @ZeroDecimal) > 0
-												THEN (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END) - (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
-												ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal)) - (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END)
-										END
-									ELSE (ISNULL([dblInvoiceSubtotal] + [dblTax] + [dblShipping] + [dblInterest], @ZeroDecimal) - ISNULL(dblPayment + [dblDiscount], @ZeroDecimal))
-								  END
-	,[dblBaseAmountDue]		= CASE WHEN intSourceId = 2 AND intOriginalInvoiceId IS NOT NULL
-									THEN 
-										CASE WHEN strTransactionType = 'Credit Memo' AND ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) > 0
-												THEN (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END) - (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
-												ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal)) - (CASE WHEN ISNULL(ysnExcludeFromPayment, 0) = 1 THEN ISNULL(dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END)
-										END
-									ELSE (ISNULL([dblBaseInvoiceSubtotal] + [dblBaseTax] + [dblBaseShipping] + [dblBaseInterest], @ZeroDecimal) - ISNULL(dblBasePayment + [dblBaseDiscount], @ZeroDecimal))
-								  END
+	 [dblInvoiceTotal]		= (ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping])
+	,[dblBaseInvoiceTotal]	= (ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping])
+	,[dblAmountDue]			= ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)
+								-
+								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
+								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblPayment ELSE 0 END
+								ELSE 0
+								END
+	,[dblBaseAmountDue]		= ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal)
+								-
+								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
+								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblBasePayment ELSE 0 END
+								ELSE 0
+								END
+FROM tblARInvoice ARI
+INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
 WHERE
-	[intInvoiceId] = @InvoiceIdLocal
+	ARI.[intInvoiceId] = @InvoiceIdLocal
 
 END
 
