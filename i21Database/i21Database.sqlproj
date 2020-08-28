@@ -1888,6 +1888,8 @@
     <Build Include="dbo\Stored Procedures\uspICAddItemReceipt.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportReceipt.sql" />
     <Build Include="dbo\User Defined Types\ReceiptStagingTable.sql" />
+    <Build Include="dbo\User Defined Types\StagingRetailAdjustment.sql" />
+    <Build Include="dbo\User Defined Types\StagingRetailAdjustmentId.sql" />
     <Build Include="dbo\User Defined Types\ShipmentItemTableType.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemsFromItemShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspSOShipped.sql" />
@@ -3456,6 +3458,9 @@
     <Build Include="dbo\Stored Procedures\uspMFCheckContamination.sql" />
     <Build Include="dbo\Stored Procedures\uspMFRescheduleAndSaveWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSTDuplicateRetailPriceAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTBatchRetailAdjustmentPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRetailAdjustmentPreview.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTBatchRetailAdjustment.sql" />
     <Build Include="dbo\Views\vyuHDProjectSearchSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetScheduleByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspMFDragAndDropWorkOrder.sql" />

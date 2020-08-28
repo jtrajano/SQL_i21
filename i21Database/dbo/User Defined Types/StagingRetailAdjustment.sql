@@ -1,0 +1,32 @@
+CREATE TYPE [dbo].[StagingRetailAdjustment] AS TABLE(
+	[intRetailPriceAdjustmentDetailId] [int] NULL,
+	[intRetailPriceAdjustmentId] [int] NULL,
+	[intItemPricingId] [int] NULL,
+	[intCompanyLocationId] [int] NULL,
+	[strRegion] [nvarchar](max) NULL,
+	[strDistrict] [nvarchar](max) NULL,
+	[strState] [nvarchar](max) NULL,
+	[intEntityId] [int] NULL,
+	[intCategoryId] [int] NULL,
+	[intManufacturerId] [int] NULL,
+	[intFamilyId] [int] NULL,
+	[intClassId] [int] NULL,
+	[intItemUOMId] [int] NULL,
+	[strUpcDescription] [nvarchar](max) NULL,
+	[ysnPromo] [nvarchar](max) NULL,
+	[strPriceMethod] [nvarchar](max) NULL,
+	[dblFactor] [numeric](18, 6) NULL,
+	[strRoundPrice] [nvarchar](max) NULL,
+	[strPriceEndingDigit] [nvarchar](max) NULL,
+	[dblPrice] [numeric](18, 6) NULL,
+	[dblLastCost] [numeric](18, 6) NULL,
+	[ysnChangeCost] [nvarchar](max) NULL,
+	[dblCost] [numeric](18, 6) NULL,
+	[dtmSalesStartDate] [int] NULL,
+	[dtmSalesEndDate] [int] NULL,
+	[strPriceType] [nvarchar](max) NULL,
+	[intModifiedByUserId] [int] NULL,
+	[intConcurrencyId] [int] NULL
+)
+
+

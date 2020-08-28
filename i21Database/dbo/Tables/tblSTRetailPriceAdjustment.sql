@@ -11,7 +11,7 @@
     [intConcurrencyId]					INT											NOT NULL, 
     CONSTRAINT [PK_tblSTRetailPriceAdjustment] PRIMARY KEY CLUSTERED ([intRetailPriceAdjustmentId] ASC),
 	--CONSTRAINT [AK_tblSTRetailPriceAdjustment_strRetailPriceAdjustmentNumber] UNIQUE NONCLUSTERED ([strRetailPriceAdjustmentNumber]ASC),
-    CONSTRAINT [AK_tblSTRetailPriceAdjustment_dtmEffectiveDate] UNIQUE NONCLUSTERED ([dtmEffectiveDate]ASC), 
+    --CONSTRAINT [AK_tblSTRetailPriceAdjustment_dtmEffectiveDate] UNIQUE NONCLUSTERED ([dtmEffectiveDate]ASC), 
 );
 GO
 
