@@ -287,9 +287,7 @@ BEGIN TRY
 								,intForexRateTypeId		= NULL -- Optional. You will use this if you are using multi-currency. 
 								,dblForexRate			= 1 -- Optional. You will use this if you are using multi-currency. 
 								,dblUnitRetail			= MUD.dblTotalRetailAmount
-								,intCategoryId			= CASE
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.intCategoryId ELSE NULL
-														END
+								,intCategoryId			= MUD.intCategoryId 
 								,dblAdjustCostValue		= MUD.dblTotalCostAmount
 								,dblAdjustRetailValue	= MUD.dblTotalRetailAmount
 						FROM tblSTMarkUpDownDetail MUD
@@ -399,11 +397,8 @@ BEGIN TRY
 															WHEN MU.strType = @MarkUpType_ItemLevel THEN MUD.dblRetailPerUnit
 															ELSE NULL
 														END
-
-								-- Department Manage
-								,intCategoryId			= CASE
-															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.intCategoryId ELSE NULL
-														END
+														
+								,intCategoryId			= MUD.intCategoryId 
 								,dblAdjustCostValue		= CASE
 															WHEN MU.strType = @MarkUpType_DepartmentLevel THEN MUD.dblTotalCostAmount * -1 ELSE NULL
 														END
