@@ -48,7 +48,7 @@ BEGIN
 			(					
 				select 
 						sum(
-							isnull(dbo.fnICConvertUOMtoStockUnit(Item.intItemId, ItemStockUOM.intItemUOMId, dblQty), 0) 
+							CAST (ISNULL(dbo.fnICConvertUOMtoStockUnit(Item.intItemId, ItemStockUOM.intItemUOMId, dblQty), 0)  AS NUMERIC(28, 2)) 
 						) as dblTotalStockPerLocation, 
 						il.intLocationId
 				FROM	

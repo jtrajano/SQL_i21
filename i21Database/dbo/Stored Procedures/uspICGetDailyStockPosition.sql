@@ -11,7 +11,7 @@ SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
 -- Check if daily stock is rebuilding. If yes, exit immediately to avoid deadlocks. 
-IF EXISTS (SELECT TOP 1 1 FROM tblICStagingDailyStockPosition WHERE ysnBuilding = 1)
+IF EXISTS (SELECT TOP 1 1 FROM tblICStagingDailyStockPosition (NOLOCK) WHERE ysnBuilding = 1)
 BEGIN 
 	RETURN; 
 END 
@@ -73,7 +73,7 @@ DECLARE	@InventoryAutoVariance AS INT = 1
 		,@SalesReturn AS INT = 51
 
 DECLARE @Transactions TABLE (intId INT IDENTITY(1,1), intTransactionId INT, intItemId INT, intItemUOMId INT,
-	intTransactionTypeId INT, intLotId INT, dblQty NUMERIC(38, 20), intItemLocationId INT, intInTransitSourceLocationId INT, ysnOwned BIT, PRIMARY KEY(intId))
+	intTransactionTypeId INT, intLotId INT, dblQty NUMERIC(18, 6), intItemLocationId INT, intInTransitSourceLocationId INT, ysnOwned BIT, PRIMARY KEY(intId))
 
 INSERT INTO @Transactions(intTransactionId, intItemId, intItemUOMId, intTransactionTypeId, intLotId, dblQty, intItemLocationId, intInTransitSourceLocationId, ysnOwned)
 SELECT t.intTransactionId, t.intItemId, t.intItemUOMId, t.intTransactionTypeId, t.intLotId, t.dblQty, t.intItemLocationId, t.intInTransitSourceLocationId, 1
@@ -96,7 +96,7 @@ CREATE TABLE #tmpDailyStockPosition
 	intTransactionTypeId			INT,
 	intLotId						INT,
 	intInTransitSourceLocationId	INT,
-	dblQty							NUMERIC(38,20)
+	dblQty							NUMERIC(18, 6)
 )	
 	-----===== SOURCE 1 - Opening Qty
 	INSERT INTO #tmpDailyStockPosition
@@ -374,7 +374,8 @@ CREATE TABLE #tmpDailyStockPosition
 			intLotId,
 			intInTransitSourceLocationId
 
-	DELETE FROM tblICStagingDailyStockPosition WHERE (guidSessionId = @guidSessionId OR DATEDIFF(SECOND, dtmDateCreated, GETDATE()) > 10)
+	--DELETE FROM tblICStagingDailyStockPosition WHERE (guidSessionId = @guidSessionId OR DATEDIFF(SECOND, dtmDateCreated, GETDATE()) > 10)
+	DELETE FROM tblICStagingDailyStockPosition WHERE guidSessionId = @guidSessionId 
 	-----===== READ DAILY STOCK POSITION
 
 	IF EXISTS (
