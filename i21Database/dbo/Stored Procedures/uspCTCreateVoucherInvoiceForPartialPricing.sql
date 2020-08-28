@@ -9,154 +9,147 @@ AS
 
 
 BEGIN TRY
-	DECLARE @ErrMsg							NVARCHAR(MAX),
-			@dblCashPrice					NUMERIC(18,6),
-			@ysnPosted						BIT,
-			@strReceiptNumber				NVARCHAR(50),
-			@intLastModifiedById			INT,
-			@intInventoryReceiptId			INT,
-			@intSourceTicketId				INT,
-			@intPricingTypeId				INT,
-			@intContractHeaderId			INT,
-			@ysnOnceApproved				BIT,
-			@ysnApprovalExist				BIT,
-			@ysnAllowChangePricing			BIT,
-			@ysnEnablePriceContractApproval BIT,
-			@intEntityId					INT,
-			@intContractTypeId				INT,
-			@intInvoiceId					INT,
-			@intInventoryShipmentId			INT,
-			@intNewInvoiceId				INT,
-			@intBillId						INT,
-			@intNewBillId					INT,
-			@ysnSuccess						BIT,
-			@voucherDetailReceipt			VoucherDetailReceipt,
-			@voucherDetailReceiptCharge		VoucherDetailReceiptCharge,
-			@InvoiceEntries					InvoiceIntegrationStagingTable,
-			@LineItemTaxEntries				LineItemTaxDetailStagingTable,
-			@ErrorMessage					NVARCHAR(250),
-			@CreatedIvoices					NVARCHAR(MAX),
-			@UpdatedIvoices					NVARCHAR(MAX),
-			@strShipmentNumber				NVARCHAR(50),
-			@intBillDetailId				INT,
-			@strVendorOrderNumber			NVARCHAR(50),
-			@ysnBillPosted					BIT,
-			@ysnBillPaid					BIT,
-			@intCompanyLocationId			INT,
-			@dblTotal						NUMERIC(18,6),
-			@ysnRequireApproval				BIT,
-			@prePayId						Id,
-			@intTicketId					INT,
-			@intInvoiceDetailId				INT,
-			@ysnInvoicePosted				BIT,
-			@intPriceFixationDetailId		INT,
-			@intPriceFixationId				INT,
-			@dblPriceFixedQty				NUMERIC(18,6),
-			@dblTotalBillQty			    NUMERIC(18,6),
-			@dblReceived			        NUMERIC(18,6),
-			@dblQtyToBill			        NUMERIC(18,6),
-			@dblTicketQty			        NUMERIC(18,6),
-			@intUniqueId					INT,
-			@dblFinalPrice					NUMERIC(18,6),
-			@intBillQtyUOMId				INT,
-			@intItemUOMId				    INT,
-			@intInventoryReceiptItemId		INT,  
-			@dblTotalInvoiceQty 			NUMERIC(18,6),  
-			@intInventoryShipmentItemId		INT,  
-			@dblShipped						NUMERIC(18,6),  
-			@dblQtyToInvoice				NUMERIC(18,6),
-			@intInvoiceQtyUOMId				INT,
-			@dblInvoicePrice				NUMERIC(18,6),
-			@dblVoucherPrice				NUMERIC(18,6),
-			@dblTotalIVForPFQty				NUMERIC(18,6),
-			@batchIdUsed					NVARCHAR(MAX),
-			@dblQtyShipped					NUMERIC(18,6),
-			@dblQtyReceived					NUMERIC(18,6),
-			@intPriceFixationDetailAPARId	INT,
-			@dblPriceFxdQty					NUMERIC(18,6),
-			@dblRemainingQty				NUMERIC(18,6),
-			@dblTotalIVForSHQty				NUMERIC(18,6),
-			@intPFDetailId					INT,
-			@ysnDestinationWeightsAndGrades	BIT,
-			@strInvoiceNumber				NVARCHAR(100),
-			@strBillId						NVARCHAR(100),
-			@strPostedAPAR					NVARCHAR(MAX),
-			@intReceiptUniqueId				INT,  
-			@intShipmentUniqueId			INT,
-			@ysnTicketBased					BIT = 0,
-			@ysnPartialPriced				BIT = 0,
-			@ysnCreateNew					BIT = 0,
-			@receiptDetails					InventoryUpdateBillQty,
-			@ysnLoad						BIT,
-			@allowAddDetail					BIT,
-			@dblPriceLoadQty				NUMERIC(18, 6),
-			@dblPriceFixationLoadApplied	NUMERIC(18, 6),
-			@dblInventoryItemLoadApplied	NUMERIC(18, 6),
-			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6),
-			@intShipmentInvoiceDetailId		INT,
-			@dtmFixationDate				DATE,
-			@detailCreated					Id;
-
-		declare @intPriceContractId int;
-		declare @shipment cursor;
-		declare @pricing cursor;
-		declare @dblPriced numeric(18,6);
-		declare @dblInvoicedShipped numeric(18,6);
-		declare @dblShippedForInvoice numeric(18,6);
-		declare @dblInvoicedPriced numeric(18,6);
-		declare @dblPricedForInvoice numeric(18,6);
-		declare @dblQuantityForInvoice numeric(18,6);
+	DECLARE @ErrMsg								NVARCHAR(MAX)
+			,@dblCashPrice						NUMERIC(18,6)
+			,@ysnPosted							BIT
+			,@strReceiptNumber					NVARCHAR(50)
+			,@intLastModifiedById				INT
+			,@intInventoryReceiptId				INT
+			,@intSourceTicketId					INT
+			,@intPricingTypeId					INT
+			,@intContractHeaderId				INT
+			,@ysnOnceApproved					BIT
+			,@ysnApprovalExist					BIT
+			,@ysnAllowChangePricing				BIT
+			,@ysnEnablePriceContractApproval	BIT
+			,@intEntityId						INT
+			,@intContractTypeId					INT
+			,@intInvoiceId						INT
+			,@intInventoryShipmentId			INT
+			,@intNewInvoiceId					INT
+			,@intBillId							INT
+			,@intNewBillId						INT
+			,@ysnSuccess						BIT
+			,@voucherDetailReceipt				VoucherDetailReceipt
+			,@voucherDetailReceiptCharge		VoucherDetailReceiptCharge
+			,@InvoiceEntries					InvoiceIntegrationStagingTable
+			,@LineItemTaxEntries				LineItemTaxDetailStagingTable
+			,@ErrorMessage						NVARCHAR(250)
+			,@CreatedIvoices					NVARCHAR(MAX)
+			,@UpdatedIvoices					NVARCHAR(MAX)
+			,@strShipmentNumber					NVARCHAR(50)
+			,@intBillDetailId					INT
+			,@strVendorOrderNumber				NVARCHAR(50)
+			,@ysnBillPosted						BIT
+			,@ysnBillPaid						BIT
+			,@intCompanyLocationId				INT
+			,@dblTotal							NUMERIC(18,6)
+			,@ysnRequireApproval				BIT
+			,@prePayId							Id
+			,@intTicketId						INT
+			,@intInvoiceDetailId				INT
+			,@ysnInvoicePosted					BIT
+			,@intPriceFixationDetailId			INT
+			,@intPriceFixationId				INT
+			,@dblPriceFixedQty					NUMERIC(18,6)
+			,@dblTotalBillQty					NUMERIC(18,6)
+			,@dblReceived						NUMERIC(18,6)
+			,@dblQtyToBill						NUMERIC(18,6)
+			,@dblTicketQty						NUMERIC(18,6)
+			,@intUniqueId						INT
+			,@dblFinalPrice						NUMERIC(18,6)
+			,@intBillQtyUOMId					INT
+			,@intItemUOMId						INT
+			,@intInventoryReceiptItemId			INT  
+			,@dblTotalInvoiceQty 				NUMERIC(18,6)  
+			,@intInventoryShipmentItemId		INT  
+			,@dblShipped						NUMERIC(18,6)  
+			,@dblQtyToInvoice					NUMERIC(18,6)
+			,@intInvoiceQtyUOMId				INT
+			,@dblInvoicePrice					NUMERIC(18,6)
+			,@dblVoucherPrice					NUMERIC(18,6)
+			,@dblTotalIVForPFQty				NUMERIC(18,6)
+			,@batchIdUsed						NVARCHAR(MAX)
+			,@dblQtyShipped						NUMERIC(18,6)
+			,@dblQtyReceived					NUMERIC(18,6)
+			,@intPriceFixationDetailAPARId		INT
+			,@dblPriceFxdQty					NUMERIC(18,6)
+			,@dblRemainingQty					NUMERIC(18,6)
+			,@dblTotalIVForSHQty				NUMERIC(18,6)
+			,@intPFDetailId						INT
+			,@ysnDestinationWeightsAndGrades	BIT
+			,@strInvoiceNumber					NVARCHAR(100)
+			,@strBillId							NVARCHAR(100)
+			,@strPostedAPAR						NVARCHAR(MAX)
+			,@intReceiptUniqueId				INT  
+			,@intShipmentUniqueId				INT
+			,@ysnTicketBased					BIT = 0
+			,@ysnPartialPriced					BIT = 0
+			,@ysnCreateNew						BIT = 0
+			,@receiptDetails					InventoryUpdateBillQty
+			,@ysnLoad							BIT
+			,@allowAddDetail					BIT
+			,@dblPriceLoadQty					NUMERIC(18, 6)
+			,@dblPriceFixationLoadApplied		NUMERIC(18, 6)
+			,@dblInventoryItemLoadApplied		NUMERIC(18, 6)
+			,@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6)
+			,@intShipmentInvoiceDetailId		INT
+			,@dtmFixationDate					DATE
+			,@detailCreated						Id
+			,@intPriceContractId				int
+			,@shipment							cursor
+			,@pricing							cursor
+			,@dblPriced							numeric(18,6)
+			,@dblInvoicedShipped				numeric(18,6)
+			,@dblShippedForInvoice				numeric(18,6)
+			,@dblInvoicedPriced					numeric(18,6)
+			,@dblPricedForInvoice				numeric(18,6)
+			,@dblQuantityForInvoice				numeric(18,6)
+			,@intShipmentCount					int = 0
+			,@intActiveShipmentId				int = 0
+			,@intPricedLoad						int = 0
+			,@intTotalLoadPriced				int = 0
+			,@intCommulativeLoadPriced			int = 0
+			,@intApplied						numeric(18,6) = 0
+			,@intPreviousPricedLoad				numeric(18,6)
+			,@dblLoadAppliedAndPriced			numeric(18,6)
+			,@ysnDestinationWeightsGrades		bit = convert(bit,0)
+			,@intWeightGradeId					int = 0
+			,@ContractPriceItemUOMId			int = null
+			,@ContractPriceUnitMeasureId		int = null
+			,@ContractDetailItemId				int = null
+			,@intSequenceFreightTermId			int
+			,@dblSequenceQuantity				numeric(18,6)
+			,@dblSequenceTotalInvoicedQuantity	numeric(18,6)
+			,@NewInvoiceSpotDetailId			int
+			,@dblOverageQuantity				numeric(18,6);
 
 		
-		declare @intShipmentCount int = 0;
-		declare @intActiveShipmentId int = 0;
-		declare @intPricedLoad int = 0;
-		declare @intTotalLoadPriced int = 0;
-		declare @PricedShipment table
-		(
-			intInventoryShipmentId int
-		)
-		declare @intCommulativeLoadPriced int = 0;
-		
-		declare @intApplied numeric(18,6) = 0;
-		declare @intPreviousPricedLoad numeric(18,6);
-		declare @dblLoadAppliedAndPriced numeric(18,6);
-		declare @ysnDestinationWeightsGrades bit = convert(bit,0);
-		declare @intWeightGradeId int = 0;
-		declare @ContractPriceItemUOMId int = null;
-		declare @ContractPriceUnitMeasureId int = null;
-		declare @ContractDetailItemId int = null;
-		declare @intSequenceFreightTermId int;
+	declare @PricedShipment table
+	(
+		intInventoryShipmentId int
+	)
 
-		declare @InvShp table (
-			intInventoryShipmentId int
-			,intInventoryShipmentItemId int
-			,dblShipped numeric(18,6)
-			,intInvoiceDetailId int null
-			,intItemUOMId int null
-			,intLoadShipped int null
-			,dtmInvoiceDate datetime null
-		)
+	declare @InvShp table (
+		intInventoryShipmentId int
+		,intInventoryShipmentItemId int
+		,dblShipped numeric(18,6)
+		,intInvoiceDetailId int null
+		,intItemUOMId int null
+		,intLoadShipped int null
+		,dtmInvoiceDate datetime null
+	)
 
 
-		declare @InvShpFinal table (
-			intInventoryShipmentId int
-			,intInventoryShipmentItemId int
-			,dblShipped numeric(18,6)
-			,intInvoiceDetailId int null
-			,intItemUOMId int null
-			,intLoadShipped int null
-			,dtmInvoiceDate datetime null
-		)
-
-	SELECT	@dblCashPrice			=	dblCashPrice, 
-			@intPricingTypeId		=	intPricingTypeId, 
-			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
-			@intContractHeaderId	=	intContractHeaderId,
-			@intCompanyLocationId	=	intCompanyLocationId,
-			@intSequenceFreightTermId = intFreightTermId
-	FROM	tblCTContractDetail 
-	WHERE	intContractDetailId		=	@intContractDetailId
+	declare @InvShpFinal table (
+		intInventoryShipmentId int
+		,intInventoryShipmentItemId int
+		,dblShipped numeric(18,6)
+		,intInvoiceDetailId int null
+		,intItemUOMId int null
+		,intLoadShipped int null
+		,dtmInvoiceDate datetime null
+	)
 	
 	DECLARE @tblToProcess TABLE
 	(
@@ -197,7 +190,25 @@ BEGIN TRY
 		intInvoiceDetailId				INT NULL
 	)
 
-	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+	declare @OverageToProcess table (
+		intContractDetailId int
+		,intContractHeaderId int
+		,intInventoryShipmentItemId int
+		,dblOverageQuantity numeric(18,6)
+	)
+
+	SELECT	@dblCashPrice			=	dblCashPrice, 
+			@intPricingTypeId		=	intPricingTypeId, 
+			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
+			@intContractHeaderId	=	intContractHeaderId,
+			@intCompanyLocationId	=	intCompanyLocationId,
+			@intSequenceFreightTermId = intFreightTermId,
+			@dblSequenceQuantity	=	dblQuantity
+	FROM	tblCTContractDetail 
+	WHERE	intContractDetailId		=	@intContractDetailId
+
+	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId;
+
 	select @intWeightGradeId = intWeightGradeId from tblCTWeightGrade where strWeightGradeDesc = 'Destination'
 		
 	SELECT	@intEntityId		=	intEntityId,
@@ -1409,7 +1420,23 @@ BEGIN TRY
 							set @dblQuantityForInvoice = @dblShippedForInvoice;	
 						end
 
-						print @dblQuantityForInvoice;
+						--Check overage quantity
+						delete from @OverageToProcess;
+
+						if (@dblPricedForInvoice < @dblShippedForInvoice and isnull(@ysnDestinationWeightsGrades,0) = 1 and @intPricingTypeId = 1)
+						begin
+							insert into @OverageToProcess (
+								intContractDetailId
+								,intContractHeaderId
+								,intInventoryShipmentItemId
+								,dblOverageQuantity
+							)
+							select
+								intContractDetailId = @intContractDetailId
+								,intContractHeaderId = @intContractHeaderId
+								,intInventoryShipmentItemId = @intInventoryShipmentItemId
+								,dblOverageQuantity = (@dblShippedForInvoice - @dblPricedForInvoice)							
+						end
 
 						--Check if Shipment Item has unposted Invoice
 						if not exists (
@@ -1456,14 +1483,14 @@ BEGIN TRY
 							IF (ISNULL(@intInvoiceDetailId,0) > 0)
 							BEGIN
 
-							--select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
-							select top 1 @ContractPriceItemUOMId = a.intItemUOMId
-							from tblICItemUOM a 
-							JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityUnitMeasureId	=	@ContractPriceUnitMeasureId
-							JOIN tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=	PU.intUnitMeasureId
-							where a.intItemId = @ContractDetailItemId and a.intUnitMeasureId = PM.intUnitMeasureId;
+								--select top 1 @ContractPriceItemUOMId = intItemUOMId from tblICItemUOM where intItemId = @ContractDetailItemId and intUnitMeasureId = @ContractPriceUnitMeasureId;
+								select top 1 @ContractPriceItemUOMId = a.intItemUOMId
+								from tblICItemUOM a 
+								JOIN tblICCommodityUnitMeasure	PU	ON	PU.intCommodityUnitMeasureId	=	@ContractPriceUnitMeasureId
+								JOIN tblICUnitMeasure			PM	ON	PM.intUnitMeasureId				=	PU.intUnitMeasureId
+								where a.intItemId = @ContractDetailItemId and a.intUnitMeasureId = PM.intUnitMeasureId;
 
-							set @dblFinalPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@ContractPriceItemUOMId,@dblFinalPrice);
+								set @dblFinalPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intItemUOMId,@ContractPriceItemUOMId,@dblFinalPrice);
 
 								EXEC	uspARUpdateInvoicePrice 
 										@InvoiceId			=	@intNewInvoiceId
@@ -1476,6 +1503,26 @@ BEGIN TRY
 								delete FROM tblARInvoiceDetail WHERE intInvoiceId = @intNewInvoiceId AND intContractDetailId = @intContractDetailId AND intInvoiceDetailId <> @intInvoiceDetailId;
 								exec uspARReComputeInvoiceAmounts @InvoiceId=@intNewInvoiceId,@AvailableDiscountOnly=0;
 							END
+
+							--Process if there's overage
+							select @dblOverageQuantity = dblOverageQuantity from @OverageToProcess;
+							if (isnull(@dblOverageQuantity,0) > 0)
+							begin
+								select @dblSequenceTotalInvoicedQuantity = SUM(dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,@intItemUOMId,dblQtyShipped))  from tblARInvoiceDetail where intContractDetailId = @intContractDetailId and intInventoryShipmentChargeId is null;
+								if (@dblSequenceQuantity <= @dblSequenceTotalInvoicedQuantity)
+								begin
+									exec uspCTCreateInvoiceDetail
+										@intInvoiceDetailId = @intInvoiceDetailId
+										,@intInventoryShipmentId = @intInventoryShipmentId
+										,@intInventoryShipmentItemId = @intInventoryShipmentItemId
+										,@dblQty = @dblOverageQuantity
+										,@dblPrice = 0.00
+										,@intUserId = @intUserId
+										,@intContractHeaderId = null
+										,@intContractDetailId = null
+										,@NewInvoiceDetailId = @NewInvoiceSpotDetailId;
+								end
+							end
 
 							--Create AR record to staging table tblCTPriceFixationDetailAPAR
 							IF @intNewInvoiceId IS NOT NULL
@@ -1525,6 +1572,26 @@ BEGIN TRY
 								,@intContractHeaderId
 								,@intContractDetailId
 								,@intInvoiceDetailId OUTPUT
+
+							--Process if there's overage
+							select @dblOverageQuantity = dblOverageQuantity from @OverageToProcess;
+							if (isnull(@dblOverageQuantity,0) > 0)
+							begin
+								select @dblSequenceTotalInvoicedQuantity = SUM(dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,@intItemUOMId,dblQtyShipped))  from tblARInvoiceDetail where intContractDetailId = @intContractDetailId and intInventoryShipmentChargeId is null;
+								if (@dblSequenceQuantity <= @dblSequenceTotalInvoicedQuantity)
+								begin
+									exec uspCTCreateInvoiceDetail
+										@intInvoiceDetailId = @intInvoiceDetailId
+										,@intInventoryShipmentId = @intInventoryShipmentId
+										,@intInventoryShipmentItemId = @intInventoryShipmentItemId
+										,@dblQty = @dblOverageQuantity
+										,@dblPrice = 0.00
+										,@intUserId = @intUserId
+										,@intContractHeaderId = null
+										,@intContractDetailId = null
+										,@NewInvoiceDetailId = @NewInvoiceSpotDetailId;
+								end
+							end
 
 							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
 							SELECT @intPriceFixationDetailId,@intInvoiceId,@intInvoiceDetailId,1
