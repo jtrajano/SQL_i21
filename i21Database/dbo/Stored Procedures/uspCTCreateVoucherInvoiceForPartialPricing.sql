@@ -271,7 +271,7 @@ BEGIN TRY
 				SELECT	dblQtyReceived = SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived))
 				FROM	tblCTPriceFixationDetailAPAR	AA
 				JOIN	tblAPBillDetail					AD	ON	AD.intBillDetailId	=	AA.intBillDetailId
-				WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+				WHERE	AA.intPriceFixationDetailId = @intPriceFixationDetailId
 				AND		ISNULL(AD.intSettleStorageId,0) <> 0
 			) SS
 			WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
@@ -358,7 +358,7 @@ BEGIN TRY
 					SELECT	@dblTotalIVForPFQty = SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived))
 					FROM	tblCTPriceFixationDetailAPAR	AA
 					JOIN	tblAPBillDetail					AD	ON	AD.intBillDetailId	=	AA.intBillDetailId
-					WHERE	intPriceFixationDetailId = @intPriceFixationDetailId
+					WHERE	AA.intPriceFixationDetailId = @intPriceFixationDetailId
 					AND		ISNULL(AD.intSettleStorageId,0) = 0
 
 					SELECT	@dblTotalIVForPFQty = ISNULL(@dblTotalIVForPFQty,0)
