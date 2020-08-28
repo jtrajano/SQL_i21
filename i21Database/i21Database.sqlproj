@@ -8825,6 +8825,7 @@
     <Build Include="dbo\Views\vyuRKGetM2MPostPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />
+    <Build Include="dbo\Views\vyuLGGetLoadData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
