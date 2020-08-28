@@ -2,11 +2,9 @@ CREATE PROCEDURE [dbo].[uspFADepreciateAsset]
 	@Param				AS NVARCHAR(MAX)	= '',	
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
-	@strBatchId			AS NVARCHAR(100)	= '',
-	@strTransactionId	AS NVARCHAR(100)	= '',
 	@intEntityId		AS INT				= 1,
-	@successfulCount	AS INT				= 0 OUTPUT
-	
+	@successfulCount	AS INT				= 0 OUTPUT,
+	@strBatchId			AS NVARCHAR(100)	= '' OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -14,44 +12,51 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON
 SET XACT_ABORT ON
 
-BEGIN TRANSACTION;
-
 
 --=====================================================================================================================================
 -- 	POPULATE FIXEDASSETS TO POST TEMPORARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE #AssetID(
 			[intAssetId] [int] NOT NULL,
+
 		)
 IF (ISNULL(@Param, '') <> '') 
 	INSERT INTO #AssetID EXEC (@Param)
 ELSE
 	INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset
+
+
+Exec uspSMGetStartingNumber @intStartingNumberId= 3, @strID = @strBatchId OUTPUT
+
 	
 --=====================================================================================================================================
 -- 	UNPOSTING FIXEDASSETS TRANSACTIONS ysnPost = 0
 ---------------------------------------------------------------------------------------------------------------------------------------
 IF ISNULL(@ysnPost, 0) = 0
+BEGIN
+	DECLARE @intCount AS INT	
+	DECLARE @strAssetId NVARCHAR(20)
+	SELECT TOP 1 @strAssetId= strAssetId FROM tblFAFixedAsset A JOIN #AssetID B on A.intAssetId = B.intAssetId
+	SET @Param = 'SELECT intGLDetailId FROM tblGLDetail WHERE strReference = ''' + @strAssetId + ''' AND strCode = ''AMDPR'' AND ysnIsUnposted=0'
+
+	IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 	BEGIN
-		DECLARE @intCount AS INT	
-
-		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
+		DECLARE @ReverseResult INT
+		EXEC @ReverseResult  = [dbo].[uspFAReverseGLEntries] @strBatchId,@Param, @ysnRecap, NULL, @intEntityId, @intCount	OUT
+		IF @ReverseResult <> 0 RETURN -1
+		SET @successfulCount = @intCount
+		IF ISNULL(@ysnRecap,0) = 0
 			BEGIN
-				SET @Param = (SELECT strAssetId FROM tblFAFixedAsset WHERE intAssetId IN (SELECT intAssetId FROM #AssetID))
-				-- TODO REPLACE @Param with the correct sql statement
-				EXEC [dbo].[uspFAReverseGLEntries] @strBatchId,@Param, 0, NULL, @intEntityId, @intCount	OUT
-				SET @successfulCount = @intCount
-				
-				IF(@intCount > 0)
-				BEGIN
-					UPDATE tblFAFixedAsset SET ysnDepreciated = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
-				END									
-			END
-		
-		GOTO Post_Commit;
+			IF(@intCount > 0)
+			BEGIN
+				UPDATE tblFAFixedAsset SET ysnDepreciated = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
+				DELETE A FROM tblFAFixedAssetDepreciation A JOIN #AssetID B ON B.intAssetId =  A.intAssetId AND strTransaction = 'Depreciation'
+			END		
+		END							
 	END
-
-
+END
+ELSE
+BEGIN
 --=====================================================================================================================================
 -- 	CHECK IF THE PROCESS IS RECAP OR NOT
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -59,6 +64,10 @@ Post_Transaction:
 
 DECLARE @ErrorMessage NVARCHAR(MAX)
 DECLARE @intDefaultCurrencyId	INT, @ysnForeignCurrency BIT = 0
+DECLARE @strTransactionId NVARCHAR(100)
+
+Exec uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strTransactionId OUTPUT
+
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
 -- Entire record
@@ -303,35 +312,22 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
 			,[strCode]				= 'AMDPR'
-								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
 			,[strTransactionType]	= 'Depreciation'
 			,[strTransactionForm]	= 'Fixed Assets'
 			,[strModuleName]		= 'Fixed Assets'
-		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
 		
-		BEGIN TRY
-		EXEC uspGLBookEntries @GLEntries, @ysnPost
-		END TRY
-		BEGIN CATCH		
-			SET @ErrorMessage  = ERROR_MESSAGE()
-			RAISERROR(@ErrorMessage, 11, 1)
-
-			IF @@ERROR <> 0	GOTO Post_Rollback;
-		END CATCH
-
-		IF @@ERROR <> 0	GOTO Post_Rollback;
-
+		DECLARE @PostResult INT
+		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
+		IF @@ERROR <> 0	OR @PostResult <> 0 RETURN -1
 		DELETE #FAAsset
 		DROP TABLE #FAAsset
-
-		IF @@ERROR <> 0	GOTO Post_Rollback;
 	END
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
+
 
 
 --=====================================================================================================================================
@@ -342,33 +338,18 @@ UPDATE tblFAFixedAsset
 	WHERE [intAssetId] IN (SELECT intAssetId From #AssetID)
 
 
-IF @@ERROR <> 0	GOTO Post_Rollback;
-
-
 IF EXISTS(SELECT TOP 1 1 FROM (SELECT TOP 1 A.intAssetDepreciationId FROM tblFAFixedAssetDepreciation A 
 						WHERE A.[intAssetId] IN (SELECT intAssetId From #AssetID) 
 								AND ISNULL([dbo].isOpenAccountingDate(A.[dtmDepreciationToDate]), 0) = 0 ORDER BY A.intAssetDepreciationId DESC ) TBL)
 BEGIN
-	GOTO Post_Rollback
+	RAISERROR('There is Depreciation Date on a closed period in this asset.', 16,1)
+	RETURN-1
 END
-
-IF @@ERROR <> 0	GOTO Post_Rollback;
-
 --=====================================================================================================================================
 -- 	RETURN TOTAL NUMBER OF VALID FIXEDASSETS
 ---------------------------------------------------------------------------------------------------------------------------------------
 SET @successfulCount = ISNULL(@successfulCount,0) + (SELECT COUNT(*) FROM #AssetID)
 
+END
 
---=====================================================================================================================================
--- 	FINALIZING STAGE
----------------------------------------------------------------------------------------------------------------------------------------
-Post_Commit:
-	COMMIT TRANSACTION
-	GOTO Post_Exit
-
-Post_Rollback:
-	ROLLBACK TRANSACTION	
-	GOTO Post_Exit
-
-Post_Exit:
+RETURN 0;

@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspFAReverseGLEntries]  
   @strBatchId  AS NVARCHAR(100) = ''  
- ,@strParams NVARCHAR(40) = NULL  
+ ,@strParams NVARCHAR(200) = NULL  
  ,@ysnRecap   AS BIT   = 0  
  ,@dtmDateReverse DATETIME  = NULL   
  ,@intEntityId  INT    = NULL   
@@ -13,24 +13,20 @@ SET NOCOUNT ON
 SET XACT_ABORT ON  
 SET ANSI_WARNINGS OFF  
   
-BEGIN TRANSACTION;  
-
-
 
 DECLARE @tmpPostJournals JournalIDTableType  
-INSERT INTO @tmpPostJournals EXEC (@strParams)  
+INSERT INTO @tmpPostJournals(intJournalId) EXEC (@strParams)  
 
 IF ISNULL(@ysnRecap, 0) = 0  
- BEGIN     
-    
-  EXEC [uspFAInsertReverseGLEntry] @tmpPostJournals,@intEntityId,@dtmDateReverse, @strBatchId  
-
-  SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strBatchId = @strBatchId)  
-  IF @@ERROR <> 0 GOTO Post_Rollback
- END  
+BEGIN     
+    DECLARE @ReverseEntry INT
+    EXEC @ReverseEntry = [uspFAInsertReverseGLEntry] @tmpPostJournals,@intEntityId,@dtmDateReverse, @strBatchId  
+    IF @@ERROR <> 0 OR  @ReverseEntry <> 0 RETURN -1
+    SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strBatchId = @strBatchId)  
+END  
 ELSE  
- BEGIN  
-  DECLARE @GLEntries RecapTableType  
+    BEGIN  
+    DECLARE @GLEntries RecapTableType  
     
   INSERT INTO @GLEntries (  
     [strTransactionId]  
@@ -91,36 +87,23 @@ ELSE
   ORDER BY intGLDetailId  
   
   EXEC uspGLPostRecap @GLEntries, @intEntityId  
-  SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strBatchId = @strBatchId)  
+  SET @successfulCount = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchId)  
       
-  IF @@ERROR <> 0 GOTO Post_Rollback;  
+  IF @@ERROR <> 0 RETURN -1
   
-  GOTO Post_Commit;  
-  
+
  END  
   
-IF @@ERROR <> 0 GOTO Post_Rollback;  
+
   
 --=====================================================================================================================================  
 --  RETURN TOTAL NUMBER OF VALID GL ENTRIES  
 ---------------------------------------------------------------------------------------------------------------------------------------  
 
   
-IF @@ERROR <> 0 GOTO Post_Rollback;  
+IF @@ERROR <> 0 RETURN -1
   
 --=====================================================================================================================================  
 --  FINALIZING STAGE  
 ---------------------------------------------------------------------------------------------------------------------------------------  
-Post_Commit:  
-IF @@TRANCOUNT > 0  
- COMMIT TRANSACTION  
- 
-
- GOTO Post_Exit  
-  
-Post_Rollback:  
-IF @@TRANCOUNT > 0  
- ROLLBACK TRANSACTION                
- GOTO Post_Exit  
-  
-Post_Exit:
+RETURN 0
