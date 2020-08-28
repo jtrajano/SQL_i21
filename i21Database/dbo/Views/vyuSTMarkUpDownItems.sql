@@ -20,3 +20,4 @@ INNER JOIN vyuICGetItemLocation GIL
 	ON IP.intItemUOMId = GIL.intIssueUOMId
 WHERE GIL.intItemLocationId = IP.intItemLocationId
 AND I.strLotTracking = 'No'
+AND GIL.intCostingMethod = 6
