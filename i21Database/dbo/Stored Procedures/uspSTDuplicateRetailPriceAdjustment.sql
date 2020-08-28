@@ -65,7 +65,7 @@ BEGIN
 		intConcurrencyId
 	)
 	SELECT 
-		dtmEffectiveDate					= NULL,
+		dtmEffectiveDate					= GETDATE(),
 		strDescription						= strDescription,
 		strRetailPriceAdjustmentNumber		= CASE
 												WHEN @ysnSuccess = CAST(1 AS BIT)
@@ -146,3 +146,4 @@ BEGIN
 	-- End duplication of RetailPriceAdjustment Detail table --
 	-----------------------------------------------------------
 END
+
