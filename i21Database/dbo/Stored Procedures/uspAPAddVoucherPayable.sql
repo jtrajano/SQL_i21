@@ -83,6 +83,7 @@ BEGIN
 			,[strPurchaseOrderNumber]			=	po.strPurchaseOrderNumber
 			,[intContractHeaderId]				=	A.intContractHeaderId
 			,[intContractDetailId]				=	A.intContractDetailId
+			,[intPriceFixationDetailId]			=	A.intPriceFixationDetailId
 			,[intContractSeqId]					=	A.intContractSeqId
 			,[intContractCostId]				=	A.intContractCostId
 			,[strContractNumber]				=	ctDetail.strContractNumber
