@@ -66,7 +66,6 @@
     [ysnUsingCheckWriter] BIT NULL, 
     [ysnLoadFuelCost] BIT NULL, 
     [ysnUseSafeFunds] BIT NULL, 
-    [ysnLotterySetupMode] BIT NULL, 
     [ysnClearPricebookFieldsOnAdd] BIT NULL, 
     [intNumberOfShifts] INT NULL, 
     [ysnUpdatePriceFromReciept] BIT NULL, 
