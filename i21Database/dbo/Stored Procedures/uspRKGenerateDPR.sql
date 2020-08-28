@@ -5840,7 +5840,8 @@ BEGIN TRY
 			, intTransactionRecordId INT
 			, strTransactionNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 			, intContractHeaderId INT
-			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
 			, intCommodityId
@@ -6011,7 +6012,8 @@ BEGIN TRY
 			, intTransactionRecordId
 			, strTransactionNumber
 			, intContractHeaderId
-			, strContractNumber)
+			, strContractNumber
+			, strEntityName)
 		SELECT strCommodityCode = @strCommodityCode
 			, strItemNo
 			, strCategoryCode
@@ -6026,6 +6028,7 @@ BEGIN TRY
 			, strTransactionNumber
 			, intContractHeaderId
 			, strContractNumber
+			, strCustomer
 		FROM #invQty
 
 	 
@@ -6619,6 +6622,7 @@ BEGIN TRY
 			, strTransactionNumber
 			, intContractHeaderId
 			, strContractNumber
+			, strEntityName
 			)
 		SELECT strCommodityCode
 			, strItemNo
@@ -6637,12 +6641,14 @@ BEGIN TRY
 			, strTransactionNumber
 			, intContractHeaderId
 			, strContractNumber
+			, strEntityName
 		FROM @InventoryStock
 		WHERE strInventoryType IN ('Company Titled', 'Collateral','Purchase In-Transit','Sales In-Transit')
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
 			, dblTotal
 			, strLocationName
+			, strEntityName
 			, intCommodityId
 			, intFromCommodityUnitMeasureId
 			, intOrderId
@@ -6672,6 +6678,7 @@ BEGIN TRY
 		SELECT strCommodityCode
 			, dblTotal
 			, strLocationName
+			, strEntityName
 			, intCommodityId
 			, intFromCommodityUnitMeasureId
 			, intOrderId = 9
