@@ -607,6 +607,30 @@ BEGIN
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds) AND 
 			0 = ISNULL([dbo].isOpenAccountingDate(A.[dtmDatePaid]), 0)
 
+		--DO NOT ALLOW TO UNPOST IF VOIDED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'You cannot unpost voided payment ' + A.strPaymentRecordNum + '.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+			AND B.ysnCheckVoid = 1
+
+		--DO NOT ALLOW TO UNPOST IF PRINTED
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'You cannot unpost printed payment ' + A.strPaymentRecordNum + '.',
+			'Payable',
+			A.strPaymentRecordNum,
+			A.intPaymentId
+		FROM tblAPPayment A 
+		INNER JOIN tblCMBankTransaction B ON A.strPaymentRecordNum = B.strTransactionId
+		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+			AND B.dtmCheckPrinted IS NOT NULL
+
 		--Do not allow to unpost if there is latest payment made
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
 		SELECT 
