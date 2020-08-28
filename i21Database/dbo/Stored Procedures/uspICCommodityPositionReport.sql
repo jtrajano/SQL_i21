@@ -65,7 +65,7 @@ begin
 			com.strCommodityCode
 			,cl.intCompanyLocationId
 			,cl.strLocationName 
-			, dblQty = ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2))
+			, dblQty = CAST( ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2)) AS NUMERIC(28, 2)) 
 			, dtmDate = @dtmDate
 			, ysnLicensed = cl.ysnLicensed
 		FROM 
