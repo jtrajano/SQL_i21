@@ -29,29 +29,27 @@ BEGIN TRY
 			@_transactionDate		DATETIME,
 			@ysnInvoice				BIT = 0
 
-	-- SELECT @strSource, @strProcess
+	-------------------------------------------
+	--- Uncomment line below when debugging ---
+	-------------------------------------------
+	--SELECT strSource = @strSource, strProcess = @strProcess
 
-	IF @strProcess = 'Update Scheduled Quantity' OR @strProcess = 'Update Sequence Status' OR @strProcess = 'Missing History' OR @strProcess = 'Update Sequence Balance - DWG (Load-based)'
+	IF @strProcess IN 
+	(
+		'Update Scheduled Quantity',
+		'Update Sequence Status',
+		'Missing History',
+		'Update Sequence Balance - DWG (Load-based)'
+	)
 	BEGIN
 		RETURN
 	END
 		
-	IF @strSource = 'Pricing' AND @strProcess = 'Save Contract'
+	IF (@strSource = 'Pricing' AND @strProcess = 'Save Contract') 
+	OR (@strSource = 'Pricing-Old' AND @strProcess = 'Price Delete')
 	BEGIN
 		RETURN
 	END
-
-	--  IF @strSource = 'Contract'
-	--  BEGIN
-	--  	SET @strProcess = 'Contract Sequence'
-	--  END
-
-
-	-- IF @strSource = '' AND @strProcess = ''
-	-- BEGIN
-	-- 	SET @strSource = 'Contract'
-	-- 	SET @strProcess = 'Save Contract'
-	-- END
 
 	-- Get if load based and quantity per load
 	SELECT @ysnLoadBased = ISNULL(ysnLoad,0), @dblQuantityPerLoad = dblQuantityPerLoad FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
@@ -1195,6 +1193,7 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
+				, dblDynamic
 			)
 			SELECT strBatchId = NULL
 				, dtmTransactionDate
@@ -1228,10 +1227,11 @@ BEGIN TRY
 				, intContractStatusId
 				, intBookId
 				, intSubBookId
-				, strNotes = ''
+				, strNotes
 				, intUserId
 				, intActionId = 55
 				, strProcess = @strProcess
+				, dblDynamic
 			FROM
 			(
 				SELECT intTransactionReferenceId = pc.intPriceContractId
@@ -1243,7 +1243,7 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = cbl.dblQty --pfd.dblQuantity
+				, dblQty = case when (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 then (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) else 0 end--pfd.dblQuantity
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'
@@ -1268,6 +1268,8 @@ BEGIN TRY
 				, cd.intSubBookId
 				, intOrderBy = 1
 				, intUserId = @intUserId
+				, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
+				, dblDynamic =  isnull(dblQuantityAppliedAndPriced,0)
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
@@ -1306,7 +1308,6 @@ BEGIN TRY
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
 			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
-			AND dblQty <> 0
 		END
 		ELSE
 		BEGIN
@@ -1636,7 +1637,8 @@ BEGIN TRY
 			dblFutures,							intQtyUOMId,								intQtyCurrencyId,						intBasisUOMId, 
 			intBasisCurrencyId,					intPriceUOMId,								dtmStartDate,							dtmEndDate, 
 			dblQty,								intContractStatusId,						intBookId,								intSubBookId, 
-			strNotes,							intUserId,									intActionId,							strProcess
+			strNotes,							intUserId,									intActionId,							strProcess,
+			dblDynamic
 		)
 		SELECT 
 			strBatchId,							dtmTransactionDate,							strTransactionType,						strTransactionReference,
@@ -1647,7 +1649,8 @@ BEGIN TRY
 			dblFutures,							intQtyUOMId,								intQtyCurrencyId,						intBasisUOMId, 
 			intBasisCurrencyId,					intPriceUOMId,								dtmStartDate,							dtmEndDate, 
 			dblQty,								intContractStatusId,						intBookId,								intSubBookId, 
-			strNotes,							intUserId,									intActionId,							strProcess
+			strNotes,							intUserId,									intActionId,							strProcess,
+			dblDynamic
 		FROM @cbLogCurrent
 		WHERE intId = @intId
 
@@ -2106,10 +2109,12 @@ BEGIN TRY
 		ELSE IF @strSource = 'Pricing'
 		BEGIN		
 			IF @strProcess = 'Price Delete'
-			BEGIN			
-				-- 	1.1. Increase basis
-				-- 	1.2. Increase basis by priced quantities
+			BEGIN
+				-- 	1.1. Decrease available priced quantities
+				-- 	1.2. Increase available basis quantities
+				--  1.3. Increase basis deliveries if DWG
 
+				-- Get available priced quantities based on the deleted pricing layer
 				declare @_id INT
 				select @_id = intTransactionReferenceId from @cbLogSpecific
 				
@@ -2134,6 +2139,23 @@ BEGIN TRY
 					UPDATE @cbLogSpecific SET dblQty = @dblQty, intPricingTypeId = 2
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				--END
+
+				-- Check if the contract is destination weights and grades
+				IF EXISTS 
+				(
+					select top 1 1 
+					from tblCTContractHeader ch
+					inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+						and wg.strWhereFinalized = 'Destination'
+					where intContractHeaderId = @intContractHeaderId
+				)
+				BEGIN
+					-- Basis Deliveries  
+					UPDATE @cbLogSpecific SET dblQty = dblDynamic, strNotes = '',
+											  strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END--,
+											  --intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+				END
 			END
 			ELSE IF @strProcess = 'Fixation Detail Delete'
 			BEGIN				
