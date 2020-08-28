@@ -1507,7 +1507,7 @@ BEGIN TRY
 		, 'Total Receipted' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
 		, strType = 'Collateral Purchase' COLLATE Latin1_General_CI_AS
-		, dblTotal = - ISNULL(dblTotal, 0)
+		, dblTotal = ISNULL(dblTotal, 0)
 		, @intCommodityId
 		, @intCommodityUnitMeasureId
 		, strLocationName
@@ -1990,7 +1990,7 @@ BEGIN TRY
 				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 				, strCommodityCode = @strCommodityCode
 				, strType
-				, dblTotal = CASE WHEN strType = 'Warehouse Receipts - Purchase' THEN ISNULL(dblTotal, 0) ELSE - ISNULL(dblTotal, 0) END
+				, dblTotal = ISNULL(dblTotal, 0)
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 				, strLocationName
