@@ -91,6 +91,7 @@ BEGIN TRY
 			BEGIN	
 				
 				IF EXISTS(SELECT TOP 1 1 FROM tblAPPaymentDetail where intBillId =  @intBillId AND intPaymentId = @intPaymentId)
+					AND @ysnVoid = 0
 				BEGIN
 					EXEC uspAPPostPayment @userId = @UserEntityID,
 					@recap = 0,
@@ -100,12 +101,15 @@ BEGIN TRY
 					@batchIdUsed = @batchIdUsed OUT,
 					@successfulCount = @totalPostedPayment OUT,
 					@invalidCount = @totalUnpostedPayment OUT
-				END
-				IF EXISTS(SELECT TOP 1 1 FROM tblAPPayment where  ysnPosted = 0 and  intPaymentId = @intPaymentId)
-				BEGIN	
-					DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
 
-					DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
+					
+					IF EXISTS(SELECT TOP 1 1 FROM tblAPPayment where  ysnPosted = 0 and  intPaymentId = @intPaymentId)
+						AND @ysnVoid = 0
+					BEGIN	
+						DELETE FROM tblAPPaymentDetail where intPaymentId = @intPaymentId
+
+						DELETE FROM tblAPPayment where intPaymentId = @intPaymentId
+					END
 				END
 			END
 		END
