@@ -50,34 +50,44 @@ BEGIN
 		, intOrigUOMId
 		, dblOrigNoOfLots
 		, dblOrigQty
+		, strDistributionType
 	) AS (
 		SELECT intFutOptTransactionId
 			, intOrigUOMId
 			, dblOrigNoOfLots = SUM(ISNULL(dblOrigNoOfLots, 0))
 			, dblOrigQty = SUM(ISNULL(dblOrigQty, 0))
+			, sl.strDistributionType
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Match Derivatives'
 			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
+			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
+			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 		GROUP BY intFutOptTransactionId
 			, intOrigUOMId
+			, strDistributionType
 	),
 	OptionsLifecycle (
 		intTransactionRecordId
 		, intOrigUOMId
 		, dblOrigNoOfLots
 		, dblOrigQty
+		, strDistributionType
 	) AS (
 		SELECT intFutOptTransactionId
 			, intOrigUOMId
 			, dblOrigNoOfLots = SUM(ISNULL(dblOrigNoOfLots, 0))
 			, dblOrigQty = SUM(ISNULL(dblOrigQty, 0))
+			, sl.strDistributionType
 		FROM vyuRKGetSummaryLog sl
 		WHERE strTransactionType = 'Options Lifecycle'
 			AND CAST(FLOOR(CAST(dtmCreatedDate AS FLOAT)) AS DATETIME) <= @dtmDate
 			AND CAST(FLOOR(CAST(dtmTransactionDate AS FLOAT)) AS DATETIME) <= @dtmDate
+			AND ISNULL(sl.intCommodityId,0) = ISNULL(@intCommodityId, ISNULL(sl.intCommodityId, 0)) 
+			AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
 		GROUP BY intFutOptTransactionId
 			, intOrigUOMId
+			, strDistributionType
 		HAVING SUM(ISNULL(dblOrigNoOfLots, 0)) > 0
 	)
 	
@@ -119,7 +129,7 @@ BEGIN
 		, strUserName
 		, strAction
 	FROM (
-		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId ORDER BY c.intSummaryLogId DESC)
+		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.strInOut ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
 			, dblOpenContract = ISNULL(c.dblOrigNoOfLots, 0) - ISNULL(md.dblOrigNoOfLots, 0)
 			, intCommodityId
@@ -158,7 +168,7 @@ BEGIN
 			, strAction
 		FROM vyuRKGetSummaryLog c
 		CROSS APPLY dbo.fnRKGetMiscFieldPivotDerivative(c.strMiscField) mf
-		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId
+		LEFT JOIN MatchDerivatives md ON md.intTransactionRecordId = c.intTransactionRecordId and md.strDistributionType = c.strDistributionType
 		WHERE strTransactionType IN ('Derivative Entry')
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmCreatedDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
 			AND CONVERT(DATETIME, CONVERT(VARCHAR(10), c.dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmDate)
