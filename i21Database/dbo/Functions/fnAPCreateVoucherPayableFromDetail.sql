@@ -37,6 +37,7 @@ RETURNS TABLE AS RETURN
 		,[intContractCostId]				=	B.intContractCostId
 		,[intContractSeqId]					=	B.intContractSeq
 		,[intContractDetailId]				=	B.intContractDetailId
+		,[intPriceFixationDetailId]			=	B.intPriceFixationDetailId
 		,[intScaleTicketId]					=	B.intScaleTicketId
 		,[intInventoryReceiptItemId]		=	B.intInventoryReceiptItemId
 		,[intInventoryReceiptChargeId]		=	B.intInventoryReceiptChargeId
