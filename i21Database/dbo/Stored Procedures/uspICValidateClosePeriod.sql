@@ -107,7 +107,8 @@ WHERE
 ORDER BY
 	tblSequenced.dtmDate ASC 
 
-IF @strTransactionId IS NOT NULL 
+IF	@strTransactionId IS NOT NULL
+	AND FLOOR(CAST(@dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmEndDate AS FLOAT))	
 BEGIN 
 	-- '%s is a back-dated transaction. Please do a Rebuild Inventory from %d before closing the fiscal month.'
 	EXEC uspICRaiseError 80255, @strTransactionId, @dtmDate; 
