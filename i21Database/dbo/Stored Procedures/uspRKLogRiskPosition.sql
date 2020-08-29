@@ -163,6 +163,105 @@ BEGIN
 		IF OBJECT_ID('tempdb..#tmpPrevLog') IS NOT NULL
 			DROP TABLE #tmpPrevLog
 
+		IF (@strTransactionType IN ('Derivative Entry'))
+		BEGIN
+			-- Check if there is a manual change in commodity or distribution type (buy/sell), marked it as ysnNegate = 1 to have a reverse entry
+			IF EXISTS(SELECT TOP 1 1
+			FROM @FinalTable
+			WHERE intTransactionRecordId = @intTransactionRecordId
+				AND strBucketType = @strBucketType
+				AND strTransactionType = @strTransactionType
+				AND strTransactionNumber = @strTransactionNumber
+				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+				AND ysnNegate IS NULL)
+			BEGIN
+				print @strTransactionNumber
+				INSERT INTO @FinalTable(strBatchId
+					, strBucketType
+					, intActionId
+					, strTransactionType
+					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
+					, strTransactionNumber
+					, dtmTransactionDate
+					, intContractDetailId
+					, intContractHeaderId
+					, intFutureMarketId
+					, intFutureMonthId
+					, intFutOptTransactionId
+					, intCommodityId
+					, intItemId
+					, intProductTypeId
+					, intOrigUOMId
+					, intBookId
+					, intSubBookId
+					, intLocationId
+					, strInOut
+					, dblOrigNoOfLots
+					, dblContractSize
+					, dblOrigQty
+					, dblPrice
+					, intEntityId
+					, intTicketId
+					, intUserId
+					, strNotes
+					, ysnNegate
+					, intRefSummaryLogId
+					, strMiscFields)
+				SELECT strBatchId
+					, strBucketType
+					, intActionId
+					, strTransactionType
+					, intTransactionRecordId
+					, intTransactionRecordHeaderId
+					, strDistributionType
+					, strTransactionNumber
+					, dtmTransactionDate
+					, intContractDetailId
+					, intContractHeaderId
+					, intFutureMarketId
+					, intFutureMonthId
+					, intFutOptTransactionId
+					, intCommodityId
+					, intItemId
+					, intProductTypeId
+					, intOrigUOMId
+					, intBookId
+					, intSubBookId
+					, intLocationId
+					, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
+					, dblOrigNoOfLots * -1
+					, dblContractSize
+					, dblOrigQty * -1
+					, dblPrice
+					, intEntityId
+					, intTicketId
+					, @intUserId
+					, strNotes
+					, ysnNegate = 1
+					, intRefSummaryLogId
+					, strMiscFields
+				FROM @FinalTable
+				WHERE intTransactionRecordId = @intTransactionRecordId
+					AND strBucketType = @strBucketType
+					AND strTransactionType = @strTransactionType
+					AND strTransactionNumber = @strTransactionNumber
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+					AND ysnNegate IS NULL
+
+
+				UPDATE @FinalTable SET ysnNegate = 1
+				WHERE intTransactionRecordId = @intTransactionRecordId
+					AND strBucketType = @strBucketType
+					AND strTransactionType = @strTransactionType
+					AND strTransactionNumber = @strTransactionNumber
+					AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
+					AND ysnNegate IS NULL
+			END
+		END
+		
+		
 		SELECT TOP 1 *
 		INTO #tmpPrevLog
 		FROM tblRKSummaryLog
