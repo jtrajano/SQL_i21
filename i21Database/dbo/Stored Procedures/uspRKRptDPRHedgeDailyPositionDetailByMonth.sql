@@ -13,6 +13,7 @@ BEGIN
 		,@ysnIsCrushPosition bit = NULL
 		,@strPositionBy nvarchar(50) = NULL
 		,@intDPRHeaderId int
+		,@intDPRRunNumber int
 	IF LTRIM(RTRIM(@xmlParam)) = ''
 		SET @xmlParam = NULL
 
@@ -78,6 +79,10 @@ SELECT *
 	SELECT @intDPRHeaderId = [from]
 	FROM @temp_xml_table	
 	WHERE [fieldname] = 'intDPRHeaderId'
+
+	SELECT @intDPRRunNumber = [from]
+	FROM @temp_xml_table	
+	WHERE [fieldname] = 'intDPRRunNumber'
 	
 
 DECLARE @strCommodityCode NVARCHAR(50)
@@ -349,6 +354,7 @@ END
 		, '''+ @dtmToDate +''' AS dtmToDate
 		, '''+ @strLocationName +''' AS strLocationName
 		, '''+ @strPositionIncludes +''' AS strPositionIncludes 
+		, '''+ @intDPRRunNumber +''' AS intDPRRunNumber 
 		, '''+ @strEntityName +''' AS strEntityName 
 		FROM (
 			select * from ##tmpTry2
@@ -387,6 +393,7 @@ END
 			@dtmToDate as dtmToDate,
 			@strLocationName as strLocationName,
 			@strPositionIncludes as strPositionIncludes,
+			@intDPRRunNumber as intDPRRunNumber,
 			@strEntityName as strEntityName
 
 	END
