@@ -5350,7 +5350,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					,ysnFreightInPrice		= NULL
 					,strActualCostId		= NULL
 					,intTaxGroupId			= NULL
-					,strVendorRefNo			= (CAST(ISNULL(tblSTStore.intStoreNo,'') as nvarchar(100)) + '-' + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTReceiveLottery.strBookNumber,''))
+					,strVendorRefNo			= tblSMCompanyLocation.strVendorRefNoPrefix  + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTReceiveLottery.strBookNumber,'')
 					,strSourceId			= NULL
 					,intPaymentOn			= NULL
 					,strChargesLink			= NULL
@@ -5372,7 +5372,11 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
 					LEFT JOIN tblICItemUOM 
 					ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+					LEFT JOIN tblSMCompanyLocation
+					ON tblSTStore.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 					WHERE tblSTReceiveLottery.intCheckoutId = @intCheckoutId
+
+					-- SELECT strVendorRefNoPrefix,* FROM tblSTStore
 
 
 					EXEC dbo.uspICAddItemReceipt 
@@ -5549,7 +5553,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 						,ysnFreightInPrice		= NULL
 						,strActualCostId		= NULL
 						,intTaxGroupId			= NULL
-						,strVendorRefNo			= (CAST(ISNULL(tblSTStore.intStoreNo,'') as nvarchar(100)) + '-' + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTLotteryBook.strBookNumber,'')) + 'R'
+						,strVendorRefNo			= tblSMCompanyLocation.strVendorRefNoPrefix + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTLotteryBook.strBookNumber,'') + 'R'
 						,strSourceId			= NULL
 						,intPaymentOn			= NULL
 						,strChargesLink			= NULL
@@ -5573,6 +5577,8 @@ IF(@ysnDebug = CAST(1 AS BIT))
 						ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
 						LEFT JOIN tblICItemUOM 
 						ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+						LEFT JOIN tblSMCompanyLocation
+						ON tblSTStore.intCompanyLocationId = tblSMCompanyLocation.intCompanyLocationId
 						WHERE tblSTReturnLottery.intReturnLotteryId IN (SELECT intReturnLotteryId FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId)
 
 
