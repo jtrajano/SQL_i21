@@ -316,7 +316,7 @@ BEGIN
 		ORDER BY [intInvoiceId]
 		
         --UPDATE CONTRACT SEQUENCE BALANCE
-		EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 0, @UserId = @UserId
+		--EXEC dbo.[uspARInvoiceUpdateSequenceBalance] @TransactionId = @InvoiceIDP, @ysnDelete = 0, @UserId = @UserId
 
 		--COMMITTED QTY
 		EXEC dbo.[uspARUpdateCommitted] @InvoiceIDP, 1, @UserId, 1
