@@ -317,6 +317,36 @@ BEGIN TRY
 
 		select @Id = Id FROM #ItemInvoice where DetailId = @ParamDetailId;
 		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @Id
+
+		IF EXISTS 
+		(
+			select top 1 1 
+			from tblCTContractHeader ch
+			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+			and wg.strWhereFinalized = 'Destination'
+			where intContractHeaderId = @intContractHeaderId
+		)
+		BEGIN
+			declare @_priceFixationDetailId int,
+					@_qtyShipped numeric(24, 10)
+			select @_priceFixationDetailId = intPriceFixationDetailId
+					,@_qtyShipped = detail.dblQtyShipped *-1
+			from tblCTPriceFixationDetailAPAR apar
+			inner join tblARInvoiceDetail detail on apar.intInvoiceDetailId = detail.intInvoiceDetailId
+			where apar.intInvoiceDetailId = @ParamDetailId
+
+			-- Summary Log
+			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 	    = 	'Price Delete DWG',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId,
+								@intTransactionId		= 	@_priceFixationDetailId,
+								@dblTransactionQty		= 	@_qtyShipped
+		END
+		
 		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
 		
 		if (@Count = 1)

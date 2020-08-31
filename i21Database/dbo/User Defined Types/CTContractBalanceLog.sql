@@ -36,6 +36,7 @@
 	, intUserId INT NULL
 	, intActionId INT NULL
 	, strProcess NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+	, ysnDeleted BIT NULL DEFAULT((0))
 	-- Dynamic value
 	, dblDynamic NUMERIC(24, 10) NULL DEFAULT((0))
 )
