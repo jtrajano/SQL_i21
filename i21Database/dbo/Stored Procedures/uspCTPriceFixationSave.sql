@@ -223,6 +223,14 @@ BEGIN TRY
 								@contractDetail 		= 	@contractDetails,
 								@intUserId				= 	@intUserId
 
+			-- EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+			-- 					@intContractDetailId 	= 	@intContractDetailId,
+			-- 					@strSource			 	= 	'Pricing',
+			-- 					@strProcess		 		= 	'Price Delete DWG',
+			-- 					@contractDetail 		= 	@contractDetails,
+			-- 					@intUserId				= 	@intUserId,
+			-- 					@intTransactionId		=   @intPriceFixationId
+
 			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 1
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId

@@ -42,6 +42,7 @@ BEGIN
 		, @intUserId INT
 		, @intActionId INT
 		, @strProcess NVARCHAR(100)
+		, @ysnDeleted BIT
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpLogItems WHERE ISNULL(strBatchId, '') = '')
@@ -91,7 +92,8 @@ BEGIN
 		, [intRefContractBalanceId] INT NULL
 		, [intUserId] INT NULL
 		, [intActionId] INT NULL
-		, [strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL)
+		, [strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
+		, [ysnDeleted] BIT DEFAULT((0)) NULL)
 
 	--DECLARE @PrevLog AS TABLE ([intContractBalanceLogId] INT
 	--	, [strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
@@ -165,6 +167,7 @@ BEGIN
 			, @intUserId = intUserId
 			, @intActionId = intActionId
 			, @strProcess = strProcess
+			, @ysnDeleted = ysnDeleted
 		FROM #tmpLogItems
 
 		--SELECT * INTO #tmpPrevLogList
@@ -330,7 +333,8 @@ BEGIN
 			, strNotes
 			, intUserId
 			, intActionId
-			, strProcess)
+			, strProcess
+			, ysnDeleted)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -367,6 +371,7 @@ BEGIN
 			, intUserId
 			, intActionId
 			, strProcess
+			, ysnDeleted
 		FROM #tmpLogItems WHERE intId = @Id
 
 		--DROP TABLE #tmpPrevLogList
@@ -413,7 +418,8 @@ BEGIN
 		, ysnNegated
 		, intRefContractBalanceId
 		, intUserId
-		, strProcess)
+		, strProcess
+		, ysnDeleted)
 	SELECT strBatchId
 		, intActionId
 		, strAction = A.strActionIn 
@@ -454,6 +460,7 @@ BEGIN
 		, intRefContractBalanceId
 		, intUserId
 		, strProcess
+		, ysnDeleted
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 

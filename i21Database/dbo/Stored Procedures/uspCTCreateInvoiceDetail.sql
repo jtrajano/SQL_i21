@@ -7,7 +7,8 @@
 	@intUserId				INT,
 	@intContractHeaderId	INT,
 	@intContractDetailId	INT,
-	@NewInvoiceDetailId		INT OUTPUT
+	@NewInvoiceDetailId		INT OUTPUT,
+	@intPriceFixationDetailId		INT
 AS
 
 BEGIN TRY
@@ -269,6 +270,28 @@ BEGIN TRY
 				,@ItemDestinationGradeId				=	@ItemDestinationGradeId
 				,@ItemDestinationWeightId				=	@ItemDestinationWeightId
 				,@NewInvoiceDetailId					=	@NewInvoiceDetailId	OUTPUT
+
+		-- Check if the contract is destination weights and grades
+		IF EXISTS 
+		(
+			select top 1 1 
+			from tblCTContractHeader ch
+			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+				and wg.strWhereFinalized = 'Destination'
+			where intContractHeaderId = @intContractHeaderId
+		)
+		BEGIN
+			-- Summary Log
+			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 	    = 	'Priced DWG',
+									@contractDetail 		= 	@contractDetails,
+									@intUserId				= 	@intUserId,
+									@intTransactionId		= 	@intPriceFixationDetailId,
+									@dblTransactionQty		= 	@ItemQtyShipped
+		END		
 
 		EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @InvoiceId, @UserId = @intUserId
 

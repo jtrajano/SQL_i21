@@ -1,10 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateInvoiceFromShipment]
 	@ShipmentId				INT
     ,@UserId				INT
+    ,@intContractHeaderId	INT
 	,@intContractDetailId	INT
     ,@LogId					INT = NULL  OUTPUT
 	,@NewInvoiceId			INT OUTPUT
     ,@dblQuantity           numeric(18,6)
+	,@intPriceFixationDetailId	INT
 AS
 
 BEGIN TRY
@@ -410,6 +412,29 @@ ORDER BY
         
 
 DECLARE @ErrorMessage NVARCHAR(250)
+
+-- Check if the contract is destination weights and grades
+IF EXISTS 
+(
+    select top 1 1 
+    from tblCTContractHeader ch
+    inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+        and wg.strWhereFinalized = 'Destination'
+    where intContractHeaderId = @intContractHeaderId
+)
+BEGIN
+    -- Summary Log
+    DECLARE @contractDetails AS [dbo].[ContractDetailTable]
+    EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+                            @intContractDetailId 	= 	@intContractDetailId,
+                            @strSource			 	= 	'Pricing',
+                            @strProcess		 	    = 	'Priced DWG',
+                            @contractDetail 		= 	@contractDetails,
+                            @intUserId				= 	@UserId,
+                            @intTransactionId		= 	@intPriceFixationDetailId,
+                            @dblTransactionQty      =   @dblQuantity
+END
+
 
 EXEC    [dbo].[uspARProcessInvoicesByBatch]
              @InvoiceEntries        = @EntriesForInvoice

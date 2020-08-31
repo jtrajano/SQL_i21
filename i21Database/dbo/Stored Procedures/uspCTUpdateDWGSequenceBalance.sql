@@ -19,6 +19,7 @@ BEGIN TRY
 		,@dblOldQuantity NUMERIC(24, 10) 
 		,@dblQuantity NUMERIC(24, 10) 
 		,@dblAdjustment NUMERIC(24, 10) 
+		,@dblContractQuantity NUMERIC(24, 10) 
 		,@intFromItemUOMId int
 		,@strScreenName nvarchar(50)
 		,@intUserId int
@@ -27,8 +28,7 @@ BEGIN TRY
 		,@dblCurrentlyApplied numeric (18,6)
 		,@dblBalanceLessOtherShipmentItem numeric (18,6)
 		,@intContractHeaderId int
-		,@ysnLoad bit = convert(bit,0)
-		,@dblBalance numeric(20,12);
+		,@ysnLoad bit = convert(bit,0);
 
 	declare @ContractSequenceBalanceSummary table (
 		intId int 
@@ -102,17 +102,55 @@ BEGIN TRY
 		where
 			intId = @intId
 
-		select @dblBalance = dblBalance from tblCTContractDetail where intContractDetailId = @intContractDetailId;
-
-		if @dblBalance = 0
+		-------------------------------------
+		-- Scenario 1
+		-- Distribute SI-1 50
+		-- Distribute SI-2 50
+		-- Post SI-1 DWG 40 | Adjustment 10
+		-- Currently Applied: 50
+		-- Balance less other shipment: 50
+		-- if -10 > 50
+		-- Converted Qty: 10
+		-------------------------------------
+		-- Scenario 2
+		-- Distribute SI-1 50
+		-- Distribute SI-2 50
+		-- Post SI-1 DWG 60 | Adjustment -10
+		-- Currently Applied: 50
+		-- Balance less other shipment: 50
+		-- if 10 > 50
+		-- Converted Qty: 10
+		-------------------------------------
+		-- Scenario 3
+		-- Distribute SI-1 90
+		-- Post SI-1 DWG 110 | Adjustment -20
+		-- Currently Applied: 90
+		-- Balance less other shipment: 10
+		-- if 20 > 10 ? 10 
+		-- Converted Qty: 10
+		-------------------------------------
+		-- Scenario 4
+		-- Distribute SI-1 100
+		-- Post SI-1 DWG 110 | Adjustment -10
+		-- Currently Applied: 100
+		-- Balance less other shipment: 0
+		-- if 10 > 0 ? 0 
+		-- Converted Qty: 0
+		-------------------------------------
+		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
+		select @dblContractQuantity = dblQuantity, @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		
+		if (@dblQuantity + @dblCurrentlyApplied) > @dblContractQuantity
 		begin
 			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 			continue
 		end
 
-		if (@dblAdjustment * -1) > @dblBalance
+		set @dblBalanceLessOtherShipmentItem = @dblContractQuantity - isnull(@dblCurrentlyApplied,0)
+
+		if (@dblAdjustment * -1) > @dblBalanceLessOtherShipmentItem
 		begin
-			set @dblAdjustment = @dblBalance;
+			set @dblAdjustment = @dblBalanceLessOtherShipmentItem;
 		end
 		
 		select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);

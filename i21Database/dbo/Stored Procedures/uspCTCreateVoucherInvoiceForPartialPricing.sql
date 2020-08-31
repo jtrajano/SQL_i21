@@ -1075,9 +1075,11 @@ BEGIN TRY
 							EXEC	uspCTCreateInvoiceFromShipment 
 									@ShipmentId				=	@intInventoryShipmentId
 									,@UserId				=	@intUserId
+									,@intContractHeaderId	=   @intContractHeaderId
 									,@intContractDetailId	=	@intContractDetailId
 									,@dblQuantity           =   @dblQuantityForInvoice
 									,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
+									,@intPriceFixationDetailId 	= 	@intPriceFixationDetailId
 
 							--For some reason, I don't know why there's this code :)
 							DELETE	AD
@@ -1463,9 +1465,11 @@ BEGIN TRY
 							EXEC	uspCTCreateInvoiceFromShipment 
 									@ShipmentId				=	@intInventoryShipmentId
 									,@UserId				=	@intUserId
+									,@intContractHeaderId	=   @intContractHeaderId
 									,@intContractDetailId	=	@intContractDetailId
 									,@NewInvoiceId			=	@intNewInvoiceId	OUTPUT
 									,@dblQuantity           =   @dblQuantityForInvoice
+									,@intPriceFixationDetailId 	= 	@intPriceFixationDetailId
 
 							--For some reason, I don't know why there's this code :)
 							DELETE	AD
@@ -1572,6 +1576,7 @@ BEGIN TRY
 								,@intContractHeaderId
 								,@intContractDetailId
 								,@intInvoiceDetailId OUTPUT
+								,@intPriceFixationDetailId
 
 							--Process if there's overage
 							select @dblOverageQuantity = dblOverageQuantity from @OverageToProcess;
