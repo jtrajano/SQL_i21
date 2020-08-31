@@ -276,6 +276,10 @@ SET
 	,[dblBaseTax]				= ISNULL(T.[dblBaseTotalTax], @ZeroDecimal)
 	,[dblInvoiceSubtotal]		= ISNULL(T.[dblTotal], @ZeroDecimal)
 	,[dblBaseInvoiceSubtotal]	= ISNULL(T.[dblBaseTotal], @ZeroDecimal)
+	,[dblInvoiceTotal]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblInvoiceTotal] END
+	,[dblBaseInvoiceTotal]		= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseInvoiceTotal] END
+	,[dblAmountDue]				= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblTotal], @ZeroDecimal) - ISNULL(T.[dblTotalTax], @ZeroDecimal) ELSE [dblAmountDue] END
+	,[dblBaseAmountDue]			= CASE WHEN intSourceId = 5 THEN ISNULL(T.[dblBaseTotal], @ZeroDecimal) - ISNULL(T.[dblBaseTotalTax], @ZeroDecimal) ELSE [dblBaseAmountDue] END
 FROM
 	(
 		SELECT 
