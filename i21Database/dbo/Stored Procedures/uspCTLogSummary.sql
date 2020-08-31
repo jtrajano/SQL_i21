@@ -1463,6 +1463,7 @@ BEGIN TRY
 					WHERE strProcess = 'Price Fixation'
 					AND intContractHeaderId = @intContractHeaderId
 					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
+					AND (strNotes like 'Priced Quantity is%' or strNotes like 'Priced Load is%')
 					AND 
 					(
 						(case when ch.ysnLoad = 1 then pfd.dblLoadPriced else pfd.dblQuantity end) <> CAST(replace(REPLACE(strNotes, 'Priced Quantity is ', ''),'Priced Load is ','') AS NUMERIC(24, 10)) 
