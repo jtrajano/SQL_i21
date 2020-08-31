@@ -164,6 +164,14 @@ BEGIN TRY
 
 			SET @intDPRRunLogId = SCOPE_IDENTITY()
 
+			--Set the DPR Run Number so that it can be shown in the report
+			UPDATE tblRKDPRHeader SET intDPRRunNumber = @intRunNumber WHERE intDPRHeaderId = @intDPRHeaderId
+
+	END
+	ELSE
+	BEGIN
+		--Set the DPR Run Number to null when it is not logging
+		UPDATE tblRKDPRHeader SET intDPRRunNumber = NULL WHERE intDPRHeaderId = @intDPRHeaderId
 	END
 
 

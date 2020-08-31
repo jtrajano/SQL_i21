@@ -19,6 +19,7 @@ SELECT H.intDPRHeaderId
 	, H.intLocationId
 	, CL.strLocationName
 	, H.ysnCrush
+	, H.intDPRRunNumber
 	, H.intConcurrencyId
 FROM tblRKDPRHeader H
 LEFT JOIN tblEMEntity E ON E.intEntityId = H.intEntityId
