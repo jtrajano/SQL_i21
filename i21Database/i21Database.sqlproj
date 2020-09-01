@@ -8779,6 +8779,7 @@
     <Build Include="dbo\Views\vyuRKGetM2MPostPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
+    <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
