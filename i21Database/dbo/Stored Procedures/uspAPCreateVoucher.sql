@@ -6,7 +6,7 @@
 	,@error NVARCHAR(1000) = NULL OUTPUT
 	,@tblAPBill NVARCHAR(MAX) = NULL OUTPUT
 	,@tblAPBillDetail NVARCHAR(MAX) = NULL OUTPUT
-	,@createdVouchersId NVARCHAR(MAX) OUT
+	,@createdVouchersId NVARCHAR(MAX) = NULL OUTPUT
 AS
 
 BEGIN
