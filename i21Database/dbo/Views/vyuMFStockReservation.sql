@@ -1,4 +1,5 @@
 ﻿CREATE VIEW dbo.vyuMFStockReservation
+WITH SCHEMABINDING
 AS
 SELECT S.intLotId
 	,SUM(CASE 
