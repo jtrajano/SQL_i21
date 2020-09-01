@@ -20,11 +20,11 @@ BEGIN
 	FROM tblIPContractFeedLog L
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId and CD.intContractStatusId=1
-	WHERE L.strCustomerContract <> CH.strCustomerContract
-		OR L.intShipperId <> CD.intShipperId
-		OR L.intDestinationCityId <> CD.intDestinationCityId
-		OR L.intDestinationPortId <> CD.intDestinationPortId
-		OR L.intNumberOfContainers <> CD.intNumberOfContainers
+	WHERE IsNULL(L.strCustomerContract,'') <> IsNULL(CH.strCustomerContract,'')
+		OR IsNULL(L.intShipperId,0) <> IsNULL(CD.intShipperId,0)
+		OR IsNULL(L.intDestinationCityId,0) <> IsNULL(CD.intDestinationCityId,0)
+		OR IsNull(L.intDestinationPortId,0) <> IsNull(CD.intDestinationPortId,0)
+		OR IsNULL(L.intNumberOfContainers,0) <> IsNULL(CD.intNumberOfContainers,0)
 
 	IF @intContractDetailId IS NOT NULL
 	BEGIN
