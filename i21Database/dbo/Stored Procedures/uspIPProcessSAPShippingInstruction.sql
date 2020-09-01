@@ -1259,15 +1259,6 @@ BEGIN TRY
 				END
 			END
 
-			-- To set Contract Planned Availability Date and send Contract feed to SAP
-			IF @strRowState = 'Added'
-				OR @strRowState = 'Modified'
-			BEGIN
-				EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
-					,@strRowState = @strRowState
-					,@intShipmentType = 2 -- LSI
-			END
-
 			-- Set Shipper in Contract and add audit log
 			IF ISNULL(@intShipperId, 0) > 0
 			BEGIN
@@ -1347,6 +1338,15 @@ BEGIN TRY
 						,@actionIcon = 'small-tree-modified'
 						,@details = @Shipperdetails
 				END
+			END
+			
+			-- To set Contract Planned Availability Date and send Contract feed to SAP
+			IF @strRowState = 'Added'
+				OR @strRowState = 'Modified'
+			BEGIN
+				EXEC uspLGCreateLoadIntegrationLog @intLoadId = @intLoadId
+					,@strRowState = @strRowState
+					,@intShipmentType = 2 -- LSI
 			END
 
 			--Move to Archive
