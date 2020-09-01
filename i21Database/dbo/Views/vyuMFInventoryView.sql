@@ -1,8 +1,9 @@
 ﻿CREATE VIEW vyuMFInventoryView
+WITH SCHEMABINDING
 AS
 SELECT l.intLotId
 	,l.strLotNumber
-	,Case When CP.ysnCostEnabled =1 Then dbo.fnGetLotUnitCost(l.intLotId) Else l.dblLastCost End AS dblLastCost
+	,Case When CP.ysnCostEnabled =1 Then dbo.fnMFGetLotUnitCost(l.intLotId) Else l.dblLastCost End AS dblLastCost
 	,l.dtmDateCreated
 	,l.dtmExpiryDate
 	,l.strLotAlias
@@ -128,32 +129,32 @@ SELECT l.intLotId
 	,ISNULL(RC.intNoOfLabel, 1) AS intNoOfLabel
 	,ISNULL(RCC.strReportName, 'PalletTag') AS strPlacardReportName -- 1 - Placard Report Name
 	,ISNULL(RCC1.strReportName, 'InventoryReceiptReport') AS strReceiptReportName -- 2 - Receipt Report Name
-FROM tblICLot l
-JOIN tblICItem i ON i.intItemId = l.intItemId
-JOIN tblICCategory ic ON ic.intCategoryId = i.intCategoryId
-JOIN tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
-LEFT JOIN tblSMUserSecurity us ON us.[intEntityId] = l.intCreatedUserId
-JOIN tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
-JOIN tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
-LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
-LEFT JOIN tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
+FROM dbo.tblICLot l
+JOIN dbo.tblICItem i ON i.intItemId = l.intItemId
+JOIN dbo.tblICCategory ic ON ic.intCategoryId = i.intCategoryId
+JOIN dbo.tblICLotStatus ls ON ls.intLotStatusId = l.intLotStatusId
+LEFT JOIN dbo.tblSMUserSecurity us ON us.[intEntityId] = l.intCreatedUserId
+JOIN dbo.tblICItemUOM ium ON ium.intItemUOMId = l.intItemUOMId
+JOIN dbo.tblICUnitMeasure um ON um.intUnitMeasureId = ium.intUnitMeasureId
+LEFT JOIN dbo.tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = l.intSubLocationId
+LEFT JOIN dbo.tblICStorageLocation sl ON sl.intStorageLocationId = l.intStorageLocationId
 LEFT JOIN dbo.tblICRestriction R ON R.intRestrictionId = sl.intRestrictionId
-LEFT JOIN tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
-LEFT JOIN tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
-LEFT JOIN tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
-LEFT JOIN tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
-LEFT JOIN tblEMEntity e ON e.intEntityId = l.intEntityVendorId
+LEFT JOIN dbo.tblSMCompanyLocation cl ON cl.intCompanyLocationId = clsl.intCompanyLocationId
+LEFT JOIN dbo.tblICItemUOM ium1 ON ium1.intItemUOMId = ISNULL(l.intWeightUOMId, l.intItemUOMId)
+LEFT JOIN dbo.tblICUnitMeasure um1 ON um1.intUnitMeasureId = ium1.intUnitMeasureId
+LEFT JOIN dbo.tblICParentLot pl ON pl.intParentLotId = l.intParentLotId
+LEFT JOIN dbo.tblEMEntity e ON e.intEntityId = l.intEntityVendorId
 LEFT JOIN dbo.vyuMFStockReservation S ON S.intLotId = l.intLotId
 LEFT JOIN dbo.tblICCommodityAttribute CA ON CA.intCommodityAttributeId = l.intGradeId
-LEFT JOIN tblMFLotInventory LI ON LI.intLotId = l.intLotId
-LEFT JOIN tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId
-LEFT JOIN tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
+LEFT JOIN dbo.tblMFLotInventory LI ON LI.intLotId = l.intLotId
+LEFT JOIN dbo.tblICItemOwner ito1 ON ito1.intItemOwnerId = l.intItemOwnerId
+LEFT JOIN dbo.tblEMEntity e2 ON e2.intEntityId = ito1.intOwnerId
 LEFT JOIN dbo.tblICLotStatus LS1 ON LS1.intLotStatusId = LI.intBondStatusId
-Left JOIN tblEMEntity e3 on e3.intEntityId=l.intProducerId
-LEFT JOIN tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
-LEFT JOIN tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId
+Left JOIN dbo.tblEMEntity e3 on e3.intEntityId=l.intProducerId
+LEFT JOIN dbo.tblMFReportCategory RC ON RC.intCategoryId = ic.intCategoryId
+LEFT JOIN dbo.tblMFReportCategoryByCustomer RCC ON RCC.intCategoryId = ic.intCategoryId
 	AND RCC.intReportType = 1
-LEFT JOIN tblMFReportCategoryByCustomer RCC1 ON RCC1.intCategoryId = ic.intCategoryId
+LEFT JOIN dbo.tblMFReportCategoryByCustomer RCC1 ON RCC1.intCategoryId = ic.intCategoryId
 	AND RCC1.intReportType = 2
-LEFT JOIN tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.intManufacturingProcessId
-Left JOIN tblMFCompanyPreference CP on 1=1
+LEFT JOIN dbo.tblMFManufacturingProcess mp ON LI.intManufacturingProcessId = mp.intManufacturingProcessId
+Left JOIN dbo.tblMFCompanyPreference CP on 1=1
