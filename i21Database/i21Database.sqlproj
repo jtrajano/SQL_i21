@@ -8273,6 +8273,7 @@
     <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
     <Build Include="dbo\Functions\fnCTCheckIfPaid.sql" />
+    <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
