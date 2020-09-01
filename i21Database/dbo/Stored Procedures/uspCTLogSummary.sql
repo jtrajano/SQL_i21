@@ -28,7 +28,8 @@ BEGIN TRY
 			@dblQuantityPerLoad		NUMERIC(24, 10),
 			@ysnReopened			BIT = 0,
 			@_transactionDate		DATETIME,
-			@ysnInvoice				BIT = 0
+			@ysnInvoice				BIT = 0,
+			@ysnSplit				BIT = 0
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -941,6 +942,90 @@ BEGIN TRY
 				AND intContractHeaderId = @intContractHeaderId
 				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
 			END
+			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Split')
+			BEGIN
+				IF @strProcess = 'Update Sequence Quantity'
+				BEGIN
+					RETURN
+				END
+
+				SET @ysnSplit = 1
+
+				INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess
+				)		
+				SELECT strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference = 'Contract Sequence'
+				, intTransactionReferenceId = intContractHeaderId
+				, intTransactionReferenceDetailId = intContractDetailId
+				, strTransactionReferenceNo = strContractNumber
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty * -1
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId = 54
+				, strProcess = 'Update Sequence Balance - Split'
+				FROM @cbLogTemp		
+			END	
 			ELSE
 			BEGIN
 				INSERT INTO @cbLogCurrent (strBatchId
@@ -2567,6 +2652,13 @@ BEGIN TRY
 							
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
+				END
+
+				IF @ysnSplit = 1
+				BEGIN
+					EXEC uspCTLogContractBalance @cbLogSpecific, 0						
+					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
+					CONTINUE					
 				END
 
 				-- Posted: IR/IS/Settle Storage
