@@ -61,7 +61,7 @@ SELECT
 											THEN NULL
 											ELSE
 											(CASE WHEN ARIFP.[strType] = 'CF Invoice' THEN
-												(SELECT CAST(DATEADD(DAY, intDiscountDay, GETDATE()) AS DATE) FROM tblSMTerm WHERE intTermID = ARIFP.[intTermId])
+												(SELECT CAST(DATEADD(DAY, intDiscountDay, dtmDate) AS DATE) FROM tblSMTerm WHERE intTermID = ARIFP.[intTermId])
 											ELSE
 												[dbo].[fnGetDiscountDateBasedOnTerm](ARIFP.[dtmDate], ARIFP.[intTermId], GETDATE())
 											END)
