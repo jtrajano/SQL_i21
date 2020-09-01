@@ -118,11 +118,7 @@ BEGIN TRY
 			,@ContractPriceItemUOMId			int = null
 			,@ContractPriceUnitMeasureId		int = null
 			,@ContractDetailItemId				int = null
-			,@intSequenceFreightTermId			int
-			,@dblSequenceQuantity				numeric(18,6)
-			,@dblSequenceTotalInvoicedQuantity	numeric(18,6)
-			,@NewInvoiceSpotDetailId			int
-			,@dblOverageQuantity				numeric(18,6);
+			,@intSequenceFreightTermId			int;
 
 		
 	declare @PricedShipment table
@@ -190,20 +186,12 @@ BEGIN TRY
 		intInvoiceDetailId				INT NULL
 	)
 
-	declare @OverageToProcess table (
-		intContractDetailId int
-		,intContractHeaderId int
-		,intInventoryShipmentItemId int
-		,dblOverageQuantity numeric(18,6)
-	)
-
 	SELECT	@dblCashPrice			=	dblCashPrice, 
 			@intPricingTypeId		=	intPricingTypeId, 
 			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
 			@intContractHeaderId	=	intContractHeaderId,
 			@intCompanyLocationId	=	intCompanyLocationId,
-			@intSequenceFreightTermId = intFreightTermId,
-			@dblSequenceQuantity	=	dblQuantity
+			@intSequenceFreightTermId = intFreightTermId
 	FROM	tblCTContractDetail 
 	WHERE	intContractDetailId		=	@intContractDetailId
 
@@ -1422,24 +1410,6 @@ BEGIN TRY
 							set @dblQuantityForInvoice = @dblShippedForInvoice;	
 						end
 
-						--Check overage quantity
-						delete from @OverageToProcess;
-
-						if (@dblPricedForInvoice < @dblShippedForInvoice and isnull(@ysnDestinationWeightsGrades,0) = 1 and @intPricingTypeId = 1)
-						begin
-							insert into @OverageToProcess (
-								intContractDetailId
-								,intContractHeaderId
-								,intInventoryShipmentItemId
-								,dblOverageQuantity
-							)
-							select
-								intContractDetailId = @intContractDetailId
-								,intContractHeaderId = @intContractHeaderId
-								,intInventoryShipmentItemId = @intInventoryShipmentItemId
-								,dblOverageQuantity = (@dblShippedForInvoice - @dblPricedForInvoice)							
-						end
-
 						--Check if Shipment Item has unposted Invoice
 						if not exists (
 										select
@@ -1508,26 +1478,6 @@ BEGIN TRY
 								exec uspARReComputeInvoiceAmounts @InvoiceId=@intNewInvoiceId,@AvailableDiscountOnly=0;
 							END
 
-							--Process if there's overage
-							select @dblOverageQuantity = dblOverageQuantity from @OverageToProcess;
-							if (isnull(@dblOverageQuantity,0) > 0)
-							begin
-								select @dblSequenceTotalInvoicedQuantity = SUM(dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,@intItemUOMId,dblQtyShipped))  from tblARInvoiceDetail where intContractDetailId = @intContractDetailId and intInventoryShipmentChargeId is null;
-								if (@dblSequenceQuantity <= @dblSequenceTotalInvoicedQuantity)
-								begin
-									exec uspCTCreateInvoiceDetail
-										@intInvoiceDetailId = @intInvoiceDetailId
-										,@intInventoryShipmentId = @intInventoryShipmentId
-										,@intInventoryShipmentItemId = @intInventoryShipmentItemId
-										,@dblQty = @dblOverageQuantity
-										,@dblPrice = 0.00
-										,@intUserId = @intUserId
-										,@intContractHeaderId = null
-										,@intContractDetailId = null
-										,@NewInvoiceDetailId = @NewInvoiceSpotDetailId;
-								end
-							end
-
 							--Create AR record to staging table tblCTPriceFixationDetailAPAR
 							IF @intNewInvoiceId IS NOT NULL
 							BEGIN
@@ -1577,26 +1527,6 @@ BEGIN TRY
 								,@intContractDetailId
 								,@intInvoiceDetailId OUTPUT
 								,@intPriceFixationDetailId
-
-							--Process if there's overage
-							select @dblOverageQuantity = dblOverageQuantity from @OverageToProcess;
-							if (isnull(@dblOverageQuantity,0) > 0)
-							begin
-								select @dblSequenceTotalInvoicedQuantity = SUM(dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,@intItemUOMId,dblQtyShipped))  from tblARInvoiceDetail where intContractDetailId = @intContractDetailId and intInventoryShipmentChargeId is null;
-								if (@dblSequenceQuantity <= @dblSequenceTotalInvoicedQuantity)
-								begin
-									exec uspCTCreateInvoiceDetail
-										@intInvoiceDetailId = @intInvoiceDetailId
-										,@intInventoryShipmentId = @intInventoryShipmentId
-										,@intInventoryShipmentItemId = @intInventoryShipmentItemId
-										,@dblQty = @dblOverageQuantity
-										,@dblPrice = 0.00
-										,@intUserId = @intUserId
-										,@intContractHeaderId = null
-										,@intContractDetailId = null
-										,@NewInvoiceDetailId = @NewInvoiceSpotDetailId;
-								end
-							end
 
 							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
 							SELECT @intPriceFixationDetailId,@intInvoiceId,@intInvoiceDetailId,1
