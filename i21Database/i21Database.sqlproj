@@ -8831,6 +8831,8 @@
     <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />
     <Build Include="dbo\Views\vyuLGGetLoadData.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedSchedule.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedScheduleHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
