@@ -140,7 +140,7 @@ BEGIN TRY
 		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
 		select @dblContractQuantity = dblQuantity, @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 		
-		if (@dblQuantity + @dblCurrentlyApplied) > @dblContractQuantity
+		if (@dblQuantity + isnull(@dblCurrentlyApplied,0)) > @dblContractQuantity
 		begin
 			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 			continue
