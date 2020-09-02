@@ -194,7 +194,7 @@ BEGIN
 		,strCompanyCountry = @strCountry 
 		,strCompanyPhone = @strPhone
 		,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
-		,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + LEFT(DATENAME(MONTH,getdate()),3) + ' ' + DATENAME(yyyy,getdate())
+		,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + DATENAME(MONTH,getdate()) + ' ' + DATENAME(yyyy,getdate())
 		,strShipmentPeriod
 		,strDestinationCity
 		,strMarkingInstruction
