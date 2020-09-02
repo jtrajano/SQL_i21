@@ -21,11 +21,11 @@ SELECT strRecordNumber			= SAR.strRecordNumber
 	  , dblQtyOrdered			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyOrdered, 0) ELSE ISNULL(SAR.dblQtyOrdered, 0) END
 	  , dblQtyShipped			= CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 	  , dblUnitCost				= ISNULL(SAR.dblStandardCost, 0)
-	  , dblTotalCost			= ISNULL(SAR.dblStandardCost, 0) *
+	  , dblTotalCost			= ROUND(ISNULL(SAR.dblStandardCost, 0) *
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END
 										ELSE ISNULL(SAR.dblQtyOrdered, 0)
-									END
+									END,2)
 	 , dblMargin				= ((ISNULL(SAR.dblPrice, 0) - ISNULL(SAR.dblStandardCost, 0)) * 
 									CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund') 
 										THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund') 
