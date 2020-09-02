@@ -346,7 +346,7 @@ BEGIN
 
 
 	----Item Contract
-/*
+
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
 		,intEntityCustomerId
@@ -436,7 +436,7 @@ BEGIN
 	INNER JOIN vyuCTItemContractHeader CTH
 		ON CTD.intItemContractHeaderId = CTH.intItemContractHeaderId
 	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
-		AND ISNULL(SC.intItemContractDetailId,0) > 0 */
+		AND ISNULL(SC.intItemContractDetailId,0) > 0 
 
 
 	--SELECT * FROM @Items
