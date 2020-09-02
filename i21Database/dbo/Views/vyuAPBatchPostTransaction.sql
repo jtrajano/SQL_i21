@@ -9,7 +9,7 @@ SELECT 'Voucher' COLLATE Latin1_General_CI_AS AS strTransactionType,
        A.intEntityId,
        A.dtmDate,
        A.strComment AS strReference,
-       NULL AS intCompanyLocationId
+       A.intStoreLocationId AS intCompanyLocationId
 FROM tblAPBill A
 WHERE intTransactionType = 1
  AND ISNULL(ysnPosted, 0) = 0
@@ -28,7 +28,7 @@ SELECT DISTINCT
        intEntityId,
        dtmDatePaid,
        strNotes AS strReference,
-       NULL AS intCompanyLocationId
+       A.intCompanyLocationId AS intCompanyLocationId
 FROM tblAPPayment A
 INNER JOIN tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
 WHERE (ysnPosted = 0 AND ISNULL(strPaymentInfo, '') NOT LIKE 'Voided%')
@@ -44,7 +44,7 @@ SELECT 'Debit Memo' AS strTransactionType,
        intEntityId,
        dtmDate,
        strComment AS strReference,
-       NULL AS intCompanyLocationId
+       intStoreLocationId AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 3
 AND ISNULL(ysnPosted, 0) = 0
@@ -58,7 +58,7 @@ SELECT 'Vendor Prepayment' AS strTransactionType,
        intEntityId,
        dtmDate,
        strComment AS strReference,
-       NULL AS intCompanyLocationId
+       intStoreLocationId AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 2
 AND ISNULL(ysnPosted, 0) = 0
@@ -72,7 +72,7 @@ SELECT 'Basis Advance' AS strTransactionType,
        intEntityId,
        dtmDate,
        strComment AS strReference,
-       NULL AS intCompanyLocationId
+       intStoreLocationId AS intCompanyLocationId
 FROM tblAPBill
 WHERE intTransactionType = 13
 AND ISNULL(ysnPosted, 0) = 0
