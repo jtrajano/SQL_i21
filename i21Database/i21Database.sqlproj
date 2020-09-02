@@ -726,6 +726,7 @@
     <Build Include="dbo\Tables\tblICInventoryFIFO.sql" />
     <Build Include="dbo\Tables\tblICInventoryLIFO.sql" />
     <Build Include="dbo\Tables\tblICItemLocation.sql" />
+    <Build Include="dbo\Tables\tblICItemCache.sql" />
     <Build Include="dbo\User Defined Types\ItemCostingTableType.sql" />
     <Build Include="dbo\Tables\tblICInventoryTransactionType.sql" />
     <None Include="Scripts\Post-Deployment\IC\01_InventoryTransactionTypes.sql" />
@@ -735,6 +736,7 @@
     <Build Include="dbo\Stored Procedures\uspICValidateCostingOnUnpost.sql" />
     <Build Include="dbo\Stored Procedures\uspICUnpostCosting.sql" />
     <Build Include="dbo\Stored Procedures\uspICSyncItemLocationPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspICCacheItem.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\1_ReportDisableConstraints.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\2_ReportDeleteOldData.sql" />
     <None Include="Scripts\Post-Deployment\Optional Run\Reports\3_ReportEnableConstraints.sql" />
