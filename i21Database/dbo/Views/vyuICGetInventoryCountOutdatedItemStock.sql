@@ -76,6 +76,7 @@ FROM
 		strLotNo = cd.strLotNo
 	FROM tblICInventoryCountDetail cd
 		INNER JOIN tblICInventoryCount c ON cd.intInventoryCountId = c.intInventoryCountId
+		INNER JOIN tblICItemCache cache ON cache.intItemId = cd.intItemId
 		INNER JOIN tblICItem Item ON Item.intItemId = cd.intItemId
 		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = c.intLocationId
 			AND ItemLocation.intItemId = cd.intItemId
@@ -239,6 +240,7 @@ FROM
 				,t.intInventoryTransactionId DESC 
 		) lastCost  
 	WHERE c.ysnPosted != 1
+		AND cache.dtmDateLastUpdated > COALESCE(c.dtmDateModified, c.dtmDateCreated, c.dtmCountDate)
 ) x
 
 GROUP BY x.intInventoryCountId
