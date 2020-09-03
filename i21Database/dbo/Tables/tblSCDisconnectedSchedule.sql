@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblSCDisconnectedSchedule]
     [intDay]					[int] NULL,
 	[intDayOfMonth]				[int] NULL,
 	[dtmRunTime]				DATETIME NULL,
+	[intEntityId]				INT NULL,
 	[intConcurrencyId]			[int] DEFAULT 1,
 	CONSTRAINT [PK_tblSCDisconnectedSchedule] PRIMARY KEY CLUSTERED ([intScheduleId] ASC),
 	
