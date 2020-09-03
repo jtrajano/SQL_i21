@@ -83,7 +83,11 @@ BEGIN
 			ReceiptItem.intItemId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,TaxCode.intPurchaseTaxAccountId
+			,--TaxCode.intPurchaseTaxAccountId
+			ISNULL(
+				dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+				, TaxCode.intPurchaseTaxAccountId
+			) 
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -106,7 +110,11 @@ BEGIN
 				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
 					dbo.fnGetItemGLAccount(ChargeItem.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
 				ELSE 
-					TaxCode.intPurchaseTaxAccountId 
+					--TaxCode.intPurchaseTaxAccountId 
+					ISNULL(
+						dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+						, TaxCode.intPurchaseTaxAccountId
+					) 
 			END
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ChargeItem
@@ -190,7 +198,27 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId			= CASE WHEN TaxCode.ysnAddToCost = 1 THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') ELSE TaxCode.intPurchaseTaxAccountId END
+				,intPurchaseTaxAccountId			= 
+					CASE 
+						WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+							dbo.fnGetItemGLAccount(
+								ReceiptItem.intItemId
+								, ItemLocation.intItemLocationId
+								, @AccountCategory_OtherChargeExpense
+							) 
+						WHEN TaxCode.ysnAddToCost = 1 THEN 
+							dbo.fnGetItemGLAccount(
+								item.intItemId
+								, ItemLocation.intItemLocationId
+								, 'Inventory'
+							) 
+						ELSE 
+							--TaxCode.intPurchaseTaxAccountId 
+							ISNULL(
+								dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+								, TaxCode.intPurchaseTaxAccountId
+							) 						
+					END
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
@@ -237,16 +265,26 @@ BEGIN
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= 
-														CASE 
-															WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
-																dbo.fnGetItemGLAccount(
-																	ReceiptCharge.intChargeId
-																	, ItemLocation.intItemLocationId
-																	, @AccountCategory_OtherChargeExpense
-																) 
-															ELSE 
-																TaxCode.intPurchaseTaxAccountId 
-														END
+					CASE 
+						WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+							dbo.fnGetItemGLAccount(
+								ReceiptCharge.intChargeId
+								, ItemLocation.intItemLocationId
+								, @AccountCategory_OtherChargeExpense
+							) 
+						WHEN TaxCode.ysnAddToCost = 1 THEN 
+							dbo.fnGetItemGLAccount(
+								item.intItemId
+								, ItemLocation.intItemLocationId
+								, 'Inventory'
+							) 
+						ELSE 
+							--TaxCode.intPurchaseTaxAccountId 
+							ISNULL(
+								dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+								, TaxCode.intPurchaseTaxAccountId
+							) 					
+					END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
@@ -291,16 +329,24 @@ BEGIN
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
 				,intPurchaseTaxAccountId			= 
-														CASE 
-															WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
-																dbo.fnGetItemGLAccount(
-																	ReceiptCharge.intChargeId
-																	, ItemLocation.intItemLocationId
-																	, @AccountCategory_OtherChargeExpense
-																) 
-															ELSE 
-																TaxCode.intPurchaseTaxAccountId 
-														END
+					CASE 
+						WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+							dbo.fnGetItemGLAccount(
+								ReceiptCharge.intChargeId
+								, ItemLocation.intItemLocationId
+								, @AccountCategory_OtherChargeExpense
+							)
+						--WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL THEN 
+						--	ex.intPurchaseTaxExemptionAccountId
+						WHEN TaxCode.ysnAddToCost = 1 THEN 
+							dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
+						ELSE 
+							--TaxCode.intPurchaseTaxAccountId 						
+							ISNULL(
+								dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+								, TaxCode.intPurchaseTaxAccountId
+							) 
+					END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
 				,strItemNo							= item.strItemNo
