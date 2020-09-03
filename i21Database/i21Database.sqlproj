@@ -8170,6 +8170,7 @@
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
+    <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
