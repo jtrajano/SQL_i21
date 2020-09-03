@@ -8804,6 +8804,12 @@
     <Build Include="dbo\Stored Procedures\uspCTCreatePricingAPARLink.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPreSaveContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTPostSaveContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessContractDetail.sql" />
+    <None Include="Scripts\Post-Deployment\CT\6_Cleanup.sql" />
+    <Build Include="dbo\User Defined Types\ContractDetail.sql" />
+    <Build Include="dbo\Functions\fnCTGetContractDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
