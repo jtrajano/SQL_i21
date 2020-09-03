@@ -2,8 +2,8 @@
 GO
 
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glhstmst]') AND type IN (N'U'))
-EXEC (
-'ALTER PROCEDURE [dbo].[uspGLImportOriginHistoricalJournal]
+
+EXEC('ALTER PROCEDURE [dbo].[uspGLImportOriginHistoricalJournal]
 @intEntityId		INT
 AS
 SET ANSI_WARNINGS OFF
@@ -136,12 +136,12 @@ SELECT @result = REPLACE(@result , ''SUCCESS '','''')
 		CONVERT(int,1) AS intJournalId,
 		glhst_trans_dt,
 		tblGLAccount.intAccountId,
-		CASE WHEN glhst_dr_cr_ind = ''D'' THEN  ABS(glhst_amt) ELSE 0 END Debit,
-		0 AS DebitRate,																						-- debit rate
-		CASE WHEN glhst_dr_cr_ind = ''C'' THEN  ABS(glhst_amt) ELSE 0 END Credit,
+		CASE WHEN (glhst_dr_cr_ind = ''D'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''C'' AND glhst_amt < 0) THEN ABS(glhst_amt) ELSE 0 END Debit,
+		0 AS DebitRate,
+		CASE WHEN (glhst_dr_cr_ind = ''C'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''D'' AND glhst_amt < 0) THEN ABS(glhst_amt) ELSE 0 END Credit,
 		0 AS CreditRate,
-		CASE WHEN glhst_dr_cr_ind = ''D'' THEN  ABS(glhst_units) ELSE 0 END DebitUnits,
-		CASE WHEN glhst_dr_cr_ind = ''C'' THEN  ABS(glhst_units) ELSE 0 END CreditUnits,
+		CASE WHEN (glhst_dr_cr_ind = ''D'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''C'' AND glhst_amt < 0) THEN ABS(glhst_units) ELSE 0 END DebitUnits,
+		CASE WHEN (glhst_dr_cr_ind = ''C'' AND  glhst_amt > 0) OR (glhst_dr_cr_ind = ''D'' AND glhst_amt < 0) THEN ABS(glhst_units) ELSE 0 END CreditUnits,
 		glhst_ref AS strDescription,
 		NULL AS intCurrencyId,
 		0 AS dblUnitsInlbs,
