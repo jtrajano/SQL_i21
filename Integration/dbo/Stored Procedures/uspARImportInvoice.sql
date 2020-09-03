@@ -847,7 +847,7 @@ BEGIN
 
 		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
 		BEGIN	
-			SELECT  COUNT(pttic_ivc_no)  
+			SELECT @Total = COUNT(pttic_ivc_no)  
 				FROM ptticmst
 			LEFT JOIN tblARInvoice Inv 
 				ON ptticmst.pttic_ivc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
