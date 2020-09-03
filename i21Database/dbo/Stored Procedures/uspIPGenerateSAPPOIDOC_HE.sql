@@ -1159,6 +1159,21 @@ BEGIN
 	FROM @tblHeader
 	WHERE intRowNo = @intMinRowNo
 
+	-- Do not generate Idoc if Rollup Sequence value got changed
+	IF ISNULL(@ysnMaxPrice, 0) <> (
+			SELECT TOP 1 ISNULL(CH.ysnMaxPrice, 0)
+			FROM tblCTContractHeader CH
+			WHERE CH.intContractHeaderId = @intContractHeaderId
+			)
+	BEGIN
+		UPDATE tblCTContractFeed
+		SET strMessage = 'Rollup Sequence value changed in i21.'
+		WHERE intContractHeaderId = @intContractHeaderId
+			AND ISNULL(strFeedStatus, '') = ''
+		
+		GOTO NEXT_PO
+	END
+
 	IF @ysnMaxPrice = 1
 	BEGIN
 		SELECT @strContractFeedIds = ''
