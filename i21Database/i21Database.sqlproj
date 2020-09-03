@@ -8575,6 +8575,7 @@
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
     <Build Include="dbo\Tables\tblSTLotteryProcessError.sql" />
+    <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
