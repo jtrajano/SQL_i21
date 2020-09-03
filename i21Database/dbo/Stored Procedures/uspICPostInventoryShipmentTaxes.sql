@@ -57,12 +57,16 @@ BEGIN
 			,ItemLocation.intItemLocationId
 			,NULL
 		   ,intPurchaseTaxCodeId = 
-			CASE 
-				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
-				 dbo.fnGetItemGLAccount(ShipmentCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-				ELSE 
-				 TaxCode.intPurchaseTaxAccountId 
-		   END
+				CASE 
+					WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
+						dbo.fnGetItemGLAccount(ShipmentCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
+					ELSE 
+						--TaxCode.intPurchaseTaxAccountId 
+						ISNULL(
+							dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
+							, TaxCode.intPurchaseTaxAccountId
+						) 
+				END
 			,@strBatchId
 	FROM	dbo.tblICInventoryShipment Shipment INNER JOIN dbo.tblICInventoryShipmentCharge ShipmentCharge
 				ON Shipment.intInventoryShipmentId = ShipmentCharge.intInventoryShipmentId
@@ -136,7 +140,11 @@ BEGIN
 																, @AccountCategory_OtherChargeExpense
 															) 
 														  ELSE 
-															TaxCode.intPurchaseTaxAccountId 
+															--TaxCode.intPurchaseTaxAccountId 
+															ISNULL(
+																dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
+																, TaxCode.intPurchaseTaxAccountId
+															) 
 													 END
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
@@ -183,7 +191,11 @@ BEGIN
 																, @AccountCategory_OtherChargeExpense
 															) 
 														  ELSE 
-															TaxCode.intPurchaseTaxAccountId 
+															--TaxCode.intPurchaseTaxAccountId 
+															ISNULL(
+																dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Shipment.intShipFromLocationId)
+																, TaxCode.intPurchaseTaxAccountId
+															) 
 													 END
 				,dblForexRate						= ISNULL(ShipmentCharge.dblForexRate, 1)
 				,strRateType						= currencyRateType.strCurrencyExchangeRateType
