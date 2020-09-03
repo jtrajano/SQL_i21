@@ -7778,6 +7778,7 @@
     <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
+    <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
