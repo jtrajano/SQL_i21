@@ -12,6 +12,7 @@ CH.dtmCheckoutDate
 , LC.intEndingCount
 , LB.intBinNumber
 , CH.intCheckoutId
+, LG.intItemId
 FROM tblSTCheckoutLotteryCount LC
 INNER JOIN tblSTCheckoutHeader CH ON CH.intCheckoutId = LC.intCheckoutId
 INNER JOIN tblSTStore S ON S.intStoreId = CH.intStoreId
