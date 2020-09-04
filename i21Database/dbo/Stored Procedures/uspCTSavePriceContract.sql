@@ -3,7 +3,8 @@
 	@intPriceContractId INT,
 	@strXML				NVARCHAR(MAX),
 	@ysnApprove			BIT = 0,
-	@ysnProcessPricing	BIT = 1
+	@ysnProcessPricing	BIT = 1,
+	@dtmLocalDate		DATETIME = NULL
 	
 AS
 
@@ -179,7 +180,10 @@ BEGIN TRY
 
 		set @ysnSplit = (select ysnSplit from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId);
 		
-		EXEC uspCTPriceFixationSave @intPriceFixationId,@strRowState,@intUserId
+		EXEC uspCTPriceFixationSave @intPriceFixationId = @intPriceFixationId
+								   ,@strAction			= @strRowState
+								   ,@intUserId			= @intUserId
+								   ,@dtmLocalDate		= @dtmLocalDate
 
 		if (isnull(@ysnSplit,convert(bit,0)) = convert(bit,1))
 		begin
