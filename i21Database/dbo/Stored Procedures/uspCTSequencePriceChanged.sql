@@ -3,7 +3,8 @@
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
 	@ScreenName				NVARCHAR(50),
-	@ysnDelete				BIT = NULL
+	@ysnDelete				BIT = NULL,
+	@dtmLocalDate			DATETIME = NULL
 	
 AS
 
@@ -132,7 +133,7 @@ BEGIN TRY
 			
 			set @dblAvailableQuantity = @dblAvailableQuantity - @dblProcessQuantity;
 
-			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPriceForVoucher, @dblAvailableQuantity
+			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPriceForVoucher, @dblAvailableQuantity, @dtmLocalDate
 
 			set @dblProcessQuantity = @dblProcessQuantity + @dblAvailableQuantity;
 				
@@ -153,7 +154,7 @@ BEGIN TRY
 		IF NOT EXISTS(SELECT top 1 1 FROM tblAPBillDetail a, tblAPBill b WHERE a.intContractDetailId = @intContractDetailId AND a.intContractCostId IS NULL AND a.intInventoryReceiptChargeId IS NULL and b.intBillId = a.intBillId and b.intTransactionType <> 13)
 		BEGIN
 			SELECT	@dblCashPrice = dbo.fnCTConvertQtyToTargetItemUOM(@intStockUOMId,@intSeqPriceUOMId,@dblCashPrice)
-			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice, null
+			EXEC uspCTCreateBillForBasisContract @intContractDetailId, @dblCashPrice, null, @dtmLocalDate
 		END
 	END
 	/*

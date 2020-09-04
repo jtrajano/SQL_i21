@@ -3,7 +3,8 @@
 	@intPriceFixationId INT,
 	@strAction			NVARCHAR(50),
 	@intUserId			INT,
-	@ysnSaveContract	BIT = 0	
+	@ysnSaveContract	BIT = 0,
+	@dtmLocalDate		DATETIME = NULL
 	
 AS
 
@@ -231,7 +232,7 @@ BEGIN TRY
 			-- 					@intUserId				= 	@intUserId,
 			-- 					@intTransactionId		=   @intPriceFixationId
 
-			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 1
+			EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 1, @dtmLocalDate
 
 			UPDATE tblCTContractDetail SET intSplitFromId = NULL WHERE intSplitFromId = @intContractDetailId
 
@@ -630,9 +631,9 @@ BEGIN TRY
 							 @strSource			 	= 	'Pricing',
 							 @strProcess		 	= 	@process,
 							 @contractDetail 		= 	@contractDetails,
-							 @intUserId				= 	@intUserId	
+							 @intUserId				= 	@intUserId
 
-		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0
+		EXEC	uspCTSequencePriceChanged @intContractDetailId, @intUserId, 'Price Contract', 0, @dtmLocalDate
 
 		EXEC	uspCTCreateDetailHistory	@intContractHeaderId	= @intContractHeaderId, 
 											@intContractDetailId 	= @intContractDetailId, 

@@ -2,6 +2,7 @@
 	  @intBasisContractDetailId INT
 	 ,@dblCashPrice DECIMAL(24, 10)
 	 ,@dblQtyFromCt DECIMAL(24, 10) = NULL
+	 ,@dtmLocalDate	DATETIME = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -88,7 +89,7 @@ BEGIN TRY
 			
 			IF(ISNULL(@intParentSettleStorageId,0) > 0)
 			BEGIN
-				EXEC [dbo].[uspGRPostSettleStorage] @intSettleStorageId,1, 1,@dblCashPrice, @dblQtyFromCt
+				EXEC [dbo].[uspGRPostSettleStorage] @intSettleStorageId,1,1,@dblCashPrice,@dblQtyFromCt,@dtmLocalDate
 			END
 			
 			SELECT @SettleStorageKey = MIN(intSettleStorageKey)
