@@ -650,6 +650,46 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,@RaiseError		 = 1
 							,@ErrorMessage		 = @ErrorMessage OUTPUT
 							,@CreatedIvoices	 = @CreatedIvoices OUTPUT
+
+						UPDATE
+						ARI
+						SET
+
+						ARI.dblBaseDiscountAvailable = T.[Discount],	
+						ARI.dblDiscountAvailable = T.[Discount],
+						ARI.dblInvoiceTotal = ARI.dblInvoiceTotal +T.[Discount] ,
+						ARI.dblBaseInvoiceTotal = ARI.dblInvoiceTotal + T.[Discount],
+						ARI.dblAmountDue	= ARI.dblInvoiceTotal + T.[Discount],
+						ARI.dblBaseAmountDue = ARI.dblInvoiceTotal + T.[Discount],
+						ARI.dblInvoiceSubtotal   =  ARI.dblInvoiceSubtotal +  T.[Discount],
+						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount]
+
+						FROM tblARInvoice ARI
+						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARI.intInvoiceId = I.intID
+						INNER JOIN (
+								SELECT  dblPrice - dblTotal [Discount],
+										intInvoiceId
+							FROM
+								tblARInvoiceDetail
+								INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON intInvoiceId = I.intID
+							WHERE
+								[intInvoiceId] =  I.intID
+						)T ON T.[intInvoiceId]  = ARI.[intInvoiceId] 
+
+				 		UPDATE
+						ARID
+						SET 
+						ARID.dblTotal  = ARID.dblTotal  + ARI.dblDiscountAvailable,
+						ARID.dblBaseTotal = ARID.dblBaseTotal  + ARI.dblDiscountAvailable
+						FROM tblARInvoiceDetail ARID
+						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARID.intInvoiceId = I.intID
+						INNER JOIN tblARInvoice ARI  ON ARI.intInvoiceId = I.intID
+
+						UPDATE
+						ARID
+						SET dblDiscount = @ZeroDecimal
+						FROM tblARInvoiceDetail ARID
+						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARID.intInvoiceId = I.intID
 			
 						SET @NewTransactionId = (SELECT TOP 1 intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))
 
