@@ -8787,6 +8787,7 @@
     <Build Include="dbo\Tables\tblSCDisconnectedScheduleHistory.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
+    <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
