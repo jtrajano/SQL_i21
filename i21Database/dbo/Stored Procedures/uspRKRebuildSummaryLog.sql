@@ -763,12 +763,12 @@ BEGIN TRY
 				SELECT 
 					dtmDate
 					,dblBalance = CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-									WHEN strType IN ('Inventory Shipment','Inventory Receipt','Outbound Shipment') THEN CB.dblQuantity * -1
+									WHEN strType IN ('Inventory Shipment','Inventory Receipt','Outbound Shipment', 'Storage') THEN CB.dblQuantity * -1
 									ELSE 0
 								END
 					,dblBasis = CASE WHEN CD.intPricingTypeId = 2 THEN
 									CASE WHEN strType IN( 'Contract Sequence') THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment','Price Fixation') THEN CB.dblQuantity * -1
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment','Price Fixation', 'Storage') THEN CB.dblQuantity * -1
 										ELSE 0
 									END
 								ELSE 0
@@ -780,7 +780,7 @@ BEGIN TRY
 									END
 								WHEN CD.intPricingTypeId = 1 THEN 
 									CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment') THEN 
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment', 'Storage') THEN 
 											 CB.dblQuantity * -1
 										ELSE 0
 									END
@@ -2353,7 +2353,7 @@ BEGIN TRY
 							WHEN intTransactionTypeId = 3 THEN (CASE WHEN sh.strType = 'Reverse Transfer' THEN - sh.dblUnits ELSE sh.dblUnits END)
 							WHEN intTransactionTypeId = 4 THEN (CASE WHEN sh.strType = 'Reverse Settlement' THEN - sh.dblUnits ELSE sh.dblUnits END)
 						END
-			, strInOut = (CASE WHEN sh.strType IN ('Reverse Settlement','Reverse Transfer' ) THEN 'OUT' ELSE 'IN' END)
+			, strInOut = (CASE WHEN sh.strType IN ('Reverse Settlement','Reverse Transfer', 'Transfer' ) THEN 'OUT' ELSE 'IN' END)
 			, sh.intTicketId
 			, cs.intEntityId
 			, strDistributionType = st.strStorageTypeDescription
@@ -2378,8 +2378,8 @@ BEGIN TRY
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
 		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
-		WHERE sh.intTransactionTypeId IN(3,4)
-		AND sh.strType IN ('Settlement', 'Reverse Settlement', 'From Transfer','Reverse Transfer')
+		WHERE sh.intTransactionTypeId IN(4)
+		AND sh.strType IN ('Settlement', 'Reverse Settlement', 'From Transfer','Reverse Transfer', 'Transfer')
 
 		INSERT INTO @ExistingHistory (strBatchId
 			, strBucketType

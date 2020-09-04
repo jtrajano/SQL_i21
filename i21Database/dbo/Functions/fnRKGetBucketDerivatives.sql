@@ -131,7 +131,7 @@ BEGIN
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strDistributionType, c.strInOut ORDER BY c.intSummaryLogId DESC)
 			, c.intFutOptTransactionId
-			, dblOpenContract = ISNULL(c.dblOrigNoOfLots, 0) - ISNULL(md.dblOrigNoOfLots, 0)
+			, dblOpenContract = ISNULL(c.dblOrigNoOfLots, 0) - CASE WHEN c.strInOut = 'IN' THEN  ISNULL(ABS(md.dblOrigNoOfLots), 0) ELSE ISNULL(md.dblOrigNoOfLots, 0) END
 			, intCommodityId
 			, strCommodityCode
 			, strInternalTradeNo = strTransactionNumber
