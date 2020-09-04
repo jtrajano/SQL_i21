@@ -27,6 +27,8 @@ DECLARE @prepayBillId NVARCHAR(100);
 DECLARE @error NVARCHAR(1000);
 DECLARE @batchIdUsed NVARCHAR(50);
 DECLARE @type INT;
+DECLARE @ysnInPayment BIT;
+DECLARE @dblPaymentTemp DECIMAL(18, 6);
 
 BEGIN TRY
 
@@ -39,6 +41,8 @@ SELECT
 	,@apAccount = voucher.intAccountId
 	,@voucherBillId = voucher.strBillId
 	,@type = voucher.intTransactionType
+	,@ysnInPayment = voucher.ysnInPayment
+	,@dblPaymentTemp = voucher.dblPaymentTemp
 FROM tblSMCompanyLocation loc
 INNER JOIN tblAPBill voucher ON loc.intCompanyLocationId = voucher.intShipToId
 WHERE voucher.intBillId = @voucherKey;
@@ -155,6 +159,8 @@ BEGIN
 		,prepay.ysnPrepayHasPayment = 1
 		,prepay.ysnPosted = 0
 		,prepay.intTransactionReversed = NULL --if the orignal transaction is an reversed transaction, we should null this for created prepaid
+		,prepay.ysnInPayment = @ysnInPayment
+		,prepay.dblPaymentTemp = @dblPaymentTemp
 	FROM tblAPBill prepay
 	WHERE prepay.intBillId = @prepayCreated
 

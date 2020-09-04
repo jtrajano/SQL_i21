@@ -75,6 +75,8 @@ BEGIN
 		,dtmDate = GETDATE()
 		,dtmBillDate = GETDATE()
 		,dtmDueDate = dbo.fnGetDueDateBasedOnTerm(GETDATE(),A.intTermsId)
+		,dblPaymentTemp = 0
+		,ysnInPayment = 0
 	FROM #tmpDuplicateBill A
 END
 --INSERT INTO tblAPBill(
