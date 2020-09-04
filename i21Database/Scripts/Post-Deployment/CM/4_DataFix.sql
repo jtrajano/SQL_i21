@@ -314,6 +314,11 @@ BEGIN CATCH
 	PRINT ERROR_MESSAGE()
 END CATCH
 
+UPDATE CM SET intAPPaymentId = AP.intPaymentId
+FROM tblCMBankTransaction CM
+JOIN  tblAPPayment AP ON AP.strPaymentRecordNum = CM.strTransactionId
+WHERE strTransactionId like 'PAY-%'
+
 GO
 print('/*******************  END Cash Management Data Fixess *******************/')
 GO
