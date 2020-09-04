@@ -49,6 +49,7 @@
 	[dtmClr]				   DATETIME	        NULL,
     [ysnHasDetailOverflow]     BIT              NULL,
     [ysnHasBasisPrepayOverflow]BIT              NULL,
+    [intAPPaymentId]           INT             NULL,
     [intConcurrencyId]         INT              DEFAULT 1 NOT NULL
 	CONSTRAINT [PK_tblCMBankTransaction] PRIMARY KEY CLUSTERED ([intTransactionId] ASC),
     CONSTRAINT [FK_tblCMBankAccounttblCMBankTransaction] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
@@ -56,6 +57,7 @@
 	CONSTRAINT [FK_tblCMBankTransactiontblSMCompanyLocation] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] (intCompanyLocationId),
 	CONSTRAINT [FK_tblCMBankTransactiontblGLAccount] FOREIGN KEY ([intShortGLAccountId]) REFERENCES [dbo].[tblGLAccount] (intAccountId),
 	CONSTRAINT [FK_tblCMBankTransaction_tblCMBankLoan] FOREIGN KEY ([intBankLoanId]) REFERENCES [dbo].[tblCMBankLoan] (intBankLoanId),
+    CONSTRAINT [FK_tblCMBankTransactionPayment] FOREIGN KEY([intAPPaymentId]) REFERENCES [dbo].[tblAPPayment] ([intPaymentId]),
     UNIQUE NONCLUSTERED ([strTransactionId] ASC)
 );
 
