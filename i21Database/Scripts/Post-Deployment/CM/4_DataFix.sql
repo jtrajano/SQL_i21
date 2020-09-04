@@ -164,5 +164,16 @@ GO
 PRINT('Finished removing Voided prefix in check numbers')
 GO
 
+PRINT('Begin linking CM transactions to AP')
+GO
+UPDATE CM SET intAPPaymentId = AP.intPaymentId
+FROM tblCMBankTransaction CM
+JOIN  tblAPPayment AP ON AP.strPaymentRecordNum = CM.strTransactionId
+WHERE strTransactionId like 'PAY-%'
+GO
+PRINT('Finished linking CM transactions to AP')
+GO
+
+
 PRINT('/*******************  END Cash Management Data Fixess *******************/')
 GO
