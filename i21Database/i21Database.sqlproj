@@ -8834,6 +8834,7 @@
     <Build Include="dbo\Tables\tblSCDisconnectedSchedule.sql" />
     <Build Include="dbo\Tables\tblSCDisconnectedScheduleHistory.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
+    <Build Include="dbo\Views\vyuCTSequenceTransactions.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
