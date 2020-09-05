@@ -47,35 +47,6 @@ BEGIN
 		AND ex.ysnTaxExempt = 1
 		AND tc.intPurchaseTaxExemptionAccountId IS NOT NULL
 
-	DECLARE @ChargeTaxExemptions TABLE(strTaxCode NVARCHAR(200), ysnAddToCost BIT, 
-		intPurchaseTaxExemptionAccountId INT, intPurchaseAccountId INT,
-		intItemId INT, intReceiptId INT, intChargeId INT, intTaxCodeId INT)
-	INSERT INTO @ChargeTaxExemptions
-	SELECT tc.strTaxCode, tc.ysnAddToCost,
-		tc.intPurchaseTaxExemptionAccountId, tc.intPurchaseTaxAccountId,
-		i.intItemId, r.intInventoryReceiptId, ri.intInventoryReceiptChargeId, tc.intTaxCodeId
-	FROM tblICInventoryReceipt r
-	INNER JOIN tblICInventoryReceiptCharge ri ON ri.intInventoryReceiptId = r.intInventoryReceiptId
-	INNER JOIN tblICItem i ON i.intItemId = ri.intChargeId
-	INNER JOIN tblSMTaxGroupCode tgc ON tgc.intTaxGroupId = ri.intTaxGroupId
-	INNER JOIN tblSMTaxCode tc ON tc.intTaxCodeId = tgc.intTaxCodeId
-	CROSS APPLY (
-		SELECT *
-		FROM dbo.fnGetVendorTaxCodeExemption(
-			r.intEntityVendorId, 
-			r.dtmReceiptDate, 
-			tgc.intTaxGroupId, 
-			tc.intTaxCodeId,
-			tc.intTaxClassId,
-			tc.strState,
-			i.intItemId,
-			i.intCategoryId,
-			r.intShipFromId)
-	) ex
-	WHERE r.intInventoryReceiptId = @intInventoryReceiptId
-		AND ex.ysnTaxExempt = 1
-		AND tc.intPurchaseTaxExemptionAccountId IS NOT NULL
-
 	INSERT INTO @GLAccounts (
 		intItemId 
 		,intItemLocationId 
@@ -141,7 +112,11 @@ BEGIN
 			ReceiptItem.intItemId
 			,ItemLocation.intItemLocationId
 			,NULL
-			,ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
+			,--TaxCode.intPurchaseTaxAccountId
+			ISNULL(
+				dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+				, TaxCode.intPurchaseTaxAccountId
+			) 
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
@@ -163,7 +138,12 @@ BEGIN
 			,CASE 
 				WHEN TaxCode.ysnExpenseAccountOverride = 1 THEN 
 					dbo.fnGetItemGLAccount(ChargeItem.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-				ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
+				ELSE 
+					--TaxCode.intPurchaseTaxAccountId 
+					ISNULL(
+						dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+						, TaxCode.intPurchaseTaxAccountId
+					) 
 			END
 			,@strBatchId
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ChargeItem
@@ -310,7 +290,11 @@ BEGIN
 					ELSE
 						CASE WHEN TaxCode.ysnAddToCost = 1 
 						THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
-						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
+						ELSE --TaxCode.intPurchaseTaxAccountId 
+							ISNULL(
+								dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+								, TaxCode.intPurchaseTaxAccountId
+							) 
 						END
 					END
 				,dblForexRate						= ISNULL(ReceiptItem.dblForexRate, 1)
@@ -368,17 +352,17 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId = 
-					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1
+				,intPurchaseTaxAccountId			= 
+					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1 
 					THEN dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-					ELSE 
-						CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-						THEN 
-							CASE WHEN TaxCode.ysnAddToCost = 1
-							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
-							ELSE ex.intPurchaseTaxExemptionAccountId
-							END
-						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId) 
+					ELSE
+						CASE WHEN TaxCode.ysnAddToCost = 1 
+						THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
+						ELSE --TaxCode.intPurchaseTaxAccountId 
+							ISNULL(
+								dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+								, TaxCode.intPurchaseTaxAccountId
+							) 
 						END
 					END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
@@ -403,10 +387,10 @@ BEGIN
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
 				OUTER APPLY (
 					SELECT TOP 1 e.*
-					FROM @ChargeTaxExemptions e
+					FROM @TaxExemptions e
 					WHERE e.intReceiptId = @intInventoryReceiptId
 						AND Receipt.intInventoryReceiptId = e.intReceiptId
-						AND ReceiptCharge.intChargeId = e.intChargeId
+						AND ReceiptCharge.intChargeId = e.intItemId
 						AND e.intTaxCodeId = ChargeTaxes.intTaxCodeId
 				) ex
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId	
@@ -432,17 +416,21 @@ BEGIN
 				,dblExchangeRate					= ISNULL(ReceiptCharge.dblForexRate, 1)
 				,strInventoryTransactionTypeName	= TransType.strName
 				,strTransactionForm					= @strTransactionForm
-				,intPurchaseTaxAccountId = 
-					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1
-					THEN dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense) 
-					ELSE 
+				,intPurchaseTaxAccountId			= 
+					CASE WHEN TaxCode.ysnExpenseAccountOverride = 1 
+					THEN dbo.fnGetItemGLAccount(ReceiptCharge.intChargeId, ItemLocation.intItemLocationId, @AccountCategory_OtherChargeExpense)
+					ELSE
 						CASE WHEN ex.intPurchaseTaxExemptionAccountId IS NOT NULL 
-						THEN 
-							CASE WHEN TaxCode.ysnAddToCost = 1
-							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory')
-							ELSE ex.intPurchaseTaxExemptionAccountId
+						THEN ex.intPurchaseTaxExemptionAccountId
+						ELSE
+							CASE WHEN TaxCode.ysnAddToCost = 1 
+							THEN dbo.fnGetItemGLAccount(item.intItemId, ItemLocation.intItemLocationId, 'Inventory') 
+							ELSE --TaxCode.intPurchaseTaxAccountId 						
+								ISNULL(
+									dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId)
+									, TaxCode.intPurchaseTaxAccountId
+								) 
 							END
-						ELSE ISNULL(dbo.fnGetLocationAwareGLAccount(TaxCode.intPurchaseTaxAccountId, Receipt.intLocationId), TaxCode.intPurchaseTaxAccountId)
 						END
 					END
 				,dblForexRate						= ISNULL(ReceiptCharge.dblForexRate, 1)
@@ -467,10 +455,10 @@ BEGIN
 					ON currencyRateType.intCurrencyExchangeRateTypeId = ReceiptCharge.intForexRateTypeId
 				OUTER APPLY (
 					SELECT TOP 1 e.*
-					FROM @ChargeTaxExemptions e
+					FROM @TaxExemptions e
 					WHERE e.intReceiptId = @intInventoryReceiptId
 						AND Receipt.intInventoryReceiptId = e.intReceiptId
-						AND ReceiptCharge.intChargeId = e.intChargeId
+						AND ReceiptCharge.intChargeId = e.intItemId
 						AND e.intTaxCodeId = ChargeTaxes.intTaxCodeId
 				) ex
 		WHERE	Receipt.intInventoryReceiptId = @intInventoryReceiptId
