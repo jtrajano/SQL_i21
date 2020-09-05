@@ -6,8 +6,6 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
 	,@intStorageScheduleId AS INT = NULL
-	,@intFutureMarketId AS INT = NULL
-	,@intFutureMonthId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -201,7 +199,7 @@ BEGIN TRY
 						WHEN ISNULL(@intDPContractId,0) > 0 THEN 
 						ISNULL(
 							(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
-							FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
+							FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
 							LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
 							LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
 						)
@@ -465,7 +463,7 @@ BEGIN TRY
 				WHEN ISNULL(@intDPContractId,0) > 0 THEN 
 				ISNULL(
 					(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
-					FROM dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,ScaleTicket.intProcessingLocationId,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
+					FROM dbo.fnRKGetFutureAndBasisPrice (1,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,NULL,NULL,ScaleTicket.intProcessingLocationId,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
 					LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
 					LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
 				)
