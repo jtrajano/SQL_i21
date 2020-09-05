@@ -137,6 +137,8 @@ BEGIN
 	FOR XML PATH(''), TYPE).value('.','NVARCHAR(MAX)'),1,1,'');
 	SET ANSI_WARNINGS OFF;
 
+	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
+
 	EXEC [dbo].[uspAPPostBill]
 		@batchId = NULL,
 		@billBatchId = NULL,
@@ -162,13 +164,14 @@ BEGIN
 	IF(@success = 0)
 	BEGIN
 		SELECT TOP 1 @error = strMessage
-		FROM tblAPPostResult where strTransactionType = 'Bill' AND strBatchNumber = @batchIdUsedInBill;
+		FROM tblAPPostResult 
+		WHERE strBatchNumber = @batchIdUsedInBill;
+		
 		RAISERROR(@error, 16, 1);
 		GOTO Post_Rollback;
 	END
 
-	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));
-	UPDATE tblPATRefundCustomer SET intBillId = NULL WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData);
+	DELETE FROM tblAPBill WHERE intBillId IN (SELECT intBillId FROM tblPATRefundCustomer WHERE intRefundCustomerId IN (SELECT intRefundCustomerId from #tmpRefundData));	
 END
 
 ---------------------------------------------------------------------------------------------------------------------------------------
