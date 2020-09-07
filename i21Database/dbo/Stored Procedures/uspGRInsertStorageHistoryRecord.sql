@@ -6,7 +6,65 @@ CREATE PROCEDURE [dbo].[uspGRInsertStorageHistoryRecord]
 AS
 BEGIN TRY   
      DECLARE @ErrMsg NVARCHAR(MAX)
+	 DECLARE @StorageHistoryDataDummy AS StorageHistoryStagingTable
+	 DECLARE @intId INT
 
+	 INSERT INTO @StorageHistoryDataDummy
+	 (
+		intCustomerStorageId
+		,intSettleStorageId
+		,intTransferStorageId
+		,intTicketId
+		,intDeliverySheetId
+		,intInventoryReceiptId
+		,intInvoiceId
+		,intInventoryShipmentId
+		,intBillId
+		,intContractHeaderId
+		,intInventoryAdjustmentId
+		,dblUnits
+		,dtmHistoryDate
+		,dblPaidAmount
+		,dblCurrencyRate
+		,intUserId
+		,ysnPost
+		,intTransactionTypeId
+		,strPaidDescription
+		,strType
+		,strTransactionId
+		,strTransferTicket
+		,strSettleTicket
+		,strVoucher
+		,dblOldCost
+		,intTransferStorageReferenceId
+	 )
+	 SELECT intCustomerStorageId
+		,intSettleStorageId
+		,intTransferStorageId
+		,intTicketId
+		,intDeliverySheetId
+		,intInventoryReceiptId
+		,intInvoiceId
+		,intInventoryShipmentId
+		,intBillId
+		,intContractHeaderId
+		,intInventoryAdjustmentId
+		,dblUnits
+		,dtmHistoryDate
+		,dblPaidAmount
+		,dblCurrencyRate
+		,intUserId
+		,ysnPost
+		,intTransactionTypeId
+		,strPaidDescription
+		,strType
+		,strTransactionId
+		,strTransferTicket
+		,strSettleTicket
+		,strVoucher
+		,dblOldCost
+		,intTransferStorageReferenceId
+	FROM @StorageHistoryData
 
     IF (SELECT COUNT(*) FROM @StorageHistoryData) > 0
     BEGIN
@@ -21,80 +79,87 @@ BEGIN TRY
             END                
     END
     ELSE 
-        RETURN
+        RETURN;
         
-
-    INSERT INTO [dbo].[tblGRStorageHistory]
-    (
-        [intCustomerStorageId],
-        [intSettleStorageId],
-        [intTransferStorageId],
-        [intTicketId],
-        [intDeliverySheetId],
-        [intInventoryReceiptId],
-        [intInvoiceId],
-        [intInventoryShipmentId],
-        [intBillId],
-        [intContractHeaderId],
-        [intInventoryAdjustmentId],
-        [dblUnits],
-        [dtmHistoryDate],
-        [dblPaidAmount],
-        [strPaidDescription],
-        [dblCurrencyRate],
-        [strType],
-        [intUserId],
-        [ysnPost],
-        [dtmDistributionDate],
-        [intTransactionTypeId],
-		[strTransactionId],
-        [intConcurrencyId],
-		[strTransferTicket],
-		[strSettleTicket],
-		[strVoucher],
-        [intTransferStorageReferenceId]
-    ) 
-    SELECT 
-        [intCustomerStorageId]          = SH.intCustomerStorageId,
-        [intSettleStorageId]            = SH.intSettleStorageId,
-        [intTransferStorageId]          = SH.intTransferStorageId,
-        [intTicketId]                   = SH.intTicketId,
-        [intDeliverySheetId]            = SH.intDeliverySheetId,
-        [intInventoryReceiptId]         = SH.intInventoryReceiptId,
-        [intInvoiceId]                  = SH.intInvoiceId,
-        [intInventoryShipmentId]        = SH.intInventoryShipmentId,
-        [intBillId]                     = SH.intBillId,
-        [intContractHeaderId]           = SH.intContractHeaderId,
-        [intInventoryAdjustmentId]      = SH.intInventoryAdjustmentId,
-        [dblUnits]                      = SH.dblUnits,
-        [dtmHistoryDate]                = SH.dtmHistoryDate,
-        [dblPaidAmount]                 = SH.dblPaidAmount,
-        [strPaidDescription]            = SH.strPaidDescription,
-        [dblCurrencyRate]               = SH.dblCurrencyRate,
-        [strType]                       = SH.strType,
-        [intUserId]                     = SH.intUserId,
-        [ysnPost]                       = SH.ysnPost,
-        [dtmDistributionDate]           = GETDATE(),
-        [intTransactionTypeId]          = SH.intTransactionTypeId,
-		[strTransactionId]			    = SH.strTransactionId,
-        1,
-		[strTransferTicket]			    = SH.strTransferTicket,
-		[strSettleTicket]			    = SH.strSettleTicket,
-		[strVoucher]				    = SH.strVoucher,
-        [intTransferStorageReferenceId] = SH.intTransferStorageReferenceId
-    FROM @StorageHistoryData SH
-
-    SELECT @intStorageHistoryId = SCOPE_IDENTITY();
-
-    IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5,3))
-    BEGIN
-        EXEC uspGRRiskSummaryLog @intStorageHistoryId
-    END	
-
-    IF @intStorageHistoryId IS NULL 
+	WHILE EXISTS (SELECT TOP 1 1 FROM @StorageHistoryDataDummy)
 	BEGIN
-		RAISERROR('Unable to get Identity value from Storage History', 16, 1);
-		RETURN;
+		SELECT @intId = intId FROM @StorageHistoryDataDummy
+
+		INSERT INTO [dbo].[tblGRStorageHistory]
+		(
+			[intCustomerStorageId],
+			[intSettleStorageId],
+			[intTransferStorageId],
+			[intTicketId],
+			[intDeliverySheetId],
+			[intInventoryReceiptId],
+			[intInvoiceId],
+			[intInventoryShipmentId],
+			[intBillId],
+			[intContractHeaderId],
+			[intInventoryAdjustmentId],
+			[dblUnits],
+			[dtmHistoryDate],
+			[dblPaidAmount],
+			[strPaidDescription],
+			[dblCurrencyRate],
+			[strType],
+			[intUserId],
+			[ysnPost],
+			[dtmDistributionDate],
+			[intTransactionTypeId],
+			[strTransactionId],
+			[intConcurrencyId],
+			[strTransferTicket],
+			[strSettleTicket],
+			[strVoucher],
+			[intTransferStorageReferenceId]
+		) 
+		SELECT 
+			[intCustomerStorageId]          = SH.intCustomerStorageId,
+			[intSettleStorageId]            = SH.intSettleStorageId,
+			[intTransferStorageId]          = SH.intTransferStorageId,
+			[intTicketId]                   = SH.intTicketId,
+			[intDeliverySheetId]            = SH.intDeliverySheetId,
+			[intInventoryReceiptId]         = SH.intInventoryReceiptId,
+			[intInvoiceId]                  = SH.intInvoiceId,
+			[intInventoryShipmentId]        = SH.intInventoryShipmentId,
+			[intBillId]                     = SH.intBillId,
+			[intContractHeaderId]           = SH.intContractHeaderId,
+			[intInventoryAdjustmentId]      = SH.intInventoryAdjustmentId,
+			[dblUnits]                      = SH.dblUnits,
+			[dtmHistoryDate]                = SH.dtmHistoryDate,
+			[dblPaidAmount]                 = SH.dblPaidAmount,
+			[strPaidDescription]            = SH.strPaidDescription,
+			[dblCurrencyRate]               = SH.dblCurrencyRate,
+			[strType]                       = SH.strType,
+			[intUserId]                     = SH.intUserId,
+			[ysnPost]                       = SH.ysnPost,
+			[dtmDistributionDate]           = GETDATE(),
+			[intTransactionTypeId]          = SH.intTransactionTypeId,
+			[strTransactionId]			    = SH.strTransactionId,
+			1,
+			[strTransferTicket]			    = SH.strTransferTicket,
+			[strSettleTicket]			    = SH.strSettleTicket,
+			[strVoucher]				    = SH.strVoucher,
+			[intTransferStorageReferenceId] = SH.intTransferStorageReferenceId
+		FROM @StorageHistoryDataDummy SH
+		WHERE intId = @intId
+
+		SELECT @intStorageHistoryId = SCOPE_IDENTITY();
+
+		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5,3))
+		BEGIN
+			EXEC uspGRRiskSummaryLog @intStorageHistoryId
+		END
+
+		DELETE FROM @StorageHistoryDataDummy WHERE intId = @intId
+
+		IF @intStorageHistoryId IS NULL 
+		BEGIN
+			RAISERROR('Unable to get Identity value from Storage History', 16, 1);
+			RETURN;
+		END
 	END
 
 END TRY
