@@ -1119,6 +1119,50 @@ BEGIN TRY
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
+		END
+
+		--(intToCustomerStorageId INT, intTransferStorageSplitId INT, intSourceCustomerStorageId INT,dblUnitQty NUMERIC(38,20),dblSplitPercent NUMERIC(38,20),dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE()))
+
+		--update tblGRTransferStorageSplit's intCustomerStorageId
+		UPDATE A
+		SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
+			,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN 
+										CASE 
+											WHEN A.intContractDetailId IS NULL THEN CT.intContractDetailId 
+											ELSE A.intContractDetailId
+										END
+									ELSE NULL END
+		FROM tblGRTransferStorageSplit A		
+		INNER JOIN @newCustomerStorageIds B
+			ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
+		INNER JOIN tblGRCustomerStorage CS
+			ON CS.intCustomerStorageId = B.intToCustomerStorageId
+		INNER JOIN tblGRStorageType ST
+			ON ST.intStorageScheduleTypeId = A.intStorageTypeId
+		OUTER APPLY (
+			SELECT TOP 1 intContractDetailId
+			FROM vyuCTGetContractForScaleTicket
+			WHERE intPricingTypeId = 5
+				AND intEntityId = CS.intEntityId
+				AND intCompanyLocationId = CS.intCompanyLocationId
+				AND intItemId = CS.intItemId
+				AND ysnEarlyDayPassed = 1
+				AND intContractTypeId = 1
+				AND ysnAllowedToShow = 1
+		) CT
+		
+		SET @cnt = 0
+		SET @cnt = (SELECT COUNT(*) 
+					FROM tblGRTransferStorageSplit TSS
+					INNER JOIN tblGRStorageType ST
+						ON ST.intStorageScheduleTypeId = TSS.intStorageTypeId
+					WHERE intTransferStorageId = @intTransferStorageId 
+						AND ST.ysnDPOwnedType = 1
+						AND intContractDetailId IS NULL)
+
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+		WITH storageDetails (
 			intTransferStorageSplitId
 			,intEntityId
 			,intToEntityId
