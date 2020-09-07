@@ -8,7 +8,7 @@ BEGIN TRY
 	DECLARE @ErrMsg NVARCHAR(MAX)
 	DECLARE @SummaryLogs AS RKSummaryLog
 
-	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,3,4,5,9)) = 1
+	IF (SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,3,4,5,8,9)) = 1
 	BEGIN
 		INSERT INTO @SummaryLogs
 		(
@@ -38,7 +38,7 @@ BEGIN TRY
 		SELECT
 			strBucketType 					= 'Customer Owned'
 			,strTransactionType 			= CASE 
-												WHEN intTransactionTypeId IN (1, 5)
+												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN CASE 
 															WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
 															WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
@@ -48,7 +48,7 @@ BEGIN TRY
 												WHEN intTransactionTypeId = 9 THEN 'Inventory Adjustment' 
 											END
 			,intTransactionRecordId 		= CASE 
-												WHEN intTransactionTypeId IN (1, 5)
+												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN
 														nullif(coalesce(sh.intInventoryReceiptId, sh.intInventoryShipmentId, sh.intTicketId, -99), -99)
 												WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
@@ -57,7 +57,7 @@ BEGIN TRY
 			,intTransactionRecordHeaderId	= sh.intCustomerStorageId
 			,strDistributionType 			= st.strStorageTypeDescription
 			,strTransactionNumber 			= CASE 
-												WHEN intTransactionTypeId IN (1, 5)
+												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN CASE 
 															WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
 															WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
@@ -94,7 +94,7 @@ BEGIN TRY
 											+ CASE WHEN ISNULL(ysnExternal, '') = '' THEN '' ELSE '{ ysnExternal = "' + CAST(ysnExternal AS NVARCHAR) + '" }' END
 			,strNotes						= 'intStorageHistoryId=' + CAST(sh.intStorageHistoryId AS NVARCHAR)
 			,intActionId					= CASE 
-												WHEN intTransactionTypeId IN (1, 5)
+												WHEN intTransactionTypeId IN (1, 5, 8)
 													THEN CASE 
 															WHEN sh.intInventoryReceiptId IS NOT NULL THEN 40
 															WHEN sh.intInventoryShipmentId IS NOT NULL THEN 41
