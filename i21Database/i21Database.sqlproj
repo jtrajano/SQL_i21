@@ -8839,6 +8839,7 @@
     <Build Include="dbo\Views\vyuCTSequenceTransactions.sql" />
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMigrateDPRLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
