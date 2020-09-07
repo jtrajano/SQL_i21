@@ -67,8 +67,7 @@ BEGIN
 		,[dtmCreated]               
 		,[intLastModifiedUserId]    
 		,[dtmLastModified]          
-		,[intConcurrencyId]    					
-		,[intAPPaymentId]     
+		,[intConcurrencyId]         
 	)
 	SELECT
 		[strTransactionId] = A.strPaymentRecordNum,
@@ -103,8 +102,7 @@ BEGIN
 		[dtmCreated] = GETDATE(),
 		[intLastModifiedUserID] = NULL,
 		[dtmLastModified] = GETDATE(),
-		[intConcurrencyId] = 1,
-		[intAPPaymentId] = A.intPaymentId
+		[intConcurrencyId] = 1
 	FROM tblAPPayment A
 		INNER JOIN tblAPVendor B
 			ON A.[intEntityVendorId] = B.[intEntityId]
