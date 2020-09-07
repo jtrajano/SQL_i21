@@ -345,7 +345,10 @@ BEGIN TRY
 		)
 		SELECT 
 			[intCustomerStorageId] 		= intCustomerStorageId
-			,[intTicketId] 				= CASE WHEN @strSourceType = 'Scale' THEN @IntSourceKey ELSE NULL END
+			,[intTicketId] 				= CASE 
+											WHEN @strSourceType = 'Scale' THEN @IntSourceKey 
+											WHEN @strSourceType = 'InventoryShipment' THEN A.intSourceId
+											ELSE NULL END
 			,[intInvoiceId] 			= CASE WHEN @strSourceType = 'Invoice' THEN @IntSourceKey ELSE NULL END
 			,[intInventoryShipmentId] 	= CASE WHEN @strSourceType = 'InventoryShipment' THEN @IntSourceKey ELSE NULL END
 			,[dblUnits] 				= dblOpenBalance
@@ -368,31 +371,41 @@ BEGIN TRY
 										END
 			,[intUserId] 				= @intUserId
 		FROM @StorageTicketInfoByFIFO
+		CROSS APPLY (
+			SELECT ShipmentItem.intSourceId
+			FROM tblICInventoryShipment Shipment
+			JOIN tblICInventoryShipmentItem ShipmentItem
+				ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
+			WHERE Shipment.intInventoryShipmentId = @IntSourceKey
+				AND @strSourceType = 'InventoryShipment'
+			--AND [strType]='Reduced By Inventory Shipment'
+			--AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL
+		) A
 		WHERE strItemType = 'Inventory'
 
 		EXEC uspGRInsertStorageHistoryRecord @StorageHistoryStagingTable, @intStorageHistoryId OUTPUT
 
-		IF @strSourceType = 'InventoryShipment'
-		BEGIN
-		      IF EXISTS( SELECT 1 FROM 
-						 tblICInventoryShipmentItem ShipmentItem 
-						 JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId=ShipmentItem.intInventoryShipmentId
-						 WHERE Shipment.intSourceType=1 AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL AND Shipment.intInventoryShipmentId=@IntSourceKey
-						)
-			 BEGIN
-				 UPDATE SH 
-				 SET 
-				 SH.intTicketId			  = ShipmentItem.intSourceId
-				,SH.intTransactionTypeId  = 1
-				FROM [tblGRStorageHistory] SH
-				JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = SH.intInventoryShipmentId
-				JOIN tblICInventoryShipmentItem ShipmentItem  ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
-				WHERE 
-				SH.intInventoryShipmentId=@IntSourceKey 
-				AND [strType]='Reduced By Inventory Shipment'  
-				AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL
-			 END
-		END
+		--IF @strSourceType = 'InventoryShipment'
+		--BEGIN
+		--      IF EXISTS( SELECT 1 FROM 
+		--				 tblICInventoryShipmentItem ShipmentItem 
+		--				 JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId=ShipmentItem.intInventoryShipmentId
+		--				 WHERE Shipment.intSourceType=1 AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL AND Shipment.intInventoryShipmentId=@IntSourceKey
+		--				)
+		--	 BEGIN
+		--		 UPDATE SH 
+		--		 SET 
+		--		 SH.intTicketId			  = ShipmentItem.intSourceId
+		--		--,SH.intTransactionTypeId  = 1
+		--		FROM [tblGRStorageHistory] SH
+		--		JOIN tblICInventoryShipment Shipment ON Shipment.intInventoryShipmentId = SH.intInventoryShipmentId
+		--		JOIN tblICInventoryShipmentItem ShipmentItem  ON ShipmentItem.intInventoryShipmentId = Shipment.intInventoryShipmentId
+		--		WHERE 
+		--		SH.intInventoryShipmentId=@IntSourceKey 
+		--		AND [strType]='Reduced By Inventory Shipment'  
+		--		AND ShipmentItem.intStorageScheduleTypeId IS NOT NULL
+		--	 END
+		--END
 
 		SELECT 
 			 [intCustomerStorageId]
