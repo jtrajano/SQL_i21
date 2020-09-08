@@ -181,7 +181,7 @@ FROM	tblICRetailValuation rv OUTER APPLY (
 
 -- Populate the ending cost 
 UPDATE	rv
-SET		rv.dblEndingCost = transactions.total 
+SET		rv.dblEndingCost = transactions.total - ISNULL(rv.dblWriteOffs, 0) 
 FROM	tblICRetailValuation rv OUTER APPLY (
 			SELECT	total = SUM(
 						ISNULL(t.dblCategoryCostValue, (ISNULL(t.dblQty, 0) * ISNULL(t.dblCost, 0)))

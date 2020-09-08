@@ -92,7 +92,7 @@ LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeade
 LEFT JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
 WHERE I.intInvoiceId = @intInvoiceId
   AND ISNULL(CH.ysnLoad, 0) = 0
-  --AND ISNULL(T.strDistributionOption, '') <> 'LOD'
+  AND (ISNULL(T.strDistributionOption, '') <> 'LOD' OR (ISNULL(T.strDistributionOption, '') = 'LOD' AND ISNULL(CH.intPricingTypeId, 0) <> 1))
 
 IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
 	BEGIN

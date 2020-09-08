@@ -7683,7 +7683,6 @@
     <Build Include="dbo\Views\vyuTRLoadDistributionDetailInfo.sql" />
     <Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
     <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
-    <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
     <None Include="Scripts\Post-Deployment\IC\18_Set_Commodity_Market_To_Market_Default_Data.sql" />
     <Build Include="dbo\Views\vyuSTCashierReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSBatchProcess.sql" />
@@ -8787,6 +8786,8 @@
     <Build Include="dbo\Tables\tblSCDisconnectedScheduleHistory.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
+    <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMigrateDPRLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

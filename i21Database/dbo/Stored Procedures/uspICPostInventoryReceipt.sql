@@ -381,15 +381,22 @@ BEGIN
 		END 
 	END
 
-	-- Update Warehouse Ref# for line items and lots
-	UPDATE ri
-	SET ri.strWarehouseRefNo = r.strWarehouseRefNo
-	FROM tblICInventoryReceiptItem ri
-		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
-	WHERE r.intInventoryReceiptId = @intTransactionId
+	/* 
+	BEGIN COMMENT (IC-8603)
+	Do not update records in tblICInventoryReceiptItem during posting. 
+	Other modules are reading it. Update will trigger a Page Lock (IX) and cause a deadlock. 
+
+	---- Update Warehouse Ref# for line items and lots
+	--UPDATE ri
+	--SET ri.strWarehouseRefNo = r.strWarehouseRefNo
+	--FROM tblICInventoryReceiptItem ri
+	--	INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
+	--WHERE r.intInventoryReceiptId = @intTransactionId
+	END COMMENT (IC-8603) 
+	*/
 
 	UPDATE lot
-	SET lot.strWarehouseRefNo = ri.strWarehouseRefNo
+	SET lot.strWarehouseRefNo = r.strWarehouseRefNo
 	FROM tblICInventoryReceiptItemLot lot 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
