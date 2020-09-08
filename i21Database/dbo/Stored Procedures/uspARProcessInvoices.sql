@@ -424,10 +424,7 @@ BEGIN
 		,@ItemPrepayTypeId 				= (CASE WHEN @GroupingOption = 0 THEN [intPrepayTypeId] ELSE NULL END) 
 		,@ItemPrepayRate 				= (CASE WHEN @GroupingOption = 0 THEN [dblPrepayRate] ELSE NULL END) 
 		,@Inventory						= (CASE WHEN @GroupingOption = 0 THEN [ysnInventory] ELSE NULL END)
-		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN CASE WHEN [strTransactionType] = 'Transport Delivery' 
-																				THEN ISNULL(ISNULL([strDocumentNumber], @SourceNumber),[strSourceId])
-																				ELSE [strDocumentNumber] END
-																		 ELSE NULL END)
+		,@ItemDocumentNumber			= (CASE WHEN @GroupingOption = 0 THEN ISNULL(ISNULL([strDocumentNumber], @SourceNumber),[strSourceId]) ELSE NULL END)
 		,@ItemDescription				= (CASE WHEN @GroupingOption = 0 THEN [strItemDescription] ELSE NULL END)
 		,@ItemOrderUOMId				= (CASE WHEN @GroupingOption = 0 THEN [intOrderUOMId] ELSE NULL END)
 		,@ItemQtyOrdered				= (CASE WHEN @GroupingOption = 0 THEN [dblQtyOrdered] ELSE NULL END)
@@ -853,7 +850,7 @@ BEGIN
 					,@ItemPrepayTypeId				= [intPrepayTypeId]
 					,@ItemPrepayRate 				= [dblPrepayRate]
 					,@Inventory						= [ysnInventory]
-					,@ItemDocumentNumber			= CASE WHEN strTransactionType = 'Transport Delivery' THEN ISNULL([strDocumentNumber], @SourceNumber) ELSE [strDocumentNumber] END
+					,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
 					,@ItemDescription				= [strItemDescription]
 					,@ItemOrderUOMId				= [intOrderUOMId]					
 					,@ItemQtyOrdered				= [dblQtyOrdered]
@@ -1627,7 +1624,7 @@ BEGIN TRY
 						,@ItemPrepayTypeId				= [intPrepayTypeId]
 						,@ItemPrepayRate				= [dblPrepayRate]
 						,@Inventory						= [ysnInventory]
-						,@ItemDocumentNumber			= CASE WHEN strTransactionType = 'Transport Delivery' THEN ISNULL([strDocumentNumber], @SourceNumber) ELSE [strDocumentNumber] END
+						,@ItemDocumentNumber			= ISNULL([strDocumentNumber], @SourceNumber)
 						,@ItemDescription				= [strItemDescription]
 						,@ItemOrderUOMId				= [intOrderUOMId]
 						,@ItemQtyOrdered				= [dblQtyOrdered]
