@@ -12,8 +12,8 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-DECLARE @key NVARCHAR(100) = NEWID()
-DECLARE @logDate DATETIME = GETDATE()
+DECLARE @key NVARCHAR(100) = NEWID();
+DECLARE @logDate DATETIME = GETDATE();
 DECLARE @from DATETIME = CASE WHEN @dateFrom IS NULL THEN '1/1/1900' ELSE @dateFrom END;
 DECLARE @to DATETIME = CASE WHEN @dateTo IS NULL THEN GETDATE() ELSE @dateTo END;
 SET @logKey = @key;
@@ -53,6 +53,15 @@ SELECT * FROM (
 			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
 			FROM (
 				SELECT * FROM dbo.vyuAPPayables
+				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
+			) tmpAPPayables 
+			GROUP BY intBillId
+			UNION ALL
+			SELECT 
+			intBillId
+			,CAST((SUM(tmpAPPayables.dblTotal) + SUM(tmpAPPayables.dblInterest) - SUM(tmpAPPayables.dblAmountPaid) - SUM(tmpAPPayables.dblDiscount)) AS DECIMAL(18,2)) AS dblAmountDue
+			FROM (
+				SELECT * FROM dbo.vyuAPPayablesForeign
 				WHERE DATEADD(dd, DATEDIFF(dd, 0,dtmDate), 0) BETWEEN @from AND @to
 			) tmpAPPayables 
 			GROUP BY intBillId
@@ -144,3 +153,4 @@ FROM @log
 RETURN
 
 GO
+

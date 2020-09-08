@@ -667,7 +667,7 @@ FROM (
   	-- ,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=0   
    	-- 	THEN 0  
   	-- ELSE ISNULL(DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE()),0) END AS intAging  
-	,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
+	,CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
@@ -711,7 +711,7 @@ FROM
  --CHARGES  
  SELECT  
 	tmpAPOpenClearing.intEntityVendorId,
-   CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
+   CASE WHEN DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmReceiptDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
@@ -748,13 +748,13 @@ FROM
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = rc.intInventoryReceiptId  
- WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
+  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END  
   GROUP BY r.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL  
  --SHIPMENT CHARGES  
  SELECT  
   tmpAPOpenClearing.intEntityVendorId 
-  ,	CASE WHEN DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())>0 AND DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())>=0 AND DATEDIFF(dayofyear,r.dtmShipDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
 		ELSE 0 
 	END AS dbl1, 
@@ -785,13 +785,13 @@ FROM
   ON tmpAPOpenClearing.intInventoryShipmentChargeId = rc.intInventoryShipmentChargeId  
  INNER JOIN tblICInventoryShipment r  
   ON r.intInventoryShipmentId = rc.intInventoryShipmentId  
- WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
+  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END  
   GROUP BY r.dtmShipDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT 
  	tmpAPOpenClearing.intEntityVendorId 
-  ,	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>=0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount) 
 		ELSE 0 
 	END AS dbl1, 
@@ -828,7 +828,7 @@ FROM
  --LOAD COST TRANSACTION ITEM
  SELECT  
   	tmpAPOpenClearing.intEntityVendorId ,
-	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
+	CASE WHEN DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())>=0 AND DATEDIFF(dayofyear,load.dtmPostedDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 	ELSE 0 
 	END AS dbl1, 
@@ -865,7 +865,7 @@ FROM
  --SETTLE STORAGE
  SELECT  
  tmpAPOpenClearing.intEntityVendorId
-  ,	CASE WHEN DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())>0 AND DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())>=0 AND DATEDIFF(dayofyear,CS.dtmDeliveryDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 
@@ -934,7 +934,7 @@ INNER JOIN tblGRSettleStorage SS
 INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt 
             ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
   ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY receipt.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL 
  --TRANSFER CHARGE
@@ -971,13 +971,13 @@ INNER JOIN tblICInventoryReceiptCharge rc
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
  INNER JOIN tblICInventoryReceipt receipt  
   ON receipt.intInventoryReceiptId = rc.intInventoryReceiptId  
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
  GROUP BY receipt.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL 
  --PATRONAGE
  SELECT  
  tmpAPOpenClearing.intEntityVendorId
-  ,	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>0 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=30 
+  ,	CASE WHEN DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())>=0 AND DATEDIFF(dayofyear,refund.dtmRefundDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
 	END AS dbl1, 

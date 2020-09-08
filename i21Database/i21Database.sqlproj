@@ -3779,7 +3779,6 @@
     <Build Include="dbo\Tables\tblARCommissionRecap.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetInvoiceChargesByShipment.sql" />
     <Build Include="dbo\Functions\fnAPCreatePaymentDetail.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspAPGLBalance.sql" />
     <Build Include="dbo\Functions\fnGetAPGLBalance.sql" />
     <Build Include="dbo\Tables\tblSMCustomGrid.sql" />
@@ -7739,6 +7738,10 @@
     <Build Include="dbo\Stored Procedures\uspICValidateClosePeriod.sql" />
     <Build Include="dbo\Functions\fnICIsValidStorageLocation.sql" />
     <Build Include="dbo\Functions\fnAllowItemTypeChange.sql" />
+    <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesForeign.sql" />
+    <Build Include="dbo\Views\vyuAPPayablesAgingDeletedForeign.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPBalance.sql" />
     <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseUsageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARFixStockUsage.sql" />

@@ -31,6 +31,9 @@ SELECT
 	,GD.intAccountId
 	,AD.strAccountId
 FROM tblGRCustomerStorage CS
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICItem IM
 	ON IM.intItemId = CS.intItemId
 INNER JOIN tblICCommodity CO
@@ -115,7 +118,10 @@ SELECT
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
-INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
+INNER JOIN (tblGRCustomerStorage CS 
+		INNER JOIN tblGRStorageType STY 
+			ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId AND STY.ysnDPOwnedType = 0
+		INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
@@ -171,7 +177,9 @@ SELECT
 	,GD.intAccountId
 	,AD.strAccountId
 FROM tblGRCustomerStorage CS
-	
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblGRSettleStorageTicket SST
 	ON SST.intCustomerStorageId = CS.intCustomerStorageId
 INNER JOIN tblGRSettleStorage SS
@@ -274,7 +282,11 @@ SELECT
 FROM tblAPBill bill
 INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
-INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
+INNER JOIN (tblGRCustomerStorage CS
+		INNER JOIN tblGRStorageType STY 
+			ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId 
+				AND STY.ysnDPOwnedType = 0
+		INNER JOIN tblGRSettleStorageTicket SST
 			ON SST.intCustomerStorageId = CS.intCustomerStorageId
 		INNER JOIN tblGRSettleStorage SS
 			ON SST.intSettleStorageId = SS.intSettleStorageId 
@@ -352,6 +364,9 @@ INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = QM.intTicketFileId
+INNER JOIN tblGRStorageType STY
+	ON STY.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND STY.ysnDPOwnedType = 0
 INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
 INNER JOIN tblGRDiscountSchedule DS
@@ -449,7 +464,11 @@ INNER JOIN tblAPBillDetail billDetail
 	ON bill.intBillId = billDetail.intBillId
 INNER JOIN tblICItem IM
 	ON billDetail.intItemId = IM.intItemId
-INNER JOIN (tblGRCustomerStorage CS INNER JOIN tblGRSettleStorageTicket SST
+INNER JOIN (tblGRCustomerStorage CS 
+			INNER JOIN tblGRStorageType STY 
+				ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId 
+					AND STY.ysnDPOwnedType = 0
+			INNER JOIN tblGRSettleStorageTicket SST
 				ON SST.intCustomerStorageId = CS.intCustomerStorageId
 			INNER JOIN tblGRSettleStorage SS
 				ON SST.intSettleStorageId = SS.intSettleStorageId

@@ -6,6 +6,8 @@
 CREATE VIEW vyuAPPayables
 --WITH SCHEMABINDING
 AS 
+SELECT payables.*
+FROM (
 SELECT 
 	A.dtmDate	
 	, A.intBillId 
@@ -28,6 +30,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -59,6 +62,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	-- ,'Bill' AS [Info]
 FROM dbo.tblAPBillArchive A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -106,6 +110,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	-- ,'Taxes' AS [Info]
 FROM dbo.tblAPBill A
 INNER JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -136,6 +141,7 @@ SELECT
 	, A.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	-- ,'Origin' AS [Info]
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -212,6 +218,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	, A.intCurrencyId
 	-- ,'Payment' AS [Info]
 FROM dbo.tblAPPayment  A
  INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -249,6 +256,7 @@ SELECT
 	,A.intAccountId
 	,F.strAccountId
 	,EC.strClass
+	,A.intCurrencyId
 	-- ,'Paid through Prepaid And Debit Memo' AS [Info]
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intBillId
@@ -284,6 +292,7 @@ SELECT
 	,A.intAccountId
 	,F.strAccountId
 	,EC.strClass
+	,A.intCurrencyId
 	-- ,'DM transactions have been paid using Prepaid And Debit Tab' AS [Info]
 FROM dbo.tblAPBill A
 INNER JOIN dbo.tblAPAppliedPrepaidAndDebit B ON A.intBillId = B.intTransactionId
@@ -312,6 +321,7 @@ SELECT --OVERPAYMENT
 	, A.intAccountId
 	, F.strAccountId
 	,EC.strClass
+	,A.intCurrencyId
 	-- ,'Overpayment' AS [Info]
 FROM dbo.tblAPBill A
 LEFT JOIN (dbo.tblAPVendor C1 INNER JOIN dbo.tblEMEntity C2 ON C1.[intEntityId] = C2.intEntityId)
@@ -370,6 +380,7 @@ SELECT A.dtmDatePaid AS dtmDate,
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	,A.intCurrencyId
 	-- ,'AR Payment' AS [Info]
 FROM dbo.tblARPayment  A
  LEFT JOIN dbo.tblARPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -405,6 +416,7 @@ SELECT
 	, B.intAccountId
 	, F.strAccountId
 	, EC.strClass
+	,A.intCurrencyId
 	--, 1
 FROM dbo.tblAPPayment  A
  INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
@@ -428,3 +440,6 @@ OUTER APPLY (
 	AND NOT EXISTS (
 		SELECT 1 FROM vyuAPPaidOriginPrepaid originPrepaid WHERE originPrepaid.intBillId = C.intBillId
 	)	
+) payables
+CROSS APPLY tblSMCompanyPreference compPref
+WHERE payables.intCurrencyId = compPref.intDefaultCurrencyId
