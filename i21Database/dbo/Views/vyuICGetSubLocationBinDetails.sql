@@ -13,14 +13,17 @@ SELECT
 	, strItemDescription		= i.strDescription
 	, strItemUOM				= um.strUnitMeasure
 	, dblStock					= 
+		CAST(
 			CASE 
 				WHEN i.ysnSeparateStockForUOMs = 1 AND i.strLotTracking = 'No' THEN 
 					ISNULL(stockUOM1.dblOnHand, 0) + ISNULL(stockUOM1.dblUnitStorage, 0) 
 				ELSE 
 					ISNULL(stockUOM2.dblOnHand, 0) + ISNULL(stockUOM2.dblUnitStorage, 0) 
 			END 								
-	, dblCapacity				= sl.dblCapacity
+		 AS NUMERIC(28, 6))
+	, dblCapacity				= CAST(sl.dblCapacity AS NUMERIC(28, 6)) 
 	, dblAvailable				= 
+		CAST(
 			CASE 
 				WHEN ISNULL(sl.dblCapacity, 0) > 0 THEN 
 					CASE 
@@ -36,6 +39,7 @@ SELECT
 				ELSE	
 					0.00
 			END
+		 AS NUMERIC(28, 6))
 	, strCommodityCode			= com.strCommodityCode
 	, i.strStatus
 FROM 
