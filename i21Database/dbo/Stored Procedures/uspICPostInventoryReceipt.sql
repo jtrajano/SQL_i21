@@ -396,7 +396,7 @@ BEGIN
 	*/
 
 	UPDATE lot
-	SET lot.strWarehouseRefNo = ri.strWarehouseRefNo
+	SET lot.strWarehouseRefNo = r.strWarehouseRefNo
 	FROM tblICInventoryReceiptItemLot lot 
 		INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = lot.intInventoryReceiptItemId
 		INNER JOIN tblICInventoryReceipt r ON r.intInventoryReceiptId = ri.intInventoryReceiptId
