@@ -1,8 +1,9 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP](
 	[intResponsiblePartyMatchingBDEPId] [int] IDENTITY(1,1) NOT NULL,
-	[intGLLocationSegment] [int] NOT NULL,
-	[strContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL,
+	[intLocationSegmentId] [int] NOT NULL,
+	[strContains] [nvarchar](100) NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
+	[intResponsiblePartyMatchingId] [int] NOT NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatchingBDEP] PRIMARY KEY CLUSTERED 
 (
 	[intResponsiblePartyMatchingBDEPId] ASC
@@ -13,8 +14,9 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP] ADD  CONSTRAINT [DF__tblCMResp__intCo__13ECCA1E]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatchingBDEP_tblGLAccountSegment] FOREIGN KEY([intGLLocationSegment])
-REFERENCES [dbo].[tblGLAccountSegment] ([intAccountSegmentId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatchingBDEP_tblGLAccountSegment] FOREIGN KEY([intResponsiblePartyMatchingId])
+REFERENCES [dbo].[tblCMResponsiblePartyMatching] ([intResponsiblePartyMatchingId])
+ON DELETE CASCADE
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatchingBDEP_tblGLAccountSegment]

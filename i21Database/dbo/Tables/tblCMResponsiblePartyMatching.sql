@@ -5,10 +5,10 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[strAccountNumberContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strReferenceContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strAction] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
-	[intGLLocationSegment] [int] NOT NULL,
-	[intBankId] [int] NOT NULL,
-	[intBankOffsetId] [int] NOT NULL,
-	[intGLPrimarySegment] [int] NOT NULL,
+	[intLocationSegmentId] [int] NOT NULL,
+	[intPrimaryBankId] [int] NOT NULL,
+	[intOffsetBankId] [int] NOT NULL,
+	[intPrimarySegmentId] [int] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED 
 (
@@ -20,14 +20,14 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank] FOREIGN KEY([intBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank] FOREIGN KEY([intPrimaryBankId])
 REFERENCES [dbo].[tblCMBank] ([intBankId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank1] FOREIGN KEY([intBankOffsetId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank1] FOREIGN KEY([intOffsetBankId])
 REFERENCES [dbo].[tblCMBank] ([intBankId])
 GO
 
@@ -41,7 +41,7 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMResponsiblePartyMatching]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment] FOREIGN KEY([intGLLocationSegment])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment] FOREIGN KEY([intLocationSegmentId])
 REFERENCES [dbo].[tblGLAccountSegment] ([intAccountSegmentId])
 GO
 
