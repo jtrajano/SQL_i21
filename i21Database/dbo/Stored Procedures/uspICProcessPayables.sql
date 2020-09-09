@@ -68,7 +68,8 @@ SET ANSI_WARNINGS OFF
 			,[intSubCurrencyCents]				
 			,[intAccountId]						
 			,[intShipViaId]						
-			,[intTermId]						
+			,[intTermId]		
+			,[intFreightTermId]				
 			,[strBillOfLading]					
 			,[ysnReturn]
 		)
@@ -122,7 +123,8 @@ SET ANSI_WARNINGS OFF
 			,GP.[intSubCurrencyCents]				
 			,GP.[intAccountId]						
 			,GP.[intShipViaId]						
-			,GP.[intTermId]						
+			,GP.[intTermId]		
+			,GP.[intFreightTermId]				
 			,GP.[strBillOfLading]					
 			,GP.[ysnReturn]	 
 		FROM dbo.fnICGeneratePayables (@intReceiptId, @ysnPost, DEFAULT) GP
