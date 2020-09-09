@@ -2,7 +2,6 @@
 AS
 /*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP/DP*/
 --Receipt item
-
 SELECT	--'1' AS TEST,
     CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN CS_TO.intEntityId ELSE receipt.intEntityVendorId END AS intEntityVendorId
     ,CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TS.dtmTransferStorageDate ELSE receipt.dtmReceiptDate END AS dtmDate
@@ -186,14 +185,14 @@ WHERE SIR.ysnUnposted = 0
 UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 SELECT DISTINCT	--'3',
-    CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (CS.dblOpenBalance > 0 AND ST_FROM.ysnDPOwnedType = 1) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (CS.dblOpenBalance > 0 AND ST_FROM.ysnDPOwnedType = 1) THEN receipt.dtmReceiptDate ELSE TSR.dtmProcessDate END AS dtmDate
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (CS.dblOpenBalance > 0 AND ST_FROM.ysnDPOwnedType = 1) THEN receipt.strReceiptNumber ELSE TS.strTransferStorageTicket END AS strTransactionNumber
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (CS.dblOpenBalance > 0 AND ST_FROM.ysnDPOwnedType = 1) THEN receipt.intInventoryReceiptId ELSE TS.intTransferStorageId END AS intInventoryReceiptId
+    CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TSR.dtmProcessDate END AS dtmDate
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.strReceiptNumber ELSE TS.strTransferStorageTicket END AS strTransactionNumber
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intInventoryReceiptId ELSE TS.intTransferStorageId END AS intInventoryReceiptId
     ,NULL AS intTransferStorageId
     ,NULL AS strTransferStorageTicket
     ,NULL AS intTransferStorageReferenceId
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (CS.dblOpenBalance > 0 AND ST_FROM.ysnDPOwnedType = 1) THEN receiptItem.intInventoryReceiptItemId ELSE TSR.intTransferStorageReferenceId END AS intInventoryReceiptItemId
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receiptItem.intInventoryReceiptItemId ELSE TSR.intTransferStorageReferenceId END AS intInventoryReceiptItemId
     ,receiptItem.intItemId
     ,receiptItem.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
@@ -437,4 +436,3 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS_TO.intItemUOMId
 /*END ====>>> ***DS/SC*** FOR OP TO DP*/
-
