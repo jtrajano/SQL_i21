@@ -1420,8 +1420,7 @@ INNER JOIN tblGRSettleStorage SS
  FROM    
  (  
   SELECT  
-   B.intEntityVendorId  
-   ,B.intInventoryReceiptItemId
+   B.intInventoryReceiptItemId
    ,B.strTransactionNumber  
    ,SUM(B.dblTransferTotal) AS dblTransferTotal
    ,SUM(B.dblTransferQty) AS dblTransferQty  
@@ -1433,8 +1432,7 @@ INNER JOIN tblGRSettleStorage SS
    ,B.strLocationName
   FROM grainTransferClearing B  
   GROUP BY   
-   intEntityVendorId  
-   ,intInventoryReceiptItemId
+   intInventoryReceiptItemId
    ,strTransactionNumber  
    ,intItemId  
    ,intLocationId  
@@ -1447,7 +1445,7 @@ INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryRecei
             ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
   ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId
   INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
-  ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+  ON receipt.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
 WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
    UNION ALL --TRANSFER CHARGE
@@ -1482,8 +1480,7 @@ WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 
  FROM    
  (  
   SELECT  
-   B.intEntityVendorId  
-   ,B.intInventoryReceiptChargeId
+  B.intInventoryReceiptChargeId
    ,B.strTransactionNumber  
    ,SUM(B.dblTransferTotal) AS dblTransferTotal
    ,SUM(B.dblTransferQty) AS dblTransferQty  
@@ -1495,8 +1492,7 @@ WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 
    ,B.strLocationName
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   intEntityVendorId  
-   ,intInventoryReceiptChargeId
+   intInventoryReceiptChargeId
    ,strTransactionNumber  
    ,intItemId  
    ,intLocationId  
@@ -1510,7 +1506,7 @@ INNER JOIN tblICInventoryReceiptCharge rc
  INNER JOIN tblICInventoryReceipt r  
   ON r.intInventoryReceiptId = rc.intInventoryReceiptId  
   INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
-  ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
+  ON r.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
 WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
    UNION ALL 
