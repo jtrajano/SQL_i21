@@ -903,7 +903,7 @@ INNER JOIN tblGRSettleStorage SS
   UNION ALL 
  --TRANSFER
  SELECT  
- tmpAPOpenClearing.intEntityVendorId
+ receipt.intEntityVendorId
   ,	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
@@ -922,24 +922,22 @@ INNER JOIN tblGRSettleStorage SS
  FROM    
  (  
   SELECT  
-   B.intEntityVendorId  
-   ,B.intInventoryReceiptItemId
+   B.intInventoryReceiptItemId
    ,SUM(B.dblReceiptQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
    ,SUM(B.dblReceiptTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
   FROM grainTransferClearing B  
   GROUP BY   
-   intEntityVendorId  
-   ,intInventoryReceiptItemId
+   intInventoryReceiptItemId
  ) tmpAPOpenClearing  
 INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt 
             ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId)
   ON receiptItem.intInventoryReceiptItemId = tmpAPOpenClearing.intInventoryReceiptItemId
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
- GROUP BY receipt.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
+ GROUP BY receipt.dtmReceiptDate, receipt.intEntityVendorId
  UNION ALL 
  --TRANSFER CHARGE
  SELECT  
- tmpAPOpenClearing.intEntityVendorId
+ receipt.intEntityVendorId
   ,	CASE WHEN DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())>=0 AND DATEDIFF(dayofyear,receipt.dtmReceiptDate,GETDATE())<=30 
 		THEN SUM(tmpAPOpenClearing.dblClearingAmount)
 		ELSE 0 
@@ -958,21 +956,19 @@ INNER JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryRecei
  FROM    
  (  
   SELECT  
-   B.intEntityVendorId  
-   ,B.intInventoryReceiptChargeId
+   B.intInventoryReceiptChargeId
    ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblTransferQty) AS dblClearingQty  
    ,SUM(B.dblReceiptChargeTotal)  -  SUM(B.dblTransferTotal) AS dblClearingAmount  
   FROM grainTransferChargeClearing B  
   GROUP BY   
-   intEntityVendorId  
-   ,intInventoryReceiptChargeId
+   intInventoryReceiptChargeId
  ) tmpAPOpenClearing  
 INNER JOIN tblICInventoryReceiptCharge rc  
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intInventoryReceiptChargeId  
  INNER JOIN tblICInventoryReceipt receipt  
   ON receipt.intInventoryReceiptId = rc.intInventoryReceiptId  
- WHERE (tmpAPOpenClearing.dblClearingQty != 0 ) --OR tmpAPOpenClearing.dblClearingAmount != 0  
- GROUP BY receipt.dtmReceiptDate, tmpAPOpenClearing.intEntityVendorId
+ WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END
+ GROUP BY receipt.dtmReceiptDate, receipt.intEntityVendorId
  UNION ALL 
  --PATRONAGE
  SELECT  
