@@ -8841,8 +8841,6 @@
     <Build Include="dbo\Stored Procedures\uspRKMigrateDPRLog.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
-    <Build Include="dbo\Stored Procedures\vyuGRGrainTransferChargesClearing.sql" />
-    <Build Include="dbo\Stored Procedures\vyuGRGrainTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
   </ItemGroup>
