@@ -17,18 +17,18 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 ) ON [PRIMARY]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  DEFAULT ((1)) FOR [intConcurrencyId]
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [DF__tblCMResp__intCo__345999B0]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank] FOREIGN KEY([intPrimaryBankId])
-REFERENCES [dbo].[tblCMBank] ([intBankId])
+REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank]
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank1] FOREIGN KEY([intOffsetBankId])
-REFERENCES [dbo].[tblCMBank] ([intBankId])
+REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank1]
@@ -47,4 +47,3 @@ GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment]
 GO
-

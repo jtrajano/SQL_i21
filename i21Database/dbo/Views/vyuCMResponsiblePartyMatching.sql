@@ -11,12 +11,13 @@ A.intPrimaryBankId,
 A.intOffsetBankId,
 A.intLocationSegmentId,
 A.intPrimarySegmentId,
+A.intConcurrencyId,
 B.strCode strLocationSegment,
 C.strCode strPrimarySegment,
-D.strBankName strPrimaryBank,
-E.strBankName strOffsetBank
+D.strBankAccountNo strPrimaryBank,
+E.strBankAccountNo strOffsetBank
 from tblCMResponsiblePartyMatching A
 left join tblGLAccountSegment B on B.intAccountSegmentId = A.intLocationSegmentId
 left join tblGLAccountSegment C on C.intAccountSegmentId = A.intPrimarySegmentId
-left join tblCMBank D on D.intBankId = A.intPrimaryBankId
-left join tblCMBank E on E.intBankId = A.intOffsetBankId
+left join vyuCMBankAccount D on D.intBankAccountId = A.intPrimaryBankId
+left join vyuCMBankAccount E on E.intBankAccountId = A.intOffsetBankId

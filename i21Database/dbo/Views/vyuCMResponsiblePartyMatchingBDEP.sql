@@ -1,7 +1,11 @@
-CREATE VIEW vyuCMResponsiblePartyMatchingBDEP
+CREATE VIEW [dbo].[vyuCMResponsiblePartyMatchingBDEP]
 AS
-select 
-A.*,
+SELECT 
+A.[intResponsiblePartyMatchingBDepId],
+A.[intResponsiblePartyMatchingId],
+A.[intLocationSegmentId],
+A.[strContains],
+A.[intConcurrencyId],
 B.strCode strLocationSegment
-from tblCMResponsiblePartyMatchingBDEP A
-left join tblGLAccountSegment B on B.intAccountSegmentId = A.intLocationSegmentId
+FROM tblCMResponsiblePartyMatchingBDEP A
+LEFT JOIN tblGLAccountSegment B on B.intAccountSegmentId = A.intLocationSegmentId
