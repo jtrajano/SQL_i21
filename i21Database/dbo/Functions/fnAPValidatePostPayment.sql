@@ -620,6 +620,22 @@ BEGIN
 		WHERE 
 			A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND payDetails.dblPayment != A.dblAmountPaid
+
+		--DO NOT ALLOW DISCOUNT FOR VOUCHER WITH NO DISCOUNT ACCOUNT IN ITS LOCATION
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Location of ' + B.strBillId + ' has no Purchase Discount Account setup.',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		INNER JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
+		INNER JOIN tblAPBill B ON B.intBillId = PD.intBillId
+		INNER JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = B.intShipToId
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND PD.dblPayment <> 0
+		AND PD.dblDiscount <> 0
+
 	END
 	ELSE
 	BEGIN
