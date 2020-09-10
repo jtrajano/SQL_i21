@@ -30,23 +30,52 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 --DECLARE
---@intM2MHeaderId INT = 1025
---	, @intCommodityId INT = 9
+--@intM2MHeaderId INT = 1
+--  , @strRecordName NVARCHAR(50) = 'M2M-67'
+--	, @intCommodityId INT = 1
 --	, @intM2MTypeId INT = 1
---	, @intM2MBasisId INT = 18
+--	, @intM2MBasisId INT = 44
 --	, @intFutureSettlementPriceId INT = 1
 --	, @intQuantityUOMId INT = 1
 --	, @intPriceUOMId INT = 1
 --	, @intCurrencyId INT = 3
---	, @dtmEndDate DATETIME = '2020-08-11 00:00:00.000'
+--	, @dtmEndDate DATETIME = '2020-09-09 00:00:00.000'
 --	, @strRateType NVARCHAR(200) = 'Contract'
 --	, @intLocationId INT = NULL
 --	, @intMarketZoneId INT = NULL
 --	, @ysnByProducer BIT = 0
 --	, @intCompanyId INT = NULL
---	, @dtmPostDate DATETIME = '2020-08-11 00:00:00.000'
+--	, @dtmPostDate DATETIME = '2020-09-09 00:00:00.000'
 --	, @dtmReverseDate DATETIME = NULL
 --	, @dtmLastReversalDate DATETIME = NULL
+--	, @intUserId INT = NULL
+
+	IF OBJECT_ID('tempdb..#tblContractCost') IS NOT NULL
+		DROP TABLE #tblContractCost
+	IF OBJECT_ID('tempdb..#tblSettlementPrice') IS NOT NULL
+		DROP TABLE #tblSettlementPrice
+	IF OBJECT_ID('tempdb..#tblPIntransitView') IS NOT NULL
+		DROP TABLE #tblPIntransitView
+	IF OBJECT_ID('tempdb..#Temp') IS NOT NULL
+		DROP TABLE #Temp
+	IF OBJECT_ID('tempdb..#tmpM2MBasisDetail') IS NOT NULL
+		DROP TABLE #tmpM2MBasisDetail
+	IF OBJECT_ID('tempdb..#RollNearbyMonth') IS NOT NULL
+		DROP TABLE #RollNearbyMonth
+	IF OBJECT_ID('tempdb..#tmpCPE') IS NOT NULL
+		DROP TABLE #tmpCPE
+	IF OBJECT_ID('tempdb..#tmpM2MDifferentialBasis') IS NOT NULL
+		DROP TABLE #tmpM2MDifferentialBasis
+	IF OBJECT_ID('tempdb..#tmpM2MTransaction') IS NOT NULL
+		DROP TABLE #tmpM2MTransaction
+	IF OBJECT_ID('tempdb..#tempIntransit') IS NOT NULL
+		DROP TABLE #tempIntransit
+	IF OBJECT_ID('tempdb..#tempCollateral') IS NOT NULL
+		DROP TABLE #tempCollateral
+	IF OBJECT_ID('tempdb..#tblContractFuture') IS NOT NULL
+		DROP TABLE #tblContractFuture
+
+		
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
@@ -592,21 +621,126 @@ BEGIN TRY
 			, intLocationId
 			, strContractType
 			, strPricingType
-			, intCommodityUnitMeasureId = NULL
+			, intCommodityUnitMeasureId
 			, intContractDetailId
 			, intContractStatusId
 			, intEntityId
 			, intQtyCurrencyId
-			, strType = strContractType + ' ' + strPricingType
+			, strType
 			, intItemId
 			, strItemNo
 			, dtmTransactionDate
 			, strEntityName
-			, strCustomerContract = ''
+			, strCustomerContract
 			, intFutureMarketId
 			, intFutureMonthId
-			, strContractStatus
-		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL)
+			, strPricingStatus
+		FROM (
+				SELECT dtmTransactionDate = MAX(dtmTransactionDate)
+				, strCommodityCode
+				, intCommodityId
+				, intContractHeaderId
+				, strContractNumber
+				, strLocationName
+				, dtmEndDate
+				, dblQty = CAST(SUM(dblQuantity) AS NUMERIC(20, 6))
+				, dblFutures = CAST(MAX(dblFutures) AS NUMERIC(20, 6))
+				, dblBasis = CAST(dblBasis AS NUMERIC(20, 6))	
+				, dblCashPrice = CAST (MAX(dblCashPrice) AS NUMERIC(20, 6))
+				, dblAmount = CAST ((SUM(dblQuantity) * (dblBasis + MAX(dblFutures))) AS NUMERIC(20, 6))
+				, intQtyUOMId
+				, intPricingTypeId
+				, intContractTypeId
+				, intLocationId
+				, strContractType
+				, strPricingType
+				, intCommodityUnitMeasureId = NULL
+				, intContractDetailId
+				, intContractStatusId
+				, intEntityId
+				, intQtyCurrencyId
+				, strType = strContractType + ' ' + strPricingType
+				, intItemId
+				, strItemNo
+				, strEntityName
+				, strCustomerContract = ''
+				, intFutureMarketId
+				, intFutureMonthId
+				, strPricingStatus
+			FROM
+			(
+				SELECT dtmTransactionDate = CASE WHEN CBL.strAction = 'Created Price' THEN CBL.dtmTransactionDate ELSE dbo.[fnCTConvertDateTime](CBL.dtmCreatedDate,'ToServerDate',0) END
+					, CBL.intContractDetailId
+					, CBL.intCommodityId
+					, strCommodityCode = CY.strCommodityCode
+					, CBL.intContractHeaderId
+					, intCompanyLocationId = CBL.intLocationId
+					, strLocationName = L.strLocationName
+					, CBL.strContractNumber
+					, CBL.dtmStartDate
+					, CBL.dtmEndDate
+					, dblQuantity = CBL.dblQty
+					, dblFutures = CASE WHEN CBL.intPricingTypeId = 1 THEN CBL.dblFutures ELSE NULL END
+					, dblBasis = CAST(CBL.dblBasis AS NUMERIC(20,6))
+					, dblCashPrice = CASE WHEN CBL.intPricingTypeId = 1 THEN ISNULL(CBL.dblFutures,0) + ISNULL(CBL.dblBasis,0) ELSE NULL END
+					, dblAmount = CASE WHEN CBL.intPricingTypeId = 1 THEN [dbo].[fnCTConvertQtyToStockItemUOM](CD.intItemUOMId, CBL.dblQty) * [dbo].[fnCTConvertPriceToStockItemUOM](CD.intPriceItemUOMId,ISNULL(CBL.dblFutures, 0) + ISNULL(CBL.dblBasis, 0))
+										ELSE NULL END
+					, CBL.intQtyUOMId
+					, CBL.intPricingTypeId
+					, CBL.intContractTypeId
+					, CBL.intLocationId
+					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
+					, PT.strPricingType
+					, CBL.intContractStatusId
+					, CBL.intEntityId
+					, CBL.intQtyCurrencyId
+					, CBL.intItemId
+					, strItemNo
+					, strEntityName = EM.strName
+					, CBL.intFutureMarketId
+					, CBL.intFutureMonthId
+					, CBL.strPricingStatus
+					
+				FROM tblCTContractBalanceLog CBL
+				INNER JOIN tblICCommodity CY ON CBL.intCommodityId = CY.intCommodityId
+				INNER JOIN tblICCommodityUnitMeasure C1 ON C1.intCommodityId = CBL.intCommodityId AND C1.intCommodityId = CBL.intCommodityId AND C1.ysnStockUnit = 1
+				INNER JOIN tblCTPricingType PT ON PT.intPricingTypeId = CBL.intPricingTypeId
+				INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = CBL.intContractStatusId
+				INNER JOIN tblICItem IM ON IM.intItemId = CBL.intItemId
+				INNER JOIN tblEMEntity EM ON EM.intEntityId = CBL.intEntityId
+				INNER JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = CBL.intLocationId
+				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CBL.intContractDetailId
+				WHERE CBL.strTransactionType = 'Contract Balance'
+			) tbl
+			WHERE intCommodityId = ISNULL(@intCommodityId, intCommodityId)
+				AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
+			GROUP BY strCommodityCode
+				, intCommodityId
+				, intContractHeaderId
+				, strContractNumber
+				, strLocationName
+				, dtmEndDate
+				, intQtyUOMId
+				, intPricingTypeId
+				, intContractTypeId
+				, intLocationId
+				, strContractType
+				, strPricingType
+				, intContractDetailId
+				, intContractStatusId
+				, intEntityId
+				, intQtyCurrencyId
+				, strContractType
+				, strPricingType
+				, intItemId
+				, strItemNo
+				, strEntityName
+				, intFutureMarketId
+				, intFutureMonthId
+				, strPricingStatus
+				, dblBasis
+			HAVING SUM(dblQuantity) <> 0	
+		) tbl
 
 		INSERT INTO @GetContractDetailView (intCommodityUnitMeasureId
 			, strLocationName
@@ -944,10 +1078,10 @@ BEGIN TRY
 			, dblMarketBasis = (ISNULL(dblBasisOrDiscount, 0) + ISNULL(dblCashOrFuture, 0)) / CASE WHEN c.ysnSubCurrency = 1 THEN 100 ELSE 1 END
 			, intMarketBasisUOM = intCommodityUnitMeasureId
 			, intMarketBasisCurrencyId = intCurrencyId
-			, intFutureMarketId = ISNULL(temp.intFutureMarketId, 0)
-			, intItemId = ISNULL(temp.intItemId, 0)
-			, intContractTypeId = ISNULL(temp.intContractTypeId, 0)
-			, intCompanyLocationId = ISNULL(temp.intCompanyLocationId, 0)
+			, intFutureMarketId = temp.intFutureMarketId
+			, intItemId = temp.intItemId
+			, intContractTypeId = temp.intContractTypeId
+			, intCompanyLocationId = temp.intCompanyLocationId
 			, strPeriodTo = ISNULL(temp.strPeriodTo, '')
 			, temp.strContractInventory
 			, temp.intUnitMeasureId
@@ -1235,7 +1369,7 @@ BEGIN TRY
 			LEFT JOIN tblICCommodityUnitMeasure cuc3 ON cd.intCommodityId = cuc3.intCommodityId AND cuc3.intUnitMeasureId = cd.intPriceUnitMeasureId
 			LEFT JOIN tblRKFuturesMonth ffm ON ffm.intFutureMonthId = cd.intFutureMonthId
 			LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
-			CROSS APPLY (
+			OUTER APPLY (
 				SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 				WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 					AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
@@ -1555,7 +1689,7 @@ BEGIN TRY
 						JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
 						LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
 						LEFT JOIN @ContractBalance CB ON CB.intContractDetailId = cd.intContractDetailId
-						CROSS APPLY (
+						OUTER APPLY (
 							SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 							WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 								AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
@@ -1653,7 +1787,7 @@ BEGIN TRY
 						JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
 						LEFT JOIN #RollNearbyMonth rk ON rk.intContractDetailId = cd.intContractDetailId AND rk.intFutureMonthId = cd.intFutureMonthId
 						LEFT JOIN @ContractBalance CB ON CB.intContractDetailId = cd.intContractDetailId
-						CROSS APPLY (
+						OUTER APPLY (
 							SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 							WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 								AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
@@ -1740,7 +1874,6 @@ BEGIN TRY
 					)t
 				)t
 			)t2
-			DROP TABLE #tempIntransit
 		END
 		---- intransit End(p)
  
@@ -2712,7 +2845,7 @@ BEGIN TRY
 					JOIN tblICCommodityUnitMeasure cu1 ON cu1.intCommodityId = c.intCommodityId AND cu1.ysnStockUnit = 1
 					LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
 					LEFT JOIN tblICItemPricing p ON i.intItemId = p.intItemId AND s.intItemLocationId = p.intItemLocationId
-					CROSS APPLY (SELECT TOP 1 intUnitMeasureId
+					OUTER APPLY (SELECT TOP 1 intUnitMeasureId
 									, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
 									, intCurrencyId = ISNULL(intCurrencyId, 0)
 								FROM #tmpM2MBasisDetail temp
@@ -2882,8 +3015,6 @@ BEGIN TRY
 			
 				DELETE FROM #tempCollateral WHERE intCollateralId = @intCollateralId
 			END
-
-			DROP TABLE #tempCollateral
 		END
 
 
@@ -2956,7 +3087,7 @@ BEGIN TRY
 						, intFutureMarketId
 						, dblNotLotTrackedPrice = ISNULL(dbo.fnCalculateValuationAverageCost(intItemId, intItemLocationId, @dtmEndDate), 0)
 					FROM @ListTransaction t
-					CROSS APPLY (SELECT TOP 1 intUnitMeasureId
+					OUTER APPLY (SELECT TOP 1 intUnitMeasureId
 									, dblCashOrFuture = ISNULL(dblCashOrFuture, 0)
 									, intCurrencyId = ISNULL(intCurrencyId, 0)
 								FROM #tmpM2MBasisDetail temp
@@ -3366,15 +3497,8 @@ BEGIN TRY
 		)t 
 		ORDER BY intContractHeaderId DESC
 
-		--DROP TABLE #tempIntransit
-		DROP TABLE #tblContractCost
-		DROP TABLE #tblSettlementPrice
-		DROP TABLE #tblContractFuture
-		DROP TABLE #tblPIntransitView
-		DROP TABLE #Temp
-		DROP TABLE #tmpM2MBasisDetail
-		DROP TABLE #RollNearbyMonth
-
+		DELETE FROM tblRKM2MTransaction WHERE intM2MHeaderId = @intM2MHeaderId
+		
 		INSERT INTO tblRKM2MTransaction(intM2MHeaderId
 			, intContractHeaderId
 			, intContractDetailId
@@ -3542,6 +3666,8 @@ BEGIN TRY
 			, strLocationName
 			, CONVERT(DATETIME, '01 ' + strPeriodTo)
 
+		DELETE FROM tblRKM2MDifferentialBasis WHERE intM2MHeaderId = @intM2MHeaderId
+
 		INSERT INTO tblRKM2MDifferentialBasis(intM2MHeaderId
 			, intM2MBasisDetailId
 			, strOriginDest
@@ -3651,6 +3777,8 @@ BEGIN TRY
 				, CONVERT(DATETIME, '01 ' + strFutureMonth)
 		END
 
+		DELETE FROM tblRKM2MSettlementPrice WHERE intM2MHeaderId = @intM2MHeaderId
+
 		INSERT INTO tblRKM2MSettlementPrice(intM2MHeaderId
 			, intFutureMarketId
 			, intFutureMonthId
@@ -3756,6 +3884,8 @@ BEGIN TRY
 			, SUM(ISNULL(dblCash, 0))
 		FROM @tmpM2MSummary
 		WHERE strSummary = 'Total'
+
+		DELETE FROM tblRKM2MSummary WHERE intM2MHeaderId = @intM2MHeaderId
 
 		INSERT INTO tblRKM2MSummary(intM2MHeaderId
 			, strSummary
@@ -3965,6 +4095,8 @@ BEGIN TRY
 			) t
 		END
 
+		DELETE FROM tblRKM2MCounterPartyExposure WHERE intM2MHeaderId = @intM2MHeaderId
+
 		INSERT INTO tblRKM2MCounterPartyExposure(intM2MHeaderId
 			, intContractHeaderId
 			, strContractSeq
@@ -3998,11 +4130,6 @@ BEGIN TRY
 			, dblUnPurchaseCashPrice
 			, dblUnfixedPurchaseValue
 		FROM @tmpCPEDetail
-
-		DROP TABLE #tmpCPE
-		DROP TABLE #tmpM2MDifferentialBasis
-		DROP TABLE #tmpM2MTransaction
-
 
 		-- Post Preview
 		IF EXISTS(SELECT TOP 1 1 FROM tblRKM2MPostPreview WHERE intM2MHeaderId = @intM2MHeaderId)

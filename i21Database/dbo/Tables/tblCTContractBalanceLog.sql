@@ -42,6 +42,7 @@
 	intUserId INT NULL, 
 	[intRefSummaryLogId] INT NULL, 
 	[strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+	[strPricingStatus] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[ysnDeleted] BIT DEFAULT((0)) NULL,
     CONSTRAINT [PK_tblCTContractBalanceLog] PRIMARY KEY ([intContractBalanceLogId]) 
 )
