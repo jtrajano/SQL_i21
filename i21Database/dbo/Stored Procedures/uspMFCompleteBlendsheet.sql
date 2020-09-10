@@ -349,7 +349,7 @@ BEGIN TRY
 		@intStorageLocationId,@intBatchId,@strRetBatchId,@dtmCurrentDate,@intUserId,@dtmCurrentDate,@intUserId,@dtmProductionDate,@strReferenceNo,1)
 
 		EXEC uspMFPostProduction 1
-			,0
+			,@ysnRecap
 			,@intWorkOrderId
 			,@intItemId
 			,@intUserId
@@ -373,6 +373,8 @@ BEGIN TRY
 			,null
 			,null
 			,@intLoadDistributionDetailId
+
+			Select @strBatchId=@strRetBatchId
 	END
 	ELSE
 	BEGIN
