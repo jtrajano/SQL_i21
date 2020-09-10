@@ -1,95 +1,127 @@
-﻿CREATE PROCEDURE [dbo].[uspMFPostRecap]
-	  @strXml NVARCHAR(MAX)
-	 ,@strBatchId NVARCHAR(50)='' OUT
+﻿CREATE PROCEDURE [dbo].[uspMFPostRecap] @strXml NVARCHAR(MAX)
+	,@strBatchId NVARCHAR(50) = '' OUT
 AS
+DECLARE @strErrMsg NVARCHAR(MAX)
+	,@GLEntries RecapTableType
+	,@intUserId INT
+	,@strType NVARCHAR(50)
+	,@idoc INT
+	,@intWorkOrderId INT
+	,@intStatusId INT
+	,@intTransactionFrom INT
 
-Declare  @strErrMsg NVARCHAR(MAX)
-		,@GLEntries RecapTableType 
-		,@intUserId INT
-		,@strType NVARCHAR(50)
-  		,@idoc INT
-		,@intWorkOrderId INT
-		,@intStatusId INT
+BEGIN TRY
+	EXEC sp_xml_preparedocument @idoc OUTPUT
+		,@strXml
 
-Begin Try
-
-	EXEC sp_xml_preparedocument @idoc OUTPUT,@strXml
-
-	SELECT	 @intWorkOrderId = intWorkOrderId
-			,@intUserId = intUserId
+	SELECT @intWorkOrderId = intWorkOrderId
+		,@intUserId = intUserId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
-			 intWorkOrderId INT
+			intWorkOrderId INT
 			,intUserId INT
 			)
-	
-	If ISNULL(@intWorkOrderId,0)=0
-		Set @strType='Post Simple Blend Production'
-	Else
-	Begin
-		Select @intStatusId=intStatusId From tblMFWorkOrder Where intWorkOrderId=@intWorkOrderId
 
-		If @intStatusId=10
-			Set @strType='Post Consume Blend'
+	SELECT @intStatusId = intStatusId
+		,@intTransactionFrom = intTransactionFrom
+	FROM tblMFWorkOrder
+	WHERE intWorkOrderId = @intWorkOrderId
 
-		If @intStatusId=12
-			Set @strType='Post Produce Blend'
+	IF (
+			ISNULL(@intWorkOrderId, 0) = 0
+			OR @intTransactionFrom = 4
+			)
+	BEGIN
+		SET @strType = 'Post Simple Blend Production'
+	END
+	ELSE
+	BEGIN
+		IF @intStatusId = 10
+			SET @strType = 'Post Consume Blend'
 
-		If @intStatusId=13
-		Begin
-			Set @strType='Unpost Produce Blend'
-		End
-	End
+		IF @intStatusId = 12
+			SET @strType = 'Post Produce Blend'
 
-	Begin Tran
+		IF @intStatusId = 13
+		BEGIN
+			SET @strType = 'Unpost Produce Blend'
+		END
+	END
+
+	BEGIN TRAN
 
 	IF OBJECT_ID('tempdb..#tblRecap') IS NOT NULL
 		DROP TABLE #tblRecap
 
 	--Create Temp table to hold Recap Data
-	Select * into #tblRecap from @GLEntries
+	SELECT *
+	INTO #tblRecap
+	FROM @GLEntries
 
-	If @strType='Post Consume Blend'
-	Begin	
-		Exec uspMFEndBlendSheet @strXml,1,@strBatchId OUT
-	End
+	IF @strType = 'Post Consume Blend'
+	BEGIN
+		EXEC uspMFEndBlendSheet @strXml
+			,1
+			,@strBatchId OUT
+	END
 
-	If @strType='Post Produce Blend'
-	Begin	
-		Exec uspMFCompleteBlendSheet @strXml=@strXml,@ysnRecap=1,@strBatchId=@strBatchId OUT
-	End
+	IF @strType = 'Post Produce Blend'
+	BEGIN
+		EXEC uspMFCompleteBlendSheet @strXml = @strXml
+			,@ysnRecap = 1
+			,@strBatchId = @strBatchId OUT
+	END
 
-	If @strType='Post Simple Blend Production'
-	Begin	
-		Exec uspMFCompleteBlendSheet @strXml=@strXml,@ysnRecap=1,@strBatchId=@strBatchId OUT
-	End
+	IF @strType = 'Post Simple Blend Production'
+	BEGIN
+		EXEC uspMFCompleteBlendSheet @strXml = @strXml
+			,@ysnRecap = 1
+			,@strBatchId = @strBatchId OUT
+	END
 
-	If @strType='Unpost Produce Blend'
-	Begin	
-		Exec uspMFUnpostProducedLot @strXML=@strXml,@ysnRecap=1,@strBatchId=@strBatchId OUT
-	End
+	IF @strType = 'Unpost Produce Blend'
+	BEGIN
+		EXEC uspMFUnpostProducedLot @strXML = @strXml
+			,@ysnRecap = 1
+			,@strBatchId = @strBatchId OUT
+	END
 
 	INSERT INTO @GLEntries
-	Select * From #tblRecap
+	SELECT *
+	FROM #tblRecap
 
-	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
 
-	If @strType='Post Consume Blend'
-	Begin	
+	IF @strType = 'Post Consume Blend'
+	BEGIN
 		-- Get the next batch number
 		EXEC dbo.uspSMGetStartingNumber 3
 			,@strBatchId OUTPUT
 
-		Update @GLEntries Set strBatchId=@strBatchId
-	End
+		UPDATE @GLEntries
+		SET strBatchId = @strBatchId
+	END
 
 	--Post Recap
-	EXEC dbo.uspGLPostRecap 
-			@GLEntries
-			,@intUserId
-End try
-Begin Catch
-	IF XACT_STATE() != 0 AND @@TRANCOUNT > 0 ROLLBACK TRANSACTION
-	SET @strErrMsg = ERROR_MESSAGE()  
-	IF @idoc <> 0 EXEC sp_xml_removedocument @idoc 
-	RAISERROR(@strErrMsg, 16, 1, 'WITH NOWAIT')  
-End Catch
+	EXEC dbo.uspGLPostRecap @GLEntries
+		,@intUserId
+END TRY
+
+BEGIN CATCH
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
+
+	SET @strErrMsg = ERROR_MESSAGE()
+
+	IF @idoc <> 0
+		EXEC sp_xml_removedocument @idoc
+
+	RAISERROR (
+			@strErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
+END CATCH
