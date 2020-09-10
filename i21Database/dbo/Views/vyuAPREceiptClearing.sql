@@ -38,7 +38,8 @@ SELECT
         END
     )
     +
-    CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
+    --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
+    ISNULL(clearingTax.dblTax,0)
     AS dblReceiptTotal
     ,ISNULL(receiptItem.dblOpenReceive, 0)
     *
@@ -73,14 +74,30 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 OUTER APPLY (
-    --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
-    --FOR MATCHING WITH GL, WE HAVE DATA FIXES FOR GL
-    SELECT
-        COUNT(*) AS intCount
-    FROM tblAPBillDetail billDetail
-    INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
-    WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-) voucherTax
+    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL
+    SELECT SUM(dblTax) AS dblTax
+    FROM tblICInventoryReceiptItemTax rctTax
+    WHERE 
+        rctTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
+    AND EXISTS (
+        SELECT 1
+        FROM tblAPBillDetail billDetail 
+        INNER JOIN tblAPBillDetailTax billDetailTax
+            ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
+        WHERE rctTax.intInventoryReceiptItemId = billDetail.intInventoryReceiptItemId
+            AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+            AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+    )
+) clearingTax
+-- OUTER APPLY (
+--     --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
+--     --FOR MATCHING WITH GL, WE HAVE DATA FIXES FOR GL
+--     SELECT
+--         COUNT(*) AS intCount
+--     FROM tblAPBillDetail billDetail
+--     INNER JOIN tblAPBillDetailTax bdTax ON bdTax.intBillDetailId = billDetail.intBillDetailId
+--     WHERE billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+-- ) voucherTax
 -- OUTER APPLY (
 -- 	SELECT 
 --     TOP 1
@@ -382,7 +399,17 @@ OUTER APPLY (
     SELECT
         SUM(dblTax) AS dblTax --dblAdjustedTax is the new cost
     FROM tblAPBillDetailTax taxes
-    WHERE taxes.intBillDetailId = billDetail.intBillDetailId
+    WHERE 
+        taxes.intBillDetailId = billDetail.intBillDetailId
+    AND EXISTS (
+        --MAKE SURE TAX CODE IS ALSO PART OF RECEIPT TAX DETAILS TO DETERMINE IT USES CLEARING
+        SELECT 1
+        FROM tblICInventoryReceiptItemTax rctTax
+        WHERE
+            rctTax.intInventoryReceiptItemId = billDetail.intInventoryReceiptItemId
+        AND rctTax.intTaxClassId = taxes.intTaxClassId
+        AND rctTax.intTaxCodeId = taxes.intTaxCodeId
+    )
 ) oldCostTax
 -- LEFT JOIN vyuAPReceiptClearingGL APClearing
 --     ON APClearing.strTransactionId = receipt.strReceiptNumber
