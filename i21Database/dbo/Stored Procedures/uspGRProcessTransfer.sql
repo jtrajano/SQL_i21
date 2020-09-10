@@ -577,10 +577,12 @@ BEGIN
 							,@intOwnerShipId INT							
 							,@strRKError VARCHAR(MAX)
 							,@ysnDPtoOtherStorage BIT
+							,@ysnFromDS BIT
 
 						--Check if Transfer is DP To Other Storage (Disregard Risk Error)
 						SELECT 
 							@ysnDPtoOtherStorage = CASE WHEN FromStorage.intStorageTypeId = 2 AND ToStorage.intStorageTypeId != 2 THEN 1 ELSE 0 END
+							,@ysnFromDS = CASE WHEN FromStorage.intDeliverySheetId IS NOT NULL THEN 1 ELSE 0 END
 						FROM tblGRTransferStorageReference SR
 						INNER JOIN tblGRCustomerStorage FromStorage
 							ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
@@ -825,48 +827,51 @@ BEGIN
 							)
 							EXEC	dbo.uspICPostCosting @Entry,@strBatchId,'AP Clearing',@intUserId
 
-							
-							INSERT INTO @GLEntries 
-							(
-								 [dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
-								,[intCurrencyId]
-								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
-								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
-							UPDATE @GLEntries 
-							SET dblDebit		= dblCredit
-								,dblDebitUnit	= dblCreditUnit
-								,dblCredit		= dblDebit
-									,dblCreditUnit  = dblDebitUnit
+							--do not book GL entries for the discounts if the storage is from the delivery sheet
+							IF @ysnFromDS = 0
+							BEGIN
+								INSERT INTO @GLEntries 
+								(
+									[dtmDate] 
+									,[strBatchId]
+									,[intAccountId]
+									,[dblDebit]
+									,[dblCredit]
+									,[dblDebitUnit]
+									,[dblCreditUnit]
+									,[strDescription]
+									,[strCode]
+									,[strReference]
+									,[intCurrencyId]
+									,[dblExchangeRate]
+									,[dtmDateEntered]
+									,[dtmTransactionDate]
+									,[strJournalLineDescription]
+									,[intJournalLineNo]
+									,[ysnIsUnposted]
+									,[intUserId]
+									,[intEntityId]
+									,[strTransactionId]
+									,[intTransactionId]
+									,[strTransactionType]
+									,[strTransactionForm]
+									,[strModuleName]
+									,[intConcurrencyId]
+									,[dblDebitForeign]	
+									,[dblDebitReport]	
+									,[dblCreditForeign]	
+									,[dblCreditReport]	
+									,[dblReportingRate]	
+									,[dblForeignRate]
+									,[strRateType]
+								)
+								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+								UPDATE @GLEntries 
+								SET dblDebit		= dblCredit
+									,dblDebitUnit	= dblCreditUnit
+									,dblCredit		= dblDebit
+										,dblCreditUnit  = dblDebitUnit
+							END
 
 							INSERT INTO @GLEntries 
 							(
@@ -1005,43 +1010,47 @@ BEGIN
 								,@GLForItem
 								,'AP Clearing'
 								,1
-
-							INSERT INTO @GLEntries 
-							(
-								 [dtmDate] 
-								,[strBatchId]
-								,[intAccountId]
-								,[dblDebit]
-								,[dblCredit]
-								,[dblDebitUnit]
-								,[dblCreditUnit]
-								,[strDescription]
-								,[strCode]
-								,[strReference]
-								,[intCurrencyId]
-								,[dblExchangeRate]
-								,[dtmDateEntered]
-								,[dtmTransactionDate]
-								,[strJournalLineDescription]
-								,[intJournalLineNo]
-								,[ysnIsUnposted]
-								,[intUserId]
-								,[intEntityId]
-								,[strTransactionId]
-								,[intTransactionId]
-								,[strTransactionType]
-								,[strTransactionForm]
-								,[strModuleName]
-								,[intConcurrencyId]
-								,[dblDebitForeign]	
-								,[dblDebitReport]	
-								,[dblCreditForeign]	
-								,[dblCreditReport]	
-								,[dblReportingRate]	
-								,[dblForeignRate]
-								,[strRateType]
-							)
-							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							
+							--do not book GL entries for the discounts if the storage is from the delivery sheet
+							IF @ysnFromDS = 0
+							BEGIN
+								INSERT INTO @GLEntries 
+								(
+									[dtmDate] 
+									,[strBatchId]
+									,[intAccountId]
+									,[dblDebit]
+									,[dblCredit]
+									,[dblDebitUnit]
+									,[dblCreditUnit]
+									,[strDescription]
+									,[strCode]
+									,[strReference]
+									,[intCurrencyId]
+									,[dblExchangeRate]
+									,[dtmDateEntered]
+									,[dtmTransactionDate]
+									,[strJournalLineDescription]
+									,[intJournalLineNo]
+									,[ysnIsUnposted]
+									,[intUserId]
+									,[intEntityId]
+									,[strTransactionId]
+									,[intTransactionId]
+									,[strTransactionType]
+									,[strTransactionForm]
+									,[strModuleName]
+									,[intConcurrencyId]
+									,[dblDebitForeign]	
+									,[dblDebitReport]	
+									,[dblCreditForeign]	
+									,[dblCreditReport]	
+									,[dblReportingRate]	
+									,[dblForeignRate]
+									,[strRateType]
+								)
+								EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@strBatchId,@dblCost,1
+							END
 
 							IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 							BEGIN 
