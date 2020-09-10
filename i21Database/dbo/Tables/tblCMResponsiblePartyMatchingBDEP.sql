@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP](
 	[intResponsiblePartyMatchingBDEPId] [int] IDENTITY(1,1) NOT NULL,
-	[intLocationSegmentId] [int] NOT NULL,
-	[strContains] [nvarchar](100) NOT NULL,
+	[intLocationSegmentId] [int] NULL,
+	[strContains] [nvarchar](100) NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intResponsiblePartyMatchingId] [int] NOT NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatchingBDEP] PRIMARY KEY CLUSTERED 

@@ -5,10 +5,10 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[strAccountNumberContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strReferenceContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strAction] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
-	[intLocationSegmentId] [int] NOT NULL,
-	[intPrimaryBankId] [int] NOT NULL,
-	[intOffsetBankId] [int] NOT NULL,
-	[intPrimarySegmentId] [int] NOT NULL,
+	[intLocationSegmentId] [int] NULL,
+	[intPrimaryBankId] [int] NULL,
+	[intOffsetBankId] [int] NULL,
+	[intPrimarySegmentId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED 
 (
