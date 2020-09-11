@@ -577,7 +577,7 @@ BEGIN
 	FROM	ForGLEntries_CTE INNER JOIN @GLAccounts InventoryAccounts
 				ON ForGLEntries_CTE.intItemId = InventoryAccounts.intItemId
 				AND ForGLEntries_CTE.intItemLocationId = InventoryAccounts.intItemLocationId
-			INNER JOIN dbo.vyuICGetInventoryReceiptItemTax ReceiptTaxes
+			LEFT OUTER JOIN dbo.vyuICGetInventoryReceiptItemTax ReceiptTaxes
 					ON ForGLEntries_CTE.intReceiptItemTaxId = ReceiptTaxes.intInventoryReceiptItemTaxId
 			OUTER APPLY (
 				SELECT TOP 1 e.*
