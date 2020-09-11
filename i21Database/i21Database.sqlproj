@@ -8844,6 +8844,7 @@
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMigrateM2M.sql" />
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
+    <Build Include="dbo\Views\vyuRKGetSettlementPriceHeader.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
