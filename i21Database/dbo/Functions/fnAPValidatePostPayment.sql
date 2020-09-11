@@ -596,6 +596,7 @@ BEGIN
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
 		AND PD.dblPayment <> 0
 		AND PD.dblDiscount <> 0
+		AND CL.intDiscountAccountId IS NULL
 
 	END
 	ELSE
