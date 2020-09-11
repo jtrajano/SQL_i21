@@ -1,6 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblSTUpdateRegisterItemReport]
 (
 	[intUpdateRegisterItemReport] INT NOT NULL IDENTITY, 
+	[intStoreId] INT,
 	[strGuid] UNIQUEIDENTIFIER NOT NULL, 
 	[strActionType] NVARCHAR(3) COLLATE Latin1_General_CI_AS NULL,
 	[strUpcCode] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL,
