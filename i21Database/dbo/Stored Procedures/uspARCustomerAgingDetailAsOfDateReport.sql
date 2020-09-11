@@ -237,18 +237,16 @@ WHERE ysnPosted = 1
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --#CASHREFUNDS
-SELECT strDocumentNumber	= ID.strDocumentNumber
-     , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
+     , dblRefundTotal		= I.dblInvoiceTotal
 INTO #CASHREFUNDS
-FROM tblARInvoiceDetail ID
-INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
+FROM tblARInvoice I
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
-  AND ISNULL(ID.strDocumentNumber, '') <> ''
+  AND ISNULL(I.intOriginalInvoiceId, '') <> ''
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY ID.strDocumentNumber
 
 --#CASHRETURNS
 SELECT intInvoiceId
@@ -473,7 +471,7 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 		FROM dbo.tblARPaymentDetail PD WITH (NOLOCK) INNER JOIN #ARPOSTEDPAYMENT P ON PD.intPaymentId = P.intPaymentId 
 		GROUP BY PD.intInvoiceId
 	) PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.strInvoiceNumber = CR.strDocumentNumber
+	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 
 UNION ALL
@@ -492,7 +490,7 @@ SELECT I.intInvoiceId
 FROM #POSTEDINVOICES I WITH (NOLOCK)
 	INNER JOIN #ARPOSTEDPAYMENT P ON I.intPaymentId = P.intPaymentId 
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
-	LEFT JOIN #CASHREFUNDS CR ON I.strInvoiceNumber = CR.strDocumentNumber
+	LEFT JOIN #CASHREFUNDS CR ON I.intInvoiceId = CR.intOriginalInvoiceId AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType = 'Customer Prepayment'
 						      
 UNION ALL      
