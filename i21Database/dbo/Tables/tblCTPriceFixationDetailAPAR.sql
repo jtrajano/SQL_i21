@@ -40,6 +40,8 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 		declare @dblRemainingAppliedQuantity numeric(18,6) = 0;
 		declare @ysnLoad bit;
 		declare @ErrMsg nvarchar(max);
+		declare @intPriceFixationDetailId int;
+		declare @intActivePriceFixationDetailId int;
 
 		declare @Pricing table (
 			intId int
@@ -83,7 +85,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 			,pfd.intPriceFixationDetailId
 			,intPricingNumber = ROW_NUMBER() over (partition by pf.intPriceFixationId order by pfd.intPriceFixationDetailId)
 			,pfd.intNumber
-			,dblPricedQuantity = isnull(invoiced.dblQtyShipped, pfd.dblQuantity)
+			,dblPricedQuantity = isnull(invoiced.dblQtyShipped, 0)
 			,dblQuantityAppliedAndPriced = isnull(pfd.dblQuantityAppliedAndPriced,0)
 			,pfd.dblLoadPriced
 			,dblLoadAppliedAndPriced = isnull(pfd.dblLoadAppliedAndPriced,0)
@@ -113,10 +115,17 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 				@dblActivelAppliedQuantity = (case when ysnLoad = 1 then dblAppliedLoad else dblAppliedQuantity end)
 				,@dblPricedQuantity = (case when ysnLoad = 1 then dblLoadPriced else dblPricedQuantity end)
 				,@ysnLoad = isnull(ysnLoad,0)
+				,@intActivePriceFixationDetailId = intPriceFixationDetailId
 			from
 				@Pricing
 			where
 				intId = @intActiveId;
+
+			if (isnull(@intPriceFixationDetailId,0) <> @intActivePriceFixationDetailId)
+			begin
+				set @dblCommulativeAppliedAndPrice = 0;
+				set @intPriceFixationDetailId = @intActivePriceFixationDetailId
+			end
 
 			set @dblCommulativeAppliedAndPrice += @dblPricedQuantity;
 			if (@dblRemainingAppliedQuantity = 0)
