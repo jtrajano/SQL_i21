@@ -22,6 +22,13 @@ SELECT
     ,0 AS dblVoucherTotal      
     ,0 AS dblVoucherQty      
     ,CAST((ISNULL(dblAmount * -1,0) --multiple the amount to reverse if ysnPrice = 1      
+        --WE NEED TO MULTIPLY THE TAX AS WELL TO MATCH WITH VOUCHER
+        --EXAMPLE SCENARIO
+        --"IR" CHARGE 100, TAX -10 (CHECKOFF) * 1QTY = 90
+        --"BL" CHARGE 100, TAX -10 (CHECKOFF) * -1QTY = 90
+        --IF WE DON'T HAVE *-1 IN TAX THE TOTAL WOULD BE
+        --(CHARGE 100 * -1QTY) + TAX -10 = -110
+        --TO ACCOMPLISH THIS CHECKOFF TAX MUST BE CONSISTENTLY NEGATIVE
         + ISNULL(dblTax * -1,0)) AS DECIMAL (18,2)) AS dblReceiptChargeTotal      
     ,ROUND(ISNULL(ReceiptCharge.dblQuantity,0),2) * -1 AS dblReceiptChargeQty      
     ,Receipt.intLocationId      
