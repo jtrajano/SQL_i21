@@ -37,7 +37,6 @@
 	, intActionId INT NULL
 	, strProcess NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 	, ysnDeleted BIT NULL DEFAULT((0))
-	, strPricingStatus NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL
 	-- Dynamic value
 	, dblDynamic NUMERIC(24, 10) NULL DEFAULT((0))
 )
