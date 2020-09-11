@@ -8788,6 +8788,9 @@
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMigrateDPRLog.sql" />
+    <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
+    <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspRKMigrateM2M.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

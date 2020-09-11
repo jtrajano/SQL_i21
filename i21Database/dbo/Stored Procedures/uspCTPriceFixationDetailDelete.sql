@@ -21,7 +21,8 @@ BEGIN TRY
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
 			@intContractHeaderId int,
-			@intContractDetailId int;
+			@intContractDetailId int,
+			@ysnFixationId bit = 1;
 
 			declare @strFinalMessage nvarchar(max);
 			declare @AffectedInvoices table
@@ -274,6 +275,7 @@ BEGIN TRY
 
 	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
 	 begin
+		set @ysnFixationId = 0
 		select @intPriceFixationId = intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
 	 end
 
@@ -295,7 +297,7 @@ BEGIN TRY
 
 	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
 
-	IF ISNULL(@intPriceFixationId,0) = 0 AND ISNULL(@intPriceFixationDetailId, 0) <> 0
+	IF @ysnFixationId = 0 AND ISNULL(@intPriceFixationDetailId, 0) <> 0
 	BEGIN
 		UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
