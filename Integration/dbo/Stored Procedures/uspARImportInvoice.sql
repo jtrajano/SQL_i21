@@ -864,6 +864,7 @@ BEGIN
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
 				AND pttic_type NOT IN ('O','X')
+				AND pttic_line_no = 1
 
 			--Check first on ptivcmst	
 			-- SELECT @Total = COUNT(ptivc_invc_no)  
