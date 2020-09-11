@@ -3947,6 +3947,7 @@ BEGIN TRY
 			, strContractSeq NVARCHAR(100)
 			, strEntityName NVARCHAR(100)
 			, intEntityId INT
+			, strRiskRating NVARCHAR(100)
 			, dblFixedPurchaseVolume NUMERIC(24, 10)
 			, dblUnfixedPurchaseVolume NUMERIC(24, 10)
 			, dblTotalValume NUMERIC(24, 10)
@@ -3969,6 +3970,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
+				, strRiskRating
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblTotalValume
@@ -3988,6 +3990,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
+				, strRiskRating
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -4008,6 +4011,7 @@ BEGIN TRY
 					, fd.strEntityName
 					, e.intEntityId
 					, fd.dblOpenQty
+					, strRiskRating = pf.strRiskIndicator
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
@@ -4050,6 +4054,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
+				, strRiskRating
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblTotalValume
@@ -4069,6 +4074,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
+				, strRiskRating
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -4089,6 +4095,7 @@ BEGIN TRY
 					, strEntityName = ISNULL(strProducer, strEntityName)
 					, e.intEntityId
 					, fd.dblOpenQty
+					, strRiskRating = pf.strRiskIndicator
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
@@ -4115,7 +4122,7 @@ BEGIN TRY
 																										, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
 				FROM #tmpCPE fd
 				JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
-				join tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
+				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
 				JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
 				JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
 				LEFT JOIN tblAPVendor e ON e.intEntityId = fd.intProducerId
@@ -4135,6 +4142,7 @@ BEGIN TRY
 			, strContractSeq
 			, strEntityName
 			, intVendorId
+			, strRating
 			, dblFixedPurchaseVolume
 			, dblUnfixedPurchaseVolume
 			, dblPurchaseOpenQty
@@ -4152,6 +4160,7 @@ BEGIN TRY
 			, strContractSeq
 			, strEntityName
 			, intEntityId
+			, strRiskRating
 			, dblFixedPurchaseVolume
 			, dblUnfixedPurchaseVolume
 			, dblPurchaseOpenQty
