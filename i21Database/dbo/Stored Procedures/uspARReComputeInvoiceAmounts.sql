@@ -301,17 +301,17 @@ SET
 	,[dblAmountDue]			= ISNULL(ARI.[dblInvoiceSubtotal] + ARI.[dblTax] + ARI.[dblShipping] + ARI.[dblInterest], @ZeroDecimal) - ISNULL(ARI.dblPayment + ARI.[dblDiscount], @ZeroDecimal)
 								-
 								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
-								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblPayment ELSE 0 END
+								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN ISNULL(PRO.dblPayment, 0) ELSE ISNULL(PRO.dblInvoiceTotal, 0) END
 								ELSE 0
 								END
 	,[dblBaseAmountDue]		= ISNULL(ARI.[dblBaseInvoiceSubtotal] + ARI.[dblBaseTax] + ARI.[dblBaseShipping] + ARI.[dblBaseInterest], @ZeroDecimal) - ISNULL(ARI.dblBasePayment + ARI.[dblBaseDiscount], @ZeroDecimal)
 								-
 								CASE WHEN ARI.intSourceId = 2 AND ARI.intOriginalInvoiceId IS NOT NULL
-								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN PRO.dblBasePayment ELSE 0 END
+								THEN CASE WHEN ISNULL(ARI.ysnExcludeFromPayment, 0) = 0 THEN ISNULL(PRO.dblBasePayment, 0) ELSE ISNULL(PRO.dblBaseInvoiceTotal, 0) END
 								ELSE 0
 								END
 FROM tblARInvoice ARI
-INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+LEFT JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
 WHERE
 	ARI.[intInvoiceId] = @InvoiceIdLocal
 
