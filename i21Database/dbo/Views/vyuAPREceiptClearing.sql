@@ -17,8 +17,21 @@ SELECT
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
     ,ROUND(
-        ISNULL(receiptItem.dblOpenReceive, 0) 
-        * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
+        CASE	
+            WHEN receiptItem.intWeightUOMId IS NULL THEN 
+                ISNULL(receiptItem.dblOpenReceive, 0) 
+            ELSE 
+                CASE 
+                    WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
+                        ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
+                    ELSE 
+                        CASE WHEN intSourceType = 2 
+                            THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
+                        ELSE ISNULL(receiptItem.dblNet, 0) 
+                        END
+                END 
+        END
+        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
         * (
             CASE 
                 WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
@@ -38,7 +51,7 @@ SELECT
         END
     )
     +
-    CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
+    receiptItem.dblTax
     AS dblReceiptTotal
     ,ISNULL(receiptItem.dblOpenReceive, 0)
     *
