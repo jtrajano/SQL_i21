@@ -21,6 +21,9 @@ BEGIN TRY
 		,intContractHeaderId INT
 		,strContractNumber NVARCHAR(50)
 		)
+	DECLARE @strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
 
 	SELECT @intContractFeedId = MAX(intContractFeedId)
 	FROM tblIPContractFeedDetail
@@ -50,6 +53,14 @@ BEGIN TRY
 	SELECT @intRecordId = min(intRecordId)
 	FROM @tblIPContractFeedHeader
 
+	IF @intRecordId IS NOT NULL
+	BEGIN
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE ysnParent = 1
+	END
+
 	WHILE @intRecordId IS NOT NULL
 	BEGIN
 		SELECT @intContractHeaderId = NULL
@@ -72,7 +83,8 @@ BEGIN TRY
 			,@strApproverXML OUTPUT
 			,NULL
 			,NULL
-			---------------------------------------------Submitted By------------------------------------------
+
+		---------------------------------------------Submitted By------------------------------------------
 		SELECT @strSubmittedByXML = NULL
 
 		EXEC [dbo].[uspCTGetTableDataInXML] 'vyuIPContractSubmittedByView'
@@ -91,12 +103,10 @@ BEGIN TRY
 
 				INSERT INTO tblIPContractFeedHeader (
 					intContractHeaderId
-					,strApproverXML
-					,strSubmittedByXML
+					,strFeedStatus
 					)
 				SELECT @intContractHeaderId
-					,@strApproverXML
-					,@strSubmittedByXML
+					,'Processed'
 
 				SELECT @intContractFeedHeaderId = SCOPE_IDENTITY();
 
@@ -108,6 +118,30 @@ BEGIN TRY
 					,intContractFeedId
 				FROM @tblIPContractFeedDetail
 				WHERE intContractHeaderId = @intContractHeaderId
+
+				IF EXISTS (
+						SELECT 1
+						FROM master.dbo.sysdatabases
+						WHERE name = @strDatabaseName
+						)
+				BEGIN
+					SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblIPContractFeedHeader (
+										intContractHeaderId
+										,strApproverXML
+										,strSubmittedByXML
+										)
+									SELECT @intContractHeaderId
+										,@strApproverXML
+										,@strSubmittedByXML'
+
+					EXEC sp_executesql @strSQL
+						,N'@intContractHeaderId int
+						,@strApproverXML nvarchar(MAX)
+						,@strSubmittedByXML nvarchar(MAX)'
+						,@intContractHeaderId
+						,@strApproverXML
+						,@strSubmittedByXML
+				END
 
 				IF @intTransactionCount = 0
 					COMMIT TRANSACTION
