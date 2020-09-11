@@ -30,8 +30,8 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 --DECLARE
---@intM2MHeaderId INT = 1
---  , @strRecordName NVARCHAR(50) = 'M2M-67'
+--@intM2MHeaderId INT = 3
+--  , @strRecordName NVARCHAR(50) = 'M2M-69'
 --	, @intCommodityId INT = 1
 --	, @intM2MTypeId INT = 1
 --	, @intM2MBasisId INT = 44
@@ -74,6 +74,8 @@ BEGIN TRY
 		DROP TABLE #tempCollateral
 	IF OBJECT_ID('tempdb..#tblContractFuture') IS NOT NULL
 		DROP TABLE #tblContractFuture
+	IF OBJECT_ID('tempdb..#tmpPricingStatus') IS NOT NULL
+		DROP TABLE #tmpPricingStatus
 
 		
 
@@ -571,6 +573,29 @@ BEGIN TRY
 			, intFutureMonthId INT
 			, strPricingStatus NVARCHAR(50))
 
+		
+		SELECT a.intContractDetailId, a.strContractNumber
+			, CASE WHEN b.intCounter > 1 THEN 'Partially Priced'
+				WHEN b.intCounter = 1 AND strPricingType IN ('Basis', 'HTA') THEN 'Unpriced'
+				WHEN b.intCounter = 1 AND strPricingType = 'Priced' THEN 'Fully Priced'
+				END as strPricingStatus
+		INTO #tmpPricingStatus
+		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, 1, NULL) a
+		
+		CROSS APPLY (
+			SELECT *, COUNT(*) as intCounter
+			FROM (
+				SELECT strContractType, strContractNumber, intContractDetailId
+				FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, 1, NULL)
+				GROUP BY strContractNumber, strPricingType, intContractDetailId, strContractType
+			) t
+			WHERE t.intContractDetailId = a.intContractDetailId
+			GROUP BY strContractNumber, intContractDetailId, strContractType
+		) b
+		GROUP BY a.intContractDetailId, a.strContractNumber, strPricingType, a.strContractType, b.intCounter
+		HAVING SUM(dblQty) > 0
+		
+
 		INSERT INTO @ContractBalance (intRowNum
 			, strCommodityCode
 			, intCommodityId
@@ -699,7 +724,7 @@ BEGIN TRY
 					, strEntityName = EM.strName
 					, CBL.intFutureMarketId
 					, CBL.intFutureMonthId
-					, CBL.strPricingStatus
+					, stat.strPricingStatus
 					
 				FROM tblCTContractBalanceLog CBL
 				INNER JOIN tblICCommodity CY ON CBL.intCommodityId = CY.intCommodityId
@@ -710,6 +735,7 @@ BEGIN TRY
 				INNER JOIN tblEMEntity EM ON EM.intEntityId = CBL.intEntityId
 				INNER JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = CBL.intLocationId
 				INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = CBL.intContractDetailId
+				LEFT JOIN #tmpPricingStatus stat ON stat.intContractDetailId = CBL.intContractDetailId
 				WHERE CBL.strTransactionType = 'Contract Balance'
 			) tbl
 			WHERE intCommodityId = ISNULL(@intCommodityId, intCommodityId)
@@ -3920,6 +3946,7 @@ BEGIN TRY
 			, intContractHeaderId INT
 			, strContractSeq NVARCHAR(100)
 			, strEntityName NVARCHAR(100)
+			, intEntityId INT
 			, dblFixedPurchaseVolume NUMERIC(24, 10)
 			, dblUnfixedPurchaseVolume NUMERIC(24, 10)
 			, dblTotalValume NUMERIC(24, 10)
@@ -3941,6 +3968,7 @@ BEGIN TRY
 				, intContractHeaderId
 				, strContractSeq
 				, strEntityName
+				, intEntityId
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblTotalValume
@@ -3959,6 +3987,7 @@ BEGIN TRY
 				, intContractHeaderId
 				, strContractSeq
 				, strEntityName
+				, intEntityId
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -3977,6 +4006,7 @@ BEGIN TRY
 				SELECT ch.intContractHeaderId
 					, fd.strContractSeq
 					, fd.strEntityName
+					, e.intEntityId
 					, fd.dblOpenQty
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
@@ -4019,6 +4049,7 @@ BEGIN TRY
 				, intContractHeaderId
 				, strContractSeq
 				, strEntityName
+				, intEntityId
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblTotalValume
@@ -4037,6 +4068,7 @@ BEGIN TRY
 				, intContractHeaderId
 				, strContractSeq
 				, strEntityName
+				, intEntityId
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -4055,6 +4087,7 @@ BEGIN TRY
 				SELECT ch.intContractHeaderId
 					, fd.strContractSeq
 					, strEntityName = ISNULL(strProducer, strEntityName)
+					, e.intEntityId
 					, fd.dblOpenQty
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
@@ -4101,6 +4134,7 @@ BEGIN TRY
 			, intContractHeaderId
 			, strContractSeq
 			, strEntityName
+			, intVendorId
 			, dblFixedPurchaseVolume
 			, dblUnfixedPurchaseVolume
 			, dblPurchaseOpenQty
@@ -4117,6 +4151,7 @@ BEGIN TRY
 			, intContractHeaderId
 			, strContractSeq
 			, strEntityName
+			, intEntityId
 			, dblFixedPurchaseVolume
 			, dblUnfixedPurchaseVolume
 			, dblPurchaseOpenQty

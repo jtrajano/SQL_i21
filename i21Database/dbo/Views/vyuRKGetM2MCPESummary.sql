@@ -2,16 +2,16 @@
 
 AS
 
-SELECT intM2MCPESummaryId = ROW_NUMBER() OVER(ORDER BY intEntityId)
+SELECT intM2MCPESummaryId = CAST(ROW_NUMBER() OVER(ORDER BY intEntityId) AS INT)
 	, intM2MHeaderId
 	, strEntityName
 	, intEntityId
-	, dblFixedPurchaseVolume = SUM(dblFixedPurchaseVolume)
-	, dblUnfixedPurchaseVolume = SUM(dblUnfixedPurchaseVolume)
-	, dblTotalCommittedVolume = SUM(dblTotalCommittedVolume)
-	, dblFixedPurchaseValue = SUM(dblFixedPurchaseValue)
-	, dblUnfixedPurchaseValue = SUM(dblUnfixedPurchaseValue)
-	, dblTotalCommittedValue = SUM(dblTotalCommittedValue)		
+	, dblFixedPurchaseVolume = ISNULL(SUM(dblFixedPurchaseVolume), 0.00)
+	, dblUnfixedPurchaseVolume = ISNULL(SUM(dblUnfixedPurchaseVolume), 0.00)
+	, dblTotalCommittedVolume = ISNULL(SUM(dblTotalCommittedVolume), 0.00)
+	, dblFixedPurchaseValue = ISNULL(SUM(dblFixedPurchaseValue), 0.00)
+	, dblUnfixedPurchaseValue = ISNULL(SUM(dblUnfixedPurchaseValue), 0.00)
+	, dblTotalCommittedValue = ISNULL(SUM(dblTotalCommittedValue), 0.00)
 	, strRiskIndicator
 	, dblRiskTotalBusinessVolume
 	, intRiskUnitOfMeasureId
@@ -20,7 +20,7 @@ SELECT intM2MCPESummaryId = ROW_NUMBER() OVER(ORDER BY intEntityId)
 FROM (
 	SELECT CPE.*
 		, strRiskIndicator
-		, dblRiskTotalBusinessVolume
+		, dblRiskTotalBusinessVolume = ISNULL(dblRiskTotalBusinessVolume, 0.00)
 		, intRiskUnitOfMeasureId
 		, dblCompanyExposurePercentage = ROUND(ISNULL(dblCompanyExposurePercentage, 0), 2)
 		, dblSupplierSalesPercentage = ROUND(ISNULL(dblSupplierSalesPercentage, 0), 2)
