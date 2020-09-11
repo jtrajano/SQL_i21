@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuCMResponsiblePartyMatchingBDEP]
 AS
 SELECT 
-A.[intResponsiblePartyMatchingBDepId],
+A.[intResponsiblePartyMatchingBDEPId],
 A.[intResponsiblePartyMatchingId],
 A.[intLocationSegmentId],
 A.[strContains],
