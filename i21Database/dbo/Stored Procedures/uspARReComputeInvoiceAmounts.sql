@@ -165,37 +165,27 @@ WHERE
 
 --IF @strTransType = 'CF Invoice' OR  @strTransType = 'CF Tran' 
 --BEGIN
-	UPDATE
-		tblARInvoice
-	SET
-		 [dblDiscountAvailable]					= CASE WHEN strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblInvoiceTotal])  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END
-		,[dblBaseDiscountAvailable]				= CASE WHEN strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], [dblBaseInvoiceTotal])  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END
+	UPDATE I
+	SET [dblDiscountAvailable]					= CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblInvoiceTotal] ELSE [dblInvoiceSubtotal] + [dblShipping] END)  + T.[dblItemTermDiscountAmount]) - T.[dblItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal) END
+		,[dblBaseDiscountAvailable]				= CASE WHEN I.strType NOT IN ('CF Invoice','CF Tran', 'Service Charge') AND strTransactionType !='Credit Memo' THEN ISNULL(([dbo].[fnGetDiscountBasedOnTerm]([dtmDate], [dtmDate], [intTermId], CASE WHEN TERM.ysnIncludeTaxOnDiscount = 1 THEN [dblBaseInvoiceTotal] ELSE [dblBaseInvoiceSubtotal] + [dblBaseShipping] END)  + T.[dblBaseItemTermDiscountAmount]) - T.[dblBaseItemTermDiscountExemption], @ZeroDecimal) ELSE ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal) END
 		,[dblTotalTermDiscount]					= ISNULL(T.[dblItemTermDiscountAmount], @ZeroDecimal)
 		,[dblBaseTotalTermDiscount]				= ISNULL(T.[dblBaseItemTermDiscountAmount], @ZeroDecimal)
 		,[dblTotalTermDiscountExemption]		= ISNULL(T.[dblItemTermDiscountExemption], @ZeroDecimal)
 		,[dblBaseTotalTermDiscountExemption]	= ISNULL(T.[dblBaseItemTermDiscountExemption], @ZeroDecimal)
-	FROM
-		(
-			SELECT 
-				 [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
-				,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
-				,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
-				,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
-				,[intInvoiceId]						= [intInvoiceId]
-			FROM
-				tblARInvoiceDetail
-			WHERE
-				[intInvoiceId] = @InvoiceIdLocal
-			GROUP BY
-				[intInvoiceId]
-		)
-		 T
-	WHERE
-		tblARInvoice.[intInvoiceId] = T.[intInvoiceId]
-		AND tblARInvoice.[intInvoiceId] = @InvoiceIdLocal
+	FROM tblARInvoice I
+	INNER JOIN (
+		SELECT [dblItemTermDiscountAmount]		= SUM([dblItemTermDiscountAmount])
+			,[dblBaseItemTermDiscountAmount]	= SUM([dblBaseItemTermDiscountAmount])
+			,[dblItemTermDiscountExemption]		= SUM([dblItemTermDiscountExemption])
+			,[dblBaseItemTermDiscountExemption]	= SUM([dblBaseItemTermDiscountExemption])
+			,[intInvoiceId]						= [intInvoiceId]
+		FROM tblARInvoiceDetail
+		WHERE [intInvoiceId] = @InvoiceIdLocal
+		GROUP BY [intInvoiceId]
+	) T ON I.[intInvoiceId] = T.[intInvoiceId]
+	   AND I.[intInvoiceId] = @InvoiceIdLocal
+	INNER JOIN tblSMTerm TERM ON I.intTermId = TERM.intTermID
 --END
-
-
 
 IF (@AvailableDiscountOnly = 1)
 	RETURN 1;
