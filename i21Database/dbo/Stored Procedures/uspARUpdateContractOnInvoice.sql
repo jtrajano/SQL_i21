@@ -276,7 +276,7 @@ BEGIN TRY
 		AND Header.strTransactionType = 'Invoice'
 		AND Detail.intContractDetailId IS NOT NULL
 		AND (Detail.[intInventoryShipmentItemId] IS NULL OR (Detail.[intInventoryShipmentItemId] IS NOT NULL AND Detail.strPricing = 'Subsystem - Direct'))
-		AND Detail.[intSalesOrderDetailId] IS NULL
+		AND (Detail.intSalesOrderDetailId IS NULL OR (Detail.intSalesOrderDetailId IS NOT NULL AND Detail.strPricing = 'Subsystem - Direct'))
 		AND Detail.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND Detail.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail WHERE intTransactionId = @TransactionId)
 		AND (ISNULL(Header.intDistributionHeaderId, 0) = 0 AND ISNULL(Header.intLoadDistributionHeaderId, 0) = 0)
@@ -332,7 +332,6 @@ BEGIN TRY
 				@intLoadDetailId				=	P.[intLoadDetailId]
 		FROM	@tblToProcess P
 		LEFT JOIN tblARInvoiceDetail ID ON P.intInvoiceDetailId = ID.intInvoiceDetailId
-
 		WHERE	[intUniqueId]					=	 @intUniqueId
 
 		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
@@ -353,7 +352,7 @@ BEGIN TRY
 					 , @strInOutFlag	= strInOutFlag
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END		
-		IF (ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0 OR (@intInventoryShipmentItemId IS NOT NULL AND @strPricing = 'Subsystem - Direct')
+		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing = 'Subsystem - Direct'		
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
