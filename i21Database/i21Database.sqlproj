@@ -8845,6 +8845,9 @@
     <Build Include="dbo\Stored Procedures\uspRKMigrateM2M.sql" />
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
     <Build Include="dbo\Views\vyuRKGetSettlementPriceHeader.sql" />
+    <Build Include="dbo\Tables\tblCFImportNetworkTaxRefResult.sql" />
+    <Build Include="dbo\Tables\tblCFNetworkTaxRefStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFImportNetworkTaxRef.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
