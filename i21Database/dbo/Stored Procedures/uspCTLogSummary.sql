@@ -229,7 +229,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 			)
 			SELECT strBatchId = NULL
 				, dtmTransactionDate
@@ -267,7 +266,6 @@ BEGIN TRY
 				, intUserId			
 				, intActionId = 43	
 				, strProcess  = @strProcess
-				, strPricingStatus
 			FROM
 			(
 				SELECT 
@@ -304,7 +302,6 @@ BEGIN TRY
 					, sh.intSubBookId
 					, intOrderBy = 1
 					, sh.intUserId
-					, strPricingStatus
 				FROM tblCTSequenceHistory sh
 				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
@@ -360,7 +357,6 @@ BEGIN TRY
 					, intUserId
 					, intActionId
 					, strProcess
-					, strPricingStatus
 				)		
 				SELECT TOP 1 strBatchId = NULL
 					, dtmTransactionDate = @_transactionDate
@@ -398,7 +394,6 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId
 					, strProcess = @strProcess
-					, strPricingStatus
 				FROM tblCTContractBalanceLog 
 				WHERE intTransactionReferenceId = @intHeaderId
 				AND intTransactionReferenceDetailId = @intDetailId
@@ -453,7 +448,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				)
 				SELECT strBatchId
 				, dtmTransactionDate
@@ -491,7 +485,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				FROM @cbLogTemp
 			END
 		END
@@ -536,7 +529,6 @@ BEGIN TRY
 			 	, intUserId
 			 	, intActionId
 			 	, strProcess
-				, strPricingStatus
 			 )		
 			SELECT strBatchId = NULL
 			, dtmTransactionDate
@@ -574,7 +566,6 @@ BEGIN TRY
 			, intUserId
 			, intActionId = NULL
 			, strProcess = @strProcess
-			, strPricingStatus
 			FROM 
 			(
 				SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
@@ -612,8 +603,7 @@ BEGIN TRY
 				, sh.intContractStatusId
 				, sh.intBookId
 				, sh.intSubBookId		
-				, sh.intUserId
-				, sh.strPricingStatus
+				, sh.intUserId	
 				FROM vyuCTSequenceUsageHistory suh
 				INNER JOIN tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 				INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
@@ -672,7 +662,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 			)		
 			SELECT strBatchId = NULL
 			, dtmTransactionDate
@@ -714,7 +703,6 @@ BEGIN TRY
 							-- 	ELSE 18 -- Inventory Shipped on Basis Delivery
 							-- END
 			, strProcess = @strProcess
-			, strPricingStatus
 			FROM 
 			(
 				SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
@@ -753,7 +741,6 @@ BEGIN TRY
 				, sh.intBookId
 				, sh.intSubBookId		
 				, sh.intUserId	
-				, sh.strPricingStatus
 				FROM vyuCTSequenceUsageHistory suh
 				INNER JOIN tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 				INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
@@ -819,7 +806,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				)		
 				SELECT strBatchId
 				, dtmTransactionDate
@@ -857,7 +843,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				FROM @cbLogTemp
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty < 0 AND strTransactionReference <> 'Transfer Storage' AND intPricingTypeId <> 5 AND @strProcess <> 'Update Sequence Balance - DWG')
@@ -907,7 +892,6 @@ BEGIN TRY
 					, intUserId
 					, intActionId
 					, strProcess
-					, strPricingStatus
 				)		
 				SELECT strBatchId = NULL
 					, dtmTransactionDate = @_transactionDate
@@ -945,7 +929,6 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId
 					, strProcess = @strProcess
-					, strPricingStatus
 				FROM tblCTContractBalanceLog 
 				WHERE intTransactionReferenceId = @intHeaderId
 				AND intTransactionReferenceDetailId = @intDetailId
@@ -1004,7 +987,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				)		
 				SELECT strBatchId
 				, dtmTransactionDate
@@ -1042,7 +1024,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId = 54
 				, strProcess = 'Update Sequence Balance - Split'
-				, strPricingStatus
 				FROM @cbLogTemp		
 			END	
 			ELSE
@@ -1083,7 +1064,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				)		
 				SELECT strBatchId
 				, dtmTransactionDate
@@ -1121,7 +1101,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 				FROM @cbLogTemp
 
 				IF NOT EXISTS (SELECT TOP 1 1 FROM @cbLogCurrent)
@@ -1163,7 +1142,6 @@ BEGIN TRY
 						, intUserId
 						, intActionId
 						, strProcess
-						, strPricingStatus
 					)		
 					SELECT strBatchId = NULL
 						, dtmTransactionDate
@@ -1205,7 +1183,6 @@ BEGIN TRY
 								-- 	ELSE 18 -- Inventory Shipped on Basis Delivery
 								-- END
 						, strProcess = @strProcess
-						, strPricingStatus
 					FROM 
 					(
 						SELECT  
@@ -1239,8 +1216,7 @@ BEGIN TRY
 											ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * -1
 							, sh.intContractStatusId
 							, sh.intBookId
-							, sh.intSubBookId
-							, sh.strPricingStatus				
+							, sh.intSubBookId							
 						FROM vyuCTSequenceUsageHistory suh
 							INNER JOIN tblCTSequenceHistory sh on sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 							INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
@@ -1304,7 +1280,6 @@ BEGIN TRY
 				, intActionId
 				, strProcess
 				, dblDynamic
-				, strPricingStatus
 			)
 			SELECT strBatchId = NULL
 				, dtmTransactionDate
@@ -1343,7 +1318,6 @@ BEGIN TRY
 				, intActionId = 55
 				, strProcess = @strProcess
 				, dblDynamic
-				, strPricingStatus
 			FROM
 			(
 				SELECT intTransactionReferenceId = pc.intPriceContractId
@@ -1382,7 +1356,6 @@ BEGIN TRY
 				, intUserId = @intUserId
 				, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
 				, dblDynamic =  isnull(dblQuantityAppliedAndPriced,0)
-				, strPricingStatus =  CASE WHEN @strProcess = 'Fixation Detail Delete' THEN 'Partially Priced' ELSE 'Unpriced' END
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
@@ -1460,8 +1433,7 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess
-				, strPricingStatus)
+				, strProcess)
 			SELECT NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
@@ -1498,7 +1470,6 @@ BEGIN TRY
 				, cbl.intUserId
 				, cbl.intActionId
 				, strProcess = @strProcess
-				, cbl.strPricingStatus
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess <> 'Priced DWG'
 			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
@@ -1546,8 +1517,7 @@ BEGIN TRY
 				, strNotes
 				, intUserId
 				, intActionId
-				, strProcess
-				, strPricingStatus)
+				, strProcess)
 			SELECT NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
@@ -1584,7 +1554,6 @@ BEGIN TRY
 				, cbl.intUserId
 				, intActionId = 55
 				, strProcess = @strProcess
-				, cbl.strPricingStatus
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess <> 'Priced DWG'
 			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
@@ -1632,7 +1601,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 			)
 			SELECT strBatchId = NULL
 				, dtmTransactionDate
@@ -1670,7 +1638,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess = @strProcess
-				, strPricingStatus
 			FROM
 			(
 				SELECT  intTransactionReferenceId = pc.intPriceContractId
@@ -1716,7 +1683,6 @@ BEGIN TRY
 				, intOrderBy = 1
 				, intUserId = @intUserId
 				, intActionId = 17
-				, sh.strPricingStatus
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
@@ -1797,7 +1763,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess
-				, strPricingStatus
 			)
 			SELECT strBatchId = NULL
 				, dtmTransactionDate
@@ -1835,7 +1800,6 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess = @strProcess
-				, strPricingStatus
 			FROM
 			(
 				SELECT  intTransactionReferenceId = pc.intPriceContractId
@@ -1874,11 +1838,6 @@ BEGIN TRY
 				, intUserId = @intUserId
 				, intActionId = 17
 				, strNotes = CASE WHEN @ysnLoadBased = 1 THEN 'Priced Load is ' + CAST(pfd.dblLoadPriced AS NVARCHAR(20)) ELSE 'Priced Quantity is ' + CAST(pfd.dblQuantity AS NVARCHAR(20)) END
-				, strPricingStatus =  CASE WHEN	cd.intPricingTypeId = 1 THEN 'Fully Priced'
-										   WHEN	ISNULL(cd.dblNoOfLots,0) = ISNULL(pf.dblLotsFixed,0) AND cd.intPricingTypeId NOT IN (2,8) THEN 'Fully Priced'
-										   WHEN	ISNULL(cd.dblNoOfLots,0) - ISNULL(pf.dblLotsFixed,0) > 0 AND pf.intPriceFixationId IS NOT NULL THEN 'Partially Priced'
-										   ELSE	'Unpriced'
-									  END
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
@@ -1905,7 +1864,7 @@ BEGIN TRY
 				)
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
-			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
+			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)			
 		END
 	END
 		
@@ -1930,7 +1889,7 @@ BEGIN TRY
 			intBasisCurrencyId,					intPriceUOMId,								dtmStartDate,							dtmEndDate, 
 			dblQty,								intContractStatusId,						intBookId,								intSubBookId, 
 			strNotes,							intUserId,									intActionId,							strProcess,
-			dblDynamic,							strPricingStatus
+			dblDynamic
 		)
 		SELECT 
 			strBatchId,							dtmTransactionDate,							strTransactionType,						strTransactionReference,
@@ -1942,7 +1901,7 @@ BEGIN TRY
 			intBasisCurrencyId,					intPriceUOMId,								dtmStartDate,							dtmEndDate, 
 			dblQty,								intContractStatusId,						intBookId,								intSubBookId, 
 			strNotes,							intUserId,									intActionId,							strProcess,
-			dblDynamic,							strPricingStatus
+			dblDynamic
 		FROM @cbLogCurrent
 		WHERE intId = @intId
 

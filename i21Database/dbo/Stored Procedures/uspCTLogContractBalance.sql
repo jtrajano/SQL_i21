@@ -43,7 +43,6 @@ BEGIN
 		, @intActionId INT
 		, @strProcess NVARCHAR(100)
 		, @ysnDeleted BIT
-		, @strPricingStatus NVARCHAR(30)
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpLogItems WHERE ISNULL(strBatchId, '') = '')
@@ -94,9 +93,7 @@ BEGIN
 		, [intUserId] INT NULL
 		, [intActionId] INT NULL
 		, [strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-		, [ysnDeleted] BIT DEFAULT((0)) NULL
-		, [strPricingStatus] NVARCHAR(30) COLLATE Latin1_General_CI_AS NULL)
-
+		, [ysnDeleted] BIT DEFAULT((0)) NULL)
 
 	--DECLARE @PrevLog AS TABLE ([intContractBalanceLogId] INT
 	--	, [strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
@@ -171,7 +168,6 @@ BEGIN
 			, @intActionId = intActionId
 			, @strProcess = strProcess
 			, @ysnDeleted = ysnDeleted
-			, @strPricingStatus = strPricingStatus
 		FROM #tmpLogItems
 
 		--SELECT * INTO #tmpPrevLogList
@@ -337,9 +333,8 @@ BEGIN
 			, strNotes
 			, intUserId
 			, intActionId
-			, strProcess			
-			, ysnDeleted
-			, strPricingStatus)
+			, strProcess
+			, ysnDeleted)
 		SELECT strBatchId
 			, dtmTransactionDate
 			, strTransactionType
@@ -377,7 +372,6 @@ BEGIN
 			, intActionId
 			, strProcess
 			, ysnDeleted
-			, strPricingStatus
 		FROM #tmpLogItems WHERE intId = @Id
 
 		--DROP TABLE #tmpPrevLogList
@@ -425,8 +419,7 @@ BEGIN
 		, intRefContractBalanceId
 		, intUserId
 		, strProcess
-		, ysnDeleted
-		, strPricingStatus)
+		, ysnDeleted)
 	SELECT strBatchId
 		, intActionId
 		, strAction = A.strActionIn 
@@ -468,7 +461,6 @@ BEGIN
 		, intUserId
 		, strProcess
 		, ysnDeleted
-		, strPricingStatus
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 
