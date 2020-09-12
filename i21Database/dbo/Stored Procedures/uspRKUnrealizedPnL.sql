@@ -16,6 +16,11 @@ AS
 
 BEGIN
 
+	IF OBJECT_ID('tempdb..#UnrealizedSettlePrice') IS NOT NULL
+		DROP TABLE #UnrealizedSettlePrice
+	IF OBJECT_ID('tempdb..#UnrealizedData') IS NOT NULL
+		DROP TABLE #UnrealizedData
+
 	SET @dtmFromDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFromDate, 110), 110)
 	SET @dtmToDate = CONVERT(DATETIME, CONVERT(VARCHAR(10), ISNULL(@dtmToDate, GETDATE()), 110), 110)
 
@@ -53,7 +58,7 @@ BEGIN
 	END
 
 	SELECT *
-	INTO #TempSettlementPrice
+	INTO #UnrealizedSettlePrice
 	FROM (
 		SELECT dblLastSettle
 			, p.intFutureMarketId
@@ -104,7 +109,7 @@ BEGIN
 		, LongWaitedPrice = LongWaitedPrice / CASE WHEN ISNULL(dblLongTotalLotByMonth, 0) = 0 THEN 1 ELSE dblLongTotalLotByMonth END
 		, ShortWaitedPrice = ShortWaitedPrice / CASE WHEN ISNULL(dblShortTotalLotByMonth, 0) = 0 THEN 1 ELSE dblShortTotalLotByMonth END
 		, intSelectedInstrumentTypeId
-	INTO #temp
+	INTO #UnrealizedData
 	FROM (
 		SELECT *
 			, GrossPnL = GrossPnL1 * (dblClosing - dblPrice)
@@ -179,7 +184,7 @@ BEGIN
 				--JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 				--JOIN tblRKFutureMarket fm ON ot.intFutureMarketId = fm.intFutureMarketId
 				JOIN tblSMCurrency c ON c.intCurrencyID = ot.intCurrencyId
-				LEFT JOIN #TempSettlementPrice t ON t.intFutureMarketId = ot.intFutureMarketId AND t.intFutureMonthId = ot.intFutureMonthId
+				LEFT JOIN #UnrealizedSettlePrice t ON t.intFutureMarketId = ot.intFutureMarketId AND t.intFutureMonthId = ot.intFutureMonthId
 				LEFT JOIN tblCTBook cb ON cb.intBookId = ot.intBookId
 				LEFT JOIN tblCTSubBook csb ON csb.intSubBookId = ot.intSubBookId
 				WHERE ot.intSelectedInstrumentTypeId = @intSelectedInstrumentTypeId
@@ -238,6 +243,6 @@ BEGIN
 		, LongWaitedPrice
 		, ShortWaitedPrice
 		, intSelectedInstrumentTypeId
-	FROM #temp
+	FROM #UnrealizedData
 	WHERE ysnExpired = CASE WHEN @ysnExpired = 1 THEN ysnExpired ELSE 0 END
 END
