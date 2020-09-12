@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[strDescriptionContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strAccountNumberContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[strReferenceContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strAction] [nvarchar](30) COLLATE Latin1_General_CI_AS NULL,
+	[intActionId] [int] NOT NULL,
 	[intLocationSegmentId] [int] NULL,
 	[intPrimaryBankId] [int] NULL,
 	[intOffsetBankId] [int] NULL,
