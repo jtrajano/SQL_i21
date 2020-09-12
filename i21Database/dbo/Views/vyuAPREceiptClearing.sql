@@ -17,8 +17,21 @@ SELECT
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
     ,ROUND(
-        ISNULL(receiptItem.dblOpenReceive, 0) 
-        * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
+        CASE 
+            WHEN receiptItem.intWeightUOMId IS NULL THEN 
+                ISNULL(receiptItem.dblOpenReceive, 0) 
+            ELSE 
+                CASE 
+                    WHEN ISNULL(receiptItem.dblNet, 0) = 0 THEN 
+                        ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intUnitMeasureId, receiptItem.intWeightUOMId, receiptItem.dblOpenReceive), 0)
+                    ELSE 
+                        CASE WHEN intSourceType = 2 
+                            THEN CAST(ISNULL(dbo.fnCalculateQtyBetweenUOM(receiptItem.intWeightUOMId,receiptItem.intUnitMeasureId , receiptItem.dblNet), 0) AS DECIMAL(18,2))
+                        ELSE ISNULL(receiptItem.dblNet, 0) 
+                        END
+                END 
+        END
+        * dbo.fnCalculateCostBetweenUOM(ISNULL(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId), ISNULL(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId), receiptItem.dblUnitCost)
         * (
             CASE 
                 WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
@@ -74,20 +87,24 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 OUTER APPLY (
-    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL
-    SELECT SUM(dblTax) AS dblTax
+    --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
+    --IF NO VOUCHER JUST TAKE THE TAX
+    SELECT SUM(rctTax.dblTax) AS dblTax
     FROM tblICInventoryReceiptItemTax rctTax
-    WHERE 
-        rctTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-    AND EXISTS (
-        SELECT 1
-        FROM tblAPBillDetail billDetail 
-        INNER JOIN tblAPBillDetailTax billDetailTax
+    LEFT JOIN tblAPBillDetail billDetail 
+		ON billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+	LEFT JOIN tblAPBillDetailTax billDetailTax
             ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
-        WHERE rctTax.intInventoryReceiptItemId = billDetail.intInventoryReceiptItemId
             AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
             AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
-    )
+    WHERE 
+        rctTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
+    AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
+            ELSE (
+                CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
+            )
+            END
+
 ) clearingTax
 -- OUTER APPLY (
 --     --DO NOT ADD TAX FOR RECEIPT IF THERE IS NO TAX (NO TAX DETAILS) ON VOUCHER TO REMOVE DATA ON CLEARING REPORT
@@ -298,13 +315,62 @@ SELECT
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
-                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  * (billDetail.dblUnitQty/ ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-                    ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
+                        THEN CAST((
+                            --HANDLE NET WEIGHT ISSUE
+                            --VOUCHER CREATED FROM RECEIPT DID NOT USE THE NET WEIGHT
+                            CASE WHEN 
+                                receiptItem.dblNet <> 0 AND 
+                                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
+                                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
+                                --SOME VOUCHER CREATED USING INCORRECT NET WEIGHT BUT TOTAL IS THE SAME
+                                receiptItem.dblLineTotal <> billDetail.dblTotal AND
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                            THEN receiptItem.dblNet
+                            ELSE billDetail.dblQtyReceived
+                            END
+                        ) 
+                        *  (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  
+                        * dbo.fnDivide(billDetail.dblUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+                    ELSE CAST((
+                        CASE WHEN 
+                                receiptItem.dblNet <> 0 AND 
+                                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
+                                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
+                                receiptItem.dblLineTotal <> billDetail.dblTotal AND
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                            THEN receiptItem.dblNet
+                            ELSE billDetail.dblQtyReceived
+                            END
+                        ) 
+                    * (receiptItem.dblUnitCost / ISNULL(bill.intSubCurrencyCents,1))  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             ELSE (CASE 
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
-                        THEN CAST((billDetail.dblQtyReceived) *  (receiptItem.dblUnitCost)  * (billDetail.dblUnitQty/ ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
-                    ELSE CAST((billDetail.dblQtyReceived) * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
+                        THEN CAST((
+                            CASE WHEN 
+                                receiptItem.dblNet <> 0 AND 
+                                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
+                                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
+                                receiptItem.dblLineTotal <> billDetail.dblTotal AND
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                            THEN receiptItem.dblNet
+                            ELSE billDetail.dblQtyReceived
+                            END
+                            ) 
+                        * (receiptItem.dblUnitCost)  
+                        * dbo.fnDivide(billDetail.dblUnitQty, ISNULL(NULLIF(billDetail.dblCostUnitQty,0),1)) AS DECIMAL(18,2))  --Formula With Receipt UOM and Cost UOM
+                    ELSE CAST((
+                        CASE WHEN 
+                                receiptItem.dblNet <> 0 AND 
+                                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
+                                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
+                                receiptItem.dblLineTotal <> billDetail.dblTotal AND
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                            THEN receiptItem.dblNet
+                            ELSE billDetail.dblQtyReceived
+                            END
+                        ) 
+                    * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             END),0)	
     *
@@ -320,7 +386,15 @@ SELECT
     -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
     CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
-    ,ISNULL(billDetail.dblQtyReceived, 0) 
+    ,ISNULL(CASE WHEN 
+                receiptItem.dblNet <> 0 AND 
+                receiptItem.dblNet <> receiptItem.dblOpenReceive AND
+                receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
+                receiptItem.dblLineTotal <> billDetail.dblTotal AND
+                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+            THEN receiptItem.dblNet
+            ELSE billDetail.dblQtyReceived
+            END, 0) 
     *
     (
         CASE 
