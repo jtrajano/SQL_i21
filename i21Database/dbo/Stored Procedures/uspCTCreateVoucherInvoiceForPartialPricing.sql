@@ -186,16 +186,15 @@ BEGIN TRY
 		intInvoiceDetailId				INT NULL
 	)
 
-	SELECT	@dblCashPrice			=	dblCashPrice, 
-			@intPricingTypeId		=	intPricingTypeId, 
-			@intLastModifiedById	=	ISNULL(intLastModifiedById,intCreatedById),
-			@intContractHeaderId	=	intContractHeaderId,
-			@intCompanyLocationId	=	intCompanyLocationId,
-			@intSequenceFreightTermId = intFreightTermId
+	SELECT	@dblCashPrice				=	dblCashPrice, 
+			@intPricingTypeId			=	intPricingTypeId, 
+			@intLastModifiedById		=	ISNULL(intLastModifiedById,intCreatedById),
+			@intContractHeaderId		=	intContractHeaderId,
+			@intCompanyLocationId		=	intCompanyLocationId,
+			@intSequenceFreightTermId 	= 	intFreightTermId,
+			@intItemUOMId 				= 	intItemUOMId
 	FROM	tblCTContractDetail 
-	WHERE	intContractDetailId		=	@intContractDetailId
-
-	SELECT	@intItemUOMId = intItemUOMId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId;
+	WHERE	intContractDetailId			=	@intContractDetailId
 
 	select @intWeightGradeId = intWeightGradeId from tblCTWeightGrade where strWeightGradeDesc = 'Destination'
 		
@@ -918,66 +917,76 @@ BEGIN TRY
 				--@ysnDestinationWeightsGrades
 
 				SET @shipment = CURSOR FOR
-					SELECT
-						intInventoryShipmentId = RI.intInventoryShipmentId,
-						intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-						dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
-																		RI.intItemUOMId
-																		,CD.intItemUOMId
-																		,(
-																				case
-																				when @ysnDestinationWeightsGrades = convert(bit,1)
-																				then ISNULL(RI.dblDestinationQuantity,0)
-																				else ISNULL(RI.dblQuantity,0)
-																				end
-																		  )
-																	  ),
-						intInvoiceDetailId = null,
-						intItemUOMId = CD.intItemUOMId,
-						intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
-					FROM
-						tblICInventoryShipmentItem RI
+					select
+						intInventoryShipmentId
+						,intInventoryShipmentItemId
+						,dblShipped
+						,intInvoiceDetailId
+						,intItemUOMId
+						,intLoadShipped
+					from
+					(
+						SELECT
+							intInventoryShipmentId = RI.intInventoryShipmentId,
+							intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
+							dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																			RI.intItemUOMId
+																			,@intItemUOMId
+																			,(
+																					case
+																					when @ysnDestinationWeightsGrades = convert(bit,1)
+																					then ISNULL(RI.dblDestinationQuantity,0)
+																					else ISNULL(RI.dblQuantity,0)
+																					end
+																			  )
+																		  ),
+							intInvoiceDetailId = null,
+							intItemUOMId = @intItemUOMId,
+							intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
+						FROM
+							tblICInventoryShipmentItem RI
+							JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+							JOIN tblCTPriceFixationTicket FT ON FT.intInventoryShipmentId = RI.intInventoryShipmentId
+						WHERE
+							RI.intLineNo = @intContractDetailId
+
+						union all
+
+						SELECT
+							intInventoryShipmentId = RI.intInventoryShipmentId,
+							intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
+							dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																			RI.intItemUOMId
+																			,@intItemUOMId
+																			,(
+																					case
+																					when @ysnDestinationWeightsGrades = convert(bit,1)
+																					then ISNULL(RI.dblDestinationQuantity,0)
+																					else ISNULL(RI.dblQuantity,0)
+																					end
+																			  )
+																		  ),
+							intInvoiceDetailId = ARD.intInvoiceDetailId,
+							intItemUOMId = @intItemUOMId,
+							intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
+						FROM tblICInventoryShipmentItem RI
 						JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
-						JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intLineNo
-						JOIN tblCTPriceFixationTicket FT ON FT.intInventoryShipmentId = RI.intInventoryShipmentId
-					WHERE
-						RI.intLineNo = @intContractDetailId
+						OUTER APPLY (
+										select top 1
+											intInvoiceDetailId
+										from
+											tblARInvoiceDetail ARD
+										WHERE
+											ARD.intContractDetailId = @intContractDetailId
+											and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
+											and ARD.intInventoryShipmentChargeId is null
+										) ARD
+									
+						WHERE
+							RI.intLineNo = @intContractDetailId
+					) t
+					ORDER BY t.intInventoryShipmentItemId
 
-					union all
-
-					SELECT
-						intInventoryShipmentId = RI.intInventoryShipmentId,
-						intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-						dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
-																		RI.intItemUOMId
-																		,CD.intItemUOMId
-																		,(
-																				case
-																				when @ysnDestinationWeightsGrades = convert(bit,1)
-																				then ISNULL(RI.dblDestinationQuantity,0)
-																				else ISNULL(RI.dblQuantity,0)
-																				end
-																		  )
-																	  ),
-						intInvoiceDetailId = ARD.intInvoiceDetailId,
-						intItemUOMId = CD.intItemUOMId,
-						intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
-					FROM tblICInventoryShipmentItem RI
-					JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
-					JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intLineNo
-					OUTER APPLY (
-									select top 1
-										intInvoiceDetailId
-									from
-										tblARInvoiceDetail ARD
-									WHERE
-										ARD.intContractDetailId = CD.intContractDetailId
-										and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
-										and ARD.intInventoryShipmentChargeId is null
-									) ARD
-								
-					WHERE
-						RI.intLineNo = @intContractDetailId
 
 					OPEN @shipment
 
@@ -1188,68 +1197,79 @@ BEGIN TRY
 		begin
 
 			insert into @InvShp
-			SELECT
-				intInventoryShipmentId = RI.intInventoryShipmentId,
-				intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-				dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
-																RI.intItemUOMId
-																,CD.intItemUOMId
-																,(
-																		case
-																		when @ysnDestinationWeightsGrades = convert(bit,1)
-																		then ISNULL(RI.dblDestinationQuantity,0)
-																		else ISNULL(RI.dblQuantity,0)
-																		end
-																  )
-															  ),
-				intInvoiceDetailId = null,
-				intItemUOMId = CD.intItemUOMId,
-				intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
-				dtmInvoiceDate = null
-			FROM
-				tblICInventoryShipmentItem RI
+			select
+				intInventoryShipmentId
+				,intInventoryShipmentItemId
+				,dblShipped
+				,intInvoiceDetailId
+				,intItemUOMId
+				,intLoadShipped
+				,dtmInvoiceDate
+			from
+			(
+				SELECT
+					intInventoryShipmentId = RI.intInventoryShipmentId,
+					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																	RI.intItemUOMId
+																	,@intItemUOMId
+																	,(
+																			case
+																			when @ysnDestinationWeightsGrades = convert(bit,1)
+																			then ISNULL(RI.dblDestinationQuantity,0)
+																			else ISNULL(RI.dblQuantity,0)
+																			end
+																	  )
+																  ),
+					intInvoiceDetailId = null,
+					intItemUOMId = @intItemUOMId,
+					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
+					dtmInvoiceDate = null
+				FROM
+					tblICInventoryShipmentItem RI
+					JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+					JOIN tblCTPriceFixationTicket FT ON FT.intInventoryShipmentId = RI.intInventoryShipmentId
+				WHERE
+					RI.intLineNo = @intContractDetailId
+
+				union all
+
+				SELECT
+					intInventoryShipmentId = RI.intInventoryShipmentId,
+					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
+					dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
+																	RI.intItemUOMId
+																	,@intItemUOMId
+																	,(
+																			case
+																			when @ysnDestinationWeightsGrades = convert(bit,1)
+																			then ISNULL(RI.dblDestinationQuantity,0)
+																			else ISNULL(RI.dblQuantity,0)
+																			end
+																	  )
+																  ),
+					intInvoiceDetailId = ARD.intInvoiceDetailId,
+					intItemUOMId = @intItemUOMId,
+					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
+					dtmInvoiceDate = null
+				FROM tblICInventoryShipmentItem RI
 				JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
-				JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intLineNo
-				JOIN tblCTPriceFixationTicket FT ON FT.intInventoryShipmentId = RI.intInventoryShipmentId
-			WHERE
-				RI.intLineNo = @intContractDetailId
+				OUTER APPLY (
+								select top 1
+									intInvoiceDetailId
+								from
+									tblARInvoiceDetail ARD
+								WHERE
+									ARD.intContractDetailId = @intContractDetailId
+									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
+									and ARD.intInventoryShipmentChargeId is null
+								) ARD
+								
+				WHERE
+					RI.intLineNo = @intContractDetailId	
+			) t
+			ORDER BY t.intInventoryShipmentItemId
 
-			union all
-
-			SELECT
-				intInventoryShipmentId = RI.intInventoryShipmentId,
-				intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
-				dblShipped = dbo.fnCTConvertQtyToTargetItemUOM(
-																RI.intItemUOMId
-																,CD.intItemUOMId
-																,(
-																		case
-																		when @ysnDestinationWeightsGrades = convert(bit,1)
-																		then ISNULL(RI.dblDestinationQuantity,0)
-																		else ISNULL(RI.dblQuantity,0)
-																		end
-																  )
-															  ),
-				intInvoiceDetailId = ARD.intInvoiceDetailId,
-				intItemUOMId = CD.intItemUOMId,
-				intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
-				dtmInvoiceDate = null
-			FROM tblICInventoryShipmentItem RI
-			JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = RI.intLineNo
-			OUTER APPLY (
-							select top 1
-								intInvoiceDetailId
-							from
-								tblARInvoiceDetail ARD
-							WHERE
-								ARD.intContractDetailId = CD.intContractDetailId
-								and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
-								and ARD.intInventoryShipmentChargeId is null
-							) ARD
-							
-			WHERE
-				RI.intLineNo = @intContractDetailId	
 
 			if (@ysnDestinationWeightsGrades = convert(bit,1))
 			begin
