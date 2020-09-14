@@ -1385,15 +1385,6 @@ BEGIN TRY
 			--@ysnDestinationWeightsGrades
 
 			SET @shipment = CURSOR FOR
-				select
-					intInventoryShipmentId
-					,intInventoryShipmentItemId
-					,dblShipped
-					,intInvoiceDetailId
-					,intItemUOMId
-					,intLoadShipped
-				from 
-				(
 				SELECT
 					intInventoryShipmentId = RI.intInventoryShipmentId,
 					intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
@@ -1456,8 +1447,6 @@ BEGIN TRY
 							
 				WHERE
 					RI.intLineNo = @intContractDetailId
-				) t order by t.intInventoryShipmentItemId
-
 
 				OPEN @shipment
 
@@ -1778,16 +1767,6 @@ BEGIN TRY
 		else
 		begin
 			insert into @InvShp
-			select
-				intInventoryShipmentId
-				,intInventoryShipmentItemId
-				,dblShipped
-				,intInvoiceDetailId
-				,intItemUOMId
-				,intLoadShipped
-				,dtmInvoiceDate
-			from
-			(
 			SELECT
 				intInventoryShipmentId = RI.intInventoryShipmentId,
 				intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
@@ -1852,8 +1831,6 @@ BEGIN TRY
 							
 			WHERE
 				RI.intLineNo = @intContractDetailId	
-			) t order by t.intInventoryShipmentItemId
-
 
 			if (@ysnDestinationWeightsGrades = convert(bit,1))
 			begin
