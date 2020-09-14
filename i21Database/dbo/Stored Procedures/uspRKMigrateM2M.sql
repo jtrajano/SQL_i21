@@ -294,7 +294,7 @@ BEGIN
 				, strContractSeq NVARCHAR(100)
 				, strEntityName NVARCHAR(100)
 				, intEntityId INT
-				, strRating NVARCHAR(100)
+				, dblMToM NUMERIC(24, 10)
 				, dblFixedPurchaseVolume NUMERIC(24, 10)
 				, dblUnfixedPurchaseVolume NUMERIC(24, 10)
 				, dblTotalValume NUMERIC(24, 10)
@@ -317,7 +317,7 @@ BEGIN
 					, strContractSeq
 					, strEntityName
 					, intEntityId
-					, strRating
+					, dblMToM
 					, dblFixedPurchaseVolume
 					, dblUnfixedPurchaseVolume
 					, dblTotalValume
@@ -337,7 +337,7 @@ BEGIN
 					, strContractSeq
 					, strEntityName
 					, intEntityId
-					, strRating
+					, dblMToM
 					, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 					, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 					, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -358,7 +358,7 @@ BEGIN
 						, strEntityName = em.strName
 						, e.intEntityId
 						, fd.dblOpenQty
-						, strRating = pf.strRiskIndicator
+						, dblMToM = ISNULL(dblResult, 0.00)
 						, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 															WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 															WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
@@ -403,7 +403,7 @@ BEGIN
 					, strContractSeq
 					, strEntityName
 					, intEntityId
-					, strRating
+					, dblMToM
 					, dblFixedPurchaseVolume
 					, dblUnfixedPurchaseVolume
 					, dblTotalValume
@@ -423,7 +423,7 @@ BEGIN
 					, strContractSeq
 					, strEntityName
 					, intEntityId
-					, strRating
+					, dblMToM
 					, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 					, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 					, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -442,7 +442,7 @@ BEGIN
 					SELECT ch.intContractHeaderId
 						, fd.strContractSeq
 						, strEntityName = ISNULL(strProducer, em.strName)
-						, strRating = pf.strRiskIndicator
+						, dblMToM = ISNULL(dblResult, 0.00)
 						, e.intEntityId
 						, fd.dblOpenQty
 						, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
@@ -491,7 +491,7 @@ BEGIN
 				, intContractHeaderId
 				, strContractSeq
 				, strEntityName
-				, strRating
+				, dblMToM
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblPurchaseOpenQty
@@ -509,7 +509,7 @@ BEGIN
 				, intContractHeaderId
 				, strContractSeq
 				, strEntityName
-				, strRating
+				, dblMToM
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblPurchaseOpenQty

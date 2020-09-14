@@ -2,38 +2,114 @@
 
 AS
 
-SELECT intM2MCPESummaryId = CAST(ROW_NUMBER() OVER(ORDER BY intEntityId) AS INT)
+SELECT intM2MCPESummaryId = CONVERT(INT, ROW_NUMBER() OVER(ORDER BY strEntityName))
 	, intM2MHeaderId
 	, strEntityName
-	, intEntityId
-	, dblFixedPurchaseVolume = ISNULL(SUM(dblFixedPurchaseVolume), 0.00)
-	, dblUnfixedPurchaseVolume = ISNULL(SUM(dblUnfixedPurchaseVolume), 0.00)
-	, dblTotalCommittedVolume = ISNULL(SUM(dblTotalCommittedVolume), 0.00)
-	, dblFixedPurchaseValue = ISNULL(SUM(dblFixedPurchaseValue), 0.00)
-	, dblUnfixedPurchaseValue = ISNULL(SUM(dblUnfixedPurchaseValue), 0.00)
-	, dblTotalCommittedValue = ISNULL(SUM(dblTotalCommittedValue), 0.00)
+	, intEntityId intVendorId
 	, strRiskIndicator
-	, dblRiskTotalBusinessVolume
-	, intRiskUnitOfMeasureId
+	, dblFixedPurchaseVolume = CONVERT(NUMERIC(16, 2), dblFixedPurchaseVolume)
+	, dblUnfixedPurchaseVolume = CONVERT(NUMERIC(16,2),dblUnfixedPurchaseVolume)
+	, dblTotalCommittedVolume = CONVERT(NUMERIC(16, 2), dblTotalCommittedVolume)
+	, dblFixedPurchaseValue = CONVERT(NUMERIC(16, 2), dblFixedPurchaseValue)
+	, dblUnfixedPurchaseValue = CONVERT(NUMERIC(16, 2), dblUnfixedPurchaseValue)
+	, dblTotalCommittedValue = CONVERT(NUMERIC(16, 2), dblTotalCommittedValue)
+	, dblTotalSpend = CONVERT(NUMERIC(16, 2), dblTotalSpend)
+	, dblShareWithSupplier
+	, dblMToM
 	, dblCompanyExposurePercentage
-	, dblSupplierSalesPercentage
+	, dblPotentialAdditionalVolume = CASE WHEN (ISNULL(dblPotentialAdditionalVolume, 0) - ISNULL(dblTotalCommittedVolume, 0)) < 0 THEN 0
+										ELSE (ISNULL(dblPotentialAdditionalVolume, 0) - ISNULL(dblTotalCommittedVolume, 0)) END
+	, intConcurrencyId = 0
 FROM (
-	SELECT CPE.*
-		, strRiskIndicator
-		, dblRiskTotalBusinessVolume = ISNULL(dblRiskTotalBusinessVolume, 0.00)
-		, intRiskUnitOfMeasureId
-		, dblCompanyExposurePercentage = ROUND(ISNULL(dblCompanyExposurePercentage, 0), 2)
-		, dblSupplierSalesPercentage = ROUND(ISNULL(dblSupplierSalesPercentage, 0), 2)
+	SELECT strEntityName
 		, intEntityId
-	FROM tblRKM2MCounterPartyExposure CPE
-	JOIN tblAPVendor e ON e.intEntityId = CPE.intVendorId
-	LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
-) t
-GROUP BY strEntityName
-	, strRiskIndicator
-	, dblRiskTotalBusinessVolume
-	, intRiskUnitOfMeasureId
-	, dblCompanyExposurePercentage
-	, dblSupplierSalesPercentage
-	, intEntityId
-	, intM2MHeaderId
+		, intM2MHeaderId
+		, strRiskIndicator
+		, dblFixedPurchaseVolume
+		, dblUnfixedPurchaseVolume
+		, dblTotalCommittedVolume
+		, dblFixedPurchaseValue
+		, dblUnfixedPurchaseValue
+		, dblTotalCommittedValue
+		, dblTotalSpend = CONVERT(NUMERIC(16, 2), dblTotalSpend)
+		, dblShareWithSupplier = CONVERT(NUMERIC(16, 2), dblShareWithSupplier)
+		, dblMToM
+		, dblCompanyExposurePercentage
+		, a = (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend, 0) = 0 THEN 1 ELSE dblTotalSpend END) * dblCompanyExposurePercentage
+		, b = (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier, 0) = 0 THEN 1 ELSE dblShareWithSupplier END) * dblSupplierSalesPercentage
+		, dblPotentialAdditionalVolume = CASE WHEN CASE WHEN ISNULL(dblTotalSpend, 0) = 0 THEN 1 ELSE dblTotalSpend END > dblCompanyExposurePercentage THEN 0
+											WHEN CASE WHEN ISNULL(dblShareWithSupplier, 0) = 0 THEN 1 ELSE dblShareWithSupplier END > dblSupplierSalesPercentage THEN 0
+											WHEN (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend, 0) = 0 THEN 1 ELSE dblTotalSpend END) * dblCompanyExposurePercentage
+												<= (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier, 0) = 0 THEN 1 ELSE dblShareWithSupplier END) * dblSupplierSalesPercentage
+												THEN (dblTotalCommittedVolume / CASE WHEN ISNULL(dblTotalSpend, 0) = 0 THEN 1 ELSE dblTotalSpend END) * dblCompanyExposurePercentage
+											ELSE (dblTotalCommittedVolume / CASE WHEN ISNULL(dblShareWithSupplier, 0) = 0 THEN 1 ELSE dblShareWithSupplier END) * dblSupplierSalesPercentage END
+	FROM (
+		SELECT strEntityName
+			, intEntityId
+			, intM2MHeaderId
+			, strRiskIndicator
+			, dblFixedPurchaseVolume
+			, dblUnfixedPurchaseVolume
+			, dblTotalCommittedVolume
+			, dblFixedPurchaseValue
+			, dblUnfixedPurchaseValue
+			, dblTotalCommittedValue
+			, dblTotalSpend = (ISNULL(dblTotalCommittedValue, 0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue, 0) = 0 THEN 1 ELSE dblTotalCommittedValue END) OVER ()) * 100
+			, dblShareWithSupplier = (CASE WHEN ISNULL(dblRiskTotalBusinessVolume, 0) = 0 THEN 0 ELSE ISNULL(dblTotalCommittedVolume, 0) / dblRiskTotalBusinessVolume END) * 100
+			, dblMToM
+			, dblCompanyExposurePercentage
+			, dblSupplierSalesPercentage
+		FROM (
+			SELECT strEntityName
+				, intEntityId
+				, intM2MHeaderId
+				, dblFixedPurchaseVolume
+				, dblUnfixedPurchaseVolume
+				, dblTotalCommittedVolume = dblFixedPurchaseVolume + dblUnfixedPurchaseVolume
+				, dblFixedPurchaseValue
+				, dblUnfixedPurchaseValue
+				, dblTotalCommittedValue = dblFixedPurchaseValue + dblUnfixedPurchaseValue
+				, dblMToM
+				, strRiskIndicator
+				, intRiskUnitOfMeasureId
+				, dblRiskTotalBusinessVolume
+				, dblCompanyExposurePercentage
+				, dblSupplierSalesPercentage
+			FROM (
+				SELECT strEntityName
+					, intEntityId
+					, intM2MHeaderId
+					, dblFixedPurchaseVolume = SUM(dblFixedPurchaseVolume)
+					, dblUnfixedPurchaseVolume = SUM(dblUnfixedPurchaseVolume)
+					, dblFixedPurchaseValue = SUM(dblFixedPurchaseValue)
+					, dblUnfixedPurchaseValue = SUM(dblUnfixedPurchaseValue)
+					, dblMToM = SUM(dblMToM)
+					, strRiskIndicator
+					, dblRiskTotalBusinessVolume
+					, intRiskUnitOfMeasureId
+					, dblCompanyExposurePercentage
+					, dblSupplierSalesPercentage
+				FROM (
+					SELECT CPE.*
+						, strRiskIndicator
+						, dblRiskTotalBusinessVolume = ISNULL(dblRiskTotalBusinessVolume, 0.00)
+						, intRiskUnitOfMeasureId
+						, dblCompanyExposurePercentage = ROUND(ISNULL(dblCompanyExposurePercentage, 0.00), 2)
+						, dblSupplierSalesPercentage = ROUND(ISNULL(dblSupplierSalesPercentage, 0.00), 2)
+						, intEntityId
+					FROM tblRKM2MCounterPartyExposure CPE
+					JOIN tblAPVendor e ON e.intEntityId = CPE.intVendorId
+					LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
+				) t1
+				GROUP BY strEntityName
+					, strRiskIndicator
+					, dblRiskTotalBusinessVolume
+					, intRiskUnitOfMeasureId
+					, dblCompanyExposurePercentage
+					, dblSupplierSalesPercentage
+					, intEntityId
+					, intM2MHeaderId
+			)t2
+		)t2
+	)t3
+)t4

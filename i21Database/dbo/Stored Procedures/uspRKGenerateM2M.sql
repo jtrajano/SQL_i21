@@ -3947,7 +3947,7 @@ BEGIN TRY
 			, strContractSeq NVARCHAR(100)
 			, strEntityName NVARCHAR(100)
 			, intEntityId INT
-			, strRiskRating NVARCHAR(100)
+			, dblM2M NUMERIC(24, 10)
 			, dblFixedPurchaseVolume NUMERIC(24, 10)
 			, dblUnfixedPurchaseVolume NUMERIC(24, 10)
 			, dblTotalValume NUMERIC(24, 10)
@@ -3970,7 +3970,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
-				, strRiskRating
+				, dblM2M
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblTotalValume
@@ -3990,7 +3990,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
-				, strRiskRating
+				, dblM2M
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -4006,12 +4006,12 @@ BEGIN TRY
 				, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 				, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			FROM (
-				SELECT ch.intContractHeaderId
+				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
 					, fd.strEntityName
 					, e.intEntityId
 					, fd.dblOpenQty
-					, strRiskRating = pf.strRiskIndicator
+					, dblM2M = ISNULL(dblResult, 0)
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 														WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 														WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
@@ -4037,13 +4037,7 @@ BEGIN TRY
 																											, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																											, fd.dblOpenQty * ((ISNULL(fd.dblContractBasis, 0)) + (ISNULL(fd.dblFuturePrice, 0)))))
 				FROM #tmpCPE fd
-				JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
-				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
-				JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
-				JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
 				JOIN tblAPVendor e ON e.intEntityId = fd.intEntityId
-				LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = e.intRiskUnitOfMeasureId
-				LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
 			) t
 		END
@@ -4054,7 +4048,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
-				, strRiskRating
+				, dblM2M
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
 				, dblTotalValume
@@ -4074,7 +4068,7 @@ BEGIN TRY
 				, strContractSeq
 				, strEntityName
 				, intEntityId
-				, strRiskRating
+				, dblM2M
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
@@ -4090,12 +4084,12 @@ BEGIN TRY
 				, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 				, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			FROM(
-				SELECT ch.intContractHeaderId
+				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
 					, strEntityName = ISNULL(strProducer, strEntityName)
 					, e.intEntityId
 					, fd.dblOpenQty
-					, strRiskRating = pf.strRiskIndicator
+					, dblM2M = ISNULL(dblResult, 0)
 					, strPriOrNotPriOrParPriced = (CASE WHEN strPriOrNotPriOrParPriced = 'Partially Priced' THEN 'Unpriced'
 							WHEN ISNULL(strPriOrNotPriOrParPriced, '') = '' THEN 'Priced'
 							WHEN strPriOrNotPriOrParPriced = 'Fully Priced' THEN 'Priced'
@@ -4121,16 +4115,15 @@ BEGIN TRY
 																										, ISNULL(intPriceUOMId, fd.intCommodityUnitMeasureId)
 																										, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
 				FROM #tmpCPE fd
-				JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
-				JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
-				JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
-				JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
 				LEFT JOIN tblAPVendor e ON e.intEntityId = fd.intProducerId
-				LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = e.intRiskUnitOfMeasureId
-				LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
-				LEFT JOIN tblAPVendor e1 ON e1.intEntityId = fd.intEntityId
-				LEFT JOIN tblICCommodityUnitMeasure cum1 ON cum1.intCommodityId = @intCommodityId AND cum1.intUnitMeasureId = e1.intRiskUnitOfMeasureId
-				LEFT JOIN tblRKVendorPriceFixationLimit pf1 ON pf1.intVendorPriceFixationLimitId = e1.intRiskVendorPriceFixationLimitId
+				--JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
+				--JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
+				--JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
+				--JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
+				
+				--LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = e.intRiskUnitOfMeasureId
+				--LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
+				
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
 			) t
 		END
@@ -4142,7 +4135,7 @@ BEGIN TRY
 			, strContractSeq
 			, strEntityName
 			, intVendorId
-			, strRating
+			, dblMToM
 			, dblFixedPurchaseVolume
 			, dblUnfixedPurchaseVolume
 			, dblPurchaseOpenQty
@@ -4160,7 +4153,7 @@ BEGIN TRY
 			, strContractSeq
 			, strEntityName
 			, intEntityId
-			, strRiskRating
+			, dblM2M
 			, dblFixedPurchaseVolume
 			, dblUnfixedPurchaseVolume
 			, dblPurchaseOpenQty
