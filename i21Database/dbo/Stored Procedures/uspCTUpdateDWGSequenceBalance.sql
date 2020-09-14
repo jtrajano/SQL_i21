@@ -153,7 +153,8 @@ BEGIN TRY
 			set @dblAdjustment = @dblBalanceLessOtherShipmentItem;
 		end
 		
-		select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);
+		--select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);
+		select @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment);
 
 		if @dblConvertedQty = 0
 		begin
