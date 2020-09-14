@@ -449,6 +449,30 @@ BEGIN TRY
 			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 			WHERE LD.intItemUOMId <> LDCL.intItemUOMId AND LD.intLoadId = @intLoadId
 		END
+
+		/* Auto-correct Storage Location and Storage Unit */
+		DECLARE @intPCompanyLocationId INT
+		SELECT TOP 1 @intPCompanyLocationId = intPCompanyLocationId FROM tblLGLoadDetail WHERE intLoadId = @intLoadId
+
+		IF (@intPCompanyLocationId IS NOT NULL)
+		BEGIN
+			UPDATE LW
+			SET intSubLocationId = (SELECT TOP 1 intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation 
+									WHERE intCompanyLocationId = @intPCompanyLocationId AND strSubLocationName = CLSL.strSubLocationName)
+			FROM tblLGLoadWarehouse LW
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId
+			WHERE intLoadId = @intLoadId
+				AND LW.intSubLocationId NOT IN (SELECT intCompanyLocationSubLocationId FROM tblSMCompanyLocationSubLocation WHERE intCompanyLocationId = @intPCompanyLocationId)
+		
+			UPDATE LW
+			SET intStorageLocationId = (SELECT TOP 1 intStorageLocationId FROM tblICStorageLocation 
+									WHERE intLocationId = @intPCompanyLocationId AND intSubLocationId = LW.intSubLocationId AND strName = SL.strName)
+			FROM tblLGLoadWarehouse LW
+			LEFT JOIN tblICStorageLocation SL ON LW.intStorageLocationId = SL.intStorageLocationId
+			WHERE intLoadId = @intLoadId
+				AND LW.intStorageLocationId NOT IN (SELECT intStorageLocationId FROM tblICStorageLocation 
+									WHERE intLocationId = @intPCompanyLocationId AND intSubLocationId = LW.intSubLocationId)
+		END
 	
 		IF EXISTS (SELECT 1 FROM tblLGLoadDetailContainerLink WHERE intLoadId = @intLoadId)
 		BEGIN
