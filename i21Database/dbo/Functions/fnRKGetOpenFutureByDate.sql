@@ -217,7 +217,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
 				SELECT * FROM (
-					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, CASE WHEN @ysnDisableHistoricalDerivative = 1 THEN History.intFutOptTransactionHistoryId ELSE History.dtmTransactionDate END DESC) intRowNum
 						, History.*
 						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
@@ -289,7 +289,7 @@ BEGIN
 			INNER JOIN vyuRKFutOptTransaction FOT ON FOTH.intFutOptTransactionHeaderId = FOT.intFutOptTransactionHeaderId
 			OUTER APPLY (
 				SELECT * FROM (
-					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, CASE WHEN @ysnDisableHistoricalDerivative = 1 THEN History.intFutOptTransactionHistoryId ELSE History.dtmTransactionDate END DESC) intRowNum
 						, History.*
 						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
@@ -360,7 +360,7 @@ BEGIN
 				, dblMatchContract
 			FROM (
 				SELECT * FROM (
-					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, History.dtmTransactionDate DESC) intRowNum
+					SELECT ROW_NUMBER() OVER (PARTITION BY History.intFutOptTransactionId ORDER BY History.intFutOptTransactionId, CASE WHEN @ysnDisableHistoricalDerivative = 1 THEN History.intFutOptTransactionHistoryId ELSE History.dtmTransactionDate END DESC) intRowNum
 						, History.*
 						, dblOpenContract = History.dblNewNoOfLots - ISNULL(mc.dblMatchContract, 0)
 						, dblMatchContract = ISNULL(mc.dblMatchContract, 0)
