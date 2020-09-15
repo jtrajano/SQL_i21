@@ -212,7 +212,7 @@ BEGIN
 			,L.dtmBLDate
 			,L.dtmDeliveredDate
 			,strContractNumber = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber ELSE CH.strContractNumber END
-			,CH.strCustomerContract
+			,strCustomerContract = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strCustomerContract ELSE CH.strCustomerContract END 
 			,Item.strItemNo
 			,Item.strDescription AS strItemDescription
 			,strVendor = CASE 
