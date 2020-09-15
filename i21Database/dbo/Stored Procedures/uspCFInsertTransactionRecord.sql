@@ -420,6 +420,16 @@ BEGIN
 	END
 	ELSE IF (@strNetworkType = 'CFN')
 	BEGIN
+
+		IF(@dblOriginalTotalPrice < 0)
+		BEGIN
+			IF(ISNULL(@dblQuantity,0) > 0)
+			BEGIN
+				SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+				SET @dblQuantity = (@dblQuantity * -1)
+			END
+		END
+
 		IF(@strTransactionType = 'R')
 		BEGIN
 			SET @strTransactionType = 'Remote'
@@ -595,13 +605,15 @@ BEGIN
 	
 	--TAX REFERENCE--
 
-
-	IF(@dblOriginalGrossPrice < 0)
+	IF (@strNetworkType != 'CFN' AND @strNetworkType != 'Wright Express')
 	BEGIN
-		SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
-		IF(ISNULL(@dblQuantity,0) > 0)
+		IF(@dblOriginalGrossPrice < 0)
 		BEGIN
-			SET @dblQuantity = (@dblQuantity * -1)
+			SET @dblOriginalGrossPrice = ABS(@dblOriginalGrossPrice)
+			IF(ISNULL(@dblQuantity,0) > 0)
+			BEGIN
+				SET @dblQuantity = (@dblQuantity * -1)
+			END
 		END
 	END
 
