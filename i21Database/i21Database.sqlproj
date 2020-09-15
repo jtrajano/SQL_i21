@@ -7780,6 +7780,7 @@
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
+    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />  
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
