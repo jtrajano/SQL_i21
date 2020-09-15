@@ -47,10 +47,10 @@ BEGIN
 	SELECT @FileHeaderId, @DetailId, 3, 'tblTRRackPriceDetail', 'intItemId', 1, 3, 1
 
 	INSERT INTO tblSMImportFileRecordMarker(intImportFileHeaderId, strRecordMarker, strFormat, intPosition, intConcurrencyId)
-	SELECT @FileHeaderId, 'Vendor Price', 'Explicit Decimals', 4, 1
+	SELECT @FileHeaderId, 'Vendor Price', 'Explicit Decimals', 5, 1
 	SET @DetailId = SCOPE_IDENTITY()
 	INSERT INTO tblSMImportFileColumnDetail(intImportFileHeaderId, intImportFileRecordMarkerId, intPosition, strTable, strColumnName, ysnActive, intLevel, intConcurrencyId)
-	SELECT @FileHeaderId, @DetailId, 4, 'tblTRRackPriceDetail', 'dblVendorRack', 1, 4, 1
+	SELECT @FileHeaderId, @DetailId, 5, 'tblTRRackPriceDetail', 'dblVendorRack', 1, 4, 1
 END
 ELSE
 BEGIN
