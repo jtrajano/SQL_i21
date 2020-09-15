@@ -59,6 +59,10 @@ BEGIN TRY
 		,@intLocationId INT
 		,@ysnPosted BIT
 		,@intLoadShippingInstructionId INT
+		,@strServiceContractNumber NVARCHAR(100)
+		,@intForwardingAgentEntityId INT
+		,@strComments NVARCHAR(MAX)
+		,@strBOLInstructions NVARCHAR(MAX)
 		,@strContainerErrMsg NVARCHAR(MAX)
 	DECLARE @strDescription NVARCHAR(MAX)
 		,@intOldPurchaseSale INT
@@ -227,6 +231,10 @@ BEGIN TRY
 				,@intLocationId = NULL
 				,@ysnPosted = NULL
 				,@intLoadShippingInstructionId = NULL
+				,@strServiceContractNumber = NULL
+				,@intForwardingAgentEntityId = NULL
+				,@strComments = NULL
+				,@strBOLInstructions = NULL
 				,@strContainerErrMsg = ''
 
 			SELECT @strDescription = NULL
@@ -499,6 +507,10 @@ BEGIN TRY
 			END
 
 			SELECT @strPackingDescription = L.strPackingDescription
+				,@strServiceContractNumber = L.strServiceContractNumber
+				,@intForwardingAgentEntityId = L.intForwardingAgentEntityId
+				,@strComments = L.strComments
+				,@strBOLInstructions = L.strBOLInstructions
 			FROM tblLGLoad L WITH (NOLOCK)
 			WHERE L.intLoadId = @intLoadShippingInstructionId
 
@@ -567,6 +579,10 @@ BEGIN TRY
 					,intNumberOfContainers
 					,intContainerTypeId
 					,intLoadShippingInstructionId
+					,strServiceContractNumber
+					,intForwardingAgentEntityId
+					,strComments
+					,strBOLInstructions
 					)
 				SELECT 1
 					,@strLoadNumber
@@ -607,6 +623,10 @@ BEGIN TRY
 					,@intNumberOfContainers
 					,@intContainerTypeId
 					,@intLoadShippingInstructionId
+					,@strServiceContractNumber
+					,@intForwardingAgentEntityId
+					,@strComments
+					,@strBOLInstructions
 
 				SELECT @intLoadId = SCOPE_IDENTITY()
 
@@ -1036,17 +1056,56 @@ BEGIN TRY
 							,intLoadId
 							,intDocumentId
 							,strDocumentType
+							,strDocumentNo
 							,intOriginal
 							,intCopies
+							,ysnSent
+							,dtmSentDate
+							,ysnReceived
+							,dtmReceivedDate
+							,ysnReceivedCopy
+							,dtmCopyReceivedDate
 							)
 						SELECT 1
 							,@intLoadId
 							,LD.intDocumentId
 							,LD.strDocumentType
+							,LD.strDocumentNo
 							,LD.intOriginal
 							,LD.intCopies
+							,LD.ysnSent
+							,LD.dtmSentDate
+							,LD.ysnReceived
+							,LD.dtmReceivedDate
+							,LD.ysnReceivedCopy
+							,LD.dtmCopyReceivedDate
 						FROM tblLGLoadDocuments LD WITH (NOLOCK)
 						WHERE LD.intLoadId = @intLoadShippingInstructionId
+
+						INSERT INTO tblLGLoadNotifyParties (
+							intConcurrencyId
+							,intLoadId
+							,strNotifyOrConsignee
+							,strType
+							,intEntityId
+							,intCompanySetupID
+							,intBankId
+							,intEntityLocationId
+							,intCompanyLocationId
+							,strText
+							)
+						SELECT 1
+							,@intLoadId
+							,LN.strNotifyOrConsignee
+							,LN.strType
+							,LN.intEntityId
+							,LN.intCompanySetupID
+							,LN.intBankId
+							,LN.intEntityLocationId
+							,LN.intCompanyLocationId
+							,LN.strText
+						FROM tblLGLoadNotifyParties LN WITH (NOLOCK)
+						WHERE LN.intLoadId = @intLoadShippingInstructionId
 					END
 					ELSE
 					BEGIN
