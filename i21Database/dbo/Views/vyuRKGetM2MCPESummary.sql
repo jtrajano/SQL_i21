@@ -54,7 +54,7 @@ FROM (
 			, dblFixedPurchaseValue
 			, dblUnfixedPurchaseValue
 			, dblTotalCommittedValue
-			, dblTotalSpend = (ISNULL(dblTotalCommittedValue, 0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue, 0) = 0 THEN 1 ELSE dblTotalCommittedValue END) OVER ()) * 100
+			, dblTotalSpend = (ISNULL(dblTotalCommittedValue, 0)/ SUM(CASE WHEN ISNULL(dblTotalCommittedValue, 0) = 0 THEN 1 ELSE dblTotalCommittedValue END) OVER (PARTITION BY intM2MHeaderId)) * 100
 			, dblShareWithSupplier = (CASE WHEN ISNULL(dblRiskTotalBusinessVolume, 0) = 0 THEN 0 ELSE ISNULL(dblTotalCommittedVolume, 0) / dblRiskTotalBusinessVolume END) * 100
 			, dblMToM
 			, dblCompanyExposurePercentage
