@@ -7,61 +7,65 @@ FROM (
 		,AH.intAllocationHeaderId
 		,AD.intAllocationDetailId
 		,AD.intPContractDetailId
-		,CHP.intContractHeaderId AS intPurchaseContractHeaderId
-		,CHP.strContractNumber AS strPurchaseContractNumber
-		,CDP.intContractSeq AS intPContractSeq
-		,CHP.intEntityId AS intPEntityId
-		,CDP.intCompanyLocationId AS intPCompanyLocationId
-		,PCL.strLocationName AS strPCompanyLocation
-		,CDP.intItemId AS intPItemId
-		,CAST(CHP.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber
+		,intPurchaseContractHeaderId = CHP.intContractHeaderId
+		,strPurchaseContractNumber = CHP.strContractNumber
+		,intPContractSeq = CDP.intContractSeq
+		,intPEntityId = CHP.intEntityId
+		,intPCompanyLocationId = CDP.intCompanyLocationId
+		,strPCompanyLocation = PCL.strLocationName
+		,intPItemId = CDP.intItemId
+		,strPContractNumber = CAST(CHP.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDP.intContractSeq AS VARCHAR(100))
 		,AD.dblPAllocatedQty
-		,AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0) AS dblPUnAllocatedQty
+		,dblPUnAllocatedQty = AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0)
 		,AD.intPUnitMeasureId
-		,UP.strUnitMeasure AS strPUnitMeasure
-		,ENP.strName AS strVendor
-		,ITP.strDescription AS strPItemDescription
-		,CDP.dtmStartDate AS dtmPStartDate
-		,CDP.dtmEndDate AS dtmPEndDate
-		,PP.strPosition AS strPPosition
-		,CP.strCountry AS strPOrigin
-		,CHP.intCommodityId AS intPCommodityId
-		,CDP.intItemUOMId AS intPItemUOMId
-		,CP.intCountryID AS intPOriginId
-		,UP.strUnitType AS strPUnitType
+		,strPUnitMeasure = UP.strUnitMeasure
+		,strVendor = ENP.strName
+		,strVendorContract = CHP.strCustomerContract
+		,strPItemDescription = ITP.strDescription
+		,dtmPStartDate = CDP.dtmStartDate
+		,dtmPEndDate = CDP.dtmEndDate
+		,strPPosition = PP.strPosition
+		,strPOrigin = CP.strCountry
+		,intPCommodityId = CHP.intCommodityId
+		,intPItemUOMId = CDP.intItemUOMId
+		,intPOriginId = CP.intCountryID
+		,strPUnitType = UP.strUnitType
+
 		,AD.intSContractDetailId
-		,CHS.intContractHeaderId AS intSalesContractHeaderId
-		,CHS.strContractNumber AS strSalesContractNumber
-		,CDS.intContractSeq AS intSContractSeq
-		,CHS.intEntityId AS intSEntityId
-		,CDS.intCompanyLocationId AS intSCompanyLocationId
-		,SCL.strLocationName AS strSCompanyLocation
-		,CDS.intItemId AS intSItemId
-		,CAST(CHS.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber
+		,intSalesContractHeaderId = CHS.intContractHeaderId
+		,strSalesContractNumber = CHS.strContractNumber
+		,intSContractSeq = CDS.intContractSeq
+		,intSEntityId = CHS.intEntityId
+		,intSCompanyLocationId = CDS.intCompanyLocationId
+		,strSCompanyLocation = SCL.strLocationName
+		,intSItemId = CDS.intItemId
+		,strSContractNumber = CAST(CHS.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDS.intContractSeq AS VARCHAR(100))
 		,AD.dblSAllocatedQty
-		,AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0) AS dblSUnAllocatedQty
+		,dblSUnAllocatedQty = AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)
 		,AD.intSUnitMeasureId
-		,US.strUnitMeasure AS strSUnitMeasure
-		,ENS.strName AS strCustomer
-		,ITS.strDescription AS strSItemDescription
-		,CDS.dtmStartDate AS dtmSStartDate
-		,CDS.dtmEndDate AS dtmSEndDate
-		,PS.strPosition AS strSPosition
-		,CS.strCountry AS strSOrigin
-		,CHS.intCommodityId AS intSCommodityId
-		,CDS.intItemUOMId AS intSItemUOMId
-		,CS.intCountryID AS intSOriginId
-		,US.strUnitType AS strSUnitType
-		,ITP.strType AS strPItemType
-		,ITP.strType AS strSItemType
+		,strSUnitMeasure = US.strUnitMeasure
+		,strCustomer = ENS.strName
+		,strCustomerContract = CHS.strCustomerContract
+		,strSItemDescription = ITS.strDescription
+		,dtmSStartDate = CDS.dtmStartDate
+		,dtmSEndDate = CDS.dtmEndDate
+		,strSPosition = PS.strPosition
+		,strSOrigin = CS.strCountry
+		,intSCommodityId = CHS.intCommodityId
+		,intSItemUOMId = CDS.intItemUOMId
+		,intSOriginId = CS.intCountryID
+		,strSUnitType = US.strUnitType
+
+		,strPItemType = ITP.strType
+		,strSItemType = ITP.strType
 		,strPriceCurrency = SCurrency.strCurrency
 		,dblSalesPrice = CDS.dblCashPrice
 		,strPriceUOM = SUOM.strUnitMeasure
 		,intPriceUnitMeasureId = SItemUOM.intUnitMeasureId
 		,SCurrency.ysnSubCurrency
-		,(ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)) AS dblAvailableAllocationQty
-		,dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId) dblQtyConversionFactor
-		,(ISNULL(CDP.dblQuantity,0)-ISNULL(CDP.dblScheduleQty,0)) dblAvailableContractQty
+		,dblAvailableAllocationQty = (ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0))
+		,dblQtyConversionFactor = dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId)
+		,dblAvailableContractQty = (ISNULL(CDP.dblQuantity,0)-ISNULL(CDP.dblScheduleQty,0))
 		,AH.intBookId
 		,BO.strBook
 		,AH.intSubBookId
@@ -141,60 +145,64 @@ FROM (
 		,AH.intAllocationHeaderId
 		,AD.intAllocationDetailId
 		,AD.intPContractDetailId
-		,CHP.intContractHeaderId AS intPurchaseContractHeaderId
-		,CHP.strContractNumber AS strPurchaseContractNumber
-		,CDP.intContractSeq AS intPContractSeq
-		,CHP.intEntityId AS intPEntityId
-		,CDP.intCompanyLocationId AS intPCompanyLocationId
-		,PCL.strLocationName AS strPCompanyLocation
-		,CDP.intItemId AS intPItemId
-		,CAST(CHP.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDP.intContractSeq AS VARCHAR(100)) AS strPContractNumber
+		,intPurchaseContractHeaderId = CHP.intContractHeaderId
+		,strPurchaseContractNumber = CHP.strContractNumber
+		,intPContractSeq = CDP.intContractSeq
+		,intPEntityId = CHP.intEntityId
+		,intPCompanyLocationId = CDP.intCompanyLocationId
+		,strPCompanyLocation = PCL.strLocationName
+		,intPItemId = CDP.intItemId
+		,strPContractNumber = CAST(CHP.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDP.intContractSeq AS VARCHAR(100))
 		,AD.dblPAllocatedQty
-		,AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0) AS dblPUnAllocatedQty
+		,dblPUnAllocatedQty = AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) - IsNull(PL.dblLotPickedQty, 0)
 		,AD.intPUnitMeasureId
-		,UP.strUnitMeasure AS strPUnitMeasure
-		,ENP.strName AS strVendor
-		,ITP.strDescription AS strPItemDescription
-		,CDP.dtmStartDate AS dtmPStartDate
-		,CDP.dtmEndDate AS dtmPEndDate
-		,PP.strPosition AS strPPosition
-		,CP.strCountry AS strPOrigin
-		,CHP.intCommodityId AS intPCommodityId
-		,CDP.intItemUOMId AS intPItemUOMId
-		,CP.intCountryID AS intPOriginId
-		,UP.strUnitType AS strPUnitType
+		,strPUnitMeasure = UP.strUnitMeasure
+		,strVendor = ENP.strName
+		,strVendorContract = CHP.strCustomerContract
+		,strPItemDescription = ITP.strDescription
+		,dtmPStartDate = CDP.dtmStartDate
+		,dtmPEndDate = CDP.dtmEndDate
+		,strPPosition = PP.strPosition
+		,strPOrigin = CP.strCountry
+		,intPCommodityId = CHP.intCommodityId
+		,intPItemUOMId = CDP.intItemUOMId
+		,intPOriginId = CP.intCountryID
+		,strPUnitType = UP.strUnitType
+
 		,AD.intSContractDetailId
-		,CHS.intContractHeaderId AS intSalesContractHeaderId
-		,CHS.strContractNumber AS strSalesContractNumber
-		,CDS.intContractSeq AS intSContractSeq
-		,CHS.intEntityId AS intSEntityId
-		,CDS.intCompanyLocationId AS intSCompanyLocationId
-		,SCL.strLocationName AS strSCompanyLocation
-		,CDS.intItemId AS intSItemId
-		,CAST(CHS.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDS.intContractSeq AS VARCHAR(100)) AS strSContractNumber
+		,intSalesContractHeaderId = CHS.intContractHeaderId
+		,strSalesContractNumber = CHS.strContractNumber
+		,intSContractSeq = CDS.intContractSeq
+		,intSEntityId = CHS.intEntityId
+		,intSCompanyLocationId = CDS.intCompanyLocationId
+		,strSCompanyLocation = SCL.strLocationName
+		,intSItemId = CDS.intItemId
+		,strSContractNumber = CAST(CHS.strContractNumber AS VARCHAR(100)) + '/' + CAST(CDS.intContractSeq AS VARCHAR(100))
 		,AD.dblSAllocatedQty
-		,AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0) AS dblSUnAllocatedQty
+		,dblSUnAllocatedQty = AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)
 		,AD.intSUnitMeasureId
-		,US.strUnitMeasure AS strSUnitMeasure
-		,ENS.strName AS strCustomer
-		,ITS.strDescription AS strSItemDescription
-		,CDS.dtmStartDate AS dtmSStartDate
-		,CDS.dtmEndDate AS dtmSEndDate
-		,PS.strPosition AS strSPosition
-		,CS.strCountry AS strSOrigin
-		,CHS.intCommodityId AS intSCommodityId
-		,CDS.intItemUOMId AS intSItemUOMId
-		,CS.intCountryID AS intSOriginId
-		,US.strUnitType AS strSUnitType
-		,ITP.strType AS strPItemType
-		,ITP.strType AS strSItemType
+		,strSUnitMeasure = US.strUnitMeasure
+		,strCustomer = ENS.strName
+		,strCustomerContract = CHS.strCustomerContract
+		,strSItemDescription = ITS.strDescription
+		,dtmSStartDate = CDS.dtmStartDate
+		,dtmSEndDate = CDS.dtmEndDate
+		,strSPosition = PS.strPosition
+		,strSOrigin = CS.strCountry
+		,intSCommodityId = CHS.intCommodityId
+		,intSItemUOMId = CDS.intItemUOMId
+		,intSOriginId = CS.intCountryID
+		,strSUnitType = US.strUnitType
+
+		,strPItemType = ITP.strType
+		,strSItemType = ITP.strType
 		,strPriceCurrency = SCurrency.strCurrency
 		,dblSalesPrice = CDS.dblCashPrice
 		,strPriceUOM = SUOM.strUnitMeasure
 		,intPriceUnitMeasureId = SItemUOM.intUnitMeasureId
 		,SCurrency.ysnSubCurrency
 		,dblAvailableAllocationQty = ISNULL(AD.dblPAllocatedQty, 0) - ISNULL(LD.dblPShippedQuantity, 0)
-		,dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId) dblQtyConversionFactor
+		,dblQtyConversionFactor = dbo.fnLGGetItemUnitConversion(CDP.intItemId,CDP.intItemUOMId,CDS.intUnitMeasureId)
 		,dblAvailableContractQty = ISNULL(CDP.dblQuantity,0) 
 			- (CASE WHEN ((CASE WHEN ISNULL(CDP.dblScheduleQty, 0) > ISNULL(CDP.dblShippingInstructionQty,0) 
 						THEN ISNULL(CDP.dblScheduleQty, 0) 
