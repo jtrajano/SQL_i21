@@ -18,6 +18,7 @@
 	[ysnDeferredPay]			BIT             DEFAULT ((0)) NOT NULL,
 	[ysnIncludeTaxOnDiscount]	BIT             DEFAULT ((0)) NOT NULL,
     [intSort]					INT             NULL,
+	[ysnSent]					BIT				DEFAULT ((0)) NOT NULL,
     [intConcurrencyId]			INT NOT NULL DEFAULT (1), 
     CONSTRAINT [PK_tblSMTerm] PRIMARY KEY CLUSTERED ([intTermID] ASC), 
     CONSTRAINT [AK_tblSMTerm_strTerm] UNIQUE ([strTerm]), 

@@ -44,6 +44,7 @@
 	[intCompanyId]			INT NULL,
 	[strFieldDelimiter]		NVARCHAR(20) COLLATE Latin1_General_CI_AS NOT NULL DEFAULT('Comma'),    
 	[strEPANumber]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+    [ysnSent]               BIT NULL DEFAULT(0),
 	[intConcurrencyId] 		INT CONSTRAINT [DF__tmp_ms_xx__intCo__5132705A] DEFAULT ((0)) NOT NULL,	
 	--CONSTRAINT [FK_tblEMEntity_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [tblEMEntityLocation]([intEntityLocationId]),
 	CONSTRAINT [FK_tblSMCountry_tblEMEntity] FOREIGN KEY ([intDefaultCountryId]) REFERENCES [tblSMCountry]([intCountryID]),

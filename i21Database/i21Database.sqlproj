@@ -7756,6 +7756,13 @@
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedGeneratedLog.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedImportLog.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCDiscountTableAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

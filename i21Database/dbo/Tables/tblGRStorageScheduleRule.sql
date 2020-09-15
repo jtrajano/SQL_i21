@@ -17,6 +17,7 @@
 	[dtmAllowancePeriodFrom] DATETIME NULL,
 	[dtmAllowancePeriodTo] DATETIME NULL,
 	[intUnitMeasureId] INT NULL,
+    [ysnSent] BIT NOT NULL DEFAULT(0),
     CONSTRAINT [PK_tblGRStorageScheduleRule_intStorageScheduleRuleId] PRIMARY KEY ([intStorageScheduleRuleId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblICCommodity] FOREIGN KEY ([intCommodity]) REFERENCES [tblICCommodity]([intCommodityId]), 
     CONSTRAINT [FK_tblGRStorageScheduleRule_tblGRStorageType] FOREIGN KEY ([intStorageType]) REFERENCES [tblGRStorageType]([intStorageScheduleTypeId]), 
