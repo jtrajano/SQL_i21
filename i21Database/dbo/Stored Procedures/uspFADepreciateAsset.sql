@@ -49,7 +49,7 @@ BEGIN
 			BEGIN
 			IF(@intCount > 0)
 			BEGIN
-				UPDATE tblFAFixedAsset SET ysnDepreciated = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
+				UPDATE tblFAFixedAsset SET ysnDepreciated = 0, ysnDisposed = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
 				DELETE A FROM tblFAFixedAssetDepreciation A JOIN #AssetID B ON B.intAssetId =  A.intAssetId AND strTransaction = 'Depreciation'
 			END		
 		END							
