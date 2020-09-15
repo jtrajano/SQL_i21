@@ -309,16 +309,18 @@ BEGIN TRY
 			, '' AS strMFGDealNameTHREE
 			, NULL AS dblMFGDealDiscountAmountTHREE
 			, CASE WHEN DEPT.ysnTobacco = 1   
-				AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
-				AND TR.dblTrlQty >= 2 -- 2 Can Deal
-			  THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-			  WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
-				AND TR.dblTrlQty >= 2
-			  THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-			  WHEN TR.strTrpPaycode IN ('COUPONS')
-			  THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
-			  ELSE dblTrlUnitPrice END as dblFinalSalesPrice
+					AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer'
+					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+				THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+					WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+					AND (TR.dblTrlQty >= 2	   OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+				THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+					WHEN TR.strTrpPaycode IN ('COUPONS')
+				THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
+					ELSE dblTrlUnitPrice 
+				END as  dblFinalSalesPrice
+
 			, NULL AS intStoreTelephone
 			, '' AS strStoreContactName
 			, '' strStoreContactEmail
@@ -422,17 +424,18 @@ BEGIN TRY
 			, CAST(intTrTickNumPosNum AS NVARCHAR(50)) as strRegisterId
 			, dblTrlQty as intQuantity
 			
-			, CASE WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(ST.intStoreId AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
-													AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
-													AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
-													AND TR.dblTrlQty >= 2 -- 2 Can Deal
-														THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-												WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') AND TR.dblTrlQty >= 2
-													THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty))
-												WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
-													THEN (TR.dblTrlUnitPrice - TR.dblTrpAmt)
-												ELSE dblTrlUnitPrice 
-											  END as dblPrice
+		,CASE WHEN TR.intTrlDeptNumber IN (SELECT intRegisterDepartmentId FROM [dbo].[fnSTRebateDepartment]((CAST(1 AS NVARCHAR(10)))) WHERE ysnTobacco = 1)
+					AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
+					AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
+					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+						THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+				WHEN TR.strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
+					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
+					THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
+				WHEN strTrpPaycode = 'COUPONS' AND strTrlMatchLineTrlPromotionIDPromoType IS NULL AND strTrlUPCEntryType = 'scanned'
+					THEN (TR.dblTrlUnitPrice - TR.dblTrpAmt)
+				ELSE dblTrlUnitPrice 
+				END as dblPrice
 
 
 			, strTrlUPC AS strUpcCode		-- Check digit is included. Since RJ and PM requires check digits
