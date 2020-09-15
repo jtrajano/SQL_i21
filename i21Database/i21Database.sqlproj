@@ -7763,6 +7763,7 @@
     <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
+    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
