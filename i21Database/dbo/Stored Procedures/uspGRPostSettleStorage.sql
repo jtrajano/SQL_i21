@@ -1911,6 +1911,7 @@ BEGIN TRY
 					,[intWeightUOMId]
 					,[intPurchaseTaxGroupId]
 					,[dtmDate]
+					,[dtmVoucherDate]
 				 )
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2083,6 +2084,7 @@ BEGIN TRY
 													END
 													--NULL
 					,[dtmDate]						= @dtmClientPostDate
+					,[dtmVoucherDate]				= @dtmClientPostDate
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
@@ -2223,6 +2225,7 @@ BEGIN TRY
 					,[intWeightUOMId]
 					,[intPurchaseTaxGroupId]
 					,[dtmDate]
+					,[dtmVoucherDate]
 				)
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2273,6 +2276,7 @@ BEGIN TRY
 					,[intWeightUOMId]				= NULL
 					,[intPurchaseTaxGroupId]		= NULL--CASE WHEN @ysnDPOwnedType = 0 THEN NULL ELSE ReceiptCharge.intTaxGroupId END
 					,[dtmDate]						= @dtmClientPostDate
+					,[dtmVoucherDate]				= @dtmClientPostDate
 				FROM tblICInventoryReceiptCharge ReceiptCharge
 				JOIN tblICItem Item 
 					ON Item.intItemId = ReceiptCharge.intChargeId
@@ -2345,6 +2349,7 @@ BEGIN TRY
 					,[dblWeightUnitQty]
 					,[intPurchaseTaxGroupId]
 					,[dtmDate]
+					,[dtmVoucherDate]
 				)
 				SELECT 
 					[intEntityVendorId]		= @EntityId
@@ -2417,6 +2422,7 @@ BEGIN TRY
 				 	,[dblWeightUnitQty]	  	= 1
 					,[intPurchaseTaxGroupId] = NULL
 					,[dtmDate]				= @dtmClientPostDate
+					,[dtmVoucherDate]		= @dtmClientPostDate
 				 FROM tblCTContractCost CC 
 				 JOIN tblCTContractDetail CD 
 					ON CD.intContractDetailId =  CC.intContractDetailId
