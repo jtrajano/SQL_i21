@@ -27,7 +27,7 @@ UPDATE A
 						AND B.ysnPaid = 0
 						AND B.ysnPosted = 1
 						AND B.intBillId > 0
-						AND A.dblPayment <= B.dblAmountDue
+						AND A.dblPayment = B.dblAmountDue
 						THEN 
 							(
 								CASE 
@@ -50,6 +50,9 @@ UPDATE A
 					WHEN 
 						A.dblPayment > B.dblAmountDue
 					THEN 'Overpayment'
+					WHEN 
+						A.dblPayment < B.dblAmountDue
+					THEN 'Underpayment'
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId,
