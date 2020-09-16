@@ -272,7 +272,10 @@ SELECT
 	,[strDocumentNumber]					= @ShipmentNumber 
 	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
+	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0
+											  THEN 0 
+											  ELSE ARSI.[dblQtyOrdered] 
+											  END
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
 	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
 	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
