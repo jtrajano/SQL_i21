@@ -2264,6 +2264,24 @@ BEGIN TRY
 						UPDATE @cbLogSpecific SET dblQty = 0
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
+					ELSE
+					BEGIN
+						-- From Unconfirmed to Open (or when the contract status changed from contract screen)
+						SELECT @ysnMatched = CASE WHEN COUNT(intContractStatusId) = 1 THEN 1 ELSE 0 END
+						FROM
+						(
+							SELECT intContractStatusId
+							FROM @cbLogPrev
+							UNION
+							SELECT intContractStatusId
+							FROM @cbLogSpecific
+						) tbl
+						IF @ysnMatched <> 1
+						BEGIN
+							UPDATE @cbLogSpecific SET dblQty = 0
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						END
+					END
 				END	
 			END
 			ELSE -- With changes with dblQty
