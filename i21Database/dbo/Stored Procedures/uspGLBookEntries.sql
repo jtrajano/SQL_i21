@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE uspGLBookEntries
 	@GLEntries RecapTableType READONLY
 	,@ysnPost AS BIT 
-	,@SkipValidation BIT = 0
+	,@SkipGLValidation BIT = 0
+	,@SkipICValidation BIT = 0
+	
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -11,11 +13,34 @@ SET ANSI_WARNINGS OFF
 --=====================================================================================================================================
 -- 	VALIDATION
 ------------------------------------------------------------------------------------------------------------------------------------
-IF (ISNULL(@SkipValidation,0)  = 0)
-BEGIN 
-	DECLARE @errorCode INT
-	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries, @ysnPost
+DECLARE @errorCode INT
+DECLARE @dtmDateEntered DATETIME = GETDATE()
+
+DECLARE @GLEntries2 AS RecapTableType;
+
+INSERT INTO @GLEntries2
+SELECT * FROM @GLEntries
+
+
+
+UPDATE
+GL SET
+dtmDate = @dtmDateEntered
+FROM
+@GLEntries2 GL
+WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
+AND dtmDate < @dtmDateEntered
+
+
+
+IF (ISNULL(@SkipGLValidation,0)  = 0)
+BEGIN
+	EXEC  @errorCode = dbo.uspGLValidateGLEntries @GLEntries2, @ysnPost
 	IF @errorCode > 0	RETURN @errorCode
+END
+
+IF (ISNULL(@SkipICValidation,0)  = 0)
+BEGIN 
 	
 	EXEC  @errorCode = dbo.uspICValidateICAmountVsGLAmount 
 			@strTransactionId = NULL 
@@ -23,12 +48,13 @@ BEGIN
 			,@dtmDateFrom = NULL 
 			,@dtmDateTo = NULL 
 			,@ysnThrowError = 1
-			,@GLEntries = @GLEntries
+			,@GLEntries = @GLEntries2
 			,@ysnPost = @ysnPost
 
 	IF @errorCode > 0	RETURN @errorCode
 END 
-;
+
+
 --=====================================================================================================================================
 -- 	BOOK THE G/L ENTRIES TO THE tblGLDetail table.
 --------------------------------------------------------------------------------------------------------------------------------------
@@ -38,7 +64,12 @@ BEGIN
 	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
 	tblSMMultiCompany MC JOIN tblSMCompanySetup C ON C.intMultiCompanyId = MC.intMultiCompanyId
 
-	DECLARE @dtmDateEntered DATETIME
+	DECLARE @dtmDateEnteredMin DATETIME = NULL ,@strBatchId NVARCHAR(50)
+
+	SELECT TOP 1 @strBatchId =strBatchId FROM @GLEntries2 
+
+	SELECT @dtmDateEnteredMin = MIN(dtmDateEntered) FROM tblGLDetail WHERE strBatchId =@strBatchId group by strBatchId
+
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
 			,[strBatchId]
@@ -82,6 +113,8 @@ BEGIN
 			,intCommodityId
 			,intSourceEntityId
 			,[intConcurrencyId]
+			,[ysnPostAction]
+			,dtmDateEnteredMin
 	)
 	SELECT 
 			dbo.fnRemoveTimeOnDate([dtmDate])
@@ -100,7 +133,7 @@ BEGIN
 			,[intCurrencyId]
 			,[intCurrencyExchangeRateTypeId]
 			,[dblExchangeRate]
-			,GETDATE()
+			,@dtmDateEntered
 			,dbo.fnRemoveTimeOnDate([dtmTransactionDate])
 			,[strJournalLineDescription]
 			,[intJournalLineNo]
@@ -126,16 +159,17 @@ BEGIN
 			,intCommodityId
 			,intSourceEntityId
 			,[intConcurrencyId]
-	FROM	@GLEntries GLEntries
+			,@ysnPost
+			,ISNULL( @dtmDateEnteredMin , @dtmDateEntered)
+	FROM	@GLEntries2 GLEntries
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 			CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
 			CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0))  CreditForeign
-END
-;
+END;
 
-EXEC uspGLInsertAuditLog @ysnPost, @GLEntries
-EXEC uspGLUpdateTrialBalance @GLEntries
+EXEC uspGLInsertAuditLog @ysnPost, @GLEntries2
+EXEC uspGLUpdateTrialBalance @GLEntries2
 --=====================================================================================================================================
 -- 	UPSERT DATA TO THE SUMMARY TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------
@@ -154,7 +188,7 @@ BEGIN
 						,dblCreditForeign = SUM(CASE WHEN @ysnPost = 1 THEN CreditForeign.Value ELSE DebitForeign.Value * -1 END)
 						,dblDebitUnit = SUM(CASE WHEN @ysnPost = 1 THEN DebitUnit.Value ELSE CreditUnit.Value * -1 END)
 						,dblCreditUnit = SUM(CASE WHEN @ysnPost = 1 THEN CreditUnit.Value ELSE DebitUnit.Value * -1 END)						
-				FROM	@GLEntries GLEntries
+				FROM	@GLEntries2 GLEntries
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0)) Debit
 						CROSS APPLY dbo.fnGetCredit(ISNULL(GLEntries.dblDebit, 0) - ISNULL(GLEntries.dblCredit, 0))  Credit
 						CROSS APPLY dbo.fnGetDebit(ISNULL(GLEntries.dblDebitForeign, 0) - ISNULL(GLEntries.dblCreditForeign, 0)) DebitForeign
@@ -165,7 +199,7 @@ BEGIN
 	) AS Source_Query  
 		ON gl_summary.intAccountId = Source_Query.intAccountId
 		AND gl_summary.strCode = Source_Query.strCode 
-		AND dbo.fnDateEquals(gl_summary.dtmDate, Source_Query.dtmDate) = 1
+		AND FLOOR(CAST(gl_summary.dtmDate AS FLOAT)) = FLOOR(CAST(Source_Query.dtmDate AS FLOAT))
 
 	-- Update an existing gl summary record
 	WHEN MATCHED THEN 
