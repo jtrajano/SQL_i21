@@ -33,6 +33,22 @@ BEGIN
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 
+	DECLARE @tblStatus TABLE
+	(
+		intContractDetailId INT,
+		intContractStatusId INT
+	)
+
+	INSERT INTO @tblStatus(intContractDetailId, intContractStatusId)
+	SELECT intContractDetailId, intContractStatusId
+	FROM
+	(
+		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC), intContractDetailId, intContractStatusId
+		FROM tblCTContractBalanceLog
+		WHERE dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
+	) tbl
+	WHERE intRowNumber = 1
+
 	-- FOR IMPROVEMENT
 	IF ISNULL(@strCallingApp,'') = 'DPR'
 	BEGIN
@@ -201,7 +217,7 @@ BEGIN
 												WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		 
 												ELSE ISNULL(intFutureMonthId,0)		 
 											END
-		AND dtmTransactionDate 			<= @dtmEndDate
+		AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
 		GROUP BY intContractHeaderId
 			,strType
 			,intContractDetailId
@@ -248,7 +264,7 @@ BEGIN
 			,dtmTransactionDate		= MAX(dtmTransactionDate)
 			,intContractHeaderId
 			,strType
-			,intContractDetailId
+			,Stat.intContractDetailId
 			,strDate
 			,strContractType
 			,intCommodityId
@@ -284,6 +300,7 @@ BEGIN
 			,dblCashPriceinCommodityStockUOM 	= CAST (MAX(dblCashPriceinCommodityStockUOM) AS NUMERIC(20,6))
 			,dblAmountinCommodityStockUOM 		= CAST (SUM(dblAmountinCommodityStockUOM) AS NUMERIC(20,6))
 			,strPrintOption
+			,intContractStatusId				= Stat.intContractStatusId
 		FROM
 		(
 			SELECT  intContractBalanceId			=	intContractBalanceLogId
@@ -360,6 +377,7 @@ BEGIN
 			LEFT JOIN tblICUnitMeasure			PUOM		ON PUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId	
 			WHERE CBL.strTransactionType = 'Contract Balance'
 		) tbl
+		INNER JOIN @tblStatus Stat ON tbl.intContractDetailId = Stat.intContractDetailId
 		WHERE intContractTypeId			= CASE WHEN ISNULL(@intContractTypeId ,0) > 0		THEN @intContractTypeId	 	ELSE intContractTypeId		END
 		AND intEntityId			 		= CASE WHEN ISNULL(@intEntityId ,0) > 0				THEN @intEntityId		 	ELSE intEntityId			END
 		AND intCommodityId				= CASE WHEN ISNULL(@IntCommodityId ,0) > 0			THEN @IntCommodityId	 	ELSE intCommodityId	 		END
@@ -372,10 +390,11 @@ BEGIN
 												WHEN ISNULL(@IntFutureMonthId ,0) > 0		THEN @IntFutureMonthId		 
 												ELSE ISNULL(intFutureMonthId,0)		 
 										 END
-		AND dtmTransactionDate 			<= @dtmEndDate
+		AND Stat.intContractStatusId NOT IN (2,3,5,6)
+		AND dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
 		GROUP BY intContractHeaderId
 			,strType
-			,intContractDetailId
+			,Stat.intContractDetailId
 			,strDate
 			,strContractType
 			,intCommodityId
@@ -409,8 +428,9 @@ BEGIN
 			--,dblFuturesinCommodityStockUOM
 			,dblBasisinCommodityStockUOM
 			--,dblCashPriceinCommodityStockUOM
-			--,dblAmountinCommodityStockUOM
+			--,dblAmountinCommodityStockUOM			
 			,strPrintOption
+			,Stat.intContractStatusId
 		HAVING SUM(dblQuantity) > 0	
 	END
 END
