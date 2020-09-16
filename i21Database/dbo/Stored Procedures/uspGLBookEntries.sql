@@ -21,12 +21,15 @@ DECLARE @GLEntries2 AS RecapTableType;
 INSERT INTO @GLEntries2
 SELECT * FROM @GLEntries
 
+
+
 UPDATE
 GL SET
 dtmDate = @dtmDateEntered
 FROM
 @GLEntries2 GL
 WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
+AND dtmDate < @dtmDateEntered
 
 
 
