@@ -135,6 +135,7 @@ BEGIN
 		TOP 1 
 		@strAccountCategory = ac.strAccountCategory
 		,@strItemNo = i.strItemNo
+		,@strAccountCategory = ac.strAccountCategory
 	FROM	
 		tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
 			ON t.intTransactionTypeId = ty.intTransactionTypeId			
@@ -163,7 +164,7 @@ BEGIN
 
 	IF @strAccountCategory IS NOT NULL AND @strItemNo IS NOT NULL AND @ysnThrowError = 1 
 	BEGIN 
-		-- 'Inventory Account is set to <Account Category> for item <Item No>.'
+		-- 'Inventory Account is set to <Category> for item <Item No>.'
 		EXEC uspICRaiseError 80250, @strAccountCategory, @strItemNo
 		RETURN 80250
 	END 
@@ -245,42 +246,42 @@ BEGIN
 			,t.strBatchId
 			,icGLAccount.intInventoryAccountId
 
-		-- Get the Consume Inventory Transactions 
-		INSERT INTO #uspICValidateICAmountVsGLAmount_result (
-			strTransactionType 
-			,strTransactionId
-			,strBatchId
-			,dblICAmount
-			,intAccountId  
-		)
-		SELECT	
-			[strTransactionType] = ty.strName
-			,[strTransactionId] = t.strTransactionId
-			,[strBatchId] = t.strBatchId			
-			,[dblICAmount] = 
-				SUM (
-					-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
-				)
-			,[intAccountId] = icGLAccount.intWIPAccountId
-		FROM	
-			tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
-				ON t.intTransactionTypeId = ty.intTransactionTypeId			
-			INNER JOIN tblICItem i
-				ON i.intItemId = t.intItemId 
-			INNER JOIN @glTransactions gl
-				ON t.strTransactionId = gl.strTransactionId 
-				AND t.strBatchId = gl.strBatchId
-			INNER JOIN @icGLAccounts icGLAccount
-				ON icGLAccount.intItemId = t.intItemId
-				AND icGLAccount.intItemLocationId = t.intItemLocationId
-		WHERE	
-			t.intInTransitSourceLocationId IS NULL 
-			AND ty.strName IN ('Consume', 'Produce')
-		GROUP BY 
-			ty.strName 
-			,t.strTransactionId
-			,t.strBatchId
-			,icGLAccount.intWIPAccountId
+		---- Get the Consume Inventory Transactions 
+		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
+		--	strTransactionType 
+		--	,strTransactionId
+		--	,strBatchId
+		--	,dblICAmount
+		--	,intAccountId  
+		--)
+		--SELECT	
+		--	[strTransactionType] = ty.strName
+		--	,[strTransactionId] = t.strTransactionId
+		--	,[strBatchId] = t.strBatchId			
+		--	,[dblICAmount] = 
+		--		SUM (
+		--			-ROUND(dbo.fnMultiply(t.dblQty, t.dblCost) + ISNULL(t.dblValue, 0), 2)
+		--		)
+		--	,[intAccountId] = icGLAccount.intWIPAccountId
+		--FROM	
+		--	tblICInventoryTransaction t INNER JOIN tblICInventoryTransactionType ty
+		--		ON t.intTransactionTypeId = ty.intTransactionTypeId			
+		--	INNER JOIN tblICItem i
+		--		ON i.intItemId = t.intItemId 
+		--	INNER JOIN @glTransactions gl
+		--		ON t.strTransactionId = gl.strTransactionId 
+		--		AND t.strBatchId = gl.strBatchId
+		--	INNER JOIN @icGLAccounts icGLAccount
+		--		ON icGLAccount.intItemId = t.intItemId
+		--		AND icGLAccount.intItemLocationId = t.intItemLocationId
+		--WHERE	
+		--	t.intInTransitSourceLocationId IS NULL 
+		--	AND ty.strName IN ('Consume', 'Produce')
+		--GROUP BY 
+		--	ty.strName 
+		--	,t.strTransactionId
+		--	,t.strBatchId
+		--	,icGLAccount.intWIPAccountId
 
 		---- Get the Produce Inventory Transactions 
 		--INSERT INTO #uspICValidateICAmountVsGLAmount_result (
@@ -382,8 +383,10 @@ BEGIN
 				AND t.strBatchId = gl.strBatchId					
 		WHERE	
 			(ty.strName = @strTransactionType OR @strTransactionType IS NULL) 
-			AND (dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-			AND (dbo.fnDateLessThanEquals(t.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+			--AND (dbo.fnDateGreaterThanEquals(t.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+			--AND (dbo.fnDateLessThanEquals(t.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+			AND (FLOOR(CAST(t.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+			AND (FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 			AND t.intInTransitSourceLocationId IS NULL 
 		GROUP BY ty.strName 
 	END 
@@ -426,8 +429,10 @@ BEGIN
 				1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
+
 						ELSE 0 
 					END 
 			GROUP BY 				
@@ -487,13 +492,16 @@ BEGIN
 					AND gd.strBatchId = list.strBatchId
 			WHERE 
 				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
-				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				--AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+				--AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 				AND gd.ysnIsUnposted = 0 
 				AND 1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
@@ -559,7 +567,8 @@ BEGIN
 				1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
@@ -622,12 +631,15 @@ BEGIN
 					AND gd.strBatchId = list.strBatchId
 			WHERE 
 				(gd.strTransactionType = @strTransactionType OR @strTransactionType IS NULL) 
-				AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
-				AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				--AND (dbo.fnDateGreaterThanEquals(gd.dtmDate, @dtmDateFrom) = 1 OR @dtmDateFrom IS NULL)
+				--AND (dbo.fnDateLessThanEquals(gd.dtmDate, @dtmDateTo) = 1 OR @dtmDateTo IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) >= FLOOR(CAST(@dtmDateFrom AS FLOAT)) OR @dtmDateFrom IS NULL)
+				AND (FLOOR(CAST(gd.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDateTo AS FLOAT)) OR @dtmDateTo IS NULL)
 				AND 1 = 
 					CASE 
 						WHEN gd.strTransactionType = 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
-						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						--WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory', 'Work In Progress') THEN 1 
+						WHEN gd.strTransactionType <> 'Cost Adjustment' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						WHEN gd.strTransactionType = 'Storage Settlement' AND ac.strAccountCategory IN ('Inventory') THEN 1 
 						ELSE 0 
 					END 
@@ -664,7 +676,54 @@ IF @ysnThrowError = 1
 		HAVING 
 			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)) <> 0 
 	)
-BEGIN 
+BEGIN
+
+	/** for debugging purposes
+	select 
+		't'
+		,t.intInventoryTransactionId
+		,t.strTransactionId
+		,t.strBatchId
+		,t.dtmDate
+		,v = round(dbo.fnMultiply(t.dblQty, t.dblCost) + t.dblValue, 2) 
+		,t.dblQty
+		,t.dblCost
+		,t.dblValue
+		,t.strDescription
+		,t.ysnIsUnposted
+		,t.intTransactionTypeId
+	from 
+		tblICInventoryTransaction t 
+	where 
+		t.strTransactionId = @strTransactionId
+	order by
+		t.intInventoryTransactionId
+	
+	select 
+		'gd'
+		,gd.intJournalLineNo
+		,gd.strTransactionId
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.dblDebit
+		,gd.dblCredit	
+	from tblGLDetail gd 
+	where gd.strTransactionId = @strTransactionId
+	order by gd.intJournalLineNo
+
+	select 
+		'@GLEntries'
+		,gd.intJournalLineNo
+		,gd.strTransactionId
+		,gd.strBatchId
+		,gd.dtmDate
+		,gd.dblDebit
+		,gd.dblCredit	
+	from @GLEntries gd 
+	where gd.strTransactionId = @strTransactionId
+	order by gd.intJournalLineNo
+	**/
+ 
 	DECLARE @difference AS NUMERIC(18, 6) 
 			,@strItemDescription NVARCHAR(500) 
 			,@strAccountDescription NVARCHAR(500)
