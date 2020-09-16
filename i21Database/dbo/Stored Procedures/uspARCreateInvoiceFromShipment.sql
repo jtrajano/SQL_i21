@@ -919,7 +919,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									END
 
 								UPDATE @EntriesForInvoice
-								SET dblQtyOrdered	= @dblOriginalQtyShipped
+								SET dblQtyOrdered	= @dblQuantity
 								  , dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
 								WHERE intId = @intInvoiceEntriesId
@@ -1015,7 +1015,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, strDocumentNumber
 									, strItemDescription
 									, intOrderUOMId
-									, dblQtyOrdered				= @dblOriginalQtyShipped
+									, dblQtyOrdered				= @dblQuantity
 									, intItemUOMId
 									, intPriceUOMId
 									, dblContractPriceUOMQty
