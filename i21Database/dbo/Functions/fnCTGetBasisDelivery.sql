@@ -90,7 +90,7 @@ BEGIN
 		AND tbl.intContractHeaderId = CD.intContractHeaderId
 		AND tbl.intRowId = 1
 	WHERE tbl.intPricingTypeId = 2
-	AND tbl.intContractStatusId = 1
+	AND (tbl.intContractStatusId = 1 or (tbl.intContractStatusId = 5 and (g.strWhereFinalized = 'Destination' or w.strWhereFinalized = 'Destination')))
 
 	INSERT INTO @Transaction
 	(
