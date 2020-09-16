@@ -580,13 +580,13 @@ BEGIN TRY
 				WHEN b.intCounter = 1 AND strPricingType = 'Priced' THEN 'Fully Priced'
 				END as strPricingStatus
 		INTO #tmpPricingStatus
-		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, 1, NULL) a
+		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL) a
 		
 		CROSS APPLY (
 			SELECT *, COUNT(*) as intCounter
 			FROM (
 				SELECT strContractType, strContractNumber, intContractDetailId
-				FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, 1, NULL)
+				FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL)
 				GROUP BY strContractNumber, strPricingType, intContractDetailId, strContractType
 			) t
 			WHERE t.intContractDetailId = a.intContractDetailId
@@ -725,7 +725,6 @@ BEGIN TRY
 					, CBL.intFutureMarketId
 					, CBL.intFutureMonthId
 					, stat.strPricingStatus
-					
 				FROM tblCTContractBalanceLog CBL
 				INNER JOIN tblICCommodity CY ON CBL.intCommodityId = CY.intCommodityId
 				INNER JOIN tblICCommodityUnitMeasure C1 ON C1.intCommodityId = CBL.intCommodityId AND C1.intCommodityId = CBL.intCommodityId AND C1.ysnStockUnit = 1
@@ -765,8 +764,9 @@ BEGIN TRY
 				, intFutureMonthId
 				, strPricingStatus
 				, dblBasis
-			HAVING SUM(dblQuantity) <> 0	
+			HAVING SUM(dblQuantity) > 0	
 		) tbl
+		WHERE intContractStatusId NOT IN (2, 3, 6, 5)
 
 		INSERT INTO @GetContractDetailView (intCommodityUnitMeasureId
 			, strLocationName
