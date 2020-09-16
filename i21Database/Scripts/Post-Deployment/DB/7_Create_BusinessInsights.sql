@@ -57,7 +57,7 @@
 					)
 					VALUES (
 						5, 7, 100, 400, @entityId, 0, 0, 0,	0, 1,	
-						0,	N'Master', N'Customer Aging Chart', N'Chart', N'', N'Customer Aging', N'3D Pie', N'rotate', N'Base', NULL, N'None',
+						0,	N'Master', N'Customer Aging Chart', N'Chart', N'', N'Customer Aging', N'Pie', N'rotate', N'Base', NULL, N'None',
 						N'None', N'', N'', N'select top 5 strCustomerName, intEntityCustomerId, dblTotalDue from vyuARCustomerAging_DashBoard', N'', N'@DATE@', N'@DATE@', N'', N'',	
 						NULL, N'', N'',	N'None', N'', N'', N'',	N'',
 						N'', N'', N'', 0, 0, NULL, NULL, N'20.1.1',	NULL,
@@ -109,7 +109,7 @@
 				BEGIN
 					SELECT @customerAgingChartPanelId = intPanelId FROM tblDBPanel WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
 
-					UPDATE tblDBPanel SET ysnChartLegend = 0 WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
+					UPDATE tblDBPanel SET ysnChartLegend = 0, strChart = 'Pie' WHERE strPanelName = 'Customer Aging Chart' AND ysnSystemPanel = 1
 					UPDATE tblDBPanelColumn SET strFormat = N'Round' WHERE intPanelId = @customerAgingChartPanelId AND strAlignment = 'Series1AxisY'
 					UPDATE tblDBPanelUser SET intSort = 1 WHERE intPanelId = @customerAgingChartPanelId and intPanelTabId = @panelTabId
 				END

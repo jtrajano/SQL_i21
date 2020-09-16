@@ -8569,6 +8569,11 @@
     <Build Include="dbo\Views\vyuARInvoiceGrossMargin.sql" />
     <Build Include="dbo\Views\vyuARCustomerAgingInvoice.sql" />
     <Build Include="dbo\Views\vyuARCustomerAging_Dashboard.sql" />
+    <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPUpdateVoucherPayment.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage945.sql" />
+    <Build Include="dbo\Tables\tblMFEDIStage944.sql" />
+    <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8815,6 +8820,8 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A089.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateKY72A138.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdateOriginDMFor20_1.sql" />
+    <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

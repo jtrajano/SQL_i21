@@ -17,12 +17,22 @@ SET ANSI_WARNINGS OFF
 BEGIN TRY
 
 DECLARE @SavePoint NVARCHAR(32) = 'uspAPUpdateVoucherPayable';
+DECLARE @primaryKeys TABLE(intBillDetailId INT, intVoucherPayableId INT);
 DECLARE @voucherPayables AS VoucherPayable;
 DECLARE @voucherPayableTax AS VoucherDetailTax;
 DECLARE @post BIT = ~@decrease;
 DECLARE @transCount INT = @@TRANCOUNT;
 
-INSERT INTO @voucherPayables(
+MERGE INTO @voucherPayables AS destination
+USING
+(
+	SELECT * FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+	WHERE ysnStage = 1
+) AS SourceData
+ON (1=0)
+WHEN NOT MATCHED THEN
+INSERT 
+(
 	[intBillId]
 	,[intEntityVendorId]                
 	,[intTransactionType]                
@@ -64,7 +74,7 @@ INSERT INTO @voucherPayables(
 	,[intLoadShipmentDetailId]            
 	,[intLoadShipmentCostId]     
 	,[intPaycheckHeaderId]                
-	,[intCustomerStorageId]                
+	,[intCustomerStorageId]        
 	,[intCCSiteDetailId]                
 	,[intInvoiceId]                        
 	,[intBuybackChargeId]                
@@ -99,8 +109,10 @@ INSERT INTO @voucherPayables(
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
 	,[dblDifference]  
+	,[intFreightTermId]
 )
-SELECT
+VALUES
+(	
 	[intBillId]
 	,[intEntityVendorId]                
 	,[intTransactionType]                
@@ -142,7 +154,7 @@ SELECT
 	,[intLoadShipmentDetailId]     
 	,[intLoadShipmentCostId]
 	,[intPaycheckHeaderId]                
-	,[intCustomerStorageId]                
+	,[intCustomerStorageId]   
 	,[intCCSiteDetailId]                
 	,[intInvoiceId]                        
 	,[intBuybackChargeId]                
@@ -177,7 +189,46 @@ SELECT
 	,[dblFranchiseAmount]                
 	,[dblActual]                        
 	,[dblDifference]
-FROM dbo.fnAPCreateVoucherPayableFromDetail(@voucherDetailIds)
+	,[intFreightTermId]
+)
+OUTPUT SourceData.intBillDetailId, inserted.intVoucherPayableId INTO @primaryKeys;
+
+INSERT INTO @voucherPayableTax
+(
+	[intVoucherPayableId]       
+	,[intTaxGroupId]				
+	,[intTaxCodeId]				
+	,[intTaxClassId]				
+	,[strTaxableByOtherTaxes]	
+	,[strCalculationMethod]		
+	,[dblRate]					
+	,[intAccountId]				
+	,[dblTax]					
+	,[dblAdjustedTax]			
+	,[ysnTaxAdjusted]			
+	,[ysnSeparateOnBill]			
+	,[ysnCheckOffTax]			
+	,[ysnTaxExempt]              
+	,[ysnTaxOnly]				
+)
+SELECT
+	B.[intVoucherPayableId]       
+	,A.[intTaxGroupId]				
+	,A.[intTaxCodeId]				
+	,A.[intTaxClassId]				
+	,A.[strTaxableByOtherTaxes]	
+	,A.[strCalculationMethod]		
+	,A.[dblRate]					
+	,A.[intAccountId]				
+	,A.[dblTax]					
+	,A.[dblAdjustedTax]			
+	,A.[ysnTaxAdjusted]			
+	,A.[ysnSeparateOnBill]			
+	,A.[ysnCheckOffTax]			
+	,A.[ysnTaxExempt]              
+	,A.[ysnTaxOnly]
+FROM dbo.fnAPCreateVoucherPayableTaxFromDetail(@voucherDetailIds) A
+INNER JOIN @primaryKeys B ON A.intBillDetailId = B.intBillDetailId
 WHERE ysnStage = 1
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables) RETURN;

@@ -67,36 +67,37 @@ LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = C2.intEntityClassId
 WHERE A.ysnPosted = 0 AND intTransactionType NOT IN (7, 2, 12, 13)  AND A.ysnOrigin = 0 AND B.dblTax != 0
 UNION ALL   
 SELECT  A.dtmDatePaid AS dtmDate,    
-	C.intBillId,   
-	C.strBillId ,
-	CAST(
-			(CASE WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment != 0
-				THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
-						THEN B.dblPayment * -1 ELSE B.dblPayment END)
-				WHEN C.intTransactionType NOT IN (1,2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
-					THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
-				ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,     
-	dblTotal = 0 
+	 C.intBillId,   
+	 C.strBillId ,
+	--  CAST(
+	-- 	 	(CASE WHEN C.intTransactionType NOT IN (1, 2, 14) AND B.dblPayment != 0
+	-- 			THEN (CASE WHEN (E.intBankTransactionTypeId <> 19 OR E.intBankTransactionTypeId <> 116 OR E.intBankTransactionTypeId <> 122 OR E.intBankTransactionTypeId IS NULL)
+	-- 					 THEN B.dblPayment * -1 ELSE B.dblPayment END)
+	-- 			WHEN C.intTransactionType NOT IN (1, 2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
+	-- 				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
+	-- 			ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,    
+	CAST(B.dblPayment  * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblAmountPaid, 
+	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
 	, CAST(CASE 
 				WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblDiscount) > 0 
-				THEN B.dblDiscount * -1 
+				THEN B.dblDiscount --* -1 note: we expect that the discount in 20.1 is already negative  
 			ELSE 
 			(
 				--Honor only the discount if full payment, consider only for voucher
 				CASE 
-					WHEN B.dblAmountDue = 0 AND E.ysnCheckVoid = 0
+					WHEN B.dblAmountDue = 0 AND ISNULL(E.ysnCheckVoid,0) = 0
 					THEN B.dblDiscount 
 				ELSE 0
 				END
 			)
-			END * A.dblExchangeRate AS DECIMAL(18,2)) AS dblDiscount
+			END * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblDiscount
 	, CAST(CASE 
 			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
-			THEN B.dblInterest * -1 
+			THEN B.dblInterest --* -1 
 			ELSE B.dblInterest
-			END * A.dblExchangeRate AS DECIMAL(18,2)) AS dblInterest 
+			END * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
@@ -109,16 +110,17 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	, 3 AS intCount
 	-- ,'Payment' AS [Info]
 FROM dbo.tblAPPayment  A
-LEFT JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
-LEFT JOIN dbo.tblAPBillArchive C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
-LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
-	ON A.[intEntityVendorId] = D.[intEntityId]
-LEFT JOIN dbo.tblGLAccount F ON  A.intAccountId = F.intAccountId		
+ INNER JOIN dbo.tblAPPaymentDetail B ON A.intPaymentId = B.intPaymentId
+ INNER JOIN dbo.tblAPBillArchive C ON ISNULL(B.intBillId,B.intOrigBillId) = C.intBillId
+ LEFT JOIN dbo.fnAPGetVoucherAverageRate() avgRate ON C.intBillId = avgRate.intBillId --handled payment for origin old payment import
+ LEFT JOIN (dbo.tblAPVendor D INNER JOIN dbo.tblEMEntity D2 ON D.[intEntityId] = D2.intEntityId)
+ 	ON A.[intEntityVendorId] = D.[intEntityId]
+LEFT JOIN dbo.tblGLAccount F ON  B.intAccountId = F.intAccountId		
 LEFT JOIN dbo.tblCMBankTransaction E
 	ON A.strPaymentRecordNum = E.strTransactionId
 LEFT JOIN dbo.tblEMEntityClass EC ON EC.intEntityClassId = D2.intEntityClassId		
-WHERE A.ysnPosted = 1  
-	AND C.ysnPosted = 0
+ WHERE A.ysnPosted = 1  
+	AND C.ysnPosted = 1
 	AND C.intTransactionType NOT IN (2, 12, 13)
 	AND A.ysnPrepay = 0 --EXCLUDE THE PREPAYMENT
 UNION ALL --THIS WILL REMOVE THE DELETED DATA WHEN THERE IS NO DATE FILTER

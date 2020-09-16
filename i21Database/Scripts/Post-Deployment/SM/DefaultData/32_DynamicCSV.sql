@@ -2030,7 +2030,6 @@ UPDATE tblSMCSVDynamicImport SET
 			
 
 			
-
 			DECLARE @entityId INT
 			DECLARE @termsId INT
 			DECLARE @shipviaId INT
@@ -2059,71 +2058,50 @@ UPDATE tblSMCSVDynamicImport SET
 
 
 
-			IF(TRY_PARSE(@entity_no AS INT) IS NULL)
+			
+			IF NOT EXISTS(Select TOP 1 1 from tblARCustomer Where strCustomerNumber = @entity_no)
 			BEGIN
 				SET @IsValid = 0
-				SET @ValidationMessage = @ValidationMessage + '' ''+''Entity No should be numeric''
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Customer No :''+@entity_no+'' is not Exist''
 			END
-			ELSE 
+			ELSE
 			BEGIN
-				SET @entityId = CONVERT(INT,@entity_no)
-				IF NOT EXISTS(Select TOP 1 1 from tblEMEntity Where intEntityId = @entityId)
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Entity No :''+@entityId+'' is not Exist''
-				END
+				SELECT  TOP 1  @entityId = intEntityId from tblARCustomer Where strCustomerNumber = @entity_no
 			END
+			
 
 
 			
 			
-			IF(@terms = '''')
+			IF(@terms = '''') 
 			BEGIN
-				SET @termsId = NULL
+				SET @termsId = NULL	
+			END
+			ELSE IF NOT EXISTS(Select TOP 1 1 from tblSMTerm Where strTerm = @terms)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Terms :''+@terms+'' is not Exist''
 			END
 			ELSE
 			BEGIN
-				IF(TRY_PARSE(@terms AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Terms should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @termsId = CONVERT(INT,@terms)
-					IF NOT EXISTS(Select TOP 1 1 from tblSMTerm Where intTermID = @termsId)
-					BEGIN
-						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Terms Id :''+@termsId+'' is not Exist''
-					END
-				END
+				Select TOP 1 @termsId = intTermID from tblSMTerm Where strTerm = @terms
 			END
+			
 
-		
-
-			IF(@shipvia = '''')
+			IF(@shipvia = '''') 
 			BEGIN
-				SET @shipviaId = NULL
+				SET @shipviaId = NULL	
+			END
+			ELSE IF NOT EXISTS(Select TOP 1 1 from tblSMShipVia Where strShipVia = @shipvia)
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Shipvia :''+@shipvia+'' is not Exist''
 			END
 			ELSE
 			BEGIN
-				IF(TRY_PARSE(@shipvia AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Ship Via should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @shipviaId = CONVERT(INT,@shipvia)
-
-					IF NOT EXISTS(Select TOP 1 1 from tblSMShipVia Where intEntityId = @shipviaId)
-					BEGIN
-						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Terms Id :''+@shipviaId+'' is not Exist''
-					END
-				END
+				Select TOP 1 @shipviaId = intEntityId from tblSMShipVia Where strShipVia = @shipvia
 			END
-
+			
 			IF(@warehouse = '''')
 			BEGIN
 				SET @warehouseId = NULL
@@ -2155,91 +2133,79 @@ UPDATE tblSMCSVDynamicImport SET
 			BEGIN
 				SET @freighttermId = NULL
 			END
-			ELSE
+			ELSE IF NOT EXISTS(Select TOP 1 1 from tblSMFreightTerms Where strFreightTerm = @freight_term )
 			BEGIN
-				IF(TRY_PARSE(@freight_term AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Freight Term Id should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @freighttermId = CONVERT(INT,@freight_term)
-					IF NOT EXISTS(Select TOP 1 1 from tblSMFreightTerms Where intFreightTermId = @freighttermId )
-					BEGIN
-						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Freight Term Id :''+@freighttermId+'' is not Exist''
-					END
-				END
-			END
-
-
-			IF(@country_tax_code = '''')
-			BEGIN
-				SET @countrytaxcodeId = NULL
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Freight Term Id :''+@freighttermId+'' is not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @countrytaxcodeId = CONVERT(INT,@country_tax_code)
+				Select TOP 1 @freighttermId = intFreightTermId from tblSMFreightTerms Where strFreightTerm = @freight_term
 			END
+
 
 			IF(@tax_group = '''')
 			BEGIN
 				SET @taxgroupId = NULL
 			END
-			ELSE
+			ELSE IF NOT EXISTS(Select TOP 1 1 from tblSMTaxGroup Where strTaxGroup = @tax_group  )
 			BEGIN
-				IF(TRY_PARSE(@tax_group  AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group Id should be numeric''
-				END
-				ELSE 
-				BEGIN	
-					SET @taxgroupId = CONVERT(INT,@tax_group)
-					IF NOT EXISTS(Select TOP 1 1 from tblSMTaxGroup Where intTaxGroupId = @taxgroupId )
-					BEGIN
-						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group Id :''+@taxgroupId+'' is not Exist''
-					END
-				END
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group:''+@tax_group+'' is not Exist''
 			END
+			BEGIN
+				Select TOP 1 @taxgroupId = intTaxGroupId from tblSMTaxGroup Where strTaxGroup = @tax_group 
+			END
+			
 
 			IF(@tax_class = '''')
 			BEGIN
 				SET @taxclassId = NULL
 			END
-			ELSE
+			ELSE IF NOT EXISTS(Select TOP 1 1 from tblSMTaxClass Where strTaxClass = @tax_class )
 			BEGIN
-				IF(TRY_PARSE(@tax_class  AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Group Id should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @taxclassId = CONVERT(INT,@tax_class)
-					IF NOT EXISTS(Select TOP 1 1 from tblSMTaxClass Where intTaxClassId = @taxclassId )
-					BEGIN
-						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Class Id :''+@taxclassId+'' is not Exist''
-					END
-				END
-			END
-
-			IF(@active = '''')
-			BEGIN
-				SET @isactive = NULL
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''Tax Class Id :''+@tax_class+'' is not Exist''
 			END
 			ELSE
 			BEGIN
-				SET @isactive = CONVERT(BIT,@active)
+				Select TOP 1 @taxclassId = intTaxClassId from tblSMTaxClass Where strTaxClass = @tax_class
+			END
+		
+
+			IF(@active = ''Yes'' OR @active = ''No'')
+			BEGIN
+				SET @isactive = CONVERT(BIT,1)
+			END
+			ELSE
+			BEGIN
+				SET @isactive = CONVERT(BIT,0)
 			END
 
-			SET @longtitudeNo = CAST(@longtitude AS NUMERIC(18,6))
 
-			SET @latitudeNo = CAST(@latitude AS NUMERIC(18,6))
+
 			
+			IF(TRY_PARSE(@longtitude AS NUMERIC(18,6)) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''longtitude should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @longtitudeNo = CAST(@longtitude AS NUMERIC(18,6))
+			END
+		
+			
+			IF(TRY_PARSE(@latitude AS NUMERIC(18,6)) IS NULL )
+			BEGIN
+				SET @IsValid = 0
+				SET @ValidationMessage = @ValidationMessage + '' ''+''latitude should be numeric''
+			END
+			ELSE 
+			BEGIN
+				SET @latitudeNo = CAST(@latitude AS NUMERIC(18,6))
+			END
+		
 
 			IF(@default_currency = '''')
 			BEGIN
@@ -2247,20 +2213,15 @@ UPDATE tblSMCSVDynamicImport SET
 			END
 			ELSE
 			BEGIN
-				IF(TRY_PARSE(@default_currency AS INT) IS NULL )
-				BEGIN
-					SET @IsValid = 0
-					SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id should be numeric''
-				END
-				ELSE 
-				BEGIN
-					SET @defaultcurrencyId = CONVERT(INT,@default_currency)
-					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where intCurrencyID = @defaultcurrencyId )
+					IF NOT EXISTS(Select TOP 1 1 from tblSMCurrency Where strCurrency = @default_currency )
 					BEGIN
 						SET @IsValid = 0
-						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency Id :''+@defaultcurrencyId+'' is not Exist''
+						SET @ValidationMessage = @ValidationMessage + '' ''+''Default Currency :''+@default_currency+'' is not Exist''
 					END
-				END
+					ELSE
+					BEGIN
+						Select TOP 1 defaultcurrencyId = intCurrencyID from tblSMCurrency Where strCurrency = @default_currency
+					END
 			END
 
 			IF(@vendor_link = '''')
@@ -2274,7 +2235,7 @@ UPDATE tblSMCSVDynamicImport SET
 
 			IF(@farm_acres = '''')
 			BEGIN
-				SET @farmacresNo = NULL
+				SET @farmacresNo = 0
 			END
 			ELSE
 			BEGIN

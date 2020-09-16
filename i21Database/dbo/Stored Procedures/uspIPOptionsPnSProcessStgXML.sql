@@ -384,6 +384,7 @@ BEGIN TRY
 			UPDATE tblRKOptionsMatchPnSHeaderStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intOptionsMatchPnSHeaderStageId = @intOptionsMatchPnSHeaderStageId
 
 			IF @intTransactionCount = 0
@@ -403,6 +404,7 @@ BEGIN TRY
 			UPDATE tblRKOptionsMatchPnSHeaderStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intOptionsMatchPnSHeaderStageId = @intOptionsMatchPnSHeaderStageId
 		END CATCH
 

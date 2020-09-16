@@ -512,6 +512,21 @@ BEGIN
 					WHERE intLoadHeaderId = @intLoadHeaderId
 					AND strReceiptLine = @strNonBlendReceiptLink
 
+					-- GET PRICE
+					DECLARE @dblNonBlendUnit NUMERIC(18,6) = 0,
+						@dblNonBlendPrice NUMERIC(18,6) = 0
+					SET @dblNonBlendUnit = CASE WHEN @strNonBlendGrossNet = 'Gross' THEN @dblNonBlendDropGross ELSE @dblNonBlendDropNet END
+ 					
+					EXEC [uspARGetItemPrice] 
+						@TransactionDate = @dtmPullDate
+						,@ItemId = @intNonBlendDropProductId 
+						,@CustomerId = @intCustomerId   
+						,@LocationId = @intCustomerCompanyLocationId    
+						,@Quantity = @dblNonBlendUnit    
+						,@ShipToLocationId=@intShipToId	
+						,@InvoiceType=N'Transport Delivery'		
+						,@Price = @dblNonBlendPrice OUTPUT	
+
 					INSERT INTO tblTRLoadDistributionDetail(intLoadDistributionHeaderId, 
 						strBillOfLading, 
 						strReceiptLink,
@@ -528,7 +543,7 @@ BEGIN
 						@strNonBlendReceiptLink ,
 						@intNonBlendDropProductId,
 						CASE WHEN @strNonBlendGrossNet = 'Gross' THEN @dblNonBlendDropGross ELSE @dblNonBlendDropNet END,
-						null,
+						@dblNonBlendPrice,
 						@dblFreightRateDistribution,
 						@dblSurchargeDistribution,
 						@intNonBlendTaxGroupId,

@@ -4188,6 +4188,8 @@ BEGIN TRY
 
 				UPDATE tblCTContractStage
 				SET strFeedStatus = 'Processed'
+					,strMessage='Success'
+					,intStatusId = 1
 				WHERE intContractStageId = @intContractStageId
 
 				IF @intTransactionCount = 0
@@ -4207,6 +4209,7 @@ BEGIN TRY
 				UPDATE tblCTContractStage
 				SET strFeedStatus = 'Failed'
 					,strMessage = @ErrMsg
+					,intStatusId = 2
 				WHERE intContractStageId = @intContractStageId
 			END CATCH
 		END

@@ -124,8 +124,15 @@ FROM (
 	LEFT JOIN tblSMCity SDC ON SDC.intCityId = CDS.intDestinationCityId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
+	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
+					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
+					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
+					WHERE intRecordId IN (CDP.intContractHeaderId, CDS.intContractHeaderId)
+					AND strApprovalStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications', '')
+				) APRV
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
 		AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
+		AND ISNULL(APRV.ysnUnapproved, 0) = 0
 
 	UNION ALL
 
@@ -260,8 +267,14 @@ FROM (
 	LEFT JOIN tblSMCity SDC ON SDC.intCityId = CDS.intDestinationCityId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
+	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
+					FROM tblSMTransaction TRN INNER JOIN tblSMScreen SCR 
+					ON TRN.intScreenId = SCR.intScreenId AND SCR.strNamespace IN ('ContractManagement.view.Contract','ContractManagement.view.Amendments' )
+					WHERE intRecordId IN (CDP.intContractHeaderId, CDS.intContractHeaderId)
+					AND strApprovalStatus NOT IN ('Approved', 'No Need for Approval', 'Approved with Modifications', '')
+				) APRV
 	WHERE ((AD.dblPAllocatedQty - IsNull(LD.dblPShippedQuantity, 0) + IsNull(PL.dblLotPickedQty, 0)) > 0)
 		AND ((AD.dblSAllocatedQty - IsNull(LD.dblSShippedQuantity, 0) - IsNull(PLS.dblSalePickedQty, 0)) > 0)
-
+		AND ISNULL(APRV.ysnUnapproved, 0) = 0
 	  ) tbl 
 	WHERE dblAvailableAllocationQty > 0

@@ -70,7 +70,7 @@ SELECT
 											WHERE _chk.intStoreId = vst.intStoreId
 												AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
 												OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
-											ORDER BY _chk.dtmCheckoutDate DESC), 0)
+											ORDER BY _chk.dtmCheckoutDate DESC , _chk.intShiftNo DESC), 0)
 										
 											- 
 										
@@ -89,7 +89,7 @@ SELECT
 																		WHERE _chk.intStoreId = vst.intStoreId
 																			AND ((_chk.dtmCheckoutDate < chk.dtmCheckoutDate) 
 																			OR  (_chk.dtmCheckoutDate = chk.dtmCheckoutDate  AND _chk.intShiftNo < chk.intShiftNo))
-																		ORDER BY _chk.dtmCheckoutDate DESC), 0)
+																		ORDER BY _chk.dtmCheckoutDate DESC, _chk.intShiftNo DESC), 0)
 										
 																		- 
 										

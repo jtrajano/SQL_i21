@@ -709,6 +709,7 @@ BEGIN TRY
 			UPDATE tblRKCoverageEntryStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intCoverageEntryStageId = @intCoverageEntryStageId
 
 			IF @intTransactionCount = 0
@@ -728,6 +729,7 @@ BEGIN TRY
 			UPDATE tblRKCoverageEntryStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intCoverageEntryStageId = @intCoverageEntryStageId
 		END CATCH
 

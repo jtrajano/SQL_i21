@@ -36,4 +36,4 @@ CROSS APPLY
 ) payDetails
 WHERE 
 	B.intTransactionType IN (3)
-AND payDetails.intCount > 1
+AND payDetails.intCount >= 1

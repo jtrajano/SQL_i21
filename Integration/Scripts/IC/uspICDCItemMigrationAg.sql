@@ -181,11 +181,12 @@ WHERE NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE strItemNo COLLATE SQL_Latin
 
 --all items are imported with type 'Inventory'
 --update items Inventory type from Category table
-update	tblICItem 
-set		strType = C.strInventoryType
-from	tblICCategory C
-where	C.intCategoryId = tblICItem.intCategoryId
-		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
+-- In latest versions, changing type is not allowed.
+-- update	tblICItem 
+-- set		strType = C.strInventoryType
+-- from	tblICCategory C
+-- where	C.intCategoryId = tblICItem.intCategoryId
+-- 		AND RTRIM(LTRIM(ISNULL(C.strInventoryType, ''))) <> '' 
 
 --====Delete obsolete items. It is not required in i21 as history is not imported===
 --Delete from tblICItem where strStatus = 'Discontinued'
@@ -756,3 +757,24 @@ WHERE i.intIngredientTag IS NULL
 UPDATE tblICItemUOM SET ysnStockUnit = 0 WHERE dblUnitQty <> 1 AND ysnStockUnit = 1
 UPDATE tblICItemUOM SET ysnStockUnit = 1 WHERE ysnStockUnit = 0 AND dblUnitQty = 1
 UPDATE tblICItemLocation SET intCostingMethod = 1 WHERE intCostingMethod IS NULL
+
+-- Fix Items with multiple stock Units
+DECLARE @ItemsWithMultipleStockUnits TABLE (intItemId INT, intItemUOMId INT NULL)
+INSERT INTO @ItemsWithMultipleStockUnits(intItemId)
+SELECT u.intItemId--, i.strItemNo
+FROM tblICItemUOM u
+	INNER JOIN tblICItem i ON i.intItemId = u.intItemId
+WHERE u.ysnStockUnit = 1
+GROUP BY u.intItemId--, i.strItemNo
+HAVING COUNT(*) > 1
+
+update u
+SET u.intItemUOMId = i.intItemUOMId
+FROM @ItemsWithMultipleStockUnits u
+INNER JOIN tblICItemUOM i ON i.intItemId = u.intItemId
+
+UPDATE u
+SET u.ysnStockUnit = 0
+FROM tblICItemUOM u
+INNER JOIN @ItemsWithMultipleStockUnits m ON m.intItemId = u.intItemId
+	AND m.intItemUOMId <> u.intItemUOMId

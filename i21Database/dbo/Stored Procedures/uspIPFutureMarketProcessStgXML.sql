@@ -119,6 +119,7 @@ BEGIN TRY
 			UPDATE tblRKFutureMarketStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intFutureMarketStageId = @intFutureMarketStageId
 
 			-- Audit Log
@@ -164,6 +165,7 @@ BEGIN TRY
 			UPDATE tblRKFutureMarketStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intFutureMarketStageId = @intFutureMarketStageId
 		END CATCH
 

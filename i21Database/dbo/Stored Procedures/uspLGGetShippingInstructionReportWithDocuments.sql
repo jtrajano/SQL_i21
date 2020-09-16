@@ -194,7 +194,7 @@ BEGIN
 		,strCompanyCountry = @strCountry 
 		,strCompanyPhone = @strPhone
 		,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
-		,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + LEFT(DATENAME(MONTH,getdate()),3) + ' ' + DATENAME(yyyy,getdate())
+		,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + DATENAME(MONTH,getdate()) + ' ' + DATENAME(yyyy,getdate())
 		,strShipmentPeriod
 		,strDestinationCity
 		,strMarkingInstruction
@@ -211,7 +211,7 @@ BEGIN
 			,L.intPurchaseSale
 			,L.dtmBLDate
 			,L.dtmDeliveredDate
-			,CH.strContractNumber
+			,strContractNumber = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber ELSE CH.strContractNumber END
 			,CH.strCustomerContract
 			,Item.strItemNo
 			,Item.strDescription AS strItemDescription
@@ -243,7 +243,7 @@ BEGIN
 			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
 			,strDestinationPort = ISNULL(L.strDestinationPort, DestinationPort.strCity)
 			,strDestinationPortVatNo = (SELECT TOP 1 strVAT FROM tblSMCity WHERE strCity = ISNULL(L.strDestinationPort, DestinationPort.strCity))
-			,strShippingLine = SLEntity.strName
+			,strShippingLine = CASE WHEN (ISNULL(SLEL.strCheckPayeeName, '') <> '') THEN SLEL.strCheckPayeeName ELSE SLEntity.strName END
 			,L.strServiceContractNumber
 			,strServiceContractOwner = SLSC.strOwner
 			,SLSC.strFreightClause
@@ -472,6 +472,8 @@ BEGIN
 		JOIN tblICItem Item ON Item.intItemId = LD.intItemId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN intPContractDetailId ELSE intSContractDetailId END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
+		LEFT JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
 		LEFT JOIN tblLGLoad SI ON SI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblEMEntity Producer ON Producer.intEntityId = CH.intProducerId
 		LEFT JOIN tblEMEntityToContact PEC ON PEC.intEntityId = Producer.intEntityId AND PEC.ysnDefaultContact = 1
@@ -489,11 +491,12 @@ BEGIN
 		LEFT JOIN tblEMEntityToContact CEC ON CEC.intEntityId = Customer.intEntityId
 		LEFT JOIN tblEMEntity CETC ON CETC.intEntityId = CEC.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = SLEntity.intEntityId AND SLEL.ysnDefaultLocation = 1
 		LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
 		LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
 		LEFT JOIN tblEMEntity DocPres ON DocPres.intEntityId = L.intDocPresentationId
-		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
+		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CASE WHEN L.intPurchaseSale = 3 THEN PCD.intShipperId ELSE CD.intShipperId END 
 		LEFT JOIN tblCMBank Bank ON Bank.intBankId = L.intDocPresentationId
 		LEFT JOIN tblLGLoadNotifyParties FLNP ON L.intLoadId = FLNP.intLoadId AND FLNP.strNotifyOrConsignee = 'First Notify'
 		LEFT JOIN tblLGLoadNotifyParties SLNP ON L.intLoadId = SLNP.intLoadId AND SLNP.strNotifyOrConsignee = 'Second Notify'

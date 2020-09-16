@@ -645,6 +645,7 @@ BEGIN TRY
 			UPDATE tblRKDailyAveragePriceStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 
 			IF @intTransactionCount = 0
@@ -664,6 +665,7 @@ BEGIN TRY
 			UPDATE tblRKDailyAveragePriceStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intDailyAveragePriceStageId = @intDailyAveragePriceStageId
 		END CATCH
 

@@ -488,6 +488,7 @@ BEGIN TRY
 			UPDATE tblRKFuturesSettlementPriceStage
 			SET strFeedStatus = 'Processed'
 				,strMessage = 'Success'
+				,intStatusId = 1
 			WHERE intFutureSettlementPriceStageId = @intFutureSettlementPriceStageId
 
 			-- Audit Log
@@ -543,6 +544,7 @@ BEGIN TRY
 			UPDATE tblRKFuturesSettlementPriceStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intFutureSettlementPriceStageId = @intFutureSettlementPriceStageId
 		END CATCH
 

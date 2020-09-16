@@ -20,6 +20,7 @@ SELECT LG.intLoadId
 																		WHEN LG.dblPCashPrice IS NULL OR LG.dblPCashPrice = 0
 																			THEN [dbo].[fnTRGetRackPrice](LG.dtmScheduledDate, SP.intSupplyPointId, LG.intItemId)
 																		END, 0)
+							WHEN LG.strType = 'Outbound' AND ISNULL(LG.dblSCashPrice, 0) = 0 THEN ItemS.dblReceiveLastCost 
 							ELSE ISNULL(LG.dblSCashPrice, 0) END
 	, strTerminalName = CASE WHEN (LG.strType != 'Outbound') THEN LG.strVendor
 								ELSE NULL END
@@ -91,4 +92,5 @@ LEFT JOIN tblEMEntity ShipVia ON ShipVia.intEntityId = Config.intShipViaId
 LEFT JOIN tblTRSupplyPoint SP ON SP.intEntityLocationId = LG.intVendorEntityLocationId AND SP.intEntityVendorId = LG.intVendorEntityId
 LEFT JOIN vyuARCustomer Customer ON Customer.intEntityId = LG.intCustomerEntityId
 LEFT JOIN vyuEMEntity Salesperson ON Salesperson.intEntityId = Customer.intSalespersonId AND Salesperson.strType = 'Salesperson'
+LEFT JOIN vyuICGetItemStock ItemS ON ItemS.intItemId = LG.intItemId AND ItemS.intLocationId = LG.intSCompanyLocationId
 WHERE ISNULL(LG.ysnDispatched, 0) = 1

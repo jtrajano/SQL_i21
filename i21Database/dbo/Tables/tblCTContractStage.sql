@@ -24,5 +24,6 @@
 	strAmendmentApprovalXML NVARCHAR(MAX)COLLATE Latin1_General_CI_AS
 	,intTransactionId int
 	,intCompanyId int, 
-    ysnMailSent BIT NULL
+    ysnMailSent BIT NULL,
+	intStatusId int
 )

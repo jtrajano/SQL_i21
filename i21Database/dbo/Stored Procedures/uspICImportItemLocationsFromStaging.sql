@@ -199,10 +199,13 @@ FROM tblICImportStagingItemLocation s
 	) cm
 	LEFT OUTER JOIN tblICUnitMeasure ru ON LOWER(ru.strUnitMeasure) = LTRIM(RTRIM(LOWER(s.strPurchaseUOM)))
 	LEFT OUTER JOIN tblICItemUOM ri ON ri.intUnitMeasureId = ru.intUnitMeasureId
+		AND ri.intItemId = i.intItemId
 	LEFT OUTER JOIN tblICUnitMeasure iu ON LOWER(iu.strUnitMeasure) = LTRIM(RTRIM(LOWER(s.strSaleUOM)))
 	LEFT OUTER JOIN tblICItemUOM rs ON rs.intUnitMeasureId = iu.intUnitMeasureId
+		AND rs.intItemId = i.intItemId
 	LEFT OUTER JOIN tblICUnitMeasure g ON LOWER(g.strUnitMeasure) = LTRIM(RTRIM(LOWER(s.strGrossNetUOM)))
 	LEFT OUTER JOIN tblICItemUOM gs ON gs.intUnitMeasureId = g.intUnitMeasureId
+		AND gs.intItemId = i.intItemId
 WHERE s.strImportIdentifier = @strIdentifier
 	
 CREATE TABLE #output (

@@ -86,6 +86,8 @@ BEGIN TRY
 					,intStorageLocationId
 				FROM tblICLot WITH (NOLOCK)
 				WHERE dblQty > 0
+					AND intSubLocationId IS NOT NULL
+					AND intStorageLocationId IS NOT NULL
 
 				SELECT @intMinRecordLotId = MIN(intLotRecordId)
 				FROM @tblLotTable

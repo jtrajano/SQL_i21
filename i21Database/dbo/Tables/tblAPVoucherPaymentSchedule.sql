@@ -10,6 +10,7 @@
 	[ysnPaid] BIT NOT NULL DEFAULT(0),
 	[ysnScheduleDiscountOverride] BIT NOT NULL DEFAULT(0),
 	[ysnReadyForPayment] BIT NOT NULL DEFAULT(0),
+	[ysnInPayment] BIT NOT NULL DEFAULT 0,
 	[intConcurrencyId] INT NOT NULL DEFAULT 0,
 	CONSTRAINT [FK_tblAPVoucherPaymentSchedule_tblAPBill] FOREIGN KEY ([intBillId]) REFERENCES [dbo].[tblAPBill] ([intBillId]) ON DELETE CASCADE
 )

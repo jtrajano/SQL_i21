@@ -297,7 +297,7 @@ BEGIN
 				FROM tblSMCity
 				WHERE strCity = L.strDestinationPort
 				) AS strDestinationPortVatNo
-			,SLEntity.strName AS strShippingLine
+			,strShippingLine = CASE WHEN (ISNULL(SLEL.strCheckPayeeName, '') <> '') THEN SLEL.strCheckPayeeName ELSE SLEntity.strName END
 			,L.strServiceContractNumber
 			,L.strPackingDescription
 			,L.intNumberOfContainers
@@ -922,6 +922,7 @@ BEGIN
 		LEFT JOIN tblEMEntityToContact CEC ON CEC.intEntityId = Customer.intEntityId AND CEC.ysnDefaultContact = 1
 		LEFT JOIN tblEMEntity CETC ON CETC.intEntityId = CEC.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = SLEntity.intEntityId AND SLEL.ysnDefaultLocation = 1
 		LEFT JOIN tblLGContainerType ContType ON ContType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN tblEMEntity ForAgent ON ForAgent.intEntityId = L.intForwardingAgentEntityId
 		LEFT JOIN tblEMEntity BLDraft ON BLDraft.intEntityId = L.intBLDraftToBeSentId
