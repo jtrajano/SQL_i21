@@ -1957,8 +1957,8 @@ BEGIN
 					,[dblReportingRate]
 					,[dblForeignRate]
 					,[strRateType]
-					,[intSourceEntityId]
-					,[intCommodityId]
+					--,[intSourceEntityId]
+					--,[intCommodityId]
 					)
 				EXEC dbo.uspICCreateGLEntries 
 					@strBatchId
