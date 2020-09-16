@@ -1,9 +1,10 @@
 ﻿GO
-
 IF  (SELECT TOP 1 ysnUsed FROM ##tblOriginMod WHERE strPrefix = 'AP') = 1
 BEGIN
-IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCMBankAccount')
-	DROP VIEW vyuCMBankAccount
+	DROP TRIGGER IF EXISTS dbo.trg_insert_vyuCMBankAccount;
+	DROP TRIGGER IF EXISTS dbo.trg_delete_vyuCMBankAccount;
+	DROP TRIGGER IF EXISTS dbo.trg_insert_vyuCMBankAccount;
+	DROP VIEW IF EXISTS dbo.vyuCMBankAccount;
 
 	EXEC('CREATE VIEW [dbo].vyuCMBankAccount
 		WITH SCHEMABINDING
@@ -105,6 +106,8 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 				,i21.strCbkNo
 				,i21.intConcurrencyId
 				,i21.intPayToDown
+				,i21.intResponsibleEntityId
+				,strResponsibleEntity = E.strName
 				-- The following fields are from the origin system		
 				,apcbk_comment = origin.apcbk_comment COLLATE Latin1_General_CI_AS			-- CHAR (30) 
 				,apcbk_password =  ISNULL(origin.apcbk_password, '''') COLLATE Latin1_General_CI_AS	-- CHAR (16)
@@ -136,6 +139,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 						) tbl),0) AS bit)
 		FROM	dbo.tblCMBankAccount i21 LEFT JOIN dbo.apcbkmst_origin origin
 					ON i21.strCbkNo = origin.apcbk_no COLLATE Latin1_General_CI_AS
+					LEFT JOIN dbo.tblEMEntity E on E.intEntityId = i21.intResponsibleEntityId
 					')
 		
 
@@ -320,6 +324,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intConcurrencyId
 					,strCbkNo
 					,intPayToDown
+					,intResponsibleEntityId
 			)
 			OUTPUT 	inserted.intBankAccountId
 			SELECT	intBankId							= i.intBankId
@@ -403,6 +408,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,intResponsibleEntityId				= i.intResponsibleEntityId
 			FROM	inserted i 
 
 			CLOSE SYMMETRIC KEY i21EncryptionSymKeyByASym
@@ -604,6 +610,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 					,intConcurrencyId					= i.intConcurrencyId
 					,strCbkNo							= i.strCbkNo
 					,intPayToDown						= i.intPayToDown
+					,intResponsibleEntityId				= i.intResponsibleEntityId
 			FROM	inserted i INNER JOIN dbo.tblCMBankAccount B
 						ON i.intBankAccountId = B.intBankAccountId
 
@@ -736,5 +743,7 @@ IF EXISTS(select top 1 1 from INFORMATION_SCHEMA.VIEWS where TABLE_NAME = 'vyuCM
 
 		END
 		')
+
+
 END
 GO
