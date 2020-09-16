@@ -575,6 +575,17 @@ BEGIN TRY
 	FOR JSON AUTO)
 	*/
 
+	--REQUESTED RETURN DATA FOR INTEGRATING MODULES
+	INSERT INTO #returnData
+	SELECT 	B.intBillId, 
+			BD.intBillDetailId, 
+			BD.intPriceFixationDetailId,
+			BD.intInventoryReceiptItemId,
+			BD.dblQtyReceived
+	FROM tblAPBill B
+	INNER JOIN @voucherIds IDS ON IDS.intId = B.intBillId
+	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+
 END TRY
 BEGIN CATCH
 	DECLARE @ErrorSeverity INT,
