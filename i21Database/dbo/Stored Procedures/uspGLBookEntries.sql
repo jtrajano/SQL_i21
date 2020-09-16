@@ -11,6 +11,15 @@ SET ANSI_WARNINGS OFF
 --=====================================================================================================================================
 -- 	VALIDATION
 ------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @dtmDateEntered DATETIME = GETDATE()
+DECLARE @GLEntries2 AS RecapTableType;
+
+INSERT INTO @GLEntries2 SELECT * FROM @GLEntries
+
+UPDATE GL SET dtmDate = @dtmDateEntered FROM @GLEntries2 GL
+WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
+AND dtmDate < @dtmDateEntered
+
 IF (ISNULL(@SkipValidation,0)  = 0)
 BEGIN 
 	DECLARE @errorCode INT
@@ -38,7 +47,6 @@ BEGIN
 	SELECT TOP 1 @intMultCompanyId = C.intMultiCompanyId FROM 
 	tblSMMultiCompany MC JOIN tblSMCompanySetup C ON C.intMultiCompanyId = MC.intMultiCompanyId
 
-	DECLARE @dtmDateEntered DATETIME
 	INSERT INTO dbo.tblGLDetail (
 			[dtmDate]
 			,[strBatchId]
