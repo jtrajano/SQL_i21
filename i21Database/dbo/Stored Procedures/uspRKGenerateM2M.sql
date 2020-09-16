@@ -581,13 +581,13 @@ BEGIN TRY
 				END as strPricingStatus
 		INTO #tmpPricingStatus
 		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL) a
-		
 		CROSS APPLY (
 			SELECT *, COUNT(*) as intCounter
 			FROM (
 				SELECT strContractType, strContractNumber, intContractDetailId
 				FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL)
 				GROUP BY strContractNumber, strPricingType, intContractDetailId, strContractType
+				HAVING SUM(dblQty) > 0
 			) t
 			WHERE t.intContractDetailId = a.intContractDetailId
 			GROUP BY strContractNumber, intContractDetailId, strContractType
