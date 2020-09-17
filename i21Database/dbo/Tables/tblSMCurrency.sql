@@ -22,6 +22,13 @@ GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_tblSMCurrency_intMainCurrencyId] ON [tblSMCurrency]([intMainCurrencyId] ASC) WHERE [intMainCurrencyId] IS NOT NULL;
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblSMCurrency_intCurrencyID]
+	ON [dbo].[tblSMCurrency]([intCurrencyID] ASC)
+	INCLUDE (strCurrency); 
+
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity field',
     @level0type = N'SCHEMA',
