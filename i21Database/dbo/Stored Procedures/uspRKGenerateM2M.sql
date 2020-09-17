@@ -83,7 +83,18 @@ BEGIN TRY
 	IF OBJECT_ID('tempdb..#ContractStatus') IS NOT NULL
 		DROP TABLE #ContractStatus
 
-		
+	IF (ISNULL(@intM2MHeaderId, 0) = 0) SET @intM2MHeaderId = NULL
+	IF (ISNULL(@intCommodityId, 0) = 0) SET @intCommodityId = NULL
+	IF (ISNULL(@intM2MTypeId, 0) = 0) SET @intM2MTypeId = NULL
+	IF (ISNULL(@intM2MBasisId, 0) = 0) SET @intM2MBasisId = NULL
+	IF (ISNULL(@intFutureSettlementPriceId, 0) = 0) SET @intFutureSettlementPriceId = NULL
+	IF (ISNULL(@intQuantityUOMId, 0) = 0) SET @intQuantityUOMId = NULL
+	IF (ISNULL(@intPriceUOMId, 0) = 0) SET @intPriceUOMId = NULL
+	IF (ISNULL(@intCurrencyId, 0) = 0) SET @intCurrencyId = NULL
+	IF (ISNULL(@intLocationId, 0) = 0) SET @intLocationId = NULL
+	IF (ISNULL(@intMarketZoneId, 0) = 0) SET @intMarketZoneId = NULL
+	IF (ISNULL(@intCompanyId, 0) = 0) SET @intCompanyId = NULL
+	IF (ISNULL(@intUserId, 0) = 0) SET @intUserId = NULL
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
