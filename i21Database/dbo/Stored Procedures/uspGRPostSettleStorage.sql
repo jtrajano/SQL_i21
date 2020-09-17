@@ -2812,7 +2812,10 @@ BEGIN TRY
 					--			ELSE 1 
 					--		END) = 1
 
-					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+					IF(SELECT ISNULL(dblSpotUnits,0) FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId) > 0
+					BEGIN
+						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
+					END
 
 
 					--this will update the cost
