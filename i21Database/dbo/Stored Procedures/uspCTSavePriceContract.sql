@@ -82,24 +82,31 @@ BEGIN TRY
 					@dtmFixationDate		=	FD.dtmFixationDate,
 
 					@intContractHeaderId	=	PF.intContractHeaderId,
-					@intContractDetailId	=	PF.intContractDetailId,
+					--@intContractDetailId	=	PF.intContractDetailId,
+					@intContractDetailId = isnull(PF.intContractDetailId,TS1.intContractDetailId), 
 
 					@intCommodityId			=	CH.intCommodityId,					
 					@intTraderId			=	CH.intSalespersonId,
 					@strBuySell				=	CASE WHEN CH.intContractTypeId = 1 THEN 'Sell' ELSE 'Buy' END,	
 
-					@intCurrencyId			=	TS.intCurrencyId,
-					@intBookId				=	TS.intBookId,
-					@intSubBookId			=	TS.intSubBookId,
-					@intLocationId			=	TS.intCompanyLocationId,
+					-- @intCurrencyId			=	TS.intCurrencyId,
+					-- @intBookId				=	TS.intBookId,
+					-- @intSubBookId			=	TS.intSubBookId,
+					-- @intLocationId			=	TS.intCompanyLocationId,
+  
+				     @intCurrencyId   = (case when PF.intContractDetailId is null then TS1.intCurrencyId else TS.intCurrencyId end),
+				     @intBookId    = (case when PF.intContractDetailId is null then TS1.intBookId else TS.intBookId end),
+				     @intSubBookId   = (case when PF.intContractDetailId is null then TS1.intSubBookId else TS.intSubBookId end),
+				     @intLocationId   = (case when PF.intContractDetailId is null then TS1.intCompanyLocationId else TS.intCompanyLocationId end),
+
 					@ysnAA					=	FD.ysnAA,
 					@dblHedgeNoOfLots		= 	FD.dblHedgeNoOfLots
 						
 			FROM	tblCTPriceFixationDetail	FD
 			JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
 			JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId 
-   			join 	tblCTContractDetail 		TS 	on 	TS.intContractDetailId 	= 	PF.intContractDetailId
-			--CROSS	APPLY	fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) TS
+		    left join  tblCTContractDetail   TS  on  TS.intContractDetailId  =  PF.intContractDetailId  
+		    CROSS APPLY fnCTGetTopOneSequence(PF.intContractHeaderId,isnull(PF.intContractDetailId,0)) TS1 
 			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
 			SELECT @ysnFreezed = ysnFreezed FROM tblRKFutOptTransaction WHERE intFutOptTransactionId = ISNULL(@intFutOptTransactionId,0)
