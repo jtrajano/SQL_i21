@@ -8,8 +8,10 @@ AS
 			,CH.ysnLoad
 			,CD.intNoOfLoad
 			,CD.ysnUseFXPrice
-			,CD.intCurrencyId
-			,AD.intSeqCurrencyId
+			,CD.intCurrencyId			
+			,intSeqCurrencyId = 
+				-- This part replicates how fnCTGetAdditionalColumnForDetailView retries the intSeqCurrencyId.
+				COALESCE(seqCurrency1.intCurrencyId, seqCurrency2.intCurrencyId, CD.intCurrencyId)
 			,CU.intMainCurrencyId
 			,CD.dblQuantity AS	dblDetailQuantity
 			,CAST(ISNULL(CD.intNoOfLoad,0) - ISNULL(CD.dblBalanceLoad,0) AS INT) AS	intLoadReceived
@@ -27,7 +29,11 @@ AS
 			,PT.intPricingTypeId
 	FROM	tblCTContractDetail					CD	
 	CROSS APPLY tblCTCompanyPreference			CP
-	CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+	/** 
+		DO NOT USE fnCTGetAdditionalColumnForDetailView. It will slow the performance of this sql view. 	
+	**/
+	--CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD 
+
 	LEFT JOIN	tblCTContractHeader			    CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId				
 	LEFT JOIN	tblCTPricingType				PT	ON	PT.intPricingTypeId			=	CD.intPricingTypeId					
 	LEFT JOIN	tblICItemUOM					IU	ON	IU.intItemUOMId				=	CD.intItemUOMId				
@@ -41,4 +47,25 @@ AS
 	LEFT JOIN	tblSMPurchasingGroup			PG	ON	PG.intPurchasingGroupId		=	CD.intPurchasingGroupId
 	LEFT JOIN	tblCTContractBasis				CB	ON	CB.intContractBasisId		=	CH.intContractBasisId
 	LEFT JOIN	tblSMCurrency					CU	ON	CU.intCurrencyID			=	CD.intCurrencyId
-	
+	OUTER APPLY (
+		SELECT intCurrencyId = ER.intFromCurrencyId 
+		FROM tblSMCurrencyExchangeRate ER
+		WHERE 
+			ER.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+			AND ER.intToCurrencyId = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId)	
+			AND CD.ysnUseFXPrice = 1 
+			AND CD.intCurrencyExchangeRateId IS NOT NULL 
+			AND CD.dblRate IS NOT NULL 
+			AND CD.intFXPriceUOMId IS NOT NULL
+	) seqCurrency1
+	OUTER APPLY (
+		SELECT intCurrencyId = intToCurrencyId 
+		FROM tblSMCurrencyExchangeRate ER
+		WHERE 
+			ER.intCurrencyExchangeRateId = CD.intCurrencyExchangeRateId 
+			AND ER.intFromCurrencyId = ISNULL(CU.intMainCurrencyId,CD.intCurrencyId)	
+			AND CD.ysnUseFXPrice = 1 
+			AND CD.intCurrencyExchangeRateId IS NOT NULL 
+			AND CD.dblRate IS NOT NULL 
+			AND CD.intFXPriceUOMId IS NOT NULL
+	) seqCurrency2
