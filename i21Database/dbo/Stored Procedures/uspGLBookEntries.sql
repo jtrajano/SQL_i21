@@ -27,7 +27,7 @@ dtmDate = @dtmDateEntered
 FROM
 @GLEntries2 GL
 WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
-
+AND dtmDate < @dtmDateEntered
 
 
 IF (ISNULL(@SkipGLValidation,0)  = 0)
