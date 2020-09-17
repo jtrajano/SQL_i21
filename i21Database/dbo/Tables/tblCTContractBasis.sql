@@ -15,3 +15,11 @@
 	CONSTRAINT [FK_tblCTContractBasis_tblCTInvoiceType_intInvoiceTypeId] FOREIGN KEY ([intInvoiceTypeId]) REFERENCES [tblCTInvoiceType]([intInvoiceTypeId]),
 	CONSTRAINT [FK_tblCTContractBasis_tblCTPosition_intPositionId] FOREIGN KEY ([intPositionId]) REFERENCES [tblCTPosition]([intPositionId])
 )
+
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractBasis_intContractBasisId]
+	ON [dbo].[tblCTContractBasis]([intContractBasisId] ASC)
+	INCLUDE (strContractBasis, ysnDefault); 
+
+GO

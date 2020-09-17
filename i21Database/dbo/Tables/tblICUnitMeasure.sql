@@ -35,7 +35,11 @@ Type the overview for the table here.
 	--	ON [dbo].[tblICUnitMeasure]([intUnitMeasureId] ASC)
 	--	INCLUDE (strUnitMeasure, strUnitType, intDecimalPlaces); 
 	--GO
-
+	
+	CREATE NONCLUSTERED INDEX [IX_tblICUnitMeasure_strUnitMeasure]
+		ON [dbo].[tblICUnitMeasure]([strUnitMeasure] ASC)
+		INCLUDE (intUnitMeasureId, strUnitType, intDecimalPlaces); 
+	
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
