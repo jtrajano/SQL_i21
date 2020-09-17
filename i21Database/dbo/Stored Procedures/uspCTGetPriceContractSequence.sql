@@ -117,8 +117,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 		UNION ALL
 
 		SELECT 	CH.intContractHeaderId,
-			    --CAST (NULL AS INT)    AS intContractDetailId,   
-			    CD.intContractDetailId    AS intContractDetailId,  
+			    CAST (NULL AS INT)    AS intContractDetailId,   
+			    --CD.intContractDetailId    AS intContractDetailId,  
 				CH.intFutureMarketId			AS	intOriginalFutureMarketId,
 				CH.intFutureMonthId				AS	intOriginalFutureMonthId,
 				CAST (NULL AS NUMERIC(18,6))	AS	dblOriginalBasis,
