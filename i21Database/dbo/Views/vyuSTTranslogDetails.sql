@@ -14,6 +14,9 @@ FROM
 	   , TR.dblTrlUnitPrice
 	   , TR.dblTrlLineTot
 	   , TR.intTermMsgSN
+	   , TR.dtmDate
+	   , TR.intCashierPosNum
+	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
 	   , USec.intEntityId
 	FROM tblSTTranslogRebates TR
 	JOIN tblSTCheckoutHeader CH 
