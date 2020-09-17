@@ -8791,6 +8791,11 @@
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMigrateM2M.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerSpecialPricing.sql" />
+    <Build Include="dbo\Views\vyuMBILExportItem.sql" />
+    <Build Include="dbo\Views\vyuMBILExportContractExport.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCategoryTaxExemption.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
