@@ -61,11 +61,11 @@ BEGIN TRY
 	SET		@dblBalanceToUpdate		=	@dblQuantityToUpdate * -1
 
 	EXEC	uspCTUpdateItemContractSequenceBalance
-		@intContractDetailId	=	@intItemContractDetailId,
-		@dblQuantityToUpdate	=	@dblBalanceToUpdate,
-		@intUserId				=	@intUserId,
-		@intExternalId			=	@intExternalId,
-		@strScreenName			=	@strScreenName
+			@intItemContractDetailId	=	@intItemContractDetailId,
+			@dblQuantityToUpdate		=	@dblBalanceToUpdate,
+			@intUserId					=	@intUserId,
+			@intExternalId				=	@intExternalId,
+			@strScreenName				=	@strScreenName
 	
 	/*Code here for History*/
 	/*
