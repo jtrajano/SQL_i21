@@ -582,11 +582,13 @@ BEGIN
 							,@dtmDate DATETIME
 							,@intOwnerShipId INT							
 							,@strRKError VARCHAR(MAX)
-							,@ysnDPtoOtherStorage BIT
+							--,@ysnDPtoOtherStorage BIT
+							,@ysnFromDS BIT
 
 						--Check if Transfer is DP To Other Storage (Disregard Risk Error)
 						SELECT 
-							@ysnDPtoOtherStorage = CASE WHEN FromStorage.intStorageTypeId = 2 AND ToStorage.intStorageTypeId != 2 THEN 1 ELSE 0 END
+							-- @ysnDPtoOtherStorage = CASE WHEN FromStorage.intStorageTypeId = 2 AND ToStorage.intStorageTypeId != 2 THEN 1 ELSE 0 END,
+							@ysnFromDS = CASE WHEN FromStorage.intDeliverySheetId IS NOT NULL THEN 1 ELSE 0 END
 						FROM tblGRTransferStorageReference SR
 						INNER JOIN tblGRCustomerStorage FromStorage
 							ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
@@ -621,12 +623,25 @@ BEGIN
 							ON ICC.intCommodityId = I.intCommodityId
 						INNER JOIN tblICItemLocation IL
 							ON IL.intItemLocationId = ITP.intItemLocationId
-						WHERE intId = @cursorId
+						WHERE intId = @cursorId						
+
+						--IF @ysnDPtoOtherStorage = 0
+						SELECT @strRKError = CASE 
+											WHEN @dblBasisCost IS NULL AND @dblSettlementPrice > 0 THEN 'Basis in Risk Management is not available.'
+											WHEN @dblSettlementPrice IS NULL AND @dblBasisCost > 0 THEN 'Settlement Price in Risk Management is not available.'
+											WHEN @dblBasisCost IS NULL AND @dblSettlementPrice IS NULL THEN 'Basis and Settlement Price in Risk Management are not available.'
+											-- WHEN @dblSettlementPrice = 0 THEN 'Settlement Price is 0. Please update its price in Risk Management.'
+										END
+
+						IF @strRKError IS NOT NULL
+						BEGIN
+							RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+						END
 
 						--update the Basis and Settlement Price of the new customer storage
 						UPDATE CS
-						SET dblBasis = ISNULL(@dblBasisCost,0)
-							,dblSettlementPrice = ISNULL(@dblSettlementPrice,0)
+						SET dblBasis = @dblBasisCost
+							,dblSettlementPrice = @dblSettlementPrice
 						FROM tblGRCustomerStorage CS
 						INNER JOIN tblGRTransferStorageReference SR
 							ON SR.intToCustomerStorageId = CS.intCustomerStorageId
@@ -636,18 +651,6 @@ BEGIN
 							ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
 								AND ST.ysnDPOwnedType = 1
 						WHERE IC.intId = @cursorId
-
-						IF @ysnDPtoOtherStorage = 0
-						SELECT @strRKError = CASE 
-												WHEN ISNULL(@dblBasisCost,0) = 0 AND ISNULL(@dblSettlementPrice,0) = 0 THEN 'Basis and Settlement Price' 
-												WHEN  ISNULL(@dblBasisCost,0) = 0 THEN 'Basis Price' 
-												WHEN ISNULL(@dblSettlementPrice,0) = 0 THEN 'Settlement Price' 
-											END +  ' in risk management is not available.'
-
-						IF @strRKError IS NOT NULL
-						BEGIN
-							RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
-						END
 
 						SET @dblCost =ISNULL(@dblSettlementPrice,0) + ISNULL(@dblBasisCost,0)
 						set @dblOriginalCost = @dblCost
