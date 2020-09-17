@@ -29,23 +29,25 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+--SELECT * FROM tblRKM2MHeader
+
 --DECLARE
---@intM2MHeaderId INT = 3
---  , @strRecordName NVARCHAR(50) = 'M2M-69'
---	, @intCommodityId INT = 1
+--@intM2MHeaderId INT = 73
+--  , @strRecordName NVARCHAR(50) = 'M2M-73'
+--	, @intCommodityId INT = 1009
 --	, @intM2MTypeId INT = 1
---	, @intM2MBasisId INT = 44
---	, @intFutureSettlementPriceId INT = 1
---	, @intQuantityUOMId INT = 1
---	, @intPriceUOMId INT = 1
+--	, @intM2MBasisId INT = NULL
+--	, @intFutureSettlementPriceId INT = 762
+--	, @intQuantityUOMId INT = 10
+--	, @intPriceUOMId INT = 10
 --	, @intCurrencyId INT = 3
---	, @dtmEndDate DATETIME = '2020-09-09 00:00:00.000'
+--	, @dtmEndDate DATETIME = '2020-09-16 00:00:00.000'
 --	, @strRateType NVARCHAR(200) = 'Contract'
 --	, @intLocationId INT = NULL
 --	, @intMarketZoneId INT = NULL
 --	, @ysnByProducer BIT = 0
 --	, @intCompanyId INT = NULL
---	, @dtmPostDate DATETIME = '2020-09-09 00:00:00.000'
+--	, @dtmPostDate DATETIME = '2020-09-16 00:00:00.000'
 --	, @dtmReverseDate DATETIME = NULL
 --	, @dtmLastReversalDate DATETIME = NULL
 --	, @intUserId INT = NULL
@@ -76,6 +78,10 @@ BEGIN TRY
 		DROP TABLE #tblContractFuture
 	IF OBJECT_ID('tempdb..#tmpPricingStatus') IS NOT NULL
 		DROP TABLE #tmpPricingStatus
+	IF OBJECT_ID('tempdb..#CBBucket') IS NOT NULL
+		DROP TABLE #CBBucket
+	IF OBJECT_ID('tempdb..#ContractStatus') IS NOT NULL
+		DROP TABLE #ContractStatus
 
 		
 
@@ -573,6 +579,19 @@ BEGIN TRY
 			, intFutureMonthId INT
 			, strPricingStatus NVARCHAR(50))
 
+		SELECT *
+		INTO #CBBucket
+		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL)
+
+		SELECT intContractDetailId, intContractStatusId
+		INTO #ContractStatus
+		FROM (
+			SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreateDate DESC)
+				, intContractDetailId
+				, intContractStatusId
+			FROM #CBBucket
+		) tbl
+		WHERE intRowNumber = 1
 		
 		SELECT a.intContractDetailId, a.strContractNumber
 			, CASE WHEN b.intCounter > 1 THEN 'Partially Priced'
@@ -580,12 +599,12 @@ BEGIN TRY
 				WHEN b.intCounter = 1 AND strPricingType = 'Priced' THEN 'Fully Priced'
 				END as strPricingStatus
 		INTO #tmpPricingStatus
-		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL) a
+		FROM #CBBucket a
 		CROSS APPLY (
 			SELECT *, COUNT(*) as intCounter
 			FROM (
 				SELECT strContractType, strContractNumber, intContractDetailId
-				FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL)
+				FROM #CBBucket
 				GROUP BY strContractNumber, strPricingType, intContractDetailId, strContractType
 				HAVING SUM(dblQty) > 0
 			) t
@@ -594,7 +613,6 @@ BEGIN TRY
 		) b
 		GROUP BY a.intContractDetailId, a.strContractNumber, strPricingType, a.strContractType, b.intCounter
 		HAVING SUM(dblQty) > 0
-		
 
 		INSERT INTO @ContractBalance (intRowNum
 			, strCommodityCode
@@ -628,7 +646,7 @@ BEGIN TRY
 			, intFutureMarketId
 			, intFutureMonthId
 			, strPricingStatus)
-		SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmTransactionDate DESC) intRowNum
+		SELECT ROW_NUMBER() OVER (PARTITION BY tbl.intContractDetailId ORDER BY dtmTransactionDate DESC) intRowNum
 			, strCommodityCode
 			, intCommodityId
 			, intContractHeaderId
@@ -647,7 +665,7 @@ BEGIN TRY
 			, strContractType
 			, strPricingType
 			, intCommodityUnitMeasureId
-			, intContractDetailId
+			, tbl.intContractDetailId
 			, intContractStatusId
 			, intEntityId
 			, intQtyCurrencyId
@@ -661,7 +679,7 @@ BEGIN TRY
 			, intFutureMonthId
 			, strPricingStatus
 		FROM (
-				SELECT dtmTransactionDate = MAX(dtmTransactionDate)
+			SELECT dtmTransactionDate = MAX(dtmTransactionDate)
 				, strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
@@ -681,7 +699,6 @@ BEGIN TRY
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
 				, intContractDetailId
-				, intContractStatusId
 				, intEntityId
 				, intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
@@ -716,7 +733,6 @@ BEGIN TRY
 					, CBL.intLocationId
 					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, PT.strPricingType
-					, CBL.intContractStatusId
 					, CBL.intEntityId
 					, CBL.intQtyCurrencyId
 					, CBL.intItemId
@@ -752,7 +768,6 @@ BEGIN TRY
 				, strContractType
 				, strPricingType
 				, intContractDetailId
-				, intContractStatusId
 				, intEntityId
 				, intQtyCurrencyId
 				, strContractType
@@ -766,7 +781,8 @@ BEGIN TRY
 				, dblBasis
 			HAVING SUM(dblQuantity) > 0	
 		) tbl
-		WHERE intContractStatusId NOT IN (2, 3, 6, 5)
+		JOIN #ContractStatus cs ON cs.intContractDetailId = tbl.intContractDetailId
+		WHERE cs.intContractStatusId NOT IN (2, 3, 6, 5)
 
 		INSERT INTO @GetContractDetailView (intCommodityUnitMeasureId
 			, strLocationName
