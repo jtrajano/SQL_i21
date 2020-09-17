@@ -509,6 +509,23 @@ BEGIN
 			)
 		) payDetails
 		WHERE  A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
+
+		--DO NOT ALLOW TO POST PAYMENT WITH DIFFERENT AMOUNT PAID AND PAYMENT DETAILS TOTAL
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
+		SELECT 
+			'Amount paid is not equal to the selected payments.',
+			'Payable',
+			P.strPaymentRecordNum,
+			P.intPaymentId
+		FROM tblAPPayment P
+		OUTER APPLY (
+			SELECT SUM(dblPayment) dblPayment
+			FROM tblAPPaymentDetail PD
+			WHERE PD.intPaymentId = P.intPaymentId
+		) TP
+		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
+		AND P.dblAmountPaid <> TP.dblPayment
+
 	END
 	ELSE
 	BEGIN
