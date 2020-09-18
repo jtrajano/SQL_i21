@@ -4250,9 +4250,16 @@ BEGIN TRY
 				, @strUnrealizedGainOnInventoryIOSId NVARCHAR(250)
 				, @strUnrealizedLossOnInventoryIOSId NVARCHAR(250)
 
+			DECLARE @GLLocationId INT
+			SET @GLLocationId = @intLocationId
+			IF (ISNULL(@GLLocationId, 0) = 0)
+			BEGIN
+				SELECT @GLLocationId = intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @intUserId
+			END
+
 			INSERT INTO @GLAccounts
 			EXEC uspRKGetGLAccountsForPosting @intCommodityId = @intCommodityId
-				, @intLocationId = @intLocationId
+				, @intLocationId = @GLLocationId
 
 			SELECT @intUnrealizedGainOnBasisId = intAccountId
 				, @strUnrealizedGainOnBasisId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
@@ -4500,7 +4507,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4532,7 +4539,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4564,7 +4571,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4596,7 +4603,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4628,7 +4635,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4660,7 +4667,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4692,7 +4699,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4723,7 +4730,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4754,7 +4761,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4785,7 +4792,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4816,7 +4823,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction WHERE intM2MHeaderId = @intM2MHeaderId
 				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
@@ -4846,7 +4853,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4877,7 +4884,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4908,7 +4915,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4940,7 +4947,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4971,7 +4978,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -5030,7 +5037,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 				, t.dblPrice
 			FROM @Result t
@@ -5060,7 +5067,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 				, t.dblPrice
 			FROM @Result t
