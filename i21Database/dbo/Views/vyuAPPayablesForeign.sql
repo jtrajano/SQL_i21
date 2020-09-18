@@ -177,7 +177,7 @@ FROM (
 		(    
 		 --TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE    
 			--USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT    
-		 (((C2.dblTotal) / C.dblTotal) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)    
+		 (((C2.dblTotal) / ISNULL(NULLIF(C.dblTotal,0),1)) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)    
 		)    
 		) AS dblAmountPaid,     
 	  dblTotal = 0     
@@ -199,7 +199,7 @@ FROM (
 	   END)     
 	   *    
 	   (    
-		(((C2.dblTotal) / C.dblTotal) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)    
+		(((C2.dblTotal) / ISNULL(NULLIF(C.dblTotal,0),1)) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)    
 	   )    
 	   ) AS dblDiscount    
 	 , (    
@@ -210,7 +210,7 @@ FROM (
 	   END)    
 	   *    
 	   (    
-		(((C2.dblTotal) / C.dblTotal) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)    
+		(((C2.dblTotal) / ISNULL(NULLIF(C.dblTotal,0),1)) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)    
 	   )    
 	   ) AS dblInterest     
 	 , dblPrepaidAmount = 0     
@@ -309,7 +309,7 @@ FROM (
 		(    
 		 --TO CORRECTLY CALCULATE THE EXCHANGE RATE ON PARTIAL PAYMENT IF EACH VOUCHER DETAIL HAVE DIFFERENT RATE    
 			--USE THE PERCENTAGE OF DETAIL TO TOTAL OF VOUCHER THEN MULTIPLE TO PAYMENT    
-		 (((ISNULL(C3.dblAdjustedTax,C3.dblTax)) / C.dblTotal) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)    
+		 (((ISNULL(C3.dblAdjustedTax,C3.dblTax)) / ISNULL(NULLIF(C.dblTotal,0),1)) * B.dblPayment) * ISNULL(NULLIF(C2.dblRate,0),1)    
 		)    
 		) AS dblAmountPaid,     
 	  dblTotal = 0     
@@ -331,7 +331,7 @@ FROM (
 	   END)     
 	   *    
 	   (    
-		(((ISNULL(C3.dblAdjustedTax,C3.dblTax)) / C.dblTotal) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)    
+		(((ISNULL(C3.dblAdjustedTax,C3.dblTax)) / ISNULL(NULLIF(C.dblTotal,0),1)) * B.dblDiscount) * ISNULL(NULLIF(C2.dblRate,0),1)    
 	   )    
 	   ) AS dblDiscount    
 	 , (    
@@ -342,7 +342,7 @@ FROM (
 	   END)    
 	   *    
 	   (    
-		((ISNULL(C3.dblAdjustedTax,C3.dblTax) / C.dblTotal) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)    
+		((ISNULL(C3.dblAdjustedTax,C3.dblTax) / ISNULL(NULLIF(C.dblTotal,0),1)) * B.dblInterest) * ISNULL(NULLIF(C2.dblRate,0),1)    
 	   )    
 	   ) AS dblInterest     
 	 , dblPrepaidAmount = 0     
