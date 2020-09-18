@@ -8796,6 +8796,7 @@
     <Build Include="dbo\Views\vyuMBILExportContractExport.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
     <Build Include="dbo\Views\vyuMBILExportCategoryTaxExemption.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailStrauss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
