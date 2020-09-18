@@ -8848,6 +8848,7 @@
     <Build Include="dbo\Tables\tblCFImportNetworkTaxRefResult.sql" />
     <Build Include="dbo\Tables\tblCFNetworkTaxRefStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspCFImportNetworkTaxRef.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailStrauss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
