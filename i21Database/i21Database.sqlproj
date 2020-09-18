@@ -8793,6 +8793,7 @@
 <Build Include="dbo\Tables\tblRKRebuildRTSLog.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailStrauss.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
