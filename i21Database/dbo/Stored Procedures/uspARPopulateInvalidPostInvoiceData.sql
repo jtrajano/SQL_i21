@@ -23,14 +23,17 @@ IF @Recap = @ZeroBit
 
 IF @Post = @OneBit
 BEGIN
-    DECLARE @InvoiceIds [InvoiceId]
-	DECLARE @PostInvoiceDataFromIntegration AS [InvoicePostingTable]
-	DECLARE @ItemsForCosting [ItemCostingTableType]
+    DECLARE @InvoiceIds 						[InvoiceId]
+	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
+	DECLARE @ItemsForContracts					[InvoicePostingTable]
+	DECLARE @ItemsForCosting 					[ItemCostingTableType]
+	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
+	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
+	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
-	DECLARE @ItemsForInTransitCosting [ItemInTransitCostingTableType]
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]
-	DECLARE @ItemsForStoragePosting [ItemCostingTableType]
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting]
+	EXEC [dbo].[uspARPopulateContractDetails]
 	
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2101,6 +2104,59 @@ BEGIN
 		,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @OneBit)
+
+
+	--Contract Schedule/Balance Validation
+	INSERT INTO @ItemsForContracts (
+		intInvoiceId
+		, intInvoiceDetailId	
+		, intEntityId
+		, intUserId
+		, intContractDetailId
+		, intContractHeaderId
+		, dtmDate
+		, dblQuantity
+		, dblQtyShipped
+		, strInvoiceNumber
+		, strTransactionType
+		, intItemId
+		, strItemNo
+		, strBatchId
+	)
+	SELECT intInvoiceId			= intInvoiceId
+		, intInvoiceDetailId	= intInvoiceDetailId
+		, intEntityId			= intEntityId
+		, intUserId				= intUserId
+		, intContractDetailId	= intContractDetailId
+		, intContractHeaderId	= intContractHeaderId
+		, dtmDate				= dtmDate
+		, dblQuantity			= dblQuantity
+		, dblQtyShipped			= dblQuantity
+		, strInvoiceNumber		= strInvoiceNumber
+		, strTransactionType	= strTransactionType
+		, intItemId				= intItemId
+		, strItemNo				= strItemNo
+		, strBatchId			= strBatchId
+	FROM #ARItemsForContracts
+	WHERE strType = 'Contract Balance'
+
+	INSERT INTO #ARInvalidInvoiceData (
+		  [intInvoiceId]
+		, [strInvoiceNumber]
+		, [strTransactionType]
+		, [intInvoiceDetailId]
+		, [intItemId]
+		, [strBatchId]
+		, [strPostingError]
+	)
+	SELECT [intInvoiceId]
+		, [strInvoiceNumber]
+		, [strTransactionType]
+		, [intInvoiceDetailId]
+		, [intItemId]
+		, [strBatchId]
+		, [strPostingError]
+	FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
 END
 
 IF @Post = @ZeroBit
