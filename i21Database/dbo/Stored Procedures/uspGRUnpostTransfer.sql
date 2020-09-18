@@ -287,6 +287,24 @@ BEGIN
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
 						DECLARE @strBatchId AS NVARCHAR(40);
+						DECLARE @ysnFromDS AS BIT
+
+						--Check if Transfer is DP To Other Storage (Disregard Risk Error)
+						SELECT 
+							@ysnFromDS = CASE WHEN FromStorage.intDeliverySheetId IS NOT NULL THEN 1 ELSE 0 END
+						FROM tblGRTransferStorageReference SR
+						INNER JOIN tblGRCustomerStorage FromStorage
+							ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
+						INNER JOIN tblGRStorageType FromType
+							ON FromType.intStorageScheduleTypeId = FromStorage.intStorageTypeId
+						INNER JOIN tblGRCustomerStorage ToStorage
+							ON ToStorage.intCustomerStorageId = SR.intToCustomerStorageId
+						INNER JOIN tblGRStorageType ToType
+							ON ToType.intStorageScheduleTypeId = ToStorage.intStorageTypeId
+						INNER JOIN tblGRTransferStorage TS
+							ON SR.intTransferStorageId = TS.intTransferStorageId
+						WHERE  ((FromType.ysnDPOwnedType = 0 AND ToType.ysnDPOwnedType = 1) OR (FromType.ysnDPOwnedType = 1 AND ToType.ysnDPOwnedType = 0)) AND SR.intTransferStorageId = @intTransferStorageId AND SR.intTransferStorageReferenceId = @intTransactionDetailId
+						ORDER BY dtmTransferStorageDate
 
 						IF OBJECT_ID('tempdb..#tblICItemRunningStock') IS NOT NULL DROP TABLE  #tblICItemRunningStock
 						CREATE TABLE #tblICItemRunningStock(
@@ -325,8 +343,7 @@ BEGIN
 							,@dblSettlementPrice DECIMAL(18,6)
 							,@strRKError VARCHAR(MAX)
 
-						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END
-							
+						SELECT @intItemId = ITP.intItemId,@intLocationId = IL.intLocationId,@intSubLocationId = ITP.intSubLocationId, @intStorageLocationId = ITP.intStorageLocationId, @dtmDate = ITP.dtmDate, @intOwnerShipId = CASE WHEN ITP.ysnIsStorage = 1 THEN 2 ELSE 1 END							
 						FROM @ItemsToPost ITP
 						INNER JOIN tblICItem I
 							ON ITP.intItemId = I.intItemId
@@ -363,7 +380,9 @@ BEGIN
 						SELECT intItemId,intItemLocationId,intItemUOMId,dtmDate,dblQty,dblUOMQty,0,dblSalesPrice,intCurrencyId,dblExchangeRate,intTransactionId,intTransactionDetailId,strTransactionId,intTransactionTypeId,intLotId,intSubLocationId,intStorageLocationId,ysnIsStorage,intStorageScheduleTypeId 
 						FROM @ItemsToPost WHERE intId = @cursorId
 
-						INSERT INTO @GLEntries 
+						IF @ysnFromDS = 0
+						BEGIN
+							INSERT INTO @GLEntries 
 							(
 								 [dtmDate] 
 								,[strBatchId]
@@ -408,6 +427,7 @@ BEGIN
 									,dblCredit		= dblDebit
 										,dblCreditUnit  = dblDebitUnit
 							END
+						END
 
 
 
