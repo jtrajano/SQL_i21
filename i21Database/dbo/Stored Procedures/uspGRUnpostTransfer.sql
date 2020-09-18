@@ -540,15 +540,15 @@ BEGIN
 									EXEC dbo.uspGLBookEntries @GLEntries, 1 
 							END
 							
-							/*UNPOST STORAGE*/
-
-						
+							/*UNPOST STORAGE*/						
 			
 				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
 
+				--unpost all transactions in GL
+				UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE intTransactionId = @intTransferStorageId AND strTransactionId = @strTransferStorageId
 		/* END REVERSAL */
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
