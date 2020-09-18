@@ -19,4 +19,3 @@ WHERE P.strPaymentMethod = 'ACH'
   AND P.ysnPosted = 1
   AND UF.intBankDepositId IS NULL
   AND BTD.intUndepositedFundId IS NULL
-  AND P.dblAmountPaid <> 0
