@@ -399,7 +399,7 @@ BEGIN
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
-		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
+		AND LOWER(B.strPaymentMethod) NOT IN ('ach','debit memos and payments')
 
 		--DO NOT ALLOW TO POST PAYMENT IF IT HAS ASSOCIATED PREPAYMENT FOR CONTRACT OR IT IS RESTRICTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)

@@ -257,6 +257,7 @@ BEGIN
 				[intAccountId]						= 	@bankGLAccountId,
 				[intBankAccountId]					= 	@bankAccount,
 				[intPaymentMethodId]				= 	CASE WHEN (vouchersPay.dblAmountPaid - vouchersPay.dblWithheld) = 0 
+																AND @paymentMethod <> 2
 														THEN 3 --Debit Memos and Payments
 														ELSE @paymentMethod END,
 				[intPayToAddressId]					= 	vouchersPay.intPayToAddressId,
