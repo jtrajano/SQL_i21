@@ -586,12 +586,36 @@ CREATE TABLE #ARItemsForStorageCosting
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL)
 
+IF(OBJECT_ID('tempdb..#ARItemsForContracts') IS NOT NULL)
+BEGIN
+    DROP TABLE #ARItemsForContracts
+END
 
-	EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
-         @Post     = @Post
-        ,@Recap    = @Recap
-        ,@PostDate = @PostDate
-        ,@BatchId  = @BatchIdUsed
+CREATE TABLE #ARItemsForContracts (
+	  [intInvoiceId]			INT NOT NULL
+	, [intInvoiceDetailId]		INT NOT NULL
+	, [intItemId]				INT NULL
+	, [intContractDetailId]		INT NULL
+	, [intContractHeaderId]		INT NULL
+	, [intEntityId]				INT NULL
+	, [intUserId]				INT NULL
+	, [dtmDate]					DATETIME NULL
+	, [dblQuantity]				NUMERIC(18, 6) NOT NULL DEFAULT 0
+    , [dblBalanceQty]			NUMERIC(18, 6) NOT NULL DEFAULT 0
+	, [dblSheduledQty]			NUMERIC(18, 6) NOT NULL DEFAULT 0
+    , [dblRemainingQty]			NUMERIC(18, 6) NOT NULL DEFAULT 0
+	, [strType]					NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [strTransactionType]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [strInvoiceNumber]		NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [strItemNo]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [strBatchId]				NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+)
+
+EXEC [dbo].[uspARPopulateInvalidPostInvoiceData]
+	 @Post     = @Post
+	,@Recap    = @Recap
+	,@PostDate = @PostDate
+	,@BatchId  = @BatchIdUsed
 		
 SELECT @totalInvalid = COUNT(DISTINCT [intInvoiceId]) FROM #ARInvalidInvoiceData
 
@@ -617,28 +641,27 @@ IF(@totalInvalid > 0)
 		--DELETE Invalid Transaction From temp table
 		DELETE A
 		FROM #ARPostInvoiceHeader A
-		INNER JOIN #ARInvalidInvoiceData B
-			ON A.intInvoiceId = B.intInvoiceId
+		INNER JOIN #ARInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
 
 		DELETE A
-			FROM #ARPostInvoiceDetail A
-		INNER JOIN #ARInvalidInvoiceData B
-					ON A.intInvoiceId = B.intInvoiceId
+		FROM #ARPostInvoiceDetail A
+		INNER JOIN #ARInvalidInvoiceData B ON A.intInvoiceId = B.intInvoiceId
 
 		DELETE A
 		FROM #ARItemsForCosting A
-		INNER JOIN #ARInvalidInvoiceData B
-			ON A.[intTransactionId] = B.[intInvoiceId]
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
 
 		DELETE A
-			FROM #ARItemsForInTransitCosting A
-				INNER JOIN #ARInvalidInvoiceData B
-					ON A.[intTransactionId] = B.[intInvoiceId]
+		FROM #ARItemsForInTransitCosting A
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
 
 		DELETE A
 		FROM #ARItemsForStorageCosting A
-		INNER JOIN #ARInvalidInvoiceData B
-			ON A.[intTransactionId] = B.[intInvoiceId]
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intTransactionId] = B.[intInvoiceId]
+
+		DELETE A
+		FROM #ARItemsForContracts A
+		INNER JOIN #ARInvalidInvoiceData B ON A.[intInvoiceId] = B.[intInvoiceId]	
 							
         DELETE FROM #ARInvalidInvoiceData
 					
