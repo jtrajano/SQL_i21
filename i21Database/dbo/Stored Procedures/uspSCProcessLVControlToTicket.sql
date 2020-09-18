@@ -17,6 +17,14 @@ DECLARE @ErrorMessage NVARCHAR(4000)
 BEGIN TRY
 		IF @ysnPosted = 1
 			BEGIN
+				if exists(select top 1 1 from tblSCTicket a 
+					join tblSCTicketLVStaging b
+						on a.intScaleSetupId = b.intScaleSetupId
+						and a.strTicketNumber = b.strTicketNumber
+						where b.intTicketLVStagingId = @intTicketLVStagingId)
+				BEGIN
+					RAISERROR('Unable to post. Duplicate Ticket', 16, 1);
+				end
 				INSERT INTO tblSCTicket(
 					[strTicketNumber]
 					,[intTicketType]
@@ -78,6 +86,9 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,[intConcurrencyId]
+
+					,[intSubLocationId]
+					,[intStorageLocationId]
 					)
 				SELECT 
 					[strTicketNumber]
@@ -126,7 +137,7 @@ BEGIN TRY
 					,[strDistributionOption]
 					,[strPitNumber]
 					,[intTicketPoolId]
-					,[intScaleSetupId]
+					,TicketStaging.[intScaleSetupId]
 					,[intSplitId]
 					,[strItemUOM]
 					,[ysnSplitWeightTicket]
@@ -140,7 +151,12 @@ BEGIN TRY
 					,[intTicketLVStagingId]
 					,[strSourceType]
 					,1
-				FROM [dbo].[tblSCTicketLVStaging] WHERE intTicketLVStagingId = @intTicketLVStagingId
+					,Setup.[intSubLocationId] 
+					,Setup.[intStorageLocationId]
+				FROM [dbo].[tblSCTicketLVStaging] TicketStaging
+					left join ( select intScaleSetupId,intSubLocationId,intStorageLocationId  from tblSCScaleSetup) Setup
+						on TicketStaging.intScaleSetupId = Setup.intScaleSetupId
+					WHERE intTicketLVStagingId = @intTicketLVStagingId
 
 				SELECT @intTicketId = SCOPE_IDENTITY()
 
