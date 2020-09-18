@@ -8542,6 +8542,8 @@
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspARPopulateContractDetails.sql" />
+    <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
