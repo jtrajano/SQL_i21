@@ -2963,11 +2963,7 @@ BEGIN TRY
 					INNER JOIN @detailCreated ON intBillDetailId = intId
 					WHERE APD.intTaxGroupId IS NULL AND CASE WHEN @ysnDPOwnedType = 1 THEN CASE WHEN intInventoryReceiptChargeId IS NULL THEN 1 ELSE 0 END ELSE 1 END = 1
 					
-					--for spot settlement only; calculation of tax for the contract is done in uspAPUpateCost
-					IF(SELECT ISNULL(dblSpotUnits,0) FROM tblGRSettleStorage WHERE intSettleStorageId = @intSettleStorageId) > 0
-					BEGIN
-						EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
-					END
+					EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
 
 
 					--this will update the cost
