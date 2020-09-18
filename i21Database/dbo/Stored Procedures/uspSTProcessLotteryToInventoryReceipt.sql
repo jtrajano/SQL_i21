@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
+﻿
+CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
 	@Id INT,
 	@UserId INT,
 	@ProcessType INT,
@@ -18,6 +19,7 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 
 
+DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @UserId
 
 DECLARE  @tblSTTempLotteryProcessError TABLE (
     [intCheckoutId]				 INT            NULL,
@@ -85,6 +87,19 @@ BEGIN TRY
 		BEGIN
 			SET @Success = CAST(0 AS BIT)
 			SET @StatusMsg = 'There are no records to process.'
+
+			INSERT INTO @tblSTTempLotteryProcessError
+			(
+				 [intCheckoutId]
+				,[strError]		
+				,[strProcess]	
+			)
+			SELECT 
+				 @UserId
+				,'There are no records to process.'
+				,(CASE WHEN @ProcessType = 1 THEN 'Create IR' ELSE 'Update IR' END)
+			
+
 			GOTO EXITWITHROLLBACK
 			RETURN
 		END
@@ -96,6 +111,18 @@ BEGIN TRY
 		BEGIN
 			SET @Success = CAST(1 AS BIT)
 			SET @StatusMsg = 'Lottery Setup Mode - No need to create IR.'
+
+			INSERT INTO @tblSTTempLotteryProcessError
+			(
+				 [intCheckoutId]
+				,[strError]			
+				,[strProcess]	
+			)
+			SELECT 
+			 @UserId
+			,@StatusMsg
+			,(CASE WHEN @ProcessType = 1 THEN 'Create IR' ELSE 'Update IR' END)
+
 			GOTO EXITWITHROLLBACK
 			RETURN
 		END
@@ -115,6 +142,18 @@ BEGIN TRY
 		BEGIN
 			SET @Success = CAST(0 AS BIT)
 			SET @StatusMsg = 'Missing UOM setup on Item Location.'
+
+			INSERT INTO @tblSTTempLotteryProcessError
+			(
+				 [intCheckoutId]
+				,[strError]			
+				,[strProcess]	
+			)
+			SELECT 
+				@UserId
+				,@StatusMsg
+				,'Processing IR for receive lottery'
+
 			GOTO EXITWITHROLLBACK
 			RETURN
 		END
@@ -276,22 +315,47 @@ BEGIN TRY
 		BEGIN
 			SET @Success = CAST(1 AS BIT)
 			SET @StatusMsg = 'No inventory receipt to post'
+
+			INSERT INTO @tblSTTempLotteryProcessError
+			(
+				 [intCheckoutId]
+				,[strError]			
+				,[strProcess]	
+			)
+			SELECT 
+				@UserId
+				,@StatusMsg
+				,'Post IR'
+
 			GOTO EXITWITHROLLBACK
 		END
 		
 	END
-	ELSE IF(@ProcessType = 5) --CREATE RETURN RECEIPT--
+	ELSE IF(@ProcessType = 5 OR @ProcessType = 11) --CREATE RETURN RECEIPT--
 	BEGIN
 
 		DECLARE @intReturnLotteryId INT = @Id
+		DECLARE @intLotteryBookId INT 
 		DECLARE @intInventoryReceiptId INT
 
-		SELECT TOP 1 @Id = intLotteryBookId FROM tblSTReturnLottery where intReturnLotteryId = @intReturnLotteryId
+		SELECT TOP 1 @intLotteryBookId = intLotteryBookId FROM tblSTReturnLottery where intReturnLotteryId = @intReturnLotteryId
 
-		IF ((SELECT COUNT(1) FROM tblSTLotteryBook WHERE intLotteryBookId = @Id) <= 0)
+		IF ((SELECT COUNT(1) FROM tblSTLotteryBook WHERE intLotteryBookId = @intLotteryBookId) <= 0)
 		BEGIN
 			SET @Success = CAST(0 AS BIT)
 			SET @StatusMsg = 'There are no records to process.'
+
+			INSERT INTO @tblSTTempLotteryProcessError
+			(
+				 [intCheckoutId]
+				,[strError]			
+				,[strProcess]	
+			)
+			SELECT 
+				@UserId
+				,@StatusMsg
+				,'Processing IR for return'
+
 			RETURN
 		END
 
@@ -301,7 +365,7 @@ BEGIN TRY
 		FROM tblSTCheckoutLotteryCount
 		INNER JOIN tblSTCheckoutHeader 
 		ON tblSTCheckoutLotteryCount.intCheckoutId = tblSTCheckoutHeader.intCheckoutId
-		WHERE ISNULL(LOWER(tblSTCheckoutHeader.strCheckoutStatus),'') != 'posted' AND tblSTCheckoutLotteryCount.intLotteryBookId = @Id
+		WHERE ISNULL(LOWER(tblSTCheckoutHeader.strCheckoutStatus),'') != 'posted' AND tblSTCheckoutLotteryCount.intLotteryBookId = @intLotteryBookId
 
 		--INSERT RETURN LOTTERY ENTRY--
 		-- INSERT INTO tblSTReturnLottery
@@ -320,7 +384,7 @@ BEGIN TRY
 		-- 	,dblQuantityRemaining
 		-- 	,0
 		-- 	,CASE WHEN @dblUnpostedQuantitySold = 0 THEN 1 ELSE 0 END
-		-- FROM tblSTLotteryBook WHERE intLotteryBookId = @Id
+		-- FROM tblSTLotteryBook WHERE intLotteryBookId = @intLotteryBookId
 		-- SET @intReturnLotteryId = SCOPE_IDENTITY()
 
 		UPDATE tblSTReturnLottery 
@@ -333,7 +397,7 @@ BEGIN TRY
 		intBinNumber = NULL
 		,dblQuantityRemaining = 0
 		,strStatus = 'Returned'
-		WHERE intLotteryBookId = @Id
+		WHERE intLotteryBookId = @intLotteryBookId
 	
 
 		SET @strReceiptType = 'Direct'
@@ -536,11 +600,11 @@ BEGIN TRY
 				,[strProcess]				
 			)
 			SELECT 
-				@checkoutId,
+				@UserId,
 				@lotteryBook,
 				@lotteryGame,
 				'There are no records to process.',
-				'Creating Inventory Receipt'
+				'Processing IR for receive lottery'
 			GOTO EXITWITHROLLBACK
 		END
 
@@ -899,39 +963,78 @@ GOTO WRITEUNHANDLEDEXCEPTION
 
 
 WRITEUNHANDLEDEXCEPTION: 
-IF(@ProcessType = 8)  
+IF(@ProcessType = 8 OR @ProcessType = 9 OR @ProcessType = 11 OR @ProcessType = 5)  
 BEGIN
 	IF(@ErrorMessage = 'Cannot insert the value NULL into column ''intShipFromId'', table ''@ReceiptStagingTable''; column does not allow nulls. INSERT fails.')
 	BEGIN
 		SET @ErrorMessage = 'Invalid vendor ship from location'
 	END
 
-	INSERT INTO tblSTLotteryProcessError (
-	[intCheckoutId]				
-	,[strBookNumber]				
-	,[strGame]					
-	,[strError]					
-	,[strProcess]				
-	)
-	SELECT 
-	tblSTReceiveLottery.intCheckoutId,
-	tblSTReceiveLottery.strBookNumber,
-	tblSTLotteryGame.strGame,
-	'[Unhandled Exception] ' + @ErrorMessage,
-	'Creating Inventory Receipt'
-	FROM tblSTReceiveLottery 
-	INNER JOIN tblSTLotteryGame 
-	ON tblSTReceiveLottery.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
-	WHERE intReceiveLotteryId = @Id
+	IF(@ProcessType = 8 OR @ProcessType = 9)
+	BEGIN
+		INSERT INTO tblSTLotteryProcessError (
+		[intCheckoutId]				
+		,[strBookNumber]				
+		,[strGame]					
+		,[strError]					
+		,[strProcess]				
+		)
+		SELECT 
+		 @UserId
+		,tblSTReceiveLottery.strBookNumber,
+		 tblSTLotteryGame.strGame,
+		'[Unhandled Exception] ' + @ErrorMessage,
+		'Processing IR for receive lottery'
+		FROM tblSTReceiveLottery 
+		INNER JOIN tblSTLotteryGame 
+		ON tblSTReceiveLottery.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+		WHERE intReceiveLotteryId = @Id
+		
+		--IF(@ProcessType = 8)
+		--BEGIN
+		--	DELETE FROM tblSTReceiveLottery WHERE intReceiveLotteryId = @Id
+		--END
+	END
+
+	IF(@ProcessType = 11 OR @ProcessType = 5)
+	BEGIN
+		INSERT INTO tblSTLotteryProcessError (
+		[intCheckoutId]				
+		,[strBookNumber]				
+		,[strGame]					
+		,[strError]					
+		,[strProcess]				
+		)
+		SELECT 
+		 @UserId
+		,tblSTLotteryBook.[strBookNumber],
+		 tblSTLotteryGame.strGame,
+		'[Unhandled Exception] ' + @ErrorMessage,
+		'Processing IR for receive lottery'
+		FROM tblSTReturnLottery 
+		INNER JOIN tblSTLotteryBook
+		ON tblSTLotteryBook.intLotteryBookId =  tblSTReturnLottery.intLotteryBookId 
+		INNER JOIN tblSTLotteryGame 
+		ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+		WHERE intReturnLotteryId = @Id
+
+		--IF(@ProcessType = 5)
+		--BEGIN
+		--	DELETE FROM tblSTReturnLottery WHERE intReturnLotteryId = @Id
+		--END
+	END
+
 END
 ELSE
 BEGIN 
 	INSERT INTO tblSTLotteryProcessError (
-	[strError]					
+	 [intCheckoutId]
+	,[strError]					
 	,[strProcess]				
 	)
 	SELECT 
-	'[Unhandled Exception] ' + @ErrorMessage,
+	 @UserId
+	,'[Unhandled Exception] ' + @ErrorMessage,
 	'[Untracked]'
 END
 
