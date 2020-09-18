@@ -884,7 +884,6 @@ BEGIN
 		,@UserId
 END 
 
-
 --UPDATE CUSTOMER CREDIT LIMIT REACHED
 UPDATE CUSTOMER
 SET [dtmCreditLimitReached] =  CASE WHEN ISNULL(CUSTOMER.[dblARBalance], 0) >= ISNULL(CUSTOMER.[dblCreditLimit], 0) THEN ISNULL(CUSTOMER.[dtmCreditLimitReached], INVOICE.[dtmPostDate]) ELSE NULL END
@@ -1114,22 +1113,26 @@ IF @IntegrationLogId IS NULL
 		FROM #ARPostInvoiceHeader
 	END
 
---INTER COMPANY PRE-STAGE
-DECLARE @tblInterCompany 	AS Id
-DECLARE @strRowState		NVARCHAR(50) = (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
+DECLARE @strRowState			NVARCHAR(50) = (CASE WHEN @Post = 1 THEN 'Posted' ELSE 'Unposted' END)
+DECLARE @tblInvoicesToUpdate	AS Id
 
-INSERT INTO @tblInterCompany
+INSERT INTO @tblInvoicesToUpdate
 SELECT DISTINCT intInvoiceId
 FROM #ARPostInvoiceHeader
 
-WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInterCompany)
+WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
 	BEGIN
-		DECLARE @intInterCompanyInvoiceId INT
-		SELECT TOP 1 @intInterCompanyInvoiceId = intId FROM @tblInterCompany
+		DECLARE @intInvoiceId INT	= NULL
 
-		EXEC dbo.uspIPInterCompanyPreStageInvoice @intInterCompanyInvoiceId, @strRowState, @UserId
+		SELECT TOP 1 @intInvoiceId = intId 
+		FROM @tblInvoicesToUpdate
 
-		DELETE FROM @tblInterCompany WHERE intId = @intInterCompanyInvoiceId
+		--INTER COMPANY PRE-STAGE
+		EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, @strRowState, @UserId
+		--UPDATE GROSS MARGIN SUMMARY
+		EXEC dbo.uspARInvoiceGrossMarginSummary @Post, @intInvoiceId
+		
+		DELETE FROM @tblInvoicesToUpdate WHERE intId = @intInvoiceId
 	END
 
 --AUDIT LOG
