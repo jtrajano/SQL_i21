@@ -162,7 +162,7 @@ BEGIN TRY
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId
 
 	EXEC uspSMAuditLog 
-	   @keyValue = @intMatchNo       -- Primary Key Value of the Match Derivatives. 
+	   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
 	   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
 	   ,@entityId = @intEntityId     -- Entity Id.
 	   ,@actionType = 'Unposted'       -- Action Type
