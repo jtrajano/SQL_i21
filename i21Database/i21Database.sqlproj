@@ -7787,7 +7787,8 @@
   <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup>  	
+    <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
     <Build Include="dbo\Views\vyuPREmployee.sql" />
