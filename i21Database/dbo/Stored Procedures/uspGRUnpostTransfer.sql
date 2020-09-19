@@ -537,6 +537,9 @@ BEGIN
 				BEGIN 
 						EXEC dbo.uspGLBookEntries @GLEntries, 1 
 				END
+
+				--unpost all transactions in GL
+				UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE intTransactionId = @intTransferStorageId AND strTransactionId = @strTransferStorageId	
 							
 		/* END REVERSAL */
 
