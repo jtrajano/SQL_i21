@@ -510,9 +510,6 @@ BEGIN
 				END
 				CLOSE _CURSOR;
 				DEALLOCATE _CURSOR;
-
-				--unpost all transactions in GL
-				UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE intTransactionId = @intTransferStorageId AND strTransactionId = @strTransferStorageId
 		/* END REVERSAL */
 
 		UPDATE @GLEntries 
@@ -567,12 +564,8 @@ BEGIN
 				EXEC dbo.uspGLBookEntries @GLEntries, 1 
 		END
 
-							
-
-
-
-
-
+		--unpost all transactions in GL
+		UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE intTransactionId = @intTransferStorageId AND strTransactionId = @strTransferStorageId		
 
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
