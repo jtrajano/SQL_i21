@@ -114,6 +114,8 @@ BEGIN
 			,intCreatedByUserId
 			,strDataSource
 			,intShipFromEntityId
+			,intBookId
+			,intSubBookId
 	)
 	SELECT	strReceiptType = @receiptType
 			,intSourceType
@@ -160,6 +162,8 @@ BEGIN
 			,intCreatedByUserId = @intEntityUserSecurityId
 			,strDataSource = 'Inventory Receipt'
 			,r.intShipFromEntityId
+			,r.intBookId
+			,r.intSubBookId
 	FROM	tblICInventoryReceipt r 
 	WHERE	r.intInventoryReceiptId = @intReceiptId
 
