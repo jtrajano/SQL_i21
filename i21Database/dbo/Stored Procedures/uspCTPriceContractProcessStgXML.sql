@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspCTPriceContractProcessStgXML
+﻿CREATE PROCEDURE dbo.uspCTPriceContractProcessStgXML (@ysnProcessApproverInfo BIT = 0)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -187,6 +187,7 @@ BEGIN TRY
 		WHERE intPriceContractStageId = @intPriceContractStageId
 
 		IF @strTransactionType = 'Sales Price Fixation'
+			AND @ysnProcessApproverInfo = 0
 		BEGIN
 			-------------------------PriceContract-----------------------------------------------------------
 			EXEC uspCTGetStartingNumber 'Price Contract'
@@ -528,6 +529,93 @@ BEGIN TRY
 			WHERE intPriceContractStageId = @intPriceContractStageId
 
 			EXEC sp_xml_removedocument @idoc
+		END
+
+		IF @strTransactionType = 'Sales Price Fixation'
+			AND @ysnProcessApproverInfo = 1
+		BEGIN
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strApproverXML
+
+			SELECT @intPriceFixationId = NULL
+				,@intContractHeaderId = NULL
+				,@intNewPriceContractId = NULL
+
+			SELECT @intNewPriceContractId = intPriceContractId
+			FROM tblCTPriceContract
+			WHERE intPriceContractRefId = @intPriceContractId
+
+			SELECT @intPriceFixationId = intPriceFixationId
+				,@intContractHeaderId = intContractHeaderId
+			FROM tblCTPriceFixation
+			WHERE intPriceContractId = @intNewPriceContractId
+
+			DELETE
+			FROM tblCTIntrCompApproval
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND intPriceFixationId = @intPriceFixationId
+				AND ysnApproval = 1
+
+			INSERT INTO tblCTIntrCompApproval (
+				intContractHeaderId
+				,intPriceFixationId
+				,strName
+				,strUserName
+				,strScreen
+				,intConcurrencyId
+				,ysnApproval
+				)
+			SELECT @intContractHeaderId
+				,@intPriceFixationId
+				,strName
+				,strUserName
+				,'Price Contract' strScreenName
+				,1 AS intConcurrencyId
+				,1
+			FROM OPENXML(@idoc, 'vyuCTPriceContractApproverViews/vyuCTPriceContractApproverView', 2) WITH (
+					strName NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+					) x
+
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strSubmittedByXML
+
+			DELETE
+			FROM tblCTIntrCompApproval
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND intPriceFixationId = @intPriceFixationId
+				AND ysnApproval = 0
+
+			INSERT INTO tblCTIntrCompApproval (
+				intContractHeaderId
+				,intPriceFixationId
+				,strName
+				,strUserName
+				,strScreen
+				,intConcurrencyId
+				,ysnApproval
+				)
+			SELECT @intContractHeaderId
+				,@intPriceFixationId
+				,strName
+				,strUserName
+				,'Price Contract' strScreenName
+				,1 AS intConcurrencyId
+				,0
+			FROM OPENXML(@idoc, 'vyuIPPriceContractSubmittedByViews/vyuIPPriceContractSubmittedByView', 2) WITH (
+					strName NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strUserName NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strScreenName NVARCHAR(250) Collate Latin1_General_CI_AS
+					) x
+
+			EXEC sp_xml_removedocument @idoc
+
+			UPDATE tblCTPriceContractStage
+			SET strFeedStatus = 'Processed'
+			WHERE intPriceContractStageId = @intPriceContractStageId
 		END
 
 		IF @strTransactionType = 'Purchase Price Fixation'

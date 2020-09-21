@@ -1,4 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspIPProcessPreStagePriceContract]
+	(@ysnProcessApproverInfo bit=0)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -85,6 +86,7 @@ BEGIN TRY
 				,@intToCompanyId
 				,'Added'
 				,0
+				,@ysnProcessApproverInfo
 		END
 		ELSE IF EXISTS (
 				SELECT 1
@@ -100,6 +102,7 @@ BEGIN TRY
 				,@intToCompanyId
 				,'Modified'
 				,0
+				,@ysnProcessApproverInfo
 		END
 		ELSE IF NOT EXISTS (
 				SELECT 1
@@ -118,6 +121,7 @@ BEGIN TRY
 				,@intToCompanyId
 				,'Delete'
 				,0
+				,@ysnProcessApproverInfo
 		END
 
 		UPDATE tblCTPriceContractPreStage
