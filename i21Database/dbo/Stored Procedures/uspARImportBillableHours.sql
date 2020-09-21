@@ -25,6 +25,7 @@ DECLARE @dblZeroDecimal			NUMERIC(18,6)	= 0
 	  , @intCompanyLocationId	INT				= @DefaultLocationId
 	  , @strErrorMessage		NVARCHAR(MAX)	= ''
 	  , @strCreatedInvoices		NVARCHAR(MAX)	= ''
+	  , @ZeroDecimal			NUMERIC(18,6)   = 0.000000
 
 IF(OBJECT_ID('tempdb..#BILLABLE') IS NOT NULL)
 BEGIN
@@ -116,8 +117,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INACTIVECUSTOMERS)
 		RETURN 0
 	END
 	
+
 INSERT INTO @tblInvoiceEntries (
 	 [strSourceTransaction]
+	,[strType]					
+	,[strTransactionType]
 	,[intSourceId]
 	,[strSourceId]
 	,[intEntityCustomerId]
@@ -142,9 +146,12 @@ INSERT INTO @tblInvoiceEntries (
 	,[intSubCurrencyId]
 	,[dblSubCurrencyRate]
 	,[intCurrencyExchangeRateTypeId]
+	,[strComments]		
 )
 SELECT 
 	 [strSourceTransaction]				= 'Direct'
+	,[strType]							= 'Standard'
+	,[strTransactionType]				= 'Invoice'
 	,[intSourceId]						= 0
 	,[strSourceId]						= BILLABLE.strTicketNumber
 	,[intEntityCustomerId]				= BILLABLE.intEntityCustomerId
@@ -169,7 +176,42 @@ SELECT
 	,[intSubCurrencyId]					= BILLABLE.intSubCurrencyId
 	,[dblSubCurrencyRate]				= BILLABLE.dblSubCurrencyRate
 	,[intCurrencyExchangeRateTypeId]	= BILLABLE.intCurrencyExchangeRateTypeId
-FROM #BILLABLE BILLABLE
+	,[strComments]						=  'HD-Invoice'
+FROM #BILLABLE BILLABLE  where BILLABLE.dblHours >= @ZeroDecimal
+
+union all
+
+SELECT 
+	 [strSourceTransaction]				= 'Direct'
+	,[strType]							= 'Standard'
+	,[strTransactionType]				= 'Credit Memo'
+	,[intSourceId]						= 0
+	,[strSourceId]						= BILLABLE.strTicketNumber
+	,[intEntityCustomerId]				= BILLABLE.intEntityCustomerId
+	,[intCompanyLocationId]				= BILLABLE.intCompanyLocationId
+	,[intCurrencyId]					= BILLABLE.intCurrencyId
+	,[dtmDate]							= @dtmDateOnly
+	,[dtmPostDate]						= @dtmDateOnly
+	,[intEntityId]						= @UserId
+	,[ysnPost]							= 0
+	,[intItemId]						= BILLABLE.intItemId
+	,[ysnInventory]						= 0
+	,[strItemDescription]				= BILLABLE.strTicketNumber + ' - ' + BILLABLE.strSubject
+	,[intOrderUOMId]					= BILLABLE.intItemUOMId
+	,[dblQtyOrdered]					= BILLABLE.dblHours
+	,[intItemUOMId]						= BILLABLE.intItemUOMId
+	,[dblQtyShipped]					= BILLABLE.dblHours
+	,[dblPrice]							= BILLABLE.dblPrice
+	,[ysnRefreshPrice]					= 0
+	,[ysnRecomputeTax]					= 1
+	,[intTicketHoursWorkedId]			= BILLABLE.intTicketHoursWorkedId
+	,[dblCurrencyExchangeRate]			= BILLABLE.dblCurrencyExchangeRate
+	,[intSubCurrencyId]					= BILLABLE.intSubCurrencyId
+	,[dblSubCurrencyRate]				= BILLABLE.dblSubCurrencyRate
+	,[intCurrencyExchangeRateTypeId]	= BILLABLE.intCurrencyExchangeRateTypeId
+	,[strComments]						=  'HD-Credit Memo'
+
+FROM #BILLABLE BILLABLE  where BILLABLE.dblHours < @ZeroDecimal
 
 IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 	BEGIN
@@ -177,7 +219,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
 			 @InvoiceEntries				= @tblInvoiceEntries
 			,@LineItemTaxEntries			= @tblTaxEntries
 			,@UserId						= @UserId
-			,@GroupingOption				= 5
+			,@GroupingOption				= 11
 			,@RaiseError					= 0
 			,@ErrorMessage					= @strErrorMessage OUT
 			,@CreatedIvoices				= @strCreatedInvoices OUT
@@ -205,6 +247,44 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
                 FROM tblARInvoiceDetail ID
                 INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON ID.intInvoiceId = I.intID
 				INNER JOIN #BILLABLE HW ON ID.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
+
+
+				--Update Header 
+				UPDATE
+					ARI
+				SET
+				    ARI.dblInvoiceTotal			=  ABS(ARI.dblInvoiceTotal)
+				   ,ARI.dblBaseInvoiceTotal		=  ABS(ARI.dblBaseInvoiceTotal)
+				   ,ARI.dblAmountDue			=  ABS(ARI.dblAmountDue)
+				   ,ARI.dblBaseAmountDue		=  ABS(ARI.dblBaseAmountDue)
+				   ,ARI.dblInvoiceSubtotal	    =  ABS(ARI.dblInvoiceSubtotal)
+				   ,ARI.dblBaseInvoiceSubtotal  =  ABS(ARI.dblInvoiceSubtotal)
+				FROM
+					tblARInvoice ARI
+					INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON intInvoiceId = I.intID
+
+				WHERE
+					ARI.[intInvoiceId] =  I.intID and ARI.strTransactionType ='Credit Memo'
+
+
+				
+				--Update Line Details
+				UPDATE
+					ARID
+				SET
+					ARID.[dblQtyShipped] = ABS(ARID.[dblQtyShipped]),
+				    ARID.[dblQtyOrdered] = ABS(ARID.[dblQtyOrdered]),
+					ARID.dblTotal		 = ABS(ARID.dblTotal),
+					ARID.dblBaseTotal	 = ABS(ARID.dblBaseTotal)
+
+				FROM
+					tblARInvoiceDetail ARID
+					INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON intInvoiceId = I.intID
+					INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = I.intID
+
+				WHERE 
+					ARID.[intInvoiceId] =  I.intID and ARI.strTransactionType ='Credit Memo'
+
 
 				IF @Post = 1
 				BEGIN
