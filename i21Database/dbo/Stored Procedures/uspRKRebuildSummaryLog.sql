@@ -315,7 +315,7 @@ BEGIN TRY
 				, CD.intContractSeq
 				, CH.intContractHeaderId
 				, CD.intContractDetailId
-				, InvTran.dtmDate
+				, Receipt.dtmReceiptDate
 				, @dtmEndDate AS dtmEndDate
 				, dblQuantity = (CASE WHEN CH.ysnLoad = 1 THEN  
 									1 * CH.dblQuantityPerLoad
@@ -332,25 +332,21 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
-				, intUserId = InvTran.intCreatedEntityId
-			FROM tblICInventoryTransaction InvTran
-			JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
-				AND strReceiptType = 'Inventory Return'
-			JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = InvTran.intTransactionId
-				AND ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
+				, intUserId = Receipt.intCreatedByUserId
+			FROM tblICInventoryReceipt Receipt
+			JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 				AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ReceiptItem.intOrderId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
 				AND CD.intContractHeaderId = CH.intContractHeaderId
-			WHERE strTransactionForm = 'Inventory Receipt'
-				AND ysnIsUnposted = 0
-				AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+			WHERE ysnPosted = 1
+				AND dbo.fnRemoveTimeOnDate(Receipt.dtmReceiptDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Receipt.dtmReceiptDate) END
 	 			AND intContractTypeId = 1
-	 			AND InvTran.intTransactionTypeId = 42
+				AND strReceiptType = 'Inventory Return'
 			GROUP BY CH.intContractTypeId
 				, CH.intContractHeaderId
 				, CD.intContractDetailId
-				, InvTran.dtmDate
+				, Receipt.dtmReceiptDate
 				, Receipt.intInventoryReceiptId
 				, ReceiptItem.intInventoryReceiptItemId
 				, Receipt.strReceiptNumber
@@ -362,7 +358,7 @@ BEGIN TRY
 				, CH.ysnLoad
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
-				, InvTran.intCreatedEntityId
+				, Receipt.intCreatedByUserId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
