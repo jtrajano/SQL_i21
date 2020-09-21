@@ -44,6 +44,8 @@ BEGIN
 		, @strNotes NVARCHAR(250)
 		, @strInOut NVARCHAR(50)
 		, @strMiscFields NVARCHAR(MAX)
+		, @intTransCtr INT = 0
+		, @intTotal INT
 
 	DECLARE @FinalTable AS TABLE (strBatchId NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
 		, strBucketType NVARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
@@ -78,6 +80,8 @@ BEGIN
 		, ysnNegate BIT NULL
 		, intRefSummaryLogId INT NULL
 		, strMiscFields NVARCHAR(MAX))
+
+	SELECT @intTotal = COUNT(*) FROM @SummaryLogs
 
 	SELECT * INTO #tmpSummaryLogs FROM @SummaryLogs ORDER BY dtmTransactionDate
 
@@ -175,7 +179,7 @@ BEGIN
 				AND (intCommodityId <> @intCommodityId OR strDistributionType <> @strDistributionType)
 				AND ysnNegate IS NULL)
 			BEGIN
-				print @strTransactionNumber
+				INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Fixing manual changes on derivative ' + ISNULL(@strTransactionNumber, '') + '.')
 				INSERT INTO @FinalTable(strBatchId
 					, strBucketType
 					, intActionId
@@ -923,16 +927,6 @@ BEGIN
 		END
 
 		---------------------------------------
-		------------- Grain --------------
-		---------------------------------------
-		ELSE IF @strTransactionType = ''
-		BEGIN
-			PRINT 'BEGIN ' + @strTransactionType
-
-			PRINT 'END ' + @strTransactionType
-		END
-
-		---------------------------------------
 		------------- Scale --------------
 		---------------------------------------
 		ELSE IF @strBucketType = 'On Hold'
@@ -997,36 +991,6 @@ BEGIN
 				, @strNotes
 				, @strMiscFields
 
-		END
-
-		---------------------------------------
-		--------- Contract Sequence -----------
-		---------------------------------------
-		ELSE IF @strTransactionType = ''
-		BEGIN
-			PRINT 'BEGIN ' + @strTransactionType
-
-			PRINT 'END ' + @strTransactionType
-		END
-
-		---------------------------------------
-		----------- Price Fixation ------------
-		---------------------------------------
-		ELSE IF @strTransactionType = ''
-		BEGIN
-			PRINT 'BEGIN ' + @strTransactionType
-
-			PRINT 'END ' + @strTransactionType
-		END
-
-		---------------------------------------
-		-------------            --------------
-		---------------------------------------
-		ELSE IF @strTransactionType = ''
-		BEGIN
-			PRINT 'BEGIN ' + @strTransactionType
-
-			PRINT 'END ' + @strTransactionType
 		END
 
 		------------------------------
@@ -1184,10 +1148,18 @@ BEGIN
 		------------------------------
 		------------------------------
 		
+		SET @intTransCtr += 1
+		IF (@intTransCtr % 10000 = 0)
+		BEGIN
+			INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Processed ' + CAST(@intTransCtr AS NVARCHAR) + ' of ' + CAST(@intTotal AS NVARCHAR) + ' records.')
+		END
 
 		DELETE FROM #tmpSummaryLogs
 		WHERE intId = @intId
 	END
+
+	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Processed ' + CAST(@intTransCtr AS NVARCHAR) + ' of ' + CAST(@intTotal AS NVARCHAR) + ' records.')
+	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Starting Bulk Insert.')
 
 	INSERT INTO tblRKSummaryLog(strBatchId
 		, dtmCreatedDate
@@ -1262,6 +1234,8 @@ BEGIN
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
 	ORDER BY dtmTransactionDate
+
+	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Bulk Insert done.')
 
 	DROP TABLE #tmpSummaryLogs
 END
