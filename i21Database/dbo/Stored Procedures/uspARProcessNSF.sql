@@ -29,6 +29,9 @@ DECLARE @BankTransactionDetail				BankTransactionDetailTable
 DECLARE @InvoiceEntries						InvoiceIntegrationStagingTable
 DECLARE @LineItemTaxEntries					LineItemTaxDetailStagingTable
 
+DECLARE  @InitTranCount				INT
+		,@Savepoint					NVARCHAR(32)
+
 SELECT TOP 1 @intNSFPaymentMethodId = intPaymentMethodID
 FROM dbo.tblSMPaymentMethod 
 WHERE strPaymentMethod = 'NSF'
@@ -165,6 +168,14 @@ IF EXISTS(SELECT TOP 1 NULL FROM #NSFWITHOVERPAYMENTS WHERE ysnPaid = 1)
 		RAISERROR(@strErrorMsgOverpayment, 16, 1) 
 		RETURN 0;
 	END
+
+SET @InitTranCount = @@TRANCOUNT
+SET @Savepoint = SUBSTRING(('uspARProcessNSF' + CONVERT(VARCHAR, @InitTranCount)), 1, 32)
+
+IF @InitTranCount = 0
+	BEGIN TRANSACTION
+ELSE
+	SAVE TRANSACTION @Savepoint
 
 --REVERSE GL ENTRIES
 INSERT INTO @GLEntries (
@@ -552,8 +563,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDPAYMENTS)
 			END
 		ELSE
 			BEGIN
-				RAISERROR('Failed to Create Bank Transaction Entry', 11, 1)
-				RETURN;
+				SET @strMessage = 'Failed to Create Bank Transaction Entry'
+				GOTO Do_Rollback
 			END
 
 		DELETE FROM #GROUPEDPAYMENTS WHERE strTransactionNumber = @strTransactionNumber
@@ -644,8 +655,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #GROUPEDCHARGES)
 			END
 		ELSE
 			BEGIN
-				RAISERROR('Failed to Create Bank Transaction Entry', 11, 1)
-				RETURN;
+				SET @strMessage = 'Failed to Create Bank Transaction Entry'
+				GOTO Do_Rollback
 			END
 
 		DELETE FROM #GROUPEDCHARGES WHERE strTransactionNumber = @strTransactionNumber
@@ -707,3 +718,25 @@ EXEC dbo.uspSMAuditLog
 		,@changeDescription	= ''			
 		,@fromValue			= ''			
 		,@toValue			= ''
+
+Do_Rollback:
+
+IF @InitTranCount = 0
+	BEGIN
+		IF (XACT_STATE()) = -1
+		BEGIN 
+			RAISERROR(@strMessage, 11, 1)
+			ROLLBACK TRANSACTION
+		END
+
+		IF (XACT_STATE()) = 1
+			COMMIT TRANSACTION
+	END		
+ELSE
+	BEGIN
+		IF (XACT_STATE()) = -1
+		BEGIN
+			RAISERROR(@strMessage, 11, 1)
+			ROLLBACK TRANSACTION  @Savepoint
+		END
+	END	
