@@ -43,6 +43,8 @@ BEGIN
 		, @intActionId INT
 		, @strProcess NVARCHAR(100)
 		, @ysnDeleted BIT
+		, @intTransCtr INT = 0
+		, @intTotal INT
 
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpLogItems WHERE ISNULL(strBatchId, '') = '')
@@ -376,8 +378,17 @@ BEGIN
 
 		--DROP TABLE #tmpPrevLogList
 
+		SET @intTransCtr += 1
+		IF (@intTransCtr % 10000 = 0)
+		BEGIN
+			INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Processed ' + CAST(@intTransCtr AS NVARCHAR) + ' of ' + CAST(@intTotal AS NVARCHAR) + ' records.')
+		END
+
 		DELETE FROM #tmpLogItems WHERE intId = @Id
 	END
+
+	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Processed ' + CAST(@intTransCtr AS NVARCHAR) + ' of ' + CAST(@intTotal AS NVARCHAR) + ' records.')
+	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Starting Bulk Insert.')
 
 	INSERT INTO tblCTContractBalanceLog(strBatchId
 		, intActionId
@@ -463,6 +474,8 @@ BEGIN
 		, ysnDeleted
 	FROM @FinalTable F
 	LEFT JOIN tblRKLogAction A ON A.intLogActionId = F.intActionId
+
+	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Bulk Insert done.')
 
 	DROP TABLE #tmpLogItems
 END
