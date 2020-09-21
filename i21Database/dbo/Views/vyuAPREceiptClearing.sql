@@ -167,6 +167,17 @@ AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
+AND NOT EXISTS (
+    SELECT intInventoryReceiptItemId
+    FROM vyuGRTransferClearing transferClr
+    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+)
+AND NOT EXISTS (
+	--receipts in storage that were FULLY transferred from DP to DP only
+    SELECT intInventoryReceiptItemId
+    FROM vyuGRTransferClearing_FullDPtoDP transferClrDP
+    WHERE transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+)
 -- AND receipt.intSourceType != 7 --NOT STORE
 -- UNION ALL
 -- SELECT	
