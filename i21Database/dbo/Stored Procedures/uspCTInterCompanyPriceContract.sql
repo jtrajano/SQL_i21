@@ -27,12 +27,20 @@ BEGIN TRY
 			JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 			JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
 			JOIN tblCTPriceContract PC ON PC.intCompanyId = TC.intFromCompanyId
+				AND PC.intPriceContractId = @intPriceContractId
 			JOIN tblCTPriceFixation PF ON PF.intPriceContractId = PC.intPriceContractId
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
 				AND CH.intBookId = TC.intToBookId
-			WHERE TT.strTransactionType = 'Sales Price Fixation'
-				AND PC.intPriceContractId = @intPriceContractId
-				AND CH.intContractTypeId = 2
+			WHERE (
+					(
+						TT.strTransactionType = 'Sales Price Fixation'
+						AND CH.intContractTypeId = 2
+						)
+					OR (
+						TT.strTransactionType = 'Purchase Price Fixation'
+						AND CH.intContractTypeId = 1
+						)
+					)
 			)
 	BEGIN
 		SELECT @strInsert = TC.strInsert
@@ -44,12 +52,21 @@ BEGIN TRY
 		JOIN tblSMInterCompanyTransactionType TT ON TT.intInterCompanyTransactionTypeId = TC.intFromTransactionTypeId
 		JOIN tblSMInterCompanyTransactionType TT1 ON TT1.intInterCompanyTransactionTypeId = TC.intToTransactionTypeId
 		JOIN tblCTPriceContract PC ON PC.intCompanyId = TC.intFromCompanyId
+			AND PC.intPriceContractId = @intPriceContractId
 		JOIN tblCTPriceFixation PF ON PF.intPriceContractId = PC.intPriceContractId
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = PF.intContractHeaderId
 			AND CH.intBookId = TC.intToBookId
-		WHERE TT.strTransactionType = 'Sales Price Fixation'
-			AND PC.intPriceContractId = @intPriceContractId
-			AND CH.intContractTypeId = 2
+		WHERE (
+					(
+						TT.strTransactionType = 'Sales Price Fixation'
+						AND CH.intContractTypeId = 2
+						)
+					OR (
+						TT.strTransactionType = 'Purchase Price Fixation'
+						AND CH.intContractTypeId = 1
+						)
+				
+			)
 
 		IF (
 				(
