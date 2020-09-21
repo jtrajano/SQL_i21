@@ -541,15 +541,18 @@ BEGIN TRY
 	*/
 
 	--REQUESTED RETURN DATA FOR INTEGRATING MODULES
-	INSERT INTO #returnData
-	SELECT 	B.intBillId, 
-			BD.intBillDetailId, 
-			BD.intPriceFixationDetailId,
-			BD.intInventoryReceiptItemId,
-			BD.dblQtyReceived
-	FROM tblAPBill B
-	INNER JOIN @voucherIds IDS ON IDS.intId = B.intBillId
-	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	IF OBJECT_ID(N'tempdb..#returnData') IS NOT NULL
+	BEGIN
+		INSERT INTO #returnData
+		SELECT 	B.intBillId, 
+				BD.intBillDetailId, 
+				BD.intPriceFixationDetailId,
+				BD.intInventoryReceiptItemId,
+				BD.dblQtyReceived
+		FROM tblAPBill B
+		INNER JOIN @voucherIds IDS ON IDS.intId = B.intBillId
+		INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	END
 
 END TRY
 BEGIN CATCH
