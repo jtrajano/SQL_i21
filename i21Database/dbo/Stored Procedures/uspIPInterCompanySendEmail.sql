@@ -206,6 +206,37 @@ BEGIN
 	END
 END
 
+IF @strMessageType = 'Contract Signature'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Contract Number</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;From Company</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+			SELECT *
+			FROM tblIPContractFeedHeader S WITH (NOLOCK)
+			WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+				AND ysnMailSent IS NULL
+			)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
+			   + '<td>&nbsp;' + 'Approved' + '</td>
+		</tr>'
+		FROM tblIPContractFeedHeader S WITH (NOLOCK)
+		WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+			AND S.ysnMailSent IS NULL
+
+		UPDATE tblIPContractFeedHeader
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
 IF @strMessageType = 'Load'
 BEGIN
 	SET @strHeader = '<tr>
