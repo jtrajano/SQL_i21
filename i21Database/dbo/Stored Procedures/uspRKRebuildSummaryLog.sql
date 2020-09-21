@@ -18,6 +18,7 @@ BEGIN TRY
 	-- Truncate table
 	TRUNCATE TABLE tblRKSummaryLog
 	TRUNCATE TABLE tblCTContractBalanceLog
+	TRUNCATE TABLE tblRKRebuildRTSLog
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
 	
@@ -28,7 +29,7 @@ BEGIN TRY
 		--=======================================
 		--				CONTRACTS
 		--=======================================
-		PRINT 'Populate RK Summary Log - Contract'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Contract')
 		
 		DECLARE @cbLog AS CTContractBalanceLog
 
@@ -1030,13 +1031,13 @@ BEGIN TRY
 
 		EXEC uspCTLogContractBalance @cbLog, 1
 
-		PRINT 'End Populate RK Summary Log - Contract'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Contract')
 		DELETE FROM @cbLog
 
 		--=======================================
 		--				BASIS DELIVERIES
 		--=======================================
-		PRINT 'Populate RK Summary Log - Basis Deliveries'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Basis Deliveries')
 
 		select  
 			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
@@ -1390,12 +1391,12 @@ BEGIN TRY
 
 		EXEC uspCTLogContractBalance @cbLog, 1
 
-		PRINT 'End Populate RK Summary Log - Basis Deliveries'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Basis Deliveries')
 		
 		--=======================================
 		--				DERIVATIVES
 		--=======================================
-		PRINT 'Populate RK Summary Log - Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Derivatives')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1466,13 +1467,13 @@ BEGIN TRY
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Derivatives')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--			MATCH DERIVATIVES
 		--=======================================
-		PRINT 'Populate RK Summary Log - Match Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Match Derivatives')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1605,13 +1606,13 @@ BEGIN TRY
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Match Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Match Derivatives')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--			Option Derivatives
 		--=======================================
-		PRINT 'Populate RK Summary Log - Option Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Option Derivatives')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1727,13 +1728,13 @@ BEGIN TRY
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Option Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Option Derivatives')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--				COLLATERAL
 		--=======================================
-		PRINT 'Populate RK Summary Log - Collateral'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Collateral')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1825,13 +1826,13 @@ BEGIN TRY
 		
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Collateral'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Collateral')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--				INVENTORY
 		--=======================================
-		PRINT 'Populate RK Summary Log - Inventory'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Inventory')
 		
 		INSERT INTO @ExistingHistory (	
 			strBatchId
@@ -2205,13 +2206,13 @@ BEGIN TRY
 		ORDER BY intInventoryTransactionId
 	
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-		PRINT 'End Populate RK Summary Log - Inventory'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Inventory')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--				CUSTOMER OWNED
 		--=======================================
-		PRINT 'Populate RK Summary Log - Customer Owned'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Customer Owned')
 		
 		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Customer Owned'
@@ -2433,14 +2434,14 @@ BEGIN TRY
 		ORDER BY dtmDeliveryDate, intStorageHistoryId
 	
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-		PRINT 'End Populate RK Summary Log - Customer Owned'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Customer Owned')
 		DELETE FROM @ExistingHistory
 
 		
         --=======================================
         --                ON HOLD
         --=======================================
-        PRINT 'Populate RK Summary Log - On Hold'
+        INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - On Hold')
 
         INSERT INTO @ExistingHistory (    
             strBatchId
@@ -2506,7 +2507,7 @@ BEGIN TRY
         WHERE ISNULL(strTicketStatus,'') = 'H'
 		
         EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-        PRINT 'End Populate RK Summary Log - On Hold'
+        INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - On Hold')
         DELETE FROM @ExistingHistory
 
 		UPDATE tblRKRebuildSummaryLog

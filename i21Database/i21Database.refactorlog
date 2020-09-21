@@ -7644,4 +7644,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[fnCTGetPricingDetailVoucherInvoice]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="f3fe308b-2f74-46da-b63c-7e421b5432b2" ChangeDateTime="09/19/2020 12:00:46">
+    <Property Name="ElementName" Value="[dbo].[tblRKRebuildRTSLog].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[tblRKRebuildRTSLog]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="intRebuildRTSLogId" />
+  </Operation>
 </Operations>

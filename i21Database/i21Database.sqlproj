@@ -8790,6 +8790,7 @@
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMigrateDPRLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKMigrateM2M.sql" />
+<Build Include="dbo\Tables\tblRKRebuildRTSLog.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing.sql" />
   </ItemGroup>
