@@ -283,6 +283,14 @@ BEGIN
       AND ID.dblQtyShipped <> TD.dblQtyShipped
       AND ITEM.strType != 'Other Charge'
 
+    --DELETE FROM PRICING
+    DELETE SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
+    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
+      AND dblQty > 0
+
     --DWG
     UPDATE SL
     SET dblQty    = 0
@@ -291,6 +299,7 @@ BEGIN
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
     INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
     WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
+      AND dblQty < 0   
 
     --CONTRACT BALANCE LOG
     INSERT INTO @tblContractBalanceLog (
