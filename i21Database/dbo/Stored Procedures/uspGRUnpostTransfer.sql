@@ -358,7 +358,6 @@ BEGIN
 						
 						DECLARE @Entry as ItemCostingTableType;
 						DECLARE @dblCost AS DECIMAL(24,10);
-						DECLARE @strBatchId AS NVARCHAR(40);
 						DECLARE @ysnFromDS AS BIT
 
 						--Check if Transfer is DP To Other Storage (Disregard Risk Error)
@@ -504,7 +503,8 @@ BEGIN
 							----debug point
 							
 							
-							/*UNPOST STORAGE*/						
+							/*UNPOST STORAGE*/
+						END
 			
 				FETCH NEXT FROM _CURSOR INTO @cursorId, @intTransactionDetailId
 				END
