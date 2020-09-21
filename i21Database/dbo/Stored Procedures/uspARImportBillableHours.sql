@@ -198,9 +198,9 @@ SELECT
 	,[ysnInventory]						= 0
 	,[strItemDescription]				= BILLABLE.strTicketNumber + ' - ' + BILLABLE.strSubject
 	,[intOrderUOMId]					= BILLABLE.intItemUOMId
-	,[dblQtyOrdered]					= BILLABLE.dblHours
+	,[dblQtyOrdered]					= ABS(BILLABLE.dblHours)
 	,[intItemUOMId]						= BILLABLE.intItemUOMId
-	,[dblQtyShipped]					= BILLABLE.dblHours
+	,[dblQtyShipped]					= ABS(BILLABLE.dblHours)
 	,[dblPrice]							= BILLABLE.dblPrice
 	,[ysnRefreshPrice]					= 0
 	,[ysnRecomputeTax]					= 1
@@ -247,44 +247,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM @tblInvoiceEntries)
                 FROM tblARInvoiceDetail ID
                 INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON ID.intInvoiceId = I.intID
 				INNER JOIN #BILLABLE HW ON ID.intTicketHoursWorkedId = HW.intTicketHoursWorkedId
-
-
-				--Update Header 
-				UPDATE
-					ARI
-				SET
-				    ARI.dblInvoiceTotal			=  ABS(ARI.dblInvoiceTotal)
-				   ,ARI.dblBaseInvoiceTotal		=  ABS(ARI.dblBaseInvoiceTotal)
-				   ,ARI.dblAmountDue			=  ABS(ARI.dblAmountDue)
-				   ,ARI.dblBaseAmountDue		=  ABS(ARI.dblBaseAmountDue)
-				   ,ARI.dblInvoiceSubtotal	    =  ABS(ARI.dblInvoiceSubtotal)
-				   ,ARI.dblBaseInvoiceSubtotal  =  ABS(ARI.dblInvoiceSubtotal)
-				FROM
-					tblARInvoice ARI
-					INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON intInvoiceId = I.intID
-
-				WHERE
-					ARI.[intInvoiceId] =  I.intID and ARI.strTransactionType ='Credit Memo'
-
-
-				
-				--Update Line Details
-				UPDATE
-					ARID
-				SET
-					ARID.[dblQtyShipped] = ABS(ARID.[dblQtyShipped]),
-				    ARID.[dblQtyOrdered] = ABS(ARID.[dblQtyOrdered]),
-					ARID.dblTotal		 = ABS(ARID.dblTotal),
-					ARID.dblBaseTotal	 = ABS(ARID.dblBaseTotal)
-
-				FROM
-					tblARInvoiceDetail ARID
-					INNER JOIN fnGetRowsFromDelimitedValues(@strCreatedInvoices) I ON intInvoiceId = I.intID
-					INNER JOIN tblARInvoice ARI ON ARI.intInvoiceId = I.intID
-
-				WHERE 
-					ARID.[intInvoiceId] =  I.intID and ARI.strTransactionType ='Credit Memo'
-
 
 				IF @Post = 1
 				BEGIN
