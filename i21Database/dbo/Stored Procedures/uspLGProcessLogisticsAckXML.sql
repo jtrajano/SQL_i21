@@ -109,15 +109,6 @@ BEGIN TRY
 				,intSubBookId INT
 				)
 
-		IF NOT EXISTS (
-				SELECT *
-				FROM tblLGIntrCompLogisticsStg
-				WHERE intLoadId = @intLoadRefId
-				)
-		BEGIN
-			GOTO NextTransaction
-		END
-
 		UPDATE tblLGLoad
 		SET intLoadRefId = @intLoadId
 			,strExternalLoadNumber = @strContractNumber

@@ -93,10 +93,14 @@ BEGIN TRY
 					intContractHeaderId
 					,strApproverXML
 					,strSubmittedByXML
+					,strFeedStatus
+					,intStatusId
 					)
 				SELECT @intContractHeaderId
 					,@strApproverXML
 					,@strSubmittedByXML
+					,'Processed'
+					,1
 
 				SELECT @intContractFeedHeaderId = SCOPE_IDENTITY();
 
