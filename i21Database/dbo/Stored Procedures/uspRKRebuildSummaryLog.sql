@@ -308,6 +308,61 @@ BEGIN TRY
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
 				, InvTran.intCreatedEntityId
+
+			UNION ALL
+			SELECT CH.intContractTypeId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, InvTran.dtmDate
+				, @dtmEndDate AS dtmEndDate
+				, dblQuantity = (CASE WHEN CH.ysnLoad = 1 THEN  
+									1 * CH.dblQuantityPerLoad
+								ELSE
+									ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)), 0)
+								END) * -1
+				, 0
+				, COUNT(DISTINCT Receipt.intInventoryReceiptId)
+				, Receipt.intInventoryReceiptId
+				, Receipt.strReceiptNumber
+				, ReceiptItem.intInventoryReceiptItemId
+				, 'Inventory Return'
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, intUserId = InvTran.intCreatedEntityId
+			FROM tblICInventoryTransaction InvTran
+			JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = InvTran.intTransactionId
+				AND strReceiptType = 'Inventory Return'
+			JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = InvTran.intTransactionId
+				AND ReceiptItem.intInventoryReceiptItemId = InvTran.intTransactionDetailId
+				AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ReceiptItem.intOrderId
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
+				AND CD.intContractHeaderId = CH.intContractHeaderId
+			WHERE strTransactionForm = 'Inventory Receipt'
+				AND ysnIsUnposted = 0
+				AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
+	 			AND intContractTypeId = 1
+	 			AND InvTran.intTransactionTypeId = 42
+			GROUP BY CH.intContractTypeId
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, InvTran.dtmDate
+				, Receipt.intInventoryReceiptId
+				, ReceiptItem.intInventoryReceiptItemId
+				, Receipt.strReceiptNumber
+				, CD.intItemUOMId
+				, ReceiptItem.intUnitMeasureId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, InvTran.intCreatedEntityId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -766,12 +821,12 @@ BEGIN TRY
 				SELECT 
 					dtmDate
 					,dblBalance = CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-									WHEN strType IN ('Inventory Shipment','Inventory Receipt','Outbound Shipment', 'Storage') THEN CB.dblQuantity * -1
+									WHEN strType IN ('Inventory Shipment','Inventory Receipt', 'Inventory Return', 'Outbound Shipment', 'Storage') THEN CB.dblQuantity * -1
 									ELSE 0
 								END
 					,dblBasis = CASE WHEN CD.intPricingTypeId = 2 THEN
 									CASE WHEN strType IN( 'Contract Sequence') THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment','Price Fixation', 'Storage') THEN CB.dblQuantity * -1
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment','Price Fixation', 'Storage') THEN CB.dblQuantity * -1
 										ELSE 0
 									END
 								ELSE 0
@@ -783,7 +838,7 @@ BEGIN TRY
 									END
 								WHEN CD.intPricingTypeId = 1 THEN 
 									CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment', 'Storage') THEN 
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment', 'Storage') THEN 
 											 CB.dblQuantity * -1
 										ELSE 0
 									END
@@ -1113,6 +1168,41 @@ BEGIN TRY
 		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
 		and sh.strPricingType = 'Basis'
 		and suh.strScreenName = 'Inventory Receipt'
+
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * ri.dblReceived end) 
+			, intQtyUOMId = ri.intUnitMeasureId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = 'Inventory Return'
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
+			, intUserId = ri.intCreatedByUserId
+			, ysnDestinationWeightsAndGrades = 0
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = suh.intExternalId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Receipt Return'
 
 		union all
 		select  
