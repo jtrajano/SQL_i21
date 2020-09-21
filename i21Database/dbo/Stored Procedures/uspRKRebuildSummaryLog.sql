@@ -726,6 +726,8 @@ BEGIN TRY
 			,intUserId int
 		)
 
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Begin Raw Contract Balance Loop.')
+
 		declare @intRawCBId as int
 		WHILE EXISTS (SELECT TOP 1 1 FROM @tblRawContractBalance)
 		BEGIN
@@ -876,6 +878,8 @@ BEGIN TRY
 
 			delete from @tblRawContractBalance where intId = @intRawCBId
 		END 
+
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Raw Contract Balance Loop.')
 
 		;WITH CTE
 		AS (
@@ -1079,8 +1083,9 @@ BEGIN TRY
 			, intActionId  = 1 --Rebuild 		
 		FROM @tblContractBalance
 
-
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Begin Contract Balance Logging.')
 		EXEC uspCTLogContractBalance @cbLog, 1
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Contract Balance Logging.')
 
 		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Contract')
 		DELETE FROM @cbLog
