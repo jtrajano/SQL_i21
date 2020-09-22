@@ -1,15 +1,15 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[intResponsiblePartyMatchingId] [int] IDENTITY(1,1) NOT NULL,
-	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strDescriptionContains] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
-	[strAccountNumberContains] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
-	[strReferenceContains] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
+	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL ,
+	[strDescriptionContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strAccountNumberContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strReferenceContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
 	[intActionId] [int] NOT NULL,
-	[intLocationSegmentId] [int] NULL,
 	[intPrimaryBankId] [int] NULL,
 	[intOffsetBankId] [int] NULL,
 	[intPrimarySegmentId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
+	[strLocationSearch] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED 
 (
 	[intResponsiblePartyMatchingId] ASC
@@ -20,30 +20,24 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] ADD  CONSTRAINT [DF__tblCMResp__intCo__345999B0]  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank] FOREIGN KEY([intPrimaryBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount] FOREIGN KEY([intOffsetBankId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank]
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank1] FOREIGN KEY([intOffsetBankId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1] FOREIGN KEY([intPrimaryBankId])
 REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId])
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBank1]
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMResponsiblePartyMatching] FOREIGN KEY([intResponsiblePartyMatchingId])
-REFERENCES [dbo].[tblCMResponsiblePartyMatching] ([intResponsiblePartyMatchingId])
-GO
-
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMResponsiblePartyMatching]
-GO
-
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment] FOREIGN KEY([intLocationSegmentId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment] FOREIGN KEY([intPrimarySegmentId])
 REFERENCES [dbo].[tblGLAccountSegment] ([intAccountSegmentId])
 GO
 
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment]
 GO
+

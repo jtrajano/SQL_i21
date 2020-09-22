@@ -10,12 +10,10 @@ WHEN A.intActionId = 3 THEN 'Bank Transfer'
 WHEN A.intActionId = 4 THEN 'Bank Deposit'     
 ELSE 'ignore'    
 END,    
-B.strCode strLocationSegment,    
 C.strCode strPrimarySegment,    
 D.strBankAccountNo strPrimaryBank,    
 E.strBankAccountNo strOffsetBank    
 from tblCMResponsiblePartyMatching A    
-left join tblGLAccountSegment B on B.intAccountSegmentId = A.intLocationSegmentId    
 left join tblGLAccountSegment C on C.intAccountSegmentId = A.intPrimarySegmentId    
 left join vyuCMBankAccount D on D.intBankAccountId = A.intPrimaryBankId    
 left join vyuCMBankAccount E on E.intBankAccountId = A.intOffsetBankId 
