@@ -211,8 +211,9 @@ LEFT OUTER JOIN (
 	FROM tblSMRecurringTransaction
 	WHERE strTransactionType = 'Invoice'
 ) RECUR ON RECUR.intTransactionId = I.intInvoiceId
-OUTER APPLY(
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
-) AccPeriod
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , strAccountingPeriod = P.strPeriod
+	FROM tblGLFiscalYearPeriod P	
+) AccPeriod ON I.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 WHERE I.ysnRecurring = 1

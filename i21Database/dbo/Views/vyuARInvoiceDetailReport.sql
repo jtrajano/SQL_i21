@@ -88,11 +88,11 @@ LEFT JOIN (
 	) CTD ON CTH.intContractHeaderId = CTD.intContractHeaderId
 ) CT ON ID.intContractHeaderId = CT.intContractHeaderId
 	AND ID.intContractDetailId = CT.intContractDetailId
-OUTER APPLY (
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy')
-	FROM tblGLFiscalYearPeriod P
-	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
-) AccPeriod
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , strAccountingPeriod = P.strPeriod
+	FROM tblGLFiscalYearPeriod P	
+) AccPeriod ON I.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 INNER JOIN (
 	SELECT intCompanyLocationId
 		 , strLocationName 
