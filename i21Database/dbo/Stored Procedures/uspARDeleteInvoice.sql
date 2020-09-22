@@ -52,7 +52,8 @@ BEGIN TRY
 			WHERE intInvoiceDetailId = @InvoiceDetailId
 
 			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
-
+			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
+			
 			--AUDIT LOG
 			DECLARE @details NVARCHAR(max) = '{"change": "tblARInvoiceDetail", "iconCls": "small-tree-grid","changeDescription": "Details", "children": [{"action": "Deleted", "change": "Deleted-Record: '+CAST(@InvoiceDetailId as varchar(15))+'", "keyValue": '+CAST(@InvoiceDetailId as varchar(15))+', "iconCls": "small-new-minus", "leaf": true}]}';
 
@@ -87,6 +88,7 @@ BEGIN TRY
 			INNER JOIN @InvoiceDetailIds SHIP ON DETAIL.intInvoiceDetailId = SHIP.intId
 
 			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
+			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 
 			WHILE EXISTS (SELECT TOP 1 NULL FROM @InvoiceDetailIds)
 				BEGIN
@@ -109,7 +111,6 @@ BEGIN TRY
 		END
 	ELSE
 		BEGIN
-
 			EXEC [dbo].[uspARUpdateInvoiceIntegrations] @InvoiceId = @InvoiceId, @ForDelete = 1, @UserId = @UserEntityID
 
 			DELETE FROM tblARInvoiceDetailTax 
@@ -124,6 +125,8 @@ BEGIN TRY
 
 			DELETE FROM tblARInvoice 
 			WHERE intInvoiceId = @InvoiceId
+
+			EXEC [dbo].[uspARReComputeInvoiceTaxes] @InvoiceId = @InvoiceId
 
 			--Audit Log          
 			EXEC dbo.uspSMAuditLog 
