@@ -312,7 +312,7 @@ OUTER APPLY (
 UPDATE STAGING
 SET strComments = ISNULL(MESSAGES.strMessage, '')
 FROM tblARInvoiceReportStagingTable STAGING
-OUTER APPLY (
+CROSS APPLY (
 	SELECT TOP 1 strMessage
 	FROM tblEMEntityMessage EM
 	WHERE EM.strMessageType = 'Invoice'
@@ -399,7 +399,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 			, blbSignature			= STAGING.blbSignature
 			, strComments			= STAGING.strComments
 			, intInvoiceId			= STAGING.intInvoiceId
-			, intInvoiceDetailId	= 99999999 + TAXES.intTaxCodeId
+			, intInvoiceDetailId	= 9999999 + TAXES.intTaxCodeId
 			, strUnitMeasure		= NULL
 			, strItemNo				= 'State Sales Tax' 
 			, strItemDescription	= TAXES.strTaxCode
@@ -496,7 +496,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , strOrigin			= CASE WHEN strSource = 'Transport Delivery' THEN NULL ELSE strOrigin END
 		  , dblInvoiceTotal		= CASE WHEN strTransactionType = 'Credit Memo' THEN dblInvoiceTotal * -1 ELSE dblInvoiceTotal END
 		  , dblAmountDue		= CASE WHEN strTransactionType = 'Credit Memo' THEN dblAmountDue * -1 ELSE dblAmountDue END
-		  , intSortId			= CASE WHEN strItemNo IN ('Tax') THEN 99999999 ELSE intInvoiceDetailId END
 		WHERE intEntityUserId = @intEntityUserId
 		  AND strRequestId = @strRequestId
 		  AND strInvoiceFormat = 'Format 5 - Honstein'
@@ -517,5 +516,5 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
 		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
-		  AND STAGING.strItemNo <> 'State Sales Tax'		
+		  AND STAGING.strItemNo <> 'State Sales Tax'
 	END
