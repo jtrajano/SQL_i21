@@ -171,7 +171,7 @@ BEGIN
         , intUserId					          	= @intUserId
         , strNotes					            = NULL
         , strMiscFields					        = NULL
-        , intActionId					          = 16--CREATE INVOICE
+        , intActionId					          = 63--DELETE INVOICE
         , intCurrencyId                 = I.intCurrencyId
     FROM tblARTransactionDetail TD
     INNER JOIN tblARInvoice I ON I.intInvoiceId = TD.intTransactionId
@@ -183,7 +183,7 @@ BEGIN
     LEFT JOIN tblCTContractDetail CTD ON TD.intContractDetailId = CTD.intContractDetailId
     WHERE TD.intItemId IS NOT NULL
       AND TD.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
-      AND ISNULL(II.ysnForDelete, 0) = 0
+      --AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId IS NULL
       AND ITEM.strType != 'Other Charge'
 
@@ -368,7 +368,7 @@ BEGIN
 		    , intFutureMarketId	        = SL.intFutureMarketId
 		    , intFutureMonthId		      = SL.intFutureMonthId
 		    , intUserId			            = SL.intUserId
-        , intActionId					      = 16--CREATE INVOICE
+        , intActionId					      = SL.intActionId
         , strNotes                  = SL.strNotes
   FROM @tblSummaryLog SL
 	INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId

@@ -89,21 +89,25 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
 OUTER APPLY (
     --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
     --IF NO VOUCHER JUST TAKE THE TAX
-    SELECT SUM(rctTax.dblTax) AS dblTax
-    FROM tblICInventoryReceiptItemTax rctTax
-    LEFT JOIN tblAPBillDetail billDetail 
-		ON billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-	LEFT JOIN tblAPBillDetailTax billDetailTax
-            ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
-            AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
-            AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
-    WHERE 
-        rctTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
-    AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
-            ELSE (
-                CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
-            )
-            END
+    SELECT SUM(dblTax) AS dblTax
+    FROM (
+        SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
+            rctTax.intInventoryReceiptItemId, rctTax.dblTax AS dblTax
+        FROM tblICInventoryReceiptItemTax rctTax
+        LEFT JOIN tblAPBillDetail billDetail 
+            ON billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+        LEFT JOIN tblAPBillDetailTax billDetailTax
+                ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
+                AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
+                AND billDetailTax.intTaxClassId = rctTax.intTaxClassId
+        WHERE 
+            rctTax.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId 
+        AND 1 = CASE WHEN billDetail.intBillDetailId IS NULL THEN 1
+                ELSE (
+                    CASE WHEN billDetailTax.intBillDetailTaxId IS NOT NULL THEN 1 ELSE 0 END
+                )
+                END
+    ) tmpTax
 
 ) clearingTax
 -- OUTER APPLY (
