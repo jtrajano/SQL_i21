@@ -142,8 +142,9 @@ LEFT OUTER JOIN (
 		 , strName 
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) USERENTERED ON USERENTERED.intEntityId = I.intPostedById
-OUTER APPLY(
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
-) AccPeriod
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , strAccountingPeriod = P.strPeriod
+	FROM tblGLFiscalYearPeriod P	
+) AccPeriod ON I.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 WHERE ((P.intPaymentId IS NOT NULL AND I.strTransactionType <> 'Cash') OR I.strTransactionType = 'Cash')
