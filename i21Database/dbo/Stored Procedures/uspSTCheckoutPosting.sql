@@ -1,4 +1,6 @@
-﻿CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
+﻿
+
+CREATE PROCEDURE [dbo].[uspSTCheckoutPosting]
 	@intCurrentUserId					INT,
 	@intCheckoutId						INT,
 	@strDirection						NVARCHAR(50),
@@ -9,7 +11,7 @@
 	@ysnCustomerChargesInvoiceStatus	BIT OUTPUT,
 	@strBatchIdForNewPostRecap			NVARCHAR(1000)	OUTPUT,
 	@strErrorCode						NVARCHAR(50)	OUTPUT,
-	@ysnDebug							BIT =	0
+	@ysnDebug							BIT								=	0
 AS
 BEGIN
 
@@ -24,18 +26,6 @@ BEGIN
 		-- ==================================================================================================================
 		-- [START] - Check Checkout current process using column [intCheckoutCurrentProcess]
 		-- ==================================================================================================================
-		DECLARE @tblSTLotteryProcessError TABLE 
-		( 
-			 intCheckoutId				int				  NULL
-			,strBookNumber				nvarchar(max)	  NULL
-			,strGame					nvarchar(max)	  NULL
-			,strError					nvarchar(max)	  NULL
-			,strProcess					nvarchar(max)	  NULL
-		)
-
-
-
-
 
 		DECLARE @ysnSetToReady BIT = CAST(0 AS BIT)
 
@@ -415,9 +405,6 @@ BEGIN
 		----------------------------------------------------------------------
 		IF(@ysnPost = 1)
 			BEGIN
-				
-			DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @intCurrentUserId
-
 --PRINT 'PUMP TOTALS'
 				----------------------------------------------------------------------
 				---------------------------- PUMP TOTALS @strtblSTCheckoutPumpTotals01--------------------------
@@ -5466,7 +5453,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					--	)
 					--END 
 
-					--DECLARE @intReturnLotteryId INT
+					DECLARE @intReturnLotteryId INT
 					DECLARE @intRLInventoryReceiptId INT
 					DECLARE @ReturnLotteryReceiptStagingTable ReceiptStagingTable
 					,@returnLotteryOtherCharges ReceiptOtherChargesTableType
@@ -5477,107 +5464,17 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					SELECT * INTO #tblSTTempReturnLottery  
 					FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId
 
-					SELECT * INTO #tblSTTempLoopReturnLottery  
-					FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId
-
-					DECLARE @intLotteryBook INT 
-					DECLARE @dblTotalReturnQuantity INT
-					DECLARE @dblTotalReceiveQuantity INT 
-					DECLARE @dblTotalSoldQuantity INT
-					DECLARE @ysnReturnLotteryHaveError BIT = 0
-
 					IF((SELECT COUNT(*) FROM #tblSTTempReturnLottery) > 0)
 					BEGIN
-						
-						DECLARE @intReturnLotteryLoopId INT 
-						WHILE EXISTS(SELECT TOP 1 * FROM #tblSTTempLoopReturnLottery)
-						BEGIN
-
-							
-							
-							SET @intLotteryBook				 = 0
-							SET @dblTotalReturnQuantity 	 = 0
-							SET @dblTotalReceiveQuantity 	 = 0
-							SET @dblTotalSoldQuantity		 = 0
-
-							SELECT TOP 1 
-							 @intReturnLotteryLoopId = intReturnLotteryId 
-							,@intLotteryBook = intLotteryBookId
-							,@dblTotalReturnQuantity = dblQuantity 
-							FROM #tblSTTempLoopReturnLottery
-
-							SELECT @dblTotalReceiveQuantity = SUM(intTicketPerPack) FROM tblSTReceiveLottery where intLotteryBookId = @intLotteryBook GROUP BY intLotteryBookId
-							SELECT @dblTotalSoldQuantity = SUM(dblQuantitySold) FROM tblSTCheckoutLotteryCount where intLotteryBookId = @intLotteryBook GROUP BY intLotteryBookId
-
-							SET @dblTotalReceiveQuantity = ISNULL(@dblTotalReceiveQuantity,0)
-							SET @dblTotalSoldQuantity = ISNULL(@dblTotalSoldQuantity,0)
-							SET @dblTotalReturnQuantity = ISNULL(@dblTotalReturnQuantity,0)
-
-							IF(@dblTotalReceiveQuantity - @dblTotalSoldQuantity != @dblTotalReturnQuantity)
-							BEGIN
-			
-								INSERT INTO @tblSTLotteryProcessError (
-									 [intCheckoutId]				
-									,[strBookNumber]				
-									,[strGame]					
-									,[strError]					
-									,[strProcess]				
-								)
-								SELECT 
-									@intCurrentUserId
-									,tblSTLotteryBook.[strBookNumber]
-									,tblSTLotteryGame.strGame
-									,'Unable to Post | Returned Quantity for Book# ' + tblSTLotteryBook.[strBookNumber] + ' does not match Total Tickets of ' + CAST(@dblTotalReceiveQuantity AS NVARCHAR(MAX))+ ' - Total Sales of ' + CAST(@dblTotalSoldQuantity AS NVARCHAR(MAX)) + ' = ' + CAST(@dblTotalReceiveQuantity - @dblTotalSoldQuantity AS NVARCHAR(MAX))
-									,'Posting return lottery'
-								FROM tblSTReturnLottery 
-								INNER JOIN tblSTLotteryBook
-								ON tblSTLotteryBook.intLotteryBookId =  tblSTReturnLottery.intLotteryBookId 
-								INNER JOIN tblSTLotteryGame 
-								ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
-								WHERE intReturnLotteryId = @intReturnLotteryLoopId
-
-								SELECT 
-									@intCurrentUserId
-									,tblSTLotteryBook.[strBookNumber]
-									,tblSTLotteryGame.strGame
-									,'Unable to Post | Returned Quantity for Book# ' + tblSTLotteryBook.[strBookNumber] + ' does not match Total Tickets of ' + CAST(@dblTotalReceiveQuantity AS NVARCHAR(MAX))+ ' - Total Sales of ' + CAST(@dblTotalSoldQuantity AS NVARCHAR(MAX)) + ' = ' + CAST(@dblTotalReceiveQuantity - @dblTotalSoldQuantity AS NVARCHAR(MAX))
-									,'Posting return lottery'
-								FROM tblSTReturnLottery 
-								INNER JOIN tblSTLotteryBook
-								ON tblSTLotteryBook.intLotteryBookId =  tblSTReturnLottery.intLotteryBookId 
-								INNER JOIN tblSTLotteryGame 
-								ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
-								WHERE intReturnLotteryId = @intReturnLotteryLoopId
-
-
-								SET @ysnReturnLotteryHaveError = 1 
-
-								--SELECT * FROM @tblSTLotteryProcessError
-								
-							END
-
-
-							DELETE FROM #tblSTTempLoopReturnLottery WHERE intReturnLotteryId = @intReturnLotteryLoopId
-							--SELECT TOP 1 'x',* FROM #tblSTTempLoopReturnLottery
-
-						END
-
-						IF(@ysnReturnLotteryHaveError = 1)
-						BEGIN
-							SET @ysnSuccess = CAST(0 as BIT)
-							SET @strStatusMsg = 'Posting Return Lottery | Validation error.'
-							GOTO ExitWithRollback
-						END
-
 						--UPDATE LOTTERY BOOK--
 						UPDATE tblSTLotteryBook
 						SET 
 						intBinNumber = NULL
-						,dblQuantityRemaining = 0 -- SHOULD ALWAYS BE 0 FOR RETURN
+						,dblQuantityRemaining = 0
 						,strStatus = 'Returned'
 						WHERE intLotteryBookId IN (SELECT intLotteryBookId FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId)
+	
 
-						
 						SET @strReceiptType = 'Direct'
 						SET @strSourceScreenName = 'Lottery Module'
 
@@ -6438,37 +6335,20 @@ IF(@ysnDebug = CAST(1 AS BIT))
 					BEGIN
 
 						UPDATE tblSTReturnLottery SET ysnPosted = 0 WHERE intCheckoutId = @intCheckoutId
-						SELECT * INTO #tblTempUnpostReturnLotteryIR FROM tblSTReturnLottery WHERE intCheckoutId = @intCheckoutId
-						DECLARE @intLoopDeleteLotteryIRId INT
-						DECLARE @intLoopDeleteLotteryBookId INT
-						DECLARE @intLoopDeleteReturnLotteryId INT
-						 WHILE EXISTS(SELECT TOP 1 * FROM #tblTempUnpostReturnLotteryIR)
-						 BEGIN
-						 	SELECT TOP 1 
-							 @intLoopDeleteLotteryIRId = intInventoryReceiptId
-							,@intLoopDeleteLotteryBookId = intLotteryBookId  
-							,@intLoopDeleteReturnLotteryId = intReturnLotteryId
-							FROM #tblTempUnpostReturnLotteryIR
+						-- SELECT * INTO #tblTempUnpostLotteryIR FROM tblSTReceiveLottery WHERE intCheckoutId = @intCheckoutId
+						-- DECLARE @intLoopDeleteLotteryIRId INT
+						-- DECLARE @intLoopDeleteLotteryBookId INT
+						-- WHILE EXISTS(SELECT TOP 1 * FROM #tblTempUnpostLotteryIR)
+						-- BEGIN
+						-- 	SELECT TOP 1 @intLoopDeleteLotteryIRId = intInventoryReceiptId, @intLoopDeleteLotteryBookId = intLotteryBookId  FROM #tblTempUnpostLotteryIR
+
+						-- 	EXEC [dbo].[uspICDeleteInventoryReceipt]=@InventoryReceiptId = @intLoopDeleteLotteryIRId,=@intEntityUserSecurityId = @intCurrentUserId
 
 
+						-- 	-- DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @intLoopDeleteLotteryBookId
+						-- 	DELETE FROM #tblTempUnpostLotteryIR WHERE intInventoryReceiptId = @intLoopDeleteLotteryIRId
 
-						 	--EXEC [dbo].[uspICDeleteInventoryReceipt]=@InventoryReceiptId = @intLoopDeleteLotteryIRId,=@intEntityUserSecurityId = @intCurrentUserId
-
-							UPDATE tblSTLotteryBook 
-							SET 
-								dblQuantityRemaining = dblQuantityRemaining + dblQuantity,
-								strStatus = 'Inactive'
-							FROM 
-							tblSTReturnLottery
-							WHERE intReturnLotteryId = @intLoopDeleteReturnLotteryId AND tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-
-						 	-- DELETE FROM tblSTLotteryBook WHERE intLotteryBookId = @intLoopDeleteLotteryBookId
-						 	DELETE FROM #tblTempUnpostReturnLotteryIR 
-							WHERE intInventoryReceiptId = @intLoopDeleteLotteryIRId
-							AND @intLoopDeleteLotteryBookId = intLotteryBookId  
-							AND @intLoopDeleteReturnLotteryId = intReturnLotteryId
-
-						 END
+						-- END
 
 					END
 
@@ -6657,24 +6537,7 @@ ExitWithRollback:
 		END
 
 	UPDATE tblSTCheckoutHeader SET intCheckoutCurrentProcess = 0 WHERE intCheckoutId = @intCheckoutId
-
-	DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @intCurrentUserId
-	--SELECT 'x',* FROM @tblSTLotteryProcessError
-	INSERT INTO tblSTLotteryProcessError (
-		 intCheckoutId
-		,strBookNumber
-		,strGame
-		,strError
-		,strProcess
-	)
-	SELECT 
-		intCheckoutId
-		,strBookNumber
-		,strGame
-		,strError
-		,strProcess
-	FROM
-	@tblSTLotteryProcessError
+	
 		
 ExitPost:
 	
