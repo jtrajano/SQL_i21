@@ -72,7 +72,7 @@ BEGIN TRY
 			@intFinalCurrencyId		=	intFinalCurrencyId,
 			@ysnFinalSubCurrency	=	CY.ysnSubCurrency,
 			@intPriceContractId		=	PF.intPriceContractId
-	FROM	tblCTPriceFixation		PF
+	FROM	tblCTPriceFixation		PF  WITH (UPDLOCK)
 	JOIN	tblCTPriceContract		PC	ON	PC.intPriceContractId	=	PF.intPriceContractId	LEFT 
 	JOIN	tblSMCurrency			CY	ON	CY.intCurrencyID		=	PC.intFinalCurrencyId
 	WHERE	intPriceFixationId		=	@intPriceFixationId
@@ -398,7 +398,7 @@ BEGIN TRY
 			
 		END
 
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WHERE intPriceFixationId = @intPriceFixationId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTSpreadArbitrage WITH (UPDLOCK) WHERE intPriceFixationId = @intPriceFixationId)
 		BEGIN
 		
 			SELECT	@intTypeRef				=	MAX(intTypeRef) 
