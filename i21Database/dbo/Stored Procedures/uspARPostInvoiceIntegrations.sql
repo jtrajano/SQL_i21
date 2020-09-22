@@ -1188,15 +1188,21 @@ FROM #ARPostInvoiceHeader
 
 WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
 	BEGIN
-		DECLARE @intInvoiceId INT	= NULL
+		DECLARE @intInvoiceId 	INT	= NULL
+			  , @dtmInvoiceDate	DATETIME = NULL
 
-		SELECT TOP 1 @intInvoiceId = intId 
-		FROM @tblInvoicesToUpdate
+		SELECT TOP 1 @intInvoiceId = intId
+				   , @dtmInvoiceDate = CASE WHEN @Post = 1 THEN NULL ELSE I.dtmPostDate END
+		FROM @tblInvoicesToUpdate U
+		INNER JOIN tblARInvoice I ON U.intId = I.intInvoiceId
 
 		--INTER COMPANY PRE-STAGE
 		EXEC dbo.uspIPInterCompanyPreStageInvoice @intInvoiceId, @strRowState, @UserId
 		--UPDATE GROSS MARGIN SUMMARY
-		EXEC dbo.uspARInvoiceGrossMarginSummary @Post, @intInvoiceId
+		EXEC dbo.uspARInvoiceGrossMarginSummary @ysnPosted 		= @Post
+    										  , @ysnRebuild 	= 0
+											  , @intInvoiceId 	= @intInvoiceId
+											  , @dtmDate	  	= @dtmInvoiceDate
 		
 		DELETE FROM @tblInvoicesToUpdate WHERE intId = @intInvoiceId
 	END
