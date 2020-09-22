@@ -87,10 +87,16 @@ OUTER APPLY (
 	GROUP BY intInventoryReceiptItemId
 ) TOTAL
 OUTER APPLY (
-	SELECT CASE WHEN ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) = receiptItem.dblOpenReceive
-		OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END AS isFullyTransferred
-		,ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) AS dblTransferredUnits
+	SELECT isFullyTransferred = CASE WHEN ABS(dblTransferredUnits - receiptItem.dblOpenReceive) <= 0.01 OR dblTransferredUnits = receiptItem.dblOpenReceive OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END
+		,dblTransferredUnits
 		,S.intInventoryReceiptItemId
+	FROM (
+		SELECT 
+		--CASE WHEN ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) = receiptItem.dblOpenReceive
+		--	OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END AS isFullyTransferred
+			ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) AS dblTransferredUnits
+			,S.intInventoryReceiptItemId
+	) A
 ) TRANSFER_TRAN
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId

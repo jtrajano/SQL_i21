@@ -8002,6 +8002,7 @@
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
+    <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
