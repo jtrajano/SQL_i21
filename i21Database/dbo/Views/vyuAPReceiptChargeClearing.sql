@@ -79,7 +79,7 @@ AND NOT EXISTS (
 		AND transferClr_dp.strTransactionNumber = Receipt.strReceiptNumber
 )   
 UNION ALL      
---BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
+--BILL ysnAccrue = 1/There is a vendor selected, receipt vendor   IR-4345 Roth
 SELECT      
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
@@ -130,7 +130,8 @@ LEFT JOIN
 WHERE       
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
-AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
+--HANDLE RECEIPT WHICH intEntityVendorId IS NULL
+AND ISNULL(Receipt.intEntityVendorId,ReceiptCharge.intEntityVendorId) = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
 AND NOT EXISTS (
 	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
