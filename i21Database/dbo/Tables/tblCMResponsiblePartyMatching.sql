@@ -1,9 +1,9 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[intResponsiblePartyMatchingId] [int] IDENTITY(1,1) NOT NULL,
 	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strDescriptionContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strAccountNumberContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strReferenceContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strDescriptionContains] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
+	[strAccountNumberContains] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
+	[strReferenceContains] [nvarchar](300) COLLATE Latin1_General_CI_AS NULL,
 	[intActionId] [int] NOT NULL,
 	[intLocationSegmentId] [int] NULL,
 	[intPrimaryBankId] [int] NULL,

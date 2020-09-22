@@ -2,7 +2,7 @@
 (
 	[intBankStatementImportId] INT IDENTITY (1, 1) NOT NULL,
 	[strBankStatementImportId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL, 
-    [intBankAccountId] INT NOT NULL, 
+    [intBankAccountId] INT NULL, 
     [dtmDate] DATETIME NULL, 
     [strPayee] NVARCHAR(300) COLLATE Latin1_General_CI_AS NULL, 
     [strReferenceNo] NVARCHAR(20) COLLATE Latin1_General_CI_AS NULL, 
@@ -21,6 +21,7 @@
     [intLastModifiedUserId] INT NULL, 
     [dtmLastModified] DATETIME NULL, 
     [intConcurrencyId] INT NULL,
+    [intResponsiblePartyMatchingId] INT NULL,
 	CONSTRAINT [FK_tblCMBankAccounttblCMBankStatementImport] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]), 
     CONSTRAINT [PK_tblCMBankStatementImport] PRIMARY KEY ([intBankStatementImportId]), 
 )
