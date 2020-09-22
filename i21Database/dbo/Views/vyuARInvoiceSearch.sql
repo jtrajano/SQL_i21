@@ -262,10 +262,11 @@ OUTER APPLY (
 			FOR XML PATH ('')
 		) C (strPaymentMethod)
 ) PAYMETHODS
-OUTER APPLY(
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy')  from tblGLFiscalYearPeriod P
-	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
-) AccPeriod
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , strAccountingPeriod = P.strPeriod
+	FROM tblGLFiscalYearPeriod P	
+) AccPeriod ON I.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 OUTER APPLY (
 	SELECT TOP 1 P.dtmDatePaid
 	FROM tblARPaymentDetail PD

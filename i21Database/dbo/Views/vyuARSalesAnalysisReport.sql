@@ -247,10 +247,11 @@ FROM
 	           AND ARI.strType = 'CF Tran'
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
-	OUTER APPLY(
-	    SELECT  strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
-	) AccPeriod
+	LEFT JOIN (
+		SELECT intGLFiscalYearPeriodId
+			, strAccountingPeriod = P.strPeriod
+		FROM tblGLFiscalYearPeriod P	
+	) AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 	WHERE ARI.ysnPosted = 1 
 		AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 		AND ISNULL(ICI.strType, '') NOT IN ('Software', 'Bundle')
@@ -382,10 +383,11 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
-	OUTER APPLY(
-	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
-	) AccPeriod
+	LEFT JOIN (
+		SELECT intGLFiscalYearPeriodId
+			, strAccountingPeriod = P.strPeriod
+		FROM tblGLFiscalYearPeriod P	
+	) AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ARID.intStorageScheduleTypeId, 0) = 0
@@ -649,10 +651,11 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
-	OUTER APPLY(
-	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
-	) AccPeriod
+	LEFT JOIN (
+		SELECT intGLFiscalYearPeriodId
+			 , strAccountingPeriod = P.strPeriod
+		FROM tblGLFiscalYearPeriod P	
+	) AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -915,10 +918,11 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
-	OUTER APPLY(
-	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
-	) AccPeriod
+	LEFT JOIN (
+		SELECT intGLFiscalYearPeriodId
+			 , strAccountingPeriod = P.strPeriod
+		FROM tblGLFiscalYearPeriod P	
+	) AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')
 	  AND ICI.strType = 'Software'
@@ -1181,10 +1185,11 @@ FROM
 			   AND ARID.intSalesOrderDetailId		= LOTTED.intLineNo
 	LEFT OUTER JOIN tblTMSite TMSITE
 	ON TMSITE.intSiteID = ARID.intSiteId
-	OUTER APPLY(
-	    SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-		WHERE ARI.intPeriodId = P.intGLFiscalYearPeriodId
-	) AccPeriod
+	LEFT JOIN (
+		SELECT intGLFiscalYearPeriodId
+			 , strAccountingPeriod = P.strPeriod
+		FROM tblGLFiscalYearPeriod P	
+	) AccPeriod ON ARI.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
 	WHERE ARI.ysnPosted = 1 
 	  AND ARI.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Service Charge')
 	  AND ISNULL(ICI.strType, '') = 'Software'

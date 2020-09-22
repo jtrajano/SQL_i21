@@ -61,7 +61,8 @@ FROM
 	 ,strAccountingPeriod   = AccPeriod.strAccountingPeriod
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 OUTER APPLY(
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
+	SELECT strAccountingPeriod = P.strPeriod 
+	FROM tblGLFiscalYearPeriod P
 	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
 ) AccPeriod
 WHERE ysnPosted = 1
