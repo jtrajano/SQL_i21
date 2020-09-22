@@ -1,9 +1,8 @@
-  
-CREATE VIEW vyuARInvoiceGrossMargin  
-AS  
-  
+CREATE VIEW vyuARInvoiceGrossMargin    
+AS
 WITH Query AS(  
     SELECT  
+		intTransactionId,
          dblTotalCost   = ISNULL(SAR.dblStandardCost, 0) *  
                                         CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')   
                                             THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund')  
@@ -18,7 +17,7 @@ WITH Query AS(
         SELECT   
   
   
-  
+			
             strTransactionType  = ARI.strTransactionType  
             , intTransactionId   = ARI.intInvoiceId    
             , intEntityCustomerId  = ARI.intEntityCustomerId  
@@ -304,6 +303,7 @@ WITH Query AS(
         UNION ALL  
         --INVOICE/SOFTWARE ITEMS/MAINTENANCE TYPE  
         SELECT  
+		
             strTransactionType  = ARI.strTransactionType  
             , intTransactionId   = ARI.intInvoiceId  
             , intEntityCustomerId  = ARI.intEntityCustomerId  
@@ -488,6 +488,7 @@ WITH Query AS(
   
         --INVOICE/SOFTWARE ITEMS/NO MAINTENANCE TYPE  
         SELECT   
+		
             strTransactionType  = ARI.strTransactionType  
             , intTransactionId   = ARI.intInvoiceId  
             , intEntityCustomerId  = ARI.intEntityCustomerId  
@@ -583,14 +584,15 @@ WITH Query AS(
 totalQuery as (  
     SELECT   
 	dtmDate,  
+	intTransactionId,
     SUM(dblTotalCost) Expense,  
     SUM(A.dblTotal) - SUM( dblTotalCost) Net,   
     SUM(A.dblTotal) Revenue  
     FROM Query A   
-    GROUP BY dtmDate  
+    GROUP BY dtmDate , intTransactionId 
 )  
-SELECT 'Expense' strType , Expense dblAmount, dtmDate  FROM totalQuery   
+SELECT intTransactionId intInvoiceId, 'Expense' strType , Expense dblAmount, dtmDate  FROM totalQuery   
 UNION  
-SELECT 'Revenue'  strType , Revenue dblAmount, dtmDate  FROM totalQuery   
+SELECT intTransactionId intInvoiceId, 'Revenue'  strType , Revenue dblAmount, dtmDate  FROM totalQuery   
 UNION  
-SELECT 'Net' strType , Net dblAmount, dtmDate  FROM totalQuery 
+SELECT intTransactionId intInvoiceId, 'Net' strType , Net dblAmount, dtmDate  FROM totalQuery 
