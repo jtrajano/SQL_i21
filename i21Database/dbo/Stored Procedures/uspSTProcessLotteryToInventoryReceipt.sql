@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
+﻿CREATE PROCEDURE [dbo].[uspSTProcessLotteryToInventoryReceipt]
 	@Id INT,
 	@UserId INT,
 	@ProcessType INT,
@@ -19,7 +18,7 @@ DECLARE @ErrorState INT;
 DECLARE @intEntityId int;
 
 
-DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @UserId
+
 
 DECLARE  @tblSTTempLotteryProcessError TABLE (
     [intCheckoutId]				 INT            NULL,
@@ -387,131 +386,193 @@ BEGIN TRY
 		-- FROM tblSTLotteryBook WHERE intLotteryBookId = @intLotteryBookId
 		-- SET @intReturnLotteryId = SCOPE_IDENTITY()
 
-		UPDATE tblSTReturnLottery 
-		SET dblOriginalQuantity = dblQuantity - @dblUnpostedQuantitySold 
-		WHERE intReturnLotteryId = @intReturnLotteryId
 
-		--UPDATE LOTTERY BOOK--
-		UPDATE tblSTLotteryBook
-		SET 
-		intBinNumber = NULL
-		,dblQuantityRemaining = 0
-		,strStatus = 'Returned'
-		WHERE intLotteryBookId = @intLotteryBookId
-	
-
-		SET @strReceiptType = 'Direct'
-		SET @strSourceScreenName = 'Lottery Module'
-
-
-		--CREATE RETURN RECEIPT--
-		INSERT INTO @ReceiptStagingTable(
-			 strReceiptType
-			,strSourceScreenName
-			,intEntityVendorId
-			,intShipFromId
-			,intLocationId
-			,intItemId
-			,intItemLocationId
-			,intItemUOMId
-			,intCostUOMId
-			,strBillOfLadding
-			,intContractHeaderId
-			,intContractDetailId
-			,dtmDate
-			,intShipViaId
-			,dblQty
-			,dblCost
-			,intCurrencyId
-			,dblExchangeRate
-			,intLotId
-			,intSubLocationId
-			,intStorageLocationId
-			,ysnIsStorage
-			,dblFreightRate
-			,intSourceId	
-			,intSourceType		 	
-			,dblGross
-			,dblNet
-			,intInventoryReceiptId
-			,dblSurcharge
-			,ysnFreightInPrice
-			,strActualCostId
-			,intTaxGroupId
-			,strVendorRefNo
-			,strSourceId			
-			,intPaymentOn
-			,strChargesLink
-			,dblUnitRetail
-			,intSort
-			,strDataSource
-		)	
-		SELECT strReceiptType	= @strReceiptType
-		,strSourceScreenName	= @strSourceScreenName
-		,intEntityVendorId		= tblICItemLocation.intVendorId
-		,intShipFromId			= (SELECT TOP 1 intShipFromId FROM tblAPVendor WHERE intEntityId = tblICItemLocation.intVendorId)
-		,intLocationId			= tblSTStore.intCompanyLocationId
-		,intItemId				= tblSTLotteryGame.intItemId
-		,intItemLocationId		= tblICItemLocation.intItemLocationId
-		,intItemUOMId			= tblICItemUOM.intItemUOMId
-		, intCostUOMId			= tblICItemUOM.intUnitMeasureId
-		,strBillOfLadding		= ''
-		,intContractHeaderId	= NULL
-		,intContractDetailId	= NULL
-		,dtmDate				= tblSTReturnLottery.dtmReturnDate
-		,intShipViaId			= NULL
-		,dblQty					= tblSTReturnLottery.dblQuantity * -1
-		,dblCost				= tblSTLotteryGame.dblInventoryCost 
-		,intCurrencyId			= @defaultCurrency
-		,dblExchangeRate		= 1
-		,intLotId				= NULL
-		,intSubLocationId		= NULL
-		,intStorageLocationId	= NULL
-		,ysnIsStorage			= 0
-		,dblFreightRate			= 0
-		,intSourceId			= tblSTReturnLottery.intReturnLotteryId
-		,intSourceType		 	= 7
-		,dblGross				= NULL
-		,dblNet					= NULL
-		,intInventoryReceiptId	= tblSTReturnLottery.intInventoryReceiptId 
-		,dblSurcharge			= NULL
-		,ysnFreightInPrice		= NULL
-		,strActualCostId		= NULL
-		,intTaxGroupId			= NULL
-		,strVendorRefNo			= (CAST(ISNULL(tblSTStore.intStoreNo,'') as nvarchar(100)) + '-' + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTLotteryBook.strBookNumber,'')) + 'R'
-		,strSourceId			= NULL
-		,intPaymentOn			= NULL
-		,strChargesLink			= NULL
-		,dblUnitRetail			= NULL
-		,intSort				= NULL
-		,strDataSource			= @strSourceScreenName
-		FROM tblSTReturnLottery
-		INNER JOIN tblSTLotteryBook
-		ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
-		INNER JOIN tblSTLotteryGame 
-		ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
-		INNER JOIN tblSTStore 
-		ON tblSTLotteryBook.intStoreId = tblSTStore.intStoreId
-		INNER JOIN tblICItemLocation 
-			ON tblICItemLocation.intLocationId = tblSTStore.intCompanyLocationId 
-			AND tblSTLotteryGame.intItemId = tblICItemLocation.intItemId
-		INNER JOIN tblICItemPricing
-			ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
-			AND tblICItemPricing.intItemId = tblICItemLocation.intItemId
-		LEFT JOIN tblAPVendor 
-		ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
-		LEFT JOIN tblICItemUOM 
-		ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
-		WHERE tblSTReturnLottery.intReturnLotteryId = @intReturnLotteryId
-
-
-		EXEC dbo.uspICAddItemReceipt 
-			 @ReceiptStagingTable
-			,@OtherCharges
-			,@UserId;
+		DECLARE @intLotteryBook INT 
 		
-		UPDATE tblSTReturnLottery SET intInventoryReceiptId = tblResult.intInventoryReceiptId FROM #tmpAddItemReceiptResult as tblResult WHERE tblSTReturnLottery.intReturnLotteryId = tblResult.intSourceId
-		SELECT * FROM #tmpAddItemReceiptResult
+		DECLARE @dblTotalReturnQuantity INT
+		DECLARE @dblTotalReceiveQuantity INT 
+		DECLARE @dblTotalSoldQuantity INT
+		SELECT TOP 1 
+		@intLotteryBook = intLotteryBookId,
+		@dblTotalReturnQuantity = dblQuantity 
+		FROM tblSTReturnLottery WHERE intReturnLotteryId = @intReturnLotteryId
+
+		SELECT @dblTotalReceiveQuantity = SUM(intTicketPerPack) FROM tblSTReceiveLottery where intLotteryBookId = @intLotteryBook GROUP BY intLotteryBookId
+		SELECT @dblTotalSoldQuantity = SUM(dblQuantitySold) FROM tblSTCheckoutLotteryCount where intLotteryBookId = @intLotteryBook GROUP BY intLotteryBookId
+
+
+		--IF(@ProcessType = 11)
+		--BEGIN
+		--	UPDATE tblSTLotteryBook
+		--	SET dblQuantityRemaining = dblQuantityRemaining + (SELECT TOP 1 dblOriginalQuantity FROM tblSTReturnLottery WHERE intReturnLotteryId = @intReturnLotteryId) 
+		--	WHERE intLotteryBookId = @intLotteryBookId
+		--END
+
+		--UPDATE tblSTReturnLottery 
+		--SET dblOriginalQuantity = dblQuantity  
+		--WHERE intReturnLotteryId = @intReturnLotteryId
+
+
+		----UPDATE LOTTERY BOOK--
+		--UPDATE tblSTLotteryBook
+		--SET 
+		--intBinNumber = NULL
+		--,dblQuantityRemaining = dblQuantityRemaining - @dblTotalReturnQuantity
+		--,strStatus = 'Returned'
+		--WHERE intLotteryBookId = @intLotteryBookId
+
+		SET @dblTotalReceiveQuantity = ISNULL(@dblTotalReceiveQuantity,0)
+		SET @dblTotalSoldQuantity = ISNULL(@dblTotalSoldQuantity,0)
+		SET @dblTotalReturnQuantity = ISNULL(@dblTotalReturnQuantity,0)
+
+		IF(@dblTotalReceiveQuantity - @dblTotalSoldQuantity != @dblTotalReturnQuantity)
+		BEGIN
+			
+			INSERT INTO tblSTLotteryProcessError (
+				 [intCheckoutId]				
+				,[strBookNumber]				
+				,[strGame]					
+				,[strError]					
+				,[strProcess]				
+			)
+			SELECT 
+				@UserId
+				,tblSTLotteryBook.[strBookNumber]
+				,tblSTLotteryGame.strGame
+				,'Returned Quantity for Book# ' + tblSTLotteryBook.[strBookNumber] + ' does not match Total Tickets of ' + CAST(@dblTotalReceiveQuantity AS NVARCHAR(MAX))+ ' - Total Sales of ' + CAST(@dblTotalSoldQuantity AS NVARCHAR(MAX)) + ' = ' + CAST(@dblTotalReceiveQuantity - @dblTotalSoldQuantity AS NVARCHAR(MAX))
+				,'Processing return lottery'
+			FROM tblSTReturnLottery 
+			INNER JOIN tblSTLotteryBook
+			ON tblSTLotteryBook.intLotteryBookId =  tblSTReturnLottery.intLotteryBookId 
+			INNER JOIN tblSTLotteryGame 
+			ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+			WHERE intReturnLotteryId = @intReturnLotteryId
+
+
+			UPDATE tblSTReturnLottery 
+			SET ysnReadyForPosting = 0
+			WHERE intReturnLotteryId = @intReturnLotteryId
+		END
+		ELSE
+		BEGIN
+			UPDATE tblSTReturnLottery 
+			SET ysnReadyForPosting = 1
+			WHERE intReturnLotteryId = @intReturnLotteryId
+		END
+	
+		--handled in posting-- 
+		--SET @strReceiptType = 'Direct'
+		--SET @strSourceScreenName = 'Lottery Module'
+
+
+		----CREATE RETURN RECEIPT--
+		--INSERT INTO @ReceiptStagingTable(
+		--	 strReceiptType
+		--	,strSourceScreenName
+		--	,intEntityVendorId
+		--	,intShipFromId
+		--	,intLocationId
+		--	,intItemId
+		--	,intItemLocationId
+		--	,intItemUOMId
+		--	,intCostUOMId
+		--	,strBillOfLadding
+		--	,intContractHeaderId
+		--	,intContractDetailId
+		--	,dtmDate
+		--	,intShipViaId
+		--	,dblQty
+		--	,dblCost
+		--	,intCurrencyId
+		--	,dblExchangeRate
+		--	,intLotId
+		--	,intSubLocationId
+		--	,intStorageLocationId
+		--	,ysnIsStorage
+		--	,dblFreightRate
+		--	,intSourceId	
+		--	,intSourceType		 	
+		--	,dblGross
+		--	,dblNet
+		--	,intInventoryReceiptId
+		--	,dblSurcharge
+		--	,ysnFreightInPrice
+		--	,strActualCostId
+		--	,intTaxGroupId
+		--	,strVendorRefNo
+		--	,strSourceId			
+		--	,intPaymentOn
+		--	,strChargesLink
+		--	,dblUnitRetail
+		--	,intSort
+		--	,strDataSource
+		--)	
+		--SELECT strReceiptType	= @strReceiptType
+		--,strSourceScreenName	= @strSourceScreenName
+		--,intEntityVendorId		= tblICItemLocation.intVendorId
+		--,intShipFromId			= (SELECT TOP 1 intShipFromId FROM tblAPVendor WHERE intEntityId = tblICItemLocation.intVendorId)
+		--,intLocationId			= tblSTStore.intCompanyLocationId
+		--,intItemId				= tblSTLotteryGame.intItemId
+		--,intItemLocationId		= tblICItemLocation.intItemLocationId
+		--,intItemUOMId			= tblICItemUOM.intItemUOMId
+		--, intCostUOMId			= tblICItemUOM.intUnitMeasureId
+		--,strBillOfLadding		= ''
+		--,intContractHeaderId	= NULL
+		--,intContractDetailId	= NULL
+		--,dtmDate				= tblSTReturnLottery.dtmReturnDate
+		--,intShipViaId			= NULL
+		--,dblQty					= tblSTReturnLottery.dblQuantity * -1
+		--,dblCost				= tblSTLotteryGame.dblInventoryCost 
+		--,intCurrencyId			= @defaultCurrency
+		--,dblExchangeRate		= 1
+		--,intLotId				= NULL
+		--,intSubLocationId		= NULL
+		--,intStorageLocationId	= NULL
+		--,ysnIsStorage			= 0
+		--,dblFreightRate			= 0
+		--,intSourceId			= tblSTReturnLottery.intReturnLotteryId
+		--,intSourceType		 	= 7
+		--,dblGross				= NULL
+		--,dblNet					= NULL
+		--,intInventoryReceiptId	= tblSTReturnLottery.intInventoryReceiptId 
+		--,dblSurcharge			= NULL
+		--,ysnFreightInPrice		= NULL
+		--,strActualCostId		= NULL
+		--,intTaxGroupId			= NULL
+		--,strVendorRefNo			= (CAST(ISNULL(tblSTStore.intStoreNo,'') as nvarchar(100)) + '-' + ISNULL(tblSTLotteryGame.strGame,'') + ISNULL(tblSTLotteryBook.strBookNumber,'')) + 'R'
+		--,strSourceId			= NULL
+		--,intPaymentOn			= NULL
+		--,strChargesLink			= NULL
+		--,dblUnitRetail			= NULL
+		--,intSort				= NULL
+		--,strDataSource			= @strSourceScreenName
+		--FROM tblSTReturnLottery
+		--INNER JOIN tblSTLotteryBook
+		--ON tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+		--INNER JOIN tblSTLotteryGame 
+		--ON tblSTLotteryBook.intLotteryGameId = tblSTLotteryGame.intLotteryGameId
+		--INNER JOIN tblSTStore 
+		--ON tblSTLotteryBook.intStoreId = tblSTStore.intStoreId
+		--INNER JOIN tblICItemLocation 
+		--	ON tblICItemLocation.intLocationId = tblSTStore.intCompanyLocationId 
+		--	AND tblSTLotteryGame.intItemId = tblICItemLocation.intItemId
+		--INNER JOIN tblICItemPricing
+		--	ON tblICItemPricing.intItemLocationId = tblICItemLocation.intItemLocationId
+		--	AND tblICItemPricing.intItemId = tblICItemLocation.intItemId
+		--LEFT JOIN tblAPVendor 
+		--ON tblAPVendor.intEntityId = tblICItemLocation.intVendorId
+		--LEFT JOIN tblICItemUOM 
+		--ON tblICItemUOM.intItemUOMId = tblICItemLocation.intIssueUOMId
+		--WHERE tblSTReturnLottery.intReturnLotteryId = @intReturnLotteryId
+
+
+		--EXEC dbo.uspICAddItemReceipt 
+		--	 @ReceiptStagingTable
+		--	,@OtherCharges
+		--	,@UserId;
+		
+		--UPDATE tblSTReturnLottery SET intInventoryReceiptId = tblResult.intInventoryReceiptId FROM #tmpAddItemReceiptResult as tblResult WHERE tblSTReturnLottery.intReturnLotteryId = tblResult.intSourceId
+		--SELECT * FROM #tmpAddItemReceiptResult
 
 		-- Flag Success
 		SET @Success = CAST(1 AS BIT)
@@ -525,20 +586,27 @@ BEGIN TRY
 
 		-- SELECT TOP 1 @Id = intLotteryBookId FROM tblSTReturnLottery where intReturnLotteryId = @intReturnLotteryId
 
-		UPDATE tblSTLotteryBook 
-		SET 
-			dblQuantityRemaining = dblOriginalQuantity,
-			strStatus = 'Inactive'
-		FROM 
-		tblSTReturnLottery
-		WHERE intReturnLotteryId = @Id AND tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
+		--UPDATE tblSTLotteryBook 
+		--SET 
+		--	dblQuantityRemaining = dblQuantityRemaining + dblQuantity,
+		--	strStatus = 'Inactive'
+		--FROM 
+		--tblSTReturnLottery
+		--WHERE intReturnLotteryId = @Id AND tblSTReturnLottery.intLotteryBookId = tblSTLotteryBook.intLotteryBookId
 		
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId FROM tblSTReturnLottery WHERE intReturnLotteryId = @Id
 
 		-- DELETE FROM tblICInventoryReceipt WHERE intInventoryReceiptId = @intInventoryReceiptId
 
-	
-		EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @intInventoryReceiptId,@intEntityUserSecurityId = @UserId
+		IF(ISNULL(@intInventoryReceiptId,0) != 0)
+		BEGIN
+			EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @intInventoryReceiptId,@intEntityUserSecurityId = @UserId
+			DELETE FROM tblSTReturnLottery WHERE intReturnLotteryId = @Id
+		END
+		ELSE
+		BEGIN
+			DELETE FROM tblSTReturnLottery WHERE intReturnLotteryId = @Id
+		END
 
 		SET @Success = CAST(1 AS BIT)
 		SET @StatusMsg = ''
