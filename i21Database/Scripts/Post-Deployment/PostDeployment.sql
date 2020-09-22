@@ -397,6 +397,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ImportSettleStorageBillDetail.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
+:R .\GR\StorageInventoryReceipt.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

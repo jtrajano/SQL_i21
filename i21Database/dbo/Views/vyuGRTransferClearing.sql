@@ -37,13 +37,14 @@ SELECT	--'1.1' AS TEST,
     ,CAST(0 AS BIT) ysnAllowVoucher
     ,APClearing.intAccountId
 	,APClearing.strAccountId
-	--,receiptItem.dblOpenReceive
-	--,S.dblNetUnits
-	--,S.dblShrinkage
-	--,S.intInventoryReceiptId
-	--,SIR.dblTransactionUnits
-	--,TRANSFER_TRAN.dblTransferredUnits
-	--,TOTAL.dblTotal
+	--,'a'=receiptItem.dblOpenReceive
+	--,'b'=S.dblNetUnits
+	--,'c'=S.dblShrinkage
+	--,'d'=S.intInventoryReceiptId
+	--,'e'=SIR.dblTransactionUnits
+	--,'f'=TRANSFER_TRAN.dblTransferredUnits
+	--,'g'=TOTAL.dblTotal
+	--,'h'=TRANSFER_TRAN.isFullyTransferred
 FROM tblICInventoryReceipt receipt 
 INNER JOIN tblICInventoryReceiptItem receiptItem
 	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
@@ -88,10 +89,16 @@ OUTER APPLY (
 	GROUP BY intInventoryReceiptItemId
 ) TOTAL
 OUTER APPLY (
-	SELECT CASE WHEN ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) = receiptItem.dblOpenReceive
-		OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END AS isFullyTransferred
-		,ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) AS dblTransferredUnits
+	SELECT isFullyTransferred = CASE WHEN ABS(dblTransferredUnits - receiptItem.dblOpenReceive) <= 0.01 OR dblTransferredUnits = receiptItem.dblOpenReceive OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END
+		,dblTransferredUnits
 		,S.intInventoryReceiptItemId
+	FROM (
+		SELECT 
+		--CASE WHEN ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) = receiptItem.dblOpenReceive
+		--	OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END AS isFullyTransferred
+			ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) AS dblTransferredUnits
+			,S.intInventoryReceiptItemId
+	) A
 ) TRANSFER_TRAN
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId
@@ -111,12 +118,10 @@ WHERE
 	AND receipt.strReceiptType != 'Transfer Order'
 	AND receiptItem.intOwnershipType != 2
 	AND receipt.ysnPosted = 1
-	--and receiptItem.intInventoryReceiptItemId = 153481
-	--AND receipt.dtmReceiptDate >= '2020-08-17'
 
 UNION ALL
 --Transfer Storages
-SELECT --'2.2',
+SELECT --'2.2' AS TEST,
     --IR.intEntityVendorId AS intEntityVendorId
 	CS.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
@@ -188,7 +193,7 @@ WHERE SIR.ysnUnposted = 0
 /*END ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
-SELECT DISTINCT	--'3',
+SELECT DISTINCT	--'3' AS TEST,
     CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TSR.dtmProcessDate END AS dtmDate
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.strReceiptNumber ELSE TS.strTransferStorageTicket END AS strTransactionNumber
@@ -270,7 +275,7 @@ AND receipt.ysnPosted = 1
 
 UNION ALL
 --Transfer Storages
-SELECT --'4',
+SELECT --'4' AS TEST,
     CS.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,IR.strReceiptNumber
@@ -326,7 +331,7 @@ LEFT JOIN
 UNION ALL
 /*START ====>>>  ***DS/SC*** FOR OP TO DP*/
 --Transfer Storages >> OS to DP >> there will be an OPEN CLEARING in the new transfer storage
-SELECT --'5',
+SELECT --'5' AS TEST,
     CS.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,TS.strTransferStorageTicket AS strReceiptNumber--IR.strReceiptNumber
@@ -435,7 +440,7 @@ Where Bill.ysnPosted = 1
 
 UNION ALL
 --Transfer Storages from above select statement
-SELECT DISTINCT --'6',
+SELECT DISTINCT --'6' AS TEST,
     CS_TO.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,SH.strTransferTicket
@@ -514,5 +519,3 @@ LEFT JOIN
 WHERE APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***DS/SC*** FOR OP TO DP*/
 GO
-
-
