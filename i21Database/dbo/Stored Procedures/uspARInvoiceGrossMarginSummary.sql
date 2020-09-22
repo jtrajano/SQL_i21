@@ -1,7 +1,7 @@
 
 CREATE PROCEDURE uspARInvoiceGrossMarginSummary
 (
-	@ysnPosted bit ,
+	@ysnPosted BIT = 0,
     @ysnRebuild BIT = 0,
 	@intInvoiceId INT = 0,
 	@dtmDate DATETIME = '01-01-1900'
