@@ -17,7 +17,7 @@ BEGIN TRY
 			@strState				NVARCHAR(500),
 			@strZip					NVARCHAR(500),
 			@strCountry				NVARCHAR(500),
-			@intContractHeaderId	INT,
+			@intContractDetailId	INT,
 			@intLaguageId			INT,
 			@intSrCurrentUserId		INT,
 			@strCurrentUser			NVARCHAR(100),
@@ -68,9 +68,9 @@ BEGIN TRY
 				[datatype]		NVARCHAR(50)  
 	)  
     
-	SELECT	@intContractHeaderId = [from]
+	SELECT	@intContractDetailId = [from]
 	FROM	@temp_xml_table   
-	WHERE	[fieldname] = 'intContractHeaderId'
+	WHERE	[fieldname] = 'intContractDetailId'
 	
 	SELECT	@intLaguageId = [from]
 	FROM	@temp_xml_table   
@@ -101,10 +101,10 @@ BEGIN TRY
 	SELECT	 intContractHeaderId					=	CH.intContractHeaderId
 			,strBuyerRefNo							=	CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END
 			,strSellerRefNo							=	CASE WHEN CH.intContractTypeId = 2 THEN CH.strContractNumber ELSE CH.strCustomerContract END
-			,strContractNumber						=	CH.strContractNumber
+			,strContractNumber						=	CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(5))
 			,strDestinationPointName				=	SQ.strDestinationPointName
-			,strItemDescription						=	strItemDescription
-			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(SQ.strPackingDescription, '')
+			,strItemDescription						=   strItemDescription
+			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(SQ.strPackingDescription, '')
 			,strShipment							=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
 
 		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
@@ -134,15 +134,18 @@ BEGIN TRY
 			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION')
 
 		FROM	tblCTContractHeader				CH
-		JOIN	vyuCTEntity						EY	WITH (NOLOCK)	ON	EY.intEntityId		=	CH.intEntityId	
-																	AND	EY.strEntityType	=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
-LEFT	JOIN	tblCTBookVsEntity				BE	WITH (NOLOCK)	ON	BE.intBookId		=	CH.intBookId AND BE.intEntityId = CH.intEntityId
-LEFT	JOIN	vyuCTEntity						EV	WITH (NOLOCK)	ON	EV.intEntityId		=	BE.intEntityId        
+		JOIN	tblCTContractDetail				CD	WITH (NOLOCK)	ON	CH.intContractHeaderId	= CD.intContractHeaderId
+		JOIN	vyuCTEntity						EY	WITH (NOLOCK)	ON	EY.intEntityId			=	CH.intEntityId	
+																	AND	EY.strEntityType		=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
+LEFT	JOIN	tblCTBookVsEntity				BE	WITH (NOLOCK)	ON	BE.intBookId			=	CH.intBookId AND BE.intEntityId = CH.intEntityId
+LEFT	JOIN	vyuCTEntity						EV	WITH (NOLOCK)	ON	EV.intEntityId			=	BE.intEntityId        
 																	AND EV.strEntityType	IN	('Vendor', 'Customer')
-LEFT	JOIN	tblICCommodityUnitMeasure		CU	WITH (NOLOCK)	ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId		
-LEFT	JOIN	tblICUnitMeasure				UM	WITH (NOLOCK)	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId																									
+LEFT	JOIN	tblICUnitMeasure				UM	WITH (NOLOCK)	ON	UM.intUnitMeasureId				=	CD.intUnitMeasureId
+--LEFT	JOIN	tblICCommodityUnitMeasure		CU	WITH (NOLOCK)	ON	CU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
+--LEFT	JOIN	tblICUnitMeasure				UM	WITH (NOLOCK)	ON	UM.intUnitMeasureId				=	CU.intUnitMeasureId
 LEFT	JOIN	(
 					SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
+								CD.intContractDetailId,
 								CD.intContractHeaderId,
 								CL.strLocationName,
 								LP.strCity								AS	strLoadingPointName,
@@ -157,10 +160,10 @@ LEFT	JOIN	(
 					JOIN		tblSMCompanyLocation	CL	WITH (NOLOCK) ON	CL.intCompanyLocationId		=	CD.intCompanyLocationId		
 					LEFT JOIN	tblSMCity				LP	WITH (NOLOCK) ON	LP.intCityId				=	CD.intLoadingPortId			
 					LEFT JOIN	tblSMCity				DP	WITH (NOLOCK) ON	DP.intCityId				=	CD.intDestinationPortId	
-				)										SQ	ON	SQ.intContractHeaderId		=	CH.intContractHeaderId	
-														AND SQ.intRowNum = 1
+				)										SQ	ON	SQ.intContractDetailId		=	CD.intContractDetailId
+														--AND SQ.intRowNum = 1
 left join tblCTPosition pos on pos.intPositionId = CH.intPositionId
-WHERE	CH.intContractHeaderId	=	@intContractHeaderId
+WHERE	CD.intContractDetailId	=	@intContractDetailId
 
 
 END TRY
