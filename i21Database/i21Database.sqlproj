@@ -8798,6 +8798,7 @@
     <Build Include="dbo\Views\vyuMBILExportCategoryTaxExemption.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportPriceFixationDetailStrauss.sql" />
     <Build Include="dbo\Tables\tblRKRebuildRTSLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreatePricingAPARLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
