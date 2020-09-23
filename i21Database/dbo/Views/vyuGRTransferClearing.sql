@@ -134,8 +134,8 @@ SELECT --'2.2' AS TEST,
     ,IRI.intItemId
     ,IRI.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST((SIR.dblTransactionUnits + ((SIR.dblTransactionUnits / S.dblNetUnits) * ABS(S.dblShrinkage))) * (IRI.dblUnitCost)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
-    ,ROUND(SIR.dblTransactionUnits + ((SIR.dblTransactionUnits / S.dblNetUnits) * ABS(S.dblShrinkage)),2) AS dblTransferQty
+    ,ISNULL(CAST(A.dblTotalTransfer * (IRI.dblUnitCost)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,ROUND(A.dblTotalTransfer,2) AS dblTransferQty
     ,0 AS dblReceiptTotal
     ,0 AS dblReceiptQty
     ,IR.intLocationId
@@ -181,6 +181,13 @@ INNER JOIN (
 	FROM tblGRStorageInventoryReceipt
 	WHERE ysnUnposted = 0
 ) S ON S.intInventoryReceiptId = SIR.intInventoryReceiptId AND S.intInventoryReceiptItemId = SIR.intInventoryReceiptItemId AND S.rk = 1
+OUTER APPLY (
+	SELECT S.intInventoryReceiptItemId
+		,CASE WHEN ABS(dblTransferredUnits - IRI.dblOpenReceive) <= 0.01 THEN IRI.dblOpenReceive ELSE dblTransferredUnits END dblTotalTransfer
+	FROM (
+		SELECT (SIR.dblTransactionUnits + ((SIR.dblTransactionUnits / S.dblNetUnits) * ABS(S.dblShrinkage))) AS dblTransferredUnits
+	) e
+) A
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
