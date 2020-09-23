@@ -61,16 +61,13 @@ BEGIN
 								CASE	WHEN Lot.intLotId IS NOT NULL AND Lot.intItemUOMId <> Lot.intWeightUOMId THEN
 											CASE	WHEN Lot.intItemUOMId = t.intItemUOMId AND ISNULL(Lot.dblWeightPerQty, 0) <> 0 THEN 
 														-- Get the actual weight and convert it to stock unit  													
-														--dbo.fnCalculateStockUnitQty(t.dblQty * Lot.dblWeightPerQty, WeightUOM.dblUnitQty) 
 														dbo.fnCalculateQtyBetweenUOM(Lot.intWeightUOMId, stockUOM.intItemUOMId, t.dblQty * Lot.dblWeightPerQty)
 													ELSE
 														-- the qty is already in weight, then convert the weight to stock unit. 
-														--dbo.fnCalculateStockUnitQty(t.dblQty, WeightUOM.dblUnitQty) 
 														dbo.fnCalculateQtyBetweenUOM(Lot.intWeightUOMId, stockUOM.intItemUOMId, t.dblQty)
 											END 
 										ELSE
-											--dbo.fnCalculateStockUnitQty(t.dblQty, t.dblUOMQty) 
-											dbo.fnCalculateQtyBetweenUOM(Lot.intItemUOMId, stockUOM.intItemUOMId, t.dblQty)
+											dbo.fnCalculateQtyBetweenUOM(t.intItemUOMId, stockUOM.intItemUOMId, t.dblQty)
 								END				
 							)
 						
