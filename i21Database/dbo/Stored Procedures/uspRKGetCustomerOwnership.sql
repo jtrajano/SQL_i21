@@ -136,6 +136,10 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 																		ELSE isnull(ysnLicensed, 0) END)
 				
 							AND CS.intCompanyLocationId = case when isnull(@intLocationId,0)=0 then CS.intCompanyLocationId  else @intLocationId end
+							--- mon modification
+							and (
+									SH.strType <> 'From Inventory Adjustment' or (SH.strType = 'From Inventory Adjustment' and SH.intInventoryAdjustmentId is not null)
+								)
 
 		)t
 		GROUP BY
@@ -231,6 +235,7 @@ SELECT  CONVERT(INT,ROW_NUMBER() OVER (ORDER BY strStorageTypeDescription)) intR
 
 		 )t     GROUP BY  dtmDate,strStorageTypeDescription,intStorageScheduleTypeId
 ) t1
+
 
 IF (@ysnDisplayAllStorage=1)
 BEGIN			 
@@ -369,3 +374,6 @@ WHERE dtmDate between ''' + CONVERT(VARCHAR(10),@dtmFromTransactionDate,110) +''
 order by dtmDate'
 
 EXEC sp_executesql @SQLFinal
+
+GO
+

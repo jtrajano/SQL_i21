@@ -25,6 +25,10 @@
 	[ysnIsRemote] BIT NOT NULL DEFAULT 0,
     [ysnDisconnectedEnabled] BIT NOT NULL DEFAULT(0),  
     [ysnLVControlIntegration] BIT NOT NULL DEFAULT(0), 
+    -- This will be used in the commodity report to determine where the new implementation in the DS side take effect in the transaction storage  
+    [intInventoryTransactionId] INT NOT NULL DEFAULT(0), 
+    [intInventoryTransactionStorageId] INT NOT NULL DEFAULT(0), 
+    -- This will be used in the commodity report to determine where the new implementation in the DS side take effect in the transaction storage  
     CONSTRAINT [PK_tblGRCompanyPreference_intCompanyPreferenceId] PRIMARY KEY CLUSTERED ([intCompanyPreferenceId] ASC),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblGRCompanyPreference_tblICUnitMeasure_intUnitMeasureId] FOREIGN KEY ([intUnitMeasureId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId])
