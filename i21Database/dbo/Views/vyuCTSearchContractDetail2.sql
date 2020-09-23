@@ -339,7 +339,7 @@ select
   b.ysnMaxPrice, 
   b.ysnMultiplePriceFixation, 
   a.dblNetWeight, 
-  b.intNoOfLoad, 
+  a.intNoOfLoad,
   a.dblNoOfLots, 
   a.intNumberOfContainers, 
   strOrigin = ISNULL(bi.strCountry, bk.strCountry), 
