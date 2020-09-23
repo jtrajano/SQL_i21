@@ -14,11 +14,17 @@ begin
 	   ) AS C
 
 	--select @Columns
-	
 	DECLARE @sql AS NVARCHAR(MAX)
 	DECLARE @top as nvarchar(20)
 	declare @location_filter as nvarchar(max)
 	declare @licensed_filter as nvarchar(100)
+
+	
+	--due to some implementation of deliverysheet, we need to determine which part of the old transaction is affected by the new implementation
+	declare @intInventoryTransactionStorageId int
+	select top 1 @intInventoryTransactionStorageId = intInventoryTransactionStorageId from tblGRCompanyPreference
+	set @intInventoryTransactionStorageId = isnull(@intInventoryTransactionStorageId, 0)
+
 
 	if isnull(@strLocationName, '') <> ''
 	begin
@@ -70,7 +76,46 @@ begin
 				(
 					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransaction t where t.ysnIsUnposted = 0
 						union all
-					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransactionStorage t where t.ysnIsUnposted = 0					
+					
+					
+					
+						select intItemId, intItemLocationId, isnull(Cleansed.dblQty, Storage.dblQty) as dblQty, intItemUOMId, 
+								case when strTransactionForm = ''Storage Settlement''  then dtmCreated else dtmDate end as dtmDate from 
+						(	
+							select sum(dblQty) as dblQty, strTransactionForm, intTransactionId, intItemLocationId, intItemId, ysnIsUnposted, dtmDate, convert(nvarchar,dtmCreated , 111) dtmCreated, intItemUOMId
+								from tblICInventoryTransactionStorage 
+									where strTransactionForm = ''Inventory Adjustment''
+									group by strTransactionForm, intTransactionId, intItemLocationId, intItemId, ysnIsUnposted, dtmDate, convert(nvarchar,dtmCreated , 111), intItemUOMId
+							union all
+							select dblQty, strTransactionForm, intTransactionId, intItemLocationId, intItemId, ysnIsUnposted, dtmDate, convert(nvarchar,dtmCreated , 111) dtmCreated, intItemUOMId
+								from tblICInventoryTransactionStorage 
+									where strTransactionForm <> ''Inventory Adjustment''
+	
+	
+						) as Storage
+
+						outer apply (
+	
+						select sum((DeliverySheetSplit.dblSplitPercent / 100) * dblNewQuantity)  as dblQty
+						from tblICInventoryAdjustmentDetail AdjustmentDetail
+							join tblICInventoryAdjustment Adjustment
+								on AdjustmentDetail.intInventoryAdjustmentId = Adjustment.intInventoryAdjustmentId
+									and Adjustment.intSourceTransactionTypeId = 53
+									and Adjustment.intInventoryAdjustmentId <= ' + cast(@intInventoryTransactionStorageId as nvarchar) + ' -- this is hardcoded but will be moved to a company preference of grain
+							join tblSCDeliverySheetSplit DeliverySheetSplit
+								on DeliverySheetSplit.intDeliverySheetId = Adjustment.intSourceId
+									and DeliverySheetSplit.strDistributionOption <> ''DP''
+							where Adjustment.intInventoryAdjustmentId = Storage.intTransactionId and Storage.strTransactionForm = ''Inventory Adjustment''
+		
+						group by Adjustment.intInventoryAdjustmentId
+						) Cleansed
+						where (strTransactionForm = ''Storage Settlement'' or (ysnIsUnposted = 0 and strTransactionForm <> ''Storage Settlement'') )
+
+
+
+
+
+
 				)			
 				 t
 				on t.intItemId = i.intItemId
@@ -121,5 +166,7 @@ begin
 	--	[Canola] IS NOT NULL 	
 	ORDER BY strLocationName 
 	'	
+	--print(@sql) 	
 	EXEC(@sql) 	
 end
+GO
