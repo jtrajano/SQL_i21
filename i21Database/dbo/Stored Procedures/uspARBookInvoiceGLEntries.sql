@@ -242,8 +242,7 @@ IF @Post = 0
 			EXEC dbo.uspGLBookEntries
 					 @GLEntries         = @GLPost
 					,@ysnPost           = @Post
-					,@SkipGLValidation	= 1
-					,@SkipICValidation	= 1
+					,@SkipValidation	= 1
 		END 
 
   --      --Recap = 1
