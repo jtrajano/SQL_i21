@@ -54,6 +54,16 @@ SELECT
 	,f.strPeriod
 	,strKey = CAST(Item.intItemId AS NVARCHAR(100)) + CAST(ItemLocation.intItemLocationId AS NVARCHAR(100)) + @strPeriod
 FROM	tblGLFiscalYearPeriod f	
+		CROSS APPLY (
+			SELECT TOP 1 
+				fyp.intGLFiscalYearPeriodId 
+			FROM 
+				tblGLFiscalYearPeriod fyp
+			WHERE
+				(fyp.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 		
+			ORDER BY
+				fyp.intGLFiscalYearPeriodId ASC 				
+		) fypStartingPoint
 		OUTER APPLY (
 			SELECT 
 				Item.intItemId
@@ -136,4 +146,4 @@ FROM	tblGLFiscalYearPeriod f
 			AND ItemPricing.intItemId = Item.intItemId
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL 
-	AND (f.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 
+	AND f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
