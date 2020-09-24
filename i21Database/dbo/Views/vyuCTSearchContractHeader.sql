@@ -80,7 +80,7 @@ SELECT	CH.intContractHeaderId,
 		CH.strExternalContractNumber,
 		CH.ysnReceivedSignedFixationLetter
 
-FROM	tblCTContractHeader					CH	
+FROM	tblCTContractHeader					CH	WITH (NOLOCK)
 JOIN	tblCTContractType					TP	ON	TP.intContractTypeId				=		CH.intContractTypeId
 JOIN	tblEMEntity							EY	ON	EY.intEntityId						=		CH.intEntityId						LEFT
 JOIN	tblEMEntity							PR	ON	PR.intEntityId						=		CH.intProducerId					LEFT
