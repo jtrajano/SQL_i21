@@ -316,15 +316,17 @@ BEGIN
 
 	WHILE (@postedCtr <> @totalPosted)
 	BEGIN
-		SELECT @postedId = intId FROM @validVoucherPrepay ORDER BY intId ASC OFFSET @postedCtr ROWS FETCH NEXT 1 ROWS ONLY
+		SET @postedCtr = @postedCtr + 1
+
+		SELECT @postedId = intId 
+		FROM ( SELECT intId, ROW_NUMBER() OVER (ORDER BY intId ASC) intRow FROM @validVoucherPrepay ) auditId
+		WHERE intRow = @postedCtr
 
 		EXEC dbo.uspSMAuditLog 
 		@screenName = 'AccountsPayable.view.Voucher'			-- Screen Namespace
 		,@keyValue = @postedId									-- Primary Key Value
 		,@entityId = @userId									-- Entity Id
 		,@actionType = @actionType								-- Action Type
-		
-		SET @postedCtr = @postedCtr + 1
 	END
 END
 ELSE
