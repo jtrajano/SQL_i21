@@ -439,15 +439,17 @@ BEGIN
 
 	WHILE (@createdCtr <> @totalCreated)
 	BEGIN
-		SELECT @createdId = intCreatePaymentId FROM #tmpMultiVouchersCreatedPayment ORDER BY intCreatePaymentId ASC OFFSET @createdCtr ROWS FETCH NEXT 1 ROWS ONLY
+		SET @createdCtr = @createdCtr + 1
+
+		SELECT @createdId = intCreatePaymentId 
+		FROM ( SELECT intCreatePaymentId, ROW_NUMBER() OVER (ORDER BY intCreatePaymentId ASC) AS intRow FROM #tmpMultiVouchersCreatedPayment ) auditId
+		WHERE intRow = @createdCtr
 
 		EXEC dbo.uspSMAuditLog 
 		@screenName = 'AccountsPayable.view.PayVouchersDetail'			-- Screen Namespace
 		,@keyValue = @createdId											-- Primary Key Value
 		,@entityId = @userId											-- Entity Id
 		,@actionType = 'Created'										-- Action Type
-		
-		SET @createdCtr = @createdCtr + 1
 	END
 
 	BEGIN TRY
