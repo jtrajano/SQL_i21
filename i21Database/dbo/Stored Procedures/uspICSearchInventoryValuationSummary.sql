@@ -2,8 +2,23 @@
 	@strPeriod NVARCHAR(50)
 AS
 
-DELETE FROM tblICInventoryValuationSummary
-WHERE strPeriod = @strPeriod
+DELETE summary
+FROM 
+	tblICInventoryValuationSummary summary
+	INNER JOIN tblGLFiscalYearPeriod f
+		ON summary.strPeriod = f.strPeriod 
+	CROSS APPLY (
+		SELECT TOP 1 
+			fyp.intGLFiscalYearPeriodId 
+		FROM 
+			tblGLFiscalYearPeriod fyp
+		WHERE
+			(fyp.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 		
+		ORDER BY
+			fyp.intGLFiscalYearPeriodId ASC 				
+	) fypStartingPoint
+WHERE
+	f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
 
 INSERT INTO tblICInventoryValuationSummary (
 	intInventoryValuationKeyId
