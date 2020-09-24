@@ -3,7 +3,23 @@
 	@intUserId INT
 AS
 
-TRUNCATE TABLE tblICInventoryValuationSummary
+DELETE summary
+FROM 
+	tblICInventoryValuationSummary summary
+	INNER JOIN tblGLFiscalYearPeriod f
+		ON summary.strPeriod = f.strPeriod 
+	CROSS APPLY (
+		SELECT TOP 1 
+			fyp.intGLFiscalYearPeriodId 
+		FROM 
+			tblGLFiscalYearPeriod fyp
+		WHERE
+			(fyp.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 		
+		ORDER BY
+			fyp.intGLFiscalYearPeriodId ASC 				
+	) fypStartingPoint
+WHERE
+	f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
 
 INSERT INTO tblICInventoryValuationSummary (
 	intInventoryValuationKeyId
@@ -25,6 +41,7 @@ INSERT INTO tblICInventoryValuationSummary (
 	, intInTransitLocationId
 	, ysnInTransit
 	, strPeriod
+	, strKey
 )
 SELECT	
 	intInventoryValuationKeyId = NULL 
@@ -51,7 +68,18 @@ SELECT
 	,intInTransitLocationId = InTransit.intItemLocationId  
 	,ysnInTransit = CAST(CASE WHEN InTransit.intItemLocationId IS NOT NULL THEN 1 ELSE 0 END AS BIT) 
 	,f.strPeriod
+	,strKey = CAST(Item.intItemId AS NVARCHAR(100)) + CAST(ItemLocation.intItemLocationId AS NVARCHAR(100)) + @strPeriod
 FROM	tblGLFiscalYearPeriod f	
+		CROSS APPLY (
+			SELECT TOP 1 
+				fyp.intGLFiscalYearPeriodId 
+			FROM 
+				tblGLFiscalYearPeriod fyp
+			WHERE
+				(fyp.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 		
+			ORDER BY
+				fyp.intGLFiscalYearPeriodId ASC 				
+		) fypStartingPoint
 		OUTER APPLY (
 			SELECT 
 				Item.intItemId
@@ -87,7 +115,8 @@ FROM	tblGLFiscalYearPeriod f
 			FROM 
 				tblICInventoryTransaction t 
 			WHERE
-				dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
+				--dbo.fnDateLessThanEquals(t.dtmDate, f.dtmEndDate) = 1
+				FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(f.dtmEndDate AS FLOAT))
 				AND t.intItemId = Item.intItemId
 				AND t.intItemLocationId = Item.intItemLocationId
 			GROUP BY 
@@ -130,9 +159,10 @@ FROM	tblGLFiscalYearPeriod f
 		) ItemLocation
 		LEFT JOIN tblICItemPricing ItemPricing 
 			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+			AND ItemPricing.intItemId = Item.intItemId
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL 
-	AND (f.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 
+	AND f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
 --CREATE PROCEDURE dbo.[uspICSearchInventoryValuationSummary]
 --	@strPeriod NVARCHAR(50)
 --AS
