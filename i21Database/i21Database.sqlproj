@@ -8800,6 +8800,7 @@
     <Build Include="dbo\Tables\tblRKRebuildRTSLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePricingAPARLink.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
+    <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
