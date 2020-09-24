@@ -432,6 +432,24 @@ BEGIN
 	FROM #tmpMultiVouchersCreatedPayment
 	ORDER BY intCreatePaymentId
 
+	DECLARE @totalCreated INT = 0
+	DECLARE @createdCtr INT = 0
+	DECLARE @createdId INT = 0
+	SELECT @totalCreated = COUNT(*) FROM #tmpMultiVouchersCreatedPayment
+
+	WHILE (@createdCtr <> @totalCreated)
+	BEGIN
+		SELECT @createdId = intCreatePaymentId FROM #tmpMultiVouchersCreatedPayment ORDER BY intCreatePaymentId ASC OFFSET @createdCtr ROWS FETCH NEXT 1 ROWS ONLY
+
+		EXEC dbo.uspSMAuditLog 
+		@screenName = 'AccountsPayable.view.PayVouchersDetail'			-- Screen Namespace
+		,@keyValue = @createdId											-- Primary Key Value
+		,@entityId = @userId											-- Entity Id
+		,@actionType = 'Created'										-- Action Type
+		
+		SET @createdCtr = @createdCtr + 1
+	END
+
 	BEGIN TRY
 		EXEC uspAPPostPayment @userId = @userId,
 				@recap = @recap,
