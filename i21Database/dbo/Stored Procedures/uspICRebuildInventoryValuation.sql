@@ -6159,6 +6159,8 @@ BEGIN
 	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod, @intUserId
 END
 
+-- Rebuild the AR Gross Margin Summary
+EXEC uspARInvoiceGrossMarginSummary @ysnRebuild = 1
 
 -- Restore the created dates
 BEGIN 
