@@ -306,6 +306,8 @@ BEGIN TRY
 				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				WHERE intSequenceUsageHistoryId IS NULL 
+				AND sh.intContractHeaderId = @intContractHeaderId
+				AND sh.intContractDetailId = ISNULL(@intContractDetailId, sh.intContractDetailId)
 			) tbl
 			WHERE Row_Num = 1
 			AND intContractHeaderId = @intContractHeaderId
@@ -394,7 +396,7 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog 
+				FROM tblCTContractBalanceLog
 				WHERE intTransactionReferenceId = @intHeaderId
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
@@ -612,6 +614,8 @@ BEGIN TRY
 				LEFT JOIN tblICInventoryReceipt receipt on suh.intExternalHeaderId = receipt.intInventoryReceiptId
 				WHERE strFieldName = 'Balance'
 				AND suh.intExternalId = @intTransactionId
+				AND suh.intContractHeaderId = @intContractHeaderId
+				AND suh.intContractDetailId = ISNULL(@intContractDetailId, suh.intContractDetailId)
 			) tbl
 			WHERE Row_Num = 1
 			AND intContractHeaderId = @intContractHeaderId
@@ -756,6 +760,8 @@ BEGIN TRY
 					AND pf.intContractDetailId = suh.intContractDetailId
 				) price
 				WHERE strFieldName = 'Balance'
+				AND suh.intContractHeaderId = @intContractHeaderId
+				AND suh.intContractDetailId = ISNULL(@intContractDetailId, suh.intContractDetailId)
 			) tbl
 			WHERE Row_Num = 1
 			AND intContractHeaderId = @intContractHeaderId
@@ -929,7 +935,7 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog 
+				FROM tblCTContractBalanceLog
 				WHERE intTransactionReferenceId = @intHeaderId
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
@@ -1222,6 +1228,8 @@ BEGIN TRY
 							INNER JOIN tblCTContractDetail cd on cd.intContractDetailId = sh.intContractDetailId
 							INNER JOIN tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 						WHERE strFieldName = 'Balance'
+						AND suh.intContractHeaderId = @intContractHeaderId
+						AND suh.intContractDetailId = ISNULL(@intContractDetailId, suh.intContractDetailId)
 					) tbl
 					WHERE Row_Num = 1
 					AND intContractHeaderId = @intContractHeaderId
@@ -1382,7 +1390,9 @@ BEGIN TRY
 					AND intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
 					GROUP BY intTransactionReferenceDetailId
 				) cbl
-				WHERE pfd.ysnToBeDeleted = 1		
+				WHERE pfd.ysnToBeDeleted = 1	
+				AND pf.intContractHeaderId = @intContractHeaderId
+				AND pf.intContractDetailId = ISNULL(@intContractDetailId, pf.intContractDetailId)	
 				AND pfd.intPriceFixationDetailId NOT IN
 				(
 					SELECT intTransactionReferenceDetailId
@@ -1707,7 +1717,9 @@ BEGIN TRY
 					AND intSequenceUsageHistoryId IS NULL
 					ORDER BY dtmHistoryCreated DESC
 				) sh
-				WHERE pfd.intPriceFixationDetailId IN
+				WHERE pf.intContractHeaderId = @intContractHeaderId
+				AND pf.intContractDetailId = ISNULL(@intContractDetailId, pf.intContractDetailId)
+				AND pfd.intPriceFixationDetailId IN
 				(
 					SELECT intTransactionReferenceDetailId
 					FROM tblCTContractBalanceLog
@@ -1854,7 +1866,9 @@ BEGIN TRY
 					AND intSequenceUsageHistoryId IS NULL
 					ORDER BY dtmHistoryCreated DESC
 				) sh
-				WHERE pfd.intPriceFixationDetailId NOT IN
+				WHERE pf.intContractHeaderId = @intContractHeaderId
+				AND pf.intContractDetailId = ISNULL(@intContractDetailId, pf.intContractDetailId)
+				AND pfd.intPriceFixationDetailId NOT IN
 				(
 					SELECT intTransactionReferenceDetailId
 					FROM tblCTContractBalanceLog
