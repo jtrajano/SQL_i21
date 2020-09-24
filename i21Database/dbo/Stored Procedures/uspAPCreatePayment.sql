@@ -489,7 +489,13 @@ BEGIN
 	JOIN tblAPBill B on PD.intBillId = B.intBillId
 	JOIN #tmpBillsId C ON C.intID = B.intBillId
 
-	 SET @createdPaymentId = @paymentId
+	SET @createdPaymentId = @paymentId
 
-	 EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
+	EXEC uspAPUpdateVoucherPayment @createdPaymentId, 1
+
+	EXEC dbo.uspSMAuditLog 
+	@screenName = 'AccountsPayable.view.PayVouchersDetail'			-- Screen Namespace
+	,@keyValue = @createdPaymentId									-- Primary Key Value
+	,@entityId = @userId											-- Entity Id
+	,@actionType = 'Created'										-- Action Type
 END
