@@ -48,7 +48,11 @@ OUTER APPLY (
 		AND ag.strAccountType = 'Liability'
 		AND gd.ysnIsUnposted = 0 
 ) APClearing
-WHERE Shipment.ysnPosted = 1 AND ShipmentCharge.ysnAccrue = 1  
+WHERE 
+    ShipmentCharge.ysnAccrue = 1  
+AND ShipmentCharge.intEntityVendorId IS NOT NULL
+AND ISNULL(Shipment.ysnPosted, 0) = 1
+AND APClearing.intAccountId IS NOT NULL
 UNION ALL  
 SELECT  
     bill.dtmDate AS dtmDate  
@@ -117,3 +121,4 @@ OUTER APPLY (
 WHERE   
     billDetail.intInventoryShipmentChargeId IS NOT NULL  
 AND bill.ysnPosted = 1
+AND APClearing.intAccountId IS NOT NULL
