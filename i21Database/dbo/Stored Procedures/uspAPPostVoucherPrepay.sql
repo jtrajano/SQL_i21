@@ -306,6 +306,26 @@ BEGIN
 		SET prepay.ysnPosted = @post, prepay.intConcurrencyId = ISNULL(prepay.intConcurrencyId,0) + 1
 	FROM tblAPBill prepay
 	INNER JOIN @validVoucherPrepay prepayIds ON prepay.intBillId = prepayIds.intId
+
+	DECLARE @totalPosted INT = 0
+	DECLARE @postedCtr INT = 0
+	DECLARE @postedId INT = 0
+	SELECT @totalPosted = COUNT(*) FROM @validVoucherPrepay
+	DECLARE @actionType AS NVARCHAR(10)
+	SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
+
+	WHILE (@postedCtr <> @totalPosted)
+	BEGIN
+		SELECT @postedId = intId FROM @validVoucherPrepay ORDER BY intId ASC OFFSET @postedCtr ROWS FETCH NEXT 1 ROWS ONLY
+
+		EXEC dbo.uspSMAuditLog 
+		@screenName = 'AccountsPayable.view.Voucher'			-- Screen Namespace
+		,@keyValue = @postedId									-- Primary Key Value
+		,@entityId = @userId									-- Entity Id
+		,@actionType = @actionType								-- Action Type
+		
+		SET @postedCtr = @postedCtr + 1
+	END
 END
 ELSE
 BEGIN
