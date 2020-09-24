@@ -41,8 +41,8 @@ fixation as (
     dblPricedQuantity = (case when aaa1.intPricingTypeId = 1 then aaa1.dblQuantity else sum(bbb.dblQuantity) end)
   from 
   tblCTContractDetail aaa1
-    left join tblCTPriceFixation aaa on aaa.intContractDetailId = aaa1.intContractDetailId
-    left join tblCTPriceFixationDetail bbb  on bbb.intPriceFixationId = aaa.intPriceFixationId and bbb.intPriceFixationId = aaa.intPriceFixationId
+    left join tblCTPriceFixation aaa WITH (NOLOCK) on aaa.intContractDetailId = aaa1.intContractDetailId
+    left join tblCTPriceFixationDetail bbb WITH (NOLOCK) on bbb.intPriceFixationId = aaa.intPriceFixationId and bbb.intPriceFixationId = aaa.intPriceFixationId
   group by 
     aaa1.intContractDetailId
   ,aaa1.intPricingTypeId
@@ -102,7 +102,7 @@ approved as (
           ) end
         ) 
       from 
-        tblCTContractDetail ccc, 
+        tblCTContractDetail ccc WITH (NOLOCK), 
         tblQMSample ddd, 
         tblICItemUOM eee, 
         tblICItemUOM fff 
@@ -153,7 +153,7 @@ statuses as (
             SELECT 
               DISTINCT ', ' + nnn.strContractStatus 
             FROM 
-              tblCTContractDetail mmm 
+              tblCTContractDetail mmm WITH (NOLOCK)
               JOIN tblCTContractStatus nnn ON nnn.intContractStatusId = mmm.intContractStatusId 
             WHERE 
               mmm.intContractHeaderId = lll.intContractHeaderId FOR XML PATH('')
@@ -163,7 +163,7 @@ statuses as (
           ''
         ) 
       FROM 
-        tblCTContractHeader lll
+        tblCTContractHeader lll WITH (NOLOCK)
     ) as ss
 ), 
 reserved as (
@@ -406,8 +406,8 @@ select
   a.intBookId as intDetailBookId,
   a.intSubBookId as intDetailSubBookId
 from 
-  tblCTContractDetail a 
-  join tblCTContractHeader b on b.intContractHeaderId = a.intContractHeaderId 
+  tblCTContractDetail a WITH (NOLOCK)
+  join tblCTContractHeader b WITH (NOLOCK) on b.intContractHeaderId = a.intContractHeaderId 
   left join tblICItem c on c.intItemId = a.intItemId 
   left join tblICItem d on d.intItemId = a.intItemBundleId 
   left join tblSMShipVia e on e.intEntityId = a.intShipViaId 
