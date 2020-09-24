@@ -3,8 +3,23 @@
 	@intUserId INT
 AS
 
-DELETE FROM tblICInventoryValuationSummary
-WHERE strPeriod = @strPeriod
+DELETE summary
+FROM 
+	tblICInventoryValuationSummary summary
+	INNER JOIN tblGLFiscalYearPeriod f
+		ON summary.strPeriod = f.strPeriod 
+	CROSS APPLY (
+		SELECT TOP 1 
+			fyp.intGLFiscalYearPeriodId 
+		FROM 
+			tblGLFiscalYearPeriod fyp
+		WHERE
+			(fyp.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 		
+		ORDER BY
+			fyp.intGLFiscalYearPeriodId ASC 				
+	) fypStartingPoint
+WHERE
+	f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
 
 INSERT INTO tblICInventoryValuationSummary (
 	intInventoryValuationKeyId
@@ -148,3 +163,69 @@ FROM	tblGLFiscalYearPeriod f
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL 
 	AND f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
+--CREATE PROCEDURE dbo.[uspICSearchInventoryValuationSummary]
+--	@strPeriod NVARCHAR(50)
+--AS
+
+--SELECT TOP 1 @strPeriod = strPeriod FROM tblGLFiscalYearPeriod WHERE strPeriod = @strPeriod
+
+--DELETE FROM tblICInventoryValuationSummary
+
+--IF NULLIF(@strPeriod, '') IS NOT NULL
+--BEGIN
+--	--INSERT INTO @valuations
+--	INSERT INTO tblICInventoryValuationSummary(
+--		  intInventoryValuationKeyId
+--		, intItemId
+--		, strItemNo
+--		, strItemDescription
+--		, intItemLocationId 
+--		, strLocationName
+--		, dblRunningQuantity
+--		, dblRunningValue
+--		, dblRunningLastCost
+--		, dblRunningStandardCost
+--		, dblRunningAverageCost
+--		, strStockUOM
+--		, strCategoryCode
+--		, strCommodityCode
+--		, strInTransitLocationName
+--		, intLocationId 
+--		, intInTransitLocationId
+--		, ysnInTransit
+--		, strPeriod
+--	)
+--	SELECT
+--		  intInventoryValuationKeyId = CAST(ROW_NUMBER() OVER (ORDER BY il.intItemLocationId) AS INT)
+--		, i.intItemId
+--		, i.strItemNo
+--		, strItemDescription = i.strDescription 
+--		, il.intItemLocationId
+--		, strLocationName = CASE WHEN val.ysnInTransit = 1 THEN loc.strLocationName + ' (In-Transit)' ELSE loc.strLocationName END
+--		, dblRunningQuantity = ISNULL(val.dblQuantity, 0)
+--		, dblRunningValue = ISNULL(val.dblValue, 0)
+--		, dblRunningLastCost = ISNULL(ROUND(val.dblQuantityInStockUOM * ip.dblLastCost, 2), 0)
+--		, dblRunningStandardCost = ISNULL( ROUND(val.dblQuantityInStockUOM * ip.dblStandardCost, 2),0)
+--		, dblRunningAverageCost = ISNULL( ROUND(val.dblQuantityInStockUOM * ip.dblAverageCost, 2),0)
+--		, strStockUOM = umStock.strUnitMeasure
+--		, cat.strCategoryCode
+--		, com.strCommodityCode
+--		, strInTransitLocationName = ''
+--		, val.intLocationId
+--		, intInTransitLocationId = null  
+--		, val.ysnInTransit
+--		, strPeriod = @strPeriod
+--	FROM tblICItem i
+--		INNER JOIN tblICItemLocation il ON il.intItemId = i.intItemId
+--		INNER JOIN tblSMCompanyLocation loc ON loc.intCompanyLocationId = il.intLocationId
+--		LEFT JOIN tblICItemPricing ip ON ip.intItemLocationId = il.intItemLocationId
+--			AND ip.intItemId = i.intItemId
+--		LEFT JOIN tblICItemUOM ium ON ium.intItemId = i.intItemId
+--			AND ium.ysnStockUnit = 1  
+--		LEFT JOIN tblICUnitMeasure umStock ON umStock.intUnitMeasureId = ium.intUnitMeasureId 
+--		LEFT JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
+--		LEFT JOIN tblICCommodity com ON com.intCommodityId = i.intCommodityId
+--		CROSS APPLY dbo.fnGetItemValuation(i.intItemId, il.intItemLocationId, @strPeriod) val	
+--	ORDER BY il.intItemLocationId
+--END
+--GO
