@@ -951,7 +951,7 @@ BEGIN TRY
 					WHERE intRowNo > @intMinItem
 				END
 
-				IF ISNULL(@dblRequiredQty, 0) > 0
+				IF ISNULL(@dblRequiredQty, 0) > 0 and NOT EXISTS(SELECT *FROM @tblPickedItem Where intItemId=@intRawItemId)
 					INSERT INTO @tblPickedItem (
 						intItemStockUOMId
 						,intItemId
