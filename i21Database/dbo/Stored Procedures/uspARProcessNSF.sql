@@ -177,86 +177,6 @@ IF @InitTranCount = 0
 ELSE
 	SAVE TRANSACTION @Savepoint
 
---REVERSE GL ENTRIES
-INSERT INTO @GLEntries (
-	 [dtmDate]
-	,[strBatchId]
-	,[intAccountId]
-	,[dblDebit]
-	,[dblCredit]
-	,[dblDebitUnit]
-	,[dblCreditUnit]
-	,[strDescription]
-	,[strCode]
-	,[strReference]
-	,[intCurrencyId]
-	,[dblExchangeRate]
-	,[dtmDateEntered]
-	,[dtmTransactionDate]
-	,[strJournalLineDescription]
-	,[intJournalLineNo]
-	,[ysnIsUnposted]
-	,[intUserId]
-	,[intEntityId]
-	,[strTransactionId]
-	,[intTransactionId]
-	,[strTransactionType]
-	,[strTransactionForm]
-	,[strModuleName]
-	,[intConcurrencyId]
-	,[dblDebitForeign]
-	,[dblDebitReport]
-	,[dblCreditForeign]
-	,[dblCreditReport]
-	,[dblReportingRate]
-	,[dblForeignRate]
-)
-SELECT
-	 [dtmDate]					= P.dtmDate
-	,[strBatchID]				= GL.strBatchId
-	,[intAccountId]				= GL.intAccountId
-	,[dblDebit]					= GL.dblCredit
-	,[dblCredit]				= GL.dblDebit
-	,[dblDebitUnit]				= GL.dblCreditUnit
-	,[dblCreditUnit]			= GL.dblDebitUnit
-	,[strDescription]			= 'NSF: ' + GL.strDescription
-	,[strCode]					= GL.strCode
-	,[strReference]				= GL.strReference
-	,[intCurrencyId]			= GL.intCurrencyId
-	,[dblExchangeRate]			= GL.dblExchangeRate
-	,[dtmDateEntered]			= P.dtmDate
-	,[dtmTransactionDate]		= GL.dtmTransactionDate
-	,[strJournalLineDescription]= 'NSF'
-	,[intJournalLineNo]			= GL.intJournalLineNo
-	,[ysnIsUnposted]			= 0
-	,[intUserId]				= GL.intUserId
-	,[intEntityId]				= GL.intEntityId
-	,[strTransactionId]			= GL.strTransactionId
-	,[intTransactionId]			= GL.intTransactionId
-	,[strTransactionType]		= GL.strTransactionType
-	,[strTransactionForm]		= GL.strTransactionForm
-	,[strModuleName]			= GL.strModuleName
-	,[intConcurrencyId]			= 1
-	,[dblDebitForeign]			= GL.dblCreditForeign
-	,[dblDebitReport]			= GL.dblCreditReport
-	,[dblCreditForeign]			= GL.dblDebitForeign
-	,[dblCreditReport]			= GL.dblDebitReport
-	,[dblReportingRate]			= GL.dblReportingRate
-	,[dblForeignRate]			= GL.dblForeignRate
-FROM dbo.tblGLDetail GL WITH (NOLOCK)
-INNER JOIN #SELECTEDPAYMENTS P ON GL.intTransactionId = P.intTransactionId
-							  AND GL.strTransactionId = P.strTransactionNumber
-WHERE GL.ysnIsUnposted = 0
-  AND GL.strCode = 'AR'
-
-IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
-	BEGIN
-		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
-								, @ysnPost			= 1
-								, @SkipGLValidation	= 1
-								, @SkipICValidation	= 1
-	END
-
 --UPDATE CASH INVOICE RECORDS
 UPDATE I
 SET ysnProcessedToNSF	= 1
@@ -426,7 +346,9 @@ BEGIN
 								, @LineItemTaxEntries	= @LineItemTaxEntries
 								, @UserId				= @intUserId
 								, @GroupingOption		= 0
+								, @RaiseError			= 1
 								, @CreatedIvoices		= @strCreatedIvoices OUT
+								, @ErrorMessage			= @strMessage OUT
 END
 
 UPDATE tblARNSFStagingTableDetail 
@@ -710,6 +632,86 @@ ELSE
 		WHERE intNSFTransactionId = @intNSFTransactionId
 	END
 
+--REVERSE GL ENTRIES
+INSERT INTO @GLEntries (
+	 [dtmDate]
+	,[strBatchId]
+	,[intAccountId]
+	,[dblDebit]
+	,[dblCredit]
+	,[dblDebitUnit]
+	,[dblCreditUnit]
+	,[strDescription]
+	,[strCode]
+	,[strReference]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[dtmDateEntered]
+	,[dtmTransactionDate]
+	,[strJournalLineDescription]
+	,[intJournalLineNo]
+	,[ysnIsUnposted]
+	,[intUserId]
+	,[intEntityId]
+	,[strTransactionId]
+	,[intTransactionId]
+	,[strTransactionType]
+	,[strTransactionForm]
+	,[strModuleName]
+	,[intConcurrencyId]
+	,[dblDebitForeign]
+	,[dblDebitReport]
+	,[dblCreditForeign]
+	,[dblCreditReport]
+	,[dblReportingRate]
+	,[dblForeignRate]
+)
+SELECT
+	 [dtmDate]					= P.dtmDate
+	,[strBatchID]				= GL.strBatchId
+	,[intAccountId]				= GL.intAccountId
+	,[dblDebit]					= GL.dblCredit
+	,[dblCredit]				= GL.dblDebit
+	,[dblDebitUnit]				= GL.dblCreditUnit
+	,[dblCreditUnit]			= GL.dblDebitUnit
+	,[strDescription]			= 'NSF: ' + GL.strDescription
+	,[strCode]					= GL.strCode
+	,[strReference]				= GL.strReference
+	,[intCurrencyId]			= GL.intCurrencyId
+	,[dblExchangeRate]			= GL.dblExchangeRate
+	,[dtmDateEntered]			= P.dtmDate
+	,[dtmTransactionDate]		= GL.dtmTransactionDate
+	,[strJournalLineDescription]= 'NSF'
+	,[intJournalLineNo]			= GL.intJournalLineNo
+	,[ysnIsUnposted]			= 0
+	,[intUserId]				= GL.intUserId
+	,[intEntityId]				= GL.intEntityId
+	,[strTransactionId]			= GL.strTransactionId
+	,[intTransactionId]			= GL.intTransactionId
+	,[strTransactionType]		= GL.strTransactionType
+	,[strTransactionForm]		= GL.strTransactionForm
+	,[strModuleName]			= GL.strModuleName
+	,[intConcurrencyId]			= 1
+	,[dblDebitForeign]			= GL.dblCreditForeign
+	,[dblDebitReport]			= GL.dblCreditReport
+	,[dblCreditForeign]			= GL.dblDebitForeign
+	,[dblCreditReport]			= GL.dblDebitReport
+	,[dblReportingRate]			= GL.dblReportingRate
+	,[dblForeignRate]			= GL.dblForeignRate
+FROM dbo.tblGLDetail GL WITH (NOLOCK)
+INNER JOIN #SELECTEDPAYMENTS P ON GL.intTransactionId = P.intTransactionId
+							  AND GL.strTransactionId = P.strTransactionNumber
+WHERE GL.ysnIsUnposted = 0
+  AND GL.strCode = 'AR'
+
+IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
+	BEGIN
+		EXEC dbo.uspGLBookEntries @GLEntries		= @GLEntries
+								, @ysnPost			= 1
+								, @SkipGLValidation	= 1
+								, @SkipICValidation	= 1
+	END
+
 EXEC dbo.uspSMAuditLog 
 		 @keyValue			= @intPaymentId
 		,@screenName		= 'AccountsReceivable.view.ReceivePaymentsDetail'
@@ -723,9 +725,8 @@ Do_Rollback:
 
 IF @InitTranCount = 0
 	BEGIN
-		IF (XACT_STATE()) = -1
+		IF (XACT_STATE()) = -1 OR ISNULL(@strMessage, '') <> ''
 		BEGIN 
-			RAISERROR(@strMessage, 11, 1)
 			ROLLBACK TRANSACTION
 		END
 
@@ -734,9 +735,8 @@ IF @InitTranCount = 0
 	END		
 ELSE
 	BEGIN
-		IF (XACT_STATE()) = -1
+		IF (XACT_STATE()) = -1 OR ISNULL(@strMessage, '') <> ''
 		BEGIN
-			RAISERROR(@strMessage, 11, 1)
 			ROLLBACK TRANSACTION  @Savepoint
 		END
 	END	
