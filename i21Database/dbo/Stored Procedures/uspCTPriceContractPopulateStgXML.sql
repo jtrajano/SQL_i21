@@ -4,6 +4,7 @@
 	,@intToCompanyId INT
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
+	,@ysnProcessApproverInfo bit=0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -62,7 +63,8 @@ BEGIN TRY
 	FROM tblSMTransaction
 	WHERE intRecordId = @intPriceContractId
 		AND intScreenId = @intContractScreenId
-
+if @ysnProcessApproverInfo=0
+Begin
 	-------------------------PriceContract-----------------------------------------------------------
 	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
 
@@ -94,32 +96,7 @@ BEGIN TRY
 		,@strPriceFixationXML OUTPUT
 		,NULL
 		,NULL
-
-	---------------------------------------------Approver------------------------------------------
-	SELECT @strApproverXML = NULL
-		,@strObjectName = NULL
-
-	SELECT @strObjectName = 'vyuCTPriceContractApproverView'
-
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strPriceContractCondition
-		,@strApproverXML OUTPUT
-		,NULL
-		,NULL
-
-	---------------------------------------------Submitted By------------------------------------------
-	SELECT @strSubmittedByXML = NULL
-		,@strObjectName = NULL
-
-	SELECT @strObjectName = 'vyuIPPriceContractSubmittedByView'
-
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strPriceContractCondition
-		,@strSubmittedByXML OUTPUT
-		,NULL
-		,NULL
-
-	---------------------------------------------PriceFixationDetail-----------------------------------------------
+		---------------------------------------------PriceFixationDetail-----------------------------------------------
 	SET @strPriceFixationDetailXML = NULL
 	SET @strPriceFixationCondition = NULL
 
@@ -144,6 +121,32 @@ BEGIN TRY
 		,@strPriceFixationDetailXML OUTPUT
 		,NULL
 		,NULL
+End
+	---------------------------------------------Approver------------------------------------------
+	SELECT @strApproverXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuCTPriceContractApproverView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strPriceContractCondition
+		,@strApproverXML OUTPUT
+		,NULL
+		,NULL
+
+	---------------------------------------------Submitted By------------------------------------------
+	SELECT @strSubmittedByXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPPriceContractSubmittedByView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strPriceContractCondition
+		,@strSubmittedByXML OUTPUT
+		,NULL
+		,NULL
+
+	
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)

@@ -831,6 +831,9 @@ BEGIN
 			INNER JOIN #tmpRebuildList list
 				ON InvTrans.intItemId  = COALESCE(list.intItemId, InvTrans.intItemId) 
 				AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
+	WHERE
+		GLDetail.strCode IN ('IC', 'ICA', 'IAN', 'IAV', 'ICA')
+
 END 
 
 ---- Force the clearing of the cost bucket if the flagged
@@ -6156,6 +6159,8 @@ BEGIN
 	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod, @intUserId
 END
 
+-- Rebuild the AR Gross Margin Summary
+EXEC uspARInvoiceGrossMarginSummary @ysnRebuild = 1
 
 -- Restore the created dates
 BEGIN 

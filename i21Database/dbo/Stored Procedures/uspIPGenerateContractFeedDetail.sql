@@ -104,9 +104,11 @@ BEGIN TRY
 				INSERT INTO tblIPContractFeedHeader (
 					intContractHeaderId
 					,strFeedStatus
+					,intStatusId
 					)
 				SELECT @intContractHeaderId
 					,'Processed'
+					,1
 
 				SELECT @intContractFeedHeaderId = SCOPE_IDENTITY();
 

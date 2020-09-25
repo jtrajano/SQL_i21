@@ -95,6 +95,7 @@ BEGIN TRY
 	IF (ISNULL(@intMarketZoneId, 0) = 0) SET @intMarketZoneId = NULL
 	IF (ISNULL(@intCompanyId, 0) = 0) SET @intCompanyId = NULL
 	IF (ISNULL(@intUserId, 0) = 0) SET @intUserId = NULL
+	IF (ISNULL(@dtmPostDate, '') = '') SET @dtmPostDate = GETDATE()
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
@@ -136,18 +137,6 @@ BEGIN TRY
 	SELECT TOP 1 @strM2MType = strType FROM tblRKM2MType WHERE intM2MTypeId = @intM2MTypeId
 
 	SET @dtmEndDate = LEFT(CONVERT(VARCHAR, @dtmEndDate, 101), 10)
-
-	IF (@intCommodityId = 0) SET @intCommodityId = NULL
-	IF (@intLocationId = 0) SET @intLocationId = NULL
-	IF (@intMarketZoneId = 0) SET @intMarketZoneId = NULL
-
-	IF (@intM2MTypeId = 0) SET @intM2MTypeId = NULL
-	IF (@intM2MBasisId = 0) SET @intM2MBasisId = NULL
-	IF (@intFutureSettlementPriceId = 0) SET @intFutureSettlementPriceId = NULL
-	IF (@intQuantityUOMId = 0) SET @intQuantityUOMId = NULL
-	IF (@intPriceUOMId = 0) SET @intPriceUOMId = NULL
-	IF (@intCurrencyId = 0) SET @intCurrencyId = NULL
-	IF (@intCompanyId = 0) SET @intCompanyId = NULL
 
 	IF (ISNULL(@strRecordName, '') = '')
 	BEGIN		
@@ -3977,7 +3966,7 @@ BEGIN TRY
 			, dblM2M NUMERIC(24, 10)
 			, dblFixedPurchaseVolume NUMERIC(24, 10)
 			, dblUnfixedPurchaseVolume NUMERIC(24, 10)
-			, dblTotalValume NUMERIC(24, 10)
+			, dblTotalCommittedVolume NUMERIC(24, 10)
 			, dblPurchaseOpenQty NUMERIC(24, 10)
 			, dblPurchaseContractBasisPrice NUMERIC(24, 10)
 			, dblPurchaseFuturesPrice NUMERIC(24, 10)
@@ -3988,7 +3977,7 @@ BEGIN TRY
 			, dblUnPurchaseFuturesPrice NUMERIC(24, 10)
 			, dblUnPurchaseCashPrice NUMERIC(24, 10)
 			, dblUnfixedPurchaseValue NUMERIC(24, 10)
-			, dblTotalCommitedValue NUMERIC(24, 10))
+			, dblTotalCommittedValue NUMERIC(24, 10))
 
 		IF (ISNULL(@ysnByProducer, 0) = 0)
 		BEGIN
@@ -4000,7 +3989,7 @@ BEGIN TRY
 				, dblM2M
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
-				, dblTotalValume
+				, dblTotalCommittedVolume
 				, dblPurchaseOpenQty
 				, dblPurchaseContractBasisPrice
 				, dblPurchaseFuturesPrice
@@ -4011,7 +4000,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice
 				, dblUnPurchaseCashPrice
 				, dblUnfixedPurchaseValue
-				, dblTotalCommitedValue)
+				, dblTotalCommittedValue)
 			SELECT intM2MHeaderId = @intM2MHeaderId
 				, intContractHeaderId
 				, strContractSeq
@@ -4031,7 +4020,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnPurchaseCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
-				, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
+				, dblTotalCommittedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			FROM (
 				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
@@ -4078,7 +4067,7 @@ BEGIN TRY
 				, dblM2M
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
-				, dblTotalValume
+				, dblTotalCommittedVolume
 				, dblPurchaseOpenQty
 				, dblPurchaseContractBasisPrice
 				, dblPurchaseFuturesPrice
@@ -4089,7 +4078,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice
 				, dblUnPurchaseCashPrice
 				, dblUnfixedPurchaseValue
-				, dblTotalCommitedValue)
+				, dblTotalCommittedValue)
 			SELECT intM2MHeaderId = @intM2MHeaderId
 				, intContractHeaderId
 				, strContractSeq
@@ -4098,7 +4087,7 @@ BEGIN TRY
 				, dblM2M
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
-				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
+				, dblTotalCommittedVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblPurchaseOpenQty = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPValueQty ELSE 0 END)
 				, dblPurchaseContractBasisPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPContractBasis ELSE 0 END)
 				, dblPurchaseFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPFutures ELSE 0 END)
@@ -4109,7 +4098,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnPurchaseCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
-				, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
+				, dblTotalCommittedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			FROM(
 				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
@@ -4143,14 +4132,6 @@ BEGIN TRY
 																										, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
 				FROM #tmpCPE fd
 				LEFT JOIN tblAPVendor e ON e.intEntityId = fd.intProducerId
-				--JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
-				--JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
-				--JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
-				--JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
-				
-				--LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = e.intRiskUnitOfMeasureId
-				--LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
-				
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
 			) t
 		END
@@ -4174,7 +4155,9 @@ BEGIN TRY
 			, dblUnPurchaseContractBasisPrice
 			, dblUnPurchaseFuturesPrice
 			, dblUnPurchaseCashPrice
-			, dblUnfixedPurchaseValue)
+			, dblUnfixedPurchaseValue
+			, dblTotalCommittedVolume
+			, dblTotalCommittedValue)
 		SELECT intM2MHeaderId
 			, intContractHeaderId
 			, strContractSeq
@@ -4193,6 +4176,8 @@ BEGIN TRY
 			, dblUnPurchaseFuturesPrice
 			, dblUnPurchaseCashPrice
 			, dblUnfixedPurchaseValue
+			, dblTotalCommittedVolume
+			, dblTotalCommittedValue
 		FROM @tmpCPEDetail
 
 		-- Post Preview
@@ -4250,9 +4235,16 @@ BEGIN TRY
 				, @strUnrealizedGainOnInventoryIOSId NVARCHAR(250)
 				, @strUnrealizedLossOnInventoryIOSId NVARCHAR(250)
 
+			DECLARE @GLLocationId INT
+			SET @GLLocationId = @intLocationId
+			IF (ISNULL(@GLLocationId, 0) = 0)
+			BEGIN
+				SELECT @GLLocationId = intCompanyLocationId FROM tblSMUserSecurity WHERE intEntityId = @intUserId
+			END
+
 			INSERT INTO @GLAccounts
 			EXEC uspRKGetGLAccountsForPosting @intCommodityId = @intCommodityId
-				, @intLocationId = @intLocationId
+				, @intLocationId = @GLLocationId
 
 			SELECT @intUnrealizedGainOnBasisId = intAccountId
 				, @strUnrealizedGainOnBasisId = CASE WHEN ysnHasError = 1 THEN strErrorMessage ELSE strAccountNo END
@@ -4500,7 +4492,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4532,7 +4524,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4564,7 +4556,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4596,7 +4588,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4628,7 +4620,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4660,7 +4652,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4692,7 +4684,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4723,7 +4715,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4754,7 +4746,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4785,7 +4777,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4816,7 +4808,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction WHERE intM2MHeaderId = @intM2MHeaderId
 				AND strContractOrInventoryType IN ('In-transit(P)', 'In-transit(S)')
@@ -4846,7 +4838,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4877,7 +4869,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4908,7 +4900,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4940,7 +4932,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -4971,7 +4963,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 			FROM tblRKM2MTransaction
 			WHERE intM2MHeaderId = @intM2MHeaderId
@@ -5030,7 +5022,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 				, t.dblPrice
 			FROM @Result t
@@ -5060,7 +5052,7 @@ BEGIN TRY
 				, intEntityId
 				, @strRecordName strRecordName
 				, @intUserId intUserId
-				, @intLocationId intLocationId
+				, @GLLocationId intLocationId
 				, @intQuantityUOMId intQtyUOMId
 				, t.dblPrice
 			FROM @Result t

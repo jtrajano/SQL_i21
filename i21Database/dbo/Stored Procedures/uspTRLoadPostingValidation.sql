@@ -92,7 +92,7 @@ BEGIN TRY
 		RAISERROR('Invalid Driver', 16, 1)
 	END
 
-	SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
 	SELECT TOP 1 @ysnItemizeSurcharge = ISNULL(ysnItemizeSurcharge, 0) FROM tblTRCompanyPreference
 	SELECT @strFreightBilledBy = strFreightBilledBy FROM tblSMShipVia where intEntityId = @intShipVia
 
@@ -162,20 +162,63 @@ BEGIN TRY
 
 		IF (ISNULL(@dblFreight, 0) > 0 AND ISNULL(@intFreightItemId, '') = '')
 		BEGIN
-				RAISERROR('Freight Item not found. Please setup in Company Configuration', 16, 1)
+			RAISERROR('Freight Item is not found. Please setup in Company Configuration', 16, 1)
 		END
 		ELSE IF (ISNULL(@dblFreight, 0) > 0  AND ISNULL(@intFreightItemId, '') != '')
 		BEGIN
+
+			DECLARE @strCostTypeFreight NVARCHAR(50) = NULL
+				, @strCostMethodFreight NVARCHAR(50) = NULL
+				, @strCostUOMFreight NVARCHAR(50) = NULL
+
+			-- CHECK FREIGHT ITEM COST TYPE  
+			SELECT TOP 1 @strCostTypeFreight = strCostType FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
+			IF(ISNULL(@strCostTypeFreight, '') = '')
+			BEGIN
+				RAISERROR('Incorrect Freight Item setup: Cost Type should be ''Freight''', 16, 1)
+			END
+
+			-- CHECK FREIGHT ITEM COST METHOD
+			SELECT TOP 1 @strCostMethodFreight = strCostMethod FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
+			IF(ISNULL(@strCostMethodFreight, '') NOT IN ('Per Unit','Gross Unit'))
+			BEGIN
+				RAISERROR('Incorrect Freight Item setup: Cost Method should be either Per Unit or Gross Unit', 16, 1)
+			END
+
+			-- CHECK FREIGHT ITEM COST UOM
+			SELECT TOP 1 @strCostUOMFreight = strCostUOM FROM vyuICGetOtherCharges WHERE intItemId = @intFreightItemId AND strCostType = 'Freight'
+			IF(ISNULL(@strCostUOMFreight, '') = '')
+			BEGIN
+				RAISERROR('Incorrect Freight Item setup: Cost UOM should have a value.', 16, 1)
+			END
+
+			-- CHECK SURCHARGE ITEM
+			SELECT TOP 1 @intSurchargeItemId = intItemId FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId
+
 			IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') = '')
 			BEGIN
 				RAISERROR('Transports Load has a Surcharge. You must link the Surcharge Item to the Freight Item (using the On Cost dropdown from the Surcharge Item''s Setup tab > Cost tab), or zero-out the Surcharge amount in both Receipt and Distribution Detail.', 16, 1)
 			END
-
-			SELECT TOP 1 @strFreightCostMethod = strCostMethod FROM tblICItem WHERE intItemId = @intFreightItemId
-			IF(ISNULL(@strFreightCostMethod, '') = '')
+			ELSE IF (ISNULL(@dblSurcharge, 0) > 0 AND ISNULL(@intSurchargeItemId, '') != '')
 			BEGIN
-				RAISERROR('Cost UOM is invalid. Make sure Item screen > Setup tab > Cost tab > Cost Method field is setup properly.', 16, 1)
-			END
+
+				DECLARE @strCostTypeSurcharge NVARCHAR(50) = NULL
+				, @strCostMethodSurcharge NVARCHAR(50) = NULL
+
+				-- CHECK SURCHARGE ITEM COST TYPE
+				SELECT TOP 1 @strCostTypeSurcharge = strCostType FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId AND strCostType = 'Other Charges'
+				IF(ISNULL(@strCostTypeSurcharge, '') = '')
+				BEGIN
+					RAISERROR('Incorrect Surcharge Item setup: Cost Type should be ''Other Charges''', 16, 1)
+				END
+
+				-- CHECK SURCHARGE ITEM COST METHOD
+				SELECT TOP 1 @strCostMethodSurcharge = strCostMethod FROM vyuICGetOtherCharges WHERE intOnCostTypeId = @intFreightItemId AND strCostType = 'Other Charges'
+				IF(ISNULL(@strCostMethodSurcharge, '') != 'Percentage')
+				BEGIN
+					RAISERROR('Incorrect Surcharge Item setup: Cost Method should be Percentage', 16, 1)
+				END
+			END	
 		END
 		
 		IF(@strOrigin = 'Terminal')
@@ -214,7 +257,7 @@ BEGIN TRY
 			
 			IF (@intStockUOMId IS NULL)
 			BEGIN
-				SET @err = 'Stock UOM is not setup for item ' + @strItem
+				SET @err = 'Stock UOM is not set for item ' + @strItem
 				RAISERROR(@err , 16, 1)
 			END
 			

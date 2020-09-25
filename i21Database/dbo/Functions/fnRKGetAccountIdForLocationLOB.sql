@@ -53,7 +53,7 @@ BEGIN
 
 	IF (ISNULL(@strLocationAccountCode, '') = '')
 	BEGIN
-		SET @ErrMsg = 'Invalid Location on GL Accounts tab of Company Location ' + @strLocationName + '.'
+		SET @ErrMsg = 'Invalid Location on GL Accounts tab of Company Location' + ISNULL(' ' + @strLocationName, '') + '.'
 		INSERT INTO @tblAccount(intAccountId, strAccountNo, ysnHasError, strErrorMessage)
 		VALUES (NULL, NULL, 1, @ErrMsg)
 		RETURN

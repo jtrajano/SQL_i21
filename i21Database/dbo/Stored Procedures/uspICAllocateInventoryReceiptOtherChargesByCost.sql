@@ -34,8 +34,8 @@ DECLARE	-- Receipt Types
 		,@SOURCE_TYPE_None AS INT = 0
 		,@SOURCE_TYPE_Scale AS INT = 1
 		,@SOURCE_TYPE_InboundShipment AS INT = 2
-		,@SOURCE_TYPE_Transport AS INT = 3
-		
+		,@SOURCE_TYPE_Transport AS INT = 3		
+
 -- Get the functional currency
 BEGIN 
 	DECLARE @intFunctionalCurrencyId AS INT
@@ -93,20 +93,12 @@ BEGIN
 						, Charge.strChargesLink 
 				) CalculatedCharges 
 					ON ReceiptItem.intInventoryReceiptId = CalculatedCharges.intInventoryReceiptId
+					AND (
+						ISNULL(CalculatedCharges.strChargesLink, '') = ISNULL(ReceiptItem.strChargesLink, '')
+					)	
 				LEFT JOIN (
 					SELECT	dblTotalCost = SUM(
 									ReceiptItem.dblLineTotal
-									--dbo.fnMultiply(
-									--	CASE	WHEN ReceiptItem.intWeightUOMId IS NOT NULL THEN 
-									--				ISNULL(ReceiptItem.dblNet, 0) 
-									--			ELSE 
-									--				ISNULL(ReceiptItem.dblOpenReceive, 0) 
-									--	END
-									--	, (
-									--		ISNULL(ReceiptItem.dblUnitCost, 0)
-									--		--* CASE WHEN ISNULL(ReceiptItem.dblForexRate, 0) = 0 AND ISNULL(Receipt.intCurrencyId, @intFunctionalCurrencyId) = @intFunctionalCurrencyId THEN 1 ELSE ReceiptItem.dblForexRate END 
-									--	)
-									--)
 								)
 							,ReceiptItem.intInventoryReceiptId 
 							,ReceiptItem.strChargesLink
@@ -133,11 +125,6 @@ BEGIN
 		SET		dblAmount = ROUND(
 								ISNULL(dblAmount, 0) 
 								+ (
-									--Source_Query.dblTotalOtherCharge									
-									--* Source_Query.Qty 
-									--* Source_Query.dblUnitCost
-									--/ Source_Query.dblTotalCost 
-									
 									Source_Query.dblTotalOtherCharge									
 									* (Source_Query.dblLineTotal / Source_Query.dblTotalCost)
 								)

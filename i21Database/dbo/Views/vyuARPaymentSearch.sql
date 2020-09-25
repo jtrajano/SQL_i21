@@ -181,7 +181,8 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (strCustomerReference)
 ) CUSTOMERREFERENCES
-OUTER APPLY(
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod GLP
-	WHERE P.intPeriodId = GLP.intGLFiscalYearPeriodId
-) AccPeriod
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , strAccountingPeriod = P.strPeriod
+	FROM tblGLFiscalYearPeriod P	
+) AccPeriod ON P.intPeriodId = AccPeriod.intGLFiscalYearPeriodId

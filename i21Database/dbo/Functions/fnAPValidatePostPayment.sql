@@ -400,7 +400,7 @@ BEGIN
 		INNER JOIN tblSMPaymentMethod B ON A.intPaymentMethodId = B.intPaymentMethodID
 		WHERE A.[intPaymentId] IN (SELECT intId FROM @paymentIds)
 		AND A.dblAmountPaid = 0
-		AND LOWER(B.strPaymentMethod) != 'debit memos and payments'
+		AND LOWER(B.strPaymentMethod) NOT IN ('ach','debit memos and payments')
 
 		--DO NOT ALLOW TO POST PAYMENT IF IT HAS ASSOCIATED PREPAYMENT FOR CONTRACT OR IT IS RESTRICTED
 		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
@@ -636,22 +636,6 @@ BEGIN
 		AND PD.dblPayment <> 0
 		AND PD.dblDiscount <> 0
 		AND CL.intDiscountAccountId IS NULL
-
-		--DO NOT ALLOW TO POST PAYMENT WITH DIFFERENT AMOUNT PAID AND PAYMENT DETAILS TOTAL
-		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId)
-		SELECT 
-			'Amount paid is not equal to the selected payments.',
-			'Payable',
-			P.strPaymentRecordNum,
-			P.intPaymentId
-		FROM tblAPPayment P
-		OUTER APPLY (
-			SELECT SUM(dblPayment) dblPayment
-			FROM tblAPPaymentDetail PD
-			WHERE PD.intPaymentId = P.intPaymentId
-		) TP
-		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds)
-		AND P.dblAmountPaid <> TP.dblPayment
 
 	END
 	ELSE

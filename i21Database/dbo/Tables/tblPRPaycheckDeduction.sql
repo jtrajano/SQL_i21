@@ -47,6 +47,12 @@ GO
 /****** Object:  Default [DF__tblPRPayc__intCo__35783A80]    Script Date: 08/14/2014 10:50:11 ******/
 ALTER TABLE [dbo].[tblPRPaycheckDeduction] ADD  DEFAULT ((1)) FOR [intConcurrencyId]
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblPRPaycheckDeduction_intPaycheckId]
+ON [dbo].[tblPRPaycheckDeduction] ([intPaycheckId],[intTypeDeductionId])
+INCLUDE ([dblTotal])
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

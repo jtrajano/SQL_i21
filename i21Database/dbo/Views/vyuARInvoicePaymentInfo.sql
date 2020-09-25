@@ -18,7 +18,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
 	 , dtmDueDate				= I.dtmDueDate
 	 , intPaymentId				= P.intPaymentId
-	 , strRecordNumber			= P.strRecordNumber
+	 , strRecordNumber			= CASE WHEN I.strTransactionType = 'Cash' THEN BT.strTransactionId ELSE P.strRecordNumber END
 	 , dblDiscount				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscount,0)  ELSE  ISNULL(I.dblDiscount,0) * -1 END
 	 , dblDiscountAvailable		= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblDiscountAvailable,0)  ELSE  ISNULL(I.dblDiscountAvailable,0) * -1 END
 	 , dblInterest				= CASE WHEN (I.strTransactionType  IN ('Invoice','Debit Memo', 'Cash')) THEN ISNULL(I.dblInterest,0)  ELSE  ISNULL(I.dblInterest,0) * -1 END
@@ -142,8 +142,11 @@ LEFT OUTER JOIN (
 		 , strName 
 	FROM dbo.tblEMEntity WITH (NOLOCK)
 ) USERENTERED ON USERENTERED.intEntityId = I.intPostedById
-OUTER APPLY(
-	SELECT strAccountingPeriod =  FORMAT( dtmEndDate, 'MMM yyyy') from tblGLFiscalYearPeriod P
-	WHERE I.intPeriodId = P.intGLFiscalYearPeriodId
-) AccPeriod
+LEFT JOIN (
+	SELECT intGLFiscalYearPeriodId
+		 , strAccountingPeriod = P.strPeriod
+	FROM tblGLFiscalYearPeriod P	
+) AccPeriod ON I.intPeriodId = AccPeriod.intGLFiscalYearPeriodId
+LEFT JOIN tblCMUndepositedFund UF ON I.intInvoiceId = UF.intSourceTransactionId AND I.strInvoiceNumber = UF.strSourceTransactionId
+LEFT JOIN tblCMBankTransaction BT ON UF.intBankDepositId = BT.intTransactionId AND BT.intBankTransactionTypeId = 1
 WHERE ((P.intPaymentId IS NOT NULL AND I.strTransactionType <> 'Cash') OR I.strTransactionType = 'Cash')
