@@ -10,7 +10,7 @@ BEGIN
 	PRINT('Started initializing summary data for invoice gross margin')
 	INSERT INTO tblARInvoiceGrossMarginSummary (intInvoiceId, strType, dtmDate, dblAmount, intConcurrencyId)
 	SELECT intInvoiceId, strType, dtmDate, SUM(dblAmount),1 FROM vyuARInvoiceGrossMargin
-	group by strType, dtmDate
+	group by strType, dtmDate,intInvoiceId
 	PRINT('Finished initializing summary data for invoice gross margin')
 END
 GO
