@@ -316,11 +316,11 @@
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
 	LEFT JOIN (
-		SELECT TOP 1  
-			intBillId 
-			,ysnRestricted
-			,intScaleTicketId
-		FROM vyuAPBasisAdvanceTicket
+		SELECT TOP 1
+		intBillId 
+		,ysnRestricted
+		,intScaleTicketId
+		FROM vyuAPBasisAdvanceTicket With(nolock)
 	) Basis ON Basis.intScaleTicketId = SCT.intTicketId
 	LEFT JOIN (
 		SELECT dblPayment = SUM(ISNULL(AP.dblPayment,0.0)), intScaleTicketId = APD.intScaleTicketId 
@@ -335,7 +335,8 @@
 		GROUP BY intScaleTicketId
 	) APPayment
 		ON APPayment.intScaleTicketId = SCT.intTicketId
-	outer apply ( SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
+	outer apply ( SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN  With(nolock)
+					INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
 	left join tblCTCropYear CYR
 		on CYR.intCropYearId = SCT.intCropYearId
 	--LEFT JOIN (SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where ) TSCN ON TSCN.intTicketId = SCT.intTicketId
