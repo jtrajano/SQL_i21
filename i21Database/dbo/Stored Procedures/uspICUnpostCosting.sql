@@ -621,9 +621,6 @@ BEGIN
 						,0
 				END 
 
-				-- Cache Item
-				EXEC dbo.uspICCacheItem @intItemId
-
 				FETCH NEXT FROM loopItemsToUnpost INTO 
 					@intItemId
 					,@intItemUOMId

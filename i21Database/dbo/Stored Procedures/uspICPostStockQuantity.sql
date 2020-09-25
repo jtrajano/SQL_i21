@@ -454,3 +454,6 @@ BEGIN
 		)
 	;
 END 
+
+-- Cache Item
+EXEC dbo.uspICCacheItem @intItemId
