@@ -354,25 +354,8 @@ SELECT
 FROM tblQMTicketDiscount QM
 INNER JOIN tblGRDiscountScheduleCode DSC
 	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-INNER JOIN (tblGRCustomerStorage CS 
-			INNER JOIN tblGRStorageType STY 
-				ON STY.intStorageScheduleTypeId  = CS.intStorageTypeId 
-					AND STY.ysnDPOwnedType = 0
-			INNER JOIN tblGRSettleStorageTicket SST
-				ON SST.intCustomerStorageId = CS.intCustomerStorageId
-			INNER JOIN tblGRSettleStorage SS
-				ON SST.intSettleStorageId = SS.intSettleStorageId
-					AND SS.intParentSettleStorageId IS NOT NULL
-					--AND SS.dblSpotUnits = 0
-			-- INNER JOIN tblQMTicketDiscount QM
-			-- 	ON QM.intTicketFileId = CS.intCustomerStorageId
-			-- LEFT JOIN tblGRSettleContract SC
-			-- 	ON SC.intSettleStorageId = SS.intSettleStorageId
-			-- LEFT JOIN tblCTContractDetail CD
-			-- 	ON CD.intContractDetailId = SC.intContractDetailId
-			)
+INNER JOIN tblGRCustomerStorage CS
 	ON CS.intCustomerStorageId = QM.intTicketFileId
-		--and billDetail.intSettleStorageId = SS.intSettleStorageId
 INNER JOIN tblICItem IM
 	ON DSC.intItemId = IM.intItemId
 INNER JOIN tblGRDiscountSchedule DS
@@ -381,12 +364,12 @@ INNER JOIN tblGRDiscountSchedule DS
 -- 	ON CO.intCommodityId = DS.intCommodityId
 INNER JOIN tblSMCompanyLocation CL
 	ON CL.intCompanyLocationId = CS.intCompanyLocationId
---INNER JOIN tblGRSettleStorageTicket SST
---	ON SST.intCustomerStorageId = CS.intCustomerStorageId
---INNER JOIN tblGRSettleStorage SS
---	ON SST.intSettleStorageId = SS.intSettleStorageId
---		AND SS.intParentSettleStorageId IS NOT NULL
---		AND SS.ysnPosted = 1
+INNER JOIN tblGRSettleStorageTicket SST
+	ON SST.intCustomerStorageId = CS.intCustomerStorageId
+INNER JOIN tblGRSettleStorage SS
+	ON SST.intSettleStorageId = SS.intSettleStorageId
+		AND SS.intParentSettleStorageId IS NOT NULL
+		AND SS.ysnPosted = 1
 		--AND SS.dblSpotUnits = 0
 LEFT JOIN tblGRSettleContract SC
 		ON SC.intSettleStorageId = SS.intSettleStorageId
@@ -420,7 +403,7 @@ WHERE
 AND QM.dblDiscountDue <> 0
 --AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 AND SS.ysnPosted = 1
---AND SS.strStorageTicket = 'STR-6513/1'
+--AND SS.strStorageTicket = 'STR-49/3'
 
 
 UNION ALL
