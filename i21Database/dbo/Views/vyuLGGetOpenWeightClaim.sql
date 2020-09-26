@@ -3,7 +3,7 @@ AS
 SELECT
 	intKeyColumn = PC.intPendingClaimId
 	,PC.intPurchaseSale
-	,strType = CASE WHEN PC.intPurchaseSale = 2 THEN 'Inbound' ELSE 'Outbound' END COLLATE Latin1_General_CI_AS
+	,strType = CASE WHEN PC.intPurchaseSale = 2 THEN 'Outbound' ELSE 'Inbound' END COLLATE Latin1_General_CI_AS
 	,strContractNumber = CH.strContractNumber
 	,intContractTypeId = CH.intContractTypeId
 	,intContractSeq = CD.intContractSeq
