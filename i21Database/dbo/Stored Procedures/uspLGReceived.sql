@@ -111,14 +111,23 @@ SET ANSI_WARNINGS OFF
 				SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
 				IF @ysnReverse = 0
+			BEGIN
+				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				
+				-- Insert to Pending Claims
+				EXEC uspLGAddPendingClaim @intLoadId, 1
+			END
+			ELSE 
+			BEGIN
+				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+				IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0)
 				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+					
+					-- Remove from Pending Claims
+					EXEC uspLGAddPendingClaim @intLoadId, 1, 0
 				END
-				ELSE 
-				BEGIN
-					UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
-					IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0) UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-				END
+			END	
 
 				SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId AND intInventoryReceiptDetailId	= @intReceiptDetailId
 			END
@@ -177,12 +186,20 @@ SET ANSI_WARNINGS OFF
 			IF @ysnReverse = 0
 			BEGIN
 				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				
+				-- Insert to Pending Claims
+				EXEC uspLGAddPendingClaim @intLoadId, 1
 			END
 			ELSE 
 			BEGIN
 				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
-				IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0) UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-
+				IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0)
+				BEGIN
+					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+					
+					-- Remove from Pending Claims
+					EXEC uspLGAddPendingClaim @intLoadId, 1, 0
+				END
 			END	
 		END
 
