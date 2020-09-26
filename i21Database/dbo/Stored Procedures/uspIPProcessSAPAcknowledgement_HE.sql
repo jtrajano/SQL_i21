@@ -186,6 +186,19 @@ BEGIN TRY
 						,'Ack Rcvd'
 						)
 
+				UPDATE tblCTContractFeed
+				SET strFirstERPPONumber = @strParam
+				WHERE intContractHeaderId = @intContractHeaderId
+					AND intContractSeq = (
+						CASE 
+							WHEN ISNULL(@ysnMaxPrice, 0) = 0
+								THEN @strTrackingNo
+							ELSE intContractSeq
+							END
+						)
+					AND strItemNo = @strItemNo
+					AND ISNULL(strFirstERPPONumber, '') = ''
+
 				--update the PO Details in modified sequences
 				UPDATE tblCTContractFeed
 				SET strERPPONumber = @strParam

@@ -272,7 +272,10 @@ SELECT
 	,[strDocumentNumber]					= @ShipmentNumber 
 	,[strItemDescription]					= ARSI.[strItemDescription]
 	,[intOrderUOMId]						= ARSI.[intOrderUOMId] 
-	,[dblQtyOrdered]						= ARSI.[dblQtyOrdered] 
+	,[dblQtyOrdered]						= CASE WHEN ISNULL(ARSI.[intContractHeaderId], 0) = 0 AND ISNULL(ARSI.[intContractDetailId], 0) = 0
+											  THEN 0 
+											  ELSE ARSI.[dblQtyOrdered] 
+											  END
 	,[intItemUOMId]							= ARSI.[intItemUOMId] 
 	,[intPriceUOMId]						= CASE WHEN ISNULL(@OnlyUseShipmentPrice, 0) = 0 THEN ARSI.[intPriceUOMId] ELSE ARSI.[intItemUOMId] END
 	,[dblQtyShipped]						= ARSI.[dblQtyShipped]
@@ -919,7 +922,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									END
 
 								UPDATE @EntriesForInvoice
-								SET dblQtyOrdered	= @dblOriginalQtyShipped
+								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN @dblQuantity ELSE @dblOriginalQtyShipped END
 								  , dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
 								WHERE intId = @intInvoiceEntriesId
@@ -1015,7 +1018,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, strDocumentNumber
 									, strItemDescription
 									, intOrderUOMId
-									, dblQtyOrdered				= @dblOriginalQtyShipped
+									, dblQtyOrdered				= @dblQuantity
 									, intItemUOMId
 									, intPriceUOMId
 									, dblContractPriceUOMQty

@@ -280,10 +280,8 @@ BEGIN
 				, t.dblNoOfLots
 				, dblFuturesPrice = CONVERT(NUMERIC(18, 6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, i.intUnitMeasureId
 										, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(dblFuturesPrice, 0), NULL, NULL, NULL)))
-				, dblSettlementPrice = CONVERT(NUMERIC(18, 6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, m.intUnitMeasureId
-										, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId
-										, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, cd.intCurrencyId, ISNULL(dblSettlementPrice, 0), NULL, NULL, m.intCurrencyId), NULL, NULL, NULL))
-										/ CASE WHEN ISNULL(c.ysnSubCurrency, 0) = 1 THEN c.intCent ELSE 1 END)
+				, dblSettlementPrice =  CONVERT(NUMERIC(18,6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, m.intUnitMeasureId
+																				, ISNULL(dblSettlementPrice, 0) * ISNULL(dbo.[fnRKGetCurrencyConvertion] (m.intCurrencyId, @intCurrencyId), 1)))
 				, dblBasis = CONVERT(NUMERIC(18, 6), dbo.[fnCTConvertQuantityToTargetItemUOM](cd.intItemId, @intUnitMeasureId, j.intUnitMeasureId
 										, dbo.[fnRKGetSourcingCurrencyConversion](t.intContractDetailId, @intCurrencyId, ISNULL(t.dblBasis, 0), NULL, intBasisCurrencyId, NULL)))
 				, t.dblRatio

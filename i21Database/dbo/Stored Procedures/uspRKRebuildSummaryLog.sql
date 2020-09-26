@@ -18,6 +18,7 @@ BEGIN TRY
 	-- Truncate table
 	TRUNCATE TABLE tblRKSummaryLog
 	TRUNCATE TABLE tblCTContractBalanceLog
+	TRUNCATE TABLE tblRKRebuildRTSLog
 	--Update ysnAllowRebuildSummaryLog to FALSE
 	UPDATE tblRKCompanyPreference SET ysnAllowRebuildSummaryLog = 0
 	
@@ -28,7 +29,7 @@ BEGIN TRY
 		--=======================================
 		--				CONTRACTS
 		--=======================================
-		PRINT 'Populate RK Summary Log - Contract'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Contract')
 		
 		DECLARE @cbLog AS CTContractBalanceLog
 
@@ -307,6 +308,57 @@ BEGIN TRY
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
 				, InvTran.intCreatedEntityId
+
+			UNION ALL
+			SELECT CH.intContractTypeId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, Receipt.dtmReceiptDate
+				, @dtmEndDate AS dtmEndDate
+				, dblQuantity = (CASE WHEN CH.ysnLoad = 1 THEN  
+									1 * CH.dblQuantityPerLoad
+								ELSE
+									ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)), 0)
+								END) * -1
+				, 0
+				, COUNT(DISTINCT Receipt.intInventoryReceiptId)
+				, Receipt.intInventoryReceiptId
+				, Receipt.strReceiptNumber
+				, ReceiptItem.intInventoryReceiptItemId
+				, 'Inventory Return'
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, intUserId = Receipt.intCreatedByUserId
+			FROM tblICInventoryReceipt Receipt
+			JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+				AND ReceiptItem.intInventoryReceiptId = Receipt.intInventoryReceiptId
+			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = ReceiptItem.intOrderId
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = ReceiptItem.intLineNo
+				AND CD.intContractHeaderId = CH.intContractHeaderId
+			WHERE ysnPosted = 1
+				AND dbo.fnRemoveTimeOnDate(Receipt.dtmReceiptDate) <= CASE WHEN @dtmEndDate IS NOT NULL THEN @dtmEndDate ELSE dbo.fnRemoveTimeOnDate(Receipt.dtmReceiptDate) END
+	 			AND intContractTypeId = 1
+				AND strReceiptType = 'Inventory Return'
+			GROUP BY CH.intContractTypeId
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, Receipt.dtmReceiptDate
+				, Receipt.intInventoryReceiptId
+				, ReceiptItem.intInventoryReceiptItemId
+				, Receipt.strReceiptNumber
+				, CD.intItemUOMId
+				, ReceiptItem.intUnitMeasureId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, Receipt.intCreatedByUserId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -674,6 +726,8 @@ BEGIN TRY
 			,intUserId int
 		)
 
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Begin Raw Contract Balance Loop.')
+
 		declare @intRawCBId as int
 		WHILE EXISTS (SELECT TOP 1 1 FROM @tblRawContractBalance)
 		BEGIN
@@ -763,12 +817,12 @@ BEGIN TRY
 				SELECT 
 					dtmDate
 					,dblBalance = CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-									WHEN strType IN ('Inventory Shipment','Inventory Receipt','Outbound Shipment', 'Storage') THEN CB.dblQuantity * -1
+									WHEN strType IN ('Inventory Shipment','Inventory Receipt', 'Inventory Return', 'Outbound Shipment', 'Storage') THEN CB.dblQuantity * -1
 									ELSE 0
 								END
 					,dblBasis = CASE WHEN CD.intPricingTypeId = 2 THEN
 									CASE WHEN strType IN( 'Contract Sequence') THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment','Price Fixation', 'Storage') THEN CB.dblQuantity * -1
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment','Price Fixation', 'Storage') THEN CB.dblQuantity * -1
 										ELSE 0
 									END
 								ELSE 0
@@ -780,7 +834,7 @@ BEGIN TRY
 									END
 								WHEN CD.intPricingTypeId = 1 THEN 
 									CASE WHEN strType = 'Contract Sequence' THEN CB.dblQuantity
-										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Outbound Shipment', 'Storage') THEN 
+										WHEN strType IN ('Inventory Shipment', 'Inventory Receipt','Inventory Return','Outbound Shipment', 'Storage') THEN 
 											 CB.dblQuantity * -1
 										ELSE 0
 									END
@@ -824,6 +878,8 @@ BEGIN TRY
 
 			delete from @tblRawContractBalance where intId = @intRawCBId
 		END 
+
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Raw Contract Balance Loop.')
 
 		;WITH CTE
 		AS (
@@ -1028,16 +1084,17 @@ BEGIN TRY
 		FROM @tblContractBalance
 		ORDER BY intContractDetailId
 
-
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Begin Contract Balance Logging.')
 		EXEC uspCTLogContractBalance @cbLog, 1
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Contract Balance Logging.')
 
-		PRINT 'End Populate RK Summary Log - Contract'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Contract')
 		DELETE FROM @cbLog
 
 		--=======================================
 		--				BASIS DELIVERIES
 		--=======================================
-		PRINT 'Populate RK Summary Log - Basis Deliveries'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Basis Deliveries')
 
 		select  
 			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
@@ -1108,6 +1165,41 @@ BEGIN TRY
 		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
 		and sh.strPricingType = 'Basis'
 		and suh.strScreenName = 'Inventory Receipt'
+
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * ri.dblReceived end) 
+			, intQtyUOMId = ri.intUnitMeasureId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = 'Inventory Return'
+			, intTransactionId = suh.intExternalId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
+			, intUserId = ri.intCreatedByUserId
+			, ysnDestinationWeightsAndGrades = 0
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = suh.intExternalId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Receipt Return'
 
 		union all
 		select  
@@ -1391,12 +1483,12 @@ BEGIN TRY
 
 		EXEC uspCTLogContractBalance @cbLog, 1
 
-		PRINT 'End Populate RK Summary Log - Basis Deliveries'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Basis Deliveries')
 		
 		--=======================================
 		--				DERIVATIVES
 		--=======================================
-		PRINT 'Populate RK Summary Log - Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Derivatives')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1467,13 +1559,13 @@ BEGIN TRY
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Derivatives')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--			MATCH DERIVATIVES
 		--=======================================
-		PRINT 'Populate RK Summary Log - Match Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Match Derivatives')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1606,13 +1698,13 @@ BEGIN TRY
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Match Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Match Derivatives')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--			Option Derivatives
 		--=======================================
-		PRINT 'Populate RK Summary Log - Option Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Option Derivatives')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1728,13 +1820,13 @@ BEGIN TRY
 
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Option Derivatives'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Option Derivatives')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--				COLLATERAL
 		--=======================================
-		PRINT 'Populate RK Summary Log - Collateral'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Collateral')
 		
 		INSERT INTO @ExistingHistory(
 			  strBucketType
@@ -1826,13 +1918,13 @@ BEGIN TRY
 		
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
 
-		PRINT 'End Populate RK Summary Log - Collateral'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Collateral')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--				INVENTORY
 		--=======================================
-		PRINT 'Populate RK Summary Log - Inventory'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Inventory')
 		
 		INSERT INTO @ExistingHistory (	
 			strBatchId
@@ -2206,13 +2298,13 @@ BEGIN TRY
 		ORDER BY intInventoryTransactionId
 	
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-		PRINT 'End Populate RK Summary Log - Inventory'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Inventory')
 		DELETE FROM @ExistingHistory
 
 		--=======================================
 		--				CUSTOMER OWNED
 		--=======================================
-		PRINT 'Populate RK Summary Log - Customer Owned'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Customer Owned')
 		
 		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Customer Owned'
@@ -2434,14 +2526,14 @@ BEGIN TRY
 		ORDER BY dtmDeliveryDate, intStorageHistoryId
 	
 		EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-		PRINT 'End Populate RK Summary Log - Customer Owned'
+		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - Customer Owned')
 		DELETE FROM @ExistingHistory
 
 		
         --=======================================
         --                ON HOLD
         --=======================================
-        PRINT 'Populate RK Summary Log - On Hold'
+        INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - On Hold')
 
         INSERT INTO @ExistingHistory (    
             strBatchId
@@ -2507,7 +2599,7 @@ BEGIN TRY
         WHERE ISNULL(strTicketStatus,'') = 'H'
 		
         EXEC uspRKLogRiskPosition @ExistingHistory, 1, 0
-        PRINT 'End Populate RK Summary Log - On Hold'
+        INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('End Populate RK Summary Log - On Hold')
         DELETE FROM @ExistingHistory
 
 		UPDATE tblRKRebuildSummaryLog

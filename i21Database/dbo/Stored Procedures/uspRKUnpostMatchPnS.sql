@@ -10,8 +10,13 @@ BEGIN TRY
 		, @intMatchFuturesPSHeaderId INT
 		, @GLEntries AS RecapTableType
 		, @strBatchId NVARCHAR(100)
+		, @intEntityId INT
 	
 	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId FROM tblRKMatchFuturesPSHeader WHERE intMatchNo = @intMatchNo
+
+	SELECT TOP 1 @intEntityId = intEntityId
+	FROM tblEMEntity
+	WHERE strName = @strUserName
 	
 	BEGIN TRANSACTION
 	INSERT INTO tblRKStgMatchPnS(intConcurrencyId
@@ -155,6 +160,15 @@ BEGIN TRY
 	SET ysnIsUnposted = 0
 		, strReversalBatchId = @strBatchId
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId
+
+	EXEC uspSMAuditLog 
+	   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
+	   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
+	   ,@entityId = @intEntityId     -- Entity Id.
+	   ,@actionType = 'Unposted'       -- Action Type
+	   ,@changeDescription = ''     -- Description
+	   ,@fromValue = ''          -- Previous Value
+	   ,@toValue = ''           -- New Value
 	
 	COMMIT TRAN
 END TRY

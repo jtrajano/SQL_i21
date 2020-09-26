@@ -12,7 +12,11 @@
     CONSTRAINT [PK_SMCountry_CoutryID] PRIMARY KEY CLUSTERED ([intCountryID] ASC), 
     CONSTRAINT [AK_tblSMCountry_Country] UNIQUE (strCountry)
 );
+GO
 
+CREATE NONCLUSTERED INDEX [IX_tblSMCountry_intContractBasisId]
+	ON [dbo].[tblSMCountry]([intCountryID] ASC)
+	INCLUDE ([strCountry]); 
 
 GO
 EXEC sp_addextendedproperty @name = N'MS_Description',

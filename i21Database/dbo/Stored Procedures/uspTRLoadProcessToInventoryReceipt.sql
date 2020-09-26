@@ -318,7 +318,7 @@ END
 													WHEN RE.strFreightBilledBy = 'Other' THEN RE.intShipViaId
 													ELSE NULL END
 			,[dblAmount]					= 0
-			,[strAllocateCostBy]			= 'Unit'
+			,[strAllocateCostBy]			= 'Cost'
 			,[intContractHeaderId]			= RE.intContractHeaderId
 			,[intContractDetailId]			= RE.intContractDetailId
 			,[ysnAccrue]					= CASE WHEN RE.strFreightBilledBy = 'Vendor' THEN 1

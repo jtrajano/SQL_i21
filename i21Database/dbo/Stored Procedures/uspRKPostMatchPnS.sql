@@ -21,6 +21,7 @@ BEGIN TRY
 		, @GLEntries AS RecapTableType
 		, @strBatchId NVARCHAR(100)
 		, @intCommodityId INT
+		, @intEntityId INT
 		
 
 	DECLARE @tblResult TABLE (Result NVARCHAR(MAX))
@@ -35,6 +36,7 @@ BEGIN TRY
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 	
 	SELECT TOP 1 @strUserName = strExternalERPId
+		,@intEntityId = intEntityId
 	FROM tblEMEntity
 	WHERE strName = @strUserName
 
@@ -278,6 +280,15 @@ BEGIN TRY
 	SET ysnIsUnposted = 1
 		, strBatchId = @strBatchId
 	WHERE intTransactionId = @intMatchFuturesPSHeaderId
+
+	EXEC uspSMAuditLog 
+	   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
+	   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
+	   ,@entityId = @intEntityId     -- Entity Id.
+	   ,@actionType = 'Posted'       -- Action Type
+	   ,@changeDescription = ''     -- Description
+	   ,@fromValue = ''          -- Previous Value
+	   ,@toValue = ''           -- New Value
 
 	COMMIT TRAN
 END TRY

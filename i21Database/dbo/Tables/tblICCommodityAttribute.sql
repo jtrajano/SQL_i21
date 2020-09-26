@@ -35,6 +35,12 @@ Type the overview for the table here.
 	GO
 
 	CREATE UNIQUE NONCLUSTERED INDEX [IX_tblICCommodityAttribute] ON [dbo].[tblICCommodityAttribute] ([intCommodityId], [strType], [strDescription]) WITH (IGNORE_DUP_KEY = OFF)
+	GO 
+
+	CREATE NONCLUSTERED INDEX [IX_tblICCommodityAttribute_strType]
+		ON [dbo].[tblICCommodityAttribute]([strType] ASC)
+		INCLUDE (intCommodityAttributeId, intCountryID); 
+
 	GO
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',

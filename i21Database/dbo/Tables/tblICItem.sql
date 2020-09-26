@@ -177,7 +177,7 @@ Type the overview for the table here.
 		[intModifiedByUserId] INT NULL,
 		[strServiceType] NVARCHAR(50)  COLLATE Latin1_General_CI_AS NULL,
 		[intDataSourceId] TINYINT NULL,
-		[ysnSeparateStockForUOMs] BIT NULL DEFAULT ((1)),
+		[ysnSeparateStockForUOMs] BIT NULL DEFAULT ((0)),
 		[ysnAutoAdjustAccrualDiff] BIT NULL DEFAULT(0),
 		[intItemRefId] INT NULL,
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 

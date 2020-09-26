@@ -156,11 +156,11 @@ BEGIN TRY
 		--select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);
 		select @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment);
 
-		if @dblConvertedQty = 0
-		begin
-			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
-			continue
-		end
+		-- if @dblConvertedQty = 0
+		-- begin
+		-- 	select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
+		-- 	continue
+		-- end
 
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,

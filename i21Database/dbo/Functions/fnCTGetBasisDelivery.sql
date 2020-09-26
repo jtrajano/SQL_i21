@@ -74,6 +74,8 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure CDUM ON CDUM.intUnitMeasureId = CD.intUnitMeasureId
 	LEFT JOIN tblICCommodityUnitMeasure CHCUM ON CHCUM.intCommodityId = CH.intCommodityId AND CHCUM.ysnStockUnit = 1
 	LEFT JOIN tblICUnitMeasure CHUM ON CHUM.intUnitMeasureId = CHCUM.intUnitMeasureId
+	left join tblCTWeightGrade w on w.intWeightGradeId = CH.intWeightId  
+	left join tblCTWeightGrade g on g.intWeightGradeId = CH.intGradeId  
 	LEFT JOIN 
 	(
 		SELECT intRowId = ROW_NUMBER() OVER(PARTITION BY SH.intContractHeaderId, SH.intContractDetailId ORDER BY SH.dtmHistoryCreated DESC)
@@ -90,7 +92,7 @@ BEGIN
 		AND tbl.intContractHeaderId = CD.intContractHeaderId
 		AND tbl.intRowId = 1
 	WHERE tbl.intPricingTypeId = 2
-	AND tbl.intContractStatusId = 1
+	AND (tbl.intContractStatusId = 1 or (tbl.intContractStatusId = 5 and (g.strWhereFinalized = 'Destination' or w.strWhereFinalized = 'Destination')))
 
 	INSERT INTO @Transaction
 	(

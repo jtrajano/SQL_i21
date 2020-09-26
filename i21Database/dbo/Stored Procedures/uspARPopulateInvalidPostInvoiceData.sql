@@ -106,6 +106,28 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--DUPLICATE BATCH ID
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
+		,[intItemId]			= I.[intItemId] 
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'Duplicate Batch ID'
+	FROM 
+		#ARPostInvoiceHeader I
+	WHERE  
+		EXISTS(SELECT strBatchId FROM tblGLDetail WHERE strBatchId = @BatchId)
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--INVOICE IS ON QUEUE
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
@@ -558,10 +580,10 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= I.[strInvoiceNumber] + ' is using invalid account. Use Undeposited Fund Account for Cash and Cash Refund transactions.'
+		,[strPostingError]		= I.[strInvoiceNumber] + ' is using invalid account. Use Undeposited Fund Account for Cash transactions.'
 	FROM #ARPostInvoiceHeader I
 	INNER JOIN vyuGLAccountDetail GLA ON ISNULL(I.[intAccountId], 0) = GLA.[intAccountId]		 
-	WHERE I.strTransactionType IN ('Cash', 'Cash Refund')
+	WHERE I.strTransactionType = 'Cash'
 	  AND GLA.strAccountCategory <> 'Undeposited Funds'
 
 	INSERT INTO #ARInvalidInvoiceData

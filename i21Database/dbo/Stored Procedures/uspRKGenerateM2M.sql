@@ -29,23 +29,25 @@ SET ANSI_WARNINGS OFF
 
 BEGIN TRY
 
+--SELECT * FROM tblRKM2MHeader
+
 --DECLARE
---@intM2MHeaderId INT = 3
---  , @strRecordName NVARCHAR(50) = 'M2M-69'
---	, @intCommodityId INT = 1
+--@intM2MHeaderId INT = 73
+--  , @strRecordName NVARCHAR(50) = 'M2M-73'
+--	, @intCommodityId INT = 1009
 --	, @intM2MTypeId INT = 1
---	, @intM2MBasisId INT = 44
---	, @intFutureSettlementPriceId INT = 1
---	, @intQuantityUOMId INT = 1
---	, @intPriceUOMId INT = 1
+--	, @intM2MBasisId INT = NULL
+--	, @intFutureSettlementPriceId INT = 762
+--	, @intQuantityUOMId INT = 10
+--	, @intPriceUOMId INT = 10
 --	, @intCurrencyId INT = 3
---	, @dtmEndDate DATETIME = '2020-09-09 00:00:00.000'
+--	, @dtmEndDate DATETIME = '2020-09-16 00:00:00.000'
 --	, @strRateType NVARCHAR(200) = 'Contract'
 --	, @intLocationId INT = NULL
 --	, @intMarketZoneId INT = NULL
 --	, @ysnByProducer BIT = 0
 --	, @intCompanyId INT = NULL
---	, @dtmPostDate DATETIME = '2020-09-09 00:00:00.000'
+--	, @dtmPostDate DATETIME = '2020-09-16 00:00:00.000'
 --	, @dtmReverseDate DATETIME = NULL
 --	, @dtmLastReversalDate DATETIME = NULL
 --	, @intUserId INT = NULL
@@ -76,8 +78,24 @@ BEGIN TRY
 		DROP TABLE #tblContractFuture
 	IF OBJECT_ID('tempdb..#tmpPricingStatus') IS NOT NULL
 		DROP TABLE #tmpPricingStatus
+	IF OBJECT_ID('tempdb..#CBBucket') IS NOT NULL
+		DROP TABLE #CBBucket
+	IF OBJECT_ID('tempdb..#ContractStatus') IS NOT NULL
+		DROP TABLE #ContractStatus
 
-		
+	IF (ISNULL(@intM2MHeaderId, 0) = 0) SET @intM2MHeaderId = NULL
+	IF (ISNULL(@intCommodityId, 0) = 0) SET @intCommodityId = NULL
+	IF (ISNULL(@intM2MTypeId, 0) = 0) SET @intM2MTypeId = NULL
+	IF (ISNULL(@intM2MBasisId, 0) = 0) SET @intM2MBasisId = NULL
+	IF (ISNULL(@intFutureSettlementPriceId, 0) = 0) SET @intFutureSettlementPriceId = NULL
+	IF (ISNULL(@intQuantityUOMId, 0) = 0) SET @intQuantityUOMId = NULL
+	IF (ISNULL(@intPriceUOMId, 0) = 0) SET @intPriceUOMId = NULL
+	IF (ISNULL(@intCurrencyId, 0) = 0) SET @intCurrencyId = NULL
+	IF (ISNULL(@intLocationId, 0) = 0) SET @intLocationId = NULL
+	IF (ISNULL(@intMarketZoneId, 0) = 0) SET @intMarketZoneId = NULL
+	IF (ISNULL(@intCompanyId, 0) = 0) SET @intCompanyId = NULL
+	IF (ISNULL(@intUserId, 0) = 0) SET @intUserId = NULL
+	IF (ISNULL(@dtmPostDate, '') = '') SET @dtmPostDate = GETDATE()
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
@@ -119,18 +137,6 @@ BEGIN TRY
 	SELECT TOP 1 @strM2MType = strType FROM tblRKM2MType WHERE intM2MTypeId = @intM2MTypeId
 
 	SET @dtmEndDate = LEFT(CONVERT(VARCHAR, @dtmEndDate, 101), 10)
-
-	IF (@intCommodityId = 0) SET @intCommodityId = NULL
-	IF (@intLocationId = 0) SET @intLocationId = NULL
-	IF (@intMarketZoneId = 0) SET @intMarketZoneId = NULL
-
-	IF (@intM2MTypeId = 0) SET @intM2MTypeId = NULL
-	IF (@intM2MBasisId = 0) SET @intM2MBasisId = NULL
-	IF (@intFutureSettlementPriceId = 0) SET @intFutureSettlementPriceId = NULL
-	IF (@intQuantityUOMId = 0) SET @intQuantityUOMId = NULL
-	IF (@intPriceUOMId = 0) SET @intPriceUOMId = NULL
-	IF (@intCurrencyId = 0) SET @intCurrencyId = NULL
-	IF (@intCompanyId = 0) SET @intCompanyId = NULL
 
 	IF (ISNULL(@strRecordName, '') = '')
 	BEGIN		
@@ -573,6 +579,19 @@ BEGIN TRY
 			, intFutureMonthId INT
 			, strPricingStatus NVARCHAR(50))
 
+		SELECT *
+		INTO #CBBucket
+		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, @intCommodityId, NULL)
+
+		SELECT intContractDetailId, intContractStatusId
+		INTO #ContractStatus
+		FROM (
+			SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreateDate DESC)
+				, intContractDetailId
+				, intContractStatusId
+			FROM #CBBucket
+		) tbl
+		WHERE intRowNumber = 1
 		
 		SELECT a.intContractDetailId, a.strContractNumber
 			, CASE WHEN b.intCounter > 1 THEN 'Partially Priced'
@@ -580,21 +599,20 @@ BEGIN TRY
 				WHEN b.intCounter = 1 AND strPricingType = 'Priced' THEN 'Fully Priced'
 				END as strPricingStatus
 		INTO #tmpPricingStatus
-		FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, 1, NULL) a
-		
+		FROM #CBBucket a
 		CROSS APPLY (
 			SELECT *, COUNT(*) as intCounter
 			FROM (
 				SELECT strContractType, strContractNumber, intContractDetailId
-				FROM dbo.fnRKGetBucketContractBalance(@dtmEndDate, 1, NULL)
+				FROM #CBBucket
 				GROUP BY strContractNumber, strPricingType, intContractDetailId, strContractType
+				HAVING SUM(dblQty) > 0
 			) t
 			WHERE t.intContractDetailId = a.intContractDetailId
 			GROUP BY strContractNumber, intContractDetailId, strContractType
 		) b
 		GROUP BY a.intContractDetailId, a.strContractNumber, strPricingType, a.strContractType, b.intCounter
 		HAVING SUM(dblQty) > 0
-		
 
 		INSERT INTO @ContractBalance (intRowNum
 			, strCommodityCode
@@ -628,7 +646,7 @@ BEGIN TRY
 			, intFutureMarketId
 			, intFutureMonthId
 			, strPricingStatus)
-		SELECT ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmTransactionDate DESC) intRowNum
+		SELECT ROW_NUMBER() OVER (PARTITION BY tbl.intContractDetailId ORDER BY dtmTransactionDate DESC) intRowNum
 			, strCommodityCode
 			, intCommodityId
 			, intContractHeaderId
@@ -647,7 +665,7 @@ BEGIN TRY
 			, strContractType
 			, strPricingType
 			, intCommodityUnitMeasureId
-			, intContractDetailId
+			, tbl.intContractDetailId
 			, intContractStatusId
 			, intEntityId
 			, intQtyCurrencyId
@@ -661,7 +679,7 @@ BEGIN TRY
 			, intFutureMonthId
 			, strPricingStatus
 		FROM (
-				SELECT dtmTransactionDate = MAX(dtmTransactionDate)
+			SELECT dtmTransactionDate = MAX(dtmTransactionDate)
 				, strCommodityCode
 				, intCommodityId
 				, intContractHeaderId
@@ -681,7 +699,6 @@ BEGIN TRY
 				, strPricingType
 				, intCommodityUnitMeasureId = NULL
 				, intContractDetailId
-				, intContractStatusId
 				, intEntityId
 				, intQtyCurrencyId
 				, strType = strContractType + ' ' + strPricingType
@@ -716,7 +733,6 @@ BEGIN TRY
 					, CBL.intLocationId
 					, strContractType = CASE WHEN CBL.intContractTypeId = 1 THEN 'Purchase' ELSE 'Sale' END
 					, PT.strPricingType
-					, CBL.intContractStatusId
 					, CBL.intEntityId
 					, CBL.intQtyCurrencyId
 					, CBL.intItemId
@@ -725,7 +741,6 @@ BEGIN TRY
 					, CBL.intFutureMarketId
 					, CBL.intFutureMonthId
 					, stat.strPricingStatus
-					
 				FROM tblCTContractBalanceLog CBL
 				INNER JOIN tblICCommodity CY ON CBL.intCommodityId = CY.intCommodityId
 				INNER JOIN tblICCommodityUnitMeasure C1 ON C1.intCommodityId = CBL.intCommodityId AND C1.intCommodityId = CBL.intCommodityId AND C1.ysnStockUnit = 1
@@ -753,7 +768,6 @@ BEGIN TRY
 				, strContractType
 				, strPricingType
 				, intContractDetailId
-				, intContractStatusId
 				, intEntityId
 				, intQtyCurrencyId
 				, strContractType
@@ -765,8 +779,10 @@ BEGIN TRY
 				, intFutureMonthId
 				, strPricingStatus
 				, dblBasis
-			HAVING SUM(dblQuantity) <> 0	
+			HAVING SUM(dblQuantity) > 0	
 		) tbl
+		JOIN #ContractStatus cs ON cs.intContractDetailId = tbl.intContractDetailId
+		WHERE cs.intContractStatusId NOT IN (2, 3, 6, 5)
 
 		INSERT INTO @GetContractDetailView (intCommodityUnitMeasureId
 			, strLocationName
@@ -3950,7 +3966,7 @@ BEGIN TRY
 			, dblM2M NUMERIC(24, 10)
 			, dblFixedPurchaseVolume NUMERIC(24, 10)
 			, dblUnfixedPurchaseVolume NUMERIC(24, 10)
-			, dblTotalValume NUMERIC(24, 10)
+			, dblTotalCommittedVolume NUMERIC(24, 10)
 			, dblPurchaseOpenQty NUMERIC(24, 10)
 			, dblPurchaseContractBasisPrice NUMERIC(24, 10)
 			, dblPurchaseFuturesPrice NUMERIC(24, 10)
@@ -3961,7 +3977,7 @@ BEGIN TRY
 			, dblUnPurchaseFuturesPrice NUMERIC(24, 10)
 			, dblUnPurchaseCashPrice NUMERIC(24, 10)
 			, dblUnfixedPurchaseValue NUMERIC(24, 10)
-			, dblTotalCommitedValue NUMERIC(24, 10))
+			, dblTotalCommittedValue NUMERIC(24, 10))
 
 		IF (ISNULL(@ysnByProducer, 0) = 0)
 		BEGIN
@@ -3973,7 +3989,7 @@ BEGIN TRY
 				, dblM2M
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
-				, dblTotalValume
+				, dblTotalCommittedVolume
 				, dblPurchaseOpenQty
 				, dblPurchaseContractBasisPrice
 				, dblPurchaseFuturesPrice
@@ -3984,7 +4000,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice
 				, dblUnPurchaseCashPrice
 				, dblUnfixedPurchaseValue
-				, dblTotalCommitedValue)
+				, dblTotalCommittedValue)
 			SELECT intM2MHeaderId = @intM2MHeaderId
 				, intContractHeaderId
 				, strContractSeq
@@ -4004,7 +4020,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnPurchaseCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
-				, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
+				, dblTotalCommittedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			FROM (
 				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
@@ -4051,7 +4067,7 @@ BEGIN TRY
 				, dblM2M
 				, dblFixedPurchaseVolume
 				, dblUnfixedPurchaseVolume
-				, dblTotalValume
+				, dblTotalCommittedVolume
 				, dblPurchaseOpenQty
 				, dblPurchaseContractBasisPrice
 				, dblPurchaseFuturesPrice
@@ -4062,7 +4078,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice
 				, dblUnPurchaseCashPrice
 				, dblUnfixedPurchaseValue
-				, dblTotalCommitedValue)
+				, dblTotalCommittedValue)
 			SELECT intM2MHeaderId = @intM2MHeaderId
 				, intContractHeaderId
 				, strContractSeq
@@ -4071,7 +4087,7 @@ BEGIN TRY
 				, dblM2M
 				, dblFixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END)
 				, dblUnfixedPurchaseVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
-				, dblTotalValume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
+				, dblTotalCommittedVolume = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblOpenQty ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblOpenQty ELSE 0 END)
 				, dblPurchaseOpenQty = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPValueQty ELSE 0 END)
 				, dblPurchaseContractBasisPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPContractBasis ELSE 0 END)
 				, dblPurchaseFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblPFutures ELSE 0 END)
@@ -4082,7 +4098,7 @@ BEGIN TRY
 				, dblUnPurchaseFuturesPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnPurchaseCashPrice = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPContractBasis ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblUPFutures ELSE 0 END)
 				, dblUnfixedPurchaseValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
-				, dblTotalCommitedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
+				, dblTotalCommittedValue = (CASE WHEN strPriOrNotPriOrParPriced = 'Priced' THEN dblQtyPrice ELSE 0 END) + (CASE WHEN strPriOrNotPriOrParPriced = 'Unpriced' THEN dblQtyUnFixedPrice ELSE 0 END)
 			FROM(
 				SELECT fd.intContractHeaderId
 					, fd.strContractSeq
@@ -4116,14 +4132,6 @@ BEGIN TRY
 																										, fd.dblOpenQty * (ISNULL(fd.dblContractBasis, 0) + ISNULL(fd.dblFuturePrice, 0))))
 				FROM #tmpCPE fd
 				LEFT JOIN tblAPVendor e ON e.intEntityId = fd.intProducerId
-				--JOIN tblCTContractDetail det ON fd.intContractDetailId = det.intContractDetailId
-				--JOIN tblCTContractHeader ch ON ch.intContractHeaderId = det.intContractHeaderId
-				--JOIN tblICItemUOM ic ON det.intPriceItemUOMId = ic.intItemUOMId
-				--JOIN tblSMCurrency c ON det.intCurrencyId = c.intCurrencyID
-				
-				--LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = @intCommodityId AND cum.intUnitMeasureId = e.intRiskUnitOfMeasureId
-				--LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
-				
 				WHERE strContractOrInventoryType IN ('Contract(P)', 'In-transit(P)', 'Inventory (P)')
 			) t
 		END
@@ -4147,7 +4155,9 @@ BEGIN TRY
 			, dblUnPurchaseContractBasisPrice
 			, dblUnPurchaseFuturesPrice
 			, dblUnPurchaseCashPrice
-			, dblUnfixedPurchaseValue)
+			, dblUnfixedPurchaseValue
+			, dblTotalCommittedVolume
+			, dblTotalCommittedValue)
 		SELECT intM2MHeaderId
 			, intContractHeaderId
 			, strContractSeq
@@ -4166,6 +4176,8 @@ BEGIN TRY
 			, dblUnPurchaseFuturesPrice
 			, dblUnPurchaseCashPrice
 			, dblUnfixedPurchaseValue
+			, dblTotalCommittedVolume
+			, dblTotalCommittedValue
 		FROM @tmpCPEDetail
 
 		-- Post Preview

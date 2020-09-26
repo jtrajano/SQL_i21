@@ -27,6 +27,7 @@ dtmDate = @dtmDateEntered
 FROM
 @GLEntries2 GL
 WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
+AND dtmDate < @dtmDateEntered
 
 --OUTER APPLY(
 --	SELECT TOP 1 1 FROM tblGLDetail where strTransactionId = GL.strTransactionId

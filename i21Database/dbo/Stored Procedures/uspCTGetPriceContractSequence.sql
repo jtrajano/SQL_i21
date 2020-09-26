@@ -96,7 +96,11 @@ BEGIN TRY
 				CD.dblQuantityPerLoad,
 				CD.intBookId,	
 				CD.intSubBookId,
-				CD.dblFutures
+				CD.dblFutures,
+				intHeaderBookId = null,
+				intHeaderSubBookId = null,
+				intDetailBookId = CD.intBookId,
+				intDetailSubBookId = CD.intSubBookId
 
 		FROM	vyuCTContractSequence		CD
 		JOIN	tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
@@ -117,8 +121,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 		UNION ALL
 
 		SELECT 	CH.intContractHeaderId,
-			    --CAST (NULL AS INT)    AS intContractDetailId,   
-			    CD.intContractDetailId    AS intContractDetailId,  
+			    CAST (NULL AS INT)    AS intContractDetailId,   
+			    --CD.intContractDetailId    AS intContractDetailId,  
 				CH.intFutureMarketId			AS	intOriginalFutureMarketId,
 				CH.intFutureMonthId				AS	intOriginalFutureMonthId,
 				CAST (NULL AS NUMERIC(18,6))	AS	dblOriginalBasis,
@@ -157,7 +161,11 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				CD.dblQuantityPerLoad,
 				CH.intBookId,	
 				CH.intSubBookId,
-				CD.dblFutures
+				CD.dblFutures,
+				intHeaderBookId = CH.intBookId,
+				intHeaderSubBookId = CH.intSubBookId,
+				intDetailBookId = null,
+				intDetailSubBookId = null  
 
 		FROM	tblCTContractHeader			CH	
 		JOIN	tblCTContractType			CT	ON	CT.intContractTypeId	=	CH.intContractTypeId
