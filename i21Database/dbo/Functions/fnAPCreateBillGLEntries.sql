@@ -191,8 +191,15 @@ BEGIN
 					R.strComment										
                 FROM dbo.tblAPBillDetail R
 				LEFT JOIN tblICItem item ON item.intItemId = R.intItemId
-				LEFT JOIN tblICItemUOM itemUOM ON item.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1
+				-- LEFT JOIN tblICItemUOM itemUOM ON item.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1
                 LEFT JOIN dbo.tblSMCurrencyExchangeRateType exRates ON R.intCurrencyExchangeRateTypeId = exRates.intCurrencyExchangeRateTypeId
+				OUTER APPLY (
+					SELECT TOP 1 stockUnit.*
+					FROM tblICItemUOM stockUnit 
+					WHERE 
+						item.intItemId = stockUnit.intItemId 
+					AND stockUnit.ysnStockUnit = 1
+				) itemUOM
                 WHERE R.intBillId = A.intBillId
 				UNION ALL --taxes
 				SELECT 
