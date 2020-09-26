@@ -28,7 +28,14 @@ RETURNS TABLE AS RETURN
 		ON loc.intItemId = B.intItemId AND loc.intLocationId = A.intShipToId
 	LEFT JOIN tblICItem F
 		ON B.intItemId = F.intItemId
-	LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
+	-- LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
+	OUTER APPLY (
+		SELECT TOP 1 stockUnit.*
+		FROM tblICItemUOM stockUnit 
+		WHERE 
+			B.intItemId = stockUnit.intItemId 
+		AND stockUnit.ysnStockUnit = 1
+	) itemUOM
 	OUTER APPLY (
 		SELECT TOP 1
 			storageHistory.dblPaidAmount,
