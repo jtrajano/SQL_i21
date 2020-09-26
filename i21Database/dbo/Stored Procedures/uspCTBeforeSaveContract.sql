@@ -115,7 +115,7 @@ BEGIN TRY
 		END
 		ELSE IF(@strRowState = 'Modified')
 		BEGIN
-			SELECT @intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+			SELECT @intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
 			IF @intPricingTypeId IN (1,6)
 			BEGIN
 				IF(SELECT dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) <> @dblCashPrice
