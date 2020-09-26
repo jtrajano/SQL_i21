@@ -398,7 +398,7 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog
+				FROM tblCTContractBalanceLog  WITH (UPDLOCK)
 				WHERE intTransactionReferenceId = @intHeaderId
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
@@ -1021,7 +1021,7 @@ BEGIN TRY
 					, intUserId = @intUserId
 					, intActionId
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog
+				FROM tblCTContractBalanceLog WITH (UPDLOCK)
 				WHERE intTransactionReferenceId = @intHeaderId
 				AND intTransactionReferenceDetailId = @intDetailId
 				AND intContractHeaderId = @intContractHeaderId
