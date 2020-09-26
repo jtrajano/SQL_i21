@@ -599,7 +599,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 		end
 		else
 		begin
-			select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+			select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
 			
 			if (@dblPricedQuantity = 0)
 			begin
