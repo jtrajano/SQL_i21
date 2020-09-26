@@ -759,7 +759,7 @@ BEGIN TRY
 					FROM tblCTPriceFixation pf 
 					INNER JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId
 					WHERE pf.intContractHeaderId = suh.intContractHeaderId 
-					AND pf.intContractDetailId = suh.intContractDetailId
+					AND ISNULL(pf.intContractDetailId,suh.intContractDetailId) = suh.intContractDetailId
 				) price
 				WHERE strFieldName = 'Balance'
 				AND suh.intContractHeaderId = @intContractHeaderId
@@ -855,15 +855,12 @@ BEGIN TRY
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Receipt Return')
 			BEGIN	
-				SET @ysnReturn = 1
-
-
-				SELECT TOP 1 * FROM @cbLogTemp
-
 				IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0)
 				BEGIN
 					SET @ysnUnposted = 1
 				END
+
+				SET @ysnReturn = 1
 
 				INSERT INTO @cbLogCurrent (strBatchId
 				, dtmTransactionDate
@@ -1465,7 +1462,7 @@ BEGIN TRY
 					SELECT TOP 1 *
 					FROM tblCTSequenceHistory
 					WHERE intContractHeaderId = pf.intContractHeaderId
-					AND intContractDetailId = pf.intContractDetailId
+					AND intContractDetailId = ISNULL(pf.intContractDetailId,intContractDetailId)
 					AND intSequenceUsageHistoryId IS NULL
 					ORDER BY dtmHistoryCreated DESC
 				) sh
@@ -1802,7 +1799,7 @@ BEGIN TRY
 					SELECT TOP 1 *
 					FROM tblCTSequenceHistory
 					WHERE intContractHeaderId = pf.intContractHeaderId
-					AND intContractDetailId = pf.intContractDetailId
+					AND intContractDetailId = ISNULL(pf.intContractDetailId,intContractDetailId)
 					AND intSequenceUsageHistoryId IS NULL
 					ORDER BY dtmHistoryCreated DESC
 				) sh
@@ -1951,7 +1948,7 @@ BEGIN TRY
 					SELECT TOP 1 *
 					FROM tblCTSequenceHistory
 					WHERE intContractHeaderId = pf.intContractHeaderId
-					AND intContractDetailId = pf.intContractDetailId
+					AND intContractDetailId = ISNULL(pf.intContractDetailId,intContractDetailId)
 					AND intSequenceUsageHistoryId IS NULL
 					ORDER BY dtmHistoryCreated DESC
 				) sh
