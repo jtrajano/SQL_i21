@@ -86,7 +86,7 @@ AS
 			CH.strExternalContractNumber,
 			CH.ysnReceivedSignedFixationLetter
 
-	FROM	[vyuCTSearchContractHeader] CH	LEFT
+	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN
 	 (
 		SELECT 
