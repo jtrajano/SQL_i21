@@ -13,16 +13,16 @@ AS
 									ELSE	ISNULL(CD.dblQuantity,0)	-	ISNULL(CD.dblBalance,0)												
 						END		AS	dblAppliedQty
 
-		FROM			tblCTContractDetail				CD
-				JOIN	tblCTContractHeader				CH	ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
+		FROM			tblCTContractDetail				CD WITH (NOLOCK)
+				JOIN	tblCTContractHeader				CH WITH (NOLOCK) ON	CH.intContractHeaderId				=		CD.intContractHeaderId	
 	
-		LEFT    JOIN	tblCTPriceFixation				PF	ON	CD.intContractDetailId				=		PF.intContractDetailId		
+		LEFT    JOIN	tblCTPriceFixation				PF WITH (NOLOCK) ON	CD.intContractDetailId				=		PF.intContractDetailId		
 		LEFT    JOIN	(
 							SELECT	 intPriceFixationId,
 									 COUNT(intPriceFixationDetailId) intPFDCount,
 									 SUM(dblQuantity) dblQuantityPriceFixed,
 									 MAX(intQtyItemUOMId) dblPFQuantityUOMId  
-							FROM	 tblCTPriceFixationDetail
+							FROM	 tblCTPriceFixationDetail WITH (NOLOCK)
 							GROUP BY intPriceFixationId
 						)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
 	),
@@ -135,7 +135,7 @@ AS
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
-		FROM		vyuCTContractSequence		CD
+		FROM		vyuCTContractSequence		CD 	WITH (NOLOCK)
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId	=	CD.intCommodityId AND CU.ysnDefault = 1
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId		=	CD.intPriceItemUOMId
 		JOIN		tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId	=	CD.intCommodityId AND PU.intUnitMeasureId = IM.intUnitMeasureId
@@ -206,8 +206,8 @@ AS
 					,intHeaderSubBookId
 					,intDetailBookId
 					,intDetailSubBookId
-		FROM		vyuCTContractSequence		CD
-		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId
+		FROM		vyuCTContractSequence		CD  WITH (NOLOCK)
+		JOIN		tblCTContractHeader			CH	WITH (NOLOCK) ON	CH.intContractHeaderId			=	CD.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
 		JOIN		tblICUnitMeasure			QM	ON	QM.intUnitMeasureId				=	QU.intUnitMeasureId	
 		JOIN		tblICItemUOM				PU	ON	PU.intItemUOMId					=	CD.intPriceItemUOMId		
@@ -315,8 +315,8 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					intHeaderSubBookId,
 					intDetailBookId,
 					intDetailSubBookId
-		FROM		tblCTPriceFixation			PF
-		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId	=	PF.intPriceContractId
+		FROM		tblCTPriceFixation			PF 	WITH (NOLOCK)
+		JOIN		tblCTPriceContract			PC	WITH (NOLOCK) ON PC.intPriceContractId	=	PF.intPriceContractId
 		JOIN		vyuCTContractSequence		CD	ON	CD.intContractDetailId	=	PF.intContractDetailId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId		=	CD.intCommodityId AND CU.ysnDefault = 1 
 		JOIN		tblICItemUOM				IM	ON	IM.intItemUOMId			=	CD.intPriceItemUOMId
@@ -389,10 +389,10 @@ LEFT	JOIN		tblCTSubBook				SB	ON	SB.intSubBookId					=	CH.intSubBookId
 					,intHeaderSubBookId
 					,intDetailBookId
 					,intDetailSubBookId
-		FROM		tblCTPriceFixation			PF
-		JOIN		tblCTPriceContract			PC	ON	PC.intPriceContractId			=	PF.intPriceContractId
-		JOIN		vyuCTContractSequence		CD	ON	CD.intContractHeaderId			=	PF.intContractHeaderId
-		JOIN		tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	CD.intContractHeaderId
+		FROM		tblCTPriceFixation			PF	WITH (NOLOCK)
+		JOIN		tblCTPriceContract			PC	WITH (NOLOCK) ON	PC.intPriceContractId			=	PF.intPriceContractId
+		JOIN		vyuCTContractSequence		CD	WITH (NOLOCK) ON	CD.intContractHeaderId			=	PF.intContractHeaderId
+		JOIN		tblCTContractHeader			CH	WITH (NOLOCK) ON	CH.intContractHeaderId			=	CD.intContractHeaderId
 		JOIN		tblICCommodityUnitMeasure	QU	ON	QU.intCommodityUnitMeasureId	=	CH.intCommodityUOMId
 		JOIN		tblICCommodityUnitMeasure	CU	ON	CU.intCommodityId				=	CD.intCommodityId 
 													AND CU.ysnDefault					=	1 				
