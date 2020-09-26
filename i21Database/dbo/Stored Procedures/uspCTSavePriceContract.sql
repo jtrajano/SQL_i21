@@ -48,9 +48,9 @@ BEGIN TRY
    			@ysnSplit 					BIT = CONVERT(BIT,0),
 			@dblDerivativeNoOfContract	NUMERIC(18,6)
 
-	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WHERE intPriceContractId = @intPriceContractId
+	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId
 
-	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	
+	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId	
 
 	SELECT	@intScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 	SELECT  @intTransactionId	=	intTransactionId,@ysnOnceApproved = ysnOnceApproved FROM tblSMTransaction WHERE intRecordId = @intPriceContractId AND intScreenId = @intScreenId
@@ -64,7 +64,7 @@ BEGIN TRY
 	BEGIN
 		SELECT	@intPriceFixationDetailId = 0
 		
-		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
+		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WITH (UPDLOCK) WHERE intPriceFixationId = @intPriceFixationId
 		
 		WHILE	ISNULL(@intPriceFixationDetailId,0) > 0
 		BEGIN
@@ -102,10 +102,10 @@ BEGIN TRY
 					@ysnAA					=	FD.ysnAA,
 					@dblHedgeNoOfLots		= 	FD.dblHedgeNoOfLots
 						
-			FROM	tblCTPriceFixationDetail	FD
-			JOIN	tblCTPriceFixation			PF	ON	PF.intPriceFixationId	=	FD.intPriceFixationId
-			JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	PF.intContractHeaderId 
-		    left join  tblCTContractDetail   TS  on  TS.intContractDetailId  =  PF.intContractDetailId  
+			FROM	tblCTPriceFixationDetail	FD WITH (UPDLOCK)
+			JOIN	tblCTPriceFixation			PF	WITH (UPDLOCK) ON	PF.intPriceFixationId	=	FD.intPriceFixationId
+			JOIN	tblCTContractHeader			CH	WITH (UPDLOCK) ON	CH.intContractHeaderId	=	PF.intContractHeaderId 
+		    left join  tblCTContractDetail   TS  WITH (UPDLOCK) on  TS.intContractDetailId  =  PF.intContractDetailId  
 		    CROSS APPLY fnCTGetTopOneSequence(PF.intContractHeaderId,isnull(PF.intContractDetailId,0)) TS1 
 			WHERE	FD.intPriceFixationDetailId	=	@intPriceFixationDetailId
 
@@ -185,7 +185,7 @@ BEGIN TRY
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 		END
 
-		set @ysnSplit = (select ysnSplit from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId);
+		set @ysnSplit = (select ysnSplit from tblCTPriceFixation WITH (UPDLOCK) where intPriceFixationId = @intPriceFixationId);
 		
 		EXEC uspCTPriceFixationSave @intPriceFixationId = @intPriceFixationId
 								   ,@strAction			= @strRowState
@@ -216,7 +216,7 @@ BEGIN TRY
 					,dblContractDetailPrice = avg(pfd.dblFutures)
 					,intContractHeaderPricingTypeId = ch.intPricingTypeId
 				from
-					tblCTContractDetail cd
+					tblCTContractDetail cd WITH (UPDLOCK)
 					join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 					left join tblCTPriceFixation pf on pf.intContractDetailId = cd.intContractDetailId
 					left join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
@@ -271,7 +271,7 @@ BEGIN TRY
 	where
 		fd.intPriceFixationDetailId = t.intPriceFixationDetailId
 
-		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
+		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
 	END
 	
 	EXEC [uspCTInterCompanyPriceContract] @intPriceContractId,@ysnApprove,@strRowState
