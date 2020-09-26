@@ -65,7 +65,7 @@ BEGIN TRY
 			@strCustomerContract		=	CH.strCustomerContract,
 			@dblHeaderNoOfLots			=	CH.dblNoOfLots,
 			@intContractTypeId			=	CH.intContractTypeId
-	FROM	tblCTContractHeader CH
+	FROM	tblCTContractHeader CH WITH (UPDLOCK)
 	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId		=	@intContractHeaderId
 
@@ -73,7 +73,7 @@ BEGIN TRY
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
 
-	SELECT @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
+	SELECT @intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId
 
 	SELECT  @ysnOnceApproved  =	ysnOnceApproved,
 			@intTransactionId = intTransactionId 
@@ -204,10 +204,10 @@ BEGIN TRY
 				@intUnitMeasureId	=	intUnitMeasureId,
 				@intCurrencyId		=	intCurrencyId
 
-		FROM	tblCTContractDetail 
+		FROM	tblCTContractDetail WITH (UPDLOCK)
 		WHERE	intContractDetailId =	@intContractDetailId 
 		
-		SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+		SELECT @dblCorrectNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intItemUOMId,intNetWeightUOMId,dblQuantity) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
 
 		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
@@ -235,9 +235,9 @@ BEGIN TRY
 			UPDATE tblCTContractDetail SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
 		END
 
-		IF EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-			SELECT @dblLotsFixed =  dblLotsFixed	FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+			SELECT @dblLotsFixed =  dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	tblCTContractDetail
@@ -286,7 +286,7 @@ BEGIN TRY
 		END
 
 		EXEC uspLGUpdateLoadItem @intContractDetailId
-		IF NOT EXISTS(SELECT 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
 		BEGIN
 			DECLARE @previousQty NUMERIC(18, 6)
 				, @previousLocation INT
@@ -295,13 +295,13 @@ BEGIN TRY
 
 			SELECT TOP 1 @previousQty = dblQuantity
 				, @previousLocation = intCompanyLocationId
-			FROM tblCTSequenceHistory
+			FROM tblCTSequenceHistory WITH (UPDLOCK)
 			WHERE intContractDetailId = @intContractDetailId
 			ORDER BY dtmHistoryCreated DESC
 
 			SELECT TOP 1 @curQty = dblQuantity
 				, @curLocation = intCompanyLocationId
-			FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractDetailId = @intContractDetailId
+			FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
 			
 			IF (@previousQty != @curQty OR @previousLocation != @curLocation)
 			BEGIN
@@ -320,13 +320,13 @@ BEGIN TRY
 		IF	@intContractStatusId	=	1	AND
 			@ysnOnceApproved		=	1	AND
 			@ysnFeedOnApproval		=	1	AND
-			NOT EXISTS (SELECT * from tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
+			NOT EXISTS (SELECT TOP 1 1 FROM tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
 		BEGIN
 			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
 		END
 
 		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND
-			NOT EXISTS(SELECT * FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId) -- ADD missing Basis components
+			NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId) -- ADD missing Basis components
 		BEGIN
 			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis)
 			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis
@@ -365,7 +365,7 @@ BEGIN TRY
 		END
 		
 		IF	@dblLotsFixed IS NOT NULL AND @dblNoOfLots IS NOT NULL AND @dblNoOfLots = @dblLotsFixed AND
-			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
+			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
@@ -374,13 +374,13 @@ BEGIN TRY
 		-- ADD DERIVATIVES
 		EXEC uspCTManageDerivatives @intContractDetailId
 
-		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
+		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 
 	IF ISNULL(@ysnMultiplePriceFixation,0) = 0
 	BEGIN
 		UPDATE	PF
-		SET		PF.[dblTotalLots] = (SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractDetailId = CD.intContractDetailId)-- OR ISNULL(intSplitFromId,0) = CD.intContractDetailId)
+		SET		PF.[dblTotalLots] = (SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = CD.intContractDetailId)-- OR ISNULL(intSplitFromId,0) = CD.intContractDetailId)
 		FROM	tblCTPriceFixation	PF
 		JOIN	tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 		WHERE	CD.intContractHeaderId = @intContractHeaderId
@@ -394,15 +394,15 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
-		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
+		SELECT @dblLotsFixed = dblLotsFixed,@intPriceFixationId = intPriceFixationId FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId
 		IF	@dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots = @dblLotsFixed AND
-			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 2)
+			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 2)
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
-			EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
+			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
 		END		
@@ -410,7 +410,7 @@ BEGIN TRY
 
 	EXEC uspCTUpdateAdditionalCost @intContractHeaderId
 
-	IF EXISTS(SELECT * FROM tblCTContractImport WHERE strContractNumber = @strContractNumber AND ysnImported = 0)
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTContractImport WITH (UPDLOCK) WHERE strContractNumber = @strContractNumber AND ysnImported = 0)
 	BEGIN
 		UPDATE	tblCTContractImport
 		SET		ysnImported = 1,
@@ -424,7 +424,7 @@ BEGIN TRY
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId
 
 	--Update Signature Date
-	IF EXISTS(SELECT * FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND ysnSigned = 1 AND dtmSigned IS NULL)
+	IF EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND ysnSigned = 1 AND dtmSigned IS NULL)
 	BEGIN
 		UPDATE tblCTContractHeader SET dtmSigned = DATEADD(d, 0, DATEDIFF(d, 0, GETDATE())) WHERE intContractHeaderId = @intContractHeaderId		
 	END
