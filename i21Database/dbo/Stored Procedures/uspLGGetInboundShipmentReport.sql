@@ -197,7 +197,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.dtmETAPOL,
 			L.dtmETAPOD,
 			L.dtmETSPOL,
-			L.strMVessel,
+			strMVessel = CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END,
 			L.strFVessel,
 			L.strMVoyageNumber,
 			L.strFVoyageNumber,

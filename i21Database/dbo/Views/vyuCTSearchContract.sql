@@ -86,17 +86,17 @@ AS
 			CH.strExternalContractNumber,
 			CH.ysnReceivedSignedFixationLetter
 
-	FROM	[vyuCTSearchContractHeader] CH	LEFT
+	FROM	[vyuCTSearchContractHeader]  CH	WITH (NOLOCK) LEFT
 	JOIN
 	 (
 		SELECT 
 			HV.intContractHeaderId,
 			dblTotalBalance = SUM(F.dblBalance),
 			dblTotalAppliedQty = SUM(F.dblAppliedQuantity)
-		FROM tblCTContractHeader HV 
+		FROM tblCTContractHeader HV WITH (NOLOCK)
 			LEFT JOIN tblICCommodityUnitMeasure UM 
 				ON UM.intCommodityUnitMeasureId = HV.intCommodityUOMId 
-			LEFT JOIN tblCTContractDetail CD 
+			LEFT JOIN tblCTContractDetail CD WITH (NOLOCK)
 				ON CD.intContractHeaderId   = HV.intContractHeaderId
 		CROSS APPLY (
 			SELECT * FROM [dbo].[fnCTConvertQuantityToTargetItemUOM2](CD.intItemId,CD.intUnitMeasureId,UM.intUnitMeasureId, CD.dblBalance,ISNULL(CD.intNoOfLoad,0),ISNULL(CD.dblQuantity,0),HV.ysnLoad)
