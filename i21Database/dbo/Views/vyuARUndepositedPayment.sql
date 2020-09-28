@@ -31,7 +31,7 @@ FROM (
 		 , strPaymentSource			= CASE WHEN POSEOD.strEODNo IS NULL THEN 'Manual Entry' ELSE 'POS' END COLLATE Latin1_General_CI_AS
 		 , strEODNumber				= POSEOD.strEODNo
 		 , strDrawerName			= POSEOD.strPOSDrawerName
-		 , ysnCompleted				= CAST(1 AS BIT)
+		 , ysnCompleted				= CASE WHEN EodCLose.ysnClosed = 0 Then  CAST(ysnClosed AS BIT)  ELSE CAST(1 AS BIT) END 
 	FROM tblARPayment PAYMENT
 	LEFT OUTER JOIN tblSMPaymentMethod SMPM ON PAYMENT.intPaymentMethodId = SMPM.intPaymentMethodID
 	LEFT OUTER JOIN tblCMUndepositedFund CM ON PAYMENT.intPaymentId = CM.intSourceTransactionId 
@@ -57,7 +57,8 @@ FROM (
 					FOR XML PATH('')
 				), 1, 2, '')
 			)
-	) POSEOD	
+	) POSEOD
+	LEFT JOIN tblARPOSEndOfDay EodCLose ON EodCLose.strEODNo = POSEOD.strEODNo	
 	WHERE PAYMENT.ysnPosted = 1
 	  AND PAYMENT.ysnProcessedToNSF = 0
 	  AND PAYMENT.intAccountId IS NOT NULL
