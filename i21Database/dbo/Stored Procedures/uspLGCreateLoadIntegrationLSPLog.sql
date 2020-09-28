@@ -18,14 +18,12 @@ BEGIN TRY
 	DECLARE @intMaxLoadStgId INT
 
 	SELECT TOP 1 @strWarehouseVendorNo = WE.strEntityNo
-			  ,  @strWarehouseVendorName = WE.strName
-			  ,  @strWarehouseVendorAddress = EL.strAddress
-			  ,  @strWarehouseVendorPostalCode = EL.strZipCode
-			  ,  @strWarehouseVendorCity = EL.strCity
-			  ,  @strWarehouseVendorCountry = (SELECT TOP 1 SM.strISOCode
-												FROM tblSMCountry SM
-												WHERE SM.strCountry = EL.strCountry)
-			  ,  @strWarehouseVendorAccNo = A.strVendorAccountNum
+			  ,@strWarehouseVendorName = WE.strName
+			  ,@strWarehouseVendorAddress = EL.strAddress
+			  ,@strWarehouseVendorPostalCode = EL.strZipCode
+			  ,@strWarehouseVendorCity = EL.strCity
+			  ,@strWarehouseVendorCountry = (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry)
+			  ,@strWarehouseVendorAccNo = A.strVendorAccountNum
 	FROM tblLGLoadDetail LD
 	JOIN tblCTContractDetail CD ON LD.intPContractDetailId = CD.intContractDetailId
 	JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
@@ -121,28 +119,14 @@ BEGIN TRY
 				)
 			SELECT TOP 1 L.intLoadId
 				,strShipmentType = CASE L.intShipmentType
-					WHEN 1
-						THEN 'Shipment'
-					WHEN 2
-						THEN 'Shipping Instructions'
-					WHEN 3
-						THEN 'Vessel Nomination'
-					ELSE ''
-					END COLLATE Latin1_General_CI_AS
+					WHEN 1 THEN 'Shipment'
+					WHEN 2 THEN 'Shipping Instructions'
+					WHEN 3 THEN 'Vessel Nomination'
+					ELSE '' END COLLATE Latin1_General_CI_AS
 				,L.strLoadNumber
-				,(
-					SELECT TOP 1 CL.strLocationName
-					FROM tblLGLoadDetail LD
-					JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
-					WHERE LD.intLoadId = L.intLoadId
-					) strCompanyLocationName
-				,(
-					SELECT TOP 1 CLSL.strSubLocationName
-					FROM tblLGLoadDetail LD
-					JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
-					WHERE LD.intLoadId = L.intLoadId
-					) strSubLocationName
-				,'EN' strLanguage
+				,strCompanyLocationName = LD.strLocationName
+				,strSubLocationName = LD.strSubLocationName
+				,strLanguage = 'EN'
 				,strWarehouseVendorNo = CASE WHEN ISNULL(WE.strEntityNo,'') = '' THEN @strWarehouseVendorNo ELSE WE.strEntityNo END
 				,strWarehouseVendorName = CASE WHEN ISNULL(WE.strName,'') = '' THEN @strWarehouseVendorName ELSE WE.strName END
 				,strWarehouseVendorAddress = CASE WHEN ISNULL(EL.strAddress,'') = '' THEN @strWarehouseVendorAddress ELSE EL.strAddress END
@@ -150,85 +134,31 @@ BEGIN TRY
 				,strWarehouseVendorCity = CASE WHEN ISNULL( EL.strCity,'') = '' THEN @strWarehouseVendorCity ELSE  EL.strCity END
 				,strWarehouseVendorCountry = CASE WHEN ISNULL((SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry),'') = '' THEN @strWarehouseVendorCountry ELSE  (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry) END
 				,strWarehouseVendorAccNo = CASE WHEN ISNULL( A.strVendorAccountNum,'') = '' THEN @strWarehouseVendorAccNo ELSE  A.strVendorAccountNum END
-				,(
-					SELECT TOP 1 E.strEntityName
-					FROM tblLGLoadDetail LD
-					JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorName
-				,(
-					SELECT TOP 1 E.strEntityAddress
-					FROM tblLGLoadDetail LD
-					JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorAddress
-				,(
-					SELECT TOP 1 E.strEntityZipCode
-					FROM tblLGLoadDetail LD
-					JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorPostalCode
-				,(
-					SELECT TOP 1 E.strEntityCity
-					FROM tblLGLoadDetail LD
-					JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorCity
-				,(
-					SELECT TOP 1 E.strEntityPhone
-					FROM tblLGLoadDetail LD
-					JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorTelePhoneNo
-				,(
-					SELECT TOP 1 E.strFax
-					FROM tblLGLoadDetail LD
-					JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorTeleFaxNo
-				,(
-					SELECT TOP 1 SM.strISOCode
-					FROM tblLGLoadDetail LD
-					JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-					JOIN tblSMCountry SM ON SM.strCountry = E.strEntityCountry
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorCountry
-				,(
-					SELECT TOP 1 A.strVendorAccountNum
-					FROM tblLGLoadDetail LD
-					JOIN tblAPVendor A ON A.[intEntityId] = LD.intVendorEntityId
-					WHERE LD.intLoadId = L.intLoadId
-					) strVendorAccountNo
+				,strVendorName = LD.strVendorName
+				,strVendorAddress = LD.strVendorAddress
+				,strVendorPostalCode = LD.strVendorZipCode
+				,strVendorCity = LD.strVendorCity
+				,strVendorTelePhoneNo = LD.strVendorPhone
+				,strVendorTeleFaxNo = LD.strVendorFax
+				,strVendorCountry = LD.strVendorCountry
+				,strVendorAccountNo = LD.strVendorAccountNum
 				,L.strOriginPort
-				--,(
-				--	SELECT TOP 1 CD.strOrigin
-				--	FROM vyuCTContractFeed CD
-				--	JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-				--	WHERE LD.intLoadId = L.intLoadId
-				--	) strOriginPort
-				,'' strOriginAddress
-				,'' strOriginPostalCode
-				,'' strOriginCity
-				,'' strOriginTelePhoneNo
-				,'' strOriginTeleFaxNo
-				--,OCountry.strISOCode strOriginCountry
-				,(
-					SELECT TOP 1 Country.strISOCode
-					FROM vyuCTContractFeed CD
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					LEFT JOIN tblSMCountry Country ON Country.strCountry = CD.strOrigin
-					WHERE LD.intLoadId = L.intLoadId
-					) strOriginCountry
-				,'' strOriginRegion
+				,strOriginAddress = '' 
+				,strOriginPostalCode = '' 
+				,strOriginCity = ''
+				,strOriginTelePhoneNo = ''
+				,strOriginTeleFaxNo = '' 
+				,strOriginCountry = LD.strOriginCountry
+				,strOriginRegion = '' 
 				,L.strDestinationPort
-				,'' strDestinationAddress
-				,'' strDestinationPostalCode
-				,'' strDestinationCity
-				,'' strDestinationTelePhoneNo
-				,'' strDestinationTeleFaxNo
-				,DCountry.strISOCode strDestinationCountry
-				,'' strDestinationRegion
-				,L.strForwardingAgent
+				,strDestinationAddress = '' 
+				,strDestinationPostalCode = '' 
+				,strDestinationCity = '' 
+				,strDestinationTelePhoneNo = '' 
+				,strDestinationTeleFaxNo = '' 
+				,strDestinationCountry = DCountry.strISOCode 
+				,strDestinationRegion = '' 
+				,strForwardingAgent = FA.strName
 				,FAEL.strAddress
 				,FAEL.strZipCode
 				,FAEL.strCity
@@ -236,66 +166,38 @@ BEGIN TRY
 				,FAEL.strFax
 				,FACountry.strISOCode
 				,FAV.strVendorAccountNum
-				,strContractBasis = (
-					SELECT TOP 1 CB.strContractBasis
-					FROM tblCTContractHeader CH
-					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					)
-				,strContractBasisDesc = (
-					SELECT TOP 1 CB.strDescription
-					FROM tblCTContractHeader CH
-					JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-					JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-					JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-					WHERE LD.intLoadId = L.intLoadId
-					)
+				,strContractBasis = LD.strContractBasis
+				,strContractBasisDesc = LD.strContractBasisDesc
 				,L.strBLNumber
-				,L.strShippingLine
+				,strShippingLine = SL.strName
 				,SLEL.strAddress
 				,SLEL.strZipCode
 				,SLEL.strCity
 				,SLEL.strPhone
 				,SLEL.strFax
 				,SLCountry.strISOCode
-				,V.strVendorAccountNum strShippingLineAccountNo
+				,strShippingLineAccountNo = SLV.strVendorAccountNum 
 				,L.strExternalShipmentNumber
-				,'015' AS strDateQualifier
+				,strDateQualifier = '015' 
 				,L.dtmScheduledDate
 				,L.dtmETAPOD
 				,L.dtmETAPOL
 				,L.dtmETSPOL
 				,L.dtmBLDate
-				,'Delete'
-				,GETDATE()
-				,(
-					SELECT SUM(dblGross)
-					FROM tblLGLoadDetail LD
-					WHERE LD.intLoadId = L.intLoadId
-					) dblTotalGross
-				,(
-					SELECT SUM(dblNet)
-					FROM tblLGLoadDetail LD
-					WHERE LD.intLoadId = L.intLoadId
-					) dblTotalNet
-				,(
-					SELECT TOP 1 UM.strUnitMeasure
-					FROM tblLGLoadDetail LD
-					JOIN tblICItemUOM IUM ON IUM.intItemUOMId = LD.intWeightItemUOMId
-					JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUM.intUnitMeasureId
-					WHERE LD.intLoadId = L.intLoadId
-					) strWeightUnitMeasure
+				,strRowState = 'Delete'
+				,dtmFeedCreated = GETDATE()
+				,dblTotalGross = LDT.dblTotalGross
+				,dblTotalNet = LDT.dblTotalNet
+				,strWeightUnitMeasure = LD.strWeightUnitMeasure
 				,L.strMVessel
 				,L.strMVoyageNumber
 				,L.strFVessel
 				,L.strFVoyageNumber
-			FROM vyuLGLoadView L
-			LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
-			LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = E.intEntityId
+			FROM tblLGLoad L
+			LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
+			LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = SL.intEntityId
 			LEFT JOIN tblSMCountry SLCountry ON SLCountry.strCountry = SLEL.strCountry
-			LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
+			LEFT JOIN tblAPVendor SLV ON SLV.intEntityId = SL.intEntityId
 			LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 			LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
@@ -308,7 +210,51 @@ BEGIN TRY
 			LEFT JOIN tblEMEntity FA ON FA.intEntityId = L.intForwardingAgentEntityId
 			LEFT JOIN tblEMEntityLocation FAEL ON FAEL.intEntityId = FA.intEntityId
 			LEFT JOIN tblSMCountry FACountry ON FACountry.strCountry = FAEL.strCountry
-			LEFT JOIN tblAPVendor FAV ON FAV.[intEntityId] = FA.intEntityId
+			LEFT JOIN tblAPVendor FAV ON FAV.intEntityId = FA.intEntityId
+			OUTER APPLY (
+				SELECT TOP 1 
+					CL.strLocationName 
+					,CLSL.strSubLocationName
+					,strVendorName = E.strName
+					,strVendorAddress = EL.strAddress
+					,strVendorZipCode = EL.strZipCode
+					,strVendorCity = EL.strCity
+					,strVendorState = EL.strState
+					,strVendorPhone = EC.strPhone
+					,strVendorFax = EC.strFax
+					,strVendorCountry = SM.strISOCode
+					,strVendorAccountNum = V.strVendorAccountNum
+					,strContractBasis = CB.strContractBasis
+					,strContractBasisDesc = CB.strDescription
+					,strWeightUnitMeasure = UM.strUnitMeasure
+					,strOriginCountry = ISNULL(ICC.strISOCode, CAC.strISOCode)
+				FROM tblLGLoadDetail LD
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+					LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = LD.intWeightItemUOMId
+					LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUM.intUnitMeasureId
+					LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+					LEFT JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
+					LEFT JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+					LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = EL.intEntityId AND EL.ysnDefaultLocation = 1
+					LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = E.intEntityId
+					LEFT JOIN tblEMEntity EC ON EC.intEntityId = ETC.intEntityContactId
+					LEFT JOIN tblSMCountry SM ON SM.strCountry = EL.strCountry
+					LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
+					LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
+					LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId 
+					LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+					LEFT JOIN tblSMCountry CAC ON CAC.intCountryID = CA.intCountryID
+					LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+					LEFT JOIN tblSMCountry ICC ON ICC.intCountryID = IC.intCountryId
+				WHERE LD.intLoadId = L.intLoadId
+				) LD
+			OUTER APPLY (
+				SELECT 
+					dblTotalGross = SUM(dblGross)
+					,dblTotalNet = SUM(dblNet)
+				FROM tblLGLoadDetail LD
+				WHERE LD.intLoadId = L.intLoadId) LDT
 			WHERE L.intLoadId = @intLoadId
 
 			SELECT @intLoadStgId = SCOPE_IDENTITY()
@@ -347,77 +293,48 @@ BEGIN TRY
 				)
 			SELECT @intLoadStgId
 				,@intLoadId
-				,CASE 
-					WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
-						THEN LD.intLoadDetailId
-					ELSE LSID.intLoadDetailId
-					END AS intSIDetailId
+				,intSIDetailId = CASE WHEN ISNULL(LSID.intLoadDetailId, 0) = 0 THEN LD.intLoadDetailId ELSE LSID.intLoadDetailId END
 				,LD.intLoadDetailId
-				,Row_NUMBER() OVER (
-					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
-					) AS intRowNumber
-				,LD.strItemNo
+				,intRowNumber = Row_NUMBER() OVER (PARTITION BY LD.intLoadId ORDER BY LD.intLoadId)
+				,I.strItemNo
 				,I.strDescription
 				,I.strShortName
-				,strSubLocationName = (
-					SELECT CLSL.strSubLocationName AS strStorageLocationName
-					FROM tblCTContractDetail CD
-					JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
-					WHERE CD.intContractDetailId = CASE 
-							WHEN LD.intPurchaseSale = 1
-								THEN LD.intPContractDetailId
-							ELSE LD.intSContractDetailId
-							END
-					)
-				,strStorageLocationName = (
-					SELECT SL.strName AS strStorageLocationName
-					FROM tblCTContractDetail CD
-					JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
-					WHERE CD.intContractDetailId = CASE 
-							WHEN LD.intPurchaseSale = 1
-								THEN LD.intPContractDetailId
-							ELSE LD.intSContractDetailId
-							END
-					)
-				,LD.strLoadNumber
+				,strSubLocationName = CLSL.strSubLocationName
+				,strStorageLocationName = SL.strName
+				,L.strLoadNumber
 				,LD.dblQuantity
-				,LD.strItemUOM
+				,strItemUOM = IUM.strUnitMeasure
 				,LD.dblGross
 				,LD.dblNet
-				,LD.strWeightItemUOM
-				,Row_NUMBER() OVER (
-					PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
-					)
-				,'C' AS strDocumentCategory
-				,'001' AS strRefDataInfo
-				,0 AS strSeq
-				,LD.strLoadNumber
+				,strWeightItemUOM = WUM.strUnitMeasure
+				,intHigherPositionRef = Row_NUMBER() OVER (PARTITION BY LD.intLoadId ORDER BY LD.intLoadId)
+				,strDocumentCategory = 'C'
+				,strRefDataInfo = '001'
+				,strSeq = 0
+				,L.strLoadNumber
 				,CD.strERPPONumber
 				,CD.strERPItemNumber
 				,CD.strERPBatchNumber
-				,D.strExternalShipmentItemNumber
-				,D.strExternalBatchNo
-				,'QUA' AS strChangeType
-				,@strRowState AS strRowState
-				,GETDATE()
+				,LD.strExternalShipmentItemNumber
+				,LD.strExternalBatchNo
+				,strChangeType = 'QUA'
+				,strRowState = @strRowState 
+				,dtmFeedCreated = GETDATE()
 				,C.strCommodityCode
-			FROM vyuLGLoadDetailView LD
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-					WHEN LD.intPurchaseSale = 1
-						THEN LD.intPContractDetailId
-					ELSE LD.intSContractDetailId
-					END
-			JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
-			JOIN tblICItem I ON I.intItemId = D.intItemId
-			JOIN tblICCommodity C ON C.intCommodityId = CASE 
-					WHEN LD.intPurchaseSale = 1
-						THEN LD.intPCommodityId
-					ELSE LD.intSCommodityId
-					END
-			LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+			FROM tblLGLoadDetail LD
+			JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
+			JOIN tblICItem I ON I.intItemId = LD.intItemId
+			JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+			LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+			LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LD.intWeightItemUOMId
+			LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WUOM.intUnitMeasureId
+			LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+			LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 			LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 			LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId
-				AND D.intPContractDetailId = LSID.intPContractDetailId
+				AND LD.intPContractDetailId = LSID.intPContractDetailId
 			WHERE LD.intLoadId = @intLoadId
 
 			INSERT INTO tblLGLoadContainerLSPStg
@@ -425,28 +342,32 @@ BEGIN TRY
 				,@intLoadId
 				,LC.intLoadContainerId
 				,LC.strContainerNumber
-				,CASE 
+				,strContainerSizeCode = CASE 
 					WHEN CT.strContainerType LIKE '%20%'
 						THEN '000000000010003243'
 					WHEN CT.strContainerType LIKE '%40%'
 						THEN '000000000010003244'
 					ELSE CT.strContainerType
 					END
-				,'0002'
-				,L.strExternalShipmentNumber
-				,ROW_NUMBER() OVER (
-					PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
-					) AS Seq
-				,LC.dblQuantity
-				,LC.strItemUOM
+				,strPackagingMaterialType = '0002'
+				,strExternalPONumber = L.strExternalShipmentNumber
+				,strSeq = ROW_NUMBER() OVER (PARTITION BY LC.intLoadId ORDER BY LC.intLoadId)
+				,dblContainerQty = LC.dblQuantity
+				,strContainerUOM = UOM.strUnitMeasure
 				,LC.dblNetWt
 				,LC.dblGrossWt
-				,LC.strWeightUnitMeasure
-				,LC.strExternalContainerId
-				,@strRowState
-				,GETDATE()
-			FROM vyuLGLoadContainerView LC
+				,strWeightUOM = LCWU.strUnitMeasure
+				,strExternalContainerId = LDCL.strExternalContainerId
+				,strRowState = @strRowState
+				,dtmFeedCreated = GETDATE()
+			FROM tblLGLoadContainer LC
 			JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+			JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+			JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+			LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
+			LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
+			LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+			LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = LC.intWeightUnitMeasureId
 			LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 			WHERE LC.intLoadId = @intLoadId
 			ORDER BY LC.intSort
@@ -469,7 +390,6 @@ BEGIN TRY
 
 			SET @strRowState = 'Added'
 		END
-
 
 		INSERT INTO tblLGLoadLSPStg (
 			intLoadId
@@ -547,28 +467,14 @@ BEGIN TRY
 			)
 		SELECT TOP 1 L.intLoadId
 			,strShipmentType = CASE L.intShipmentType
-				WHEN 1
-					THEN 'Shipment'
-				WHEN 2
-					THEN 'Shipping Instructions'
-				WHEN 3
-					THEN 'Vessel Nomination'
-				ELSE ''
-				END COLLATE Latin1_General_CI_AS
+				WHEN 1 THEN 'Shipment'
+				WHEN 2 THEN 'Shipping Instructions'
+				WHEN 3 THEN 'Vessel Nomination'
+				ELSE '' END COLLATE Latin1_General_CI_AS
 			,L.strLoadNumber
-			,(
-				SELECT TOP 1 CL.strLocationName
-				FROM tblLGLoadDetail LD
-				JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
-				WHERE LD.intLoadId = L.intLoadId
-				) strCompanyLocationName
-			,(
-				SELECT TOP 1 CLSL.strSubLocationName
-				FROM tblLGLoadDetail LD
-				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
-				WHERE LD.intLoadId = L.intLoadId
-				) strSubLocationName
-			,'EN' strLanguage
+			,strCompanyLocationName = LD.strLocationName
+			,strSubLocationName = LD.strSubLocationName
+			,strLanguage = 'EN'
 			,strWarehouseVendorNo = CASE WHEN ISNULL(WE.strEntityNo,'') = '' THEN @strWarehouseVendorNo ELSE WE.strEntityNo END
 			,strWarehouseVendorName = CASE WHEN ISNULL(WE.strName,'') = '' THEN @strWarehouseVendorName ELSE WE.strName END
 			,strWarehouseVendorAddress = CASE WHEN ISNULL(EL.strAddress,'') = '' THEN @strWarehouseVendorAddress ELSE EL.strAddress END
@@ -576,85 +482,31 @@ BEGIN TRY
 			,strWarehouseVendorCity = CASE WHEN ISNULL( EL.strCity,'') = '' THEN @strWarehouseVendorCity ELSE  EL.strCity END
 			,strWarehouseVendorCountry = CASE WHEN ISNULL((SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry),'') = '' THEN @strWarehouseVendorCountry ELSE  (SELECT TOP 1 SM.strISOCode FROM tblSMCountry SM WHERE SM.strCountry = EL.strCountry) END
 			,strWarehouseVendorAccNo = CASE WHEN ISNULL( A.strVendorAccountNum,'') = '' THEN @strWarehouseVendorAccNo ELSE  A.strVendorAccountNum END
-			,(
-				SELECT TOP 1 E.strEntityName
-				FROM tblLGLoadDetail LD
-				JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorName
-			,(
-				SELECT TOP 1 E.strEntityAddress
-				FROM tblLGLoadDetail LD
-				JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorAddress
-			,(
-				SELECT TOP 1 E.strEntityZipCode
-				FROM tblLGLoadDetail LD
-				JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorPostalCode
-			,(
-				SELECT TOP 1 E.strEntityCity
-				FROM tblLGLoadDetail LD
-				JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorCity
-			,(
-				SELECT TOP 1 E.strEntityPhone
-				FROM tblLGLoadDetail LD
-				JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorTelePhoneNo
-			,(
-				SELECT TOP 1 E.strFax
-				FROM tblLGLoadDetail LD
-				JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorTeleFaxNo
-			,(
-				SELECT TOP 1 SM.strISOCode
-				FROM tblLGLoadDetail LD
-				JOIN vyuCTEntity E ON E.intEntityId = LD.intVendorEntityId
-				JOIN tblSMCountry SM ON SM.strCountry = E.strEntityCountry
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorCountry
-			,(
-				SELECT TOP 1 A.strVendorAccountNum
-				FROM tblLGLoadDetail LD
-				JOIN tblAPVendor A ON A.[intEntityId] = LD.intVendorEntityId
-				WHERE LD.intLoadId = L.intLoadId
-				) strVendorAccountNo
+			,strVendorName = LD.strVendorName
+			,strVendorAddress = LD.strVendorAddress
+			,strVendorPostalCode = LD.strVendorZipCode
+			,strVendorCity = LD.strVendorCity
+			,strVendorTelePhoneNo = LD.strVendorPhone
+			,strVendorTeleFaxNo = LD.strVendorFax
+			,strVendorCountry = LD.strVendorCountry
+			,strVendorAccountNo = LD.strVendorAccountNum
 			,L.strOriginPort
-			--,(
-			--	SELECT TOP 1 CD.strOrigin
-			--	FROM vyuCTContractFeed CD
-			--	JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-			--	WHERE LD.intLoadId = L.intLoadId
-			--	) strOriginPort
-			,'' strOriginAddress
-			,'' strOriginPostalCode
-			,'' strOriginCity
-			,'' strOriginTelePhoneNo
-			,'' strOriginTeleFaxNo
-			--,OCountry.strISOCode strOriginCountry
-			,(
-				SELECT TOP 1 Country.strISOCode
-				FROM vyuCTContractFeed CD
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-				LEFT JOIN tblSMCountry Country ON Country.strCountry = CD.strOrigin
-				WHERE LD.intLoadId = L.intLoadId
-				) strOriginCountry
-			,'' strOriginRegion
+			,strOriginAddress = '' 
+			,strOriginPostalCode = '' 
+			,strOriginCity = ''
+			,strOriginTelePhoneNo = ''
+			,strOriginTeleFaxNo = '' 
+			,strOriginCountry = LD.strOriginCountry
+			,strOriginRegion = '' 
 			,L.strDestinationPort
-			,'' strDestinationAddress
-			,'' strDestinationPostalCode
-			,'' strDestinationCity
-			,'' strDestinationTelePhoneNo
-			,'' strDestinationTeleFaxNo
-			,DCountry.strISOCode strDestinationCountry
-			,'' strDestinationRegion
-			,L.strForwardingAgent
+			,strDestinationAddress = '' 
+			,strDestinationPostalCode = '' 
+			,strDestinationCity = '' 
+			,strDestinationTelePhoneNo = '' 
+			,strDestinationTeleFaxNo = '' 
+			,strDestinationCountry = DCountry.strISOCode 
+			,strDestinationRegion = '' 
+			,strForwardingAgent = FA.strName
 			,FAEL.strAddress
 			,FAEL.strZipCode
 			,FAEL.strCity
@@ -662,66 +514,38 @@ BEGIN TRY
 			,FAEL.strFax
 			,FACountry.strISOCode
 			,FAV.strVendorAccountNum
-			,strContractBasis = (
-				SELECT TOP 1 CB.strContractBasis
-				FROM tblCTContractHeader CH
-				JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-				JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-				WHERE LD.intLoadId = L.intLoadId
-				)
-			,strContractBasisDesc = (
-				SELECT TOP 1 CB.strDescription
-				FROM tblCTContractHeader CH
-				JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
-				JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
-				JOIN tblLGLoadDetail LD ON LD.intPContractDetailId = CD.intContractDetailId
-				WHERE LD.intLoadId = L.intLoadId
-				)
+			,strContractBasis = LD.strContractBasis
+			,strContractBasisDesc = LD.strContractBasisDesc
 			,L.strBLNumber
-			,L.strShippingLine
+			,strShippingLine = SL.strName
 			,SLEL.strAddress
 			,SLEL.strZipCode
 			,SLEL.strCity
 			,SLEL.strPhone
 			,SLEL.strFax
 			,SLCountry.strISOCode
-			,V.strVendorAccountNum strShippingLineAccountNo
+			,strShippingLineAccountNo = SLV.strVendorAccountNum 
 			,L.strExternalShipmentNumber
-			,'015' AS strDateQualifier
+			,strDateQualifier = '015' 
 			,L.dtmScheduledDate
 			,L.dtmETAPOD
 			,L.dtmETAPOL
 			,L.dtmETSPOL
 			,L.dtmBLDate
-			,'Added'
-			,GETDATE()
-			,(
-				SELECT SUM(dblGross)
-				FROM tblLGLoadDetail LD
-				WHERE LD.intLoadId = L.intLoadId
-				) dblTotalGross
-			,(
-				SELECT SUM(dblNet)
-				FROM tblLGLoadDetail LD
-				WHERE LD.intLoadId = L.intLoadId
-				) dblTotalNet
-			,(
-				SELECT TOP 1 UM.strUnitMeasure
-				FROM tblLGLoadDetail LD
-				JOIN tblICItemUOM IUM ON IUM.intItemUOMId = LD.intWeightItemUOMId
-				JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUM.intUnitMeasureId
-				WHERE LD.intLoadId = L.intLoadId
-				) strWeightUnitMeasure
+			,strRowState = 'Added'
+			,dtmFeedCreated = GETDATE()
+			,dblTotalGross = LDT.dblTotalGross
+			,dblTotalNet = LDT.dblTotalNet
+			,strWeightUnitMeasure = LD.strWeightUnitMeasure
 			,L.strMVessel
 			,L.strMVoyageNumber
 			,L.strFVessel
 			,L.strFVoyageNumber
-		FROM vyuLGLoadView L
-		LEFT JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
-		LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = E.intEntityId
+		FROM tblLGLoad L
+		LEFT JOIN tblEMEntity SL ON SL.intEntityId = L.intShippingLineEntityId
+		LEFT JOIN tblEMEntityLocation SLEL ON SLEL.intEntityId = SL.intEntityId
 		LEFT JOIN tblSMCountry SLCountry ON SLCountry.strCountry = SLEL.strCountry
-		LEFT JOIN tblAPVendor V ON V.[intEntityId] = E.intEntityId
+		LEFT JOIN tblAPVendor SLV ON SLV.intEntityId = SL.intEntityId
 		LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN tblEMEntity WE ON WE.intEntityId = CLSL.intVendorId
@@ -734,7 +558,51 @@ BEGIN TRY
 		LEFT JOIN tblEMEntity FA ON FA.intEntityId = L.intForwardingAgentEntityId
 		LEFT JOIN tblEMEntityLocation FAEL ON FAEL.intEntityId = FA.intEntityId
 		LEFT JOIN tblSMCountry FACountry ON FACountry.strCountry = FAEL.strCountry
-		LEFT JOIN tblAPVendor FAV ON FAV.[intEntityId] = FA.intEntityId
+		LEFT JOIN tblAPVendor FAV ON FAV.intEntityId = FA.intEntityId
+		OUTER APPLY (
+			SELECT TOP 1 
+				CL.strLocationName 
+				,CLSL.strSubLocationName
+				,strVendorName = E.strName
+				,strVendorAddress = EL.strAddress
+				,strVendorZipCode = EL.strZipCode
+				,strVendorCity = EL.strCity
+				,strVendorState = EL.strState
+				,strVendorPhone = EC.strPhone
+				,strVendorFax = EC.strFax
+				,strVendorCountry = SM.strISOCode
+				,strVendorAccountNum = V.strVendorAccountNum
+				,strContractBasis = CB.strContractBasis
+				,strContractBasisDesc = CB.strDescription
+				,strWeightUnitMeasure = UM.strUnitMeasure
+				,strOriginCountry = ISNULL(ICC.strISOCode, CAC.strISOCode)
+			FROM tblLGLoadDetail LD
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intPContractDetailId
+				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+				LEFT JOIN tblICItemUOM IUM ON IUM.intItemUOMId = LD.intWeightItemUOMId
+				LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IUM.intUnitMeasureId
+				LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
+				LEFT JOIN tblEMEntity E ON E.intEntityId = LD.intVendorEntityId
+				LEFT JOIN tblAPVendor V ON V.intEntityId = E.intEntityId
+				LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = EL.intEntityId AND EL.ysnDefaultLocation = 1
+				LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = E.intEntityId
+				LEFT JOIN tblEMEntity EC ON EC.intEntityId = ETC.intEntityContactId
+				LEFT JOIN tblSMCountry SM ON SM.strCountry = EL.strCountry
+				LEFT JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = LD.intPCompanyLocationId
+				LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LD.intPSubLocationId
+				LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId 
+				LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
+				LEFT JOIN tblSMCountry CAC ON CAC.intCountryID = CA.intCountryID
+				LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
+				LEFT JOIN tblSMCountry ICC ON ICC.intCountryID = IC.intCountryId
+			WHERE LD.intLoadId = L.intLoadId
+			) LD
+		OUTER APPLY (
+			SELECT 
+				dblTotalGross = SUM(dblGross)
+				,dblTotalNet = SUM(dblNet)
+			FROM tblLGLoadDetail LD
+			WHERE LD.intLoadId = L.intLoadId) LDT
 		WHERE L.intLoadId = @intLoadId
 
 		SELECT @intLoadStgId = SCOPE_IDENTITY()
@@ -773,77 +641,48 @@ BEGIN TRY
 			)
 		SELECT @intLoadStgId
 			,@intLoadId
-			,CASE 
-				WHEN ISNULL(LSID.intLoadDetailId, 0) = 0
-					THEN LD.intLoadDetailId
-				ELSE LSID.intLoadDetailId
-				END AS intSIDetailId
+			,intSIDetailId = CASE WHEN ISNULL(LSID.intLoadDetailId, 0) = 0 THEN LD.intLoadDetailId ELSE LSID.intLoadDetailId END
 			,LD.intLoadDetailId
-			,Row_NUMBER() OVER (
-				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
-				) AS intRowNumber
-			,LD.strItemNo
+			,intRowNumber = Row_NUMBER() OVER (PARTITION BY LD.intLoadId ORDER BY LD.intLoadId)
+			,I.strItemNo
 			,I.strDescription
 			,I.strShortName
-			,strSubLocationName = (
-				SELECT CLSL.strSubLocationName AS strStorageLocationName
-				FROM tblCTContractDetail CD
-				JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
-				WHERE CD.intContractDetailId = CASE 
-						WHEN LD.intPurchaseSale = 1
-							THEN LD.intPContractDetailId
-						ELSE LD.intSContractDetailId
-						END
-				)
-			,strStorageLocationName = (
-				SELECT SL.strName AS strStorageLocationName
-				FROM tblCTContractDetail CD
-				JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
-				WHERE CD.intContractDetailId = CASE 
-						WHEN LD.intPurchaseSale = 1
-							THEN LD.intPContractDetailId
-						ELSE LD.intSContractDetailId
-						END
-				)
-			,LD.strLoadNumber
+			,strSubLocationName = CLSL.strSubLocationName
+			,strStorageLocationName = SL.strName
+			,L.strLoadNumber
 			,LD.dblQuantity
-			,LD.strItemUOM
+			,strItemUOM = IUM.strUnitMeasure
 			,LD.dblGross
 			,LD.dblNet
-			,LD.strWeightItemUOM
-			,Row_NUMBER() OVER (
-				PARTITION BY LD.intLoadId ORDER BY LD.intLoadId
-				)
-			,'C' AS strDocumentCategory
-			,'001' AS strRefDataInfo
-			,0 AS strSeq
-			,LD.strLoadNumber
+			,strWeightItemUOM = WUM.strUnitMeasure
+			,intHigherPositionRef = Row_NUMBER() OVER (PARTITION BY LD.intLoadId ORDER BY LD.intLoadId)
+			,strDocumentCategory = 'C'
+			,strRefDataInfo = '001'
+			,strSeq = 0
+			,L.strLoadNumber
 			,CD.strERPPONumber
 			,CD.strERPItemNumber
 			,CD.strERPBatchNumber
-			,D.strExternalShipmentItemNumber
-			,D.strExternalBatchNo
-			,'QUA' AS strChangeType
-			,@strRowState AS strRowState
-			,GETDATE()
+			,LD.strExternalShipmentItemNumber
+			,LD.strExternalBatchNo
+			,strChangeType = 'QUA'
+			,strRowState = @strRowState 
+			,dtmFeedCreated = GETDATE()
 			,C.strCommodityCode
-		FROM vyuLGLoadDetailView LD
-		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-				WHEN LD.intPurchaseSale = 1
-					THEN LD.intPContractDetailId
-				ELSE LD.intSContractDetailId
-				END
-		JOIN tblLGLoadDetail D ON D.intLoadDetailId = LD.intLoadDetailId
-		JOIN tblICItem I ON I.intItemId = D.intItemId
-		JOIN tblICCommodity C ON C.intCommodityId = CASE 
-				WHEN LD.intPurchaseSale = 1
-					THEN LD.intPCommodityId
-				ELSE LD.intSCommodityId
-				END
-		LEFT JOIN tblLGLoad L ON L.intLoadId = D.intLoadId
+		FROM tblLGLoadDetail LD
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN L.intPurchaseSale = 1 THEN LD.intPContractDetailId ELSE LD.intSContractDetailId END
+		JOIN tblICItem I ON I.intItemId = LD.intItemId
+		JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
+		LEFT JOIN tblICItemUOM WUOM ON WUOM.intItemUOMId = LD.intWeightItemUOMId
+		LEFT JOIN tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WUOM.intUnitMeasureId
+		LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CD.intSubLocationId
+		LEFT JOIN tblICStorageLocation SL ON SL.intStorageLocationId = CD.intStorageLocationId
 		LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
 		LEFT JOIN tblLGLoadDetail LSID ON LSID.intLoadId = LSI.intLoadId
-			AND D.intPContractDetailId = LSID.intPContractDetailId
+			AND LD.intPContractDetailId = LSID.intPContractDetailId
 		WHERE LD.intLoadId = @intLoadId
 
 		INSERT INTO tblLGLoadContainerLSPStg
@@ -851,28 +690,32 @@ BEGIN TRY
 			,@intLoadId
 			,LC.intLoadContainerId
 			,LC.strContainerNumber
-			,CASE 
+			,strContainerSizeCode = CASE 
 				WHEN CT.strContainerType LIKE '%20%'
 					THEN '000000000010003243'
 				WHEN CT.strContainerType LIKE '%40%'
 					THEN '000000000010003244'
 				ELSE CT.strContainerType
 				END
-			,'0002'
-			,L.strExternalShipmentNumber
-			,ROW_NUMBER() OVER (
-				PARTITION BY LC.intLoadId ORDER BY LC.intLoadId
-				) AS Seq
-			,LC.dblQuantity
-			,LC.strItemUOM
+			,strPackagingMaterialType = '0002'
+			,strExternalPONumber = L.strExternalShipmentNumber
+			,strSeq = ROW_NUMBER() OVER (PARTITION BY LC.intLoadId ORDER BY LC.intLoadId)
+			,dblContainerQty = LC.dblQuantity
+			,strContainerUOM = UOM.strUnitMeasure
 			,LC.dblNetWt
 			,LC.dblGrossWt
-			,LC.strWeightUnitMeasure
-			,LC.strExternalContainerId
-			,@strRowState
-			,GETDATE()
-		FROM vyuLGLoadContainerView LC
+			,strWeightUOM = LCWU.strUnitMeasure
+			,strExternalContainerId = LDCL.strExternalContainerId
+			,strRowState = @strRowState
+			,dtmFeedCreated = GETDATE()
+		FROM tblLGLoadContainer LC
 		JOIN tblLGLoad L ON L.intLoadId = LC.intLoadId
+		JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadContainerId = LC.intLoadContainerId
+		JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = LDCL.intLoadDetailId
+		LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
+		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
+		LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure LCWU ON LCWU.intUnitMeasureId = LC.intWeightUnitMeasureId
 		LEFT JOIN tblLGContainerType CT ON CT.intContainerTypeId = L.intContainerTypeId
 		WHERE LC.intLoadId = @intLoadId
 		ORDER BY LC.intSort
