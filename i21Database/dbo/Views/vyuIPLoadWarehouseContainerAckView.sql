@@ -1,0 +1,6 @@
+﻿CREATE VIEW vyuIPLoadWarehouseContainerAckView
+AS
+SELECT intLoadWarehouseId
+	,intLoadWarehouseContainerId
+	,intLoadWarehouseContainerRefId
+FROM tblLGLoadWarehouseContainer
