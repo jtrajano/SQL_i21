@@ -2165,6 +2165,7 @@ BEGIN TRY
 									on a.intContractHeaderId = c.intContractHeaderId
 										and a.intContractDetailId = c.intContractDetailId
 										and c.intCustomerStorageId = a.intCustomerStorageId
+										and a.intSettleStorageId = c.intSettleStorageId
 								join tblAPBill d
 									on c.intBillId = d.intBillId
 										and d.strVendorOrderNumber = @TicketNo
