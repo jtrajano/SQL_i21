@@ -8856,6 +8856,25 @@
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
+    <Build Include="dbo\Views\vyuIPLoadDetailView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadDetailLotsView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadNotifyParties.sql" />
+    <Build Include="dbo\Views\vyuIPLoadContainerView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadWarehouseView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadWarehouseServices.sql" />
+    <Build Include="dbo\Views\vyuIPLoadCostView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadStorageCostView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadDetailAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadNotifyPartiesAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadDocumentsAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadContainerAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadDetailContainerLinkAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadWarehouseAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadCostAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadStorageCostAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadWarehouseServicesAckView.sql" />
+    <Build Include="dbo\Views\vyuIPLoadWarehouseContainerAckView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
