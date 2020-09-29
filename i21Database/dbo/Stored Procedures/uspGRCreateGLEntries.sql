@@ -8,14 +8,7 @@
 AS
 BEGIN TRY
 BEGIN
-	declare @debug_awesome_ness bit =0
-	
-	if @debug_awesome_ness = 1	
-	begin
-		
-		select 'awesomeness begins [uspGRCreateGLEntries]'
-		--set @dblCashPriceFromCt = 9.55
-	end
+
 	DECLARE
 	 @ErrMsg					    NVARCHAR(MAX)
 	,@intFunctionalCurrencyId		INT
@@ -45,6 +38,12 @@ BEGIN
 	,@StorageChargeItemDescription  NVARCHAR(100)
 	
 	declare @EntityNo nvarchar(100)
+
+	/* strCalcMethod
+		1 = Net weight
+		2 = Wet weight
+		3 = Gross weight	
+	*/
 
 	DECLARE 
 	@ACCOUNT_CATEGORY_Inventory				NVARCHAR(30) = 'Inventory'
@@ -106,24 +105,20 @@ BEGIN
 	FROM tblGRCustomerStorage CS 
 	JOIN tblGRSettleStorageTicket SST 
 		ON  SST.intCustomerStorageId = CS.intCustomerStorageId
-	WHERE SST.intSettleStorageId = @intSettleStorageId
-	
+	WHERE SST.intSettleStorageId = @intSettleStorageId	
 
 	select  @EntityNo = strEntityNo 
 		from tblEMEntity 
 			where intEntityId = @intEntityVendorId
 
 	select  @intInventoryItemUOMId = intItemUOMId 
-		from tblICInventoryTransaction 
-			where intItemId = @InventoryItemId 
-				and strBatchId = @strBatchId
-			
+	from tblICInventoryTransaction 
+		where intItemId = @InventoryItemId 
+			and strBatchId = @strBatchId			
 	
 	if @intInventoryItemUOMId is not null
 		select @dblConvertedUnits = dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), @dblUnits) 
 	select @dblConvertedUnits = isnull(@dblConvertedUnits, @dblUnits)
-	
-	
 	
 	--Freight
 	SELECT 
@@ -251,12 +246,28 @@ BEGIN
 													
 													)
 
-													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END))
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CD.dblBasis + F.dblFutureMarketPrice))
 													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
 													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
 															else  -1 end
 													)
 													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+												END
+											ELSE
+												CASE
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END) --+ 8888888888888
+													* 
+															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															else  -1 end
+													
+													)
+
+													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END)) --+ 9999999999
+													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
+													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+															else  -1 end --+ 77777777777777777
+													)
+													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount --+ 66666666666666
 												END
 											END
 
@@ -277,19 +288,26 @@ BEGIN
 													WHEN QM.dblDiscountAmount > 0 THEN 0
 												END
 											end
-											/*CASE
-												WHEN QM.dblDiscountAmount < 0 THEN 1
-												WHEN QM.dblDiscountAmount > 0 THEN 0
-											END*/
 		,[ysnPrice]							= CASE
 												WHEN QM.dblDiscountAmount < 0 THEN 0
 												WHEN QM.dblDiscountAmount > 0 THEN 1
 											END
 		,[intTicketDiscountId]				= QM.intTicketDiscountId
-		,[dblUnits]							= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblUnits END
-		,[dblConvertedUnits]				= CASE WHEN QM.strCalcMethod = 3 THEN @dblGrossUnits ELSE @dblConvertedUnits END
+		,[dblUnits]							= CASE 
+													WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NULL THEN @dblGrossUnits --+ 111111
+													WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN ROUND((PricedBasis.dblUnits / @dblUnits) * @dblGrossUnits,6) -- + 222222
+													WHEN QM.strCalcMethod <> 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN PricedBasis.dblUnits --+ 33333333
+													ELSE @dblUnits --+ 4444444
+											END
+		,[dblConvertedUnits]				= CASE 
+													WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NULL THEN @dblGrossUnits --+ 555555
+													WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN ROUND((ISNULL(dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), PricedBasis.dblUnits),PricedBasis.dblUnits)  / @dblConvertedUnits) * @dblGrossUnits,6) --+ 6666666
+													WHEN QM.strCalcMethod <> 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), PricedBasis.dblUnits),PricedBasis.dblUnits) --+ 777777
+													ELSE @dblConvertedUnits --+ 88888888
+											END
 		,ysnGross							= CASE WHEN QM.strCalcMethod = 3 THEN 1 ELSE 0 END
 		,dblOriginalQty						= CASE WHEN QM.strCalcMethod = 3 THEN @dblUnits ELSE null END
+		--,PricedBasis.*,QM.*
 	FROM tblGRSettleStorageTicket SST
 	JOIN tblGRSettleStorage SS 
 		ON SS.intSettleStorageId = SST.intSettleStorageId
@@ -327,6 +345,9 @@ BEGIN
 		)
 		ORDER by b.dtmPriceDate DESC
 	) F
+	OUTER APPLY (
+		SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intSettleContractId = SC.intSettleContractId
+	) PricedBasis
 	WHERE SST.intSettleStorageId = @intSettleStorageId 
 		  AND ISNULL(QM.dblDiscountDue,0) <> ISNULL(QM.dblDiscountPaid,0)
 
@@ -367,10 +388,133 @@ BEGIN
 		AND (CD.intContractDetailId is null or ( CD.intContractDetailId is not null and CD.intPricingTypeId <> 2))
 
 
-	if @debug_awesome_ness = 1
-	begin
-		select 'other charges', * from @tblOtherCharges
-	end
+	--if @debug_awesome_ness = 1
+	--begin
+	--	SELECT '@dblGrossUnits',@dblGrossUnits,'@dblConvertedUnits',@dblConvertedUnits,'@dblUnits',@dblUnits
+	--	SELECT 'DISCOUNT',
+	--	 [intItemId]						= IC.intItemId
+	--	,[strItemNo]						= IC.strItemNo	
+	--	,[intEntityVendorId]				= @intEntityVendorId	
+	--	,[intCurrencyId]  					= @intCurrencyId
+	--	,[intCostCurrencyId]  				= @intCurrencyId
+	--	,[intChargeId]						= IC.intItemId
+	--	,[intForexRateTypeId]				= NULL
+	--	,[dblForexRate]						= NULL
+	--	,[ysnInventoryCost]					= IC.ysnInventoryCost
+	--	,[strCostMethod]					= IC.strCostMethod
+	--	,[dblRate]							=
+	--										CASE WHEN CD.intPricingTypeId = 2 THEN --Basis
+	--										  	CASE
+	--												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CD.dblBasis + F.dblFutureMarketPrice) 												
+	--												* 
+	--														case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+	--														else  -1 end
+													
+	--												)
+
+	--												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CD.dblBasis + F.dblFutureMarketPrice))
+	--												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
+	--												case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+	--														else  -1 end
+	--												)
+	--												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
+	--											END
+	--										ELSE
+	--											CASE
+	--												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END) --+ 8888888888888
+	--												* 
+	--														case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+	--														else  -1 end
+													
+	--												)
+
+	--												WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END)) --+ 9999999999
+	--												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
+	--												case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
+	--														else  -1 end --+ 77777777777777777
+	--												)
+	--												WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount --+ 66666666666666
+	--											END
+	--										END
+
+	--	,[intOtherChargeEntityVendorId]		= @intEntityVendorId
+	--	,[dblAmount]						= CASE
+	--											WHEN IC.strCostMethod = 'Per Unit' THEN 0
+	--											WHEN IC.strCostMethod = 'Amount' THEN 
+	--												CASE 
+	--													WHEN @ysnIsStorage = 1 THEN 0
+	--													WHEN @ysnIsStorage = 0 THEN 0												
+	--												END
+	--										END
+	--	,[ysnAccrue]						= case when isnull(IC.strCostType, '') = 'Discount' then
+	--											0 
+	--										else
+	--											CASE
+	--												WHEN QM.dblDiscountAmount < 0 THEN 1
+	--												WHEN QM.dblDiscountAmount > 0 THEN 0
+	--											END
+	--										end
+	--	,[ysnPrice]							= CASE
+	--											WHEN QM.dblDiscountAmount < 0 THEN 0
+	--											WHEN QM.dblDiscountAmount > 0 THEN 1
+	--										END
+	--	,[intTicketDiscountId]				= QM.intTicketDiscountId
+	--	,[dblUnits]							= CASE 
+	--												WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NULL THEN @dblGrossUnits --+ 111111
+	--												WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN ROUND((PricedBasis.dblUnits / @dblUnits) * @dblGrossUnits,6) -- + 222222
+	--												WHEN QM.strCalcMethod <> 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN PricedBasis.dblUnits --+ 33333333
+	--												ELSE @dblUnits --+ 4444444
+	--										END
+	--	,[dblConvertedUnits]				= CASE 
+	--												WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NULL THEN @dblGrossUnits --+ 555555
+	--												WHEN QM.strCalcMethod = 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN ROUND((ISNULL(dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), PricedBasis.dblUnits),PricedBasis.dblUnits)  / @dblConvertedUnits) * @dblGrossUnits,6) --+ 6666666
+	--												WHEN QM.strCalcMethod <> 3 AND PricedBasis.intPriceFixationDetailId IS NOT NULL THEN ISNULL(dbo.fnCalculateQtyBetweenUOM(@intCSInventoryItemUOMId, (@intInventoryItemUOMId), PricedBasis.dblUnits),PricedBasis.dblUnits) --+ 777777
+	--												ELSE @dblConvertedUnits --+ 88888888
+	--										END
+	--	,PricedBasis.*,QM.*
+	--FROM tblGRSettleStorageTicket SST
+	--JOIN tblGRSettleStorage SS 
+	--	ON SS.intSettleStorageId = SST.intSettleStorageId
+	--LEFT JOIN tblGRSettleContract SC
+	--	ON SC.intSettleStorageId = SS.intSettleStorageId
+	--LEFT JOIN tblCTContractDetail CD
+	--	ON CD.intContractDetailId = SC.intContractDetailId
+	--JOIN tblQMTicketDiscount QM 
+	--	ON QM.intTicketFileId = SST.intCustomerStorageId 
+	--		AND QM.strSourceType = 'Storage'
+	--JOIN tblGRDiscountScheduleCode GR 
+	--	ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
+	--JOIN tblICItem IC 
+	--	ON IC.intItemId = GR.intItemId
+	--OUTER APPLY (
+	--	SELECT TOP 1 
+	--		dblFutureMarketPrice = ISNULL(a.dblLastSettle,0)
+	--	FROM tblRKFutSettlementPriceMarketMap a 
+	--	JOIN tblRKFuturesSettlementPrice b 
+	--		ON b.intFutureSettlementPriceId = a.intFutureSettlementPriceId
+	--	JOIN tblRKFuturesMonth c 
+	--		ON c.intFutureMonthId = a.intFutureMonthId
+	--	JOIN tblRKFutureMarket d 
+	--		ON d.intFutureMarketId = b.intFutureMarketId
+	--	WHERE b.intFutureMarketId = (
+	--		SELECT
+	--			ISNULL(Com.intFutureMarketId,0)
+	--		FROM tblICItem Item
+	--		JOIN tblICCommodity Com 
+	--			ON Com.intCommodityId = Item.intCommodityId
+	--		LEFT JOIN tblICItemLocation IL
+	--			ON IL.intItemId = Item.intItemId
+	--				AND IL.intLocationId = @LocationId
+	--		WHERE Item.intItemId = @InventoryItemId
+	--	)
+	--	ORDER by b.dtmPriceDate DESC
+	--) F
+	--OUTER APPLY (
+	--	SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intSettleContractId = SC.intSettleContractId
+	--) PricedBasis
+	--WHERE SST.intSettleStorageId = @intSettleStorageId 
+	--	  AND ISNULL(QM.dblDiscountDue,0) <> ISNULL(QM.dblDiscountPaid,0)
+	--end
 
 	DECLARE @tblItem AS TABLE 
 	(
@@ -567,78 +711,7 @@ BEGIN
 	FROM @tblItem Query 
 	WHERE intItemType IN (2,3) 	
 		AND intItemLocationId IS NOT NULL
-
-	if @debug_awesome_ness = 1
-	begin
-		SELECT
-			ABS(InventoryCostCharges.dblCost * InventoryCostCharges.dblConvertedUnits)
-			,intItemId					= InventoryCostCharges.intChargeId
-			,[strItemNo]				= InventoryCostCharges.strItemNo
-			,dtmDate					= InventoryCostCharges.dtmDate
-			,strBatchId					= @strBatchId
-			,intAccountId				= GLAccount.intAccountId
-			,dblDebit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
-											case 
-												when InventoryCostCharges.dblCost < 0 then
-													InventoryCostCharges.dblCost  
-												else 0 end
-											else     0 end
-			,dblCredit					= case when InventoryCostCharges.strICCCostType = 'Discount' then 
-											
-											case when InventoryCostCharges.dblCost < 0 
-												then 0 
-												else InventoryCostCharges.dblCost end
-												 
-											
-											else     InventoryCostCharges.dblCost end
-			,dblDebitUnit				= 0
-			,dblCreditUnit				= InventoryCostCharges.dblUnits
-			,strDescription				= ISNULL(GLAccount.strDescription, '') + ', Charges from ' + InventoryCostCharges.strCharge + ' for ' + InventoryCostCharges.strItem
-			,strCode					= @strCode
-			,strReference				= @EntityNo
-			,intCurrencyId				= InventoryCostCharges.intCurrencyId
-			,dblExchangeRate			= InventoryCostCharges.dblForexRate
-			,dtmDateEntered				= GETDATE()
-			,dtmTransactionDate			= InventoryCostCharges.dtmDate
-			,strJournalLineDescription	= ''
-			,intJournalLineNo			= InventoryCostCharges.intInventoryReceiptItemId
-			,ysnIsUnposted				= CASE WHEN @ysnPost = 1 THEN 0 ELSE 1 END
-			,intUserId					= NULL
-			,intEntityId				= @intEntityUserSecurityId
-			,strTransactionId			= InventoryCostCharges.strTransactionId
-			,intTransactionId			= InventoryCostCharges.intTransactionId
-			,strTransactionType			= InventoryCostCharges.strInventoryTransactionTypeName
-			,strTransactionForm			= InventoryCostCharges.strTransactionForm
-			,strModuleName				= @ModuleName
-			,intConcurrencyId			= 1
-			,dblDebitForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN DebitForeign.Value 
-											ELSE 0 
-										END
-			,dblDebitReport				= NULL
-			,dblCreditForeign			= CASE 
-											WHEN intCurrencyId <> @intFunctionalCurrencyId THEN CreditForeign.Value 
-											ELSE 0 
-										END
-			,dblCreditReport			= NULL
-			,dblReportingRate			= NULL
-			,dblForeignRate				= InventoryCostCharges.dblForexRate
-			,strRateType				= InventoryCostCharges.strRateType
-			,dblUnits					= InventoryCostCharges.dblUnits
-			,dblCost				    = InventoryCostCharges.dblCost
-			,InventoryCostCharges.dblConvertedUnits
-		FROM @InventoryCostCharges InventoryCostCharges
-		INNER JOIN @ItemGLAccounts ItemGLAccounts 
-			ON InventoryCostCharges.intItemId = ItemGLAccounts.intItemId
-				AND InventoryCostCharges.intItemLocationId = ItemGLAccounts.intItemLocationId
-		INNER JOIN dbo.tblGLAccount GLAccount 
-			ON GLAccount.intAccountId = ItemGLAccounts.intInventoryId
-		CROSS APPLY dbo.fnGetDebit(InventoryCostCharges.dblCost) DebitForeign
-		CROSS APPLY dbo.fnGetCredit(InventoryCostCharges.dblCost) CreditForeign
-		WHERE ISNULL(InventoryCostCharges.ysnAccrue, 0) = 0
-			AND ISNULL(InventoryCostCharges.ysnInventoryCost, 0) = 1
-			AND InventoryCostCharges.strBundleType != 'Kit'
-	end
+	
 	INSERT INTO @ChargesGLEntries
 	(
 		 [dtmDate]                
