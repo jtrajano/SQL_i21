@@ -7781,6 +7781,8 @@
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
+    <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
