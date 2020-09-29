@@ -7763,7 +7763,8 @@
     <Build Include="dbo\Views\vyuSCEntityAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCStorageScheduleAuditRecords.sql" />
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
-    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />    
+    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7771,7 +7772,7 @@
   <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
-  <ItemGroup>  	
+  <ItemGroup>
     <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
