@@ -22,7 +22,8 @@ BEGIN TRY
 			@intSrCurrentUserId		INT,
 			@strCurrentUser			NVARCHAR(100),
 			@strMonthLabelName		NVARCHAR(50) = 'Month',
-			@userSignature 			VARBINARY(MAX) 
+			@userSignature 			VARBINARY(MAX),
+			@strReportDateFormat	nvarchar(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
