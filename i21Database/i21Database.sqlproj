@@ -8807,6 +8807,8 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
+    <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

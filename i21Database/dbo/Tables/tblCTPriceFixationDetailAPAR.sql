@@ -6,6 +6,9 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	intBillDetailId					INT,
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
+	intSourceId						INT,
+	dblQuantity						numeric(18,6),
+	dtmCreatedDate					datetime,
 	ysnMarkDelete					BIT,
 	[intConcurrencyId]				INT NOT NULL,
 

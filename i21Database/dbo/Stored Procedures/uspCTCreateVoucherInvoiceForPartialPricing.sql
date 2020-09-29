@@ -236,6 +236,55 @@ BEGIN TRY
 	INNER JOIN tblCTPriceFixationDetailAPAR APAR ON PFD.intPriceFixationDetailId = APAR.intPriceFixationDetailId
 	WHERE PF.intContractDetailId = @intContractDetailId
 
+
+	--CT-5059
+	if (@intContractTypeId = 1)
+	begin
+
+		declare @ContractReceipts as table (
+			intInventoryReceiptId int
+		)
+
+		insert into @ContractReceipts
+		select
+			intInventoryReceiptId = ri.intInventoryReceiptId
+		from
+			tblICInventoryReceiptItem ri
+			join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId and ir.strReceiptType = 'Purchase Contract'
+		where
+			ri.intLineNo = @intContractDetailId
+		order by ir.intInventoryReceiptId
+
+
+
+		if exists (select top 1 1 from @ContractReceipts)
+		begin
+			set @intInventoryReceiptId = 0
+			select @intInventoryReceiptId = min(intInventoryReceiptId) from @ContractReceipts where intInventoryReceiptId > @intInventoryReceiptId;
+
+			while (@intInventoryReceiptId is not null and @intInventoryReceiptId > 0)
+			begin
+
+				update tblICInventoryReceiptItem set ysnAllowVoucher = 1 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
+				exec uspICConvertReceiptToVoucher
+					@intInventoryReceiptId
+					,@intUserId
+					,@intNewBillId OUTPUT
+
+				if (@intPricingTypeId = 2)
+				begin
+					update tblICInventoryReceiptItem set ysnAllowVoucher = 0 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
+				end
+
+				select @intInventoryReceiptId = min(intInventoryReceiptId) from @ContractReceipts where intInventoryReceiptId > @intInventoryReceiptId;
+			end
+		end
+
+	end
+
+	--End of CT-5059
+
+	/*
     IF @intContractTypeId = 1 
     BEGIN
 
@@ -859,8 +908,10 @@ BEGIN TRY
 		   SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 	    END	
     END
-
+	*/
 	/*CT-4127 - Move here outside the Price Fixation Detail loop the creation of Invoice from Contract Partial Pricing*/
+	
+	
 	IF (@intContractTypeId = 2)
 	BEGIN
 
