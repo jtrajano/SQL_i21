@@ -8804,6 +8804,7 @@
     <Build Include="dbo\Stored Procedures\uspCTCreatePricingAPARLink.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
