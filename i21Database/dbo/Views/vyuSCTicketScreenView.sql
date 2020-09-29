@@ -242,7 +242,7 @@
 	,CYR.strCropYear
 	,SCT.ysnHasSpecialDiscount
 	,SCT.ysnSpecialGradePosted
-  FROM tblSCTicket SCT
+  FROM tblSCTicket SCT With(nolock)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag
