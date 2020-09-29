@@ -315,6 +315,7 @@ BEGIN TRY
 				,@strHSubBook = NULL
 				,@intHBookId = NULL
 				,@intHSubBookId = NULL
+				,@strWeightUnitMeasure=NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -396,6 +397,7 @@ BEGIN TRY
 				,@strBook = strBook
 				,@strSubBook = strSubBook
 				,@strUserName = strUserName
+				,@strWeightUnitMeasure=strWeightUnitMeasure
 			FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 					strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -416,6 +418,7 @@ BEGIN TRY
 					,strBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strUserName NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strWeightUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intSourceType = CASE @strSourceType
@@ -799,6 +802,9 @@ BEGIN TRY
 					SELECT TOP 1 @intUserId = intEntityId
 					FROM tblSMUserSecurity
 			END
+			Select @intWeightUnitMeasureId=intUnitMeasureId
+			from tblICUnitMeasure 
+			Where strUnitMeasure=@strWeightUnitMeasure
 
 			SELECT @intNewLoadId = intLoadId
 				,@strNewLoadNumber = strLoadNumber
@@ -845,9 +851,6 @@ BEGIN TRY
 					,strLoadNumber
 					,intCompanyLocationId
 					,intPurchaseSale
-					--,intItemId
-					--,dblQuantity
-					--,intUnitMeasureId
 					,dtmScheduledDate
 					,strCustomerReference
 					,strBookingReference
@@ -1042,7 +1045,7 @@ BEGIN TRY
 						ELSE @intSourceType
 						END
 					,@intPositionId
-					,intWeightUnitMeasureId
+					,@intWeightUnitMeasureId
 					,strBLNumber
 					,dtmBLDate
 					,strOriginPort
@@ -1192,7 +1195,6 @@ BEGIN TRY
 						,intLoadHeaderId INT
 						,intSourceType INT
 						,intPositionId INT
-						,intWeightUnitMeasureId INT
 						,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,dtmBLDate DATETIME
 						,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -1373,7 +1375,7 @@ BEGIN TRY
 							END
 						)
 					,intPositionId = @intPositionId
-					,intWeightUnitMeasureId = x.intWeightUnitMeasureId
+					,intWeightUnitMeasureId = @intWeightUnitMeasureId
 					,strBLNumber = x.strBLNumber
 					,dtmBLDate = x.dtmBLDate
 					,strOriginPort = x.strOriginPort
@@ -1524,7 +1526,6 @@ BEGIN TRY
 						,intLoadHeaderId INT
 						,intSourceType INT
 						,intPositionId INT
-						,intWeightUnitMeasureId INT
 						,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,dtmBLDate DATETIME
 						,strOriginPort NVARCHAR(200) COLLATE Latin1_General_CI_AS
