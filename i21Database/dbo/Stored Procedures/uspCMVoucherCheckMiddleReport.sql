@@ -146,6 +146,7 @@ SELECT
 		,CHK.ysnCheckVoid
 		,BNKACCNT.intPayToDown
 		,strDateFormat = CASE WHEN CURRENCY.strCurrency = 'CAD' THEN NULL ELSE CompanyPref.strReportDateFormat END
+		,intCheckPrintId = APCompanyPref.intCheckPrintId
 FROM	dbo.tblCMBankTransaction CHK 
 		INNER JOIN tblCMBankAccount BNKACCNT ON BNKACCNT.intBankAccountId = CHK.intBankAccountId
 		INNER JOIN tblCMBank BNK ON BNK.intBankId = BNKACCNT.intBankId
@@ -199,6 +200,7 @@ FROM	dbo.tblCMBankTransaction CHK
 			Value
 		)Address
 		OUTER APPLY tblSMCompanyPreference CompanyPref
+		OUTER APPLY tblAPCompanyPreference APCompanyPref
 WHERE	CHK.intBankAccountId = @intBankAccountId
 		AND CHK.strTransactionId IN (SELECT strValues COLLATE Latin1_General_CI_AS FROM dbo.fnARGetRowsFromDelimitedValues(@strTransactionId))
 		AND CHK.dblAmount != 0 AND PYMT.intPaymentMethodId ! = 3
