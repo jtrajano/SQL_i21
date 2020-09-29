@@ -383,6 +383,7 @@ BEGIN
 	SET @strHeader = '<tr>
 						<th>&nbsp;Transaction Id</th>
 						<th>&nbsp;Transaction Date</th>
+						<th>&nbsp;Trade No</th>
 						<th>&nbsp;From Company</th>
 						<th>&nbsp;Message</th>
 					</tr>'
@@ -397,11 +398,14 @@ BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intFutOptTransactionHeaderId),'') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR(20), dtmTransactionDate, 106), '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strInternalTradeNo, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(strFromCompanyName, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
-		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName,S.strMessage
+		FROM (SELECT DISTINCT S.intFutOptTransactionHeaderId,S.dtmTransactionDate,S.strFromCompanyName,S.strMessage,FOT.strInternalTradeNo
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
+		JOIN tblRKFutOptTransactionHeader H WITH (NOLOCK) ON H.intFutOptTransactionHeaderRefId = S.intFutOptTransactionHeaderId
+		JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
 		WHERE S.intStatusId = @intStatusId
 			AND S.ysnMailSent = 0) t
 
