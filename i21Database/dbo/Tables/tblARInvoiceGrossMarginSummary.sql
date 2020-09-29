@@ -1,5 +1,6 @@
 CREATE TABLE [dbo].[tblARInvoiceGrossMarginSummary](
 	[intSummaryId] [int] IDENTITY(1,1) NOT NULL,
+	[intInvoiceId] [int] NOT NULL,
 	[strType] [varchar](7) COLLATE Latin1_General_CI_AS NOT NULL,
 	[dblAmount] [decimal](18, 6) NULL,
 	[dtmDate] [datetime] NOT NULL,
