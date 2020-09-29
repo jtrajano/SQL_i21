@@ -100,7 +100,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDetail'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadDetailView'
+		SELECT @strObjectName = 'vyuIPLoadDetailView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDetailCondition
@@ -120,7 +120,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadDetailLot'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadDetailLotsView'
+		SELECT @strObjectName = 'vyuIPLoadDetailLotsView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadDetailLotCondition
@@ -154,7 +154,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadNotifyParties'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadNotifyPartiesNotMapped'
+		SELECT @strObjectName = 'vyuIPLoadNotifyParties'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadNotifyPartyCondition
@@ -171,7 +171,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadContainer'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadContainerView'
+		SELECT @strObjectName = 'vyuIPLoadContainerView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadContainerCondition
@@ -217,7 +217,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadWarehouse'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadWarehouseView'
+		SELECT @strObjectName = 'vyuIPLoadWarehouseView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadWarehouseCondition
@@ -244,7 +244,7 @@ BEGIN TRY
 		IF @ysnReplication = 1
 			SELECT @strObjectName = 'tblLGLoadWarehouseServices'
 		ELSE
-			SELECT @strObjectName = 'vyuLGLoadWarehouseServices'
+			SELECT @strObjectName = 'vyuIPLoadWarehouseServices'
 
 		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 			,@strLoadWarehouseServicesCondition
@@ -286,7 +286,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadCost'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadCostView'
+		SELECT @strObjectName = 'vyuIPLoadCostView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadCostCondition
@@ -303,9 +303,9 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblLGLoadStorageCost'
 	ELSE
-		SELECT @strObjectName = 'vyuLGLoadStorageCostView'
+		SELECT @strObjectName = 'vyuIPLoadStorageCostView'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] 'tblLGLoadStorageCost'
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strLoadStorageCostCondition
 		,@strLoadStorageCostXML OUTPUT
 		,NULL
