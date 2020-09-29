@@ -106,22 +106,23 @@ BEGIN TRY
 
 		SELECT	@intCommodityId				=	CH.intCommodityId,
 				@intPriceItemUOMId			=	CD.intPriceItemUOMId,
-				@strCommodityDescription	=	CH.strCommodityDescription,
+				@strCommodityDescription	=	CY.strDescription,
 				@intPricingTypeId			=	CD.intPricingTypeId,
 				@dblQuantity				=	CD.dblQuantity,
 				@intBasisUOMId				=	BM.intCommodityUnitMeasureId,
 				@intCurrencyId				=	CD.intCurrencyId,
 				@intBasisCurrencyId			=	CD.intBasisCurrencyId,
 				@ysnBasisSubCurrency		=	AY.ysnSubCurrency,
-				@ysnSeqSubCurrency		=	SY.ysnSubCurrency
+				@ysnSeqSubCurrency			=	SY.ysnSubCurrency
 
 		FROM	tblCTContractDetail			CD
-		JOIN	vyuCTContractHeaderView		CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
+		JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId 
    LEFT JOIN	tblICItemUOM				BU	ON	BU.intItemUOMId			=	CD.intBasisUOMId
    LEFT JOIN	tblICCommodityUnitMeasure	BM	ON	BM.intCommodityId		=	CH.intCommodityId
 												AND	BM.intUnitMeasureId		=	BU.intUnitMeasureId
    LEFT JOIN	tblSMCurrency				AY	ON	AY.intCurrencyID		=	CD.intBasisCurrencyId
    LEFT JOIN	tblSMCurrency				SY	ON	SY.intCurrencyID		=	CD.intCurrencyId
+   LEFT JOIN 	tblICCommodity				CY	ON	CY.intCommodityId		=	CH.intCommodityId
 		WHERE	intContractDetailId			=	@intContractDetailId
 		
 		IF @strPricingQuantity = 'By Futures Contracts'
@@ -148,7 +149,7 @@ BEGIN TRY
 		JOIN	tblICUnitMeasure	UM	ON IM.intUnitMeasureId = UM.intUnitMeasureId
 		WHERE	IM.intItemUOMId		=	@intPriceItemUOMId
 
-		IF NOT EXISTS(SELECT * FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUnitMeasureId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblICCommodityUnitMeasure WHERE intCommodityId = @intCommodityId AND intUnitMeasureId = @intUnitMeasureId)
 		BEGIN
 			SET @ErrMsg = @strUnitMeasure + ' not configured for the commodity ' + @strCommodityDescription + '.'
 			RAISERROR(@ErrMsg,16,1)
@@ -181,7 +182,7 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
@@ -285,8 +286,11 @@ BEGIN TRY
 			JOIN	tblCTPriceFixationDetail	FD	ON	FD.intPriceFixationId	=	PF.intPriceFixationId
 			WHERE	FD.intPriceFixationDetailId	=	@intFirstPFDetailId 
 
-			UPDATE	tblCTContractDetail	
-			SET		dblNoOfLots				=	 (SELECT SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intFirstPFDetailId) 
+			DECLARE @_dblNoOfLots NUMERIC(18,6)
+			SELECT _dblNoOfLotsv = SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intFirstPFDetailId
+
+			UPDATE	tblCTContractDetail	 
+			SET		dblNoOfLots				=	 @_dblNoOfLots
 			WHERE	intContractDetailId		=	 @intContractDetailId
 
 			SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId) 
@@ -484,7 +488,7 @@ BEGIN TRY
 					CD.intPriceItemUOMId	=	(SELECT TOP 1 intItemUOMId FROM tblICItemUOM WHERE intItemId = CD.intItemId AND intUnitMeasureId = @intMarketUnitMeasureId)
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 			
 
@@ -508,7 +512,7 @@ BEGIN TRY
 					CD.intConcurrencyId		=	CD.intConcurrencyId + 1
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			IF	@ysnMultiplePriceFixation = 1
@@ -583,7 +587,7 @@ BEGIN TRY
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblSMCurrency		CY	ON	CY.intCurrencyID = CD.intCurrencyId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			IF	@ysnMultiplePriceFixation = 1
@@ -607,7 +611,7 @@ BEGIN TRY
 			FROM	tblCTContractDetail	CD
 			JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 			JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-			AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+			AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 			WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 			IF	@ysnMultiplePriceFixation = 1
@@ -701,37 +705,8 @@ BEGIN TRY
 			  --,strOldValue			  =  0
 			  ,strOldValue			  =  (
 											case
-											when PFD.dblQuantity <> CD.dblQuantity
-											then
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Partial Price Qty'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
-											else
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Full Price Qty'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
+											when PFD.dblQuantity <> CD.dblQuantity then isnull(SALPart.strNewValue,'0')
+											else isnull(SALFull.strNewValue,'0')
 											end
 										 )
 			  ,strNewValue		      =  PFD.dblQuantity
@@ -742,11 +717,39 @@ BEGIN TRY
 			  JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 			  JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			  LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
-			  WHERE (
-						ISNULL(CH.ysnPrinted, 0) = 1
-						OR ISNULL(CH.ysnSigned, 0) = 1
-						)
-					AND CD.intContractDetailId = @intContractDetailId
+			  OUTER APPLY
+			  (
+				select
+					top 1 strNewValue
+				from
+					tblCTSequenceAmendmentLog
+				where
+					intContractHeaderId = @intContractHeaderId
+					and intContractDetailId = @intContractDetailId
+					and strItemChanged = 'Partial Price Qty'
+				order by
+					intSequenceAmendmentLogId desc
+			  ) SALPart
+			  OUTER APPLY
+			  (
+				select
+					top 1 strNewValue
+				from
+					tblCTSequenceAmendmentLog
+				where
+					intContractHeaderId = @intContractHeaderId
+					and intContractDetailId = @intContractDetailId
+					and strItemChanged = 'Full Price Qty'
+				order by
+					intSequenceAmendmentLogId desc
+			  ) SALFull
+			  WHERE 
+			  (
+				  ISNULL(CH.ysnPrinted, 0) = 1
+				  OR ISNULL(CH.ysnSigned, 0) = 1
+			  ) 
+			  AND CD.intContractDetailId = @intContractDetailId
+
            UNION
 
 			  SELECT 
@@ -759,37 +762,8 @@ BEGIN TRY
 			 --,strOldValue			  =  0
 			 ,strOldValue			  =  (
 											case
-											when PFD.dblQuantity <> CD.dblQuantity
-											then
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Partial Price Fixation'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
-											else
-												isnull(
-													(
-														select
-															top 1 strNewValue
-														from
-															tblCTSequenceAmendmentLog
-														where
-															intContractHeaderId = @intContractHeaderId
-															and intContractDetailId = @intContractDetailId
-															and strItemChanged = 'Full Price Fixation'
-														order by
-															intSequenceAmendmentLogId desc
-													),
-												'0')
+											when PFD.dblQuantity <> CD.dblQuantity then isnull(SALPart.strNewValue,'0')
+											else isnull(SALFull.strNewValue,'0')
 											end
 										 )
 			 ,strNewValue		      =  PFD.dblFutures
@@ -800,6 +774,32 @@ BEGIN TRY
 			 JOIN tblCTContractDetail CD ON CD.intContractDetailId = PF.intContractDetailId
 			 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			 LEFT JOIN tblSMUserSecurityRequireApprovalFor RAF ON RAF.intEntityUserSecurityId = CH.intLastModifiedById
+			 OUTER APPLY
+			 (
+				select
+					top 1 strNewValue
+				from
+					tblCTSequenceAmendmentLog
+				where
+					intContractHeaderId = @intContractHeaderId
+					and intContractDetailId = @intContractDetailId
+					and strItemChanged = 'Partial Price Fixation'
+				order by
+					intSequenceAmendmentLogId desc
+		 	 ) SALPart
+			OUTER APPLY
+			 (
+				select
+					top 1 strNewValue
+				from
+					tblCTSequenceAmendmentLog
+				where
+					intContractHeaderId = @intContractHeaderId
+					and intContractDetailId = @intContractDetailId
+					and strItemChanged = 'Full Price Fixation'
+				order by
+					intSequenceAmendmentLogId desc
+		 	 ) SALFull
 			 WHERE (
 					ISNULL(CH.ysnPrinted, 0) = 1
 					OR ISNULL(CH.ysnSigned, 0) = 1

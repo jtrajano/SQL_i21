@@ -39,26 +39,28 @@ BEGIN TRY
 
 	if (@intPriceFixationId is null or @intPriceFixationId < 1)
 	begin
-		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = (select top 1 intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId))
+		set @intContractDetailId = (select top 1 pf.intContractDetailId from tblCTPriceFixationDetail pfd inner join tblCTPriceFixation pf on pfd.intPriceFixationId = pf.intPriceFixationId where intPriceFixationDetailId = @intPriceFixationDetailId)
 	end
-	ELSE
+	else
 	begin
 		set @intContractDetailId = (select top 1 intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId)
 	end
 
 	declare @intDWGIdId int
-			,@ysnDestinationWeightsAndGrades bit;
+			,@ysnDestinationWeightsAndGrades bit = 0;
 
-	select @intDWGIdId = intWeightGradeId from tblCTWeightGrade where strWhereFinalized = 'Destination';
-			
-	select
-		@ysnDestinationWeightsAndGrades = (case when ch.intWeightId = @intDWGIdId or ch.intGradeId = @intDWGIdId then 1 else 0 end)
-	from
-		tblCTContractDetail cd
-		,tblCTContractHeader ch
-	where
-		cd.intContractDetailId = @intContractDetailId
-		and ch.intContractHeaderId = cd.intContractHeaderId
+	if exists 
+	(
+		select top 1 1 
+		from tblCTContractDetail cd
+		inner join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+		inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+			and wg.strWhereFinalized = 'Destination'
+		where cd.intContractDetailId = @intContractDetailId
+	)
+	begin
+		set @ysnDestinationWeightsAndGrades = 1
+	end
 
 	if (@ysnDestinationWeightsAndGrades = 0)
 	begin
@@ -290,7 +292,7 @@ BEGIN TRY
 	FROM	tblCTContractDetail	CD
 	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
 	JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-	AND EXISTS(SELECT * FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+	AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
 	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
 
 	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
