@@ -2457,6 +2457,7 @@ BEGIN TRY
 									on a.intContractHeaderId = c.intContractHeaderId
 										and a.intContractDetailId = c.intContractDetailId
 										and c.intCustomerStorageId = a.intCustomerStorageId
+										and a.intSettleStorageId = c.intSettleStorageId
 							)
 
 					if @ysnFromPriceBasisContract = 1
