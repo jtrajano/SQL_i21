@@ -74,7 +74,7 @@ BEGIN TRY
 		IF(@strRowState = 'Delete')
 		BEGIN
 			--FEED
-			IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
 			BEGIN
 				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND  ISNULL(strFeedStatus,'') =''
 			END
