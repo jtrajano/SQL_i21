@@ -23,7 +23,7 @@ BEGIN TRY
 	SELECT	@ysnSendFeedOnPrice		=	ysnSendFeedOnPrice FROM tblCTCompanyPreference
 
 
-	IF EXISTS(SELECT * FROM tblSMApproval WHERE intTransactionId  = @intTransactionId AND intScreenId = @intAmendmentScreenId)
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMApproval WHERE intTransactionId  = @intTransactionId AND intScreenId = @intAmendmentScreenId)
 	BEGIN
 		SELECT @intScreenId = @intAmendmentScreenId
 	END
