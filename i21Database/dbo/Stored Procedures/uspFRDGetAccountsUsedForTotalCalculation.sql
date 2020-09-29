@@ -25,8 +25,10 @@ CREATE TABLE #TempCalculationRowDesign (
 --     NO SUM FORMULA
 -- +++++++++++++++++++++++++
 SELECT @Formula = strRelatedRows FROM tblFRRowDesign WHERE intRowDetailId = @RowDetailId
-SET @FormulaToReplace = REPLACE(@Formula,'R',' R')
+SET @FormulaToReplace = REPLACE(@Formula,'*100','')
+SET @FormulaToReplace = REPLACE(@FormulaToReplace,'R',' R')
 SET @Formula = REPLACE(REPLACE(REPLACE(@Formula, ' ',''), CHAR(13), ''), CHAR(10), '')
+SET @Formula = REPLACE(@Formula,'*100','')
 
 DECLARE @TempFormula	NVARCHAR(MAX) = ''
 WHILE (CHARINDEX('SUM',@Formula)>0)
@@ -90,7 +92,6 @@ END
 --SET @BuildString = SUBSTRING(@BuildString,0,LEN(@BuildString)-2)
 --SET @FormulaToReplace = SUBSTRING(@FormulaToReplace,0,LEN(@FormulaToReplace)-3) + ')'
 SELECT @FilterString = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@FormulaToReplace,'(',''),')',''),'/',' or '),'*',' or '),'-',' or '),'+',' or ')
-
 
 GO
 

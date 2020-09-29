@@ -50,10 +50,20 @@ BEGIN
 END
 
 SET @Formula = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@Formula,':',''),'SUM(',''),')',''), CHAR(13), ''), CHAR(10), '')
+SET @Formula = REPLACE(@Formula,'*100','')
 SET @Formula = REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(@Formula,' ',''),'/',''),'*',''),'-',''),'+',''),'(',''),')','')
 
+--DECLARE @string NVARCHAR(MAX), @i INT
+--SELECT @string = @Formula, @i = 0
+--WHILE @i <10 
+--BEGIN
+--	SELECT @string = REPLACE(REPLACE(REPLACE(REPLACE(@string,'/'+CAST(@i as NVARCHAR(10)),'/'),'*'+CAST(@i as NVARCHAR(10)),'*'),'-'+CAST(@i as NVARCHAR(10)),'-'),'+'+CAST(@i as NVARCHAR(10)),'+'), @i = @i + 1 --replace(@string , '*'+@i , '*'), @i = @i + 1
+--END
+
+--SET @Formula = @string
+
 INSERT INTO #TempCalculationRowDesign (Item) SELECT * FROM dbo.fnSplitStringWithTrim(@Formula, 'R')
-SELECT * FROM #TempCalculationRowDesign
+
 WHILE EXISTS(SELECT 1 FROM #TempCalculationRowDesign WHERE Item != '')
 BEGIN
 	SELECT TOP 1 @intRefNo = Item FROM #TempCalculationRowDesign WHERE Item != ''
