@@ -20,7 +20,8 @@ BEGIN TRY
 			@intContractDetailId	INT,
 			@intLaguageId			INT,
 			@intSrCurrentUserId		INT,
-			@strCurrentUser			NVARCHAR(100)
+			@strCurrentUser			NVARCHAR(100),
+			@strReportDateFormat	nvarchar(50)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -79,7 +80,8 @@ BEGIN TRY
 	FROM	@temp_xml_table   
 	WHERE	[fieldname] = 'intSrCurrentUserId'
 
-	SELECT	@strCurrentUser = strName FROM tblEMEntity WHERE intEntityId = @intSrCurrentUserId
+	SELECT	@strCurrentUser = strName FROM tblEMEntity WHERE intEntityId = @intSrCurrentUserId;
+	select top 1 @strReportDateFormat = strReportDateFormat from tblSMCompanyPreference;
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END,
 			@strAddress		=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strAddress)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strAddress)) END,
@@ -119,6 +121,9 @@ BEGIN TRY
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityZipCode)) END,'') + 
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityCountry)) END,'')
 			,strLocationWithDate					=	SQ.strLocationName+', '+ CONVERT (VARCHAR,CH.dtmContractDate,106)
+			,strLocationWithOutDate					=	SQ.strLocationName+', '
+			,strLocationDate						=	CH.dtmContractDate
+			,strReportDateFormat					=	@strReportDateFormat
 			,strCustomerContract					=	CH.strCustomerContract
 			,strStraussText1						=	'<p>Pls arrange for pre-shipment samples for the above mentioned consignment. Samples of 250 grams per lot should be drawn and sent by Courier <span style="text-decoration: underline;"><strong>21 days prior</strong></span> to shipment to the below stated address.</p>'
 			,strCompanyName							=	@strCompanyName
