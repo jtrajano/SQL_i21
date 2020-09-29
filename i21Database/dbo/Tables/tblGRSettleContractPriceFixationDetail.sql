@@ -6,6 +6,7 @@ CREATE TABLE tblGRSettleContractPriceFixationDetail
 	,intPriceFixationDetailId INT
 	,dblUnits DECIMAL(38,20)
 	,dblCashPrice DECIMAL(38,20)
+    ,intContractDetailId INT
 	,CONSTRAINT [PK_tblGRSettleContractPriceFixationDetail_intSettleContractPriceFixationDetailId] PRIMARY KEY ([intSettleContractPriceFixationDetailId])
 	,CONSTRAINT [FK_tblGRSettleContractPriceFixationDetail_tblGRSettleStorage_intSettleStorageId] FOREIGN KEY ([intSettleStorageId]) REFERENCES [dbo].[tblGRSettleStorage] ([intSettleStorageId]) ON DELETE CASCADE
 )

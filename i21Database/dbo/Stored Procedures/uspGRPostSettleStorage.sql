@@ -622,6 +622,7 @@ BEGIN TRY
 				,A.intPriceFixationDetailId
 				,dblAvailableQuantity
 				,A.dblCashPrice
+				,B.intContractDetailId
 			FROM @avqty A
 			INNER JOIN tblGRSettleContract B
 				ON B.intSettleStorageId = @intSettleStorageId
@@ -630,9 +631,7 @@ BEGIN TRY
 				AND A.intPricingTypeId = 1 AND A.intPricingTypeIdHeader = 2
 
 			--SELECT 'tblGRSettleContractPriceFixationDetail',* FROM tblGRSettleContractPriceFixationDetail
-
 			
-
 			--Discount
 			IF EXISTS (
 						SELECT 1
@@ -1197,8 +1196,6 @@ BEGIN TRY
 			DECLARE @SettleVoucherCreate2 AS SettleVoucherCreate
 			IF(SELECT TOP 1 1 FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId) > 0
 			BEGIN
-				--WILL BE USED IN CREATING THE GL ENTRIES FOR INVENTORY ITEMS; 
-				--HAD TO CREATE A DUMMY SO THAT @SettleVoucherCreate WON'T BE MESSED UP WHEN CREATING THE VOUCHER
 				INSERT INTO @SettleVoucherCreate2
 				(
 					strOrderType
@@ -1218,13 +1215,15 @@ BEGIN TRY
 					,dblCostUnitQty
 					,dblSettleContractUnits
 					,ysnDiscountFromGrossWeight
+					,ysnPercentChargeType	
+					,dblCashPriceUsed
 				)
 				SELECT 
 					strOrderType
 					,intCustomerStorageId
 					,intCompanyLocationId
 					,intContractHeaderId
-					,intContractDetailId
+					,SVC.intContractDetailId
 					,dblUnits				= CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (SVC.dblUnits / SVC.dblSettleContractUnits) * A.dblUnits ELSE A.dblUnits END
 					,dblCashPrice			= CASE 
 												WHEN SVC.intItemType = 1 THEN A.dblCashPrice 
@@ -1244,12 +1243,35 @@ BEGIN TRY
 					,dblCostUnitQty
 					,dblSettleContractUnits
 					,ysnDiscountFromGrossWeight
+					,ysnPercentChargeType	
+					,dblCashPriceUsed		
 				FROM @SettleVoucherCreate SVC
 				OUTER APPLY (
 					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId
 				) A
 
-			BEGIN			
+				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
+				UPDATE SS
+				SET dblNetSettlement = A.dblNetSettlement
+					,dblDiscountsDue = B.dblDiscountDue
+				FROM tblGRSettleStorage SS
+				OUTER APPLY (
+					SELECT 
+						dblNetSettlement = SUM(ISNULL(ABS(dblUnits),0) * ISNULL(ABS(dblCashPrice),0))
+					FROM @SettleVoucherCreate2
+				) A
+				OUTER APPLY (
+					SELECT 
+						dblDiscountDue = ABS(SUM(ISNULL(dblUnits,0) * ISNULL(dblCashPrice,0)))
+					FROM @SettleVoucherCreate2
+					WHERE intItemType = 3
+				) B
+				WHERE SS.intSettleStorageId = @intSettleStorageId
+
+
+
+				--select '@SettleVoucherCreate2',* from @SettleVoucherCreate2
+			END			
 
 
 				-- Get the Batch Id 
@@ -1291,6 +1313,7 @@ BEGIN TRY
 					AND intCustomerStorageId = @intCustomerStorageId		
 				
 				--this code will see the future	if there will be a discrepancy
+				--	
 				BEGIN
 					declare @aa as decimal(36, 20)
 					declare @ab as decimal(36, 20)
@@ -1360,10 +1383,6 @@ BEGIN TRY
 							set @useUnits = 0
 						end
 					end
-<<<<<<< HEAD
-
-=======
->>>>>>> 9ee97059c4... GRN-2342 (Settlement against Priced Basis Contract)
 				END
 				--select '@SettleVoucherCreate',* from @SettleVoucherCreate
 				INSERT INTO @ItemsToStorage 
@@ -2502,7 +2521,7 @@ BEGIN TRY
 
 				UPDATE @voucherPayable SET dblQuantityToBill = dblQuantityToBill * -1 WHERE ISNULL(dblCost,0) < 0
 				UPDATE @voucherPayable SET dblCost = dblCost * -1 WHERE ISNULL(dblCost,0) < 0
-				
+
 				----- delete voucher payable that does not have quantity to bill -----
 				delete from @voucherPayable where dblQuantityToBill = 0
 				
@@ -2808,17 +2827,29 @@ BEGIN TRY
 	FROM tblGRSettleStorage	
 	WHERE intParentSettleStorageId = @intParentSettleStorageId 
 		AND intSettleStorageId > @intSettleStorageId
-
 	END
 
 	UPDATE tblGRSettleStorage
 	SET ysnPosted = 1
 	WHERE intSettleStorageId = @intParentSettleStorageId or  intParentSettleStorageId = @intParentSettleStorageId
-
-	
+		
 	UPDATE tblGRStorageHistory
 		SET intBillId = @createdVouchersId
 		WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
+
+	--NEED TO UPDATE THE PARENT SETTLEMENT BASED ON THE COMPUTED ACTUAL SETTLEMENTS
+	UPDATE SS
+	SET dblNetSettlement = A.dblNetSettlementTotal
+		,dblDiscountsDue = A.dblDiscountsDueTotal
+	FROM tblGRSettleStorage SS
+	INNER JOIN (
+		SELECT intParentSettleStorageId
+			,dblDiscountsDueTotal = SUM(dblDiscountsDue)
+			,dblNetSettlementTotal = SUM(dblNetSettlement)
+		FROM tblGRSettleStorage
+		GROUP BY intParentSettleStorageId
+	) A ON A.intParentSettleStorageId = SS.intSettleStorageId
+	WHERE SS.intSettleStorageId = @intParentSettleStorageId
 
 	DECLARE @intVoucherId2 AS INT
 	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
@@ -2860,8 +2891,8 @@ BEGIN TRY
 		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId = @intVoucherId;
 		RAISERROR (@ErrMsg, 16, 1);
 		GOTO SettleStorage_Exit;
-	END
-
+	END	
+	
 	SettleStorage_Exit:
 END TRY
 
