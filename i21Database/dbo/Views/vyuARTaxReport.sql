@@ -133,12 +133,13 @@ INNER JOIN (
 			 , intTaxCodeId
 			 , intTaxGroupId
 			 , intTaxClassId
+			 , intSalesTaxAccountId
 			 , strCalculationMethod
 			 , dblRate
 			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
-			 ,ysnTaxAdjusted
+			 , ysnTaxAdjusted
 			 , ysnInvalidSetup
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
@@ -209,7 +210,7 @@ INNER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
-	) SALESACCOUNT ON TAXCODE.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
+	) SALESACCOUNT ON IDT.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
 	LEFT OUTER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
