@@ -1997,9 +1997,9 @@ BEGIN TRY
 					,[intCostUOMId]
 					,[dblNetWeight]
 					,[dblWeightUnitQty]
-					,[intWeightUOMId]
-					,[dtmDate]
+					,[intWeightUOMId]					
 					,[intPurchaseTaxGroupId]
+					,[dtmDate]
 					,[dtmVoucherDate]
 				 )
 				SELECT 
@@ -2155,8 +2155,7 @@ BEGIN TRY
 					,[intWeightUOMId]				= CASE
 														WHEN a.[intContractHeaderId] IS NOT NULL THEN b.intItemUOMId
 														ELSE NULL
-													END	
-					,[dtmDate]						= case when CS.dtmDeliveryDate > Getdate() then CS.dtmDeliveryDate else getdate() end 
+													END
 					,[intPurchaseTaxGroupId]		= 
 													CASE 
 														WHEN RI.intTaxGroupId IS NULL THEN dbo.fnGetTaxGroupIdForVendor(
