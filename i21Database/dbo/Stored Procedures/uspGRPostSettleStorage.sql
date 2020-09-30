@@ -2568,13 +2568,6 @@ BEGIN TRY
 							-- 	,@userId = @intCreatedUserId
 							-- 	,@transactionType = 'Settle Storage'
 							-- 	,@success = @success OUTPUT
-							
-							----- DEBUG POINT -----
-							if @debug_awesome_ness = 1	 AND 1 = 0
-							begin
-								print 'end post bill'
-							end
-							----- DEBUG POINT -----
 
 					END
 
