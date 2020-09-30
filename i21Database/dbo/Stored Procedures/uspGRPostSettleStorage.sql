@@ -1251,13 +1251,14 @@ BEGIN TRY
 				) A
 
 				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
+				--UPDATE THE NET SETTLEMENT AND DISCOUNT DUE BASED ON THE PRICING LAYERS
 				UPDATE SS
 				SET dblNetSettlement = A.dblNetSettlement
 					,dblDiscountsDue = B.dblDiscountDue
 				FROM tblGRSettleStorage SS
 				OUTER APPLY (
 					SELECT 
-						dblNetSettlement = SUM(ISNULL(ABS(dblUnits),0) * ISNULL(ABS(dblCashPrice),0))
+						dblNetSettlement = SUM(ISNULL(dblUnits,0) * ISNULL(dblCashPrice,0))
 					FROM @SettleVoucherCreate2
 				) A
 				OUTER APPLY (
