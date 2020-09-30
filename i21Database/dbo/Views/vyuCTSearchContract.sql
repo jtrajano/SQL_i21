@@ -94,7 +94,7 @@ AS
 			dblTotalBalance = SUM(F.dblBalance),
 			dblTotalAppliedQty = SUM(F.dblAppliedQuantity)
 		FROM tblCTContractHeader HV WITH (NOLOCK)
-			LEFT JOIN tblICCommodityUnitMeasure UM 
+			LEFT JOIN tblICCommodityUnitMeasure UM WITH (NOLOCK)
 				ON UM.intCommodityUnitMeasureId = HV.intCommodityUOMId 
 			LEFT JOIN tblCTContractDetail CD WITH (NOLOCK)
 				ON CD.intContractHeaderId   = HV.intContractHeaderId
@@ -109,8 +109,8 @@ AS
 		(
 			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
 					TR.intRecordId, TR.ysnOnceApproved 
-			FROM	tblSMTransaction	TR
-			JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
+			FROM	tblSMTransaction	TR WITH (NOLOCK)
+			JOIN	tblSMScreen			SC	WITH (NOLOCK) ON	SC.intScreenId		=	TR.intScreenId
 			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
 										'ContractManagement.view.Amendments')
 		) t
