@@ -671,7 +671,7 @@ BEGIN
 		intBundleItemId,
 		strDescription,
 		dblQuantity,
-		dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, @NewItemId),
+		dbo.fnICGetItemUOMIdFromDuplicateItem(intItemUnitMeasureId, intBundleItemId),
 		ysnAddOn,
 		dblMarkUpOrDown,
 		dtmBeginDate,
