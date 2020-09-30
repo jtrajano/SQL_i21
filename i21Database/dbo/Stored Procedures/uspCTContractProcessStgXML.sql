@@ -1295,7 +1295,7 @@ BEGIN TRY
 								AND EXISTS (
 									SELECT *
 									FROM @tblCTAmendmentApproval
-									WHERE strDataIndex = 'intContractBasisId'
+									WHERE strDataIndex in ('intContractBasisId','intFreightTermId')
 										AND ysnApproval = 1
 									)
 								THEN CH.intFreightTermId
