@@ -48,3 +48,9 @@ INCLUDE (     [intContractDetailId],
        [dblTotalLots],
        [dblLotsFixed]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 go
+
+CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixation_intContractDetailId]
+	ON [dbo].[tblCTPriceFixation](intContractDetailId ASC)
+	INCLUDE (dblLotsFixed, dblFinalPrice)
+	
+GO
