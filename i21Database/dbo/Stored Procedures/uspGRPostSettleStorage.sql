@@ -2025,13 +2025,12 @@ BEGIN TRY
 					,[intContractHeaderId]			= case when a.intItemType = 1 then  a.[intContractHeaderId] else null end -- need to set the contract details to null for non item
 					,[intContractDetailId]			= case when a.intItemType = 1 then  a.[intContractDetailId] else null end -- need to set the contract details to null for non item
 					,[intInventoryReceiptItemId] =  CASE 
-																		WHEN ST.ysnDPOwnedType = 0 THEN NULL
-																		ELSE 
-																				CASE 
-																						WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
-																						ELSE NULL
-																				END
-																END
+														WHEN ST.ysnDPOwnedType = 0 THEN NULL
+														ELSE 
+															CASE 
+																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
+																ELSE NULL
+															END
 													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
@@ -2928,7 +2927,7 @@ BEGIN TRY
 			SET ysnPosted = 1
 				,intBillId = @createdVouchersId
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
-		END
+		--END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	
