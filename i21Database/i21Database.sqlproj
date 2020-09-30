@@ -650,8 +650,6 @@
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportCMChecks.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleSubReportAPPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspCMVoucherCheckMiddleReport.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLImportChartOfAccountsFromStaging.sql" />
-    <Build Include="dbo\Tables\tblGLAccountImportStaging.sql" />
     <Build Include="dbo\Tables\tblHDTempEmail.sql" />
     <Build Include="dbo\Views\vyuAPPaymentDetail.sql" />
     <Build Include="dbo\Functions\fnHDDecodeComment.sql" />
