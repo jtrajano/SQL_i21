@@ -1,4 +1,4 @@
-ALTER VIEW vyuLGWeightClaimHeader
+CREATE VIEW vyuLGWeightClaimHeader
 AS
 SELECT
 	WC.intWeightClaimId,
