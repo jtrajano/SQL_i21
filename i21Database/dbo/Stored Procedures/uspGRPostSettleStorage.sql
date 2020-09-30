@@ -185,10 +185,10 @@ BEGIN TRY
 		4-Fee
    */
 	
-	-- Get the Batch Id 
-	EXEC dbo.uspSMGetStartingNumber 
-		@STARTING_NUMBER_BATCH
-		,@strBatchId OUTPUT
+	---- Get the Batch Id 
+	--EXEC dbo.uspSMGetStartingNumber 
+	--	@STARTING_NUMBER_BATCH
+	--	,@strBatchId OUTPUT
 
 	-- Call Starting number for Receipt Detail Update to prevent deadlocks. 
 	BEGIN 
@@ -607,6 +607,8 @@ BEGIN TRY
 				--update @avqty set dblAvailableQuantity = dblAvailableQuantity - case when (abs(dblContractUnitGuard))
 				--delete from @avqty where dblAvailableQuantity is null
 			end
+
+			
 
 			--Discount
 			IF EXISTS (
@@ -1163,6 +1165,13 @@ BEGIN TRY
 			END
 
 			BEGIN			
+
+
+				-- Get the Batch Id 
+				EXEC dbo.uspSMGetStartingNumber 
+					@STARTING_NUMBER_BATCH
+					,@strBatchId OUTPUT
+
 				SET @intLotId = NULL
 				
 				SELECT @intLotId = ReceiptItemLot.intLotId
