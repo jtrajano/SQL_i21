@@ -1436,6 +1436,17 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Demand Plan' and strModule = 'Manufacturing')
 
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 155
+			,[strTransactionType]	= N'Receipt Item and Charge Update'
+			,[strPrefix]			= N'RIDetail-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Inventory'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receipt Item and Charge Update' and strModule = 'Inventory')
+
+	
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
