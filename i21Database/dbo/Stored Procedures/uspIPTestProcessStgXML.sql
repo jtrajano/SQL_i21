@@ -224,6 +224,14 @@ BEGIN TRY
 			SELECT intTestPropertyId
 			FROM OPENXML(@idoc, 'vyuIPGetTestPropertys/vyuIPGetTestProperty', 2) WITH (intTestPropertyId INT)
 
+			DELETE
+			FROM tblQMTestProperty
+			WHERE intTestId = @intNewTestId
+				AND intTestPropertyRefId NOT IN (
+					SELECT intTestPropertyId
+					FROM @tblQMTestProperty
+					)
+
 			SELECT @intTestPropertyId = MIN(intTestPropertyId)
 			FROM @tblQMTestProperty
 
@@ -321,14 +329,6 @@ BEGIN TRY
 				FROM @tblQMTestProperty
 				WHERE intTestPropertyId > @intTestPropertyId
 			END
-
-			DELETE
-			FROM tblQMTestProperty
-			WHERE intTestId = @intNewTestId
-				AND intTestPropertyRefId NOT IN (
-					SELECT intTestPropertyId
-					FROM @tblQMTestProperty
-					)
 
 			ext:
 
