@@ -107,6 +107,7 @@ BEGIN TRY
 					ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
+					AND IR.intEntityVendorId = @intEntityId  
 				DELETE FROM @voucherItems
 				DELETE FROM @voucherItemsTax
 

@@ -73,8 +73,24 @@ DECLARE @dblTicketNetUnits NUMERIC(18,6)
 DECLARE @intTicketTypeId AS INT
 DECLARE @intTicketLoadId INT
 DECLARE @intTicketStorageScheduleTypeId INT
+DECLARE @strZeroPriceTransaction NVARCHAR(50)
 
 BEGIN TRY
+		---Check for Zero Spot Transaction
+		IF EXISTS(SELECT TOP 1 1 FROM tblGRUnPricedSpotTicket WHERE intTicketId = @intTicketId)
+		BEGIN
+			SELECT TOP 1
+				@strZeroPriceTransaction = strPriceTicket
+			FROM tblGRUnPricedSpotTicket A
+			INNER JOIN tblGRUnPriced B
+				ON A.intUnPricedId = B.intUnPricedId
+			WHERE A.intTicketId = @intTicketId
+
+			SET @ErrorMessage = 'Undistributing ticket is not allowed. Ticket is being used in ''' + ISNULL(@strZeroPriceTransaction,'') +''', Unpost and remove it first before undistributing the Ticket.'
+			
+			RAISERROR(@ErrorMessage, 11, 1);
+		END
+
 		IF ISNULL(@ysnDeliverySheet, 0) = 0
 		BEGIN
 			SELECT @intLoadId = LGLD.intLoadId ,@intLoadDetailId = LGLD.intLoadDetailId
