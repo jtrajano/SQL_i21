@@ -794,12 +794,17 @@ begin try
 					begin
 						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 					end
-
-
-					--3. Post all created Vuchers
-					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intCreatedBillId,@userId = @userId,@success = @ysnSuccessBillPosting OUTPUT
-						
+					
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
+				end
+
+				--3. Post all created Vuchers
+				set @intCreatedBillId = 0;
+				select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId;
+				while (@intCreatedBillId is not null and @intCreatedBillId > 0)
+				begin
+					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intCreatedBillId,@userId = @userId,@success = @ysnSuccessBillPosting OUTPUT
+					select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId;
 				end
 
 			end
