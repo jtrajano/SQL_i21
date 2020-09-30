@@ -381,6 +381,14 @@ BEGIN TRY
 			SELECT intSampleTypeDetailId
 			FROM OPENXML(@idoc, 'vyuIPGetSampleTypeDetails/vyuIPGetSampleTypeDetail', 2) WITH (intSampleTypeDetailId INT)
 
+			DELETE
+			FROM tblQMSampleTypeDetail
+			WHERE intSampleTypeId = @intNewSampleTypeId
+				AND intSampleTypeDetailRefId NOT IN (
+					SELECT intSampleTypeDetailId
+					FROM @tblQMSampleTypeDetail
+					)
+
 			SELECT @intSampleTypeDetailId = MIN(intSampleTypeDetailId)
 			FROM @tblQMSampleTypeDetail
 
@@ -474,14 +482,6 @@ BEGIN TRY
 				WHERE intSampleTypeDetailId > @intSampleTypeDetailId
 			END
 
-			DELETE
-			FROM tblQMSampleTypeDetail
-			WHERE intSampleTypeId = @intNewSampleTypeId
-				AND intSampleTypeDetailRefId NOT IN (
-					SELECT intSampleTypeDetailId
-					FROM @tblQMSampleTypeDetail
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Sample Type User Role--------------------------------------------
@@ -493,6 +493,14 @@ BEGIN TRY
 			INSERT INTO @tblQMSampleTypeUserRole (intSampleTypeUserRoleId)
 			SELECT intSampleTypeUserRoleId
 			FROM OPENXML(@idoc, 'vyuIPGetSampleTypeUserRoles/vyuIPGetSampleTypeUserRole', 2) WITH (intSampleTypeUserRoleId INT)
+
+			DELETE
+			FROM tblQMSampleTypeUserRole
+			WHERE intSampleTypeId = @intNewSampleTypeId
+				AND intSampleTypeUserRoleRefId NOT IN (
+					SELECT intSampleTypeUserRoleId
+					FROM @tblQMSampleTypeUserRole
+					)
 
 			SELECT @intSampleTypeUserRoleId = MIN(intSampleTypeUserRoleId)
 			FROM @tblQMSampleTypeUserRole
@@ -581,14 +589,6 @@ BEGIN TRY
 				FROM @tblQMSampleTypeUserRole
 				WHERE intSampleTypeUserRoleId > @intSampleTypeUserRoleId
 			END
-
-			DELETE
-			FROM tblQMSampleTypeUserRole
-			WHERE intSampleTypeId = @intNewSampleTypeId
-				AND intSampleTypeUserRoleRefId NOT IN (
-					SELECT intSampleTypeUserRoleId
-					FROM @tblQMSampleTypeUserRole
-					)
 
 			ext:
 

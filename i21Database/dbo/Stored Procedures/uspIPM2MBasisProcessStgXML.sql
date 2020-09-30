@@ -191,6 +191,14 @@ BEGIN TRY
 			SELECT intM2MBasisDetailId
 			FROM OPENXML(@idoc, 'vyuIPGetM2MBasisDetails/vyuIPGetM2MBasisDetail', 2) WITH (intM2MBasisDetailId INT)
 
+			DELETE
+			FROM tblRKM2MBasisDetail
+			WHERE intM2MBasisId = @intNewM2MBasisId
+				AND intM2MBasisDetailRefId NOT IN (
+					SELECT intM2MBasisDetailId
+					FROM @tblRKM2MBasisDetail
+					)
+
 			SELECT @intM2MBasisDetailId = MIN(intM2MBasisDetailId)
 			FROM @tblRKM2MBasisDetail
 
@@ -544,14 +552,6 @@ BEGIN TRY
 				FROM @tblRKM2MBasisDetail
 				WHERE intM2MBasisDetailId > @intM2MBasisDetailId
 			END
-
-			DELETE
-			FROM tblRKM2MBasisDetail
-			WHERE intM2MBasisId = @intNewM2MBasisId
-				AND intM2MBasisDetailRefId NOT IN (
-					SELECT intM2MBasisDetailId
-					FROM @tblRKM2MBasisDetail
-					)
 
 			ext:
 
