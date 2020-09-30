@@ -24,3 +24,9 @@
     CONSTRAINT [PK_tblCTSequenceUsageHistory_intSequenceUsageHistoryId] PRIMARY KEY CLUSTERED ([intSequenceUsageHistoryId] ASC), 
 	CONSTRAINT [FK_tblCTSequenceUsageHistory_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTSequenceUsageHistory]
+	ON [dbo].[tblCTSequenceUsageHistory](intContractDetailId ASC, strScreenName ASC, intExternalId ASC)
+		
+GO
