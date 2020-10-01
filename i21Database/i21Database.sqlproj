@@ -8816,6 +8816,7 @@
     <Build Include="dbo\Views\vyuIPLoadWarehouseServicesAckView.sql" />
     <Build Include="dbo\Views\vyuIPLoadWarehouseContainerAckView.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContainerTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
