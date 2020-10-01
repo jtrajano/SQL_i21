@@ -365,6 +365,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 					 , intContractHeaderId	= CD.intContractHeaderId
 					 , intContractSeq		= CD.intContractSeq
 					 , intPricingTypeId		= C.intPricingTypeId
+					 , intItemId			= CD.intItemId
+					 , intItemUOMId			= CD.intItemUOMId
 					 , dblBalance			= CD.dblBalance - ISNULL(CD.dblScheduleQty, 0)
 					 , dblCashPrice			= CD.dblCashPrice
 				INTO #AVAILABLECONTRACTS
@@ -385,12 +387,16 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						DECLARE @intContractDetailIdAC	INT = NULL
 							  , @intContractHeaderIdAC	INT = NULL
 							  , @intPricingTypeIdAC		INT = NULL
+							  , @intItemIdAC			INT = NULL
+							  , @intItemUOMIdAC			INT = NULL
 							  , @dblQtyToApplyAC		NUMERIC(18, 6) = 0
 							  , @dblCashPriceAC			NUMERIC(18, 6) = 0
 
 						SELECT TOP 1 @intContractDetailIdAC		= intContractDetailId
 								   , @intContractHeaderIdAC		= intContractHeaderId
 								   , @intPricingTypeIdAC		= intPricingTypeId
+								   , @intItemIdAC				= intItemId
+								   , @intItemUOMIdAC			= intItemUOMId								    
 								   , @dblQtyToApplyAC			= CASE WHEN dblBalance > @dblQtyOverAged THEN @dblQtyOverAged ELSE dblBalance END
 								   , @dblCashPriceAC			= dblCashPrice
 						FROM #AVAILABLECONTRACTS 
@@ -430,8 +436,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 											 , intContractDetailId	= @intContractDetailIdAC
 											 , intContractHeaderId	= @intContractHeaderIdAC
 											 , intTicketId			= @intTicketId
-											 , intItemId			= NULL
-											 , intItemUOMId			= NULL
+											 , intItemId			= @intItemIdAC
+											 , intItemUOMId			= @intItemUOMIdAC
 											 , dblQtyShipped		= @dblQuantityBasis
 											 , dblPrice				= @dblFinalPriceBasis
 											 , ysnCharge			= CAST(0 AS BIT)										
@@ -457,8 +463,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 									 , intContractDetailId	= @intContractDetailIdAC
 									 , intContractHeaderId	= @intContractHeaderId
 									 , intTicketId			= @intTicketId
-									 , intItemId			= NULL
-									 , intItemUOMId			= NULL
+									 , intItemId			= @intItemIdAC
+									 , intItemUOMId			= @intItemUOMIdAC
 									 , dblQtyShipped		= @dblQtyToApplyAC
 									 , dblPrice				= @dblCashPriceAC
 									 , ysnCharge			= CAST(0 AS BIT)								
@@ -491,6 +497,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						SELECT intContractDetailId	= CD.intContractDetailId
 							 , intContractHeaderId	= CD.intContractHeaderId
 							 , intPricingTypeId		= C.intPricingTypeId
+							 , intItemId			= CD.intItemId
+							 , intItemUOMId			= CD.intItemUOMId
 							 , dblBalance			= CD.dblBalance - ISNULL(CD.dblScheduleQty, 0)
 							 , dblCashPrice			= CD.dblCashPrice
 						INTO #AVAILABLECONTRACTSBYCUSTOMER
@@ -510,6 +518,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 								DECLARE @intContractDetailIdACBC	INT = NULL
 									  , @intContractHeaderIdACBC	INT = NULL
 									  , @intPricingTypeIdACBC		INT = NULL
+									  , @intItemIdACBC				INT = NULL
+									  , @intItemUOMIdACBC			INT = NULL
 								      , @dblQtyToApplyACBC			NUMERIC(18, 6) = 0
 									  , @dblCashPriceACBC			NUMERIC(18, 6) = 0
 									  , @dblQtyOverAgedACBC			NUMERIC(18, 6) = @dblQtyOverAged
@@ -517,6 +527,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 								SELECT TOP 1 @intContractDetailIdACBC	= intContractDetailId
 										   , @intContractHeaderIdACBC	= intContractHeaderId
 										   , @intPricingTypeIdACBC		= intPricingTypeId
+										   , @intItemIdACBC				= intItemId
+										   , @intItemUOMIdACBC			= intItemUOMId
 										   , @dblQtyToApplyACBC			= CASE WHEN dblBalance > @dblQtyOverAged THEN @dblQtyOverAged ELSE dblBalance END
 										   , @dblCashPriceACBC			= dblCashPrice
 								FROM #AVAILABLECONTRACTSBYCUSTOMER
@@ -556,8 +568,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 													 , intContractDetailId	= @intContractDetailIdACBC
 													 , intContractHeaderId	= @intContractHeaderIdACBC
 													 , intTicketId			= @intTicketId
-													 , intItemId			= NULL
-													 , intItemUOMId			= NULL
+													 , intItemId			= @intItemIdACBC
+													 , intItemUOMId			= @intItemUOMIdACBC
 													 , dblQtyShipped		= @dblQuantityBasisACBC
 													 , dblPrice				= @dblFinalPriceBasisACBC
 													 , ysnCharge			= CAST(0 AS BIT)										
@@ -583,8 +595,8 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 											 , intContractDetailId	= @intContractDetailIdACBC
 											 , intContractHeaderId	= @intContractHeaderIdACBC
 											 , intTicketId			= @intTicketId
-											 , intItemId			= NULL
-											 , intItemUOMId			= NULL
+											 , intItemId			= @intItemIdACBC
+											 , intItemUOMId			= @intItemUOMIdACBC
 											 , dblQtyShipped		= @dblQtyToApplyACBC
 											 , dblPrice				= @dblCashPriceACBC
 											 , ysnCharge			= CAST(0 AS BIT)								
