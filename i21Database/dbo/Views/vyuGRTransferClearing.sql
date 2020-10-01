@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRTransferClearing]
 AS
-/*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
+/*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP/DP*/
 --Receipt item
 SELECT	--'1.1' AS TEST,
     CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN CS_TO.intEntityId ELSE receipt.intEntityVendorId END AS intEntityVendorId
@@ -10,46 +10,28 @@ SELECT	--'1.1' AS TEST,
     ,NULL AS intTransferStorageId
     ,NULL AS strTransferStorageTicket
     ,NULL AS intTransferStorageReferenceId
-    ,receiptItem.intInventoryReceiptItemId
+    ,CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN SIR.intTransferStorageReferenceId ELSE receiptItem.intInventoryReceiptItemId END AS intInventoryReceiptItemId
     ,receiptItem.intItemId
     ,receiptItem.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblTransferTotal
     ,0 AS dblTransferQty
     ,ROUND(
-        ISNULL(receiptItem.dblOpenReceive, 0) 
+        ISNULL(CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TRANSFER_TRAN.dblTransferredUnits ELSE receiptItem.dblOpenReceive END, 0) --
+		--ISNULL(CASE WHEN (SIR.dblTransactionUnits + ABS(SIR.dblShrinkage)) <= receiptItem.dblOpenReceive THEN receiptItem.dblOpenReceive ELSE (SIR.dblTransactionUnits + ABS(SIR.dblShrinkage)) END, 0) 
         * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
         * (
             CASE 
-                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
-                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
-                ELSE 
-                    1 
+                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 1 / ISNULL(receipt.intSubCurrencyCents, 1) 
+                ELSE 1 
             END 
         )
         , 2
-    ) 
-    *
-    (
-        CASE
-        WHEN receipt.strReceiptType = 'Inventory Return'
-        THEN -1
-        ELSE 1
-        END
     )
     +
     receiptItem.dblTax
     AS dblReceiptTotal
-    ,ISNULL(receiptItem.dblOpenReceive, 0)
-    *
-    (
-        CASE
-        WHEN receipt.strReceiptType = 'Inventory Return'
-        THEN -1
-        ELSE 1
-        END
-    )
-    AS dblReceiptQty
+    ,ISNULL(CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN TRANSFER_TRAN.dblTransferredUnits ELSE receiptItem.dblOpenReceive END, 0) AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,CAST(0 AS BIT) ysnAllowVoucher
@@ -161,6 +143,10 @@ SELECT --'2.2' AS TEST,
     ,0
     ,APClearing.intAccountId
 	,APClearing.strAccountId
+	--,SIR.dblTransactionUnits
+	--,S.dblNetUnits
+	--,S.dblShrinkage
+	--,IRI.dblUnitCost
 FROM tblGRStorageInventoryReceipt SIR
 INNER JOIN tblGRTransferStorageReference TSR
 	ON TSR.intTransferStorageReferenceId = SIR.intTransferStorageReferenceId
@@ -177,10 +163,9 @@ INNER JOIN tblICInventoryReceipt IR
 	ON IR.intInventoryReceiptId = SIR.intInventoryReceiptId
 INNER JOIN tblSMCompanyLocation CL
     ON CL.intCompanyLocationId = CS.intCompanyLocationId
-INNER JOIN tblGLDetail GL
-	ON GL.intTransactionId = TSR.intTransferStorageId
-		AND GL.strTransactionType = 'Transfer Storage'
-		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
+INNER JOIN (
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
 		AND APClearing.intAccountCategoryId = 45
@@ -210,6 +195,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
+WHERE SIR.ysnUnposted = 0
+    --AND IR.dtmReceiptDate >= '08-17-2020'
 /*END ====>>> ***DELIVERY SHEETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
@@ -221,14 +208,14 @@ SELECT DISTINCT	--'3' AS TEST,
     ,NULL AS intTransferStorageId
     ,NULL AS strTransferStorageTicket
     ,NULL AS intTransferStorageReferenceId
-    ,receiptItem.intInventoryReceiptItemId
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receiptItem.intInventoryReceiptItemId ELSE TSR.intTransferStorageReferenceId END AS intInventoryReceiptItemId
     ,receiptItem.intItemId
     ,receiptItem.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblTransferTotal
     ,0 AS dblTransferQty
     ,ROUND(
-        ISNULL(receiptItem.dblOpenReceive, 0) 
+        ISNULL(CASE WHEN (CS.dblOpenBalance = 0 AND ST_FROM.ysnDPOwnedType = 1) THEN CS_TO.dblOriginalBalance ELSE receiptItem.dblOpenReceive END, 0) 
         * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
         * (
             CASE 
@@ -239,49 +226,41 @@ SELECT DISTINCT	--'3' AS TEST,
             END 
         )
         , 2
-    ) 
-    *
-    (
-        CASE
-        WHEN receipt.strReceiptType = 'Inventory Return'
-        THEN -1
-        ELSE 1
-        END
     )
     +
     receiptItem.dblTax
     AS dblReceiptTotal
-    ,ISNULL(receiptItem.dblOpenReceive, 0)
-    *
-    (
-        CASE
-        WHEN receipt.strReceiptType = 'Inventory Return'
-        THEN -1
-        ELSE 1
-        END
-    )
+    ,ISNULL(CASE WHEN (CS.dblOpenBalance = 0 AND ST_FROM.ysnDPOwnedType = 1) THEN CS_TO.dblOriginalBalance ELSE receiptItem.dblOpenReceive END, 0)
     AS dblReceiptQty
     ,receipt.intLocationId
     ,compLoc.strLocationName
     ,0
     ,APClearing.intAccountId
 	,APClearing.strAccountId
+	--,transfers.dblOriginalBalance
 FROM tblICInventoryReceipt receipt 
 INNER JOIN tblICInventoryReceiptItem receiptItem
 	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
 INNER JOIN tblSMCompanyLocation compLoc
     ON receipt.intLocationId = compLoc.intCompanyLocationId
 INNER JOIN (
-	SELECT intInventoryReceiptId
-	FROM tblGRStorageHistory SH
+	tblGRStorageHistory SH
 	INNER JOIN tblGRTransferStorageReference TSR
 		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblGRTransferStorage TS
+		ON TS.intTransferStorageId = TSR.intTransferStorageId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblGRStorageType ST_TO
+		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
 	INNER JOIN tblGRCustomerStorage CS
 		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
 			AND CS.ysnTransferStorage = 0
 			AND CS.intTicketId IS NOT NULL
-) transfers
-	ON transfers.intInventoryReceiptId = receipt.intInventoryReceiptId
+	INNER JOIN tblGRStorageType ST_FROM
+		ON ST_FROM.intStorageScheduleTypeId = CS.intStorageTypeId
+)
+	ON SH.intInventoryReceiptId = receipt.intInventoryReceiptId
 LEFT JOIN tblSMFreightTerms ft
     ON ft.intFreightTermId = receipt.intFreightTermId
 LEFT JOIN 
@@ -316,8 +295,7 @@ SELECT --'4' AS TEST,
     ,IRI.intUnitMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
     ,ISNULL(CAST((TSR.dblUnitQty) * (IRI.dblUnitCost)  AS DECIMAL(18,2)),0) * 1 + IRI.dblTax AS dblTransferTotal  --Orig Calculation	
-    ,ISNULL(TSR.dblUnitQty, 0)
-    AS dblTransferQty
+    ,ISNULL(TSR.dblUnitQty, 0) AS dblTransferQty
     ,0 AS dblReceiptTotal
     ,0 AS dblReceiptQty
     ,IR.intLocationId
@@ -339,15 +317,16 @@ INNER JOIN tblICInventoryReceiptItem IRI
 	ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 INNER JOIN tblSMCompanyLocation CL
     ON CL.intCompanyLocationId = CS.intCompanyLocationId
-INNER JOIN tblGLDetail GL
-	ON GL.intTransactionId = TSR.intTransferStorageId
-		AND GL.strTransactionType = 'Transfer Storage'
-		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
+--INNER JOIN tblGLDetail GL
+--	ON GL.intTransactionId = TSR.intTransferStorageId
+--		AND GL.strTransactionType = 'Transfer Storage'
+--		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
+INNER JOIN (
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+) GL ON GL.intTransactionId = TSR.intTransferStorageId
 INNER JOIN vyuGLAccountDetail APClearing
     ON APClearing.intAccountId = GL.intAccountId 
 		AND APClearing.intAccountCategoryId = 45
-LEFT JOIN tblSMFreightTerms ft
-    ON ft.intFreightTermId = IR.intFreightTermId
 LEFT JOIN 
 (
     tblICItemUOM itemUOM 
