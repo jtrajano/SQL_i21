@@ -92,9 +92,9 @@ FROM
 		ON ST.intTermID = A.intTermsId
 	OUTER APPLY (
 		SELECT TOP 1 commodity.strCommodityCode
-		FROM tblAPBillDetail detail
-		LEFT JOIN tblICItem item ON detail.intItemId = item.intItemId
-		LEFT JOIN tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
+		FROM dbo.tblAPBillDetail detail
+		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
+		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 		WHERE detail.intBillId = A.intBillId
 	) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
