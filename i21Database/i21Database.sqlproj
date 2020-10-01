@@ -8818,6 +8818,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimDetail.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTGetContainerTypes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
