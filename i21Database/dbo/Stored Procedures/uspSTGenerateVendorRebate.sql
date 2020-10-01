@@ -318,7 +318,7 @@ BEGIN TRY
 				THEN (TR.dblTrlUnitPrice - (TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty)) * TR.dblTrlQty
 					WHEN TR.strTrpPaycode IN ('COUPONS')
 				THEN (TR.dblTrlUnitPrice - (TR.dblTrpAmt))
-					ELSE dblTrlUnitPrice 
+					ELSE dblTrlUnitPrice * TR.dblTrlQty
 				END as  dblFinalSalesPrice
 
 			, NULL AS intStoreTelephone

@@ -90,7 +90,13 @@ FROM
 		ON CL.intCompanyLocationId = A.intShipToId
 	INNER JOIN dbo.tblSMTerm ST
 		ON ST.intTermID = A.intTermsId
-	OUTER APPLY [dbo].[fnAPGetVoucherCommodity](A.intBillId) commodity
+	OUTER APPLY (
+		SELECT TOP 1 commodity.strCommodityCode
+		FROM dbo.tblAPBillDetail detail
+		LEFT JOIN dbo.tblICItem item ON detail.intItemId = item.intItemId
+		LEFT JOIN dbo.tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
+		WHERE detail.intBillId = A.intBillId
+	) commodity
 	LEFT JOIN dbo.tblSMShipVia SV
 		ON SV.intEntityId = A.intShipViaId
 	LEFT JOIN dbo.tblEMEntity EN

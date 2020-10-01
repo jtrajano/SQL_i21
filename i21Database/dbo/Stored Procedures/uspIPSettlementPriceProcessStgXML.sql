@@ -240,6 +240,14 @@ BEGIN TRY
 			SELECT intFutSettlementPriceMonthId
 			FROM OPENXML(@idoc, 'vyuIPGetFutSettlementPriceMarketMaps/vyuIPGetFutSettlementPriceMarketMap', 2) WITH (intFutSettlementPriceMonthId INT)
 
+			DELETE
+			FROM tblRKFutSettlementPriceMarketMap
+			WHERE intFutureSettlementPriceId = @intNewFutureSettlementPriceId
+				AND intFutSettlementPriceMonthRefId NOT IN (
+					SELECT intFutSettlementPriceMonthId
+					FROM @tblRKFuturesSettlementPriceDetail
+					)
+
 			SELECT @intFutSettlementPriceMonthId = MIN(intFutSettlementPriceMonthId)
 			FROM @tblRKFuturesSettlementPriceDetail
 
@@ -347,14 +355,6 @@ BEGIN TRY
 				WHERE intFutSettlementPriceMonthId > @intFutSettlementPriceMonthId
 			END
 
-			DELETE
-			FROM tblRKFutSettlementPriceMarketMap
-			WHERE intFutureSettlementPriceId = @intNewFutureSettlementPriceId
-				AND intFutSettlementPriceMonthRefId NOT IN (
-					SELECT intFutSettlementPriceMonthId
-					FROM @tblRKFuturesSettlementPriceDetail
-					)
-
 			EXEC sp_xml_removedocument @idoc
 
 			------------------------------------Option Settlement Price--------------------------------------------
@@ -366,6 +366,14 @@ BEGIN TRY
 			INSERT INTO @tblRKOptionsSettlementPriceDetail (intOptSettlementPriceMonthId)
 			SELECT intOptSettlementPriceMonthId
 			FROM OPENXML(@idoc, 'vyuIPGetOptSettlementPriceMarketMaps/vyuIPGetOptSettlementPriceMarketMap', 2) WITH (intOptSettlementPriceMonthId INT)
+
+			DELETE
+			FROM tblRKOptSettlementPriceMarketMap
+			WHERE intFutureSettlementPriceId = @intNewFutureSettlementPriceId
+				AND intOptSettlementPriceMonthRefId NOT IN (
+					SELECT intOptSettlementPriceMonthId
+					FROM @tblRKOptionsSettlementPriceDetail
+					)
 
 			SELECT @intOptSettlementPriceMonthId = MIN(intOptSettlementPriceMonthId)
 			FROM @tblRKOptionsSettlementPriceDetail
@@ -472,14 +480,6 @@ BEGIN TRY
 				FROM @tblRKOptionsSettlementPriceDetail
 				WHERE intOptSettlementPriceMonthId > @intOptSettlementPriceMonthId
 			END
-
-			DELETE
-			FROM tblRKOptSettlementPriceMarketMap
-			WHERE intFutureSettlementPriceId = @intNewFutureSettlementPriceId
-				AND intOptSettlementPriceMonthRefId NOT IN (
-					SELECT intOptSettlementPriceMonthId
-					FROM @tblRKOptionsSettlementPriceDetail
-					)
 
 			ext:
 
