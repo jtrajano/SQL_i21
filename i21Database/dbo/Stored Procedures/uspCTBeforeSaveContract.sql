@@ -197,10 +197,12 @@ BEGIN TRY
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
 	END
 
-	
-	--Unslice
-	EXEC uspQMSampleContractUnSlice @intContractHeaderId,@intUserId
-	EXEC uspLGLoadContractUnSlice @intContractHeaderId
+	IF ((SELECT COUNT(*) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND ysnSlice = 0) >= 1)
+	BEGIN
+		--Unslice
+		EXEC uspQMSampleContractUnSlice @intContractHeaderId,@intUserId
+		EXEC uspLGLoadContractUnSlice @intContractHeaderId
+	END
 
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId	
 
