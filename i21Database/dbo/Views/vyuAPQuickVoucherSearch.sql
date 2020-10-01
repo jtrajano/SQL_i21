@@ -43,16 +43,11 @@ FROM
 		(dbo.tblAPVendor B INNER JOIN dbo.tblEMEntity B1 ON B.[intEntityId] = B1.intEntityId)
 		ON A.[intEntityVendorId] = B.[intEntityId]
 	OUTER APPLY (
-		SELECT TOP 1
-			COUNT(commodity.intCommodityId) intCount, 
-			commodity.intCommodityId,
-			commodity.strCommodityCode
+		SELECT TOP 1 commodity.strCommodityCode
 		FROM tblAPBillDetail detail
 		LEFT JOIN tblICItem item ON detail.intItemId = item.intItemId
 		LEFT JOIN tblICCommodity commodity ON item.intCommodityId = commodity.intCommodityId
 		WHERE detail.intBillId = A.intBillId
-		GROUP BY commodity.intCommodityId, commodity.strCommodityCode
-		ORDER BY COUNT(commodity.intCommodityId) DESC
 	) commodity
 	LEFT JOIN dbo.[tblEMEntityCredential] F ON A.intEntityId = F.intEntityId
 	LEFT JOIN dbo.tblSMCompanyLocation G
