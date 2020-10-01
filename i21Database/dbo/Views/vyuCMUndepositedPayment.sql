@@ -17,7 +17,7 @@ Undep.intUndepositedFundId
 ,EM.strName as strUserName
 ,Undep.dtmCreated
 ,Undep.intCurrencyId
-,strBatchId = (SELECT TOP 1 strBatchId FROM vyuGLDetail WHERE strTransactionId = Undep.strSourceTransactionId AND strTransactionType = 'Receive Payments')
+,RCV.strBatchId
 ,Pay.strCardType
 ,Undep.strPaymentSource
 ,Undep.strEODNumber
@@ -27,6 +27,7 @@ FROM tblCMUndepositedFund Undep
 INNER JOIN tblEMEntity EM ON Undep.intCreatedUserId = EM.intEntityId
 INNER JOIN tblSMCompanyLocation Loc ON Undep.intLocationId = Loc.intCompanyLocationId
 LEFT JOIN tblSMPayment Pay ON Undep.strSourceTransactionId =  Pay.strTransactionNo
+LEFT JOIN tblARPayment RCV ON RCV.strRecordNumber = Undep.strSourceTransactionId
 WHERE
 Undep.intUndepositedFundId NOT IN( 
 	SELECT intUndepositedFundId 
