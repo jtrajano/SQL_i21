@@ -25,6 +25,7 @@ BEGIN TRY
 	DECLARE @dtmPlannedAvailabilityDate DATETIME
 	DECLARE @intApprovedById INT
 	DECLARE @intShipmentStatus INT
+	DECLARE @intPurchaseSale INT
 
 	DECLARE @tblLoadDetail TABLE
 			(intDetailRecordId INT Identity(1, 1),
@@ -39,7 +40,8 @@ BEGIN TRY
 		   @strETAPODReasonCode = PODRC.strReasonCodeDescription,
 		   @strETSPOLReasonCode = POLRC.strReasonCodeDescription,
 		   @intShipmentStatus = L.intShipmentStatus,
-		   @intLeadTime = ISNULL(DPort.intLeadTime, 0)
+		   @intLeadTime = ISNULL(DPort.intLeadTime, 0),
+		   @intPurchaseSale = L.intPurchaseSale
 	FROM tblLGLoad L
 	LEFT JOIN tblLGReasonCode PODRC ON PODRC.intReasonCodeId = L.intETAPOLReasonCodeId
 	LEFT JOIN tblLGReasonCode POLRC ON POLRC.intReasonCodeId = L.intETSPOLReasonCodeId
@@ -683,7 +685,7 @@ BEGIN TRY
 						BEGIN
 							UPDATE tblCTContractDetail 
 							SET dtmPlannedAvailabilityDate = @dtmCurrentETAPOD
-								,intConcurrencyId = intConcurrencyId + 1 
+								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intContractDetailId = @intContractDetailId 
 
 							SELECT @ysnIsETAUpdated = 1
@@ -694,21 +696,18 @@ BEGIN TRY
 							UPDATE tblCTContractDetail 
 							SET dtmUpdatedAvailabilityDate = CASE WHEN (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) THEN DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
 																ELSE dtmUpdatedAvailabilityDate END
+								,intConcurrencyId = intConcurrencyId + 1
 							WHERE intContractDetailId = @intContractDetailId 
+								OR (@intPurchaseSale = 3 AND intContractDetailId = (SELECT TOP 1 intSContractDetailId FROM tblLGLoadDetail WHERE intLoadDetailId = @intLoadDetailId))
 
 							SELECT @ysnIsETAUpdated = 1
 						END
 						
 						IF (@ysnIsETAUpdated = 1) 
 						BEGIN
-
 							EXEC uspCTContractApproved @intContractHeaderId = @intContractHeaderId,
 								@intApprovedById =  @intApprovedById, 
 								@intContractDetailId = @intContractDetailId
-
-							UPDATE tblCTContractDetail 
-							SET intConcurrencyId = intConcurrencyId + 1 
-							WHERE intContractDetailId = @intContractDetailId 
 						END
 					END
 				END
