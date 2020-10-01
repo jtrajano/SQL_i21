@@ -69,6 +69,74 @@ BEGIN TRY
 	LEFT JOIN tblCTPosition		PO ON PO.intPositionId = CH.intPositionId
 	WHERE	intContractHeaderId		=	@intContractHeaderId
 
+	DECLARE @CDTableUpdate AS TABLE (
+		intContractDetailId INT
+		, intPricingTypeId INT NULL
+		, dblFutures NUMERIC(24, 10) NULL
+		, dblCashPrice NUMERIC(24, 10) NULL
+		, dblTotalCost NUMERIC(24, 10) NULL
+		, intProducerId INT NULL
+		, dblNetWeight NUMERIC(24, 10) NULL
+		, dtmPlannedAvailabilityDate DATETIME NULL
+		, intFutureMonthId INT NULL
+		, dblOriginalQty NUMERIC(24, 10) NULL
+		, ysnPriceChanged BIT NULL
+		, dblOriginalBasis NUMERIC(24, 10) NULL
+		, dblConvertedBasis NUMERIC(24, 10) NULL
+		, dtmStartDate DATETIME NULL
+		, intCurrencyId INT NULL
+		, intItemUOMId INT NULL
+		, intPriceItemUOMId INT NULL
+		, dblQuantity NUMERIC(24, 10) NULL
+		, dblBasis NUMERIC(24, 10) NULL
+		, intBasisUOMId INT NULL
+		, intBasisCurrencyId INT NULL
+	)
+
+	INSERT INTO @CDTableUpdate(intContractDetailId
+		, intPricingTypeId
+		, dblFutures
+		, dblCashPrice
+		, dblTotalCost
+		, intProducerId
+		, dblNetWeight
+		, dtmPlannedAvailabilityDate
+		, intFutureMonthId
+		, dblOriginalQty
+		, ysnPriceChanged
+		, dblOriginalBasis
+		, dblConvertedBasis
+		, dtmStartDate
+		, intCurrencyId
+		, intItemUOMId
+		, intPriceItemUOMId
+		, dblQuantity
+		, dblBasis
+		, intBasisUOMId
+		, intBasisCurrencyId)
+	SELECT intContractDetailId
+		, intPricingTypeId
+		, dblFutures
+		, dblCashPrice
+		, dblTotalCost
+		, intProducerId
+		, dblNetWeight
+		, dtmPlannedAvailabilityDate
+		, intFutureMonthId
+		, dblOriginalQty
+		, ysnPriceChanged
+		, dblOriginalBasis
+		, dblConvertedBasis
+		, dtmStartDate
+		, intCurrencyId
+		, intItemUOMId
+		, intPriceItemUOMId
+		, dblQuantity
+		, dblBasis
+		, intBasisUOMId
+		, intBasisCurrencyId
+	FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
+
 	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
 
 	SELECT	@intContractScreenId=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.Contract'
@@ -89,79 +157,25 @@ BEGIN TRY
 	AND		strStatus = 'Approved' 
 	ORDER BY intApprovalId DESC
 
-	--Correct if UOM are wrong
-
-	UPDATE	CD 
-	SET		CD.intPriceItemUOMId	=	CU.intItemUOMId
-	from	vyuCTContractSequence	CD
-	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	CD.intPriceItemUOMId
-	JOIN	tblICUnitMeasure		UM	ON	UM.strUnitMeasure		=	strPriceUOM
-	JOIN	tblICItemUOM			CU	ON	CU.intItemId			=	CD.intItemId 
-									AND CU.intUnitMeasureId			=	UM.intUnitMeasureId
-	WHERE	IU.intItemId			<>	CD.intItemId	
-	AND		CD.intContractHeaderId	=	@intContractHeaderId
-
-	UPDATE	CD 
-	SET		CD.intItemUOMId			=	CU.intItemUOMId
-	from	vyuCTContractSequence	CD
-	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	CD.intItemUOMId
-	JOIN	tblICUnitMeasure		UM	ON	UM.strUnitMeasure		=	strItemUOM
-	JOIN	tblICItemUOM			CU	ON	CU.intItemId			=	CD.intItemId 
-									AND CU.intUnitMeasureId			=	UM.intUnitMeasureId
-	WHERE	IU.intItemId			<>	CD.intItemId	
-	AND		CD.intContractHeaderId	=	@intContractHeaderId
-
-	UPDATE	CD 
-	SET		CD.intNetWeightUOMId	=	CU.intItemUOMId
-	from	vyuCTContractSequence	CD
-	JOIN	tblICItemUOM			IU	ON	IU.intItemUOMId			=	CD.intNetWeightUOMId
-	JOIN	tblICUnitMeasure		UM	ON	UM.strUnitMeasure		=	strNetWeightUOM
-	JOIN	tblICItemUOM			CU	ON	CU.intItemId			=	CD.intItemId 
-										AND CU.intUnitMeasureId		=	UM.intUnitMeasureId
-	WHERE	IU.intItemId			<>	CD.intItemId	
-	AND		CD.intContractHeaderId	=	@intContractHeaderId
-
-	UPDATE	CD 
-	SET		CD.intBasisUOMId		=	CU.intItemUOMId
-	FROM	tblCTContractDetail CD
-	JOIN	tblICItemUOM		IU		ON	IU.intItemUOMId			=	CD.intBasisUOMId
-	JOIN	tblICUnitMeasure	BU		ON	BU.intUnitMeasureId		=	IU.intUnitMeasureId
-	JOIN	tblICUnitMeasure	UM		ON	UM.strUnitMeasure		=	BU.strUnitMeasure
-	JOIN	tblICItemUOM		CU		ON	CU.intItemId			=	CD.intItemId 
-										AND CU.intUnitMeasureId		=	UM.intUnitMeasureId
-	WHERE	IU.intItemId			<>	CD.intItemId
-	AND		CD.intContractHeaderId	=	@intContractHeaderId
-
-	--End Correct if UOM are wrong
-
-	--Other safety Checks--
-
 	IF ISNULL(@intPriceFixationId,0) = 0 AND @ysnMultiplePriceFixation = 1 AND @dblFutures IS NOT NULL AND @intHeaderPricingTypeId = 2
 	BEGIN
-		UPDATE tblCTContractHeader SET dblFutures = NULL  WHERE intContractHeaderId = @intContractHeaderId
-
-		UPDATE	CD 
-		SET		CD.intPricingTypeId	=	2,
-				CD.dblFutures		=	NULL,
-				CD.dblCashPrice		=	NULL,
-				CD.dblTotalCost		=	NULL
-		FROM	tblCTContractDetail		CD
-		WHERE	CD.intContractHeaderId	=	@intContractHeaderId
+		UPDATE @CDTableUpdate
+		SET intPricingTypeId = 2
+			, dblFutures = NULL
+			, dblCashPrice = NULL
+			, dblTotalCost = NULL
 	END
 
-	UPDATE	CD 
-	SET		CD.intProducerId	=	@intProducerId
-	FROM	tblCTContractDetail	CD
-	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
-	AND		CD.intProducerId	IS NULL
-	AND		@intProducerId		IS NOT NULL
+	UPDATE @CDTableUpdate
+	SET intProducerId = @intProducerId
+	WHERE intProducerId IS NULL
+		AND @intProducerId IS NOT NULL
 	
-	UPDATE	CD 
-	SET		dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
-	FROM	tblCTContractDetail CD
-	JOIN	tblSMCurrency		CY	ON CY.intCurrencyID = CD.intCurrencyId
-	WHERE	CD.intPricingTypeId	IN (1,6)
-	AND		intContractHeaderId =	@intContractHeaderId
+	UPDATE CD
+	SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
+	FROM @CDTableUpdate CD
+	JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
+	WHERE CD.intPricingTypeId IN (1, 6)
 
 	SELECT	@ErrMsg = COALESCE(@ErrMsg, '') + '#' + LTRIM(CC.strItemNo)  + '@' + LTRIM(CD.intContractSeq) + '^' + CD.strItemUOM + '.' +CHAR(13) + CHAR(10) 
 	FROM	vyuCTContractCostView	CC
@@ -211,12 +225,12 @@ BEGIN TRY
 
 		IF ISNULL(@intNetWeightUOMId,0) > 0 AND (@dblNetWeight IS NULL OR @dblNetWeight <> @dblCorrectNetWeight)
 		BEGIN
-			UPDATE tblCTContractDetail SET dblNetWeight = @dblCorrectNetWeight WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET dblNetWeight = @dblCorrectNetWeight
 		END
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
 		BEGIN
-			UPDATE tblCTContractDetail SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)  WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)
 			
 			DECLARE @FutureMonthId INT
 
@@ -227,12 +241,12 @@ BEGIN TRY
 				SELECT TOP 1 @FutureMonthId = intFutureMonthId FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intFutureMarketId AND intYear >= CAST(SUBSTRING(LTRIM(YEAR(@dtmPlannedAvalability)),3,2) AS INT) + 1 AND intMonth > 0 AND ysnExpired <> 1 ORDER BY intYear ASC, intMonth ASC
 			END
 
-			UPDATE tblCTContractDetail SET intFutureMonthId = ISNULL(@FutureMonthId,intFutureMonthId) WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET intFutureMonthId = ISNULL(@FutureMonthId,intFutureMonthId) WHERE intContractDetailId = @intContractDetailId
 		END
 
 		IF @intConcurrencyId = 1
 		BEGIN
-			UPDATE tblCTContractDetail SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET dblOriginalQty = dblQuantity WHERE intContractDetailId = @intContractDetailId
 		END
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
@@ -240,7 +254,7 @@ BEGIN TRY
 			SELECT @dblLotsFixed =  dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
-				UPDATE	tblCTContractDetail
+				UPDATE	@CDTableUpdate
 				SET		dblFutures			=	NULL,
 						dblCashPrice		=	NULL,
 						dblTotalCost		=	NULL,
@@ -253,17 +267,21 @@ BEGIN TRY
 		IF @ysnPriceChanged = 1
 		BEGIN
 			EXEC	uspCTSequencePriceChanged @intContractDetailId,null,'Sequence',0
-			UPDATE tblCTContractDetail SET ysnPriceChanged = 0 WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET ysnPriceChanged = 0 WHERE intContractDetailId = @intContractDetailId
 		END
 		
 		IF @intPricingTypeId IN (2,8) AND @dblOriginalBasis IS NULL
 		BEGIN
-			UPDATE tblCTContractDetail SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET dblOriginalBasis = dblBasis WHERE intContractDetailId = @intContractDetailId
 		END
 
 		IF @dblOriginalBasis IS NOT NULL AND  @dblBasis <> @dblOriginalBasis
 		BEGIN
-			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis
+			UPDATE @CDTableUpdate SET dblOriginalBasis = @dblBasis WHERE intContractDetailId = @intContractDetailId;
+
+			DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+			EXEC uspCTUpdateSequenceBasis @intContractDetailId,@dblBasis;
+			ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 		END
 
 		IF @intPricingTypeId IN (1,2,8)
@@ -274,16 +292,32 @@ BEGIN TRY
 							WHEN	ISNULL(CY.ysnSubCurrency,0) = 1 THEN 0.01 
 							ELSE	100
 					END
-			FROM	tblCTContractDetail CD
+			FROM	@CDTableUpdate CD
 			JOIN	tblSMCurrency		CY	ON	CD.intCurrencyId	=	CY.intCurrencyID
 			WHERE	CD.intContractDetailId	=	@intContractDetailId 
 		END
 		ELSE
 		BEGIN
-			UPDATE	tblCTContractDetail 
+			UPDATE	@CDTableUpdate 
 			SET		dblConvertedBasis	=	NULL
 			WHERE	intContractDetailId	=	@intContractDetailId 
 		END
+
+		UPDATE tblCTContractDetail
+		SET intPricingTypeId = CD.intPricingTypeId
+			, dblFutures = CD.dblFutures
+			, dblCashPrice = CD.dblCashPrice
+			, dblTotalCost = CD.dblTotalCost
+			, intProducerId = CD.intProducerId
+			, dblNetWeight = CD.dblNetWeight
+			, dtmPlannedAvailabilityDate = CD.dtmPlannedAvailabilityDate
+			, intFutureMonthId = CD.intFutureMonthId
+			, dblOriginalQty = CD.dblOriginalQty
+			, ysnPriceChanged = CD.ysnPriceChanged
+			, dblOriginalBasis = CD.dblOriginalBasis
+			, dblConvertedBasis = CD.dblConvertedBasis
+		FROM @CDTableUpdate CD
+		WHERE CD.intContractDetailId = tblCTContractDetail.intContractDetailId
 
 		EXEC uspLGUpdateLoadItem @intContractDetailId
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (NOLOCK) WHERE intParentDetailId = @intContractDetailId AND ysnSlice = 1 ) OR (@ysnSlice <> 1)
@@ -305,12 +339,16 @@ BEGIN TRY
 			
 			IF (@previousQty != @curQty OR @previousLocation != @curLocation)
 			BEGIN
-				EXEC uspLGUpdateCompanyLocation @intContractDetailId
+				EXEC uspLGUpdateCompanyLocation @intContractDetailId;
 				-- Update Shipping Intruction Quantity
+				DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
+				
 				UPDATE T SET dblShippingInstructionQty = T.dblQuantity 
 				FROM tblCTContractDetail T 
 				WHERE intContractDetailId = @intContractDetailId
-				AND dblShippingInstructionQty > 0
+				AND dblShippingInstructionQty > 0;
+
+				ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 			END
 		END
 		UPDATE tblQMSample SET intLocationId = @intCompanyLocationId WHERE intContractDetailId = @intContractDetailId
@@ -333,8 +371,9 @@ BEGIN TRY
 			FROM	tblICItem		IM
 			JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE	ysnBasisContract = 1
-		END
+		END;
 
+		DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
 		BEGIN 
 			SELECT	@strCertificationName = NULL
@@ -348,7 +387,8 @@ BEGIN TRY
 		ELSE
 		BEGIN
 			UPDATE	tblCTContractDetail SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
-		END
+		END;
+		ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
 
 		IF @intContractStatusId IN (3,6)
 		BEGIN
