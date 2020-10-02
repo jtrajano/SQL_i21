@@ -237,6 +237,29 @@ BEGIN
         AND P.[ysnInvoicePrepayment] = @ZeroBit
         AND P.[dblAmountPaid] < @ZeroDecimal
 
+
+    INSERT INTO #ARInvalidPaymentData
+	([intTransactionId]
+	,[strTransactionId]
+	,[strTransactionType]
+	,[intTransactionDetailId]
+	,[strBatchId]
+	,[strError])
+	--0.00 Amount paid in ACH is not allowed.
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.[strPaymentMethod] + '''s ' + 'must have a non $0.00 value.  Please adjust the payment method to ''Debit Memos and Payments'''
+	FROM
+		#ARPostPaymentHeader P
+    WHERE
+            P.[ysnPost] = @OneBit
+        AND P.[strPaymentMethod]  = 'ACH'
+        AND P.[dblAmountPaid] <= @ZeroDecimal
+
  --   This is being handled by [uspGLValidateGLEntries]
  --   INSERT INTO #ARInvalidPaymentData
  --       ([intTransactionId]
