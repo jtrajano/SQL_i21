@@ -17,7 +17,7 @@ BEGIN
 	AS
 	SELECT * FROM 
 		(SELECT DISTINCT
-			EmployeeName = strFirstName + '' '' + strMiddleName + '' '' + strLastName 
+			EmployeeName = strFirstName + '' '' + ISNULL(strMiddleName,'''') + '' '' + strLastName 
 			,CheckNo = PCheck.strPaycheckId
 			,PayDate = PCheck.dtmPayDate
 			,TaxTotal = PTax.dblTotal
@@ -51,7 +51,7 @@ BEGIN
 	AS
 	SELECT * FROM 
 		(SELECT DISTINCT
-			EmployeeName = strFirstName + '' '' + strMiddleName + '' '' + strLastName 
+			EmployeeName = strFirstName + '' '' + ISNULL(strMiddleName,'''') + '' '' + strLastName 
 			,CheckNo = PCheck.strPaycheckId
 			,PayDate = PCheck.dtmPayDate
 			,EarningTotal = PTax.dblTotal
@@ -85,7 +85,7 @@ BEGIN
 	AS
 	SELECT * FROM 
 		(SELECT DISTINCT
-			EmployeeName = strFirstName + '' '' + strMiddleName + '' '' + strLastName 
+			EmployeeName = strFirstName + '' '' + ISNULL(strMiddleName,'''') + '' '' + strLastName 
 			,CheckNo = PCheck.strPaycheckId
 			,PayDate = PCheck.dtmPayDate
 			,DeductionTotal = PTax.dblTotal
