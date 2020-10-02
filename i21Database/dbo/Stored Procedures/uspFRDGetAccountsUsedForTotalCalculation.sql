@@ -25,6 +25,7 @@ DECLARE @FormulaSUMBuild	NVARCHAR(MAX)
 DECLARE @FormulaSUM			NVARCHAR(MAX)
 DECLARE @Filter				NVARCHAR(MAX)
 DECLARE @RowType			NVARCHAR(MAX)
+DECLARE @tempfirstRef		INT
 DECLARE @firstRef			INT
 DECLARE @secondRef			INT
 DECLARE @dataXML			XML
@@ -74,6 +75,7 @@ BEGIN
 				SET @FormulaSUM		= ''
 				SET @Filter			= ''
 				SET @RowType		= ''
+				SET @tempfirstRef	= NULL
 				SET @firstRef		= NULL
 				SET @secondRef		= NULL
 				SET @FormulaSUMBuild = ''
@@ -86,6 +88,13 @@ BEGIN
 
 				SELECT @firstRef = Item FROM (SELECT TOP 1 Item, Row_Number() OVER (ORDER BY Item) AS rownum FROM #TempCalculationRowDesign WHERE Item != '') AS tbl WHERE rownum = 1;
 				SELECT @secondRef = Item FROM (SELECT TOP 2 Item, Row_Number() OVER (ORDER BY Item) AS rownum FROM #TempCalculationRowDesign WHERE Item != '') AS tbl WHERE rownum = 2;
+
+				IF(@firstRef>@secondRef)
+				BEGIN
+					SET @tempfirstRef = @firstRef
+					SET @firstRef = @secondRef
+					SET @secondRef = @tempfirstRef
+				END
 
 				WHILE(@firstRef<=@secondRef)
 				BEGIN
