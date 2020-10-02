@@ -331,9 +331,9 @@ USING
 WHEN MATCHED THEN
 	UPDATE SET
 		  strItemNo = source.strItemNo
-		, strInventoryTracking =
-			CASE WHEN ISNULL(source.strLotTracking, 'No') = 'No' THEN
-				CASE WHEN source.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END
+		, strInventoryTracking = 
+			CASE WHEN ISNULL(source.strLotTracking, 'No') = 'No' THEN 
+				CASE WHEN source.strType IN ('Inventory', 'Raw Material', 'Finished Good') THEN 'Item Level' ELSE 'None' END 
 			ELSE 'Lot Level' END
 		, strDescription = source.strDescription
 		, strStatus = source.strStatus
