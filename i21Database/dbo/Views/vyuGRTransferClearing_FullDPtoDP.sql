@@ -1,5 +1,6 @@
 CREATE VIEW [dbo].[vyuGRTransferClearing_FullDPtoDP]
 AS
+--DELIVERY SHEETS
 SELECT	--'1' AS TEST,
     receipt.intEntityVendorId
     ,receipt.dtmReceiptDate AS dtmDate
@@ -120,6 +121,89 @@ WHERE
 	AND ST.ysnDPOwnedType = 1
 	--and receiptItem.intInventoryReceiptItemId = 153481
 	--AND receipt.dtmReceiptDate >= '2020-09-09'
+UNION ALL
+--SCALE TICKETS
+SELECT DISTINCT	--'3' AS TEST,
+    receipt.intEntityVendorId
+    ,receipt.dtmReceiptDate
+    ,receipt.strReceiptNumber
+    ,receipt.intInventoryReceiptId
+    ,NULL AS intTransferStorageId
+    ,NULL AS strTransferStorageTicket
+    ,NULL AS intTransferStorageReferenceId
+    ,receiptItem.intInventoryReceiptItemId
+    ,receiptItem.intItemId
+    ,receiptItem.intUnitMeasureId AS intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
+    ,0 AS dblTransferTotal
+    ,0 AS dblTransferQty
+    ,ROUND(
+        ISNULL(receiptItem.dblOpenReceive, 0) 
+        * dbo.fnCalculateCostBetweenUOM(receiptItem.intCostUOMId, receiptItem.intUnitMeasureId, receiptItem.dblUnitCost)
+        * (
+            CASE 
+                WHEN receiptItem.ysnSubCurrency = 1 AND ISNULL(receipt.intSubCurrencyCents, 1) <> 0 THEN 
+                    1 / ISNULL(receipt.intSubCurrencyCents, 1) 
+                ELSE 
+                    1 
+            END 
+        )
+        , 2
+    )
+    +
+    receiptItem.dblTax
+    AS dblReceiptTotal
+    ,ISNULL(receiptItem.dblOpenReceive, 0) AS dblReceiptQty
+    ,receipt.intLocationId
+    ,compLoc.strLocationName
+    ,0
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+	--,transfers.dblOriginalBalance
+FROM tblICInventoryReceipt receipt 
+INNER JOIN tblICInventoryReceiptItem receiptItem
+	ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId
+INNER JOIN tblSMCompanyLocation compLoc
+    ON receipt.intLocationId = compLoc.intCompanyLocationId
+INNER JOIN (
+	tblGRStorageHistory SH
+	INNER JOIN tblGRTransferStorageReference TSR
+		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblGRTransferStorage TS
+		ON TS.intTransferStorageId = TSR.intTransferStorageId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblGRStorageType ST_TO
+		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+			AND ST_TO.ysnDPOwnedType = 1
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
+			AND CS.ysnTransferStorage = 0
+			AND CS.intTicketId IS NOT NULL
+	INNER JOIN tblGRStorageType ST_FROM
+		ON ST_FROM.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND ST_TO.ysnDPOwnedType = 1
+)
+	ON SH.intInventoryReceiptId = receipt.intInventoryReceiptId
+LEFT JOIN tblSMFreightTerms ft
+    ON ft.intFreightTermId = receipt.intFreightTermId
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = COALESCE(receiptItem.intWeightUOMId, receiptItem.intUnitMeasureId)
+LEFT JOIN vyuAPReceiptClearingGL APClearing
+    ON APClearing.strTransactionId = receipt.strReceiptNumber
+        AND APClearing.intItemId = receiptItem.intItemId
+        AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
+WHERE 
+    receiptItem.dblUnitCost != 0
+AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
+AND receipt.strReceiptType != 'Transfer Order'
+AND receiptItem.intOwnershipType != 2
+AND receipt.ysnPosted = 1
+AND CS.dblOpenBalance = 0
 GO
 
 

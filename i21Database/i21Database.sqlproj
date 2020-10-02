@@ -7782,6 +7782,7 @@
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
     <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />  
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
+    <Build Include="dbo\Views\vyuGRTransferChargesClearing_DPtoDP.sql" />   
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

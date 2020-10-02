@@ -65,9 +65,18 @@ WHERE
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnPrice = 1   
 AND NOT EXISTS (
+	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
     WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+		AND transferClr.strTransactionNumber = Receipt.strReceiptNumber
+)
+AND NOT EXISTS (
+	--DP to DP only
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing_DPtoDP transferClr_dp
+    WHERE transferClr_dp.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+		AND transferClr_dp.strTransactionNumber = Receipt.strReceiptNumber
 )   
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
@@ -123,10 +132,19 @@ WHERE
 AND ReceiptCharge.ysnAccrue = 1      
 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only 
 AND NOT EXISTS (
+	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
     WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-)     
+		AND transferClr.strTransactionNumber = Receipt.strReceiptNumber
+)
+AND NOT EXISTS (
+	--DP to DP only
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing_DPtoDP transferClr_dp
+    WHERE transferClr_dp.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+		AND transferClr_dp.strTransactionNumber = Receipt.strReceiptNumber
+)  
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
 SELECT      
@@ -182,10 +200,19 @@ AND ReceiptCharge.ysnAccrue = 1
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
 AND NOT EXISTS (
+	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
     WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
-)  
+		AND transferClr.strTransactionNumber = Receipt.strReceiptNumber
+)
+AND NOT EXISTS (
+	--DP to DP only
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing_DPtoDP transferClr_dp
+    WHERE transferClr_dp.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+		AND transferClr_dp.strTransactionNumber = Receipt.strReceiptNumber
+) 
 UNION ALL      
 --Voucher For Receipt Charges      
 SELECT      
@@ -242,12 +269,24 @@ WHERE
     billDetail.intInventoryReceiptChargeId IS NOT NULL      
 AND bill.ysnPosted = 1  
 AND NOT EXISTS (
+	--DP to OS and vice verse
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
     WHERE transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
-)  
+		AND transferClr.strTransactionNumber = receipt.strReceiptNumber
+)
+AND NOT EXISTS (
+	--DP to DP only
+    SELECT intInventoryReceiptChargeId
+    FROM vyuGRTransferChargesClearing_DPtoDP transferClr_dp
+    WHERE transferClr_dp.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
+		AND transferClr_dp.strTransactionNumber = receipt.strReceiptNumber
+) 
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl
 	 WHERE gl.strTransactionId = charges.strTransactionNumber
 ) APClearing
+GO
+
+

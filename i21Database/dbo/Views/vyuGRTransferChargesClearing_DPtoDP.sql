@@ -1,6 +1,6 @@
-﻿/*NOTE: this applies only in dp storages from Scale Tickets; 
+/*NOTE: this applies only in dp storages from Scale Tickets; 
 ****charges/discounts don't have GL entries when they were generated from Delivery Sheets****/
-CREATE VIEW [dbo].[vyuGRTransferChargesClearing]
+CREATE VIEW [dbo].[vyuGRTransferChargesClearing_DPtoDP]
 AS
 SELECT  
     charges.*  
@@ -8,7 +8,7 @@ SELECT
     ,APClearing.strAccountId  
 FROM (     
 --BILL ysnPrice = 1/Charge Entity      
-SELECT
+SELECT '1' as test,
     Receipt.intEntityVendorId AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber     
@@ -38,7 +38,7 @@ INNER JOIN (
 	FROM tblGRStorageHistory SH
 	INNER JOIN tblGRTransferStorageReference TSR
 		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
-		INNER JOIN tblGRCustomerStorage CS_FROM
+	INNER JOIN tblGRCustomerStorage CS_FROM
 		ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
 			AND CS_FROM.ysnTransferStorage = 0
 			AND CS_FROM.intTicketId IS NOT NULL
@@ -48,8 +48,7 @@ INNER JOIN (
 		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
 	INNER JOIN tblGRStorageType ST_TO
 		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
-	WHERE (ST_FROM.ysnDPOwnedType = 0 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
-		OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) --DP to OS
+	WHERE (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
 ) TS	
 	ON TS.intInventoryReceiptId = Receipt.intInventoryReceiptId
 LEFT JOIN   
@@ -63,7 +62,7 @@ WHERE
 AND ReceiptCharge.ysnPrice = 1      
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
-SELECT
+SELECT '2' as test,
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber    
@@ -103,8 +102,7 @@ INNER JOIN (
 		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
 	INNER JOIN tblGRStorageType ST_TO
 		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
-	WHERE (ST_FROM.ysnDPOwnedType = 0 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
-		OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) --DP to OS
+	WHERE (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1)
 ) TS	
 	ON TS.intInventoryReceiptId = Receipt.intInventoryReceiptId
 LEFT JOIN   
@@ -119,7 +117,7 @@ AND ReceiptCharge.ysnAccrue = 1
 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only    
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
-SELECT
+SELECT '3' as test,
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber    
@@ -159,8 +157,7 @@ INNER JOIN (
 		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
 	INNER JOIN tblGRStorageType ST_TO
 		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
-	WHERE (ST_FROM.ysnDPOwnedType = 0 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
-		OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) --DP to OS
+	WHERE (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1)
 ) TS	
 	ON TS.intInventoryReceiptId = Receipt.intInventoryReceiptId
 LEFT JOIN   
@@ -173,69 +170,13 @@ WHERE
     Receipt.ysnPosted = 1        
 AND ReceiptCharge.ysnAccrue = 1      
 AND ReceiptCharge.intEntityVendorId IS NOT NULL    
-AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
-UNION ALL      
---Transfer for Receipt Charges
-SELECT
-    CS.intEntityId AS intEntityVendorId
-    ,TS.dtmTransferStorageDate AS dtmDate      
-    ,IR.strReceiptNumber      
-    ,IR.intInventoryReceiptId      
-    ,TS.intTransferStorageId
-    ,TS.strTransferStorageTicket
-    ,SR.intTransferStorageReferenceId
-    ,IRC.intInventoryReceiptChargeId      
-    ,IC.intItemId      
-    ,CS.intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM  
-    ,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) * -1 AS dblTransferTotal
-    ,-1
-    ,0 AS dblReceiptChargeTotal  
-    ,0 AS dblReceiptChargeQty 
-    ,CS.intCompanyLocationId      
-    ,CL.strLocationName      
-    ,0
-FROM vyuGLDetail GL
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
-INNER JOIN tblGRTransferStorage TS
-	ON TS.intTransferStorageId = GL.intTransactionId
-		AND TS.strTransferStorageTicket = GL.strTransactionId
-INNER JOIN tblGRTransferStorageReference SR
-	ON SR.intTransferStorageId = TS.intTransferStorageId
-INNER JOIN tblGRCustomerStorage CS
-	ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
-INNER JOIN tblSMCompanyLocation CL      
-    ON CL.intCompanyLocationId = CS.intCompanyLocationId
-INNER JOIN (
-	SELECT CS.intCustomerStorageId
-		,intInventoryReceiptId
-	FROM tblGRStorageHistory SH
-	INNER JOIN tblGRTransferStorageReference TSR
-		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
-	INNER JOIN tblGRCustomerStorage CS
-		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
-			AND CS.ysnTransferStorage = 0
-			AND CS.intTicketId IS NOT NULL
-) IR_SOURCE	
-	ON IR_SOURCE.intCustomerStorageId = CS.intCustomerStorageId
-INNER JOIN tblICItem IC
-	ON IC.strItemNo = REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Charges from ', GL.strDescription), LEN(GL.strDescription) -1),'Charges from ','')
-INNER JOIN tblICInventoryReceipt IR
-	ON IR.intInventoryReceiptId = IR_SOURCE.intInventoryReceiptId
-INNER JOIN tblICInventoryReceiptCharge IRC
-	ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
-		AND IRC.intChargeId = IC.intItemId
-LEFT JOIN   
-(  
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
-)  
-    ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE GL.strDescription LIKE '%Charges from %'
+AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl
 	 WHERE gl.strTransactionId = charges.strTransactionNumber
 ) APClearing
+
+--GO
+
+
