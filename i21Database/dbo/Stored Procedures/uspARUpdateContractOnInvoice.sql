@@ -27,6 +27,7 @@ BEGIN TRY
 				@intToItemUOMId					INT,
 				@intUniqueId					INT,
 				@dblQty							NUMERIC(12,4),
+				@dblQtyOrdered					NUMERIC(12,4),
 				@ErrMsg							NVARCHAR(MAX),
 				@dblSchQuantityToUpdate			NUMERIC(12,4),
 				@intLoadDetailId				INT
@@ -307,6 +308,32 @@ BEGIN TRY
 	  AND ISNULL(Header.intTransactionId, 0) = 0
 	  AND @TransactionId IS NULL
 
+	UNION ALL
+
+	SELECT
+		 I.[intInvoiceDetailId]
+		,D.[intContractDetailId]
+		,D.[intTicketId]
+		,D.[intInventoryShipmentItemId]
+		,D.[intItemUOMId]
+		,dbo.fnCalculateQtyBetweenUOM(D.[intItemUOMId], CD.[intItemUOMId], (CASE WHEN @ForDelete = 1 THEN D.[dblQtyShipped] ELSE -D.dblQtyShipped END))
+		, I.intLoadDetailId
+	FROM @ItemsFromInvoice I
+	INNER JOIN tblARInvoiceDetail D ON	I.[intInvoiceDetailId] = D.[intInvoiceDetailId]
+	INNER JOIN tblICItem ITEM ON D.intItemId = ITEM.intItemId AND ITEM.strType <> 'Other Charge'
+	INNER JOIN tblSCTicket T ON D.intTicketId = T.intTicketId
+	LEFT JOIN tblARTransactionDetail TD ON D.intInvoiceDetailId = TD.intTransactionDetailId 
+									   AND D.intInvoiceId = TD.intTransactionId 
+									   AND TD.strTransactionType = 'Invoice'
+	INNER JOIN tblCTContractDetail CD ON D.intContractDetailId = CD.intContractDetailId
+	WHERE D.intContractDetailId IS NOT NULL
+		AND D.[intInventoryShipmentItemId] IS NULL
+		AND D.[intSalesOrderDetailId] IS NOT NULL
+		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
+		AND TD.intId IS NULL
+		AND T.strDistributionOption = 'SO'
+		AND I.strTransactionType = 'Invoice'
+
 	SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
 	WHILE ISNULL(@intUniqueId,0) > 0
@@ -314,6 +341,7 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	NULL,
 				@intFromItemUOMId				=	NULL,
 				@dblQty							=	NULL,
+				@dblQtyOrdered					=	NULL,
 				@intInvoiceDetailId				=	NULL,
 				@intTicketId					=	NULL,
 				@intInventoryShipmentItemId		=	NULL,
@@ -323,6 +351,7 @@ BEGIN TRY
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
 				@dblQty							=	P.[dblQty] * (CASE WHEN @ForDelete = 1 THEN -1 ELSE 1 END),
+				@dblQtyOrdered					=	ID.[dblQtyOrdered],
 				@intInvoiceDetailId				=	P.[intInvoiceDetailId],
 				@intTicketId					=   P.[intTicketId],
 				@intInventoryShipmentItemId		=   P.[intInventoryShipmentItemId],
@@ -339,22 +368,39 @@ BEGIN TRY
 
 		SET @dblQty = ISNULL(@dblQty,0)
 
-		DECLARE @intTicketTypeId	INT = NULL
-			  , @intTicketType		INT = NULL
-			  , @strInOutFlag		NVARCHAR(MAX) = NULL
+		DECLARE @intTicketTypeId		INT = NULL
+			  , @intTicketType			INT = NULL
+			  , @strInOutFlag			NVARCHAR(MAX) = NULL
+			  , @strDistributionOption	NVARCHAR(MAX) = NULL
 
 		IF ISNULL(@intTicketId, 0) <> 0
 			BEGIN
-				SELECT @intTicketTypeId = intTicketTypeId
-					 , @intTicketType	= intTicketType
-					 , @strInOutFlag	= strInOutFlag
+				SELECT @intTicketTypeId 		= intTicketTypeId
+					 , @intTicketType			= intTicketType
+					 , @strInOutFlag			= strInOutFlag
+					 , @strDistributionOption	= strDistributionOption
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
-			END		
+			END
+			
 		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing = 'Subsystem - Direct'		
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
 						@dblQuantityToUpdate	=	@dblQty,
+						@intUserId				=	@UserId,
+						@intExternalId			=	@intInvoiceDetailId,
+						@strScreenName			=	'Invoice'
+			END
+
+		--SCHEDULE QTY DIFFERENCE IF FROM SALES ORDER
+		IF ISNULL(@intTicketId, 0) <> 0 AND ISNULL(@strInOutFlag, '') = 'O' AND @strDistributionOption = 'SO' AND @dblQtyOrdered <> @dblQty AND @strPricing = 'Contracts'	
+			BEGIN
+				DECLARE @dblQtyDifference	NUMERIC(18, 6) = 0
+				SET @dblQtyDifference 		= -(@dblQtyOrdered + @dblQty)
+
+				EXEC	uspCTUpdateScheduleQuantity
+						@intContractDetailId	=	@intContractDetailId,
+						@dblQuantityToUpdate	=	@dblQtyDifference,
 						@intUserId				=	@UserId,
 						@intExternalId			=	@intInvoiceDetailId,
 						@strScreenName			=	'Invoice'

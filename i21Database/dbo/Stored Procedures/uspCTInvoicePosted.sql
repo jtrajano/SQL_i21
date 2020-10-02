@@ -215,8 +215,8 @@ BEGIN TRY
 				
 		END
 
-		SELECT @dblSchQuantityToUpdate = CASE WHEN ABS(@dblQtyOrdered) > 0 AND ABS(@dblQty) > ABS(@dblQtyOrdered) THEN -@dblConvertedQtyOrdered ELSE -@dblConvertedQty END
-		SELECT @dblRemainingSchedQty = @dblConvertedQtyOrdered - @dblConvertedQty
+		SELECT @dblSchQuantityToUpdate = -@dblConvertedQty--CASE WHEN ABS(@dblQtyOrdered) > 0 AND ABS(@dblQty) > ABS(@dblQtyOrdered) THEN -@dblConvertedQtyOrdered ELSE -@dblConvertedQty END
+		--SELECT @dblRemainingSchedQty = @dblConvertedQtyOrdered - @dblConvertedQty
 
 		IF	ISNULL(@ysnDestWtGrd,0) = 0 AND
 			(
@@ -250,25 +250,25 @@ BEGIN TRY
 							@intExternalId			=	@intInvoiceDetailId,
 							@strScreenName			=	'Invoice' 
 				
-					IF ISNULL(@dblRemainingSchedQty, 0) <> 0 AND ISNULL(@dblConvertedQtyOrdered, 0) <> 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty <> 0 AND ISNULL(@ysnLoad, 0) = 0
-						BEGIN
-							DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
+					-- IF ISNULL(@dblRemainingSchedQty, 0) <> 0 AND ISNULL(@dblConvertedQtyOrdered, 0) <> 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty <> 0 AND ISNULL(@ysnLoad, 0) = 0
+					-- 	BEGIN
+					-- 		DECLARE @dblScheduleQty	NUMERIC(18, 6) = 0
 
-							SELECT @dblScheduleQty = dblScheduleQty 
-							FROM tblCTContractDetail 
-							WHERE intContractDetailId = @intContractDetailId
+					-- 		SELECT @dblScheduleQty = dblScheduleQty 
+					-- 		FROM tblCTContractDetail 
+					-- 		WHERE intContractDetailId = @intContractDetailId
 
-							IF @dblRemainingSchedQty > @dblScheduleQty
-								SET @dblRemainingSchedQty = @dblScheduleQty
+					-- 		IF @dblRemainingSchedQty > @dblScheduleQty
+					-- 			SET @dblRemainingSchedQty = @dblScheduleQty
 								
-							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
+					-- 		SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-							EXEC uspCTUpdateScheduleQuantity @intContractDetailId	= @intContractDetailId
-														, @dblQuantityToUpdate	= @dblRemainingSchedQty
-														, @intUserId				= @intUserId
-														, @intExternalId			= @intInvoiceDetailId
-														, @strScreenName			= 'Invoice' 
-						END
+					-- 		EXEC uspCTUpdateScheduleQuantity @intContractDetailId	= @intContractDetailId
+					-- 									, @dblQuantityToUpdate	= @dblRemainingSchedQty
+					-- 									, @intUserId				= @intUserId
+					-- 									, @intExternalId			= @intInvoiceDetailId
+					-- 									, @strScreenName			= 'Invoice' 
+					-- 	END
 				-- END
 		END
 
