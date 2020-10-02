@@ -237,7 +237,7 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 			LEFT JOIN tblSMCurrency SY ON SY.intCurrencyID = CDetail.intBasisCurrencyId
 			LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CDetail.intPricingTypeId
 			LEFT JOIN tblICItemUOM BU ON BU.intItemUOMId = CDetail.intBasisUOMId
-			WHERE intContractHeaderId = @intContractHeaderId
+			WHERE intContractHeaderId in (SELECT convert(int,ISNULL(Item,'0')) FROM dbo.fnSplitString(@intContractHeaderId,','))    
 		) CD
 
 
