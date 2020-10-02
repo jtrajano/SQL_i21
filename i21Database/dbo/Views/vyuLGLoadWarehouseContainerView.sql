@@ -1,6 +1,6 @@
 ﻿CREATE VIEW vyuLGLoadWarehouseContainerView
 AS
-SELECT DISTINCT  
+SELECT
 	L.intLoadId
 	,L.strLoadNumber
 	,L.strBLNumber
@@ -81,7 +81,7 @@ SELECT DISTINCT
 	,LWC.intLoadWarehouseContainerId
 	,CLSL.strSubLocationName
 	,WRMH.strServiceContractNo
-	,CLSLV.intEntityId 
+	,intEntityId = CLSL.intVendorId 
 	,strShippingLine = ShippingLine.strName
 	,strTransactionType = CASE L.intPurchaseSale
 		WHEN 1 THEN 'Inbound'
@@ -126,8 +126,8 @@ SELECT DISTINCT
 		WHEN 2 THEN 'Ocean Vessel'
 		WHEN 3 THEN 'Rail'
 		END COLLATE Latin1_General_CI_AS
-	,BI.strBillId
-	,BI.intBillId
+	,LWSB.strBillId
+	,LWSB.intBillId
 	,L.intBookId
 	,BO.strBook
 	,L.intSubBookId
@@ -148,27 +148,34 @@ LEFT JOIN tblICUnitMeasure LCUOM ON LCUOM.intUnitMeasureId = LC.intUnitMeasureId
 LEFT JOIN tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
 LEFT JOIN tblLGLoadWarehouse LW ON LW.intLoadWarehouseId = LWC.intLoadWarehouseId
 LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
-LEFT JOIN tblEMEntity CLSLV ON CLSLV.intEntityId = CLSL.intVendorId
 LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = LW.intWarehouseRateMatrixHeaderId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
-LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 LEFT JOIN tblEMEntity VEN ON VEN.intEntityId = LD.intVendorEntityId
-LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 LEFT JOIN tblICItem Item On Item.intItemId = LD.intItemId
 LEFT JOIN tblICItem Bundle ON Bundle.intItemId = PCD.intItemBundleId
 LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = LD.intItemUOMId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute Origin ON Origin.intCommodityAttributeId = Item.intOriginId
-LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
-LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Hauler'
+			and ET.intEntityId = L.intHaulerEntityId) Hauler
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Salesperson'
+			and ET.intEntityId = L.intDriverEntityId) Driver
+OUTER APPLY (SELECT TOP 1 strName FROM tblEMEntityType ET
+			INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId 
+			WHERE strType = 'Shipping Line'
+			and ET.intEntityId = L.intShippingLineEntityId) ShippingLine
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblSMUserSecurity US ON US.intEntityId = L.intDispatcherId
-LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
-LEFT JOIN tblLGLoadWarehouseServices LWS ON LWS.intLoadWarehouseId = LW.intLoadWarehouseId
-LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
 LEFT JOIN tblCTBook BO ON BO.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblLGLoad LSI ON LSI.intLoadId = L.intLoadShippingInstructionId
+OUTER APPLY (SELECT TOP 1 BI.intBillId, BI.strBillId FROM tblLGLoadWarehouseServices LWS 
+				LEFT JOIN tblAPBill BI ON BI.intBillId = LWS.intBillId
+				WHERE LWS.intLoadWarehouseId = LW.intLoadWarehouseId) LWSB
 OUTER APPLY (SELECT TOP 1 ysnShowReceivedLoadsInWarehouseTab = ISNULL(ysnShowReceivedLoadsInWarehouseTab,0) FROM tblLGCompanyPreference) CP
 WHERE L.intShipmentType = 1
 	AND ((CP.ysnShowReceivedLoadsInWarehouseTab = 0 AND L.intShipmentStatus NOT IN (4, 10)) OR CP.ysnShowReceivedLoadsInWarehouseTab = 1)
