@@ -38,10 +38,18 @@ INNER JOIN (
 	FROM tblGRStorageHistory SH
 	INNER JOIN tblGRTransferStorageReference TSR
 		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
-	INNER JOIN tblGRCustomerStorage CS
-		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
-			AND CS.ysnTransferStorage = 0
-			AND CS.intTicketId IS NOT NULL
+		INNER JOIN tblGRCustomerStorage CS_FROM
+		ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+			AND CS_FROM.ysnTransferStorage = 0
+			AND CS_FROM.intTicketId IS NOT NULL
+	INNER JOIN tblGRStorageType ST_FROM
+		ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblGRStorageType ST_TO
+		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+	WHERE (ST_FROM.ysnDPOwnedType = 0 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
+		OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) --DP to OS
 ) TS	
 	ON TS.intInventoryReceiptId = Receipt.intInventoryReceiptId
 LEFT JOIN   
@@ -85,10 +93,18 @@ INNER JOIN (
 	FROM tblGRStorageHistory SH
 	INNER JOIN tblGRTransferStorageReference TSR
 		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
-	INNER JOIN tblGRCustomerStorage CS
-		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
-			AND CS.ysnTransferStorage = 0
-			AND CS.intTicketId IS NOT NULL
+	INNER JOIN tblGRCustomerStorage CS_FROM
+		ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+			AND CS_FROM.ysnTransferStorage = 0
+			AND CS_FROM.intTicketId IS NOT NULL
+	INNER JOIN tblGRStorageType ST_FROM
+		ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblGRStorageType ST_TO
+		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+	WHERE (ST_FROM.ysnDPOwnedType = 0 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
+		OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) --DP to OS
 ) TS	
 	ON TS.intInventoryReceiptId = Receipt.intInventoryReceiptId
 LEFT JOIN   
@@ -133,10 +149,18 @@ INNER JOIN (
 	FROM tblGRStorageHistory SH
 	INNER JOIN tblGRTransferStorageReference TSR
 		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
-	INNER JOIN tblGRCustomerStorage CS
-		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
-			AND CS.ysnTransferStorage = 0
-			AND CS.intTicketId IS NOT NULL
+	INNER JOIN tblGRCustomerStorage CS_FROM
+		ON CS_FROM.intCustomerStorageId = TSR.intSourceCustomerStorageId
+			AND CS_FROM.ysnTransferStorage = 0
+			AND CS_FROM.intTicketId IS NOT NULL
+	INNER JOIN tblGRStorageType ST_FROM
+		ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId
+	INNER JOIN tblGRCustomerStorage CS_TO
+		ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+	INNER JOIN tblGRStorageType ST_TO
+		ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+	WHERE (ST_FROM.ysnDPOwnedType = 0 AND ST_TO.ysnDPOwnedType = 1) --OS to DP
+		OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) --DP to OS
 ) TS	
 	ON TS.intInventoryReceiptId = Receipt.intInventoryReceiptId
 LEFT JOIN   
