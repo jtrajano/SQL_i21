@@ -26,6 +26,10 @@ BEGIN
 	IF @divisor = 1 
 		RETURN @dividend; 
 
+	-- Return 1 if @dividend and @divisor are the same
+	IF @dividend = @divisor
+		RETURN 1; 
+
 	SELECT @sign = SIGN(@dividend) * SIGN(@divisor) 
 
 	-- Divide it and process the raw result as a string. 
