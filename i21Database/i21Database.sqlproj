@@ -7786,6 +7786,7 @@
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
