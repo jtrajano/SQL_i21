@@ -18,6 +18,7 @@
 	[ysnOnceApproved]				[bit]											NULL,
 	[ysnVisible]					[bit]											NOT NULL DEFAULT (1),
 	[intOrder]						[int]											NULL,
+	[strRecentAmendment]			[nvarchar] (max) COLLATE Latin1_General_CI_AS	NULL,
 	[intConcurrencyId]				[int]											NOT NULL DEFAULT ((1)), 
     CONSTRAINT [FK_tblSMApproval_tblSMTransaction] FOREIGN KEY ([intTransactionId]) REFERENCES [tblSMTransaction]([intTransactionId]) ON DELETE CASCADE, 
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_Approver] FOREIGN KEY ([intApproverId]) REFERENCES [tblEMEntity]([intEntityId]), 
