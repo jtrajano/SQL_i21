@@ -1830,27 +1830,27 @@ BEGIN TRY
 						END
 					END
 
-					IF @strShipper IS NOT NULL
-						AND NOT EXISTS (
-							SELECT 1
-							FROM tblEMEntity ShippingLine
-							JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
-								AND ET.strType IN (
-									'Vendor'
-									,'Futures Broker'
-									)
-							WHERE ShippingLine.strName = @strShipper
-							)
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipper ' + @strShipper + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
-						END
-					END
+					--IF @strShipper IS NOT NULL
+					--	AND NOT EXISTS (
+					--		SELECT 1
+					--		FROM tblEMEntity ShippingLine
+					--		JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+					--			AND ET.strType IN (
+					--				'Vendor'
+					--				,'Futures Broker'
+					--				)
+					--		WHERE ShippingLine.strName = @strShipper
+					--		)
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipper ' + @strShipper + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Shipper ' + @strShipper + ' is not available.'
+					--	END
+					--END
 
 					SELECT @intShipToEntityId = NULL
 
@@ -3770,30 +3770,30 @@ BEGIN TRY
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strDocumentXML
 
-				IF EXISTS (
-						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
-								intContractDocumentId INT
-								,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
-								) x
-						LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-						WHERE D.strDocumentName IS NULL
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Document Name ' + x.strDocumentName + ' is not available.'
-					FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
-							intContractDocumentId INT
-							,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
-							) x
-					LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
-					WHERE D.strDocumentName IS NULL
+				--IF EXISTS (
+				--		SELECT *
+				--		FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				--				intContractDocumentId INT
+				--				,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+				--				) x
+				--		LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+				--		WHERE D.strDocumentName IS NULL
+				--		)
+				--BEGIN
+				--	SELECT @strErrorMessage = 'Document Name ' + x.strDocumentName + ' is not available.'
+				--	FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				--			intContractDocumentId INT
+				--			,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
+				--			) x
+				--	LEFT JOIN tblICDocument D ON D.strDocumentName = x.strDocumentName
+				--	WHERE D.strDocumentName IS NULL
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
+				--	RAISERROR (
+				--			@strErrorMessage
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				INSERT INTO tblCTContractDocument (
 					intContractHeaderId
