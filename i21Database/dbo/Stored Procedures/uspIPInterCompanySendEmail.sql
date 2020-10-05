@@ -210,8 +210,6 @@ IF @strMessageType = 'Contract Signature'
 BEGIN
 	SET @strHeader = '<tr>
 						<th>&nbsp;Contract Number</th>
-						<th>&nbsp;Row State</th>
-						<th>&nbsp;From Company</th>
 						<th>&nbsp;Message</th>
 					</tr>'
 
