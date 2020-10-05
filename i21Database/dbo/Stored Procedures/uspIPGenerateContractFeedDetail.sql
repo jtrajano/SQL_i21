@@ -103,10 +103,14 @@ BEGIN TRY
 
 				INSERT INTO tblIPContractFeedHeader (
 					intContractHeaderId
+					,strContractNumber
 					,strFeedStatus
+					,intStatusId
 					)
 				SELECT @intContractHeaderId
+					,@strContractNumber
 					,'Processed'
+					,1
 
 				SELECT @intContractFeedHeaderId = SCOPE_IDENTITY();
 
@@ -127,18 +131,22 @@ BEGIN TRY
 				BEGIN
 					SELECT @strSQL = N'INSERT INTO ' + @strServerName + '.' + @strDatabaseName + '.dbo.tblIPContractFeedHeader (
 										intContractHeaderId
+										,strContractNumber
 										,strApproverXML
 										,strSubmittedByXML
 										)
 									SELECT @intContractHeaderId
+										,@strContractNumber
 										,@strApproverXML
 										,@strSubmittedByXML'
 
 					EXEC sp_executesql @strSQL
 						,N'@intContractHeaderId int
+						,@strContractNumber nvarchar(50)
 						,@strApproverXML nvarchar(MAX)
 						,@strSubmittedByXML nvarchar(MAX)'
 						,@intContractHeaderId
+						,@strContractNumber
 						,@strApproverXML
 						,@strSubmittedByXML
 				END
