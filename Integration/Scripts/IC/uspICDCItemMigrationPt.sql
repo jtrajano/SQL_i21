@@ -386,8 +386,9 @@ union
 select pt3cf_prc3 prclvl, 3 srt from ptctlmst where pt3cf_prc3 is not null
 ) as prc 
 join tblSMCompanyLocation CL on 1 = 1
-where CL.[intCompanyLocationId] not in (select [intCompanyLocationId] from tblSMCompanyLocationPricingLevel
-where [strPricingLevelName] COLLATE Latin1_General_CI_AS = prclvl COLLATE Latin1_General_CI_AS)
+where not exists (select TOP 1 1 from tblSMCompanyLocationPricingLevel
+where [strPricingLevelName] COLLATE Latin1_General_CI_AS = prclvl COLLATE Latin1_General_CI_AS AND
+CL.[intCompanyLocationId] = intCompanyLocationId)
 --on CL.strLocationNumber COLLATE SQL_Latin1_General_CP1_CS_AS = prc.agloc_loc_no COLLATE SQL_Latin1_General_CP1_CS_AS
 order by CL.intCompanyLocationId, srt
 
@@ -414,7 +415,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
 	,PL.strPricingLevelName strPricingLevel
-	,(select IU.intItemUOMId 
+	,(select TOP 1 IU.intItemUOMId 
 	from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
@@ -446,7 +447,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
 	,PL.strPricingLevelName strPricingLevel
-	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
+	,(select TOP 1 IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
@@ -481,7 +482,7 @@ INSERT INTO [dbo].[tblICItemPricingLevel] (
 SELECT inv.intItemId
 	,iloc.intItemLocationId
 	,PL.strPricingLevelName strPricingLevel
-	,(select IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
+	,(select TOP 1 IU.intItemUOMId from tblICItemUOM IU join tblICUnitMeasure U on U.intUnitMeasureId = IU.intUnitMeasureId
 	where IU.intItemId = inv.intItemId
 	and U.strSymbol COLLATE SQL_Latin1_General_CP1_CS_AS = itm.ptitm_unit COLLATE SQL_Latin1_General_CP1_CS_AS) uom
 	,1 dblUnit
@@ -502,10 +503,9 @@ SELECT inv.intItemId
 
 	--===Convert Physical items to bundles in i21
 	UPDATE I 
-	SET strType = 'Bundle',
-		strBundleType = 'Kit',
+	SET strBundleType = 'Kit',
 		ysnListBundleSeparately = 0
-	FROM tblICItem I WHERE strItemNo in	(SELECT ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS FROM ptitmmst WHERE ptitm_alt_itm <>'' and ptitm_alt_itm <> ptitm_itm_no) 
+	FROM tblICItem I WHERE EXISTS(SELECT TOP 1 1 FROM ptitmmst WHERE ptitm_itm_no COLLATE SQL_Latin1_General_CP1_CS_AS = strItemNo AND ptitm_alt_itm <>'' and ptitm_alt_itm <> ptitm_itm_no) 
 
 	INSERT INTO tblICItemBundle (intItemId,
 								intBundleItemId,
