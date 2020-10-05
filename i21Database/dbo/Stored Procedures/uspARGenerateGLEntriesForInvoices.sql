@@ -184,7 +184,7 @@ SELECT
     ,[intAccountId]                 = I.[intAccountId]
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseInvoiceTotal] - ISNULL(ARID.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseInvoiceTotal] - ISNULL(ARID.[dblBaseTaxesAddToCost], 0) END
-    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblDebitUnit]                 = ARID.[dblUnitQtyShipped]
     ,[dblCreditUnit]                = @ZeroDecimal
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
@@ -1103,7 +1103,7 @@ SELECT
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN @ZeroDecimal ELSE I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseLineItemGLAmount] + CASE WHEN I.[ysnImpactInventory] = 0 THEN ISNULL(I.[dblBaseTaxesAddToCost], 0) ELSE @ZeroDecimal END ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
-    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[dblCreditUnit]                = I.[dblUnitQtyShipped]
     ,[strDescription]               = I.[strDescription]
     ,[strCode]                      = @CODE
     ,[strReference]                 = I.[strCustomerNumber]
