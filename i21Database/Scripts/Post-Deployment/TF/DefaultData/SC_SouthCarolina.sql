@@ -3,12 +3,15 @@ DECLARE @TaxAuthorityCode NVARCHAR(10) = 'SC'
 	, @TaxAuthorityId INT
 	
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
+
+IF(@TaxAuthorityId IS NOT NULL)
+BEGIN
+	PRINT ('Deploying South Carolina Tax Forms')
+END
+GO
 	
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
-
-	PRINT ('Deploying South Carolina Tax Forms')
-
 	-- Product Codes
 	/* Generate script for Product Codes. Specify Tax Authority Id to filter out specific Product Codes only.
 select strQuery = 'UNION ALL SELECT intProductCodeId = ' + CAST(intProductCodeId AS NVARCHAR(10)) 

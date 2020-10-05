@@ -1,7 +1,8 @@
-﻿PRINT ('TAX FORMS - Deployment')
+﻿PRINT ('TAX FORMS - Deployment - START')
+GO
 
 PRINT ('Deploying Tax Authority')
-
+GO
 -- Tax Authority
 /* Generate script for Tax Authority 
 select 'UNION ALL SELECT intTaxAuthorityId = ' + CAST(intTaxAuthorityId AS NVARCHAR(10)) 
@@ -114,10 +115,10 @@ WHERE intMasterId NOT IN (SELECT intMasterId FROM #tmpTaxAuthority)
 DROP TABLE #tmpTaxAuthority
 
 SET IDENTITY_INSERT tblTFTaxAuthority OFF
-
 GO
 
 PRINT ('Deploying Output Designer Fields')
+GO
 -- Output Designer Fields
 /*
 SELECT 'UNION ALL SELECT strColumnName = ''' + name + ''''
@@ -233,10 +234,10 @@ WHEN NOT MATCHED BY SOURCE THEN
 	DELETE;
 
 DROP TABLE #tmpFields
-
 GO
 
 PRINT ('Deploying OriginDestination State')
+GO
 -- Origin/Destination State
 /* Generate script for Origin/Destination States.
 select 'UNION ALL SELECT intOriginDestinationStateId = ' + CAST(intOriginDestinationStateId AS NVARCHAR(10))
@@ -304,10 +305,11 @@ UNION ALL SELECT intOriginDestinationStateId = 49, strOriginDestinationState = '
 UNION ALL SELECT intOriginDestinationStateId = 50, strOriginDestinationState = 'WY', intMasterId = 50
 
 EXEC uspTFUpgradeOriginDestinationState @OriginDestinationStates = @OriginDestinationStates
-
 GO
 
 PRINT ('Deploying Component Types')
+GO
+
 -- Component Types
 SELECT * 
 INTO #tmpTypes
@@ -348,5 +350,4 @@ WHEN NOT MATCHED BY SOURCE THEN
 DROP TABLE #tmpTypes
 
 SET IDENTITY_INSERT tblTFComponentType OFF
-
 GO

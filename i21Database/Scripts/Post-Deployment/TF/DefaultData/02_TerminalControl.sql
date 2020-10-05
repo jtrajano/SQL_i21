@@ -17,6 +17,8 @@ where intTaxAuthorityId = @TaxAuthorityId
 
 -- AL Terminals
 PRINT ('Deploying AL Terminal Control Number')
+GO
+
 DECLARE @TerminalAL AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalAL(
@@ -68,6 +70,8 @@ GO
 
 -- AK Terminals
 PRINT ('Deploying AK Terminal Control Number')
+GO
+
 DECLARE @TerminalAK AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalAK(
@@ -148,6 +152,8 @@ GO
 
 -- AR Terminals
 PRINT ('Deploying AR Terminal Control Number')
+GO
+
 DECLARE @TerminalAR AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalAR(
@@ -188,6 +194,8 @@ GO
 
 -- AZ Terminals
 PRINT ('Deploying AZ Terminal Control Number')
+GO
+
 DECLARE @TerminalAZ AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalAZ(
@@ -220,6 +228,8 @@ GO
 
 -- CA Terminals
 PRINT ('Deploying CA Terminal Control Number')
+GO
+
 DECLARE @TerminalCA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalCA(
@@ -325,6 +335,8 @@ GO
 
 -- CO Terminals
 PRINT ('Deploying CO Terminal Control Number')
+GO
+
 DECLARE @TerminalCO AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalCO(
@@ -361,6 +373,8 @@ GO
 
 -- CT Terminals
 PRINT ('Deploying CT Terminal Control Number')
+GO
+
 DECLARE @TerminalCT AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalCT(
@@ -404,6 +418,8 @@ GO
 
 -- DE Terminals
 PRINT ('Deploying DE Terminal Control Number')
+GO
+
 DECLARE @TerminalDE AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalDE(
@@ -428,6 +444,8 @@ GO
 
 -- FL Terminals
 PRINT ('Deploying FL Terminal Control Number')
+GO
+
 DECLARE @TerminalFL AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalFL(
@@ -493,6 +511,8 @@ GO
 
 -- GA Terminals
 PRINT ('Deploying GA Terminal Control Number')
+GO
+
 DECLARE @TerminalGA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalGA(
@@ -556,6 +576,8 @@ DELETE @TerminalGA
 
 -- HI Terminals
 PRINT ('Deploying HI Terminal Control Number')
+GO
+
 DECLARE @TerminalHI AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalHI(
@@ -596,6 +618,8 @@ GO
 
 -- IA Terminals
 PRINT ('Deploying IA Terminal Control Number')
+GO
+
 DECLARE @TerminalIA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalIA(
@@ -639,6 +663,8 @@ GO
 
 -- ID Terminals
 PRINT ('Deploying ID Terminal Control Number')
+GO
+
 DECLARE @TerminalID AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalID(
@@ -667,6 +693,8 @@ GO
 
 -- IL Terminals
 PRINT ('Deploying IL Terminal Control Number')
+GO
+
 DECLARE @TerminalIL AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalIL(
@@ -733,6 +761,8 @@ GO
 
 -- IN Terminals
 PRINT ('Deploying IN Terminal Control Number')
+GO
+
 DECLARE @TerminalIN AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalIN(
@@ -793,6 +823,8 @@ GO
 
 -- KS Terminals
 PRINT ('Deploying KS Terminal Control Number')
+GO
+
 DECLARE @TerminalKS AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalKS(
@@ -834,6 +866,8 @@ GO
 
 -- KY Terminals
 PRINT ('Deploying KY Terminal Control Number')
+GO
+
 DECLARE @TerminalKY AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalKY(
@@ -878,6 +912,8 @@ GO
 
 -- LA Terminals
 PRINT ('Deploying LA Terminal Control Number')
+GO
+
 DECLARE @TerminalLA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalLA(
@@ -940,6 +976,8 @@ GO
 
 -- MA Terminals
 PRINT ('Deploying MA Terminal Control Number')
+GO
+
 DECLARE @TerminalMA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMA(
@@ -984,6 +1022,8 @@ GO
 
 -- MD Terminals
 PRINT ('Deploying MD Terminal Control Number')
+GO
+
 DECLARE @TerminalMD AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMD(
@@ -1019,6 +1059,8 @@ GO
 
 -- ME Terminals
 PRINT ('Deploying ME Terminal Control Number')
+GO
+
 DECLARE @TerminalME AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalME(
@@ -1050,6 +1092,8 @@ GO
 
 -- MI Terminals
 PRINT ('Deploying MI Terminal Control Number')
+GO
+
 DECLARE @TerminalMI AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMI(
@@ -1109,6 +1153,8 @@ GO
 
 -- MN Terminals
 PRINT ('Deploying MN Terminal Control Number')
+GO
+
 DECLARE @TerminalMN AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMN(
@@ -1148,6 +1194,8 @@ GO
 
 -- MO Terminals
 PRINT ('Deploying MO Terminal Control Number')
+GO
+
 DECLARE @TerminalMO AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMO(
@@ -1189,6 +1237,8 @@ GO
 
 -- MS Terminals
 PRINT ('Deploying MS Terminal Control Number')
+GO
+
 DECLARE @TerminalMS AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMS(
@@ -1232,6 +1282,8 @@ GO
 
 -- MT Terminals
 PRINT ('Deploying MT Terminal Control Number')
+GO
+
 DECLARE @TerminalMT AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalMT(
@@ -1269,6 +1321,8 @@ GO
 
 -- NC Terminals
 PRINT ('Deploying NC Terminal Control Number')
+GO
+
 DECLARE @TerminalNC AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNC(
@@ -1331,6 +1385,8 @@ GO
 
 -- ND Terminals
 PRINT ('Deploying ND Terminal Control Number')
+GO
+
 DECLARE @TerminalND AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalND(
@@ -1361,6 +1417,8 @@ GO
 
 -- NE Terminals
 PRINT ('Deploying NE Terminal Control Number')
+GO
+
 DECLARE @TerminalNE AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNE(
@@ -1397,6 +1455,8 @@ GO
 
 -- NH Terminals
 PRINT ('Deploying NH Terminal Control Number')
+GO
+
 DECLARE @TerminalNH AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNH(
@@ -1420,6 +1480,8 @@ GO
 
 -- NJ Terminals
 PRINT ('Deploying NJ Terminal Control Number')
+GO
+
 DECLARE @TerminalNJ AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNJ(
@@ -1471,6 +1533,8 @@ GO
 
 -- NM Terminals
 PRINT ('Deploying NM Terminal Control Number')
+GO
+
 DECLARE @TerminalNM AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNM(
@@ -1506,6 +1570,8 @@ GO
 
 -- NV Terminals
 PRINT ('Deploying NV Terminal Control Number')
+GO
+
 DECLARE @TerminalNV AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNV(
@@ -1536,6 +1602,8 @@ GO
 
 -- NY Terminals
 PRINT ('Deploying NY Terminal Control Number')
+GO
+
 DECLARE @TerminalNY AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalNY(
@@ -1616,6 +1684,8 @@ GO
 
 -- OH Terminals
 PRINT ('Deploying OH Terminal Control Number')
+GO
+
 DECLARE @TerminalOH AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalOH(
@@ -1690,6 +1760,8 @@ GO
 
 -- OK Terminals
 PRINT ('Deploying OK Terminal Control Number')
+GO
+
 DECLARE @TerminalOK AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalOK(
@@ -1724,6 +1796,8 @@ GO
 
 -- OR Terminals
 PRINT ('Deploying OR Terminal Control Number')
+GO
+
 DECLARE @TerminalOR AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalOR(
@@ -1759,6 +1833,8 @@ GO
 
 -- PA Terminals
 PRINT ('Deploying PA Terminal Control Number')
+GO
+
 DECLARE @TerminalPA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalPA(
@@ -1842,6 +1918,8 @@ GO
 
 -- RI Terminals
 PRINT ('Deploying RI Terminal Control Number')
+GO
+
 DECLARE @TerminalRI AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalRI(
@@ -1869,6 +1947,8 @@ GO
 
 -- SC Terminals
 PRINT ('Deploying SC Terminal Control Number')
+GO
+
 DECLARE @TerminalSC AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalSC(
@@ -1906,6 +1986,8 @@ GO
 
 -- SD Terminals
 PRINT ('Deploying SD Terminal Control Number')
+GO
+
 DECLARE @TerminalSD AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalSD(
@@ -1935,6 +2017,8 @@ GO
 
 -- TN Terminals
 PRINT ('Deploying TN Terminal Control Number')
+GO
+
 DECLARE @TerminalTN AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalTN(
@@ -1987,6 +2071,8 @@ GO
 
 -- TX Terminals
 PRINT ('Deploying TX Terminal Control Number')
+GO
+
 DECLARE @TerminalTX AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalTX(
@@ -2149,6 +2235,8 @@ GO
 
 -- UT Terminals
 PRINT ('Deploying UT Terminal Control Number')
+GO
+
 DECLARE @TerminalUT AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalUT(
@@ -2180,6 +2268,8 @@ GO
 
 -- VA Terminals
 PRINT ('Deploying VA Terminal Control Number')
+GO
+
 DECLARE @TerminalVA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalVA(
@@ -2242,6 +2332,8 @@ GO
 
 -- WA Terminals
 PRINT ('Deploying WA Terminal Control Number')
+GO
+
 DECLARE @TerminalWA AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalWA(
@@ -2292,6 +2384,8 @@ GO
 
 -- WI Terminals
 PRINT ('Deploying WI Terminal Control Number')
+GO
+
 DECLARE @TerminalWI AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalWI(
@@ -2345,6 +2439,8 @@ GO
 
 -- WV Terminals
 PRINT ('Deploying WV Terminal Control Number')
+GO
+
 DECLARE @TerminalWV AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalWV(
@@ -2372,6 +2468,8 @@ GO
 
 -- WY Terminals
 PRINT ('Deploying WY Terminal Control Number')
+GO
+
 DECLARE @TerminalWY AS TFTerminalControlNumbers
 
 INSERT INTO @TerminalWY(
