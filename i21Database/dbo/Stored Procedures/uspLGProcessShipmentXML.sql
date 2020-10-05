@@ -2117,8 +2117,8 @@ BEGIN TRY
 						,@intWeightItemUOMId
 						,x.[strPriceStatus]
 						,x.[dblUnitPrice]
-						,NULL [intPriceCurrencyId]
-						,NULL [intPriceUOMId]
+						,PCD.intCurrencyId  [intPriceCurrencyId]
+						,PCD.intPriceItemUOMId [intPriceUOMId]
 						,x.[dblAmount]
 						,NULL [intForexRateTypeId]
 						,x.[dblForexRate]
@@ -2255,8 +2255,8 @@ BEGIN TRY
 						,[intWeightItemUOMId] = @intWeightItemUOMId
 						,[strPriceStatus] = x.[strPriceStatus]
 						,[dblUnitPrice] = x.[dblUnitPrice]
-						,[intPriceCurrencyId] = NULL -- [intPriceCurrencyId]
-						,[intPriceUOMId] = NULL --[intPriceUOMId]
+						,[intPriceCurrencyId] = PCD.intCurrencyId
+						,[intPriceUOMId] = PCD.intPriceItemUOMId
 						,[dblAmount] = x.[dblAmount]
 						,[intForexRateTypeId] = NULL --[intForexRateTypeId]
 						,[dblForexRate] = x.[dblForexRate]
