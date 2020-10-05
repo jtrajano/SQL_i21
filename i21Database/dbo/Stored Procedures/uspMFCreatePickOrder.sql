@@ -262,8 +262,8 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
-
-	SELECT @strReferernceNo = strWorkOrderNo
+	Select @strReferernceNo=''
+	SELECT @strReferernceNo = @strReferernceNo+strWorkOrderNo+', '
 		,@intRecipeTypeId = intRecipeTypeId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
@@ -271,6 +271,10 @@ BEGIN TRY
 			FROM @tblMFWorkOrder
 			)
 
+	if len(@strReferernceNo)>0
+	Begin
+		SELECT @strReferernceNo = left(@strReferernceNo,len(@strReferernceNo)-1)
+	End
 	INSERT INTO @OrderHeaderInformation (
 		intOrderStatusId
 		,intOrderTypeId
