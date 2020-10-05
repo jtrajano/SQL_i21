@@ -38,7 +38,8 @@ BEGIN TRY
 			intContractBasisId			   INT,
 			intTermId					   INT,
 			intGradeId					   INT,
-			intWeightId					   INT
+			intWeightId					   INT,
+			intFreightTermId				INT
 		)
 		
 		DECLARE @tblDetail AS TABLE 
@@ -82,7 +83,8 @@ BEGIN TRY
 			,intContractBasisId	
 			,intTermId			
 			,intGradeId			
-			,intWeightId			
+			,intWeightId
+			,intFreightTermId			
 		)
 
 		SELECT TOP 1
@@ -93,6 +95,7 @@ BEGIN TRY
 		,intTermId			
 		,intGradeId			
 		,intWeightId
+		,intFreightTermId
 	    FROM tblCTSequenceHistory 
 		WHERE intContractHeaderId = @intContractHeaderId ORDER BY intSequenceHistoryId DESC
 		
@@ -153,7 +156,7 @@ BEGIN TRY
 			,dblScheduleQty,				dtmHistoryCreated,				dblCashPrice,						strPricingStatus,			intContractBasisId			
 			,intGradeId,					intItemUOMId,					intPositionId,						intPriceItemUOMId,			intTermId			
 			,intWeightId,					intBookId,						intSubBookId,						dblRatio,					strBook
-			,strSubBook,					intSequenceUsageHistoryId,		dtmDateAdded,						intUserId
+			,strSubBook,					intSequenceUsageHistoryId,		dtmDateAdded,						intUserId,					intFreightTermId
 		)
 		OUTPUT	inserted.intSequenceHistoryId INTO @SCOPE_IDENTITY
 		SELECT   
@@ -210,6 +213,7 @@ BEGIN TRY
 					ELSE NULL
 			END
 			,intUserId = @intUserId
+			,intFreightTermId = CH.intFreightTermId
 		FROM	tblCTContractDetail			CD
 		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
@@ -354,15 +358,15 @@ BEGIN TRY
 		  ,intContractDetailId		= NULL
 		  ,intAmendmentApprovalId	= 3
 		  ,strItemChanged		    = 'INCO/Ship Term' 
-		  ,strOldValue			    = PreviousType.strContractBasis
-		  ,strNewValue		        = CurrentType.strContractBasis
+		  ,strOldValue			    = PreviousType.strFreightTerm
+		  ,strNewValue		        = CurrentType.strFreightTerm
 		  ,intConcurrencyId		  =  1
 
 		  FROM tblCTSequenceHistory			    CurrentRow
 		  JOIN @SCOPE_IDENTITY				    NewRecords				ON  NewRecords.intSequenceHistoryId	 =  CurrentRow.intSequenceHistoryId 
-		  JOIN @tblHeader					    PreviousRow			    ON ISNULL(PreviousRow.intContractBasisId ,0)   <>   ISNULL(CurrentRow.intContractBasisId ,0)
-		  LEFT JOIN tblCTContractBasis		    CurrentType		        ON ISNULL(CurrentType.intContractBasisId ,0)   =	ISNULL(CurrentRow.intContractBasisId ,0)
-		  LEFT JOIN tblCTContractBasis		    PreviousType	        ON ISNULL(PreviousType.intContractBasisId,0)   =	ISNULL(PreviousRow.intContractBasisId,0)
+		  JOIN @tblHeader					    PreviousRow			    ON ISNULL(PreviousRow.intFreightTermId ,0)   <>   ISNULL(CurrentRow.intFreightTermId ,0)
+		  LEFT JOIN tblSMFreightTerms		    CurrentType		        ON ISNULL(CurrentType.intFreightTermId ,0)   =	ISNULL(CurrentRow.intFreightTermId ,0)
+		  LEFT JOIN tblSMFreightTerms		    PreviousType	        ON ISNULL(PreviousType.intFreightTermId,0)   =	ISNULL(PreviousRow.intFreightTermId,0)
 		  
 		    
 		  UNION
