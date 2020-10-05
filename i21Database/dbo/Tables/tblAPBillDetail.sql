@@ -18,6 +18,7 @@
 	[intPurchaseDetailId]    INT             NULL,
 	[intContractHeaderId]    INT             NULL,
 	[intContractDetailId]    INT             NULL,
+	[intPriceFixationDetailId] INT 			NULL,
 	[intCustomerStorageId]    INT             NULL,
 	[intSettleStorageId] INT NULL,
 	[intStorageLocationId] INT             NULL,
