@@ -173,7 +173,7 @@ FROM
 			tblICInventoryTransaction t
 		WHERE
 			t.strTransactionId = p.strTransactionId	
-			AND t.strBatchId <> @strBatchId 
+			AND t.strBatchId <> REPLACE(@strBatchId, '-P', '') 
 		ORDER BY 
 			t.intInventoryTransactionId DESC 
 	) lastTransaction
