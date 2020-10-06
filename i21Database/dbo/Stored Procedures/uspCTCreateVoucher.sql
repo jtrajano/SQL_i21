@@ -334,7 +334,7 @@ begin try
 					,int1099Category
 					,dbl1099
 					,ysnStage
-					--,intPriceFixationDetailId
+					,intPriceFixationDetailId
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -427,7 +427,7 @@ begin try
 					,int1099Category = vp.int1099Category
 					,dbl1099 = vp.dbl1099
 					,ysnStage = 0--vp.ysnStage
-					--,intPriceFixationDetailId = @intPriceFixationDetailId
+					,intPriceFixationDetailId = @intPriceFixationDetailId
 				from
 					@voucherPayables vp
 				where
@@ -711,7 +711,10 @@ begin try
 			   ,intPriceFixationDetailId
 			   ,intInventoryReceiptItemId
 			   ,dblQtyReceived
-			from #returnData
+			from
+				#returnData
+			where
+				isnull(intPriceFixationDetailId,0) > 0 --Exclude Bill Deatail that has no pricing layer (eg. Charges)
 
 			--Code here to process the return table from uspAPCreateVoucher
 			if exists (select top 1 1 from @CreatedVoucher)
@@ -741,15 +744,15 @@ begin try
 					select @intCreatedInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId;
 
 					--1. Process Pro Rated Charges
-					/*
+					
 					EXEC uspICAddProRatedReceiptChargesToVoucher
-						@intCreatedInventoryReceiptItemId
-						,@intCreatedInventoryReceiptId
-						,@intCreatedBillDetailId
-						*/
+						@intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId
+						,@intBillId = @intCreatedBillId
+						,@intBillDetailId = @intCreatedBillDetailId
+						
 
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
-					/*
+					
 					INSERT INTO tblCTPriceFixationDetailAPAR(
 						intPriceFixationDetailId
 						,intBillId
@@ -767,7 +770,7 @@ begin try
 						,dblQuantity = @dblCreatedQtyReceived
 						,dtmCreatedDate = getdate()
 						,intConcurrencyId = 1 
-						*/
+					
 
 					--4. Apply PrePay
 					select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
