@@ -228,6 +228,16 @@ BEGIN
 		WHERE B.intBillId IN (SELECT intId FROM @validVoucherPrepay)
 		AND B.strBillId = A.strTransactionId
 	) AND A.ysnIsUnposted = 0
+
+	--CLEAN ysnInPayment, dblPaymentTemp, & ysnPrepayHasPayment
+	--WE CAN ASSUME NEWLY POSTED VOUCHERS DOES NOT HAVE PAYMENT YET
+	UPDATE B
+	SET B.ysnInPayment = 0,
+		B.dblPaymentTemp = 0,
+		B.ysnPrepayHasPayment = 0
+	FROM tblAPBill B
+	INNER JOIN @validVoucherPrepay VP ON VP.intId = B.intBillId
+	WHERE B.ysnPrepayHasPayment = 0 AND @post = 1
 END
 
 IF @recap = 0
