@@ -244,7 +244,7 @@ BEGIN TRY
 				SELECT TOP 1 @FutureMonthId = intFutureMonthId FROM vyuCTFuturesMonth WHERE intFutureMarketId = @intFutureMarketId AND intYear >= CAST(SUBSTRING(LTRIM(YEAR(@dtmPlannedAvalability)),3,2) AS INT) + 1 AND intMonth > 0 AND ysnExpired <> 1 ORDER BY intYear ASC, intMonth ASC
 			END
 
-			UPDATE @CDTableUpdate SET intFutureMonthId = ISNULL(@FutureMonthId,intFutureMonthId) WHERE intContractDetailId = @intContractDetailId
+			UPDATE @CDTableUpdate SET intFutureMonthId = CASE WHEN ISNULL(@FutureMonthId, 0) > ISNULL(intFutureMonthId, 0) THEN @FutureMonthId ELSE intFutureMonthId END WHERE intContractDetailId = @intContractDetailId
 		END
 
 		IF @intConcurrencyId = 1
