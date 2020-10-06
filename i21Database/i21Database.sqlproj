@@ -8813,6 +8813,9 @@
     <Build Include="dbo\Views\vyuIPLoadWarehouseServicesAckView.sql" />
     <Build Include="dbo\Views\vyuIPLoadWarehouseContainerAckView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContainerTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderInputLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputSKUs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
