@@ -1448,6 +1448,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Summary Log Batch' and strModule = 'Risk Management')
+
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 149
 			,[strTransactionType]	= N'PO Export'
@@ -1457,6 +1458,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO Export' and strModule = 'Manufacturing')
+
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 150
 			,[strTransactionType]	= N'PO-Sequence-Cancel'
@@ -1466,6 +1468,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'PO-Sequence-Cancel' and strModule = 'Manufacturing')
+
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 151
 			,[strTransactionType]	= N'LSI and LS Acknowledgement'
@@ -1475,6 +1478,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'LSI and LS Acknowledgement' and strModule = 'Manufacturing')
+
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 155
 			,[strTransactionType]	= N'Receipt Item and Charge Update'
@@ -1484,6 +1488,16 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Receipt Item and Charge Update' and strModule = 'Inventory')
+
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 156
+			,[strTransactionType]	= N'Responsible Party Task'
+			,[strPrefix]			= N'Task-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Cash Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Responsible Party Task' and strModule = 'Cash Management')
 
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
