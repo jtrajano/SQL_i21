@@ -1627,6 +1627,16 @@ DECLARE @strDescription AS NVARCHAR(100)
 DECLARE @billCounter INT = 0;
 SELECT @actionType = CASE WHEN @post = 0 THEN 'Unposted' ELSE 'Posted' END
 
+--CLEAN ysnInPayment, dblPaymentTemp, & ysnPrepayHasPayment
+--WE CAN ASSUME NEWLY POSTED VOUCHERS DOES NOT HAVE PAYMENT YET
+UPDATE B
+SET B.ysnInPayment = 0,
+	B.dblPaymentTemp = 0,
+	B.ysnPrepayHasPayment = 0
+FROM tblAPBill B
+INNER JOIN #tmpPostBillData BD ON BD.intBillId = B.intBillId
+WHERE B.ysnPaid = 0 AND @post = 1
+
 WHILE(@billCounter != (@totalRecords))
 BEGIN
 	SELECT @billId = CAST((SELECT TOP (1) intBillId FROM #tmpPostBillData) AS NVARCHAR(50))
