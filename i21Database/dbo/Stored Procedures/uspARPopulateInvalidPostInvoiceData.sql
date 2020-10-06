@@ -431,6 +431,31 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
+	--UOM is required
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The UOM for ' + I.[strInvoiceNumber] + ' is blank and must be populated to complete this transaction.' 
+	FROM 
+		#ARPostInvoiceDetail I	
+		OUTER APPLY(
+		select 	intItemUOMId from #ARItemsForCosting 	 where 	intItemUOMId IS NULL AND intItemId  =  I.[intItemId]
+		)UOM
+		Where UOM.intItemUOMId IS  NULL
+
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
 	--Dsicount Account
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]

@@ -491,7 +491,7 @@ END
 CREATE TABLE #ARItemsForCosting
 	([intItemId] INT NOT NULL
 	,[intItemLocationId] INT NULL
-	,[intItemUOMId] INT NOT NULL
+	,[intItemUOMId] INT NULL
 	,[dtmDate] DATETIME NOT NULL
     ,[dblQty] NUMERIC(38, 20) NOT NULL DEFAULT 0
 	,[dblUOMQty] NUMERIC(38, 20) NOT NULL DEFAULT 1
