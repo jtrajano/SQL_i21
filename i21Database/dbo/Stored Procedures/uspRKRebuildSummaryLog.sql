@@ -1235,6 +1235,42 @@ BEGIN TRY
 		and sh.strPricingType = 'Basis'
 		and suh.strScreenName = 'Load Schedule'
 
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * st.dblUnits end) * -1
+			, intQtyUOMId = ss.intCommodityStockUomId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalHeaderId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
+			, intUserId = ss.intCreatedUserId
+			, ysnDestinationWeightsAndGrades = 0
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblGRSettleStorage ss ON ss.intSettleStorageId = suh.intExternalHeaderId
+			inner join tblGRSettleStorageTicket st on st.intSettleStorageTicketId = suh.intExternalId and st.intSettleStorageId = suh.intExternalHeaderId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Settle Storage'
+
 		SELECT * 
 		INTO #tblFinalBasisDeliveries 
 		FROM (
@@ -1290,8 +1326,36 @@ BEGIN TRY
 				, intUserId = b.intUserId
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
-			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType = 'Inventory Receipt' and ba.intContractTypeId = 1 and ba.intItemId = bd.intItemId
 	
+			union all
+			select 
+				 strType  = 'Purchase Basis Deliveries'
+				, b.dtmBillDate
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty =  bd.dblQtyReceived  * -1
+				, intItemUOMId = bd.intUnitOfMeasureId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Voucher'
+				, intTransactionId = b.intBillId
+				, strTransactionId = b.strBillId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intUserId = b.intUserId
+			from tblAPBillDetail bd
+			inner join tblAPBill b ON b.intBillId = bd.intBillId
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intSettleStorageId and ba.strTransactionType = 'Settle Storage' and ba.intContractTypeId = 1 and ba.intItemId = bd.intItemId
+			
 			union all
 			select 
 				 strType  = 'Purchase Basis Deliveries'
