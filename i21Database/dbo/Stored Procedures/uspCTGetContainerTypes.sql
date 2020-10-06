@@ -20,7 +20,7 @@ BEGIN
 			vyuLGContainerTypeNotMapped a
 			join vyuLGContainerType b on b.intContainerTypeId = a.intContainerTypeId
 		WHERE
-			a.strOrigin = (case when isnull(@strOrigin,'') = '' then a.strOrigin else @strOrigin end)
-			and a.intCommodityId = (case when isnull(@intCommodityId,0) = 0 then a.intCommodityId else @intCommodityId end)
+			a.strOrigin = @strOrigin
+			and a.intCommodityId = @intCommodityId
 	END
 END
