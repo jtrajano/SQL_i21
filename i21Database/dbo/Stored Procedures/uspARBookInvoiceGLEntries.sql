@@ -149,7 +149,7 @@ IF @Post = 0
           AND [intItemId] IS NOT NULL
           AND ISNULL([strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
 
-		--DELETE FROM @GLPost
+		DELETE FROM @GLPost WHERE strCode <> 'AR'
         
 		WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
         BEGIN				
