@@ -1203,6 +1203,52 @@ BEGIN TRY
 
 				--select '@SettleVoucherCreate2',* from @SettleVoucherCreate2
 			END			
+			ELSE
+			BEGIN
+				INSERT INTO @SettleVoucherCreate2
+				(
+					strOrderType
+					,intCustomerStorageId
+					,intCompanyLocationId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblUnits
+					,dblCashPrice
+					,intItemId
+					,intItemType
+					,IsProcessed
+					,intTicketDiscountId
+					,intPricingTypeId
+					,dblBasis
+					,intContractUOMId
+					,dblCostUnitQty
+					,dblSettleContractUnits
+					,ysnDiscountFromGrossWeight
+					,ysnPercentChargeType	
+					,dblCashPriceUsed
+				)
+				SELECT 
+					strOrderType
+					,intCustomerStorageId
+					,intCompanyLocationId
+					,intContractHeaderId
+					,intContractDetailId
+					,dblUnits
+					,dblCashPrice
+					,intItemId
+					,intItemType
+					,IsProcessed
+					,intTicketDiscountId
+					,intPricingTypeId
+					,dblBasis
+					,intContractUOMId
+					,dblCostUnitQty
+					,dblSettleContractUnits
+					,ysnDiscountFromGrossWeight
+					,ysnPercentChargeType	
+					,dblCashPriceUsed		
+				FROM @SettleVoucherCreate
+			END		
 
 			BEGIN
 				EXEC dbo.uspSMGetStartingNumber 
