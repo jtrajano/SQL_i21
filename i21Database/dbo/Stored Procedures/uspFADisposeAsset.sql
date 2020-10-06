@@ -3,6 +3,7 @@ CREATE PROCEDURE [dbo].[uspFADisposeAsset]
 	@ysnPost			AS BIT				= 0,
 	@ysnRecap			AS BIT				= 0,
 	@strBatchId			AS NVARCHAR(100)	= '',
+	@strTransactionId	AS NVARCHAR(100)	= '',
 	@intEntityId		AS INT				= 1,
 	@successfulCount	AS INT				= 0 OUTPUT
 	
@@ -33,17 +34,20 @@ ELSE
 IF ISNULL(@ysnPost, 0) = 0
 	BEGIN
 		DECLARE @intCount AS INT	
-
+		DECLARE @strAssetId NVARCHAR(20)
+		SELECT TOP 1 @strAssetId= strAssetId FROM tblFAFixedAsset A JOIN #AssetID B on A.intAssetId = B.intAssetId
+		SET @Param = 'SELECT intGLDetailId FROM tblGLDetail WHERE strReference = ''' + @strAssetId + ''' AND strCode = ''AMDIS'' AND ysnIsUnposted=0'
 		IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))
 			BEGIN
-				SET @Param = (SELECT strAssetId FROM tblFAFixedAsset WHERE intAssetId IN (SELECT intAssetId FROM #AssetID))
-				EXEC [dbo].[uspGLReverseGLEntries] @strBatchId,@Param, 0, 'AM', NULL, @intEntityId, @intCount	OUT
+				DECLARE @ReverseResult INT
+				EXEC @ReverseResult  = [dbo].[uspFAReverseGLEntries] @strBatchId,@Param, @ysnRecap, NULL, @intEntityId, @intCount	OUT
+				IF @ReverseResult <> 0 RETURN -1
 				SET @successfulCount = @intCount
-				
-				IF(@intCount > 0)
-				BEGIN
-					UPDATE tblFAFixedAsset SET ysnDisposed = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
-				END									
+				IF ISNULL(@ysnRecap,0) = 0
+					IF(@intCount > 0)
+					BEGIN
+						UPDATE tblFAFixedAsset SET ysnDisposed = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
+					END									
 			END
 		
 		GOTO Post_Commit;
@@ -102,11 +106,11 @@ IF ISNULL(@ysnRecap, 0) = 0
 			
 		)
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
+			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= A.[dblCost]
 			,[dblCredit]			= 0
@@ -127,7 +131,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMDIS' --FA
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
@@ -137,48 +141,13 @@ IF ISNULL(@ysnRecap, 0) = 0
 		
 		FROM tblFAFixedAsset A
 		WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)
-
-
-		INSERT INTO @GLEntries (
-			 [strTransactionId]
-			,[intTransactionId]
-			,[intAccountId]
-			,[strDescription]
-			,[strReference]	
-			,[dtmTransactionDate]
-			,[dblDebit]
-			,[dblCredit]
-			,[dblDebitForeign]			
-			,[dblCreditForeign]
-			,[dblDebitReport]
-			,[dblCreditReport]
-			,[dblReportingRate]
-			,[dblForeignRate]
-			,[dblDebitUnit]
-			,[dblCreditUnit]
-			,[dtmDate]
-			,[ysnIsUnposted]
-			,[intConcurrencyId]	
-			,[intCurrencyId]
-			,[dblExchangeRate]
-			,[intUserId]
-			,[intEntityId]			
-			,[dtmDateEntered]
-			,[strBatchId]
-			,[strCode]			
-			,[strJournalLineDescription]
-			,[intJournalLineNo]
-			,[strTransactionType]
-			,[strTransactionForm]
-			,[strModuleName]			
-			
-		)
+		UNION ALL
 		SELECT 
-			 [strTransactionId]		= A.[strAssetId]
+			 [strTransactionId]		= @strTransactionId
 			,[intTransactionId]		= A.[intAssetId]
 			,[intAccountId]			= A.[intAccumulatedAccountId]
 			,[strDescription]		= A.[strAssetDescription]
-			,[strReference]			= ''
+			,[strReference]			= A.strAssetId
 			,[dtmTransactionDate]	= A.[dtmDateAcquired]
 			,[dblDebit]				= 0
 			,[dblCredit]			= A.[dblCost]
@@ -199,7 +168,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			,[intEntityId]			= @intEntityId			
 			,[dtmDateEntered]		= GETDATE()
 			,[strBatchId]			= @strBatchId
-			,[strCode]				= 'AM' --FA
+			,[strCode]				= 'AMDIS' --FA
 								
 			,[strJournalLineDescription] = ''
 			,[intJournalLineNo]		= A.[intAssetId]			
