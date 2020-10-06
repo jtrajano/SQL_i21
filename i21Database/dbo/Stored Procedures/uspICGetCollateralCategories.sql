@@ -78,18 +78,18 @@ FROM
 		WHERE
 			t2.strTransactionId = t.strTransactionId
 			AND t2.ysnIsUnposted = 0 
-			AND i2.intItemId <> t.intItemId
-			AND t2.dblQty > 0 
+			AND i2.intItemId <> t.intItemId			
 			AND 1 = 
 				CASE 
 					WHEN 
 						ty2.strName = 'Inventory Adjustment - Item Change' 
 						AND t2.intTransactionDetailId = t.intTransactionDetailId 
-						AND t2.strBatchId = t.strBatchId 
+						AND t2.strBatchId = t.strBatchId 						
+						AND t2.dblQty > 0 
 					THEN 
 						1 
 					WHEN 
-						ty2.strName = 'Produce' 
+						ty2.strName IN ('Produce', 'Consume') 
 					THEN 
 						1 
 					ELSE 
@@ -140,18 +140,18 @@ BEGIN
 				t2.strTransactionId = t.strTransactionId
 				AND t2.ysnIsUnposted = 0 
 				AND i2.intCategoryId <> i.intCategoryId
-				AND i2.intCategoryId <> @intCategoryId
-				AND t2.dblQty > 0 
+				AND i2.intCategoryId <> @intCategoryId				
 				AND 1 = 
 					CASE 
 						WHEN 
 							ty2.strName = 'Inventory Adjustment - Item Change' 
 							AND t2.intTransactionDetailId = t.intTransactionDetailId 
 							AND t2.strBatchId = t.strBatchId 
+							AND t2.dblQty > 0 
 						THEN 
 							1 
 						WHEN 
-							ty2.strName = 'Produce' 
+							ty2.strName IN ('Produce', 'Consume') 
 						THEN 
 							1 
 						ELSE 

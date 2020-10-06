@@ -23,13 +23,13 @@ SELECT * FROM @GLEntries
 
 
 
-UPDATE
-GL SET
-dtmDate = @dtmDateEntered
-FROM
-@GLEntries2 GL
-WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
-AND dtmDate < @dtmDateEntered
+--UPDATE
+--GL SET
+--dtmDate = @dtmDateEntered
+--FROM
+--@GLEntries2 GL
+--WHERE EXISTS (SELECT TOP 1 1 from tblGLDetail WHERE strTransactionId = GL.strTransactionId)
+--AND dtmDate < @dtmDateEntered
 
 
 
