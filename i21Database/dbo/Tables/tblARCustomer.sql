@@ -118,6 +118,8 @@
     CONSTRAINT [FK_tblARCustomer_tblARServiceCharge] FOREIGN KEY ([intServiceChargeId]) REFERENCES [dbo].[tblARServiceCharge] ([intServiceChargeId]),    
     CONSTRAINT [FK_tblARCustomer_tblEMEntityLocation] FOREIGN KEY ([intDefaultLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
 	CONSTRAINT [FK_tblARCustomer_tblSMTaxCode] FOREIGN KEY([intTaxCodeId]) REFERENCES [dbo].[tblSMTaxCode] ([intTaxCodeId]),
+    CONSTRAINT [FK_tblARCustomer_tblEMEntityLocation_intShipToId] FOREIGN KEY ([intShipToId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
+	CONSTRAINT [FK_tblARCustomer_tblEMEntityLocation_intBillToId] FOREIGN KEY ([intBillToId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
     CONSTRAINT [UK_intCustomerId] UNIQUE NONCLUSTERED ([intEntityId] ASC),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_ContractGroup] FOREIGN KEY([intContractGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
 	CONSTRAINT [FK_tblARCustomer_tblARCustomerGroup_BuybackGroup] FOREIGN KEY([intBuybackGroupId]) REFERENCES [dbo].[tblARCustomerGroup] ([intCustomerGroupId]),
