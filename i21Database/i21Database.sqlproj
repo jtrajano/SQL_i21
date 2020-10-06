@@ -8819,6 +8819,9 @@
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetContainerTypes.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderInputLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputLots.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputSKUs.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
