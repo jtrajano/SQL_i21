@@ -17,17 +17,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @tmpPostJournals JournalIDTableType  
 INSERT INTO @tmpPostJournals(intJournalId) EXEC (@strParams)  
 
-IF ISNULL(@ysnRecap, 0) = 0  
-BEGIN     
-    DECLARE @ReverseEntry INT
-    EXEC @ReverseEntry = [uspFAInsertReverseGLEntry] @tmpPostJournals,@intEntityId,@dtmDateReverse, @strBatchId  
-    IF @@ERROR <> 0 OR  @ReverseEntry <> 0 RETURN -1
-    SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strBatchId = @strBatchId)  
-END  
-ELSE  
-    BEGIN  
-    DECLARE @GLEntries RecapTableType  
-    
+  DECLARE @GLEntries RecapTableType  
   INSERT INTO @GLEntries (  
     [strTransactionId]  
    ,[intTransactionId]  
@@ -68,8 +58,8 @@ ELSE
    ,[dblCreditForeign]  = A.[dblDebitForeign]   
    ,[dblDebitUnit]   = A.[dblCreditUnit]  
    ,[dblCreditUnit]  = A.[dblDebitUnit]  
-   ,A.[dtmDate]      
-   ,[ysnIsUnposted]    
+   ,dtmDate = ISNULL(@dtmDateReverse, A.dtmDate) -- If date is provided, use date reverse as the date for unposting the transaction.  
+   ,[ysnIsUnposted] = 1   
    ,A.[intConcurrencyId]    
    ,[dblExchangeRate]  
    ,[intCurrencyExchangeRateTypeId] = A.[intCurrencyExchangeRateTypeId]  
@@ -85,13 +75,22 @@ ELSE
   @tmpPostJournals B on B.intJournalId = A.intGLDetailId
   AND ysnIsUnposted = 0  
   ORDER BY intGLDetailId  
-  
-  EXEC uspGLPostRecap @GLEntries, @intEntityId  
-  SET @successfulCount = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchId)  
-      
-  IF @@ERROR <> 0 RETURN -1
-  
 
+
+
+IF ISNULL(@ysnRecap, 0) = 0  
+BEGIN     
+    DECLARE @PostResult INT
+    EXEC @PostResult = uspGLBookEntries @GLEntries, 0, 0, 1
+    IF @@ERROR <> 0 OR  @PostResult <> 0 RETURN -1
+    UPDATE GL set ysnIsUnposted = 1 from tblGLDetail GL  join @tmpPostJournals B on GL.intGLDetailId = B.intJournalId
+    SET @successfulCount = (SELECT COUNT(*) FROM tblGLDetail WHERE strBatchId = @strBatchId)  
+END  
+ELSE  
+    BEGIN  
+    EXEC uspGLPostRecap @GLEntries, @intEntityId  
+    SET @successfulCount = (SELECT COUNT(*) FROM tblGLPostRecap WHERE strBatchId = @strBatchId)  
+    IF @@ERROR <> 0 RETURN -1
  END  
   
 
