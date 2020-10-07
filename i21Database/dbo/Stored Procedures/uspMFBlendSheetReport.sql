@@ -256,7 +256,7 @@ AS
 	bs.strBlendUOM=um.strUnitMeasure,bs.strBlendLotNumber=l.strLotNumber,bs.strBlendLotAlias=l.strLotAlias,
 	bs.strShift=s.strShiftName,bs.dtmCreatedDate=w.dtmCreated,bs.dtmCreatedTime=Convert(char,l.dtmDateCreated,108),
 	bs.strBlender=us.strUserName,bs.strVesselNo=sl.strName,bs.strReferenceNo=ISNULL(w.strReferenceNo,''),bs.strERPOrderNo=ISNULL(w.strERPOrderNo,''),
-	bs.dtmCompletedDate=w.dtmCompletedDate
+	bs.dtmCompletedDate=IsNULL(wpl.dtmProductionDate,w.dtmCompletedDate)
 	From @tblBlendSheet bs Join tblMFWorkOrder w on bs.intWorkOrderId=w.intWorkOrderId 
 	join tblICItem i on w.intItemId=i.intItemId
 	Join tblICItemUOM iu on w.intItemUOMId=iu.intItemUOMId
