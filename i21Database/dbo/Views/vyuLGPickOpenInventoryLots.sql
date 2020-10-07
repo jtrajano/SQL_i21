@@ -108,7 +108,7 @@ FROM (
        ,strWarehouseRefNo = ISNULL(Receipt.strWarehouseRefNo,Lot.strWarehouseRefNo)
 	   ,dblFutures = CTDetail.dblFutures
 	   ,dblBasis = CTDetail.dblBasis
-	   ,dblCashPrice = CASE WHEN (CTDetail.dblCashPrice IS NOT NULL) THEN CTDetail.dblCashPrice ELSE dbo.fnCTGetSequencePrice(CTDetail.intContractDetailId,NULL) END
+	   ,dblCashPrice = ISNULL(AD.dblSeqPrice, AD.dblSeqPartialPrice)
 	   ,intPriceItemUOMId = CTDetail.intPriceItemUOMId
 	   ,strPriceBasis = CAST(BC.strCurrency as VARCHAR(100)) + '/' + CAST(BUM.strUnitMeasure as VARCHAR(100))
 	   ,dblTotalCost = CTDetail.dblTotalCost
@@ -139,6 +139,7 @@ FROM (
 		LEFT JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 		LEFT JOIN tblCTContractDetail CTDetail ON CTDetail.intContractDetailId = ReceiptItem.intLineNo 
 		LEFT JOIN tblCTContractHeader CTHeader ON CTHeader.intContractHeaderId = ReceiptItem.intOrderId
+		LEFT JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = CTDetail.intContractDetailId
 		LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = ReceiptItem.intSourceId
 		LEFT JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = ReceiptItem.intContainerId AND ISNULL(LC.ysnRejected, 0) <> 1
