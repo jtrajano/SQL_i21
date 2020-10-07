@@ -50,7 +50,17 @@ BEGIN TRY
 
 	SELECT @intUserId = ISNULL(intLastModifiedById,intCreatedById) FROM tblCTPriceContract WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId
 
-	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId	
+	DECLARE @PFTable TABLE(
+		intPriceFixationId INT,
+		intPriceContractId INT
+	)
+
+	INSERT INTO @PFTable (intPriceFixationId, intPriceContractId)
+	SELECT intPriceFixationId, intPriceContractId 
+	FROM tblCTPriceFixation 
+	WHERE intPriceContractId = @intPriceContractId
+
+	SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId
 
 	SELECT	@intScreenId	=	intScreenId FROM tblSMScreen WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 	SELECT  @intTransactionId	=	intTransactionId,@ysnOnceApproved = ysnOnceApproved FROM tblSMTransaction WHERE intRecordId = @intPriceContractId AND intScreenId = @intScreenId
@@ -271,7 +281,7 @@ BEGIN TRY
 	where
 		fd.intPriceFixationDetailId = t.intPriceFixationDetailId
 
-		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM tblCTPriceFixation WITH (UPDLOCK) WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
+		SELECT @intPriceFixationId = MIN(intPriceFixationId) FROM @PFTable WHERE intPriceContractId = @intPriceContractId	AND intPriceFixationId > @intPriceFixationId
 	END
 	
 	EXEC [uspCTInterCompanyPriceContract] @intPriceContractId,@ysnApprove,@strRowState
