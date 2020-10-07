@@ -68,7 +68,7 @@ BEGIN
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
 			  AND ICT.intInTransitSourceLocationId IS NOT NULL
 			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intTransactionDetailId, ICT.intLotId
-		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
+		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId	
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
 			 AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
@@ -439,7 +439,7 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The UOM for ' + I.[strInvoiceNumber] + ' is blank and must be populated to complete this transaction.' 
+		,[strPostingError]		= 'The UOM of item '  +  ISNULL(NULLIF(I.[strItemDescription], ''), I.[strItemNo]) +  ' for ' + I.[strInvoiceNumber] + ' is blank and must be populated to complete this transaction.' 
 	FROM 
 		#ARPostInvoiceDetail I	
 		OUTER APPLY(
