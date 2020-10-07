@@ -759,7 +759,7 @@ BEGIN TRY
 					FROM tblCTPriceFixation pf 
 					INNER JOIN tblCTPriceFixationDetail pfd ON pf.intPriceFixationId = pfd.intPriceFixationId
 					WHERE pf.intContractHeaderId = suh.intContractHeaderId 
-					AND ISNULL(pf.intContractDetailId,suh.intContractDetailId) = suh.intContractDetailId
+					AND suh.intContractDetailId = (case when @ysnMultiPrice = 1 then suh.intContractDetailId else pf.intContractDetailId end)
 				) price
 				WHERE strFieldName = 'Balance'
 				AND suh.intContractHeaderId = @intContractHeaderId
@@ -1462,7 +1462,7 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = (case when @ysnMultiPrice = 1 then cd.intContractDetailId else pf.intContractDetailId end)
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = ch.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
@@ -1471,7 +1471,7 @@ BEGIN TRY
 					SELECT TOP 1 *
 					FROM tblCTSequenceHistory
 					WHERE intContractHeaderId = pf.intContractHeaderId
-					AND intContractDetailId = ISNULL(pf.intContractDetailId,intContractDetailId)
+					AND intContractDetailId = (case when @ysnMultiPrice = 1 then intContractDetailId else pf.intContractDetailId end)
 					AND intSequenceUsageHistoryId IS NULL
 					ORDER BY dtmHistoryCreated DESC
 				) sh
@@ -1798,7 +1798,7 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = (case when @ysnMultiPrice = 1 then cd.intContractDetailId else pf.intContractDetailId end)
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = ch.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
@@ -1955,7 +1955,7 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = pf.intContractDetailId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractDetailId = (case when @ysnMultiPrice = 1 then cd.intContractDetailId else pf.intContractDetailId end)
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = ch.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
