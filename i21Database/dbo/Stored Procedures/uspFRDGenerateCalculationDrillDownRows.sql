@@ -152,7 +152,7 @@ BEGIN
 	SELECT @FormulaR = SUBSTRING(@TempFormula,CHARINDEX(' X',@TempFormula,0),(CHARINDEX(' ',@TempFormula,(CHARINDEX(' X',@TempFormula,0)+1))-CHARINDEX(' X',@TempFormula,0)))
 	SELECT @intRefNo = CAST(REPLACE(REPLACE(@FormulaR,'X',''),' ','') as INT)
 
-	SELECT		TOP 1 @R_AccountUsed = strAccountsUsed, @R_Formula = strRelatedRows, @RowType = strRowType
+	SELECT		TOP 1 @R_AccountUsed = strAccountsUsed, @R_Formula = strRelatedRows, @RowType = strRowType, @BalanceSide = strBalanceSide
 				FROM tblFRRowDesign 
 				WHERE intRowId = @RowId AND intRefNo = @intRefNo
 
