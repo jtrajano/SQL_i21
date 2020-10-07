@@ -1032,6 +1032,33 @@ WHERE
 	AND NOT EXISTS (SELECT NULL FROM tblSMCompanyPreference WITH (NOLOCK) WHERE intDefaultCurrencyId IS NOT NULL)
 
 INSERT INTO #ARInvalidInvoiceRecords
+	([intId]
+	,[strMessage]		
+	,[strTransactionType]
+	,[strType]
+	,[strSourceTransaction]
+	,[intSourceId]
+	,[strSourceId]
+	,[intInvoiceId])
+SELECT
+	 [intId]				= ITG.[intId]
+	,[strMessage]			= 'Duplicate Ticket Number found ' + ITG.[strSourceId] +  '.' +  ' This file may not be imported until all Ticket Numbers are unique.'
+	,[strTransactionType]	= ITG.[strTransactionType]
+	,[strType]				= ITG.[strType]
+	,[strSourceTransaction]	= ITG.[strSourceTransaction]
+	,[intSourceId]			= ITG.[intSourceId]
+	,[strSourceId]			= ITG.[strSourceId]
+	,[intInvoiceId]			= ITG.[intInvoiceId]
+FROM
+	@InvoicesToGenerate ITG --WITH (NOLOCK)
+	INNER JOIN (
+		SELECT COUNT(strSourceId)[SourceCount],strSourceId FROM  @InvoicesToGenerate GROUP BY strSourceId 
+	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
+	where ID.SourceCount > 1
+
+
+
+INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
     ,[strMessage]		
     ,[strTransactionType]
