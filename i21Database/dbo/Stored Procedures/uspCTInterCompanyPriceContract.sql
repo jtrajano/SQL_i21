@@ -17,6 +17,11 @@ BEGIN TRY
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
 
+	IF ISNULL(@intCompanyId, 0) = 0
+	BEGIN
+		RETURN
+	END
+
 	UPDATE dbo.tblCTPriceContract
 	SET intCompanyId = @intCompanyId
 	WHERE intCompanyId IS NULL
