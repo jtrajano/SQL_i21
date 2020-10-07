@@ -12,6 +12,7 @@
     [dblUnits] NUMERIC(18, 6) NULL, 
     [dtmHistoryDate] DATETIME NULL, 
     [dblPaidAmount] NUMERIC(18, 6) NULL, 
+	[dblPaidAmountRaw] NUMERIC(18, 6) NULL,  --- Dev Note -- MonGonzales -- I need another column to put the raw value of dblPaidAmount 
     [strPaidDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
     [dblCurrencyRate] NUMERIC(18, 8) NULL, 
     [strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL, 
@@ -30,6 +31,7 @@
 	[intTransferStorageId] INT NULL,
 	[ysnPost] BIT NULL DEFAULT 0,
 	[intInventoryAdjustmentId] INT NULL,
+	[dblOldCost] DECIMAL(38,20) NULL,
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRStorageHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
