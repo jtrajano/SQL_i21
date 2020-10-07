@@ -91,6 +91,7 @@ BEGIN TRY
 		, dblBasis NUMERIC(24, 10) NULL
 		, intBasisUOMId INT NULL
 		, intBasisCurrencyId INT NULL
+		, strCertifications NVARCHAR(MAX)
 	)
 
 	INSERT INTO @CDTableUpdate(intContractDetailId
@@ -113,7 +114,8 @@ BEGIN TRY
 		, dblQuantity
 		, dblBasis
 		, intBasisUOMId
-		, intBasisCurrencyId)
+		, intBasisCurrencyId
+		, strCertifications)
 	SELECT intContractDetailId
 		, intPricingTypeId
 		, dblFutures
@@ -135,6 +137,7 @@ BEGIN TRY
 		, dblBasis
 		, intBasisUOMId
 		, intBasisCurrencyId
+		, strCertifications
 	FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId
 
 	SELECT @ysnFeedOnApproval	=	ysnFeedOnApproval, @ysnAutoEvaluateMonth = ysnAutoEvaluateMonth, @ysnBasisComponent = (CASE WHEN @intContractTypeId = 1 THEN ysnBasisComponentPurchase ELSE ysnBasisComponentSales END) FROM tblCTCompanyPreference
@@ -303,6 +306,21 @@ BEGIN TRY
 			WHERE	intContractDetailId	=	@intContractDetailId 
 		END
 
+		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
+		BEGIN 
+			SELECT	@strCertificationName = NULL
+			SELECT	@strCertificationName = COALESCE(@strCertificationName + ', ', '') + CAST(strCertificationName AS NVARCHAR(100))
+			FROM	tblCTContractCertification	CF
+			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
+			WHERE	intContractDetailId = @intContractDetailId
+
+			UPDATE	@CDTableUpdate SET	strCertifications = @strCertificationName WHERE	intContractDetailId	= @intContractDetailId 
+		END
+		ELSE
+		BEGIN
+			UPDATE	@CDTableUpdate SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
+		END
+
 		UPDATE tblCTContractDetail
 		SET intPricingTypeId = CD.intPricingTypeId
 			, dblFutures = CD.dblFutures
@@ -373,23 +391,6 @@ BEGIN TRY
 			WHERE	ysnBasisContract = 1
 		END;
 
-		DISABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
-		IF EXISTS(SELECT TOP 1 1 FROM tblCTContractCertification WHERE intContractDetailId = @intContractDetailId)
-		BEGIN 
-			SELECT	@strCertificationName = NULL
-			SELECT	@strCertificationName = COALESCE(@strCertificationName + ', ', '') + CAST(strCertificationName AS NVARCHAR(100))
-			FROM	tblCTContractCertification	CF
-			JOIN	tblICCertification			IC	ON	IC.intCertificationId	=	CF.intCertificationId
-			WHERE	intContractDetailId = @intContractDetailId
-
-			UPDATE	tblCTContractDetail SET	strCertifications = @strCertificationName WHERE	intContractDetailId	= @intContractDetailId 
-		END
-		ELSE
-		BEGIN
-			UPDATE	tblCTContractDetail SET	strCertifications	=	NULL WHERE	intContractDetailId	=	@intContractDetailId 
-		END;
-		ENABLE TRIGGER trgCTContractDetail ON tblCTContractDetail;
-
 		IF @intContractStatusId IN (3,6)
 		BEGIN
 			EXEC uspCTCancelOpenLoadSchedule @intContractDetailId
@@ -408,7 +409,7 @@ BEGIN TRY
 			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId AND intPricingTypeId IN (2,8))
 		BEGIN
 			UPDATE	tblCTPriceFixation SET dblTotalLots = @dblNoOfLots WHERE intPriceFixationId = @intPriceFixationId
-			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById, 1
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END		
 		
 		-- ADD DERIVATIVES
@@ -439,7 +440,7 @@ BEGIN TRY
 			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 2)
 		BEGIN
 			UPDATE tblCTPriceFixation SET dblTotalLots = @dblHeaderNoOfLots WHERE intPriceFixationId = @intPriceFixationId
-			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById, 1
+			EXEC	[uspCTPriceFixationSave] @intPriceFixationId, '', @intLastModifiedById
 		END
 		ELSE IF @dblLotsFixed IS NOT NULL AND @dblHeaderNoOfLots IS NOT NULL AND @dblHeaderNoOfLots <> @dblLotsFixed AND
 			EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intPricingTypeId = 1)
