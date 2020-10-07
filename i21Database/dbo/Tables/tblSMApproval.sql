@@ -25,3 +25,7 @@
     CONSTRAINT [FK_tblSMApproval_tblEMEntity_SubmitterBy] FOREIGN KEY ([intSubmittedById]) REFERENCES [tblEMEntity]([intEntityId]),
 	CONSTRAINT [FK_tblSMApproval_tblEMEntity_AlternateApprover] FOREIGN KEY ([intAlternateApproverId]) REFERENCES [tblEMEntity]([intEntityId])
 )
+
+GO
+
+	CREATE NONCLUSTERED INDEX [IX_tblSMApproval_intTransactionId] ON dbo.tblSMApproval ([intTransactionId],[ysnCurrent]) INCLUDE([intApproverId],[dtmDate])
