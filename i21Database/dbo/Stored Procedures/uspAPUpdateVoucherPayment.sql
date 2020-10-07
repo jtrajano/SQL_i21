@@ -180,7 +180,7 @@ BEGIN TRY
 					FROM tblAPAppliedPrepaidAndDebit APD
 					WHERE APD.intBillId = B.intBillId AND APD.ysnApplied = 1
 	) appliedPrepays
-	WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND B.ysnInPayment IS NULL
+	WHERE P.intPaymentId IN (SELECT intId FROM @ids) AND B.ysnInPayment IS NULL AND B.dblPaymentTemp <> 0
 
 	--VALIDATIONS
 	IF @nullCheck IS NULL AND @tempCheck > @totalCheck
