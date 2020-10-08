@@ -658,6 +658,7 @@ BEGIN TRY
 					,intContractUOMId
 					,ysnPercentChargeType
 					,dblCashPriceUsed
+					,intSettleContractId
 				)
 				SELECT 
 					 intCustomerStorageId		= CS.intCustomerStorageId
@@ -698,6 +699,8 @@ BEGIN TRY
 					,intContractUOMId			= SC.intContractUOMId
 					,ysnPercentChargeType		= CASE WHEN DSC.strDiscountChargeType = 'Dollar' THEN 0 ELSE 1 /* Percent */END
 					,dblCashPriceUsed			= CASE WHEN SC.strPricingType = 'Basis' THEN @dblFutureMarkePrice + SC.dblBasis ELSE (CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END) END
+													
+					,intSettleContractId		= intSettleContractKey
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
@@ -1009,6 +1012,7 @@ BEGIN TRY
 								,dblBasis
 								,intContractUOMId
 								,dblCostUnitQty
+								,intSettleContractId
 							)
 							SELECT 
 								 intCustomerStorageId	= @intCustomerStorageId
@@ -1024,7 +1028,8 @@ BEGIN TRY
 								,intPricingTypeId		= @intPricingTypeId
 								,dblBasis				= @dblContractBasis
 								,intContractUOMId		= @intContractUOMId
-								,dblCostUnitQty			= @dblCostUnitQty
+								,dblCostUnitQty			= @dblCostUnitQty								
+								,intSettleContractId	= @SettleContractKey
 							BREAK;
 						END
 						ELSE
@@ -1075,7 +1080,8 @@ BEGIN TRY
 								,intPricingTypeId
 								,dblBasis
 								,intContractUOMId
-								,dblCostUnitQty
+								,dblCostUnitQty								
+								,intSettleContractId
 							)
 							SELECT 
 								 intCustomerStorageId   = @intCustomerStorageId
@@ -1091,7 +1097,8 @@ BEGIN TRY
 								,intPricingTypeId		= @intPricingTypeId
 								,dblBasis				= @dblContractBasis
 								,intContractUOMId		= @intContractUOMId
-								,dblCostUnitQty			= @dblCostUnitQty
+								,dblCostUnitQty			= @dblCostUnitQty								
+								,intSettleContractId	= @SettleContractKey
 							BREAK;
 						END
 
@@ -1127,7 +1134,8 @@ BEGIN TRY
 							,dblCashPrice
 							,intItemId
 							,intItemType
-							,IsProcessed
+							,IsProcessed								
+							,intSettleContractId
 						 )
 						SELECT 
 							 intCustomerStorageId = @intCustomerStorageId
@@ -1139,7 +1147,8 @@ BEGIN TRY
 							,dblCashPrice         = @dblSpotCashPrice
 							,intItemId            = @ItemId
 							,intItemType          = 1
-							,IsProcessed          = 0
+							,IsProcessed          = 0								
+							,intSettleContractId = -90
 					END
 					ELSE
 					BEGIN
@@ -1158,7 +1167,8 @@ BEGIN TRY
 							,dblCashPrice
 							,intItemId
 							,intItemType
-							,IsProcessed
+							,IsProcessed								
+							,intSettleContractId
 						)
 						SELECT 
 							 intCustomerStorageId = @intCustomerStorageId
@@ -1170,7 +1180,8 @@ BEGIN TRY
 							,dblCashPrice         = @dblSpotCashPrice
 							,intItemId            = @ItemId
 							,intItemType          = 1
-							,IsProcessed          = 0
+							,IsProcessed          = 0															
+							,intSettleContractId = -90
 
 						SET @dblSpotUnits = 0
 					END
@@ -2051,6 +2062,8 @@ BEGIN TRY
 					,[intPurchaseTaxGroupId]
 					,[dtmDate]
 					,[dtmVoucherDate]
+
+					,intLinkingId
 				 )
 				SELECT 
 					[intEntityVendorId]				= @EntityId
@@ -2229,6 +2242,8 @@ BEGIN TRY
 													--NULL
 					,[dtmDate]						= @dtmClientPostDate
 					,[dtmVoucherDate]				= @dtmClientPostDate
+
+					, intLinkingId		= isnull(a.intSettleContractId, -90)
 				FROM @SettleVoucherCreate a
 				JOIN tblICItemUOM b 
 					ON b.intItemId = a.intItemId 
