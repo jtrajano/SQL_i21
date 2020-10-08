@@ -8831,6 +8831,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderInputLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputSKUs.sql" />
+    <Build Include="dbo\Tables\tblLGPendingClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddPendingClaim.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
