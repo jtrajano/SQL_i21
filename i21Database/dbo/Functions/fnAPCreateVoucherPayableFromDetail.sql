@@ -51,7 +51,7 @@ RETURNS TABLE AS RETURN
 		,[intCCSiteDetailId]				=	B.intCCSiteDetailId
 		,[intInvoiceId]						=	B.intInvoiceId
 		,[intBuybackChargeId]				=	B.intBuybackChargeId
-		,[intDiscountId]					=	B.intDiscountId
+		,[intLinkingId]						=	B.intLinkingId
 		,[dblOrderQty]						=	B.dblQtyOrdered
 		,[dblOrderUnitQty]					=	B.dblUnitQty
 		,[intOrderUOMId]					=	B.intUnitOfMeasureId
