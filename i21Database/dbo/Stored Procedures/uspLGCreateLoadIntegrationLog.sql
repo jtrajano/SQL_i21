@@ -706,8 +706,6 @@ BEGIN TRY
 				FROM tblCTContractDetail
 				WHERE intContractDetailId = @intContractDetailId
 
-				UPDATE tblLGLoad SET dtmPlannedAvailabilityDate = DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD) WHERE intLoadId = @intLoadId
-
 				DECLARE @ysnIsETAUpdated BIT = 0
 
 				IF NOT EXISTS(SELECT 1 FROM tblLGLoad WHERE intLoadShippingInstructionId = @intLoadId AND intShipmentStatus <> 10)

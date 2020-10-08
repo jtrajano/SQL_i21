@@ -33,6 +33,8 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@intCompanyId INT
 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM dbo.tblIPMultiCompany) RETURN;
+
 	SELECT @intCompanyId = intCompanyId
 	FROM dbo.tblIPMultiCompany
 	WHERE ysnCurrentCompany = 1
