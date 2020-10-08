@@ -297,6 +297,7 @@ BEGIN TRY
 					,strApprovalBase
 					,intSampleLabelId
 					,ysnAdjustInventoryQtyBySampleQty
+					,ysnPartyMandatory
 					,intApprovalLotStatusId
 					,intRejectionLotStatusId
 					,intBondedApprovalLotStatusId
@@ -315,6 +316,7 @@ BEGIN TRY
 					,strApprovalBase
 					,@intSampleLabelId
 					,ysnAdjustInventoryQtyBySampleQty
+					,ysnPartyMandatory
 					,@intApprovalLotStatusId
 					,@intRejectionLotStatusId
 					,@intBondedApprovalLotStatusId
@@ -330,6 +332,7 @@ BEGIN TRY
 						,ysnFinalApproval BIT
 						,strApprovalBase NVARCHAR(50)
 						,ysnAdjustInventoryQtyBySampleQty BIT
+						,ysnPartyMandatory BIT
 						,dtmCreated DATETIME
 						,dtmLastModified DATETIME
 						)
@@ -348,6 +351,7 @@ BEGIN TRY
 					,strApprovalBase = x.strApprovalBase
 					,intSampleLabelId = @intSampleLabelId
 					,ysnAdjustInventoryQtyBySampleQty = x.ysnAdjustInventoryQtyBySampleQty
+					,ysnPartyMandatory = x.ysnPartyMandatory
 					,intApprovalLotStatusId = @intApprovalLotStatusId
 					,intRejectionLotStatusId = @intRejectionLotStatusId
 					,intBondedApprovalLotStatusId = @intBondedApprovalLotStatusId
@@ -360,6 +364,7 @@ BEGIN TRY
 						,ysnFinalApproval BIT
 						,strApprovalBase NVARCHAR(50)
 						,ysnAdjustInventoryQtyBySampleQty BIT
+						,ysnPartyMandatory BIT
 						,dtmLastModified DATETIME
 						) x
 				WHERE tblQMSampleType.intSampleTypeRefId = @intSampleTypeRefId

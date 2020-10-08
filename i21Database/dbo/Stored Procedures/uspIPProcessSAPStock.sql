@@ -53,6 +53,10 @@ End
 
 Select @intLocationId=dbo.[fnIPGetSAPIDOCTagValue]('STOCK','LOCATION_ID')
 
+SELECT @intEntityUserId = intEntityId
+FROM tblSMUserSecurity WITH (NOLOCK)
+WHERE strUserName = 'IRELYADMIN'
+
 If ISNULL(@strSessionId,'')=''
 	Insert Into @tblStock(strItemNo,strSubLocation,dblQuantity,strSessionId)
 	Select strItemNo,strSubLocation,SUM(ISNULL(dblQuantity,0)),strSessionId 
