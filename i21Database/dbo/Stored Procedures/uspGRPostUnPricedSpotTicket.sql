@@ -65,10 +65,11 @@ BEGIN TRY
 	(
 		intEntityKey INT IDENTITY(1, 1)
 		,intEntityId INT NULL
+		,intTicketId INT NOT NULL
 	)
 
-	INSERT INTO @tblEntity (intEntityId)
-	SELECT DISTINCT intEntityId
+	INSERT INTO @tblEntity (intEntityId,intTicketId)
+	SELECT DISTINCT intEntityId,intTicketId
 	FROM tblGRUnPricedSpotTicket
 	WHERE intUnPricedId = @intUnPricedId
 
@@ -83,7 +84,9 @@ BEGIN TRY
 			BEGIN
 				SET @intEntityId = NULL
 
-				SELECT @intEntityId = intEntityId
+				SELECT TOP 1
+					@intEntityId = intEntityId
+					,@intTicketId = intTicketId
 				FROM @tblEntity
 				WHERE intEntityKey = @intEntityKey
 
@@ -93,9 +96,9 @@ BEGIN TRY
 				DECLARE @intInventoryReceiptId AS INT
 
 				--Inventory Item
-				SELECT @intInventoryReceiptId = IRI.intInventoryReceiptId,
-					   @intItemId = IRI.intItemId,
-					   @intTicketId = SpotTicket.intTicketId
+				SELECT TOP 1
+					   @intInventoryReceiptId = IRI.intInventoryReceiptId,
+					   @intItemId = IRI.intItemId
 				FROM tblGRUnPricedSpotTicket SpotTicket
 				JOIN tblSCTicket SC 
 					ON SC.intTicketId = SpotTicket.intTicketId
@@ -108,6 +111,7 @@ BEGIN TRY
 				WHERE SpotTicket.intUnPricedId = @intUnPricedId
 					AND SpotTicket.intEntityId = @intEntityId
 					AND IR.intEntityVendorId = @intEntityId  
+					AND SC.intTicketId = @intTicketId
 				DELETE FROM @voucherItems
 				DELETE FROM @voucherItemsTax
 
@@ -332,15 +336,18 @@ BEGIN TRY
 						ON SC.intTicketId = SpotTicket.intTicketId
 					WHERE SpotTicket.intUnPricedId = @intUnPricedId 
 						AND SpotTicket.intEntityId = @intEntityId
+						AND SC.intTicketId = @intTicketId
 
 					UPDATE SC
 					SET dblUnitPrice = @dblFuturesPrice
 					   ,dblUnitBasis = @dblFuturesBasis
+					   ,intBillId = @intCreatedBillId
 					FROM tblGRUnPricedSpotTicket SpotTicket
 					JOIN tblSCTicket SC 
 						ON SC.intTicketId = SpotTicket.intTicketId
 					WHERE SpotTicket.intUnPricedId = @intUnPricedId 
 						AND SpotTicket.intEntityId = @intEntityId
+						AND SC.intTicketId = @intTicketId
 
 				END
 
