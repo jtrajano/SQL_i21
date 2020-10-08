@@ -122,12 +122,12 @@ GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptItemId]
 		ON [dbo].[tblAPBillDetail]([intInventoryReceiptItemId] ASC)
-		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived, intInventoryReceiptChargeId)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intInventoryReceiptChargeId]
 		ON [dbo].[tblAPBillDetail]([intInventoryReceiptChargeId] ASC)
-		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived, intInventoryReceiptItemId)
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intLoadDetailId]
