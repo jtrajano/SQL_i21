@@ -558,6 +558,7 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'WA', @TaxCategories = @TaxCa
 DELETE @TaxCategoryWA
 GO
 
+
 PRINT ('Deploying TN Tax Category')
 GO
 
@@ -576,4 +577,26 @@ UNION ALL SELECT intTaxCategoryId = 0, strState = 'TN', strTaxCategory = 'TN Exc
 EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'TN', @TaxCategories = @TaxCategoryTN
 
 DELETE @TaxCategoryTN
+GO
+
+
+PRINT ('Deploying MD Tax Category')
+GO
+
+DECLARE @TaxCategoryMD AS TFTaxCategory
+
+INSERT INTO @TaxCategoryMD(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Gasoline/Gasohol/Ethanol/Methano/E85', intMasterId = 201
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Diesel/Biodiesel', intMasterId = 202
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Propane/LNG/CNG', intMasterId = 203
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'MD', strTaxCategory = 'MD Excise Tax Aviation Gasoline/Turbine Fuel', intMasterId = 204
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MD', @TaxCategories = @TaxCategoryMD
+
+DELETE @TaxCategoryMD
 GO
