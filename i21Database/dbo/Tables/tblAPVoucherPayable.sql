@@ -44,7 +44,7 @@
 	[intInvoiceId]					INT NULL,
 	[intBuybackChargeId]			INT NULL,
 	[intItemId]						INT NULL,
-	[intDiscountId]					INT NULL,
+	[intLinkingId]					INT NULL,
 	[strItemNo]						NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[intFreightTermId]				INT NULL,
 	[intPurchaseTaxGroupId]			INT NULL,
