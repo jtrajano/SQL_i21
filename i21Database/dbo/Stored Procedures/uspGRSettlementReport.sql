@@ -657,7 +657,7 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
 				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
@@ -745,6 +745,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -752,8 +753,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+					,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
 				ON tblOtherCharge.intBillId = Bill.intBillId			
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -944,7 +947,7 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
 				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
@@ -1050,6 +1053,7 @@ BEGIN
 			LEFT JOIN (
 						SELECT 
 							A.intBillId
+							,isnull(A.intLinkingId, -90) as intLinkingId
 							,SUM(dblTotal) AS dblTotal
 							,SUM(dblTax) AS dblTax
 						FROM tblAPBillDetail A
@@ -1057,8 +1061,10 @@ BEGIN
 							ON A.intItemId = B.intItemId 
 								AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId			
+					ON tblOtherCharge.intBillId = Bill.intBillId	
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1536,7 +1542,7 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
 				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
@@ -1622,6 +1628,7 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
+						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -1629,8 +1636,10 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
+							,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId			
+				ON tblOtherCharge.intBillId = Bill.intBillId				
+					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1821,7 +1830,7 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
 				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
