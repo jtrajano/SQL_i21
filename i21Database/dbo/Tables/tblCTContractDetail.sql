@@ -633,8 +633,10 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			end
 		end
 
-		update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
-
+		if not exists(select top 1 1 from tblCTContractDetail where intPricingStatus = @intPricingStatus and intContractDetailId = @intActiveContractDetailId)
+		begin
+			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
+		end
 
 		declare @Pricing table (
 			intId int
