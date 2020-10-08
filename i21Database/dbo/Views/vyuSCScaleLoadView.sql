@@ -34,7 +34,7 @@ SELECT
 	,ysnInProgress = CAST((CASE WHEN ISNULL(B.intLoadDetailId,0) = 0  THEN 0 ELSE 1 END) AS BIT)
 	,intTicketId = B.intTicketId
 	,A.intItemUOMId
-FROM vyuLGLoadDetailViewSearch A
+FROM vyuLGLoadDetailViewSearch A WITH(NOLOCK)
 OUTER APPLY (
 	SELECT TOP 1
 		intLoadDetailId 
@@ -50,7 +50,7 @@ OUTER APPLY (
 	SELECT TOP 1
 		intLoadDetailId 
 		,intTicketId
-	FROM tblSCTicket 
+	FROM tblSCTicket WITH(NOLOCK)
 	WHERE intLoadDetailId = A.intLoadDetailId
 	)A1
 )B
