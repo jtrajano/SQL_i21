@@ -332,7 +332,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -622,7 +622,7 @@ BEGIN
 													ELSE NULL 
 												END
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -909,7 +909,7 @@ BEGIN
 				,strCustomerReference			= ''
 				,lblTicketComment				= NULL
 				,strTicketComment				= NULL
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1215,7 +1215,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1501,7 +1501,7 @@ BEGIN
 													ELSE NULL 
 												END
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1786,7 +1786,7 @@ BEGIN
 				,strCustomerReference			= ''
 				,lblTicketComment				= NULL
 				,strTicketComment				= NULL
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
