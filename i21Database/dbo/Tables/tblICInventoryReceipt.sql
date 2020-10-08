@@ -89,7 +89,7 @@ Type the overview for the table here.
 
 	CREATE NONCLUSTERED INDEX [IX_tblICInventoryReceipt_intInventoryReceiptId]
 		ON [dbo].[tblICInventoryReceipt]([intInventoryReceiptId] ASC)
-		INCLUDE (strReceiptNumber, intEntityVendorId, strBillOfLading)
+		INCLUDE (strReceiptNumber, intEntityVendorId, strBillOfLading, strReceiptType, intSourceType, ysnPosted)
 
 	GO
 

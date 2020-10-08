@@ -32,25 +32,25 @@ BEGIN TRY
 --SELECT * FROM tblRKM2MHeader
 
 --DECLARE
---@intM2MHeaderId INT = 73
---  , @strRecordName NVARCHAR(50) = 'M2M-73'
---	, @intCommodityId INT = 1009
+--@intM2MHeaderId INT = 4
+--  , @strRecordName NVARCHAR(50) = 'M2M-5'
+--	, @intCommodityId INT = 70
 --	, @intM2MTypeId INT = 1
---	, @intM2MBasisId INT = NULL
---	, @intFutureSettlementPriceId INT = 762
---	, @intQuantityUOMId INT = 10
---	, @intPriceUOMId INT = 10
---	, @intCurrencyId INT = 3
---	, @dtmEndDate DATETIME = '2020-09-16 00:00:00.000'
+--	, @intM2MBasisId INT = 9
+--	, @intFutureSettlementPriceId INT = 6
+--	, @intQuantityUOMId INT = 4
+--	, @intPriceUOMId INT = 4
+--	, @intCurrencyId INT = 2
+--	, @dtmEndDate DATETIME = '2020-10-07 00:00:00.000'
 --	, @strRateType NVARCHAR(200) = 'Contract'
 --	, @intLocationId INT = NULL
 --	, @intMarketZoneId INT = NULL
 --	, @ysnByProducer BIT = 0
 --	, @intCompanyId INT = NULL
---	, @dtmPostDate DATETIME = '2020-09-16 00:00:00.000'
+--	, @dtmPostDate DATETIME = '2020-10-07 00:00:00.000'
 --	, @dtmReverseDate DATETIME = NULL
 --	, @dtmLastReversalDate DATETIME = NULL
---	, @intUserId INT = NULL
+--	, @intUserId INT = 1
 
 	IF OBJECT_ID('tempdb..#tblContractCost') IS NOT NULL
 		DROP TABLE #tblContractCost
@@ -115,6 +115,7 @@ BEGIN TRY
 		, @strEvaluationBy NVARCHAR(50)
 		, @strEvaluationByZone NVARCHAR(50)
 		, @strM2MType NVARCHAR(50)
+		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell BIT
 
 	SELECT TOP 1 @strM2MView = strM2MView
 		, @intMarkExpiredMonthPositionId = intMarkExpiredMonthPositionId
@@ -128,6 +129,7 @@ BEGIN TRY
 		, @ysnIncludeInTransitM2M = ysnIncludeInTransitM2M
 		, @strEvaluationBy = strEvaluationBy
 		, @strEvaluationByZone = strEvaluationByZone
+		, @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell
 	FROM tblRKCompanyPreference
 
 	SELECT TOP 1 @dtmPriceDate = dtmM2MBasisDate FROM tblRKM2MBasis WHERE intM2MBasisId = @intM2MBasisId
@@ -1415,8 +1417,12 @@ BEGIN TRY
 				SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 				WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 					AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-					AND tmp.intContractTypeId = ISNULL(cd.intContractTypeId, tmp.intContractTypeId)
-					AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+					AND ISNULL(tmp.intContractTypeId, cd.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, cd.intContractTypeId) ELSE cd.intContractTypeId END
+														ELSE ISNULL(tmp.intContractTypeId, cd.intContractTypeId) END 
+					AND ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) = CASE WHEN @strEvaluationByZone <> 'Company'
+																				THEN cd.intCompanyLocationId
+																			ELSE ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) END
 					AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 													THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 												ELSE tmp.strPeriodTo END
@@ -1735,10 +1741,14 @@ BEGIN TRY
 							SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 							WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 								AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-								AND tmp.intContractTypeId = ISNULL(ch.intContractTypeId, tmp.intContractTypeId)
-								AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+								AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
+														ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
+								AND ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) = CASE WHEN @strEvaluationByZone <> 'Company'
+																							THEN cd.intCompanyLocationId
+																						ELSE ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) END
 								AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
-																THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate,'MMM yyyy') END
+																THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 															ELSE tmp.strPeriodTo END
 								AND tmp.strContractInventory = 'Contract') basisDetail
 
@@ -1833,8 +1843,12 @@ BEGIN TRY
 							SELECT TOP 1 dblRatio, dblMarketBasis, intMarketBasisUOM, intMarketBasisCurrencyId FROM #tmpM2MBasisDetail tmp
 							WHERE tmp.intFutureMarketId = ISNULL(cd.intFutureMarketId, tmp.intFutureMarketId)
 								AND tmp.intItemId = ISNULL(cd.intItemId, tmp.intItemId)
-								AND tmp.intContractTypeId = ISNULL(ch.intContractTypeId, tmp.intContractTypeId)
-								AND tmp.intCompanyLocationId = ISNULL(cd.intCompanyLocationId, tmp.intCompanyLocationId)
+								AND ISNULL(tmp.intContractTypeId, ch.intContractTypeId) = CASE WHEN @ysnEnterSeparateMarketBasisDifferentialsForBuyVsSell = 1
+														THEN CASE WHEN ISNULL(tmp.intContractTypeId, 0) = 0 THEN ISNULL(tmp.intContractTypeId, ch.intContractTypeId) ELSE ch.intContractTypeId END
+														ELSE ISNULL(tmp.intContractTypeId, ch.intContractTypeId) END 
+								AND ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) = CASE WHEN @strEvaluationByZone <> 'Company'
+																							THEN cd.intCompanyLocationId
+																						ELSE ISNULL(tmp.intCompanyLocationId, cd.intCompanyLocationId) END
 								AND tmp.strPeriodTo = CASE WHEN @ysnEnterForwardCurveForMarketBasisDifferential = 1
 																THEN CASE WHEN tmp.strPeriodTo = '' THEN tmp.strPeriodTo ELSE dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy') END
 															ELSE tmp.strPeriodTo END
@@ -3637,6 +3651,10 @@ BEGIN TRY
 		IF @strEvaluationByZone = 'Location'
 		BEGIN
 			SET @strZoneIds = ''
+		END
+		ELSE IF @strEvaluationByZone = 'Market Zone'
+		BEGIN
+			SET @strLocationIds = ''
 		END
 		ELSE IF @strEvaluationByZone = 'Company'
 		BEGIN

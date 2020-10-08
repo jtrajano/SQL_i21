@@ -577,6 +577,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
     AS
 
 	declare @intActiveContractDetailId int = 0;
+	declare @intActiveContractHeaderId int = 0;
 	declare @intPricingTypeId int = 0;
 	declare @dblSequenceQuantity numeric(18,6) = 0.00;
 	declare @intPricingStatus int = 0;
@@ -588,6 +589,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	declare @dblRemainingAppliedQuantity numeric(18,6) = 0;
 	declare @ysnLoad bit;
 	declare @ErrMsg nvarchar(max);
+	declare @ysnMultiPrice bit = 0;
 
 	begin try
 
@@ -599,7 +601,20 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 		end
 		else
 		begin
-			select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+			if exists (select top 1 1 from tblCTContractHeader ch inner join tblCTContractDetail cd on ch.intContractHeaderId = cd.intContractHeaderId where cd.intContractDetailId = @intActiveContractDetailId and ch.ysnMultiplePriceFixation is not null)
+			begin
+				set @ysnMultiPrice = 1
+				select top 1 @intActiveContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intActiveContractDetailId
+			end
+
+			if @ysnMultiPrice = 1
+			begin
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractHeaderId = @intActiveContractHeaderId and pfd.intPriceFixationId = pf.intPriceFixationId
+			end
+			else
+			begin
+				select @dblPricedQuantity = isnull(sum(pfd.dblQuantity),0.00) from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd with (updlock) where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId
+			end			
 			
 			if (@dblPricedQuantity = 0)
 			begin
@@ -618,8 +633,10 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			end
 		end
 
-		update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
-
+		if not exists(select top 1 1 from tblCTContractDetail where intPricingStatus = @intPricingStatus and intContractDetailId = @intActiveContractDetailId)
+		begin
+			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
+		end
 
 		declare @Pricing table (
 			intId int
@@ -643,44 +660,47 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			,dblCorrectAppliedAndPriced numeric(18,6) null
 		)
 
-		insert into @Pricing
-		select
-			intId = convert(int,ROW_NUMBER() over (order by pfd.intPriceFixationDetailId))
-			,ch.intContractHeaderId
-			,ch.ysnLoad
-			,cd.intContractDetailId
-			,dblSequenceQuantity = cd.dblQuantity
-			,cd.dblBalance
-			,dblAppliedQuantity = cd.dblQuantity - cd.dblBalance
-			,cd.intNoOfLoad
-			,cd.dblBalanceLoad
-			,dblAppliedLoad = cd.intNoOfLoad - cd.dblBalanceLoad
-			,pf.intPriceFixationId
-			,pfd.intPriceFixationDetailId
-			,intPricingNumber = ROW_NUMBER() over (partition by pf.intPriceFixationId order by pfd.intPriceFixationDetailId)
-			,pfd.intNumber
-			,dblPricedQuantity = isnull(invoiced.dblQtyShipped, pfd.dblQuantity)
-			,pfd.dblQuantityAppliedAndPriced
-			,pfd.dblLoadPriced
-			,pfd.dblLoadAppliedAndPriced
-			,dblCorrectAppliedAndPriced = null
-		from tblCTPriceFixation pf
-		join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
-		join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
-		join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
-		join tblCTContractType ct on ct.intContractTypeId = ch.intContractTypeId
-		left join (
-			select 
-				ar.intPriceFixationDetailId, dblQtyShipped = sum(di.dblQtyShipped)
-			from
-				tblCTPriceFixationDetailAPAR ar
-				join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId
-			group by
-				ar.intPriceFixationDetailId
-		) invoiced on invoiced.intPriceFixationDetailId = pfd.intPriceFixationDetailId
-		where pf.intContractDetailId = @intActiveContractDetailId
-		and ct.strContractType = 'Sale'
-		order by pfd.intPriceFixationDetailId
+		if @ysnMultiPrice <> 1
+		begin
+			insert into @Pricing
+			select
+				intId = convert(int,ROW_NUMBER() over (order by pfd.intPriceFixationDetailId))
+				,ch.intContractHeaderId
+				,ch.ysnLoad
+				,cd.intContractDetailId
+				,dblSequenceQuantity = cd.dblQuantity
+				,cd.dblBalance
+				,dblAppliedQuantity = cd.dblQuantity - cd.dblBalance
+				,cd.intNoOfLoad
+				,cd.dblBalanceLoad
+				,dblAppliedLoad = cd.intNoOfLoad - cd.dblBalanceLoad
+				,pf.intPriceFixationId
+				,pfd.intPriceFixationDetailId
+				,intPricingNumber = ROW_NUMBER() over (partition by pf.intPriceFixationId order by pfd.intPriceFixationDetailId)
+				,pfd.intNumber
+				,dblPricedQuantity = isnull(invoiced.dblQtyShipped, pfd.dblQuantity)
+				,pfd.dblQuantityAppliedAndPriced
+				,pfd.dblLoadPriced
+				,pfd.dblLoadAppliedAndPriced
+				,dblCorrectAppliedAndPriced = null
+			from tblCTPriceFixation pf
+			join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+			join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId
+			join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+			join tblCTContractType ct on ct.intContractTypeId = ch.intContractTypeId
+			left join (
+				select 
+					ar.intPriceFixationDetailId, dblQtyShipped = sum(di.dblQtyShipped)
+				from
+					tblCTPriceFixationDetailAPAR ar
+					join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId
+				group by
+					ar.intPriceFixationDetailId
+			) invoiced on invoiced.intPriceFixationDetailId = pfd.intPriceFixationDetailId
+			where pf.intContractDetailId = @intActiveContractDetailId
+			and ct.strContractType = 'Sale'
+			order by pfd.intPriceFixationDetailId
+		end
 
 		select @intActiveId = min(intId) from @Pricing
 		while (@intActiveId is not null)
