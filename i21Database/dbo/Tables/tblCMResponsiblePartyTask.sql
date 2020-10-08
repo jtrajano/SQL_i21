@@ -1,5 +1,5 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyTask](
-	[intTaskId] [int] NOT NULL,
+	[intTaskId] [int] IDENTITY(1,1) NOT NULL,
 	[strTaskId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[intResponsibleBankAccountId] [int] NULL,
 	[intEntityId] [int] NULL,
