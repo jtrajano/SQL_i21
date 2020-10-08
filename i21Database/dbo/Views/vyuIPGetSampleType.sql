@@ -9,6 +9,7 @@ SELECT ST.intSampleTypeId
 	,ST.strApprovalBase
 	,ST.intSampleLabelId
 	,ST.ysnAdjustInventoryQtyBySampleQty
+	,ST.ysnPartyMandatory
 	,ST.intApprovalLotStatusId
 	,ST.intRejectionLotStatusId
 	,ST.intBondedApprovalLotStatusId
