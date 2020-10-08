@@ -174,6 +174,7 @@ BEGIN TRY
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
+	DECLARE @SettleVoucherCreate2 AS SettleVoucherCreate
 	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
 	DECLARE @intStorageHistoryId AS INT
 	DECLARE @VoucherIds AS Id
@@ -1183,7 +1184,7 @@ BEGIN TRY
 					BREAK;
 			END
 						
-			DECLARE @SettleVoucherCreate2 AS SettleVoucherCreate
+			DELETE FROM @SettleVoucherCreate2
 			IF(SELECT TOP 1 1 FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId) > 0
 			BEGIN
 				INSERT INTO @SettleVoucherCreate2
