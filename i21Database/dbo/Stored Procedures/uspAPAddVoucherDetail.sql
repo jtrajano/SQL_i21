@@ -144,16 +144,18 @@ SELECT TOP 100 PERCENT
 	,dblCostUnitQty						=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
 												THEN ISNULL(contractItemCostUOM.dblUnitQty, A.dblCostUnitQty)
 											ELSE A.dblCostUnitQty END
-	,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
-												THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
-														THEN ctDetail.dblSeqPrice
-													ELSE 
-														(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
-															THEN ctDetail.dblSeqPrice
-															ELSE A.dblCost
-														END)
-													END)
-											ELSE A.dblCost END
+	/*WE CAN EXPECT THAT THE COST BEING PASSED IS ALREADY SANITIZED AND USED IT AS IT IS*/
+	,dblCost							=	A.dblCost
+	-- ,dblCost							=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
+	-- 											THEN (CASE WHEN ctDetail.dblSeqPrice > 0 
+	-- 													THEN ctDetail.dblSeqPrice
+	-- 												ELSE 
+	-- 													(CASE WHEN A.dblCost = 0 AND ctDetail.dblSeqPrice > 0
+	-- 														THEN ctDetail.dblSeqPrice
+	-- 														ELSE A.dblCost
+	-- 													END)
+	-- 												END)
+	-- 										ELSE A.dblCost END
 	,dblOldCost							=	A.dblOldCost
 	/*Quantity info*/					
 	,intUnitOfMeasureId					=	CASE WHEN item.intItemId IS NOT NULL AND item.strType IN ('Inventory','Finished Good','Raw Material') AND A.intTransactionType = 1
