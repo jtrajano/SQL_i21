@@ -12,6 +12,10 @@
 	CONSTRAINT [FK_tblGRSettleContract_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]),	
 )
 
+GO
+
 CREATE NONCLUSTERED INDEX IX_tblGRSettleContract_intContractDetailId
-ON tblGRSettleContract (intSettleStorageId ASC)
-INCLUDE (intContractDetailId,dblUnits);
+	ON tblGRSettleContract (intSettleStorageId ASC)
+	INCLUDE (intContractDetailId,dblUnits);
+
+GO

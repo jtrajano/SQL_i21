@@ -10,5 +10,9 @@
 	CONSTRAINT [FK_tblGRSettleStorageTicket_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [tblGRCustomerStorage]([intCustomerStorageId]),	
 )
 
-CREATE NONCLUSTERED INDEX IX_tblGRSettleStorageTicket_intSettleStorageId
-ON tblGRSettleStorageTicket (intSettleStorageId ASC)
+GO
+
+CREATE NONCLUSTERED INDEX IX_tblGRSettleStorageTicket_intSettleStorageId 
+	ON tblGRSettleStorageTicket (intSettleStorageId ASC);
+
+GO
