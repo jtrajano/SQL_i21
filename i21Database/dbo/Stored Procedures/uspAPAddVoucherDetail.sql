@@ -116,6 +116,7 @@ SELECT TOP 100 PERCENT
 	,intContractDetailId				=	ctDetail.intContractDetailId
 	,intPriceFixationDetailId			=	A.intPriceFixationDetailId
 	,intContractSeq						=	ctDetail.intContractSeq
+	,intDiscountId						=	A.intDiscountId
 	/*Prepaid info*/					
 	,dblPrepayPercentage				=	A.dblPrepayPercentage
 	,intPrepayTypeId					=	A.intPrepayTypeId
@@ -391,6 +392,7 @@ INSERT
 	,intContractDetailId	
 	,intPriceFixationDetailId			
 	,intContractSeq						
+	,intDiscountId					
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
 	,intPrepayTypeId					
@@ -482,6 +484,7 @@ VALUES
 	,intContractDetailId	
 	,intPriceFixationDetailId			
 	,intContractSeq						
+	,intDiscountId			
 	/*Prepaid info*/					
 	,dblPrepayPercentage				
 	,intPrepayTypeId					

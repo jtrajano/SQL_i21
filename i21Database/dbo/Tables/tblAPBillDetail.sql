@@ -35,6 +35,7 @@
 	[intPrepayTransactionId]    INT             NULL,
 	[intReallocationId]    INT             NULL,
 	[intItemBundleId]	INT 	NULL,
+	[intDiscountId]	INT NULL,
     [dblTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
 	[dblBundleTotal]        DECIMAL (18, 6) NOT NULL DEFAULT 0,
     [intConcurrencyId] INT NOT NULL DEFAULT 0, 
