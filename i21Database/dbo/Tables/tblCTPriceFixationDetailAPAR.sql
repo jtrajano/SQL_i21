@@ -7,8 +7,8 @@
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
 	intSourceId						INT,
-	dblQuantity						INT,
-	dtmCreatedDate					INT,
+	dblQuantity						numeric(18,6),
+	dtmCreatedDate					DATETIME,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),

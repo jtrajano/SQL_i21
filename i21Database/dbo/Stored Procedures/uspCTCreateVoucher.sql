@@ -713,8 +713,6 @@ begin try
 			   ,dblQtyReceived
 			from
 				#returnData
-			where
-				isnull(intPriceFixationDetailId,0) > 0 --Exclude Bill Deatail that has no pricing layer (eg. Charges)
 
 			--Code here to process the return table from uspAPCreateVoucher
 			if exists (select top 1 1 from @CreatedVoucher)
@@ -744,7 +742,6 @@ begin try
 					select @intCreatedInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId;
 
 					--1. Process Pro Rated Charges
-					
 					EXEC uspICAddProRatedReceiptChargesToVoucher
 						@intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId
 						,@intBillId = @intCreatedBillId
@@ -752,25 +749,27 @@ begin try
 						
 
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
-					
-					INSERT INTO tblCTPriceFixationDetailAPAR(
-						intPriceFixationDetailId
-						,intBillId
-						,intBillDetailId
-						,intSourceId
-						,dblQuantity
-						,dtmCreatedDate
-						,intConcurrencyId  
-					)  
-					SELECT   
-						intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
-						,intBillId = @intCreatedBillId  
-						,intBillDetailId = @intCreatedBillDetailId 
-						,intSourceId = @intCreatedInventoryReceiptItemId
-						,dblQuantity = @dblCreatedQtyReceived
-						,dtmCreatedDate = getdate()
-						,intConcurrencyId = 1 
-					
+					if (isnull(@intCreatedPriceFixationDetailId,0) > 0)
+					begin
+						INSERT INTO tblCTPriceFixationDetailAPAR(
+							intPriceFixationDetailId
+							,intBillId
+							,intBillDetailId
+							,intSourceId
+							,dblQuantity
+							,dtmCreatedDate
+							,intConcurrencyId  
+						)  
+						SELECT   
+							intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
+							,intBillId = @intCreatedBillId  
+							,intBillDetailId = @intCreatedBillDetailId 
+							,intSourceId = @intCreatedInventoryReceiptItemId
+							,dblQuantity = @dblCreatedQtyReceived
+							,dtmCreatedDate = getdate()
+							,intConcurrencyId = 1 
+					end
+
 
 					--4. Apply PrePay
 					select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
