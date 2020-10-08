@@ -81,7 +81,7 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[intInvoiceId]					INT NULL,
 	[intBuybackChargeId]			INT NULL,
 	[intTicketId]					INT NULL,
-	[intDiscountId]					INT NULL,
+	[intLinkingId]					INT NULL,
 	/*Quantity info*/
 	[dblOrderQty]					DECIMAL(38,15) NOT NULL DEFAULT(0),	--IF NOT PROVIDED, WE WILL DEFAULT TO dblQuantityToBill
 	[dblOrderUnitQty]				DECIMAL(38,20) NOT NULL DEFAULT(1),	
