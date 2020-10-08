@@ -2134,9 +2134,13 @@ BEGIN TRY
 														ELSE b.intItemUOMId
 													END
 					,[dblCost]						= 
-														case when @doPartialHistory = 1 then
-															case WHEN (intItemType = 2 or intItemType = 3) then a.dblCashPrice
-															else isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) end
+														case 
+															when @doPartialHistory = 1 
+																then
+																	case 
+																		when intItemType = 1 then isnull(availableQtyForVoucher.dblCashPrice, a.dblCashPrice) 
+																		else a.dblCashPrice 
+																	end
 														else
 															CASE
 																when (availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 and intItemType = 1) or (@ysnFromPriceBasisContract = 0 and availableQtyForVoucher.intPricingTypeIdHeader = 2 and availableQtyForVoucher.intPricingTypeId /*sequence*/ = 1 and intItemType = 1) 
