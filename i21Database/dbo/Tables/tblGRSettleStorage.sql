@@ -34,5 +34,9 @@
 	CONSTRAINT [FK_tblGRSettleStorage_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
 )
 
+GO
+
 CREATE NONCLUSTERED INDEX IX_tblGRSettleStorage_intParentSettleStorageId
-ON tblGRSettleStorage (intParentSettleStorageId ASC)
+	ON tblGRSettleStorage (intParentSettleStorageId ASC);
+	
+GO
