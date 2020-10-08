@@ -367,6 +367,7 @@ BEGIN TRY
 				BEGIN
 					UPDATE tblLGLoadContainer
 					SET ysnNewContainer = 0
+						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intLoadId = @intLoadId
 						AND EXISTS (
 							SELECT 1
@@ -376,10 +377,12 @@ BEGIN TRY
 
 					UPDATE tblLGLoad
 					SET strExternalShipmentNumber = @strParam
+						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intLoadId = @intLoadId
 
 					UPDATE tblLGLoadDetail
 					SET strExternalShipmentItemNumber = @strDeliveryItemNo
+						,intConcurrencyId = intConcurrencyId + 1
 					WHERE intLoadDetailId = @strTrackingNo
 						AND intLoadId = @intLoadId
 				END
@@ -504,6 +507,7 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblLGLoadContainer
 				SET ysnNewContainer = 0
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intLoadId = @intLoadId
 					AND EXISTS (
 						SELECT 1
@@ -580,6 +584,7 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblICInventoryReceiptItem
 				SET ysnExported = 1
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intInventoryReceiptId = @intReceiptId
 
 				UPDATE tblIPReceiptError
@@ -664,6 +669,7 @@ BEGIN TRY
 			BEGIN
 				UPDATE tblICInventoryReceiptItem
 				SET ysnExported = 1
+					,intConcurrencyId = intConcurrencyId + 1
 				WHERE intInventoryReceiptId = @intReceiptId
 
 				UPDATE tblIPReceiptError
