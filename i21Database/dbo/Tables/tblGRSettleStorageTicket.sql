@@ -11,4 +11,4 @@
 )
 
 CREATE NONCLUSTERED INDEX IX_tblGRSettleStorageTicket_intSettleStorageId
-ON tblGRSettleStorageTicket (intSettleStorageId)
+ON tblGRSettleStorageTicket (intSettleStorageId ASC)

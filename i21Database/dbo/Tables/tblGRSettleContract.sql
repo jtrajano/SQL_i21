@@ -13,5 +13,5 @@
 )
 
 CREATE NONCLUSTERED INDEX IX_tblGRSettleContract_intContractDetailId
-ON tblGRSettleContract (intSettleStorageId)
+ON tblGRSettleContract (intSettleStorageId ASC)
 INCLUDE (intContractDetailId,dblUnits);
