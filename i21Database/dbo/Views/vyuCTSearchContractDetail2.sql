@@ -240,7 +240,7 @@ select
   y.strUnitMeasure, 
   a.dblAdjustment, 
   z.dblAllocatedQty, 
-  za.strApprovalBasis, 
+  strApprovalBasis = au.strWeightGradeDesc, 
   ysnApproved = ISNULL(TR.ysnOnceApproved,0), --convert(bit, 0), 
   dblApprovedQty = aa.dblRepresentingQty, 
   strAssociationName = zb.strName, 
@@ -361,7 +361,7 @@ select
       isnull(v.dblUnitQty, 0) / isnull(bt.dblUnitQty, 0)
     ) end
   ), 
-  strQualityApproval = bh.strGrade, 
+  strQualityApproval = QA.strSampleStatus,
   dblQtyInCommodityStockUOM = (
     case when isnull(v.dblUnitQty, 0) = 0 
     or isnull(bu.dblUnitQty, 0) = 0 then null when isnull(v.dblUnitQty, 0) = isnull(bu.dblUnitQty, 0) then a.dblQuantity else a.dblQuantity * (
@@ -438,7 +438,7 @@ from
   left join tblICItemUOM x  with (nolock) on x.intItemUOMId = a.intAdjItemUOMId 
   left join tblICUnitMeasure y  with (nolock) on y.intUnitMeasureId = x.intUnitMeasureId 
   left join lgalloationP z on z.intContractDetailId = a.intContractDetailId 
-  left join tblCTApprovalBasis za  with (nolock) on za.intApprovalBasisId = b.intApprovalBasisId 
+  --left join tblCTApprovalBasis za  with (nolock) on za.intApprovalBasisId = b.intApprovalBasisId 
   left join approved aa on aa.intContractDetailId = a.intContractDetailId 
   left join tblCTAssociation zb  with (nolock) on zb.intAssociationId = b.intAssociationId 
   left join hedge ab on ab.intContractDetailId = a.intContractDetailId 
@@ -526,3 +526,4 @@ from
 		) t
 		WHERE intRowNum = 1
   ) TR ON TR.intRecordId = b.intContractHeaderId
+  OUTER APPLY dbo.fnCTGetSampleDetail(a.intContractDetailId) QA
