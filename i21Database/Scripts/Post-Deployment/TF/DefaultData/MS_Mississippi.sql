@@ -1,14 +1,13 @@
-﻿-- Declare the Tax Authority Code that will be used all throughout Mississippi Default Data
-DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MS'
-	, @TaxAuthorityId INT
-
-SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
-
-IF(@TaxAuthorityId IS NOT NULL)
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'MS' AND ysnFilingForThisTA = 1)
 BEGIN
 	PRINT ('Deploying Mississippi Tax Forms')
 END
 GO
+
+DECLARE @TaxAuthorityCode NVARCHAR(10) = 'MS'
+	, @TaxAuthorityId INT
+
+SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode
 
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN

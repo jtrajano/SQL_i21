@@ -1,15 +1,14 @@
-﻿-- Declare the Tax Authority Code that will be used all throughout South Carolina Default Data
+﻿IF EXISTS(SELECT TOP 1 1 FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = 'SC' AND ysnFilingForThisTA = 1)
+BEGIN
+	PRINT ('Deploying South Carolina Tax Forms')
+END
+GO
+
 DECLARE @TaxAuthorityCode NVARCHAR(10) = 'SC'
 	, @TaxAuthorityId INT
 	
 SELECT @TaxAuthorityId = intTaxAuthorityId FROM tblTFTaxAuthority WHERE strTaxAuthorityCode = @TaxAuthorityCode AND ysnFilingForThisTA = 1
 
-IF(@TaxAuthorityId IS NOT NULL)
-BEGIN
-	PRINT ('Deploying South Carolina Tax Forms')
-END
-GO
-	
 IF(@TaxAuthorityId IS NOT NULL)
 BEGIN
 	-- Product Codes
