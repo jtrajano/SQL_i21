@@ -102,8 +102,8 @@ FROM (
 					FROM tblRKM2MCounterPartyExposure CPE
 					JOIN tblRKM2MHeader M2M ON M2M.intM2MHeaderId = CPE.intM2MHeaderId
 					JOIN tblAPVendor e ON e.intEntityId = CPE.intVendorId
-					JOIN tblICCommodityUnitMeasure fromUOM ON M2M.intCommodityId = fromUOM.intCommodityId AND fromUOM.intUnitMeasureId = M2M.intQtyUOMId
-					JOIN tblICCommodityUnitMeasure toUOM ON M2M.intCommodityId = toUOM.intCommodityId AND toUOM.intUnitMeasureId = e.intRiskUnitOfMeasureId
+					LEFT JOIN tblICCommodityUnitMeasure fromUOM ON M2M.intCommodityId = fromUOM.intCommodityId AND fromUOM.intUnitMeasureId = M2M.intQtyUOMId
+					LEFT JOIN tblICCommodityUnitMeasure toUOM ON M2M.intCommodityId = toUOM.intCommodityId AND toUOM.intUnitMeasureId = e.intRiskUnitOfMeasureId
 					LEFT JOIN tblRKVendorPriceFixationLimit pf ON pf.intVendorPriceFixationLimitId = e.intRiskVendorPriceFixationLimitId
 				) t1
 				GROUP BY strEntityName
