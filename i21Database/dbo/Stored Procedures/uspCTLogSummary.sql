@@ -2088,7 +2088,7 @@ BEGIN TRY
 			AND intContractDetailId = @currentContractDetalId	
 
 			DECLARE @ysnNew BIT
-			SELECT @ysnNew = CASE WHEN COUNT(*) = 0 THEN 1 ELSE 0 END FROM @cbLogPrev
+			SELECT @ysnNew = CASE WHEN COUNT(1) = 0 THEN 1 ELSE 0 END FROM @cbLogPrev
 
 			IF @ysnNew = 1
 			BEGIN
