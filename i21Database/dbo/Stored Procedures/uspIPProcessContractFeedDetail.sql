@@ -118,6 +118,7 @@ BEGIN TRY
 			UPDATE tblIPContractFeedHeader
 			SET strFeedStatus = 'Processed'
 				,strMessage = NULL
+				,intStatusId =1
 			WHERE intContractFeedHeaderId = @intContractFeedHeaderId
 
 			EXEC sp_xml_removedocument @idoc
@@ -139,6 +140,7 @@ BEGIN TRY
 			UPDATE tblIPContractFeedHeader
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId =0
 			WHERE intContractFeedHeaderId = @intContractFeedHeaderId
 		END CATCH
 

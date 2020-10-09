@@ -19,4 +19,5 @@
 	,intTransactionId int
 	,intCompanyId int
 	,ysnMailSent Bit
+	,intStatusId int
 )
