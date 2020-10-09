@@ -526,4 +526,16 @@ from
 		) t
 		WHERE intRowNum = 1
   ) TR ON TR.intRecordId = b.intContractHeaderId
-  OUTER APPLY dbo.fnCTGetSampleDetail(a.intContractDetailId) QA
+  OUTER APPLY 
+  (
+    SELECT TOP 1 strSampleStatus = 
+      CASE 
+        WHEN s.intSampleStatusId = 3 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId,s.intRepresentingUOMId,c.intUnitMeasureId,s.dblRepresentingQty)) >= 100 THEN 'Approved' ELSE 'Partially Approved' END) 
+        WHEN s.intSampleStatusId = 4 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId,s.intRepresentingUOMId,c.intUnitMeasureId, s.dblRepresentingQty)) >= 100 THEN 'Rejected' ELSE 'Partially Rejected' END)
+      END 
+    FROM tblQMSample s
+    INNER JOIN tblCTContractDetail c ON s.intContractDetailId = c.intContractDetailId
+    WHERE c.intContractDetailId = a.intContractDetailId
+    GROUP BY s.intSampleId,s.intSampleStatusId
+    ORDER BY s.intSampleId DESC
+  ) QA
