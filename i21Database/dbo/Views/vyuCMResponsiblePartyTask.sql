@@ -1,14 +1,14 @@
  CREATE VIEW dbo.vyuCMResponsiblePartyTask
  AS
  WITH BT AS(
- SELECT ysnPosted, strTransactionId FROM tblCMBankTransaction union
- select ysnPosted, strTransactionId from tblCMBankTransfer
+ SELECT ysnPosted, dblAmount, strTransactionId FROM tblCMBankTransaction union
+ select ysnPosted, dblAmount, strTransactionId from tblCMBankTransfer
  )
  SELECT                 
     S.intBankStatementImportId,
     S.strBankStatementImportId,
     T.strNotes,
-    S.strReferenceNo,
+    BT.dblAmount,
     T.dtmDateCreated,
     E.strName strResponsibleEntity,
 	T.strTransactionId strRelatedTransaction,
