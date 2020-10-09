@@ -3554,6 +3554,7 @@ BEGIN TRY
 						,intContractCostRefId
 						,intContractDetailId
 						,intConcurrencyId
+						,intPrevConcurrencyId
 						)
 					SELECT @intItemId
 						,@intVendorId
@@ -3589,6 +3590,7 @@ BEGIN TRY
 						,intContractCostId
 						,intContractDetailId
 						,1
+						,0
 					FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (
 							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -4058,31 +4060,31 @@ BEGIN TRY
 				FROM tblCTContractHeader
 				WHERE intContractHeaderId = @intNewContractHeaderId
 
-				INSERT INTO @config (
-					strApprovalFor
-					,strValue
-					)
-				SELECT 'Contract Type'
-					,'Purchase'
+				--INSERT INTO @config (
+				--	strApprovalFor
+				--	,strValue
+				--	)
+				--SELECT 'Contract Type'
+				--	,'Purchase'
 
-				SELECT @strApprover = strApprover
-				FROM tblIPMultiCompany
-				WHERE intCompanyId = @intCompanyRefId
+				--SELECT @strApprover = strApprover
+				--FROM tblIPMultiCompany
+				--WHERE intCompanyId = @intCompanyRefId
 
-				SELECT @intCurrentUserEntityId = intEntityId
-				FROM tblSMUserSecurity
-				WHERE strUserName = @strApprover
+				--SELECT @intCurrentUserEntityId = intEntityId
+				--FROM tblSMUserSecurity
+				--WHERE strUserName = @strApprover
 
 				IF @intCurrentUserEntityId IS NULL
 					SELECT @intCurrentUserEntityId = @intCreatedById
 
-				EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.Contract'
-					,@recordId = @intNewContractHeaderId
-					,@transactionNo = @strNewContractNumber
-					,@transactionEntityId = @intEntityId
-					,@currentUserEntityId = @intCurrentUserEntityId
-					,@amount = 0
-					,@approverConfiguration = @config
+				--EXEC uspSMSubmitTransaction @type = 'ContractManagement.view.Contract'
+				--	,@recordId = @intNewContractHeaderId
+				--	,@transactionNo = @strNewContractNumber
+				--	,@transactionEntityId = @intEntityId
+				--	,@currentUserEntityId = @intCurrentUserEntityId
+				--	,@amount = 0
+				--	,@approverConfiguration = @config
 
 				SELECT @intContractScreenId = intScreenId
 				FROM tblSMScreen
@@ -4092,6 +4094,115 @@ BEGIN TRY
 				FROM tblSMTransaction
 				WHERE intRecordId = @intNewContractHeaderId
 					AND intScreenId = @intContractScreenId
+
+				IF @intTransactionRefId IS NULL
+				BEGIN
+					INSERT INTO tblSMTransaction (
+						intScreenId
+						,intRecordId
+						,strTransactionNo
+						,intEntityId
+						,strApprovalStatus
+						,intConcurrencyId
+						)
+					SELECT @intContractScreenId
+						,@intNewContractHeaderId
+						,@strNewContractNumber
+						,@intEntityId
+						,'Waiting for Submit'
+						,1
+
+					SELECT @intTransactionRefId = SCOPE_IDENTITY()
+					INSERT INTO tblSMApproval (
+						dtmDate
+						,dblAmount
+						,dtmDueDate
+						,intSubmittedById
+						,strStatus
+						,ysnCurrent
+						,intScreenId
+						,ysnVisible
+						,intOrder
+						,intTransactionId
+						)
+					SELECT GETUTCDATE()
+						,0
+						,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+						,@intCurrentUserEntityId
+						,'Waiting for Submit'
+						,1
+						,@intContractScreenId
+						,1
+						,1
+						,@intTransactionRefId
+				END
+				ELSE
+				BEGIN
+					IF @ysnApproval = 1
+					BEGIN
+						UPDATE tblSMTransaction
+						SET strApprovalStatus = 'Waiting for Submit'
+							,intConcurrencyId = intConcurrencyId + 1
+						WHERE intTransactionId = @intTransactionRefId
+
+						UPDATE tblSMApproval
+						SET ysnCurrent = 0 
+						WHERE intTransactionId = @intTransactionRefId 
+
+						DECLARE @maxOrder INT = ISNULL((SELECT MAX(intOrder) from tblSMApproval where intTransactionId = @intTransactionRefId), 0)
+						-- Increment this
+						SELECT @maxOrder = @maxOrder + 1
+						INSERT INTO tblSMApproval (
+							dtmDate
+							,dblAmount
+							,dtmDueDate
+							,intSubmittedById
+							,strStatus
+							,ysnCurrent
+							,intScreenId
+							,ysnVisible
+							,intOrder
+							,intTransactionId
+							,intApproverId
+							)
+						SELECT GETUTCDATE()
+							,0
+							,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+							,@intCurrentUserEntityId
+							,'Edited Transaction'
+							,0
+							,@intContractScreenId
+							,1
+							,@maxOrder
+							,@intTransactionRefId
+							,@intCurrentUserEntityId
+
+						-- Increment this
+						SELECT @maxOrder = @maxOrder + 1
+						INSERT INTO tblSMApproval (
+							dtmDate
+							,dblAmount
+							,dtmDueDate
+							,intSubmittedById
+							,strStatus
+							,ysnCurrent
+							,intScreenId
+							,ysnVisible
+							,intOrder
+							,intTransactionId
+							)
+						SELECT GETUTCDATE()
+							,0
+							,Convert(DATETIME, Convert(CHAR, GETDATE(), 101))
+							,@intCurrentUserEntityId
+							,'Waiting for Submit'
+							,1
+							,@intContractScreenId
+							,1
+							,@maxOrder
+							,@intTransactionRefId
+					END
+				END
 
 				DECLARE @strSQL NVARCHAR(MAX)
 					,@strServerName NVARCHAR(50)
