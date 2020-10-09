@@ -36,9 +36,10 @@ BEGIN TRY
 	WHERE intMatchFuturesPSHeaderId = @intMatchFuturesPSHeaderId
 	
 	SELECT TOP 1 @strUserName = strExternalERPId
-		,@intEntityId = intEntityId
-	FROM tblEMEntity
-	WHERE strName = @strUserName
+		,@intEntityId = E.intEntityId
+	FROM tblEMEntity E
+	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
+	WHERE EC.strUserName = @strUserName
 
 	SELECT @intCurrencyId = intCurrencyId
 		, @BrokerAccount = strClearingAccountNumber
