@@ -130,7 +130,7 @@ BEGIN TRY
 
 		SELECT @strAdditionalInfo = '<strExternalContractNumber>' + @strExternalContractNumber + '</strExternalContractNumber>'
 
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + @strExternalEntity + '</strExternalEntity>'
+		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + [dbo].[fnEscapeXML](@strExternalEntity) + '</strExternalEntity>'
 
 		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 

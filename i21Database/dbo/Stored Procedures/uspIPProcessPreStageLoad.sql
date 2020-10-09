@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE dbo.uspIPProcessPreStageLoad
+﻿CREATE PROCEDURE dbo.uspIPProcessPreStageLoad (@ysnTruck BIT = 1)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -24,28 +24,59 @@ BEGIN TRY
 		,intToBookId INT
 		)
 
-	INSERT INTO @tblLGIntrCompLogisticsPreStg (
-		intLoadPreStageId
-		,intLoadId
-		,strFeedStatus
-		,dtmFeedDate
-		,strRowState
-		,strToTransactionType
-		,intToCompanyId
-		,intToCompanyLocationId
-		,intToBookId
-		)
-	SELECT intLoadPreStageId
-		,intLoadId
-		,strFeedStatus
-		,dtmFeedDate
-		,strRowState
-		,strToTransactionType
-		,intToCompanyId
-		,intToCompanyLocationId
-		,intToBookId
-	FROM dbo.tblLGIntrCompLogisticsPreStg
-	WHERE strFeedStatus IS NULL
+	IF @ysnTruck = 0
+	BEGIN
+		INSERT INTO @tblLGIntrCompLogisticsPreStg (
+			intLoadPreStageId
+			,intLoadId
+			,strFeedStatus
+			,dtmFeedDate
+			,strRowState
+			,strToTransactionType
+			,intToCompanyId
+			,intToCompanyLocationId
+			,intToBookId
+			)
+		SELECT intLoadPreStageId
+			,PS.intLoadId
+			,strFeedStatus
+			,dtmFeedDate
+			,strRowState
+			,strToTransactionType
+			,intToCompanyId
+			,intToCompanyLocationId
+			,intToBookId
+		FROM dbo.tblLGIntrCompLogisticsPreStg PS
+		JOIN tblLGLoadDetail LD ON LD.intLoadId = PS.intLoadId
+		JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
+			AND CD.intContractDetailRefId IS NOT NULL
+		WHERE strFeedStatus IS NULL
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblLGIntrCompLogisticsPreStg (
+			intLoadPreStageId
+			,intLoadId
+			,strFeedStatus
+			,dtmFeedDate
+			,strRowState
+			,strToTransactionType
+			,intToCompanyId
+			,intToCompanyLocationId
+			,intToBookId
+			)
+		SELECT intLoadPreStageId
+			,PS.intLoadId
+			,strFeedStatus
+			,dtmFeedDate
+			,strRowState
+			,strToTransactionType
+			,intToCompanyId
+			,intToCompanyLocationId
+			,intToBookId
+		FROM dbo.tblLGIntrCompLogisticsPreStg PS
+		WHERE strFeedStatus IS NULL
+	END
 
 	SELECT @intLoadPreStageId = MIN(intLoadPreStageId)
 	FROM @tblLGIntrCompLogisticsPreStg
