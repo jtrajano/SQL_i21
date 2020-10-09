@@ -614,7 +614,7 @@ BEGIN TRY
 			EXEC sp_xml_removedocument @idoc
 
 			UPDATE tblCTPriceContractStage
-			SET strFeedStatus = 'Processed'
+			SET strFeedStatus = 'Processed',intStatusId=1
 			WHERE intPriceContractStageId = @intPriceContractStageId
 		END
 
