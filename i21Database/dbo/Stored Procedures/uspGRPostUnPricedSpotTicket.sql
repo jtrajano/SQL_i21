@@ -341,7 +341,6 @@ BEGIN TRY
 					UPDATE SC
 					SET dblUnitPrice = @dblFuturesPrice
 					   ,dblUnitBasis = @dblFuturesBasis
-					   ,intBillId = @intCreatedBillId
 					FROM tblGRUnPricedSpotTicket SpotTicket
 					JOIN tblSCTicket SC 
 						ON SC.intTicketId = SpotTicket.intTicketId
