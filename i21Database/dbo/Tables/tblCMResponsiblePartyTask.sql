@@ -2,6 +2,7 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyTask](
 	[intTaskId] [int] IDENTITY(1,1) NOT NULL,
 	[strTaskId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[intResponsibleBankAccountId] [int] NULL,
+	[intActionId] INT NULL,
 	[intEntityId] [int] NULL,
 	[strTransactionId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
 	[strNotes] NVARCHAR(MAX),

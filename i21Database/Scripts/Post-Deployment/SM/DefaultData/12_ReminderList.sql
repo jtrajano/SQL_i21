@@ -1,4 +1,5 @@
-﻿GO
+﻿
+GO
 
 	IF EXISTS (SELECT TOP 1 1 FROM [tblSMReminderList] WHERE [strReminder] = N'Process' AND [strType] = N'General Journal Recurring')
 	BEGIN
@@ -1494,5 +1495,20 @@ BEGIN
 														'
 	WHERE [strReminder] = N'Pre-shipment Sample not yet approved' AND [strType] = N'Contract' 
 END
+--START RESPONSIBLE PARTY TASK
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMReminderList WHERE CHARINDEX('CashManagement.view.ResponsiblePartyTask', strNamespace) > 0 )
+	INSERT INTO tblSMReminderList(strReminder, strType,strMessage, strQuery,strNamespace, intSort, intConcurrencyId)
+	SELECT 'Process',	'Task',	'{0} {1} {2} unprocessed.',
+		'select intTaskId from vyuCMResponsiblePartyTask where isnull(ysnStatus,0) = 0 and intEntityId = {0}',
+		'CashManagement.view.ResponsiblePartyTask?showSearch=true&intEntityId={0}', 1, 1 
+
+ELSE
+	UPDATE tblSMReminderList
+	SET strReminder='Process', strType='Task',strMessage='{0} {1} {2} unprocessed.', 
+	strQuery='select intTaskId from vyuCMResponsiblePartyTask where isnull(ysnStatus,0) = 0 and intEntityId = {0}',
+	strNamespace='CashManagement.view.ResponsiblePartyTask?showSearch=true&intEntityId={0}'
+	WHERE CHARINDEX('CashManagement.view.ResponsiblePartyTask', strNamespace) > 0 
 GO
+--END RESPONSIBLE PARTY TASK
+
