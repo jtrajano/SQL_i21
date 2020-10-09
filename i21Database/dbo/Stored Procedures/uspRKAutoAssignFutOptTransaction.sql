@@ -14,11 +14,12 @@ BEGIN
          (       
          RowNumber int IDENTITY(1,1),     
          intLFutOptTransactionId int,    
-         intSFutOptTransactionId int  
+         intSFutOptTransactionId int,
+		 intMatchFuturesPSDetailId int
          )      
   
        INSERT INTO @tblExercisedAssignedDetail  
-       SELECT intLFutOptTransactionId,intSFutOptTransactionId FROM tblRKMatchFuturesPSDetail WHERE intMatchFuturesPSHeaderId= @intMatchFuturesPSHeaderId  
+       SELECT intLFutOptTransactionId,intSFutOptTransactionId, intMatchFuturesPSDetailId FROM tblRKMatchFuturesPSDetail WHERE intMatchFuturesPSHeaderId= @intMatchFuturesPSHeaderId  
   
        DECLARE @mRowNumber int  
        SELECT @mRowNumber=MIN(RowNumber) FROM @tblExercisedAssignedDetail      
@@ -27,12 +28,14 @@ BEGIN
 
               DECLARE @intLFutOptTransactionId int = NULL    
               DECLARE @intSFutOptTransactionId int = NULL  
+			  DECLARE @intMatchFuturesPSDetailId int = NULL
   
-              SELECT @intLFutOptTransactionId=intLFutOptTransactionId,@intSFutOptTransactionId=intSFutOptTransactionId   
+              SELECT @intLFutOptTransactionId=intLFutOptTransactionId,@intSFutOptTransactionId=intSFutOptTransactionId,@intMatchFuturesPSDetailId = intMatchFuturesPSDetailId   
               FROM @tblExercisedAssignedDetail WHERE RowNumber=@mRowNumber  
    
 
-              IF EXISTS(SELECT * FROM  tblRKAssignFuturesToContractSummary where intFutOptTransactionId in(@intLFutOptTransactionId,@intSFutOptTransactionId) AND ysnIsHedged = 1 )  
+              IF EXISTS(SELECT * FROM  tblRKAssignFuturesToContractSummary where intFutOptTransactionId in(@intLFutOptTransactionId,@intSFutOptTransactionId) AND ysnIsHedged = 1 ) 
+			  AND NOT EXISTS (SELECT * FROM tblRKAssignFuturesToContractSummary WHERE intMatchFuturesPSDetailId = @intMatchFuturesPSDetailId)
               BEGIN  
   
                      IF (SELECT ISNULL(SUM(ISNULL(dblHedgedLots,0) + ISNULL(dblAssignedLots,0)),0) FROM  tblRKAssignFuturesToContractSummary   
@@ -72,18 +75,35 @@ BEGIN
                         --           NOT IN(SELECT   intContractDetailId   
                         --                  FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intLFutOptTransactionId)  
                         --                  AND ISNULL(cd.intContractDetailId,0)  <> 0  
-							INSERT INTO tblRKAssignFuturesToContractSummary   
-							SELECT TOP 1 @intAssignFuturesToContractHeaderId,  
-								1,  
-								s.intContractHeaderId,
-								NULL,   
-								GETDATE(),@intLFutOptTransactionId,dblMatchQty,0,0,null FROM tblRKMatchFuturesPSDetail ps  
-							JOIN tblRKAssignFuturesToContractSummary s on ps.intSFutOptTransactionId=intFutOptTransactionId   
+							INSERT INTO tblRKAssignFuturesToContractSummary(
+								intAssignFuturesToContractHeaderId
+								,intConcurrencyId
+								,intContractHeaderId
+								,intContractDetailId
+								,dtmMatchDate
+								,intFutOptTransactionId
+								,dblAssignedLots
+								,dblHedgedLots
+								,ysnIsHedged
+								,intFutOptAssignedId
+								,intMatchFuturesPSDetailId
+							)   
+							SELECT TOP 1 
+								@intAssignFuturesToContractHeaderId 
+								,intConcurrencyId = 1  
+								,s.intContractHeaderId
+								,intContractDetailId = NULL   
+								, dtmMatchDate = GETDATE()
+								,@intLFutOptTransactionId
+								,dblAssignedLots = dblMatchQty
+								,dblHedgedLots = 0
+								,ysnIsHedged = 0
+								,intFutOptAssignedId = null 
+								,ps.intMatchFuturesPSDetailId
+							FROM tblRKMatchFuturesPSDetail ps  
+							JOIN tblRKAssignFuturesToContractSummary s on ps.intSFutOptTransactionId=intFutOptTransactionId
 							WHERE intMatchFuturesPSHeaderId= @intMatchFuturesPSHeaderId  and intLFutOptTransactionId=@intLFutOptTransactionId  
 							AND s.intFutOptTransactionId  = @intSFutOptTransactionId  
-                                  --  AND s.intContractHeaderId    
-                                  --not  IN(SELECT   intContractHeaderId   
-                                  --              FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intSFutOptTransactionId)  
                                                 AND ISNULL(s.intContractHeaderId,0)  <> 0
                              
 							END
@@ -101,15 +121,35 @@ BEGIN
                         --           NOT IN(SELECT   intContractHeaderId   
                         --                  FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intLFutOptTransactionId)  
                         --                  AND ISNULL(s.intContractHeaderId,0)  <> 0  
-                                          INSERT INTO tblRKAssignFuturesToContractSummary   
-							SELECT TOP 1 @intAssignFuturesToContractHeaderId,  
-								1,  
-								NULL,
-								s.intContractDetailId,   
-								GETDATE(),@intLFutOptTransactionId,dblMatchQty,0,0,null FROM tblRKMatchFuturesPSDetail ps  
-							JOIN tblRKAssignFuturesToContractSummary s on ps.intSFutOptTransactionId=intFutOptTransactionId   
+                            INSERT INTO tblRKAssignFuturesToContractSummary(
+								intAssignFuturesToContractHeaderId
+								,intConcurrencyId
+								,intContractHeaderId
+								,intContractDetailId
+								,dtmMatchDate
+								,intFutOptTransactionId
+								,dblAssignedLots
+								,dblHedgedLots
+								,ysnIsHedged
+								,intFutOptAssignedId
+								,intMatchFuturesPSDetailId
+							)   
+							SELECT TOP 1 
+								@intAssignFuturesToContractHeaderId 
+								,intConcurrencyId = 1  
+								,intContractHeaderId = NULL
+								,s.intContractDetailId   
+								,dtmMatchDate = GETDATE()
+								,@intLFutOptTransactionId
+								,dblAssignedLots = dblMatchQty
+								,dblHedgedLots = 0
+								,ysnIsHedged = 0
+								,intFutOptAssignedId = null 
+								,ps.intMatchFuturesPSDetailId
+							FROM tblRKMatchFuturesPSDetail ps  
+							JOIN tblRKAssignFuturesToContractSummary s on ps.intSFutOptTransactionId=intFutOptTransactionId
 							WHERE intMatchFuturesPSHeaderId= @intMatchFuturesPSHeaderId  and intLFutOptTransactionId=@intLFutOptTransactionId  
-							AND s.intContractDetailId    
+							AND s.intContractDetailId  
 							IN(SELECT   intContractDetailId   
 								FROM tblRKAssignFuturesToContractSummary WHERE intFutOptTransactionId=@intSFutOptTransactionId)  
 								AND ISNULL(s.intContractDetailId,0)  <> 0
