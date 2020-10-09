@@ -8165,6 +8165,7 @@
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\NR\1_NoteTransType.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\GR\1920_Dev_Linking_Voucher_Discount.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\1_TaxStatesAndLocalities.sql" />
     <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />

@@ -33,7 +33,7 @@ AS
 			,strDiscountCodeDescription
 			,WeightedAverageReading	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE (SUM(WeightedAverageReading) / SUM(Net)) END
 			,WeightedAverageShrink	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE  (SUM(WeightedAverageShrink) / SUM(Net)) END
-			,Discount				= SUM(dblDiscountAmount)
+			,Discount				= (dblDiscountAmount)
 			,Amount					= SUM(dblAmount)
 			,Tax					= SUM(dblTax)
 		FROM	(	
@@ -128,6 +128,7 @@ AS
 GROUP BY intPaymentId
 	,strDiscountCode
 	,strDiscountCodeDescription
+	,dblDiscountAmount
 /*SELECT 
 	intPaymentId
 	,strDiscountCode
