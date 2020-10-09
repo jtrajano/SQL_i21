@@ -14,9 +14,10 @@ BEGIN TRY
 	
 	SELECT TOP 1 @intMatchFuturesPSHeaderId = intMatchFuturesPSHeaderId FROM tblRKMatchFuturesPSHeader WHERE intMatchNo = @intMatchNo
 
-	SELECT TOP 1 @intEntityId = intEntityId
-	FROM tblEMEntity
-	WHERE strName = @strUserName
+	SELECT TOP 1 @intEntityId = E.intEntityId
+	FROM tblEMEntity E
+	INNER JOIN tblEMEntityCredential EC ON EC.intEntityId = E.intEntityId
+	WHERE EC.strUserName = @strUserName
 	
 	BEGIN TRANSACTION
 	INSERT INTO tblRKStgMatchPnS(intConcurrencyId
@@ -79,6 +80,26 @@ BEGIN TRY
 	IF ((SELECT COUNT(intAccountId) FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId AND intAccountId IS NULL) > 0)
 	BEGIN
 		RAISERROR('GL Account is not setup.',16,1)
+	END
+
+	IF ((SELECT COUNT(intAccountId) FROM tblRKMatchDerivativesPostRecap WHERE intTransactionId = @intMatchFuturesPSHeaderId ) = 0)
+	BEGIN
+		
+		UPDATE tblRKMatchFuturesPSHeader
+		SET ysnPosted = 0
+		WHERE intMatchNo = @intMatchNo
+
+		EXEC uspSMAuditLog 
+		   @keyValue = @intMatchFuturesPSHeaderId       -- Primary Key Value of the Match Derivatives. 
+		   ,@screenName = 'RiskManagement.view.MatchDerivatives'        -- Screen Namespace
+		   ,@entityId = @intEntityId     -- Entity Id.
+		   ,@actionType = 'Unposted'       -- Action Type
+		   ,@changeDescription = ''     -- Description
+		   ,@fromValue = ''          -- Previous Value
+		   ,@toValue = ''           -- New Value
+
+		COMMIT TRAN
+		RETURN
 	END
 	
 	DECLARE @strOldBatchId NVARCHAR(50)
