@@ -214,7 +214,7 @@ begin try
 				/*Get Price Details*/
 				select
 					@intPriceFixationId = intPriceFixationId 
-					,@dblFinalPrice = dblFinalprice  
+					,@dblFinalPrice = dblFinalPrice  
 					,@dblAvailablePriceQuantity = dblAvailablePriceQuantity  
 					,@dtmFixationDate = dtmFixationDate  
 					,@dblPriceQuantity = dblPriceQuantity  
