@@ -1106,3 +1106,6 @@ EXEC sp_addextendedproperty @name = N'MS_Description',
 GO
 
 	
+CREATE INDEX [IX_tbltblSCTicket_intContractId_intLoadDetailId_intLoadId] ON [dbo].[tblSCTicket] ([intContractId],intLoadDetailId,intLoadId)
+GO
+
