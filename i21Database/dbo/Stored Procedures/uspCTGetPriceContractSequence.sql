@@ -23,33 +23,35 @@ BEGIN TRY
 				CD.intContractDetailId,
 				CD.intFutureMarketId intOriginalFutureMarketId,
 				CD.intFutureMonthId intOriginalFutureMonthId,
-				CD.dblBasis dblOriginalBasis,
-				(
-					SELECT SUM(dblNoOfLots)
-					FROM (
-						SELECT	dblNoOfLots dblNoOfLots
-						FROM	tblCTContractDetail
-						WHERE	intContractDetailId = CD.intContractDetailId				
-						UNION ALL
-						SELECT	dblNoOfLots dblNoOfLots
-						FROM	tblCTContractDetail
-						WHERE	intSplitFromId = CD.intContractDetailId
-					) tbl
-				) dblTotalLots,
+				CD.dblBasis dblOriginalBasis,				
+				-- (
+				-- 	SELECT SUM(dblNoOfLots)
+				-- 	FROM (
+				-- 		SELECT	dblNoOfLots dblNoOfLots
+				-- 		FROM	tblCTContractDetail
+				-- 		WHERE	intContractDetailId = CD.intContractDetailId				
+				-- 		UNION ALL
+				-- 		SELECT	dblNoOfLots dblNoOfLots
+				-- 		FROM	tblCTContractDetail
+				-- 		WHERE	intSplitFromId = CD.intContractDetailId
+				-- 	) tbl
+				-- ) dblTotalLots,
+				dblTotalLots = ISNULL(tblLots.dblNoOfLots,0),
 				CAST(NULL AS NUMERIC(18,6))		AS	dblAdditionalCost,
-				PU.intCommodityUnitMeasureId	AS	intFinalPriceUOMId,
-				(
-					SELECT SUM(dblQuantity)
-					FROM (
-						SELECT	dblQuantity
-						FROM	tblCTContractDetail
-						WHERE	intContractDetailId = CD.intContractDetailId
-						UNION ALL
-						SELECT	dblQuantity
-						FROM	tblCTContractDetail
-						WHERE	intSplitFromId = CD.intContractDetailId
-					) tbl
-				) dblQuantity,
+				 PU.intCommodityUnitMeasureId	AS	intFinalPriceUOMId,
+				-- (
+				-- 	SELECT SUM(dblQuantity)
+				-- 	FROM (
+				-- 		SELECT	dblQuantity
+				-- 		FROM	tblCTContractDetail
+				-- 		WHERE	intContractDetailId = CD.intContractDetailId
+				-- 		UNION ALL
+				-- 		SELECT	dblQuantity
+				-- 		FROM	tblCTContractDetail
+				-- 		WHERE	intSplitFromId = CD.intContractDetailId
+				-- 	) tbl
+				-- ) dblQuantity,
+				dblQuantity = ISNULL(tblQuantity.dblQuantity,0),				
 				CD.intItemUOMId,
 				CD.strPriceUOM,
 				CD.strItemUOM,
@@ -96,6 +98,34 @@ LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId	=	CD.intCommodityId
 												AND BU.intUnitMeasureId =	CD.intBasisUnitMeasureId
 LEFT    JOIN	tblGRDiscountScheduleCode	SC	ON	SC.intDiscountScheduleCodeId =	CD.intDiscountScheduleCodeId
 LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
+		OUTER APPLY
+		(
+			SELECT SUM(dblNoOfLots) dblNoOfLots
+			FROM 
+			(
+				SELECT	dblNoOfLots dblNoOfLots
+				FROM	tblCTContractDetail
+				WHERE	intContractDetailId = CD.intContractDetailId				
+				UNION ALL
+				SELECT	dblNoOfLots dblNoOfLots
+				FROM	tblCTContractDetail
+				WHERE	intSplitFromId = CD.intContractDetailId
+			) tbl
+		) tblLots
+		OUTER APPLY
+		(
+			SELECT SUM(dblQuantity) dblQuantity
+			FROM 
+			(
+				SELECT	dblQuantity
+				FROM	tblCTContractDetail
+				WHERE	intContractDetailId = CD.intContractDetailId
+				UNION ALL
+				SELECT	dblQuantity
+				FROM	tblCTContractDetail
+				WHERE	intSplitFromId = CD.intContractDetailId
+			) tbl
+		) tblQuantity
 
 		UNION ALL
 
@@ -153,7 +183,34 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMonthId		=	CH.intFutureMonthId
 		JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID		=	MA.intCurrencyId
 		JOIN	tblICUnitMeasure			PM	ON	PM.intUnitMeasureId		=	MA.intUnitMeasureId	
-		CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD	
+		-- CROSS APPLY fnCTGetTopOneSequence(CH.intContractHeaderId,0)	CD	
+		CROSS APPLY
+		(
+			SELECT TOP 1
+			CDetail.intCurrencyId
+			,ysnSubCurrency = CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT)
+			,CDetail.intBasisCurrencyId
+			,ysnBasisSubCurrency = SY.ysnSubCurrency
+			,CDetail.intDiscountScheduleCodeId
+			,strPricingType = PT.strPricingType
+			,CDetail.dblRatio
+			,dblAppliedQty = CASE
+								WHEN CH.ysnLoad = 1 THEN ISNULL(CDetail.intNoOfLoad,0) - ISNULL(CDetail.dblBalanceLoad,0)
+								ELSE ISNULL(CDetail.dblQuantity,0) - ISNULL(CDetail.dblBalance,0)
+							END
+			,CDetail.intNoOfLoad
+			,CDetail.dblQuantityPerLoad
+			,CDetail.dblFutures
+			,intBasisUnitMeasureId = BU.intUnitMeasureId	
+			FROM tblCTContractDetail CDetail
+			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
+			LEFT JOIN tblSMCurrency SY ON SY.intCurrencyID = CDetail.intBasisCurrencyId
+			LEFT JOIN tblCTPricingType PT ON PT.intPricingTypeId = CDetail.intPricingTypeId
+			LEFT JOIN tblICItemUOM BU ON BU.intItemUOMId = CDetail.intBasisUOMId
+			WHERE intContractHeaderId = @intContractHeaderId
+		) CD
+
+
 LEFT	JOIN	tblCTBook					BK	ON	BK.intBookId			=	CH.intBookId						
 LEFT	JOIN	tblCTSubBook				SB	ON	SB.intSubBookId			=	CH.intSubBookId	
 LEFT	JOIN	tblICCommodityUnitMeasure	BU	ON	BU.intCommodityId		=	CH.intCommodityId 

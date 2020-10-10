@@ -74,7 +74,7 @@ BEGIN TRY
 		IF(@strRowState = 'Delete')
 		BEGIN
 			--FEED
-			IF EXISTS(SELECT * FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
+			IF EXISTS(SELECT TOP 1 1 FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND ISNULL(strFeedStatus,'') ='')
 			BEGIN
 				DELETE FROM tblCTContractFeed WHERE intContractDetailId = @intContractDetailId AND  ISNULL(strFeedStatus,'') =''
 			END
@@ -115,7 +115,7 @@ BEGIN TRY
 		END
 		ELSE IF(@strRowState = 'Modified')
 		BEGIN
-			SELECT @intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+			SELECT @intPricingTypeId = intPricingTypeId FROM tblCTContractDetail WITH (UPDLOCK) WHERE intContractDetailId = @intContractDetailId
 			IF @intPricingTypeId IN (1,6)
 			BEGIN
 				IF(SELECT dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId) <> @dblCashPrice
@@ -197,10 +197,12 @@ BEGIN TRY
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessDetail WHERE intUniqueId > @intUniqueId
 	END
 
-	
-	--Unslice
-	EXEC uspQMSampleContractUnSlice @intContractHeaderId,@intUserId
-	EXEC uspLGLoadContractUnSlice @intContractHeaderId
+	IF ((SELECT COUNT(1) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId AND ysnSlice = 0) >= 1)
+	BEGIN
+		--Unslice
+		EXEC uspQMSampleContractUnSlice @intContractHeaderId,@intUserId
+		EXEC uspLGLoadContractUnSlice @intContractHeaderId
+	END
 
 	UPDATE tblCTContractDetail SET ysnSlice = NULL WHERE intContractHeaderId = @intContractHeaderId	
 
