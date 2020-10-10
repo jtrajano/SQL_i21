@@ -96,6 +96,7 @@ OUTER APPLY (
         FROM tblICInventoryReceiptItemTax rctTax
         LEFT JOIN tblAPBillDetail billDetail 
             ON billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+            AND billDetail.intInventoryReceiptChargeId IS NULL
         LEFT JOIN tblAPBillDetailTax billDetailTax
                 ON billDetail.intBillDetailId = billDetailTax.intBillDetailId
                 AND billDetailTax.intTaxCodeId = rctTax.intTaxCodeId
@@ -330,6 +331,9 @@ SELECT
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
                                 ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
                             THEN receiptItem.dblNet
+                            --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
+                            WHEN billDetail.dblNetWeight <> 0
+                            THEN billDetail.dblNetWeight
                             ELSE billDetail.dblQtyReceived
                             END
                         ) 
@@ -343,6 +347,8 @@ SELECT
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
                                 ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
                             THEN receiptItem.dblNet
+                            WHEN billDetail.dblNetWeight <> 0
+                            THEN billDetail.dblNetWeight
                             ELSE billDetail.dblQtyReceived
                             END
                         ) 
@@ -358,6 +364,9 @@ SELECT
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
                                 ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
                             THEN receiptItem.dblNet
+                            --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
+                            WHEN billDetail.dblNetWeight <> 0
+                            THEN billDetail.dblNetWeight
                             ELSE billDetail.dblQtyReceived
                             END
                             ) 
@@ -371,6 +380,9 @@ SELECT
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
                                 ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
                             THEN receiptItem.dblNet
+                            --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
+                            WHEN billDetail.dblNetWeight <> 0
+                            THEN billDetail.dblNetWeight
                             ELSE billDetail.dblQtyReceived
                             END
                         ) 
