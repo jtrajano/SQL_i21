@@ -329,8 +329,7 @@ BEGIN TRY
 		END
 		--End Active check
 	END
-
-	IF @RowState  = 'Modified'
+	ELSE IF @RowState  = 'Modified'
 	BEGIN
 		--SELECT @dblQuantityUsed = SUM(dblQuantity) FROM tblLGShippingInstructionContractQty WHERE intContractDetailId = @intContractDetailId
 		--IF @dblQuantityUsed > @dblNewQuantityInOldUOM
@@ -445,8 +444,7 @@ BEGIN TRY
 			END
 		END
 	END
-
-	IF @RowState  = 'Delete'
+	ELSE IF @RowState  = 'Delete'
 	BEGIN
 		IF EXISTS	(	
 						SELECT * FROM tblICInventoryReceipt IR
@@ -480,16 +478,14 @@ BEGIN TRY
 	END
 
 	IF EXISTS(
-			SELECT	* 
-			FROM	tblICItemSubLocation	SL
+			SELECT	TOP 1 1 FROM tblICItemSubLocation SL
 			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
 			JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
 			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId 
 	) AND ISNULL(@intNewSubLocationId,0) <> 0
 	BEGIN
 		IF NOT EXISTS(
-			SELECT	* 
-			FROM	tblICItemSubLocation	SL
+			SELECT	TOP 1 1 FROM tblICItemSubLocation SL
 			JOIN	tblICItemLocation		IL	ON	IL.intItemLocationId	=	SL.intItemLocationId	
 			JOIN	tblSMCompanyLocationSubLocation CS	ON CS.intCompanyLocationSubLocationId = SL.intSubLocationId
 			WHERE	IL.intItemId = @intNewItemId AND CS.intCompanyLocationId = @intNewCompanyLocationId AND SL.intSubLocationId = @intNewSubLocationId
@@ -502,7 +498,7 @@ BEGIN TRY
 
 	IF ISNULL(@ysnSlice,0) = 0
 	BEGIN
-		IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT * FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
+		IF	@intNewItemId IS NOT NULL AND NOT EXISTS(SELECT TOP 1 1 FROM tblICItem WHERE intItemId = @intNewItemId AND strStatus = 'Active')
 		BEGIN
 			SELECT @ErrMsg = strStatus FROM tblICItem WHERE intItemId = @intNewItemId
 			IF @ErrMsg = 'Phased Out'

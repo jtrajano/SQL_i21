@@ -96,7 +96,8 @@ BEGIN TRY
 			@dblInventoryShipmentItemLoadApplied	NUMERIC(18, 6),
 			@intShipmentInvoiceDetailId		INT,
 			@dtmFixationDate				DATE,
-			@detailCreated					Id;
+			@detailCreated					Id,
+			@ysnMultiPrice					BIT = 0;
 
 		declare @intPriceContractId int;
 		declare @shipment cursor;
@@ -216,7 +217,8 @@ BEGIN TRY
 															end
 													  )
 												end
-											)
+											),
+			@ysnMultiPrice 		= 	ISNULL(ysnMultiplePriceFixation,0)
 	FROM	tblCTContractHeader 
 	WHERE	intContractHeaderId = @intContractHeaderId
 
@@ -224,7 +226,14 @@ BEGIN TRY
 
 	SELECT	@ysnAllowChangePricing = ysnAllowChangePricing, @ysnEnablePriceContractApproval = ISNULL(ysnEnablePriceContractApproval,0) FROM tblCTCompanyPreference
 
-	SELECT	@intPriceFixationId = intPriceFixationId, @intPriceContractId = intPriceContractId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+	IF @ysnMultiPrice = 1
+	BEGIN
+		SELECT	@intPriceFixationId = intPriceFixationId, @intPriceContractId = intPriceContractId FROM tblCTPriceFixation WHERE intContractHeaderId = @intContractHeaderId
+	END
+	ELSE
+	BEGIN
+		SELECT	@intPriceFixationId = intPriceFixationId, @intPriceContractId = intPriceContractId FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+	END
 
 	IF	@ysnAllowChangePricing = 1 OR @intPriceFixationId IS NULL
 		RETURN

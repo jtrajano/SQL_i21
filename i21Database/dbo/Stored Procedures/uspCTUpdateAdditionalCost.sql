@@ -28,7 +28,8 @@ BEGIN TRY
 				@dblAdditionalCost	=	dblAdditionalCost,
 				@dblFinalPrice		=	dblFinalPrice
 		FROM	tblCTPriceFixation 
-		WHERE	intContractDetailId = @intContractDetailId
+		WHERE intContractHeaderId = @intContractHeaderId
+		AND intContractDetailId = @intContractDetailId
 		
 		IF ISNULL(@intPriceFixationId,0) > 0
 		BEGIN
