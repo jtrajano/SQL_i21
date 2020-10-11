@@ -101,7 +101,7 @@ SELECT DISTINCT
 	,TRANSFERSTORAGE.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
 	,strStorageTransactionNumber = CS.strStorageTicketNumber
-FROM tblGRCustomerStorage CS  
+FROM tblGRCustomerStorage CS WITH (NOLOCK)
 JOIN (
 	SELECT intCompanyLocationId
 		,strLocationName
