@@ -167,6 +167,13 @@ BEGIN TRY
 			GOTO _Exit
 		END
 
+		-- Get the next batch number
+		BEGIN 
+			DECLARE @strBatchId AS NVARCHAR(40)
+			SET @strBatchId = NULL 
+			EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, @intLocationId  
+		END
+
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN
 			

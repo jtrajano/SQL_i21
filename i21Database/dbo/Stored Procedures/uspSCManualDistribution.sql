@@ -137,6 +137,14 @@ BEGIN
 
 END
 
+-- Get the next batch number
+BEGIN 
+	DECLARE @strBatchId AS NVARCHAR(40)
+	SET @strBatchId = NULL 
+	EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, @intLocationId  
+END
+
+
 DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
 FOR
 SELECT intTransactionDetailId, dblQty, ysnIsStorage, intId, strDistributionOption , intStorageScheduleId, intStorageScheduleTypeId, intLoadDetailId
