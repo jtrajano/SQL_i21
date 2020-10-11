@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[intPrimaryBankId] [int] NULL,
 	[intOffsetBankId] [int] NULL,
 	[intPrimarySegmentId] [int] NULL,
+	[intResponsibleEntityId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[strLocationSearch] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED
