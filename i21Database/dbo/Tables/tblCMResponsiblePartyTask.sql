@@ -5,7 +5,6 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyTask](
 	[intActionId] INT NULL,
 	[intEntityId] [int] NULL,
 	[strTransactionId] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
-	[strNotes] NVARCHAR(MAX),
 	[dtmDateCreated] [datetime] NOT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[ysnStatus] [bit] NULL,
