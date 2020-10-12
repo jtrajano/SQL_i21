@@ -600,3 +600,27 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'MD', @TaxCategories = @TaxCa
 
 DELETE @TaxCategoryMD
 GO
+
+
+PRINT ('Deploying VA Tax Category')
+GO
+
+DECLARE @TaxCategoryVA AS TFTaxCategory
+
+INSERT INTO @TaxCategoryVA(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Gasoline', intMasterId = 460001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Diesel', intMasterId = 460002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Blended Fuels (Gasoline)', intMasterId = 460003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Blended Fuels (Diesel)', intMasterId = 460004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Aviation Fuels', intMasterId = 460005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'VA', strTaxCategory = 'VA Excise Alternative Fuels', intMasterId = 460006
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'VA', @TaxCategories = @TaxCategoryVA
+
+DELETE @TaxCategoryVA
+GO

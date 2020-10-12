@@ -9337,4 +9337,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\MD_Maryland.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\VA_Virginia.sql" />
+  </ItemGroup>
 </Project>
