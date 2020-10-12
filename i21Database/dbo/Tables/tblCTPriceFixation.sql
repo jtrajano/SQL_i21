@@ -46,18 +46,12 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblCTPriceFixation_197_13243102__K4_5_9_10
 )
 INCLUDE (     [intContractDetailId],
        [dblTotalLots],
-       [dblLotsFixed]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+       [dblLotsFixed],
+	   [intPriceContractId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 go
 
 CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixation_intContractDetailId]
 	ON [dbo].[tblCTPriceFixation](intContractDetailId ASC)
 	INCLUDE (dblLotsFixed, dblFinalPrice)
 	
-GO
-
-CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixation_intPriceContractId] ON [dbo].[tblCTPriceFixation]
-(
-	[intPriceContractId] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-
 GO
