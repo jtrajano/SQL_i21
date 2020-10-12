@@ -10,6 +10,23 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+DECLARE @CategoryCode NVARCHAR(50),
+	@NewCategoryCode NVARCHAR(50),
+	@NewCategoryCodeWithCounter NVARCHAR(50),
+	@counter INT
+SELECT @CategoryCode = strCategoryCode, @NewCategoryCode = strCategoryCode + '-copy' FROM [tblICCategory] WHERE intCategoryId = @intCategoryId
+IF EXISTS(SELECT TOP 1 1 FROM [tblICCategory] WHERE strCategoryCode = @NewCategoryCode)
+BEGIN
+	SET @counter = 1
+	SET @NewCategoryCodeWithCounter = @NewCategoryCode + (CAST(@counter AS NVARCHAR(50)))
+	WHILE EXISTS(SELECT TOP 1 1 FROM [tblICCategory] WHERE strCategoryCode = @NewCategoryCodeWithCounter)
+	BEGIN
+		SET @counter += 1
+		SET @NewCategoryCodeWithCounter = @NewCategoryCode + (CAST(@counter AS NVARCHAR(50)))
+	END
+	SET @NewCategoryCode = @NewCategoryCodeWithCounter
+END
+
 -- Duplicate primary details
 INSERT INTO [dbo].[tblICCategory]
            ([strCategoryCode]
@@ -48,8 +65,8 @@ INSERT INTO [dbo].[tblICCategory]
            ,[ysnYieldAdjustment]
            ,[ysnWarehouseTracked]
            ,[dtmDateCreated])
-SELECT [strCategoryCode] + '-copy'
-           ,[strDescription] + '-copy'
+SELECT @NewCategoryCode
+           ,[strDescription] + @NewCategoryCode
            ,[strInventoryType]
            ,[intLineOfBusinessId]
            ,[intCostingMethod]
@@ -217,10 +234,6 @@ WHERE intCategoryId = @intCategoryId
 BEGIN 
 
 DECLARE @strDescription NVARCHAR(400)
-DECLARE @CategoryCode NVARCHAR(50)
-DECLARE @NewCategoryCode NVARCHAR(50)
-SELECT @CategoryCode = strCategoryCode FROM tblICCategory where intCategoryId = @intCategoryId
-SELECT @NewCategoryCode = strCategoryCode FROM tblICCategory where intCategoryId = @intNewCategoryId
 
 SET @strDescription = 'Duplicated ' + @CategoryCode + ' as ' + @NewCategoryCode + ''
 EXEC	dbo.uspSMAuditLog 
