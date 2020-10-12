@@ -55,8 +55,6 @@ CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_001] ON [dbo].tbl
 
 GO
 
-GO
-
 CREATE NONCLUSTERED INDEX [NonClusteredIndex_tblCTContractCost_002] ON [dbo].tblCTContractCost
 (
 	[intContractDetailId] ASC

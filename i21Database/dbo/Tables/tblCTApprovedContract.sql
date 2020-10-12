@@ -45,3 +45,15 @@
 
 	CONSTRAINT [PK_tblCTApprovedContract_intApprovedContractId] PRIMARY KEY CLUSTERED (intApprovedContractId ASC)
 )
+GO
+	CREATE NONCLUSTERED INDEX [IX_tblCTApprovedContract_intContractDetailId] ON [dbo].[tblCTApprovedContract]
+	(
+		[intContractDetailId] ASC
+	)
+	INCLUDE 
+	(	
+		[intContractHeaderId],
+		[intApprovedContractId],
+		[intApprovedById]
+	)
+GO
