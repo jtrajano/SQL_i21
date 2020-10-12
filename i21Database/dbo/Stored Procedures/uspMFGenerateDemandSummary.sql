@@ -24,6 +24,30 @@ BEGIN
 		,@intBookId INT
 		,@intSubBookId INT
 
+	IF @ysnLoadPlan = 0
+	BEGIN
+		IF (
+			SELECT Count(DISTINCT AV.strValue)
+			FROM tblCTInvPlngReportAttributeValue AV
+			JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+			WHERE AV.intReportAttributeID = 1
+				AND AV.intInvPlngReportMasterID IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					)
+				AND strFieldName = 'strMonth1'
+		) > 1
+		BEGIN
+		RAISERROR (
+				'Starting month should be same for all the selected demand batches.'
+				,16
+				,1
+				)
+
+		RETURN
+		END
+	END
+
 	IF @ysnLoadPlan = 1
 	BEGIN
 		INSERT INTO @tblMFItemBook (
