@@ -1419,6 +1419,53 @@ ELSE
 	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.UndepositedFundUMReports?showSearch=true' WHERE strMenuName = N'Undeposited Fund - Unmatched Report' AND strModuleName = N'Cash Management' AND intParentMenuID = @CashManagementReportParentMenuId
 
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Tasks' AND 
+strModuleName = 'Cash Management' 
+AND intParentMenuID = @CashManagementParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID],
+	 [strDescription], [strCategory], [strType], [strCommand], [strIcon], 
+	 [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Bank Tasks', N'Cash Management', @CashManagementParentMenuId,
+	 N'Bank Tasks', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 4, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', 
+	intSort = 0 WHERE strMenuName = 'Bank Tasks' 
+	AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+
+--START BANK TASK GL-7365
+
+DECLARE @CashManagementBankTaskParentMenuId INT
+SELECT @CashManagementBankTaskParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Bank Tasks' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Bank Transactions' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementBankTaskParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon],
+	 [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Import Bank Transactions', N'Cash Management', @CashManagementBankTaskParentMenuId, 
+	N'Import Bank Transactions', N'Bank Tasks', N'Screen', N'CashManagement.view.ImportBankStatement', N'small-menu-activity', 1, 1, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'CashManagement.view.ImportBankStatement'
+	WHERE strMenuName = 'Import Bank Transactions' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementBankTaskParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank Tasks' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementBankTaskParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon],
+	 [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Bank Tasks', N'Cash Management', @CashManagementBankTaskParentMenuId, 
+	N'Bank Tasks', N'Bank Tasks', N'Screen', N'CashManagement.view.ResponsiblePartyTask?showSearch=true', N'small-menu-activity', 1, 1, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand =  N'CashManagement.view.ResponsiblePartyTask?showSearch=true'
+	WHERE strMenuName = 'Bank Tasks' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementBankTaskParentMenuId
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Responsible Party Config' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementBankTaskParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon],
+	 [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Responsible Party Config', N'Cash Management', @CashManagementBankTaskParentMenuId, 
+	N'Responsible Party Config', N'Bank Tasks', N'Screen', N'CashManagement.view.ResponsiblePartyMatching', N'small-menu-activity', 1, 1, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand =  N'CashManagement.view.ResponsiblePartyMatching'
+	WHERE strMenuName = N'Responsible Party Config' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementBankTaskParentMenuId
+
+--END BANK TASK GL-7365
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Positive Pay Export' AND strModuleName = 'Cash Management' AND intParentMenuID = @CashManagementActivitiesParentMenuId
