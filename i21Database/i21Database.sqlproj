@@ -218,6 +218,8 @@
     <Build Include="dbo\Tables\tblCMCurrentBankReconciliation.sql" />
     <Build Include="dbo\Tables\tblCMEFTACHAudit.sql" />
     <Build Include="dbo\Tables\tblCMUndepositedFund.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyMatching.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Tables\tblCPUserConfiguration.sql" />
     <Build Include="dbo\Tables\tblDBPanel.sql" />
     <Build Include="dbo\Tables\tblDBPanelAccess.sql" />
@@ -8822,6 +8824,14 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputSKUs.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
