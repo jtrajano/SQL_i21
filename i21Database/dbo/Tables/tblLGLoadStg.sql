@@ -28,3 +28,16 @@
 	[strMessageState] NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	[ysnMailSent]	BIT DEFAULT 0
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblLGLoadStg_intLoadId] ON [dbo].[tblLGLoadStg]
+(
+	[intLoadId] ASC
+)
+INCLUDE 
+(
+	[strRowState]
+	,[strFeedStatus]
+)
+
+GO

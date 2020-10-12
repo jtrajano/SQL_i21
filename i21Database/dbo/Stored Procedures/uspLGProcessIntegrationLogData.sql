@@ -79,9 +79,9 @@ BEGIN TRY
 
 		IF (ISNULL(@intShipmentStatus,0) = 4)
 		BEGIN
-			DELETE FROM tblLGLoadContainerLog
-			DELETE FROM tblLGLoadDetailLog
-			DELETE FROM tblLGLoadLog
+			TRUNCATE TABLE tblLGLoadContainerLog
+			TRUNCATE TABLE tblLGLoadDetailLog
+			TRUNCATE TABLE tblLGLoadLog
 
 			RETURN;
 		END
@@ -541,9 +541,9 @@ INSERTDATE:
 	JOIN tblLGLoadContainerLog LO ON LDCL.intLoadContainerId = LO.intLoadContainerId
 	WHERE ISNULL(LO.strExternalContainerId,'') <> '' AND LDCL.intLoadStgId=@intLoadStdId
 
-	DELETE FROM tblLGLoadContainerLog
-	DELETE FROM tblLGLoadDetailLog
-	DELETE FROM tblLGLoadLog
+	TRUNCATE TABLE tblLGLoadContainerLog
+	TRUNCATE TABLE tblLGLoadDetailLog
+	TRUNCATE TABLE tblLGLoadLog
 
 END TRY
 
