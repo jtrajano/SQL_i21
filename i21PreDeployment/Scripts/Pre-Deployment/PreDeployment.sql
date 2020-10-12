@@ -177,6 +177,7 @@
 :r .\14_CT\1910_ContractCostPaidByToParty.sql
 :r .\14_CT\1910_BasisComponent.sql
 :r .\14_CT\1920_ItemContracts.sql
+:r .\14_CT\DropIndexes.sql
 
 --GR
 :r .\15_GR\1_ConstraintDropQuery.sql
