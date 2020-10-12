@@ -298,9 +298,12 @@ BEGIN TRY
 
 			--3. OnHand and OnStore Increment
 			BEGIN
-				EXEC dbo.uspSMGetStartingNumber 
-					 @STARTING_NUMBER_BATCH
-					,@strBatchId OUTPUT
+				IF ISNULL(@strBatchId, '') = ''
+				BEGIN
+					EXEC dbo.uspSMGetStartingNumber 
+						 @STARTING_NUMBER_BATCH
+						,@strBatchId OUTPUT
+				END
 
 				IF @@ERROR <> 0
 					GOTO SettleStorage_Exit;
