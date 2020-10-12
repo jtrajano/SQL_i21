@@ -301,15 +301,15 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '4', strType = 'Gasoline', intMasterId = 20049
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '5', strType = 'Gasoline', intMasterId = 20050
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '6', strType = 'Gasoline', intMasterId = 20051
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'D', strScheduleCode = '7DE', strType = 'Gasoline', intMasterId = 20052
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '094', strFormCode = 'D', strScheduleCode = '7PA', strType = 'Gasoline', intMasterId = 20053
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '095', strFormCode = 'D', strScheduleCode = '7VA', strType = 'Gasoline', intMasterId = 20054
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '096', strFormCode = 'D', strScheduleCode = '7WV', strType = 'Gasoline', intMasterId = 20055
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '096', strFormCode = 'D', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 20056
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '096', strFormCode = 'D', strScheduleCode = '9', strType = 'Gasoline', intMasterId = 20057
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '096', strFormCode = 'D', strScheduleCode = '10', strType = 'Gasoline', intMasterId = 20058
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '096', strFormCode = 'D', strScheduleCode = '11', strType = 'Gasoline', intMasterId = 20059
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '096', strFormCode = 'D', strScheduleCode = '12', strType = 'Gasoline', intMasterId = 20060
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '7DE', strType = 'Gasoline', intMasterId = 20052
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '7PA', strType = 'Gasoline', intMasterId = 20053
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '7VA', strType = 'Gasoline', intMasterId = 20054
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '7WV', strType = 'Gasoline', intMasterId = 20055
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '8', strType = 'Gasoline', intMasterId = 20056
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '9', strType = 'Gasoline', intMasterId = 20057
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '10', strType = 'Gasoline', intMasterId = 20058
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '11', strType = 'Gasoline', intMasterId = 20059
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'D', strScheduleCode = '12', strType = 'Gasoline', intMasterId = 20060
 
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'S', strScheduleCode = '1', strType = 'Diesel/Biodiesel', intMasterId = 20061
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '054', strFormCode = 'S', strScheduleCode = '1', strType = 'LPG/LNG/CNG', intMasterId = 20062
@@ -382,27 +382,27 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '4', strType = 'Diesel/Biodiesel', intMasterId = 20127
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '4', strType = 'LPG/LNG/CNG', intMasterId = 20128
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '5', strType = 'Diesel/Biodiesel', intMasterId = 20129
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'S', strScheduleCode = '5', strType = 'LPG/LNG/CNG', intMasterId = 20130
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '5', strType = 'LPG/LNG/CNG', intMasterId = 20130
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '6', strType = 'Diesel/Biodiesel', intMasterId = 20131
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'S', strScheduleCode = '6', strType = 'LPG/LNG/CNG', intMasterId = 20132
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '6', strType = 'LPG/LNG/CNG', intMasterId = 20132
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '7DE', strType = 'Diesel/Biodiesel', intMasterId = 20133
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'S', strScheduleCode = '7DE', strType = 'LPG/LNG/CNG', intMasterId = 20134
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '7DE', strType = 'LPG/LNG/CNG', intMasterId = 20134
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '7PA', strType = 'Diesel/Biodiesel', intMasterId = 20135
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '226', strFormCode = 'S', strScheduleCode = '7PA', strType = 'LPG/LNG/CNG', intMasterId = 20136
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '7PA', strType = 'LPG/LNG/CNG', intMasterId = 20136
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '7VA', strType = 'Diesel/Biodiesel', intMasterId = 20137
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'S', strScheduleCode = '7VA', strType = 'LPG/LNG/CNG', intMasterId = 20138
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '7VA', strType = 'LPG/LNG/CNG', intMasterId = 20138
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '7WV', strType = 'Diesel/Biodiesel', intMasterId = 20139
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'S', strScheduleCode = '7WV', strType = 'LPG/LNG/CNG', intMasterId = 20140
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '7WV', strType = 'LPG/LNG/CNG', intMasterId = 20140
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '8', strType = 'Diesel/Biodiesel', intMasterId = 20141
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'S', strScheduleCode = '8', strType = 'LPG/LNG/CNG', intMasterId = 20142
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '8', strType = 'LPG/LNG/CNG', intMasterId = 20142
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '9', strType = 'Diesel/Biodiesel', intMasterId = 20143
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '227', strFormCode = 'S', strScheduleCode = '9', strType = 'LPG/LNG/CNG', intMasterId = 20144
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '9', strType = 'LPG/LNG/CNG', intMasterId = 20144
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '10', strType = 'Diesel/Biodiesel', intMasterId = 20145
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'S', strScheduleCode = '10', strType = 'LPG/LNG/CNG', intMasterId = 20146
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '10', strType = 'LPG/LNG/CNG', intMasterId = 20146
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '11', strType = 'Diesel/Biodiesel', intMasterId = 20147
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'S', strScheduleCode = '11', strType = 'LPG/LNG/CNG', intMasterId = 20148
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '11', strType = 'LPG/LNG/CNG', intMasterId = 20148
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '150', strFormCode = 'S', strScheduleCode = '12', strType = 'Diesel/Biodiesel', intMasterId = 20149
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'S', strScheduleCode = '12', strType = 'LPG/LNG/CNG', intMasterId = 20150
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '225', strFormCode = 'S', strScheduleCode = '12', strType = 'LPG/LNG/CNG', intMasterId = 20150
 
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'S', strScheduleCode = '1', strType = 'Diesel/Biodiesel', intMasterId = 20151
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '152', strFormCode = 'S', strScheduleCode = '2', strType = 'Diesel/Biodiesel', intMasterId = 20152
@@ -488,17 +488,17 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '2', strType = 'Diesel/Biodiesel', intMasterId = 20227
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '3', strType = 'Diesel/Biodiesel', intMasterId = 20228
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '4', strType = 'Diesel/Biodiesel', intMasterId = 20229
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'S', strScheduleCode = '5', strType = 'Diesel/Biodiesel', intMasterId = 20230
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'S', strScheduleCode = '6', strType = 'Diesel/Biodiesel', intMasterId = 20231
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'S', strScheduleCode = '7DE', strType = 'Diesel/Biodiesel', intMasterId = 20232
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '093', strFormCode = 'S', strScheduleCode = '7PA', strType = 'Diesel/Biodiesel', intMasterId = 20233
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '094', strFormCode = 'S', strScheduleCode = '7VA', strType = 'Diesel/Biodiesel', intMasterId = 20234
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '094', strFormCode = 'S', strScheduleCode = '7WV', strType = 'Diesel/Biodiesel', intMasterId = 20235
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '094', strFormCode = 'S', strScheduleCode = '8', strType = 'Diesel/Biodiesel', intMasterId = 20236
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '094', strFormCode = 'S', strScheduleCode = '9', strType = 'Diesel/Biodiesel', intMasterId = 20237
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '095', strFormCode = 'S', strScheduleCode = '10', strType = 'Diesel/Biodiesel', intMasterId = 20238
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '095', strFormCode = 'S', strScheduleCode = '11', strType = 'Diesel/Biodiesel', intMasterId = 20239
-	UNION SELECT intValidProductCodeId = 0, strProductCode = '095', strFormCode = 'S', strScheduleCode = '12', strType = 'Diesel/Biodiesel', intMasterId = 20240
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '5', strType = 'Diesel/Biodiesel', intMasterId = 20230
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '6', strType = 'Diesel/Biodiesel', intMasterId = 20231
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '7DE', strType = 'Diesel/Biodiesel', intMasterId = 20232
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '7PA', strType = 'Diesel/Biodiesel', intMasterId = 20233
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '7VA', strType = 'Diesel/Biodiesel', intMasterId = 20234
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '7WV', strType = 'Diesel/Biodiesel', intMasterId = 20235
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '8', strType = 'Diesel/Biodiesel', intMasterId = 20236
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '9', strType = 'Diesel/Biodiesel', intMasterId = 20237
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '10', strType = 'Diesel/Biodiesel', intMasterId = 20238
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '11', strType = 'Diesel/Biodiesel', intMasterId = 20239
+	UNION SELECT intValidProductCodeId = 0, strProductCode = '092', strFormCode = 'S', strScheduleCode = '12', strType = 'Diesel/Biodiesel', intMasterId = 20240
 
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'A', strScheduleCode = '1', strType = 'Aviation Gas', intMasterId = 20241
 	UNION SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'A', strScheduleCode = '2', strType = 'Aviation Gas', intMasterId = 20242
