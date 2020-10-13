@@ -29,7 +29,7 @@ BEGIN TRY
 				,@strPatternString 		=	@strPatternString out
 				,@intEntityId			=	@intEntityId
 
-		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE strContractNumber = @strPatternString AND intContractTypeId = @intContractTypeId)
+		IF NOT EXISTS(SELECT * FROM tblCTContractHeader WHERE strContractNumber = @strPatternString AND intContractTypeId = @intContractTypeId)
 			SET	@ysnExist = 0
 	END
 		

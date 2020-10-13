@@ -19,8 +19,8 @@
           ISNULL(hhh.strBookingReference, '') <> ''
         ) THEN 'Booked' ELSE 'Shipping Instruction Created' END WHEN 8 THEN 'Partial Shipment Created' WHEN 9 THEN 'Full Shipment Created' WHEN 10 THEN 'Cancelled' WHEN 11 THEN 'Invoiced' ELSE 'Open' END COLLATE Latin1_General_CI_AS 
       from 
-        tblLGLoadDetail ggg with (nolock), 
-        tblLGLoad hhh  with (nolock)
+        tblLGLoadDetail ggg, 
+        tblLGLoad hhh 
       where 
         ggg.intPContractDetailId is not null 
         and hhh.intLoadId = ggg.intLoadId
@@ -40,9 +40,9 @@ fixation as (
     aaa1.intContractDetailId,
     dblPricedQuantity = (case when aaa1.intPricingTypeId = 1 then aaa1.dblQuantity else sum(bbb.dblQuantity) end)
   from 
-  tblCTContractDetail aaa1 with (nolock)
-    left join tblCTPriceFixation aaa with (nolock) on aaa.intContractDetailId = aaa1.intContractDetailId
-    left join tblCTPriceFixationDetail bbb with (nolock)  on bbb.intPriceFixationId = aaa.intPriceFixationId and bbb.intPriceFixationId = aaa.intPriceFixationId
+  tblCTContractDetail aaa1
+    left join tblCTPriceFixation aaa on aaa.intContractDetailId = aaa1.intContractDetailId
+    left join tblCTPriceFixationDetail bbb  on bbb.intPriceFixationId = aaa.intPriceFixationId and bbb.intPriceFixationId = aaa.intPriceFixationId
   group by 
     aaa1.intContractDetailId
   ,aaa1.intPricingTypeId
@@ -70,7 +70,7 @@ lgallocationS as (
     ), 
     intAllocationUOMId = MIN(intSUnitMeasureId) 
   from 
-    tblLGAllocationDetail  with (nolock)
+    tblLGAllocationDetail 
   Group By 
     intSContractDetailId
 ), 
@@ -83,7 +83,7 @@ lgalloationP as (
     ), 
     intAllocationUOMId = MIN(intPUnitMeasureId) 
   from 
-    tblLGAllocationDetail  with (nolock)
+    tblLGAllocationDetail 
   Group By 
     intPContractDetailId
 ), 
@@ -102,10 +102,10 @@ approved as (
           ) end
         ) 
       from 
-        tblCTContractDetail ccc with (nolock), 
-        tblQMSample ddd with (nolock), 
-        tblICItemUOM eee with (nolock), 
-        tblICItemUOM fff  with (nolock)
+        tblCTContractDetail ccc, 
+        tblQMSample ddd, 
+        tblICItemUOM eee, 
+        tblICItemUOM fff 
       where 
         ddd.intProductValueId = ccc.intContractDetailId 
         and intProductTypeId = 8 
@@ -123,8 +123,8 @@ prepaid as (
     jjj.intContractHeaderId, 
     intRecordCount = count(*) 
   from 
-    tblAPBillDetail jjj with (nolock), 
-    tblAPBill kkk  with (nolock)
+    tblAPBillDetail jjj, 
+    tblAPBill kkk 
   where 
     kkk.intBillId = jjj.intBillId 
     and kkk.intTransactionType = 2 
@@ -136,7 +136,7 @@ hedge as (
     iii.intContractDetailId, 
     dblHedgedLots = sum(iii.dblHedgedLots) 
   from 
-    tblRKAssignFuturesToContractSummary iii  with (nolock)
+    tblRKAssignFuturesToContractSummary iii 
   group by 
     iii.intContractDetailId
 ), 
@@ -153,8 +153,8 @@ statuses as (
             SELECT 
               DISTINCT ', ' + nnn.strContractStatus 
             FROM 
-              tblCTContractDetail mmm  with (nolock)
-              JOIN tblCTContractStatus nnn with (nolock) ON nnn.intContractStatusId = mmm.intContractStatusId 
+              tblCTContractDetail mmm 
+              JOIN tblCTContractStatus nnn ON nnn.intContractStatusId = mmm.intContractStatusId 
             WHERE 
               mmm.intContractHeaderId = lll.intContractHeaderId FOR XML PATH('')
           ), 
@@ -163,7 +163,7 @@ statuses as (
           ''
         ) 
       FROM 
-        tblCTContractHeader lll with (nolock)
+        tblCTContractHeader lll
     ) as ss
 ), 
 reserved as (
@@ -174,7 +174,7 @@ reserved as (
       0
     ) 
   from 
-    tblLGReservation  with (nolock)
+    tblLGReservation 
   Group By 
     intContractDetailId
 ) 
@@ -402,112 +402,112 @@ select
   strWeightUOM = cn.strUnitMeasure, 
   aq.intEntityId 
 from 
-  tblCTContractDetail a  with (nolock)
-  join tblCTContractHeader b with (nolock) on b.intContractHeaderId = a.intContractHeaderId 
-  left join tblICItem c  with (nolock) on c.intItemId = a.intItemId 
-  left join tblICItem d  with (nolock) on d.intItemId = a.intItemBundleId 
-  left join tblSMShipVia e  with (nolock) on e.intEntityId = a.intShipViaId 
-  left join tblCTPricingType f  with (nolock) on f.intPricingTypeId = a.intPricingTypeId 
-  left join tblICItemUOM g  with (nolock) on g.intItemUOMId = a.intItemUOMId 
-  left join tblICUnitMeasure h  with (nolock) on h.intUnitMeasureId = g.intUnitMeasureId 
-  left join tblRKFutureMarket i  with (nolock) on i.intFutureMarketId = a.intFutureMarketId 
-  left join tblRKFuturesMonth j  with (nolock) on j.intFutureMonthId = a.intFutureMonthId 
-  left join tblICItemUOM k  with (nolock) on k.intItemUOMId = a.intPriceItemUOMId 
-  left join tblICUnitMeasure l  with (nolock) on l.intUnitMeasureId = k.intUnitMeasureId 
-  left join tblCTContractOptHeader m  with (nolock) on m.intContractOptHeaderId = a.intContractOptHeaderId 
-  left join tblSMCompanyLocation n  with (nolock) on n.intCompanyLocationId = a.intCompanyLocationId 
-  left join tblSMCurrency o  with (nolock) on o.intCurrencyID = a.intCurrencyId 
-  left join tblCTContractStatus p  with (nolock) on p.intContractStatusId = a.intContractStatusId 
+  tblCTContractDetail a 
+  join tblCTContractHeader b on b.intContractHeaderId = a.intContractHeaderId 
+  left join tblICItem c on c.intItemId = a.intItemId 
+  left join tblICItem d on d.intItemId = a.intItemBundleId 
+  left join tblSMShipVia e on e.intEntityId = a.intShipViaId 
+  left join tblCTPricingType f on f.intPricingTypeId = a.intPricingTypeId 
+  left join tblICItemUOM g on g.intItemUOMId = a.intItemUOMId 
+  left join tblICUnitMeasure h on h.intUnitMeasureId = g.intUnitMeasureId 
+  left join tblRKFutureMarket i on i.intFutureMarketId = a.intFutureMarketId 
+  left join tblRKFuturesMonth j on j.intFutureMonthId = a.intFutureMonthId 
+  left join tblICItemUOM k on k.intItemUOMId = a.intPriceItemUOMId 
+  left join tblICUnitMeasure l on l.intUnitMeasureId = k.intUnitMeasureId 
+  left join tblCTContractOptHeader m on m.intContractOptHeaderId = a.intContractOptHeaderId 
+  left join tblSMCompanyLocation n on n.intCompanyLocationId = a.intCompanyLocationId 
+  left join tblSMCurrency o on o.intCurrencyID = a.intCurrencyId 
+  left join tblCTContractStatus p on p.intContractStatusId = a.intContractStatusId 
   left join shipmentstatus r on r.intContractDetailId = a.intContractDetailId 
   outer apply
   (
     select top 1 intContractDetailId
-    from tblAPBillDetail with (nolock)
+    from tblAPBillDetail
     where intContractDetailId = a.intContractDetailId
   ) s
   left join fixation t on t.intContractDetailId = a.intContractDetailId 
-  left join tblCTPricingType u  with (nolock) on u.intPricingTypeId = b.intPricingTypeId 
-  left join tblICItemUOM v  with (nolock) on v.intItemId = a.intItemId 
+  left join tblCTPricingType u on u.intPricingTypeId = b.intPricingTypeId 
+  left join tblICItemUOM v on v.intItemId = a.intItemId 
   						   and v.intUnitMeasureId = g.intUnitMeasureId 
-  left join tblICItemUOM w  with (nolock) on w.intItemId = a.intItemId 
+  left join tblICItemUOM w on w.intItemId = a.intItemId 
   						   and w.intUnitMeasureId = i.intUnitMeasureId 
-  left join tblICItemUOM x  with (nolock) on x.intItemUOMId = a.intAdjItemUOMId 
-  left join tblICUnitMeasure y  with (nolock) on y.intUnitMeasureId = x.intUnitMeasureId 
+  left join tblICItemUOM x on x.intItemUOMId = a.intAdjItemUOMId 
+  left join tblICUnitMeasure y on y.intUnitMeasureId = x.intUnitMeasureId 
   left join lgalloationP z on z.intContractDetailId = a.intContractDetailId 
-  left join tblCTApprovalBasis za  with (nolock) on za.intApprovalBasisId = b.intApprovalBasisId 
+  left join tblCTApprovalBasis za on za.intApprovalBasisId = b.intApprovalBasisId 
   left join approved aa on aa.intContractDetailId = a.intContractDetailId 
-  left join tblCTAssociation zb  with (nolock) on zb.intAssociationId = b.intAssociationId 
+  left join tblCTAssociation zb on zb.intAssociationId = b.intAssociationId 
   left join hedge ab on ab.intContractDetailId = a.intContractDetailId 
-  left join tblICCommodityUnitMeasure ac  with (nolock) on ac.intCommodityId = b.intCommodityId 
+  left join tblICCommodityUnitMeasure ac on ac.intCommodityId = b.intCommodityId 
   										 and ac.ysnStockUnit = 1 
-  left join tblICItemUOM ad  with (nolock) on ad.intItemId = a.intItemId 
+  left join tblICItemUOM ad on ad.intItemId = a.intItemId 
   							and ad.intUnitMeasureId = i.intUnitMeasureId 
-  left join tblICItemUOM ae  with (nolock) on ae.intItemId = a.intItemId 
+  left join tblICItemUOM ae on ae.intItemId = a.intItemId 
   							and ae.intUnitMeasureId = ac.intUnitMeasureId 
-  left join tblCTBook zc  with (nolock) on zc.intBookId = b.intBookId 
-  left join tblICCommodity af  with (nolock) on af.intCommodityId = b.intCommodityId 
-  left join tblICCommodityUnitMeasure ag  with (nolock) on ag.intCommodityUnitMeasureId = b.intCommodityUOMId 
-  left join tblICItemUOM ah  with (nolock) on ah.intItemId = a.intItemId 
+  left join tblCTBook zc on zc.intBookId = b.intBookId 
+  left join tblICCommodity af on af.intCommodityId = b.intCommodityId 
+  left join tblICCommodityUnitMeasure ag on ag.intCommodityUnitMeasureId = b.intCommodityUOMId 
+  left join tblICItemUOM ah on ah.intItemId = a.intItemId 
   							and ah.intUnitMeasureId = a.intUnitMeasureId 
-  left join tblICItemUOM ai  with (nolock) on ai.intItemId = a.intItemId 
+  left join tblICItemUOM ai on ai.intItemId = a.intItemId 
   							and ai.intUnitMeasureId = ag.intUnitMeasureId 
-  left join tblCTContractPlan aj  with (nolock) on aj.intContractPlanId = b.intContractPlanId 
-  left join tblCTContractType ak  with (nolock) on ak.intContractTypeId = b.intContractTypeId 
-  left join tblSMCountry al  with (nolock) on al.intCountryID = b.intCountryId 
-  left join tblEMEntity am  with (nolock) on am.intEntityId = b.intCreatedById 
-  left join tblCTCropYear an  with (nolock) on an.intCropYearId = b.intCropYearId 
-  left join tblEMEntity ao  with (nolock) on ao.intEntityId = b.intCounterPartyId 
-  left join tblSMCity ap  with (nolock) on ap.intCityId = a.intDestinationPortId 
-  left join tblEMEntity aq  with (nolock) on aq.intEntityId = b.intEntityId 
-  left join tblSMFreightTerms ar  with (nolock) on ar.intFreightTermId = a.intFreightTermId 
-  left join tblCTWeightGrade au  with (nolock) on au.intWeightGradeId = b.intGradeId 
-  left join tblCTContractBasis av  with (nolock) on av.intContractBasisId = b.intContractBasisId 
-  left join tblSMCity aw  with (nolock) on aw.intCityId = b.intINCOLocationTypeId 
-  left join tblSMCompanyLocationSubLocation ax  with (nolock) on ax.intCompanyLocationSubLocationId = b.intWarehouseId 
-  left join tblCTIndex ay  with (nolock) on ay.intIndexId = a.intIndexId 
-  left join tblCTInsuranceBy az  with (nolock) on az.intInsuranceById = b.intInsuranceById 
-  left join tblCTContractInvoice ba  with (nolock) on ba.intContractDetailId = a.intContractDetailId 
-  left join tblCTInvoiceType bb  with (nolock) on bb.intInvoiceTypeId = b.intInvoiceTypeId 
-  left join tblEMEntity bc  with (nolock) on bc.intEntityId = b.intLastModifiedById 
-  left join tblICCommodityUnitMeasure bd  with (nolock) on bd.intCommodityUnitMeasureId = b.intLoadUOMId 
-  left join tblICUnitMeasure be  with (nolock) on be.intUnitMeasureId = bd.intUnitMeasureId 
-  left join tblSMCity bf  with (nolock) on bf.intCityId = a.intLoadingPortId 
-  left join tblARMarketZone bg  with (nolock) on bg.intMarketZoneId = a.intMarketZoneId 
-  left join tblICItemContract bh  with (nolock) on bh.intItemContractId = a.intItemContractId 
-  left join tblSMCountry bi  with (nolock) on bi.intCountryID = bh.intCountryId 
-  left join tblICCommodityAttribute bj  with (nolock) on bj.intCommodityAttributeId = c.intOriginId 
-  left join tblSMCountry bk  with (nolock) on bk.intCountryID = bj.intCountryID 
-  left join tblCTFreightRate bl  with (nolock) on bl.intFreightRateId = a.intFreightRateId 
-  left join tblCTPosition bm  with (nolock) on bm.intPositionId = b.intPositionId 
+  left join tblCTContractPlan aj on aj.intContractPlanId = b.intContractPlanId 
+  left join tblCTContractType ak on ak.intContractTypeId = b.intContractTypeId 
+  left join tblSMCountry al on al.intCountryID = b.intCountryId 
+  left join tblEMEntity am on am.intEntityId = b.intCreatedById 
+  left join tblCTCropYear an on an.intCropYearId = b.intCropYearId 
+  left join tblEMEntity ao on ao.intEntityId = b.intCounterPartyId 
+  left join tblSMCity ap on ap.intCityId = a.intDestinationPortId 
+  left join tblEMEntity aq on aq.intEntityId = b.intEntityId 
+  left join tblSMFreightTerms ar on ar.intFreightTermId = a.intFreightTermId 
+  left join tblCTWeightGrade au on au.intWeightGradeId = b.intGradeId 
+  left join tblCTContractBasis av on av.intContractBasisId = b.intContractBasisId 
+  left join tblSMCity aw on aw.intCityId = b.intINCOLocationTypeId 
+  left join tblSMCompanyLocationSubLocation ax on ax.intCompanyLocationSubLocationId = b.intWarehouseId 
+  left join tblCTIndex ay on ay.intIndexId = a.intIndexId 
+  left join tblCTInsuranceBy az on az.intInsuranceById = b.intInsuranceById 
+  left join tblCTContractInvoice ba on ba.intContractDetailId = a.intContractDetailId 
+  left join tblCTInvoiceType bb on bb.intInvoiceTypeId = b.intInvoiceTypeId 
+  left join tblEMEntity bc on bc.intEntityId = b.intLastModifiedById 
+  left join tblICCommodityUnitMeasure bd on bd.intCommodityUnitMeasureId = b.intLoadUOMId 
+  left join tblICUnitMeasure be on be.intUnitMeasureId = bd.intUnitMeasureId 
+  left join tblSMCity bf on bf.intCityId = a.intLoadingPortId 
+  left join tblARMarketZone bg on bg.intMarketZoneId = a.intMarketZoneId 
+  left join tblICItemContract bh on bh.intItemContractId = a.intItemContractId 
+  left join tblSMCountry bi on bi.intCountryID = bh.intCountryId 
+  left join tblICCommodityAttribute bj on bj.intCommodityAttributeId = c.intOriginId 
+  left join tblSMCountry bk on bk.intCountryID = bj.intCountryID 
+  left join tblCTFreightRate bl on bl.intFreightRateId = a.intFreightRateId 
+  left join tblCTPosition bm on bm.intPositionId = b.intPositionId 
   left join prepaid bn on bn.intContractHeaderId = b.intContractHeaderId 
-  left join tblSMCompanyLocationPricingLevel bo  with (nolock) on bo.intCompanyLocationPricingLevelId = b.intCompanyLocationPricingLevelId 
-  left join tblEMEntity bp  with (nolock) on bp.intEntityId = b.intProducerId 
-  left join tblICCommodityAttribute bq  with (nolock) on bq.intCommodityAttributeId = c.intProductTypeId 
+  left join tblSMCompanyLocationPricingLevel bo on bo.intCompanyLocationPricingLevelId = b.intCompanyLocationPricingLevelId 
+  left join tblEMEntity bp on bp.intEntityId = b.intProducerId 
+  left join tblICCommodityAttribute bq on bq.intCommodityAttributeId = c.intProductTypeId 
   									   and bq.strType = 'ProductType' 
-  left join tblSMPurchasingGroup br  with (nolock) on br.intPurchasingGroupId = a.intPurchasingGroupId 
-  left join tblICCommodityUnitMeasure bs  with (nolock) on bs.intCommodityId = b.intCommodityId 
+  left join tblSMPurchasingGroup br on br.intPurchasingGroupId = a.intPurchasingGroupId 
+  left join tblICCommodityUnitMeasure bs on bs.intCommodityId = b.intCommodityId 
   										 and bs.ysnDefault = 1 
-  left join tblICItemUOM bt  with (nolock) on bt.intItemId = a.intItemId 
+  left join tblICItemUOM bt on bt.intItemId = a.intItemId 
   							and bt.intUnitMeasureId = bs.intUnitMeasureId 
-  left join tblICItemUOM bu  with (nolock) on bu.intItemId = a.intItemId 
+  left join tblICItemUOM bu on bu.intItemId = a.intItemId 
   							and bu.intUnitMeasureId = ac.intUnitMeasureId 
-  left join tblCTRailGrade bv  with (nolock) on bv.intRailGradeId = a.intRailGradeId 
-  left join tblEMEntity bw  with (nolock) on bw.intEntityId = b.intSalespersonId 
-  left join tblCTBook bx  with (nolock) on bx.intBookId = a.intBookId 
-  left join tblCTSubBook bz  with (nolock) on bz.intSubBookId = a.intSubBookId 
+  left join tblCTRailGrade bv on bv.intRailGradeId = a.intRailGradeId 
+  left join tblEMEntity bw on bw.intEntityId = b.intSalespersonId 
+  left join tblCTBook bx on bx.intBookId = a.intBookId 
+  left join tblCTSubBook bz on bz.intSubBookId = a.intSubBookId 
   left join statuses ca on ca.intContractHeaderId = b.intContractHeaderId 
-  left join tblICUnitMeasure cb  with (nolock) on cb.intUnitMeasureId = ac.intUnitMeasureId 
-  left join tblICStorageLocation cc  with (nolock) on cc.intStorageLocationId = a.intStorageLocationId 
-  left join tblCTSubBook cd  with (nolock) on cd.intSubBookId = b.intSubBookId 
-  left join tblSMCompanyLocationSubLocation ce  with (nolock) on ce.intCompanyLocationSubLocationId = a.intSubLocationId 
-  left join tblSMTerm cf  with (nolock) on cf.intTermID = b.intTermId 
-  left join tblCTContractText cg  with (nolock) on cg.intContractTextId = b.intContractTextId 
-  left join tblICUnitMeasure ci  with (nolock) on ci.intUnitMeasureId = ag.intUnitMeasureId 
+  left join tblICUnitMeasure cb on cb.intUnitMeasureId = ac.intUnitMeasureId 
+  left join tblICStorageLocation cc on cc.intStorageLocationId = a.intStorageLocationId 
+  left join tblCTSubBook cd on cd.intSubBookId = b.intSubBookId 
+  left join tblSMCompanyLocationSubLocation ce on ce.intCompanyLocationSubLocationId = a.intSubLocationId 
+  left join tblSMTerm cf on cf.intTermID = b.intTermId 
+  left join tblCTContractText cg on cg.intContractTextId = b.intContractTextId 
+  left join tblICUnitMeasure ci on ci.intUnitMeasureId = ag.intUnitMeasureId 
   left join reserved cj on cj.intContractDetailId = a.intContractDetailId 
-  left join tblAPVendor ck  with (nolock) on ck.intEntityId = a.intBillTo 
-  left join tblCTWeightGrade cl  with (nolock) on cl.intWeightGradeId = b.intWeightId 
-  left join tblICItemUOM cm  with (nolock) on cm.intItemUOMId = a.intNetWeightUOMId 
-  left join tblICUnitMeasure cn  with (nolock) on cn.intUnitMeasureId = cm.intUnitMeasureId 
+  left join tblAPVendor ck on ck.intEntityId = a.intBillTo 
+  left join tblCTWeightGrade cl on cl.intWeightGradeId = b.intWeightId 
+  left join tblICItemUOM cm on cm.intItemUOMId = a.intNetWeightUOMId 
+  left join tblICUnitMeasure cn on cn.intUnitMeasureId = cm.intUnitMeasureId 
   left join lgallocationS co on co.intSContractDetailId = a.intContractDetailId
   left join
   (
@@ -515,8 +515,8 @@ from
 		(
 			SELECT	ROW_NUMBER() OVER (PARTITION BY TR.intRecordId ORDER BY TR.intRecordId ASC) intRowNum,
 					TR.intRecordId, TR.ysnOnceApproved 
-			FROM	tblSMTransaction	TR with (nolock) 
-			JOIN	tblSMScreen			SC	 with (nolock) ON	SC.intScreenId		=	TR.intScreenId
+			FROM	tblSMTransaction	TR
+			JOIN	tblSMScreen			SC	ON	SC.intScreenId		=	TR.intScreenId
 			WHERE	SC.strNamespace IN( 'ContractManagement.view.Contract',
 										'ContractManagement.view.Amendments')
 		) t

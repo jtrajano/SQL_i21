@@ -267,9 +267,9 @@ BEGIN TRY
 		SELECT	@intSequenceHistoryId = MIN(intSequenceHistoryId) FROM @SCOPE_IDENTITY WHERE intSequenceHistoryId > @intSequenceHistoryId
 	END
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND (ISNULL(ysnPrinted,0)=1 OR ISNULL(ysnSigned,0)=1))
+	IF EXISTS(SELECT 1 FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId AND (ISNULL(ysnPrinted,0)=1 OR ISNULL(ysnSigned,0)=1))
 	BEGIN
-		IF EXISTS(SELECT TOP 1 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId ) OR (@ysnAmdWoAppvl = 1)
+		IF EXISTS(SELECT 1 FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] =@intLastModifiedById AND [intApprovalListId]=@intApprovalListId ) OR (@ysnAmdWoAppvl = 1)
 		BEGIN
 		  INSERT INTO tblCTSequenceAmendmentLog
 		  (

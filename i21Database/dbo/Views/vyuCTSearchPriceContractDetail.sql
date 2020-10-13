@@ -37,7 +37,8 @@ AS
 			REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') AS strPricingMonth,
 			REPLACE(HO.strFutureMonth,' ','('+HO.strSymbol+') ') AS strHedgeMonth,
 			DP.dtmDate				AS dtmAveragePriceDate
-	FROM	tblCTPriceFixationDetail	PD	WITH (NOLOCK)
+
+	FROM	tblCTPriceFixationDetail	PD
 	JOIN	vyuCTSearchPriceContract	PF	ON	PF.intPriceFixationId			=	PD.intPriceFixationId		LEFT
 	JOIN	tblEMEntity					EY	ON	EY.intEntityId					=	PD.intBrokerId				LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PD.intPricingUOMId			LEFT
