@@ -867,7 +867,6 @@ BEGIN TRY
 					SET @dblUnitsForContract = NULL
 					SET @intPricingTypeId = NULL
 					SET @dblContractBasis = NULL
-					SET @intContractHeaderId = NULL
 
 					WHILE @SettleContractKey > 0
 					BEGIN
@@ -879,9 +878,12 @@ BEGIN TRY
 							,@dblContractBasis		= dblBasis
 							,@intContractUOMId		= intContractUOMId
 							,@dblCostUnitQty		= dblCostUnitQty
-							,@intContractHeaderId	= intContractHeaderId
 						FROM @SettleContract
 						WHERE intSettleContractKey 	= @SettleContractKey
+
+						--SELECT @intContractHeaderId = intContractHeaderId
+						--FROM tblCTContractDetail
+						--WHERE intContractDetailId = @intContractDetailId
 
 						IF @dblStorageUnits <= @dblContractUnits
 						BEGIN
