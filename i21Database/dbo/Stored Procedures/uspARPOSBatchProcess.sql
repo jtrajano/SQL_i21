@@ -672,7 +672,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #POSTRANSACTIONS)
 				,dblInvoiceTotal				= IFP.dblInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblBaseInvoiceTotal			= IFP.dblBaseInvoiceTotal * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
 				,dblPayment						= CASE WHEN POSPAYMENTS.strPaymentMethod = 'Cash' and II.strTransactionType <> 'Credit Memo'
-													THEN IFP.dblAmountDue
+													THEN POSPAYMENTS.dblAmount
 													ELSE
 													  CASE WHEN ISNULL(POSPAYMENTS.dblAmount, 0) <  0 
 													    THEN (ISNULL(POSPAYMENTS.dblAmount, 0) * -1) * dbo.fnARGetInvoiceAmountMultiplier(IFP.strTransactionType)
