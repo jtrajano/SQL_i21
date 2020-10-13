@@ -219,9 +219,17 @@ BEGIN TRY
 			JOIN tblGRSettleStorageTicket SST 
 				ON SST.intSettleStorageTicketId = UH.intExternalId 
 					AND SST.intSettleStorageId = UH.intExternalHeaderId
+			JOIN tblGRStorageHistory SH 
+				ON SH.intContractHeaderId = UH.intContractHeaderId 
+					AND SH.intCustomerStorageId = SST.intCustomerStorageId 
+					AND SH.intSettleStorageId = UH.intExternalHeaderId
+			LEFT JOIN tblCTContractDetail CD 
+				ON CD.intContractDetailId = UH.intContractDetailId
 			WHERE UH.intExternalHeaderId = @intSettleStorageId 
 				AND UH.strScreenName = 'Settle Storage' 
-				AND UH.strFieldName = 'Balance'
+				AND UH.strFieldName = 'Balance' 
+				AND SH.strType = 'Settlement'
+
 			BEGIN
 				DECLARE @intDepletionKey INT
 				DECLARE @intPricingTypeId INT
@@ -250,7 +258,7 @@ BEGIN TRY
 					FROM @tblContractIncrement
 					WHERE intDepletionKey = @intDepletionKey
 
-					IF @intPricingTypeId = 5 --DP
+					IF @intPricingTypeId = 5
 					BEGIN
 						SELECT @intItemUOMId = intItemUOMId
 						FROM tblCTContractDetail
@@ -267,7 +275,7 @@ BEGIN TRY
 							,@intSourceItemUOMId = @intItemUOMId
 					END
 					ELSE
-					BEGIN --Priced/Cash/Basis
+					BEGIN
 						EXEC uspCTUpdateSequenceBalance 
 							 @intContractDetailId = @intContractDetailId
 							,@dblQuantityToUpdate = @dblUnits
