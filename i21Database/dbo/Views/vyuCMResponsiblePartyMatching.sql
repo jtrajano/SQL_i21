@@ -14,6 +14,6 @@ C.strCode strPrimarySegment,
 D.strBankAccountNo strPrimaryBank,
 E.strBankAccountNo strOffsetBank
 from tblCMResponsiblePartyMatching A
-left join tblGLAccountSegment C on C.intAccountSegmentId = A.intPrimarySegmentId
+left join tblGLAccount C on C.intAccountId = A.intPrimaryAccountId
 left join vyuCMBankAccount D on D.intBankAccountId = A.intPrimaryBankId
 left join vyuCMBankAccount E on E.intBankAccountId = A.intOffsetBankId
