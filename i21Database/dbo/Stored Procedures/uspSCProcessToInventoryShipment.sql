@@ -126,12 +126,7 @@ BEGIN TRY
 			END
 		end
 		
-		-- Get the next batch number
-		BEGIN 
-			DECLARE @strBatchId AS NVARCHAR(40)
-			SET @strBatchId = NULL 
-			EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL  
-		END
+		
 
  		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1 ELSE 4 END
 
