@@ -28,7 +28,6 @@ BEGIN TRY
 	DECLARE @intInventoryItemStockUOMId INT
 	DECLARE @intParentSettleStorageId INT
 	DECLARE @GLEntries AS RecapTableType
-	DECLARE @GLEntries2 AS RecapTableType
 	DECLARE @intReturnValue AS INT
 	DECLARE @strOwnedPhysicalStock NVARCHAR(20)	
 	DECLARE @isParentSettleStorage AS BIT
@@ -42,8 +41,7 @@ BEGIN TRY
 	SELECT 
 		@intSettleStorageId = intSettleStorageId
 		,@UserId			= intEntityUserSecurityId
-		,@strBatchId		= strBatchId
-	FROM OPENXML(@idoc, 'root', 2) WITH (intSettleStorageId INT,intEntityUserSecurityId INT, strBatchId NVARCHAR(20))
+	FROM OPENXML(@idoc, 'root', 2) WITH (intSettleStorageId INT,intEntityUserSecurityId INT)
 	
 	SET @intParentSettleStorageId = @intSettleStorageId
 
@@ -442,8 +440,10 @@ BEGIN TRY
 
 				IF @intReturnValue < 0 GOTO SettleStorage_Exit;				
 
-				INSERT INTO @GLEntries2
-				SELECT * FROM @GLEntries				
+				IF EXISTS (SELECT TOP 1 1 FROM @GLEntries) 
+				BEGIN 
+					EXEC dbo.uspGLBookEntries @GLEntries, 0 
+				END
 			END
 
 			--4. Deleting History
@@ -573,11 +573,6 @@ BEGIN TRY
 			end
 		
 		END		
-	END
-
-	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries2) 
-	BEGIN 
-		EXEC dbo.uspGLBookEntries @GLEntries2, 0 
 	END
 
 	SettleStorage_Exit:
