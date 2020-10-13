@@ -280,6 +280,18 @@ BEGIN TRY
 				GOTO ext
 			END
 
+			IF EXISTS(SELECT *FROM tblAPBill
+				WHERE intInvoiceRefId = @intInvoiceId
+					AND intBookId = @intBookId
+					AND IsNULL(intSubBookId, 0) = IsNULL(@intSubBookId, 0))
+			BEGIN
+				UPDATE tblARInvoiceStage
+				SET strFeedStatus = 'IGNORE'
+				WHERE intInvoiceStageId = @intInvoiceStageId
+				AND strFeedStatus ='In-Progress'
+				GOTO ext
+			END
+
 			SELECT @intLocationId = NULL
 
 			SELECT @intLocationId = intCompanyLocationId
@@ -760,15 +772,16 @@ BEGIN TRY
 			UPDATE tblARInvoiceStage
 			SET strFeedStatus = 'Processed'
 			WHERE intInvoiceStageId = @intInvoiceStageId
+			AND strFeedStatus ='In-Progress'
 
-			SELECT @intVoucherScreenId = intScreenId
-			FROM tblSMScreen
-			WHERE strNamespace = 'AccountsPayable.view.Voucher'
+			--SELECT @intVoucherScreenId = intScreenId
+			--FROM tblSMScreen
+			--WHERE strNamespace = 'AccountsPayable.view.Voucher'
 
-			SELECT @intTransactionRefId = intTransactionId
-			FROM tblSMTransaction
-			WHERE intRecordId = @intBillInvoiceId
-				AND intScreenId = @intVoucherScreenId
+			--SELECT @intTransactionRefId = intTransactionId
+			--FROM tblSMTransaction
+			--WHERE intRecordId = @intBillInvoiceId
+			--	AND intScreenId = @intVoucherScreenId
 
 			--EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
 			--	,@referenceTransactionId = @intTransactionId
