@@ -204,7 +204,7 @@ BEGIN
     SET NOCOUNT ON;
 
    UPDATE tblICItemPricingLevel
-      SET tblICItemPricingLevel.dtmDateChanged = GETDATE()
+      SET tblICItemPricingLevel.dtmDateChanged = GETUTCDATE()
      FROM   inserted
     WHERE tblICItemPricingLevel.intItemPricingLevelId = inserted.intItemPricingLevelId
 END
