@@ -4,7 +4,7 @@
 	,@ysnFromPriceBasisContract BIT = 0
 	,@dblCashPriceFromCt DECIMAL(24, 10) = 0
 	,@dblQtyFromCt DECIMAL(24,10) = 0
-	,@strBatchId NVARCHAR(20) = ''
+	,@strBatchId NVARCHAR(20)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -187,13 +187,12 @@ BEGIN TRY
 		3-Discount
 		4-Fee
    */
+
    -- Get the Batch Id 
-   IF ISNULL(@strBatchId, '') = ''
-   BEGIN	   
-		EXEC dbo.uspSMGetStartingNumber 
-			@STARTING_NUMBER_BATCH
-			,@strBatchId OUTPUT
-	END
+	--EXEC dbo.uspSMGetStartingNumber 
+	--@STARTING_NUMBER_BATCH
+	--,@strBatchId OUTPUT
+
 	--SELECT @strBatchId = 'BATCH-8991587'
 
 	SET @intParentSettleStorageId = @intSettleStorageId	
@@ -2820,8 +2819,7 @@ BEGIN TRY
 			,@recap = 0
 			,@isBatch = 0
 			,@param = @intVoucherId2
-			,@userId = @intCreatedUserId			
-			,@batchId = @strBatchId
+			,@userId = @intCreatedUserId
 			,@transactionType = 'Settle Storage'
 			,@success = @success OUTPUT
 		DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
