@@ -980,6 +980,193 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								where TicketStaging.strInOutFlag = ''O''
 
 					
+						----- Calculating Discount information
+
+
+						--Scale Station
+						declare @is_multiple_weight bit
+						--Ticket
+						declare @scale_setup int
+						declare @ticket_gross_w0 DECIMAL(24, 4) = 0
+						declare @ticket_gross_w1 DECIMAL(24, 4) = 0
+						declare @ticket_gross_w2 DECIMAL(24, 4) = 0
+						declare @ticket_convert_uom DECIMAL(24, 10) = 0
+						declare @ticket_delivery_sheet int
+						declare @ticket_item_id int 
+
+						--Getting Ticket Information
+						select 
+							--dblNetUnits	
+							@scale_setup = intScaleSetupId
+							,@ticket_gross_w0 = dblGrossWeight - dblTareWeight
+							--,@ticket_gross_w1 = dblGrossWeight1 - dblTareWeight1
+							--,@ticket_gross_w2 = dblGrossWeight2 - dblTareWeight2
+							,@ticket_convert_uom = dblConvertedUOMQty
+							,@ticket_delivery_sheet = intDeliverySheetId
+							,@ticket_item_id  = intItemId
+							--, dblShrink 
+
+						from tblSCTicketLVStaging with(updlock)
+
+						where intTicketLVStagingId = @newLVTicket
+
+						select @is_multiple_weight = ysnMultipleWeights 
+							from tblSCScaleSetup 
+								where intScaleSetupId = @scale_setup
+						--Discount
+						--Wet Weight
+						declare @discount_ww DECIMAL(24, 4) = 0
+						--Net Weight
+						declare @discount_nw DECIMAL(24, 4)  = 0
+						--Gross Weight
+						declare @discount_gw DECIMAL(24, 4)  = 0
+
+
+						declare @gross_shrink_w DECIMAL(24, 4)
+						declare @wet_shrink_w DECIMAL(24, 4)
+						declare @net_shrink_w DECIMAL(24, 4)
+						-- Final computation
+						--Wet Weight
+						declare @ww DECIMAL(24, 4) = 0
+						declare @ws_ww DECIMAL(24, 4) = 0
+						--Net Weight
+						declare @nw DECIMAL(24, 4)  = 0
+						--Gross Weight
+						declare @gw DECIMAL(24, 4)  = 0
+
+
+
+						declare @final_gross DECIMAL(24, 4)
+						declare @final_shrink DECIMAL(24, 4)
+						declare @final_net DECIMAL(24, 4)
+
+						--Holder for the weight group
+						declare @all_w table (
+							--total per weight group
+							total_w DECIMAL(24, 4)
+							-- weight group header
+							,what_w nvarchar(50)
+
+						)
+						--get the total shrink per group header
+						insert into @all_w (total_w, what_w)
+						select sum(dblShrinkPercent), strShrinkWhat 
+							from tblSCTicketDiscountLVStaging 
+								where intTicketId = @newLVTicket 
+						group by strShrinkWhat
+
+						--assign the right weight to the variable to be used later in the computation
+						select @discount_ww = case when what_w = ''Wet Weight'' or what_w = ''W'' then @discount_ww + total_w else @discount_ww end
+							, @discount_nw = case when what_w = ''Net Weight'' or what_w = ''N'' then @discount_nw + total_w else @discount_nw end
+							, @discount_gw = case when what_w = ''Gross Weight'' or what_w = ''P'' then @discount_gw + total_w else @discount_gw end
+
+							from @all_w 
+
+						-- if the scale station is a multi weight add the gross 0, 1, 2
+						if @is_multiple_weight = 1
+						begin
+							set @ticket_gross_w0 = @ticket_gross_w0 + @ticket_gross_w1 + @ticket_gross_w2
+						end
+
+
+						select @gross_shrink_w = ( @ticket_gross_w0 * @discount_gw ) / 100
+						select @ww = @ticket_gross_w0 - @gross_shrink_w
+
+						select @wet_shrink_w = (@ww * @discount_ww ) / 100
+						select @ws_ww = @ww - @wet_shrink_w
+
+						select @net_shrink_w = (@ws_ww * @discount_nw ) / 100
+
+
+						select @final_gross = @ticket_gross_w0 * @ticket_convert_uom
+						select @final_shrink = case when isnull(@ticket_delivery_sheet, 0) > 0 then 0 else (@gross_shrink_w + @wet_shrink_w + @net_shrink_w) * @ticket_convert_uom end
+						select @final_net = @final_gross - @final_shrink
+
+						
+						update  tblSCTicketLVStaging
+							set dblNetUnits = @final_net
+								, dblGrossUnits = @final_gross
+								, dblShrink = @final_shrink
+						where intTicketLVStagingId = @newLVTicket
+
+						declare @calculated_discount table (
+								intExtendedKey int
+								,dblFrom DECIMAL(24, 6)
+								,dblTo DECIMAL(24, 6)
+								,dblDiscountAmount DECIMAL(24, 6)
+								,dblShrink DECIMAL(24, 6)
+								,strMessage nvarchar(50)
+								,intDiscountCalculatingOptionId int
+								,strDiscountChargeType nvarchar(50)
+								,strCalculationDiscountOption nvarchar(50)
+								,intShrinkCalculationOptionId int
+								,strCalculationShrinkOption nvarchar(50)
+								,intDiscountUOMId int
+							)
+
+						declare @discounts_table as table(
+							id int
+							,intDiscountScheduleCodeId int
+							,dblReading DECIMAL(24, 6)
+						)
+						insert into @discounts_table(id, intDiscountScheduleCodeId, dblReading)
+						select intTicketDiscountLVStagingId, intDiscountScheduleCodeId, dblGradeReading 
+							from tblSCTicketDiscountLVStaging with(updlock) 
+							where intTicketId = @newLVTicket 
+							
+								and dblGradeReading <> 0
+
+
+
+						declare @current_discount_id int
+						declare @current_discount_schedule int
+						declare @current_reading DECIMAL(24, 6)
+						declare @current_discount_result DECIMAL(24, 6)
+						declare @current_shrink_result DECIMAL(24, 6)
+
+
+						select @current_discount_id = min(id) from @discounts_table
+						while @current_discount_id is not null
+						begin
+							select @current_discount_schedule = intDiscountScheduleCodeId
+								,@current_reading = dblReading
+							from @discounts_table
+								where id = @current_discount_id 
+
+							delete from @calculated_discount
+							insert into @calculated_discount
+							exec uspGRCalculateDiscountandShrink 
+								@intDiscountScheduleCodeId = @current_discount_schedule
+								, @dblReading = @current_reading
+								, @intItemId = @ticket_item_id
+								, @intItemUOMId = 0
+
+							
+							select @current_discount_result = dblDiscountAmount
+								, @current_shrink_result = dblShrink
+							from @calculated_discount
+
+							
+
+							update tblSCTicketDiscountLVStaging
+								set dblShrinkPercent = @current_discount_result
+								,dblDiscountAmount = @current_shrink_result
+
+								where intTicketDiscountLVStagingId = @current_discount_id
+
+							select @current_discount_id = min(id) 
+								from @discounts_table where id > @current_discount_id
+
+						end
+
+
+						----- End calculating discount information
+
+
+
+
+
+
 						declare @ticket_number nvarchar(100)
 						declare @inserted_ticket_number int
 						declare @validation_message nvarchar(max)
