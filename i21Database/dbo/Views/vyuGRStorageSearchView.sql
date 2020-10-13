@@ -5,7 +5,7 @@ SELECT DISTINCT
 	,intTransactionId			  	= CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intDeliverySheetId
 										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN CS.intTicketId
-										ELSE TRANSFERSTORAGE.intTransferStorageId
+										ELSE TSS.intTransferStorageId
 									END
 	,CASE 
 										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN 'DS' --DELIVERY SHEET
@@ -13,13 +13,13 @@ SELECT DISTINCT
 										ELSE 'TS' --TRANSFER STORAGE
 									END COLLATE Latin1_General_CI_AS as strTransactionCode
 	,CASE 
-										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DELIVERYSHEET.strDeliverySheetNumber
+										WHEN CS.intDeliverySheetId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN DeliverySheet.strDeliverySheetNumber
 										WHEN CS.intTicketId IS NOT NULL AND CS.ysnTransferStorage = 0 THEN SC.strTicketNumber
-										ELSE TRANSFERSTORAGE.strTransferStorageTicket
+										ELSE TS.strTransferStorageTicket
 									END COLLATE Latin1_General_CI_AS as strTransaction
 	,intEntityId				  	= CS.intEntityId
 	,strName					  	= E.strName  
-	,strStorageTicketNumber		  = CASE WHEN CS.ysnTransferStorage = 1 THEN TRANSFERSTORAGE.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
+	,strStorageTicketNumber		  = CASE WHEN CS.ysnTransferStorage = 1 THEN TS.strTransferStorageTicket ELSE CS.strStorageTicketNumber END
 	,intStorageTypeId			  	= CS.intStorageTypeId
 	,strStorageTypeDescription	  	= ST.strStorageTypeDescription
 	,intCommodityId				  	= CS.intCommodityId
@@ -72,20 +72,20 @@ SELECT DISTINCT
 											ELSE NULL
 										END
 									end
-	,strDeliverySheetNumber		  	= DELIVERYSHEET.strDeliverySheetNumber
+	,strDeliverySheetNumber		  	= DeliverySheet.strDeliverySheetNumber
 	,dtmLastStorageAccrueDate	  	= CS.dtmLastStorageAccrueDate
 	,dblSplitPercent			  	= CASE WHEN SCTicketSplit.dblSplitPercent IS NULL		
 										THEN 
 											CASE 
-												WHEN DELIVERYSHEET.dblSplitPercent IS NOT NULL THEN DELIVERYSHEET.dblSplitPercent 
-												WHEN TRANSFERSTORAGE.dblSplitPercent IS NOT NULL THEN TRANSFERSTORAGE.dblSplitPercent
+												WHEN DSS.dblSplitPercent IS NOT NULL THEN DSS.dblSplitPercent 
+												WHEN TSS.dblSplitPercent IS NOT NULL THEN TSS.dblSplitPercent
 												ELSE 100
 											END
 										ELSE SCTicketSplit.dblSplitPercent
 									END
 	,intSplitId					   	= EMSplit.intSplitId
 	,intItemUOMId				 	= CS.intItemUOMId
-	,ysnDeliverySheetPosted		 	= ISNULL(DELIVERYSHEET.ysnPost,1)
+	,ysnDeliverySheetPosted		 	= ISNULL(DeliverySheet.ysnPost,1)
     ,ysnShowInStorage			 	= CAST(
 										CASE
 											WHEN ST.ysnCustomerStorage = 0 THEN 1
@@ -95,182 +95,69 @@ SELECT DISTINCT
 									)
 	,Category.strCategoryCode
 	,strTransactionStatus           = CASE 
-										WHEN CS.ysnTransferStorage = 1 OR (CS.intTicketId IS NOT NULL AND SC.strTicketStatus = 'C') OR DELIVERYSHEET.ysnPost = 1 THEN 'Posted'
+										WHEN CS.ysnTransferStorage = 1 OR (CS.intTicketId IS NOT NULL AND SC.strTicketStatus = 'C') OR DeliverySheet.ysnPost = 1 THEN 'Posted'
 										ELSE 'Open'
 									END
-	,TRANSFERSTORAGE.intSourceCustomerStorageId
+	,TSR.intSourceCustomerStorageId
 	,CS.ysnTransferStorage
 	,strStorageTransactionNumber = CS.strStorageTicketNumber
 FROM tblGRCustomerStorage CS  
-JOIN (
-	SELECT intCompanyLocationId
-		,strLocationName
-	FROM tblSMCompanyLocation WITH (NOLOCK)
-) LOC
+JOIN tblSMCompanyLocation LOC
 	ON LOC.intCompanyLocationId = CS.intCompanyLocationId  
-LEFT JOIN (
-	SELECT intStorageScheduleTypeId
-		,ysnDPOwnedType
-		,ysnCustomerStorage
-		,strOwnedPhysicalStock
-		,strStorageTypeDescription
-	FROM tblGRStorageType WITH (NOLOCK)
-)ST
+LEFT JOIN tblGRStorageType ST
 	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
-JOIN (
-	SELECT intItemId
-		,strItemNo
-		,intCategoryId
-	FROM tblICItem WITH (NOLOCK)
-) Item 
+JOIN tblICItem Item 
 	ON Item.intItemId = CS.intItemId
-JOIN (
-	SELECT intCommodityId
-		,strCommodityCode
-	FROM tblICCommodity WITH (NOLOCK)
-) Commodity
+JOIN tblICCommodity Commodity
     ON Commodity.intCommodityId = CS.intCommodityId
-JOIN (
-	SELECT intCategoryId
-		,strCategoryCode
-	FROM tblICCategory WITH (NOLOCK)
-) Category
+JOIN tblICCategory Category
 	ON Item.intCategoryId = Category.intCategoryId
-JOIN (
-	SELECT intItemId
-		,ysnStockUnit
-		,intItemUOMId
-	FROM tblICItemUOM WITH (NOLOCK)
-) ItemUOM
+JOIN tblICItemUOM ItemUOM
 	ON ItemUOM.intItemId = Item.intItemId
 		AND ItemUOM.ysnStockUnit = 1
-JOIN (
-	SELECT intEntityId
-		,strName
-	FROM tblEMEntity WITH (NOLOCK)
-) E
+JOIN tblEMEntity E
 	ON E.intEntityId = CS.intEntityId
-LEFT JOIN (
-	SELECT intStorageScheduleRuleId
-		,strScheduleDescription
-	FROM tblGRStorageScheduleRule WITH (NOLOCK)
-) SR
+LEFT JOIN tblGRStorageScheduleRule SR
 	ON SR.intStorageScheduleRuleId = CS.intStorageScheduleId
-JOIN (
-	SELECT intDiscountScheduleId
-		,strDiscountDescription
-	FROM tblGRDiscountSchedule WITH (NOLOCK)
-) DS 
+JOIN tblGRDiscountSchedule DS 
 	ON DS.intDiscountScheduleId = CS.intDiscountScheduleId
-LEFT JOIN (
-	SELECT DeliverySheet.intDeliverySheetId
-		,DeliverySheet.strDeliverySheetNumber
-		,DeliverySheet.intSplitId
-		,DeliverySheet.ysnPost
-		,DSS.intEntityId
-		,DSS.intStorageScheduleTypeId
-		,DSS.intStorageScheduleRuleId		
-		,DSS.dblSplitPercent		
-	FROM tblSCDeliverySheet DeliverySheet WITH (NOLOCK)
-	INNER JOIN (
-		SELECT intDeliverySheetId
-			,intEntityId
-			,intStorageScheduleTypeId
-			,intStorageScheduleRuleId
-			,dblSplitPercent
-		FROM tblSCDeliverySheetSplit WITH (NOLOCK)
-	) DSS
-		ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
-) DELIVERYSHEET ON DELIVERYSHEET.intDeliverySheetId = CS.intDeliverySheetId
-	AND DELIVERYSHEET.intEntityId = E.intEntityId
-	AND DELIVERYSHEET.intStorageScheduleTypeId = CS.intStorageTypeId
-	AND DELIVERYSHEET.intStorageScheduleRuleId = CS.intStorageScheduleId
-LEFT JOIN (
-	SELECT intTicketId
-		,strTicketNumber
-		,intContractId
-		,strTicketStatus
-		,intSplitId
-	FROM tblSCTicket WITH (NOLOCK)
-) SC 
+LEFT JOIN (tblSCDeliverySheet DeliverySheet 
+			INNER JOIN tblSCDeliverySheetSplit DSS	
+				ON DSS.intDeliverySheetId = DeliverySheet.intDeliverySheetId
+		) ON DeliverySheet.intDeliverySheetId = CS.intDeliverySheetId
+			AND DSS.intEntityId = E.intEntityId
+			AND DSS.intStorageScheduleTypeId = CS.intStorageTypeId
+			AND DSS.intStorageScheduleRuleId = CS.intStorageScheduleId
+LEFT JOIN tblSCTicket SC 
 	ON SC.intTicketId = CS.intTicketId
-LEFT JOIN (
-	SELECT intTicketId
-		,intCustomerId
-		,dblSplitPercent
-	FROM tblSCTicketSplit WITH (NOLOCK)
-) SCTicketSplit
+LEFT JOIN tblSCTicketSplit SCTicketSplit	
 	ON SCTicketSplit.intTicketId = CS.intTicketId 
 		AND SCTicketSplit.intCustomerId = CS.intEntityId
-LEFT JOIN (
-	SELECT intSplitId
-		,strSplitNumber
-	FROM tblEMEntitySplit WITH (NOLOCK)
-) EMSplit
-	ON (EMSplit.intSplitId = SC.intSplitId OR EMSplit.intSplitId = DELIVERYSHEET.intSplitId)
-LEFT JOIN (
-	SELECT intContractDetailId
-		,intContractHeaderId
-	FROM tblCTContractDetail WITH (NOLOCK)
-)  CD
+LEFT JOIN tblEMEntitySplit EMSplit
+	ON EMSplit.intSplitId = SC.intSplitId 
+		OR EMSplit.intSplitId = DeliverySheet.intSplitId
+LEFT JOIN tblCTContractDetail CD
     ON CD.intContractDetailId = SC.intContractId  
-LEFT JOIN (
-	SELECT intContractHeaderId
-		,strContractNumber
-	FROM tblCTContractHeader WITH (NOLOCK)
-) CH 
+LEFT JOIN tblCTContractHeader CH 
     ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN (
-		SELECT 
-			TSS.intTransferStorageId
-			,TSS.intTransferToCustomerStorageId
-			,TSR.intToCustomerStorageId
-			,TSS.intContractDetailId
-			,TSR.intSourceCustomerStorageId
-			,TSS.dblSplitPercent
-			,TS.strTransferStorageTicket
-		FROM tblGRTransferStorageSplit TSS WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intTransferStorageId
-				,strTransferStorageTicket
-			FROM tblGRTransferStorage WITH (NOLOCK)
-		) TS
+		tblGRTransferStorageSplit TSS
+		INNER JOIN tblGRTransferStorage TS
 			ON TS.intTransferStorageId = TSS.intTransferStorageId
-		LEFT JOIN (
-			SELECT intTransferStorageSplitId
-				,intToCustomerStorageId
-				,intSourceCustomerStorageId
-			FROM tblGRTransferStorageReference WITH (NOLOCK)
-		) TSR
+		LEFT JOIN tblGRTransferStorageReference TSR
 			ON TSR.intTransferStorageSplitId  = TSS.intTransferStorageSplitId
-	) TRANSFERSTORAGE ON ISNULL(TRANSFERSTORAGE.intToCustomerStorageId,TRANSFERSTORAGE.intTransferToCustomerStorageId) = CS.intCustomerStorageId
-LEFT JOIN (
-	SELECT intContractDetailId
-		,intContractHeaderId
-	FROM tblCTContractDetail WITH (NOLOCK)
-) CD_Transfer
-    ON CD_Transfer.intContractDetailId = TRANSFERSTORAGE.intContractDetailId
+	) ON ISNULL(TSR.intToCustomerStorageId,TSS.intTransferToCustomerStorageId) = CS.intCustomerStorageId
+LEFT JOIN tblCTContractDetail CD_Transfer
+    ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
 		AND CS.ysnTransferStorage = 1
-LEFT JOIN (
-	SELECT intContractHeaderId
-		,strContractNumber
-	FROM tblCTContractHeader WITH (NOLOCK)
-) CH_Transfer
+LEFT JOIN tblCTContractHeader CH_Transfer
     ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
 LEFT JOIN (
 	SELECT GSH.intCustomerStorageId, GCH.intContractHeaderId, GCH.strContractNumber, GCD.intContractDetailId 
-	FROM tblGRStorageHistory GSH WITH (NOLOCK)
-	JOIN (
-		SELECT intContractHeaderId
-			,strContractNumber
-		FROM tblCTContractHeader WITH (NOLOCK)
-	) GCH
+	FROM tblGRStorageHistory GSH
+	JOIN tblCTContractHeader GCH
 		ON GCH.intContractHeaderId = GSH.intContractHeaderId
-	JOIN (
-		SELECT intContractDetailId
-			,intContractHeaderId
-		FROM tblCTContractDetail WITH (NOLOCK)
-	) GCD
+	JOIN tblCTContractDetail GCD
 		ON GCH.intContractHeaderId = GCD.intContractHeaderId
 	WHERE GSH.intTransactionTypeId IN (1,3,5) --Scale, Transfer, Delivery Sheet
 ) GHistory
