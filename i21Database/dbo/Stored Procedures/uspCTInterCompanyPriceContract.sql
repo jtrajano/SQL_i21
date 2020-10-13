@@ -106,11 +106,13 @@ BEGIN TRY
 				,strRowState
 				,intMultiCompanyId
 				,strTransactionType
+				,ysnApproval
 				)
 			SELECT @intPriceContractId
 				,@strRowState
 				,@intToCompanyId
 				,@strTransactionType
+				,@ysnApprove
 		END
 	END
 END TRY
