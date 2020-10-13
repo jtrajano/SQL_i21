@@ -292,6 +292,69 @@ BEGIN TRY
 			AND Trans.strTransactionType = 'Invoice'
 			AND Trans.intTransactionId IS NOT NULL
 		END
+		ELSE IF (@TaxAuthorityCode = 'MD')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicMD
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+			
+			INSERT INTO tblTFTransactionDynamicMD (intTransactionId, strMDDeliveryMethod, strMDFreightPaidBy, strMDConsignorAddress, strMDProductCode, intConcurrencyId)
+			SELECT Trans.intTransactionId, 
+				CASE WHEN tblSMShipVia.ysnCompanyOwnedCarrier = 1 THEN 'COT' ELSE 'CCT' END, 
+				'', 
+				SellerLoc.strAddress + ', ' +  SellerLoc.strCity + ', ' + SellerLoc.strState,
+				CASE WHEN Trans.strProductCode = '125' THEN 'AG' 
+					WHEN Trans.strProductCode = '065' THEN 'G' 
+					WHEN Trans.strProductCode IN ('124','241') THEN 'GH' 
+					WHEN Trans.strProductCode = '150' THEN 'F.O.' 
+					WHEN Trans.strProductCode IN ('072','142') THEN 'K' 
+					WHEN Trans.strProductCode IN ('160','170','171','228') THEN 'D'
+					WHEN Trans.strProductCode = '130' THEN 'A'
+				ELSE '' END,
+				1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			INNER JOIN tblTRLoadDistributionHeader ON tblTRLoadDistributionHeader.intLoadDistributionHeaderId = tblARInvoice.intLoadDistributionHeaderId
+			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadDistributionHeader.intLoadHeaderId
+			LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
+			LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
+			LEFT JOIN tblEMEntityLocation SellerLoc ON SellerLoc.intEntityId = Seller.intEntityId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Invoice'
+			AND Trans.intTransactionId IS NOT NULL
+
+			UNION ALL
+
+			SELECT Trans.intTransactionId, 
+				CASE WHEN tblSMShipVia.ysnCompanyOwnedCarrier = 1 THEN 'COT' ELSE 'CCT' END, 
+				'', 
+				SellerLoc.strAddress + ', ' +  SellerLoc.strCity + ', ' + SellerLoc.strState,
+				CASE WHEN Trans.strProductCode = '125' THEN 'AG' 
+					WHEN Trans.strProductCode = '065' THEN 'G' 
+					WHEN Trans.strProductCode IN ('124','241') THEN 'GH' 
+					WHEN Trans.strProductCode = '150' THEN 'F.O.' 
+					WHEN Trans.strProductCode IN ('072','142') THEN 'K' 
+					WHEN Trans.strProductCode IN ('160','170','171','228') THEN 'D'
+					WHEN Trans.strProductCode = '130' THEN 'A'
+				ELSE '' END,
+				1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblICInventoryReceiptItem ON tblICInventoryReceiptItem.intInventoryReceiptItemId =  Trans.intTransactionNumberId
+			INNER JOIN tblICInventoryReceipt ON tblICInventoryReceipt.intInventoryReceiptId = tblICInventoryReceiptItem.intInventoryReceiptId
+			INNER JOIN tblTRLoadReceipt ON tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId
+			INNER JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
+			LEFT JOIN tblSMShipVia ON tblSMShipVia.intEntityId = tblTRLoadHeader.intShipViaId
+			LEFT JOIN tblEMEntity Seller ON Seller.intEntityId = tblTRLoadHeader.intSellerId
+			LEFT JOIN tblEMEntityLocation SellerLoc ON SellerLoc.intEntityId = Seller.intEntityId
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Receipt'
+			AND Trans.intTransactionId IS NOT NULL
+
+		END
 
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 

@@ -8882,6 +8882,7 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputSKUs.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicMD.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
