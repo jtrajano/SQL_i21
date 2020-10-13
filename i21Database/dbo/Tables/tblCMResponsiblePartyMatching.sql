@@ -1,17 +1,17 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyMatching](
 	[intResponsiblePartyMatchingId] [int] IDENTITY(1,1) NOT NULL,
-	[strType] [nvarchar](100) COLLATE Latin1_General_CI_AS NOT NULL ,
-	[strDescriptionContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strAccountNumberContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
-	[strReferenceContains] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strType] [nvarchar](100)  COLLATE Latin1_General_CI_AS NOT NULL,
+	[strDescriptionContains] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
+	[strAccountNumberContains] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
+	[strReferenceContains] [nvarchar](100)  COLLATE Latin1_General_CI_AS NULL,
 	[intActionId] [int] NOT NULL,
 	[intPrimaryBankId] [int] NULL,
 	[intOffsetBankId] [int] NULL,
-	[intPrimarySegmentId] [int] NULL,
+	[intPrimaryAccountId] [int] NULL,
 	[intResponsibleEntityId] [int] NULL,
 	[intConcurrencyId] [int] NOT NULL,
-	[strLocationSearch] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
- CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED
+	[strLocationSearch] [nvarchar](20)  COLLATE Latin1_General_CI_AS NULL,
+ CONSTRAINT [PK_tblCMResponsiblePartyMatching] PRIMARY KEY CLUSTERED 
 (
 	[intResponsiblePartyMatchingId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
@@ -35,10 +35,9 @@ GO
 ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblCMBankAccount1]
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment] FOREIGN KEY([intPrimarySegmentId])
-REFERENCES [dbo].[tblGLAccountSegment] ([intAccountSegmentId])
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching]  WITH CHECK ADD  CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccount] FOREIGN KEY([intPrimaryAccountId])
+REFERENCES [dbo].[tblGLAccount] ([intAccountId])
 GO
 
-ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccountSegment]
+ALTER TABLE [dbo].[tblCMResponsiblePartyMatching] CHECK CONSTRAINT [FK_tblCMResponsiblePartyMatching_tblGLAccount]
 GO
-
