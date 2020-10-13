@@ -5,6 +5,7 @@
 	,@strRowState NVARCHAR(100)
 	,@ysnReplication BIT = 1
 	,@ysnProcessApproverInfo bit=0
+	,@ysnApproval BIT=0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -25,6 +26,7 @@ BEGIN TRY
 		,@intContractScreenId INT
 		,@strApproverXML NVARCHAR(MAX)
 		,@strSubmittedByXML NVARCHAR(MAX)
+		,@strAdditionalInfo NVARCHAR(MAX)
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
@@ -80,6 +82,12 @@ Begin
 		,@strPriceContractXML OUTPUT
 		,NULL
 		,NULL
+
+	SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
+
+	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPPriceContract></vyuIPPriceContracts>'
+
+	SELECT @strPriceContractXML = Replace(@strPriceContractXML, '</vyuIPPriceContract></vyuIPPriceContracts>', @strAdditionalInfo)
 
 	---------------------------------------------PriceFixation------------------------------------------
 	SET @strPriceFixationXML = NULL
