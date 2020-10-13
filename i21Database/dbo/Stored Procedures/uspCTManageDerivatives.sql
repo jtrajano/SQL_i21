@@ -52,7 +52,7 @@ BEGIN TRY
 
 	IF @remove = 0
 	BEGIN
-		SELECT @intContractFuturesId	= MIN(intContractFuturesId) FROM tblCTContractFutures WITH (UPDLOCK) WHERE intContractDetailId = @id
+		SELECT @intContractFuturesId	= MIN(intContractFuturesId) FROM tblCTContractFutures WHERE intContractDetailId = @id
 	
 		WHILE ISNULL(@intContractFuturesId,0) > 0
 		BEGIN

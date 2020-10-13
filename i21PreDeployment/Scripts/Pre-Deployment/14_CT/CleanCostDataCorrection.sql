@@ -88,11 +88,3 @@ BEGIN
 END
 END
 GO
-	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intPrevConcurrencyId' AND object_id = OBJECT_ID(N'tblCTContractCost'))
-	BEGIN
-		EXEC 
-		('
-			update tblCTContractCost set intPrevConcurrencyId = 0 where intPrevConcurrencyId is null
-		');
-	END
-GO

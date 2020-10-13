@@ -51,7 +51,7 @@ BEGIN TRY
 			IF (@intContractHeaderId IS NOT NULL AND @intContractHeaderId > 0)
 			BEGIN
 				SET @intScreenId = (SELECT TOP 1 intScreenId FROM tblSMScreen WHERE strModule = 'Contract Management' AND strNamespace = 'ContractManagement.view.Contract');
-				IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
+				IF NOT EXISTS (SELECT * FROM tblSMTransaction a WHERE a.intRecordId = @intContractHeaderId AND a.intScreenId = @intScreenId AND a.strApprovalStatus IN ('Approved', 'No Need for Approval', 'Approved with Modifications'))
 				BEGIN
 					/*Don't add to Payables IF the contract is NOT yet approved.*/
 					RETURN
@@ -122,7 +122,7 @@ INSERT INTO @voucherPayables(
 )
 SELECT * FROM dbo.fnCTCreateVoucherPayable(@id, @type, 1, @remove);
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM @voucherPayables)
+IF NOT EXISTS(SELECT * FROM @voucherPayables)
 BEGIN	
 	IF @type = 'header' AND @remove = 0
 	BEGIN
@@ -144,13 +144,11 @@ IF @type = 'header' AND @remove = 0
 BEGIN
 	EXEC uspCTDeleteBasisUnAccruedPayable @id
 
-	SELECT @intContractDetailId = intContractDetailId
-	FROM tblCTContractDetail
-	WHERE intContractHeaderId = @id
-	
-	UPDATE	tblCTContractCost
-	SET		intPrevConcurrencyId = intConcurrencyId
-	WHERE	intContractDetailId	=	@intContractDetailId
+	UPDATE	CC
+	SET		CC.intPrevConcurrencyId = CC.intConcurrencyId
+	FROM	tblCTContractCost	CC
+	JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	CC.intContractDetailId
+	WHERE	CD.intContractHeaderId	=	@id
 END
 
 END TRY

@@ -104,7 +104,7 @@ BEGIN TRY
 		RETURN
 
 
-	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(1) FROM tblAPBillDetail a, tblAPBill b WHERE a.intContractDetailId = @intContractDetailId and b.intBillId = a.intBillId and b.intTransactionType <> 13) > 0))
+	if (@intPricingTypeId = 2 or (@intPricingTypeId = 1 and (SELECT count(*) FROM tblAPBillDetail a, tblAPBill b WHERE a.intContractDetailId = @intContractDetailId and b.intBillId = a.intBillId and b.intTransactionType <> 13) > 0))
 	BEGIN
 
 		if (@ysnDelete = 1) return;
