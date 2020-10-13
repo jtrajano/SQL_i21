@@ -138,6 +138,7 @@ SELECT -- Load Header
 	,L.[ysnInvoice]
 	,L.[ysnProvisionalInvoice]
 	,L.[ysnQuantityFinal]
+	,IsNULL(L.intTransUsedBy,1)
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
