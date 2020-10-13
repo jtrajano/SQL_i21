@@ -90,13 +90,6 @@ DECLARE @intInventoryShipmentItemUsed INT
 DECLARE @intInventoryReceiptItemUsed INT
 DECLARE @intShipmentReceiptItemId INT
 
--- Get the next batch number
-BEGIN 
-	DECLARE @strBatchId AS NVARCHAR(40)
-	SET @strBatchId = NULL 
-	EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL  
-END
-
 BEGIN TRY
 		SELECT TOP 1
 			@intTicketItemUOMId = SC.intItemUOMIdTo
