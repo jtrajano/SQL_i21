@@ -6,5 +6,6 @@
 	dtmFeedDate			      DATETIME Constraint DF_tblCTPriceContractPreStage_dtmFeedDate Default GETDATE(),
 	strRowState				  NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	intMultiCompanyId			int,
-	strTransactionType		NVARCHAR(50) COLLATE Latin1_General_CI_AS
+	strTransactionType		NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	ysnApproval					BIT
 )
