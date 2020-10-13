@@ -10,7 +10,7 @@ WHEN A.intActionId = 3 THEN 'Bank Transfer'
 WHEN A.intActionId = 4 THEN 'Bank Deposit'
 ELSE 'ignore'
 END,
-C.strCode strPrimarySegment,
+C.strAccountId strPrimaryAccount,
 D.strBankAccountNo strPrimaryBank,
 E.strBankAccountNo strOffsetBank
 from tblCMResponsiblePartyMatching A
