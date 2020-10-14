@@ -337,7 +337,7 @@ LEFT JOIN @payablesKey payableKeys
 	ON payableKeys.intOldPayableId = A.intVoucherPayableId
 LEFT JOIN tblAPVoucherPayable vp 
 	ON payableKeys.intNewPayableId = vp.intVoucherPayableId
-WHERE A.ysnStage = 1
+WHERE A.ysnStage = 1 AND vp.intVoucherPayableId IS NOT NULL --UPDATE ONLY THOSE WHO IS IN tblAPVoucherPayable
 
 MERGE INTO tblAPBillDetail AS destination
 USING
