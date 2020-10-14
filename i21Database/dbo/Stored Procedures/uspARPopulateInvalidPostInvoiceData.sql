@@ -443,7 +443,7 @@ BEGIN
 	FROM 
 		#ARPostInvoiceDetail I	
 		OUTER APPLY(
-		select 	intItemUOMId from #ARItemsForCosting 	 where 	intItemUOMId IS NULL AND intItemId  =  I.[intItemId]
+		SELECT 	intItemUOMId FROM #ARItemsForCosting WHERE 	 intItemId  =  I.[intItemId]
 		)UOM
 		Where UOM.intItemUOMId IS  NULL
 
