@@ -140,6 +140,7 @@ BEGIN TRY
 		,[ysnForgiven]
 		,[ysnCalculated]
 		,[ysnSplitted]
+		,[ysnImpactInventory]
 		,[intPaymentId]
 		,[intSplitId]
 		,[intLoadDistributionHeaderId]
@@ -241,6 +242,7 @@ BEGIN TRY
 		,[ysnForgiven] = @Forgiven
 		,[ysnCalculated] = @Calculated
 		,[ysnSplitted] = @Splitted
+		,[ysnImpactInventory] = 0
 		,[intPaymentId] = @PaymentId
 		,[intSplitId] = @SplitId
 		,[intDistributionHeaderId] = @DistributionHeaderId
@@ -286,7 +288,7 @@ BEGIN TRY
 		,[strSCBudgetDescription] = NULL
 		,[intInventoryShipmentItemId] = NULL
 		,[intLoadDetailId] = NULL
-		,[intLoadId] = LD.intLoadId
+		,[intLoadId] = L.intLoadId
 		,[intLotId] = NULL
 		,[strShipmentNumber] = NULL
 		,[intRecipeItemId] = NULL
@@ -320,8 +322,8 @@ BEGIN TRY
 	FROM tblLGWeightClaim WC
 	JOIN tblLGWeightClaimDetail WCD ON WCD.intWeightClaimId = WC.intWeightClaimId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = WCD.intContractDetailId
-	JOIN tblLGLoadDetail LD ON LD.intSContractDetailId = CD.intContractDetailId
-	JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId AND L.intShipmentType = 1
+	JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+	JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId AND LD.intSContractDetailId = CD.intContractDetailId
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	LEFT OUTER JOIN (
 		SELECT intLoadDetailId
@@ -366,6 +368,7 @@ BEGIN TRY
 		,[ysnForgiven] = @Forgiven
 		,[ysnCalculated] = @Calculated
 		,[ysnSplitted] = @Splitted
+		,[ysnImpactInventory] = 0
 		,[intPaymentId] = @PaymentId
 		,[intSplitId] = @SplitId
 		,[intDistributionHeaderId] = @DistributionHeaderId
