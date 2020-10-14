@@ -841,7 +841,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						SELECT 
 						DISTINCT 
 							gasct_reading AS dblGradeReading
-							,gasct_shrk_what AS strShrinkWhat
+							,ShrinkCalculationOption.strShrinkCalculationOption --gasct_shrk_what AS strShrinkWhat
 							,gasct_shrk_pct AS dblShrinkPercent
 							,c.intDiscountScheduleCodeId
 							,intTicketId = k.intTicketLVStagingId
@@ -952,6 +952,11 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						--INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 						--INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
 						--INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
+						--
+						join tblGRShrinkCalculationOption ShrinkCalculationOption
+							on c.intShrinkCalculationOptionId = ShrinkCalculationOption.intShrinkCalculationOptionId	
+						--
+
 						INNER JOIN tblICItem i on i.intItemId = c.intItemId AND i.strShortName = b.gasct_disc_cd  COLLATE Latin1_General_CI_AS
 						INNER JOIN INSERTED IR  ON k.intOriginTicketId= IR.A4GLIdentity
 						WHERE b.gasct_disc_cd is not null 
@@ -981,7 +986,6 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 
 					
 						----- Calculating Discount information
-
 
 						--Scale Station
 						declare @is_multiple_weight bit
@@ -1013,6 +1017,81 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						select @is_multiple_weight = ysnMultipleWeights 
 							from tblSCScaleSetup 
 								where intScaleSetupId = @scale_setup
+
+						declare @calculated_discount table (
+								intExtendedKey int
+								,dblFrom DECIMAL(24, 6)
+								,dblTo DECIMAL(24, 6)
+								,dblDiscountAmount DECIMAL(24, 6)
+								,dblShrink DECIMAL(24, 6)
+								,strMessage nvarchar(50)
+								,intDiscountCalculatingOptionId int
+								,strDiscountChargeType nvarchar(50)
+								,strCalculationDiscountOption nvarchar(50)
+								,intShrinkCalculationOptionId int
+								,strCalculationShrinkOption nvarchar(50)
+								,intDiscountUOMId int
+							)
+
+						
+						declare @discounts_table as table(
+							id int
+							,intDiscountScheduleCodeId int
+							,dblReading DECIMAL(24, 6)
+						)
+						insert into @discounts_table(id, intDiscountScheduleCodeId, dblReading)
+						select intTicketDiscountLVStagingId, intDiscountScheduleCodeId, dblGradeReading 
+							from tblSCTicketDiscountLVStaging with(updlock) 
+							where intTicketId = @newLVTicket 
+							
+								and dblGradeReading <> 0
+
+
+
+						declare @current_discount_id int
+						declare @current_discount_schedule int
+						declare @current_reading DECIMAL(24, 6)
+						declare @current_discount_result DECIMAL(24, 6)
+						declare @current_shrink_result DECIMAL(24, 6)
+
+
+						select @current_discount_id = min(id) from @discounts_table
+						while @current_discount_id is not null
+						begin
+							select @current_discount_schedule = intDiscountScheduleCodeId
+								,@current_reading = dblReading
+							from @discounts_table
+								where id = @current_discount_id 
+
+							delete from @calculated_discount
+							insert into @calculated_discount
+							exec uspGRCalculateDiscountandShrink 
+								@intDiscountScheduleCodeId = @current_discount_schedule
+								, @dblReading = @current_reading
+								, @intItemId = @ticket_item_id
+								, @intItemUOMId = 0
+
+							
+							select @current_discount_result = dblDiscountAmount
+								, @current_shrink_result = dblShrink
+							from @calculated_discount
+
+							
+
+							update tblSCTicketDiscountLVStaging
+								set dblShrinkPercent = @current_shrink_result
+								,dblDiscountAmount = @current_discount_result
+
+								where intTicketDiscountLVStagingId = @current_discount_id
+
+
+							select @current_discount_id = min(id) 
+								from @discounts_table where id > @current_discount_id
+
+						end
+
+
+						
 						--Discount
 						--Wet Weight
 						declare @discount_ww DECIMAL(24, 4) = 0
@@ -1089,76 +1168,6 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								, dblShrink = @final_shrink
 						where intTicketLVStagingId = @newLVTicket
 
-						declare @calculated_discount table (
-								intExtendedKey int
-								,dblFrom DECIMAL(24, 6)
-								,dblTo DECIMAL(24, 6)
-								,dblDiscountAmount DECIMAL(24, 6)
-								,dblShrink DECIMAL(24, 6)
-								,strMessage nvarchar(50)
-								,intDiscountCalculatingOptionId int
-								,strDiscountChargeType nvarchar(50)
-								,strCalculationDiscountOption nvarchar(50)
-								,intShrinkCalculationOptionId int
-								,strCalculationShrinkOption nvarchar(50)
-								,intDiscountUOMId int
-							)
-
-						declare @discounts_table as table(
-							id int
-							,intDiscountScheduleCodeId int
-							,dblReading DECIMAL(24, 6)
-						)
-						insert into @discounts_table(id, intDiscountScheduleCodeId, dblReading)
-						select intTicketDiscountLVStagingId, intDiscountScheduleCodeId, dblGradeReading 
-							from tblSCTicketDiscountLVStaging with(updlock) 
-							where intTicketId = @newLVTicket 
-							
-								and dblGradeReading <> 0
-
-
-
-						declare @current_discount_id int
-						declare @current_discount_schedule int
-						declare @current_reading DECIMAL(24, 6)
-						declare @current_discount_result DECIMAL(24, 6)
-						declare @current_shrink_result DECIMAL(24, 6)
-
-
-						select @current_discount_id = min(id) from @discounts_table
-						while @current_discount_id is not null
-						begin
-							select @current_discount_schedule = intDiscountScheduleCodeId
-								,@current_reading = dblReading
-							from @discounts_table
-								where id = @current_discount_id 
-
-							delete from @calculated_discount
-							insert into @calculated_discount
-							exec uspGRCalculateDiscountandShrink 
-								@intDiscountScheduleCodeId = @current_discount_schedule
-								, @dblReading = @current_reading
-								, @intItemId = @ticket_item_id
-								, @intItemUOMId = 0
-
-							
-							select @current_discount_result = dblDiscountAmount
-								, @current_shrink_result = dblShrink
-							from @calculated_discount
-
-							
-
-							update tblSCTicketDiscountLVStaging
-								set dblShrinkPercent = @current_shrink_result
-								,dblDiscountAmount = @current_discount_result
-
-								where intTicketDiscountLVStagingId = @current_discount_id
-
-
-							select @current_discount_id = min(id) 
-								from @discounts_table where id > @current_discount_id
-
-						end
 
 
 						----- End calculating discount information
