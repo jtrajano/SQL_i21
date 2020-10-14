@@ -86,6 +86,8 @@ LEFT JOIN vyuAPReceiptClearingGL APClearing
         AND APClearing.intItemId = receiptItem.intItemId
         AND APClearing.intTransactionDetailId = receiptItem.intInventoryReceiptItemId
 OUTER APPLY (
+    --SINCE WE REVERSE IN GL THOSE TAX DETAIL THAT DOES NOT HAVE VOUCHER
+    --WE NEED TO EXCLUDE THAT ON THE REPORT TO BALANCE WITH GL
     --GET ONLY THE TAX IF IT HAS RELATED VOUCHER TAX DETAIL AND IF THERE IS A VOUCHER FOR IT
     --IF NO VOUCHER JUST TAKE THE TAX
     SELECT SUM(dblTax) AS dblTax
