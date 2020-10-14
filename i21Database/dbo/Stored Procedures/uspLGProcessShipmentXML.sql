@@ -3429,21 +3429,15 @@ BEGIN TRY
 					,[intLoadCostId]
 				FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
 						[intLoadCostId] [int]
-						--,[intConcurrencyId] [int]
 						,[intLoadId] [int]
-						--,[intItemId] [int]
-						--,[intVendorId] [int]
 						,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
 						,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
-						--,[intCurrencyId] INT
 						,[dblRate] [numeric](18, 6)
 						,[dblAmount] [numeric](18, 6)
 						,[dblFX] [numeric](18, 6)
-						--,[intItemUOMId] [int]
 						,[ysnAccrue] [bit]
 						,[ysnMTM] [bit]
 						,[ysnPrice] [bit]
-						--,[intBillId] [int]
 						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
@@ -3471,7 +3465,7 @@ BEGIN TRY
 					,[intVendorId] = E.intEntityId
 					,[strEntityType] = ET.[strType]
 					,[strCostMethod] = x.[strCostMethod]
-					,[intCurrencyId] = LC.[intCurrencyId] + 1
+					,[intCurrencyId] = CU.[intCurrencyID]
 					,[dblRate] = x.[dblRate]
 					,[dblAmount] = x.[dblAmount]
 					,[dblFX] = x.[dblFX]
@@ -3481,21 +3475,15 @@ BEGIN TRY
 					,[ysnPrice] = x.[ysnPrice]
 				FROM OPENXML(@idoc, 'vyuIPLoadCostViews/vyuIPLoadCostView', 2) WITH (
 						[intLoadCostId] [int]
-						--,[intConcurrencyId] [int]
 						,[intLoadId] [int]
-						--,[intItemId] [int]
-						--,[intVendorId] [int]
 						,[strEntityType] [nvarchar](100) COLLATE Latin1_General_CI_AS
 						,[strCostMethod] [nvarchar](30) COLLATE Latin1_General_CI_AS
-						--,[intCurrencyId] INT
 						,[dblRate] [numeric](18, 6)
 						,[dblAmount] [numeric](18, 6)
 						,[dblFX] [numeric](18, 6)
-						--,[intItemUOMId] [int]
 						,[ysnAccrue] [bit]
 						,[ysnMTM] [bit]
 						,[ysnPrice] [bit]
-						--,[intBillId] [int]
 						,strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 						,strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 						,strItemUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS
