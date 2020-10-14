@@ -33,6 +33,7 @@ FROM (
 	WHERE CD.dblBalance > 0
 		AND Item.ysnUseWeighScales = 1
 		AND CD.intContractStatusId NOT IN (2,3,6)
+		AND CD.intPricingTypeId <> 5 --DO NOT INCLUDE OPEN DP CONTRACTS (GRN-2370)
 ) A
 GROUP BY A.intEntityId
 		,A.ItemName
