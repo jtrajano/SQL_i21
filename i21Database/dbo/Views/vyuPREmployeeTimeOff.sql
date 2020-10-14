@@ -14,6 +14,7 @@ SELECT ETO.intEntityEmployeeId
 	,ETO.strAwardPeriod
 	,ETO.dblRateFactor
 	,ETO.dblMaxCarryover
+	,ETO.dblMaxBalance
 	,ETO.dblMaxEarned
 	,ETO.dtmLastAward
 	,ETO.dblHoursEarned

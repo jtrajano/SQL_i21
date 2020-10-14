@@ -88,6 +88,7 @@ BEGIN
 			,strAwardPeriod = T.strAwardPeriod
 			,dblMaxEarned = T.dblMaxEarned
 			,dblMaxCarryover = T.dblMaxCarryover
+			,dblMaxBalance = T.dblMaxBalance
 		FROM
 		(SELECT 
 			TOP 1
@@ -98,7 +99,8 @@ BEGIN
 			,D.strPeriod
 			,M.strAwardPeriod
 			,D.dblMaxEarned
-			,D.dblMaxCarryover FROM 
+			,D.dblMaxCarryover 
+			,D.dblMaxBalance FROM 
 		tblPRTypeTimeOff M 
 		RIGHT JOIN (SELECT * FROM tblPRTypeTimeOffDetail 
 					WHERE intTypeTimeOffId = @intTypeTimeOffId 

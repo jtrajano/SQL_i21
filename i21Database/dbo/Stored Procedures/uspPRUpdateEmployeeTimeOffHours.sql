@@ -19,6 +19,7 @@ SELECT E.intEntityId
 	,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
 	,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
 	,dblEarnedTotalHours = T.dblHoursEarned
+	,dblBalance = (T.dblHoursCarryover + T.dblHoursEarned) - T.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)
 	,dblRate
 	,dblPerPeriod
 	,strPeriod
@@ -75,6 +76,13 @@ LEFT JOIN (SELECT TOP 1 intPaycheckId
 				,dtmDateTo 
 			FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId) P
 	ON E.intEntityId = P.intEntityEmployeeId
+LEFT JOIN(
+	SELECT intEntityEmployeeId
+		,intTypeTimeOffId
+		,intYear
+		,dblHoursUsedYTD = dblHoursUsed 
+	FROM vyuPREmployeeTimeOffUsedYTD
+) TOYTD ON T.intEntityEmployeeId = TOYTD.intEntityEmployeeId AND T.intTypeTimeOffId = TOYTD.intTypeTimeOffId
 WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 	AND T.intTypeTimeOffId = @intTypeTimeOffId
 
@@ -209,9 +217,20 @@ BEGIN
 
 	--Update Earned Hours
 	UPDATE tblPREmployeeTimeOff
-		SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) AND ysnPaycheckPosted = 1 THEN dblMaxEarned
-								ELSE T.dblEarnedTotalHours + T.dblEarnedHours
-							 END
+		SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) AND ysnPaycheckPosted = 1 
+								THEN 
+										CASE WHEN (dblMaxBalance IS NOT NULL AND dblBalance + T.dblEarnedHours > dblMaxBalance) THEN
+												dblHoursEarned + ISNULL(NULLIF(ABS(T.dblEarnedHours - (dblBalance - dblMaxBalance)), -(T.dblEarnedHours - (dblBalance - dblMaxBalance)) ),0)
+											ELSE
+											dblMaxEarned
+										END
+							    ELSE 
+										CASE WHEN (dblMaxBalance IS NOT NULL AND dblBalance + T.dblEarnedHours > dblMaxBalance) THEN
+												dblHoursEarned + ISNULL(NULLIF(ABS(T.dblEarnedHours - (dblBalance - dblMaxBalance)), -(T.dblEarnedHours - (dblBalance - dblMaxBalance)) ),0)
+											ELSE
+											T.dblEarnedTotalHours + T.dblEarnedHours
+										END
+								END
 	FROM #tmpEmployees T
 	WHERE T.[intEntityId] = @intEmployeeId
 		AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
