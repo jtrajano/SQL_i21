@@ -8884,6 +8884,7 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMD.sql" />
+    <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
