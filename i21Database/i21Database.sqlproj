@@ -8843,6 +8843,7 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
+    <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
