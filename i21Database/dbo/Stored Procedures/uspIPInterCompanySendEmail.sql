@@ -235,6 +235,31 @@ BEGIN
 	END
 END
 
+IF @strMessageType = 'Price Contract Approved in BU'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Price Contract Number</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF @strStatus = 'Success'
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(S.strPriceContractNo, '') + '</td>' + 
+			   '<td>&nbsp;' + 'Approved' + '</td>
+		</tr>'
+		FROM tblCTPriceContractStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent is null
+
+		UPDATE tblCTPriceContractStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId
+		AND ysnMailSent is null
+	END
+	
+END
+
 IF @strMessageType = 'Load'
 BEGIN
 	SET @strHeader = '<tr>

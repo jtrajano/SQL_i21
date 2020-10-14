@@ -44,17 +44,17 @@ AS
 						ELSE	0
 				END	dblCashPrice,
 				LP.strCity			AS	strLoadingPoint,
-				DL.strPackingDescription,
+				CD.strPackingDescription,
 				CH.ysnMaxPrice,
 				CH.ysnSubstituteItem,
 				CD.strLocationName,
 				CH.strSalespersonId AS strSalesperson,
 				SE.strExternalERPId AS strSalespersonExternalERPId,
 				PR.strName AS strProducer
-				,DL.intPricingTypeId
+				,CD.intPricingTypeId
 				,IM.intItemId
 		FROM	vyuCTContractSequence	CD
-		JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
+		--JOIN	tblCTContractDetail		DL	ON	DL.intContractDetailId		=	CD.intContractDetailId
 		JOIN	vyuCTContractHeaderView	CH	ON	CH.intContractHeaderId		=	CD.intContractHeaderId	LEFT
 		JOIN	tblICItem				IM	ON	IM.intItemId				=	CD.intItemId			LEFT
 		JOIN	tblICItemUOM			PU	ON	PU.intItemUOMId				=	CD.intPriceItemUOMId	LEFT
@@ -84,7 +84,7 @@ AS
 		 JOIN	tblEMEntity	SE	ON	SE.intEntityId	=	CH.intSalespersonId
 	LEFT JOIN	tblEMEntity	UE	ON	UE.intEntityId	=	ISNULL(CH.intLastModifiedById,CH.intCreatedById)
 	LEFT JOIN	tblAPVendor	VE	ON	VE.intEntityId	=	CH.intEntityId							
-	LEFT JOIN	tblSMCity	LP	ON	LP.intCityId	=	DL.intLoadingPortId
-	LEFT JOIN	tblEMEntity	PR	ON	PR.intEntityId	=	DL.intProducerId
-	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = DL.intItemContractId
+	LEFT JOIN	tblSMCity	LP	ON	LP.intCityId	=	CD.intLoadingPortId
+	LEFT JOIN	tblEMEntity	PR	ON	PR.intEntityId	=	CD.intProducerId
+	LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 	LEFT JOIN tblSMCountry RY ON RY.intCountryID = IC.intCountryId

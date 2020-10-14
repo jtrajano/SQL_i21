@@ -123,6 +123,7 @@ CREATE NONCLUSTERED INDEX [IX_tblAPVoucherPayable_deleteIX]
     ON [dbo].[tblAPVoucherPayable](intEntityVendorId
 								,intPurchaseDetailId
 								,intContractDetailId
+								,intContractCostId
 								,intScaleTicketId
 								,intInventoryReceiptChargeId
 								,intInventoryReceiptItemId

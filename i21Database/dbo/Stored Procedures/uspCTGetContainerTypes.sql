@@ -8,7 +8,7 @@ BEGIN
 	SELECT @ysnLoadContainerTypeByOrigin = ysnLoadContainerTypeByOrigin
 	FROM tblLGCompanyPreference
 
-	IF (ISNULL(@ysnLoadContainerTypeByOrigin, 0) = 0)
+	IF (ISNULL(@ysnLoadContainerTypeByOrigin, 0) = 0 or isnull(@strOrigin,'') = '')
 	BEGIN
 		SELECT *
 		FROM vyuLGContainerType
@@ -21,6 +21,5 @@ BEGIN
 			join vyuLGContainerType b on b.intContainerTypeId = a.intContainerTypeId
 		WHERE
 			a.strOrigin = @strOrigin
-			and a.intCommodityId = @intCommodityId
 	END
 END

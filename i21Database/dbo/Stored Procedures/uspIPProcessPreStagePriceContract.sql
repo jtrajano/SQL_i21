@@ -14,6 +14,7 @@ BEGIN TRY
 		,@intPriceContractPreStageId INT
 		,@intPriceContractId INT
 		,@intContractHeaderId INT
+		,@ysnApproval BIT
 
 	Declare @tblCTPriceContractPreStage table(intPriceContractPreStageId int)
 	Insert into @tblCTPriceContractPreStage
@@ -46,8 +47,9 @@ BEGIN TRY
 			,@strDelete = NULL
 			,@strToTransactionType = NULL
 			,@intContractHeaderId = NULL
+			,@ysnApproval=NULL
 
-		SELECT @intPriceContractId = intPriceContractId
+		SELECT @intPriceContractId = intPriceContractId,@ysnApproval=ysnApproval
 		FROM tblCTPriceContractPreStage
 		WHERE intPriceContractPreStageId = @intPriceContractPreStageId
 
@@ -87,6 +89,7 @@ BEGIN TRY
 				,'Added'
 				,0
 				,@ysnProcessApproverInfo
+				,@ysnApproval
 		END
 		ELSE IF EXISTS (
 				SELECT 1
@@ -103,6 +106,7 @@ BEGIN TRY
 				,'Modified'
 				,0
 				,@ysnProcessApproverInfo
+				,@ysnApproval
 		END
 		ELSE IF NOT EXISTS (
 				SELECT 1
@@ -122,6 +126,7 @@ BEGIN TRY
 				,'Delete'
 				,0
 				,@ysnProcessApproverInfo
+				,@ysnApproval
 		END
 
 		UPDATE tblCTPriceContractPreStage
