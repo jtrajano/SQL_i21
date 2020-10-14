@@ -1149,10 +1149,11 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							
 
 							update tblSCTicketDiscountLVStaging
-								set dblShrinkPercent = @current_discount_result
-								,dblDiscountAmount = @current_shrink_result
+								set dblShrinkPercent = @current_shrink_result
+								,dblDiscountAmount = @current_discount_result
 
 								where intTicketDiscountLVStagingId = @current_discount_id
+
 
 							select @current_discount_id = min(id) 
 								from @discounts_table where id > @current_discount_id
