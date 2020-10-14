@@ -6516,6 +6516,7 @@
     <Build Include="dbo\Stored Procedures\uspLGPopulateLoadUpdateXML.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetAcknowledgementXML.sql" />
     <Build Include="dbo\Views\vyuARGetInvoiceDetail.sql" />
+    <Build Include="dbo\Views\vyuSTStoreRegister.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessLogisticsAckXML.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyContract.sql" />
     <Build Include="dbo\Stored Procedures\uspCTInterCompanyPriceContract.sql" />
