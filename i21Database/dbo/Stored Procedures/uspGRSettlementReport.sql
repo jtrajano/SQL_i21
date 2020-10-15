@@ -657,8 +657,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / NULLIF(ISNULL(tblInventory.dblTotalQty,1),0))
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / NULLIF(ISNULL(tblInventory.dblTotalQty,1),0) ) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / NULLIF(ISNULL(tblInventory.dblTotalQty,1),0) ))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -731,14 +731,14 @@ BEGIN
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
-			JOIN tblICItem Item 
+			LEFT JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	
-			JOIN tblGRStorageHistory StrgHstry 
+			LEFT JOIN tblGRStorageHistory StrgHstry 
 				ON Bill.intBillId = StrgHstry.intBillId
-			JOIN tblGRCustomerStorage CS 
+			LEFT JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			JOIN tblSCTicket SC 
+			LEFT JOIN tblSCTicket SC  
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
