@@ -86,6 +86,5 @@ INCLUDE (
 	[strContainerNumber]
 	,[dblQuantity]
 	,[intLoadContainerId]
-	,[ysnRejected]
 ) 
 GO 
