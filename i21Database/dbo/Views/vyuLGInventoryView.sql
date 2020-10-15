@@ -59,13 +59,13 @@ FROM (
 		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
 		,dtmReceiptDate = CAST(NULL AS DATETIME)
 		,dblTotalCost = CAST(ISNULL(((dbo.fnCTConvertQtyToTargetItemUOM(Shipment.intWeightItemUOMId, 
-												CD.intPriceItemUOMId, 
+												Shipment.intPriceItemUOMId, 
 												CASE 
 												WHEN ISNULL(Shipment.dblContainerContractReceivedQty, 0) > 0
 													THEN ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0) - ISNULL(Shipment.dblContainerContractReceivedQty, 0))
 												ELSE ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)
 												END)
-						) * Shipment.dblCashPrice)/ (CASE WHEN CAST(ISNULL(CU.intMainCurrencyId,0) AS BIT) = 0 THEN 1 ELSE 100 END),0) AS NUMERIC(18,6))
+						) * Shipment.dblCashPrice)/ (CASE WHEN ISNULL(Shipment.ysnSubCurrency,0) = 0 THEN 100 ELSE 1 END),0) AS NUMERIC(18,6))
 		,dblFutures = Shipment.dblFutures
 		,dblCashPrice = Shipment.dblCashPrice
 		,dblBasis = Shipment.dblBasis
@@ -73,11 +73,11 @@ FROM (
 		,strPriceBasis = Shipment.strPriceBasis
 		,strINCOTerm = Shipment.strContractBasis
 		,strTerm = Shipment.strTerm
-		,strExternalShipmentNumber = L.strExternalShipmentNumber
-		,strERPPONumber = CD.strERPPONumber
+		,strExternalShipmentNumber = Shipment.strExternalShipmentNumber
+		,strERPPONumber = Shipment.strERPPONumber
 		,strPosition = Shipment.strPosition
 		,intLoadId = Shipment.intLoadId
-		,intCompanyLocationId = CD.intCompanyLocationId
+		,intCompanyLocationId = Shipment.intCompanyLocationId
 		,intBookId = Shipment.intBookId
 		,strBook = Shipment.strBook
 		,intSubBookId = Shipment.intSubBookId
@@ -88,13 +88,8 @@ FROM (
 		,strCertification = Shipment.strCertification
 		,strCertificationId = Shipment.strCertificationId
 	FROM vyuLGInboundShipmentView Shipment
-	LEFT JOIN tblLGLoad L ON Shipment.intLoadId = L.intLoadId
-	LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = Shipment.intContractDetailId
-	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CD.intCurrencyId			
-	LEFT JOIN tblSMCurrency	CY ON CY.intCurrencyID = CU.intMainCurrencyId
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
-	   AND Shipment.intLoadId NOT IN (SELECT intLoadId FROM tblARInvoice WHERE intLoadId IS NOT NULL)
 
 	UNION ALL
 

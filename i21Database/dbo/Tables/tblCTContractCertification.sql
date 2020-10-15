@@ -12,3 +12,9 @@
 	CONSTRAINT [FK_tblCTContractCertification_tblCTContractDetail_intContractDetailId] FOREIGN KEY ([intContractDetailId]) REFERENCES [tblCTContractDetail]([intContractDetailId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblCTContractCertification_tblICCertification_intCertificationId] FOREIGN KEY ([intCertificationId]) REFERENCES [tblICCertification]([intCertificationId]) 
 )
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblCTContractCertification_intContractDetailId]
+	ON [dbo].[tblCTContractCertification](intContractDetailId ASC)
+	INCLUDE (intCertificationId)
+GO
