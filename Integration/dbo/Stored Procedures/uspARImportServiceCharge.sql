@@ -113,6 +113,10 @@ BEGIN
 	--================================================
 	IF(@Update = 1 AND @ServiceChargeCode IS NOT NULL) 
 	BEGIN
+		
+		DECLARE @frequency INT = NULL
+		SELECT @frequency = (CASE WHEN ptsrv_pct_freq = ''M'' THEN 12 WHEN   ptsrv_pct_freq = ''D'' THEN  365 END) FROM ptsrvmst  WHERE ptsrv_code = @ServiceChargeCode
+
 		--UPDATE IF EXIST IN THE ORIGIN
 		IF(EXISTS(SELECT 1 FROM ptsrvmst WHERE ptsrv_code = @ServiceChargeCode))
 		BEGIN
@@ -120,7 +124,7 @@ BEGIN
 				SET 
 				ptsrv_code = SrvCharge.strServiceChargeCode,
 				ptsrv_desc = SUBSTRING(SrvCharge.strDescription,1,20),
-				ptsrv_pct = CAST((SrvCharge.dblPercentage/100) as decimal(5,5))				
+				ptsrv_pct = CAST((SrvCharge.dblServiceChargeAPR /100) /@frequency as decimal(5,5))			
 				,ptsrv_amt = CAST(SrvCharge.dblServiceChargeAPR as decimal(9,2)) 
 				,ptsrv_min_svchg = CAST(SrvCharge.dblMinimumCharge as decimal(9,2))
 				,ptsrv_grace_per = SrvCharge.intGracePeriod 				
@@ -145,7 +149,7 @@ BEGIN
 			SELECT 
 				strServiceChargeCode,
 				SUBSTRING(strDescription,1,20),
-				CAST((dblPercentage/100) as decimal(5,5))				
+				CAST((dblServiceChargeAPR/100) / @frequency as decimal(5,5))				
 				,CAST(dblServiceChargeAPR as decimal(9,2))
 				,CAST(dblMinimumCharge as decimal(9,2))
 				,intGracePeriod				
@@ -187,7 +191,7 @@ BEGIN
 			,ptsrv_desc
 			,''Percent''
 			,CAST((ptsrv_pct * 100) AS numeric(18,2))			
-			,CAST(ptsrv_amt AS numeric(18,2))
+			,CAST((ptsrv_pct * CASE WHEN ptsrv_pct_freq = ''M'' THEN 12 WHEN   ptsrv_pct_freq = ''D'' THEN  365 END) * 100 AS numeric(18,2))
 			,CAST(ptsrv_min_svchg  AS numeric(18,2))
 			,ptsrv_grace_per			
 			,(CASE	WHEN ptsrv_allow_mthly_chg_freq = ''Y''
