@@ -96,6 +96,8 @@ FROM (
 		, a.strTranType
 	FROM #tempFirstToSecond a
 	INNER JOIN #tempSecondToFirst b ON b.strContractNumber = a.strContractNumber
+		AND a.strTransactionReferenceId = b.strTransactionReferenceId
+	WHERE ISNULL(a.dblTotal, 0.00) <> ISNULL(b.dblTotal, 0.00)
 
 
 	UNION ALL
