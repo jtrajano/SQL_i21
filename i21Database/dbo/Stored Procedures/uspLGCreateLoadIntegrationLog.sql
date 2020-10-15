@@ -689,7 +689,7 @@ BEGIN TRY
 							SELECT @ysnIsETAUpdated = 1
 						END
 
-						IF (ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
+						IF (@intShipmentType = 1 AND ISNULL(DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD),'') <> ISNULL(@dtmCurrentUpdatedAvailabilityDate,''))
 						BEGIN
 							UPDATE tblCTContractDetail 
 							SET dtmUpdatedAvailabilityDate = CASE WHEN (ISNULL(@ysnFeedETAToUpdatedAvailabilityDate,0) = 1) THEN DATEADD(DD, @intLeadTime, @dtmCurrentETAPOD)
