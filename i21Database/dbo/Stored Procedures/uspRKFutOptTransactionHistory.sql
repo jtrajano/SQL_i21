@@ -114,11 +114,13 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO @SummaryLog(strTransactionType
 					, intTransactionRecordId
+					, dtmTransactionDate
 					, ysnDelete
 					, intUserId
 					, strNotes)
 				SELECT strTransactionType = 'Derivatives'
 					, intTransactionRecordId = intFutOptTransactionId
+					, dtmTransactionDate
 					, ysnDelete = 1
 					, intUserId = @intUserId
 					, strNotes = 'Delete record'
@@ -224,11 +226,13 @@ BEGIN TRY
 			BEGIN
 				INSERT INTO @SummaryLog(strTransactionType
 				, intTransactionRecordId
+				, dtmTransactionDate
 				, ysnDelete
 				, intUserId
 				, strNotes)
 			SELECT strTransactionType = 'Derivatives'
 				, intTransactionRecordId = @intFutOptTransactionId
+				, dtmTransactionDate = GETDATE()
 				, ysnDelete = 1
 				, intUserId = @intUserId
 				, strNotes = 'Delete record'
