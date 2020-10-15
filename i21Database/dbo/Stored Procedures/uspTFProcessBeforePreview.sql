@@ -299,19 +299,20 @@ BEGIN TRY
 				SELECT intTransactionId FROM #tmpTransaction
 			)
 			
-			INSERT INTO tblTFTransactionDynamicMD (intTransactionId, strMDDeliveryMethod, strMDFreightPaidBy, strMDConsignorAddress, strMDProductCode, intConcurrencyId)
+			INSERT INTO tblTFTransactionDynamicMD (intTransactionId, strMDDeliveryMethod, strMDFreightPaidBy, strMDConsignorAddress, strMDProductCode, strMDTransportationMode, intConcurrencyId)
 			SELECT Trans.intTransactionId, 
 				CASE WHEN tblSMShipVia.ysnCompanyOwnedCarrier = 1 THEN 'COT' ELSE 'CCT' END, 
 				'', 
 				SellerLoc.strAddress + ', ' +  SellerLoc.strCity + ', ' + SellerLoc.strState,
 				CASE WHEN Trans.strProductCode = '125' THEN 'AG' 
 					WHEN Trans.strProductCode = '065' THEN 'G' 
-					WHEN Trans.strProductCode IN ('124','241') THEN 'GH' 
+					WHEN Trans.strProductCode IN ('124','241') THEN 'GH' 	
 					WHEN Trans.strProductCode = '150' THEN 'F.O.' 
 					WHEN Trans.strProductCode IN ('072','142') THEN 'K' 
 					WHEN Trans.strProductCode IN ('160','170','171','228') THEN 'D'
 					WHEN Trans.strProductCode = '130' THEN 'A'
 				ELSE '' END,
+				CASE WHEN Trans.strTransportationMode = 'J' THEN 'TR' ELSE Trans.strTransportationMode END,
 				1
 			FROM tblTFTransaction Trans
 			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
@@ -340,6 +341,7 @@ BEGIN TRY
 					WHEN Trans.strProductCode IN ('160','170','171','228') THEN 'D'
 					WHEN Trans.strProductCode = '130' THEN 'A'
 				ELSE '' END,
+				CASE WHEN Trans.strTransportationMode = 'J' THEN 'TR' ELSE Trans.strTransportationMode END,
 				1
 			FROM tblTFTransaction Trans
 			INNER JOIN tblICInventoryReceiptItem ON tblICInventoryReceiptItem.intInventoryReceiptItemId =  Trans.intTransactionNumberId
