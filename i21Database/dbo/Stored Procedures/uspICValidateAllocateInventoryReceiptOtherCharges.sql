@@ -80,7 +80,7 @@ FROM
 WHERE
 	r.intInventoryReceiptId = @intInventoryReceiptId
 	AND rc.ysnInventoryCost = 1
-	AND ISNULL(rc.dblAmount, 0) <> 0 
+	--AND ISNULL(rc.dblAmount, 0) <> 0 
 	AND 1 = 
 		CASE 
 			WHEN a.intInventoryReceiptItemAllocatedChargeId IS NULL THEN -- No allocation
