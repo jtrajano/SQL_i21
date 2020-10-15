@@ -8789,7 +8789,7 @@
     <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
     <Build Include="dbo\Tables\tblSCDisconnectedSchedule.sql" />
-    <Build Include="dbo\Tables\tblSCDisconnectedScheduleHistory.sql" />
+    <Build Include="dbo\Tables\tblSCDisconnectedScheduleCreationHistory.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
     <Build Include="dbo\Views\vyuMBILExportFullTax.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
