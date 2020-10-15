@@ -27,24 +27,24 @@ BEGIN
 	IF @ysnLoadPlan = 0
 	BEGIN
 		IF (
-			SELECT Count(DISTINCT AV.strValue)
-			FROM tblCTInvPlngReportAttributeValue AV
-			JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
-			WHERE AV.intReportAttributeID = 1
-				AND AV.intInvPlngReportMasterID IN (
-					SELECT Item Collate Latin1_General_CI_AS
-					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
-					)
-				AND strFieldName = 'strMonth1'
-		) > 1
+				SELECT Count(DISTINCT AV.strValue)
+				FROM tblCTInvPlngReportAttributeValue AV
+				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+				WHERE AV.intReportAttributeID = 1
+					AND AV.intInvPlngReportMasterID IN (
+						SELECT Item Collate Latin1_General_CI_AS
+						FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+						)
+					AND strFieldName = 'strMonth1'
+				) > 1
 		BEGIN
-		RAISERROR (
-				'Starting month should be same for all the selected demand batches.'
-				,16
-				,1
-				)
+			RAISERROR (
+					'Starting month should be same for all the selected demand batches.'
+					,16
+					,1
+					)
 
-		RETURN
+			RETURN
 		END
 	END
 
@@ -73,7 +73,7 @@ BEGIN
 				,intBookId
 				,intSubBookId
 				)
-			SELECT DISTINCT IsNULL(AV.intMainItemId,AV.intItemId)
+			SELECT DISTINCT IsNULL(AV.intMainItemId, AV.intItemId)
 				,RM.intBookId
 				,RM.intSubBookId
 			FROM tblCTInvPlngReportAttributeValue AV
@@ -128,15 +128,15 @@ BEGIN
 		--			AND IBook.intItemId IS NULL
 		--		)
 		--BEGIN
-			SELECT @strItemNo = @strItemNo + IsNULL(I.strShortName,'') + ' / '
-			FROM tblICItemBundle IBundle
-			JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
-			JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
-				AND IBook.intBookId = @intBookId
-				AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
-			WHERE IBundle.intItemId = @intItemId
-		--END
+		SELECT @strItemNo = @strItemNo + IsNULL(I.strShortName, '') + ' / '
+		FROM tblICItemBundle IBundle
+		JOIN tblICItem I ON I.intItemId = IBundle.intBundleItemId
+		JOIN tblICItemBook IBook ON IBook.intItemId = IBundle.intBundleItemId
+			AND IBook.intBookId = @intBookId
+			AND isNULL(IBook.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+		WHERE IBundle.intItemId = @intItemId
 
+		--END
 		IF @strItemNo IS NULL
 			SELECT @strItemNo = ''
 
@@ -431,7 +431,7 @@ BEGIN
 				,(
 					CASE 
 						WHEN MI.intItemId IS NOT NULL
-							THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
+							THEN I.strItemNo + ' - ' + IsNULL(I.strShortName, '')
 						ELSE IB.strItemNo
 						END
 					) AS strItemDescription
@@ -885,7 +885,7 @@ BEGIN
 					,(
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
-								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
+								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName, '')
 							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
@@ -928,7 +928,22 @@ BEGIN
 				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
 					AND IB.intBookId = B.intBookId
 					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
-				WHERE A.intReportAttributeID IN (
+				WHERE EXISTS (
+						SELECT 1
+						FROM tblCTInvPlngReportAttributeValue AV1
+						WHERE AV1.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
+							AND AV1.intItemId = AV.intItemId
+							AND AV1.intReportAttributeID = 8
+							AND IsNumeric(AV1.strValue) = 1
+							AND (
+								CASE 
+									WHEN IsNUmeric(AV1.strValue) = 0
+										THEN Convert(NUMERIC(18, 6), 0.0)
+									ELSE AV1.strValue
+									END
+								) > 0
+						)
+					AND A.intReportAttributeID IN (
 						2 --Opening Inventory
 						,4 --Existing Purchases
 						,5 --Planned Purchases
@@ -1155,6 +1170,10 @@ BEGIN
 				,DATEDIFF(mm, 0, Max(dtmDate))
 			FROM tblCTInvPlngReportMaster
 			WHERE ysnPost = 1
+				AND intInvPlngReportMasterID IN (
+					SELECT Item Collate Latin1_General_CI_AS
+					FROM [dbo].[fnSplitString](@strInvPlngReportMasterID, ',')
+					)
 			GROUP BY intBookId
 				,intSubBookId
 
@@ -1509,7 +1528,7 @@ BEGIN
 					,(
 						CASE 
 							WHEN MI.intItemId IS NOT NULL
-								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName,'')
+								THEN I.strItemNo + ' - ' + IsNULL(I.strShortName, '')
 							ELSE IB.strItemNo
 							END
 						) AS strItemDescription
