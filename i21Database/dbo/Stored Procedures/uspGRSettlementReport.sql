@@ -731,19 +731,19 @@ BEGIN
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
-			JOIN tblICItem Item 
+			LEFT JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'	
-			JOIN tblGRStorageHistory StrgHstry 
+			LEFT JOIN tblGRStorageHistory StrgHstry 
 				ON ( 
 						Bill.intBillId = StrgHstry.intBillId
 						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
 							and StrgHstry.strType = 'Settlement'
 							)
 				)
-			JOIN tblGRCustomerStorage CS 
+			LEFT JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			JOIN tblSCTicket SC 
+			LEFT JOIN tblSCTicket SC  
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
