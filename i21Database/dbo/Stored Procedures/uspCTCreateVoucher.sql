@@ -629,8 +629,7 @@ begin try
 		from
 			@voucherPayables vp
 		where
-			isnull(vp.intInventoryReceiptChargeId,0) > 0
-			or (isnull(vp.intInventoryReceiptChargeId,0) = 0 and isnull(vp.intContractDetailId,0) = 0)
+			isnull(vp.intInventoryReceiptChargeId,0) = 0 and isnull(vp.intContractDetailId,0) = 0
 
 		if exists (select top 1 1 from @voucherPayablesFinal)
 		begin
