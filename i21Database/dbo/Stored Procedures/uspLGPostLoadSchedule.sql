@@ -159,6 +159,10 @@ BEGIN TRY
 					END
 			WHERE intLoadId = @intLoadId
 
+			--Add Pending Claim Entries for Inbound and Outbound
+			EXEC uspLGAddPendingClaim @intLoadId, 1, @ysnPost
+			EXEC uspLGAddPendingClaim @intLoadId, 2, @ysnPost
+
 			IF(ISNULL(@strFOBPoint,'') = 'Origin')
 			BEGIN	
 				EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
