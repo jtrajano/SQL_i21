@@ -135,7 +135,6 @@ begin try
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
 		,@ysnSuccessBillPosting bit
-  		,@receiptDetails InventoryUpdateBillQty
 		;
 
 	declare @CreatedVoucher as table(
@@ -799,32 +798,6 @@ begin try
 					begin
 						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 					end
-
-					DELETE FROM @receiptDetails
-					INSERT INTO @receiptDetails
-					(
-						[intInventoryReceiptItemId],
-						[intInventoryReceiptChargeId],
-						[intInventoryShipmentChargeId],
-						[intSourceTransactionNoId],
-						[strSourceTransactionNo],
-						[intItemId],
-						[intToBillUOMId],
-						[dblToBillQty]
-					)
-					SELECT
-						[intInventoryReceiptItemId],
-						[intInventoryReceiptChargeId],
-						[intInventoryShipmentChargeId],
-						[intSourceTransactionNoId],
-						[strSourceTransactionNo],
-						[intItemId],
-						[intToBillUOMId],
-						[dblToBillQty]
-					FROM
-						dbo.fnCTGenerateReceiptDetail(@intCreatedInventoryReceiptItemId, @intCreatedBillId, @intCreatedBillDetailId, @dblCreatedQtyReceived, 0)
-
-					EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 						
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				end
