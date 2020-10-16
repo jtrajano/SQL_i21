@@ -116,15 +116,18 @@ BEGIN TRY
 	FROM tblCTContractHeader
 	WHERE intContractHeaderId = @intContractHeaderId
 	
-	IF EXISTS (SELECT TOP 1 1 FROM tblRKReconciliationBrokerStatementHeader t
-				WHERE t.intFutureMarketId = @intFutureMarketId
-					AND t.intBrokerageAccountId = @intBrokerageAccountId
-					AND t.intCommodityId = @intCommodityId
-					AND t.intEntityId = @intEntityId
-					AND ysnFreezed = 1
-					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFilledDate, 110), 110))
+	IF (@ysnReassign = 0)
 	BEGIN
-		RAISERROR('The selected filled date already reconciled.', 16, 1)
+		IF EXISTS (SELECT TOP 1 1 FROM tblRKReconciliationBrokerStatementHeader t
+					WHERE t.intFutureMarketId = @intFutureMarketId
+						AND t.intBrokerageAccountId = @intBrokerageAccountId
+						AND t.intCommodityId = @intCommodityId
+						AND t.intEntityId = @intEntityId
+						AND ysnFreezed = 1
+						AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmFilledDate, 110), 110) = CONVERT(DATETIME, CONVERT(VARCHAR(10), @dtmFilledDate, 110), 110))
+		BEGIN
+			RAISERROR('The selected filled date already reconciled.', 16, 1)
+		END
 	END
 	
 	IF ISNULL(@intFutureMarketId, 0) = 0
