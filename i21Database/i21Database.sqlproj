@@ -8833,6 +8833,9 @@
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
     <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
+    <Build Include="dbo\Views\vyuIPContractCostView.sql" />
+    <Build Include="dbo\Views\vyuIPContractCertification.sql" />
+    <Build Include="dbo\Views\vyuIPContractDocumentView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
