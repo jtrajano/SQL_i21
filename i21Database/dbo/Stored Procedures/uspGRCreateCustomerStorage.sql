@@ -38,7 +38,7 @@ BEGIN TRY
 		, @intShipFromEntityId		= CS.intShipFromEntityId
 	FROM @CustomerStorageStagingTable CS	
 
-	SELECT @ysnDPOwnedType = ysnDPOwnedType FROM tblGRStorageType WHERE intStorageScheduleTypeId = @intStorageTypeId
+	--SELECT @ysnDPOwnedType = ysnDPOwnedType FROM tblGRStorageType WHERE intStorageScheduleTypeId = @intStorageTypeId
 
 	IF EXISTS(SELECT TOP 1 1 FROM tblGRCustomerStorage WHERE intEntityId = @intEntityId AND intItemId = @intItemId AND intCompanyLocationId = @intLocationId AND intDeliverySheetId = @intDeliverySheetId AND intStorageTypeId = @intStorageTypeId)
 	BEGIN
