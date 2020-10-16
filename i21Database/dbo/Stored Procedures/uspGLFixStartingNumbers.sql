@@ -206,7 +206,7 @@ BEGIN
 		SELECT	@intNumber = MAX(CAST(REPLACE(strBatchId, @strPrefix, '') AS INT))	
 		FROM	dbo.tblGLDetail  WHERE strBatchId LIKE @strPrefix + '%'
 		
-		DECLARE @intSMNumber = 0;
+		DECLARE @intSMNumber int = 0;
 		SELECT	intSMNumber = MAX(CAST(REPLACE(strBatchNo, 'BATCH-', '') AS INT))	
 		FROM	dbo.tblSMBatchPostingLog
 
