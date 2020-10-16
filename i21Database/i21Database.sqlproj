@@ -8816,6 +8816,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderInputLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputLots.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetSanitizationOrderOutputSKUs.sql" />
+    <Build Include="dbo\Views\vyuIPContractCostView.sql" />
+    <Build Include="dbo\Views\vyuIPContractCertification.sql" />
+    <Build Include="dbo\Views\vyuIPContractDocumentView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
