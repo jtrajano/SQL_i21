@@ -569,6 +569,7 @@ BEGIN TRY
 			FROM @avqty A
 			INNER JOIN tblGRSettleContract B
 				ON B.intSettleStorageId = @intSettleStorageId
+					AND B.intContractDetailId = A.intContractDetailId
 			WHERE A.dblAvailableQuantity > 0
 				AND A.intPriceFixationDetailId IS NOT NULL
 				AND A.intPricingTypeId = 1 AND A.intPricingTypeIdHeader = 2
@@ -1189,7 +1190,7 @@ BEGIN TRY
 					,dblCashPriceUsed		
 				FROM @SettleVoucherCreate SVC
 				OUTER APPLY (
-					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId
+					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intContractDetailId = SVC.intContractDetailId
 				) A
 
 				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
