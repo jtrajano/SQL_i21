@@ -8885,6 +8885,9 @@
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMD.sql" />
     <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
+    <Build Include="dbo\Tables\tblTFLocality.sql" />
+    <Build Include="dbo\Stored Procedures\uspTFUpgradeLocality.sql" />
+    <Build Include="dbo\User Defined Types\TFLocality.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9342,5 +9345,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\VA_Virginia.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\05_Locality.sql" />
   </ItemGroup>
 </Project>
