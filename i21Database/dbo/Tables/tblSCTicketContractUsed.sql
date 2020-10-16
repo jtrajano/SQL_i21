@@ -11,6 +11,7 @@
 	CONSTRAINT [FK_tblSCTicketContractUsed_tblEMEntity_intEntityId] FOREIGN KEY (intEntityId) REFERENCES [tblEMEntity](intEntityId)
 )
 
+GO
 
 CREATE INDEX [IX_tblSCTicketContractUsed_intTicketId_intContractDetailId] ON [dbo].[tblSCTicketContractUsed] ([intTicketId],intContractDetailId)
 GO
