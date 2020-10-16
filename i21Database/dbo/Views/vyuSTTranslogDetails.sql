@@ -16,7 +16,6 @@ FROM
 	   , TR.dblTrlUnitPrice
 	   , TR.dblTrlLineTot
 	   , TR.intTermMsgSN
-	   , USec.intEntityId
 	   , TR.dtmDate
 	   , TR.intCashierPosNum
 	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
