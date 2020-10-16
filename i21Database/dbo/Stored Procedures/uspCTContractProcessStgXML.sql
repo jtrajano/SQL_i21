@@ -173,6 +173,8 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@strApprover NVARCHAR(100)
 		,@intCurrentUserEntityId INT
+		,@strINCOLocation nvarchar(50)
+		,@intINCOLocationTypeId int
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -575,6 +577,7 @@ BEGIN TRY
 					,@strCountry = NULL
 					,@ysnApproval = NULL
 					,@strSubBook = NULL
+					,@strINCOLocation=NULL
 
 				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
@@ -595,6 +598,7 @@ BEGIN TRY
 					,@strCountry = strCountry
 					,@ysnApproval = ysnApproval
 					,@strSubBook = strSubBook
+					,@strINCOLocation=strINCOLocation
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -615,6 +619,7 @@ BEGIN TRY
 						,strCountry NVARCHAR(100) Collate Latin1_General_CI_AS
 						,ysnApproval BIT
 						,strSubBook NVARCHAR(100) Collate Latin1_General_CI_AS
+						,strINCOLocation NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
 
 				SELECT @strErrorMessage = ''
@@ -841,6 +846,23 @@ BEGIN TRY
 					END
 				END
 
+				IF @strINCOLocation IS NOT NULL
+					AND NOT EXISTS (
+						SELECT 1
+						FROM tblSMCity AB
+						WHERE AB.strCity = @strINCOLocation
+						)
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'City ' + @strINCOLocation + ' is not available.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'City ' + @strINCOLocation + ' is not available.'
+					END
+				END
+
 				SELECT @intCountryId = NULL
 
 				SELECT @intCountryId = intCountryID
@@ -919,6 +941,7 @@ BEGIN TRY
 				SELECT @intCityId = NULL
 
 				SELECT @intCommodityUnitMeasureId = NULL
+				SELECT @intINCOLocationTypeId=NULL
 
 				SELECT @intCommodityId = intCommodityId
 				FROM tblICCommodity C
@@ -1003,6 +1026,10 @@ BEGIN TRY
 				SELECT @intCityId = intCityId
 				FROM tblSMCity AB
 				WHERE AB.strCity = @strArbitration
+
+				SELECT @intINCOLocationTypeId = intCityId
+				FROM tblSMCity AB
+				WHERE AB.strCity = @strINCOLocation
 
 				IF NOT EXISTS (
 						SELECT *
@@ -1116,6 +1143,7 @@ BEGIN TRY
 					,ysnReadOnlyInterCoContract
 					,intSubBookId
 					,intCompanyId
+					,intINCOLocationTypeId
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1179,11 +1207,12 @@ BEGIN TRY
 					,1 AS ysnReadOnlyInterCoContract
 					,@intSubBookId
 					,@intCompanyRefId
+					,@intINCOLocationTypeId
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
-						strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
-						,dtmContractDate DATETIME
+						--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
+						dtmContractDate DATETIME
 						,dblHeaderQuantity NUMERIC(18, 6)
-						,strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
+						--,strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 						,ysnSigned BIT
 						,dtmSigned DATETIME
 						,ysnPrinted BIT
@@ -1311,6 +1340,17 @@ BEGIN TRY
 									)
 								THEN CH.intTermId
 							ELSE CH1.intTermId
+							END
+						,CH.intINCOLocationTypeId = CASE 
+							WHEN @ysnApproval = 0
+								AND EXISTS (
+									SELECT *
+									FROM @tblCTAmendmentApproval
+									WHERE strDataIndex = 'intINCOLocationTypeId'
+										AND ysnApproval = 1
+									)
+								THEN CH.intINCOLocationTypeId
+							ELSE CH1.intINCOLocationTypeId
 							END
 						,CH.intContractTextId = CH1.intContractTextId
 						,CH.intGradeId = CASE 
@@ -2525,8 +2565,8 @@ BEGIN TRY
 						,dblConvertedBasis
 						,@intSubBookId
 					FROM OPENXML(@idoc, 'vyuIPContractDetailViews/vyuIPContractDetailView', 2) WITH (
-							strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
-							,dtmContractDate DATETIME
+							--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
+							dtmContractDate DATETIME
 							,dblHeaderQuantity NUMERIC(18, 6)
 							,strSalespersonId NVARCHAR(3) Collate Latin1_General_CI_AS
 							,ysnSigned BIT
@@ -3445,7 +3485,7 @@ BEGIN TRY
 
 				INSERT INTO @tblCTContractCost (intContractCostId)
 				SELECT intContractCostId
-				FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (intContractCostId INT)
+				FROM OPENXML(@idoc, 'vyuIPContractCostViews/vyuIPContractCostView', 2) WITH (intContractCostId INT)
 
 				SELECT @intContractCostId = MIN(intContractCostId)
 				FROM @tblCTContractCost
@@ -3463,7 +3503,7 @@ BEGIN TRY
 						,@strCurrency = strCurrency
 						,@strVendorName = strVendorName
 						,@strCurrencyExchangeRateType = strCurrencyExchangeRateType
-					FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (
+					FROM OPENXML(@idoc, 'vyuIPContractCostViews/vyuIPContractCostView', 2) WITH (
 							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
 							,strCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -3591,13 +3631,13 @@ BEGIN TRY
 						,intContractDetailId
 						,1
 						,0
-					FROM OPENXML(@idoc, 'vyuCTContractCostViews/vyuCTContractCostView', 2) WITH (
-							strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strVendorName NVARCHAR(50) Collate Latin1_General_CI_AS
-							,strCurrencyExchangeRateType NVARCHAR(50) Collate Latin1_General_CI_AS
-							,dblRate NUMERIC(18, 6)
+					FROM OPENXML(@idoc, 'vyuIPContractCostViews/vyuIPContractCostView', 2) WITH (
+							--strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strUOM NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strCurrency NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strVendorName NVARCHAR(50) Collate Latin1_General_CI_AS
+							--,strCurrencyExchangeRateType NVARCHAR(50) Collate Latin1_General_CI_AS
+							dblRate NUMERIC(18, 6)
 							,dblFX NUMERIC(18, 6)
 							,ysnAccrue BIT
 							,ysnMTM BIT
@@ -3807,7 +3847,7 @@ BEGIN TRY
 					,D.intDocumentId
 					,1
 					,x.intContractDocumentId
-				FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (
 						intContractDocumentId INT
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
@@ -3821,7 +3861,7 @@ BEGIN TRY
 
 				UPDATE CD
 				SET intDocumentId = D.intDocumentId
-				FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (
 						intContractDocumentId INT
 						,strDocumentName NVARCHAR(50) Collate Latin1_General_CI_AS
 						) x
@@ -3834,7 +3874,7 @@ BEGIN TRY
 				WHERE CD.intContractHeaderId = @intNewContractHeaderId
 					AND NOT EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractDocumentViews/vyuCTContractDocumentView', 2) WITH (intContractDocumentId INT) x
+						FROM OPENXML(@idoc, 'vyuIPContractDocumentViews/vyuIPContractDocumentView', 2) WITH (intContractDocumentId INT) x
 						WHERE CD.intContractDocumentRefId = x.intContractDocumentId
 						)
 
@@ -3845,14 +3885,14 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
+						FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
 						LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
 						WHERE PR.strName IS NULL
 							AND x.strProducer IS NOT NULL
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Producer ' + x.strProducer + ' is not available.'
-					FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
+					FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strProducer NVARCHAR(50) Collate Latin1_General_CI_AS) x
 					LEFT JOIN tblEMEntity PR ON PR.strName = x.strProducer
 						AND x.strProducer IS NOT NULL
 					WHERE PR.strName IS NULL
@@ -3866,13 +3906,13 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT *
-						FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
+						FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
 						LEFT JOIN tblICCertification CF ON CF.strCertificationName = x.strCertificationName
 						WHERE CF.strCertificationName IS NULL
 						)
 				BEGIN
 					SELECT @strErrorMessage = 'Certification ' + x.strCertificationName + ' is not available.'
-					FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
+					FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS) x
 					LEFT JOIN tblICCertification CF ON CF.strCertificationName = x.strCertificationName
 					WHERE CF.strCertificationName IS NULL
 
@@ -3909,7 +3949,7 @@ BEGIN TRY
 					,PR.intEntityId
 					,x.dblQuantity
 					,1 AS intConcurrencyId
-				FROM OPENXML(@idoc, 'vyuCTContractCertifications/vyuCTContractCertification', 2) WITH (
+				FROM OPENXML(@idoc, 'vyuIPContractCertifications/vyuIPContractCertification', 2) WITH (
 						strProducer NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strCertificationName NVARCHAR(100) Collate Latin1_General_CI_AS
 						,intContractDetailId INT
@@ -3952,11 +3992,13 @@ BEGIN TRY
 					intContractHeaderId
 					,intConditionId
 					,intConcurrencyId
+					,strConditionDescription
 					)
 				SELECT @intNewContractHeaderId
 					,C.intConditionId
 					,1 AS intConcurrencyId
-				FROM OPENXML(@idoc, 'vyuCTContractConditionViews/vyuCTContractConditionView', 2) WITH (strConditionName NVARCHAR(200) Collate Latin1_General_CI_AS) x
+					,x.strConditionDescription
+				FROM OPENXML(@idoc, 'vyuCTContractConditionViews/vyuCTContractConditionView', 2) WITH (strConditionName NVARCHAR(200) Collate Latin1_General_CI_AS,strConditionDescription NVARCHAR(MAX) Collate Latin1_General_CI_AS) x
 				JOIN tblCTCondition C ON C.strConditionName = x.strConditionName
 
 				EXEC sp_xml_removedocument @idoc
