@@ -49,7 +49,7 @@ FROM
 		SELECT [dbo].fnGLGetCMGLDetailBalance(EOP.Value, BA.intGLAccountId) Value -- this is in us / functional currency
   )GLBalance
   OUTER APPLY(
-		Select GLBalance.Value / BankBalance.Value Value
+		SELECT GLBalance.Value / BankBalance.Value  Value
   )Rate
 	
 WHERE
@@ -58,4 +58,5 @@ WHERE
     FROM     tblCMBankTransaction
     GROUP BY MONTH(dtmDate), YEAR(dtmDate), intBankAccountId
   )
+  AND BankBalance.Value <> 0
 GO
