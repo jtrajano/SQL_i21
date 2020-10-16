@@ -49,15 +49,19 @@ WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 
 SELECT * INTO #tempFirstToSecond FROM (
-	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, sum(dblTotal) as dblTotal, strEntityName, strLocationName from #FirstRun
+    group by strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, strEntityName, strLocationName 
 	except
-	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, sum(dblTotal) as dblTotal, strEntityName, strLocationName from #SecondRun
+    group by strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, strEntityName, strLocationName 
 )t
 
 SELECT * INTO #tempSecondToFirst FROM (
-	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, sum(dblTotal) as dblTotal, strEntityName, strLocationName from #SecondRun
+    group by strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, strEntityName, strLocationName 
 	except
-	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, sum(dblTotal) as dblTotal, strEntityName, strLocationName from #FirstRun
+    group by strContractNumber, intContractHeaderId, strTransactionReferenceId, intTransactionReferenceId, strTranType, strEntityName, strLocationName 
 ) t
 
 
@@ -95,9 +99,7 @@ FROM (
 		, a.intTransactionReferenceId
 		, a.strTranType
 	FROM #tempFirstToSecond a
-	INNER JOIN #tempSecondToFirst b ON b.strContractNumber = a.strContractNumber
-		AND a.strTransactionReferenceId = b.strTransactionReferenceId
-	WHERE ISNULL(a.dblTotal, 0.00) <> ISNULL(b.dblTotal, 0.00)
+    INNER JOIN #tempSecondToFirst b ON  a.strTransactionReferenceId = b.strTransactionReferenceId
 
 
 	UNION ALL
@@ -113,7 +115,7 @@ FROM (
 		, a.intTransactionReferenceId
 		, a.strTranType
 	FROM #tempFirstToSecond  a
-	WHERE a.strContractNumber NOT IN (SELECT strContractNumber FROM #tempSecondToFirst)
+	WHERE a.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempSecondToFirst)
 
 	UNION ALL
 	SELECT 
@@ -128,7 +130,7 @@ FROM (
 		, b.intTransactionReferenceId
 		, b.strTranType
 	FROM #tempSecondToFirst b
-	WHERE b.strContractNumber NOT IN (SELECT strContractNumber FROM #tempFirstToSecond)
+	WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFirstToSecond)
 ) t
 
 

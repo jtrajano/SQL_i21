@@ -44,15 +44,19 @@ WHERE intRunNumber = @intDPRRun2 and strType = @strBucketType
 
 
 SELECT * INTO #tempFirstToSecond FROM (
-	select strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName  from #FirstRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 	except
-	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName  from #SecondRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 )t
 
 SELECT * INTO #tempSecondToFirst FROM (
-	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #SecondRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName from #SecondRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 	except
-	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, dblTotal, strEntityName, strLocationName from #FirstRun
+	select strTransactionReferenceId,  intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, SUM(dblTotal) as dblTotal, strEntityName, strLocationName from #FirstRun
+	group by strTransactionReferenceId, intTransactionReferenceId, intTransactionReferenceDetailId, strTranType, strEntityName, strLocationName
 ) t
 
 
