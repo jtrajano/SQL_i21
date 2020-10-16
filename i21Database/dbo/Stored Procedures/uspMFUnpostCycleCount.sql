@@ -235,6 +235,7 @@ BEGIN TRY
 			,intFobPointId
 			,dblVoucherCost = NULL
 		FROM tblICInventoryTransaction t
+		LEFT JOIN tblMFWorkOrderProducedLot PL ON PL.intWorkOrderProducedLotId = t.intTransactionDetailId
 		WHERE t.strBatchId = @strCostAdjustmentBatchId
 			AND t.ysnIsUnposted = 0
 			AND t.intTransactionTypeId = 26
