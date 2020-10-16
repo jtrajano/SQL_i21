@@ -4305,14 +4305,14 @@ BEGIN TRY
 			)
 	BEGIN
 		--DECLARE @intFreightTermId INT
-		SELECT @intFreightTermId = intFreightTermId
-		FROM tblSMFreightTerms
-		WHERE strFreightTerm = 'Pickup'
+		--SELECT @intFreightTermId = intFreightTermId
+		--FROM tblSMFreightTerms
+		--WHERE strFreightTerm = 'Pickup'
 
 		UPDATE tblLGLoad
 		SET intPurchaseSale = 1
 			,intSourceType = 2
-			,intFreightTermId = @intFreightTermId
+			--,intFreightTermId = @intFreightTermId
 		WHERE intLoadId = @intNewLoadId
 
 		IF EXISTS (
