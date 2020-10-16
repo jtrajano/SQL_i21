@@ -135,6 +135,7 @@ begin try
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
 		,@ysnSuccessBillPosting bit
+  		,@receiptDetails InventoryUpdateBillQty
 		;
 
 	declare @CreatedVoucher as table(
@@ -633,7 +634,7 @@ begin try
 		from
 			@voucherPayables vp
 		where
-			isnull(vp.intInventoryReceiptChargeId,0) > 0
+			isnull(vp.intInventoryReceiptChargeId,0) = 0 and isnull(vp.intContractDetailId,0) = 0
 
 		if exists (select top 1 1 from @voucherPayablesFinal)
 		begin
@@ -750,25 +751,28 @@ begin try
 						,@intCreatedBillDetailId
 
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
-					INSERT INTO tblCTPriceFixationDetailAPAR(
-						intPriceFixationDetailId
-						,intBillId
-						,intBillDetailId
-						,intSourceId
-						,dblQuantity
-						,dtmCreatedDate
-						,ysnMarkDelete
-						,intConcurrencyId  
-					)  
-					SELECT   
-						intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
-						,intBillId = @intCreatedBillId  
-						,intBillDetailId = @intCreatedBillDetailId 
-						,intSourceId = @intCreatedInventoryReceiptItemId
-						,dblQuantity = @dblCreatedQtyReceived
-						,dtmCreatedDate = getdate()
-						,ysnMarkDelete = null
-						,intConcurrencyId = 1 
+					if (isnull(@intCreatedPriceFixationDetailId,0) > 0)
+					begin
+						INSERT INTO tblCTPriceFixationDetailAPAR(
+							intPriceFixationDetailId
+							,intBillId
+							,intBillDetailId
+							,intSourceId
+							,dblQuantity
+							,dtmCreatedDate
+							,ysnMarkDelete
+							,intConcurrencyId  
+						)  
+						SELECT   
+							intPriceFixationDetailId = @intCreatedPriceFixationDetailId  
+							,intBillId = @intCreatedBillId  
+							,intBillDetailId = @intCreatedBillDetailId 
+							,intSourceId = @intCreatedInventoryReceiptItemId
+							,dblQuantity = @dblCreatedQtyReceived
+							,dtmCreatedDate = getdate()
+							,ysnMarkDelete = null
+							,intConcurrencyId = 1
+					end
 
 					--4. Apply PrePay
 					select @intTicketId = intTicketId from tblSCTicket where intInventoryReceiptId = @intCreatedInventoryReceiptId;
@@ -795,6 +799,32 @@ begin try
 					begin
 						EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 					end
+
+					DELETE FROM @receiptDetails
+					INSERT INTO @receiptDetails
+					(
+						[intInventoryReceiptItemId],
+						[intInventoryReceiptChargeId],
+						[intInventoryShipmentChargeId],
+						[intSourceTransactionNoId],
+						[strSourceTransactionNo],
+						[intItemId],
+						[intToBillUOMId],
+						[dblToBillQty]
+					)
+					SELECT
+						[intInventoryReceiptItemId],
+						[intInventoryReceiptChargeId],
+						[intInventoryShipmentChargeId],
+						[intSourceTransactionNoId],
+						[strSourceTransactionNo],
+						[intItemId],
+						[intToBillUOMId],
+						[dblToBillQty]
+					FROM
+						dbo.fnCTGenerateReceiptDetail(@intCreatedInventoryReceiptItemId, @intCreatedBillId, @intCreatedBillDetailId, @dblCreatedQtyReceived, 0)
+
+					EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 						
 					select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 				end
@@ -805,7 +835,6 @@ begin try
 				while (@intCreatedBillId is not null and @intCreatedBillId > 0)
 				begin
 					EXEC [dbo].[uspAPPostBill] @post = 1,@recap = 0,@isBatch = 0,@param = @intCreatedBillId,@userId = @userId,@success = @ysnSuccessBillPosting OUTPUT
-
 					select @intCreatedBillId = min(intBillId) from @CreatedVoucher where intBillId >  @intCreatedBillId
 				end
 
