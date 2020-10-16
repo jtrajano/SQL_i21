@@ -172,6 +172,7 @@ BEGIN TRY
 	)
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
+	DECLARE @VoucherIds AS Id
 
 	/*	intItemType
 		------------
@@ -2443,10 +2444,14 @@ BEGIN TRY
 
 								if @cur_bid is not null
 								begin
-								
-									exec uspAPUpdateCost @billDetailId = @cur_bid,  @cost = @cur_cost
-									insert into @used_bill_id(id) values(@cur_bid)
+									declare @ysn_have_receipt_item_id bit 
+									set @ysn_have_receipt_item_id = 0 
+									if exists(select top 1 1 from @voucherPayable where isnull(intInventoryReceiptItemId, 0) > 0)
+										set @ysn_have_receipt_item_id = 1
+										
+									exec uspAPUpdateCost @billDetailId = @cur_bid,  @cost = @cur_cost, @costAdjustment = @ysn_have_receipt_item_id
 
+									insert into @used_bill_id(id) values(@cur_bid)
 								end
 								
 							end
@@ -2545,15 +2550,20 @@ BEGIN TRY
 						end
 
 							--IF @ysnFromTransferStorage = 0
-							
-						EXEC [dbo].[uspAPPostBill] 
-								@post = 1
-							,@recap = 0
-							,@isBatch = 0
-							,@param = @intVoucherId
-							,@userId = @intCreatedUserId
-							,@transactionType = 'Settle Storage'
-							,@success = @success OUTPUT
+							select '@intVoucherId',@intVoucherId
+							IF ISNULL(@intVoucherId,0) > 0
+							BEGIN
+								INSERT INTO @VoucherIds
+								SELECT @intVoucherId
+							END
+						--EXEC [dbo].[uspAPPostBill] 
+						--		@post = 1
+						--	,@recap = 0
+						--	,@isBatch = 0
+						--	,@param = @intVoucherId
+						--	,@userId = @intCreatedUserId
+						--	,@transactionType = 'Settle Storage'
+						--	,@success = @success OUTPUT
 					END
 
 					IF(@success = 0)
@@ -2752,6 +2762,21 @@ BEGIN TRY
 	UPDATE tblGRStorageHistory
 	SET intBillId = @createdVouchersId
 	WHERE intSettleStorageId = @intParentSettleStorageId and @createdVouchersId is not null
+
+	DECLARE @intVoucherId2 AS INT
+	WHILE EXISTS(SELECT TOP 1 1 FROM @VoucherIds)
+	BEGIN
+		SELECT TOP 1 @intVoucherId2 = intId FROM @VoucherIds
+		EXEC [dbo].[uspAPPostBill] 
+			@post = 1
+			,@recap = 0
+			,@isBatch = 0
+			,@param = @intVoucherId2
+			,@userId = @intCreatedUserId
+			,@transactionType = 'Settle Storage'
+			,@success = @success OUTPUT
+		DELETE FROM @VoucherIds WHERE intId = @intVoucherId2
+	END
 
 	SettleStorage_Exit:
 END TRY
