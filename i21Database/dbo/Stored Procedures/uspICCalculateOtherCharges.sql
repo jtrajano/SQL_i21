@@ -69,4 +69,19 @@ BEGIN
 				ON ReceiptCharge.intInventoryReceiptChargeId = ComputedCharges.intInventoryReceiptChargeId
 	WHERE	ReceiptCharge.intInventoryReceiptId = @intInventoryReceiptId
 
+	-- Recalculate the other charge Amount based on the Qty and Rate
+	UPDATE ReceiptCharge
+	SET 
+		dblAmount = 
+			ROUND(
+				dbo.fnMultiply(
+					ReceiptCharge.dblQuantity
+					,ReceiptCharge.dblRate
+				)
+				,2
+			)
+	FROM	dbo.tblICInventoryReceiptCharge ReceiptCharge 
+	WHERE	ReceiptCharge.intInventoryReceiptId = @intInventoryReceiptId
+			AND ReceiptCharge.strCostMethod IN ('Per Unit') 
+			AND ISNULL(ReceiptCharge.dblAmount, 0) <> 0
 END
