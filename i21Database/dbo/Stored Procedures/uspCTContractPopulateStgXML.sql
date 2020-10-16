@@ -173,7 +173,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblCTContractCost'
 	ELSE
-		SELECT @strObjectName = 'vyuCTContractCostView'
+		SELECT @strObjectName = 'vyuIPContractCostView'
 
 	IF @strCostCondition IS NOT NULL
 	BEGIN
@@ -192,7 +192,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblCTContractDocument'
 	ELSE
-		SELECT @strObjectName = 'vyuCTContractDocumentView'
+		SELECT @strObjectName = 'vyuIPContractDocumentView'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strHeaderCondition
@@ -224,7 +224,7 @@ BEGIN TRY
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblCTContractCertification'
 	ELSE
-		SELECT @strObjectName = 'vyuCTContractCertification'
+		SELECT @strObjectName = 'vyuIPContractCertification'
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,@strCostCondition
