@@ -206,7 +206,11 @@ BEGIN
 		SELECT	@intNumber = MAX(CAST(REPLACE(strBatchId, @strPrefix, '') AS INT))	
 		FROM	dbo.tblGLDetail  WHERE strBatchId LIKE @strPrefix + '%'
 		
-		IF (@intNumber IS NOT NULL)	
+		DECLARE @intSMNumber = 0;
+		SELECT	intSMNumber = MAX(CAST(REPLACE(strBatchNo, 'BATCH-', '') AS INT))	
+		FROM	dbo.tblSMBatchPostingLog
+
+		IF (@intNumber IS NOT NULL AND ISNULL(@intSMNumber, 0) < @intNumber)	
 		BEGIN 	
 			-- Update the next transaction id. 
 			UPDATE	dbo.tblSMStartingNumber
