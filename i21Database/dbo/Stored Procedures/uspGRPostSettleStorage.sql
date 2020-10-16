@@ -2550,7 +2550,7 @@ BEGIN TRY
 						end
 
 							--IF @ysnFromTransferStorage = 0
-							select '@intVoucherId',@intVoucherId
+							--select '@intVoucherId',@intVoucherId
 							IF ISNULL(@intVoucherId,0) > 0
 							BEGIN
 								INSERT INTO @VoucherIds
