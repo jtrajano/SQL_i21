@@ -182,7 +182,18 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strCurrency				= CURRENCY.strCurrency	 	 
 	 , strInvoiceNumber			= INV.strInvoiceNumber
 	 , strBillToLocationName	= INV.strBillToLocationName
-	 , strBillTo				= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
+	 , strBillTo				= dbo.fnARFormatCustomerAddress(
+									 NULL
+									,NULL
+									,CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 4 - Zeeland' THEN ENTITYLOCATION.strCheckPayeeName ELSE INV.strBillToLocationName END
+									,INV.strBillToAddress
+									,INV.strBillToCity
+									,INV.strBillToState
+									,INV.strBillToZipCode
+									,INV.strBillToCountry
+									,CUSTOMER.strName
+									,CUSTOMER.ysnIncludeEntityName
+								)
 	 , strShipTo				= CASE WHEN INV.strType = 'Tank Delivery' AND CONSUMPTIONSITE.intSiteId IS NOT NULL 
 	 									THEN CONSUMPTIONSITE.strSiteFullAddress
 										ELSE dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strShipToLocationName, INV.strShipToAddress, INV.strShipToCity, INV.strShipToState, INV.strShipToZipCode, INV.strShipToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
@@ -454,6 +465,11 @@ LEFT JOIN (
 		 , strName
 	FROM dbo.tblEMEntity
 ) SHIPVIA ON INV.intShipViaId = SHIPVIA.intEntityId
+OUTER APPLY (
+	SELECT strCheckPayeeName
+	FROM dbo.tblEMEntityLocation
+	WHERE intEntityLocationId = INV.intBillToLocationId
+) ENTITYLOCATION
 LEFT JOIN (
 	SELECT intFreightTermId
 		 , strFreightTerm
