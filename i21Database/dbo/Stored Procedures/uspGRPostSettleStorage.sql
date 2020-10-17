@@ -380,7 +380,7 @@ BEGIN TRY
 				,intContractDetailId 	= SSC.intContractDetailId 
 				,dblContractUnits    	= SSC.dblUnits -- ( isnull( b.dblVoucherQtyReceived, 0 ) )
 				,ContractEntityId    	= CD.intEntityId
-				,dblCashPrice		 	= case when ISNULL(@dblCashPriceFromCt,0) != 0 then @dblCashPriceFromCt else CD.dblCashPrice end
+				,dblCashPrice		 	= case WHEN CD.strPricingType = 'Priced' AND CD.strPricingType = 'Priced' THEN CD.dblCashPrice ELSE CASE when ISNULL(@dblCashPriceFromCt,0) != 0 then @dblCashPriceFromCt else CD.dblCashPrice end END
 				,intPricingTypeId    	= CD.intPricingTypeId
 				,dblBasis			 	= CD.dblBasisInItemStockUOM
 				,intContractUOMId	 	= CD.intContractUOMId
