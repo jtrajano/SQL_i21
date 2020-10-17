@@ -1232,9 +1232,13 @@ BEGIN TRY
 					,intCompanyLocationId
 					,intContractHeaderId
 					,SVC.intContractDetailId
-					,dblUnits				= CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (SVC.dblUnits / SVC.dblSettleContractUnits) * A.dblUnits ELSE A.dblUnits END
+					,dblUnits				= CASE 
+												WHEN A.intPriceFixationDetailId IS NOT NULL
+													THEN CASE WHEN SVC.ysnDiscountFromGrossWeight = 1 THEN (SVC.dblUnits / SVC.dblSettleContractUnits) * A.dblUnits ELSE A.dblUnits END
+												ELSE SVC.dblUnits
+											END
 					,dblCashPrice			= CASE 
-												WHEN SVC.intItemType = 1 THEN A.dblCashPrice 
+												WHEN SVC.intItemType = 1 THEN CASE WHEN A.intPriceFixationDetailId IS NOT NULL THEN A.dblCashPrice ELSE SVC.dblCashPrice END
 												ELSE 
 													CASE 
 														WHEN (intItemType = 3 and ysnPercentChargeType = 1) THEN ROUND((SVC.dblCashPrice / SVC.dblCashPriceUsed) * A.dblCashPrice,6)
