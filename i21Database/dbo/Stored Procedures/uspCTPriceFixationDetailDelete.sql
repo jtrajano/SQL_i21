@@ -27,6 +27,8 @@ BEGIN TRY
 		intBillDetailId				INT,
 		dblReceived					NUMERIC(26,16)
 	)
+	
+	DECLARE @receiptDetails AS InventoryUpdateBillQty
 
 	SELECT  BL.intBillId AS Id, FT.intDetailId AS DetailId, DA.intBillDetailId AS BillDetailId, FD.dblQuantity AS Quantity
 	INTO	#ItemBill
@@ -42,7 +44,7 @@ BEGIN TRY
 	AND		ISNULL(BL.ysnPosted,0) = 0
 	
 	SELECT @Id = MIN(Id), @DetailId = MIN(DetailId) FROM #ItemBill
-	WHILE ISNULL(@Id,0) > 0
+	WHILE (ISNULL(@Id,0) > 0 and isnull(@DetailId,0) > 0)
 	BEGIN
 		SELECT @Count = COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
 		IF @intPriceFixationTicketId IS NOT NULL AND @Count > 1
@@ -52,7 +54,6 @@ BEGIN TRY
 			FROM tblAPBillDetail 
 			WHERE intBillDetailId = @DetailId
 
-			DECLARE @receiptDetails AS InventoryUpdateBillQty
 			DELETE FROM @receiptDetails
 			INSERT INTO @receiptDetails
 			(
@@ -147,6 +148,55 @@ BEGIN TRY
 
 		SELECT @Id = MIN(Id) FROM #ItemBill WHERE Id > @Id
 	END
+
+	
+	SELECT @Id = MIN(Id) FROM #ItemBill
+	select @BillDetailId = 0;
+	while (isnull(@Id,0) > 0)
+	begin
+		
+		select @BillDetailId = min(BillDetailId) from #ItemBill where Id = @Id and BillDetailId > @BillDetailId;
+		while(isnull(@BillDetailId,0) > 0)
+		begin
+			SELECT @ItemId = intInventoryReceiptItemId, @Quantity = dblQtyReceived, @Id = intBillId
+			FROM tblAPBillDetail 
+			WHERE intBillDetailId = @BillDetailId
+
+			DELETE FROM @receiptDetails
+			INSERT INTO @receiptDetails
+			(
+				[intInventoryReceiptItemId],
+				[intInventoryReceiptChargeId],
+				[intInventoryShipmentChargeId],
+				[intSourceTransactionNoId],
+				[strSourceTransactionNo],
+				[intItemId],
+				[intToBillUOMId],
+				[dblToBillQty]
+			)
+			SELECT
+			[intInventoryReceiptItemId],
+			[intInventoryReceiptChargeId],
+			[intInventoryShipmentChargeId],
+			[intSourceTransactionNoId],
+			[strSourceTransactionNo],
+			[intItemId],
+			[intToBillUOMId],
+			[dblToBillQty]
+			FROM dbo.fnCTGenerateReceiptDetail(@ItemId, @Id, @BillDetailId, @Quantity * -1, 0)
+
+			EXEC uspICUpdateBillQty @updateDetails = @receiptDetails;
+
+			select @BillDetailId = min(BillDetailId) from #ItemBill where Id = @Id and BillDetailId > @BillDetailId;
+		end
+
+		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id
+		EXEC uspAPDeleteVoucher @Id,@intUserId
+
+
+		SELECT @Id = MIN(Id) FROM #ItemBill where Id > @Id;
+
+	end
 
 	SELECT @List = NULL
 
