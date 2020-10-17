@@ -44,6 +44,7 @@ SELECT strCustomerName				= CUSTOMER.strName
      , strPhone1 					= CONTACT.strPhone
      , strEmail 					= CONTACT.strEmail
      , strInternalNotes				= CONTACT.strInternalNotes
+	 , dblCreditStopDays			= ISNULL(AGING.dblCreditStopDays, 0)
 FROM vyuARCustomerSearch CUSTOMER
 LEFT JOIN vyuARCustomerAgingReport AGING ON CUSTOMER.intEntityCustomerId = AGING.intEntityCustomerId
 LEFT JOIN (

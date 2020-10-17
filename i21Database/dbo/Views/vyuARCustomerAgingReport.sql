@@ -1,6 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARCustomerAgingReport]
 AS
-WITH RESULT_CTE(intInvoiceId, intEntityCustomerId, dblInvoiceTotal, dblDiscountTerm, strAge, dblAmountPaid, dblTotalDue, dblAvailableCredit, dblPrepayments, dblFuture, dbl0Days, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl91Days)
+WITH RESULT_CTE(intInvoiceId, intEntityCustomerId, dblInvoiceTotal, dblDiscountTerm, strAge, dblAmountPaid, dblTotalDue, dblAvailableCredit, dblPrepayments, dblFuture, dbl0Days, dbl10Days, dbl30Days, dbl60Days, dbl90Days, dbl91Days, dblCreditStopDays)
 AS(
 SELECT I.intInvoiceId
 	  , I.intEntityCustomerId
@@ -25,6 +25,7 @@ SELECT I.intInvoiceId
 	  , dbl60Days
 	  , dbl90Days
 	  , dbl91Days
+	  , dblCreditStopDays
 FROM (
 	SELECT I.intInvoiceId
 		 , I.intEntityCustomerId
@@ -44,6 +45,7 @@ FROM (
 		 , Z.dbl60Days
 		 , Z.dbl90Days
 		 , Z.dbl91Days
+		 , Z.dblCreditStopDays
 	FROM dbo.tblARInvoice I WITH (NOLOCK)
 	LEFT JOIN vyuARCustomerAgingSubview Z ON Z.intEntityCustomerId = I.intEntityCustomerId 
 	  AND Z.intInvoiceId = I.intInvoiceId
@@ -102,6 +104,7 @@ FROM (
 		 , dblCredits			= SUM(dblAvailableCredit) * -1
 		 , dblPrepayments		= SUM(dblPrepayments) * -1
 		 , dblPrepaids			= 0.000000
+		 , dblCreditStopDays	= SUM(dblCreditStopDays)
 	FROM RESULT_CTE
 	GROUP BY intEntityCustomerId
 	--HAVING dbo.fnRoundBanker(SUM(dblTotalDue) - SUM(dblAvailableCredit) - SUM(dblPrepayments), 2) <> 0.00 
