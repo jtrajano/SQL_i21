@@ -143,21 +143,19 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , strSourceSONumber					= SO.strSalesOrderNumber
 	 , strBook								= CBOOK.strBook
 	 , strSubBook							= CSBOOK.strSubBook
-	 , intCreditStopDays					= CUS.intCreditStopDays
 	 , strCreditCode						= CUS.strCreditCode
 	 , intPurchaseSale						= LG.intPurchaseSale
      , strReceiptNumber						= ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber)
      , strEODNumber							= ISNULL(POS.strEODNo,POSMixedTransactionCreditMemo.strEODNo)
      , strEODStatus                         = CASE WHEN POS.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END
      , strEODPOSDrawerName                  = ISNULL(POS.strPOSDrawerName, POSMixedTransactionCreditMemo.strPOSDrawerName)
-	 , intCreditLimitReached				= CUS.intCreditLimitReached
-	 , dtmCreditLimitReached				= CUS.dtmCreditLimitReached
      , ysnFromIntegration                   = CASE WHEN ISNULL(INV.intLoadId, 0) <> 0 OR ISNULL(INV.intDistributionHeaderId, 0) <> 0 OR ISNULL(INV.intLoadDistributionHeaderId, 0) <> 0 OR ISNULL(INV.intMeterReadingId, 0) <> 0 OR ISNULL(INTEG.intInvoiceId, 0) <> 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	 , ysnValidCreditCode					= INV.ysnValidCreditCode
 	 , ysnServiceChargeCredit				= INV.ysnServiceChargeCredit
 	 , blbSignature							= INV.blbSignature
      , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
      , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
+     , dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -168,11 +166,8 @@ INNER JOIN (
 		 , dblARBalance
 		 , ysnPORequired
 		 , strName
-		 , intCreditStopDays
 		 , strCreditCode
 		 , intEntityContactId
-		 , intCreditLimitReached
-		 , dtmCreditLimitReached
     FROM vyuARCustomerSearch WITH (NOLOCK)
 ) CUS ON CUS.intEntityId = INV.intEntityCustomerId
 INNER JOIN (
@@ -339,3 +334,8 @@ OUTER APPLY(
 	AND SC.strScreenName = 'Invoice'
 	WHERE SRA.intEntityUserSecurityId = INV.intEntityId
 ) USERCREDITAPPROVER
+OUTER APPLY(
+	SELECT TOP 1 dblCreditStopDays
+	FROM dbo.vyuARCustomerInquiry
+	WHERE intEntityCustomerId = INV.intEntityCustomerId
+) CUSTOMERAGING
