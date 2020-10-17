@@ -335,18 +335,29 @@ SELECT DISTINCT
   , dblTotalDue	= dblInvoiceTotal - dblAmountPaid
   , dblAvailableCredit
   , dblPrepayments
-  , CASE WHEN strType = 'CF Tran'
+  , CASE WHEN CTE.strType = 'CF Tran'
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dblFuture
-  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 0 AND strType <> 'CF Tran'
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 0 AND CTE.strType <> 'CF Tran'
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl0Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 0 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 10 AND strType <> 'CF Tran'
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 0 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 10 AND CTE.strType <> 'CF Tran'
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl10Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 10 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 30 AND strType <> 'CF Tran'
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 10 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 30 AND CTE.strType <> 'CF Tran'
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl30Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 30 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 60 AND strType <> 'CF Tran'
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 30 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 60 AND CTE.strType <> 'CF Tran'
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl60Days
-  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 90 AND strType <> 'CF Tran'
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 60 AND DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) <= 90 AND CTE.strType <> 'CF Tran'
 		 THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl90Days    
-  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 90 AND strType <> 'CF Tran'
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) > 90 AND CTE.strType <> 'CF Tran'
 	     THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dbl91Days 
-FROM RESULT_CTE
+  , CASE WHEN DATEDIFF(DAYOFYEAR, dtmDueDate, GETDATE()) >= ISNULL(CUS.intCreditStopDays, 0) AND CTE.strType <> 'CF Tran'
+	     THEN ISNULL((dblInvoiceTotal), 0) - ISNULL(dblAmountPaid, 0) ELSE 0 END dblCreditStopDays 
+FROM RESULT_CTE CTE
+INNER JOIN (
+	SELECT C.intEntityId
+		 , C.intCreditStopDays
+	FROM tblARCustomer C WITH (NOLOCK)
+	INNER JOIN (SELECT intEntityId
+					 , strName
+				FROM dbo.tblEMEntity
+	) E ON C.intEntityId = E.intEntityId
+) CUS ON CTE.intEntityCustomerId = CUS.intEntityId
