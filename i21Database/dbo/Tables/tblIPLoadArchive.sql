@@ -10,6 +10,7 @@
 	dtmDeadlineCargo			DATETIME, -- LS. Instr ETA
 	dtmETSPOL					DATETIME, -- LS. Instr ETD
 	strBookingReference			NVARCHAR(100) COLLATE Latin1_General_CI_AS,
+	strServiceContractNumber	NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	strBLNumber					NVARCHAR(100) COLLATE Latin1_General_CI_AS,
 	dtmBLDate					DATETIME, -- LS
 	strShippingLine				NVARCHAR(100) COLLATE Latin1_General_CI_AS, -- LS
