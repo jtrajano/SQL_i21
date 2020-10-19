@@ -107,14 +107,17 @@ BEGIN TRY
 		ON A.intTransactionReversed = B.intBillId
 	WHERE A.intBillId = @intBillId
 
-	--EXECUTE uspAPUpdateVoucherPayable for deleted.
-	EXEC [dbo].[uspAPUpdateVoucherPayable]
-		@voucherDetailIds = @voucherBillDetailIds,
-		@decrease = 1
-	
-	EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
-		@billDetailIds = @voucherBillDetailIds,
-		@decrease = 0
+	IF(EXISTS(SELECT TOP 1 1 FROM @voucherBillDetailIds))
+	BEGIN
+		--EXECUTE uspAPUpdateVoucherPayable for deleted.
+		EXEC [dbo].[uspAPUpdateVoucherPayable]
+			@voucherDetailIds = @voucherBillDetailIds,
+			@decrease = 1
+		
+		EXEC [dbo].[uspAPUpdateIntegrationPayableAvailableQty]
+			@billDetailIds = @voucherBillDetailIds,
+			@decrease = 0
+	END
 
 	EXEC uspAPUpdateInvoiceNumInGLDetail @invoiceNumber = @vendorOrderNumber, @intBillId = @intBillId
 
@@ -122,7 +125,10 @@ BEGIN TRY
 
 	EXEC uspAPArchiveVoucher @billId = @intBillId
 
-	EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
+	IF(EXISTS(SELECT TOP 1 1 FROM @voucherBillDetailIds))
+	BEGIN
+		EXEC uspAPLogVoucherDetailRisk @voucherDetailIds = @voucherBillDetailIds, @remove = 1
+	END
 
 	DELETE FROM dbo.tblAPBillDetailTax
 	WHERE intBillDetailId IN (SELECT intBillDetailId FROM dbo.tblAPBillDetail WHERE intBillId = @intBillId)
