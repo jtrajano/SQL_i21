@@ -44,11 +44,11 @@ BEGIN TRY
 	INSERT INTO @voucherBillDetailIds
 	SELECT intBillDetailId FROM tblAPBillDetail WHERE intBillId = @intBillId
 
-	-- IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
-	-- BEGIN
-	-- 	RAISERROR('Voucher details already deleted.',16,1)
-	-- 	RETURN;
-	-- END
+	IF(NOT EXISTS(SELECT 1 FROM @voucherBillDetailIds))
+	BEGIN
+		RAISERROR('Voucher details already deleted.',16,1)
+		RETURN;
+	END
 
 	SELECT @vendorOrderNumber = strVendorOrderNumber FROM tblAPBill WHERE intBillId = @intBillId
 
