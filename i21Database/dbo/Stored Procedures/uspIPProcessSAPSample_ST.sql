@@ -177,7 +177,7 @@ BEGIN TRY
 				,@strNewContractNumber = NULL
 
 			SELECT @strERPPONumber = ISNULL(strERPPONumber, '')
-				,@strERPItemNumber = ISNULL(strERPItemNumber, '')
+				,@strERPItemNumber = dbo.fnRemoveTrailingZeroes(ISNULL(strERPItemNumber, ''))
 				,@strSampleNumber = strSampleNumber
 				,@strSampleTypeName = strSampleTypeName
 				,@strItemNo = strItemNo
