@@ -25,6 +25,7 @@ BEGIN TRY
 		,dtmETSPOL DATETIME
 		,dtmDeadlineCargo DATETIME
 		,strBookingReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strServiceContractNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strBLNumber NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strShippingLine NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		,strMVessel NVARCHAR(200) COLLATE Latin1_General_CI_AS
@@ -45,6 +46,19 @@ BEGIN TRY
 		,dblQuantity NUMERIC(18, 6)
 		,dblGrossWeight NUMERIC(18, 6)
 		,strPackageType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		)
+	DECLARE @tblLoadNotifyParties TABLE (
+		strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strPartyType NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strPartyName NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strPartyLocation NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		)
+	DECLARE @tblLoadDocuments TABLE (
+		strCustomerReference NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,strTypeCode NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strName NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,intOriginal INT
+		,intCopies INT
 		)
 	DECLARE @intStageLoadId INT
 
@@ -78,6 +92,12 @@ BEGIN TRY
 			DELETE
 			FROM @tblLoadDetail
 
+			DELETE
+			FROM @tblLoadNotifyParties
+
+			DELETE
+			FROM @tblLoadDocuments
+
 			INSERT INTO @tblLoad (
 				strCustomerReference
 				,strERPPONumber
@@ -88,6 +108,7 @@ BEGIN TRY
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
+				,strServiceContractNumber
 				,strBLNumber
 				,strShippingLine
 				,strMVessel
@@ -129,6 +150,7 @@ BEGIN TRY
 					ELSE CONVERT(DATETIME, CONVERT(NVARCHAR, CONVERT(DATETIME, Eta), 101))
 					END
 				,BookingNumber
+				,ContractReference
 				,BLNumber
 				,CarrierCode
 				,Vessel
@@ -154,6 +176,7 @@ BEGIN TRY
 					,Etd NVARCHAR(50)
 					,Eta NVARCHAR(50)
 					,BookingNumber NVARCHAR(100)
+					,ContractReference NVARCHAR(100)
 					,BLNumber NVARCHAR(100)
 					,CarrierCode NVARCHAR(100)
 					,Vessel NVARCHAR(200)
@@ -207,6 +230,53 @@ BEGIN TRY
 					) x
 			WHERE ISNULL(x.CommodityCode, '') <> ''
 
+			INSERT INTO @tblLoadNotifyParties (
+				strCustomerReference
+				,strPartyType
+				,strPartyName
+				,strPartyLocation
+				)
+			SELECT CargooReference
+				,[Type]
+				,[Name]
+				,[Location]
+			FROM OPENXML(@idoc, 'Shipment/Parties/Party', 2) WITH (
+					CargooReference NVARCHAR(100) COLLATE Latin1_General_CI_AS '../../CargooReference'
+					,[Type] NVARCHAR(50)
+					,[Name] NVARCHAR(100)
+					,[Location] NVARCHAR(100)
+					) x
+			WHERE ISNULL(x.[Type], '') <> ''
+
+			INSERT INTO @tblLoadDocuments (
+				strCustomerReference
+				,strTypeCode
+				,strName
+				,intOriginal
+				,intCopies
+				)
+			SELECT CargooReference
+				,TypeCode
+				,[Name]
+				,CASE 
+					WHEN ISNUMERIC(Original) = 0
+						THEN 0
+					ELSE Original
+					END
+				,CASE 
+					WHEN ISNUMERIC(Copies) = 0
+						THEN 0
+					ELSE Copies
+					END
+			FROM OPENXML(@idoc, 'Shipment/Documents/Document', 2) WITH (
+					CargooReference NVARCHAR(100) COLLATE Latin1_General_CI_AS '../../CargooReference'
+					,TypeCode NVARCHAR(50)
+					,[Name] NVARCHAR(50)
+					,Original INT
+					,Copies INT
+					) x
+			WHERE ISNULL(x.[Name], '') <> ''
+
 			--Add to Staging tables
 			INSERT INTO tblIPLoadStage (
 				strCustomerReference
@@ -218,6 +288,7 @@ BEGIN TRY
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
+				,strServiceContractNumber
 				,strBLNumber
 				,strShippingLine
 				,strMVessel
@@ -240,6 +311,7 @@ BEGIN TRY
 				,dtmETSPOL
 				,dtmDeadlineCargo
 				,strBookingReference
+				,strServiceContractNumber
 				,strBLNumber
 				,strShippingLine
 				,strMVessel
@@ -275,6 +347,36 @@ BEGIN TRY
 				,dblGrossWeight
 				,strPackageType
 			FROM @tblLoadDetail
+
+			INSERT INTO tblIPLoadNotifyPartiesStage (
+				intStageLoadId
+				,strCustomerReference
+				,strPartyType
+				,strPartyName
+				,strPartyLocation
+				)
+			SELECT @intStageLoadId
+				,strCustomerReference
+				,strPartyType
+				,strPartyName
+				,strPartyLocation
+			FROM @tblLoadNotifyParties
+
+			INSERT INTO tblIPLoadDocumentsStage (
+				intStageLoadId
+				,strCustomerReference
+				,strTypeCode
+				,strName
+				,intOriginal
+				,intCopies
+				)
+			SELECT @intStageLoadId
+				,strCustomerReference
+				,strTypeCode
+				,strName
+				,intOriginal
+				,intCopies
+			FROM @tblLoadDocuments
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
