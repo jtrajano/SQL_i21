@@ -313,7 +313,7 @@ BEGIN
 					vyuICGetInventoryReceiptVoucher
 				WHERE 
 					intInventoryReceiptId = @intReceiptId
-					AND dblQtyToVoucher = dblQtyToReceive
+					AND dblQtyToReceive = dblQtyVouchered
 			)
 			BEGIN
 				IF @billTypeToUse = @type_Voucher
