@@ -1003,8 +1003,8 @@ BEGIN TRY
 					IF (@strOldBookingReference <> @strBookingReference)
 						SET @strDetails += '{"change":"strBookingReference","iconCls":"small-gear","from":"' + LTRIM(@strOldBookingReference) + '","to":"' + LTRIM(@strBookingReference) + '","leaf":true,"changeDescription":"Booking Ref."},'
 
-					IF (@strOldServiceContractNumber <> @strServiceContractNumber)
-						SET @strDetails += '{"change":"strServiceContractNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldServiceContractNumber) + '","to":"' + LTRIM(@strServiceContractNumber) + '","leaf":true,"changeDescription":"Service Contract No."},'
+					IF (ISNULL(@strOldServiceContractNumber, '') <> @strServiceContractNumber)
+						SET @strDetails += '{"change":"strServiceContractNumber","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldServiceContractNumber, '')) + '","to":"' + LTRIM(@strServiceContractNumber) + '","leaf":true,"changeDescription":"Service Contract No."},'
 
 					IF (@strOldBLNumber <> @strBLNumber)
 						SET @strDetails += '{"change":"strBLNumber","iconCls":"small-gear","from":"' + LTRIM(@strOldBLNumber) + '","to":"' + LTRIM(@strBLNumber) + '","leaf":true,"changeDescription":"BOL No."},'
@@ -1021,8 +1021,8 @@ BEGIN TRY
 					IF (@intOldShippingLineEntityId <> @intShippingLineEntityId)
 						SET @strDetails += '{"change":"strShippingLine","iconCls":"small-gear","from":"' + LTRIM(@strOldShippingLine) + '","to":"' + LTRIM(@strShippingLine) + '","leaf":true,"changeDescription":"Shipping Line"},'
 
-					IF (@intOldForwardingAgentEntityId <> @intForwardingAgentEntityId)
-						SET @strDetails += '{"change":"strForwardingAgent","iconCls":"small-gear","from":"' + LTRIM(@strOldForwardingAgent) + '","to":"' + LTRIM(@strForwardingAgent) + '","leaf":true,"changeDescription":"Forwarding Agent"},'
+					IF (ISNULL(@intOldForwardingAgentEntityId, 0) <> @intForwardingAgentEntityId)
+						SET @strDetails += '{"change":"strForwardingAgent","iconCls":"small-gear","from":"' + LTRIM(ISNULL(@strOldForwardingAgent, '')) + '","to":"' + LTRIM(@strForwardingAgent) + '","leaf":true,"changeDescription":"Forwarding Agent"},'
 
 					IF (@intOldNumberOfContainers <> @intNumberOfContainers)
 						SET @strDetails += '{"change":"intNumberOfContainers","iconCls":"small-gear","from":"' + LTRIM(@intOldNumberOfContainers) + '","to":"' + LTRIM(@intNumberOfContainers) + '","leaf":true,"changeDescription":"No. of Containers"},'
@@ -1647,7 +1647,7 @@ BEGIN TRY
 					BEGIN
 						IF @strNotifyPartyType = 'NI'
 							SELECT @strNotifyOrConsignee = 'First Notify'
-						ELSE
+						ELSE IF @strNotifyPartyType = 'NI1'
 							SELECT @strNotifyOrConsignee = 'Second Notify'
 
 						SELECT @intNotifyEntityId = intEntityId
@@ -1787,10 +1787,10 @@ BEGIN TRY
 								)
 						)
 
-				DELETE LN
-				FROM tblLGLoadNotifyParties LN
-				JOIN @tblDeleteNotifyParties DEL ON DEL.intLoadNotifyPartyId = LN.intLoadNotifyPartyId
-					AND LN.intLoadId = @intLoadId
+				--DELETE LN
+				--FROM tblLGLoadNotifyParties LN
+				--JOIN @tblDeleteNotifyParties DEL ON DEL.intLoadNotifyPartyId = LN.intLoadNotifyPartyId
+				--	AND LN.intLoadId = @intLoadId
 
 				INSERT INTO @tblLGLoadNotifyPartiesChanges (
 					intLoadNotifyPartyId
@@ -2055,15 +2055,15 @@ BEGIN TRY
 													"leaf": true
 													},'
 
-						IF @strAction = 'Deleted'
-							SET @AllNotifydetails = @AllNotifydetails + '
-													{  
-													"action":"Deleted",
-													"change":"Deleted - Record: ' + LTRIM(@strNotifyAuditInfo) + '",
-													"keyValue":' + LTRIM(@intAuditLoadNotifyPartyId) + ',
-													"iconCls":"small-new-minus",
-													"leaf": true
-													},'
+						--IF @strAction = 'Deleted'
+						--	SET @AllNotifydetails = @AllNotifydetails + '
+						--							{  
+						--							"action":"Deleted",
+						--							"change":"Deleted - Record: ' + LTRIM(@strNotifyAuditInfo) + '",
+						--							"keyValue":' + LTRIM(@intAuditLoadNotifyPartyId) + ',
+						--							"iconCls":"small-new-minus",
+						--							"leaf": true
+						--							},'
 
 						DELETE
 						FROM @tblLGLoadNotifyPartiesChanges
@@ -2268,10 +2268,10 @@ BEGIN TRY
 							AND LDS.strName = ID.strDocumentName
 						)
 
-				DELETE LD
-				FROM tblLGLoadDocuments LD
-				JOIN @tblDeleteDocuments DEL ON DEL.intLoadDocumentId = LD.intLoadDocumentId
-					AND LD.intLoadId = @intLoadId
+				--DELETE LD
+				--FROM tblLGLoadDocuments LD
+				--JOIN @tblDeleteDocuments DEL ON DEL.intLoadDocumentId = LD.intLoadDocumentId
+				--	AND LD.intLoadId = @intLoadId
 
 				INSERT INTO @tblLGLoadDocumentsChanges (
 					intLoadDocumentId
@@ -2471,15 +2471,15 @@ BEGIN TRY
 													"leaf": true
 													},'
 
-						IF @strAction = 'Deleted'
-							SET @AllDocumentdetails = @AllDocumentdetails + '
-													{  
-													"action":"Deleted",
-													"change":"Deleted - Record: ' + LTRIM(@strDocumentAuditInfo) + '",
-													"keyValue":' + LTRIM(@intAuditLoadDocumentId) + ',
-													"iconCls":"small-new-minus",
-													"leaf": true
-													},'
+						--IF @strAction = 'Deleted'
+						--	SET @AllDocumentdetails = @AllDocumentdetails + '
+						--							{  
+						--							"action":"Deleted",
+						--							"change":"Deleted - Record: ' + LTRIM(@strDocumentAuditInfo) + '",
+						--							"keyValue":' + LTRIM(@intAuditLoadDocumentId) + ',
+						--							"iconCls":"small-new-minus",
+						--							"leaf": true
+						--							},'
 
 						DELETE
 						FROM @tblLGLoadDocumentsChanges
