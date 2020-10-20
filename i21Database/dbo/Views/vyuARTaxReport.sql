@@ -164,7 +164,7 @@ INNER JOIN (
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
 					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
-	CROSS APPLY (
+	OUTER APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
