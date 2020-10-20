@@ -61,7 +61,7 @@ BEGIN TRY
 
 	DECLARE @tblSequenceHistoryId TABLE
 	(
-	  intSequenceAmendmentLogId INT
+	  intSequenceHistoryId INT
 	)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
@@ -190,17 +190,17 @@ BEGIN TRY
 
 	INSERT INTO @tblSequenceHistoryId
 	(
-	  intSequenceAmendmentLogId
+	  intSequenceHistoryId
 	)
 	SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
 
 	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
 	BEGIN
-		 SELECT  @strAmendedColumns= STUFF((
+		 SELECT  @strAmendedColumns = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
 											FROM tblCTAmendmentApproval AAP
 											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
-											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceAmendmentLogId  = AL.intSequenceAmendmentLogId  
+											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
 											WHERE ISNULL(AAP.ysnAmendment,0) =1
 											FOR XML PATH('')
 											), 1, 1, '')
