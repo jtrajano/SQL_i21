@@ -3,6 +3,7 @@
     [intStoreId]             INT              NULL,
     [strBookNumber]          NVARCHAR (500)   COLLATE Latin1_General_CI_AS NULL,
     [strCountDirection]      NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
+    [strLastCountDirection]  NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [intLotteryGameId]       INT              NULL,
     [intBinNumber]           INT			  NULL,
     [dtmReceiptDate]         DATETIME         NULL,
