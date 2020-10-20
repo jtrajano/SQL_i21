@@ -854,7 +854,10 @@ BEGIN TRY
 				ON ID.intContractDetailId = PRICE.intContractDetailId 
 					AND ID.dblPrice = PRICE.dblPrice
 			WHERE ID.intInvoiceId = @intInvoiceId
-			AND ID.intInventoryShipmentItemId IS NOT NULL
+			
+			/*Fixes for CT-5248 (Direct Out ticket does not have create IS)*/
+			--AND ID.intInventoryShipmentItemId IS NOT NULL
+
 			AND ID.intInventoryShipmentChargeId IS NULL
 			
 		END
