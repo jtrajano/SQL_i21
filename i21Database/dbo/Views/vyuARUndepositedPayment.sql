@@ -53,8 +53,8 @@ FROM (
 	  AND PAYMENT.ysnProcessedToNSF = 0
 	  AND PAYMENT.intAccountId IS NOT NULL
 	  AND (PAYMENT.ysnImportedFromOrigin <> 1 AND PAYMENT.ysnImportedAsPosted <> 1)
-	  AND CM.intSourceTransactionId IS NULL
-	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+	  AND CM.intSourceTransactionId IS NULL	  
+	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) NOT IN (UPPER('Write Off'), UPPER('CF Invoice'))
 	  AND (ISNULL(PAYMENT.dblAmountPaid, 0) > 0 OR (ISNULL(PAYMENT.dblAmountPaid, 0) < 0 AND SMPM.strPaymentMethod IN ('ACH','Prepay', 'Cash', 'Manual Credit Card', 'Debit Card')))
 
 	UNION ALL	
@@ -82,7 +82,7 @@ FROM (
 	  AND INVOICE.intAccountId IS NOT NULL
 	  AND INVOICE.strTransactionType = 'Cash'
 	  AND CM.intSourceTransactionId IS NULL
-	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) <> UPPER('Write Off')
+	  AND UPPER(ISNULL(SMPM.strPaymentMethod,'')) NOT IN (UPPER('Write Off'), UPPER('CF Invoice'))
 	  AND (ISNULL(INVOICE.ysnImportedFromOrigin,0) <> 1 AND ISNULL(INVOICE.ysnImportedAsPosted,0) <> 1)
 
 	UNION ALL	
