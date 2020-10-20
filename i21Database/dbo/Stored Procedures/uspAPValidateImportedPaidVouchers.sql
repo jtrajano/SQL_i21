@@ -14,6 +14,12 @@ BEGIN TRY
 DECLARE @transCount INT = @@TRANCOUNT;  
 IF @transCount = 0 BEGIN TRANSACTION; 
 
+;WITH cte AS (
+	SELECT ROW_NUMBER() OVER(PARTITION BY A.strStore, A.strVendorOrderNumber ORDER BY A.intId) intRow,
+	A.intId
+	FROM tblAPImportPaidVouchersForPayment A
+)
+
 UPDATE A
 	SET A.strNotes = CASE
 					WHEN 
@@ -48,10 +54,16 @@ UPDATE A
 					END,
 		A.strBillId = B.strBillId
 FROM tblAPImportPaidVouchersForPayment A
-LEFT JOIN tblAPBill B
-ON 
-	B.strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber
-AND B.intEntityVendorId = A.intEntityVendorId
+INNER JOIN cte cte ON cte.intId = A.intId
+OUTER APPLY	(
+	SELECT *
+	FROM (
+		SELECT *, ROW_NUMBER() OVER (ORDER BY intBillId ASC) intRow
+		FROM tblAPBill 
+		WHERE strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber AND intEntityVendorId = A.intEntityVendorId
+	) voucher
+	WHERE voucher.intRow = cte.intRow
+) B
 	
 IF @transCount = 0 COMMIT TRANSACTION;  
   
