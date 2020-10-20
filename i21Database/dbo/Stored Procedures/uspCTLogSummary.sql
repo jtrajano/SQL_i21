@@ -2798,7 +2798,7 @@ BEGIN TRY
 					BEGIN						
 						IF  @dblQty <> 0
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
+							UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 					END
