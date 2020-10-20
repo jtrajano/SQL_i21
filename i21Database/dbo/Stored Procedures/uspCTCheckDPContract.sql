@@ -11,7 +11,7 @@ BEGIN TRY
 		WHERE dblBalance = 0
 		AND intPricingTypeId = 5
 		AND intContractStatusId = 1
-		AND GETDATE() > dtmEndDate
+		AND dbo.fnRemoveTimeOnDate(GETDATE()) > dbo.fnRemoveTimeOnDate(dtmEndDate)
 	END
 
 END TRY      

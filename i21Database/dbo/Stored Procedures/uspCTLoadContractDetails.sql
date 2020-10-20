@@ -41,7 +41,7 @@ BEGIN TRY
 		AND intPricingTypeId = 5
 		AND intContractStatusId = 1
 		AND intContractHeaderId = @intContractHeaderId
-		AND GETDATE() > dtmEndDate
+		AND dbo.fnRemoveTimeOnDate(GETDATE()) > dbo.fnRemoveTimeOnDate(dtmEndDate)
 	END
 
 	INSERT INTO @tblShipment(intContractHeaderId,intContractDetailId,dblQuantity,dblDestinationQuantity)
