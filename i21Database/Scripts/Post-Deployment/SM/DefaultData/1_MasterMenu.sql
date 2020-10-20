@@ -10,8 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND strCommand = 'Grain.view.DisconnectedScaleSchedule')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Receipts' AND strModuleName = 'Accounts Receivable' AND strCommand = 'AccountsReceivable.view.PointOfSaleSalesReceipt?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -2497,6 +2497,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'POS Login
 	VALUES (N'POS Login', N'Accounts Receivable', @AccountsReceivablePOSParentMenuId, N'POS Login', N'Point of Sale', N'Screen', N'AccountsReceivable.view.PointOfSaleLogin', N'small-menu-pos', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'AccountsReceivable.view.PointOfSaleLogin' WHERE strMenuName = 'POS Login' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivablePOSParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Receipts' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivablePOSParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Sales Receipts', N'Accounts Receivable', @AccountsReceivablePOSParentMenuId, N'Sales Receipts', N'Point of Sale', N'Screen', N'AccountsReceivable.view.PointOfSaleSalesReceipt?showSearch=true', N'small-menu-pos', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'AccountsReceivable.view.PointOfSaleSalesReceipt?showSearch=true' WHERE strMenuName = 'Sales Receipts' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivablePOSParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'POS End Of Day' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivablePOSParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
