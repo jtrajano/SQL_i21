@@ -357,6 +357,29 @@ BEGIN TRY
 			AND Trans.intTransactionId IS NOT NULL
 
 		END
+		ELSE IF (@TaxAuthorityCode = 'VA')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicVA
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicVA 
+			(intTransactionId, strVALocalityCode, strVALocalityName, strVADestinationAddress, strVADestinationZipCode, intConcurrencyId)
+			SELECT Trans.intTransactionId, tblTFLocality.strLocalityCode, tblTFLocality.strLocalityName, tblEMEntityLocation.strAddress, tblEMEntityLocation.strZipCode, 1
+			FROM tblTFTransaction Trans
+			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId = Trans.intTransactionNumberId
+			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
+			INNER JOIN tblTFReportingComponent ON tblTFReportingComponent.intReportingComponentId = Trans.intReportingComponentId
+			INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+				LEFT JOIN tblTFLocality ON tblTFLocality.strLocalityZipCode = tblEMEntityLocation.strZipCode AND tblTFLocality.strLocalityCode = tblEMEntityLocation.strOregonFacilityNumber
+			WHERE Trans.uniqTransactionGuid = @Guid
+			AND Trans.intReportingComponentId = @ReportingComponentId
+			AND Trans.strTransactionType = 'Invoice'
+			AND tblTFReportingComponent.strScheduleCode IN ('16A', '16B', '17A', '17B')
+			AND Trans.intTransactionId IS NOT NULL
+
+		END
 
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 
