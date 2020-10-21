@@ -50,3 +50,10 @@ CREATE NONCLUSTERED INDEX [_dta_index_tblLGLoad_197_1172915250__K5_1] ON [dbo].[
 )
 INCLUDE ( 	[intLoadId]) WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [_dta_index_tblLGAllocationDetail_intSContractDetailId_intPContractDetailId] ON [dbo].[tblLGAllocationDetail]
+(
+	intSContractDetailId ASC,
+    intPContractDetailId ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+GO

@@ -92,7 +92,7 @@ BEGIN TRY
 		SELECT	@intPricingTypeId = intPricingTypeId,@dblAppliedQty = dblQuantity - dblBalance FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		SELECT @intSourceId = intSourceId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentItemId = @intInventoryShipmentItemId
 
-		IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
+		IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
 			RAISERROR('Contract does not exist.',16,1)
 		END
