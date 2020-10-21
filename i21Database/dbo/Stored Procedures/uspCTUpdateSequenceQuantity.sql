@@ -26,7 +26,7 @@ BEGIN TRY
 			@dblTolerance				NUMERIC(18,6) = 0.0001,
 			@intSequenceUsageHistoryId	INT
 
-	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
 		RAISERROR('Sequence is deleted by other user.',16,1)
 	END 

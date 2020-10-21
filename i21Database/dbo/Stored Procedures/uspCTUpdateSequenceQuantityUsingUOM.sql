@@ -14,12 +14,12 @@ BEGIN TRY
 	DECLARE @ErrMsg			NVARCHAR(MAX),
 			@intItemUOMId	INT
 
-	IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
 	BEGIN
 		RAISERROR('Sequence is deleted by other user.',16,1)
 	END 
 	
-	IF NOT EXISTS(SELECT * FROM tblICItemUOM UM
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM UM
 					JOIN tblCTContractDetail CD ON CD.intItemId = UM.intItemId AND UM.intItemUOMId = ISNULL(@intSourceItemUOMId,0))
 	BEGIN
 		RAISERROR('Invalid UOM detected.',16,1)

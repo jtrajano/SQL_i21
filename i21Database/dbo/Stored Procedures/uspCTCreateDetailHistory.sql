@@ -135,13 +135,16 @@ BEGIN TRY
 		,intPriceItemUOMId
 		FROM 
 		(
-		  SELECT * FROM 
-			(
-				SELECT	*,ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
-				FROM	tblCTSequenceHistory
-				WHERE	intContractHeaderId =@intContractHeaderId
-			) t
-			WHERE intRowNum = 1
+		  SELECT *
+		  FROM 
+		  (
+			SELECT	intContractHeaderId,intContractDetailId,intContractStatusId,dtmStartDate,dtmEndDate,intItemId,dblQuantity,
+					intItemUOMId,intFutureMarketId,intCurrencyId,intFutureMonthId,dblFutures,dblBasis,dblCashPrice,intPriceItemUOMId,
+					ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY intSequenceHistoryId DESC) intRowNum
+			FROM	tblCTSequenceHistory
+			WHERE	intContractHeaderId =@intContractHeaderId
+		  ) t
+		WHERE intRowNum = 1
 		) t1
 
 		INSERT INTO tblCTSequenceHistory

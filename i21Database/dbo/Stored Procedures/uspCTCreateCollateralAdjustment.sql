@@ -40,7 +40,7 @@ BEGIN TRY
 	IF	@intCollateralId IS NULL 
 		RETURN
 
-	IF NOT EXISTS(SELECT * FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId	= @intCollateralUOMId)
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblICItemUOM WHERE intItemId = @intItemId AND intUnitMeasureId	= @intCollateralUOMId)
 	BEGIN
 		RAISERROR('UOM %s selected in Collateral %s is not configured for the item %s.',16,1,@strUnitMeasure,@strTransNo,@strItemNo)
 	END
