@@ -104,7 +104,7 @@ BEGIN TRY
 	JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	Sig.intEntityId=@FirstApprovalId
 	
-	SELECT	@InterCompApprovalSign =Sig.blbDetail 
+	SELECT	TOP 1 @InterCompApprovalSign =Sig.blbDetail 
 	FROM	tblCTIntrCompApproval	IA
 	JOIN	tblSMUserSecurity		US	ON	US.strUserName	=	IA.strUserName	
 	JOIN	tblSMSignature			Sig	ON	US.intEntityId	=	Sig.intEntityId
