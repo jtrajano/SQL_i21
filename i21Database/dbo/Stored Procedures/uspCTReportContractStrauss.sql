@@ -188,11 +188,18 @@ BEGIN TRY
 		SET @ysnFairtrade = 1
 	END
 
-	INSERT INTO @tblSequenceHistoryId
-	(
-	  intSequenceHistoryId
-	)
-	SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
+	IF (ISNULL(@strSequenceHistoryId, '') <> '')
+	BEGIN
+		INSERT INTO @tblSequenceHistoryId (intSequenceHistoryId)
+		SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSequenceHistoryId (intSequenceHistoryId)
+		SELECT DISTINCT intSequenceHistoryId
+		FROM tblCTSequenceHistory
+		WHERE intContractHeaderId = @intContractHeaderId
+	END
 
 	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
 	BEGIN
