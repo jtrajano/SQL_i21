@@ -70,6 +70,11 @@ BEGIN TRY
 					AND intItemContractHeaderId IS NOT NULL
 				END
 		END
+
+	--Update Invoice for ID
+	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
+
+	
 		
 	EXEC dbo.[uspARUpdatePricingHistory] 2, @intInvoiceId, @intUserId
 	EXEC dbo.[uspSOUpdateOrderShipmentStatus] @intInvoiceId, 'Invoice', @ForDelete
