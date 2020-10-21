@@ -112,12 +112,12 @@ BEGIN
 	LEFT JOIN tblLGLoadWarehouse LW ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	
-	SELECT @strShippingLineName = E.strName
+	SELECT @strShippingLineName = CASE WHEN (ISNULL(SLLocation.strCheckPayeeName, '') <> '') THEN SLLocation.strCheckPayeeName ELSE E.strName END
 	FROM tblLGLoad L
 	JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	LEFT JOIN tblEMEntityLocation SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.ysnDefaultLocation = 1
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
-
 
 	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the cargo in favour of ' + @strWarehouseEntityName
 	
@@ -201,6 +201,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.strFVessel,
 			L.strMVoyageNumber,
 			L.strFVoyageNumber,
+			L.strComments,
 			L.dblInsuranceValue,
 			L.intInsuranceCurrencyId,
 			InsuranceCur.strCurrency,
@@ -229,7 +230,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strCustomerState = CLocation.strState,
 			strCustomerZipCode = CLocation.strZipCode,
 
-  			strShippingLine = SLEntity.strName,
+  			strShippingLine = CASE WHEN (ISNULL(SLLocation.strCheckPayeeName, '') <> '') THEN SLLocation.strCheckPayeeName ELSE SLEntity.strName END,
 			strShippingLineEmail = SLEntity.strEmail,
 			strShippingLineFax = SLEntity.strFax,
 			strShippingLinePhone = SLEntity.strPhone,
@@ -240,7 +241,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strShippingLineCountry = SLLocation.strCountry,
 			strShippingLineState = SLLocation.strState,
 			strShippingLineZipCode = SLLocation.strZipCode,
-			strShippingLineWithAddress = SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,''),
+			strShippingLineWithAddress = CASE WHEN (ISNULL(SLLocation.strCheckPayeeName, '') <> '') THEN SLLocation.strCheckPayeeName ELSE SLEntity.strName END + ', ' + ISNULL(SLLocation.strAddress,''),
 
 			strTerminal = TerminalEntity.strName,
 			strTerminalEmail = TerminalEntity.strEmail,
@@ -555,7 +556,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblEMEntityToContact CustomerContact ON CustomerContact.intEntityId = Customer.intEntityId
 		LEFT JOIN tblEMEntity CustomerContactEntity ON CustomerContactEntity.intEntityId = CustomerContact.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
-		LEFT JOIN [tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
+		LEFT JOIN [tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = L.intTerminalEntityId
 		LEFT JOIN [tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
 		LEFT JOIN tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
