@@ -98,6 +98,9 @@ BEGIN TRY
 			END
 		END
 
+	--Update Invoice for ID
+	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
+
 	--UPDATE PREPAID ITEM CONTRACT
 	IF ISNULL(@ysnFromItemContract, 0) <> 0
 	BEGIN
