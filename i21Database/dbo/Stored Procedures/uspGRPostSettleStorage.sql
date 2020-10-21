@@ -2011,6 +2011,14 @@ BEGIN TRY
 																						ELSE NULL
 																				END
 																END
+					--,[intInventoryReceiptChargeId] =  CASE 
+					--										WHEN ST.ysnDPOwnedType = 0 THEN NULL
+					--										ELSE 
+					--												CASE 
+					--														WHEN a.intItemType = 3 THEN RC.intInventoryReceiptChargeId
+					--														ELSE NULL
+					--												END
+					--								END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
@@ -2176,6 +2184,13 @@ BEGIN TRY
 								AND a.intItemType = 1
 								and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null) or (
 												(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
+				--LEFT JOIN (
+				--		tblICInventoryReceiptCharge RC
+				--		INNER JOIN tblGRStorageHistory SHC
+				--				ON SHC.intInventoryReceiptId = RC.intInventoryReceiptId
+				--						AND CASE WHEN (SHC.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
+				--)  
+				--		ON SHC.intCustomerStorageId = CS.intCustomerStorageId AND a.intItemType = 3 and @ysnDPOwnedType = 1 and a.intItemId = RC.intChargeId
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2204,7 +2219,7 @@ BEGIN TRY
 								and availableQtyForVoucher.dblAvailableQuantity > 0)
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
-				and (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType = 1))
+				and (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType IN (1,2)))
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
 				 
