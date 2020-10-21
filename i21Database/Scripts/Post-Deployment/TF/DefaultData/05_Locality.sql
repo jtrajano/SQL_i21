@@ -565,14 +565,3 @@ EXEC uspTFUpgradeLocality @TaxAuthorityCode = 'VA', @Locality = @TFLocalityVA
 
 DELETE @TFLocalityVA
 GO
-
---SYNC - UPDATE THE LOCALITY CODE / STATE FACILTY NO
-
-PRINT ('Updating State Facility Number / Locality Code')
-GO
-
-UPDATE EL SET EL.strOregonFacilityNumber = L.strLocalityCode	
-FROM tblEMEntityLocation EL
-INNER JOIN tblTFLocality L ON L.strLocalityCode = RTRIM(LTRIM(EL.strZipCode))
-GO
-
