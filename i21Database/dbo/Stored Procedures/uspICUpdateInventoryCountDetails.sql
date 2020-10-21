@@ -389,11 +389,11 @@ BEGIN
 						dbo.fnCalculateCostBetweenUOM (
 							stockUOM.intItemUOMId
 							,itemUOM.intItemUOMId
-							,dbo.fnICGetMovingAverageCost(
+							, COALESCE(EffectivePricing.dblCost, dbo.fnICGetMovingAverageCost(
 								il.intItemId
 								,il.intItemLocationId
 								,lastTransaction.intInventoryTransactionId
-							)
+							))
 						)
 					ELSE 
 						ISNULL(
@@ -401,13 +401,13 @@ BEGIN
 							dbo.fnCalculateCostBetweenUOM(
 								lastCost.intItemUOMId 
 								, itemUOM.intItemUOMId
-								, lastCost.dblCost 
+								, COALESCE(EffectivePricing.dblCost, lastCost.dblCost)
 							)
 							-- last cost from item pricing
 							,dbo.fnCalculateCostBetweenUOM(
 								stockUOM.intItemUOMId
 								, itemUOM.intItemUOMId
-								, p.dblLastCost
+								, COALESCE(EffectivePricing.dblCost, p.dblLastCost)
 							)
 						)
 				END
@@ -523,7 +523,8 @@ BEGIN
 		LEFT JOIN @CategoryIds categoryFilter ON 1 = 1
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
 		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
-		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1		 
+		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1	
+		OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@AsOfDate, i.intItemId, il.intItemLocationId, 0) EffectivePricing	 
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		
 		AND i.strLotTracking = 'No'
@@ -610,7 +611,7 @@ BEGIN
 					dbo.fnCalculateCostBetweenUOM (
 						stockUOM.intItemUOMId
 						,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-						,ISNULL(
+						,COALESCE(EffectivePricing.dblCost, ISNULL(
 							dbo.fnICGetMovingAverageCost(
 								i.intItemId
 								,il.intItemLocationId
@@ -618,7 +619,7 @@ BEGIN
 							
 							)
 							,p.dblLastCost
-						)					
+						))
 					)
 					
 				-- Or else, get the last cost. 
@@ -626,7 +627,7 @@ BEGIN
 					dbo.fnCalculateQtyBetweenUOM (
 						lastTransaction.intItemUOMId
 						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-						, lastTransaction.dblCost
+						, COALESCE(EffectivePricing.dblCost, lastTransaction.dblCost)
 					)
 			END 			
 
@@ -758,6 +759,7 @@ BEGIN
 		LEFT JOIN @CommodityIds commodityFilter ON 1 = 1 
 		LEFT JOIN @StorageLocationIds storageLocationFilter ON 1 = 1 
 		LEFT JOIN @StorageUnitIds storageUnitFilter ON 1 = 1	
+		OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@AsOfDate, i.intItemId, il.intItemLocationId, 0) EffectivePricing	 
 	WHERE 
 		il.intLocationId = @intLocationId
 		AND ((COALESCE(stock.dblOnHand, stockUnit.dblOnHand) <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))		

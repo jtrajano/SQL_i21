@@ -187,22 +187,22 @@ UPDATE cd
 SET cd.dblLastCost = --ISNULL(cd.dblLastCost, ISNULL(dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost)), 0)),
 						ISNULL(CASE 
 							WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
-								dbo.fnGetItemAverageCost(
+								COALESCE(EffectivePricing.dblCost, dbo.fnGetItemAverageCost(
 									cd.intItemId
 									, ItemLocation.intItemLocationId
 									, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-								)
+								))
 							WHEN ItemLocation.intCostingMethod = 2 AND Item.strLotTracking = 'No' THEN -- FIFO
 								dbo.fnCalculateCostBetweenUOM(
 									COALESCE(FIFO.intItemUOMId, StockUOM.intItemUOMId)
 									,COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-									,COALESCE(FIFO.dblCost, ItemPricing.dblLastCost)
+									,COALESCE(EffectivePricing.dblCost, FIFO.dblCost, ItemPricing.dblLastCost)
 								)
 							WHEN ItemLocation.intCostingMethod = 3 AND Item.strLotTracking = 'No' THEN -- LIFO
 								dbo.fnCalculateCostBetweenUOM(
 									StockUOM.intItemUOMId
 									, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
-									, ItemPricing.dblLastCost
+									, COALESCE(EffectivePricing.dblCost, ItemPricing.dblLastCost)
 								)
 							WHEN Item.strLotTracking != 'No' THEN
 								dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ISNULL(ItemLot.dblLastCost, ItemPricing.dblLastCost))
@@ -237,18 +237,20 @@ FROM tblICInventoryCountDetail cd
 		AND dbo.fnDateLessThanEquals(dtmDate, c.dtmCountDate) = 1
 	ORDER BY dtmDate ASC
 	) FIFO 
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(c.dtmCountDate, cd.intItemId, cd.intItemLocationId, 0) EffectivePricing	 
 WHERE c.intImportFlagInternal = 1
 
 
 UPDATE cd
 SET cd.dblLastCost = CASE WHEN ISNULL(cd.dblPhysicalCount, 0) > ISNULL(cd.dblSystemCount, 0) 
-	THEN ISNULL(oc.dblLastCost, COALESCE(NULLIF(cd.dblLastCost, 0), NULLIF(p.dblLastCost, 0), p.dblStandardCost))
-	ELSE COALESCE(NULLIF(cd.dblLastCost, 0), NULLIF(p.dblLastCost, 0), p.dblStandardCost) END
+	THEN COALESCE(EffectivePricing.dblCost, ISNULL(oc.dblLastCost, COALESCE(NULLIF(cd.dblLastCost, 0), NULLIF(p.dblLastCost, 0), p.dblStandardCost)))
+	ELSE COALESCE(EffectivePricing.dblCost, NULLIF(cd.dblLastCost, 0), NULLIF(p.dblLastCost, 0), p.dblStandardCost) END
 FROM tblICInventoryCountDetail cd
 	INNER JOIN tblICInventoryCount c ON c.intInventoryCountId = cd.intInventoryCountId
 	INNER JOIN @OriginalCost oc ON oc.intInventoryCountDetailId = cd.intInventoryCountDetailId
 	LEFT OUTER JOIN tblICItemPricing p ON p.intItemId = cd.intItemId
 		AND p.intItemLocationId = cd.intItemLocationId
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(c.dtmCountDate, cd.intItemId, cd.intItemLocationId, 0) EffectivePricing	 
 WHERE c.intImportFlagInternal = 1
 
 -- Others

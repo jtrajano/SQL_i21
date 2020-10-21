@@ -49,7 +49,7 @@ SELECT
 	stock.strReceieveLongUPC,
 	stock.dblReceiveSalePrice,
 	stock.dblReceiveMSRPPrice,
-	stock.dblReceiveLastCost,
+	stock.dblReceiveLastCost dblReceiveLastCost,
 	stock.dblReceiveStandardCost,
 	stock.dblReceiveAverageCost,
 	stock.dblReceiveEndMonthCost,
@@ -91,7 +91,7 @@ SELECT
 	stock.dblSalePrice,
 	stock.dblMSRPPrice,
 	stock.strPricingMethod,
-	stock.dblLastCost,
+	COALESCE(EffectivePricing.dblCost, stock.dblLastCost) dblLastCost,
 	stock.dblStandardCost,
 	stock.dblAverageCost,
 	stock.dblEndMonthCost,
@@ -131,8 +131,12 @@ SELECT
 	stock.ysnLotWeightsRequired,
 	stock.ysnHasAddOn,
 	stock.ysnHasSubstitute,
-	stock.ysnHasAddOnOtherCharge
+	stock.ysnHasAddOnOtherCharge,
+	guiSessionId = tsession.guiSessionId,
+	dtmSessionDate = tsession.dtmTransactionDate
 FROM vyuICGetItemStock stock
+	OUTER APPLY tblICTransactionSession tsession
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, DEFAULT) EffectivePricing
 	OUTER APPLY (
 		SELECT TOP 1 xref.intVendorId, xref.strProductDescription, xref.strVendorProduct
 		FROM tblICItemVendorXref xref

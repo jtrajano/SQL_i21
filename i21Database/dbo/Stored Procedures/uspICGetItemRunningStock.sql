@@ -102,13 +102,14 @@ SELECT
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= t.dblQty
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
-	,dblCost
+	,dblCost			= COALESCE(EffectivePricing.dblCost, t.dblCost)
 	,intOwnershipType	= 1
 FROM
 	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL
 		ON IL.intItemLocationId = t.intItemLocationId
 	LEFT JOIN tblICLot Lot
 		ON Lot.intLotId = t.intLotId
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(t.dtmDate, t.intItemId, t.intItemLocationId, DEFAULT) EffectivePricing
 WHERE 
 	t.intItemId = @intItemId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
@@ -141,13 +142,14 @@ SELECT
 	,dtmDate			= dbo.fnRemoveTimeOnDate(dtmDate)
 	,dblQty				= CAST(0 AS NUMERIC(38, 20))
 	,dblUnitStorage		= t.dblQty
-	,dblCost
+	,dblCost			= COALESCE(EffectivePricing.dblCost, t.dblCost)
 	,intOwnershipType	= 2
 FROM
 	tblICInventoryTransactionStorage t INNER JOIN tblICItemLocation IL
 		ON IL.intItemLocationId = t.intItemLocationId
 		LEFT JOIN tblICLot Lot
 		ON Lot.intLotId = t.intLotId
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(t.dtmDate, t.intItemId, t.intItemLocationId, DEFAULT) EffectivePricing
 WHERE 
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
@@ -161,13 +163,14 @@ WHERE
 
 -- Get the last cost
 SELECT TOP 1 
-	@dblLastCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @intStockUOMId, t.dblCost) 
+	@dblLastCost = dbo.fnCalculateCostBetweenUOM(t.intItemUOMId, @intStockUOMId, COALESCE(EffectivePricing.dblCost, t.dblCost))
 	,@intLastInventoryTransactionId = t.intInventoryTransactionId
 FROM
 	tblICInventoryTransaction t INNER JOIN tblICItemLocation IL
 		ON IL.intItemLocationId = t.intItemLocationId
 	LEFT JOIN tblICLot Lot
 		ON Lot.intLotId = t.intLotId
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(t.dtmDate, t.intItemId, t.intItemLocationId, DEFAULT) EffectivePricing
 WHERE 
 	t.intItemId = @intItemId
 	AND dbo.fnDateLessThanEquals(t.dtmDate, @dtmDate) = 1
@@ -196,7 +199,7 @@ BEGIN
 		,dtmDate			= CAST(CONVERT(VARCHAR(10),@dtmDate,112) AS datetime)
 		,dblQty				= CAST(0 AS NUMERIC(38, 20))
 		,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
-		,dblCost			= ItemPricing.dblLastCost
+		,dblCost			= COALESCE(EffectivePricing.dblCost, ItemPricing.dblLastCost)
 		,intOwnershipType	= 1
 	FROM 
 		tblICItem i INNER JOIN tblICItemUOM ItemUOMStock
@@ -213,6 +216,7 @@ BEGIN
 				ItemLocation.intItemId = i.intItemId
 				AND [Location].intCompanyLocationId = @intLocationId
 		) DefaultLocation
+		OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@dtmDate, i.intItemId, DefaultLocation.intItemLocationId, DEFAULT) EffectivePricing
 		LEFT JOIN tblICItemPricing ItemPricing
 			ON i.intItemId = ItemPricing.intItemId
 				AND DefaultLocation.intItemLocationId = ItemPricing.intItemLocationId
@@ -353,15 +357,15 @@ SELECT
 					dbo.fnCalculateCostBetweenUOM(
 						@intStockUOMId
 						, ItemUOM.intItemUOMId
-						, dbo.[fnICGetMovingAverageCost](
+						, COALESCE(EffectivePricing.dblCost, dbo.[fnICGetMovingAverageCost](
 							t.intItemId
 							, t.intItemLocationId
 							, @intLastInventoryTransactionId
-						)
+						))
 					)
 				-- Otherwise, get the last cost 
 				ELSE 
-					t.dblCost
+					COALESCE(EffectivePricing.dblCost, t.dblCost)
 			END
 	, intDecimalPlaces = iUOM.intDecimalPlaces
 	, ItemUOM.ysnAllowPurchase
@@ -434,4 +438,5 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 		ON strgLoc.intStorageLocationId = t.intStorageLocationId
 	LEFT JOIN tblICCostingMethod CostMethod
 		ON CostMethod.intCostingMethodId = t.intCostingMethodId
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@dtmDate, i.intItemId, ItemLocation.intItemLocationId, 0) EffectivePricing
 	ORDER BY iUOM.strUnitMeasure ASC
