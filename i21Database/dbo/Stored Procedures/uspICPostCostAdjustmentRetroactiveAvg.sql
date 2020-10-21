@@ -611,7 +611,7 @@ BEGIN
 			END 
 
 			UPDATE	cb
-			SET		cb.dblCost = (@CostBucketOriginalValue + @CostAdjustment) / cb.dblStockIn
+			SET		cb.dblCost = dbo.fnDivide((@CostBucketOriginalValue + @CostAdjustment), cb.dblStockIn)
 			FROM	tblICInventoryFIFO cb
 			WHERE	cb.intItemId = @intItemId
 					AND cb.intInventoryFIFOId = @CostBucketId
