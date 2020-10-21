@@ -248,7 +248,7 @@ LEFT JOIN (
 	FROM dbo.tblEMEntity
 	WHERE (@strSalespersonName IS NULL OR strName = @strSalespersonName)
 ) SP ON I.intEntitySalespersonId = SP.intEntityId
-WHERE I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo
+WHERE CAST(I.dtmDate AS DATE) BETWEEN @dtmDateFrom AND @dtmDateTo
   AND (@strInvoiceNumber IS NULL OR strInvoiceNumber = @strInvoiceNumber)
 
 IF @strSubTotalBy = 'Tax Group'
