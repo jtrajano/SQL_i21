@@ -17,6 +17,8 @@ BEGIN
 	DECLARE @ysnClaimsToProducer BIT
 	DECLARE @intProducerEntityId INT
 	DECLARE @strInstoreLetterName NVARCHAR(MAX)
+	DECLARE @strContractNumber NVARCHAR(200)
+	DECLARE @strCustomerContract NVARCHAR(200)
 
 	IF (@strReportName IN  ('ShippingInstruction','ShippingInstruction2','ShippingInstruction3','ShippingInstruction4','ShippingInstruction5'))
 	BEGIN
@@ -26,7 +28,9 @@ BEGIN
 		WHERE intLoadId = @intTransactionId
 
 		SELECT TOP 1 @ysnClaimsToProducer = ISNULL(CH.ysnClaimsToProducer, 0),
-					 @intProducerEntityId = CD.intProducerId
+					 @intProducerEntityId = CD.intProducerId,
+					 @strContractNumber = CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(10)),
+					 @strCustomerContract = CH.strCustomerContract
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
@@ -73,7 +77,11 @@ BEGIN
 		FROM vyuCTEntityToContact CH
 		WHERE intEntityId = @intEntityId
 
-		SET @Subject = 'Load/Shipment Schedule - Shipping Instruction - ' + @strLoadNumber
+		SET @Subject = @strContractNumber 
+			+ CASE WHEN (ISNULL(@strCustomerContract, '') <> '') THEN
+				'Vendor ref: ' + @strCustomerContract
+			  ELSE '' END 
+			+ ' Load/Shipment Schedule - Shipping Instruction - ' + @strLoadNumber
 		SET @body += '<!DOCTYPE html>'
 		SET @body += '<html>'
 		SET @body += '<body>Dear <strong>' + @strEntityName + '</strong>, <br><br>'
