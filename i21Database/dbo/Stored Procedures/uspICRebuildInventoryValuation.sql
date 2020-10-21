@@ -2035,12 +2035,12 @@ BEGIN
 						@intProduceItemWIPAccountId IS NOT NULL 
 
 
-					-- Clear all the GL entries for the Consume/Produce transaction
-					DELETE gd 
-					FROM 
-						tblGLDetail gd 
-					WHERE	
-						gd.strBatchId = @strBatchId
+					---- Clear all the GL entries for the Consume/Produce transaction
+					--DELETE gd 
+					--FROM 
+					--	tblGLDetail gd 
+					--WHERE	
+					--	gd.strBatchId = @strBatchId
 				END 
 			END
 
