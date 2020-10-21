@@ -34,9 +34,9 @@ BEGIN
 		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE 
-				WHEN L.intPurchaseSale = 1
-					THEN LD.intPContractDetailId
-				ELSE LD.intSContractDetailId
+				WHEN L.intPurchaseSale = 2
+					THEN LD.intSContractDetailId
+				ELSE LD.intPContractDetailId
 				END
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE L.intLoadId = @intTransactionId
@@ -79,7 +79,7 @@ BEGIN
 
 		SET @Subject = @strContractNumber 
 			+ CASE WHEN (ISNULL(@strCustomerContract, '') <> '') THEN
-				'Vendor ref: ' + @strCustomerContract
+				' Vendor ref: ' + @strCustomerContract
 			  ELSE '' END 
 			+ ' Load/Shipment Schedule - Shipping Instruction - ' + @strLoadNumber
 		SET @body += '<!DOCTYPE html>'
