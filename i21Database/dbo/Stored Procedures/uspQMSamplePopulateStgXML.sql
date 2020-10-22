@@ -34,6 +34,13 @@ BEGIN TRY
 	FROM tblQMSample WITH (NOLOCK)
 	WHERE intSampleId = @intSampleId
 
+	IF @strRowState = 'Delete'
+	BEGIN
+		SELECT @intCompanyId = intCompanyId
+		FROM dbo.tblIPMultiCompany WITH (NOLOCK)
+		WHERE ysnCurrentCompany = 1
+	END
+
 	SELECT @intScreenId = intScreenId
 	FROM tblSMScreen WITH (NOLOCK)
 	WHERE strNamespace = 'Quality.view.QualitySample'
