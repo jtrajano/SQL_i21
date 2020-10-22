@@ -24,8 +24,6 @@ CREATE TABLE #tmp (
 	, dblStandardCost NUMERIC(38, 20) NULL
 	, dblAverageCost NUMERIC(38, 20) NULL
 	, dblDefaultGrossPrice NUMERIC(38, 20) NULL
-	, dtmEffectiveCostDate DATETIME NULL
-	, dtmEffectiveRetailDate DATETIME NULL
 	, dtmDateCreated DATETIME NULL
 	, intCreatedByUserId INT NULL
 )
@@ -43,8 +41,6 @@ INSERT INTO #tmp
 	, dblStandardCost		
 	, dblAverageCost		
 	, dblDefaultGrossPrice
-	, dtmEffectiveCostDate
-	, dtmEffectiveRetailDate	
 	, dtmDateCreated		
 	, intCreatedByUserId	
 )
@@ -59,9 +55,7 @@ SELECT
 	, dblLastCost			 = s.dblLastCost			
 	, dblStandardCost		 = s.dblStandardCost		
 	, dblAverageCost		 = s.dblAverageCost			
-	, dblDefaultGrossPrice	 = s.dblDefaultGrossPrice	
-	, dtmEffectiveCostDate   = s.dtmEffectiveCostDate
-	, dtmEffectiveRetailDate = s.dtmEffectiveRetailDate
+	, dblDefaultGrossPrice	 = s.dblDefaultGrossPrice
 	, dtmDateCreated		 = s.dtmDateCreated		
 	, intCreatedByUserId	 = s.intCreatedByUserId	
 FROM tblICImportStagingItemPricing s
@@ -91,8 +85,6 @@ USING
 	, dblStandardCost		
 	, dblAverageCost		
 	, dblDefaultGrossPrice
-	, dtmEffectiveCostDate
-	, dtmEffectiveRetailDate
 	, dtmDateCreated		
 	, intCreatedByUserId
 	FROM #tmp s
@@ -110,8 +102,6 @@ WHEN MATCHED THEN
 		, dblStandardCost		 = source.dblStandardCost
 		, dblAverageCost		 = source.dblAverageCost
 		, dblDefaultGrossPrice	 = source.dblDefaultGrossPrice
-		, dtmEffectiveCostDate   = source.dtmEffectiveCostDate
-	    , dtmEffectiveRetailDate = source.dtmEffectiveRetailDate
 		, dtmDateModified = GETUTCDATE()
 		, intModifiedByUserId = source.intCreatedByUserId
 		, intImportFlagInternal = 1
@@ -127,9 +117,7 @@ WHEN NOT MATCHED THEN
 		, dblLastCost			
 		, dblStandardCost		
 		, dblAverageCost		
-		, dblDefaultGrossPrice	
-		, dtmEffectiveCostDate
-	    , dtmEffectiveRetailDate
+		, dblDefaultGrossPrice
 		, dtmDateCreated		
 		, intCreatedByUserId
 		, intDataSourceId
@@ -146,9 +134,7 @@ WHEN NOT MATCHED THEN
 		, dblLastCost			
 		, dblStandardCost		
 		, dblAverageCost		
-		, dblDefaultGrossPrice	
-		, dtmEffectiveCostDate
-	    , dtmEffectiveRetailDate
+		, dblDefaultGrossPrice
 		, dtmDateCreated		
 		, intCreatedByUserId
 		, @intDataSourceId
