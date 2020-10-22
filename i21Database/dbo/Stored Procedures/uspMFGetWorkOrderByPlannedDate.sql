@@ -16,7 +16,7 @@ BEGIN
 			WHERE ysnStandard = 1
 			)
 	BEGIN
-		SELECT W.intWorkOrderId
+		SELECT Distinct W.intWorkOrderId
 			,W.strWorkOrderNo
 		FROM dbo.tblMFSchedule S
 		JOIN dbo.tblMFScheduleWorkOrder SW ON SW.intScheduleId = S.intScheduleId

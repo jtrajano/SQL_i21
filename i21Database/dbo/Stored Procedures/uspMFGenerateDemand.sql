@@ -55,6 +55,8 @@ BEGIN TRY
 		,@intIntegerPart INT
 		,@dblTotalConsumptionQty NUMERIC(18, 6)
 		,@intConsumptionAvlMonth INT
+		,@intBookId INT
+		,@intSubBookId INT
 	DECLARE @tblMFContainerWeight TABLE (
 		intItemId INT
 		,dblWeight NUMERIC(18, 6)
@@ -181,13 +183,47 @@ BEGIN TRY
 		SELECT @intCurrentMonth = DATEDIFF(mm, 0, @dtmDate)
 	END
 
+	SELECT @intBookId = intBookId
+		,@intSubBookId = intSubBookId
+	FROM tblMFDemandHeader
+	WHERE intDemandHeaderId = @intDemandHeaderId
+
 	--To get a previously saved demand view
-	SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
-	FROM tblCTInvPlngReportMaster
-	WHERE ysnPost = 1
-		AND dtmDate <= @dtmDate
-		AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
-	ORDER BY intInvPlngReportMasterID DESC
+	IF @intBookId = 0
+		OR @intBookId IS NULL
+	BEGIN
+		SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+		FROM tblCTInvPlngReportMaster
+		WHERE ysnPost = 1
+			AND dtmDate <= @dtmDate
+			AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+		ORDER BY intInvPlngReportMasterID DESC
+	END
+	ELSE
+	BEGIN
+		IF @intSubBookId = 0
+			OR @intSubBookId IS NULL
+		BEGIN
+			SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+			FROM tblCTInvPlngReportMaster
+			WHERE ysnPost = 1
+				AND dtmDate <= @dtmDate
+				AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+				AND intBookId = @intBookId
+			ORDER BY intInvPlngReportMasterID DESC
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 1 @intPrevInvPlngReportMasterID = intInvPlngReportMasterID
+			FROM tblCTInvPlngReportMaster
+			WHERE ysnPost = 1
+				AND dtmDate <= @dtmDate
+				AND intInvPlngReportMasterID <> @intInvPlngReportMasterID
+				AND intBookId = @intBookId
+				AND intSubBookId = @intSubBookId
+			ORDER BY intInvPlngReportMasterID DESC
+		END
+	END
 
 	IF @intCompanyLocationId IS NULL
 		SELECT @intCompanyLocationId = 0
@@ -219,7 +255,7 @@ BEGIN TRY
 						AND NOT EXISTS (
 							SELECT *
 							FROM tblMFDemandDetail DD
-							WHERE IE.intItemId = IsNULL(DD.intSubstituteItemId,DD.intItemId)
+							WHERE IE.intItemId = IsNULL(DD.intSubstituteItemId, DD.intItemId)
 								AND DD.intDemandHeaderId = @intDemandHeaderId
 							)
 					)
@@ -400,7 +436,8 @@ BEGIN TRY
 					END)
 		FROM @tblMFItemDetail ID
 		JOIN tblICItem I ON I.intItemId = ID.intItemId
-		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId and CA.intCommodityAttributeId = I.intOriginId
+		LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityId = I.intCommodityId
+			AND CA.intCommodityAttributeId = I.intOriginId
 		LEFT JOIN tblLGContainerTypeCommodityQty CTCQ ON CTCQ.intCommodityAttributeId = I.intOriginId
 			AND CTCQ.intCommodityId = I.intCommodityId
 			AND CTCQ.intContainerTypeId = @intContainerTypeId
@@ -414,7 +451,8 @@ BEGIN TRY
 					END
 				) --From Unit
 			AND UMCByWeight.intStockUnitMeasureId = @intUnitMeasureId -- To Unit
-		WHERE ID.ysnSpecificItemDescription = 0 and ID.intItemId<>ID.intMainItemId
+		WHERE ID.ysnSpecificItemDescription = 0
+			AND ID.intItemId <> ID.intMainItemId
 		GROUP BY ID.intMainItemId
 
 		INSERT INTO @tblMFContainerWeight (
