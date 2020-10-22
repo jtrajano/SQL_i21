@@ -2489,7 +2489,8 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Tables\tblICTransactionSession.sql" />
-    <Build Include="dbo\Tables\tblICEffectiveItemPricing.sql" />
+    <Build Include="dbo\Tables\tblICEffectiveItemPrice.sql" />
+    <Build Include="dbo\Tables\tblICEffectiveItemCost.sql" />
 	<Build Include="dbo\Functions\fnICGetItemCostByEffectiveDate.sql" />
 	<Build Include="dbo\Functions\fnICGetItemPriceByEffectiveDate.sql" />
 	<Build Include="dbo\Views\vyuICGetItemStockForShipment.sql" />
