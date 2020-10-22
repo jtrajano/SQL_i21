@@ -65,6 +65,32 @@ BEGIN TRY
 		RETURN 0;
 	END
 
+	--Check if any Purchase Basis Contract price is not fully priced
+	IF EXISTS (SELECT TOP 1 1 FROM 
+					tblCTContractDetail CD
+					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
+	BEGIN
+		DECLARE @strContractNumber NVARCHAR(100)
+		DECLARE @ErrorMessageNotPriced NVARCHAR(250)
+
+		SELECT TOP 1 
+			@strContractNumber = CH.strContractNumber + '/' + CAST(CD.intContractSeq AS nvarchar(10))
+		FROM 
+		tblCTContractDetail CD
+		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intPContractDetailId
+		JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
+		OUTER APPLY fnCTGetSeqPriceFixationInfo(CD.intContractDetailId) PF
+		WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)
+			AND (PF.dblTotalLots IS NULL OR (ISNULL(PF.dblTotalLots,0) > 0 AND (ISNULL(PF.dblTotalLots,0) <> ISNULL(PF.dblLotsFixed,0))))
+
+		SET @ErrorMessageNotPriced = 'Contract No. ' + @strContractNumber + ' is not fully priced. Unable to create Voucher.' 
+		RAISERROR(@ErrorMessageNotPriced, 16, 1);
+		RETURN 0;
+	END
+
 	SELECT TOP 1 @intShipTo = CD.intCompanyLocationId
 				,@intCurrencyId = CASE WHEN CD.ysnUseFXPrice = 1 THEN ISNULL(AD.intSeqCurrencyId, L.intCurrencyId) ELSE L.intCurrencyId END
 				,@intShipmentStatus = L.intShipmentStatus
