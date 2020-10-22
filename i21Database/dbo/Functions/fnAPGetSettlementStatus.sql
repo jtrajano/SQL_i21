@@ -11,25 +11,25 @@ BEGIN
 	IF EXISTS( 
 				SELECT TOP 1 1
 				FROM tblAPPayment PYMT
-				INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-				INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-				INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
-				INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-				INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
-				INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
+				  INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+				  INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+				  INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+				  INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+				  INNER JOIN tblICInventoryReceiptItem INVRCPTITEM ON BillDtl.intInventoryReceiptItemId = INVRCPTITEM.intInventoryReceiptItemId
+				  INNER JOIN tblICInventoryReceipt INVRCPT ON INVRCPTITEM.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
 				WHERE  INVRCPTITEM.intSourceId IS NOT NULL
 					AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId 
-					AND PYMT.strPaymentRecordNum = @strTransactionId
+				  AND PYMT.strPaymentRecordNum = @strTransactionId
 
 				UNION ALL
 				SELECT TOP 1 1 
 				FROM tblAPPayment PYMT 
-				INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
-				INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
-				INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
-				INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
-				LEFT JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
-				WHERE PYMT.strPaymentRecordNum = @strTransactionId
+				  INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+				  INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+				  INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+				  INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+				  INNER JOIN tblGRStorageHistory StrgHstry ON Bill.intBillId = StrgHstry.intBillId
+				  WHERE PYMT.strPaymentRecordNum = @strTransactionId
 			)
 	BEGIN
 		SET @hasSettlement = 1
