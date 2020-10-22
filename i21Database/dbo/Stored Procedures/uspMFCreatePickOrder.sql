@@ -58,7 +58,7 @@ BEGIN TRY
 		,@strInventoryTracking NVARCHAR(50)
 		,@intStorageLocationId INT
 		,@intRecipeTypeId INT
-		,@intIncludeConsumptionByLocationInPickOrder int
+		,@intIncludeConsumptionByLocationInPickOrder INT
 
 	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
 		,@intIncludeConsumptionByLocationInPickOrder = CASE 
@@ -262,8 +262,10 @@ BEGIN TRY
 	BEGIN TRANSACTION
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
-	Select @strReferernceNo=''
-	SELECT @strReferernceNo = @strReferernceNo+strWorkOrderNo+', '
+
+	SELECT @strReferernceNo = ''
+
+	SELECT @strReferernceNo = @strReferernceNo + strWorkOrderNo + ', '
 		,@intRecipeTypeId = intRecipeTypeId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
@@ -271,10 +273,11 @@ BEGIN TRY
 			FROM @tblMFWorkOrder
 			)
 
-	if len(@strReferernceNo)>0
-	Begin
-		SELECT @strReferernceNo = left(@strReferernceNo,len(@strReferernceNo)-1)
-	End
+	IF len(@strReferernceNo) > 0
+	BEGIN
+		SELECT @strReferernceNo = left(@strReferernceNo, len(@strReferernceNo) - 1)
+	END
+
 	INSERT INTO @OrderHeaderInformation (
 		intOrderStatusId
 		,intOrderTypeId
@@ -320,63 +323,136 @@ BEGIN TRY
 			WHERE intTransactionFrom = 1
 			)
 	BEGIN
-		INSERT INTO @OrderDetailInformation (
-			intOrderHeaderId
-			,intItemId
-			,dblQty
-			,intItemUOMId
-			,dblWeight
-			,intWeightUOMId
-			,dblWeightPerUnit
-			,intLotId
-			,strLotAlias
-			,intUnitsPerLayer
-			,intLayersPerPallet
-			,intPreferenceId
-			,dtmProductionDate
-			,intLineNo
-			,intSanitizationOrderDetailsId
-			,strLineItemNote
-			)
-		SELECT @intOrderHeaderId
-			,CL.intItemId
-			,SUm(L.dblQty)
-			,L.intItemUOMId
-			,SUm(L.dblWeight)
-			,L.intWeightUOMId
-			,L.dblWeightPerQty
-			,L.intLotId
-			,L.strLotAlias
-			,I.intUnitPerLayer
-			,intLayerPerPallet
-			,(
-				SELECT TOP 1 intPickListPreferenceId
-				FROM tblMFPickListPreference
+		IF EXISTS (
+				SELECT *
+				FROM tblMFWorkOrderInputParentLot PL
+				JOIN @tblMFWorkOrder W1 ON W1.intWorkOrderId = PL.intWorkOrderId
 				)
-			,L.dtmDateCreated
-			,Row_Number() OVER (
-				ORDER BY CL.intItemId
+		BEGIN
+			INSERT INTO @OrderDetailInformation (
+				intOrderHeaderId
+				,intItemId
+				,dblQty
+				,intItemUOMId
+				,dblWeight
+				,intWeightUOMId
+				,dblWeightPerUnit
+				,intLotId
+				,strLotAlias
+				,intUnitsPerLayer
+				,intLayersPerPallet
+				,intPreferenceId
+				,dtmProductionDate
+				,intLineNo
+				,intSanitizationOrderDetailsId
+				,strLineItemNote
+				,intParentLotId
 				)
-			,NULL
-			,''
-		FROM dbo.tblMFWorkOrderConsumedLot CL
-		JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
-		JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
-		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
-		JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
-		WHERE CL.intWorkOrderId IN (
-				SELECT x.intWorkOrderId
-				FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (intWorkOrderId INT) x
+			SELECT @intOrderHeaderId
+				,CL.intItemId
+				,SUm(CL.dblIssuedQuantity)
+				,CL.intItemIssuedUOMId
+				,SUm(CL.dblQuantity)
+				,CL.intItemUOMId
+				,(
+					SELECT TOP 1 L.dblWeightPerQty
+					FROM tblICLot L
+					WHERE L.intParentLotId = CL.intParentLotId
+					)
+				,NULL
+				,(
+					SELECT TOP 1 L.strLotAlias
+					FROM tblICLot L
+					WHERE L.intParentLotId = CL.intParentLotId
+					)
+				,I.intUnitPerLayer
+				,intLayerPerPallet
+				,(
+					SELECT TOP 1 intPickListPreferenceId
+					FROM tblMFPickListPreference
+					)
+				,GETDATE() AS dtmDateCreated
+				,Row_Number() OVER (
+					ORDER BY CL.intItemId
+					)
+				,NULL
+				,''
+				,CL.intParentLotId
+			FROM dbo.tblMFWorkOrderInputParentLot CL
+			JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
+			JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
+			WHERE CL.intWorkOrderId IN (
+					SELECT x.intWorkOrderId
+					FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (intWorkOrderId INT) x
+					)
+			GROUP BY CL.intItemId
+				,CL.intItemUOMId
+				,CL.intItemIssuedUOMId
+				,I.intUnitPerLayer
+				,intLayerPerPallet
+				,CL.intParentLotId
+		END
+		ELSE
+		BEGIN
+			INSERT INTO @OrderDetailInformation (
+				intOrderHeaderId
+				,intItemId
+				,dblQty
+				,intItemUOMId
+				,dblWeight
+				,intWeightUOMId
+				,dblWeightPerUnit
+				,intLotId
+				,strLotAlias
+				,intUnitsPerLayer
+				,intLayersPerPallet
+				,intPreferenceId
+				,dtmProductionDate
+				,intLineNo
+				,intSanitizationOrderDetailsId
+				,strLineItemNote
 				)
-		GROUP BY CL.intItemId
-			,L.intItemUOMId
-			,L.intWeightUOMId
-			,L.dblWeightPerQty
-			,L.intLotId
-			,L.strLotAlias
-			,I.intUnitPerLayer
-			,intLayerPerPallet
-			,L.dtmDateCreated
+			SELECT @intOrderHeaderId
+				,CL.intItemId
+				,SUm(L.dblQty)
+				,L.intItemUOMId
+				,SUm(L.dblWeight)
+				,L.intWeightUOMId
+				,L.dblWeightPerQty
+				,L.intLotId
+				,L.strLotAlias
+				,I.intUnitPerLayer
+				,intLayerPerPallet
+				,(
+					SELECT TOP 1 intPickListPreferenceId
+					FROM tblMFPickListPreference
+					)
+				,L.dtmDateCreated
+				,Row_Number() OVER (
+					ORDER BY CL.intItemId
+					)
+				,NULL
+				,''
+			FROM dbo.tblMFWorkOrderConsumedLot CL
+			JOIN dbo.tblICLot L ON L.intLotId = CL.intLotId
+			JOIN dbo.tblICItem I ON I.intItemId = CL.intItemId
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = CL.intItemUOMId
+			JOIN dbo.tblICItemUOM IU1 ON IU1.intItemUOMId = CL.intItemIssuedUOMId
+			WHERE CL.intWorkOrderId IN (
+					SELECT x.intWorkOrderId
+					FROM OPENXML(@idoc, 'root/WorkOrders/WorkOrder', 2) WITH (intWorkOrderId INT) x
+					)
+			GROUP BY CL.intItemId
+				,L.intItemUOMId
+				,L.intWeightUOMId
+				,L.dblWeightPerQty
+				,L.intLotId
+				,L.strLotAlias
+				,I.intUnitPerLayer
+				,intLayerPerPallet
+				,L.dtmDateCreated
+		END
 	END
 	ELSE
 	BEGIN
