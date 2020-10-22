@@ -9,8 +9,8 @@ CREATE TABLE [dbo].[tblCMResponsiblePartyTask](
 	[intConcurrencyId] [int] NOT NULL,
 	[ysnStatus] [bit] NULL,
 	[strNotes] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
-	[dblAmount] DECIMAL(18,6) NULL,
-	[intBankStatementImportId] [int] NULL
+	[intBankStatementImportId] [int] NULL,
+	[dblAmount] DECIMAL(18,6) NULL
  CONSTRAINT [PK_tblCMResponsiblePartyTask] PRIMARY KEY CLUSTERED
 (
 	[intTaskId] ASC
