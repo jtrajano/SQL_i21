@@ -16,7 +16,8 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-    ,ROUND(
+    ,(
+        ROUND(
         CASE 
             WHEN receiptItem.intWeightUOMId IS NULL THEN 
                 ISNULL(receiptItem.dblOpenReceive, 0) 
@@ -41,6 +42,10 @@ SELECT
             END 
         )
         , 2
+    )
+    +
+    --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
+    ISNULL(clearingTax.dblTax,0)
     ) 
     *
     (
@@ -50,9 +55,6 @@ SELECT
         ELSE 1
         END
     )
-    +
-    --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
-    ISNULL(clearingTax.dblTax,0)
     AS dblReceiptTotal
     ,ISNULL(receiptItem.dblOpenReceive, 0)
     *
@@ -92,7 +94,9 @@ OUTER APPLY (
     SELECT SUM(dblTax) AS dblTax
     FROM (
         SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
-            rctTax.intInventoryReceiptItemId, rctTax.dblTax AS dblTax
+            rctTax.intInventoryReceiptItemId,
+            rctTax.intInventoryReceiptItemTaxId,
+            rctTax.dblTax AS dblTax
         FROM tblICInventoryReceiptItemTax rctTax
         LEFT JOIN tblAPBillDetail billDetail 
             ON billDetail.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
@@ -316,7 +320,8 @@ SELECT
     ,billDetail.intItemId
     ,billDetail.intUnitOfMeasureId AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,--billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
+    ,(
+    --billDetail.dblTotal + billDetail.dblTax AS dblVoucherTotal --comment temporarily, we need to use the cost of receipt until cost adjustment on report added
     ISNULL((CASE WHEN billDetail.ysnSubCurrency > 0 --CHECK IF SUB-CURRENCY
             THEN (CASE 
                     WHEN (billDetail.intUnitOfMeasureId > 0 AND billDetail.intCostUOMId > 0)
@@ -389,6 +394,11 @@ SELECT
                     * (receiptItem.dblUnitCost)  AS DECIMAL(18,2))  --Orig Calculation
                 END)
             END),0)	
+    +
+    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
+    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
+    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
+    )
     *
     (
         CASE 
@@ -397,10 +407,6 @@ SELECT
         ELSE 1
         END
     )
-    +
-    -- receiptItem.dblTax --DO NOT USE THIS, WE WILL HAVE ISSUE IF PARTIAL VOUCHER
-    -- if there is tax in receipt, use the tblAPBillDetail.dblTax for the original cost
-    CASE WHEN receiptItem.dblTax <> 0 THEN ISNULL(oldCostTax.dblTax,0) ELSE 0 END
     AS dblVoucherTotal
     ,ISNULL(CASE WHEN 
                 receiptItem.dblNet <> 0 AND 
@@ -409,6 +415,9 @@ SELECT
                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
                 ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
             THEN receiptItem.dblNet
+             --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
+            WHEN billDetail.dblNetWeight <> 0
+            THEN billDetail.dblNetWeight
             ELSE billDetail.dblQtyReceived
             END, 0) 
     *
