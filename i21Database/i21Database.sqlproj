@@ -2490,9 +2490,9 @@
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Tables\tblICTransactionSession.sql" />
     <Build Include="dbo\Tables\tblICEffectiveItemPricing.sql" />
-	<Build Include="dbo\Functions\fnICGetItemCostByEffectiveDate.sql" />
-	<Build Include="dbo\Functions\fnICGetItemPriceByEffectiveDate.sql" />
-	<Build Include="dbo\Views\vyuICGetItemStockForShipment.sql" />
+    <Build Include="dbo\Functions\fnICGetItemCostByEffectiveDate.sql" />
+    <Build Include="dbo\Functions\fnICGetItemPriceByEffectiveDate.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
@@ -8903,7 +8903,8 @@
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesArchive.sql" />
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesError.sql" />
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesStage.sql" />
-	<Build Include="dbo\Tables\tblTFTransactionDynamicVA.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicVA.sql" />
+    <Build Include="dbo\Tables\tblARAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
