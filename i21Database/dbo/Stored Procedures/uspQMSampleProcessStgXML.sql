@@ -695,21 +695,21 @@ BEGIN TRY
 						)
 			END
 
-			IF @strLocationName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblSMCompanyLocation CL WITH (NOLOCK)
-					WHERE CL.strLocationName = @strLocationName
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
+			--IF @strLocationName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblSMCompanyLocation CL WITH (NOLOCK)
+			--		WHERE CL.strLocationName = @strLocationName
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			IF @strReceiptNumber IS NOT NULL
 				AND NOT EXISTS (
@@ -1017,7 +1017,7 @@ BEGIN TRY
 				END
 			END
 
-			IF @strCountry IS NOT NULL
+			IF ISNULL(@strCountry, '') <> ''
 				AND NOT EXISTS (
 					SELECT 1
 					FROM tblSMCountry C WITH (NOLOCK)
@@ -1164,9 +1164,12 @@ BEGIN TRY
 			FROM tblMFShift t WITH (NOLOCK)
 			WHERE t.strShiftName = @strShiftName
 
-			SELECT @intLocationId = t.intCompanyLocationId
+			--SELECT @intLocationId = t.intCompanyLocationId
+			--FROM tblSMCompanyLocation t WITH (NOLOCK)
+			--WHERE t.strLocationName = @strLocationName
+
+			SELECT TOP 1 @intLocationId = t.intCompanyLocationId
 			FROM tblSMCompanyLocation t WITH (NOLOCK)
-			WHERE t.strLocationName = @strLocationName
 
 			SELECT @intInventoryReceiptId = t.intInventoryReceiptId
 			FROM tblICInventoryReceipt t WITH (NOLOCK)
@@ -1611,7 +1614,7 @@ BEGIN TRY
 					,intCountryID = @intCountryID
 					,ysnIsContractCompleted = x.ysnIsContractCompleted
 					,intLotStatusId = @intLotStatusId
-					,intEntityId = @intEntityId
+					,intEntityId = ISNULL(@intEntityId, intEntityId)
 					,strShipmentNumber = x.strShipmentNumber
 					,strLotNumber = x.strLotNumber
 					,strSampleNote = x.strSampleNote
