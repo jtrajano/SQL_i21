@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspQMInterCompanyPreStageSample] @intSampleId INT
 	,@strRowState NVARCHAR(50) = NULL
+	,@intBookId INT = NULL
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -11,16 +12,28 @@ BEGIN TRY
 	WHERE ISNULL(strFeedStatus, '') IN ('', 'HOLD')
 		AND intSampleId = @intSampleId
 
-	INSERT INTO tblQMSamplePreStage (
-		intSampleId
-		,strRowState
-		,strFeedStatus
-		,strMessage
-		)
-	SELECT @intSampleId
-		,@strRowState
-		,''
-		,''
+	IF EXISTS (
+			SELECT 1
+			FROM tblQMSample WITH (NOLOCK)
+			WHERE intSampleId = @intSampleId
+				AND intBookId IS NOT NULL
+			)
+		OR (
+			ISNULL(@strRowState, '') = 'Delete'
+			AND @intBookId IS NOT NULL
+			)
+		INSERT INTO tblQMSamplePreStage (
+			intSampleId
+			,strRowState
+			,strFeedStatus
+			,strMessage
+			,intBookId
+			)
+		SELECT @intSampleId
+			,ISNULL(@strRowState, '')
+			,''
+			,''
+			,@intBookId
 END TRY
 
 BEGIN CATCH
