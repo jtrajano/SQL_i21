@@ -40,9 +40,7 @@ SELECT
 	Item.strLotTracking,
 	Item.strCommodityCode AS strCommodity,
 	Item.strCategoryCode AS strCategory,
-	Item.strStatus,
-	ItemPricing.dtmEffectiveCostDate,
-	ItemPricing.dtmEffectiveRetailDate
+	Item.strStatus
 FROM vyuICGetItemStock Item
 LEFT JOIN tblEMEntity Vendor ON Vendor.intEntityId = Item.intVendorId
 LEFT JOIN tblICItemPricing ItemPricing ON ItemPricing.intItemId = Item.intItemId and ItemPricing.intItemLocationId = Item.intItemLocationId

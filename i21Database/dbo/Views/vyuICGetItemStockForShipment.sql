@@ -45,9 +45,9 @@ v.intKey
 , v.strReceiveUOM
 , v.strReceiveUPC
 , v.strReceieveLongUPC
-, v.dblReceiveSalePrice
+, COALESCE(EffectivePrice.dblRetailPrice, v.dblReceiveSalePrice) dblReceiveSalePrice
 , v.dblReceiveMSRPPrice
-, v.dblReceiveLastCost
+, COALESCE(EffectiveCost.dblCost, v.dblReceiveLastCost) dblReceiveLastCost
 , v.dblReceiveStandardCost
 , v.dblReceiveAverageCost
 , v.dblReceiveEndMonthCost
@@ -56,9 +56,9 @@ v.intKey
 , v.strIssueUOM
 , v.strIssueUPC
 , v.strIssueLongUPC
-, COALESCE(EffectivePricing.dblRetailPrice, v.dblIssueSalePrice) dblIssueSalePrice
+, COALESCE(EffectivePrice.dblRetailPrice, v.dblIssueSalePrice) dblIssueSalePrice
 , v.dblIssueMSRPPrice
-, v.dblIssueLastCost
+, COALESCE(EffectiveCost.dblCost, v.dblIssueLastCost) dblIssueLastCost
 , v.dblIssueStandardCost
 , v.dblIssueAverageCost
 , v.dblIssueEndMonthCost
@@ -86,10 +86,10 @@ v.intKey
 , v.intCostingMethod
 , v.strCostingMethod
 , v.dblAmountPercent
-, v.dblSalePrice
+, COALESCE(EffectivePrice.dblRetailPrice, v.dblSalePrice) dblSalePrice
 , v.dblMSRPPrice
 , v.strPricingMethod
-, v.dblLastCost
+, COALESCE(EffectiveCost.dblCost, v.dblLastCost) dblLastCost
 , v.dblStandardCost
 , v.dblAverageCost
 , v.dblEndMonthCost
@@ -134,4 +134,5 @@ v.intKey
 , dtmSessionDate = tsession.dtmTransactionDate
 FROM vyuICGetItemStock v
 OUTER APPLY tblICTransactionSession tsession
-OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectivePricing
+OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectiveCost
+OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, v.intItemId, v.intItemLocationId, DEFAULT) EffectivePrice

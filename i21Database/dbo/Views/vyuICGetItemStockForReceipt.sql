@@ -47,9 +47,9 @@ SELECT
 	stock.strReceiveUOM,
 	stock.strReceiveUPC,
 	stock.strReceieveLongUPC,
-	stock.dblReceiveSalePrice,
+	COALESCE(EffectivePrice.dblRetailPrice, stock.dblReceiveSalePrice) dblReceiveSalePrice,
 	stock.dblReceiveMSRPPrice,
-	stock.dblReceiveLastCost dblReceiveLastCost,
+	COALESCE(EffectiveCost.dblCost, stock.dblReceiveLastCost) dblReceiveLastCost,
 	stock.dblReceiveStandardCost,
 	stock.dblReceiveAverageCost,
 	stock.dblReceiveEndMonthCost,
@@ -60,7 +60,7 @@ SELECT
 	stock.strIssueLongUPC,
 	stock.dblIssueSalePrice,
 	stock.dblIssueMSRPPrice,
-	stock.dblIssueLastCost,
+	COALESCE(EffectiveCost.dblCost, stock.dblIssueLastCost) dblIssueLastCost,
 	stock.dblIssueStandardCost,
 	stock.dblIssueAverageCost,
 	stock.dblIssueEndMonthCost,
@@ -88,10 +88,10 @@ SELECT
 	stock.intCostingMethod,
 	stock.strCostingMethod,
 	stock.dblAmountPercent,
-	stock.dblSalePrice,
+	COALESCE(EffectivePrice.dblRetailPrice, stock.dblSalePrice) dblSalePrice,
 	stock.dblMSRPPrice,
 	stock.strPricingMethod,
-	COALESCE(EffectivePricing.dblCost, stock.dblLastCost) dblLastCost,
+	COALESCE(EffectiveCost.dblCost, stock.dblLastCost) dblLastCost,
 	stock.dblStandardCost,
 	stock.dblAverageCost,
 	stock.dblEndMonthCost,
@@ -136,7 +136,8 @@ SELECT
 	dtmSessionDate = tsession.dtmTransactionDate
 FROM vyuICGetItemStock stock
 	OUTER APPLY tblICTransactionSession tsession
-	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, DEFAULT) EffectivePricing
+	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, DEFAULT) EffectiveCost
+	OUTER APPLY dbo.fnICGetItemPriceByEffectiveDate(tsession.dtmTransactionDate, stock.intItemId, stock.intItemLocationId, DEFAULT) EffectivePrice
 	OUTER APPLY (
 		SELECT TOP 1 xref.intVendorId, xref.strProductDescription, xref.strVendorProduct
 		FROM tblICItemVendorXref xref

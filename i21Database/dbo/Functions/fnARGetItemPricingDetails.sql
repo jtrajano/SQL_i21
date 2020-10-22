@@ -208,31 +208,13 @@ DECLARE	 @Price							NUMERIC(18,6)
 				--Item Standard Pricing
 				IF ISNULL(@UOMQuantity,0) = 0
 					SET @UOMQuantity = 1
-				SET @Price = @UOMQuantity *	
-									( 
-										SELECT TOP 1
-											P.dblSalePrice
-										FROM
-											tblICItemPricing P
-										WHERE 
-											P.intItemId = @ItemId 
-											AND P.intItemLocationId = @ItemLocationId
-											AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
-											ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC
-										)
 
-				SET @OriginalGrossPrice = @UOMQuantity *	
-									( 
-										SELECT TOP 1
-											P.dblDefaultGrossPrice
-										FROM
-											tblICItemPricing P
-										WHERE
-											P.intItemId = @ItemId
-											AND P.intItemLocationId = @ItemLocationId
-											AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
-											ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC
-										)
+				SELECT @Price = @UOMQuantity * ep.dblRetailPrice
+				FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, DEFAULT) ep
+
+				SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice
+				FROM tblICItemPricing P
+				WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
 
 				IF @Price < @ContractPrice
 				BEGIN
@@ -729,15 +711,14 @@ DECLARE	 @Price							NUMERIC(18,6)
 		END	
 	
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
-	SET @Price = @UOMQuantity *	(SELECT TOP 1 P.dblSalePrice FROM tblICItemPricing P 
-								WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
-								AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
-								ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC)
+	SELECT @Price = @UOMQuantity * ep.dblRetailPrice
+	FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, DEFAULT) ep
+
 	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
-	SET @OriginalGrossPrice = @UOMQuantity * (SELECT TOP 1 P.dblDefaultGrossPrice FROM tblICItemPricing P 
-												WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
-												AND CAST(@TransactionDate AS DATE) >= CAST(ISNULL(P.dtmEffectiveRetailDate, @TransactionDate) AS DATE)
-											    ORDER BY CAST(ISNULL(P.dtmEffectiveRetailDate, '01/01/1900') AS DATE) DESC)	
+	SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice
+	FROM tblICItemPricing P
+	WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
+
 	SET @OriginalGrossPrice = (CASE WHEN @ysnToBse = 1 THEN @OriginalGrossPrice / @dblCalculatedExchangeRate ELSE @OriginalGrossPrice * @dblCalculatedExchangeRate END)
 
 	IF(@Price IS NOT NULL)
