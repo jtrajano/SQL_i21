@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTCreateInvoiceFromShipment]
 	@ShipmentId				INT
+    ,@ShipmentItemId                INT
     ,@UserId				INT
     ,@intContractHeaderId	INT
 	,@intContractDetailId	INT
@@ -337,11 +338,12 @@ INNER JOIN
 	tblICInventoryShipmentItem ICISI on ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId and ICISI.intLineNo = @intContractDetailId
 INNER JOIN
     vyuARShippedItems ARSI
-        ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo
+        ON ICIS.[intInventoryShipmentId] = ARSI.[intInventoryShipmentId] and ARSI.intContractDetailId = ICISI.intLineNo and ARSI.intInventoryShipmentItemId = ICISI.intInventoryShipmentItemId
 LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = ARSI.intContractDetailId 
 left join tblCTContractHeader ch on ch.intContractHeaderId = CD.intContractHeaderId
 WHERE
 ICIS.[intInventoryShipmentId] = @ShipmentId AND ARSI.strTransactionType = 'Inventory Shipment'
+and ICISI.intInventoryShipmentItemId = @ShipmentItemId
 --AND (
 --		(CD.intContractDetailId <> @intContractDetailId AND CD.dblCashPrice IS NOT NULL) 
 --			OR 

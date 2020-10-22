@@ -1131,6 +1131,7 @@ BEGIN TRY
 
 							EXEC	uspCTCreateInvoiceFromShipment 
 									@ShipmentId				=	@intInventoryShipmentId
+									,@ShipmentItemId		=	@intInventoryShipmentItemId
 									,@UserId				=	@intUserId
 									,@intContractHeaderId	=   @intContractHeaderId
 									,@intContractDetailId	=	@intContractDetailId
@@ -1514,6 +1515,7 @@ BEGIN TRY
 
 							EXEC	uspCTCreateInvoiceFromShipment 
 									@ShipmentId				=	@intInventoryShipmentId
+									,@ShipmentItemId		=	@intInventoryShipmentItemId
 									,@UserId				=	@intUserId
 									,@intContractHeaderId	=   @intContractHeaderId
 									,@intContractDetailId	=	@intContractDetailId
