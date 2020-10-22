@@ -172,6 +172,7 @@ WHERE	ReceiptCharge.ysnAccrue = 1
 				AND ABS(ISNULL(ReceiptCharge.dblAmountBilled, 0)) < ABS(ROUND(ReceiptCharge.dblAmount, 6))
 			)
 		)
+		AND ISNULL(ReceiptCharge.dblAmount, 0) <> 0 
 
 -- Query for 'Price' Other Charges. 
 UNION ALL 
@@ -359,3 +360,4 @@ WHERE	ReceiptCharge.ysnPrice = 1
 				AND ABS(ISNULL(ReceiptCharge.dblAmountPriced, 0)) < ABS(ROUND(ReceiptCharge.dblAmount, 6))
 			)
 		)
+		AND ISNULL(ReceiptCharge.dblAmount, 0) <> 0 
