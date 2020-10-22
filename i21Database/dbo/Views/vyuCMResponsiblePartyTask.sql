@@ -8,7 +8,7 @@
     S.intBankStatementImportId,
     S.strBankStatementImportId,
     T.strNotes,
-    BT.dblAmount,
+    ISNULL(BT.dblAmount, T.dblAmount) dblAmount,
 	BT.dtmDate dtmTransactionDate,
     T.dtmDateCreated,
     E.strName strResponsibleEntity,
