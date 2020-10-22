@@ -303,7 +303,7 @@ BEGIN TRY
 				,intItemUOMId
 				,1
 				,@dtmPlannedDate
-				,@intPlannedShiftId
+				,(Case When @intPlannedShiftId=0 then NULL Else @intPlannedShiftId end)
 				,intFromStorageLocationId
 				,NULL
 				,0

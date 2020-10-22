@@ -24,4 +24,5 @@
 	,intOwnershipType INT
 	,strInventoryTracking NVARCHAR(50)
 	,intStorageLocationId int
+	,intParentLotId int
 	)

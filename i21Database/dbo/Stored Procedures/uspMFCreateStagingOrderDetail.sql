@@ -55,6 +55,7 @@ BEGIN TRY
 		,dblSurplusQtyInStageLocation
 		,intOwnershipType
 		,intStorageLocationId
+		,intParentLotId 
 		)
 	SELECT 1
 		,intOrderHeaderId
@@ -82,6 +83,7 @@ BEGIN TRY
 		,dblSurplusQtyInStageLocation
 		,intOwnershipType
 		,intStorageLocationId
+		,intParentLotId 
 	FROM @OrderDetailInformation
 
 	SELECT @intOrderDetailId = SCOPE_IDENTITY()

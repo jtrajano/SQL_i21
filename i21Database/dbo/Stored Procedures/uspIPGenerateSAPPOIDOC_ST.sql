@@ -11,6 +11,8 @@ BEGIN
 		,@strSessionId NVARCHAR(50)
 		,@strRowState NVARCHAR(50)
 		,@strERPPONumber NVARCHAR(50)
+		,@strSubBook NVARCHAR(50)
+		,@intSubBookId INT
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -70,12 +72,35 @@ BEGIN
 			,@strDetailXML = ''
 			,@strRowState = NULL
 			,@strERPPONumber = NULL
+			,@intSubBookId = NULL
+			,@strSubBook = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
 			,@strERPPONumber = strERPPONumber
 		FROM @tblCTContractFeed
 		WHERE intRecordId = @intRecordId
+
+		SELECT @intSubBookId = intSubBookId
+		FROM tblCTContractHeader
+		WHERE intContractHeaderId = @intContractHeaderId
+
+		SELECT @strSubBook = strSubBook
+		FROM tblCTSubBook
+		WHERE intSubBookId = @intSubBookId
+
+		IF IsNULL(@strSubBook, '') IN (
+				'Ngon'
+				,'Vayhan'
+				)
+		BEGIN
+			UPDATE tblCTContractFeed
+			SET strFeedStatus = 'IGNORE'
+			WHERE intContractHeaderId = @intContractHeaderId
+				AND IsNULL(strFeedStatus, '') = ''
+
+			GOTO NextPO
+		END
 
 		IF @strRowState IN (
 				'Modified'
