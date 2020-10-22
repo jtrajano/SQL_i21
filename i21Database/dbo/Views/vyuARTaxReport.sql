@@ -89,6 +89,7 @@ SELECT intEntityCustomerId		= INVOICE.intEntityCustomerId
 	 , dblQtyTonShipped			= DETAIL.dblQtyTonShipped * [dbo].[fnARGetInvoiceAmountMultiplier](INVOICE.strTransactionType)
 	 , strFederalTaxId 			= CUSTOMER.strFederalTaxId
 	 , strStateTaxId			= CUSTOMER.strStateTaxId
+	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
 FROM dbo.tblARInvoice INVOICE WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId				= ID.intInvoiceId
@@ -273,4 +274,18 @@ OUTER APPLY (
 			   , strCompanyAddress = dbo.[fnARFormatCustomerAddress] (NULL, NULL, NULL, strAddress, strCity, strState, strZip, strCountry, NULL, 0) COLLATE Latin1_General_CI_AS
 	FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 ) COMPANY
+OUTER APPLY (
+	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) COLLATE Latin1_General_CI_AS
+	 FROM (
+	  SELECT CAST(ARAS.strAccountStatusCode AS VARCHAR(200))  + ', '
+	  FROM dbo.tblARCustomerAccountStatus CAS WITH(NOLOCK)
+	  INNER JOIN (
+	   SELECT intAccountStatusId
+		 , strAccountStatusCode
+	   FROM dbo.tblARAccountStatus WITH (NOLOCK)
+	  ) ARAS ON CAS.intAccountStatusId = ARAS.intAccountStatusId
+	  WHERE CAS.intEntityCustomerId = INVOICE.intEntityCustomerId
+	  FOR XML PATH ('')
+	 ) SC (strAccountStatusCode)
+) STATUSCODES
 WHERE INVOICE.ysnPosted = 1
