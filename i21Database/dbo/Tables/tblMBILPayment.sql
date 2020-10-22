@@ -16,6 +16,7 @@
 	,ysnVoided				BIT DEFAULT((0)) NULL
 	,dtmPostedDate			DATETIME NULL
 	,dtmVoidedDate			DATETIME NULL
+	,inti21PaymentId		INT NULL
 	,intConcurrencyId		INT DEFAULT((1)) NULL
 	CONSTRAINT [PK_tblMBILPayment] PRIMARY KEY CLUSTERED ([intPaymentId] ASC), 
 	CONSTRAINT [FK_tblMBILPayment_tblEMEntity_Customer] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblEMEntity]([intEntityId]),

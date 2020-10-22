@@ -23,6 +23,7 @@ SELECT Payment.intPaymentId
 	, Payment.ysnVoided
 	, Payment.dtmPostedDate
 	, Payment.dtmVoidedDate
+	, Payment.inti21PaymentId
 	, Payment.intConcurrencyId
 FROM tblMBILPayment Payment
 LEFT JOIN tblEMEntity Customer ON Customer.intEntityId = Payment.intEntityCustomerId
