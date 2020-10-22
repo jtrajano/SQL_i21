@@ -430,7 +430,7 @@ begin try
 				,intCostUOMId = vp.intCostUOMId
 				,intCostCurrencyId = vp.intCostCurrencyId
 				,dblWeight = vp.dblWeight
-				,dblNetWeight = vp.dblNetWeight
+				,dblNetWeight = @dblTransactionQuantity
 				,dblWeightUnitQty = vp.dblWeightUnitQty
 				,intWeightUOMId = vp.intWeightUOMId
 				,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
