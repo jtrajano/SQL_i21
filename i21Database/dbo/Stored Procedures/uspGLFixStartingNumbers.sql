@@ -207,7 +207,7 @@ BEGIN
 		FROM	dbo.tblGLDetail  WHERE strBatchId LIKE @strPrefix + '%'
 		
 		DECLARE @intSMNumber int = 0;
-		SELECT	intSMNumber = MAX(CAST(REPLACE(strBatchNo, 'BATCH-', '') AS INT))	
+		SELECT	@intSMNumber = MAX(CAST(REPLACE(strBatchNo, 'BATCH-', '') AS INT))	
 		FROM	dbo.tblSMBatchPostingLog
 
 		IF (@intNumber IS NOT NULL AND ISNULL(@intSMNumber, 0) < @intNumber)	
