@@ -21,6 +21,10 @@ begin
 			,intBillDetailId
 			,intInvoiceId
 			,intInvoiceDetailId
+			,intSourceId
+			,dblQuantity
+			,dtmCreatedDate
+			,ysnMarkDelete
 			,intConcurrencyId  
 		)  
 		SELECT   
@@ -29,6 +33,10 @@ begin
 			,intBillDetailId = (case when @strScreen = 'Voucher' then @intDetailId else null end)  
 			,intInvoiceId = (case when @strScreen = 'Invoice' then @intHeaderId else null end)  
 			,intInvoiceDetailId = (case when @strScreen = 'Invoice' then @intDetailId else null end)  
+			,intSourceId = @intSourceDetailId
+			,dblQuantity = @dblQuantity
+			,dtmCreatedDate = getdate()
+			,ysnMarkDelete = null
 			,intConcurrencyId = 1 
 
 	end try
