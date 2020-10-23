@@ -156,6 +156,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , ysnHasPricingLayer                   = CASE WHEN ISNULL(APAR.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
      , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
      , dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
+     , intCreditStopDays					= CUS.intCreditStopDays
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -168,6 +169,7 @@ INNER JOIN (
 		 , strName
 		 , strCreditCode
 		 , intEntityContactId
+         , intCreditStopDays
     FROM vyuARCustomerSearch WITH (NOLOCK)
 ) CUS ON CUS.intEntityId = INV.intEntityCustomerId
 INNER JOIN (
