@@ -8158,6 +8158,7 @@ BEGIN TRY
 
 			UPDATE tblICItemStage
 			SET strFeedStatus = 'Processed'
+				,intStatusId = 1
 			WHERE intItemStageId = @intItemStageId
 
 			-- Audit Log
@@ -8195,6 +8196,7 @@ BEGIN TRY
 			UPDATE tblICItemStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId = 2
 			WHERE intItemStageId = @intItemStageId
 		END CATCH
 

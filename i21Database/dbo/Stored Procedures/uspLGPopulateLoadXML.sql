@@ -57,12 +57,14 @@ BEGIN TRY
 		,@intSubBookId INT
 		,@strBook NVARCHAR(50)
 		,@strSubBook NVARCHAR(50)
+		,@intShipmentType int
 
 	SELECT @strLoadNumber = strLoadNumber
 		,@intSourceType = intSourceType
 		,@intCompanyId = intCompanyId
 		,@intBookId = intBookId
 		,@intSubBookId = intSubBookId
+		,@intShipmentType=intShipmentType
 	FROM tblLGLoad
 	WHERE intLoadId = @intLoadId
 
@@ -360,6 +362,7 @@ BEGIN TRY
         ,intCompanyId 
 		,strBook
 		,strSubBook
+		,intShipmentType
 		)
 	SELECT @intLoadId
 		,@strLoadNumber
@@ -383,7 +386,8 @@ BEGIN TRY
 		,@intTransactionId
         ,@intCompanyId
 		,@strBook
-		,@strSubBook'
+		,@strSubBook
+		,@intShipmentType'
 
 		EXEC sp_executesql @strSQL
 			,N'@intLoadId int
@@ -408,7 +412,8 @@ BEGIN TRY
 		,@intTransactionId int
         ,@intCompanyId int
 		,@strBook nvarchar(50)
-		,@strSubBook nvarchar(50)'
+		,@strSubBook nvarchar(50)
+		,@intShipmentType int'
 			,@intLoadId
 			,@strLoadNumber
 			,@strLoadXML
@@ -432,6 +437,7 @@ BEGIN TRY
 			,@intCompanyId
 			,@strBook
 			,@strSubBook
+			,@intShipmentType
 	END
 END TRY
 
