@@ -8,6 +8,7 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strHeader NVARCHAR(MAX)
 	,@strDetail NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
+	,@intShipmentType int
 
 IF @strStatus = 'Success'
 	SELECT @intStatusId = 1 -- Processed
@@ -260,8 +261,16 @@ BEGIN
 	
 END
 
-IF @strMessageType = 'Load'
+IF @strMessageType In ('Inbound Shipping Instruction','Inbound Shipment')
 BEGIN
+	If @strMessageType='Inbound Shipment'
+	Begin
+		Select @intShipmentType=1
+	End
+	Else
+	Begin
+		Select @intShipmentType=2
+	End
 	SET @strHeader = '<tr>
 						<th>&nbsp;Load Number</th>
 						<th>&nbsp;Row State</th>
@@ -269,7 +278,13 @@ BEGIN
 						<th>&nbsp;Message</th>
 					</tr>'
 
-	IF @strStatus = 'Success'
+	IF EXISTS (
+		SELECT *
+		FROM tblLGIntrCompLogisticsStg WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND intShipmentType=@intShipmentType
+			AND ysnMailSent IS NULL
+		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
@@ -279,31 +294,15 @@ BEGIN
 		</tr>'
 		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
 		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
-		WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent IS NULL
+			AND intShipmentType=@intShipmentType
 
 		UPDATE tblLGIntrCompLogisticsStg
 		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Processed'
-			AND ISNULL(ysnMailSent, 0) = 0
-	END
-	ELSE IF @strStatus = 'Failure'
-	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
-			   '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
-		</tr>'
-		FROM tblLGIntrCompLogisticsStg S WITH (NOLOCK)
-		Left JOIN tblIPMultiCompany MC WITH (NOLOCK) on MC.intCompanyId=S.intCompanyId
-		WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-			AND ISNULL(S.ysnMailSent, 0) = 0
-
-		UPDATE tblLGIntrCompLogisticsStg
-		SET ysnMailSent = 1
-		WHERE ISNULL(strFeedStatus, '') = 'Failed'
-			AND ISNULL(ysnMailSent, 0) = 0
+		WHERE intStatusId = @intStatusId
+			AND ysnMailSent IS NULL
+			AND intShipmentType=@intShipmentType
 	END
 END
 
@@ -664,37 +663,7 @@ BEGIN
 
 -- IC, LG and RM Masters
 
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intItemId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + 'Success' + '</td>' + 
-			'<td>&nbsp;' + 'Item' + '</td>
-	</tr>'
-	FROM tblICItemStage S WITH (NOLOCK)
-	WHERE ISNULL(S.strFeedStatus, '') = 'Processed'
-		AND ISNULL(S.ysnMailSent, 0) = 0
-
-	UPDATE tblICItemStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Processed'
-		AND ISNULL(ysnMailSent, 0) = 0
-			
-	SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intItemId),'') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
-			'<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>' + 
-			'<td>&nbsp;' + 'Item' + '</td>
-	</tr>'
-	FROM tblICItemStage S WITH (NOLOCK)
-	WHERE ISNULL(S.strFeedStatus, '') = 'Failed'
-		AND ISNULL(S.ysnMailSent, 0) = 0
-
-	UPDATE tblICItemStage
-	SET ysnMailSent = 1
-	WHERE ISNULL(strFeedStatus, '') = 'Failed'
-		AND ISNULL(ysnMailSent, 0) = 0
+	
 
 	IF EXISTS (
 		SELECT 1
@@ -871,6 +840,36 @@ BEGIN
 		WHERE S.dtmFeedDate BETWEEN @dtmDate
 				AND @dtmDate2 
 				AND intMultiCompanyId =4
+END
+IF @strMessageType = 'Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + 'Success' + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
+	</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
 END
 
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
