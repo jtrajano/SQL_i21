@@ -10,8 +10,10 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
+	
 
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Inventory Report' AND strCommand = ' Store.view.LotteryInventoryReport')
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Setup' AND strModuleName = 'Mobile Billing' AND strCommand = 'EnergyTrac.view.ExportFilter')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
