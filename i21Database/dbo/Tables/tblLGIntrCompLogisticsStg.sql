@@ -30,5 +30,7 @@
 		intCompanyId int,
 		ysnMailSent bit,
 		strBook NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
-		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+		strSubBook NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+		intStatusId int,
+		intShipmentType int
 	)
