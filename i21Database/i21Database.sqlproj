@@ -8858,6 +8858,7 @@
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesStage.sql" />
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILProcessPayments.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

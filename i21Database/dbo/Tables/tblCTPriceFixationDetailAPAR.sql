@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	intInvoiceDetailId				INT,
 	intSourceId						INT,
 	dblQuantity						numeric(18,6),
-	dtmCreatedDate					datetime,
+	dtmCreatedDate					datetime default getdate(),
 	ysnMarkDelete					BIT,
 	[intConcurrencyId]				INT NOT NULL,
 
