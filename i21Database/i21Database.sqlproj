@@ -8853,6 +8853,7 @@
     <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
