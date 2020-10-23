@@ -8959,6 +8959,7 @@
     <Build Include="dbo\Views\vyuAGProductMixerView.sql" />
     <Build Include="dbo\Tables\tblAGProductMixer.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -101,6 +101,7 @@ BEGIN TRY
 			,@pricing							cursor
 			,@dblPriced							numeric(18,6)
 			,@dblInvoicedShipped				numeric(18,6)
+			,@dblInvoicedShippedReturned		numeric(18,6)
 			,@dblShippedForInvoice				numeric(18,6)
 			,@dblInvoicedPriced					numeric(18,6)
 			,@dblPricedForInvoice				numeric(18,6)
@@ -991,6 +992,7 @@ BEGIN TRY
 					and f.intItemId = d.intItemId
 					and f.intUnitMeasureId = e.intUnitMeasureId
 					and a.intContractDetailId = @intContractDetailId
+	 				and b.dblLoadPriced >= 0
 
 			OPEN @pricing
 
@@ -1118,7 +1120,17 @@ BEGIN TRY
 						set @intPricedLoad = (
 								select count(*) from
 								(
-									select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId
+									select distinct
+										ar.intInvoiceId
+									from
+										tblCTPriceFixationDetailAPAR ar
+										,tblARInvoice i
+									where
+										ar.intPriceFixationDetailId = @intPriceFixationDetailId
+										and i.intInvoiceId = ar.intInvoiceId
+										and i.strTransactionType = 'Invoice'
+										and isnull(i.ysnReturned,0) = 0
+										
 								) uniqueInvoice
 							)
 
@@ -1217,8 +1229,14 @@ BEGIN TRY
 							--Create AR record to staging table tblCTPriceFixationDetailAPAR
 							IF @intNewInvoiceId IS NOT NULL
 							BEGIN
-								INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
-								SELECT @intPriceFixationDetailId,@intNewInvoiceId,@intInvoiceDetailId,1
+								exec uspCTCreatePricingAPARLink
+									@intPriceFixationDetailId = @intPriceFixationDetailId
+									,@intHeaderId = @intNewInvoiceId
+									,@intDetailId = @intInvoiceDetailId
+									,@intSourceHeaderId = null
+									,@intSourceDetailId = @intInventoryShipmentItemId
+									,@dblQuantity = @dblQuantityForInvoice
+									,@strScreen = 'Invoice'
 							END
 
 							insert into @PricedShipment (intInventoryShipmentId)
@@ -1433,13 +1451,32 @@ BEGIN TRY
 				
 				set @dblInvoicedShipped = (
 											SELECT
-												SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,dblQtyShipped)) 
+												SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,ID.dblQtyShipped)) 
 											FROM
-												tblARInvoiceDetail ID 
+												tblARInvoiceDetail ID, tblARInvoice I
 											WHERE
-												intInventoryShipmentItemId = @intInventoryShipmentItemId
-												AND intInventoryShipmentChargeId IS NULL
+												ID.intInventoryShipmentItemId = @intInventoryShipmentItemId
+												AND ID.intInventoryShipmentChargeId IS NULL
+												AND isnull(ID.ysnReturned,0) = 0
+												AND I.intInvoiceId = ID.intInvoiceId
+												and I.strTransactionType = 'Invoice'
+												
 										  )
+
+				set @dblInvoicedShippedReturned = (
+											SELECT
+												SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,ID.dblQtyShipped)) 
+											FROM
+												tblARInvoiceDetail ID, tblARInvoice I
+											WHERE
+												ID.intInventoryShipmentItemId = @intInventoryShipmentItemId
+												AND ID.intInventoryShipmentChargeId IS NULL
+												AND isnull(ID.ysnReturned,0) = 1
+												AND I.intInvoiceId = ID.intInvoiceId
+												and I.strTransactionType = 'Credit Memo'
+											)
+
+				set @dblInvoicedShipped = @dblInvoicedShipped - (isnull(@dblInvoicedShippedReturned,0) * 2);
 
 				set @dblShippedForInvoice = 0;
 				set @dblInvoicedShipped = isnull(@dblInvoicedShipped,0.00);
@@ -1476,6 +1513,7 @@ BEGIN TRY
 							and f.intItemId = d.intItemId
 							and f.intUnitMeasureId = e.intUnitMeasureId
 							and a.intContractDetailId = @intContractDetailId
+	   						and b.dblQuantity >= 0
 
 					OPEN @pricing
 
@@ -1502,12 +1540,12 @@ BEGIN TRY
 
 						set @dblInvoicedPriced = (
 													SELECT
-														SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,dblQtyShipped))
+														SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,AD.dblQtyShipped))
 													FROM
 														tblCTPriceFixationDetailAPAR AA
 														JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 													WHERE
-														intPriceFixationDetailId = @intPriceFixationDetailId
+														AA.intPriceFixationDetailId = @intPriceFixationDetailId
 												 )
 						
 						set @dblPricedForInvoice = 0;
@@ -1542,6 +1580,7 @@ BEGIN TRY
 											and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
 											and c.intInvoiceId = b.intInvoiceId
 											and isnull(c.ysnPosted,0) = 0
+											and c.strTransactionType = 'Invoice'
 									  )
 						begin
 							--Shipment Item has no unposted Invoice, therefore create
@@ -1602,8 +1641,14 @@ BEGIN TRY
 							--Create AR record to staging table tblCTPriceFixationDetailAPAR
 							IF @intNewInvoiceId IS NOT NULL
 							BEGIN
-								INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
-								SELECT @intPriceFixationDetailId,@intNewInvoiceId,@intInvoiceDetailId,1
+								exec uspCTCreatePricingAPARLink
+									@intPriceFixationDetailId = @intPriceFixationDetailId
+									,@intHeaderId = @intNewInvoiceId
+									,@intDetailId = @intInvoiceDetailId
+									,@intSourceHeaderId = null
+									,@intSourceDetailId = @intInventoryShipmentItemId
+									,@dblQuantity = @dblQuantityForInvoice
+									,@strScreen = 'Invoice'
 							END
 
 							--Update the load applied and priced
@@ -1632,6 +1677,7 @@ BEGIN TRY
 								and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
 								and c.intInvoiceId = b.intInvoiceId
 								and isnull(c.ysnPosted,0) = 0
+								and c.strTransactionType = 'Invoice'
 
 							print 'add detail to existing invoice';
 
@@ -1649,8 +1695,14 @@ BEGIN TRY
 								,@intInvoiceDetailId OUTPUT
 								,@intPriceFixationDetailId
 
-							INSERT INTO tblCTPriceFixationDetailAPAR(intPriceFixationDetailId,intInvoiceId,intInvoiceDetailId,intConcurrencyId)
-							SELECT @intPriceFixationDetailId,@intInvoiceId,@intInvoiceDetailId,1
+							exec uspCTCreatePricingAPARLink
+								@intPriceFixationDetailId = @intPriceFixationDetailId
+								,@intHeaderId = @intInvoiceId
+								,@intDetailId = @intInvoiceDetailId
+								,@intSourceHeaderId = null
+								,@intSourceDetailId = @intInventoryShipmentItemId
+								,@dblQuantity = @dblQuantityForInvoice
+								,@strScreen = 'Invoice'
 							
 							--Deduct the quantity from @dblPricedForInvoice and @dblShippedForInvoice
 							set @dblPricedForInvoice = (@dblPricedForInvoice - @dblQuantityForInvoice);
