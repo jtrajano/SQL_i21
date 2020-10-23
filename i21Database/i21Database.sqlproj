@@ -440,6 +440,7 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Stored Procedures\uspCMGetRPAccountIdByLocation.sql"/>
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
