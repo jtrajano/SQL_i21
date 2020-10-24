@@ -40,10 +40,10 @@ BEGIN
 
 
 
-	IF (SELECT TOP 1 A.dblOriginalBalance
+	IF (SELECT SUM(A.dblOpenBalance)
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
-			ON B.intCustomerStorageId = A.intCustomerStorageId) <>	
+			ON B.intToCustomerStorage = A.intCustomerStorageId) <>	
 		(SELECT  sum(B.dblUnits)
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
