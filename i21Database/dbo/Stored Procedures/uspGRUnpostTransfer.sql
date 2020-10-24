@@ -42,15 +42,11 @@ BEGIN
 
 
 
-	--IF (SELECT TOP 1 A.dblOriginalBalance
-	--		FROM tblGRCustomerStorage A 
-	--		INNER JOIN #tmpTransferCustomerStorage B 
-	--		ON B.intCustomerStorageId = A.intCustomerStorageId) <>	
-	--	(SELECT  sum(B.dblUnits)
-	--		FROM tblGRCustomerStorage A 
-	--		INNER JOIN #tmpTransferCustomerStorage B 
-	--			ON B.intCustomerStorageId = A.intCustomerStorageId)
-	IF EXISTS(SELECT TOP 1 1 
+	IF (SELECT SUM(A.dblOpenBalance)
+			FROM tblGRCustomerStorage A 
+			INNER JOIN #tmpTransferCustomerStorage B 
+			ON B.intToCustomerStorage = A.intCustomerStorageId) <>	
+		(SELECT  sum(B.dblUnits)
 			FROM tblGRCustomerStorage A 
 			OUTER APPLY (
 				SELECT dblUnitQty = SUM(dblUnitQty)
