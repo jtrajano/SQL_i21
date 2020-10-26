@@ -282,7 +282,7 @@ BEGIN
 				shipFromTerm.*
 			FROM tblEMEntityLocation shipFrom
 			INNER JOIN tblSMTerm shipFromTerm ON shipFrom.intTermsId = shipFromTerm.intTermID
-			WHERE shipFrom.intEntityLocationId = A.intShipFromId
+			WHERE shipFrom.intEntityLocationId = A.intShipFromId AND shipFrom.intEntityId = A.intEntityVendorId
 			UNION ALL
 			--use contract term
 			SELECT
