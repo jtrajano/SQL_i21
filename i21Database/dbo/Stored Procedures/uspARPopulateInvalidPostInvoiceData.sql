@@ -1954,7 +1954,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,[dblQty]
+		,CASE WHEN [strType] IN ('CF Tran','POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
