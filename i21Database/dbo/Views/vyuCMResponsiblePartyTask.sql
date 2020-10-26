@@ -1,8 +1,8 @@
  CREATE VIEW dbo.vyuCMResponsiblePartyTask
  AS
   WITH BT AS(
- SELECT ysnPosted, dblAmount, dtmDate, strTransactionId FROM tblCMBankTransaction union
- select ysnPosted, dblAmount, dtmDate, strTransactionId from tblCMBankTransfer
+ SELECT ysnPosted, dblAmount, dtmDate, intTransactionId, strTransactionId FROM tblCMBankTransaction union
+ select ysnPosted, dblAmount, dtmDate, intTransactionId, strTransactionId from tblCMBankTransfer
  )
  SELECT                 
     S.intBankStatementImportId,
@@ -22,6 +22,7 @@
     BA.strBankAccountNo strResponsibleBankAccountNo,
     BT.ysnPosted,
     T.intActionId,
+    BT.intTransactionId,
     CASE WHEN T.intActionId = 0  then 'Ignore'
     when T.intActionId = 1 then 'Notify Only' 
     when T.intActionId = 2 then 'Clear Check' 
