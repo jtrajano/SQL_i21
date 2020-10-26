@@ -8757,6 +8757,7 @@
     <Build Include="dbo\Stored Procedures\uspGRDiscountTableReport.sql" />
     <Build Include="dbo\Views\vyuSCTermsAuditRecords.sql" />
     <Build Include="dbo\Views\vyuRKGetSettlementPriceHeader.sql" />
+    <Build Include="dbo\Views\vyuGLLocationAccountId.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityBookPermission.sql" />
