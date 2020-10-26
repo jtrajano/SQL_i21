@@ -313,21 +313,25 @@ BEGIN
 		-------------GROUP VOLUME DISCOUNT---------------
 		INSERT @tblCFGroupVolumeDisctinct
 		(
-			intCustomerGroupId,
-			strTempInvoiceReportNumber
+			intCustomerGroupId
+			-- ,
+			-- strTempInvoiceReportNumber
 		)
 		SELECT 
 			 intCustomerGroupId
-			,strTempInvoiceReportNumber
+			-- ,strTempInvoiceReportNumber
 		FROM @tblCFInvoiceDiscount
 		GROUP BY 
-		intCustomerGroupId, 
-		strTempInvoiceReportNumber
+		intCustomerGroupId
+		-- , 
+		-- strTempInvoiceReportNumber
 
 		WHILE (EXISTS(SELECT 1 FROM @tblCFGroupVolumeDisctinct))
 		BEGIN
 	
-			SELECT @intDistinctDiscountLoop = intCustomerGroupId , @strDistinctInvoiceReportNumber = strTempInvoiceReportNumber FROM @tblCFGroupVolumeDisctinct
+			SELECT @intDistinctDiscountLoop = intCustomerGroupId
+			--  , @strDistinctInvoiceReportNumber = strTempInvoiceReportNumber 
+			 FROM @tblCFGroupVolumeDisctinct
 
 			IF(@intDistinctDiscountLoop != 0)
 			BEGIN
@@ -335,7 +339,8 @@ BEGIN
 			SELECT 
 			@dblTotalQuantity = SUM(dblQuantity)	
 			FROM @tblCFInvoiceDiscount as cfInvoice
-			WHERE intCustomerGroupId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
+			WHERE intCustomerGroupId = @intDistinctDiscountLoop 
+			-- AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 			GROUP BY intCustomerGroupId
 
 			INSERT @tblCFGroupVolumeTemp(
@@ -430,11 +435,13 @@ BEGIN
 				,strDiscountSchedule
 				,ysnShowOnCFInvoice
 			FROM @tblCFInvoiceDiscount as cfInvoice
-			WHERE intCustomerGroupId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
+			WHERE intCustomerGroupId = @intDistinctDiscountLoop 
+			-- AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 
 			END
 			
-			DELETE FROM @tblCFGroupVolumeDisctinct WHERE intCustomerGroupId = @intDistinctDiscountLoop AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
+			DELETE FROM @tblCFGroupVolumeDisctinct WHERE intCustomerGroupId = @intDistinctDiscountLoop
+			--  AND strTempInvoiceReportNumber = @strDistinctInvoiceReportNumber
 		END
 		-------------GROUP VOLUME DISCOUNT---------------
 
