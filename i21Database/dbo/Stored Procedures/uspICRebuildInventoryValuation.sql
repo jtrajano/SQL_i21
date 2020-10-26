@@ -7,6 +7,7 @@ CREATE PROCEDURE [dbo].[uspICRebuildInventoryValuation]
 	,@intUserId AS INT = NULL
 	,@ysnRebuildShipmentAndInvoiceAsInTransit AS BIT = 0
 	,@ysnForceClearTheCostBuckets AS BIT = 0
+	,@ysnRecomputeCountVariance AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -5611,6 +5612,9 @@ BEGIN
 						ON adj.intInventoryAdjustmentId = adjDetail.intInventoryAdjustmentId
 					INNER JOIN tblICItem i
 						ON i.intItemId = adjDetail.intItemId 
+					INNER JOIN #tmpRebuildList list
+						ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+						AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 					INNER JOIN tblICItemLocation il
 						ON il.intItemId = adjDetail.intItemId
 						AND il.intLocationId = adj.intLocationId
@@ -5685,7 +5689,7 @@ BEGIN
 			END 
 
 			ELSE 
-			BEGIN 								
+			BEGIN 							
 				-- Update the cost used in the adjustment 
 				UPDATE	AdjDetail
 				SET		dblCost =	CASE	WHEN Lot.intLotId IS NOT NULL  THEN 
@@ -5872,6 +5876,53 @@ BEGIN
 						AND RebuildInvTrans.intTransactionId = @intTransactionId
 						AND ItemLocation.intLocationId IS NOT NULL 
 
+				-- Recompute the Inventory Count vairance if @ysnRecomputeCountVariance = 1
+				IF @strTransactionType IN ('Inventory Count')
+					AND @ysnRecomputeCountVariance = 1
+				BEGIN 
+					UPDATE tp
+					SET 
+						tp.dblQty = 0 
+					FROM 
+						@ItemsToPost tp
+
+					UPDATE tp
+					SET 
+						tp.dblQty = 
+							dbo.fnCalculateQtyBetweenUOM(
+								cd.intItemUOMId
+								,tp.intItemUOMId
+								,cd.dblPhysicalCount
+							)
+							- ISNULL(onHand.dblQty, 0) 
+					FROM 
+						(
+							SELECT TOP 1 intId 
+							FROM @ItemsToPost
+						) topTp
+
+						INNER JOIN @ItemsToPost tp 
+							ON topTp.intId = tp.intId
+						
+						INNER JOIN (
+							tblICInventoryCount c INNER JOIN tblICInventoryCountDetail cd
+								ON c.intInventoryCountId = cd.intInventoryCountId
+						)
+							ON tp.intTransactionId = cd.intInventoryCountId
+							AND tp.intTransactionDetailId = cd.intInventoryCountDetailId
+						CROSS APPLY (
+							SELECT 
+								dblQty = SUM(ISNULL(t.dblQty, 0))
+							FROM 
+								tblICInventoryTransaction t
+							WHERE
+								t.intItemId = tp.intItemId
+								AND t.intItemLocationId = tp.intItemLocationId
+								AND t.intItemUOMId = tp.intItemUOMId
+						) onHand
+
+				END 
+
 				EXEC @intReturnValue = dbo.uspICRepostCosting
 					@strBatchId
 					,@strAccountToCounterInventory
@@ -6037,6 +6088,9 @@ BEGIN
 					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
 				INNER JOIN tblICItem i
 					ON i.intItemId = ad.intItemId
+				INNER JOIN #tmpRebuildList list
+					ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = i.intItemId
 					AND il.intLocationId = a.intLocationId
@@ -6056,6 +6110,9 @@ BEGIN
 					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
 				INNER JOIN tblICItem i
 					ON i.intItemId = ad.intItemId
+				INNER JOIN #tmpRebuildList list
+					ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = i.intItemId
 					AND il.intLocationId = a.intLocationId
@@ -6075,6 +6132,9 @@ BEGIN
 					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
 				INNER JOIN tblICItem i
 					ON i.intItemId = ad.intItemId
+				INNER JOIN #tmpRebuildList list
+					ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = i.intItemId
 					AND il.intLocationId = a.intLocationId
@@ -6094,6 +6154,9 @@ BEGIN
 					ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
 				INNER JOIN tblICItem i
 					ON i.intItemId = ad.intItemId
+				INNER JOIN #tmpRebuildList list
+					ON i.intItemId  = COALESCE(list.intItemId, i.intItemId) 
+					AND i.intCategoryId = COALESCE(list.intCategoryId, i.intCategoryId) 
 				INNER JOIN tblICItemLocation il
 					ON il.intItemId = i.intItemId
 					AND il.intLocationId = a.intLocationId
@@ -6157,7 +6220,9 @@ BEGIN
 	ORDER BY 
 		fyp.dtmStartDate ASC 
 
-	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod
+	EXEC dbo.[uspICSearchInventoryValuationSummary] 
+		@strPeriod
+		,@strCategoryCode 
 END
 
 
