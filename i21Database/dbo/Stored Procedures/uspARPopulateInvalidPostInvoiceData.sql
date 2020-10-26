@@ -74,13 +74,7 @@ BEGIN
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
-	OUTER APPLY (
-		SELECT intLoadId
-		FROM dbo.tblARInvoice ARI WITH (NOLOCK)
-		WHERE ARI.intInvoiceId = I.intOriginalInvoiceId
-	) IL
 	WHERE I.strTransactionType = 'Invoice'
-	AND (I.[ysnFromProvisional] = 0 OR (I.[ysnFromProvisional] = 1 AND IL.[intLoadId] IS NULL))
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1954,7 +1948,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,[dblQty]
+		,CASE WHEN [strType] IN ('CF Tran','POS') THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -1977,9 +1971,6 @@ BEGIN
 		,[dblForexRate]
 	FROM
 		#ARItemsForCosting
-	WHERE
-		[ysnForValidation] IS NULL
-		OR [ysnForValidation] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
