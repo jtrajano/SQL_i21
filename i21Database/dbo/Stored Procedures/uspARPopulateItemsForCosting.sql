@@ -240,6 +240,6 @@ WHERE
 	AND ARID.[strTransactionType] <> 'Debit Memo'
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
-	AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)
+	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 
 RETURN 1
