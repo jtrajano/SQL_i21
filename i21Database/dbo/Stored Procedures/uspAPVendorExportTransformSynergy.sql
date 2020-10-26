@@ -34,7 +34,9 @@ USING
 		strContact				=	dbo.fnTrim(cntcDataStg.strName),
 		ysnUserShipperWeight	=	0,
 		intVendorType			=	0,
-		strVendorType			=	'Both'
+		strVendorType			=	'Both',
+		intEntityLocationId		=	vndStg.intEntityLocationId,
+		strLocationName			=	vndStg.strLocationName
 	FROM tblEMEntityStaging entStg
 	INNER JOIN tblAPVendorStaging vndStg
 		ON entStg.intEntityId = vndStg.intEntityId
@@ -52,7 +54,9 @@ INSERT
 	strContact,
 	ysnUserShipperWeight,
 	intVendorType,
-	strVendorType
+	strVendorType,
+	intEntityLocationId,
+	strLocationName
 )
 VALUES
 (
@@ -61,7 +65,9 @@ VALUES
 	strContact,
 	ysnUserShipperWeight,
 	intVendorType,
-	strVendorType
+	strVendorType,
+	intEntityLocationId,
+	strLocationName
 )
 OUTPUT
 	inserted.intVendorStagingId,
