@@ -75,11 +75,13 @@ INNER JOIN tblEMEntityToContactStaging cntcStg
 
 --GET ALL OF VENDOR INFO
 SELECT
-	vendor.*
+	vendor.*, entLoc.intEntityLocationId, entLoc.strLocationName
 INTO tblAPVendorStaging
 FROM tblAPVendor vendor
 INNER JOIN tblEMEntityStaging entStg
 	ON vendor.intEntityId = entStg.intEntityId
+INNER JOIN tblEMEntityLocation entLoc
+	ON vendor.intEntityId = entLoc.intEntityId
 
 IF @transCount = 0 COMMIT TRANSACTION;
 
