@@ -108,8 +108,8 @@ BEGIN
 			, strContractNumber
 			, intContractSeq
 			, c.dtmTransactionDate
-			, dblOriginalQuantity = ISNULL(c.dblOrigQty, 0)
-			, dblRemainingQuantity = c.dblOrigQty
+			, dblOriginalQuantity = ISNULL(c.dblOrigQty, 0) * CASE WHEN UPPER(strDistributionType) = 'PURCHASE' THEN 1 ELSE -1 END
+			, dblRemainingQuantity = c.dblOrigQty  * CASE WHEN UPPER(strDistributionType) = 'PURCHASE' THEN 1 ELSE -1 END
 			, c.intCommodityId
 			, c.strCommodityCode
 			, intCommodityUnitMeasureId = c.intOrigUOMId
