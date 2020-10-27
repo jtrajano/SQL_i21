@@ -7,8 +7,10 @@ CREATE TABLE tblCMBankStatementImportLog
     intTaskCount INT NULL,
     intBTransactionCount INT NULL,
     dtmDate DATETIME,
+    intTotalImported INT NULL,
+    intTotalCount INT NULL,
     intConcurrencyId INT NULL,
-    CONSTRAINT [PK_tblCMBankStatementImportLog] PRIMARY KEY CLUSTERED 
+    CONSTRAINT [PK_tblCMBankStatementImportLog] PRIMARY KEY CLUSTERED
 (
 	[intImportBankStatementLogId] ASC
 )

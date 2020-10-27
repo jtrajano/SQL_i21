@@ -1,10 +1,11 @@
 CREATE TABLE [dbo].[tblCMResponsiblePartyMatchingBDEP](
 	[intResponsiblePartyMatchingBDEPId] [int] IDENTITY(1,1) NOT NULL,
 	[intLocationSegmentId] [int] NULL,
+	[intAccountId] INT NULL,
 	[strContains] [nvarchar](100) NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intResponsiblePartyMatchingId] [int] NOT NULL,
- CONSTRAINT [PK_tblCMResponsiblePartyMatchingBDEP] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_tblCMResponsiblePartyMatchingBDEP] PRIMARY KEY CLUSTERED
 (
 	[intResponsiblePartyMatchingBDEPId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
