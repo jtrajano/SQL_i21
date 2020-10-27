@@ -2,6 +2,7 @@ CREATE TABLE [dbo].[tblICImportStagingItemLocation]
 (
     [intImportStagingItemLocationId] INT IDENTITY(1, 1) NOT NULL,
     [strImportIdentifier] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
+	[intLineNo] INT NOT NULL,
     [strItemNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strLocation] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,
     [strPOSDescription] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

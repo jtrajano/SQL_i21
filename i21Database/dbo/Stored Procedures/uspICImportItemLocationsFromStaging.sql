@@ -462,6 +462,32 @@ SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + IS
 FROM tblICImportLog 
 WHERE strUniqueId = @strIdentifier
 
+INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+SELECT @LogId, s.intLineNo, 'Location', 'Skipped', s.strLocation, 'Invalid Location', 'Failed', 'Error', 1
+FROM tblICImportStagingItemLocation s
+LEFT OUTER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+WHERE s.strImportIdentifier = @strIdentifier
+	AND c.intCompanyLocationId IS NULL
+
+INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+SELECT @LogId, s.intLineNo, 'Item No', 'Skipped', s.strLocation, 'Invalid Item', 'Failed', 'Error', 1
+FROM tblICImportStagingItemLocation s
+LEFT OUTER JOIN tblICItem c ON LOWER(c.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo)))
+WHERE s.strImportIdentifier = @strIdentifier
+	AND c.intItemId IS NULL
+
+UPDATE l
+SET l.intTotalErrors = x.Errors
+FROM tblICImportLog l
+INNER JOIN (
+	SELECT l.intImportLogId, COUNT(d.intImportLogDetailId) Errors
+	FROM tblICImportLog l
+		INNER JOIN tblICImportLogDetail d ON d.intImportLogId = l.intImportLogId
+	WHERE l.strUniqueId = @strIdentifier
+		AND d.strType = 'Error'
+	GROUP BY l.intImportLogId 
+) x ON l.intImportLogId = x.intImportLogId
+
 IF @TotalImported = 0 AND @LogId IS NOT NULL
 BEGIN
 	INSERT INTO tblICImportLogDetail(intImportLogId, intRecordNo, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
