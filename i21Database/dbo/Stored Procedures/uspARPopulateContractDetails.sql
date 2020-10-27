@@ -6,28 +6,30 @@ SET NOCOUNT ON
 SET ANSI_WARNINGS OFF
 
 DECLARE @tblToProcess TABLE (
-		intUniqueId				INT IDENTITY
-	  , intInvoiceDetailId		INT 
-	  , intInvoiceId			INT 
-	  , intContractDetailId		INT 
-	  , intContractHeaderId		INT NULL
-	  , intItemUOMId			INT NULL
-	  , intOrderUOMId			INT NULL
-	  , intTicketId				INT NULL
-	  , intLoadDetailId			INT NULL
-	  , intPurchaseSale			INT NULL
-	  , dblQty					NUMERIC(18,6)
-	  , dblQtyOrdered			NUMERIC(18,6)
-	  , ysnDestWtGrd			BIT
-	  , dblShippedQty			NUMERIC(18,6)
-	  , intShippedQtyUOMId		INT
-	  , ysnFromReturn			BIT
-	  , strPricing				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	  , strBatchId				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	  , strInvoiceNumber		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	  , strTransactionType		NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	  , strItemNo				NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
-	  , dtmDate					DATETIME NULL
+		intUniqueId					INT IDENTITY
+	  , intInvoiceDetailId			INT 
+	  , intInvoiceId				INT
+	  , intOriginalInvoiceId		INT NULL
+	  , intOriginalInvoiceDetailId	INT NULL
+	  , intContractDetailId			INT 
+	  , intContractHeaderId			INT NULL
+	  , intItemUOMId				INT NULL
+	  , intOrderUOMId				INT NULL
+	  , intTicketId					INT NULL
+	  , intLoadDetailId				INT NULL
+	  , intPurchaseSale				INT NULL
+	  , dblQty						NUMERIC(18,6)
+	  , dblQtyOrdered				NUMERIC(18,6)
+	  , ysnDestWtGrd				BIT
+	  , dblShippedQty				NUMERIC(18,6)
+	  , intShippedQtyUOMId			INT
+	  , ysnFromReturn				BIT
+	  , strPricing					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	  , strBatchId					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	  , strInvoiceNumber			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	  , strTransactionType			NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	  , strItemNo					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	  , dtmDate						DATETIME NULL
 )
 
 DELETE FROM #ARItemsForContracts
@@ -35,6 +37,8 @@ DELETE FROM @tblToProcess
 INSERT INTO @tblToProcess (
 	  intInvoiceDetailId
 	, intInvoiceId
+	, intOriginalInvoiceId
+	, intOriginalInvoiceDetailId
 	, intContractDetailId
 	, intContractHeaderId
 	, intItemUOMId
@@ -55,34 +59,36 @@ INSERT INTO @tblToProcess (
 	, strItemNo
 	, dtmDate
 )
-SELECT intInvoiceDetailId	= ID.intInvoiceDetailId
-	, intInvoiceId			= ID.intInvoiceId
-	, intContractDetailId	= ID.intContractDetailId
-	, intContractHeaderId	= ID.intContractHeaderId
-	, intItemUOMId			= ID.intItemUOMId
-	, intOrderUOMId			= IDD.intOrderUOMId
-	, intTicketId			= NULL--ID.intTicketId
-	, intLoadDetailId		= ID.intLoadDetailId
-	, intPurchaseSale		= LG.intPurchaseSale		
-	, dblQty				= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
-									THEN 1 
-									ELSE 
-										CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.intDestinationGradeId IS NOT NULL AND ISI.intDestinationWeightId IS NOT NULL AND ID.dblQtyShipped > ISNULL(ISI.dblQuantity, 0) AND ISNULL(CD.dblBalance, 0) = 0
-												THEN ID.dblQtyShipped - ISNULL(ISI.dblQuantity, 0)
-												ELSE ID.dblQtyShipped 
-										END
-								END * (CASE WHEN ID.[ysnPost] = 0 THEN -1.000000 ELSE 1.000000 END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -1.000000 ELSE 1.000000 END)
-	, dblQtyOrdered			= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.strInOutFlag, '') <> 'O') THEN IDD.dblQtyOrdered ELSE 0 END
-	, ysnDestWtGrd			= CAST(0 AS BIT)
-	, dblShippedQty			= CAST(0 AS NUMERIC(18, 6))
-	, intShippedQtyUOMId	= NULL
-	, ysnFromReturn			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
-	, strPricing			= IDD.strPricing
-	, strBatchId			= ID.strBatchId
-	, strInvoiceNumber		= ID.strInvoiceNumber
-	, strTransactionType	= ID.strTransactionType
-	, strItemNo				= ID.strItemNo
-	, dtmDate				= ID.dtmDate
+SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
+	, intInvoiceId					= ID.intInvoiceId
+	, intOriginalInvoiceId			= RI.intInvoiceId
+	, intOriginalInvoiceDetailId	= IDD.intOriginalInvoiceDetailId
+	, intContractDetailId			= ID.intContractDetailId
+	, intContractHeaderId			= ID.intContractHeaderId
+	, intItemUOMId					= ID.intItemUOMId
+	, intOrderUOMId					= IDD.intOrderUOMId
+	, intTicketId					= NULL--ID.intTicketId
+	, intLoadDetailId				= ID.intLoadDetailId
+	, intPurchaseSale				= LG.intPurchaseSale		
+	, dblQty						= CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 
+											THEN 1 
+											ELSE 
+												CASE WHEN ID.intInventoryShipmentItemId IS NOT NULL AND ISI.intDestinationGradeId IS NOT NULL AND ISI.intDestinationWeightId IS NOT NULL AND ID.dblQtyShipped > ISNULL(ISI.dblQuantity, 0) AND ISNULL(CD.dblBalance, 0) = 0
+														THEN ID.dblQtyShipped - ISNULL(ISI.dblQuantity, 0)
+														ELSE ID.dblQtyShipped 
+												END
+										END * (CASE WHEN ID.[ysnPost] = 0 THEN -1.000000 ELSE 1.000000 END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -1.000000 ELSE 1.000000 END)
+	, dblQtyOrdered					= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.strInOutFlag, '') <> 'O') THEN IDD.dblQtyOrdered ELSE 0 END
+	, ysnDestWtGrd					= CAST(0 AS BIT)
+	, dblShippedQty					= CAST(0 AS NUMERIC(18, 6))
+	, intShippedQtyUOMId			= NULL
+	, ysnFromReturn					= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
+	, strPricing					= IDD.strPricing
+	, strBatchId					= ID.strBatchId
+	, strInvoiceNumber				= ID.strInvoiceNumber
+	, strTransactionType			= ID.strTransactionType
+	, strItemNo						= ID.strItemNo
+	, dtmDate						= ID.dtmDate
 FROM #ARPostInvoiceDetail ID
 INNER JOIN tblARInvoiceDetail IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
@@ -180,6 +186,8 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 
 DECLARE @intInvoiceDetailId				INT
 	  , @intInvoiceId					INT
+	  , @intOriginalInvoiceId			INT = NULL
+	  , @intOriginalInvoiceDetailId		INT = NULL
 	  , @intContractDetailId			INT
 	  , @intFromItemUOMId				INT
 	  , @intFromItemOrderedUOMId		INT
@@ -223,32 +231,34 @@ SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess
 
 WHILE ISNULL(@intUniqueId,0) > 0
 	BEGIN
-		SELECT @intContractDetailId		= NULL
-			 , @intFromItemUOMId		= NULL
-			 , @intFromItemOrderedUOMId	= NULL
-			 , @dblQty					= NULL
-			 , @dblQtyOrdered			= NULL
-			 , @dblConvertedQtyOrdered	= NULL
-			 , @intInvoiceDetailId		= NULL
-			 , @intInvoiceId			= NULL
-			 , @intTicketId				= NULL
-			 , @intTicketTypeId			= NULL
-			 , @intTicketType			= NULL
-			 , @strInOutFlag			= NULL
-			 , @ysnDestWtGrd			= NULL
-			 , @dblShippedQty			= NULL
-			 , @intShippedQtyUOMId		= NULL
-			 , @dblRemainingSchedQty	= NULL
-			 , @intLoadDetailId			= NULL
-			 , @intPurchaseSale			= NULL
-			 , @ysnFromReturn			= CAST(0 AS BIT)
-			 , @ysnLoad					= CAST(0 AS BIT)
-			 , @strPricing				= NULL
-			 , @strBatchId				= NULL
-			 , @strInvoiceNumber		= NULL
-			 , @strTransactionType		= NULL
-			 , @strItemNo				= NULL
-			 , @dtmDate					= NULL
+		SELECT @intContractDetailId			= NULL
+			 , @intFromItemUOMId			= NULL
+			 , @intFromItemOrderedUOMId		= NULL
+			 , @dblQty						= NULL
+			 , @dblQtyOrdered				= NULL
+			 , @dblConvertedQtyOrdered		= NULL
+			 , @intInvoiceDetailId			= NULL
+			 , @intInvoiceId				= NULL
+			 , @intOriginalInvoiceId		= NULL
+			 , @intOriginalInvoiceDetailId	= NULL
+			 , @intTicketId					= NULL
+			 , @intTicketTypeId				= NULL
+			 , @intTicketType				= NULL
+			 , @strInOutFlag				= NULL
+			 , @ysnDestWtGrd				= NULL
+			 , @dblShippedQty				= NULL
+			 , @intShippedQtyUOMId			= NULL
+			 , @dblRemainingSchedQty		= NULL
+			 , @intLoadDetailId				= NULL
+			 , @intPurchaseSale				= NULL
+			 , @ysnFromReturn				= CAST(0 AS BIT)
+			 , @ysnLoad						= CAST(0 AS BIT)
+			 , @strPricing					= NULL
+			 , @strBatchId					= NULL
+			 , @strInvoiceNumber			= NULL
+			 , @strTransactionType			= NULL
+			 , @strItemNo					= NULL
+			 , @dtmDate						= NULL
 
 		SELECT @intContractDetailId			= P.intContractDetailId
 			 , @intFromItemUOMId			= P.intItemUOMId
@@ -257,6 +267,8 @@ WHILE ISNULL(@intUniqueId,0) > 0
 			 , @dblQtyOrdered				= P.dblQtyOrdered
 			 , @intInvoiceDetailId			= P.intInvoiceDetailId
 			 , @intInvoiceId				= P.intInvoiceId
+			 , @intOriginalInvoiceId		= P.intOriginalInvoiceId
+			 , @intOriginalInvoiceDetailId	= P.intOriginalInvoiceDetailId
 			 , @ysnDestWtGrd				= P.ysnDestWtGrd
 			 , @dblShippedQty				= P.dblShippedQty
 			 , @intShippedQtyUOMId			= P.intShippedQtyUOMId
@@ -329,6 +341,8 @@ WHILE ISNULL(@intUniqueId,0) > 0
 					INSERT INTO #ARItemsForContracts (
 						  intInvoiceId
 						, intInvoiceDetailId
+						, intOriginalInvoiceId
+						, intOriginalInvoiceDetailId
 						, intItemId
 						, intContractDetailId
 						, intContractHeaderId
@@ -344,24 +358,28 @@ WHILE ISNULL(@intUniqueId,0) > 0
 						, strInvoiceNumber
 						, strItemNo
 						, strBatchId
+						, ysnFromReturn
 					)
-					SELECT intInvoiceId			= @intInvoiceId
-						, intInvoiceDetailId	= @intInvoiceDetailId
-						, intItemId				= @intItemId
-						, intContractDetailId	= @intContractDetailId
-						, intContractHeaderId	= @intContractHeaderId
-						, intEntityId			= @intEntityId
-						, intUserId				= @intEntityId
-						, dtmDate				= @dtmDate
-						, dblQuantity			= @dblConvertedQty
-						, dblBalanceQty			= @dblConvertedQty
-						, dblSheduledQty		= 0
-						, dblRemainingQty		= 0
-						, strType				= 'Contract Balance'
-						, strTransactionType	= @strTransactionType
-						, strInvoiceNumber		= @strInvoiceNumber
-						, strItemNo				= @strItemNo
-						, strBatchId			= @strBatchId
+					SELECT intInvoiceId					= @intInvoiceId
+						, intInvoiceDetailId			= @intInvoiceDetailId
+						, intOriginalInvoiceId			= @intOriginalInvoiceId
+						, intOriginalInvoiceDetailId	= @intOriginalInvoiceDetailId
+						, intItemId						= @intItemId
+						, intContractDetailId			= @intContractDetailId
+						, intContractHeaderId			= @intContractHeaderId
+						, intEntityId					= @intEntityId
+						, intUserId						= @intEntityId
+						, dtmDate						= @dtmDate
+						, dblQuantity					= @dblConvertedQty
+						, dblBalanceQty					= @dblConvertedQty
+						, dblSheduledQty				= 0
+						, dblRemainingQty				= 0
+						, strType						= 'Contract Balance'
+						, strTransactionType			= @strTransactionType
+						, strInvoiceNumber				= @strInvoiceNumber
+						, strItemNo						= @strItemNo
+						, strBatchId					= @strBatchId
+						, ysnFromReturn					= @ysnFromReturn
 				END
 				
 				IF ISNULL(@ysnFromReturn, 0) = 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3))
@@ -385,23 +403,23 @@ WHILE ISNULL(@intUniqueId,0) > 0
 						, strItemNo
 						, strBatchId
 					)
-					SELECT intInvoiceId			= @intInvoiceId
-						, intInvoiceDetailId	= @intInvoiceDetailId
-						, intItemId				= @intItemId
-						, intContractDetailId	= @intContractDetailId
-						, intContractHeaderId	= @intContractHeaderId
-						, intEntityId			= @intEntityId
-						, intUserId				= @intEntityId
-						, dtmDate				= @dtmDate
-						, dblQuantity			= @dblSchQuantityToUpdate
-						, dblBalanceQty			= 0
-						, dblSheduledQty		= @dblSchQuantityToUpdate
-						, dblRemainingQty		= 0
-						, strType				= 'Contract Scheduled'
-						, strTransactionType	= @strTransactionType
-						, strInvoiceNumber		= @strInvoiceNumber
-						, strItemNo				= @strItemNo
-						, strBatchId			= @strBatchId
+					SELECT intInvoiceId					= @intInvoiceId
+						, intInvoiceDetailId			= @intInvoiceDetailId
+						, intItemId						= @intItemId
+						, intContractDetailId			= @intContractDetailId
+						, intContractHeaderId			= @intContractHeaderId
+						, intEntityId					= @intEntityId
+						, intUserId						= @intEntityId
+						, dtmDate						= @dtmDate
+						, dblQuantity					= @dblSchQuantityToUpdate
+						, dblBalanceQty					= 0
+						, dblSheduledQty				= @dblSchQuantityToUpdate
+						, dblRemainingQty				= 0
+						, strType						= 'Contract Scheduled'
+						, strTransactionType			= @strTransactionType
+						, strInvoiceNumber				= @strInvoiceNumber
+						, strItemNo						= @strItemNo
+						, strBatchId					= @strBatchId
 										
 					IF ISNULL(@dblRemainingSchedQty, 0) <> 0 AND ISNULL(@dblConvertedQtyOrdered, 0) <> 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3)) AND @dblQty <> 0 AND ISNULL(@ysnLoad, 0) = 0
 						BEGIN

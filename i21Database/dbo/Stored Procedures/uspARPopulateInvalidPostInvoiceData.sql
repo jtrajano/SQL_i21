@@ -2203,23 +2203,23 @@ BEGIN
 	FROM #ARItemsForContracts
 	WHERE strType = 'Contract Balance'
 
-	INSERT INTO #ARInvalidInvoiceData (
-		  [intInvoiceId]
-		, [strInvoiceNumber]
-		, [strTransactionType]
-		, [intInvoiceDetailId]
-		, [intItemId]
-		, [strBatchId]
-		, [strPostingError]
-	)
-	SELECT [intInvoiceId]
-		, [strInvoiceNumber]
-		, [strTransactionType]
-		, [intInvoiceDetailId]
-		, [intItemId]
-		, [strBatchId]
-		, [strPostingError]
-	FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
+	-- INSERT INTO #ARInvalidInvoiceData (
+	-- 	  [intInvoiceId]
+	-- 	, [strInvoiceNumber]
+	-- 	, [strTransactionType]
+	-- 	, [intInvoiceDetailId]
+	-- 	, [intItemId]
+	-- 	, [strBatchId]
+	-- 	, [strPostingError]
+	-- )
+	-- SELECT [intInvoiceId]
+	-- 	, [strInvoiceNumber]
+	-- 	, [strTransactionType]
+	-- 	, [intInvoiceDetailId]
+	-- 	, [intItemId]
+	-- 	, [strBatchId]
+	-- 	, [strPostingError]
+	-- FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
 END
 
 IF @Post = @ZeroBit
