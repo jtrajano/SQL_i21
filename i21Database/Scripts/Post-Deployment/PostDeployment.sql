@@ -568,6 +568,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\TF\DefaultData\MO_Missouri.sql
 :r .\TF\DefaultData\MD_Maryland.sql
 :r .\TF\DefaultData\VA_Virginia.sql
+:r .\TF\DefaultData\DC_DistrictColumbia.sql
 :r .\TF\DefaultData\AfterUpgradeCleanup.sql
 
 --Integration

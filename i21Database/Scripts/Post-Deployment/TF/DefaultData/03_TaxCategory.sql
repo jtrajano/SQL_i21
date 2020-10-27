@@ -627,3 +627,23 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'VA', @TaxCategories = @TaxCa
 
 DELETE @TaxCategoryVA
 GO
+
+
+PRINT ('Deploying DC Tax Category')
+GO
+
+DECLARE @TaxCategoryDC AS TFTaxCategory
+
+INSERT INTO @TaxCategoryDC(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'DC', strTaxCategory = 'DC Excise Gasoline', intMasterId = 520001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'DC', strTaxCategory = 'DC Excise Diesel', intMasterId = 520002
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'DC', @TaxCategories = @TaxCategoryDC
+
+DELETE @TaxCategoryDC
+GO

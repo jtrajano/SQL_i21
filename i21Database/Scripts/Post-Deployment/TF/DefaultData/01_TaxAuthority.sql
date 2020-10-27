@@ -68,6 +68,7 @@ UNION ALL SELECT intTaxAuthorityId = 48, strTaxAuthorityCode = 'WV', strDescript
 UNION ALL SELECT intTaxAuthorityId = 49, strTaxAuthorityCode = 'WI', strDescription = 'Wisconsin', ysnFilingForThisTA = 0, intMasterId = 49
 UNION ALL SELECT intTaxAuthorityId = 50, strTaxAuthorityCode = 'WY', strDescription = 'Wyoming', ysnFilingForThisTA = 0, intMasterId = 50
 UNION ALL SELECT intTaxAuthorityId = 51, strTaxAuthorityCode = 'US', strDescription = 'Federal Government', ysnFilingForThisTA = 0, intMasterId = 51
+UNION ALL SELECT intTaxAuthorityId = 52, strTaxAuthorityCode = 'DC', strDescription = 'District of Columbia', ysnFilingForThisTA = 0, intMasterId = 52
 ) tblPatch
 
 SET IDENTITY_INSERT tblTFTaxAuthority ON
@@ -209,6 +210,7 @@ UNION ALL SELECT strColumnName = 'strDiversionNumber'
 UNION ALL SELECT strColumnName = 'strDiversionOriginalDestinationState'
 UNION ALL SELECT strColumnName = 'strTransactionType'
 UNION ALL SELECT strColumnName = 'strImportVerificationNumber'
+UNION ALL SELECT strColumnName = 'strReason'
 ) tblPatch
 
 MERGE	
@@ -303,6 +305,7 @@ UNION ALL SELECT intOriginDestinationStateId = 47, strOriginDestinationState = '
 UNION ALL SELECT intOriginDestinationStateId = 48, strOriginDestinationState = 'WV', intMasterId = 48
 UNION ALL SELECT intOriginDestinationStateId = 49, strOriginDestinationState = 'WI', intMasterId = 49
 UNION ALL SELECT intOriginDestinationStateId = 50, strOriginDestinationState = 'WY', intMasterId = 50
+UNION ALL SELECT intOriginDestinationStateId = 51, strOriginDestinationState = 'DC', intMasterId = 51
 
 EXEC uspTFUpgradeOriginDestinationState @OriginDestinationStates = @OriginDestinationStates
 GO

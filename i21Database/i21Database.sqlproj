@@ -2491,9 +2491,9 @@
     <Build Include="dbo\Tables\tblICTransactionSession.sql" />
     <Build Include="dbo\Tables\tblICEffectiveItemPrice.sql" />
     <Build Include="dbo\Tables\tblICEffectiveItemCost.sql" />
-	<Build Include="dbo\Functions\fnICGetItemCostByEffectiveDate.sql" />
-	<Build Include="dbo\Functions\fnICGetItemPriceByEffectiveDate.sql" />
-	<Build Include="dbo\Views\vyuICGetItemStockForShipment.sql" />
+    <Build Include="dbo\Functions\fnICGetItemCostByEffectiveDate.sql" />
+    <Build Include="dbo\Functions\fnICGetItemPriceByEffectiveDate.sql" />
+    <Build Include="dbo\Views\vyuICGetItemStockForShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogTransactionDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARInsertPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddMiscItemToInvoice.sql" />
@@ -9366,5 +9366,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\05_Locality.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\DC_DistrictColumbia.sql" />
   </ItemGroup>
 </Project>
