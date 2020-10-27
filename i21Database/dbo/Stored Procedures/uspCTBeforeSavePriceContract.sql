@@ -172,8 +172,8 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
-			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId
+			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 		END
 
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
@@ -223,8 +223,8 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
-			EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId
+			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 		END
 
 		IF @strRowState = 'Delete' AND ISNULL(@intFutOptTransactionId,0) > 0
@@ -256,8 +256,8 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
-			EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId
+			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 		END
 				
 		SELECT @intUniqueId = MIN(intUniqueId) FROM #ProcessFixationTicket WHERE intUniqueId > @intUniqueId

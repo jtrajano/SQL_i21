@@ -467,6 +467,8 @@ BEGIN
 								,[dblReportingRate]	
 								,[dblForeignRate]
 								,[strRateType]
+								,[intSourceEntityId]
+								,[intCommodityId]
 							)
 							EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] @intTransferStorageId,@intTransactionDetailId,@strBatchId,0,1,@intEntityId
 								

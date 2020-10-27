@@ -63,3 +63,9 @@ INCLUDE (
 	,intContractHeaderId
 ) 
 GO 
+
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_forDPR]
+	ON [dbo].[tblGRStorageHistory] ([intTransactionTypeId])
+	INCLUDE ([intCustomerStorageId],[intTicketId],[intInventoryReceiptId],[intInventoryShipmentId],[dblUnits],[dtmHistoryDate],[strType],[strTransferTicket],[strSettleTicket],[intSettleStorageId],[intTransferStorageId])
+
+GO

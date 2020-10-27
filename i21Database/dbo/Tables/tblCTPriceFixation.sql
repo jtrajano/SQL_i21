@@ -55,3 +55,4 @@ CREATE NONCLUSTERED INDEX [IX_tblCTPriceFixation_intContractDetailId]
 	INCLUDE (dblLotsFixed, dblFinalPrice)
 	
 GO
+GO

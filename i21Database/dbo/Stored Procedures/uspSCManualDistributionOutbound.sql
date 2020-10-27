@@ -149,7 +149,15 @@ DECLARE @convertedLoopContractUnits numeric(38,20)
 		END
 	end
 
-IF OBJECT_ID(N'tempdb..#tmpManualDistributionLineItem') IS NOT NULL DROP TABLE #tmpManualDistributionLineItem
+	IF OBJECT_ID(N'tempdb..#tmpManualDistributionLineItem') IS NOT NULL DROP TABLE #tmpManualDistributionLineItem
+
+	-- Get the next batch number
+	BEGIN 
+		DECLARE @strBatchId AS NVARCHAR(40)
+		SET @strBatchId = NULL 
+		EXEC dbo.uspSMGetStartingNumber 3, @strBatchId OUTPUT, NULL  
+	END
+
 
 SELECT 
 	*

@@ -32,21 +32,6 @@ INNER JOIN tblLGLoadCost C
 	ON A.intLoadId = C.intLoadId
 INNER JOIN tblSMCompanyLocation compLoc
     ON B.intSCompanyLocationId = compLoc.intCompanyLocationId
-INNER JOIN 
-(
-	SELECT 
-		GLD.intAccountId
-		,GLAcc.strAccountId 
-		,GLD.strTransactionId
-		,GLD.intTransactionId
-	FROM tblGLDetail GLD
-		INNER JOIN vyuGLAccountDetail GLAcc ON GLD.intAccountId = GLAcc.intAccountId
-	WHERE ysnIsUnposted = 0
-		AND GLD.strCode IN ('LG') AND GLAcc.intAccountCategoryId = 45
-) GL
-ON
-	GL.strTransactionId = A.strLoadNumber
-AND GL.intTransactionId = A.intLoadId
 LEFT JOIN (tblICInventoryReceiptItem receiptItem INNER JOIN tblICInventoryReceipt receipt
 			ON receipt.intInventoryReceiptId = receiptItem.intInventoryReceiptId AND receipt.intSourceType = 2)
 ON receiptItem.intSourceId = B.intLoadDetailId
@@ -56,6 +41,20 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = B.intItemUOMId
+OUTER APPLY 
+(
+	SELECT TOP 1
+		GLD.intAccountId
+		,GLAcc.strAccountId 
+		,GLD.strTransactionId
+		,GLD.intTransactionId
+	FROM tblGLDetail GLD
+		INNER JOIN vyuGLAccountDetail GLAcc ON GLD.intAccountId = GLAcc.intAccountId
+	WHERE ysnIsUnposted = 0
+		AND GLD.strCode IN ('LG') AND GLAcc.intAccountCategoryId = 45
+		AND GLD.strTransactionId = A.strLoadNumber
+		AND GLD.intTransactionId = A.intLoadId
+) GL
 WHERE 
 	A.ysnPosted = 1 
 AND A.intPurchaseSale = 2 --Outbound type is the only type that have AP Clearing for cost, this is also driven by company config

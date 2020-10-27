@@ -264,23 +264,24 @@ END
 
 		DECLARE  @tmpColList TABLE(
 			strType nvarchar(max),
-			intSeqNo int
+			intOrderId int
 		)
 
 		select @cols = STUFF((select ',' + QUOTENAME(strType) 
 							from @List
 							where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
-							group by strType, intSeqNo
-							order by intSeqNo, strType
+							group by strType, intOrderId
+							order by intOrderId, strType
 					FOR XML PATH(''), TYPE
 					).value('.', 'NVARCHAR(MAX)') 
 				,1,1,'')
 
-		insert into @tmpColList (strType,intSeqNo)
-		SELECT DISTINCT strType,intSeqNo
+		
+		insert into @tmpColList (strType,intOrderId)
+		SELECT DISTINCT strType,intOrderId
 					from @List
 					where strType not in('Position') and strType <> CASE WHEN isnull(@intVendorId,0) = 0 THEN '' ELSE 'Net Hedge' END
-					order by intSeqNo, strType
+					order by intOrderId, strType
 					--group by strType
 
 
@@ -289,7 +290,7 @@ END
 					DECLARE @strCol AS NVARCHAR(max)
 					SET @colCtr = @colCtr + 1;
 
-					SELECT TOP 1 @strCol = strType FROM @tmpColList ORDER BY intSeqNo, strType
+					SELECT TOP 1 @strCol = strType FROM @tmpColList ORDER BY intOrderId, strType
 			
 
 					SET @colstry = @colstry + '''' + @strCol + ''' as col' + cast(@colCtr as nvarchar(20)) + ','
