@@ -1081,6 +1081,7 @@ BEGIN TRY
 							,LD.dtmCopyReceivedDate
 						FROM tblLGLoadDocuments LD WITH (NOLOCK)
 						WHERE LD.intLoadId = @intLoadShippingInstructionId
+						ORDER BY LD.intLoadDocumentId
 
 						INSERT INTO tblLGLoadNotifyParties (
 							intConcurrencyId
@@ -1106,6 +1107,7 @@ BEGIN TRY
 							,LN.strText
 						FROM tblLGLoadNotifyParties LN WITH (NOLOCK)
 						WHERE LN.intLoadId = @intLoadShippingInstructionId
+						ORDER BY LN.intLoadNotifyPartyId
 					END
 					ELSE
 					BEGIN
