@@ -3,6 +3,17 @@ AS
 
 DELETE FROM tblICImportStagingItemLocation WHERE strImportIdentifier <> @strIdentifier
 
+DECLARE @Duplicates TABLE (intRecordNo INT, strItemNo NVARCHAR(150), strLocation NVARCHAR(250))
+;WITH cte0 AS
+(
+   SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
+   FROM tblICImportStagingItemLocation
+   WHERE strImportIdentifier = @strIdentifier
+)
+INSERT INTO @Duplicates (intRecordNo, strItemNo, strLocation)
+SELECT cte0.intLineNo, cte0.strItemNo, cte0.strLocation FROM cte0 
+WHERE RowNumber > 1;
+
 ;WITH cte AS
 (
    SELECT *, ROW_NUMBER() OVER(PARTITION BY strItemNo, strLocation ORDER BY strItemNo, strLocation) AS RowNumber
@@ -461,6 +472,10 @@ DECLARE @LogId INT
 SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
 FROM tblICImportLog 
 WHERE strUniqueId = @strIdentifier
+
+INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
+SELECT @LogId, s.intRecordNo, 'Item No/Location', 'Skipped', s.strItemNo + '/' + s.strLocation, 'Duplicate Record', 'Failed', 'Warning', 1
+FROM @Duplicates s
 
 INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
 SELECT @LogId, s.intLineNo, 'Location', 'Skipped', s.strLocation, 'Invalid Location', 'Failed', 'Error', 1
