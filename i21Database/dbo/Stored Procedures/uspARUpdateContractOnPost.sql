@@ -13,19 +13,28 @@ BEGIN TRY
 
 	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARItemsForContracts)
 		BEGIN
-			DECLARE @intInvoiceDetailId		INT = NULL
-				  , @intContractDetailId	INT = NULL
-				  , @strType				NVARCHAR(100) = NULL
-				  , @dblBalanceQty			NUMERIC(18, 6) = 0
-				  , @dblSheduledQty			NUMERIC(18, 6) = 0
-				  , @dblRemainingQty		NUMERIC(18, 6) = 0
+			DECLARE @intInvoiceId				INT = NULL
+				  , @intInvoiceDetailId			INT = NULL
+				  , @intOriginalInvoiceId		INT = NULL
+				  , @intOriginalInvoiceDetailId	INT = NULL
+				  , @intContractDetailId		INT = NULL				  
+				  , @strType					NVARCHAR(100) = NULL
+				  , @dblBalanceQty				NUMERIC(18, 6) = 0
+				  , @dblSheduledQty				NUMERIC(18, 6) = 0
+				  , @dblRemainingQty			NUMERIC(18, 6) = 0
+				  , @dblQtyToReturn				NUMERIC(18, 6) = 0
+				  , @ysnFromReturn				BIT = 0
 
-			SELECT TOP 1 @intInvoiceDetailId	= intInvoiceDetailId
-					   , @intContractDetailId	= intContractDetailId
-					   , @strType				= strType
-					   , @dblBalanceQty			= dblBalanceQty
-					   , @dblSheduledQty		= dblSheduledQty
-					   , @dblRemainingQty		= dblRemainingQty
+			SELECT TOP 1 @intInvoiceId					= intInvoiceId
+					   , @intInvoiceDetailId			= intInvoiceDetailId
+					   , @intOriginalInvoiceId			= intOriginalInvoiceId
+					   , @intOriginalInvoiceDetailId	= intOriginalInvoiceDetailId
+					   , @intContractDetailId			= intContractDetailId
+					   , @strType						= strType
+					   , @dblBalanceQty					= dblBalanceQty
+					   , @dblSheduledQty				= dblSheduledQty
+					   , @dblRemainingQty				= dblRemainingQty
+					   , @ysnFromReturn					= ysnFromReturn
 			FROM #ARItemsForContracts
 
 			IF @strType = 'Contract Balance' AND @dblBalanceQty <> 0
@@ -36,6 +45,17 @@ BEGIN TRY
 													  , @intExternalId		 = @intInvoiceDetailId
 													  , @strScreenName		 = 'Invoice'
 													  , @ysnFromInvoice 	 = 1
+
+					IF ISNULL(@ysnFromReturn, 0) = 1 AND @intOriginalInvoiceDetailId IS NOT NULL
+						BEGIN
+							SET @dblQtyToReturn = ABS(@dblBalanceQty)
+							
+							EXEC dbo.uspCTProcessInvoiceReturn @intInvoiceDetailId		= @intOriginalInvoiceDetailId                --> Returned Invoice Detail Id
+														     , @intInvoiceId			= @intOriginalInvoiceId                    --> Returned Invoice Id
+														     , @intNewInvoiceDetialId	= @intInvoiceDetailId            --> (Credit Memo) Invoice Detail Id
+														     , @intNewInvoiceId			= @intInvoiceId                --> (Credit Memo) Invoice Id
+														     , @dblQuantity				= @dblQtyToReturn            --> (Credit Memo) Return Quantity - must be positive
+						END
 				END
 
 			IF @strType = 'Contract Scheduled' AND @dblSheduledQty <> 0
