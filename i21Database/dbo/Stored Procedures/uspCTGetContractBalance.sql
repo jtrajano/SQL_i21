@@ -381,7 +381,7 @@ BEGIN TRY
 	   ,Shipment.dtmShipDate
 	   ,@dtmEndDate AS dtmEndDate
 	   ,dblQuantity = CASE 
-	   					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+	   					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN CH.dblQuantityPerLoad ELSE 0 END)
 						ELSE
 							ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
 							CASE
