@@ -65,6 +65,7 @@ CREATE TABLE #tmp (
 	, dblSuggestedQty NUMERIC(38, 20)
 	, dblLeadTime NUMERIC(38, 20)
 	, strCounted NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
+	, intCountGroupId INT NULL
 	, ysnCountedDaily BIT NULL
 	, ysnCountBySINo BIT NULL
 	, strSerialNoBegin NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL
@@ -122,6 +123,7 @@ INSERT INTO #tmp (
 	, dblSuggestedQty
 	, dblLeadTime
 	, strCounted
+	, intCountGroupId
 	, ysnCountedDaily
 	, ysnCountBySINo
 	, strSerialNoBegin
@@ -178,6 +180,7 @@ SElECT
 	, dblSuggestedQty           = s.dblSuggestedQty
 	, dblLeadTime               = s.dblLeadTime
 	, strCounted                = s.strCounted
+	, intCountGroupId			= cg.intCountGroupId
 	, ysnCountedDaily           = s.ysnCountedDaily
 	, ysnCountBySINo            = s.ysnCountbySerialNumber
 	, strSerialNoBegin          = s.strSerialNumberBegin
@@ -217,6 +220,7 @@ FROM tblICImportStagingItemLocation s
 	LEFT OUTER JOIN tblICUnitMeasure g ON LOWER(g.strUnitMeasure) = LTRIM(RTRIM(LOWER(s.strGrossNetUOM)))
 	LEFT OUTER JOIN tblICItemUOM gs ON gs.intUnitMeasureId = g.intUnitMeasureId
 		AND gs.intItemId = i.intItemId
+	LEFT OUTER JOIN tblICCountGroup cg ON LOWER(cg.strCountGroup) = LTRIM(RTRIM(LOWER(s.strInventoryCountGroup)))
 WHERE s.strImportIdentifier = @strIdentifier
 	
 CREATE TABLE #output (
@@ -268,7 +272,8 @@ USING
 		, dblMinOrder               
 		, dblSuggestedQty           
 		, dblLeadTime               
-		, strCounted                
+		, strCounted
+		, intCountGroupId
 		, ysnCountedDaily           
 		, ysnCountBySINo            
 		, strSerialNoBegin          
@@ -328,6 +333,7 @@ UPDATE SET
 	, dblSuggestedQty = source.dblSuggestedQty
 	, dblLeadTime = source.dblLeadTime
 	, strCounted = source.strCounted
+	, intCountGroupId = source.intCountGroupId
 	, ysnCountedDaily = source.ysnCountedDaily
 	, ysnCountBySINo = source.ysnCountBySINo
 	, strSerialNoBegin = source.strSerialNoBegin
@@ -385,6 +391,7 @@ INSERT
 	, dblSuggestedQty           
 	, dblLeadTime               
 	, strCounted                
+	, intCountGroupId
 	, ysnCountedDaily           
 	, ysnCountBySINo            
 	, strSerialNoBegin          
@@ -442,7 +449,8 @@ VALUES
 	, dblMinOrder               
 	, dblSuggestedQty           
 	, dblLeadTime               
-	, strCounted                
+	, strCounted   
+	, intCountGroupId
 	, ysnCountedDaily           
 	, ysnCountBySINo            
 	, strSerialNoBegin          
