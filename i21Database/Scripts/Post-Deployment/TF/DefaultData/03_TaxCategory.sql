@@ -647,3 +647,29 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'DC', @TaxCategories = @TaxCa
 
 DELETE @TaxCategoryDC
 GO
+
+
+PRINT ('Deploying GA Tax Category')
+GO
+
+DECLARE @TaxCategoryGA AS TFTaxCategory
+
+INSERT INTO @TaxCategoryGA(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Gasoline', intMasterId = 100001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Fuel Oils - Clear', intMasterId = 100002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Fuel Oils - Dyed', intMasterId = 100003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Aviation Gasoline to Licensed Purchaser', intMasterId = 100004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Aviation Gasoline to Unlicensed Purchaser', intMasterId = 100005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise LPG', intMasterId = 100006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excixe Special Fuel (inc. CNG)', intMasterId = 100007
+
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'GC', @TaxCategories = @TaxCategoryGA
+
+DELETE @TaxCategoryGA
+GO

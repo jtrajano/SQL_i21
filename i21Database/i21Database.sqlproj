@@ -9369,4 +9369,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\TF\DefaultData\DC_DistrictColumbia.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\GA_Georgia.sql" />
+  </ItemGroup>
 </Project>
