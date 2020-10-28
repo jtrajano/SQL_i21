@@ -478,22 +478,6 @@ BEGIN TRY
 										@strScreenName			=	'Auto - Scale'
 							END
 						END
-					END
-					ELSE
-					BEGIN
-						IF (@strDistributionOption = 'LOD')
-						BEGIN
-							SET @dblInreaseSchBy  = @dblNetUnits - ISNULL(@dblScheduleQty,0)
-							IF(@dblInreaseSchBy <> 0)
-							BEGIN
-								EXEC	uspCTUpdateScheduleQuantity 
-										@intContractDetailId	=	@intContractDetailId,
-										@dblQuantityToUpdate	=	@dblInreaseSchBy,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
-							END
-						END
 						ELSE
 						BEGIN
 							EXEC	uspCTUpdateScheduleQuantity 
