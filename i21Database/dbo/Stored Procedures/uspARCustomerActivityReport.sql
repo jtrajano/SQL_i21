@@ -614,6 +614,8 @@ EXEC dbo.uspARCustomerAgingAsOfDateReport @dtmDateFrom		= @dtmDateFrom
 										, @strCustomerIds	= @strCustomerIds
 										, @intEntityUserId	= @intEntityUserId
 
+DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
+
 IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Totals Only'
 	BEGIN
 		--#TRANSACTIONS
@@ -672,7 +674,6 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			 , dblTotalTax				= CAST(0 AS NUMERIC(18, 6))
 		FROM #PAYMENTS P
 
-		DELETE FROM tblARCustomerActivityStagingTable WHERE intEntityUserId = @intEntityUserId
 		INSERT INTO tblARCustomerActivityStagingTable (
 			  strReportDateRange
 			, dtmLastPaymentDate
@@ -805,7 +806,7 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 		ORDER BY TRANSACTIONS.dtmTransactionDate
 	END
 
-IF @ysnPrintRecap = 1
+IF @ysnPrintRecap = 1 OR @strFormattingOptions = 'Product Recap Totals Only'
 	BEGIN
 		EXEC dbo.uspARInvoiceProductRecapReport @dtmDateFrom = @dtmDateFrom
 											  , @dtmDateTo = @dtmDateTo
