@@ -144,7 +144,6 @@ WHERE
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND (ARID.[intOriginalInvoiceDetailId] IS NULL OR (ARID.[intSourceId] = 2 AND ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped]))))
 
 INSERT INTO #ARItemsForCosting
 	([intItemId]
@@ -241,5 +240,67 @@ WHERE
 	AND ISNULL(ARIC.[strType],'') NOT IN ('Finished Good','Comment')
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)	
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
+
+-- Final Invoice
+INSERT INTO #ARItemsForCosting
+	([intItemId]
+	,[intItemLocationId]
+	,[intItemUOMId]
+	,[dtmDate]
+	,[dblQty]
+	,[dblUOMQty]
+	,[dblCost]
+	,[dblSalesPrice]
+	,[intCurrencyId]
+	,[dblExchangeRate]
+	,[intTransactionId]
+	,[intTransactionDetailId]
+	,[strTransactionId]
+	,[intTransactionTypeId]
+	,[intLotId]
+	,[intSubLocationId]
+	,[intStorageLocationId]
+	,[strActualCostId]
+	,[intForexRateTypeId]
+	,[dblForexRate]
+	,[intStorageScheduleTypeId]
+    ,[dblUnitRetail]
+	,[intCategoryId]
+	,[dblAdjustRetailValue]
+	,[strType]
+) 
+SELECT
+	ARIC.[intItemId]
+	,ARIC.[intItemLocationId]
+	,ARIC.[intItemUOMId]
+	,ARIC.[dtmDate]
+	,[dblQty] = ARIDP.[dblQtyShipped]
+	,ARIC.[dblUOMQty]
+	,ARIC.[dblCost]
+	,ARIC.[dblSalesPrice]
+	,ARIC.[intCurrencyId]
+	,ARIC.[dblExchangeRate]
+	,ARIC.[intTransactionId]
+	,ARIC.[intTransactionDetailId]
+	,ARIC.[strTransactionId]
+	,ARIC.[intTransactionTypeId]
+	,ARIC.[intLotId]
+	,ARIC.[intSubLocationId]
+	,ARIC.[intStorageLocationId]
+	,ARIC.[strActualCostId]
+	,ARIC.[intForexRateTypeId]
+	,ARIC.[dblForexRate]
+	,ARIC.[intStorageScheduleTypeId]
+    ,ARIC.[dblUnitRetail]
+	,ARIC.[intCategoryId]
+	,ARIC.[dblAdjustRetailValue]
+	,ARID.[strType]
+FROM #ARItemsForCosting ARIC
+INNER JOIN #ARPostInvoiceDetail ARID
+ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
+INNER JOIN tblARInvoiceDetail ARIDP
+ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
+WHERE ARID.[intSourceId] = 2
+AND ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped]
 
 RETURN 1
