@@ -40,6 +40,9 @@ SC.intContractSequence,
 SC.dblNetUnits,
 SC.dtmTicketDateTime
 FROM tblSCTicket SC  
-INNER JOIN vyuICGetInventoryShipmentItem ICSI ON SC.strTicketNumber = ICSI.strSourceNumber AND SC.intInventoryReceiptId = ICSI.intInventoryShipmentId 
+INNER JOIN vyuICGetInventoryShipmentItem ICSI
+    ON SC.intTicketId = ICSI.intSourceId
+    AND SC.intItemId = ICSI.intItemId
+    AND ICSI.strSourceType = 'Scale'
 LEFT JOIN vyuGRGetStorageTickets GRSC ON SC.intTicketId = GRSC.intTicketId  
 LEFT JOIN tblGRStorageType GRST ON GRST.strStorageTypeCode = SC.strDistributionOption
