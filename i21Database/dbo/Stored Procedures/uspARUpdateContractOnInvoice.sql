@@ -127,7 +127,7 @@ BEGIN TRY
 		D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.[intInventoryShipmentItemId] IS NULL
-		AND D.[intSalesOrderDetailId] IS NULL
+		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
@@ -382,7 +382,7 @@ BEGIN TRY
 				FROM tblSCTicket WHERE intTicketId = @intTicketId
 			END
 			
-		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing = 'Subsystem - Direct'		
+		IF ((ISNULL(@intTicketId, 0) = 0 AND ISNULL(@intTicketTypeId, 0) <> 9 AND (ISNULL(@intTicketType, 0) <> 6 AND ISNULL(@strInOutFlag, '') <> 'O')) AND (ISNULL(@intInventoryShipmentItemId, 0) = 0) AND ISNULL(@intLoadDetailId,0) = 0) OR @strPricing IN ('Subsystem - Direct', 'MANUAL OVERRIDE')	
 			BEGIN
 				EXEC	uspCTUpdateScheduleQuantity
 						@intContractDetailId	=	@intContractDetailId,
