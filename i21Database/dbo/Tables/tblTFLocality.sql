@@ -10,3 +10,7 @@
 	CONSTRAINT [PK_tblTFLocality] PRIMARY KEY CLUSTERED ([intLocalityId] ASC),
 	CONSTRAINT [FK_tblTFLocality_tblTFTaxAuthority] FOREIGN KEY ([intTaxAuthorityId]) REFERENCES [dbo].[tblTFTaxAuthority] ([intTaxAuthorityId])
 )
+GO
+
+CREATE INDEX [IX_tblTFLocality_intMasterId] ON [dbo].[tblTFLocality] ([intMasterId])
+GO
