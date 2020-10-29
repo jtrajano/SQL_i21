@@ -39,7 +39,7 @@ AS
 				,CC.strPayToReceiveFrom
 				,CC.strReferenceNo
 				,CC.intContractCostRefId
-    			,ysnFromBasisComponent = CC.ysnBasis,
+				,CC.ysnFromBasisComponent,
 
 				IM.strItemNo, 
 				IM.strDescription strItemDescription,
