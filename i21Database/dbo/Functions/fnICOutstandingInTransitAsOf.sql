@@ -17,7 +17,7 @@ SELECT
 	, intTransactionId = tblInTransit.intTransactionId
 	, intTransactionDetailId = tblInTransit.intTransactionDetailId
 	, tblInTransit.intInventoryTransactionId
-	, dblInTransitQty = tblInTransit.dblInTransitQtyInStockUOM
+	, dblInTransitQty = ROUND(tblInTransit.dblInTransitQtyInStockUOM, 3)
 	, dtmDate = dbo.fnRemoveTimeOnDate(tblInTransit.dtmDate) 
 FROM 
 	tblICItem i
@@ -82,7 +82,7 @@ SELECT
 	, intTransactionId = tblInTransit.intTransactionId
 	, intTransactionDetailId = tblInTransit.intTransactionDetailId
 	, tblInTransit.intInventoryTransactionId
-	, dblInTransitQty = tblInTransit.dblInTransitQtyInStockUOM
+	, dblInTransitQty = ROUND(tblInTransit.dblInTransitQtyInStockUOM, 3)
 	, dtmDate = dbo.fnRemoveTimeOnDate(tblInTransit.dtmDate)
 FROM 
 	tblICItem i
