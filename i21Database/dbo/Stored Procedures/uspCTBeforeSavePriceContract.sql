@@ -172,7 +172,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
 			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 		END
 
@@ -223,7 +223,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationDetailId = @intPriceFixationDetailId
 			EXEC uspCTPriceFixationDetailDelete @intPriceFixationDetailId = @intPriceFixationDetailId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 		END
 
@@ -256,7 +256,7 @@ BEGIN TRY
 		
 		IF @strRowState = 'Delete'
 		BEGIN
-			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
+			EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationTicketId = @intPriceFixationTicketId
 			EXEC uspCTPriceFixationDetailDelete @intPriceFixationTicketId = @intPriceFixationTicketId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
 		END
 				
