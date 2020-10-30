@@ -187,6 +187,7 @@ EXEC dbo.uspCMPostBankTransaction
 		@ysnPost = 1
 		,@ysnRecap = 0
 		,@strTransactionId = @strTransactionId
+		,@intUserId = @intUserId
 		,@isSuccessful = @isAddSuccessful OUTPUT
 		,@message_id = @msg_id OUTPUT
 
