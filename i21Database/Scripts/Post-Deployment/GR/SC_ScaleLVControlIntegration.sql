@@ -1,5 +1,8 @@
 ﻿IF NOT EXISTS(SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'gasctmst')
 BEGIN
+	--any modification in below table definition should also update the column definition in the service 
+	-- use this formula in excel =CONCATENATE("new column_definition(""", A2, """,", D2, "),")
+	-- purpose is to avoid string will be truncated error 
 	EXEC('
 
 	CREATE TABLE [dbo].[gasctmst](
@@ -1018,13 +1021,17 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							from tblSCScaleSetup 
 								where intScaleSetupId = @scale_setup
 
+						declare @discount_calculation_success_message nvarchar(100) = ''Success''
+						declare @discount_captured_message nvarchar(max) = ''''
+						declare @discount_has_issue bit = 0
+
 						declare @calculated_discount table (
 								intExtendedKey int
 								,dblFrom DECIMAL(24, 6)
 								,dblTo DECIMAL(24, 6)
 								,dblDiscountAmount DECIMAL(24, 6)
 								,dblShrink DECIMAL(24, 6)
-								,strMessage nvarchar(50)
+								,strMessage nvarchar(max)
 								,intDiscountCalculatingOptionId int
 								,strDiscountChargeType nvarchar(50)
 								,strCalculationDiscountOption nvarchar(50)
@@ -1053,6 +1060,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						declare @current_reading DECIMAL(24, 6)
 						declare @current_discount_result DECIMAL(24, 6)
 						declare @current_shrink_result DECIMAL(24, 6)
+						declare @current_discount_message nvarchar(max)
 
 
 						select @current_discount_id = min(id) from @discounts_table
@@ -1074,9 +1082,15 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							
 							select @current_discount_result = dblDiscountAmount
 								, @current_shrink_result = dblShrink
+								, @current_discount_message = strMessage
 							from @calculated_discount
 
-							
+							if @current_discount_message <> @discount_calculation_success_message and @discount_has_issue = 0
+							begin
+								select @discount_captured_message = @current_discount_message
+									,@discount_has_issue = 1
+
+							end
 
 							update tblSCTicketDiscountLVStaging
 								set dblShrinkPercent = @current_shrink_result
@@ -1182,7 +1196,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						declare @validation_message nvarchar(max)
 						
 
-						select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket)
+						select @validation_message = dbo.fnSCValidateTicketStagingTable(@newLVTicket) + isnull(LTRIM(RTRIM(@discount_captured_message)), '''')
 						--select @validation_message
 						if @validation_message = ''''
 						begin
