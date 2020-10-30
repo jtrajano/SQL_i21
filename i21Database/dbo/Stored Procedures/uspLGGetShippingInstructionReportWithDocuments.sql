@@ -194,7 +194,7 @@ BEGIN
 		,strCompanyCountry = @strCountry 
 		,strCompanyPhone = @strPhone
 		,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
-		,strCityAndDate = @strCity + ', '+ DATENAME(dd,getdate()) + ' ' + DATENAME(MONTH,getdate()) + ' ' + DATENAME(yyyy,getdate())
+		,strCityAndDate = @strCity + ', '+ dbo.fnConvertDateToReportDateFormat(GETDATE(), 0)
 		,strShipmentPeriod
 		,strDestinationCity
 		,strMarkingInstruction
