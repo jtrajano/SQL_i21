@@ -108,7 +108,7 @@ BEGIN
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblSMFreightTerms FT ON CH.intFreightTermId = FT.intFreightTermId
-	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId AND FT.strINCOLocationType = 'City'
+	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId
 	LEFT JOIN tblSMCountry CN ON CN.intCountryID = CH.intCountryId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CH.intWarehouseId AND FT.strINCOLocationType <> 'City'
 	LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
