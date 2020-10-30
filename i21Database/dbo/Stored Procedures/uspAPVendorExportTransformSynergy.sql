@@ -35,11 +35,13 @@ USING
 		ysnUserShipperWeight	=	0,
 		intVendorType			=	0,
 		strVendorType			=	'Both',
-		intEntityLocationId		=	vndStg.intEntityLocationId,
-		strLocationName			=	vndStg.strLocationName
+		intEntityLocationId		=	vndLocStg.intEntityLocationId,
+		strLocationName			=	vndLocStg.strLocationName
 	FROM tblEMEntityStaging entStg
 	INNER JOIN tblAPVendorStaging vndStg
 		ON entStg.intEntityId = vndStg.intEntityId
+	INNER JOIN tblEMEntityLocationStaging vndLocStg
+		ON vndLocStg.intEntityId = vndStg.intEntityId
 	INNER JOIN tblEMEntityToContactStaging cntcStg
 		ON entStg.intEntityId = cntcStg.intEntityId
 	INNER JOIN tblEMEntityContactDataStaging cntcDataStg
