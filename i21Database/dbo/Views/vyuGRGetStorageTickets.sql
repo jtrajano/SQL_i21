@@ -23,7 +23,7 @@ SELECT DISTINCT
     ,intContractHeaderId                = case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.intContractHeaderId else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.intContractHeaderId ELSE CH_Transfer.intContractHeaderId END end
     ,intContractDetailId				= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractDetailId is not null) then GHistory.intContractDetailId else CASE WHEN CS.ysnTransferStorage = 0 THEN CD_Ticket.intContractDetailId ELSE CD_Transfer.intContractDetailId END end
     ,strContractNumber					= case when (ST.ysnDPOwnedType = 1 and GHistory.intContractHeaderId is not null) then GHistory.strContractNumber else CASE WHEN CS.ysnTransferStorage = 0 THEN CH_Ticket.strContractNumber ELSE CH_Transfer.strContractNumber END end
-    ,intTicketId						= ISNULL(SC.intTicketId,0)
+    ,intTicketId						= SC.intTicketId
     ,dblDiscountUnPaid					= ISNULL(dblDiscountsDue,0) - ISNULL(dblDiscountsPaid,0)
     ,dblStorageUnPaid					= ISNULL(dblStorageDue,0) - ISNULL(dblStoragePaid,0)
     ,strReceiptNumber					= IR.strReceiptNumber
