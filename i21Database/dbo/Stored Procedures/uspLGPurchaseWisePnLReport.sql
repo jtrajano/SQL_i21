@@ -315,7 +315,7 @@ FROM
 					,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM (intItemUOMId, ToWUOM.intItemUOMId, dblQtyShipped) 
 									* CASE WHEN iv.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END
 					FROM tblARInvoiceDetail ivd
-					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId) IVD 
+					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Standard') IVD 
 				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
 			WHERE IVD.ysnPosted = 1 
 				AND IVD.intContractDetailId = SCD.intContractDetailId
