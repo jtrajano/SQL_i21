@@ -280,6 +280,6 @@ FROM
 		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
 				t3.intBillId = t1.intBillId 
 					and isnull(t3.intInventoryReceiptItemId, 0) = isnull(t1.intInventoryReceiptItemId, 0)
-					and t3.intLinkingId = t1.intLinkingId
+					and ISNULL(t3.intLinkingId, 0) = ISNULL(t1.intLinkingId, 0)
 	WHERE t3.intItemId IS NOT NULL 
 )t	
