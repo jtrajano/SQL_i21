@@ -660,16 +660,16 @@ INSERT INTO @TaxCategoryGA(
 	, strTaxCategory
 	, intMasterId
 )
-SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Gasoline', intMasterId = 100001
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Fuel Oils - Clear', intMasterId = 100002
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Fuel Oils - Dyed', intMasterId = 100003
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Aviation Gasoline to Licensed Purchaser', intMasterId = 100004
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise Aviation Gasoline to Unlicensed Purchaser', intMasterId = 100005
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excise LPG', intMasterId = 100006
-UNION ALL SELECT intTaxCategoryId = 0, strState = 'GC', strTaxCategory = 'GA Excixe Special Fuel (inc. CNG)', intMasterId = 100007
+SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Gasoline', intMasterId = 100001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Fuel Oils - Clear', intMasterId = 100002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Fuel Oils - Dyed', intMasterId = 100003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Aviation Gasoline to Licensed Purchaser', intMasterId = 100004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise Aviation Gasoline to Unlicensed Purchaser', intMasterId = 100005
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excise LPG', intMasterId = 100006
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'GA', strTaxCategory = 'GA Excixe Special Fuel (inc. CNG)', intMasterId = 100007
 
 
-EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'GC', @TaxCategories = @TaxCategoryGA
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'GA', @TaxCategories = @TaxCategoryGA
 
 DELETE @TaxCategoryGA
 GO

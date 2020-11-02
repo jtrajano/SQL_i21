@@ -55,7 +55,8 @@ UPDATE A
 					THEN 'Underpayment'
 					ELSE NULL
 					END,
-		A.strBillId = B.strBillId
+		A.strBillId = B.strBillId,
+		A.strVendorOrderNumber = A.strStore + '-' + A.strVendorOrderNumber
 FROM tblAPImportPaidVouchersForPayment A
 INNER JOIN cte cte ON cte.intId = A.intId
 OUTER APPLY	(
