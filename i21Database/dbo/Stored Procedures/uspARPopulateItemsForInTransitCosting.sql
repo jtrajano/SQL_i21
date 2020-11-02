@@ -110,7 +110,8 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty] * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
+	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/AVGT.dblTotalQty, 2) * ICIT.[dblQty]
+	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -188,6 +189,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	--,[dblQty]                       = - ROUND(ARID.dblQtyShipped/ CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
 	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(25, 13))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(25, 13))) * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -247,6 +249,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
 	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(25, 13)))  * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -685,7 +688,7 @@ WHERE
 	ARID.[intSourceId] = 2
 	AND ARID.[ysnFromProvisional] = 1 
 	AND ARID.[ysnProvisionalWithGL] = 1
-	AND ARID.[strTransactionType] = 'Invoice'
+	AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
 	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
     AND ARID.[intTicketId] IS NULL
@@ -699,7 +702,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= -ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal)
+	,[dblQty]						= -ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], CASE WHEN ARID.[dblShipmentNetWt] > ARID.[dblShipmentNetWtProvisional] THEN ARID.[dblShipmentNetWtProvisional] ELSE ARID.[dblShipmentNetWt] END), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -742,6 +745,7 @@ FROM
 	, ARPID.ysnProvisionalWithGL
 	, INVD.intItemWeightUOMId
 	, ARPID.dblShipmentNetWt
+	, dblShipmentNetWtProvisional = INVD.dblShipmentNetWt
 FROM tblARInvoiceDetail INVD
 INNER JOIN #ARPostInvoiceDetail ARPID
 ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
@@ -783,7 +787,7 @@ WHERE
 	ARID.[intSourceId] = 2
 	AND ARID.[ysnFromProvisional] = 1 
 	AND ARID.[ysnProvisionalWithGL] = 1
-	AND ARID.[strTransactionType] = 'Invoice'
+	AND ARID.[strTransactionType] IN ('Invoice', 'Credit Memo')
 	AND ISNULL(LG.[intPurchaseSale], 0) IN (2,3)
 	AND ISNULL(ICS.[intInventoryShipmentItemId], 0) = 0
     AND ARID.[intTicketId] IS NULL
@@ -841,7 +845,8 @@ FROM
 	, ARPID.ysnProvisionalWithGL
 FROM tblARInvoiceDetail INVD
 INNER JOIN #ARPostInvoiceDetail ARPID
-ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId) ARID
+ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
+AND INVD.dblQtyShipped <> ARPID.dblQtyShipped) ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -872,7 +877,7 @@ WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARID.[intSourceId] = 2
 	AND ARID.[ysnFromProvisional] = 1 
 	AND ARID.[ysnProvisionalWithGL] = 1
-	AND ARID.[strTransactionType] = 'Invoice'
+	AND ARID.[strTransactionType]  IN ('Invoice', 'Credit Memo')
     AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
 
 UNION ALL
@@ -883,7 +888,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= -ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], ISNULL(ARID.[dblQtyShipped], ICS.dblQuantity)), @ZeroDecimal)
+	,[dblQty]						= -ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.intItemUOMId, ICIT.[intItemUOMId], CASE WHEN ARID.[dblQtyShipped] > ARID.[dblQtyShippedProvisional] THEN ISNULL(ARID.[dblQtyShippedProvisional], ICS.dblQuantity) ELSE ISNULL(ARID.[dblQtyShipped], ICS.dblQuantity) END), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -920,6 +925,7 @@ FROM
 	, INVD.dblCurrencyExchangeRate
 	, ARPID.intSourceId
 	, ARPID.dblQtyShipped
+	, dblQtyShippedProvisional = INVD.dblQtyShipped
 	, INVD.intLotId
 	, INVD.intItemUOMId
 	, INVD.intTicketId
@@ -959,7 +965,7 @@ WHERE ISNULL(ARID.[intLoadDetailId], 0) = 0
 	AND ARID.[intSourceId] = 2
 	AND ARID.[ysnFromProvisional] = 1 
 	AND ARID.[ysnProvisionalWithGL] = 1
-	AND ARID.[strTransactionType] = 'Invoice'
+	AND ARID.[strTransactionType]  IN ('Invoice', 'Credit Memo')
     AND ISNULL(ARIDL.[intInvoiceDetailLotId],0) = 0
 
 UPDATE A 
