@@ -86,7 +86,7 @@ BEGIN TRY
 		D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId = TD.intContractDetailId		
 		AND D.[intInventoryShipmentItemId] IS NULL
-		AND D.[intSalesOrderDetailId] IS NULL
+		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.[intItemId] = TD.[intItemId]
 		AND (D.intItemUOMId <> TD.intItemUOMId OR D.dblQtyShipped <> TD.dblQtyShipped)
@@ -169,7 +169,7 @@ BEGIN TRY
 		D.intContractDetailId IS NOT NULL
 		AND D.intContractDetailId <> ISNULL(TD.intContractDetailId, 0)
 		AND D.[intInventoryShipmentItemId] IS NULL
-		AND D.[intSalesOrderDetailId] IS NULL
+		AND (D.[intSalesOrderDetailId] IS NULL OR D.strPricing = 'MANUAL OVERRIDE')
 		AND D.[intShipmentPurchaseSalesContractId] IS NULL 
 		AND D.intItemId = TD.intItemId
 		AND (ISNULL(H.intDistributionHeaderId, 0) = 0 AND ISNULL(H.intLoadDistributionHeaderId, 0) = 0)
