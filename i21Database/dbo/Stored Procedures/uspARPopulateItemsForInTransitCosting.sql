@@ -598,6 +598,34 @@ FROM #ARItemsForInTransitCosting A
 JOIN tblICInventoryShipmentItem B ON A.intLinkedItem = B.intParentItemLinkId
 WHERE A.intLinkedItem IS NOT NULL
 
-SELECT * FROM #ARItemsForInTransitCosting
+--SELECT * FROM #ARItemsForInTransitCosting
+
+-- AR-12521 added rounding for dblQTY
+SELECT 
+	[intItemId] 
+	,[intItemLocationId] 
+	,[intItemUOMId] 
+	,[dtmDate] 
+	,[dblQty] = ROUND([dblQty],3)
+	,[dblUOMQty] 
+	,[dblCost] 
+	,[dblValue] 
+	,[dblSalesPrice] 
+	,[intCurrencyId] 
+	,[dblExchangeRate] 
+	,[intTransactionId] 
+	,[intTransactionDetailId] 
+	,[strTransactionId] 
+	,[intTransactionTypeId] 
+	,[intLotId] 
+	,[intSourceTransactionId] 
+	,[strSourceTransactionId] 
+	,[intSourceTransactionDetailId] 
+	,[intFobPointId] 
+	,[intInTransitSourceLocationId]
+	,[intForexRateTypeId]
+	,[dblForexRate]
+	,[intLinkedItem]
+FROM #ARItemsForInTransitCosting
 
 RETURN 1
