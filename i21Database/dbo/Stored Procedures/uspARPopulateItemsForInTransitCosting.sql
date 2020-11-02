@@ -110,7 +110,8 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty] * (CASE WHEN ARID.strTransactionType = 'Credit Memo' THEN 1 ELSE -1 END)
+	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/AVGT.dblTotalQty, 2) * ICIT.[dblQty]
+	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -188,6 +189,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	--,[dblQty]                       = - ROUND(ARID.dblQtyShipped/ CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
 	,[dblQty]                       = - (CAST(ARID.dblQtyShipped AS NUMERIC(25, 13))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(25, 13))) * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
@@ -247,6 +249,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
+	--,[dblQty]						= - ROUND(ARIDL.[dblQuantityShipped]/CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END, 2) * ICIT.[dblQty]
 	,[dblQty]						= - (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13))/CAST(CASE WHEN ICS.ysnDestinationWeightsAndGrades = 1 THEN ISNULL(ICS.[dblDestinationQuantity], ICS.[dblQuantity]) ELSE ICS.[dblQuantity] END AS NUMERIC(25, 13)))  * ICIT.[dblQty]
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
