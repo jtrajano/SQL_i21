@@ -157,12 +157,15 @@ BEGIN TRY
 		 , intItemId				= OPD.intItemId
 		 , ysnRestricted			= ISNULL(OPD.ysnRestricted, 0)
 		 , strContractApplyTo		= OP.strContractApplyTo
+		 , strContractCategoryId	= ICH.strContractCategoryId
 	INTO #ITEMCONTRACTS
 	FROM #OPENPREPAIDS OP
 	INNER JOIN tblARInvoiceDetail OPD ON OP.intInvoiceId = OPD.intInvoiceId
-	WHERE OPD.intContractDetailId IS NULL
+	LEFT JOIN tblCTItemContractHeader ICH ON OPD.intItemContractHeaderId = ICH.intItemContractHeaderId
+	WHERE (OPD.intContractDetailId IS NULL
 	  AND OPD.intItemCategoryId IS NULL
-	  AND OPD.intItemContractDetailId IS NOT NULL
+	  AND OPD.intItemContractDetailId IS NOT NULL)
+	  OR strContractCategoryId = 'Dollar'
 
 	--GET ITEM CATEGORY
 	SELECT intInvoiceId				= OP.intInvoiceId
@@ -272,6 +275,7 @@ BEGIN TRY
 		FROM tblARInvoiceDetail ID
 		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 		INNER JOIN #ITEMCONTRACTS RIC ON ((RIC.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 1 AND ID.intItemContractDetailId IS NOT NULL AND ID.intItemId = RIC.intItemId)
+									   OR (RIC.strContractApplyTo = 'Contract' AND RIC.strContractCategoryId = 'Dollar')
 									   OR (RIC.strContractApplyTo = 'Contract' AND RIC.ysnRestricted = 0 AND ID.intItemContractDetailId IS NOT NULL)
 									   OR (RIC.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 1 AND ID.intItemId = RIC.intItemId)
 									   OR (RIC.strContractApplyTo = 'Any' AND RIC.ysnRestricted = 0 AND RIC.intItemId IS NOT NULL))
