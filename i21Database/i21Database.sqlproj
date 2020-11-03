@@ -8848,6 +8848,8 @@
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesError.sql" />
     <Build Include="dbo\Tables\tblIPLoadNotifyPartiesStage.sql" />
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyMasterScreen.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\42_InterCompanyMasterScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
