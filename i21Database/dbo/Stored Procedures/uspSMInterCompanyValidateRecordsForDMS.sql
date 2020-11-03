@@ -37,6 +37,8 @@ BEGIN
 	DECLARE @strReferenceServerName NVARCHAR(250);
 	DECLARE @sql NVARCHAR(MAX);
 	DECLARE @intCurrentCompanyId INT;
+	DECLARE @intCurrentTransactionScreenId INT;
+	DECLARE @intReferenceTransactionScreenId INT;
 
 		SELECT
 		@intInterCompanyMappingIdToUse = intInterCompanyMappingId,
@@ -48,6 +50,20 @@ BEGIN
 
 IF ISNULL(@intCurrentTransactionId, 0) <> 0 AND ISNULL(@intReferenceTransactionId, 0) <> 0
 BEGIN
+
+	--WE NEED TO CHECK IF THE TRANSACTION SCRREN ID IS CORRECT OR EXISTS IN THE tblSMInterCompanyMasterScreen
+	SELECT @intCurrentTransactionScreenId = intScreenId FROM tblSMTransaction WHERE intTransactionId = @intCurrentTransactionId
+	SELECT @intReferenceTransactionScreenId = intScreenId FROM tblSMTransaction WHERE intTransactionId = @intReferenceTransactionId
+	IF ISNULL(@intCurrentTransactionScreenId, 0) <> 0  AND ISNULL(@intReferenceTransactionScreenId, 0) <> 0
+	BEGIN
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMInterCompanyMasterScreen WHERE intScreenId = @intCurrentTransactionScreenId)
+			RETURN 1
+
+		IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMInterCompanyMasterScreen WHERE intScreenId = @intReferenceTransactionScreenId)
+			RETURN 1
+	END
+	--END CHECKING
+
 	SELECT @intCurrentCompanyId = intInterCompanyId FROM tblSMInterCompany WHERE UPPER(strDatabaseName) = UPPER(DB_NAME()) AND UPPER(strServerName) = UPPER(@@SERVERNAME);
 		--CHECK IF THE CURRENT and REFERENCE transactionId is already executed for current database
 		IF CHARINDEX(',' + CONVERT(VARCHAR, @intCurrentTransactionId) + ':' + CONVERT(VARCHAR, ISNULL(@intCurrentCompanyId, 0)) + ',', @strFinishedTransactionId) > 0 AND
