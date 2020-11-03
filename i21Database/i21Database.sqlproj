@@ -8863,6 +8863,8 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationDashboard.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationAsCommodityStockUOM.sql" />
+    <Build Include="dbo\Tables\tblSMInterCompanyMasterScreen.sql" />
+    <None Include="Scripts\Post-Deployment\SM\DefaultData\42_InterCompanyMasterScreen.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
