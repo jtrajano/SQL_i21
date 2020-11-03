@@ -449,6 +449,7 @@ BEGIN
 		SELECT 	intItemUOMId FROM #ARItemsForCosting WHERE 	 intItemId  =  I.[intItemId]
 		)UOM
 		Where UOM.intItemUOMId IS  NULL
+		AND I.[intItemId] IS NOT NULL
 
 
 	INSERT INTO #ARInvalidInvoiceData
