@@ -8146,6 +8146,7 @@
     <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql" />
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
     <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuationDashboard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
