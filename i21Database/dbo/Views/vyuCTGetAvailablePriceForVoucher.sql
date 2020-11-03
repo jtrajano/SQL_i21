@@ -1,7 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuCTGetAvailablePriceForVoucher]
 	AS
-		select      
-			intContractDetailId      
+		select
+		    intId = convert(int,ROW_NUMBER() over (order by intContractDetailId))            
+			,intContractDetailId      
 			,intPriceFixationId      
 			,intPriceFixationDetailId      
 			,dtmFixationDate    
@@ -45,6 +46,34 @@
 					,iu.intItemUOMId      
 					,pfd.dblFinalPrice      
 					,cd.intNoOfLoad
+
+                union all
+
+                select        
+                    cd.intContractDetailId        
+                    ,intPriceFixationId = null
+                    ,intPriceFixationDetailId = null
+                    ,dtmFixationDate = null
+                    ,cd.dblQuantity    
+                    ,dblLoadPriced = (cd.dblQuantity / cd.dblQuantityPerLoad)
+                    ,dblFinalprice = dbo.fnCTConvertToSeqFXCurrency(cd.intContractDetailId,cd.intCurrencyId,iu.intItemUOMId,cd.dblCashPrice)        
+                    ,dblBilledQuantity = (case when isnull(cd.intNoOfLoad,0) = 0 then isnull(sum(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId,cd.intItemUOMId,bd.dblQtyReceived)),0) else cd.dblQuantity end)  
+                    ,intBilledLoad = (case when isnull(cd.intNoOfLoad,0) = 0 then 0 else isnull(count(distinct bd.intBillId),0) end)  
+                from        
+                    tblCTContractDetail cd
+                    left join tblAPBillDetail bd on bd.intContractDetailId = cd.intContractDetailId and isnull(bd.intSettleStorageId,0) = 0        
+                    left join tblICCommodityUnitMeasure co on co.intCommodityUnitMeasureId = cd.intPriceItemUOMId
+                    left join tblICItemUOM iu on iu.intItemId = cd.intItemId and iu.intUnitMeasureId = co.intUnitMeasureId
+                where
+                    not exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceContract pc where pc.intPriceContractId = pf.intPriceContractId and pf.intContractDetailId = cd.intContractDetailId)
+                group by        
+                    cd.intContractDetailId        
+                    ,cd.dblQuantity        
+                    ,cd.dblQuantityPerLoad         
+                    ,cd.intCurrencyId        
+                    ,iu.intItemUOMId        
+                    ,cd.dblCashPrice        
+                    ,cd.intNoOfLoad  
 			)tbl      
 		where
 			(tbl.dblQuantity - tbl.dblBilledQuantity) > 0
