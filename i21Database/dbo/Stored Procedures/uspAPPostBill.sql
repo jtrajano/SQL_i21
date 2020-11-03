@@ -284,10 +284,6 @@ BEGIN
 	FROM tblAPPostResult A
 	INNER JOIN @postResult B ON A.intId = B.id
 
-	--CLEAN UP TRACKER FOR POSTING
-	DELETE A
-	FROM tblAPBillForPosting A
-
 	SET @successfulCount = 0;
 	SET @success = 0
 	GOTO Post_Exit
@@ -1618,21 +1614,11 @@ Post_Commit:
 	GOTO Post_Exit
 
 Post_Rollback:
-
-	--CLEAN UP TRACKER FOR POSTING
-	DELETE A
-	FROM tblAPBillForPosting A
-
 	ROLLBACK TRANSACTION	
 	SET @success = 0
 	GOTO Post_Exit
 
 Post_Cleanup:
-
-	--CLEAN UP TRACKER FOR POSTING
-	DELETE A
-	FROM tblAPBillForPosting A
-
 	IF(ISNULL(@recap,0) = 0)
 	BEGIN
 
@@ -1649,3 +1635,6 @@ Post_Cleanup:
 Post_Exit:
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpPostBillData')) DROP TABLE #tmpPostBillData
 	IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = OBJECT_ID('tempdb..#tmpInvalidBillData')) DROP TABLE #tmpInvalidBillData
+	--CLEAN UP TRACKER FOR POSTING
+	DELETE A
+	FROM tblAPBillForPosting A
