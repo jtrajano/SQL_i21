@@ -101,6 +101,15 @@ AND GL.intTransactionId IS NULL
 DELETE FROM tblGLDetailRecap 
 WHERE intTransactionId IS NULL
 
+--FIX BAD ACCOUNT CATEGORY FOR GL BANKACCOUNT
+UPDATE S SET intAccountCategoryId = C.intAccountCategoryId
+FROM tblCMBankAccount BA
+JOIN tblGLAccountSegmentMapping SM ON SM.intAccountId = BA.intGLAccountId
+JOIN tblGLAccountSegment S ON S.intAccountSegmentId = SM.intAccountSegmentId
+JOIN tblGLAccountStructure STRUC  ON STRUC.intAccountStructureId = S.intAccountStructureId
+CROSS APPLY(SELECT TOP 1 intAccountCategoryId FROM tblGLAccountCategory WHERE strAccountCategory = 'Cash Account') C
+WHERE STRUC.strType = 'Primary'
+
 UPDATE tblCMBankTransaction set ysnCheckToBePrinted = 0 WHERE ISNULL(ysnCheckToBePrinted,0) = 1
 
 --This will fix all old transaction to be included as one batch in the Archive File tab of Process Payment. This is related to this jira key CM-1904
