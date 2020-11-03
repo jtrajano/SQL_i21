@@ -8,6 +8,33 @@
 AS
 
 begin try
+
+    /*Process immediately if the IR is not created for Contract*/
+    if exists (
+    select
+        top 1 1
+    from
+        tblICInventoryReceipt ir
+        ,tblICInventoryReceiptItem ri
+        ,@voucherPayables vp
+    where
+        ri.intInventoryReceiptItemId = vp.intInventoryReceiptItemId
+        and ir.intInventoryReceiptId = ri.intInventoryReceiptId
+        and (ir.strReceiptType <> 'Purchase Contract' or isnull(vp.intContractDetailId,0) = 0)
+    )
+    begin
+
+       exec uspAPCreateVoucher    
+        @voucherPayables = @voucherPayables    
+        ,@voucherPayableTax = @voucherPayableTax    
+        ,@userId = @userId    
+        ,@throwError = @throwError  
+        ,@error = @error    
+        ,@createdVouchersId  = @createdVouchersId out  
+
+        goto _return;
+
+    end
 	
 	declare
 		@voucherPayablesFinal			VoucherPayable
@@ -112,7 +139,8 @@ begin try
 	);
 
 	declare @availablePrice as table (
-		intPriceFixationId int
+		intId int
+		,intPriceFixationId int
 		,intPriceFixationDetailId int
 		,dblFinalPrice numeric(18,6)
 		,dblAvailablePriceQuantity numeric(18,6)
@@ -135,6 +163,7 @@ begin try
 		,@ysnLoad bit = 0
 		,@intInventoryReceiptId int
 		,@ysnSuccessBillPosting bit
+		,@intId int
 		;
 
 	declare @CreatedVoucher as table(
@@ -192,7 +221,8 @@ begin try
 			/*Check if there's available priced quantity*/  
 			insert into @availablePrice
 			select
-				intPriceFixationId = intPriceFixationId  
+				intId = intId
+				,intPriceFixationId = intPriceFixationId  
 				,intPriceFixationDetailId = intPriceFixationDetailId  
 				,dblFinalPrice = dblFinalprice  
 				,dblAvailablePriceQuantity = dblAvailableQuantity  
@@ -206,8 +236,8 @@ begin try
 			order by intPriceFixationDetailId 
 
 			/*Loop Pricing*/
-			select @intPriceFixationDetailId = min(intPriceFixationDetailId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0);
-			while (@intPriceFixationDetailId is not null and isnull(@dblQuantityToBill,0) > 0)
+			select @intId = min(intId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0);
+        	while (@intId is not null and isnull(@dblQuantityToBill,0) > 0)
 			begin
 			
 				/*Get Price Details*/
@@ -218,10 +248,11 @@ begin try
 					,@dtmFixationDate = dtmFixationDate  
 					,@dblPriceQuantity = dblPriceQuantity  
 					,@intAvailablePriceLoad = intAvailablePriceLoad  
+					,@intPriceFixationDetailId = intPriceFixationDetailId  
 				from  
 					@availablePrice  
 				where  
-					intPriceFixationDetailId = @intPriceFixationDetailId
+					intId = @intId
 
 				--Set @dblTransactionQuantity = @dblQuantityToBill by default (this is also correct quantity for Load Based)
 				set @dblTransactionQuantity = @dblQuantityToBill;
@@ -404,7 +435,7 @@ begin try
 					,intCostUOMId = vp.intCostUOMId
 					,intCostCurrencyId = vp.intCostCurrencyId
 					,dblWeight = vp.dblWeight
-					,dblNetWeight = vp.dblNetWeight
+					,dblNetWeight = @dblTransactionQuantity
 					,dblWeightUnitQty = vp.dblWeightUnitQty
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
@@ -436,7 +467,7 @@ begin try
 					vp.intVoucherPayableId = @intVoucherPayableId
 
 				--select @intPriceFixationDetailId = null;
-				select @intPriceFixationDetailId = min(intPriceFixationDetailId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0) and intPriceFixationDetailId > @intPriceFixationDetailId;
+				select @intId = min(intId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0) and intId > @intId;
 			end
 						
 			ReciptNextLoop:
@@ -814,6 +845,9 @@ begin try
 			end
 
 		end
+
+	_return:
+	
 end try
 begin catch
 	set @error = ERROR_MESSAGE()  
