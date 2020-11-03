@@ -6,6 +6,10 @@
 	, @strRegisterIPAddress AS NVARCHAR(150) OUTPUT
 	, @strRegisterUsername AS NVARCHAR(150) OUTPUT
 	, @strRegisterPassword AS NVARCHAR(150) OUTPUT
+	, @ysnCaptureTransactionLog BIT OUTPUT
+	, @intCaptureIntervalMinutes AS INT OUTPUT
+	, @strLastTranslogReport AS NVARCHAR(150) OUTPUT
+	, @strLastTranslogReportDayCloseTime AS NVARCHAR(150) OUTPUT
 	, @intPeriodNum AS INT OUTPUT
 	, @intSetNum AS INT OUTPUT
 	, @strPullTime AS NVARCHAR(30) OUTPUT
@@ -42,6 +46,10 @@ BEGIN
 			, @strRegisterIPAddress = ISNULL(Reg.strSapphireIpAddress, '')
 			, @strRegisterUsername = ISNULL(Reg.strSAPPHIREUserName, '')
 			, @strRegisterPassword = ISNULL(dbo.fnAESDecryptASym(Reg.strSAPPHIREPassword), '')
+			, @ysnCaptureTransactionLog = ISNULL(Reg.ysnSAPPHIRECaptureTransactionLog, '')
+			, @intCaptureIntervalMinutes = ISNULL(Reg.intSAPPHIRECaptureIntervalMinutes, '')
+			, @strLastTranslogReport = ISNULL(Reg.strSAPPHIRELastTranslogReport, '')
+			, @strLastTranslogReportDayCloseTime = ISNULL(Reg.strSAPPHIRELastTranslogReportDayCloseTime, '')
 			, @intPeriodNum = ISNULL(Reg.intSAPPHIRECheckoutPullTimePeriodId, 0)
 			, @intSetNum = ISNULL(Reg.intSAPPHIRECheckoutPullTimeSetId, 0)
 			, @strPullTime = ISNULL(Reg.strSAPPHIRECheckoutPullTime, '')
