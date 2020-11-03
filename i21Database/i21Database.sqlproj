@@ -8861,6 +8861,7 @@
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILProcessPayments.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryValuationDashboard.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
