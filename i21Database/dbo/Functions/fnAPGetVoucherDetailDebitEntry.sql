@@ -70,6 +70,8 @@ RETURNS TABLE AS RETURN
 		ON B.intInventoryReceiptItemId = E.intInventoryReceiptItemId
 	LEFT JOIN tblICInventoryReceiptCharge charges
 		ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+	-- LEFT JOIN tblICInventoryShipmentCharge shipmentCharges
+	-- 	ON B.intInventoryShipmentChargeId = shipmentCharges.intInventoryShipmentChargeId
 	LEFT JOIN dbo.tblSMCurrencyExchangeRateType G
 		ON B.intCurrencyExchangeRateTypeId = G.intCurrencyExchangeRateTypeId
 	LEFT JOIN tblICItem B2
@@ -81,8 +83,11 @@ RETURNS TABLE AS RETURN
 	LEFT JOIN tblICItemUOM itemUOM ON F.intItemId = itemUOM.intItemId AND itemUOM.ysnStockUnit = 1	
 	OUTER APPLY (
 		SELECT dblTotal = CAST (
-				CASE WHEN B.intInventoryReceiptChargeId > 0
-				THEN charges.dblAmount
+				CASE 
+				WHEN B.intInventoryReceiptChargeId > 0
+					THEN charges.dblAmount
+				-- WHEN B.intInventoryShipmentChargeId > 0
+				-- 	THEN shipmentCharges.dblAmount (PENDING)
 				ELSE (CASE	
 						-- If there is a Gross/Net UOM, compute by the net weight. 
 						WHEN E.intWeightUOMId IS NOT NULL THEN 
@@ -123,4 +128,5 @@ RETURNS TABLE AS RETURN
 	) storageOldCost
 	WHERE A.intBillId = @billId
 	AND B.intInventoryReceiptChargeId IS NULL --EXCLUDE CHARGES
+	-- AND B.intInventoryShipmentChargeId IS NULL --EXCLUDE SHIPMENT CHARGES (PENDING IMPLEMENTATION)
 )

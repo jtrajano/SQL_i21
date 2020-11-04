@@ -7785,6 +7785,7 @@
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
