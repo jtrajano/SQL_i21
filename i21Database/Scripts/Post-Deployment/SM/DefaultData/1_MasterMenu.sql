@@ -13,7 +13,7 @@ GO
 	
 
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Setup' AND strModuleName = 'Mobile Billing' AND strCommand = 'EnergyTrac.view.ExportFilter')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Comparative Report' AND strModuleName = 'Accounts Receivable' AND strCommand = 'AccountsReceivable.view.SalesComparativeReport')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -2456,9 +2456,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Comparative Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES ( N'Sales Comparative Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Sales Comparative Report', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=SalesComparativeReport&direct=true', N'small-menu-report', 0, 0, 0, 1, 15, 1)
+	VALUES ( N'Sales Comparative Report', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Sales Comparative Report', N'Report', N'Screen', N'AccountsReceivable.view.SalesComparativeReport', N'small-menu-report', 0, 0, 0, 1, 15, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 15, strType = N'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=SalesComparativeReport&direct=true', strCategory = N'Report', strIcon = 'small-menu-report' WHERE strMenuName = 'Sales Comparative Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 15, strType = N'Screen', strCommand = N'AccountsReceivable.view.SalesComparativeReport', strCategory = N'Report', strIcon = 'small-menu-report' WHERE strMenuName = 'Sales Comparative Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Trend Report' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
