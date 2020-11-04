@@ -1,5 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuSCTicketScreenView]
-	AS select 
+	AS
+select 
 	SCT.intTicketId
 	,SCT.strTicketStatus
 	,SCT.strTicketNumber
@@ -123,13 +124,13 @@
 	,SCD.strDeliverySheetNumber
 	,SCListTicket.strTicketType
 	,SCT.ysnDeliverySheetPost
-	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WITH(NOLOCK) WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
+	,MatchTicket.strTicketNumber AS strMatchTicketNumber
     ,SCT.intLotId
     ,SCT.strLotNumber
     ,SCT.intSalesOrderId
 	,SCT.ysnReadyToTransfer
 	,SCT.ysnDestinationWeightGradePost
-	,SCT.strPlateNumber COLLATE Latin1_General_CI_AS AS strPlateNumber
+	,SCT.strPlateNumber AS strPlateNumber
 	,SCT.blbPlateNumber
 	,SCT.strDriverName
 	--,SCT.intEntityContactId
@@ -181,9 +182,10 @@
 		ELSE 0 END
 	 AS BIT) AS ysnLotItem
 	 ,CAST(
-		CASE WHEN (SELECT COUNT(ICAttribute.intCommodityAttributeId) FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) > 1 THEN 1
+		CASE WHEN (isnull(HasComGrade.cnt,0)) > 1 THEN 1
 		ELSE 0 END
 	 AS BIT) AS ysnHasCommodityGrade
+		--,1 as ysnHasCommodityGrade
 	 ,ICIUOMFrom.dblUnitQty AS dblUnitQtyFrom
 	 ,ICIUOM.dblUnitQty AS dblUnitQtyTo
 	 ,ICCategory.intCategoryId
@@ -252,6 +254,7 @@
   FROM tblSCTicket SCT WITH(NOLOCK)
 	LEFT JOIN tblSCTicketPool SCTPool on SCTPool.intTicketPoolId = SCT.intTicketPoolId
 	LEFT JOIN tblSCScaleSetup SCSetup on SCSetup.intScaleSetupId = SCT.intScaleSetupId
+	--added index here
 	LEFT JOIN tblSCListTicketTypes SCListTicket on SCListTicket.intTicketType = SCT.intTicketType AND SCListTicket.strInOutIndicator = SCT.strInOutFlag
 	LEFT JOIN tblSCDeliverySheet SCD on SCD.intDeliverySheetId = SCT.intDeliverySheetId
 
@@ -290,15 +293,15 @@
 			,SML.strLocationName AS strContractDetailLocation
 		FROM tblCTContractDetail CTD With(nolock)
 		LEFT JOIN tblCTContractHeader CTH WITH(NOLOCK) ON CTH.intContractHeaderId = CTD.intContractHeaderId
-		LEFT JOIN tblSMCompanyLocation SML ON SML.intCompanyLocationId = CTD.intCompanyLocationId
+		LEFT JOIN tblSMCompanyLocation SML WITH(NOLOCK) ON SML.intCompanyLocationId = CTD.intCompanyLocationId
 	) CT ON CT.intContractDetailId = SCT.intContractId
 	LEFT JOIN (
-		SELECT	EY.intEntityId, EY.strName AS strHaulerName FROM tblEMEntity EY 
-		INNER JOIN tblEMEntityType ET ON EY.intEntityId = ET.intEntityId
-		WHERE	ET.strType = 'Ship Via'
+		SELECT	EY.intEntityId, EY.strName AS strHaulerName 
+			FROM tblEMEntityType ET WITH(NOLOCK)
+		INNER JOIN tblEMEntity EY WITH(NOLOCK) ON EY.intEntityId = ET.intEntityId and ET.strType = 'Ship Via'
 	) EMShipVia on EMShipVia.intEntityId = SCT.intHaulerId
-	LEFT JOIN tblCTWeightGrade CTGrade on CTGrade.intWeightGradeId = SCT.intGradeId
-	LEFT JOIN tblCTWeightGrade CTWeight on CTWeight.intWeightGradeId = SCT.intWeightId
+	LEFT JOIN tblCTWeightGrade CTGrade WITH(NOLOCK) on CTGrade.intWeightGradeId = SCT.intGradeId
+	LEFT JOIN tblCTWeightGrade CTWeight WITH(NOLOCK) on CTWeight.intWeightGradeId = SCT.intWeightId
 	LEFT JOIN tblCTContractCost CTCost on CTCost.intContractCostId = SCT.intContractCostId
 
 	LEFT JOIN (SELECT L.intLoadId
@@ -317,8 +320,8 @@
 				,L.intSourceType
 			FROM tblLGLoad L With(nolock)
 			INNER JOIN tblLGLoadDetail LD With(nolock) ON LD.intLoadId = L.intLoadId 
-			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
-			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
+			LEFT JOIN tblEMEntityLocation VEL WITH(NOLOCK) ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
+			LEFT JOIN tblEMEntityLocation CEL WITH(NOLOCK) ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId AND  LGD.intLoadDetailId = SCT.intLoadDetailId
 	LEFT JOIN tblSOSalesOrder SO on SO.intSalesOrderId = SCT.intSalesOrderId
 	--LEFT JOIN tblEMEntity EMDriver ON EMDriver.intEntityId = SCT.intEntityContactId
@@ -343,9 +346,11 @@
 	) APPayment
 		ON APPayment.intScaleTicketId = SCT.intTicketId
 	outer apply ( SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN  With(nolock)
-					INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
-	left join tblCTCropYear CYR
+					INNER JOIN tblSCSealNumber SCN WITH(NOLOCK) ON SCN.intSealNumberId = TSN.intSealNumberId where TSN.intTicketId = SCT.intTicketId) TSCN 
+	left join tblCTCropYear CYR WITH(NOLOCK) 
 		on CYR.intCropYearId = SCT.intCropYearId
 	--LEFT JOIN (SELECT TOP 1 TSN.intTicketId,SCN.strSealNumber strTicketSealNumber FROM tblSCTicketSealNumber TSN INNER JOIN tblSCSealNumber SCN ON SCN.intSealNumberId = TSN.intSealNumberId where ) TSCN ON TSCN.intTicketId = SCT.intTicketId
 	LEFT JOIN tblCTItemContractDetail ICD ON ISNULL(SCT.intItemContractDetailId,0) = ICD.intItemContractDetailId
 	LEFT JOIN tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
+	outer apply (SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WITH(NOLOCK) WHERE SCMatch.intTicketId = SCT.intMatchTicketId) as MatchTicket
+	outer apply (SELECT COUNT(ICAttribute.intCommodityAttributeId) as cnt FROM tblICCommodityAttribute ICAttribute WHERE ICAttribute.intCommodityId = SCT.intCommodityId ) as HasComGrade

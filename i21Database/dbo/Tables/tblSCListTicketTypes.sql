@@ -8,3 +8,16 @@
     [intConcurrencyId] [int] NULL, 
     CONSTRAINT [PK_tblSCListTicketTypes] PRIMARY KEY ([intTicketTypeId]), 
 )
+GO
+
+
+
+CREATE NONCLUSTERED INDEX [IX_tblSCListTicketTypes_ticket_view] ON [dbo].[tblAPPaymentDetail] 
+(
+	[intTicketTypeId] ASC,
+	[strInOutIndicator] ASC
+)
+WITH (SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, DROP_EXISTING = OFF, ONLINE = OFF) ON [PRIMARY]
+
+
+GO
