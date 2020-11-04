@@ -60,7 +60,7 @@ BEGIN
 		INNER JOIN (
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
-				 --, ICT.intTransactionDetailId
+				 , ICT.intTransactionDetailId
 				 , ICT.intLotId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
@@ -70,10 +70,10 @@ BEGIN
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
 			  AND ICT.intInTransitSourceLocationId IS NOT NULL
-			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
-		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
+			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intTransactionDetailId, ICT.intLotId
+		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId	
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
-			 --AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
+			 AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
@@ -425,6 +425,32 @@ BEGIN
 		AND (I.[intLoadDetailId] IS NULL OR I.[intLoadDetailId] = 0)
 		AND (I.[intItemId] IS NOT NULL OR I.[intItemId] <> 0)
 		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--UOM is required
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]			= I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The UOM of item '  +  ISNULL(NULLIF(I.[strItemDescription], ''), I.[strItemNo]) +  ' for ' + I.[strInvoiceNumber] + ' is blank and must be populated to complete this transaction.' 
+	FROM 
+		#ARPostInvoiceDetail I	
+		OUTER APPLY(
+		SELECT 	intItemUOMId FROM #ARItemsForCosting WHERE 	 intItemId  =  I.[intItemId]
+		)UOM
+		Where UOM.intItemUOMId IS  NULL
+		AND I.[intItemId] IS NOT NULL
+
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
