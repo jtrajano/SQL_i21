@@ -142,6 +142,19 @@ GO
 		AND strGridLayoutFields LIKE '%INCO/Ship Term%'
 
 
+	update
+			h
+	set
+		h.intFreightTermId = ch.intFreightTermId
+	from
+		tblCTSequenceHistory h
+		,tblCTContractHeader ch
+	where
+		ch.intContractHeaderId = h.intContractHeaderId 
+		and ch.intFreightTermId is not null
+		and h.intFreightTermId is null
+
+
 GO
 	print 'END - UPDATE INCO/Ship Term to Freight Term';
 GO
