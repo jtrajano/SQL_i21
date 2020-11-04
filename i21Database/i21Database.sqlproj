@@ -7835,6 +7835,7 @@
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
     <Build Include="dbo\Views\vyuGRTransferFlow.sql" />
     <Build Include="dbo\Functions\fnGRCheckForSameTransfer.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
