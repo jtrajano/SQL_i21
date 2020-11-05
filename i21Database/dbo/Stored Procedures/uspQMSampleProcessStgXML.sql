@@ -829,24 +829,24 @@ BEGIN TRY
 			IF @strSentByValue IS NOT NULL
 				AND ISNULL(@strSentBy, '') <> ''
 			BEGIN
-				IF @strSentBy = 'Self'
-				BEGIN
-					IF NOT EXISTS (
-							SELECT 1
-							FROM tblSMCompanyLocation CL WITH (NOLOCK)
-							WHERE CL.strLocationName = @strSentByValue
-							)
-					BEGIN
-						SELECT @strErrorMessage = 'Sent By Location ' + @strSentByValue + ' is not available.'
+				--IF @strSentBy = 'Self'
+				--BEGIN
+				--	IF NOT EXISTS (
+				--			SELECT 1
+				--			FROM tblSMCompanyLocation CL WITH (NOLOCK)
+				--			WHERE CL.strLocationName = @strSentByValue
+				--			)
+				--	BEGIN
+				--		SELECT @strErrorMessage = 'Sent By Location ' + @strSentByValue + ' is not available.'
 
-						RAISERROR (
-								@strErrorMessage
-								,16
-								,1
-								)
-					END
-				END
-				ELSE IF @strSentBy = 'Forwarding Agent'
+				--		RAISERROR (
+				--				@strErrorMessage
+				--				,16
+				--				,1
+				--				)
+				--	END
+				--END
+				IF @strSentBy = 'Forwarding Agent'
 				BEGIN
 					IF NOT EXISTS (
 							SELECT 1
@@ -1207,6 +1207,13 @@ BEGIN TRY
 				SELECT @intSentById = t.intCompanyLocationId
 				FROM tblSMCompanyLocation t WITH (NOLOCK)
 				WHERE t.strLocationName = @strSentByValue
+
+				IF ISNULL(@strSentByValue, '') <> ''
+					AND @intSentById IS NULL
+				BEGIN
+					SELECT TOP 1 @intSentById = t.intCompanyLocationId
+					FROM tblSMCompanyLocation t WITH (NOLOCK)
+				END
 			END
 			ELSE IF @strSentBy = 'Forwarding Agent'
 			BEGIN
