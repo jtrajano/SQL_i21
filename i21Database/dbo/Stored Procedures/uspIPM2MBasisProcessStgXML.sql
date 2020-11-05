@@ -304,21 +304,21 @@ BEGIN TRY
 							)
 				END
 
-				IF @strLocationName IS NOT NULL
-					AND NOT EXISTS (
-						SELECT 1
-						FROM tblSMCompanyLocation t
-						WHERE t.strLocationName = @strLocationName
-						)
-				BEGIN
-					SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
+				--IF @strLocationName IS NOT NULL
+				--	AND NOT EXISTS (
+				--		SELECT 1
+				--		FROM tblSMCompanyLocation t
+				--		WHERE t.strLocationName = @strLocationName
+				--		)
+				--BEGIN
+				--	SELECT @strErrorMessage = 'Location ' + @strLocationName + ' is not available.'
 
-					RAISERROR (
-							@strErrorMessage
-							,16
-							,1
-							)
-				END
+				--	RAISERROR (
+				--			@strErrorMessage
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				IF @strMarketZoneCode IS NOT NULL
 					AND NOT EXISTS (
@@ -428,9 +428,16 @@ BEGIN TRY
 				WHERE t.strFutureMonth = @strFutureMonth
 					AND t.intFutureMarketId = @intFutureMarketId
 
-				SELECT @intCompanyLocationId = t.intCompanyLocationId
-				FROM tblSMCompanyLocation t
-				WHERE t.strLocationName = @strLocationName
+				--SELECT @intCompanyLocationId = t.intCompanyLocationId
+				--FROM tblSMCompanyLocation t
+				--WHERE t.strLocationName = @strLocationName
+
+				IF ISNULL(@strLocationName, '') <> ''
+					AND @intCompanyLocationId IS NULL
+				BEGIN
+					SELECT TOP 1 @intCompanyLocationId = t.intCompanyLocationId
+					FROM tblSMCompanyLocation t WITH (NOLOCK)
+				END
 
 				SELECT @intMarketZoneId = t.intMarketZoneId
 				FROM tblARMarketZone t
