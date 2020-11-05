@@ -430,8 +430,10 @@ BEGIN
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFRecipeItemStage RI
-				WHERE RI.strSessionId = @strSessionId
-					AND ISNULL(RI.strMessage, '') = ''
+				WHERE 
+					--RI.strSessionId = @strSessionId
+					--AND 
+					ISNULL(RI.strMessage, '') = ''
 					AND RI.strRecipeItemType = 'INPUT'
 					AND R.strRecipeName = RI.strRecipeName
 					AND R.strVersionNo = RI.strVersionNo
