@@ -774,6 +774,10 @@ FROM
   SELECT  
    B.intEntityVendorId  
    ,B.intInventoryShipmentChargeId
+   ,SUM(B.dblReceiptChargeQty) AS dblReceiptChargeQty
+   ,SUM(B.dblVoucherQty) AS dblVoucherQty
+   ,SUM(B.dblReceiptChargeTotal) AS dblReceiptChargeTotal
+   ,SUM(B.dblVoucherTotal) AS dblVoucherTotal
    ,SUM(B.dblReceiptChargeQty)  -  SUM(B.dblVoucherQty) AS dblClearingQty  
    ,SUM(B.dblReceiptChargeTotal)  -  SUM(B.dblVoucherTotal) AS dblClearingAmount   
   FROM shipmentChargesForClearing B  
@@ -785,7 +789,9 @@ FROM
   ON tmpAPOpenClearing.intInventoryShipmentChargeId = rc.intInventoryShipmentChargeId  
  INNER JOIN tblICInventoryShipment r  
   ON r.intInventoryShipmentId = rc.intInventoryShipmentId  
-  WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END  
+  -- WHERE 1 = CASE WHEN (tmpAPOpenClearing.dblClearingQty = 0 OR tmpAPOpenClearing.dblClearingAmount = 0) THEN 0 ELSE 1 END  
+  WHERE 1 = CASE WHEN (dblVoucherQty) < dblReceiptChargeQty
+                 AND (dblVoucherTotal) <  dblReceiptChargeTotal THEN 1 ELSE 0 END
   GROUP BY r.dtmShipDate, tmpAPOpenClearing.intEntityVendorId
  UNION ALL
  --LOAD TRANSACTION ITEM
