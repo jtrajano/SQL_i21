@@ -126,6 +126,9 @@ BEGIN TRY
 		declare @intWeightGradeId int = 0;
   		declare @intSequenceFreightTermId int;
   		declare @strBillDetailChargesId nvarchar(500);
+		declare @intUTCOffsetInMinutes int;
+		declare @strTransactionType nvarchar(5);
+		declare @intSettleStorageId int;
 
 
 		declare @InvShp table (
@@ -164,7 +167,8 @@ BEGIN TRY
 		intInventoryId				INT,
 		intInventoryItemId			INT,
 		dblQty						NUMERIC(18,6),
-		intPFDetailId				INT
+		intPFDetailId				INT,  
+  		strTransactionType   nvarchar(5)  
 	)
 
 	DECLARE @tblCreatedTransaction TABLE
@@ -181,7 +185,9 @@ BEGIN TRY
 		strReceiptNumber			NVARCHAR(50),
 		dblTotalIVForSHQty			NUMERIC(26,16),
 		dblTicketQty				NUMERIC(26,16),
-		dblInventoryItemLoad		NUMERIC(18,6)
+		dblInventoryItemLoad		NUMERIC(18,6),
+		dtmCreated 					datetime,
+		strTransactionType			nvarchar(5)
 	)
 
 	DECLARE @tblShipment TABLE
@@ -294,7 +300,9 @@ BEGIN TRY
 								WHERE	intInventoryReceiptItemId = RI.intInventoryReceiptItemId AND intInventoryReceiptChargeId IS NULL
 							) AS dblTotalIVForSHQty,
 							FT.dblQuantity,
-							RI.intLoadReceive
+							RI.intLoadReceive,
+							dtmCreated = null,
+							strTransactionType = null
 					FROM    tblICInventoryReceiptItem   RI
 					JOIN    tblICInventoryReceipt		IR  ON  IR.intInventoryReceiptId		=   RI.intInventoryReceiptId
 															AND IR.strReceiptType				=   'Purchase Contract'
@@ -313,7 +321,9 @@ BEGIN TRY
 					BEGIN
 						SELECT @intPriceFixationDetailId = MIN(intPriceFixationDetailId) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailId
 						CONTINUE
-					END		
+					END
+
+					/*	
 					INSERT INTO @tblReceipt
 					SELECT  RI.intInventoryReceiptId,
 							RI.intInventoryReceiptItemId,
@@ -332,6 +342,75 @@ BEGIN TRY
 					JOIN    tblCTContractDetail			CD  ON  CD.intContractDetailId			=   RI.intLineNo
 					WHERE	RI.intLineNo	=  @intContractDetailId 
 						AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
+					*/
+
+					select @intUTCOffsetInMinutes = DATEDIFF(minute,getutcdate(),getdate());
+
+					INSERT INTO @tblReceipt
+					select
+						*
+					from
+					(
+						SELECT
+							intInventoryReceiptId = SS.intParentSettleStorageId
+							,intInventoryReceiptItemId = SC.intSettleStorageId
+							,dblReceived = SC.dblUnits
+							,strReceiptNumber = SS.strStorageTicket
+							,dblTotalIVForSHQty = (
+								SELECT
+									SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
+								FROM
+									tblAPBillDetail ID
+									,tblAPBill B
+								WHERE
+									ID.intSettleStorageId = SC.intSettleStorageId
+									AND ID.intContractDetailId  = SC.intContractDetailId
+									and B.intBillId = ID.intBillId
+									and B.intTransactionType <> 13
+							)
+							,dblTicketQty = convert(int,0)
+							,dblInventoryItemLoad = null
+							,dtmCreated = DATEADD(minute,@intUTCOffsetInMinutes,SS.dtmCreated)   
+							,strTransactionType = 'STR'
+						FROM
+							tblGRSettleContract SC
+							JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
+						WHERE
+							SC.intContractDetailId = @intContractDetailId
+							AND SS.intParentSettleStorageId IS NOT NULL
+
+						union all
+
+						SELECT
+							RI.intInventoryReceiptId,
+							RI.intInventoryReceiptItemId,
+							dbo.fnCTConvertQtyToTargetItemUOM(RI.intUnitMeasureId,CD.intItemUOMId,RI.dblReceived) dblReceived,
+							IR.strReceiptNumber,
+							(
+								SELECT
+									SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intUnitOfMeasureId,@intItemUOMId,dblQtyReceived)) 
+								FROM
+									tblAPBillDetail ID
+									,tblAPBill B
+								WHERE
+									ID.intInventoryReceiptItemId = RI.intInventoryReceiptItemId
+									AND ID.intInventoryReceiptChargeId IS NULL
+									and B.intBillId = ID.intBillId
+									and B.intTransactionType <> 13
+							) AS dblTotalIVForSHQty,
+							dblTicketQty = convert(int,0),
+							dblInventoryItemLoad = RI.intLoadReceive,
+							dtmCreated = IR.dtmDateCreated,      
+							strTransactionType = 'IR'
+						FROM
+							tblICInventoryReceiptItem   RI
+							JOIN tblICInventoryReceipt IR on IR.intInventoryReceiptId = RI.intInventoryReceiptId and IR.strReceiptType = 'Purchase Contract'
+							JOIN tblCTContractDetail CD on CD.intContractDetailId = RI.intLineNo
+						WHERE
+							RI.intLineNo = @intContractDetailId 
+							AND (@ysnLoad = 0 or RI.dblBillQty <> dblOpenReceive)
+					) tbl order by tbl.dtmCreated
+
 				END
 				
 				SELECT	@dblRemainingQty = 0
@@ -341,7 +420,7 @@ BEGIN TRY
 				WHILE	ISNULL(@intReceiptUniqueId,0) > 0 
 				BEGIN
 
-					SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM @tblReceipt WHERE intReceiptUniqueId = @intReceiptUniqueId
+					SELECT @intInventoryReceiptItemId = intInventoryReceiptItemId, @strTransactionType = strTransactionType  FROM @tblReceipt WHERE intReceiptUniqueId = @intReceiptUniqueId  
 
 					SELECT @intPFDetailId = 0
 
@@ -403,7 +482,7 @@ BEGIN TRY
 					IF @ysnLoad = 1
 					BEGIN
 						INSERT	INTO @tblToProcess
-						SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived,@intPriceFixationDetailId
+						SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblReceived,@intPriceFixationDetailId, @strTransactionType
 					END 
 					ELSE
 					BEGIN
@@ -417,7 +496,7 @@ BEGIN TRY
 							IF @dblRemainingQty <= @dblReceived
 							BEGIN						
 								INSERT	INTO @tblToProcess
-								SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId
+								SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblRemainingQty,@intPriceFixationDetailId, @strTransactionType
 
 								SELECT	@dblRemainingQty = 0
 							END
@@ -430,6 +509,7 @@ BEGIN TRY
 															THEN @dblReceived - @dblTotalIVForSHQty
 															ELSE @dblReceived END
 										,@intPriceFixationDetailId
+										,@strTransactionType
 								SELECT	@dblRemainingQty = @dblRemainingQty - (CASE WHEN @dblTotalIVForSHQty <= @dblReceived THEN @dblReceived - @dblTotalIVForSHQty ELSE @dblReceived END)
 							END
 						END
@@ -440,13 +520,13 @@ BEGIN TRY
 								IF(@dblReceived - @dblTotalIVForSHQty) <= @dblPriceFxdQty
 								BEGIN							
 									INSERT	INTO @tblToProcess
-									SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,CASE WHEN @ysnTicketBased = 1 THEN @dblTicketQty ELSE @dblReceived - @dblTotalIVForSHQty END,@intPriceFixationDetailId
+									SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,CASE WHEN @ysnTicketBased = 1 THEN @dblTicketQty ELSE @dblReceived - @dblTotalIVForSHQty END,@intPriceFixationDetailId, @strTransactionType
 									SELECT	@dblRemainingQty = @dblPriceFxdQty - (@dblReceived - @dblTotalIVForSHQty)
 								END
 								ELSE
 								BEGIN
 									INSERT	INTO @tblToProcess
-									SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblPriceFxdQty,@intPriceFixationDetailId
+									SELECT	@intInventoryReceiptId,@intInventoryReceiptItemId,@dblPriceFxdQty,@intPriceFixationDetailId, @strTransactionType
 									SELECT	@dblRemainingQty = 0
 								END
 							END
@@ -458,7 +538,17 @@ BEGIN TRY
 					IF EXISTS (SELECT TOP 1 1 FROM @tblToProcess)
 					WHILE	ISNULL(@intUniqueId,0) > 0 
 					BEGIN
-						SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId  FROM @tblToProcess WHERE intUniqueId = @intUniqueId
+						SELECT	@intInventoryReceiptId = intInventoryId, @dblQtyToBill = dblQty, @intInventoryReceiptItemId = intInventoryItemId, @strTransactionType = strTransactionType   FROM @tblToProcess WHERE intUniqueId = @intUniqueId
+
+					      if (@strTransactionType = 'STR')  
+					      begin  
+					  
+					       declare @dblAvailableQuantity numeric(18,6);  
+					       select @dblAvailableQuantity = dblAvailableQuantity from vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId;  
+					  
+					       EXEC [dbo].[uspGRPostSettleStorage] @intInventoryReceiptItemId,1, 1,@dblFinalPrice, @dblAvailableQuantity;  
+					       goto ExitReceiptLoop;  
+					      end  
 
 						SET @allowAddDetail = 0
 
@@ -826,6 +916,8 @@ BEGIN TRY
 							END
 						END
 
+						ExitReceiptLoop:
+
 						SELECT @intUniqueId = MIN(intUniqueId)  FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 					END	
 					ELSE
@@ -884,6 +976,7 @@ BEGIN TRY
 					END
 					SELECT	@intInventoryReceiptItemId = MIN(intInventoryReceiptItemId)  FROM @tblReceipt WHERE intInventoryReceiptItemId > @intInventoryReceiptItemId
 					SELECT	@intReceiptUniqueId = MIN(intReceiptUniqueId)  FROM @tblReceipt WHERE intReceiptUniqueId > @intReceiptUniqueId		
+				
 				END
 
 				-- SELECT @intPriceFixationDetailAPARId = MIN(intPriceFixationDetailAPARId) FROM tblCTPriceFixationDetailAPAR WHERE intPriceFixationDetailId = @intPriceFixationDetailId
