@@ -7,13 +7,13 @@ RETURNS TABLE AS RETURN
  SELECT  
   B.intBillDetailId  
   ,B.strMiscDescription  
-  ,CAST(CASE WHEN B.dblTotal > D.dblAmount THEN D.dblAmount
+  ,CAST(CASE WHEN B.dblTotal <> D.dblAmount AND B.dblQtyReceived >= D.dblQuantity THEN D.dblAmount
 		ELSE B.dblTotal   
 		END   
    * ISNULL(NULLIF(B.dblRate,0),1)   
    * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
       ELSE 1 END AS DECIMAL(18,2)) AS dblTotal  
-  ,CAST(CASE WHEN B.dblTotal > D.dblAmount THEN D.dblAmount
+  ,CAST(CASE WHEN B.dblTotal <> D.dblAmount AND B.dblQtyReceived >= D.dblQuantity THEN D.dblAmount
 		ELSE B.dblTotal   
 		END  
    * CASE WHEN A.intTransactionType IN (2, 3, 13) THEN (-1)   
