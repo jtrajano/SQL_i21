@@ -16,7 +16,7 @@ DECLARE @ParmDefinition NVARCHAR(100)
 IF NOT EXISTS(SELECT TOP 1 1 FROM glarcmst)
 BEGIN
 	SET @resultOut = ''SUCCESS ''
-    RETURN -1
+	GOTO ExitImport
 END
 
 
@@ -173,7 +173,7 @@ ALTER TABLE #iRelyImptblGLJournalDetail
 ALTER TABLE #iRelyImptblGLJournalDetail
  ALTER COLUMN glarc_src_seq
  CHAR(5) COLLATE Latin1_General_CI_AS NOT NULL
-IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
+--IF @@ERROR <> 0 GOTO ROLLBACK_INSERT
 --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  -- UPDATE DETAIL [intJournalId] BASED ON HEADER
  --+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -231,6 +231,7 @@ END
 --=====================================================================================================================================
 -- FINALIZING STAGE
 ---------------------------------------------------------------------------------------------------------------------------------------
+ExitImport:
 
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournal'')) DROP TABLE #iRelyImptblGLJournal
  IF EXISTS (SELECT 1 FROM tempdb..sysobjects WHERE id = object_id(''tempdb..#iRelyImptblGLJournalDetail'')) DROP TABLE #iRelyImptblGLJournalDetail'
@@ -240,4 +241,3 @@ END
 ELSE
 	SET @result = 'SUCCESS '
 GO
-
