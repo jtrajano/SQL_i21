@@ -206,22 +206,22 @@ BEGIN TRY
 				END
 			END
 
-			IF @strLocationName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblSMCompanyLocation CL
-					WHERE CL.strLocationName = @strLocationName
-					)
-			BEGIN
-				IF @strErrorMessage <> ''
-				BEGIN
-					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location Name ' + @strLocationName + ' is not available.'
-				END
-				ELSE
-				BEGIN
-					SELECT @strErrorMessage = 'Location Name ' + @strLocationName + ' is not available.'
-				END
-			END
+			--IF @strLocationName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblSMCompanyLocation CL
+			--		WHERE CL.strLocationName = @strLocationName
+			--		)
+			--BEGIN
+			--	IF @strErrorMessage <> ''
+			--	BEGIN
+			--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Location Name ' + @strLocationName + ' is not available.'
+			--	END
+			--	ELSE
+			--	BEGIN
+			--		SELECT @strErrorMessage = 'Location Name ' + @strLocationName + ' is not available.'
+			--	END
+			--END
 
 			IF @strBook IS NOT NULL
 				AND NOT EXISTS (
@@ -332,6 +332,12 @@ BEGIN TRY
 			SELECT @intLocationId = intCompanyLocationId
 			FROM tblSMCompanyLocation
 			WHERE strLocationName = @strLocationName
+
+			if @intLocationId is null
+			Begin
+				SELECT @intLocationId = intCompanyLocationId
+				FROM tblSMCompanyLocation
+			End
 
 			SELECT @intUserId = CE.intEntityId
 			FROM tblEMEntity CE
