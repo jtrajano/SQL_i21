@@ -11,6 +11,8 @@ BEGIN
 	DECLARE @intNoOfMonths INT
 		,@strBatch NVARCHAR(MAX) = ''
 		,@strBatchId NVARCHAR(MAX) = ''
+		,@ysnParent BIT
+		,@intLocationId int
 	DECLARE @tblMFItemBook TABLE (
 		intId INT identity(1, 1)
 		,intItemId INT
@@ -23,6 +25,13 @@ BEGIN
 		,@intItemId INT
 		,@intBookId INT
 		,@intSubBookId INT
+
+	SELECT @ysnParent = ysnParent
+	FROM tblIPMultiCompany
+	WHERE ysnCurrentCompany = 1
+
+	SELECT @intLocationId = intCompanyLocationId
+	FROM tblSMCompanyLocation
 
 	IF @ysnLoadPlan = 0
 	BEGIN
@@ -447,7 +456,11 @@ BEGIN
 				,SB.intSubBookId
 				,AV.intMainItemId
 				,I.intItemId
-				,ST.dblSupplyTarget
+				,CASE 
+					WHEN @ysnParent = 1
+						THEN ST.dblSupplyTarget
+					ELSE IL.dblLeadTime
+					END AS dblSupplyTarget
 				,MI.strItemNo AS strMainItemNo
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
@@ -466,6 +479,7 @@ BEGIN
 			LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
 				AND IB.intBookId = B.intBookId
 				AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
+			LEFT JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.intLocationId =@intLocationId
 			WHERE A.intReportAttributeID IN (
 					2 --Opening Inventory
 					,4 --Existing Purchases
@@ -907,7 +921,11 @@ BEGIN
 					,SB.intSubBookId
 					,AV.intMainItemId
 					,I.intItemId
-					,ST.dblSupplyTarget
+					,CASE 
+					WHEN @ysnParent = 1
+						THEN ST.dblSupplyTarget
+					ELSE IL.dblLeadTime
+					END AS dblSupplyTarget
 					,MI.strItemNo AS strMainItemNo
 				FROM tblCTInvPlngReportAttributeValue AV
 				JOIN tblCTInvPlngReportMaster RM ON RM.intInvPlngReportMasterID = AV.intInvPlngReportMasterID
@@ -928,6 +946,8 @@ BEGIN
 				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = AV.intItemId
 					AND IB.intBookId = B.intBookId
 					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
+					LEFT JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.intLocationId =@intLocationId
+			
 				WHERE EXISTS (
 						SELECT 1
 						FROM tblCTInvPlngReportAttributeValue AV1
@@ -1544,7 +1564,11 @@ BEGIN
 					,SB.intSubBookId
 					,FD.intMainItemId
 					,I.intItemId
-					,ST.dblSupplyTarget
+					,CASE 
+					WHEN @ysnParent = 1
+						THEN ST.dblSupplyTarget
+					ELSE IL.dblLeadTime
+					END AS dblSupplyTarget
 					,MI.strItemNo AS strMainItemNo
 				FROM #tblMFFinalDemand FD
 				JOIN tblCTReportAttribute A ON A.intReportAttributeID = FD.intAttributeId
@@ -1562,6 +1586,7 @@ BEGIN
 				LEFT JOIN @tblMFItemBook IB ON IB.intItemId = FD.intItemId
 					AND IB.intBookId = B.intBookId
 					AND IsNULL(IB.intSubBookId, 0) = IsNULL(SB.intSubBookId, 0)
+					LEFT JOIN tblICItemLocation IL on IL.intItemId=I.intItemId and IL.intLocationId =@intLocationId
 				WHERE IsNumeric(FD.dblQty) = 1
 					--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				) AS SourceTable
