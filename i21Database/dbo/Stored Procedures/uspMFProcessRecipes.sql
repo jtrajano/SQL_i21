@@ -15,6 +15,10 @@ BEGIN
 	SELECT DISTINCT strSessionId
 	FROM tblMFRecipeStage
 	WHERE IsNULL(strMessage, '') = ''
+	UNION
+	SELECT DISTINCT strSessionId
+	FROM tblMFRecipeItemStage
+	WHERE IsNULL(strMessage, '') = ''
 
 	SELECT @intRecordId = MIN(intRecordId)
 	FROM @tblMFSession
