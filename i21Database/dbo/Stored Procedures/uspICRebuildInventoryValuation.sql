@@ -1017,7 +1017,7 @@ BEGIN
 						WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
 						WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
 						WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
-						WHEN dblValue <> 0 THEN 8
+						WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 8
 						ELSE 9
 					END
 				,intItemId
@@ -1082,7 +1082,7 @@ BEGIN
 				WHEN dblQty < 0 AND t.strTransactionForm = 'Invoice' THEN 6
 				WHEN dblQty > 0 AND t.strTransactionForm = 'Credit Memo' THEN 7
 				WHEN t.strTransactionForm IN ('Inventory Count') THEN 10
-				WHEN dblValue <> 0 THEN 8
+				WHEN dblValue <> 0 AND t.strTransactionForm NOT IN ('Produce') THEN 8
 				ELSE 9
 			END    
 			ASC 
