@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[uspCTCreateVoucherInvoiceForPartialPricing]
+﻿CREATE PROCEDURE [dbo].[uspCTCreateVoucherInvoiceForPartialPricing]
 		
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
@@ -252,41 +252,80 @@ BEGIN TRY
 	begin
 
 		declare @ContractReceipts as table (
-			intInventoryReceiptId int
+			intId int
+			,intInventoryReceiptId int
+			,dtmCreated datetime
+			,strTransactionType nvarchar(5)
 		)
+
+		declare
+			@intUTCOffsetInMinutes int
+			,@intId int
+			,@strTransactionType nvarchar(5);
+
+		select @intUTCOffsetInMinutes = DATEDIFF(minute,getutcdate(),getdate());
 
 		insert into @ContractReceipts
 		select
-			intInventoryReceiptId = ri.intInventoryReceiptId
+			intId = convert(int,row_number() over (order by dtmCreated))
+			,*
 		from
-			tblICInventoryReceiptItem ri
-			join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId and ir.strReceiptType = 'Purchase Contract'
-		where
-			ri.intLineNo = @intContractDetailId
-		order by ir.intInventoryReceiptId
+		(
+			select
+				intInventoryReceiptId = ri.intInventoryReceiptId
+				,ir.dtmCreated 
+				,strTransactionType = 'IR'
+			from
+				tblICInventoryReceiptItem ri
+				join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId and ir.strReceiptType = 'Purchase Contract'
+			where
+				ri.intLineNo = @intContractDetailId
 
+			union all
 
+			SELECT
+				intInventoryReceiptId = SC.intSettleStorageId
+				,dtmCreated = DATEADD(minute,@intUTCOffsetInMinutes,SS.dtmCreated)   
+				,strTransactionType = 'STR'
+			FROM
+				tblGRSettleContract SC
+				JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
+			WHERE
+				SC.intContractDetailId = @intContractDetailId
+				AND SS.intParentSettleStorageId IS NOT NULL
+		) tbl order by dtmCreated
 
 		if exists (select top 1 1 from @ContractReceipts)
 		begin
-			set @intInventoryReceiptId = 0
-			select @intInventoryReceiptId = min(intInventoryReceiptId) from @ContractReceipts where intInventoryReceiptId > @intInventoryReceiptId;
+			set @intId = 0
+			select @intId = min(intId) from @ContractReceipts where intId > @intId;
 
-			while (@intInventoryReceiptId is not null and @intInventoryReceiptId > 0)
+			while (@intId is not null and @intId > 0)
 			begin
 
-				update tblICInventoryReceiptItem set ysnAllowVoucher = 1 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
-				exec uspICConvertReceiptToVoucher
-					@intInventoryReceiptId
-					,@intUserId
-					,@intNewBillId OUTPUT
+				select @intInventoryReceiptId = intInventoryReceiptId, @strTransactionType = strTransactionType from @ContractReceipts where intId = @intId;
 
-				if (@intPricingTypeId = 2)
+				if (@strTransactionType = 'STR')
 				begin
-					update tblICInventoryReceiptItem set ysnAllowVoucher = 0 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
-				end
+					declare @dblAvailableQuantity numeric(18,6);  
+			        select @dblAvailableQuantity = dblAvailableQuantity from vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId;  
+			  		EXEC [dbo].[uspGRPostSettleStorage] @intInventoryReceiptId,1, 1,@dblFinalPrice, @dblAvailableQuantity; 
 
-				select @intInventoryReceiptId = min(intInventoryReceiptId) from @ContractReceipts where intInventoryReceiptId > @intInventoryReceiptId;
+				end
+				else
+				begin
+					update tblICInventoryReceiptItem set ysnAllowVoucher = 1 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
+					exec uspICConvertReceiptToVoucher
+						@intInventoryReceiptId
+						,@intUserId
+						,@intNewBillId OUTPUT
+
+					if (@intPricingTypeId = 2)
+					begin
+						update tblICInventoryReceiptItem set ysnAllowVoucher = 0 where intInventoryReceiptId = @intInventoryReceiptId and intLineNo = @intContractDetailId;
+					end
+				end
+				select @intId = min(intId) from @ContractReceipts where intId > @intId;
 			end
 		end
 
