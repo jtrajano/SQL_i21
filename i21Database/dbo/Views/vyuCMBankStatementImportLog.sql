@@ -8,5 +8,6 @@ LEFT JOIN
 tblEMEntity B on A.intEntityId = B.intEntityId
 OUTER APPLY(
     SELECT intErrorCount = COUNT(*) FROM tblCMBankStatementImportLogDetail WHERE ISNULL(strError,'') <> ''
+    AND intImportBankStatementLogId = A.intImportBankStatementLogId
 
 )Detail
