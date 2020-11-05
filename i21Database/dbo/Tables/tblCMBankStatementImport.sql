@@ -22,6 +22,7 @@
     [dtmLastModified] DATETIME NULL,
     [intConcurrencyId] INT NULL,
     [intResponsiblePartyMatchingId] INT NULL,
+    [ysnSuccess] BIT NULL,
 	CONSTRAINT [FK_tblCMBankAccounttblCMBankStatementImport] FOREIGN KEY ([intBankAccountId]) REFERENCES [dbo].[tblCMBankAccount] ([intBankAccountId]),
     CONSTRAINT [PK_tblCMBankStatementImport] PRIMARY KEY ([intBankStatementImportId]), 
 )
