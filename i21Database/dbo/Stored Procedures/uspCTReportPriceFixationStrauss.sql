@@ -20,7 +20,9 @@ BEGIN TRY
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),	
 			@xmlDocumentId				INT,
-			@intTransactionId			INT			
+			@intTransactionId			INT,
+			@PreviousSubmitterId		INT,
+			@PreviousSubmitterSign 		VARBINARY(MAX)
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -92,17 +94,21 @@ BEGIN TRY
 	WHERE intScreenId = @intScreenId
 	AND intRecordId = @intPriceContractId 
 
-	SELECT	TOP 1 @FirstApprovalId=intApproverId 
+	SELECT	TOP 1 @FirstApprovalId=intApproverId, @PreviousSubmitterId = intSubmittedById
 	FROM	tblSMApproval 
 	WHERE	intTransactionId=@intTransactionId
 	AND		strStatus='Approved' 
-	ORDER 
-	BY		intApprovalId
+	ORDER BY intApprovalId
 
 	SELECT	@FirstApprovalSign =  Sig.blbDetail 
 	FROM	tblSMSignature Sig  WITH (NOLOCK)
 	JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	Sig.intEntityId=@FirstApprovalId
+
+	SELECT	@PreviousSubmitterSign =  Sig.blbDetail 
+	FROM	tblSMSignature Sig  WITH (NOLOCK)
+	JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
+	WHERE	Sig.intEntityId=@PreviousSubmitterId
 	
 	SELECT	TOP 1 @InterCompApprovalSign =Sig.blbDetail 
 	FROM	tblCTIntrCompApproval	IA
@@ -119,6 +125,7 @@ BEGIN TRY
 			xmlParam = @xmlParam,
 			PF.intPriceFixationId,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
+			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
 			strOtherPartyAddress	= CASE 
 									  WHEN CH.strReportTo = 'Buyer' THEN --Customer
 									  	LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
@@ -176,7 +183,8 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-		    BuyerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
+			SubmitterSign = @PreviousSubmitterSign,
+		    BuyerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,			
 		    SellerSign = CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
 			intReportLogoHeight = ISNULL(@intReportLogoHeight,0),
 			intReportLogoWidth = ISNULL(@intReportLogoWidth,0)
