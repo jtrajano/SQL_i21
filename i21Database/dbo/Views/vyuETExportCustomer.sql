@@ -11,7 +11,7 @@ AS
 		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 1),1,50) COLLATE Latin1_General_CI_AS as addr1
 		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 2),1,50) COLLATE Latin1_General_CI_AS as addr2 
 		,SUBSTRING(dbo.fnEMSplitWithGetByIdx(Loc.strAddress, CHAR(10), 3),1,50) COLLATE Latin1_General_CI_AS as addr3
-		,Loc.strZipCode zip
+		,CAST(Loc.strZipCode AS VARCHAR(10))  zip
 		,Loc.strState [state]
 		,Loc.strCity [city]
 		,Cus.strType [type]
