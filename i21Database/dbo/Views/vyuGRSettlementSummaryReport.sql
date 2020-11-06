@@ -146,11 +146,14 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(APD.dblPayment) dblTotal
+			,SUM(BD.dblTotal) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 
-				AND Bill.intTransactionType = 3
+				-- AND Bill.intTransactionType = 3
+		JOIN tblAPBillDetail BD
+			ON BD.intBillId = Bill.intBillId
+			AND BD.intScaleTicketId IS NULL
 		GROUP BY intPaymentId
 	) BillByReceiptItem ON BillByReceiptItem.intPaymentId = PYMT.intPaymentId			 
 	LEFT JOIN (
@@ -322,11 +325,15 @@ FROM
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
-			,SUM(APD.dblPayment) dblTotal
+			-- ,SUM(APD.dblPayment) dblTotal
+			,SUM(BD.dblTotal) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 
-				AND Bill.intTransactionType = 3
+				--AND Bill.intTransactionType = 3
+		JOIN tblAPBillDetail BD
+			ON BD.intBillId = Bill.intBillId
+				AND BD.intCustomerStorageId IS NULL
 		GROUP BY intPaymentId
 	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId			
 	LEFT JOIN (

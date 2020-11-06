@@ -36,6 +36,8 @@ FROM
 				 BillDtl.intBillDetailId
 				,BillDtl.dblQtyOrdered
 				,Bill.intBillId
+				,BillDtl.intInventoryReceiptItemId
+				,BillDtl.intCustomerStorageId
 			FROM tblAPBillDetail BillDtl
 			JOIN tblAPBill Bill 
 				ON BillDtl.intBillId = Bill.intBillId 
@@ -93,6 +95,8 @@ FROM
 				,dblTax						= BillDtl.dblTax
 				,dblNetTotal				= BillDtl.dblTotal + BillDtl.dblTax
 				,strTaxClass = TaxClass.strTaxClass
+				,BillDtl.intInventoryReceiptItemId
+				,BillDtl.intCustomerStorageId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId
@@ -152,9 +156,12 @@ FROM
 			,dblTax
 			,dblNetTotal
 			,strTaxClass
+			,intInventoryReceiptItemId
+			,intCustomerStorageId
 	) t3 
 		ON t3.intBillId = t2.intBillId 
 			AND t3.intBillId = t1.intBillId
+			AND (t1.intInventoryReceiptItemId = t3.intInventoryReceiptItemId OR t1.intCustomerStorageId = t3.intCustomerStorageId)
 	WHERE t3.intItemId IS NOT NULL
 
 	UNION 
@@ -181,6 +188,7 @@ FROM
 				,BillDtl.dblQtyOrdered
 				,Bill.intBillId
 				,BillDtl.intInventoryReceiptItemId
+				,BillDtl.intCustomerStorageId
 			FROM tblAPBillDetail BillDtl
 			JOIN tblAPBill Bill 
 				ON BillDtl.intBillId = Bill.intBillId
@@ -239,6 +247,7 @@ FROM
 				,dblNetTotal				= BillDtl.dblTotal + BillDtl.dblTax
 				,strTaxClass = TaxClass.strTaxClass
 				,BillDtl.intInventoryReceiptItemId
+				,BillDtl.intCustomerStorageId
 		FROM tblAPBillDetail BillDtl
 		JOIN tblAPBill Bill 
 			ON BillDtl.intBillId = Bill.intBillId
@@ -301,9 +310,11 @@ FROM
 			,dblNetTotal
 			,strTaxClass
 			,intInventoryReceiptItemId
+			,intCustomerStorageId
    )t3 
 		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
-				t3.intBillId = t1.intBillId and t3.intInventoryReceiptItemId = t1.intInventoryReceiptItemId
+				t3.intBillId = t1.intBillId and (t3.intInventoryReceiptItemId = t1.intInventoryReceiptItemId
+					or t3.intCustomerStorageId = t1.intCustomerStorageId)
 	WHERE t3.intItemId IS NOT NULL 
 )t	
 GROUP BY 
