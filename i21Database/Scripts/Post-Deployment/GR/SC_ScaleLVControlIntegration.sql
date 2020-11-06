@@ -748,7 +748,7 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 							,[dblTareWeight]				= SC.dblTareWeight
 							,[dtmTareDateTime]				= SC.dtmTareDateTime
 							,[strTicketComment]				= LTRIM(RTRIM(SC.strTicketComment))
-							,[intDiscountId]				= GRD_CROSS_REF.intDiscountId -- GRDI.intDiscountId (not being used)
+							,[intDiscountId]				= ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId)
 							,[intDiscountScheduleId]		= GRD_CROSS_REF.intDiscountScheduleId -- consider review for redundancy. 
 							,[dblFreightRate]				= SC.dblFreightRate
 							,[dblTicketFees]				= SC.dblTicketFees
@@ -796,7 +796,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						LEFT JOIN tblICItem IC ON IC.strShortName COLLATE Latin1_General_CI_AS =  IR.gasct_com_cd COLLATE Latin1_General_CI_AS
 						LEFT JOIN tblICCommodity ICC ON ICC.intCommodityId = IC.intCommodityId
 						LEFT JOIN tblSMCompanyLocation SM ON SM.strLocationNumber = SC.strLocationNumber
-						LEFT JOIN tblGRDiscountId GRDI ON GRDI.strDiscountId = SC.strDiscountId
+						LEFT JOIN tblGRDiscountId GRDI ON (ISNUMERIC(GRDI.strDiscountId) = 1 AND CAST(GRDI.strDiscountId AS INT) = SC.strDiscountId)
+								OR  (ISNUMERIC(GRDI.strDiscountId) = 0 and (GRDI.strDiscountId =  SC.strDiscountId) )
 						LEFT JOIN tblSCScaleSetup SCS ON SCS.strStationShortDescription = SC.strStationShortDescription
 						LEFT JOIN tblSCTicketPool SCTP ON SCTP.strTicketPool = SC.strTicketPool
 						LEFT JOIN tblGRStorageType GRS ON GRS.strStorageTypeCode = SC.strDistributionOption
@@ -807,9 +808,8 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						LEFT JOIN tblICItemUOM UOM ON UOM.intUnitMeasureId = SCS.intUnitMeasureId AND UOM.intItemId = IC.intItemId
 						LEFT JOIN tblSCListTicketTypes SCL ON SCL.strInOutIndicator = SC.strInOutFlag AND SCL.intTicketType = SC.intTicketType
 						--LEFT JOIN tblGRDiscountSchedule GRDS ON GRDS.strDiscountDescription =  (IC.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
-						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId
-						left join tblGRDiscountSchedule GRDS on GRDS.intCommodityId = IC.intCommodityId
-						left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+						--left join tblGRDiscountCrossReference GRD_CROSS_REF on GRDI.intDiscountId = GRD_CROSS_REF.intDiscountId				
+						left join tblGRDiscountCrossReference GRD_CROSS_REF on ISNULL(GRDI.intDiscountId, ICC.intScheduleDiscountId) = GRD_CROSS_REF.intDiscountId
 						OUTER APPLY (
 							SELECT TOP 1 intLoadId, intLoadDetailId,
 								intContractDetailId = case 
@@ -944,10 +944,9 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						INNER JOIN tblSCTicketLVStaging k ON k.intOriginTicketId = b.A4GLIdentity AND b.gasct_disc_cd is not null
 						INNER JOIN tblICCommodity ic ON ic.intCommodityId = k.intCommodityId
 					
-						INNER JOIN tblGRDiscountSchedule GRDS on GRDS.intCommodityId = ic.intCommodityId
-						INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRDS.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId
+						INNER JOIN tblGRDiscountCrossReference GRD_CROSS_REF on GRD_CROSS_REF.intDiscountId = isnull(k.intDiscountId, ic.intScheduleDiscountId)
 						--dapat di ka nababa dito
-						INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRDS.intDiscountScheduleId AND c.intStorageTypeId = -1
+						INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = GRD_CROSS_REF.intDiscountScheduleId AND c.intStorageTypeId = -1
 						INNER JOIN vyuGRDiscountScheduleCodeNotMapped DCode on DCode.intDiscountScheduleCodeId = c.intDiscountScheduleCodeId
 						--INNER JOIN tblGRDiscountSchedule d ON d.strDiscountDescription =  (ic.strDescription  + '' Discount'' COLLATE Latin1_General_CI_AS) 
 						--INNER JOIN tblGRDiscountScheduleCode c ON c.intDiscountScheduleId = d.intDiscountScheduleId AND c.intStorageTypeId = -1
