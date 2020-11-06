@@ -330,11 +330,15 @@ FROM
 										THEN (ISNULL(VCHR.dblTotal, 0) + ISNULL(INVC.dblTotal, 0)) - ISNULL(CC.dblAmount, 0) 
 										ELSE 0 END)
 			FROM tblICItem I 
-				OUTER APPLY (SELECT intPContractDetailId
-								,intSContractDetailId
-								,dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
+				OUTER APPLY (SELECT intPContractDetailId, intSContractDetailId, dblPAllocatedQty, dblSAllocatedQty
+					FROM tblLGAllocationDetail WHERE intAllocationDetailId = @intAllocationDetailId) ALD
+				OUTER APPLY (SELECT dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate)
-												ELSE CC.dblRate END
+												WHEN CC.strCostMethod = 'Amount' THEN
+													CC.dblRate / dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty)
+												ELSE 
+													CC.dblRate 
+												END / ISNULL(CCUR.intCent, 1) * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
 													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,TonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
@@ -344,7 +348,7 @@ FROM
 													CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 												WHEN CC.strCostMethod = 'Percentage' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) * CD.dblCashPrice * CC.dblRate/100
-												END
+												END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						FROM tblCTContractCost CC
 							LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CC.intContractDetailId
 							LEFT JOIN tblLGAllocationDetail ALD ON CC.intContractDetailId = ALD.intSContractDetailId
@@ -354,24 +358,51 @@ FROM
 										WHERE intItemId = CC.intItemId AND intUnitMeasureId = CDUOM.intUnitMeasureId) CToUOM
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intUnitMeasureId) TonUOM
+							OUTER APPLY (SELECT	TOP 1 dblFXRate = CASE WHEN ER.intFromCurrencyId = @intDefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
+									FROM tblSMCurrencyExchangeRate ER
+									JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+									WHERE @intDefaultCurrencyId <> ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)
+										AND ((ER.intFromCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID) AND ER.intToCurrencyId = @intDefaultCurrencyId) 
+											OR (ER.intFromCurrencyId = @intDefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)))
+									ORDER BY RD.dtmValidFromDate DESC) FX
 					WHERE CC.intItemId = I.intItemId AND ALD.intAllocationDetailId = @intAllocationDetailId) CC
-				OUTER APPLY (SELECT dblTotal = SUM(BLD.dblTotal) 
-					FROM tblAPBillDetail BLD 
-						INNER JOIN tblAPBill BL ON BL.intBillId = BLD.intBillId
-						INNER JOIN tblICItem BLDI ON BLDI.intItemId = BLD.intItemId
-					WHERE BL.ysnPosted = 1
-						AND BLD.intContractDetailId IN (CC.intPContractDetailId, CC.intSContractDetailId) 
-						AND BLD.intItemId = I.intItemId 
-						AND BLDI.intCategoryId IN (CP.intPnLReportReserveACategoryId)
-					) VCHR
-				OUTER APPLY (SELECT dblTotal = SUM(IVD.dblTotal) 
-					FROM tblARInvoiceDetail IVD 
+				OUTER APPLY 
+					(SELECT dblTotal = SUM(CASE WHEN BL.intTransactionType IN (3, 11) 
+									THEN (BLD.dblTotal * -1) * COALESCE(BLD.dblRate, FX.dblFXRate, 1) 
+									ELSE BLD.dblTotal * COALESCE(BLD.dblRate, FX.dblFXRate, 1) END) 
+						FROM tblAPBillDetail BLD 
+							INNER JOIN tblAPBill BL ON BL.intBillId = BLD.intBillId
+							INNER JOIN tblICItem BLDI ON BLDI.intItemId = BLD.intItemId
+							LEFT JOIN tblSMCurrency CCUR ON CCUR.intCurrencyID = BLD.intCurrencyId
+							OUTER APPLY (SELECT	TOP 1 dblFXRate = CASE WHEN ER.intFromCurrencyId = @intDefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
+										FROM tblSMCurrencyExchangeRate ER
+										JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+										WHERE @intDefaultCurrencyId <> ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)
+											AND ((ER.intFromCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID) AND ER.intToCurrencyId = @intDefaultCurrencyId) 
+												OR (ER.intFromCurrencyId = @intDefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)))
+										ORDER BY RD.dtmValidFromDate DESC) FX
+						WHERE BL.ysnPosted = 1
+							AND BLD.intContractDetailId IN (ALD.intPContractDetailId, ALD.intSContractDetailId)
+							AND BLD.intItemId = I.intItemId 
+							) VCHR
+				OUTER APPLY 
+					(SELECT dblTotal = SUM(CASE WHEN IV.strTransactionType IN ('Credit Memo') 
+										THEN (IVD.dblTotal * -1) * COALESCE(IVD.dblCurrencyExchangeRate, FX.dblFXRate, 1) 
+										ELSE IVD.dblTotal * COALESCE(IVD.dblCurrencyExchangeRate, FX.dblFXRate, 1) END)
+				FROM tblARInvoiceDetail IVD 
 						INNER JOIN tblARInvoice IV ON IV.intInvoiceId = IVD.intInvoiceId
 						INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
+						LEFT JOIN tblSMCurrency CCUR ON CCUR.intCurrencyID = IV.intCurrencyId
+						OUTER APPLY (SELECT	TOP 1 dblFXRate = CASE WHEN ER.intFromCurrencyId = @intDefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
+									FROM tblSMCurrencyExchangeRate ER
+									JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+									WHERE @intDefaultCurrencyId <> ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)
+										AND ((ER.intFromCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID) AND ER.intToCurrencyId = @intDefaultCurrencyId) 
+											OR (ER.intFromCurrencyId = @intDefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)))
+									ORDER BY RD.dtmValidFromDate DESC) FX
 					WHERE IV.ysnPosted = 1
-						AND IVD.intContractDetailId IN (CC.intPContractDetailId, CC.intSContractDetailId)
+						AND IVD.intContractDetailId IN (ALD.intPContractDetailId, ALD.intSContractDetailId)
 						AND IVD.intItemId = I.intItemId 
-						AND IVDI.intCategoryId IN (CP.intPnLReportReserveACategoryId)
 					) INVC
 			WHERE I.intCategoryId = CP.intPnLReportReserveACategoryId
 		) RA 
@@ -383,8 +414,12 @@ FROM
 			OUTER APPLY (SELECT intPContractDetailId
 							,intSContractDetailId
 							,dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
-											dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate)
-										ELSE CC.dblRate END
+												dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate)
+											WHEN CC.strCostMethod = 'Amount' THEN
+												CC.dblRate / dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty)
+											ELSE 
+												CC.dblRate 
+											END / ISNULL(CCUR.intCent, 1) * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 							,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 												dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
 												* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,TonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
@@ -394,7 +429,7 @@ FROM
 												CC.dblRate * (CASE WHEN ISNULL(CD.intNumberOfContainers,1) = 0 THEN 1 ELSE ISNULL(CD.intNumberOfContainers,1) END)
 											WHEN CC.strCostMethod = 'Percentage' THEN 
 												dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) * CD.dblCashPrice * CC.dblRate/100
-											END
+											END * COALESCE(CC.dblFX, FX.dblFXRate, 1)
 						FROM tblCTContractCost CC
 							LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CC.intContractDetailId
 							LEFT JOIN tblLGAllocationDetail ALD ON CC.intContractDetailId = ALD.intSContractDetailId
@@ -404,6 +439,13 @@ FROM
 									WHERE intItemId = CC.intItemId AND intUnitMeasureId = CDUOM.intUnitMeasureId) CToUOM
 							OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 									WHERE intItemId = CC.intItemId AND intUnitMeasureId = @intUnitMeasureId) TonUOM
+							OUTER APPLY (SELECT	TOP 1 dblFXRate = CASE WHEN ER.intFromCurrencyId = @intDefaultCurrencyId THEN 1/RD.[dblRate] ELSE RD.[dblRate] END 
+									FROM tblSMCurrencyExchangeRate ER
+									JOIN tblSMCurrencyExchangeRateDetail RD ON RD.intCurrencyExchangeRateId = ER.intCurrencyExchangeRateId
+									WHERE @intDefaultCurrencyId <> ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)
+										AND ((ER.intFromCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID) AND ER.intToCurrencyId = @intDefaultCurrencyId) 
+											OR (ER.intFromCurrencyId = @intDefaultCurrencyId AND ER.intToCurrencyId = ISNULL(CCUR.intMainCurrencyId, CCUR.intCurrencyID)))
+									ORDER BY RD.dtmValidFromDate DESC) FX
 					 WHERE CC.intItemId = I.intItemId AND ALD.intAllocationDetailId = @intAllocationDetailId) CC
 			WHERE I.intCategoryId = CP.intPnLReportReserveBCategoryId
 		) RB 
