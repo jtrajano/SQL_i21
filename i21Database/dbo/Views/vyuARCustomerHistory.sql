@@ -4,7 +4,8 @@ SELECT TRANSACTIONS.*
      , CUSTOMER.strCustomerNumber
 	 , CUSTOMER.strName 
 FROM (
-	SELECT dtmDate				= ISNULL(SO.dtmProcessDate, SO.dtmDate)
+	SELECT dtmDate				= SO.dtmDate
+		 , dtmPostDate			= SO.dtmProcessDate
 		 , strTransactionNumber	= SO.strSalesOrderNumber
 		 , strTransactionType	= SO.strTransactionType
 		 , dblTransactionTotal	= ISNULL(SO.dblSalesOrderTotal, 0.00)
@@ -18,7 +19,8 @@ FROM (
 	
 	UNION	
 
-	SELECT dtmDate				= ISNULL(I.dtmPostDate, I.dtmDate)
+	SELECT dtmDate				= I.dtmDate
+		 , dtmPostDate			= I.dtmPostDate
 		 , strTransactionNumber	= I.strInvoiceNumber
 		 , strTransactionType	= I.strTransactionType
 		 , dblTransactionTotal	= ISNULL(I.dblInvoiceTotal, 0.00)
@@ -34,6 +36,7 @@ FROM (
 	UNION	
 	
 	SELECT dtmDate				= P.dtmDatePaid
+		 , dtmPostDate			= P.dtmDatePaid
 		 , strTransactionNumber	= P.strRecordNumber
 		 , strTransactionType	= 'Receive Payment'
 		 , dblTransactionTotal	= ISNULL(PD.dblTotal, 0.00)
