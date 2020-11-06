@@ -193,5 +193,11 @@ GO
 PRINT('Finished linking CM transactions to AP')
 GO
 
+UPDATE tblCMBankFileFormat SET ysnContainsHeader = 1 WHERE ysnContainsHeader IS NULL
+AND intBankFileType = 3
+
+GO
+
+
 PRINT('/*******************  END Cash Management Data Fixess *******************/')
 GO
