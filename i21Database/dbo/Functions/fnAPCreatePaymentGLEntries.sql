@@ -910,6 +910,7 @@ BEGIN
 		) DT
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds) AND
 		((DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1) OR (DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1))
+		AND PD.dblPayment <> 0 AND PD.dblPayment <> RT.dblTotalForeign
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
