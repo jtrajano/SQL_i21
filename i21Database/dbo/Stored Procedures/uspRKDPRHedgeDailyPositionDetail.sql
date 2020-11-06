@@ -513,7 +513,35 @@ BEGIN
 		AND ysnInTransit = 0 AND ISNULL(s.dblQuantity, 0) <> 0
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND s.strTransactionType <> 'Storage Settlement'
 		--AND ISNULL(strDistributionOption,'') <> CASE WHEN @ysnIncludeDPPurchasesInCompanyTitled = 1 THEN '@#$%' ELSE 'DP' END
+
+	UNION ALL
+	SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
+		, t.strTicketNumber
+		, s.strLocationName
+		, s.strItemNo
+		, i.intCommodityId
+		, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
+		, s.intLocationId
+		, strTransactionId
+		, strTransactionType
+		, i.intItemId
+		, s.intCategoryId
+		, s.strCategory
+		, s.strCurrency
+	FROM vyuRKGetInventoryValuation s
+	JOIN tblICItem i ON i.intItemId = s.intItemId
+	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
+	LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
+	WHERE i.intCommodityId IN (SELECT intCommodity FROM @Commodity)
+		AND ysnInTransit = 0 AND ISNULL(s.dblQuantity, 0) <> 0
+		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+		AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND s.strTransactionType = 'Storage Settlement'
+
 	
 	SELECT * INTO #tempCollateral
 	FROM (
