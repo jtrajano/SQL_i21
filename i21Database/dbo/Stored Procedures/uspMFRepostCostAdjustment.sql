@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE uspMFRepostCostAdjustment 
 	@strCostAdjustmentBatchId AS NVARCHAR(50)
 	,@intEntityUserSecurityId AS INT
+	,@dtmDate AS DATETIME = NULL -- This is used to fix the stock rebuild.
 AS
 BEGIN TRY
 	DECLARE @adjustedEntries AS ItemCostAdjustmentTableType
@@ -252,7 +253,7 @@ BEGIN TRY
 					AND IL.intLocationId = @intLocationId
 				))
 		,[intItemUOMId] = PL.intItemUOMId
-		,[dtmDate] = IsNull(Isnull(@dtmCurrentDateTime,W.dtmPostDate), W.dtmCompletedDate)
+		,[dtmDate] = COALESCE(@dtmDate, @dtmCurrentDateTime, W.dtmPostDate, W.dtmCompletedDate) --IsNull(Isnull(@dtmCurrentDateTime,W.dtmPostDate), W.dtmCompletedDate)
 		,[dblQty] = 0
 		,[dblUOMQty] = 1
 		,[intCostUOMId] = PL.intItemUOMId
