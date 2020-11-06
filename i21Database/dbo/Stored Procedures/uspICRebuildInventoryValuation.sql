@@ -1528,6 +1528,7 @@ BEGIN
 				EXEC uspMFRepostCostAdjustment
 					@strBatchId
 					,@intEntityUserSecurityId
+					,@dtmDate
 			END
 
 			-- Repost 'Consume' and 'Produce'
