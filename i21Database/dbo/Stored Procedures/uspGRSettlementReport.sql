@@ -733,15 +733,15 @@ BEGIN
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
 			LEFT JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
-					AND Item.strType <> 'Other Charge'	
-			LEFT JOIN tblGRStorageHistory StrgHstry 
-				ON ( 
-						Bill.intBillId = StrgHstry.intBillId
-						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
-							and StrgHstry.strType = 'Settlement'
-							)
-				)
-			LEFT JOIN tblGRCustomerStorage CS 
+					AND Item.strType <> 'Other Charge'
+			JOIN ( --DEV'S NOTE: GRN-2409; changed to cater multiple vouchers in settlements
+					tblGRSettleStorageBillDetail BD 
+					JOIN tblGRStorageHistory StrgHstry
+						ON StrgHstry.intSettleStorageId = BD.intSettleStorageId
+				) ON BD.intBillId = Bill.intBillId
+			-- JOIN tblGRStorageHistory StrgHstry 
+			-- 	ON Bill.intBillId = StrgHstry.intBillId
+			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
 			LEFT JOIN tblSCTicket SC  
 				ON SC.intTicketId = CS.intTicketId
