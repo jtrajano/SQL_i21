@@ -543,6 +543,43 @@ BEGIN
 					JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = Com.intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
 				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
 					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+					AND Inv.strTransactionType = 'Inventory Shipment'
+
+				UNION ALL
+				SELECT 
+					 strShipmentNumber = InTran.strTransactionId
+					,intInventoryShipmentId = InTran.intTransactionId
+					,strContractNumber = LG.strSContractNumber + '-' + CONVERT(NVARCHAR, LG.intSContractSeq) COLLATE Latin1_General_CI_AS 
+					,intContractHeaderId = LG.intSContractHeaderId
+					,strTicketNumber = ''
+					,intTicketId = NULL
+					,dtmTicketDateTime = InTran.dtmDate
+					,intCompanyLocationId = Inv.intLocationId
+					,strLocationName = Inv.strLocationName
+					,strUOM = InTran.strUnitMeasure
+					,Inv.intEntityId
+					,strCustomerReference = LG.strCustomer
+					,Com.intCommodityId
+					,Itm.intItemId
+					,Itm.strItemNo
+					,strCategory = Cat.strCategoryCode
+					,Cat.intCategoryId
+					,dblBalanceToInvoice = dbo.fnCTConvertQuantityToTargetCommodityUOM(cum.intCommodityUnitMeasureId,@intCommodityUnitMeasureId,isnull((InTran.dblInTransitQty),0)) 
+					,strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), InTran.dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
+					,strFutureMonth = (SELECT TOP 1 strFutureMonth FROM tblCTContractDetail cd INNER JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId =  fmnt.intFutureMonthId WHERE intContractHeaderId = LG.intSContractHeaderId)
+					,strDeliveryDate =  (SELECT TOP 1 dbo.fnRKFormatDate(dtmEndDate, 'MMM yyyy') FROM tblCTContractDetail WHERE intContractHeaderId = LG.intSContractHeaderId)
+				FROM dbo.fnICOutstandingInTransitAsOf(NULL, @intCommodityId, @dtmToDate) InTran
+					INNER JOIN vyuICGetInventoryValuation Inv ON InTran.intInventoryTransactionId = Inv.intInventoryTransactionId
+					INNER JOIN tblICItem Itm ON InTran.intItemId = Itm.intItemId
+					INNER JOIN tblICCommodity Com ON Itm.intCommodityId = Com.intCommodityId
+					INNER JOIN tblICCategory Cat ON Itm.intCategoryId = Cat.intCategoryId
+					LEFT JOIN vyuLGLoadDetailView LG ON InTran.intTransactionDetailId = LG.intLoadDetailId
+					INNER JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = InTran.intItemUOMId
+					INNER JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
+					JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = Com.intCommodityId AND cum.intUnitMeasureId = UOM.intUnitMeasureId
+				WHERE CONVERT(DATETIME, CONVERT(VARCHAR(10), Inv.dtmDate, 110), 110) <= CONVERT(DATETIME,@dtmToDate)
+					AND ISNULL(Inv.intEntityId,0) = CASE WHEN ISNULL(@intVendorId,0)=0 THEN ISNULL(Inv.intEntityId,0) ELSE @intVendorId END
+					AND Inv.strTransactionType = 'Outbound Shipment'
 				
 			)t
 		
