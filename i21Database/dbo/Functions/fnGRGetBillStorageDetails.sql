@@ -232,7 +232,8 @@ BEGIN
 					end
 				) + SV.dblStorageDuePerUnit
 			) >= 0
-		and SV.dblStorageDuePerUnit > 0
+		AND SV.dblStorageDuePerUnit > 0
+		AND MagicalOpenBalance.dblOpenBalance >= 1 
 	ORDER BY EM.strName, CL.strLocationName		
 
 	RETURN;
