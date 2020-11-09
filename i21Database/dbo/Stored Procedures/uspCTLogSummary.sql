@@ -1317,6 +1317,7 @@ BEGIN TRY
 						WHERE strFieldName = 'Balance'
 						AND suh.intContractHeaderId = @intContractHeaderId
 						AND suh.intContractDetailId = ISNULL(@intContractDetailId, suh.intContractDetailId)
+	  					AND suh.intExternalHeaderId is not null
 					) tbl
 					WHERE Row_Num = 1
 					AND intContractHeaderId = @intContractHeaderId
