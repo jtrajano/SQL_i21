@@ -13,6 +13,7 @@ BEGIN
 		,@strERPPONumber NVARCHAR(50)
 		,@strSubBook NVARCHAR(50)
 		,@intSubBookId INT
+		,@strContractNumber NVARCHAR(50)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,strContractFeedIds NVARCHAR(MAX)
@@ -26,6 +27,7 @@ BEGIN
 		,intContractHeaderId INT
 		,strRowState NVARCHAR(50)
 		,strERPPONumber NVARCHAR(50)
+		,strContractNumber NVARCHAR(50)
 		)
 	DECLARE @tblCTContractCertification TABLE (
 		intContractDetailId INT
@@ -56,10 +58,12 @@ BEGIN
 		intContractHeaderId
 		,strRowState
 		,strERPPONumber
+		,strContractNumber
 		)
 	SELECT DISTINCT intContractHeaderId
 		,strRowState
 		,strERPPONumber
+		,strContractNumber
 	FROM dbo.tblCTContractFeed
 	WHERE ISNULL(strFeedStatus, '') = ''
 
@@ -74,10 +78,12 @@ BEGIN
 			,@strERPPONumber = NULL
 			,@intSubBookId = NULL
 			,@strSubBook = NULL
+			,@strContractNumber = NULL
 
 		SELECT @intContractHeaderId = intContractHeaderId
 			,@strRowState = strRowState
 			,@strERPPONumber = strERPPONumber
+			,@strContractNumber=strContractNumber
 		FROM @tblCTContractFeed
 		WHERE intRecordId = @intRecordId
 
@@ -207,8 +213,8 @@ BEGIN
 				@intRecipeStageId
 				,@strTransactionType
 				,@strXml
-				,ISNULL(@strRecipeName, '')
-				,ISNULL(@strItemNo, '')
+				,ISNULL(@strContractNumber, '')
+				,ISNULL(@strERPPONumber, '')
 				)
 
 			UPDATE tblCTContractFeed

@@ -4109,13 +4109,13 @@ BEGIN TRY
 				--SELECT 'Contract Type'
 				--	,'Purchase'
 
-				--SELECT @strApprover = strApprover
-				--FROM tblIPMultiCompany
-				--WHERE intCompanyId = @intCompanyRefId
+				SELECT @strApprover = strApprover
+				FROM tblIPMultiCompany
+				WHERE intCompanyId = @intCompanyRefId
 
-				--SELECT @intCurrentUserEntityId = intEntityId
-				--FROM tblSMUserSecurity
-				--WHERE strUserName = @strApprover
+				SELECT @intCurrentUserEntityId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = @strApprover
 
 				IF @intCurrentUserEntityId IS NULL
 					SELECT @intCurrentUserEntityId = @intCreatedById

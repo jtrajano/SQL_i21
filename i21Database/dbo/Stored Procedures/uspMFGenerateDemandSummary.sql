@@ -465,7 +465,6 @@ BEGIN
 			FROM tblMFInvPlngSummaryDetail AV
 			JOIN tblMFInvPlngSummary S ON S.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			JOIN tblCTReportAttribute A ON A.intReportAttributeID = AV.intAttributeId
-			JOIN tblMFInvPlngSummaryBatch Batch ON Batch.intInvPlngSummaryId = AV.intInvPlngSummaryId
 			LEFT JOIN tblICItem MI ON MI.intItemId = AV.intMainItemId
 			JOIN tblICItem I ON I.intItemId = AV.intItemId
 			LEFT JOIN tblCTBook B ON B.intBookId = AV.intBookId
@@ -489,10 +488,6 @@ BEGIN
 					,10 --Weeks of Supply
 					)
 				AND IsNumeric(AV.strValue) = 1
-				AND Batch.intInvPlngReportMasterID IN (
-					SELECT Item Collate Latin1_General_CI_AS
-					FROM [dbo].[fnSplitString](@strBatchId, ',')
-					)
 				--2-Opening Inventory;8-Forecasted Consumption;9-Ending Inventory;13-Existing Purchases;12-Planned Purchases
 				AND AV.strFieldName NOT IN (
 					'OpeningInv'
