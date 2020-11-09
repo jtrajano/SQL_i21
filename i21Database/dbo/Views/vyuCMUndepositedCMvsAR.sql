@@ -1,6 +1,7 @@
 CREATE VIEW vyuCMUndepositedCMvsAR      
 AS      
-WITH ARPosting AS      
+WITH 
+ARPosting AS      
 (      
  select       
  AR.strRecordNumber,      
@@ -12,14 +13,14 @@ WITH ARPosting AS
  CMUF.intBankDepositId,      
  ysnPosted = AR.ysnPosted  ,
  GL.intGLDetailId
- from vyuARPostedTransactionForUndeposited AR      
+  from vyuARPostedTransactionForUndeposited AR      
  left join tblCMUndepositedFund CMUF on CMUF.strSourceTransactionId = AR.strRecordNumber      
  outer apply (      
   select TOP 1 dtmDate, intGLDetailId, (dblDebit- dblCredit) dblAmount, strAccountId from vyuGLDetail where       
   strTransactionId = AR.strRecordNumber and  ysnIsUnposted = 0      
   and intAccountId =  AR.intAccountId --  in( select intAccountId from vyuGLAccountDetail where strAccountCategory = 'Undeposited Funds')  
  )GL      
-  
+ 
 ),      
 CMPosting AS(      
 select       
@@ -64,7 +65,7 @@ AR.intUndepositedFundId,
 AR.intGLDetailId ARGLDetailId,
 CM.intGLDetailId CMGLDetailId
 from       
-ARPosting AR left join      
+ARPosting AR join      
 PartitionCMPosting CM on CM.intUndepositedFundId = AR.intUndepositedFundId      
 AND CM.rowId = 1
 )  
@@ -72,8 +73,9 @@ select
 strStatus = case       
 when isnull(Q.ysnARPosted,0) = 1 and Q.intUndepositedFundId is null then 'Missing in Undeposited'       
 when isnull(Q.ysnARPosted,0) = 0 and ISNULL(Q.ysnCMPosted , 0) = 0 and Q.intUndepositedFundId is NOT null then 'Unposted AR/CM in Undeposited'   
-when Q.dblARAmount <> Q.dblCMAmount  and isnull(Q.ysnARPosted,0) = 1 and isnull(Q.ysnCMPosted,0) =1 then 'Mismatched Amount'       
-when Q.ysnARGLEntryError = 1 or Q.ysnCMGLEntryError =1 then 'Posting Error'  
+when Q.dblARAmount <> Q.dblCMAmount  and isnull(Q.ysnARPosted,0) = 1 and isnull(Q.ysnCMPosted,0) =1 then 'Mismatched Amount'  
+when Q.ysnARGLEntryError = 1  then 'AR GL Entry Error'  
+WHEN Q.ysnCMGLEntryError =1 then 'CM GL Entry Error'  
 when ysnGLMismatch = 1 then 'GL Account Matching Error'  
 --when isnull(Q.ysnARPosted,0) = 0 and ISNULL(Q.ysnCMPosted , 0) = 0 and Q.intUndepositedFundId is null then 'Unposted AR'   
 --when isnull(Q.ysnARPosted,0) = 1 and ISNULL(Q.ysnCMPosted , 0) = 0 and Q.intUndepositedFundId is not null then 'Unposted CM'      
