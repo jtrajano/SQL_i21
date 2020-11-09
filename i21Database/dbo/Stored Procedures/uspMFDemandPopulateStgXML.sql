@@ -78,10 +78,8 @@ BEGIN TRY
 	FROM tblICItem
 	WHERE IsNUll(intCompanyId, 0) > 0
 
-	SELECT @strHeaderCondition = 'intCompanyId = ' + LTRIM(@intCompanyId)
-
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
+		,NULL
 		,@strItemSupplyTargetXML OUTPUT
 		,NULL
 		,NULL
