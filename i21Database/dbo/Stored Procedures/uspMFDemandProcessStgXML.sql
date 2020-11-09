@@ -607,7 +607,6 @@ BEGIN TRY
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					) x
 
-			--Declare @intBookId int
 			SELECT @intBookId = intBookId
 			FROM tblCTBook
 			WHERE strBook = @strBook
@@ -633,16 +632,15 @@ BEGIN TRY
 				,intCompanyId
 				)
 			SELECT I.intItemId
-				,x.dblSupplyTarget
+				,x.dblTgt
 				,@intBookId
 				,@intSubBookId
 				,NULL AS intCompanyId
 			FROM OPENXML(@idoc, 'vyuMFGetItemSupplyTargets/vyuMFGetItemSupplyTarget', 2) WITH (
-					strItemNo NVARCHAR(50) Collate Latin1_General_CI_AS
-					,strCompanyName NVARCHAR(50) Collate Latin1_General_CI_AS
-					,dblSupplyTarget NUMERIC(18, 6)
+					strNo NVARCHAR(50) Collate Latin1_General_CI_AS
+					,dblTgt NUMERIC(18, 6)
 					) x
-			JOIN tblICItem I ON I.strItemNo = x.strItemNo
+			JOIN tblICItem I ON I.strItemNo = x.strNo
 
 			ext:
 
