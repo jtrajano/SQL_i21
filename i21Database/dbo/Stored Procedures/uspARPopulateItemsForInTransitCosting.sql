@@ -816,7 +816,7 @@ FROM
 	, INVD.intCurrencyExchangeRateTypeId
 	, INVD.dblCurrencyExchangeRate
 	, ARPID.intSourceId
-	, ARPID.dblQtyShipped
+	, INVD.dblQtyShipped
 	, INVD.intLotId
 	, INVD.intItemUOMId
 	, INVD.intTicketId
@@ -824,8 +824,7 @@ FROM
 	, ARPID.ysnProvisionalWithGL
 FROM tblARInvoiceDetail INVD
 INNER JOIN #ARPostInvoiceDetail ARPID
-ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId
-AND INVD.dblQtyShipped <> ARPID.dblQtyShipped) ARID
+ON INVD.intInvoiceDetailId = ARPID.intOriginalInvoiceDetailId) ARID
 INNER JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
@@ -902,7 +901,7 @@ FROM
 	, INVD.intCurrencyExchangeRateTypeId
 	, INVD.dblCurrencyExchangeRate
 	, ARPID.intSourceId
-	, INVD.dblQtyShipped
+	, ARPID.dblQtyShipped
 	, INVD.intLotId
 	, INVD.intItemUOMId
 	, INVD.intTicketId
