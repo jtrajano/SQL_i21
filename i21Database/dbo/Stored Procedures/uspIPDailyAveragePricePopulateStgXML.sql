@@ -149,10 +149,10 @@ BEGIN TRY
 			,@strFromCompanyName NVARCHAR(150)
 			,@intTransactionId INT
 			,@intCompanyId INT'
-		,intDailyAveragePriceId
-		,strAverageNo
+		,@intDailyAveragePriceId
+		,@strAverageNo
 		,@strHeaderXML
-		,strDetailXML
+		,@strDetailXML
 		,@strRowState
 		,@strLastModifiedUser
 		,@intToCompanyId

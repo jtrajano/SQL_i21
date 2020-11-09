@@ -162,10 +162,10 @@ BEGIN TRY
 			,@strFromCompanyName NVARCHAR(150)
 			,@intTransactionId INT
 			,@intCompanyId INT'
-		,intOptionsMatchPnSHeaderId
-		,strHeaderXML
-		,strOptionsMatchPnSXML
-		,strOptionsPnSExpiredXML
+		,@intOptionsMatchPnSHeaderId
+		,@strHeaderXML
+		,@strOptionsMatchPnSXML
+		,@strOptionsPnSExpiredXML
 		,@strRowState
 		,@strLastModifiedUser
 		,@intToCompanyId
