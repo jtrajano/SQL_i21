@@ -678,9 +678,6 @@ GROUP BY intAccountId
 IF ABS(@Variance) <= @Threshold
 	SET @OverThresholdLimit = 1
 
-SELECT ABS(@Variance) AS Variance
-SELECT @Threshold AS Threshold
-
 IF @ysnThrowError = 1 AND @OverThresholdLimit = 0
 	AND EXISTS (
 		SELECT TOP 1 
