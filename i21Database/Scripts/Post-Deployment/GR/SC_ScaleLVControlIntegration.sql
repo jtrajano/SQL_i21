@@ -159,7 +159,7 @@ BEGIN
 	[gasct_cnt_loc] [char](3) NULL,
 	[gasct_xfr_to_loc] [char](3) NULL,
 	[gasct_itm_no] [char](13) NULL,
-	[gasct_ivc_no] [char](8) NOT NULL,
+	[gasct_ivc_no] [char](8) NULL,
 	[gasct_load_loc_no] [char](3) NULL,
 	[gasct_load_no] [char](8) NULL,
 	[gasct_orig_gross_wgt] [decimal](13, 3) NULL,
@@ -1084,9 +1084,16 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 								, @current_discount_message = strMessage
 							from @calculated_discount
 
-							if @current_discount_message <> @discount_calculation_success_message and @discount_has_issue = 0
+							if @current_discount_message <> @discount_calculation_success_message --and @discount_has_issue = 0
 							begin
-								select @discount_captured_message = @current_discount_message
+								select top 1 @current_discount_message = ''Discount('' + Item.strShortName + '')-'' +  @current_discount_message
+									from tblGRDiscountScheduleCode DiscountSchedCode
+										join tblICItem Item
+											on DiscountSchedCode.intItemId = Item.intItemId
+									where DiscountSchedCode.intDiscountScheduleCodeId = @current_discount_schedule
+								
+
+								select @discount_captured_message = @discount_captured_message + @current_discount_message + '','' 
 									,@discount_has_issue = 1
 
 							end
@@ -1104,7 +1111,13 @@ IF (SELECT TOP 1 1 TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 
 						end
 
 
-						
+						if @discount_captured_message <> ''''
+						begin
+							set @discount_captured_message = replace(@discount_captured_message, ''Invalid reading value entered'', ''Invalid reading value'')
+							set @discount_captured_message = replace(@discount_captured_message, '' Minimum Reading'', ''Minimum'')
+							set @discount_captured_message = replace(@discount_captured_message, ''Maximum Reading'', ''Maximum'')
+
+						end
 						--Discount
 						--Wet Weight
 						declare @discount_ww DECIMAL(24, 4) = 0
