@@ -12,6 +12,7 @@ BEGIN TRY
 
 DECLARE @foreignCurrency BIT = 0;
 DECLARE @rate DECIMAL(18,6) = 1;
+DECLARE @voucherDate DATETIME;
 DECLARE @rateType INT;
 DECLARE @voucherCurrency INT;
 DECLARE @functionalCurrency INT;
@@ -21,7 +22,8 @@ IF @transCount = 0 BEGIN TRANSACTION
 SELECT TOP 1 
 	@voucherCurrency = voucher.intCurrencyId,
 	@functionalCurrency = pref.intDefaultCurrencyId,
-	@foreignCurrency = CASE WHEN intDefaultCurrencyId != voucher.intCurrencyId THEN 1 ELSE 0 END
+	@foreignCurrency = CASE WHEN intDefaultCurrencyId != voucher.intCurrencyId THEN 1 ELSE 0 END,
+	@voucherDate = voucher.dtmDate
 FROM tblAPBill voucher
 CROSS APPLY tblSMCompanyPreference pref
 WHERE voucher.intBillId = @voucherId
@@ -38,7 +40,7 @@ BEGIN
 	INNER JOIN tblSMCurrencyExchangeRateDetail exchangeRateDetail ON exchangeRate.intCurrencyExchangeRateId = exchangeRateDetail.intCurrencyExchangeRateId
 	WHERE exchangeRateDetail.intRateTypeId = @rateType
 	AND exchangeRate.intFromCurrencyId = @voucherCurrency AND exchangeRate.intToCurrencyId = @functionalCurrency
-	AND exchangeRateDetail.dtmValidFromDate <= GETDATE()
+	AND exchangeRateDetail.dtmValidFromDate <= @voucherDate
 	ORDER BY exchangeRateDetail.dtmValidFromDate DESC
 
 	IF @rateType IS NULL 
