@@ -665,7 +665,23 @@ BEGIN
 	END 
 END
 
-IF @ysnThrowError = 1 
+DECLARE @Threshold NUMERIC(38, 20)
+DECLARE @Variance NUMERIC(38, 20)
+DECLARE @OverThresholdLimit BIT
+SET @Threshold = 0.05
+SET @OverThresholdLimit = 0
+
+SELECT TOP 1 @Variance = SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
+FROM #uspICValidateICAmountVsGLAmount_result 
+GROUP BY intAccountId
+
+IF ABS(@Variance) <= @Threshold
+	SET @OverThresholdLimit = 1
+
+SELECT ABS(@Variance) AS Variance
+SELECT @Threshold AS Threshold
+
+IF @ysnThrowError = 1 AND @OverThresholdLimit = 0
 	AND EXISTS (
 		SELECT TOP 1 
 			SUM(ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0))
