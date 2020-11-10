@@ -180,7 +180,6 @@ BEGIN
 			, strUserName = u.strName
 			, cb.strAction
 		FROM tblCTContractBalanceLog cb
-		--INNER JOIN @OpenBasisContract obc ON cb.intContractDetailId = obc.intContractDetailId
 		INNER JOIN tblICCommodity c ON c.intCommodityId = cb.intCommodityId
 		INNER JOIN tblICItem i ON i.intItemId = cb.intItemId
 		INNER JOIN tblICCategory cat ON cat.intCategoryId = i.intCategoryId
