@@ -668,15 +668,7 @@ BEGIN
 						
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
-					BEGIN
-						IF @TaxTaxOnly = 1
-							SET @TaxableAmount = @ZeroDecimal
-						ELSE 
-							IF(@TaxableAmount = @ZeroDecimal) --SET TAXABLE AMOUNT AGAIN --
-							BEGIN
-								SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
-							END
-
+					BEGIN						
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
