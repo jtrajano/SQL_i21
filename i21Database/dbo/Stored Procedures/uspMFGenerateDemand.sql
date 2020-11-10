@@ -764,6 +764,8 @@ BEGIN TRY
 					FROM @tblMFRefreshtemStock EI
 					WHERE EI.intItemId = I.intItemId
 					)
+			AND IsNULL(L.intBookId,0) =IsNULL(@intBookId,0) 
+			AND IsNULL(L.intSubBookId,0) =IsNULL(@intSubBookId,0) 
 			GROUP BY CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
@@ -1156,6 +1158,8 @@ BEGIN TRY
 						ELSE @intCompanyLocationId
 						END
 					)
+				AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
+				AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -1188,6 +1192,8 @@ BEGIN TRY
 					FROM #tblMFContractDetail CD
 					WHERE CD.intContractDetailId = SS.intContractDetailId
 					)
+			AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
+			AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
 			GROUP BY CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
@@ -1225,6 +1231,8 @@ BEGIN TRY
 					FROM #tblMFContractDetail CD
 					WHERE CD.intContractDetailId = SS.intContractDetailId
 					)
+			AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
+			AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
 			GROUP BY datename(m, SS.dtmUpdatedAvailabilityDate) + ' ' + cast(datepart(yyyy, SS.dtmUpdatedAvailabilityDate) AS VARCHAR)
 				,CASE 
 					WHEN I.ysnSpecificItemDescription = 1
@@ -1314,6 +1322,8 @@ BEGIN TRY
 				END
 			)
 		AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
+		AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
+		AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
 	GROUP BY CASE 
 			WHEN I.ysnSpecificItemDescription = 1
 				THEN I.intItemId
@@ -1365,6 +1375,8 @@ BEGIN TRY
 				END
 			)
 		AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
+		AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
+		AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
 	GROUP BY CASE 
 			WHEN I.ysnSpecificItemDescription = 1
 				THEN I.intItemId
@@ -1834,7 +1846,7 @@ BEGIN TRY
 
 					IF (
 							@dblRemainingConsumptionQty = 0
-							OR @dblEndInventory > @dblRemainingConsumptionQty
+							--OR @dblEndInventory > @dblRemainingConsumptionQty
 							)
 						AND @intConsumptionMonth = @intMonthId + 1
 					BEGIN
