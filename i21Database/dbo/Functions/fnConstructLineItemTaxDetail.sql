@@ -669,32 +669,6 @@ BEGIN
 						
 					IF(@TaxTaxableByOtherTaxes IS NOT NULL AND RTRIM(LTRIM(@TaxTaxableByOtherTaxes)) <> '')
 					BEGIN
-						IF @TaxTaxOnly = 1 
-							--**old code**--
-							--SET @TaxableAmount = @ZeroDecimal
-							--**old code**--
-
-							--**new code**--
-							--Add 0 OR do nothing [don't reset taxable amount specially when there are multiple tax on tax with [balance]
-							BEGIN
-								SET @TaxableAmount += @ZeroDecimal
-							END
-							--**new code**--
-						ELSE 
-							--**old code**--
-							--IF(@TaxableAmount = @ZeroDecimal) 
-							--BEGIN
-							--	SET @TaxableAmount	= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
-							--END
-							--**old code**--
-
-							--**new code**--
-							-- Continue to add taxable amount if tax on tax is set to balance
-							BEGIN
-								SET @TaxableAmount	+= ISNULL(@ItemPrice, @ZeroDecimal) * ISNULL(@Quantity, @ZeroDecimal)
-							END
-							--**new code**--
-
 						IF(@TaxAdjustedTax = 1)
 						BEGIN
 							SET @OtherTaxAmount = @OtherTaxAmount + @TaxAdjustedTax
