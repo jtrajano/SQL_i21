@@ -250,45 +250,11 @@ IF ISNULL(@ysnRecap, 0) = 0
     
   FROM tblFAFixedAsset A  
   WHERE A.[intAssetId] IN (SELECT [intAssetId] FROM #AssetID)  
-  
-  INSERT INTO @GLEntries (  
-    [strTransactionId]  
-   ,[intTransactionId]  
-   ,[intAccountId]  
-   ,[strDescription]  
-   ,[strReference]   
-   ,[dtmTransactionDate]  
-   ,[dblDebit]  
-   ,[dblCredit]  
-   ,[dblDebitForeign]     
-   ,[dblCreditForeign]  
-   ,[dblDebitReport]  
-   ,[dblCreditReport]  
-   ,[dblReportingRate]  
-   ,[dblForeignRate]  
-   ,[dblDebitUnit]  
-   ,[dblCreditUnit]  
-   ,[dtmDate]  
-   ,[ysnIsUnposted]  
-   ,[intConcurrencyId]   
-   ,[intCurrencyId]  
-   ,[dblExchangeRate]  
-   ,[intUserId]  
-   ,[intEntityId]     
-   ,[dtmDateEntered]  
-   ,[strBatchId]  
-   ,[strCode]     
-   ,[strJournalLineDescription]  
-   ,[intJournalLineNo]  
-   ,[strTransactionType]  
-   ,[strTransactionForm]  
-   ,[strModuleName]     
-     
-  )  
+  UNION ALL  
   SELECT   
     [strTransactionId]  = @strTransactionId  
    ,[intTransactionId]  = A.[intAssetId]  
-   ,[intAccountId]   = A.[intDepreciationAccountId]  
+   ,[intAccountId]   = A.[intAccumulatedAccountId]  
    ,[strDescription]  = A.[strAssetDescription]  
    ,[strReference]   = A.[strAssetId]  
    ,[dtmTransactionDate] = (SELECT TOP 1 B.[dtmDepreciationToDate] FROM tblFAFixedAssetDepreciation B WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC)  
