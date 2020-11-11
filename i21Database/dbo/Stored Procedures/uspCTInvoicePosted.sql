@@ -45,6 +45,9 @@ BEGIN TRY
 		  , @ysnFromReturn					BIT = 0
 		  , @ysnLoad						BIT = 0
 		  , @intPurchaseSale				INT = NULL
+		  , @intOriginalInvoiceDetailId		INT = NULL
+		  , @intOriginalInvoiceId			INT = NULL
+		  , @dblQtyToReturn					NUMERIC(18, 6) = 0
 
 	DECLARE @tblToProcess TABLE (
 		  intUniqueId				INT IDENTITY
@@ -63,6 +66,8 @@ BEGIN TRY
 		, intShippedQtyUOMId		INT
 		, ysnFromReturn				BIT
 		, strPricing				NVARCHAR(200)	COLLATE Latin1_General_CI_AS    NULL
+		, intOriginalInvoiceDetailId	INT NULL
+		, intOriginalInvoiceId			INT NULL
 	)
 
 	INSERT INTO @tblToProcess (
@@ -79,6 +84,8 @@ BEGIN TRY
 		, [intLoadDetailId]
 		, [ysnFromReturn]
 		, [strPricing]
+		, intOriginalInvoiceDetailId
+		, intOriginalInvoiceId
 	)
 	SELECT [intInvoiceDetailId] 	= I.[intInvoiceDetailId]
 	    , [intInvoiceId]			= INV.[intInvoiceId]
@@ -93,6 +100,8 @@ BEGIN TRY
 		, [intLoadDetailId]			= ID.[intLoadDetailId]
 		, [ysnFromReturn]			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 		, [strPricing]				= ID.[strPricing]
+		, intOriginalInvoiceDetailId	= ID.intOriginalInvoiceDetailId
+		, intOriginalInvoiceId			= RI.intInvoiceId
 	FROM @ItemsFromInvoice I
 	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
@@ -184,7 +193,9 @@ BEGIN TRY
 				@intPurchaseSale				=	NULL,
 				@ysnFromReturn					=	CAST(0 AS BIT),
 				@ysnLoad						=	CAST(0 AS BIT),
-				@strPricing						=	NULL
+				@strPricing						=	NULL,
+				@intOriginalInvoiceDetailId		= 	NULL,
+				@intOriginalInvoiceId			= 	NULL
 
 		SELECT	@intContractDetailId			=	P.[intContractDetailId],
 				@intFromItemUOMId				=	P.[intItemUOMId],
@@ -213,7 +224,9 @@ BEGIN TRY
 				@ysnBestPriceOnly				=	CH.ysnBestPriceOnly,
 				@dblCashPrice					=	CD.dblCashPrice,
 				@ysnLoad						=	ISNULL(CH.ysnLoad, 0),
-				@strPricing						=	P.strPricing
+				@strPricing						=	P.strPricing,
+				@intOriginalInvoiceDetailId		=	P.intOriginalInvoiceDetailId,
+				@intOriginalInvoiceId			=	P.intOriginalInvoiceId
 
 		FROM	@tblToProcess P
 		JOIN	tblCTContractDetail	CD	ON	CD.intContractDetailId	=	P.intContractDetailId
@@ -304,6 +317,16 @@ BEGIN TRY
 														, @strScreenName			= 'Invoice' 
 						END
 				END
+				ELSE IF ISNULL(@ysnFromReturn, 0) = 1 AND @intOriginalInvoiceDetailId IS NOT NULL
+					BEGIN
+						SET @dblQtyToReturn = ABS(@dblConvertedQty)
+
+						EXEC uspCTProcessInvoiceReturn @intInvoiceDetailId 		= @intOriginalInvoiceDetailId               --> Returned Invoice Detail Id
+													 , @intInvoiceId 			= @intOriginalInvoiceId                    --> Returned Invoice Id
+													 , @intNewInvoiceDetialId 	= @intInvoiceDetailId             --> (Credit Memo) Invoice Detail Id
+													 , @intNewInvoiceId 		= @intInvoiceId                --> (Credit Memo) Invoice Id
+													 , @dblQuantity 			= @dblQtyToReturn           
+					END
 		END
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
