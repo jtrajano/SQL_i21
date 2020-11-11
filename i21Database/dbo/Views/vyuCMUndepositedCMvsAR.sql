@@ -37,7 +37,8 @@ from tblCMBankTransactionDetail CMD
 left join tblCMUndepositedFund CMUF on CMUF.intUndepositedFundId = CMD.intUndepositedFundId      
 left join tblCMBankTransaction CM on CM.intTransactionId = CMD.intTransactionId      
 left join vyuGLDetail GL ON GL.strTransactionId = CM.strTransactionId   
-  and (GL.dblCredit-GL.dblDebit) = (CMD.dblCredit-CMD.dblDebit) and ysnIsUnposted = 0      
+  and (GL.dblCredit-GL.dblDebit) = ((CMD.dblCredit-CMD.dblDebit) * ISNULL(CMD.dblExchangeRate,1)) 
+  and ysnIsUnposted = 0      
   and intAccountId = CMD.intGLAccountId --in (select intAccountId from vyuGLAccountDetail where strAccountCategory = 'Undeposited Funds'            
 ) ,  
 PartitionCMPosting as(
