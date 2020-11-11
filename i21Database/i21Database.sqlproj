@@ -8152,6 +8152,7 @@
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBillDetailCharges.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationAsCommodityStockUOM.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
