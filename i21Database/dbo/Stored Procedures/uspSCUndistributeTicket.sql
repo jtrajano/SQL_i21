@@ -293,6 +293,10 @@ BEGIN TRY
 								END
 							END
 
+							-- Set Inventory Transfer status back to "In Transit" if ticket distribution type is Transfer In
+							IF @intEntityId = 0
+								EXEC [dbo].[uspICUpdateTransferOrderStatus] @InventoryReceiptId, 2
+
 							EXEC [dbo].[uspGRReverseOnReceiptDelete] @InventoryReceiptId
 
 
