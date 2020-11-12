@@ -540,17 +540,19 @@ SELECT
 FROM #tmpGLDetail
 
 
-	DECLARE @PostResult INT
-	EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
-		
-	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
+UPDATE tblCMBankTransaction
+	SET		ysnPosted = @ysnPost
+			,intConcurrencyId += 1 
+	WHERE	strTransactionId = @strTransactionId
+IF @@ERROR <> 0	GOTO Post_Rollback
+
+DECLARE @PostResult INT
+EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
+	
+IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
 
-	UPDATE tblCMBankTransaction
-		SET		ysnPosted = @ysnPost
-				,intConcurrencyId += 1 
-		WHERE	strTransactionId = @strTransactionId
-		IF @@ERROR <> 0	GOTO Post_Rollback
+
 END -- @ysnRecap = 0
 
 --=====================================================================================================================================
