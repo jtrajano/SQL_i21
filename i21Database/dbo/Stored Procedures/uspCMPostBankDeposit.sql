@@ -507,7 +507,7 @@ BEGIN
 			,[strTransactionForm]
 			,[strModuleName]	
 			) 
-SELECT
+	SELECT
 			[strTransactionId]
 			,[intTransactionId]
 			,[intAccountId]
@@ -536,13 +536,8 @@ SELECT
 			,[strTransactionType]
 			,[strTransactionForm]
 			,[strModuleName]	 
-FROM #tmpGLDetail
+	FROM #tmpGLDetail
 
-
-	DECLARE @PostResult INT
-	EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
-		
-	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
 
 	UPDATE 	A 
 	SET		ysnPosted = @ysnPost
@@ -553,6 +548,14 @@ FROM #tmpGLDetail
 	WHERE	strTransactionId = @strTransactionId
 
 	IF @@ERROR <> 0	GOTO Post_Rollback
+
+	DECLARE @PostResult INT
+	EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
+		
+	IF @@ERROR <> 0	OR @PostResult <> 0 GOTO Post_Rollback
+
+
+
 END -- @ysnRecap = 0
 
 --=====================================================================================================================================
