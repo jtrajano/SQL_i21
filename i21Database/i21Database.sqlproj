@@ -593,6 +593,7 @@
     <Build Include="dbo\Stored Procedures\uspAPFixStartingNumbers.sql" />
     <None Include="Scripts\Post-Deployment\CM\1_BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\CM\2_DataImportStatus.sql" />
+    <None Include="Scripts\Post-Deployment\CM\DisableTriggers.sql"/>
     <None Include="Scripts\Post-Deployment\CM\EnableTriggers.sql"/>
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
