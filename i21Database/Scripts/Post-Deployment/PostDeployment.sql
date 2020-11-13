@@ -612,6 +612,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\3_PopulateSourceSystemData.sql
 :r .\CM\4_DataFix.sql
 :r .\CM\5_UndepositedFund.sql
-:R .\CM\6_EnableTriggers.sql
+:r .\CM\6_EnableTriggers.sql
 
 print 'END POST DEPLOYMENT'
