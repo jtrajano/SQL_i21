@@ -525,6 +525,7 @@ SELECT intTransactionId			= I.intInvoiceId
 	 , strTransactionNumber		= I.strInvoiceNumber
 	 , strTransactionType		= I.strTransactionType
 	 , strActivityType			= 'Invoice'
+	 , strType					= I.strType
 	 , dtmTransactionDate		= I.dtmDate
 	 , dblInvoiceTotal			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
 	 , dblInvoiceSubtotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
@@ -624,13 +625,12 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			 , strTransactionType		= I.strTransactionType
 			 , strActivityType			= 'Invoice'
 			 , dtmTransactionDate		= I.dtmTransactionDate
-			 , dblInvoiceTotal			= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END
+			 , dblInvoiceTotal			= CASE  WHEN I.strType = 'Service Charge' THEN  0 ELSE  CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END END 
 			 , dblInvoiceSubtotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceSubtotal, 0) * -1 ELSE ISNULL(I.dblInvoiceSubtotal, 0) END
 			 , dblInvoiceLineTotal		= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceLineTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceLineTotal, 0) END
 			 , dblPayment				= NULL
 			 , dblDiscount				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblDiscount, 0) * -1 ELSE ISNULL(I.dblDiscount, 0) END
-			 , dblInterest				= CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END
-			 , intEntityCustomerId		= I.intEntityCustomerId
+			 , dblInterest				= CASE  WHEN I.strType = 'Service Charge' THEN CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInvoiceTotal, 0) * -1 ELSE ISNULL(I.dblInvoiceTotal, 0) END ELSE CASE WHEN I.strTransactionType NOT IN ('Invoice', 'Debit Memo', 'Cash') THEN ISNULL(I.dblInterest, 0) * -1 ELSE ISNULL(I.dblInterest, 0) END END 			 , intEntityCustomerId		= I.intEntityCustomerId
 			 , intItemId				= I.intItemId
 			 , intInvoiceDetailId		= I.intInvoiceDetailId
 			 , intInvoiceDetailTaxId	= I.intInvoiceDetailTaxId
@@ -819,9 +819,24 @@ IF @ysnPrintRecap = 1 OR @strFormattingOptions = 'Product Recap Totals Only'
 
 IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Totals Only'
 	BEGIN
-		SELECT * FROM tblARCustomerActivityStagingTable 
-		WHERE intEntityUserId = @intEntityUserId 
-		ORDER BY dtmTransactionDate
+	SELECT * FROM(
+		SELECT ISNULL(PostDatePayment.dtmDatePaid,PostDateInvoice.dtmPostDate)[PostDate],* FROM tblARCustomerActivityStagingTable ARST
+		LEFT  JOIN(
+		SELECT 
+			ARI.strInvoiceNumber[strInvoiceNumber2],
+			ARI.dtmPostDate
+			FROM dbo.tblARInvoice ARI
+		)  PostDateInvoice ON PostDateInvoice.strInvoiceNumber2=ARST.strTransactionNumber 
+
+		LEFT  JOIN(
+		SELECT 
+			ARI.strRecordNumber[strRecordNumber2],
+			ARI.dtmDatePaid
+			FROM dbo.tblARPayment ARI
+		)  PostDatePayment ON PostDatePayment.strRecordNumber2=ARST.strTransactionNumber 
+
+		WHERE intEntityUserId = @intEntityUserId)NST
+		ORDER BY NST.PostDate 
 	END
 ELSE 
 	BEGIN
