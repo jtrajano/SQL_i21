@@ -2023,6 +2023,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intInventoryReceiptItemId]
+					,[intInventoryReceiptChargeId]
 					,[intCustomerStorageId]
 					,[intSettleStorageId]
 					,[dblOrderQty]
@@ -2071,14 +2072,6 @@ BEGIN TRY
 																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
 																ELSE NULL
 															END
-													END
-					,[intInventoryReceiptChargeId]	= CASE 
-														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
-														ELSE 
-																CASE 
-																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL THEN RC.intInventoryReceiptChargeId
-																		ELSE NULL
-																END
 													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
@@ -2260,6 +2253,13 @@ BEGIN TRY
 								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
 								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 								AND CS.intTicketId IS NOT NULL
+				LEFT JOIN (
+						tblICInventoryReceiptCharge RC
+						INNER JOIN tblGRStorageHistory SHC
+								ON SHC.intInventoryReceiptId = RC.intInventoryReceiptId
+										AND CASE WHEN (SHC.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
+				)  
+						ON SHC.intCustomerStorageId = CS.intCustomerStorageId AND a.intItemType = 3 and @ysnDPOwnedType = 1 and a.intItemId = RC.intChargeId
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2438,7 +2438,7 @@ BEGIN TRY
 						AND CU.ysnStockUnit = 1
 				JOIN tblSCScaleSetup ScaleSetup 
 					ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
-						--AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+						AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
 				LEFT JOIN tblICItemLocation CL
 					ON CL.intItemId = Item.intItemId
 						AND CL.intLocationId = @LocationId
