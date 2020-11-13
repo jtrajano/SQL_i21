@@ -1,4 +1,4 @@
-ALTER TRIGGER trgCMBankTransaction
+CREATE TRIGGER trgCMBankTransaction
 ON dbo.tblCMBankTransaction
 AFTER INSERT, UPDATE, DELETE
 AS
