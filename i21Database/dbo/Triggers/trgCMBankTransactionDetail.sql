@@ -12,6 +12,6 @@ IF EXISTS(
     WHERE G.ysnIsUnposted = 0
 	)
 BEGIN
-    RAISERROR (70031,16, 1)
+    RAISERROR ('Transaction has already been posted and further changes are not possible without unposting.',16, 1)
     ROLLBACK TRANSACTION
 END
