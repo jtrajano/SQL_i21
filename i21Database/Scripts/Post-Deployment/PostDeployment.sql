@@ -635,7 +635,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\4_DataFix.sql
 :r .\CM\5_UndepositedFund.sql
 :r .\CM\7_AlterCashProjectionView.sql
-:r .\CM\6_EnableTriggers.sql
+:r .\CM\EnableTriggers.sql
 
 
 print 'END POST DEPLOYMENT'
