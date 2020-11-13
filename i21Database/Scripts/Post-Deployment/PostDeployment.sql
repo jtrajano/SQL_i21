@@ -15,6 +15,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\EncryptionDataFix.sql
+:R .\CM\DisableTriggers.sql
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
