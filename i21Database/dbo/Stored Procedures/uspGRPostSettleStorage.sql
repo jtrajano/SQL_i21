@@ -2048,6 +2048,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intInventoryReceiptItemId]
+					,[intInventoryReceiptChargeId]
 					,[intCustomerStorageId]
 					,[intSettleStorageId]
 					,[dblOrderQty]
@@ -2097,6 +2098,14 @@ BEGIN TRY
 																WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
 																ELSE NULL
 															END
+													END
+					,[intInventoryReceiptChargeId] =  CASE 
+															WHEN ST.ysnDPOwnedType = 0 THEN NULL
+															ELSE 
+																	CASE 
+																			WHEN a.intItemType = 3 THEN RC.intInventoryReceiptChargeId
+																			ELSE NULL
+																	END
 													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
@@ -2278,6 +2287,13 @@ BEGIN TRY
 								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
 								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 								AND CS.intTicketId IS NOT NULL
+				LEFT JOIN (
+						tblICInventoryReceiptCharge RC
+						INNER JOIN tblGRStorageHistory SHC
+								ON SHC.intInventoryReceiptId = RC.intInventoryReceiptId
+										AND CASE WHEN (SHC.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
+				)  
+						ON SHC.intCustomerStorageId = CS.intCustomerStorageId AND a.intItemType = 3 and @ysnDPOwnedType = 1 and a.intItemId = RC.intChargeId
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2308,10 +2324,10 @@ BEGIN TRY
 							and isnull(availableQtyForVoucher.intPricingTypeId, 0) = 1)
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
-				and (
-						CS.intDeliverySheetId is not null 
-						or (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType = 1))
-					)
+				--and (
+				--		CS.intDeliverySheetId is not null 
+				--		or (@ysnDPOwnedType = 0 or (@ysnDPOwnedType = 1 and a.intItemType = 1))
+				--	)
 				ORDER BY SST.intSettleStorageTicketId
 					,a.intItemType				
 				 
@@ -2461,7 +2477,7 @@ BEGIN TRY
 						AND CU.ysnStockUnit = 1
 				JOIN tblSCScaleSetup ScaleSetup 
 					ON ScaleSetup.intScaleSetupId = SC.intScaleSetupId 
-						--AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
+						AND ScaleSetup.intFreightItemId = ReceiptCharge.[intChargeId]
 				LEFT JOIN tblICItemLocation CL
 					ON CL.intItemId = Item.intItemId
 						AND CL.intLocationId = @LocationId
