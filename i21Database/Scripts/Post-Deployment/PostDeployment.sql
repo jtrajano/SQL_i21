@@ -646,6 +646,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\6_InsertDefaultDataSync.sql
 :r .\CM\7_AlterCashProjectionView.sql
 :r .\CM\8_FlagCCTransaction.sql
-:r .\CM\6_EnableTriggers
+:r .\CM\EnableTriggers.sql
 
 print 'END POST DEPLOYMENT'
