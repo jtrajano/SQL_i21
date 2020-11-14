@@ -15,8 +15,12 @@ DECLARE @transCount INT = @@TRANCOUNT;
 IF @transCount = 0 BEGIN TRANSACTION; 
 
 UPDATE A
-	SET A.strVendorOrderNumber = D.strLocationNumber + SUBSTRING(A.strVendorOrderNumber, CHARINDEX('-', A.strVendorOrderNumber), LEN(A.strVendorOrderNumber))
-						+ CASE WHEN A.dblPayment < 0 THEN 'R' ELSE '' END
+	SET A.strVendorOrderNumber = CASE WHEN C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.strVendorOrderNumber) - 1)
+								THEN
+									D.strLocationNumber + SUBSTRING(A.strVendorOrderNumber, CHARINDEX('-', A.strVendorOrderNumber), LEN(A.strVendorOrderNumber))
+								ELSE A.strVendorOrderNumber --IF NO MATCH
+								END
+								+ CASE WHEN A.dblPayment < 0 THEN 'R' ELSE '' END
 		,A.dblPayment = CASE WHEN B.dblInvoiceAdjPercentage > 0 
 							THEN A.dblPayment - ((B.dblInvoiceAdjPercentage / 100) * A.dblPayment)
 						ELSE A.dblPayment
@@ -28,7 +32,7 @@ LEFT JOIN tblAPVendorImportInfo C
 	ON B.intEntityId = C.intEntityVendorId
 LEFT JOIN tblSMCompanyLocation D
 	ON D.intCompanyLocationId = C.intCompanyLocationId
-WHERE C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.strVendorOrderNumber) - 1)
+--WHERE C.strLocationXRef = SUBSTRING(A.strVendorOrderNumber, 1, CHARINDEX('-', A.strVendorOrderNumber) - 1)
 
 UPDATE A
 	SET A.strNotes = CASE
