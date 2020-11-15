@@ -326,11 +326,20 @@ BEGIN TRY
 		,@strServerName NVARCHAR(50)
 		,@strDatabaseName NVARCHAR(50)
 
-	SELECT @strServerName = strServerName
-		,@strDatabaseName = strDatabaseName
-	FROM tblIPMultiCompany
-	WHERE intBookId = @intToBookId
-
+	IF @strToTransactionType='Drop Shipment'
+	BEGIN
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE intCompanyId = @intToCompanyId
+	END
+	ELSE
+	BEGIN
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE intBookId = @intToBookId
+	END
 	IF EXISTS (
 			SELECT 1
 			FROM master.dbo.sysdatabases
