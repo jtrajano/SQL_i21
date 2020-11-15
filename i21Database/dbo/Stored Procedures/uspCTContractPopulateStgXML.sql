@@ -39,6 +39,7 @@ BEGIN TRY
 		,@intContractScreenId INT
 		,@strSubmittedByXML NVARCHAR(MAX)
 		,@intPContractSeq INT
+		,@strApprovalStatus nvarchar(150)
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -55,7 +56,7 @@ BEGIN TRY
 	FROM tblSMScreen
 	WHERE strNamespace = 'ContractManagement.view.Contract'
 
-	SELECT @intTransactionId = intTransactionId
+	SELECT @intTransactionId = intTransactionId,@strApprovalStatus=strApprovalStatus
 	FROM tblSMTransaction
 	WHERE intRecordId = @ContractHeaderId
 		AND intScreenId = @intContractScreenId
@@ -96,7 +97,7 @@ BEGIN TRY
 		,NULL
 		,NULL
 
-	SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
+	SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval><strApprovalStatus>' + @strApprovalStatus + '</strApprovalStatus>'
 
 	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
