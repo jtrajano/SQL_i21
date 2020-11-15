@@ -175,6 +175,7 @@ BEGIN TRY
 		,@intCurrentUserEntityId INT
 		,@strINCOLocation nvarchar(50)
 		,@intINCOLocationTypeId int
+		,@strApprovalStatus nvarchar(150)
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -578,6 +579,7 @@ BEGIN TRY
 					,@ysnApproval = NULL
 					,@strSubBook = NULL
 					,@strINCOLocation=NULL
+					,@strApprovalStatus=NULL
 
 				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
@@ -599,6 +601,7 @@ BEGIN TRY
 					,@ysnApproval = ysnApproval
 					,@strSubBook = strSubBook
 					,@strINCOLocation=strINCOLocation
+					,@strApprovalStatus=strApprovalStatus
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -620,6 +623,7 @@ BEGIN TRY
 						,ysnApproval BIT
 						,strSubBook NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strINCOLocation NVARCHAR(50) Collate Latin1_General_CI_AS
+						,strApprovalStatus NVARCHAR(150) Collate Latin1_General_CI_AS
 						) x
 
 				SELECT @strErrorMessage = ''
@@ -3323,8 +3327,15 @@ BEGIN TRY
 						WHERE CD.intContractHeaderId = @intNewContractHeaderId
 							AND CD.intContractSeq = @intContractSeq
 
-						IF @ysnApproval = 0
+						SELECT @intContractDetailId = intContractDetailId
+						FROM tblCTContractDetail
+						WHERE intContractHeaderId = @intNewContractHeaderId
+							AND intContractSeq = @intContractSeq
+
+						IF @strApprovalStatus='Approved with Modifications' and EXISTS(SELECT *FROM tblCTContractFeed WHERE intContractHeaderId = @intNewContractHeaderId)
 						BEGIN
+							--EXEC [uspCTContractApproved] @intNewContractHeaderId,@intUserId,@intContractDetailId
+
 							DELETE
 							FROM tblCTContractFeed
 							WHERE intContractHeaderId = @intNewContractHeaderId
@@ -3455,11 +3466,6 @@ BEGIN TRY
 							WHERE intContractHeaderId = @intNewContractHeaderId
 								AND intContractSeq = @intContractSeq
 						END
-
-						SELECT @intContractDetailId = intContractDetailId
-						FROM tblCTContractDetail
-						WHERE intContractHeaderId = @intNewContractHeaderId
-							AND intContractSeq = @intContractSeq
 					END
 
 					EXEC uspCTCreateDetailHistory @intContractHeaderId = NULL
