@@ -184,8 +184,8 @@ BEGIN TRY
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
 			SubmitterSign = @PreviousSubmitterSign,
-		    BuyerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,			
-		    SellerSign = CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
+		    BuyerSign = CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,			
+		    SellerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
 			intReportLogoHeight = ISNULL(@intReportLogoHeight,0),
 			intReportLogoWidth = ISNULL(@intReportLogoWidth,0)
 
