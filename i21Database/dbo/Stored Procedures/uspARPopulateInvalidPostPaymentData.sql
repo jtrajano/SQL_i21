@@ -670,47 +670,8 @@ BEGIN
         AND P.[intInvoiceId] IS NOT NULL
         AND P.[dblPayment] <> @ZeroDecimal
         AND P.[ysnTransactionPaid] = @ZeroBit
-        AND [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]) < @ZeroDecimal
-    GROUP BY
-         P.[intTransactionId]
-        ,P.[strTransactionId]
-        ,P.[intInvoiceId]
-        ,P.[strTransactionNumber]
-        ,P.[strBatchId]
-    HAVING
-         (-((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount]))) > ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]) + SUM(P.[dblWriteOffAmount])) 
-
-    INSERT INTO #ARInvalidPaymentData
-        ([intTransactionId]
-        ,[strTransactionId]
-        ,[strTransactionType]
-        ,[intTransactionDetailId]
-        ,[strBatchId]
-        ,[strError])
-	--over the transaction''s amount due
-	SELECT
-         [intTransactionId]         = P.[intTransactionId]
-        ,[strTransactionId]         = P.[strTransactionId]
-        ,[strTransactionType]       = @TransType
-        ,[intTransactionDetailId]   = NULL
-        ,[strBatchId]               = P.[strBatchId]
-        ,[strError]                 = 'Payment on ' + P.[strTransactionNumber] + ' is over the transaction''s amount due'
-	FROM
-		#ARPostPaymentDetail P
-    WHERE
-            P.[ysnPost] = @OneBit
-        AND P.[intInvoiceId] IS NOT NULL
-        AND P.[dblPayment] <> @ZeroDecimal
-        AND P.[ysnTransactionPaid] = @ZeroBit
-        AND [dbo].[fnARGetInvoiceAmountMultiplier](P.[strTransactionType]) > @ZeroDecimal
-    GROUP BY
-         P.[intTransactionId]
-        ,P.[strTransactionId]
-        ,P.[intInvoiceId]
-        ,P.[strTransactionNumber]
-        ,P.[strBatchId]
-    HAVING
-        ((AVG(P.[dblTransactionAmountDue]) + AVG(P.[dblTransactionInterest])) - AVG(P.[dblTransactionDiscount])) < ((SUM(P.[dblPayment]) - SUM(P.[dblInterest])) + SUM(P.[dblDiscount]) + SUM(P.[dblWriteOffAmount]))
+        AND (P.[dblTransactionPayment] + P.[dblTransactionAmountDue] > P.[dblInvoiceTotal] + P.[dblTransactionInterest] - P.[dblTransactionDiscount]
+        OR P.[dblPayment] > P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount])
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
