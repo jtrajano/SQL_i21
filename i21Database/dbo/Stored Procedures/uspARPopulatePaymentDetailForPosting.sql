@@ -739,6 +739,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseTransactionInterest]
     ,[dblTransactionAmountDue]
     ,[dblBaseTransactionAmountDue]
+    ,[dblTransactionPayment]
+    ,[dblBaseTransactionPayment]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strRateType])
@@ -819,6 +821,8 @@ SELECT
     ,[dblBaseTransactionInterest]       = ARI.[dblBaseInterest]
     ,[dblTransactionAmountDue]          = ARI.[dblAmountDue]
     ,[dblBaseTransactionAmountDue]      = ARI.[dblBaseAmountDue]
+    ,[dblTransactionPayment]			= ARI.[dblPayment]
+    ,[dblBaseTransactionPayment]		= ARI.[dblBasePayment]
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '')
@@ -911,6 +915,8 @@ INSERT INTO #ARPostPaymentDetail
     ,[dblBaseTransactionInterest]
     ,[dblTransactionAmountDue]
     ,[dblBaseTransactionAmountDue]
+    ,[dblTransactionPayment]
+    ,[dblBaseTransactionPayment]
     ,[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]
     ,[strRateType])
@@ -1000,6 +1006,8 @@ SELECT
     ,[dblBaseTransactionInterest]       = APB.[dblInterest]
     ,[dblTransactionAmountDue]          = APB.[dblAmountDue]
     ,[dblBaseTransactionAmountDue]      = APB.[dblAmountDue]
+    ,[dblTransactionPayment]			= @ZeroDecimal
+    ,[dblBaseTransactionPayment]		= @ZeroDecimal
  	,[intCurrencyExchangeRateTypeId]    = ARPD.[intCurrencyExchangeRateTypeId]
     ,[dblCurrencyExchangeRate]          = ARPD.[dblCurrencyExchangeRate]
     ,[strRateType]                      = ISNULL(SMCER.[strCurrencyExchangeRateType], '') 
