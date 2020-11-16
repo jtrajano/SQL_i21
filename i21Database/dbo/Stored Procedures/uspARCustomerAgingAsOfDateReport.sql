@@ -193,7 +193,6 @@ SELECT intPaymentId
 INTO #ARPOSTEDPAYMENT
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN @tblCustomers C ON P.intEntityCustomerId = C.intEntityCustomerId
-INNER JOIN @tblCompanyLocation CL ON P.intLocationId = CL.intCompanyLocationId
 WHERE ysnPosted = 1
 	AND ysnProcessedToNSF = 0
 	AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
