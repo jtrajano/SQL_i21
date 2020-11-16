@@ -7,7 +7,7 @@
 	[intLoadDetailId] INT,
 	[intRowNumber] INT,
 	[strItemNo] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
-	[strItemDesc] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
+	[strItemDesc] NVARCHAR(500) COLLATE Latin1_General_CI_AS, 
 	[strItemShortDesc] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strSubLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
 	[strStorageLocationName] NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
