@@ -41,6 +41,8 @@ SELECT CD.intContractDetailId
 	,B.strBook
 	,CD.intSubBookId
 	,SB.strSubBook
+	,CD.intItemBundleId
+	,IB.strItemNo AS strBundleItemNo
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
@@ -50,6 +52,7 @@ LEFT JOIN tblICItem IM ON IM.intItemId = CD.intItemId
 LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intItemUOMId
 LEFT JOIN tblICUnitMeasure U1 ON U1.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = IM.intOriginId
+LEFT JOIN tblICItem IB ON IB.intItemId = CD.intItemBundleId
 LEFT JOIN tblICItemContract IC ON IC.intItemContractId = CD.intItemContractId
 LEFT JOIN tblSMCountry CG ON CG.intCountryID = IC.intCountryId
 LEFT JOIN tblCTBook B ON B.intBookId = CD.intBookId
