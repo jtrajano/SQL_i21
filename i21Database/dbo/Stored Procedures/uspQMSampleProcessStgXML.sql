@@ -596,24 +596,24 @@ BEGIN TRY
 			--			)
 			--END
 
-			IF @strTestedByName IS NOT NULL
-				AND NOT EXISTS (
-					SELECT 1
-					FROM tblEMEntity t WITH (NOLOCK)
-					JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
-					WHERE ET.strType = 'User'
-						AND t.strName = @strTestedByName
-						AND t.strEntityNo <> ''
-					)
-			BEGIN
-				SELECT @strErrorMessage = 'Tested By ' + @strTestedByName + ' is not available.'
+			--IF @strTestedByName IS NOT NULL
+			--	AND NOT EXISTS (
+			--		SELECT 1
+			--		FROM tblEMEntity t WITH (NOLOCK)
+			--		JOIN tblEMEntityType ET WITH (NOLOCK) ON ET.intEntityId = t.intEntityId
+			--		WHERE ET.strType = 'User'
+			--			AND t.strName = @strTestedByName
+			--			AND t.strEntityNo <> ''
+			--		)
+			--BEGIN
+			--	SELECT @strErrorMessage = 'Tested By ' + @strTestedByName + ' is not available.'
 
-				RAISERROR (
-						@strErrorMessage
-						,16
-						,1
-						)
-			END
+			--	RAISERROR (
+			--			@strErrorMessage
+			--			,16
+			--			,1
+			--			)
+			--END
 
 			IF @strSampleUOM IS NOT NULL
 				AND NOT EXISTS (
@@ -1143,6 +1143,21 @@ BEGIN TRY
 			WHERE ET.strType = 'User'
 				AND t.strName = @strTestedByName
 				AND t.strEntityNo <> ''
+
+			IF @intTestedById IS NULL
+			BEGIN
+				IF EXISTS (
+						SELECT 1
+						FROM tblSMUserSecurity WITH (NOLOCK)
+						WHERE strUserName = 'irelyadmin'
+						)
+					SELECT TOP 1 @intTestedById = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
+					WHERE strUserName = 'irelyadmin'
+				ELSE
+					SELECT TOP 1 @intTestedById = intEntityId
+					FROM tblSMUserSecurity WITH (NOLOCK)
+			END
 
 			SELECT @intSampleUOMId = t.intUnitMeasureId
 			FROM tblICUnitMeasure t WITH (NOLOCK)
