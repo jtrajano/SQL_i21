@@ -910,7 +910,8 @@ BEGIN TRY
 		 							set @dblPriceFixationLoadApplied = isnull(@dblPriceFixationLoadApplied,0) + 1;
 									update tblCTPriceFixationDetail 
 										set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
-											dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
+											--dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
+											dblLoadAppliedAndPriced = @dblInventoryItemLoadApplied
 									WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 								END						
 							END
