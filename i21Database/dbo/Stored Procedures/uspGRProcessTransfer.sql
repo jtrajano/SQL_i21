@@ -835,12 +835,7 @@ BEGIN TRY
 	--update tblGRTransferStorageSplit's intCustomerStorageId
 	UPDATE A
 	SET A.intTransferToCustomerStorageId = B.intToCustomerStorageId
-		,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN 
-									CASE 
-										WHEN A.intContractDetailId IS NULL THEN CT.intContractDetailId 
-										ELSE A.intContractDetailId
-									END
-								ELSE NULL END
+		,A.intContractDetailId = CASE WHEN ST.ysnDPOwnedType = 1 THEN CT.intContractDetailId ELSE NULL END
 	FROM tblGRTransferStorageSplit A		
 	INNER JOIN @newCustomerStorageIds B
 		ON B.intTransferStorageSplitId = A.intTransferStorageSplitId
