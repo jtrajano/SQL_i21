@@ -420,6 +420,7 @@ CREATE TABLE #tmpDailyStockPosition
 				strItemUOM				= sUOM.strUnitMeasure,
 				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
+				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0),
 				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
 				dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
 				dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
@@ -446,8 +447,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dtmDateCreated			= GETDATE(),
 				intModifiedByUserId		= NULL,
 				intCreatedByUserId		= NULL,
-				ysnBuilding				= 0,
-				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0)
+				ysnBuilding				= 0
 		FROM 
 			tblICItem Item
 				INNER JOIN (tblICItemUOM StockUOM
@@ -501,6 +501,7 @@ CREATE TABLE #tmpDailyStockPosition
 				strItemUOM				= sUOM.strUnitMeasure,
 				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
+				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0),
 				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
 				dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
 				dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
@@ -527,8 +528,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dtmDateCreated			= GETDATE(),
 				intModifiedByUserId		= NULL,
 				intCreatedByUserId		= NULL,
-				ysnBuilding				= 0,
-				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0)
+				ysnBuilding				= 0
 		FROM 
 			tblICItem Item
 				INNER JOIN (tblICItemUOM StockUOM
