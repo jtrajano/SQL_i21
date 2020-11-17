@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspICUpdateInventoryShiftCountDetails]
+﻿CREATE PROCEDURE [dbo].[uspICUpdateInventoryShiftCountDetails]
 	  @intInventoryCountId INT
 	, @intEntityUserSecurityId INT
 	, @strHeaderNo NVARCHAR(50)
