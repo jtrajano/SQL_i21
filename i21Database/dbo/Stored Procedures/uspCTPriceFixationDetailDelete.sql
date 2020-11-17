@@ -58,7 +58,8 @@ BEGIN TRY
 		,tblCTContractHeader ch
 	where
 		cd.intContractDetailId = @intContractDetailId
-		and ch.intContractHeaderId = cd.intContractHeaderId
+		and ch.intContractHeaderId = cd.intContractHeaderId 
+  		and ch.intContractTypeId = 2
 
 	if (@ysnDestinationWeightsAndGrades = 0)
 	begin
