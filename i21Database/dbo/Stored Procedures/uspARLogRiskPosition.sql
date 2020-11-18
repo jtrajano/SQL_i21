@@ -379,7 +379,7 @@ BEGIN
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
         BEGIN
-            EXEC dbo.uspRKLogRiskPosition @tblSummaryLog
+            EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
         END
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblContractBalanceLog)
