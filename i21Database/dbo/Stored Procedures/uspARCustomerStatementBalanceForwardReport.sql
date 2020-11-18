@@ -507,7 +507,7 @@ INNER JOIN (
 		FROM dbo.tblARInvoice WITH (NOLOCK)
 		WHERE ysnPosted = 1
 			--AND ((strType = ''Service Charge'' AND ysnForgiven = 0) OR ((strType <> ''Service Charge'' AND ysnForgiven = 1) OR (strType <> ''Service Charge'' AND ysnForgiven = 0)))
-			AND strType <> ''CF Tran''
+			AND (strType <> ''CF Tran'' OR (strType = ''CF Tran'' AND dtmPostDate <= '+ @strDateFrom +'))
 	) I ON I.intInvoiceId = PD.intInvoiceId	
 	GROUP BY intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal	
 ) PD ON P.intPaymentId = PD.intPaymentId
