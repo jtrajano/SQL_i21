@@ -103,12 +103,12 @@ BEGIN
 	WHERE InvDet.intInvoiceId = @intInvoiceId
 
 	SELECT @strFreightConditions = RTRIM(LTRIM(ISNULL(FT.strContractBasis, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
-		,@strFreightDescConditions = RTRIM(LTRIM(ISNULL(FT.strDescription, '') + ' ' + COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
+		,@strFreightDescConditions = RTRIM(LTRIM(ISNULL(FT.strDescription, '') + ' ' + ISNULL(CT.strCity, '') + ' ' + ISNULL(WG.strWeightGradeDesc, '')))
 	FROM tblARInvoiceDetail InvDet
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvDet.intContractDetailId
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 	LEFT JOIN tblSMFreightTerms FT ON CH.intFreightTermId = FT.intFreightTermId
-	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId AND FT.strINCOLocationType = 'City'
+	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId
 	LEFT JOIN tblSMCountry CN ON CN.intCountryID = CH.intCountryId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CH.intWarehouseId AND FT.strINCOLocationType <> 'City'
 	LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
@@ -178,6 +178,7 @@ BEGIN
 		,strProvisionalInvoiceNumber = Prov.strInvoiceNumber
 		,strProvisionalPONumber = Prov.strPONumber
 		,dtmProvDate = Prov.dtmDate
+		,strProvDate = dbo.fnConvertDateToReportDateFormat(Prov.dtmDate, 0)
 		,dblProvQtyShipped = ProvDet.dblQtyShipped
 		,dblProvGrossWt = ProvDet.dblShipmentGrossWt
 		,dblProvTareWt = ProvDet.dblShipmentTareWt
@@ -221,6 +222,7 @@ BEGIN
 		,strContractNumber = LTRIM(CH.strContractNumber) +'/'+ LTRIM(CD.intContractSeq)
 		,strContractNumberOnly = LTRIM(CH.strContractNumber)
 		,CH.dtmContractDate
+		,strContractDate = dbo.fnConvertDateToReportDateFormat(CH.dtmContractDate, 0)
 		,CD.intContractSeq
 		,strContainerNumber = CASE WHEN (L.intPurchaseSale = 3) THEN ISNULL(DSCont.strContainerNumber, Cont.strContainerNumber) ELSE Cont.strContainerNumber END
 		,strMarks = CASE WHEN (L.intPurchaseSale = 3) THEN ISNULL(DSCont.strMarks, Cont.strMarks) ELSE Cont.strMarks END
@@ -244,6 +246,7 @@ BEGIN
 							  END
 		,strBLNumber = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.strBLNumber, L.strBLNumber) ELSE L.strBLNumber END
 		,dtmBLDate = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.dtmBLDate, L.dtmBLDate) ELSE L.dtmBLDate END
+		,strBLDate = dbo.fnConvertDateToReportDateFormat(CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.dtmBLDate, L.dtmBLDate) ELSE L.dtmBLDate END, 0)
 		,strBLNoDated = CASE WHEN L.intPurchaseSale = 2 THEN 
 								ISNULL(PL.strBLNumber, L.strBLNumber) + ' ' + @dated + ' ' + CONVERT(NVARCHAR,ISNULL(PL.dtmBLDate, L.dtmBLDate),106) 
 							ELSE 
@@ -261,7 +264,7 @@ BEGIN
 		,Inv.dtmDueDate
 		,dtmInvoiceDate = Inv.dtmDate
 		,strInvoicePaymentInformation = @strPaymentInfo 
-		,strWarehouse = COALESCE(CT.strCity, CLSL.strSubLocationName, CN.strCountry, '')
+		,strWarehouse = PWH.strSubLocationName
 		,strWarehouseCondition = (SELECT TOP 1 CASE WHEN ISNULL(ID.strItemDescription, '') = '' 
 									THEN I.strDescription ELSE ID.strItemDescription END
 								  FROM tblARInvoiceDetail ID
@@ -316,6 +319,8 @@ BEGIN
 					WHERE DSLDCLink.intLoadDetailId = LD.intLoadDetailId) DSCont
 	LEFT JOIN tblLGLoadDetail PLD ON PLD.intLoadDetailId = ReceiptItem.intSourceId
 	LEFT JOIN tblLGLoad PL ON PL.intLoadId = PLD.intLoadId
+	LEFT JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = PLD.intPContractDetailId
+	LEFT JOIN tblSMCompanyLocationSubLocation PWH ON PWH.intCompanyLocationSubLocationId = PCD.intSubLocationId
 	LEFT JOIN tblEMEntity PLFA ON PLFA.intEntityId = PL.intForwardingAgentEntityId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = Inv.intFreightTermId
 	LEFT JOIN tblSMTerm TM ON TM.intTermID = CH.intTermId
