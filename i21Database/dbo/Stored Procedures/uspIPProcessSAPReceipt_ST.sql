@@ -712,13 +712,13 @@ BEGIN TRY
 					,@changeDescription = @strDescription
 					,@fromValue = ''
 					,@toValue = @strReceiptNo
-			END
 
-			--Post Receipt
-			EXEC uspICPostInventoryReceipt 1
-				,0
-				,@strReceiptNo
-				,@intEntityId
+				--Post Receipt
+				EXEC uspICPostInventoryReceipt 1
+					,0
+					,@strReceiptNo
+					,@intEntityId
+			END
 
 			--Move to Archive
 			INSERT INTO tblIPInvReceiptArchive (

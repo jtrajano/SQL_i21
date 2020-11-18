@@ -12,5 +12,7 @@ BEGIN
 
 	Select TOP 1 @strValue=strUnitMeasure From tblICUnitMeasure Where strSymbol=@strSymbol
 
+	If ISNULL(@strValue,'')='' Set @strValue=@strSAPUOM
+
 	Return ISNULL(@strValue,'')
 END
