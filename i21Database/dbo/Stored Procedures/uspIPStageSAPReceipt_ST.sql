@@ -282,13 +282,13 @@ BEGIN TRY
 				,strSubLocationName
 				,strStorageLocationName
 				,dblQuantity
-				,strQuantityUOM
+				,dbo.fnIPConvertSAPUOMToi21(strQuantityUOM)
 				,dblGrossWeight
 				,dblTareWeight
 				,dblNetWeight
-				,strNetWeightUOM
+				,dbo.fnIPConvertSAPUOMToi21(strNetWeightUOM)
 				,dblCost
-				,strCostUOM
+				,dbo.fnIPConvertSAPUOMToi21(strCostUOM)
 				,strCostCurrency
 				,strContainerNumber
 				,strTrackingNo
