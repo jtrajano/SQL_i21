@@ -228,7 +228,7 @@ BEGIN
 		SELECT intContractDetailId
 		FROM @Transaction
 		GROUP BY intContractDetailId
-		HAVING SUM(dblQuantity) = 0
+		HAVING SUM(dblQuantity) <= 0
 	)
 
 	RETURN
