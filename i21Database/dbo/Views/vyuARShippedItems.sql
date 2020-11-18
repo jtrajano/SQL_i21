@@ -310,14 +310,7 @@ FROM (
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
 	     --, dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
-		 , dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL
-		 										   THEN
-														CASE WHEN ARCC.ysnLoad = 1
-															 THEN ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
-															 ELSE ARCC.dblDetailQuantity
-														END
-												   ELSE 0
-											  END
+		 , dblQtyOrdered					= ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
 														THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0))
 													ELSE
@@ -512,7 +505,6 @@ FROM (
 			 , dblPriceUOMQuantity
 			 , intBookId
 			 , intSubBookId
-			 , ysnLoad
 		 FROM dbo.vyuCTCustomerContract WITH (NOLOCK)
 	) ARCC ON ICISI.intLineNo = ARCC.intContractDetailId 
 		  AND ICIS.intOrderType = 1
@@ -579,7 +571,7 @@ FROM (
 		 , dblQtyOrdered					= 0 
 		 , dblShipmentQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblShipmentQtyShippedTotal		= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
-		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END) - ISNULL(ID.dblQtyShipped, 0)
+		 , dblQtyRemaining					= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1  ELSE ISNULL(ICISC.dblQuantity,1) END) -    CASE WHEN ARIDCHARGE.intInventoryShipmentChargeId IS NOT NULL THEN ISNULL(ARIDCHARGE.dblQtyShipped,1) ELSE ISNULL(ID.dblQtyShipped, 0) END 
 		 , dblPriceUOMQuantity				= (CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN 1 ELSE ISNULL(ICISC.dblQuantity,1) END)
 		 , dblDiscount						= 0 
 		 , dblPrice							= CAST((CASE WHEN ICISC.strCostMethod IN ('Amount', 'Percentage') THEN ISNULL(ICISC.dblAmount,0.000000) ELSE ISNULL(ICISC.dblRate, 0.000000) END) AS DECIMAL(18,6))
@@ -646,6 +638,12 @@ FROM (
 		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
 		WHERE ISNULL(intInventoryShipmentChargeId, 0) = 0
 	) ARID ON ICISC.intInventoryShipmentChargeId = ARID.intInventoryShipmentChargeId
+	LEFT JOIN (
+		SELECT intInventoryShipmentChargeId
+			 , dblQtyShipped
+		FROM dbo.tblARInvoiceDetail WITH (NOLOCK)
+		WHERE ISNULL(intInventoryShipmentChargeId, 0) <> 0
+	) ARIDCHARGE ON ICISC.intInventoryShipmentChargeId = ARIDCHARGE.intInventoryShipmentChargeId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 			 , dblQtyShipped = SUM(dblQtyShipped)
@@ -913,7 +911,7 @@ FROM (
 	     , intItemId						= intItemId
 	     , strItemDescription				= strItemDescription
 	     , intItemUOMId						= intItemUOMId
-		 , intPriceUOMId					= intShipmentItemUOMId
+		 , intPriceUOMId					= intPriceUOMId
 	     , intOrderUOMId					= intOrderUOMId
 	     , intShipmentItemUOMId				= intShipmentItemUOMId
 		 , intWeightUOMId					= intItemUOMId
@@ -927,7 +925,7 @@ FROM (
 	     , dblDiscount						= dblDiscount
 	     , dblPrice							= CAST(dblPrice AS DECIMAL(18,6))
 		 , dblUnitPrice						= CAST(dblPrice AS DECIMAL(18,6))
-	     , dblShipmentUnitPrice				= CAST(dblPrice AS DECIMAL(18,6))
+	     , dblShipmentUnitPrice				= CAST(dblShipmentUnitPrice AS DECIMAL(18,6))
 	     , strPricing						= strPricing
 	     , strVFDDocumentNumber				= strVFDDocumentNumber
 	     , dblTotalTax						= dblTotalTax
