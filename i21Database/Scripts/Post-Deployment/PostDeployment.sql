@@ -15,7 +15,6 @@ print 'BEGIN POST DEPLOYMENT'
 
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\EncryptionDataFix.sql
-:r .\CM\DisableTriggers.sql
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
@@ -586,10 +585,5 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
-
-:r .\CM\EnableTriggers.sql
-
-
-
 
 print 'END POST DEPLOYMENT'
