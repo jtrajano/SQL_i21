@@ -224,6 +224,13 @@ print 'BEGIN POST DEPLOYMENT'
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
 
+-- Cash Management
+:r .\CM\1_BankTransactionTypes.sql
+:r .\CM\2_DataImportStatus.sql
+:r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
+:r .\CM\5_UndepositedFund.sql
+
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
 :r .\AR\DefaultData\2_CleanStagingTables.sql
@@ -606,14 +613,5 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
-
-
--- Cash Management
-:r .\CM\1_BankTransactionTypes.sql
-:r .\CM\2_DataImportStatus.sql
-:r .\CM\3_PopulateSourceSystemData.sql
-:r .\CM\4_DataFix.sql
-:r .\CM\5_UndepositedFund.sql
-:R .\CM\EnableTriggers.sql
 
 print 'END POST DEPLOYMENT'
