@@ -16,7 +16,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SetInLineToOff.sql
 :r .\EncryptionDataFix.sql
-:R .\CM\DisableTriggers.sql
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
@@ -229,6 +228,14 @@ print 'BEGIN POST DEPLOYMENT'
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
+
+-- Cash Management
+:r .\CM\1_BankTransactionTypes.sql
+:r .\CM\2_DataImportStatus.sql
+:r .\CM\3_PopulateSourceSystemData.sql
+:r .\CM\4_DataFix.sql
+:r .\CM\5_UndepositedFund.sql
+:r .\CM\7_AlterCashProjectionView.sql
 
 --Accounts Receivable
 :R .\AR\DefaultData\1_CustomerPortalMenu.sql
@@ -630,14 +637,5 @@ print 'BEGIN POST DEPLOYMENT'
 -- MB - Meter Billing
 :r .\MB\ImportFileDefault.sql
 
-
--- Cash Management
-:r .\CM\1_BankTransactionTypes.sql
-:r .\CM\2_DataImportStatus.sql
-:r .\CM\3_PopulateSourceSystemData.sql
-:r .\CM\4_DataFix.sql
-:r .\CM\5_UndepositedFund.sql
-:r .\CM\7_AlterCashProjectionView.sql
-:r .\CM\EnableTriggers.sql
 
 print 'END POST DEPLOYMENT'
