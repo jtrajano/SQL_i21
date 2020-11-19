@@ -600,8 +600,6 @@
     <Build Include="dbo\Stored Procedures\uspAPFixStartingNumbers.sql" />
     <None Include="Scripts\Post-Deployment\CM\1_BankTransactionTypes.sql" />
     <None Include="Scripts\Post-Deployment\CM\2_DataImportStatus.sql" />
-    <None Include="Scripts\Post-Deployment\CM\DisableTriggers.sql" />
-    <None Include="Scripts\Post-Deployment\CM\EnableTriggers.sql" />
     <None Include="Scripts\Post-Deployment\VersionUpdate.sql" />
     <PostDeploy Include="Scripts\Post-Deployment\PostDeployment.sql" />
     <Build Include="dbo\Functions\fnIsDepositEntry.sql" />
@@ -1432,8 +1430,6 @@
     <Build Include="dbo\Triggers\trgCMDeleteResponsiblePartTaskDetail.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountGroup.sql" />
     <Build Include="dbo\Triggers\trgAfterUpdatetblGLAccountSegment.sql" />
-    <Build Include="dbo\Triggers\trgCMBankTransaction.sql" />
-    <Build Include="dbo\Triggers\trgCMBankTransactionDetail.sql" />
     <Build Include="dbo\Views\vyuICGetItemStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoAdjustment.sql" />
     <Build Include="dbo\Views\vyuICGetPostedLot.sql" />
