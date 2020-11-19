@@ -119,6 +119,17 @@ BEGIN TRY
 
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
 
+	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
+	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
+
+	SELECT	TOP 1 @FirstApprovalId = intApproverId
+		, @intApproverGroupId = intApproverGroupId
+		, @StraussContractSubmitId = intSubmittedById
+	FROM	tblSMApproval 
+	WHERE	intTransactionId = @intTransactionId
+	AND		strStatus = 'Approved' 
+	ORDER BY intApprovalId
+
 	select top 1
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
@@ -131,12 +142,6 @@ BEGIN TRY
 		and smc.intMultiCompanyId = ch.intCompanyId
 		and mc.intCompanyId = smc.intMultiCompanyId
 		and lower(us.strUserName) = lower(mc.strApprover)
-
-	
-	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
-	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
-	set @StraussContractSubmitId  = isnull(@intChildDefaultSubmitById,(SELECT TOP 1 intSubmittedById FROM tblSMApproval WHERE intTransactionId=@intTransactionId ORDER BY intApprovalId));
-	SELECT TOP 1 @FirstApprovalId=intApproverId,@intApproverGroupId = intApproverGroupId FROM tblSMApproval WHERE intTransactionId=@intTransactionId AND strStatus='Approved' ORDER BY intApprovalId
 
 	select
 		@ysnIsParent = t.ysnIsParent
