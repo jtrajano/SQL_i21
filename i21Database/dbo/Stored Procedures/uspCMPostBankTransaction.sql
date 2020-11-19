@@ -229,6 +229,11 @@ END
 
 IF @ysnRecap = 0
 BEGIN
+	IF @ysnPost = 1 AND EXISTS(SELECT TOP 1 1 FROM tblCMBankTransactionDetail where  intTransactionId = @intTransactionId AND intGLAccountId IS NULL)
+	BEGIN
+		RAISERROR('Missing required GL Account Id.', 11, 1)
+		GOTO Post_Rollback
+	END
 -- Validate the date against the FY Periods
 	IF EXISTS (SELECT 1 WHERE [dbo].isOpenAccountingDate(@dtmDate) = 0)
 	BEGIN 
