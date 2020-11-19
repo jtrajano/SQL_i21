@@ -16,7 +16,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CreateEncryptionCertificateAndSymmetricKey.sql
 :r .\SetInLineToOff.sql
 :r .\EncryptionDataFix.sql
-:R .\CM\DisableTriggers.sql
 
 -- System Manager Default Data
 :r .\SM\DefaultData\1_MasterMenu.sql
@@ -636,7 +635,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CM\4_DataFix.sql
 :r .\CM\5_UndepositedFund.sql
 :r .\CM\7_AlterCashProjectionView.sql
-:r .\CM\EnableTriggers.sql
 
 
 print 'END POST DEPLOYMENT'
