@@ -1058,6 +1058,27 @@ BEGIN
 		AND (intSiteId = 0 OR intSiteId IS NULL)
 	END
 
+	IF(@intProductId = 0)
+	BEGIN
+
+		IF(ISNUMERIC(RTRIM(LTRIM(@strProductId))) = 1)
+		BEGIN
+
+			SELECT * INTO #tempProduct FROM tblCFItem 
+			WHERE intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+			AND ISNUMERIC(strProductNumber) = 1 
+
+			SELECT TOP 1 
+				@intProductId = intItemId
+				,@intARItemId = intARItemId
+			FROM #tempProduct 
+			WHERE strProductNumber = CAST( RTRIM(LTRIM(@strProductId)) as INT)
+			AND intNetworkId = @intNetworkId
+			AND (intSiteId = 0 OR intSiteId IS NULL)
+		END
+	END
+
 
 
 
