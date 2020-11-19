@@ -13,7 +13,8 @@ SELECT r.intRecipeId
 	,i.strItemNo
 	,i.strDescription
 	,ri.dblQuantity
-	,um.strUnitMeasure strUOM
+	--,um.strUnitMeasure strUOM
+	,CASE WHEN ISNULL(r.intRecipeTypeId, 0) = 2 AND ISNULL(ri.intRecipeItemTypeId, 0) = 1 THEN '' ELSE um.strUnitMeasure END AS strUOM
 	,r.dblQuantity AS dblRecipeQuantity
 	,CASE WHEN ISNULL(r.intItemId,0) > 0 THEN um1.strUnitMeasure ELSE um2.strUnitMeasure END AS strRecipeUOM
 	,RT1.strName AS strRecipeType
