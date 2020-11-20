@@ -299,6 +299,13 @@ IF (@ysnPrintFromCFLocal = 1)
 											   AND LOWER(IST.strStatementType) = 'invoice'
 		WHERE I.strType = 'CF Tran'
 		  AND I.intInvoiceId IS NULL
+
+		DELETE I 
+        FROM #POSTEDINVOICES I
+        INNER JOIN tblCFTransaction CF ON I.strInvoiceNumber = CF.strTransactionId
+        WHERE I.strType = 'CF Tran'
+          AND ISNULL(CF.ysnInvoiced, 0) = 1
+          AND I.dtmPostDate <= @dtmDateToLocal
 	END
 
 --#CASHREFUNDS
