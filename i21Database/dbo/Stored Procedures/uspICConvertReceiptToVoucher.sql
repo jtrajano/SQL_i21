@@ -241,7 +241,8 @@ BEGIN
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
 
-		EXEC [dbo].[uspAPCreateVoucher]
+		--EXEC [dbo].[uspAPCreateVoucher]
+		EXEC uspCTCreateVoucher
 			@voucherPayables = @voucherItems
 			,@voucherPayableTax = @voucherItemsTax
 			,@userId = @intEntityUserSecurityId
