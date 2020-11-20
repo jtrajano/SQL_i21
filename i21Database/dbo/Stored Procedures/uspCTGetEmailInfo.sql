@@ -55,9 +55,15 @@ BEGIN
 	END
 	ELSE IF @strMailType = 'Sample Instruction'
 	BEGIN
+		--SET @routeScreen = 'Contract'
+		--INSERT INTO @loop
+		--SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 		SET @routeScreen = 'Contract'
 		INSERT INTO @loop
-		SELECT intContractHeaderId,intEntityId,strContractNumber,intSalespersonId FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+		SELECT CD.intContractHeaderId,CH.intEntityId,CH.strContractNumber +'-'+ CAST(CD.intContractSeq AS NVARCHAR(10)) ,CH.intSalespersonId 
+		FROM tblCTContractDetail CD
+		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		WHERE CD.intContractDetailId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 	END
 	ELSE IF @strMailType = 'Release Instruction'
 	BEGIN
