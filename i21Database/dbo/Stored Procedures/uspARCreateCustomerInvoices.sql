@@ -1054,9 +1054,8 @@ FROM
 	INNER JOIN (
 		SELECT COUNT(strSourceId)[SourceCount],strSourceId FROM  @InvoicesToGenerate GROUP BY strSourceId 
 	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
-	where ID.SourceCount > 1
-
-
+	WHERE ID.SourceCount > 1
+	AND [strType] <> 'POS'
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
