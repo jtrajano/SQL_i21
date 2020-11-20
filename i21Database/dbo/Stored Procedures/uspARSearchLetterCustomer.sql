@@ -4,9 +4,10 @@
 	, @intEntityUserId	INT
 )
 AS
-DECLARE @strLetterName			NVARCHAR(MAX),
-		@ysnSystemDefined		BIT
-		, @intSourceLetterId INT;
+DECLARE  @strLetterName		NVARCHAR(MAX)
+		,@ysnSystemDefined	BIT
+		,@intSourceLetterId INT
+		,@dtmDateFrom		DATETIME = NULL;
 
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -52,12 +53,34 @@ IF @strLetterName NOT IN ('Credit Suspension', 'Expired Credit Card', 'Credit Re
               AND ysnActive = 1
             FOR XML PATH ('')
         ) C (intEntityId)
+
+		IF @strLetterName = '1 Day Overdue Collection Letter'		
+			BEGIN		
+				SET @dtmDateFrom = DATEADD(day, -10, GETDATE())
+			END		
+		ELSE IF @strLetterName = '10 Day Overdue Collection Letter'		
+			BEGIN		
+				SET @dtmDateFrom = DATEADD(day, -30, GETDATE())
+			END
+		ELSE IF @strLetterName = '30 Day Overdue Collection Letter' OR @strLetterName = 'Recent Overdue Collection Letter'
+			BEGIN						
+				SET @dtmDateFrom = DATEADD(day, -60, GETDATE())
+			END
+		ELSE IF @strLetterName = '60 Day Overdue Collection Letter'
+			BEGIN						
+				SET @dtmDateFrom = DATEADD(day, -90, GETDATE())
+			END
+		ELSE IF @strLetterName = '90 Day Overdue Collection Letter'
+			BEGIN
+				SET @dtmDateFrom = DATEADD(day, -120, GETDATE())
+			END
 		
-        EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateTo = @dtmAsOfDate													  
-                                                      , @ysnInclude120Days = 1
-                                                      , @strCustomerIds = @strCustomerIds
-                                                      , @intEntityUserId = @intEntityUserId
-													  , @ysnPaidInvoice = 0
+        EXEC dbo.uspARCustomerAgingDetailAsOfDateReport @dtmDateFrom = @dtmDateFrom
+													   ,@dtmDateTo = @dtmAsOfDate
+                                                       ,@ysnInclude120Days = 1
+                                                       ,@strCustomerIds = @strCustomerIds
+                                                       ,@intEntityUserId = @intEntityUserId
+													   ,@ysnPaidInvoice = 0
 
 		DELETE AGING
 		FROM tblARCustomerAgingStagingTable AGING
