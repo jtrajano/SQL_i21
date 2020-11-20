@@ -1,7 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessTransfer]
 (
 	@intTransferStorageId INT,
-	@intUserId INT
+	@intUserId INT,
+	@intFutureMarketId INT = NULL,
+	@intFutureMonthId INT = NULL
 )
 AS
 BEGIN TRY
@@ -511,8 +513,8 @@ BEGIN TRY
 						ON IL.intItemLocationId = ITP.intItemLocationId
 					WHERE intId = @cursorId
 						
-					SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
-						,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,NULL,NULL,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+					SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
+						,@dblSettlementPrice  = (SELECT dblSettlementPrice FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
 					FROM @ItemsToPost ITP
 					INNER JOIN tblICItem I
 						ON ITP.intItemId = I.intItemId
