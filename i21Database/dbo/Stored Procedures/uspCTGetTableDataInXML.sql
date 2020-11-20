@@ -41,7 +41,4 @@ BEGIN
 
 	EXEC sp_executesql @SQL,N'@TableData NVARCHAR(MAX) OUTPUT',@TableData = @XML OUTPUT
 
-	Set @XML = Replace(@XML,'&', '&amp;')
-    Set @XML = Replace(@XML,'''', '&apos;')
-    Set @XML = Replace(@XML,'"', '&quot;')
 END
