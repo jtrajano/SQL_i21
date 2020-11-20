@@ -1408,6 +1408,8 @@ BEGIN TRY
 						,CH.ysnReadOnlyInterCoContract = 1
 						,CH.intSubBookId = @intSubBookId
 						,CH.intCompanyId = @intCompanyRefId
+						,CH.strExternalEntity=CH1.strExternalEntity
+						,CH.strExternalContractNumber=CH1.strExternalContractNumber
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
@@ -1851,24 +1853,24 @@ BEGIN TRY
 						END
 					END
 
-					IF @strShippingLine IS NOT NULL
-						AND NOT EXISTS (
-							SELECT 1
-							FROM tblEMEntity ShippingLine
-							JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
-								AND ET.strType = 'Shipping Line'
-							WHERE ShippingLine.strName = @strShippingLine
-							)
-					BEGIN
-						IF @strErrorMessage <> ''
-						BEGIN
-							SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipping Line ' + @strShippingLine + ' is not available.'
-						END
-						ELSE
-						BEGIN
-							SELECT @strErrorMessage = 'Shipping Line ' + @strShippingLine + ' is not available.'
-						END
-					END
+					--IF @strShippingLine IS NOT NULL
+					--	AND NOT EXISTS (
+					--		SELECT 1
+					--		FROM tblEMEntity ShippingLine
+					--		JOIN tblEMEntityType ET ON ET.intEntityId = ShippingLine.intEntityId
+					--			AND ET.strType = 'Shipping Line'
+					--		WHERE ShippingLine.strName = @strShippingLine
+					--		)
+					--BEGIN
+					--	IF @strErrorMessage <> ''
+					--	BEGIN
+					--		SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'Shipping Line ' + @strShippingLine + ' is not available.'
+					--	END
+					--	ELSE
+					--	BEGIN
+					--		SELECT @strErrorMessage = 'Shipping Line ' + @strShippingLine + ' is not available.'
+					--	END
+					--END
 
 					--IF @strShipper IS NOT NULL
 					--	AND NOT EXISTS (
