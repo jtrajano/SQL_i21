@@ -7,6 +7,7 @@
 	,@ysnReplication BIT = 1
 	,@intToBookId INT = NULL
 	,@ysnApproval BIT = 1
+	,@ysnPopulateERPInfo BIT=0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -40,6 +41,9 @@ BEGIN TRY
 		,@strSubmittedByXML NVARCHAR(MAX)
 		,@intPContractSeq INT
 		,@strApprovalStatus nvarchar(150)
+		,@strSQL NVARCHAR(MAX)
+		,@strServerName NVARCHAR(50)
+		,@strDatabaseName NVARCHAR(50)
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -82,6 +86,29 @@ BEGIN TRY
 
 		RETURN
 	END
+
+	IF @ysnPopulateERPInfo=1
+	BEGIN
+		SELECT @strDetailXML = NULL
+				,@strObjectName = NULL
+
+		SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
+
+		SELECT @strObjectName = 'vyuIPContractDetailERPInfoView'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strDetailXML OUTPUT
+			,NULL
+			,NULL
+		
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE ysnParent=1
+	END
+	ELSE
+	BEGIN
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
@@ -270,15 +297,12 @@ BEGIN TRY
 		,@strSubmittedByXML OUTPUT
 		,NULL
 		,NULL
-
-	DECLARE @strSQL NVARCHAR(MAX)
-		,@strServerName NVARCHAR(50)
-		,@strDatabaseName NVARCHAR(50)
-
-	SELECT @strServerName = strServerName
-		,@strDatabaseName = strDatabaseName
-	FROM tblIPMultiCompany
-	WHERE intBookId = @intToBookId
+	
+		SELECT @strServerName = strServerName
+			,@strDatabaseName = strDatabaseName
+		FROM tblIPMultiCompany
+		WHERE intBookId = @intToBookId
+	END
 
 	IF EXISTS (
 			SELECT 1
