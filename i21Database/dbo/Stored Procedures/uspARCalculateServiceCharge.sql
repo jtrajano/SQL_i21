@@ -473,6 +473,9 @@ AS
 						END
 					ELSE
 						BEGIN
+
+							IF (ISNULL(@isIncludeBudget,0) <> 0  AND EXISTS (SELECT TOP 1 intEntityCustomerId FROM dbo.tblARCustomerBudget  WHERE intEntityCustomerId =@entityId))
+							BEGIN
 							--GET AMOUNT DUE PER CUSTOMER
 							INSERT INTO @tblTypeServiceCharge
 							SELECT NULL
@@ -497,6 +500,7 @@ AS
 							FROM @tempTblTypeServiceCharge 
 							WHERE ISNULL(dblAmountDue, 0) > @zeroDecimal 
 							  AND ISNULL(dblTotalAmount, 0) > @zeroDecimal
+							END 
 						END
 
 					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue < @dblMinFinanceSC
