@@ -34,8 +34,8 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , dblBaseInterest						= INV.dblBaseInterest
      , dblAmountDue							= INV.dblAmountDue
      , dblBaseAmountDue						= INV.dblBaseAmountDue
-     , dblPayment							= INV.dblPayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblPayment, 0) ELSE 0 END 
-     , dblBasePayment						= INV.dblBasePayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, 0) ELSE 0 END 
+     , dblPayment							= INV.dblPayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN PROVISIONALPAYMENT.dblPayment ELSE 0 END 
+     , dblBasePayment						= INV.dblBasePayment + CASE WHEN ysnFromProvisional = 1 AND dblProvisionalAmount > 0 AND INV.ysnExcludeFromPayment = 0 THEN PROVISIONALPAYMENT.dblBasePayment ELSE 0 END 
      , dblProvisionalAmount					= INV.dblProvisionalAmount
      , dblBaseProvisionalAmount				= INV.dblBaseProvisionalAmount
 	 , dblCurrencyExchangeRate				= INV.dblCurrencyExchangeRate
