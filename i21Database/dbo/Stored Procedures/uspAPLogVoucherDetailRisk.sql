@@ -69,7 +69,7 @@ BEGIN
 	INNER JOIN tblICCommodityUnitMeasure cum ON cum.intCommodityId = c.intCommodityId AND cum.intUnitMeasureId = iuom.intUnitMeasureId
 	WHERE bd.intItemId > 0
 	
-	EXEC [dbo].[uspRKLogRiskPosition] @SummaryLogs = @rkSummaryLog, @Rebuild = 0
+	EXEC [dbo].[uspRKLogRiskPosition] @SummaryLogs = @rkSummaryLog, @Rebuild = 0, @LogContracts = 0
 
 	DECLARE @contractBalance AS CTContractBalanceLog
 
