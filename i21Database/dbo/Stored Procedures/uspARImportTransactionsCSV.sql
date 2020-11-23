@@ -88,7 +88,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@ConversionFactor				NUMERIC(18,6)   = @ZeroDecimal	
 			,@BillingBy						NVARCHAR(50)	= NULL
 			,@COGSAmount					NUMERIC(18,6)   = @ZeroDecimal
-			,@CustomerNumber				NVARCHAR(100)	= NULL
+			,@CustomerNumber				NVARCHAR(100)	= ''
 			,@ItemCategory					NVARCHAR(100)	= NULL
 			,@intItemLocationId				INT				= NULL
 			,@ysnAllowNegativeStock			BIT				= 0
@@ -595,7 +595,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
-							,[ysnUseOriginIdAsInvoiceNumber] =   CASE WHEN  (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN CAST(1 AS BIT) ELSE CAST(1 AS BIT) END
+							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(@OriginId, '') <> '' AND  @CustomerNumber <> '9998' THEN 1 ELSE 0 END
 							,[ysnImpactInventory]		= @ysnImpactInventory
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
