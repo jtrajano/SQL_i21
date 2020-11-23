@@ -28,6 +28,7 @@ INSERT INTO tblICStagingCommodityActivity(
 
 	dblOpeningQty,
 	dblReceivedQty,
+	dblInventoryCountQty,
 	dblInvoicedQty,
 	dblAdjustments,
 	dblTransfersReceived,
@@ -51,6 +52,7 @@ SELECT
 	,a.strItemUOM
 	,sum(a.dblOpeningQty) AS dblOpeningQty
 	,sum(a.dblReceivedQty) AS dblReceivedQty
+	,sum(a.dblInventoryCountQty) AS dblInventoryCountQty
 	,sum(a.dblInvoicedQty) AS dblInvoicedQty
 	,sum(a.dblAdjustments) AS dblAdjustments
 	,sum(a.dblTransfersReceived) AS dblTransfersReceived
