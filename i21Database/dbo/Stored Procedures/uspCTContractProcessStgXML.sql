@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractProcessStgXML]
 	--@intToCompanyId INT
+	@ysnProcessERPInfo BIT
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -466,7 +467,7 @@ BEGIN TRY
 			WHERE intContractStageId = @intContractStageId
 		END
 
-		IF @strTransactionType = 'Purchase Contract'
+		IF @strTransactionType = 'Purchase Contract' or @ysnProcessERPInfo = 1
 		BEGIN
 			BEGIN TRY
 				SELECT @intContractHeaderRefId = @intContractHeaderId
@@ -485,6 +486,25 @@ BEGIN TRY
 					GOTO x
 				END
 
+				IF @ysnProcessERPInfo = 1
+				BEGIN
+					EXEC sp_xml_preparedocument @idoc OUTPUT
+						,@strDetailXML
+
+					UPDATE CD
+					SET CD.strERPPONumber = x.strERPPONumber
+						,CD.strERPItemNumber = x.strERPItemNumber
+					FROM OPENXML(@idoc, 'vyuIPContractDetailERPInfoViews/vyuIPContractDetailERPInfoView', 2) WITH (
+							strERPPONumber NVARCHAR(100) Collate Latin1_General_CI_AS
+							,strERPItemNumber NVARCHAR(100) Collate Latin1_General_CI_AS
+							,intContractDetailRefId INT
+							) x
+					JOIN tblCTContractDetail CD ON CD.intContractDetailId = x.intContractDetailRefId
+
+					EXEC sp_xml_removedocument @idoc
+
+					GOTO ext
+				END
 				------------------Header------------------------------------------------------
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strHeaderXML

@@ -8915,6 +8915,7 @@
     <Build Include="dbo\Tables\tblAPClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAPClearing.sql" />
     <Build Include="dbo\User Defined Types\APClearing.sql" />
+    <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
