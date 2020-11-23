@@ -7792,6 +7792,8 @@
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTransferStorage_DPtoOS_InventoryPost.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTransferStorage_OStoDP_InventoryPost.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

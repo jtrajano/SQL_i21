@@ -116,6 +116,16 @@ BEGIN TRY
 	-----------------------------------------------------------
 	DELETE FROM tblCFInvoiceReportTempTable	WHERE strUserId = @UserId 
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId 
+
+	DELETE FROM tblCFInvoiceReportTotalValidation WHERE strUserId = @UserId 
+	EXEC "dbo"."uspCFInvoiceReportValidation" @UserId = @UserId 
+
+	DECLARE @intInvalidTransaction INT 
+	SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
+
+	IF (@intInvalidTransaction >= 1) 
+	GOTO EXITWITHERROR
+	
 	
 	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId 
 	EXEC "dbo"."uspCFInvoiceReportSummary"@UserId = @UserId 
@@ -1146,8 +1156,11 @@ BEGIN CATCH
 
 	RAISERROR (@CatchErrorMessage,@CatchErrorSeverity,@CatchErrorState)
 
-	
-	
 
 END CATCH
+
+
+	EXITWITHERROR:
+	RAISERROR ('Total Validation Error',16,1)
+
 END
