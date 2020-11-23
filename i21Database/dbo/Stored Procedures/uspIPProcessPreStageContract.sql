@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessPreStageContract
+﻿CREATE PROCEDURE uspIPProcessPreStageContract(@ysnPopulateERPInfo BIT=0)
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -93,6 +93,7 @@ BEGIN TRY
 			,0
 			,@intToBookId
 			,@ysnApproval
+			,@ysnPopulateERPInfo
 
 		UPDATE tblCTContractPreStage
 		SET strFeedStatus = 'Processed'

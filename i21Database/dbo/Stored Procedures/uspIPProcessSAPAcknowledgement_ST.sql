@@ -207,6 +207,9 @@ BEGIN TRY
 						WHERE intContractDetailId = @intContractDetailId
 							AND ISNULL(strFeedStatus, '') = ''
 
+						INSERT INTO dbo.tblCTContractPreStage (intContractHeaderId)
+						SELECT @intContractHeaderId
+
 						INSERT INTO @tblMessage (
 							strMessageType
 							,strMessage
@@ -292,6 +295,10 @@ BEGIN TRY
 								,strERPItemNumber = @PO_LINE_ITEM_NO
 							WHERE intContractDetailId = @intContractDetailId
 								AND ISNULL(strFeedStatus, '') = 'Awt Ack'
+
+							INSERT INTO dbo.tblCTContractPreStage (intContractHeaderId)
+							SELECT @intContractHeaderId
+
 						END
 
 						INSERT INTO @tblMessage (

@@ -8848,6 +8848,7 @@
     <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
     <Build Include="dbo\Tables\tblSMInterCompanyMasterScreen.sql" />
     <None Include="Scripts\Post-Deployment\SM\DefaultData\42_InterCompanyMasterScreen.sql" />
+    <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
