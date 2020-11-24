@@ -59,8 +59,8 @@ BEGIN
 			EXEC dbo.uspIPCreateWeightClaims @intLoadId = @intLoadId
 				,@intNewWeightClaimId = @intNewWeightClaimId OUTPUT
 
-			EXEC [dbo].[uspIPWeightClaimPopulateStgXML] @intWeightClaimId = @intNewWeightClaimId
-				,@strRowState = 'Added'
+			--EXEC [dbo].[uspIPWeightClaimPopulateStgXML] @intWeightClaimId = @intNewWeightClaimId
+			--	,@strRowState = 'Added'
 
 			UPDATE tblIPInventoryReceiptWeightClaim
 			SET intWeightClaimId = @intNewWeightClaimId
