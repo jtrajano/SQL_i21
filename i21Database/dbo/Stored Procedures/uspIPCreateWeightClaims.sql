@@ -97,6 +97,9 @@ BEGIN TRY
 	FROM vyuLGGetOpenWeightClaim WC
 	WHERE intLoadId = @intLoadId
 
+	INSERT INTO tblLGWeightClaimPreStage (intWeightClaimId)
+	SELECT @intNewWeightClaimId
+
 	SELECT @strDescription = 'Created from system : ' + @strNewWeightClaimReferenceNo
 
 	EXEC uspSMAuditLog @keyValue = @intNewWeightClaimId
