@@ -387,8 +387,8 @@ IF @ysnPrintOnlyPastDueLocal = 1
 --FILTER OUT ZERO BALANCE
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
-		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) = 0) AND strTransactionType <> 'Customer Budget'
-		DELETE FROM #AGINGSUMMARY WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0)
+		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) <= 0) AND strTransactionType <> 'Customer Budget'
+		DELETE FROM #AGINGSUMMARY WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0)
 
 		DELETE C
 		FROM #CUSTOMERS C
