@@ -214,8 +214,11 @@ JOIN (
 	WHERE LOD.intLoadId = @intLoadId
 	) LD ON WCD.intContractDetailId = LD.intPContractDetailId
 LEFT JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-LEFT JOIN tblEMEntityLocation EL ON EL.intEntityLocationId = CASE WHEN LD.intVendorEntityId <> WCD.intPartyEntityId THEN E.intDefaultLocationId 
-																ELSE ISNULL(LD.intVendorEntityLocationId, E.intDefaultLocationId) END
+LEFT JOIN tblEMEntityLocation EL ON EL.intEntityId = E.intEntityId 
+	AND ((LD.intVendorEntityId = WCD.intPartyEntityId AND EL.ysnDefaultLocation = 1)
+		OR (LD.intVendorEntityId <> WCD.intPartyEntityId 
+			AND ((intVendorEntityLocationId IS NOT NULL AND EL.intEntityLocationId = LD.intVendorEntityLocationId)
+				OR (intVendorEntityLocationId IS NULL AND EL.ysnDefaultLocation = 1))))
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN vyuCMBankAccount BA ON BA.intBankAccountId = B.intBankInfoId
 LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
