@@ -26,7 +26,12 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET ANSI_WARNINGS OFF
 SET XACT_ABORT ON
-  
+
+DECLARE @Retry			BIT = 0
+DECLARE @ErrorMerssage	NVARCHAR(MAX)
+DECLARE @ErrorNumber	INT
+
+Retry:  
 --------------------------------------------------------------------------------------------  
 -- Initialize   
 --------------------------------------------------------------------------------------------   
@@ -65,8 +70,6 @@ BEGIN
 		SAVE TRANSACTION @Savepoint
 END
 
-DECLARE @ErrorMerssage NVARCHAR(MAX)
-
 SET @recapId = '1'
 SET @success = 1
 
@@ -76,12 +79,16 @@ SET @recap = ISNULL(@recap, 0)
 SET @accrueLicense = ISNULL(@accrueLicense, 0)
 
 DECLARE @StartingNumberId INT
-SET @StartingNumberId = 3
-IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0) AND @recap = 0
+
+IF @Retry = 0
 BEGIN
-	EXEC dbo.uspSMGetStartingNumber @StartingNumberId, @batchId OUT
+	SET @StartingNumberId = 3
+	IF(LEN(RTRIM(LTRIM(ISNULL(@batchId,'')))) = 0) AND @recap = 0
+	BEGIN
+		EXEC dbo.uspSMGetStartingNumber @StartingNumberId, @batchId OUT
+	END
+	SET @batchIdUsed = @batchId
 END
-SET @batchIdUsed = @batchId
  
 -- Get Transaction to Post
 IF (@transType IS NULL OR RTRIM(LTRIM(@transType)) = '')
@@ -526,7 +533,7 @@ CREATE TABLE #ARItemsForCosting
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
-	,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
+	,[ysnForValidation] BIT NULL)
 
 IF(OBJECT_ID('tempdb..#ARItemsForInTransitCosting') IS NOT NULL)
 BEGIN
@@ -770,8 +777,8 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-	IF @raiseError = 0
+	SELECT @ErrorMerssage = ERROR_MESSAGE(), @ErrorNumber = ERROR_NUMBER()
+	IF @raiseError = 0 OR @ErrorNumber = 1205 OR CHARINDEX('deadlock', @ErrorMerssage) > 0
 		BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
@@ -805,10 +812,22 @@ BEGIN CATCH
 					--	COMMIT TRANSACTION  @Savepoint
 				END	
 		END						
-	IF @raiseError = 1
-        RAISERROR(@ErrorMerssage, 11, 1)
+	
+	IF @ErrorNumber = 1205 OR CHARINDEX('deadlock', @ErrorMerssage) > 0
+	BEGIN
+		PRINT 'Retry due to deadlock'
+		SELECT 'Retry due to deadlock'
+		SET @Retry = 1
+		WAITFOR DELAY '00:00:00.05'
+		GOTO Retry
+	END 
+	ELSE
+	BEGIN
+		IF @raiseError = 1
+			RAISERROR(@ErrorMerssage, 11, 1)
 		
-	GOTO Post_Exit
+		GOTO Post_Exit	
+	END
 END CATCH
 
 
@@ -1087,8 +1106,8 @@ BEGIN TRY
 
 END TRY
 BEGIN CATCH
-	SELECT @ErrorMerssage = ERROR_MESSAGE()					
-	IF @raiseError = 0
+	SELECT @ErrorMerssage = ERROR_MESSAGE(), @ErrorNumber = ERROR_NUMBER()
+	IF @raiseError = 0 OR @ErrorNumber = 1205 OR CHARINDEX('deadlock', @ErrorMerssage) > 0
 		BEGIN
 			IF @InitTranCount = 0
 				IF (XACT_STATE()) <> 0
@@ -1122,10 +1141,22 @@ BEGIN CATCH
 					--	COMMIT TRANSACTION  @Savepoint
 				END	
 		END						
-	IF @raiseError = 1
-        RAISERROR(@ErrorMerssage, 11, 1)
+	
+	IF @ErrorNumber = 1205 OR CHARINDEX('deadlock', @ErrorMerssage) > 0
+	BEGIN
+		PRINT 'Retry due to deadlock'
+		SELECT 'Retry due to deadlock'
+		SET @Retry = 1
+		WAITFOR DELAY '00:00:00.05'
+		GOTO Retry
+	END 
+	ELSE
+	BEGIN
+		IF @raiseError = 1
+			RAISERROR(@ErrorMerssage, 11, 1)
 		
-	GOTO Post_Exit
+		GOTO Post_Exit	
+	END
 END CATCH
 
 SET @successfulCount = @totalRecords
@@ -1186,8 +1217,20 @@ Do_Rollback:
 						ROLLBACK TRANSACTION  @CurrentSavepoint
 				END	
 		END
-	IF @raiseError = 1
-		RAISERROR(@ErrorMerssage, 11, 1)	
+	
+	IF @ErrorNumber = 1205 OR CHARINDEX('deadlock', @ErrorMerssage) > 0
+	BEGIN
+		PRINT 'Retry due to deadlock'
+		SELECT 'Retry due to deadlock'
+		SET @Retry = 1
+		WAITFOR DELAY '00:00:00.05'
+		GOTO Retry
+	END 
+	ELSE
+	BEGIN
+		IF @raiseError = 1
+			RAISERROR(@ErrorMerssage, 11, 1)
+	END
 	    
 -- This is our immediate exit in case of exceptions controlled by this stored procedure
 Post_Exit:
