@@ -221,6 +221,7 @@ BEGIN
 		,CH.strCustomerContract
 		,strContractNumber = LTRIM(CH.strContractNumber) +'/'+ LTRIM(CD.intContractSeq)
 		,strContractNumberOnly = LTRIM(CH.strContractNumber)
+		,CD.strERPPONumber
 		,CH.dtmContractDate
 		,strContractDate = dbo.fnConvertDateToReportDateFormat(CH.dtmContractDate, 0)
 		,CD.intContractSeq
