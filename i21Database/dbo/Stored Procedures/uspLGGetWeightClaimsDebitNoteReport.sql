@@ -115,6 +115,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,strCompanyPhone = @strPhone
 	,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ', '
 	,strCityAndDate = @strCity + ', '+ DATENAME(dd,WC.dtmTransDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,WC.dtmTransDate),3)),LEFT(DATENAME(MONTH,WC.dtmTransDate),3)) + ' ' + DATENAME(yyyy,WC.dtmTransDate)
+	,strTransDate = dbo.fnConvertDateToReportDateFormat(WC.dtmTransDate, 0)
 	,L.intLoadId
 	,L.strLoadNumber
 	,E.intEntityId
@@ -131,6 +132,7 @@ SELECT DISTINCT WC.intWeightClaimId
 	,L.strPackingDescription
 	,CH.strContractNumber
 	,CH.dtmContractDate
+	,strContractDate = dbo.fnConvertDateToReportDateFormat(CH.dtmContractDate, 0)
 	,CH.strCustomerContract
 	,CH.dblQuantity
 	,strCommodityUnitMeasure = CMUM.strUnitMeasure
