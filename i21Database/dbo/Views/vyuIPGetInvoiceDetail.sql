@@ -20,6 +20,7 @@ SELECT I.strItemNo
 				AND WCD.intInvoiceId = IV.intInvoiceId
 			)) AS intLoadId
 	,LD.intLoadDetailId
+	,C.strCurrency
 FROM dbo.tblARInvoice IV
 JOIN dbo.tblARInvoiceDetail IVD ON IV.intInvoiceId = IVD.intInvoiceId
 LEFT JOIN dbo.tblICItemUOM OIU ON OIU.intItemUOMId = IVD.intOrderUOMId
@@ -32,3 +33,4 @@ JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IVD.intItemUOMId
 JOIN dbo.tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 LEFT JOIN dbo.tblICItemUOM WIU ON WIU.intItemUOMId = IVD.intItemWeightUOMId
 LEFT JOIN dbo.tblICUnitMeasure WUM ON WUM.intUnitMeasureId = WIU.intUnitMeasureId
+Left JOIN tblSMCurrency C on C.intCurrencyID =IVD.intSubCurrencyId 
