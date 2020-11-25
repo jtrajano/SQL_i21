@@ -538,7 +538,7 @@ BEGIN TRY
 														ELSE	0.01 
 												END,
 					CD.dblCashPrice			=	(
-													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CD.dblBasis,0)) / 
+													dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
 													CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 															WHEN	@intBasisCurrencyId <> @intCurrencyId	
 															AND		@ysnBasisSubCurrency = 1				THEN 100 
@@ -559,7 +559,7 @@ BEGIN TRY
 					CD.dblTotalCost			=	dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * 
 												(	
 													(
-														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CD.dblBasis,0)) / 
+														dbo.fnCTConvertQuantityToTargetCommodityUOM(@intPriceCommodityUOMId,@intBasisUOMId,ISNULL(CASE WHEN CD.intPricingTypeId = 3 THEN PF.dblOriginalBasis ELSE CD.dblBasis END,0)) / 
 														CASE	WHEN	@intBasisCurrencyId = @intCurrencyId	THEN 1 
 																WHEN	@intBasisCurrencyId <> @intCurrencyId	
 																AND		@ysnBasisSubCurrency = 1				THEN 100 
