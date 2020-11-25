@@ -388,36 +388,31 @@ BEGIN TRY
 			)
 
 			INSERT INTO tblTFTransactionDynamicGA (intTransactionId
-				, strGAOriginFacilityNumber
 				, strGAOriginAddress
-				, strGADestinationFacilityNumber
 				, strGADestinationAddress
 				, intConcurrencyId)
-
 			SELECT Trans.intTransactionId
-					, [strGAOriginFacilityNumber] = tblEMEntityLocation.strOregonFacilityNumber
 					, [strGAOriginAddress] = tblEMEntityLocation.strAddress
-					, [strGADestinationFacilityNumber] = NULL
-					, [strGADestinationAddress] = NULL
+					, [strGADestinationAddress] = tblSMCompanyLocation.strAddress
 					, 1
 			FROM tblTFTransaction Trans
 			INNER JOIN tblICInventoryReceiptItem ReceiptItem ON ReceiptItem.intInventoryReceiptItemId = Trans.intTransactionNumberId
 			INNER JOIN tblICInventoryReceipt Receipt ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
-			INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = Receipt.intShipFromEntityId
+				LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = Receipt.intShipFromEntityId
+				LEFT JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = Receipt.intLocationId
 			WHERE Trans.uniqTransactionGuid = @Guid
 				AND Trans.strTransactionType = 'Receipt'
 				AND Trans.intTransactionId IS NOT NULL
 			UNION ALL
 			SELECT Trans.intTransactionId
-					, [strGAOriginFacilityNumber] = NULL
-					, [strGAOriginAddress] = NULL
-					, [strGADestinationFacilityNumber] = tblEMEntityLocation.strOregonFacilityNumber
+					, [strGAOriginAddress] = tblSMCompanyLocation.strAddress
 					, [strGADestinationAddress] = tblEMEntityLocation.strAddress
 					, 1
 			FROM tblTFTransaction Trans
 			INNER JOIN tblARInvoiceDetail ON tblARInvoiceDetail.intInvoiceDetailId =  Trans.intTransactionNumberId
 			INNER JOIN tblARInvoice ON tblARInvoice.intInvoiceId = tblARInvoiceDetail.intInvoiceId
-			INNER JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+			 	LEFT JOIN tblEMEntityLocation ON tblEMEntityLocation.intEntityLocationId = tblARInvoice.intShipToLocationId
+				LEFT JOIN tblSMCompanyLocation ON tblSMCompanyLocation.intCompanyLocationId = tblARInvoice.intCompanyLocationId
 			WHERE Trans.uniqTransactionGuid = @Guid
 				AND Trans.strTransactionType = 'Invoice'
 				AND Trans.intTransactionId IS NOT NULL
