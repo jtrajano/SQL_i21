@@ -265,7 +265,7 @@ BEGIN
 		,Inv.dtmDueDate
 		,dtmInvoiceDate = Inv.dtmDate
 		,strInvoicePaymentInformation = @strPaymentInfo 
-		,strWarehouse = PWH.strSubLocationName
+		,strWarehouse = ISNULL(PWH.strSubLocationName,SWH .strSubLocationName)
 		,strWarehouseCondition = (SELECT TOP 1 CASE WHEN ISNULL(ID.strItemDescription, '') = '' 
 									THEN I.strDescription ELSE ID.strItemDescription END
 								  FROM tblARInvoiceDetail ID
@@ -288,6 +288,7 @@ BEGIN
 	LEFT JOIN tblSMCity CT ON CT.intCityId = CH.intINCOLocationTypeId AND CFT.strINCOLocationType = 'City'
 	LEFT JOIN tblSMCountry CN ON CN.intCountryID = CH.intCountryId
 	LEFT JOIN tblSMCompanyLocationSubLocation CLSL ON CLSL.intCompanyLocationSubLocationId = CH.intWarehouseId AND CFT.strINCOLocationType <> 'City'
+	LEFT JOIN tblSMCompanyLocationSubLocation SWH ON SWH.intCompanyLocationSubLocationId = CD.intSubLocationId
 	LEFT JOIN tblSMCurrency PriceCur ON PriceCur.intCurrencyID = CD.intCurrencyId
 	LEFT JOIN tblSMCurrency InvDetPriceCur ON InvDetPriceCur.intCurrencyID = InvDet.intSubCurrencyId 
 	LEFT JOIN tblICItemUOM OIM ON OIM.intItemUOMId = InvDet.intOrderUOMId
