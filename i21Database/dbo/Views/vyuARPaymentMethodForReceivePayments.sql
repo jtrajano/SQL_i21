@@ -16,7 +16,7 @@ SELECT
 	ROW_NUMBER() OVER(ORDER BY intEntityCardInfoId) + (SELECT COUNT(*) FROM tblSMPaymentMethod WHERE strPaymentMethod <> 'Credit Card' and ysnActive = 1) AS intId  
 	,11
 	,strCreditCardNumber
-	,1 
+	,ysnActive
 	,intEntityCardInfoId
 	,intEntityId
 FROM tblEMEntityCardInformation
