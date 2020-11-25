@@ -8935,6 +8935,7 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099NECFile.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileNECPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentSimplifiedAvg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
