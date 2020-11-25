@@ -279,7 +279,7 @@ BEGIN
 		,Inv.dtmDueDate
 		,dtmInvoiceDate = Inv.dtmDate
 		,strInvoicePaymentInformation = @strPaymentInfo 
-		,strWarehouse = ISNULL(PWH.strSubLocationName,SWH .strSubLocationName)
+		,strWarehouse = SWH.strSubLocationName
 		,strWarehouseCondition = (SELECT TOP 1 CASE WHEN ISNULL(ID.strItemDescription, '') = '' 
 									THEN I.strDescription ELSE ID.strItemDescription END
 								  FROM tblARInvoiceDetail ID
