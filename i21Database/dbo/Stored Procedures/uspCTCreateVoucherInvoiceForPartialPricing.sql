@@ -308,7 +308,7 @@ BEGIN TRY
 				if (@strTransactionType = 'STR')
 				begin
 					declare @dblAvailableQuantity numeric(18,6);  
-			        select @dblAvailableQuantity = dblAvailableQuantity from vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId;  
+			        select top 1 @dblAvailableQuantity = dblAvailableQuantity, @dblFinalPrice = dblCashPrice from vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId;  
 			  		EXEC [dbo].[uspGRPostSettleStorage] @intInventoryReceiptId,1, 1,@dblFinalPrice, @dblAvailableQuantity; 
 
 				end
