@@ -491,6 +491,7 @@ BEGIN
 			INNER join tblGLJournal C on A. intJournalId = C.intJournalId
 			OUTER APPLY dbo.fnGLGetExchangeRate(@intCurrencylId,A.intCurrencyExchangeRateTypeId,@dtmDate_NEW) B
 			WHERE A.intJournalId = @intJournalId
+			ORDER BY A.intJournalDetailId
 							
 		DELETE FROM @tmpReverseJournals WHERE intJournalId = @intJournalId
 	END 	

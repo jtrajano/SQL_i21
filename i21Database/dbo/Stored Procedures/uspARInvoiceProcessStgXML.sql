@@ -55,6 +55,9 @@ BEGIN TRY
 		,@intItemLocationId INT
 		,@intAccountId INT
 		,@intWeightClaimId INT
+		,@intCurrencyId INT
+		,@ysnSubCurrency BIT
+		,@strSubCurrency NVARCHAR(50)
 	DECLARE @tblIPInvoiceDetail TABLE (
 		intInvoiceDetailId INT identity(1, 1)
 		,strItemNo NVARCHAR(50)
@@ -73,6 +76,7 @@ BEGIN TRY
 		,intLoadDetailId INT
 		,strOrderUnitMeasure NVARCHAR(50)
 		,intAccountId INT
+		,strCurrency NVARCHAR(50)
 		)
 	DECLARE @tblIPFinalInvoiceDetail TABLE (
 		intFinalInvoiceDetailId INT identity(1, 1)
@@ -92,6 +96,8 @@ BEGIN TRY
 		,intLoadDetailId INT
 		,intOrderItemUOMId INT
 		,intAccountId INT
+		,intCurrencyId INT
+		,ysnSubCurrency INT
 		)
 	DECLARE @tblARInvoiceStage TABLE (intInvoiceStageId INT)
 
@@ -195,6 +201,10 @@ BEGIN TRY
 					SELECT @strErrorMessage = 'Currency ' + @strCurrency + ' is not available.'
 				END
 			END
+			SELECT @intCurrencyId = NULL
+			SELECT @intCurrencyId = intCurrencyID
+			FROM tblSMCurrency
+			WHERE strCurrency=@strCurrency
 
 			--IF @strLocationName IS NOT NULL
 			--	AND NOT EXISTS (
@@ -354,6 +364,7 @@ BEGIN TRY
 				,intLoadId
 				,intLoadDetailId
 				,strOrderUnitMeasure
+				,strCurrency
 				)
 			SELECT x.strItemNo
 				,x.intContractHeaderId
@@ -370,6 +381,7 @@ BEGIN TRY
 				,L.intLoadId
 				,LD.intLoadDetailId
 				,x.strOrderUnitMeasure
+				,x.strCurrency
 			FROM OPENXML(@idoc, 'vyuIPGetInvoiceDetails/vyuIPGetInvoiceDetail', 2) WITH (
 					strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					,intContractHeaderId INT
@@ -386,6 +398,7 @@ BEGIN TRY
 					,intLoadId INT
 					,intLoadDetailId INT
 					,strOrderUnitMeasure NVARCHAR(50) COLLATE Latin1_General_CI_AS
+					,strCurrency NVARCHAR(50) COLLATE Latin1_General_CI_AS
 					) x
 			LEFT JOIN tblLGLoad L ON L.intLoadRefId = x.intLoadId
 			LEFT JOIN tblLGLoadDetail LD ON LD.intLoadDetailRefId = x.intLoadDetailId
@@ -403,12 +416,14 @@ BEGIN TRY
 					,@strOrderUnitMeasure = NULL
 					,@intItemLocationId = NULL
 					,@intAccountId = NULL
+					,@strSubCurrency = NULL
 
 				SELECT @strItemNo = strItemNo
 					,@strUnitMeasure = strUnitMeasure
 					,@strWeightUnitMeasure = strWeightUnitMeasure
 					,@intContractDetailRefId = intContractDetailId
 					,@strOrderUnitMeasure = strOrderUnitMeasure
+					,@strSubCurrency = strCurrency
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -595,6 +610,12 @@ BEGIN TRY
 							,1
 							)
 				END
+				SELECT @ysnSubCurrency = NULL
+
+				SELECT @ysnSubCurrency = ysnSubCurrency
+				FROM tblSMCurrency
+				WHERE strCurrency = @strSubCurrency
+
 
 				INSERT INTO @tblIPFinalInvoiceDetail (
 					intItemId
@@ -613,6 +634,8 @@ BEGIN TRY
 					,intLoadDetailId
 					,intOrderItemUOMId
 					,intAccountId
+					,intCurrencyId
+					,ysnSubCurrency
 					)
 				SELECT @intItemId
 					,@intContractHeaderId
@@ -630,6 +653,8 @@ BEGIN TRY
 					,intLoadDetailId
 					,@intOrderItemUOMId
 					,@intAccountId
+					,@intCurrencyId
+					,@ysnSubCurrency
 				FROM @tblIPInvoiceDetail
 				WHERE intInvoiceDetailId = @intInvoiceDetailId
 
@@ -674,6 +699,8 @@ BEGIN TRY
 				,intLoadShipmentDetailId
 				,intLineNo
 				,intAccountId
+				,intCurrencyId
+				,ysnSubCurrency
 				)
 			SELECT @intEntityId
 				,1
@@ -697,6 +724,8 @@ BEGIN TRY
 				,intLoadDetailId
 				,intFinalInvoiceDetailId
 				,intAccountId
+				,intCurrencyId
+				,ysnSubCurrency
 			FROM @tblIPFinalInvoiceDetail FID
 
 			SELECT @intLoadId = NULL
