@@ -20,6 +20,25 @@ BEGIN
 		,dblTotalAR NUMERIC(18,6) NULL
 	)
 
+	--dynamic sql due to ( ROWS are not supported in SSDT project )
+	DECLARE @sqlString NVARCHAR(MAX)
+
+	SET @sqlString = '
+	SELECT  
+	 intEntityCustomerId 
+	,strCustomerNumber	
+	,strCustomerName	
+	,dtmDate
+	,dblCalcRunningBalance = SUM (CASE WHEN strTransactionType = ''Balance Forward'' 
+											  THEN dblBalance - dblPayment 
+											  ELSE ISNULL (dblInvoiceTotal, 0) - dblPayment END)
+											  OVER (PARTITION BY intEntityCustomerId ORDER BY dtmDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) 
+	,dblTotalAR
+	FROM (SELECT *
+	FROM tblARCustomerStatementStagingTable 
+	WHERE strStatementFormat = ''Balance Forward'' AND intEntityUserId = ' + CAST(@intUserId as nvarchar(MAX)) + ') 
+	as innerquery '
+
 
 	INSERT INTO @tblMainQuery
 	(
@@ -30,22 +49,7 @@ BEGIN
 		,dblCalcRunningBalance
 		,dblTotalAR
 	)
-	SELECT  
-	 intEntityCustomerId 
-	,strCustomerNumber	
-	,strCustomerName	
-	,dtmDate
-	,dblCalcRunningBalance = SUM (CASE WHEN strTransactionType = 'Balance Forward' 
-											  THEN dblBalance - dblPayment 
-											  ELSE ISNULL (dblInvoiceTotal, 0) - dblPayment END)
-											  OVER (PARTITION BY intEntityCustomerId ORDER BY dtmDate ROWS
-											 BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) 
-	,dblTotalAR
-	FROM (SELECT *
-	FROM tblARCustomerStatementStagingTable 
-	WHERE strStatementFormat = 'Balance Forward' AND intEntityUserId = @intUserId) 
-	as innerquery 
-
+	EXEC (@sqlString)
 
 	
 	INSERT INTO tblCFInvoiceReportBalanceValidation
