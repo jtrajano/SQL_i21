@@ -1175,13 +1175,11 @@ BEGIN TRY
 	END
 
 	
-
-	DELETE FROM tblCFInvoiceReportBalanceValidation WHERE strUserId = @UserId 
 	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 AND ISNULL(@ysnIncludeRemittancePage,0) = 1 ) 
 	BEGIN
 		EXEC "dbo"."uspCFInvoiceReportBalanceValidation" @UserId = @UserId 
 		DECLARE @intInvalidBalance INT 
-		SELECT @intInvalidBalance = COUNT(1) FROM tblCFInvoiceReportBalanceValidation	WHERE strUserId = @UserId 
+		SELECT @intInvalidBalance = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
 
 		IF (@intInvalidBalance >= 1) 
 		BEGIN
