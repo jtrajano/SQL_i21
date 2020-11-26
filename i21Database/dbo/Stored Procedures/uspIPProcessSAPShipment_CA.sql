@@ -1269,11 +1269,29 @@ BEGIN TRY
 			END
 
 			-- Load Container
-			IF ISNULL(@ysnPosted, 0) = 0
+			IF EXISTS (
+					SELECT 1
+					FROM tblIPLoadContainerStage
+					WHERE intStageLoadId = @intMinRowNo
+					)
+				AND EXISTS (
+					SELECT 1
+					FROM tblLGLoadContainer
+					WHERE intLoadId = @intLoadId
+					)
+			BEGIN
+				SELECT @strContainerErrMsg = 'Received container updates from Cargoo. '
+			END
+			ELSE IF ISNULL(@ysnPosted, 0) = 0
 				AND EXISTS (
 					SELECT 1
 					FROM tblIPLoadContainerStage
 					WHERE intStageLoadId = @intMinRowNo
+					)
+				AND NOT EXISTS (
+					SELECT 1
+					FROM tblLGLoadContainer
+					WHERE intLoadId = @intLoadId
 					)
 				AND (
 					@strRowState = 'Added'
@@ -1918,9 +1936,8 @@ BEGIN TRY
 						END
 					END
 				END
-			END
-
-			IF ISNULL(@ysnPosted, 0) = 1
+			END		
+			ELSE IF ISNULL(@ysnPosted, 0) = 1
 				AND EXISTS (
 					SELECT 1
 					FROM tblIPLoadContainerStage
