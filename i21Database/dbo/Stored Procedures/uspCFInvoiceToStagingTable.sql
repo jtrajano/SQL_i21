@@ -76,6 +76,11 @@ BEGIN TRY
 			@ysnReprintInvoice = ISNULL([from],0)
 	FROM @temp_params WHERE [fieldname] = 'ysnReprintInvoice'
 
+	DECLARE @ysnIncludePrintedTransaction BIT
+	SELECT TOP 1
+			@ysnIncludePrintedTransaction = ISNULL([from],0)
+	FROM @temp_params WHERE [fieldname] = 'ysnIncludePrintedTransaction'
+
 	DECLARE @dtmBalanceForwardDate DATETIME
 	SELECT TOP 1
 		@dtmBalanceForwardDate = [from]
@@ -117,17 +122,20 @@ BEGIN TRY
 	-----------------------------------------------------------
 	DELETE FROM tblCFInvoiceReportTempTable	WHERE strUserId = @UserId 
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId 
-
+	
 	DELETE FROM tblCFInvoiceReportTotalValidation WHERE strUserId = @UserId 
-	EXEC "dbo"."uspCFInvoiceReportValidation" @UserId = @UserId 
-
-	DECLARE @intInvalidTransaction INT 
-	SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
-
-	IF (@intInvalidTransaction >= 1) 
+	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 ) 
 	BEGIN
-		SET @ErrorMessage = 'Total Validation Error'
-		GOTO EXITWITHERROR
+		EXEC "dbo"."uspCFInvoiceReportValidation" @UserId = @UserId 
+
+		DECLARE @intInvalidTransaction INT 
+		SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
+
+		IF (@intInvalidTransaction >= 1) 
+		BEGIN
+			SET @ErrorMessage = 'Total Validation Error'
+			GOTO EXITWITHERROR
+		END
 	END
 	
 	
@@ -1122,7 +1130,7 @@ BEGIN TRY
 	
 
 	DELETE FROM tblCFInvoiceReportBalanceValidation WHERE strUserId = @UserId 
-	IF (ISNULL(@ysnIncludeRemittancePage,0) = 1)
+	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 AND ISNULL(@ysnIncludeRemittancePage,0) = 1 ) 
 	BEGIN
 		EXEC "dbo"."uspCFInvoiceReportBalanceValidation" @UserId = @UserId 
 		DECLARE @intInvalidBalance INT 
