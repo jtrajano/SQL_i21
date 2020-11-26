@@ -1272,7 +1272,7 @@ BEGIN TRY
 
 
 		DECLARE @intAllRevertedRecordsCount INT = 0
-		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords + @intRevertItemPricingRecords + @intRevertItemSpecialPricingRecords = @intRevertItemDiscontinuedRecords
+		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords + @intRevertItemPricingRecords + @intRevertItemSpecialPricingRecords + @intRevertItemDiscontinuedRecords
 
 		DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
 
