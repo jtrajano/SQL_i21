@@ -29,7 +29,7 @@ BEGIN
 			INNER JOIN tblPRPaycheckTax PTax ON PCheck.intPaycheckId = PTax.intPaycheckId
 			INNER JOIN tblPRTypeTax TType ON PTax.intTypeTaxId = TType.intTypeTaxId
 			INNER JOIN tblPREmployee E ON E.intEntityId = PCheck.intEntityEmployeeId
-			WHERE ysnVoid = 0
+			WHERE ysnVoid = 0 AND ysnPosted = 1
 			) AS s 
 		PIVOT
 		(
@@ -65,7 +65,7 @@ BEGIN
 			INNER JOIN tblPRPaycheckEarning PTax ON PCheck.intPaycheckId = PTax.intPaycheckId
 			INNER JOIN tblPRTypeEarning TType ON PTax.intTypeEarningId = TType.intTypeEarningId
 			INNER JOIN tblPREmployee E ON E.intEntityId = PCheck.intEntityEmployeeId
-			WHERE ysnVoid = 0
+			WHERE ysnVoid = 0 AND ysnPosted = 1
 		) AS s
 		PIVOT
 		(	SUM(EarningTotal)
@@ -100,7 +100,7 @@ BEGIN
 		INNER JOIN tblPRPaycheckDeduction PTax ON PCheck.intPaycheckId = PTax.intPaycheckId
 		INNER JOIN tblPRTypeDeduction TType ON PTax.intTypeDeductionId = TType.intTypeDeductionId
 		INNER JOIN tblPREmployee E ON E.intEntityId = PCheck.intEntityEmployeeId
-		WHERE ysnVoid = 0
+		WHERE ysnVoid = 0 AND ysnPosted = 1
 		) AS s
 		PIVOT
 		(	SUM(DeductionTotal)
