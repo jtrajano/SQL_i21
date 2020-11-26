@@ -134,29 +134,60 @@ BEGIN
 						<th>&nbsp;From Company</th>
 						<th>&nbsp;Message</th>
 					</tr>'
-
-	IF EXISTS (
-			SELECT *
+	IF @intStatusId=1
+	BEGIN
+		IF EXISTS (
+				SELECT *
+				FROM tblCTContractStage S WITH (NOLOCK)
+				WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+					AND ysnMailSent IS NULL
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>
+				   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+			</tr>'
 			FROM tblCTContractStage S WITH (NOLOCK)
+			LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
+			WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+				AND S.ysnMailSent IS NULL
+
+			UPDATE tblCTContractStage
+			SET ysnMailSent = 1
 			WHERE intStatusId = @intStatusId --1--Processed/2--Failed
 				AND ysnMailSent IS NULL
-			)
+		END
+	END
+	ELSE
 	BEGIN
-		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
-			   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
-			   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
-			   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
-		</tr>'
-		FROM tblCTContractStage S WITH (NOLOCK)
-		LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
-		WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
-			AND S.ysnMailSent IS NULL
+			IF EXISTS (
+				SELECT *
+				FROM tblCTContractStage S WITH (NOLOCK)
+				WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+					AND ysnMailSent IS NULL
+					AND intDeadlockError=0
+				)
+		BEGIN
+			SELECT @strDetail = @strDetail + '<tr>
+				   <td>&nbsp;' + ISNULL(S.strContractNumber, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' 
+				   + '<td>&nbsp;' + ISNULL(S.strMessage, '') + '</td>
+			</tr>'
+			FROM tblCTContractStage S WITH (NOLOCK)
+			LEFT JOIN tblIPMultiCompany MC WITH (NOLOCK) ON MC.intCompanyId = S.intCompanyId
+			WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+				AND S.ysnMailSent IS NULL
+				AND S.intDeadlockError=0
 
-		UPDATE tblCTContractStage
-		SET ysnMailSent = 1
-		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
-			AND ysnMailSent IS NULL
+			UPDATE tblCTContractStage
+			SET ysnMailSent = 1
+			WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+				AND ysnMailSent IS NULL
+				AND intDeadlockError=0
+		END
 	END
 END
 

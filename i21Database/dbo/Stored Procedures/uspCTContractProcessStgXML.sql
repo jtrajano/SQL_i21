@@ -189,6 +189,11 @@ BEGIN TRY
 	SELECT intContractStageId
 	FROM tblCTContractStage
 	WHERE strFeedStatus IS NULL
+	UNION
+	SELECT intContractStageId
+	FROM tblCTContractStage
+	WHERE intStatusId = 2
+		AND intDeadlockError >0 
 
 	SELECT @intContractStageId = MIN(intContractStageId)
 	FROM @tblCTContractStage
@@ -4389,8 +4394,9 @@ BEGIN TRY
 
 				UPDATE tblCTContractStage
 				SET strFeedStatus = 'Failed'
-					,strMessage = @ErrMsg
+					,strMessage = Ltrim(ERROR_NUMBER())+' - '+@ErrMsg
 					,intStatusId = 2
+					,intDeadlockError = (Case When ERROR_NUMBER() = 1205 and intDeadlockError<=5 Then intDeadlockError+1 else 0 end)
 				WHERE intContractStageId = @intContractStageId
 			END CATCH
 		END
