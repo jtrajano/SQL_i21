@@ -8869,6 +8869,8 @@
     <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferStorage_DPtoOS_InventoryPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferStorage_OStoDP_InventoryPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
