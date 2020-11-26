@@ -8874,6 +8874,8 @@
     <Build Include="dbo\Stored Procedures\uspCTUpdateAppliedAndPrice.sql" />
     <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceReportBalanceValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
