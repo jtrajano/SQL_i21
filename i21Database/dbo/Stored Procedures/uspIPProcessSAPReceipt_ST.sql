@@ -204,14 +204,14 @@ BEGIN TRY
 							)
 				END
 
-				IF ISNULL(@strERPItemNumber, '') = ''
-				BEGIN
-					RAISERROR (
-							'Invalid ERP Item No. '
-							,16
-							,1
-							)
-				END
+				--IF ISNULL(@strERPItemNumber, '') = ''
+				--BEGIN
+				--	RAISERROR (
+				--			'Invalid ERP Item No. '
+				--			,16
+				--			,1
+				--			)
+				--END
 
 				SELECT @intItemId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
@@ -236,7 +236,7 @@ BEGIN TRY
 				FROM tblCTContractDetail WITH (NOLOCK)
 				WHERE intContractSeq = @intContractSeq
 					AND strERPPONumber = @strERPPONumber
-					AND strERPItemNumber = @strERPItemNumber
+					--AND strERPItemNumber = @strERPItemNumber
 
 				IF ISNULL(@intContractDetailId, 0) = 0
 				BEGIN
@@ -277,15 +277,6 @@ BEGIN TRY
 				SELECT @intStorageLocationId = t.intStorageLocationId
 				FROM tblICStorageLocation t WITH (NOLOCK)
 				WHERE t.strName = @strStorageLocationName
-
-				IF ISNULL(@intStorageLocationId, 0) = 0
-				BEGIN
-					RAISERROR (
-							'Invalid Storage Location. '
-							,16
-							,1
-							)
-				END
 
 				IF ISNULL(@intStorageLocationId, 0) = 0
 				BEGIN
