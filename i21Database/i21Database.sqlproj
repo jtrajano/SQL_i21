@@ -8868,6 +8868,8 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferStorage_DPtoOS_InventoryPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferStorage_OStoDP_InventoryPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

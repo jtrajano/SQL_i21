@@ -489,7 +489,7 @@ BEGIN TRY
 	LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = @intItemId
 
 
-	IF(ISNULL(@intTicketDeliverySheetId,0) > 0)
+	--IF(ISNULL(@intTicketDeliverySheetId,0) > 0)
 	BEGIN
 		IF EXISTS (SELECT TOP 1 1 FROM tblGRCustomerStorage 
 					WHERE intCustomerStorageId = @intHoldCustomerStorageId 
