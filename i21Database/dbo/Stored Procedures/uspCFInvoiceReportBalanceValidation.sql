@@ -18,6 +18,7 @@ BEGIN
 		,dtmDate DATETIME NULL
 		,dblCalcRunningBalance NUMERIC(18,6) NULL
 		,dblTotalAR NUMERIC(18,6) NULL
+		,strInvoiceReportNumber  NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 	)
 
 	--dynamic sql due to ( ROWS are not supported in SSDT project )
@@ -34,6 +35,7 @@ BEGIN
 											  ELSE ISNULL (dblInvoiceTotal, 0) - dblPayment END)
 											  OVER (PARTITION BY intEntityCustomerId ORDER BY dtmDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) 
 	,dblTotalAR
+	,strCFTempInvoiceReportNumber
 	FROM (SELECT *
 	FROM tblARCustomerStatementStagingTable 
 	WHERE strStatementFormat = ''Balance Forward'' AND intEntityUserId = ' + CAST(@intUserId as nvarchar(MAX)) + ') 
@@ -48,21 +50,24 @@ BEGIN
 		,dtmDate
 		,dblCalcRunningBalance
 		,dblTotalAR
+		,strInvoiceReportNumber
 	)
 	EXEC (@sqlString)
 
 	
-	INSERT INTO tblCFInvoiceReportBalanceValidation
+	INSERT INTO tblCFInvoiceReportTotalValidation
 	(
 		 intEntityCustomerId
 		,strCustomerNumber	
 		,strCustomerName	
-		,dblRunningBalance
-		,dblAREndingBalance
+		,dblCFTotal
+		,dblARTotal
 		,dblDiff
-		,dtmDate
+		,dtmTransactionDate
 		,strUserId
 		,strStatementType
+		,strErrorType
+		,strTransactionId
 	)
 	SELECT 
 		 mainQuery.intEntityCustomerId
@@ -74,6 +79,8 @@ BEGIN
 		,mainQuery.dtmDate
 		,@UserId
 		,'invoice'	
+		,'Running Balance <> AR'
+		,strInvoiceReportNumber
 	FROM (
 			SELECT intEntityCustomerId , MAX(dtmDate) as dtmDate 
 			FROM @tblMainQuery
@@ -83,12 +90,6 @@ BEGIN
 	ON mainQuery.intEntityCustomerId = innerQuery.intEntityCustomerId
 	AND mainQuery.dtmDate = innerQuery.dtmDate
 	AND dblCalcRunningBalance != dblTotalAR
-
-
-	
-
-
-
 
 
 END

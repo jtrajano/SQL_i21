@@ -19,9 +19,14 @@ BEGIN
 		,dtmTransactionDate				
 		,dtmInvoiceDate					
 		,dtmPostedDate					
-		,strUserId						
+		,strUserId		
+		,intEntityCustomerId
+		,strCustomerNumber
+		,strCustomerName
+		,strErrorType				
 	)
-	select 
+	
+select 
 	     T.intTransactionId			    
 		,T.intInvoiceId					
 		,T.strTransactionId				
@@ -33,9 +38,14 @@ BEGIN
 		,T.dtmTransactionDate				
 		,T.dtmInvoiceDate					
 		,T.dtmPostedDate					
-		,@UserId				
+		,@UserId		
+		,vyuCFAccountCustomer.intCustomerId
+		,vyuCFAccountCustomer.strCustomerNumber
+		,vyuCFAccountCustomer.strName
+		,'Tran <> AR'
 	from tblCFTransaction T
 	inner join tblARInvoice I on I.intTransactionId=T.intTransactionId
+	inner join vyuCFAccountCustomer on T.intCustomerId = vyuCFAccountCustomer.intCustomerId
 	where 
 		case when T.ysnExpensed=1 
 				then 0 
@@ -50,4 +60,3 @@ BEGIN
 	order by abs(T.dblCalculatedTotalPrice - case when I.strTransactionType='Credit Memo' then I.dblInvoiceTotal  * -1 else I.dblInvoiceTotal end)
 
 END
-
