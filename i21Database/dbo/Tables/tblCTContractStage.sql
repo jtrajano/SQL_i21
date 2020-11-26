@@ -21,9 +21,10 @@
 	intCompanyLocationId	INT,
 	strTransactionType		NVARCHAR(100) COLLATE Latin1_General_CI_AS, 
     intToBookId INT NULL,
-	strAmendmentApprovalXML NVARCHAR(MAX)COLLATE Latin1_General_CI_AS
-	,intTransactionId int
-	,intCompanyId int, 
+	strAmendmentApprovalXML NVARCHAR(MAX)COLLATE Latin1_General_CI_AS,
+	intTransactionId int,
+	intCompanyId int, 
     ysnMailSent BIT NULL,
-	intStatusId int
+	intStatusId int,
+	intDeadlockError int CONSTRAINT DF_tblCTContractStage_intDeadlockError DEFAULT 0
 )
