@@ -118,6 +118,9 @@ SELECT --DISTINCT
 									ELSE 
 										ISNULL(RHD.strNewData, '')
 								END
+								
+							 WHEN revertHolder.intRevertType = 3
+								THEN 'Discontinued'
 
 							ELSE  
 								ISNULL(RHD.strNewData, '')
@@ -125,6 +128,8 @@ SELECT --DISTINCT
 	, strPreviewOldData	= CASE
 								WHEN RHD.strTableColumnDataType = 'DATETIME'
 									THEN CONVERT(VARCHAR(10), CAST(RHD.strOldData AS DATE), 101)
+								WHEN RHD.strTableColumnDataType = 'VARCHAR'
+									THEN  CAST(RHD.strOldData AS VARCHAR(20))
 								WHEN RHD.strOldData = 'true' THEN 'Yes'
 								WHEN RHD.strOldData = 'false' THEN 'No'
 								ELSE

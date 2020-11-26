@@ -37,6 +37,7 @@ BEGIN TRY
 		DECLARE @intRevertItemLocationRecords INT = 0
 		DECLARE @intRevertItemPricingRecords INT = 0
 		DECLARE @intRevertItemSpecialPricingRecords INT = 0
+		DECLARE @intRevertItemDiscontinuedRecords INT = 0
 
 		
 		
@@ -1158,13 +1159,95 @@ BEGIN TRY
 				-- ==================================================================================================================================================
 
 			END
+
+		ELSE IF(@intRevertType = 3)
+			BEGIN
+			-- ITEM STATUS
+			-- ==================================================================================================================================================
+			-- [START] - Revert ITEM STATUS
+			-- ==================================================================================================================================================
+			IF EXISTS(
+							SELECT TOP 1 1 FROM vyuSTSearchRevertHolderDetail detail
+							WHERE detail.strTableName = N'tblICItem' 
+								AND detail.intRevertHolderId = @intRevertHolderId
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND detail.strPreviewOldData != detail.strPreviewNewData
+						 )
+					BEGIN
+					
+						IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Items') IS NULL 
+							BEGIN
+								CREATE TABLE #tmpUpdateItemForCStore_Items (
+									intItemId INT 
+								)
+							END
+
+
+						-- Insert
+						INSERT INTO #tmpUpdateItemForCStore_Items
+						(
+							intItemId
+						)
+						SELECT DISTINCT
+							intItemId		= src.intItemId
+						FROM (
+							SELECT detail.intItemId
+							FROM vyuSTSearchRevertHolderDetail detail
+							WHERE detail.strTableName = N'tblICItem'
+								AND detail.intRevertHolderId = @intRevertHolderId
+								AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+								AND detail.strPreviewOldData != detail.strPreviewNewData
+						) src
+
+
+
+						-- Count records
+						SET @intRevertItemDiscontinuedRecords = (
+																SELECT COUNT(detail.intItemId)
+																FROM vyuSTSearchRevertHolderDetail detail
+																WHERE detail.strTableName = N'tblICItem'
+																	AND detail.intRevertHolderId = @intRevertHolderId
+																	AND detail.intRevertHolderDetailId IN (SELECT [intID] FROM [dbo].[fnGetRowsFromDelimitedValues](@strRevertHolderDetailIdList))
+																	AND detail.strPreviewOldData != detail.strPreviewNewData
+																	)
+
+						IF (EXISTS (SELECT * FROM #tmpUpdateItemForCStore_Items))
+						BEGIN
+							-- This is where IC SP Executed for updating 
+							EXEC [uspICUpdateItemForCStore]
+									@strDescription					= NULL
+									,@dblRetailPriceFrom			= NULL
+									,@dblRetailPriceTo 				= NULL
+									,@intItemId 					= NULL
+									,@intItemUOMId 					= NULL
+									--update params				
+									,@intCategoryId 				= NULL
+									,@strCountCode 					= NULL
+									,@strItemDescription 			= NULL
+									,@strItemNo 					= NULL
+									,@strShortName 					= NULL
+									,@strUpcCode					= NULL
+									,@strLongUpcCode 				= NULL
+									,@strStatus 					= 'Active'
+									,@intEntityUserSecurityId		= @intEntityId
+						END
+					
+
+
+					END	
+			END
+			
+			-- ==================================================================================================================================================
+			-- [END] - Revert ITEM STATUS
+			-- ==================================================================================================================================================
+			
 		
-		
-
-
-
 		-- Clean up (ITEM, ITEM UOM, ITEM LOCATION, VendorXref)
 		BEGIN
+		
+			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Items') IS NOT NULL  
+				DROP TABLE #tmpUpdateItemForCStore_Items 
+
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_itemAuditLog') IS NOT NULL  
 				DROP TABLE #tmpUpdateItemForCStore_itemAuditLog 
 
@@ -1189,7 +1272,7 @@ BEGIN TRY
 
 
 		DECLARE @intAllRevertedRecordsCount INT = 0
-		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords + @intRevertItemPricingRecords + @intRevertItemSpecialPricingRecords
+		SET @intAllRevertedRecordsCount = @intRevertItemRecords + @intRevertItemLocationRecords + @intRevertItemPricingRecords + @intRevertItemSpecialPricingRecords = @intRevertItemDiscontinuedRecords
 
 		DECLARE @strAllRevertedRecordsCount NVARCHAR(500) = CAST(@intAllRevertedRecordsCount AS NVARCHAR(500))
 
