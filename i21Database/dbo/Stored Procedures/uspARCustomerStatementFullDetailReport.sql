@@ -471,7 +471,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) = 0) AND ISNULL(strTransactionType, '') NOT IN ('Beginning Balance', 'Customer Budget')
+        DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Beginning Balance', 'Customer Budget')
 		DELETE FROM #AGINGSUMMARY WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
     END
 
