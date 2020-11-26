@@ -7781,9 +7781,9 @@
     <Build Include="dbo\Tables\tblAPBillForPosting.sql" />
     <Build Include="dbo\Functions\fnCTConvertDateTime.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
-    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />  
+    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
-    <Build Include="dbo\Views\vyuGRTransferChargesClearing_DPtoDP.sql" />   
+    <Build Include="dbo\Views\vyuGRTransferChargesClearing_DPtoDP.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
@@ -7792,6 +7792,8 @@
     <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferStorage_DPtoOS_InventoryPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferStorage_OStoDP_InventoryPost.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -7799,7 +7801,7 @@
   <ItemGroup>
     <Build Include="dbo\Views\vyuARCustomer.sql" />
   </ItemGroup>
-  <ItemGroup>   
+  <ItemGroup>
     <Build Include="dbo\Tables\tblSCScaleSetupOriginLink.sql" />
     <None Include="Scripts\Post-Deployment\HD\DefaultData\1_StatusData.sql" />
     <None Include="Scripts\Post-Deployment\HD\HDEntryDataFix.sql" />
