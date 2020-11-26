@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
+﻿
+CREATE PROCEDURE [dbo].[uspCFInvoiceToStagingTable](
 	 @xmlParam					NVARCHAR(MAX)  
 	,@Guid						NVARCHAR(MAX)  
 	,@UserId					NVARCHAR(MAX)  
@@ -7,6 +8,7 @@
 AS
 BEGIN
 
+	DECLARE @ErrorMessage NVARCHAR(MAX);  
 	DECLARE @CatchErrorMessage NVARCHAR(MAX);  
 	DECLARE @CatchErrorSeverity INT;  
 	DECLARE @CatchErrorState INT;  
@@ -63,7 +65,6 @@ BEGIN TRY
 		, [begingroup] NVARCHAR(MAX)
 		, [endgroup] NVARCHAR(MAX)
 		, [datatype] NVARCHAR(MAX))
-
 	
 	DECLARE @ysnIncludeRemittancePage BIT
 	SELECT TOP 1
@@ -125,7 +126,10 @@ BEGIN TRY
 	SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
 
 	IF (@intInvalidTransaction >= 1) 
-	GOTO EXITWITHERROR
+	BEGIN
+		SET @ErrorMessage = 'Total Validation Error'
+		GOTO EXITWITHERROR
+	END
 	
 	
 	DELETE FROM tblCFInvoiceSummaryTempTable WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
@@ -679,13 +683,13 @@ BEGIN TRY
 
 	
 	
-	SELECT DISTINCT 
-	 intAccountId
-	,intCustomerId
-	,strCustomerName
-	FROM tblCFInvoiceStagingTable
-	WHERE strUserId = @UserId 
-	AND LOWER(strStatementType) =  LOWER(@StatementType)
+	--SELECT DISTINCT 
+	-- intAccountId
+	--,intCustomerId
+	--,strCustomerName
+	--FROM tblCFInvoiceStagingTable
+	--WHERE strUserId = @UserId 
+	--AND LOWER(strStatementType) =  LOWER(@StatementType)
 
 	--INSERT FEE RECORDS--
 	IF LOWER(@StatementType)  = 'invoice'
@@ -1162,12 +1166,30 @@ BEGIN TRY
 		UPDATE tblARCustomerStatementStagingTable SET strCFEmail = '' WHERE strCFEmail IS NULL AND intEntityUserId = @intEntityUserId AND strStatementFormat = @strStatementFormat
 	END
 
+	
+
+	DELETE FROM tblCFInvoiceReportBalanceValidation WHERE strUserId = @UserId 
+	IF (ISNULL(@ysnIncludeRemittancePage,0) = 1)
+	BEGIN
+		EXEC "dbo"."uspCFInvoiceReportBalanceValidation" @UserId = @UserId 
+		DECLARE @intInvalidBalance INT 
+		SELECT @intInvalidBalance = COUNT(1) FROM tblCFInvoiceReportBalanceValidation	WHERE strUserId = @UserId 
+
+		IF (@intInvalidBalance >= 1) 
+		BEGIN
+			SET @ErrorMessage = 'Balance Validation Error'
+			GOTO EXITWITHERROR
+		END
+
+	END
+	
+
 	--SELECT * FROM vyuCFAccountTerm
 	--select * from vyuCFCardAccount
 
 
 	--IF (@@TRANCOUNT > 0) COMMIT TRANSACTION 
-
+	RETURN
 END TRY 
 BEGIN CATCH
 	
@@ -1208,6 +1230,6 @@ END CATCH
 
 
 	EXITWITHERROR:
-	RAISERROR ('Total Validation Error',16,1)
+	RAISERROR (@ErrorMessage,16,1)
 
 END
