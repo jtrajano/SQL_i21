@@ -8856,6 +8856,8 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePricingAPARLink.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateAppliedAndPrice.sql" />
+    <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
