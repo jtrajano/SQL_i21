@@ -125,7 +125,7 @@ BEGIN TRY
 			strItemSpecification	= CD.strItemSpecification,
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 
-			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure,
+			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(CD.strPackingDescription, ''),
 			strStaussItemDescription = IBM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
