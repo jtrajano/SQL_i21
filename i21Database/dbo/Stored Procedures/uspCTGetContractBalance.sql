@@ -464,11 +464,11 @@ BEGIN TRY
 	  ,InvTran.dtmDate	  
 	  ,@dtmEndDate AS dtmEndDate
 	  ,dblQuantity = CASE 
-	  					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN (MAX(CH.dblQuantityPerLoad)) * -1
+	  					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
 						ELSE SUM(InvTran.dblQty * - 1)
 					 END
 	  ,0
-	  ,COUNT(DISTINCT Invoice.intInvoiceId) * -1
+	  ,COUNT(DISTINCT Invoice.intInvoiceId)
 	  ,Invoice.intInvoiceId
 	  ,'Invoice'
 	   FROM tblICInventoryTransaction InvTran
@@ -480,7 +480,7 @@ BEGIN TRY
 	   JOIN tblCTContractDetail CD ON CD.intContractDetailId = InvoiceDetail.intContractDetailId
 	   LEFT JOIN tblSOSalesOrderDetail SOD ON SOD.intSalesOrderDetailId = InvoiceDetail.intSalesOrderDetailId
 	   AND CD.intContractHeaderId = CH.intContractHeaderId
-	   WHERE InvTran.strTransactionForm in ('Invoice','Credit Memo')
+	   WHERE InvTran.strTransactionForm = 'Invoice'
 	   	AND InvTran.ysnIsUnposted = 0
 	   	AND dbo.fnRemoveTimeOnDate(InvTran.dtmDate) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(InvTran.dtmDate) END
 	   	AND intContractTypeId = 2
