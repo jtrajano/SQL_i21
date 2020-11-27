@@ -3123,7 +3123,7 @@ BEGIN TRY
 						IF @ysnLoadBased = 1 AND @dblActual > 0
 						BEGIN
 							-- Basis Deliveries
-							SET @_actual = (CASE WHEN @dblActual > ISNULL(@dblBasis,0) THEN ISNULL(@dblBasis,0) ELSE @dblActual END)
+							SET @_actual = @dblActual
 						END
 					END
 					IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intPricingTypeId = 5)--ISNULL(@dblDP,0) > 0
