@@ -8871,6 +8871,7 @@
     <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTransferStorage_DPtoOS_InventoryPost.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTransferStorage_OStoDP_InventoryPost.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateAppliedAndPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
