@@ -374,6 +374,25 @@ CREATE TABLE #tmpDailyStockPosition
 			intLotId,
 			intInTransitSourceLocationId
 
+	-----===== SOURCE 23 - Inventory Count
+	INSERT INTO #tmpDailyStockPosition
+	SELECT	23,
+			t.intItemId,
+			ItemLocation.intLocationId,
+			t.intTransactionTypeId,
+			t.intLotId,
+			t.intInTransitSourceLocationId,
+			dblQty = SUM(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty))
+	FROM @Transactions t 
+		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemLocationId = t.intItemLocationId
+	WHERE t.intTransactionTypeId = @InventoryCount
+		AND intInTransitSourceLocationId IS NULL
+	GROUP BY t.intItemId,
+			ItemLocation.intLocationId,
+			t.intTransactionTypeId,
+			t.intLotId,
+			t.intInTransitSourceLocationId
+
 	--DELETE FROM tblICStagingDailyStockPosition WHERE (guidSessionId = @guidSessionId OR DATEDIFF(SECOND, dtmDateCreated, GETDATE()) > 10)
 	DELETE FROM tblICStagingDailyStockPosition WHERE guidSessionId = @guidSessionId 
 	-----===== READ DAILY STOCK POSITION
@@ -401,6 +420,7 @@ CREATE TABLE #tmpDailyStockPosition
 				strItemUOM				= sUOM.strUnitMeasure,
 				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
+				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0),
 				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
 				dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
 				dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
@@ -411,7 +431,8 @@ CREATE TABLE #tmpDailyStockPosition
 				dblProduced				= ISNULL(tmpDSP.dblProduced, 0),
 				dblClosingQty			= 
 											tmpDSP.dblOpeningQty 
-											+ tmpDSP.dblReceivedQty 
+											+ tmpDSP.dblReceivedQty
+											+ tmpDSP.dblInventoryCountQty
 											- tmpDSP.dblInvoicedQty 
 											+ tmpDSP.dblAdjustments 
 											+ tmpDSP.dblTransfersReceived 
@@ -426,7 +447,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dtmDateCreated			= GETDATE(),
 				intModifiedByUserId		= NULL,
 				intCreatedByUserId		= NULL,
-				ysnBuilding				= 0 
+				ysnBuilding				= 0
 		FROM 
 			tblICItem Item
 				INNER JOIN (tblICItemUOM StockUOM
@@ -444,7 +465,8 @@ CREATE TABLE #tmpDailyStockPosition
 							dblInTransitInbound		= SUM(CASE WHEN intSourceType = 7 THEN dblQty ELSE 0 END),
 							dblInTransitOutbound	= SUM(CASE WHEN intSourceType = 8 THEN dblQty ELSE 0 END),
 							dblConsumedQty			= SUM(CASE WHEN intSourceType = 9 THEN dblQty ELSE 0 END),
-							dblProduced				= SUM(CASE WHEN intSourceType = 10 THEN dblQty ELSE 0 END)
+							dblProduced				= SUM(CASE WHEN intSourceType = 10 THEN dblQty ELSE 0 END),
+							dblInventoryCountQty	= SUM(CASE WHEN intSourceType = 23 THEN dblQty ELSE 0 END)
 				FROM #tmpDailyStockPosition 
 				GROUP BY intItemId, intLocationId
 			) tmpDSP
@@ -479,6 +501,7 @@ CREATE TABLE #tmpDailyStockPosition
 				strItemUOM				= sUOM.strUnitMeasure,
 				dblOpeningQty			= ISNULL(tmpDSP.dblOpeningQty, 0),
 				dblReceivedQty			= ISNULL(tmpDSP.dblReceivedQty, 0),
+				dblInventoryCountQty	= ISNULL(tmpDSP.dblInventoryCountQty, 0),
 				dblInvoicedQty			= ISNULL(tmpDSP.dblInvoicedQty, 0),
 				dblAdjustments			= ISNULL(tmpDSP.dblAdjustments, 0),
 				dblTransfersReceived	= ISNULL(tmpDSP.dblTransfersReceived, 0),
@@ -490,6 +513,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dblClosingQty			= 
 											tmpDSP.dblOpeningQty 
 											+ tmpDSP.dblReceivedQty 
+											+ tmpDSP.dblInventoryCountQty
 											- tmpDSP.dblInvoicedQty 
 											+ tmpDSP.dblAdjustments 
 											+ tmpDSP.dblTransfersReceived 
@@ -504,7 +528,7 @@ CREATE TABLE #tmpDailyStockPosition
 				dtmDateCreated			= GETDATE(),
 				intModifiedByUserId		= NULL,
 				intCreatedByUserId		= NULL,
-				ysnBuilding				= 0 
+				ysnBuilding				= 0
 		FROM 
 			tblICItem Item
 				INNER JOIN (tblICItemUOM StockUOM
@@ -515,6 +539,7 @@ CREATE TABLE #tmpDailyStockPosition
 							intLocationId,
 							dblOpeningQty			= SUM(CASE WHEN intSourceType = 1 THEN dblQty ELSE 0 END),
 							dblReceivedQty			= SUM(CASE WHEN intSourceType = 2 THEN dblQty ELSE 0 END),
+							dblInventoryCountQty	= SUM(CASE WHEN intSourceType = 23 THEN dblQty ELSE 0 END),
 							dblInvoicedQty			= SUM(CASE WHEN intSourceType = 3 THEN dblQty ELSE 0 END),
 							dblAdjustments			= SUM(CASE WHEN intSourceType = 4 THEN dblQty ELSE 0 END),
 							dblTransfersReceived	= SUM(CASE WHEN intSourceType = 5 THEN dblQty ELSE 0 END),
