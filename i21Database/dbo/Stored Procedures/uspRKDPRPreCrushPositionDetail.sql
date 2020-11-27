@@ -1574,6 +1574,7 @@ FROM (
 	WHERE th.intCommodityId IN (SELECT DISTINCT intCommodity FROM @Commodity c)
 		AND l.intCompanyLocationId = ISNULL(@intLocationId, l.intCompanyLocationId)
 		AND intCompanyLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation WHERE @ysnExchangeTraded = 1)
+		AND oc.strInstrumentType = 'Futures'
 		AND ISNULL(oc.ysnPreCrush, 0) = 0) t
 
 INSERT INTO @List (strCommodityCode
