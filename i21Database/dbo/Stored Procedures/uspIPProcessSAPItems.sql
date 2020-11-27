@@ -456,11 +456,13 @@ BEGIN TRY
 						,intLocationId
 						,intCostingMethod
 						,intAllowNegativeInventory
+						,intAllowZeroCostTypeId
 						)
 					SELECT @intItemId
 						,cl.intCompanyLocationId
 						,1
 						,3
+						,2
 					FROM tblSMCompanyLocation cl
 
 					INSERT INTO tblICItemSubLocation (
