@@ -440,7 +440,7 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
-    <Build Include="dbo\Stored Procedures\uspCMGetRPAccountIdByLocation.sql"/>
+    <Build Include="dbo\Stored Procedures\uspCMGetRPAccountIdByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
@@ -8855,6 +8855,7 @@
     <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePricingAPARLink.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTUpdateAppliedAndPrice.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

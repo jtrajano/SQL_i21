@@ -585,10 +585,11 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	declare @intPricingStatus int = 0;
 	declare @dblPricedQuantity numeric(18,6) = 0.00;
 	declare @ysnMultiPrice bit = 0;
+	declare @dblBalance numeric(18,6);
 
 	begin try
 
-		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity from inserted i;
+		select @intActiveContractDetailId = i.intContractDetailId, @intPricingTypeId = i.intPricingTypeId, @dblSequenceQuantity = i.dblQuantity, @dblBalance = (case when isnull(ch.ysnLoad,0) = 0 then i.dblBalance else i.dblBalanceLoad end) from inserted i, tblCTContractHeader ch where ch.intContractHeaderId = i.intContractHeaderId;  
 
 		if (@intPricingTypeId = 1)
 		begin
@@ -633,48 +634,9 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
 		end
 
-		update
-			pfd
-		set
-			pfd.dblQuantityAppliedAndPriced = rd.dblInvoiceQuantityAppliedAndPriced
-			,pfd.dblLoadAppliedAndPriced = rd.dblInvoiceLoadAppliedAndPriced
-		from
-			tblCTPriceFixationDetail pfd 
-			join (
-				select
-					pfd.intPriceFixationDetailId
-					,pfd.intNumber
-					,pfd.dblQuantity
-					,pfd.dblQuantityAppliedAndPriced
-					,dblInvoiceQuantityAppliedAndPriced = (case when ch.intContractTypeId = 2 then sum(iq.dblQtyShipped) else sum(vq.dblQtyReceived) end)
-					,pfd.dblLoadPriced
-					,pfd.dblLoadAppliedAndPriced
-					,dblInvoiceLoadAppliedAndPriced = (case when ch.intContractTypeId = 2 then convert(numeric(18,6),count(iq.intInvoiceDetailId)) else convert(numeric(18,6),count(vq.intBillDetailId)) end)
-				from
-					tblCTPriceFixation pf
-					join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
-					join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
-					join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
-					left join (
-						select di.intInvoiceDetailId, di.dblQtyShipped from tblARInvoiceDetail di where di.intInventoryShipmentChargeId is null and isnull(di.ysnReturned,0) = 0
-					) iq on iq.intInvoiceDetailId = ar.intInvoiceDetailId
-					left join (
-						select bd.intBillDetailId, bd.dblQtyReceived from tblAPBillDetail bd where bd.intInventoryReceiptChargeId is null
-					) vq on vq.intBillDetailId = ar.intBillDetailId
-				where
-					pf.intContractDetailId = @intActiveContractDetailId
-				group by
-					pfd.intPriceFixationDetailId
-					,pfd.intNumber
-					,pfd.dblQuantity
-					,pfd.dblQuantityAppliedAndPriced
-					,pfd.dblLoadPriced
-					,pfd.dblLoadAppliedAndPriced
-					,ch.intContractTypeId
-			) rd  on rd.intPriceFixationDetailId = pfd.intPriceFixationDetailId
-		where
-			isnull(pfd.dblQuantityAppliedAndPriced,0) <> isnull(rd.dblInvoiceQuantityAppliedAndPriced,0)
-			or isnull(pfd.dblLoadAppliedAndPriced,0) <> isnull(rd.dblInvoiceLoadAppliedAndPriced,0)
+		exec uspCTUpdateAppliedAndPrice
+			@intContractDetailId = @intActiveContractDetailId
+			,@dblBalance = @dblBalance
 
 	end try
 	begin catch
