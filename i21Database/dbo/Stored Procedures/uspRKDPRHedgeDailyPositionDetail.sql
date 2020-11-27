@@ -787,6 +787,7 @@ BEGIN
 					JOIN tblRKFutureMarket m ON m.strFutMarketName = t.strFutureMarket
 					JOIN tblSMCurrency cu ON cu.intCurrencyID = m.intCurrencyId
 					LEFT JOIN tblRKBrokerageAccount ba ON ba.strAccountNumber = t.strBrokerAccount
+					INNER JOIN tblEMEntity e ON e.strName = t.strBroker AND t.strInstrumentType= 'Futures'
 					JOIN tblICCommodityUnitMeasure cuc1 ON cuc1.intCommodityId = @intCommodityId AND m.intUnitMeasureId = cuc1.intUnitMeasureId
 					INNER JOIN tblRKFuturesMonth fm ON fm.strFutureMonth = t.strFutureMonth AND fm.intFutureMarketId = m.intFutureMarketId
 					WHERE th.intCommodityId = @intCommodityId
