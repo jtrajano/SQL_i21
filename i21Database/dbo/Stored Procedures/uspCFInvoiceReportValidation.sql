@@ -1,5 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportValidation](
-	 @UserId NVARCHAR(MAX)
+	 @UserId NVARCHAR(MAX),
+	 @StatementType NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -24,6 +25,7 @@ BEGIN
 		,strCustomerNumber
 		,strCustomerName
 		,strErrorType				
+		,strStatementType
 	)
 	
 select 
@@ -43,6 +45,7 @@ select
 		,vyuCFAccountCustomer.strCustomerNumber
 		,vyuCFAccountCustomer.strName
 		,'Tran <> AR'
+		,@StatementType
 	from tblCFTransaction T
 	inner join tblARInvoice I on I.intTransactionId=T.intTransactionId
 	inner join vyuCFAccountCustomer on T.intCustomerId = vyuCFAccountCustomer.intCustomerId
@@ -56,7 +59,7 @@ select
 				else I.dblInvoiceTotal 
 		end
 	and isnull(T.ysnInvoiced,0)=0 
-	AND T.intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable where LOWER(strUserId) = LOWER(@UserId) )
+	AND T.intTransactionId IN (SELECT intTransactionId FROM tblCFInvoiceReportTempTable where LOWER(strUserId) = LOWER(@UserId) AND LOWER(strStatementType) = LOWER(@StatementType) )
 	order by abs(T.dblCalculatedTotalPrice - case when I.strTransactionType='Credit Memo' then I.dblInvoiceTotal  * -1 else I.dblInvoiceTotal end)
 
 END
