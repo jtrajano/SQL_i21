@@ -1,5 +1,8 @@
-﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportBalanceValidation](
+﻿
+
+CREATE PROCEDURE [dbo].[uspCFInvoiceReportBalanceValidation](
 	 @UserId NVARCHAR(MAX)
+	 ,@StatementType NVARCHAR(MAX)
 )
 AS
 BEGIN
@@ -78,7 +81,7 @@ BEGIN
 		,ABS(ISNULL(dblCalcRunningBalance,0) - ISNULL(dblTotalAR,0))
 		,mainQuery.dtmDate
 		,@UserId
-		,'invoice'	
+		,@StatementType	
 		,'Running Balance <> AR'
 		,strInvoiceReportNumber
 	FROM (

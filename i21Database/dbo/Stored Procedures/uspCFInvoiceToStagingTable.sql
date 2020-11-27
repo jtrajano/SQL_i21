@@ -124,13 +124,13 @@ BEGIN TRY
 	EXEC "dbo"."uspCFInvoiceReport"			@xmlParam	=	@xmlParam , @UserId = @UserId, @StatementType = @StatementType
 
 
-	DELETE FROM tblCFInvoiceReportTotalValidation WHERE strUserId = @UserId 
+	DELETE FROM tblCFInvoiceReportTotalValidation WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 ) 
 	BEGIN
-		EXEC "dbo"."uspCFInvoiceReportValidation" @UserId = @UserId 
+		EXEC "dbo"."uspCFInvoiceReportValidation" @UserId = @UserId , @StatementType = @StatementType
 
 		DECLARE @intInvalidTransaction INT 
-		SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
+		SELECT @intInvalidTransaction = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 
 		IF (@intInvalidTransaction >= 1) 
 		BEGIN
@@ -1179,9 +1179,9 @@ BEGIN TRY
 	
 	IF (ISNULL(@ysnReprintInvoice,0) = 0 AND ISNULL(@ysnIncludePrintedTransaction,0) = 0 AND ISNULL(@ysnIncludeRemittancePage,0) = 1 ) 
 	BEGIN
-		EXEC "dbo"."uspCFInvoiceReportBalanceValidation" @UserId = @UserId 
+		EXEC "dbo"."uspCFInvoiceReportBalanceValidation" @UserId = @UserId ,  @StatementType = @StatementType 
 		DECLARE @intInvalidBalance INT 
-		SELECT @intInvalidBalance = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId 
+		SELECT @intInvalidBalance = COUNT(1) FROM tblCFInvoiceReportTotalValidation	WHERE strUserId = @UserId AND LOWER(strStatementType) =  LOWER(@StatementType)
 
 		IF (@intInvalidBalance >= 1) 
 		BEGIN
