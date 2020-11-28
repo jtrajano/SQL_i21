@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCTContractProcessStgXML]
 	--@intToCompanyId INT
-	@ysnProcessERPInfo BIT
+	@ysnProcessERPInfo BIT=0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
