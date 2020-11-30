@@ -58,6 +58,8 @@ BEGIN TRY
 		,@dtmCurrentUTCDate DATETIME
 		,@dtmCurrentDate DATETIME
 		,@intPreviousSampleStatusId INT
+		,@intControlPointId INT
+		,@ysnPartyMandatory BIT
 	DECLARE @intNewStageSampleId INT
 	DECLARE @intValidDate INT
 	DECLARE @strDescription AS NVARCHAR(MAX)
@@ -153,6 +155,8 @@ BEGIN TRY
 				,@dtmCurrentUTCDate = NULL
 				,@dtmCurrentDate = NULL
 				,@intPreviousSampleStatusId = NULL
+				,@intControlPointId = NULL
+				,@ysnPartyMandatory = NULL
 
 			SELECT @strDescription = NULL
 
@@ -177,7 +181,7 @@ BEGIN TRY
 				,@strNewContractNumber = NULL
 
 			SELECT @strERPPONumber = ISNULL(strERPPONumber, '')
-				,@strERPItemNumber = dbo.fnRemoveTrailingZeroes(ISNULL(strERPItemNumber, ''))
+				,@strERPItemNumber = strERPItemNumber
 				,@strSampleNumber = strSampleNumber
 				,@strSampleTypeName = strSampleTypeName
 				,@strItemNo = strItemNo
@@ -200,6 +204,11 @@ BEGIN TRY
 			FROM tblIPSampleStage WITH (NOLOCK)
 			WHERE intStageSampleId = @intMinRowNo
 
+			IF @strERPItemNumber = ''
+				SELECT @strERPItemNumber = NULL
+			ELSE
+				SELECT @strERPItemNumber = dbo.fnRemoveTrailingZeroes(@strERPItemNumber)
+
 			SELECT @dtmCurrentUTCDate = DATEADD(mi, DATEDIFF(mi, GETDATE(), GETUTCDATE()), GETDATE())
 				,@dtmCurrentDate = GETDATE()
 
@@ -217,6 +226,8 @@ BEGIN TRY
 			END
 
 			SELECT @intSampleTypeId = t.intSampleTypeId
+				,@intControlPointId = t.intControlPointId
+				,@ysnPartyMandatory = t.ysnPartyMandatory
 			FROM tblQMSampleType t WITH (NOLOCK)
 			WHERE t.strSampleTypeName = @strSampleTypeName
 
@@ -272,7 +283,12 @@ BEGIN TRY
 				END
 			END
 
-			IF LOWER(@strSampleTypeName) = LOWER('Offer Sample')
+			-- Offer / Approval(Pre-shipment) sample type
+			IF ISNULL(@strERPPONumber, '') = ''
+				AND (
+					@intControlPointId = 1
+					OR @intControlPointId = 2
+					)
 			BEGIN
 				SELECT @intContractDetailId = NULL
 					,@intLocationId = NULL
@@ -286,6 +302,9 @@ BEGIN TRY
 				FROM tblICItem IM WITH (NOLOCK)
 				LEFT JOIN tblICCommodityAttribute CA WITH (NOLOCK) ON CA.intCommodityAttributeId = IM.intOriginId
 				WHERE IM.intItemId = @intItemId
+
+				SELECT TOP 1 @intLocationId = t.intCompanyLocationId
+				FROM tblSMCompanyLocation t WITH (NOLOCK)
 			END
 			ELSE
 			BEGIN
@@ -398,6 +417,7 @@ BEGIN TRY
 			END
 
 			IF ISNULL(@intEntityId, 0) = 0
+				AND @ysnPartyMandatory = 1
 			BEGIN
 				RAISERROR (
 						'Invalid Vendor. '
@@ -443,7 +463,6 @@ BEGIN TRY
 				WHERE ET.strType = 'User'
 					AND t.strName = @strCreatedBy
 					AND t.strEntityNo <> ''
-
 					--IF ISNULL(@intCreatedUserId, 0) = 0
 					--BEGIN
 					--	RAISERROR (
