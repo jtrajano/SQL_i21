@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[tblGLDetail] (
     [intGLDetailId]             INT              IDENTITY (1, 1) NOT NULL,
-    [intCompanyId] [int] NULL,
+    [intSubsidiaryCompanyId] [int] NULL,
     [intMultiCompanyId] [int]   NULL,
     [dtmDate]                   DATETIME         NOT NULL,
     [strBatchId]                NVARCHAR (20)    COLLATE Latin1_General_CI_AS NULL,
