@@ -8929,6 +8929,9 @@
     <Build Include="dbo\Tables\tblCCCrossReferenceVendor.sql" />
     <Build Include="dbo\Tables\tblCCCrossReference.sql" />
     <Build Include="dbo\Views\vyuCCCrossReferenceVendor.sql" />
+    <Build Include="dbo\Views\vyuAP1099NEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
