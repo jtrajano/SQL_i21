@@ -96,6 +96,7 @@ BEGIN TRY
 	where
 		cd.intContractDetailId = @intContractDetailId
 		and ch.intContractHeaderId = cd.intContractHeaderId
+  		and ch.intContractTypeId = 2  
 
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
