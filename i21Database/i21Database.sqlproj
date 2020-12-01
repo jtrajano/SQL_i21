@@ -8184,6 +8184,9 @@
     <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
+    <Build Include="dbo\Views\vyuAP1099NEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

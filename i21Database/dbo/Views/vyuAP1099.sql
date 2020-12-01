@@ -144,6 +144,21 @@ SELECT
 	, A.int1099Form
 	, A.int1099Category
 	, CASE WHEN B.intTransactionType = 9 THEN B.dtmDate ELSE B2.dtmDatePaid END AS dtmDate
+	, dblNonemployeeCompensationNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 8--'Nonemployee Compensation'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END  
+	, dblDirectSalesNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 2--'Direct Sales'     
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+	ELSE 0 END    
+	, dblFederalIncomeNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 4--'Federal Income Tax Withheld'     
+		 THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+		 	* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END    
+	, dblStateNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 15--'State Tax Withheld'     
+		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END   
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
     ON B.intBillId = A.intBillId
