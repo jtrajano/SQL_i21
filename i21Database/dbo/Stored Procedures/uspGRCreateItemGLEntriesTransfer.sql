@@ -6,6 +6,7 @@ CREATE PROCEDURE [dbo].[uspGRCreateItemGLEntriesTransfer]
 	,@strGLDescription AS NVARCHAR(255) = NULL 	
 	,@intContraInventory_ItemLocationId AS INT = NULL
 	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@intRebuildItemId AS INT = NULL
 	,@ysnUnpostInvAdj AS BIT = 0
 	,@ysnDPtoOS AS BIT = 0
 AS
