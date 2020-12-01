@@ -629,6 +629,11 @@ BEGIN TRY
 
 							--UPDATE	tblAPBillDetail SET  dblQtyOrdered = @dblQtyToBill, dblQtyReceived = @dblQtyToBill,dblNetWeight = dbo.fnCTConvertQtyToTargetItemUOM(intUnitOfMeasureId, intWeightUOMId, @dblQtyToBill) WHERE intBillDetailId = @intBillDetailId
 
+							IF (ISNULL(@intBillDetailId, 0) <> 0)
+							BEGIN
+								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
+							END
+							
 							-- CT-3983
 							DELETE @detailCreated
 
@@ -645,11 +650,6 @@ BEGIN TRY
 							WHERE APD.intInventoryReceiptChargeId IS NULL
 							
 							EXEC [uspAPUpdateVoucherDetailTax] @detailCreated
-
-							IF (ISNULL(@intBillDetailId, 0) <> 0)
-							BEGIN
-								EXEC uspAPUpdateCost @intBillDetailId, @dblFinalPrice, 1
-							END
 							--
 
 							IF ISNULL(@ysnBillPosted,0) = 1
@@ -910,7 +910,8 @@ BEGIN TRY
 		 							set @dblPriceFixationLoadApplied = isnull(@dblPriceFixationLoadApplied,0) + 1;
 									update tblCTPriceFixationDetail 
 										set dblLoadApplied = ISNULL(dblLoadApplied, 0)  + @dblInventoryItemLoadApplied,
-											dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
+											--dblLoadAppliedAndPriced = ISNULL(dblLoadAppliedAndPriced, 0) + @dblInventoryItemLoadApplied
+											dblLoadAppliedAndPriced = @dblInventoryItemLoadApplied
 									WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 								END						
 							END
@@ -1884,6 +1885,16 @@ BEGIN TRY
 		else
 		begin
 			insert into @InvShp
+			select
+				intInventoryShipmentId
+				,intInventoryShipmentItemId
+				,dblShipped
+				,intInvoiceDetailId
+				,intItemUOMId
+				,intLoadShipped
+				,dtmInvoiceDate
+			from
+			(
 			SELECT
 				intInventoryShipmentId = RI.intInventoryShipmentId,
 				intInventoryShipmentItemId = RI.intInventoryShipmentItemId,
@@ -1948,6 +1959,8 @@ BEGIN TRY
 							
 			WHERE
 				RI.intLineNo = @intContractDetailId	
+			) t order by t.intInventoryShipmentItemId
+
 
 			if (@ysnDestinationWeightsGrades = convert(bit,1))
 			begin
