@@ -15,7 +15,7 @@ SELECT
 	,REQ.dtmDateTo
 	,TOFF.strTimeOff
 	,REQ.dblRequest
-	,strApprovalStatus = ISNULL(TRN.strApprovalStatus, CASE WHEN APP.intEntityUserSecurityId IS NOT NULL AND APPScreen.strNamespace = 'Payroll.view.TimeOffRequest' THEN 'Wait for Submit' ELSE 'No Need for Approval' END)
+	,strApprovalStatus = ISNULL(TRN.strApprovalStatus, CASE WHEN APP.intEntityUserSecurityId IS NOT NULL AND APPScreen.strNamespace = 'Payroll.view.TimeOffRequest' THEN 'Waiting for Submit' ELSE 'No Need for Approval' END)
 	,REQ.ysnPostedToCalendar
 	,strCalendarInfo = ENT.strName + ' : ' + CAST(CAST(dblRequest AS FLOAT) AS VARCHAR(20)) 
 						+ ' Hour' + CASE WHEN (dblRequest > 0) THEN 's ' ELSE ' ' END + TOFF.strTimeOff
