@@ -123,7 +123,7 @@
 	,SCD.strDeliverySheetNumber
 	,SCListTicket.strTicketType
 	,SCT.ysnDeliverySheetPost
-	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
+	,(SELECT SCMatch.strTicketNumber FROM tblSCTicket SCMatch WITH(NOLOCK) WHERE SCMatch.intTicketId = SCT.intMatchTicketId) AS strMatchTicketNumber
     ,SCT.intLotId
     ,SCT.strLotNumber
     ,SCT.intSalesOrderId
@@ -281,8 +281,8 @@
 			,CTH.strContractNumber AS strShowContractNumber
 			,CTD.intContractSeq AS intContractDetailSequence
 			,SML.strLocationName AS strContractDetailLocation
-		FROM tblCTContractDetail CTD 
-		LEFT JOIN tblCTContractHeader CTH ON CTH.intContractHeaderId = CTD.intContractHeaderId
+		FROM tblCTContractDetail CTD With(nolock)
+		LEFT JOIN tblCTContractHeader CTH WITH(NOLOCK) ON CTH.intContractHeaderId = CTD.intContractHeaderId
 		LEFT JOIN tblSMCompanyLocation SML ON SML.intCompanyLocationId = CTD.intCompanyLocationId
 	) CT ON CT.intContractDetailId = SCT.intContractId
 	LEFT JOIN (
@@ -308,8 +308,8 @@
 				,CEL.strLocationName AS strShipTo
 				,L.intTicketId
 				,L.intSourceType
-			FROM tblLGLoad L
-			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId 
+			FROM tblLGLoad L With(nolock)
+			INNER JOIN tblLGLoadDetail LD With(nolock) ON LD.intLoadId = L.intLoadId 
 			LEFT JOIN tblEMEntityLocation VEL ON VEL.intEntityLocationId = LD.intVendorEntityLocationId
 			LEFT JOIN tblEMEntityLocation CEL ON CEL.intEntityLocationId = LD.intCustomerEntityLocationId
 	) LGD on LGD.intLoadId = SCT.intLoadId AND  LGD.intLoadDetailId = SCT.intLoadDetailId

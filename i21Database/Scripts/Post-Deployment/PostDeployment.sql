@@ -390,6 +390,8 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
 
+:R .\GR\1920_Dev_Linking_Voucher_Discount.sql
+
 --Manufacturing
 :R .\MF\1_MasterTables.sql
 :R .\MF\2_ProcessAttribute.sql

@@ -46,6 +46,7 @@ BEGIN
 			AND si.intItemId = d.intItemId
 			AND l.intItemLocationId = d.intItemLocationId
 			AND si.intInventoryShipmentItemId = COALESCE(d.intInventoryShipmentItemId, si.intInventoryShipmentItemId) 
+			and si.intLineNo is not null
 END 
 
 IF @ysnPost = 0
@@ -78,6 +79,7 @@ BEGIN
 			AND si.intItemId = d.intItemId
 			AND l.intItemLocationId = d.intItemLocationId
 			AND si.intInventoryShipmentItemId = COALESCE(d.intInventoryShipmentItemId, si.intInventoryShipmentItemId) 
+			and si.intLineNo is not null
 END 
 
 

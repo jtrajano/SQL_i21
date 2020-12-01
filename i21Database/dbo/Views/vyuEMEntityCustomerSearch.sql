@@ -72,6 +72,7 @@ SELECT DISTINCT
 	, intCreditLimitReached = DATEDIFF(DAYOFYEAR, CUSTOMER.dtmCreditLimitReached, GETDATE())
 	, ysnHasPastDueBalances	= CAST(0 AS BIT)
 	, strEntityType = CASE WHEN entityType.Prospect = 1 THEN 'Prospect' ELSE 'Customer' END COLLATE Latin1_General_CI_AS
+	, ysnHasCustomerCreditApprover	= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
 FROM tblARCustomer CUSTOMER  WITH (NOLOCK) 
 INNER JOIN tblEMEntity entityToCustomer ON CUSTOMER.intEntityId = entityToCustomer.intEntityId
 LEFT JOIN tblEMEntityToContact entityToContact ON entityToCustomer.intEntityId = entityToContact.intEntityId AND entityToContact.ysnDefaultContact = 1
@@ -115,5 +116,15 @@ OUTER APPLY (
 		FOR XML PATH ('')
 	) INV (intLineOfBusinessId)
 ) LINEOFBUSINESS
+OUTER APPLY(
+	SELECT COUNT(ARC.intEntityId) AS intApproverCount
+	FROM dbo.tblARCustomer ARC
+	INNER JOIN dbo.tblEMEntityRequireApprovalFor ERA
+		ON ARC.intEntityId = ERA.[intEntityId]
+	INNER JOIN tblSMScreen SC
+		ON ERA.intScreenId = SC.intScreenId
+		AND SC.strScreenName = 'Invoice'
+	WHERE ARC.intEntityId = CUSTOMER.intEntityId
+) CUSTOMERCREDITAPPROVER
 WHERE (entityType.Customer = 1 OR entityType.Prospect = 1)
 GO

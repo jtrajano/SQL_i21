@@ -98,6 +98,7 @@ BEGIN
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
 			,[intSettleStorageId]				=	A.intSettleStorageId
 			,[intItemId]						=	A.intItemId
+			,[intLinkingId]						=	A.intLinkingId
 			,[strItemNo]						=	item.strItemNo
 			,[intPurchaseTaxGroupId]			=	A.intPurchaseTaxGroupId
 			,[strTaxGroup]						=	taxGroup.strTaxGroup
@@ -342,6 +343,7 @@ BEGIN
 		,[intCustomerStorageId]	
 		,[intSettleStorageId]
 		,[intItemId]						
+		,[intLinkingId]			
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	
@@ -425,6 +427,7 @@ BEGIN
 		,[intCustomerStorageId]
 		,[intSettleStorageId]
 		,[intItemId]						
+		,[intLinkingId]					
 		,[strItemNo]						
 		,[intPurchaseTaxGroupId]		
 		,[strTaxGroup]	

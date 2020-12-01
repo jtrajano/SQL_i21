@@ -67,4 +67,8 @@ CREATE NONCLUSTERED INDEX [IX_tblGRCustomerStorage_intItemId]
 	INCLUDE ([intEntityId],[intCommodityId],[intStorageScheduleId],[intStorageTypeId],[intCompanyLocationId],[dtmDeliveryDate],[strDPARecieptNumber],[dtmLastStorageAccrueDate],[dblStorageDue],[dblDiscountsDue],[strCustomerReference],[strStorageType],[strStorageTicketNumber],[intDeliverySheetId])
 GO
 
+CREATE NONCLUSTERED INDEX IX_tblGRCustomerStorage_units
+ON tblGRCustomerStorage (dblOriginalBalance ASC)
+INCLUDE(dblGrossQuantity)
 
+GO

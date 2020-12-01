@@ -407,28 +407,6 @@ BEGIN
 		RETURN
 	END
 
-	--9. No Hiearchy
-	IF @strDefaultComment IS NULL
-		BEGIN
-			SELECT TOP 1 @strDefaultComment = B.strMessage --strMessageDesc
-				,@intDocumentMaintenanceId = A.intDocumentMaintenanceId
-				FROM [tblSMDocumentMaintenance] A
-				INNER JOIN (SELECT intDocumentMaintenanceId
-								 , strMessage = dbo.fnEliminateHTMLTags(CAST(blbMessage AS VARCHAR(MAX)), @ysnPrintAsHTML)
-							FROM tblSMDocumentMaintenanceMessage
-							WHERE strHeaderFooter = @strHeaderFooter) B ON A.intDocumentMaintenanceId = B.intDocumentMaintenanceId
-				WHERE [strSource] IS NULL
-			ORDER BY A.[intDocumentMaintenanceId] DESC
-				, ISNULL(A.intEntityCustomerId, -10 * A.intDocumentMaintenanceId) DESC
-				, ISNULL(A.intCompanyLocationId, -100 * A.intDocumentMaintenanceId) DESC
-		END
-	ELSE
-	BEGIN
-		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
-		VALUES( @strDefaultComment, @intDocumentMaintenanceId)
-		RETURN
-	END
-
 	IF @strDefaultComment IS NOT NULL	
 	BEGIN
 		INSERT INTO @returntable(strDefaultComment, intDocumentMaintenanceId)
