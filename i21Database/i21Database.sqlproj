@@ -7805,6 +7805,9 @@
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
 <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+    <Build Include="dbo\Views\vyuAP1099NEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
