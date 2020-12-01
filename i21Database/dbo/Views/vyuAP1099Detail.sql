@@ -25,6 +25,7 @@ SELECT
 		WHEN 3 THEN '1099 B'
 		WHEN 4 THEN '1099 PATR'
 		WHEN 5 THEN '1099 DIV'
+		WHEN 7 THEN '1099 NEC'
 		ELSE 'NONE' END COLLATE Latin1_General_CI_AS AS str1099Form
 	,CASE voucherDetail.int1099Form 
 			WHEN 1
@@ -33,6 +34,8 @@ SELECT
 			THEN categoryPATR.strCategory
 			WHEN 5
 			THEN categoryDIV.strCategory
+			WHEN 7
+			THEN category.strCategory
 			ELSE 'NONE'
 	END AS strCategory
 	,voucher.intEntityVendorId
