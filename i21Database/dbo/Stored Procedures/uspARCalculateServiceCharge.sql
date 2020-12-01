@@ -448,6 +448,8 @@ AS
 
 					IF (@calculation = 'By Invoice')
 						BEGIN
+							IF (ISNULL(@isIncludeBudget,0) <> 0  AND EXISTS (SELECT TOP 1 intEntityCustomerId FROM dbo.tblARCustomerBudget  WHERE intEntityCustomerId =@entityId))
+							BEGIN
 							--GET AMOUNT DUE PER INVOICE
 							INSERT INTO @tblTypeServiceCharge
 							SELECT intInvoiceId
@@ -470,6 +472,7 @@ AS
 									INNER JOIN @tempTblTypeServiceCharge SC ON C.intEntityId = SC.intEntityCustomerId
 									WHERE C.intEntityId = @entityId
 								END
+							END
 						END
 					ELSE
 						BEGIN
