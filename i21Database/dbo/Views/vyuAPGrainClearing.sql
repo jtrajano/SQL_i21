@@ -339,7 +339,7 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,CAST(CASE
+	,CAST((CASE
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 
 			THEN ((QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) * -1))
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 
@@ -350,10 +350,10 @@ SELECT
 		WHEN QM.strCalcMethod = 3 
 			THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))	
 		ELSE SST.dblUnits 
-	END) AS DECIMAL(18,2))
-	,ROUND(CASE WHEN QM.strCalcMethod = 3 
+	END) * -1) AS DECIMAL(18,2))
+	,ROUND((CASE WHEN QM.strCalcMethod = 3 
 		THEN (CS.dblGrossQuantity * (SST.dblUnits / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SST.dblUnits END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END), 2)
+	ELSE SST.dblUnits END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END)) * -1, 2)
 	--,GLDetail.dblCreditUnit - GLDetail.dblDebitUnit 
 	,CS.intCompanyLocationId
 	,CL.strLocationName
