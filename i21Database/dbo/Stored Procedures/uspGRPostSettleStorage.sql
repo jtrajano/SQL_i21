@@ -2708,6 +2708,7 @@ BEGIN TRY
 					,[strSettleTicket]
 					,[intTransactionTypeId]
 					,[dblPaidAmount]
+					,[dblCost]	
 					,[intBillId]
 					,[intSettleStorageId]
 					,[strVoucher]
@@ -2725,7 +2726,9 @@ BEGIN TRY
 					,[intEntityId]			= @EntityId
 					,[strSettleTicket]		= @TicketNo
 					,[intTransactionTypeId]	= 4
-					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits],SV.dblCashPrice)
+					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits]
+												, SV.dblCashPrice * SV.[dblUnits] )
+					,[dblCost]				= SV.dblCashPrice
 					,[intBillId]			= CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 					,intSettleStorageId		= @intSettleStorageId
 					,strVoucher				= @strVoucher
