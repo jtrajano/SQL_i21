@@ -377,6 +377,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
 :R .\GR\StorageInventoryReceipt.sql
+:R .\GR\StorageHistoryPaidAmount.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql

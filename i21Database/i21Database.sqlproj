@@ -7798,6 +7798,7 @@
     <Build Include="dbo\Views\vyuAP1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
+    <None Include="Scripts\Post-Deployment\GR\StorageHistoryPaidAmount.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
