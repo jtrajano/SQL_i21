@@ -65,7 +65,7 @@ FROM (
 													THEN ((ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)) / ISNULL(Shipment.dblContainerContractQty, 1)) * (ISNULL(Shipment.dblContainerContractQty, 0) - ISNULL(Shipment.dblContainerContractReceivedQty, 0))
 												ELSE ISNULL(Shipment.dblContainerContractGrossWt, 0) - ISNULL(Shipment.dblContainerContractTareWt, 0)
 												END)
-						) * Shipment.dblCashPrice)/ (CASE WHEN ISNULL(Shipment.ysnSubCurrency,0) = 0 THEN 100 ELSE 1 END),0) AS NUMERIC(18,6))
+						) * Shipment.dblCashPrice)/ (CASE WHEN ISNULL(Shipment.ysnSubCurrency,0) = 1 THEN 100 ELSE 1 END),0) AS NUMERIC(18,6))
 		,dblFutures = Shipment.dblFutures
 		,dblCashPrice = Shipment.dblCashPrice
 		,dblBasis = Shipment.dblBasis
