@@ -2972,6 +2972,7 @@ BEGIN TRY
 					, intSettleStorageId
 					, strSettleTicket
 					, dblPaidAmount
+					, dblCost
 					, intBillId
 				)
 				SELECT
@@ -2985,7 +2986,9 @@ BEGIN TRY
 					, GETDATE()
 					, @intSettleStorageId
 					, @strSettleTicket
-					, SV.dblCashPrice
+					,[dblPaidAmount]		= ISNULL(((select top 1 dblOldCost from @voucherPayable where intItemId = CS.intItemId AND dblOldCost > 0) + isnull(@sum_e, 0)) * SV.[dblUnits]
+												, SV.dblCashPrice * SV.[dblUnits] )
+					,[dblCost]				= SV.dblCashPrice
 					, CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
 				FROM @SettleVoucherCreate SV
 					INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
