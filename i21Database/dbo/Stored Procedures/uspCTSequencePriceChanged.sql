@@ -96,7 +96,7 @@ BEGIN TRY
 													OR @ysnEnablePriceContractApproval = 0
 												)
 		BEGIN
-			EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId
+			EXEC [uspCTContractApproved] @intContractHeaderId,@intUserId,@intContractDetailId,0,1
 		END
 	END
 
