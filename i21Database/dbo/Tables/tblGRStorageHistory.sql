@@ -31,6 +31,7 @@
 	[ysnPost] BIT NULL DEFAULT 0,
 	[intInventoryAdjustmentId] INT NULL,
 	[dblOldCost] DECIMAL(38,20) NULL,
+	[dblCost] DECIMAL(38,20) NULL,
     CONSTRAINT [PK_tblGRStorageHistory_intStorageHistoryId] PRIMARY KEY ([intStorageHistoryId]),
 	CONSTRAINT [FK_tblGRStorageHistory_tblGRCustomerStorage_intCustomerStorageId] FOREIGN KEY ([intCustomerStorageId]) REFERENCES [dbo].[tblGRCustomerStorage] ([intCustomerStorageId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblGRStorageHistory_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]),	
