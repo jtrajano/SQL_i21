@@ -403,6 +403,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\GR_FarmField.sql
 :R .\GR\ContractPrice.sql
 :R .\GR\SC_ScaleLVControlIntegration.sql
+:R .\GR\StorageHistoryPaidAmount.sql
 :R .\GR\ImportSettleStorageBillDetail.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql

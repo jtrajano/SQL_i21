@@ -8926,6 +8926,7 @@
     <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
+    <None Include="Scripts\Post-Deployment\GR\StorageHistoryPaidAmount.sql" />
     <Build Include="dbo\Tables\tblCCCrossReferenceVendor.sql" />
     <Build Include="dbo\Tables\tblCCCrossReference.sql" />
     <Build Include="dbo\Views\vyuCCCrossReferenceVendor.sql" />
