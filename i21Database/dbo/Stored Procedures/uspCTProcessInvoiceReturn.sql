@@ -15,12 +15,16 @@ declare
 	,@dblLoadPriced numeric(18,6)
 	,@ysnLoad bit
 	,@dblQuantityPerLoad numeric(18,6)
+	,@intPricingTypeId int
+	,@intContractDetailId int
+	,@dblSequenceQuantity numeric(18,6)
+	,@intPriceFixationId int
+	,@dblQuantityPerLot numeric(18,6)
+	,@dblSequenceTotalLot numeric(18,6)
 	;
 
 begin try
 
-	set @dblQuantity = @dblQuantity * -1;
-	set @dblLoadPriced = null;
 
 	/*Check Contract if Load Base*/
 	select
@@ -28,28 +32,41 @@ begin try
 		@ysnLoad = ch.ysnLoad
 		,@dblQuantityPerLoad = ch.dblQuantityPerLoad
 		,@intPriceFixationDetailId = pfd.intPriceFixationDetailId
+		,@intPricingTypeId = ch.intPricingTypeId
+		,@intContractDetailId = pf.intContractDetailId
+		,@dblSequenceQuantity = cd.dblQuantity
+		,@dblSequenceTotalLot = cd.dblNoOfLots
+		,@dblQuantityPerLot = cd.dblQuantity / cd.dblNoOfLots
+		,@intPriceFixationId = pf.intPriceFixationId
 	from
 		tblCTPriceFixationDetailAPAR ar
 		,tblCTPriceFixationDetail pfd
 		,tblCTPriceFixation pf
 		,tblCTContractHeader ch
+		,tblCTContractDetail cd
 	where
 		ar.intInvoiceDetailId = @intInvoiceDetailId
 		and pfd.intPriceFixationDetailId = ar.intPriceFixationDetailId
 		and pf.intPriceFixationId = pfd.intPriceFixationId
 		and ch.intContractHeaderId = pf.intContractHeaderId
+		and cd.intContractDetailId = pf.intContractDetailId
 
 	if (isnull(@intPriceFixationDetailId,0) = 0)
 	begin
 		goto _return;
 	end
 
+	update tblCTContractDetail set dblCashPrice = null, dblFutures = null,intPricingTypeId = @intPricingTypeId where intContractDetailId = @intContractDetailId;
+	update tblCTPriceFixation set dblFinalPrice = null, dblLotsFixed = dblTotalLots - (@dblQuantity / @dblQuantityPerLot) where intPriceFixationId = @intPriceFixationId;
+
+	set @dblQuantity = @dblQuantity * -1;
+	set @dblLoadPriced = null;
+
 	if (@ysnLoad = convert(bit,1))
 	begin
 		set @dblQuantity = @dblQuantityPerLoad * -1;
 		set @dblLoadPriced = -1;
 	end
-
 
 	insert into tblCTPriceFixationDetail
 	(
@@ -104,7 +121,7 @@ begin try
 		,dblLoadAppliedAndPriced = null
 		,dblLoadPriced = @dblLoadPriced
 		,intQtyItemUOMId = pfd.intQtyItemUOMId
-		,dblNoOfLots = pfd.dblNoOfLots
+		,dblNoOfLots = pfd.dblNoOfLots * -1
 		,intFutureMarketId = pfd.intFutureMarketId
 		,intFutureMonthId = pfd.intFutureMonthId
 		,dblFixationPrice = pfd.dblFixationPrice
