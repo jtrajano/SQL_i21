@@ -233,7 +233,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 9
 
 	UPDATE A
-		SET A.strBillId = @voucherPref + CAST(@voucherStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @voucherPref + CAST(@voucherStartNum AS NVARCHAR)
 		,@voucherStartNum = @voucherStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 1
@@ -247,7 +247,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 18
 
 	UPDATE A
-		SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @debitMemoPref + CAST(@debitMemoStartNum AS NVARCHAR)
 		,@debitMemoStartNum = @debitMemoStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 3
@@ -261,7 +261,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 101
 
 	UPDATE A
-		SET A.strBillId = @claimPref + CAST(@claimStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @claimPref + CAST(@claimStartNum AS NVARCHAR)
 		,@claimStartNum = @claimStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 11
@@ -275,7 +275,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 124
 
 	UPDATE A
-		SET A.strBillId = @baPref + CAST(@baStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @baPref + CAST(@baStartNum AS NVARCHAR)
 		,@baStartNum = @baStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 13
@@ -289,7 +289,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 132
 
 	UPDATE A
-		SET A.strBillId = @deferPref + CAST(@deferStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @deferPref + CAST(@deferStartNum AS NVARCHAR)
 		,@deferStartNum = @deferStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 14
@@ -303,7 +303,7 @@ BEGIN TRY
 	WHERE A.intStartingNumberId = 77
 
 	UPDATE A
-		SET A.strBillId = @adjPref + CAST(@adjStartNum - 1 AS NVARCHAR)
+		SET A.strBillId = @adjPref + CAST(@adjStartNum AS NVARCHAR)
 		,@adjStartNum = @adjStartNum + 1
 	FROM #tmpVoucherHeaderData A
 	WHERE A.intTransactionType = 9
