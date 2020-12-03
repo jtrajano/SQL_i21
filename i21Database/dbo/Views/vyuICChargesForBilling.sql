@@ -11,11 +11,13 @@ SELECT
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=	
-													CASE 
-														WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
-															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
-														ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
-													END 
+													--CASE 
+													--	WHEN ISNULL(ReceiptCharge.dblAmount,0) < 0 -- Negate the qty if Charge is negative. 
+													--		THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
+													--	ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+													--END 
+													--ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+													ISNULL(ReceiptCharge.dblQuantity, 1) 
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	
 													CASE 
@@ -186,13 +188,14 @@ SELECT
 	,[strItemNo]								=	Item.strItemNo
 	,[strDescription]							=	Item.strDescription
 	,[dblOrderQty]								=		
-													CASE 
-														WHEN ReceiptCharge.dblAmount > 0 
-															--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
-															THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
-														ELSE 
-															ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
-													END  
+													--CASE 
+													--	WHEN ReceiptCharge.dblAmount > 0 
+													--		--Negate Quantity if amount is positive for Price Down charges; Amount is negated in Voucher for Price Down so no need to negate quantity for negative amount
+													--		THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
+													--	ELSE 
+													--		ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
+													--END  
+													-ISNULL(ReceiptCharge.dblQuantity, 1)
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=		
 													CASE 
