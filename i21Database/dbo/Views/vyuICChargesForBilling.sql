@@ -350,4 +350,9 @@ WHERE	ReceiptCharge.ysnPrice = 1
 				ISNULL(ReceiptCharge.dblAmountPriced, 0) = 0 
 				AND ROUND(ReceiptCharge.dblAmount, 6) = 0 
 			)
+			OR (
+				SIGN(ReceiptCharge.dblAmount) = -1
+				AND ABS(ISNULL(ReceiptCharge.dblAmountPriced, 0)) < ABS(ROUND(ReceiptCharge.dblAmount, 6))
+			)
 		)
+		AND ISNULL(ReceiptCharge.dblAmount, 0) <> 0 
