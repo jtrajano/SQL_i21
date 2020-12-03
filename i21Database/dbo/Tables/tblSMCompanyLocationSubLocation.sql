@@ -6,6 +6,7 @@
     [strSubLocationDescription] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
 	[intVendorId] INT NULL,
     [strClassification] NVARCHAR(50) COLLATE Latin1_General_CI_AS NOT NULL, 
+	[ysnWeightClaimRequiredForTransfers] BIT NULL DEFAULT (0),
 	[ysnExternal] BIT NULL DEFAULT (0),
 	[intNewLotBin] INT NULL, 
     [intAuditBin] INT NULL, 
