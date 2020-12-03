@@ -173,7 +173,7 @@ BEGIN TRY
 	
 	DECLARE @SettleVoucherCreate AS SettleVoucherCreate
 	DECLARE @VoucherIds AS Id
-
+	DECLARE @dblTotalUnits DECIMAL(24, 10)
 	/*	intItemType
 		------------
 		1-Inventory
@@ -1744,7 +1744,7 @@ BEGIN TRY
 												
 				begin
 					-- must update the qty for the discounts
-					declare @dblTotalUnits DECIMAL(24, 10)
+					SET @dblTotalUnits = NULL
 				
 					select @dblTotalUnits = sum(case when @doPartialHistory = 1 then
 												case WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
