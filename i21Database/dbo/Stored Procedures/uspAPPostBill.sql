@@ -1523,7 +1523,7 @@ ELSE
 			,A.[dtmDate]
 			,A.[ysnIsUnposted]
 			,A.[intConcurrencyId]	
-			,A.[dblForeignRate]
+			,ISNULL(A.[dblForeignRate], 1)
 			,A.[intUserId]
 			,A.[dtmDateEntered]
 			,A.[strBatchId]
