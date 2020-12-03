@@ -172,7 +172,11 @@ AND receipt.ysnPosted = 1
 AND NOT EXISTS (
     SELECT intInventoryReceiptItemId
     FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+    CROSS APPLY tblSMStartingNumber pfxRct
+    WHERE
+        pfxRct.intStartingNumberId = 23
+    AND transferClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
+    AND transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 )
 -- AND receipt.intSourceType != 7 --NOT STORE
 -- UNION ALL
@@ -557,7 +561,11 @@ AND receiptItem.intOwnershipType != 2
 AND NOT EXISTS (
     SELECT intInventoryReceiptItemId
     FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+    CROSS APPLY tblSMStartingNumber pfxRct
+    WHERE
+        pfxRct.intStartingNumberId = 23
+    AND transferClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
+    AND transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 )
 
 
