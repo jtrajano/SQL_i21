@@ -267,7 +267,7 @@ SELECT a.intContractDetailId
 	, dblQtyInCommodityDefaultUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bt.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bt.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bt.dblUnitQty, 0)) END)
-	, strQualityApproval = bh.strGrade
+	, strQualityApproval = bh.strContractItemName
 	--, strQualityApproval = QA.strSampleStatus
 	, dblQtyInCommodityStockUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bu.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bu.dblUnitQty, 0) THEN a.dblQuantity
