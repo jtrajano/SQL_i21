@@ -19,6 +19,7 @@ BEGIN TRY
 			@FirstApprovalId			INT,
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),	
+   			@InterCompSubmitterSign  VARBINARY(MAX),  
 			@xmlDocumentId				INT,
 			@intTransactionId			INT,
 			@PreviousSubmitterId		INT,
@@ -117,6 +118,16 @@ BEGIN TRY
 	JOIN    tblEMEntitySignature	ES	ON	Sig.intSignatureId = ES.intElectronicSignatureId
 	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
 	AND		IA.strScreen	=	'Price Contract'
+	 AND IA.ysnApproval = 1
+	   
+	 SELECT TOP 1 @InterCompSubmitterSign =Sig.blbDetail   
+	 FROM tblCTIntrCompApproval IA  
+	 JOIN tblSMUserSecurity  US ON US.strUserName = IA.strUserName   
+	 JOIN tblSMSignature   Sig ON US.intEntityId = Sig.intEntityId  
+	 JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId  
+	 WHERE IA.intContractHeaderId = @intContractHeaderId  
+	 AND  IA.strScreen = 'Price Contract'  
+	 AND IA.ysnApproval = 0
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
 	FROM	tblSMCompanySetup
@@ -183,6 +194,7 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
+			CounterSubmitterSign = @InterCompSubmitterSign,
 			SubmitterSign = @PreviousSubmitterSign,
 		    BuyerSign = CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,			
 		    SellerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
