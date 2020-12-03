@@ -16,7 +16,8 @@ SELECT
 													--		THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0))
 													--	ELSE ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
 													--END 
-													ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+													--ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(ReceiptCharge.dblQuantityBilled, 0)
+													ISNULL(ReceiptCharge.dblQuantity, 1) 
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=	
 													--CASE 
@@ -191,8 +192,8 @@ SELECT
 													--		THEN -(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))															
 													--	ELSE 
 													--		ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0)
-													--END
-													-(ISNULL(ReceiptCharge.dblQuantity, 1) - ISNULL(-ReceiptCharge.dblQuantityPriced, 0))	  
+													--END  
+													-ISNULL(ReceiptCharge.dblQuantity, 1)
 	,[dblPOOpenReceive]							=	0
 	,[dblOpenReceive]							=		
 													--CASE 
@@ -357,3 +358,4 @@ WHERE	ReceiptCharge.ysnPrice = 1
 				AND ABS(ISNULL(ReceiptCharge.dblAmountPriced, 0)) < ABS(ROUND(ReceiptCharge.dblAmount, 6))
 			)
 		)
+		AND ISNULL(ReceiptCharge.dblAmount, 0) <> 0 
