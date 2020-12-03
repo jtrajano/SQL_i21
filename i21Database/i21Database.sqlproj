@@ -7804,6 +7804,7 @@
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
+<Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
