@@ -1,4 +1,4 @@
-ALTER PROCEDURE uspSCGetContractsAndAllocate
+CREATE PROCEDURE uspSCGetContractsAndAllocate
 
 	@intTicketId			INT,
 	@intEntityId			INT,
