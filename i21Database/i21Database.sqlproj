@@ -8291,6 +8291,8 @@
     <Build Include="dbo\Tables\tblCFInvoiceReportTotalValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentSimplifiedAvg.sql" />
+    <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
