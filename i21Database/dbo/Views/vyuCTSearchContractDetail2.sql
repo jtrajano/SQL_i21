@@ -363,7 +363,7 @@ select
     ) end
   ), 
   --strQualityApproval = QA.strSampleStatus,
-  strQualityApproval = bh.strGrade, 
+  strQualityApproval = bh.strContractItemName, 
   dblQtyInCommodityStockUOM = (
     case when isnull(v.dblUnitQty, 0) = 0 
     or isnull(bu.dblUnitQty, 0) = 0 then null when isnull(v.dblUnitQty, 0) = isnull(bu.dblUnitQty, 0) then a.dblQuantity else a.dblQuantity * (
