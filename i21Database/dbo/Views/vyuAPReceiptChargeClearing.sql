@@ -60,7 +60,11 @@ AND ReceiptCharge.ysnPrice = 1
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
-    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+    CROSS APPLY tblSMStartingNumber pfxRct
+    WHERE
+        pfxRct.intStartingNumberId = 23
+    AND transferClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
+    AND transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 )   
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor   IR-4345 Roth
@@ -119,7 +123,11 @@ AND ISNULL(Receipt.intEntityVendorId,ReceiptCharge.intEntityVendorId) = ISNULL(R
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
-    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+    CROSS APPLY tblSMStartingNumber pfxRct
+    WHERE
+        pfxRct.intStartingNumberId = 23
+    AND transferClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
+    AND transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 )     
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
@@ -178,7 +186,11 @@ AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure tha
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
-    WHERE transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
+    CROSS APPLY tblSMStartingNumber pfxRct
+    WHERE
+        pfxRct.intStartingNumberId = 23
+    AND transferClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
+    AND transferClr.intInventoryReceiptChargeId = ReceiptCharge.intInventoryReceiptChargeId
 )  
 UNION ALL      
 --Voucher For Receipt Charges      
@@ -251,7 +263,11 @@ AND bill.ysnPosted = 1
 AND NOT EXISTS (
     SELECT intInventoryReceiptChargeId
     FROM vyuGRTransferChargesClearing transferClr
-    WHERE transferClr.intInventoryReceiptChargeId = receiptCharge.intInventoryReceiptChargeId
+    CROSS APPLY tblSMStartingNumber pfxRct
+    WHERE
+        pfxRct.intStartingNumberId = 23
+    AND transferClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
+    AND transferClr.intInventoryReceiptChargeId = billDetail.intInventoryReceiptChargeId
 )  
 ) charges  
 OUTER APPLY (
