@@ -130,12 +130,11 @@ BEGIN
 		WHERE intAllocationDetailId = @intAllocationDetailId
 END
 
-IF (@intUnitMeasureId IS NULL)
-	SELECT @intUnitMeasureId = UOM.intUnitMeasureId
-	FROM tblLGAllocationDetail ALD 
-		INNER JOIN tblCTContractDetail SCD ON ALD.intSContractDetailId = SCD.intContractDetailId
-		INNER JOIN tblICItemUOM UOM ON UOM.intItemUOMId = SCD.intPriceItemUOMId
-	WHERE intAllocationDetailId = @intAllocationDetailId
+SELECT @intUnitMeasureId = FM.intUnitMeasureId
+FROM tblLGAllocationDetail ALD
+	INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = ALD.intPContractDetailId
+	INNER JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = PCD.intFutureMarketId
+WHERE intAllocationDetailId = @intAllocationDetailId
 
 IF (@intWeightUnitMeasureId IS NULL)
 	SELECT @intUnitMeasureId = AL.intWeightUnitMeasureId 
@@ -332,13 +331,7 @@ FROM
 			FROM tblICItem I 
 				OUTER APPLY (SELECT intPContractDetailId, intSContractDetailId, dblPAllocatedQty, dblSAllocatedQty
 					FROM tblLGAllocationDetail WHERE intAllocationDetailId = @intAllocationDetailId) ALD
-				OUTER APPLY (SELECT dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
-													dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate)
-												WHEN CC.strCostMethod = 'Amount' THEN
-													CC.dblRate / dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty)
-												ELSE 
-													CC.dblRate 
-												END / ISNULL(CCUR.intCent, 1) * COALESCE(CC.dblFX, FX.dblFXRate, 1)
+				OUTER APPLY (SELECT dblRate = CC.dblRate
 								,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 													dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
 													* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,TonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
@@ -413,13 +406,7 @@ FROM
 			FROM tblICItem I 
 			OUTER APPLY (SELECT intPContractDetailId
 							,intSContractDetailId
-							,dblRate = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
-												dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,CToUOM.intItemUOMId,CC.dblRate)
-											WHEN CC.strCostMethod = 'Amount' THEN
-												CC.dblRate / dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,ALD.dblSAllocatedQty)
-											ELSE 
-												CC.dblRate 
-											END / ISNULL(CCUR.intCent, 1) * COALESCE(CC.dblFX, FX.dblFXRate, 1)
+							,dblRate = CC.dblRate
 							,dblAmount = CASE WHEN CC.strCostMethod = 'Per Unit' THEN 
 												dbo.fnCalculateQtyBetweenUOM(CD.intItemUOMId,ToUOM.intItemUOMId,CD.dblQuantity) 
 												* dbo.fnCalculateCostBetweenUOM(CC.intItemUOMId,TonUOM.intItemUOMId,CC.dblRate) / ISNULL(CCUR.intCent, 1)
