@@ -614,7 +614,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			,@dblQuantityPerLoad = ch.dblQuantityPerLoad
 			,@dblSequenceAppliedQuantity = (i.dblQuantity - i.dblBalance)
 			,@intSequenceLoad = i.intNoOfLoad
-			,@intSequenceAppliedLoad = (i.intNoOfLoad - convert(int,i.dblBalance))
+			,@intSequenceAppliedLoad = (i.intNoOfLoad - convert(int,i.dblBalanceLoad))
 		from
 			inserted i
 			,tblCTContractHeader ch
