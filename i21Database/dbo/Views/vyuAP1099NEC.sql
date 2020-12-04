@@ -72,9 +72,7 @@ AS
 SELECT
 	*
 	,SUM(ISNULL(dblNonemployeeCompensationNEC,0)
-		+ ISNULL(dblDirectSalesNEC,0)
-		+ ISNULL(dblFederalIncomeNEC,0)
-		+ ISNULL(dblStateNEC,0)) AS dblTotalPayment
+		+ ISNULL(dblFederalIncomeNEC,0)) AS dblTotalPayment
 FROM NEC1099 A
 GROUP BY intEntityVendorId
 	,strEmployerAddress
@@ -97,8 +95,6 @@ GROUP BY intEntityVendorId
 	,dblFederalIncomeNEC
 	,dblStateNEC
 HAVING SUM(ISNULL(dblNonemployeeCompensationNEC,0)
-		+ ISNULL(dblDirectSalesNEC,0)
-		+ ISNULL(dblFederalIncomeNEC,0)
-		+ ISNULL(dblStateNEC,0)) > 0
+		+ ISNULL(dblFederalIncomeNEC,0)) > 0
 	
 GO
