@@ -70,7 +70,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblQMSampleStage WITH (NOLOCK)
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -82,12 +82,12 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
 		FROM tblQMSampleStage WITH (NOLOCK)
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 
 		UPDATE tblQMSampleStage
 		SET ysnMailSent = 1
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 	END
 END
@@ -104,7 +104,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblRKDailyAveragePriceStage WITH (NOLOCK)
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -116,12 +116,12 @@ BEGIN
 		</tr>'
 		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
 		JOIN tblRKDailyAveragePrice DAP WITH (NOLOCK) ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
-		WHERE S.intStatusId IS NOT NULL
+		WHERE S.intStatusId = @intStatusId
 			AND S.ysnMailSent = 0
 
 		UPDATE tblRKDailyAveragePriceStage
 		SET ysnMailSent = 1
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 	END
 END
@@ -444,7 +444,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblRKFutOptTransactionHeaderStage WITH (NOLOCK)
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -459,12 +459,12 @@ BEGIN
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
 		JOIN tblRKFutOptTransactionHeader H WITH (NOLOCK) ON H.intFutOptTransactionHeaderRefId = S.intFutOptTransactionHeaderId
 		JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
-		WHERE S.intStatusId IS NOT NULL
+		WHERE S.intStatusId = @intStatusId
 			AND S.ysnMailSent = 0) t
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 	END
 END
@@ -482,7 +482,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblRKCoverageEntryStage WITH (NOLOCK)
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -494,12 +494,12 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
 		FROM tblRKCoverageEntryStage WITH (NOLOCK)
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 
 		UPDATE tblRKCoverageEntryStage
 		SET ysnMailSent = 1
-		WHERE intStatusId IS NOT NULL
+		WHERE intStatusId = @intStatusId
 			AND ysnMailSent = 0
 	END
 END
