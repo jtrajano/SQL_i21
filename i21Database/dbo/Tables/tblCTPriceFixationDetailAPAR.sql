@@ -55,17 +55,21 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 					,pfd.intNumber
 					,pfd.dblQuantity
 					,pfd.dblQuantityAppliedAndPriced
-					,dblInvoiceQuantityAppliedAndPriced = sum(iq.dblQtyShipped)
+					,dblInvoiceQuantityAppliedAndPriced = (case when ch.intContractTypeId = 2 then sum(iq.dblQtyShipped) else sum(vq.dblQtyReceived) end)
 					,pfd.dblLoadPriced
 					,pfd.dblLoadAppliedAndPriced
-					,dblInvoiceLoadAppliedAndPriced = convert(numeric(18,6),count(iq.intInvoiceDetailId))
+					,dblInvoiceLoadAppliedAndPriced = (case when ch.intContractTypeId = 2 then convert(numeric(18,6),count(iq.intInvoiceDetailId)) else convert(numeric(18,6),count(vq.intBillDetailId)) end)
 				from
 					tblCTPriceFixation pf
+					join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
 					join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
 					join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
 					left join (
 						select di.intInvoiceDetailId, di.dblQtyShipped from tblARInvoiceDetail di where di.intInventoryShipmentChargeId is null and isnull(di.ysnReturned,0) = 0
 					) iq on iq.intInvoiceDetailId = ar.intInvoiceDetailId
+					left join (
+						select bd.intBillDetailId, bd.dblQtyReceived from tblAPBillDetail bd where bd.intInventoryReceiptChargeId is null
+					) vq on vq.intBillDetailId = ar.intBillDetailId
 				where
 					pf.intContractDetailId = @intActiveContractDetailId
 				group by
@@ -75,6 +79,7 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
 					,pfd.dblQuantityAppliedAndPriced
 					,pfd.dblLoadPriced
 					,pfd.dblLoadAppliedAndPriced
+					,ch.intContractTypeId
 			) rd  on rd.intPriceFixationDetailId = pfd.intPriceFixationDetailId
 		where
 			isnull(pfd.dblQuantityAppliedAndPriced,0) <> isnull(rd.dblInvoiceQuantityAppliedAndPriced,0)
