@@ -220,6 +220,7 @@ BEGIN
 		AND strUserId = @username
 		AND LOWER(strStatementType) = @statementType
 		AND ISNULL(ysnExpensed,0) = 0
+		AND ISNULL(tblCFInvoiceStagingTable.dblCalculatedTotalAmount,0) != 0 
 		GROUP BY 
 		intCustomerId
 		,strTempInvoiceReportNumber
@@ -687,6 +688,7 @@ BEGIN
 			AND strUserId = @username
 			AND LOWER(strStatementType) = @statementType
 			AND ISNULL(ysnExpensed,0) = 0
+			AND ISNULL(tblCFInvoiceStagingTable.dblCalculatedTotalAmount,0) != 0 
 			GROUP BY
 			 intCustomerId
 			,strTempInvoiceReportNumber
