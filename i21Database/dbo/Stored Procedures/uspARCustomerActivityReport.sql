@@ -11,7 +11,7 @@ IF LTRIM(RTRIM(@xmlParam)) = ''
 	BEGIN 
 		SET @xmlParam = NULL
 		
-		SELECT * FROM tblARCustomerActivityStagingTable
+		SELECT *,0 [dblUnitsRecap], 0 [dblAmountsRecap] FROM tblARCustomerActivityStagingTable
 	END
 
 -- Declare the variables.
@@ -827,13 +827,15 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 			ARI.dtmPostDate
 			FROM dbo.tblARInvoice ARI
 		)  PostDateInvoice ON PostDateInvoice.strInvoiceNumber2=ARST.strTransactionNumber 
-
 		LEFT  JOIN(
 		SELECT 
 			ARI.strRecordNumber[strRecordNumber2],
 			ARI.dtmDatePaid
 			FROM dbo.tblARPayment ARI
 		)  PostDatePayment ON PostDatePayment.strRecordNumber2=ARST.strTransactionNumber 
+		OUTER APPLY(
+		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		)Recap
 
 		WHERE intEntityUserId = @intEntityUserId)NST
 		ORDER BY NST.PostDate 
@@ -841,6 +843,9 @@ IF @strFormattingOptions IS NULL OR @strFormattingOptions <> 'Product Recap Tota
 ELSE 
 	BEGIN
 		SELECT * FROM tblARCustomerActivityStagingTable 
+		OUTER APPLY(
+		SELECT SUM(ISNULL(dblUnits,0))[dblUnitsRecap],SUM(ISNULL(dblAmounts,0))[dblAmountsRecap] FROM dbo.tblARProductRecapStagingTable
+		)Recap
 		WHERE intEntityUserId = @intEntityUserId 
 		ORDER BY strCustomerName
 	END
