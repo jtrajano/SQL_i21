@@ -58,6 +58,7 @@ BEGIN TRY
 		UPDATE tblQMTestPreStage
 		SET strFeedStatus = 'Processed'
 			,strMessage = 'Success'
+			,intStatusId = 1
 		WHERE intTestPreStageId = @intTestPreStageId
 
 		SELECT @intTestPreStageId = MIN(intTestPreStageId)
