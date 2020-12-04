@@ -70,7 +70,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblQMSampleStage WITH (NOLOCK)
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -82,12 +82,12 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
 		FROM tblQMSampleStage WITH (NOLOCK)
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 
 		UPDATE tblQMSampleStage
 		SET ysnMailSent = 1
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
 END
@@ -104,7 +104,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblRKDailyAveragePriceStage WITH (NOLOCK)
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -116,12 +116,12 @@ BEGIN
 		</tr>'
 		FROM tblRKDailyAveragePriceStage S WITH (NOLOCK)
 		JOIN tblRKDailyAveragePrice DAP WITH (NOLOCK) ON DAP.intDailyAveragePriceId = S.intDailyAveragePriceId
-		WHERE S.intStatusId = @intStatusId
+		WHERE S.intStatusId IS NOT NULL
 			AND S.ysnMailSent = 0
 
 		UPDATE tblRKDailyAveragePriceStage
 		SET ysnMailSent = 1
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
 END
@@ -444,7 +444,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblRKFutOptTransactionHeaderStage WITH (NOLOCK)
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -459,12 +459,12 @@ BEGIN
 		FROM tblRKFutOptTransactionHeaderStage S WITH (NOLOCK)
 		JOIN tblRKFutOptTransactionHeader H WITH (NOLOCK) ON H.intFutOptTransactionHeaderRefId = S.intFutOptTransactionHeaderId
 		JOIN tblRKFutOptTransaction FOT WITH (NOLOCK) ON FOT.intFutOptTransactionHeaderId = H.intFutOptTransactionHeaderId
-		WHERE S.intStatusId = @intStatusId
+		WHERE S.intStatusId IS NOT NULL
 			AND S.ysnMailSent = 0) t
 
 		UPDATE tblRKFutOptTransactionHeaderStage
 		SET ysnMailSent = 1
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
 END
@@ -482,7 +482,7 @@ BEGIN
 	IF EXISTS (
 		SELECT 1
 		FROM tblRKCoverageEntryStage WITH (NOLOCK)
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 		)
 	BEGIN
@@ -494,12 +494,12 @@ BEGIN
 			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
 		</tr>'
 		FROM tblRKCoverageEntryStage WITH (NOLOCK)
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 
 		UPDATE tblRKCoverageEntryStage
 		SET ysnMailSent = 1
-		WHERE intStatusId = @intStatusId
+		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
 END
@@ -538,7 +538,7 @@ END
 
 -- Master Screens
 
-IF @strMessageType = 'Masters'
+IF @strMessageType = 'Quality Masters'
 BEGIN
 	SET @strHeader = '<tr>
 						<th>&nbsp;Id</th>
@@ -690,11 +690,18 @@ BEGIN
 		SET ysnMailSent = 1
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
-	END
+	END	
+END
 
--- IC, LG and RM Masters
-
-	
+IF @strMessageType = 'Freight Rate Matrix'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -719,6 +726,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Futures Month'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -743,6 +761,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Options Month'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -767,6 +796,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Settlement Price'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -791,6 +831,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Basis Entry'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -815,6 +866,17 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Forecast Price'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
 
 	IF EXISTS (
 		SELECT 1
@@ -839,6 +901,161 @@ BEGIN
 		WHERE intStatusId IS NOT NULL
 			AND ysnMailSent = 0
 	END
+END
+
+IF @strMessageType = 'Parent Quality Masters'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMAttributePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+				<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intAttributeId),'') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strAttributeName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Attribute' + '</td>
+		</tr>'
+		FROM tblQMAttributePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMAttributePreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMListPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+				<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intListId),'') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strListName, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+				'<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'List' + '</td>
+		</tr>'
+		FROM tblQMListPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMListPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMSampleTypePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intSampleTypeId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strSampleTypeName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Sample Type' + '</td>
+		</tr>'
+		FROM tblQMSampleTypePreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMSampleTypePreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+	
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMPropertyPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intPropertyId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strPropertyName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Property' + '</td>
+		</tr>'
+		FROM tblQMPropertyPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMPropertyPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMTestPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intTestId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strTestName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Test' + '</td>
+		</tr>'
+		FROM tblQMTestPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMTestPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END
+
+	IF EXISTS (
+		SELECT 1
+		FROM tblQMProductPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			   <td>&nbsp;' + ISNULL(CONVERT(NVARCHAR,intProductId),'') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strProductName, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + 
+			   '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + 
+				'<td>&nbsp;' + 'Template' + '</td>
+		</tr>'
+		FROM tblQMProductPreStage WITH (NOLOCK)
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+
+		UPDATE tblQMProductPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId IS NOT NULL
+			AND ysnMailSent = 0
+	END	
 END
 
 IF @ysnDailyNotification = 1
