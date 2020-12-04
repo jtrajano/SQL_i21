@@ -142,6 +142,20 @@ BEGIN
 			) tmpAmountCodes
 		) tblAmountCodes
 	END
+	sELSE IF @form1099 = 7 --NEC
+	BEGIN
+		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes 
+		FROM (
+			SELECT 
+					CASE WHEN SUM(A.dblNonemployeeCompensationNEC) > 0 THEN '1' ELSE '' END +
+					CASE WHEN SUM(A.dblFederalIncomeNEC) > 0 THEN '4' ELSE '' END AS strAmountCodes
+				FROM dbo.vyuAP1099NEC A
+				WHERE 1 = (CASE WHEN @vendorFrom IS NOT NULL THEN
+							(CASE WHEN A.strVendorId BETWEEN @vendorFrom AND @vendorTo THEN 1 ELSE 0 END)
+						ELSE 1 END)
+				AND A.intYear = @year
+		) tblAmountCodes
+	END
 
 	SELECT 
 	@payer =
@@ -158,6 +172,7 @@ BEGIN
 			WHEN 4 THEN '7 ' --1099 PATR
 			WHEN 5 THEN '1 ' --1099 DIV
 			WHEN 6 THEN 'MC' --1099 K
+			WHEN 7 THEN 'NE' --1099 NEC
 			ELSE SPACE(2) END --Type of return/1099 --Position 26-27
 		+ @amountCodes + SPACE(16 - LEN(@amountCodes))
 			--CASE @form1099 
