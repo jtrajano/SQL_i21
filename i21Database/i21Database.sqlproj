@@ -7799,6 +7799,9 @@
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageHistoryPaidAmount.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCreate1099NECFile.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileNECPayee.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
