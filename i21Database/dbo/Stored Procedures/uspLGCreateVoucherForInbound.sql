@@ -186,7 +186,7 @@ BEGIN TRY
 			,[dblCost] = (CASE WHEN intPurchaseSale = 3 THEN COALESCE(AD.dblSeqPrice, dbo.fnCTGetSequencePrice(CT.intContractDetailId, NULL), 0) ELSE ISNULL(LD.dblUnitPrice, 0) END)
 			,[dblCostUnitQty] = CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
 			,[intCostUOMId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqPriceUOMId, 0) ELSE ISNULL(AD.intSeqPriceUOMId, LD.intPriceUOMId) END) 
-			,[dblNetWeight] = dbo.fnCalculateQtyBetweenUOM(LD.intItemUOMId, ItemWeightUOM.intItemUOMId, (LD.dblQuantity - ISNULL(B.dblQtyBilled, 0)))
+			,[dblNetWeight] = LD.dblNet - ISNULL(B.dblNetWeight, 0)
 			,[dblWeightUnitQty] = ISNULL(ItemWeightUOM.dblUnitQty,1)
 			,[intWeightUOMId] = ItemWeightUOM.intItemUOMId
 			,[intCostCurrencyId] = (CASE WHEN intPurchaseSale = 3 THEN ISNULL(AD.intSeqCurrencyId, 0) ELSE ISNULL(AD.intSeqCurrencyId, LD.intPriceCurrencyId) END)
@@ -227,7 +227,8 @@ BEGIN TRY
 		LEFT JOIN tblICItemUOM ItemUOM ON ItemUOM.intItemUOMId = CT.intItemUOMId
 		LEFT JOIN tblICItemUOM ItemWeightUOM ON ItemWeightUOM.intItemId = LD.intItemId and ItemWeightUOM.intUnitMeasureId = L.intWeightUnitMeasureId
 		LEFT JOIN tblICItemUOM ItemCostUOM ON ItemCostUOM.intItemUOMId = CT.intPriceItemUOMId
-		OUTER APPLY (SELECT dblQtyBilled = SUM(CASE WHEN (intTransactionType = 3) THEN -dblQtyReceived ELSE dblQtyReceived END) 
+		OUTER APPLY (SELECT dblQtyBilled = SUM(CASE WHEN (intTransactionType = 3) THEN -dblQtyReceived ELSE dblQtyReceived END)
+							,dblNetWeight = SUM(CASE WHEN (intTransactionType = 3) THEN -BD.dblNetWeight ELSE BD.dblNetWeight END)
 					FROM tblAPBillDetail BD 
 					INNER JOIN tblAPBill B ON B.intBillId = BD.intBillId
 					INNER JOIN tblICItem Item ON Item.intItemId = BD.intItemId
