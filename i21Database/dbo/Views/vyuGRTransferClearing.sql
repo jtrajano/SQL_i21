@@ -370,6 +370,72 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
+
+
+
+
+UNION ALL
+-- Bill for Transfer Settlement
+SELECT 
+	--'5.99' AS TEST,
+    CS.intEntityId AS intEntityVendorId
+    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.strTransferStorageTicket AS strReceiptNumber--IR.strReceiptNumber
+    ,TS.intTransferStorageId AS intInventoryReceiptId--IR.intInventoryReceiptId
+	,NULL AS intTransferStorageId
+    ,NULL AS strTransferStorageTicket
+    ,NULL AS intTransferStorageReferenceId
+    ,TSR.intTransferStorageReferenceId AS intInventoryReceiptItemId--IRI.intInventoryReceiptItemId
+    ,CS.intItemId
+    ,CS.intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM
+    ,ISNULL(CAST((TSR.dblUnitQty) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,BillDetail.dblQtyReceived AS dblTransferQty
+    ,0 -- ISNULL(CAST((TSR.dblUnitQty) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblReceiptTotal
+    ,0 -- ISNULL(TSR.dblUnitQty, 0) AS dblReceiptQty
+    ,CS.intCompanyLocationId
+    ,CL.strLocationName
+    ,0
+    ,APClearing.intAccountId
+	,APClearing.strAccountId
+FROM tblGRTransferStorageReference TSR
+INNER JOIN tblGRCustomerStorage CS
+	ON CS.intCustomerStorageId = TSR.intToCustomerStorageId
+INNER JOIN tblGRStorageType ST
+	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+		AND ST.ysnDPOwnedType = 1
+INNER JOIN tblGRTransferStorage TS
+	ON TS.intTransferStorageId = TSR.intTransferStorageId
+INNER JOIN tblSMCompanyLocation CL
+    ON CL.intCompanyLocationId = CS.intCompanyLocationId
+join tblAPBillDetail BillDetail
+	on BillDetail.intCustomerStorageId =  BillDetail.intCustomerStorageId
+		and BillDetail.intItemId = TS.intItemId
+join tblAPBill Bill
+    on Bill.intBillId = BillDetail.intBillId
+--INNER JOIN tblGLDetail GL
+--	ON GL.intTransactionId = TSR.intTransferStorageId
+--		AND GL.strTransactionType = 'Transfer Storage'
+--		AND GL.strDescription LIKE '%Item: %' --A/P CLEARING ACCOUNT - {Location} - Grain Item: {Item}, Qty: {Units}, Cost: {Cost}
+INNER JOIN (
+	SELECT DISTINCT intAccountId, intTransactionId FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
+) GL ON GL.intTransactionId = TSR.intTransferStorageId
+INNER JOIN vyuGLAccountDetail APClearing
+    ON APClearing.intAccountId = GL.intAccountId 
+		AND APClearing.intAccountCategoryId = 45
+LEFT JOIN 
+(
+    tblICItemUOM itemUOM 
+	INNER JOIN tblICUnitMeasure unitMeasure
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
+)
+    ON itemUOM.intItemUOMId = CS.intItemUOMId
+Where Bill.ysnPosted = 1
+
+
+----
+
+
 UNION ALL
 --Transfer Storages from above select statement
 SELECT --'6',
