@@ -21,20 +21,20 @@ SET @ZeroBit = CAST(0 AS BIT)
 IF @Recap = @ZeroBit	
 	EXEC dbo.uspARPostItemResevation
 
-DECLARE @ItemsForInTransitCosting [ItemInTransitCostingTableType]
+DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
+DECLARE @ItemsForContracts					[InvoicePostingTable]
+EXEC [dbo].[uspARPopulateContractDetails]
 
 IF @Post = @OneBit
 BEGIN
     DECLARE @InvoiceIds 						[InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
-	DECLARE @ItemsForContracts					[InvoicePostingTable]
 	DECLARE @ItemsForCosting 					[ItemCostingTableType]
 	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]	
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting]
-	EXEC [dbo].[uspARPopulateContractDetails]
 	
 	INSERT INTO #ARInvalidInvoiceData (
 		  [intInvoiceId]
