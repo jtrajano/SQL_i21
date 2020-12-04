@@ -182,7 +182,7 @@ SELECT
 	NEC1099Bottom.strEmployerAddress AS strEmployerAddress2, 
 	NEC1099Bottom.strCompanyName AS strCompanyName2, 
 	NEC1099Bottom.strEIN AS strEIN2, 
-	NEC1099Bottom.strFederalTaxId AS trFederalTaxId2, 
+	NEC1099Bottom.strFederalTaxId AS strFederalTaxId2, 
 	NEC1099Bottom.strAddress AS strAddress2, 
 	NEC1099Bottom.strVendorCompanyName AS strVendorCompanyName2, 
 	NEC1099Bottom.strPayeeName AS strPayeeName2, 
