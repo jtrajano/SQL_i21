@@ -576,32 +576,31 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
     AS
 
 	declare @ErrMsg nvarchar(max);
-
-	 declare @intActiveContractDetailId int = 0;  
-	 declare @intPricingTypeId int = 0;  
-	 declare @dblSequenceQuantity numeric(18,6) = 0.00;  
-	 declare @intPricingStatus int = 0;  
-	 declare @dblPricedQuantity numeric(18,6) = 0.00
-			,@intContractTypeId int
-			,@ysnLoad bit
-			,@dblQuantityPerLoad numeric(18,6)
-			,@intActivePriceFixationDetailId int
-			,@dblSequenceAppliedQuantity numeric(18,6)
-			,@intSequenceLoad numeric(18,6)
-			,@intSequenceAppliedLoad numeric(18,6)
-			,@dblPricedLoad numeric(18,6)
-			,@dblPricedQuantity2 numeric(18,6)
-			;  
+	declare @intActiveContractDetailId int = 0;  
+	declare @intPricingTypeId int = 0;  
+	declare @dblSequenceQuantity numeric(18,6) = 0.00;  
+	declare @intPricingStatus int = 0;  
+	declare @dblPricedQuantity numeric(18,6) = 0.00
+		,@intContractTypeId int
+		,@ysnLoad bit
+		,@dblQuantityPerLoad numeric(18,6)
+		,@intActivePriceFixationDetailId int
+		,@dblSequenceAppliedQuantity numeric(18,6)
+		,@intSequenceLoad numeric(18,6)
+		,@intSequenceAppliedLoad numeric(18,6)
+		,@dblPricedLoad numeric(18,6)
+		,@dblPricedQuantity2 numeric(18,6)
+		;  
 
 	declare @SalePricing table (
-			intPriceFixationDetailId int
-			,dblQuantity numeric(18,6)
-			,dblQuantityAppliedAndPriced numeric(18,6) null
-			,dblLoadPriced numeric(18,6) null
-			,dblLoadApplied numeric(18,6) null
-			,dblLoadAppliedAndPriced numeric(18,6) null
-			,dblCorrectQuantityAppliedAndPriced numeric(18,6) null
-			,dblCorrectLoadAppliedAndPriced numeric(18,6) null
+		intPriceFixationDetailId int
+		,dblQuantity numeric(18,6)
+		,dblQuantityAppliedAndPriced numeric(18,6) null
+		,dblLoadPriced numeric(18,6) null
+		,dblLoadApplied numeric(18,6) null
+		,dblLoadAppliedAndPriced numeric(18,6) null
+		,dblCorrectQuantityAppliedAndPriced numeric(18,6) null
+		,dblCorrectLoadAppliedAndPriced numeric(18,6) null
 	);
 
 	begin try
@@ -649,7 +648,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 		update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
 
-		if exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd, tblCTPriceFixationDetailAPAR ar where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId)
+		if (@intContractTypeId = 2 and exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd, tblCTPriceFixationDetailAPAR ar where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId))
 		begin
 
 			update
