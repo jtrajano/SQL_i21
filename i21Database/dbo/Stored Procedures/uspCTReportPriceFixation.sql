@@ -176,13 +176,13 @@ BEGIN TRY
 											ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 											ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
 
-			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),			
+			strTotal = dbo.fnCTChangeNumericScale(dbo.fnConvertToBaseCurrency(pc.intFinalCurrencyId,dbo.fnCTConvertQuantityToTargetCommodityUOM(pc.intFinalPriceUOMId,PF.intFinalPriceUOMId,PF.dblPriceWORollArb)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),			
 			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			lblAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN 'Additional Cost' ELSE NULL END,
 			lblAdditionalCostColon = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN ':' ELSE NULL END,
 			strEQTAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ELSE NULL END, 
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice =	dbo.fnCTChangeNumericScale(dbo.fnConvertToBaseCurrency(pc.intFinalCurrencyId,dbo.fnCTConvertQuantityToTargetCommodityUOM(pc.intFinalPriceUOMId,PF.intFinalPriceUOMId,PF.dblFinalPrice)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
@@ -256,6 +256,7 @@ BEGIN TRY
 			CD.strContractPrintSignOff
 		   ,dtmContractDate						= CH.dtmContractDate
 	FROM	tblCTPriceFixation			PF
+	join tblCTPriceContract pc on pc.intPriceContractId = PF.intPriceContractId
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
 	JOIN	(
 				SELECT	ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractDetailId ASC) intRowNum,
