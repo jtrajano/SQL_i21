@@ -75,7 +75,7 @@ BEGIN TRY
 			isnull(rtrt.strTranslation,MA.strFutMarketName) AS strFutMarketName,
 			MO.strFutureMonth,
 			dbo.fnRemoveTrailingZeroes(PD.[dblNoOfLots]) AS [dblNoOfLots],
-			CASE WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN CONVERT(NVARCHAR,CAST(PD.dblFutures  AS Money),1) ELSE dbo.fnCTChangeNumericScale(PD.dblFutures,2) END + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPrice,
+			CASE WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN CONVERT(NVARCHAR,CAST(PD.dblFutures  AS Money),1) ELSE dbo.fnCTChangeNumericScale(PD.dblFutures,2) END + ' ' + CYY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPrice,
 			PD.strNotes,
 			LTRIM(CAST(ROUND(PD.dblFutures,2) AS NUMERIC(18,2))) + ' ' + CY.strCurrency + ' '+@per+' ' + isnull(rtrt2.strTranslation,CM.strUnitMeasure) strPriceDesc,
 			FLOOR(PD.[dblNoOfLots]) AS intNoOfLots,
@@ -86,6 +86,8 @@ BEGIN TRY
 			dbo.fnRemoveTrailingZeroes(PD.dblQuantity) + ' ' + QM.strUnitMeasure AS strQtyWithUOM
 
 	FROM	tblCTPriceFixation			PF
+	join tblCTPriceContract pc on pc.intPriceContractId = PF.intPriceContractId
+	left JOIN tblSMCurrency    CYY ON CYY.intCurrencyID    = pc.intFinalCurrencyId
 	JOIN	tblCTPriceFixationDetail	PD	ON	PD.intPriceFixationId			=	PF.intPriceFixationId
 	JOIN	tblCTContractDetail			CD	ON	CD.intContractHeaderId			=	PF.intContractHeaderId	
 											AND	CD.intContractDetailId			=	CASE	WHEN	PF.intContractDetailId IS NOT NULL 
