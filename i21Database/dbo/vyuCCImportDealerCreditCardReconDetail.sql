@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuCCImportDealerCreditCardReconDetail]
 AS 
 SELECT D.intImportDealerCreditCardReconDetailId,
- D.intImportDealerCreditCardReconDetailId,
 	D.intImportDealerCreditCardReconId,
 	D.intVendorDefaultId,
     strVendorNo = Vendor.strVendorId,
