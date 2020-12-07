@@ -1,5 +1,6 @@
 CREATE TABLE tblICStagingCount(
 	  intStagingCountId INT IDENTITY(1, 1)
+	, guiIdentifier UNIQUEIDENTIFIER NOT NULL
 	, intCountId INT NULL -- Used when exporting
 	, strCountNo NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL -- Used for grouping or when exporting
 	, strLocation NVARCHAR(200) COLLATE Latin1_General_CI_AS NOT NULL

@@ -11,7 +11,7 @@ DECLARE @Duplicates TABLE (intRecordNo INT, strItemNo NVARCHAR(150), strLocation
    WHERE strImportIdentifier = @strIdentifier
 )
 INSERT INTO @Duplicates (intRecordNo, strItemNo, strLocation)
-SELECT cte0.intLineNo, cte0.strItemNo, cte0.strLocation FROM cte0 
+SELECT ISNULL(cte0.intLineNo, 1), cte0.strItemNo, cte0.strLocation FROM cte0 
 WHERE RowNumber > 1;
 
 ;WITH cte AS
@@ -477,23 +477,28 @@ WHERE l.strUniqueId = @strIdentifier
 DECLARE @TotalImported INT
 DECLARE @LogId INT
 
-SELECT @LogId = intImportLogId, @TotalImported = ISNULL(intRowsImported, 0) + ISNULL(intRowsUpdated, 0) 
-FROM tblICImportLog 
-WHERE strUniqueId = @strIdentifier
+IF @LogId IS NULL
+BEGIN
+	INSERT INTO tblICImportLog(strDescription, intTotalRows, strUniqueId, intRowsImported, intRowsUpdated, intTotalErrors, intTotalWarnings, strType, dtmDateImported)
+	SELECT 'Insert items via i21 REST API', 0, @strIdentifier, 0, 0, 0, 0, 'Items', GETUTCDATE()
+
+	SET @LogId = SCOPE_IDENTITY()
+END
 
 INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
 SELECT @LogId, s.intRecordNo, 'Item No/Location', 'Skipped', s.strItemNo + '/' + s.strLocation, 'Duplicate Record', 'Failed', 'Warning', 1
 FROM @Duplicates s
 
 INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-SELECT @LogId, s.intLineNo, 'Location', 'Skipped', s.strLocation, 'Invalid Location', 'Failed', 'Error', 1
+SELECT @LogId, ISNULL(s.intLineNo, 1), 'Location', 'Skipped', s.strLocation, 'Invalid Location', 'Failed', 'Error', 1
 FROM tblICImportStagingItemLocation s
 LEFT OUTER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
 WHERE s.strImportIdentifier = @strIdentifier
 	AND c.intCompanyLocationId IS NULL
 
+
 INSERT INTO tblICImportLogDetail (intImportLogId, intRecordNo, strField, strAction, strValue, strMessage, strStatus, strType, intConcurrencyId)
-SELECT @LogId, s.intLineNo, 'Item No', 'Skipped', s.strLocation, 'Invalid Item', 'Failed', 'Error', 1
+SELECT @LogId, ISNULL(s.intLineNo, 1), 'Item No', 'Skipped', s.strLocation, 'Invalid Item', 'Failed', 'Error', 1
 FROM tblICImportStagingItemLocation s
 LEFT OUTER JOIN tblICItem c ON LOWER(c.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo)))
 WHERE s.strImportIdentifier = @strIdentifier

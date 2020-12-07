@@ -9,7 +9,7 @@ DECLARE @Adjustments TABLE(strAdjustmentNo NVARCHAR(100) COLLATE Latin1_General_
 INSERT INTO @Adjustments(strAdjustmentNo, intLocationId, intAdjustmentType, dtmAdjustmentDate, strDescription, strIntegrationDocNo)
 SELECT a.strAdjustmentNo, c.intCompanyLocationId, a.intAdjustmentType, a.dtmDate, a.strDescription, a.strIntegrationDocNo
 FROM tblICStagingAdjustment a
-	INNER JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName
+	INNER JOIN tblSMCompanyLocation c ON c.strLocationNumber = a.strLocationName OR c.strLocationName = a.strLocationName
 
 DECLARE @intLocationId INT
 DECLARE @intAdjustmentType INT
@@ -26,7 +26,7 @@ DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NV
 INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
 SELECT 'The company location no: ''' + a.strLocationName + ''' does not exists.' strError, a.strLocationName strValue, 'location' strField, a.LineNumber, a.LinePosition, 'Error'
 FROM tblSMCompanyLocation c
-RIGHT OUTER JOIN tblICStagingAdjustment a ON c.strLocationNumber = a.strLocationName
+RIGHT OUTER JOIN tblICStagingAdjustment a ON c.strLocationNumber = a.strLocationName OR c.strLocationName = a.strLocationName
 WHERE c.intCompanyLocationId IS NULL 
 
 DECLARE cur CURSOR LOCAL FAST_FORWARD
