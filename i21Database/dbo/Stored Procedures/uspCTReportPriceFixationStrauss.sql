@@ -203,8 +203,23 @@ BEGIN TRY
 
 	FROM	tblCTPriceFixation			PF
 	JOIN	tblCTContractHeader			CH	ON	CH.intContractHeaderId			=	PF.intContractHeaderId
-	CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
-	JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
+	cross apply	(	select top 1 cd1.*
+					from tblCTContractDetail cd1
+					where cd1.intContractHeaderId = 
+													case
+													when isnull(@intContractDetailId,0) = 0
+													then @intContractHeaderId
+													else cd1.intContractHeaderId
+													end
+						  and cd1.intContractDetailId =
+						  							case
+						  							when isnull(@intContractDetailId,0) = 0
+						  							then cd1.intContractDetailId
+						  							else @intContractDetailId 
+						  							end
+				) CD
+	--CROSS	APPLY dbo.fnCTGetTopOneSequence(PF.intContractHeaderId,PF.intContractDetailId) SQ
+	--JOIN	tblCTContractDetail			CD	ON	CD.intContractDetailId			=	SQ.intContractDetailId
 	JOIN	tblSMCompanyLocation		CL	ON	CL.intCompanyLocationId			=	CD.intCompanyLocationId
 	JOIN	vyuCTEntity					EY	ON	EY.intEntityId					=	CH.intEntityId	AND
 												EY.strEntityType				=	(CASE WHEN CH.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)	LEFT
