@@ -7,5 +7,6 @@
 	[intConcurrencyId] INT NOT NULL DEFAULT ((1)),
 	CONSTRAINT [PK_tblCCCrossReferenceVendor_intCrossReferenceVendorId] PRIMARY KEY CLUSTERED ([intCrossReferenceVendorId] ASC),
 	CONSTRAINT [FK_tblCCCrossReferenceVendor_tblCCCrossReference_intCrossReferenceId] FOREIGN KEY ([intCrossReferenceId]) REFERENCES [dbo].[tblCCCrossReference] ([intCrossReferenceId]) ON DELETE CASCADE,
-	CONSTRAINT [FK_tblCCCrossReferenceVendor_tblCCVendorDefault_intVendorDefaultId] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [tblCCVendorDefault]([intVendorDefaultId])
+	CONSTRAINT [FK_tblCCCrossReferenceVendor_tblCCVendorDefault_intVendorDefaultId] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [tblCCVendorDefault]([intVendorDefaultId]),
+	CONSTRAINT [UK_tblCCCrossReferenceVendor_intVendorDefaultId_strImportValue] UNIQUE ([intVendorDefaultId], [strImportValue]) 
 )
