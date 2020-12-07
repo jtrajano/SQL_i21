@@ -598,6 +598,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\CCR\SiteDataFix.sql
 :r .\CCR\RemoveCCRObsoleteScreen.sql
 :r .\CCR\ImportFileDefault.sql
+:r .\CCR\CrossReferenceDefault.sql
 
 --TR
 :r .\TR\RemoveObsoleteScreen.sql
