@@ -21,7 +21,8 @@ BEGIN TRY
 			@intPriceFixationTicketId	INT,
 			@intFutOptTransactionId		INT,
 			@strAction					NVARCHAR(50) = '',
-			@intFutOptTransactionHeaderId INT = NULL
+			@intFutOptTransactionHeaderId INT = NULL,
+			@ysnDeleteWholePrice bit = 0
 
 	--IF @strXML = 'Delete'
 	--BEGIN
@@ -39,6 +40,7 @@ BEGIN TRY
 
 	IF @strXML = 'Delete'
 	BEGIN
+		set @ysnDeleteWholePrice = 1;
 		SET	@strAction = @strXML
 		SET @Condition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
 		EXEC [dbo].[uspCTGetTableDataInXML] 'tblCTPriceFixation', @Condition, @strXML OUTPUT,null,'intPriceFixationId,intContractHeaderId,intContractDetailId,''Delete'' AS strRowState'
@@ -107,7 +109,7 @@ BEGIN TRY
 		IF @strRowState = 'Delete'
 		BEGIN
 			--EXEC uspCTValidatePriceFixationDetailUpdateDelete @intPriceFixationId = @intPriceFixationId
-			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice
+			EXEC uspCTPriceFixationDetailDelete @intPriceFixationId = @intPriceFixationId, @intUserId = @intUserId, @ysnDeleteFromInvoice = @ysnDeleteFromInvoice, @ysnDeleteWholePrice = @ysnDeleteWholePrice
 		END
 
 		SELECT	@intPriceFixationDetailId = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
