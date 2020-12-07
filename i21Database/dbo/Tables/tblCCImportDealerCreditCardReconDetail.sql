@@ -21,8 +21,10 @@
 	[dblBatchSubFee2] NUMERIC(18,6) NULL,
 	[dblBatchSubFee3] NUMERIC(18,6) NULL,
 	[intSubImportFileHeaderId] INT NULL,
+	[intVendorDefaultId] INT NULL, 
 	CONSTRAINT [PK_tblCCImportDealerCreditCardReconDetail] PRIMARY KEY ([intImportDealerCreditCardReconDetailId]),
-	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCImportDealerCreditCardRecon] FOREIGN KEY([intImportDealerCreditCardReconId]) REFERENCES [tblCCImportDealerCreditCardRecon] ([intImportDealerCreditCardReconId]) ON DELETE CASCADE
+	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCImportDealerCreditCardRecon] FOREIGN KEY([intImportDealerCreditCardReconId]) REFERENCES [tblCCImportDealerCreditCardRecon] ([intImportDealerCreditCardReconId]) ON DELETE CASCADE,
+	CONSTRAINT [FK_tblCCImportDealerCreditCardReconDetail_tblCCVendorDefault] FOREIGN KEY ([intVendorDefaultId]) REFERENCES [tblCCVendorDefault]([intVendorDefaultId])
 )
 GO
 
