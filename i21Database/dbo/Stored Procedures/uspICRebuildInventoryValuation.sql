@@ -6161,7 +6161,7 @@ BEGIN
 		@strPeriod = strPeriod
 	FROM 
 		tblGLFiscalYearPeriod fyp
-		CROSS APPLY dbo.udfDateGreaterThanEquals(fyp.dtmStartDate, @dtmStartDate) dtmStart	
+		CROSS APPLY dbo.udfDateGreaterThanEquals(@dtmStartDate, fyp.dtmStartDate) dtmStart	
 	ORDER BY 
 		fyp.dtmStartDate ASC 
 
