@@ -17,7 +17,8 @@ SELECT D.intImportDealerCreditCardReconDetailId,
 	D.dtmTransactionDate,
 	strSiteType = S.strSiteType,
     strCustomerName = S.strCustomerName,
-	D.ysnValid
+	D.ysnValid,
+	D.strMessage
  FROM tblCCImportDealerCreditCardReconDetail D 
  LEFT JOIN vyuCCSite S ON S.intSiteId = D.intSiteId
  LEFT JOIN tblCCVendorDefault V ON V.intVendorDefaultId = D.intVendorDefaultId
