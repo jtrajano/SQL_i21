@@ -4,7 +4,7 @@ GO
     WHILE EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE intFiscalPeriodId IS NULL)
 	  BEGIN
 		;WITH cte as(
-		    SELECT TOP 1000 intGLDetailId from tblGLDetail WHERE intFiscalPeriodId IS NULL
+		    SELECT TOP 1000000 intGLDetailId from tblGLDetail WHERE intFiscalPeriodId IS NULL
 		)
         UPDATE T SET intFiscalPeriodId = F.intGLFiscalYearPeriodId FROM tblGLDetail T 
 		JOIN cte C ON C.intGLDetailId = T.intGLDetailId

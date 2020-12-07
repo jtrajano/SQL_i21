@@ -212,3 +212,10 @@ EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Document' , @l
 GO
 EXEC sys.sp_addextendedproperty @name=N'MS_Description', @value=N'Comments' , @level0type=N'SCHEMA',@level0name=N'dbo', @level1type=N'TABLE',@level1name=N'tblGLDetail', @level2type=N'COLUMN',@level2name=N'strComments' 
 GO
+
+CREATE NONCLUSTERED INDEX idxGL_tblGLDetail_FiscalPeriod ON [dbo].[tblGLDetail]
+(
+	[intFiscalPeriodId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, DROP_EXISTING = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+GO
+
