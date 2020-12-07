@@ -203,7 +203,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.dtmETAPOL,
 			L.dtmETAPOD,
 			L.dtmETSPOL,
-			strMVessel = CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END,			L.strFVessel,
+			strMVessel = CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END,
 			L.strFVessel,
 			L.strMVoyageNumber,
 			L.strFVoyageNumber,
@@ -557,6 +557,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WHEN CLNP.strType = 'Company' THEN ISNULL(CNCompanyLocation.strZipPostalCode, ConsigneeNotifyCompany.strZip)
 				WHEN CLNP.strType IN ('Vendor', 'Customer', 'Forwarding Agent') THEN ISNULL(CNLocation.strZipCode, '')
 				ELSE '' END
+		FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
