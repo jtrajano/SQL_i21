@@ -122,7 +122,6 @@ BEGIN
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
-
 	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the cargo in favour of ' + @strWarehouseEntityName
 	
 	SELECT @strLogisticsCompanyName = strLogisticsCompanyName,
@@ -204,7 +203,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.dtmETAPOL,
 			L.dtmETAPOD,
 			L.dtmETSPOL,
-			L.strMVessel,
+			strMVessel = CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END,			L.strFVessel,
 			L.strFVessel,
 			L.strMVoyageNumber,
 			L.strFVoyageNumber,
@@ -558,7 +557,6 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 				WHEN CLNP.strType = 'Company' THEN ISNULL(CNCompanyLocation.strZipPostalCode, ConsigneeNotifyCompany.strZip)
 				WHEN CLNP.strType IN ('Vendor', 'Customer', 'Forwarding Agent') THEN ISNULL(CNLocation.strZipCode, '')
 				ELSE '' END
-			FROM tblLGLoad L
 		JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		LEFT JOIN tblCTContractDetail CD ON CD.intContractDetailId = CASE WHEN (L.intPurchaseSale = 2) THEN LD.intSContractDetailId ELSE LD.intPContractDetailId END
 		LEFT JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -587,13 +585,14 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN tblEMEntityToContact CustomerContact ON CustomerContact.intEntityId = Customer.intEntityId
 		LEFT JOIN tblEMEntity CustomerContactEntity ON CustomerContactEntity.intEntityId = CustomerContact.intEntityContactId
 		LEFT JOIN tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
-		LEFT JOIN [tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
+		LEFT JOIN [tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = L.intTerminalEntityId
-		LEFT JOIN [tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
+	
+		LEFT JOIN [tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.ysnDefaultLocation = 1
 		LEFT JOIN tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
-		LEFT JOIN [tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId	
+		LEFT JOIN [tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.ysnDefaultLocation = 1	
 		LEFT JOIN tblEMEntity Shipper ON Shipper.intEntityId = CD.intShipperId
-		LEFT JOIN [tblEMEntityLocation] SpLocation ON SpLocation.intEntityId = Shipper.intEntityId and SpLocation.intEntityLocationId = Shipper.intDefaultLocationId
+		LEFT JOIN [tblEMEntityLocation] SpLocation ON SpLocation.intEntityId = Shipper.intEntityId and SpLocation.ysnDefaultLocation = 1
 		
 		LEFT JOIN tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
@@ -810,15 +809,15 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		JOIN		tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN	tblLGContainerType CType ON CType.intContainerTypeId = L.intContainerTypeId
 		LEFT JOIN	tblEMEntity Vendor ON Vendor.intEntityId = LD.intVendorEntityId
-		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.intEntityLocationId = Vendor.intDefaultLocationId
+		LEFT JOIN	[tblEMEntityLocation] VLocation ON VLocation.intEntityId = LD.intVendorEntityId and VLocation.ysnDefaultLocation = 1
 		LEFT JOIN	tblEMEntity Customer ON Customer.intEntityId = LD.intCustomerEntityId
-		LEFT JOIN	[tblEMEntityLocation] CLocation ON CLocation.intEntityId = LD.intCustomerEntityId and CLocation.intEntityLocationId = Customer.intDefaultLocationId
+		LEFT JOIN	[tblEMEntityLocation] CLocation ON CLocation.intEntityId = LD.intCustomerEntityId and CLocation.ysnDefaultLocation = 1
 		LEFT JOIN	tblEMEntity SLEntity ON SLEntity.intEntityId = L.intShippingLineEntityId
-		LEFT JOIN	[tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.intEntityLocationId = SLEntity.intDefaultLocationId
+		LEFT JOIN	[tblEMEntityLocation] SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.ysnDefaultLocation = 1
 		LEFT JOIN	tblEMEntity TerminalEntity ON TerminalEntity.intEntityId = L.intTerminalEntityId
-		LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.intEntityLocationId = TerminalEntity.intDefaultLocationId
+		LEFT JOIN	[tblEMEntityLocation] TerminalLocation ON TerminalLocation.intEntityId = L.intTerminalEntityId and TerminalLocation.ysnDefaultLocation = 1
 		LEFT JOIN	tblEMEntity InsurEntity ON InsurEntity.intEntityId = L.intInsurerEntityId
-		LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.intEntityLocationId = InsurEntity.intDefaultLocationId
+		LEFT JOIN	[tblEMEntityLocation] InsurLocation ON InsurLocation.intEntityId = L.intInsurerEntityId and InsurLocation.ysnDefaultLocation = 1
 		LEFT JOIN	tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
 		LEFT JOIN	tblLGLoadContainer LC ON LC.intLoadContainerId = LDCL.intLoadContainerId
 		LEFT JOIN	tblLGLoadWarehouseContainer LWC ON LWC.intLoadContainerId = LC.intLoadContainerId
@@ -826,7 +825,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 		LEFT JOIN	tblEMEntity Via ON Via.intEntityId = LW .intHaulerEntityId
 		LEFT JOIN	tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = LW.intSubLocationId
 		LEFT JOIN   tblEMEntity WHVendor ON WHVendor.intEntityId = WH.intVendorId
-		LEFT JOIN	tblEMEntityLocation WHVendorLoc ON WHVendorLoc.intEntityLocationId = WHVendor.intDefaultLocationId
+		LEFT JOIN	tblEMEntityLocation WHVendorLoc ON WHVendorLoc.intEntityId = WHVendor.intEntityId and WHVendorLoc.ysnDefaultLocation = 1
 		LEFT JOIN   tblEMEntityToContact WEC ON WEC.intEntityId = WH.intVendorId
 		LEFT JOIN   tblEMEntity WETC ON WETC .intEntityId = WEC.intEntityContactId
 		LEFT JOIN	tblEMEntityPhoneNumber WETCP ON WETCP.intEntityId = WETC .intEntityId
