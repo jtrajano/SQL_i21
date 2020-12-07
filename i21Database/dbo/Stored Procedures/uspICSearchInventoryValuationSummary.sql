@@ -1,9 +1,31 @@
 ﻿CREATE PROCEDURE dbo.[uspICSearchInventoryValuationSummary]
-	@strPeriod NVARCHAR(50),
-	@intUserId INT
+	@strPeriod NVARCHAR(50)
+	,@intUserId INT
+	,@strCategoryCode AS NVARCHAR(50) = NULL 
 AS
 
-TRUNCATE TABLE tblICInventoryValuationSummary
+DELETE summary
+FROM 
+	tblICInventoryValuationSummary summary
+	INNER JOIN tblICItem i 
+		ON summary.intItemId = i.intItemId
+	INNER JOIN tblGLFiscalYearPeriod f
+		ON summary.strPeriod = f.strPeriod 
+	CROSS APPLY (
+		SELECT TOP 1 
+			fyp.intGLFiscalYearPeriodId 
+		FROM 
+			tblGLFiscalYearPeriod fyp
+		WHERE
+			(fyp.strPeriod = @strPeriod COLLATE Latin1_General_CI_AS OR @strPeriod IS NULL) 		
+		ORDER BY
+			fyp.intGLFiscalYearPeriodId ASC 				
+	) fypStartingPoint
+	LEFT JOIN tblICCategory c 
+		ON c.intCategoryId = i.intCategoryId
+WHERE
+	f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
+	AND (c.strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL) 
 
 INSERT INTO tblICInventoryValuationSummary (
 	intInventoryValuationKeyId
@@ -67,6 +89,8 @@ FROM	tblGLFiscalYearPeriod f
 					ON Category.intCategoryId = Item.intCategoryId
 				LEFT JOIN tblICCommodity Commodity
 					ON Commodity.intCommodityId = Item.intCommodityId
+			WHERE
+				(Category.strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL)
 			--WHERE
 			--	Item.strType NOT IN ('Other Charge', 'Non-Inventory', 'Service', 'Software', 'Comment', 'Bundle')
 		) Item		
