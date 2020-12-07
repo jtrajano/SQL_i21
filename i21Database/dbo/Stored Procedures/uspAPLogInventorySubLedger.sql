@@ -91,7 +91,7 @@ BEGIN
 		ON ctd.intContractDetailId = BillDetail.intContractDetailId
 	LEFT JOIN (tblLGLoadDetail lgd INNER JOIN tblLGLoad lg ON lg.intLoadId = lgd.intLoadId)
 		ON lgd.intLoadDetailId = BillDetail.intLoadDetailId
-	WHERE Bill.intTransactionType IN (1,3)
+	WHERE Bill.intTransactionType IN (1,3) AND BillDetail.intItemId IS NOT NULL
 		
 	EXEC uspICSubLedgerAddReportEntries 
 		@SubLedgerReportEntries = @inventorySubLedger
