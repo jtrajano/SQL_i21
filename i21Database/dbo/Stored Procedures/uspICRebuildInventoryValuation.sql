@@ -6165,7 +6165,11 @@ BEGIN
 	ORDER BY 
 		fyp.dtmStartDate DESC 
 
-	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod, @intUserId
+	EXEC dbo.[uspICSearchInventoryValuationSummary] 
+		@strPeriod
+		,@intUserId
+		,@strCategoryCode 
+		,1 
 END
 
 -- Rebuild the AR Gross Margin Summary
