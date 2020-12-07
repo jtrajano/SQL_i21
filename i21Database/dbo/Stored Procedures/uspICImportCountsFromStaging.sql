@@ -1,4 +1,4 @@
-ALTER PROCEDURE uspICImportCountsFromStaging
+CREATE PROCEDURE uspICImportCountsFromStaging
 	@identifier UNIQUEIDENTIFIER,
 	@type NVARCHAR(50),
 	@intUserId INT = 1
