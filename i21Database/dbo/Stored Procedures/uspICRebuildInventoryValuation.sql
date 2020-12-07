@@ -6160,11 +6160,16 @@ BEGIN
 		@strPeriod = strPeriod
 	FROM 
 		tblGLFiscalYearPeriod fyp
-		CROSS APPLY dbo.udfDateGreaterThanEquals(fyp.dtmStartDate, @dtmStartDate) dtmStart	
+	WHERE	
+		fyp.dtmStartDate <= @dtmStartDate
 	ORDER BY 
-		fyp.dtmStartDate ASC 
+		fyp.dtmStartDate DESC 
 
-	EXEC dbo.[uspICSearchInventoryValuationSummary] @strPeriod, @intUserId
+	EXEC dbo.[uspICSearchInventoryValuationSummary] 
+		@strPeriod
+		,@intUserId
+		,@strCategoryCode 
+		,1 
 END
 
 -- Rebuild the AR Gross Margin Summary
