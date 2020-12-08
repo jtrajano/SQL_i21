@@ -46,7 +46,7 @@ BEGIN
 		--WE NEED TO CHECK IF THE TRANSACTION SCRREN ID IS CORRECT OR EXISTS IN THE tblSMInterCompanyMasterScreen
 		SELECT @intCurrentTransactionScreenId = intScreenId FROM tblSMTransaction WHERE intTransactionId = @intCurrentTransactionId
 		SELECT @intReferenceTransactionScreenId = intScreenId FROM tblSMTransaction WHERE intTransactionId = @intReferenceTransactionId
-		IF ISNULL(@intCurrentTransactionScreenId, 0) <> 0  AND ISNULL(@intReferenceTransactionScreenId, 0) <> 0
+		IF ISNULL(@intCurrentTransactionScreenId, 0) <> 0  AND ISNULL(@intReferenceTransactionScreenId, 0) <> 0 AND ISNULL(@intReferenceCompanyId, 0) = 0
 		BEGIN
 			IF NOT EXISTS (SELECT TOP 1 1 FROM tblSMInterCompanyMasterScreen WHERE intScreenId = @intCurrentTransactionScreenId)
 				RETURN 1
