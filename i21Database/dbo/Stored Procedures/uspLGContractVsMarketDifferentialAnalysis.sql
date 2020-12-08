@@ -18,7 +18,7 @@ SELECT
 	,strItemNo
 	,strItemDescription
 	,strItemOrigin
-	,dblPBasis = ROUND(dblSBasis, 2)
+	,dblPBasis = ROUND(dblPBasis, 2)
 	,dblMBasis = ROUND(dblMBasis, 2)
 	,dblPaymentTermAdjustmentRate = ROUND(dblPaymentTermAdjustmentRate, 2)
 	,dblPackingAdjustmentRate = ROUND(dblPackingAdjustmentRate, 2)
