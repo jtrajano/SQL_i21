@@ -38,7 +38,7 @@
 	[ysnEnableCreditCardProcessing]					BIT NOT NULL DEFAULT 0,
 	[strMerchantId]									NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[strMerchantPassword]							NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
-	[strPaymentServer]								NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strPaymentServer]								NVARCHAR(500) COLLATE Latin1_General_CI_AS NULL,
 	[strCreditCardProcessingType]					NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
 	[strPaymentExternalLink]						NVARCHAR(350) COLLATE Latin1_General_CI_AS NULL,
 	[strPaymentPortal]								NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
