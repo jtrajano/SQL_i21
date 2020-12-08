@@ -142,7 +142,7 @@ BEGIN
 			) tmpAmountCodes
 		) tblAmountCodes
 	END
-	sELSE IF @form1099 = 7 --NEC
+	ELSE IF @form1099 = 7 --NEC
 	BEGIN
 		SELECT @amountCodes = COALESCE(@amountCodes,'') + strAmountCodes 
 		FROM (
