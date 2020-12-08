@@ -1738,7 +1738,7 @@ BEGIN TRY
 								IF EXISTS(SELECT 1 FROM tblGRSettleContract WHERE intSettleStorageId = @intSettleStorageId)
 								BEGIN
 									UPDATE SC1
-									SET dblCost = (select top 1 dblCost from tblICInventoryTransaction IT
+									SET dblCost = (select top 1 IT.dblCost from tblICInventoryTransaction IT
 														where IT.intTransactionId = @intSettleStorageId
 															and IT.intTransactionTypeId = 44
 															and IT.intItemId = a.intItemId
@@ -2185,7 +2185,7 @@ BEGIN TRY
 															--and (@dblQtyFromCt = @dblSelectedUnits) 
 															THEN 															
 																(
-																	select dblCost from tblICInventoryTransaction IT
+																	select IT.dblCost from tblICInventoryTransaction IT
 																		where IT.intTransactionId = @intSettleStorageId
 																			and IT.intTransactionTypeId = 44
 																			and IT.intItemId = a.intItemId
@@ -2193,7 +2193,7 @@ BEGIN TRY
 																)
 																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
 																WHEN CS.intStorageTypeId = 2 THEN 
-																(select dblCost from tblICInventoryTransaction IT
+																(select IT.dblCost from tblICInventoryTransaction IT
 																inner join tblGRStorageHistory STH
 																	on STH.intTransferStorageId = IT.intTransactionId
 																	where IT.intTransactionTypeId = 56
