@@ -203,7 +203,7 @@ IF(OBJECT_ID('tempdb..#exclusionTable') IS NOT NULL)
 												'''+@strType+''', 
 												 GETUTCDATE(),
 												 '+CASE WHEN @intSize IS NULL THEN 'NULL' ELSE  CONVERT(NVARCHAR,@intSize) END + ', 
-												 '+CASE WHEN @intDocumentSourceFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intDocumentSourceFolderId) END+ ',
+												 '+CASE WHEN @outFolderId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@outFolderId) END+ ',
 												  '+CASE WHEN @referenceTransId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@referenceTransId) END +', 
 												  '+CASE WHEN @placeHolderEntityId IS NULL THEN 'NULL' ELSE CONVERT(VARCHAR,@placeHolderEntityId) END+', 
 												  '+CASE WHEN @intNewUploadId IS NULL THEN 'NULL' ELSE CONVERT(NVARCHAR,@intNewUploadId) END+', 
