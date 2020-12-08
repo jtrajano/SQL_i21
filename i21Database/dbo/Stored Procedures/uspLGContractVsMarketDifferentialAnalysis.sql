@@ -189,9 +189,10 @@ FROM
 						LEFT JOIN tblSMCurrency FRMCU ON FRMCU.intCurrencyID = FRMX.intCurrencyId
 						LEFT JOIN tblLGContainerType CON ON CON.intContainerTypeId = FRMX.intContainerTypeId
 						LEFT JOIN tblICItemUOM CTUOM ON CTUOM.intItemId = I.intItemId AND CTUOM.intUnitMeasureId = CON.intWeightUnitMeasureId
-					 WHERE FRMX.strOriginPort = ODP.strOriginDefaultPort
+					 WHERE FRMX.intType = 1
+						AND FRMX.strOriginPort = ODP.strOriginDefaultPort
 						AND FRMX.strDestinationCity = PLOC.strCity
-						AND SCD.dtmStartDate BETWEEN FRMX.dtmValidFrom AND FRMX.dtmValidTo
+						AND PCD.dtmStartDate BETWEEN FRMX.dtmValidFrom AND FRMX.dtmValidTo
 						AND PCH.intPositionId IN (SELECT intPositionId FROM tblCTPosition P WHERE P.strPositionType = 'Spot')
 					 ORDER BY FRMX.dblTotalCostPerContainer ASC
 					 ) FTADJ 
