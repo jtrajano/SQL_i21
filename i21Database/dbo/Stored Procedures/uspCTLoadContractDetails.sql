@@ -122,7 +122,7 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		OUTER APPLY (
 			SELECT TOP 1 intLoadDetailId
-			
+			FROM tblLGLoadDetail
 			WHERE CD.intContractDetailId = CASE WHEN CH.intContractTypeId = 1 THEN intPContractDetailId ELSE intSContractDetailId END
 			ORDER BY intLoadDetailId DESC
 		) LG
