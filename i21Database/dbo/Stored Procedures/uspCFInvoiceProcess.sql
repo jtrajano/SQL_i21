@@ -261,6 +261,95 @@ BEGIN TRY
 	INNER JOIN tblEMEntity as ent
 	ON ipr.intCustomerId = ent.intEntityId
 
+	INSERT INTO tblCFInvoiceProcessResult
+	(
+		 ysnStatus
+		,intCustomerId
+		,strInvoiceReportNumber
+		,dblInvoiceAmount
+		,dblInvoiceQuantity
+		,dblInvoiceDiscount
+		,dblInvoiceFee
+		,dblPayment
+		,intInvoiceId
+		,intPaymentId
+		,strInvoiceId
+		,strPaymentId
+		,dtmInvoiceDate
+	)
+	SELECT
+		 1
+		,intCustomerId
+		,strTempInvoiceReportNumber
+		,SUM(dblCalculatedTotalAmount)
+		,SUM(dblQuantity)
+		,SUM(dblDiscount)
+		,SUM(dblFeeAmount)
+		,0
+		,NULL
+		,NULL
+		,NULL
+		,NULL
+		,dtmInvoiceDate
+		FROM
+		tblCFInvoiceStagingTable
+		WHERE strUserId = @username
+		AND LOWER(strStatementType) = @statementType
+		AND intCustomerId NOT IN (SELECT intCustomerId FROM tblCFInvoiceProcessResult AS innerQuery WHERE ISNULL(innerQuery.strInvoiceReportNumber,'') = ISNULL(tblCFInvoiceStagingTable.strTempInvoiceReportNumber,''))
+		GROUP BY 
+			intCustomerId , 
+			strCustomerNumber ,
+			strCustomerName ,
+			strTempInvoiceReportNumber, 
+			dtmInvoiceDate
+
+
+	INSERT INTO tblCFInvoiceProcessHistory
+	(
+		 intCustomerId
+		,intInvoiceId
+		,intPaymentId
+		,strCustomerNumber
+		,strCustomerName
+		,strInvoiceNumber
+		,strPaymentNumber
+		,dblInvoiceAmount
+		,dblTotalQuantity
+		,dblDiscountEligibleQuantity
+		,dblDiscountAmount
+		,dtmInvoiceDate
+		,strInvoiceNumberHistory
+		,strReportName
+		,dtmBalanceForwardDate
+	)
+	SELECT
+		 intCustomerId
+		,NULL
+		,NULL
+		,strCustomerNumber
+		,strCustomerName
+		,strTempInvoiceReportNumber
+		,NULL
+		,SUM(dblCalculatedTotalAmount)
+		,SUM(dblQuantity)
+		,SUM(dblEligableGallon)
+		,SUM(dblDiscount)
+		,dtmInvoiceDate
+		,strTempInvoiceReportNumber
+		,@reportName
+		,@balanceForwardDate
+		FROM
+		tblCFInvoiceStagingTable
+		WHERE strUserId = @username
+		AND LOWER(strStatementType) = @statementType
+		AND intCustomerId NOT IN (SELECT intCustomerId FROM tblCFInvoiceProcessHistory AS innerQuery WHERE ISNULL(innerQuery.strInvoiceNumber,'') = ISNULL(tblCFInvoiceStagingTable.strTempInvoiceReportNumber,''))
+		GROUP BY 
+			intCustomerId , 
+			strCustomerNumber ,
+			strCustomerName ,
+			strTempInvoiceReportNumber, 
+			dtmInvoiceDate
+	
 
 	INSERT INTO tblCFInvoiceHistoryStagingTable
 	(
