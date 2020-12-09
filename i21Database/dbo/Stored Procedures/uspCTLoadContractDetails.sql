@@ -118,6 +118,7 @@ BEGIN TRY
 			, CH.intCommodityId
 			, CH.intContractTypeId
 			, CH.ysnLoad
+			, CH.intCommodityUOMId
 		FROM #tmpContractDetail CD
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		OUTER APPLY (
@@ -434,7 +435,7 @@ BEGIN TRY
 	LEFT JOIN tblSMCurrencyExchangeRateType RT ON RT.intCurrencyExchangeRateTypeId = CD.intRateTypeId
 	LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = CD.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
-	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId = CT.intCommodityId
+	LEFT JOIN tblICCommodityUnitMeasure CO ON CO.intCommodityUnitMeasureId =  CT.intCommodityUOMId
 	LEFT JOIN tblICItemUOM CM ON CM.intItemId = CD.intItemId AND CM.intUnitMeasureId = CO.intUnitMeasureId
 	LEFT JOIN @tblShipment Shipment ON Shipment.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN @tblBill Bill ON Bill.intContractDetailId = CD.intContractDetailId
