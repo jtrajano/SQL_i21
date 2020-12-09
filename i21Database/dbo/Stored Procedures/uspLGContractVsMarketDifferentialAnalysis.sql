@@ -18,6 +18,7 @@ SELECT
 	,strItemNo
 	,strItemDescription
 	,strItemOrigin
+	,strItemOriginDefaultPort
 	,dblPBasis = ROUND(dblPBasis, 2)
 	,dblMBasis = ROUND(dblMBasis, 2)
 	,dblPaymentTermAdjustmentRate = ROUND(dblPaymentTermAdjustmentRate, 2)
@@ -63,17 +64,17 @@ FROM
 		,strPContractNumber = PCH.strContractNumber
 		,dtmPContractDate = PCH.dtmContractDate
 		,strVendor = VEN.strName
-		,strPINCO = PFT.strFreightTerm
+		,strPINCO = PFT.strFreightTerm + ', ' + PLOC.strCity
 		,intItemId = I.intItemId
 		,strItemNo = I.strItemNo
 		,strItemDescription = I.strDescription
 		,strItemOrigin = OG.strDescription
+		,strItemOriginDefaultPort = ODP.strOriginDefaultPort
 		,dblPBasis = ISNULL(PCD.dblBasis, 0)
 		,dblMBasis = ISNULL(MB.dblBasisOrDiscount, 0)
 		,dblPaymentTermAdjustmentRate = ISNULL(PTADJ.dblRate, 0)
 		,dblPackingAdjustmentRate = ISNULL(PKADJ.dblRate, 0)
-		,dblPINCOAdjustmentRate = CASE WHEN (PCH.intFreightTermId = SCH.intFreightTermId) THEN NULL
-						ELSE ISNULL(FTADJ.dblTotalCostPerContainer, 0) / ISNULL(FTADJ.dblNetWeight, 1) END
+		,dblPINCOAdjustmentRate = ISNULL(FTADJ.dblTotalCostPerContainer, 0) / ISNULL(FTADJ.dblNetWeight, 1)
 		,dblCertificationAdjustmentRate = ISNULL(CFADJ.dblRate, 0)
 		,dblPBasisAmt = CASE WHEN ISNULL(PBUOM.dblUnitQty, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
 						ELSE dbo.fnCalculateCostBetweenUOM(PCD.intBasisUOMId, ItemUOM.intItemUOMId, ISNULL(PCD.dblBasis, 0)) / ISNULL(PCUR.intCent, 1) END
@@ -83,8 +84,7 @@ FROM
 						ELSE dbo.fnCalculateCostBetweenUOM(PTADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(PTADJ.dblRate, 0)) / ISNULL(PTADJ.intCent, 1) END
 		,dblPackingAdjustmentRateAmt = CASE WHEN ISNULL(PKADJ.dblRate, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 	
 						ELSE dbo.fnCalculateCostBetweenUOM(PKADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(PKADJ.dblRate, 0)) / ISNULL(PKADJ.intCent, 1) END
-		,dblPINCOAdjustmentRateAmt = CASE WHEN (PCH.intFreightTermId = SCH.intFreightTermId) THEN NULL
-						ELSE dbo.fnCalculateCostBetweenUOM(FTADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(FTADJ.dblTotalCostPerContainer, 0) / ISNULL(FTADJ.dblNetWeight, 1)) / ISNULL(FTADJ.intCent, 1) END
+		,dblPINCOAdjustmentRateAmt = dbo.fnCalculateCostBetweenUOM(FTADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(FTADJ.dblTotalCostPerContainer, 0) / ISNULL(FTADJ.dblNetWeight, 1)) / ISNULL(FTADJ.intCent, 1)
 		,dblCertificationAdjustmentRateAmt = CASE WHEN ISNULL(CFADJ.dblRate, 0) = 0 OR ISNULL(ItemUOM.dblUnitQty, 0) = 0 THEN NULL 			
 						ELSE dbo.fnCalculateCostBetweenUOM(CFADJ.intItemUOMId, ItemUOM.intItemUOMId, ISNULL(CFADJ.dblRate, 0)) / ISNULL(CFADJ.intCent, 1) END
 		,strSContractNumber = SCH.strContractNumber
