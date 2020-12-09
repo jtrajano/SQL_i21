@@ -94,6 +94,6 @@ GROUP BY intEntityVendorId
 	,dblDirectSalesNEC
 	,dblFederalIncomeNEC
 	,dblStateNEC
-HAVING SUM(ISNULL(dblNonemployeeCompensationNEC,0)) >= 600
+HAVING SUM(ISNULL(dblNonemployeeCompensationNEC,0)) >= 600 OR SUM(ISNULL(dblFederalIncomeNEC,0)) > 0
 	
 GO
