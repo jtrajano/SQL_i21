@@ -179,6 +179,8 @@ AS
     
 	,SCT.ysnCertOfAnalysisPosted
 	,SCT.ysnExportRailXML
+   ,SCT.intAGWorkOrderId
+   ,SCT.ysnMultipleTicket
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
