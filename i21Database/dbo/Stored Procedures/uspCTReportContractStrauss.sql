@@ -208,12 +208,23 @@ BEGIN TRY
 
 	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
 	BEGIN
-		 SELECT  @strAmendedColumns = STUFF((
+		DECLARE @dtmApproveDate DATETIME
+		
+		SELECT TOP 1 @dtmApproveDate = CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, A.dtmDate), DATENAME(TzOffset, SYSDATETIMEOFFSET())))
+		FROM tblSMApproval A
+		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
+		WHERE T.intScreenId = @intScreenId
+			AND strStatus = 'Approved'
+			AND T.intRecordId = 1042
+		ORDER BY intApprovalId
+
+		SELECT  @strAmendedColumns = STUFF((
 											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
 											FROM tblCTAmendmentApproval AAP
 											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
 											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
-											WHERE ISNULL(AAP.ysnAmendment,0) =1
+											WHERE ISNULL(AAP.ysnAmendment,0) = 1
+												AND AL.dtmHistoryCreated >= @dtmApproveDate
 											FOR XML PATH('')
 											), 1, 1, '')
 	END
