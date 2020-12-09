@@ -100,6 +100,9 @@ BEGIN
 			,0 AS dblSubstitutePayments2
 			,0 AS dblDirectSales2
 			,NULL AS strDirectSales2
+			,0 AS dblFishResale2
+			,0 AS dblDeferrals2
+			,0 AS dblDeferredCompensation2
 			,0 ASintEntityVendorId2
 			,NULL AS strCorrected2
 			,0 AS dblTotalPayment2
@@ -189,6 +192,9 @@ WITH MISC1099 (
 	,dblSubstitutePayments
 	,dblDirectSales
 	,strDirectSales
+	,dblFishResale
+	,dblDeferrals
+	,dblDeferredCompensation
 	,intEntityVendorId
 	,dblTotalPayment
 	,strCorrected
@@ -249,6 +255,9 @@ SELECT
 	,MISC1099Top.dblSubstitutePayments
 	,MISC1099Top.dblDirectSales
 	,MISC1099Top.strDirectSales
+	,MISC1099Top.dblFishResale
+	,MISC1099Top.dblDeferrals
+	,MISC1099Top.dblDeferredCompensation
 	,MISC1099Top.intEntityVendorId
 	,MISC1099Top.strCorrected
 	,MISC1099Top.dblTotalPayment
@@ -278,6 +287,9 @@ SELECT
 	,MISC1099Bottom.dblSubstitutePayments		AS dblSubstitutePayments2
 	,MISC1099Bottom.dblDirectSales				AS dblDirectSales2
 	,MISC1099Bottom.strDirectSales				AS strDirectSales2
+	,MISC1099Bottom.dblFishResale				AS dblFishResale2
+	,MISC1099Bottom.dblDeferrals				AS dblDeferrals2
+	,MISC1099Bottom.dblDeferredCompensation		AS dblDeferredCompensation2
 	,MISC1099Bottom.intEntityVendorId			AS intEntityVendorId2
 	,MISC1099Bottom.strCorrected				AS strCorrected2
 	,MISC1099Bottom.dblTotalPayment				AS dblTotalPayment2
