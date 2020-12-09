@@ -20,7 +20,16 @@ BEGIN
 				WHERE  INVRCPTITEM.intSourceId IS NOT NULL
 					AND PYMT.intEntityVendorId = INVRCPT.intEntityVendorId 
 				  AND PYMT.strPaymentRecordNum = @strTransactionId
-
+				UNION ALL --DIRECT IN
+				SELECT TOP 1 1
+				FROM tblAPPayment PYMT
+					INNER JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+					INNER JOIN tblAPBill Bill ON PYMTDTL.intBillId = Bill.intBillId
+					INNER JOIN tblAPBillDetail BillDtl ON Bill.intBillId = BillDtl.intBillId
+					INNER JOIN tblICItem Item ON BillDtl.intItemId = Item.intItemId
+					INNER JOIN tblSCTicket TKT ON BillDtl.intScaleTicketId = TKT.intTicketId
+				WHERE  PYMT.intEntityVendorId = TKT.intEntityId 
+					AND PYMT.strPaymentRecordNum = @strTransactionId
 				UNION ALL
 				SELECT TOP 1 1 
 				FROM tblAPPayment PYMT 
