@@ -46,9 +46,22 @@ SELECT
     , dblRoyalties = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 11--'Royalties'     
 		THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END    
-    , dblSubstitutePayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 12--'Substitute Payments in Lieu of Dividends or Interest '     
-	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
-     ELSE 0 END    
+    , dblSubstitutePayments = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 12--'Substitute Payments in Lieu of Dividends or Interest'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END   
+	 , dblFishResale = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 13--'Fish purchased for resale'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END  
+	 , dblDeferrals = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 14--'Section 409A deferrals'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END  
+	 , dblDeferredCompensation = CASE WHEN A.int1099Form = 1 AND A.int1099Category = 15--'Nonqualified deferred compensation'     
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099))
+			* (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+     ELSE 0 END   	
 	, dbl1099INT = CASE WHEN A.int1099Form = 2--1099 INT
 	    THEN (A.dblTotal + A.dblTax) / B.dblTotal  * ISNULL(B2.dblPayment,A.dbl1099)
      ELSE 0 END  

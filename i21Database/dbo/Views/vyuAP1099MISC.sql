@@ -28,6 +28,9 @@ WITH MISC1099 (
 	,dblSubstitutePayments
 	,dblDirectSales
 	,strDirectSales
+	,dblFishResale
+	,dblDeferrals
+	,dblDeferredCompensation
 	,intEntityVendorId
 )
 AS
@@ -67,6 +70,9 @@ AS
 		, CASE WHEN SUM(A.dblSubstitutePayments) >= MIN(C.dbl1099MISCSubstitute) AND SUM(A.dblSubstitutePayments) != 0 THEN SUM(dblSubstitutePayments) ELSE NULL END AS dblSubstitutePayments
 		, CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN SUM(A.dblDirectSales) ELSE NULL END AS dblDirectSales
 		, (CASE WHEN SUM(A.dblDirectSales) >= MIN(C.dbl1099MISCDirecSales) AND SUM(A.dblDirectSales) != 0 THEN 'X' ELSE NULL END) AS strDirectSales
+		, CASE WHEN SUM(A.dblFishResale) != 0 THEN SUM(A.dblFishResale) ELSE NULL END
+		, CASE WHEN SUM(A.dblDeferrals) != 0 THEN SUM(A.dblDeferrals) ELSE NULL END
+		, CASE WHEN SUM(A.dblDeferredCompensation) != 0 THEN SUM(A.dblDeferredCompensation) ELSE NULL END
 		, A.[intEntityId]
 	FROM vyuAP1099 A
 	CROSS JOIN tblSMCompanySetup B
@@ -98,6 +104,9 @@ SELECT
 		+ ISNULL(dblParachutePayments,0)
 		+ ISNULL(dblRents,0)
 		+ ISNULL(dblRoyalties,0)
+		+ ISNULL(dblSubstitutePayments,0)
+		+ ISNULL(dblSubstitutePayments,0)
+		+ ISNULL(dblSubstitutePayments,0)
 		+ ISNULL(dblSubstitutePayments,0)) AS dblTotalPayment
 FROM MISC1099 A
 GROUP BY intEntityVendorId
@@ -126,17 +135,14 @@ GROUP BY intEntityVendorId
 	,dblRents
 	,dblRoyalties
 	,dblSubstitutePayments
+	,dblFishResale
+	,dblDeferrals
+	,dblDeferredCompensation
 	,strDirectSales
-HAVING SUM(ISNULL(dblBoatsProceeds,0)
-		+ ISNULL(dblCropInsurance,0)
-		+ ISNULL(dblDirectSales,0)
-		+ ISNULL(dblFederalIncome,0)
-		+ ISNULL(dblGrossProceedsAtty,0)
-		+ ISNULL(dblMedicalPayments,0)
-		+ ISNULL(dblNonemployeeCompensation,0)
-		+ ISNULL(dblOtherIncome,0)
-		+ ISNULL(dblParachutePayments,0)
-		+ ISNULL(dblRents,0)
-		+ ISNULL(dblRoyalties,0)
-		+ ISNULL(dblSubstitutePayments,0)) > 0
+HAVING SUM(ISNULL(dblRoyalties,0)) >= 10 OR SUM(ISNULL(dblSubstitutePayments,0)) >= 10
+		OR SUM(ISNULL(dblRents,0)) >= 600 OR SUM(ISNULL(dblOtherIncome,0)) >= 600
+		OR SUM(ISNULL(dblBoatsProceeds,0)) >= 600 OR SUM(ISNULL(dblMedicalPayments,0)) >= 600
+		OR SUM(ISNULL(dblCropInsurance,0)) >= 600 OR SUM(ISNULL(dblGrossProceedsAtty,0)) >= 600
+		OR SUM(ISNULL(dblDeferrals,0)) >= 600 OR SUM(ISNULL(dblDeferredCompensation,0)) >= 600
+		OR SUM(ISNULL(dblFederalIncome,0)) > 0
 GO
