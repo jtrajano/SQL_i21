@@ -254,7 +254,11 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-			SELECT @dblLotsFixed =  dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
+			declare
+				@dblSlicedFutures numeric(18,6)
+				,@dblSlicedCashPrice numeric(18,6);
+
+			SELECT @dblLotsFixed =  round(dblLotsFixed,2), @dblSlicedFutures = dblFinalPrice - dblOriginalBasis, @dblSlicedCashPrice = dblFinalPrice FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId;
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
@@ -262,6 +266,16 @@ BEGIN TRY
 						dblCashPrice		=	NULL,
 						dblTotalCost		=	NULL,
 						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
+				WHERE	intContractDetailId	=	@intContractDetailId
+			END
+
+			IF @dblNoOfLots = @dblLotsFixed AND @intPricingTypeId = 2
+			BEGIN
+				UPDATE	@CDTableUpdate
+				SET		dblFutures			=	@dblSlicedFutures,
+						dblCashPrice		=	@dblSlicedCashPrice,
+						dblTotalCost		=	(dblQuantity * @dblSlicedCashPrice),
+						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 1 END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
