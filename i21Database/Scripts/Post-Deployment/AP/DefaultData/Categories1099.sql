@@ -12,7 +12,10 @@ USING (VALUES
   (9, N'Other Income'),
   (10, N'Rents'),
   (11, N'Royalties'),
-  (12, N'Substitute Payments in Lieu of Dividends or Interest')
+  (12, N'Substitute Payments in Lieu of Dividends or Interest'),
+  (13, N'Fish purchased for resale'),
+  (14, N'Section 409A deferrals'),
+  (15, N'Nonqualified deferred compensation')
 )
 AS Source (int1099CategoryId, strCategory)
 ON Target.int1099CategoryId = Source.int1099CategoryId AND Target.strCategory = Source.strCategory
