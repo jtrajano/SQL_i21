@@ -6,5 +6,9 @@
 	strFeedStatus				NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	dtmFeedDate					DATETIME CONSTRAINT DF_tblICItemPreStage_dtmFeedDate DEFAULT GETDATE(),
 	strMessage					NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
-	intUserId int
+	intUserId int,
+	ysnMailSent BIT,
+	intStatusId int
+
+	
 )

@@ -804,6 +804,14 @@ BEGIN TRY
 
 			UPDATE tblARInvoiceStage
 			SET strFeedStatus = 'Processed'
+				,intStatusId=1
+				,intTransactionTypeId= CASE 
+					WHEN @strTransactionType = 'Invoice'
+						THEN 1 --Voucher
+					WHEN @strTransactionType = 'Claim'
+						THEN 11 --Claim
+					ELSE 3 --Debit Note
+					END
 			WHERE intInvoiceStageId = @intInvoiceStageId
 			AND strFeedStatus ='In-Progress'
 
@@ -854,6 +862,14 @@ BEGIN TRY
 			UPDATE tblARInvoiceStage
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
+				,intStatusId=2
+				,intTransactionTypeId= CASE 
+					WHEN @strTransactionType = 'Invoice'
+						THEN 1 --Voucher
+					WHEN @strTransactionType = 'Claim'
+						THEN 11 --Claim
+					ELSE 3 --Debit Note
+					END
 			WHERE intInvoiceStageId = @intInvoiceStageId
 		END CATCH
 

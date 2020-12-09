@@ -77,12 +77,14 @@ BEGIN
 
 			UPDATE tblMFRecipeStage
 			SET strMessage = 'Success'
+				,intStatusId=1
 			WHERE intRecipeStageId = @intMinId
 		END TRY
 
 		BEGIN CATCH
 			UPDATE tblMFRecipeStage
 			SET strMessage = ERROR_MESSAGE()
+				,intStatusId=2
 			WHERE intRecipeStageId = @intMinId
 		END CATCH
 
@@ -157,6 +159,7 @@ BEGIN
 		BEGIN
 			UPDATE tblMFRecipeItemStage
 			SET strMessage = 'No recipe found to Delete items.'
+				,intStatusId=2
 			WHERE intRecipeItemStageId = @intMinId
 
 			GOTO NEXT_RECIPEITEM_DELETE
@@ -170,12 +173,14 @@ BEGIN
 
 			UPDATE tblMFRecipeItemStage
 			SET strMessage = 'Success'
+				,intStatusId=1
 			WHERE intRecipeItemStageId = @intMinId
 		END TRY
 
 		BEGIN CATCH
 			UPDATE tblMFRecipeItemStage
 			SET strMessage = ERROR_MESSAGE()
+				,intStatusId=2
 			WHERE intRecipeItemStageId = @intMinId
 		END CATCH
 
@@ -196,6 +201,7 @@ BEGIN
 	--Recipe Name is required
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Recipe Name is required'
+		,intStatusId=2
 	WHERE ISNULL(strRecipeName, '') = ''
 		AND ISNULL(strItemNo, '') = ''
 		AND strSessionId = @strSessionId
@@ -204,6 +210,7 @@ BEGIN
 	--Invalid Item
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Item'
+		,intStatusId=2
 	WHERE strItemNo NOT IN (
 			SELECT strItemNo
 			FROM tblICItem
@@ -215,6 +222,7 @@ BEGIN
 	--Invalid Qty
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Quantity should be greater than 0'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strQuantity], 0)) = 0
 			OR ISNULL(CAST([strQuantity] AS NUMERIC(18, 6)), 0) <= 0
@@ -225,6 +233,7 @@ BEGIN
 	--UOM is required
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'UOM is required'
+		,intStatusId=2
 	WHERE ISNULL(strUOM, '') = ''
 		AND ISNULL(strItemNo, '') = ''
 		AND strSessionId = @strSessionId
@@ -233,6 +242,7 @@ BEGIN
 	--Invalid UOM
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid UOM'
+		,intStatusId=2
 	WHERE strUOM NOT IN (
 			SELECT strUnitMeasure
 			FROM tblICUnitMeasure
@@ -245,6 +255,7 @@ BEGIN
 	--Location is required
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Location is required'
+		,intStatusId=2
 	WHERE ISNULL(strLocationName, '') = ''
 		AND ISNULL(strItemNo, '') <> ''
 		AND strSessionId = @strSessionId
@@ -253,6 +264,7 @@ BEGIN
 	--Invalid Location
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Location'
+		,intStatusId=2
 	WHERE strLocationName NOT IN (
 			SELECT strLocationName
 			FROM tblSMCompanyLocation
@@ -264,6 +276,7 @@ BEGIN
 	--Invalid Version
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Version No'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strVersionNo], 0)) = 0
 			OR CHARINDEX('.', ISNULL([strVersionNo], 0)) > 0
@@ -275,6 +288,7 @@ BEGIN
 	--Invalid Recipe Type
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Recipe Type'
+		,intStatusId=2
 	WHERE strRecipeType NOT IN (
 			SELECT strName
 			FROM tblMFRecipeType
@@ -295,6 +309,7 @@ BEGIN
 	--Invalid Manufacturing Process
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Manufacturing Process'
+		,intStatusId=2
 	WHERE strManufacturingProcess NOT IN (
 			SELECT strProcessName
 			FROM tblMFManufacturingProcess
@@ -306,6 +321,7 @@ BEGIN
 	--Invalid Customer
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Customer'
+		,intStatusId=2
 	WHERE strCustomer NOT IN (
 			SELECT strCustomer
 			FROM vyuARCustomer
@@ -317,6 +333,7 @@ BEGIN
 	--Invalid Farm
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Farm'
+		,intStatusId=2
 	WHERE strFarm NOT IN (
 			SELECT strFarm
 			FROM tblEMEntityFarm
@@ -328,6 +345,7 @@ BEGIN
 	--Invalid Cost Type
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Cost Type'
+		,intStatusId=2
 	WHERE strCostType NOT IN (
 			SELECT strName
 			FROM tblMFCostType
@@ -339,6 +357,7 @@ BEGIN
 	--Invalid Margin By
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Margin By'
+		,intStatusId=2
 	WHERE strMarginBy NOT IN (
 			SELECT strName
 			FROM tblMFMarginBy
@@ -350,6 +369,7 @@ BEGIN
 	--Invalid Margin
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Margin / Margin cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strMargin], 0)) = 0
 			OR ISNULL(CAST([strMargin] AS NUMERIC(18, 6)), 0) < 0
@@ -360,6 +380,7 @@ BEGIN
 	--Invalid Discount
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Discount / Discount cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strDiscount], 0)) = 0
 			OR ISNULL(CAST([strDiscount] AS NUMERIC(18, 6)), 0) < 0
@@ -370,6 +391,7 @@ BEGIN
 	--Invalid One Line Print
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid One Line Print'
+		,intStatusId=2
 	WHERE strOneLinePrint NOT IN (
 			SELECT strName
 			FROM tblMFOneLinePrint
@@ -397,6 +419,7 @@ BEGIN
 	--Invalid Valid From
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Valid From (YYYY-MM-DD)'
+		,intStatusId=2
 	WHERE ISDATE(ISNULL([strValidFrom], '')) = 0
 		AND ISNULL([strValidFrom], '') <> ''
 		AND strSessionId = @strSessionId
@@ -405,6 +428,7 @@ BEGIN
 	--Invalid Valid To
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Invalid Valid To (YYYY-MM-DD)'
+		,intStatusId=2
 	WHERE ISDATE(ISNULL([strValidTo], '')) = 0
 		AND ISNULL([strValidTo], '') <> ''
 		AND strSessionId = @strSessionId
@@ -415,6 +439,7 @@ BEGIN
 		--Invalid Detail Item
 		UPDATE tblMFRecipeItemStage
 		SET strMessage = 'Invalid Recipe Detail Item'
+			,intStatusId=2
 		WHERE ISNULL(strRecipeItemNo, '') NOT IN (
 				SELECT strItemNo
 				FROM tblICItem
@@ -424,6 +449,7 @@ BEGIN
 
 		UPDATE R
 		SET R.strMessage = 'Minimum one input item is required to create a recipe.'
+			,R.intStatusId=2
 		From tblMFRecipeStage R
 		WHERE R.strSessionId = @strSessionId
 			AND ISNULL(R.strMessage, '') = ''
@@ -501,6 +527,7 @@ BEGIN
 		BEGIN
 			UPDATE tblMFRecipeStage
 			SET strMessage = 'Farm does not belong to customer.'
+				,intStatusId=2
 			WHERE intRecipeStageId = @intMinId
 
 			GOTO NEXT_RECIPE
@@ -716,6 +743,7 @@ BEGIN
 
 		UPDATE tblMFRecipeStage
 		SET strMessage = 'Success'
+			,intStatusId=1
 		WHERE intRecipeStageId = @intMinId
 
 		NEXT_RECIPE:
@@ -729,6 +757,7 @@ BEGIN
 
 	UPDATE tblMFRecipeStage
 	SET strMessage = 'Skipped'
+		,intStatusId=2
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 END
@@ -739,6 +768,7 @@ BEGIN
 	--Recipe Name is required
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Recipe Name is required'
+		,intStatusId=2
 	WHERE ISNULL(strRecipeName, '') = ''
 		AND ISNULL(strRecipeHeaderItemNo, '') = ''
 		AND strSessionId = @strSessionId
@@ -747,6 +777,7 @@ BEGIN
 	--Invalid Header Item
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Recipe Header Item'
+		,intStatusId=2
 	WHERE strRecipeHeaderItemNo NOT IN (
 			SELECT strItemNo
 			FROM tblICItem
@@ -758,6 +789,7 @@ BEGIN
 	--Invalid Version No
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Version No'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strVersionNo], 0)) = 0
 			OR CHARINDEX('.', ISNULL([strVersionNo], 0)) > 0
@@ -769,6 +801,7 @@ BEGIN
 	--Invalid Detail Item
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Recipe Detail Item'
+		,intStatusId=2
 	WHERE ISNULL(strRecipeItemNo, '') NOT IN (
 			SELECT strItemNo
 			FROM tblICItem
@@ -779,6 +812,7 @@ BEGIN
 	--Invalid Qty
 	UPDATE s
 	SET s.strMessage = 'Quantity should be greater than 0'
+		,s.intStatusId=2
 	FROM tblMFRecipeItemStage s
 	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
 	WHERE (
@@ -795,6 +829,7 @@ BEGIN
 	--UOM is required
 	UPDATE s
 	SET s.strMessage = 'UOM is required'
+		,s.intStatusId=2
 	FROM tblMFRecipeItemStage s
 	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
 	WHERE ISNULL(strUOM, '') = ''
@@ -808,6 +843,7 @@ BEGIN
 	--Invalid UOM
 	UPDATE s
 	SET s.strMessage = 'Invalid UOM'
+		,s.intStatusId=2
 	FROM tblMFRecipeItemStage s
 	JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
 	WHERE ISNULL(strUOM, '') <> ''
@@ -825,6 +861,7 @@ BEGIN
 	--Invalid Recipe Item Type
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Recipe Item Type (Possible values: INPUT,OUTPUT)'
+		,intStatusId=2
 	WHERE strRecipeItemType NOT IN (
 			SELECT strName
 			FROM tblMFRecipeItemType
@@ -836,6 +873,7 @@ BEGIN
 	--Invalid Upper Tolerance
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Upper Tolerance/Upper Tolerance cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strUpperTolerance], 0)) = 0
 			OR ISNULL(CAST([strUpperTolerance] AS NUMERIC(18, 6)), 0) < 0
@@ -846,6 +884,7 @@ BEGIN
 	--Invalid Lower Tolerance
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Lower Tolerance/Lower Tolerance cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strLowerTolerance], 0)) = 0
 			OR ISNULL(CAST([strLowerTolerance] AS NUMERIC(18, 6)), 0) < 0
@@ -856,6 +895,7 @@ BEGIN
 	--Invalid Shrinkage
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Shrinkage/Shrinkage cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strShrinkage], 0)) = 0
 			OR ISNULL(CAST([strShrinkage] AS NUMERIC(18, 6)), 0) < 0
@@ -866,6 +906,7 @@ BEGIN
 	--Invalid Scale
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Scale (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strScaled], '') NOT IN (
 			'1'
 			,'0'
@@ -877,6 +918,7 @@ BEGIN
 	--Invalid Consumption Method
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Consumption Method (Possible values: By Lot,By Location,FIFO,None)'
+		,intStatusId=2
 	WHERE strConsumptionMethod NOT IN (
 			SELECT strName
 			FROM tblMFConsumptionMethod
@@ -888,6 +930,7 @@ BEGIN
 	--Invalid Storage Location
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Storage Location'
+		,intStatusId=2
 	WHERE strStorageLocation NOT IN (
 			SELECT strName
 			FROM tblICStorageLocation
@@ -899,6 +942,7 @@ BEGIN
 	--Invalid Valid From
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Valid From (YYYY-MM-DD)'
+		,intStatusId=2
 	WHERE ISDATE(ISNULL([strValidFrom], '')) = 0
 		AND ISNULL([strValidFrom], '') <> ''
 		AND strSessionId = @strSessionId
@@ -907,6 +951,7 @@ BEGIN
 	--Invalid Valid To
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Valid To (YYYY-MM-DD)'
+		,intStatusId=2
 	WHERE ISDATE(ISNULL([strValidTo], '')) = 0
 		AND ISNULL([strValidTo], '') <> ''
 		AND strSessionId = @strSessionId
@@ -915,6 +960,7 @@ BEGIN
 	--Invalid Year Validation
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Year Validation (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strYearValidationRequired], '') NOT IN (
 			'1'
 			,'0'
@@ -926,6 +972,7 @@ BEGIN
 	--Invalid Minor Ingredient
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Minor Ingredient (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strMinorIngredient], '') NOT IN (
 			'1'
 			,'0'
@@ -937,6 +984,7 @@ BEGIN
 	--Invalid Output Item Mandatory
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Output Item Mandatory (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strOutputItemMandatory], '') NOT IN (
 			'1'
 			,'0'
@@ -948,6 +996,7 @@ BEGIN
 	--Invalid Scrap
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Scrap / Scrap cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strScrap], 0)) = 0
 			OR ISNULL(CAST([strScrap] AS NUMERIC(18, 6)), 0) < 0
@@ -958,6 +1007,7 @@ BEGIN
 	--Invalid Consumption Required
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Consumption Required (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strConsumptionRequired], '') NOT IN (
 			'1'
 			,'0'
@@ -969,6 +1019,7 @@ BEGIN
 	--Invalid Cost Allocation Percentage
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Cost Allocation Percentage / Cost Allocation Percentage cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strCostAllocationPercentage], 0)) = 0
 			OR ISNULL(CAST([strCostAllocationPercentage] AS NUMERIC(18, 6)), 0) < 0
@@ -979,6 +1030,7 @@ BEGIN
 	--Invalid Margin By
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Margin By'
+		,intStatusId=2
 	WHERE strMarginBy NOT IN (
 			SELECT strName
 			FROM tblMFMarginBy
@@ -990,6 +1042,7 @@ BEGIN
 	--Invalid Margin
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Margin / Margin cannot be negative'
+		,intStatusId=2
 	WHERE (
 			ISNUMERIC(ISNULL([strMargin], 0)) = 0
 			OR ISNULL(CAST([strMargin] AS NUMERIC(18, 6)), 0) < 0
@@ -1000,6 +1053,7 @@ BEGIN
 	--Invalid Cost Applied At Invoice
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Cost Applied At Invoice (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strCostAppliedAtInvoice], '') NOT IN (
 			'1'
 			,'0'
@@ -1011,6 +1065,7 @@ BEGIN
 	--Invalid Comment Type
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Comment Type'
+		,intStatusId=2
 	WHERE strCommentType NOT IN (
 			SELECT strName
 			FROM tblMFCommentType
@@ -1022,6 +1077,7 @@ BEGIN
 	--Invalid Partial Fill Consumption
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Invalid Partial Fill Consumption (Possible values: 1,0)'
+		,intStatusId=2
 	WHERE ISNULL([strPartialFillConsumption], '') NOT IN (
 			'1'
 			,'0'
@@ -1166,6 +1222,7 @@ BEGIN
 		BEGIN
 			UPDATE tblMFRecipeItemStage
 			SET strMessage = 'No recipe found to add items.'
+				,intStatusId=2
 			WHERE intRecipeItemStageId = @intMinId
 
 			GOTO NEXT_RECIPEITEM
@@ -1400,6 +1457,7 @@ BEGIN
 
 		UPDATE tblMFRecipeItemStage
 		SET strMessage = 'Success'
+			,intStatusId=1
 		WHERE intRecipeItemStageId = @intMinId
 
 		--Mark Recipe as Active if it has Input Items
@@ -1432,6 +1490,7 @@ BEGIN
 
 	UPDATE tblMFRecipeItemStage
 	SET strMessage = 'Skipped'
+		,intStatusId=2
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 END
