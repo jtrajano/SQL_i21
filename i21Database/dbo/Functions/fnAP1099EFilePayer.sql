@@ -27,11 +27,13 @@ BEGIN
 						CASE WHEN SUM(A.dblFederalIncome) > 0 THEN '4' ELSE '' END +
 						CASE WHEN SUM(A.dblBoatsProceeds) > 0 THEN '5' ELSE '' END + 
 						CASE WHEN SUM(A.dblMedicalPayments) > 0 THEN '6' ELSE '' END + 
-						CASE WHEN SUM(A.dblNonemployeeCompensation) > 0 THEN '7' ELSE '' END + 
 						CASE WHEN SUM(A.dblSubstitutePayments) > 0 THEN '8' ELSE '' END + 
 						CASE WHEN SUM(A.dblCropInsurance) > 0 THEN 'A' ELSE '' END + 
 						CASE WHEN SUM(A.dblParachutePayments) > 0 THEN 'B' ELSE '' END + 
-						CASE WHEN SUM(A.dblGrossProceedsAtty) > 0 THEN 'C' ELSE '' END
+						CASE WHEN SUM(A.dblGrossProceedsAtty) > 0 THEN 'C' ELSE '' END +
+						CASE WHEN SUM(A.dblDeferrals) > 0 THEN 'D' ELSE '' END +
+						CASE WHEN SUM(A.dblDeferredCompensation) > 0 THEN 'E' ELSE '' END +
+						CASE WHEN @year < YEAR(GETDATE()) AND SUM(A.dblNonemployeeCompensation) > 0 THEN 'G' ELSE '' END
 					END AS strAmountCodes
 				FROM vyuAP1099MISC A
 				--OUTER APPLY --Temporarily removed, identify when the voucher will exclude from generating 1099 file and report
