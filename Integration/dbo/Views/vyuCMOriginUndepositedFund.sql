@@ -15,7 +15,7 @@ EXEC(
 AS
 
 WITH AR AS (
-	SELECT    
+	SELECT
 		     	dbo.fnGetGLAccountIdFromOriginToi21(gl.apegl_gl_acct) intAccountId
 				,null intEntityCustomerId 
 				,DefaultCurrency.Val intCurrencyId
@@ -25,6 +25,8 @@ WITH AR AS (
 				+ CAST(v.aptrx_cbk_no AS NVARCHAR(2)) 
 				+ CAST(v.aptrx_chk_no AS NVARCHAR(8))  COLLATE Latin1_General_CI_AS strSourceTransactionId 
 				,'''' strType
+				,CAST(1 AS NUMERIC(18,6)) dblWeightRate
+				,null intCurrencyExchangeRateTypeId
 	FROM	apeglmst gl INNER JOIN vyuCMOriginDepositEntry v
 	ON gl.apegl_cbk_no COLLATE Latin1_General_CI_AS = v.aptrx_cbk_no
 	AND gl.apegl_vnd_no COLLATE Latin1_General_CI_AS = v.aptrx_vnd_no
@@ -33,9 +35,19 @@ WITH AR AS (
 		SELECT TOP 1 intDefaultCurrencyId Val FROM tblSMCompanyPreference
 	)DefaultCurrency
 	UNION
-	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId , ''Payment''  strType FROM tblARPayment UNION
-	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intInvoiceId intSourceTransactionId, strInvoiceNumber strSourceTransactionId, ''Invoice'' strType FROM tblARInvoice UNION
-	SELECT intUndepositedFundsId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, ''EndOfDay'' strType FROM tblARPOSEndOfDay
+	SELECT intAccountId,  intEntityCustomerId,intCurrencyId,
+	intPaymentId intSourceTransactionId, strRecordNumber strSourceTransactionId , ''Payment''  strType
+	,dblExchangeRate dblWeightRate,
+	intCurrencyExchangeRateTypeId
+	FROM tblARPayment UNION
+	SELECT intAccountId,  intEntityCustomerId,intCurrencyId, intInvoiceId intSourceTransactionId, strInvoiceNumber strSourceTransactionId, ''Invoice'' strType
+	,dblCurrencyExchangeRate dblWeightRate
+	,null intCurrencyExchangeRateTypeId
+	FROM tblARInvoice UNION
+	SELECT intUndepositedFundsId intAccountId,intEntityId intEntityCustomerId,intCurrencyId, intPOSEndOfDayId intSourceTransactionId, strEODNo strSourceTransactionId, ''EndOfDay'' strType
+	,CAST(1 AS NUMERIC(18,6)) dblWeightRate
+	,null intCurrencyExchangeRateTypeId
+	FROM tblARPOSEndOfDay
 ),
 
 C AS (
