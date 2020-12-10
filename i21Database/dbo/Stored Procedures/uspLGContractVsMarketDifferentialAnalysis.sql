@@ -129,7 +129,7 @@ FROM
 		LEFT JOIN tblICCommodityAttribute OG ON OG.intCommodityAttributeId = I.intOriginId
 		LEFT JOIN tblICCommodityUnitMeasure CM ON CM.intCommodityUnitMeasureId = SCH.intCommodityUOMId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CM.intUnitMeasureId
-		LEFT JOIN tblICUnitMeasure FMUM ON FMUM.intUnitMeasureId = FMUM.intUnitMeasureId
+		LEFT JOIN tblICUnitMeasure FMUM ON FMUM.intUnitMeasureId = FM.intUnitMeasureId
 		LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemUOMId = PCD.intItemUOMId
 		LEFT JOIN tblICItemUOM SUOM ON SUOM.intItemUOMId = SCD.intItemUOMId
 		LEFT JOIN tblICItemUOM PBUOM ON PBUOM.intItemUOMId = PCD.intBasisUOMId
