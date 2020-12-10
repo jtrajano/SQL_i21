@@ -68,6 +68,7 @@
 	[dblFranchiseAmount] DECIMAL(38, 20) NOT NULL DEFAULT 0,  
 	[dblClaimAmount] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
 	[dbl1099] DECIMAL(18, 6) NOT NULL DEFAULT 0, 
+	[dblWeightConversion] AS (ISNULL(NULLIF([dblNetWeight],0),1) / [dblQtyReceived]) PERSISTED,
     [dtmExpectedDate] DATETIME NULL, 
     [int1099Form] INT NOT NULL DEFAULT 0 , 
     [int1099Category] INT NOT NULL DEFAULT 0 , 
