@@ -274,6 +274,7 @@ BEGIN
 		WHEN @msgId = 80258 THEN 'Bill Amount for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80259 THEN 'Bill Amount as charge (or discount) for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80260 THEN 'Bill Quantity as charge (or discount) for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80261 THEN 'The Storage Location invalid in %s for %s.'
 	END 
 
 	RETURN @msg
