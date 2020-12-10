@@ -57,7 +57,7 @@
 	[dblOldCost]					DECIMAL(38,20) NULL,
 	[dblCost]						DECIMAL(38,20),
 	[dblCostUnitQty]				DECIMAL(38,20),
-	[dblWeightConversion]			AS (ISNULL(NULLIF([dblNetWeight],0),1) / [dblQuantityToBill]) PERSISTED,
+	[dblWeightConversion]			AS (ISNULL(NULLIF([dblNetWeight],0),1) / ISNULL(NULLIF([dblQuantityToBill],0),1)) PERSISTED,
 	[intCostUOMId]					INT NULL,
 	[strCostUOM]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblNetWeight]					DECIMAL(18,6),
