@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPGenerateSAPFeedFailureEmailMessage_ST @strMessageType NVARCHAR(50)
+﻿CREATE PROCEDURE uspIPGenerateSAPFeedFailureEmailMessage_ST @strMessageType NVARCHAR(50),@intStatusId int=2
 AS
 BEGIN TRY
 	DECLARE @strStyle NVARCHAR(MAX)
@@ -196,6 +196,68 @@ BEGIN TRY
 			WHERE ysnMailSent = 0
 		END
 	END
+
+IF @strMessageType ='Recipe'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM tblMFRecipeStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType ='Recipe Item'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Recipe Header Item No</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeItemStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeHeaderItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM tblMFRecipeItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
 
 	SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 	SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
