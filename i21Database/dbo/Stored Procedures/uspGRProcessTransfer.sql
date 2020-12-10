@@ -47,7 +47,8 @@ BEGIN
 		,dtmProcessDate DATETIME NOT NULL DEFAULT(GETDATE())
 	)
 	DECLARE @GLForItem AS GLForItem
-
+	DECLARE @intTransferStorageReferenceId INT
+	
 	---START---TRANSACTIONS FOR THE SOURCE-----	
 	IF EXISTS(SELECT TOP 1 1 
 			FROM tblGRCustomerStorage A 
@@ -121,7 +122,7 @@ BEGIN
 			FETCH c INTO @intTransferContractDetailId, @dblTransferUnits, @intSourceItemUOMId, @intCustomerStorageId
 		END
 		CLOSE c; DEALLOCATE c;
-
+		
 		--update the source's customer storage open balance
 		UPDATE A
 		SET A.dblOpenBalance 	= CASE WHEN (ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6)) > A.dblOriginalBalance THEN A.dblOriginalBalance ELSE ROUND(B.dblOriginalUnits - B.dblDeductedUnits,6) END
@@ -130,7 +131,7 @@ BEGIN
 			ON B.intSourceCustomerStorageId = A.intCustomerStorageId
 		WHERE B.intTransferStorageId = @intTransferStorageId
 		----END----TRANSACTIONS FOR THE SOURCE---------
-
+		
 		----START--TRANSACTIONS FOR THE NEW CUSTOMER STORAGE-------
 		DELETE FROM @StorageHistoryStagingTable
 		
@@ -642,44 +643,196 @@ BEGIN
 
 			--/*start === FOR DP to DP only*/
 			DECLARE @strBatchId NVARCHAR(500)
+			DECLARE @dblBasis DECIMAL(38,20)
+			DECLARE @dblSettlementPrice DECIMAL(38,20)
+			DECLARE @GLEntries RecapTableType
+			DECLARE @strRKError NVARCHAR(150)
+			DECLARE @intSourceTransactionDetailId INT
+			DECLARE @intSourceCustomerStorageId INT
+			DECLARE @ysnFromDS BIT
+			DECLARE @GLValidation AS TABLE (
+				strText nvarchar(150)  COLLATE Latin1_General_CI_AS NULL,
+				intErrorCode int, 
+				strModuleName nvarchar(100)  COLLATE Latin1_General_CI_AS NULL
+			)
+			SET @intTransferStorageReferenceId = NULL
+
 			DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 			FOR
 			WITH storageTransfers (
 				intTranferStorageReferenceId
+				,dblBasis
+				,dblSettlementPrice
+				,intSourceCustomerStorageId
+				,ysnFromDS
 			) AS (
-				SELECT SR.intTransferStorageReferenceId
+				SELECT SR.intTransferStorageReferenceId, CS_FROM.dblBasis,CS_FROM.dblSettlementPrice,CS_FROM.intCustomerStorageId,CASE WHEN CS_FROM.intDeliverySheetId IS NULL THEN 0 ELSE 1 END
 				FROM tblGRTransferStorageReference SR
-				INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
-				INNER JOIN tblGRStorageType ST ON ST.intStorageScheduleTypeId = CS.intStorageTypeId AND ST.ysnDPOwnedType = 1
+				INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
+				INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+				INNER JOIN tblGRCustomerStorage CS_TO ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
+				INNER JOIN tblGRStorageType ST_TO ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId AND ST_TO.ysnDPOwnedType = 1
 				WHERE SR.intTransferStorageId = @intTransferStorageId
 			)
 			SELECT
 				intTranferStorageReferenceId
+				,dblBasis
+				,dblSettlementPrice
+				,intSourceCustomerStorageId
+				,ysnFromDS
 			FROM ( SELECT * FROM storageTransfers ) params
 			OPEN c;
 
-			FETCH c INTO @intTransferStorageReferenceId
+			FETCH c INTO @intTransferStorageReferenceId,@dblBasis,@dblSettlementPrice,@intSourceCustomerStorageId,@ysnFromDS
 
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 				EXEC uspSMGetStartingNumber 3, @strBatchId OUT
 				--update the Basis and Settlement Price of the new customer storage
 				--just get the basis and settlement priced from the source storages
+
+				IF @dblBasis IS NULL AND @dblSettlementPrice IS NULL
+				BEGIN
+					SELECT @dblSettlementPrice	 = IRI.dblUnitCost
+					FROM tblICInventoryReceiptItem IRI
+					INNER JOIN tblICInventoryReceipt IR
+						ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
+					INNER JOIN tblGRStorageHistory SH
+						ON SH.intInventoryReceiptId = IR.intInventoryReceiptId
+							AND SH.intTransactionTypeId = 1 --From Scale
+					WHERE SH.intCustomerStorageId = @intSourceCustomerStorageId
+				END
+
 				UPDATE CS
-				SET dblBasis = ISNULL(CS_FROM.dblBasis,0)
-					,dblSettlementPrice = ISNULL(CS_FROM.dblSettlementPrice,0)
+				SET dblBasis = ISNULL(@dblBasis,0)
+					,dblSettlementPrice = ISNULL(@dblSettlementPrice,0)
 				FROM tblGRCustomerStorage CS
 				INNER JOIN tblGRTransferStorageReference SR ON SR.intToCustomerStorageId = CS.intCustomerStorageId
-				INNER JOIN tblGRCustomerStorage CS_FROM	ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
-				INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
 				WHERE SR.intTransferStorageReferenceId = @intTransferStorageReferenceId
 
-				-- EXEC uspGRCreateItemGLEntriesTransfer_DPtoDP 
-				-- 	@strBatchId  = @strBatchId
-				-- 	,@intEntityUserSecurityId = @intUserId
-				-- 	,@intTransactionDetailId = @intTransferStorageReferenceId
+				SELECT DISTINCT @intSourceTransactionDetailId = TSR.intTransferStorageReferenceId
+				FROM tblGRTransferStorage TS
+				INNER JOIN tblGRTransferStorageReference TSR
+					ON TSR.intTransferStorageId = TS.intTransferStorageId
+						AND TSR.intToCustomerStorageId = @intSourceCustomerStorageId
 
-				FETCH c INTO @intTransferStorageReferenceId
+				--GET IR# IF STORAGE IS FROM SCALE TICKET
+				IF @intSourceTransactionDetailId IS NULL
+				BEGIN
+					SELECT @intSourceTransactionDetailId = intInventoryReceiptId
+					FROM tblGRStorageHistory
+					WHERE intCustomerStorageId = @intSourceCustomerStorageId
+						AND intTransactionTypeId = 1
+				END
+
+				--inventory items
+				DELETE FROM @GLEntries
+				INSERT INTO @GLEntries 
+				(
+					[dtmDate]
+					,[strBatchId]
+					,[intAccountId]
+					,[dblDebit]
+					,[dblCredit]
+					,[dblDebitUnit]
+					,[dblCreditUnit]
+					,[strDescription]
+					,[strCode]
+					,[strReference]
+					,[intCurrencyId]
+					,[dblExchangeRate]
+					,[dtmDateEntered]
+					,[dtmTransactionDate]
+					,[strJournalLineDescription]
+					,[intJournalLineNo]
+					,[ysnIsUnposted]
+					,[intUserId]
+					,[intEntityId]
+					,[strTransactionId]
+					,[intTransactionId]
+					,[strTransactionType]
+					,[strTransactionForm]
+					,[strModuleName]
+					,[intConcurrencyId]
+					,[dblDebitForeign]
+					,[dblDebitReport]
+					,[dblCreditForeign]
+					,[dblCreditReport]
+					,[dblReportingRate]
+					,[dblForeignRate]
+					,[strRateType]
+				)
+				EXEC uspGRCreateItemGLEntriesTransfer_DPtoDP 
+					@strBatchId  = @strBatchId
+					,@intEntityUserSecurityId = @intUserId
+					,@intTransactionDetailId = @intTransferStorageReferenceId
+					,@intSourceTransactionDetailId = @intSourceTransactionDetailId
+
+				IF @ysnFromDS = 0 
+				BEGIN
+					INSERT INTO @GLEntries 
+					(
+						[dtmDate]
+						,[strBatchId]
+						,[intAccountId]
+						,[dblDebit]
+						,[dblCredit]
+						,[dblDebitUnit]
+						,[dblCreditUnit]
+						,[strDescription]
+						,[strCode]
+						,[strReference]
+						,[intCurrencyId]
+						,[dblExchangeRate]
+						,[dtmDateEntered]
+						,[dtmTransactionDate]
+						,[strJournalLineDescription]
+						,[intJournalLineNo]
+						,[ysnIsUnposted]
+						,[intUserId]
+						,[intEntityId]
+						,[strTransactionId]
+						,[intTransactionId]
+						,[strTransactionType]
+						,[strTransactionForm]
+						,[strModuleName]
+						,[intConcurrencyId]
+						,[dblDebitForeign]
+						,[dblDebitReport]
+						,[dblCreditForeign]
+						,[dblCreditReport]
+						,[dblReportingRate]
+						,[dblForeignRate]
+						,[strRateType]
+					)
+					EXEC uspGRCreateDiscountGLEntriesTransfer_DPtoDP
+						@strBatchId	= @strBatchId
+						,@intEntityUserSecurityId = @intUserId
+						,@intTransactionDetailId = @intTransferStorageReferenceId
+						,@intSourceTransactionDetailId = @intSourceTransactionDetailId
+				END
+
+					--SELECT '@GLEntries1',* FROM @GLEntries
+					--delete from @GLEntries where strDescription like '%Qty: 286.29, Cost: 6.1725%' and dblCredit = 0
+					--SELECT '@GLEntries',* FROM @GLEntries
+
+				INSERT INTO @GLValidation
+				SELECT * FROM dbo.fnGRGetGLEntriesErrors_DPtoDP(@GLEntries,1)
+					
+					--select 'validation',* from @GLValidation
+
+				IF EXISTS(SELECT 1 FROM @GLValidation)
+				BEGIN
+					SELECT TOP 1 @strRKError = strText FROM @GLValidation
+					RAISERROR (@strRKError,16,1,'WITH NOWAIT') 
+				END
+				
+				IF EXISTS(SELECT 1 FROM @GLEntries)
+				BEGIN 
+					EXEC uspGLBookEntries @GLEntries, 1, 1, 1
+				END
+
+				FETCH c INTO @intTransferStorageReferenceId,@dblBasis,@dblSettlementPrice,@intSourceCustomerStorageId,@ysnFromDS
 			END
 			CLOSE c; DEALLOCATE c;
 			--/*end === FOR DP to DP only*/
@@ -924,7 +1077,7 @@ BEGIN
 		CLOSE c; DEALLOCATE c;	
 
 		--DISCOUNTS
-		DECLARE @intSourceCustomerStorageId INT;
+		SET @intSourceCustomerStorageId = NULL
 		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
 		FOR
 			SELECT intToCustomerStorageId,intSourceCustomerStorageId FROM @newCustomerStorageIds
