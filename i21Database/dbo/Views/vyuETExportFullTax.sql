@@ -107,22 +107,38 @@ SELECT ItemNumber
 , Locale12EFT COLLATE Latin1_General_CI_AS AS Locale12EFT 
 , ISNULL(MAX(Locale12SSTOnLC12), 'N') COLLATE Latin1_General_CI_AS AS Locale12SSTOnLC12
 , Locale12LC12OnFET COLLATE Latin1_General_CI_AS AS Locale12LC12OnFET 
-,MAX(FETTaxCodeId) FETTaxCodeId
-,MAX(SETTaxCodeId) SETTaxCodeId
-,MAX(SSTTaxCodeId) SSTTaxCodeId
-,MAX(PSTTaxCodeId) PSTTaxCodeId
-,MAX(Locale1TaxCodeId) Locale1TaxCodeId
-,MAX(Locale2TaxCodeId) Locale2TaxCodeId
-,MAX(Locale3TaxCodeId) Locale3TaxCodeId
-,MAX(Locale4TaxCodeId) Locale4TaxCodeId
-,MAX(Locale5TaxCodeId) Locale5TaxCodeId
-,MAX(Locale6TaxCodeId) Locale6TaxCodeId
-,MAX(Locale7TaxCodeId) Locale7TaxCodeId
-,MAX(Locale8TaxCodeId) Locale8TaxCodeId
-,MAX(Locale9TaxCodeId) Locale9TaxCodeId
-,MAX(Locale10TaxCodeId) Locale10TaxCodeId
-,MAX(Locale11TaxCodeId) Locale11TaxCodeId
-,MAX(Locale12TaxCodeId) Locale12TaxCodeId
+,ISNULL(MAX(FETTaxCodeId),0) FETTaxCodeId
+,ISNULL(MAX(SETTaxCodeId),0) SETTaxCodeId
+,ISNULL(MAX(SSTTaxCodeId),0) SSTTaxCodeId
+,ISNULL(MAX(PSTTaxCodeId),0) PSTTaxCodeId
+,ISNULL(MAX(Locale1TaxCodeId),0) Locale1TaxCodeId
+,ISNULL(MAX(Locale2TaxCodeId),0) Locale2TaxCodeId
+,ISNULL(MAX(Locale3TaxCodeId),0) Locale3TaxCodeId
+,ISNULL(MAX(Locale4TaxCodeId),0) Locale4TaxCodeId
+,ISNULL(MAX(Locale5TaxCodeId),0) Locale5TaxCodeId
+,ISNULL(MAX(Locale6TaxCodeId),0) Locale6TaxCodeId
+,ISNULL(MAX(Locale7TaxCodeId),0) Locale7TaxCodeId
+,ISNULL(MAX(Locale8TaxCodeId),0) Locale8TaxCodeId
+,ISNULL(MAX(Locale9TaxCodeId),0) Locale9TaxCodeId
+,ISNULL(MAX(Locale10TaxCodeId),0) Locale10TaxCodeId
+,ISNULL(MAX(Locale11TaxCodeId),0) Locale11TaxCodeId
+,ISNULL(MAX(Locale12TaxCodeId),0) Locale12TaxCodeId
+,ISNULL(MAX(FETTaxClassId),0) FETTaxClassId
+,ISNULL(MAX(SETTaxClassId),0) SETTaxClassId
+,ISNULL(MAX(SSTTaxClassId),0) SSTTaxClassId
+,ISNULL(MAX(PSTTaxClassId),0) PSTTaxClassId
+,ISNULL(MAX(Locale1TaxClassId),0) Locale1TaxClassId
+,ISNULL(MAX(Locale2TaxClassId),0) Locale2TaxClassId
+,ISNULL(MAX(Locale3TaxClassId),0) Locale3TaxClassId
+,ISNULL(MAX(Locale4TaxClassId),0) Locale4TaxClassId
+,ISNULL(MAX(Locale5TaxClassId),0) Locale5TaxClassId
+,ISNULL(MAX(Locale6TaxClassId),0) Locale6TaxClassId
+,ISNULL(MAX(Locale7TaxClassId),0) Locale7TaxClassId
+,ISNULL(MAX(Locale8TaxClassId),0) Locale8TaxClassId
+,ISNULL(MAX(Locale9TaxClassId),0) Locale9TaxClassId
+,ISNULL(MAX(Locale10TaxClassId),0) Locale10TaxClassId
+,ISNULL(MAX(Locale11TaxClassId),0) Locale11TaxClassId
+,ISNULL(MAX(Locale12TaxClassId),0) Locale12TaxClassId
 FROM
 (
 	SELECT 
@@ -134,17 +150,20 @@ FROM
 	, Authority2Description	= ''--NULL	
 	, [Description]			= TaxGroup.strDescription --tblSMTaxCode.strDescription
 	, FETTaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'FET')
+	, FETTaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'FET')
 	, FETRatePerUnit		= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'FET' 
 								AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
 								ORDER BY dtmEffectiveDate DESC)
 	, FETGLAccount			= '00000000'
 	, EFTonFET				= 'N'
 	, SETTaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SET')
+	, SETTaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SET')
 	, SETRatePerUnit		= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SET' 
 							AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
 	, SETGLAccount			= '00000000'--tblGLAccount.strAccountId
 	, EFTonSET				= 'N'
 	, SSTTaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST')
+	, SSTTaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST')
 	, SSTRatePerUnit		= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'SST' 
 						AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
 	, SSTGLAccount			= '00000000'
@@ -177,6 +196,7 @@ FROM
 	)
 	, EFTOnSST				= 'N'
 	, PSTTaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'PST')
+	, PSTTaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'PST')
 	, PSTRatePerUnit		= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a 
 								WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'PST' 
 								AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) 
@@ -185,6 +205,7 @@ FROM
 	, PSTMethod				= (SELECT TOP 1 CASE ISNULL(strCalculationMethod, 'Percentage') WHEN 'Percentage' THEN 'P' ELSE 'U' END FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'PST' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
 	, Locale1TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC1')
+	, Locale1TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC1')
 	, Locale1Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC1')
 	, Locale1Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC1'
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE)  ORDER BY dtmEffectiveDate DESC)
@@ -205,6 +226,7 @@ FROM
 	)
 	, Locale1LC1OnFET		= 'N'
 	, Locale2TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC2')
+	, Locale2TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC2')
 	, Locale2Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC2')
 	, Locale2Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC2'
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE)  ORDER BY dtmEffectiveDate DESC)
@@ -225,6 +247,7 @@ FROM
 	)
 	, Locale2LC2OnFET		= 'N'	
 	, Locale3TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC3')
+	, Locale3TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC3')
 	, Locale3Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC3')
 	, Locale3Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC3' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -245,6 +268,7 @@ FROM
 	) 	
 	, Locale3LC3OnFET		= 'N'
 	, Locale4TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC4')
+	, Locale4TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC4')
 	, Locale4Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC4')
 	, Locale4Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC4' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -265,6 +289,7 @@ FROM
 	)
 	, Locale4LC4OnFET		= 'N'	
 	, Locale5TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC5')
+	, Locale5TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC5')
 	, Locale5Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC5')
 	, Locale5Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC5'
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE)  ORDER BY dtmEffectiveDate DESC)
@@ -285,6 +310,7 @@ FROM
 	)
 	, Locale5LC5OnFET		= 'N'	
 	, Locale6TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC6')
+	, Locale6TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC6')
 	, Locale6Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC6')
     , Locale6Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC6' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -307,6 +333,7 @@ FROM
 	)
 	, Locale6LC6OnFET		= 'N'
 	, Locale7TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7')
+	, Locale7TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7')
 	, Locale7Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7')
     , Locale7Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC7' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -329,6 +356,7 @@ FROM
 	)
 	, Locale7LC7OnFET		= 'N'
 	, Locale8TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8')
+	, Locale8TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8')
 	, Locale8Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8')
     , Locale8Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC8' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -351,6 +379,7 @@ FROM
 	)
 	, Locale8LC8OnFET		= 'N'
 	, Locale9TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9')
+	, Locale9TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9')
 	, Locale9Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9')
     , Locale9Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC9' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -373,6 +402,7 @@ FROM
 	)
 	, Locale9LC9OnFET		= 'N'
 	, Locale10TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10')
+	, Locale10TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10')
 	, Locale10Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10')
     , Locale10Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC10' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -395,6 +425,7 @@ FROM
 	)
 	, Locale10LC10OnFET		= 'N'
 	, Locale11TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11')
+	, Locale11TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11')
 	, Locale11Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11')
     , Locale11Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC11' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
@@ -417,6 +448,7 @@ FROM
 	)
 	, Locale11LC11OnFET		= 'N'
 	, Locale12TaxCodeId	= (SELECT intTaxCodeId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12')
+	, Locale12TaxClassId	= (SELECT intTaxClassId FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12')
 	, Locale12Description	= (SELECT strDescription FROM tblSMTaxCode WHERE intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12')
     , Locale12Rate			= (SELECT TOP 1 dblRate FROM tblSMTaxCodeRate a WHERE a.intTaxCodeId = TaxCode.intTaxCodeId AND ExportTaxCodeMapping.strTaxCodeReference = 'LC12' 
 	AND  CAST(dtmEffectiveDate  AS DATE) <= CAST(GETDATE() AS DATE) ORDER BY dtmEffectiveDate DESC)
