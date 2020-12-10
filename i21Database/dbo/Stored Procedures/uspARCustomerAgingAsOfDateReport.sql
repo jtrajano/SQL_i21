@@ -354,8 +354,8 @@ IF (@ysnPrintFromCFLocal = 1)
 	END
 
 --#CASHREFUNDS
-SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
-     , dblRefundTotal		= I.dblInvoiceTotal
+SELECT strDocumentNumber	= ID.strDocumentNumber
+     , dblRefundTotal		= SUM(ID.dblTotal) 
 INTO #CASHREFUNDS
 FROM tblARInvoice I
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
