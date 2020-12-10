@@ -11,13 +11,36 @@ BEGIN
 
 	IF EXISTS(SELECT TOP 1 1 FROM vyuRKGetAllowedFuturesMonthTraded WHERE intFutureMarketId = @intFutureMarketId AND intMonthCode = @intMonthCode)
 	BEGIN
-		SELECT TOP 2 intFutureMarketId
-			,strFutureMonth
-			,intMonthCode
-			,strSymbol
-		FROM vyuRKGetAllowedFuturesMonthTraded
-		WHERE intFutureMarketId = @intFutureMarketId AND intMonthCode >= @intMonthCode
-		ORDER BY intMonthCode ASC
+		
+		IF (@intMonthCode > 11)
+		BEGIN
+			SELECT TOP 1 intFutureMarketId
+				,strFutureMonth
+				,intMonthCode
+				,strSymbol
+			FROM vyuRKGetAllowedFuturesMonthTraded
+			WHERE intFutureMarketId = @intFutureMarketId AND intMonthCode = @intMonthCode
+
+			UNION ALL
+			SELECT TOP 1 intFutureMarketId
+				,strFutureMonth
+				,intMonthCode
+				,strSymbol
+			FROM vyuRKGetAllowedFuturesMonthTraded
+			WHERE intFutureMarketId = @intFutureMarketId
+		END
+		ELSE
+		BEGIN
+			SELECT TOP 2 intFutureMarketId
+				,strFutureMonth
+				,intMonthCode
+				,strSymbol
+			FROM vyuRKGetAllowedFuturesMonthTraded
+			WHERE intFutureMarketId = @intFutureMarketId AND intMonthCode >= @intMonthCode
+			ORDER BY intMonthCode ASC
+		END
+
+
 	END
 	ELSE 
 	BEGIN
