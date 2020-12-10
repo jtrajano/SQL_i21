@@ -484,6 +484,45 @@ BEGIN
 		UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE intTransactionId = @intTransferStorageId AND strTransactionId = @strTransferStorageId	
 							
 		/* END REVERSAL */
+
+		--/*start === FOR DP to DP only*/
+		DECLARE @intTransferStorageReferenceId INT
+		DECLARE @strBatchId2 AS NVARCHAR(40);
+
+		DELETE FROM @GLEntries
+
+		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		FOR
+		WITH storageTransfers (
+			intTranferStorageReferenceId
+		) AS (
+			SELECT SR.intTransferStorageReferenceId
+			FROM tblGRTransferStorageReference SR
+			INNER JOIN tblGRCustomerStorage CS_FROM ON CS_FROM.intCustomerStorageId = SR.intSourceCustomerStorageId
+			INNER JOIN tblGRStorageType ST_FROM ON ST_FROM.intStorageScheduleTypeId = CS_FROM.intStorageTypeId AND ST_FROM.ysnDPOwnedType = 1
+			INNER JOIN tblGRCustomerStorage CS_TO ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
+			INNER JOIN tblGRStorageType ST_TO ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId AND ST_TO.ysnDPOwnedType = 1
+			WHERE SR.intTransferStorageId = @intTransferStorageId
+		)
+		SELECT
+			intTranferStorageReferenceId
+		FROM ( SELECT * FROM storageTransfers ) params
+		OPEN c;
+
+		FETCH c INTO @intTransferStorageReferenceId
+
+		WHILE @@FETCH_STATUS = 0
+		BEGIN
+			SELECT TOP 1 @strBatchId2 = strBatchId FROM tblGRTransferGLEntriesCTE WHERE intSourceTransactionDetailId = @intTransferStorageReferenceId
+			
+			UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strBatchId = @strBatchId2
+			UPDATE tblGRTransferGLEntriesCTE SET ysnIsUnposted = 1, strUnpostBatchId = @strBatchId WHERE strBatchId = @strBatchId2
+
+			FETCH c INTO @intTransferStorageReferenceId
+		END
+		CLOSE c; DEALLOCATE c;
+		--/*end === FOR DP to DP only*/
+
 		DELETE FROM tblGRTransferStorage WHERE intTransferStorageId = @intTransferStorageId
 		DELETE FROM tblGRCustomerStorage WHERE intCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
 		DELETE FROM tblGRTransferStorageReference WHERE intToCustomerStorageId IN (SELECT [intToCustomerStorage] FROM #tmpTransferCustomerStorage)
