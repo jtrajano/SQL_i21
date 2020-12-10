@@ -107,38 +107,38 @@ SELECT ItemNumber
 , Locale12EFT COLLATE Latin1_General_CI_AS AS Locale12EFT 
 , ISNULL(MAX(Locale12SSTOnLC12), 'N') COLLATE Latin1_General_CI_AS AS Locale12SSTOnLC12
 , Locale12LC12OnFET COLLATE Latin1_General_CI_AS AS Locale12LC12OnFET 
-,MAX(FETTaxCodeId) FETTaxCodeId
-,MAX(SETTaxCodeId) SETTaxCodeId
-,MAX(SSTTaxCodeId) SSTTaxCodeId
-,MAX(PSTTaxCodeId) PSTTaxCodeId
-,MAX(Locale1TaxCodeId) Locale1TaxCodeId
-,MAX(Locale2TaxCodeId) Locale2TaxCodeId
-,MAX(Locale3TaxCodeId) Locale3TaxCodeId
-,MAX(Locale4TaxCodeId) Locale4TaxCodeId
-,MAX(Locale5TaxCodeId) Locale5TaxCodeId
-,MAX(Locale6TaxCodeId) Locale6TaxCodeId
-,MAX(Locale7TaxCodeId) Locale7TaxCodeId
-,MAX(Locale8TaxCodeId) Locale8TaxCodeId
-,MAX(Locale9TaxCodeId) Locale9TaxCodeId
-,MAX(Locale10TaxCodeId) Locale10TaxCodeId
-,MAX(Locale11TaxCodeId) Locale11TaxCodeId
-,MAX(Locale12TaxCodeId) Locale12TaxCodeId
-,MAX(FETTaxClassId) FETTaxClassId
-,MAX(SETTaxClassId) SETTaxClassId
-,MAX(SSTTaxClassId) SSTTaxClassId
-,MAX(PSTTaxClassId) PSTTaxClassId
-,MAX(Locale1TaxClassId) Locale1TaxClassId
-,MAX(Locale2TaxClassId) Locale2TaxClassId
-,MAX(Locale3TaxClassId) Locale3TaxClassId
-,MAX(Locale4TaxClassId) Locale4TaxClassId
-,MAX(Locale5TaxClassId) Locale5TaxClassId
-,MAX(Locale6TaxClassId) Locale6TaxClassId
-,MAX(Locale7TaxClassId) Locale7TaxClassId
-,MAX(Locale8TaxClassId) Locale8TaxClassId
-,MAX(Locale9TaxClassId) Locale9TaxClassId
-,MAX(Locale10TaxClassId) Locale10TaxClassId
-,MAX(Locale11TaxClassId) Locale11TaxClassId
-,MAX(Locale12TaxClassId) Locale12TaxClassId
+,ISNULL(MAX(FETTaxCodeId),0) FETTaxCodeId
+,ISNULL(MAX(SETTaxCodeId),0) SETTaxCodeId
+,ISNULL(MAX(SSTTaxCodeId),0) SSTTaxCodeId
+,ISNULL(MAX(PSTTaxCodeId),0) PSTTaxCodeId
+,ISNULL(MAX(Locale1TaxCodeId),0) Locale1TaxCodeId
+,ISNULL(MAX(Locale2TaxCodeId),0) Locale2TaxCodeId
+,ISNULL(MAX(Locale3TaxCodeId),0) Locale3TaxCodeId
+,ISNULL(MAX(Locale4TaxCodeId),0) Locale4TaxCodeId
+,ISNULL(MAX(Locale5TaxCodeId),0) Locale5TaxCodeId
+,ISNULL(MAX(Locale6TaxCodeId),0) Locale6TaxCodeId
+,ISNULL(MAX(Locale7TaxCodeId),0) Locale7TaxCodeId
+,ISNULL(MAX(Locale8TaxCodeId),0) Locale8TaxCodeId
+,ISNULL(MAX(Locale9TaxCodeId),0) Locale9TaxCodeId
+,ISNULL(MAX(Locale10TaxCodeId),0) Locale10TaxCodeId
+,ISNULL(MAX(Locale11TaxCodeId),0) Locale11TaxCodeId
+,ISNULL(MAX(Locale12TaxCodeId),0) Locale12TaxCodeId
+,ISNULL(MAX(FETTaxClassId),0) FETTaxClassId
+,ISNULL(MAX(SETTaxClassId),0) SETTaxClassId
+,ISNULL(MAX(SSTTaxClassId),0) SSTTaxClassId
+,ISNULL(MAX(PSTTaxClassId),0) PSTTaxClassId
+,ISNULL(MAX(Locale1TaxClassId),0) Locale1TaxClassId
+,ISNULL(MAX(Locale2TaxClassId),0) Locale2TaxClassId
+,ISNULL(MAX(Locale3TaxClassId),0) Locale3TaxClassId
+,ISNULL(MAX(Locale4TaxClassId),0) Locale4TaxClassId
+,ISNULL(MAX(Locale5TaxClassId),0) Locale5TaxClassId
+,ISNULL(MAX(Locale6TaxClassId),0) Locale6TaxClassId
+,ISNULL(MAX(Locale7TaxClassId),0) Locale7TaxClassId
+,ISNULL(MAX(Locale8TaxClassId),0) Locale8TaxClassId
+,ISNULL(MAX(Locale9TaxClassId),0) Locale9TaxClassId
+,ISNULL(MAX(Locale10TaxClassId),0) Locale10TaxClassId
+,ISNULL(MAX(Locale11TaxClassId),0) Locale11TaxClassId
+,ISNULL(MAX(Locale12TaxClassId),0) Locale12TaxClassId
 FROM
 (
 	SELECT 
