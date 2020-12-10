@@ -236,8 +236,8 @@ WHERE ysnPosted = 1
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --#CASHREFUNDS
-SELECT strDocumentNumber	= ID.strDocumentNumber
-     , dblRefundTotal		= SUM(ID.dblTotal) 
+SELECT intOriginalInvoiceId	= I.intOriginalInvoiceId
+     , dblRefundTotal		= I.dblInvoiceTotal
 INTO #CASHREFUNDS
 FROM tblARInvoice I
 INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
