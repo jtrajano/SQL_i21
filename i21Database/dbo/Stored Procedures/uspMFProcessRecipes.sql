@@ -4,7 +4,7 @@ BEGIN
 	DECLARE @strSessionId NVARCHAR(50),@intRecordId int,@intEntityId int
 	DECLARE @tblMFSession TABLE (
 		intRecordId INT identity(1, 1)
-		,strSessionId NVARCHAR(50)
+		,strSessionId NVARCHAR(50) Collate Latin1_General_CI_AS
 		)
 
 		Select @intEntityId=intEntityId 
