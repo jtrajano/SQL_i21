@@ -237,7 +237,7 @@ WHERE ysnPosted = 1
 
 --#CASHREFUNDS
 SELECT strDocumentNumber	= ID.strDocumentNumber
-     , dblRefundTotal		= SUM(I.dblInvoiceTotal) 
+     , dblRefundTotal		= SUM(ID.dblTotal) 
 INTO #CASHREFUNDS
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
