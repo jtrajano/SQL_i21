@@ -1,25 +1,25 @@
-CREATE VIEW vyuARInvoiceGrossMargin    
+CREATE VIEW vyuARInvoiceGrossMargin
 AS
 WITH Query AS(  
     SELECT  
 		intInvoiceId,
-         dblTotalCost   = ISNULL(SAR.dblStandardCost, 0) *  
+         dblTotalCost   = ISNULL(SAR.dblStandardCost, 0) *
                                         CASE WHEN SAR.strTransactionType IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund')   
                                             THEN CASE WHEN SAR.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment', 'Cash Refund')  
                                             THEN -ISNULL(SAR.dblQtyShipped, 0) ELSE ISNULL(SAR.dblQtyShipped, 0) END  
                                             ELSE ISNULL(SAR.dblQtyOrdered, 0)  
                                         END  
         , dblTotal  
-        , dtmDate  
+        , dtmDate
     FROM  
     (  
         --INVOICE/NORMAL ITEMS  
         SELECT   
   
   
-			
+
             strTransactionType  = ARI.strTransactionType  
-            ,ARI.intInvoiceId    
+            ,ARI.intInvoiceId
             , intEntityCustomerId  = ARI.intEntityCustomerId  
             , intItemAccountId   = CASE WHEN ICI.strType IN ('Non-Inventory','Service','Other Charge') THEN ISNULL(ARID.intAccountId, ARID.intSalesAccountId) ELSE ISNULL(ARID.intSalesAccountId, ARID.intAccountId) END  
             , dblQtyOrdered    = ARID.dblQtyOrdered  
@@ -121,7 +121,7 @@ WITH Query AS(
         SELECT   
               
             strTransactionType  = ARI.strTransactionType  
-            , ARI.intInvoiceId  
+            , ARI.intInvoiceId
             , intEntityCustomerId  = ARI.intEntityCustomerId  
             , intItemAccountId   = CASE WHEN ICI.strType IN ('Non-Inventory','Service','Other Charge') THEN ISNULL(ARID.intAccountId, ARID.intSalesAccountId) ELSE ISNULL(ARID.intSalesAccountId, ARID.intAccountId) END  
             , dblQtyOrdered    = ARID.dblQtyOrdered  
@@ -214,8 +214,8 @@ WITH Query AS(
         SELECT  
               
             strTransactionType  = ARI.strTransactionType  
-            , ARI.intInvoiceId  
-            , intEntityCustomerId  = ARI.intEntityCustomerId  
+            , ARI.intInvoiceId
+            , intEntityCustomerId  = ARI.intEntityCustomerId
             , intItemAccountId   = ARID.intLicenseAccountId   
             , dblQtyOrdered    = ARID.dblQtyOrdered  
             , dblQtyShipped    = ARID.dblQtyShipped  
@@ -303,9 +303,9 @@ WITH Query AS(
         UNION ALL  
         --INVOICE/SOFTWARE ITEMS/MAINTENANCE TYPE  
         SELECT  
-		
-            strTransactionType  = ARI.strTransactionType  
-            , ARI.intInvoiceId  
+
+            strTransactionType  = ARI.strTransactionType
+            , ARI.intInvoiceId
             , intEntityCustomerId  = ARI.intEntityCustomerId  
             , intItemAccountId   = ARID.intMaintenanceAccountId  
             , dblQtyOrdered    = ARID.dblQtyOrdered  
@@ -398,7 +398,7 @@ WITH Query AS(
         SELECT   
               
          strTransactionType  = ARI.strTransactionType  
-            , ARI.intInvoiceId  
+            , ARI.intInvoiceId
             , intEntityCustomerId  = ARI.intEntityCustomerId  
             , intItemAccountId   = ARID.intMaintenanceAccountId  
             , dblQtyOrdered    = ARID.dblQtyOrdered  
@@ -488,9 +488,9 @@ WITH Query AS(
   
         --INVOICE/SOFTWARE ITEMS/NO MAINTENANCE TYPE  
         SELECT   
-		
-            strTransactionType  = ARI.strTransactionType  
-            , ARI.intInvoiceId  
+
+            strTransactionType  = ARI.strTransactionType
+            , ARI.intInvoiceId
             , intEntityCustomerId  = ARI.intEntityCustomerId  
             , intItemAccountId   =  ISNULL(ARID.intSalesAccountId , ARID.intAccountId)     
             , dblQtyOrdered    = ARID.dblQtyOrdered  
@@ -585,14 +585,14 @@ totalQuery as (
     SELECT   
 	dtmDate,  
 	intInvoiceId,
-    SUM(dblTotalCost) Expense,  
+    SUM(dblTotalCost) Expense,
     SUM(A.dblTotal) - SUM( dblTotalCost) Net,   
     SUM(A.dblTotal) Revenue  
     FROM Query A   
-    GROUP BY dtmDate , intInvoiceId 
+    GROUP BY dtmDate , intInvoiceId
 )  
-SELECT intInvoiceId, 'Expense' strType , Expense dblAmount, dtmDate  FROM totalQuery   
+SELECT intInvoiceId, 'Expense' strType , Expense dblAmount, dtmDate  FROM totalQuery
 UNION  
-SELECT intInvoiceId, 'Revenue'  strType , Revenue dblAmount, dtmDate  FROM totalQuery   
+SELECT intInvoiceId, 'Revenue'  strType , Revenue dblAmount, dtmDate  FROM totalQuery
 UNION  
-SELECT intInvoiceId, 'Net' strType , Net dblAmount, dtmDate  FROM totalQuery 
+SELECT intInvoiceId, 'Net' strType , Net dblAmount, dtmDate  FROM totalQuery

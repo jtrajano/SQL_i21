@@ -166,8 +166,7 @@ SELECT a.intContractDetailId
 	, y.strUnitMeasure
 	, a.dblAdjustment
 	, z.dblAllocatedQty
-	, za.strApprovalBasis
-	--, strApprovalBasis = au.strWeightGradeDesc
+	, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
 	, dblApprovedQty = aa.dblRepresentingQty
 	, strAssociationName = zb.strName
@@ -267,8 +266,7 @@ SELECT a.intContractDetailId
 	, dblQtyInCommodityDefaultUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bt.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bt.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bt.dblUnitQty, 0)) END)
-	, strQualityApproval = bh.strGrade
-	--, strQualityApproval = QA.strSampleStatus
+	, strQualityApproval = QA.strSampleStatus
 	, dblQtyInCommodityStockUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bu.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bu.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bu.dblUnitQty, 0)) END)
@@ -339,7 +337,6 @@ LEFT JOIN tblICItemUOM w WITH(NOLOCK) ON w.intItemId = a.intItemId AND w.intUnit
 LEFT JOIN tblICItemUOM x WITH(NOLOCK) ON x.intItemUOMId = a.intAdjItemUOMId
 LEFT JOIN tblICUnitMeasure y WITH(NOLOCK) ON y.intUnitMeasureId = x.intUnitMeasureId
 LEFT JOIN lgalloationP z ON z.intContractDetailId = a.intContractDetailId
-left join tblCTApprovalBasis za  with (nolock) on za.intApprovalBasisId = b.intApprovalBasisId 
 LEFT JOIN approved aa ON aa.intContractDetailId = a.intContractDetailId
 LEFT JOIN tblCTAssociation zb WITH(NOLOCK) ON zb.intAssociationId = b.intAssociationId
 LEFT JOIN hedge ab ON ab.intContractDetailId = a.intContractDetailId
@@ -417,7 +414,6 @@ LEFT JOIN (
 		WHERE SC.strNamespace IN('ContractManagement.view.Contract', 'ContractManagement.view.Amendments')
 	) t WHERE intRowNum = 1
 ) TR ON TR.intRecordId = b.intContractHeaderId
-/*
 OUTER APPLY (
 	SELECT TOP 1 strSampleStatus = CASE WHEN s.intSampleStatusId = 3 THEN (CASE WHEN SUM(dbo.fnCTConvertQuantityToTargetItemUOM(c.intItemId, s.intRepresentingUOMId, c.intUnitMeasureId, s.dblRepresentingQty)) >= 100 THEN 'Approved'
 																				ELSE 'Partially Approved' END)
@@ -430,4 +426,3 @@ OUTER APPLY (
 		, s.intSampleStatusId
 	ORDER BY s.intSampleId DESC
 ) QA
-*/

@@ -92,11 +92,9 @@ BEGIN
 		-- ==================================================================================================================
 
 
-		IF @@TRANCOUNT = 0
-		BEGIN
-			BEGIN TRANSACTION 
-		END
 
+
+		BEGIN TRANSACTION 
 
 		-- OUT Params
 		SET @strStatusMsg = 'Success'
@@ -4713,19 +4711,9 @@ IF(@ysnDebug = 1)
 																				FROM tblGLPostRecap
 																				WHERE strBatchId = @strBatchIdForNewPostRecap
 
-																 
-																
-																IF @@TRANCOUNT > 0
-																BEGIN
-																	ROLLBACK TRANSACTION
-																END
+																ROLLBACK TRANSACTION 
 
-
-																IF @@TRANCOUNT = 0
-																BEGIN
-																	BEGIN TRANSACTION
-																END
-
+																BEGIN TRANSACTION
 																	EXEC dbo.uspGLPostRecap 
 																			@GLEntries
 																			,@intCurrentUserId
@@ -5447,7 +5435,7 @@ IF(@ysnDebug = CAST(1 AS BIT))
 						END TRY
 						BEGIN CATCH
 					
-							--UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	 
+							UPDATE tblSTReceiveLottery SET ysnPosted = 0 WHERE intInventoryReceiptId = @loopPostInventoryReceiptId	 
 
 							SET @strStatusMsg = ERROR_MESSAGE()
 							GOTO ExitWithRollback
@@ -6200,16 +6188,9 @@ IF(@ysnDebug = CAST(1 AS BIT))
 																					FROM tblGLPostRecap
 																					WHERE strBatchId = @strBatchIdUsed
 
-																		IF @@TRANCOUNT > 0
-																		BEGIN
-																			ROLLBACK TRANSACTION
-																		END
+																		ROLLBACK TRANSACTION 
 
-
-																		IF @@TRANCOUNT = 0
-																		BEGIN
-																			BEGIN TRANSACTION
-																		END
+																		BEGIN TRANSACTION
 
 																			EXEC dbo.uspGLPostRecap 
 																					@GLEntries
@@ -6663,13 +6644,7 @@ ExitWithCommit:
 
 
 	-- Commit Transaction
-
-	
-	IF @@TRANCOUNT > 0
-		BEGIN
-			-- PRINT 'Will Rollback'
-			COMMIT TRANSACTION
-		END
+	COMMIT TRANSACTION
 	GOTO ExitPost
 	
 
@@ -6681,9 +6656,9 @@ ExitWithRollback:
 			ROLLBACK TRANSACTION 
 		END
 
-	--UPDATE tblSTCheckoutHeader SET intCheckoutCurrentProcess = 0 WHERE intCheckoutId = @intCheckoutId
+	UPDATE tblSTCheckoutHeader SET intCheckoutCurrentProcess = 0 WHERE intCheckoutId = @intCheckoutId
 
-	--DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @intCurrentUserId
+	DELETE FROM tblSTLotteryProcessError WHERE intCheckoutId = @intCurrentUserId
 	--SELECT 'x',* FROM @tblSTLotteryProcessError
 	INSERT INTO tblSTLotteryProcessError (
 		 intCheckoutId
@@ -6700,7 +6675,6 @@ ExitWithRollback:
 		,strProcess
 	FROM
 	@tblSTLotteryProcessError
-	GOTO ExitPost
 		
 ExitPost:
 	

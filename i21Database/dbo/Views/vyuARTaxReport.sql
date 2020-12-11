@@ -134,13 +134,12 @@ INNER JOIN (
 			 , intTaxCodeId
 			 , intTaxGroupId
 			 , intTaxClassId
-			 , intSalesTaxAccountId
 			 , strCalculationMethod
 			 , dblRate
 			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
-			 , ysnTaxAdjusted
+			 ,ysnTaxAdjusted
 			 , ysnInvalidSetup
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
@@ -165,7 +164,7 @@ INNER JOIN (
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 	) ITEMTAXCATEGORY ON ITEMTAXCATEGORY.intTaxClassId = IDT.intTaxClassId
 					 AND ITEMTAXCATEGORY.intCategoryId = ITEM.intCategoryId
-	OUTER APPLY (
+	CROSS APPLY (
 		SELECT intTaxClassCount	= COUNT(*)
 		FROM dbo.tblICCategoryTax ICT WITH (NOLOCK)
 		WHERE ICT.intCategoryId = ITEM.intCategoryId
@@ -211,7 +210,7 @@ INNER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
-	) SALESACCOUNT ON IDT.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
+	) SALESACCOUNT ON TAXCODE.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
 	LEFT OUTER JOIN (
 		SELECT intAccountId
 			 , strAccountId 

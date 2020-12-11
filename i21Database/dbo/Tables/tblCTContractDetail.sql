@@ -574,9 +574,7 @@ GO
 CREATE TRIGGER [dbo].[trgCTContractDetail]
     ON [dbo].[tblCTContractDetail]
     FOR INSERT,UPDATE
-    AS 
-    
-	declare @ErrMsg nvarchar(max);
+    AS
 
 	declare @intActiveContractDetailId int = 0;
 	declare @intActiveContractHeaderId int = 0;
@@ -584,6 +582,13 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 	declare @dblSequenceQuantity numeric(18,6) = 0.00;
 	declare @intPricingStatus int = 0;
 	declare @dblPricedQuantity numeric(18,6) = 0.00;
+	
+	declare @intActiveId int = 0;
+	declare @dblCommulativeAppliedAndPrice numeric(18,6) = 0;
+	declare @dblActivelAppliedQuantity numeric(18,6);
+	declare @dblRemainingAppliedQuantity numeric(18,6) = 0;
+	declare @ysnLoad bit;
+	declare @ErrMsg nvarchar(max);
 	declare @ysnMultiPrice bit = 0;
 	declare @dblBalance numeric(18,6);
 
@@ -633,10 +638,11 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 		begin
 			update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
 		end
-
+		
 		exec uspCTUpdateAppliedAndPrice
 			@intContractDetailId = @intActiveContractDetailId
 			,@dblBalance = @dblBalance
+			
 
 	end try
 	begin catch

@@ -254,11 +254,7 @@ BEGIN TRY
 
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-			declare
-				@dblSlicedFutures numeric(18,6)
-				,@dblSlicedCashPrice numeric(18,6);
-
-			SELECT @dblLotsFixed =  round(dblLotsFixed,2), @dblSlicedFutures = dblFinalPrice - dblOriginalBasis, @dblSlicedCashPrice = dblFinalPrice FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId;
+			SELECT @dblLotsFixed =  dblLotsFixed FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId
 			IF @dblNoOfLots > @dblLotsFixed AND @intPricingTypeId = 1
 			BEGIN
 				UPDATE	@CDTableUpdate
@@ -266,16 +262,6 @@ BEGIN TRY
 						dblCashPrice		=	NULL,
 						dblTotalCost		=	NULL,
 						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 2 END
-				WHERE	intContractDetailId	=	@intContractDetailId
-			END
-
-			IF @dblNoOfLots = @dblLotsFixed AND @intPricingTypeId = 2
-			BEGIN
-				UPDATE	@CDTableUpdate
-				SET		dblFutures			=	@dblSlicedFutures,
-						dblCashPrice		=	@dblSlicedCashPrice,
-						dblTotalCost		=	(dblQuantity * @dblSlicedCashPrice),
-						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 1 END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
@@ -392,7 +378,7 @@ BEGIN TRY
 			@ysnFeedOnApproval		=	1	AND
 			NOT EXISTS (SELECT TOP 1 1 FROM tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
 		BEGIN
-			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1, 1
+			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
 		END
 
 		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND

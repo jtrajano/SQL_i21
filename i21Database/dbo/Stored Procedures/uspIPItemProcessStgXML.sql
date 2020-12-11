@@ -8207,7 +8207,6 @@ BEGIN TRY
 
 			UPDATE tblICItemStage
 			SET strFeedStatus = 'Processed'
-				,strMessage = 'Success'
 				,intStatusId = 1
 			WHERE intItemStageId = @intItemStageId
 
