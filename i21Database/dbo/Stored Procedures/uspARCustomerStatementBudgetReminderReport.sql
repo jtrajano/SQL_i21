@@ -122,7 +122,6 @@ CREATE TABLE #STATEMENTREPORT (
 	 , strCompanyAddress			NVARCHAR(200)	COLLATE Latin1_General_CI_AS NULL
 	 , strFullAddress				NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
 	 , strStatementFooterComment	NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL
-	 , strComment					NVARCHAR(MAX)	COLLATE Latin1_General_CI_AS NULL	 
      , dtmDate						DATETIME NULL
      , dtmDueDate					DATETIME NULL	 
 	 , dtmDatePaid					DATETIME NULL
@@ -333,7 +332,6 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strTransactionType		= I.strTransactionType
 	 , strType					= I.strType
 	 , strInvoiceOriginId		= I.strInvoiceOriginId
-	 , strComments				= I.strComments
 	 , dtmDate					= I.dtmDate
 	 , dtmDueDate				= I.dtmDueDate
 	 , dblInvoiceTotal			= I.dblInvoiceTotal
@@ -368,7 +366,6 @@ INSERT INTO #STATEMENTREPORT (
 	 , strPaymentInfo
 	 , strFullAddress
 	 , strStatementFooterComment
-	 , strComment
      , dtmDate
      , dtmDueDate
 	 , dtmDatePaid
@@ -392,7 +389,6 @@ SELECT intEntityCustomerId			= C.intEntityCustomerId
 	 , strPaymentInfo				= TRANSACTIONS.strPaymentInfo
 	 , strFullAddress				= C.strFullAddress
 	 , strStatementFooterComment	= C.strStatementFooterComment
-	 , strComment					= TRANSACTIONS.strComment
      , dtmDate						= TRANSACTIONS.dtmDate
      , dtmDueDate					= TRANSACTIONS.dtmDueDate
 	 , dtmDatePaid					= ISNULL(TRANSACTIONS.dtmDatePaid, '01/02/1900')
@@ -429,7 +425,6 @@ LEFT JOIN (
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
-		 , strComment			= dbo.fnEliminateHTMLTags(I.strComments, 0)
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
 	LEFT JOIN (
@@ -457,7 +452,6 @@ LEFT JOIN (
 		 , dtmDueDate			= NULL
 		 , dtmDatePaid			= P.dtmDatePaid
 		 , strType				= NULL
-		 , strComment			= ISNULL(P.strPaymentInfo, '') + CASE WHEN ISNULL(P.strNotes, '') <> '' THEN ' - ' + P.strNotes ELSE '' END
 	FROM #POSTEDARPAYMENTS P
 	INNER JOIN (
 		SELECT intPaymentId		= PD.intPaymentId
@@ -652,7 +646,6 @@ INSERT INTO tblARCustomerStatementStagingTable (
 	, strTransactionType
 	, strPaymentInfo
 	, strFullAddress
-	, strComment
 	, strStatementFooterComment
 	, strCompanyName
 	, strCompanyAddress
@@ -684,7 +677,6 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, strTransactionType		= SR.strTransactionType
 	, strPaymentInfo			= SR.strPaymentInfo
 	, strFullAddress			= SR.strFullAddress
-	, strComment				= SR.strComment
 	, strStatementFooterComment	= SR.strStatementFooterComment
 	, strCompanyName			= SR.strCompanyName
 	, strCompanyAddress			= SR.strCompanyAddress
@@ -700,6 +692,11 @@ SELECT intEntityCustomerId		= SR.intEntityCustomerId
 	, ysnStatementCreditLimit	= SR.ysnStatementCreditLimit
 	, blbLogo					= @blbLogo
 FROM #STATEMENTREPORT SR
+
+UPDATE tblARCustomerStatementStagingTable
+SET strComment = dbo.fnEMEntityMessage(intEntityCustomerId, 'Statement')  
+WHERE intEntityUserId = @intEntityUserIdLocal 
+  AND strStatementFormat = 'Budget Reminder'
 
 IF @ysnPrintCreditBalanceLocal = 0
 	BEGIN
