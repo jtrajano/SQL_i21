@@ -8888,6 +8888,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileNECPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
     <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
