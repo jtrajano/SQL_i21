@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuLGContainerSample]
 AS
 	SELECT 
-		S.intSampleId
+		S.intSampleId,
 		strContainerNumber, 
 		strMarks, 
 		strSampleNumber,
