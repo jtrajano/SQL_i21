@@ -99,7 +99,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[dblWeight]						DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblNetWeight]					DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblWeightUnitQty]				DECIMAL(38,20) DEFAULT(1),
-	[dblWeightConversion]			AS (ISNULL(NULLIF([dblNetWeight],0),1) / [dblQuantityToBill]) PERSISTED,
 	[intWeightUOMId]				INT NULL,
 	/*Exchange Rate info*/
 	[intCurrencyExchangeRateTypeId]	INT NULL,

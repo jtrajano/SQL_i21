@@ -95,7 +95,6 @@
 	[dblFranchiseAmount]			DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblActual]						DECIMAL(18,6) NOT NULL DEFAULT(0),
 	[dblDifference]					DECIMAL(18,6) NOT NULL DEFAULT(0),
-	[dblWeightConversion]			AS (ISNULL(NULLIF([dblNetWeight],0),1) / [dblQuantityToBill]) PERSISTED,
 	[intCurrencyExchangeRateTypeId]	INT NULL,
 	[strRateType]					NVARCHAR(200) COLLATE Latin1_General_CI_AS NULL,
 	[dblExchangeRate]				DECIMAL(38,20) DEFAULT(1),
