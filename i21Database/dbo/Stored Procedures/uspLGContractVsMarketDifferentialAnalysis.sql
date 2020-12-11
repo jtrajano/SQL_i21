@@ -162,7 +162,7 @@ FROM
 		/* Payment Terms Adjustment Basis */
 		OUTER APPLY (SELECT TOP 1 PTSA.strMasterRecord, PTSA.intCurrencyId, PTUOM.intItemUOMId,
 						dblRate = PTSA.dblRate 
-							* CASE WHEN (PTCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN PTCU.intCent
+							* CASE WHEN (PTCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN FMCUR.intCent
 								   WHEN (PTCU.intMainCurrencyId = FMCUR.intCurrencyID) THEN (1 / PTCU.intCent) ELSE 1 END
 					 FROM tblLGStandardAdjustment PTSA
 						LEFT JOIN tblICItemUOM PTUOM ON PTUOM.intItemId = I.intItemId AND PTUOM.intUnitMeasureId = PTSA.intUnitMeasureId
@@ -175,7 +175,7 @@ FROM
 		/* Packaging Adjustment Basis */
 		OUTER APPLY (SELECT TOP 1 PKSA.strMasterRecord, PKSA.intCurrencyId, PKUOM.intItemUOMId,
 						dblRate = PKSA.dblRate 
-							* CASE WHEN (PKCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN PKCU.intCent
+							* CASE WHEN (PKCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN FMCUR.intCent
 								   WHEN (PKCU.intMainCurrencyId = FMCUR.intCurrencyID) THEN (1 / PKCU.intCent) ELSE 1 END
 					 FROM tblLGStandardAdjustment PKSA
 						LEFT JOIN tblICItemUOM PKUOM ON PKUOM.intItemId = I.intItemId AND PKUOM.intUnitMeasureId = PKSA.intUnitMeasureId
@@ -188,7 +188,7 @@ FROM
 		/* Certification Adjustment Basis */
 		OUTER APPLY (SELECT TOP 1 CFSA.strMasterRecord, CFSA.intCurrencyId, CFUOM.intItemUOMId,
 						dblRate = CFSA.dblRate
-							* CASE WHEN (CFCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN CFCU.intCent 
+							* CASE WHEN (CFCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN FMCUR.intCent 
 								   WHEN (CFCU.intMainCurrencyId = FMCUR.intCurrencyID) THEN (1 / CFCU.intCent) ELSE 1 END
 					 FROM tblLGStandardAdjustment CFSA
 						LEFT JOIN tblICItemUOM CFUOM ON CFUOM.intItemId = I.intItemId AND CFUOM.intUnitMeasureId = CFSA.intUnitMeasureId
@@ -202,7 +202,7 @@ FROM
 		/* INCO Term Adjustment Basis */
 		OUTER APPLY (SELECT TOP 1 FRMX.intCurrencyId, CTUOM.intItemUOMId, CON.dblNetWeight,
 						dblTotalCostPerContainer = FRMX.dblTotalCostPerContainer 
-							* CASE WHEN (FRMCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN FRMCU.intCent 
+							* CASE WHEN (FRMCU.intCurrencyID = FMCUR.intMainCurrencyId) THEN FMCUR.intCent 
 								   WHEN (FRMCU.intMainCurrencyId = FMCUR.intCurrencyID) THEN (1 / FRMCU.intCent) ELSE 1 END
 					 FROM tblLGFreightRateMatrix FRMX
 						LEFT JOIN tblSMCurrency FRMCU ON FRMCU.intCurrencyID = FRMX.intCurrencyId
