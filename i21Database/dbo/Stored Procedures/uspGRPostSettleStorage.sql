@@ -233,7 +233,7 @@ BEGIN TRY
 				AND intCustomerStorageId = @intCustomerStorageId
 			GROUP BY intCustomerStorageId
 
-			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.01
+			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
 			BEGIN
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
 				RETURN;
