@@ -150,6 +150,7 @@ begin try
 
 	declare 
 		@intVoucherPayableId int
+		,@previous_intVoucherPayableId INT
 		,@intContractTypeId int
 		,@intPriceFixationId int
 		,@intPriceFixationDetailId int
@@ -470,8 +471,9 @@ begin try
 		end
 					
 		ReciptNextLoop:
-		select @intVoucherPayableId = null;
-		select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0 and intVoucherPayableId > @intVoucherPayableId;
+		SELECT @previous_intVoucherPayableId = @intVoucherPayableId
+		select @intVoucherPayableId = null
+		select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0 and intVoucherPayableId > @previous_intVoucherPayableId;  
 	end
 	
 	--add the non-contract items (charges, overage/spot....)
@@ -744,8 +746,6 @@ begin try
 		   ,dblQtyReceived
 		from
 			#returnData
-		where
-			isnull(intPriceFixationDetailId,0) > 0
 
 		--Code here to process the return table from uspAPCreateVoucher
 		if exists (select top 1 1 from @CreatedVoucher)
