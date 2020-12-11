@@ -6,6 +6,9 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	intBillDetailId					INT,
 	intInvoiceId					INT,
 	intInvoiceDetailId				INT,
+	intSourceId						INT,
+	dblQuantity						numeric(18,6),
+	dtmCreatedDate					datetime default getdate(),
 	ysnMarkDelete					BIT,
 	[intConcurrencyId]				INT NOT NULL,
 
@@ -23,7 +26,6 @@ CREATE TRIGGER [dbo].[trgCTPriceFixationDetailAPARDelete]
     FOR INSERT
     AS
     BEGIN
-    
 		SET NoCount ON  
 		declare @ErrMsg nvarchar(max);  
 		declare @intActiveContractDetailId int = 0; 

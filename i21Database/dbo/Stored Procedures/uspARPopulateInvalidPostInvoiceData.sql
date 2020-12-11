@@ -21,20 +21,20 @@ SET @ZeroBit = CAST(0 AS BIT)
 IF @Recap = @ZeroBit	
 	EXEC dbo.uspARPostItemResevation
 
-DECLARE @ItemsForContracts					[InvoicePostingTable]
-EXEC [dbo].[uspARPopulateContractDetails]
+DECLARE @ItemsForInTransitCosting [ItemInTransitCostingTableType]
 
 IF @Post = @OneBit
 BEGIN
     DECLARE @InvoiceIds 						[InvoiceId]
 	DECLARE @PostInvoiceDataFromIntegration 	[InvoicePostingTable]
+	DECLARE @ItemsForContracts					[InvoicePostingTable]
 	DECLARE @ItemsForCosting 					[ItemCostingTableType]
 	DECLARE @ItemsForStoragePosting 			[ItemCostingTableType]
-	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
 	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]	
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting]
+	EXEC [dbo].[uspARPopulateContractDetails]
 	
 	INSERT INTO #ARInvalidInvoiceData (
 		  [intInvoiceId]
@@ -60,7 +60,7 @@ BEGIN
 		INNER JOIN (
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
-				 --, ICT.intTransactionDetailId
+				 , ICT.intTransactionDetailId
 				 , ICT.intLotId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
@@ -70,10 +70,10 @@ BEGIN
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
 			  AND ICT.intInTransitSourceLocationId IS NOT NULL
-			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
+			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intTransactionDetailId, ICT.intLotId
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
-			 --AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
+			 AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
@@ -106,28 +106,6 @@ BEGIN
 		#ARPostInvoiceHeader I
 	WHERE  
 		I.[ysnPosted] = @OneBit
-
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--DUPLICATE BATCH ID
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId] 
-		,[intItemId]			= I.[intItemId] 
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Duplicate Batch ID'
-	FROM 
-		#ARPostInvoiceHeader I
-	WHERE  
-		EXISTS(SELECT strBatchId FROM tblGLDetail WHERE strBatchId = @BatchId)
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -365,6 +343,7 @@ BEGIN
 		AND I.[strType] != 'POS'	
 		AND ISNULL(INV.[ysnValidCreditCode], 0) = 0
 
+			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -373,23 +352,22 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-	--Approval
+		
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
 		,[strTransactionType]	= I.[strTransactionType]
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]            = I.[intItemId]
+		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN VI.ysnHasCreditApprover = 0 THEN 'The Customer''s credit limit has been reached but there is no approver configured.' ELSE ISNULL(SMT.strApprovalStatus, 'Not Yet Approved') END
+		,[strPostingError]		= 'Invoice - ' + I.strInvoiceNumber + ' is not yet Approved!'
 	FROM 
-		#ARPostInvoiceHeader I 
-	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
-	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
-	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
-	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
-	WHERE SMT.strApprovalStatus <> 'Approved'
-	AND SMT.strApprovalStatus IS NOT NULL
+		#ARPostInvoiceHeader I
+	WHERE
+		I.[ysnForApproval] = @OneBit
+	--INNER JOIN
+	--	(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
+	--		ON I.intInvoiceId = FAT.intTransactionId
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1829,37 +1807,6 @@ BEGIN
 		I.strTransactionType = 'Cash Refund'
 		AND I.dblInvoiceTotal <> ISNULL(PREPAIDS.dblAppliedInvoiceAmount, 0)
 
-	DECLARE @strItemBlankStorageLocation NVARCHAR(MAX) = NULL;
-
-	SELECT @strItemBlankStorageLocation = COALESCE(@strItemBlankStorageLocation + ', ' + I.strItemNo, I.strItemNo)
-	FROM 					
-		#ARPostInvoiceDetail I
-	WHERE ISNULL(I.intStorageLocationId, 0) > 0
-	AND	ISNULL(I.intSubLocationId, 0) = 0
-
-	IF (@strItemBlankStorageLocation IS NOT NULL)
-	BEGIN
-		INSERT INTO #ARInvalidInvoiceData
-			([intInvoiceId]
-			,[strInvoiceNumber]
-			,[strTransactionType]
-			,[intInvoiceDetailId]
-			,[intItemId]
-			,[strBatchId]
-			,[strPostingError])
-		--CASH REFUND AMOUNT IS NOT EQUAL TO PREPAIDS
-		SELECT
-			 [intInvoiceId]			= I.[intInvoiceId]
-			,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-			,[strTransactionType]	= I.[strTransactionType]
-			,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-			,[intItemId]			= I.[intItemId]
-			,[strBatchId]			= I.[strBatchId]
-			,[strPostingError]		= 'The Storage Location field is required if the Storage Unit field is populated.  Please review these fields for Item(s) (' + @strItemBlankStorageLocation + ') and make the appropriate edits.'
-		FROM 					
-			#ARPostInvoiceDetail I
-	END
-
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -2204,6 +2151,59 @@ BEGIN
 		,[strPostingError] -- + '[fnICGetInvalidInvoicesForItemStoragePosting]'
 	FROM 
 		[dbo].[fnICGetInvalidInvoicesForItemStoragePosting](@ItemsForStoragePosting, @OneBit)
+
+
+	--Contract Schedule/Balance Validation
+	INSERT INTO @ItemsForContracts (
+		intInvoiceId
+		, intInvoiceDetailId	
+		, intEntityId
+		, intUserId
+		, intContractDetailId
+		, intContractHeaderId
+		, dtmDate
+		, dblQuantity
+		, dblQtyShipped
+		, strInvoiceNumber
+		, strTransactionType
+		, intItemId
+		, strItemNo
+		, strBatchId
+	)
+	SELECT intInvoiceId			= intInvoiceId
+		, intInvoiceDetailId	= intInvoiceDetailId
+		, intEntityId			= intEntityId
+		, intUserId				= intUserId
+		, intContractDetailId	= intContractDetailId
+		, intContractHeaderId	= intContractHeaderId
+		, dtmDate				= dtmDate
+		, dblQuantity			= dblQuantity
+		, dblQtyShipped			= dblQuantity
+		, strInvoiceNumber		= strInvoiceNumber
+		, strTransactionType	= strTransactionType
+		, intItemId				= intItemId
+		, strItemNo				= strItemNo
+		, strBatchId			= strBatchId
+	FROM #ARItemsForContracts
+	WHERE strType = 'Contract Balance'
+
+	-- INSERT INTO #ARInvalidInvoiceData (
+	-- 	  [intInvoiceId]
+	-- 	, [strInvoiceNumber]
+	-- 	, [strTransactionType]
+	-- 	, [intInvoiceDetailId]
+	-- 	, [intItemId]
+	-- 	, [strBatchId]
+	-- 	, [strPostingError]
+	-- )
+	-- SELECT [intInvoiceId]
+	-- 	, [strInvoiceNumber]
+	-- 	, [strTransactionType]
+	-- 	, [intInvoiceDetailId]
+	-- 	, [intItemId]
+	-- 	, [strBatchId]
+	-- 	, [strPostingError]
+	-- FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
 END
 
 IF @Post = @ZeroBit
@@ -2615,58 +2615,6 @@ BEGIN
 				AND I.[ysnImportedFromOrigin] = @OneBit												
 		END
 END
-
---Contract Schedule/Balance Validation
-INSERT INTO @ItemsForContracts (
-	intInvoiceId
-	, intInvoiceDetailId	
-	, intEntityId
-	, intUserId
-	, intContractDetailId
-	, intContractHeaderId
-	, dtmDate
-	, dblQuantity
-	, dblQtyShipped
-	, strInvoiceNumber
-	, strTransactionType
-	, intItemId
-	, strItemNo
-	, strBatchId
-)
-SELECT intInvoiceId			= intInvoiceId
-	, intInvoiceDetailId	= intInvoiceDetailId
-	, intEntityId			= intEntityId
-	, intUserId				= intUserId
-	, intContractDetailId	= intContractDetailId
-	, intContractHeaderId	= intContractHeaderId
-	, dtmDate				= dtmDate
-	, dblQuantity			= dblQuantity
-	, dblQtyShipped			= dblQuantity
-	, strInvoiceNumber		= strInvoiceNumber
-	, strTransactionType	= strTransactionType
-	, intItemId				= intItemId
-	, strItemNo				= strItemNo
-	, strBatchId			= strBatchId
-FROM #ARItemsForContracts
-WHERE strType = 'Contract Balance'
-
-INSERT INTO #ARInvalidInvoiceData (
-		[intInvoiceId]
-	, [strInvoiceNumber]
-	, [strTransactionType]
-	, [intInvoiceDetailId]
-	, [intItemId]
-	, [strBatchId]
-	, [strPostingError]
-)
-SELECT [intInvoiceId]
-	, [strInvoiceNumber]
-	, [strTransactionType]
-	, [intInvoiceDetailId]
-	, [intItemId]
-	, [strBatchId]
-	, [strPostingError]
-FROM dbo.fnCTValidateInvoiceContract(@ItemsForContracts)
 
 UPDATE #ARInvalidInvoiceData
 SET [strBatchId] = @BatchId

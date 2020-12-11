@@ -858,7 +858,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
         DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
-		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) = 0
+		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0
     END
 
 INSERT INTO @temp_cf_table (

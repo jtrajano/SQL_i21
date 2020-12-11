@@ -65,6 +65,10 @@ BEGIN TRY
 	FROM tblSMTransaction
 	WHERE intRecordId = @intPriceContractId
 		AND intScreenId = @intContractScreenId
+
+	-------------------------PriceContract-----------------------------------------------------------
+	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
+
 if @ysnProcessApproverInfo=0
 Begin
 	-------------------------PriceContract-----------------------------------------------------------
