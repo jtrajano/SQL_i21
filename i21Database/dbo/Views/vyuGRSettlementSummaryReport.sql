@@ -14,7 +14,7 @@ SELECT
 	,OutboundDiscount			    = OutboundDiscount		
 	,OutboundNetDue				    = OutboundNetDue			
 	,SalesAdjustment			    = SalesAdjustment	
-	,VoucherAdjustment			    = VoucherAdjustment
+	,VoucherAdjustment			    = SUM(VoucherAdjustment)
 	,dblVendorPrepayment		    = SUM(dblVendorPrepayment)	 
 	,lblVendorPrepayment		    = lblVendorPrepayment		 
 	,dblCustomerPrepayment		    = dblCustomerPrepayment		 
@@ -147,14 +147,14 @@ FROM
 		AND BillByReceipt.intInventoryReceiptItemId = BillDtl.intInventoryReceiptItemId
 	LEFT JOIN (
 		SELECT 
-			intPaymentId
+			Bill.intBillId
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 
 				AND Bill.intTransactionType = 3
-		GROUP BY intPaymentId
-	) BillByReceiptItem ON BillByReceiptItem.intPaymentId = PYMT.intPaymentId			 
+		GROUP BY Bill.intBillId
+	) BillByReceiptItem ON BillByReceiptItem.intBillId = Bill.intBillId			 
 	LEFT JOIN (
 		SELECT 
 			PYMT.intPaymentId
@@ -348,7 +348,7 @@ FROM
 	) tblTax ON tblTax.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT 
-			intPaymentId
+			Bill.intBillId
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
@@ -358,8 +358,8 @@ FROM
 			ON BD.intBillId = Bill.intBillId
 				AND BD.intCustomerStorageId IS NULL
 				AND BD.intSettleStorageId IS NULL
-		GROUP BY intPaymentId
-	) tblAdjustment ON tblAdjustment.intPaymentId = PYMT.intPaymentId			
+		GROUP BY Bill.intBillId
+	) tblAdjustment ON tblAdjustment.intBillId = Bill.intBillId			
 	LEFT JOIN (
 		SELECT
 			PYMT.intPaymentId
@@ -445,7 +445,7 @@ GROUP BY
 	,OutboundDiscount		
 	,OutboundNetDue			
 	,SalesAdjustment	
-	,VoucherAdjustment		 
+	-- ,VoucherAdjustment		 
 	,lblVendorPrepayment		 
 	,dblCustomerPrepayment		 
 	,lblCustomerPrepayment		 
