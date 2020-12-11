@@ -1807,7 +1807,7 @@ BEGIN TRY
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				INNER JOIN
 				(
-					SELECT intTransactionReferenceDetailId, dblQty = sum(dblQty)
+					SELECT intTransactionReferenceDetailId, dblQty = sum(CAST(replace(REPLACE(strNotes, 'Priced Quantity is ', ''),'Priced Load is ','') AS NUMERIC(24, 10)))
 					FROM tblCTContractBalanceLog
 					WHERE strProcess = 'Price Fixation'
 					and intPricingTypeId = 1
@@ -2786,13 +2786,13 @@ BEGIN TRY
 				IF @_dblQty > @dblBasisDelOrig
 				BEGIN					
 					-- Negate basis using the current priced quantities
-					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - (CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblBasisDel END)) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END) * -1, 
+					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty >= @dblQty THEN (@_dblQty - (CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblBasisDel END)) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END) * -1, 
 												intPricingTypeId = 2,
 											   dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 
 					-- Negate basis using the current priced quantities
-					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty = @dblQty THEN (@_dblQty - (CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblBasisDel END)) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END), 
+					UPDATE  @cbLogSpecific SET dblQty = (CASE WHEN @_dblQty >= @dblQty THEN (@_dblQty - (CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblBasisDel END)) ELSE (CASE WHEN @dblQty > @dblBasis THEN @dblBasis ELSE @dblQty END) END), 
 												intPricingTypeId = 1,
 												dblFutures = ISNULL(@dblAvrgFutures, dblFutures)
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
