@@ -460,7 +460,7 @@ BEGIN
 					--RI.strSessionId = @strSessionId
 					--AND 
 					ISNULL(RI.strMessage, '') = ''
-					AND RI.strRecipeItemType = 'INPUT'
+					--AND RI.strRecipeItemType = 'INPUT'
 					AND R.strRecipeName = RI.strRecipeName
 					AND R.strVersionNo = RI.strVersionNo
 					AND R.strLocationName = RI.strLocationName
