@@ -593,7 +593,7 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (ROUND(
 												(
-													dbo.fnAPGetPaymentAmountFactor(ISNULL(taxes.dblAdjustedTax, taxes.dblTax), B.dblPayment 
+													dbo.fnAPGetPaymentAmountFactor(taxesEntry.dblForeignTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1))
 											,2)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
@@ -621,7 +621,7 @@ BEGIN
 		[intConcurrencyId]				=	1,
 		[dblDebitForeign]				=	ROUND(
 													(
-													dbo.fnAPGetPaymentAmountFactor(ISNULL(taxes.dblAdjustedTax, taxes.dblTax), B.dblPayment 
+													dbo.fnAPGetPaymentAmountFactor(taxesEntry.dblForeignTotal, B.dblPayment 
 													+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 													- B.dblInterest, voucher.dblTotal))
 											,2)
@@ -638,6 +638,9 @@ BEGIN
 			INNER JOIN tblAPBill voucher ON voucher.intBillId = B.intBillId
 			INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
 			INNER JOIN tblAPBillDetailTax taxes ON voucherDetail.intBillDetailId = taxes.intBillDetailId
+			OUTER APPLY (
+				SELECT * FROM fnAPGetVoucherTaxGLEntry(voucher.intBillId) WHERE intBillDetailTaxId = taxes.intBillDetailTaxId
+			) taxesEntry
 			--WE HAVE TO CLEAR THE AP EQUAL TO THE AP ENTERED WHEN VOUCHER WAS POSTED
 			--THIS WILL PREVENT US FROM HAVING A DISCREPANCY WHEN MULTIPLE FOREIGN RATE IS IN VOUCHER DETAILS
 			--USING AVERAGE RATE FOR PAYMENT (WHICH IS PER DETAIL IN VOUCHER) WOULD CAUSE DISCREPANCY
@@ -910,7 +913,7 @@ BEGIN
 		) DT
 		WHERE P.intPaymentId IN (SELECT intId FROM @paymentIds) AND
 		((DT.dblDifference <> 0 AND DT.dblDifference < 1 AND DT.dblDifference > -1) OR (DT.dblDifferenceForeign <> 0 AND DT.dblDifferenceForeign < 1 AND DT.dblDifferenceForeign > -1))
-		AND PD.dblPayment <> 0 AND PD.dblPayment <> RT.dblTotalForeign
+		AND PD.dblPayment <> 0
 
 	UPDATE A
 		SET A.strDescription = B.strDescription
