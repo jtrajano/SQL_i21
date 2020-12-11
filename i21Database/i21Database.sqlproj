@@ -8938,6 +8938,7 @@
     <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentSimplifiedAvg.sql" />
     <Build Include="dbo\Views\vyuCCImportDealerCreditCardReconDetail.sql" />
+    <Build Include="dbo\Views\vyuLGContainerSample.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
