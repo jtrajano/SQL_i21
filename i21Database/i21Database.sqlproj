@@ -8939,6 +8939,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentSimplifiedAvg.sql" />
     <Build Include="dbo\Views\vyuCCImportDealerCreditCardReconDetail.sql" />
     <Build Include="dbo\Views\vyuLGContainerSample.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPValidateImportedPaidVouchersDTN.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
