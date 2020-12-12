@@ -55,8 +55,10 @@ BEGIN TRY
 		,@intIntegerPart INT
 		,@dblTotalConsumptionQty NUMERIC(18, 6)
 		,@intConsumptionAvlMonth INT
+		,@intPrevUnitMeasureId INT
 		,@intBookId INT
 		,@intSubBookId INT
+		,@intDemandAnalysisMonthlyCutOffDay INT
 	DECLARE @tblMFContainerWeight TABLE (
 		intItemId INT
 		,dblWeight NUMERIC(18, 6)
@@ -94,6 +96,7 @@ BEGIN TRY
 		,@ysnComputeDemandUsingRecipe = ysnComputeDemandUsingRecipe
 		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 		,@ysnDisplayRestrictedBookInDemandView = IsNULL(ysnDisplayRestrictedBookInDemandView, 0)
+		,@intDemandAnalysisMonthlyCutOffDay = IsNULL(intDemandAnalysisMonthlyCutOffDay, 32)
 	FROM tblMFCompanyPreference
 
 	SELECT @strContainerType = strContainerType
@@ -764,8 +767,8 @@ BEGIN TRY
 					FROM @tblMFRefreshtemStock EI
 					WHERE EI.intItemId = I.intItemId
 					)
-			AND IsNULL(L.intBookId,0) =IsNULL(@intBookId,0) 
-			AND IsNULL(L.intSubBookId,0) =IsNULL(@intSubBookId,0) 
+				AND IsNULL(L.intBookId, 0) = IsNULL(@intBookId, 0)
+				AND IsNULL(L.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			GROUP BY CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
@@ -1158,8 +1161,8 @@ BEGIN TRY
 						ELSE @intCompanyLocationId
 						END
 					)
-				AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
-				AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
+				AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
+				AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 
 			INSERT INTO #tblMFDemand (
 				intItemId
@@ -1186,14 +1189,20 @@ BEGIN TRY
 						END
 					)
 			WHERE SS.intContractStatusId = 1
-				AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
+				AND (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					) < @dtmStartOfMonth
 				AND NOT EXISTS (
 					SELECT *
 					FROM #tblMFContractDetail CD
 					WHERE CD.intContractDetailId = SS.intContractDetailId
 					)
-			AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
-			AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
+				AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
+				AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 			GROUP BY CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
@@ -1213,7 +1222,13 @@ BEGIN TRY
 					END AS intItemId
 				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(SS.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, SS.dblBalance) * I.dblRatio) AS dblIntrasitQty
 				,13 AS intAttributeId --Open Purchases
-				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
+				,DATEDIFF(mm, 0, (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					)) + 1 - @intCurrentMonth AS intMonthId
 			FROM @tblMFItemDetail I
 			JOIN dbo.tblCTContractDetail SS ON SS.intItemId = I.intItemId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = SS.intItemUOMId
@@ -1225,21 +1240,45 @@ BEGIN TRY
 						END
 					)
 			WHERE SS.intContractStatusId = 1
-				AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
+				AND (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					) >= @dtmStartOfMonth
 				AND NOT EXISTS (
 					SELECT *
 					FROM #tblMFContractDetail CD
 					WHERE CD.intContractDetailId = SS.intContractDetailId
 					)
-			AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
-			AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
-			GROUP BY datename(m, SS.dtmUpdatedAvailabilityDate) + ' ' + cast(datepart(yyyy, SS.dtmUpdatedAvailabilityDate) AS VARCHAR)
+				AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
+				AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
+			GROUP BY datename(m, (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					)) + ' ' + cast(datepart(yyyy, (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					)) AS VARCHAR)
 				,CASE 
 					WHEN I.ysnSpecificItemDescription = 1
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END
-				,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate)
+				,DATEDIFF(mm, 0, (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					))
 		END
 		ELSE
 		BEGIN
@@ -1321,9 +1360,15 @@ BEGIN TRY
 				ELSE @intCompanyLocationId
 				END
 			)
-		AND SS.dtmUpdatedAvailabilityDate < @dtmStartOfMonth
-		AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
-		AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
+		AND (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					) < @dtmStartOfMonth
+		AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
+		AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 	GROUP BY CASE 
 			WHEN I.ysnSpecificItemDescription = 1
 				THEN I.intItemId
@@ -1349,7 +1394,13 @@ BEGIN TRY
 						END
 					)) * I.dblRatio) AS dblIntrasitQty
 		,14 AS intAttributeId --In-transit Purchases
-		,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate) + 1 - @intCurrentMonth AS intMonthId
+		,DATEDIFF(mm, 0, (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					)) + 1 - @intCurrentMonth AS intMonthId
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId
 		AND L.intPurchaseSale = 1
@@ -1374,15 +1425,27 @@ BEGIN TRY
 				ELSE @intCompanyLocationId
 				END
 			)
-		AND SS.dtmUpdatedAvailabilityDate >= @dtmStartOfMonth
-		AND IsNULL(SS.intBookId,0) =IsNULL(@intBookId,0) 
-		AND IsNULL(SS.intSubBookId,0) =IsNULL(@intSubBookId,0) 
+		AND (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					) >= @dtmStartOfMonth
+		AND IsNULL(SS.intBookId, 0) = IsNULL(@intBookId, 0)
+		AND IsNULL(SS.intSubBookId, 0) = IsNULL(@intSubBookId, 0)
 	GROUP BY CASE 
 			WHEN I.ysnSpecificItemDescription = 1
 				THEN I.intItemId
 			ELSE I.intMainItemId
 			END
-		,DATEDIFF(mm, 0, SS.dtmUpdatedAvailabilityDate)
+		,DATEDIFF(mm, 0, (
+					CASE 
+						WHEN Day(SS.dtmUpdatedAvailabilityDate) > @intDemandAnalysisMonthlyCutOffDay
+							THEN DateAdd(m, 1, SS.dtmUpdatedAvailabilityDate)
+						ELSE SS.dtmUpdatedAvailabilityDate
+						END
+					))
 
 	INSERT INTO #tblMFDemand (
 		intItemId
@@ -1507,7 +1570,7 @@ BEGIN TRY
 		,CASE 
 			WHEN strValue = ''
 				THEN NULL
-			ELSE strValue
+			ELSE dbo.fnCTConvertQuantityToTargetItemUOM(intItemId, @intPrevUnitMeasureId, @intUnitMeasureId, strValue)
 			END --Previous Planned Purchases
 		,6
 		,Replace(Replace(Replace(strFieldName, 'strMonth', ''), 'OpeningInv', '-1'), 'PastDue', '0') intMonthId
@@ -1734,8 +1797,8 @@ BEGIN TRY
 					SET dblQty = IsNULL((
 								SELECT CASE 
 										WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
-											THEN Floor((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight)) * Max(CW.dblWeight)
-										ELSE (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
+											THEN Ceiling(abs((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight))) * Max(CW.dblWeight)
+										ELSE abs(sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
 										END
 								FROM #tblMFDemand OpenInv
 								LEFT JOIN @tblMFContainerWeight CW ON CW.intItemId = OpenInv.intItemId
@@ -1748,12 +1811,8 @@ BEGIN TRY
 											,8
 											) --Opening Inventory, Existing Purchases,Forecasted Consumption
 										)
-								HAVING CASE 
-										WHEN Max(IsNULL(CW.dblWeight, 0)) > 0
-											THEN Floor((sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) / Max(CW.dblWeight)) * Max(CW.dblWeight)
-										ELSE (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0))
-										END < 0
-								), 0) * - 1
+								HAVING (sum(OpenInv.dblQty) - IsNULL(@dblTotalConsumptionQty, 0)) < 0
+								), 0)
 					FROM #tblMFDemand D
 					WHERE intAttributeId = 5 --Planned Purchases -
 						AND intMonthId = @intMonthId
