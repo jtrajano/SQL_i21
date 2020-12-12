@@ -392,7 +392,7 @@ BEGIN TRY
 			@ysnFeedOnApproval		=	1	AND
 			NOT EXISTS (SELECT TOP 1 1 FROM tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
 		BEGIN
-			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
+			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1, 1
 		END
 
 		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND

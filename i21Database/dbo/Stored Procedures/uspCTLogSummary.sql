@@ -1426,7 +1426,16 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = CASE WHEN @ysnLoadBased = 1 THEN 0 ELSE (case when (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 then (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) else 0 end) END--pfd.dblQuantity
+				, dblQty = CASE
+								WHEN @ysnLoadBased = 1 THEN 0
+								ELSE 
+								(
+									case 
+										when (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 then (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) 
+										else 0 
+									end
+								) 
+						   END--pfd.dblQuantity
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'
@@ -1471,15 +1480,21 @@ BEGIN TRY
 				) sh
 				OUTER APPLY
 				(
-					SELECT dblQty = MIN(dblQty) * -1
-					FROM tblCTContractBalanceLog
-					WHERE strProcess = 'Price Fixation'
-					AND intContractHeaderId = @intContractHeaderId
-					AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
-					AND intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
-					GROUP BY intTransactionReferenceDetailId
-				) cbl
-				WHERE pfd.ysnToBeDeleted = 1	
+					SELECT dblQty
+					FROM
+					(
+						SELECT ROW_NUMBER() OVER (PARTITION BY intTransactionReferenceDetailId ORDER BY dtmCreatedDate DESC) AS Row_Num, dblQty
+						FROM tblCTContractBalanceLog
+						WHERE strProcess = 'Price Fixation'
+						AND intContractHeaderId = @intContractHeaderId
+						AND dblQty >= 0
+						AND intContractDetailId = ISNULL(@intContractDetailId, cd.intContractDetailId)
+						AND intTransactionReferenceDetailId = pfd.intPriceFixationDetailId
+					) t
+					WHERE Row_Num = 1 
+				) cbl		
+
+				WHERE pfd.ysnToBeDeleted = 1		
 				AND pf.intContractHeaderId = @intContractHeaderId
 				AND pf.intContractDetailId = ISNULL(@intContractDetailId, pf.intContractDetailId)	
 				AND pfd.intPriceFixationDetailId NOT IN
@@ -1617,7 +1632,7 @@ BEGIN TRY
 				, intUserId
 				, intActionId
 				, strProcess)
-			SELECT NULL
+			SELECT TOP 1 NULL
 				, cbl.dtmTransactionDate
 				, strTransactionType = 'Sales Basis Deliveries'
 				, cbl.strTransactionReference
@@ -1660,6 +1675,7 @@ BEGIN TRY
 			AND cbl.intContractHeaderId = @intContractHeaderId
 			AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
 			AND cbl.intTransactionReferenceDetailId = @intTransactionId
+			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE
 		BEGIN
@@ -2960,7 +2976,7 @@ BEGIN TRY
 					BEGIN						
 						IF  @dblQty <> 0
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @dblQty * -1, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
+							UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 					END

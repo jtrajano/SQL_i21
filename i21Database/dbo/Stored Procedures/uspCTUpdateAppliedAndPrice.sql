@@ -47,13 +47,13 @@ as
 			cd.intContractDetailId = @intContractDetailId
 			and ch.intContractHeaderId = cd.intContractHeaderId
 
-		if (@intContractTypeId = 2)
+		if (@intContractTypeId = 2 and exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd, tblCTPriceFixationDetailAPAR ar where pf.intContractDetailId = @intContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId))
 		begin
 			update
 				pfd
 			set
-				pfd.dblQuantityAppliedAndPriced = rd.dblInvoiceQuantityAppliedAndPriced
-				,pfd.dblLoadAppliedAndPriced = rd.dblInvoiceLoadAppliedAndPriced
+				pfd.dblQuantityAppliedAndPriced = isnull(rd.dblInvoiceQuantityAppliedAndPriced,0)
+				,pfd.dblLoadAppliedAndPriced = isnull(rd.dblInvoiceLoadAppliedAndPriced,0)
 			from
 				tblCTPriceFixationDetail pfd 
 				join (
@@ -70,7 +70,7 @@ as
 						tblCTPriceFixation pf
 						join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
 						join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
-						join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
+						left join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
 						left join (
 							select di.intInvoiceDetailId, di.dblQtyShipped from tblARInvoiceDetail di where di.intInventoryShipmentChargeId is null and isnull(di.ysnReturned,0) = 0
 						) iq on iq.intInvoiceDetailId = ar.intInvoiceDetailId
@@ -112,8 +112,8 @@ as
 				,dblLoadPriced = pfd.dblLoadPriced
 				,dblLoadApplied = pfd.dblLoadApplied
 				,dblLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
-				,dblCorrectQuantityAppliedAndPriced = pfd.dblQuantityAppliedAndPriced
-				,dblCorrectLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
+				,dblCorrectQuantityAppliedAndPriced = 0.00--pfd.dblQuantityAppliedAndPriced
+				,dblCorrectLoadAppliedAndPriced = 0.00--pfd.dblLoadAppliedAndPriced 
 			from
 				tblCTPriceFixation pf
 				,tblCTPriceFixationDetail pfd
