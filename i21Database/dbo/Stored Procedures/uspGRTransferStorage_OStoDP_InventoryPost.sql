@@ -301,6 +301,8 @@ BEGIN
 				,[dblReportingRate]	
 				,[dblForeignRate]
 				,[strRateType]
+				,[intSourceEntityId]
+				,[intCommodityId]
 			)
 			EXEC dbo.uspICPostCosting @ItemsToPostCopy,@strBatchId,'AP Clearing',@intUserId
 
@@ -351,6 +353,9 @@ BEGIN
 			--discounts and charges
 			IF @ysnFromDS = 0
 			BEGIN
+				
+				
+				
 				INSERT INTO @GLEntries 
 				(
 					[dtmDate] 
@@ -388,12 +393,12 @@ BEGIN
 				)
 				EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage] 
 					@intTransferStorageId
+					,@intTransactionDetailId
 					,@strBatchId
 					,@dblOriginalCost
 					,1
-					,@intTransferStorageReferenceId = @intTransactionDetailId
+									
 			END
-
 			--select '@GLEntries',* from @GLEntries
 			IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 			BEGIN 
