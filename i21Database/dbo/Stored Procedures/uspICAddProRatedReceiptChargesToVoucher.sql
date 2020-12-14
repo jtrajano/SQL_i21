@@ -122,7 +122,7 @@ BEGIN
 		AND ISNULL(rc.intContractId, 0) = ISNULL(@intContractHeaderId, 0)
 		AND ISNULL(rc.intContractDetailId, 0) = ISNULL(@intContractDetailId, 0)
 		AND ISNULL(rc.strChargesLink, '') = ISNULL(@strChargesLink, '')
-		AND rc.ysnAllowVoucher = 0 
+		--AND rc.ysnAllowVoucher = 0 
 
 	INSERT INTO @voucherDetailReceiptCharge (
 		[intInventoryReceiptChargeId]
