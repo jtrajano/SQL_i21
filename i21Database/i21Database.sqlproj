@@ -8852,6 +8852,7 @@
     <Build Include="dbo\Tables\tblLGWeightClaimPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPWeightClaimProcessPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateAppliedAndPrice.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
