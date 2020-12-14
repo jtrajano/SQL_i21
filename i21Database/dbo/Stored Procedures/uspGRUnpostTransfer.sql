@@ -47,7 +47,7 @@ BEGIN
 			FROM tblGRCustomerStorage A 
 			INNER JOIN #tmpTransferCustomerStorage B 
 			ON B.intToCustomerStorage = A.intCustomerStorageId) <>	
-		(SELECT  sum(B.dblUnits)
+		(SELECT  sum(F.dblUnitQty)
 			FROM tblGRCustomerStorage A 
 			OUTER APPLY (
 				SELECT dblUnitQty = SUM(dblUnitQty)
@@ -373,10 +373,10 @@ BEGIN
 				)
 				EXEC [dbo].[uspGRCreateGLEntriesForTransferStorage]
 					@intTransferStorageId = @intTransferStorageId
+					,@intTransactionDetailId = @intTransactionDetailId
 					,@strBatchId = @strBatchId
 					,@dblCost = 0
 					,@ysnPost = 1
-					,@intTransferStorageReferenceId = @intTransactionDetailId
 			END
 			/*UNPOST STORAGE*/						
 			
