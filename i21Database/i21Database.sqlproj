@@ -270,6 +270,8 @@
     <Build Include="dbo\Tables\tblGLCOAImportLogDetail.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplate.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplateDetail.sql" />
+    <Build Include="dbo\Tables\tblGLConsolidateLog.sql" />
+    <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLCurrentFiscalYear.sql" />
     <Build Include="dbo\Tables\tblGLDetail.sql" />
     <Build Include="dbo\Tables\tblGLDetailRecap.sql" />
@@ -440,6 +442,7 @@
     <Build Include="dbo\Stored Procedures\uspGLImportOriginHistoricalJournal.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
     </Build>
+    <Build Include="dbo\Stored Procedures\uspCMGetRPAccountIdByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
     <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
@@ -1226,6 +1229,7 @@
     <Build Include="dbo\Index\IX_tblGLAccountReallocation_strName.sql" />
     <Build Include="dbo\Index\IX_tblGLDtail_intTransactionId_strTransactionType.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strTransactionId.sql" />
+    <Build Include="dbo\Index\IX_tblCMResponsiblePartyMatching_strType.sql" />
     <Build Include="dbo\Stored Procedures\uspGLExportAccountToCSV.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDoRoll.sql" />
     <Build Include="dbo\Tables\tblRKTradersbyBrokersAccountMapping.sql" />
@@ -3498,6 +3502,7 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
+    <Build Include="dbo\Functions\fnGLGetRelativeDatabase.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
@@ -3814,6 +3819,7 @@
     <Build Include="dbo\Tables\tblMFCostSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
     <Build Include="dbo\Views\vyuGLPostRemind.sql" />
+    <Build Include="dbo\Views\vyuGLConsolidateLog.sql" />
     <Build Include="dbo\Tables\tblSMRemoteServer.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
@@ -8835,6 +8841,8 @@
     <Build Include="dbo\Stored Procedures\uspRKM2MPostPreview.sql" />
     <Build Include="dbo\Tables\tblICInventoryValuationSummaryLog.sql" />
     <Build Include="dbo\Tables\tblSMUserSecurityBookPermission.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MPostPreview.sql" />
     <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />

@@ -75,7 +75,10 @@ DECLARE @GLEntries RecapTableType
   and ysnIsUnposted = 0  
   ORDER BY intGLDetailId  
   
-  EXEC uspGLBookEntries @GLEntries, 0  
+  DECLARE @PostResult INT
+  EXEC @PostResult = uspGLBookEntries @GLEntries, 0, 0, 1
+
+  IF @PostResult <> 0 RETURN -1
   
   UPDATE GL set ysnIsUnposted = 1 from tblGLDetail GL   join
   @tmpPostJournals B on GL.intGLDetailId = B.intJournalId

@@ -1,6 +1,6 @@
 CREATE PROCEDURE [dbo].[uspFAReverseGLEntries]  
   @strBatchId  AS NVARCHAR(100) = ''  
- ,@strParams NVARCHAR(40) = NULL  
+ ,@strParams NVARCHAR(200) = NULL  
  ,@ysnRecap   AS BIT   = 0  
  ,@dtmDateReverse DATETIME  = NULL   
  ,@intEntityId  INT    = NULL   
@@ -118,6 +118,6 @@ IF @@TRANCOUNT > 0
 Post_Rollback:  
 IF @@TRANCOUNT > 0  
  ROLLBACK TRANSACTION                
- GOTO Post_Exit  
+ 
   
 Post_Exit:
