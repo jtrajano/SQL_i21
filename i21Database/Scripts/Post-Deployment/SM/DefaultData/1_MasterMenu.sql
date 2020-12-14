@@ -1575,6 +1575,31 @@ BEGIN
 	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CrossReferenceVendor?', strCategory = 'Maintenance' WHERE strMenuName = 'Cross Reference - DCC Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardMaitenanceParentMenuId
 END
 
+--//IMPORT FOLDER
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardParentMenuId)
+BEGIN
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Import', N'Credit Card Recon', @DealerCreditCardParentMenuId, N'Import', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 0, 1)
+END
+ELSE
+BEGIN
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2, intRow = 0 WHERE strMenuName = 'Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardParentMenuId
+END
+
+DECLARE @DealerCreditCardImportParentMenuId INT
+SELECT TOP 1 @DealerCreditCardImportParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardParentMenuId
+
+--CHILD
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Dealer Credit Card' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardImportParentMenuId)
+BEGIN
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Import Dealer Credit Card', N'Credit Card Recon', @DealerCreditCardImportParentMenuId, N'Import Dealer Credit Card', N'Import', N'Screen', N'CreditCardRecon.view.ImportDealerCreditCardReconGeneric?', N'small-menu-create', 0, 0, 0, 1, 0, 1)
+END
+ELSE
+BEGIN
+	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.ImportDealerCreditCardReconGeneric?', strCategory = 'Import' WHERE strMenuName = 'Import Dealer Credit Card' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardImportParentMenuId
+END
+
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @DealerCreditCardActivitiesParentMenuId
