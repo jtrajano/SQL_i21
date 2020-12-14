@@ -217,23 +217,29 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @intId = intId FROM @CustomerStorageIds
 
-			IF (
-			SELECT SUM(dblUnits) 
+			SELECT @dblSettlementTotal = SUM(dblUnits) 
 			FROM tblGRSettleStorageTicket A
 			INNER JOIN tblGRSettleStorage B
 				ON B.intSettleStorageId = A.intSettleStorageId
 				AND B.intParentSettleStorageId IS NULL
-			WHERE intCustomerStorageId = @intId ) > 
-			(SELECT dblOriginalBalance FROM tblGRCustomerStorage WHERE intCustomerStorageId = @intId)
+			WHERE intCustomerStorageId = @intId
+				--AND A.intSettleStorageId <> @intSettleStorageId
+
+			SELECT @dblTotalUnits = SUM(dblUnits)
+			FROM tblGRStorageHistory
+			WHERE intTransactionTypeId IN (5,1,9)
+				AND intCustomerStorageId = @intId
+			GROUP BY intCustomerStorageId
+
+			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
 			BEGIN
-				DELETE FROM @CustomerStorageIds WHERE intId = @intId
+				--DECLARE @strMsg as nvarchar(max)
+				--set @strMsg = CAST(@dblSettlementTotal AS nvarchar(50)) + ' aa ' + CAST(@dblTotalUnits AS nvarchar(50))
 				RAISERROR('The record has changed. Please refresh screen.',16,1,1)
+				--RAISERROR(@strMsg,16,1,1)
 				RETURN;
 			END
-			ELSE
-			BEGIN
-				DELETE FROM @CustomerStorageIds WHERE intId = @intId
-			END			
+			DELETE FROM @CustomerStorageIds WHERE intId = @intId
 		END	
 	END
 
