@@ -10,6 +10,38 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
+--------------------------
+-- Generate Category Code --
+--------------------------
+DECLARE 
+	@strCategoryCode NVARCHAR(50),
+	@strNewCategoryCode NVARCHAR(50),
+	@strNewCategoryCodeWithCounter NVARCHAR(50),
+	@counter INT,
+	@strNewDescription NVARCHAR(50)
+
+SELECT 
+	@strCategoryCode = strCategoryCode
+	,@strNewCategoryCode = strCategoryCode + '-copy' 
+	,@strNewDescription = strDescription + '-copy' 
+FROM 
+	tblICCategory 
+WHERE 
+	intCategoryId = @intCategoryId
+
+IF EXISTS(SELECT TOP 1 1 FROM tblICCategory WHERE strCategoryCode = @strNewCategoryCode)
+BEGIN
+	SET @counter = 1
+	SET @strNewCategoryCodeWithCounter = @strNewCategoryCode + (CAST(@counter AS NVARCHAR(50)))
+	WHILE EXISTS(SELECT TOP 1 1 FROM tblICCategory WHERE strCategoryCode = @strNewCategoryCodeWithCounter)
+	BEGIN
+		SET @counter += 1
+		SET @strNewCategoryCodeWithCounter = @strNewCategoryCode + (CAST(@counter AS NVARCHAR(50)))
+	END
+	SET @strNewCategoryCode = @strNewCategoryCodeWithCounter
+	SET @strNewDescription = @strNewDescription + (CAST(@counter AS NVARCHAR(50)))
+END
+
 -- Duplicate primary details
 INSERT INTO [dbo].[tblICCategory]
            ([strCategoryCode]
@@ -48,42 +80,43 @@ INSERT INTO [dbo].[tblICCategory]
            ,[ysnYieldAdjustment]
            ,[ysnWarehouseTracked]
            ,[dtmDateCreated])
-SELECT [strCategoryCode] + '-copy'
-           ,[strDescription] + '-copy'
-           ,[strInventoryType]
-           ,[intLineOfBusinessId]
-           ,[intCostingMethod]
-           ,[strInventoryTracking]
-           ,[dblStandardQty]
-           ,[intUOMId]
-           ,[strGLDivisionNumber]
-           ,[ysnSalesAnalysisByTon]
-           ,[strMaterialFee]
-           ,[intMaterialItemId]
-           ,[ysnAutoCalculateFreight]
-           ,[intFreightItemId]
-           ,[strERPItemClass]
-           ,[dblLifeTime]
-           ,[dblBOMItemShrinkage]
-           ,[dblBOMItemUpperTolerance]
-           ,[dblBOMItemLowerTolerance]
-           ,[ysnScaled]
-           ,[ysnOutputItemMandatory]
-           ,[strConsumptionMethod]
-           ,[strBOMItemType]
-           ,[strShortName]
-           ,[imgReceiptImage]
-           ,[imgWIPImage]
-           ,[imgFGImage]
-           ,[imgShipImage]
-           ,[dblLaborCost]
-           ,[dblOverHead]
-           ,[dblPercentage]
-           ,[strCostDistributionMethod]
-           ,[ysnSellable]
-           ,[ysnYieldAdjustment]
-           ,[ysnWarehouseTracked]
-           ,GETUTCDATE()
+SELECT 
+	[strCategoryCode] = @strNewCategoryCode
+    ,[strDescription] = @strNewDescription
+    ,[strInventoryType]
+    ,[intLineOfBusinessId]
+    ,[intCostingMethod]
+    ,[strInventoryTracking]
+    ,[dblStandardQty]
+    ,[intUOMId]
+    ,[strGLDivisionNumber]
+    ,[ysnSalesAnalysisByTon]
+    ,[strMaterialFee]
+    ,[intMaterialItemId]
+    ,[ysnAutoCalculateFreight]
+    ,[intFreightItemId]
+    ,[strERPItemClass]
+    ,[dblLifeTime]
+    ,[dblBOMItemShrinkage]
+    ,[dblBOMItemUpperTolerance]
+    ,[dblBOMItemLowerTolerance]
+    ,[ysnScaled]
+    ,[ysnOutputItemMandatory]
+    ,[strConsumptionMethod]
+    ,[strBOMItemType]
+    ,[strShortName]
+    ,[imgReceiptImage]
+    ,[imgWIPImage]
+    ,[imgFGImage]
+    ,[imgShipImage]
+    ,[dblLaborCost]
+    ,[dblOverHead]
+    ,[dblPercentage]
+    ,[strCostDistributionMethod]
+    ,[ysnSellable]
+    ,[ysnYieldAdjustment]
+    ,[ysnWarehouseTracked]
+    ,GETUTCDATE()
 FROM tblICCategory
 WHERE intCategoryId = @intCategoryId
 
