@@ -1537,6 +1537,45 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'New Deale
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CreditCardReconciliation?action=new' WHERE strMenuName = 'New Dealer Credit Cards Transaction' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardCreateParentMenuId
 
+-- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsParentMenuId)
+-- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+-- 	VALUES (N'Maintenance', N'Transports', @TransportsParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 0, 1)
+-- ELSE
+-- 	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1, intRow = 0 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsParentMenuId
+
+-- DECLARE @TransportsMaintenanceParentMenuId INT
+-- SELECT @TransportsMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Transports' AND intParentMenuID = @TransportsParentMenuId
+
+--//MAINTENANCE FOLDER
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardParentMenuId)
+BEGIN
+	SELECT 'Maintenance'
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Credit Card Recon', @DealerCreditCardParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 0, 1)
+END
+ELSE
+BEGIN
+	SELECT 'Maintenance'
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1, intRow = 0 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardParentMenuId
+END
+
+DECLARE @DealerCreditCardMaitenanceParentMenuId INT
+SELECT TOP 1 @DealerCreditCardMaitenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardParentMenuId
+
+--CHILD
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference - DCC Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardMaitenanceParentMenuId)
+BEGIN
+	SELECT 'Cross Reference - DCC Import'
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Cross Reference - DCC Import', N'Credit Card Recon', @DealerCreditCardMaitenanceParentMenuId, N'Cross Reference - DCC Import', N'Maintenance', N'Screen', N'CreditCardRecon.view.CrossReferenceVendor?', N'small-menu-create', 0, 0, 0, 1, 0, 1)
+END
+ELSE
+BEGIN
+	SELECT 'Cross Reference - DCC Import'
+	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CrossReferenceVendor?', strCategory = 'Maintenance' WHERE strMenuName = 'Cross Reference - DCC Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardMaitenanceParentMenuId
+END
+
+
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Import Transaction' AND strModuleName = 'Card Fueling' AND intParentMenuID = @DealerCreditCardActivitiesParentMenuId
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'File Field Mapping' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardActivitiesParentMenuId
