@@ -226,11 +226,12 @@ BEGIN TRY
 				ON B.intSettleStorageId = A.intSettleStorageId
 				AND B.intParentSettleStorageId IS NULL
 			WHERE intCustomerStorageId = @intId
+				--AND A.intSettleStorageId <> @intSettleStorageId
 
 			SELECT @dblTotalUnits = SUM(dblUnits)
 			FROM tblGRStorageHistory
 			WHERE intTransactionTypeId IN (5,1,9)
-				AND intCustomerStorageId = @intCustomerStorageId
+				AND intCustomerStorageId = @intId
 			GROUP BY intCustomerStorageId
 
 			IF @dblSettlementTotal > @dblTotalUnits AND ABS(@dblSettlementTotal - @dblTotalUnits) > 0.1
