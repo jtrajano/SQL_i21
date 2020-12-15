@@ -222,9 +222,11 @@ FROM	tblGLFiscalYearPeriod f
 WHERE
 	ItemLocation.intItemLocationId IS NOT NULL
 	AND f.intGLFiscalYearPeriodId >= fypStartingPoint.intGLFiscalYearPeriodId
+	AND FLOOR(CAST(f.dtmStartDate AS FLOAT)) <= FLOOR(CAST(GETDATE() AS FLOAT))
 
 UPDATE l
 SET l.ysnRebuilding = 0
 	,l.dtmEnd = GETDATE() 
 FROM tblICInventoryValuationSummaryLog l
 WHERE l.strPeriod = @strPeriod
+	
