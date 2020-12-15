@@ -67,7 +67,7 @@ AS
 		,A.dtmDate
 		,0
 		,A.strTransactionType
-		,''
+		,DItem.strItemNo
 	FROM tblGRTransferGLEntriesCTE A
 	INNER JOIN tblGRTransferStorageReference TSR
 		ON TSR.intTransferStorageReferenceId = A.intSourceTransactionDetailId
@@ -139,7 +139,7 @@ SELECT
 	,dblCredit					= Debit.Value
 	,dblDebitUnit				= DebitUnit.Value
 	,dblCreditUnit				= CreditUnit.Value
-	,strDescription				= GL.strDescription--ISNULL(C.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strItemNo + ' a'
+	,strDescription				= GL.strDescription --+ ' A'--ISNULL(C.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strItemNo + ' a'
 	,strCode					= 'TRA'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -168,6 +168,7 @@ FROM tblGLDetail GL
 INNER JOIN ForGLEntries_CTE
 	ON ForGLEntries_CTE.intTransactionId = GL.intTransactionId
 		AND ForGLEntries_CTE.strTransactionId = GL.strTransactionId
+		AND ForGLEntries_CTE.strItemNo = REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Charges from ', GL.strDescription), LEN(GL.strDescription) -1),'Charges from ','')
 INNER JOIN vyuGLAccountDetail C
 	ON C.intAccountId = GL.intAccountId
 		AND C.intAccountCategoryId = 45 --AP CLEARING ONLY
@@ -204,7 +205,7 @@ SELECT
 	,dblCredit					= CASE WHEN GL.dblCredit = 0 THEN 0 ELSE Credit.Value END
 	,dblDebitUnit				= CASE WHEN GL.dblDebitUnit = 0 THEN 0 ELSE DebitUnit.Value END
 	,dblCreditUnit				= CASE WHEN GL.dblCreditUnit = 0 THEN 0 ELSE CreditUnit.Value END
-	,strDescription				= ISNULL(GLA.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strItemNo
+	,strDescription				= ISNULL(GLA.strDescription, '') + ', Charges from ' + ForGLEntries_CTE.strItemNo --+ ' B'
 	,strCode					= 'TRA'
 	,strReference				= '' 
 	,intCurrencyId				= ForGLEntries_CTE.intCurrencyId
@@ -233,6 +234,7 @@ FROM tblGLDetail GL
 INNER JOIN ForGLEntries_CTE
 	ON ForGLEntries_CTE.intTransactionId = GL.intTransactionId
 		AND ForGLEntries_CTE.strTransactionId = GL.strTransactionId
+		AND ForGLEntries_CTE.strItemNo = REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Charges from ', GL.strDescription), LEN(GL.strDescription) -1),'Charges from ','')
 INNER JOIN vyuGLAccountDetail C
 	ON C.intAccountId = GL.intAccountId
 		AND C.intAccountCategoryId = 45 --AP CLEARING ONLY
