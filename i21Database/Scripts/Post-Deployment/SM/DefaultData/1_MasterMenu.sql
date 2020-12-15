@@ -1555,7 +1555,7 @@ SELECT TOP 1 @DealerCreditCardMaitenanceParentMenuId = intMenuID FROM tblSMMaste
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Cross Reference - DCC Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardMaitenanceParentMenuId)
 BEGIN
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Cross Reference - DCC Import', N'Credit Card Recon', @DealerCreditCardMaitenanceParentMenuId, N'Cross Reference - DCC Import', N'Maintenance', N'Screen', N'CreditCardRecon.view.CrossReferenceVendor?', N'small-menu-create', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Cross Reference - DCC Import', N'Credit Card Recon', @DealerCreditCardMaitenanceParentMenuId, N'Cross Reference - DCC Import', N'Maintenance', N'Screen', N'CreditCardRecon.view.CrossReferenceVendor', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 END
 ELSE
 BEGIN
