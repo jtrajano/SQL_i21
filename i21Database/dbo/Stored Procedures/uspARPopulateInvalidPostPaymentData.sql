@@ -78,12 +78,30 @@ BEGIN
         ,[intTransactionDetailId]   = P.[intTransactionDetailId]
         ,[strBatchId]               = P.[strBatchId]
         ,[strError]                 = 'Missing AR Account Category.'
-    FROM
-	 #ARPostPaymentHeader P
-	INNER JOIN
-    vyuGLAccountDetail GLAD
+    FROM #ARPostPaymentHeader P
+	INNER JOIN vyuGLAccountDetail GLAD
         ON P.[intUndepositedFundsId] = GLAD.[intAccountId]
 	WHERE GLAD.[strAccountCategory] IS NULL
+
+    INSERT INTO #ARInvalidPaymentData (
+         [intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError]
+    )
+    SELECT [intTransactionId]       = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Invalid Write Off Account.'
+    FROM #ARPostPaymentHeader P
+    INNER JOIN tblSMPaymentMethod PM ON P.intPaymentMethodId = PM.intPaymentMethodID
+    INNER JOIN vyuGLAccountDetail GLAD ON P.intWriteOffAccountId = GLAD.intAccountId
+    WHERE UPPER(PM.strPaymentMethod) = 'WRITE OFF'
+      AND GLAD.strAccountCategory = 'AR Account'
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
