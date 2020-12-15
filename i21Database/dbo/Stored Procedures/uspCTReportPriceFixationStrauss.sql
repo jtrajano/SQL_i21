@@ -19,8 +19,21 @@ BEGIN TRY
 			@FirstApprovalId			INT,
 			@FirstApprovalSign			VARBINARY(MAX),
 			@InterCompApprovalSign		VARBINARY(MAX),	
+   			@InterCompSubmitterSign  VARBINARY(MAX),  
 			@xmlDocumentId				INT,
-			@intTransactionId			INT			
+			@intTransactionId			INT,
+			@PreviousSubmitterId		INT,
+			@PreviousSubmitterSign 		VARBINARY(MAX);
+
+	Declare @intApproverGroupId int
+			,@StraussContractSubmitId int
+			,@intChildDefaultSubmitById int
+			,@ysnIsParent bit
+			,@blbParentSubmitSignature VARBINARY(MAX)
+			,@blbParentApproveSignature VARBINARY(MAX)
+			,@blbChildSubmitSignature VARBINARY(MAX)
+			,@blbChildApproveSignature VARBINARY(MAX)
+			;
 
 	IF	LTRIM(RTRIM(@xmlParam)) = ''   
 		SET @xmlParam = NULL   
@@ -92,25 +105,62 @@ BEGIN TRY
 	WHERE intScreenId = @intScreenId
 	AND intRecordId = @intPriceContractId 
 
-	SELECT	TOP 1 @FirstApprovalId=intApproverId 
-	FROM	tblSMApproval 
-	WHERE	intTransactionId=@intTransactionId
-	AND		strStatus='Approved' 
-	ORDER 
-	BY		intApprovalId
-
-	SELECT	@FirstApprovalSign =  Sig.blbDetail 
-	FROM	tblSMSignature Sig  WITH (NOLOCK)
-	JOIN    tblEMEntitySignature ES ON Sig.intSignatureId = ES.intElectronicSignatureId
-	WHERE	Sig.intEntityId=@FirstApprovalId
 	
-	SELECT	TOP 1 @InterCompApprovalSign =Sig.blbDetail 
-	FROM	tblCTIntrCompApproval	IA
-	JOIN	tblSMUserSecurity		US	ON	US.strUserName	=	IA.strUserName	
-	JOIN	tblSMSignature			Sig	ON	US.intEntityId	=	Sig.intEntityId
-	JOIN    tblEMEntitySignature	ES	ON	Sig.intSignatureId = ES.intElectronicSignatureId
-	WHERE	IA.intContractHeaderId	=	@intContractHeaderId
-	AND		IA.strScreen	=	'Price Contract'
+	SELECT	TOP 1 @FirstApprovalId = intApproverId
+		, @intApproverGroupId = intApproverGroupId
+		, @StraussContractSubmitId = intSubmittedById
+	FROM	tblSMApproval 
+	WHERE	intTransactionId = @intTransactionId
+	AND		strStatus = 'Approved' 
+	ORDER BY intApprovalId
+
+	select top 1
+		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
+	from
+		tblCTContractHeader ch
+		,tblSMMultiCompany smc
+		,tblIPMultiCompany mc
+		,tblSMUserSecurity us
+	where
+		ch.intContractHeaderId = @intContractHeaderId
+		and smc.intMultiCompanyId = ch.intCompanyId
+		and mc.intCompanyId = smc.intMultiCompanyId
+		and lower(us.strUserName) = lower(mc.strApprover)
+
+	select
+		@ysnIsParent = t.ysnIsParent
+		,@blbParentSubmitSignature = h.blbDetail
+		,@blbParentApproveSignature = j.blbDetail
+		,@blbChildSubmitSignature = l.blbDetail
+		,@blbChildApproveSignature = n.blbDetail
+	from
+		(
+		select
+			ysnIsParent = (case when isnull(b.intMultiCompanyParentId,0) = 0 then convert(bit,1) else convert(bit,0) end)
+			,intParentSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @StraussContractSubmitId else d.intEntityId end)
+			,intParentApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then @FirstApprovalId else f.intEntityId end)
+			,intChildSubmitBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then d.intEntityId else @StraussContractSubmitId end)
+			,intChildApprovedBy = (case when isnull(b.intMultiCompanyParentId,0) = 0 then f.intEntityId else @FirstApprovalId end)
+		from
+			tblCTContractHeader a
+			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
+			left join tblCTIntrCompApproval c on c.intPriceFixationId = @intPriceFixationId and c.strScreen = 'Price Contract' and c.ysnApproval = 0
+			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
+			left join tblCTIntrCompApproval e on e.intPriceFixationId = @intPriceFixationId and e.strScreen = 'Price Contract' and e.ysnApproval = 1
+			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
+		where
+			a.intContractHeaderId = @intContractHeaderId
+		) t
+		left join tblEMEntitySignature g on g.intEntityId = t.intParentSubmitBy
+		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId
+		left join tblEMEntitySignature i on i.intEntityId = t.intParentApprovedBy
+		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId
+		left join tblEMEntitySignature k on k.intEntityId = t.intChildSubmitBy
+		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
+		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
+		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId
+
+	
 
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
 	FROM	tblSMCompanySetup
@@ -119,6 +169,7 @@ BEGIN TRY
 			xmlParam = @xmlParam,
 			PF.intPriceFixationId,
 			blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header'),
+			blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer'),
 			strOtherPartyAddress	= CASE 
 									  WHEN CH.strReportTo = 'Buyer' THEN --Customer
 									  	LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
@@ -176,8 +227,71 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-		    BuyerSign = CASE WHEN CH.intContractTypeId = 1 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
-		    SellerSign = CASE WHEN CH.intContractTypeId = 2 THEN @FirstApprovalSign ELSE @InterCompApprovalSign END,
+			
+			SubmitterSign =		case
+								when CH.intContractTypeId = 1
+								then 
+									case
+									when @ysnIsParent = 1
+									then @blbParentSubmitSignature
+									else @blbChildSubmitSignature
+									end
+								else
+									case
+									when @ysnIsParent = 1
+									then @blbChildSubmitSignature
+									else null
+									end
+								end
+								,
+		    BuyerSign =			case
+									when CH.intContractTypeId = 1
+									then 
+										case
+										when @ysnIsParent = 1
+										then @blbParentApproveSignature
+										else @blbChildApproveSignature
+										end
+									else
+										case
+										when @ysnIsParent = 1
+										then @blbChildApproveSignature
+										else null
+										end
+									end
+									,
+			CounterSubmitterSign =	case
+									when CH.intContractTypeId = 1
+									then 
+										case
+										when @ysnIsParent = 1
+										then null
+										else @blbParentSubmitSignature
+										end
+									else
+										case
+										when @ysnIsParent = 1
+										then @blbParentSubmitSignature
+										else @blbChildSubmitSignature
+										end
+									end
+									,
+		    SellerSign =			case
+									when CH.intContractTypeId = 1
+									then 
+										case
+										when @ysnIsParent = 1
+										then null
+										else @blbParentApproveSignature
+										end
+									else
+										case
+										when @ysnIsParent = 1
+										then @blbParentApproveSignature
+										else @blbChildApproveSignature
+										end
+									end
+									,
 			intReportLogoHeight = ISNULL(@intReportLogoHeight,0),
 			intReportLogoWidth = ISNULL(@intReportLogoWidth,0)
 
