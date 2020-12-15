@@ -1580,11 +1580,11 @@ SELECT TOP 1 @DealerCreditCardImportParentMenuId = intMenuID FROM tblSMMasterMen
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Dealer Credit Card' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardImportParentMenuId)
 BEGIN
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Import Dealer Credit Card', N'Credit Card Recon', @DealerCreditCardImportParentMenuId, N'Import Dealer Credit Card', N'Import', N'Screen', N'CreditCardRecon.view.ImportDealerCreditCardReconGeneric?', N'small-menu-create', 0, 0, 0, 1, 0, 1)
+	VALUES (N'Import Dealer Credit Card', N'Credit Card Recon', @DealerCreditCardImportParentMenuId, N'Import Dealer Credit Card', N'Import', N'Screen', N'CreditCardRecon.view.ImportDealerCreditCardReconGeneric', N'small-menu-create', 0, 0, 0, 1, 0, 1)
 END
 ELSE
 BEGIN
-	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.ImportDealerCreditCardReconGeneric?', strCategory = 'Import' WHERE strMenuName = 'Import Dealer Credit Card' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardImportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.ImportDealerCreditCardReconGeneric', strCategory = 'Import' WHERE strMenuName = 'Import Dealer Credit Card' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardImportParentMenuId
 END
 
 
