@@ -5,7 +5,7 @@
 	[strContractOrInventoryType] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL, 
     [strContractSeq] NVARCHAR(50) COLLATE Latin1_General_CI_AS  NULL, 
     [intEntityId] INT NULL, 
-	[strEntityName] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
+	[strEntityName] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,	
     [intFutureMarketId] INT NULL, 
 	[strFutureMarket] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,	
     [intFutureMonthId] INT NULL, 
