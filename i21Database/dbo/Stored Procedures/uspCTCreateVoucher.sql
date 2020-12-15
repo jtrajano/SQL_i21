@@ -746,8 +746,6 @@ begin try
 		   ,dblQtyReceived
 		from
 			#returnData
-		where
-			isnull(intPriceFixationDetailId,0) > 0
 
 		--Code here to process the return table from uspAPCreateVoucher
 		if exists (select top 1 1 from @CreatedVoucher)
