@@ -457,3 +457,6 @@ END
 
 -- Cache Item
 EXEC dbo.uspICCacheItem @intItemId
+
+-- Lock AVG costing once a transaction has been made to this item
+UPDATE tblICItem SET ysnAvgLocked = 1 WHERE intItemId = @intItemId

@@ -8807,6 +8807,7 @@
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
     <Build Include="dbo\Tables\tblARInvoiceReportStagingTableCopy.sql" />
     <None Include="Scripts\Post-Deployment\IC\25_TransactionTypeRename.sql" />
+    <None Include="Scripts\Post-Deployment\IC\26_LockAvgCost.sql" />
     <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
     <Build Include="dbo\Stored Procedures\uspICIncreaseUsageQty.sql" />
     <Build Include="dbo\Stored Procedures\uspARFixStockUsage.sql" />
