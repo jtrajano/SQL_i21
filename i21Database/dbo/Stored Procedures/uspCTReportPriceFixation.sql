@@ -176,13 +176,13 @@ BEGIN TRY
 											ISNULL(' - '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + CHAR(13)+CHAR(10) + 
 											ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = ''      THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,''),
 
-			strTotal = dbo.fnCTChangeNumericScale(dbo.fnConvertToBaseCurrency(pc.intFinalCurrencyId,dbo.fnCTConvertQuantityToTargetCommodityUOM(pc.intFinalPriceUOMId,PF.intFinalPriceUOMId,PF.dblPriceWORollArb)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),			
-			strDifferential = dbo.fnCTChangeNumericScale(CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strTotal = dbo.fnCTChangeNumericScale(PF.dblPriceWORollArb,2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure),			
+			strDifferential = dbo.fnCTChangeNumericScale(dbo.fnCTConvertToSubCurrency(pc.intFinalCurrencyId,CAST(dbo.fnCTConvertQuantityToTargetCommodityUOM(PF.intFinalPriceUOMId,PU.intCommodityUnitMeasureId, PF.dblOriginalBasis) AS NUMERIC(18, 6))),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			lblAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN 'Additional Cost' ELSE NULL END,
 			lblAdditionalCostColon = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN ':' ELSE NULL END,
 			strEQTAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ELSE NULL END, 
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice =	dbo.fnCTChangeNumericScale(dbo.fnConvertToBaseCurrency(pc.intFinalCurrencyId,dbo.fnCTConvertQuantityToTargetCommodityUOM(pc.intFinalPriceUOMId,PF.intFinalPriceUOMId,PF.dblFinalPrice)),2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
@@ -281,7 +281,7 @@ BEGIN TRY
 	JOIN	tblSMCurrency				CY	ON	CY.intCurrencyID				=	CD.intCurrencyId		LEFT
 	JOIN	tblICCommodityUnitMeasure	CU	ON	CU.intCommodityUnitMeasureId	=	PF.intFinalPriceUOMId	LEFT	
 	JOIN	tblICUnitMeasure			CM	ON	CM.intUnitMeasureId				=	CU.intUnitMeasureId		LEFT	
-	JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intPriceItemUOMId	LEFT
+	JOIN	tblICItemUOM				PM	ON	PM.intItemUOMId					=	CD.intBasisUOMId	LEFT
 	JOIN	tblICCommodityUnitMeasure	PU	ON	PU.intCommodityId				=	CH.intCommodityId		AND 
 												PU.intUnitMeasureId				=	PM.intUnitMeasureId		LEFT
 	JOIN	tblSMCurrencyExchangeRate	ER	ON	ER.intCurrencyExchangeRateId	=	CD.intCurrencyExchangeRateId	LEFT	
