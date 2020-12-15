@@ -588,7 +588,7 @@ IF @ysnPrintOnlyPastDueLocal = 1
 	DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'        
 
 IF @ysnPrintZeroBalanceLocal = 0
-    DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
+    DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
 
 DELETE FROM #STATEMENTREPORT WHERE strTransactionType IS NULL
 
