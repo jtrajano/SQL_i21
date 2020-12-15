@@ -178,7 +178,7 @@ BEGIN TRY
 	DECLARE @StorageHistoryStagingTable AS StorageHistoryStagingTable
 	DECLARE @intStorageHistoryId AS INT
 	DECLARE @VoucherIds AS Id
-	
+	DECLARE @dblTotalUnits AS DECIMAL(24,10)
 	/*	intItemType
 		------------
 		1-Inventory
@@ -209,6 +209,8 @@ BEGIN TRY
 	BEGIN
 		DECLARE @CustomerStorageIds AS Id
 		DECLARE @intId AS INT
+		DECLARE @dblSettlementTotal AS DECIMAL(24,10)
+
 		DELETE FROM @CustomerStorageIds
 		INSERT INTO @CustomerStorageIds
 		SELECT intCustomerStorageId FROM tblGRSettleStorageTicket WHERE intSettleStorageId = @intSettleStorageId
@@ -242,7 +244,8 @@ BEGIN TRY
 			DELETE FROM @CustomerStorageIds WHERE intId = @intId
 		END	
 	END
-
+	SET @dblTotalUnits = NULL
+	
 	if @ysnFromPriceBasisContract = 0 
 	begin
 		declare @invalid_tickets_with_special_discount nvarchar(500)
