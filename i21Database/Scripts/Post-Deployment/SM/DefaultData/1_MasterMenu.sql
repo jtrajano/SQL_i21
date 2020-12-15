@@ -1559,7 +1559,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CrossReferenceVendor?', strCategory = 'Maintenance' WHERE strMenuName = 'Cross Reference - DCC Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardMaitenanceParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'CreditCardRecon.view.CrossReferenceVendor', strCategory = 'Maintenance' WHERE strMenuName = 'Cross Reference - DCC Import' AND strModuleName = 'Credit Card Recon' AND intParentMenuID = @DealerCreditCardMaitenanceParentMenuId
 END
 
 --//IMPORT FOLDER
