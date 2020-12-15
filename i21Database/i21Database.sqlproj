@@ -8891,6 +8891,8 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateDiscountGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
+    <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
+    <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
