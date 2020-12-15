@@ -216,7 +216,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('In_store','In_store2','In_store3'))
+	ELSE IF (@strReportName IN ('In_store','In_store2','In_store3','In_store4'))
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
