@@ -160,7 +160,9 @@ AS
 			CH.intInsuranceById,				CH.strInsuranceBy,				CH.strInsuranceByDescription,
 			CH.intInvoiceTypeId,				CH.strInvoiceType,				CH.strInvoiceTypeDescription,
 			CH.dblTolerancePct,					CH.dblProvisionalInvoicePct,	CH.ysnPrepaid,
-			CH.ysnSubstituteItem,				CH.ysnUnlimitedQuantity,		CH.ysnMaxPrice,			
+			CH.ysnSubstituteItem
+			,ysnUnlimitedQuantity = CAST(ISNULL(CH.ysnUnlimitedQuantity,0) AS BIT)
+			,CH.ysnMaxPrice,			
 			CH.intINCOLocationTypeId,			CH.intCountryId,				CH.strCountry,
 			CH.ysnMultiplePriceFixation,		CH.strINCOLocation,				CH.ysnLoad,
 			CH.strCropYear,						CH.ysnExported,					CH.dtmExported,
