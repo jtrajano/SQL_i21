@@ -55,7 +55,7 @@ BEGIN
 		EXEC dbo.uspMFImportRecipes @strSessionId
 			,'Recipe Item'
 			,@intEntityId
-
+			,1
 		SELECT @intRecordId = MIN(intRecordId)
 		FROM @tblMFSession
 		WHERE intRecordId > @intRecordId
