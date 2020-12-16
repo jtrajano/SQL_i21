@@ -460,3 +460,8 @@ EXEC dbo.uspICCacheItem @intItemId
 
 -- Lock AVG costing once a transaction has been made to this item
 UPDATE tblICItem SET ysnAvgLocked = 1 WHERE intItemId = @intItemId
+
+-- Update transaction tracking dates
+DELETE FROM tblICTransactionHistory
+INSERT INTO tblICTransactionHistory (dtmLastUpdate)
+SELECT GETDATE()

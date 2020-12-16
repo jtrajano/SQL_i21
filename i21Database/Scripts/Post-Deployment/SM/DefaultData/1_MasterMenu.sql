@@ -1804,6 +1804,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Stock Det
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.StockDetail?showSearch=true', intSort = 3, strIcon = 'small-menu-report' WHERE strMenuName = 'Stock Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sub Ledger Traceability' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Stock Details', N'Inventory', @InventoryReportParentMenuId, N'Sub Ledger Traceability', N'Report', N'Screen', N'Inventory.view.TransactionTraceability?showSearch=false', N'small-menu-report', 1, 1, 0, 1, 3, 0)
+ELSE 
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.TransactionTraceability?showSearch=false', intSort = 3, strIcon = 'small-menu-report' WHERE strMenuName = 'ub Ledger Traceability' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId
+
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Blend Details', N'Inventory', @InventoryReportParentMenuId, N'Blend Details', N'Report', N'Screen', N'Inventory.view.BlendDetail?showSearch=true', N'small-menu-report', 0, 0, 0, 1, 5, 1)

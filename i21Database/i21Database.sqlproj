@@ -2494,6 +2494,10 @@
     <Build Include="dbo\Views\vyuICGetInventoryReceiptItemTax.sql" />
     <Build Include="dbo\Tables\tblICTransactionDetailLog.sql" />
     <Build Include="dbo\Tables\tblICTransactionSession.sql" />
+    <Build Include="dbo\Tables\tblICStagingTransactionNode.sql" />
+    <Build Include="dbo\Tables\tblICTransactionLinks.sql" />
+    <Build Include="dbo\Tables\tblICTransactionHistory.sql" />
+    <Build Include="dbo\Tables\tblICTransactionNodes.sql" />
     <Build Include="dbo\Tables\tblICEffectiveItemPrice.sql" />
     <Build Include="dbo\Tables\tblICEffectiveItemCost.sql" />
     <Build Include="dbo\Functions\fnICGetItemCostByEffectiveDate.sql" />
@@ -2647,8 +2651,13 @@
     <Build Include="dbo\Tables\tblICInventorySubLedgerReport.sql" />
     <Build Include="dbo\User Defined Types\SubLedgerReportUdt.sql" />
     <Build Include="dbo\User Defined Types\SubLedgerTransactionsUdt.sql" />
+    <Build Include="dbo\User Defined Types\udtICTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspICSubLedgerAddReportEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICSubLedgerRemoveReportEntries.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetTransactionsLedger.sql" />
+    <Build Include="dbo\Stored Procedures\uspICAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetTransactionsLedgerAccounts.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGenerateGraphDemoData.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogInventorySubLedger.sql" />
     <Build Include="dbo\Views\vyuICInventorySubLedgerReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARAddItemToInvoice.sql" />
