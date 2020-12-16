@@ -398,8 +398,8 @@ BEGIN TRY
 		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND
 			NOT EXISTS(SELECT TOP 1 1 FROM tblCTContractCost WHERE ysnBasis = 1 AND intContractDetailId = @intContractDetailId) -- ADD missing Basis components
 		BEGIN
-			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis)
-			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis
+			INSERT	INTO tblCTContractCost(intConcurrencyId,intContractDetailId,intItemId,strCostMethod,intCurrencyId,dblRate,intItemUOMId,ysnBasis, ysnAccrue)
+			SELECT	1 AS intConcurrencyId,@intContractDetailId,IM.intItemId,'Per Unit',@intCurrencyId,0 AS dblRate, IU.intItemUOMId, 1 AS ysnBasis, 0 AS ysnAccrue
 			FROM	tblICItem		IM
 			JOIN	tblICItemUOM	IU ON IU.intItemId = IM.intItemId AND IU.intUnitMeasureId = @intUnitMeasureId
 			WHERE	ysnBasisContract = 1
