@@ -312,12 +312,14 @@ BEGIN
 
 					
 		DECLARE @strBatchId AS NVARCHAR(40);
-		EXEC uspSMGetStartingNumber 3, @strBatchId OUT
-			
 		DECLARE @GLEntries AS RecapTableType;
-
 		DECLARE @cursorId INT					
 		DECLARE @intTransactionDetailId INT
+
+		IF EXISTS(SELECT 1 FROM @ItemsToPost)
+		BEGIN
+			EXEC uspSMGetStartingNumber 3, @strBatchId OUT
+		END
 
 		DECLARE _CURSOR CURSOR
 		FOR
@@ -516,7 +518,7 @@ BEGIN
 			SELECT TOP 1 @strBatchId2 = strBatchId FROM tblGRTransferGLEntriesCTE WHERE intSourceTransactionDetailId = @intTransferStorageReferenceId
 			
 			UPDATE tblGLDetail SET ysnIsUnposted = 1 WHERE strBatchId = @strBatchId2
-			UPDATE tblGRTransferGLEntriesCTE SET ysnIsUnposted = 1, strUnpostBatchId = @strBatchId WHERE strBatchId = @strBatchId2
+			UPDATE tblGRTransferGLEntriesCTE SET ysnIsUnposted = 1 WHERE strBatchId = @strBatchId2
 
 			FETCH c INTO @intTransferStorageReferenceId
 		END

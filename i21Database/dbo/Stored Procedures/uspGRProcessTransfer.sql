@@ -815,6 +815,9 @@ BEGIN
 					--SELECT '@GLEntries1',* FROM @GLEntries
 					--delete from @GLEntries where strDescription like '%Qty: 286.29, Cost: 6.1725%' and dblCredit = 0
 					--SELECT '@GLEntries',* FROM @GLEntries
+					
+				--remove records with 0 Dr/Cr
+				DELETE FROM @GLEntries WHERE dblDebit = 0 AND dblCredit = 0
 
 				INSERT INTO @GLValidation
 				SELECT * FROM dbo.fnGRGetGLEntriesErrors_DPtoDP(@GLEntries,1)
