@@ -37,6 +37,7 @@ BEGIN
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 		AND strTransactionType = 'RECIPE_DELETE'
+		AND ysnImport =1
 
 	WHILE @intMinId IS NOT NULL
 	BEGIN
@@ -53,7 +54,7 @@ BEGIN
 			,@strLocationName = strLocationName
 		FROM tblMFRecipeStage
 		WHERE intRecipeStageId = @intMinId
-
+		
 		SELECT @intItemId = intItemId
 		FROM tblICItem
 		WHERE strItemNo = @strItemNo
@@ -94,6 +95,7 @@ BEGIN
 			AND strSessionId = @strSessionId
 			AND ISNULL(strMessage, '') = ''
 			AND strTransactionType = 'RECIPE_DELETE'
+			AND ysnImport =1
 	END
 END
 
@@ -105,6 +107,7 @@ BEGIN
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
 		AND strRowState = 'D'
+		AND ysnImport =1
 
 	--Delete recipe item
 	WHILE @intMinId IS NOT NULL
@@ -192,6 +195,7 @@ BEGIN
 			AND strSessionId = @strSessionId
 			AND ISNULL(strMessage, '') = ''
 			AND strRowState = 'D'
+			AND ysnImport =1
 	END
 END
 
@@ -206,6 +210,7 @@ BEGIN
 		AND ISNULL(strItemNo, '') = ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Item
 	UPDATE tblMFRecipeStage
@@ -218,6 +223,7 @@ BEGIN
 		AND ISNULL(strItemNo, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Qty
 	UPDATE tblMFRecipeStage
@@ -229,6 +235,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--UOM is required
 	UPDATE tblMFRecipeStage
@@ -238,6 +245,7 @@ BEGIN
 		AND ISNULL(strItemNo, '') = ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid UOM
 	UPDATE tblMFRecipeStage
@@ -251,6 +259,7 @@ BEGIN
 		AND ISNULL(strItemNo, '') = ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Location is required
 	UPDATE tblMFRecipeStage
@@ -260,6 +269,7 @@ BEGIN
 		AND ISNULL(strItemNo, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Location
 	UPDATE tblMFRecipeStage
@@ -272,6 +282,7 @@ BEGIN
 		AND ISNULL(strLocationName, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Version
 	UPDATE tblMFRecipeStage
@@ -284,6 +295,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Recipe Type
 	UPDATE tblMFRecipeStage
@@ -296,6 +308,7 @@ BEGIN
 		AND ISNULL(strRecipeType, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	UPDATE tblMFRecipeStage
 	SET strManufacturingProcess=(Select Top 1 strProcessName  from tblMFManufacturingProcess )
@@ -305,6 +318,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Manufacturing Process
 	UPDATE tblMFRecipeStage
@@ -317,6 +331,7 @@ BEGIN
 		AND ISNULL(strManufacturingProcess, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Customer
 	UPDATE tblMFRecipeStage
@@ -329,6 +344,7 @@ BEGIN
 		AND ISNULL(strCustomer, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Farm
 	UPDATE tblMFRecipeStage
@@ -341,6 +357,7 @@ BEGIN
 		AND ISNULL(strFarm, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Cost Type
 	UPDATE tblMFRecipeStage
@@ -353,6 +370,7 @@ BEGIN
 		AND ISNULL(strCostType, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Margin By
 	UPDATE tblMFRecipeStage
@@ -365,6 +383,7 @@ BEGIN
 		AND ISNULL(strMarginBy, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Margin
 	UPDATE tblMFRecipeStage
@@ -376,6 +395,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Discount
 	UPDATE tblMFRecipeStage
@@ -387,6 +407,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid One Line Print
 	UPDATE tblMFRecipeStage
@@ -399,6 +420,7 @@ BEGIN
 		AND ISNULL(strOneLinePrint, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Set Default Values
 	--Recipe Name
@@ -408,6 +430,7 @@ BEGIN
 		AND ISNULL(strItemNo, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Recipe Type
 	UPDATE tblMFRecipeStage
@@ -415,6 +438,7 @@ BEGIN
 	WHERE ISNULL(strRecipeType, '') = ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Valid From
 	UPDATE tblMFRecipeStage
@@ -424,6 +448,7 @@ BEGIN
 		AND ISNULL([strValidFrom], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Valid To
 	UPDATE tblMFRecipeStage
@@ -433,6 +458,7 @@ BEGIN
 		AND ISNULL([strValidTo], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	IF @ysnMinOneInputItemRequired = 1
 	BEGIN
@@ -446,6 +472,7 @@ BEGIN
 				)
 			AND strSessionId = @strSessionId
 			AND ISNULL(strMessage, '') = ''
+			AND ysnImport=1
 
 		UPDATE R
 		SET R.strMessage = 'Minimum one input item is required to create a recipe.'
@@ -453,6 +480,7 @@ BEGIN
 		From tblMFRecipeStage R
 		WHERE R.strSessionId = @strSessionId
 			AND ISNULL(R.strMessage, '') = ''
+			AND ysnImport=1
 			AND NOT EXISTS (
 				SELECT *
 				FROM tblMFRecipeItemStage RI
@@ -472,6 +500,7 @@ BEGIN
 	FROM tblMFRecipeStage
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Insert/Update recipe
 	WHILE (@intMinId IS NOT NULL)
@@ -753,6 +782,7 @@ BEGIN
 		WHERE intRecipeStageId > @intMinId
 			AND strSessionId = @strSessionId
 			AND ISNULL(strMessage, '') = ''
+			AND ysnImport=1
 	END
 
 	UPDATE tblMFRecipeStage
@@ -760,6 +790,7 @@ BEGIN
 		,intStatusId=2
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 END
 
 --Recipe Item
@@ -773,6 +804,7 @@ BEGIN
 		AND ISNULL(strRecipeHeaderItemNo, '') = ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Header Item
 	UPDATE tblMFRecipeItemStage
@@ -785,6 +817,7 @@ BEGIN
 		AND ISNULL(strRecipeHeaderItemNo, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Version No
 	UPDATE tblMFRecipeItemStage
@@ -797,6 +830,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Detail Item
 	UPDATE tblMFRecipeItemStage
@@ -808,6 +842,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Qty
 	UPDATE s
@@ -825,6 +860,7 @@ BEGIN
 			)
 		AND s.strSessionId = @strSessionId
 		AND ISNULL(s.strMessage, '') = ''
+		AND ysnImport=1
 
 	--UOM is required
 	UPDATE s
@@ -839,6 +875,7 @@ BEGIN
 			)
 		AND s.strSessionId = @strSessionId
 		AND ISNULL(s.strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid UOM
 	UPDATE s
@@ -857,6 +894,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Recipe Item Type
 	UPDATE tblMFRecipeItemStage
@@ -869,6 +907,7 @@ BEGIN
 		AND ISNULL(strRecipeItemType, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Upper Tolerance
 	UPDATE tblMFRecipeItemStage
@@ -880,6 +919,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Lower Tolerance
 	UPDATE tblMFRecipeItemStage
@@ -891,6 +931,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Shrinkage
 	UPDATE tblMFRecipeItemStage
@@ -902,6 +943,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Scale
 	UPDATE tblMFRecipeItemStage
@@ -914,6 +956,7 @@ BEGIN
 		AND ISNULL([strScaled], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Consumption Method
 	UPDATE tblMFRecipeItemStage
@@ -926,18 +969,23 @@ BEGIN
 		AND ISNULL(strConsumptionMethod, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
-
-	--Invalid Storage Location
-	UPDATE tblMFRecipeItemStage
-	SET strMessage = 'Invalid Storage Location'
-		,intStatusId=2
-	WHERE strStorageLocation NOT IN (
-			SELECT strName
-			FROM tblICStorageLocation
-			)
-		AND ISNULL(strStorageLocation, '') <> ''
-		AND strSessionId = @strSessionId
-		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
+	
+	IF @ysnMinOneInputItemRequired=0
+	BEGIN
+		--Invalid Storage Location
+		UPDATE tblMFRecipeItemStage
+		SET strMessage = 'Invalid Storage Location'
+			,intStatusId=2
+		WHERE strStorageLocation NOT IN (
+				SELECT strName
+				FROM tblICStorageLocation
+				)
+			AND ISNULL(strStorageLocation, '') <> ''
+			AND strSessionId = @strSessionId
+			AND ISNULL(strMessage, '') = ''
+			AND ysnImport=1
+	END
 
 	--Invalid Valid From
 	UPDATE tblMFRecipeItemStage
@@ -947,6 +995,7 @@ BEGIN
 		AND ISNULL([strValidFrom], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Valid To
 	UPDATE tblMFRecipeItemStage
@@ -956,6 +1005,7 @@ BEGIN
 		AND ISNULL([strValidTo], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Year Validation
 	UPDATE tblMFRecipeItemStage
@@ -968,6 +1018,7 @@ BEGIN
 		AND ISNULL([strYearValidationRequired], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Minor Ingredient
 	UPDATE tblMFRecipeItemStage
@@ -980,6 +1031,7 @@ BEGIN
 		AND ISNULL([strMinorIngredient], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Output Item Mandatory
 	UPDATE tblMFRecipeItemStage
@@ -992,6 +1044,7 @@ BEGIN
 		AND ISNULL([strOutputItemMandatory], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Scrap
 	UPDATE tblMFRecipeItemStage
@@ -1003,6 +1056,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Consumption Required
 	UPDATE tblMFRecipeItemStage
@@ -1015,6 +1069,7 @@ BEGIN
 		AND ISNULL([strConsumptionRequired], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Cost Allocation Percentage
 	UPDATE tblMFRecipeItemStage
@@ -1026,6 +1081,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Margin By
 	UPDATE tblMFRecipeItemStage
@@ -1038,6 +1094,7 @@ BEGIN
 		AND ISNULL(strMarginBy, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Margin
 	UPDATE tblMFRecipeItemStage
@@ -1049,6 +1106,7 @@ BEGIN
 			)
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Cost Applied At Invoice
 	UPDATE tblMFRecipeItemStage
@@ -1061,6 +1119,7 @@ BEGIN
 		AND ISNULL([strCostAppliedAtInvoice], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Comment Type
 	UPDATE tblMFRecipeItemStage
@@ -1073,6 +1132,7 @@ BEGIN
 		AND ISNULL(strCommentType, '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Invalid Partial Fill Consumption
 	UPDATE tblMFRecipeItemStage
@@ -1085,6 +1145,7 @@ BEGIN
 		AND ISNULL([strPartialFillConsumption], '') <> ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Set Default Values
 	--Recipe Item Type
@@ -1093,6 +1154,7 @@ BEGIN
 	WHERE ISNULL(strRecipeItemType, '') = ''
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Consumption Method
 	UPDATE tblMFRecipeItemStage
@@ -1101,6 +1163,7 @@ BEGIN
 		AND strRecipeItemType = 'INPUT'
 		AND strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Comment Type
 	UPDATE s
@@ -1111,6 +1174,7 @@ BEGIN
 		AND i.strType = 'Comment'
 		AND s.strSessionId = @strSessionId
 		AND ISNULL(s.strMessage, '') = ''
+		AND ysnImport=1
 
 	--Set Comment as Item Desc if empty
 	UPDATE s
@@ -1121,6 +1185,7 @@ BEGIN
 		AND i.strType = 'Comment'
 		AND s.strSessionId = @strSessionId
 		AND ISNULL(s.strMessage, '') = ''
+		AND ysnImport=1
 
 	--Quantity=0,UOM=null for Other Charge,Comment items
 	UPDATE s
@@ -1134,11 +1199,13 @@ BEGIN
 			)
 		AND s.strSessionId = @strSessionId
 		AND ISNULL(s.strMessage, '') = ''
+		AND ysnImport=1
 
 	SELECT @intMinId = MIN(intRecipeItemStageId)
 	FROM tblMFRecipeItemStage
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 
 	--Insert/Update recipe item
 	WHILE (@intMinId IS NOT NULL)
@@ -1226,6 +1293,20 @@ BEGIN
 			WHERE intRecipeItemStageId = @intMinId
 
 			GOTO NEXT_RECIPEITEM
+		END
+
+		IF @ysnMinOneInputItemRequired =1
+		BEGIN
+			DELETE RI
+			FROM tblMFRecipeItem RI
+			WHERE intRecipeId = @intRecipeId
+				AND NOT EXISTS (
+					SELECT *
+					FROM tblMFRecipeItemStage RIS
+					JOIN tblICItem I ON I.strItemNo = RIS.strRecipeItemNo
+					WHERE RIS.strSessionId = @strSessionId
+						AND I.intItemId = RI.intItemId
+					)
 		END
 
 		SELECT TOP 1 @intRecipeItemId = intRecipeItemId
@@ -1486,6 +1567,7 @@ BEGIN
 		WHERE intRecipeItemStageId > @intMinId
 			AND strSessionId = @strSessionId
 			AND ISNULL(strMessage, '') = ''
+			AND ysnImport=1
 	END
 
 	UPDATE tblMFRecipeItemStage
@@ -1493,6 +1575,7 @@ BEGIN
 		,intStatusId=2
 	WHERE strSessionId = @strSessionId
 		AND ISNULL(strMessage, '') = ''
+		AND ysnImport=1
 END
 
 --Recipe Substitute Item
