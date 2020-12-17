@@ -130,6 +130,15 @@ BEGIN TRY
 	AND		strStatus = 'Approved' 
 	ORDER BY intApprovalId
 
+	IF (ISNULL(@StraussContractSubmitId, 0) = 0)
+	BEGIN
+		SELECT	TOP 1 @StraussContractSubmitId = intSubmittedById
+		FROM	tblSMApproval 
+		WHERE	intTransactionId = @intTransactionId
+		AND		strStatus = 'Submitted' 
+		ORDER BY intApprovalId
+	END
+
 	select top 1
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
@@ -215,7 +224,7 @@ BEGIN TRY
 		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
 		WHERE T.intScreenId = @intScreenId
 			AND strStatus = 'Approved'
-			AND T.intRecordId = 1042
+			AND T.intRecordId = @intContractHeaderId
 		ORDER BY intApprovalId
 
 		SELECT  @strAmendedColumns = STUFF((

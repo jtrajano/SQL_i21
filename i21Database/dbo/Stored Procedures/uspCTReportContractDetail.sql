@@ -6,7 +6,7 @@
 AS
 
 BEGIN TRY
-	
+	DECLARE @ysnExternal BIT 
 	DECLARE	@ErrMsg NVARCHAR(MAX)
 
 	
@@ -19,8 +19,7 @@ BEGIN TRY
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
 			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT,
-			@ysnExternal BIT
+			@intContractDetailId INT
 
 	DECLARE @Amend TABLE (intContractDetailId INT, strAmendedColumns NVARCHAR(MAX))
 
@@ -32,6 +31,11 @@ BEGIN TRY
 	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
 
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
+
+	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END)		
+	FROM tblCTContractHeader CH
+	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -59,10 +63,7 @@ BEGIN TRY
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	
-	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
-	FROM tblCTContractHeader CH
-	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
-	WHERE CH.intContractHeaderId = @intContractHeaderId
+
 
 	SELECT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
@@ -126,7 +127,7 @@ BEGIN TRY
 			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
 
 			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure,
-			strStaussItemDescription = IBM.strDescription,
+			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
 			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
 			strStraussItemBundleNo	= IBM.strItemNo,
 			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'Price to be fixed basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
@@ -162,7 +163,7 @@ BEGIN TRY
 	-- Strauss
 	JOIN	tblICItem			IBM	WITH (NOLOCK) ON	IBM.intItemId			=	CD.intItemBundleId		LEFT
 	JOIN	tblSMCurrency		BCU	WITH (NOLOCK) ON	BCU.intCurrencyID		=	CD.intBasisCurrencyId	LEFT
-	JOIN	tblICItemUOM		BCY	WITH (NOLOCK) ON	BCY.intItemUOMId		=	CD.intBasisCurrencyId	LEFT
+	JOIN	tblICItemUOM		BCY	WITH (NOLOCK) ON	BCY.intItemUOMId		=	CD.intBasisUOMId		LEFT
 	JOIN	tblICUnitMeasure	BUM WITH (NOLOCK) ON	BUM.intUnitMeasureId	=	BCY.intUnitMeasureId	LEFT
 	JOIN	tblICItemUOM		PCY WITH (NOLOCK) ON	PCY.intItemUOMId		=	CD.intPriceItemUOMId	LEFT
 	JOIN	tblICUnitMeasure	PUM WITH (NOLOCK) ON	PUM.intUnitMeasureId	=	PCY.intUnitMeasureId	LEFT
