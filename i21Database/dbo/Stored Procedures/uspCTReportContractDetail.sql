@@ -119,7 +119,20 @@ BEGIN TRY
 			strCommodityCode		= CO.strCommodityCode,
 			strERPBatchNumber		= CD.strERPBatchNumber,
 			strItemSpecification	= CD.strItemSpecification,
-			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY') 
+			strBasisComponent		= dbo.fnCTGetBasisComponentString(CD.intContractDetailId,'HERSHEY'),
+
+			strStraussQuantity		= dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure,
+			strStaussItemDescription = (case when @ysnExternal = convert(bit,1) then '(' + IBM.strItemNo + ') ' else '' end) + IM.strDescription,
+			strItemBundleNoLabel	= (case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end),
+			strStraussItemBundleNo	= IBM.strItemNo,
+			strStraussPrice			= CASE WHEN CD.intPricingTypeId = 2 THEN 'Price to be fixed basis ' + MA.strFutMarketName + ' ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + 
+												CASE WHEN CD.dblBasis < 0 THEN ' minus ' ELSE ' plus ' END +
+													BCU.strCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(CD.dblBasis),2) + '/'+ BUM.strUnitMeasure +' at '+ CD.strFixationBy + '''s option prior to first notice day of ' + DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) + ' or on presentation of documents,whichever is earlier.'
+										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
+									   END,
+			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
+			strStraussShipment		= datename(m,CD.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,CD.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end),
+			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)
 	JOIN	tblCTContractHeader	CH	WITH (NOLOCK) ON	CH.intContractHeaderId	=	CD.intContractHeaderId	
@@ -140,7 +153,19 @@ BEGIN TRY
 	JOIN	tblICUnitMeasure	U7	WITH (NOLOCK) ON	U7.intUnitMeasureId		=	WU.intUnitMeasureId		LEFT
 	JOIN	tblICUnitMeasure	NU	WITH (NOLOCK) ON	NU.intUnitMeasureId		=	NM.intUnitMeasureId		LEFT
 	JOIN	@Amend				AM	ON	AM.intContractDetailId	=	CD.intContractDetailId	LEFT
-	JOIN	tblICItemContract	IC	WITH (NOLOCK) ON	IC.intItemContractId	=	CD.intItemContractId
+	JOIN	tblICItemContract	IC	WITH (NOLOCK) ON	IC.intItemContractId	=	CD.intItemContractId	LEFT
+	
+	-- Strauss
+	JOIN	tblICItem			IBM	WITH (NOLOCK) ON	IBM.intItemId			=	CD.intItemBundleId		LEFT
+	JOIN	tblSMCurrency		BCU	WITH (NOLOCK) ON	BCU.intCurrencyID		=	CD.intBasisCurrencyId	LEFT
+	JOIN	tblICItemUOM		BCY	WITH (NOLOCK) ON	BCY.intItemUOMId		=	CD.intBasisUOMId		LEFT
+	JOIN	tblICUnitMeasure	BUM WITH (NOLOCK) ON	BUM.intUnitMeasureId	=	BCY.intUnitMeasureId	LEFT
+	JOIN	tblICItemUOM		PCY WITH (NOLOCK) ON	PCY.intItemUOMId		=	CD.intPriceItemUOMId	LEFT
+	JOIN	tblICUnitMeasure	PUM WITH (NOLOCK) ON	PUM.intUnitMeasureId	=	PCY.intUnitMeasureId	LEFT
+	JOIN	tblCTPosition		PO	WITH (NOLOCK) ON	PO.intPositionId		=	CH.intPositionId		LEFT
+	JOIN	tblSMCity			CT	WITH (NOLOCK) ON	CT.intCityId			=	CH.intINCOLocationTypeId LEFT
+	JOIN	tblSMCity			CTY	WITH (NOLOCK) ON	CTY.intCityId			=	CD.intDestinationPortId
+		
 	CROSS JOIN tblCTCompanyPreference   CP
 	WHERE	CD.intContractHeaderId	=	@intContractHeaderId
 	AND		CD.intContractStatusId <> 3
