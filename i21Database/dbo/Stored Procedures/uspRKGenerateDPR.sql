@@ -356,7 +356,7 @@ BEGIN TRY
 		, ysnExternal
 	INTO #tblCustomerOwnedAll
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToDate, @intCommodityId, @intVendorId) t
-	WHERE ISNULL(strStorageType, '') <> 'ITR' AND intTypeId IN (1, 3, 4, 5, 9)
+	WHERE ISNULL(strStorageType, '') <> 'ITR' AND intTypeId IN (1, 3, 4, 5, 8, 9)
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 		AND intCommodityId = ISNULL(@intCommodityId, intCommodityId)
 		AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
