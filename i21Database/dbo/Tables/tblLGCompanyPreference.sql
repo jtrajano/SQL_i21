@@ -77,6 +77,7 @@
 [intPnLReportReserveBCategoryId] INT NULL,
 [intPurchaseContractBasisItemId] INT NULL,
 [intDefaultPickType] INT NULL,
+[ysnIncludeOpenContractsOnInventoryView] BIT NULL DEFAULT ((0)),
 
 CONSTRAINT [PK_tblLGCompanyPreference] PRIMARY KEY ([intCompanyPreferenceId]), 
 CONSTRAINT [FK_tblLGCompanyPreference_tblICCommodity_intCommodityId] FOREIGN KEY ([intCommodityId]) REFERENCES [tblICCommodity]([intCommodityId]),

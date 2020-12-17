@@ -178,6 +178,7 @@ SELECT CP.intCompanyPreferenceId
 	,strPurchaseContractBasisItem = PCBI.strItemNo
 	,CP.intDefaultPickType
 	,strDefaultPickType = CASE WHEN CP.intDefaultPickType = 2 THEN 'Containers' ELSE 'Lots' END COLLATE Latin1_General_CI_AS
+	,CP.ysnIncludeOpenContractsOnInventoryView
 FROM tblLGCompanyPreference CP
 LEFT JOIN tblICCommodity CO ON CO.intCommodityId = CP.intCommodityId
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = CP.intWeightUOMId
