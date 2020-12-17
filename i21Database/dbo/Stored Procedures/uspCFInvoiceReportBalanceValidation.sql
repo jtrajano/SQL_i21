@@ -1,6 +1,4 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFInvoiceReportBalanceValidation](
+﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportBalanceValidation](
 	 @UserId NVARCHAR(MAX)
 	 ,@StatementType NVARCHAR(MAX)
 )
@@ -15,7 +13,8 @@ BEGIN
 	
 	DECLARE @tblMainQuery TABLE 
 	(
-		 intEntityCustomerId INT NULL
+		 intRowId INT NULL
+		,intEntityCustomerId INT NULL
 		,strCustomerNumber	 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 		,strCustomerName	 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 		,dtmDate DATETIME NULL
@@ -29,7 +28,8 @@ BEGIN
 
 	SET @sqlString = '
 	SELECT  
-	 intEntityCustomerId 
+	 ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ORDER BY intEntityCustomerId DESC) 
+	,intEntityCustomerId 
 	,strCustomerNumber	
 	,strCustomerName	
 	,dtmDate
@@ -47,7 +47,8 @@ BEGIN
 
 	INSERT INTO @tblMainQuery
 	(
-		 intEntityCustomerId 
+		 intRowId
+		,intEntityCustomerId 
 		,strCustomerNumber	
 		,strCustomerName	
 		,dtmDate
@@ -72,7 +73,7 @@ BEGIN
 		,strErrorType
 		,strTransactionId
 	)
-	SELECT 
+	SELECT  
 		 mainQuery.intEntityCustomerId
 		 ,strCustomerNumber	
 		 ,strCustomerName	
@@ -85,16 +86,15 @@ BEGIN
 		,'Running Balance <> AR'
 		,strInvoiceReportNumber
 	FROM (
-			SELECT intEntityCustomerId , MAX(dtmDate) as dtmDate 
+			
+			SELECT intEntityCustomerId, MAX(intRowId) as intLastRow
 			FROM @tblMainQuery
 			GROUP BY intEntityCustomerId
 		) as innerQuery
 	INNER JOIN @tblMainQuery as mainQuery
 	ON mainQuery.intEntityCustomerId = innerQuery.intEntityCustomerId
-	AND mainQuery.dtmDate = innerQuery.dtmDate
+	AND mainQuery.intRowId = innerQuery.intLastRow
 	AND dblCalcRunningBalance != dblTotalAR
 
 
 END
-
-
