@@ -425,7 +425,19 @@ IF @Post = 0
 					
 			DELETE FROM #ARPostOverPayment WHERE [intTransactionId] = @PaymentIdToDelete
 		END			
-	END
+
+    --DELETE Prepayment
+	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARPostPrePayment)
+		BEGIN			
+			DECLARE @PaymentIdToDeletePre int		
+			SELECT TOP 1 @PaymentIdToDeletePre = [intTransactionId] FROM #ARPostPrePayment
+					
+			EXEC [dbo].[uspARDeletePrePayment] @PaymentIdToDeletePre, @BatchId ,@UserId 
+					
+			DELETE FROM #ARPostPrePayment WHERE [intTransactionId] = @PaymentIdToDeletePre
+					
+		END    
+    END
 ELSE
 	BEGIN
 			
