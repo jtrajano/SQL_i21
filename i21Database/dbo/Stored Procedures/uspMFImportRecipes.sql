@@ -464,7 +464,7 @@ BEGIN
 	BEGIN
 		--Invalid Detail Item
 		UPDATE tblMFRecipeItemStage
-		SET strMessage = 'Invalid Recipe Detail Item'
+		SET strMessage = 'Missing Recipe Detail Item'
 			,intStatusId=2
 		WHERE ISNULL(strRecipeItemNo, '') NOT IN (
 				SELECT strItemNo
@@ -834,7 +834,7 @@ BEGIN
 
 	--Invalid Detail Item
 	UPDATE tblMFRecipeItemStage
-	SET strMessage = 'Invalid Recipe Detail Item'
+	SET strMessage = 'Missing Recipe Detail Item'
 		,intStatusId=2
 	WHERE ISNULL(strRecipeItemNo, '') NOT IN (
 			SELECT strItemNo
