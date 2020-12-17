@@ -8962,6 +8962,8 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
+    <Build Include="dbo\Views\vyuAGProductMixerView.sql" />
+    <Build Include="dbo\Tables\tblAGProductMixer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
