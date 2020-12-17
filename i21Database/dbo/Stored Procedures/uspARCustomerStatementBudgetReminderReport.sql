@@ -290,6 +290,7 @@ SELECT intPaymentId			= P.intPaymentId
 	 , strNotes				= P.strNotes
 	 , dtmDatePaid			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), P.dtmDatePaid)))
 	 , ysnInvoicePrepayment	= P.ysnInvoicePrepayment
+	 , intPaymentMethodId	= P.intPaymentMethodId
 INTO #POSTEDARPAYMENTS
 FROM dbo.tblARPayment P WITH (NOLOCK)
 INNER JOIN #CUSTOMERS C ON P.intEntityCustomerId = C.intEntityCustomerId
@@ -433,6 +434,7 @@ LEFT JOIN (
 		FROM #PAYMENTDETAILS
 		WHERE ysnInvoicePrepayment = 0
 		  AND dtmDatePaid <= @dtmDateTo
+		  AND @ysnPrintZeroBalance = 0
 		GROUP BY intInvoiceId
 	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 
@@ -458,10 +460,10 @@ LEFT JOIN (
 		     , intInvoiceId		= PD.intInvoiceId
 			 , strInvoiceNumber	= I.strInvoiceNumber
 			 , dblPayment		= SUM(PD.dblPayment) + SUM(PD.dblDiscount) + SUM(PD.dblWriteOffAmount) - SUM(PD.dblInterest) 
-			 , dblInvoiceTotal	= CASE WHEN I.dtmDate BETWEEN @dtmDateFrom AND @dtmDateTo THEN I.dblInvoiceTotal ELSE 0 END 
+			 , dblInvoiceTotal	= CASE WHEN I.dtmPostDate BETWEEN @dtmDateFrom AND @dtmDateTo THEN I.dblInvoiceTotal ELSE 0 END 
 		FROM #PAYMENTDETAILS PD 
 		INNER JOIN tblARInvoice I ON PD.intInvoiceId = I.intInvoiceId
-		GROUP BY PD.intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal, I.dtmDate
+		GROUP BY PD.intPaymentId, PD.intInvoiceId, I.strInvoiceNumber, I.dblInvoiceTotal, I.dtmPostDate
 	) DETAILS ON DETAILS.intPaymentId = P.intPaymentId
 	LEFT JOIN (
 		SELECT intInvoiceId
@@ -472,7 +474,7 @@ LEFT JOIN (
 	) TOTALPAYMENT ON DETAILS.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
-	  AND DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
+	  AND ((@ysnPrintZeroBalance = 0 AND DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0) OR @ysnPrintZeroBalance = 1)
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
