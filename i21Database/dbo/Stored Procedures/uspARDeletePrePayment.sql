@@ -1,6 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspARDeletePrePayment]
 	 @PaymentId		as int
-	,@UnPost		as bit			= 1
 	,@BatchId		as nvarchar(20)	= NULL
 	,@UserId		as int			= 1
 AS
@@ -16,67 +15,40 @@ SET ANSI_WARNINGS OFF
 
 
 WHILE EXISTS(
-			SELECT TOP 1
-				I.intInvoiceId 
-			FROM
-				tblARInvoice I
-			INNER JOIN
-				tblARPayment P
-					ON I.strComments = P.strRecordNumber				
-					AND I.intPaymentId = P.intPaymentId
-			WHERE
-				I.strTransactionType = 'Customer Prepayment'
-				AND P.intPaymentId = @PaymentId
+			SELECT TOP 1 I.intInvoiceId 
+			FROM tblARInvoice I
+			INNER JOIN tblARPayment P
+					ON I.intPaymentId = P.intPaymentId
+			WHERE I.strTransactionType = 'Customer Prepayment'
+			  AND P.intPaymentId = @PaymentId
 			)
 	BEGIN
-
 		DECLARE @invoiceId int
 
-		SELECT TOP 1
-			@invoiceId = I.intInvoiceId 
-		FROM
-			tblARInvoice I
-		INNER JOIN
-			tblARPayment P
-				ON I.strComments = P.strRecordNumber
-				AND I.intPaymentId = P.intPaymentId			
-		WHERE
-			I.strTransactionType = 'Customer Prepayment'
-			AND P.intPaymentId = @PaymentId
+		SELECT TOP 1 @invoiceId = I.intInvoiceId 
+		FROM tblARInvoice I
+		INNER JOIN tblARPayment P ON I.intPaymentId = P.intPaymentId
+		WHERE I.strTransactionType = 'Customer Prepayment'
+		  AND P.intPaymentId = @PaymentId
 
-		--IF @UnPost = 1
-		--	BEGIN
-		--		DECLARE	@successfulCount int,
-		--				@invalidCount int,
-		--				@success bit
-
-		--		EXEC	[dbo].[uspARPostInvoice]
-		--				@batchId = @BatchId,
-		--				@post = 0,
-		--				@recap = 0,
-		--				@param = @invoiceId,
-		--				@userId = @UserId,
-		--				@beginDate = NULL,
-		--				@endDate = NULL,
-		--				@beginTransaction = NULL,
-		--				@endTransaction = NULL,
-		--				@exclude = NULL,
-		--				@successfulCount = @successfulCount OUTPUT,
-		--				@invalidCount = @invalidCount OUTPUT,
-		--				@success = @success OUTPUT,
-		--				@batchIdUsed = NULL,
-		--				@recapId = NULL,
-		--				@transType = N'Customer Prepayment'
-		--	END 
+		DELETE FROM tblARPaymentDetail
+		WHERE intInvoiceId = @invoiceId
 
 		DELETE FROM tblARInvoiceDetail 
+		WHERE intInvoiceId = @invoiceId
+
+		UPDATE tblARInvoice 
+		SET ysnPosted = 0
 		WHERE intInvoiceId = @invoiceId
 
 		DELETE FROM tblARInvoice 
 		WHERE intInvoiceId = @invoiceId
 
+		UPDATE tblARPayment 
+		SET ysnInvoicePrepayment = 0 
+		WHERE intPaymentId = @PaymentId
 	END
-		                     
+
 RETURN 1
 
 END
