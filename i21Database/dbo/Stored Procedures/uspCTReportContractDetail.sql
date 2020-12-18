@@ -6,7 +6,7 @@
 AS
 
 BEGIN TRY
-	
+	declare @ysnExternal bit 
 	DECLARE	@ErrMsg NVARCHAR(MAX)
 
 	
