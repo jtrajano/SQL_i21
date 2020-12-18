@@ -8893,6 +8893,7 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
+    <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
