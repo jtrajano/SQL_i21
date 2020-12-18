@@ -3676,6 +3676,7 @@ BEGIN TRY
 				, strFutureMonth
 			FROM #tempCollateral c1
 			WHERE c1.intLocationId = ISNULL(@intLocationId, c1.intLocationId)
+			AND c1.ysnIncludeInPriceRiskAndCompanyTitled = 1
 		) t GROUP BY intCommodityId
 			, intFromCommodityUnitMeasureId
 			, intCommodityId
