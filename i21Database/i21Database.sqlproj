@@ -7806,7 +7806,11 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
+<<<<<<< Updated upstream
 <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+=======
+    <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
+>>>>>>> Stashed changes
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
