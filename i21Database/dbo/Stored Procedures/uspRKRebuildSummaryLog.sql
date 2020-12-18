@@ -2308,27 +2308,31 @@ BEGIN TRY
 		
 		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Customer Owned'
-			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5)
+			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5, 8)
 											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
 													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
 													 ELSE 'NONE' END
 										WHEN intTransactionTypeId = 3 THEN 'Transfer Storage'
 										WHEN intTransactionTypeId = 4 THEN 'Storage Settlement'
 										WHEN intTransactionTypeId = 9 THEN 'Inventory Adjustment' END
-			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN (1, 5)
-												THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
-														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
-														ELSE NULL END
+			, intTransactionRecordId = CASE 
+											WHEN intTransactionTypeId IN (1, 5, 8)
+												THEN
+													nullif(coalesce(sh.intInventoryReceiptId, sh.intInventoryShipmentId, sh.intTicketId, -99), -99)
 											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
 											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
 											WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId END
-			, strTransactioneNo = CASE WHEN intTransactionTypeId IN (1, 5)
-											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
-													WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
-													ELSE NULL END
+			, strTransactionNo 	= CASE 
+									WHEN intTransactionTypeId IN (1, 5, 8)
+										THEN CASE 
+												WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
+												WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
+												WHEN sh.intTicketId is not null then t.strTicketNumber
+												ELSE NULL 
+											END
 									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
 									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
-									WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo END
+									WHEN intTransactionTypeId = 9 THEN ISNULL(sh.strAdjustmentNo, sh.strTransactionId) END
 			, intTransactionRecordHeaderId = sh.intCustomerStorageId
 			, sh.intContractHeaderId
 			, cs.intCommodityId
@@ -2362,31 +2366,36 @@ BEGIN TRY
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
 		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
+		WHERE sh.intTransactionTypeId in (1,3,4,5,8,9)
 	
 		UNION ALL
 		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Delayed Pricing'
-			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5)
+			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5, 8)
 											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
 													 WHEN sh.intInventoryShipmentId IS NOT NULL THEN 'Inventory Shipment'
 													 ELSE 'NONE' END
 										WHEN intTransactionTypeId = 3 THEN 'Transfer Storage'
 										WHEN intTransactionTypeId = 4 THEN 'Storage Settlement'
 										WHEN intTransactionTypeId = 9 THEN 'Inventory Adjustment' END
-			, intTransactionRecordId = CASE WHEN intTransactionTypeId IN (1, 5)
-												THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.intInventoryReceiptId
-														WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.intInventoryShipmentId
-														ELSE NULL END
-											WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
-											WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
-											WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId END
-			, strTransactioneNo = CASE WHEN intTransactionTypeId IN (1, 5)
-											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
+			, intTransactionRecordId = CASE 
+										WHEN intTransactionTypeId IN (1, 5)
+											THEN 
+												nullif(coalesce(sh.intInventoryReceiptId, sh.intInventoryShipmentId, sh.intTicketId, -99), -99)
+									WHEN intTransactionTypeId = 3 THEN sh.intTransferStorageId
+									WHEN intTransactionTypeId = 4 THEN sh.intSettleStorageId
+									WHEN intTransactionTypeId = 9 THEN sh.intInventoryAdjustmentId END
+			, strTransactionNo 	= CASE 
+										WHEN intTransactionTypeId IN (1, 5, 8)
+											THEN CASE 
+													WHEN sh.intInventoryReceiptId IS NOT NULL THEN sh.strReceiptNumber
 													WHEN sh.intInventoryShipmentId IS NOT NULL THEN sh.strShipmentNumber
-													ELSE NULL END
-									WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
-									WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
-									WHEN intTransactionTypeId = 9 THEN sh.strAdjustmentNo END
+													WHEN sh.intTicketId is not null then t.strTicketNumber
+													ELSE NULL 
+												END
+										WHEN intTransactionTypeId = 3 THEN sh.strTransferTicket
+										WHEN intTransactionTypeId = 4 THEN sh.strSettleTicket
+										WHEN intTransactionTypeId = 9 THEN ISNULL(sh.strAdjustmentNo, sh.strTransactionId) END
 			, intTransactionRecordHeaderId = sh.intCustomerStorageId
 			, sh.intContractHeaderId
 			, cs.intCommodityId
@@ -2419,6 +2428,7 @@ BEGIN TRY
 		JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = iuom.intUnitMeasureId and cum.intCommodityId = cs.intCommodityId
 		LEFT JOIN tblSCTicket t ON t.intTicketId = sh.intTicketId
 		LEFT JOIN tblSMCompanyLocationSubLocation sl ON sl.intCompanyLocationSubLocationId = t.intSubLocationId AND sl.intCompanyLocationId = t.intProcessingLocationId
+		WHERE sh.intTransactionTypeId in (1,3,4,5,8,9)
 		
 		UNION ALL
 		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
@@ -2499,7 +2509,7 @@ BEGIN TRY
 			, intTransactionRecordId
 			, intTransactionRecordHeaderId
 			, strDistributionType
-			, strTransactioneNo
+			, strTransactionNo
 			, dtmDeliveryDate
 			, intContractHeaderId
 			, intTicketId
