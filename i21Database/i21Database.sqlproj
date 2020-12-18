@@ -8894,6 +8894,7 @@
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
+    <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
