@@ -78,7 +78,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @temp_xml_table WHERE [fieldname] IN ('strC
 		FROM @temp_xml_table 
 		WHERE [fieldname] IN ('strCustomerName', 'strSalespersonName', 'strAccountStatusCode', 'strCompanyLocation')
 
-		IF @condition = 'Equal To'
+		IF UPPER(@condition) = UPPER('Equal To')
 			BEGIN				
 				IF @fieldname = 'strCustomerName'
 					BEGIN
