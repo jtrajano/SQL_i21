@@ -6,7 +6,7 @@
 AS
 
 BEGIN TRY
-	declare @ysnExternal bit 
+	DECLARE @ysnExternal BIT 
 	DECLARE	@ErrMsg NVARCHAR(MAX)
 
 	
@@ -31,6 +31,11 @@ BEGIN TRY
 	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
 
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
+
+	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END)		
+	FROM tblCTContractHeader CH
+	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
