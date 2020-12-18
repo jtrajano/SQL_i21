@@ -8964,6 +8964,7 @@
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
     <Build Include="dbo\Views\vyuAGProductMixerView.sql" />
     <Build Include="dbo\Tables\tblAGProductMixer.sql" />
+    <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
