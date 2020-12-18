@@ -95,7 +95,7 @@ BEGIN
 		, strNotes
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY c.intTransactionRecordId, c.strTransactionType ORDER BY c.intSummaryLogId DESC)
-			, dblTotal = c.dblOrigQty
+			, dblTotal = ABS(c.dblOrigQty)
 			, intCollateralId = c.intTransactionRecordId
 			, c.strLocationName
 			, c.intItemId
@@ -108,8 +108,8 @@ BEGIN
 			, strContractNumber
 			, intContractSeq
 			, c.dtmTransactionDate
-			, dblOriginalQuantity = ISNULL(c.dblOrigQty, 0) * CASE WHEN UPPER(strDistributionType) = 'PURCHASE' THEN 1 ELSE -1 END
-			, dblRemainingQuantity = c.dblOrigQty  * CASE WHEN UPPER(strDistributionType) = 'PURCHASE' THEN 1 ELSE -1 END
+			, dblOriginalQuantity = ABS(ISNULL(c.dblOrigQty, 0))
+			, dblRemainingQuantity = ABS(c.dblOrigQty)
 			, c.intCommodityId
 			, c.strCommodityCode
 			, intCommodityUnitMeasureId = c.intOrigUOMId

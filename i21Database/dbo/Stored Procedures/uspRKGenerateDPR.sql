@@ -1998,7 +1998,7 @@ BEGIN TRY
 				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 				, strCommodityCode = @strCommodityCode
 				, strType
-				, dblTotal = ISNULL(dblTotal, 0)
+				, dblTotal = ISNULL(CASE WHEN intSeqId = 8 THEN - dblTotal ELSE dblTotal END, 0)
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 				, strLocationName
@@ -6051,7 +6051,7 @@ BEGIN TRY
 			, intContractHeaderId
 			, strContractNumber)
 		SELECT strCommodityCode
-			, dblTotal = SUM(dblTotal)
+			, dblTotal = SUM(CASE WHEN ISNULL(intContractTypeId, 1) = 2 THEN - dblTotal ELSE dblTotal END)
 			, strLocationName
 			, intCommodityId
 			, @intCommodityUnitMeasureId
