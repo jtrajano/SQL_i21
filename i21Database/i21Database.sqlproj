@@ -8060,6 +8060,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
     <Build Include="dbo\Functions\fnCTConvertToSubCurrency.sql" />
+    <Build Include="dbo\Functions\fnCTConvertToBaseCurrency.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1h_AccountRange.sql" />
