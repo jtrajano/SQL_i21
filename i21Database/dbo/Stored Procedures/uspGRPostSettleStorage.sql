@@ -1963,9 +1963,7 @@ BEGIN TRY
 			 BEGIN
 												
 				begin
-					-- must update the qty for the discounts
-					declare @dblTotalUnits DECIMAL(24, 10)
-				
+					-- must update the qty for the discounts				
 					select @dblTotalUnits = sum(case when @doPartialHistory = 1 then
 												case WHEN @ysnFromPriceBasisContract = 1 and (intItemType = 2 or intItemType = 3)
 														then a.dblUnits
