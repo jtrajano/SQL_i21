@@ -224,7 +224,7 @@ BEGIN TRY
 		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
 		WHERE T.intScreenId = @intScreenId
 			AND strStatus = 'Approved'
-			AND T.intRecordId = 1042
+			AND T.intRecordId = @intContractHeaderId
 		ORDER BY intApprovalId
 
 		SELECT  @strAmendedColumns = STUFF((
