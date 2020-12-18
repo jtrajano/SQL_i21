@@ -8881,6 +8881,7 @@
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
+    <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
