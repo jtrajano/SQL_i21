@@ -190,12 +190,13 @@ OPEN intListCursor;
 								SET @dblLoopAdjustedScheduleQuantity = @dblLoopContractUnits - @_dblQuantityPerLoad 
 								IF(@dblLoopAdjustedScheduleQuantity <> 0)
 								BEGIN
-									EXEC	uspCTUpdateScheduleQuantity 
+									EXEC	uspCTUpdateScheduleQuantityUsingUOM 
 									@intContractDetailId	=	@intLoopContractId,
 									@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
 									@intUserId				=	@intUserId,
 									@intExternalId			=	@intTicketId,
 									@strScreenName			=	'Auto - Scale'
+									,@intSourceItemUOMId	=	@intTicketItemUOMId
 								END
 								
 							END
@@ -230,12 +231,13 @@ OPEN intListCursor;
 
 									IF @dblLoopAdjustedScheduleQuantity <> 0
 									BEGIN
-										EXEC	uspCTUpdateScheduleQuantity 
-										@intContractDetailId	=	@intLoopContractId,
-										@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity,
-										@intUserId				=	@intUserId,
-										@intExternalId			=	@intTicketId,
-										@strScreenName			=	'Auto - Scale'
+										EXEC uspCTUpdateScheduleQuantityUsingUOM 
+											@intContractDetailId	=	@intLoopContractId
+											,@dblQuantityToUpdate	=	@dblLoopAdjustedScheduleQuantity
+											,@intUserId				=	@intUserId
+											,@intExternalId			=   @intTicketId
+											,@strScreenName			=	'Auto - Scale'
+											,@intSourceItemUOMId	=	@intTicketItemUOMId
 									END
 								END
 								
