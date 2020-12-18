@@ -400,6 +400,7 @@ END
 	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
 	WHERE RE.intSourceId = @intTicketId AND (QM.dblDiscountAmount != 0 OR GR.ysnSpecialDiscountCode = 1) AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6) 
 
+		and isnull(@intDeliverySheetId,0 ) = 0
 	--FOR FEE CHARGES
 	INSERT INTO @OtherCharges
 	(
