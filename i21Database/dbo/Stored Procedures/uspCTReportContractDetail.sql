@@ -6,7 +6,7 @@
 AS
 
 BEGIN TRY
-	
+	DECLARE @ysnExternal BIT 
 	DECLARE	@ErrMsg NVARCHAR(MAX)
 
 	
@@ -19,8 +19,7 @@ BEGIN TRY
 			@intLastApprovedContractId INT,
 			@intPrevApprovedContractId INT,
 			@strAmendedColumns NVARCHAR(MAX),
-			@intContractDetailId INT,
-			@ysnExternal BIT
+			@intContractDetailId INT
 
 	DECLARE @Amend TABLE (intContractDetailId INT, strAmendedColumns NVARCHAR(MAX))
 
@@ -32,6 +31,11 @@ BEGIN TRY
 	SELECT  @TotalNetQuantity =SUM(dblNetWeight) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId=@intContractHeaderId AND intContractStatusId <> 3
 
 	SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId
+
+	SELECT @ysnExternal = (CASE WHEN intBookVsEntityId > 0 THEN CONVERT(BIT,1) ELSE CONVERT(BIT,0) END)		
+	FROM tblCTContractHeader CH
+	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
+	WHERE CH.intContractHeaderId = @intContractHeaderId
 
 	WHILE ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -59,10 +63,7 @@ BEGIN TRY
 		SELECT @intContractDetailId = MIN(intContractDetailId) FROM tblCTContractDetail WITH (NOLOCK) WHERE intContractHeaderId = @intContractHeaderId AND intContractDetailId > @intContractDetailId
 	END
 	
-	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
-	FROM tblCTContractHeader CH
-	LEFT JOIN tblCTBookVsEntity be on be.intEntityId = CH.intEntityId
-	WHERE CH.intContractHeaderId = @intContractHeaderId
+
 
 	SELECT	intContractHeaderId		= CD.intContractHeaderId,
 			intContractSeq			= CD.intContractSeq,
