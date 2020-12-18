@@ -29,7 +29,7 @@ SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference
 		,strPayee = CASE WHEN  BT.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE ISNULL(Entity.strName, BT.strPayee) END 
 		,strMemo = BT.strMemo
 		,strRecordNo = BT.strTransactionId
-		,dblAmount = ABS(BT.dblAmount)
+		,dblAmount = BT.dblAmount
 		,intBankTransactionTypeId = BT.intBankTransactionTypeId
 		,strBankTransactionTypeName = BTYPE.strBankTransactionTypeName
     FROM 
