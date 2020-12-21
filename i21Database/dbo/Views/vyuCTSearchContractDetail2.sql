@@ -6,7 +6,7 @@ WITH shipmentstatus AS (
 	SELECT DISTINCT intContractDetailId
 		, strShipmentStatus
 	FROM (
-		SELECT ROW_NUMBER() OVER(PARTITION BY intLoadDetailId ORDER BY dtmScheduledDate) AS intNumberId
+		SELECT ROW_NUMBER() OVER(PARTITION BY intPContractDetailId ORDER BY dtmScheduledDate DESC) AS intNumberId
 			, intContractDetailId = intPContractDetailId
 			, strShipmentStatus
 			, intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
@@ -14,7 +14,7 @@ WITH shipmentstatus AS (
 		WHERE ((intShipmentType = 2 AND strShipmentStatus <> 'Scheduled') OR intShipmentType = 1)
 			AND intPContractDetailId IS NOT NULL
 
-		UNION SELECT ROW_NUMBER() OVER(PARTITION BY intLoadDetailId ORDER BY dtmScheduledDate) AS intNumberId
+		UNION SELECT ROW_NUMBER() OVER(PARTITION BY intSContractDetailId ORDER BY dtmScheduledDate DESC) AS intNumberId
 			, intContractDetailId = intSContractDetailId
 			, strShipmentStatus
 			, intPriorityId = CASE WHEN strShipmentStatus = 'Cancelled' THEN 2 ELSE 1 END
