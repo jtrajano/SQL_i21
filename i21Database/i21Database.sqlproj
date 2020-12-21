@@ -8744,9 +8744,6 @@
     <Build Include="dbo\Stored Procedures\uspICValidateAllocateInventoryReceiptOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspARCustomerStatementHonsteinReport.sql" />
     <Build Include="dbo\Views\vyuLGInventoryAllocationView.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRptPostPreviewPayVoucherHeader.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRptPostPreviewPayVoucherDetails.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRptPostPreviewPayVoucherSummary.sql" />
     <Build Include="dbo\Views\vyuSCDiscountScheduleAuditRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspAPLogInventorySubLedger.sql" />
     <Build Include="dbo\Tables\tblSCDisconnectedImportLog.sql" />
