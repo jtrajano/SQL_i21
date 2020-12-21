@@ -1798,7 +1798,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
