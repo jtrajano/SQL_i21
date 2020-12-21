@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspCFDuplicateTransaction]
 	@TransactionId	NVARCHAR(MAX),
-	@UserId INT
+	@UserId	INT
 AS
 BEGIN
 
@@ -8,6 +8,39 @@ BEGIN
 BEGIN TRANSACTION
 
 	BEGIN TRY
+
+	DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+	DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+	DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+	DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+	DECLARE @strTransactionId				NVARCHAR(MAX) = ''
+	
+
+	
+	SELECT TOP 1
+		@dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+	, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+	, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+	, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+	, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+	, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+	, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+	, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+	, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+	, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+	, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+	, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+	, @strTransactionId					 =		ISNULL(strTransactionId,'')
+	FROM tblCFTransaction
+	WHERE intTransactionId = @TransactionId 
 
 	DECLARE @newId INT
 	DECLARE @strOldId NVARCHAR(MAX)
@@ -206,15 +239,26 @@ BEGIN TRANSACTION
 	FROM tblCFTransactionNote
 	WHERE ISNULL(intTransactionId,0) = ISNULL(@TransactionId,0)
 
+	DECLARE @processName nvarchar(max) = ('Duplicated from ' + @strTransactionId)
 
-	EXEC dbo.uspSMAuditLog 
-	 @keyValue			= @newId							-- Primary Key Value of the Invoice. 
-	,@screenName		= 'CardFueling.view.Transaction'	-- Screen Namespace
-	,@entityId			= @UserId									-- Entity Id.
-	,@actionType		= 'Add'							    -- Action Type
-	,@changeDescription	= @strAuditLogTilte							-- Description
-	,@fromValue			= ''								-- Previous Value
-	,@toValue			= ''	
+	EXEC [uspCFTransactionAuditLog] 
+		@processName					= @processName
+		,@keyValue						= @newId
+		,@entityId						= @UserId
+		,@action						= ''
+		,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+		,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+		,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+		,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+		,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+		,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+		,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+		,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+		,@strFromPriceMethod			= @strAuditPriceMethod			
+		,@strFromPriceBasis				= @strAuditPriceBasis			
+		,@strFromPriceProfileId			= @strAuditPriceProfileId		
+		,@strFromPriceIndexId			= @strAuditPriceIndexId			
+
 
 	COMMIT TRANSACTION
 

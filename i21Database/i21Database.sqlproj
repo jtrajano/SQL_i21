@@ -8890,6 +8890,7 @@
     <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />  
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
