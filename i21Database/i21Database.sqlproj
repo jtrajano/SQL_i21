@@ -8293,6 +8293,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentSimplifiedAvg.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
