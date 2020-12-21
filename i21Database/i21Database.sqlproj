@@ -7800,6 +7800,7 @@
     <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
