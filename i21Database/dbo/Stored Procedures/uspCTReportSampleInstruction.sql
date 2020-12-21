@@ -104,7 +104,7 @@ BEGIN TRY
 			,strContractNumber						=	CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(5))
 			,strDestinationPointName				=	SQ.strDestinationPointName
 			,strItemDescription						=   strItemDescription
-			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(SQ.strPackingDescription, '')
+			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure
 			,strShipment							=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
 
 		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
@@ -132,6 +132,7 @@ BEGIN TRY
 			,strReportTitle							=   (case when pos.strPositionType = 'Shipment' then 'PRE-SHIPMENT SAMPLE INSTRUCTIONS' when pos.strPositionType = 'Spot' then 'SAMPLE INSTRUCTIONS' else '' end)
 			,strPositionLabel						=   (case when pos.strPositionType = 'Shipment' then 'Shipment' when pos.strPositionType = 'Spot' then 'Delivery' else '' end)
 			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION%')
+			, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 
 		FROM	tblCTContractHeader				CH
 		JOIN	tblCTContractDetail				CD	WITH (NOLOCK)	ON	CH.intContractHeaderId	= CD.intContractHeaderId
