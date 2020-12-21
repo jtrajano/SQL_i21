@@ -8,8 +8,9 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	intInvoiceDetailId				INT,
 	intSourceId						INT,
 	dblQuantity						numeric(18,6),
-	dtmCreatedDate					datetime default getdate(),
+	dtmCreatedDate					datetime null default getdate(),
 	ysnMarkDelete					BIT,
+	ysnReturn						BIT null default 0,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),
