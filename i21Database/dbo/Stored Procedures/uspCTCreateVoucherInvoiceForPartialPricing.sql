@@ -101,7 +101,6 @@ BEGIN TRY
 			,@pricing							cursor
 			,@dblPriced							numeric(18,6)
 			,@dblInvoicedShipped				numeric(18,6)
-			,@dblInvoicedShippedReturned		numeric(18,6)
 			,@dblShippedForInvoice				numeric(18,6)
 			,@dblInvoicedPriced					numeric(18,6)
 			,@dblPricedForInvoice				numeric(18,6)
@@ -1365,7 +1364,7 @@ BEGIN TRY
 																			else ISNULL(RI.dblQuantity,0)
 																			end
 																	  )
-																  ),
+																  ) - isnull(rt.dblQtyShipped,0),
 					intInvoiceDetailId = ARD.intInvoiceDetailId,
 					intItemUOMId = @intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
@@ -1382,12 +1381,21 @@ BEGIN TRY
 									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
 									and ARD.intInventoryShipmentChargeId is null
 								) ARD
+				OUTER APPLY (
+								select dblQtyShipped = sum(dblQtyShipped)
+								from
+									tblARInvoiceDetail ARD
+								WHERE
+									ARD.intContractDetailId = CD.intContractDetailId
+									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
+									and ARD.intInventoryShipmentChargeId is null
+									and isnull(ARD.ysnReturned,0) = 1
+								) rt
 								
 				WHERE
 					RI.intLineNo = @intContractDetailId	
 			) t
 			ORDER BY t.intInventoryShipmentItemId
-
 
 			if (@ysnDestinationWeightsGrades = convert(bit,1))
 			begin
@@ -1463,21 +1471,6 @@ BEGIN TRY
 												
 										  )
 
-				set @dblInvoicedShippedReturned = (
-											SELECT
-												SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,ID.dblQtyShipped)) 
-											FROM
-												tblARInvoiceDetail ID, tblARInvoice I
-											WHERE
-												ID.intInventoryShipmentItemId = @intInventoryShipmentItemId
-												AND ID.intInventoryShipmentChargeId IS NULL
-												AND isnull(ID.ysnReturned,0) = 1
-												AND I.intInvoiceId = ID.intInvoiceId
-												and I.strTransactionType = 'Credit Memo'
-											)
-
-				set @dblInvoicedShipped = @dblInvoicedShipped - (isnull(@dblInvoicedShippedReturned,0) * 2);
-
 				set @dblShippedForInvoice = 0;
 				set @dblInvoicedShipped = isnull(@dblInvoicedShipped,0.00);
 				if (@dblShipped > @dblInvoicedShipped)
@@ -1546,6 +1539,7 @@ BEGIN TRY
 														JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 													WHERE
 														AA.intPriceFixationDetailId = @intPriceFixationDetailId
+														and isnull(AA.ysnReturn,0) = 0
 												 )
 						
 						set @dblPricedForInvoice = 0;
