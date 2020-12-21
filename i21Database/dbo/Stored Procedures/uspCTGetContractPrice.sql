@@ -94,7 +94,8 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 														tblCTPriceFixationDetailAPAR AA
 														JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 													WHERE
-														intPriceFixationDetailId = @intPriceFixationDetailId
+														AA.intPriceFixationDetailId = @intPriceFixationDetailId
+														and isnull(AA.ysnReturn,0) = 0
 												 )
 					end
 					else
@@ -102,7 +103,7 @@ set @dblShippedForInvoice = @dblQuantityToPrice;
 						set @dblInvoicedPricedQuantity = (
 													select count(*) from
 													(
-														select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId
+														select distinct intInvoiceId from tblCTPriceFixationDetailAPAR where intPriceFixationDetailId = @intPriceFixationDetailId and isnull(ysnReturn,0) = 0
 													) uniqueInvoice
 													/*
 													SELECT
