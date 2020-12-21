@@ -73,6 +73,10 @@ BEGIN
 		SELECT @dtmCMDate = DATEADD( SECOND, 1, @dtmDateTo) 
 	END
 
+	DECLARE @intUserId INT
+	select TOP 1 @intUserId = intEntityId from tblSMConnectedUser order by dtmConnectDate desc
+	EXEC [dbo].[uspCMRefreshUndepositedFundsFromOrigin]	@intBankAccountId = NULL,@intUserId = @intUserId
+
 
 	DECLARE @strLocation NVARCHAR(50)
 	SELECT @strLocation = [from] FROM @temp_xml_table WHERE [fieldname] = 'strLocationName' --and condition in ('Equal To' , 'Between')
