@@ -87,6 +87,7 @@ SELECT
     ,dblTotalLC =  ISNULL(LCTaxes_1.dblTaxCalculatedAmount, 0)
 	,strItemCategory = cfItem.strCategoryCode           
 	,cfDuplicateUnpostedTransaction.intTotalDuplicateUnposted
+	,intTotalTransactionWithPotentialIssue = (SELECT COUNT(1) FROM vyuCFTransactionAmountPotentialIssue)
 	,cfCard.strCardDepartment
 	,cfCard.strPrimaryDepartment
 	,cfVehicle.strVehicleDepartment
