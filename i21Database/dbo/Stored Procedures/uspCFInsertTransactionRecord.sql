@@ -118,6 +118,9 @@
 	,@CardNumberForDualCard				NVARCHAR(MAX)	= NULL
 	,@VehicleNumberForDualCard			NVARCHAR(MAX)	= NULL
 	,@strDriverPin						NVARCHAR(MAX)	= NULL
+	,@intUserId							INT				= NULL
+
+	
 
 
 	
@@ -2303,6 +2306,58 @@ BEGIN
 		------------------------------------------------------------
 		--						TRANSACTION PRICE				  --
 		------------------------------------------------------------
+
+
+		--DECLARE @dblAuditOriginalTotalPrice	    NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalGrossPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalNetPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedTotalPrice	NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedGrossPrice	NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedNetPrice		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditCalculatedTotalTax		NVARCHAR(MAX) = 0.000000
+		--DECLARE @dblAuditOriginalTotalTax		NVARCHAR(MAX) = 0.000000
+		--DECLARE @strAuditPriceMethod			NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceBasis				NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceProfileId			NVARCHAR(MAX) = ''
+		--DECLARE @strAuditPriceIndexId			NVARCHAR(MAX) = ''
+
+		--SELECT TOP 1
+		--  @dblAuditOriginalTotalPrice	     =		ISNULL(dblOriginalTotalPrice,0)		
+		--, @dblAuditOriginalGrossPrice		 =		ISNULL(dblOriginalGrossPrice,0)
+		--, @dblAuditOriginalNetPrice			 =		ISNULL(dblOriginalNetPrice,0) 
+		--, @dblAuditCalculatedTotalPrice		 =		ISNULL(dblCalculatedTotalPrice,0) 
+		--, @dblAuditCalculatedGrossPrice		 =		ISNULL(dblCalculatedGrossPrice,0) 
+		--, @dblAuditCalculatedNetPrice		 =		ISNULL(dblCalculatedNetPrice,0)
+		--, @dblAuditCalculatedTotalTax		 =		ISNULL(dblCalculatedTotalTax,0)
+		--, @dblAuditOriginalTotalTax			 =		ISNULL(dblOriginalTotalTax,0)
+		--, @strAuditPriceMethod				 =		ISNULL(strPriceMethod,'')
+		--, @strAuditPriceBasis				 =		ISNULL(strPriceBasis,'')
+		--, @strAuditPriceProfileId			 =		ISNULL(strPriceProfileId,'')
+		--, @strAuditPriceIndexId				 =		ISNULL(strPriceIndexId,'')
+		--FROM tblCFTransaction
+		--WHERE intTransactionId = @Pk 
+
+		EXEC [uspCFTransactionAuditLog] 
+			@processName					= 'Import Transaction'
+			,@keyValue						= @Pk
+			,@entityId						= @intUserId
+			,@action						= ''
+			--,@dblFromOriginalTotalPrice		= @dblAuditOriginalTotalPrice	
+			--,@dblFromOriginalGrossPrice		= @dblAuditOriginalGrossPrice	
+			--,@dblFromOriginalNetPrice		= @dblAuditOriginalNetPrice		
+			--,@dblFromCalculatedTotalPrice	= @dblAuditCalculatedTotalPrice	
+			--,@dblFromCalculatedGrossPrice	= @dblAuditCalculatedGrossPrice	
+			--,@dblFromCalculatedNetPrice		= @dblAuditCalculatedNetPrice	
+			--,@dblFromCalculatedTotalTax		= @dblAuditCalculatedTotalTax	
+			--,@dblFromOriginalTotalTax		= @dblAuditOriginalTotalTax		
+			--,@strFromPriceMethod			= @strAuditPriceMethod			
+			--,@strFromPriceBasis				= @strAuditPriceBasis			
+			--,@strFromPriceProfileId			= @strAuditPriceProfileId		
+			--,@strFromPriceIndexId			= @strAuditPriceIndexId			
+
+	
+
+
 
 		print @dblCalcOverfillQuantity
 		IF(@dblCalcOverfillQuantity > 0)
