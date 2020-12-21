@@ -8966,6 +8966,7 @@
     <Build Include="dbo\Views\vyuAGWorkOrderSearch.sql" />
     <Build Include="dbo\Views\vyuAGGetWorkOrderDetail.sql" />
     <Build Include="dbo\Views\vyuAGGetWorkOrder.sql" />
+    <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
