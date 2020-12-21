@@ -113,7 +113,7 @@ BEGIN TRY
 														ELSE '/' + CH2.strContractNumber END)
 		, strDestinationPointName = DP.strCity
 		, strItemDescription = IM.strDescription
-		, strQuantity = dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(CD.strPackingDescription, '')
+		, strQuantity = dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
 		, strShipment = REPLACE(CONVERT(VARCHAR, GETDATE(), 107), LTRIM(DAY(GETDATE())) + ', ', '') + ' shipment at ' + CD.strFixationBy + '''s option'
 		, strEntityAddress = LTRIM(RTRIM(EY.strEntityName)) + ', '
 							+ CHAR(13) + CHAR(10) + ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') + ', '
@@ -156,6 +156,7 @@ BEGIN TRY
 		, strDeliveryPeriod = LEFT(DATENAME(DAY, CD.dtmStartDate), 2) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLaguageId, LEFT(DATENAME(MONTH, CD.dtmStartDate), 3)), LEFT(DATENAME(MONTH, CD.dtmStartDate), 3)) + ' ' + LEFT(DATENAME(YEAR, CD.dtmStartDate), 4) + ' to ' + LEFT(DATENAME(DAy, CD.dtmEndDate), 2) + ' ' + ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName, @intLaguageId, LEFT(DATENAME(MONTH, CD.dtmEndDate), 3)), LEFT(DATENAME(MONTH, CD.dtmEndDate), 3)) + ' ' + LEFT(DATENAME(YEAR, CD.dtmEndDate), 4)
 		, strShippingLineDescription = 'Kindly inform ' + ES.strName + ' at port of destination to release container(s) to:'
 		, UserSignature = @userSignature
+		, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH WITH(NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN vyuCTEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
