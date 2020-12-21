@@ -8960,6 +8960,12 @@
     <Build Include="dbo\Tables\tblAGProductMixer.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
+    <Build Include="dbo\Tables\tblAGWorkOrder.sql" />
+    <Build Include="dbo\Tables\tblAGWorkOrderDetail.sql" />
+    <Build Include="dbo\Tables\tblAGWorkOrderDetailTax.sql" />
+    <Build Include="dbo\Views\vyuAGWorkOrderSearch.sql" />
+    <Build Include="dbo\Views\vyuAGGetWorkOrderDetail.sql" />
+    <Build Include="dbo\Views\vyuAGGetWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -1528,7 +1528,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Responsible Party Task' and strModule = 'Cash Management')
-
+	UNION ALL 
+		SELECT	[intStartingNumberId]	= 157
+			,[strTransactionType]	= N'AG Work Order'
+			,[strPrefix]			= N'WO-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Agronomy'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order' and strModule = 'Agronomy')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
 
 
