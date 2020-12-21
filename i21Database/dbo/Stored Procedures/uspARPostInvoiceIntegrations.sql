@@ -44,7 +44,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
@@ -56,7 +56,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
@@ -180,196 +180,6 @@ BEGIN
 		EXEC dbo.uspTMSyncInvoiceToDeliveryHistory @intInvoiceForSyncId, @UserId, @ResultLogForSync OUT
 												
 		DELETE FROM @TankDeliveryForSync WHERE [intInvoiceId] = @intInvoiceForSyncId																												
-	END
-
-	--CREATE CREDIT MEMO FOR FINAL INVOICE
-	DECLARE @FinalInvoicesWithCreditMemo AS TABLE (
-		 intInvoiceId		INT
-		, strInvoiceNumber	NVARCHAR(50)
-		, dblAmountDue		NUMERIC(18, 6)
-		, dblBaseAmountDue	NUMERIC(18, 6)
-	)
-
-	INSERT INTO @FinalInvoicesWithCreditMemo
-	SELECT PID.intInvoiceId, PID.strInvoiceNumber, ISNULL(PROVISIONAL.dblInvoiceTotal, 0) - ISNULL(ARI.dblInvoiceTotal, 0), ISNULL(PROVISIONAL.dblBaseInvoiceTotal, 0) - ISNULL(ARI.dblBaseInvoiceTotal, 0)
-	FROM #ARPostInvoiceHeader PID
-	INNER JOIN (
-		SELECT intInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal, ysnPosted
-			 , dblPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-	) ARI ON ARI.intInvoiceId = PID.intInvoiceId
-	INNER JOIN (
-		SELECT intInvoiceId, dblInvoiceTotal, dblBaseInvoiceTotal, dblPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-	) PROVISIONAL ON PROVISIONAL.intInvoiceId = PID.intOriginalInvoiceId
-	WHERE PID.intSourceId = 2 AND ISNULL(PID.intOriginalInvoiceId, 0) > 0
-	AND PID.ysnExcludeInvoiceFromPayment = 1
-	AND PID.dblInvoiceTotal < ISNULL(PROVISIONAL.dblInvoiceTotal, 0)
-	AND ARI.ysnPosted = 1
-
-	WHILE EXISTS(SELECT TOP 1 1 FROM @FinalInvoicesWithCreditMemo)
-	BEGIN
-		DECLARE @intFinalInvoiceIdWithCreditMemo	INT = NULL
-			  , @strInvoiceNumber					NVARCHAR(50)
-			  , @InvoiceEntries						InvoiceIntegrationStagingTable
-			  , @LineItemTaxEntries					LineItemTaxDetailStagingTable
-
-		SELECT TOP 1 @intFinalInvoiceIdWithCreditMemo = intInvoiceId, @strInvoiceNumber = strInvoiceNumber
-		FROM @FinalInvoicesWithCreditMemo
-
-		INSERT INTO @InvoiceEntries (
-			[strTransactionType]
-			, [strType]
-			, [strSourceTransaction]
-			, [intOriginalInvoiceId]
-			, [strSourceId]
-			, [intEntityCustomerId]
-			, [intCompanyLocationId]			
-			, [intCurrencyId]
-			, [intEntityId]
-			, [dtmDate]
-			, [dtmDueDate]
-			, [dtmShipDate]
-			, [dtmPostDate]
-			, [ysnPost]
-			, [ysnInventory]
-			, [strItemDescription]
-			, [dblQtyShipped]
-			, [dblPrice]
-			, [intTaxGroupId]
-			, [ysnRecomputeTax]
-		)
-		SELECT [strTransactionType]			= 'Credit Memo' 
-				, [strType]					= 'Standard'
-				, [strSourceTransaction]	= 'Direct'
-				, [intOriginalInvoiceId]	= @intFinalInvoiceIdWithCreditMemo
-				, [strSourceId]				= I.strInvoiceNumber
-				, [intEntityCustomerId]		= I.intEntityCustomerId
-				, [intCompanyLocationId]	= I.intCompanyLocationId			 
-				, [intCurrencyId]			= I.intCurrencyId
-				, [intEntityId]				= @UserId
-				, [dtmDate]					= I.dtmDate
-				, [dtmDueDate]				= I.dtmDate
-				, [dtmShipDate]				= I.dtmDate
-				, [dtmPostDate]				= I.dtmDate
-				, [ysnPost]					= 0
-				, [ysnInventory]			= 0
-				, [strItemDescription]		= 'Credit Memo for ' + @strInvoiceNumber
-				, [dblQtyShipped]			= 1
-				, [dblPrice]				= ISNULL(I.dblProvisionalAmount, 0) - ISNULL(I.dblInvoiceTotal, 0)
-				, [intTaxGroupId]			= NULL
-				, [ysnRecomputeTax]			= 0
-		FROM tblARInvoice I
-		WHERE intInvoiceId = @intFinalInvoiceIdWithCreditMemo
-
-		EXEC dbo.uspARProcessInvoices @InvoiceEntries		= @InvoiceEntries
-									, @LineItemTaxEntries	= @LineItemTaxEntries
-									, @UserId				= 1
-									, @GroupingOption		= 0
-
-		DELETE FROM @FinalInvoicesWithCreditMemo WHERE intInvoiceId = @intFinalInvoiceIdWithCreditMemo
-	END
-
-	--CREATE OVERPAYMENT FOR FINAL INVOICE
-	DECLARE @FinalInvoicesWithOverpayment AS TABLE (
-		 intInvoiceId			INT
-		, intEntityCustomerId	INT
-		, intCompanyLocationId	INT
-		, intCurrencyId			INT
-		, dtmDatePaid			DATETIME
-		, intPaymentMethodId	INT
-		, strPaymentInfo		NVARCHAR(50)
-		, dblAmountPaid			DECIMAL(18, 6)
-		, intAccountId			INT
-	)
-
-	INSERT INTO @FinalInvoicesWithOverpayment
-	SELECT intInvoiceId				= ARI.intInvoiceId
-			,intEntityCustomerId	= ARI.intEntityCustomerId
-			,intCompanyLocationId	= ARI.intCompanyLocationId
-			,intCurrencyId			= ARI.intCurrencyId
-			,dtmDatePaid			= ARI.dtmDate
-			,intPaymentMethodId		= (SELECT TOP 1 intPaymentMethodID FROM tblSMPaymentMethod WHERE strPaymentMethod = 'Prepay')
-			,strPaymentInfo			= ARI.strPaymentInfo
-			,dblAmountPaid			= (CASE WHEN ARI.ysnExcludeFromPayment = 0 THEN PROVISIONAL.dblPayment ELSE ARI.dblProvisionalAmount END) - ARI.dblInvoiceTotal
-			,intInvoiceAccountId	= ARI.intAccountId
-	FROM #ARPostInvoiceHeader PID
-	INNER JOIN (
-		SELECT intInvoiceId
-			, intEntityCustomerId
-			, intCompanyLocationId
-			, intCurrencyId
-			, dtmDate
-			, strPaymentInfo
-			, dblInvoiceTotal
-			, dblProvisionalAmount
-			, intAccountId
-			, dblPayment
-			, intOriginalInvoiceId
-			, intSourceId
-			, ysnPosted
-			, ysnExcludeFromPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)) ARI  ON ARI.intInvoiceId = PID.intInvoiceId
-	INNER JOIN (
-		SELECT intInvoiceId, dblInvoiceTotal, dblPayment
-		FROM dbo.tblARInvoice WITH (NOLOCK)
-	) PROVISIONAL ON PROVISIONAL.intInvoiceId = ARI.intOriginalInvoiceId
-	INNER JOIN tblSMCompanyLocation CL ON ARI.intCompanyLocationId = CL.intCompanyLocationId
-	INNER JOIN tblARCustomer C ON ARI.intEntityCustomerId = C.intEntityId
-	WHERE ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0
-	AND ARI.dblInvoiceTotal < ISNULL(PROVISIONAL.dblPayment, 0)
-	AND ARI.ysnPosted = 1
-
-	WHILE EXISTS(SELECT TOP 1 1 FROM @FinalInvoicesWithOverpayment)
-	BEGIN
-		DECLARE @intFinalInvoiceIdWithOverpayment	INT = NULL
-				, @intEntityCustomerId		INT
-				, @intCompanyLocationId		INT
-				, @intCurrencyId			INT
-				, @dtmDatePaid				DATETIME
-				, @intPaymentMethodId		INT
-				, @strPaymentInfo			NVARCHAR(50)
-				, @dblAmountPaid			DECIMAL(18, 6)
-				, @intAccountId				INT
-				, @intPaymentId				INT
-
-		SELECT TOP 1 
-				@intFinalInvoiceIdWithOverpayment = intInvoiceId
-				,@intEntityCustomerId	= intEntityCustomerId
-				,@intCompanyLocationId	= intCompanyLocationId
-				,@intCurrencyId			= intCurrencyId
-				,@dtmDatePaid			= dtmDatePaid
-				,@intPaymentMethodId	= intPaymentMethodId
-				,@strPaymentInfo		= strPaymentInfo
-				,@dblAmountPaid			= dblAmountPaid
-				,@intAccountId			= intAccountId
-		FROM @FinalInvoicesWithOverpayment
-
-		EXEC dbo.uspARCreateCustomerPayment
-			@EntityCustomerId		= @intEntityCustomerId
-			,@CompanyLocationId		= @intCompanyLocationId
-			,@CurrencyId			= @intCurrencyId
-			,@DatePaid				= @dtmDatePaid
-			,@AccountId				= @intAccountId
-			,@AmountPaid			= @dblAmountPaid
-			,@PaymentMethodId		= @intPaymentMethodId
-			,@EntityId				= 1 
-			,@AllowOverpayment		= 1	
-			,@AllowPrepayment		= 1	
-			,@RaiseError			= 1
-			,@NewPaymentId			= @intPaymentId OUT
-
-		EXEC uspARPostPayment @post = 1, @param = @intPaymentId, @raiseError = 1, @ysnForFinalInvoice = 1
-
-		UPDATE tblARInvoice
-		SET 
-			  dblAmountDue = dblInvoiceSubtotal
-			, dblBaseAmountDue = dblBaseInvoiceSubtotal
-			, dblInvoiceTotal = dblInvoiceSubtotal
-			, dblBaseInvoiceTotal = dblBaseInvoiceSubtotal
-		WHERE intPaymentId = @intPaymentId
-
-		DELETE FROM @FinalInvoicesWithOverpayment WHERE intInvoiceId = @intFinalInvoiceIdWithOverpayment
 	END
 
 	--CREATE PAYMENT FOR PREPAIDS/CREDIT MEMO TAB
@@ -646,7 +456,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) THEN ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblPayment, @ZeroDecimal)
@@ -658,7 +468,7 @@ BEGIN
 												CASE WHEN ARI.intSourceId = 2 AND ISNULL(ARI.intOriginalInvoiceId, 0) > 0 
 												THEN 
 													CASE WHEN PID.ysnExcludeInvoiceFromPayment = 1
-													THEN CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) >= ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal) ELSE @ZeroDecimal END
+													THEN ABS(ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBaseProvisionalAmount, @ZeroDecimal))
 													ELSE CASE WHEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) > ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) THEN ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE @ZeroDecimal END
 													END
 												ELSE ISNULL(ARI.dblBaseInvoiceTotal, @ZeroDecimal) - ISNULL(ARI.dblBasePayment, @ZeroDecimal)
@@ -673,7 +483,6 @@ BEGIN
 		, ARI.dblPayment				= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblPayment, @ZeroDecimal) END
 		, ARI.dblBasePayment			= CASE WHEN ARI.strTransactionType = 'Cash' THEN @ZeroDecimal ELSE ISNULL(ARI.dblBasePayment, @ZeroDecimal) END
 		, ARI.dtmPostDate				= CAST(ISNULL(ARI.dtmPostDate, ARI.dtmDate) AS DATE)
-		, ARI.ysnExcludeFromPayment		= 0
 		, ARI.intConcurrencyId			= ISNULL(ARI.intConcurrencyId,0) + 1
 		, ARI.intPeriodId				= NULL
 	FROM #ARPostInvoiceHeader PID
