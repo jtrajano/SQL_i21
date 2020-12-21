@@ -1488,6 +1488,7 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pick Containers' and strModule = 'Logistics')
+	
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 153
 			,[strTransactionType]	= N'Container ID'
@@ -1497,15 +1498,17 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Container ID' and strModule = 'Logistics')
-	UNION ALL
-	SELECT	[intStartingNumberId]	= 154
-			,[strTransactionType]	= N'Payable Batch'
-			,[strPrefix]			= N'BPAY-'
-			,[intNumber]			= 1
-			,[strModule]			= 'Accounts Payable'
-			,[ysnEnable]			= 1
-			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable Batch' and strModule = 'Accounts Payable')
+	
+	-- UNION ALL
+	-- SELECT	[intStartingNumberId]	= 154
+	-- 		,[strTransactionType]	= N'Payable Batch'
+	-- 		,[strPrefix]			= N'BPAY-'
+	-- 		,[intNumber]			= 1
+	-- 		,[strModule]			= 'Accounts Payable'
+	-- 		,[ysnEnable]			= 1
+	-- 		,[intConcurrencyId]		= 1
+	-- WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Payable Batch' and strModule = 'Accounts Payable')
+	
 	UNION ALL
 	SELECT	[intStartingNumberId]	= 155	
 			,[strTransactionType]	= N'Receipt Item and Charge Update'
