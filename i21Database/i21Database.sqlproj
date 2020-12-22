@@ -7808,7 +7808,6 @@
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
-    <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8049,7 +8048,7 @@
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
-    <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
+    <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />    
     <Build Include="dbo\Stored Procedures\uspARPopulateContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
   </ItemGroup>
