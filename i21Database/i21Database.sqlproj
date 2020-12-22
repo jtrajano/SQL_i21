@@ -8891,6 +8891,7 @@
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
