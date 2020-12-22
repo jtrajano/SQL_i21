@@ -559,6 +559,16 @@ AND NOT EXISTS (
     WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
 )
 
+
+GO
+
+
+
+
+
+
+
+
 --Vouchers for receipt items
 union all
 SELECT
