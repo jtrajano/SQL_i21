@@ -1386,7 +1386,7 @@ BEGIN TRY
 								from
 									tblARInvoiceDetail ARD
 								WHERE
-									ARD.intContractDetailId = CD.intContractDetailId
+									ARD.intContractDetailId = @intContractDetailId
 									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
 									and ARD.intInventoryShipmentChargeId is null
 									and isnull(ARD.ysnReturned,0) = 1
