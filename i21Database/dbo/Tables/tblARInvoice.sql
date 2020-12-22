@@ -235,6 +235,9 @@ GO
 CREATE INDEX [IX_tblARInvoice_strTransactionType] ON [dbo].[tblARInvoice] ([strTransactionType] ASC)
 GO
 
+CREATE INDEX [IX_tblARInvoice_ysnPosted] ON [dbo].[tblARInvoice] ([ysnPosted] ASC)
+GO
+
 CREATE INDEX [IX_tblARInvoice_intOriginalInvoiceId] ON [dbo].[tblARInvoice] ([intOriginalInvoiceId] ASC)
 GO
 
