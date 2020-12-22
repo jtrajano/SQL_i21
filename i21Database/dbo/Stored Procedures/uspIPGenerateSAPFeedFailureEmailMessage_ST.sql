@@ -7,6 +7,9 @@ BEGIN TRY
 		,@strDetail NVARCHAR(MAX) = ''
 		,@strMessage NVARCHAR(MAX)
 		,@intDuration INT = 30
+	DECLARE @intLotErrorCount INT
+		,@intLotSuccessCount INT
+		,@strSummaryDetail NVARCHAR(MAX) = ''
 
 	SELECT @intDuration = ISNULL(strValue, 30)
 	FROM tblIPSAPIDOCTag
@@ -44,6 +47,7 @@ BEGIN TRY
 					</style>'
 	SET @strHtml = '<html>
 					<body>
+						@summary
 
 					<table class="GeneratedTable">
 						<tbody>
@@ -125,15 +129,29 @@ BEGIN TRY
 
 	IF @strMessageType = 'Stock'
 	BEGIN
-		SET @strHeader = '<tr>
-						<th>&nbsp;Transaction</th>
-						<th>&nbsp;Lot No.</th>
-						<th>&nbsp;Item No.</th>
-						<th>&nbsp;Storage Unit</th>
-						<th>&nbsp;Book</th>
-						<th>&nbsp;Sub Book</th>
-						<th>&nbsp;Message</th>
-					</tr>'
+		SELECT @intLotErrorCount = 0
+			,@intLotSuccessCount = 0
+
+		SELECT @intLotErrorCount = COUNT(1)
+		FROM tblIPLotError WITH (NOLOCK)
+		WHERE ysnMailSent = 0
+
+		SELECT @intLotSuccessCount = COUNT(1)
+		FROM tblIPLotArchive WITH (NOLOCK)
+		WHERE ysnMailSent = 0
+
+		IF @intLotErrorCount > 0
+			OR @intLotSuccessCount > 0
+		BEGIN
+			SET @strSummaryDetail = '<p><b>
+										Total Lots: ' + CONVERT(VARCHAR, (@intLotSuccessCount + @intLotErrorCount)) + '</br>
+										Processed Lots: ' + CONVERT(VARCHAR, @intLotSuccessCount) + '</br>
+										Failed Lots: ' + CONVERT(VARCHAR, @intLotErrorCount) + '</b></p>'
+			
+			UPDATE tblIPLotArchive
+			SET ysnMailSent = 1
+			WHERE ysnMailSent = 0
+		END
 
 		IF EXISTS (
 			SELECT 1
@@ -141,6 +159,16 @@ BEGIN TRY
 			WHERE ysnMailSent = 0
 			)
 		BEGIN
+			SET @strHeader = '<tr>
+				<th>&nbsp;Transaction</th>
+				<th>&nbsp;Lot No.</th>
+				<th>&nbsp;Item No.</th>
+				<th>&nbsp;Storage Unit</th>
+				<th>&nbsp;Book</th>
+				<th>&nbsp;Sub Book</th>
+				<th>&nbsp;Message</th>
+			</tr>'
+
 			SELECT @strDetail = @strDetail + 
 			'<tr>
 				<td>&nbsp;' + 'Stock' + '</td>' + 
@@ -259,12 +287,16 @@ BEGIN
 	END
 END
 
-	SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
-	SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
+	SET @strHtml = REPLACE(@strHtml, '@header', ISNULL(@strHeader, ''))
+	SET @strHtml = REPLACE(@strHtml, '@detail', ISNULL(@strDetail, ''))
+	SET @strHtml = REPLACE(@strHtml, '@summary', ISNULL(@strSummaryDetail, ''))
 	SET @strMessage = @strStyle + @strHtml
 
 	IF ISNULL(@strDetail, '') = ''
 		SET @strMessage = ''
+	
+	IF ISNULL(@strSummaryDetail, '') <> ''
+		SET @strMessage = @strStyle + @strHtml
 
 	SELECT @strMessage AS strMessage
 END TRY
