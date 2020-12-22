@@ -7792,6 +7792,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8030,7 +8031,7 @@
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
-    <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />    
+    <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
     <Build Include="dbo\Stored Procedures\uspARPopulateContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
   </ItemGroup>
