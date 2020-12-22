@@ -8294,6 +8294,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostCostAdjustmentSimplifiedAvg.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
