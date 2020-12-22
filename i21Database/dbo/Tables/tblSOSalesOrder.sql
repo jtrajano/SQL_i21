@@ -99,6 +99,9 @@
 );
 GO
 
+CREATE INDEX [IX_tblSOSalesOrder_ysnProcessed] ON [dbo].[tblSOSalesOrder] ([ysnProcessed] ASC)
+GO
+
 CREATE TRIGGER trgSalesOrderNumber
 ON dbo.tblSOSalesOrder
 AFTER INSERT

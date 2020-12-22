@@ -90,3 +90,7 @@
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblSOSalesOrderDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId])
 );
+GO
+
+CREATE INDEX [IX_tblSOSalesOrderDetail_intSalesOrderId] ON [dbo].[tblSOSalesOrderDetail] ([intSalesOrderId] ASC)
+GO
