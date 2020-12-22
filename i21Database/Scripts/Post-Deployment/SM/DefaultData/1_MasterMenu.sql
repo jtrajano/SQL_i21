@@ -12,7 +12,7 @@ GO
 
 	
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Update Item Discontinued' AND strModuleName = 'Store' AND strCommand = 'Store.view.UpdateItemDiscontinued')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND strCommand = 'Agronomy.view.WorkOrder?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -6573,6 +6573,45 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Export Se
 	VALUES (N'Export Setup', N'Mobile Billing', @MobileBillingMaintenanceParentMenuId, N'Export Setup', N'Activity', N'Screen', N'EnergyTrac.view.ExportFilter', N'small-menu-activity', 0, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET strCommand = N'EnergyTrac.view.ExportFilter' WHERE strMenuName = 'Export Setup' AND strModuleName = 'Mobile Billing' AND intParentMenuID = @MobileBillingMaintenanceParentMenuId
+
+/* AGRONOMY */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy' AND strModuleName = 'Agronomy' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Agronomy', N'Agronomy', 0, N'Agronomy', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 35, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 35 WHERE strMenuName = 'Agronomy' AND strModuleName = 'Agronomy' AND intParentMenuID = 0
+
+DECLARE @AgronomyParentMenuId INT
+SELECT @AgronomyParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy' AND strModuleName = 'Agronomy' AND intParentMenuID = 0
+
+/* CATEGORY FOLDERS */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Agronomy', @AgronomyParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Activities' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyParentMenuId
+
+DECLARE @AgronomyActivitiesParentMenuId INT
+SELECT @AgronomyActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Agronomy', @AgronomyParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 2 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyParentMenuId
+
+DECLARE @AgronomyMaintenanceParentMenuId INT
+SELECT @AgronomyMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyParentMenuId
+
+/* ADD TO RESPECTIVE CATEGORY */ 
+UPDATE tblSMMasterMenu SET intParentMenuID = @AgronomyActivitiesParentMenuId WHERE intParentMenuID =  @AgronomyParentMenuId AND strCategory = 'Activity'
+UPDATE tblSMMasterMenu SET intParentMenuID = @AgronomyMaintenanceParentMenuId WHERE intParentMenuID =  @AgronomyParentMenuId AND strCategory = 'Maintenance'
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND intParentMenuID = @MobileBillingActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Work Order', N'Agronomy', @AgronomyActivitiesParentMenuId, N'Work Order', N'Activity', N'Screen', N'Agronomy.view.WorkOrder?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Agronomy.view.WorkOrder?showSearch=true' WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyActivitiesParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
