@@ -8877,6 +8877,7 @@
     <Build Include="dbo\Views\vyuIPLogView.sql" />
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
