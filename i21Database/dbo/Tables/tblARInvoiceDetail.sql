@@ -198,3 +198,6 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intOriginalInvoiceDetailId]
 	ON [dbo].[tblARInvoiceDetail] ([intOriginalInvoiceDetailId])
 GO
+
+CREATE INDEX [IX_tblARInvoiceDetail_[intInvoiceId] ON [dbo].[tblARInvoice] ([intInvoiceId] ASC)
+GO
