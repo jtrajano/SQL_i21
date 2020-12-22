@@ -11,4 +11,5 @@ JOIN tblSMScreen S ON S.intScreenId = A.intScreenId
 JOIN tblEMEntity E ON E.intEntityId = A.intSubmittedById
 JOIN tblSMUserSecurity US ON US.intEntityId = E.intEntityId
 WHERE S.strNamespace = 'ContractManagement.view.Contract'
+	AND A.strStatus = 'Submitted'
 
