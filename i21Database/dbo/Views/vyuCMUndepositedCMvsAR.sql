@@ -14,12 +14,21 @@ ARPosting AS
       ysnPosted = AR.ysnPosted,
       GL.intGLDetailId,
       GL.strCode,
+      GL.strTransactionType,
+      GL.strTransactionForm,
+      GL.strModuleName,
+      GL.intTransactionId,
       ysnValidUndepGLAccount = ISNULL(CL.ysnValidUndepGLAccount, 0)
     FROM vyuARPostedTransactionForUndeposited AR      
     LEFT join tblCMUndepositedFund CMUF on CMUF.strSourceTransactionId = AR.strRecordNumber   
 
     OUTER apply (      
-      SELECT TOP 1 dtmDate,intAccountId, intGLDetailId, (dblDebit- dblCredit) dblAmount, strAccountId, strCode FROM vyuGLDetail where       
+      SELECT TOP 1 dtmDate,intAccountId, intGLDetailId, (dblDebit- dblCredit) dblAmount, strAccountId, strCode,
+		  strTransactionType,
+		  strTransactionForm,
+		  strModuleName,
+		  intTransactionId
+	  FROM vyuGLDetail where       
       strTransactionId = AR.strRecordNumber AND  ysnIsUnposted = 0      
       AND intAccountId =  AR.intAccountId --  in( SELECT intAccountId FROM vyuGLAccountDetail where strAccountCategory = 'Undeposited Funds')  
     )GL      
@@ -39,12 +48,27 @@ CMPosting AS(
       GL.dtmDate,
       GL.intGLDetailId,
       GL.strCode,
+      GL.strTransactionType,
+      GL.strTransactionForm,
+      GL.strModuleName,
+      GL.intTransactionId,
       ysnValidUndepGLAccount = ISNULL(CL.ysnValidUndepGLAccount, 0)
     FROM tblCMBankTransactionDetail CMD      
     LEFT join tblCMUndepositedFund CMUF on CMUF.intUndepositedFundId = CMD.intUndepositedFundId 
     LEFT join tblCMBankTransaction CM on CM.intTransactionId = CMD.intTransactionId     
     OUTER APPLY( 
-      SELECT dtmDate,intAccountId, strAccountId, intGLDetailId, strCode FROM vyuGLDetail WHERE strTransactionId = CM.strTransactionId   
+      SELECT 
+		  dtmDate,
+		  intAccountId, 
+		  strAccountId, 
+		  intGLDetailId, 
+		  strCode, 
+		  strTransactionType,
+		  strTransactionForm,
+		  strModuleName,
+		  intTransactionId
+	  
+	  FROM vyuGLDetail WHERE strTransactionId = CM.strTransactionId   
       AND (dblCredit-dblDebit) = ((CMD.dblCredit-CMD.dblDebit) * ISNULL(CMD.dblExchangeRate,1)) 
       AND ysnIsUnposted = 0      
       AND intAccountId = CMD.intGLAccountId
@@ -75,8 +99,18 @@ Query AS(
       ysnARInvalidGLAccount = CASE WHEN AR.ysnValidUndepGLAccount = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,
       AR.intBankDepositId,  
       AR.intUndepositedFundId,
-      AR.intGLDetailId ARGLDetailId,
-      CM.intGLDetailId CMGLDetailId,
+	    AR.intGLDetailId intARGLDetailId,
+      CM.intGLDetailId intCMGLDetailId,
+      AR.strTransactionType strARTransactionType,
+      AR.strTransactionForm strARTransactionForm,
+      AR.strModuleName strARModuleName,
+      AR.intTransactionId intARTransactionId,
+      AR.strCode strARCode,
+      CM.strTransactionType strCMTransactionType,
+      CM.strTransactionForm strCMTransactionForm,
+      CM.strModuleName strCMModuleName,
+      CM.intTransactionId intCMTransactionId,
+      CM.strCode strCMCode,
       ISNULL(AR.strCode, CM.strCode) strCode
     FROM ARPosting AR join      
         PartitionCMPosting CM on CM.intUndepositedFundId = AR.intUndepositedFundId   
@@ -101,20 +135,30 @@ Query AS(
       ysnARInvalidGLAccount = CAST(0 AS BIT),
       intBankDepositId = NULL,  
       intUndepositedFundId = NULL,
-      ARGLDetailId = GL.intGLDetailId,
-      CMGLDetailId = NULL,
+      GL.intGLDetailId intARGLDetailId,
+      GL.intGLDetailId intCMGLDetailId,
+      GL.strTransactionType strARTransactionType,
+      GL.strTransactionForm strARTransactionForm,
+      GL.strModuleName strARModuleName,
+      GL.intTransactionId intARTransactionId,
+      GL.strCode strARCode,
+      GL.strTransactionType strCMTransactionType,
+      GL.strTransactionForm strCMTransactionForm,
+      GL.strModuleName strCMModuleName,
+      GL.intTransactionId intCMTransactionId,
+      GL.strCode strCMCode,
       strCode
     FROM vyuGLDetail GL
     JOIN tblSMCompanyLocation CL ON CL.intUndepositedFundsId = GL.intAccountId
-    WHERE strModuleName NOT IN('CASh Management', 'Accounts Receivable', 'Receive Payments')
+    WHERE strModuleName NOT IN('Cash Management', 'Accounts Receivable', 'Receive Payments')
     AND ysnIsUnposted = 0
 )  
 SELECT CAST(ROW_NUMBER() over(order by strRecordNumber) AS int) intRowId,     
 strStatus =  CASE 
   WHEN ysnARCMEntry = 0 THEN 'Non-CM/AR GL Entry'    
-  WHEN ISNULL(Q.ysnARPosted,0) = 1 AND Q.intUndepositedFundId IS NULL THEN 'MISsing in Undeposited'       
+  WHEN ISNULL(Q.ysnARPosted,0) = 1 AND Q.intUndepositedFundId IS NULL THEN 'Missing in Undeposited'       
   WHEN ISNULL(Q.ysnARPosted,0) = 0 AND ISNULL(Q.ysnCMPosted , 0) = 0 AND Q.intUndepositedFundId IS NOT null THEN 'Unposted AR/CM in Undeposited'   
-  WHEN Q.dblARAmount <> Q.dblCMAmount  AND ISNULL(Q.ysnARPosted,0) = 1 AND ISNULL(Q.ysnCMPosted,0) =1 THEN 'MISmatched Amount'  
+  WHEN Q.dblARAmount <> Q.dblCMAmount  AND ISNULL(Q.ysnARPosted,0) = 1 AND ISNULL(Q.ysnCMPosted,0) =1 THEN 'Mismatched Amount'  
   WHEN Q.ysnARGLEntryError = 1  THEN 'AR GL Entry Error'  
   WHEN Q.ysnCMGLEntryError =1 THEN 'CM GL Entry Error'  
   WHEN ysnGLMismatch = 1 THEN 'GL Account Matching Error' 
