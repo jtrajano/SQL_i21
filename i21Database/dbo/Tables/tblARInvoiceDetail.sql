@@ -185,3 +185,6 @@ CREATE NONCLUSTERED INDEX [IX_tblARInvoiceDetail_intInventoryShipmentChargeId]
 	ON [dbo].[tblARInvoiceDetail] ([intInventoryShipmentChargeId])
 	INCLUDE ([intInvoiceId])
 GO
+
+CREATE INDEX [IX_tblARInvoiceDetail_[intInvoiceId] ON [dbo].[tblARInvoice] ([intInvoiceId] ASC)
+GO
