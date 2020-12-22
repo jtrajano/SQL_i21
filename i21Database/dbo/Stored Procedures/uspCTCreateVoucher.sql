@@ -151,6 +151,7 @@ begin try
 
 	declare 
 		@intVoucherPayableId int
+		,@previous_intVoucherPayableId INT
 		,@intContractTypeId int
 		,@intPriceFixationId int
 		,@intPriceFixationDetailId int
@@ -186,6 +187,7 @@ begin try
 			@voucherPayables a
 		where
 			isnull(a.intInventoryReceiptChargeId,0) = 0;
+			and a.intContractDetailId is not null;
 
 		--Loop through Payables data
 		select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0;
@@ -471,8 +473,9 @@ begin try
 			end
 						
 			ReciptNextLoop:
+			SELECT @previous_intVoucherPayableId = @intVoucherPayableId
 			select @intVoucherPayableId = null;
-			select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0 and intVoucherPayableId > @intVoucherPayableId;
+			select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0 and intVoucherPayableId > @previous_intVoucherPayableId;
 		end
 		
 		--add the non-contract items (charges, overage/spot....)
