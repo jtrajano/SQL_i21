@@ -8905,6 +8905,7 @@
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
