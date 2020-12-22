@@ -154,3 +154,4 @@ FROM vyuICGetItemStock stock
 	) novref
 	LEFT JOIN tblICItemUOM upc ON upc.intItemUOMId = stock.intReceiveUOMId
 	LEFT JOIN tblICItemUOM upcs ON upcs.intItemUOMId = stock.intStockUOMId
+WHERE stock.ysnActive = 1

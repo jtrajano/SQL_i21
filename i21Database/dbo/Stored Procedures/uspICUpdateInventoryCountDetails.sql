@@ -346,6 +346,7 @@ BEGIN
 		AND Item.strType = 'Inventory'
 		AND (il.intCountGroupId = @intCountGroupId OR ISNULL(@intCountGroupId, 0) = 0)
 		AND Item.strStatus NOT IN ('Discontinued')
+		AND il.ysnActive = 1
 END
 
 ELSE IF @strCountBy = 'Pack'
@@ -541,6 +542,7 @@ BEGIN
 			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 			OR (lastTransaction.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
 		)
+		AND il.ysnActive = 1
 END
 
 ELSE
@@ -777,4 +779,5 @@ BEGIN
 			(stock.intStorageLocationId = storageUnitFilter.intStorageUnitId OR ISNULL(@StorageUnitFilterCount, 0) = 0)
 			OR (hasExistingStock.intItemId IS NULL AND il.intStorageLocationId = storageUnitFilter.intStorageUnitId)		
 		)
+		AND il.ysnActive = 1
 END

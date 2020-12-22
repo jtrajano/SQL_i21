@@ -43,6 +43,7 @@ CREATE TABLE #tmp (
 	, ysnPromotionalItem BIT NULL
 	, ysnStorageUnitRequired BIT NULL
 	, ysnDepositRequired BIT NULL
+	, ysnActive BIT NULL
 	, intBottleDepositNo INT NULL
 	, ysnSaleable BIT NULL
 	, ysnQuantityRequired BIT NULL
@@ -101,6 +102,7 @@ INSERT INTO #tmp (
 	, ysnPromotionalItem
 	, ysnStorageUnitRequired
 	, ysnDepositRequired
+	, ysnActive
 	, intBottleDepositNo
 	, ysnSaleable
 	, ysnQuantityRequired
@@ -158,6 +160,7 @@ SElECT
 	, ysnPromotionalItem		= s.ysnPromotionalItem
 	, ysnStorageUnitRequired	= s.ysnStorageUnitRequired
 	, ysnDepositRequired        = s.ysnDepositRequired
+	, ysnActive        			= s.ysnActive
 	, intBottleDepositNo        = s.intBottleDepositNo
 	, ysnSaleable               = s.ysnSaleable
 	, ysnQuantityRequired       = s.ysnQuantityRequired
@@ -251,6 +254,7 @@ USING
 		, ysnPromotionalItem		
 		, ysnStorageUnitRequired	
 		, ysnDepositRequired        
+		, ysnActive        
 		, intBottleDepositNo        
 		, ysnSaleable               
 		, ysnQuantityRequired       
@@ -311,6 +315,7 @@ UPDATE SET
 	, ysnPromotionalItem = source.ysnPromotionalItem
 	, ysnStorageUnitRequired = source.ysnStorageUnitRequired
 	, ysnDepositRequired = source.ysnDepositRequired
+	, ysnActive = source.ysnActive
 	, intBottleDepositNo = source.intBottleDepositNo
 	, ysnSaleable = source.ysnSaleable
 	, ysnQuantityRequired = source.ysnQuantityRequired
@@ -369,6 +374,7 @@ INSERT
 	, ysnPromotionalItem		
 	, ysnStorageUnitRequired	
 	, ysnDepositRequired        
+	, ysnActive        
 	, intBottleDepositNo        
 	, ysnSaleable               
 	, ysnQuantityRequired       
@@ -428,6 +434,7 @@ VALUES
 	, ysnPromotionalItem		
 	, ysnStorageUnitRequired	
 	, ysnDepositRequired        
+	, ysnActive        
 	, intBottleDepositNo        
 	, ysnSaleable               
 	, ysnQuantityRequired       

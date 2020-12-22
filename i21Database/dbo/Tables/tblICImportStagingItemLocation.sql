@@ -23,6 +23,7 @@ CREATE TABLE [dbo].[tblICImportStagingItemLocation]
     [ysnTaxFlag2] BIT NULL DEFAULT(0),
     [ysnTaxFlag3] BIT NULL DEFAULT(0),
     [ysnTaxFlag4] BIT NULL DEFAULT(0),
+    [ysnActive] BIT NULL,
     [ysnPromotionalItem] BIT NULL DEFAULT(0),
     [ysnDepositRequired] BIT NULL DEFAULT(0),
     [strDepositPLU] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL,

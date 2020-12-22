@@ -17,6 +17,7 @@ SELECT
 	ItemLocation.ysnStorageUnitRequired,
 	ItemLocation.intItemLocationId,
 	ItemLocation.intSubLocationId,
+	ItemLocation.ysnActive,
 	Item.intCategoryId,
 	Category.strCategoryCode,
 	Category.ysnRetailValuation,

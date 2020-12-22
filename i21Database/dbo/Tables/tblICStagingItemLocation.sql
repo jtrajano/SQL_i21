@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[tblICStagingItemLocation] (
 	, strLocationNo NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, strCostingMethod NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	, ysnAllowNegativeInventory BIT NULL
+	, ysnActive BIT NULL
 	, intAllowZeroCostTypeId INT NULL -- 1 OR NULL = No, 2 = Yes, 3 = Yes but warn user
 	, ysnRequireStorageUnit BIT NULL
 	, dblReorderPoint NUMERIC(18, 6) NULL

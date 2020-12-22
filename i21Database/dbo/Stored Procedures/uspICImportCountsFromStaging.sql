@@ -83,6 +83,7 @@ BEGIN
 	WHERE sd.strCountNo = @strTempCountNo
 		AND ((item.strLotTracking = 'No' AND @ysnCountByLots = 0) OR (item.strLotTracking <> 'No' AND @ysnCountByLots = 1))
 		AND sd.guiIdentifier = @identifier
+		AND il.ysnActive = 1
 
 	UPDATE tblICInventoryCount
 	SET strCountNo = @strCountNo

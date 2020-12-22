@@ -443,7 +443,8 @@ BEGIN
 		ysnCountedDaily,
 		intSort,
 		ysnStorageUnitRequired,
-		intCostAdjustmentType
+		intCostAdjustmentType,
+		ysnActive
 	)
 	SELECT @NewItemId,
 		intLocationId,
@@ -506,7 +507,8 @@ BEGIN
 		ysnCountedDaily,
 		intSort,
 		ysnStorageUnitRequired,
-		intCostAdjustmentType
+		intCostAdjustmentType,
+		ysnActive
 	FROM tblICItemLocation
 	WHERE intItemId = @ItemId
 	--------------------------------------------
