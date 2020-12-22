@@ -438,6 +438,16 @@ AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 
+
+GO
+
+
+
+
+
+
+
+
 --Vouchers for receipt items
 union all
 SELECT
