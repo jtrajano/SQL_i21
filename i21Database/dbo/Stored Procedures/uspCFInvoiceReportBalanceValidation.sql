@@ -12,8 +12,7 @@ BEGIN
 	
 	DECLARE @tblMainQuery TABLE 
 	(
-		 intRowId INT NULL
-		,intEntityCustomerId INT NULL
+		 intEntityCustomerId INT NULL
 		,strCustomerNumber	 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 		,strCustomerName	 NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL
 		,dtmDate DATETIME NULL
@@ -27,8 +26,7 @@ BEGIN
 
 	SET @sqlString = '
 	SELECT  
-	 ROW_NUMBER() OVER(PARTITION BY intEntityCustomerId ORDER BY intEntityCustomerId DESC) 
-	,intEntityCustomerId 
+	 intEntityCustomerId 
 	,strCustomerNumber	
 	,strCustomerName	
 	,dtmDate
@@ -46,8 +44,7 @@ BEGIN
 
 	INSERT INTO @tblMainQuery
 	(
-		 intRowId
-		,intEntityCustomerId 
+		 intEntityCustomerId 
 		,strCustomerNumber	
 		,strCustomerName	
 		,dtmDate
@@ -72,7 +69,7 @@ BEGIN
 		,strErrorType
 		,strTransactionId
 	)
-	SELECT  
+	SELECT 
 		 mainQuery.intEntityCustomerId
 		 ,strCustomerNumber	
 		 ,strCustomerName	
@@ -85,15 +82,16 @@ BEGIN
 		,'Running Balance <> AR'
 		,strInvoiceReportNumber
 	FROM (
-			
-			SELECT intEntityCustomerId, MAX(intRowId) as intLastRow
+			SELECT intEntityCustomerId , MAX(dtmDate) as dtmDate 
 			FROM @tblMainQuery
 			GROUP BY intEntityCustomerId
 		) as innerQuery
 	INNER JOIN @tblMainQuery as mainQuery
 	ON mainQuery.intEntityCustomerId = innerQuery.intEntityCustomerId
-	AND mainQuery.intRowId = innerQuery.intLastRow
+	AND mainQuery.dtmDate = innerQuery.dtmDate
 	AND dblCalcRunningBalance != dblTotalAR
 
 
 END
+
+
