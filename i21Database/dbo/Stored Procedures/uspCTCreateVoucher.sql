@@ -136,6 +136,7 @@ begin try
 		,dblQuantityToBill decimal(38,15)
 		,intContractDetailId int
 		,intInventoryReceiptItemId int
+		,intBillItemUOMId int
 	);
 
 	declare @availablePrice as table (
@@ -147,6 +148,7 @@ begin try
 		,dtmFixationDate datetime
 		,dblPriceQuantity numeric(18,6)
 		,intAvailablePriceLoad int
+		,intPriceItemUOMId int
 	);
 
 	declare 
@@ -165,6 +167,8 @@ begin try
 		,@intInventoryReceiptId int
 		,@ysnSuccessBillPosting bit
 		,@intId int
+		,@intPriceItemUOMId int
+		,@intBillItemUOMId int
 		;
 
 	declare @CreatedVoucher as table(
@@ -183,6 +187,7 @@ begin try
 			,dblQuantityToBill = a.dblQuantityToBill
 			,intContractDetailId = a.intContractDetailId
 			,intInventoryReceiptItemId = a.intInventoryReceiptItemId
+			,intBillItemUOMId = a.intQtyToBillUOMId
 		from
 			@voucherPayables a
 		where
@@ -199,6 +204,7 @@ begin try
 				,@dblQuantityToBill = dblQuantityToBill
 				,@intContractDetailId = intContractDetailId
 				,@intInventoryReceiptItemId = intInventoryReceiptItemId
+				,@intBillItemUOMId = intBillItemUOMId
 			from
 				@voucherPayablesDataTemp
 			where
@@ -227,10 +233,11 @@ begin try
 				,intPriceFixationId = intPriceFixationId  
 				,intPriceFixationDetailId = intPriceFixationDetailId  
 				,dblFinalPrice = dblFinalprice  
-				,dblAvailablePriceQuantity = dblAvailableQuantity  
+				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intBillItemUOMId,dblAvailableQuantity)--dblAvailableQuantity
 				,dtmFixationDate = dtmFixationDate  
 				,dblPriceQuantity = dblQuantity  
 				,intAvailablePriceLoad = intAvailableLoad  
+				,intPriceItemUOMId = intPriceItemUOMId
 			from  
 				vyuCTGetAvailablePriceForVoucher  
 			where  
@@ -251,6 +258,7 @@ begin try
 					,@dblPriceQuantity = dblPriceQuantity  
 					,@intAvailablePriceLoad = intAvailablePriceLoad  
 					,@intPriceFixationDetailId = intPriceFixationDetailId  
+					,@intPriceItemUOMId = intPriceItemUOMId
 				from  
 					@availablePrice  
 				where  
