@@ -33,26 +33,32 @@ from
 	join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
 	left join tblCTPriceFixationDetailAPAR ar on ar.intInvoiceDetailId = di.intInvoiceDetailId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
 where
-	isnull(di.ysnReturned,0) = 0
-	and pfd.dblCashPrice = di.dblPrice
+	pfd.dblCashPrice = di.dblPrice
+	--and isnull(di.ysnReturned,0) = 0
 )tbl
 where tbl.intPriceFixationDetailId is not null and tbl.intPriceFixationDetailAPARId is null
 
-exec ('disable trigger trgCTPriceFixationDetailAPARDelete on tblCTPriceFixationDetailAPAR');
+IF (OBJECT_ID(N'dbo.trgCTPriceFixationDetailAPARDelete') IS NOT NULL)
+BEGIN
+     exec ('disable trigger dbo.trgCTPriceFixationDetailAPARDelete on tblCTPriceFixationDetailAPAR');
+END
 
-IF not EXISTS
-	(
-		SELECT
-			1
-		FROM
-			sys.columns 
-		WHERE
-			Name = N'ysnFixedPriceAndInvoiceLink'
-			AND Object_ID = Object_ID(N'tblCTMiscellaneous')
-	)
-	BEGIN
-		exec('alter table tblCTMiscellaneous add ysnFixedPriceAndInvoiceLink bit not null default 0');
-	END
+IF OBJECT_ID(N'tblCTMiscellaneous') IS NOT NULL
+BEGIN
+	IF not EXISTS
+		(
+			SELECT
+				1
+			FROM
+				sys.columns 
+			WHERE
+				Name = N'ysnFixedPriceAndInvoiceLink'
+				AND Object_ID = Object_ID(N'tblCTMiscellaneous')
+		)
+		BEGIN
+			exec('alter table tblCTMiscellaneous add ysnFixedPriceAndInvoiceLink bit not null default 0');
+		END
+END
 
 IF OBJECT_ID(N'tempdb..#tmpB') IS NOT NULL
 BEGIN
@@ -65,7 +71,10 @@ BEGIN
 	exec('drop table #tmpA');
 END
 create table #tmpA (intValue int);
-exec('insert into #tmpA select top 1 1 from tblCTMiscellaneous where ysnFixedPriceAndInvoiceLink = 1')
+IF OBJECT_ID(N'tblCTMiscellaneous') IS NOT NULL
+BEGIN
+	exec('insert into #tmpA select top 1 1 from tblCTMiscellaneous where ysnFixedPriceAndInvoiceLink = 1');
+END
 
 if exists (select top 1 1 from #tmpA)
 begin
@@ -125,7 +134,6 @@ begin
 			,intBillDetailId
 			,intInvoiceId
 			,intInvoiceDetailId
-			,ysnMarkDelete
 			,intConcurrencyId
 		)
 		select
@@ -134,7 +142,6 @@ begin
 			,intBillDetailId = null
 			,intInvoiceId = @intInvoiceId
 			,intInvoiceDetailId = @intInvoiceDetailId
-			,ysnMarkDelete = null
 			,intConcurrencyId = 1
 			
 		insert into #tmpB select intPriceFixationDetailAPARId = SCOPE_IDENTITY();
@@ -153,9 +160,16 @@ begin
 	select @intInvoiceDetailId = min(intInvoiceDetailId) from @InvoiceDetail where intInvoiceDetailId > @intActiveInvoiceDetailId;
 end
 
-exec('enable trigger trgCTPriceFixationDetailAPARDelete on tblCTPriceFixationDetailAPAR');
+IF (OBJECT_ID(N'dbo.trgCTPriceFixationDetailAPARDelete') IS NOT NULL)
+BEGIN
+     exec('enable trigger dbo.trgCTPriceFixationDetailAPARDelete on tblCTPriceFixationDetailAPAR');
+END
 
-exec('update tblCTMiscellaneous set ysnFixedPriceAndInvoiceLink = 1');
+IF OBJECT_ID(N'tblCTMiscellaneous') IS NOT NULL
+BEGIN
+	exec('update tblCTMiscellaneous set ysnFixedPriceAndInvoiceLink = 1');
+END
+
 
 exec('Update tblCTPriceFixationDetailAPAR set ysnPreDeploymentFix = 1 where intPriceFixationDetailAPARId in (select intPriceFixationDetailAPARId from #tmpB)');
 
