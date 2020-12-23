@@ -5,10 +5,11 @@ SELECT
 	,A.strScreenName
 	,APTransaction.intTransactionId
 	,APTransaction.strTransactionNo
+	,APTransaction.strApprovalStatus
 FROM tblSMScreen A
 CROSS APPLY (
 	SELECT
-		B.strTransactionNo, B.intRecordId intTransactionId, B.intEntityId
+		B.strTransactionNo, B.intRecordId intTransactionId, B.intEntityId, B.strApprovalStatus
 	FROM tblSMTransaction B
 	WHERE A.intScreenId = B.intScreenId
 	AND (B.strApprovalStatus IS NOT NULL AND B.strApprovalStatus NOT IN ('No Need for Approval','Approved'))
