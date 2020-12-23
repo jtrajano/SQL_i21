@@ -51,6 +51,7 @@ ON (1=0)
 WHEN NOT MATCHED THEN
 INSERT
 (
+	intEntityId,
 	strVendorId,
 	strDescription,
 	strContact,
@@ -62,6 +63,7 @@ INSERT
 )
 VALUES
 (
+	intEntityId,
 	strVendorId,
 	strDescription,
 	strContact,
