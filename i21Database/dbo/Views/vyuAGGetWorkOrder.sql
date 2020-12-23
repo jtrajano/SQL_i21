@@ -23,6 +23,7 @@ AS
 	, ORDEREDBY.strName  AS strOrderedBy
 	, WO.intEntitySalesRepId
 	, ENTITY.strName AS strSalesPersonName
+	, WO.intSplitId
 	, SPLIT.strSplitNumber
 	, WO.strComments
 	,WO.strFarmDescription
