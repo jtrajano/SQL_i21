@@ -4474,6 +4474,7 @@
     <Build Include="dbo\Stored Procedures\uspETImportUpdateInvoiceDetailTaxById.sql" />
     <Build Include="dbo\Tables\tblICFOBPoint.sql" />
     <None Include="Scripts\Post-Deployment\IC\09_FOBPointTypes.sql" />
+    <None Include="Scripts\Post-Deployment\IC\27_ActivateItemLocations.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetItemInTransitLocation.sql" />
     <Build Include="dbo\Views\vyuICItemLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInTransitCosting.sql" />
