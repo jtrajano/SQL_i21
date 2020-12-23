@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[tblSTTranslogRebates] (
+﻿﻿CREATE TABLE [dbo].[tblSTTranslogRebates] (
     [intTranslogId]                          INT             IDENTITY (1, 1) NOT NULL,
     [intScanTransactionId]                   INT             NULL,
     [strTrlUPCwithoutCheckDigit]             NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL,
@@ -39,11 +39,11 @@
     [intTill]                                INT             NULL,
     [strCashier]                             NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [intCashierSysId]                        INT             NULL,
-    [strCashierEmpNum]                       NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
+    [strCashierEmpNum]                       NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intCashierPosNum]                       INT             NULL,
     [intCashierPeriod]                       INT             NULL,
     [intCashierDrawer]                       INT             NULL,
-    [strOriginalCashier]                     NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
+    [strOriginalCashier]                     NVARCHAR (MAX)  COLLATE Latin1_General_CI_AS NULL,
     [intOriginalCashierSysid]                INT             NULL,
     [strOriginalCashierEmpNum]               NVARCHAR (200)  COLLATE Latin1_General_CI_AS NULL,
     [intOriginalCashierPosNum]               INT             NULL,
