@@ -360,14 +360,14 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Invoice - ' + I.strInvoiceNumber + ' is not yet Approved!'
+		,[strPostingError]		= FAT.strApprovalStatus
 	FROM 
 		#ARPostInvoiceHeader I
+	INNER JOIN
+		(SELECT intTransactionId, strApprovalStatus FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
+			ON I.intInvoiceId = FAT.intTransactionId
 	WHERE
 		I.[ysnForApproval] = @OneBit
-	--INNER JOIN
-	--	(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
-	--		ON I.intInvoiceId = FAT.intTransactionId
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
