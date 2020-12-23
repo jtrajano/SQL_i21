@@ -8893,6 +8893,13 @@
     <Build Include="dbo\Stored Procedures\uspGRCreateItemGLEntriesTransfer_DPtoDP.sql" />
     <Build Include="dbo\Tables\tblGRTransferGLEntriesCTE.sql" />
     <Build Include="dbo\Functions\fnGRGetGLEntriesErrors_DPtoDP.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCManualDistributionDirect.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualDistributeContractTable.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualDistributeLoadTable.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualDistributeSpotTable.sql" />
+    <Build Include="dbo\User Defined Types\ScaleManualDistributeStorageTable.sql" />
+    <Build Include="dbo\Tables\tblSCTicketSpotUsed.sql" />
+    <Build Include="dbo\Tables\tblSCTicketStorageUsed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

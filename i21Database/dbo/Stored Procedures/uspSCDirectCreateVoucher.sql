@@ -1,10 +1,9 @@
 ﻿CREATE PROCEDURE [dbo].[uspSCDirectCreateVoucher]
 	@intTicketId INT,
-	@intEntityId INT,
-	@intLocationId INT,
-	@dtmScaleDate DATETIME,
 	@intUserId INT,
-	@intBillId INT = NULL OUTPUT
+	@ysnManualDistribution BIT = 0
+	,@intBillId INT = NULL OUTPUT
+	,@ysnBillPosted BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -38,6 +37,8 @@ DECLARE @ItemsToIncreaseInTransitDirect AS InTransitTableType
 		,@voucherTaxDetail as VoucherDetailTax
 		,@voucherItems AS VoucherDetailReceipt 
 		,@voucherOtherCharges AS VoucherDetailReceiptCharge
+DECLARE @intEntityId INT
+DECLARE @dblTicketNetUnits NUMERIC(18,6)
 
 BEGIN TRY
 
@@ -73,123 +74,540 @@ BEGIN TRY
 			,[intStorageScheduleTypeId]		INT				NULL
 		)
 		
+		--GEt ticket Informantion
+		BEGIN
+			SELECT TOP 1 
+				@intEntityId = intEntityId
+			FROM tblSCTicket
+			WHERE intTicketId = @intTicketId
+		END
+
+
 		--FOR LINE ITEM
-		INSERT INTO #tmpScaleToVoucherStagingTable(
-			[intAccountId]
-			,[intItemId]
-			,[strMiscDescription]
-			,[dblQtyReceived]
-			,[dblUnitQty]
-			,[dblDiscount]
-			,[dblCost]
-			,[intTaxGroupId]
-			,[intInvoiceId]
-			,[intScaleTicketId]
-			,[intUnitOfMeasureId]
-			,[intCostUOMId]
-			,[dblCostUnitQty]
-			,[intContractDetailId]
-			,[intLoadDetailId]
-			,[intFreightItemId]
-			,[dblFreightRate]
-			,[intTicketFeesItemId]
-			,[dblTicketFees]
-			,[intEntityId]
-			,[intScaleSetupId]
-			,[ysnFarmerPaysFreight]
-			,[ysnCusVenPaysFees]
-			,[dblGrossUnits]
-			,[dblNetUnits]
-			,[strVendorOrderNumber]
-			,[intStorageScheduleTypeId]
-		)
-		SELECT 
-			intAccountId				= NULL
-			,intItemId					= SC.intItemId
-			,strMiscDescription			= ICI.strDescription
-			,dblQtyReceived				= SC.dblNetUnits
-			,dblUnitQty					= SC.dblConvertedUOMQty
-			,dblDiscount				= 0
-			,dblCost					= CASE
-											WHEN CNT.intPricingTypeId = 2 THEN 
-											(
-												SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,(SC.dblUnitPrice + SC.dblUnitBasis)),0)),0) 
-												FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId, SC.intCurrencyId)
-												LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = SC.intItemId
-											)
-											ELSE
-												CASE 
-													WHEN CNT.ysnUseFXPrice = 1 
-															AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-															AND CNT.dblRate IS NOT NULL 
-															AND CNT.intFXPriceUOMId IS NOT NULL 
-													THEN CNT.dblSeqPrice
-													ELSE (SC.dblUnitPrice + SC.dblUnitBasis)
-												END 
-												* -- AD.dblQtyToPriceUOMConvFactor
-												CASE 
-													WHEN CNT.ysnUseFXPrice = 1 
-															AND CNT.intCurrencyExchangeRateId IS NOT NULL 
-															AND CNT.dblRate IS NOT NULL 
-															AND CNT.intFXPriceUOMId IS NOT NULL 
-													THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
-													WHEN CNT.intPricingTypeId = 5 THEN 1
-													ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
-												END 
-										END
-			,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
-			,intInvoiceId				= null
-			,intScaleTicketId			= SC.intTicketId
-			,intUnitOfMeasureId			= SC.intItemUOMIdTo
-			,intCostUOMId				= SC.intItemUOMIdTo
-			,dblCostUnitQty				= SC.dblConvertedUOMQty
-			,intContractDetailId		= CNT.intContractDetailId
-			,intLoadDetailId			= LGD.intLoadDetailId
-			,intFreightItemId			= SCSetup.intFreightItemId
-			,dblFreightRate				= SC.dblFreightRate
-			,intTicketFeesItemId		= SCSetup.intDefaultFeeItemId
-			,dblTicketFees				= SC.dblTicketFees
-			,intEntityId				= SC.intEntityId
-			,intScaleSetupId			= SC.intScaleSetupId
-			,ysnFarmerPaysFreight		= SC.ysnFarmerPaysFreight
-			,ysnCusVenPaysFees			= SC.ysnCusVenPaysFees
-			,dblGrossUnits				= SC.dblGrossUnits
-			,dblNetUnits				= SC.dblNetUnits
-			,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
-			,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
-		FROM tblSCTicket SC 
-		INNER JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId
-		INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
-		LEFT JOIN (
-			SELECT CTD.intContractHeaderId
-			,CTD.intContractDetailId
-			,CTD.intItemId
-			,CTD.intItemUOMId
-			,CTD.intFutureMarketId
-			,CTD.intFutureMonthId
-			,CTD.intRateTypeId 
-			,CTD.intPriceItemUOMId
-			,CTD.ysnUseFXPrice
-			,CTD.intCurrencyExchangeRateId 
-			,CTD.dblRate 
-			,CTD.intFXPriceUOMId 
-			,CTD.intInvoiceCurrencyId 
-			,CTD.intCurrencyId
-			,CTD.intAdjItemUOMId
-			,CTD.intPricingTypeId
-			,CTD.intBasisUOMId
-			,CTD.dtmEndDate
-			,AD.dblSeqPrice
-			,CU.intCent
-			,CU.ysnSubCurrency
-			FROM tblCTContractDetail CTD 
-			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
-			CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
-		) CNT ON CNT.intContractDetailId = SC.intContractId
-		LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = SC.intLoadId
-		LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SC.intEntityId AND ysnDefaultLocation = 1
-		WHERE SC.intTicketId = @intTicketId
-		
+		BEGIN
+			--MANUAL Distribution
+			IF @ysnManualDistribution = 1
+			BEGIN
+
+				--CONTRACT
+				BEGIN
+					INSERT INTO #tmpScaleToVoucherStagingTable(
+						[intAccountId]
+						,[intItemId]
+						,[strMiscDescription]
+						,[dblQtyReceived]
+						,[dblUnitQty]
+						,[dblDiscount]
+						,[dblCost]
+						,[intTaxGroupId]
+						,[intInvoiceId]
+						,[intScaleTicketId]
+						,[intUnitOfMeasureId]
+						,[intCostUOMId]
+						,[dblCostUnitQty]
+						,[intContractDetailId]
+						,[intLoadDetailId]
+						,[intFreightItemId]
+						,[dblFreightRate]
+						,[intTicketFeesItemId]
+						,[dblTicketFees]
+						,[intEntityId]
+						,[intScaleSetupId]
+						,[ysnFarmerPaysFreight]
+						,[ysnCusVenPaysFees]
+						,[dblGrossUnits]
+						,[dblNetUnits]
+						,[strVendorOrderNumber]
+						,[intStorageScheduleTypeId]
+					)
+					SELECT 
+						intAccountId				= NULL
+						,intItemId					= SC.intItemId
+						,strMiscDescription			= ICI.strDescription
+						,dblQtyReceived				= TC.dblScheduleQty
+						,dblUnitQty					= SC.dblConvertedUOMQty
+						,dblDiscount				= 0
+						,dblCost					= CASE
+														WHEN CNT.intPricingTypeId = 2 THEN 
+														(
+															SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,(SC.dblUnitPrice + SC.dblUnitBasis)),0)),0) 
+															FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId, SC.intCurrencyId)
+															LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = SC.intItemId
+														)
+														ELSE
+															CASE 
+																WHEN CNT.ysnUseFXPrice = 1 
+																		AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+																		AND CNT.dblRate IS NOT NULL 
+																		AND CNT.intFXPriceUOMId IS NOT NULL 
+																THEN CNT.dblSeqPrice
+																ELSE (SC.dblUnitPrice + SC.dblUnitBasis)
+															END 
+															* 
+															CASE 
+																WHEN CNT.ysnUseFXPrice = 1 
+																		AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+																		AND CNT.dblRate IS NOT NULL 
+																		AND CNT.intFXPriceUOMId IS NOT NULL 
+																THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
+																WHEN CNT.intPricingTypeId = 5 THEN 1
+																ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+															END 
+													END
+						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(TC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,intInvoiceId				= null
+						,intScaleTicketId			= SC.intTicketId
+						,intUnitOfMeasureId			= SC.intItemUOMIdTo
+						,intCostUOMId				= SC.intItemUOMIdTo
+						,dblCostUnitQty				= SC.dblConvertedUOMQty
+						,intContractDetailId		= CNT.intContractDetailId
+						,intLoadDetailId			= NULL
+						,intFreightItemId			= SCSetup.intFreightItemId
+						,dblFreightRate				= SC.dblFreightRate
+						,intTicketFeesItemId		= SCSetup.intDefaultFeeItemId
+						,dblTicketFees				= SC.dblTicketFees
+						,intEntityId				= SC.intEntityId
+						,intScaleSetupId			= SC.intScaleSetupId
+						,ysnFarmerPaysFreight		= SC.ysnFarmerPaysFreight
+						,ysnCusVenPaysFees			= SC.ysnCusVenPaysFees
+						,dblGrossUnits				= SC.dblGrossUnits
+						,dblNetUnits				= TC.dblScheduleQty
+						,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
+						,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
+					FROM tblSCTicket SC 
+					INNER JOIN tblICItem ICI 
+						ON ICI.intItemId = SC.intItemId
+					INNER JOIN tblSCScaleSetup SCSetup 
+						ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+					INNER JOIN tblSCTicketContractUsed TC
+						ON SC.intTicketId = TC.intTicketId
+					INNER JOIN (
+						SELECT CTD.intContractHeaderId
+						,CTD.intContractDetailId
+						,CTD.intItemId
+						,CTD.intItemUOMId
+						,CTD.intFutureMarketId
+						,CTD.intFutureMonthId
+						,CTD.intRateTypeId 
+						,CTD.intPriceItemUOMId
+						,CTD.ysnUseFXPrice
+						,CTD.intCurrencyExchangeRateId 
+						,CTD.dblRate 
+						,CTD.intFXPriceUOMId 
+						,CTD.intInvoiceCurrencyId 
+						,CTD.intCurrencyId
+						,CTD.intAdjItemUOMId
+						,CTD.intPricingTypeId
+						,CTD.intBasisUOMId
+						,CTD.dtmEndDate
+						,AD.dblSeqPrice
+						,CU.intCent
+						,CU.ysnSubCurrency
+						FROM tblCTContractDetail CTD 
+						LEFT JOIN tblSMCurrency CU 
+							ON CU.intCurrencyID = CTD.intCurrencyId
+						CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+					) CNT ON CNT.intContractDetailId = TC.intContractDetailId
+					LEFT JOIN tblEMEntityLocation EM 
+						ON EM.intEntityId = TC.intEntityId AND ysnDefaultLocation = 1
+					WHERE SC.intTicketId = @intTicketId
+				END
+
+				--Load
+				BEGIN
+					INSERT INTO #tmpScaleToVoucherStagingTable(
+						[intAccountId]
+						,[intItemId]
+						,[strMiscDescription]
+						,[dblQtyReceived]
+						,[dblUnitQty]
+						,[dblDiscount]
+						,[dblCost]
+						,[intTaxGroupId]
+						,[intInvoiceId]
+						,[intScaleTicketId]
+						,[intUnitOfMeasureId]
+						,[intCostUOMId]
+						,[dblCostUnitQty]
+						,[intContractDetailId]
+						,[intLoadDetailId]
+						,[intFreightItemId]
+						,[dblFreightRate]
+						,[intTicketFeesItemId]
+						,[dblTicketFees]
+						,[intEntityId]
+						,[intScaleSetupId]
+						,[ysnFarmerPaysFreight]
+						,[ysnCusVenPaysFees]
+						,[dblGrossUnits]
+						,[dblNetUnits]
+						,[strVendorOrderNumber]
+						,[intStorageScheduleTypeId]
+					)
+					SELECT 
+						intAccountId				= NULL
+						,intItemId					= SC.intItemId
+						,strMiscDescription			= ICI.strDescription
+						,dblQtyReceived				= TC.dblQty
+						,dblUnitQty					= SC.dblConvertedUOMQty
+						,dblDiscount				= 0
+						,dblCost					= CASE
+														WHEN CNT.intPricingTypeId = 2 THEN 
+														(
+															SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,(SC.dblUnitPrice + SC.dblUnitBasis)),0)),0) 
+															FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId, SC.intCurrencyId)
+															LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = SC.intItemId
+														)
+														ELSE
+															CASE 
+																WHEN CNT.ysnUseFXPrice = 1 
+																		AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+																		AND CNT.dblRate IS NOT NULL 
+																		AND CNT.intFXPriceUOMId IS NOT NULL 
+																THEN CNT.dblSeqPrice
+																ELSE (SC.dblUnitPrice + SC.dblUnitBasis)
+															END 
+															* 
+															CASE 
+																WHEN CNT.ysnUseFXPrice = 1 
+																		AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+																		AND CNT.dblRate IS NOT NULL 
+																		AND CNT.intFXPriceUOMId IS NOT NULL 
+																THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
+																WHEN CNT.intPricingTypeId = 5 THEN 1
+																ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+															END 
+													END
+						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(TC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,intInvoiceId				= null
+						,intScaleTicketId			= SC.intTicketId
+						,intUnitOfMeasureId			= SC.intItemUOMIdTo
+						,intCostUOMId				= SC.intItemUOMIdTo
+						,dblCostUnitQty				= SC.dblConvertedUOMQty
+						,intContractDetailId		= CNT.intContractDetailId
+						,intLoadDetailId			= TC.intLoadDetailId
+						,intFreightItemId			= SCSetup.intFreightItemId
+						,dblFreightRate				= SC.dblFreightRate
+						,intTicketFeesItemId		= SCSetup.intDefaultFeeItemId
+						,dblTicketFees				= SC.dblTicketFees
+						,intEntityId				= SC.intEntityId
+						,intScaleSetupId			= SC.intScaleSetupId
+						,ysnFarmerPaysFreight		= SC.ysnFarmerPaysFreight
+						,ysnCusVenPaysFees			= SC.ysnCusVenPaysFees
+						,dblGrossUnits				= SC.dblGrossUnits
+						,dblNetUnits				= TC.dblQty
+						,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
+						,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
+					FROM tblSCTicket SC 
+					INNER JOIN tblICItem ICI 
+						ON ICI.intItemId = SC.intItemId
+					INNER JOIN tblSCScaleSetup SCSetup 
+						ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+					INNER JOIN tblSCTicketLoadUsed TC
+						ON SC.intTicketId = TC.intTicketId
+					INNER JOIN tblLGLoadDetail LGD
+						ON TC.intLoadDetailId = LGD.intLoadDetailId
+					INNER JOIN (
+						SELECT CTD.intContractHeaderId
+						,CTD.intContractDetailId
+						,CTD.intItemId
+						,CTD.intItemUOMId
+						,CTD.intFutureMarketId
+						,CTD.intFutureMonthId
+						,CTD.intRateTypeId 
+						,CTD.intPriceItemUOMId
+						,CTD.ysnUseFXPrice
+						,CTD.intCurrencyExchangeRateId 
+						,CTD.dblRate 
+						,CTD.intFXPriceUOMId 
+						,CTD.intInvoiceCurrencyId 
+						,CTD.intCurrencyId
+						,CTD.intAdjItemUOMId
+						,CTD.intPricingTypeId
+						,CTD.intBasisUOMId
+						,CTD.dtmEndDate
+						,AD.dblSeqPrice
+						,CU.intCent
+						,CU.ysnSubCurrency
+						FROM tblCTContractDetail CTD 
+						LEFT JOIN tblSMCurrency CU 
+							ON CU.intCurrencyID = CTD.intCurrencyId
+						CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+					) CNT ON CNT.intContractDetailId = CASE WHEN SC.strInOutFlag = 'I' THEN ISNULL(intPContractDetailId,0) ELSE intSContractDetailId END
+					LEFT JOIN tblEMEntityLocation EM 
+						ON EM.intEntityId = TC.intEntityId AND ysnDefaultLocation = 1
+					WHERE SC.intTicketId = @intTicketId
+				END
+
+				--Storage
+				BEGIN
+					INSERT INTO #tmpScaleToVoucherStagingTable(
+						[intAccountId]
+						,[intItemId]
+						,[strMiscDescription]
+						,[dblQtyReceived]
+						,[dblUnitQty]
+						,[dblDiscount]
+						,[dblCost]
+						,[intTaxGroupId]
+						,[intInvoiceId]
+						,[intScaleTicketId]
+						,[intUnitOfMeasureId]
+						,[intCostUOMId]
+						,[dblCostUnitQty]
+						,[intContractDetailId]
+						,[intLoadDetailId]
+						,[intFreightItemId]
+						,[dblFreightRate]
+						,[intTicketFeesItemId]
+						,[dblTicketFees]
+						,[intEntityId]
+						,[intScaleSetupId]
+						,[ysnFarmerPaysFreight]
+						,[ysnCusVenPaysFees]
+						,[dblGrossUnits]
+						,[dblNetUnits]
+						,[strVendorOrderNumber]
+						,[intStorageScheduleTypeId]
+					)
+					SELECT 
+						intAccountId				= NULL
+						,intItemId					= SC.intItemId
+						,strMiscDescription			= ICI.strDescription
+						,dblQtyReceived				= TC.dblQty
+						,dblUnitQty					= SC.dblConvertedUOMQty
+						,dblDiscount				= 0
+						,dblCost					= 0
+						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(TC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,intInvoiceId				= null
+						,intScaleTicketId			= SC.intTicketId
+						,intUnitOfMeasureId			= SC.intItemUOMIdTo
+						,intCostUOMId				= SC.intItemUOMIdTo
+						,dblCostUnitQty				= SC.dblConvertedUOMQty
+						,intContractDetailId		= NULL
+						,intLoadDetailId			= NULL
+						,intFreightItemId			= SCSetup.intFreightItemId
+						,dblFreightRate				= SC.dblFreightRate
+						,intTicketFeesItemId		= SCSetup.intDefaultFeeItemId
+						,dblTicketFees				= SC.dblTicketFees
+						,intEntityId				= SC.intEntityId
+						,intScaleSetupId			= SC.intScaleSetupId
+						,ysnFarmerPaysFreight		= SC.ysnFarmerPaysFreight
+						,ysnCusVenPaysFees			= SC.ysnCusVenPaysFees
+						,dblGrossUnits				= SC.dblGrossUnits
+						,dblNetUnits				= TC.dblQty
+						,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
+						,intStorageScheduleTypeId	= TC.intStorageScheduleId 
+					FROM tblSCTicket SC 
+					INNER JOIN tblICItem ICI 
+						ON ICI.intItemId = SC.intItemId
+					INNER JOIN tblSCScaleSetup SCSetup 
+						ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+					INNER JOIN tblSCTicketStorageUsed TC
+						ON SC.intTicketId = TC.intTicketId
+					LEFT JOIN tblEMEntityLocation EM 
+						ON EM.intEntityId = TC.intEntityId AND ysnDefaultLocation = 1
+					WHERE SC.intTicketId = @intTicketId
+				END
+
+				--Spot
+				BEGIN
+					INSERT INTO #tmpScaleToVoucherStagingTable(
+						[intAccountId]
+						,[intItemId]
+						,[strMiscDescription]
+						,[dblQtyReceived]
+						,[dblUnitQty]
+						,[dblDiscount]
+						,[dblCost]
+						,[intTaxGroupId]
+						,[intInvoiceId]
+						,[intScaleTicketId]
+						,[intUnitOfMeasureId]
+						,[intCostUOMId]
+						,[dblCostUnitQty]
+						,[intContractDetailId]
+						,[intLoadDetailId]
+						,[intFreightItemId]
+						,[dblFreightRate]
+						,[intTicketFeesItemId]
+						,[dblTicketFees]
+						,[intEntityId]
+						,[intScaleSetupId]
+						,[ysnFarmerPaysFreight]
+						,[ysnCusVenPaysFees]
+						,[dblGrossUnits]
+						,[dblNetUnits]
+						,[strVendorOrderNumber]
+						,[intStorageScheduleTypeId]
+					)
+					SELECT 
+						intAccountId				= NULL
+						,intItemId					= SC.intItemId
+						,strMiscDescription			= ICI.strDescription
+						,dblQtyReceived				= TC.dblQty
+						,dblUnitQty					= SC.dblConvertedUOMQty
+						,dblDiscount				= 0
+						,dblCost					= ISNULL(TC.dblBasis,0) + ISNULL(TC.dblFuture,0)
+						,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(TC.intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+						,intInvoiceId				= null
+						,intScaleTicketId			= SC.intTicketId
+						,intUnitOfMeasureId			= SC.intItemUOMIdTo
+						,intCostUOMId				= SC.intItemUOMIdTo
+						,dblCostUnitQty				= SC.dblConvertedUOMQty
+						,intContractDetailId		= NULL
+						,intLoadDetailId			= NULL
+						,intFreightItemId			= SCSetup.intFreightItemId
+						,dblFreightRate				= SC.dblFreightRate
+						,intTicketFeesItemId		= SCSetup.intDefaultFeeItemId
+						,dblTicketFees				= SC.dblTicketFees
+						,intEntityId				= SC.intEntityId
+						,intScaleSetupId			= SC.intScaleSetupId
+						,ysnFarmerPaysFreight		= SC.ysnFarmerPaysFreight
+						,ysnCusVenPaysFees			= SC.ysnCusVenPaysFees
+						,dblGrossUnits				= SC.dblGrossUnits
+						,dblNetUnits				= TC.dblQty
+						,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
+						,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
+					FROM tblSCTicket SC 
+					INNER JOIN tblICItem ICI 
+						ON ICI.intItemId = SC.intItemId
+					INNER JOIN tblSCScaleSetup SCSetup 
+						ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+					INNER JOIN tblSCTicketSpotUsed TC
+						ON SC.intTicketId = TC.intTicketId
+					LEFT JOIN tblEMEntityLocation EM 
+						ON EM.intEntityId = TC.intEntityId AND ysnDefaultLocation = 1
+					WHERE SC.intTicketId = @intTicketId
+				END
+
+			END
+
+			---NON-ManualDistribution
+			ELSE
+			BEGIN
+				SELECT TOP 1 
+					@intEntityId = intEntityId
+				FROM tblSCTicket
+				WHERE intTicketId = @intTicketId
+
+				INSERT INTO #tmpScaleToVoucherStagingTable(
+					[intAccountId]
+					,[intItemId]
+					,[strMiscDescription]
+					,[dblQtyReceived]
+					,[dblUnitQty]
+					,[dblDiscount]
+					,[dblCost]
+					,[intTaxGroupId]
+					,[intInvoiceId]
+					,[intScaleTicketId]
+					,[intUnitOfMeasureId]
+					,[intCostUOMId]
+					,[dblCostUnitQty]
+					,[intContractDetailId]
+					,[intLoadDetailId]
+					,[intFreightItemId]
+					,[dblFreightRate]
+					,[intTicketFeesItemId]
+					,[dblTicketFees]
+					,[intEntityId]
+					,[intScaleSetupId]
+					,[ysnFarmerPaysFreight]
+					,[ysnCusVenPaysFees]
+					,[dblGrossUnits]
+					,[dblNetUnits]
+					,[strVendorOrderNumber]
+					,[intStorageScheduleTypeId]
+				)
+				SELECT 
+					intAccountId				= NULL
+					,intItemId					= SC.intItemId
+					,strMiscDescription			= ICI.strDescription
+					,dblQtyReceived				= SC.dblNetUnits
+					,dblUnitQty					= SC.dblConvertedUOMQty
+					,dblDiscount				= 0
+					,dblCost					= CASE
+													WHEN CNT.intPricingTypeId = 2 THEN 
+													(
+														SELECT ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice + ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(futureUOM.intItemUOMId,CNT.intBasisUOMId,(SC.dblUnitPrice + SC.dblUnitBasis)),0)),0) 
+														FROM dbo.fnRKGetFutureAndBasisPrice (1,SC.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),2,CNT.intFutureMarketId,CNT.intFutureMonthId,NULL,NULL,0 ,SC.intItemId, SC.intCurrencyId)
+														LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = SC.intItemId
+													)
+													ELSE
+														CASE 
+															WHEN CNT.ysnUseFXPrice = 1 
+																	AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+																	AND CNT.dblRate IS NOT NULL 
+																	AND CNT.intFXPriceUOMId IS NOT NULL 
+															THEN CNT.dblSeqPrice
+															ELSE (SC.dblUnitPrice + SC.dblUnitBasis)
+														END 
+														* -- AD.dblQtyToPriceUOMConvFactor
+														CASE 
+															WHEN CNT.ysnUseFXPrice = 1 
+																	AND CNT.intCurrencyExchangeRateId IS NOT NULL 
+																	AND CNT.dblRate IS NOT NULL 
+																	AND CNT.intFXPriceUOMId IS NOT NULL 
+															THEN ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,CNT.intFXPriceUOMId,1),1)),1)
+															WHEN CNT.intPricingTypeId = 5 THEN 1
+															ELSE ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(SC.intItemUOMIdTo,CNT.intItemUOMId,ISNULL(dbo.fnCTConvertQtyToTargetItemUOM(CNT.intItemUOMId,ISNULL(CNT.intPriceItemUOMId,CNT.intAdjItemUOMId),1),1)),1)
+														END 
+												END
+					,intTaxGroupId				= dbo.fnGetTaxGroupIdForVendor(@intEntityId,SC.intProcessingLocationId,SC.intItemId,EM.intEntityLocationId,EM.intFreightTermId)
+					,intInvoiceId				= null
+					,intScaleTicketId			= SC.intTicketId
+					,intUnitOfMeasureId			= SC.intItemUOMIdTo
+					,intCostUOMId				= SC.intItemUOMIdTo
+					,dblCostUnitQty				= SC.dblConvertedUOMQty
+					,intContractDetailId		= CNT.intContractDetailId
+					,intLoadDetailId			= LGD.intLoadDetailId
+					,intFreightItemId			= SCSetup.intFreightItemId
+					,dblFreightRate				= SC.dblFreightRate
+					,intTicketFeesItemId		= SCSetup.intDefaultFeeItemId
+					,dblTicketFees				= SC.dblTicketFees
+					,intEntityId				= SC.intEntityId
+					,intScaleSetupId			= SC.intScaleSetupId
+					,ysnFarmerPaysFreight		= SC.ysnFarmerPaysFreight
+					,ysnCusVenPaysFees			= SC.ysnCusVenPaysFees
+					,dblGrossUnits				= SC.dblGrossUnits
+					,dblNetUnits				= SC.dblNetUnits
+					,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
+					,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
+				FROM tblSCTicket SC 
+				INNER JOIN tblICItem ICI ON ICI.intItemId = SC.intItemId
+				INNER JOIN tblSCScaleSetup SCSetup ON SCSetup.intScaleSetupId = SC.intScaleSetupId
+				LEFT JOIN (
+					SELECT CTD.intContractHeaderId
+					,CTD.intContractDetailId
+					,CTD.intItemId
+					,CTD.intItemUOMId
+					,CTD.intFutureMarketId
+					,CTD.intFutureMonthId
+					,CTD.intRateTypeId 
+					,CTD.intPriceItemUOMId
+					,CTD.ysnUseFXPrice
+					,CTD.intCurrencyExchangeRateId 
+					,CTD.dblRate 
+					,CTD.intFXPriceUOMId 
+					,CTD.intInvoiceCurrencyId 
+					,CTD.intCurrencyId
+					,CTD.intAdjItemUOMId
+					,CTD.intPricingTypeId
+					,CTD.intBasisUOMId
+					,CTD.dtmEndDate
+					,AD.dblSeqPrice
+					,CU.intCent
+					,CU.ysnSubCurrency
+					FROM tblCTContractDetail CTD 
+					LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CTD.intCurrencyId
+					CROSS APPLY	dbo.fnCTGetAdditionalColumnForDetailView(CTD.intContractDetailId) AD
+				) CNT ON CNT.intContractDetailId = SC.intContractId
+				LEFT JOIN tblLGLoadDetail LGD ON LGD.intLoadId = SC.intLoadId
+				LEFT JOIN tblEMEntityLocation EM ON EM.intEntityId = SC.intEntityId AND ysnDefaultLocation = 1
+				WHERE SC.intTicketId = @intTicketId
+			END
+		END
 
 		--Inventory Item
 		INSERT INTO @voucherDetailDirectInventory (
@@ -384,6 +802,7 @@ BEGIN TRY
 		SELECT @recCount = COUNT(*) FROM @voucherDetailDirectInventory;
 		IF ISNULL(@recCount,0) > 0
 		BEGIN
+
 			BEGIN /* CREATE VOUCHER */
 				INSERT INTO @voucherPayable(
 				[intTransactionType],
@@ -492,7 +911,7 @@ BEGIN TRY
 					END
 			END
 
-			IF ISNULL(@intBillId,0) > 0 AND @postVoucher = 1
+			IF ISNULL(@intBillId,0) > 0 
 			BEGIN
 				UPDATE tblAPBillDetail SET intScaleTicketId = @intTicketId WHERE intBillId = @intBillId
 				EXEC [dbo].[uspAPPostBill]
@@ -501,7 +920,40 @@ BEGIN TRY
 				,@isBatch = 0
 				,@param = @intBillId
 				,@userId = @intUserId
-				,@success = @success OUTPUT
+				,@success = @ysnBillPosted OUTPUT
+			
+				---Increase In-Transit after creating voucher
+				DELETE FROM @ItemsToIncreaseInTransitDirect
+				INSERT INTO @ItemsToIncreaseInTransitDirect(
+					[intItemId]
+					,[intItemLocationId]
+					,[intItemUOMId]
+					,[intLotId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[dblQty]
+					,[intTransactionId]
+					,[strTransactionId]
+					,[intTransactionTypeId]
+					,[intFOBPointId]
+				)
+				SELECT 
+					intItemId = SC.intItemId
+					,intItemLocationId = ICIL.intItemLocationId
+					,intItemUOMId = SC.intItemUOMIdTo
+					,intLotId = SC.intLotId
+					,intSubLocationId = SC.intSubLocationId
+					,intStorageLocationId = SC.intStorageLocationId
+					,dblQty = SC.dblNetUnits
+					,intTransactionId = 1
+					,strTransactionId = SC.strTicketNumber
+					,intTransactionTypeId = 1
+					,intFOBPointId = NULL
+				FROM tblSCTicket SC 
+				INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+				WHERE SC.intTicketId = @intTicketId
+				EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+
 			END
 		END
 END TRY

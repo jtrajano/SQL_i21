@@ -106,6 +106,18 @@ DECLARE @dblTicketNetUnits NUMERIC(18,6)
 DECLARE @intTicketTypeId AS INT
 DECLARE @intTicketLoadId INT
 DECLARE @intTicketStorageScheduleTypeId INT
+DECLARE @strTicketInOutFlag NVARCHAR(2)
+
+DECLARE @__intContractDetailId INT
+DECLARE @__intTicketContractUsedId INT
+DECLARE @__dblUsedQuantity NUMERIC(18,6)
+DECLARE @__dblFinalUsedQuantity NUMERIC(18,6)
+DECLARE @__intLoadDetailId INT
+DECLARE @__intTicketLoadUsedId INT
+DECLARE @__dblLoadQuantity Numeric(18,6)
+DECLARE @__dblContractAvailableQty Numeric(18,6)
+
+
 
 BEGIN TRY
 		SELECT TOP 1
@@ -613,6 +625,8 @@ BEGIN TRY
 							,@dblTicketScheduleQty = ISNULL(dblScheduleQty,0)
 							,@intTicketLoadId = intLoadId
 							,@dblTicketNetUnits = dblNetUnits
+							,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+							,@strTicketInOutFlag = strInOutFlag
 						FROM tblSCTicket SC
 						LEFT JOIN tblCTWeightGrade CTGrade 
 							ON CTGrade.intWeightGradeId = SC.intGradeId
@@ -680,76 +694,234 @@ BEGIN TRY
 							BEGIN							
 								DELETE FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @intBillId
 								EXEC [dbo].[uspAPDeleteVoucher] @intBillId, @intUserId
+
+								--- Auto Distributed tickets
+								IF (NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketContractUsed WHERE intTicketId = @intTicketId)
+									AND NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketLoadUsed WHERE intTicketId = @intTicketId)
+									AND NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketStorageUsed WHERE intTicketId = @intTicketId)
+									AND NOT EXISTS(SELECT TOP 1 1 FROM tblSCTicketSpotUsed WHERE intTicketId = @intTicketId))
+								BEGIN
+									SELECT TOP 1
+										@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
+									FROM tblCTContractDetail A
+									INNER JOIN tblCTContractHeader B
+										ON A.intContractHeaderId = B.intContractHeaderId
+									WHERE A.intContractDetailId = @intTicketContractDetailId 
+
+									SET @dblScheduleQty = @dblTicketNetUnits
+									IF(ISNULL(@ysnContractLoadBased,0) = 1)
+									BEGIN
+										SET @dblScheduleQty = 1
+									END
+									
+
+									SET @dblScheduleQty = (@dblScheduleQty * -1)
+									EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
+									SET @dblScheduleQty = (@dblScheduleQty * -1)
+									IF(@intTicketStorageScheduleTypeId <> -6)
+									BEGIN
+										EXEC uspCTUpdateScheduleQuantity
+											@intContractDetailId	=	@intTicketContractDetailId,
+											@dblQuantityToUpdate	=	@dblScheduleQty,
+											@intUserId				=	@intUserId,
+											@intExternalId			=	@intTicketId,
+											@strScreenName			=	'Scale'	
+									END
+									ELSE
+									BEGIN
+										EXEC uspCTUpdateScheduleQuantity
+											@intContractDetailId	=	@intTicketContractDetailId,
+											@dblQuantityToUpdate	=	@dblTicketScheduleQty,
+											@intUserId				=	@intUserId,
+											@intExternalId			=	@intTicketId,
+											@strScreenName			=	'Scale'	
+									END
+								END
+								
+								------ Manually distributed tickets
+								ELSE
+								BEGIN
+									---Update contract Balance and schedule Base on contract Used
+									BEGIN
+										SELECT TOP 1 
+											@__intContractDetailId = intContractDetailId
+											,@__intTicketContractUsedId = intTicketContractUsed
+											,@__dblUsedQuantity = dblScheduleQty
+										FROM tblSCTicketContractUsed
+										WHERE intTicketId = @intTicketId
+										ORDER BY intTicketContractUsed ASC
+
+										WHILE (ISNULL(@__intTicketContractUsedId,0) > 0)
+										BEGIN
+											SET @__dblFinalUsedQuantity = 0
+
+											SELECT TOP 1
+												@__dblFinalUsedQuantity = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, B.intItemUOMId, A.dblScheduleQty) 
+											FROM tblSCTicketContractUsed A
+											INNER JOIN tblCTContractDetail B
+												ON A.intContractDetailId = B.intContractDetailId
+											WHERE intTicketContractUsed = @__intTicketContractUsedId
+
+
+											SET @__dblFinalUsedQuantity = @__dblFinalUsedQuantity * -1
+											EXEC uspCTUpdateSequenceBalance @__intContractDetailId, @__dblFinalUsedQuantity, @intUserId, @intBillId, 'Voucher'
+
+											--- LOOP Iterator
+											BEGIN
+												IF EXISTS (SELECT TOP 1 1 FROM tblSCTicketContractUsed WHERE intTicketId = @intTicketId AND intTicketContractUsed > @__intTicketContractUsedId)
+												BEGIN
+													SELECT TOP 1 
+														@__intContractDetailId = intContractDetailId
+														,@__intTicketContractUsedId = intTicketContractUsed
+														,@__dblUsedQuantity = dblScheduleQty
+													FROM tblSCTicketContractUsed
+													WHERE intTicketId = @intTicketId
+														AND intTicketContractUsed > @__intTicketContractUsedId
+													ORDER BY intTicketContractUsed ASC
+												END
+												ELSE
+												BEGIN
+													SET @__intTicketContractUsedId = NULL
+												END
+											END
+										END
+									END
+
+
+									---Update contract Balance and schedule Base on Load Used	
+									BEGIN
+										IF OBJECT_ID (N'tempdb.dbo.#tmpLoadContractTable') IS NOT NULL
+											DROP TABLE #tmpLoadContractTable
+
+										SELECT 
+											dblLoadQuantity = B.dblQuantity
+											,dblContractScheduleQty = C.dblScheduleQty
+											,ysnContractLoadBased = CAST(ISNULL(D.ysnLoad,0) AS BIT)
+											,dblcontractAvailable = ISNULL(C.dblBalance,0)		-	ISNULL(C.dblScheduleQty,0)
+											,A.intTicketLoadUsedId
+											,A.dblQty
+											,dblQtyContractUOM = dbo.fnCalculateQtyBetweenUOM(@intTicketItemUOMId, C.intItemUOMId, A.dblQty)
+											,A.intLoadDetailId
+											,C.intContractDetailId
+										INTO #tmpLoadContractTable
+										FROM tblSCTicketLoadUsed A
+										INNER JOIN tblLGLoadDetail B
+											ON A.intLoadDetailId = B.intLoadDetailId
+										INNER JOIN tblCTContractDetail C
+											ON C.intContractDetailId = CASE WHEN @strTicketInOutFlag = 'I' THEN B.intPContractDetailId WHEN @strTicketInOutFlag = 'O' THEN B.intSContractDetailId END
+										INNER JOIN tblCTContractHeader D	
+											ON C.intContractHeaderId = D.intContractHeaderId
+										WHERE A.intTicketId = @intTicketId 
+										ORDER BY A.intTicketLoadUsedId ASC
+										
+
+										SELECT TOP 1 
+											@__intLoadDetailId = A.intLoadDetailId
+											,@__intTicketLoadUsedId = A.intTicketLoadUsedId
+											,@__dblUsedQuantity = A.dblQty
+											,@__dblContractAvailableQty = A.dblcontractAvailable
+											,@__dblLoadQuantity = A.dblLoadQuantity
+											,@__intContractDetailId = A.intContractDetailId
+										FROM #tmpLoadContractTable A
+										ORDER BY intTicketLoadUsedId ASC
+
+										WHILE (ISNULL(@__intTicketLoadUsedId,0) > 0)
+										BEGIN
+											SET @__dblFinalUsedQuantity = 0
+
+											--Update Balance				
+											SET @__dblFinalUsedQuantity = @__dblUsedQuantity * -1
+											EXEC uspCTUpdateSequenceBalance @__intContractDetailId, @__dblFinalUsedQuantity, @intUserId, @intBillId, 'Voucher'
+
+											--Reschedule Contract Based on load qty
+											SET @__dblFinalUsedQuantity = @__dblLoadQuantity
+											EXEC uspCTUpdateScheduleQuantityUsingUOM 
+												@intContractDetailId	=	@__intContractDetailId
+												,@dblQuantityToUpdate	=	@__dblFinalUsedQuantity
+												,@intUserId				=	@intUserId
+												,@intExternalId			=	@intBillId
+												,@strScreenName			=   'Voucher'	
+												
+
+											--- LOOP Iterator
+											BEGIN
+												IF EXISTS (SELECT TOP 1 1 FROM #tmpLoadContractTable WHERE intTicketLoadUsedId > @__dblFinalUsedQuantity)
+												BEGIN
+													SELECT TOP 1 
+														@__intLoadDetailId = A.intLoadDetailId
+														,@__intTicketLoadUsedId = A.intTicketLoadUsedId
+														,@__dblUsedQuantity = A.dblQty
+														,@__dblContractAvailableQty = A.dblcontractAvailable
+														,@__dblLoadQuantity = A.dblLoadQuantity
+														,@__intContractDetailId = A.intContractDetailId
+													FROM #tmpLoadContractTable
+													WHERE intTicketLoadUsedId > @__dblFinalUsedQuantity
+													ORDER BY intTicketLoadUsedId ASC
+												END
+												ELSE
+												BEGIN
+													SET @__dblFinalUsedQuantity = NULL
+												END
+											END
+										END
+									END
+
+
+									--Contract Distribution
+									IF @intTicketStorageScheduleTypeId = -2
+									BEGIN
+										---Update selected contract Schedule based on ticket scheduled quantity and selected contract
+										BEGIN
+											SET @__dblFinalUsedQuantity = @dblTicketScheduleQty
+											EXEC uspCTUpdateScheduleQuantityUsingUOM 
+												@intContractDetailId	=	@intTicketContractDetailId,
+												@dblQuantityToUpdate	=	@__dblFinalUsedQuantity,
+												@intUserId				=	@intUserId,
+												@intExternalId			=	@intBillId,
+												@strScreenName			=   'Voucher'	
+												,@intSourceItemUOMId	=	@intTicketItemUOMId
+										END
+									END
+
+									
+								END
+
+								INSERT INTO @ItemsToIncreaseInTransitDirect(
+									[intItemId]
+									,[intItemLocationId]
+									,[intItemUOMId]
+									,[intLotId]
+									,[intSubLocationId]
+									,[intStorageLocationId]
+									,[dblQty]
+									,[intTransactionId]
+									,[strTransactionId]
+									,[intTransactionTypeId]
+									,[intFOBPointId]
+								)
+								SELECT 
+									intItemId = SC.intItemId
+									,intItemLocationId = ICIL.intItemLocationId
+									,intItemUOMId = SC.intItemUOMIdTo
+									,intLotId = SC.intLotId
+									,intSubLocationId = SC.intSubLocationId
+									,intStorageLocationId = SC.intStorageLocationId
+									,dblQty = (SC.dblNetUnits * -1)
+									,intTransactionId = 1
+									,strTransactionId = SC.strTicketNumber
+									,intTransactionTypeId = 1
+									,intFOBPointId = NULL
+								FROM tblSCTicket SC 
+								INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+								WHERE SC.intTicketId = @intTicketId
+								EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+
 							END
 
-							SELECT TOP 1
-								@ysnContractLoadBased = ISNULL(B.ysnLoad,0)
-							FROM tblCTContractDetail A
-							INNER JOIN tblCTContractHeader B
-								ON A.intContractHeaderId = B.intContractHeaderId
-							WHERE A.intContractDetailId = @intTicketContractDetailId 
-
-							SET @dblScheduleQty = @dblTicketNetUnits
-							IF(ISNULL(@ysnContractLoadBased,0) = 1)
-							BEGIN
-								SET @dblScheduleQty = 1
-							END
 							
-
-							SET @dblScheduleQty = (@dblScheduleQty * -1)
-							EXEC uspCTUpdateSequenceBalance @intTicketContractDetailId, @dblScheduleQty, @intUserId, @intTicketId, 'Scale'
-							SET @dblScheduleQty = (@dblScheduleQty * -1)
-							IF(@intTicketStorageScheduleTypeId <> -6)
-							BEGIN
-								EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intTicketContractDetailId,
-									@dblQuantityToUpdate	=	@dblScheduleQty,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'	
-							END
-							ELSE
-							BEGIN
-								EXEC uspCTUpdateScheduleQuantity
-									@intContractDetailId	=	@intTicketContractDetailId,
-									@dblQuantityToUpdate	=	@dblTicketScheduleQty,
-									@intUserId				=	@intUserId,
-									@intExternalId			=	@intTicketId,
-									@strScreenName			=	'Scale'	
-							END
-
-							INSERT INTO @ItemsToIncreaseInTransitDirect(
-								[intItemId]
-								,[intItemLocationId]
-								,[intItemUOMId]
-								,[intLotId]
-								,[intSubLocationId]
-								,[intStorageLocationId]
-								,[dblQty]
-								,[intTransactionId]
-								,[strTransactionId]
-								,[intTransactionTypeId]
-								,[intFOBPointId]
-							)
-							SELECT 
-								intItemId = SC.intItemId
-								,intItemLocationId = ICIL.intItemLocationId
-								,intItemUOMId = SC.intItemUOMIdTo
-								,intLotId = SC.intLotId
-								,intSubLocationId = SC.intSubLocationId
-								,intStorageLocationId = SC.intStorageLocationId
-								,dblQty = (SC.dblNetUnits * -1)
-								,intTransactionId = 1
-								,strTransactionId = SC.strTicketNumber
-								,intTransactionTypeId = 1
-								,intFOBPointId = NULL
-							FROM tblSCTicket SC 
-							INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-							WHERE SC.intTicketId = @intTicketId
-							EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 						END
 
-						UPDATE tblSCTicket SET strTicketStatus = 'R' WHERE intTicketId = @intTicketId
+						EXEC [dbo].[uspSCUpdateTicketStatus] @intTicketId, 1;
 
 
                         set @intInventoryAdjustmentId = null

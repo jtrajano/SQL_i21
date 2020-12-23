@@ -367,7 +367,7 @@ BEGIN TRY
 		WHERE intCustomerStorageId = @intHoldCustomerStorageId
 	END
 
-	IF EXISTS(SELECT * FROM @CustomerStorageStagingTable WHERE ISNULL(intDeliverySheetId,0) > 0)
+	IF EXISTS(SELECT TOP 1 1 FROM @CustomerStorageStagingTable WHERE ISNULL(intDeliverySheetId,0) > 0)
 	BEGIN
 		DECLARE @intId INT
 				,@finalGrossWeight NUMERIC (38,20)

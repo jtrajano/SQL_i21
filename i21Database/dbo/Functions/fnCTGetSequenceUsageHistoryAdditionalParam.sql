@@ -190,6 +190,16 @@ BEGIN
 		WHERE	HR.intDeliverySheetId	=	@intExternalId
 		
 	END
+	ELSE IF @strScreenName = 'Voucher'
+	BEGIN
+		SELECT	@intExternalHeaderId	=	HR.intBillId,
+				@strNumber				=	HR.strBillId,
+				@strHeaderIdColumn		=	'intBillId',
+				@dtmScreenDate			=	HR.dtmDate
+		FROM	tblAPBill	HR
+		WHERE	HR.intBillId	=	@intExternalId
+		
+	END
 
 	IF ISNULL(@strNumber,'')  = ''
 	BEGIN

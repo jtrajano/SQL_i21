@@ -193,7 +193,9 @@ BEGIN TRY
 
 				IF ISNULL(@strWhereFinalizedMatchWeight, 'Origin') = 'Destination' OR ISNULL(@strWhereFinalizedMatchGrade, 'Origin') = 'Destination'
 				BEGIN
-					EXEC uspSCDirectCreateVoucher @intMatchTicketId,@intMatchTicketEntityId,@intMatchTicketLocationId,@dtmScaleDate,@intUserId
+					EXEC uspSCDirectCreateVoucher 
+						@intTicketId = @intMatchTicketId
+						,@intUserId = @intUserId
 
 					IF ISNULL(@intMatchTicketContractDetailId,0) != 0
 					BEGIN
@@ -325,36 +327,36 @@ BEGIN TRY
 										@strScreenName			=   'Scale'	
 					END
 
-					DELETE FROM @ItemsToIncreaseInTransitDirect
-					INSERT INTO @ItemsToIncreaseInTransitDirect(
-						[intItemId]
-						,[intItemLocationId]
-						,[intItemUOMId]
-						,[intLotId]
-						,[intSubLocationId]
-						,[intStorageLocationId]
-						,[dblQty]
-						,[intTransactionId]
-						,[strTransactionId]
-						,[intTransactionTypeId]
-						,[intFOBPointId]
-					)
-					SELECT 
-						intItemId = SC.intItemId
-						,intItemLocationId = ICIL.intItemLocationId
-						,intItemUOMId = SC.intItemUOMIdTo
-						,intLotId = SC.intLotId
-						,intSubLocationId = SC.intSubLocationId
-						,intStorageLocationId = SC.intStorageLocationId
-						,dblQty = SC.dblNetUnits
-						,intTransactionId = 1
-						,strTransactionId = SC.strTicketNumber
-						,intTransactionTypeId = 1
-						,intFOBPointId = NULL
-					FROM tblSCTicket SC 
-					INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-					WHERE SC.intTicketId = @intMatchTicketId
-					EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+					-- DELETE FROM @ItemsToIncreaseInTransitDirect
+					-- INSERT INTO @ItemsToIncreaseInTransitDirect(
+					-- 	[intItemId]
+					-- 	,[intItemLocationId]
+					-- 	,[intItemUOMId]
+					-- 	,[intLotId]
+					-- 	,[intSubLocationId]
+					-- 	,[intStorageLocationId]
+					-- 	,[dblQty]
+					-- 	,[intTransactionId]
+					-- 	,[strTransactionId]
+					-- 	,[intTransactionTypeId]
+					-- 	,[intFOBPointId]
+					-- )
+					-- SELECT 
+					-- 	intItemId = SC.intItemId
+					-- 	,intItemLocationId = ICIL.intItemLocationId
+					-- 	,intItemUOMId = SC.intItemUOMIdTo
+					-- 	,intLotId = SC.intLotId
+					-- 	,intSubLocationId = SC.intSubLocationId
+					-- 	,intStorageLocationId = SC.intStorageLocationId
+					-- 	,dblQty = SC.dblNetUnits
+					-- 	,intTransactionId = 1
+					-- 	,strTransactionId = SC.strTicketNumber
+					-- 	,intTransactionTypeId = 1
+					-- 	,intFOBPointId = NULL
+					-- FROM tblSCTicket SC 
+					-- INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+					-- WHERE SC.intTicketId = @intMatchTicketId
+					-- EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 				END
 
 				IF ISNULL(@intTicketContractDetailId,0) > 0
@@ -485,37 +487,37 @@ BEGIN TRY
 				BEGIN
 					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId
 
-					IF(ISNULL(@intMatchTicketId,0) > 0)
-					DELETE FROM @ItemsToIncreaseInTransitDirect
-					INSERT INTO @ItemsToIncreaseInTransitDirect(
-						[intItemId]
-						,[intItemLocationId]
-						,[intItemUOMId]
-						,[intLotId]
-						,[intSubLocationId]
-						,[intStorageLocationId]
-						,[dblQty]
-						,[intTransactionId]
-						,[strTransactionId]
-						,[intTransactionTypeId]
-						,[intFOBPointId]
-					)
-					SELECT 
-						intItemId = SC.intItemId
-						,intItemLocationId = ICIL.intItemLocationId
-						,intItemUOMId = SC.intItemUOMIdTo
-						,intLotId = SC.intLotId
-						,intSubLocationId = SC.intSubLocationId
-						,intStorageLocationId = SC.intStorageLocationId
-						,dblQty = SC.dblNetUnits * -1
-						,intTransactionId = 1
-						,strTransactionId = SC.strTicketNumber
-						,intTransactionTypeId = 1
-						,intFOBPointId = NULL
-					FROM tblSCTicket SC 
-					INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-					WHERE SC.intTicketId = @intMatchTicketId
-					EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+					-- IF(ISNULL(@intMatchTicketId,0) > 0)
+					-- DELETE FROM @ItemsToIncreaseInTransitDirect
+					-- INSERT INTO @ItemsToIncreaseInTransitDirect(
+					-- 	[intItemId]
+					-- 	,[intItemLocationId]
+					-- 	,[intItemUOMId]
+					-- 	,[intLotId]
+					-- 	,[intSubLocationId]
+					-- 	,[intStorageLocationId]
+					-- 	,[dblQty]
+					-- 	,[intTransactionId]
+					-- 	,[strTransactionId]
+					-- 	,[intTransactionTypeId]
+					-- 	,[intFOBPointId]
+					-- )
+					-- SELECT 
+					-- 	intItemId = SC.intItemId
+					-- 	,intItemLocationId = ICIL.intItemLocationId
+					-- 	,intItemUOMId = SC.intItemUOMIdTo
+					-- 	,intLotId = SC.intLotId
+					-- 	,intSubLocationId = SC.intSubLocationId
+					-- 	,intStorageLocationId = SC.intStorageLocationId
+					-- 	,dblQty = SC.dblNetUnits * -1
+					-- 	,intTransactionId = 1
+					-- 	,strTransactionId = SC.strTicketNumber
+					-- 	,intTransactionTypeId = 1
+					-- 	,intFOBPointId = NULL
+					-- FROM tblSCTicket SC 
+					-- INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+					-- WHERE SC.intTicketId = @intMatchTicketId
+					-- EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
 				END
 			END
 		END
@@ -579,7 +581,10 @@ BEGIN TRY
 		BEGIN
 			IF ISNULL(@strWhereFinalizedWeight,'Origin') <> 'Destination' AND ISNULL(@strWhereFinalizedGrade,'Origin') <> 'Destination'
 			BEGIN
-				EXEC uspSCDirectCreateVoucher @intTicketId,@intEntityId,@intLocationId,@dtmScaleDate,@intUserId, @intBillId OUT
+				EXEC uspSCDirectCreateVoucher 
+					@intTicketId = @intTicketId 
+					,@intUserId = @intUserId 
+					,@intBillId = @intBillId OUT
 
 				BEGIN
 					IF ISNULL(@intTicketContractDetailId,0) != 0
@@ -712,36 +717,7 @@ BEGIN TRY
 				
 			END
 			
-			DELETE FROM @ItemsToIncreaseInTransitDirect
-			INSERT INTO @ItemsToIncreaseInTransitDirect(
-				[intItemId]
-				,[intItemLocationId]
-				,[intItemUOMId]
-				,[intLotId]
-				,[intSubLocationId]
-				,[intStorageLocationId]
-				,[dblQty]
-				,[intTransactionId]
-				,[strTransactionId]
-				,[intTransactionTypeId]
-				,[intFOBPointId]
-			)
-			SELECT 
-				intItemId = SC.intItemId
-				,intItemLocationId = ICIL.intItemLocationId
-				,intItemUOMId = SC.intItemUOMIdTo
-				,intLotId = SC.intLotId
-				,intSubLocationId = SC.intSubLocationId
-				,intStorageLocationId = SC.intStorageLocationId
-				,dblQty = SC.dblNetUnits
-				,intTransactionId = 1
-				,strTransactionId = SC.strTicketNumber
-				,intTransactionTypeId = 1
-				,intFOBPointId = NULL
-			FROM tblSCTicket SC 
-			INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-			WHERE SC.intTicketId = @intTicketId
-			EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+			
 			
 		END
 		ELSE
@@ -768,39 +744,39 @@ BEGIN TRY
 				BEGIN
 					EXEC uspSCDirectCreateInvoice @intTicketId,@intEntityId,@intLocationId,@intUserId,@intInvoiceId OUTPUT
 
-					IF(ISNULL(@intMatchTicketId,0) > 0)
-					BEGIN
-						DELETE FROM @ItemsToIncreaseInTransitDirect
-						INSERT INTO @ItemsToIncreaseInTransitDirect(
-							[intItemId]
-							,[intItemLocationId]
-							,[intItemUOMId]
-							,[intLotId]
-							,[intSubLocationId]
-							,[intStorageLocationId]
-							,[dblQty]
-							,[intTransactionId]
-							,[strTransactionId]
-							,[intTransactionTypeId]
-							,[intFOBPointId]
-						)
-						SELECT 
-							intItemId = SC.intItemId
-							,intItemLocationId = ICIL.intItemLocationId
-							,intItemUOMId = SC.intItemUOMIdTo
-							,intLotId = SC.intLotId
-							,intSubLocationId = SC.intSubLocationId
-							,intStorageLocationId = SC.intStorageLocationId
-							,dblQty = SC.dblNetUnits * -1
-							,intTransactionId = 1
-							,strTransactionId = SC.strTicketNumber
-							,intTransactionTypeId = 1
-							,intFOBPointId = NULL
-						FROM tblSCTicket SC 
-						INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-						WHERE SC.intTicketId = @intMatchTicketId
-						EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
-					END
+					-- IF(ISNULL(@intMatchTicketId,0) > 0)
+					-- BEGIN
+					-- 	DELETE FROM @ItemsToIncreaseInTransitDirect
+					-- 	INSERT INTO @ItemsToIncreaseInTransitDirect(
+					-- 		[intItemId]
+					-- 		,[intItemLocationId]
+					-- 		,[intItemUOMId]
+					-- 		,[intLotId]
+					-- 		,[intSubLocationId]
+					-- 		,[intStorageLocationId]
+					-- 		,[dblQty]
+					-- 		,[intTransactionId]
+					-- 		,[strTransactionId]
+					-- 		,[intTransactionTypeId]
+					-- 		,[intFOBPointId]
+					-- 	)
+					-- 	SELECT 
+					-- 		intItemId = SC.intItemId
+					-- 		,intItemLocationId = ICIL.intItemLocationId
+					-- 		,intItemUOMId = SC.intItemUOMIdTo
+					-- 		,intLotId = SC.intLotId
+					-- 		,intSubLocationId = SC.intSubLocationId
+					-- 		,intStorageLocationId = SC.intStorageLocationId
+					-- 		,dblQty = SC.dblNetUnits * -1
+					-- 		,intTransactionId = 1
+					-- 		,strTransactionId = SC.strTicketNumber
+					-- 		,intTransactionTypeId = 1
+					-- 		,intFOBPointId = NULL
+					-- 	FROM tblSCTicket SC 
+					-- 	INNER JOIN dbo.tblICItemLocation ICIL ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+					-- 	WHERE SC.intTicketId = @intMatchTicketId
+					-- 	EXEC uspICIncreaseInTransitDirectQty @ItemsToIncreaseInTransitDirect;
+					-- END
 				END
 			END
 		END
