@@ -61,6 +61,16 @@
 )
 
 GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransferDetail_intInventoryTransferDetailId]
+	ON [dbo].[tblICInventoryTransferDetail]([intInventoryTransferDetailId] ASC)
+	INCLUDE (intInventoryTransferId)
+GO
+
+CREATE NONCLUSTERED INDEX [IX_tblICInventoryTransferDetail_intInventoryTransferId]
+	ON [dbo].[tblICInventoryTransferDetail]([intInventoryTransferId] ASC)
+GO
+
 EXEC sp_addextendedproperty @name = N'MS_Description',
     @value = N'Identity Field',
     @level0type = N'SCHEMA',

@@ -15,25 +15,19 @@ AS
 						ELSE 'None'
 					END COLLATE Latin1_General_CI_AS
 	, TransferDetail.intSourceId
-	, strSourceNumber = (
-		CASE WHEN [Transfer].intSourceType = 1 -- Scale
-				THEN (SELECT TOP 1
-			strTicketNumber
-		FROM tblSCTicket
-		WHERE intTicketId = TransferDetail.intSourceId)
-			WHEN [Transfer].intSourceType = 2 -- Inbound Shipment
-				THEN (SELECT TOP 1
-			CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!')AS NVARCHAR(50))
-		FROM tblLGShipment
-		WHERE intShipmentId = TransferDetail.intSourceId)
-			WHEN [Transfer].intSourceType = 3 -- Transports
-				THEN (SELECT TOP 1
-			CAST(ISNULL(TransportView.strTransaction, 'Transport not found!')AS NVARCHAR(50))
-		FROM vyuTRGetLoadReceipt TransportView
-		WHERE TransportView.intLoadReceiptId = TransferDetail.intSourceId)
-			ELSE NULL
+	, strSourceNumber =
+		(
+			CASE 
+				WHEN [Transfer].intSourceType = 1 THEN -- Scale
+					ScaleTicket.strTicketNumber
+				WHEN [Transfer].intSourceType = 2 THEN -- Inbound Shipment
+					LGShipment.strTrackingNumber
+				WHEN [Transfer].intSourceType = 3 THEN -- Transports
+					TransportLoad.strTransaction
+				ELSE 
+					NULL
 			END
-	) COLLATE Latin1_General_CI_AS
+		) COLLATE Latin1_General_CI_AS
 	, TransferDetail.intItemId
 	, Item.strItemNo
 	, strItemDescription = Item.strDescription
@@ -189,3 +183,29 @@ AS
 		LEFT JOIN tblICLotStatus NewLotStatus
 			ON NewLotStatus.intLotStatusId = TransferDetail.intNewLotStatusId
 		LEFT JOIN tblSMShipVia ShipVia ON ShipVia.intEntityId = [Transfer].intShipViaId
+		OUTER APPLY (					
+			SELECT TOP 1
+				strTicketNumber
+			FROM 
+				tblSCTicket
+			WHERE 
+				intTicketId = TransferDetail.intSourceId
+				AND [Transfer].intSourceType = 1 -- Scale Ticket 
+		) ScaleTicket
+		OUTER APPLY (
+			SELECT TOP 1
+				strTrackingNumber = CAST(ISNULL(intTrackingNumber, 'Inbound Shipment not found!') AS NVARCHAR(50))
+			FROM 
+				tblLGShipment lg
+			WHERE 
+				lg.intShipmentId = TransferDetail.intSourceId
+				AND [Transfer].intSourceType = 2 -- Inbound Shipment			
+		) LGShipment
+		OUTER APPLY (				
+			SELECT TOP 1
+				strTransaction = CAST(ISNULL(TransportView.strTransaction, 'Transport not found!') AS NVARCHAR(50))
+			FROM vyuTRGetLoadReceipt TransportView
+			WHERE 
+				TransportView.intLoadReceiptId = TransferDetail.intSourceId	
+				AND [Transfer].intSourceType = 3 -- Transports
+		) TransportLoad 

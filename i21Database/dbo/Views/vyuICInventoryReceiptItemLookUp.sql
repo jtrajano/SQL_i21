@@ -351,7 +351,7 @@ FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem 
 					,dblQuantity
 					,dblItemUOMCF
 					,strSourceNumber
-			FROM	vyuICGetInventoryTransferDetail TransferView
+			FROM	vyuICCompactInventoryTransferDetail TransferView
 			WHERE	TransferView.intInventoryTransferDetailId = ISNULL(ReceiptItem.intInventoryTransferDetailId, ReceiptItem.intSourceId)
 					AND (
 						Receipt.strReceiptType = 'Transfer Order'
