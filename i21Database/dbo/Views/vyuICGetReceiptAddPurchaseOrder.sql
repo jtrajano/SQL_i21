@@ -75,6 +75,7 @@ FROM (
 		, POView.strBundleType
 		, strLotCondition = ICPreference.strLotCondition
 		, intAllowZeroCostTypeId = ItemLocation.intAllowZeroCostTypeId 
+		, ysnWeighed					= CAST(0 AS BIT) 
 	FROM	vyuPODetails POView			
 			INNER JOIN tblICItemLocation ItemLocation 
 				ON ItemLocation.intItemId = POView.intItemId 

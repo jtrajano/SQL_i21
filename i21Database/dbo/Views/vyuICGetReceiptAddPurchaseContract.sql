@@ -138,6 +138,7 @@ FROM (
 		, ContractView.intContractSeq
 		, strLotCondition			= ICPreference.strLotCondition
 		, intAllowZeroCostTypeId	= ItemLocation.intAllowZeroCostTypeId 
+		, ysnWeighed				= CAST(0 AS BIT) 
 	FROM vyuCTContractAddOrdersLookup ContractView
 		INNER JOIN tblICItem Item ON Item.intItemId = ContractView.intItemId
 		INNER JOIN tblICItemLocation ItemLocation ON ItemLocation.intItemId = Item.intItemId AND ItemLocation.intLocationId = ContractView.intCompanyLocationId	
