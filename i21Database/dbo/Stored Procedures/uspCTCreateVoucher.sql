@@ -136,6 +136,7 @@ begin try
 		,dblQuantityToBill decimal(38,15)
 		,intContractDetailId int
 		,intInventoryReceiptItemId int
+		,intBillItemUOMId int
 	);
 
 	declare @availablePrice as table (
@@ -147,10 +148,12 @@ begin try
 		,dtmFixationDate datetime
 		,dblPriceQuantity numeric(18,6)
 		,intAvailablePriceLoad int
+		,intPriceItemUOMId int
 	);
 
 	declare 
 		@intVoucherPayableId int
+		,@previous_intVoucherPayableId INT
 		,@intContractTypeId int
 		,@intPriceFixationId int
 		,@intPriceFixationDetailId int
@@ -164,6 +167,8 @@ begin try
 		,@intInventoryReceiptId int
 		,@ysnSuccessBillPosting bit
 		,@intId int
+		,@intPriceItemUOMId int
+		,@intBillItemUOMId int
 		;
 
 	declare @CreatedVoucher as table(
@@ -182,10 +187,12 @@ begin try
 			,dblQuantityToBill = a.dblQuantityToBill
 			,intContractDetailId = a.intContractDetailId
 			,intInventoryReceiptItemId = a.intInventoryReceiptItemId
+			,intBillItemUOMId = a.intQtyToBillUOMId
 		from
 			@voucherPayables a
 		where
 			isnull(a.intInventoryReceiptChargeId,0) = 0;
+			and a.intContractDetailId is not null;
 
 		--Loop through Payables data
 		select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0;
@@ -197,6 +204,7 @@ begin try
 				,@dblQuantityToBill = dblQuantityToBill
 				,@intContractDetailId = intContractDetailId
 				,@intInventoryReceiptItemId = intInventoryReceiptItemId
+				,@intBillItemUOMId = intBillItemUOMId
 			from
 				@voucherPayablesDataTemp
 			where
@@ -225,10 +233,11 @@ begin try
 				,intPriceFixationId = intPriceFixationId  
 				,intPriceFixationDetailId = intPriceFixationDetailId  
 				,dblFinalPrice = dblFinalprice  
-				,dblAvailablePriceQuantity = dblAvailableQuantity  
+				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intBillItemUOMId,dblAvailableQuantity)--dblAvailableQuantity
 				,dtmFixationDate = dtmFixationDate  
 				,dblPriceQuantity = dblQuantity  
 				,intAvailablePriceLoad = intAvailableLoad  
+				,intPriceItemUOMId = intPriceItemUOMId
 			from  
 				vyuCTGetAvailablePriceForVoucher  
 			where  
@@ -249,6 +258,7 @@ begin try
 					,@dblPriceQuantity = dblPriceQuantity  
 					,@intAvailablePriceLoad = intAvailablePriceLoad  
 					,@intPriceFixationDetailId = intPriceFixationDetailId  
+					,@intPriceItemUOMId = intPriceItemUOMId
 				from  
 					@availablePrice  
 				where  
@@ -471,8 +481,9 @@ begin try
 			end
 						
 			ReciptNextLoop:
+			SELECT @previous_intVoucherPayableId = @intVoucherPayableId
 			select @intVoucherPayableId = null;
-			select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0 and intVoucherPayableId > @intVoucherPayableId;
+			select @intVoucherPayableId = min(intVoucherPayableId) from @voucherPayablesDataTemp where isnull(dblQuantityToBill,0) > 0 and intVoucherPayableId > @previous_intVoucherPayableId;
 		end
 		
 		--add the non-contract items (charges, overage/spot....)

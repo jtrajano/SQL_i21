@@ -79,6 +79,7 @@ as
 						) vq on vq.intBillDetailId = ar.intBillDetailId
 					where
 						pf.intContractDetailId = @intContractDetailId
+						and isnull(ar.ysnReturn,0) = 0
 					group by
 						pfd.intPriceFixationDetailId
 						,pfd.intNumber
