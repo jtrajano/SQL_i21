@@ -15,8 +15,8 @@ CREATE TABLE [dbo].[tblAGWorkOrderDetail]
 	[dblQtyShipped] NUMERIC(18,6) NULL,
 	[dblDiscount] NUMERIC(18,6) NULL,
 	[dblDiscountValue] NUMERIC(18,6) NULL,
-	[dblItemTermDiscount] NUMERIC(18,6) null,
-	[strItemTermDiscountBy] NUMERIC(50) COLLATE Latin1_General_CI_AS NULL,
+	[dblItemTermDiscount] NUMERIC(18,6) NULL,
+	[strItemTermDiscountBy] NUMERIC(18,6) NULL,
 	[intTaxId] INT NULL,
 	[dblPrice] NUMERIC(18,6) NULL,
 	[dblBasePrice] NUMERIC(18,6) NULL,
@@ -96,7 +96,7 @@ CREATE TABLE [dbo].[tblAGWorkOrderDetail]
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
 
-	CONSTRAINT [PK_dbo.tblAGWorkOrderDetail] PRIMARY KEY CLUSTERED ([intWorkOrderDetailId] ASC) 
+	CONSTRAINT [PK_dbo.tblAGWorkOrderDetail_intWorkOrderDetailId] PRIMARY KEY CLUSTERED ([intWorkOrderDetailId] ASC) 
 	
 	
 )

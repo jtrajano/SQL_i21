@@ -4,7 +4,7 @@
  [strType] NVARCHAR(20) NULL,
  [intEntityLocationId] INT NULL,
  [strStatus] NVARCHAR(10) NULL,
- [strOrderNumber] NVARCHAR(MAX) NULL,
+ [strOrderNumber] NVARCHAR(250) NULL,
  [intEntityCustomerId] INT NULL,
  [strCustomerName] NVARCHAR(500) COLLATE Latin1_General_CI_AS  NULL,
  [dtmApplyDate] DATETIME NULL,
@@ -54,7 +54,7 @@
  CONSTRAINT [FK_tblAGWorkOrder_tblARSalesperson_intEntitySalesRepId] FOREIGN KEY ([intEntitySalesRepId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblARSalesperson2_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
- CONSTRAINT [PK_dbo.tblAGWorkOrder] PRIMARY KEY CLUSTERED ([intWorkOrderId] ASC)
+ CONSTRAINT [PK_dbo.tblAGWorkOrder_intWorkOrderId] PRIMARY KEY CLUSTERED ([intWorkOrderId] ASC)
 
 );
 
