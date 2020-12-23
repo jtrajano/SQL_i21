@@ -191,7 +191,7 @@ begin try
 		from
 			@voucherPayables a
 		where
-			isnull(a.intInventoryReceiptChargeId,0) = 0;
+			isnull(a.intInventoryReceiptChargeId,0) = 0
 			and a.intContractDetailId is not null;
 
 		--Loop through Payables data
