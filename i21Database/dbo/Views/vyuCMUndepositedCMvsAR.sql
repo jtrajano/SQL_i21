@@ -20,7 +20,7 @@ ARPosting AS
       ysnPosted = AR.ysnPosted,  
       GL.intGLDetailId,  
       GL.strCode,  
-	    GL.strTransactionType,  
+      GL.strTransactionType,  
       GL.strTransactionForm,  
       GL.strModuleName,  
       GL.intTransactionId,  
@@ -29,11 +29,16 @@ ARPosting AS
     LEFT join tblCMUndepositedFund CMUF on CMUF.strSourceTransactionId = AR.strRecordNumber     
   
     OUTER apply (        
-      SELECT TOP 1 dtmDate,intAccountId, intGLDetailId, (dblDebit- dblCredit) dblAmount, strAccountId, strCode,  
-    strTransactionType,  
-    strTransactionForm,  
-    strModuleName,  
-    intTransactionId  
+      SELECT TOP 1
+        dtmDate,intAccountId,
+        intGLDetailId, 
+        (dblDebit- dblCredit) dblAmount, 
+        strAccountId, 
+        strCode,  
+        strTransactionType,  
+        strTransactionForm,  
+        strModuleName,  
+        intTransactionId  
    FROM vyuGLDetail where         
       strTransactionId = AR.strRecordNumber AND  ysnIsUnposted = 0        
       AND intAccountId =  AR.intAccountId --  in( SELECT intAccountId FROM vyuGLAccountDetail where strAccountCategory = 'Undeposited Funds')    
@@ -103,7 +108,7 @@ Query AS(
       ysnCMInvalidGLAccount = CASE WHEN CM.ysnValidUndepGLAccount = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,  
       ysnARInvalidGLAccount = CASE WHEN AR.ysnValidUndepGLAccount = 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END,  
       AR.intBankDepositId,    
-      AR.intUndepositedFundId,  
+      AR.intUndepositedFundId,
 	    AR.intGLDetailId intARGLDetailId,  
       CM.intGLDetailId intCMGLDetailId,  
       AR.strTransactionType strARTransactionType,  
@@ -117,7 +122,6 @@ Query AS(
       CM.intTransactionId intCMTransactionId,  
       CM.strCode strCMCode,  
       ISNULL(AR.strCode, CM.strCode) strCode  
-  
     FROM ARPosting AR join        
         PartitionCMPosting CM on CM.intUndepositedFundId = AR.intUndepositedFundId     
     AND CM.rowId = 1  
@@ -131,7 +135,7 @@ Query AS(
       dtmARDate = NULL,        
       dtmCMDate = GL.dtmDate,        
       dblARAmount = NULL,        
-      dblCMAmount = GL.dblDebit - GL.dblCredit,        
+      dblCMAmount = SUM(GL.dblDebit - GL.dblCredit),        
       ysnARPosted = NULL,        
       ysnCMPosted = NULL,        
       ysnGLMismatch = NULL,   
@@ -141,8 +145,8 @@ Query AS(
       ysnARInvalidGLAccount = CAST(0 AS BIT),  
       intBankDepositId = NULL,    
       intUndepositedFundId = NULL,  
-      GL.intGLDetailId intARGLDetailId,  
-      GL.intGLDetailId intCMGLDetailId,  
+      MIN(GL.intGLDetailId) intARGLDetailId,  
+      MIN(GL.intGLDetailId) intCMGLDetailId,  
       GL.strTransactionType strARTransactionType,  
       GL.strTransactionForm strARTransactionForm,  
       GL.strModuleName strARModuleName,  
@@ -156,8 +160,9 @@ Query AS(
       strCode  
     FROM vyuGLDetail GL  
     JOIN CompanyLocation CL ON CL.intUndepositedFundsId = GL.intAccountId  
-    WHERE strModuleName NOT IN('Cash Management', 'Accounts Receivable', 'Receive Payments')  
+    where strModuleName NOT IN('Cash Management', 'Accounts Receivable', 'Receive Payments')  
     AND ysnIsUnposted = 0  
+	  GROUP BY GL.strTransactionId, GL.strAccountId,GL.strTransactionType,GL.strTransactionForm,GL.strModuleName,GL.intTransactionId,GL.strCode,GL.dtmDate
 )    
 SELECT CAST(ROW_NUMBER() over(order by strRecordNumber) AS int) intRowId,       
 strStatus =  CASE   
@@ -172,5 +177,4 @@ ELSE
   'Good'  
 END,        
 *  FROM    
-Query Q 
-
+Query Q
