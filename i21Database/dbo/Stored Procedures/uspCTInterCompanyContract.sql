@@ -122,12 +122,11 @@ BEGIN TRY
 
 		IF @strInsert = 'Insert'
 		BEGIN
-			IF EXISTS (
+			IF NOT EXISTS (
 					SELECT 1
-					FROM tblCTContractHeader
+					FROM tblCTContractPreStage
 					WHERE intContractHeaderId = @ContractHeaderId
-						AND intConcurrencyId = 1
-					)
+						)
 			BEGIN
 				INSERT INTO dbo.tblCTContractPreStage (
 					intContractHeaderId
@@ -144,9 +143,8 @@ BEGIN TRY
 		BEGIN
 			IF EXISTS (
 					SELECT 1
-					FROM tblCTContractHeader
+					FROM tblCTContractPreStage
 					WHERE intContractHeaderId = @ContractHeaderId
-						AND intConcurrencyId > 1
 					)
 			BEGIN
 				DELETE
