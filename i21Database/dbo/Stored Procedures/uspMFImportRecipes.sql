@@ -736,6 +736,7 @@ BEGIN
 				,r.dtmLastModified = GETDATE()
 				,r.dtmValidFrom = t.strValidFrom
 				,r.dtmValidTo = t.strValidTo
+				,r.intRecipeTypeId=t.intRecipeTypeId
 			FROM tblMFRecipe r
 			CROSS JOIN (
 				SELECT TOP 1 s.strRecipeName
