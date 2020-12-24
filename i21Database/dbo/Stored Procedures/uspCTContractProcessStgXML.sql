@@ -4037,6 +4037,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
 					AND ysnApproval = 1
+					AND intPriceFixationId is NULL
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
@@ -4065,6 +4066,7 @@ BEGIN TRY
 				FROM tblCTIntrCompApproval
 				WHERE intContractHeaderId = @intNewContractHeaderId
 					AND ysnApproval = 0
+					AND intPriceFixationId is NULL
 
 				INSERT INTO tblCTIntrCompApproval (
 					intContractHeaderId
