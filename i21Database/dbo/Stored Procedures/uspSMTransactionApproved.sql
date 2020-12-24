@@ -122,7 +122,7 @@ BEGIN
 				BEGIN
 					IF NOT EXISTS (
 							SELECT *
-							FROM tblCTContractStage
+							FROM tblCTContractPreStage
 							WHERE intContractHeaderId = @recordId
 							)
 						INSERT INTO dbo.tblCTContractPreStage (
