@@ -1606,7 +1606,7 @@ DECLARE @InventoryParentMenuId INT
 SELECT @InventoryParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Inventory' AND strModuleName = 'Inventory' AND intParentMenuID = 0
 
 /* PRE-UPDATE - 1730 */
-UPDATE tblSMMasterMenu SET strCategory = N'Report' WHERE strMenuName IN ('Inventory Valuation', 'Inventory Valuation Summary', 'Lot Details', 'Stock Details') AND strModuleName = 'Inventory'
+UPDATE tblSMMasterMenu SET strCategory = N'Report' WHERE strMenuName IN ('Inventory Valuation', 'Inventory Valuation Summary', 'Lot Details', 'Stock Details', 'Sub Ledger Traceability') AND strModuleName = 'Inventory'
 
 /* CATEGORY FOLDERS */
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryParentMenuId)
@@ -1808,7 +1808,7 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sub Ledge
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Sub Ledger Traceability', N'Inventory', @InventoryReportParentMenuId, N'Sub Ledger Traceability', N'Report', N'Screen', N'Inventory.view.TransactionTraceability?showSearch=false', N'small-menu-report', 1, 1, 0, 1, 3, 0)
 ELSE 
-	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.TransactionTraceability?showSearch=false', intSort = 3, strIcon = 'small-menu-report' WHERE strMenuName = 'ub Ledger Traceability' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId
+	UPDATE tblSMMasterMenu SET strCommand = N'Inventory.view.TransactionTraceability?showSearch=false', intSort = 3, strIcon = 'small-menu-report' WHERE strMenuName = 'Sub Ledger Traceability' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Blend Details' AND strModuleName = 'Inventory' AND intParentMenuID = @InventoryReportParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
