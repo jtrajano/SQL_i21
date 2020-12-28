@@ -361,10 +361,10 @@ BEGIN
 			,strCargoNo				= ItemLot.strWarrantNo
 			,intSourceType			= Receipt.intSourceType
 			,intLotStatusId			= ItemLot.intLotStatusId
-			,intContractHeaderId	= ReceiptItem.intContractHeaderId
-			,intContractDetailId	= ReceiptItem.intContractDetailId
-			,ysnWeighed				= ReceiptItem.ysnWeighed
-			,strSealNo				= Receipt.strSealNo
+			,intContractHeaderId	= ISNULL(SourceLot.intContractHeaderId, ReceiptItem.intContractHeaderId) 
+			,intContractDetailId	= ISNULL(SourceLot.intContractDetailId, ReceiptItem.intContractDetailId)
+			,ysnWeighed				= ISNULL(SourceLot.ysnWeighed, ReceiptItem.ysnWeighed) 
+			,strSealNo				= ISNULL(SourceLot.strSealNo, Receipt.strSealNo) 
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item
@@ -376,6 +376,8 @@ BEGIN
 				ON ReceiptItem.intInventoryReceiptItemId = ItemLot.intInventoryReceiptItemId
 			LEFT JOIN dbo.tblICStorageLocation StorageLocation 
 				ON StorageLocation.intStorageLocationId = ISNULL(ItemLot.intStorageLocationId, ReceiptItem.intStorageLocationId)
+			LEFT JOIN tblICLot SourceLot
+				ON SourceLot.intLotId = ItemLot.intSourceLotId
 	WHERE	Receipt.strReceiptNumber = @strTransactionId
 
 END 

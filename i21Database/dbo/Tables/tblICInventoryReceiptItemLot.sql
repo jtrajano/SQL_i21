@@ -55,6 +55,7 @@ Type the overview for the table here.
 		[strCargoNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[strWarrantNo] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[intLotStatusId] INT NULL, 
+		[intSourceLotId] INT NULL,
 		[intSort] INT NULL, 
 		[intConcurrencyId] INT NULL DEFAULT ((0)),
 		[dtmDateCreated] DATETIME NULL,
