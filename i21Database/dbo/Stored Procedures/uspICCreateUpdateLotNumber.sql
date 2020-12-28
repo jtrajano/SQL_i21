@@ -117,6 +117,10 @@ DECLARE
 	,@strWarehouseRefNo			AS NVARCHAR(255)
 	,@strCargoNo			AS NVARCHAR(50)
 	,@strWarrantNo			AS NVARCHAR(50)
+	,@intContractHeaderId		AS INT 
+	,@intContractDetailId		AS INT 
+	,@ysnWeighed				AS BIT 
+	,@strSealNo			AS NVARCHAR(100)
 DECLARE @strName AS NVARCHAR(200)
 		,@intItemOwnerId AS INT 
 		,@intEntityProducerId AS INT 
@@ -227,6 +231,10 @@ SELECT  intId
 		,strWarehouseRefNo
 		,strCargoNo
 		,strWarrantNo
+		,intContractHeaderId
+		,intContractDetailId
+		,ysnWeighed
+		,strSealNo
 FROM	@ItemsForLot
 
 OPEN loopLotItems;
@@ -290,6 +298,10 @@ FETCH NEXT FROM loopLotItems INTO
 		,@strWarehouseRefNo
 		,@strCargoNo
 		,@strWarrantNo
+		,@intContractHeaderId
+		,@intContractDetailId
+		,@ysnWeighed
+		,@strSealNo
 ;
 
 -----------------------------------------------------------------------------------------------------------------------------
@@ -696,6 +708,10 @@ BEGIN
 						,strWarehouseRefNo = @strWarehouseRefNo
 						,strCargoNo = @strCargoNo
 						,strWarrantNo = @strWarrantNo
+						,intContractHeaderId = @intContractHeaderId
+						,intContractDetailId = @intContractDetailId
+						,ysnWeighed = @ysnWeighed
+						,strSealNo = @strSealNo
 		) AS LotToUpdate
 			ON LotMaster.intItemId = LotToUpdate.intItemId
 			AND LotMaster.intLocationId = LotToUpdate.intLocationId			
@@ -808,6 +824,10 @@ BEGIN
 				,intStorageLocationId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intStorageLocationId ELSE LotMaster.intStorageLocationId END
 				,intItemOwnerId			= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intItemOwnerId ELSE LotMaster.intItemOwnerId END
 				,strWarehouseRefNo		= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.strWarehouseRefNo ELSE LotMaster.strWarehouseRefNo END
+				,intContractHeaderId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intContractHeaderId ELSE LotMaster.intContractHeaderId END
+				,intContractDetailId	= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.intContractDetailId ELSE LotMaster.intContractDetailId END
+				,ysnWeighed				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.ysnWeighed ELSE LotMaster.ysnWeighed END
+				,strSealNo				= CASE	WHEN ISNULL(LotMaster.dblQty, 0) = 0 THEN LotToUpdate.strSealNo ELSE LotMaster.strSealNo END
 
 				-- The following fields are always updated if it has the same: 
 				-- 1. Quantity UOM
@@ -1014,6 +1034,10 @@ BEGIN
 				,strWarehouseRefNo
 				,strCargoNo
 				,strWarrantNo
+				,intContractHeaderId
+				,intContractDetailId
+				,ysnWeighed
+				,strSealNo
 			) VALUES (
 				@intItemId
 				,@intLocationId
@@ -1072,6 +1096,10 @@ BEGIN
 				,@strWarehouseRefNo
 				,@strCargoNo
 				,@strWarrantNo
+				,@intContractHeaderId
+				,@intContractDetailId
+				,@ysnWeighed
+				,@strSealNo
 			)
 		;
 	
@@ -1269,6 +1297,10 @@ BEGIN
 		,@strWarehouseRefNo
 		,@strCargoNo
 		,@strWarrantNo
+		,@intContractHeaderId
+		,@intContractDetailId
+		,@ysnWeighed
+		,@strSealNo
 	;
 END
 

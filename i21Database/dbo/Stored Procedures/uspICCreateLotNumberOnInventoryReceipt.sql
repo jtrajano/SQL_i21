@@ -300,6 +300,10 @@ BEGIN
 			,strWarrantNo
 			,intSourceType
 			,intLotStatusId
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
 	)
 	SELECT	intLotId				= ItemLot.intLotId
 			,strLotNumber			= ItemLot.strLotNumber
@@ -357,6 +361,10 @@ BEGIN
 			,strCargoNo				= ItemLot.strWarrantNo
 			,intSourceType			= Receipt.intSourceType
 			,intLotStatusId			= ItemLot.intLotStatusId
+			,intContractHeaderId	= ReceiptItem.intContractHeaderId
+			,intContractDetailId	= ReceiptItem.intContractDetailId
+			,ysnWeighed				= ReceiptItem.ysnWeighed
+			,strSealNo				= Receipt.strSealNo
 	FROM	dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
 				ON Receipt.intInventoryReceiptId = ReceiptItem.intInventoryReceiptId
 			INNER JOIN dbo.tblICItem Item

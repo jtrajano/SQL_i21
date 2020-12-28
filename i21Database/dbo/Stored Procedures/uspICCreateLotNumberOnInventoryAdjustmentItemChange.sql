@@ -134,6 +134,10 @@ BEGIN
 			,[intProducerId]
 			,[strCertificateId]
 			,[strTrackingNumber]
+			,intContractHeaderId
+			,intContractDetailId
+			,ysnWeighed
+			,strSealNo
 	)
 	SELECT	[intLotId]					= Detail.intNewLotId 
 			,[intItemId]				= Detail.intNewItemId
@@ -189,7 +193,10 @@ BEGIN
 			,[intProducerId]			= SourceLot.intProducerId
 			,[strCertificateId]			= SourceLot.strCertificateId
 			,[strTrackingNumber]		= SourceLot.strTrackingNumber 
-
+			,intContractHeaderId		= SourceLot.intContractHeaderId
+			,intContractDetailId		= SourceLot.intContractDetailId
+			,ysnWeighed					= SourceLot.ysnWeighed
+			,strSealNo					= SourceLot.strSealNo
 	FROM	dbo.tblICInventoryAdjustment Header INNER JOIN dbo.tblICInventoryAdjustmentDetail Detail
 				ON Header.intInventoryAdjustmentId = Detail.intInventoryAdjustmentId
 
