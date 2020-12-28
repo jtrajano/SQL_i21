@@ -422,7 +422,7 @@ INNER JOIN tblGRTransferStorage TS
 INNER JOIN tblSMCompanyLocation CL
     ON CL.intCompanyLocationId = CS.intCompanyLocationId
 join tblAPBillDetail BillDetail
-	on BillDetail.intCustomerStorageId =  BillDetail.intCustomerStorageId
+	on BillDetail.intCustomerStorageId =  CS.intCustomerStorageId
 		and BillDetail.intItemId = TS.intItemId
 join tblAPBill Bill
     on Bill.intBillId = BillDetail.intBillId
