@@ -3,7 +3,7 @@
 	@intUserId INT,
 	@ysnManualDistribution BIT = 0
 	,@intBillId INT = NULL OUTPUT
-	,@ysnBillPosted BIT = 0 
+	,@ysnBillPosted BIT = 0 OUTPUT
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -468,7 +468,7 @@ BEGIN TRY
 						,dblGrossUnits				= SC.dblGrossUnits
 						,dblNetUnits				= TC.dblQty
 						,strVendorOrderNumber		= 'TKT-' + SC.strTicketNumber
-						,intStorageScheduleTypeId	= SC.intStorageScheduleTypeId 
+						,intStorageScheduleTypeId	= -3 ---Spot
 					FROM tblSCTicket SC 
 					INNER JOIN tblICItem ICI 
 						ON ICI.intItemId = SC.intItemId

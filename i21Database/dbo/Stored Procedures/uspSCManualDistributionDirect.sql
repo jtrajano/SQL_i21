@@ -30,9 +30,12 @@ BEGIN
 	DECLARE @intTicketStorageScheduleTypeId INT
 	DECLARE @dblTicketScheduleQty NUMERIC(18,6)
 	DECLARE @intTicketLoadDetailId INT
+	DECLARE @intTicketProcessingLocationId INT
 
 	DECLARE @intBillId INT
+	DECLARE @intInvoiceId INT
 	DECLARE @ysnBillPosted BIT 
+	DECLARE @intNewTicketId INT
 
 	DECLARE @_intContractDetailId INT
 	DECLARE @_intLoadDetailId INT
@@ -61,6 +64,7 @@ BEGIN
 				,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
 				,@dblTicketScheduleQty = dblScheduleQty
 				,@intTicketLoadDetailId = intLoadDetailId
+				,@intTicketProcessingLocationId = intProcessingLocationId
 			FROM tblSCTicket A
 			LEFT JOIN tblCTWeightGrade CTWG1
 				ON A.intWeightId = CTWG1.intWeightGradeId 
@@ -385,6 +389,335 @@ BEGIN
 				-- end
 			END
 
+			--Create Direct out 
+			BEGIN
+
+				--tblSCTicket
+				INSERT INTO [dbo].[tblSCTicket]
+					([strTicketStatus]
+					,[strTicketNumber]
+					,[strOriginalTicketNumber]
+					,[intScaleSetupId]
+					,[intTicketPoolId]
+					,[intTicketLocationId]
+					,[intTicketType]
+					,[strInOutFlag]
+					,[dtmTicketDateTime]
+					,[dtmTicketTransferDateTime]
+					,[dtmTicketVoidDateTime]
+					,[dtmTransactionDateTime]
+					,[intProcessingLocationId]
+					,[intTransferLocationId]
+					,[strScaleOperatorUser]
+					,[intEntityScaleOperatorId]
+					,[strTruckName]
+					,[strDriverName]
+					,[ysnDriverOff]
+					,[ysnSplitWeightTicket]
+					,[ysnGrossManual]
+					,[ysnGross1Manual]
+					,[ysnGross2Manual]
+					,[dblGrossWeight]
+					,[dblGrossWeight1]
+					,[dblGrossWeight2]
+					,[dblGrossWeightOriginal]
+					,[dblGrossWeightSplit1]
+					,[dblGrossWeightSplit2]
+					,[dtmGrossDateTime]
+					,[dtmGrossDateTime1]
+					,[dtmGrossDateTime2]
+					,[intGrossUserId]
+					,[ysnTareManual]
+					,[ysnTare1Manual]
+					,[ysnTare2Manual]
+					,[dblTareWeight]
+					,[dblTareWeight1]
+					,[dblTareWeight2]
+					,[dblTareWeightOriginal]
+					,[dblTareWeightSplit1]
+					,[dblTareWeightSplit2]
+					,[dtmTareDateTime]
+					,[dtmTareDateTime1]
+					,[dtmTareDateTime2]
+					,[intTareUserId]
+					,[dblGrossUnits]
+					,[dblShrink]
+					,[dblNetUnits]
+					,[strItemUOM]
+					,[intCustomerId]
+					,[intSplitId]
+					,[strDistributionOption]
+					,[intDiscountSchedule]
+					,[strDiscountLocation]
+					,[dtmDeferDate]
+					,[dblUnitPrice]
+					,[dblUnitBasis]
+					,[dblTicketFees]
+					,[intCurrencyId]
+					,[dblCurrencyRate]
+					,[strTicketComment]
+					,[strCustomerReference]
+					,[ysnTicketPrinted]
+					,[ysnPlantTicketPrinted]
+					,[ysnGradingTagPrinted]
+					,[intHaulerId]
+					,[intFreightCarrierId]
+					,[dblFreightRate]
+					,[dblFreightAdjustment]
+					,[intFreightCurrencyId]
+					,[dblFreightCurrencyRate]
+					,[strFreightCContractNumber]
+					,[ysnFarmerPaysFreight]
+					,[ysnCusVenPaysFees]
+					,[strLoadNumber]
+					,[intLoadLocationId]
+					,[intAxleCount]
+					,[intAxleCount1]
+					,[intAxleCount2]
+					,[strPitNumber]
+					,[intGradingFactor]
+					,[strVarietyType]
+					,[strFarmNumber]
+					,[strFieldNumber]
+					,[strDiscountComment]
+					,[intCommodityId]
+					,[intDiscountId]
+					,[intDiscountLocationId]
+					,[intItemId]
+					,[intEntityId]
+					,[intLoadId]
+					,[intMatchTicketId]
+					,[intSubLocationId]
+					,[intStorageLocationId]
+					,[intSubLocationToId]
+					,[intStorageLocationToId]
+					,[intFarmFieldId]
+					,[intDistributionMethod]
+					,[intSplitInvoiceOption]
+					,[intDriverEntityId]
+					,[intStorageScheduleId]
+					,[intConcurrencyId]
+					,[dblNetWeightDestination]
+					,[ysnHasGeneratedTicketNumber]
+					,[intInventoryTransferId]
+					,[intInventoryReceiptId]
+					,[intInventoryShipmentId]
+					,[intInventoryAdjustmentId]
+					,[dblScheduleQty]
+					,[dblConvertedUOMQty]
+					,[dblContractCostConvertedUOM]
+					,[intItemUOMIdFrom]
+					,[intItemUOMIdTo]
+					,[intTicketTypeId]
+					,[intStorageScheduleTypeId]
+					,[strFreightSettlement]
+					,[strCostMethod]
+					,[intGradeId]
+					,[intWeightId]
+					,[intDeliverySheetId]
+					,[intCommodityAttributeId]
+					,[strElevatorReceiptNumber]
+					,[ysnRailCar]
+					,[ysnDeliverySheetPost]
+					,[intLotId]
+					,[strLotNumber]
+					,[intSalesOrderId]
+					,[intTicketLVStagingId]
+					,[intBillId]
+					,[intInvoiceId]
+					,[intCompanyId]
+					,[intEntityContactId]
+					,[strPlateNumber]
+					,[blbPlateNumber]
+					,[ysnDestinationWeightGradePost]
+					,[strSourceType]
+					,[ysnHasSpecialDiscount]
+					)
+				SELECT 
+					[strTicketStatus] = 'O'
+					,[strTicketNumber] = strTicketNumber + '-B'
+					,[strOriginalTicketNumber]
+					,[intScaleSetupId]
+					,[intTicketPoolId]
+					,[intTicketLocationId]
+					,[intTicketType]
+					,[strInOutFlag] = 'O'
+					,[dtmTicketDateTime]
+					,[dtmTicketTransferDateTime]
+					,[dtmTicketVoidDateTime]
+					,[dtmTransactionDateTime]
+					,[intProcessingLocationId]
+					,[intTransferLocationId]
+					,[strScaleOperatorUser]
+					,[intEntityScaleOperatorId]
+					,[strTruckName]
+					,[strDriverName]
+					,[ysnDriverOff]
+					,[ysnSplitWeightTicket]
+					,[ysnGrossManual]
+					,[ysnGross1Manual]
+					,[ysnGross2Manual]
+					,[dblGrossWeight]
+					,[dblGrossWeight1]
+					,[dblGrossWeight2]
+					,[dblGrossWeightOriginal]
+					,[dblGrossWeightSplit1]
+					,[dblGrossWeightSplit2]
+					,[dtmGrossDateTime]
+					,[dtmGrossDateTime1]
+					,[dtmGrossDateTime2]
+					,[intGrossUserId]
+					,[ysnTareManual]
+					,[ysnTare1Manual]
+					,[ysnTare2Manual]
+					,[dblTareWeight]
+					,[dblTareWeight1]
+					,[dblTareWeight2]
+					,[dblTareWeightOriginal]
+					,[dblTareWeightSplit1]
+					,[dblTareWeightSplit2]
+					,[dtmTareDateTime]
+					,[dtmTareDateTime1]
+					,[dtmTareDateTime2]
+					,[intTareUserId]
+					,[dblGrossUnits]
+					,[dblShrink]
+					,[dblNetUnits]
+					,[strItemUOM]
+					,[intCustomerId]
+					,[intSplitId]
+					,[strDistributionOption]
+					,[intDiscountSchedule]
+					,[strDiscountLocation]
+					,[dtmDeferDate]
+					,[dblUnitPrice]
+					,[dblUnitBasis]
+					,[dblTicketFees]
+					,[intCurrencyId]
+					,[dblCurrencyRate]
+					,[strTicketComment]
+					,[strCustomerReference]
+					,[ysnTicketPrinted]
+					,[ysnPlantTicketPrinted]
+					,[ysnGradingTagPrinted]
+					,[intHaulerId]
+					,[intFreightCarrierId]
+					,[dblFreightRate]
+					,[dblFreightAdjustment]
+					,[intFreightCurrencyId]
+					,[dblFreightCurrencyRate]
+					,[strFreightCContractNumber]
+					,[ysnFarmerPaysFreight]
+					,[ysnCusVenPaysFees]
+					,[strLoadNumber]
+					,[intLoadLocationId]
+					,[intAxleCount]
+					,[intAxleCount1]
+					,[intAxleCount2]
+					,[strPitNumber]  = ''
+					,[intGradingFactor]
+					,[strVarietyType]
+					,[strFarmNumber]
+					,[strFieldNumber]
+					,[strDiscountComment]
+					,[intCommodityId]
+					,[intDiscountId]
+					,[intDiscountLocationId]
+					,[intItemId]
+					,[intEntityId] = NULL
+					,[intLoadId]
+					,[intMatchTicketId] = @intTicketId
+					,[intSubLocationId]
+					,[intStorageLocationId] = NULL
+					,[intSubLocationToId]
+					,[intStorageLocationToId]
+					,[intFarmFieldId]
+					,[intDistributionMethod]
+					,[intSplitInvoiceOption]
+					,[intDriverEntityId]
+					,[intStorageScheduleId]
+					,[intConcurrencyId]
+					,[dblNetWeightDestination]
+					,[ysnHasGeneratedTicketNumber]
+					,[intInventoryTransferId]
+					,[intInventoryReceiptId]
+					,[intInventoryShipmentId]
+					,[intInventoryAdjustmentId]
+					,[dblScheduleQty]
+					,[dblConvertedUOMQty]
+					,[dblContractCostConvertedUOM]
+					,[intItemUOMIdFrom]
+					,[intItemUOMIdTo]
+					,[intTicketTypeId]
+					,[intStorageScheduleTypeId]
+					,[strFreightSettlement]
+					,[strCostMethod]
+					,[intGradeId]
+					,[intWeightId]
+					,[intDeliverySheetId]
+					,[intCommodityAttributeId]
+					,[strElevatorReceiptNumber]
+					,[ysnRailCar]
+					,[ysnDeliverySheetPost]
+					,[intLotId]
+					,[strLotNumber]
+					,[intSalesOrderId]
+					,[intTicketLVStagingId]
+					,[intBillId]
+					,[intInvoiceId]
+					,[intCompanyId]
+					,[intEntityContactId]
+					,[strPlateNumber]
+					,[blbPlateNumber]
+					,[ysnDestinationWeightGradePost]
+					,[strSourceType]
+					,[ysnHasSpecialDiscount]
+				FROM tblSCTicket
+				WHERE intTicketId = @intTicketId
+
+				SET @intNewTicketId = SCOPE_IDENTITY()
+
+				--tblQMTicketDiscount
+				INSERT INTO [dbo].[tblQMTicketDiscount]
+					([intConcurrencyId]
+					,[dblGradeReading]
+					,[strCalcMethod]
+					,[strShrinkWhat]
+					,[dblShrinkPercent]
+					,[dblDiscountAmount]
+					,[dblDiscountDue]
+					,[dblDiscountPaid]
+					,[ysnGraderAutoEntry]
+					,[intDiscountScheduleCodeId]
+					,[dtmDiscountPaidDate]
+					,[intTicketId] 
+					,[intTicketFileId]
+					,[strSourceType]
+					,[intSort]
+					,[strDiscountChargeType])
+				SELECT 
+					[intConcurrencyId]
+					,[dblGradeReading]
+					,[strCalcMethod]
+					,[strShrinkWhat]
+					,[dblShrinkPercent]
+					,[dblDiscountAmount]
+					,[dblDiscountDue]
+					,[dblDiscountPaid]
+					,[ysnGraderAutoEntry]
+					,[intDiscountScheduleCodeId]
+					,[dtmDiscountPaidDate]
+					,[intTicketId] = @intNewTicketId
+					,[intTicketFileId] = NULL
+					,[strSourceType]
+					,[intSort]
+					,[strDiscountChargeType]
+				FROM tblQMTicketDiscount
+				WHERE intTicketId = @intTicketId
+				ORDER BY intTicketDiscountId ASC
+			END
+
+
 			IF LOWER(ISNULL(@strTicketWhereFinalizedWeight,'Origin')) <> 'destination' AND LOWER(ISNULL(@strTicketWhereFinalizedGrade,'Origin')) <> 'destination'
 			BEGIN
 
@@ -535,6 +868,16 @@ BEGIN
 				BEGIN
 					RAISERROR('Cannot distribute closed ticket.', 11, 1);
 				END
+			END
+
+			IF LOWER(ISNULL(@strTicketWhereFinalizedWeight,'Origin')) <> 'destination' AND LOWER(ISNULL(@strTicketWhereFinalizedGrade,'Origin')) <> 'destination'
+			BEGIN
+				EXEC uspSCDirectCreateInvoice 
+					@intTicketId = @intTicketId
+					,@intEntityId = @intTicketEntityId
+					,@intLocationId = @intTicketProcessingLocationId
+					,@intUserId = @intUserId
+					,@intInvoiceId = @intInvoiceId OUTPUT
 			END
 		END
 
