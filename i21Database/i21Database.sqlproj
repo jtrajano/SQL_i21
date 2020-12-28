@@ -2656,6 +2656,7 @@
     <Build Include="dbo\Stored Procedures\uspICSubLedgerRemoveReportEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetTransactionsLedger.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddTransactionLinks.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGenerateDemoTransactionLinks.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetTransactionsLedgerAccounts.sql" />
     <Build Include="dbo\Stored Procedures\uspICGenerateGraphDemoData.sql" />
     <Build Include="dbo\Stored Procedures\uspARLogInventorySubLedger.sql" />
