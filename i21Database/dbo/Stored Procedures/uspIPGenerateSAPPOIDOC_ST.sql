@@ -205,7 +205,7 @@ BEGIN
 		LEFT JOIN tblICItemUOM IU ON IU.intItemUOMId = CD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = IU.intUnitMeasureId
 		LEFT JOIN tblSMCurrency C ON C.intCurrencyID = CD.intBasisCurrencyId
-		LEFT JOIN tblCTPriceFixation PF ON PF.intContractHeaderId = CD.intContractHeaderId
+		LEFT JOIN tblCTPriceFixation PF ON PF.intContractHeaderId = CD.intContractHeaderId and PF.intContractDetailId = CD.intContractDetailId
 		LEFT JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationId = PF.intPriceFixationId
 		LEFT JOIN tblSMCity City ON City.intCityId = CD.intDestinationPortId
 		LEFT JOIN tblEMEntity E ON E.intEntityId = CD.intShippingLineId
