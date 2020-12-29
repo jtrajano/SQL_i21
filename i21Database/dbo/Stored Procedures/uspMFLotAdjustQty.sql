@@ -7,6 +7,7 @@
 	,@strNotes NVARCHAR(MAX) = NULL
 	,@dtmDate DATETIME = NULL
 	,@ysnBulkChange BIT = 0
+	,@strReferenceNo NVARCHAR(50) = NULL
 AS
 BEGIN TRY
 	DECLARE @intItemId INT
@@ -164,6 +165,19 @@ BEGIN TRY
 				)
 	END
 
+	IF @strReasonCode='Production reversal adjustment'
+	BEGIN
+		IF NOT EXISTS(SELECT *FROM dbo.tblMFWorkOrder WHERE strWorkOrderNo =@strReferenceNo )
+		BEGIN
+			RAISERROR (
+				'Invalid Reference No.'
+				,11
+				,1
+				)
+			RETURN
+		END
+	END
+
 	--IF @strReasonCode IS NULL
 	--	OR @strReasonCode = ''
 	--BEGIN
@@ -173,18 +187,18 @@ BEGIN TRY
 	--			,1
 	--			)
 	--END
-	IF EXISTS (
-			SELECT 1
-			FROM tblWHSKU
-			WHERE intLotId = @intLotId
-			)
-	BEGIN
-		RAISERROR (
-				'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
-				,11
-				,1
-				)
-	END
+	--IF EXISTS (
+	--		SELECT 1
+	--		FROM tblWHSKU
+	--		WHERE intLotId = @intLotId
+	--		)
+	--BEGIN
+	--	RAISERROR (
+	--			'This lot is being managed in warehouse. All transactions should be done in warehouse module. You can only change the lot status from inventory view.'
+	--			,11
+	--			,1
+	--			)
+	--END
 
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
@@ -223,6 +237,7 @@ BEGIN TRY
 		,@strReason = @strReasonCode
 		,@intLocationId = @intLocationId
 		,@intInventoryAdjustmentId = @intInventoryAdjustmentId
+		,@strReferenceNo=@strReferenceNo
 
 	IF EXISTS (
 			SELECT TOP 1 *
