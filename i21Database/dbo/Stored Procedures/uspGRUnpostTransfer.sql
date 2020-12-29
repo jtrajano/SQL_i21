@@ -63,19 +63,24 @@ BEGIN
 		DECLARE @TicketNo VARCHAR(50)
 
 		SELECT @TicketNo = STUFF((
-			SELECT ',' + strStorageTicketNumber 
+			SELECT ',' + strStorageTicketNumber
 			FROM tblGRCustomerStorage A 
-			INNER JOIN (
-				SELECT dblUnitQty = SUM(dblUnitQty)
-					,intTransferStorageId
-					,intToCustomerStorageId
-				FROM tblGRTransferStorageReference
-				WHERE intTransferStorageId = @intTransferStorageId
-					--AND intToCustomerStorageId = A.intCustomerStorageId
-				GROUP BY intToCustomerStorageId,intTransferStorageId
-			) F
+			INNER JOIN tblGRTransferStorageReference F
 				ON F.intToCustomerStorageId = A.intCustomerStorageId
-			WHERE F.dblUnitQty <> A.dblOpenBalance
+			WHERE A.dblOriginalBalance <> A.dblOpenBalance
+				AND F.intTransferStorageId = @intTransferStorageId
+			-- FROM tblGRCustomerStorage A 
+			-- INNER JOIN (
+			-- 	SELECT dblUnitQty = SUM(dblUnitQty)
+			-- 		,intTransferStorageId
+			-- 		,intToCustomerStorageId
+			-- 	FROM tblGRTransferStorageReference
+			-- 	WHERE intTransferStorageId = @intTransferStorageId
+			-- 		--AND intToCustomerStorageId = A.intCustomerStorageId
+			-- 	GROUP BY intToCustomerStorageId,intTransferStorageId
+			-- ) F
+			-- 	ON F.intToCustomerStorageId = A.intCustomerStorageId
+			-- WHERE F.dblUnitQty <> A.dblOpenBalance
 			FOR XML PATH('')
 		),1,1,'')
 		
