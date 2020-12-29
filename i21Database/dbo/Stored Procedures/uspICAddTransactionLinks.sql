@@ -24,6 +24,13 @@ WHERE NOT EXISTS(
 		(strDestTransactionNo = link.strSrcTransactionNo AND strDestTransactionNo = link.strDestTransactionNo)
 )
 
+;WITH CTE 
+AS (
+	SELECT	RN = ROW_NUMBER() OVER (PARTITION BY strSrcTransactionNo, strDestTransactionNo ORDER BY strSrcTransactionNo)
+	FROM	tblICTransactionLinks 
+)
+DELETE FROM CTE WHERE RN > 1;
+
 INSERT INTO tblICTransactionNodes (guiTransactionGraphId, intTransactionId, strTransactionNo, strTransactionType, strModuleName)
 SELECT DISTINCT COALESCE(related.guiTransactionGraphId, @GraphId), intSrcId, strSrcTransactionNo, strSrcTransactionType, strSrcModuleName
 FROM @TransactionLinks l
