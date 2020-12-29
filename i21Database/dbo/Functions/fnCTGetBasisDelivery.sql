@@ -84,6 +84,7 @@ BEGIN
 		INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId
 		WHERE CBL1.strTransactionType LIKE '%Basis Deliveries'
 			AND CBL1.dtmTransactionDate < DATEADD(DAY, 1, GETDATE())
+			AND isnull(CBL1.dblQty,0) <> 0
 	)
 
 	INSERT INTO @Transaction (intContractHeaderId
