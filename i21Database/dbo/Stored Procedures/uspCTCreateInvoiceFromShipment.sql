@@ -415,6 +415,7 @@ ORDER BY
 
 DECLARE @ErrorMessage NVARCHAR(250)
 
+/*
 -- Check if the contract is destination weights and grades
 IF EXISTS 
 (
@@ -436,6 +437,7 @@ BEGIN
                             @intTransactionId		= 	@intPriceFixationDetailId,
                             @dblTransactionQty      =   @dblQuantity
 END
+*/
 
 
 EXEC    [dbo].[uspARProcessInvoicesByBatch]
