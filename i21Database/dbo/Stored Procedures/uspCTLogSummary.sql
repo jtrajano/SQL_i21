@@ -1426,16 +1426,10 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = CASE
-								WHEN @ysnLoadBased = 1 THEN 0
-								ELSE 
-								(
-									case 
-										when (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 then (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) 
-										else 0 
-									end
-								) 
-						   END--pfd.dblQuantity
+				, dblQty = CASE WHEN @strProcess = 'Price Delete' THEN pfd.dblQuantity
+								ELSE (CASE WHEN @ysnLoadBased = 1 THEN 0
+										ELSE (CASE WHEN (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 THEN (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) 
+												ELSE 0 END) END) END
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'
