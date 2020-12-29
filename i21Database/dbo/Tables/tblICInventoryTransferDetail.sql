@@ -42,6 +42,7 @@
 	[dblWeightPerQty] NUMERIC(38, 20) NULL,
 	[strLotCondition] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 	[intCostingMethod] INT NULL,
+	[ysnWeighed] BIT NULL DEFAULT ((0)),
     [dtmDateCreated] DATETIME NULL,
     [dtmDateModified] DATETIME NULL,
     [intCreatedByUserId] INT NULL,

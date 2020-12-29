@@ -156,7 +156,7 @@ FROM (
 			, item.strBundleType
 			, d.intOwnershipType 
 			, intAllowZeroCostTypeId = toLocation.intAllowZeroCostTypeId 
-			, ysnWeighed				= CAST(0 AS BIT) 
+			, ysnWeighed				= d.ysnWeighed
 			, intSourceLotId			= LotItem.intLotId
 	FROM	dbo.tblICInventoryTransfer h INNER JOIN tblICInventoryTransferDetail d 
 				ON h.intInventoryTransferId = d.intInventoryTransferId
