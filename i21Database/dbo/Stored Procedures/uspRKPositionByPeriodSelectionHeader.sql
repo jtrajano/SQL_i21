@@ -23,7 +23,7 @@ BEGIN TRY
 	
 	SELECT intSeqId = 1
 		, strType = 'Ownership'
-		, dblTotal = ISNULL(invQty, 0) + ISNULL(ReserveQty, 0) + ISNULL(InTransite, 0) + (ISNULL(dblPurchase,0) - ISNULL(dblSales,0))
+		, dblTotal = ISNULL(invQty, 0) + ISNULL(InTransite, 0) + (ISNULL(dblPurchase,0) - ISNULL(dblSales,0))
 	INTO #temp
 	FROM (
 		SELECT invQty = (SELECT SUM(ISNULL(dbo.fnCTConvertQuantityToTargetCommodityUOM(ium.intCommodityUnitMeasureId, ium1.intCommodityUnitMeasureId, ISNULL(it1.dblUnitOnHand, 0)), 0))
