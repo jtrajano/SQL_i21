@@ -90,6 +90,8 @@ BEGIN TRY
             @intSeq int,
 			@intCount int,
 			@intLotId int
+			,@strPickByStorageLocation NVARCHAR(50)
+			,@intSubLocationId int
 
 	SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
 	FROM tblMFCompanyPreference
@@ -170,10 +172,32 @@ BEGIN TRY
 	FROM tblSMCompanyLocation
 	WHERE intCompanyLocationId = @intLocationId
 
+	SELECT @strPickByStorageLocation = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND pa.intAttributeId=123
+
 	SELECT @intIssuedUOMTypeId = ISNULL(intIssuedUOMTypeId, 0)
 		,@strBlenderName = strName
+		,@intSubLocationId=intSubLocationId
 	FROM tblMFMachine
 	WHERE intMachineId = @intMachineId
+
+	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT)
+
+	IF IsNULL(@strPickByStorageLocation,'')='True'
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT @intSubLocationId 
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationId = @intLocationId
+	END
 
 	IF @intIssuedUOMTypeId = 0
 	BEGIN
@@ -543,6 +567,7 @@ BEGIN TRY
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+			JOIN @tblSourceSubLocation SubLoc on SubLoc.intSubLocationId =L.intSubLocationId 
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (
@@ -1182,6 +1207,7 @@ BEGIN TRY
 			FROM tblICLot L
 			LEFT JOIN tblSMUserSecurity US ON L.intCreatedEntityId = US.[intEntityId]
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
+			JOIN @tblSourceSubLocation SubLoc on SubLoc.intSubLocationId =L.intSubLocationId 
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (

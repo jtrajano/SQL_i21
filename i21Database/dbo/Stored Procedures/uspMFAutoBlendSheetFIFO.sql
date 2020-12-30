@@ -74,6 +74,8 @@ BEGIN TRY
 		,@strValue NVARCHAR(50)
 		,@strOrderBy NVARCHAR(100) = ''
 		,@strOrderByFinal NVARCHAR(100) = ''
+		,@strPickByStorageLocation NVARCHAR(50)
+		,@intSubLocationId int
 
 	IF @ysnFromPickList = 0
 		SELECT TOP 1 @ysnEnableParentLot = ISNULL(ysnEnableParentLot, 0)
@@ -179,6 +181,12 @@ BEGIN TRY
 		AND intLocationId = @intLocationId
 		AND at.strAttributeName = 'Source Location'
 
+	SELECT @strPickByStorageLocation = ISNULL(pa.strAttributeValue, '')
+	FROM tblMFManufacturingProcessAttribute pa
+	WHERE intManufacturingProcessId = @intManufacturingProcessId
+		AND intLocationId = @intLocationId
+		AND pa.intAttributeId=123
+
 	IF ISNULL(@ysnIncludeKitStagingLocation, 0) = 1
 		SET @intKitStagingLocationId = 0
 
@@ -188,6 +196,7 @@ BEGIN TRY
 
 	SELECT @intIssuedUOMTypeId = ISNULL(intIssuedUOMTypeId, 0)
 		,@strBlenderName = strName
+		,@intSubLocationId=intSubLocationId
 	FROM tblMFMachine
 	WHERE intMachineId = @intMachineId
 
@@ -313,6 +322,21 @@ BEGIN TRY
 		FROM tblICStorageLocation
 		WHERE intLocationId = @intLocationId
 			AND ISNULL(ysnAllowConsume, 0) = 1
+	END
+
+	DECLARE @tblSourceSubLocation AS TABLE (intSubLocationId INT)
+
+	IF IsNULL(@strPickByStorageLocation,'')='True'
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT @intSubLocationId 
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSourceSubLocation
+		SELECT intCompanyLocationSubLocationId
+		FROM tblSMCompanyLocationSubLocation
+		WHERE intCompanyLocationId = @intLocationId
 	END
 
 	DECLARE @tblExcludedLot TABLE (
@@ -1014,6 +1038,7 @@ BEGIN TRY
 			JOIN tblICLotStatus LS ON L.intLotStatusId = LS.intLotStatusId
 			JOIN tblICStorageLocation SL ON L.intStorageLocationId = SL.intStorageLocationId
 			JOIN @tblSourceStorageLocation tsl ON tsl.intStorageLocationId = SL.intStorageLocationId
+			JOIN @tblSourceSubLocation SubLoc on SubLoc.intSubLocationId =L.intSubLocationId 
 			WHERE L.intItemId = @intRawItemId
 				AND L.intLocationId = @intLocationId
 				AND LS.strPrimaryStatus IN (

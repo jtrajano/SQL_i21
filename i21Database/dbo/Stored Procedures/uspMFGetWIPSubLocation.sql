@@ -30,6 +30,6 @@ BEGIN
 					THEN @intManufacturingProcessId
 				ELSE PM.intManufacturingProcessId
 				END
-			) and SL.strClassification='WIP'
+			) --and SL.strClassification='WIP'
 	ORDER BY SL.strSubLocationName
 END
