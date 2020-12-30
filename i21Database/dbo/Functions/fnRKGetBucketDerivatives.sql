@@ -158,7 +158,7 @@ BEGIN
 			, ysnPreCrush = CAST(ISNULL(mf.ysnPreCrush, 0) AS BIT)
 			, strNotes
 			, strBrokerTradeNo = mf.strBrokerTradeNo			
-			, mf.intFutOptTransactionHeaderId
+			, intFutOptTransactionHeaderId = c.intTransactionRecordHeaderId
 			, c.intCurrencyId
 			, c.strCurrency
 			, dtmCreatedDate
