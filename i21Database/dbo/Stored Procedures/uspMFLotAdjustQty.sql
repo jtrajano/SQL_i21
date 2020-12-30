@@ -31,7 +31,7 @@ BEGIN TRY
 		,@dblWeight NUMERIC(38, 20)
 		,@dblLotReservedQty NUMERIC(38, 20)
 		,@dblLotAvailableQty NUMERIC(38, 20)
-		,@strNote1 NVARCHAR(MAX)
+		--,@strNote1 NVARCHAR(MAX)
 		,@dblDefaultResidueQty NUMERIC(38, 20)
 		,@intTransactionCount INT
 		,@strDescription NVARCHAR(MAX)
@@ -203,7 +203,13 @@ BEGIN TRY
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
 
-	SET @strNote1 = isNULL(@strReasonCode, '') + ' ' + IsNULL(@strNotes, '')
+	--SET @strNote1 = isNULL(@strReasonCode, '') + ' ' + IsNULL(@strNotes, '')
+
+	IF @strReferenceNo IS NOT NULL
+	BEGIN
+		SELECT @strNotes = isNULL(@strNotes, '') + ' Ref: ' + IsNULL(@strReferenceNo, '')
+		SELECT @strNotes=Ltrim(@strNotes)
+	END
 
 	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId=@intItemId
 		,@dtmDate=@dtmDate
