@@ -38,8 +38,21 @@ BEGIN TRY
 
 	SELECT @intTransactionCount = @@TRANCOUNT
 
-	SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
-
+	IF IsNULL(@strReferenceNo,'')<>''
+	BEGIN
+		if IsNULL(@strNotes,'')<>''
+		BEGIN
+			SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, '')+ ' Ref: ' + isNULL(@strReferenceNo, ''))
+		END
+		ELSE
+		BEGIN
+			SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' Ref: ' + isNULL(@strReferenceNo, ''))
+		END
+	END
+	ELSE
+	BEGIN
+		SELECT @strDescription = Ltrim(isNULL(@strReasonCode, '') + ' ' + isNULL(@strNotes, ''))
+	END
 	SELECT TOP 1 @dblDefaultResidueQty = ISNULL(dblDefaultResidueQty, 0.00001)
 	FROM tblMFCompanyPreference
 
@@ -202,14 +215,6 @@ BEGIN TRY
 
 	IF @intTransactionCount = 0
 		BEGIN TRANSACTION
-
-	--SET @strNote1 = isNULL(@strReasonCode, '') + ' ' + IsNULL(@strNotes, '')
-
-	IF @strReferenceNo IS NOT NULL
-	BEGIN
-		SELECT @strNotes = isNULL(@strNotes, '') + ' Ref: ' + IsNULL(@strReferenceNo, '')
-		SELECT @strNotes=Ltrim(@strNotes)
-	END
 
 	EXEC uspICInventoryAdjustment_CreatePostQtyChange @intItemId=@intItemId
 		,@dtmDate=@dtmDate
