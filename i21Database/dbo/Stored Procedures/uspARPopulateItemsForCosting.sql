@@ -59,7 +59,9 @@ SELECT
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
+										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
+										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
@@ -115,7 +117,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intInvoiceDetailId], [dblQtyShipped] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
+	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
 		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN
 	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
@@ -132,11 +134,11 @@ WHERE
     AND ARID.[ysnImpactInventory] = @OneBit
 	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 		
 	AND (
-		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0) AND  ARID.[strTransactionType] <> 'Credit Memo')
+		(ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR 
-		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NOT NULL AND ARID.[intLoadDetailId] > 0) AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice')
+		(((ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped]) OR (ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt])) AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice')
 		OR
-		(((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) OR (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)) AND ARID.[strTransactionType] = 'Credit Memo')
+		((ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 OR ISNULL(ARID.[intLoadDetailId], 0) = 0) AND ARID.[strTransactionType] = 'Credit Memo')
 		)
 	AND ARID.[intItemId] IS NOT NULL
 	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
@@ -144,7 +146,7 @@ WHERE
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ARID.[intLoadDetailId] IS NULL))
+	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND (ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped])))
 
 INSERT INTO #ARItemsForCosting
 	([intItemId]
@@ -302,6 +304,6 @@ ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
 INNER JOIN tblARInvoiceDetail ARIDP
 ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
-AND ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped]
+AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))
 
 RETURN 1

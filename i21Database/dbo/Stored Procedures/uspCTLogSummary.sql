@@ -1426,16 +1426,10 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = CASE
-								WHEN @ysnLoadBased = 1 THEN 0
-								ELSE 
-								(
-									case 
-										when (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 then (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) 
-										else 0 
-									end
-								) 
-						   END--pfd.dblQuantity
+				, dblQty = CASE WHEN @strProcess = 'Price Delete' THEN pfd.dblQuantity
+								ELSE (CASE WHEN @ysnLoadBased = 1 THEN 0
+										ELSE (CASE WHEN (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 THEN (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) 
+												ELSE 0 END) END) END
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'
@@ -1675,6 +1669,91 @@ BEGIN TRY
 			AND cbl.intContractHeaderId = @intContractHeaderId
 			AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
 			AND cbl.intTransactionReferenceDetailId = @intTransactionId
+			ORDER BY cbl.intContractBalanceLogId DESC
+		END
+		ELSE IF @strProcess = 'Price Update'
+		BEGIN
+			
+			INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess)
+			SELECT TOP 1 NULL
+				, cbl.dtmTransactionDate
+				, strTransactionType = 'Sales Basis Deliveries'
+				, cbl.strTransactionReference
+				, cbl.intTransactionReferenceId
+				, cbl.intTransactionReferenceDetailId
+				, cbl.strTransactionReferenceNo
+				, cbl.intContractDetailId
+				, cbl.intContractHeaderId
+				, cbl.strContractNumber
+				, cbl.intContractSeq
+				, cbl.intContractTypeId
+				, cbl.intEntityId
+				, cbl.intCommodityId
+				, cbl.intItemId
+				, cbl.intLocationId
+				, cbl.intPricingTypeId
+				, cbl.intFutureMarketId
+				, cbl.intFutureMonthId
+				, cbl.dblBasis
+				, cbl.dblFutures
+				, cbl.intQtyUOMId
+				, cbl.intQtyCurrencyId
+				, cbl.intBasisUOMId
+				, cbl.intBasisCurrencyId
+				, cbl.intPriceUOMId
+				, cbl.dtmStartDate
+				, cbl.dtmEndDate
+				, dblQty = @dblTransactionQty
+				, cbl.intContractStatusId
+				, cbl.intBookId
+				, cbl.intSubBookId
+				, cbl.strNotes
+				, cbl.intUserId
+				, intActionId = 17
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog cbl
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
+			INNER JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = cbl.intTransactionReferenceDetailId
+			WHERE cbl.intPricingTypeId = 1			
+			AND cbl.intContractHeaderId = @intContractHeaderId
+			AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
+			AND cbl.intTransactionReferenceDetailId = @intTransactionId
+			AND cbl.dblQty > 0
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE
@@ -2769,7 +2848,7 @@ BEGIN TRY
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				--END
 			END
-			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG')
+			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
 			BEGIN
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END

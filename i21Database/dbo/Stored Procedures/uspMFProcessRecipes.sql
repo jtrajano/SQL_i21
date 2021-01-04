@@ -5,6 +5,7 @@ BEGIN
 	DECLARE @tblMFSession TABLE (
 		intRecordId INT identity(1, 1)
 		,strSessionId NVARCHAR(50) Collate Latin1_General_CI_AS
+		,intSortOrder int
 		)
 
 		Select @intEntityId=intEntityId 
@@ -12,13 +13,14 @@ BEGIN
 		Where strUserName ='IRELYADMIN'
 
 	INSERT INTO @tblMFSession
-	SELECT DISTINCT strSessionId
+	SELECT DISTINCT strSessionId,1 as intSortOrder
 	FROM tblMFRecipeStage
 	WHERE IsNULL(strMessage, '') = '' and intStatusId is null
 	UNION
-	SELECT DISTINCT strSessionId
+	SELECT DISTINCT strSessionId,2 as intSortOrder
 	FROM tblMFRecipeItemStage
 	WHERE IsNULL(strMessage, '') = '' and intStatusId is null
+	Order by intSortOrder
 
 	Update tblMFRecipeStage 
 	Set intStatusId=3 

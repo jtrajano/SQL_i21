@@ -224,7 +224,7 @@ BEGIN TRY
 		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
 		WHERE T.intScreenId = @intScreenId
 			AND strStatus = 'Approved'
-			AND T.intRecordId = 1042
+			AND T.intRecordId = @intContractHeaderId
 		ORDER BY intApprovalId
 
 		SELECT  @strAmendedColumns = STUFF((
@@ -341,7 +341,7 @@ BEGIN TRY
 	 ,strContractNumberStrauss				= CH.strContractNumber + (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 then '' else ' - AMENDMENT' end)
 	 ,strSeller							    = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 	 ,strBuyer							    = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END
-	 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure + ' ' + ISNULL(@strPackingDescription, '')
+	 ,strStraussQuantity					= dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + UM.strUnitMeasure
 	 ,strItemDescription					= @strItemDescription
 	 ,strItemBundleNo						=	(case when @ysnExternal = convert(bit,1) then @strItemBundleNo else null end)
 	 ,strStraussPrice						=	CASE WHEN CH.intPricingTypeId = 2 THEN 

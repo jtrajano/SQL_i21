@@ -60,7 +60,7 @@ BEGIN
 		INNER JOIN (
 			SELECT ICT.strTransactionId
 				 , ICT.intTransactionId
-				 , ICT.intTransactionDetailId
+				 --, ICT.intTransactionDetailId
 				 , ICT.intLotId
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
@@ -70,10 +70,10 @@ BEGIN
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
 			  AND ICT.intInTransitSourceLocationId IS NOT NULL
-			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intTransactionDetailId, ICT.intLotId
+			GROUP BY ICT.strTransactionId, ICT.intTransactionId, ICT.intLotId
 		) ICT ON ICT.strTransactionId = COSTING.strSourceTransactionId
 		     AND ICT.intTransactionId = COSTING.intSourceTransactionId
-			 AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
+			 --AND ICT.intTransactionDetailId = COSTING.intSourceTransactionDetailId
 			 AND (ICT.intLotId IS NULL OR (ICT.intLotId IS NOT NULL AND ICT.intLotId = COSTING.intLotId))
 			 AND ABS(COSTING.dblQty) > ICT.dblAvailableQty
 	) INTRANSIT ON I.intInvoiceId = INTRANSIT.intTransactionId AND I.strInvoiceNumber = INTRANSIT.strTransactionId
@@ -360,14 +360,14 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Invoice - ' + I.strInvoiceNumber + ' is not yet Approved!'
+		,[strPostingError]		= FAT.strApprovalStatus
 	FROM 
 		#ARPostInvoiceHeader I
+	INNER JOIN
+		(SELECT intTransactionId, strApprovalStatus FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
+			ON I.intInvoiceId = FAT.intTransactionId
 	WHERE
 		I.[ysnForApproval] = @OneBit
-	--INNER JOIN
-	--	(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
-	--		ON I.intInvoiceId = FAT.intTransactionId
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

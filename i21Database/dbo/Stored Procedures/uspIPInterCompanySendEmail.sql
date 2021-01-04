@@ -1272,7 +1272,7 @@ BEGIN
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
 			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeHeaderItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
-	<td>&nbsp;' + (Case When Exists(Select 1 from tblMFRecipeStage R Where R.strSessionId =RI.strSessionId and R.strItemNo =RI.strRecipeHeaderItemNo and R.strMessage ='Success') Then 'Yes' Else 'No' End) + '</td> 
+	<td>&nbsp;' + (Case When Exists(Select 1 from tblMFRecipeStage R Where R.strSessionId =RI.strSessionId and R.strItemNo =RI.strRecipeHeaderItemNo and R.strVersionNo =RI.strVersionNo and R.strMessage ='Success') Then 'Yes' Else 'No' End) + '</td> 
 	</tr>'
 		FROM tblMFRecipeItemStage RI WITH (NOLOCK)
 		WHERE intStatusId = @intStatusId --1--Processed/2--Failed

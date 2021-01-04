@@ -1925,7 +1925,8 @@ BEGIN TRY
 		, strContractEndMonth
 		, strDeliveryDate
 		, strContractNumber
-		, intContractHeaderId)
+		, intContractHeaderId
+		, strTransactionType)
 	SELECT intSeqId = 15
 		, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 		, strCommodityCode
@@ -1956,6 +1957,7 @@ BEGIN TRY
 		, strDeliveryDate
 		, strContractNumber
 		, intContractHeaderId
+		, strTransactionType
 	FROM @ListInventory f
 	WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId --AND ISNULL(Strg.ysnDPOwnedType, 0) = 0
 		AND strReceiptNumber NOT IN (SELECT strTransactionNumber FROM #tempTransfer)
@@ -1975,7 +1977,8 @@ BEGIN TRY
 		, intFutureMarketId
 		, intFutureMonthId
 		, strFutureMarket
-		, strFutureMonth)
+		, strFutureMonth
+		, strTransactionType)
 	SELECT * FROM (
 		SELECT DISTINCT intSeqId
 			, strSeqHeader
@@ -1993,12 +1996,13 @@ BEGIN TRY
 			, intFutureMonthId
 			, strFutureMarket
 			, strFutureMonth
+			, strTransactionType
 		FROM (
 			SELECT intSeqId = 15
 				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 				, strCommodityCode = @strCommodityCode
 				, strType
-				, dblTotal = ISNULL(dblTotal, 0)
+				, dblTotal = ISNULL(CASE WHEN intSeqId = 8 THEN - dblTotal ELSE dblTotal END, 0)
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 				, strLocationName
@@ -2014,6 +2018,7 @@ BEGIN TRY
 				, strDeliveryDate
 				, strContractNumber
 				, intContractHeaderId
+				, strTransactionType
 			FROM @ListInventory
 			WHERE intSeqId IN (9,8) AND strType IN ('Warehouse Receipts - Purchase','Warehouse Receipts - Sales') AND intCommodityId = @intCommodityId
 		) t GROUP BY intSeqId
@@ -2035,6 +2040,7 @@ BEGIN TRY
 			, strDeliveryDate
 			, strContractNumber
 			, intContractHeaderId
+			, strTransactionType
 	) t WHERE dblTotal <> 0	
 		
 	IF (@ysnIncludeOffsiteInventoryInCompanyTitled = 1)
@@ -2259,7 +2265,8 @@ BEGIN TRY
 			, strTicketNumber
 			, strContractEndMonth
 			, strFutureMonth
-			, strDeliveryDate)
+			, strDeliveryDate
+			, strTransactionType)
 		SELECT intSeqId = 15
 			, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 			, @strCommodityCode
@@ -2284,6 +2291,7 @@ BEGIN TRY
 			, strContractEndMonth
 			, strFutureMonth
 			, strDeliveryDate
+			, strTransactionType
 		FROM @ListInventory WHERE strSeqHeader = 'Sales In-Transit' AND strType = 'Sales In-Transit'
 
 		INSERT INTO @ListInventory(intSeqId
@@ -2300,7 +2308,8 @@ BEGIN TRY
 			, strContractNumber
 			, intCommodityId
 			, intFromCommodityUnitMeasureId
-			, strContractEndMonth)
+			, strContractEndMonth
+			, strTransactionType)
 		SELECT intSeqId = 15
 			, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 			, @strCommodityCode
@@ -2316,6 +2325,7 @@ BEGIN TRY
 			, @intCommodityId
 			, @intCommodityUnitMeasureId
 			, strContractEndMonth
+			, strTransactionType
 		FROM @ListInventory WHERE strSeqHeader = 'Purchase In-Transit' AND strType = 'Purchase In-Transit'
 	END
 		
@@ -3676,6 +3686,7 @@ BEGIN TRY
 				, strFutureMonth
 			FROM #tempCollateral c1
 			WHERE c1.intLocationId = ISNULL(@intLocationId, c1.intLocationId)
+			AND c1.ysnIncludeInPriceRiskAndCompanyTitled = 1
 		) t GROUP BY intCommodityId
 			, intFromCommodityUnitMeasureId
 			, intCommodityId
@@ -6051,7 +6062,7 @@ BEGIN TRY
 			, intContractHeaderId
 			, strContractNumber)
 		SELECT strCommodityCode
-			, dblTotal = SUM(dblTotal)
+			, dblTotal = SUM(CASE WHEN ISNULL(intContractTypeId, 1) = 2 THEN - dblTotal ELSE dblTotal END)
 			, strLocationName
 			, intCommodityId
 			, @intCommodityUnitMeasureId
