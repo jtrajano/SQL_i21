@@ -21,7 +21,7 @@ SET ANSI_WARNINGS OFF
 MERGE tblICUnitMeasure AS [Target]
 USING 
 (
-	SELECT
+	SELECT DISTINCT
 		  strUnitMeasure	= RTRIM(ptuom_desc) COLLATE Latin1_General_CI_AS 
 		, strSymbol			= RTRIM(ptuom_code) COLLATE Latin1_General_CI_AS
 		, intConcurrencyId	= 1
@@ -41,7 +41,7 @@ VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);
 MERGE tblICUnitMeasure AS [Target]
 USING 
 (
-	SELECT
+	SELECT DISTINCT
 		  strUnitMeasure	= RTRIM(ptpkg_desc) COLLATE Latin1_General_CI_AS 
 		, strSymbol			= RTRIM(ptpkg_code) COLLATE Latin1_General_CI_AS
 		, intConcurrencyId	= 1
