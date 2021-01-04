@@ -88,8 +88,9 @@ planed as (
   ,tblSMScreen c  
   ,tblSMActivity d  
  where  
-  a.dtmDueDate is not null  
-  and convert(int, convert(nvarchar(8), d.dtmStartDate, 112)) between @intDateFrom and @intDateTo  
+  --a.dtmDueDate is not null  
+  --and 
+  convert(int, convert(nvarchar(8), d.dtmStartDate, 112)) between @intDateFrom and @intDateTo  
   and c.strModule = 'Help Desk'  
   and c.strNamespace = 'HelpDesk.view.Ticket'  
   and b.intRecordId = a.intTicketId  
