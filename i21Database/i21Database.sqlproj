@@ -8890,6 +8890,7 @@
     <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
