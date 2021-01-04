@@ -49,7 +49,7 @@ BEGIN TRY
 	BEGIN
 		RETURN
 	END
-		
+
 	IF (@strSource = 'Pricing' AND @strProcess = 'Save Contract') 
 	OR (@strSource = 'Pricing-Old' AND @strProcess = 'Price Delete')
 	BEGIN
@@ -1426,10 +1426,10 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = CASE WHEN @strProcess = 'Price Delete' THEN pfd.dblQuantity
-								ELSE (CASE WHEN @ysnLoadBased = 1 THEN 0
-										ELSE (CASE WHEN (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) > 0 THEN (cbl.dblQty - isnull(dblQuantityAppliedAndPriced,0)) 
-												ELSE 0 END) END) END
+				, dblQty = CASE WHEN @ysnLoadBased = 1 THEN 0
+								ELSE (CASE WHEN @strProcess = 'Price Delete' THEN pfd.dblQuantity - ISNULL(dblQuantityAppliedAndPriced, 0)
+											WHEN @strProcess = 'Fixation Detail Delete' THEN pfd.dblQuantity
+											ELSE 0 END) END
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'
@@ -1886,7 +1886,7 @@ BEGIN TRY
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				INNER JOIN
 				(
-					SELECT intTransactionReferenceDetailId, dblQty = sum(CAST(replace(REPLACE(strNotes, 'Priced Quantity is ', ''),'Priced Load is ','') AS NUMERIC(24, 10)))
+					SELECT intTransactionReferenceDetailId, dblQty = sum(dblQty)
 					FROM tblCTContractBalanceLog
 					WHERE strProcess = 'Price Fixation'
 					and intPricingTypeId = 1
@@ -1921,11 +1921,11 @@ BEGIN TRY
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
 			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)
+			AND dblQty <> 0
 			/*End of CT-4833*/
 
 			/*CT-5179*/
 			/*If DWG and Ticket DWG is not yet posted, log Sales Basis Delivery (negative)*/
-
 			if exists (
 				select top 1 1
 				from
@@ -2082,12 +2082,7 @@ BEGIN TRY
 				) tbl
 				WHERE intContractHeaderId = @intContractHeaderId
 				AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)	
-
 			END
-
-
-
-
 			/*End of CT-5179*/
 
 			INSERT INTO @cbLogCurrent (strBatchId
@@ -2174,7 +2169,7 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = pfd.dblQuantity
+				, dblQty = pfd.dblQuantity - ISNULL(dblQuantityAppliedAndPriced, 0)
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'
@@ -2229,10 +2224,10 @@ BEGIN TRY
 				)
 			) tbl
 			WHERE intContractHeaderId = @intContractHeaderId
-			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)			
+			AND intContractDetailId = ISNULL(@intContractDetailId, tbl.intContractDetailId)		
 		END
 	END
-		
+	
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
 			@intId INT,
