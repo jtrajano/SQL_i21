@@ -168,20 +168,28 @@ BEGIN
 		CLOSE c; DEALLOCATE c;				
 
 		-- Reverse original	risk summary logs
-		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-		FOR
+		DECLARE @StorageHistoryIds AS Id
+		DELETE FROM @StorageHistoryIds
+		INSERT INTO @StorageHistoryIds
 		SELECT intStorageHistoryId FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
-		OPEN c;
-		FETCH c INTO @_intStorageHistoryId;
 
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			EXEC [dbo].[uspGRRiskSummaryLog]
-				@intStorageHistoryId = @_intStorageHistoryId
-				,@strAction = 'UNPOST';
-			FETCH c INTO @_intStorageHistoryId;
-		END
-		CLOSE c; DEALLOCATE c;	
+		EXEC [dbo].[uspGRRiskSummaryLog2]
+			@StorageHistoryIds = @StorageHistoryIds
+			,@strAction = 'UNPOST'
+		-- DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		-- FOR
+		-- SELECT intStorageHistoryId FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId
+		-- OPEN c;
+		-- FETCH c INTO @_intStorageHistoryId;
+
+		-- WHILE @@FETCH_STATUS = 0
+		-- BEGIN
+		-- 	EXEC [dbo].[uspGRRiskSummaryLog]
+		-- 		@intStorageHistoryId = @_intStorageHistoryId
+		-- 		,@strAction = 'UNPOST';
+		-- 	FETCH c INTO @_intStorageHistoryId;
+		-- END
+		-- CLOSE c; DEALLOCATE c;	
 
 		--DELETE HISTORY
 		DELETE FROM tblGRStorageHistory WHERE intTransferStorageId = @intTransferStorageId

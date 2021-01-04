@@ -477,7 +477,11 @@ BEGIN
 			DECLARE @ItemsToPost AS ItemCostingTableType
 			DECLARE @ItemsToPost_DPtoOS AS ItemCostingTableType
 			DECLARE @ItemsToPost_OStoDP AS ItemCostingTableType
-				
+			
+			DELETE FROM @ItemsToPost
+			DELETE FROM @ItemsToPost_DPtoOS
+			DELETE FROM @ItemsToPost_OStoDP
+
 			INSERT INTO @ItemsToPost 
 			(
 				intItemId
@@ -1132,19 +1136,23 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 		
 		--RISK SUMMARY LOG
-		SET @intStorageHistoryId = NULL
-		DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-		FOR
-			SELECT intId FROM @HistoryIds
-		OPEN c;
-		FETCH NEXT FROM c INTO @intStorageHistoryId
+		--RISK SUMMARY LOG
+		EXEC [dbo].[uspGRRiskSummaryLog2]
+			@StorageHistoryIds = @HistoryIds
+			,@strAction = 'UNPOST'
+		-- SET @intStorageHistoryId = NULL
+		-- DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
+		-- FOR
+		-- 	SELECT intId FROM @HistoryIds
+		-- OPEN c;
+		-- FETCH NEXT FROM c INTO @intStorageHistoryId
 
-		WHILE @@FETCH_STATUS = 0
-		BEGIN
-			EXEC uspGRRiskSummaryLog @intStorageHistoryId
-			FETCH NEXT FROM c INTO @intStorageHistoryId
-		END
-		CLOSE c; DEALLOCATE c;
+		-- WHILE @@FETCH_STATUS = 0
+		-- BEGIN
+		-- 	EXEC uspGRRiskSummaryLog @intStorageHistoryId
+		-- 	FETCH NEXT FROM c INTO @intStorageHistoryId
+		-- END
+		-- CLOSE c; DEALLOCATE c;
 
 		DONE:
 		COMMIT TRANSACTION

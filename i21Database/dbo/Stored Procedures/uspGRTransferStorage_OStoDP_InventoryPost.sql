@@ -267,6 +267,7 @@ BEGIN
 
 			UPDATE @ItemsToPostCopy SET dblQty = dblQty*-1
 
+			DELETE FROM @DummyGLEntries
 			INSERT INTO @DummyGLEntries 
 			(
 				[dtmDate] 
