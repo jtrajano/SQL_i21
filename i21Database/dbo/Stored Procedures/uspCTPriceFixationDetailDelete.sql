@@ -23,6 +23,7 @@ BEGIN TRY
 			@intContractHeaderId int,
 			@intContractDetailId int;
 
+			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 			declare @strFinalMessage nvarchar(max);
 			declare @AffectedInvoices table
 			(
@@ -274,40 +275,57 @@ BEGIN TRY
 	AND		ISNULL(FT.intPriceFixationTicketId, 0)	=   CASE WHEN @intPriceFixationTicketId IS NOT NULL THEN @intPriceFixationTicketId ELSE ISNULL(FT.intPriceFixationTicketId,0) END
 	AND		ISNULL(IV.ysnPosted,0) = 0
 	AND @ysnDeleteFromInvoice = 0
+	
+	IF (@intPriceFixationId IS NULL OR @intPriceFixationId < 1)
+	BEGIN
+		DECLARE @tempPriceFixationId INT
+		SELECT @tempPriceFixationId = intPriceFixationId FROM tblCTPriceFixationDetail WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+		
+		UPDATE	CD
+		SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
+				CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
+				CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
+				CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
+				CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE NULL END,
+				CD.dblCashPrice			=	NULL,
+				CD.dblTotalCost			=	NULL,
+				CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
+				CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end
+		FROM	tblCTContractDetail	CD
+		JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
+		JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
+		AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
+		WHERE	PF.intPriceFixationId	=	@tempPriceFixationId
 
-	 if (@intPriceFixationId is null or @intPriceFixationId < 1)
-	 begin
-		select @intPriceFixationId = intPriceFixationId from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailId;
-	 end
-
-	UPDATE	CD
-	SET		CD.dblBasis				=	ISNULL(CD.dblOriginalBasis,0),
-			CD.intFutureMarketId	=	PF.intOriginalFutureMarketId,
-			CD.intFutureMonthId		=	PF.intOriginalFutureMonthId,
-			CD.intPricingTypeId		=	CASE WHEN CH.intPricingTypeId <> 8 THEN 2 ELSE 8 END,
-			CD.dblFutures			=	CASE WHEN CH.intPricingTypeId = 3 THEN CD.dblFutures ELSE NULL END,
-			CD.dblCashPrice			=	NULL,
-			CD.dblTotalCost			=	NULL,
-			CD.intConcurrencyId		=	CD.intConcurrencyId + 1,
-			CD.intContractStatusId	=	case when CD.intContractStatusId = 5 and @ysnDestinationWeightsAndGrades = 0 then 1 else CD.intContractStatusId end
-	FROM	tblCTContractDetail	CD
-	JOIN	tblCTContractHeader	CH	ON	CH.intContractHeaderId	=	CD.intContractHeaderId
-	JOIN	tblCTPriceFixation	PF	ON	CD.intContractDetailId = PF.intContractDetailId OR CD.intSplitFromId = PF.intContractDetailId
-	AND EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = ISNULL(CD.intContractDetailId,0))
-	WHERE	PF.intPriceFixationId	=	@intPriceFixationId
-
-	select @intContractHeaderId = intContractHeaderId, @intContractDetailId = intContractDetailId from tblCTPriceFixation where intPriceFixationId = @intPriceFixationId;
+		SELECT @intContractHeaderId = intContractHeaderId
+			, @intContractDetailId = intContractDetailId
+		FROM tblCTPriceFixation WHERE intPriceFixationId = @tempPriceFixationId
+	END
 
 	IF ISNULL(@intPriceFixationId,0) = 0 AND ISNULL(@intPriceFixationDetailId, 0) <> 0
 	BEGIN
 		UPDATE tblCTPriceFixationDetail SET ysnToBeDeleted = 1
 		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
 
-		exec uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
+		DECLARE @QtyToDelete NUMERIC(24, 10)
+		SELECT @QtyToDelete = dblQuantity FROM tblCTPriceFixationDetail
+		WHERE intPriceFixationDetailId = @intPriceFixationDetailId
+
+		EXEC uspCTCreateDetailHistory @intContractHeaderId 	= @intContractHeaderId, 
 								  @intContractDetailId 	= @intContractDetailId, 
 								  @strSource 			= 'Pricing',
 								  @strProcess 			= 'Fixation Detail Delete',
 								  @intUserId			=  @intUserId
+
+		-- Summary Log
+		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+							@intContractDetailId 	= 	@intContractDetailId,
+							@strSource			 	= 	'Pricing',
+							@strProcess		 	    = 	'Fixation Detail Delete',
+							@contractDetail 		= 	@contractDetails,
+							@intUserId				= 	@intUserId,
+							@intTransactionId		= 	@intPriceFixationDetailId,
+							@dblTransactionQty		= 	@QtyToDelete
 	END
 	
 	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
@@ -339,7 +357,6 @@ BEGIN TRY
 			where apar.intInvoiceDetailId = @ParamDetailId
 
 			-- Summary Log
-			DECLARE @contractDetails AS [dbo].[ContractDetailTable]
 			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 								@intContractDetailId 	= 	@intContractDetailId,
 								@strSource			 	= 	'Pricing',
