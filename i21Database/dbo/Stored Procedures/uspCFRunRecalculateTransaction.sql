@@ -1,7 +1,7 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFRunRecalculateTransaction]
+﻿CREATE PROCEDURE [dbo].[uspCFRunRecalculateTransaction]
 @TransactionId					INT	
 ,@ContractsOverfill				INT = 0
+,@UserId						INT
 AS
 BEGIN
 DECLARE @intTransactionId		INT
@@ -56,6 +56,7 @@ EXEC dbo.uspCFRecalculateTransaciton
 ,@CreditCardUsed		= @ysnCreditCardUsed	
 ,@PumpId				= @intPumpId
 ,@BatchRecalculate		= 1
+,@UserId				= @UserId
 
 
 IF(ISNULL(@ContractsOverfill,0) = 0)
