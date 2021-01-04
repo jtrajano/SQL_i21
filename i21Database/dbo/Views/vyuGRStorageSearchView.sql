@@ -154,7 +154,7 @@ LEFT JOIN tblEMEntitySplit EMSplit
 	ON EMSplit.intSplitId = SC.intSplitId 
 		OR EMSplit.intSplitId = DeliverySheet.intSplitId
 LEFT JOIN tblCTContractDetail CD
-    ON CD.intContractDetailId = SC.intContractId  
+    ON CD.intContractDetailId = IRI.intContractDetailId
 LEFT JOIN tblCTContractHeader CH 
     ON CH.intContractHeaderId = CD.intContractHeaderId  
 LEFT JOIN (
