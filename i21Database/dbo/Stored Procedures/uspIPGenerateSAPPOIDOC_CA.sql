@@ -36,7 +36,6 @@ BEGIN
 		,@dtmStartDate DATETIME
 		,@dtmEndDate DATETIME
 		,@intNumberOfContainers INT
-		,@strThirdPartyFeedStatus nvarchar(50)
 	DECLARE @tblCTContractFeed TABLE (intContractFeedId INT)
 	DECLARE @tblOutput AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
@@ -225,16 +224,6 @@ BEGIN
 				SELECT @strError = @strError + 'Contract Item cannot be blank. '
 			END
 		END
-		SELECT @strThirdPartyFeedStatus = NULL
-		SELECT TOP 1 @strThirdPartyFeedStatus = strThirdPartyFeedStatus
-		FROM dbo.tblIPThirdPartyContractFeed
-		WHERE intContractFeedId = @intContractFeedId
-		ORDER BY intThirdPartyContractFeedId
-
-		IF @strThirdPartyFeedStatus IS NOT NULL
-		BEGIN
-			SELECT @strError = @strError + 'Duplicate Entry. '
-		END
 
 		IF @strError <> ''
 		BEGIN
@@ -242,7 +231,6 @@ BEGIN
 			SET strThirdPartyMessage = @strError
 				,strThirdPartyFeedStatus = 'Failed'
 			WHERE intContractFeedId = @intContractFeedId
-				AND strThirdPartyFeedStatus IS NULL
 
 			GOTO X
 		END
