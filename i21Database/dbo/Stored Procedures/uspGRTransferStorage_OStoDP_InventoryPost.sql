@@ -267,6 +267,7 @@ BEGIN
 
 			UPDATE @ItemsToPostCopy SET dblQty = dblQty*-1
 
+			DELETE FROM @DummyGLEntries
 			INSERT INTO @DummyGLEntries 
 			(
 				[dtmDate] 
@@ -353,9 +354,6 @@ BEGIN
 			--discounts and charges
 			IF @ysnFromDS = 0
 			BEGIN
-				
-				
-				
 				INSERT INTO @GLEntries 
 				(
 					[dtmDate] 
