@@ -817,43 +817,44 @@ BEGIN TRY
 				, intActionId
 				, strProcess
 				)		
-				SELECT strBatchId
-				, dtmTransactionDate
-				, strTransactionType
-				, strTransactionReference
-				, intTransactionReferenceId
-				, intTransactionReferenceDetailId
-				, strTransactionReferenceNo
-				, intContractDetailId
-				, intContractHeaderId
-				, strContractNumber
-				, intContractSeq
-				, intContractTypeId
-				, intEntityId
-				, intCommodityId
-				, intItemId
-				, intLocationId
-				, intPricingTypeId
-				, intFutureMarketId
-				, intFutureMonthId
-				, dblBasis
-				, dblFutures
-				, intQtyUOMId
-				, intQtyCurrencyId
-				, intBasisUOMId
-				, intBasisCurrencyId
-				, intPriceUOMId
-				, dtmStartDate
-				, dtmEndDate
-				, dblQty
-				, intContractStatusId
-				, intBookId
-				, intSubBookId
-				, strNotes
-				, intUserId
-				, intActionId
-				, strProcess
-				FROM @cbLogTemp
+				SELECT lt.strBatchId
+				, lt.dtmTransactionDate
+				, lt.strTransactionType
+				, lt.strTransactionReference
+				, lt.intTransactionReferenceId
+				, lt.intTransactionReferenceDetailId
+				, lt.strTransactionReferenceNo
+				, lt.intContractDetailId
+				, lt.intContractHeaderId
+				, lt.strContractNumber
+				, lt.intContractSeq
+				, lt.intContractTypeId
+				, lt.intEntityId
+				, lt.intCommodityId
+				, lt.intItemId
+				, lt.intLocationId
+				, intPricingTypeId = cd.intPricingTypeId
+				, lt.intFutureMarketId
+				, lt.intFutureMonthId
+				, lt.dblBasis
+				, lt.dblFutures
+				, lt.intQtyUOMId
+				, lt.intQtyCurrencyId
+				, lt.intBasisUOMId
+				, lt.intBasisCurrencyId
+				, lt.intPriceUOMId
+				, lt.dtmStartDate
+				, lt.dtmEndDate
+				, lt.dblQty
+				, lt.intContractStatusId
+				, lt.intBookId
+				, lt.intSubBookId
+				, lt.strNotes
+				, lt.intUserId
+				, lt.intActionId
+				, lt.strProcess
+				FROM @cbLogTemp lt
+				join tblCTContractDetail cd on cd.intContractDetailId = lt.intContractDetailId
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Receipt Return')
 			BEGIN	
