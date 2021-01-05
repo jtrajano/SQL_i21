@@ -75,7 +75,7 @@ BEGIN
 		a.intPricingStatus is null
 	');
 
-	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail'))
+	IF EXISTS(SELECT * FROM sys.columns  WHERE name = N'intDailyAveragePriceDetailId' AND object_id = OBJECT_ID(N'tblCTPriceFixationDetail') AND object_id = OBJECT_ID(N'tblRKDailyAveragePriceDetail')) 
 	BEGIN
 		EXEC 
 		('
