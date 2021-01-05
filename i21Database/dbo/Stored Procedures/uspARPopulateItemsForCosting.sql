@@ -51,7 +51,7 @@ INSERT INTO #ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnForValidation]
+	,[strType]
 ) 
 
 SELECT 
@@ -110,7 +110,7 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = @OneBit
+	,[strType]					= ARID.[strType]
 FROM
     #ARPostInvoiceDetail ARID
 INNER JOIN
@@ -181,7 +181,7 @@ INSERT INTO #ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnForValidation]
+	,[strType]
 ) 
 
 SELECT 
@@ -238,7 +238,7 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = @ZeroBit
+	,[strType]					= ARID.[strType]
 FROM
     #ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -275,7 +275,6 @@ WHERE
 	--AND (ARID.intLoadDetailId IS NULL OR (ARID.intLoadDetailId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))
 	AND (((ISNULL(T.[intTicketTypeId], 0) <> 9 AND (ISNULL(T.[intTicketType], 0) <> 6 OR ISNULL(T.[strInOutFlag], '') <> 'O')) AND ISNULL(ARID.[intTicketId], 0) <> 0) OR ISNULL(ARID.[intTicketId], 0) = 0)
-	AND (ARID.[ysnFromProvisional] = 0 OR (ARID.[ysnFromProvisional] = 1 AND ARID.[intLoadDetailId] IS NULL))
 
 -- Final Invoice
 INSERT INTO #ARItemsForCosting
@@ -303,7 +302,7 @@ INSERT INTO #ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnForValidation]
+	,[strType]
 ) 
 SELECT
 	ARIC.[intItemId]
@@ -330,7 +329,7 @@ SELECT
     ,ARIC.[dblUnitRetail]
 	,ARIC.[intCategoryId]
 	,ARIC.[dblAdjustRetailValue]
-	,@ZeroBit
+	,ARID.[strType]
 FROM #ARItemsForCosting ARIC
 INNER JOIN #ARPostInvoiceDetail ARID
 ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
