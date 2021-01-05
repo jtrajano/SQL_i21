@@ -59,7 +59,7 @@ BEGIN
 	INSERT INTO @ImportShipVia
 	SELECT
 		 AG.[sscar_key]			AS [strShipViaOriginKey]
-		 ,(CASE WHEN EXISTS(SELECT [sscar_key], [sscar_name] FROM [sscarmst] WHERE RTRIM(LTRIM([sscar_key])) <> RTRIM(LTRIM(AG.[sscar_key])) AND RTRIM(LTRIM([sscar_name])) = RTRIM(LTRIM(AG.[sscar_name])))
+		 ,(CASE WHEN EXISTS(SELECT [sscar_key], [sscar_name] FROM [sscarmst] WHERE UPPER(RTRIM(LTRIM([sscar_key]))) <> UPPER(RTRIM(LTRIM(AG.[sscar_key]))) AND UPPER(RTRIM(LTRIM([sscar_name]))) = UPPER(RTRIM(LTRIM(AG.[sscar_name]))))
 					THEN 
 						RTRIM(LTRIM(AG.[sscar_name])) + '' - '' + RTRIM(LTRIM(AG.[sscar_key]))
 					ELSE
