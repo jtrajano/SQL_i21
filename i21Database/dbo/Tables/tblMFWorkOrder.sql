@@ -36,6 +36,7 @@
     [intBlendRequirementId] INT NULL, 
     [intPickListId] INT NULL, 
     [ysnKittingEnabled] BIT NULL CONSTRAINT [DF_tblMFWorkOrder_ysnKittingEnabled] DEFAULT 0,
+	ysnDietarySupplements BIT NULL CONSTRAINT [DF_tblMFWorkOrder_ysnDietarySupplements] DEFAULT 0,
 	[intKitStatusId] INT NULL,
     [intProductOwnerId] INT NULL,  
     [intCustomerId] INT NULL, 

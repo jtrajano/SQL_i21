@@ -4004,5 +4004,5 @@ IF NOT EXISTS (
 		,'Blend Production'
 GO
 
-
-
+UPDATE tblMFWorkOrder SET ysnDietarySupplements = 0 WHERE ysnDietarySupplements IS NULL
+GO
