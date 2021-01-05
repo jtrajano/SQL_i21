@@ -39,7 +39,6 @@ RETURNS @Transaction TABLE
 	strSequenceUnitMeasure nvarchar(100),
 	intHeaderUnitMeasureId INT,
 	strHeaderUnitMeasure nvarchar(100),
- 	ysnDeletedBillDetail bit,
 	intHeaderBookId			INT NULL,
 	intHeaderSubBookId		INT NULL,
 	intDetailBookId			INT NULL,
@@ -83,7 +82,7 @@ BEGIN
 		INNER JOIN tblEMEntityType ET ON ET.intEntityId = CBL1.intEntityId AND ET.strType = (CASE WHEN CBL1.intContractTypeId = 1 THEN 'Vendor' ELSE 'Customer' END)
 		INNER JOIN tblEMEntity EM ON EM.intEntityId = ET.intEntityId
 		WHERE CBL1.strTransactionType LIKE '%Basis Deliveries'
-			AND CBL1.dtmTransactionDate < DATEADD(DAY, 1, GETDATE())
+			AND CBL1.dtmTransactionDate < DATEADD(DAY, 1, @dtmDate)
 			AND isnull(CBL1.dblQty,0) <> 0
 	)
 
@@ -117,7 +116,6 @@ BEGIN
 		, intHeaderUnitMeasureId
 		, strHeaderUnitMeasure
 		, ysnOpenGetBasisDelivery
-		, ysnDeletedBillDetail
 		, intHeaderBookId
 		, intHeaderSubBookId
 		, intDetailBookId
@@ -152,7 +150,6 @@ BEGIN
 		, OBC.intHeaderUnitMeasureId
 		, OBC.strHeaderUnitMeasure
 		, ysnOpenGetBasisDelivery = 1--CASE WHEN @dtmDate IS NULL OR CBL1.dtmTransactionDate <= @dtmDate AND CBL1.dblQty > 0 THEN 1 ELSE 0 END
-		, ysnDeletedBillDetail = (case when CBL1.strTransactionReference = 'Voucher' and isnull(bd.intBillDetailId,0) = 0 then convert(bit,1) else convert(bit,0) end) 
 		, CH.intBookId
 		, CH.intSubBookId
 		, OBC.intBookId
@@ -167,7 +164,6 @@ BEGIN
 	INNER JOIN tblCTContractHeader CH ON CBL1.intContractHeaderId = CH.intContractHeaderId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId AND CUM.ysnStockUnit=1
 	INNER JOIN OpenBasisContract OBC ON CBL1.intContractDetailId = OBC.intContractDetailId AND CBL1.intContractHeaderId = OBC.intContractHeaderId
- 	LEFT JOIN tblAPBillDetail bd on bd.intContractHeaderId = CBL1.intContractHeaderId and bd.intContractDetailId = CBL1.intContractDetailId
 	GROUP BY CBL1.dtmCreatedDate
 		, CBL1.intContractBalanceLogId
 		, CBL1.intContractHeaderId
@@ -200,15 +196,20 @@ BEGIN
 		, OBC.strSequenceUnitMeasure
 		, OBC.intHeaderUnitMeasureId
 		, OBC.strHeaderUnitMeasure
- 		, bd.intBillDetailId
 		, CH.intBookId
 		, CH.intSubBookId
 		, OBC.intBookId
 		, OBC.intSubBookId
 	ORDER BY CBL1.dtmCreatedDate, CBL1.intContractBalanceLogId ASC;
  
- 	DELETE FROM @Transaction WHERE ysnDeletedBillDetail = CONVERT(BIT, 1);
-
+ 	DELETE FROM @Transaction
+	WHERE strTransactionType = 'Voucher'
+		AND intTransactionId NOT IN (
+		SELECT DISTINCT T.intTransactionId
+		FROM @Transaction T
+		JOIN tblAPBillDetail BD ON BD.intBillId = T.intTransactionId AND strTransactionType = 'Voucher' AND BD.intContractHeaderId = T.intContractHeaderId AND BD.intContractDetailId = T.intContractDetailId
+	)
+	
 	DELETE FROM @Transaction
 	WHERE intContractDetailId IN (
 		SELECT intContractDetailId
