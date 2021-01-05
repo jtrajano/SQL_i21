@@ -226,6 +226,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
 :r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
 :r .\GL\DefaultData\1u_InsertDefaultDataSync.sql
+:r .\GL\DefaultData\1v_InsertRunningBalanceOrder.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
