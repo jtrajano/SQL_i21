@@ -31,7 +31,7 @@
 	[intModifiedByUserId] INT NULL,
     CONSTRAINT [PK_tblICInventoryTransfer] PRIMARY KEY ([intInventoryTransferId]), 
     CONSTRAINT [AK_tblICInventoryTransfer_strTransferNo] UNIQUE ([strTransferNo]), 
-    CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]), 
+    CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity_intBrokerId] FOREIGN KEY ([intBrokerId]) REFERENCES tblEMEntity([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_tblEMEntity] FOREIGN KEY ([intTransferredById]) REFERENCES tblEMEntity([intEntityId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_FromLocation] FOREIGN KEY ([intFromLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblICInventoryTransfer_ToLocation] FOREIGN KEY ([intToLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
