@@ -8974,6 +8974,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
     <Build Include="dbo\Views\vyuMFInventoryTransferInTransitLots.sql" />
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
+    <Build Include="dbo\Views\vyuAPVoucherPaymentSchedule.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
