@@ -17,9 +17,9 @@ AS
 SELECT 
 	tblICItem.intItemId
 	,imsgno = tblICItem.strItemNo
-	,imsg1 = (SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM ItemCrossMessages WHERE ItemMessageLineNo = 1)
-	,imsg2 = (SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM ItemCrossMessages WHERE ItemMessageLineNo = 2)
-	,imsg3 = (SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM ItemCrossMessages WHERE ItemMessageLineNo = 3)
+	,imsg1 = (SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM ItemCrossMessages WHERE ItemMessageLineNo = 1 AND ItemCrossMessages.intItemId = tblICItem.intItemId )
+	,imsg2 = (SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM ItemCrossMessages WHERE ItemMessageLineNo = 2 AND ItemCrossMessages.intItemId = tblICItem.intItemId )
+	,imsg3 = (SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM ItemCrossMessages WHERE ItemMessageLineNo = 3 AND ItemCrossMessages.intItemId = tblICItem.intItemId )
 	,iamsgno = 0
 FROM tblICItem
 WHERE REPLACE(LTRIM(RTRIM(ISNULL(strInvoiceComments,''))),CHAR(10),'') <> ''
