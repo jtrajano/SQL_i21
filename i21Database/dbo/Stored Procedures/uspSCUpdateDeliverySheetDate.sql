@@ -65,12 +65,14 @@ AS
 		if @dtmLargetDate > @dtmTicketDate
 			set @dtmTicketDate = @dtmLargetDate
 	end
-	update tblSCDeliverySheet 
-		
-		set dtmDeliverySheetDate = coalesce(@dtmDeliveryDate, @dtmTicketDate, dtmDeliverySheetDate , getdate())
-
+	
+	update tblSCDeliverySheet 		
+	set dtmDeliverySheetDate = coalesce(@dtmDeliveryDate, @dtmTicketDate, dtmDeliverySheetDate , getdate())
 	where intDeliverySheetId = @intDeliverySheetId
 
-
+	--update also the customer storage's delivery date to match with the delivery sheet's date
+	update tblGRCustomerStorage
+	set dtmDeliveryDate = coalesce(@dtmDeliveryDate, @dtmTicketDate, dtmDeliveryDate , getdate())
+	where intDeliverySheetId = @intDeliverySheetId
 
 RETURN 0
