@@ -17,43 +17,43 @@ SET ANSI_WARNINGS OFF
 -- UnitMeasure data migration from ptuommst origin table to tblICUnitMeasure i21 table 
 -- This does not insert duplicates
 --------------------------------------------------------------------------------------------------------------------------------------------
+DECLARE @UOMS TABLE (strUnitMeasure NVARCHAR(100) COLLATE Latin1_General_CI_AS, strSymbol NVARCHAR(100) COLLATE Latin1_General_CI_AS)
+INSERT INTO @UOMS
+SELECT DISTINCT
+	  strUnitMeasure	= RTRIM(ptuom_desc) COLLATE Latin1_General_CI_AS 
+	, strSymbol			= RTRIM(ptuom_code) COLLATE Latin1_General_CI_AS
+FROM ptuommst
+WHERE ptuom_code != ' '	
+
+UNION
+
+SELECT DISTINCT
+	  strUnitMeasure	= RTRIM(ptpkg_desc) COLLATE Latin1_General_CI_AS 
+	, strSymbol			= RTRIM(ptpkg_code) COLLATE Latin1_General_CI_AS
+FROM ptpkgmst
+WHERE ptpkg_code != ' '
+
+;WITH CTE AS 
+(
+    SELECT strUnitMeasure, strSymbol, ROW_NUMBER() OVER 
+    (
+        PARTITION BY strUnitMeasure ORDER BY strUnitMeasure
+    ) RowNumber
+    FROM  @UOMS
+)
+DELETE
+FROM CTE 
+WHERE RowNumber > 1;
 
 MERGE tblICUnitMeasure AS [Target]
 USING 
 (
-	SELECT DISTINCT
-		  strUnitMeasure	= RTRIM(ptuom_desc) COLLATE Latin1_General_CI_AS 
-		, strSymbol			= RTRIM(ptuom_code) COLLATE Latin1_General_CI_AS
-		, intConcurrencyId	= 1
-	FROM ptuommst
-	WHERE ptuom_code != ' '	
-) AS [Source] (strUnitMeasure, strSymbol, intConcurrencyId)
+	SELECT DISTINCT strUnitMeasure, strSymbol FROM @UOMS
+) AS [Source] (strUnitMeasure, strSymbol)
 ON [Target].strUnitMeasure = [Source].strUnitMeasure
 WHEN NOT MATCHED THEN
 INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
-VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);
-
---------------------------------------------------------------------------------------------------------------------------------------------
--- UnitMeasure data migration from ptpkgmst origin table to tblICUnitMeasure i21 table 
--- This does not insert duplicates
---------------------------------------------------------------------------------------------------------------------------------------------
-
-MERGE tblICUnitMeasure AS [Target]
-USING 
-(
-	SELECT DISTINCT
-		  strUnitMeasure	= RTRIM(ptpkg_desc) COLLATE Latin1_General_CI_AS 
-		, strSymbol			= RTRIM(ptpkg_code) COLLATE Latin1_General_CI_AS
-		, intConcurrencyId	= 1
-	FROM ptpkgmst
-	WHERE ptpkg_code != ' '	
-) AS [Source] (strUnitMeasure, strSymbol, intConcurrencyId)
-ON [Target].strSymbol = [Source].strSymbol OR [Target].strUnitMeasure = [Source].strUnitMeasure
-WHEN NOT MATCHED THEN
-INSERT (strUnitMeasure, strSymbol, intConcurrencyId)
-VALUES ([Source].strUnitMeasure, [Source].strSymbol, [Source].intConcurrencyId);
-
-
+VALUES ([Source].strUnitMeasure, [Source].strSymbol, 1);
 
 --update the unit type for the imported uoms
 UPDATE tblICUnitMeasure
