@@ -185,8 +185,8 @@ BEGIN
 				,strPrintOption						= 	@strPrintOption
 				,CBL.intContractTypeId
 				,CBL.intEntityId
-				,dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
-									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
+				,dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Load is%' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
+									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Quantity is%' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
 			FROM tblCTContractBalanceLog		CBL
 			INNER JOIN tblICCommodity			CY			ON CBL.intCommodityId = CY.intCommodityId
 			INNER JOIN tblICCommodity			CM			ON CM.intCommodityId = CBL.intCommodityId
@@ -359,8 +359,8 @@ BEGIN
 				,strPrintOption						= 	@strPrintOption
 				,CBL.intContractTypeId
 				,CBL.intEntityId
-				,dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
-									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
+				,dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Load is%' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
+									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') LIKE '%Priced Quantity is%' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
 			FROM tblCTContractBalanceLog		CBL
 			INNER JOIN tblICCommodity			CY			ON CBL.intCommodityId = CY.intCommodityId
 			INNER JOIN tblICCommodity			CM			ON CM.intCommodityId = CBL.intCommodityId

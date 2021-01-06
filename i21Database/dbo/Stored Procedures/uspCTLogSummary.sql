@@ -363,7 +363,7 @@ BEGIN TRY
 					, intActionId
 					, strProcess
 				)		
-				SELECT TOP 1 strBatchId = NULL
+				SELECT strBatchId = NULL
 					, dtmTransactionDate = @_transactionDate
 					, strTransactionType
 					, strTransactionReference
