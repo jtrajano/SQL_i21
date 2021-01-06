@@ -248,7 +248,7 @@ BEGIN
 		WHERE intAccountId = GL.intAccountId AND dtmDate = GL.dtmDate
 	) Ordering
 	WHERE 
-	strTransactionId IN (SELECT strTransactionId from @GLEntries)
+	GL.strTransactionId IN (SELECT strTransactionId from @GLEntries)
 	AND
 	GL.ysnIsUnposted = 0
 END
