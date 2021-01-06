@@ -18,8 +18,8 @@ AS
 SELECT 
 	tblICTag.intTagId
 	,epa_group = tblICTag.strTagNumber
-	,msg1 = ISNULL((SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM HazMatMessages WHERE ItemMessageLineNo = 1 AND strTagNumber = tblICTag.strTagNumber),'')
-	,msg2 = ISNULL((SELECT TOP 1 SUBSTRING(ItemMessage,1, 60) FROM HazMatMessages WHERE ItemMessageLineNo = 2 AND strTagNumber = tblICTag.strTagNumber),'')
+	,msg1 = ISNULL((SELECT TOP 1 SUBSTRING(ItemMessage,1, 40) FROM HazMatMessages WHERE ItemMessageLineNo = 1 AND strTagNumber = tblICTag.strTagNumber),'')
+	,msg2 = ISNULL((SELECT TOP 1 SUBSTRING(ItemMessage,1, 40) FROM HazMatMessages WHERE ItemMessageLineNo = 2 AND strTagNumber = tblICTag.strTagNumber),'')
 FROM tblICTag
 WHERE REPLACE(LTRIM(RTRIM(ISNULL(strMessage,''))),CHAR(10),'') <> ''
 AND strType = 'Hazmat Message'
