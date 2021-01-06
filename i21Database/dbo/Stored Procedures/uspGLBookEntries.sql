@@ -234,12 +234,14 @@ BEGIN
 		intGLDetailId,
 		intAccountId,
 		dtmDate,
+		strTransactionId,
 		rowId
 	)
 	SELECT 	
 	intGLDetailId,
 	GL.intAccountId,
 	GL.dtmDate,
+	GL.strTransactionId,
 	Ordering.PeakValue + ROW_NUMBER() 
 	OVER (PARTITION BY GL.intAccountId,GL.dtmDate ORDER BY intGLDetailId)rowId
 	FROM tblGLDetail GL 
