@@ -114,16 +114,16 @@ BEGIN
 			,intFutureMonthId
 			,strDeliveryMonth
 			,strFutureMonth
-			,dblFutures 						= CAST (MAX(dblFutures) AS NUMERIC(20,6))
+			,dblFutures 						= CASE WHEN ISNULL(MAX(dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblFutures, 0) <> 0 THEN dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END
 			,dblBasis 							= CAST (dblBasis AS NUMERIC(20,6))	
 			,strBasisUOM
 			,dblQuantity 						= CAST (SUM(dblQuantity) AS NUMERIC(20,6))
 			,strQuantityUOM
-			,dblCashPrice 						= CAST (MAX(dblCashPrice) AS NUMERIC(20,6))
+			,dblCashPrice 						= CASE WHEN ISNULL(MAX(dblCashPrice), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblCashPrice, 0) <> 0 THEN dblCashPrice * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END
 			,strPriceUOM
 			,strStockUOM
 			,dblAvailableQty 					= CAST (SUM(dblAvailableQty) AS NUMERIC(20,6))
-			,dblAmount 							= CAST ((SUM(dblQuantity) * (dblBasis + MAX(dblFutures))) AS NUMERIC(20,6))
+			,dblAmount 							= CAST ((SUM(dblQuantity) * (dblBasis + (CASE WHEN ISNULL(MAX(dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblFutures, 0) <> 0 THEN dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END))) AS NUMERIC(20,6))
 			,dblQtyinCommodityStockUOM 			= CAST (SUM(dblQtyinCommodityStockUOM) AS NUMERIC(20,6))
 			,dblFuturesinCommodityStockUOM 		= CAST (MAX(dblFuturesinCommodityStockUOM) AS NUMERIC(20,6))
 			,dblBasisinCommodityStockUOM		= CAST (dblBasisinCommodityStockUOM AS NUMERIC(20,6))
@@ -185,6 +185,8 @@ BEGIN
 				,strPrintOption						= 	@strPrintOption
 				,CBL.intContractTypeId
 				,CBL.intEntityId
+				,dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
+									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
 			FROM tblCTContractBalanceLog		CBL
 			INNER JOIN tblICCommodity			CY			ON CBL.intCommodityId = CY.intCommodityId
 			INNER JOIN tblICCommodity			CM			ON CM.intCommodityId = CBL.intCommodityId
@@ -284,16 +286,16 @@ BEGIN
 			,intFutureMonthId
 			,strDeliveryMonth
 			,strFutureMonth
-			,dblFutures 						= CAST (MAX(dblFutures) AS NUMERIC(20,6))
+			,dblFutures 						= CASE WHEN ISNULL(MAX(dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblFutures, 0) <> 0 THEN dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END
 			,dblBasis 							= CAST (dblBasis AS NUMERIC(20,6))	
 			,strBasisUOM
 			,dblQuantity 						= CAST (SUM(dblQuantity) AS NUMERIC(20,6))
 			,strQuantityUOM
-			,dblCashPrice 						= CAST (MAX(dblCashPrice) AS NUMERIC(20,6))
+			,dblCashPrice 						= CASE WHEN ISNULL(MAX(dblCashPrice), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblCashPrice, 0) <> 0 THEN dblCashPrice * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END
 			,strPriceUOM
 			,strStockUOM
 			,dblAvailableQty 					= CAST (SUM(dblAvailableQty) AS NUMERIC(20,6))
-			,dblAmount 							= CAST ((SUM(dblQuantity) * (dblBasis + MAX(dblFutures))) AS NUMERIC(20,6))
+			,dblAmount 							= CAST ((SUM(dblQuantity) * (dblBasis + (CASE WHEN ISNULL(MAX(dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblFutures, 0) <> 0 THEN dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END))) AS NUMERIC(20,6))
 			,dblQtyinCommodityStockUOM 			= CAST (SUM(dblQtyinCommodityStockUOM) AS NUMERIC(20,6))
 			,dblFuturesinCommodityStockUOM 		= CAST (MAX(dblFuturesinCommodityStockUOM) AS NUMERIC(20,6))
 			,dblBasisinCommodityStockUOM		= CAST (dblBasisinCommodityStockUOM AS NUMERIC(20,6))
@@ -357,6 +359,8 @@ BEGIN
 				,strPrintOption						= 	@strPrintOption
 				,CBL.intContractTypeId
 				,CBL.intEntityId
+				,dblOrigQty = CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Load is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) * CH.dblQuantityPerLoad
+									ELSE CAST(CASE WHEN ISNULL(CBL.strNotes, '') <> '' THEN REPLACE(CBL.strNotes, 'Priced Quantity is ', '') ELSE CBL.dblQty END AS NUMERIC(18, 6)) END
 			FROM tblCTContractBalanceLog		CBL
 			INNER JOIN tblICCommodity			CY			ON CBL.intCommodityId = CY.intCommodityId
 			INNER JOIN tblICCommodity			CM			ON CM.intCommodityId = CBL.intCommodityId
