@@ -119,7 +119,9 @@ BEGIN TRY
 			,@ContractPriceUnitMeasureId		int = null
 			,@ContractDetailItemId				int = null
 			,@intSequenceFreightTermId			int
-			,@ysnMultiPrice						BIT = 0;
+			,@ysnMultiPrice						BIT = 0
+			,@dblQuantityForSpot				numeric(18,6)
+			,@NewInvoiceSpotDetailId			int;
 
 		
 	declare @PricedShipment table
@@ -1453,6 +1455,13 @@ BEGIN TRY
 							set @dblQuantityForInvoice = @dblShippedForInvoice;	
 						end
 
+						select @dblQuantityForSpot = 0;
+
+						if (isnull(@ysnDestinationWeightsGrades,0) = 1 and @intPricingTypeId = 1 and @dblPricedForInvoice < @dblShippedForInvoice)
+						begin
+							select @dblQuantityForSpot = @dblShippedForInvoice - @dblPricedForInvoice;
+						end
+
 						--Check if Shipment Item has unposted Invoice
 						if not exists (
 										select
@@ -1536,6 +1545,21 @@ BEGIN TRY
 									,@strScreen = 'Invoice'
 							END
 
+							if (isnull(@dblQuantityForSpot,0) > 0)
+							begin
+								exec uspCTCreateInvoiceDetail
+									@intInvoiceDetailId = @intInvoiceDetailId
+									,@intInventoryShipmentId = @intInventoryShipmentId
+									,@intInventoryShipmentItemId = @intInventoryShipmentItemId
+									,@dblQty = @dblQuantityForSpot
+									,@dblPrice = 0.00
+									,@intUserId = @intUserId
+									,@intContractHeaderId = null
+									,@intContractDetailId = null
+									,@NewInvoiceDetailId = @NewInvoiceSpotDetailId
+									,@intPriceFixationDetailId = @intPriceFixationDetailId;
+							end
+
 							--Update the load applied and priced
 							IF @ysnLoad = 1
 							BEGIN
@@ -1588,6 +1612,21 @@ BEGIN TRY
 								,@intSourceDetailId = @intInventoryShipmentItemId
 								,@dblQuantity = @dblQuantityForInvoice
 								,@strScreen = 'Invoice'
+
+							if (isnull(@dblQuantityForSpot,0) > 0)
+							begin
+								exec uspCTCreateInvoiceDetail
+									@intInvoiceDetailId = @intInvoiceDetailId
+									,@intInventoryShipmentId = @intInventoryShipmentId
+									,@intInventoryShipmentItemId = @intInventoryShipmentItemId
+									,@dblQty = @dblQuantityForSpot
+									,@dblPrice = 0.00
+									,@intUserId = @intUserId
+									,@intContractHeaderId = null
+									,@intContractDetailId = null
+									,@NewInvoiceDetailId = @NewInvoiceSpotDetailId
+									,@intPriceFixationDetailId = @intPriceFixationDetailId;
+							end
 							
 							--Deduct the quantity from @dblPricedForInvoice and @dblShippedForInvoice
 							set @dblPricedForInvoice = (@dblPricedForInvoice - @dblQuantityForInvoice);
