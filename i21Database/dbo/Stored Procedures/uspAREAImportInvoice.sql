@@ -79,13 +79,15 @@ LEFT JOIN tblICItem ITEM ON I.strItemNo = ITEM.strItemNo
 LEFT JOIN tblICUnitMeasure UOM ON I.intUnitMeasureId = UOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM IUOM ON ITEM.intItemId = IUOM.intItemId AND I.intUnitMeasureId = IUOM.intUnitMeasureId
 
-DELETE IE
-FROM @InvoiceEntries IE
-INNER JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId
-
-IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
+IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries IE INNER JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId)
+	RAISERROR('Invoice already exists', 16, 1)
+ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)))
+	 RAISERROR('Customer not found', 16, 1)
+ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)))
+	RAISERROR('Location not found', 16, 1)
+ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
+	RAISERROR('No invoice to import', 16, 1)
+ELSE 
 	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 15, 1
-ELSE
-	RAISERROR('No Invoices to import', 16, 1)
 
 RETURN 0
