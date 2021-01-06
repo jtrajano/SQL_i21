@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuCTGetAvailablePriceForVoucher]
 	AS
 		select
-		    intId = convert(int,ROW_NUMBER() over (order by intContractDetailId))            
+		    intId = convert(int,ROW_NUMBER() over (order by intPriceFixationDetailId))            
 			,intContractDetailId      
 			,intPriceFixationId      
 			,intPriceFixationDetailId      
