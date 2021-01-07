@@ -788,12 +788,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 		INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 		INNER JOIN vyuARGetAddOnItems ADDON ON ID.intItemId = ADDON.intComponentItemId
 										   AND I.intCompanyLocationId = ADDON.intCompanyLocationId
-		INNER JOIN (
-			SELECT dblQtyShipped = SUM(dblQtyShipped)
-				 , intItemId	 = intItemId
-			FROM #INVOICEDETAILSTOADD 
-			GROUP BY intItemId
-		) IDTOADD ON IDTOADD.intItemId = ADDON.intItemId
+		INNER JOIN #INVOICEDETAILSTOADD IDTOADD ON IDTOADD.intItemId = ADDON.intItemId
 		WHERE ID.strAddonDetailKey IS NOT NULL
 		  AND ISNULL(ID.ysnAddonParent, 0) = 0		  
 		  AND ISNULL(@ysnFromSalesOrder, 0) = 1
