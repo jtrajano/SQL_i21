@@ -2170,7 +2170,7 @@ BEGIN TRY
 				, cd.intContractDetailId
 				, cd.intContractSeq
 				, ch.intContractTypeId
-				, dblQty = pfd.dblQuantity - ISNULL(dblQuantityAppliedAndPriced, 0)
+				, dblQty = CASE WHEN ISNULL(ch.ysnLoad, 0) = 1 THEN (pfd.dblLoadPriced - ISNULL(pfd.dblLoadAppliedAndPriced, 0)) * ch.dblQuantityPerLoad ELSE pfd.dblQuantity - ISNULL(dblQuantityAppliedAndPriced, 0) END
 				, intQtyUOMId = ch.intCommodityUOMId
 				, intPricingTypeId = 1
 				, strPricingType = 'Priced'

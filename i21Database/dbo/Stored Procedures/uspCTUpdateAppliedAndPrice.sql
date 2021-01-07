@@ -47,135 +47,84 @@ as
 			cd.intContractDetailId = @intContractDetailId
 			and ch.intContractHeaderId = cd.intContractHeaderId
 
-		if (@intContractTypeId = 2 and exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd, tblCTPriceFixationDetailAPAR ar where pf.intContractDetailId = @intContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId))
-		begin
-			update
-				pfd
-			set
-				pfd.dblQuantityAppliedAndPriced = isnull(rd.dblInvoiceQuantityAppliedAndPriced,0)
-				,pfd.dblLoadAppliedAndPriced = isnull(rd.dblInvoiceLoadAppliedAndPriced,0)
-			from
-				tblCTPriceFixationDetail pfd 
-				join (
-					select
-						pfd.intPriceFixationDetailId
-						,pfd.intNumber
-						,pfd.dblQuantity
-						,pfd.dblQuantityAppliedAndPriced
-						,dblInvoiceQuantityAppliedAndPriced = (case when ch.intContractTypeId = 2 then sum(iq.dblQtyShipped) else sum(vq.dblQtyReceived) end)
-						,pfd.dblLoadPriced
-						,pfd.dblLoadAppliedAndPriced
-						,dblInvoiceLoadAppliedAndPriced = (case when ch.intContractTypeId = 2 then convert(numeric(18,6),count(iq.intInvoiceDetailId)) else convert(numeric(18,6),count(vq.intBillDetailId)) end)
-					from
-						tblCTPriceFixation pf
-						join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
-						join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
-						left join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
-						left join (
-							select di.intInvoiceDetailId, di.dblQtyShipped from tblARInvoiceDetail di where di.intInventoryShipmentChargeId is null and isnull(di.ysnReturned,0) = 0
-						) iq on iq.intInvoiceDetailId = ar.intInvoiceDetailId
-						left join (
-							select bd.intBillDetailId, bd.dblQtyReceived from tblAPBillDetail bd where bd.intInventoryReceiptChargeId is null
-						) vq on vq.intBillDetailId = ar.intBillDetailId
-					where
-						pf.intContractDetailId = @intContractDetailId
-						and isnull(ar.ysnReturn,0) = 0
-					group by
-						pfd.intPriceFixationDetailId
-						,pfd.intNumber
-						,pfd.dblQuantity
-						,pfd.dblQuantityAppliedAndPriced
-						,pfd.dblLoadPriced
-						,pfd.dblLoadAppliedAndPriced
-						,ch.intContractTypeId
-				) rd  on rd.intPriceFixationDetailId = pfd.intPriceFixationDetailId
-			where
-				isnull(pfd.dblQuantityAppliedAndPriced,0) <> isnull(rd.dblInvoiceQuantityAppliedAndPriced,0)
-				or isnull(pfd.dblLoadAppliedAndPriced,0) <> isnull(rd.dblInvoiceLoadAppliedAndPriced,0)
-		end
-		else
-		begin
+		insert into @PurchasePricing (
+			intPriceFixationDetailId
+			,dblQuantity
+			,dblQuantityAppliedAndPriced
+			,dblLoadPriced
+			,dblLoadApplied
+			,dblLoadAppliedAndPriced
+			,dblCorrectQuantityAppliedAndPriced
+			,dblCorrectLoadAppliedAndPriced
+		)
+		select
+			intPriceFixationDetailId = pfd.intPriceFixationDetailId
+			,dblQuantity = pfd.dblQuantity
+			,dblQuantityAppliedAndPriced = pfd.dblQuantityAppliedAndPriced
+			,dblLoadPriced = pfd.dblLoadPriced
+			,dblLoadApplied = pfd.dblLoadApplied
+			,dblLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
+			,dblCorrectQuantityAppliedAndPriced = 0.00--pfd.dblQuantityAppliedAndPriced
+			,dblCorrectLoadAppliedAndPriced = 0.00--pfd.dblLoadAppliedAndPriced 
+		from
+			tblCTPriceFixation pf
+			,tblCTPriceFixationDetail pfd
+		where
+			pf.intContractDetailId = @intContractDetailId
+			and pfd.intPriceFixationId = pf.intPriceFixationId;
 
-			insert into @PurchasePricing (
-				intPriceFixationDetailId
-				,dblQuantity
-				,dblQuantityAppliedAndPriced
-				,dblLoadPriced
-				,dblLoadApplied
-				,dblLoadAppliedAndPriced
-				,dblCorrectQuantityAppliedAndPriced
-				,dblCorrectLoadAppliedAndPriced
-			)
-			select
-				intPriceFixationDetailId = pfd.intPriceFixationDetailId
-				,dblQuantity = pfd.dblQuantity
-				,dblQuantityAppliedAndPriced = pfd.dblQuantityAppliedAndPriced
-				,dblLoadPriced = pfd.dblLoadPriced
-				,dblLoadApplied = pfd.dblLoadApplied
-				,dblLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
-				,dblCorrectQuantityAppliedAndPriced = 0.00--pfd.dblQuantityAppliedAndPriced
-				,dblCorrectLoadAppliedAndPriced = 0.00--pfd.dblLoadAppliedAndPriced 
-			from
-				tblCTPriceFixation pf
-				,tblCTPriceFixationDetail pfd
-			where
-				pf.intContractDetailId = @intContractDetailId
-				and pfd.intPriceFixationId = pf.intPriceFixationId;
-
-			if exists (select top 1 1 from @PurchasePricing)
+		if exists (select top 1 1 from @PurchasePricing)
+		begin
+			select @intActivePriceFixationDetailId = min(intPriceFixationDetailId) from @PurchasePricing where intPriceFixationDetailId > isnull(@intActivePriceFixationDetailId,0);
+			while (@intActivePriceFixationDetailId is not null and @intActivePriceFixationDetailId > 0)
 			begin
-				select @intActivePriceFixationDetailId = min(intPriceFixationDetailId) from @PurchasePricing where intPriceFixationDetailId > isnull(@intActivePriceFixationDetailId,0);
-				while (@intActivePriceFixationDetailId is not null and @intActivePriceFixationDetailId > 0)
+				select @dblPricedLoad = dblLoadPriced, @dblPricedQuantity = dblQuantity from @PurchasePricing where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+				if (isnull(@ysnLoad,0) = 0)
 				begin
-					select @dblPricedLoad = dblLoadPriced, @dblPricedQuantity = dblQuantity from @PurchasePricing where intPriceFixationDetailId = @intActivePriceFixationDetailId;
-					if (isnull(@ysnLoad,0) = 0)
+					if (@dblSequenceAppliedQuantity > @dblPricedQuantity)
 					begin
-						if (@dblSequenceAppliedQuantity > @dblPricedQuantity)
-						begin
-							update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = @dblPricedQuantity where intPriceFixationDetailId = @intActivePriceFixationDetailId;
-							select @dblSequenceAppliedQuantity = @dblSequenceAppliedQuantity - @dblPricedQuantity;
-						end
-						else
-						begin
-							update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = @dblSequenceAppliedQuantity where intPriceFixationDetailId = @intActivePriceFixationDetailId;
-							select @dblSequenceAppliedQuantity = 0;
-						end
+						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = @dblPricedQuantity where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						select @dblSequenceAppliedQuantity = @dblSequenceAppliedQuantity - @dblPricedQuantity;
 					end
 					else
 					begin
-						if (@intSequenceAppliedLoad > @dblPricedLoad)
-						begin
-							update @PurchasePricing set dblCorrectLoadAppliedAndPriced = @dblPricedLoad where intPriceFixationDetailId = @intActivePriceFixationDetailId;
-							select @intSequenceAppliedLoad = @intSequenceAppliedLoad - @dblPricedLoad;
-						end
-						else
-						begin
-							update @PurchasePricing set dblCorrectLoadAppliedAndPriced = @intSequenceAppliedLoad where intPriceFixationDetailId = @intActivePriceFixationDetailId;
-							select @intSequenceAppliedLoad = 0;
-						end
+						update @PurchasePricing set dblCorrectQuantityAppliedAndPriced = @dblSequenceAppliedQuantity where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						select @dblSequenceAppliedQuantity = 0;
 					end
-
-					select @intActivePriceFixationDetailId = min(intPriceFixationDetailId) from @PurchasePricing where intPriceFixationDetailId > isnull(@intActivePriceFixationDetailId,0);
+				end
+				else
+				begin
+					if (@intSequenceAppliedLoad > @dblPricedLoad)
+					begin
+						update @PurchasePricing set dblCorrectLoadAppliedAndPriced = @dblPricedLoad where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						select @intSequenceAppliedLoad = @intSequenceAppliedLoad - @dblPricedLoad;
+					end
+					else
+					begin
+						update @PurchasePricing set dblCorrectLoadAppliedAndPriced = @intSequenceAppliedLoad where intPriceFixationDetailId = @intActivePriceFixationDetailId;
+						select @intSequenceAppliedLoad = 0;
+					end
 				end
 
+				select @intActivePriceFixationDetailId = min(intPriceFixationDetailId) from @PurchasePricing where intPriceFixationDetailId > isnull(@intActivePriceFixationDetailId,0);
 			end
 
-			update
-				pfd
-			set
-				pfd.dblQuantityAppliedAndPriced = pp.dblCorrectQuantityAppliedAndPriced
-				,pfd.dblLoadAppliedAndPriced = pp.dblCorrectLoadAppliedAndPriced
-			from
-				tblCTPriceFixationDetail pfd
-				,@PurchasePricing pp
-			where
-				pfd.intPriceFixationDetailId = pp.intPriceFixationDetailId
-				and (
-						pp.dblQuantityAppliedAndPriced <> pp.dblCorrectQuantityAppliedAndPriced
-						or pp.dblLoadAppliedAndPriced <> pp.dblCorrectLoadAppliedAndPriced
-					)
-
 		end
+
+		update
+			pfd
+		set
+			pfd.dblQuantityAppliedAndPriced = pp.dblCorrectQuantityAppliedAndPriced
+			,pfd.dblLoadAppliedAndPriced = pp.dblCorrectLoadAppliedAndPriced
+		from
+			tblCTPriceFixationDetail pfd
+			,@PurchasePricing pp
+		where
+			pfd.intPriceFixationDetailId = pp.intPriceFixationDetailId
+			and (
+					pp.dblQuantityAppliedAndPriced <> pp.dblCorrectQuantityAppliedAndPriced
+					or pp.dblLoadAppliedAndPriced <> pp.dblCorrectLoadAppliedAndPriced
+				)
 
 	end try
 	begin catch
