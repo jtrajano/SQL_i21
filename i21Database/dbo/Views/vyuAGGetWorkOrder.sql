@@ -27,6 +27,19 @@ AS
 	, SPLIT.strSplitNumber
 	, WO.strComments
 	,WO.strFarmDescription
+	, WO.dtmStartDate
+	, WO.dtmEndDate
+	, WO.dtmStartTime
+	, WO.dtmEndTime
+	, WO.dblApplicationRate
+	, WO.strSeason
+	, WO.strWindDirection
+	, WO.dblWindSpeed
+	, WO.strWindSpeedUOM
+	, WO.dblTemperature
+	, WO.strSoilCondition
+	, WO.dblAppliedAcres
+	, WO.strTemperatureUOM
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
@@ -69,7 +82,7 @@ AS
 	 strSplitNumber
 	 FROM tblEMEntitySplit WITH(NOLOCK)  
 	) SPLIT ON SPLIT.intSplitId = WO.intSplitId
-	JOIN (
+	LEFT JOIN (
 	SELECT intTermID
 		 , strTerm 
 	FROM tblSMTerm WITH (NOLOCK)

@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[tblAGWorkOrderDetail]
 	[dblDiscount] NUMERIC(18,6) NULL,
 	[dblDiscountValue] NUMERIC(18,6) NULL,
 	[dblItemTermDiscount] NUMERIC(18,6) NULL,
-	[strItemTermDiscountBy] NUMERIC(18,6) NULL,
+	[strItemTermDiscountBy] NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
 	[intTaxId] INT NULL,
 	[dblPrice] NUMERIC(18,6) NULL,
 	[dblBasePrice] NUMERIC(18,6) NULL,
