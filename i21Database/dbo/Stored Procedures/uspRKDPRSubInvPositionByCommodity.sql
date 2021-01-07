@@ -465,6 +465,35 @@ BEGIN
 		AND convert(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110)<=convert(datetime,@dtmToDate)
 		AND ysnInTransit = 0
 		AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND s.strTransactionType <> 'Storage Settlement'
+
+	UNION ALL
+	SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity , 0)))
+		, t.strTicketNumber Ticket
+		, s.strLocationName
+		, s.strItemNo
+		, i.intCommodityId intCommodityId
+		, intCommodityUnitMeasureId intFromCommodityUnitMeasureId
+		, s.intLocationId intLocationId
+		, strTransactionId
+		, strTransactionType
+		, i.intItemId
+		, t.strDistributionOption
+		, strTicketStatus
+		, s.intEntityId
+	FROM vyuRKGetInventoryValuation s
+	JOIN tblICItem i on i.intItemId=s.intItemId
+	JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+	JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
+	LEFT JOIN tblSCTicket t on s.intSourceId = t.intTicketId
+	WHERE i.intCommodityId in (select intCommodity from @Commodity) AND ISNULL(s.dblQuantity, 0) <>0 
+		AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId) AND ISNULL(strTicketStatus,'') <> 'V'
+		AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
+		AND convert(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110)<=convert(datetime,@dtmToDate)
+		AND ysnInTransit = 0
+		AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+		AND s.strTransactionType = 'Storage Settlement'
 
 	--========================
 	-- TRANSFER

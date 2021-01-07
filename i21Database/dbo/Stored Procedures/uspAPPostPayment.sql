@@ -664,36 +664,46 @@ BEGIN
 	--BATCH POST
 	EXEC uspGLBatchPostEntries @GLEntries, @batchId, @userId, @post
 
+	--INSERT THE RESULT FOR SHOWING ON THE USER
+	DECLARE @invalidGLEntries AS Id
+	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
+	OUTPUT inserted.intTransactionId INTO @invalidGLEntries
+	SELECT 
+		A.strDescription
+		,A.strTransactionType
+		,A.strTransactionId
+		,pay.ysnLienExists
+		,A.intTransactionId
+		,@batchId
+	FROM tblGLPostResult A
+	INNER JOIN tblAPPayment pay
+		ON pay.strPaymentRecordNum = A.strTransactionId COLLATE Latin1_General_CI_AS
+	WHERE A.strBatchId = @batchId
+
 	--Add to invalid payment count those invalid GL entries
 	SET @invalidCount = (SELECT COUNT(*) 
 						FROM tblGLPostResult B 
 						WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId)
 						+ ISNULL(@invalidCount, 0)
 
+	IF EXISTS(SELECT 1 FROM @invalidGLEntries)
+	BEGIN
+		DECLARE @postVarGL BIT = ~@post
+		--ROLLBACK THE UPDATING OF AMOUNT DUE IF IF THERE IS NO VALID
+		--UPDATE tblAPPaymentDetail
+		EXEC uspAPUpdatePaymentAmountDue @paymentIds = @invalidGLEntries, @post = @postVarGL
+		--UPDATE BILL RECORDS
+		EXEC uspAPUpdateBillPayment @paymentIds = @invalidGLEntries, @post = @postVarGL
+	END
+	
 	--DELETE THE FAILED POST ENTRIES
 	DELETE A
 	FROM @payments A
-	INNER JOIN tblGLPostResult B ON A.intId = B.intTransactionId
-	WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
+	INNER JOIN @invalidGLEntries B ON A.intId = B.intId
 
 	DELETE A
 	FROM @prepayIds A
-	INNER JOIN tblGLPostResult B ON A.intId = B.intTransactionId
-	WHERE B.strDescription NOT LIKE '%success%' AND B.strBatchId = @batchId
-
-	--INSERT THE RESULT FOR SHOWING ON THE USER
-	INSERT INTO tblAPPostResult(strMessage, strTransactionType, strTransactionId, ysnLienExists, intTransactionId, strBatchNumber)
-	SELECT 
-		A.strDescription
-		,A.strTransactionType
-		,A.strTransactionId
-		,A.intTransactionId
-		,pay.ysnLienExists
-		,@batchId
-	FROM tblGLPostResult A
-	INNER JOIN tblAPPayment pay
-		ON pay.strPaymentRecordNum = A.strTransactionId COLLATE Latin1_General_CI_AS
-	WHERE A.strBatchId = @batchId
+	INNER JOIN @invalidGLEntries B ON A.intId = B.intId
 
 	--MAKE SURE THAT ALL GL ENTRIES ARE VALID
 	SET @lenOfSuccessPay = (SELECT COUNT(*) FROM @payments)

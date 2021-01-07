@@ -782,6 +782,35 @@ BEGIN
 					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
 					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 					AND strTransactionId NOT IN (SELECT strTransactionId FROM @transfer)
+					AND s.strTransactionType <> 'Storage Settlement'
+
+				UNION ALL
+				SELECT strCommodityCode
+					, i.strItemNo
+					, Category.strCategoryCode
+					, dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
+					, strLocationName
+					, intCommodityId = @intCommodityId
+					, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+					, strInventoryType = 'Company Titled' COLLATE Latin1_General_CI_AS
+					, strTransactionType
+					, strEntity
+					, s.strTransactionId
+					, s.intTransactionId
+					, s.intTransactionDetailId
+				FROM vyuRKGetInventoryValuation s
+				JOIN tblICItem i ON i.intItemId = s.intItemId
+				JOIN tblICCommodityUnitMeasure cuom ON i.intCommodityId = cuom.intCommodityId AND cuom.ysnStockUnit = 1
+				JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+				JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = cuom.intUnitMeasureId
+				JOIN tblICCommodity c ON i.intCommodityId = c.intCommodityId
+				JOIN tblICCategory Category ON Category.intCategoryId = i.intCategoryId
+				WHERE i.intCommodityId = @intCommodityId AND ISNULL(s.dblQuantity,0) <> 0 AND ysnInTransit = 0
+					AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
+					AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
+					AND s.intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+					AND strTransactionId NOT IN (SELECT strTransactionId FROM @transfer)
+					AND s.strTransactionType = 'Storage Settlement'
 			) t
 
 			--Collateral

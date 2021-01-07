@@ -78,7 +78,7 @@ SELECT	intInventoryValuationKeyId  = ISNULL(t.intInventoryTransactionId, 0)
 										ELSE
 											''
 										END
-		,strTransactionType			= (CASE WHEN ty.strName = 'Invoice' THEN invoice.strTransactionType ELSE ty.strName END)
+		,strTransactionType			= ty.strName
 		,t.strTransactionForm	
 		,t.intTransactionId	
 		,t.strTransactionId	

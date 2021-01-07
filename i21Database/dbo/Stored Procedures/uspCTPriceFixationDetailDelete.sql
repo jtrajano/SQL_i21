@@ -4,7 +4,8 @@
 	@intPriceFixationDetailId	INT = NULL,
 	@intPriceFixationTicketId	INT = NULL,
 	@intUserId					INT,
-	@ysnDeleteFromInvoice bit = 0
+	@ysnDeleteFromInvoice bit = 0,
+	@ysnDeleteWholePrice bit = 0
 	
 AS
 BEGIN TRY
@@ -21,7 +22,8 @@ BEGIN TRY
 			@Quantity		NUMERIC(18,6),
 			@ysnSuccess		BIT,
 			@intContractDetailId INT,
-			@strBillDetailChargesId nvarchar(500);
+			@strBillDetailChargesId nvarchar(500),
+			@intContractHeaderId int;
 
 			declare @strFinalMessage nvarchar(max);
 			declare @AffectedInvoices table
@@ -58,13 +60,26 @@ BEGIN TRY
 		,tblCTContractHeader ch
 	where
 		cd.intContractDetailId = @intContractDetailId
-		and ch.intContractHeaderId = cd.intContractHeaderId
+		and ch.intContractHeaderId = cd.intContractHeaderId 
+  		and ch.intContractTypeId = 2
 
-	if (@ysnDestinationWeightsAndGrades = 0)
+	if (isnull(@ysnDestinationWeightsAndGrades,0) = 0)
 	begin
 		UPDATE	tblCTContractDetail
 		SET		intContractStatusId	=	case when intContractStatusId = 5 then 1 else intContractStatusId end
 		where intContractDetailId = @intContractDetailId
+
+		if (@ysnDeleteWholePrice = 1)
+		begin
+
+			select @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+
+			EXEC uspCTCreateDetailHistory
+				@intContractHeaderId
+				,@intContractDetailId
+				,'Pricing Delete'
+		end
+
 	end
 
 
@@ -182,7 +197,6 @@ BEGIN TRY
 			IF (SELECT COUNT(*) FROM tblCTPriceFixationDetailAPAR WHERE intBillId = @Id) = 0
 			BEGIN
 			
-				SELECT 'Delete 1', * FROM tblAPBill ORDER BY intBillId DESC
 				EXEC uspAPDeleteVoucher @Id,@intUserId,4
 		
 				--Audit Log

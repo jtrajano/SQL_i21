@@ -56,7 +56,8 @@
 GO
 
 CREATE NONCLUSTERED INDEX [IX_tblCTContractBalance_forDPR]
-	ON [dbo].[tblCTContractBalance] ([intContractDetailId])
-	INCLUDE (dtmContractDate,dtmEndDate)
-
+	ON [dbo].[tblCTContractBalance] ([dtmContractDate] DESC, [dtmEndDate] DESC)
+GO
+CREATE NONCLUSTERED INDEX [IX_tblCTContractBalance_intContractDetailId]
+	ON [dbo].[tblCTContractBalance] ([intContractDetailId] DESC)
 GO

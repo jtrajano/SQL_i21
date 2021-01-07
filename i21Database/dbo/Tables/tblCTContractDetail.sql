@@ -576,32 +576,31 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
     AS
 
 	declare @ErrMsg nvarchar(max);
-
-	 declare @intActiveContractDetailId int = 0;  
-	 declare @intPricingTypeId int = 0;  
-	 declare @dblSequenceQuantity numeric(18,6) = 0.00;  
-	 declare @intPricingStatus int = 0;  
-	 declare @dblPricedQuantity numeric(18,6) = 0.00
-			,@intContractTypeId int
-			,@ysnLoad bit
-			,@dblQuantityPerLoad numeric(18,6)
-			,@intActivePriceFixationDetailId int
-			,@dblSequenceAppliedQuantity numeric(18,6)
-			,@intSequenceLoad numeric(18,6)
-			,@intSequenceAppliedLoad numeric(18,6)
-			,@dblPricedLoad numeric(18,6)
-			,@dblPricedQuantity2 numeric(18,6)
-			;  
+	declare @intActiveContractDetailId int = 0;  
+	declare @intPricingTypeId int = 0;  
+	declare @dblSequenceQuantity numeric(18,6) = 0.00;  
+	declare @intPricingStatus int = 0;  
+	declare @dblPricedQuantity numeric(18,6) = 0.00
+		,@intContractTypeId int
+		,@ysnLoad bit
+		,@dblQuantityPerLoad numeric(18,6)
+		,@intActivePriceFixationDetailId int
+		,@dblSequenceAppliedQuantity numeric(18,6)
+		,@intSequenceLoad numeric(18,6)
+		,@intSequenceAppliedLoad numeric(18,6)
+		,@dblPricedLoad numeric(18,6)
+		,@dblPricedQuantity2 numeric(18,6)
+		;  
 
 	declare @SalePricing table (
-			intPriceFixationDetailId int
-			,dblQuantity numeric(18,6)
-			,dblQuantityAppliedAndPriced numeric(18,6) null
-			,dblLoadPriced numeric(18,6) null
-			,dblLoadApplied numeric(18,6) null
-			,dblLoadAppliedAndPriced numeric(18,6) null
-			,dblCorrectQuantityAppliedAndPriced numeric(18,6) null
-			,dblCorrectLoadAppliedAndPriced numeric(18,6) null
+		intPriceFixationDetailId int
+		,dblQuantity numeric(18,6)
+		,dblQuantityAppliedAndPriced numeric(18,6) null
+		,dblLoadPriced numeric(18,6) null
+		,dblLoadApplied numeric(18,6) null
+		,dblLoadAppliedAndPriced numeric(18,6) null
+		,dblCorrectQuantityAppliedAndPriced numeric(18,6) null
+		,dblCorrectLoadAppliedAndPriced numeric(18,6) null
 	);
 
 	begin try
@@ -615,7 +614,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 			,@dblQuantityPerLoad = ch.dblQuantityPerLoad
 			,@dblSequenceAppliedQuantity = (i.dblQuantity - i.dblBalance)
 			,@intSequenceLoad = i.intNoOfLoad
-			,@intSequenceAppliedLoad = (i.intNoOfLoad - convert(int,i.dblBalance))
+			,@intSequenceAppliedLoad = (i.intNoOfLoad - convert(int,i.dblBalanceLoad))
 		from
 			inserted i
 			,tblCTContractHeader ch
@@ -649,14 +648,14 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 
 		update tblCTContractDetail set intPricingStatus = @intPricingStatus where intContractDetailId = @intActiveContractDetailId;
 
-		if exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd, tblCTPriceFixationDetailAPAR ar where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId)
+		if (@intContractTypeId = 2 and exists (select top 1 1 from tblCTPriceFixation pf, tblCTPriceFixationDetail pfd, tblCTPriceFixationDetailAPAR ar where pf.intContractDetailId = @intActiveContractDetailId and pfd.intPriceFixationId = pf.intPriceFixationId and ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId))
 		begin
 
 			update
 				pfd
 			set
-				pfd.dblQuantityAppliedAndPriced = rd.dblInvoiceQuantityAppliedAndPriced
-				,pfd.dblLoadAppliedAndPriced = rd.dblInvoiceLoadAppliedAndPriced
+				pfd.dblQuantityAppliedAndPriced = isnull(rd.dblInvoiceQuantityAppliedAndPriced,0)
+				,pfd.dblLoadAppliedAndPriced = isnull(rd.dblInvoiceLoadAppliedAndPriced,0)
 			from
 				tblCTPriceFixationDetail pfd 
 				join (
@@ -673,7 +672,7 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 						tblCTPriceFixation pf
 						join tblCTContractHeader ch on ch.intContractHeaderId = pf.intContractHeaderId
 						join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
-						join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
+						left join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId
 						left join (
 							select di.intInvoiceDetailId, di.dblQtyShipped from tblARInvoiceDetail di where di.intInventoryShipmentChargeId is null and isnull(di.ysnReturned,0) = 0
 						) iq on iq.intInvoiceDetailId = ar.intInvoiceDetailId
@@ -716,8 +715,8 @@ CREATE TRIGGER [dbo].[trgCTContractDetail]
 				,dblLoadPriced = pfd.dblLoadPriced
 				,dblLoadApplied = pfd.dblLoadApplied
 				,dblLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
-				,dblCorrectQuantityAppliedAndPriced = pfd.dblQuantityAppliedAndPriced
-				,dblCorrectLoadAppliedAndPriced = pfd.dblLoadAppliedAndPriced 
+				,dblCorrectQuantityAppliedAndPriced = 0.00--pfd.dblQuantityAppliedAndPriced
+				,dblCorrectLoadAppliedAndPriced = 0.00--pfd.dblLoadAppliedAndPriced 
 			from
 				tblCTPriceFixation pf
 				,tblCTPriceFixationDetail pfd

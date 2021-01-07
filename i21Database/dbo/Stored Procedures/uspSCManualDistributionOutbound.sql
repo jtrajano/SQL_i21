@@ -549,6 +549,15 @@ END
 		,@intInvoiceId = @intInvoiceId OUTPUT 
 		,@dtmClientDate = @dtmClientDate
 	
+	SET @intInvoiceId =	(SELECT TOP 1
+		A.intInvoiceId
+	FROM tblARInvoice A
+	INNER JOIN tblARInvoiceDetail B
+		ON  A.intInvoiceId = B.intInvoiceId
+	INNER JOIN tblICInventoryShipmentItem C
+		ON B.intInventoryShipmentItemId = C.intInventoryShipmentItemId
+	WHERE C.intInventoryShipmentId = @InventoryShipmentId
+	ORDER BY B.intInvoiceId)
 
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 

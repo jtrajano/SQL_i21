@@ -673,6 +673,51 @@ BEGIN
 				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmDate, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
 				AND ysnInTransit = 0
 				AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND s.strTransactionType <> 'Storage Settlement'
+
+			UNION ALL
+			SELECT dblTotal = dbo.fnCalculateQtyBetweenUOM(iuomStck.intItemUOMId, iuomTo.intItemUOMId, (ISNULL(s.dblQuantity ,0)))
+				, strCustomer = s.strEntity
+				, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8) COLLATE Latin1_General_CI_AS
+				--, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmDate, 106), 8)
+				, strDeliveryDate = dbo.fnRKFormatDate(cd.dtmEndDate, 'MMM yyyy')
+				, s.strLocationName
+				, i.intItemId
+				, s.strItemNo
+				, intCommodityId = @intCommodityId
+				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
+				, strTruckName = ''
+				, strDriverName = ''
+				, dblStorageDue = NULL
+				, s.intLocationId
+				, intTransactionId
+				, strTransactionId
+				, strTransactionType
+				, s.intCategoryId
+				, s.strCategory
+				, t.strDistributionOption
+				, t.dtmTicketDateTime
+				, t.intTicketId
+				, t.strTicketNumber
+				, intContractHeaderId = ch.intContractHeaderId
+				, strContractNumber = ch.strContractNumber
+				, strFutureMonth = fmnt.strFutureMonth
+			FROM vyuRKGetInventoryValuation s
+			JOIN tblICItem i ON i.intItemId = s.intItemId
+			JOIN tblICItemUOM iuomStck ON s.intItemId = iuomStck.intItemId AND iuomStck.ysnStockUnit = 1
+			JOIN tblICItemUOM iuomTo ON s.intItemId = iuomTo.intItemId AND iuomTo.intUnitMeasureId = @intCommodityStockUOMId
+			LEFT JOIN tblSCTicket t ON s.intSourceId = t.intTicketId
+			LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = s.intTransactionDetailId 
+			LEFT JOIN tblCTContractHeader ch on cd.intContractHeaderId = ch.intContractHeaderId
+			LEFT JOIN tblRKFuturesMonth fmnt ON cd.intFutureMonthId = fmnt.intFutureMonthId
+			WHERE i.intCommodityId = @intCommodityId  AND ISNULL(s.dblQuantity, 0) <> 0
+				AND s.intLocationId = ISNULL(@intLocationId, s.intLocationId)
+				AND ISNULL(strTicketStatus, '') <> 'V'
+				AND ISNULL(s.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(s.intEntityId, 0))
+				AND CONVERT(DATETIME, CONVERT(VARCHAR(10), s.dtmCreated, 110), 110) <= cONVERT(DATETIME, @dtmToDate)
+				AND ysnInTransit = 0
+				AND s.intLocationId  IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+				AND s.strTransactionType = 'Storage Settlement'
 
 			--=============================
 			-- Transfer

@@ -299,7 +299,7 @@ FROM (
 	     , strItemDescription				= NULL
 	     , intItemUOMId						= ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) --CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId) ELSE ICISI.intItemUOMId END
 		 , intPriceUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intPriceItemUOMId ELSE ICISI.intPriceUOMId END
-	     , intOrderUOMId					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.intOrderUOMId ELSE ICISI.intItemUOMId END
+	     , intOrderUOMId     				= ISNULL(TICKET.intItemUOMIdTo, ICISI.intItemUOMId)
 	     , intShipmentItemUOMId				= ICISI.intItemUOMId
 		 , intWeightUOMId					= ICISI.intWeightUOMId
 		 , dblWeight						= CASE WHEN ISNULL(LGICSHIPMENT.intShipmentId,0) <> 0 THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), 1) ELSE 1 END
@@ -308,7 +308,7 @@ FROM (
 													ELSE
 														dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblQuantity,0))
 												END)
-	     , dblQtyOrdered					= CASE WHEN ARCC.intContractDetailId IS NOT NULL THEN ARCC.dblDetailQuantity ELSE 0 END
+	     , dblQtyOrdered     				= ISNULL(TICKET.dblNetUnits, ICISI.dblQuantity)
 	     , dblShipmentQuantity				= (CASE WHEN ICISI.dblDestinationQuantity IS NOT NULL AND ISNULL(ICISI.ysnDestinationWeightsAndGrades, 0) = 1
 														THEN dbo.fnCalculateQtyBetweenUOM(ICISI.intItemUOMId, ISNULL(ARCC.intItemUOMId, ICISI.intItemUOMId), ISNULL(ICISI.dblDestinationQuantity,0))
 													ELSE
@@ -418,6 +418,12 @@ FROM (
 		WHERE intOrderType <> 2 
 		  AND ysnPosted = 1 
 	) ICIS ON ICISI.intInventoryShipmentId = ICIS.intInventoryShipmentId
+	LEFT JOIN (
+	SELECT intTicketId
+		, intItemUOMIdTo
+		, dblNetUnits
+	FROM dbo.tblSCTicket T WITH (NOLOCK)
+	) TICKET ON ICISI.intSourceId = TICKET.intTicketId
 	LEFT OUTER JOIN (
 		SELECT intInventoryShipmentItemId
 			 , dblGrossWeight	= SUM(dblGrossWeight)

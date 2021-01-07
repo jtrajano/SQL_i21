@@ -342,7 +342,6 @@ BEGIN
 		AND I.[strType] != 'POS'	
 		AND ISNULL(INV.[ysnValidCreditCode], 0) = 0
 
-			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
@@ -351,22 +350,23 @@ BEGIN
 		,[intItemId]
 		,[strBatchId]
 		,[strPostingError])
-		
+	--Approval
 	SELECT
 		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
 		,[strTransactionType]	= I.[strTransactionType]
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
+		,[intItemId]            = I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'Invoice - ' + I.strInvoiceNumber + ' is not yet Approved!'
+		,[strPostingError]		= CASE WHEN VI.ysnHasCreditApprover = 0 THEN 'The Customer''s credit limit has been reached but there is no approver configured.' ELSE ISNULL(SMT.strApprovalStatus, 'Not Yet Approved') END
 	FROM 
-		#ARPostInvoiceHeader I
-	WHERE
-		I.[ysnForApproval] = @OneBit
-	--INNER JOIN
-	--	(SELECT intTransactionId FROM dbo.vyuARForApprovalTransction WITH (NOLOCK) WHERE strScreenName = 'Invoice') FAT
-	--		ON I.intInvoiceId = FAT.intTransactionId
+		#ARPostInvoiceHeader I 
+	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
+	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
+	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
+	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
+	WHERE SMT.strApprovalStatus <> 'Approved'
+	AND SMT.strApprovalStatus IS NOT NULL
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

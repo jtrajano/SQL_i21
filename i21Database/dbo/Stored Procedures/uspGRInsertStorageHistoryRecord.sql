@@ -10,8 +10,7 @@ BEGIN TRY
 
     IF (SELECT COUNT(*) FROM @StorageHistoryData) > 0
     BEGIN
-        IF NOT EXISTS(SELECT 
-                            intStorageHistoryTransactionId 
+        IF NOT EXISTS(SELECT TOP 1 1
                         FROM tblGRStorageHistoryTypeTransaction SHT 
                         INNER JOIN @StorageHistoryData SH 
                             ON SH.intTransactionTypeId = SHT.intTypeId)

@@ -8140,6 +8140,7 @@
     <Build Include="dbo\Stored Procedures\uspICPostDestinationInventoryShipmentIntegration.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateDWGSequenceBalance.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUpdateSequenceStatus.sql" />
+    <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
     <Build Include="dbo\Stored Procedures\uspCTValidatePricingUpdateDelete.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteUnpostedInvoiceFromPricingUpdate.sql" />
     <Build Include="dbo\Views\vyuAPPrepayHistory.sql" />
@@ -8151,8 +8152,10 @@
     <Build Include="dbo\Functions\fnAPCreateVoucherPayableTaxFromDetail.sql" />
     <Build Include="dbo\Functions\fnAPValidateBillGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCTDeleteBillDetailCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryValuationAsCommodityStockUOM.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessInvoiceReturn.sql" />
+    <Build Include="dbo\Functions\fnCMUndepositedFundReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -8172,6 +8175,7 @@
     <None Include="Scripts\Post-Deployment\CT\1_MasterTables.sql" />
     <None Include="Scripts\Post-Deployment\NR\1_NoteTransType.sql" />
     <None Include="Scripts\Post-Deployment\GR\1_MasterTables.sql" />
+    <None Include="Scripts\Post-Deployment\GR\1920_Dev_Linking_Voucher_Discount.sql" />
     <None Include="Scripts\Post-Deployment\PR\DefaultData\1_TaxStatesAndLocalities.sql" />
     <None Include="Scripts\Post-Deployment\AP\DateCreatedValueDefault.sql" />
     <None Include="Scripts\Post-Deployment\EM\001_EMEntityPortalMenu.sql" />
@@ -8396,6 +8400,8 @@
     <Build Include="dbo\User Defined Types\CTContractSequenceBalanceType.sql" />
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <None Include="Scripts\Post-Deployment\AP\UpdatePayableFreightTerm.sql" />
+    <Build Include="dbo\Tables\tblGRSettleContractPriceFixationDetail.sql" />
+    <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
   </ItemGroup>

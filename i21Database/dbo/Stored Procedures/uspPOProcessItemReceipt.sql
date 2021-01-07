@@ -375,8 +375,30 @@ BEGIN
 			(dbo.fnIsStockTrackingItem(C.intItemId) = 0 OR C.intItemId IS NULL)
 		AND payables.dblTax != 0
 
+	--ONLY FORCE OR REMOVE PAYABLE THAT IS IN THE CREATED RECEIPT
+	DELETE P
+	FROM @voucherPayables P
+	INNER JOIN tblPOPurchaseDetail PD ON PD.intPurchaseDetailId = P.intPurchaseDetailId
+	LEFT JOIN @ReceiptStagingTable ST 
+		ON ST.intContractDetailId = ISNULL(P.intContractDetailId, P.intPurchaseDetailId) AND ST.intContractHeaderId = ISNULL(P.intContractHeaderId, PD.intPurchaseId)
+	WHERE ST.intId IS NULL
 
-	IF (EXISTS(SELECT 1 FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId AND dblQtyReceived != 0))
+	DELETE PT
+	FROM @voucherPayableTax PT
+	LEFT JOIN @voucherPayables P ON P.intVoucherPayableId = PT.intVoucherPayableId
+	WHERE P.intVoucherPayableId IS NULL
+
+	-- IF (EXISTS(SELECT 1 FROM tblPOPurchaseDetail WHERE intPurchaseId = @poId AND dblQtyReceived != 0))
+	IF EXISTS(
+		--MAKE SURE IF THERE IS REALLY A PARTIAL VOUCHER
+		SELECT 1 FROM @voucherPayables A
+		INNER JOIN (tblICInventoryReceiptItem B INNER JOIN tblICInventoryReceipt B2 ON B.intInventoryReceiptId = B2.intInventoryReceiptId)
+			ON A.intPurchaseDetailId = B.intLineNo
+		WHERE
+			B2.strReceiptType = 'Purchase Order'
+		AND B.dblBillQty <> 0
+		AND B.dblOpenReceive > B.dblBillQty
+	)
 	BEGIN
 		--FORCE COMPLETE THOSE PARTIALLY VOUCHERD NON-INVENTORY		
 		EXEC uspAPForceCompletePayable @voucherPayable = @voucherPayables, @voucherPayableTax = @voucherPayableTax, @throwError = 1, @error = @error OUT;

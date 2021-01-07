@@ -381,7 +381,7 @@ BEGIN TRY
 	   ,Shipment.dtmShipDate
 	   ,@dtmEndDate AS dtmEndDate
 	   ,dblQuantity = CASE 
-	   					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CH.dblQuantityPerLoad)
+	   					WHEN ISNULL(CH.ysnLoad,0) = 1 THEN MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN CH.dblQuantityPerLoad ELSE 0 END)
 						ELSE
 							ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ShipmentItem.intPriceUOMId,
 							CASE
@@ -607,9 +607,8 @@ BEGIN TRY
 		JOIN tblGRSettleStorage  SS ON SS.intSettleStorageId = SC.intSettleStorageId
 		JOIN tblCTContractDetail CD ON SC.intContractDetailId = CD.intContractDetailId
 		JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-		AND CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE SS.ysnPosted = 1
-			AND SS.intParentSettleStorageId IS NULL
+			AND SS.intParentSettleStorageId IS NOT NULL
 			AND dbo.fnRemoveTimeOnDate(SS.dtmCreated) <= CASE WHEN @dtmEndDate IS NOT NULL   THEN @dtmEndDate   ELSE dbo.fnRemoveTimeOnDate(SS.dtmCreated) END
 		GROUP BY CH.intContractTypeId,CH.intContractHeaderId,CD.intContractDetailId,SS.dtmCreated,SS.intSettleStorageId,CH.ysnLoad
 

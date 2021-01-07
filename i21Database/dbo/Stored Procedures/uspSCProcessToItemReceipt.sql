@@ -10,6 +10,8 @@ CREATE PROCEDURE [dbo].[uspSCProcessToItemReceipt]
 	,@InventoryReceiptId AS INT OUTPUT
 	,@intBillId AS INT OUTPUT
 	,@ysnSkipValidation as BIT = NULL
+	,@intFutureMarketId AS INT = NULL
+	,@intFutureMonthId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -485,6 +487,8 @@ BEGIN TRY
 					,@intContractId
 					,@intUserId
 					,@ysnDPStorage
+					,@intFutureMarketId = @intFutureMarketId
+					,@intFutureMonthId = @intFutureMonthId
 
 					DECLARE @intDPContractId INT;
 					DECLARE @dblDPContractUnits NUMERIC(38,20);
@@ -528,7 +532,7 @@ BEGIN TRY
 								,intStorageScheduleTypeId
 								,ysnAllowVoucher 
 							)
-							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId
+							EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblNetUnits , @intEntityId, @strDistributionOption, @intDPContractId, @intStorageScheduleId, @intFutureMarketId, @intFutureMonthId
 							EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intDPContractId, @dblNetUnits, @intEntityId, @ysnDPStorage;
 
 						-- Attempt to fetch next row from cursor

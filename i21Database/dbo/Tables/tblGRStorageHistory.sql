@@ -68,3 +68,8 @@ CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_forDPR]
 	INCLUDE ([intCustomerStorageId],[intTicketId],[intInventoryReceiptId],[intInventoryShipmentId],[dblUnits],[dtmHistoryDate],[strType],[strTransferTicket],[strSettleTicket],[intSettleStorageId],[intTransferStorageId])
 
 GO
+CREATE NONCLUSTERED INDEX [IX_tblGRStorageHistory_intSettleStorageId]
+ON [dbo].[tblGRStorageHistory] ([intSettleStorageId] ASC)
+INCLUDE([dtmDistributionDate])
+
+GO
