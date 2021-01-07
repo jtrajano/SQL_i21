@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[tblGLRunningBalanceOrder](
 	[intGLDetailId] [int] NOT NULL,
 	[intAccountId] [int] NOT NULL,
 	[dtmDate] [datetime] NOT NULL,
-	[strTransactionId] NVARCHAR(40) NOT NULL,
+	[strTransactionId] NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
 	[rowId] [bigint] NULL,
  CONSTRAINT [PK_tblGLRunningBalanceOrder] PRIMARY KEY CLUSTERED 
 (
