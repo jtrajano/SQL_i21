@@ -120,7 +120,7 @@ Invoices AS(
 						ELSE  PYMTDetail.dblInterest 
 						END
 			,dblNet = PYMTDetail.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
-			,'' AS intTransactionType
+			,0 AS intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
 			,F.strReferenceNo strCheckNumber
