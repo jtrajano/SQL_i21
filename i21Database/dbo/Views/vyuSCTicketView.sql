@@ -181,6 +181,8 @@ AS
 	,SCT.ysnExportRailXML
    ,SCT.intAGWorkOrderId
    ,SCT.ysnMultipleTicket
+   ,strAGWorkOrderNumber  = AWO.strOrderNumber
+   ,strAGWorkOrderLocation = AWOL.strLocationName
   from tblSCTicket SCT
 	LEFT JOIN tblEMEntity EMEntity on EMEntity.intEntityId = SCT.intEntityId
 	LEFT JOIN tblEMEntitySplit EMSplit on [EMSplit].intSplitId = SCT.intSplitId
@@ -219,3 +221,7 @@ AS
 		FOR XML PATH ('')
 	) ContractsApplied(strContractsApplied)
 	) ContractsApplied
+   LEFT JOIN tblAGWorkOrder AWO
+      ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
+   LEFT JOIN tblEMEntityLocation AWOL
+		ON AWO.intEntityLocationId = AWOL.intEntityLocationId

@@ -8977,6 +8977,7 @@
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
     <Build Include="dbo\Views\vyuAPVoucherPaymentSchedule.sql" />
     <Build Include="dbo\Tables\tblAGApplicationTarget.sql" />
+    <Build Include="dbo\Views\vyuSCAgWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
