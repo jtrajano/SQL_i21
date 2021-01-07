@@ -981,23 +981,8 @@ BEGIN
 		CLOSE c; DEALLOCATE c;
 		
 		--RISK SUMMARY LOG
-		--RISK SUMMARY LOG
 		EXEC [dbo].[uspGRRiskSummaryLog2]
 			@StorageHistoryIds = @HistoryIds
-			,@strAction = 'UNPOST'
-		-- SET @intStorageHistoryId = NULL
-		-- DECLARE c CURSOR LOCAL STATIC READ_ONLY FORWARD_ONLY
-		-- FOR
-		-- 	SELECT intId FROM @HistoryIds
-		-- OPEN c;
-		-- FETCH NEXT FROM c INTO @intStorageHistoryId
-
-		-- WHILE @@FETCH_STATUS = 0
-		-- BEGIN
-		-- 	EXEC uspGRRiskSummaryLog @intStorageHistoryId
-		-- 	FETCH NEXT FROM c INTO @intStorageHistoryId
-		-- END
-		-- CLOSE c; DEALLOCATE c;
 
 		DONE:
 		COMMIT TRANSACTION
