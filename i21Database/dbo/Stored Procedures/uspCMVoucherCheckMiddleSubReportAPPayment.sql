@@ -52,11 +52,11 @@ Invoices AS(
 			,dtmDate = BILL.dtmBillDate
 			,intTermsId = BILL.intTermsId
 			,strComment = SUBSTRING(BILL.strComment,1,25)
+			,dblAmount = PYMTDetail.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
 						ELSE  PYMTDetail.dblInterest 
 						END
-			,dblAmount = PYMTDetail.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,dblNet = PYMTDetail.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,BILL.intTransactionType
 			,PYMTDetail.intPaymentDetailId
@@ -82,12 +82,9 @@ Invoices AS(
 			,dtmDate = preBILL.dtmBillDate
 			,intTermsId = preBILL.intTermsId
 			,strComment = SUBSTRING(preBILL.strComment,1,25)
-			,dblAmount = CASE WHEN preBILL.intTransactionType = 3
-						THEN preBILL.dblTotal * -1
-						ELSE preBILL.dblTotal
-						END
+			,dblAmount = PYMTDetail.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,dblDiscount = preBILL.dblDiscount
-			,dblNet = preBILL.dblTotal * -1
+			,dblNet = PYMTDetail.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,preBILL.intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
@@ -117,12 +114,12 @@ Invoices AS(
 			,dtmDate = INV.dtmDate
 			,intTermsId = INV.intTermId
 			,strComment = INV.strComments
-			,dblAmount = PYMTDetail.dblTotal
+			,dblAmount = PYMTDetail.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
 						ELSE  PYMTDetail.dblInterest 
 						END
-			,dblNet = PYMTDetail.dblPayment
+			,dblNet = PYMTDetail.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,0 AS intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
