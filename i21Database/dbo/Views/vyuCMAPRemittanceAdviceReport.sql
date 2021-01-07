@@ -8,28 +8,25 @@ SELECT CHK.dtmDate
 		, strCompanyAddress = dbo.fnConvertToFullAddress(COMPANY.strAddress
 		, COMPANY.strCity
 		, COMPANY.strState
-		, COMPANY.strZip) COLLATE Latin1_General_CI_AS
+		, COMPANY.strZip)
 		, strBank = UPPER (Bank.strBankName)
-		, strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress, Bank.strCity, Bank.strState, Bank.strZipCode) COLLATE Latin1_General_CI_AS
+		, strBankAddress = dbo.fnConvertToFullAddress (Bank.strAddress, Bank.strCity, Bank.strState, Bank.strZipCode)
 		, strVendorId = ISNULL (VENDOR.strVendorId, '--')
 		, strVendorName = ISNULL (ENTITY.strName, CHK.strPayee)
-		, strVendorAccount = ISNULL (F.strAccountNumber, '') COLLATE Latin1_General_CI_AS
+		, strVendorAccount = ISNULL (F.strAccountNumber, '')
 		, strVendorAddress = 
 			CASE WHEN ISNULL (dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState,LOCATION.strZipCode), '') <> '' 
 			THEN dbo.fnConvertToFullAddress(LOCATION.strAddress, LOCATION.strCity, LOCATION.strState,LOCATION.strZipCode) 
 			ELSE dbo.fnConvertToFullAddress(CHK.strAddress, CHK.strCity, CHK.strState, CHK.strZipCode)
-	       END COLLATE Latin1_General_CI_AS
+	       END
 		, CHK.intBankTransactionTypeId --DETAIL PART
 		, strBillId = BILL.strBillId
 		, strInvoice = BILL.strVendorOrderNumber
 		, dtmDetailDate = BILL.dtmBillDate
 		, strComment = BILL.strComment
-		, dblDetailAmount = 
-			CASE WHEN BILL.intTransactionType IN (3) OR ISNULL(ysnOffset,0) = 1 -- Debit Memo , Prepayment (DM, VPRE with ysnOffset =1)
-			THEN BILL.dblTotal * - 1 
-			ELSE BILL.dblTotal END
-		, dblDiscount = PYMTDTL.dblDiscount
-		, dblNet = PYMTDTL.dblPayment
+		, dblDetailAmount = PYMTDTL.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
+		, dblDiscount = PYMTDTL.dblDiscount 
+		, dblNet = PYMTDTL.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 		, strBankAccountNo = STUFF(ACCT.strBankAccountNo, 1, LEN (ACCT.strBankAccountNo) - 4
 		, REPLICATE ('x', LEN (ACCT.strBankAccountNo) - 4))
 		, strMessage = 'The following items(s) will be presented to ' + 

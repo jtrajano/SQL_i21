@@ -52,18 +52,12 @@ Invoices AS(
 			,dtmDate = BILL.dtmBillDate
 			,intTermsId = BILL.intTermsId
 			,strComment = SUBSTRING(BILL.strComment,1,25)
-			,dblAmount = CASE WHEN BILL.intTransactionType = 3
-						THEN BILL.dblTotal * -1
-						ELSE BILL.dblTotal
-						END
 			,dblDiscount = CASE WHEN PYMTDetail.dblDiscount <> 0 
 						THEN PYMTDetail.dblDiscount 
 						ELSE  PYMTDetail.dblInterest 
 						END
-			,dblNet = CASE WHEN BILL.intTransactionType = 3
-						THEN PYMTDetail.dblPayment * -1
-						ELSE PYMTDetail.dblPayment
-						END
+			,dblAmount = PYMTDetail.dblTotal -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
+			,dblNet = PYMTDetail.dblPayment -- as of 19.2 PYMTDetail.dblTotal / dblPayment will reflect negative sign appropriately
 			,BILL.intTransactionType
 			,PYMTDetail.intPaymentDetailId
 			,F.intCurrencyId
