@@ -46,6 +46,10 @@ BEGIN
 		, @intTransCtr INT = 0
 		, @intTotal INT
 
+	
+	
+	SELECT @intTotal = COUNT(*) FROM @ContractSequences
+	
 	-- Validate Batch Id
 	IF EXISTS(SELECT TOP 1 1 FROM #tmpLogItems WHERE ISNULL(strBatchId, '') = '')
 	BEGIN
@@ -132,6 +136,11 @@ BEGIN
 	--	, [ysnNegated] BIT DEFAULT((0)) NULL
 	--	, [intRefContractBalanceId] INT NULL)
 
+	IF @Rebuild = 1 
+	BEGIN
+		GOTO BulkRebuild
+	END
+	
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpLogItems)
 	BEGIN
 		SELECT TOP 1 @Id = intId
@@ -387,6 +396,90 @@ BEGIN
 		DELETE FROM #tmpLogItems WHERE intId = @Id
 	END
 
+	GOTO Logging
+
+	BulkRebuild:
+
+	SET @intTransCtr = @intTotal
+
+	INSERT INTO @FinalTable(strBatchId
+			, dtmTransactionDate
+			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblBasis
+			, dblFutures
+			, intQtyUOMId
+			, intQtyCurrencyId
+			, intBasisUOMId
+			, intBasisCurrencyId
+			, intPriceUOMId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQty
+			, intContractStatusId
+			, intBookId
+			, intSubBookId
+			, strNotes
+			, intUserId
+			, intActionId
+			, strProcess
+			, ysnDeleted)
+		SELECT strBatchId
+			, dtmTransactionDate
+			, strTransactionType
+			, strTransactionReference
+			, intTransactionReferenceId
+			, intTransactionReferenceDetailId
+			, strTransactionReferenceNo
+			, intContractDetailId
+			, intContractHeaderId
+			, strContractNumber
+			, intContractSeq
+			, intContractTypeId
+			, intEntityId
+			, intCommodityId
+			, intItemId
+			, intLocationId
+			, intPricingTypeId
+			, intFutureMarketId
+			, intFutureMonthId
+			, dblBasis
+			, dblFutures
+			, intQtyUOMId
+			, intQtyCurrencyId
+			, intBasisUOMId
+			, intBasisCurrencyId
+			, intPriceUOMId
+			, dtmStartDate
+			, dtmEndDate
+			, dblQty
+			, intContractStatusId
+			, intBookId
+			, intSubBookId
+			, strNotes
+			, intUserId
+			, intActionId
+			, strProcess
+			, ysnDeleted
+		FROM #tmpLogItems
+
+	Logging:
+	
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Processed ' + CAST(@intTransCtr AS NVARCHAR) + ' of ' + CAST(@intTotal AS NVARCHAR) + ' records.')
 	INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Starting Bulk Insert.')
 
