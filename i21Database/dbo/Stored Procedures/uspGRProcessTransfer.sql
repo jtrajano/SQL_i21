@@ -977,7 +977,7 @@ BEGIN
       		,[strTransferTicket] = TS.strTransferStorageTicket
 		FROM tblGRTransferStorageReference SR
     	INNER JOIN tblGRTransferStorage TS
-			ON TS.intTransferStorageId = TransferStorageSplit.intTransferStorageId
+			ON TS.intTransferStorageId = SR.intTransferStorageId
 		INNER JOIN tblGRCustomerStorage FromStorage
 			ON FromStorage.intCustomerStorageId = SR.intSourceCustomerStorageId
 		INNER JOIN tblGRCustomerStorage ToStorage
