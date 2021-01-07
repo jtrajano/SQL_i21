@@ -140,11 +140,18 @@ AS
 	, TransferDetail.intConcurrencyId
 	, ShipVia.strName strShipVia
 	, [Transfer].intShipViaId
+	, TransferDetail.dtmDeliveryDate
+	, TransferDetail.strContainerNumber
+	, TransferDetail.intCurrencyId
+	, Currency.strCurrency
+	, TransferDetail.strMarks
+	, TransferDetail.dblTransferPrice
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
 		LEFT JOIN tblICItem Item ON Item.intItemId = TransferDetail.intItemId
 		LEFT JOIN tblICStatus stat ON stat.intStatusId = [Transfer].intStatusId
+		LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = TransferDetail.intCurrencyId
 		LEFT JOIN (
 			tblICLot Lot LEFT JOIN tblICItemUOM LotItemUOM 
 				ON Lot.intItemUOMId = LotItemUOM.intItemUOMId

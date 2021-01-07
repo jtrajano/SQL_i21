@@ -151,6 +151,12 @@ AS
 	, ShipVia.strShipVia
 	, [Transfer].intShipViaId
 	, TransferDetail.ysnWeighed
+	, TransferDetail.dtmDeliveryDate
+	, TransferDetail.strContainerNumber
+	, TransferDetail.intCurrencyId
+	, Currency.strCurrency
+	, TransferDetail.strMarks
+	, TransferDetail.dblTransferPrice
 	FROM tblICInventoryTransferDetail TransferDetail
 		LEFT JOIN tblICInventoryTransfer [Transfer] ON [Transfer].intInventoryTransferId = TransferDetail.intInventoryTransferId
 		LEFT JOIN tblEMEntity e ON e.intEntityId = [Transfer].intTransferredById
@@ -159,6 +165,7 @@ AS
 		LEFT JOIN tblICCommodity Commodity ON Commodity.intCommodityId = Item.intCommodityId
 		LEFT JOIN tblICStatus stat ON stat.intStatusId = [Transfer].intStatusId
 		LEFT JOIN vyuICGetLot Lot ON Lot.intLotId = TransferDetail.intLotId
+		LEFT JOIN tblSMCurrency Currency ON Currency.intCurrencyID = TransferDetail.intCurrencyId
 		LEFT JOIN tblSMCompanyLocation FromLoc ON FromLoc.intCompanyLocationId = [Transfer].intFromLocationId
 		LEFT JOIN tblSMCompanyLocation ToLoc ON ToLoc.intCompanyLocationId = [Transfer].intToLocationId
 		LEFT JOIN tblSMCompanyLocationSubLocation FromSubLocation ON FromSubLocation.intCompanyLocationSubLocationId = TransferDetail.intFromSubLocationId
