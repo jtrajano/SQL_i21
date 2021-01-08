@@ -40,7 +40,7 @@ INSERT INTO @InvoiceEntries (
 	, ysnRecomputeTax
 	, ysnConvertToStockUOM
 )
-SELECT intId				= I.intId
+SELECT intId				= I.intId 
 	, strTransactionType	= I.strTransactionType
 	, strType				= I.strType
 	, strSourceTransaction	= I.strSourceTransaction
@@ -78,6 +78,81 @@ INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM
 LEFT JOIN tblICItem ITEM ON I.strItemNo = ITEM.strItemNo
 LEFT JOIN tblICUnitMeasure UOM ON I.intUnitMeasureId = UOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM IUOM ON ITEM.intItemId = IUOM.intItemId AND I.intUnitMeasureId = IUOM.intUnitMeasureId
+WHERE I.intEntityId IS NULL
+
+INSERT INTO @InvoiceEntries (
+      intId
+	, strTransactionType
+	, strType
+	, strSourceTransaction
+	, strSourceId
+	, intEntityCustomerId
+	, intCompanyLocationId
+	, intEntityId
+	, dtmDate
+	, dtmDueDate
+	, dtmShipDate
+	, dtmPostDate
+	, strInvoiceOriginId
+	, strComments
+	, ysnImpactInventory
+	, strAcresApplied		
+	, strNutrientAnalysis	
+	, strBillingMethod		
+	, strApplicatorLicense	
+
+	, intItemId
+	, intItemUOMId
+	, intPriceUOMId
+	, strItemDescription
+	, strSubFormula	
+	, dblQtyShipped
+	, dblDiscount
+	, dblPrice
+	, ysnRefreshPrice
+	, ysnAllowRePrice
+	, ysnRecomputeTax
+	, ysnConvertToStockUOM
+)
+SELECT intId				= I.intId
+	, strTransactionType	= I.strTransactionType
+	, strType				= I.strType
+	, strSourceTransaction	= I.strSourceTransaction
+	, strSourceId			= I.strSourceId
+	, intEntityCustomerId	= C.intEntityId
+	, intCompanyLocationId	= CL.intCompanyLocationId
+	, intEntityId			= @intUserId
+	, dtmDate				= I.dtmDate
+	, dtmDueDate			= I.dtmDueDate
+	, dtmShipDate			= ISNULL(I.dtmShipDate, I.dtmDate)
+	, dtmPostDate			= ISNULL(I.dtmPostDate, I.dtmDate)
+	, strInvoiceOriginId	= I.strInvoiceOriginId
+	, strComments			= I.strComments
+	, ysnImpactInventory	= I.ysnImpactInventory
+	, strAcresApplied		= I.strAcresApplied
+	, strNutrientAnalysis	= I.strNutrientAnalysis
+	, strBillingMethod		= I.strBillingMethod
+	, strApplicatorLicense	= I.strApplicatorLicense
+
+	, intItemId				= ITEM.intItemId
+	, intItemUOMId			= IUOM.intItemUOMId
+	, intPriceUOMId			= IUOM.intItemUOMId
+	, strItemDescription	= I.strItemDescription
+	, strSubFormula			= I.strSubFormula
+	, dblQtyShipped			= I.dblQtyShipped
+	, dblDiscount			= I.dblDiscount
+	, dblPrice				= I.dblPrice
+	, ysnRefreshPrice		= I.ysnRefreshPrice
+	, ysnAllowRePrice		= I.ysnAllowRePrice
+	, ysnRecomputeTax		= I.ysnRecomputeTax
+	, ysnConvertToStockUOM	= I.ysnConvertToStockUOM
+FROM @InvoiceEAEntries I
+INNER JOIN tblARCustomer C ON C.intEntityId = I.intEntityId
+INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber))
+LEFT JOIN tblICItem ITEM ON I.strItemNo = ITEM.strItemNo
+LEFT JOIN tblICUnitMeasure UOM ON I.intUnitMeasureId = UOM.intUnitMeasureId
+LEFT JOIN tblICItemUOM IUOM ON ITEM.intItemId = IUOM.intItemId AND I.intUnitMeasureId = IUOM.intUnitMeasureId
+WHERE I.intEntityId IS NOT NULL
 
 IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries IE INNER JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId)
 	RAISERROR('Invoice already exists', 16, 1)
