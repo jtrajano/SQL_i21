@@ -3373,7 +3373,7 @@ BEGIN TRY
 				, strLocationName
 				, strCurrency = NULL
 			FROM (
-				SELECT DISTINCT intTicketId
+				SELECT intTicketId
 					, strTicketType = strDistributionType
 					, strTicketNumber
 					, dblTotal = dblBalance
@@ -3425,7 +3425,7 @@ BEGIN TRY
 				, strLocationName
 				, strCurrency = NULL
 			FROM (
-				SELECT DISTINCT intTicketId
+				SELECT  intTicketId
 					, strTicketType = strDistributionType
 					, strTicketNumber
 					, dblTotal = dblBalance
