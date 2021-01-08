@@ -440,7 +440,7 @@ begin try
 					,dblQtyToBillUnitQty = vp.dblQtyToBillUnitQty
 					,intQtyToBillUOMId = vp.intQtyToBillUOMId
 					,dblCost = @dblFinalPrice
-					,dblOldCost = vp.dblOldCost
+					,dblOldCost = case when @dblFinalPrice <> vp.dblCost then vp.dblCost else vp.dblOldCost end
 					,dblCostUnitQty = vp.dblCostUnitQty
 					,intCostUOMId = vp.intCostUOMId
 					,intCostCurrencyId = vp.intCostCurrencyId
