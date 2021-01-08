@@ -140,7 +140,7 @@ BEGIN TRY
 		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
 		select @dblContractQuantity = dblQuantity, @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
 		
-		if (@dblQuantity + isnull(@dblCurrentlyApplied,0)) > @dblContractQuantity
+		if ((@dblQuantity + isnull(@dblCurrentlyApplied,0)) > @dblContractQuantity  and @dblSequenceBalanceQuantity <= 0)
 		begin
 			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 			continue
@@ -154,12 +154,17 @@ BEGIN TRY
 		end
 		
 		select @dblConvertedQty =	(dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblAdjustment) * -1);
-
-		if @dblConvertedQty = 0
+		--If there's available balance and the tota applied quantity (posted DWG quantity) is more than sequence quantity, need to just zero out the sequence balance.
+		if (@dblConvertedQty > @dblSequenceBalanceQuantity)
 		begin
-			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
-			continue
+			select @dblConvertedQty = @dblSequenceBalanceQuantity;
 		end
+
+		-- if @dblConvertedQty = 0
+		-- begin
+		-- 	select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
+		-- 	continue
+		-- end
 
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,
