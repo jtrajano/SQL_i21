@@ -12,7 +12,7 @@ GO
 
 	
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND strCommand = 'Agronomy.view.WorkOrder?showSearch=true')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Application Target' AND strModuleName = 'Agronomy' AND strCommand = 'Agronomy.view.ApplicationTarget?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -6607,11 +6607,17 @@ SELECT @AgronomyMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE s
 UPDATE tblSMMasterMenu SET intParentMenuID = @AgronomyActivitiesParentMenuId WHERE intParentMenuID =  @AgronomyParentMenuId AND strCategory = 'Activity'
 UPDATE tblSMMasterMenu SET intParentMenuID = @AgronomyMaintenanceParentMenuId WHERE intParentMenuID =  @AgronomyParentMenuId AND strCategory = 'Maintenance'
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND intParentMenuID = @MobileBillingActivitiesParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
 	VALUES (N'Work Order', N'Agronomy', @AgronomyActivitiesParentMenuId, N'Work Order', N'Activity', N'Screen', N'Agronomy.view.WorkOrder?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Agronomy.view.WorkOrder?showSearch=true' WHERE strMenuName = 'Work Order' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Application Targets' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Application Targets', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Application Targets', N'Activity', N'Screen', N'Agronomy.view.ApplicationTarget?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Agronomy.view.ApplicationTarget?showSearch=true' WHERE strMenuName = 'Application Target' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
