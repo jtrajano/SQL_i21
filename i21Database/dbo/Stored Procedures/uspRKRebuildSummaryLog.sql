@@ -401,6 +401,145 @@ BEGIN TRY
 				, CH.dblQuantityPerLoad
 				, CH.intEntityId
 				, SS.intCreatedUserId
+
+			UNION ALL
+			SELECT 
+				CH.intContractTypeId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, dbo.fnRemoveTimeOnDate(SS.dtmCreated)
+				, @dtmEndDate AS dtmEndDate
+				, SUM(SH.dblUnits) * -1 AS dblQuantity
+				, 0
+				, COUNT(DISTINCT SS.intSettleStorageId)
+				, SS.intSettleStorageId
+				, SS.strStorageTicket
+				, SS.intSettleStorageId
+				, 'Storage' --Settle Storage
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, intUserId = SS.intCreatedUserId
+			FROM tblGRSettleStorage SS
+			INNER JOIN tblGRStorageHistory SH ON SH.intSettleStorageId = SS.intSettleStorageId
+			INNER JOIN (
+				tblGRStorageHistory SH_DP
+				INNER JOIN tblCTContractHeader CH
+					ON CH.intContractHeaderId = SH_DP.intContractHeaderId
+						AND (SH_DP.intTransactionTypeId IN (1,5) OR (SH_DP.intTransactionTypeId = 3 AND SH_DP.strType = 'From Transfer'))
+				INNER JOIN tblCTContractDetail CD
+					ON CD.intContractHeaderId = CH.intContractHeaderId
+			) ON SH_DP.intCustomerStorageId = SH.intCustomerStorageId
+			GROUP BY CH.intContractTypeId
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, SS.dtmCreated
+				, SS.intSettleStorageId
+				, SS.strStorageTicket
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, SS.intCreatedUserId
+
+			--REDUCTION IN DP CONTRACTS
+			UNION ALL
+			SELECT 
+				CH_SOURCE.intContractTypeId
+				, CH_SOURCE.strContractNumber
+				, CD_SOURCE.intContractSeq
+				, CH_SOURCE.intContractHeaderId
+				, CD_SOURCE.intContractDetailId
+				, dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate)
+				, @dtmEndDate AS dtmEndDate
+				, SUM(TSR.dblUnitQty) * -1 AS dblQuantity
+				, 0
+				, COUNT(DISTINCT TS.intTransferStorageId)
+				, TS.intTransferStorageId
+				, TS.strTransferStorageTicket
+				, TS.intTransferStorageId
+				, 'Storage' --Transfer Storage
+				, CH_SOURCE.intCommodityId
+				, CH_SOURCE.ysnLoad
+				, CH_SOURCE.dblQuantityPerLoad
+				, CH_SOURCE.intEntityId
+				, intUserId = TS.intUserId
+			FROM tblGRTransferStorage TS
+			INNER JOIN tblGRTransferStorageSourceSplit TS_SOURCE
+				ON TS_SOURCE.intTransferStorageId = TS.intTransferStorageId
+			INNER JOIN tblGRTransferStorageReference TSR
+				ON TSR.intTransferStorageId = TS.intTransferStorageId
+					AND TSR.intSourceCustomerStorageId = TS_SOURCE.intSourceCustomerStorageId
+			INNER JOIN (
+				tblCTContractDetail CD_SOURCE
+				INNER JOIN tblCTContractHeader CH_SOURCE
+					ON CH_SOURCE.intContractHeaderId = CD_SOURCE.intContractHeaderId
+			) ON CD_SOURCE.intContractDetailId = TS_SOURCE.intContractDetailId
+			GROUP BY CH_SOURCE.intContractTypeId
+				, CH_SOURCE.intContractHeaderId
+				, CD_SOURCE.intContractDetailId
+				, TS.dtmTransferStorageDate
+				, TS.intTransferStorageId
+				, TS.strTransferStorageTicket
+				, CH_SOURCE.strContractNumber
+				, CD_SOURCE.intContractSeq
+				, CH_SOURCE.intCommodityId
+				, CH_SOURCE.ysnLoad
+				, CH_SOURCE.dblQuantityPerLoad
+				, CH_SOURCE.intEntityId
+				, TS.intUserId
+			
+			--INCREASE IN DP CONTRACTS
+			UNION ALL
+			SELECT 
+				CH_SPLIT.intContractTypeId
+				, CH_SPLIT.strContractNumber
+				, CD_SPLIT.intContractSeq
+				, CH_SPLIT.intContractHeaderId
+				, CD_SPLIT.intContractDetailId
+				, dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate)
+				, @dtmEndDate AS dtmEndDate
+				, SUM(TSR.dblUnitQty) AS dblQuantity
+				, 0
+				, COUNT(DISTINCT TS.intTransferStorageId)
+				, TS.intTransferStorageId
+				, TS.strTransferStorageTicket
+				, TS.intTransferStorageId
+				, 'Storage' --Transfer Storage
+				, CH_SPLIT.intCommodityId
+				, CH_SPLIT.ysnLoad
+				, CH_SPLIT.dblQuantityPerLoad
+				, CH_SPLIT.intEntityId
+				, intUserId = TS.intUserId
+			FROM tblGRTransferStorage TS
+			INNER JOIN tblGRTransferStorageSplit TS_SPLIT
+				ON TS_SPLIT.intTransferStorageId = TS.intTransferStorageId
+			INNER JOIN tblGRTransferStorageReference TSR
+				ON TSR.intTransferStorageId = TS.intTransferStorageId
+					AND TSR.intTransferStorageSplitId = TS_SPLIT.intTransferStorageSplitId
+			INNER JOIN (
+				tblCTContractDetail CD_SPLIT
+				INNER JOIN tblCTContractHeader CH_SPLIT
+					ON CH_SPLIT.intContractHeaderId = CD_SPLIT.intContractHeaderId
+			) ON CD_SPLIT.intContractDetailId = TS_SPLIT.intContractDetailId
+			GROUP BY CH_SPLIT.intContractTypeId
+				, CH_SPLIT.intContractHeaderId
+				, CD_SPLIT.intContractDetailId
+				, TS.dtmTransferStorageDate
+				, TS.intTransferStorageId
+				, TS.strTransferStorageTicket
+				, CH_SPLIT.strContractNumber
+				, CD_SPLIT.intContractSeq
+				, CH_SPLIT.intCommodityId
+				, CH_SPLIT.ysnLoad
+				, CH_SPLIT.dblQuantityPerLoad
+				, CH_SPLIT.intEntityId
+				, TS.intUserId
 	
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -1235,6 +1374,42 @@ BEGIN TRY
 		and sh.strPricingType = 'Basis'
 		and suh.strScreenName = 'Load Schedule'
 
+		union all
+		select  
+			dtmTransactionDate = dbo.fnRemoveTimeOnDate(dtmTransactionDate)
+			, sh.intContractHeaderId
+			, sh.intContractDetailId
+			, sh.strContractNumber
+			, sh.intContractSeq
+			, sh.intEntityId
+			, ch.intCommodityId
+			, sh.intItemId
+			, sh.intCompanyLocationId
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+							else suh.dblTransactionQuantity * st.dblUnits end) * -1
+			, intQtyUOMId = ss.intCommodityStockUomId
+			, sh.intPricingTypeId
+			, sh.strPricingType
+			, strTransactionType = strScreenName
+			, intTransactionId = suh.intExternalHeaderId
+			, strTransactionId = suh.strNumber
+			, sh.intContractStatusId
+			, ch.intContractTypeId
+			, sh.intFutureMarketId
+			, sh.intFutureMonthId
+			, intUserId = ss.intCreatedUserId
+			, ysnDestinationWeightsAndGrades = 0
+		from vyuCTSequenceUsageHistory suh
+			inner join tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
+			inner join tblCTContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			inner join tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
+			inner join tblGRSettleStorage ss ON ss.intSettleStorageId = suh.intExternalHeaderId
+			inner join tblGRSettleStorageTicket st on st.intSettleStorageTicketId = suh.intExternalId and st.intSettleStorageId = suh.intExternalHeaderId
+		where strFieldName = 'Balance'
+		and sh.strPricingStatus  IN ('Unpriced','Partially Priced')
+		and sh.strPricingType = 'Basis'
+		and suh.strScreenName = 'Settle Storage'
+
 		SELECT * 
 		INTO #tblFinalBasisDeliveries 
 		FROM (
@@ -1290,8 +1465,37 @@ BEGIN TRY
 				, intUserId = b.intUserId
 			from tblAPBillDetail bd
 			inner join tblAPBill b ON b.intBillId = bd.intBillId
-			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType <> 'Load Schedule' and ba.intContractTypeId = 1
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intInventoryReceiptItemId and ba.strTransactionType = 'Inventory Receipt' and ba.intContractTypeId = 1 and ba.intItemId = bd.intItemId
 	
+			union all
+			select 
+				 strType  = 'Purchase Basis Deliveries'
+				, b.dtmBillDate
+				, ba.intContractHeaderId
+				, ba.intContractDetailId
+				, ba.strContractNumber
+				, ba.intContractSeq
+				, ba.intContractTypeId
+				, ba.intContractStatusId
+				, ba.intCommodityId
+				, ba.intItemId
+				, ba.intEntityId
+				, ba.intCompanyLocationId
+				, dblQty =  bd.dblQtyReceived  * -1
+				, intItemUOMId = bd.intUnitOfMeasureId
+				, intPricingTypeId = 2
+				, strPricingType = 'Basis'
+				, strTransactionType = 'Voucher'
+				, intTransactionId = b.intBillId
+				, strTransactionId = b.strBillId
+				, intFutureMarketId
+				, intFutureMonthId
+				, intUserId = b.intUserId
+			from tblAPBillDetail bd
+			inner join tblAPBill b ON b.intBillId = bd.intBillId
+			inner join #tblBasisDeliveries ba ON ba.intTransactionId = bd.intSettleStorageId and ba.strTransactionType = 'Settle Storage' and ba.intContractTypeId = 1 and ba.intItemId = bd.intItemId
+				and ba.intContractHeaderId = bd.intContractHeaderId and ba.intContractDetailId = bd.intContractDetailId
+			
 			union all
 			select 
 				 strType  = 'Purchase Basis Deliveries'
@@ -2305,7 +2509,7 @@ BEGIN TRY
 		--=======================================
 		INSERT INTO tblRKRebuildRTSLog(strLogMessage) VALUES ('Populate RK Summary Log - Customer Owned')
 		
-		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
+		SELECT dtmDeliveryDate =  sh.dtmHistoryDate --(CASE WHEN sh.strType IN ('Transfer') THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Customer Owned'
 			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5, 8)
 											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
@@ -2368,7 +2572,7 @@ BEGIN TRY
 		WHERE sh.intTransactionTypeId in (1,3,4,5,8,9)
 	
 		UNION ALL
-		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
+		SELECT dtmDeliveryDate =  sh.dtmHistoryDate --(CASE WHEN sh.strType IN ('Transfer','Settlement') THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Delayed Pricing'
 			, strTransactionType = CASE WHEN intTransactionTypeId IN (1, 5, 8)
 											THEN CASE WHEN sh.intInventoryReceiptId IS NOT NULL THEN 'Inventory Receipt'
@@ -2430,7 +2634,7 @@ BEGIN TRY
 		WHERE sh.intTransactionTypeId in (1,3,4,5,8,9)
 		
 		UNION ALL
-		SELECT dtmDeliveryDate = (CASE WHEN sh.strType = 'Transfer' THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
+		SELECT dtmDeliveryDate =  sh.dtmHistoryDate --(CASE WHEN sh.strType IN ('Transfer') THEN  sh.dtmHistoryDate ELSE cs.dtmDeliveryDate END)
 			, strBucketType = 'Company Owned'
 			, strTransactionType = CASE 
 										WHEN intTransactionTypeId = 3 THEN 'Transfer Storage'
