@@ -214,28 +214,28 @@ BEGIN TRY
 		,ysnApproval BIT
 		)
 
-	IF @intContractStageId IS NOT NULL
-	BEGIN
-		SELECT TOP 1 @strAmendmentApprovalXML = strAmendmentApprovalXML
-		FROM tblCTContractStage
-		WHERE intContractStageId = @intContractStageId
+	--IF @intContractStageId IS NOT NULL
+	--BEGIN
+	--	SELECT TOP 1 @strAmendmentApprovalXML = strAmendmentApprovalXML
+	--	FROM tblCTContractStage
+	--	WHERE intContractStageId = @intContractStageId
 
-		EXEC sp_xml_preparedocument @idoc OUTPUT
-			,@strAmendmentApprovalXML
+	--	EXEC sp_xml_preparedocument @idoc OUTPUT
+	--		,@strAmendmentApprovalXML
 
-		INSERT INTO @tblCTAmendmentApproval (
-			strDataIndex
-			,ysnApproval
-			)
-		SELECT strDataIndex
-			,ysnApproval
-		FROM OPENXML(@idoc, 'vyuIPAmendmentApprovals/vyuIPAmendmentApproval', 2) WITH (
-				strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
-				,ysnApproval BIT
-				) x
+	--	INSERT INTO @tblCTAmendmentApproval (
+	--		strDataIndex
+	--		,ysnApproval
+	--		)
+	--	SELECT strDataIndex
+	--		,ysnApproval
+	--	FROM OPENXML(@idoc, 'vyuIPAmendmentApprovals/vyuIPAmendmentApproval', 2) WITH (
+	--			strDataIndex NVARCHAR(50) Collate Latin1_General_CI_AS
+	--			,ysnApproval BIT
+	--			) x
 
-		EXEC sp_xml_removedocument @idoc
-	END
+	--	EXEC sp_xml_removedocument @idoc
+	--END
 
 	WHILE @intContractStageId > 0
 	BEGIN
