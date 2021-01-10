@@ -1697,11 +1697,18 @@ BEGIN TRY
 						END
 					END
 
+					SELECT @intFutureMarketId = NULL
+
+					SELECT @intFutureMarketId = intFutureMarketId
+					FROM tblRKFutureMarket FM
+					WHERE FM.strFutMarketName = @strFutMarketName
+
 					IF @strFutureMonth IS NOT NULL
 						AND NOT EXISTS (
 							SELECT 1
 							FROM tblRKFuturesMonth MO
 							WHERE MO.strFutureMonth = @strFutureMonth
+							AND intFutureMarketId=@intFutureMarketId
 							)
 					BEGIN
 						IF @strErrorMessage <> ''
@@ -2098,8 +2105,6 @@ BEGIN TRY
 
 					SELECT @intPriceItemUOMId = NULL
 
-					SELECT @intFutureMarketId = NULL
-
 					SELECT @intFutureMonthId = NULL
 
 					SELECT @intPricingTypeId = NULL
@@ -2208,13 +2213,10 @@ BEGIN TRY
 					WHERE PU.intItemId = @intItemId
 						AND PU.intUnitMeasureId = @intPriceUnitMeasureId
 
-					SELECT @intFutureMarketId = intFutureMarketId
-					FROM tblRKFutureMarket FM
-					WHERE FM.strFutMarketName = @strFutMarketName
-
 					SELECT @intFutureMonthId = intFutureMonthId
 					FROM tblRKFuturesMonth MO
 					WHERE MO.strFutureMonth = @strFutureMonth
+					AND intFutureMarketId=@intFutureMarketId
 
 					SELECT @intPricingTypeId = intPricingTypeId
 					FROM tblCTPricingType PT
