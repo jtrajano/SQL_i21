@@ -263,6 +263,15 @@ BEGIN
 		IF(LOWER(@strCardType) = 's' OR LOWER(@strCardType) = 'd')
 		BEGIN
 			SET @intSycnType = 1
+
+			--CF-2623--
+			DECLARE @strNetworkType NVARCHAR(MAX)
+			SELECT TOP 1 @strNetworkType = strNetworkType FROM tblCFNetwork WHERE intNetworkId = @intNetworkId
+			IF(LOWER(@strNetworkType) = 'cfn')
+			BEGIN
+				SET @strCardNumber = dbo.fnCFPadString(@strCardNumber,7, '0', 'left')
+			END
+
 		END
 		ELSE IF(LOWER(@strCardType) = 'v') 
 		BEGIN
