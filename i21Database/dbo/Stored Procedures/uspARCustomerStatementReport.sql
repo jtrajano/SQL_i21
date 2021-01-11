@@ -54,7 +54,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
 
 DECLARE @temp_statement_table TABLE(
-	 [strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
+	 [intTempId]					INT IDENTITY(1,1)		
+	,[strReferenceNumber]			NVARCHAR(100) COLLATE Latin1_General_CI_AS
 	,[strTransactionType]			NVARCHAR(100)
 	,[intEntityCustomerId]			INT
 	,[dtmDueDate]					DATETIME
@@ -214,6 +215,10 @@ IF (@@version NOT LIKE '%2008%')
 	BEGIN
 		SET @queryRunningBalance = ' ORDER BY I.dtmPostDate ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
 		SET @queryRunningBalanceBudget = ' ORDER BY intCustomerBudgetId ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW'
+	END
+ELSE  
+	BEGIN
+		SET @queryRunningBalance = ' , I.intInvoiceId '
 	END
 
 IF @ysnEmailOnly IS NOT NULL
@@ -538,6 +543,24 @@ UPDATE SET dtmLastStatementDate = Source.dtmLastStatementDate, dblLastStatement 
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (strEntityNo, dtmLastStatementDate, dblLastStatement)
 VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
+
+IF (@@version  LIKE '%2008%')
+BEGIN
+
+    UPDATE STATEMENTREPORT
+    SET dblRunningBalance = STATEMENTREPORT2.dblRunningBalance
+    FROM @temp_statement_table STATEMENTREPORT
+        INNER JOIN
+        (
+            SELECT STATEMENTREPORT.intTempId,
+                   SUM(STATEMENTREPORT2.dblRunningBalance) [dblRunningBalance]
+            FROM @temp_statement_table AS STATEMENTREPORT
+                INNER JOIN @temp_statement_table AS STATEMENTREPORT2
+                 ON STATEMENTREPORT2.intTempId <= STATEMENTREPORT.intTempId
+            WHERE STATEMENTREPORT.strReferenceNumber NOT IN (SELECT strInvoiceNumber FROM @temp_cf_table )
+            GROUP BY STATEMENTREPORT.intTempId
+        ) STATEMENTREPORT2 ON STATEMENTREPORT2.intTempId = STATEMENTREPORT.intTempId;
+END;
 
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = @strStatementFormatLocal
 INSERT INTO tblARCustomerStatementStagingTable (
