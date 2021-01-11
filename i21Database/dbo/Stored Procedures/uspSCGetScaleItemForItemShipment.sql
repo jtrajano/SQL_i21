@@ -18,8 +18,16 @@ SET ANSI_WARNINGS OFF
 
 DECLARE @ErrMsg NVARCHAR(MAX)
 DECLARE @intDirectType AS INT = 3
+DECLARE @intTicketStorageScheduleTypeId AS INT
+
+
 
 BEGIN TRY
+		SELECT TOP 1
+			@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
+		FROM tblSCTicket
+		WHERE intTicketId = @intTicketId
+
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' OR @strDistributionOption = 'ICN'
 		BEGIN
 			BEGIN 
@@ -86,6 +94,35 @@ BEGIN TRY
 				WHERE	ScaleTicket.intTicketId = @intTicketId
 			END
 		END
+		ELSE IF (@intTicketStorageScheduleTypeId = -9)
+		BEGIN
+			BEGIN 
+				SELECT	intItemId = ScaleTicket.intItemId
+						,intLocationId = ItemLocation.intItemLocationId 
+						,intItemUOMId = ItemUOM.intItemUOMId
+						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
+						,dblQty = @dblNetUnits 
+						,dblUOMQty = ItemUOM.dblUnitQty
+						,dblCost = @dblCost
+						,dblSalesPrice = 0
+						,intCurrencyId = ScaleTicket.intCurrencyId
+						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
+						,intTransactionId = ScaleTicket.intTicketId
+						,strTransactionId = ScaleTicket.strTicketNumber
+						,intTransactionTypeId = @intDirectType 
+						,intTransactionDetailId = NULL
+						,intLotId = NULL 
+						,intSubLocationId = ScaleTicket.intSubLocationId
+						,intStorageLocationId = ScaleTicket.intStorageLocationId
+						,ysnIsStorage = 0
+						,ysnAllowInvoice = 1
+				FROM	dbo.tblSCTicket ScaleTicket
+						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
+						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				WHERE	ScaleTicket.intTicketId = @intTicketId
+			END
+		END
+		
 		ELSE
 		BEGIN
 			BEGIN 
