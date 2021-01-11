@@ -18,6 +18,34 @@ END
 GO
 
 /*
+* Company Preferences Default Values 
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGCompanyPreference') AND name = 'intDefaultPickType')
+BEGIN
+	EXEC ('UPDATE tblLGCompanyPreference SET intDefaultPickType = 1 WHERE intDefaultPickType IS NULL')
+END
+GO
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGCompanyPreference') AND name = 'intWeightClaimsBy')
+BEGIN
+	EXEC ('UPDATE tblLGCompanyPreference SET intWeightClaimsBy = 1 WHERE intWeightClaimsBy IS NULL')
+END
+GO
+
+/*
+* Set Document Received value 
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGCompanyPreference') AND name = 'ysnDocumentsReceived')
+BEGIN
+	EXEC ('UPDATE tblLGLoad
+			SET ysnDocumentsReceived = CASE WHEN NOT EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId) THEN NULL
+											WHEN EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId AND ISNULL(ysnReceived, 0) = 0) THEN 0 
+										ELSE 1 END
+			WHERE ysnDocumentsReceived IS NULL AND EXISTS(SELECT TOP 1 1 FROM tblLGLoadDocuments WHERE intLoadId = tblLGLoad.intLoadId)
+	')
+END
+GO
+
+/*
 * Set Document Received value 
 */
 IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGLoad') AND name = 'ysnDocumentsReceived')
