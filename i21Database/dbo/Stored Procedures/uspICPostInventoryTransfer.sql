@@ -841,7 +841,7 @@ BEGIN
 	END 
 
 
-	IF @ysnGLEntriesRequired = 0
+	--IF @ysnGLEntriesRequired = 0
 	BEGIN 
 		INSERT INTO @GLEntries (
 				[dtmDate] 
