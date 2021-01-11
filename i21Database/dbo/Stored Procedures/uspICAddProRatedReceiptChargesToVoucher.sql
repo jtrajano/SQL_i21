@@ -174,10 +174,15 @@ BEGIN
 		,[intItemId] = rc.intItemId
 		,[intToBillUOMId] = rc.intItemUOMId
 		,[dblToBillQty] = rc.dblQtyReceived
-		,[dblAmountToBill] = rc.dblAmountToBill
+		,[dblAmountToBill] = 
+			CASE 
+				WHEN SIGN(A.dblQuantityToBill) = -1 THEN -rc.dblAmountToBill
+				ELSE rc.dblAmountToBill
+			END 
 		,[intEntityVendorId] = rc.intEntityVendorId
 	FROM 
-		@receiptCharges rc
+		@receiptCharges rc INNER JOIN [vyuICChargesForBilling] A	
+			ON rc.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 	ORDER BY 
 		rc.intInventoryReceiptChargeId
 
