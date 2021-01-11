@@ -40,6 +40,8 @@ AS
 	, WO.strSoilCondition
 	, WO.dblAppliedAcres
 	, WO.strTemperatureUOM
+	, WO.intApplicationTargetId
+	, TARGET.strTargetName
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
@@ -69,7 +71,7 @@ AS
 			strName
 			,intEntityCustomerId
 		FROM vyuARCustomerSearch WITH(NOLOCK)  
-	) ORDEREDBY ON ORDEREDBY.intEntityCustomerId = WO.intEntityCustomerId
+	) ORDEREDBY ON ORDEREDBY.intEntityCustomerId = WO.intOrderedById
 	LEFT JOIN (
 		SELECT
 		 intEntityId
@@ -87,4 +89,9 @@ AS
 		 , strTerm 
 	FROM tblSMTerm WITH (NOLOCK)
 ) TERM ON WO.intTermId = TERM.intTermID
+LEFT JOIN (
+	SELECT strTargetName,
+	intApplicationTargetId FROM 
+	tblAGApplicationTarget WITH (NOLOCK)
+)   TARGET ON WO.intApplicationTargetId  = TARGET.intApplicationTargetId
 ) 

@@ -3,6 +3,13 @@ AS
 (
 	SELECT WO.intWorkOrderId
 	 ,WO.strOrderNumber
+	 ,WO.strType AS 'strCrop'
+	, FARMLOCATION.strLocationName AS 'strFarmField'
+	 ,TARGET.strTargetName
+	, SALESREP.strName as 'strSalesperson'
+	, SPLIT.strSplitNumber
+	, WO.dblAcres
+	, WO.strComments
 	, WO.strCustomerName
 	, WO.intEntityCustomerId
 	, CUSTOMER.strCustomerNumber
@@ -31,4 +38,26 @@ AS
 	   strName
 	   FROM tblEMEntity WITH(NOLOCK)  
    ) ENTITY ON ENTITY.intEntityId  = WO.intOrderedById
+    LEFT JOIN (      
+	  SELECT intEntityLocationId      
+	   , strLocationName     
+	   FROM tblEMEntityLocation WITH(NOLOCK)        
+ ) FARMLOCATION ON FARMLOCATION.intEntityLocationId = WO.intFarmFieldId  
+    LEFT JOIN (  
+	 SELECT strTargetName,  
+		 intApplicationTargetId FROM   
+		 tblAGApplicationTarget WITH (NOLOCK)  
+	)   TARGET ON WO.intApplicationTargetId  = TARGET.intApplicationTargetId 
+ LEFT JOIN (      
+	  SELECT      
+	   intEntityId      
+	  , strName      
+	   FROM tblEMEntity WITH(NOLOCK)        
+ ) SALESREP ON SALESREP.intEntityId = WO.intEntitySalesRepId  
+  LEFT JOIN (      
+	  SELECT      
+		  intSplitId,      
+		  strSplitNumber      
+	 FROM tblEMEntitySplit WITH(NOLOCK)        
+ ) SPLIT ON SPLIT.intSplitId = WO.intSplitId   
 )
