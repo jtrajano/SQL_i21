@@ -262,6 +262,9 @@ SELECT
 	,[dblAdjustRetailValue]
 FROM 
 	#ARItemsForCosting
+WHERE
+	[ysnForValidation] IS NULL
+	OR [ysnForValidation] = 0
 
 -- Call the post routine 
 IF EXISTS (SELECT TOP 1 1 FROM @ItemsForPost)
