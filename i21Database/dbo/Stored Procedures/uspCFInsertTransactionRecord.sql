@@ -1583,6 +1583,8 @@ BEGIN
 			--,(@Pk,'Net Price',0.0,0.0)
 			--,(@Pk,'Total Amount',0.0,0.0)
 
+			
+			COMMIT TRANSACTION
 			RETURN;
 		END
 
