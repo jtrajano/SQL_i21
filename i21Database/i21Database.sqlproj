@@ -8978,6 +8978,7 @@
     <Build Include="dbo\Views\vyuAPVoucherPaymentSchedule.sql" />
     <Build Include="dbo\Tables\tblAGApplicationTarget.sql" />
     <Build Include="dbo\Views\vyuSCAgWorkOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
