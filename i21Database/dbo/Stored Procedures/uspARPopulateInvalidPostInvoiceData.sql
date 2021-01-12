@@ -1980,6 +1980,9 @@ BEGIN
 		,[dblForexRate]
 	FROM
 		#ARItemsForCosting
+	WHERE
+		[ysnForValidation] IS NULL
+		OR [ysnForValidation] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
