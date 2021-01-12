@@ -6167,9 +6167,9 @@ BEGIN
 
 	EXEC dbo.[uspICSearchInventoryValuationSummary] 
 		@strPeriod
-		,@intUserId
-		,@strCategoryCode 
+		,@intUserId		
 		,1 
+		,@strCategoryCode 
 END
 
 -- Rebuild the AR Gross Margin Summary

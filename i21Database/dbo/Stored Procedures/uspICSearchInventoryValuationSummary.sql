@@ -1,8 +1,8 @@
 ﻿CREATE PROCEDURE dbo.[uspICSearchInventoryValuationSummary]
 	@strPeriod NVARCHAR(50)
 	,@intUserId INT
-	,@strCategoryCode AS NVARCHAR(50) = NULL 
 	,@ysnForceRebuild AS BIT = 0
+	,@strCategoryCode AS NVARCHAR(50) = NULL 
 AS
 
 -- If rebuild is in-progress, leave immediately to avoid deadlocks. 
@@ -117,7 +117,7 @@ SELECT
 	,dblRunningLastCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblLastCost, 2), 0)
 	,dblRunningStandardCost = ISNULL(ROUND(dblQuantityInStockUOM * ItemPricing.dblStandardCost, 2),0)
 	,dblRunningAverageCost = ISNULL(ROUND(t.dblQuantityInStockUOM * ItemPricing.dblAverageCost, 2), 0)
-	,strStockUOM = stockUOM.strUnitMeasure
+	,strStockUOM = Item.strUnitMeasure
 	,Item.strCategoryCode
 	,Item.strCommodityCode
 	,strInTransitLocationName = InTransit.strLocationName
@@ -145,6 +145,8 @@ FROM	tblGLFiscalYearPeriod f
 				,Category.strCategoryCode
 				,Commodity.strCommodityCode
 				,ItemLocation.intItemLocationId
+				,stockUOM.intItemUOMId
+				,stockUOM.strUnitMeasure
 			FROM 
 				tblICItem Item INNER JOIN tblICItemLocation ItemLocation
 					ON Item.intItemId = ItemLocation.intItemId				
@@ -152,6 +154,17 @@ FROM	tblGLFiscalYearPeriod f
 					ON Category.intCategoryId = Item.intCategoryId
 				LEFT JOIN tblICCommodity Commodity
 					ON Commodity.intCommodityId = Item.intCommodityId
+				OUTER APPLY (
+					SELECT TOP 1 
+						iu.intItemUOMId
+						,u.strUnitMeasure
+					FROM 
+						tblICItemUOM iu LEFT JOIN tblICUnitMeasure u
+							ON u.intUnitMeasureId = iu.intUnitMeasureId 
+					WHERE 
+						iu.intItemId = Item.intItemId
+						AND iu.ysnStockUnit = 1  			
+				) stockUOM
 			WHERE
 				(Category.strCategoryCode = @strCategoryCode OR @strCategoryCode IS NULL)
 			--WHERE
@@ -183,17 +196,7 @@ FROM	tblGLFiscalYearPeriod f
 				,t.intItemLocationId
 				,t.intInTransitSourceLocationId				
 		) t
-		OUTER APPLY (
-			SELECT TOP 1 
-				iu.intItemUOMId
-				,u.strUnitMeasure
-			FROM 
-				tblICItemUOM iu LEFT JOIN tblICUnitMeasure u
-					ON u.intUnitMeasureId = iu.intUnitMeasureId 
-			WHERE 
-				iu.intItemId = t.intItemId
-				AND iu.ysnStockUnit = 1  			
-		) stockUOM
+
 		OUTER APPLY (
 			SELECT
 				cl.strLocationName
