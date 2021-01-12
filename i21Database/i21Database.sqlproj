@@ -9245,6 +9245,8 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
+    <Build Include="dbo\Views\vyuPATClearingItem.sql" />
+    <Build Include="dbo\Views\vyuPATClearingItemGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
