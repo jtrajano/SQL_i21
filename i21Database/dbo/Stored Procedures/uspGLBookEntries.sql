@@ -255,5 +255,5 @@ BEGIN
 	GL.ysnIsUnposted = 0
 END
 ELSE
-	DELETE FROM tblGLRunningBalanceOrder WHERE strTransactionId COLLATE Latin1_General_CI_AS IN (SELECT strTransactionId from @GLEntries)
+	DELETE FROM tblGLRunningBalanceOrder WHERE strTransactionId IN (SELECT strTransactionId from @GLEntries)
 RETURN 0
