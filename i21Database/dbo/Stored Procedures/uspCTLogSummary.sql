@@ -2501,10 +2501,15 @@ BEGIN TRY
 				-- Reverse Basis Deliveries
 				IF @dblBasisDel > 0
 				BEGIN
-					UPDATE @cbLogSpecific SET dblQty = @dblBasisDel * -1,
-								strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
-								intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+					-- Short Closing sequence should not deduct Basis Delivery
+					delete from @cbLogSpecific where intContractStatusId = 6;
+					if exists (select top 1 1 from @cbLogSpecific)
+					begin
+						UPDATE @cbLogSpecific SET dblQty = @dblBasisDel * -1,
+									strTransactionType = CASE WHEN intContractTypeId = 1 THEN 'Purchase Basis Deliveries' ELSE 'Sales Basis Deliveries' END,
+									intPricingTypeId = CASE WHEN ISNULL(@dblBasis,0) = 0 THEN 1 ELSE 2 END, intActionId = @_action
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+					end
 				END
 			END			
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogSpecific WHERE intContractStatusId = 4)
