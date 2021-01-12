@@ -593,7 +593,7 @@ BEGIN
 		[intAccountId]					=	B.intAccountId,
 		[dblDebit]						=  (ROUND(
 												(
-													dbo.fnAPGetPaymentAmountFactor(taxesEntry.dblForeignTotal, B.dblPayment 
+													dbo.fnAPGetPaymentAmountFactor(taxesEntry.dblTotal, B.dblPayment 
 														+ (CASE WHEN (B.dblPayment + B.dblDiscount = B.dblAmountDue) THEN B.dblDiscount ELSE 0 END)
 														- B.dblInterest, voucher.dblTotal) *  ISNULL(NULLIF(voucherDetail.dblRate,0),1))
 											,2)) * (CASE WHEN voucher.intTransactionType NOT IN (1,14) AND A.ysnPrepay = 0 THEN -1 ELSE 1 END),
@@ -639,7 +639,24 @@ BEGIN
 			INNER JOIN tblAPBillDetail voucherDetail ON voucherDetail.intBillId = voucher.intBillId
 			INNER JOIN tblAPBillDetailTax taxes ON voucherDetail.intBillDetailId = taxes.intBillDetailId
 			OUTER APPLY (
-				SELECT * FROM fnAPGetVoucherTaxGLEntry(voucher.intBillId) WHERE intBillDetailTaxId = taxes.intBillDetailTaxId
+				-- SELECT * FROM fnAPGetVoucherTaxGLEntry(voucher.intBillId) WHERE intBillDetailTaxId = taxes.intBillDetailTaxId
+				SELECT
+					CAST((ISNULL(D.dblAdjustedTax, D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1)) 
+						* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) 
+						* (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblTotal
+					,CAST((ISNULL(D.dblAdjustedTax, D.dblTax)) 
+					* (CASE WHEN A.intTransactionType != 1 THEN -1 ELSE 1 END) 
+					* (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblForeignTotal
+				FROM tblAPBill A
+				INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+				INNER JOIN tblAPBillDetailTax D
+					ON B.intBillDetailId = D.intBillDetailId
+				LEFT JOIN tblICInventoryReceiptItem receiptItem
+					ON B.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
+				LEFT JOIN tblICInventoryReceiptCharge charges
+					ON B.intInventoryReceiptChargeId = charges.intInventoryReceiptChargeId
+				WHERE D.intBillDetailTaxId = taxes.intBillDetailTaxId
+				AND A.intTransactionType IN (1,3)
 			) taxesEntry
 			--WE HAVE TO CLEAR THE AP EQUAL TO THE AP ENTERED WHEN VOUCHER WAS POSTED
 			--THIS WILL PREVENT US FROM HAVING A DISCREPANCY WHEN MULTIPLE FOREIGN RATE IS IN VOUCHER DETAILS
