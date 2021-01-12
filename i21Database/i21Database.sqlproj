@@ -8891,6 +8891,7 @@
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

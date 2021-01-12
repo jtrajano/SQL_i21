@@ -52,6 +52,8 @@ DECLARE @dblBasis NUMERIC(18,6)
 DECLARE @dblFutures NUMERIC(18,6)
 DECLARE @intTicketDeliverySheetId INT
 DECLARE @intTicketItemUOMIdTo INT
+DECLARE @intFutureMarketId INT
+DECLARE @intFutureMonthId INT
 
 
 DECLARE @ErrorMessage NVARCHAR(4000);
@@ -98,6 +100,9 @@ BEGIN TRY
 		FROM	dbo.tblICCommodity COM	        
 		WHERE	COM.intCommodityId = @intCommodityId
 	END
+
+	-- Get default futures market and month for the commodity
+	EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
 
     BEGIN
 	IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
@@ -214,7 +219,7 @@ BEGIN TRY
 						WHEN ISNULL(@intDPContractId,0) > 0 THEN 
 						ISNULL(
 							(SELECT dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) + dbo.fnCTConvertQtyToTargetItemUOM(ScaleTicket.intItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
-							FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,NULL,NULL,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
+							FROM dbo.fnRKGetFutureAndBasisPrice (2,ScaleTicket.intCommodityId,right(convert(varchar, CNT.dtmEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,NULL,NULL,0,ScaleTicket.intItemId,ScaleTicket.intCurrencyId)
 							LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = ScaleTicket.intItemId
 							LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = ScaleTicket.intItemId),0
 						)
@@ -482,7 +487,7 @@ BEGIN TRY
 	SELECT TOP 1
 		@dblFutures = dbo.fnCTConvertQtyToTargetItemUOM(@intTicketItemUOMIdTo,futureUOM.intItemUOMId,dblSettlementPrice) 
 		,@dblBasis = dbo.fnCTConvertQtyToTargetItemUOM(@intTicketItemUOMIdTo,basisUOM.intItemUOMId,dblBasis)
-	FROM dbo.fnRKGetFutureAndBasisPrice (1,@intCommodityId,right(convert(varchar, @dtmContractEndDate, 106),8),3,NULL,NULL,@intTicketProcessingLocationId,NULL,0,@intItemId,@intTicketCurrencyId)
+	FROM dbo.fnRKGetFutureAndBasisPrice (1,@intCommodityId,right(convert(varchar, @dtmContractEndDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,@intTicketProcessingLocationId,NULL,0,@intItemId,@intTicketCurrencyId)
 	LEFT JOIN tblICItemUOM futureUOM ON futureUOM.intUnitMeasureId = intSettlementUOMId AND futureUOM.intItemId = @intItemId
 	LEFT JOIN tblICItemUOM basisUOM ON basisUOM.intUnitMeasureId = intBasisUOMId AND basisUOM.intItemId = @intItemId
 
