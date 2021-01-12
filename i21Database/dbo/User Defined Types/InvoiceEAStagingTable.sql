@@ -5,7 +5,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[strType]								NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL		-- Valid values 
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
-	,[strCustomerNumber]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	
+	,[strCustomerNumber]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL	
 	,[strCompanyLocation]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
 	,[intEntityId]							INT												NULL		-- If not null, this will be used to get the customer id instead of the customer number.
 	,[dtmDate]								DATETIME										NOT NULL	-- Invoice Date
