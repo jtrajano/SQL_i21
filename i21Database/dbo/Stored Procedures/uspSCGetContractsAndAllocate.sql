@@ -61,6 +61,8 @@ BEGIN TRY
 	DECLARE @LoadDetailUsedId Id
     DECLARE @dtmTicketDate             DATETIME
     DECLARE @intTicketSclaeSetupId    INT
+	DECLARE @intFutureMarketId INT
+	DECLARE @intFutureMonthId INT
 
 	DECLARE @strEntityNo NVARCHAR(200)
 	DECLARE @errorMessage NVARCHAR(500)
@@ -217,10 +219,13 @@ BEGIN TRY
 				FROM	vyuCTContractSequence 
 				WHERE	intContractHeaderId = @intNewContractHeaderId
 
+				-- Get default futures market and month for the commodity
+				EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
+
 				IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 					DROP TABLE #FutureAndBasisPrice						
 
-				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,null,null,@locationId,null,0,@intItemId,null)
+				SELECT * INTO #FutureAndBasisPrice FROM dbo.fnRKGetFutureAndBasisPrice(@intContractTypeId,@intCommodityId,@strSeqMonth,3,@intFutureMarketId,@intFutureMonthId,@locationId,null,0,@intItemId,null)
 
 				IF NOT EXISTS(SELECT * FROM #FutureAndBasisPrice)
 				BEGIN
@@ -267,6 +272,9 @@ BEGIN TRY
 					-- @intItemId				=	intItemId
 			FROM	vyuCTContractSequence 
 			WHERE	intContractDetailId = @intContractDetailId
+
+			-- Get default futures market and month for the commodity
+			EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
 
 			IF OBJECT_ID('tempdb..#FutureAndBasisPrice') IS NOT NULL  						
 				DROP TABLE #FutureAndBasisPrice2

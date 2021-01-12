@@ -8159,6 +8159,7 @@
     <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
     <Build Include="dbo\Stored Procedures\uspICCompareValuationWithGL.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
