@@ -526,7 +526,7 @@ CREATE TABLE #ARItemsForCosting
 	,[intCategoryId] INT NULL 
 	,[dblAdjustCostValue] NUMERIC(38, 20) NULL
 	,[dblAdjustRetailValue] NUMERIC(38, 20) NULL
-	,[ysnForValidation] BIT NULL)
+	,[strType] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL)
 
 IF(OBJECT_ID('tempdb..#ARItemsForInTransitCosting') IS NOT NULL)
 BEGIN
