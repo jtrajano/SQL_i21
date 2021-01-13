@@ -106,8 +106,7 @@ ELSE
 												   , @intScaleUOMId = NULL
 												   , @intUserId = @UserId
 												   , @dblNetWeight = 0
-												   , @ysnFromSalesOrder = 1
-												   , @intTicketId = NULL
+												   , @ysnFromSalesOrder = 1												   
 			END
 
 		IF EXISTS (SELECT TOP 1 NULL FROM tblSOSalesOrderDetail SOD INNER JOIN tblCTItemContractDetail ICTD ON ICTD.intItemContractDetailId = SOD.intItemContractDetailId AND SOD.dblQtyOrdered > ICTD.dblBalance WHERE SOD.intSalesOrderId = @SalesOrderId)
