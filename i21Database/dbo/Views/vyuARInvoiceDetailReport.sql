@@ -36,6 +36,9 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , intDaysToPay				= CASE WHEN I.ysnPaid = 0 OR I.strTransactionType IN ('Cash') THEN 0 
 								   	   ELSE DATEDIFF(DAYOFYEAR, I.dtmDate, CAST(FULLPAY.dtmDatePaid AS DATE))
 							  	  END
+	 , strBinNumber				= ID.strBinNumber
+	 , strGroupNumber			= ID.strGroupNumber
+	 , strFeedDiet				= ID.strFeedDiet
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
@@ -52,29 +55,30 @@ INNER JOIN (
 		 , dblTotal
 		 , strUnitCostCurrency = SC.strCurrency
 		 , ID.intItemUOMId
-		 ,strUnitMeasure
+		 , strUnitMeasure
+		 , strBinNumber
+		 , strGroupNumber
+		 , strFeedDiet
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
 		     , strCurrency
 		FROM dbo.tblSMCurrency
 	) SC ON ID.intSubCurrencyId = SC.intCurrencyID
-
-
-		LEFT JOIN (
-			SELECT intItemUOMId
-				 , intItemId
-				 , IU.intUnitMeasureId
-				 , IU.strUpcCode
-				 ,strUnitMeasure
-			FROM dbo.tblICItemUOM IU WITH (NOLOCK)
-			INNER JOIN (
-				SELECT intUnitMeasureId
-					 , strUnitMeasure
-				FROM dbo.tblICUnitMeasure WITH (NOLOCK)
-			) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
-		) U ON ID.intItemId = U.intItemId   and U.intItemUOMId = ID.intItemUOMId
-
+	LEFT JOIN (
+		SELECT intItemUOMId
+				, intItemId
+				, IU.intUnitMeasureId
+				, IU.strUpcCode
+				,strUnitMeasure
+		FROM dbo.tblICItemUOM IU WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intUnitMeasureId
+					, strUnitMeasure
+			FROM dbo.tblICUnitMeasure WITH (NOLOCK)
+		) UM ON IU.intUnitMeasureId = UM.intUnitMeasureId
+	) U ON ID.intItemId = U.intItemId 
+	   AND U.intItemUOMId = ID.intItemUOMId
 ) ID ON I.intInvoiceId = ID.intInvoiceId
 INNER JOIN (
 	SELECT EME.intEntityId

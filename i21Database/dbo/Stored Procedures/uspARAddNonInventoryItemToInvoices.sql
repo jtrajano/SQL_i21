@@ -512,7 +512,10 @@ CREATE TABLE #InvoiceNonInventoryItem
 	,[intSourceId]						INT												NULL
 	,[strSourceId]						NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL
 	,[ysnPost]							BIT												NULL
-	,[intTempDetailIdForTaxes]			INT												NULL)
+	,[intTempDetailIdForTaxes]			INT												NULL
+	,[strBinNumber]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strGroupNumber]					NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL
+	,[strFeedDiet]						NVARCHAR(100)	COLLATE Latin1_General_CI_AS	NULL)
 
 INSERT INTO #InvoiceNonInventoryItem
 	([intInvoiceId]
@@ -637,7 +640,10 @@ INSERT INTO #InvoiceNonInventoryItem
 	,[intSourceId]
 	,[strSourceId]
 	,[ysnPost]
-	,[intTempDetailIdForTaxes])
+	,[intTempDetailIdForTaxes]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet])
 SELECT
 	 [intInvoiceId]							= IE.[intInvoiceId]
 	,[intInvoiceDetailId]					= NULL
@@ -778,6 +784,9 @@ SELECT
 	,[strSourceId]							= IE.[strSourceId]
 	,[ysnPost]								= IE.[ysnPost]
 	,[intTempDetailIdForTaxes]				= IE.[intTempDetailIdForTaxes]
+	,[strBinNumber]							= IE.[strBinNumber]
+	,[strGroupNumber]						= IE.[strGroupNumber]
+	,[strFeedDiet]							= IE.[strFeedDiet]
 FROM
 	@ItemEntries IE
 INNER JOIN
@@ -974,6 +983,9 @@ USING
 		,[strSourceId]
 		,[ysnPost]
 		,[intTempDetailIdForTaxes]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	FROM
 		#InvoiceNonInventoryItem
 	)
@@ -1093,6 +1105,9 @@ INSERT(
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 	)
 VALUES(
 	 [intInvoiceId]
@@ -1207,6 +1222,9 @@ VALUES(
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
 	,[intConcurrencyId]
+	,[strBinNumber]
+	,[strGroupNumber]
+	,[strFeedDiet]
 )
 OUTPUT  
 			ISNULL(@IntegrationLogId, -9999)		--[intIntegrationLogId]

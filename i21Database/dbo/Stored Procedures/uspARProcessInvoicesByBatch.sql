@@ -359,6 +359,9 @@ BEGIN
         ,[ysnAddonParent]
 		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -504,6 +507,9 @@ BEGIN
         ,[ysnAddonParent]                   = (CASE WHEN @GroupingOption = 0 THEN IE.[ysnAddonParent] ELSE NULL END)
 		,[ysnConvertToStockUOM]				= (CASE WHEN @GroupingOption = 0 THEN IE.[ysnConvertToStockUOM] ELSE NULL END)
         ,[dblAddOnQuantity]                 = (CASE WHEN @GroupingOption = 0 THEN IE.[dblAddOnQuantity] ELSE NULL END)
+		,[strBinNumber]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strBinNumber] ELSE NULL END)
+		,[strGroupNumber]					= (CASE WHEN @GroupingOption = 0 THEN IE.[strGroupNumber] ELSE NULL END)
+		,[strFeedDiet]						= (CASE WHEN @GroupingOption = 0 THEN IE.[strFeedDiet] ELSE NULL END)
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
@@ -722,7 +728,10 @@ BEGIN
             ,[strAddonDetailKey]
             ,[ysnAddonParent]
 			,[ysnConvertToStockUOM]
-            ,[dblAddOnQuantity])
+            ,[dblAddOnQuantity]
+			,[strBinNumber]
+			,[strGroupNumber]
+			,[strFeedDiet])
 		SELECT
 			 [intId]								= ITG.[intId]
 			,[strTransactionType]					= ARI.[strTransactionType]
@@ -868,6 +877,9 @@ BEGIN
             ,[ysnAddonParent]                       = ITG.[ysnAddonParent]
 			,[ysnConvertToStockUOM]					= ITG.[ysnConvertToStockUOM]
             ,[dblAddOnQuantity]                     = ITG.[dblAddOnQuantity]
+			,[strBinNumber]							= ITG.[strBinNumber]
+			,[strGroupNumber]						= ITG.[strGroupNumber]
+			,[strFeedDiet]							= ITG.[strFeedDiet]
 		FROM
 			@InvoiceEntries ITG
 		INNER JOIN
@@ -1337,6 +1349,9 @@ BEGIN
 		,[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]
+		,[strBinNumber]
+		,[strGroupNumber]
+		,[strFeedDiet]
 	)								
 	SELECT		 	
 		 [intId]							= IE.[intId]
@@ -1476,6 +1491,9 @@ BEGIN
 		,[ysnConvertToStockUOM]				= IE.[ysnConvertToStockUOM]
         ,[dblAddOnQuantity]                 = IE.[dblAddOnQuantity]
 		,[intTempDetailIdForTaxes]			= IE.[intTempDetailIdForTaxes]
+		,[strBinNumber]						= IE.[strBinNumber]
+		,[strGroupNumber]					= IE.[strGroupNumber]
+		,[strFeedDiet]						= IE.[strFeedDiet]
 	FROM
 		#EntriesForProcessing EFP
 	CROSS APPLY
