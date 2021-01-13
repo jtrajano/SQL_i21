@@ -325,7 +325,71 @@ BEGIN TRY
 							@intUserId				= 	@intUserId,
 							@intTransactionId		= 	@intPriceFixationDetailId,
 							@dblTransactionQty		= 	@QtyToDelete
+
+		-- Summary Log
+		IF EXISTS 
+		(
+			select top 1 1 
+			from tblCTContractHeader ch
+			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+			and wg.strWhereFinalized = 'Destination'
+			where intContractHeaderId = @intContractHeaderId
+		)
+		BEGIN
+			declare @QtyToDeleteNegative numeric(18,6) = @QtyToDelete * -1;
+			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+								@intContractDetailId 	= 	@intContractDetailId,
+								@strSource			 	= 	'Pricing',
+								@strProcess		 	    = 	'Price Delete DWG',
+								@contractDetail 		= 	@contractDetails,
+								@intUserId				= 	@intUserId,
+								@intTransactionId		= 	@intPriceFixationDetailId,
+								@dblTransactionQty		= 	@QtyToDeleteNegative
+		END
+
 	END
+
+	IF ISNULL(@intPriceFixationDetailId,0) = 0 AND ISNULL(@intPriceFixationId, 0) <> 0
+	begin
+
+
+		SELECT @intContractHeaderId = intContractHeaderId
+			, @intContractDetailId = intContractDetailId
+		FROM tblCTPriceFixation WHERE intPriceFixationId = @intPriceFixationId
+
+		IF EXISTS 
+		(
+			select top 1 1 
+			from tblCTContractHeader ch
+			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
+			and wg.strWhereFinalized = 'Destination'
+			where intContractHeaderId = @intContractHeaderId
+		)
+		BEGIN
+			declare @intPriceFixationDetailIdToDelete int = 0;
+			
+			SELECT	@intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId
+			WHILE	ISNULL(@intPriceFixationDetailIdToDelete,0) > 0
+			BEGIN
+				select @QtyToDelete = dblQuantity from tblCTPriceFixationDetail where intPriceFixationDetailId = @intPriceFixationDetailIdToDelete;
+
+				select @QtyToDeleteNegative = @QtyToDelete * -1;
+				EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
+									@intContractDetailId 	= 	@intContractDetailId,
+									@strSource			 	= 	'Pricing',
+									@strProcess		 	    = 	'Price Delete DWG',
+									@contractDetail 		= 	@contractDetails,
+									@intUserId				= 	@intUserId,
+									@intTransactionId		= 	@intPriceFixationDetailIdToDelete,
+									@dblTransactionQty		= 	@QtyToDeleteNegative
+				 
+				SELECT	@intPriceFixationDetailIdToDelete = MIN(intPriceFixationDetailId)	FROM	tblCTPriceFixationDetail WHERE intPriceFixationId = @intPriceFixationId AND intPriceFixationDetailId > @intPriceFixationDetailIdToDelete
+			END
+		END
+
+
+
+	end
 	
 	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
 	if EXISTS (select top 1 1 from #ItemInvoice)
@@ -337,34 +401,6 @@ BEGIN TRY
 
 		select @Id = Id FROM #ItemInvoice where DetailId = @ParamDetailId;
 		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @Id
-
-		IF EXISTS 
-		(
-			select top 1 1 
-			from tblCTContractHeader ch
-			inner join tblCTWeightGrade wg on wg.intWeightGradeId in (ch.intWeightId, ch.intGradeId)
-			and wg.strWhereFinalized = 'Destination'
-			where intContractHeaderId = @intContractHeaderId
-		)
-		BEGIN
-			declare @_priceFixationDetailId int,
-					@_qtyShipped numeric(24, 10)
-			select @_priceFixationDetailId = intPriceFixationDetailId
-					,@_qtyShipped = detail.dblQtyShipped *-1
-			from tblCTPriceFixationDetailAPAR apar
-			inner join tblARInvoiceDetail detail on apar.intInvoiceDetailId = detail.intInvoiceDetailId
-			where apar.intInvoiceDetailId = @ParamDetailId
-
-			-- Summary Log
-			EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
-								@intContractDetailId 	= 	@intContractDetailId,
-								@strSource			 	= 	'Pricing',
-								@strProcess		 	    = 	'Price Delete DWG',
-								@contractDetail 		= 	@contractDetails,
-								@intUserId				= 	@intUserId,
-								@intTransactionId		= 	@_priceFixationDetailId,
-								@dblTransactionQty		= 	@_qtyShipped
-		END
 		
 		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
 		
