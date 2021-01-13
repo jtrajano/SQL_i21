@@ -3,8 +3,6 @@ CREATE PROCEDURE [dbo].[uspGRTransferStorage_OStoDP_InventoryPost]
 	@ItemsToPost AS ItemCostingTableType READONLY
 	,@intTransferStorageId INT
 	,@intUserId INT
-    ,@intFutureMarketId INT = NULL
-	,@intFutureMonthId INT = NULL
 )
 AS
 BEGIN
@@ -79,6 +77,9 @@ BEGIN
 			WHERE intTransactionDetailId = @intTransactionDetailId
 
 			DECLARE @intItemId INT
+				,@intCommodityId INT
+				,@intFutureMarketId INT
+				,@intFutureMonthId INT
 				,@intLocationId INT
 				,@intSubLocationId INT
 				,@intStorageLocationId INT
@@ -105,6 +106,10 @@ BEGIN
 			INNER JOIN tblICItemLocation IL
 				ON IL.intItemLocationId = ITP.intItemLocationId
 			WHERE intId = @cursorId
+
+			SELECT @intCommodityId = intCommodityId FROM tblICItem WHERE intItemId = @intItemId
+			-- Get default futures market and month for the commodity
+			EXEC uspSCGetDefaultFuturesMarketAndMonth @intCommodityId, @intFutureMarketId OUTPUT, @intFutureMonthId OUTPUT;
 						
 			/*NOTE: OS to DP >> get the current basis and settlement price in Risk*/	
 			SELECT @dblBasisCost = (SELECT dblBasis FROM dbo.fnRKGetFutureAndBasisPrice (1,I.intCommodityId,right(convert(varchar, dtmDate, 106),8),3,@intFutureMarketId,@intFutureMonthId,@intLocationId,NULL,0,I.intItemId,intCurrencyId))
