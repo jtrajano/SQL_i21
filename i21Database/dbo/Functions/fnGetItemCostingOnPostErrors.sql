@@ -477,8 +477,8 @@ RETURN (
 				,intItemLocationId = @intItemLocationId
 				,strText = dbo.fnFormatMessage(
 							dbo.fnICGetErrorMessage(80229)
-							, Location.strLocationName
 							, Item.strItemNo
+							, Location.strLocationName
 							, DEFAULT
 							, DEFAULT
 							, DEFAULT
