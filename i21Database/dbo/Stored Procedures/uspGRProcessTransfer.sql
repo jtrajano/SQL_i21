@@ -1,9 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspGRProcessTransfer]
 (
 	@intTransferStorageId INT,
-	@intUserId INT,
-	@intFutureMarketId INT = NULL,
-	@intFutureMonthId INT = NULL
+	@intUserId INT
 )
 AS
 BEGIN
@@ -641,8 +639,6 @@ BEGIN
   				@ItemsToPost = @ItemsToPost_OStoDP
   				,@intTransferStorageId = @intTransferStorageId
   				,@intUserId = @intUserId
-  				,@intFutureMarketId = @intFutureMarketId
-  				,@intFutureMonthId = @intFutureMonthId
 
 			--/*start === FOR DP to DP only*/
 			DECLARE @strBatchId NVARCHAR(500)
