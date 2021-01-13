@@ -121,13 +121,13 @@ SELECT
 				* COALESCE(
 					dbo.fnCalculateCostBetweenUOM( 
 						positiveStock.intItemUOMId
-						,stockUOM.intItemUOMId 
+						,Item.intItemUOMId 
 						,positiveStock.dblCost 
 					)
 					,NULLIF(ItemPricing.dblLastCost, 0)
 					,dbo.fnCalculateCostBetweenUOM( 
 						negativeStock.intItemUOMId
-						,stockUOM.intItemUOMId 
+						,Item.intItemUOMId 
 						,negativeStock.dblCost 
 					)
 				)
@@ -307,4 +307,3 @@ SET l.ysnRebuilding = 0
 	,l.dtmEnd = GETDATE() 
 FROM tblICInventoryValuationSummaryLog l
 WHERE l.strPeriod = @strPeriod
-	
