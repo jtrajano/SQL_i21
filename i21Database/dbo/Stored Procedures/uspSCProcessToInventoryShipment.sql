@@ -64,6 +64,7 @@ DECLARE @intTicketItemContractDetailId INT
 DECLARE @dblLoopItemContractUnits NUMERIC(38,20)
 DECLARE @dblPrevLoopItemContractId int
 DECLARE @dblLoopItemContractId int
+DECLARE @intTicketStorageScheduleTypeId INT
 
 DECLARE @loopLoadDetailId INT
 DECLARE @strTicketStatus NVARCHAR(3)
@@ -84,6 +85,7 @@ SELECT @intLoadId = intLoadId
 	, @intTicketLoadDetailId = intLoadDetailId
 	, @intTicketItemContractDetailId = intItemContractDetailId
 	,@strTicketStatus = strTicketStatus
+	,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType
@@ -530,157 +532,197 @@ BEGIN TRY
 				BEGIN
 					IF(@dblRemainingUnits IS NULL)
 						SET @dblRemainingUnits = (@dblNetUnits * -1)
-					INSERT INTO @ItemsForItemShipment (
-						intItemId
-						,intItemLocationId
-						,intItemUOMId
-						,dtmDate
-						,dblQty
-						,dblUOMQty
-						,dblCost
-						,dblSalesPrice
-						,intCurrencyId
-						,dblExchangeRate
-						,intTransactionId
-						,intTransactionDetailId
-						,strTransactionId
-						,intTransactionTypeId
-						,intLotId
-						,intSubLocationId
-						,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-						,ysnIsStorage
-						,strSourceTransactionId 
-						,intStorageScheduleTypeId
-						,ysnAllowVoucher
-					)
-					EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
-					SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
 
-					IF @strOwnedPhysicalStock = @OWNERSHIP_CUSTOMER AND ABS(@dblRemainingUnits) > 0 
-						and  @dblNetUnits > ISNULL(@dblRemainingUnitStorage, 0)
+					IF(@intTicketStorageScheduleTypeId  <> -9)
 					BEGIN
-						SET @ErrMsg  = 'Cannot distribute ticket. Not enough storage unit.'
-						RAISERROR(@ErrMsg, 11, 1);	
-					END
+						INSERT INTO @ItemsForItemShipment (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage
+							,strSourceTransactionId 
+							,intStorageScheduleTypeId
+							,ysnAllowVoucher
+						)
+						EXEC dbo.uspSCStorageUpdate @intTicketId, @intUserId, @dblRemainingUnits , @intEntityId, @strDistributionOption, NULL, @intStorageScheduleId
+						SELECT TOP 1 @dblRemainingUnitStorage = dblQty FROM @ItemsForItemShipment IIS
 
-					SET @dblRemainingUnits = (@dblRemainingUnits + ISNULL(@dblRemainingUnitStorage, 0)) * -1
-					IF (@dblRemainingUnits > 0)
-					BEGIN
-						INSERT INTO @LineItems (
-						intContractDetailId,
-						dblUnitsDistributed,
-						dblUnitsRemaining,
-						dblCost,
-						intCurrencyId,
-						intLoadDetailId)
-						EXEC dbo.uspSCGetContractsAndAllocate
-							@intTicketId
-							,@intEntityId
-							,@dblRemainingUnits
-							,NULL
-							,@intUserId
-							,0
+						IF @strOwnedPhysicalStock = @OWNERSHIP_CUSTOMER AND ABS(@dblRemainingUnits) > 0 
+							and  @dblNetUnits > ISNULL(@dblRemainingUnitStorage, 0)
 						BEGIN
-							DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
-							FOR
-							SELECT intContractDetailId, dblUnitsDistributed
-							FROM @LineItems;
+							SET @ErrMsg  = 'Cannot distribute ticket. Not enough storage unit.'
+							RAISERROR(@ErrMsg, 11, 1);	
+						END
 
-							OPEN intListCursor;
-
-							-- Initial fetch attempt
-							FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-
-							WHILE @@FETCH_STATUS = 0
+						SET @dblRemainingUnits = (@dblRemainingUnits + ISNULL(@dblRemainingUnitStorage, 0)) * -1
+						IF (@dblRemainingUnits > 0)
+						BEGIN
+							INSERT INTO @LineItems (
+							intContractDetailId,
+							dblUnitsDistributed,
+							dblUnitsRemaining,
+							dblCost,
+							intCurrencyId,
+							intLoadDetailId)
+							EXEC dbo.uspSCGetContractsAndAllocate
+								@intTicketId
+								,@intEntityId
+								,@dblRemainingUnits
+								,NULL
+								,@intUserId
+								,0
 							BEGIN
-							   -- Here we do some kind of action that requires us to
-							   -- process the table variable row-by-row. This example simply
-							   -- uses a PRINT statement as that action (not a very good
-							   -- example).
-							   IF	ISNULL(@intLoopContractId,0) != 0
-							   EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
-							   EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
-							   SET @dblRemainingUnits -=@dblLoopContractUnits;
-							   -- Attempt to fetch next row from cursor
-							   FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
-							END;
+								DECLARE intListCursor CURSOR LOCAL FAST_FORWARD
+								FOR
+								SELECT intContractDetailId, dblUnitsDistributed
+								FROM @LineItems;
 
-							CLOSE intListCursor;
-							DEALLOCATE intListCursor;
+								OPEN intListCursor;
+
+								-- Initial fetch attempt
+								FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+
+								WHILE @@FETCH_STATUS = 0
+								BEGIN
+								-- Here we do some kind of action that requires us to
+								-- process the table variable row-by-row. This example simply
+								-- uses a PRINT statement as that action (not a very good
+								-- example).
+								IF	ISNULL(@intLoopContractId,0) != 0
+								EXEC uspCTUpdateScheduleQuantityUsingUOM @intLoopContractId, @dblLoopContractUnits, @intUserId, @intTicketId, 'Scale', @intTicketItemUOMId
+								EXEC dbo.uspSCUpdateTicketContractUsed @intTicketId, @intLoopContractId, @dblLoopContractUnits, @intEntityId;
+								SET @dblRemainingUnits -=@dblLoopContractUnits;
+								-- Attempt to fetch next row from cursor
+								FETCH NEXT FROM intListCursor INTO @intLoopContractId, @dblLoopContractUnits;
+								END;
+
+								CLOSE intListCursor;
+								DEALLOCATE intListCursor;
+							END
+							SELECT @totalContract = COUNT(intContractDetailId) FROM @LineItems
+							IF(@totalContract > 0)
+							BEGIN
+								UPDATE @LineItems set intTicketId = @intTicketId
+								INSERT INTO @ItemsForItemShipment (
+									intItemId
+									,intItemLocationId
+									,intItemUOMId
+									,dtmDate
+									,dblQty
+									,dblUOMQty
+									,dblCost
+									,dblSalesPrice
+									,intCurrencyId
+									,dblExchangeRate
+									,intTransactionId
+									,intTransactionDetailId
+									,strTransactionId
+									,intTransactionTypeId
+									,intLotId
+									,intSubLocationId
+									,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+									,ysnIsStorage
+									,ysnAllowVoucher
+								)
+								EXEC dbo.uspSCGetScaleItemForItemShipment
+									@intTicketId
+									,@strSourceType
+									,@intUserId
+									,@dblRemainingUnits
+									,0
+									,@intEntityId
+									,NULL
+									,'CNT'
+									,@LineItems
+							END
+							IF(@dblRemainingUnits > 0)
+							BEGIN
+								INSERT INTO @ItemsForItemShipment (
+									intItemId
+									,intItemLocationId
+									,intItemUOMId
+									,dtmDate
+									,dblQty
+									,dblUOMQty
+									,dblCost
+									,dblSalesPrice
+									,intCurrencyId
+									,dblExchangeRate
+									,intTransactionId
+									,intTransactionDetailId
+									,strTransactionId
+									,intTransactionTypeId
+									,intLotId
+									,intSubLocationId
+									,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+									,ysnIsStorage
+									,ysnAllowVoucher
+								)
+								EXEC dbo.uspSCGetScaleItemForItemShipment
+									@intTicketId
+									,@strSourceType
+									,@intUserId
+									,@dblRemainingUnits
+									,0
+									,@intEntityId
+									,NULL
+									,'SPT'
+									,@LineItems
+							END
+							SET @dblRemainingUnits = 0
 						END
-						SELECT @totalContract = COUNT(intContractDetailId) FROM @LineItems
-						IF(@totalContract > 0)
-						BEGIN
-							UPDATE @LineItems set intTicketId = @intTicketId
-							INSERT INTO @ItemsForItemShipment (
-								intItemId
-								,intItemLocationId
-								,intItemUOMId
-								,dtmDate
-								,dblQty
-								,dblUOMQty
-								,dblCost
-								,dblSalesPrice
-								,intCurrencyId
-								,dblExchangeRate
-								,intTransactionId
-								,intTransactionDetailId
-								,strTransactionId
-								,intTransactionTypeId
-								,intLotId
-								,intSubLocationId
-								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage
-								,ysnAllowVoucher
-							)
-							EXEC dbo.uspSCGetScaleItemForItemShipment
-								@intTicketId
-								,@strSourceType
-								,@intUserId
-								,@dblRemainingUnits
-								,0
-								,@intEntityId
-								,NULL
-								,'CNT'
-								,@LineItems
-						END
-						IF(@dblRemainingUnits > 0)
-						BEGIN
-							INSERT INTO @ItemsForItemShipment (
-								intItemId
-								,intItemLocationId
-								,intItemUOMId
-								,dtmDate
-								,dblQty
-								,dblUOMQty
-								,dblCost
-								,dblSalesPrice
-								,intCurrencyId
-								,dblExchangeRate
-								,intTransactionId
-								,intTransactionDetailId
-								,strTransactionId
-								,intTransactionTypeId
-								,intLotId
-								,intSubLocationId
-								,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
-								,ysnIsStorage
-								,ysnAllowVoucher
-							)
-							EXEC dbo.uspSCGetScaleItemForItemShipment
-								@intTicketId
-								,@strSourceType
-								,@intUserId
-								,@dblRemainingUnits
-								,0
-								,@intEntityId
-								,NULL
-								,'SPT'
-								,@LineItems
-						END
-						SET @dblRemainingUnits = 0
 					END
-		END
+					---- AG Work Order
+					ELSE
+					BEGIN
+						SET @dblRemainingUnits = @dblNetUnits
+						INSERT INTO @ItemsForItemShipment (
+							intItemId
+							,intItemLocationId
+							,intItemUOMId
+							,dtmDate
+							,dblQty
+							,dblUOMQty
+							,dblCost
+							,dblSalesPrice
+							,intCurrencyId
+							,dblExchangeRate
+							,intTransactionId
+							,intTransactionDetailId
+							,strTransactionId
+							,intTransactionTypeId
+							,intLotId
+							,intSubLocationId
+							,intStorageLocationId -- ???? I don't see usage for this in the PO to Inventory receipt conversion.
+							,ysnIsStorage
+							,ysnAllowVoucher
+						)
+						EXEC dbo.uspSCGetScaleItemForItemShipment
+							@intTicketId
+							,@strSourceType
+							,@intUserId
+							,@dblRemainingUnits
+							,@dblCost
+							,@intEntityId
+							,NULL
+							,'AWO'
+							,@LineItems
+					END
+				END
 			END
 		END
 
