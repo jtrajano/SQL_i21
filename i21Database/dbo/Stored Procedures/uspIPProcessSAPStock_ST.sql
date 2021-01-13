@@ -54,13 +54,29 @@ BEGIN TRY
 		,intItemId INT
 		,intLocationId INT
 		,intSubLocationId INT
-		,intStorageLocationId INT
+		--,intStorageLocationId INT
 		)
 	DECLARE @intMinRecordLotId INT
 		,@ysnResetLotQtyOnce BIT = 1
+	DECLARE @tblLotStage TABLE (intStageLotId INT)
+
+	INSERT INTO @tblLotStage (intStageLotId)
+	SELECT intStageLotId
+	FROM tblIPLotStage
+	WHERE ISNULL(strImportStatus, '') = ''
 
 	SELECT @intMinRowNo = Min(intStageLotId)
-	FROM tblIPLotStage WITH (NOLOCK)
+	FROM @tblLotStage
+
+	IF @intMinRowNo IS NULL
+	BEGIN
+		RETURN
+	END
+
+	UPDATE t
+	SET t.strImportStatus = 'In-Progress'
+	FROM tblIPLotStage t
+	JOIN @tblLotStage pt ON pt.intStageLotId = t.intStageLotId
 
 	WHILE (@intMinRowNo IS NOT NULL)
 	BEGIN
@@ -83,11 +99,11 @@ BEGIN TRY
 				SELECT DISTINCT intItemId
 					,intLocationId
 					,intSubLocationId
-					,intStorageLocationId
+					--,intStorageLocationId
 				FROM tblICLot WITH (NOLOCK)
 				WHERE dblQty > 0
 					AND intSubLocationId IS NOT NULL
-					AND intStorageLocationId IS NOT NULL
+					--AND intStorageLocationId IS NOT NULL
 
 				SELECT @intMinRecordLotId = MIN(intLotRecordId)
 				FROM @tblLotTable
@@ -99,12 +115,12 @@ BEGIN TRY
 					SELECT @intItemId = NULL
 						,@intCompanyLocationId = NULL
 						,@intSubLocationId = NULL
-						,@intStorageLocationId = NULL
+						--,@intStorageLocationId = NULL
 
 					SELECT @intItemId = intItemId
 						,@intCompanyLocationId = intLocationId
 						,@intSubLocationId = intSubLocationId
-						,@intStorageLocationId = intStorageLocationId
+						--,@intStorageLocationId = intStorageLocationId
 					FROM @tblLotTable
 					WHERE intLotRecordId = @intMinRecordLotId
 
@@ -113,7 +129,7 @@ BEGIN TRY
 						,@strLotNumber = 'FIFO'
 						,@intLocationId = @intCompanyLocationId
 						,@intSubLocationId = @intSubLocationId
-						,@intStorageLocationId = @intStorageLocationId
+						,@intStorageLocationId = NULL
 						,@intItemUOMId = NULL
 						,@dblNewQty = 0
 						,@dblCost = NULL
@@ -591,9 +607,15 @@ BEGIN TRY
 		END CATCH
 
 		SELECT @intMinRowNo = Min(intStageLotId)
-		FROM tblIPLotStage WITH (NOLOCK)
+		FROM @tblLotStage
 		WHERE intStageLotId > @intMinRowNo
 	END
+
+	UPDATE t
+	SET t.strImportStatus = NULL
+	FROM tblIPLotStage t
+	JOIN @tblLotStage pt ON pt.intStageLotId = t.intStageLotId
+		AND t.strImportStatus = 'In-Progress'
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
 		RAISERROR (
