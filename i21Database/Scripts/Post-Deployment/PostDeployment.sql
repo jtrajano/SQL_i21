@@ -272,6 +272,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\CleanBasisAdvance.sql
 :r .\AP\UpdatePOPendingStatus.sql
 :r .\AP\FixStartingNumbers.sql
+:r .\AP\NonEmployeeCompensationTo1099NEC.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 
