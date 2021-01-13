@@ -109,7 +109,8 @@ USING (
 					WHERE	iUOM.intItemId = r.intItemId
 							AND iUOM.ysnStockUnit = 1 
 				) StockUOM
-		WHERE	r.intLotId IS NULL 
+		WHERE	--r.intLotId IS NULL 
+				i.strLotTracking = 'No'
 				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 0 
 		GROUP BY r.intItemId
 				, r.intItemLocationId
@@ -129,7 +130,8 @@ USING (
 		FROM	@ItemsToIncreaseReserve r
 				INNER JOIN tblICItem i
 					ON r.intItemId = i.intItemId 
-		WHERE	r.intLotId IS NULL 
+		WHERE	--r.intLotId IS NULL 
+				i.strLotTracking = 'No'
 				AND ISNULL(i.ysnSeparateStockForUOMs, 0) = 1 
 		GROUP BY r.intItemId
 				, r.intItemLocationId
@@ -181,7 +183,10 @@ USING (
 								)
 							) 
 							,intMark = 4
-				FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+				FROM	@ItemsToIncreaseReserve r 
+						INNER JOIN tblICItem i
+							ON r.intItemId = i.intItemId
+						INNER JOIN tblICLot l
 							ON r.intLotId = l.intLotId 
 						CROSS APPLY (
 							SELECT	TOP 1 
@@ -191,7 +196,9 @@ USING (
 							WHERE	iUOM.intItemId = r.intItemId
 									AND iUOM.ysnStockUnit = 1 
 						) StockUOM
-				WHERE	r.intLotId IS NOT NULL 
+				WHERE	
+						--r.intLotId IS NOT NULL 
+						i.strLotTracking <> 'No'
 				GROUP BY r.intItemId
 						, r.intItemLocationId
 						, StockUOM.intItemUOMId 
@@ -214,7 +221,10 @@ USING (
 								END 						
 							) 
 						,intMark = 5
-				FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+				FROM	@ItemsToIncreaseReserve r 
+						INNER JOIN tblICItem i
+							ON r.intItemId = i.intItemId
+						INNER JOIN tblICLot l
 							ON r.intLotId = l.intLotId 
 						CROSS APPLY (
 							SELECT	TOP 1 
@@ -224,7 +234,8 @@ USING (
 							WHERE	iUOM.intItemId = r.intItemId
 									AND iUOM.ysnStockUnit = 1 
 						) StockUOM
-				WHERE	r.intLotId IS NOT NULL 
+				WHERE	--r.intLotId IS NOT NULL 
+						i.strLotTracking <> 'No'
 						AND l.intItemUOMId <> StockUOM.intItemUOMId 
 				GROUP BY r.intItemId
 						, r.intItemLocationId
@@ -248,7 +259,10 @@ USING (
 								END 						
 							) 
 						,intMark = 6
-				FROM	@ItemsToIncreaseReserve r INNER JOIN tblICLot l
+				FROM	@ItemsToIncreaseReserve r 
+						INNER JOIN tblICItem i
+							ON r.intItemId = i.intItemId
+						INNER JOIN tblICLot l
 							ON r.intLotId = l.intLotId 
 						CROSS APPLY (
 							SELECT	TOP 1 
@@ -258,7 +272,8 @@ USING (
 							WHERE	iUOM.intItemId = r.intItemId
 									AND iUOM.ysnStockUnit = 1 
 						) StockUOM
-				WHERE	r.intLotId IS NOT NULL 
+				WHERE	--r.intLotId IS NOT NULL 
+						i.strLotTracking <> 'No'
 						AND l.intWeightUOMId IS NOT NULL 
 						AND l.intWeightUOMId <> StockUOM.intItemUOMId 
 						AND l.intWeightUOMId <> l.intItemUOMId 
