@@ -26,6 +26,9 @@ SELECT
 	,WCD.dblFranchise
 	,WCD.dblSeqPriceConversionFactoryWeightUOM
 	,WCD.intWeightClaimDetailRefId
+	,WCD.intLoadContainerId
+	,strContainerNumber = LC.strContainerNumber
+	,strMarks = LC.strMarks
 	,strContractNumber = CH.strContractNumber
 	,intContractTypeId = CH.intContractTypeId
 	,intContractSeq = CD.intContractSeq
@@ -46,5 +49,5 @@ FROM
 	LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemUOMId = WCD.intPriceItemUOMId
 	LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency C ON C.intCurrencyID = WCD.intCurrencyId
-
+	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WCD.intLoadContainerId
 GO

@@ -36,6 +36,9 @@ SELECT
 	,strWeightUOM = WUOM.strUnitMeasure
 	,intWeightId = PC.intWeightId
 	,strWeightGradeDesc = WG.strWeightGradeDesc
+	,intLoadContainerId = LC.intLoadContainerId
+	,strContainerNumber = LC.strContainerNumber
+	,strMarks = LC.strMarks
 	,dblShippedNetWt = PC.dblShippedNetWt
 	,dblReceivedNetWt = PC.dblReceivedNetWt
 	,dblReceivedGrossWt = PC.dblReceivedGrossWt
@@ -110,6 +113,7 @@ FROM tblLGPendingClaim PC
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = CD.intSubBookId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblSMPurchasingGroup PG ON PG.intPurchasingGroupId = CD.intPurchasingGroupId
+	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = PC.intLoadContainerId
 	OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW 
 		JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
 GO

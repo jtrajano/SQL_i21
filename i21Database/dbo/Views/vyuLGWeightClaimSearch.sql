@@ -25,6 +25,9 @@ SELECT
 	,WD.intPriceItemUOMId
 	,WD.ysnNoClaim
 	,WD.intContractDetailId
+	,WD.intLoadContainerId
+	,strContainerNumber = LC.strContainerNumber
+	,strMarks = LC.strMarks
 	,WC.dtmClaimValidTill
 	,L.strLoadNumber
 	,L.dtmScheduledDate
@@ -76,6 +79,7 @@ FROM tblLGWeightClaim WC
 	JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId 
 	JOIN tblICItem I ON I.intItemId = CD.intItemId
 	JOIN tblICCommodity C ON C.intCommodityId = I.intCommodityId
+	LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WD.intLoadContainerId
 	LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = CH.intFreightTermId
 	LEFT JOIN tblICCommodityAttribute CA ON CA.intCommodityAttributeId = I.intOriginId
 	LEFT JOIN tblICItemContract CONI ON CONI.intItemContractId = CD.intItemContractId AND CONI.intItemId = I.intItemId

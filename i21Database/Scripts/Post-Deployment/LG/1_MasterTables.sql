@@ -247,13 +247,13 @@ GO
 /* 
 * Populate Pending Claims table
 */
-
 IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGPendingClaim'))
 BEGIN
 	EXEC('
 		INSERT INTO tblLGPendingClaim 
 			([intPurchaseSale]
 			,[intLoadId]
+			,[intLoadContainerId]
 			,[intContractDetailId]
 			,[intEntityId]
 			,[intPartyEntityId]
@@ -281,6 +281,7 @@ BEGIN
 		SELECT 
 			[intPurchaseSale]
 			,[intLoadId]
+			,[intLoadContainerId]
 			,[intContractDetailId]
 			,[intEntityId]
 			,[intPartyEntityId]
@@ -317,6 +318,7 @@ BEGIN
 											THEN EMPH.intEntityId
 										ELSE EM.intEntityId END
 				,intLoadId = L.intLoadId
+				,intLoadContainerId = LC.intLoadContainerId
 				,intWeightUnitMeasureId = L.intWeightUnitMeasureId
 				,intWeightId = CH.intWeightId
 				,dblShippedNetWt = (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0))
@@ -353,6 +355,8 @@ BEGIN
 				JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 				JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 				JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
+				OUTER APPLY (SELECT TOP 1 intWeightClaimsBy = ISNULL(intWeightClaimsBy, 1) FROM tblLGCompanyPreference) CP
+				LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 AND CP.intWeightClaimsBy = 2
 				LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 				LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 				LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
@@ -362,21 +366,26 @@ BEGIN
 				OUTER APPLY (SELECT TOP 1 intWeightUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemId = CD.intItemId AND IU.intUnitMeasureId = L.intWeightUnitMeasureId) WUI
 				OUTER APPLY (SELECT TOP 1 intPriceUOMId = IU.intItemUOMId, dblUnitQty FROM tblICItemUOM IU WHERE IU.intItemUOMId = AD.intSeqPriceUOMId) PUI
 				OUTER APPLY (SELECT TOP 1 strSubLocation = CLSL.strSubLocationName FROM tblLGLoadWarehouse LW JOIN tblSMCompanyLocationSubLocation CLSL ON LW.intSubLocationId = CLSL.intCompanyLocationSubLocationId WHERE LW.intLoadId = L.intLoadId) SL
-				OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink WHERE intLoadDetailId = LD.intLoadDetailId) CLNW
+				OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink 
+									 WHERE intLoadDetailId = LD.intLoadDetailId 
+									 AND (LC.intLoadContainerId IS NULL OR intLoadContainerId = LC.intLoadContainerId)) CLNW
 				CROSS APPLY (SELECT dblNet = SUM(ISNULL(IRI.dblNet,0)),dblGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 								JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-								WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+								WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+									AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
 									AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> ''Inventory Return'') RI
 				CROSS APPLY (SELECT dblIRNet = SUM(ISNULL(IRI.dblNet,0)),dblIRGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 								JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-								WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+								WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
+									AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
 									AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = ''Inventory Return'') IRN
 				WHERE 
 					L.intPurchaseSale IN (1, 3)
 					AND ((L.intPurchaseSale = 1 AND L.intShipmentStatus = 4) OR (L.intPurchaseSale <> 1 AND L.intShipmentStatus IN (6,11)))
 					AND WC.intWeightClaimId IS NULL
 					AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
-					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1)
+					AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = L.intLoadId AND intPurchaseSale = 1
+										AND (LC.intLoadContainerId IS NULL OR (LC.intLoadContainerId IS NOT NULL AND intLoadContainerId = LC.intLoadContainerId)))
 
 			UNION ALL
 
@@ -389,6 +398,7 @@ BEGIN
 											THEN EMPH.intEntityId
 										ELSE EM.intEntityId END
 				,intLoadId = L.intLoadId
+				,intLoadContainerId = NULL
 				,intWeightUnitMeasureId = L.intWeightUnitMeasureId
 				,intWeightId = CH.intWeightId
 				,dblShippedNetWt = CASE WHEN (CLCT.intCount) > 0 THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END

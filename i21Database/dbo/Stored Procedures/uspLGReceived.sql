@@ -125,7 +125,13 @@ SET ANSI_WARNINGS OFF
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					
 					-- Remove from Pending Claims
-					EXEC uspLGAddPendingClaim @intLoadId, 1, 0
+					IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
+					BEGIN
+						SET @ErrMsg = 'Weight Claim already exists for this Shipment.'
+						RAISERROR(@ErrMsg,16,1)
+					END
+
+					EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
 				END
 			END	
 
@@ -198,7 +204,13 @@ SET ANSI_WARNINGS OFF
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					
 					-- Remove from Pending Claims
-					EXEC uspLGAddPendingClaim @intLoadId, 1, 0
+					IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
+					BEGIN
+						SET @ErrMsg = 'Weight Claim already exists for this Shipment.'
+						RAISERROR(@ErrMsg,16,1)
+					END
+
+					EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
 				END
 			END	
 		END

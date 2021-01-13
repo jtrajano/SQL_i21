@@ -3,6 +3,7 @@
 	[intPendingClaimId] INT NOT NULL IDENTITY (1, 1),
 	[intPurchaseSale] INT NOT NULL,
 	[intLoadId] INT NOT NULL,
+	[intLoadContainerId] INT NULL,
 	[intContractDetailId] INT NULL,
 	[intEntityId] INT NULL,
 	[intPartyEntityId] INT NULL,
@@ -30,6 +31,7 @@
 	
 	CONSTRAINT [PK_tblLGPendingClaim_intPendingClaimId] PRIMARY KEY ([intPendingClaimId]), 
 	CONSTRAINT [FK_tblLGPendingClaim_tblLGLoad] FOREIGN KEY ([intLoadId]) REFERENCES tblLGLoad([intLoadId]),
+	CONSTRAINT [PK_tblLGPendingClaim_tblLGLoadContainer] FOREIGN KEY ([intLoadContainerId]) REFERENCES tblLGLoadContainer([intLoadContainerId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblCTContractDetail] FOREIGN KEY ([intContractDetailId]) REFERENCES tblCTContractDetail([intContractDetailId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES tblEMEntity([intEntityId]),
 	CONSTRAINT [FK_tblLGPendingClaim_tblEMEntity_intPartyEntityId] FOREIGN KEY ([intPartyEntityId]) REFERENCES tblEMEntity([intEntityId]),
