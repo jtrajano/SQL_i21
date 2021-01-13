@@ -9266,6 +9266,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
+    <None Include="Scripts\Post-Deployment\AP\NonEmployeeCompensationTo1099NEC.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1h_AccountRange.sql" />
