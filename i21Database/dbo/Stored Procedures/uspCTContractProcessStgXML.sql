@@ -3360,8 +3360,9 @@ BEGIN TRY
 						FROM tblCTContractDetail
 						WHERE intContractHeaderId = @intNewContractHeaderId
 							AND intContractSeq = @intContractSeq
+					END
 
-						IF @strApprovalStatus='Approved with Modifications' and EXISTS(SELECT *FROM tblCTContractFeed WHERE intContractHeaderId = @intNewContractHeaderId)
+					IF @strApprovalStatus='Approved with Modifications' and EXISTS(SELECT *FROM tblCTContractFeed WHERE intContractHeaderId = @intNewContractHeaderId)
 						BEGIN
 							--EXEC [uspCTContractApproved] @intNewContractHeaderId,@intUserId,@intContractDetailId
 
@@ -3495,7 +3496,7 @@ BEGIN TRY
 							WHERE intContractHeaderId = @intNewContractHeaderId
 								AND intContractSeq = @intContractSeq
 						END
-					END
+
 
 					EXEC uspCTCreateDetailHistory @intContractHeaderId = NULL
 						,@intContractDetailId = @intContractDetailId
