@@ -4,6 +4,8 @@ AS
 
 DECLARE @InvoiceEntries		AS InvoiceStagingTable
 DECLARE @LineItemTaxEntries	AS LineItemTaxDetailStagingTable
+DECLARE @ErrorMessage		NVARCHAR(250)	= NULL
+DECLARE @LogId				INT				= NULL
 DECLARE @intUserId	INT = (SELECT TOP 1 intEntityId FROM tblSMUserSecurity)
 
 INSERT INTO @InvoiceEntries (
@@ -85,9 +87,17 @@ ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblAR
 	 RAISERROR('Customer not found', 16, 1)
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)))
 	RAISERROR('Location not found', 16, 1)
+ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
+	RAISERROR('Invalid source transaction', 16, 1)
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
 	RAISERROR('No invoice to import', 16, 1)
 ELSE 
-	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 15, 1
+BEGIN
+	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 15, 1, NULL, @ErrorMessage OUTPUT, @LogId OUTPUT
+
+	SET @ErrorMessage = ISNULL(@ErrorMessage, 'Failed to import invoice')
+	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
+		RAISERROR(@ErrorMessage, 16, 1)
+END
 
 RETURN 0
