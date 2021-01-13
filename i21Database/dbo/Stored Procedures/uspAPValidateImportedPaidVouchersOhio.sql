@@ -61,6 +61,9 @@ UPDATE A
 						ABS(A.dblPayment) > B.dblAmountDue
 					THEN 'Overpayment'
 					WHEN 
+						A.dblPayment < B.dblAmountDue
+					THEN 'Underpayment'
+					WHEN 
 						A.dblPayment < 0 AND B.intTransactionType != 3
 					THEN 'Amount is negative. Debit Memo type is expected.'
 					ELSE NULL
