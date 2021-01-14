@@ -1,9 +1,12 @@
 
 CREATE PROCEDURE uspGLImportGLAccountCSV(
-    @filePath NVARCHAR(MAX),
-    @intEntityId INT
+@filePath NVARCHAR(MAX),
+@intEntityId INT,
+@strVersion NVARCHAR(100),
+@importLogId INT OUT
 )
 AS
+
 
 IF object_id('tblGLAccountImportDataStaging') IS NOT NULL 
 	DROP TABLE dbo.tblGLAccountImportDataStaging
@@ -19,6 +22,8 @@ CREATE TABLE tblGLAccountImportDataStaging (
 	[strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 )
  
+
+--FROM 'C:\Users\Jeff\Documents\SQL Server Management Studio\testImportGL.csv' --REPLACE WITH VALID FULL FILE PATH
 DECLARE @s NVARCHAR(MAX) =
 'BULK
 INSERT tblGLAccountImportDataStaging
@@ -112,7 +117,7 @@ UPDATE [tblGLAccountImportDataStaging2] SET ysnValid = 1
 WHERE intPrimarySegmentId IS NOT NULL 
 AND intLocationSegmentId IS NOT NULL 
 AND [ysnMissingLOBSegment] =0 
-AND intAccountUnitId IS NOT NULL
+-- AND intAccountUnitId IS NOT NULL warning only
 AND ISNULL([ysnGLAccountExist],0) = 0
 
 
@@ -133,11 +138,11 @@ WHERE  ST.strStructureName = 'LOB'AND ISNULL(ysnValid,0) = 1 AND  ISNULL(T.[ysnN
 
 UPDATE [tblGLAccountImportDataStaging2] SET 
 strError =
-CASE WHEN ISNULL([ysnGLAccountExist],0) = 1 THEN  'GL Account exists |' ELSE '' END +
-CASE WHEN intPrimarySegmentId IS NULL THEN  ' Missing or invalid Primary Segment |' ELSE '' END +
-CASE WHEN intLocationSegmentId IS NULL THEN  ' Missing or invalid Location Segment |' ELSE '' END +
-CASE WHEN intLOBSegmentId IS NULL AND @withLOB = 1 THEN  ' Missing or invalid LOB Segment |' ELSE '' END +
-CASE WHEN intAccountUnitId IS NULL THEN  ' Missing or invalid UOM Code |' ELSE '' END
+CASE WHEN ISNULL([ysnGLAccountExist],0) = 1 THEN  'Error : GL Account exists |' ELSE '' END +
+CASE WHEN intPrimarySegmentId IS NULL THEN  ' Error : Missing or invalid Primary Segment |' ELSE '' END +
+CASE WHEN intLocationSegmentId IS NULL THEN  'Error : Missing or invalid Location Segment |' ELSE '' END +
+CASE WHEN intLOBSegmentId IS NULL AND @withLOB = 1 THEN  ' Error : Missing or invalid LOB Segment |' ELSE '' END +
+CASE WHEN intAccountUnitId IS NULL THEN  'Warning : Missing or invalid UOM Code |' ELSE '' END
 
 INSERT intO tblGLAccount 
 ([strAccountId],[strDescription], [intAccountGroupId],[ysnSystem],[ysnActive],intCurrencyID,intAccountUnitId,  intConcurrencyId, intEntityIdLastModified)
@@ -189,7 +194,7 @@ SELECT @intInvalidCount = count(*) FROM tblGLAccountImportDataStaging2 where ISN
 SELECT @intValidCount=COUNT(*) FROM tblGLAccount A JOIN tblGLAccountImportDataStaging2 B on B.intAccountId = A.intAccountId 
 WHERE ISNULL(ysnValid,0) = 1
 
-DECLARE @i INT
+
 DECLARE @m NVARCHAR(MAX)
 
 IF @intValidCount > 0 and @intInvalidCount >0
@@ -197,22 +202,18 @@ IF @intValidCount > 0 and @intInvalidCount >0
 IF @intValidCount > 0 AND @intInvalidCount = 0
 	SET @m = 'Successfully imported GL Accounts.'
 IF @intValidCount = 0 AND @intInvalidCount > 0
-	SET @m = 'Imported GL Accounts failed.'
+	SET @m = 'Importing GL Accounts Failed.'
 IF @intValidCount = 0 AND @intInvalidCount = 0
 	SET @m = 'No GL Accounts was imported.'
 
-INSERT INTO tblGLCOAImportLog(strEvent, intEntityId, intConcurrencyId, intUserId, dtmDate, intErrorCount, intSuccessCount)
-	SELECT 'Importing GL Accounts with Errors', @intEntityId, 1, @intEntityId, GETDATE(), @intInvalidCount, @intValidCount
-	SELECT @i = SCOPE_IDENTITY()
+INSERT INTO tblGLCOAImportLog(strEvent, intEntityId, intConcurrencyId, intUserId, dtmDate, intErrorCount, intSuccessCount, strIrelySuiteVersion)
+	SELECT @m, @intEntityId, 1, @intEntityId, GETDATE(), @intInvalidCount, @intValidCount, @strVersion
+	SELECT @importLogId = SCOPE_IDENTITY()
 
-INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strJournalId,strLineNumber)
+INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strExternalId,strLineNumber)
 	SELECT 
-		@i,
+		@importLogId,
 		CASE WHEN isnull(ysnValid,0) = 0 THEN strError ELSE 'GL Account created' END, 
 		strAccountId, 
 		CAST([intImportStagingId] AS nvarchar(4))
 	FROM tblGLAccountImportDataStaging2
-
-
-RETURN @i
-
