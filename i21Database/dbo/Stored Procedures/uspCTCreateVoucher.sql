@@ -149,6 +149,9 @@ begin try
 		,dblPriceQuantity numeric(18,6)
 		,intAvailablePriceLoad int
 		,intPriceItemUOMId int
+		,intPricingTypeId int
+		,intFreightTermId int
+		,intCompanyLocationId int
 	);
 
 	declare 
@@ -169,6 +172,9 @@ begin try
 		,@intId int
 		,@intPriceItemUOMId int
 		,@intBillItemUOMId int
+		,@intPricingTypeId int
+		,@intFreightTermId int
+		,@intCompanyLocationId int
 		;
 
 	declare @CreatedVoucher as table(
@@ -238,6 +244,9 @@ begin try
 				,dblPriceQuantity = dblQuantity  
 				,intAvailablePriceLoad = intAvailableLoad  
 				,intPriceItemUOMId = intPriceItemUOMId
+				,intPricingTypeId = intPricingTypeId
+				,intFreightTermId = intFreightTermId
+				,intCompanyLocationId = intCompanyLocationId
 			from  
 				vyuCTGetAvailablePriceForVoucher  
 			where  
@@ -259,6 +268,9 @@ begin try
 					,@intAvailablePriceLoad = intAvailablePriceLoad  
 					,@intPriceFixationDetailId = intPriceFixationDetailId  
 					,@intPriceItemUOMId = intPriceItemUOMId
+					,@intPricingTypeId = intPricingTypeId
+					,@intFreightTermId = intFreightTermId
+					,@intCompanyLocationId = intCompanyLocationId
 				from  
 					@availablePrice  
 				where  
@@ -450,7 +462,7 @@ begin try
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
 					,dblExchangeRate = vp.dblExchangeRate
-					,intPurchaseTaxGroupId = vp.intPurchaseTaxGroupId
+					,intPurchaseTaxGroupId = (case when @intPricingTypeId = 2 then dbo.fnGetTaxGroupIdForVendor(vp.intEntityVendorId,@intCompanyLocationId,vp.intItemId,em.intEntityLocationId,@intFreightTermId) else vp.intPurchaseTaxGroupId end)
 					,dblTax = vp.dblTax
 					,dblDiscount = vp.dblDiscount
 					,dblDetailDiscountPercent = vp.dblDetailDiscountPercent
@@ -473,6 +485,7 @@ begin try
 					,intPriceFixationDetailId = @intPriceFixationDetailId
 				from
 					@voucherPayables vp
+					left join tblEMEntityLocation em ON em.intEntityId = vp.intEntityVendorId and isnull(em.ysnDefaultLocation,0) = 1
 				where
 					vp.intVoucherPayableId = @intVoucherPayableId
 

@@ -14,6 +14,9 @@
 			,tbl.intBilledLoad  
 			,intAvailableLoad = isnull(tbl.dblLoadPriced,0) - isnull(tbl.intBilledLoad,0)  
 			,intPriceItemUOMId
+			,intPricingTypeId
+			,intFreightTermId 
+			,intCompanyLocationId
 		from      
 			(      
 				select      
@@ -27,6 +30,9 @@
 					,dblBilledQuantity = (case when isnull(cd.intNoOfLoad,0) = 0 then isnull(sum(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId,cd.intItemUOMId,bd.dblQtyReceived)),0) else pfd.dblQuantity end)
 					,intBilledLoad = (case when isnull(cd.intNoOfLoad,0) = 0 then 0 else isnull(count(distinct bd.intBillId),0) end)
 					,intPriceItemUOMId = iu.intItemUOMId
+	 				,cd.intPricingTypeId
+					,cd.intFreightTermId 
+					,cd.intCompanyLocationId 
 				from      
 					tblCTPriceFixation pf      
 					left join tblCTContractDetail cd on cd.intContractDetailId = pf.intContractDetailId      
@@ -48,6 +54,9 @@
 					,iu.intItemUOMId      
 					,pfd.dblFinalPrice      
 					,cd.intNoOfLoad
+	 				,cd.intPricingTypeId
+					,cd.intFreightTermId 
+					,cd.intCompanyLocationId 
 
                 union all
 
@@ -62,6 +71,9 @@
                     ,dblBilledQuantity = (case when isnull(cd.intNoOfLoad,0) = 0 then isnull(sum(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId,cd.intItemUOMId,bd.dblQtyReceived)),0) else cd.dblQuantity end)  
                     ,intBilledLoad = (case when isnull(cd.intNoOfLoad,0) = 0 then 0 else isnull(count(distinct bd.intBillId),0) end)  
                     ,intPriceItemUOMId = cd.intPriceItemUOMId
+	 				,cd.intPricingTypeId
+					,cd.intFreightTermId 
+					,cd.intCompanyLocationId 
                 from        
                     tblCTContractDetail cd
                     left join tblAPBillDetail bd on bd.intContractDetailId = cd.intContractDetailId and isnull(bd.intSettleStorageId,0) = 0   
@@ -75,6 +87,9 @@
                     ,cd.dblCashPrice        
                     ,cd.intNoOfLoad  
                     ,cd.intPriceItemUOMId
+	 				,cd.intPricingTypeId
+					,cd.intFreightTermId 
+					,cd.intCompanyLocationId
 			)tbl      
 		where
 			(tbl.dblQuantity - tbl.dblBilledQuantity) > 0
