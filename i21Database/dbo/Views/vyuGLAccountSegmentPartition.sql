@@ -1,6 +1,6 @@
 	CREATE VIEW vyuGLAccountSegmentPartition
 	AS
-	SELECT [Primary Account],  [Location],  [LOB], ISNULL(strDescription,'')strDescription,ISNULL(strUOMCode,'')strUOMCode
+	SELECT [Primary Account] strPrimary,  [Location] strLocation,  [LOB] strLOB, ISNULL(strDescription,'')strDescription,ISNULL(strUOMCode,'')strUOMCode
 	FROM (
 		SELECT 
 			A.intAccountId,
