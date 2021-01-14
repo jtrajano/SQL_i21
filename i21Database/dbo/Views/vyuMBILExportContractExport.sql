@@ -8,6 +8,7 @@ AS
  FROM    
  (    
   SELECT 
+	CD.intContractDetailId,
 	CL.strLocationNumber,    
     EY.strEntityNo,
     IM.strItemNo,    
