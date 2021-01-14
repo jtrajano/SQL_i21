@@ -6,8 +6,6 @@ AS
 DECLARE @ItemsToIncreaseInTransitInBound AS InTransitTableType,
         @total as int;
 
-BEGIN TRY
-
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
 SET NOCOUNT ON
@@ -29,7 +27,10 @@ SET ANSI_WARNINGS OFF
 				@ysnInventorize					BIT,
 				@ysnReverse						BIT = 0,
 				@intLoadId						INT,
-				@dblNetWeight					NUMERIC(18,6)
+				@dblNetWeight					NUMERIC(18,6),
+				@intWeightClaimsBy				INT
+
+	SELECT TOP 1 @intWeightClaimsBy = ISNULL(intWeightClaimsBy, 1) FROM tblLGCompanyPreference
 
 	SELECT @strReceiptType = strReceiptType, @intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
@@ -125,9 +126,11 @@ SET ANSI_WARNINGS OFF
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					
 					-- Remove from Pending Claims
-					IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
+					IF @intWeightClaimsBy = 2 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
 					BEGIN
-						SET @ErrMsg = 'Weight Claim already exists for this Shipment.'
+						SELECT TOP 1 @ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber + '.' 
+						FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+						WHERE WC.intLoadId = @intLoadId
 						RAISERROR(@ErrMsg,16,1)
 					END
 
@@ -204,9 +207,11 @@ SET ANSI_WARNINGS OFF
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					
 					-- Remove from Pending Claims
-					IF EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
+					IF @intWeightClaimsBy = 2 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
 					BEGIN
-						SET @ErrMsg = 'Weight Claim already exists for this Shipment.'
+						SELECT TOP 1 @ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber + '.' 
+						FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+						WHERE WC.intLoadId = @intLoadId
 						RAISERROR(@ErrMsg,16,1)
 					END
 
@@ -263,11 +268,3 @@ SET ANSI_WARNINGS OFF
 		-- Or Increase it back when unposting the IR. 
 		EXEC dbo.uspICIncreaseInTransitInBoundQty @ItemsToIncreaseInTransitInBound
 	END
-END TRY
-
-BEGIN CATCH
-
-	SET @ErrMsg = 'uspLGReceived - ' + ERROR_MESSAGE()  
-	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
-	
-END CATCH
