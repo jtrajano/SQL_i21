@@ -22,18 +22,27 @@ CREATE TABLE tblGLAccountImportDataStaging (
 )
  
 
-DECLARE @s NVARCHAR(MAX) =
-'BULK
-INSERT tblGLAccountImportDataStaging
-FROM ''' +   @filePath +
 
-''' WITH
-(
-FIELDTERMINATOR = '','',
-ROWTERMINATOR = ''\n''
-)'
+BEGIN TRY
+	DECLARE @s NVARCHAR(MAX) =
+	'BULK
+	INSERT tblGLAccountImportDataStaging
+	FROM ''' +   @filePath +
 
-Exec(@s)
+	''' WITH
+	(
+	FIELDTERMINATOR = '','',
+	ROWTERMINATOR = ''\n''
+	)'
+	--select @s
+	Exec(@s)
+END TRY
+BEGIN CATCH
+	RAISERROR('Bulk Load operation failed', 16, 1);
+	RETURN;
+
+END CATCH
+
 
 --Check the content of the table.
 CREATE TABLE tblGLAccountImportDataStaging2
