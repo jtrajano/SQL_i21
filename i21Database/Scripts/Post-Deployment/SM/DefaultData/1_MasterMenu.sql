@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Sales Receipts' AND strModuleName = 'Accounts Receivable' AND strCommand = 'AccountsReceivable.view.PointOfSaleSalesReceipt?showSearch=true')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND strCommand = 'Grain.view.DisconnectedScaleSchedule?showSearch=true')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -3808,7 +3808,7 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Disconnected Scale Schedule', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Disconnected Scale Schedule', N'Maintenance', N'Screen', N'Grain.view.DisconnectedScaleSchedule', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
+	VALUES (N'Disconnected Scale Schedule', N'Ticket Management', @TicketManagementMaintenanceParentMenuId, N'Disconnected Scale Schedule', N'Maintenance', N'Screen', N'Grain.view.DisconnectedScaleSchedule?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 9, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET strCommand = 'Grain.view.DisconnectedScaleSchedule', intSort = 9 WHERE strMenuName = 'Disconnected Scale Schedule' AND strModuleName = 'Ticket Management' AND intParentMenuID = @TicketManagementMaintenanceParentMenuId
 
