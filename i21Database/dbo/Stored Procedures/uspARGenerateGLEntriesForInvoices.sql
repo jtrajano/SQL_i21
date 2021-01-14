@@ -1146,7 +1146,7 @@ WHERE
     AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
     AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
 
---FINAL INVOICES (DROP SHIP/ AP Clearing)
+--FINAL INVOICES (DROP SHIP/ COGS)
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
     ,[strBatchId]
@@ -1242,7 +1242,7 @@ LEFT OUTER JOIN
 		,[dblTotal]				= SUM(ID.[dblTotal] - IDP.[dblTotal])
         ,[intInvoiceId]			= ID.[intInvoiceId]
 		,[intSourceType]		= LG.[intSourceType]
-		,[intAccountId]			= dbo.fnGetItemGLAccount(IDP.[intItemId], ICIL.[intItemLocationId], 'AP CLearing')
+		,[intAccountId]			= dbo.fnGetItemGLAccount(IDP.[intItemId], ICIL.[intItemLocationId], 'Cost of Goods')
     FROM
         #ARPostInvoiceDetail ID
 	INNER JOIN tblARInvoiceDetail IDP
