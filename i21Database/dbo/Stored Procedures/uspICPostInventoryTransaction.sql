@@ -190,10 +190,29 @@ END
 
 IF @InventoryTransactionIdentityId IS NOT NULL 
 BEGIN 
+	------------------------------------------------------------
+	-- Update the Stock Movement
+	------------------------------------------------------------
 	EXEC uspICPostInventoryStockMovement
 		@InventoryTransactionId = @InventoryTransactionIdentityId
 		,@InventoryTransactionStorageId = NULL
 		,@InventoryStockMovementId = @InventoryStockMovementId OUTPUT 
+
+	------------------------------------------------------------
+	-- Update the Valuation Summary
+	------------------------------------------------------------
+	EXEC [uspICUpdateInventoryValuationSummary]
+		@intItemId 
+		,@intItemLocationId 
+		,@intSubLocationId 
+		,@intStorageLocationId 
+		,@intItemUOMId 
+		,@dblQty 
+		,@dblCost 
+		,@dblValue
+		,@intTransactionTypeId 
+		,@dtmDate
+		,@intInTransitSourceLocationId
 END 
 
 _EXIT:

@@ -13,7 +13,7 @@ END
 
 -- If fyp is Open and the log is more than a day old, continue with the rebuild. 
 -- Otherwise, exit immediately. Do not rebuild the valuation summary. 
-IF EXISTS (
+IF NOT EXISTS (
 	SELECT TOP 1 1 
 	FROM 
 		tblICInventoryValuationSummaryLog (NOLOCK) l INNER JOIN tblGLFiscalYearPeriod fyp
@@ -21,7 +21,7 @@ IF EXISTS (
 	WHERE 
 		l.strPeriod = @strPeriod
 		AND fyp.ysnINVOpen = 1 
-		AND ABS(DATEDIFF(DAY, l.dtmLastRun, GETDATE())) <= 1
+		AND ABS(DATEDIFF(DAY, l.dtmLastRun, GETDATE())) > 1
 )
 AND @ysnForceRebuild <> 1
 BEGIN 
