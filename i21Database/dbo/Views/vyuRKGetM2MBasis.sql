@@ -158,8 +158,8 @@ FROM (
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	WHERE dblQuantity > 0
 		AND it.strLotTracking = (CASE WHEN (SELECT TOP 1 intRiskViewId FROM tblRKCompanyPreference) = 2 THEN it.strLotTracking ELSE 'No' END)) iis
-LEFT JOIN (
-	SELECT DISTINCT cd.intItemId
+OUTER APPLY (
+	SELECT DISTINCT TOP 1 cd.intItemId
 		, cd.intCompanyLocationId
 		, fm.intFutureMarketId
 		, fmon.intFutureMonthId
@@ -194,4 +194,5 @@ LEFT JOIN (
 	LEFT JOIN tblSMCurrency muc ON muc.intCurrencyID = fm.intCurrencyId
 	LEFT JOIN tblICUnitMeasure um ON um.intUnitMeasureId = u.intUnitMeasureId
 	LEFT JOIN tblARMarketZone mz ON	mz.intMarketZoneId = cd.intMarketZoneId
-) ct ON iis.intItemId = ct.intItemId
+	WHERE cd.intItemId = iis.intItemId
+) ct
