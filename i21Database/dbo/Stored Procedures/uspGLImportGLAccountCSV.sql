@@ -1,12 +1,11 @@
 
 CREATE PROCEDURE uspGLImportGLAccountCSV(
-@filePath NVARCHAR(MAX),
-@intEntityId INT,
-@strVersion NVARCHAR(100),
-@importLogId INT OUT
+	@filePath NVARCHAR(MAX),
+	@intEntityId INT,
+	@strVersion NVARCHAR(100),
+	@importLogId INT OUT
 )
 AS
-
 
 IF object_id('tblGLAccountImportDataStaging') IS NOT NULL 
 	DROP TABLE dbo.tblGLAccountImportDataStaging
@@ -18,12 +17,11 @@ CREATE TABLE tblGLAccountImportDataStaging (
 	[strPrimarySegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocationSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
-	[strDescription] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL
 )
  
 
---FROM 'C:\Users\Jeff\Documents\SQL Server Management Studio\testImportGL.csv' --REPLACE WITH VALID FULL FILE PATH
 DECLARE @s NVARCHAR(MAX) =
 'BULK
 INSERT tblGLAccountImportDataStaging
@@ -34,9 +32,8 @@ FROM ''' +   @filePath +
 FIELDTERMINATOR = '','',
 ROWTERMINATOR = ''\n''
 )'
-select @s
-Exec(@s)
 
+Exec(@s)
 
 --Check the content of the table.
 CREATE TABLE tblGLAccountImportDataStaging2
@@ -45,7 +42,7 @@ CREATE TABLE tblGLAccountImportDataStaging2
 	[strPrimarySegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLocationSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,
-	[strDescription] [nvarchar](100) COLLATE Latin1_General_CI_AS NULL,
+	[strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
 	[strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
  	[intAccountId] [int] NULL,
 	[strAccountId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL,
@@ -65,7 +62,12 @@ CREATE TABLE tblGLAccountImportDataStaging2
 
 
 INSERT INTO tblGLAccountImportDataStaging2([strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM])
-SELECT [strPrimarySegment],[strLocationSegment],[strLOBSegment],[strDescription],[strUOM] FROM tblGLAccountImportDataStaging
+SELECT 
+REPLACE([strPrimarySegment],'"','')
+,REPLACE([strLocationSegment],'"','')
+,REPLACE([strLOBSegment],'"','')
+,REPLACE([strDescription],'"','')
+,REPLACE([strUOM],'"','') FROM tblGLAccountImportDataStaging
 
 
 CREATE UNIQUE INDEX indunique
@@ -176,15 +178,18 @@ WHERE A.strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE s
 
 
  IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))  
+ BEGIN
   EXEC uspGLAccountOriginSync @intEntityId  
 
--- sync description incase description is explicitly stated
-UPDATE G set glact_desc = D.strDescription
-FROM tblGLCOACrossReference C Join tblGLAccount A on A.intAccountId = C.inti21Id 
-JOIN [tblGLAccountImportDataStaging2] D  on D.intAccountId = A.intAccountId
-join glactmst G on G.A4GLIdentity = C.intLegacyReferenceId
-where isnull(ysnNoDescription,0) = 0
-
+	EXEC('
+	DECLARE @l int
+	SELECT @l = COL_LENGTH(''glactmst'', ''glact_desc'')
+	UPDATE G set glact_desc = LEFT( D.strDescription, @l)
+	FROM tblGLCOACrossReference C Join tblGLAccount A on A.intAccountId = C.inti21Id 
+	JOIN [tblGLAccountImportDataStaging2] D  on D.intAccountId = A.intAccountId
+	join glactmst G on G.A4GLIdentity = C.intLegacyReferenceId
+	where isnull(ysnNoDescription,0) = 0')
+END
 
 --checking
 
