@@ -16,15 +16,23 @@ SELECT
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
 	
-	,CASE WHEN SS.dblUnpaidUnits != 0 
-		THEN (
-			CASE WHEN ST.intSettleContractId IS NOT NULL THEN CAST(ST.dblUnits * ISNULL(ST.dblCost, ST.dblPrice) as decimal(18, 2))
-			ELSE SS.dblNetSettlement
-			END
-		)
-		ELSE CAST((SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) AS DECIMAL(18,2))
-		END AS dblSettleStorageAmount
-	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,2)) AS dblSettleStorageQty
+	,CASE 
+		WHEN SS.dblUnpaidUnits != 0 
+			THEN (
+				CASE WHEN SC.intSettleContractId IS NOT NULL THEN CAST(SC.dblUnits * ISNULL(SC.dblCost, SC.dblPrice) as decimal(18, 4))
+				ELSE SS.dblNetSettlement
+				END
+			)
+		ELSE CAST(
+				CASE 
+					WHEN SC.intSettleContractId IS NULL 
+						THEN (SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) 
+					ELSE
+						(SC.dblUnits * ISNULL(SC.dblCost, SC.dblPrice)) --NET SETTLEMENT
+				END						
+			AS DECIMAL(18,4))
+	END AS dblSettleStorageAmount
+	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,4)) AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
@@ -50,12 +58,12 @@ INNER JOIN tblGLDetail GD
 		AND GD.strTransactionType = 'Storage Settlement'
 		AND GD.ysnIsUnposted = 0
 		AND GD.strDescription LIKE '%Item: ' + IM.strItemNo + '%'
-INNER JOIN vyuGLAccountDetail AD
-	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
-LEFT JOIN tblGRSettleContract ST
-	ON ST.intSettleStorageId = SS.intSettleStorageId
+ INNER JOIN vyuGLAccountDetail AD
+ 	ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
+LEFT JOIN tblGRSettleContract SC
+	ON SC.intSettleStorageId = SS.intSettleStorageId
 LEFT JOIN tblCTContractDetail CT
-	ON CT.intContractDetailId = ST.intContractDetailId
+	ON CT.intContractDetailId = SC.intContractDetailId
 left join tblCTContractHeader CH
 		on CH.intContractHeaderId = CT.intContractHeaderId
 LEFT JOIN 
@@ -418,8 +426,9 @@ OUTER APPLY
 WHERE 
 	QM.strSourceType = 'Storage' 
 AND QM.dblDiscountDue <> 0
---AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 AND SS.ysnPosted = 1
+AND GLDetail.intAccountId IS NOT NULL
+--AND (CH.intContractHeaderId is null or (CH.intContractHeaderId is not null and CH.intPricingTypeId = 2))
 --AND SS.strStorageTicket = 'STR-6513/1'
 
 
