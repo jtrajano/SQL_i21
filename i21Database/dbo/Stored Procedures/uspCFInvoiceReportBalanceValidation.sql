@@ -1,6 +1,3 @@
-﻿
-
-CREATE PROCEDURE [dbo].[uspCFInvoiceReportBalanceValidation](
 ﻿CREATE PROCEDURE [dbo].[uspCFInvoiceReportBalanceValidation](
 	 @UserId NVARCHAR(MAX)
 	 ,@StatementType NVARCHAR(MAX)
@@ -101,4 +98,4 @@ BEGIN
 
 
 END
-
+GO
