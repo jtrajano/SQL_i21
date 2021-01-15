@@ -2057,13 +2057,13 @@ BEGIN TRY
 				IF @intTemplateProductTypeId = 1
 				BEGIN
 					SELECT @intTemplateProductValueId = t.intCategoryId
-					FROM tblICCategory t WITH (NOLOCK)
+					FROM tblICCategory t
 					WHERE t.strCategoryCode = @strTemplateProductValue
 				END
 				ELSE IF @intTemplateProductTypeId = 2
 				BEGIN
 					SELECT @intTemplateProductValueId = t.intItemId
-					FROM tblICItem t WITH (NOLOCK)
+					FROM tblICItem t
 					WHERE t.strItemNo = @strTemplateProductValue
 				END
 
@@ -2110,8 +2110,8 @@ BEGIN TRY
 					OR @intTemplateProductTypeId = 5
 				BEGIN
 					SELECT @intProductId = P.intProductId
-					FROM tblQMProduct P WITH (NOLOCK)
-					JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
+					FROM tblQMProduct P
+					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 						AND PC.intSampleTypeId = @intSampleTypeId
 					WHERE P.intProductTypeId = @intTemplateProductTypeId
 						AND P.ysnActive = 1
@@ -2123,8 +2123,8 @@ BEGIN TRY
 					AND @intTemplateProductValueId IS NOT NULL
 				BEGIN
 					SELECT @intProductId = P.intProductId
-					FROM tblQMProduct P WITH (NOLOCK)
-					JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
+					FROM tblQMProduct P
+					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
 						AND PC.intSampleTypeId = @intSampleTypeId
 					WHERE P.intProductTypeId = @intTemplateProductTypeId
 						AND P.intProductValueId = @intTemplateProductValueId
