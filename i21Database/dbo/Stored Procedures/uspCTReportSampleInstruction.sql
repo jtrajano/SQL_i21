@@ -105,7 +105,7 @@ BEGIN TRY
 			,strDestinationPointName				=	SQ.strDestinationPointName
 			,strItemDescription						=   strItemDescription
 			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure
-			,strShipment							=	REPLACE(CONVERT (VARCHAR,GETDATE(),107),LTRIM(DAY (GETDATE())) + ', ' ,'') + ' shipment at '+ SQ.strFixationBy+'''s option'
+			,strShipment							=	LEFT(DATENAME(MONTH, GETDATE()), 3) + ' ' + DATENAME(YEAR, GETDATE()) + ' shipment at '+ SQ.strFixationBy+'''s option'
 
 		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
 										                ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +  
