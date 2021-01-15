@@ -7306,6 +7306,7 @@
     <Build Include="dbo\Tables\tblCFInvoiceDiscountCalculationTempTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation2.sql" />
     <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
+    <Build Include="dbo\Tables\tblGLRunningBalanceOrder.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
@@ -8881,6 +8882,7 @@
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportValidation.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportBalanceValidation.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageHistoryPaidAmount.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Views\vyuAP1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
@@ -9097,6 +9099,7 @@
     <Build Include="dbo\Functions\fnHDCoalesceJiraTickets.sql" />
     <None Include="dbo\Stored Procedures\uspPOFixReceivedQty.sql" />
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1t_InsertTrialBalanceData.sql" />
+    <None Include="Scripts\Post-Deployment\GL\DefaultData\1v_InsertRunningBalance.sql" />
     <Build Include="dbo\Views\vyuAP1099MISCYear.sql" />
     <Build Include="dbo\Views\vyuAP1099INTYear.sql" />
     <Build Include="dbo\Views\vyuAP1099BYear.sql" />
@@ -9171,6 +9174,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1e_AccountCategory.sql" />
+    <None Include="Scripts\Post-Deployment\AP\NonEmployeeCompensationTo1099NEC.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\GL\DefaultData\1h_AccountRange.sql" />

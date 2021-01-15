@@ -226,5 +226,34 @@ BEGIN
 		);
 END;
 
+-- UPDATE ORDERING OF RUNNING BALANCE
+IF @ysnPost = 1 
+BEGIN
+	
+	INSERT INTO tblGLRunningBalanceOrder (
+		intGLDetailId,
+		intAccountId,
+		dtmDate,
+		strTransactionId,
+		rowId
+	)
+	SELECT 	
+	intGLDetailId,
+	GL.intAccountId,
+	GL.dtmDate,
+	GL.strTransactionId,
+	Ordering.PeakValue + ROW_NUMBER() 
+	OVER (PARTITION BY GL.intAccountId,GL.dtmDate ORDER BY intGLDetailId)rowId
+	FROM tblGLDetail GL 
+	OUTER APPLY(
+		SELECT ISNULL(MAX(rowId), 0) PeakValue FROM tblGLRunningBalanceOrder 
+		WHERE intAccountId = GL.intAccountId AND dtmDate = GL.dtmDate
+	) Ordering
+	WHERE 
+	GL.strTransactionId IN (SELECT strTransactionId from @GLEntries)
+	AND
+	GL.ysnIsUnposted = 0
+END
+ELSE
+	DELETE FROM tblGLRunningBalanceOrder WHERE strTransactionId COLLATE Latin1_General_CI_AS IN (SELECT strTransactionId from @GLEntries)
 RETURN 0
-

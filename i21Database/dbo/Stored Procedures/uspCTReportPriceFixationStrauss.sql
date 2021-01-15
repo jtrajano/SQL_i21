@@ -114,6 +114,15 @@ BEGIN TRY
 	AND		strStatus = 'Approved' 
 	ORDER BY intApprovalId
 
+	IF (ISNULL(@StraussContractSubmitId, 0) = 0)
+	BEGIN
+		SELECT	TOP 1 @StraussContractSubmitId = intSubmittedById
+		FROM	tblSMApproval 
+		WHERE	intTransactionId = @intTransactionId
+		AND		strStatus = 'Submitted' 
+		ORDER BY intApprovalId
+	END
+
 	select top 1
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
@@ -227,7 +236,7 @@ BEGIN TRY
 								+ ' per ' + FM.strUnitMeasure,
 			strBuyer = CASE WHEN CH.ysnBrokerage = 1 THEN EC.strEntityName ELSE CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END END,
 			strSeller = CASE WHEN CH.ysnBrokerage = 1 THEN EY.strEntityName ELSE CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END END,
-	
+			
 			SubmitterSign =		case
 								when CH.intContractTypeId = 1
 								then 

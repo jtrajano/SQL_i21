@@ -225,6 +225,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\GL\DefaultData\1r_UpdateModuleCategory.sql
 :r .\GL\DefaultData\1s_UpdateChartDescription.sql
 :r .\GL\DefaultData\1t_InsertTrialBalanceData.sql
+:r .\GL\DefaultData\1v_InsertRunningBalanceOrder.sql
 
 -- Financial Report Designer
 :r .\FRD\FRDEntryDataFix.sql
@@ -309,6 +310,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\AP\PurgePayableCompleted.sql
 :r .\AP\UpdatePaymentDetailOffset.sql
 :r .\AP\UpdatePayableFreightTerm.sql
+:r .\AP\NonEmployeeCompensationTo1099NEC.sql
 
 -- Inventory 
 :r .\IC\01_InventoryTransactionTypes.sql 

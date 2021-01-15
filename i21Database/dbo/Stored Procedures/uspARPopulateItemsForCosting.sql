@@ -59,7 +59,9 @@ SELECT
 	,[intItemLocationId]		= ARID.[intItemLocationId]
 	,[intItemUOMId]				= ARID.[intItemUOMId]
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]					= (CASE WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
+	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
+										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
+										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
 								   END
@@ -115,7 +117,7 @@ LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
 LEFT OUTER JOIN
-	(SELECT [intInvoiceDetailId], [dblQtyShipped] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
+	(SELECT [intInvoiceDetailId], [dblQtyShipped], [dblShipmentNetWt] FROM tblARInvoiceDetail WITH (NOLOCK)) ARIDP
 		ON ARIDP.[intInvoiceDetailId] = ARID.[intOriginalInvoiceDetailId]
 LEFT OUTER JOIN
 	(SELECT [intLotId], [intWeightUOMId], [intStorageLocationId], [intSubLocationId] FROM tblICLot WITH (NOLOCK)) LOT
@@ -134,7 +136,7 @@ WHERE
 	AND (
 		(ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR 
-		((ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0) AND (ARID.[intLoadDetailId] IS NOT NULL AND ARID.[intLoadDetailId] > 0) AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice')
+		(((ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped]) OR (ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt])) AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice')
 		OR
 		((ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 OR ISNULL(ARID.[intLoadDetailId], 0) = 0) AND ARID.[strTransactionType] = 'Credit Memo')
 		)
@@ -302,6 +304,6 @@ ON ARIC.intTransactionDetailId = ARID.intInvoiceDetailId
 INNER JOIN tblARInvoiceDetail ARIDP
 ON ARID.intOriginalInvoiceDetailId = ARIDP.intInvoiceDetailId
 WHERE ARID.[intSourceId] = 2
-AND ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped]
+AND ((ARID.[dblQtyShipped] <> ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0) OR (ARID.[dblQtyShipped] < ARIDP.[dblQtyShipped] AND ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0))
 
 RETURN 1

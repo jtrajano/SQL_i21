@@ -79,16 +79,16 @@ BEGIN
     WHERE tblARInvoice.intInvoiceId = P.intInvoiceId
 
     UPDATE tblARInvoice
-    SET tblARInvoice.dblAmountDue =ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)) 
+    SET tblARInvoice.dblAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)) 
 						            -
-						            CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-						            THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE ISNULL(C.dblProvisionalAmount, @ZeroDecimal) END
+						            CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
+						            THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal)
 						            ELSE 0
 						            END	
-        ,tblARInvoice.dblBaseAmountDue = ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
+        ,tblARInvoice.dblBaseAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
 								        -
-						                CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-						                THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) END
+						                CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
+						                THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal)
 						                ELSE 0
 						                END	
     FROM tblARPayment A
@@ -112,17 +112,7 @@ BEGIN
 
     UPDATE tblARPaymentDetail
     SET dblAmountDue     = ((((ISNULL(C.dblAmountDue, 0.00) + ISNULL(A.dblInterest,0.00)) - ISNULL(A.dblDiscount,0.00) - ISNULL(A.dblWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblPayment)
-							-
-							CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-							THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE ISNULL(C.dblProvisionalAmount, @ZeroDecimal) END
-							ELSE 0
-							END	
       , dblBaseAmountDue = ((((ISNULL(C.dblBaseAmountDue, 0.00) + ISNULL(A.dblBaseInterest,0.00)) - ISNULL(A.dblBaseDiscount,0.00) - ISNULL(A.dblBaseWriteOffAmount,0.00)) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) - A.dblBasePayment)
-							-
-							CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-							THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) END
-							ELSE 0
-							END	
     FROM tblARPaymentDetail A
     INNER JOIN tblARPayment B ON A.intPaymentId = B.intPaymentId
     INNER JOIN @PaymentIds P ON B.[intPaymentId] = P.[intId] 
@@ -248,18 +238,18 @@ BEGIN
     WHERE tblARInvoice.intInvoiceId = P.intInvoiceId
 
     UPDATE C
-    SET C.dblAmountDue =ISNULL(C.dblInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)) 
+    SET C.dblAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblPayment, @ZeroDecimal) - ISNULL(C.dblInterest, @ZeroDecimal)) + ISNULL(C.dblDiscount, @ZeroDecimal)) 
 						-
-						CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-						THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE ISNULL(C.dblProvisionalAmount, @ZeroDecimal) END
+						CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
+						THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal)
 						ELSE 0
 						END	
-        ,C.dblBaseAmountDue = ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
+        ,C.dblBaseAmountDue = (CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) END) - ((ISNULL(C.dblBasePayment, @ZeroDecimal) - ISNULL(C.dblBaseInterest, @ZeroDecimal)) + ISNULL(C.dblBaseDiscount, @ZeroDecimal))
 								-
-						        CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-						        THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) END
+						        CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
+						        THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal)
 						        ELSE 0
-						        END	
+						        END
     FROM #ARPostPaymentDetail B 
     INNER JOIN tblARInvoice C ON B.intInvoiceId = C.intInvoiceId
     LEFT OUTER JOIN (
@@ -289,16 +279,16 @@ BEGIN
       AND B.[ysnPost] = @OneBit
 		
     UPDATE ARPD
-    SET ARPD.dblAmountDue     = (((((ISNULL(C.dblInvoiceTotal, 0.00) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) + ISNULL(ARPD.dblInterest,0.00)) - ISNULL(ARPD.dblDiscount,0.00))) - (C.dblPayment * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])))
+    SET ARPD.dblAmountDue     = ((((((CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblInvoiceTotal, @ZeroDecimal) END) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) + ISNULL(ARPD.dblInterest,0.00)) - ISNULL(ARPD.dblDiscount,0.00))) - (C.dblPayment * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])))
 								-
-								CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-								THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal) ELSE ISNULL(C.dblProvisionalAmount, @ZeroDecimal) END
+								CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
+								THEN ISNULL(PROVISIONALPAYMENT.dblPayment, @ZeroDecimal)
 								ELSE 0
 								END	
-      , ARPD.dblBaseAmountDue = (((((ISNULL(C.dblBaseInvoiceTotal, 0.00) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00))) - (C.dblBasePayment * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])))
+      , ARPD.dblBaseAmountDue = ((((((CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 1 THEN ABS(ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) - ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal)) ELSE ISNULL(C.dblBaseInvoiceTotal, @ZeroDecimal) END) * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])) + ISNULL(ARPD.dblBaseInterest,0.00)) - ISNULL(ARPD.dblBaseDiscount,0.00))) - (C.dblBasePayment * [dbo].[fnARGetInvoiceAmountMultiplier](C.[strTransactionType])))
 								-
-								CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 
-								THEN CASE WHEN C.ysnExcludeFromPayment = 0 THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal) ELSE ISNULL(C.dblBaseProvisionalAmount, @ZeroDecimal) END
+								CASE WHEN C.intSourceId = 2 AND ISNULL(C.intOriginalInvoiceId, 0) > 0 AND C.ysnExcludeFromPayment = 0
+								THEN ISNULL(PROVISIONALPAYMENT.dblBasePayment, @ZeroDecimal)
 								ELSE 0
 								END	
     FROM tblARPaymentDetail ARPD

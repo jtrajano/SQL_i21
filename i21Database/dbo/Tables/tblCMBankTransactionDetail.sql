@@ -3,7 +3,7 @@
     [intTransactionId]       INT             NOT NULL,
     [dtmDate]                DATETIME        NULL,
     [intGLAccountId]         INT             NULL,
-    [strDescription]         NVARCHAR (255)  COLLATE Latin1_General_CI_AS NULL,
+    [strDescription]         NVARCHAR (800)  COLLATE Latin1_General_CI_AS NULL,
     [dblDebit]               DECIMAL (18, 6) DEFAULT 0 NOT NULL,
     [dblCredit]              DECIMAL (18, 6) DEFAULT 0 NOT NULL,
 	[dblDebitForeign]               DECIMAL (18, 6) DEFAULT 0 NOT NULL,
