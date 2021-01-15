@@ -495,7 +495,7 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #CASHREFUNDS CR ON I.strInvoiceNumber = CR.strDocumentNumber
 WHERE I.strTransactionType = 'Customer Prepayment'
-AND ISNULL(I.dblInvoiceTotal, 0) + ISNULL(PD.dblPayment, 0) - ISNULL(CR.dblRefundTotal, 0) = 0 
+AND  ISNULL(CR.dblRefundTotal, 0) = 0 
 
 						      
 UNION ALL      
