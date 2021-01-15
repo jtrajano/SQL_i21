@@ -3,6 +3,7 @@
 	,strXml NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strType NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 	,strFileName NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strCompany NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	,dtmCreatedDate DATETIME CONSTRAINT [DF_tblIPIDOCXMLStage_dtmCreatedDate] DEFAULT GETDATE()
 	,CONSTRAINT [PK_tblIPIDOCXMLStage_intIDOCXMLStageId] PRIMARY KEY (intIDOCXMLStageId)
 	)

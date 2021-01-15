@@ -8982,6 +8982,7 @@
     <Build Include="dbo\Views\vyuSCAgWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryValuationSummary.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGetTestMsg.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
