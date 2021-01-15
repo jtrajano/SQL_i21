@@ -7,6 +7,8 @@ CREATE TABLE [dbo].[tblSCDisconnectedSchedule]
     [intDay]					[int] NULL,
 	[intDayOfMonth]				[int] NULL,
 	[dtmRunTime]				DATETIME NULL,
+	[dtmEndTime]				DATETIME NULL,
+	[intTimeInterval]			INT NULL,
 	[intEntityId]				INT NULL,
 	[ysnMonday]					BIT NULL,
 	[ysnTuesday]				BIT NULL,
