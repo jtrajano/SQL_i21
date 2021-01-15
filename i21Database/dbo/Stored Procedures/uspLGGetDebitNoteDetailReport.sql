@@ -21,10 +21,12 @@ FROM tblLGWeightClaim
 WHERE intWeightClaimId = @intWeightClaimId
 
 SELECT DISTINCT WC.intWeightClaimId, 
-	   WC.strReferenceNumber AS strWeightClaimNumber,
+	   strWeightClaimNumber = WC.strReferenceNumber,
 	   L.strLoadNumber,
 	   L.intLoadId,
 	   LD.intLoadDetailId,
+	   strContainerNumber = LC.strContainerNumber,
+	   strMarks = LC.strMarks,
 	   CD.intContractDetailId,
 	   CH.intContractHeaderId,
 	   CH.strContractNumber,
@@ -44,7 +46,7 @@ SELECT DISTINCT WC.intWeightClaimId,
 	   CH.strCustomerContract,
 	   I.strItemNo, 
 	   I.strDescription AS strItemDescription,
-	   CD.dblQuantity,
+	   dblQuantity = ISNULL(LC.dblQuantity, CD.dblQuantity),
 	   L.strMVessel
 FROM tblLGWeightClaim WC
 JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
@@ -59,7 +61,8 @@ JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			ELSE LD.intSContractDetailId
 			END
 		) = CD.intContractDetailId
-CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) CDV
+JOIN vyuLGAdditionalColumnForContractDetailView CDV ON CDV.intContractDetailId = CD.intContractDetailId
 LEFT JOIN tblAPBill B ON B.intBillId = WCD.intBillId
 LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
+LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WCD.intLoadContainerId
 WHERE WC.intWeightClaimId = @intWeightClaimId
