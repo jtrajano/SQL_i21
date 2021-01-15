@@ -460,7 +460,7 @@ begin try
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
 					,dblExchangeRate = vp.dblExchangeRate
-					,intPurchaseTaxGroupId = (case when @intPricingTypeId = 2 then dbo.fnGetTaxGroupIdForVendor(vp.intEntityVendorId,@intCompanyLocationId,vp.intItemId,em.intEntityLocationId,@intFreightTermId) else vp.intPurchaseTaxGroupId end)
+					,intPurchaseTaxGroupId = (case when isnull(vp.intPurchaseTaxGroupId,0) = 0 then dbo.fnGetTaxGroupIdForVendor(vp.intEntityVendorId,@intCompanyLocationId,vp.intItemId,em.intEntityLocationId,@intFreightTermId) else vp.intPurchaseTaxGroupId end)
 					,dblTax = vp.dblTax
 					,dblDiscount = vp.dblDiscount
 					,dblDetailDiscountPercent = vp.dblDetailDiscountPercent
