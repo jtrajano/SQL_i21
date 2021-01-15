@@ -40,62 +40,99 @@ FROM (
 			, dblQtyToReceive			= d.dblQuantity - ISNULL(st.dblReceiptQty, 0)
 			, intLoadToReceive			= CAST(0 AS INT)
 			, dblUnitCost				= 
-										CASE 
-											WHEN t.intInventoryTransactionId IS NOT NULL THEN 
-												CASE 
-													WHEN 
-														GrossNetUOM.intItemUOMId IS NOT NULL 
-														AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
-														AND ISNULL(d.dblNet, 0) <> 0 THEN 
-															dbo.fnDivide(
-																dbo.fnMultiply(
-																	-t.dblQty
-																	, t.dblCost
-																), d.dblNet
-															) 
-													WHEN 
-														t.intItemUOMId = ItemUOM.intItemUOMId 
-														AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
-															dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblQuantity) 
-													ELSE 
-														t.dblCost
-												END
-											ELSE
-												CASE 
-													WHEN 
-														GrossNetUOM.intItemUOMId IS NOT NULL 
-														AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
-														AND ISNULL(d.dblNet, 0) <> 0 THEN 
-															dbo.fnDivide(
-																dbo.fnMultiply(
-																	-storage.dblQty
-																	, storage.dblCost
-																), d.dblNet
-															) 
-													WHEN 
-														storage.intItemUOMId = ItemUOM.intItemUOMId 
-														AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
-															dbo.fnDivide(dbo.fnMultiply(-storage.dblQty, storage.dblCost), d.dblQuantity) 
-													ELSE 
-														storage.dblCost
-												END
-										END 
+					CASE 
+						WHEN t.dblValue IS NOT NULL THEN 
+							CASE 
+								WHEN 
+									GrossNetUOM.intItemUOMId IS NOT NULL 
+									AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+									AND ISNULL(d.dblNet, 0) <> 0 
+								THEN 
+									dbo.fnDivide(
+										t.dblValue 
+										, d.dblNet
+									)	
+								ELSE 
+									dbo.fnDivide(t.dblValue, d.dblQuantity) 
+							END	
+						WHEN storage.dblValue IS NOT NULL THEN 
+							CASE 
+								WHEN 
+									GrossNetUOM.intItemUOMId IS NOT NULL 
+									AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+									AND ISNULL(d.dblNet, 0) <> 0 
+								THEN 
+									dbo.fnDivide(
+										storage.dblValue 
+										, d.dblNet
+									)	
+								ELSE 
+									dbo.fnDivide(storage.dblValue, d.dblQuantity) 
+							END									
+					END 
+										--CASE 
+										--	WHEN t.intInventoryTransactionId IS NOT NULL THEN 
+										--		CASE 
+										--			WHEN 
+										--				GrossNetUOM.intItemUOMId IS NOT NULL 
+										--				AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+										--				AND ISNULL(d.dblNet, 0) <> 0 THEN 
+										--					dbo.fnDivide(
+										--						dbo.fnMultiply(
+										--							-t.dblQty
+										--							, t.dblCost
+										--						), d.dblNet
+										--					) 
+										--			WHEN 
+										--				t.intItemUOMId = ItemUOM.intItemUOMId 
+										--				AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
+										--					dbo.fnDivide(dbo.fnMultiply(-t.dblQty, t.dblCost), d.dblQuantity) 
+										--			ELSE 
+										--				t.dblCost
+										--		END
+										--	ELSE
+										--		CASE 
+										--			WHEN 
+										--				GrossNetUOM.intItemUOMId IS NOT NULL 
+										--				AND GrossNetUOM.intItemUOMId = CostUOM.intItemUOMId 
+										--				AND ISNULL(d.dblNet, 0) <> 0 THEN 
+										--					dbo.fnDivide(
+										--						dbo.fnMultiply(
+										--							-storage.dblQty
+										--							, storage.dblCost
+										--						), d.dblNet
+										--					) 
+										--			WHEN 
+										--				storage.intItemUOMId = ItemUOM.intItemUOMId 
+										--				AND ISNULL(d.dblQuantity, 0) <> 0 THEN 
+										--					dbo.fnDivide(dbo.fnMultiply(-storage.dblQty, storage.dblCost), d.dblQuantity) 
+										--			ELSE 
+										--				storage.dblCost
+										--		END
+										--END 
 
 
 			, dblTax					= CAST(0 AS NUMERIC(18, 6))
 			, dblLineTotal				= 
-										CASE 
-											WHEN t.intInventoryTransactionId IS NOT NULL THEN 
-												ROUND(
-													-t.dblQty * t.dblCost
-													, 2
-												)
-											ELSE
-												ROUND(
-													-storage.dblQty * storage.dblCost
-													, 2
-												)
-										END
+					CASE 
+						WHEN t.dblValue IS NOT NULL THEN 
+							ROUND(t.dblValue, 2) 
+						WHEN storage.dblValue IS NOT NULL THEN 
+							ROUND(storage.dblValue, 2) 
+					END
+
+										--CASE 
+										--	WHEN t.intInventoryTransactionId IS NOT NULL THEN 
+										--		ROUND(
+										--			-t.dblQty * t.dblCost
+										--			, 2
+										--		)
+										--	ELSE
+										--		ROUND(
+										--			-storage.dblQty * storage.dblCost
+										--			, 2
+										--		)
+										--END
 
 			, strLotTracking			= item.strLotTracking
 			, intCommodityId			= item.intCommodityId
@@ -164,23 +201,45 @@ FROM (
 			INNER JOIN dbo.tblICItem item
 				ON item.intItemId = d.intItemId
 
-			LEFT JOIN tblICInventoryTransaction t
-				ON t.intTransactionId = h.intInventoryTransferId
-				AND t.strTransactionId = h.strTransferNo
-				AND t.intTransactionDetailId = d.intInventoryTransferDetailId 
-				AND ISNULL(t.dblQty, 0) <> 0 
-				AND ISNULL(t.dblQty, 0) < 0 
-				AND t.ysnIsUnposted = 0 
-				AND t.intItemId = d.intItemId
+			OUTER APPLY (
+				SELECT 
+					dblValue = SUM(-t.dblQty * t.dblCost + t.dblValue)
+					,t.intItemUOMId
+					,t.intLotId
+				FROM 
+					tblICInventoryTransaction t 
+				WHERE
+					t.intTransactionId = h.intInventoryTransferId
+					AND t.strTransactionId = h.strTransferNo
+					AND t.intTransactionDetailId = d.intInventoryTransferDetailId 
+					AND ISNULL(t.dblQty, 0) <> 0 
+					AND ISNULL(t.dblQty, 0) < 0 
+					AND t.ysnIsUnposted = 0 
+					AND t.intItemId = d.intItemId			
+				GROUP BY 
+					t.intItemUOMId
+					,t.intLotId
+			) t
 
-			LEFT JOIN tblICInventoryTransactionStorage storage
-				ON storage.intTransactionId = h.intInventoryTransferId
-				AND storage.strTransactionId = h.strTransferNo
-				AND storage.intTransactionDetailId = d.intInventoryTransferDetailId 
-				AND ISNULL(storage.dblQty, 0) <> 0 
-				AND ISNULL(storage.dblQty, 0) < 0 
-				AND storage.ysnIsUnposted = 0 
-				AND storage.intItemId = d.intItemId
+			OUTER APPLY (
+				SELECT 
+					dblValue = SUM(-storage.dblQty * storage.dblCost + storage.dblValue)
+					,storage.intItemUOMId
+					,storage.intLotId
+				FROM 
+					tblICInventoryTransactionStorage storage 
+				WHERE
+					storage.intTransactionId = h.intInventoryTransferId
+					AND storage.strTransactionId = h.strTransferNo
+					AND storage.intTransactionDetailId = d.intInventoryTransferDetailId 
+					AND ISNULL(storage.dblQty, 0) <> 0 
+					AND ISNULL(storage.dblQty, 0) < 0 
+					AND storage.ysnIsUnposted = 0 
+					AND storage.intItemId = d.intItemId
+				GROUP BY
+					storage.intItemUOMId
+					,storage.intLotId
+			) storage
 
 			LEFT JOIN tblICItemLocation fromLocation
 				ON fromLocation.intItemId = d.intItemId
@@ -257,7 +316,8 @@ FROM (
 		h.ysnPosted = 1
 		AND h.ysnShipmentRequired = 1
 		AND (h.intStatusId = 1 OR h.intStatusId = 2)
-		AND ISNULL(t.intInventoryTransactionId, storage.intInventoryTransactionStorageId) IS NOT NULL 
+		--AND ISNULL(t.intInventoryTransactionId, storage.intInventoryTransactionStorageId) IS NOT NULL 
+		AND COALESCE(t.dblValue, storage.dblValue) IS NOT NULL 
 		AND item.strType NOT IN ('Software', 'Other Charge', 'Comment', 'Service')
 		AND (d.dblQuantity - ISNULL(st.dblReceiptQty, 0)) > 0 
 ) tblAddOrders
