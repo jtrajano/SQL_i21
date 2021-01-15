@@ -51,7 +51,7 @@ UPDATE A
 						A.dblPayment > B.dblAmountDue
 					THEN 'Overpayment'
 					WHEN 
-						A.dblPayment < B.dblAmountDue
+						A.dblPayment < (B.dblAmountDue * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END))
 					THEN 'Underpayment'
 					ELSE NULL
 					END,

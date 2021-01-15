@@ -62,7 +62,7 @@ UPDATE A
 						ABS(A.dblPayment) > B.dblAmountDue
 					THEN 'Overpayment'
 					WHEN 
-						A.dblPayment < B.dblAmountDue
+						A.dblPayment < (B.dblAmountDue * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END))
 					THEN 'Underpayment'
 					WHEN 
 						A.dblPayment < 0 AND B.intTransactionType != 3
