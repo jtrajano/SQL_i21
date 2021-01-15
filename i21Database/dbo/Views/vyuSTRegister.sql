@@ -4,6 +4,7 @@ SELECT reg.intRegisterId
 	--, reg.intStoreId
 	, st.intStoreId
 	, st.intStoreNo
+	, st.intCompanyLocationId
 	, reg.strRegisterName
 	, reg.strRegisterClass
 	, reg.ysnRegisterDataLoad
@@ -142,4 +143,3 @@ INNER JOIN tblSTStore st
 --FROM tblSTRegister R
 --INNER JOIN tblSTStore S 
 --	ON S.intStoreId = R.intStoreId
-
