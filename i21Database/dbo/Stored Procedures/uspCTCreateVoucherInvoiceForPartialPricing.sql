@@ -121,7 +121,9 @@ BEGIN TRY
 			,@intSequenceFreightTermId			int
 			,@ysnMultiPrice						BIT = 0
 			,@dblQuantityForSpot				numeric(18,6)
-			,@NewInvoiceSpotDetailId			int;
+			,@NewInvoiceSpotDetailId			int
+			,@dblRemainingPricedQuantityForInvoice numeric(18,6)
+			;
 
 		
 	declare @PricedShipment table
@@ -1455,9 +1457,19 @@ BEGIN TRY
 							set @dblQuantityForInvoice = @dblShippedForInvoice;	
 						end
 
-						select @dblQuantityForSpot = 0;
+						select @dblQuantityForSpot = 0; 
+  
+						select
+							@dblRemainingPricedQuantityForInvoice = isnull((sum(pfd.dblQuantity) - isnull(sum(di.dblQtyShipped),0)),0)
+						from
+							tblCTPriceFixation pf
+							join tblCTPriceFixationDetail pfd on pfd.intPriceFixationId = pf.intPriceFixationId
+							left join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = pfd.intPriceFixationDetailId and isnull(ar.ysnReturn,0) = 0
+							left join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId and isnull(di.intInventoryShipmentChargeId,0) = 0
+						where
+							pf.intPriceFixationId = @intPriceFixationId
 
-						if (isnull(@ysnDestinationWeightsGrades,0) = 1 and @intPricingTypeId = 1 and @dblPricedForInvoice < @dblShippedForInvoice)
+						if (isnull(@ysnDestinationWeightsGrades,0) = 1 and @intPricingTypeId = 1 and @dblRemainingPricedQuantityForInvoice = @dblPricedForInvoice and @dblPricedForInvoice < @dblShippedForInvoice)
 						begin
 							select @dblQuantityForSpot = @dblShippedForInvoice - @dblPricedForInvoice;
 						end
