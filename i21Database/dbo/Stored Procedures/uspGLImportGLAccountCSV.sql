@@ -220,8 +220,8 @@ IF @intValidCount = 0 AND @intInvalidCount > 0
 IF @intValidCount = 0 AND @intInvalidCount = 0
 	SET @m = 'No GL Accounts was imported.'
 
-INSERT INTO tblGLCOAImportLog(strEvent, intEntityId, intConcurrencyId, intUserId, dtmDate, intErrorCount, intSuccessCount, strIrelySuiteVersion)
-	SELECT @m, @intEntityId, 1, @intEntityId, GETDATE(), @intInvalidCount, @intValidCount, @strVersion
+INSERT INTO tblGLCOAImportLog(strEvent, intEntityId, intConcurrencyId, intUserId, dtmDate, intErrorCount, intSuccessCount, strIrelySuiteVersion, strJournalType)
+	SELECT @m, @intEntityId, 1, @intEntityId, GETDATE(), @intInvalidCount, @intValidCount, @strVersion,'glaccount'
 	SELECT @importLogId = SCOPE_IDENTITY()
 
 INSERT INTO tblGLCOAImportLogDetail(intImportLogId, strEventDescription, strExternalId,strLineNumber)
