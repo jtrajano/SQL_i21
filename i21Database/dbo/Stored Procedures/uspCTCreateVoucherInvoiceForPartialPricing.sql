@@ -220,7 +220,7 @@ BEGIN TRY
 												end
 											),
 			@ysnMultiPrice 		= 	ISNULL(ysnMultiplePriceFixation,0)
-	FROM	tblCTContractHeader 
+	FROM	tblCTContractHeader with (nolock)
 	WHERE	intContractHeaderId = @intContractHeaderId
 
 	SELECT  @intUserId = ISNULL(@intUserId,@intLastModifiedById)
@@ -279,8 +279,8 @@ BEGIN TRY
 				,ir.dtmCreated 
 				,strTransactionType = 'IR'
 			from
-				tblICInventoryReceiptItem ri
-				join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId and ir.strReceiptType = 'Purchase Contract'
+				tblICInventoryReceiptItem ri with (nolock)
+				join tblICInventoryReceipt ir with (nolock) on ir.intInventoryReceiptId = ri.intInventoryReceiptId and ir.strReceiptType = 'Purchase Contract'
 			where
 				ri.intLineNo = @intContractDetailId
 
@@ -291,8 +291,8 @@ BEGIN TRY
 				,dtmCreated = DATEADD(minute,@intUTCOffsetInMinutes,SS.dtmCreated)   
 				,strTransactionType = 'STR'
 			FROM
-				tblGRSettleContract SC
-				JOIN tblGRSettleStorage SS ON SS.intSettleStorageId = SC.intSettleStorageId
+				tblGRSettleContract SC with (nolock)
+				JOIN tblGRSettleStorage SS with (nolock) ON SS.intSettleStorageId = SC.intSettleStorageId
 			WHERE
 				SC.intContractDetailId = @intContractDetailId
 				AND SS.intParentSettleStorageId IS NOT NULL
@@ -311,7 +311,7 @@ BEGIN TRY
 				if (@strTransactionType = 'STR')
 				begin
 					declare @dblAvailableQuantity numeric(18,6);  
-			        select @dblAvailableQuantity = dblAvailableQuantity from vyuCTAvailableQuantityForVoucher where intContractDetailId = @intContractDetailId;  
+			        select top 1 @dblAvailableQuantity = dblAvailableQuantity, @dblFinalPrice = dblCashPrice from vyuCTAvailableQuantityForVoucher with (nolock) where intContractDetailId = @intContractDetailId;  
 			  		EXEC [dbo].[uspGRPostSettleStorage] @intInventoryReceiptId,1, 1,@dblFinalPrice, @dblAvailableQuantity; 
 
 				end
@@ -983,7 +983,7 @@ BEGIN TRY
 					tblCTPriceFixation a
 					,tblCTPriceFixationDetail b
 					,tblCTPriceContract c
-					,tblCTContractDetail d
+					,tblCTContractDetail d with (nolock)
 					,tblICCommodityUnitMeasure e
 					,tblICItemUOM f
 				where
@@ -1048,8 +1048,8 @@ BEGIN TRY
 							intItemUOMId = @intItemUOMId,
 							intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
 						FROM
-							tblICInventoryShipmentItem RI
-							JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+							tblICInventoryShipmentItem RI with (nolock)
+							JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
 							JOIN tblCTPriceFixationTicket FT ON FT.intInventoryShipmentId = RI.intInventoryShipmentId
 						WHERE
 							RI.intLineNo = @intContractDetailId
@@ -1073,13 +1073,13 @@ BEGIN TRY
 							intInvoiceDetailId = ARD.intInvoiceDetailId,
 							intItemUOMId = @intItemUOMId,
 							intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0))
-						FROM tblICInventoryShipmentItem RI
-						JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+						FROM tblICInventoryShipmentItem RI with (nolock)
+						JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
 						OUTER APPLY (
 										select top 1
 											intInvoiceDetailId
 										from
-											tblARInvoiceDetail ARD
+											tblARInvoiceDetail ARD with (nolock)
 										WHERE
 											ARD.intContractDetailId = @intContractDetailId
 											and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
@@ -1347,8 +1347,8 @@ BEGIN TRY
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
 					dtmInvoiceDate = null
 				FROM
-					tblICInventoryShipmentItem RI
-					JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+					tblICInventoryShipmentItem RI with (nolock)
+					JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
 					JOIN tblCTPriceFixationTicket FT ON FT.intInventoryShipmentId = RI.intInventoryShipmentId
 				WHERE
 					RI.intLineNo = @intContractDetailId
@@ -1373,13 +1373,13 @@ BEGIN TRY
 					intItemUOMId = @intItemUOMId,
 					intLoadShipped = convert(numeric(18,6),isnull(RI.intLoadShipped,0)),
 					dtmInvoiceDate = null
-				FROM tblICInventoryShipmentItem RI
-				JOIN tblICInventoryShipment IR ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
+				FROM tblICInventoryShipmentItem RI with (nolock)
+				JOIN tblICInventoryShipment IR with (nolock) ON IR.intInventoryShipmentId = RI.intInventoryShipmentId AND IR.intOrderType = 1
 				OUTER APPLY (
 								select top 1
 									intInvoiceDetailId
 								from
-									tblARInvoiceDetail ARD
+									tblARInvoiceDetail ARD with (nolock)
 								WHERE
 									ARD.intContractDetailId = @intContractDetailId
 									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
@@ -1388,7 +1388,7 @@ BEGIN TRY
 				OUTER APPLY (
 								select dblQtyShipped = sum(dblQtyShipped)
 								from
-									tblARInvoiceDetail ARD
+									tblARInvoiceDetail ARD with (nolock)
 								WHERE
 									ARD.intContractDetailId = @intContractDetailId
 									and ARD.intInventoryShipmentItemId = RI.intInventoryShipmentItemId
@@ -1415,8 +1415,8 @@ BEGIN TRY
 					,si.intLoadShipped
 					,dtmInvoiceDate = isnull(i.dtmDate,getdate())
 				from @InvShp si
-				left join tblARInvoiceDetail di on di.intInventoryShipmentItemId = si.intInventoryShipmentItemId
-				left join tblARInvoice i on i.intInvoiceId = di.intInvoiceId
+				left join tblARInvoiceDetail di with (nolock) on di.intInventoryShipmentItemId = si.intInventoryShipmentItemId
+				left join tblARInvoice i with (nolock) on i.intInvoiceId = di.intInvoiceId
 				)t
 				order by t.dtmInvoiceDate,t.intInventoryShipmentItemId
 			end
@@ -1465,7 +1465,7 @@ BEGIN TRY
 											SELECT
 												SUM(dbo.fnCTConvertQtyToTargetItemUOM(ID.intItemUOMId,@intItemUOMId,ID.dblQtyShipped)) 
 											FROM
-												tblARInvoiceDetail ID, tblARInvoice I
+												tblARInvoiceDetail ID with (nolock), tblARInvoice I with (nolock)
 											WHERE
 												ID.intInventoryShipmentItemId = @intInventoryShipmentItemId
 												AND ID.intInventoryShipmentChargeId IS NULL
@@ -1498,7 +1498,7 @@ BEGIN TRY
 							tblCTPriceFixation a
 							,tblCTPriceFixationDetail b
 							,tblCTPriceContract c
-							,tblCTContractDetail d
+							,tblCTContractDetail d with (nolock)
 							,tblICCommodityUnitMeasure e
 							,tblICItemUOM f
 						where
@@ -1540,7 +1540,7 @@ BEGIN TRY
 														SUM(dbo.fnCTConvertQtyToTargetItemUOM(AD.intItemUOMId,@intItemUOMId,AD.dblQtyShipped))
 													FROM
 														tblCTPriceFixationDetailAPAR AA
-														JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
+														JOIN tblARInvoiceDetail AD with (nolock) ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 													WHERE
 														AA.intPriceFixationDetailId = @intPriceFixationDetailId
 														and isnull(AA.ysnReturn,0) = 0
@@ -1588,8 +1588,8 @@ BEGIN TRY
 										select
 											top 1 1
 										from
-											tblICInventoryShipmentItem a
-											,tblARInvoiceDetail b, tblARInvoice c
+											tblICInventoryShipmentItem a with (nolock)
+											,tblARInvoiceDetail b with (nolock), tblARInvoice c with (nolock)
 										where
 											a.intInventoryShipmentId = @intInventoryShipmentId
 											and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId
@@ -1700,8 +1700,8 @@ BEGIN TRY
 							select
 								top 1 @intInvoiceId = c.intInvoiceId, @intInvoiceDetailId = b.intInvoiceDetailId
 							from
-								tblICInventoryShipmentItem a
-								,tblARInvoiceDetail b, tblARInvoice c
+								tblICInventoryShipmentItem a with (nolock)
+								,tblARInvoiceDetail b with (nolock), tblARInvoice c with (nolock)
 							where
 								a.intInventoryShipmentId = @intInventoryShipmentId
 								and b.intInventoryShipmentItemId = a.intInventoryShipmentItemId

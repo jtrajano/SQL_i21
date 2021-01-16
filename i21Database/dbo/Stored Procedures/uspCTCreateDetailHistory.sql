@@ -65,11 +65,11 @@ BEGIN TRY
 
 		IF @intContractHeaderId IS NULL AND @intContractDetailId IS NOT NULL
 		BEGIN
-		SELECT @intContractHeaderId	=   intContractHeaderId FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
+		SELECT @intContractHeaderId	=   intContractHeaderId FROM tblCTContractDetail with (nolock) WHERE intContractDetailId = @intContractDetailId
 		END
 		
-		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
-		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
+		SELECT @intLastModifiedById = intLastModifiedById FROM tblCTContractHeader with (nolock) WHERE intContractHeaderId = @intContractHeaderId
+		SELECT @intApprovalListId   = intApprovalListId FROM tblSMUserSecurityRequireApprovalFor with (nolock) WHERE [intEntityUserSecurityId] = @intLastModifiedById AND [intScreenId] = (select [intScreenId] from tblSMScreen where strScreenName = 'Amendment and Approvals')
 		SELECT @ysnAmdWoAppvl	    = ISNULL(ysnAmdWoAppvl,0) FROM tblCTCompanyPreference
 
 		DELETE FROM @tblHeader
@@ -214,8 +214,8 @@ BEGIN TRY
 			END
 			,intUserId = @intUserId
 			,intFreightTermId = CH.intFreightTermId
-		FROM	tblCTContractDetail			CD
-		JOIN	tblCTContractHeader			CH  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
+		FROM	tblCTContractDetail			CD with (nolock)
+		JOIN	tblCTContractHeader			CH with (nolock)  ON  CH.intContractHeaderId	=	CD.intContractHeaderId
 		JOIN	tblICCommodity				CO  ON  CO.intCommodityId		=	CH.intCommodityId
 		JOIN	tblSMCompanyLocation	    CL  ON  CL.intCompanyLocationId =	CD.intCompanyLocationId
 		JOIN	tblCTContractType		    CT  ON  CT.intContractTypeId	=	CH.intContractTypeId
