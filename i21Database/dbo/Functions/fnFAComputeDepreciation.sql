@@ -15,15 +15,20 @@ RETURNS @tbl TABLE (
 AS
 BEGIN
 DECLARE @intDepreciationMethodId INT, @strConvention NVARCHAR(40)
+DECLARE @dblBasis NUMERIC (18,6), @dtmPlacedInService DATETIME 
+
+
+
 
 SELECT 
-
 @dblBasis = dblCost - A.dblSalvageValue,
 @strConvention = strConvention,
 @intDepreciationMethodId = A.intDepreciationMethodId,
 @dtmPlacedInService = dtmDateInService
-FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
-WHERE intAssetId = @intAssetId
+from tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+where intAssetId = @intAssetId
+
+
 
 -- Service Year Percentage
 DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FROM tblFADepreciationMethodDetail A 
@@ -31,7 +36,7 @@ DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FR
 
 -- Running Balance
 DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId
- ORDER BY intAssetDepreciationId DESC)
+ORDER BY intAssetDepreciationId DESC)
 
 -- Computation
 
@@ -44,7 +49,8 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 	IF @intExcessMonthBegin = 0 OR @intMonth > @intExcessMonthBegin
 		SET @intMonthDivisor = @totalMonths % 12
 	
-	DECLARE @dblMonth		NUMERIC (18,6)	= (@dblAnnualDep / CASE WHEN @intMonthDivisor = 0 THEN 1 ELSE @intMonthDivisor END)								--NEED TO VERIFY IF ITS REALLY 12
+	DECLARE @dblMonth NUMERIC (18,6)	= (@dblAnnualDep / CASE WHEN @intMonthDivisor = 0 THEN 1 ELSE @intMonthDivisor END)
+
 
 	IF @strConvention = 'Mid Month'
 	BEGIN
@@ -86,7 +92,8 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 			SELECT @dblMonth = @dblMonth /2  --- half of quarter
 		
 	END
-	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)	
+
+	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)				--NEED TO VERIFY IF ITS REALLY 2
 
 	INSERT INTO @tbl(
 	dblBasis,
@@ -97,7 +104,7 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 	@dblBasis, @dblMonth, @dblDepre
 
 	RETURN
-
+	
 END
 
 GO
