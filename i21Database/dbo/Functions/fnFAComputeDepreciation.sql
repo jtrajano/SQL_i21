@@ -17,18 +17,13 @@ BEGIN
 DECLARE @intDepreciationMethodId INT, @strConvention NVARCHAR(40)
 DECLARE @dblBasis NUMERIC (18,6), @dtmPlacedInService DATETIME 
 
-
-
-
 SELECT 
 @dblBasis = dblCost - A.dblSalvageValue,
 @strConvention = strConvention,
 @intDepreciationMethodId = A.intDepreciationMethodId,
 @dtmPlacedInService = dtmDateInService
-from tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
-where intAssetId = @intAssetId
-
-
+FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+WHERE intAssetId = @intAssetId
 
 -- Service Year Percentage
 DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FROM tblFADepreciationMethodDetail A 
@@ -41,17 +36,31 @@ ORDER BY intAssetDepreciationId DESC)
 -- Computation
 
 	DECLARE @dblAnnualDep	NUMERIC (18,6)	= (@dblBasis * (@dblPercentage * .01))
-	DECLARE @dblMonth		NUMERIC (18,6)	= (@dblAnnualDep / 12)								--NEED TO VERIFY IF ITS REALLY 12
+
+	DECLARE @intExcessMonthBegin INT =  @totalMonths  - (@totalMonths % 12)
+	DECLARE @intMonthDivisor INT =12
+	
+
+	IF @intExcessMonthBegin = 0 OR @intMonth > @intExcessMonthBegin
+		SET @intMonthDivisor = @totalMonths % 12
+	
+	DECLARE @dblMonth		NUMERIC (18,6)	= (@dblAnnualDep / CASE WHEN @intMonthDivisor = 0 THEN 1 ELSE @intMonthDivisor END)								--NEED TO VERIFY IF ITS REALLY 12
 
 	IF @strConvention = 'Mid Month'
 	BEGIN
-		IF @intMonth = 1 OR @intMonth > @totalMonths
+		IF @intMonth = 1 
 			SELECT @dblMonth = @dblMonth /2
+
+		IF @intMonth = @totalMonths + 1
+			SELECT @dblMonth= @dblAnnualDep / 24
+			
+			
 	END
 	IF @strConvention = 'Actual Days'
 	BEGIN
 		DECLARE @intDaysInFirstMonth INT = DAY(EOMONTH(@dtmPlacedInService))
 		DECLARE @intDaysRemainingFirstMonth INT =  @intDaysInFirstMonth - DAY(@dtmPlacedInService)
+
 		IF @intMonth = 1 
 		BEGIN
 			SET @dblMonth =  @dblMonth * (@intDaysRemainingFirstMonth/ CAST(@intDaysInFirstMonth AS FLOAT))
@@ -77,12 +86,7 @@ ORDER BY intAssetDepreciationId DESC)
 			SELECT @dblMonth = @dblMonth /2  --- half of quarter
 		
 	END
-
-	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)				--NEED TO VERIFY IF ITS REALLY 2
-
-
-	
-	
+	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)	
 
 	INSERT INTO @tbl(
 	dblBasis,
@@ -93,8 +97,6 @@ ORDER BY intAssetDepreciationId DESC)
 	@dblBasis, @dblMonth, @dblDepre
 
 	RETURN
-
-
 
 END
 

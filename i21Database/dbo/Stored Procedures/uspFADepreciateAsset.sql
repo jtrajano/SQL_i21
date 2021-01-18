@@ -81,12 +81,21 @@ DECLARE @dblMonth		NUMERIC (18,6)
 DECLARE @dblDepre		NUMERIC (18,6)
 
 IF ISNULL(@ysnRecap, 0) = 0
-	BEGIN							
-		
-		DECLARE @GLEntries RecapTableType				
+	BEGIN			
+						
+		DECLARE @totalMonth INT,
+		@intServiceYear INT, 
+		@intServiceMonth INT,
+		@GLEntries RecapTableType		
+
+		SELECT @intServiceYear = intServiceYear,@intServiceMonth= intMonth 
+		FROM tblFADepreciationMethod A join tblFAFixedAsset B 
+		on A.intDepreciationMethodId = B.intDepreciationMethodId and @intAssetId = intAssetId	
+			
+		SELECT @totalMonth = @intServiceYear * 12 + @intServiceMonth
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId AND strTransaction = 'Place in service')
 		BEGIN
-			SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre FROM dbo.fnFAComputeDepreciation(@intAssetId, 1 ,1, 1)
+			SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre FROM dbo.fnFAComputeDepreciation(@intAssetId, 1 ,1, @totalMonth)
 			INSERT INTO tblFAFixedAssetDepreciation (
 						[intAssetId],
 						[intDepreciationMethodId],
@@ -115,7 +124,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 			END
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId AND strTransaction <> 'Place in service')
 			BEGIN
-				SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre FROM dbo.fnFAComputeDepreciation(@intAssetId, 1 ,1, 1)
+				SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre FROM dbo.fnFAComputeDepreciation(@intAssetId, 1 ,1, @totalMonth)
 				
 				
 				INSERT INTO tblFAFixedAssetDepreciation (
@@ -148,14 +157,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 			BEGIN
 				DECLARE @dtmStartDepreciate DATETIME , 
 				@nextDate DATETIME,
-				@intServiceYear INT, 
-				@intServiceMonth INT,
-				@totalMonth INT,
+				
 				@intYear INT,
 				@intMonth INT
 				SELECT TOP 1 @dtmStartDepreciate = dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId =@intAssetId and strTransaction = 'Depreciation'   ORDER BY dtmDepreciationToDate 
 				SELECT  @nextDate = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId ORDER BY intAssetDepreciationId DESC)) + 2, 0))
-				SELECT @intServiceYear = intServiceYear,@intServiceMonth= intMonth FROM tblFADepreciationMethod A join tblFAFixedAsset B on A.intDepreciationMethodId = B.intDepreciationMethodId and @intAssetId = intAssetId
+				
 				
 				IF @nextDate > DATEADD(YEAR, @intServiceYear, DATEADD(MONTH,@intServiceMonth, @dtmStartDepreciate))
 				BEGIN 
@@ -163,7 +170,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 					RETURN
 				END
 
-				SELECT @totalMonth = @intServiceYear * 12 + @intServiceMonth
+				
 				SELECT @intYear =  DATEDIFF(year, @dtmStartDepreciate, @nextDate) 
 				SELECT @intMonth = DATEDIFF(MONTH, @dtmStartDepreciate, @nextDate) + 1
 
