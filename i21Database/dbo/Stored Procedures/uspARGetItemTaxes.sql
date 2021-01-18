@@ -39,7 +39,7 @@ AS
 				,NULL							AS [intTaxGroupMasterId]
 				,[intTaxGroupId]
 				,[intTaxCodeId]
-				,[intTaxClassId]
+				,CT.[intTaxClassId]
 				,[strTaxableByOtherTaxes]
 				,[strCalculationMethod]
 				,[dblRate]
@@ -63,8 +63,10 @@ AS
 				,[strTaxClass]					AS [strTaxClass]
 				,[ysnAddToCost]					AS [ysnAddToCost]
 			FROM
-				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1,1, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @LocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate)
-				
+				[dbo].[fnGetTaxGroupTaxCodesForCustomer](@TaxGroupId, @CustomerId, @TransactionDate, @ItemId, @CustomerLocationId, 1,1, @IsCustomerSiteTaxable, @CardId, @VehicleId, @SiteId, @DisregardExemptionSetup, @ItemUOMId, @LocationId, @FreightTermId, @CFSiteId, @IsDeliver, @IsCFQuote, @CurrencyId, @CurrencyExchangeRateTypeId, @CurrencyExchangeRate) CT 
+			INNER JOIN tblICCategoryTax ICT ON CT.intTaxClassId = ICT.intTaxClassId
+			INNER JOIN tblICItem IT ON IT.intCategoryId = ICT.intCategoryId AND IT.intItemId = @ItemId
+
 			RETURN 1
 		END
 							
