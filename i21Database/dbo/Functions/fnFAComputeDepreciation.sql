@@ -16,19 +16,14 @@ AS
 BEGIN
 DECLARE @intDepreciationMethodId INT, @strConvention NVARCHAR(40)
 
-DECLARE @dblBasis		NUMERIC (18,6)	
-
-
-
 SELECT 
 
 @dblBasis = dblCost - A.dblSalvageValue,
 @strConvention = strConvention,
-@intDepreciationMethodId = A.intDepreciationMethodId
-from tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
-where intAssetId = @intAssetId
-
-
+@intDepreciationMethodId = A.intDepreciationMethodId,
+@dtmPlacedInService = dtmDateInService
+FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+WHERE intAssetId = @intAssetId
 
 -- Service Year Percentage
 DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FROM tblFADepreciationMethodDetail A 
@@ -41,12 +36,40 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 -- Computation
 
 	DECLARE @dblAnnualDep	NUMERIC (18,6)	= (@dblBasis * (@dblPercentage * .01))
-	DECLARE @dblMonth		NUMERIC (18,6)	= (@dblAnnualDep / 12)								--NEED TO VERIFY IF ITS REALLY 12
+
+	DECLARE @intExcessMonthBegin INT =  @totalMonths  - (@totalMonths % 12)
+	DECLARE @intMonthDivisor INT =12
+	
+
+	IF @intExcessMonthBegin = 0 OR @intMonth > @intExcessMonthBegin
+		SET @intMonthDivisor = @totalMonths % 12
+	
+	DECLARE @dblMonth		NUMERIC (18,6)	= (@dblAnnualDep / CASE WHEN @intMonthDivisor = 0 THEN 1 ELSE @intMonthDivisor END)								--NEED TO VERIFY IF ITS REALLY 12
 
 	IF @strConvention = 'Mid Month'
 	BEGIN
-		IF @intMonth = 1 OR @intMonth > @totalMonths
+		IF @intMonth = 1 
 			SELECT @dblMonth = @dblMonth /2
+
+		IF @intMonth = @totalMonths + 1
+			SELECT @dblMonth= @dblAnnualDep / 24
+			
+			
+	END
+	IF @strConvention = 'Actual Days'
+	BEGIN
+		DECLARE @intDaysInFirstMonth INT = DAY(EOMONTH(@dtmPlacedInService))
+		DECLARE @intDaysRemainingFirstMonth INT =  @intDaysInFirstMonth - DAY(@dtmPlacedInService)
+
+		IF @intMonth = 1 
+		BEGIN
+			SET @dblMonth =  @dblMonth * (@intDaysRemainingFirstMonth/ CAST(@intDaysInFirstMonth AS FLOAT))
+		END
+		IF @intMonth > @totalMonths
+		BEGIN
+			DECLARE @intDaysRemainingLastMonth INT = @intDaysInFirstMonth - @intDaysRemainingFirstMonth
+			SET @dblMonth =  @dblMonth * (@intDaysRemainingLastMonth/CAST(@intDaysInFirstMonth AS FLOAT))  
+		END
 	END
 	IF @strConvention = 'Half Year'
 	BEGIN
@@ -63,12 +86,7 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 			SELECT @dblMonth = @dblMonth /2  --- half of quarter
 		
 	END
-
-	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)				--NEED TO VERIFY IF ITS REALLY 2
-
-
-	
-	
+	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)	
 
 	INSERT INTO @tbl(
 	dblBasis,
@@ -79,8 +97,6 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 	@dblBasis, @dblMonth, @dblDepre
 
 	RETURN
-
-
 
 END
 
