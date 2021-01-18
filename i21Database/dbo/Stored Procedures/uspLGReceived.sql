@@ -28,9 +28,9 @@ SET ANSI_WARNINGS OFF
 				@ysnReverse						BIT = 0,
 				@intLoadId						INT,
 				@dblNetWeight					NUMERIC(18,6),
-				@intWeightClaimsBy				INT
+				@ysnWeightClaimsByContainer		BIT
 
-	SELECT TOP 1 @intWeightClaimsBy = ISNULL(intWeightClaimsBy, 1) FROM tblLGCompanyPreference
+	SELECT TOP 1 @ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 0) FROM tblLGCompanyPreference
 
 	SELECT @strReceiptType = strReceiptType, @intSourceType = intSourceType FROM @ItemsFromInventoryReceipt
 	IF (@strReceiptType <> 'Purchase Contract' AND @intSourceType <> 2)
@@ -126,7 +126,7 @@ SET ANSI_WARNINGS OFF
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					
 					-- Remove from Pending Claims
-					IF @intWeightClaimsBy = 2 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
+					IF @ysnWeightClaimsByContainer = 1 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
 					BEGIN
 						SELECT TOP 1 @ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber + '.' 
 						FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
@@ -207,7 +207,7 @@ SET ANSI_WARNINGS OFF
 					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
 					
 					-- Remove from Pending Claims
-					IF @intWeightClaimsBy = 2 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
+					IF @ysnWeightClaimsByContainer = 1 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
 					BEGIN
 						SELECT TOP 1 @ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber + '.' 
 						FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId

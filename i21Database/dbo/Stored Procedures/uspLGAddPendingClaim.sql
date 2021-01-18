@@ -118,8 +118,8 @@ BEGIN
 					JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 					JOIN tblEMEntity EM ON EM.intEntityId = CH.intEntityId
 					JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-					OUTER APPLY (SELECT TOP 1 intWeightClaimsBy = ISNULL(intWeightClaimsBy, 1) FROM tblLGCompanyPreference) CP
-					LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 AND CP.intWeightClaimsBy = 2
+					OUTER APPLY (SELECT TOP 1 ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 1) FROM tblLGCompanyPreference) CP
+					LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 AND CP.ysnWeightClaimsByContainer = 1
 					LEFT JOIN tblSMCurrency BCUR ON BCUR.intCurrencyID = AD.intSeqBasisCurrencyId
 					LEFT JOIN tblEMEntity EMPH ON EMPH.intEntityId = CH.intProducerId
 					LEFT JOIN tblEMEntity EMPD ON EMPD.intEntityId = CD.intProducerId
