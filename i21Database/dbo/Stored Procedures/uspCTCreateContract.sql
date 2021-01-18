@@ -312,6 +312,18 @@ BEGIN TRY
 
 	IF EXISTS(SELECT * FROM #tmpExtracted)
 	BEGIN
+		;WITH CTE AS 
+		(
+			SELECT intContractTypeId, strContractNumber, intEntityId, intCommodityId, ROW_NUMBER() OVER 
+			(
+				PARTITION BY intContractTypeId, strContractNumber, intEntityId, intCommodityId ORDER BY intContractTypeId, strContractNumber, intEntityId, intCommodityId
+			) RowNumber
+			FROM #tmpExtracted
+		)
+		DELETE
+		FROM CTE 
+		WHERE RowNumber > 1;
+
 		INSERT	INTO #tmpContractHeader(intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, ysnReceivedSignedFixationLetter, ysnReadOnlyInterCoContract)
 		SELECT	intContractTypeId,intEntityId,dtmContractDate,intCommodityId,intCommodityUOMId,dblHeaderQuantity,intSalespersonId,ysnSigned,strContractNumber,ysnPrinted,intCropYearId,intPositionId,intPricingTypeId,intCreatedById,dtmCreated,intConcurrencyId, 0, 0
 		FROM	#tmpExtracted
