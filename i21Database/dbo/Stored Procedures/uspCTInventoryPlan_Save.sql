@@ -18,6 +18,7 @@ BEGIN TRY
 		,@intOldConcurrencyId INT
 		,@strDetails NVARCHAR(MAX)
 		,@intLastModifiedUserId INT
+		,@ysnAllItem BIT
 	DECLARE @tblIPAuditLog TABLE (
 		strColumnName NVARCHAR(50)
 		,strColumnDescription NVARCHAR(50)
@@ -43,11 +44,27 @@ BEGIN TRY
 
 	SELECT @intConcurrencyId = intConcurrencyId
 		,@intLastModifiedUserId = intLastModifiedUserId
+		,@ysnAllItem=ysnAllItem
 	FROM OPENXML(@idoc, 'root/InvPlngReportMaster', 2) WITH (
 			intConcurrencyId INT
 			,intLastModifiedUserId INT
+			,ysnAllItem BIT
 			)
+	IF IsNULL(@ysnAllItem, 0) = 0
+		AND NOT EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/InvPlngReportMaterial/MaterialKeyList', 2) WITH (intItemId INT)
+			)
+	BEGIN
+		SET @ErrMsg = 'Item cannot be empty.'
 
+		RAISERROR (
+				@ErrMsg
+				,16
+				,1
+				)
+	END
+	
 	IF @intInvPlngReportMasterID = 0
 	BEGIN
 		--IF EXISTS (

@@ -4244,6 +4244,8 @@ BEGIN TRY
 			UPDATE tblLGIntrCompLogisticsStg
 			SET strFeedStatus = 'Processed'
 				,intStatusId = 1
+				,strReference =@strNewLoadNumber 
+				,intReferenceId =@intNewLoadId 
 			WHERE intId = @intId
 
 			IF @intTransactionCount = 0
@@ -4264,6 +4266,8 @@ BEGIN TRY
 			SET strFeedStatus = 'Failed'
 				,strMessage = @ErrMsg
 				,intStatusId = 2
+				,strReference =@strNewLoadNumber 
+				,intReferenceId =@intNewLoadId 
 			WHERE intId = @intId
 
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg

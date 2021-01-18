@@ -4401,7 +4401,7 @@ BEGIN TRY
 				SET strFeedStatus = 'Failed'
 					,strMessage = Ltrim(ERROR_NUMBER())+' - '+@ErrMsg
 					,intStatusId = 2
-					,intDeadlockError = (Case When ERROR_NUMBER() = 1205 and intDeadlockError<=5 Then intDeadlockError+1 else 0 end)
+					,intDeadlockError = (CASE WHEN ERROR_NUMBER() IN (1205,266) AND intDeadlockError<=5 THEN intDeadlockError+1 ELSE 0 END)
 				WHERE intContractStageId = @intContractStageId
 			END CATCH
 		END
