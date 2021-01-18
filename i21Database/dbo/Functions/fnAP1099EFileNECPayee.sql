@@ -43,29 +43,29 @@ BEGIN
 					+ CAST(FLOOR((CAST(ISNULL(A.dblNonemployeeCompensationNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100)) --get the whole number
 					+ CAST(PARSENAME(CAST(ISNULL(A.dblNonemployeeCompensationNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2)) --last two digit decimal
 			END
-			+ CASE WHEN ISNULL(A.dblFederalIncomeNEC,0) > @maxAmount 
-				THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
-					+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
-				ELSE 
-					REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblFederalIncomeNEC,0))) AS NVARCHAR(100))))
-					+ CAST(FLOOR((CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
-					+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
-				END
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12) 
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12) 
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12) 
-			+ REPLICATE('0',12)
-			+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
+		+ CASE WHEN ISNULL(A.dblFederalIncomeNEC,0) > @maxAmount 
+			THEN REPLICATE('0',10 - LEN(CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((@maxAmount - CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			ELSE 
+				REPLICATE('0',10 - LEN(CAST(FLOOR((ISNULL(A.dblFederalIncomeNEC,0))) AS NVARCHAR(100))))
+				+ CAST(FLOOR((CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)))) AS NVARCHAR(100))
+				+ CAST(PARSENAME(CAST(ISNULL(A.dblFederalIncomeNEC,0) AS DECIMAL(18,2)),1) AS NVARCHAR(2))
+			END
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12) 
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12) 
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12) 
+		+ REPLICATE('0',12)
+		+ REPLICATE('0',12)
 		+ ' ' --Foreign Indicator
 		+ dbo.fnTrimX(A.strPayeeName) + SPACE(40 - LEN(dbo.fnTrimX(A.strPayeeName)))
 		+ SPACE(40) -- 288-327
