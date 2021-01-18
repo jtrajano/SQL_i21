@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuAPGrainClearing]
 AS 
 
-SELECT 
+SELECT --'a',
 	CS.intEntityId AS intEntityVendorId
 	,SS.dtmCreated AS dtmDate
 	,SS.strStorageTicket AS strTransactionNumber
@@ -14,12 +14,11 @@ SELECT
 	,CS.intItemUOMId  AS intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
-    ,0 AS dblVoucherQty
-	
+    ,0 AS dblVoucherQty	
 	,CASE 
 		WHEN SS.dblUnpaidUnits != 0 
 			THEN (
-				CASE WHEN SC.intSettleContractId IS NOT NULL THEN CAST(SC.dblUnits * ISNULL(SC.dblCost, SC.dblPrice) as decimal(18, 4))
+				CASE WHEN SC.intSettleContractId IS NOT NULL THEN CAST(SC.dblUnits * SC.dblPrice as decimal(18, 4))
 				ELSE SS.dblNetSettlement
 				END
 			)
@@ -28,11 +27,11 @@ SELECT
 					WHEN SC.intSettleContractId IS NULL 
 						THEN (SS.dblNetSettlement + SS.dblStorageDue + SS.dblDiscountsDue) 
 					ELSE
-						(SC.dblUnits * ISNULL(SC.dblCost, SC.dblPrice)) --NET SETTLEMENT
+						(SC.dblUnits * SC.dblPrice) --NET SETTLEMENT
 				END						
 			AS DECIMAL(18,4))
 	END AS dblSettleStorageAmount
-	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE SS.dblSettleUnits END AS DECIMAL(18,4)) AS dblSettleStorageQty
+	,CAST(CASE WHEN SS.dblUnpaidUnits != 0 THEN SS.dblUnpaidUnits ELSE CASE WHEN SC.intSettleStorageId IS NOT NULL THEN SC.dblUnits ELSE SS.dblSettleUnits END END AS DECIMAL(18,4)) AS dblSettleStorageQty
 	,CS.intCompanyLocationId AS intLocationId
 	,CL.strLocationName
 	,CAST(0 AS BIT) ysnAllowVoucher
@@ -74,7 +73,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 where SS.ysnPosted = 1
 UNION ALL
-SELECT
+SELECT --'b',
 	bill.intEntityVendorId
 	,bill.dtmDate
 	,SS.strStorageTicket
@@ -157,7 +156,7 @@ AND glAccnt.intAccountCategoryId = 45
 
 UNION ALL
 
-SELECT 
+SELECT --'c',
 	CS.intEntityId AS intEntityVendorId
 	,SS.dtmCreated
 	,SS.strStorageTicket
@@ -246,7 +245,7 @@ where SS.ysnPosted = 1
 
 
 UNION ALL
-SELECT
+SELECT --'d',
 	bill.intEntityVendorId
 	,bill.dtmDate
 	,SS.strStorageTicket
@@ -325,7 +324,7 @@ AND glAccnt.intAccountCategoryId = 45
 
 --DISCOUNTS
 UNION ALL
-SELECT 
+SELECT --'e',
 	CS.intEntityId AS intEntityVendorId
 	,SS.dtmCreated
 	,SS.strStorageTicket
@@ -433,7 +432,7 @@ AND GLDetail.intAccountId IS NOT NULL
 
 
 UNION ALL
-SELECT
+SELECT --'f',
 	bill.intEntityVendorId
 	,bill.dtmDate
 	,SS.strStorageTicket
