@@ -14,7 +14,7 @@ SET ANSI_WARNINGS OFF
 DECLARE @ZeroDecimal	DECIMAL(18,6) = 0.000000
 DECLARE @OneDecimal		DECIMAL(18,6) = 1.000000
 
-DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
+-- DECLARE @ItemsFromInvoice AS dbo.[InvoiceItemTableType]
 DECLARE @Invoices AS dbo.[InvoiceId]
 
 DECLARE  @InitTranCount				INT
@@ -890,102 +890,7 @@ FROM tblARInvoice INV
 INNER JOIN #ARPostInvoiceHeader PID ON INV.[intInvoiceId] = PID.[intInvoiceId]
 
 --UPDATE CONTRACT BALANCE
-DELETE FROM @ItemsFromInvoice
-INSERT INTO @ItemsFromInvoice
- ([intInvoiceId]
- ,[strInvoiceNumber]
- ,[intEntityCustomerId]
- ,[strTransactionType]
- ,[dtmDate]
- ,[intCurrencyId]
- ,[intCompanyLocationId]
- ,[intDistributionHeaderId]
- -- Detail 
- ,[intInvoiceDetailId]
- ,[intItemId]
- ,[strItemNo]
- ,[strItemDescription]
- ,[intItemUOMId]
- ,[dblQtyShipped]
- ,[dblDiscount]
- ,[dblPrice]
- ,[dblTotal]
- ,[intServiceChargeAccountId]
- ,[intInventoryShipmentItemId]
- ,[intSalesOrderDetailId]
- ,[intSiteId]
- ,[intPerformerId]
- ,[intContractHeaderId]
- ,[strContractNumber]
- ,[strMaintenanceType]
- ,[strFrequency]
- ,[dtmMaintenanceDate]
- ,[dblMaintenanceAmount]
- ,[dblLicenseAmount]
- ,[intContractDetailId]
- ,[intTicketId]
- ,[intCustomerStorageId]
- ,[intLoadDetailId]
- ,[ysnLeaseBilling])
-SELECT
- -- Header
-  [intInvoiceId]     = ID.[intInvoiceId]
- ,[strInvoiceNumber]    = ID.[strInvoiceNumber]
- ,[intEntityCustomerId]   = ID.[intEntityCustomerId]
- ,[strTransactionType]           = ID.[strTransactionType]
- ,[dtmDate]      = ID.[dtmDate]
- ,[intCurrencyId]    = ID.[intCurrencyId]
- ,[intCompanyLocationId]   = ID.[intCompanyLocationId]
- ,[intDistributionHeaderId]  = ID.[intDistributionHeaderId]
- -- Detail 
- ,[intInvoiceDetailId]   = ID.[intInvoiceDetailId]   
- ,[intItemId]     = ID.[intItemId]  
- ,[strItemNo]     = ID.[strItemNo]
- ,[strItemDescription]   = ID.[strItemDescription]   
- ,[intItemUOMId]     = ID.[intItemUOMId]     
- ,[dblQtyShipped]    = CASE WHEN ID.[strTransactionType] = 'Credit Memo' AND ID.[intLoadDetailId] IS NOT NULL AND ISNULL(CH.[ysnLoad], 0) = 1 THEN 1 ELSE ID.[dblQtyShipped] END * (CASE WHEN ID.[ysnPost] = 0 THEN -@OneDecimal ELSE @OneDecimal END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -@OneDecimal ELSE @OneDecimal END)
- ,[dblDiscount]     = ID.[dblDiscount]     
- ,[dblPrice]      = ID.[dblPrice]      
- ,[dblTotal]      = ID.[dblTotal]      
- ,[intServiceChargeAccountId] = ID.[intServiceChargeAccountId] 
- ,[intInventoryShipmentItemId] = ID.[intInventoryShipmentItemId] 
- ,[intSalesOrderDetailId]  = ID.[intSalesOrderDetailId]
- ,[intSiteId]     = ID.[intSiteId]     
- ,[intPerformerId]    = ID.[intPerformerId]    
- ,[intContractHeaderId]   = ID.[intContractHeaderId]
- ,[strContractNumber]   = CH.[strContractNumber]
- ,[strMaintenanceType]           = ID.[strMaintenanceType]           
- ,[strFrequency]                 = ID.[strFrequency]                 
- ,[dtmMaintenanceDate]           = ID.[dtmMaintenanceDate]           
- ,[dblMaintenanceAmount]         = ID.[dblMaintenanceAmount]         
- ,[dblLicenseAmount]             = ID.[dblLicenseAmount]             
- ,[intContractDetailId]   = ID.[intContractDetailId]   
- ,[intTicketId]         = (CASE WHEN ID.strTransactionType = 'Credit Memo' AND @Post = CONVERT(BIT, 1) THEN NULL ELSE ID.[intTicketId] END)
- ,[intCustomerStorageId]   = ID.[intCustomerStorageId]
- ,[intLoadDetailId]    = ID.[intLoadDetailId]
- ,[ysnLeaseBilling]    = ID.[ysnLeaseBilling]    
-FROM #ARPostInvoiceDetail ID
-INNER JOIN tblCTContractDetail CD ON ID.[intContractDetailId] = CD.[intContractDetailId] 
-LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
-LEFT JOIN tblICInventoryShipmentItem ISI ON ID.[intInventoryShipmentItemId] = ISI.[intInventoryShipmentItemId]
-OUTER APPLY (
- SELECT TOP 1 intInvoiceId 
- FROM tblARInvoice I
- WHERE I.strTransactionType = 'Invoice'
-   AND I.ysnReturned = 1
-   AND ID.strInvoiceOriginId = I.strInvoiceNumber
-   AND ID.intOriginalInvoiceId = I.intInvoiceId
-) RI
-WHERE ID.[intInventoryShipmentChargeId] IS NULL
- AND (
-  (ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND ID.[intLoadDetailId] IS NULL) OR (ISI.[ysnDestinationWeightsAndGrades] = 1 AND ISI.[intDestinationGradeId] IS NOT NULL AND ISI.[intDestinationWeightId] IS NOT NULL)))
-  OR
-  (ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
-  )
-    AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
- AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
- 
-EXEC dbo.[uspCTInvoicePosted] @ItemsFromInvoice, @UserId
+EXEC dbo.uspARUpdateContractOnPost @UserId
 
 --UPDATE CONTRACTS FINANCIAL STATUS
 DECLARE @tblContractsFinancial AS Id
