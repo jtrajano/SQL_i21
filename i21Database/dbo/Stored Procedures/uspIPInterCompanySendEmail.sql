@@ -318,7 +318,7 @@ BEGIN
 		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			   <td>&nbsp;' + ISNULL(S.strLoadNumber, '') + '</td>' + 
+			   <td>&nbsp;' + ISNULL(S.strReference, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + 
 			   '<td>&nbsp;' + ISNULL(MC.strName, '') + '</td>' + 
 			   '<td>&nbsp;' + 'Success' + '</td>
