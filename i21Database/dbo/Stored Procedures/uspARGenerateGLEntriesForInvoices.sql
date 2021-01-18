@@ -1655,7 +1655,13 @@ SELECT
     ,[strBatchId]                   = I.[strBatchId]
     ,[intAccountId]                 = CASE WHEN ARIDT.[ysnAddToCost] = 0 THEN ARIDT.[intSalesTaxAccountId] ELSE I.intItemAccountId END
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal 
+													  THEN ABS(ARIDT.[dblBaseAdjustedTax]) 
+													  ELSE (CASE WHEN ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 
+																 THEN ROUND(I.dblQtyShipped * ARIDT.dblRate, dbo.fnARGetDefaultDecimal())
+																 ELSE @ZeroDecimal 
+															END) 
+												 END)
                                            ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
                                       END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 
@@ -1683,11 +1689,23 @@ SELECT
     ,[strModuleName]                = @MODULE_NAME
     ,[intConcurrencyId]             = 1
     ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARIDT.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblAdjustedTax]) ELSE @ZeroDecimal END )
+                                           THEN (CASE WHEN ARIDT.[dblAdjustedTax] < @ZeroDecimal 
+													  THEN ABS(ARIDT.[dblAdjustedTax]) 
+													  ELSE (CASE WHEN ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 
+																 THEN ROUND(I.dblQtyShipped * ARIDT.dblRate, dbo.fnARGetDefaultDecimal())
+																 ELSE @ZeroDecimal 
+															END)  
+												 END )
                                            ELSE (CASE WHEN ARIDT.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblAdjustedTax] END)
                                       END
     ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 1 
-                                           THEN (CASE WHEN ARIDT.[dblAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblAdjustedTax]) ELSE @ZeroDecimal END )
+                                           THEN (CASE WHEN ARIDT.[dblAdjustedTax] < @ZeroDecimal 
+													  THEN ABS(ARIDT.[dblAdjustedTax]) 
+													  ELSE (CASE WHEN ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 
+																 THEN ROUND(I.dblQtyShipped * ARIDT.dblRate, dbo.fnARGetDefaultDecimal())
+																 ELSE @ZeroDecimal 
+															END)  
+												 END )
                                            ELSE (CASE WHEN ARIDT.[dblAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblAdjustedTax] END)
                                       END
     ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 0 
@@ -1720,12 +1738,162 @@ FROM (
 		 , IDT.[dblAdjustedTax]
 		 , IDT.[dblBaseAdjustedTax]
 		 , [ysnAddToCost]  = ISNULL(TC.[ysnAddToCost], 0)
+		 , [ysnTaxExempt]  = ISNULL(IDT.[ysnTaxExempt], 0)
+		 , IDT.[dblRate]
     FROM tblARInvoiceDetailTax IDT WITH (NOLOCK)
-	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId	
+	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
 ) ARIDT
 INNER JOIN #ARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
 WHERE I.[intPeriodsToAccrue] <= 1
-  AND ARIDT.[dblAdjustedTax] <> @ZeroDecimal
+  AND (ARIDT.[dblAdjustedTax] <> @ZeroDecimal
+  OR (ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1))
+
+--TAX DETAIL CREDIT
+INSERT #ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = dbo.fnGetItemGLAccount(I.[intItemId], ICIL.[intItemLocationId], 'Cost of Goods')
+    ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 0 
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
+                                           ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
+                                      END
+    ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 1 
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal 
+													  THEN ABS(ARIDT.[dblBaseAdjustedTax]) 
+													  ELSE (CASE WHEN ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 
+																 THEN ROUND(I.dblQtyShipped * ARIDT.dblRate, dbo.fnARGetDefaultDecimal())
+																 ELSE @ZeroDecimal 
+															END) 
+												 END)
+                                           ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
+                                      END
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = I.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblCurrencyExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = @POSTDESC + I.[strTransactionType]
+    ,[intJournalLineNo]             = ARIDT.[intInvoiceDetailTaxId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = CASE WHEN I.[ysnIsInvoicePositive] = 0 
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
+                                           ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
+                                      END
+    ,[dblDebitReport]               = CASE WHEN I.[ysnIsInvoicePositive] = 0 
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN ABS(ARIDT.[dblBaseAdjustedTax]) ELSE @ZeroDecimal END )
+                                           ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
+                                      END
+    ,[dblCreditForeign]             = CASE WHEN I.[ysnIsInvoicePositive] = 1 
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal 
+													  THEN ABS(ARIDT.[dblBaseAdjustedTax]) 
+													  ELSE (CASE WHEN ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 
+																 THEN ROUND(I.dblQtyShipped * ARIDT.dblRate, dbo.fnARGetDefaultDecimal())
+																 ELSE @ZeroDecimal 
+															END) 
+												 END)
+                                           ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
+                                      END
+    ,[dblCreditReport]              = CASE WHEN I.[ysnIsInvoicePositive] = 1 
+                                           THEN (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal 
+													  THEN ABS(ARIDT.[dblBaseAdjustedTax]) 
+													  ELSE (CASE WHEN ARIDT.[dblAdjustedTax] = @ZeroDecimal AND [intSalesTaxExemptionAccountId] > 0 AND [ysnAddToCost] = 1 AND [ysnTaxExempt] = 1 
+																 THEN ROUND(I.dblQtyShipped * ARIDT.dblRate, dbo.fnARGetDefaultDecimal())
+																 ELSE @ZeroDecimal 
+															END) 
+												 END)
+                                           ELSE (CASE WHEN ARIDT.[dblBaseAdjustedTax] < @ZeroDecimal THEN @ZeroDecimal ELSE ARIDT.[dblBaseAdjustedTax] END)
+                                      END
+    ,[dblReportingRate]             = I.[dblCurrencyExchangeRate]
+    ,[dblForeignRate]               = I.[dblCurrencyExchangeRate]
+    ,[strRateType]                  = I.[strCurrencyExchangeRateType]
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[ysnRebuild]                   = NULL
+FROM (
+    SELECT IDT.[intTaxCodeId]
+		 , IDT.[intInvoiceDetailId]
+		 , IDT.[intInvoiceDetailTaxId]
+		 , IDT.[intSalesTaxAccountId]
+		 , [intSalesTaxExemptionAccountId]  = ISNULL(IDT.[intSalesTaxExemptionAccountId], TC.[intSalesTaxExemptionAccountId])
+		 , IDT.[dblAdjustedTax]
+		 , IDT.[dblBaseAdjustedTax]
+		 , [ysnAddToCost]  = ISNULL(TC.[ysnAddToCost], 0)
+		 , [ysnTaxExempt]  = ISNULL(IDT.[ysnTaxExempt], 0)
+		 , IDT.[dblRate]
+    FROM tblARInvoiceDetailTax IDT WITH (NOLOCK)
+	INNER JOIN tblSMTaxCode TC ON IDT.intTaxCodeId = TC.intTaxCodeId
+) ARIDT
+INNER JOIN #ARPostInvoiceDetail I ON ARIDT.[intInvoiceDetailId] = I.[intInvoiceDetailId]
+INNER JOIN (
+	SELECT [intItemId], [intLocationId], [intItemLocationId], [intAllowNegativeInventory], [intSubLocationId] FROM tblICItemLocation WITH(NOLOCK)
+) ICIL ON I.[intItemId] = ICIL.[intItemId] AND I.[intCompanyLocationId] = ICIL.[intLocationId]
+WHERE I.[intPeriodsToAccrue] <= 1
+  AND ARIDT.[dblAdjustedTax] = @ZeroDecimal 
+  AND [intSalesTaxExemptionAccountId] > 0 
+  AND [ysnAddToCost] = 1
+  AND [ysnTaxExempt] = 1
 
 --SALES DISCOUNT
 INSERT #ARInvoiceGLEntries
