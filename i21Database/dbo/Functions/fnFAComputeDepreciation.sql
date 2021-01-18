@@ -15,16 +15,16 @@ RETURNS @tbl TABLE (
 AS
 BEGIN
 DECLARE @intDepreciationMethodId INT, @strConvention NVARCHAR(40)
+DECLARE @dblBasis NUMERIC (18,6), @dtmPlacedInService DATETIME 
 
-DECLARE @dblBasis		NUMERIC (18,6)	
 
 
 
 SELECT 
-
 @dblBasis = dblCost - A.dblSalvageValue,
 @strConvention = strConvention,
-@intDepreciationMethodId = A.intDepreciationMethodId
+@intDepreciationMethodId = A.intDepreciationMethodId,
+@dtmPlacedInService = dtmDateInService
 from tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
 where intAssetId = @intAssetId
 
@@ -36,7 +36,7 @@ DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FR
 
 -- Running Balance
 DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId
- ORDER BY intAssetDepreciationId DESC)
+ORDER BY intAssetDepreciationId DESC)
 
 -- Computation
 
@@ -47,6 +47,20 @@ DECLARE @dblYear NUMERIC (18,6) = (SELECT TOP 1 dblDepreciationToDate FROM tblFA
 	BEGIN
 		IF @intMonth = 1 OR @intMonth > @totalMonths
 			SELECT @dblMonth = @dblMonth /2
+	END
+	IF @strConvention = 'Actual Days'
+	BEGIN
+		DECLARE @intDaysInFirstMonth INT = DAY(EOMONTH(@dtmPlacedInService))
+		DECLARE @intDaysRemainingFirstMonth INT =  @intDaysInFirstMonth - DAY(@dtmPlacedInService)
+		IF @intMonth = 1 
+		BEGIN
+			SET @dblMonth =  @dblMonth * (@intDaysRemainingFirstMonth/ CAST(@intDaysInFirstMonth AS FLOAT))
+		END
+		IF @intMonth > @totalMonths
+		BEGIN
+			DECLARE @intDaysRemainingLastMonth INT = @intDaysInFirstMonth - @intDaysRemainingFirstMonth
+			SET @dblMonth =  @dblMonth * (@intDaysRemainingLastMonth/CAST(@intDaysInFirstMonth AS FLOAT))  
+		END
 	END
 	IF @strConvention = 'Half Year'
 	BEGIN
