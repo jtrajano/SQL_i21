@@ -99,10 +99,10 @@ BEGIN
 		@totalPayees = (SELECT COUNT(*) FROM MISC1099),
 		@controlTotal1 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblNonemployeeCompensationNEC,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
 						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblNonemployeeCompensationNEC,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
-		@controlTotal2 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblFederalIncomeNEC,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
-						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblFederalIncomeNEC,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
+		@controlTotal2 = REPLICATE('0',18),
 		@controlTotal3 = REPLICATE('0',18),
-		@controlTotal4 = REPLICATE('0',18),
+		@controlTotal4 = REPLICATE('0',18 - LEN(REPLACE(CAST(CAST(SUM(ISNULL(A.dblFederalIncomeNEC,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.','')))
+						+ REPLACE(CAST(CAST(SUM(ISNULL(A.dblFederalIncomeNEC,0)) AS DECIMAL(18,2)) AS NVARCHAR(100)),'.',''),
 		@controlTotal5 = REPLICATE('0',18),
 		@controlTotal6 = REPLICATE('0',18),
 		@controlTotal7 = REPLICATE('0',18),
