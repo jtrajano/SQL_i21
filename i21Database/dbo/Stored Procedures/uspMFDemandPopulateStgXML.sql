@@ -29,6 +29,10 @@ BEGIN TRY
 	WHERE intRecordId = @intInvPlngReportMasterID
 		AND intScreenId = @intDemandScreenId
 
+	SELECT @intCompanyId = intCompanyId
+	FROM tblIPMultiCompany
+	WHERE intMultiCompanyId=1
+
 	IF @strRowState = 'Delete'
 	BEGIN
 		INSERT INTO tblMFDemandStage (
@@ -73,10 +77,6 @@ BEGIN TRY
 		,NULL
 
 	SELECT @strObjectName = 'vyuMFGetItemSupplyTarget'
-
-	SELECT @intCompanyId = intCompanyId
-	FROM tblICItem
-	WHERE IsNUll(intCompanyId, 0) > 0
 
 	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 		,NULL
