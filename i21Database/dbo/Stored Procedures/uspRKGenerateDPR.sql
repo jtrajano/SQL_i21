@@ -1625,7 +1625,7 @@ BEGIN TRY
 	)t WHERE intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
 	SELECT strCommodityCode
-		, dblTotal = dblQty
+		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intQtyUOMId, @intCommodityUnitMeasureId,dblQty)
 		, intCommodityId
 		, strLocationName
 		, intItemId
@@ -1635,7 +1635,7 @@ BEGIN TRY
 		, strTicketNumber = ''
 		, dtmTicketDateTime = dtmTransactionDate
 		, strDistributionOption = 'CNT' COLLATE Latin1_General_CI_AS
-		, intFromCommodityUnitMeasureId = NULL
+		, intFromCommodityUnitMeasureId = intQtyUOMId
 		, intLocationId
 		, strDPAReceiptNo = strTransactionReferenceNo
 		, strContractNumber = strContractNumber + '-' + LTRIM(intContractSeq) COLLATE Latin1_General_CI_AS
