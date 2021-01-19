@@ -1964,6 +1964,14 @@ BEGIN
 			JOIN tblSCTicket SC 
 				ON SC.intTicketId = BillDtl.intScaleTicketId
 					AND BillDtl.intCustomerStorageId IS NULL
+
+			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
+				on SC.intTicketId = INVRCPTITEM.intSourceId
+			
+			LEFT JOIN tblICInventoryReceipt InventoryReceipt
+				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
+
+
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
@@ -2038,6 +2046,8 @@ BEGIN
 					) PartialPayment 
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
+				and INVRCPTITEM.intInventoryReceiptItemId is null
+				and InventoryReceipt.intSourceType = 1
 
 			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******
