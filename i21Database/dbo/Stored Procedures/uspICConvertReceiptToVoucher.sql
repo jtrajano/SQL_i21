@@ -241,8 +241,8 @@ BEGIN
 	BEGIN 
 		DECLARE @throwedError AS NVARCHAR(1000);
 
-		--EXEC [dbo].[uspAPCreateVoucher]
-		EXEC uspCTCreateVoucher
+		EXEC [dbo].[uspAPCreateVoucher]
+		--EXEC uspCTCreateVoucher --Dev Note - Mon - Removed this one from IC-8796 
 			@voucherPayables = @voucherItems
 			,@voucherPayableTax = @voucherItemsTax
 			,@userId = @intEntityUserSecurityId
