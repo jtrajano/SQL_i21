@@ -31,7 +31,7 @@ BEGIN TRY
 
 	SELECT @intCompanyId = intCompanyId
 	FROM tblIPMultiCompany
-	WHERE intMultiCompanyId=1
+	WHERE ysnCurrentCompany=1
 
 	IF @strRowState = 'Delete'
 	BEGIN
