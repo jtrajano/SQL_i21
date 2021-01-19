@@ -1058,16 +1058,17 @@ SELECT
 	,[intSourceId]			= ITG.[intSourceId]
 	,[strSourceId]			= ITG.[strSourceId]
 	,[intInvoiceId]			= ITG.[intInvoiceId]
-FROM
-	@InvoicesToGenerate ITG --WITH (NOLOCK)
-	INNER JOIN (
-		SELECT COUNT(strSourceId)[SourceCount],strSourceId FROM  @InvoicesToGenerate GROUP BY strSourceId 
-	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
-	WHERE ID.SourceCount > 1
-	AND [strType] <> 'POS'
-	AND ITG.[strSourceTransaction] <> 'Store Charge'
-
-
+FROM @InvoicesToGenerate ITG --WITH (NOLOCK)
+INNER JOIN (
+	SELECT COUNT(strSourceId)[SourceCount]
+		, strSourceId 
+	FROM @InvoicesToGenerate 
+	WHERE ISNULL(strSourceId, '') <> ''
+GROUP BY strSourceId 
+) ID ON  ITG.[strSourceId] =  ID.[strSourceId]  
+WHERE ID.SourceCount > 1
+  AND [strType] <> 'POS'
+  AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
