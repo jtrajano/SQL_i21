@@ -105,7 +105,7 @@ BEGIN TRY
 			,strDestinationPointName				=	SQ.strDestinationPointName
 			,strItemDescription						=   strItemDescription
 			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure
-			,strShipment							=	LEFT(DATENAME(MONTH, GETDATE()), 3) + ' ' + DATENAME(YEAR, GETDATE()) + ' shipment at '+ SQ.strFixationBy+'''s option'
+			,strShipment							=	LEFT(DATENAME(MONTH, GETDATE()), 3) + ' ' + DATENAME(YEAR, GETDATE()) + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + ' at '+ SQ.strFixationBy+'''s option'
 
 		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
 										                ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +  
@@ -123,7 +123,7 @@ BEGIN TRY
 													  	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityCountry)) END,'')
 			,strLocationWithDate					=	SQ.strLocationName+', '+ CONVERT (VARCHAR,CH.dtmContractDate,106)
 			,strLocationWithOutDate					=	SQ.strLocationName+', '
-			,strLocationDate						=	CH.dtmContractDate
+			,strLocationDate						=	GETDATE()--CH.dtmContractDate
 			,strReportDateFormat					=	@strReportDateFormat
 			,strCustomerContract					=	CH.strCustomerContract
 			,strStraussText1						=	'<p>Pls arrange for pre-shipment samples for the above mentioned consignment. Samples of 250 grams per lot should be drawn and sent by Courier <span style="text-decoration: underline;"><strong>21 days prior</strong></span> to shipment to the below stated address.</p>'
