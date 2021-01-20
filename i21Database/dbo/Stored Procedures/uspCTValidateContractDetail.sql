@@ -390,6 +390,8 @@ BEGIN TRY
 			END
 			ELSE
 			BEGIN
+				select @dblOldScheduleQty = isnull(@dblOldScheduleQty,0);
+				
 				IF (@dblNewQuantity < @dblOldQuantity - @dblOldBalance + @dblOldScheduleQty)
 				BEGIN
 					SET @ErrMsg = 'Sequence ' + LTRIM(@intContractSeq) + ' quantity cannot be reduced below ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '. As current contract quantity is ' +  LTRIM(@dblOldQuantity) + ' and quantity in use is ' + LTRIM(@dblOldQuantity - @dblOldBalance + @dblOldScheduleQty) + '.'
