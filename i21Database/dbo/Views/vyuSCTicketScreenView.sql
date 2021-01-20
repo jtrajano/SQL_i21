@@ -354,5 +354,5 @@
 	LEFT JOIN tblCTItemContractHeader ICH ON ICD.intItemContractHeaderId = ICH.intItemContractHeaderId
 	LEFT JOIN tblAGWorkOrder AWO
     	ON SCT.intAGWorkOrderId = AWO.intWorkOrderId
-   	LEFT JOIN tblEMEntityLocation AWOL
-		ON AWO.intEntityLocationId = AWOL.intEntityLocationId
+   	LEFT JOIN tblSMCompanyLocation AWOL
+		ON AWO.intCompanyLocationId = AWOL.intCompanyLocationId

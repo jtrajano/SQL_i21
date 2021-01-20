@@ -30,7 +30,7 @@ AS
 		SELECT 
 		intCompanyLocationId,
 		strLocationName
-		FROM tblEMEntityLocation  WITH(NOLOCK)  
+		FROM tblSMCompanyLocation  WITH(NOLOCK)  
 	) LOCATION ON LOCATION.intCompanyLocationId = WO.intCompanyLocationId
    LEFT JOIN (
 	   SELECT 
