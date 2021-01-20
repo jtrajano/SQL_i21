@@ -44,7 +44,7 @@
  [strWindSpeedUOM] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
  [strSoilCondition] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
  [dblTemperature] NUMERIC(18,6) NULL,
- [strTemperatureUOM] CHAR(1) NULL,
+ [strTemperatureUOM] NVARCHAR(20) NULL,
  [blbApplicatorSignature] VARBINARY(max) NULL,
  [dtmDueDate] DATETIME NOT NULL,
  [dtmEndTime] DATETIME NULL,
