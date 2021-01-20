@@ -6,8 +6,8 @@ AS
 	, WO.strType
 	, WO.intItemId
 	, ITEM.strItemNo
-	, ENTITYLOCATION.intEntityLocationId
-	, ENTITYLOCATION.strLocationName
+	, COMPANYLOCATION.intCompanyLocationId
+	, COMPANYLOCATION.strLocationName
 	, WO.strStatus
 	, WO.strOrderNumber
 	, WO.intEntityCustomerId
@@ -51,10 +51,10 @@ AS
 		FROM tblICItem WITH(NOLOCK)  
 	) ITEM ON ITEM.intItemId = WO.intItemId
 	LEFT JOIN (
-		SELECT intEntityLocationId
+		SELECT intCompanyLocationId
 		, strLocationName
-		FROM tblEMEntityLocation WITH(NOLOCK)  
-	) ENTITYLOCATION ON ENTITYLOCATION.intEntityLocationId = WO.intEntityLocationId
+		FROM tblSMCompanyLocation WITH(NOLOCK)  
+	) COMPANYLOCATION ON COMPANYLOCATION.intCompanyLocationId = WO.intCompanyLocationId
 	LEFT JOIN (
 		SELECT  
 			strName
@@ -69,9 +69,9 @@ AS
 	LEFT JOIN (
 		SELECT  
 			strName
-			,intEntityCustomerId
-		FROM vyuARCustomerSearch WITH(NOLOCK)  
-	) ORDEREDBY ON ORDEREDBY.intEntityCustomerId = WO.intOrderedById
+			,intEntityId
+		FROM tblEMEntity WITH(NOLOCK)  
+	) ORDEREDBY ON ORDEREDBY.intEntityId = WO.intOrderedById
 	LEFT JOIN (
 		SELECT
 		 intEntityId

@@ -15,7 +15,7 @@ AS
 	, CUSTOMER.strCustomerNumber
 	, WO.intOrderedById
 	, WO.dtmApplyDate
-	, WO.intEntityLocationId
+	, WO.intCompanyLocationId
 	, LOCATION.strLocationName
 	, ENTITY.strName AS 'strOrderedBy'
 	, WO.strStatus
@@ -28,10 +28,10 @@ AS
 	) CUSTOMER on CUSTOMER.intEntityId = WO.intEntityCustomerId
 	LEFT JOIN (
 		SELECT 
-		intEntityLocationId,
+		intCompanyLocationId,
 		strLocationName
 		FROM tblEMEntityLocation  WITH(NOLOCK)  
-	) LOCATION ON LOCATION.intEntityLocationId = WO.intEntityLocationId
+	) LOCATION ON LOCATION.intCompanyLocationId = WO.intCompanyLocationId
    LEFT JOIN (
 	   SELECT 
 	   intEntityId,

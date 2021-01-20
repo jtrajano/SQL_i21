@@ -2,7 +2,7 @@
 (
  [intWorkOrderId] INT IDENTITY (1, 1) NOT NULL,
  [strType] NVARCHAR(20) NULL,
- [intEntityLocationId] INT NULL,
+ [intCompanyLocationId] INT NULL,
  [strStatus] NVARCHAR(10) NULL,
  [strOrderNumber] NVARCHAR(250) NULL,
  [intEntityCustomerId] INT NULL,
@@ -50,12 +50,12 @@
  [dtmEndTime] DATETIME NULL,
  [intConcurrencyId] INT NOT NULL DEFAULT(0),
  CONSTRAINT [UK_tblAGWorkOrder_strOrderNumber] UNIQUE ([strOrderNumber]),
- CONSTRAINT [FK_tblAGWorkOrder_tblEMEntityLocation_intEntityLocationId] FOREIGN KEY ([intEntityLocationId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
+ CONSTRAINT [FK_tblAGWorkOrder_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntityLocation_FarmField] FOREIGN KEY ([intFarmFieldId]) REFERENCES [dbo].[tblEMEntityLocation] ([intEntityLocationId]),
  --Constraint for app target
  CONSTRAINT [FK_tblAGWorkOrder_tblARSalesperson_intEntitySalesRepId] FOREIGN KEY ([intEntitySalesRepId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId]),
- CONSTRAINT [FK_tblAGWorkOrder_tblARSalesperson2_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
+ CONSTRAINT [FK_tblAGWorkOrder_tblEMEntity_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
  CONSTRAINT [PK_dbo.tblAGWorkOrder_intWorkOrderId] PRIMARY KEY CLUSTERED ([intWorkOrderId] ASC)
 
 );
