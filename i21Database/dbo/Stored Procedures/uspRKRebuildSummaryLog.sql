@@ -100,7 +100,7 @@ BEGIN TRY
 								ELSE
 									ISNULL( CASE WHEN ISNULL(INV.ysnPosted, 0) = 1 AND ShipmentItem.dblDestinationNet IS NOT NULL THEN 
 													MAX(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN 
-																ShipmentItem.dblDestinationNet * -1 
+																ShipmentItem.dblDestinationNet
 														ELSE 0 END)
 													ELSE SUM(CASE WHEN CM.intInventoryShipmentItemId IS NULL THEN 
 																		ShipmentItem.dblQuantity
