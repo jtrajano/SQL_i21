@@ -57,7 +57,8 @@ BEGIN TRY
 			,@blbParentApproveSignature				varbinary(max)
 			,@blbChildSubmitSignature				varbinary(max)
 			,@blbChildApproveSignature				varbinary(max)
-			,@intChildDefaultSubmitById				int;
+			,@intChildDefaultSubmitById				int
+			,@strTransactionApprovalStatus			NVARCHAR(100);
 
 	DECLARE @tblSequenceHistoryId TABLE
 	(
