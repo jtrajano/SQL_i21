@@ -477,7 +477,7 @@ BEGIN TRY
 					AND IsNULL(intSubstituteItemId, 0) = IsNULL(@intSubstituteItemId, IsNULL(intSubstituteItemId, 0))
 					AND IsNULL(intCompanyLocationId, 0) = IsNULL(@intLocationId, IsNULL(intCompanyLocationId, 0))
 					AND DD.intDemandDetailId IN (
-						SELECT MIN(DD2.intDemandDetailId)
+						SELECT MAX(DD2.intDemandDetailId)
 						FROM tblMFDemandDetail DD2
 						WHERE DD2.intItemId = DD.intItemId
 							AND IsNULL(DD2.intSubstituteItemId, 0) = IsNULL(DD.intSubstituteItemId, 0)
