@@ -220,8 +220,7 @@ begin try
 			end
 		end
 
-		/*Check if there's available priced quantity*/ 
-		delete from @availablePrice;
+		/*Check if there's available priced quantity*/  
 		insert into @availablePrice
 		select
 			intId = intId
