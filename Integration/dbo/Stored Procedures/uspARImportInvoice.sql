@@ -845,8 +845,9 @@ BEGIN
 					)
 		 END
 
-		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptivcmst')
-		BEGIN	
+		IF @ysnPT = 1 AND EXISTS(SELECT TOP 1 1 from INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'ptticmst')
+		 BEGIN
+		--Check first on ptticmst
 			SELECT @Total = COUNT(pttic_ivc_no)  
 				FROM ptticmst
 			LEFT JOIN tblARInvoice Inv 
@@ -864,27 +865,7 @@ BEGIN
 						((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
 					)
 				AND pttic_type NOT IN ('O','X')
-				AND pttic_line_no = 1
 
-			--Check first on ptivcmst	
-			-- SELECT @Total = COUNT(ptivc_invc_no)  
-			-- 	FROM ptivcmst
-			-- LEFT JOIN tblARInvoice Inv 
-			-- 	ON ptivcmst.ptivc_invc_no COLLATE Latin1_General_CI_AS = Inv.strInvoiceOriginId COLLATE Latin1_General_CI_AS
-			-- 	AND Inv.[dtmDate] = CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112)
-			-- 	AND Inv.[dblInvoiceTotal] = ROUND(ISNULL(ptivc_sold_by_tot, 0), [dbo].[fnARGetDefaultDecimal]())
-			-- 	AND ISNULL(Inv.[ysnImportedFromOrigin],0) = 1 AND ISNULL(Inv.[ysnImportedAsPosted],0) = 0
-			-- INNER JOIN tblARCustomer Cus ON  strCustomerNumber COLLATE Latin1_General_CI_AS = ptivc_cus_no COLLATE Latin1_General_CI_AS
-			-- WHERE 
-			-- Inv.strInvoiceNumber IS NULL 
-			-- 	AND Cus.ysnActive = 1
-			-- 	AND (
-			-- 			((CASE WHEN ISDATE(ptivc_rev_dt) = 1 THEN CONVERT(DATE, CAST(ptivc_rev_dt AS CHAR(12)), 112) ELSE @current_date END) BETWEEN @StartDate AND @EndDate)
-			-- 			OR
-			-- 			((@StartDate IS NULL OR ISDATE(@StartDate) = 0) OR (@EndDate IS NULL OR ISDATE(@EndDate) = 0))
-			-- 		)
-			-- 	AND ptivc_type NOT IN ('O','X')
-			-- 	and ptivc_bal_due <> 0
 			--Add Count of Prepayment
 			-- SELECT  @Total  +=  COUNT(1) 
 			-- FROM ptcrdmst CRD
@@ -905,6 +886,3 @@ BEGIN
 	END
 		
 END	
-
-
-
