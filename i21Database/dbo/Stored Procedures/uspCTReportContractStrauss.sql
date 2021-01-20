@@ -139,6 +139,36 @@ BEGIN TRY
 		ORDER BY intApprovalId
 	END
 
+--if contract is for amendment
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMTransaction WHERE intTransactionId = @intTransactionId AND ysnOnceApproved = 1)
+	BEGIN
+
+		SELECT @strTransactionApprovalStatus = strApprovalStatus FROM tblSMTransaction WHERE intTransactionId = @intTransactionId
+		IF @strTransactionApprovalStatus = 'Waiting for Submit'
+		BEGIN
+			SELECT @FirstApprovalId = NULL
+			, @intApproverGroupId = NULL
+			, @StraussContractSubmitId = NULL
+		END
+
+		IF @strTransactionApprovalStatus = 'Waiting for Approval'
+		BEGIN
+			SELECT @FirstApprovalId = NULL
+			, @intApproverGroupId = NULL
+			, @StraussContractSubmitId = intSubmittedById
+			FROM tblSMApproval WHERE	intTransactionId = @intTransactionId AND ysnCurrent = 1 AND strStatus = 'Waiting for Approval' 
+		END
+
+		IF @strTransactionApprovalStatus = 'Approved'
+		BEGIN
+			SELECT	TOP 1 @FirstApprovalId = intApproverId
+				, @intApproverGroupId = intApproverGroupId
+				, @StraussContractSubmitId = intSubmittedById
+			FROM tblSMApproval WHERE	intTransactionId = @intTransactionId AND ysnCurrent = 1 AND strStatus = 'Approved' 
+		END
+
+	END
+
 	select top 1
 		@intChildDefaultSubmitById = (case when isnull(smc.intMultiCompanyParentId,0) = 0 then null else us.intEntityId end)
 	from
