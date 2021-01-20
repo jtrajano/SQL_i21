@@ -1056,6 +1056,7 @@ FROM
 	)ID ON  ITG.[strSourceId] =  ID.[strSourceId]		
 	WHERE ID.SourceCount > 1
 	AND [strType] <> 'POS'
+	AND ITG.[strSourceTransaction] <> 'Store Charge'
 
 INSERT INTO #ARInvalidInvoiceRecords
     ([intId]
