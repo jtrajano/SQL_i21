@@ -89,8 +89,12 @@ DECLARE @withLOB BIT = 0, @separator nchar(1) = ''
 SELECT @separator = strMask FROM tblGLAccountStructure WHERE strType = 'Divider'
 SELECT @withLOB = 1 FROM tblGLAccountStructure WHERE strStructureName = 'LOB'
 
-UPDATE [tblGLAccountImportDataStaging2] SET strAccountId = TRIM(strPrimarySegment) + @separator + TRIM(strLocationSegment) +  case when trim(ISNULL(strLOBSegment,'')) = '' THEN ''  ELSE @separator + strLOBSegment  END
-UPDATE [tblGLAccountImportDataStaging2] SET ysnNoDescription = 1 WHERE TRIM(ISNULL([strDescription],'')) = ''
+UPDATE [tblGLAccountImportDataStaging2] 
+SET strAccountId = RTRIM(LTRIM(strPrimarySegment)) + @separator + RTRIM(LTRIM(strLocationSegment)) +  
+	CASE WHEN RTRIM(LTRIM(ISNULL(strLOBSegment,''))) = '' 
+	THEN ''  
+	ELSE @separator + strLOBSegment  END
+UPDATE [tblGLAccountImportDataStaging2] SET ysnNoDescription = 1 WHERE RTRIM(LTRIM(ISNULL([strDescription],''))) = ''
 UPDATE [tblGLAccountImportDataStaging2] SET [ysnMissingLOBSegment] = 0
 	
 
@@ -101,18 +105,18 @@ JOIN tblGLAccount A ON A.strAccountId COLLATE Latin1_General_CI_AS = T.strAccoun
 
 UPDATE T SET intAccountUnitId = A.intAccountUnitId
 FROM  [tblGLAccountImportDataStaging2] T 
-LEFT JOIN tblGLAccountUnit A ON LOWER(A.strUOMCode) COLLATE Latin1_General_CI_AS = LOWER(TRIM(ISNULL(T.strUOM,''))) COLLATE Latin1_General_CI_AS
+LEFT JOIN tblGLAccountUnit A ON LOWER(A.strUOMCode) COLLATE Latin1_General_CI_AS = LOWER(RTRIM(LTRIM(ISNULL(T.strUOM,'')))) COLLATE Latin1_General_CI_AS
 
 UPDATE T SET 
 intPrimarySegmentId = A.intAccountSegmentId
 FROM  [tblGLAccountImportDataStaging2] T 
-LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =TRIM(T.strPrimarySegment) COLLATE Latin1_General_CI_AS 
+LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =RTRIM(LTRIM(T.strPrimarySegment)) COLLATE Latin1_General_CI_AS 
 JOIN tblGLAccountStructure S on S.intAccountStructureId = A.intAccountStructureId
 WHERE S.strType = 'Primary'
 
 UPDATE T SET [intLocationSegmentId] = A.intAccountSegmentId
 FROM  [tblGLAccountImportDataStaging2] T 
-LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =TRIM(T.strLocationSegment) COLLATE Latin1_General_CI_AS
+LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =RTRIM(LTRIM(T.strLocationSegment)) COLLATE Latin1_General_CI_AS
 JOIN tblGLAccountStructure S on S.intAccountStructureId = A.intAccountStructureId
 WHERE strStructureName = 'Location'
 
@@ -120,7 +124,7 @@ WHERE strStructureName = 'Location'
 IF @withLOB =1 
 	UPDATE T SET [ysnMissingLOBSegment] = CASE WHEN A.strCode IS NULL THEN 1 ELSE 0 END	,[intLOBSegmentId] = A.intAccountSegmentId
 	FROM  [tblGLAccountImportDataStaging2] T 
-	LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =TRIM(T.strLOBSegment) COLLATE Latin1_General_CI_AS
+	LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =RTRIM(LTRIM(T.strLOBSegment)) COLLATE Latin1_General_CI_AS
 	LEFT JOIN tblGLAccountStructure S on S.intAccountStructureId = A.intAccountStructureId
 	WHERE strStructureName = 'LOB'
 
@@ -133,17 +137,17 @@ AND ISNULL([ysnGLAccountExist],0) = 0
 
 
 UPDATE T set strDescription = S.strChartDesc FROM [tblGLAccountImportDataStaging2] T 
-JOIN tblGLAccountSegment S ON S.strCode = TRIM(T.strPrimarySegment) 
+JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment)) 
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId 
 WHERE  ST.strType = 'Primary'AND ISNULL(ysnValid,0) = 1 AND  ISNULL(T.[ysnNoDescription],0)  = 1
 
 UPDATE T set strDescription = T.strDescription + '-' + S.strChartDesc FROM [tblGLAccountImportDataStaging2] T 
-JOIN tblGLAccountSegment S ON S.strCode = TRIM(T.strPrimarySegment) 
+JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment)) 
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId 
 WHERE  ST.strStructureName = 'Location'AND ISNULL(ysnValid,0) = 1  AND  ISNULL(T.[ysnNoDescription],0)  = 1
 
 UPDATE T set strDescription = T.strDescription + '-' + S.strChartDesc FROM [tblGLAccountImportDataStaging2] T 
-JOIN tblGLAccountSegment S ON S.strCode = TRIM(T.strPrimarySegment) 
+JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment)) 
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId 
 WHERE  ST.strStructureName = 'LOB'AND ISNULL(ysnValid,0) = 1 AND  ISNULL(T.[ysnNoDescription],0)  = 1
 
