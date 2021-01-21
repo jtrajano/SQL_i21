@@ -2658,6 +2658,7 @@ INSERT INTO @ItemsForContracts (
 	, intItemId
 	, strItemNo
 	, strBatchId
+	, ysnFromReturn
 )
 SELECT intInvoiceId			= intInvoiceId
 	, intInvoiceDetailId	= intInvoiceDetailId
@@ -2673,6 +2674,7 @@ SELECT intInvoiceId			= intInvoiceId
 	, intItemId				= intItemId
 	, strItemNo				= strItemNo
 	, strBatchId			= strBatchId
+	, ysnFromReturn			= ysnFromReturn
 FROM #ARItemsForContracts
 WHERE strType = 'Contract Balance'
 
