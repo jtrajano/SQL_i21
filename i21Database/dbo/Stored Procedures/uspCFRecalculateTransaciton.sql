@@ -1158,13 +1158,26 @@ BEGIN
 						FROM #ItemTax
 
 
-						UPDATE @tblCFRemoteTax 
-						SET 
-						 dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
-						,dblTax = (SELECT TOP 1 dblTaxOriginalAmount FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
-						WHERE intTaxGroupId = @intLoopTaxGroupID
-						AND intTaxClassId = @intLoopTaxClassID
-						AND intTaxCodeId = @intLoopTaxCodeID
+						IF(@dblQuantity < 0)
+						BEGIN
+							UPDATE @tblCFRemoteTax 
+							SET 
+							 dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+							,dblTax = -1 * ABS((SELECT TOP 1 dblTaxOriginalAmount FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId))
+							WHERE intTaxGroupId = @intLoopTaxGroupID
+							AND intTaxClassId = @intLoopTaxClassID
+							AND intTaxCodeId = @intLoopTaxCodeID
+						END
+						ELSE
+						BEGIN
+							UPDATE @tblCFRemoteTax 
+							SET 
+							 dblRate = (SELECT TOP 1 dblTaxRate FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId)
+							,dblTax = ABS((SELECT TOP 1 dblTaxOriginalAmount FROM tblCFTransactionTax WHERE intTaxCodeId = @intLoopTaxCodeID AND intTransactionId = @intTransactionId))
+							WHERE intTaxGroupId = @intLoopTaxGroupID
+							AND intTaxClassId = @intLoopTaxClassID
+							AND intTaxCodeId = @intLoopTaxCodeID
+						END
 
 						DELETE #ItemTax
 						WHERE intTaxGroupId = @intLoopTaxGroupID
