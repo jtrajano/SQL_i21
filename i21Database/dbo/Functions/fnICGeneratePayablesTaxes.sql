@@ -59,15 +59,19 @@ BEGIN
 				,dblTax						= 
 					CASE 
 						--WHEN voucherItems.ysnReturn = 1 THEN -ItemTax.dblTax
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ItemTax.dblTax
-						ELSE ItemTax.dblTax
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-ROUND(dbo.fnMultiply(ItemTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+						ELSE 							
+							ROUND(dbo.fnMultiply(ItemTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
 					END
 
 				,dblAdjustedTax				= 
 					CASE 
 						--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
-						ELSE ISNULL(ItemTax.dblAdjustedTax, 0)
+						WHEN @billTypeToUse = @type_DebitMemo THEN 							
+							-ROUND(dbo.fnMultiply(ItemTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+						ELSE 
+							ROUND(dbo.fnMultiply(ItemTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
 					END
 				,ysnTaxAdjusted				= ItemTax.ysnTaxAdjusted
 				,ysnSeparateOnBill			= ItemTax.ysnSeparateOnInvoice
@@ -99,8 +103,25 @@ BEGIN
 					--	ELSE ChargeTax.dblTax
 					--END 
 					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo THEN -(CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblTax ELSE ChargeTax.dblTax END)
-						ELSE (CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblTax ELSE ChargeTax.dblTax END)
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2) 
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
+							
+						ELSE 
+							(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2) 
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
 					END 
 
 				,dblAdjustedTax				= 
@@ -110,8 +131,24 @@ BEGIN
 					--	ELSE ISNULL(ChargeTax.dblAdjustedTax, 0)
 					--END 
 					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo THEN -(CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblAdjustedTax ELSE ChargeTax.dblAdjustedTax END)
-						ELSE (CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblAdjustedTax ELSE ChargeTax.dblAdjustedTax END)
+						WHEN @billTypeToUse = @type_DebitMemo THEN 
+							-(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
+						ELSE 
+							(
+								CASE 
+									WHEN Charge.ysnPrice = 1 THEN 
+										-ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+									ELSE 
+										ROUND(dbo.fnMultiply(ChargeTax.dblAdjustedTax, ISNULL(NULLIF(voucherItems.dblRatio, 0), 1)), 2)
+								END
+							)
 					END 
 
 				,ysnTaxAdjusted				= ChargeTax.ysnTaxAdjusted

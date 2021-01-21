@@ -7804,13 +7804,15 @@
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
-<Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+    <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
     <Build Include="dbo\Views\vyuAP1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreate1099NECFile.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileNECPayee.sql" />
-    <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
+    <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />    
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
