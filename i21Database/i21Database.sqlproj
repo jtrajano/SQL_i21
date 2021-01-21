@@ -9254,6 +9254,7 @@
     <Build Include="dbo\Views\vyuPATClearingItem.sql" />
     <Build Include="dbo\Views\vyuPATClearingItemGL.sql" />
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
+    <None Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
