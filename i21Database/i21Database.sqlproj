@@ -9134,7 +9134,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildPayment.sql" />
-    <None Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
