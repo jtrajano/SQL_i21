@@ -1323,6 +1323,7 @@
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuICGetLot.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTRetailChangeReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCommanderTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDiscontinued.sql" />
     <Build Include="dbo\Stored Procedures\uspSTPurgePromotions.sql" />
