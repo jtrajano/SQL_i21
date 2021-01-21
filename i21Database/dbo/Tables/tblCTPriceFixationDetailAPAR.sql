@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[tblCTPriceFixationDetailAPAR]
 	ysnMarkDelete					BIT,
 	ysnReturn						BIT null default 0,
 	ysnPreDeploymentFix				BIT null default 0,
+	strInvoiceDiscountsChargesIds	nvarchar(500) COLLATE Latin1_General_CI_AS,
 	[intConcurrencyId]				INT NOT NULL,
 
 	CONSTRAINT [PK_tblCTPriceFixationDetailAPAR_intPriceFixationDetailAPARId] PRIMARY KEY CLUSTERED (intPriceFixationDetailAPARId ASC),

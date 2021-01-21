@@ -464,7 +464,8 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[intOriginalInvoiceDetailId]
 				,[strAddonDetailKey]
 				,[ysnAddonParent]
-				,[dblAddOnQuantity])
+				,[dblAddOnQuantity]
+				,[intInventoryShipmentChargeId])
 			SELECT TOP 1
 				 @InvoiceId
 				,intItemId
@@ -554,6 +555,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemAddonDetailKey	
 				,@ItemAddonParent
 				,@ItemAddOnQuantity
+				,@ItemInventoryShipmentChargeId
 			FROM tblICItem WHERE intItemId = @ItemId
 
 			SET @NewDetailId = SCOPE_IDENTITY()
