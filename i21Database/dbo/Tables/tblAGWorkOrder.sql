@@ -48,6 +48,7 @@
  [blbApplicatorSignature] VARBINARY(max) NULL,
  [dtmDueDate] DATETIME NOT NULL,
  [dtmEndTime] DATETIME NULL,
+ [ysnShipped] BIT NOT NULL DEFAULT(0),
  [intConcurrencyId] INT NOT NULL DEFAULT(0),
  CONSTRAINT [UK_tblAGWorkOrder_strOrderNumber] UNIQUE ([strOrderNumber]),
  CONSTRAINT [FK_tblAGWorkOrder_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),

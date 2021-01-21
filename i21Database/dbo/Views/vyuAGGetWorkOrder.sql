@@ -42,6 +42,7 @@ AS
 	, WO.strTemperatureUOM
 	, WO.intApplicationTargetId
 	, TARGET.strTargetName
+	, WO.ysnShipped
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
