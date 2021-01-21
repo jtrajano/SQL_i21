@@ -145,7 +145,159 @@ BEGIN
 	FROM	tblICInventoryTransaction t 
 	WHERE	t.strTransactionId = @strBillId
 			AND t.strBatchId = @strBatchId
+
+	DECLARE @voucherIds AS Id
+
+	INSERT INTO @voucherIds
+	SELECT intBillId = @intBillId
 		
+	--INSERT INTO @adjustedEntries (
+	--	[intItemId] 
+	--	,[intItemLocationId] 
+	--	,[intItemUOMId] 
+	--	,[dtmDate] 
+	--	,[dblQty] 
+	--	,[dblUOMQty] 
+	--	,[intCostUOMId] 
+	--	,[dblVoucherCost] 
+	--	,[dblNewValue]
+	--	,[intCurrencyId] 
+	--	--,[dblExchangeRate] 
+	--	,[intTransactionId]
+	--	,[intTransactionDetailId]
+	--	,[strTransactionId]
+	--	,[intTransactionTypeId]
+	--	,[intLotId]
+	--	,[intSubLocationId]
+	--	,[intStorageLocationId]
+	--	,[ysnIsStorage]
+	--	,[strActualCostId]
+	--	,[intSourceTransactionId]
+	--	,[intSourceTransactionDetailId]
+	--	,[strSourceTransactionId]	
+	--)
+	--SELECT
+	--		[intItemId]							=	B.intItemId
+	--		,[intItemLocationId]				=	D.intItemLocationId
+	--		,[intItemUOMId]						=   itemUOM.intItemUOMId
+	--		,[dtmDate] 							=	A.dtmDate
+	--		,[dblQty] 							=	NULL --CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+	--		,[dblUOMQty] 						=	NULL --itemUOM.dblUnitQty
+	--		,[intCostUOMId]						=	NULL -- voucherCostUOM.intItemUOMId 
+	--		,[dblVoucherCost] 					=	NULL -- B.dblCost 
+	--		,[dblNewValue]						=	
+	--											/*
+	--												New Formula: 
+	--												Cost Adjustment Value = 
+	--												[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
+	--											*/
+	--											ROUND(
+	--												dbo.fnMultiply(
+	--													--[Voucher Qty]
+	--													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+	--													--[Voucher Cost]
+	--													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
+	--															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
+	--																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+	--																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
+	--														ELSE 
+	--															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
+	--																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
+	--																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
+	--													END 													
+	--												)
+	--												,2 
+	--											)
+	--											- 
+	--											ROUND(
+	--												dbo.fnMultiply(
+	--												--[Voucher Qty]
+	--												CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
+													
+	--												,--[Receipt Cost]
+	--												CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
+	--														CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
+	--																dbo.fnCalculateCostBetweenUOM(
+	--																	receiptCostUOM.intItemUOMId
+	--																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+	--																	, E2.dblUnitCost
+	--																) 
+	--																/ E1.intSubCurrencyCents
+	--																* E2.dblForexRate
+	--															ELSE 
+	--																dbo.fnCalculateCostBetweenUOM(
+	--																	receiptCostUOM.intItemUOMId
+	--																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+	--																	, E2.dblUnitCost
+	--																) 
+	--																/ E1.intSubCurrencyCents
+	--														END 
+	--													ELSE
+	--														CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
+	--															dbo.fnCalculateCostBetweenUOM(
+	--																receiptCostUOM.intItemUOMId
+	--																, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+	--																, E2.dblUnitCost
+	--															) 
+	--															* E2.dblForexRate
+	--														ELSE 
+	--															dbo.fnCalculateCostBetweenUOM(
+	--																receiptCostUOM.intItemUOMId
+	--																, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
+	--																, E2.dblUnitCost
+	--															) 
+	--													END 
+	--												END
+	--												)
+	--												,2
+	--											) 
+	--		,[intCurrencyId] 					=	A.intCurrencyId
+	--		--,[dblExchangeRate] 					=	0
+	--		,[intTransactionId]					=	A.intBillId
+	--		,[intTransactionDetailId] 			=	B.intBillDetailId
+	--		,[strTransactionId] 				=	A.strBillId
+	--		,[intTransactionTypeId] 			=	transType.intTransactionTypeId
+	--		,[intLotId] 						=	NULL 
+	--		,[intSubLocationId] 				=	E2.intSubLocationId
+	--		,[intStorageLocationId] 			=	E2.intStorageLocationId
+	--		,[ysnIsStorage] 					=	0
+	--		,[strActualCostId] 					=	E2.strActualCostId
+	--		,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
+	--		,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
+	--		,[strSourceTransactionId] 			=	E1.strReceiptNumber
+	--FROM	tblAPBill A INNER JOIN tblAPBillDetail B
+	--			ON A.intBillId = B.intBillId
+	--		INNER JOIN (
+	--			tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
+	--				ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
+	--		)
+	--			ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
+	--			AND B.intItemId = E2.intItemId 
+	--		INNER JOIN tblICItem item 
+	--			ON B.intItemId = item.intItemId
+	--		INNER JOIN tblICItemLocation D
+	--			ON D.intLocationId = E1.intLocationId AND D.intItemId = item.intItemId
+	--		LEFT JOIN tblICItemUOM itemUOM
+	--			ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
+	--		LEFT JOIN tblICItemUOM voucherCostUOM
+	--			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
+	--		LEFT JOIN tblICItemUOM receiptCostUOM
+	--			ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
+	--		LEFT JOIN tblICInventoryTransactionType transType
+	--			ON transType.strName = 'Bill'
+	--WHERE	A.intBillId = @intBillId
+	--		AND B.intInventoryReceiptChargeId IS NULL 
+	--		-- Compare the cost used in Voucher against the IR cost. 
+	--		-- If there is a difference, add it to @adjustedEntries table variable. 
+	--		AND (
+	--			dbo.fnCalculateCostBetweenUOM(
+	--				voucherCostUOM.intItemUOMId
+	--				,receiptCostUOM.intItemUOMId
+	--				,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
+	--				) <> E2.dblUnitCost
+	--			OR E2.dblForexRate <> B.dblRate
+	--		) 
+
 	INSERT INTO @adjustedEntries (
 		[intItemId] 
 		,[intItemLocationId] 
@@ -154,10 +306,8 @@ BEGIN
 		,[dblQty] 
 		,[dblUOMQty] 
 		,[intCostUOMId] 
-		,[dblVoucherCost] 
 		,[dblNewValue]
 		,[intCurrencyId] 
-		--,[dblExchangeRate] 
 		,[intTransactionId]
 		,[intTransactionDetailId]
 		,[strTransactionId]
@@ -170,121 +320,34 @@ BEGIN
 		,[intSourceTransactionId]
 		,[intSourceTransactionDetailId]
 		,[strSourceTransactionId]	
+		,[intFobPointId]
+		,[intInTransitSourceLocationId]
 	)
-	SELECT
-			[intItemId]							=	B.intItemId
-			,[intItemLocationId]				=	D.intItemLocationId
-			,[intItemUOMId]						=   itemUOM.intItemUOMId
-			,[dtmDate] 							=	A.dtmDate
-			,[dblQty] 							=	NULL --CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
-			,[dblUOMQty] 						=	NULL --itemUOM.dblUnitQty
-			,[intCostUOMId]						=	NULL -- voucherCostUOM.intItemUOMId 
-			,[dblVoucherCost] 					=	NULL -- B.dblCost 
-			,[dblNewValue]						=	
-												/*
-													New Formula: 
-													Cost Adjustment Value = 
-													[Voucher Qty x Voucher Cost] - [Voucher Qty x Receipt Cost]												
-												*/
-												dbo.fnMultiply(
-													--[Voucher Qty]
-													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
-													--[Voucher Cost]
-													,CASE WHEN A.intCurrencyId <> @intFunctionalCurrencyId THEN 														
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId,
-																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100)))) * ISNULL(B.dblRate, 0) 
-														ELSE 
-															dbo.fnCalculateCostBetweenUOM(voucherCostUOM.intItemUOMId, 
-																COALESCE(B.intWeightUOMId, B.intUnitOfMeasureId),
-																(B.dblCost - (B.dblCost * (ISNULL(B.dblDiscount,0) / 100))))
-													END 													
-												)
-												- dbo.fnMultiply(
-													--[Voucher Qty]
-													CASE WHEN B.intWeightUOMId IS NULL THEN B.dblQtyReceived ELSE B.dblNetWeight END
-													
-													,--[Receipt Cost]
-													CASE WHEN E2.ysnSubCurrency = 1 AND E1.intSubCurrencyCents <> 0 THEN 
-															CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
-																	dbo.fnCalculateCostBetweenUOM(
-																		receiptCostUOM.intItemUOMId
-																		, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
-																		, E2.dblUnitCost
-																	) 
-																	/ E1.intSubCurrencyCents
-																	* E2.dblForexRate
-																ELSE 
-																	dbo.fnCalculateCostBetweenUOM(
-																		receiptCostUOM.intItemUOMId
-																		, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
-																		, E2.dblUnitCost
-																	) 
-																	/ E1.intSubCurrencyCents
-															END 
-														ELSE
-															CASE WHEN E1.intCurrencyId <> @intFunctionalCurrencyId THEN 	
-																dbo.fnCalculateCostBetweenUOM(
-																	receiptCostUOM.intItemUOMId
-																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
-																	, E2.dblUnitCost
-																) 
-																* E2.dblForexRate
-															ELSE 
-																dbo.fnCalculateCostBetweenUOM(
-																	receiptCostUOM.intItemUOMId
-																	, COALESCE(E2.intWeightUOMId, E2.intUnitMeasureId) 
-																	, E2.dblUnitCost
-																) 
-														END 
-													END
-												)
-			,[intCurrencyId] 					=	A.intCurrencyId
-			--,[dblExchangeRate] 					=	0
-			,[intTransactionId]					=	A.intBillId
-			,[intTransactionDetailId] 			=	B.intBillDetailId
-			,[strTransactionId] 				=	A.strBillId
-			,[intTransactionTypeId] 			=	transType.intTransactionTypeId
-			,[intLotId] 						=	NULL 
-			,[intSubLocationId] 				=	E2.intSubLocationId
-			,[intStorageLocationId] 			=	E2.intStorageLocationId
-			,[ysnIsStorage] 					=	0
-			,[strActualCostId] 					=	E2.strActualCostId
-			,[intSourceTransactionId] 			=	E2.intInventoryReceiptId
-			,[intSourceTransactionDetailId] 	=	E2.intInventoryReceiptItemId
-			,[strSourceTransactionId] 			=	E1.strReceiptNumber
-	FROM	tblAPBill A INNER JOIN tblAPBillDetail B
-				ON A.intBillId = B.intBillId
-			INNER JOIN (
-				tblICInventoryReceipt E1 INNER JOIN tblICInventoryReceiptItem E2 
-					ON E1.intInventoryReceiptId = E2.intInventoryReceiptId
-			)
-				ON B.intInventoryReceiptItemId = E2.intInventoryReceiptItemId
-				AND B.intItemId = E2.intItemId 
-			INNER JOIN tblICItem item 
-				ON B.intItemId = item.intItemId
-			INNER JOIN tblICItemLocation D
-				ON D.intLocationId = E1.intLocationId AND D.intItemId = item.intItemId
-			LEFT JOIN tblICItemUOM itemUOM
-				ON itemUOM.intItemUOMId = ISNULL(B.intWeightUOMId, B.intUnitOfMeasureId)
-			LEFT JOIN tblICItemUOM voucherCostUOM
-				ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
-			LEFT JOIN tblICItemUOM receiptCostUOM
-				ON receiptCostUOM.intItemUOMId = ISNULL(E2.intCostUOMId, E2.intUnitMeasureId)
-			LEFT JOIN tblICInventoryTransactionType transType
-				ON transType.strName = 'Bill'
-	WHERE	A.intBillId = @intBillId
-			AND B.intInventoryReceiptChargeId IS NULL 
-			-- Compare the cost used in Voucher against the IR cost. 
-			-- If there is a difference, add it to @adjustedEntries table variable. 
-			AND (
-				dbo.fnCalculateCostBetweenUOM(
-					voucherCostUOM.intItemUOMId
-					,receiptCostUOM.intItemUOMId
-					,B.dblCost - (B.dblCost * (B.dblDiscount / 100))
-					) <> E2.dblUnitCost
-				OR E2.dblForexRate <> B.dblRate
-			) 
+	SELECT 
+		[intItemId] 
+		,[intItemLocationId] 
+		,[intItemUOMId] 
+		,[dtmDate] 
+		,[dblQty] 
+		,[dblUOMQty] 
+		,[intCostUOMId] 
+		,[dblNewValue]
+		,[intCurrencyId] 
+		,[intTransactionId] 
+		,[intTransactionDetailId] 
+		,[strTransactionId] 
+		,[intTransactionTypeId] 
+		,[intLotId] 
+		,[intSubLocationId] 
+		,[intStorageLocationId] 
+		,[ysnIsStorage] 
+		,[strActualCostId] 
+		,[intSourceTransactionId] 
+		,[intSourceTransactionDetailId] 
+		,[strSourceTransactionId] 
+		,[intFobPointId]
+		,[intInTransitSourceLocationId]
+	FROM dbo.fnAPCreateReceiptItemCostAdjustment(@voucherIds, @intFunctionalCurrencyId)
 
 	-- Remove zero cost adjustments. 
 	DELETE FROM @adjustedEntries WHERE ROUND(dblNewValue, 2) = 0 
