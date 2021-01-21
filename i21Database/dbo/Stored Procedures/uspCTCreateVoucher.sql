@@ -39,6 +39,8 @@ begin try
 	declare
 		@voucherPayablesFinal			VoucherPayable
 		,@voucherPayableTaxFinal		VoucherDetailTax
+		,@voucherPayableProRatedCharges VoucherPayable
+		,@voucherPayableProRatedChargeTaxes	VoucherDetailTax
 		,@intPartitionId				INT 
 		,@intBillId						INT 
 		,@intEntityVendorId				INT
@@ -135,6 +137,7 @@ begin try
 		,dblQuantityToBill decimal(38,15)
 		,intContractDetailId int
 		,intInventoryReceiptItemId int
+		,intQtyToBillUOMId int 
 	);
 
 	declare @availablePrice as table (
@@ -174,6 +177,7 @@ begin try
 	   ,intInventoryReceiptId int
 	   ,intInventoryReceiptItemId int
 	   ,dblQtyReceived numeric(18,6)
+	   ,intQtyToBillUOMId int
 	);
 
 	insert into
@@ -183,6 +187,7 @@ begin try
 		,dblQuantityToBill = a.dblQuantityToBill
 		,intContractDetailId = a.intContractDetailId
 		,intInventoryReceiptItemId = a.intInventoryReceiptItemId
+		,intQtyToBillUOMId = a.intQtyToBillUOMId
 	from
 		@voucherPayables a
 	where
@@ -199,6 +204,7 @@ begin try
 			,@dblQuantityToBill = dblQuantityToBill
 			,@intContractDetailId = intContractDetailId
 			,@intInventoryReceiptItemId = intInventoryReceiptItemId
+			,@intQtyToBillUOMId = intQtyToBillUOMId
 		from
 			@voucherPayablesDataTemp
 		where
@@ -367,7 +373,8 @@ begin try
 				,int1099Form
 				,int1099Category
 				,dbl1099
-				,ysnStage
+				,ysnStage				
+				,dblRatio
 				,intPriceFixationDetailId
 			)
 			select
@@ -460,12 +467,207 @@ begin try
 				,int1099Form = vp.int1099Form
 				,int1099Category = vp.int1099Category
 				,dbl1099 = vp.dbl1099
-				,ysnStage = 0--vp.ysnStage
+				,ysnStage = 
+					CASE WHEN hasExistingPayable.intVoucherPayableId IS NOT NULL THEN 1 ELSE 0 END 
+				,dblRatio = 
+					dbo.fnDivide(
+						@dblTransactionQuantity
+						,dblQuantityToBill
+					)
 				,intPriceFixationDetailId = @intPriceFixationDetailId
 			from
 				@voucherPayables vp
+				OUTER APPLY (
+					SELECT TOP 1 
+						ap.intVoucherPayableId
+					FROM
+						tblAPVoucherPayable ap
+					WHERE
+						ap.strSourceNumber = vp.strSourceNumber
+						AND ap.intInventoryReceiptItemId = vp.intInventoryReceiptItemId 
+						AND ap.intInventoryReceiptChargeId IS NULL 
+						AND vp.intInventoryReceiptChargeId IS NULL										
+				) hasExistingPayable
 			where
 				vp.intVoucherPayableId = @intVoucherPayableId
+				
+			-- Get the pro-rated other charges. 
+			DELETE FROM @voucherPayableProRatedCharges
+			INSERT INTO @voucherPayableProRatedCharges (
+				[intEntityVendorId]			
+				,[intTransactionType]		
+				,[intLocationId]	
+				,[intShipToId]	
+				,[intShipFromId]			
+				,[intShipFromEntityId]
+				,[intPayToAddressId]
+				,[intCurrencyId]					
+				,[dtmDate]				
+				,[strVendorOrderNumber]			
+				,[strReference]						
+				,[strSourceNumber]					
+				,[intPurchaseDetailId]				
+				,[intContractHeaderId]				
+				,[intContractDetailId]				
+				,[intContractSeqId]					
+				,[intScaleTicketId]					
+				,[intInventoryReceiptItemId]		
+				,[intInventoryReceiptChargeId]		
+				,[intInventoryShipmentItemId]		
+				,[intInventoryShipmentChargeId]		
+				,[intLoadShipmentId]				
+				,[intLoadShipmentDetailId]	
+				,[intLoadShipmentCostId]		
+				,[intItemId]						
+				,[intPurchaseTaxGroupId]			
+				,[strMiscDescription]				
+				,[dblOrderQty]						
+				,[dblOrderUnitQty]					
+				,[intOrderUOMId]					
+				,[dblQuantityToBill]				
+				,[dblQtyToBillUnitQty]				
+				,[intQtyToBillUOMId]				
+				,[dblCost]							
+				,[dblCostUnitQty]					
+				,[intCostUOMId]						
+				,[dblNetWeight]						
+				,[dblWeightUnitQty]					
+				,[intWeightUOMId]					
+				,[intCostCurrencyId]
+				,[dblTax]							
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]	
+				,[dblExchangeRate]					
+				,[ysnSubCurrency]					
+				,[intSubCurrencyCents]				
+				,[intAccountId]						
+				,[intShipViaId]						
+				,[intTermId]		
+				,[intFreightTermId]				
+				,[strBillOfLading]					
+				,[ysnReturn]
+				,[ysnStage]
+				,[dblRatio]
+			)
+			EXEC uspICGetProRatedReceiptCharges
+				@intInventoryReceiptItemId = @intInventoryReceiptItemId
+				,@intBillUOMId = @intQtyToBillUOMId
+				,@dblQtyBilled = @dblTransactionQuantity			
+			
+			-- Insert the pro-rated other charges. 
+			INSERT INTO @voucherPayablesFinal (
+				[intEntityVendorId]			
+				,[intTransactionType]		
+				,[intLocationId]	
+				,[intShipToId]	
+				,[intShipFromId]			
+				,[intShipFromEntityId]
+				,[intPayToAddressId]
+				,[intCurrencyId]					
+				,[dtmDate]				
+				,[strVendorOrderNumber]			
+				,[strReference]						
+				,[strSourceNumber]					
+				,[intPurchaseDetailId]				
+				,[intContractHeaderId]				
+				,[intContractDetailId]				
+				,[intContractSeqId]					
+				,[intScaleTicketId]					
+				,[intInventoryReceiptItemId]		
+				,[intInventoryReceiptChargeId]		
+				,[intInventoryShipmentItemId]		
+				,[intInventoryShipmentChargeId]		
+				,[intLoadShipmentId]				
+				,[intLoadShipmentDetailId]	
+				,[intLoadShipmentCostId]		
+				,[intItemId]						
+				,[intPurchaseTaxGroupId]			
+				,[strMiscDescription]				
+				,[dblOrderQty]						
+				,[dblOrderUnitQty]					
+				,[intOrderUOMId]					
+				,[dblQuantityToBill]				
+				,[dblQtyToBillUnitQty]				
+				,[intQtyToBillUOMId]				
+				,[dblCost]							
+				,[dblCostUnitQty]					
+				,[intCostUOMId]						
+				,[dblNetWeight]						
+				,[dblWeightUnitQty]					
+				,[intWeightUOMId]					
+				,[intCostCurrencyId]
+				,[dblTax]							
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]	
+				,[dblExchangeRate]					
+				,[ysnSubCurrency]					
+				,[intSubCurrencyCents]				
+				,[intAccountId]						
+				,[intShipViaId]						
+				,[intTermId]		
+				,[intFreightTermId]				
+				,[strBillOfLading]					
+				,[ysnReturn]
+				,[ysnStage]
+				,[dblRatio]
+			)
+			SELECT 
+				[intEntityVendorId]			
+				,[intTransactionType]		
+				,[intLocationId]	
+				,[intShipToId]	
+				,[intShipFromId]			
+				,[intShipFromEntityId]
+				,[intPayToAddressId]
+				,[intCurrencyId]					
+				,[dtmDate]				
+				,[strVendorOrderNumber]			
+				,[strReference]						
+				,[strSourceNumber]					
+				,[intPurchaseDetailId]				
+				,[intContractHeaderId]				
+				,[intContractDetailId]				
+				,[intContractSeqId]					
+				,[intScaleTicketId]					
+				,[intInventoryReceiptItemId]		
+				,[intInventoryReceiptChargeId]		
+				,[intInventoryShipmentItemId]		
+				,[intInventoryShipmentChargeId]		
+				,[intLoadShipmentId]				
+				,[intLoadShipmentDetailId]	
+				,[intLoadShipmentCostId]		
+				,[intItemId]						
+				,[intPurchaseTaxGroupId]			
+				,[strMiscDescription]				
+				,[dblOrderQty]						
+				,[dblOrderUnitQty]					
+				,[intOrderUOMId]					
+				,[dblQuantityToBill]				
+				,[dblQtyToBillUnitQty]				
+				,[intQtyToBillUOMId]				
+				,[dblCost]							
+				,[dblCostUnitQty]					
+				,[intCostUOMId]						
+				,[dblNetWeight]						
+				,[dblWeightUnitQty]					
+				,[intWeightUOMId]					
+				,[intCostCurrencyId]
+				,[dblTax]							
+				,[dblDiscount]
+				,[intCurrencyExchangeRateTypeId]	
+				,[dblExchangeRate]					
+				,[ysnSubCurrency]					
+				,[intSubCurrencyCents]				
+				,[intAccountId]						
+				,[intShipViaId]						
+				,[intTermId]		
+				,[intFreightTermId]				
+				,[strBillOfLading]					
+				,[ysnReturn]
+				,[ysnStage]
+				,[dblRatio]
+			FROM 
+				@voucherPayableProRatedCharges				
 
 			--select @intPriceFixationDetailId = null;
 			select @intId = min(intId) from @availablePrice where (isnull(dblAvailablePriceQuantity,0) > 0 or isnull(intAvailablePriceLoad,0) > 0) and intId > @intId;
@@ -570,7 +772,7 @@ begin try
 				,dbl1099
 				,ysnStage
 	)
-	select
+	SELECT
 		intPartitionId = vp.intPartitionId
 		,intBillId = vp.intBillId
 		,intEntityVendorId = vp.intEntityVendorId
@@ -661,10 +863,11 @@ begin try
 		,int1099Category = vp.int1099Category
 		,dbl1099 = vp.dbl1099
 		,ysnStage = vp.ysnStage
-	from
+	FROM
 		@voucherPayables vp
-	where
-		isnull(vp.intInventoryReceiptChargeId,0) = 0 and isnull(vp.intContractDetailId,0) = 0
+	WHERE
+		--ISNULL(vp.intInventoryReceiptChargeId,0) = 0 
+		ISNULL(vp.intContractDetailId,0) = 0
 
 	if exists (select top 1 1 from @voucherPayablesFinal)
 	begin
@@ -775,11 +978,12 @@ begin try
 
 				select @intCreatedInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId;
 
-				--1. Process Pro Rated Charges
-				EXEC uspICAddProRatedReceiptChargesToVoucher
-					@intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId
-					,@intBillId = @intCreatedBillId
-					,@intBillDetailId = @intCreatedBillDetailId
+				-- DO NOT USE uspICAddProRatedReceiptChargesToVoucher. Instead, use uspICGetProRatedReceiptCharges and uspICGetProRatedReceiptChargeTaxes
+				----1. Process Pro Rated Charges
+				--EXEC uspICAddProRatedReceiptChargesToVoucher
+				--	@intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId
+				--	,@intBillId = @intCreatedBillId
+				--	,@intBillDetailId = @intCreatedBillDetailId
 					
 
 				--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
@@ -831,31 +1035,37 @@ begin try
 					EXEC uspAPApplyPrepaid @intCreatedBillId, @prePayId
 				end
 
-				DELETE FROM @receiptDetails
-				INSERT INTO @receiptDetails
-				(
-					[intInventoryReceiptItemId],
-					[intInventoryReceiptChargeId],
-					[intInventoryShipmentChargeId],
-					[intSourceTransactionNoId],
-					[strSourceTransactionNo],
-					[intItemId],
-					[intToBillUOMId],
-					[dblToBillQty]
-				)
-				SELECT
-					[intInventoryReceiptItemId],
-					[intInventoryReceiptChargeId],
-					[intInventoryShipmentChargeId],
-					[intSourceTransactionNoId],
-					[strSourceTransactionNo],
-					[intItemId],
-					[intToBillUOMId],
-					[dblToBillQty]
-				FROM
-					dbo.fnCTGenerateReceiptDetail(@intCreatedInventoryReceiptItemId, @intCreatedBillId, @intCreatedBillDetailId, @dblCreatedQtyReceived, 0)
+				/**
+				-- NOTE: See CT-5484. 
+				-- Commented this code out because there is no need to call uspICUpdateBillQty
+				-- when it is already called inside uspAPCreateVoucher and uspICAddProRatedReceiptChargesToVoucher
 
-				EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+				--DELETE FROM @receiptDetails
+				--INSERT INTO @receiptDetails
+				--(
+				--	[intInventoryReceiptItemId],
+				--	[intInventoryReceiptChargeId],
+				--	[intInventoryShipmentChargeId],
+				--	[intSourceTransactionNoId],
+				--	[strSourceTransactionNo],
+				--	[intItemId],
+				--	[intToBillUOMId],
+				--	[dblToBillQty]
+				--)
+				--SELECT
+				--	[intInventoryReceiptItemId],
+				--	[intInventoryReceiptChargeId],
+				--	[intInventoryShipmentChargeId],
+				--	[intSourceTransactionNoId],
+				--	[strSourceTransactionNo],
+				--	[intItemId],
+				--	[intToBillUOMId],
+				--	[dblToBillQty]
+				--FROM
+				--	dbo.fnCTGenerateReceiptDetail(@intCreatedInventoryReceiptItemId, @intCreatedBillId, @intCreatedBillDetailId, @dblCreatedQtyReceived, 0)
+
+				--EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
+				**/
 				
 				select @intCreatedBillDetailId = min(intBillDetailId) from @CreatedVoucher where intBillDetailId >  @intCreatedBillDetailId
 			end

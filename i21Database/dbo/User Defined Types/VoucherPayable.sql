@@ -127,5 +127,6 @@ CREATE TYPE [dbo].[VoucherPayable] AS TABLE
 	[int1099Form]					INT NULL,
 	[int1099Category]				INT NULL,
 	[dbl1099]						DECIMAL(18,6) NOT NULL DEFAULT(0),
-	[ysnStage]						BIT DEFAULT(1)
+	[ysnStage]						BIT DEFAULT(1),
+	[dblRatio]						NUMERIC(38, 20) NULL DEFAULT(1) 
 )

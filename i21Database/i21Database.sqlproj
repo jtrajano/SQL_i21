@@ -7814,6 +7814,8 @@
     <Build Include="dbo\Views\vyuETExportHazMat.sql" />
     <Build Include="dbo\Views\vyuETExportHazMatXRef.sql" />
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
