@@ -1181,6 +1181,33 @@ BEGIN
 		GOTO Post_Rollback
 	END
 
+	BEGIN TRY
+		--POST INTEGRATION
+		DECLARE @postIntegrationError TABLE(intBillId INT, strBillId NVARCHAR(50), strError NVARCHAR(200));
+		DECLARE @voucherIdsIntegration AS Id;
+		INSERT INTO @voucherIdsIntegration
+		SELECT DISTINCT intBillId FROM #tmpPostBillData	
+
+		INSERT INTO @postIntegrationError(intBillId, strBillId, strError)
+		EXEC uspAPCallPostVoucherIntegration @billIds = @voucherIdsIntegration, @post = @post, @intUserId = @userId
+
+		IF EXISTS(SELECT 1 FROM @postIntegrationError)
+		BEGIN
+			--REMOVE FAILED POST VOUCHER INTEGRATION FROM UPDATING VOUCHER TABLE
+			DELETE A
+			FROM #tmpPostBillData A
+			INNER JOIN @postIntegrationError B ON A.intBillId = B.intBillId
+		END
+	END TRY
+	BEGIN CATCH
+		DECLARE @errorPostIntegration NVARCHAR(200) = ERROR_MESSAGE()
+		SET @invalidCount = @invalidCount + 1;
+		SET @totalRecords = @totalRecords - 1;
+		RAISERROR(@errorPostIntegration, 16, 1);
+		--ROLLBACK ALL IF UNKNOWN ERROR OCCURS
+		GOTO Post_Rollback
+	END CATCH
+
 	IF(ISNULL(@post,0) = 0)
 	BEGIN
 

@@ -8988,6 +8988,7 @@
     <Build Include="dbo\Stored Procedures\uspLGWeightNoteReport.sql" />
     <Build Include="dbo\Tables\tblAPBillPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspIPPreStageBill.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPCallPostVoucherIntegration.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
