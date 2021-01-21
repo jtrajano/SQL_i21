@@ -392,7 +392,12 @@ BEGIN TRY
 
 	end
 	
-	--if EXISTS (select top 1 1 from #ItemInvoice where isnull(ysnPosted,convert(bit,0)) = convert(bit,1))
+	declare @strInvoiceDiscountsChargesIds nvarchar(500);
+	declare @InvoiceDiscountsChargesIds table (
+		intId nvarchar(20)
+	)
+	declare @intActiveId int = 0;
+
 	if EXISTS (select top 1 1 from #ItemInvoice)
 	select @DetailId = MIN(DetailId) FROM #ItemInvoice
 	while (@DetailId is not null)
@@ -403,11 +408,28 @@ BEGIN TRY
 		select @Id = Id FROM #ItemInvoice where DetailId = @ParamDetailId;
 		select @Count = COUNT(*) FROM tblARInvoiceDetail WHERE intInvoiceId = @Id
 		
+		select @strInvoiceDiscountsChargesIds = strInvoiceDiscountsChargesIds from tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
 		DELETE FROM tblCTPriceFixationDetailAPAR WHERE intInvoiceDetailId = @ParamDetailId
 		
 		if (@Count = 1)
 		begin
 			set @ParamDetailId = null
+		end
+
+		/*THis will also delete the charges/discounts*/
+		if (isnull(@strInvoiceDiscountsChargesIds,'') <> '')
+		begin
+			insert into @InvoiceDiscountsChargesIds select Item from fnSplitString(@strInvoiceDiscountsChargesIds,',');
+			if exists (select top 1 1 from @InvoiceDiscountsChargesIds)
+			begin
+				select @intActiveId = min(convert(int,intId)) from @InvoiceDiscountsChargesIds where convert(int,intId) > @intActiveId;
+				while (@intActiveId is not null)
+				begin
+					EXEC uspARDeleteInvoice @Id,@intUserId,@intActiveId;
+					select @intActiveId = min(convert(int,intId)) from @InvoiceDiscountsChargesIds where convert(int,intId) > @intActiveId;
+				end
+			end
+
 		end
 
 		EXEC uspARDeleteInvoice @Id,@intUserId,@ParamDetailId
