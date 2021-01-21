@@ -1240,6 +1240,12 @@ BEGIN TRY
 									,@intSourceDetailId = @intInventoryShipmentItemId
 									,@dblQuantity = @dblQuantityForInvoice
 									,@strScreen = 'Invoice'
+
+									exec uspCTAddDiscountsChargesToInvoice
+										@intContractDetailId  = @intContractDetailId
+										,@intInventoryShipmentId = @intInventoryShipmentId
+										,@UserId = @intUserId
+										,@intInvoiceDetailId = @intInvoiceDetailId
 							END
 
 							insert into @PricedShipment (intInventoryShipmentId)
@@ -1664,6 +1670,13 @@ BEGIN TRY
 									,@intSourceDetailId = @intInventoryShipmentItemId
 									,@dblQuantity = @dblQuantityForInvoice
 									,@strScreen = 'Invoice'
+
+									exec uspCTAddDiscountsChargesToInvoice
+										@intContractDetailId  = @intContractDetailId
+										,@intInventoryShipmentId = @intInventoryShipmentId
+										,@UserId = @intUserId
+										,@intInvoiceDetailId = @intInvoiceDetailId
+
 							END
 
 							if (isnull(@dblQuantityForSpot,0) > 0)
@@ -1733,6 +1746,12 @@ BEGIN TRY
 								,@intSourceDetailId = @intInventoryShipmentItemId
 								,@dblQuantity = @dblQuantityForInvoice
 								,@strScreen = 'Invoice'
+
+							exec uspCTAddDiscountsChargesToInvoice
+								@intContractDetailId  = @intContractDetailId
+								,@intInventoryShipmentId = @intInventoryShipmentId
+								,@UserId = @intUserId
+								,@intInvoiceDetailId = @intInvoiceDetailId
 
 							if (isnull(@dblQuantityForSpot,0) > 0)
 							begin
