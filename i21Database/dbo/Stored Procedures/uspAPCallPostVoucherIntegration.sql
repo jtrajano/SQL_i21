@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPCallPostVoucherIntegration]
-	@billIds AS Id,
+	@billIds AS Id READONLY,
 	@post AS BIT,
 	@intUserId INT
 AS
