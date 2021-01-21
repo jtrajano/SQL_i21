@@ -8986,6 +8986,8 @@
     <Build Include="dbo\Stored Procedures\uspICUpdateInventoryValuationSummary.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGetTestMsg.sql" />
     <Build Include="dbo\Stored Procedures\uspLGWeightNoteReport.sql" />
+    <Build Include="dbo\Tables\tblAPBillPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPPreStageBill.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
