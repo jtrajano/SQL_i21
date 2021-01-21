@@ -28,7 +28,7 @@ GO
 CREATE NONCLUSTERED INDEX [IX_tblQMTicketDiscount_intTicketFiledId_strSourceTYpe] ON [dbo].[tblQMTicketDiscount]([intTicketFileId],[strSourceType]) INCLUDE ([intTicketDiscountId]);
 GO
 
-CREATE NONCLUSTERED INDEX [_dta_index_tblQMTicketDiscount_intTicketId_K5_] ON [dbo].[tblQMTicketDiscount]
+CREATE NONCLUSTERED INDEX [IX_tblQMTicketDiscount_intTicketId_K5_] ON [dbo].[tblQMTicketDiscount]
 (
 	[intTicketId] ASC,
 	[strSourceType] ASC,
