@@ -9156,6 +9156,7 @@
     <Build Include="dbo\Tables\tblGRSettleContractPriceFixationDetail.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
     <None Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
