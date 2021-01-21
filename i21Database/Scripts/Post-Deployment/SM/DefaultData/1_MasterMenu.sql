@@ -10,7 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Summary By Customer/Product/Period' AND strModuleName = 'Card Fueling' AND strCommand = 'CardFueling.view.CustomerProductPeriodSummaryReportOption')
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Maintenance' AND strModuleName = 'Accounts Receivable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -2609,6 +2610,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Import Tr
 	VALUES (N'Import Transactions from CSV', N'Accounts Receivable', @AccountsReceivableImportParentMenuId, N'Import Transactions from CSV', N'Import', N'Screen', N'AccountsReceivable.view.ImportTransactionsCSV', N'small-menu-import', 1, 0, 0, 1, 3, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 3, strCommand = N'AccountsReceivable.view.ImportTransactionsCSV' WHERE strMenuName = 'Import Transactions from CSV' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableImportParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
+	VALUES ( N'Performance Maintenance', N'Accounts Receivable', @AccountsReceivableReportParentMenuId, N'Performance Maintenance', N'Report', N'Screen', N'Reporting.view.ReportManager?group=Sales&report=PerformanceMatrix&direct=true', N'small-menu-report', 0, 0, 0, 1, 20, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 20, strType = 'Screen', strCommand = N'Reporting.view.ReportManager?group=Sales&report=PerformanceMatrix&direct=true' WHERE strMenuName = 'Performance Maintenance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableReportParentMenuId
 
 /* START OF DELETING */
 DELETE FROM tblSMMasterMenu WHERE strMenuName = 'Credit Memos' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
