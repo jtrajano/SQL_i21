@@ -105,7 +105,7 @@ BEGIN TRY
 			,strDestinationPointName				=	SQ.strDestinationPointName
 			,strItemDescription						=   strItemDescription
 			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure
-			,strShipment							=	LEFT(DATENAME(MONTH, GETDATE()), 3) + ' ' + DATENAME(YEAR, GETDATE()) + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + ' at '+ SQ.strFixationBy+'''s option'
+			,strShipment							=	LEFT(DATENAME(MONTH, SQ.dtmEndDate), 3) + ' ' + DATENAME(YEAR, SQ.dtmEndDate) + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + CASE WHEN NULLIF(SQ.strFixationBy, '') IS NOT NULL THEN ' at '+ SQ.strFixationBy+'''s option' ELSE '' END
 
 		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
 										                ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +  
@@ -153,6 +153,7 @@ LEFT	JOIN	(
 								DP.strCity								AS	strDestinationPointName,
 								CD.strPackingDescription				AS strPackingDescription,
 								CD.dtmStartDate,
+								CD.dtmEndDate,
 								IM.strDescription AS strItemDescription,
 								CD.strFixationBy
 
