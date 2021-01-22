@@ -1022,7 +1022,7 @@ BEGIN
 			JOIN tblAPBillDetail BillDtl 
 				ON Bill.intBillId = BillDtl.intBillId 
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
-			LEFT JOIN tblICItem Item 
+			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
 					AND Item.strType <> 'Other Charge'
 			JOIN ( --DEV'S NOTE: GRN-2409; changed to cater multiple vouchers in settlements
