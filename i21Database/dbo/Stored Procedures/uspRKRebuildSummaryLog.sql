@@ -1279,7 +1279,7 @@ BEGIN TRY
 			, ch.intCommodityId
 			, sh.intItemId
 			, sh.intCompanyLocationId
-			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then si.dblQuantity * -1
 							else suh.dblTransactionQuantity * si.dblQuantity end) * -1
 			, intQtyUOMId = si.intItemUOMId
 			, sh.intPricingTypeId
@@ -1317,7 +1317,7 @@ BEGIN TRY
 			, sh.intItemId
 			, sh.intCompanyLocationId
 			, dblQty = (case when isnull(cd.intNoOfLoad,0) = 0 then (CASE WHEN ISNULL(si.dblDestinationNet,0) = 0 THEN suh.dblTransactionQuantity ELSE si.dblDestinationNet * -1 END)
-							else suh.dblTransactionQuantity * (CASE WHEN ISNULL(si.dblDestinationNet,0) = 0 THEN suh.dblTransactionQuantity ELSE si.dblDestinationNet * -1 END) end) * -1
+							else suh.dblTransactionQuantity * (CASE WHEN ISNULL(si.dblDestinationNet,0) = 0 THEN suh.dblTransactionQuantity ELSE si.dblDestinationNet END) end) * -1
 			, intQtyUOMId = si.intItemUOMId
 			, sh.intPricingTypeId
 			, sh.strPricingType
@@ -1423,7 +1423,7 @@ BEGIN TRY
 			, ch.intCommodityId
 			, sh.intItemId
 			, sh.intCompanyLocationId
-			, dblQty = abs(sum(case when isnull(cd.intNoOfLoad,0) = 0 then suh.dblTransactionQuantity 
+			, dblQty = abs(sum(case when isnull(cd.intNoOfLoad,0) = 0 then (case when suh.dblTransactionQuantity < 0 then ld.dblQuantity * -1 else ld.dblQuantity end)
 							else suh.dblTransactionQuantity * ld.dblQuantity end) * -1)
 			, intQtyUOMId = ld.intItemUOMId
 			, sh.intPricingTypeId
