@@ -3881,7 +3881,7 @@ BEGIN TRY
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
-		FROM @ListContractHedge WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'OffSite' , 'Purchase In-Transit','Sales In-Transit') AND @ysnExchangeTraded = 1
+		FROM @ListContractHedge WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'OffSite' , 'Purchase In-Transit','Sales In-Transit', 'Sales Basis Deliveries' ) AND @ysnExchangeTraded = 1
 		GROUP BY strCommodityCode
 			, strContractType
 			, intContractHeaderId
@@ -7054,7 +7054,7 @@ BEGIN TRY
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure from @ListCrushDetail where intOrderId in(19, 20, 21, 22)
 
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
-		SELECT strCommodityCode,ROUND(dblTotal,2),strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(1, 2, 8, 19, 20) AND @ysnExchangeTraded = 1
+		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 19, 20) AND @ysnExchangeTraded = 1
 
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 16) AND @ysnExchangeTraded = 1
