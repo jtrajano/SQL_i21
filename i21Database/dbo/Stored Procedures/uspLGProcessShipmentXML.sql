@@ -2368,8 +2368,15 @@ BEGIN TRY
 						,@strDestinationPort = strDestinationPort
 					FROM @tblIPETAPOD
 
-					SELECT @intContractDetailId = intContractDetailId
-					FROM @tblIPContractDetail
+					IF @strTransactionType = 'Drop Shipment'
+					BEGIN
+						SELECT @intContractDetailId=@intSContractDetailId
+					END
+					ELSE
+					BEGIN
+						SELECT @intContractDetailId = intContractDetailId
+						FROM @tblIPContractDetail
+					END
 
 					SELECT TOP 1 @intLeadTime = intLeadTime
 					FROM tblSMCity DPort
