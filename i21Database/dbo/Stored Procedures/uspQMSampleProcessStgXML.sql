@@ -4,28 +4,28 @@ BEGIN TRY
 	SET NOCOUNT ON
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
-	DECLARE @intSampleStageId INT
-	DECLARE @intSampleId INT
-	DECLARE @strSampleNumber NVARCHAR(MAX)
-	DECLARE @strNewSampleNumber NVARCHAR(MAX)
-	DECLARE @strHeaderXML NVARCHAR(MAX)
-	DECLARE @strDetailXML NVARCHAR(MAX)
-	DECLARE @strTestResultXML NVARCHAR(MAX)
-	DECLARE @strReference NVARCHAR(MAX)
-	DECLARE @strRowState NVARCHAR(MAX)
-	DECLARE @strFeedStatus NVARCHAR(MAX)
-	DECLARE @dtmFeedDate DATETIME
-	DECLARE @strMessage NVARCHAR(MAX)
-	DECLARE @intMultiCompanyId INT
-	DECLARE @intStgEntityId INT
-	DECLARE @intCompanyLocationId INT
-	DECLARE @strTransactionType NVARCHAR(MAX)
-	DECLARE @intSampleAcknowledgementStageId INT
-	DECLARE @strHeaderCondition NVARCHAR(MAX)
-	DECLARE @strAckHeaderXML NVARCHAR(MAX)
-	DECLARE @strAckDetailXML NVARCHAR(MAX)
-	DECLARE @strAckTestResultXML NVARCHAR(MAX)
-	DECLARE @idoc INT
+		,@intSampleStageId INT
+		,@intSampleId INT
+		,@strSampleNumber NVARCHAR(MAX)
+		,@strNewSampleNumber NVARCHAR(MAX)
+		,@strHeaderXML NVARCHAR(MAX)
+		,@strDetailXML NVARCHAR(MAX)
+		,@strTestResultXML NVARCHAR(MAX)
+		,@strReference NVARCHAR(MAX)
+		,@strRowState NVARCHAR(MAX)
+		,@strFeedStatus NVARCHAR(MAX)
+		,@dtmFeedDate DATETIME
+		,@strMessage NVARCHAR(MAX)
+		,@intMultiCompanyId INT
+		,@intStgEntityId INT
+		,@intCompanyLocationId INT
+		,@strTransactionType NVARCHAR(MAX)
+		,@intSampleAcknowledgementStageId INT
+		,@strHeaderCondition NVARCHAR(MAX)
+		,@strAckHeaderXML NVARCHAR(MAX)
+		,@strAckDetailXML NVARCHAR(MAX)
+		,@strAckTestResultXML NVARCHAR(MAX)
+		,@idoc INT
 		,@intTransactionCount INT
 		,@intSampleRefId INT
 		,@intNewSampleId INT
@@ -131,6 +131,17 @@ BEGIN TRY
 		,@intTransactionRefId INT
 		,@intCompanyRefId INT
 	DECLARE @tblQMSampleStage TABLE (intSampleStageId INT)
+	DECLARE @intCurrentCompanyId INT
+		,@intParentCompanyId INT
+		,@ysnIgnoreContract BIT
+
+	SELECT @intCurrentCompanyId = intCompanyId
+	FROM tblIPMultiCompany WITH (NOLOCK)
+	WHERE ysnCurrentCompany = 1
+
+	SELECT @intParentCompanyId = intCompanyId
+	FROM tblIPMultiCompany WITH (NOLOCK)
+	WHERE ysnParent = 1
 
 	INSERT INTO @tblQMSampleStage (intSampleStageId)
 	SELECT intSampleStageId
@@ -153,22 +164,22 @@ BEGIN TRY
 
 	WHILE @intSampleStageId > 0
 	BEGIN
-		SET @intSampleId = NULL
-		SET @strSampleNumber = NULL
-		SET @strHeaderXML = NULL
-		SET @strDetailXML = NULL
-		SET @strTestResultXML = NULL
-		SET @strReference = NULL
-		SET @strRowState = NULL
-		SET @strFeedStatus = NULL
-		SET @dtmFeedDate = NULL
-		SET @strMessage = NULL
-		SET @intMultiCompanyId = NULL
-		SET @intStgEntityId = NULL
-		SET @intCompanyLocationId = NULL
-		SET @strTransactionType = NULL
-		SET @intToBookId = NULL
-		SET @strFromBook = NULL
+		SELECT @intSampleId = NULL
+			,@strSampleNumber = NULL
+			,@strHeaderXML = NULL
+			,@strDetailXML = NULL
+			,@strTestResultXML = NULL
+			,@strReference = NULL
+			,@strRowState = NULL
+			,@strFeedStatus = NULL
+			,@dtmFeedDate = NULL
+			,@strMessage = NULL
+			,@intMultiCompanyId = NULL
+			,@intStgEntityId = NULL
+			,@intCompanyLocationId = NULL
+			,@strTransactionType = NULL
+			,@intToBookId = NULL
+			,@strFromBook = NULL
 		SELECT @intTransactionId = NULL
 			,@intCompanyId = NULL
 			,@intScreenId = NULL
@@ -243,6 +254,7 @@ BEGIN TRY
 				,@intOrgContractDetailId = NULL
 				,@intOrgLoadDetailContainerLinkId = NULL
 				,@intOrgLoadDetailId = NULL
+				,@ysnIgnoreContract = NULL
 
 			SELECT @strSampleTypeName = strSampleTypeName
 				,@strProductValue = strProductValue
@@ -277,6 +289,7 @@ BEGIN TRY
 				,@strLastModifiedUser = strLastModifiedUser
 				,@dtmLastModified = dtmLastModified
 				,@ysnParent = ysnParent
+				,@ysnIgnoreContract = ysnIgnoreContract
 				,@intOrgContractDetailId = intContractDetailId
 				,@intOrgLoadDetailContainerLinkId = intLoadDetailContainerLinkId
 				,@intOrgLoadDetailId = intLoadDetailId
@@ -314,6 +327,7 @@ BEGIN TRY
 					,strLastModifiedUser NVARCHAR(100) Collate Latin1_General_CI_AS
 					,dtmLastModified DATETIME
 					,ysnParent BIT
+					,ysnIgnoreContract BIT
 					,intContractDetailId INT
 					,intLoadDetailContainerLinkId INT
 					,intLoadDetailId INT
@@ -333,6 +347,28 @@ BEGIN TRY
 						,16
 						,1
 						)
+			END
+
+			IF @intContractDetailRefId IS NULL
+				AND @intOrgContractDetailId IS NOT NULL
+			BEGIN
+				IF @intProductTypeId = 8
+					OR @intProductTypeId = 9
+					OR @intProductTypeId = 10
+				BEGIN
+					IF @intCurrentCompanyId = @intParentCompanyId
+					BEGIN
+						SELECT @intProductTypeId = 2
+							,@strProductValue = @strItemNo
+							,@intOrgContractDetailId = NULL
+							,@intContractDetailRefId = NULL
+							,@intOrgLoadDetailContainerLinkId = NULL
+							,@intLoadDetailContainerLinkRefId = NULL
+							,@intOrgLoadDetailId = NULL
+							,@intLoadDetailRefId = NULL
+							,@ysnIgnoreContract = 1
+					END
+				END
 			END
 
 			IF @strProductValue IS NOT NULL
@@ -1263,6 +1299,11 @@ BEGIN TRY
 				SELECT @intProductValueId = t.intItemId
 				FROM tblICItem t WITH (NOLOCK)
 				WHERE t.strItemNo = @strProductValue
+
+				SELECT @intEntityId = t.intEntityId
+				FROM tblEMEntity t
+				WHERE t.strName = @strPartyName
+					AND t.strEntityNo <> ''
 			END
 			ELSE IF @intProductTypeId = 3
 			BEGIN
@@ -1520,6 +1561,7 @@ BEGIN TRY
 					,intSentById
 					,intSampleRefId
 					,ysnParent
+					,ysnIgnoreContract
 					,intCreatedUserId
 					,dtmCreated
 					,intLastModifiedUserId
@@ -1584,6 +1626,7 @@ BEGIN TRY
 					,@intSentById
 					,@intSampleRefId
 					,0
+					,@ysnIgnoreContract
 					,@intCreatedUserId
 					,dtmCreated
 					,@intLastModifiedUserId
@@ -1618,26 +1661,54 @@ BEGIN TRY
 						)
 
 				SELECT @intNewSampleId = SCOPE_IDENTITY()
+
+				IF ISNULL(@ysnIgnoreContract, 0) = 1
+				BEGIN
+					UPDATE tblQMSample
+					SET strShipmentNumber = ''
+						,strContainerNumber = ''
+					WHERE intSampleId = @intNewSampleId
+				END
 			END
 
 			IF @strRowState = 'Modified'
 			BEGIN
+				IF ISNULL(@ysnIgnoreContract, 0) = 0
+				BEGIN
+					UPDATE tblQMSample
+					SET intProductTypeId = @intProductTypeId
+						,intProductValueId = @intProductValueId
+						,intContractDetailId = @intContractDetailId
+						,strShipmentNumber = x.strShipmentNumber
+						,strContainerNumber = x.strContainerNumber
+						,intLoadContainerId = @intLoadContainerId
+						,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
+						,intLoadId = @intLoadId
+						,intLoadDetailId = @intLoadDetailId
+					FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
+							strShipmentNumber NVARCHAR(30)
+							,strContainerNumber NVARCHAR(100)
+							) x
+					WHERE tblQMSample.intSampleRefId = @intSampleRefId
+						AND tblQMSample.intBookId = @intToBookId
+				END
+
 				UPDATE tblQMSample
 				SET intConcurrencyId = intConcurrencyId + 1
 					,intSampleTypeId = @intSampleTypeId
 					,strSampleRefNo = @strSampleNumber
-					,intProductTypeId = @intProductTypeId
-					,intProductValueId = @intProductValueId
+					--,intProductTypeId = @intProductTypeId
+					--,intProductValueId = @intProductValueId
 					,intSampleStatusId = @intSampleStatusId
 					,intPreviousSampleStatusId = @intPreviousSampleStatusId
 					,intItemId = @intItemId
 					,intItemContractId = @intItemContractId
-					,intContractDetailId = @intContractDetailId
+					--,intContractDetailId = @intContractDetailId
 					,intCountryID = @intCountryID
 					,ysnIsContractCompleted = x.ysnIsContractCompleted
 					,intLotStatusId = @intLotStatusId
 					,intEntityId = ISNULL(@intEntityId, intEntityId)
-					,strShipmentNumber = x.strShipmentNumber
+					--,strShipmentNumber = x.strShipmentNumber
 					,strLotNumber = x.strLotNumber
 					,strSampleNote = x.strSampleNote
 					,dtmSampleReceivedDate = x.dtmSampleReceivedDate
@@ -1651,15 +1722,15 @@ BEGIN TRY
 					,dtmTestingEndDate = x.dtmTestingEndDate
 					,dtmSamplingEndDate = x.dtmSamplingEndDate
 					,strSamplingMethod = x.strSamplingMethod
-					,strContainerNumber = x.strContainerNumber
+					--,strContainerNumber = x.strContainerNumber
 					,strMarks = x.strMarks
 					,intCompanyLocationSubLocationId = @intCompanyLocationSubLocationId
 					,strCountry = x.strCountry
 					,intItemBundleId = @intItemBundleId
-					,intLoadContainerId = @intLoadContainerId
-					,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
-					,intLoadId = @intLoadId
-					,intLoadDetailId = @intLoadDetailId
+					--,intLoadContainerId = @intLoadContainerId
+					--,intLoadDetailContainerLinkId = @intLoadDetailContainerLinkId
+					--,intLoadId = @intLoadId
+					--,intLoadDetailId = @intLoadDetailId
 					,intInventoryReceiptId = @intInventoryReceiptId
 					,intInventoryShipmentId = @intInventoryShipmentId
 					,intWorkOrderId = @intWorkOrderId
@@ -1679,7 +1750,7 @@ BEGIN TRY
 					,dtmLastModified = @dtmLastModified
 				FROM OPENXML(@idoc, 'vyuQMSampleHeaderViews/vyuQMSampleHeaderView', 2) WITH (
 						ysnIsContractCompleted BIT
-						,strShipmentNumber NVARCHAR(30)
+						--,strShipmentNumber NVARCHAR(30)
 						,strLotNumber NVARCHAR(50)
 						,strSampleNote NVARCHAR(512)
 						,dtmSampleReceivedDate DATETIME
@@ -1691,7 +1762,7 @@ BEGIN TRY
 						,dtmTestingEndDate DATETIME
 						,dtmSamplingEndDate DATETIME
 						,strSamplingMethod NVARCHAR(50)
-						,strContainerNumber NVARCHAR(100)
+						--,strContainerNumber NVARCHAR(100)
 						,strMarks NVARCHAR(100)
 						,strCountry NVARCHAR(100)
 						,strComment NVARCHAR(MAX)
