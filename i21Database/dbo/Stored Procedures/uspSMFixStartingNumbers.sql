@@ -82,7 +82,8 @@ BEGIN
 			SET		intNumber = @intNumber + 1 
 			WHERE	strTransactionType = @strTransactionType	
 		END
-		ELSE
+
+		IF (@intAPNumber IS NOT NULL AND ISNULL(@intAPNumber, 0) > @intNumber)
 		BEGIN
 			UPDATE	dbo.tblSMStartingNumber
 			SET		intNumber = @intAPNumber + 1 
