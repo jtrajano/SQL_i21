@@ -348,14 +348,14 @@ BEGIN
 			
 
 			    ,dblFutures						=	CASE
-													WHEN CBL.intPricingTypeId = 1
-													THEN CD.dblFutures
+													WHEN CBL.intPricingTypeId = 1 and CD.dblFutures is not null
+													THEN round(CD.dblFutures,2)
 													ELSE NULL
 													END  
-			    ,dblBasis						=	CAST(CD.dblBasis AS NUMERIC(20,6))
+			    ,dblBasis						=	round(CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6)),2)
 				,dblCashPrice					=	CASE
 													WHEN CBL.intPricingTypeId = 1
-													THEN ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)
+													THEN round((ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),2)
 													ELSE NULL
 													END  
 			    ,dblAmount						=	CASE   
