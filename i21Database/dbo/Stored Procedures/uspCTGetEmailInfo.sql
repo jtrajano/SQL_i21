@@ -164,13 +164,14 @@ BEGIN
 
 	IF @strMailType <> 'Sample Instruction'
 	BEGIN
-		SET @body +='Please use the link below to open your ' + LOWER(@strMailType) + '. <br><br>'
+		IF @strMailType <> 'Release Instruction'
+			SET @body += 'Please find attached the contract document.<br>'--'Please find attached the ' + LOWER(@strMailType) + '. <br>'
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @loop
 		WHILE ISNULL(@intUniqueId,0) > 0
 		BEGIN
 			SELECT	@Id = Id,@strNumber = strNumber FROM @loop WHERE intUniqueId = @intUniqueId
-			SELECT  @body += '<p><a href="'+@strURL+'#/CT/'+@routeScreen+'?routeId='+LTRIM(@Id)+'">'+@strMailType+' - '+@strNumber+'</a></p>'
+			--SELECT  @body += '<p><a href="'+@strURL+'#/CT/'+@routeScreen+'?routeId='+LTRIM(@Id)+'">'+@strMailType+' - '+@strNumber+'</a></p>'
 			SELECT	@intUniqueId = MIN(intUniqueId) FROM @loop WHERE intUniqueId > @intUniqueId
 		END
 	END
@@ -185,7 +186,8 @@ BEGIN
 		SELECT  @body += 'Please find attached the release instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
 	END	
 
-	SET @body += '<br>'
+	IF @strMailType IN ('Sample Instruction', 'Release Instruction')
+		SET @body += '<br>'
 	SET @body +=@strThanks+'<br><br>'
 	SET @body +='Sincerely, <br>'
 		
@@ -198,7 +200,7 @@ BEGIN
 		SET @body +='#SIGNATURE#'
 	END
 
-	SET @body +='<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
+	--SET @body +='<br><strong>Please do not reply to this e-mail, this is sent from an unattended mail box.</strong>'
 	SET @body +='</html>'
 
 	SET @Filter = '[{"column":"intEntityContactId","value":"' + @strIds + '","condition":"eq","conjunction":"and"}]'
