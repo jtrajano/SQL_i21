@@ -8900,6 +8900,7 @@
     <Build Include="dbo\Stored Procedures\uspCTProcessSummaryLogOnPriceUpdate.sql" />
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
