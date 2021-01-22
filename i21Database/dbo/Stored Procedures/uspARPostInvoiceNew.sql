@@ -157,6 +157,7 @@ CREATE TABLE #ARPostInvoiceHeader
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
+	,[ysnFromReturn]                        BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NULL
     ,[intItemId]                            INT             NULL
@@ -316,6 +317,7 @@ CREATE TABLE #ARPostInvoiceDetail
     ,[ysnExcludeInvoiceFromPayment]         BIT             NULL
     ,[ysnRefundProcessed]                   BIT             NULL
     ,[ysnIsInvoicePositive]                 BIT             NULL
+	,[ysnFromReturn]                        BIT             NULL
 
     ,[intInvoiceDetailId]                   INT             NOT NULL PRIMARY KEY
     ,[intItemId]                            INT             NULL
