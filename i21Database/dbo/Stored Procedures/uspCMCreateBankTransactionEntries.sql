@@ -139,31 +139,6 @@ BEGIN
 	FROM @BankTransactionDetailEntries BankTransactionDetailEntries
 END
 ;
-
--- Zero ACH transaction will skip ACH Generation and Proceed with Remittance Printing
-
-	DECLARE @dblAmount NUMERIC(18,6)
-	DECLARE @intBankTransactionTypeId INT
-	DECLARE @intBankAccountId INT
-	DECLARE @intEntityId INT
-	DECLARE @strTransactionId NVARCHAR(100)
-	SELECT 
-		@strTransactionId = cast(@intTransactionId as nvarchar(20)), 
-		@dblAmount = dblAmount, 
-		@intBankTransactionTypeId = intBankTransactionTypeId,
-		@intBankAccountId = intBankAccountId,
-		@intEntityId = intEntityId
-	FROM  @BankTransactionEntries
-	IF( @dblAmount = 0 AND @intBankTransactionTypeId = 22) --ACH PAYMENT 
-	BEGIN
-		EXEC [dbo].[uspCMBankFileGenerationLog]
-		@intBankAccountId = @intBankAccountId,
-		@strTransactionIds = @strTransactionId,
-		@strFileName = '',
-		@strProcessType  = 'ACH OR NACHA',
-		@intBankFileFormatId = 0,
-		@intEntityId = @intEntityId
-	END
 --=====================================================================================================================================
 -- 	EXIT ROUTINES 
 ---------------------------------------------------------------------------------------------------------------------------------------
