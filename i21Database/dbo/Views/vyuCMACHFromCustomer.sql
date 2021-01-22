@@ -16,6 +16,7 @@ dbo.fnConvertNumberToWord(Unde.dblAmount) COLLATE Latin1_General_CI_AS AS strAmo
 BT.intCurrencyId, 
 BT.dblExchangeRate, 
 BT.intEntityId, 
+BT.ysnCheckVoid,
 Unde.ysnToProcess, 
 Unde.ysnCommitted, 
 Unde.ysnGenerated, 
