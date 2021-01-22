@@ -1214,3 +1214,8 @@ UPDATE tblQMSampleType
 SET ysnPartyMandatory = 1
 WHERE ysnPartyMandatory IS NULL
 GO
+
+UPDATE tblQMSample
+SET ysnIgnoreContract = 0
+WHERE ysnIgnoreContract IS NULL
+GO
