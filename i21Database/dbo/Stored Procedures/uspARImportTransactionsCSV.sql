@@ -96,6 +96,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 			,@intCostingMethod				INT				= NULL
 			,@ysnOrigin						BIT				= 0
 			,@ysnRecap						BIT			 	= 0
+			,@ysnImpactInventory			BIT			 	= 1
 
 		IF @IsTank = 1
 			BEGIN
@@ -219,7 +220,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 					, @ysnAllowNegativeStock		= (CASE WHEN ICIL.intAllowNegativeInventory = 1 THEN 1 ELSE 0 END)
 					, @intStockUnit					= ICUOM.intItemUOMId
 					, @intCostingMethod				= ICIL.intCostingMethod
-					,@ysnRecap						= H.ysnRecap	
+					, @ysnRecap						= H.ysnRecap
+					, @ysnImpactInventory			= 0
 				FROM
 					tblARImportLogDetail ILD
 				INNER JOIN
@@ -490,7 +492,7 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[intSubCurrencyId]
 							,[dblSubCurrencyRate]
 							,[ysnUseOriginIdAsInvoiceNumber]
-
+							,[ysnImpactInventory]
 						)
 						SELECT 
 							 [strSourceTransaction]		= 'Import'
@@ -593,8 +595,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 							,[dblCurrencyExchangeRate]	= 1.000000
 							,[intSubCurrencyId]			= NULL
 							,[dblSubCurrencyRate]		= 1.000000
-							,[ysnUseOriginIdAsInvoiceNumber] = CASE WHEN ISNULL(@OriginId, '') <> '' AND  @CustomerNumber <> '9998' THEN 1 ELSE 0 END
-				
+							,[ysnUseOriginIdAsInvoiceNumber] =   CASE WHEN  (@OriginId IS NOT NULL  AND  @CustomerNumber <> '9998') THEN CAST(1 AS BIT) ELSE CAST(1 AS BIT) END
+							,[ysnImpactInventory]		= @ysnImpactInventory
 						IF @ImportFormat = @IMPORTFORMAT_CARQUEST
 							BEGIN
 								INSERT INTO @TaxDetails(
