@@ -9155,6 +9155,7 @@
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
     <Build Include="dbo\Tables\tblGRSettleContractPriceFixationDetail.sql" />
     <None Include="Scripts\Post-Deployment\GR\GR_InsertVouchersInSettleStorageBillDetailTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
   </ItemGroup>
   <ItemGroup>
