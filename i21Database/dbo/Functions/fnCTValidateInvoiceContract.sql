@@ -91,7 +91,7 @@ BEGIN
 		SELECT @dblInvoiceQty = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN @dblInvoiceQty ELSE @dblInvoiceQty / ABS(@dblInvoiceQty) END
 			, @intContractStatusId = CD.intContractStatusId
 			, @dblQuantity = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(CD.dblQuantity, 0) ELSE ISNULL(CD.intNoOfLoad, 0) END
-			, @dblScheduleQty = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(CD.dblScheduleQty, 0) - @dblOrigInvoiceQty ELSE ISNULL(CD.dblScheduleLoad, 0) -1 END
+			, @dblScheduleQty = case when (isnull(CD.dblScheduleQty,0) = 0 or isnull(CD.dblScheduleLoad,0) = 0) and @dblOrigInvoiceQty < 0 then (CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN abs(@dblOrigInvoiceQty) ELSE 1 END) else (CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(CD.dblScheduleQty, 0) - @dblOrigInvoiceQty ELSE ISNULL(CD.dblScheduleLoad, 0) -1 END) end--CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(CD.dblScheduleQty, 0) - @dblOrigInvoiceQty ELSE ISNULL(CD.dblScheduleLoad, 0) -1 END
 			, @dblOrgScheduleQty = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(CD.dblScheduleQty, 0) - @dblOrigInvoiceQty ELSE ISNULL(CD.dblScheduleLoad, 0) - 1 END
 			, @dblBalance = CASE WHEN ISNULL(ysnLoad, 0) = 0 THEN ISNULL(CD.dblBalance, 0) ELSE ISNULL(CD.dblBalanceLoad, 0) END
 			, @ysnUnlimitedQuantity = ISNULL(CH.ysnUnlimitedQuantity, 0)
