@@ -71,21 +71,23 @@ ORDER BY intAssetDepreciationId DESC)
 			SET @dblMonth =  @dblMonth * (@intDaysRemainingLastMonth/CAST(@intDaysInFirstMonth AS FLOAT))  
 		END
 	END
-	IF @strConvention = 'Half Year'
-	BEGIN
-		IF @intMonth BETWEEN 1 AND 12
-			OR @intMonth BETWEEN    @totalMonths - 11 AND @totalMonths
-			SELECT @dblMonth = @dblMonth / 2
+	-- ELSE Full Month would be in effect
+	
+	-- IF @strConvention = 'Half Year'
+	-- BEGIN
+	-- 	IF @intMonth BETWEEN 1 AND 12
+	-- 		OR @intMonth BETWEEN    @totalMonths - 11 AND @totalMonths
+	-- 		SELECT @dblMonth = @dblMonth / 2
 		
-	END
+	-- END
 
-	IF @strConvention = 'Mid Quarter'
-	BEGIN
-		IF @intMonth BETWEEN 1 AND 3
-			OR @intMonth BETWEEN    @totalMonths -1 AND @totalMonths+1 -- 12 -2 == 10 October , November , December
-			SELECT @dblMonth = @dblMonth /2  --- half of quarter
+	-- IF @strConvention = 'Mid Quarter'
+	-- BEGIN
+	-- 	IF @intMonth BETWEEN 1 AND 3
+	-- 		OR @intMonth BETWEEN    @totalMonths -1 AND @totalMonths+1 -- 12 -2 == 10 October , November , December
+	-- 		SELECT @dblMonth = @dblMonth /2  --- half of quarter
 		
-	END
+	-- END
 	DECLARE @dblDepre		NUMERIC (18,6)	= (@dblMonth ) + ISNULL(@dblYear,0)	
 
 	INSERT INTO @tbl(
