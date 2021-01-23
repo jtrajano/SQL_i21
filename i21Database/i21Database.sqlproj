@@ -461,6 +461,7 @@
     <Build Include="dbo\Tables\tblGLPostRecap.sql" />
     <Build Include="dbo\Tables\tblGLPostResult.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostJournal.sql" />
+    <Build Include="dbo\Views\vyuFAFixedAsset.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
