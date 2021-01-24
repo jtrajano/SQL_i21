@@ -114,7 +114,11 @@ IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) 
 		WHERE intContractHeaderId = @intContractHeaderIdToCompute
 		  AND intInventoryShipmentItemId IS NOT NULL
 
-		EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceId, 0, @intUserId
+		EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId			= @intInvoiceId
+											  , @ForDelete			= 0    
+											  , @UserId			    = @intUserId
+											  , @InvoiceDetailId 	= NULL
+											  , @ysnLogRisk			= 0
 	END
 
 INSERT INTO @tblInvoiceIds (intHeaderId)
@@ -826,7 +830,11 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEIDS) AND ISNULL(@ysnFromImport, 0) 
 				   , @intEntityUserId	 = intEntityId
 		FROM #INVOICEIDS
 
-		EXEC dbo.uspARUpdateInvoiceIntegrations @intInvoiceToUpdate, 0, @intEntityUserId
+		EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId			= @intInvoiceToUpdate
+											  , @ForDelete			= 0    
+											  , @UserId			    = @intEntityUserId
+											  , @InvoiceDetailId 	= NULL
+											  , @ysnLogRisk			= 0
 
 		DELETE FROM #INVOICEIDS WHERE intInvoiceId = @intInvoiceId
 	END
