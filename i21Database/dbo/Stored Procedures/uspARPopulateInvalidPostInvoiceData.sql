@@ -390,6 +390,29 @@ BEGIN
 	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
 	WHERE SMT.strApprovalStatus <> 'Approved'
 	AND SMT.strApprovalStatus IS NOT NULL
+
+	INSERT INTO #ARInvalidInvoiceData
+		([intInvoiceId]
+		,[strInvoiceNumber]
+		,[strTransactionType]
+		,[intInvoiceDetailId]
+		,[intItemId]
+		,[strBatchId]
+		,[strPostingError])
+	--Credit limit
+	SELECT
+		 [intInvoiceId]			= I.[intInvoiceId]
+		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
+		,[strTransactionType]	= I.[strTransactionType]
+		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+		,[intItemId]            = I.[intItemId]
+		,[strBatchId]			= I.[strBatchId]
+		,[strPostingError]		= 'The Customer''s credit limit has been reached but there is no approver configured. This invoice cannot be posted without an authorized approver.'
+	FROM #ARPostInvoiceHeader I 
+	INNER JOIN vyuEMEntityCustomerSearch C ON C.intEntityId = I.intEntityCustomerId
+	WHERE C.ysnHasCustomerCreditApprover = 0
+      AND C.strCreditCode NOT IN ('Always Allow', 'Normal', 'Reject Orders', 'COD')
+      AND ((I.dblInvoiceTotal + C.dblARBalance > C.dblCreditLimit) OR C.intCreditStopDays > 0)
 		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
