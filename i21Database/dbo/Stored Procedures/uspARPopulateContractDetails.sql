@@ -431,45 +431,24 @@ WHILE ISNULL(@intUniqueId,0) > 0
 
 							IF @dblRemainingSchedQty > @dblScheduleQty
 								SET @dblRemainingSchedQty = @dblScheduleQty
-								
+
+							--IF UNPOST WITH OVERAGE CONTRACT
+							SELECT @dblRemainingSchedQty = dblQtyShipped - dblQtyOrdered
+							FROM tblARInvoiceDetail
+							WHERE intInvoiceDetailId = @intInvoiceDetailId
+							  AND intContractDetailId = @intContractDetailId
+							  AND intSalesOrderDetailId IS NOT NULL
+							  AND dblQtyOrdered <> dblQtyShipped
+							  AND @dblQty < 0
+							  	
 							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-							INSERT INTO #ARItemsForContracts (
-								  intInvoiceId
-								, intInvoiceDetailId
-								, intItemId
-								, intContractDetailId
-								, intContractHeaderId
-								, intEntityId
-								, intUserId
-								, dtmDate
-								, dblQuantity
-								, dblBalanceQty
-								, dblSheduledQty
-								, dblRemainingQty
-								, strType
-								, strTransactionType
-								, strInvoiceNumber
-								, strItemNo
-								, strBatchId
-							)
-							SELECT intInvoiceId			= @intInvoiceId
-								, intInvoiceDetailId	= @intInvoiceDetailId
-								, intItemId				= @intItemId
-								, intContractDetailId	= @intContractDetailId
-								, intContractHeaderId	= @intContractHeaderId
-								, intEntityId			= @intEntityId
-								, intUserId				= @intEntityId
-								, dtmDate				= @dtmDate
-								, dblQuantity			= @dblSchQuantityToUpdate
-								, dblBalanceQty			= 0
-								, dblSheduledQty		= 0
-								, dblRemainingQty		= @dblRemainingSchedQty
-								, strType				= 'Remaining Scheduled'
-								, strTransactionType	= @strTransactionType
-								, strInvoiceNumber		= @strInvoiceNumber
-								, strItemNo				= @strItemNo
-								, strBatchId			= @strBatchId							
+							UPDATE #ARItemsForContracts
+							SET dblQuantity = dblQuantity - @dblRemainingSchedQty
+							  , dblSheduledQty = dblSheduledQty - @dblRemainingSchedQty
+							WHERE strType = 'Contract Scheduled'
+							  AND intInvoiceDetailId = @intInvoiceDetailId
+							  AND intContractDetailId = @intContractDetailId	
 						END
 				END
 		END
