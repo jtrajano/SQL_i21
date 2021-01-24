@@ -448,7 +448,8 @@ WHILE ISNULL(@intUniqueId,0) > 0
 							  , dblSheduledQty = dblSheduledQty - @dblRemainingSchedQty
 							WHERE strType = 'Contract Scheduled'
 							  AND intInvoiceDetailId = @intInvoiceDetailId
-							  AND intContractDetailId = @intContractDetailId	
+							  AND intContractDetailId = @intContractDetailId
+							  AND @dblConvertedQty > @dblConvertedQtyOrdered --IF S.O. Qty is less than net qty
 						END
 				END
 		END
