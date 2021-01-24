@@ -67,15 +67,6 @@ BEGIN TRY
 													  , @strScreenName		 = 'Invoice'
 				END
 
-			IF @strType = 'Remaining Scheduled' AND @dblRemainingQty <> 0
-				BEGIN
-					EXEC dbo.uspCTUpdateScheduleQuantity @intContractDetailId = @intContractDetailId
-													  , @dblQuantityToUpdate = @dblRemainingQty
-													  , @intUserId			 = @intUserId
-													  , @intExternalId		 = @intInvoiceDetailId
-													  , @strScreenName		 = 'Invoice'
-				END
-
 			DELETE FROM #ARItemsForContracts 
 			WHERE intInvoiceDetailId = @intInvoiceDetailId 
 			  AND intContractDetailId = @intContractDetailId
