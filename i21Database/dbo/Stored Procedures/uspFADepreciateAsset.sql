@@ -72,7 +72,9 @@ Exec uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strTransactio
 SELECT TOP 1 @intDefaultCurrencyId = intDefaultCurrencyId FROM tblSMCompanyPreference
 
 -- Entire record
-SELECT * INTO #FAAsset FROM tblFAFixedAsset where intAssetId IN (SELECT [intAssetId] FROM #AssetID)
+SELECT A.*, B.intDepreciationMethodId INTO #FAAsset 
+FROM tblFAFixedAsset A JOIN tblFADepreciationMethod B ON A.intAssetId = B.intAssetId where A.intAssetId IN (SELECT [intAssetId] FROM #AssetID)
+
 DECLARE @intAssetId INT = (SELECT [intAssetId] FROM #AssetID )
 
 DECLARE @dblBasis		NUMERIC (18,6)
@@ -90,7 +92,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 
 		SELECT @intServiceYear = intServiceYear,@intServiceMonth= intMonth 
 		FROM tblFADepreciationMethod A join tblFAFixedAsset B 
-		on A.intDepreciationMethodId = B.intDepreciationMethodId and @intAssetId = intAssetId	
+		on A.intAssetId = B.intAssetId and @intAssetId = B.intAssetId	
 			
 		SELECT @totalMonth = @intServiceYear * 12 + @intServiceMonth
 		IF NOT EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId AND strTransaction = 'Place in service')
@@ -119,8 +121,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 						0,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Place in service',
-						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
-						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
+						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID)),
+						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID))
 			END
 			IF NOT EXISTS(SELECT TOP 1 1 FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId AND strTransaction <> 'Place in service')
 			BEGIN
@@ -150,8 +152,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 						@dblDepre,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Depreciation',
-						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
-						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
+						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID)),
+						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID))
 				END
 			ELSE
 			BEGIN
@@ -202,8 +204,8 @@ IF ISNULL(@ysnRecap, 0) = 0
 						@dblDepre,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Depreciation',
-						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset)),
-						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intDepreciationMethodId] = (SELECT TOP 1 intDepreciationMethodId FROM #FAAsset))
+						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID)),
+						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID))
 			END
 		
 		DELETE FROM @GLEntries

@@ -20,9 +20,9 @@ DECLARE @dblBasis NUMERIC (18,6), @dtmPlacedInService DATETIME
 SELECT 
 @dblBasis = dblCost - A.dblSalvageValue,
 @strConvention = strConvention,
-@intDepreciationMethodId = A.intDepreciationMethodId,
+@intDepreciationMethodId = B.intDepreciationMethodId,
 @dtmPlacedInService = dtmDateInService
-FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intDepreciationMethodId = B.intDepreciationMethodId
+FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intAssetId = B.intAssetId
 WHERE intAssetId = @intAssetId
 
 -- Service Year Percentage
