@@ -249,6 +249,7 @@ SELECT -- Load Header
 		,L.dtmStuffingDate
 		,L.intBookId
 		,L.intSubBookId
+		,L.ysnAllowReweighs
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
