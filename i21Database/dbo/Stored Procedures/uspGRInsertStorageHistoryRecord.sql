@@ -152,7 +152,7 @@ BEGIN TRY
 
 		SELECT @intStorageHistoryId = SCOPE_IDENTITY();
 
-		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND intTransactionTypeId IN (1,5,3) OR (intTransactionTypeId = 4 AND strType = 'Settlement'))
+		IF NOT EXISTS(SELECT 1 FROM tblGRStorageHistory WHERE intStorageHistoryId = @intStorageHistoryId AND (intTransactionTypeId IN (1,5,3) OR (intTransactionTypeId = 4 AND strType = 'Settlement')))
 		BEGIN
 			EXEC uspGRRiskSummaryLog @intStorageHistoryId
 		END
