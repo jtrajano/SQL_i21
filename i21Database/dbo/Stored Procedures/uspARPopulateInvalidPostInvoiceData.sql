@@ -364,6 +364,7 @@ BEGIN
 	INNER JOIN vyuEMEntityCustomerSearch C ON C.intEntityId = I.intEntityCustomerId
 	WHERE C.ysnHasCustomerCreditApprover = 0
       AND C.strCreditCode NOT IN ('Always Allow', 'Normal', 'Reject Orders', 'COD')
+	  AND ISNULL(C.strCreditCode, '') <> ''
       AND ((I.dblInvoiceTotal + C.dblARBalance > C.dblCreditLimit) OR C.intCreditStopDays > 0)
 			
 	INSERT INTO #ARInvalidInvoiceData
