@@ -284,14 +284,18 @@ BEGIN
       AND ITEM.strType != 'Other Charge'
 
     --DELETE FROM PRICING
-    DELETE SL
+    --UNPOST DWG
+    UPDATE SL
+    SET dblQty      = 0
+      , strNotes    = 'Invoiced Quantity is ' + CONVERT(VARCHAR, CAST(dblQty AS MONEY), 1)
+	    , intActionId = 63
     FROM @tblSummaryLog SL
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
     INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
     WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
       AND dblQty > 0
 
-    --DWG
+    --POST DWG
     UPDATE SL
     SET dblQty    = 0
       , strNotes  = 'Invoiced Quantity is ' + CONVERT(VARCHAR, CAST(dblQty * -1 AS MONEY), 1)
