@@ -609,7 +609,7 @@ BEGIN TRY
 			, PF.intContractDetailId
 			, FD.dtmFixationDate
 			, dblQuantity = CASE WHEN CH.ysnLoad = 1 THEN 
-							ABS(FD.dblLoadPriced -  (ISNULL(FD.dblLoadAppliedAndPriced,0))) * CH.dblQuantityPerLoad
+							ABS(FD.dblLoadPriced -  (ISNULL(FD.dblLoadAppliedAndPriced,0) / CH.dblQuantityPerLoad)) * CH.dblQuantityPerLoad
 						ELSE 
 							ABS(FD.dblQuantity - ISNULL(FD.dblQuantityAppliedAndPriced,0)) --priced are already consumed IS/IR, so we just need unconsumed pricing
 						END
