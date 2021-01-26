@@ -1998,7 +1998,7 @@ BEGIN TRY
 				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 				, strCommodityCode = @strCommodityCode
 				, strType
-				, dblTotal = ISNULL(CASE WHEN intSeqId = 8 THEN - dblTotal ELSE dblTotal END, 0)
+				, dblTotal =  dblTotal
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 				, strLocationName
@@ -3660,7 +3660,7 @@ BEGIN TRY
 			, intFutureMonthId
 			, strFutureMonth
 		FROM(
-			SELECT dblRemainingQuantity = CASE WHEN ISNULL(intContractTypeId, 1) = 2 THEN - dblRemainingQuantity ELSE dblRemainingQuantity END
+			SELECT dblRemainingQuantity = dblRemainingQuantity
 				, intContractHeaderId
 				, strContractNumber
 				, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
@@ -6052,7 +6052,7 @@ BEGIN TRY
 			, intContractHeaderId
 			, strContractNumber)
 		SELECT strCommodityCode
-			, dblTotal = SUM(CASE WHEN ISNULL(intContractTypeId, 1) = 2 THEN - dblTotal ELSE dblTotal END)
+			, dblTotal = SUM(dblTotal)
 			, strLocationName
 			, intCommodityId
 			, @intCommodityUnitMeasureId
