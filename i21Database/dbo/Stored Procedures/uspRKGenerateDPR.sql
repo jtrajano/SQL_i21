@@ -1359,7 +1359,7 @@ BEGIN TRY
 			, strSeqHeader = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Sales' ELSE 'Collateral Receipts - Sales' END COLLATE Latin1_General_CI_AS
 			, strCommodityCode = @strCommodityCode
 			, strType = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Sales' ELSE 'Collateral Receipts - Sales' END COLLATE Latin1_General_CI_AS
-			, dblTotal
+			, dblTotal = dblTotal * -1
 			, intCollateralId
 			, strLocationName
 			, intItemId
@@ -1525,7 +1525,7 @@ BEGIN TRY
 		, 'Total Receipted' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
 		, strType = 'Collateral Sale' COLLATE Latin1_General_CI_AS
-		, dblTotal = ISNULL(dblTotal, 0)
+		, dblTotal = ISNULL(-dblTotal, 0)
 		, @intCommodityId
 		, @intCommodityUnitMeasureId
 		, strLocationName
@@ -2002,7 +2002,7 @@ BEGIN TRY
 				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 				, strCommodityCode = @strCommodityCode
 				, strType
-				, dblTotal =  dblTotal
+				, dblTotal = ISNULL(CASE WHEN intSeqId = 8 THEN - dblTotal ELSE dblTotal END, 0)
 				, intCommodityId = @intCommodityId
 				, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 				, strLocationName
@@ -3687,6 +3687,7 @@ BEGIN TRY
 			FROM #tempCollateral c1
 			WHERE c1.intLocationId = ISNULL(@intLocationId, c1.intLocationId)
 			AND c1.ysnIncludeInPriceRiskAndCompanyTitled = 1
+			AND @ysnExchangeTraded = 1
 		) t GROUP BY intCommodityId
 			, intFromCommodityUnitMeasureId
 			, intCommodityId
