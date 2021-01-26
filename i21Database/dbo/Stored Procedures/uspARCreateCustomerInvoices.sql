@@ -1497,7 +1497,7 @@ SELECT
 	,[intOriginalInvoiceId]			= ITG.[intOriginalInvoiceId]
 	,[intLoadId]                    = ITG.[intLoadId]
 	,[intEntityId]					= ITG.[intEntityId]
-	,[intEntityContactId]			= ITG.[intEntityContactId]
+	,[intEntityContactId]			= ISNULL(ITG.[intEntityContactId], ETC.intEntityContactId)
 	,[intDocumentMaintenanceId]		= NULL
 	,[dblTotalWeight]				= @ZeroDecimal
 	,[dblTotalTermDiscount]			= @ZeroDecimal
@@ -1545,6 +1545,9 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN
 	(SELECT [intEntityLocationId], [strLocationName], [strAddress], [strCity], [strState], [strZipCode], [strCountry] FROM [tblEMEntityLocation] WITH (NOLOCK)) BL1
 		ON ARC.[intBillToId] = BL1.intEntityLocationId
+LEFT OUTER JOIN
+	(SELECT intEntityId, intEntityContactId FROM tblEMEntityToContact WITH (NOLOCK) WHERE ysnDefaultContact = 1) ETC
+		ON ITG.intEntityCustomerId = ETC.intEntityId
 		
 WHILE EXISTS(SELECT TOP 1 NULL FROM #CustomerInvoice WHERE RTRIM(LTRIM(ISNULL([strInvoiceNumber],''))) = '' ORDER BY [intRowId])	
 BEGIN
