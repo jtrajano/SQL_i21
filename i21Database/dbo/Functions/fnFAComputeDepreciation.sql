@@ -23,7 +23,7 @@ SELECT
 @intDepreciationMethodId = B.intDepreciationMethodId,
 @dtmPlacedInService = dtmDateInService
 FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intAssetId = B.intAssetId
-WHERE intAssetId = @intAssetId
+WHERE A.intAssetId = @intAssetId
 
 -- Service Year Percentage
 DECLARE @dblPercentage	INT = (SELECT ISNULL(dblPercentage,1) as dblPercentage FROM tblFADepreciationMethodDetail A 
