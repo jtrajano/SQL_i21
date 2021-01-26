@@ -299,7 +299,8 @@ BEGIN TRY
 		JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT
 		JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(RTRIM(LOWER(CI.strFutMarketName)))		LEFT
 		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
-												AND LTRIM(RTRIM(LOWER(MO.strFutureMonth))) = LTRIM(RTRIM(LOWER(DATENAME(MONTH, DATEADD(MONTH, CI.intMonth , 0) - 1)))) + ' ' + CAST(CI.intYear AS NVARCHAR(5))
+												AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
+												AND	(YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear		LEFT
 		JOIN	vyuCTEntity					EY	ON	EY.strEntityName				=	CI.strEntityName	
 												AND ISNULL(EY.strEntityNumber,'')	= ISNULL(CI.strEntityNo,'')	
 												AND	EY.strEntityType	=	CASE WHEN CI.strContractType IN ('B','Purchase') THEN 'Vendor' ELSE 'Customer' END LEFT
