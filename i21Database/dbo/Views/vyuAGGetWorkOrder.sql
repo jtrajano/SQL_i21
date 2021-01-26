@@ -4,8 +4,8 @@ AS
 (
 	SELECT intWorkOrderId
 	, WO.strType
-	, WO.intItemId
-	, ITEM.strItemNo
+	, WO.intCropId
+	, CROP.strCrop
 	, COMPANYLOCATION.intCompanyLocationId
 	, COMPANYLOCATION.strLocationName
 	, WO.strStatus
@@ -13,6 +13,7 @@ AS
 	, WO.intEntityCustomerId
 	, CUSTOMER.strName AS strCustomerName
 	, WO.intFarmFieldId
+	, WO.intTermId
 	, TERM.strTerm
 	, FARMLOCATION.strLocationName AS strFarmFieldName
 	, WO.dblAcres
@@ -43,14 +44,15 @@ AS
 	, WO.intApplicationTargetId
 	, TARGET.strTargetName
 	, WO.ysnShipped
+	, WO.ysnFinalized
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
 	LEFT JOIN (
-		SELECT intItemId 
-		, strItemNo
-		FROM tblICItem WITH(NOLOCK)  
-	) ITEM ON ITEM.intItemId = WO.intItemId
+		SELECT intCropId 
+		, strCrop
+		FROM tblAGCrop WITH(NOLOCK)  
+	) CROP ON CROP.intCropId = WO.intCropId
 	LEFT JOIN (
 		SELECT intCompanyLocationId
 		, strLocationName

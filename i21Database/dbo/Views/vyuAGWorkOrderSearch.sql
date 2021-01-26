@@ -3,7 +3,8 @@ AS
 (
 	SELECT WO.intWorkOrderId
 	 ,WO.strOrderNumber
-	 ,WO.strType AS 'strCrop'
+	 ,CROP.strCrop
+	 --,WO.strType AS 'strCrop'
 	, FARMLOCATION.strLocationName AS 'strFarmField'
 	 ,TARGET.strTargetName
 	, SALESREP.strName as 'strSalesperson'
@@ -59,5 +60,11 @@ AS
 		  intSplitId,      
 		  strSplitNumber      
 	 FROM tblEMEntitySplit WITH(NOLOCK)        
- ) SPLIT ON SPLIT.intSplitId = WO.intSplitId   
+ ) SPLIT ON SPLIT.intSplitId = WO.intSplitId
+ LEFT JOIN (
+	 SELECT
+	 	intCropId,
+		 strCrop
+	FROM tblAGCrop WITH(NOLOCK)
+ ) CROP ON CROP.intCropId = WO.intCropId   
 )
