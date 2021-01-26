@@ -2655,6 +2655,36 @@ BEGIN TRY
 				END		
 				ELSE
 				BEGIN
+	
+					-- (CT-5480) Check if the changes is with either Start Date or End Date  
+					SELECT @ysnMatched = CASE WHEN COUNT(dtmStartDate) = 1 THEN 1 ELSE 0 END  
+					FROM  
+					(  
+						SELECT
+							dtmStartDate  
+							,dtmEndDate  
+						FROM
+							@cbLogPrev  
+						UNION  
+						SELECT
+							dtmStartDate  
+							,dtmEndDate 
+						FROM @cbLogSpecific  
+					) tbl
+
+					IF @ysnMatched <> 1  
+					BEGIN  
+
+						--Negate the quantity
+						UPDATE @cbLogSpecific SET dblQty = dblQty * -1, strNotes = 'Change Start Date / End Date'
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+						--Log the quantity
+						UPDATE @cbLogSpecific SET dblQty = abs(dblQty), strNotes = 'Change Start Date / End Date'
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0  
+
+					END 
+
 					-- Check if the changes is with either Basis or Futures
 					SELECT @ysnMatched = CASE WHEN COUNT(dblBasis) = 1 THEN 1 ELSE 0 END
 					FROM
