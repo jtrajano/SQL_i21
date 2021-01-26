@@ -607,6 +607,21 @@ FROM vyuARCustomerSearch C
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		LEFT JOIN (
+			SELECT dblPayment = ' + CASE WHEN @ysnPrintZeroBalanceLocal = 0 THEN   'SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)' ELSE 'SUM(0)' END + 
+				 ', intInvoiceId 
+			FROM tblARPaymentDetail PD WITH (NOLOCK) 
+			INNER JOIN (
+				SELECT intPaymentId
+				FROM dbo.tblARPayment WITH (NOLOCK)
+				WHERE ysnPosted = 1
+				  AND ysnInvoicePrepayment = 0
+				  AND ISNULL(ysnProcessedToNSF, 0) = 0 
+				  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
+				  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
+			) P ON PD.intPaymentId = P.intPaymentId
+			GROUP BY intInvoiceId
+		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
+		LEFT JOIN (
 			SELECT intPaymentId
 				 , strPaymentInfo
 				 , strRecordNumber
