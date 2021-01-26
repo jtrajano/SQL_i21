@@ -860,7 +860,7 @@ BEGIN
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId
 				AND BNKTRN.strTransactionId = @strPaymentNo
 				and INVRCPTITEM.intInventoryReceiptItemId is null
-				and InventoryReceipt.intSourceType = 1
+				--and InventoryReceipt.intSourceType = 1
 			/*--------------------------------------------------------
 			*******************FROM SETTLE STORAGE********************
 			--------------------------------------------------------*/			
