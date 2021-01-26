@@ -83,4 +83,21 @@ IF EXISTS(
 -- [END]: Update tblSTRegister.strRegisterClass from SAPPHIRE to SAPPHIRE/COMMANDER
 ----------------------------------------------------------------------------------------------------------------------------------
 
+	
+----------------------------------------------------------------------------------------------------------------------------------
+-- [START]: Update tblSTCheckoutHeader.dblTotalToDeposit additional of ATM Replenished to the computation of Total To Deposit
+----------------------------------------------------------------------------------------------------------------------------------
+        
+IF EXISTS(SELECT intCheckoutId FROM tblSTCheckoutHeader 
+			WHERE dblTotalToDeposit != (dblTotalSales + dblTotalTax + dblCustomerPayments) -  (dblTotalPaidOuts + dblCustomerCharges + dblATMReplenished))
+			BEGIN
+				UPDATE tblSTCheckoutHeader 
+					SET dblTotalToDeposit = (dblTotalSales + dblTotalTax + dblCustomerPayments) -  (dblTotalPaidOuts + dblCustomerCharges + dblATMReplenished)
+				WHERE dblTotalToDeposit != (dblTotalSales + dblTotalTax + dblCustomerPayments) -  (dblTotalPaidOuts + dblCustomerCharges + dblATMReplenished)
+			END
+			
+----------------------------------------------------------------------------------------------------------------------------------
+-- [END]: Update tblSTCheckoutHeader.dblTotalToDeposit additional of ATM Replenished to the computation of Total To Deposit
+----------------------------------------------------------------------------------------------------------------------------------
+
 GO
