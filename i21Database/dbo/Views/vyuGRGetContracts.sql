@@ -84,5 +84,5 @@ LEFT JOIN tblICItemUOM ItemUOM
 		AND ItemUOM.ysnStockUnit = 1
 LEFT JOIN tblSMFreightTerms FT
 	ON FT.intFreightTermId = ISNULL(CD.intFreightTermId,CH.intFreightTermId)
-CROSS APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+OUTER APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 
