@@ -529,7 +529,7 @@ WHERE ysnInvoicePrepayment = 0
   AND ysnPosted = 1
   AND ISNULL(P.ysnProcessedToNSF, 0) = 0
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
-  AND PD.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0
+  AND ((PD.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0 OR PD.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) = 0))
   ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND P.intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
 GROUP BY P.intPaymentId, intEntityCustomerId, intLocationId, strRecordNumber, strPaymentInfo, dblAmountPaid, dtmDatePaid, PD.intInvoiceId, strInvoiceNumber, strNotes'
 
@@ -606,8 +606,8 @@ FROM vyuARCustomerSearch C
 			) INV (strTicketNumber)
 		) SCALETICKETS
 		LEFT JOIN (
-			SELECT dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
-				 , intInvoiceId 
+			SELECT dblPayment = ' + CASE WHEN @ysnPrintZeroBalanceLocal = 0 THEN   'SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)' ELSE 'SUM(0)' END + 
+				 ', intInvoiceId 
 			FROM tblARPaymentDetail PD WITH (NOLOCK) 
 			INNER JOIN (
 				SELECT intPaymentId
