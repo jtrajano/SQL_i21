@@ -201,7 +201,8 @@ END
 
 IF ISNULL(@EntityContactId, 0) = 0
 	BEGIN
-		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
+		--SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuEMEntityContact WHERE intEntityId = @EntityCustomerId AND ysnDefaultContact = 1 AND Customer = 1
+		SELECT TOP 1 @EntityContactId = intEntityContactId FROM vyuARCustomerSearch WHERE intEntityId = @EntityCustomerId
 	END
 
 IF ISNULL(@TransactionType, '') = ''
