@@ -367,6 +367,7 @@ BEGIN
 				,[strPaidDescription]
 				,[strType]
 				,[intTransferStorageReferenceId]
+				,[strTransferTicket]
 			)
 			SELECT
 				[intCustomerStorageId]				= TSR.intSourceCustomerStorageId
@@ -380,7 +381,10 @@ BEGIN
 				,[strPaidDescription]				= 'Generated from Transfer Storage'
 				,[strType]							= 'Transfer'
 				,[intTransferStorageReferenceId]	= @intInsertedId
+				,[strTransferTicket]				= TS.strTransferStorageTicket
 			FROM tblGRTransferStorageReference TSR
+			INNER JOIN tblGRTransferStorage TS
+				ON TS.intTransferStorageId = TSR.intTransferStorageId
 			INNER JOIN tblGRTransferStorageSourceSplit T_SOURCE
 				ON T_SOURCE.intTransferStorageId = TSR.intTransferStorageId
 					AND TSR.intSourceCustomerStorageId = T_SOURCE.intSourceCustomerStorageId
@@ -406,6 +410,7 @@ BEGIN
 					,[strPaidDescription]
 					,[strType]
 					,[intTransferStorageReferenceId]
+					,[strTransferTicket]
 				)
 				SELECT TOP 1
 					[intCustomerStorageId]
@@ -419,6 +424,7 @@ BEGIN
 					,[strPaidDescription]
 					,[strType]
 					,[intTransferStorageReferenceId]
+					,[strTransferTicket]
 				FROM @StorageHistoryStagingTable
 				WHERE intId = @intIdentityId
 
@@ -1005,6 +1011,7 @@ BEGIN
 				,[strPaidDescription]
 				,[strType]
 				,[intTransferStorageReferenceId]
+				,[strTransferTicket]
 			)
 			SELECT TOP 1
 				[intCustomerStorageId]
@@ -1018,6 +1025,7 @@ BEGIN
 				,[strPaidDescription]
 				,[strType]
 				,[intTransferStorageReferenceId]
+				,[strTransferTicket]
 			FROM @StorageHistoryStagingTable
 			WHERE intId = @intIdentityId
 
