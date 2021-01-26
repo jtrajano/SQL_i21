@@ -2,6 +2,7 @@ CREATE VIEW vyuCMResponsiblePartyMatching
 AS
 select
 A.*,
+D.intResponsibleEntityId,
 strAction =
 CASE
 WHEN A.intActionId = 1 THEN 'Notify Only'
