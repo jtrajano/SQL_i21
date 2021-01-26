@@ -22,3 +22,5 @@ CREATE TABLE [dbo].[tblSMAudit] (
 GO
 CREATE NONCLUSTERED INDEX [IX_tblSMAudit_1] ON [dbo].[tblSMAudit] ([intParentAuditId], [ysnHidden])
 GO
+CREATE NONCLUSTERED INDEX [IX_tblSMAudit_intLogId] ON [dbo].[tblSMAudit] ([intLogId])
+GO
