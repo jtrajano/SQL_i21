@@ -80,7 +80,7 @@ GO
 				end
 				else
 				begin
-					set @dblComputedQuantity = @dblLoadPriced - (@dblRunningDetailQuantityApplied-@dblDetailQuantityApplied);
+					set @dblComputedQuantity = @dblLoadPriced - (@dblRunningDetailQuantityApplied-@dblDetailLoadApplied);
 					--print @dblComputedQuantity;
 					update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = case when @dblComputedQuantity > 0 then @dblComputedQuantity else 0 end where intPriceFixationDetailId = @intPriceFixationDetailId;
 				end
