@@ -568,6 +568,7 @@ BEGIN
 			,ysnShowDriverPinDescriptionOnly	BIT
 			,ysnPageBreakByPrimarySortOrder		BIT
 			,ysnSummaryByDeptDriverPinProd		BIT
+			,strDepartmentGrouping				NVARCHAR(MAX)
 		)
 		INSERT INTO @tblCFTempInvoiceReport(
 			intCustomerId				
@@ -673,6 +674,7 @@ BEGIN
 			,ysnShowDriverPinDescriptionOnly
 			,ysnPageBreakByPrimarySortOrder
 			,ysnSummaryByDeptDriverPinProd
+			,strDepartmentGrouping
 		)
 		SELECT
 		intCustomerId				
@@ -778,6 +780,7 @@ BEGIN
 			,ysnShowDriverPinDescriptionOnly
 			,ysnPageBreakByPrimarySortOrder
 			,ysnSummaryByDeptDriverPinProd
+			,strDepartmentGrouping
 		FROM vyuCFInvoiceReport
 		WHERE intTransactionId IN (SELECT intTransactionId FROM @tblCFTransactionIds)
 		
@@ -925,6 +928,7 @@ BEGIN
 		,ysnShowDriverPinDescriptionOnly
 		,ysnPageBreakByPrimarySortOrder
 		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping
 		,strStatementType
 		)
 		SELECT
@@ -1026,6 +1030,7 @@ BEGIN
 		,ysnShowDriverPinDescriptionOnly
 		,ysnPageBreakByPrimarySortOrder
 		,ysnSummaryByDeptDriverPinProd
+		,strDepartmentGrouping
 		,@StatementType
 		FROM @tblCFTempInvoiceReport
 

@@ -515,6 +515,7 @@ BEGIN TRY
 		,ysnSummaryByDriverPin
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
+		,strDepartmentGrouping
 	)
 	SELECT 
 		intCustomerGroupId
@@ -675,6 +676,7 @@ BEGIN TRY
 		,ysnSummaryByDriverPin
 		,ysnSummaryByDeptDriverPinProd
 		,ysnPageBreakByPrimarySortOrder
+		,strDepartmentGrouping
 	FROM
 	tblCFInvoiceStagingTable
 	WHERE strUserId = @username

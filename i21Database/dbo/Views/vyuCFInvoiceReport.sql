@@ -61,6 +61,7 @@ SELECT
 ,cfAccount.ysnShowDriverPinDescriptionOnly
 ,cfAccount.ysnPageBreakByPrimarySortOrder
 ,cfAccount.ysnSummaryByDeptDriverPinProd
+,cfAccount.strDepartmentGrouping
 ----------------------------------------------
 ,strCustomerName = emEntity.strName
 ,emEntity.strName
