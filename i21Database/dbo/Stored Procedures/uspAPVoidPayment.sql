@@ -379,6 +379,15 @@ BEGIN
 						ON C.intBillId = ISNULL(B.intOrigBillId, B.intBillId)
 				WHERE A.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables)
 
+	--UPDATE 1099 AMOUNT
+	UPDATE BD
+	SET BD.dbl1099 = BD.dbl1099 - ((BD.dblTotal + BD.dblTax) / B.dblTotal * PD.dblPayment)
+	FROM tblAPPayment P
+	INNER JOIN tblAPPaymentDetail PD ON P.intPaymentId = PD.intPaymentId
+	INNER JOIN tblAPBill B ON B.intBillId = PD.intOrigBillId
+	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
+	WHERE P.intPaymentId IN (SELECT intPaymentId FROM #tmpPayables) AND BD.int1099Form > 0
+
 	--UPDATE INVOICES
 	DECLARE @invoices Id
 	INSERT INTO @invoices
