@@ -42,7 +42,7 @@ BEGIN
 			, @ItemUOMId = intItemUOMId 
 		FROM #tmpMeterReading
 
-		SELECT dblAdjustedTax, ysnTaxExempt
+		SELECT dblRate, ysnTaxExempt
 		INTO #tmpTaxes
 		FROM dbo.fnConstructLineItemTaxDetail (
 			1
@@ -73,7 +73,7 @@ BEGIN
 			,NULL -- @@CurrencyExchangeRate	
 		)
 
-		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblAdjustedTax, 0)), 0)
+		SELECT @TaxTotal = ISNULL(SUM(ISNULL(dblRate, 0)), 0)
 		FROM #tmpTaxes 
 		WHERE ysnTaxExempt = 0
 
