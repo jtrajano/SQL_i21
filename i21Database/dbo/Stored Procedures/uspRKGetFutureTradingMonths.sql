@@ -9,7 +9,7 @@ BEGIN
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	IF EXISTS(SELECT TOP 1 1 FROM vyuRKGetAllowedFuturesMonthTraded WHERE intFutureMarketId = @intFutureMarketId AND intMonthCode = @intMonthCode)
+	IF EXISTS(SELECT TOP 1 1 FROM vyuRKGetAllowedFuturesMonthTraded WHERE intFutureMarketId = @intFutureMarketId AND (intMonthCode = @intMonthCode OR @intMonthCode = 12))
 	BEGIN
 		
 		IF (@intMonthCode > 11)
