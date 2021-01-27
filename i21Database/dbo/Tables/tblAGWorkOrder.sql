@@ -29,6 +29,7 @@
  [dblTotalGallonsOfSolutions] DECIMAL(18,6) NULL,
  [dblTotalPoundsOfProduct] DECIMAL(18,6) NULL,
  [dblDensity] DECIMAL(18,6) NULL,
+ [dtmCreatedDate] DATETIME NULL,
  [dtmStartDate] DATETIME NULL,
  [dtmEndDate] DATETIME NULL,
  [dtmStartTime] DATETIME NULL,

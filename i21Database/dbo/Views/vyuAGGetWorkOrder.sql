@@ -17,6 +17,7 @@ AS
 	, TERM.strTerm
 	, FARMLOCATION.strLocationName AS strFarmFieldName
 	, WO.dblAcres
+	, WO.dtmCreatedDate
 	, WO.dtmApplyDate
 	, WO.dtmDueDate
 	, strApplicatorLicenseNumber
