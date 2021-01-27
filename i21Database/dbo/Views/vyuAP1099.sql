@@ -178,16 +178,16 @@ SELECT
 	, A.int1099Form
 	, A.int1099Category
 	, dblNonemployeeCompensationNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 8--'Nonemployee Compensation'     
-	    THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+	    THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END  
 	, dblDirectSalesNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 2--'Direct Sales'     
-		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
 	ELSE 0 END    
 	, dblFederalIncomeNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 4--'Federal Income Tax Withheld'     
-		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END    
 	, dblStateNEC = CASE WHEN A.int1099Form = 7 AND A.int1099Category = 15--'State Tax Withheld'     
-		THEN (A.dblTotal + A.dblTax) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
+		THEN ((A.dblTotal + A.dblTax) / B.dblTotal * ISNULL(B2.dblPayment, B3.dbl1099)) * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END)
      ELSE 0 END   
 FROM tblAPBillDetail A
 INNER JOIN tblAPBill B
@@ -203,6 +203,11 @@ LEFT JOIN (
 	INNER JOIN tblAPPaymentDetail P2 ON P.intPaymentId = P2.intPaymentId
 	WHERE P.ysnPosted = 1
 ) B2 ON B.intBillId = B2.intBillId
+OUTER APPLY (
+	SELECT SUM(dbl1099) dbl1099
+	FROM tblAPBillDetail
+	WHERE intBillId = B.intBillId AND int1099Form <> 0
+) B3
 LEFT JOIN (tblAPVendor C INNER JOIN tblEMEntity C2 ON C.[intEntityId] = C2.intEntityId)
     ON C.[intEntityId] = B.intEntityVendorId
 LEFT JOIN [tblEMEntityLocation] D
