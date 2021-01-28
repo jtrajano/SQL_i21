@@ -368,7 +368,7 @@ begin try
 				,int1099Category
 				,dbl1099
 				,ysnStage
-				,intPriceFixationDetailId
+				--,intPriceFixationDetailId
 			)
 			select
 				intPartitionId = vp.intPartitionId
@@ -461,7 +461,7 @@ begin try
 				,int1099Category = vp.int1099Category
 				,dbl1099 = vp.dbl1099
 				,ysnStage = 0--vp.ysnStage
-				,intPriceFixationDetailId = @intPriceFixationDetailId
+				--,intPriceFixationDetailId = @intPriceFixationDetailId
 			from
 				@voucherPayables vp
 			where
