@@ -1515,7 +1515,7 @@ BEGIN TRY
 		, 'Total Receipted' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
 		, strType = 'Collateral Purchase' COLLATE Latin1_General_CI_AS
-		, dblTotal = ISNULL(dblTotal, 0)
+		, dblTotal = - ISNULL(dblTotal, 0)
 		, @intCommodityId
 		, @intCommodityUnitMeasureId
 		, strLocationName
@@ -1525,7 +1525,7 @@ BEGIN TRY
 		, 'Total Receipted' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
 		, strType = 'Collateral Sale' COLLATE Latin1_General_CI_AS
-		, dblTotal = ISNULL(-dblTotal, 0)
+		, dblTotal = ISNULL(dblTotal, 0)
 		, @intCommodityId
 		, @intCommodityUnitMeasureId
 		, strLocationName
