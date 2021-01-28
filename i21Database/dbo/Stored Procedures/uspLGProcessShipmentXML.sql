@@ -2903,8 +2903,25 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
-			IF @strLoadContainer IS NOT NULL
-			BEGIN
+			--IF @strLoadDetailContainerLink IS NOT NULL
+			--BEGIN
+				EXEC sp_xml_preparedocument @idoc OUTPUT
+					,@strLoadDetailContainerLink
+
+				DELETE LDCL
+				FROM tblLGLoadDetailContainerLink LDCL
+				WHERE LDCL.intLoadId = @intNewLoadId
+					AND NOT EXISTS (
+						SELECT *
+						FROM OPENXML(@idoc, 'vyuLGLoadDetailContainerLinkViews/vyuLGLoadDetailContainerLinkView', 2) WITH ([intLoadDetailContainerLinkId] INT) x
+						WHERE LDCL.intLoadDetailContainerLinkRefId = x.intLoadDetailContainerLinkId
+						)
+
+				EXEC sp_xml_removedocument @idoc
+			--END
+
+			--IF @strLoadContainer IS NOT NULL
+			--BEGIN
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strLoadContainer
 
@@ -3209,7 +3226,7 @@ BEGIN TRY
 						)
 
 				EXEC sp_xml_removedocument @idoc
-			END
+			--END
 
 			IF @strLoadDetailContainerLink IS NOT NULL
 			BEGIN
