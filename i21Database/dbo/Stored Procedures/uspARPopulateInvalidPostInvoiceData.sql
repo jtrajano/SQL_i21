@@ -33,7 +33,7 @@ BEGIN
 	DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
 	
 	EXEC [dbo].[uspARPopulateItemsForCosting]
-	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]	
+	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]
 	EXEC [dbo].[uspARPopulateItemsForStorageCosting]
 	
 	INSERT INTO #ARInvalidInvoiceData (
@@ -2257,8 +2257,6 @@ END
 
 IF @Post = @ZeroBit
 BEGIN
-	EXEC [dbo].[uspARPopulateItemsForInTransitCosting]
-
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]

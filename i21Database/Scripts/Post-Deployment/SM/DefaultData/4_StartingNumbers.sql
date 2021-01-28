@@ -1531,7 +1531,7 @@ GO
 	UNION ALL 
 		SELECT	[intStartingNumberId]	= 157
 			,[strTransactionType]	= N'AG Work Order'
-			,[strPrefix]			= N'WO-'
+			,[strPrefix]			= N'AGWO-'
 			,[intNumber]			= 1
 			,[strModule]			= 'Agronomy'
 			,[ysnEnable]			= 1
