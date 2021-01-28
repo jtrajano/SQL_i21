@@ -595,7 +595,7 @@ BEGIN TRY
 		) tbl
 		WHERE intRowNumber = 1
 		
-		SELECT a.intContractDetailId, a.strContractNumber
+		SELECT DISTINCT a.intContractDetailId, a.strContractNumber
 			, CASE WHEN b.intCounter > 1 THEN 'Partially Priced'
 				WHEN b.intCounter = 1 AND strPricingType IN ('Basis', 'HTA') THEN 'Unpriced'
 				WHEN b.intCounter = 1 AND strPricingType = 'Priced' THEN 'Fully Priced'
