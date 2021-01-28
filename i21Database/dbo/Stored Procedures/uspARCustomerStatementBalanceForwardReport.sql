@@ -18,6 +18,7 @@
 	, @ysnIncludeWriteOffPayment    AS BIT 				= 0
 	, @ysnReprintInvoice			AS BIT				= 1
 	, @intEntityUserId				AS INT				= NULL
+	, @dblTotalAR				    AS NUMERIC(18,6)    = 0.00
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -580,8 +581,8 @@ FROM vyuARCustomerSearch C
 									  END
 			 , dblBalance			= CASE WHEN strTransactionType IN (''Credit Memo'', ''Overpayment'', ''Customer Prepayment'') THEN I.dblInvoiceTotal * -1
 										   ELSE I.dblInvoiceTotal 
-									  END - CASE WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
-			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE ' + CASE WHEN @ysnPrintFromCFLocal = 1 THEN '0.00' ELSE 'CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) ELSE 0.00 END' END +' END
+									  END - CASE WHEN strTransactionType = ''Customer Prepayment'' THEN 0.00 ELSE 0.00 END
+			 , dblPayment			= CASE WHEN strTransactionType = ''Customer Prepayment'' THEN I.dblInvoiceTotal ELSE ' + CASE WHEN @ysnPrintFromCFLocal = 1 THEN '0.00' ELSE 'CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal  = 0 THEN 0.00 ELSE 0.00 END' END +' END
 			 , dtmDate				= I.dtmDate
 			 , dtmDueDate			= I.dtmDueDate
 			 , dtmShipDate			= I.dtmShipDate
@@ -605,21 +606,6 @@ FROM vyuARCustomerSearch C
 				FOR XML PATH ('''')
 			) INV (strTicketNumber)
 		) SCALETICKETS
-		LEFT JOIN (
-			SELECT dblPayment = ' + CASE WHEN @ysnPrintZeroBalanceLocal = 0 THEN   'SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)' ELSE 'SUM(0)' END + 
-				 ', intInvoiceId 
-			FROM tblARPaymentDetail PD WITH (NOLOCK) 
-			INNER JOIN (
-				SELECT intPaymentId
-				FROM dbo.tblARPayment WITH (NOLOCK)
-				WHERE ysnPosted = 1
-				  AND ysnInvoicePrepayment = 0
-				  AND ISNULL(ysnProcessedToNSF, 0) = 0 
-				  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) <= '+ @strDateTo +'
-				  ' + CASE WHEN @ysnIncludeWriteOffPaymentLocal = 1 THEN 'AND intPaymentMethodId <> ' + CAST(@intWriteOffPaymentMethodId AS NVARCHAR(10)) + '' ELSE ' ' END + '
-			) P ON PD.intPaymentId = P.intPaymentId
-			GROUP BY intInvoiceId
-		) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 		LEFT JOIN (
 			SELECT intPaymentId
 				 , strPaymentInfo
@@ -855,11 +841,16 @@ IF @ysnPrintOnlyPastDueLocal = 1
 		  , dblTotalAR 	= ISNULL(dblTotalAR, 0) - ISNULL(dbl0Days, 0) - ISNULL(dblFuture, 0)
     END
 
+SET @dblTotalAR = (SELECT SUM(dblTotalAR) FROM @temp_aging_table)
+
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
-        DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
-		DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0
-    END
+		IF @dblTotalAR = 0 
+		BEGIN
+			DELETE FROM @temp_statement_table WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR ISNULL(dblBalance, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Balance Forward', 'Customer Budget')
+			DELETE FROM @temp_aging_table WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0
+		END
+	END
 
 INSERT INTO @temp_cf_table (
 	  intInvoiceId
@@ -1058,7 +1049,7 @@ FROM (
 LEFT JOIN @temp_aging_table AS AGINGREPORT
 	ON MAINREPORT.intEntityCustomerId = AGINGREPORT.intEntityCustomerId
 INNER JOIN #CUSTOMERS CUSTOMER ON MAINREPORT.intEntityCustomerId = CUSTOMER.intEntityCustomerId
-ORDER BY MAINREPORT.dtmDate
+ORDER BY MAINREPORT.dtmDate,MAINREPORT.strTransactionType DESC
 
 UPDATE tblARCustomerStatementStagingTable
 SET blbLogo				= CASE WHEN ISNULL(@ysnStretchLogo, 0) = 1 THEN ISNULL(@blbStretchedLogo, @blbLogo) ELSE @blbLogo END
