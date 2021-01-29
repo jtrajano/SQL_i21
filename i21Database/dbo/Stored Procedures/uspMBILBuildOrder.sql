@@ -75,7 +75,7 @@ SELECT DISTINCT intDispatchId
 	, intShipToId
 	, intLocationId
 FROM #Dispatch
-WHERE intDriverId = @intDriverId AND strOrderStatus = 'Generated'
+WHERE intDriverId = @intDriverId AND strOrderStatus IN ('Generated','Dispatched')
 		AND intTermId IN (SELECT intTermID from tblSMTerm)
 
 -- ++++++ CREATE ORDER's ITEM LIST ++++++ --
