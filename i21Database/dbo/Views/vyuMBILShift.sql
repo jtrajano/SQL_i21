@@ -13,7 +13,7 @@ SELECT Shift.intShiftId
 	, Shift.dtmStartTime
 	, Shift.dtmEndTime
 	, Shift.intTruckId
-	, strTruckName = Truck.strData
+	, strTruckName = Truck.strTruckNumber
 	, Shift.intStartOdometer
 	, Shift.intEndOdometer
 	, Shift.dblFuelGallonsDelievered
@@ -21,5 +21,5 @@ SELECT Shift.intShiftId
 	, Shift.intConcurrencyId
 FROM tblMBILShift Shift
 LEFT JOIN vyuMBILDriver Driver ON Driver.intEntityId = Shift.intDriverId
-LEFT JOIN tblSCTruckDriverReference Truck ON Truck.intTruckDriverReferenceId = Shift.intTruckId AND Truck.strRecordType = 'T'
+LEFT JOIN tblSMTruck Truck ON Truck.intTruckId = Shift.intTruckId
 LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = Shift.intLocationId

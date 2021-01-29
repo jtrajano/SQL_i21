@@ -8992,6 +8992,13 @@
     <Build Include="dbo\Stored Procedures\uspIPPreStageBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCallPostVoucherIntegration.sql" />
     <Build Include="dbo\Tables\tblAGCrop.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILProcessInvoices.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILProcessPayments.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCategoryTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportContractExport.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerSpecialPricing.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

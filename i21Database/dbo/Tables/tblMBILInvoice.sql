@@ -20,7 +20,7 @@ CREATE TABLE [dbo].[tblMBILInvoice](
 	[inti21InvoiceId] INT NULL,
 	[intConcurrencyId] INT DEFAULT ((1)) NULL,
 	CONSTRAINT [PK_tblMBILInvoice] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC), 
-    CONSTRAINT [FK_tblMBILInvoice_tblMBILOrder] FOREIGN KEY ([intOrderId]) REFERENCES [tblMBILOrder]([intOrderId]), 
+    --CONSTRAINT [FK_tblMBILInvoice_tblMBILOrder] FOREIGN KEY ([intOrderId]) REFERENCES [tblMBILOrder]([intOrderId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblEMEntity] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [tblEMEntity]([intEntityId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]), 
     CONSTRAINT [FK_tblMBILInvoice_tblEMEntityDriver] FOREIGN KEY ([intDriverId]) REFERENCES [tblEMEntity]([intEntityId]), 
