@@ -146,6 +146,7 @@ AS
 			AP.strApprovalStatus,
 			P.strPositionType,
 			CH.ysnReadOnlyInterCoContract,
+			CH.ysnEnableFutures,
 			intCommodityFutureMarketId = NM.intCommodityFutureMarketId
 	FROM		tblCTContractHeader				CH
 	JOIN		vyuCTContractHeaderNotMapped	NM	ON	NM.intContractHeaderId	=	CH.intContractHeaderId

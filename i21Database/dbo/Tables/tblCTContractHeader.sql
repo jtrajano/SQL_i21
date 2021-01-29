@@ -85,6 +85,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
 	strExternalContractNumber [nvarchar](50) COLLATE Latin1_General_CI_AS NULL,
 	ysnReceivedSignedFixationLetter	BIT NOT NULL DEFAULT 0,
 	ysnReadOnlyInterCoContract BIT NOT NULL DEFAULT 0,
+	ysnEnableFutures BIT NULL DEFAULT 0,
 
     CONSTRAINT [PK_tblCTContractHeader_intContractHeaderId] PRIMARY KEY CLUSTERED ([intContractHeaderId] ASC), 	
 	CONSTRAINT [UQ_tblCTContractHeader_intContractTypeId_intContractNumber] UNIQUE ([intContractTypeId], [strContractNumber],[intEntityId],[intCommodityId]), 

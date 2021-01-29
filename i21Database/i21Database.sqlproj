@@ -4792,6 +4792,8 @@
     <Build Include="dbo\Views\vyuLGWeightClaimSearch.sql" />
     <Build Include="dbo\Views\vyuRKContractDetail.sql" />
     <Build Include="dbo\Views\vyuCTContractFeed.sql" />
+    <Build Include="dbo\Views\vyuCTGetRawToWipConversion.sql" />
+    <Build Include="dbo\Views\vyuCTCommodityFutures.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCompareRecords.sql" />
     <Build Include="dbo\Stored Procedures\uspCTProcessApprovedContractToFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspICDeleteInventoryShipment.sql" />

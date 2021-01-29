@@ -464,6 +464,15 @@ BEGIN TRY
 		, ysnContractAllocated = CAST(CASE WHEN AD.intAllocationDetailId IS NOT NULL THEN 1 ELSE 0 END AS BIT)
 		, strFreightBasisUOM = FBUM.strUnitMeasure
 		, strFreightBasisBaseUOM = FBBUM.strUnitMeasure
+		, CD.intRefFuturesMarketId
+		, CD.intRefFuturesMonthId
+		, CD.intRefFuturesItemUOMId
+		, CD.intRefFuturesCurrencyId
+		, CD.dblRefFuturesQty
+		, RefFuturesMarket.strFutMarketName  strRefFuturesMarket
+		, REPLACE(RefFuturesMonth.strFutureMonth, ' ', '(' + RefFuturesMonth.strSymbol + ') ') strRefFuturesMonth
+		, RefFuturesCurrency.strCurrency strRefFuturesCurrency
+		, RefFturesUnitMeasure.strUnitMeasure strRefFuturesUnitMeasure
 	FROM #tmpContractDetail CD
 	JOIN CTE1 CT ON CT.intContractDetailId = CD.intContractDetailId
 	LEFT JOIN tblCTContractStatus CS ON CS.intContractStatusId = CD.intContractStatusId
@@ -499,6 +508,12 @@ BEGIN TRY
 	LEFT JOIN tblICUnitMeasure FBUM ON FBUM.intUnitMeasureId = FB.intUnitMeasureId
 	LEFT JOIN tblICItemUOM FBB ON FBB.intItemUOMId = CD.intFreightBasisBaseUOMId
 	LEFT JOIN tblICUnitMeasure FBBUM ON FBBUM.intUnitMeasureId = FBB.intUnitMeasureId
+	-- Reference Pricing
+	LEFT JOIN tblRKFutureMarket RefFuturesMarket ON RefFuturesMarket.intFutureMarketId = CD.intRefFuturesMarketId
+	LEFT JOIN tblRKFuturesMonth RefFuturesMonth ON RefFuturesMonth.intFutureMonthId = CD.intRefFuturesMonthId
+	LEFT JOIN tblSMCurrency RefFuturesCurrency ON RefFuturesCurrency.intCurrencyID = CD.intRefFuturesCurrencyId
+	LEFT JOIN tblICItemUOM RefFuturesItemUOMId ON RefFuturesItemUOMId.intItemUOMId = CD.intRefFuturesItemUOMId
+	LEFT JOIN tblICUnitMeasure RefFturesUnitMeasure ON RefFturesUnitMeasure.intUnitMeasureId = RefFuturesItemUOMId.intUnitMeasureId
 	OUTER APPLY (
 		SELECT TOP 1 a.intContractHeaderId
 			, a.intContractDetailId
