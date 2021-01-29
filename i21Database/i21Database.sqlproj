@@ -8864,6 +8864,12 @@
     <Build Include="dbo\Stored Procedures\uspAPCreate1099NECFile.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileNECPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILProcessPayments.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCategoryTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportContractExport.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerSpecialPricing.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportItem.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

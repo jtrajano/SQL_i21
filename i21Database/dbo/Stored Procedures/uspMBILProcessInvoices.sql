@@ -214,6 +214,13 @@ CREATE TABLE #TempMBILInvoice (
 			WHERE Invoice.intInvoiceId = @intInvoiceId
 
 			DELETE FROM #TempMBILInvoice WHERE intInvoiceId = @intInvoiceId
+
+			UPDATE tblARInvoice 
+				SET strInvoiceNumber = (SELECT TOP 1 strInvoiceNo FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
+				WHERE intInvoiceId   = (SELECT TOP 1 intInvoiceId FROM tblARInvoice A
+										WHERE A.intEntityCustomerId = (SELECT TOP 1 intEntityCustomerId FROM tblMBILInvoice WHERE intInvoiceId = @intInvoiceId) 
+										AND A.intSourceId = @intInvoiceId 
+										AND A.strType = 'Tank Delivery' order by dtmDateCreated desc)
 		END
 
 	END
