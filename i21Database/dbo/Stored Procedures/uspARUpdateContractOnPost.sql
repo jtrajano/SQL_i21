@@ -16,6 +16,7 @@ BEGIN TRY
 			DECLARE @intInvoiceDetailId		INT = NULL
 				  , @intContractDetailId	INT = NULL
 				  , @strType				NVARCHAR(100) = NULL
+				  , @dblQuantity			NUMERIC(18, 6) = 0
 				  , @dblBalanceQty			NUMERIC(18, 6) = 0
 				  , @dblSheduledQty			NUMERIC(18, 6) = 0
 				  , @dblRemainingQty		NUMERIC(18, 6) = 0
@@ -23,6 +24,7 @@ BEGIN TRY
 			SELECT TOP 1 @intInvoiceDetailId	= intInvoiceDetailId
 					   , @intContractDetailId	= intContractDetailId
 					   , @strType				= strType
+					   , @dblQuantity			= dblQuantity
 					   , @dblBalanceQty			= dblBalanceQty
 					   , @dblSheduledQty		= dblSheduledQty
 					   , @dblRemainingQty		= dblRemainingQty
@@ -59,6 +61,7 @@ BEGIN TRY
 			DELETE FROM #ARItemsForContracts 
 			WHERE intInvoiceDetailId = @intInvoiceDetailId 
 			  AND intContractDetailId = @intContractDetailId
+			  AND dblQuantity = @dblQuantity
               AND strType = @strType
 		END
 
