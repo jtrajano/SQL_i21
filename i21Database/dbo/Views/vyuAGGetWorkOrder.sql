@@ -3,7 +3,8 @@ AS
 
 (
 	SELECT intWorkOrderId
-	, WO.strType
+	, WO.intApplicationTypeId,
+	, TYPE.strType
 	, WO.intCropId
 	, CROP.strCrop
 	, COMPANYLOCATION.intCompanyLocationId
@@ -98,4 +99,9 @@ LEFT JOIN (
 	intApplicationTargetId FROM 
 	tblAGApplicationTarget WITH (NOLOCK)
 )   TARGET ON WO.intApplicationTargetId  = TARGET.intApplicationTargetId
+LEFT JOIN (
+	SELECT intApplicationTypeId,
+		strType
+		FROM tblAGApplicationType WITH (NOLOCK)
+) TYPE ON TYPE.intApplicationTypeId = WO.intApplicationTypeId
 ) 

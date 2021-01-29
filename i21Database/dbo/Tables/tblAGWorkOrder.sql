@@ -1,9 +1,9 @@
 ﻿CREATE TABLE [dbo].[tblAGWorkOrder]
 (
  [intWorkOrderId] INT IDENTITY (1, 1) NOT NULL,
- [strType] NVARCHAR(20) NULL,
+ [intApplicationTypeId] INT NULL,
  [intCompanyLocationId] INT NULL,
- [strStatus] NVARCHAR(10) NULL,
+ [strStatus] NVARCHAR(25) NULL,
  [strOrderNumber] NVARCHAR(250) NULL,
  [intEntityCustomerId] INT NULL,
  [strCustomerName] NVARCHAR(500) COLLATE Latin1_General_CI_AS  NULL,
@@ -61,6 +61,7 @@
  CONSTRAINT [FK_tblAGWorkOrder_tblARSalesperson_intEntitySalesRepId] FOREIGN KEY ([intEntitySalesRepId]) REFERENCES [dbo].[tblARSalesperson] ([intEntityId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntitySplit_intSplitId] FOREIGN KEY ([intSplitId]) REFERENCES [dbo].[tblEMEntitySplit] ([intSplitId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntity_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
+ CONSTRAINT [FK_tblAGWorkOrder_tblAGApplicationType_intApplicationTypeId] FOREIGN KEY ([intApplicationTypeId]) REFERENCES [dbo].[tblAGApplicationType] ([intApplicationTypeId]),
  CONSTRAINT [PK_dbo.tblAGWorkOrder_intWorkOrderId] PRIMARY KEY CLUSTERED ([intWorkOrderId] ASC)
 
 );

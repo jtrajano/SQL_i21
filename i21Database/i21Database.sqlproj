@@ -9002,6 +9002,7 @@
     <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
     <Build Include="dbo\Views\vyuMBILExportItem.sql" />
     <Build Include="dbo\Views\vyuSCAgWorkOrderDetail.sql" />
+    <Build Include="dbo\Tables\tblAGApplicationType.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
