@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[tblMBILInvoiceItem](
 	[intInvoiceItemId] INT IDENTITY(1,1) NOT NULL,	
 	[intInvoiceId] INT NOT NULL,
-	[intSiteId] INT NOT NULL,
+	[intSiteId] INT NULL,
 	[intItemId] INT NULL,
 	[intItemUOMId] INT NULL,
 	[intContractDetailId] INT NULL,
