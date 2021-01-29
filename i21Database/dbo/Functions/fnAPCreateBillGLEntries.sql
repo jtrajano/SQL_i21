@@ -203,8 +203,8 @@ BEGIN
                 WHERE R.intBillId = A.intBillId
 				UNION ALL --taxes
 				SELECT 
-					CASE WHEN charges.intInventoryReceiptChargeId > 0 
-								THEN (CASE WHEN (A.intEntityVendorId = receipts.intEntityVendorId)
+					CASE WHEN R.intInventoryReceiptChargeId > 0 
+								THEN (CASE WHEN (A.intEntityVendorId = charges.intEntityVendorId)
 												AND charges.ysnPrice = 1
 											THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
 						ELSE R2.dblAdjustedTax
