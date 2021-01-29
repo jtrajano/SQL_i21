@@ -74,6 +74,7 @@ AS
 			,CP.ysnDocumentByBookAndSubBook
 			,CP.ysnUpdatedAvailabilityPurchase
 			,CP.ysnUpdatedAvailabilitySales
+			,CP.ysnAllowFutureTypeContracts
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus

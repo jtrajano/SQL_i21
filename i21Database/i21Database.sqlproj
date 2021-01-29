@@ -4547,6 +4547,8 @@
     <Build Include="dbo\Stored Procedures\uspICGetStatusUnitCost.sql" />
     <Build Include="dbo\Stored Procedures\uspMFUpdateSalesOrderItemsPrice.sql" />
     <Build Include="dbo\Tables\tblCTCondition.sql" />
+    <Build Include="dbo\Tables\tblCTRawToWipConversion.sql" />
+    <Build Include="dbo\Views\vyuCTRawToWipConversion.sql" />
     <Build Include="dbo\Tables\tblCTContractCondition.sql" />
     <Build Include="dbo\Views\vyuCRMActivitySearch.sql" />
     <None Include="Scripts\Post-Deployment\EM\034_UpdateEntityEmail.sql" />
