@@ -105,7 +105,7 @@ BEGIN TRY
 						,dtmDate = dbo.fnRemoveTimeOnDate(GETDATE())
 						,dblQty = @dblNetUnits 
 						,dblUOMQty = ItemUOM.dblUnitQty
-						,dblCost = @dblCost
+						,dblCost = WOD.dblPrice
 						,dblSalesPrice = 0
 						,intCurrencyId = ScaleTicket.intCurrencyId
 						,dblExchangeRate = 1 -- TODO: Not yet implemented in PO. Default to 1 for now. 
@@ -119,8 +119,14 @@ BEGIN TRY
 						,ysnIsStorage = 0
 						,ysnAllowInvoice = 1
 				FROM	dbo.tblSCTicket ScaleTicket
-						INNER JOIN dbo.tblICItemUOM ItemUOM ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
-						INNER JOIN dbo.tblICItemLocation ItemLocation ON ScaleTicket.intItemId = ItemLocation.intItemId AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				INNER JOIN dbo.tblICItemUOM ItemUOM 
+					ON ScaleTicket.intItemUOMIdTo = ItemUOM.intItemUOMId
+				INNER JOIN dbo.tblICItemLocation ItemLocation 
+					ON ScaleTicket.intItemId = ItemLocation.intItemId 
+					AND ScaleTicket.intProcessingLocationId = ItemLocation.intLocationId
+				INNER JOIN tblAGWorkOrderDetail WOD
+					ON ScaleTicket.intAGWorkOrderId = WOD.intWorkOrderId
+						AND ScaleTicket.intItemId = WOD.intItemId
 				WHERE	ScaleTicket.intTicketId = @intTicketId
 			END
 		END
