@@ -37,7 +37,6 @@ BEGIN TRY
 		EXEC uspTRLoadProcessToInvoice @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
 		EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
 		EXEC uspTRLoadProcessToInventoryReceipt @intLoadHeaderId,@intUserId,@ysnRecap,@ysnPostOrUnPost
-		EXEC uspTRLoadProcessContracts @intLoadHeaderId, NULL, @intUserId
 	END
 	ELSE
 	BEGIN
@@ -57,7 +56,6 @@ BEGIN TRY
 		EXEC uspTRLoadProcessToInventoryTransfer @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
 		EXEC uspTRLoadProcessToInvoice @intLoadHeaderId, @intUserId, @ysnRecap, @ysnPostOrUnPost, @BatchId
 		EXEC uspTRUpdateCostOnTransportLoad @intLoadHeaderId
-		EXEC uspTRLoadProcessContracts @intLoadHeaderId, 'Delete', @intUserId
 	END
 
 	IF @ysnRecap = 0 
