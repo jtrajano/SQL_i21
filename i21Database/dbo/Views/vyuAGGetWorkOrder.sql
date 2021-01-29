@@ -3,7 +3,7 @@ AS
 
 (
 	SELECT intWorkOrderId
-	, WO.intApplicationTypeId,
+	, WO.intApplicationTypeId
 	, TYPE.strType
 	, WO.intCropId
 	, CROP.strCrop
