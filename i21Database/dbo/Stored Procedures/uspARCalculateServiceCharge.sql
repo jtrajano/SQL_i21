@@ -446,10 +446,17 @@ AS
 					INNER JOIN #tmpCustomers C ON SC.intEntityCustomerId = C.intEntityId
 					WHERE C.ysnActive = 0 AND ISNULL(SC.dblTotalAmount, 0) <= 0
 
+				
+					IF @isIncludeBudget = 0 
+					BEGIN
+					DELETE SC
+					FROM @tempTblTypeServiceCharge SC
+					INNER JOIN #tmpCustomers C ON SC.intEntityCustomerId = C.intEntityId
+					WHERE intEntityCustomerId IN (SELECT  intEntityCustomerId FROM dbo.tblARCustomerBudget  WHERE intEntityCustomerId =@entityId)
+					END 
+
 					IF (@calculation = 'By Invoice')
 						BEGIN
-							IF (ISNULL(@isIncludeBudget,0) <> 0  AND EXISTS (SELECT TOP 1 intEntityCustomerId FROM dbo.tblARCustomerBudget  WHERE intEntityCustomerId =@entityId))
-							BEGIN
 							--GET AMOUNT DUE PER INVOICE
 							INSERT INTO @tblTypeServiceCharge
 							SELECT intInvoiceId
@@ -472,13 +479,9 @@ AS
 									INNER JOIN @tempTblTypeServiceCharge SC ON C.intEntityId = SC.intEntityCustomerId
 									WHERE C.intEntityId = @entityId
 								END
-							END
 						END
 					ELSE
 						BEGIN
-
-							IF (ISNULL(@isIncludeBudget,0) <> 0  AND EXISTS (SELECT TOP 1 intEntityCustomerId FROM dbo.tblARCustomerBudget  WHERE intEntityCustomerId =@entityId))
-							BEGIN
 							--GET AMOUNT DUE PER CUSTOMER
 							INSERT INTO @tblTypeServiceCharge
 							SELECT NULL
@@ -503,7 +506,7 @@ AS
 							FROM @tempTblTypeServiceCharge 
 							WHERE ISNULL(dblAmountDue, 0) > @zeroDecimal 
 							  AND ISNULL(dblTotalAmount, 0) > @zeroDecimal
-							END 
+
 						END
 
 					DELETE FROM @tblTypeServiceCharge WHERE dblAmountDue < @dblMinFinanceSC
