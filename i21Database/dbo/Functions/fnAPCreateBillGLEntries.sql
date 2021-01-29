@@ -201,7 +201,8 @@ BEGIN
 						-- 						THEN R2.dblAdjustedTax * -1 ELSE R2.dblAdjustedTax END) 
 						-- 	ELSE R2.dblAdjustedTax
 						-- END 
-				R2.dblAdjustedTax * (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) AS dblTotal ,
+				R2.dblAdjustedTax * (CASE WHEN charges.ysnPrice = 1 AND A.intEntityVendorId = charges.intEntityVendorId
+										 THEN -1 ELSE 1 END) AS dblTotal ,
 				 R.dblRate  AS dblRate, 
 				 exRates.intCurrencyExchangeRateTypeId,
 				  exRates.strCurrencyExchangeRateType,
