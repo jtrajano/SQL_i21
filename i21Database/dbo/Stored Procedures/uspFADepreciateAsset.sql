@@ -1,5 +1,5 @@
   
-alter PROCEDURE [dbo].[uspFADepreciateAsset]  
+CREATE PROCEDURE [dbo].[uspFADepreciateAsset]  
  @Param    AS NVARCHAR(MAX) = '',   
  @ysnPost   AS BIT    = 0,  
  @ysnRecap   AS BIT    = 0,  
