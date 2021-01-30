@@ -33,6 +33,7 @@
 	[dtmStartDate] DATETIME,
 	[dtmEndDate] DATETIME,
 	[dblQty] NUMERIC(24, 10) NULL DEFAULT((0)),
+	[dblOrigQty] NUMERIC(24, 10) NULL,
 	[intContractStatusId] INT NOT NULL,
 	[intBookId] INT NULL,
 	[intSubBookId] INT NULL,

@@ -35,6 +35,7 @@ BEGIN
 		, @dtmStartDate DATETIME
 		, @dtmEndDate DATETIME
 		, @dblQty NUMERIC(24, 10)
+		, @dblOrigQty NUMERIC(24, 10)
 		, @intContractStatusId INT
 		, @intBookId INT
 		, @intSubBookId INT
@@ -90,6 +91,7 @@ BEGIN
 		, [dtmStartDate] DATETIME
 		, [dtmEndDate] DATETIME
 		, [dblQty] NUMERIC(24, 10) NULL DEFAULT((0))
+		, [dblOrigQty] NUMERIC(24, 10) NULL DEFAULT((0))
 		, [intContractStatusId] INT NOT NULL
 		, [intBookId] INT NULL
 		, [intSubBookId] INT NULL
@@ -171,6 +173,7 @@ BEGIN
 			, @dtmStartDate = dtmStartDate
 			, @dtmEndDate = dtmEndDate
 			, @dblQty = dblQty
+			, @dblOrigQty = dblOrigQty
 			, @intContractStatusId = intContractStatusId
 			, @intBookId = intBookId
 			, @intSubBookId = intSubBookId
@@ -338,6 +341,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -375,6 +379,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -431,6 +436,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -468,6 +474,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -515,6 +522,7 @@ BEGIN
 		, dtmStartDate
 		, dtmEndDate
 		, dblQty
+		, dblOrigQty
 		, intContractStatusId
 		, intBookId
 		, intSubBookId
@@ -556,6 +564,7 @@ BEGIN
 		, dtmStartDate
 		, dtmEndDate
 		, dblQty
+		, dblOrigQty
 		, intContractStatusId
 		, intBookId
 		, intSubBookId

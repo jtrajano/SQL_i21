@@ -256,3 +256,33 @@ GO
 GO
 	print 'End fixing SM Transaction records associated to wrong Pricing Screen ID';
 GO
+
+
+IF EXISTS (SELECT TOP 1 1 FROM tblCTContractBalanceLog
+WHERE dblOrigQty IS NULL
+	AND dblQty IS NOT NULL)
+BEGIN
+	UPDATE tblCTContractBalanceLog
+	SET dblOrigQty = (CAST(REPLACE(strNotes, 'Priced Quantity is ', '') AS NUMERIC(18, 6)))
+	WHERE dblOrigQty IS NULL
+		AND dblQty IS NOT NULL
+		AND strNotes LIKE '%Priced Quantity is %'
+
+	UPDATE tblCTContractBalanceLog
+	SET dblOrigQty = (CAST(REPLACE(strNotes, 'Priced Load is ', '') AS NUMERIC(18, 6)))
+	WHERE dblOrigQty IS NULL
+		AND dblQty IS NOT NULL
+		AND strNotes LIKE '%Priced Load is %'
+
+	UPDATE tblCTContractBalanceLog
+	SET dblOrigQty = (CAST(REPLACE(REPLACE(strNotes, 'Invoiced Quantity is ', ''), ',', '') AS NUMERIC(18, 6)))
+	WHERE dblOrigQty IS NULL
+		AND dblQty IS NOT NULL
+		AND strNotes LIKE '%Invoiced Quantity is %'
+
+	UPDATE tblCTContractBalanceLog
+	SET dblOrigQty = dblQty
+	WHERE dblOrigQty IS NULL
+		AND dblQty IS NOT NULL
+END
+GO
