@@ -209,7 +209,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						@dblDepre,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Depreciation',
-						@strTransaction,
+						@strTransactionId,
 						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID)),
 						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID))
 			END
