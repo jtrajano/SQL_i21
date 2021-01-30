@@ -162,33 +162,19 @@ IF ISNULL(@ysnRecap, 0) = 0
     END  
    ELSE  
    BEGIN  
-    DECLARE @dtmStartDepreciate DATETIME ,   
-    @nextDate DATETIME,  
-      
-    @intYear INT,  
-    @intMonth INT  
-    SELECT TOP 1 @dtmStartDepreciate = dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId =@intAssetId and strTransaction = 'Depreciation'   ORDER BY dtmDepreciationToDate   
-    SELECT  @nextDate = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId ORDER BY intAssetDepreciationId DESC)) + 2, 0))  
-      
-      
+      DECLARE @dtmStartDepreciate DATETIME , @nextDate DATETIME
+      SELECT TOP 1 @dtmStartDepreciate = dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId =@intAssetId and strTransaction = 'Depreciation'   ORDER BY dtmDepreciationToDate   
+      SELECT  @nextDate = DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation A WHERE A.[intAssetId] =@intAssetId ORDER BY intAssetDepreciationId DESC)) + 2, 0))  
+          
+  	  DECLARE @strError NVARCHAR(100)
+      SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre ,@ysnFullyDepreciated =ysnFullyDepreciated, @strError = strError
+      FROM dbo.fnFAComputeDepreciation(@intAssetId)  
   
-  
-  
-    SELECT @intYear =  DATEDIFF(year, @dtmStartDepreciate, @nextDate)   
-    SELECT @intMonth = DATEDIFF(MONTH, @dtmStartDepreciate, @nextDate) + 1  
-      
-	DECLARE @strError NVARCHAR(100)
-    SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre ,@ysnFullyDepreciated =ysnFullyDepreciated, @strError = strError
-    FROM dbo.fnFAComputeDepreciation(@intAssetId)  
-  
-
-    IF @strError IS NOT NULL
-    BEGIN   
-     RAISERROR (@strError,16,1)  
-     RETURN  
-    END  
-  
-  
+      IF @strError IS NOT NULL
+      BEGIN   
+        RAISERROR (@strError,16,1)  
+        RETURN  
+      END  
   
     INSERT INTO tblFAFixedAssetDepreciation (  
       [intAssetId],  
