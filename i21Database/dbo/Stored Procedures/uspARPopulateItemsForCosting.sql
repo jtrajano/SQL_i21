@@ -57,14 +57,14 @@ INSERT INTO #ARItemsForCosting
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= ARID.[intItemUOMId]
+	,[intItemUOMId]				= CASE WHEN ISNULL(ICI.[ysnSeparateStockForUOMs], 0) = 0 AND ISNULL(ICI.[strLotTracking], 'No') = 'No' THEN ICIUOM.[intItemUOMId] ELSE ARID.[intItemUOMId] END
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
 										WHEN ARIDL.[intLotId] IS NULL THEN ARID.[dblQtyShipped] 
 										WHEN LOT.[intWeightUOMId] IS NULL THEN ARIDL.[dblQuantityShipped]
 										ELSE dbo.fnMultiply(ARIDL.[dblQuantityShipped], ARIDL.[dblWeightPerQty])
-								   END
+								   END 
 								* (CASE WHEN ARID.[strTransactionType] IN ('Invoice', 'Cash') THEN -1 ELSE 1 END)) * CASE WHEN ARID.[ysnPost] = @ZeroBit THEN -1 ELSE 1 END
 	,[dblUOMQty]				= ARID.[dblUnitQty]
 	-- If item is using average costing, it must use the average cost. 
@@ -107,12 +107,18 @@ SELECT
 	,[intForexRateTypeId]		= ARID.[intCurrencyExchangeRateTypeId]
 	,[dblForexRate]				= ARID.[dblCurrencyExchangeRate]
 	,[intStorageScheduleTypeId] = ARID.[intStorageScheduleTypeId]
-    ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
+    ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
 	,[strType]					= ARID.[strType]
 FROM
     #ARPostInvoiceDetail ARID
+INNER JOIN
+	(SELECT [intItemId], [ysnSeparateStockForUOMs], [strLotTracking] FROM tblICItem WITH (NOLOCK)) ICI
+		ON ARID.[intItemId] = ICI.[intItemId]
+LEFT OUTER JOIN
+	(SELECT [intItemId], [intItemUOMId], [ysnStockUnit] FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
+		ON ARID.[intItemId] = ICIUOM.[intItemId] AND ICIUOM.[ysnStockUnit] = 1
 LEFT OUTER JOIN
 	(SELECT [intInvoiceDetailId], [intLotId], [dblQuantityShipped], [dblWeightPerQty] FROM tblARInvoiceDetailLot WITH (NOLOCK)) ARIDL
 		ON ARIDL.[intInvoiceDetailId] = ARID.[intInvoiceDetailId]
@@ -132,7 +138,7 @@ WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
     AND ARID.[ysnImpactInventory] = @OneBit
-	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 		
+	AND ((ISNULL(ARID.[strImportFormat], '') <> 'CarQuest' AND (ARID.[dblTotal] <> 0 OR dbo.fnGetItemAverageCost(ARID.[intItemId], ARID.[intItemLocationId], ARID.[intItemUOMId]) <> 0)) OR ISNULL(ARID.[strImportFormat], '') = 'CarQuest') 
 	AND (
 		(ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 AND ISNULL(ARID.[intLoadDetailId], 0) = 0 AND  ARID.[strTransactionType] <> 'Credit Memo')
 		OR 
@@ -141,7 +147,7 @@ WHERE
 		((ISNULL(ARID.[intInventoryShipmentItemId], 0) = 0 OR ISNULL(ARID.[intLoadDetailId], 0) = 0) AND ARID.[strTransactionType] = 'Credit Memo')
 		)
 	AND ARID.[intItemId] IS NOT NULL
-	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = @OneBit))
+	AND (ARID.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Bundle','Comment') OR (ARID.[ysnBlended] = 1))
 	AND ARID.[strTransactionType] <> 'Debit Memo'							
 	AND (ARID.[intStorageScheduleTypeId] IS NULL OR ISNULL(ARID.[intStorageScheduleTypeId],0) = 0)
 	AND (ARID.intLoadId IS NULL OR (ARID.intLoadId IS NOT NULL AND ISNULL(LGL.[intPurchaseSale], 0) NOT IN (2, 3)))

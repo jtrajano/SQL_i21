@@ -157,7 +157,6 @@ BEGIN TRY
 		, strShippingLineDescription = 'Kindly inform ' + ES.strName + ' at port of destination to release container(s) to:'
 		, UserSignature = @userSignature
 		, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
-		, supplier.strName AS strSupplier
 	FROM tblCTContractDetail CD
 	JOIN tblCTContractHeader CH WITH(NOLOCK) ON CD.intContractHeaderId = CH.intContractHeaderId
 	JOIN vyuCTEntity EY WITH(NOLOCK) ON EY.intEntityId = CH.intEntityId
@@ -179,7 +178,6 @@ BEGIN TRY
 	LEFT JOIN tblSMCountry CCN WITH(NOLOCK) ON CCN.intCountryID = CH.intCountryId
 	LEFT JOIN tblCTWeightGrade WG WITH(NOLOCK) ON WG.intWeightGradeId = CH.intWeightId
 	LEFT JOIN tblEMEntity ES WITH(NOLOCK) ON ES.intEntityId = CD.intShippingLineId
-	LEFT JOIN tblEMEntity supplier WITH(NOLOCK) ON supplier.intEntityId = CH.intEntityId
 	LEFT JOIN tblSMCompanyLocationSubLocation SL ON SL.intCompanyLocationSubLocationId = CH.intWarehouseId
 	WHERE CD.intContractDetailId = @intContractDetailId
 END TRY
