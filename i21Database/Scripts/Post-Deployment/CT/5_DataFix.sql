@@ -80,9 +80,9 @@ GO
 				end
 				else
 				begin
-					set @dblComputedQuantity = @dblLoadPriced - (@dblRunningDetailQuantityApplied-@dblDetailQuantityApplied);
+					set @dblComputedQuantity = @dblLoadPriced - (@dblRunningDetailQuantityApplied-@dblDetailLoadApplied);
 					--print @dblComputedQuantity;
-					update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = @dblComputedQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+					update tblCTPriceFixationDetail set dblLoadAppliedAndPriced = case when @dblComputedQuantity > 0 then @dblComputedQuantity else 0 end where intPriceFixationDetailId = @intPriceFixationDetailId;
 				end
 			end
 			else
@@ -98,7 +98,7 @@ GO
 				begin
 					set @dblComputedQuantity = @dblQuantity - (@dblRunningDetailQuantityApplied-@dblDetailQuantityApplied);
 					--print @dblComputedQuantity;
-					update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = @dblComputedQuantity where intPriceFixationDetailId = @intPriceFixationDetailId;
+					update tblCTPriceFixationDetail set dblQuantityAppliedAndPriced = case when @dblComputedQuantity > 0 then @dblComputedQuantity else 0 end where intPriceFixationDetailId = @intPriceFixationDetailId;
 				end
 			end
 

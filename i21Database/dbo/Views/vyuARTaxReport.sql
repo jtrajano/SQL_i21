@@ -128,7 +128,7 @@ INNER JOIN (
 		 , strItemNo				= ITEM.strItemNo
 		 , strCategoryCode			= CATEGORY.strCategoryCode
 		 , intTaxClassId			= IDT.intTaxClassId
-		 , intSalesTaxAccountId		= TAXCODE.intSalesTaxAccountId
+		 , intSalesTaxAccountId		= IDT.intSalesTaxAccountId
 		 , intPurchaseTaxAccountId	= TAXCODE.intPurchaseTaxAccountId
 		 , intCategoryId			= ITEM.intCategoryId
 		 , intTaxCodeCount			= ISNULL(TAXTOTAL.intTaxCodeCount, TAXCLASSTOTAL.intTaxClassCount)
@@ -145,8 +145,9 @@ INNER JOIN (
 			 , dblAdjustedTax		
 			 , dblTax				
 			 , ysnTaxExempt
-			 ,ysnTaxAdjusted
+			 , ysnTaxAdjusted
 			 , ysnInvalidSetup
+			 , intSalesTaxAccountId
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
@@ -216,7 +217,7 @@ INNER JOIN (
 		SELECT intAccountId
 			 , strAccountId 
 		FROM dbo.tblGLAccount WITH (NOLOCK)
-	) SALESACCOUNT ON TAXCODE.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
+	) SALESACCOUNT ON IDT.intSalesTaxAccountId = SALESACCOUNT.intAccountId 
 	LEFT OUTER JOIN (
 		SELECT intAccountId
 			 , strAccountId 

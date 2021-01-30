@@ -2,7 +2,8 @@
 	 @InvoiceId			INT = NULL	
 	,@ForDelete			BIT = 0    
 	,@UserId			INT = NULL
-	,@InvoiceDetailId 	INT = NULL     
+	,@InvoiceDetailId 	INT = NULL
+	,@ysnLogRisk		BIT = 1     
 AS  
 
 SET QUOTED_IDENTIFIER OFF  
@@ -131,7 +132,9 @@ BEGIN TRY
 		 , strBatchId 	= @strBatchId	
 
 	EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @InvoiceIds
-	EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
+	
+	IF ISNULL(@ysnLogRisk, 0) = 1
+		EXEC dbo.[uspARLogRiskPosition] @InvoiceIds, @UserId
 
 	-- --PRICING LAYER
 	-- INSERT INTO @InvoicesForContractDelete(

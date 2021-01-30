@@ -1359,7 +1359,7 @@ BEGIN TRY
 			, strSeqHeader = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Sales' ELSE 'Collateral Receipts - Sales' END COLLATE Latin1_General_CI_AS
 			, strCommodityCode = @strCommodityCode
 			, strType = CASE WHEN ysnIncludeInPriceRiskAndCompanyTitled = 1 THEN 'Warehouse Receipts - Sales' ELSE 'Collateral Receipts - Sales' END COLLATE Latin1_General_CI_AS
-			, dblTotal
+			, dblTotal = dblTotal * -1
 			, intCollateralId
 			, strLocationName
 			, intItemId
@@ -1515,7 +1515,7 @@ BEGIN TRY
 		, 'Total Receipted' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
 		, strType = 'Collateral Purchase' COLLATE Latin1_General_CI_AS
-		, dblTotal = ISNULL(dblTotal, 0)
+		, dblTotal = - ISNULL(dblTotal, 0)
 		, @intCommodityId
 		, @intCommodityUnitMeasureId
 		, strLocationName
@@ -3670,7 +3670,7 @@ BEGIN TRY
 			, intFutureMonthId
 			, strFutureMonth
 		FROM(
-			SELECT dblRemainingQuantity = CASE WHEN ISNULL(intContractTypeId, 1) = 2 THEN - dblRemainingQuantity ELSE dblRemainingQuantity END
+			SELECT dblRemainingQuantity = dblRemainingQuantity
 				, intContractHeaderId
 				, strContractNumber
 				, intFromCommodityUnitMeasureId = intCommodityUnitMeasureId
@@ -3687,6 +3687,7 @@ BEGIN TRY
 			FROM #tempCollateral c1
 			WHERE c1.intLocationId = ISNULL(@intLocationId, c1.intLocationId)
 			AND c1.ysnIncludeInPriceRiskAndCompanyTitled = 1
+			AND @ysnExchangeTraded = 1
 		) t GROUP BY intCommodityId
 			, intFromCommodityUnitMeasureId
 			, intCommodityId
@@ -6062,7 +6063,7 @@ BEGIN TRY
 			, intContractHeaderId
 			, strContractNumber)
 		SELECT strCommodityCode
-			, dblTotal = SUM(CASE WHEN ISNULL(intContractTypeId, 1) = 2 THEN - dblTotal ELSE dblTotal END)
+			, dblTotal = SUM(dblTotal)
 			, strLocationName
 			, intCommodityId
 			, @intCommodityUnitMeasureId
@@ -7064,7 +7065,7 @@ BEGIN TRY
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure from @ListCrushDetail where intOrderId in(19, 20, 21, 22)
 
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
-		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 19, 20) AND @ysnExchangeTraded = 1
+		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(1, 2, 6, 8, 19, 20) AND @ysnExchangeTraded = 1
 
 		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
 		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 16) AND @ysnExchangeTraded = 1

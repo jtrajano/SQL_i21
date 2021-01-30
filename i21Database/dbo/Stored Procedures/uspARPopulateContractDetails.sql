@@ -79,7 +79,7 @@ SELECT intInvoiceDetailId			= ID.intInvoiceDetailId
 												END
 										END * (CASE WHEN ID.[ysnPost] = 0 THEN -1.000000 ELSE 1.000000 END) * (CASE WHEN ID.[ysnIsInvoicePositive] = 0 THEN -1.000000 ELSE 1.000000 END)
 	, dblQtyOrdered					= CASE WHEN ID.intSalesOrderDetailId IS NOT NULL OR (ID.intTicketId IS NOT NULL AND ISNULL(T.intTicketType, 0) <> 6 AND ISNULL(T.strInOutFlag, '') <> 'O') THEN IDD.dblQtyOrdered ELSE 0 END
-	, ysnDestWtGrd					= CAST(0 AS BIT)
+	, ysnDestWtGrd					= CASE WHEN (W.strWhereFinalized = 'Destination' OR G.strWhereFinalized= 'Destination') THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 	, dblShippedQty					= CAST(0 AS NUMERIC(18, 6))
 	, intShippedQtyUOMId			= NULL
 	, ysnFromReturn					= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
@@ -96,6 +96,8 @@ LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeade
 LEFT JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
 LEFT JOIN tblARInvoice PI ON ID.intOriginalInvoiceId = PI.intInvoiceId AND ID.ysnFromProvisional = 1 AND PI.strType = 'Provisional'
 LEFT JOIN tblSCTicket T ON ID.intTicketId = T.intTicketId
+LEFT JOIN tblCTWeightGrade W ON W.intWeightGradeId = T.intWeightId
+LEFT JOIN tblCTWeightGrade G ON G.intWeightGradeId = T.intGradeId
 LEFT JOIN (
 	SELECT intLoadDetailId
 		 , intPurchaseSale 
@@ -431,48 +433,30 @@ WHILE ISNULL(@intUniqueId,0) > 0
 
 							IF @dblRemainingSchedQty > @dblScheduleQty
 								SET @dblRemainingSchedQty = @dblScheduleQty
-								
+
+							--IF UNPOST WITH OVERAGE CONTRACT
+							SELECT @dblRemainingSchedQty = dblQtyShipped - dblQtyOrdered
+							FROM tblARInvoiceDetail
+							WHERE intInvoiceDetailId = @intInvoiceDetailId
+							  AND intContractDetailId = @intContractDetailId
+							  AND intSalesOrderDetailId IS NOT NULL
+							  AND dblQtyOrdered <> dblQtyShipped
+							  AND @dblQty < 0
+							  	
 							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-							INSERT INTO #ARItemsForContracts (
-								  intInvoiceId
-								, intInvoiceDetailId
-								, intItemId
-								, intContractDetailId
-								, intContractHeaderId
-								, intEntityId
-								, intUserId
-								, dtmDate
-								, dblQuantity
-								, dblBalanceQty
-								, dblSheduledQty
-								, dblRemainingQty
-								, strType
-								, strTransactionType
-								, strInvoiceNumber
-								, strItemNo
-								, strBatchId
-							)
-							SELECT intInvoiceId			= @intInvoiceId
-								, intInvoiceDetailId	= @intInvoiceDetailId
-								, intItemId				= @intItemId
-								, intContractDetailId	= @intContractDetailId
-								, intContractHeaderId	= @intContractHeaderId
-								, intEntityId			= @intEntityId
-								, intUserId				= @intEntityId
-								, dtmDate				= @dtmDate
-								, dblQuantity			= @dblSchQuantityToUpdate
-								, dblBalanceQty			= 0
-								, dblSheduledQty		= 0
-								, dblRemainingQty		= @dblRemainingSchedQty
-								, strType				= 'Remaining Scheduled'
-								, strTransactionType	= @strTransactionType
-								, strInvoiceNumber		= @strInvoiceNumber
-								, strItemNo				= @strItemNo
-								, strBatchId			= @strBatchId							
+							UPDATE #ARItemsForContracts
+							SET dblQuantity = dblQuantity - @dblRemainingSchedQty
+							  , dblSheduledQty = dblSheduledQty - @dblRemainingSchedQty
+							WHERE strType = 'Contract Scheduled'
+							  AND intInvoiceDetailId = @intInvoiceDetailId
+							  AND intContractDetailId = @intContractDetailId
+							  AND @dblConvertedQty > @dblConvertedQtyOrdered --IF S.O. Qty is less than net qty
 						END
 				END
 		END
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
+
+SELECT '#ARItemsForContracts', * FROM #ARItemsForContracts

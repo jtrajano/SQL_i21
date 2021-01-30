@@ -297,7 +297,7 @@ BEGIN TRY
 		JOIN	tblCTCropYear				CP	ON	CP.strCropYear		=	CI.strCropYear			
 												AND	CP.intCommodityId	=	CM.intCommodityId		LEFT
 		JOIN	tblCTPosition				PN	ON	PN.strPosition		=	CI.strPosition			LEFT
-		JOIN	tblRKFutureMarket			MA	ON	MA.strFutMarketName	=	CI.strFutMarketName		LEFT
+		JOIN	tblRKFutureMarket			MA	ON	LTRIM(RTRIM(LOWER(MA.strFutMarketName))) =	LTRIM(RTRIM(LOWER(CI.strFutMarketName)))		LEFT
 		JOIN	tblRKFuturesMonth			MO	ON	MO.intFutureMarketId=	MA.intFutureMarketId
 												AND	MONTH(MO.dtmFutureMonthsDate) = CI.intMonth
 												AND	(YEAR(MO.dtmFutureMonthsDate) % 100) = CI.intYear		LEFT

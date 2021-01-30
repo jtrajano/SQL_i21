@@ -27,4 +27,5 @@ FROM (
 			, strType
 			, strFieldName
 	) t
+	WHERE dblTotal <> 0
 ) y

@@ -263,7 +263,7 @@ begin try
 		update tblCTPriceFixationDetailAPAR set strInvoiceDiscountsChargesIds = @strInvoiceDiscountsChargesIds where intInvoiceDetailId = @intInvoiceDetailId;
 	end
 
-	EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @UserId = @UserId
+	EXEC dbo.uspARUpdateInvoiceIntegrations @InvoiceId = @intInvoiceId, @UserId = @UserId, @ysnLogRisk	= 0
 
 end try
 begin catch

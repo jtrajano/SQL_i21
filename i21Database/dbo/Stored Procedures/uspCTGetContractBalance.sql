@@ -286,12 +286,12 @@ BEGIN
 			,intFutureMonthId
 			,strDeliveryMonth
 			,strFutureMonth
-			,dblFutures 						= CASE WHEN ISNULL(MAX(dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblFutures, 0) <> 0 THEN dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END
-			,dblBasis 							= CAST (dblBasis AS NUMERIC(20,6))	
+			,dblFutures 						= round((CASE WHEN ISNULL(MAX(dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblFutures, 0) <> 0 THEN dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END),2)
+			,dblBasis 							= round(CAST (dblBasis AS NUMERIC(20,6)),2)
 			,strBasisUOM
 			,dblQuantity 						= CAST (SUM(dblQuantity) AS NUMERIC(20,6))
 			,strQuantityUOM
-			,dblCashPrice 						= CASE WHEN ISNULL(MAX(dblCashPrice), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblCashPrice, 0) <> 0 THEN dblCashPrice * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END
+			,dblCashPrice 						= round((CASE WHEN ISNULL(MAX(dblCashPrice), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(dblCashPrice, 0) <> 0 THEN dblCashPrice * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END),2)
 			,strPriceUOM
 			,strStockUOM
 			,dblAvailableQty 					= CAST (SUM(dblAvailableQty) AS NUMERIC(20,6))
@@ -349,13 +349,13 @@ BEGIN
 
 			    ,dblFutures						=	CASE
 													WHEN CBL.intPricingTypeId = 1 and CD.dblFutures is not null
-													THEN round(CD.dblFutures,2)
+													THEN CD.dblFutures
 													ELSE NULL
 													END  
-			    ,dblBasis						=	round(CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6)),2)
+			    ,dblBasis						=	CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6))
 				,dblCashPrice					=	CASE
 													WHEN CBL.intPricingTypeId = 1
-													THEN round((ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),2)
+													THEN (ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0))
 													ELSE NULL
 													END  
 			    ,dblAmount						=	CASE   

@@ -88,7 +88,7 @@ LEFT JOIN tblSMFreightTerms FT
 	ON FT.intFreightTermId = ISNULL(CD.intFreightTermId,CH.intFreightTermId)
 LEFT JOIN tblCTPricingType PT_HEAD
 	ON PT_HEAD.intPricingTypeId = CH.intPricingTypeId
-CROSS APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
+OUTER APPLY fnCTGetAdditionalColumnForDetailView(CD.intContractDetailId) AD
 GO
 
 
