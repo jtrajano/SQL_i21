@@ -108,6 +108,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						[dblDepreciationToDate],
 						[dblSalvageValue],
 						[strTransaction],
+						[strTransactionId],
 						[strType],
 						[strConvention]
 					)
@@ -121,6 +122,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						0,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Place in service',
+						@strTransactionId,
 						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID)),
 						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID))
 			END
@@ -139,6 +141,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						[dblDepreciationToDate],
 						[dblSalvageValue],
 						[strTransaction],
+						[strTransactionId],
 						[strType],
 						[strConvention]
 					)
@@ -152,6 +155,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						@dblDepre,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Depreciation',
+						@strTransactionId,
 						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID)),
 						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.intAssetId = (SELECT TOP 1 intAssetId FROM #AssetID))
 				END
@@ -191,6 +195,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						[dblDepreciationToDate],
 						[dblSalvageValue],
 						[strTransaction],
+						[strTransactionId],
 						[strType],
 						[strConvention]
 					)
@@ -204,6 +209,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						@dblDepre,
 						(SELECT TOP 1 dblSalvageValue FROM #FAAsset),
 						'Depreciation',
+						@strTransaction,
 						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID)),
 						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID))
 			END
