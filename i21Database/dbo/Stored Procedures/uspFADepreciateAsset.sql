@@ -50,7 +50,7 @@ BEGIN
 			BEGIN
 			IF(@intCount > 0)
 			BEGIN
-				UPDATE tblFAFixedAsset SET ysnDepreciated = 0, ysnDisposed = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
+				UPDATE tblFAFixedAsset SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0 WHERE intAssetId IN (SELECT intAssetId FROM #AssetID)				
 				DELETE A FROM tblFAFixedAssetDepreciation A JOIN #AssetID B ON B.intAssetId =  A.intAssetId AND strTransaction = 'Depreciation'
 			END		
 		END							
@@ -81,6 +81,7 @@ DECLARE @dblBasis		NUMERIC (18,6)
 DECLARE @dblAnnualDep	NUMERIC (18,6)
 DECLARE @dblMonth		NUMERIC (18,6)
 DECLARE @dblDepre		NUMERIC (18,6)
+DECLARE @ysnFullyDepreciated BIT = 0
 
 IF ISNULL(@ysnRecap, 0) = 0
 	BEGIN			
@@ -176,12 +177,14 @@ IF ISNULL(@ysnRecap, 0) = 0
 					RETURN
 				END
 
-				
+
 				SELECT @intYear =  DATEDIFF(year, @dtmStartDepreciate, @nextDate) 
 				SELECT @intMonth = DATEDIFF(MONTH, @dtmStartDepreciate, @nextDate) + 1
+				
 
-				SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre 
+				SELECT @dblBasis=dblBasis,@dblMonth=dblMonth,@dblDepre=dblDepre ,@ysnFullyDepreciated =ysnFullyDepreciated
 				FROM dbo.fnFAComputeDepreciation(@intAssetId,case when @intYear = 0 then 1 else @intYear end,@intMonth, @totalMonth)
+
 
 
 
@@ -212,6 +215,7 @@ IF ISNULL(@ysnRecap, 0) = 0
 						@strTransactionId,
 						(SELECT TOP 1 strDepreciationType FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID)),
 						(SELECT TOP 1 strConvention FROM tblFADepreciationMethod A WHERE A.[intAssetId] = (SELECT TOP 1 intAssetId FROM #AssetID))
+				
 			END
 		
 		DELETE FROM @GLEntries
@@ -324,6 +328,12 @@ IF ISNULL(@ysnRecap, 0) = 0
 		DECLARE @PostResult INT
 		EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1
 		IF @@ERROR <> 0	OR @PostResult <> 0 RETURN -1
+
+		UPDATE A  SET ysnFullyDepreciated  =1
+		FROM tblFAFixedAsset A  JOIN #FAAsset B ON A.intAssetId = B.intAssetId
+		WHERE @ysnFullyDepreciated = 1
+
+
 		DELETE #FAAsset
 		DROP TABLE #FAAsset
 	END

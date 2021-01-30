@@ -10,12 +10,13 @@ CREATE FUNCTION [dbo].[fnFAComputeDepreciation]
 RETURNS @tbl TABLE (
 	dblBasis NUMERIC(18,6) NULL,
 	dblMonth NUMERIC(18,6) NULL,
-	dblDepre NUMERIC(18,6) NULL
+	dblDepre NUMERIC(18,6) NULL,
+	ysnFullyDepreciated BIT NULL
 )
 AS
 BEGIN
 DECLARE @intDepreciationMethodId INT, @strConvention NVARCHAR(40)
-DECLARE @dblBasis NUMERIC (18,6), @dtmPlacedInService DATETIME 
+DECLARE @dblBasis NUMERIC (18,6), @dtmPlacedInService DATETIME , @ysnFullyDepreciated BIT = 0
 
 SELECT 
 @dblBasis = dblCost - A.dblSalvageValue,
@@ -52,7 +53,10 @@ ORDER BY intAssetDepreciationId DESC)
 			SELECT @dblMonth = @dblMonth /2
 
 		IF @intMonth = @totalMonths + 1
+		BEGIN
 			SELECT @dblMonth= @dblAnnualDep / 24
+			SET @ysnFullyDepreciated = 1
+		END
 			
 			
 	END
@@ -68,8 +72,14 @@ ORDER BY intAssetDepreciationId DESC)
 		IF @intMonth > @totalMonths
 		BEGIN
 			DECLARE @intDaysRemainingLastMonth INT = @intDaysInFirstMonth - @intDaysRemainingFirstMonth
-			SET @dblMonth =  @dblMonth * (@intDaysRemainingLastMonth/CAST(@intDaysInFirstMonth AS FLOAT))  
+			SELECT @dblMonth =  @dblMonth * (@intDaysRemainingLastMonth/CAST(@intDaysInFirstMonth AS FLOAT)) , @ysnFullyDepreciated = 1
+			
 		END
+	END
+	ELSE
+	BEGIN -- Full Month
+		IF @intMonth = @totalMonths + 1
+			SET @ysnFullyDepreciated = 1
 	END
 	-- ELSE Full Month would be in effect
 	
@@ -93,10 +103,11 @@ ORDER BY intAssetDepreciationId DESC)
 	INSERT INTO @tbl(
 	dblBasis,
 	dblMonth,
-	dblDepre
+	dblDepre,
+	ysnFullyDepreciated
 	 )
 	SELECT 
-	@dblBasis, @dblMonth, @dblDepre
+	@dblBasis, @dblMonth, @dblDepre, @ysnFullyDepreciated
 
 	RETURN
 
