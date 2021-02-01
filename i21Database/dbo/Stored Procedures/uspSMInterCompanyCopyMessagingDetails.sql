@@ -69,17 +69,20 @@ BEGIN
 
 		CREATE TABLE #TempComment
 		(
-			[intCommentId]		INT,
-			[strComment]		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-			[strScreen]			NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-			[strRecordNo]		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
-			[dtmAdded]			DATETIME DEFAULT (GETDATE()) NULL,
-			[dtmModified]		DATETIME DEFAULT (GETDATE()) NULL,
-			[ysnPublic]			BIT NULL,
-			[ysnEdited]			BIT NULL,
-			[intEntityId]		INT NULL,
-			[intTransactionId]	INT NULL,
-			[intActivityId]		INT NULL
+			[intCommentId]				INT,
+			[strComment]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
+			[strScreen]					NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+			[strRecordNo]				NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+			[dtmAdded]					DATETIME DEFAULT (GETDATE()) NULL,
+			[dtmModified]				DATETIME DEFAULT (GETDATE()) NULL,
+			[ysnPublic]					BIT NULL,
+			[ysnEdited]					BIT NULL,
+			[intEntityId]				INT NULL,
+			[intTransactionId]			INT NULL,
+			[intActivityId]				INT NULL,
+			[intInterCompanyId]			INT NULL,
+			[strInterCompanyEntityName]	NVARCHAR(250) COLLATE Latin1_General_CI_AS NULL,
+			[intInterCompanyEntityId]	INT NULL
 		)
 
 		IF OBJECT_ID('tempdb..#TempNotification') IS NOT NULL
@@ -509,9 +512,9 @@ BEGIN
 			EXEC sp_executesql @sql;
 
 			INSERT INTO #TempComment(
-				[intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId]
+				[intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], [intInterCompanyId], [strInterCompanyEntityName], [intInterCompanyEntityId]
 			)
-			SELECT [intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId]
+			SELECT [intCommentId], [strComment], [strScreen], [strRecordNo], [dtmAdded], [dtmModified], [ysnPublic], [ysnEdited], [intEntityId], [intTransactionId], [intActivityId], [intInterCompanyId], [strInterCompanyEntityName], [intInterCompanyEntityId]
 			FROM tblSMComment
 			WHERE intActivityId = @intSourceActivityId AND
 			intCommentId NOT IN (
@@ -523,6 +526,11 @@ BEGIN
 			BEGIN
 				SELECT TOP 1 @intCommentId = intCommentId, @intCommentEntityId = intEntityId FROM #TempComment
 				SELECT TOP 1 @strCommentEntityName = strName FROM tblEMEntity where intEntityId = @intCommentEntityId
+
+				IF ISNULL(@strCommentEntityName, '') = ''
+				BEGIN
+					SELECT TOP 1 @strCommentEntityName = strInterCompanyEntityName FROM #TempComment where intEntityId = @intCommentEntityId
+				END
 
 				SET @sql = N'
 					INSERT INTO [' + @strDestinationDatabaseName + '].dbo.[tblSMComment] (
