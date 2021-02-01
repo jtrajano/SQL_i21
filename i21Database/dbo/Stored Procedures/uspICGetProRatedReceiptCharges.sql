@@ -265,7 +265,7 @@ BEGIN
 						END 
 				END 
 		,[dblQtyToBillUnitQty] = 1				
-		,[intQtyToBillUOMId] = NULL 				
+		,[intQtyToBillUOMId] = A.intCostUnitMeasureId 				
 		,[dblCost] = 
 			CASE 
 				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
