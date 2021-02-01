@@ -7,7 +7,7 @@
 	,@ysnReplication BIT = 1
 	,@intToBookId INT = NULL
 	,@ysnApproval BIT = 1
-	,@ysnPopulateERPInfo BIT=0
+	,@ysnPopulateERPInfo BIT = 0
 AS
 BEGIN TRY
 	SET NOCOUNT ON
@@ -29,7 +29,7 @@ BEGIN TRY
 		,@strObjectName NVARCHAR(50)
 		,@intSContractDetailId INT
 		,@intPContractDetailId INT
-		,@intPContractHeaderId INT
+		--,@intPContractHeaderId INT
 		,@strExternalContractNumber NVARCHAR(50)
 		,@strExternalEntity NVARCHAR(100)
 		,@intEntityId INT
@@ -40,14 +40,14 @@ BEGIN TRY
 		,@intContractScreenId INT
 		,@strSubmittedByXML NVARCHAR(MAX)
 		,@intPContractSeq INT
-		,@strApprovalStatus nvarchar(150)
+		,@strApprovalStatus NVARCHAR(150)
 		,@strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
 		,@strDatabaseName NVARCHAR(50)
-		,@strLogCondition nvarchar(50)
+		,@strLogCondition NVARCHAR(50)
 		,@strLogXML NVARCHAR(MAX)
 		,@strAuditXML NVARCHAR(MAX)
-		,@intLogId int
+		,@intLogId INT
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
@@ -66,14 +66,15 @@ BEGIN TRY
 	WHERE strNamespace = 'ContractManagement.view.Contract'
 
 	SELECT @intTransactionId = intTransactionId
+		,@strApprovalStatus = strApprovalStatus
 	FROM tblSMTransaction
 	WHERE intRecordId = @ContractHeaderId
 		AND intScreenId = @intContractScreenId
 
-	Select Top 1 @intLogId=intLogId
-	from dbo.tblSMLog
-	Where intTransactionId=@intTransactionId
-	Order by 1 desc
+	SELECT TOP 1 @intLogId = intLogId
+	FROM dbo.tblSMLog
+	WHERE intTransactionId = @intTransactionId
+	ORDER BY 1 DESC
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -97,10 +98,10 @@ BEGIN TRY
 		RETURN
 	END
 
-	IF @ysnPopulateERPInfo=1
+	IF @ysnPopulateERPInfo = 1
 	BEGIN
 		SELECT @strDetailXML = NULL
-				,@strObjectName = NULL
+			,@strObjectName = NULL
 
 		SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
 
@@ -111,226 +112,228 @@ BEGIN TRY
 			,@strDetailXML OUTPUT
 			,NULL
 			,NULL
-		
+
 		SELECT @strServerName = strServerName
 			,@strDatabaseName = strDatabaseName
 		FROM tblIPMultiCompany
-		WHERE ysnParent=1
+		WHERE ysnParent = 1
 	END
 	ELSE
 	BEGIN
+		-------------------------Header-----------------------------------------------------------
+		SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
 
-	-------------------------Header-----------------------------------------------------------
-	SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
-	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
+		SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
 
-	IF @ysnReplication = 1
-		SELECT @strObjectName = 'tblCTContractHeader'
-	ELSE
-		SELECT @strObjectName = 'vyuIPContractHeaderView'
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblCTContractHeader'
+		ELSE
+			SELECT @strObjectName = 'vyuIPContractHeaderView'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
-		,@strHeaderXML OUTPUT
-		,NULL
-		,NULL
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strHeaderXML OUTPUT
+			,NULL
+			,NULL
 
-	SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval>'
-
-	SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
-
-	SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
-
-	SELECT @intPContractDetailId = intPContractDetailId
-	FROM tblLGAllocationDetail
-	WHERE intSContractDetailId IN (
-			SELECT intContractDetailId
-			FROM tblCTContractDetail
-			WHERE intContractHeaderId = @ContractHeaderId
-			)
-
-	SELECT @intPContractHeaderId = intContractHeaderId
-		,@intPContractSeq = intContractSeq
-	FROM tblCTContractDetail
-	WHERE intContractDetailId = @intPContractDetailId
-
-	SELECT @strExternalContractNumber = strContractNumber + ' / ' + Ltrim(@intPContractSeq)
-		,@intEntityId = intEntityId
-	FROM tblCTContractHeader
-	WHERE intContractHeaderId = @intPContractHeaderId
-
-	SELECT @strExternalEntity = strName
-	FROM tblEMEntity
-	WHERE intEntityId = @intEntityId
-
-	IF @strExternalContractNumber IS NOT NULL
-	BEGIN
-		SELECT @strAdditionalInfo = NULL
-
-		SELECT @strAdditionalInfo = '<strExternalContractNumber>' + @strExternalContractNumber + '</strExternalContractNumber>'
-
-		SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + [dbo].[fnEscapeXML](@strExternalEntity) + '</strExternalEntity>'
+		SELECT @strAdditionalInfo = '<ysnApproval>' + Ltrim(@ysnApproval) + '</ysnApproval><strApprovalStatus>' + @strApprovalStatus + '</strApprovalStatus>'
 
 		SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
-		IF @strAdditionalInfo <> ''
-			SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
-	END
+		SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
 
-	SET @intContractStageId = SCOPE_IDENTITY();
+		SELECT @strExternalContractNumber = IsNULL(@strExternalContractNumber, '') + strContractNumber + '/' + Ltrim(CD.intContractSeq) + ','
+			,@intEntityId = CH.intEntityId
+		FROM tblCTContractDetail CD
+		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		WHERE CD.intContractDetailId IN (
+				SELECT intPContractDetailId
+				FROM tblLGAllocationDetail
+				WHERE intSContractDetailId IN (
+						SELECT intContractDetailId
+						FROM tblCTContractDetail
+						WHERE intContractHeaderId = @ContractHeaderId
+						)
+				)
 
-	---------------------------------------------Detail------------------------------------------
-	SELECT @strDetailXML = NULL
-		,@strObjectName = NULL
+		IF Len(@strExternalContractNumber) > 0
+		BEGIN
+			SELECT @strExternalContractNumber = Left(@strExternalContractNumber, len(@strExternalContractNumber) - 1)
+		END
 
-	IF @ysnReplication = 1
-		SELECT @strObjectName = 'tblCTContractDetail'
-	ELSE
-		SELECT @strObjectName = 'vyuIPContractDetailView'
+		SELECT @strExternalEntity = strName
+		FROM tblEMEntity
+		WHERE intEntityId = @intEntityId
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
-		,@strDetailXML OUTPUT
-		,NULL
-		,NULL
+		IF @strExternalContractNumber IS NOT NULL
+		BEGIN
+			SELECT @strAdditionalInfo = NULL
 
-	---------------------------------------------Cost-----------------------------------------------
-	SET @strCostXML = NULL
-	SET @strCostCondition = NULL
+			SELECT @strAdditionalInfo = '<strExternalContractNumber>' + @strExternalContractNumber + '</strExternalContractNumber>'
 
-	SELECT @strContractDetailAllId = STUFF((
-				SELECT DISTINCT ',' + LTRIM(intContractDetailId)
-				FROM tblCTContractDetail
-				WHERE intContractHeaderId = @ContractHeaderId
-				FOR XML PATH('')
-				), 1, 1, '')
+			SELECT @strAdditionalInfo = @strAdditionalInfo + '<strExternalEntity>' + [dbo].[fnEscapeXML](@strExternalEntity) + '</strExternalEntity>'
 
-	SELECT @strCostCondition = 'intContractDetailId IN (' + LTRIM(@strContractDetailAllId) + ')'
+			SELECT @strAdditionalInfo = @strAdditionalInfo + '</vyuIPContractHeaderView></vyuIPContractHeaderViews>'
 
-	SELECT @strObjectName = NULL
+			IF @strAdditionalInfo <> ''
+				SELECT @strHeaderXML = Replace(@strHeaderXML, '</vyuIPContractHeaderView></vyuIPContractHeaderViews>', @strAdditionalInfo)
+		END
 
-	IF @ysnReplication = 1
-		SELECT @strObjectName = 'tblCTContractCost'
-	ELSE
-		SELECT @strObjectName = 'vyuIPContractCostView'
+		SET @intContractStageId = SCOPE_IDENTITY();
 
-	IF @strCostCondition IS NOT NULL
-	BEGIN
+		---------------------------------------------Detail------------------------------------------
+		SELECT @strDetailXML = NULL
+			,@strObjectName = NULL
+
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblCTContractDetail'
+		ELSE
+			SELECT @strObjectName = 'vyuIPContractDetailView'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strDetailXML OUTPUT
+			,NULL
+			,NULL
+
+		---------------------------------------------Cost-----------------------------------------------
+		SET @strCostXML = NULL
+		SET @strCostCondition = NULL
+
+		SELECT @strContractDetailAllId = STUFF((
+					SELECT DISTINCT ',' + LTRIM(intContractDetailId)
+					FROM tblCTContractDetail
+					WHERE intContractHeaderId = @ContractHeaderId
+					FOR XML PATH('')
+					), 1, 1, '')
+
+		SELECT @strCostCondition = 'intContractDetailId IN (' + LTRIM(@strContractDetailAllId) + ')'
+
+		SELECT @strObjectName = NULL
+
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblCTContractCost'
+		ELSE
+			SELECT @strObjectName = 'vyuIPContractCostView'
+
+		IF @strCostCondition IS NOT NULL
+		BEGIN
+			EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+				,@strCostCondition
+				,@strCostXML OUTPUT
+				,NULL
+				,NULL
+		END
+
+		-------------------------------------------------------------Document----------------------------------------
+		SELECT @strDocumentXML = NULL
+
+		SELECT @strObjectName = NULL
+
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblCTContractDocument'
+		ELSE
+			SELECT @strObjectName = 'vyuIPContractDocumentView'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strDocumentXML OUTPUT
+			,NULL
+			,NULL
+
+		-------------------------------------------------------------Condition----------------------------------------
+		SELECT @strConditionXML = NULL
+
+		SELECT @strObjectName = NULL
+
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblCTContractCondition'
+		ELSE
+			SELECT @strObjectName = 'vyuCTContractConditionView'
+
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strConditionXML OUTPUT
+			,NULL
+			,NULL
+
+		-------------------------------------------------------------Certification----------------------------------------
+		SELECT @strCertificationXML = NULL
+
+		SELECT @strObjectName = NULL
+
+		IF @ysnReplication = 1
+			SELECT @strObjectName = 'tblCTContractCertification'
+		ELSE
+			SELECT @strObjectName = 'vyuIPContractCertification'
+
 		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
 			,@strCostCondition
-			,@strCostXML OUTPUT
+			,@strCertificationXML OUTPUT
 			,NULL
 			,NULL
-	END
 
-	-------------------------------------------------------------Document----------------------------------------
-	SELECT @strDocumentXML = NULL
+		---------------------------------------------Approver------------------------------------------
+		SELECT @strApproverXML = NULL
+			,@strObjectName = NULL
 
-	SELECT @strObjectName = NULL
+		SELECT @strObjectName = 'vyuCTContractApproverView'
 
-	IF @ysnReplication = 1
-		SELECT @strObjectName = 'tblCTContractDocument'
-	ELSE
-		SELECT @strObjectName = 'vyuIPContractDocumentView'
+		SELECT @strHeaderCondition = 'strContractNumber = ''' + @strContractNumber + ''''
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
-		,@strDocumentXML OUTPUT
-		,NULL
-		,NULL
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strApproverXML OUTPUT
+			,NULL
+			,NULL
 
-	-------------------------------------------------------------Condition----------------------------------------
-	SELECT @strConditionXML = NULL
+		---------------------------------------------Amendment Approval------------------------------------------
+		SELECT @strAmendmentApprovalXML = NULL
+			,@strObjectName = NULL
 
-	SELECT @strObjectName = NULL
+		SELECT @strObjectName = 'vyuIPAmendmentApproval'
 
-	IF @ysnReplication = 1
-		SELECT @strObjectName = 'tblCTContractCondition'
-	ELSE
-		SELECT @strObjectName = 'vyuCTContractConditionView'
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,NULL
+			,@strAmendmentApprovalXML OUTPUT
+			,NULL
+			,NULL
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
-		,@strConditionXML OUTPUT
-		,NULL
-		,NULL
+		---------------------------------------------Submitted By------------------------------------------
+		SELECT @strSubmittedByXML = NULL
+			,@strObjectName = NULL
 
-	-------------------------------------------------------------Certification----------------------------------------
-	SELECT @strCertificationXML = NULL
+		SELECT @strObjectName = 'vyuIPContractSubmittedByView'
 
-	SELECT @strObjectName = NULL
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strHeaderCondition
+			,@strSubmittedByXML OUTPUT
+			,NULL
+			,NULL
 
-	IF @ysnReplication = 1
-		SELECT @strObjectName = 'tblCTContractCertification'
-	ELSE
-		SELECT @strObjectName = 'vyuIPContractCertification'
+		---------------------------------------------Audit Log------------------------------------------
+		SELECT @strLogXML = NULL
+			,@strObjectName = NULL
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strCostCondition
-		,@strCertificationXML OUTPUT
-		,NULL
-		,NULL
+		SELECT @strObjectName = 'vyuIPLogView'
 
-	---------------------------------------------Approver------------------------------------------
-	SELECT @strApproverXML = NULL
-		,@strObjectName = NULL
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strLogCondition
+			,@strLogXML OUTPUT
+			,NULL
+			,NULL
 
-	SELECT @strObjectName = 'vyuCTContractApproverView'
+		---------------------------------------------Audit Log------------------------------------------
+		SELECT @strAuditXML = NULL
+			,@strObjectName = NULL
 
-	SELECT @strHeaderCondition = 'strContractNumber = ''' + @strContractNumber + ''''
+		SELECT @strObjectName = 'vyuIPAuditView'
 
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
-		,@strApproverXML OUTPUT
-		,NULL
-		,NULL
-
-	---------------------------------------------Amendment Approval------------------------------------------
-	SELECT @strAmendmentApprovalXML = NULL
-		,@strObjectName = NULL
-
-	SELECT @strObjectName = 'vyuIPAmendmentApproval'
-
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,NULL
-		,@strAmendmentApprovalXML OUTPUT
-		,NULL
-		,NULL
-
-	---------------------------------------------Submitted By------------------------------------------
-	SELECT @strSubmittedByXML = NULL
-		,@strObjectName = NULL
-
-	SELECT @strObjectName = 'vyuIPContractSubmittedByView'
-
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strHeaderCondition
-		,@strSubmittedByXML OUTPUT
-		,NULL
-		,NULL
-	---------------------------------------------Audit Log------------------------------------------
-	SELECT @strLogXML = NULL
-		,@strObjectName = NULL
-
-	SELECT @strObjectName = 'vyuIPLogView'
-
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strLogCondition
-		,@strLogXML OUTPUT
-		,NULL
-		,NULL
-
-	---------------------------------------------Audit Log------------------------------------------
-	SELECT @strAuditXML = NULL
-		,@strObjectName = NULL
-
-	SELECT @strObjectName = 'vyuIPAuditView'
-
-	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
-		,@strLogCondition
-		,@strAuditXML OUTPUT
-		,NULL
-		,NULL
+		EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+			,@strLogCondition
+			,@strAuditXML OUTPUT
+			,NULL
+			,NULL
 
 		SELECT @strServerName = strServerName
 			,@strDatabaseName = strDatabaseName
