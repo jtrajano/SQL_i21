@@ -8901,6 +8901,7 @@
     <Build Include="dbo\Stored Procedures\uspGRRiskSummaryLog2.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
