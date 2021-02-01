@@ -96,7 +96,7 @@ BEGIN TRY
 		,@ysnComputeDemandUsingRecipe = ysnComputeDemandUsingRecipe
 		,@ysnDisplayDemandWithItemNoAndDescription = ysnDisplayDemandWithItemNoAndDescription
 		,@ysnDisplayRestrictedBookInDemandView = IsNULL(ysnDisplayRestrictedBookInDemandView, 0)
-		,@intDemandAnalysisMonthlyCutOffDay = IsNULL(intDemandAnalysisMonthlyCutOffDay, 32)
+		,@intDemandAnalysisMonthlyCutOffDay = (Case When IsNULL(intDemandAnalysisMonthlyCutOffDay, 0)=0 then 32 Else intDemandAnalysisMonthlyCutOffDay End)
 	FROM tblMFCompanyPreference
 
 	SELECT @strContainerType = strContainerType

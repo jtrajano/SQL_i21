@@ -26,5 +26,7 @@
 	intCompanyId int, 
     ysnMailSent BIT NULL,
 	intStatusId int,
-	intDeadlockError int CONSTRAINT DF_tblCTContractStage_intDeadlockError DEFAULT 0
+	intDeadlockError int CONSTRAINT DF_tblCTContractStage_intDeadlockError DEFAULT 0,
+	strLogXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strAuditXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
