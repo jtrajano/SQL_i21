@@ -1924,6 +1924,14 @@ BEGIN TRY
 																		ELSE NULL
 																END
 													END
+					,[intInventoryReceiptChargeId]	= CASE 
+														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
+														ELSE 
+																CASE 
+																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL THEN RC.intInventoryReceiptChargeId
+																		ELSE NULL
+																END
+													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
 					,[dblOrderQty]					= CASE	
@@ -2126,7 +2134,7 @@ BEGIN TRY
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
-					,a.intItemType				
+					,a.intItemType
 				 
 
 				update @voucherPayable set dblOldCost = null where dblCost = dblOldCost
