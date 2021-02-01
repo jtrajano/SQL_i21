@@ -27,12 +27,17 @@ BEGIN TRY
 		,@strApproverXML NVARCHAR(MAX)
 		,@strSubmittedByXML NVARCHAR(MAX)
 		,@strAdditionalInfo NVARCHAR(MAX)
+		,@strLogCondition nvarchar(50)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId int
 
 	SET @intPriceContractStageId = NULL
 	SET @strPriceContractNo = NULL
 	SET @strPriceContractXML = NULL
 	SET @strPriceContractCondition = NULL
 	SET @strPriceFixationXML = NULL
+	SET @strLogCondition = NULL
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -66,8 +71,15 @@ BEGIN TRY
 	WHERE intRecordId = @intPriceContractId
 		AND intScreenId = @intContractScreenId
 
+	Select Top 1 @intLogId=intLogId
+	from dbo.tblSMLog
+	Where intTransactionId=@intTransactionId
+	Order by 1 desc
+
 	-------------------------PriceContract-----------------------------------------------------------
 	SELECT @strPriceContractCondition = 'intPriceContractId = ' + LTRIM(@intPriceContractId)
+	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
+
 
 if @ysnProcessApproverInfo=0
 Begin
@@ -158,7 +170,30 @@ End
 		,NULL
 		,NULL
 
-	
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strLogXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPLogView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strLogXML OUTPUT
+		,NULL
+		,NULL
+
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strAuditXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAuditView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strAuditXML OUTPUT
+		,NULL
+		,NULL
+
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
@@ -189,6 +224,8 @@ End
 		,intTransactionId 
 		,intCompanyId 
 		,strSubmittedByXML
+		,strLogXML
+		,strAuditXML
 		)
 	SELECT intPriceContractId = @intPriceContractId
 		,strPriceContractNo = @strPriceContractNo
@@ -202,7 +239,9 @@ End
 		,intMultiCompanyId = @intToCompanyId
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
-		,strSubmittedByXML=@strSubmittedByXML'
+		,strSubmittedByXML=@strSubmittedByXML
+		,strLogXML=@strLogXML
+		,strAuditXML=@strAuditXML'
 
 		EXEC sp_executesql @strSQL
 			,N'@intPriceContractId int, 
@@ -217,7 +256,9 @@ End
 			@intToCompanyId int,
 			@intTransactionId int,
 			@intCompanyId int,
-			@strSubmittedByXML nvarchar(MAX)'
+			@strSubmittedByXML nvarchar(MAX),
+			@strLogXML nvarchar(MAX),
+			@strAuditXML nvarchar(MAX)'
 			,@intPriceContractId
 			,@strPriceContractNo
 			,@strPriceContractXML
@@ -231,6 +272,8 @@ End
 			,@intTransactionId
 			,@intCompanyId
 			,@strSubmittedByXML
+			,@strLogXML
+			,@strAuditXML
 	END
 END TRY
 
