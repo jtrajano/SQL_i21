@@ -40,6 +40,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT				= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -348,6 +349,7 @@ BEGIN TRY
 				,[intRecipeItemId] 
 				,[intRecipeId]
 				,[intSubLocationId]
+				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
 				,[intCommentTypeId]
@@ -465,6 +467,7 @@ BEGIN TRY
 				,[intRecipeItemId]					= @ItemRecipeItemId 
 				,[intRecipeId]						= @ItemRecipeId
 				,[intSubLocationId]					= @ItemSublocationId
+				,[intPriceFixationDetailId]			= @ItemPriceFixationDetailId
 				,[intCostTypeId]					= @ItemCostTypeId
 				,[intMarginById]					= @ItemMarginById
 				,[intCommentTypeId]					= @ItemCommentTypeId	
