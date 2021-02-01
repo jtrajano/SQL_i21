@@ -44,6 +44,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT 			= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -191,6 +192,7 @@ IF (ISNULL(@ItemIsInventory,0) = 1) OR [dbo].[fnIsStockTrackingItem](@ItemId) = 
 			,@ItemRecipeItemId				= @ItemRecipeItemId
 			,@ItemRecipeId					= @ItemRecipeId
 			,@ItemSublocationId				= @ItemSublocationId
+			,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 			,@ItemCostTypeId				= @ItemCostTypeId
 			,@ItemMarginById				= @ItemMarginById
 			,@ItemCommentTypeId				= @ItemCommentTypeId
@@ -450,6 +452,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,[strSubFormula]
 				,[intRecipeId]
 				,[intSubLocationId]
+				,[intPriceFixationDetailId]
 				,[intCostTypeId]
 				,[intMarginById]
 				,[intCommentTypeId]
@@ -539,6 +542,7 @@ ELSE IF ISNULL(@ItemId, 0) > 0 AND ISNULL(@ItemCommentTypeId, 0) = 0
 				,@ItemSubFormula
 				,@ItemRecipeId
 				,@ItemSublocationId
+				,@ItemPriceFixationDetailId
 				,@ItemCostTypeId
 				,@ItemMarginById
 				,@ItemCommentTypeId

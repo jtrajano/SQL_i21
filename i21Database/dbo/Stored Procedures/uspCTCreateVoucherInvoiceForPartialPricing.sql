@@ -1513,7 +1513,7 @@ BEGIN TRY
 														tblCTPriceFixationDetailAPAR AA
 														JOIN tblARInvoiceDetail AD ON AD.intInvoiceDetailId	= AA.intInvoiceDetailId
 													WHERE
-														intPriceFixationDetailId = @intPriceFixationDetailId
+														AA.intPriceFixationDetailId = @intPriceFixationDetailId
 												 )
 					
 						set @dblPricedForInvoice = 0;
