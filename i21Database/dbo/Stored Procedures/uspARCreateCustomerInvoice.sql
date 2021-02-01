@@ -89,6 +89,7 @@
 	,@ItemRecipeItemId				INT				= NULL
 	,@ItemRecipeId					INT				= NULL
 	,@ItemSublocationId				INT				= NULL
+	,@ItemPriceFixationDetailId		INT				= NULL
 	,@ItemCostTypeId				INT				= NULL
 	,@ItemMarginById				INT				= NULL
 	,@ItemCommentTypeId				INT				= NULL
@@ -704,6 +705,7 @@ BEGIN TRY
 		,@ItemRecipeItemId				= @ItemRecipeItemId
 		,@ItemRecipeId					= @ItemRecipeId
 		,@ItemSublocationId				= @ItemSublocationId
+		,@ItemPriceFixationDetailId		= @ItemPriceFixationDetailId
 		,@ItemCostTypeId				= @ItemCostTypeId
 		,@ItemMarginById				= @ItemMarginById
 		,@ItemCommentTypeId				= @ItemCommentTypeId
