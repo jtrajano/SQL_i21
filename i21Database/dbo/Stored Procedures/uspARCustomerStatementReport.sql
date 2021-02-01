@@ -351,10 +351,9 @@ FROM (
 														SELECT intPaymentId
 														FROM dbo.tblARPayment WITH (NOLOCK)
 														WHERE ysnPosted = 1	
-															AND strPaymentMethod  = ''Write Off''
 															AND ISNULL(ysnProcessedToNSF, 0) = 0
 															AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), dtmDatePaid))) > '+ @strDateTo +'																	
-													) P ON PD.intPaymentId = P.intPaymentId))))
+													) P ON PD.intPaymentId = P.intPaymentId AND I.strInvoiceNumber =PD.strTransactionNumber))))
 		AND intAccountId IN (SELECT intAccountId FROM dbo.vyuGLAccountDetail WITH (NOLOCK) WHERE strAccountCategory IN (''AR Account'', ''Customer Prepayments''))
 	) I ON I.intEntityCustomerId = C.intEntityId		
 	LEFT JOIN (
