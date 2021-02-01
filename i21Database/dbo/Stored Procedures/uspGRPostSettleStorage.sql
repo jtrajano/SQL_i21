@@ -1835,6 +1835,7 @@ BEGIN TRY
 					,[intContractHeaderId]
 					,[intContractDetailId]
 					,[intInventoryReceiptItemId]
+					,[intInventoryReceiptChargeId]
 					,[intCustomerStorageId]
 					,[intSettleStorageId]
 					,[dblOrderQty]
@@ -1881,6 +1882,14 @@ BEGIN TRY
 																			WHEN a.intItemType = 1 AND CS.intTicketId IS NOT NULL THEN RI.intInventoryReceiptItemId
 																			ELSE NULL
 																	END
+													END
+					,[intInventoryReceiptChargeId]	= CASE 
+														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
+														ELSE 
+																CASE 
+																		WHEN a.intItemType = 3 AND CS.intTicketId IS NOT NULL THEN RC.intInventoryReceiptChargeId
+																		ELSE NULL
+																END
 													END
 					,[intCustomerStorageId]			= a.[intCustomerStorageId]
 					,[intSettleStorageId]			= @intSettleStorageId
@@ -2039,10 +2048,17 @@ BEGIN TRY
 										AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
 				) 
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
-								AND a.intItemType = 1
+								--AND a.intItemType = 1
 								AND ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null) or (
 												(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 								AND CS.intTicketId IS NOT NULL
+				LEFT JOIN (tblICInventoryReceiptCharge RC
+							INNER JOIN tblGRStorageHistory SH2
+								ON SH2.intInventoryReceiptId = RC.intInventoryReceiptId
+									AND RC.intContractId = SH2.intContractHeaderId
+						)
+					ON RC.intInventoryReceiptId = RI.intInventoryReceiptId
+						AND RC.intChargeId = a.intItemId
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
@@ -2069,7 +2085,7 @@ BEGIN TRY
 					)
 				and a.intSettleVoucherKey not in ( select id from @DiscountSCRelation )
 				ORDER BY SST.intSettleStorageTicketId
-					,a.intItemType				
+					,a.intItemType
 				 
 							 
 				 ---we should delete priced contracts that has a voucher already
