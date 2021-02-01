@@ -180,6 +180,7 @@ BEGIN TRY
 		,@strLogXML NVARCHAR(MAX)
 		,@strAuditXML NVARCHAR(MAX)
 		,@intLogId INT
+		,@strExternalContractNumber nvarchar(MAX)
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -612,6 +613,7 @@ BEGIN TRY
 					,@strSubBook = NULL
 					,@strINCOLocation = NULL
 					,@strApprovalStatus = NULL
+					,@strExternalContractNumber = NULL
 
 				SELECT @strSalespersonId = strSalesperson
 					,@strCommodityCode = strCommodityCode
@@ -634,6 +636,7 @@ BEGIN TRY
 					,@strSubBook = strSubBook
 					,@strINCOLocation = strINCOLocation
 					,@strApprovalStatus = strApprovalStatus
+					,@strExternalContractNumber=strExternalContractNumber
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -656,9 +659,22 @@ BEGIN TRY
 						,strSubBook NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strINCOLocation NVARCHAR(50) Collate Latin1_General_CI_AS
 						,strApprovalStatus NVARCHAR(150) Collate Latin1_General_CI_AS
+						,strExternalContractNumber NVARCHAR(MAX) Collate Latin1_General_CI_AS
 						) x
 
 				SELECT @strErrorMessage = ''
+
+				IF Len(@strExternalContractNumber)>50
+				BEGIN
+					IF @strErrorMessage <> ''
+					BEGIN
+						SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'External Contract Number cannot be more than 50 chars.'
+					END
+					ELSE
+					BEGIN
+						SELECT @strErrorMessage = 'External Contract Number cannot be more than 50 chars.'
+					END
+				END
 
 				IF @strCommodityCode IS NOT NULL
 					AND NOT EXISTS (
