@@ -2046,19 +2046,22 @@ BEGIN TRY
 						INNER JOIN tblGRStorageHistory SH
 								ON SH.intInventoryReceiptId = RI.intInventoryReceiptId
 										AND CASE WHEN (SH.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RI.intContractHeaderId = ISNULL(SH.intContractHeaderId,RI.intContractHeaderId) THEN 1 ELSE 0 END) END = 1
-				) 
+				)  
 						ON SH.intCustomerStorageId = CS.intCustomerStorageId
-								--AND a.intItemType = 1
-								AND ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null) or (
-												(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
+								AND a.intItemType = 1
+								/*RI.intContractDetailId and a.intContractDetailId will never be equal
+								RI.intContractDetailId - DP contract
+								a.intContractDetailId - Contract used during the settlement*/
+								-- and ((@ysnDPOwnedType = 1 and a.dblSettleContractUnits is null and RI.intContractDetailId = a.intContractDetailId) or (
+								-- 				(RI.intContractDetailId is null or RI.intContractDetailId = a.intContractDetailId)))
 								AND CS.intTicketId IS NOT NULL
-				LEFT JOIN (tblICInventoryReceiptCharge RC
-							INNER JOIN tblGRStorageHistory SH2
-								ON SH2.intInventoryReceiptId = RC.intInventoryReceiptId
-									AND RC.intContractId = SH2.intContractHeaderId
-						)
-					ON RC.intInventoryReceiptId = RI.intInventoryReceiptId
-						AND RC.intChargeId = a.intItemId
+				LEFT JOIN (
+						tblICInventoryReceiptCharge RC
+						INNER JOIN tblGRStorageHistory SHC
+								ON SHC.intInventoryReceiptId = RC.intInventoryReceiptId
+										AND CASE WHEN (SHC.strType = 'From Transfer') THEN 1 ELSE (CASE WHEN RC.intContractId = ISNULL(SHC.intContractHeaderId,RC.intContractId) THEN 1 ELSE 0 END) END = 1
+				)  
+						ON SHC.intCustomerStorageId = CS.intCustomerStorageId AND a.intItemType = 3 and @ysnDPOwnedType = 1 and a.intItemId = RC.intChargeId
 				LEFT JOIN tblCTContractDetail CD
 					ON CD.intContractDetailId = a.intContractDetailId				
 				LEFT JOIN tblCTContractHeader CH
