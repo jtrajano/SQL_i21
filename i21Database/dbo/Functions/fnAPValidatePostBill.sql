@@ -506,6 +506,19 @@ BEGIN
 			)
 		)--Prepay and Debit Memo transactions
 		
+		INSERT INTO @returntable(strError, strTransactionType, strTransactionId, intTransactionId, intErrorKey)
+		SELECT
+			ISNULL(C.strItemNo, A2.strMiscDescription) + ' has incorrect cost. Cost cannot be negative.',
+			'Bill',
+			A.strBillId,
+			A.intBillId,
+			37
+		FROM tblAPBill A
+		INNER JOIN tblAPBillDetail A2 ON A.intBillId = A2.intBillId
+		LEFT JOIN tblICItem C ON A2.intItemId = C.intItemId  
+		WHERE 
+			A.intBillId IN (SELECT intBillId FROM @tmpBills) 
+		AND A2.dblCost < 0
 
 	END
 	ELSE
