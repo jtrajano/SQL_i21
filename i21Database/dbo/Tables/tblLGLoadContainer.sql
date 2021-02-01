@@ -10,6 +10,10 @@
 [dblGrossWt] NUMERIC(18, 6) NULL,
 [dblTareWt] NUMERIC(18, 6) NULL,
 [dblNetWt] NUMERIC(18, 6) NULL,
+[dblShippedQuantity] NUMERIC(18, 6) NULL,
+[dblShippedGrossWt] NUMERIC(18, 6) NULL,
+[dblShippedTareWt] NUMERIC(18, 6) NULL,
+[dblShippedNetWt] NUMERIC(18, 6) NULL,
 [intWeightUnitMeasureId] INT NULL,
 [strComments] NVARCHAR(1024) COLLATE Latin1_General_CI_AS NULL,
 
