@@ -9141,6 +9141,7 @@
     <Build Include="dbo\Stored Procedures\uspARRebuildPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
+    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
