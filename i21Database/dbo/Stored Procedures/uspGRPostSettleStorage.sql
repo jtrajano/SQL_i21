@@ -177,6 +177,8 @@ BEGIN TRY
 	DECLARE @VoucherIds AS Id
 	DECLARE @dblTotalUnits AS DECIMAL(24,10)
 
+	DECLARE @ysnDeliverySheet AS BIT
+
 	/*	intItemType
 		------------
 		1-Inventory
@@ -810,6 +812,7 @@ BEGIN TRY
 					,@intShipFrom 			= CS.intShipFromLocationId
 					,@shipFromEntityId 		= CS.intShipFromEntityId
 					,@ysnDPOwnedType 		= ISNULL(ST.ysnDPOwnedType,0) 
+					,@ysnDeliverySheet = CAST(CASE WHEN CS.intDeliverySheetId IS NULL THEN 0 ELSE 1 END AS BIT)
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRStorageType ST 
 					ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
@@ -1848,7 +1851,7 @@ BEGIN TRY
 					
 				
 				--GRN-2138 - COST ADJUSTMENT LOGIC FOR DELIVERY SHEETS
-				IF @ysnFromPriceBasisContract = 0 AND @ysnDPOwnedType = 1
+				IF @ysnFromPriceBasisContract = 0 AND @ysnDPOwnedType = 1 AND @ysnDeliverySheet = 1
 				BEGIN
 					EXEC uspGRStorageInventoryReceipt 
 						@SettleVoucherCreate = @SettleVoucherCreate
@@ -2012,7 +2015,7 @@ BEGIN TRY
 																)
 																--IT.dblCost--RI.dblUnitCost --dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,RI.intCostUOMId, RI.dblUnitCost)
 																WHEN CS.intStorageTypeId = 2 THEN 
-																(select dblCost from tblICInventoryTransaction IT
+																(select TOP 1 IT.dblCost from tblICInventoryTransaction IT
 																inner join tblGRStorageHistory STH
 																	on STH.intTransferStorageId = IT.intTransactionId
 																	where IT.intTransactionTypeId = 56
