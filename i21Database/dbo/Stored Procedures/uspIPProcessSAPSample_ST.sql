@@ -320,7 +320,7 @@ BEGIN TRY
 				SELECT @intContractDetailId = CD.intContractDetailId
 				FROM tblCTContractDetail CD WITH (NOLOCK)
 				JOIN tblCTContractHeader CH WITH (NOLOCK) ON CH.intContractHeaderId = CD.intContractHeaderId
-				WHERE ISNULL(CH.strExternalContractNumber, '') = (@strERPPONumber + ' / ' + @strERPItemNumber)
+				WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/' + @strERPItemNumber) + '%'
 
 				IF ISNULL(@intContractDetailId, 0) = 0
 				BEGIN
@@ -331,13 +331,7 @@ BEGIN TRY
 								AND CD.intItemId = @intItemId
 								AND CD.dblQuantity = @dblQuantity
 								AND CD.intUnitMeasureId = @intRepresentingUOMId
-							WHERE (
-									CASE 
-										WHEN CHARINDEX('/', CH.strExternalContractNumber) > 1
-											THEN RTRIM(SUBSTRING(CH.strExternalContractNumber, 0, CHARINDEX('/', CH.strExternalContractNumber)))
-										ELSE CH.strExternalContractNumber
-										END
-									) = @strERPPONumber
+							WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/') + '%'
 							) > 1
 					BEGIN
 						RAISERROR (
@@ -353,13 +347,7 @@ BEGIN TRY
 						AND CD.intItemId = @intItemId
 						AND CD.dblQuantity = @dblQuantity
 						AND CD.intUnitMeasureId = @intRepresentingUOMId
-					WHERE (
-							CASE 
-								WHEN CHARINDEX('/', CH.strExternalContractNumber) > 1
-									THEN RTRIM(SUBSTRING(CH.strExternalContractNumber, 0, CHARINDEX('/', CH.strExternalContractNumber)))
-								ELSE CH.strExternalContractNumber
-								END
-							) = @strERPPONumber
+					WHERE ISNULL(CH.strExternalContractNumber, '') LIKE '%' + (@strERPPONumber + '/') + '%'
 
 					IF ISNULL(@intContractDetailId, 0) = 0
 					BEGIN
