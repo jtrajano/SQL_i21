@@ -202,5 +202,6 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 
     ,[strAddonDetailKey]                    NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                       BIT                                             NULL
-    ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                  NULL
+    ,[dblAddOnQuantity]                     NUMERIC(38, 20)                                 NULL
+	,[intPriceFixationDetailId]				INT												NULL
 )
