@@ -580,16 +580,16 @@ SELECT DISTINCT
 		,[intInventoryReceiptChargeId]				=	A.intInventoryReceiptChargeId
 		,[intContractChargeId]						=	NULL
 		,[dblUnitCost]								=	
-			--CAST(A.dblUnitCost AS DECIMAL(38,20))
-			CASE 
-				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
-					A.dblUnitCost
-				ELSE 
-					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
-						ELSE A.dblUnitCost
-					END 
-			END
+			CAST(A.dblUnitCost AS DECIMAL(38,20))
+			--CASE 
+			--	WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
+			--		A.dblUnitCost
+			--	ELSE 
+			--		CASE 
+			--			WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = IR.intEntityVendorId THEN -A.dblUnitCost
+			--			ELSE A.dblUnitCost
+			--		END 
+			--END
 		,[dblDiscount]								=	0
 		,[dblTax]									=	
 			ISNULL(

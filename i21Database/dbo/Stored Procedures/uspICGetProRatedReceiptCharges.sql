@@ -271,12 +271,13 @@ BEGIN
 				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
 					rc.dblRate
 				ELSE 
-					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = r.intEntityVendorId THEN 
-							-ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
-						ELSE 
-							ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
-					END 
+					ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
+					--CASE 
+					--	WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = r.intEntityVendorId THEN 
+					--		-ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
+					--	ELSE 
+					--		ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
+					--END 
 			END
 		,[dblCostUnitQty] = CAST(1 AS DECIMAL(38,20))					
 		,[intCostUOMId]	= A.intCostUnitMeasureId					
