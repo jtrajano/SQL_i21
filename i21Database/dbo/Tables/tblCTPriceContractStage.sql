@@ -20,4 +20,6 @@
 	,intCompanyId int
 	,ysnMailSent Bit
 	,intStatusId int
+	,strLogXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
+	,strAuditXML		NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )

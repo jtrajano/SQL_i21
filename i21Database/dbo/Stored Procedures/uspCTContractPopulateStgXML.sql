@@ -44,12 +44,17 @@ BEGIN TRY
 		,@strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
 		,@strDatabaseName NVARCHAR(50)
+		,@strLogCondition nvarchar(50)
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId int
 
 	SET @intContractStageId = NULL
 	SET @strContractNumber = NULL
 	SET @strHeaderXML = NULL
 	SET @strHeaderCondition = NULL
 	SET @strDetailXML = NULL
+	SET @strLogCondition = NULL
 
 	SELECT @strContractNumber = strContractNumber
 		,@intCompanyId = intCompanyId
@@ -64,6 +69,11 @@ BEGIN TRY
 	FROM tblSMTransaction
 	WHERE intRecordId = @ContractHeaderId
 		AND intScreenId = @intContractScreenId
+
+	Select Top 1 @intLogId=intLogId
+	from dbo.tblSMLog
+	Where intTransactionId=@intTransactionId
+	Order by 1 desc
 
 	IF @strRowState = 'Delete'
 	BEGIN
@@ -112,6 +122,7 @@ BEGIN TRY
 
 	-------------------------Header-----------------------------------------------------------
 	SELECT @strHeaderCondition = 'intContractHeaderId = ' + LTRIM(@ContractHeaderId)
+	SELECT @strLogCondition = 'intLogId = ' + LTRIM(@intLogId)
 
 	IF @ysnReplication = 1
 		SELECT @strObjectName = 'tblCTContractHeader'
@@ -297,7 +308,30 @@ BEGIN TRY
 		,@strSubmittedByXML OUTPUT
 		,NULL
 		,NULL
-	
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strLogXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPLogView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strLogXML OUTPUT
+		,NULL
+		,NULL
+
+	---------------------------------------------Audit Log------------------------------------------
+	SELECT @strAuditXML = NULL
+		,@strObjectName = NULL
+
+	SELECT @strObjectName = 'vyuIPAuditView'
+
+	EXEC [dbo].[uspCTGetTableDataInXML] @strObjectName
+		,@strLogCondition
+		,@strAuditXML OUTPUT
+		,NULL
+		,NULL
+
 		SELECT @strServerName = strServerName
 			,@strDatabaseName = strDatabaseName
 		FROM tblIPMultiCompany
@@ -331,6 +365,8 @@ BEGIN TRY
 		,intTransactionId 
 		,intCompanyId 
 		,strSubmittedByXML
+		,strLogXML
+		,strAuditXML
 		)
 	SELECT intContractHeaderId = @ContractHeaderId
 		,strContractNumber = @strContractNumber
@@ -350,7 +386,9 @@ BEGIN TRY
 		,strAmendmentApprovalXML=@strAmendmentApprovalXML
 		,intTransactionId =@intTransactionId
 		,intCompanyId =@intCompanyId
-		,strSubmittedByXML=@strSubmittedByXML'
+		,strSubmittedByXML=@strSubmittedByXML
+		,strLogXML=@strLogXML
+		,strAuditXML=@strAuditXML'
 
 		EXEC sp_executesql @strSQL
 			,N'@ContractHeaderId int, 
@@ -371,7 +409,9 @@ BEGIN TRY
 			@strAmendmentApprovalXML nvarchar(MAX),
 			@intTransactionId int,
 			@intCompanyId int,
-			@strSubmittedByXML nvarchar(MAX)'
+			@strSubmittedByXML nvarchar(MAX),
+			@strLogXML nvarchar(MAX),
+			@strAuditXML nvarchar(MAX)'
 			,@ContractHeaderId
 			,@strContractNumber
 			,@strHeaderXML
@@ -391,6 +431,8 @@ BEGIN TRY
 			,@intTransactionId
 			,@intCompanyId
 			,@strSubmittedByXML
+			,@strLogXML
+			,@strAuditXML
 	END
 END TRY
 
