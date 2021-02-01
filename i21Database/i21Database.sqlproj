@@ -8870,6 +8870,7 @@
     <Build Include="dbo\Views\vyuMBILExportCustomerSpecialPricing.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
     <Build Include="dbo\Views\vyuMBILExportItem.sql" />
+    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
