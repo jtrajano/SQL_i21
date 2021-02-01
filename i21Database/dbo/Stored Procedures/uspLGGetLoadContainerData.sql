@@ -7,8 +7,8 @@ BEGIN
 		,LCWU.strUnitMeasure AS strWeightUnitMeasure
 		,CU.strCurrency AS strStaticValueCurrency
 		,ACU.strCurrency AS strAmountCurrency
-		,NULL dblUnMatchedQty
-		,NULL dblWeightPerUnit
+		,dblUnMatchedQty = CAST(NULL AS NUMERIC(18, 6))
+		,dblWeightPerUnit = UOMF.dblUnitQty / UOMT.dblUnitQty
 	FROM tblLGLoad L
 	JOIN tblLGLoadDetail LD ON L.intLoadId = LD.intLoadId AND L.intLoadId = @intLoadId
 	JOIN tblLGLoadDetailContainerLink LDCL ON LDCL.intLoadDetailId = LD.intLoadDetailId
@@ -20,4 +20,7 @@ BEGIN
 	LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = ItemUOM.intUnitMeasureId
 	LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = LC.intStaticValueCurrencyId
 	LEFT JOIN tblSMCurrency ACU ON ACU.intCurrencyID = LC.intAmountCurrencyId
+	OUTER APPLY (SELECT TOP 1 dblUnitQty FROM tblICItemUOM WHERE intItemUOMId = LD.intItemUOMId) UOMF
+	OUTER APPLY (SELECT TOP 1 dblUnitQty FROM tblICItemUOM 
+					WHERE intItemId = LD.intItemId AND intUnitMeasureId = L.intWeightUnitMeasureId) UOMT
 END
