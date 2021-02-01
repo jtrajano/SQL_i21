@@ -131,6 +131,7 @@
 	[ysnItemContract]						BIT												NULL,
 	[dblAddOnQuantity]						NUMERIC(38, 20)	CONSTRAINT [DF_tblARInvoiceDetail_dblAddOnQuantity] DEFAULT ((0)) NULL,
 	[dblPriceAdjustment]					NUMERIC(18,6)									NULL,
+	[intPriceFixationDetailId]				INT												NULL,
     CONSTRAINT [PK_tblARInvoiceDetail_intInvoiceDetailId] PRIMARY KEY CLUSTERED ([intInvoiceDetailId] ASC),
     CONSTRAINT [FK_tblARInvoiceDetail_tblARInvoice] FOREIGN KEY ([intInvoiceId]) REFERENCES [dbo].[tblARInvoice] ([intInvoiceId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_tblARInvoiceDetail_tblGLAccount_intAccountId] FOREIGN KEY ([intAccountId]) REFERENCES [dbo].[tblGLAccount] ([intAccountId]),

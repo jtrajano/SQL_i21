@@ -925,6 +925,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 								SET dblQtyOrdered	= CASE WHEN @ysnLoad = 0 THEN dblQtyOrdered ELSE @dblOriginalQtyShipped END
 								  , dblPrice		= @dblFinalPrice
 								  , dblUnitPrice	= @dblFinalPrice
+								  ,  intPriceFixationDetailId	= @intPriceFixationDetailId
 								WHERE intId = @intInvoiceEntriesId
 
 								SET @dblQtyShipped = @dblQtyShipped - @dblQuantity
@@ -988,6 +989,10 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, dblConversionFactor
 									, ysnClearDetailTaxes
 									, dblSubCurrencyRate
+									, intStorageLocationId
+									, intCompanyLocationSubLocationId
+									, intSubLocationId
+									, intPriceFixationDetailId
 								)
 								SELECT strSourceTransaction
 									, intSourceId
@@ -1042,6 +1047,10 @@ IF EXISTS (SELECT TOP 1 NULL FROM #CONTRACTSPRICING)
 									, dblConversionFactor
 									, ysnClearDetailTaxes
 									, dblSubCurrencyRate
+									, intStorageLocationId
+									, intCompanyLocationSubLocationId
+									, intSubLocationId
+									, intPriceFixationDetailId	= @intPriceFixationDetailId
 								FROM @EntriesForInvoice
 								WHERE intId = @intInvoiceEntriesId
 
@@ -1176,7 +1185,7 @@ IF @ysnHasPriceFixation = 1
 			 , intInvoiceDetailId		= ID.intInvoiceDetailId
 			 , intConcurrencyId			= 1
 		FROM tblARInvoiceDetail ID
-		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.dblPrice = PRICE.dblFinalPrice
+		INNER JOIN #FIXATION PRICE ON ID.intContractDetailId = PRICE.intContractDetailId AND ID.intPriceFixationDetailId = PRICE.intPriceFixationDetailId
 		WHERE ID.intInvoiceId = @NewInvoiceId
 		  AND PRICE.ysnProcessed = 1
 		  AND ID.intInventoryShipmentItemId IS NOT NULL
