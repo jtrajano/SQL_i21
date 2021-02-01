@@ -9005,6 +9005,7 @@
     <Build Include="dbo\Views\vyuMBILExportItem.sql" />
     <Build Include="dbo\Views\vyuSCAgWorkOrderDetail.sql" />
     <Build Include="dbo\Tables\tblAGApplicationType.sql" />
+    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
