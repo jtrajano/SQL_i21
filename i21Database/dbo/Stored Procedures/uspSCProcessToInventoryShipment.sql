@@ -68,6 +68,7 @@ DECLARE @dblLoopItemContractId int
 DECLARE @intTicketStorageScheduleTypeId INT
 DECLARE @strNewTicketNumber NVARCHAR(50)
 DECLARE @ysnTicketMultipleTicket BIT
+DECLARE @intTicketAGWorkOrderId INT
 
 
 DECLARE @loopLoadDetailId INT
@@ -91,6 +92,7 @@ SELECT @intLoadId = intLoadId
 	,@strTicketStatus = strTicketStatus
 	,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
 	,@ysnTicketMultipleTicket = ysnMultipleTicket
+	,@intTicketAGWorkOrderId = intAGWorkOrderId
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType
@@ -726,6 +728,11 @@ BEGIN TRY
 							,NULL
 							,'AWO'
 							,@LineItems
+
+						----------Remove the reservation from WorkOrder for the Item in ticket
+
+						EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intItemId, 1
+
 					END
 				END
 			END
@@ -1054,6 +1061,16 @@ BEGIN TRY
 			SET @intNewTicketId = SCOPE_IDENTITY()
 		END
 		
+		--Update Work order Shipped Quantity for the Ticket Item
+		IF(ISNULL(@InventoryShipmentId,0) > 0)
+		BEGIN
+			--TODO update work order shipped
+			UPDATE tblAGWorkOrderDetail	
+			SET dblQtyShipped = (ISNULL(dblQtyShipped,0) + @dblNetUnits)
+				,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			WHERE intWorkOrderId = @intTicketAGWorkOrderId
+				AND intItemId = @intItemId
+		END
 	END
 	
 	EXEC dbo.uspSMAuditLog 

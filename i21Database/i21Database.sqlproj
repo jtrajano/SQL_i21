@@ -9006,6 +9006,7 @@
     <Build Include="dbo\Views\vyuSCAgWorkOrderDetail.sql" />
     <Build Include="dbo\Tables\tblAGApplicationType.sql" />
     <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspSCUpdateAGWorkOrderItemReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
