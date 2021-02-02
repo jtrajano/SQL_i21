@@ -9009,6 +9009,8 @@
     <Build Include="dbo\Stored Procedures\uspSCUpdateAGWorkOrderItemReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderWarehouseRateMatrixDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetServiceContract.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
