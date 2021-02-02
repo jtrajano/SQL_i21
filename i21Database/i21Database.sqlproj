@@ -9007,6 +9007,8 @@
     <Build Include="dbo\Tables\tblAGApplicationType.sql" />
     <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateAGWorkOrderItemReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
