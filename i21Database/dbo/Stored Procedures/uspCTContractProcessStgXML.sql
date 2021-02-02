@@ -1197,6 +1197,7 @@ BEGIN TRY
 					,intSubBookId
 					,intCompanyId
 					,intINCOLocationTypeId
+					,intLastModifiedById
 					)
 				OUTPUT INSERTED.intEntityId
 				INTO @MyTableVar
@@ -1261,6 +1262,7 @@ BEGIN TRY
 					,@intSubBookId
 					,@intCompanyRefId
 					,@intINCOLocationTypeId
+					,@intUserId
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						--strEntityName NVARCHAR(100) Collate Latin1_General_CI_AS
 						dtmContractDate DATETIME
@@ -1353,7 +1355,7 @@ BEGIN TRY
 						,CH.dblQuantity = CH1.dblQuantity
 						,CH.intSalespersonId = CH1.intSalespersonId
 						,CH.ysnSigned = CH1.ysnSigned
-						,CH.ysnPrinted = CH1.ysnPrinted
+						,CH.ysnPrinted = 1
 						,CH.intCropYearId = CH1.intCropYearId
 						,CH.intPositionId = CASE 
 							WHEN @ysnApproval = 0
@@ -1466,6 +1468,7 @@ BEGIN TRY
 						,CH.intCompanyId = @intCompanyRefId
 						,CH.strExternalEntity = CH1.strExternalEntity
 						,CH.strExternalContractNumber = CH1.strExternalContractNumber
+						,CH.intLastModifiedById=CH1.intLastModifiedById
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
