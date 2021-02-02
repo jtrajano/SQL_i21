@@ -175,6 +175,12 @@ BEGIN TRY
 		,@strLogXML NVARCHAR(MAX)
 		,@strAuditXML NVARCHAR(MAX)
 		,@intLogId INT
+		,@strETAPODReasonCode NVARCHAR(100)
+		,@strETAPOLReasonCode NVARCHAR(100)
+		,@strETSPOLReasonCode  NVARCHAR(100)
+		,@intETAPODReasonCodeId int
+		,@intETAPOLReasonCodeId int
+		,@intETSPOLReasonCodeId int
 	DECLARE @tempLoadDetail TABLE (
 		intLoadDetailId INT NOT NULL
 		,intConcurrencyId INT NOT NULL
@@ -321,6 +327,9 @@ BEGIN TRY
 				,@strWeightUnitMeasure = NULL
 				,@strLogXML = NULL
 				,@strAuditXML = NULL
+				,@strETAPODReasonCode = NULL
+				,@strETAPOLReasonCode = NULL
+				,@strETSPOLReasonCode = NULL
 
 			SELECT @intLoadId = intLoadId
 				,@strLoadNumber = strLoadNumber
@@ -405,6 +414,9 @@ BEGIN TRY
 				,@strSubBook = strSubBook
 				,@strUserName = strUserName
 				,@strWeightUnitMeasure = strWeightUnitMeasure
+				,@strETAPODReasonCode = strETAPODReasonCode
+				,@strETAPOLReasonCode = strETAPOLReasonCode
+				,@strETSPOLReasonCode = strETSPOLReasonCode
 			FROM OPENXML(@idoc, 'vyuIPLoadViews/vyuIPLoadView', 2) WITH (
 					strHauler NVARCHAR(100) Collate Latin1_General_CI_AS
 					,strDriver NVARCHAR(100) Collate Latin1_General_CI_AS
@@ -426,6 +438,9 @@ BEGIN TRY
 					,strSubBook NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strUserName NVARCHAR(50) Collate Latin1_General_CI_AS
 					,strWeightUnitMeasure NVARCHAR(50) Collate Latin1_General_CI_AS
+					,strETAPODReasonCode NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strETAPOLReasonCode NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strETSPOLReasonCode NVARCHAR(100) Collate Latin1_General_CI_AS
 					) x
 
 			SELECT @intSourceType = CASE @strSourceType
@@ -446,6 +461,57 @@ BEGIN TRY
 					END
 
 			SELECT @strErrorMessage = ''
+			SELECT @intETAPODReasonCodeId=NULL
+			SELECT @intETAPODReasonCodeId=intReasonCodeId
+			FROM tblLGReasonCode 
+			WHERE strReasonCode = @strETAPODReasonCode
+
+			IF @strETAPODReasonCode IS NOT NULL
+				AND @intETAPODReasonCodeId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ETA POD ' + @strETAPODReasonCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ETA POD ' + @strETAPODReasonCode + ' is not available.'
+				END
+			END
+			SELECT @intETAPOLReasonCodeId=NULL
+			SELECT @intETAPOLReasonCodeId=intReasonCodeId
+			FROM tblLGReasonCode 
+			WHERE strReasonCode = @strETAPOLReasonCode
+
+			IF @strETAPOLReasonCode IS NOT NULL
+				AND @intETAPOLReasonCodeId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ETA POL ' + @strETAPOLReasonCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ETA POL ' + @strETAPOLReasonCode + ' is not available.'
+				END
+			END
+			SELECT @intETSPOLReasonCodeId=NULL
+			SELECT @intETSPOLReasonCodeId=intReasonCodeId
+			FROM tblLGReasonCode 
+			WHERE strReasonCode = @strETSPOLReasonCode
+
+			IF @strETSPOLReasonCode IS NOT NULL
+				AND @intETSPOLReasonCodeId IS NULL
+			BEGIN
+				IF @strErrorMessage <> ''
+				BEGIN
+					SELECT @strErrorMessage = @strErrorMessage + CHAR(13) + CHAR(10) + 'ETS POL ' + @strETSPOLReasonCode + ' is not available.'
+				END
+				ELSE
+				BEGIN
+					SELECT @strErrorMessage = 'ETS POL ' + @strETSPOLReasonCode + ' is not available.'
+				END
+			END
 
 			IF @strHauler IS NOT NULL
 				AND NOT EXISTS (
@@ -1123,9 +1189,9 @@ BEGIN TRY
 					,ysnQuantityFinal
 					,ysnCancelled
 					,intShippingModeId
-					,intETAPOLReasonCodeId
-					,intETSPOLReasonCodeId
-					,intETAPODReasonCodeId
+					,@intETAPOLReasonCodeId
+					,@intETSPOLReasonCodeId
+					,@intETAPODReasonCodeId
 					,@intFreightTermId
 					,@intCurrencyId
 					,intCreatedById
@@ -1295,9 +1361,6 @@ BEGIN TRY
 						,ysnQuantityFinal BIT
 						,ysnCancelled BIT
 						,intShippingModeId INT
-						,intETAPOLReasonCodeId INT
-						,intETSPOLReasonCodeId INT
-						,intETAPODReasonCodeId INT
 						,intFreightTermId INT
 						,intCurrencyId INT
 						,intCreatedById INT
@@ -1452,9 +1515,9 @@ BEGIN TRY
 					,ysnQuantityFinal = x.ysnQuantityFinal
 					,ysnCancelled = x.ysnCancelled
 					,intShippingModeId = x.intShippingModeId
-					,intETAPOLReasonCodeId = x.intETAPOLReasonCodeId
-					,intETSPOLReasonCodeId = x.intETSPOLReasonCodeId
-					,intETAPODReasonCodeId = x.intETAPODReasonCodeId
+					,intETAPOLReasonCodeId = @intETAPOLReasonCodeId
+					,intETSPOLReasonCodeId = @intETSPOLReasonCodeId
+					,intETAPODReasonCodeId = @intETAPODReasonCodeId
 					,intFreightTermId = @intFreightTermId
 					,intCurrencyId = @intCurrencyId
 					,intCreatedById = x.intCreatedById
@@ -1626,9 +1689,6 @@ BEGIN TRY
 						,ysnQuantityFinal BIT
 						,ysnCancelled BIT
 						,intShippingModeId INT
-						,intETAPOLReasonCodeId INT
-						,intETSPOLReasonCodeId INT
-						,intETAPODReasonCodeId INT
 						,intFreightTermId INT
 						,intCurrencyId INT
 						,intCreatedById INT
