@@ -156,7 +156,8 @@ BEGIN TRY
 				CD.dblQuantityPerLoad,
 				CD.intBookId,	
 				CD.intSubBookId,
-				CD.dblFutures	
+				CD.dblFutures,
+				CD.intContractStatusId	
 		
 		INTO	#NonMultiPriceFixation
 		FROM	#tblCTPriceFixation			PF
@@ -236,7 +237,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId			=	SC.intItemId
 				CD.dblQuantityPerLoad,
 				CH.intBookId,	
 				CH.intSubBookId,
-				CD.dblFutures	
+				CD.dblFutures,
+				CD.intContractStatusId	
 
 		INTO	#MultiPriceFixation
 		FROM	#tblCTPriceFixation			PF	
