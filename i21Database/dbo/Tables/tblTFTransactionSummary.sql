@@ -8,7 +8,7 @@
 	[intItemSequenceNumber] INT NULL,
 	[strSection] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strDescription] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
-	[strScheduleCode] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	[strScheduleCode] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
 	[strColumn] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	[strColumnValue] NUMERIC(18, 2) NULL,
 	[strSegment] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
