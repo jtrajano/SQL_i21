@@ -139,6 +139,9 @@ SELECT -- Load Header
 	,L.[ysnProvisionalInvoice]
 	,L.[ysnQuantityFinal]
 	,IsNULL(L.intTransUsedBy,1) intTransUsedBy
+	,ETAPOD.strReasonCode AS strETAPODReasonCode
+	,ETAPOL.strReasonCode AS strETAPOLReasonCode
+	,ETSPOL.strReasonCode AS strETSPOLReasonCode
 FROM tblLGLoad L
 LEFT JOIN tblICUnitMeasure UM ON UM.intUnitMeasureId = L.intWeightUnitMeasureId
 LEFT JOIN tblLGGenerateLoad GLoad ON GLoad.intGenerateLoadId = L.intGenerateLoadId
@@ -164,4 +167,7 @@ LEFT JOIN tblSMFreightTerms FT ON FT.intFreightTermId = L.intFreightTermId
 LEFT JOIN tblCTBook B ON B.intBookId = L.intBookId
 LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = L.intSubBookId
 LEFT JOIN tblSMUserSecurity US1 ON US1.[intEntityId] = L.intUserSecurityId
+Left JOIN dbo.tblLGReasonCode ETAPOD on ETAPOD.intReasonCodeId=L.intETAPODReasonCodeId
+Left JOIN dbo.tblLGReasonCode ETAPOL on ETAPOL.intReasonCodeId=L.intETAPOLReasonCodeId
+Left JOIN dbo.tblLGReasonCode ETSPOL on ETSPOL.intReasonCodeId=L.intETSPOLReasonCodeId
 
