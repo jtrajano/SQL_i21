@@ -553,6 +553,9 @@ BEGIN TRY
 							and intContractDetailId = a.intContractDetailId
 				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
+					and ((c.intPricingTypeHeader = 2 and c.intPricingTypeId = 1) --Priced Basis
+								or (c.intPricingTypeHeader = 2 and c.intPricingTypeId = 2 and b.intPriceFixationDetailId is not null) --Basis and not fully priced yet
+							)
 
 
 				declare @acd DECIMAL(24,10)
@@ -2734,7 +2737,7 @@ BEGIN TRY
 					, @intSettleStorageId
 					, @strSettleTicket
 					, SV.dblCashPrice
-					, CASE WHEN @intVoucherId = 0 THEN NULL ELSE @intVoucherId END
+					, CASE WHEN ISNULL(CAST(@createdVouchersId AS INT), 0) = 0 THEN NULL ELSE CAST(@createdVouchersId AS INT) END
 				FROM @SettleVoucherCreate SV
 					INNER JOIN tblGRCustomerStorage CS ON CS.intCustomerStorageId = SV.intCustomerStorageId
 					INNER JOIN tblICItemUOM IU ON IU.intItemId = CS.intItemId
