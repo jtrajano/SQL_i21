@@ -58,9 +58,40 @@ BEGIN TRY
 	DECLARE @strBatchId NVARCHAR(50)
 	EXEC uspSMGetStartingNumber 148, @strBatchId OUTPUT
 
-	IF OBJECT_ID('tempdb..#tmpContractDetail') IS NOT NULL
-		DROP TABLE #tmpContractDetail
+	declare @tmpContractDetail table (
+		  intContractHeaderId int
+		, intContractDetailId int
+		, intContractTypeId int
+		, intEntityId int
+		, intCommodityId int
+		, intCommodityUOMId int
+		, strContractNumber nvarchar(50)
+		, ysnLoadBased bit
+		, dblQuantity numeric(18,6)
+		, intNoOfLoad int
+		, dblQuantityPerLoad numeric(18,6)
+		, ysnMultiPrice bit
+		, dtmCreated datetime
+		, intContractSeq int
+		, intPricingTypeId int
+		, intContractStatusId int
+		, intBasisUOMId int
+		, intBasisCurrencyId int
+		, intItemId int
+		, intItemUOMId int
+		, intUnitMeasureId int
+		, intCompanyLocationId int
+		, intFutureMarketId int
+		, intFutureMonthId int
+		, dtmStartDate datetime
+		, dtmEndDate datetime
+		, dblBasis numeric(18,6)
+		, intBookId int
+		, intSubBookId int
+	)
+
 	-- Get Contract Details
+	insert into @tmpContractDetail
 	SELECT ch.intContractHeaderId
 		, cd.intContractDetailId
 		, ch.intContractTypeId
@@ -90,7 +121,6 @@ BEGIN TRY
 		, cd.dblBasis
 		, cd.intBookId
 		, cd.intSubBookId
-	INTO #tmpContractDetail	
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 	WHERE cd.intContractHeaderId = @intContractHeaderId
@@ -174,7 +204,7 @@ BEGIN TRY
 	WHERE intContractHeaderId = @intContractHeaderId
 
 	-- Deleted Contract Sequence
-	IF EXISTS (SELECT TOP 1 1 FROM @contractDetail) OR NOT EXISTS (SELECT TOP 1 1 FROM #tmpContractDetail)
+	IF EXISTS (SELECT TOP 1 1 FROM @contractDetail) OR NOT EXISTS (SELECT TOP 1 1 FROM @tmpContractDetail)
 	BEGIN
 		SELECT TOP 1 @intContractHeaderId = intContractHeaderId
 			, @intContractDetailId = intContractDetailId
@@ -306,7 +336,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity FROM #tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity FROM @tmpContractDetail
 
 	IF @strSource = 'Contract'
 	BEGIN
@@ -436,7 +466,7 @@ BEGIN TRY
 				, intOrderBy = 1
 				, sh.intUserId
 			FROM tblCTSequenceHistory sh
-			INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+			INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 			WHERE intSequenceUsageHistoryId IS NULL
 		) tbl
 		WHERE Row_Num = 1
@@ -746,7 +776,7 @@ BEGIN TRY
 					, sh.intUserId	
 				FROM vyuCTSequenceUsageHistory suh
 				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-				INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 				LEFT JOIN tblICInventoryShipment shipment ON suh.intExternalHeaderId = shipment.intInventoryShipmentId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
 				WHERE strFieldName = 'Balance'
@@ -876,7 +906,7 @@ BEGIN TRY
 					, sh.intUserId	
 				FROM vyuCTSequenceUsageHistory suh
 				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-				INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = suh.intContractDetailId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = suh.intContractDetailId
 				LEFT JOIN tblICInventoryShipment shipment ON suh.intExternalHeaderId = shipment.intInventoryShipmentId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
 				OUTER APPLY 
@@ -1432,7 +1462,7 @@ BEGIN TRY
 							, sh.intSubBookId							
 						FROM vyuCTSequenceUsageHistory suh
 						INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
-						INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
+						INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = sh.intContractDetailId
 						WHERE strFieldName = 'Balance'
 						AND suh.intExternalHeaderId is not null
 					) tbl
@@ -1575,7 +1605,7 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				--OUTER APPLY
@@ -2006,7 +2036,7 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				OUTER APPLY (
 					SELECT TOP 1 pl.dblOrigQty, pl.dblFutures
@@ -2156,7 +2186,7 @@ BEGIN TRY
 					FROM tblCTPriceFixationDetail pfd
 					INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 					INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-					INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+					INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 					LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId AND qu.intUnitMeasureId = cd.intUnitMeasureId
 					WHERE pfd.intPriceFixationDetailId NOT IN
 					(
@@ -2290,7 +2320,7 @@ BEGIN TRY
 				FROM tblCTPriceFixationDetail pfd
 				INNER JOIN tblCTPriceFixation pf ON pfd.intPriceFixationId = pf.intPriceFixationId
 				INNER JOIN tblCTPriceContract pc ON pc.intPriceContractId = pf.intPriceContractId
-				INNER JOIN #tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
+				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = (CASE WHEN @ysnMultiPrice = 1 THEN cd.intContractDetailId ELSE pf.intContractDetailId END) AND cd.intContractHeaderId = pf.intContractHeaderId
 				LEFT JOIN tblICCommodityUnitMeasure	qu  ON  qu.intCommodityId = cd.intCommodityId
 					AND qu.intUnitMeasureId = cd.intUnitMeasureId
 				WHERE pfd.intPriceFixationDetailId NOT IN
