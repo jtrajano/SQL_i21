@@ -508,6 +508,9 @@ WITH ForGLEntries_CTE (
 	,strItemNo
 	,strRateType
 	,strTransactionType
+	,intSourceTransactionId
+	,intSourceTransactionDetailId
+	,strSourceTransactionId
 )
 AS
 (
@@ -526,6 +529,9 @@ AS
 		,strItemNo
 		,strRateType
 		,strTransactionType
+		,intSourceTransactionId
+		,intSourceTransactionDetailId
+		,strSourceTransactionId
 	FROM tblGRTransferGLEntriesCTE
 	WHERE (strBatchId = @strBatchId AND @ysnUnpost = 0)
 		OR (strBatchId = @strBatchId2 AND @ysnUnpost = 1)
@@ -551,12 +557,12 @@ SELECT
 	,dtmDateEntered				= GETDATE()
 	,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
     ,strJournalLineDescription  = '' 
-	,intJournalLineNo			= ForGLEntries_CTE.intTransactionDetailId
+	,intJournalLineNo			= ForGLEntries_CTE.intSourceTransactionDetailId
 	,ysnIsUnposted				= 0
 	,intUserId					= @intEntityUserSecurityId
 	,intEntityId				= GL.intEntityId 
-	,strTransactionId			= ForGLEntries_CTE.strTransactionId
-	,intTransactionId			= ForGLEntries_CTE.intTransactionId
+	,strTransactionId			= ForGLEntries_CTE.strSourceTransactionId
+	,intTransactionId			= ForGLEntries_CTE.intSourceTransactionId
 	,strTransactionType			= 'Transfer Storage'
 	,strTransactionForm			= 'Transfer Storage'
 	,strModuleName				= @ModuleName
