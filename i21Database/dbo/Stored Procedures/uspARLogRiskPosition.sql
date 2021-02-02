@@ -283,27 +283,12 @@ BEGIN
       AND ID.dblQtyShipped <> TD.dblQtyShipped
       AND ITEM.strType != 'Other Charge'
 
-    --DELETE FROM PRICING
-    --UNPOST DWG
-    UPDATE SL
-    SET dblQty      = 0
-      , strNotes    = 'Invoiced Quantity is ' + CONVERT(VARCHAR, CAST(dblQty AS MONEY), 1)
-	    , intActionId = 63
+    --POST/UNPOST DWG
+    DELETE FROM SL
     FROM @tblSummaryLog SL
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
     INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
     WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
-      AND dblQty > 0
-
-    --POST DWG
-    UPDATE SL
-    SET dblQty    = 0
-      , strNotes  = 'Invoiced Quantity is ' + CONVERT(VARCHAR, CAST(dblQty * -1 AS MONEY), 1)
-    FROM @tblSummaryLog SL
-    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
-    INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
-    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
-      AND dblQty < 0   
 
     --CONTRACT BALANCE LOG
     INSERT INTO @tblContractBalanceLog (
