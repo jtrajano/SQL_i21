@@ -8903,6 +8903,8 @@
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
     <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
