@@ -155,6 +155,9 @@ SELECT   L.intLoadId
         ,strHauler = Hauler.strName
         ,strDriver = Driver.strName
 		,strDispatcher = US.strUserName 
+		,strShippingLine = ShippingLine.strName
+		,strForwardingAgent = ForwardingAgent.strName
+		,L.strBookingReference
         ,strScaleTicketNo = CASE WHEN IsNull(L.intTicketId, 0) <> 0 
 									THEN CAST(ST.strTicketNumber AS VARCHAR(100))
 								 WHEN IsNull(L.intLoadHeaderId, 0) <> 0 
@@ -266,6 +269,8 @@ LEFT JOIN tblTRLoadHeader TR ON TR.intLoadHeaderId = L.intLoadHeaderId
 LEFT JOIN tblLGEquipmentType EQ ON EQ.intEquipmentTypeId = L.intEquipmentTypeId
 LEFT JOIN tblEMEntity Hauler ON Hauler.intEntityId = L.intHaulerEntityId
 LEFT JOIN tblEMEntity Driver ON Driver.intEntityId = L.intDriverEntityId
+LEFT JOIN tblEMEntity ShippingLine ON ShippingLine.intEntityId = L.intShippingLineEntityId
+LEFT JOIN tblEMEntity ForwardingAgent ON ForwardingAgent.intEntityId = L.intForwardingAgentEntityId
 LEFT JOIN tblCTPricingType PTP ON PTP.intPricingTypeId = PDetail.intPricingTypeId
 LEFT JOIN tblCTPricingType PTS ON PTS.intPricingTypeId = SDetail.intPricingTypeId
 LEFT JOIN tblSCTicket ST ON ST.intTicketId = L.intTicketId
