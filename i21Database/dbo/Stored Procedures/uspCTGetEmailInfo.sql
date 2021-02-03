@@ -143,9 +143,13 @@ BEGIN
 
 	IF @strMailType <> 'Sample Instruction'
 	BEGIN
-		IF @strMailType <> 'Release Instruction'
+		IF @strMailType = 'Price Contract'
+			SET @body += 'Please find attached the price confirmation document.<br>'--'Please find attached the ' + LOWER(@strMailType) + '. <br>'
+		
+		ELSE IF @strMailType <> 'Release Instruction'
 			SET @body += 'Please find attached the contract document.<br>'--'Please find attached the ' + LOWER(@strMailType) + '. <br>'
-	
+		
+
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @loop
 		WHILE ISNULL(@intUniqueId,0) > 0
 		BEGIN
