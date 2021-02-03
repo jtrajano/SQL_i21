@@ -11,7 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Performance Maintenance' AND strModuleName = 'Accounts Receivable')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Crop' AND strModuleName = 'Agronomy')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 1
 		
@@ -6623,6 +6623,18 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Applicati
 	VALUES (N'Application Targets', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Application Targets', N'Activity', N'Screen', N'Agronomy.view.ApplicationTarget?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Agronomy.view.ApplicationTarget?showSearch=true' WHERE strMenuName = 'Application Target' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Application Type' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Application Type', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Application Type', N'Activity', N'Screen', N'Agronomy.view.ApplicationType', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'Agronomy.view.ApplicationType' WHERE strMenuName = 'Application Type' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Crop' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Crop', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Crop', N'Activity', N'Screen', N'Agronomy.view.Crop', N'small-menu-activity', 1, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.Crop' WHERE strMenuName = 'Crop' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
