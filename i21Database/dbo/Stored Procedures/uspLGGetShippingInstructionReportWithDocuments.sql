@@ -249,7 +249,7 @@ BEGIN
 			,SLSC.strFreightClause
 			,strShipper = Shipper.strName
 			,L.strPackingDescription
-			,L.intNumberOfContainers
+			,intNumberOfContainers = ISNULL(L.intNumberOfContainers, 0)
 			,strNumberOfContainers = CONVERT(NVARCHAR, L.intNumberOfContainers) + ' (' + L.strPackingDescription + ')'
 			,ContType.strContainerType
 			,L.strShippingMode
