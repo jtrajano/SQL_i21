@@ -11,9 +11,9 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Crop' AND strModuleName = 'Agronomy')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Raw to WIP Conversion' AND strModuleName = 'Contract Management')
 	BEGIN
-		EXEC uspSMIncreaseECConcurrency 1
+		EXEC uspSMIncreaseECConcurrency 0
 		
 		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
 		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
@@ -3299,6 +3299,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Weight/Gr
 	VALUES (N'Weight/Grades', N'Contract Management', @ContractManagementMaintenanceParentMenuId, N'Weight/Grades', N'Maintenance', N'Screen', N'ContractManagement.view.WeightGrades?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 13, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = N'ContractManagement.view.WeightGrades?showSearch=true' WHERE strMenuName = 'Weight/Grades' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Raw to WIP Conversion' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Raw to WIP Conversion', N'Contract Management', @ContractManagementMaintenanceParentMenuId, N'Raw to WIP Conversion', N'Maintenance', N'Screen', N'ContractManagement.view.RawToWipConversion', N'small-menu-maintenance', 0, 0, 0, 1, 14, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 13, strCommand = N'ContractManagement.view.RawToWipConversion' WHERE strMenuName = 'Raw to WIP Conversion' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Entity Producer Map' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementMaintenanceParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
