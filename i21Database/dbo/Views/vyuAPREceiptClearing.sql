@@ -16,9 +16,8 @@ SELECT
     ,unitMeasure.strUnitMeasure AS strUOM
     ,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-    ,(
-        ROUND(
-        CASE 
+    ,(ROUND(
+        CASE	
             WHEN receiptItem.intWeightUOMId IS NULL THEN 
                 ISNULL(receiptItem.dblOpenReceive, 0) 
             ELSE 
@@ -45,8 +44,7 @@ SELECT
     )
     +
     --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
-    ISNULL(clearingTax.dblTax,0)
-    ) 
+    ISNULL(clearingTax.dblTax,0))
     *
     (
         CASE
@@ -55,9 +53,6 @@ SELECT
         ELSE 1
         END
     )
-    +
-    --CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
-    ISNULL(clearingTax.dblTax,0)
     AS dblReceiptTotal
     ,ISNULL(receiptItem.dblOpenReceive, 0)
     *
