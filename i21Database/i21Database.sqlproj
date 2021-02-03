@@ -9011,6 +9011,8 @@
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderWarehouseRateMatrixDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetServiceContract.sql" />
+    <Build Include="dbo\Views\vyuMFWorkOrderWarehouseRateMatrixDetail.sql" />
+    <Build Include="dbo\Views\vyuMFWorkOrderWarehouseServicesSearch.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

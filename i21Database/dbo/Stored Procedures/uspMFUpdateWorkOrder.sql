@@ -44,6 +44,7 @@ BEGIN TRY
 		,@dtmPrevPlannedDate DATETIME
 		,@intSalesOrderLineItemId INT
 		,@intLoadId INT
+		,@intWarehouseRateMatrixHeaderId INT
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -83,6 +84,7 @@ BEGIN TRY
 		,@intDepartmentId = intDepartmentId
 		,@intSalesOrderLineItemId = intSalesOrderLineItemId
 		,@intLoadId = intLoadId
+		,@intWarehouseRateMatrixHeaderId = intWarehouseRateMatrixHeaderId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -115,6 +117,7 @@ BEGIN TRY
 			,intDepartmentId INT
 			,intSalesOrderLineItemId INT
 			,intLoadId INT
+			,intWarehouseRateMatrixHeaderId INT
 			)
 
 	IF EXISTS (
@@ -226,6 +229,7 @@ BEGIN TRY
 		,ysnIngredientAvailable = @ysnIngredientAvailable
 		,intDepartmentId = @intDepartmentId
 		,intLoadId = @intLoadId
+		,intWarehouseRateMatrixHeaderId = @intWarehouseRateMatrixHeaderId
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId = @intConcurrencyId
@@ -377,6 +381,3 @@ BEGIN CATCH
 			,'WITH NOWAIT'
 			)
 END CATCH
-GO
-
-
