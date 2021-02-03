@@ -239,22 +239,6 @@ BEGIN
 												END
 											ELSE
 												CASE
-													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) 												
-													* 
-															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
-															else  -1 end
-													
-													)
-
-													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 THEN (QM.dblDiscountAmount * (CD.dblBasis + F.dblFutureMarketPrice))
-													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * 
-													case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 
-															else  -1 end
-													)
-													WHEN QM.strDiscountChargeType = 'Dollar' AND QM.dblDiscountAmount > 0 THEN QM.dblDiscountAmount
-												END
-											ELSE
-												CASE
 													WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 THEN (QM.dblDiscountAmount * (CASE WHEN PricedBasis.intPriceFixationDetailId IS NULL THEN (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) ELSE PricedBasis.dblCashPrice END) --+ 8888888888888
 													* 
 															case when isnull(IC.strCostType, '') = 'Discount' and QM.dblDiscountAmount < 0 then 1 

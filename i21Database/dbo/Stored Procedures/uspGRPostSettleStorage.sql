@@ -1812,9 +1812,6 @@ BEGIN TRY
 
 				end
 
-
-				DELETE FROM @voucherDetailStorage
-				DELETE FROM @VoucherDetailReceiptCharge
 				SET @intCreatedBillId = 0
 				UPDATE a
 				SET a.dblUnits = CASE 
@@ -2013,7 +2010,7 @@ BEGIN TRY
 																						ELSE NULL
 																				END
 																END
-													END
+													--END
 					,[intInventoryReceiptChargeId]	= CASE 
 														WHEN ST.ysnDPOwnedType = 0 OR @ysnDeliverySheet = 1 THEN NULL
 														ELSE 
@@ -2822,7 +2819,7 @@ BEGIN TRY
 			SET ysnPosted = 1
 				,intBillId = @createdVouchersId
 			WHERE (intSettleStorageId = @intSettleStorageId  ) and @createdVouchersId is not null
-		END
+		--END
 
 	SELECT @intSettleStorageId = MIN(intSettleStorageId)
 	FROM tblGRSettleStorage	
