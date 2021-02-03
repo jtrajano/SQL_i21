@@ -3105,7 +3105,7 @@ BEGIN TRY
 			, strNotes
 			, ysnPreCrush
 		FROM (
-			SELECT DISTINCT t.strCommodityCode
+			SELECT t.strCommodityCode
 				, strInternalTradeNo
 				, t.intFutOptTransactionHeaderId
 				, intCommodityId
@@ -3158,7 +3158,7 @@ BEGIN TRY
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush)
-		SELECT DISTINCT t.strCommodityCode
+		SELECT t.strCommodityCode
 			, t.strInternalTradeNo
 			, intFutOptTransactionHeaderId
 			, 'Net Hedge' COLLATE Latin1_General_CI_AS
@@ -4965,7 +4965,7 @@ BEGIN TRY
 			, strBrokerTradeNo
 			, t.strFutureMarket
 		FROM (
-			SELECT DISTINCT t.strCommodityCode
+			SELECT t.strCommodityCode
 				, strInternalTradeNo
 				, intFutOptTransactionHeaderId
 				, intCommodityId
@@ -5008,7 +5008,7 @@ BEGIN TRY
 			, strNotes
 			, strBrokerTradeNo
 			, strFutureMarket)
-		SELECT DISTINCT t.strCommodityCode
+		SELECT t.strCommodityCode
 			, intCommodityId
 			, t.strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6766,7 +6766,7 @@ BEGIN TRY
 			, strNotes
 			, ysnPreCrush
 		FROM (
-			SELECT DISTINCT oc.strCommodityCode
+			SELECT oc.strCommodityCode
 				, oc.strInternalTradeNo
 				, oc.intFutOptTransactionHeaderId
 				, intCommodityId
@@ -6843,7 +6843,7 @@ BEGIN TRY
 			, strNotes
 			, ysnPreCrush
 		FROM (
-			SELECT DISTINCT oc.strCommodityCode
+			SELECT oc.strCommodityCode
 				, oc.strInternalTradeNo
 				, oc.intFutOptTransactionHeaderId
 				, intCommodityId
