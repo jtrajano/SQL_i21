@@ -276,6 +276,66 @@ BEGIN TRY
 				AND x.strRowState = 'DELETE'
 			)
 
+	INSERT INTO dbo.tblMFWorkOrderWarehouseRateMatrixDetail (
+		intWorkOrderId
+		,intWarehouseRateMatrixDetailId
+		,dblQuantity
+		,dblEstimatedAmount
+		,dtmCreated
+		,intCreatedUserId
+		,dtmLastModified
+		,intLastModifiedUserId
+		,intConcurrencyId
+		)
+	SELECT @intWorkOrderId
+		,intWarehouseRateMatrixDetailId
+		,dblQuantity
+		,dblEstimatedAmount
+		,@dtmCurrentDate
+		,intUserId
+		,@dtmCurrentDate
+		,intUserId
+		,1 intConcurrencyId
+	FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
+			intWorkOrderWarehouseRateMatrixDetailId int
+			,intWarehouseRateMatrixDetailId int
+			,dblQuantity Numeric(18,6)
+			,dblEstimatedAmount Numeric(18,6)
+			,intUserId int
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intWorkOrderWarehouseRateMatrixDetailId = 0
+		AND x.strRowState = 'ADDED'
+
+	UPDATE dbo.tblMFWorkOrderWarehouseRateMatrixDetail
+	SET dblQuantity = x.dblQuantity
+		,dblEstimatedAmount = x.dblEstimatedAmount
+		,dtmLastModified=@dtmCurrentDate
+		,intLastModifiedUserId=x.intUserId
+		,intConcurrencyId = Isnull(intConcurrencyId, 0) + 1
+	FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
+			intWorkOrderWarehouseRateMatrixDetailId int
+			,dblQuantity Numeric(18,6)
+			,dblEstimatedAmount Numeric(18,6)
+			,intUserId int
+			,strRowState NVARCHAR(50)
+			) x
+	WHERE x.intWorkOrderWarehouseRateMatrixDetailId = tblMFWorkOrderWarehouseRateMatrixDetail.intWorkOrderWarehouseRateMatrixDetailId
+		AND x.strRowState = 'MODIFIED'
+
+	DELETE
+	FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND EXISTS (
+			SELECT *
+			FROM OPENXML(@idoc, 'root/WarehouseRateMatrixDetails/WarehouseRateMatrixDetail', 2) WITH (
+					intWorkOrderWarehouseRateMatrixDetailId INT
+					,strRowState NVARCHAR(50)
+					) x
+			WHERE x.intWorkOrderWarehouseRateMatrixDetailId = tblMFWorkOrderWarehouseRateMatrixDetail.intWorkOrderWarehouseRateMatrixDetailId
+				AND x.strRowState = 'DELETE'
+			)
+
 	IF @intBlendRequirementId IS NOT NULL
 	BEGIN
 		SELECT @intUnitMeasureId = intUnitMeasureId
