@@ -201,7 +201,12 @@ FROM
 		ALD.strAllocationDetailRefNo 
 		,ALD.intPContractDetailId
 		,ALD.intSContractDetailId
-		,strFinancialStatus = SCS.strContractStatus + CASE WHEN ISNULL(SCD.strFinancialStatus, '') <> '' THEN '/' + ISNULL(SCD.strFinancialStatus, '') ELSE '' END
+		,strFinancialStatus = PCS.strContractStatus
+				+ CASE WHEN PCD.ysnFinalPNL = 1 THEN '/Final P&L Created'
+						WHEN PCD.ysnProvisionalPNL = 1 THEN '/Provisional P&L Created'
+						WHEN BD.intContractDetailId IS NOT NULL THEN '/Purchase Invoice Received' 
+						WHEN PCD.strFinancialStatus IS NOT NULL THEN '/' + PCD.strFinancialStatus 
+						ELSE '' END
 		,strPContractNumberSeq = PCH.strContractNumber + '/' + CAST(PCD.intContractSeq AS NVARCHAR(10))
 		,strSContractNumberSeq = SCH.strContractNumber + '/' + CAST(SCD.intContractSeq AS NVARCHAR(10))
 		,strItemNo = I.strItemNo
@@ -272,7 +277,7 @@ FROM
 		LEFT JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = PCD.intFutureMarketId
 		LEFT JOIN tblCTContractDetail SCD ON ALD.intSContractDetailId = SCD.intContractDetailId
 		LEFT JOIN tblCTContractHeader SCH ON SCH.intContractHeaderId = SCD.intContractHeaderId
-		LEFT JOIN tblCTContractStatus SCS ON SCS.intContractStatusId = SCD.intContractStatusId
+		LEFT JOIN tblCTContractStatus PCS ON PCS.intContractStatusId = PCD.intContractStatusId
 		LEFT JOIN tblEMEntity C ON C.intEntityId = SCH.intEntityId
 		LEFT JOIN tblICItemUOM SUOM ON SUOM.intItemId = I.intItemId AND SUOM.intUnitMeasureId = ALD.intSUnitMeasureId
 		LEFT JOIN tblICItemUOM PUOM ON PUOM.intItemId = I.intItemId AND PUOM.intUnitMeasureId = ALD.intPUnitMeasureId
@@ -280,6 +285,7 @@ FROM
 		LEFT JOIN tblSMCurrency SCUR ON SCUR.intCurrencyID = SCD.intBasisCurrencyId
 		LEFT JOIN tblICItemUOM IUOM ON PCD.intPriceItemUOMId = IUOM.intItemUOMId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = IUOM.intUnitMeasureId
+		OUTER APPLY (SELECT TOP 1 intContractDetailId FROM tblAPBillDetail bd WHERE bd.intContractDetailId = PCD.intContractDetailId) BD
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
 						WHERE intItemId = I.intItemId AND intUnitMeasureId = @intUnitMeasureId) ToUOM
 		OUTER APPLY (SELECT	TOP 1 intItemUOMId, dblUnitQty FROM	dbo.tblICItemUOM 
