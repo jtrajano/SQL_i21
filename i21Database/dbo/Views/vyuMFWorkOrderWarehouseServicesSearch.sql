@@ -22,6 +22,8 @@ SELECT WWRMD.intWorkOrderWarehouseRateMatrixDetailId
 	,W.strERPServicePONumber
 	,WWRMD.strERPServicePOLineNo
 	,WRMH.strServiceContractNo
+	,W.intLocationId
+	,W.intManufacturingProcessId
 FROM dbo.tblMFWorkOrderWarehouseRateMatrixDetail WWRMD
 JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = WWRMD.intWorkOrderId
 JOIN dbo.tblLGWarehouseRateMatrixDetail AS WRMD ON WWRMD.intWarehouseRateMatrixDetailId = WRMD.intWarehouseRateMatrixDetailId

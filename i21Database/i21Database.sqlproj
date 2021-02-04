@@ -9020,6 +9020,7 @@
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
     <Build Include="dbo\Views\vyuRKOpenDerivativesPosition.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

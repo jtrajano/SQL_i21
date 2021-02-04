@@ -1,0 +1,37 @@
+﻿CREATE PROCEDURE uspMFGenerateVoucher @intWorkOrderId INT
+	,@intUserId INT
+	,@strXML NVARCHAR(MAX)
+AS
+BEGIN TRY
+	SET QUOTED_IDENTIFIER OFF
+	SET ANSI_NULLS ON
+	SET NOCOUNT ON
+	SET XACT_ABORT ON
+	SET ANSI_WARNINGS OFF
+
+	DECLARE @idoc INT
+	DECLARE @ErrMsg NVARCHAR(MAX)
+
+	EXEC sp_xml_preparedocument @idoc OUTPUT
+		,@strXML
+
+
+END TRY
+
+BEGIN CATCH
+	IF XACT_STATE() != 0
+		AND @@TRANCOUNT > 0
+		ROLLBACK TRANSACTION
+
+	SET @ErrMsg = ERROR_MESSAGE()
+
+	IF @idoc <> 0
+		EXEC sp_xml_removedocument @idoc
+
+	RAISERROR (
+			@ErrMsg
+			,16
+			,1
+			,'WITH NOWAIT'
+			)
+END CATCH
