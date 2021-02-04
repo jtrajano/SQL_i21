@@ -6823,6 +6823,7 @@
     <Build Include="dbo\Stored Procedures\uspSMRepSnapshotAddArticleParentToSub.sql" />
     <None Include="Scripts\Post-Deployment\CreateEncryptionCertificateAndSymmetricKey.sql" />
     <Build Include="dbo\Stored Procedures\uspCFSyncInvoiceFormat.sql" />
+    <Build Include="dbo\Stored Procedures\uspCFSyncEmailDistributionFormat.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScanner.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScannerExportPricebook.sql" />
     <Build Include="dbo\Tables\tblSTHandheldScannerImportReceipt.sql" />
