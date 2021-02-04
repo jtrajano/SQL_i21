@@ -1200,8 +1200,8 @@ BEGIN TRY
 				--SELECT 'TESTTTT', SS.* ,dblNetSettlement.*,dblDiscountDue.*
 				--UPDATE THE NET SETTLEMENT AND DISCOUNT DUE BASED ON THE PRICING LAYERS
 				UPDATE SS
-				SET dblNetSettlement = A.dblNetSettlement
-					,dblDiscountsDue = B.dblDiscountDue
+				SET dblNetSettlement = ISNULL(A.dblNetSettlement,0)
+					,dblDiscountsDue = ISNULL(B.dblDiscountDue,0)
 				FROM tblGRSettleStorage SS
 				OUTER APPLY (
 					SELECT 
