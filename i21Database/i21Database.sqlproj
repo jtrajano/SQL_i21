@@ -8880,6 +8880,7 @@
     <Build Include="dbo\Views\vyuMBILExportCustomerSpecialPricing.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
     <Build Include="dbo\Views\vyuMBILExportItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
