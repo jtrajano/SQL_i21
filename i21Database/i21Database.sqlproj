@@ -7815,6 +7815,8 @@
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
     <Build Include="dbo\Tables\tblARAuditLog.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
