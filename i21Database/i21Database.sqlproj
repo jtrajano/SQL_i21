@@ -8878,6 +8878,8 @@
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
