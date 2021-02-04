@@ -4,4 +4,5 @@
 	,intLoadId INT
 	,intWeightClaimId INT
 	,dtmCreated DATETIME CONSTRAINT DF_tblIPInventoryReceiptWeightClaim_dtmCreated DEFAULT GETDATE()
+	,ysnInProgress BIT
 	)
