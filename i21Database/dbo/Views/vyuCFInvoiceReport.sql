@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -411,8 +413,13 @@ OUTER APPLY (
 	WHERE intEntityId = cfTrans.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
 ) AS arCustomerContact
 -------------------------------------------------------------
-WHERE ISNULL(cfTrans.ysnPosted,0) = 1 
-AND ISNULL(cfTrans.ysnInvalid,0) = 0
+WHERE (ysnPosted = 1 AND ysnPosted IS NOT NULL) 
+AND (ysnInvalid = 0 OR ysnInvoiced IS NULL) 
+AND cfTrans.intTransactionId NOT IN (
+			SELECT tblCFTransaction.intTransactionId FROM tblCFTransaction
+			INNER JOIN tblCFNetwork ON tblCFTransaction.intNetworkId = tblCFNetwork.intNetworkId
+			 where strTransactionType = 'Foreign Sale' and (tblCFNetwork.ysnPostForeignSales = 0 OR tblCFNetwork.ysnPostForeignSales IS NULL))
+
 GO
 
 
