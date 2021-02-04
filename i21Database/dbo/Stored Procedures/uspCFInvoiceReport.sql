@@ -422,9 +422,18 @@ BEGIN
 			DECLARE @temptable NVARCHAR(MAX)
 
 			SET @guid = @filterGuid
-			SET @tableName = 'vyuCFInvoiceReport'
+			
 			SET @field = 'intTransactionId'
 			SET @temptable = '##'+REPLACE(@guid,'-','')
+
+			IF(ISNULL(@ysnReprintInvoice,0) = 1 AND @dtmInvoiceDate IS NOT NULL)
+			BEGIN
+				SET @tableName = 'vyuCFInvoiceReportForReprint'
+			END
+			ELSE
+			BEGIN
+				SET @tableName = 'vyuCFInvoiceReportForNewPrint'
+			END
 
 			IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
 			BEGIN
