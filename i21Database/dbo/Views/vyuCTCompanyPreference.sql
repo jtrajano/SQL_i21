@@ -76,6 +76,7 @@ AS
 			,CP.ysnUpdatedAvailabilitySales
 			,CP.ysnAllowFutureTypeContracts
 			,CP.strDefaultReleaseReport
+			,CP.ysnEnableReleaseInstructionsTab
 			,strCleanCostUOM = U1.strUnitMeasure
 			,strCleanCostCurrency = C1.strCurrency
 			,strDefContractStatus = CS.strContractStatus

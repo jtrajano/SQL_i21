@@ -61,6 +61,7 @@
 	ysnRequireProducerQty BIT,
 	ysnDisableContractSearchScreenCancelButton	BIT NULL DEFAULT 0,
 	ysnAllowFutureTypeContracts	BIT NULL DEFAULT 0,
+	ysnEnableReleaseInstructionsTab	BIT NULL DEFAULT 0,
 	ysnSendFeedOnPrice BIT,
 	strBulkChangeFields NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	ysnSendFeedOnSlice BIT,

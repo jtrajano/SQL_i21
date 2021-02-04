@@ -74,6 +74,16 @@ BEGIN
 		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 		WHERE CD.intContractDetailId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
 	END
+	ELSE IF @strMailType = 'Release Instructions'
+	BEGIN
+		SET @routeScreen = 'Contract'
+		INSERT INTO @loop
+		SELECT CD.intContractHeaderId,CH.intEntityId,CH.strContractNumber +'-'+ CAST(CD.intContractSeq AS NVARCHAR(10)) + '-' + RI.strReleaseNumber ,CH.intSalespersonId 
+		FROM tblCTContractDetail CD
+		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
+		INNER JOIN tblCTContractReleaseInstruction RI ON RI.intContractDetailId = CD.intContractDetailId
+		WHERE RI.intContractReleaseInstructionId IN (SELECT * FROM  dbo.fnSplitString(@strId,','))
+	END
 	ELSE IF @strMailType = 'Price Contract'
 	BEGIN
 		SET @routeScreen = 'PriceContract'
@@ -152,6 +162,12 @@ BEGIN
 		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
 	END
 
+	IF @strMailType = 'Release Instructions'
+	BEGIN
+		SELECT @strCustomerContract = strCustomerContract FROM tblCTContractHeader WHERE intContractHeaderId IN (SELECT TOP 1 Id FROM @loop)
+		SET @Subject = 'Contract' + ' - ' + @strNumber + ' - Release Instruction - Your ref. no. ' + @strCustomerContract
+	END
+
 	IF	@strDefaultContractReport	=	'ContractJDE' AND @strMailType = 'Price Contract'
 	BEGIN
 		SET @strMailType = 'Price Fixation'
@@ -164,7 +180,7 @@ BEGIN
 
 	IF @strMailType <> 'Sample Instruction'
 	BEGIN
-		IF @strMailType <> 'Release Instruction'
+		IF @strMailType <> 'Release Instruction' AND @strMailType <> 'Release Instructions'
 			SET @body += 'Please find attached the contract document.<br>'--'Please find attached the ' + LOWER(@strMailType) + '. <br>'
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @loop
@@ -186,7 +202,12 @@ BEGIN
 		SELECT  @body += 'Please find attached the release instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
 	END	
 
-	IF @strMailType IN ('Sample Instruction', 'Release Instruction')
+	IF @strMailType = 'Release Instructions'
+	BEGIN
+		SELECT  @body += 'Please find attached the release instructions for contract - ' + @strNumber + '(Your ref. no. '+ @strCustomerContract +')'
+	END	
+
+	IF @strMailType IN ('Sample Instruction', 'Release Instruction', 'Release Instructions')
 		SET @body += '<br>'
 	SET @body +=@strThanks+'<br><br>'
 	SET @body +='Sincerely, <br>'
