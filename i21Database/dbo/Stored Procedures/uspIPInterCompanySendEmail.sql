@@ -1089,7 +1089,6 @@ BEGIN
 				AND @dtmDate2 
 				AND intMultiCompanyId =4
 END
-
 IF @strMessageType = 'Item'
 BEGIN
 	SET @strHeader = '<tr>
@@ -1108,7 +1107,7 @@ BEGIN
 		)
 	BEGIN
 		SELECT @strDetail = @strDetail + '<tr>
-			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + 'Success' + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
 	</tr>'
 		FROM tblICItemStage S WITH (NOLOCK)
 		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
