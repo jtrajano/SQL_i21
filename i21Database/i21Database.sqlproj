@@ -9014,6 +9014,8 @@
     <Build Include="dbo\Views\vyuMFGetServiceContract.sql" />
     <Build Include="dbo\Views\vyuMFWorkOrderWarehouseRateMatrixDetail.sql" />
     <Build Include="dbo\Views\vyuMFWorkOrderWarehouseServicesSearch.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
