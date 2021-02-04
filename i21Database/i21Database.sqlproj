@@ -4802,6 +4802,8 @@
     <Build Include="dbo\Stored Procedures\uspICDeleteInventoryShipment.sql" />
     <Build Include="dbo\Views\vyuLGWeightClaimHeader.sql" />
     <Build Include="dbo\Tables\tblMFItemOwner.sql" />
+    <Build Include="dbo\Tables\tblCTContractReleaseInstruction.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportReleaseInstructionUS.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPOIDOC.sql" />
     <Build Include="dbo\Views\vyuCTEvent.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPNLIDOC.sql" />

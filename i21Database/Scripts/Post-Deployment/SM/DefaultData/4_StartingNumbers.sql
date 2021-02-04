@@ -1538,7 +1538,15 @@ GO
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Work Order' and strModule = 'Agronomy')
 	--Make sure to check with 19.1 and lower version. 142 is the last number
-
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 158
+			,[strTransactionType]	= N'Contract Release Instruction'
+			,[strPrefix]			= N'REL-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Contract Management'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Contract Release Instruction' and strModule = 'Contract Management')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
