@@ -2,8 +2,6 @@ CREATE PROCEDURE [dbo].[uspSTRetailChangeReport]
 	@intStoreNo INT
 	, @dtmBeginChange DATETIME
 	, @dtmEndChange DATETIME
-	--, @sqlResultSuccess NVARCHAR(1000) OUTPUT
-	--, @strResultMsg NVARCHAR(1000) OUTPUT
 AS
 BEGIN 
 
@@ -25,34 +23,56 @@ BEGIN
 			et.strOldData,
 			et.strNewData
 		FROM (
-			SELECT te.intItemId, te.intItemLocationId, MAX(te.dblRetailPrice) AS strNewData,  MIN(te.dblRetailPrice) AS strOldData
-				FROM (
-					SELECT *
-					FROM
+			SELECT 
+				te.intItemId, 
+				te.intItemLocationId, 
+				MAX(tblMaxRetail.dblRetailPrice) AS strNewData,  
+				MIN(te.dblRetailPrice) AS strOldData
+			FROM (
+				SELECT *
+				FROM
 					(
 						SELECT
-							ep.*, COUNT(*) OVER ( PARTITION BY ep.intItemId) AS intCountItem,
+							ep.*, 
+							COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
 							ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-											  ORDER BY ep.dtmEffectiveRetailPriceDate DESC) ts
+												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate ASC) ts
 						FROM tblICEffectiveItemPrice ep
 						WHERE ep.dtmEffectiveRetailPriceDate BETWEEN @dtmBeginChange AND @dtmEndChange
 					) r
-					WHERE r.ts <= 2  AND r.intCountItem > 1
+					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 1
 				) te
+				JOIN
+				(
+					SELECT *
+					FROM
+						(
+							SELECT
+								ep.*, 
+								COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
+								ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
+													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate ASC) ts
+							FROM tblICEffectiveItemPrice ep
+						WHERE ep.dtmEffectiveRetailPriceDate BETWEEN @dtmBeginChange AND @dtmEndChange
+					) r
+					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
+				) tblMaxRetail
+				ON te.intItemId = tblMaxRetail.intItemId AND te.intItemLocationId = tblMaxRetail.intItemLocationId
 				GROUP BY te.intItemId, te.intItemLocationId
-			) et
-			LEFT JOIN tblICItem item
-				ON et.intItemId = item.intItemId
-			LEFT JOIN tblICCategory cat
-				ON item.intCategoryId = cat.intCategoryId
-			LEFT JOIN tblICItemLocation loc
-				ON loc.intItemId = item.intItemId AND et.intItemLocationId = loc.intItemLocationId
-			LEFT JOIN tblSMCompanyLocation cl
-				ON cl.intCompanyLocationId = loc.intLocationId
-			LEFT JOIN tblSTStore st
-				ON st.intCompanyLocationId = cl.intCompanyLocationId
+		) et
+		LEFT JOIN tblICItem item
+			ON et.intItemId = item.intItemId
+		LEFT JOIN tblICCategory cat
+			ON item.intCategoryId = cat.intCategoryId
+		LEFT JOIN tblICItemLocation loc
+			ON loc.intItemId = item.intItemId AND et.intItemLocationId = loc.intItemLocationId
+		LEFT JOIN tblSMCompanyLocation cl
+			ON cl.intCompanyLocationId = loc.intLocationId
+		LEFT JOIN tblSTStore st
+			ON st.intCompanyLocationId = cl.intCompanyLocationId
 		WHERE st.intStoreNo = @intStoreNo
 	) preview
 
-END 
-GO
+END
+
+
