@@ -98,7 +98,8 @@ BEGIN TRY
 				CD.dblQuantityPerLoad,
 				CD.intBookId,	
 				CD.intSubBookId,
-				CD.dblFutures
+				CD.dblFutures,
+				CD.intContractStatusId
 
 				,intHeaderBookId = NULL
 				,intHeaderSubBookId = null
@@ -192,7 +193,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 				CD.dblQuantityPerLoad,
 				CH.intBookId,	
 				CH.intSubBookId,
-				CD.dblFutures
+				CD.dblFutures,
+				CD.intContractStatusId
 				
 				,intHeaderBookId = NULL
 				,intHeaderSubBookId = null
@@ -231,7 +233,8 @@ LEFT	JOIN	tblICItem					SI	ON	SI.intItemId		=	SC.intItemId
 			,CDetail.intNoOfLoad
 			,CDetail.dblQuantityPerLoad
 			,CDetail.dblFutures
-			,intBasisUnitMeasureId = BU.intUnitMeasureId	
+			,intBasisUnitMeasureId = BU.intUnitMeasureId
+			,CDetail.intContractStatusId
 			FROM tblCTContractDetail CDetail
 			LEFT JOIN tblSMCurrency CU ON CU.intCurrencyID = CDetail.intCurrencyId
 			LEFT JOIN tblSMCurrency SY ON SY.intCurrencyID = CDetail.intBasisCurrencyId
