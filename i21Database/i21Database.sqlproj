@@ -8193,6 +8193,8 @@
     <Build Include="dbo\Functions\fnAP1099EFileNECPayee.sql" />
     <Build Include="dbo\Functions\fnAP1099EFileEndOfNEC.sql" />
     <Build Include="dbo\Functions\fnCTValidateInvoiceContract.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
