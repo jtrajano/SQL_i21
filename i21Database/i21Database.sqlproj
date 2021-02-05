@@ -9028,6 +9028,8 @@
     <Build Include="dbo\Stored Procedures\uspAGUpdateICStockReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessReweighs.sql" />
     <Build Include="dbo\Stored Procedures\uspMFWorkOrderFeed.sql" />
+    <Build Include="dbo\Views\vyuIPLogView.sql" />
+    <Build Include="dbo\Views\vyuIPAuditView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
