@@ -42,6 +42,8 @@ DECLARE @dtmDateToLocal						AS DATETIME			= ISNULL(@dtmDateTo, GETDATE())
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @intEntityUserIdLocal				AS INT				= NULLIF(@intEntityUserId, 0)
 	  , @intCompanyLocationId				AS INT				= NULL
+	  , @ARBalance							NUMERIC(18,6)		= 0.00
+
 
 SET @dtmDateToLocal				= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateToLocal)))
 SET @dtmDateFromLocal			= CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), @dtmDateFromLocal)))
@@ -474,7 +476,7 @@ LEFT JOIN (
 	) TOTALPAYMENT ON DETAILS.intInvoiceId = TOTALPAYMENT.intInvoiceId
 	WHERE P.ysnInvoicePrepayment = 0
 	  AND P.dtmDatePaid BETWEEN @dtmDateFrom AND @dtmDateTo
-	  AND ((@ysnPrintZeroBalance = 0 AND DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0) OR @ysnPrintZeroBalance = 1)
+	  AND  (DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) <> 0  OR  DETAILS.dblInvoiceTotal - ABS(ISNULL(TOTALPAYMENT.dblPayment, 0)) = 0)
 	GROUP BY P.intPaymentId, P.intEntityCustomerId, P.strRecordNumber, P.strPaymentInfo, P.dtmDatePaid, DETAILS.strInvoiceNumber, P.strNotes
 ) TRANSACTIONS ON C.intEntityCustomerId = TRANSACTIONS.intEntityCustomerId
 
@@ -589,10 +591,18 @@ VALUES (strCustomerNumber, dtmLastStatementDate, dblLastStatement);
 IF @ysnPrintOnlyPastDueLocal = 1
 	DELETE FROM #STATEMENTREPORT WHERE DATEDIFF(DAYOFYEAR, dtmDueDate, @dtmDateToLocal) <= 0 AND strTransactionType <> 'Balance Forward'        
 
-IF @ysnPrintZeroBalanceLocal = 0
-    DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
+SELECT @ARBalance = SUM(dblTotalAR) FROM #BALANCEFORWARDAGING
 
+IF @ysnPrintZeroBalanceLocal = 0
+	BEGIN
+		IF @ARBalance = 0 
+		BEGIN	
+
+		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblBalance) * 10000) - CONVERT(FLOAT, (ABS(dblBalance) * 10000))) <> 0) OR (ISNULL(dblBalance, 0) <= 0 OR ISNULL(dblARBalance,0) <=0)) AND ISNULL(strTransactionType, '') NOT IN ('Customer Budget')
+		END
+	END
 DELETE FROM #STATEMENTREPORT WHERE strTransactionType IS NULL
+
 
 DELETE SR
 FROM #STATEMENTREPORT SR
