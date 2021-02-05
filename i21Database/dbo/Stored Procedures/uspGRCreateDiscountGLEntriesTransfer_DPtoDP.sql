@@ -147,12 +147,12 @@ SELECT
 	,dtmDateEntered				= GETDATE()
 	,dtmTransactionDate			= ForGLEntries_CTE.dtmDate
     ,strJournalLineDescription  = '' 
-	,intJournalLineNo			= ForGLEntries_CTE.intTransactionDetailId
+	,intJournalLineNo			= ForGLEntries_CTE.intSourceTransactionDetailId
 	,ysnIsUnposted				= 0
 	,intUserId					= @intEntityUserSecurityId
 	,intEntityId				= GL.intEntityId 
-	,strTransactionId			= ForGLEntries_CTE.strTransactionId
-	,intTransactionId			= ForGLEntries_CTE.intTransactionId
+	,strTransactionId			= ForGLEntries_CTE.strSourceTransactionId
+	,intTransactionId			= ForGLEntries_CTE.intSourceTransactionId
 	,strTransactionType			= 'Transfer Storage'
 	,strTransactionForm			= 'Transfer Storage'
 	,strModuleName				= @ModuleName
