@@ -8881,6 +8881,8 @@
     <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
     <Build Include="dbo\Views\vyuMBILExportItem.sql" />
     <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
+    <Build Include="dbo\Views\vyuIPLogView.sql" />
+    <Build Include="dbo\Views\vyuIPAuditView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
