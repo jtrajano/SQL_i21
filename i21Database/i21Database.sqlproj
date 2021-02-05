@@ -8871,6 +8871,8 @@
     <Build Include="dbo\Views\vyuMBILExportItem.sql" />
     <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
+    <Build Include="dbo\Views\vyuIPLogView.sql" />
+    <Build Include="dbo\Views\vyuIPAuditView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
