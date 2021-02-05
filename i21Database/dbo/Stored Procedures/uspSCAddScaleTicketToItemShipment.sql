@@ -542,7 +542,7 @@ END
 													END 
 												END
 		,[ysnAccrue]						= 0
-		,[ysnPrice]							= IC.ysnPrice
+		,[ysnPrice]							= 1
 		,[strChargesLink]					= SE.strChargesLink
 		FROM @ShipmentStagingTable SE
 		LEFT JOIN tblQMTicketDiscount QM ON QM.intTicketId = SE.intSourceId
