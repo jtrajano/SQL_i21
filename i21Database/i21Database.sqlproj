@@ -8908,6 +8908,8 @@
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
     <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
+    <Build Include="dbo\Views\vyuIPLogView.sql" />
+    <Build Include="dbo\Views\vyuIPAuditView.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
