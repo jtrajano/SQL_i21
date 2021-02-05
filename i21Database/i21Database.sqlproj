@@ -9027,6 +9027,7 @@
     <Build Include="dbo\Stored Procedures\uspAGValidateStockReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspAGUpdateICStockReservation.sql" />
     <Build Include="dbo\Stored Procedures\uspLGProcessReweighs.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFWorkOrderFeed.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

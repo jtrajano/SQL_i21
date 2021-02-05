@@ -30,6 +30,8 @@
 	[dtmValidTo] DATETIME NULL,
 	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intSubLocationId int,
+	strERPRecipeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+
     CONSTRAINT [PK_tblMFRecipe_intRecipeId] PRIMARY KEY ([intRecipeId]), 
     CONSTRAINT [FK_tblMFRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
 	CONSTRAINT [FK_tblMFRecipe_tblICItemUOM_intItemUOMId] FOREIGN KEY ([intItemUOMId]) REFERENCES [tblICItemUOM]([intItemUOMId]),
