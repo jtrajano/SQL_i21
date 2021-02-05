@@ -9022,6 +9022,8 @@
     <Build Include="dbo\Views\vyuRKOpenDerivativesPosition.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGValidateStockReservation.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGUpdateICStockReservation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
