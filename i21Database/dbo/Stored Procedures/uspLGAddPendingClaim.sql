@@ -84,21 +84,41 @@ BEGIN
 					,intLoadContainerId = LC.intLoadContainerId
 					,intWeightUnitMeasureId = L.intWeightUnitMeasureId
 					,intWeightId = CH.intWeightId
-					,dblShippedNetWt = (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0))
+					,dblShippedNetWt = (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+											ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END - ISNULL(IRN.dblIRNet, 0))
 					,dblReceivedNetWt = (RI.dblNet - ISNULL(IRN.dblIRNet, 0))
 					,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 					,dblFranchisePercent = WG.dblFranchise
 					,dblFranchise = WG.dblFranchise / 100
-					,dblFranchiseWt = CASE WHEN (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END * WG.dblFranchise / 100) <> 0.0
-										THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
-									ELSE 0.0 END
-					,dblWeightLoss = CASE WHEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) < 0.0
-										THEN (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
-									ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) END
-					,dblClaimableWt = CASE WHEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-										THEN ((RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END) + (LD.dblNet * WG.dblFranchise / 100))
-										ELSE (RI.dblNet - CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN (CLNW.dblLinkNetWt) ELSE LD.dblNet END)
-									END
+					,dblFranchiseWt = CASE WHEN (CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+													ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END 
+													* WG.dblFranchise / 100) <> 0.0
+										THEN ((CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+												ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END 
+												- ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
+										ELSE 0.0 END
+					,dblWeightLoss = CASE WHEN (RI.dblNet 
+												- CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+													ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END) < 0.0
+										THEN (RI.dblNet 
+												- CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+													ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END)
+										ELSE (RI.dblNet 
+												- CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+													ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END) 
+										END
+					,dblClaimableWt = CASE WHEN ((RI.dblNet 
+											- CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+												ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END) 
+											+ (ISNULL(LD.dblShippedNet, LD.dblNet) * WG.dblFranchise / 100)) < 0.0
+										THEN ((RI.dblNet 
+											- CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+												ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END) 
+											+ (ISNULL(LD.dblShippedNet, LD.dblNet) * WG.dblFranchise / 100))
+										ELSE (RI.dblNet 
+											- CASE WHEN (CLNW.dblLinkNetWt IS NOT NULL) THEN 
+												ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) ELSE ISNULL(LD.dblShippedNet, LD.dblNet) END)
+										END
 					,dblSeqPrice = AD.dblSeqPrice
 					,strSeqCurrency = AD.strSeqCurrency
 					,strSeqPriceUOM = AD.strSeqPriceUOM

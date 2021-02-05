@@ -99,6 +99,9 @@ BEGIN TRY
 			AND receipt.intSourceInventoryReceiptId IS NULL 
 			AND receipt.intInventoryReceiptId NOT IN (SELECT intSourceInventoryReceiptId FROM tblICInventoryReceipt WHERE intSourceInventoryReceiptId IS NOT NULL AND strDataSource = 'Reverse')
 
+		--Delete the Payables created by LS to allow IR to regenerate the payables
+		DELETE FROM tblAPVoucherPayable WHERE intLoadShipmentId = @intLoadId AND intLoadShipmentCostId IS NULL
+
 		DECLARE @intInventoryReceiptId INT = NULL
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpInventoryReceipts)
 		BEGIN

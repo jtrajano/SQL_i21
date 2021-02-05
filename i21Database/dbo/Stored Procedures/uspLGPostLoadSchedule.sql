@@ -98,6 +98,7 @@ BEGIN TRY
 				ELSE 
 				BEGIN
 					UPDATE tblLGLoad SET intShipmentStatus = 3, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
+					EXEC uspLGProcessReweighs @intLoadId, NULL, NULL
 				END
 
 				IF (@ysnCancel = 1) 
