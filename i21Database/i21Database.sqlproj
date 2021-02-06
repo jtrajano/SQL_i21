@@ -3157,6 +3157,8 @@
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Functions\fnFAComputeDepreciation.sql" />
+    <Build Include="dbo\Functions\fnFAComputeMultipleDepreciation.sql" />
+    <Build Include="dbo\Functions\fnFAValidateAssetDepreciation.sql" />
     <Build Include="dbo\Views\vyuPATCancel.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
     <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
@@ -5200,11 +5202,15 @@
     <Build Include="dbo\Stored Procedures\uspFADepreciateAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADisposeAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFACopyDepreciationMethod.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAReverseMultipleAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleAsset.sql" />
     <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepreciation.sql" />
     <Build Include="dbo\Tables\tblFADepreciationMethod.sql" />
     <Build Include="dbo\Tables\tblFADepreciationMethodDetail.sql" />
+    <Build Include="dbo\Tables\tblFADepreciateLog.sql" />
+    <Build Include="dbo\Tables\tblFADepreciateLogDetail.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
