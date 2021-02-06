@@ -45,6 +45,7 @@ BEGIN TRY
 		,@intSalesOrderLineItemId INT
 		,@intLoadId INT
 		,@intWarehouseRateMatrixHeaderId INT
+		,@intMachineId INT
 
 	SELECT @dtmCurrentDate = GETDATE()
 
@@ -85,6 +86,7 @@ BEGIN TRY
 		,@intSalesOrderLineItemId = intSalesOrderLineItemId
 		,@intLoadId = intLoadId
 		,@intWarehouseRateMatrixHeaderId = intWarehouseRateMatrixHeaderId
+		,@intMachineId = intMachineId
 	FROM OPENXML(@idoc, 'root', 2) WITH (
 			intWorkOrderId INT
 			,strWorkOrderNo NVARCHAR(50)
@@ -118,6 +120,7 @@ BEGIN TRY
 			,intSalesOrderLineItemId INT
 			,intLoadId INT
 			,intWarehouseRateMatrixHeaderId INT
+			,intMachineId INT
 			)
 
 	IF EXISTS (
@@ -230,6 +233,7 @@ BEGIN TRY
 		,intDepartmentId = @intDepartmentId
 		,intLoadId = @intLoadId
 		,intWarehouseRateMatrixHeaderId = @intWarehouseRateMatrixHeaderId
+		,intMachineId = @intMachineId
 		,dtmLastModified = @dtmCurrentDate
 		,intLastModifiedUserId = @intUserId
 		,intConcurrencyId = @intConcurrencyId

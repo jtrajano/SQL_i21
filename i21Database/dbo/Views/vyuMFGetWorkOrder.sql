@@ -97,6 +97,8 @@ SELECT C.intManufacturingCellId
 		,E.strName AS strSalesRepresentative
 		,L.strLoadNumber
 		,WRMH.strServiceContractNo
+		,W.strERPServicePONumber
+		,M.strName AS strMachineName
 		,E1.strName AS strVendorName
 FROM dbo.tblMFWorkOrder W
 JOIN dbo.tblMFWorkOrderStatus WS ON WS.intStatusId = W.intStatusId
@@ -135,4 +137,5 @@ LEFT JOIN tblSOSalesOrder SO ON SO.intSalesOrderId = SOD.intSalesOrderId
 LEFT JOIN tblEMEntity E ON E.intEntityId = SO.intEntitySalespersonId
 LEFT JOIN tblLGLoad L ON L.intLoadId = W.intLoadId
 LEFT JOIN tblLGWarehouseRateMatrixHeader WRMH ON WRMH.intWarehouseRateMatrixHeaderId = W.intWarehouseRateMatrixHeaderId
+LEFT JOIN tblMFMachine M ON M.intMachineId = W.intMachineId
 LEFT JOIN tblEMEntity E1 ON E1.intEntityId = WRMH.intVendorEntityId
