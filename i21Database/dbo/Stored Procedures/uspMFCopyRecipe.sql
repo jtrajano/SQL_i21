@@ -16,6 +16,7 @@ BEGIN TRY
 		,@intManufacturingProcessId INT
 		,@strAttributeValue NVARCHAR(50)
 		,@dtmExpectedDate DATETIME
+		,@intSubLocationId INT
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intWorkOrderRecipeItemId INT
 		,[intWorkOrderId] INT
@@ -85,6 +86,7 @@ BEGIN TRY
 
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@dtmExpectedDate = dtmExpectedDate
+		,@intSubLocationId = intSubLocationId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
 
@@ -260,6 +262,16 @@ BEGIN TRY
 	WHERE intItemId = @intItemId
 		AND intLocationId = @intLocationId
 		AND ysnActive = 1
+		AND intSubLocationId = @intSubLocationId
+
+	IF @intRecipeId IS NULL
+	BEGIN
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+	END
 
 	INSERT INTO dbo.tblMFWorkOrderRecipe (
 		intRecipeId
@@ -504,7 +516,6 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId
-
 		)
 	SELECT rs.intRecipeSubstituteItemId
 		,rs.intRecipeItemId
@@ -559,7 +570,7 @@ BEGIN TRY
 		,intLastModifiedUserId
 		,dtmLastModified
 		,intConcurrencyId
-				,ysnLock
+		,ysnLock
 		)
 	SELECT intRecipeSubstituteItemId
 		,intRecipeItemId

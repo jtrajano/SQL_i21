@@ -11,8 +11,9 @@ BEGIN TRY
 
 	DECLARE @ErrMsg NVARCHAR(MAX)
 
-
-
+	Insert into dbo.tblMFWorkOrderPreStage(intWorkOrderId,intWorkOrderStatusId,intUserId)
+	Select @intWorkOrderId,@intStatusId,@intUserId
+	
 END TRY
 
 BEGIN CATCH
