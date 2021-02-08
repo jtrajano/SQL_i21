@@ -59,6 +59,9 @@ BEGIN TRY
 		,@intStorageLocationId INT
 		,@intRecipeTypeId INT
 		,@intIncludeConsumptionByLocationInPickOrder INT
+		,@intSubLocationId int
+		,@intWorkOrderItemId int
+		,@intRecipeId int
 
 	SELECT @ysnGenerateTaskOnCreatePickOrder = ysnGenerateTaskOnCreatePickOrder
 		,@intIncludeConsumptionByLocationInPickOrder = CASE 
@@ -263,10 +266,12 @@ BEGIN TRY
 
 	DECLARE @OrderHeaderInformation AS OrderHeaderInformation
 
-	SELECT @strReferernceNo = ''
+	SELECT @strReferernceNo = '',@intSubLocationId=NULL,@intWorkOrderItemId=NULL
 
 	SELECT @strReferernceNo = @strReferernceNo + strWorkOrderNo + ', '
 		,@intRecipeTypeId = intRecipeTypeId
+		,@intSubLocationId=intSubLocationId
+		,@intWorkOrderItemId=intItemId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId IN (
 			SELECT intWorkOrderId
@@ -456,6 +461,23 @@ BEGIN TRY
 	END
 	ELSE
 	BEGIN
+		SELECT @intRecipeId = intRecipeId
+		FROM dbo.tblMFRecipe
+		WHERE intItemId = @intWorkOrderItemId
+			AND intLocationId = @intLocationId
+			AND ysnActive = 1
+			AND intSubLocationId = @intSubLocationId
+
+		IF @intRecipeId IS NULL
+		BEGIN
+			SELECT @intRecipeId = intRecipeId
+			FROM dbo.tblMFRecipe
+			WHERE intItemId = @intWorkOrderItemId
+				AND intLocationId = @intLocationId
+				AND ysnActive = 1
+				AND intSubLocationId IS NULL
+		END
+
 		INSERT INTO @OrderDetail (
 			intOrderHeaderId
 			,intItemId
@@ -619,6 +641,7 @@ BEGIN TRY
 		JOIN dbo.tblMFRecipe r ON r.intRecipeId = ri.intRecipeId
 			AND r.ysnActive = 1
 			AND r.intLocationId = @intLocationId
+			AND r.intRecipeId=@intRecipeId
 		JOIN dbo.tblICItem I ON I.intItemId = ri.intItemId
 		JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = ri.intItemUOMId
 		JOIN dbo.tblICCategory C ON I.intCategoryId = C.intCategoryId

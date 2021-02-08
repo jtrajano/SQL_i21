@@ -271,6 +271,7 @@ BEGIN TRY
 		WHERE intItemId = @intItemId
 			AND intLocationId = @intLocationId
 			AND ysnActive = 1
+			AND intSubLocationId IS NULL
 	END
 
 	INSERT INTO dbo.tblMFWorkOrderRecipe (
