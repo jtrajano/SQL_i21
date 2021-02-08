@@ -13,21 +13,6 @@ SET ANSI_NULLS ON
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
   
-  
---=====================================================================================================================================  
---  POPULATE FIXEDASSETS TO POST TEMPORARY TABLE  
----------------------------------------------------------------------------------------------------------------------------------------  
--- CREATE TABLE #AssetID(  
---    [intAssetId] [int] NOT NULL,  
-  
---   )  
--- IF (ISNULL(@Param, '') <> '')   
---  INSERT INTO #AssetID EXEC (@Param)  
--- ELSE  
---  INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset  
-
--- DECLARE @Id Id
-DECLARE @IdInput Id
 DECLARE @IdGood Id
 DECLARE @ysnSingleMode BIT = 0
 DECLARE @tblError TABLE (  
@@ -36,36 +21,13 @@ DECLARE @tblError TABLE (
 )  
 EXEC uspSMGetStartingNumber @intStartingNumberId= 3, @strID = @strBatchId OUTPUT  
 
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM @Id) 
-BEGIN
-  IF (@ysnPost = 1)
-  BEGIN
-    INSERT INTO @IdInput
-    SELECT intAssetId FROM dbo.fnFAGetOldestDepreciatedAsset()
-
-    IF NOT EXISTS(SELECT TOP 1 1 FROM @IdInput)
-    BEGIN
-      RAISERROR('No qualified asset to depreciate',16,1)
-      RETURN
-    END
-  END
-
-END
-ELSE
-BEGIN
-  IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
-  INSERT INTO @IdInput SELECT intId FROM @Id
-  
-
-END
-
+IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
 
 INSERT INTO @tblError 
-      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @IdInput)
+      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @Id)
 
 INSERT INTO @IdGood
-    SELECT A.intId FROM @IdInput A LEFT JOIN @tblError B
+    SELECT A.intId FROM @Id A LEFT JOIN @tblError B
     ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL
     
 IF NOT EXISTS (SELECT TOP 1 1 FROM @IdGood)
