@@ -1,5 +1,4 @@
-﻿
-CREATE PROCEDURE [dbo].[uspCFSyncEmailDistributionFormat]
+﻿CREATE PROCEDURE [dbo].[uspCFSyncEmailDistributionFormat]
 		@strUserId NVARCHAR(MAX),
 		@strStatementType NVARCHAR(MAX)  
 		AS 
@@ -15,9 +14,30 @@ BEGIN
 	--===UPDATE STAGING TABLE===--
 	UPDATE tblCFInvoiceStagingTable 
 	SET 
-		strEmailDistributionOption  = arCustomerContact.strEmailDistributionOption,
+		strEmailDistributionOption = 
+		(SELECT (CASE 
+			WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+				THEN 'print , email'
+
+			WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+				THEN 'email'
+
+			WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+				THEN 'email'
+
+			WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+				THEN 'print'
+
+			WHEN ( LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+				THEN 'print'
+
+			WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+				THEN 'print'
+		END)),
 		strEmail					= arCustomerContact.strEmail
 	FROM tblCFInvoiceStagingTable 
+	INNER JOIN vyuCFCustomerEntity AS emEntity 
+	ON emEntity.intEntityId = tblCFInvoiceStagingTable.intCustomerId
 	OUTER APPLY (
 		SELECT TOP 1 
 			 strEmailDistributionOption
@@ -25,6 +45,7 @@ BEGIN
 		FROM vyuARCustomerContacts
 		WHERE intEntityId = tblCFInvoiceStagingTable.intCustomerId  AND strEmailDistributionOption LIKE '%CF Invoice%' AND ISNULL(strEmail,'') != '' AND ISNULL(ysnActive,0) = 1
 	) AS arCustomerContact
+
 	WHERE LOWER(strUserId) = LOWER(@strUserId) AND LOWER(strStatementType) = LOWER(@strStatementType)
 
 		
