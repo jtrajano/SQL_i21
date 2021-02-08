@@ -82,7 +82,7 @@ BEGIN
  INSERT INTO @IdGLDetail
     SELECT intGLDetailId FROM tblGLDetail GL JOIN tblFAFixedAsset A on GL.strReference = A.strAssetId
     JOIN @IdGood C on C.intId = A.intAssetId
-    WHERE ysnIsUnposted = 0 AND strCode <> 'AMPUR'
+    WHERE ysnIsUnposted = 0
 
   
  IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))  
@@ -96,10 +96,9 @@ BEGIN
       BEGIN  
         IF(@intCount > 0)  
           BEGIN  
-            UPDATE A SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0 
+            UPDATE A SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0, ysnAcquired = 0
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
-            AND strTransaction = 'Depreciation'  
           END    
         END         
       END  
