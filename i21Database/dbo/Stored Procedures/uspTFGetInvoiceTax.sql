@@ -259,6 +259,7 @@ BEGIN TRY
 						OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
+					AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
 				) Transactions
 		END
 		ELSE
@@ -464,6 +465,7 @@ BEGIN TRY
 						OR tblARInvoice.strType IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 1))
 					AND ((SELECT COUNT(*) FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0) = 0
 						OR tblARInvoice.strType NOT IN (SELECT strTransactionSource FROM vyuTFGetReportingComponentTransactionSource WHERE intReportingComponentId = @RCId AND ysnInclude = 0))
+					AND (CASE WHEN tblARInvoice.strType = 'Standard' AND tblARInvoice.strTransactionType = 'Customer Prepayment' THEN 'Invalid' ELSE 'Invoice' END) = 'Invoice'
 				) Transactions
 		END
 
