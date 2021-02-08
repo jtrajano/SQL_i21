@@ -17,13 +17,13 @@ BEGIN
 		strEmailDistributionOption = 
 		(SELECT (CASE 
 			WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
-				THEN 'print , email'
+				THEN 'print , email , CF Invoice'
 
 			WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
-				THEN 'email'
+				THEN 'email , CF Invoice'
 
 			WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
-				THEN 'email'
+				THEN 'email , CF Invoice'
 
 			WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
 				THEN 'print'
