@@ -84,7 +84,7 @@ BEGIN TRY
 
 			IF(@ysnPost = 0)
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 2, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
+				UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = NULL WHERE intLoadId = @intLoadId
 			END
 			ELSE 
 			BEGIN
