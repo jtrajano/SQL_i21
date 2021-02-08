@@ -506,6 +506,9 @@ BEGIN TRY
 							and intContractDetailId = a.intContractDetailId
 				) total_bill
 					where a.dblContractUnits > isnull(total_bill.dblTotal, 0)
+					and ((c.intPricingTypeHeader = 2 and c.intPricingTypeId = 1) --Priced Basis
+        				or (c.intPricingTypeHeader = 2 and c.intPricingTypeId = 2 and b.intPriceFixationDetailId is not null) --Basis and not fully priced yet
+       				)
 
 
 				--select '@avqty1',* from @avqty
