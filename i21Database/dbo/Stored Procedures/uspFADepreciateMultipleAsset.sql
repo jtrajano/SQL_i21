@@ -27,23 +27,36 @@ SET XACT_ABORT ON
 --  INSERT INTO #AssetID SELECT [intAssetId] FROM tblFAFixedAsset  
 
 -- DECLARE @Id Id
+DECLARE @IdInput Id
 DECLARE @IdGood Id
 DECLARE @ysnSingleMode BIT = 0
 DECLARE @tblError TABLE (  
-   [intAssetId] [int] NOT NULL,  
-   strError NVARCHAR(400) NULL
+  [intAssetId] [int] NOT NULL,  
+  strError NVARCHAR(400) NULL
 )  
-
-IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
-
 EXEC uspSMGetStartingNumber @intStartingNumberId= 3, @strID = @strBatchId OUTPUT  
 
-INSERT INTO @tblError 
-    SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @Id)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM @Id) 
+BEGIN
+  IF (@ysnPost = 1)
+    INSERT INTO @IdInput
+    SELECT intAssetId FROM dbo.fnFAGetOldestDepreciatedAsset()
+
+END
+ELSE
+BEGIN
+  IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
+  INSERT INTO @IdInput SELECT intId FROM @Id
+  INSERT INTO @tblError 
+      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @IdInput)
+
+END
+
 
 INSERT INTO @IdGood
-  SELECT A.intId FROM @Id A LEFT JOIN @tblError B
-  ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL
+    SELECT A.intId FROM @IdInput A LEFT JOIN @tblError B
+    ON A.intId = B.intAssetId WHERE B.intAssetId IS NULL
     
 IF NOT EXISTS (SELECT TOP 1 1 FROM @IdGood)
   GOTO LogError
@@ -54,14 +67,12 @@ IF NOT EXISTS (SELECT TOP 1 1 FROM @IdGood)
 IF ISNULL(@ysnPost, 0) = 0  
 BEGIN  
  DECLARE @intCount AS INT   
- DECLARE @strAssetId NVARCHAR(20)  
  DECLARE @IdGLDetail Id
- SELECT TOP 1 @strAssetId= strAssetId FROM tblFAFixedAsset A JOIN @IdGood B on A.intAssetId = B.intId  
-
+ 
  INSERT INTO @IdGLDetail
     SELECT intGLDetailId FROM tblGLDetail GL JOIN tblFAFixedAsset A on GL.strReference = A.strAssetId
     JOIN @IdGood C on C.intId = A.intAssetId
-    WHERE ysnIsUnposted = 0 AND strCode ='AMDPR'
+    WHERE ysnIsUnposted = 0 AND strCode <> 'AMPUR'
 
   
  IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))  
@@ -137,7 +148,7 @@ BEGIN
         where D.cnt = 0
       
     INSERT INTO @IdHasNoDepreciation 
-		select intId from @Id 
+		select intId from @IdGood 
 		outer apply
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  and strTransaction  in( 'Depreciation', 'Place in service')
@@ -145,7 +156,7 @@ BEGIN
         where D.cnt =1
 
     INSERT INTO @IdHasDepreciation 
-		select intId from @Id 
+		select intId from @IdGood 
 		outer apply
 		(	
 			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  and strTransaction  in( 'Depreciation', 'Place in service')
@@ -477,13 +488,14 @@ SELECT @strBatchId, GETDATE(), @intEntityId
 SELECT @intLogId = SCOPE_IDENTITY()
 
 ;WITH Q as(
-  SELECT strReference strAssetId, strTransactionId, 'Depreciated' strResult FROM tblGLDetail C WHERE @strBatchId = strBatchId
-  AND ysnIsUnposted = 0   GROUP by strReference, strTransactionId
+  SELECT strReference strAssetId, strTransactionId, 'Depreciated' strResult, dtmDate FROM tblGLDetail C WHERE @strBatchId = strBatchId
+  AND ysnIsUnposted = 0   
+  GROUP by strReference, strTransactionId, dtmDate
   UNION
-  SELECT strAssetId,'' strTransactionId, strError strResult FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
+  SELECT strAssetId,'' strTransactionId, strError strResult, null dtmDate FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
 )
-INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strResult) 
-SELECT @intLogId, strAssetId, strTransactionId, strResult FROM Q 
+INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strResult, dtmDate) 
+SELECT @intLogId, strAssetId, strTransactionId, strResult, dtmDate FROM Q 
 
 IF @ysnSingleMode = 1 AND EXISTS (SELECT TOP 1 1 FROM @tblError)
 BEGIN

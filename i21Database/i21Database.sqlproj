@@ -3159,6 +3159,7 @@
     <Build Include="dbo\Functions\fnFAComputeDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAComputeMultipleDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAValidateAssetDepreciation.sql" />
+    <Build Include="dbo\Functions\fnFAGetOldestDepreciatedAsset.sql" />
     <Build Include="dbo\Views\vyuPATCancel.sql" />
     <Build Include="dbo\Tables\tblPRTemplateEarningDistribution.sql" />
     <Build Include="dbo\Views\vyuCFSearchTransaction.sql" />
