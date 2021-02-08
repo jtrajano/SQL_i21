@@ -417,7 +417,7 @@ LEFT JOIN (
 								  END
 		 , dblBalance			= CASE WHEN strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN I.dblInvoiceTotal * -1
 									   ELSE I.dblInvoiceTotal 
-								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
+								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE 0.00 END
 		 , dblPayment			= 0.00
 		 , dtmDate				= I.dtmDate
 		 , dtmDueDate			= I.dtmDueDate
