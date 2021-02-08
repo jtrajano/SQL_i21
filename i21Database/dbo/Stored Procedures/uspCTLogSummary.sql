@@ -910,12 +910,29 @@ BEGIN TRY
 					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
 					, sh.dtmStartDate
 					, sh.dtmEndDate
-					--, dblQty =  (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1
-					, dblQty = dbo.fnCTConvertQtyToTargetCommodityUOM(sh.intCommodityId, CASE WHEN strScreenName = 'Inventory Shipment' THEN sUOM.intUnitMeasureId
-																				WHEN strScreenName = 'Inventory Receipt' THEN rUOM.intUnitMeasureId
-																				ELSE cd.intUnitMeasureId END
-												, cd.intUnitMeasureId,  (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1)
-					, dblOrigQty = (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1
+
+					------------------
+					-- Actual Codes --
+					------------------
+					, dblQty =  (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1
+					, dblOrigQty =  (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1
+					--, dblQty = CASE WHEN ISNULL(cd.ysnLoadBased, 0) <> 0 THEN suh.dblTransactionQuantity * cd.dblQuantityPerLoad
+					--				ELSE (CASE WHEN strScreenName <> 'Inventory Shipment' AND strScreenName <> 'Inventory Receipt' THEN suh.dblTransactionQuantity
+					--							ELSE (dbo.fnCTConvertQtyToTargetCommodityUOM(cd.intCommodityId
+					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN sUOM.intUnitMeasureId
+					--																				WHEN strScreenName = 'Inventory Receipt' THEN rUOM.intUnitMeasureId END
+					--																		, cd.intUnitMeasureId
+					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN shipItem.dblQuantity
+					--																				WHEN strScreenName = 'Inventory Receipt' THEN recItem.dblOpenReceive END)) END) END * - 1
+					
+					--, dblOrigQty = CASE WHEN ISNULL(cd.ysnLoadBased, 0) <> 0 THEN suh.dblTransactionQuantity * cd.dblQuantityPerLoad
+					--				ELSE (CASE WHEN strScreenName <> 'Inventory Shipment' AND strScreenName <> 'Inventory Receipt' THEN suh.dblTransactionQuantity
+					--							ELSE (dbo.fnCTConvertQtyToTargetCommodityUOM(cd.intCommodityId
+					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN sUOM.intUnitMeasureId
+					--																				WHEN strScreenName = 'Inventory Receipt' THEN rUOM.intUnitMeasureId END
+					--																		, cd.intUnitMeasureId
+					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN shipItem.dblQuantity
+					--																				WHEN strScreenName = 'Inventory Receipt' THEN recItem.dblOpenReceive END)) END) END * - 1
 					, sh.intContractStatusId
 					, sh.intBookId
 					, sh.intSubBookId		
@@ -928,7 +945,7 @@ BEGIN TRY
 				LEFT JOIN tblICItemUOM sUOM ON sUOM.intItemUOMId = shipItem.intItemUOMId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
 				LEFT JOIN tblICInventoryReceiptItem recItem ON recItem.intInventoryReceiptId = receipt.intInventoryReceiptId AND suh.intExternalId = recItem.intInventoryReceiptItemId
-				LEFT JOIN tblICItemUOM rUOM ON rUOM.intItemUOMId = recItem.intUnitMeasureId
+				LEFT JOIN tblICItemUOM rUOM ON rUOM.intItemUOMId = recItem.intUnitMeasureId				
 				OUTER APPLY 
 				(
 					SELECT dblFutures = AVG(pfd.dblFutures)
@@ -941,7 +958,7 @@ BEGIN TRY
 				AND suh.intExternalHeaderId is not null
 			) tbl
 			WHERE Row_Num = 1
-
+			
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
 			BEGIN		
@@ -1885,7 +1902,7 @@ BEGIN TRY
 				, cbl.dtmStartDate
 				, cbl.dtmEndDate
 				, dblQty = @dblTransactionQty
-				, dblOrigQty = pfd.dblQuantity
+				, dblOrigQty = pfd.dblQuantity - @dblTransactionQty
 				, dblDynamic = CASE WHEN @ysnLoadBased = 1 THEN ISNULL(pfd.dblLoadAppliedAndPriced, 0) * @dblQuantityPerLoad
 									ELSE ISNULL(pfd.dblQuantityAppliedAndPriced, 0) END
 				, cbl.intContractStatusId
@@ -2825,7 +2842,6 @@ BEGIN TRY
 				-- 	1.1. Decrease available priced quantities
 				-- 	1.2. Increase available basis quantities
 				--  1.3. Increase basis deliveries if DWG
-				
 				SET @FinalQty = CASE WHEN @strProcess = 'Price Delete' THEN @dblQty ELSE @dblOrigQty END
 				
 				-- Negate all the priced quantities
