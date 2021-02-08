@@ -15,6 +15,10 @@ SELECT LD.intLoadDetailId
 	, LD.dblDeliveredGross
 	, LD.dblDeliveredTare
 	, LD.dblDeliveredNet
+	, LD.dblShippedQuantity
+	, LD.dblShippedGross
+	, LD.dblShippedTare
+	, LD.dblShippedNet
 	, LD.intPSubLocationId
 	, PCLSL.strSubLocationName AS strPSubLocationName
 	, SCLSL.strSubLocationName AS strSSubLocationName
