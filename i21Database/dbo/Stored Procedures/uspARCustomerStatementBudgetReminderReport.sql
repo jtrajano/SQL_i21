@@ -418,27 +418,13 @@ LEFT JOIN (
 		 , dblBalance			= CASE WHEN strTransactionType IN ('Credit Memo', 'Overpayment', 'Customer Prepayment') THEN I.dblInvoiceTotal * -1
 									   ELSE I.dblInvoiceTotal 
 								  END - CASE WHEN strTransactionType = 'Customer Prepayment' THEN 0.00 ELSE ISNULL(TOTALPAYMENT.dblPayment, 0) END
-		 , dblPayment			= CASE WHEN strTransactionType = 'Customer Prepayment' THEN I.dblInvoiceTotal 
-									   ELSE 
-											CASE WHEN dbo.fnARGetInvoiceAmountMultiplier(strTransactionType) * I.dblInvoiceTotal - ISNULL(TOTALPAYMENT.dblPayment, 0) = 0 THEN ISNULL(TOTALPAYMENT.dblPayment, 0) 
-												 ELSE 0.00 
-											END
-								  END
+		 , dblPayment			= 0.00
 		 , dtmDate				= I.dtmDate
 		 , dtmDueDate			= I.dtmDueDate
 		 , dtmDatePaid			= CREDITS.dtmDatePaid
 		 , strType				= I.strType
 	FROM #POSTEDINVOICES I
 	LEFT JOIN #POSTEDARPAYMENTS CREDITS ON I.intPaymentId = CREDITS.intPaymentId
-	LEFT JOIN (
-		SELECT intInvoiceId
-			 , dblPayment = SUM(dblPayment) + SUM(dblDiscount) + SUM(dblWriteOffAmount) - SUM(dblInterest)
-		FROM #PAYMENTDETAILS
-		WHERE ysnInvoicePrepayment = 0
-		  AND dtmDatePaid <= @dtmDateTo
-		  AND @ysnPrintZeroBalance = 0
-		GROUP BY intInvoiceId
-	) TOTALPAYMENT ON I.intInvoiceId = TOTALPAYMENT.intInvoiceId
 
 	UNION ALL
 
