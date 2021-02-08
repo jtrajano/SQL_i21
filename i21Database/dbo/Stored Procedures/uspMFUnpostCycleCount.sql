@@ -218,7 +218,7 @@ BEGIN TRY
 			,[dblQty]
 			,[dblUOMQty]
 			,[intCostUOMId] = t.[intItemUOMId]
-			,[dblNewValue] = IsNULL(PL.dblItemValue, t.dblValue)
+			,[dblNewValue] = t.dblValue
 			,[intCurrencyId]
 			,[intTransactionId] = t.intRelatedTransactionId
 			,[intTransactionDetailId] = t.intTransactionDetailId
