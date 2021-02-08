@@ -329,6 +329,26 @@ BEGIN
         ,[intTransactionDetailId]
         ,[strBatchId]
         ,[strError])
+	--Invalid base discount
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = 'Base discount amount for ' + I.strInvoiceNumber + ' is invalid.'
+	FROM #ARPostPaymentDetail P
+    INNER JOIN tblARInvoice I ON P.intInvoiceId = I.intInvoiceId
+    WHERE P.[ysnPost] = @OneBit
+      AND ((P.[dblDiscount] <> @ZeroDecimal AND P.[dblBaseDiscount] = @ZeroDecimal) OR (P.[dblDiscount] = @ZeroDecimal AND P.[dblBaseDiscount] <> @ZeroDecimal))      
+
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
 	--Write off Account on detail
 	SELECT
          [intTransactionId]         = P.[intTransactionId]
