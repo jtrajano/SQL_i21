@@ -1,6 +1,4 @@
-﻿
-
-CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 
@@ -250,8 +248,29 @@ SELECT
 ,dblTotalTax				= cfTransTotalTax.dblTotalTax
 ,dblTotalSST				= cfTransSSTTax.dblTotalTax
 ,dblTaxExceptSST			= cfTransExceptSSTTax.dblTotalTax
-,strEmailDistributionOption = arCustomerContact.strEmailDistributionOption
+--,strEmailDistributionOption = arCustomerContact.strEmailDistributionOption
 ,strEmail					= arCustomerContact.strEmail
+--,strDocumentDelivery		= emEntity.strDocumentDelivery
+,strEmailDistributionOption = 
+	(SELECT (CASE 
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'print , email'
+
+		WHEN (LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email'
+
+		WHEN ( (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) like '%cf invoice%')
+			THEN 'email'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%direct mail%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN ( LOWER(emEntity.strDocumentDelivery) like '%email%' AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+
+		WHEN (  (LOWER(emEntity.strDocumentDelivery) not like '%email%' OR  LOWER(emEntity.strDocumentDelivery) not like '%direct mail%') AND LOWER(ISNULL(arCustomerContact.strEmailDistributionOption,'')) not like '%cf invoice%')
+			THEN 'print'
+	END))
 ,cfDriverPin.strDriverPinNumber
 ,cfDriverPin.strDriverDescription
 ,cfDriverPin.intDriverPinId
