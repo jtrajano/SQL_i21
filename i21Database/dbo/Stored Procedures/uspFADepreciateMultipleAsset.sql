@@ -40,19 +40,29 @@ EXEC uspSMGetStartingNumber @intStartingNumberId= 3, @strID = @strBatchId OUTPUT
 IF NOT EXISTS(SELECT TOP 1 1 FROM @Id) 
 BEGIN
   IF (@ysnPost = 1)
+  BEGIN
     INSERT INTO @IdInput
     SELECT intAssetId FROM dbo.fnFAGetOldestDepreciatedAsset()
+
+    IF NOT EXISTS(SELECT TOP 1 1 FROM @IdInput)
+    BEGIN
+      RAISERROR('No qualified asset to depreciate',16,1)
+      RETURN
+    END
+  END
 
 END
 ELSE
 BEGIN
   IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
   INSERT INTO @IdInput SELECT intId FROM @Id
-  INSERT INTO @tblError 
-      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @IdInput)
+  
 
 END
 
+
+INSERT INTO @tblError 
+      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @IdInput)
 
 INSERT INTO @IdGood
     SELECT A.intId FROM @IdInput A LEFT JOIN @tblError B

@@ -117,8 +117,6 @@ END
 FROM @tblAssetInfo T
 WHERE strError IS NULL AND intMonth = 1 
 
-SELECT * FROM @tblAssetInfo
-
 UPDATE T
 SET
 dblPercentage = FirstDep.dblPercentage,
@@ -135,6 +133,10 @@ OUTER APPLY(
 WHERE strError IS NULL AND intMonth > totalMonths 
 
 
+UPDATE T
+SET ysnFullyDepreciated = 1
+FROM @tblAssetInfo T
+WHERE strError IS NULL AND intMonth = totalMonths AND strConvention = 'Full Month'
 
 
 UPDATE T
