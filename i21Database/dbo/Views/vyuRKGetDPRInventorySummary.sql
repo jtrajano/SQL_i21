@@ -12,4 +12,3 @@ GROUP BY intDPRHeaderId
 	, strCommodityCode
 	, intSeqId
 	, strSeqHeader
-HAVING CAST(ISNULL(SUM(ISNULL(dblTotal, 0.00)), 0.00) AS DECIMAL(24, 10)) <> 0
