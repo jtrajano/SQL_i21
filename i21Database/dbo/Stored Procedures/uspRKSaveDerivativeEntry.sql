@@ -62,6 +62,7 @@ BEGIN
 			, intUserId
 			, strNotes
 			, intCommodityUOMId
+			, strInOut
 			, strMiscFields
 			, intActionId)
 		SELECT TOP 1  strBucketType = 'Derivatives'
@@ -88,7 +89,8 @@ BEGIN
 			, intEntityId 
 			, intUserId = @intUserId
 			, strNotes 
-			, intOrigUOMId 
+			, intOrigUOMId
+			, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END 
 			, strMiscField
 			, intActionId = 57 --Delete Derivative
 		FROM tblRKSummaryLog 
@@ -291,6 +293,7 @@ BEGIN
 			, intUserId
 			, strNotes
 			, intCommodityUOMId
+			, strInOut
 			, strMiscFields
 			, intActionId)
 		SELECT TOP 1  strBucketType = 'Derivatives'
@@ -318,6 +321,7 @@ BEGIN
 			, intUserId = @intUserId
 			, strNotes 
 			, intOrigUOMId 
+			, strInOut = CASE WHEN strInOut = 'IN' THEN 'OUT' ELSE 'IN' END
 			, strMiscField
 			, intActionId = 57 --Delete Derivative
 		FROM tblRKSummaryLog 
