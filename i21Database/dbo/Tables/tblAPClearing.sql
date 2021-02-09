@@ -11,6 +11,7 @@
 	[intLocationId]				INT NOT NULL,
 	--DETAIL
 	[intTransactionDetailId]	INT NOT NULL,
+	[intAccountId]				INT NOT NULL,
 	[intItemId]					INT NULL,
 	[intItemUOMId]				INT NULL,
 	[dblQuantity]				NUMERIC(18, 6) DEFAULT 0 NOT NULL,
