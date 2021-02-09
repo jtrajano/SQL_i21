@@ -166,6 +166,7 @@ BEGIN
 			, @intUserId = intUserId
 			, @intEntityId = intEntityId
 			, @strNotes = strNotes
+			, @strInOut = strInOut
 			, @ysnDelete = ysnDelete
 			, @strMiscFields = strMiscFields
 		FROM #tmpSummaryLogs
@@ -511,7 +512,7 @@ BEGIN
 				, @intBookId
 				, @intSubBookId
 				, @intLocationId
-				, strInOut = CASE WHEN UPPER(@strDistributionType) = 'BUY' THEN 'IN' ELSE 'OUT' END
+				, strInOut = @strInOut
 				, dblOrigNoOfLots = @dblNoOfLots 
 				, @dblContractSize
 				, dblOrigQty = ISNULL(@dblQty, @dblNoOfLots * @dblContractSize)
