@@ -198,6 +198,14 @@ BEGIN
 			AND ISNULL(cb.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(cb.intEntityId, 0))
 	) t
 
+	DELETE FROM @returntable
+	WHERE intContractDetailId IN (
+		SELECT intContractDetailId
+		FROM @returntable
+		GROUP BY intContractDetailId
+		HAVING SUM(dblQty) <= 0
+	)
+
 
 RETURN
 
