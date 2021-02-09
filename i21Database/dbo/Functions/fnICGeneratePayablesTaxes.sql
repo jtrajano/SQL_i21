@@ -62,6 +62,7 @@ BEGIN
 						WHEN @billTypeToUse = @type_DebitMemo THEN -ItemTax.dblTax
 						ELSE ItemTax.dblTax
 					END
+
 				,dblAdjustedTax				= 
 					CASE 
 						--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ItemTax.dblAdjustedTax, 0)
@@ -92,17 +93,27 @@ BEGIN
 				,dblRate					= ChargeTax.dblRate
 				,intAccountId				= ChargeTax.intTaxAccountId
 				,dblTax						= 
+					--CASE 
+					--	--WHEN voucherItems.ysnReturn = 1 THEN -ChargeTax.dblTax
+					--	WHEN @billTypeToUse = @type_DebitMemo THEN -ChargeTax.dblTax
+					--	ELSE ChargeTax.dblTax
+					--END 
 					CASE 
-						--WHEN voucherItems.ysnReturn = 1 THEN -ChargeTax.dblTax
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ChargeTax.dblTax
-						ELSE ChargeTax.dblTax
+						WHEN @billTypeToUse = @type_DebitMemo THEN -(CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblTax ELSE ChargeTax.dblTax END)
+						ELSE (CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblTax ELSE ChargeTax.dblTax END)
 					END 
+
 				,dblAdjustedTax				= 
+					--CASE 
+					--	--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
+					--	WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
+					--	ELSE ISNULL(ChargeTax.dblAdjustedTax, 0)
+					--END 
 					CASE 
-						--WHEN voucherItems.ysnReturn = 1 THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
-						WHEN @billTypeToUse = @type_DebitMemo THEN -ISNULL(ChargeTax.dblAdjustedTax, 0)
-						ELSE ISNULL(ChargeTax.dblAdjustedTax, 0)
+						WHEN @billTypeToUse = @type_DebitMemo THEN -(CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblAdjustedTax ELSE ChargeTax.dblAdjustedTax END)
+						ELSE (CASE WHEN Charge.ysnPrice = 1 THEN -ChargeTax.dblAdjustedTax ELSE ChargeTax.dblAdjustedTax END)
 					END 
+
 				,ysnTaxAdjusted				= ChargeTax.ysnTaxAdjusted
 				,ysnSeparateOnBill			= 0
 				,ysnCheckoffTax				= ChargeTax.ysnCheckoffTax
@@ -110,6 +121,8 @@ BEGIN
 				,ysnTaxOnly					= ChargeTax.ysnTaxOnly
 		FROM 
 			tblICInventoryReceiptChargeTax ChargeTax
+			INNER JOIN tblICInventoryReceiptCharge Charge
+				ON ChargeTax.intInventoryReceiptChargeId = Charge.intInventoryReceiptChargeId
 			INNER JOIN @voucherItems voucherItems 
 				ON voucherItems.intInventoryReceiptChargeId = ChargeTax.intInventoryReceiptChargeId
 			INNER JOIN tblICItem Item 
