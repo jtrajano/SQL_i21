@@ -31,4 +31,5 @@
 	, strNotes NVARCHAR(250) NULL
 	, strMiscFields NVARCHAR(MAX) NULL
 	, intActionId INT NULL
+	, strInOut NVARCHAR(50)
 )

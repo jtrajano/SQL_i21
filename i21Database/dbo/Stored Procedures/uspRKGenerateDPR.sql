@@ -2948,39 +2948,70 @@ BEGIN TRY
 		, strEntityName NVARCHAR(100) COLLATE Latin1_General_CI_AS
 		, strDeliveryDate NVARCHAR(100) COLLATE Latin1_General_CI_AS)
 	
-	SELECT t.intFutOptTransactionId
-		, t.dblOpenContract
-		, t.intCommodityId
-		, t.strCommodityCode
-		, t.strInternalTradeNo
-		, t.intLocationId
-		, t.strLocationName
-		, t.dblContractSize
-		, t.intFutureMarketId
-		, t.strFutureMarket
-		, t.intFutureMonthId
-		, t.strFutureMonth
-		, t.intOptionMonthId
-		, t.strOptionMonth
-		, t.dblStrike
-		, t.strOptionType
-		, t.strInstrumentType
-		, t.intBrokerageAccountId
-		, t.strBrokerAccount
-		, t.intEntityId
-		, t.strBroker
-		, t.strBuySell
-		, t.intFutOptTransactionHeaderId
-		, t.ysnPreCrush
-		, t.strNotes
-		, t.strBrokerTradeNo
-		, intUnitMeasureId = intOrigUOMId
-		, intCommodityUnitMeasureId = intOrigUOMId
-		, strCurrency
-		, dtmFutureMonthsDate
-		, strUnitMeasure
-	INTO #tempFutures
-	FROM dbo.fnRKGetBucketDerivatives(@dtmToDate, @intCommodityId, @intVendorId) t
+	SELECT * INTO #tempFutures FROM (
+		SELECT t.intFutOptTransactionId
+			, dblOpenContract = sum(t.dblOpenContract)
+			, t.intCommodityId
+			, t.strCommodityCode
+			, t.strInternalTradeNo
+			, t.intLocationId
+			, t.strLocationName
+			, t.dblContractSize
+			, t.intFutureMarketId
+			, t.strFutureMarket
+			, t.intFutureMonthId
+			, t.strFutureMonth
+			, t.intOptionMonthId
+			, t.strOptionMonth
+			, t.dblStrike
+			, t.strOptionType
+			, t.strInstrumentType
+			, t.intBrokerageAccountId
+			, t.strBrokerAccount
+			, t.intEntityId
+			, t.strBroker
+			, t.strBuySell
+			, t.intFutOptTransactionHeaderId
+			, t.ysnPreCrush
+			, t.strNotes
+			, t.strBrokerTradeNo
+			, intUnitMeasureId = intOrigUOMId
+			, intCommodityUnitMeasureId = intOrigUOMId
+			, strCurrency
+			, dtmFutureMonthsDate
+			, strUnitMeasure
+		FROM dbo.fnRKGetBucketDerivatives(@dtmToDate, @intCommodityId, @intVendorId) t
+		GROUP BY
+			  t.intFutOptTransactionId
+			, t.intCommodityId
+			, t.strCommodityCode
+			, t.strInternalTradeNo
+			, t.intLocationId
+			, t.strLocationName
+			, t.dblContractSize
+			, t.intFutureMarketId
+			, t.strFutureMarket
+			, t.intFutureMonthId
+			, t.strFutureMonth
+			, t.intOptionMonthId
+			, t.strOptionMonth
+			, t.dblStrike
+			, t.strOptionType
+			, t.strInstrumentType
+			, t.intBrokerageAccountId
+			, t.strBrokerAccount
+			, t.intEntityId
+			, t.strBroker
+			, t.strBuySell
+			, t.intFutOptTransactionHeaderId
+			, t.ysnPreCrush
+			, t.strNotes
+			, t.strBrokerTradeNo
+			, intOrigUOMId
+			, strCurrency
+			, dtmFutureMonthsDate
+			, strUnitMeasure
+	) t WHERE dblOpenContract <> 0
 	
 	IF ISNULL(@intVendorId, 0) = 0
 	BEGIN
