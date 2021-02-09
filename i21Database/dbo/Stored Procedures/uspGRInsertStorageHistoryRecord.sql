@@ -48,6 +48,7 @@ BEGIN TRY
         [dtmDistributionDate],
         [intTransactionTypeId],
 		[strTransactionId],
+		[strTransferTicket],
         [intConcurrencyId]
     ) 
     SELECT 
@@ -73,6 +74,7 @@ BEGIN TRY
         [dtmDistributionDate]       = GETDATE(),
         [intTransactionTypeId]      = SH.intTransactionTypeId,
 		[strTransactionId]			= SH.strTransactionId,
+        [strTransferTicket]         = SH.strTransferTicket,
         1
     FROM @StorageHistoryData SH
 
