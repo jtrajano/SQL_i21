@@ -1,8 +1,8 @@
 ﻿GO
     /* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo LIKE '18.3%')
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMBuildNumber WHERE strVersionNo LIKE '21.1%') --THIS WILL UPDATE CONCURRENCY EVERY UPGRADE UNTILL 21.1
 	BEGIN
-		EXEC uspSMIncreaseECConcurrency 1
+		EXEC uspSMIncreaseECConcurrency 0
 		
 		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
 		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
@@ -15,7 +15,7 @@ GO
 		SELECT intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'System Manager' AND strMenuName = 'Maintenance' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
 	))
 	BEGIN
-		EXEC uspSMIncreaseECConcurrency 1
+		EXEC uspSMIncreaseECConcurrency 0
 		
 		IF OBJECT_ID('tempdb..#updateUserRoleMenus') IS NOT NULL DROP TABLE #updateUserRoleMenus
 		CREATE TABLE #updateUserRoleMenus (ysnUpdate BIT)
