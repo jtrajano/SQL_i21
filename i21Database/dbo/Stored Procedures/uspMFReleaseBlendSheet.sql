@@ -73,6 +73,7 @@ BEGIN TRY
 		,strComment NVARCHAR(Max)
 		,ysnUseTemplate BIT
 		,ysnKittingEnabled BIT
+		,ysnDietarySupplements BIT
 		,intLocationId INT
 		,intBlendRequirementId INT
 		,intItemUOMId INT
@@ -128,6 +129,7 @@ BEGIN TRY
 		,strComment
 		,ysnUseTemplate
 		,ysnKittingEnabled
+		,ysnDietarySupplements
 		,intLocationId
 		,intBlendRequirementId
 		,intItemUOMId
@@ -145,6 +147,7 @@ BEGIN TRY
 		,strComment
 		,ysnUseTemplate
 		,ysnKittingEnabled
+		,ysnDietarySupplements
 		,intLocationId
 		,intBlendRequirementId
 		,intItemUOMId
@@ -162,6 +165,7 @@ BEGIN TRY
 			,strComment NVARCHAR(Max)
 			,ysnUseTemplate BIT
 			,ysnKittingEnabled BIT
+			,ysnDietarySupplements BIT
 			,intLocationId INT
 			,intBlendRequirementId INT
 			,intItemUOMId INT
@@ -738,6 +742,7 @@ End
 			,ysnKittingEnabled
 			,intKitStatusId
 			,ysnUseTemplate
+			,ysnDietarySupplements
 			,strComment
 			,dtmCreated
 			,intCreatedUserId
@@ -770,6 +775,7 @@ End
 			,ysnKittingEnabled
 			,@intKitStatusId
 			,ysnUseTemplate
+			,ysnDietarySupplements
 			,strComment
 			,GetDate()
 			,intUserId
