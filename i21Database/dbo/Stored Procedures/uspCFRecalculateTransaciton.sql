@@ -2344,7 +2344,7 @@ BEGIN
 
 
 				-- RE COMPUTE TAX > FOR CFN NETWORK ONLY
-				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0)
+				IF(@strNetworkType = 'CFN' AND ISNULL(@intTaxGroupId,0) = 0 AND ISNULL(@IsImporting,0) = 1) 
 				BEGIN
 
 
