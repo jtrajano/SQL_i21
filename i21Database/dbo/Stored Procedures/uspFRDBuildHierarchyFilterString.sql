@@ -35,7 +35,7 @@ INSERT INTO #TempFRDHierarchy EXEC ('SELECT * FROM tblFRReportHierarchyDetail WH
 
 WHILE EXISTS(SELECT 1 FROM #TempFRDHierarchy)
 BEGIN
-	SELECT TOP 1 @intReportHierarchyDetailId = intReportHierarchyDetailId, @intParentGroupId = intParentGroupId, @strLevel = strLevel, @strFilterString = strFilterString FROM #TempFRDHierarchy
+	SELECT TOP 1 @intReportHierarchyDetailId = intReportHierarchyDetailId, @intParentGroupId = intParentGroupId, @strLevel = strLevel, @strFilterString = strFilterString FROM #TempFRDHierarchy ORDER BY intSort DESC
 
 	IF(@strFilterString IS NULL)
 	BEGIN
