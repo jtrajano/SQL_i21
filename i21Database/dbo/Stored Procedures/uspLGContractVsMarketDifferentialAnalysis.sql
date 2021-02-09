@@ -67,7 +67,7 @@ FROM
 		,strFutMarketCurrency = FMCUR.strCurrency
 		,strFutMarketUOM = FMUM.strUnitMeasure
 		,dtmFutureMonthsDate = SFM.dtmFutureMonthsDate
-		,strPContractNumber = PCH.strContractNumber
+		,strPContractNumber = PCH.strContractNumber + '/' + CAST(PCD.intContractSeq AS NVARCHAR(10))
 		,dtmPContractDate = PCH.dtmContractDate
 		,strVendor = VEN.strName
 		,strPINCO = PFT.strFreightTerm + ', ' + PLOC.strCity
@@ -90,7 +90,7 @@ FROM
 		,dblPackingAdjustmentRateAmt = dbo.fnCalculateCostBetweenUOM(PKADJ.intItemUOMId, FMUOM.intItemUOMId, ISNULL(PKADJ.dblRate, 0)) / ISNULL(FMCUR.intCent, 1)
 		,dblPINCOAdjustmentRateAmt = dbo.fnCalculateCostBetweenUOM(FTADJ.intItemUOMId, FMUOM.intItemUOMId, ISNULL(FTADJ.dblTotalCostPerContainer, 0) / ISNULL(FTADJ.dblNetWeight, 1)) / ISNULL(FMCUR.intCent, 1)
 		,dblCertificationAdjustmentRateAmt = dbo.fnCalculateCostBetweenUOM(CFADJ.intItemUOMId, FMUOM.intItemUOMId, ISNULL(CFADJ.dblRate, 0)) / ISNULL(FMCUR.intCent, 1)
-		,strSContractNumber = SCH.strContractNumber
+		,strSContractNumber = SCH.strContractNumber + '/' + CAST(SCD.intContractSeq AS NVARCHAR(10))
 		,dtmSContractDate = SCH.dtmContractDate
 		,strCustomer = CUS.strName
 		,dblQty = dbo.fnCalculateQtyBetweenUOM(SCD.intItemUOMId, ItemUOM.intItemUOMId, SCD.dblQuantity)
@@ -224,7 +224,7 @@ FROM
 		AND (@dtmStartDate IS NULL OR SCH.dtmContractDate >= @dtmStartDate) 
 		AND (@dtmEndDate IS NULL OR SCH.dtmContractDate <= @dtmEndDate)
 	) CVMD
-	ORDER BY dtmFutureMonthsDate, dtmPContractDate ASC
+	ORDER BY dtmFutureMonthsDate, dtmSContractDate DESC
 
 END
 
