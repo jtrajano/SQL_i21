@@ -45,8 +45,8 @@ BEGIN
                                                     THEN ((WOD.dblQtyOrdered  - ISNULL(WOD.dblQtyShipped,0))) 
                                                     ELSE 0 END)
                                             ELSE 
-                                                CASE WHEN (WOD.dblQtyShipped) > 0
-                                                        THEN (WOD.dblQtyShipped) * - 1
+                                                CASE WHEN (WOD.dblQtyOrdered - ISNULL(WOD.dblQtyShipped,0)) > 0
+                                                        THEN (WOD.dblQtyOrdered - ISNULL(WOD.dblQtyShipped,0)) * - 1
                                                     ELSE 0 END
 
 						                    END
@@ -81,10 +81,10 @@ BEGIN
             --UPDATE THE STATUS
 			IF (@toShip = 1)
 			BEGIN
-				UPDATE tblAGWorkOrderDetail
-						SET dblQtyShipped = CASE WHEN (ISNULL(dblQtyShipped,0)) < ISNULL(dblQtyOrdered,0) THEN (ISNULL(dblQtyShipped,0) + ISNULL(dblQtyOrdered,0)) 
-											ELSE ISNULL(dblQtyShipped,0) END
-						WHERE intWorkOrderId = @intWorkOrderId
+				-- UPDATE tblAGWorkOrderDetail
+				-- 		SET dblQtyShipped = CASE WHEN (ISNULL(dblQtyShipped,0)) < ISNULL(dblQtyOrdered,0) THEN (ISNULL(dblQtyShipped,0) + ISNULL(dblQtyOrdered,0)) 
+				-- 							ELSE ISNULL(dblQtyShipped,0) END
+				-- 		WHERE intWorkOrderId = @intWorkOrderId
 
 				UPDATE tblAGWorkOrder SET
 						 ysnShipped = 1,
@@ -93,9 +93,9 @@ BEGIN
 			END
 			ELSE
 				BEGIN
-					UPDATE tblAGWorkOrderDetail
-							SET dblQtyShipped = CASE WHEN (ISNULL(dblQtyShipped,0) > 0 ) THEN ISNULL(dblQtyOrdered,0) - (dblQtyShipped)
-												ELSE 0 END
+					-- UPDATE tblAGWorkOrderDetail
+					-- 		SET dblQtyShipped = CASE WHEN (ISNULL(dblQtyShipped,0) > 0 ) THEN ISNULL(dblQtyOrdered,0) - (dblQtyShipped)
+					-- 							ELSE 0 END
 					--UPDATE THE STATUS
 					UPDATE tblAGWorkOrder SET
 						 ysnShipped = 0,
