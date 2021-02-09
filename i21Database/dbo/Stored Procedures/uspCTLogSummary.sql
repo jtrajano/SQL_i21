@@ -62,6 +62,7 @@ BEGIN TRY
 		  intContractHeaderId INT
 		, intContractDetailId INT
 		, intContractTypeId INT
+		, intHeaderPricingTypeId INT
 		, intEntityId INT
 		, intCommodityId INT
 		, intCommodityUOMId INT
@@ -95,6 +96,7 @@ BEGIN TRY
 	SELECT ch.intContractHeaderId
 		, cd.intContractDetailId
 		, ch.intContractTypeId
+		, intHeaderPricingTypeId = ch.intPricingTypeId
 		, ch.intEntityId
 		, ch.intCommodityId
 		, ch.intCommodityUOMId
@@ -910,29 +912,8 @@ BEGIN TRY
 					, intPriceUOMId = sh.intDtlQtyInCommodityUOMId
 					, sh.dtmStartDate
 					, sh.dtmEndDate
-
-					------------------
-					-- Actual Codes --
-					------------------
 					, dblQty =  (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1
 					, dblOrigQty =  (CASE WHEN ISNULL(cd.intNoOfLoad, 0) = 0 THEN suh.dblTransactionQuantity ELSE suh.dblTransactionQuantity * cd.dblQuantityPerLoad END) * - 1
-					--, dblQty = CASE WHEN ISNULL(cd.ysnLoadBased, 0) <> 0 THEN suh.dblTransactionQuantity * cd.dblQuantityPerLoad
-					--				ELSE (CASE WHEN strScreenName <> 'Inventory Shipment' AND strScreenName <> 'Inventory Receipt' THEN suh.dblTransactionQuantity
-					--							ELSE (dbo.fnCTConvertQtyToTargetCommodityUOM(cd.intCommodityId
-					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN sUOM.intUnitMeasureId
-					--																				WHEN strScreenName = 'Inventory Receipt' THEN rUOM.intUnitMeasureId END
-					--																		, cd.intUnitMeasureId
-					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN shipItem.dblQuantity
-					--																				WHEN strScreenName = 'Inventory Receipt' THEN recItem.dblOpenReceive END)) END) END * - 1
-					
-					--, dblOrigQty = CASE WHEN ISNULL(cd.ysnLoadBased, 0) <> 0 THEN suh.dblTransactionQuantity * cd.dblQuantityPerLoad
-					--				ELSE (CASE WHEN strScreenName <> 'Inventory Shipment' AND strScreenName <> 'Inventory Receipt' THEN suh.dblTransactionQuantity
-					--							ELSE (dbo.fnCTConvertQtyToTargetCommodityUOM(cd.intCommodityId
-					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN sUOM.intUnitMeasureId
-					--																				WHEN strScreenName = 'Inventory Receipt' THEN rUOM.intUnitMeasureId END
-					--																		, cd.intUnitMeasureId
-					--																		, CASE WHEN strScreenName = 'Inventory Shipment' THEN shipItem.dblQuantity
-					--																				WHEN strScreenName = 'Inventory Receipt' THEN recItem.dblOpenReceive END)) END) END * - 1
 					, sh.intContractStatusId
 					, sh.intBookId
 					, sh.intSubBookId		
@@ -941,11 +922,7 @@ BEGIN TRY
 				INNER JOIN tblCTSequenceHistory sh ON sh.intSequenceUsageHistoryId = suh.intSequenceUsageHistoryId
 				INNER JOIN @tmpContractDetail cd ON cd.intContractDetailId = suh.intContractDetailId
 				LEFT JOIN tblICInventoryShipment shipment ON suh.intExternalHeaderId = shipment.intInventoryShipmentId
-				LEFT JOIN tblICInventoryShipmentItem shipItem ON shipItem.intInventoryShipmentId = shipment.intInventoryShipmentId AND suh.intExternalId = shipItem.intInventoryShipmentItemId
-				LEFT JOIN tblICItemUOM sUOM ON sUOM.intItemUOMId = shipItem.intItemUOMId
 				LEFT JOIN tblICInventoryReceipt receipt ON suh.intExternalHeaderId = receipt.intInventoryReceiptId
-				LEFT JOIN tblICInventoryReceiptItem recItem ON recItem.intInventoryReceiptId = receipt.intInventoryReceiptId AND suh.intExternalId = recItem.intInventoryReceiptItemId
-				LEFT JOIN tblICItemUOM rUOM ON rUOM.intItemUOMId = recItem.intUnitMeasureId				
 				OUTER APPLY 
 				(
 					SELECT dblFutures = AVG(pfd.dblFutures)
@@ -961,7 +938,7 @@ BEGIN TRY
 			
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
-			BEGIN		
+			BEGIN
 				SET @ysnInvoice = 1
 				INSERT INTO @cbLogCurrent (strBatchId
 					, dtmTransactionDate
@@ -1040,7 +1017,7 @@ BEGIN TRY
 				FROM @cbLogTemp lt
 			END
 			ELSE IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Receipt Return')
-			BEGIN	
+			BEGIN
 				IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE dblQty > 0)
 				BEGIN
 					SET @ysnUnposted = 1
@@ -2851,13 +2828,6 @@ BEGIN TRY
 				-- Add all the basis quantities
 				UPDATE @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
-
-				--IF (@ysnDWGPriceOnly = 0)
-				--BEGIN
-				--	-- Bring back Basis Delivery
-				--	UPDATE @cbLogSpecific SET dblQty = @dblOrigQty, intPricingTypeId = 1, strTransactionReference = 'Price Fixation', strTransactionType = 'Sales Basis Deliveries'
-				--	EXEC uspCTLogContractBalance @cbLogSpecific, 0
-				--END
 			END
 			ELSE IF @strProcess IN ('Priced DWG','Price Delete DWG', 'Price Update')
 			BEGIN
@@ -3135,9 +3105,11 @@ BEGIN TRY
 					-- Inventory Shipment
 					IF (@strTransactionReference = 'Inventory Shipment')
 					BEGIN
-						SELECT @dblActual = SUM(ISNULL(ABS(dbo.fnICConvertUOMtoStockUnit(a.intItemId, a.intItemUOMId, ISNULL(a.dblDestinationQuantity,ISNULL(a.dblQuantity, 0)))), 0))
+						SELECT @dblActual = SUM(ISNULL(ABS(dbo.fnCTConvertQtyToTargetCommodityUOM(b.intCommodityId, siuom.intUnitMeasureId, cd.intUnitMeasureId, ISNULL(a.dblDestinationQuantity, ISNULL(a.dblQuantity, 0)))), 0))
 						FROM tblICInventoryShipmentItem a
 						INNER JOIN @cbLogSpecific b ON a.intInventoryShipmentId = b.intTransactionReferenceId
+						LEFT JOIN tblICItemUOM siuom ON siuom.intItemUOMId = a.intItemUOMId
+						LEFT JOIN tblCTContractDetail cd ON cd.intContractDetailId = a.intLineNo AND cd.intContractHeaderId = a.intOrderId
 						WHERE b.intContractHeaderId = a.intOrderId
 						AND a.intLineNo = ISNULL(b.intContractDetailId, a.intLineNo)
 					END
