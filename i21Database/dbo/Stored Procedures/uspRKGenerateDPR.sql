@@ -4517,7 +4517,7 @@ BEGIN TRY
 			--, c.intCommodityId
 		FROM @FinalContractHedge f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-		WHERE dblTotal <> 0
+		--WHERE dblTotal <> 0
 		GROUP BY c.strCommodityCode
 			, strUnitMeasure
 			, strType
@@ -4540,7 +4540,7 @@ BEGIN TRY
 			, strLocationName
 		FROM @FinalContractHedge f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-		WHERE dblTotal <> 0
+		--WHERE dblTotal <> 0
 		GROUP BY c.strCommodityCode
 			, strUnitMeasure
 			, strType
@@ -4674,7 +4674,7 @@ BEGIN TRY
 				, strDeliveryDate
 			FROM @FinalContractHedge f
 			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-			WHERE dblTotal <> 0
+			--WHERE dblTotal <> 0
 			ORDER BY intSeqNo
 				, strType ASC
 				, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
@@ -4804,7 +4804,7 @@ BEGIN TRY
 				, strDeliveryDate
 			FROM @FinalContractHedge f
 			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-			WHERE dblTotal <> 0 AND strSubType NOT LIKE '%' + @strPurchaseSales + '%'
+			WHERE strSubType NOT LIKE '%' + @strPurchaseSales + '%'
 			ORDER BY intSeqNo
 				, strType ASC
 				, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
