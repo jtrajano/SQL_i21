@@ -19,6 +19,7 @@ CREATE TYPE [dbo].[InvoiceEAStagingTable] AS TABLE
 	,[strNutrientAnalysis]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
 	,[strBillingMethod]						NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL
 	,[strApplicatorLicense]					NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL
+	,[strPONumber]							NVARCHAR(25)	COLLATE Latin1_General_CI_AS	NULL
 
 	--Detail																																															
     ,[strItemNo]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NULL

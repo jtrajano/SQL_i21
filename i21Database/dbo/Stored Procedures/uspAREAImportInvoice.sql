@@ -27,7 +27,8 @@ INSERT INTO @InvoiceEntries (
 	, strAcresApplied		
 	, strNutrientAnalysis	
 	, strBillingMethod		
-	, strApplicatorLicense	
+	, strApplicatorLicense
+	, strPONumber	
 
 	, intItemId
 	, intItemUOMId
@@ -64,6 +65,7 @@ SELECT intId				= I.intId
 	, strNutrientAnalysis	= I.strNutrientAnalysis
 	, strBillingMethod		= I.strBillingMethod
 	, strApplicatorLicense	= I.strApplicatorLicense
+	, strPONumber			= I.strPONumber
 
 	, intItemId				= ITEM.intItemId
 	, intItemUOMId			= IUOM.intItemUOMId
