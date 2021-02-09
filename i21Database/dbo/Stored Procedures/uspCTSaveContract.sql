@@ -175,7 +175,7 @@ BEGIN TRY
 		AND @intProducerId IS NOT NULL
 	
 	UPDATE CD
-	SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) * CD.dblCashPrice / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
+	SET dblTotalCost = ROUND(dbo.fnCTConvertQtyToTargetItemUOM(CD.intItemUOMId,CD.intPriceItemUOMId,CD.dblQuantity) *  ROUND(CD.dblCashPrice,2) / CASE WHEN CY.ysnSubCurrency = 1 THEN 100 ELSE 1 END,6)
 	FROM @CDTableUpdate CD
 	JOIN tblSMCurrency CY ON CY.intCurrencyID = CD.intCurrencyId
 	WHERE CD.intPricingTypeId IN (1, 6)
@@ -269,15 +269,16 @@ BEGIN TRY
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
 
-			IF @dblNoOfLots = @dblLotsFixed AND @intPricingTypeId = 2
+			IF @dblNoOfLots = @dblLotsFixed AND @intPricingTypeId IN (1,2)
 			BEGIN
 				UPDATE	@CDTableUpdate
 				SET		dblFutures			=	@dblSlicedFutures,
 						dblCashPrice		=	@dblSlicedCashPrice,
-						dblTotalCost		=	(dblQuantity * @dblSlicedCashPrice),
+						dblTotalCost		=	(dblQuantity * CAST(@dblSlicedCashPrice AS DECIMAL(18,2))),
 						intPricingTypeId	=	CASE WHEN @intHeaderPricingTypeId= 8 THEN 8 ELSE 1 END
 				WHERE	intContractDetailId	=	@intContractDetailId
 			END
+		
 
 		END
 
