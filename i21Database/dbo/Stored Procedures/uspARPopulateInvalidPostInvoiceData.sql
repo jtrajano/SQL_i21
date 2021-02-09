@@ -381,39 +381,18 @@ BEGIN
 		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 		,[intItemId]            = I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= CASE WHEN VI.ysnHasCreditApprover = 0 THEN 'The Customer''s credit limit has been reached but there is no approver configured.' ELSE ISNULL(SMT.strApprovalStatus, 'Not Yet Approved') END
+		,[strPostingError]		= CASE WHEN VI.ysnHasCreditApprover = 0 THEN 'The Customer''s credit limit has been reached but there is no approver configured. This invoice cannot be posted without an authorized approver.' ELSE ISNULL(SMT.strApprovalStatus, 'Not Yet Approved') END
 	FROM 
 		#ARPostInvoiceHeader I 
 	INNER JOIN tblARInvoice INV ON I.intInvoiceId = INV.intInvoiceId
 	INNER JOIN tblSMTransaction SMT ON SMT.intRecordId = INV.intInvoiceId
 	INNER JOIN tblSMScreen SMS ON SMS.intScreenId = SMT.intScreenId AND SMS.strScreenName = 'Invoice'
 	INNER JOIN vyuARGetInvoice VI ON VI.intInvoiceId = INV.intInvoiceId
-	WHERE SMT.strApprovalStatus <> 'Approved'
-	AND SMT.strApprovalStatus IS NOT NULL
+	WHERE ISNULL(SMT.strApprovalStatus, '') <> 'Approved'
+	AND VI.ysnHasCreditApprover = 0
+    AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
+    AND ((I.dblInvoiceTotal + VI.dblARBalance > VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) > 0)
 
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--Credit limit
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]        
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]            = I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The Customer''s credit limit has been reached but there is no approver configured. This invoice cannot be posted without an authorized approver.'
-	FROM #ARPostInvoiceHeader I 
-	INNER JOIN vyuEMEntityCustomerSearch C ON C.intEntityId = I.intEntityCustomerId
-	WHERE C.ysnHasCustomerCreditApprover = 0
-      AND C.strCreditCode NOT IN ('Always Allow', 'Normal', 'Reject Orders', 'COD')
-      AND ((I.dblInvoiceTotal + C.dblARBalance > C.dblCreditLimit) OR C.intCreditStopDays > 0)
-		
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
