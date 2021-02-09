@@ -499,6 +499,22 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(billDetail.intWeightUOMId, billDetail.intUnitOfMeasureId)
+OUTER APPLY (
+    SELECT
+        SUM(dblTax) AS dblTax --dblAdjustedTax is the new cost
+    FROM tblAPBillDetailTax taxes
+    WHERE 
+        taxes.intBillDetailId = billDetail.intBillDetailId
+    AND EXISTS (
+        --MAKE SURE TAX CODE IS ALSO PART OF RECEIPT TAX DETAILS TO DETERMINE IT USES CLEARING
+        SELECT 1
+        FROM tblICInventoryReceiptItemTax rctTax
+        WHERE
+            rctTax.intInventoryReceiptItemId = billDetail.intInventoryReceiptItemId
+        AND rctTax.intTaxClassId = taxes.intTaxClassId
+        AND rctTax.intTaxCodeId = taxes.intTaxCodeId
+    )
+) oldCostTax
 -- LEFT JOIN vyuAPReceiptClearingGL APClearing
 --     ON APClearing.strTransactionId = receipt.strReceiptNumber
 --         AND APClearing.intItemId = receiptItem.intItemId
