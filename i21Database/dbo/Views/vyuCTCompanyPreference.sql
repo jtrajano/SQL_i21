@@ -74,7 +74,8 @@ AS
 			,CP.ysnDocumentByBookAndSubBook
 			,CP.ysnUpdatedAvailabilityPurchase
 			,CP.ysnUpdatedAvailabilitySales
-			,CP.ysnAllowFutureTypeContracts
+			,CP.ysnAllowFutureTypeContractsPurchase
+			,CP.ysnAllowFutureTypeContractsSales
 			,CP.strDefaultReleaseReport
 			,CP.ysnEnableReleaseInstructionsTab
 			,strCleanCostUOM = U1.strUnitMeasure
