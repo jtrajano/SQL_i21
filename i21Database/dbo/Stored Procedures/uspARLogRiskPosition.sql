@@ -11,7 +11,7 @@ SET ANSI_WARNINGS OFF
  
 BEGIN
     DECLARE @tblSummaryLog          AS RKSummaryLog
-    DECLARE @tblContractBalanceLog  AS CTContractBalanceLog
+    DECLARE @tblContractBalanceLog  AS ContractDetailTable
     
     INSERT INTO @tblSummaryLog (
           strBatchId 
@@ -288,91 +288,66 @@ BEGIN
     FROM @tblSummaryLog SL
     INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
     INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
-    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1
-
-    --CONTRACT BALANCE LOG
-    INSERT INTO @tblContractBalanceLog (
-          strTransactionType
-        , strTransactionReference
-        , dtmTransactionDate
-        , dtmStartDate
-        , dtmEndDate
-		    , intContractHeaderId
-		    , intContractDetailId
-	    	, strContractNumber
-	    	, intContractSeq
-		    , intContractTypeId
-	    	, intContractStatusId
-		    , intCommodityId
-	    	, intItemId
-		    , intEntityId
-		    , intLocationId
-        , intBookId
-        , intSubBookId
-		    , dblQty
-        , dblBasis
-        , dblFutures
-		    , intQtyUOMId
-        , intBasisUOMId
-        , intBasisCurrencyId
-        , intPriceUOMId
-		    , intPricingTypeId		
-		    , intTransactionReferenceId
-			  , intTransactionReferenceDetailId
-	    	, strTransactionReferenceNo
-	    	, intFutureMarketId
-	    	, intFutureMonthId
-	    	, intUserId        
-        , intActionId
-        , strNotes
-    )
-    SELECT strTransactionType	      = 'Sales Basis Deliveries'
-        , strTransactionReference   = SL.strTransactionType
-        , dtmTransactionDate	      = SL.dtmTransactionDate
-        , dtmStartDate              = CD.dtmStartDate
-        , dtmEndDate                = CD.dtmEndDate
-		    , intContractHeaderId	      = SL.intContractHeaderId
-	    	, intContractDetailId	      = SL.intContractDetailId
-	    	, strContractNumber	        = CH.strContractNumber
-	    	, intContractSeq		        = CD.intContractSeq
-	    	, intContractTypeId	        = CH.intContractTypeId
-	    	, intContractStatusId	      = CD.intContractStatusId
-	    	, intCommodityId		        = SL.intCommodityId
-	    	, intItemId			            = SL.intItemId
-	    	, intEntityId			          = SL.intEntityId
-		    , intLocationId		          = SL.intLocationId
-        , intBookId                 = SL.intBookId
-        , intSubBookId              = SL.intSubBookId
-		    , dblQty				            = SL.dblQty
-        , dblBasis                  = CD.dblBasis
-        , dblFutures                = CD.dblFutures
-		    , intQtyUOMId			          = SL.intCommodityUOMId
-        , intBasisUOMId             = CD.intBasisUOMId
-        , intBasisCurrencyId        = CD.intBasisCurrencyId
-        , intPriceUOMId             = SL.intCommodityUOMId
-		    , intPricingTypeId		      = CD.intPricingTypeId		
-		    , intTransactionReferenceId = SL.intTransactionRecordHeaderId
-			  , intTransactionReferenceDetailId = SL.intTransactionRecordId
-		    , strTransactionReferenceNo = SL.strTransactionNumber
-		    , intFutureMarketId	        = SL.intFutureMarketId
-		    , intFutureMonthId		      = SL.intFutureMonthId
-		    , intUserId			            = SL.intUserId
-        , intActionId					      = SL.intActionId
-        , strNotes                  = SL.strNotes
-  FROM @tblSummaryLog SL
-	INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId
-	INNEr JOIN tblCTContractDetail CD ON SL.intContractDetailId = CD.intContractDetailId
-	WHERE SL.intContractDetailId IS NOT NULL
-	  AND SL.strTransactionType = 'Invoice'
-    AND CH.intPricingTypeId = 2
+    WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1   
 
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
         BEGIN
             EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
         END
 
-    IF EXISTS (SELECT TOP 1 NULL FROM @tblContractBalanceLog)
+    --CONTRACT BALANCE LOG
+    WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
         BEGIN
-            EXEC dbo.uspCTLogContractBalance @tblContractBalanceLog, 0
+            DELETE FROM @tblContractBalanceLog
+
+            DECLARE @intId					        INT = NULL
+                  , @intContractHeaderId		INT	= NULL
+                  , @intContractDetailId		INT = NULL				 
+                  , @intTransactionId		    INT = NULL
+                  , @dblTransactionQty		  NUMERIC(24, 10) = 0
+                  , @strSource				      NVARCHAR(20) = NULL
+                  , @strProcess				      NVARCHAR(50) = NULL
+
+            SELECT TOP 1 @intId	          = intId
+                  , @intContractHeaderId	= intContractHeaderId
+                  , @intContractDetailId	= intContractDetailId
+                  , @intTransactionId		  = intTransactionRecordId
+                  , @dblTransactionQty		= dblQty
+                  , @strSource				    = 'Inventory'
+                  , @strProcess			      = CASE WHEN dblQty > 0 THEN 'Delete Invoice' ELSE 'Create Invoice' END
+            FROM @tblSummaryLog
+            
+            INSERT INTO @tblContractBalanceLog (
+                  intContractDetailId
+                , intContractHeaderId
+                , dtmCreated
+                , intContractSeq
+                , intBasisCurrencyId
+                , intBasisUOMId
+            )   
+            SELECT intContractDetailId	= SL.intContractDetailId
+                , intContractHeaderId	  = SL.intContractHeaderId
+                , dtmCreated			      = GETDATE()
+                , intContractSeq		    = CD.intContractSeq
+                , intBasisCurrencyId	  = CD.intBasisCurrencyId
+                , intBasisUOMId			    = CD.intBasisUOMId
+            FROM @tblSummaryLog SL
+            INNER JOIN tblCTContractHeader CH ON SL.intContractHeaderId = CH.intContractHeaderId
+            INNER JOIN tblCTContractDetail CD ON SL.intContractDetailId = CD.intContractDetailId
+            WHERE SL.intContractDetailId IS NOT NULL
+              AND SL.strTransactionType = 'Invoice'
+              AND CH.intPricingTypeId = 2
+              AND SL.intId = @intId
+
+            EXEC dbo.uspCTLogSummary @intContractHeaderId	= @intContractHeaderId
+                                   , @intContractDetailId	= @intContractDetailId
+                                   , @strSource				    = @strSource
+                                   , @strProcess			    = @strProcess
+                                   , @contractDetail		  = @tblContractBalanceLog
+                                   , @intUserId				    = @intUserId
+                                   , @intTransactionId		= @intTransactionId
+                                   , @dblTransactionQty		= @dblTransactionQty
+            
+            DELETE FROM @tblSummaryLog WHERE intId = @intId
         END
 END
