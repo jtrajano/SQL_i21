@@ -184,6 +184,9 @@ BEGIN
 			, @ysnDeleted = ysnDeleted
 		FROM #tmpLogItems
 
+		DECLARE @intHeaderPricingTypeId INT
+		SELECT @intHeaderPricingTypeId = intPricingTypeId FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
+
 		--SELECT * INTO #tmpPrevLogList
 		--FROM tblCTContractBalanceLog
 		--WHERE intContractDetailId = @intContractDetailId
@@ -389,6 +392,7 @@ BEGIN
 			, strProcess
 			, ysnDeleted
 		FROM #tmpLogItems WHERE intId = @Id
+		AND NOT (@intHeaderPricingTypeId = 1 AND strTransactionType LIKE '%Basis Deliveries%')
 
 		--DROP TABLE #tmpPrevLogList
 
