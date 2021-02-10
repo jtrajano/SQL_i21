@@ -165,7 +165,8 @@ BEGIN
 	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
 
-	IF @transactionType IS NULL
+	--.Net is sending default value if parameter is not provided
+	IF ISNULL(NULLIF(@transactionType,''),'') = ''
 	BEGIN
 		SET @transactionType = 'Voucher';
 	END
