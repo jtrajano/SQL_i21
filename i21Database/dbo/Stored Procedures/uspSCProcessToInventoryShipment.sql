@@ -76,6 +76,10 @@ DECLARE @strTicketStatus NVARCHAR(3)
 DECLARE @_strShipmentNumber NVARCHAR(50)
 DECLARE @strOwnedPhysicalStock NVARCHAR(20)
 DECLARE @OWNERSHIP_CUSTOMER NVARCHAR(20)
+DECLARE @dblAGWorkOrderReserveQuantity NUMERIC(38,20)
+DECLARE @strTicketNumber NVARCHAR(50)
+DECLARE @_strAuditDescription NVARCHAR(500)
+dECLARE @dblTicketNetUnits NUMERIC(38,20)
 
 SET @OWNERSHIP_CUSTOMER = 'CUSTOMER'
 
@@ -93,6 +97,8 @@ SELECT @intLoadId = intLoadId
 	,@intTicketStorageScheduleTypeId = intStorageScheduleTypeId
 	,@ysnTicketMultipleTicket = ysnMultipleTicket
 	,@intTicketAGWorkOrderId = intAGWorkOrderId
+	,@strTicketNumber = strTicketNumber
+	,@dblTicketNetUnits = dblNetUnits
 FROM vyuSCTicketScreenView where intTicketId = @intTicketId
 
 SELECT	@ysnDPStorage = ST.ysnDPOwnedType
@@ -1064,12 +1070,18 @@ BEGIN TRY
 		--Update Work order Shipped Quantity for the Ticket Item
 		IF(ISNULL(@InventoryShipmentId,0) > 0)
 		BEGIN
-			--TODO update work order shipped
-			UPDATE tblAGWorkOrderDetail	
-			SET dblQtyShipped = (ISNULL(dblQtyShipped,0) + @dblNetUnits)
-				,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+			SELECT TOP 1
+				@dblAGWorkOrderReserveQuantity = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
+			FROM tblAGWorkOrderDetail
 			WHERE intWorkOrderId = @intTicketAGWorkOrderId
-				AND intItemId = @intItemId
+				AND intItemId = @intTicketItemId
+
+			IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) = 0)
+			BEGIN
+				SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
+				SET @_strAuditDescription = 'Distribution of Ticket - ' +  @strTicketNumber
+				EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intItemId, dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+			END
 		END
 	END
 	

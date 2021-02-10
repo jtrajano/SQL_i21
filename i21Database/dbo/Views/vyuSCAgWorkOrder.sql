@@ -7,6 +7,8 @@ AS
 		,strCustomerName = B.strName
 		,A.intWorkOrderId
 		,intEntityId = A.intEntityCustomerId
+		,A.ysnShipped
+		,A.ysnFinalized
 	FROM tblAGWorkOrder A
 	LEFT JOIN tblEMEntity B
 		ON A.intEntityCustomerId = B.intEntityId

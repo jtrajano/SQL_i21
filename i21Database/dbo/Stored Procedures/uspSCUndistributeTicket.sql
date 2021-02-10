@@ -96,6 +96,9 @@ DECLARE @intTicketStorageScheduleTypeId INT
 DECLARE @intTicketAGWorkOrderId INT
 DECLARE @dblTicketNetUnits NUMERIC(18,6)
 DECLARE @intTicketItemId INT
+DECLARE @dblAGWorkOrderReserveQuantity NUMERIC(38,20)
+DECLARE @strTicketNumber NVARCHAR(50)
+DECLARE @_strAuditDescription NVARCHAR(500)
 
 DECLARE @ItemReservationTableType AS ItemReservationTableType
 
@@ -112,6 +115,7 @@ BEGIN TRY
 			,@intTicketAGWorkOrderId = intAGWorkOrderId
 			,@dblTicketNetUnits = dblNetUnits
 			,@intTicketItemId = intItemId
+			,@strTicketNumber = strTicketNumber
 		FROM tblSCTicket SC
 		WHERE intTicketId = @intTicketId
 
@@ -1296,47 +1300,22 @@ BEGIN TRY
 						IF(@intTicketStorageScheduleTypeId = -9)
 						BEGIN
 							--Update Work order Shipped Quantity for the Ticket Item
-							UPDATE tblAGWorkOrderDetail	
-							SET dblQtyShipped = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
-								,intConcurrencyId = ISNULL(intConcurrencyId,0) + 1
+							SELECT TOP 1
+								@dblAGWorkOrderReserveQuantity = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
+							FROM tblAGWorkOrderDetail
 							WHERE intWorkOrderId = @intTicketAGWorkOrderId
 								AND intItemId = @intTicketItemId
+
+							IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) = 0)
+							BEGIN
+								SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
+								SET @_strAuditDescription = 'Undistribution of Ticket - ' +  @strTicketNumber
+								EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intTicketItemId, dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+							END
 							
 
 							--Update Work Order reservation
-								INSERT INTO @ItemReservationTableType (
-									[intItemId]
-									,[intItemLocationId]
-									,[intItemUOMId]
-									,[intLotId]
-									,[intSubLocationId]
-									,[intStorageLocationId]
-									,[dblQty]
-									,[intTransactionId]
-									,[strTransactionId]
-									,[intTransactionTypeId]
-								)
-								SELECT	[intItemId]				= SC.intItemId
-										,[intItemLocationId]	= ICIL.intItemLocationId
-										,[intItemUOMId]			= SC.intItemUOMIdTo
-										,[intLotId]				= NULL
-										,[intSubLocationId]		= SC.intSubLocationId
-										,[intStorageLocationId]	= SC.intStorageLocationId
-										,[dblQty]				= CASE WHEN (WOD.dblQtyOrdered - ISNULL(WOD.dblQtyShipped,0)) > 0 THEN (WOD.dblQtyOrdered  - ISNULL(WOD.dblQtyShipped,0)) ELSE 0 END
-										,[intTransactionId]		= @intTicketAGWorkOrderId
-										,[strTransactionId]		= WO.strOrderNumber
-										,[intTransactionTypeId] = 59
-								FROM	tblSCTicket SC
-								INNER JOIN dbo.tblICItemLocation ICIL 
-									ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
-								INNER JOIN tblAGWorkOrder WO
-									ON SC.intAGWorkOrderId = WO.intWorkOrderId
-								INNER JOIN tblAGWorkOrderDetail WOD
-									ON WO.intWorkOrderId = WOD.intWorkOrderId AND WOD.intItemId = SC.intItemId
-								WHERE SC.intTicketId = @intTicketId
-
-								EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intTicketAGWorkOrderId,59
-
+							EXEC [uspSCUpdateAGWorkOrderItemReservation] @intTicketAGWorkOrderId, @intTicketId,@intTicketItemId, 0
 						END
 					END
 				END
