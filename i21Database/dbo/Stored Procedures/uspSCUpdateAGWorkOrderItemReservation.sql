@@ -75,7 +75,7 @@ BEGIN
 					,[intSubLocationId]		= SC.intSubLocationId
 					,[intStorageLocationId]	= SC.intStorageLocationId
 					,[dblQty]				= CASE WHEN (WOD.dblQtyOrdered - ISNULL(WOD.dblQtyShipped,0)) > 0 THEN (WOD.dblQtyOrdered  - ISNULL(WOD.dblQtyShipped,0)) ELSE 0 END
-					,[intTransactionId]		= @intTicketAGWorkOrderId
+					,[intTransactionId]		= @intWorkOrderId
 					,[strTransactionId]		= WO.strOrderNumber
 					,[intTransactionTypeId] = 59
 			FROM	tblSCTicket SC
@@ -87,7 +87,7 @@ BEGIN
 				ON WO.intWorkOrderId = WOD.intWorkOrderId AND WOD.intItemId = SC.intItemId
 			WHERE SC.intTicketId = @intTicketId
 
-			EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intTicketAGWorkOrderId,59
+			EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intWorkOrderId,59
 
 		END
 	_Exit:

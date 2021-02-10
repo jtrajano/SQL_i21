@@ -1074,7 +1074,7 @@ BEGIN TRY
 				@dblAGWorkOrderReserveQuantity = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
 			FROM tblAGWorkOrderDetail
 			WHERE intWorkOrderId = @intTicketAGWorkOrderId
-				AND intItemId = @intTicketItemId
+				AND intItemId = @intItemId
 
 			IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) = 0)
 			BEGIN
