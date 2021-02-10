@@ -51,11 +51,44 @@ BEGIN
 				ON WO.intWorkOrderId = WOD.intWorkOrderId AND WOD.intItemId = SC.intItemId
 			WHERE SC.intTicketId = @intTicketId
 
+			EXEC uspICValidateStockReserves @ItemReservationTableType
 			EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intWorkOrderId,@intTransctionTypeId
 		END
 		ELSE
 		BEGIN
-			print 'undistribute'
+			INSERT INTO @ItemReservationTableType (
+				[intItemId]
+				,[intItemLocationId]
+				,[intItemUOMId]
+				,[intLotId]
+				,[intSubLocationId]
+				,[intStorageLocationId]
+				,[dblQty]
+				,[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionTypeId]
+			)
+			SELECT	[intItemId]				= SC.intItemId
+					,[intItemLocationId]	= ICIL.intItemLocationId
+					,[intItemUOMId]			= SC.intItemUOMIdTo
+					,[intLotId]				= NULL
+					,[intSubLocationId]		= SC.intSubLocationId
+					,[intStorageLocationId]	= SC.intStorageLocationId
+					,[dblQty]				= CASE WHEN (WOD.dblQtyOrdered - ISNULL(WOD.dblQtyShipped,0)) > 0 THEN (WOD.dblQtyOrdered  - ISNULL(WOD.dblQtyShipped,0)) ELSE 0 END
+					,[intTransactionId]		= @intTicketAGWorkOrderId
+					,[strTransactionId]		= WO.strOrderNumber
+					,[intTransactionTypeId] = 59
+			FROM	tblSCTicket SC
+			INNER JOIN dbo.tblICItemLocation ICIL 
+				ON ICIL.intItemId = SC.intItemId AND ICIL.intLocationId = SC.intProcessingLocationId
+			INNER JOIN tblAGWorkOrder WO
+				ON SC.intAGWorkOrderId = WO.intWorkOrderId
+			INNER JOIN tblAGWorkOrderDetail WOD
+				ON WO.intWorkOrderId = WOD.intWorkOrderId AND WOD.intItemId = SC.intItemId
+			WHERE SC.intTicketId = @intTicketId
+
+			EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intTicketAGWorkOrderId,59
+
 		END
 	_Exit:
 	END TRY
