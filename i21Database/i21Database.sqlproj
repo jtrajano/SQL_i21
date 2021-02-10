@@ -7307,7 +7307,6 @@
     <Build Include="dbo\Tables\tblCFInvoiceDiscountCalculationTempTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation2.sql" />
     <Build Include="dbo\Tables\tblGLTrialBalance.sql" />
-    <Build Include="dbo\Tables\tblGLRunningBalanceOrder.sql" />
     <Build Include="dbo\Views\vyuGLTrialBalanceRE_NonRE.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateTrialBalance.sql" />
     <Build Include="dbo\Tables\tblHDTicketRootCause.sql" />
