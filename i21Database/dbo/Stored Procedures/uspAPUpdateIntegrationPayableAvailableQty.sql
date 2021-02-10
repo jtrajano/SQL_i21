@@ -299,10 +299,16 @@ BEGIN
 			[intItemId]						=	A.intItemId,
 			[intToBillUOMId]				=	A.intQtyToBillUOMId,--CASE WHEN A.intWeightUOMId > 0 THEN A.intWeightUOMId ELSE A.intQtyToBillUOMId END,
 			[dblToBillQty]					=	--A.dblQuantityToBill--CASE WHEN A.intWeightUOMId > 0 THEN A.dblNetWeight ELSE A.dblQuantityToBill END
-												 (CASE WHEN @decreaseQty = 0 
-														THEN -A.dblQuantityToBill
-													ELSE A.dblQuantityToBill
-													END),
+												CASE
+													WHEN RC.strCostMethod IN ('Amount', 'Percentage')
+													THEN
+														0 --WE CAN MAKE THIS 0, TO HANDLE MULTITPLE QUANTITY OF SAME CHARGE IN 1 VOUCHER
+													ELSE
+														(CASE WHEN @decreaseQty = 0 
+															THEN -A.dblQuantityToBill
+														ELSE A.dblQuantityToBill
+														END)
+												END,
 			[intEntityVendorId]				=	B.intEntityVendorId,
 			[dblAmountToBill]				=   
 												CASE 
@@ -344,6 +350,7 @@ BEGIN
 
 		FROM #tmpInventoryReceipt A
 		INNER JOIN tblAPBill B ON A.intBillId = B.intBillId
+		LEFT JOIN tblICInventoryReceiptCharge RC ON RC.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 
 		EXEC uspICUpdateBillQty @updateDetails = @receiptDetails
 	END
