@@ -43,6 +43,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbLogo							AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @dblTotalAR							AS NUMERIC(18,6)    = 0
 
 SET @dtmDateToLocal						= ISNULL(@dtmDateTo, GETDATE())
 SET	@dtmDateFromLocal					= ISNULL(@dtmDateFrom, CAST(-53690 AS DATETIME))
@@ -469,11 +470,16 @@ IF @ysnPrintOnlyPastDueLocal = 1
 		  , dblTotalAR 	= ISNULL(dblTotalAR, 0) - ISNULL(dbl0Days, 0) - ISNULL(dblFuture, 0)
     END
 
+SELECT @dblTotalAR  =SUM(dblTotalAR)  from #AGINGSUMMARY
+
 IF @ysnPrintZeroBalanceLocal = 0
     BEGIN
+		IF  @dblTotalAR = 0 
+		BEGIN
         DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmount) * 10000) - CONVERT(FLOAT, (ABS(dblAmount) * 10000))) <> 0) OR ISNULL(dblAmount, 0) <= 0) AND ISNULL(strTransactionType, '') NOT IN ('Beginning Balance', 'Customer Budget')
 		DELETE FROM #AGINGSUMMARY WHERE (((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0
-    END
+		END
+	END
 
 --INSERT INTO STATEMENT STAGING
 DELETE FROM tblARCustomerStatementStagingTable WHERE intEntityUserId = @intEntityUserIdLocal AND strStatementFormat = 'Full Details - No Card Lock' 
