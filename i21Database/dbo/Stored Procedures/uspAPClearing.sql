@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPClearing]
 	@APClearing AS APClearing READONLY,
-	@post AS BIT = 1
+	@post AS BIT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -42,8 +42,8 @@ BEGIN TRY
 		intAccountId,
 		intItemId,
 		intItemUOMId,
-		CASE WHEN @post = 1 THEN dblQuantity ELSE dblQuantity * -1 END,
-		CASE WHEN @post = 1 THEN dblAmount ELSE dblAmount * -1 END,
+		CASE WHEN @post = 0 THEN dblQuantity * -1 ELSE dblQuantity END,
+		CASE WHEN @post = 0 THEN dblAmount * -1 ELSE dblAmount END,
 		intBillId,
 		strBillId,
 		intBillDetailId,
