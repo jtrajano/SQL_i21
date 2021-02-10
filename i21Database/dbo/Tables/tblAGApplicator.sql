@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[tblAGApplicator]
 (
 	[intEntityId]					INT            NOT NULL,
-    [strApplicatorId]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NOT NULL,
+    [strApplicatorId]				NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strName]						NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
 	[strAddress]					NVARCHAR (250) COLLATE Latin1_General_CI_AS NULL,
 	[strCity]						NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,

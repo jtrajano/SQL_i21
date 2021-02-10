@@ -9042,6 +9042,7 @@
     <Build Include="dbo\Stored Procedures\uspAGUpdateWOShippedQty.sql" />
     <Build Include="dbo\Functions\fnAPClearing.sql" />
     <Build Include="dbo\Functions\fnAPGetDetailSourceTransaction.sql" />
+    <Build Include="dbo\Tables\tblAGApplicatorLicense.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
