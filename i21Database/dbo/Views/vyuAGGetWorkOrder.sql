@@ -19,6 +19,7 @@ AS
 	, FARMLOCATION.strLocationName AS strFarmFieldName
 	, WO.dblAcres
 	, WO.dtmCreatedDate
+	, WO.dtmProcessDate
 	, WO.dtmApplyDate
 	, WO.dtmDueDate
 	, strApplicatorLicenseNumber
@@ -47,6 +48,8 @@ AS
 	, TARGET.strTargetName
 	, WO.ysnShipped
 	, WO.ysnFinalized
+	, WO.dblWorkOrderTotal
+	, WO.dblWorkOrderSubtotal
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 

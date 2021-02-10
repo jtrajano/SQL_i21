@@ -30,6 +30,7 @@
  [dblTotalPoundsOfProduct] DECIMAL(18,6) NULL,
  [dblDensity] DECIMAL(18,6) NULL,
  [dtmCreatedDate] DATETIME NULL,
+ [dtmProcessDate] DATETIME NULL,
  [dtmStartDate] DATETIME NULL,
  [dtmEndDate] DATETIME NULL,
  [dtmStartTime] DATETIME NULL,

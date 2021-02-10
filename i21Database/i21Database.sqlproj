@@ -9048,6 +9048,7 @@
     <Build Include="dbo\Tables\tblAGApplicatorLicense.sql" />
     <Build Include="dbo\Stored Procedures\uspICInventoryTransferDetailReportMPCT.sql" />
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetailReportMPCT.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGProcessWOToItemShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
