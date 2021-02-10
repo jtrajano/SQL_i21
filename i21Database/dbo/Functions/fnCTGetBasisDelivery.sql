@@ -42,7 +42,9 @@ RETURNS @Transaction TABLE
 	intHeaderBookId			INT NULL,
 	intHeaderSubBookId		INT NULL,
 	intDetailBookId			INT NULL,
-	intDetailSubBookId		INT NULL
+	intDetailSubBookId		INT NULL,
+	strContractStatus		NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
+	dblUnpriceQuantity NUMERIC(38,20)
 )
 AS
 BEGIN
@@ -55,6 +57,8 @@ BEGIN
 			, strHeaderUnitMeasure = CHUM.strUnitMeasure
 			, CD.intBookId
 			, CD.intSubBookId
+			, tbl.intContractStatusId
+			, tbl.dblQtyUnpriced
 		FROM tblCTContractHeader CH
 		INNER JOIN tblCTContractDetail CD ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblICUnitMeasure CDUM ON CDUM.intUnitMeasureId = CD.intUnitMeasureId
@@ -69,12 +73,13 @@ BEGIN
 				, SH.intContractDetailId
 				, dtmHistoryCreated
 				, intContractStatusId
+				, SH.dblQtyUnpriced
 			FROM tblCTSequenceHistory SH
 			INNER JOIN tblCTContractHeader ET ON SH.intContractHeaderId = ET.intContractHeaderId
 			WHERE dtmHistoryCreated < DATEADD(DAY, 1, @dtmDate)
 		) tbl ON tbl.intContractDetailId = CD.intContractDetailId AND tbl.intContractHeaderId = CD.intContractHeaderId AND tbl.intRowId = 1
-		WHERE tbl.intPricingTypeId = 2
-			AND (tbl.intContractStatusId = 1 or (tbl.intContractStatusId = 5 and (g.strWhereFinalized = 'Destination' or w.strWhereFinalized = 'Destination'))))
+		WHERE (tbl.intPricingTypeId = 2 or (tbl.intContractStatusId = 6 and 'Destination' not in (g.strWhereFinalized, w.strWhereFinalized)))
+			AND (tbl.intContractStatusId = 1 or (tbl.intContractStatusId = 5 and (g.strWhereFinalized = 'Destination' or w.strWhereFinalized = 'Destination'))) or (tbl.intContractStatusId = 6 and isnull(g.strWhereFinalized,'') <> 'Destination' and isnull(w.strWhereFinalized,'') <> 'Destination'))
 	, CBL AS (
 		SELECT CBL1.*
 			, strEntityName = EM.strName
@@ -119,7 +124,9 @@ BEGIN
 		, intHeaderBookId
 		, intHeaderSubBookId
 		, intDetailBookId
-		, intDetailSubBookId)
+		, intDetailSubBookId
+		, strContractStatus
+		, dblUnpriceQuantity)
 	SELECT CBL1.intContractHeaderId
 		, CBL1.intContractDetailId
 		, intTransactionId = CBL1.intTransactionReferenceId
@@ -154,6 +161,8 @@ BEGIN
 		, CH.intSubBookId
 		, OBC.intBookId
 		, OBC.intSubBookId
+		, CS.strContractStatus
+		, dblUnpriceQuantity = OBC.dblQtyUnpriced
 	FROM CBL CBL1
 	INNER JOIN CBL CBL2 ON CBL1.intContractBalanceLogId >= CBL2.intContractBalanceLogId
 		AND CBL1.intContractHeaderId = CBL2.intContractHeaderId
@@ -164,6 +173,7 @@ BEGIN
 	INNER JOIN tblCTContractHeader CH ON CBL1.intContractHeaderId = CH.intContractHeaderId
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId AND CUM.ysnStockUnit=1
 	INNER JOIN OpenBasisContract OBC ON CBL1.intContractDetailId = OBC.intContractDetailId AND CBL1.intContractHeaderId = OBC.intContractHeaderId
+	INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = OBC.intContractStatusId
 	GROUP BY CBL1.dtmCreatedDate
 		, CBL1.intContractBalanceLogId
 		, CBL1.intContractHeaderId
@@ -200,6 +210,8 @@ BEGIN
 		, CH.intSubBookId
 		, OBC.intBookId
 		, OBC.intSubBookId
+		, CS.strContractStatus
+		, OBC.dblQtyUnpriced
 	ORDER BY CBL1.dtmCreatedDate, CBL1.intContractBalanceLogId ASC;
  
  	DELETE FROM @Transaction
