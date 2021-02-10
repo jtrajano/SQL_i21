@@ -1811,7 +1811,7 @@ BEGIN TRY
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE IF @strProcess = 'Price Update'
-		BEGIN			
+		BEGIN
 			INSERT INTO @cbLogCurrent (strBatchId
 				, dtmTransactionDate
 				, strTransactionType
@@ -1896,7 +1896,7 @@ BEGIN TRY
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
 				AND cbl.intTransactionReferenceDetailId = @intTransactionId
-				AND cbl.dblQty > 0
+				AND cbl.dblQty <> 0
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE
@@ -2865,10 +2865,6 @@ BEGIN TRY
 					-- New Price or No change
 					SET @FinalQty = @dblQty
 				END
-
-
-				SET @tmpTotal = @TotalConsumed + (@TotalBasis + (@FinalQty * - 1)) + (@TotalPriced + (@FinalQty))
-				SET @tmpTotal = @tmpTotal
 
 				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
 				BEGIN
