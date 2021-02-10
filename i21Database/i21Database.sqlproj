@@ -1527,6 +1527,8 @@
     <Build Include="dbo\Stored Procedures\uspICInventoryAdjustmentUpdateOutdatedStockOnHand.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailGrain.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintGrain.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetailAgSource.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintAgSource.sql" />
     <Build Include="dbo\Stored Procedures\uspICCreateLotNumberOnInventoryTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspICPostInventoryTransfer.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderProductSpecification.sql" />
