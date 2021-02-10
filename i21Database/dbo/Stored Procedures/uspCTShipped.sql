@@ -131,7 +131,8 @@ BEGIN TRY
 					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryShipmentItemId,
-					@strScreenName			=	@strScreenName
+					@strScreenName			=	@strScreenName,
+					@ysnDWG					= 	1
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
