@@ -4,6 +4,7 @@
 AS
 
 BEGIN TRY
+	
 	DECLARE
 		@ErrMsg NVARCHAR(MAX)
 		,@intId int = 0
@@ -138,8 +139,9 @@ BEGIN TRY
 		-------------------------------------
 		select @dblCurrentlyApplied = sum(isnull(si.dblDestinationQuantity, si.dblQuantity)) from tblICInventoryShipmentItem si where si.intLineNo = @intContractDetailId and si.intInventoryShipmentItemId <> @intExternalId;
 		select @dblContractQuantity = dblQuantity, @intContractHeaderId = intContractHeaderId from tblCTContractDetail where intContractDetailId = @intContractDetailId;
+		select @ysnLoad = isnull(ysnLoad, convert(bit,0)) from tblCTContractHeader where intContractHeaderId = @intContractHeaderId;    
 		
-		if ((@dblQuantity + isnull(@dblCurrentlyApplied,0)) > @dblContractQuantity  and @dblSequenceBalanceQuantity <= 0)
+		if (@ysnLoad = 0 and (@dblQuantity + isnull(@dblCurrentlyApplied,0)) > @dblContractQuantity  and @dblSequenceBalanceQuantity <= 0)
 		begin
 			select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 			continue
@@ -160,12 +162,6 @@ BEGIN TRY
 			select @dblConvertedQty = @dblSequenceBalanceQuantity;
 		end
 
-		-- if @dblConvertedQty = 0
-		-- begin
-		-- 	select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
-		-- 	continue
-		-- end
-
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,
 				@dblQuantityToUpdate	=	@dblConvertedQty,
@@ -175,6 +171,7 @@ BEGIN TRY
 				@ysnFromInvoice 		= 	@ysnFromInvoice,
 				@ysnDWG					=   1,
 				@ysnPostDWG				=   @ysnPost
+				
 
 		select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 
