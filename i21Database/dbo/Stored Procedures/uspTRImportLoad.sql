@@ -101,33 +101,39 @@ BEGIN
 			END
 
 			-- TRUCK
-			DECLARE @intTruckId INT = NULL
-			SELECT @intTruckId  = CRB.intTruckId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Truck' AND CRB.strImportValue = @strTruck
+			IF(@strTruck != '')
+			BEGIN
+				DECLARE @intTruckId INT = NULL
+				SELECT @intTruckId  = CRB.intTruckId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Truck' AND CRB.strImportValue = @strTruck
 
-            IF (@intTruckId IS NULL)
-			BEGIN
-				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')	
-			END
-			ELSE
-			BEGIN
-				UPDATE tblTRImportLoadDetail SET intTruckId = @intTruckId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				IF (@intTruckId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Truck')	
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intTruckId = @intTruckId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				END
 			END
 
 			-- TRAILER
-            DECLARE @intTrailerId INT = NULL
-			SELECT @intTrailerId  = CRB.intTrailerId
-			FROM tblTRCrossReferenceBol CRB 
-			WHERE CRB.strType = 'Trailer' AND CRB.strImportValue = @strTrailer
+			IF(@strTrailer != '')
+			BEGIN
+				DECLARE @intTrailerId INT = NULL
+				SELECT @intTrailerId  = CRB.intTrailerId
+				FROM tblTRCrossReferenceBol CRB 
+				WHERE CRB.strType = 'Trailer' AND CRB.strImportValue = @strTrailer
 
-            IF (@intTrailerId IS NULL)
-			BEGIN
-				SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Trailer')	
-			END
-			ELSE
-			BEGIN
-				UPDATE tblTRImportLoadDetail SET intTrailerId = @intTrailerId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				IF (@intTrailerId IS NULL)
+				BEGIN
+					SELECT @strMessage = dbo.fnTRMessageConcat(@strMessage, 'Invalid Trailer')	
+				END
+				ELSE
+				BEGIN
+					UPDATE tblTRImportLoadDetail SET intTrailerId = @intTrailerId WHERE intImportLoadDetailId = @intImportLoadDetailId
+				END
 			END
 
 			-- SUPLLIER / VENDOR

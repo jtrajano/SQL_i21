@@ -15,7 +15,7 @@ BEGIN
 	DECLARE @ErrorState INT
 
 	BEGIN TRY
-
+		
 		DECLARE @CursorHeaderTran AS CURSOR
 		SET @CursorHeaderTran = CURSOR FOR
 		SELECT DISTINCT 
@@ -58,10 +58,10 @@ BEGIN
 
 			UPDATE tblTRImportLoadDetail SET strMessage = @strTransactionNumber, intLoadHeaderId = @intLoadHeaderId
 			WHERE intImportLoadId = @intImportLoadId 
-			AND intTruckId = @intTruckId 
+			AND ISNULL(intTruckId, 0)  = ISNULL(@intTruckId, 0)
 			AND intCarrierId = @intCarrierId 
 			AND intDriverId = @intDriverId 
-			AND intTrailerId = @intTrailerId 
+			AND ISNULL(intTrailerId, 0) =  ISNULL(@intTrailerId, 0) 
 			AND dtmPullDate = @dtmPullDate
 			AND ysnValid = 1
 
@@ -189,24 +189,25 @@ BEGIN
 				LD.intCustomerId, 
 				LD.intShipToId, 
 				LD.intCustomerCompanyLocationId,
-				LD.intDropProductId
+				LD.dtmInvoiceDate,
+				LD.strPONumber
 			FROM tblTRImportLoadDetail LD WHERE LD.ysnValid = 1 
 			AND LD.intLoadHeaderId = @intLoadHeaderId
 
 			DECLARE @intCustomerId INT = NULL,
 				@intShipToId INT = NULL,
 				@intCustomerCompanyLocationId INT = NULL,		
-				@intDropProductId INT = NULL,
 				@intLoadDistributionHeaderId INT = NULL,
 				@strDestination NVARCHAR(20) = NULL,
 				@intSalePerson INT = NULL,
 				@ysnToBulkPlant BIT = NULL,
 				@intCustomerOrLocation INT = NULL,
-				@intShipToOrLocation INT = NULL
-
+				@intShipToOrLocation INT = NULL,
+				@dtmInvoiceDate DATETIME = NULL,
+				@strPONumber NVARCHAR(30) = NULL
 
 			OPEN @CursorDistributionTran
-			FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @intDropProductId
+			FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @dtmInvoiceDate, @strPONumber
 			WHILE @@FETCH_STATUS = 0
 			BEGIN
 
@@ -224,7 +225,7 @@ BEGIN
 		
 				-- GET SALES PERSON
 				SELECT @intSalePerson = intSalespersonId from vyuEMEntityCustomerSearch WHERE intEntityId = @intCustomerId
-				
+
 				INSERT INTO tblTRLoadDistributionHeader (intLoadHeaderId, 
 					strDestination, 
 					intEntityCustomerId, 
@@ -232,6 +233,7 @@ BEGIN
 					intCompanyLocationId, 
 					intEntitySalespersonId, 
 					dtmInvoiceDateTime,
+					strPurchaseOrder,
 					intConcurrencyId)
 				VALUES (@intLoadHeaderId,
 					@strDestination,
@@ -239,7 +241,8 @@ BEGIN
 					@intShipToId,
 					@intCustomerCompanyLocationId,
 					@intSalePerson,
-					@dtmPullDate,
+					@dtmInvoiceDate,
+					@strPONumber,
 					1)
 
 				SET @intLoadDistributionHeaderId = @@identity
@@ -248,9 +251,9 @@ BEGIN
 				WHERE intImportLoadId = @intImportLoadId 
 				AND ISNULL(intCustomerId, 0) = ISNULL(@intCustomerId, 0) 
 				AND ISNULL(intShipToId, 0) = ISNULL(@intShipToId, 0) 
-				AND ISNULL(intCustomerCompanyLocationId, 0) = ISNULL(@intCustomerCompanyLocationId, 0) 
-				AND ISNULL(intDropProductId, 0) = ISNULL(@intDropProductId, 0) 
-				AND dtmPullDate = @dtmPullDate
+				AND ISNULL(intCustomerCompanyLocationId, 0) = ISNULL(@intCustomerCompanyLocationId, 0)
+				AND dtmInvoiceDate = @dtmInvoiceDate
+				AND ISNULL(strPONumber,'') = ISNULL(@strPONumber, '')
 				AND ysnValid = 1
 
 				-- DISTRIBUTION DETAIL - BLENDING - START
@@ -400,7 +403,7 @@ BEGIN
 						,@dblRawValue -- Receipt Qty
 						,@dblSum -- Distiribution Qty
 						,@dtmPullDate
-						,@dtmPullDate
+						,@dtmInvoiceDate
 						,@ysnToBulkPlant
 						,@dblBlendFreightRateDistribution OUTPUT
 						,@dblBlendFreightRateReceipt OUTPUT
@@ -491,14 +494,14 @@ BEGIN
 
 						EXECUTE [dbo].[uspTRGetCustomerFreight]
 							@intCustomerOrLocation  -- Customer / Company Location
-							,@intDropProductId -- Receipt Item
+							,@intNonBlendDropProductId  -- Receipt Item
 							,@strNonBlendReceiptZipCode -- Supply Point
 							,@intCarrierId -- Ship Via
 							,@intShipToOrLocation -- Ship To
 							,@dblReceiptGallon
 							,@dblReceiptGallon
 							,@dtmPullDate
-							,@dtmPullDate
+							,@dtmInvoiceDate
 							,@ysnToBulkPlant
 							,@dblFreightRateDistribution OUTPUT
 							,@dblFreightRateReceipt OUTPUT
@@ -518,7 +521,7 @@ BEGIN
 					SET @dblNonBlendUnit = CASE WHEN @strNonBlendGrossNet = 'Gross' THEN @dblNonBlendDropGross ELSE @dblNonBlendDropNet END
  					
 					EXEC [uspARGetItemPrice] 
-						@TransactionDate = @dtmPullDate
+						@TransactionDate = @dtmInvoiceDate
 						,@ItemId = @intNonBlendDropProductId 
 						,@CustomerId = @intCustomerId   
 						,@LocationId = @intCustomerCompanyLocationId    
@@ -564,7 +567,7 @@ BEGIN
 				DEALLOCATE @CursorDistributionDetailNonBlendTran
 				-- DISTRIBUTION DETAIL - NON BLENDING - END
 
-				FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @intDropProductId
+				FETCH NEXT FROM @CursorDistributionTran INTO @intCustomerId, @intShipToId, @intCustomerCompanyLocationId, @dtmInvoiceDate, @strPONumber
 			END
 			CLOSE @CursorDistributionTran
 			DEALLOCATE @CursorDistributionTran
