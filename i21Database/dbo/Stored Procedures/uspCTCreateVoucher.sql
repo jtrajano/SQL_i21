@@ -404,8 +404,8 @@ begin try
 					,intShipFromEntityId = vp.intShipFromEntityId
 					,intPayToAddressId = vp.intPayToAddressId
 					,intCurrencyId = vp.intCurrencyId
-					,dtmDate = vp.dtmDate
-					,dtmVoucherDate = vp.dtmVoucherDate
+					,dtmDate = getdate()
+					,dtmVoucherDate = getdate()
 					,dtmDueDate = vp.dtmDueDate
 					,strVendorOrderNumber = vp.strVendorOrderNumber
 					,strReference = vp.strReference
@@ -779,8 +779,8 @@ begin try
 			,intShipFromEntityId = vp.intShipFromEntityId
 			,intPayToAddressId = vp.intPayToAddressId
 			,intCurrencyId = vp.intCurrencyId
-			,dtmDate = vp.dtmDate
-			,dtmVoucherDate = vp.dtmVoucherDate
+			,dtmDate = getdate()
+			,dtmVoucherDate = getdate()
 			,dtmDueDate = vp.dtmDueDate
 			,strVendorOrderNumber = vp.strVendorOrderNumber
 			,strReference = vp.strReference
