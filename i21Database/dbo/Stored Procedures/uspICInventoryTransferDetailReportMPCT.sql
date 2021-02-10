@@ -1,4 +1,5 @@
-﻿CREATE PROCEDURE uspICInventoryTransferReportMPCT @xmlParam NVARCHAR(MAX) = NULL
+﻿CREATE PROCEDURE uspICInventoryTransferDetailReportMPCT 
+	@xmlParam NVARCHAR(MAX) = NULL
 AS
 SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON
@@ -13,9 +14,35 @@ DECLARE @xmlDocumentId AS INT;
 
 -- Sanitize the @xmlParam 
 IF LTRIM(RTRIM(@xmlParam)) = '' 
-BEGIN
---SET @xmlParam = NULL 
-	SELECT *, CAST(0 AS BIT) ysnHasHeaderLogo FROM [vyuICGetInventoryTransferDetail] WHERE intInventoryTransferId = 1 --RETURN NOTHING TO RETURN SCHEMA
+BEGIN	
+	SELECT 
+		strTransferNo
+		,dtmTransferDate
+		,strCarrier
+		,strAttn
+		,dtmDeliveryDate
+		,strPONumber
+		,strSupplierRef
+		,strItemNo
+		,strItemDescription
+		,strMotherLotNumber
+		,strLotNumber
+		,strContainerNumber
+		,strMarks
+		,dblQuantity
+		,strQuantityUOM
+		,dblWeight
+		,strWeightUOM
+		,dtmReceiptDate		
+		,CAST(0 AS BIT) ysnHasHeaderLogo 
+		,strWarehouse
+		,strDeliveryInstructions
+		,strApproxValue
+		,strDescription
+	FROM 
+		vyuICGetInventoryTransferDetailReportMPCT 
+	WHERE 
+		1 = 0 --RETURN NOTHING TO RETURN SCHEMA
 END
 
 -- Create a table variable to hold the XML data. 		
@@ -46,9 +73,13 @@ WITH (
 )
 
 DECLARE @strTransferNo NVARCHAR(100)
-SELECT @strTransferNo = [from]
-FROM @temp_xml_table
-WHERE [fieldname] = 'strTransferNo'
+
+SELECT 
+	@strTransferNo = [from]
+FROM 
+	@temp_xml_table
+WHERE 
+	[fieldname] = 'strTransferNo'
 
 
 IF EXISTS(SELECT 1 FROM @temp_xml_table)
@@ -66,7 +97,11 @@ ELSE
 	SET @HasHeaderLogo = 0
 
 SELECT 
-	dtmDeliveryDate 
+	strTransferNo
+	,dtmTransferDate
+	,strCarrier
+	,strAttn	
+	,dtmDeliveryDate
 	,strPONumber
 	,strSupplierRef
 	,strItemNo
@@ -77,17 +112,18 @@ SELECT
 	,strMarks
 	,dblQuantity
 	,strQuantityUOM
-	,dblWeight 
+	,dblWeight
 	,strWeightUOM
-	,dtmReceiptDate 
-	
-
-	
-	, ysnHasHeaderLogo = CAST(@HasHeaderLogo AS BIT)
+	,dtmReceiptDate
+	,ysnHasHeaderLogo = CAST(@HasHeaderLogo AS BIT)
+	,strWarehouse
+	,strDeliveryInstructions
+	,strApproxValue
+	,strDescription
 FROM 
-	[vyuICGetInventoryTransferDetail] v
-	LEFT JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = v.intFromLocationId
+	vyuICGetInventoryTransferDetailReportMPCT v
 WHERE 
 	v.strTransferNo = @strTransferNo
 ORDER BY 
-	dtmTransferDate DESC
+	dtmDeliveryDate ASC
+	,intInventoryTransferDetailId ASC 

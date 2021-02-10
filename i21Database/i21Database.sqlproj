@@ -9043,6 +9043,8 @@
     <Build Include="dbo\Functions\fnAPClearing.sql" />
     <Build Include="dbo\Functions\fnAPGetDetailSourceTransaction.sql" />
     <Build Include="dbo\Tables\tblAGApplicatorLicense.sql" />
+    <Build Include="dbo\Stored Procedures\uspICInventoryTransferDetailReportMPCT.sql" />
+    <Build Include="dbo\Views\vyuICGetInventoryTransferDetailReportMPCT.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
