@@ -8912,8 +8912,6 @@
     <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
     <Build Include="dbo\Views\vyuIPLogView.sql" />
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
-    <Build Include="dbo\Tables\tblQMTicketDiscountItemInfo.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCModifyTicketDiscountItemInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

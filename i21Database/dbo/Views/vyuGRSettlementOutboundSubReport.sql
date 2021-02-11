@@ -31,8 +31,6 @@ FROM (
 			,dblShrinkPercent = ISNULL((
 										SELECT dblShrinkPercent
 										FROM tblQMTicketDiscount TD
-										LEFT JOIN tblQMTicketDiscountItemInfo QMII
-											on TD.intTicketDiscountId = QMII.intTicketDiscountId
 										JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
 										WHERE TD.intTicketId =  CASE 
 																	WHEN INVSHIP.intSourceType = 4 THEN (
@@ -48,14 +46,12 @@ FROM (
 																										   WHERE intTicketId = INVSHIPITEM.intSourceId
 																										 )
 																END
-															AND isnull(QMII.intItemId, DS.intItemId) = InvDtl.intItemId
+															AND DS.intItemId = InvDtl.intItemId
 										), 0)
 
 			,dblGradeReading = ISNULL((
 										SELECT dblGradeReading
 										FROM tblQMTicketDiscount TD
-										LEFT JOIN tblQMTicketDiscountItemInfo QMII
-											on TD.intTicketDiscountId = QMII.intTicketDiscountId
 										JOIN tblGRDiscountScheduleCode DS ON TD.intDiscountScheduleCodeId = DS.intDiscountScheduleCodeId
 										WHERE TD.intTicketId = CASE 
 																	WHEN INVSHIP.intSourceType = 4
@@ -71,7 +67,7 @@ FROM (
 																			WHERE intTicketId = INVSHIPITEM.intSourceId
 																		 )
 															   END
-											AND isnull(QMII.intItemId, DS.intItemId) = InvDtl.intItemId
+											AND DS.intItemId = InvDtl.intItemId
 										), 0)
 			,InvDtl.dblTotal AS dblAmount
 			,InvDtl.dblTotalTax AS dblTax

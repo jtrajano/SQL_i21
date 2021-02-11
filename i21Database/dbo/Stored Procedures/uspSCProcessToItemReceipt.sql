@@ -720,8 +720,6 @@ BEGIN TRY
 		EXEC uspSCProcessReceiptToVoucher @intTicketId, @InventoryReceiptId	,@intUserId, @intBillId OUTPUT
 	END
 
-	--EXEC uspSCModifyTicketDiscountItemInfo @intTicketId
-
 	EXEC dbo.uspSMAuditLog 
 			@keyValue			= @intTicketId				-- Primary Key Value of the Ticket. 
 			,@screenName		= 'Grain.view.Scale'		-- Screen Namespace
