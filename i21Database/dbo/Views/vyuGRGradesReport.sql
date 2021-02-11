@@ -17,11 +17,13 @@ FROM (
 		,'#' + CAST(CAST(ISNULL(QM.dblGradeReading,0) AS INT) AS nvarchar(2)) COLLATE Latin1_General_CI_AS as strGrade
 		,CS.dblOriginalBalance
 		,intDeliveryYear = YEAR(CS.dtmDeliveryDate)
-	FROM tblQMTicketDiscount QM
+	FROM tblQMTicketDiscount QM	
+	LEFT JOIN tblQMTicketDiscountItemInfo QMII
+		on QM.intTicketDiscountId = QMII.intTicketDiscountId
 	INNER JOIN tblGRDiscountScheduleCode DSC
 		ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 	INNER JOIN tblICItem IM
-		ON DSC.intItemId = IM.intItemId
+		ON ISNULL(QMII.intItemId,DSC.intItemId) = IM.intItemId
 	INNER JOIN tblGRDiscountSchedule DS
 		ON DS.intDiscountScheduleId = DSC.intDiscountScheduleId
 	INNER JOIN tblGRCustomerStorage CS
