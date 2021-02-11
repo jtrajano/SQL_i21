@@ -9052,6 +9052,7 @@
     <Build Include="dbo\Views\vyuICGetInventoryTransferDetailReportMPCT.sql" />
     <Build Include="dbo\Stored Procedures\uspAGProcessWOToItemShipment.sql" />
     <Build Include="dbo\Tables\tblEMEntityFarmDetail.sql" />
+    <Build Include="dbo\Tables\tblMFWorkOrderPreStage.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
