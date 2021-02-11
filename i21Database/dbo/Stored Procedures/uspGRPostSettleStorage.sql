@@ -13,6 +13,7 @@ BEGIN TRY
 	DECLARE @EntityId INT
 	DECLARE @LocationId INT
 	DECLARE @ItemId INT
+	DECLARE @ysnInventoryCost_ItemId bit
 	DECLARE @strItemNo NVARCHAR(20)
 	DECLARE @intUnitMeasureId INT
 	DECLARE @CommodityStockUomId INT
@@ -43,6 +44,7 @@ BEGIN TRY
 	DECLARE @strUpdateType NVARCHAR(30)
 	DECLARE @IntCommodityId INT
 	DECLARE @intStorageChargeItemId INT
+	DECLARE @ysnInventoryCost_StorageChargeItem bit
 	DECLARE @StorageChargeItemDescription NVARCHAR(100)
 	DECLARE @dblStorageDuePerUnit DECIMAL(24, 10)
 	DECLARE @dblStorageDueAmount DECIMAL(24, 10)
@@ -328,6 +330,7 @@ BEGIN TRY
 			,@ItemLocationId	= IL.intItemLocationId
 			,@strCommodityCode	= Com.strCommodityCode
 			,@ysnExchangeTraded = Com.ysnExchangeTraded
+			,@ysnInventoryCost_ItemId = Item.ysnInventoryCost
 		FROM tblICItem Item
 		JOIN tblICCommodity Com 
 			ON Com.intCommodityId = Item.intCommodityId
@@ -497,6 +500,7 @@ BEGIN TRY
 			SELECT TOP 1 
 				@intStorageChargeItemId = intItemId
 				,@StorageChargeItemDescription = strDescription
+				,@ysnInventoryCost_StorageChargeItem = 0
 			FROM tblICItem
 			WHERE strType = 'Other Charge' 
 				AND strCostType = 'Storage Charge' 
@@ -670,6 +674,7 @@ BEGIN TRY
 					,ysnPercentChargeType
 					,dblCashPriceUsed
 					,intSettleContractId
+					,ysnInventoryCost
 				)
 				SELECT 
 					 intCustomerStorageId		= CS.intCustomerStorageId
@@ -712,6 +717,8 @@ BEGIN TRY
 					,dblCashPriceUsed			= CASE WHEN SC.strPricingType = 'Basis' THEN @dblFutureMarkePrice + SC.dblBasis ELSE (CASE WHEN SS.dblCashPrice <> 0 THEN SS.dblCashPrice ELSE SC.dblCashPrice END) END
 													
 					,intSettleContractId		= intSettleContractKey
+					
+					,ysnInventoryCost 			= isnull(QMII.ysnInventoryCost, DItem.ysnInventoryCost)
 				FROM tblGRCustomerStorage CS
 				JOIN tblGRSettleStorageTicket SST 
 					ON SST.intCustomerStorageId = CS.intCustomerStorageId 
@@ -725,6 +732,10 @@ BEGIN TRY
 				JOIN tblQMTicketDiscount QM 
 					ON QM.intTicketFileId = CS.intCustomerStorageId 
 						AND QM.strSourceType = 'Storage'
+				
+				LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+					ON QMII.intTicketDiscountId = QM.intTicketDiscountId
+
 				JOIN tblGRDiscountScheduleCode DSC
 					ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 				JOIN tblGRDiscountCalculationOption DCO
@@ -762,6 +773,7 @@ BEGIN TRY
 					,intItemId
 					,intItemType
 					,IsProcessed
+					,ysnInventoryCost
 				)
 				SELECT DISTINCT
 					 intCustomerStorageId = SST.intCustomerStorageId
@@ -776,6 +788,7 @@ BEGIN TRY
 					,intItemId            = IC.intItemId
 					,intItemType          = 4
 					,IsProcessed          = 0
+					,ysnInventoryCost	  = IC.ysnInventoryCost
 				FROM tblGRCustomerStorage CS
 				INNER JOIN tblGRSettleStorageTicket SST 
 					ON 	SST.intCustomerStorageId = CS.intCustomerStorageId 
@@ -903,6 +916,7 @@ BEGIN TRY
 						,intItemId
 						,intItemType
 						,IsProcessed
+						,ysnInventoryCost
 					)
 					SELECT 
 						 intCustomerStorageId  = @intCustomerStorageId
@@ -914,6 +928,7 @@ BEGIN TRY
 						,intItemId             = @intStorageChargeItemId
 						,intItemType           = 2
 						,IsProcessed           = 0
+						,ysnInventoryCost	   = @ysnInventoryCost_StorageChargeItem
 				END
 
 				IF ISNULL(@DPContractHeaderId, 0) > 0
@@ -1029,6 +1044,7 @@ BEGIN TRY
 								,intContractUOMId
 								,dblCostUnitQty
 								,intSettleContractId
+								,ysnInventoryCost
 							)
 							SELECT 
 								 intCustomerStorageId	= @intCustomerStorageId
@@ -1046,6 +1062,7 @@ BEGIN TRY
 								,intContractUOMId		= @intContractUOMId
 								,dblCostUnitQty			= @dblCostUnitQty								
 								,intSettleContractId	= @SettleContractKey
+								,ysnInventoryCost	    = @ysnInventoryCost_ItemId
 							BREAK;
 						END
 						ELSE
@@ -1098,6 +1115,7 @@ BEGIN TRY
 								,intContractUOMId
 								,dblCostUnitQty								
 								,intSettleContractId
+								,ysnInventoryCost
 							)
 							SELECT 
 								 intCustomerStorageId   = @intCustomerStorageId
@@ -1115,6 +1133,7 @@ BEGIN TRY
 								,intContractUOMId		= @intContractUOMId
 								,dblCostUnitQty			= @dblCostUnitQty								
 								,intSettleContractId	= @SettleContractKey
+								,ysnInventoryCost	    = @ysnInventoryCost_ItemId
 							BREAK;
 						END
 
@@ -1152,6 +1171,7 @@ BEGIN TRY
 							,intItemType
 							,IsProcessed								
 							,intSettleContractId
+							,ysnInventoryCost
 						 )
 						SELECT 
 							 intCustomerStorageId = @intCustomerStorageId
@@ -1165,6 +1185,7 @@ BEGIN TRY
 							,intItemType          = 1
 							,IsProcessed          = 0								
 							,intSettleContractId = -90
+							,ysnInventoryCost	    = @ysnInventoryCost_ItemId
 					END
 					ELSE
 					BEGIN
@@ -1185,6 +1206,7 @@ BEGIN TRY
 							,intItemType
 							,IsProcessed								
 							,intSettleContractId
+							,ysnInventoryCost
 						)
 						SELECT 
 							 intCustomerStorageId = @intCustomerStorageId
@@ -1198,6 +1220,7 @@ BEGIN TRY
 							,intItemType          = 1
 							,IsProcessed          = 0															
 							,intSettleContractId = -90
+							,ysnInventoryCost	    = @ysnInventoryCost_ItemId
 
 						SET @dblSpotUnits = 0
 					END
@@ -1235,6 +1258,7 @@ BEGIN TRY
 					,ysnDiscountFromGrossWeight
 					,ysnPercentChargeType	
 					,dblCashPriceUsed
+					,ysnInventoryCost
 				)
 				SELECT 
 					strOrderType
@@ -1266,7 +1290,8 @@ BEGIN TRY
 					,dblSettleContractUnits
 					,ysnDiscountFromGrossWeight
 					,ysnPercentChargeType	
-					,dblCashPriceUsed		
+					,dblCashPriceUsed
+					,ysnInventoryCost		
 				FROM @SettleVoucherCreate SVC
 				OUTER APPLY (
 					SELECT * FROM tblGRSettleContractPriceFixationDetail WHERE intSettleStorageId = @intSettleStorageId AND intContractDetailId = SVC.intContractDetailId
@@ -1314,6 +1339,7 @@ BEGIN TRY
 					,ysnDiscountFromGrossWeight
 					,ysnPercentChargeType	
 					,dblCashPriceUsed
+					,ysnInventoryCost
 				)
 				SELECT 
 					strOrderType
@@ -1335,6 +1361,7 @@ BEGIN TRY
 					,ysnDiscountFromGrossWeight
 					,ysnPercentChargeType	
 					,dblCashPriceUsed		
+					,ysnInventoryCost
 				FROM @SettleVoucherCreate
 			END		
 
@@ -1414,9 +1441,7 @@ BEGIN TRY
 							,0)  AS dblTotalCashPrice,
 							sum(CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END ) as dblTotalUnits 
 						FROM @SettleVoucherCreate SV
-						INNER JOIN tblICItem I
-							ON I.intItemId = SV.intItemId
-								AND I.ysnInventoryCost = 1
+							where SV.ysnInventoryCost = 1
 								and SV.intItemType = 3
 					) DiscountCost
 					WHERE SV.intItemType = 1
@@ -1525,10 +1550,8 @@ BEGIN TRY
 					SELECT 
 						ISNULL(SUM(ROUND((SV2.dblCashPrice * SV2.dblUnits), 2)),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV2
-					INNER JOIN tblICItem I
-						ON I.intItemId = SV2.intItemId
-							AND I.ysnInventoryCost = 1
-							and SV.intItemType = 3
+					where SV2.ysnInventoryCost = 1 
+							and SV2.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost			
 
@@ -1593,9 +1616,7 @@ BEGIN TRY
 					SELECT 
 						ISNULL(SUM(ROUND((SV2.dblCashPrice * SV2.dblUnits), 2)),0) AS dblTotalCashPrice
 					FROM @SettleVoucherCreate SV2
-					INNER JOIN tblICItem I
-						ON I.intItemId = SV2.intItemId
-							AND I.ysnInventoryCost = 1
+					where SV2.ysnInventoryCost = 1 
 							and SV2.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
@@ -2118,7 +2139,11 @@ BEGIN TRY
 																when (availableQtyForVoucher.intContractDetailId is not null and @ysnFromPriceBasisContract = 1 and intItemType = 1) or (@ysnFromPriceBasisContract = 0 and availableQtyForVoucher.intPricingTypeIdHeader = 2 and availableQtyForVoucher.intPricingTypeId /*sequence*/ = 1 and intItemType = 1) 
 																then dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice) 
 																WHEN a.[intContractHeaderId] IS NOT NULL THEN dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId,a.dblCashPrice) 
-																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),6) else a.dblCashPrice end
+																--Dev Note ( Mon Gonzales)
+																--Added a.dblCashPriceUsed is not null and a.intContractUOMId is not null, spot settlement will have an issue here
+																--some discount might not get contract uom for spot settlements
+																ELSE case when (intItemType = 3 and ysnPercentChargeType = 1 and a.dblCashPriceUsed is not null and a.intContractUOMId is not null) then ROUND((a.dblCashPrice / a.dblCashPriceUsed) * dbo.fnCTConvertQtyToTargetItemUOM(a.intContractUOMId,b.intItemUOMId, availableQtyForVoucher.dblCashPrice),6) 
+																else a.dblCashPrice end
 															END
 														end					
 															
@@ -2698,7 +2723,9 @@ BEGIN TRY
 								from @voucherPayable a 
 									join tblICItem b on 
 										a.intItemId = b.intItemId
-									where b.ysnInventoryCost = 1 and strType = 'Other Charge'
+									left join @SettleVoucherCreate SettleVoucher
+										on a.intItemId = SettleVoucher.intItemId
+									where isnull(SettleVoucher.ysnInventoryCost, b.ysnInventoryCost) = 1 and strType = 'Other Charge'
 
 					IF ISNULL(@dblTotal,0) > 0
 					BEGIN							
