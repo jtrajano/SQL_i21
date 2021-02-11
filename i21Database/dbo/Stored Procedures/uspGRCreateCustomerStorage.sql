@@ -243,6 +243,9 @@ BEGIN TRY
 		JOIN @CustomerStorageStagingTable CS ON CS.intTicketId = SD.intTicketId
 		JOIN tblGRDiscountScheduleCode DCode ON DCode.intDiscountScheduleCodeId = SD.intDiscountScheduleCodeId
 		WHERE SD.strSourceType = 'Scale'
+
+
+		exec [uspGRModifyTicketDiscountItemInfo] @intStorageId = @intCustomerStorageId
 		
 		UPDATE CS
 		SET  CS.dblDiscountsDue = QM.dblDiscountsDue
