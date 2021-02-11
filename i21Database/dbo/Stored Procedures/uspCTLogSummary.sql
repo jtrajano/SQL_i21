@@ -901,7 +901,7 @@ BEGIN TRY
 					, cd.intCommodityId
 					, sh.intItemId
 					, sh.intCompanyLocationId
-					, intPricingTypeId = CASE WHEN suh.strScreenName IN ('Voucher', 'Invoice') THEN 1 ELSE sh.intPricingTypeId END
+					, intPricingTypeId = cd.intPricingTypeId--CASE WHEN suh.strScreenName IN ('Voucher', 'Invoice') THEN 1 ELSE sh.intPricingTypeId END
 					, sh.intFutureMarketId  
 					, sh.intFutureMonthId  
 					, sh.dblBasis  
