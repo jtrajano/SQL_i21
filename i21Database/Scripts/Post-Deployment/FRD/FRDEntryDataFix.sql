@@ -773,3 +773,34 @@ WHERE (strSource = '' or strSource IS NULL) and strRowType IN ('Filter Accounts'
 GO
 	PRINT N'UPDATE Default Value'
 GO
+
+
+--=====================================================================================================================================
+-- 	REPORT HIERARCHY: REBUILD FILTER STRING
+---------------------------------------------------------------------------------------------------------------------------------------
+
+PRINT N'BEGIN - FRD Data Fix for 20.1. Rebuild Hierarchy Filter String'
+GO
+
+IF	EXISTS (SELECT 1 FROM (SELECT TOP 1 dblVersion = CAST(LEFT(strVersionNo, 4) AS NUMERIC(18,1)) FROM tblSMBuildNumber ORDER BY intVersionID DESC) v WHERE v.dblVersion = 20.1)
+	AND EXISTS (SELECT TOP 1 1 FROM tblFRReportHierarchy)
+BEGIN 
+	IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[uspFRDBuildHierarchyFilterString]') AND type in (N'P', N'PC'))
+	BEGIN
+		DECLARE @ReportHierarchy TABLE ([intReportHierarchyId] INT)
+		DECLARE @intReportHierarchyId INT
+
+		INSERT INTO @ReportHierarchy
+		SELECT intReportHierarchyId FROM  tblFRReportHierarchy
+
+		WHILE EXISTS(SELECT 1 FROM @ReportHierarchy)
+		BEGIN
+			SELECT TOP 1 @intReportHierarchyId = intReportHierarchyId FROM @ReportHierarchy
+			EXEC uspFRDBuildHierarchyFilterString @intReportHierarchyId
+			DELETE @ReportHierarchy WHERE intReportHierarchyId = @intReportHierarchyId
+		END
+	END
+END 
+GO
+
+PRINT N'END - FRD Data Fix for 20.1. Rebuild Hierarchy Filter String'
