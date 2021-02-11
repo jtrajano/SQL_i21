@@ -3223,7 +3223,8 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = dblQty
+							--If unposting, Contract Balance Log should always positive.
+							UPDATE @cbLogSpecific SET dblQty = abs(dblQty)
 						END
 					END
 					ELSE
