@@ -43,16 +43,34 @@ SET NOCOUNT ON
 
 		ALTER TABLE #tblCTContractDetail DROP COLUMN intContractDetailId
 
-		UPDATE	#tblCTContractDetail 
-		SET		dblQuantity			=	@dblQuantity,
-				dblNetWeight		=	@dblQuantity,
-				dblBalance			=	@dblQuantity,
-				dblScheduleQty		=	NULL,
-				intConcurrencyId	=	1,
-				intContractStatusId =	1,
-				intContractSeq		=	@intNextSequence,
-				intSplitId			=	NULL,
-				intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId)
+		if (@strScreenName = 'Split')
+		BEGIN
+			UPDATE	#tblCTContractDetail 
+			SET		dblQuantity			=	@dblQuantity,
+					dblNetWeight		=	@dblQuantity,
+					dblBalance			=	@dblQuantity,
+					dblScheduleQty		=	NULL,
+					intConcurrencyId	=	1,
+					intContractStatusId =	1,
+					intContractSeq		=	@intNextSequence,
+					intSplitId			=	NULL,
+					intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId)
+		END
+		ELSE
+		BEGIN
+			UPDATE	#tblCTContractDetail 
+			SET		dblQuantity			=	@dblQuantity,
+					dblNetWeight		=	@dblQuantity,
+					dblBalance			=	@dblQuantity,
+					dblScheduleQty		=	NULL,
+					intConcurrencyId	=	1,
+					intContractStatusId =	1,
+					intContractSeq		=	@intNextSequence,
+					intSplitId			=	NULL,
+					intContractHeaderId	=	ISNULL(@intNewContractHeaderid, @intContractHeaderId),
+					intPricingTypeId    =    1
+		END
+
 
 		EXEC	uspCTGetTableDataInXML '#tblCTContractDetail',null,@XML OUTPUT							
 		EXEC	uspCTInsertINTOTableFromXML 'tblCTContractDetail',@XML,@intNewContractDetailId OUTPUT
