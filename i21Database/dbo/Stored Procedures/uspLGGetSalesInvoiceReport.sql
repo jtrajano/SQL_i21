@@ -117,10 +117,10 @@ BEGIN
 	SELECT TOP 1 @strCompanyName = tblSMCompanySetup.strCompanyName
 		,@strCompanyAddress = tblSMCompanySetup.strAddress
 		,@strContactName = tblSMCompanySetup.strContactName
-		,@strCounty = tblSMCompanySetup.strCounty
-		,@strCity = tblSMCompanySetup.strCity
-		,@strState = tblSMCompanySetup.strState
-		,@strZip = tblSMCompanySetup.strZip
+		,@strCounty = ISNULL(tblSMCompanySetup.strCounty, '')
+		,@strCity = ISNULL(tblSMCompanySetup.strCity, '')
+		,@strState = ISNULL(tblSMCompanySetup.strState, '')
+		,@strZip = ISNULL(tblSMCompanySetup.strZip, '')
 		,@strCountry = isnull(rtCompanyTranslation.strTranslation, tblSMCompanySetup.strCountry)
 		,@strPhone = tblSMCompanySetup.strPhone
 	FROM tblSMCompanySetup
@@ -157,7 +157,8 @@ BEGIN
 		,Inv.strBillToCity
 		,Inv.strBillToState
 		,Inv.strBillToZipCode
-		,strCityStateZip = Inv.strBillToCity + ', ' + Inv.strBillToState + ', ' + Inv.strBillToZipCode
+		,strCityStateZip = CASE WHEN (ISNULL(Inv.strBillToCity, '') = '') THEN '' ELSE Inv.strBillToCity + ', ' END 
+			+ CASE WHEN (ISNULL(Inv.strBillToState, '') = '') THEN '' ELSE Inv.strBillToState + ', ' END + Inv.strBillToZipCode
 		,Inv.strBillToCountry
 		,Inv.strComments
 		,Inv.strFooterComments
