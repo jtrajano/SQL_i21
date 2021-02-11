@@ -39,7 +39,8 @@ BEGIN TRY
 				@dblReverseSchQty				NUMERIC(18,6),
 				@intSContractDetailId			INT,
 				@dblAppliedQty					NUMERIC(18,6),
-				@dblDistributedLoadQty			NUMERIC(18,6)
+				@dblDistributedLoadQty			NUMERIC(18,6),
+				@ysnDWG							BIT = 0
 
 	SELECT @intOrderType = intOrderType,@intSourceType = intSourceType,@strShipmentId= strShipmentId FROM @ItemsFromInventoryShipment
 	SELECT @ysnReduceScheduleByLogisticsLoad = ysnReduceScheduleByLogisticsLoad FROM tblCTCompanyPreference
@@ -126,13 +127,30 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+
+			select @ysnDWG = 0;
+			if exists (
+				select
+					top 1 1
+				from
+					tblCTContractDetail cd
+					join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
+					left join tblCTWeightGrade wg on wg.intWeightGradeId in (isnull(ch.intWeightId,0), isnull(ch.intGradeId,0))
+				where
+					cd.intContractDetailId = @intContractDetailId
+					and wg.strWhereFinalized = 'Destination'
+			)
+			begin
+				select @ysnDWG = 1;
+			end
+
 			EXEC	uspCTUpdateSequenceBalance
 					@intContractDetailId	=	@intContractDetailId,
 					@dblQuantityToUpdate	=	@dblConvertedQty,
 					@intUserId				=	@intUserId,
 					@intExternalId			=	@intInventoryShipmentItemId,
 					@strScreenName			=	@strScreenName,
-					@ysnDWG					= 	1
+					@ysnDWG					= 	@ysnDWG
 
 			SELECT	@dblSchQuantityToUpdate = -@dblConvertedQty
 
