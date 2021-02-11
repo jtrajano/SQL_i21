@@ -1310,7 +1310,7 @@ BEGIN TRY
 							BEGIN
 								SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
 								SET @_strAuditDescription = 'Undistribution of Ticket - ' +  @strTicketNumber
-								EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intTicketItemId, dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+								EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intTicketItemId, @dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
 							END
 							
 
