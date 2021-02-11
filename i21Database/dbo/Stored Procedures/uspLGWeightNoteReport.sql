@@ -81,7 +81,7 @@ BEGIN
 		LEFT JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		LEFT JOIN tblEMEntity E ON E.intEntityId = CH.intEntityId
 		LEFT JOIN tblEMEntityToContact ETC ON ETC.intEntityId = E.intEntityId AND ETC.ysnDefaultContact = 1
-		LEFT JOIN tblEMEntity EC ON EC.intEntityId = ISNULL(CH.intEntityContactId, ETC.intEntityId)
+		LEFT JOIN tblEMEntity EC ON EC.intEntityId = ISNULL(CH.intEntityContactId, ETC.intEntityContactId)
 		LEFT JOIN tblICItem I ON I.intItemId = CD.intItemId
 		OUTER APPLY (SELECT TOP 1 
 						iri.intInventoryReceiptItemId
