@@ -125,7 +125,13 @@ SELECT DISTINCT WC.intWeightClaimId
 	,EL.strCity
 	,EL.strState
 	,strCountry = isnull(rtELTranslation.strTranslation,EL.strCountry)
-	,strVendorAddress = E.strName + CHAR(13) + EL.strAddress + CHAR(13) + EL.strZipCode + ' ' + EL.strCity + CHAR(13) + EL.strState + ' ' + isnull(rtELTranslation.strTranslation,EL.strCountry)
+	,strVendorAddress = E.strName + CHAR(13) 
+		+ CASE WHEN (ISNULL(EL.strAddress, '') = '') THEN '' ELSE EL.strAddress + CHAR(13) END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '') THEN '' ELSE EL.strZipCode + ' ' END 
+		+ CASE WHEN (ISNULL(EL.strCity, '') = '') THEN '' ELSE EL.strCity END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '' AND ISNULL(EL.strCity, '') = '') THEN '' ELSE CHAR(13) END  
+		+ CASE WHEN (ISNULL(EL.strState, '') = '') THEN '' ELSE EL.strState + ' ' END 
+		+ ISNULL(rtELTranslation.strTranslation,EL.strCountry)
 	,B.strBillId
 	,strShippingLine = @via + ' ' + ShippingLine.strName
 	,L.strMVessel
@@ -150,6 +156,7 @@ SELECT DISTINCT WC.intWeightClaimId
 			THEN @Invoice
 		END
 	,strVoucherBankInfo = @strVoucherBankInfo1 + ': ' + CHAR(13) + CHAR(13) + BA.strBankName + CHAR(13) + @strVoucherBankInfo2 + ' : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + @strVoucherBankInfo3 + ' : ' + ISNULL(BA.strSWIFT, '')
+	,strVoucherBankInfoBrE = 'Please transfer this amount in our favour with: ' + CHAR(13) + CHAR(13) + BA.strBankName + CHAR(13) + @strVoucherBankInfo2 + ' : ' + ISNULL(BA.strIBAN, '') + CHAR(13) + @strVoucherBankInfo3 + ' : ' + ISNULL(BA.strSWIFT, '')
 	,blbFullHeaderLogo = dbo.fnSMGetCompanyLogo('FullHeaderLogo')
 	,blbFullFooterLogo = dbo.fnSMGetCompanyLogo('FullFooterLogo')
 	,blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
