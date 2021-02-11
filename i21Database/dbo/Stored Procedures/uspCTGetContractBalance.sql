@@ -350,12 +350,12 @@ BEGIN
 			    ,dblFutures						=	CASE
 													WHEN CBL.intPricingTypeId = 1 and CD.dblFutures is not null
 													THEN CD.dblFutures
-													ELSE NULL
+													ELSE (case when CBL.intPricingTypeId = 1 then PF.dblPriceWORollArb else null end)
 													END  
 			    ,dblBasis						=	CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6))
 				,dblCashPrice					=	CASE
 													WHEN CBL.intPricingTypeId = 1
-													THEN (ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0))
+													THEN (ISNULL(CD.dblFutures,isnull(PF.dblPriceWORollArb,0)) + ISNULL(CD.dblBasis,0))
 													ELSE NULL
 													END  
 			    ,dblAmount						=	CASE   
@@ -394,7 +394,8 @@ BEGIN
 			LEFT JOIN tblICItemUOM				BASISUOM	ON BASISUOM.intItemUOMId = CBL.intBasisUOMId
 			LEFT JOIN tblICUnitMeasure			BUOM		ON BUOM.intUnitMeasureId = BASISUOM.intUnitMeasureId
 			LEFT JOIN tblICItemUOM				PriceUOM	ON PriceUOM.intItemUOMId = CD.intPriceItemUOMId
-			LEFT JOIN tblICUnitMeasure			PUOM		ON PUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId	
+			LEFT JOIN tblICUnitMeasure			PUOM		ON PUOM.intUnitMeasureId = PriceUOM.intUnitMeasureId
+			left join tblCTPriceFixation 		PF 			ON PF.intContractDetailId = CD.intContractDetailId	
 			WHERE CBL.strTransactionType = 'Contract Balance'
 		) tbl
 		INNER JOIN @tblStatus Stat ON tbl.intContractDetailId = Stat.intContractDetailId
