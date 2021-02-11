@@ -147,7 +147,7 @@ CROSS APPLY (
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE SS.intParentSettleStorageId IS NOT NULL
-			AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
+			-- AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractNumbers
 ) AS _strContractNumbers
 CROSS APPLY (
@@ -160,7 +160,7 @@ CROSS APPLY (
 		INNER JOIN tblCTContractHeader CH
 			ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE SS.intParentSettleStorageId IS NOT NULL
-			AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
+			-- AND CASE WHEN (CD.intPricingTypeId = 2 AND (CD.dblTotalCost = 0)) THEN 0 ELSE 1 END = 1
 		FOR XML PATH('')) COLLATE Latin1_General_CI_AS as strContractIds
 ) AS _strContractIds
 OUTER APPLY (
