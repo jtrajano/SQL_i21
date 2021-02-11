@@ -111,11 +111,13 @@ BEGIN
 				receipt.intContractDetailId
 				, shipment.intContractDetailId
 				, invoice.intContractDetailId
+				, adjustment.intContractDetailId
 			)
 			,intContractHeaderId = COALESCE(
 				receipt.intContractHeaderId
 				, shipment.intContractHeaderId
 				, invoice.intContractHeaderId
+				, adjustment.intContractHeaderId
 			)
 			,intTicketId = v.intTicketId
 			,intCommodityId = v.intCommodityId
@@ -248,6 +250,22 @@ BEGIN
 						, invoice.intContractDetailId 
 					)
 			) contractDetail
+
+			OUTER APPLY (
+				SELECT 
+					intContractDetailId = ad.intContractDetailId
+					,intContractHeaderId = ad.intContractHeaderId
+				FROM 
+					tblICInventoryAdjustment a INNER JOIN tblICInventoryAdjustmentDetail ad
+						ON a.intInventoryAdjustmentId = ad.intInventoryAdjustmentId
+					LEFT JOIN tblICLot l
+						ON l.intLotId = ad.intLotId 
+				WHERE
+					t.strTransactionForm = 'Inventory Adjustment'
+					AND a.strAdjustmentNo = t.strTransactionId
+					AND a.intInventoryAdjustmentId = t.intTransactionId
+					AND ad.intInventoryAdjustmentDetailId = t.intTransactionDetailId
+			) adjustment 
 
 		WHERE
 			(t.strTransactionId = @strTransactionId OR @strTransactionId IS NULL) 
