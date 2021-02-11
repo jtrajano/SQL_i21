@@ -122,7 +122,13 @@ SELECT DISTINCT WC.intWeightClaimId
 	,EL.strCity
 	,EL.strState
 	,strCountry = isnull(rtELTranslation.strTranslation,EL.strCountry)
-	,strCustomerAddress = E.strName + CHAR(13) + EL.strAddress + CHAR(13) + EL.strZipCode + ' ' + EL.strCity + CHAR(13) + EL.strState + ' ' + isnull(rtELTranslation.strTranslation,EL.strCountry)
+	,strCustomerAddress = E.strName + CHAR(13) 
+		+ CASE WHEN (ISNULL(EL.strAddress, '') = '') THEN '' ELSE EL.strAddress + CHAR(13) END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '') THEN '' ELSE EL.strZipCode + ' ' END 
+		+ CASE WHEN (ISNULL(EL.strCity, '') = '') THEN '' ELSE EL.strCity END
+		+ CASE WHEN (ISNULL(EL.strZipCode, '') = '' AND ISNULL(EL.strCity, '') = '') THEN '' ELSE CHAR(13) END  
+		+ CASE WHEN (ISNULL(EL.strState, '') = '') THEN '' ELSE EL.strState + ' ' END 
+		+ ISNULL(rtELTranslation.strTranslation,EL.strCountry)
 	,INV.intInvoiceId
 	,INV.strInvoiceNumber
 	,strShippingLine = @via + ' ' + ShippingLine.strName
