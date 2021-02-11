@@ -60,11 +60,14 @@ FROM
 			AND ItemUOM.intItemUOMId = CS.intItemUOMId
 	LEFT JOIN tblQMTicketDiscount QM 
 		ON QM.intTicketFileId = CS.intCustomerStorageId 
-			AND QM.strSourceType = 'Storage'  
+			AND QM.strSourceType = 'Storage'  	
+	LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+		on QM.intTicketDiscountId = QMII.intTicketDiscountId	
+
 	JOIN tblGRDiscountScheduleCode Dcode 
 		ON Dcode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId  
 	JOIN tblICItem DItem 
-		ON DItem.intItemId = Dcode.intItemId
+		ON DItem.intItemId = isnull(QMII.intItemId, Dcode.intItemId)
 	JOIN tblGRDiscountCalculationOption DC 
 		ON DC.intDiscountCalculationOptionId = QM.strCalcMethod
 	LEFT JOIN tblSCTicketSplit SCTicketSplit 
@@ -143,11 +146,13 @@ FROM
 			AND ItemUOM.intItemUOMId = CS.intItemUOMId
 	LEFT JOIN tblQMTicketDiscount QM 
 		ON QM.intTicketFileId = CS.intCustomerStorageId 
-			AND QM.strSourceType = 'Storage'  
+			AND QM.strSourceType = 'Storage' 	
+	LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+		on QM.intTicketDiscountId = QMII.intTicketDiscountId 
 	JOIN tblGRDiscountScheduleCode Dcode 
 		ON Dcode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId  
 	JOIN tblICItem DItem 
-		ON DItem.intItemId = Dcode.intItemId
+		ON DItem.intItemId = ISNULL(Dcode.intItemId, QMII.intItemId)
 	JOIN tblGRDiscountCalculationOption DC 
 		ON DC.intDiscountCalculationOptionId = QM.strCalcMethod
 	LEFT JOIN tblSCDeliverySheetSplit DSSplit 
