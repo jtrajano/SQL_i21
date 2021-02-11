@@ -76,11 +76,11 @@ BEGIN
 	SELECT TOP 1 @strCompanyName = strCompanyName
 			,@strCompanyAddress = strAddress
 			,@strContactName = strContactName
-			,@strCounty = strCounty
-			,@strCity = strCity
-			,@strState = strState
-			,@strZip = strZip
-			,@strCountry = strCountry
+			,@strCounty = ISNULL(strCounty, '')
+			,@strCity = ISNULL(strCity, '')
+			,@strState = ISNULL(strState, '')
+			,@strZip = ISNULL(strZip, '')
+			,@strCountry = ISNULL(strCountry, '')
 			,@strPhone = strPhone
 	FROM tblSMCompanySetup
 	
@@ -193,8 +193,10 @@ BEGIN
 		,strCompanyZip = @strZip 
 		,strCompanyCountry = @strCountry 
 		,strCompanyPhone = @strPhone
-		,strCityStateZip = @strCity + ', ' + @strState + ', ' + @strZip + ','
-		,strCityAndDate = @strCity + ', '+ dbo.fnConvertDateToReportDateFormat(GETDATE(), 0)
+		,strCityStateZip = CASE WHEN (@strCity = '') THEN '' ELSE @strCity + ', ' END 
+						+ CASE WHEN (@strState = '') THEN '' ELSE @strState + ', ' END 
+						+ @strZip + CASE WHEN (@strCity = '' AND @strState = '' AND @strZip = '') THEN '' ELSE ',' END
+		,strCityAndDate = CASE WHEN (@strCity = '') THEN '' ELSE @strCity + ', ' END + dbo.fnConvertDateToReportDateFormat(GETDATE(), 0)
 		,strShipmentPeriod
 		,strDestinationCity
 		,strMarkingInstruction
@@ -239,7 +241,8 @@ BEGIN
 			,strVendorCountry = VEL.strCountry
 			,strVendorState = VEL.strState
 			,strVendorZipCode = VEL.strZipCode
-			,strVendorCityStateZip = VEL.strCity  + ' ' + VEL.strState + ' ' + VEL.strZipCode
+			,strVendorCityStateZip = CASE WHEN (ISNULL(VEL.strCity, '') = '') THEN VEL.strCity  + ' ' ELSE '' END 
+				+ CASE WHEN (ISNULL(VEL.strState, '') = '') THEN VEL.strState  + ' ' ELSE '' END + VEL.strZipCode
 			,strCustomer = Customer.strName
 			,strCustomerContact = CETC.strName
 			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
