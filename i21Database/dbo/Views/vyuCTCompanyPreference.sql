@@ -76,6 +76,7 @@ AS
 			,CP.ysnUpdatedAvailabilitySales
 			,CP.ysnAllowFutureTypeContractsPurchase
 			,CP.ysnAllowFutureTypeContractsSales
+			,CP.ysnAllowAutoShortCloseFutureTypeContracts
 			,CP.strDefaultReleaseReport
 			,CP.ysnEnableReleaseInstructionsTab
 			,strCleanCostUOM = U1.strUnitMeasure

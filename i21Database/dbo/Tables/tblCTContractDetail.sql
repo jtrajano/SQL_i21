@@ -154,6 +154,7 @@ CREATE TABLE [dbo].[tblCTContractDetail]
 	intRefFuturesCurrencyId INT NULL,
 	intRefFuturesMarketId INT NULL,
 	intRefFuturesMonthId INT NULL,
+	ysnAutoShortClosed BIT NULL,
 
     CONSTRAINT [PK_tblCTContractDetail_intContractDetailId] PRIMARY KEY CLUSTERED ([intContractDetailId] ASC),
 	CONSTRAINT [UQ_tblCTContractDetail_intContractHeaderId_intContractSeq] UNIQUE ([intContractHeaderId],[intContractSeq]), 

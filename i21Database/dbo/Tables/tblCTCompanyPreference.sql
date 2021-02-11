@@ -62,6 +62,7 @@
 	ysnDisableContractSearchScreenCancelButton	BIT NULL DEFAULT 0,
 	ysnAllowFutureTypeContractsPurchase	BIT NULL DEFAULT 0,
 	ysnAllowFutureTypeContractsSales	BIT NULL DEFAULT 0,
+	ysnAllowAutoShortCloseFutureTypeContracts BIT NULL DEFAULT 0,
 	ysnEnableReleaseInstructionsTab	BIT NULL DEFAULT 0,
 	ysnSendFeedOnPrice BIT,
 	strBulkChangeFields NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
