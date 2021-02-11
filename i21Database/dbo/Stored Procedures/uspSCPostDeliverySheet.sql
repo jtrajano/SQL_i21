@@ -581,8 +581,6 @@ BEGIN TRY
 
 	EXEC [dbo].[uspSCUpdateDeliverySheetStatus] @intDeliverySheetId, 0;
 
-	--EXEC [dbo].[uspSCModifyTicketDiscountItemInfo] null, @intDeliverySheetId
-
 	EXEC dbo.uspSMAuditLog 
 		@keyValue			= @intDeliverySheetId				-- Primary Key Value of the Ticket. 
 		,@screenName		= 'Grain.view.DeliverySheet'		-- Screen Namespace

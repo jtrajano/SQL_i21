@@ -21,5 +21,4 @@ CREATE TYPE [dbo].[SettleVoucherCreate] AS TABLE
 	,ysnPercentChargeType BIT NULL
 	,dblCashPriceUsed DECIMAL(24,10) --to determine the cash price used in Percent discounts
 	,intSettleContractId int null
-	,ysnInventoryCost bit null
 )

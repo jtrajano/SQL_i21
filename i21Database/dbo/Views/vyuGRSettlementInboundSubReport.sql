@@ -85,12 +85,10 @@ AS
 					LEFT JOIN (
 								SELECT 
 									QM.intTicketId
-								   ,isnull(QMII.intItemId, DCode.intItemId) as intItemId
+								   ,DCode.intItemId
 								   ,QM.dblGradeReading
 								   ,QM.dblShrinkPercent
-								FROM tblQMTicketDiscount QM								
-								LEFT JOIN tblQMTicketDiscountItemInfo QMII
-									on QM.intTicketDiscountId = QMII.intTicketDiscountId
+								FROM tblQMTicketDiscount QM
 								JOIN tblGRDiscountScheduleCode DCode 
 									ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 								WHERE QM.strSourceType = 'Scale'
@@ -109,12 +107,10 @@ AS
 					FROM (
 								 SELECT 
 									 QM.intTicketFileId
-									,isnull(QMII.intItemId, DCode.intItemId) as intItemId
+									,DCode.intItemId
 									,QM.dblGradeReading
 									,QM.dblShrinkPercent
 								FROM tblQMTicketDiscount QM
-								LEFT JOIN tblQMTicketDiscountItemInfo QMII
-									on QM.intTicketDiscountId = QMII.intTicketDiscountId
 								JOIN tblGRDiscountScheduleCode DCode 
 									ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 								WHERE QM.strSourceType = 'Storage'

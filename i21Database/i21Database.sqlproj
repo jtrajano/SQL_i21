@@ -9041,8 +9041,6 @@
     <Build Include="dbo\Stored Procedures\uspMFWorkOrderFeed.sql" />
     <Build Include="dbo\Views\vyuIPLogView.sql" />
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
-    <Build Include="dbo\Tables\tblQMTicketDiscountItemInfo.sql" />
-    <Build Include="dbo\Stored Procedures\uspSCModifyTicketDiscountItemInfo.sql" />
     <Build Include="dbo\Tables\tblAGApplicator.sql" />
     <Build Include="dbo\Stored Procedures\uspAGUpdateWOShippedQty.sql" />
     <Build Include="dbo\Functions\fnAPClearing.sql" />
