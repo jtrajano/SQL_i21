@@ -13,10 +13,10 @@ BEGIN
 	FROM tblIPIDOCXMLArchive
 	WHERE dtmCreatedDate < @dtmDate
 	
-	DELETE
-	FROM tblCTContractPreStage
-	WHERE dtmFeedDate < @dtmDate
-		AND strFeedStatus = 'Processed'
+	--DELETE
+	--FROM tblCTContractPreStage
+	--WHERE dtmFeedDate < @dtmDate
+	--	AND strFeedStatus = 'Processed'
 
 	DELETE
 	FROM tblCTContractStage
