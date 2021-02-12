@@ -2,7 +2,8 @@
 AS
 SELECT L.intLogId
 	,L.dtmDate
-	,L.intEntityId
+	,E.strName
 	,L.strRoute
 FROM tblSMLog L
+JOIN tblEMEntity E on E.intEntityId=L.intEntityId
 WHERE L.strType = 'Audit' 
