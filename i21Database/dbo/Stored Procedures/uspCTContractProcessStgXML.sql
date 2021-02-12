@@ -180,7 +180,9 @@ BEGIN TRY
 		,@strLogXML NVARCHAR(MAX)
 		,@strAuditXML NVARCHAR(MAX)
 		,@intLogId INT
-		,@strExternalContractNumber nvarchar(MAX)
+		,@strExternalContractNumber NVARCHAR(MAX)
+		,@strUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -636,7 +638,7 @@ BEGIN TRY
 					,@strSubBook = strSubBook
 					,@strINCOLocation = strINCOLocation
 					,@strApprovalStatus = strApprovalStatus
-					,@strExternalContractNumber=strExternalContractNumber
+					,@strExternalContractNumber = strExternalContractNumber
 				FROM OPENXML(@idoc, 'vyuIPContractHeaderViews/vyuIPContractHeaderView', 2) WITH (
 						strSalesperson NVARCHAR(100) Collate Latin1_General_CI_AS
 						,strCommodityCode NVARCHAR(50) Collate Latin1_General_CI_AS
@@ -664,7 +666,7 @@ BEGIN TRY
 
 				SELECT @strErrorMessage = ''
 
-				IF Len(@strExternalContractNumber)>50
+				IF Len(@strExternalContractNumber) > 50
 				BEGIN
 					IF @strErrorMessage <> ''
 					BEGIN
@@ -1468,7 +1470,7 @@ BEGIN TRY
 						,CH.intCompanyId = @intCompanyRefId
 						,CH.strExternalEntity = CH1.strExternalEntity
 						,CH.strExternalContractNumber = CH1.strExternalContractNumber
-						,CH.intLastModifiedById=CH1.intLastModifiedById
+						,CH.intLastModifiedById = CH1.intLastModifiedById
 					FROM tblCTContractHeader CH
 					JOIN #tmpContractHeader CH1 ON CH.intContractHeaderRefId = CH1.intContractHeaderRefId
 					WHERE CH.intContractHeaderRefId = @intContractHeaderRefId
@@ -4327,6 +4329,27 @@ BEGIN TRY
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strLogXML
 
+				SELECT @strUserName = NULL
+
+				SELECT @strUserName = strName
+				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(MAX) Collate Latin1_General_CI_AS)
+
+				SELECT @intAuditLogUserId = NULL
+
+				SELECT @intAuditLogUserId = CE.intEntityId
+				FROM tblEMEntity CE
+				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+				WHERE ET1.strType = 'User'
+					AND CE.strName = @strUserName
+					AND CE.strEntityNo <> ''
+
+				IF @intAuditLogUserId IS NULL
+				BEGIN
+					SELECT TOP 1 @intAuditLogUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				END
+
 				INSERT INTO tblSMLog (
 					dtmDate
 					,strRoute
@@ -4339,7 +4362,7 @@ BEGIN TRY
 					,strRoute
 					,@intTransactionRefId
 					,1
-					,@intUserId
+					,@intAuditLogUserId
 					,'Audit'
 				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
 						intLogId INT
@@ -4517,6 +4540,13 @@ BEGIN TRY
 				SET strFeedStatus = 'Processed'
 					,strMessage = 'Success'
 					,intStatusId = 1
+					,ysnMailSent = (
+						CASE 
+							WHEN @ysnApproval = 0
+								THEN 1
+							ELSE NULL
+							END
+						)
 				WHERE intContractStageId = @intContractStageId
 
 				IF @intTransactionCount = 0
