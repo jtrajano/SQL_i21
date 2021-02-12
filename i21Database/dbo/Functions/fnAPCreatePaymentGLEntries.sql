@@ -642,9 +642,11 @@ BEGIN
 				-- SELECT * FROM fnAPGetVoucherTaxGLEntry(voucher.intBillId) WHERE intBillDetailTaxId = taxes.intBillDetailTaxId
 				SELECT
 					CAST((ISNULL(D.dblAdjustedTax, D.dblTax) * ISNULL(NULLIF(B.dblRate,0),1)) 
-						* (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblTotal
+						* (CASE WHEN charges.ysnPrice = 1 
+				AND A.intEntityVendorId = charges.intEntityVendorId THEN -1 ELSE 1 END)  AS DECIMAL(18,2)) AS dblTotal
 					,CAST((ISNULL(D.dblAdjustedTax, D.dblTax))
-					* (CASE WHEN charges.ysnPrice = 1 THEN -1 ELSE 1 END) AS DECIMAL(18,2)) AS dblForeignTotal
+					* (CASE WHEN charges.ysnPrice = 1 
+				AND A.intEntityVendorId = charges.intEntityVendorId THEN -1 ELSE 1 END)  AS DECIMAL(18,2)) AS dblForeignTotal
 				FROM tblAPBill A
 				INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 				INNER JOIN tblAPBillDetailTax D
