@@ -124,6 +124,8 @@ BEGIN TRY
 		,@strLogXML NVARCHAR(MAX)
 		,@strAuditXML NVARCHAR(MAX)
 		,@intLogId INT
+		,@strUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
 
 	SELECT @intCompanyRefId = intCompanyId
 	FROM dbo.tblIPMultiCompany
@@ -1915,6 +1917,27 @@ BEGIN TRY
 				EXEC sp_xml_preparedocument @idoc OUTPUT
 					,@strLogXML
 
+				SELECT @strUserName = NULL
+
+				SELECT @strUserName = strName
+				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+				SELECT @intAuditLogUserId = NULL
+
+				SELECT @intAuditLogUserId = CE.intEntityId
+				FROM tblEMEntity CE
+				JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+				WHERE ET1.strType = 'User'
+					AND CE.strName = @strUserName
+					AND CE.strEntityNo <> ''
+
+				IF @intAuditLogUserId IS NULL
+				BEGIN
+					SELECT TOP 1 @intAuditLogUserId = intEntityId
+					FROM tblSMUserSecurity
+					WHERE strUserName = 'irelyadmin'
+				END
+
 				INSERT INTO tblSMLog (
 					dtmDate
 					,strRoute
@@ -1927,7 +1950,7 @@ BEGIN TRY
 					,strRoute
 					,@intTransactionRefId
 					,1
-					,@intLastModifiedById
+					,@intAuditLogUserId
 					,'Audit'
 				FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
 						intLogId INT
