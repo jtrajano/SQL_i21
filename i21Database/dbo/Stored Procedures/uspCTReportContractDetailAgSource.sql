@@ -85,12 +85,7 @@ BEGIN TRY
 			 SELECT 
 			 strItemNo					 = strItemNo
 			,dblDetailQuantity			 = dblDetailQuantity
-			,dblPrice					 = CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
-													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
-													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
-													ELSE 0
-										   END
+			,dblPrice					 = CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
 			,dtmStartDate				 = dtmStartDate
 			,dtmEndDate					 = dtmEndDate
 			,strPricingType				 = strPricingType
@@ -112,28 +107,11 @@ BEGIN TRY
 			,strBasis					 = dbo.fnFormatNumber(DV.dblBasis)
 			,strFutureMonthZee			 = CASE	WHEN intPricingTypeId = 1 THEN '' ELSE REPLACE(MO.strFutureMonth,' ','('+MO.strSymbol+') ') END
 			,strQuantity				 = dbo.fnFormatNumber(dblDetailQuantity) + ' ' + strItemUOM
-			,strPrice					 = dbo.fnFormatNumber(CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))
-													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,4))
-													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,4))
-													ELSE 0
-										   END) + ' per ' + strPriceUOM + ' ' + strCurrency
-			,strPriceZee				 = CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	dbo.fnCTChangeNumericScale(ISNULL(dblCashPrice,0),@intDecimalDPR)
-													WHEN intPricingTypeId = 2		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblBasis,0),@intDecimalDPR)
-													WHEN intPricingTypeId = 3		THEN	dbo.fnCTChangeNumericScale(ISNULL(dblFutures,0),@intDecimalDPR)
-													ELSE '0'
-											END
-											+ ' ' + strPriceUOM + ' ' + strCurrency
+			,strPrice					 = dbo.fnFormatNumber(CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,4))) + ' per ' + strPriceUOM + ' ' + strCurrency
+			,strPriceZee				 = ''
 			,strQuantityRoth			 = convert(nvarchar(30),CAST(ISNULL(dblDetailQuantity,0) AS DECIMAL(24,2))) + ' ' + strItemUOM
 			,strQuantityZee				 = REPLACE(CONVERT(VARCHAR,CONVERT(MONEY,dblDetailQuantity),1), '.00','') + ' ' + strItemUOM
-			,strPriceRoth				 = convert(nvarchar(30),(CASE	
-													WHEN intPricingTypeId IN (1,6)	THEN	CAST(ISNULL(dblCashPrice,0) AS DECIMAL(24,2))
-													WHEN intPricingTypeId = 2		THEN	CAST(ISNULL(dblBasis,0)		AS DECIMAL(24,2))
-													WHEN intPricingTypeId = 3		THEN	CAST(ISNULL(dblFutures,0)	AS DECIMAL(24,2))
-													ELSE 0
-										   END)) --+ ' ' + strPriceUOM 
-										   + ' ' + strCurrency
+			,strPriceRoth				 = ''
 			FROM	vyuCTContractDetailView DV
 			LEFT JOIN	tblRKFuturesMonth	MO	ON	MO.intFutureMonthId = DV.intFutureMonthId
 
@@ -211,37 +189,10 @@ BEGIN TRY
 												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
 												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
 											  END)
-			,strPriceZee				 = (CASE	
-											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' per '										
-											
-											WHEN CC.strCostMethod = 'Amount'   
-												THEN '$ '+LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' '
-											
-											WHEN CC.strCostMethod = 'Percentage'   
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,4))) +' %'
-											END) + ' ' +
-											  (CASE	
-												WHEN CC.strCostMethod = 'Per Unit' THEN UM.strUnitMeasure+' '+ISNULL(Currency.strCurrency,'')										
-												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
-											  END)
+			,strPriceZee				 = ''
 			,strQuantityRoth			 = Item.strItemNo
 			,strQuantityZee				= Item.strItemNo
-			,strPriceRoth				 = (CASE	
-											WHEN CC.strCostMethod IN('Per Unit','Gross Unit') 
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) + ' ' --' per '
-											
-											WHEN CC.strCostMethod = 'Amount'   
-												THEN '$ ' +LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) + ' '
-											
-											WHEN CC.strCostMethod = 'Percentage'   
-												THEN LTRIM(CAST(CC.dblRate AS DECIMAL(24,2))) + ' %'
-											END) + ' ' +
-											  (CASE	
-												WHEN CC.strCostMethod = 'Per Unit' THEN ISNULL(Currency.strCurrency,'')--UM.strUnitMeasure + ' ' + ISNULL(Currency.strCurrency,'')
-												WHEN CC.strCostMethod = 'Amount'   THEN ISNULL(Currency.strCurrency,'')
-												ELSE ''
-											  END)
+			,strPriceRoth				 = ''
 			FROM		tblCTContractCost			CC
 			JOIN		tblCTContractDetail			CD	      ON CD.intContractDetailId  = CC.intContractDetailId
 			JOIN		tblSMCompanyLocation		CL	      ON CL.intCompanyLocationId = CD.intCompanyLocationId
