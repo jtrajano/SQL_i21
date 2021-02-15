@@ -178,6 +178,7 @@ INSERT INTO @EntriesForInvoice
     ,[intStorageScheduleTypeId]
     ,[intDestinationGradeId]
     ,[intDestinationWeightId]
+    ,[intPriceFixationDetailId]
     --,[strAddonDetailKey]
     --,[ysnAddonParent]
     --,[dblAddOnQuantity]
@@ -329,6 +330,7 @@ SELECT
     ,[intStorageScheduleTypeId]             = ARSI.[intStorageScheduleTypeId]
     ,[intDestinationGradeId]                = ARSI.[intDestinationGradeId]
     ,[intDestinationWeightId]               = ARSI.[intDestinationWeightId]
+    ,[intPriceFixationDetailId]             = @intPriceFixationDetailId
     --,[strAddonDetailKey]                    = NULL
     --,[ysnAddonParent]                       = @ZeroBit
     --,[dblAddOnQuantity]                     = @ZeroDecimal

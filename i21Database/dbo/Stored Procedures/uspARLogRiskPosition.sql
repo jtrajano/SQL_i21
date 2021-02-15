@@ -132,11 +132,13 @@ BEGIN
     INNER JOIN tblICCommodityUnitMeasure ICUM ON ICUM.intCommodityId = ITEM.intCommodityId AND ICUM.intUnitMeasureId = IUOM.intUnitMeasureId 
     LEFT JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId
     INNER JOIN tblARTransactionDetail TD ON I.intInvoiceId = TD.intTransactionId AND I.strTransactionType = TD.strTransactionType
+    INNER JOIN tblICItem ITEM2 ON TD.intItemId = ITEM2.intItemId
     WHERE ID.intItemId IS NOT NULL
       AND I.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId NOT IN (SELECT intTransactionDetailId FROM tblARTransactionDetail TDD WHERE I.intInvoiceId = TDD.intTransactionId AND ID.intInvoiceDetailId = TDD.intTransactionDetailId AND I.strTransactionType = TDD.strTransactionType) 
       AND ITEM.strType != 'Other Charge'
+      AND ITEM2.strType != 'Other Charge'
 
     UNION ALL
 
@@ -180,11 +182,13 @@ BEGIN
     INNER JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = TD.intItemUOMId
     INNER JOIN tblICCommodityUnitMeasure ICUM ON ICUM.intCommodityId = ITEM.intCommodityId AND ICUM.intUnitMeasureId = IUOM.intUnitMeasureId 
     LEFT JOIN tblCTContractDetail CTD ON TD.intContractDetailId = CTD.intContractDetailId
+    INNER JOIN tblICItem ITEM2 ON TD.intItemId = ITEM2.intItemId
     WHERE TD.intItemId IS NOT NULL
       AND TD.strTransactionType IN ('Credit Memo', 'Debit Memo', 'Invoice')
       --AND ISNULL(II.ysnForDelete, 0) = 0
       AND ID.intInvoiceDetailId IS NULL
       AND ITEM.strType != 'Other Charge'
+      AND ITEM2.strType != 'Other Charge'
 
     UNION ALL
 
