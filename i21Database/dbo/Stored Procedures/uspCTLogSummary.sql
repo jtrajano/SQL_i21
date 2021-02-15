@@ -2603,7 +2603,8 @@ BEGIN TRY
 				@dblReturn		NUMERIC(24, 10),
 				@dblBasisQty	NUMERIC(24, 10),
 				@dblPricedQty	NUMERIC(24, 10),
-				@_action		INT
+				@_action		INT,
+				@_dblActual		NUMERIC(24, 10)
 
 		DECLARE @TotalBasis NUMERIC(24, 10) = 0
 			, @TotalPriced NUMERIC(24, 10) = 0
@@ -3176,7 +3177,7 @@ BEGIN TRY
 						END						
 					END
 
-					IF (@currPricingTypeId = 2)
+					IF (@currPricingTypeId in (1,2)) 
 					BEGIN
 						IF  @dblQty <> 0
 						BEGIN
@@ -3242,6 +3243,8 @@ BEGIN TRY
 						UPDATE @cbLogSpecific SET dblQty = @_priced * - 1, intPricingTypeId = 1, intActionId = CASE WHEN intContractTypeId = 1 THEN 47 ELSE 46 END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 
+						SET @_dblActual = @dblActual;
+
 						SET @dblQty = @dblQty - @_priced
 
 						IF @ysnLoadBased = 1
@@ -3254,7 +3257,7 @@ BEGIN TRY
 						-- Increase SBD upon creation of IS
 						IF (@strTransactionReference = 'Inventory Shipment')
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @_priced, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'
+							UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 
