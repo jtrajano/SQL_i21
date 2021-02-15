@@ -5218,6 +5218,8 @@
     <Build Include="dbo\Tables\tblFADepreciationMethodDetail.sql" />
     <Build Include="dbo\Tables\tblFADepreciateLog.sql" />
     <Build Include="dbo\Tables\tblFADepreciateLogDetail.sql" />
+    <Build Include="dbo\Tables\tblFAImportLog.sql" />
+    <Build Include="dbo\Tables\tblFAImportLogDetail.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
