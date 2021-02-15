@@ -781,13 +781,13 @@ BEGIN TRY
 						THEN I.intItemId
 					ELSE I.intMainItemId
 					END AS intItemId
-				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, L.dblQty) * I.dblRatio) AS dblIntrasitQty
+				,sum(dbo.fnCTConvertQuantityToTargetItemUOM(L.intItemId, IU.intUnitMeasureId, @intUnitMeasureId, (Case When L.intWeightUOMId is NULL Then L.dblQty Else L.dblWeight End)) * I.dblRatio) AS dblIntrasitQty
 				,2 AS intAttributeId --Opening Inventory
 				,- 1 AS intMonthId
 				,L.intLocationId
 			FROM @tblMFItemDetail I
 			JOIN dbo.tblICLot L ON L.intItemId = I.intItemId
-			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = L.intItemUOMId
+			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = IsNULL(L.intWeightUOMId, L.intItemUOMId)
 				AND ISNULL(L.intLocationId, 0) = (
 					CASE 
 						WHEN @intCompanyLocationId = 0
