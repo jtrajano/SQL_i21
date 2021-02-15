@@ -55,7 +55,7 @@ EXEC dbo.[uspARUpdateLineItemsCommitted] @IIDs
 
 EXEC dbo.[uspARUpdateInvoiceTransactionHistory] @IIDs
 
-EXEC [dbo].[uspARLogRiskPosition] @IIDs, @UserId
+--EXEC [dbo].[uspARLogRiskPosition] @IIDs, @UserId
 
 DELETE FROM ARTD
 FROM tblARTransactionDetail ARTD WITH (NOLOCK)

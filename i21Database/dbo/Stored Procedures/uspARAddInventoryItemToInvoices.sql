@@ -508,6 +508,7 @@ CREATE TABLE #InvoiceInventoryItem
 	,[intStorageScheduleTypeId]			INT												NULL
 	,[intDestinationGradeId]			INT												NULL
 	,[intDestinationWeightId]			INT												NULL
+	,[intPriceFixationDetailId]			INT												NULL
     ,[strAddonDetailKey]                NVARCHAR(100)   COLLATE Latin1_General_CI_AS    NULL
     ,[ysnAddonParent]                   BIT                                             NULL
     ,[dblAddOnQuantity]                 NUMERIC(38,20)                                  NULL
@@ -638,6 +639,7 @@ INSERT INTO #InvoiceInventoryItem
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
@@ -783,6 +785,7 @@ SELECT
 	,[intStorageScheduleTypeId]				= IE.[intStorageScheduleTypeId]
 	,[intDestinationGradeId]				= IE.[intDestinationGradeId]
 	,[intDestinationWeightId]				= IE.[intDestinationWeightId]
+	,[intPriceFixationDetailId]				= IE.[intPriceFixationDetailId]
     ,[strAddonDetailKey]                    = IE.[strAddonDetailKey]
     ,[ysnAddonParent]                       = IE.[ysnAddonParent]
     ,[dblAddOnQuantity]                     = IE.[dblAddOnQuantity]
@@ -986,6 +989,7 @@ USING
 		,[intStorageScheduleTypeId]
 		,[intDestinationGradeId]
 		,[intDestinationWeightId]
+		,[intPriceFixationDetailId]
         ,[strAddonDetailKey]
         ,[ysnAddonParent]
         ,[dblAddOnQuantity]
@@ -1120,6 +1124,7 @@ INSERT(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
@@ -1239,6 +1244,7 @@ VALUES(
 	,[intStorageScheduleTypeId]
 	,[intDestinationGradeId]
 	,[intDestinationWeightId]
+	,[intPriceFixationDetailId]
     ,[strAddonDetailKey]
     ,[ysnAddonParent]
     ,[dblAddOnQuantity]
