@@ -193,7 +193,7 @@ FROM
 		union 
 		select 
 			intBillId,
-			dblTotal
+			[dblVendorPrepayment] = (ISNULL(dblTotal, 0) + ISNULL(dblTax, 0)) * (CASE ysnPaid WHEN 1 THEN -1 ELSE 1 END)
 		from 
 		tblAPBill 
 		where intTransactionType = 2 
@@ -232,11 +232,12 @@ FROM
 		WHERE a.ysnApplied = 1
 		GROUP BY a.intBillId
 	) BasisPayment ON BasisPayment.intBillId = Bill.intBillId	
-	WHERE (
+	WHERE ((
 			BillDtl.intInventoryReceiptChargeId IS NOT NULL
 			OR BillDtl.intInventoryReceiptItemId IS NOT NULL
 		)
-		AND Item.strType <> 'Other Charge' 
+		AND Item.strType <> 'Other Charge' )
+		OR Bill.intTransactionType = 2
 	GROUP BY 
 		PYMT.intPaymentId
 		,PYMT.strPaymentRecordNum
@@ -401,7 +402,7 @@ FROM
 		union 
 		select 
 			intBillId,
-			dblTotal
+			[dblVendorPrepayment] = (ISNULL(dblTotal, 0) + ISNULL(dblTax, 0)) * (CASE ysnPaid WHEN 1 THEN -1 ELSE 1 END)
 		from 
 		tblAPBill 
 		where intTransactionType = 2 
