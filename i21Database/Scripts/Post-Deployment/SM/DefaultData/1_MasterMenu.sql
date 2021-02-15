@@ -10,9 +10,7 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 	
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = (
-		SELECT intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'System Manager' AND strMenuName = 'Maintenance' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
-	))
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Applicator License Category' AND strModuleName = 'Agronomy')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -6648,6 +6646,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Applicato
 	VALUES (N'Applicators', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Applicators', N'Activity', N'Screen', N'Agronomy.view.EntityApplicator?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.EntityApplicator?showSearch=true' WHERE strMenuName = 'Applicators' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Applicator License Category' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Applicator License Category', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Applicator License Category', N'Activity', N'Screen', N'Agronomy.view.ApplicatorLicenseCategory?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.ApplicatorLicenseCategory?showSearch=true' WHERE strMenuName = 'Applicator License Category' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
