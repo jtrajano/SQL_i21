@@ -3074,7 +3074,7 @@ BEGIN TRY
 						END						
 					END
 
-					IF (@currPricingTypeId = 2)
+					IF (@currPricingTypeId in (1,2))  
 					BEGIN
 						IF  @dblQty <> 0
 						BEGIN
@@ -3143,7 +3143,7 @@ BEGIN TRY
 						-- Increase SBD upon creation of IS
 						IF (@strTransactionReference = 'Inventory Shipment')
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @_priced, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'
+							UPDATE @cbLogSpecific SET dblQty = @dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 
