@@ -477,6 +477,53 @@ BEGIN
 		EXEC uspICRaiseError 80229, @strLocation, @strItemNo
 		GOTO With_Rollback_Exit 	
 	END
+
+	-- Check if 'Price Fix warning' is enabled for IR
+	IF	@ysnPost = 1 AND @ysnRecap = 0
+		AND EXISTS (SELECT TOP 1 1 FROM tblICCompanyPreference WHERE ysnPriceFixWarningInReceipt = 1) 
+	BEGIN 
+		-- Create a table to retrieve the list of contracts
+		DECLARE @contracts AS TABLE (
+			strContractNumber NVARCHAR(100) 
+		)
+
+		-- Get all the 'basis' contracts
+		INSERT INTO @contracts (
+			strContractNumber	
+		)
+		SELECT DISTINCT 
+			ch.strContractNumber 
+		FROM	
+			tblICInventoryReceipt r INNER JOIN tblICInventoryReceiptItem ri
+				ON r.intInventoryReceiptId = ri.intInventoryReceiptId			
+			INNER JOIN (
+				tblCTContractHeader ch INNER JOIN tblCTContractDetail cd
+					ON ch.intContractHeaderId = cd.intContractHeaderId
+			)
+				ON	ch.intContractHeaderId = ISNULL(ri.intContractHeaderId, ri.intOrderId) 
+					AND cd.intContractDetailId = ISNULL(ri.intContractDetailId, ri.intLineNo) 					
+		WHERE	
+			r. strReceiptNumber = @strTransactionId
+			AND r.strReceiptType IN ('Purchase Contract', 'Direct')
+			AND r.intSourceType IN (0, 2) -- (0): None (2): Inbound Shipment
+			AND ch.intPricingTypeId = 2 -- (2): Basis
+
+
+		IF EXISTS (SELECT TOP 1 1 FROM @contracts)
+		BEGIN 
+			DECLARE @strContracts AS NVARCHAR(1000) 
+
+			-- Show only the top 10 contracts so that we don't mess up the UI. 
+			SELECT TOP 10 
+				@strContracts = COALESCE(@strContracts, '') + '<li>' + strContractNumber + '</li>'
+			FROM
+				@contracts			
+
+			-- 'Unable to Post. The following contract(s) needs to be priced: <ul>%s</ul>'
+			EXEC uspICRaiseError 80262, @strContracts;
+			GOTO With_Rollback_Exit; 
+		END 
+	END 
 END
 
 -- Check if sub location and storage locations are valid. 
