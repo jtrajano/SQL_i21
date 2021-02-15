@@ -31,6 +31,9 @@
 	[strComment] NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL,
 	intSubLocationId int,
 	strERPRecipeNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBookId INT,
+	intSubBookId INT,
+	ysnVirtualRecipe BIT CONSTRAINT [DF_tblMFRecipe_ysnVirtualRecipe] DEFAULT 0,
 
     CONSTRAINT [PK_tblMFRecipe_intRecipeId] PRIMARY KEY ([intRecipeId]), 
     CONSTRAINT [FK_tblMFRecipe_tblICItem_intItemId] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId]),
@@ -43,7 +46,9 @@
 	CONSTRAINT [FK_tblMFRecipe_tblMFCostType_intCostTypeId] FOREIGN KEY ([intCostTypeId]) REFERENCES [tblMFCostType]([intCostTypeId]),
 	CONSTRAINT [FK_tblMFRecipe_tblICUnitMeasure_intMarginUOMId] FOREIGN KEY ([intMarginUOMId]) REFERENCES [tblICUnitMeasure]([intUnitMeasureId]),
 	CONSTRAINT [FK_tblMFRecipe_tblMFOneLinePrint_intOneLinePrintId] FOREIGN KEY ([intOneLinePrintId]) REFERENCES [tblMFOneLinePrint]([intOneLinePrintId]),
-	CONSTRAINT [FK_tblMFRecipe_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]) 
+	CONSTRAINT [FK_tblMFRecipe_tblSMCompanyLocationSubLocation_intSubLocationId] FOREIGN KEY ([intSubLocationId]) REFERENCES [tblSMCompanyLocationSubLocation]([intCompanyLocationSubLocationId]),
+	CONSTRAINT [FK_tblMFRecipe_tblCTBook_intBookId] FOREIGN KEY ([intBookId]) REFERENCES [tblCTBook]([intBookId]),
+	CONSTRAINT [FK_tblMFRecipe_tblCTSubBook_intSubBookId] FOREIGN KEY ([intSubBookId]) REFERENCES [tblCTSubBook]([intSubBookId])
 )
 
 GO

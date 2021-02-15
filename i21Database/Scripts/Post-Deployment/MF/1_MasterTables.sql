@@ -4006,3 +4006,6 @@ GO
 
 UPDATE tblMFWorkOrder SET ysnDietarySupplements = 0 WHERE ysnDietarySupplements IS NULL
 GO
+
+UPDATE tblMFRecipe SET ysnVirtualRecipe = 0 WHERE ysnVirtualRecipe IS NULL
+GO
