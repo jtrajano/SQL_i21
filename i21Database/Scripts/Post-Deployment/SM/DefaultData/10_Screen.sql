@@ -552,7 +552,7 @@ WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule =
 
 --Include Price Contracts on approval
 
-UPDATE TOP(1) tblSMScreen SET ysnApproval =  1, ysnAvailable = 1 WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+UPDATE TOP(1) tblSMScreen SET ysnApproval =  1, ysnAvailable = 1, strScreenName = 'Price Contracts' WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 
 
 ------------------------END Contract Management------------
