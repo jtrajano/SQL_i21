@@ -63,14 +63,14 @@ BEGIN
 							 ELSE NULL 
 						END
 	
-	--Calculate if Time Off is Scheduled for Reset  
-	 UPDATE #tmpEmployees  
-	 SET ysnForReset = CASE WHEN (
-							(strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward)  
-						 OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
-						 OR (strAwardPeriod = 'Paycheck')
-						 ) THEN 1   
-						ELSE 0 END  
+	--Calculate if Time Off is Scheduled for Reset
+	UPDATE #tmpEmployees
+	SET ysnForReset = CASE WHEN (
+								 (strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR(dtmNextAward)  )
+								OR (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
+								OR (strAwardPeriod = 'Paycheck')
+								) THEN 1 
+							ELSE 0 END
 
 	DECLARE @intEmployeeId INT
 	DECLARE @intYearsOfService INT
@@ -120,12 +120,7 @@ BEGIN
 			SET dblHoursUsed = CASE WHEN (T.ysnForReset = 1) THEN 0 ELSE EOT.dblHoursUsed END
 				,dblHoursCarryover = CASE WHEN (T.ysnForReset = 1) THEN 
 											CASE WHEN ((dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < dblMaxCarryover) 
-												THEN 
-													CASE WHEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0)) < 0 --check if negative if so  set to 0
-														THEN 0
-													ELSE
-														(dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))
-													END
+												THEN (dblHoursCarryover + dblHoursEarned - EOT.dblHoursUsed - ISNULL(YTD.dblHoursUsed, 0))
 											ELSE dblMaxCarryover END
 									ELSE dblHoursCarryover END
 				,dblHoursEarned = CASE WHEN (T.ysnForReset = 1) THEN 0
@@ -137,7 +132,7 @@ BEGIN
 			LEFT JOIN (SELECT * FROM vyuPREmployeeTimeOffUsedYTD WHERE intTypeTimeOffId = @intTypeTimeOffId) YTD
 				ON T.intEntityId = YTD.intEntityEmployeeId
 				AND YTD.intTypeTimeOffId = @intTypeTimeOffId
-				AND YTD.intYear = YEAR(T.dtmLastAward)
+				--AND YTD.intYear = YEAR(T.dtmLastAward)
 		WHERE T.[intEntityId] = @intEmployeeId
 			AND EOT.intTypeTimeOffId = @intTypeTimeOffId
 
