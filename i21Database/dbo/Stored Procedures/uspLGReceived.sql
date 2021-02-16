@@ -112,31 +112,42 @@ SET ANSI_WARNINGS OFF
 				SELECT @intLoadId = intLoadId FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
 				IF @ysnReverse = 0
-			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
-				
-				-- Insert to Pending Claims
-				EXEC uspLGAddPendingClaim @intLoadId, 1
-			END
-			ELSE 
-			BEGIN
-				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
-				IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0)
 				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+					IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
+						UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				
+					-- Insert to Pending Claims
+					IF (@ysnWeightClaimsByContainer = 1)
+						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
+					ELSE
+						EXEC uspLGAddPendingClaim @intLoadId, 1
+				END
+				ELSE 
+				BEGIN
+					UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
+
+					IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) < SUM(ISNULL(dblQuantity, 0)))
+						UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+							
+					SELECT TOP 1
+						@ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber 
+						+ CASE WHEN (@ysnWeightClaimsByContainer = 1) THEN ' Container No. ' + LC.strContainerNumber ELSE '' END + '.' 
+					FROM tblLGWeightClaim WC 
+						INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+						LEFT JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+						LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WCD.intLoadContainerId
+					WHERE WC.intLoadId = @intLoadId
+						AND (@ysnWeightClaimsByContainer = 0
+							OR @ysnWeightClaimsByContainer = 1 AND WCD.intLoadContainerId = @intContainerId)
+
+					IF (LEN(@ErrMsg) > 0) RAISERROR(@ErrMsg,16,1)
 					
 					-- Remove from Pending Claims
-					IF @ysnWeightClaimsByContainer = 1 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
-					BEGIN
-						SELECT TOP 1 @ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber + '.' 
-						FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
-						WHERE WC.intLoadId = @intLoadId
-						RAISERROR(@ErrMsg,16,1)
-					END
-
-					EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
-				END
-			END	
+					IF (@ysnWeightClaimsByContainer = 1)
+						EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId, 0
+					ELSE
+						EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
+				END	
 
 				SELECT @intLotId = MIN(intLotId) FROM @ItemsFromInventoryReceipt WHERE intLotId > @intLotId AND intInventoryReceiptDetailId	= @intReceiptDetailId
 			END
@@ -194,29 +205,40 @@ SET ANSI_WARNINGS OFF
 
 			IF @ysnReverse = 0
 			BEGIN
-				UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
+				IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
+					UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
 				-- Insert to Pending Claims
-				EXEC uspLGAddPendingClaim @intLoadId, 1
+				IF (@ysnWeightClaimsByContainer = 1)
+					EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId
+				ELSE
+					EXEC uspLGAddPendingClaim @intLoadId, 1
 			END
 			ELSE 
 			BEGIN
 				UPDATE tblLGLoadDetail SET dblDeliveredGross = dblDeliveredGross-@dblNetWeight, dblDeliveredNet = dblDeliveredGross-@dblNetWeight WHERE intLoadDetailId = @intSourceId
-				IF ((SELECT SUM(ISNULL(dblDeliveredQuantity, 0)) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId) = 0)
-				BEGIN
-					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
-					
-					-- Remove from Pending Claims
-					IF @ysnWeightClaimsByContainer = 1 AND EXISTS (SELECT TOP 1 1 FROM tblLGWeightClaim WHERE intLoadId = @intLoadId)
-					BEGIN
-						SELECT TOP 1 @ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber + '.' 
-						FROM tblLGWeightClaim WC INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
-						WHERE WC.intLoadId = @intLoadId
-						RAISERROR(@ErrMsg,16,1)
-					END
 
+				IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) < SUM(ISNULL(dblQuantity, 0)))
+					UPDATE tblLGLoad SET intShipmentStatus = 3 WHERE intLoadId = @intLoadId
+							
+				SELECT TOP 1
+					@ErrMsg = 'Unable to unpost. Weight Claim ' + strReferenceNumber + ' exists for ' + L.strLoadNumber 
+					+ CASE WHEN (@ysnWeightClaimsByContainer = 1) THEN ' Container No. ' + LC.strContainerNumber ELSE '' END + '.' 
+				FROM tblLGWeightClaim WC 
+					INNER JOIN tblLGLoad L ON L.intLoadId = WC.intLoadId
+					LEFT JOIN tblLGWeightClaimDetail WCD ON WC.intWeightClaimId = WCD.intWeightClaimId
+					LEFT JOIN tblLGLoadContainer LC ON LC.intLoadContainerId = WCD.intLoadContainerId
+				WHERE WC.intLoadId = @intLoadId
+					AND (@ysnWeightClaimsByContainer = 0
+						OR @ysnWeightClaimsByContainer = 1 AND WCD.intLoadContainerId = @intContainerId)
+
+				IF (LEN(@ErrMsg) > 0) RAISERROR(@ErrMsg,16,1)
+					
+				-- Remove from Pending Claims
+				IF (@ysnWeightClaimsByContainer = 1)
+					EXEC uspLGAddPendingClaim @intLoadId, 1, @intContainerId, 0
+				ELSE
 					EXEC uspLGAddPendingClaim @intLoadId, 1, NULL, 0
-				END
 			END	
 		END
 
