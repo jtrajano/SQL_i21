@@ -20,6 +20,7 @@
 	[intBillId]					INT NULL,
 	[strBillId]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NULL,
 	[intBillDetailId]			INT NULL,
+	[intBillDetailTaxId]		INT NULL,
 	--OTHER INFORMATION
 	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnPostAction]				BIT DEFAULT 1 NOT NULL,
