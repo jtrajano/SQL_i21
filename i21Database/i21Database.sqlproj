@@ -5798,6 +5798,7 @@
     <Build Include="dbo\Views\vyuGLglhstmstDifference.sql" />
     <Build Include="dbo\Views\vyuGLPTDrillDownDifference.sql" />
     <Build Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
+    <Build Include="dbo\Views\vyuGLUnpostedTransaction.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceipt.sql" />
     <Build Include="dbo\User Defined Types\VoucherDetailReceiptCharge.sql" />
     <Build Include="dbo\Stored Procedures\uspAPCreateVoucherDetailReceiptCharge.sql" />

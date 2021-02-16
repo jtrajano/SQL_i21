@@ -326,6 +326,7 @@
     <None Include="dbo\Views\vyuGLtblGLIjemstDifference.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateSiteCustomerView.sql" />
     <None Include="dbo\Views\vyuGLglhstmstDifference.sql" />
+    <None Include="dbo\Views\vyuGLUnpostedTransaction.sql" />
     <None Include="dbo\Stored Procedures\uspTMDeliveryFillReport.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateItemUsedBySiteView.sql" />
     <None Include="dbo\Stored Procedures\uspTMRecreateLocationUsedBySiteView.sql" />
