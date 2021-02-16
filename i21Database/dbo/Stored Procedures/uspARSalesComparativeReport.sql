@@ -195,13 +195,13 @@ SELECT
 	 , dblEndQuantity 			= 0
 FROM vyuARTransactionSummary 
 WHERE dtmTransactionDate BETWEEN @dtmBeginningDateFrom AND @dtmBeginningDateTo
-  AND intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCustomerIds, '|^|', ',')))
-  AND intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ',')))
-  AND intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ',')))
-  AND intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ',')))
-  AND intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ',')))
-  AND (@strAccountStatusCode IS NULL OR strAccountStatusCode = @strAccountStatusCode)
-  AND (@strSource IS NULL OR strSource = @strSource)
+  AND (intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCustomerIds, '|^|', ','))) OR ISNULL(@strCustomerIds, '') = '')
+  AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
+  AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
+  AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
+  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
+  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
 
 UNION ALL
 
@@ -233,13 +233,13 @@ SELECT dtmBeginDate				= CONVERT(VARCHAR(10), @dtmBeginningDateFrom, 101) + ' - 
 	 , dblEndQuantity			= dblQuantity 
 FROM vyuARTransactionSummary 
 WHERE dtmTransactionDate BETWEEN @dtmEndingDateFrom AND @dtmEndingDateTo
-  AND intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCustomerIds, '|^|', ',')))
-  AND intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ',')))
-  AND intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ',')))
-  AND intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ',')))
-  AND intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ',')))
-  AND (@strAccountStatusCode IS NULL OR strAccountStatusCode = @strAccountStatusCode)
-  AND (@strSource IS NULL OR strSource = @strSource)
+  AND (intEntityCustomerId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCustomerIds, '|^|', ','))) OR ISNULL(@strCustomerIds, '') = '')
+  AND (intSalesPersonId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strSalesPersonIds, '|^|', ','))) OR ISNULL(@strSalesPersonIds, '') = '')
+  AND (intCategoryId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCategoryCodeIds, '|^|', ','))) OR ISNULL(@strCategoryCodeIds, '') = '')
+  AND (intItemId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strItemIds, '|^|', ','))) OR ISNULL(@strItemIds, '') = '')
+  AND (intCompanyLocationId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(REPLACE (@strCompanyLocationIds, '|^|', ','))) OR ISNULL(@strCompanyLocationIds, '') = '')
+  AND (strAccountStatusCode = @strAccountStatusCode OR ISNULL(@strAccountStatusCode, '') = '')
+  AND (strSource = @strSource OR ISNULL(@strSource, '') = '')
   ) SUMMARY
    	OUTER APPLY (
 	SELECT TOP 1 strCompanyName
