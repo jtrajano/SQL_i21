@@ -241,8 +241,8 @@ BEGIN
 			,strVendorCountry = VEL.strCountry
 			,strVendorState = VEL.strState
 			,strVendorZipCode = VEL.strZipCode
-			,strVendorCityStateZip = CASE WHEN (ISNULL(VEL.strCity, '') = '') THEN VEL.strCity  + ' ' ELSE '' END 
-				+ CASE WHEN (ISNULL(VEL.strState, '') = '') THEN VEL.strState  + ' ' ELSE '' END + VEL.strZipCode
+			,strVendorCityStateZip = CASE WHEN (ISNULL(VEL.strCity, '') = '') THEN '' ELSE VEL.strCity  + ' ' END 
+				+ CASE WHEN (ISNULL(VEL.strState, '') = '') THEN '' ELSE VEL.strState  + ' ' END + VEL.strZipCode
 			,strCustomer = Customer.strName
 			,strCustomerContact = CETC.strName
 			,strOriginPort = ISNULL(L.strOriginPort, LoadingPort.strCity)
