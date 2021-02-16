@@ -29,6 +29,7 @@ BEGIN
 		,ysnPaycheckPosted = CASE WHEN (ysnVoid = 1) THEN 0 ELSE ysnPosted END
 		,dtmPaycheckStartDate = dtmDateFrom
 		,dtmPaycheckEndDate = dtmDateTo
+		,ysnForReset = CAST(0 AS BIT)
 	INTO #tmpEmployees
 	FROM tblPREmployee E 
 		LEFT JOIN tblPREmployeeTimeOff T
@@ -75,6 +76,14 @@ BEGIN
 								dtmPaycheckEndDate
 							 ELSE NULL 
 						END
+
+	--Calculate if Time Off is Scheduled for Reset
+	UPDATE #tmpEmployees
+	SET ysnForReset = CASE WHEN ((strAwardPeriod IN ('Anniversary Date', 'End of Year') AND GETDATE() >= dtmNextAward AND YEAR(dtmLastAward) < YEAR (dtmNextAward)  )
+									OR 
+								  (strAwardPeriod NOT IN ('Anniversary Date', 'End of Year') AND YEAR(GETDATE()) > YEAR(dtmLastAward))
+								) THEN 1 
+							ELSE 0 END
 
 	UPDATE #tmpEmployees 
 		--Calculate Total Accrued Hours
@@ -155,23 +164,48 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-									dblMaxEarned
-								 ELSE
-									(dblHoursEarned + T.dblEarnedHours)
-								END
+			SET dblHoursEarned = CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
+										CASE WHEN (T.ysnForReset = 1) THEN
+											CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
+												dblMaxEarned
+											ELSE
+												(dblHoursEarned + T.dblEarnedHours)
+											END
+										Else
+											dblHoursEarned
+										END
+								 ELSE 
+								 		CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
+												dblMaxEarned
+											ELSE
+												(dblHoursEarned + T.dblEarnedHours)
+										END
+								 END
+								
 				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
 				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
 									DATEADD(DD, -1, dtmPaycheckStartDate) 
-								ELSE T.dtmNextAward END
+								ELSE 
+										CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN
+												CASE WHEN ysnForReset =1 THEN 
+													T.dtmNextAward
+												ELSE
+													tblPREmployeeTimeOff.dtmLastAward
+												END
+										ELSE
+												T.dtmNextAward
+										END
+
+										
+								END
 		FROM
 		#tmpEmployees T
 		WHERE T.[intEntityId] = @intEmployeeId
 				AND tblPREmployeeTimeOff.intEntityEmployeeId = @intEmployeeId
 				AND intTypeTimeOffId = @intTypeTimeOffId 
-				AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() >= T.dtmNextAward)
-					OR (T.strAwardPeriod IN ('Paycheck') AND T.dtmNextAward >= T.dtmLastAward)
-					OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Start of Year', 'Paycheck') AND GETDATE() > T.dtmLastAward))
+				--AND ((T.strAwardPeriod IN ('Anniversary Date', 'End of Year', 'Start of Year') AND GETDATE() >= T.dtmNextAward)
+				--	OR (T.strAwardPeriod IN ('Paycheck') AND T.dtmNextAward >= T.dtmLastAward)
+				--	OR (T.strAwardPeriod NOT IN ('Anniversary Date', 'End of Year', 'Start of Year', 'Paycheck') AND GETDATE() > T.dtmLastAward))
 
 		DELETE FROM #tmpEmployees WHERE [intEntityId] = @intEmployeeId
 	END
