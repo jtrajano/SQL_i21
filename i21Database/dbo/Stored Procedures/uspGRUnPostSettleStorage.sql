@@ -96,7 +96,8 @@ BEGIN TRY
 		ON _SS.intId = SS.intSettleStorageId
 	LEFT JOIN tblGRSettleStorageBillDetail SSB
 		ON SSB.intSettleStorageId = SS.intSettleStorageId
-		--AND intBillId IS NOT NULL
+	WHERE SS.intBillId IS NOT NULL OR SSB.intBillId IS NOT NULL
+	
 	DELETE FROM @billList WHERE intId IS NULL
 
 	--will be used at the end of the loop to delete the vouchers
