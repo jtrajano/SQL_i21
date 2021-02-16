@@ -9060,6 +9060,7 @@
     <Build Include="dbo\Tables\tblAGApplicatorLicenseCategory.sql" />
     <Build Include="dbo\Tables\tblAGApplicatorCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforePostValidateInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblMFVirtualRecipeMap.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
