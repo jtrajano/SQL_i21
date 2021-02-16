@@ -247,7 +247,8 @@ BEGIN TRY
 							 @intContractDetailId 	= 	@intContractDetailId,
 							 @strSource			 	= 	@strSource,
 							 @strProcess		 	= 	@strProcess,
-							 @contractDetail 		= 	@contractDetails		
+							 @contractDetail 		= 	@contractDetails,		
+							 @intUserId				=   @intUserId
 
 		IF @intPrevHistoryId IS NULL
 		BEGIN
