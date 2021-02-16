@@ -9057,6 +9057,7 @@
     <Build Include="dbo\Tables\tblMFWorkOrderPreStage.sql" />
     <Build Include="dbo\Tables\tblAGRestrictedChemical.sql" />
     <Build Include="dbo\Tables\tblAGApplicatorLicenseCategory.sql" />
+    <Build Include="dbo\Tables\tblAGApplicatorCategory.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
