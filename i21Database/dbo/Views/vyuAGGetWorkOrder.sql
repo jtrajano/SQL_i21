@@ -50,6 +50,7 @@ AS
 	, WO.ysnFinalized
 	, WO.dblWorkOrderTotal
 	, WO.dblWorkOrderSubtotal
+	, WO.dblTotalDiscount 
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
