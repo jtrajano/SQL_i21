@@ -275,7 +275,6 @@ BEGIN
 		WHEN @msgId = 80259 THEN 'Bill Amount as charge (or discount) for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80260 THEN 'Bill Quantity as charge (or discount) for %s is already %f. You cannot over bill the transaction'
 		WHEN @msgId = 80261 THEN 'The Storage Location invalid in %s for %s.'
-		WHEN @msgId = 80262 THEN 'Unable to Post. The following contract(s) needs to be Priced:<p><br><div style="list-style-position: inside;;"><ul>%s</ul></div></p>'
 	END 
 
 	RETURN @msg
