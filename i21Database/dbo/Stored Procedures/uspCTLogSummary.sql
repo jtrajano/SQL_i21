@@ -3029,20 +3029,41 @@ BEGIN TRY
 					AND intTransactionReferenceDetailId = @intPriceFixationDetailId
 				ORDER BY intId DESC
 
-				IF (@qtyDiff > 0)
+				IF (@intContractTypeId = 1)
 				BEGIN
-					-- Qty increased
-					SET @FinalQty = CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END
-				END
-				ELSE IF (@qtyDiff < 0)
-				BEGIN
-					-- Qty decreased
-					SET @FinalQty = CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END
+					IF (@qtyDiff > 0)
+					BEGIN
+						-- Qty increased
+						SET @FinalQty = CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END
+					END
+					ELSE IF (@qtyDiff < 0)
+					BEGIN
+						-- Qty decreased
+						SET @FinalQty = CASE WHEN @TotalPriced + @dblQty > @TotalConsumed THEN @qtyDiff ELSE 0 END
+					END
+					ELSE
+					BEGIN
+						-- New Price or No change
+						SET @FinalQty = @dblQty
+					END
 				END
 				ELSE
 				BEGIN
-					-- New Price or No change
-					SET @FinalQty = @dblQty
+					IF (@qtyDiff > 0)
+					BEGIN
+						-- Qty increased
+						SET @FinalQty = CASE WHEN @TotalBasis - @qtyDiff > 0 THEN @qtyDiff ELSE @TotalBasis END
+					END
+					ELSE IF (@qtyDiff < 0)
+					BEGIN
+						-- Qty decreased
+						SET @FinalQty = CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END
+					END
+					ELSE
+					BEGIN
+						-- New Price or No change
+						SET @FinalQty = @dblQty
+					END
 				END
 
 				IF (@strTransactionType LIKE '%Basis Deliveries%' AND @FinalQty < 0)
