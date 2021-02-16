@@ -883,7 +883,7 @@ BEGIN TRY
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
-				AND cbl.dblQty <> 0
+				--AND cbl.dblQty <> 0
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE IF @strProcess = 'Delete Invoice'
@@ -970,7 +970,7 @@ BEGIN TRY
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
-				AND cbl.dblQty <> 0
+				--AND cbl.dblQty <> 0
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE
