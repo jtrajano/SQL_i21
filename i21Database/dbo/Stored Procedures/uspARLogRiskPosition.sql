@@ -297,4 +297,37 @@ BEGIN
     BEGIN
         EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
     END
+
+    --CONTRACT BALANCE LOG  
+    WHILE EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)  
+    BEGIN  
+        DECLARE @intId                INT = NULL  
+              , @intContractHeaderId  INT = NULL  
+              , @intContractDetailId  INT = NULL       
+              , @intTransactionId     INT = NULL  
+              , @dblTransactionQty    NUMERIC(24, 10) = 0  
+              , @strSource            NVARCHAR(20) = NULL  
+              , @strProcess           NVARCHAR(50) = NULL  
+  
+        SELECT TOP 1 @intId    = intId  
+                , @intContractHeaderId = intContractHeaderId  
+                , @intContractDetailId = intContractDetailId  
+                , @intTransactionId  = intTransactionRecordId  
+                , @dblTransactionQty = dblQty  
+                , @strSource   = 'Inventory'  
+                , @strProcess   = CASE WHEN dblQty > 0 THEN 'Delete Invoice' ELSE 'Create Invoice' END  
+        FROM @tblSummaryLog  
+  
+        DECLARE @contractDetailList AS ContractDetailTable  
+        EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId  
+                                , @intContractDetailId = @intContractDetailId  
+                                , @strSource   = @strSource  
+                                , @strProcess   = @strProcess  
+                                , @contractDetail  = @contractDetailList  
+                                , @intUserId   = @intUserId  
+                                , @intTransactionId  = @intTransactionId  
+                                , @dblTransactionQty = @dblTransactionQty  
+  
+        DELETE FROM @tblSummaryLog WHERE intId = @intId  
+    END  
 END
