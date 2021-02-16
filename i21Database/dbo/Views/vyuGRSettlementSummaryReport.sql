@@ -182,25 +182,30 @@ FROM
 		WHERE BillDtl.intInventoryReceiptChargeId IS NOT NULL
 		GROUP BY PYMT.intPaymentId
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			 
-	LEFT JOIN (
+	OUTER APPLY (
 		SELECT 
 			a.intBillId
 			,SUM(a.dblAmountApplied * - 1) AS dblVendorPrepayment
 		FROM tblAPAppliedPrepaidAndDebit a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType  not in (13, 3)
 		WHERE a.ysnApplied = 1
+		AND b.intBillId = Bill.intBillId
 		GROUP BY a.intBillId		
 
 		union 
 		select 
-			intBillId,
-			[dblVendorPrepayment] = (ISNULL(dblTotal, 0) + ISNULL(dblTax, 0)) * (CASE ysnPaid WHEN 1 THEN -1 ELSE 1 END)
+			ap.intBillId,
+			[dblVendorPrepayment] = (ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
 		from 
-		tblAPBill 
-		where intTransactionType = 2 
+		tblAPBill ap
+		inner join tblAPPaymentDetail pay
+			ON pay.intBillId = ap.intBillId
+		where ap.intTransactionType = 2
+		and ap.intBillId = Bill.intBillId
+		and pay.intPaymentId = PYMT.intPaymentId
 		
 
 		
-	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId
+	) VendorPrepayment
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
@@ -391,23 +396,28 @@ FROM
 				AND B.strType = 'Other Charge'
 		GROUP BY PYMT.intPaymentId
 	) ScaleDiscountTax ON ScaleDiscountTax.intPaymentId = PYMT.intPaymentId			
-	LEFT JOIN (
+	OUTER APPLY (
 		SELECT
 			a.intBillId
 			,SUM(a.dblAmountApplied* -1) AS dblVendorPrepayment 
 		FROM tblAPAppliedPrepaidAndDebit  a join tblAPBill b on a.intTransactionId = b.intBillId and b.intTransactionType not  in (13, 3)
 		WHERE a.ysnApplied = 1
+		AND b.intBillId = Bill.intBillId
 		GROUP BY a.intBillId
 			
 		union 
 		select 
-			intBillId,
-			[dblVendorPrepayment] = (ISNULL(dblTotal, 0) + ISNULL(dblTax, 0)) * (CASE ysnPaid WHEN 1 THEN -1 ELSE 1 END)
+			ap.intBillId,
+			[dblVendorPrepayment] = (ISNULL(ap.dblTotal, 0) + ISNULL(ap.dblTax, 0)) * (CASE pay.ysnOffset WHEN 1 THEN -1 ELSE 1 END)
 		from 
-		tblAPBill 
-		where intTransactionType = 2 
+		tblAPBill ap
+		inner join tblAPPaymentDetail pay
+			ON pay.intBillId = ap.intBillId
+		where ap.intTransactionType = 2
+		and ap.intBillId = Bill.intBillId
+		and pay.intPaymentId = PYMT.intPaymentId
 
-	) VendorPrepayment ON VendorPrepayment.intBillId = Bill.intBillId			
+	) VendorPrepayment		
 	LEFT JOIN (
 		SELECT 
 			intPaymentId
