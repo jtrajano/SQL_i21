@@ -552,7 +552,7 @@ WHERE strNamespace = 'ContractManagement.view.PriceContractsNew' AND strModule =
 
 --Include Price Contracts on approval
 
-UPDATE TOP(1) tblSMScreen SET ysnApproval =  1, ysnAvailable = 1, strScreenName = 'Price Contracts' WHERE strNamespace = 'ContractManagement.view.PriceContracts'
+UPDATE TOP(1) tblSMScreen SET ysnApproval =  1, ysnAvailable = 1, strScreenName = 'Price Contracts', strModule = 'Contract Management' WHERE strNamespace = 'ContractManagement.view.PriceContracts'
 
 
 ------------------------END Contract Management------------
@@ -614,7 +614,7 @@ GO
 
 ----------------------------Contract Management------------
 
-UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Price Contracts','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New')
+UPDATE tblSMScreen set ysnAvailable = 0 WHERE strScreenName IN ('Allocations','Contract Ag Petro','Contract Options','Cost Type','Cost Type New','Deferred Payment Rates','Freight Rates','Freight Rate New','Market Zone','Weight Grade New','Approval Basis','Packing Description','Delivery Sheet','Acre Contract','Approval','Crop Year New')
 AND strModule = 'Contract Management'
 
 UPDATE tblSMScreen SET strScreenName = N'Weight Grade',strNamespace = 'ContractManagement.view.WeightGrade' 
