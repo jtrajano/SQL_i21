@@ -136,8 +136,8 @@ SELECT
 FROM @ItemEntries IT
 LEFT JOIN tblICItem ITEM ON IT.intItemId = ITEM.intItemId
 LEFT JOIN tblSMCompanyLocation CL ON IT.intCompanyLocationId = CL.intCompanyLocationId
-WHERE
-	NOT EXISTS(	SELECT NULL 
+WHERE ITEM.strType <> 'Comment'
+AND NOT EXISTS(	SELECT NULL 
 				FROM tblICItem IC WITH (NOLOCK) INNER JOIN tblICItemLocation IL WITH (NOLOCK) ON IC.intItemId = IL.intItemId
 				WHERE IC.[intItemId] = IT.[intItemId] AND IL.[intLocationId] = IT.[intCompanyLocationId])
 	
