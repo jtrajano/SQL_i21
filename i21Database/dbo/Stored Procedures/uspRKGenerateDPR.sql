@@ -2975,12 +2975,14 @@ BEGIN TRY
 			, t.ysnPreCrush
 			, t.strNotes
 			, t.strBrokerTradeNo
-			, intUnitMeasureId = intOrigUOMId
-			, intCommodityUnitMeasureId = intOrigUOMId
+			, intUnitMeasureId = cum.intCommodityUnitMeasureId
+			, intCommodityUnitMeasureId = cum.intCommodityUnitMeasureId
 			, strCurrency
 			, dtmFutureMonthsDate
 			, strUnitMeasure
 		FROM dbo.fnRKGetBucketDerivatives(@dtmToDate, @intCommodityId, @intVendorId) t
+		LEFT JOIN tblRKFutureMarket fMar ON fMar.intFutureMarketId = t.intFutureMarketId
+		LEFT JOIN tblICCommodityUnitMeasure cum ON cum.intUnitMeasureId = fMar.intUnitMeasureId AND cum.intCommodityId = t.intCommodityId
 		GROUP BY
 			  t.intFutOptTransactionId
 			, t.intCommodityId
@@ -3007,7 +3009,7 @@ BEGIN TRY
 			, t.ysnPreCrush
 			, t.strNotes
 			, t.strBrokerTradeNo
-			, intOrigUOMId
+			, cum.intCommodityUnitMeasureId
 			, strCurrency
 			, dtmFutureMonthsDate
 			, strUnitMeasure
