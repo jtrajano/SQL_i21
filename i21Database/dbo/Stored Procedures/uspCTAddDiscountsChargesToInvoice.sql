@@ -96,7 +96,7 @@ begin try
 	select
 		@dblQuantity = di.dblQtyShipped
 		,@intInvoiceId = di.intInvoiceId
-		,@dblISTotalQuantity = si.dblQuantity
+		,@dblISTotalQuantity = isnull(si.dblDestinationQuantity,si.dblQuantity)
 		,@strChargesLink = si.strChargesLink
 	from
 		tblARInvoiceDetail di
