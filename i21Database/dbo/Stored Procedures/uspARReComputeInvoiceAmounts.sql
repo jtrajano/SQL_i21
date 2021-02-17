@@ -311,7 +311,7 @@ SET
 								ELSE 0
 								END
 FROM tblARInvoice ARI
-INNER JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
+LEFT JOIN tblARInvoice PRO ON ARI.[intOriginalInvoiceId] = PRO.[intInvoiceId]
 WHERE
 	ARI.[intInvoiceId] = @InvoiceIdLocal
 
