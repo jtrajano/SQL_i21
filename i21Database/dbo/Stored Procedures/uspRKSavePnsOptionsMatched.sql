@@ -75,6 +75,10 @@ BEGIN TRY
 		BEGIN
 			SELECT TOP 1 @intMatchDeletedHeaderId = intOptionsMatchPnSHeaderId FROM #tmpMatchDeletedHeader
 
+			 EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @intMatchDeletedHeaderId
+                , @strRowState = 'Modified'
+                , @intUserId = @intUserId
+
 			DELETE FROM #tmpMatchDeletedHeader WHERE intOptionsMatchPnSHeaderId = @intMatchDeletedHeaderId
 		END
 		
@@ -106,6 +110,10 @@ BEGIN TRY
 		WHILE EXISTS (SELECT TOP 1 1 FROM #tmpExpireDeletedHeader)
 		BEGIN
 			SELECT TOP 1 @intExpireDeletedHeaderId = intOptionsMatchPnSHeaderId FROM #tmpExpireDeletedHeader
+
+			EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @intExpireDeletedHeaderId
+                , @strRowState = 'Modified'
+                , @intUserId = @intUserId
 
 			DELETE FROM #tmpExpireDeletedHeader WHERE intOptionsMatchPnSHeaderId = @intExpireDeletedHeaderId
 		END
@@ -263,6 +271,10 @@ BEGIN TRY
 	BEGIN
 		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewMatched
 
+		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
+            , @strRowState = 'Added'
+            , @intUserId = @intUserId
+
 		DELETE FROM #tmpNewMatched WHERE intOptionsMatchPnSHeaderId = @newRowId
 	END
 
@@ -295,6 +307,10 @@ BEGIN TRY
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewExpired)
 	BEGIN
 		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewExpired
+
+		EXEC uspIPInterCompanyPreStageOptionsPnS @intOptionsMatchPnSHeaderId = @newRowId
+            , @strRowState = 'Added'
+            , @intUserId = @intUserId
 
 		DELETE FROM #tmpNewExpired WHERE intOptionsMatchPnSHeaderId = @newRowId
 	END
