@@ -24,8 +24,8 @@ Undep.intUndepositedFundId
 ,Undep.strEODDrawer 
 ,Undep.ysnEODComplete 
 FROM tblCMUndepositedFund Undep
-INNER JOIN tblEMEntity EM ON Undep.intCreatedUserId = EM.intEntityId
-INNER JOIN tblSMCompanyLocation Loc ON Undep.intLocationId = Loc.intCompanyLocationId
+LEFT JOIN tblEMEntity EM ON Undep.intCreatedUserId = EM.intEntityId
+LEFT JOIN tblSMCompanyLocation Loc ON Undep.intLocationId = Loc.intCompanyLocationId
 LEFT JOIN tblSMPayment Pay ON Undep.strSourceTransactionId =  Pay.strTransactionNo
 LEFT JOIN tblARPayment RCV ON RCV.strRecordNumber = Undep.strSourceTransactionId
 WHERE
