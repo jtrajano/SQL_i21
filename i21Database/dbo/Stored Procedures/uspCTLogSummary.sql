@@ -2996,7 +2996,14 @@ BEGIN TRY
 				-- 	1.1. Decrease available priced quantities
 				-- 	1.2. Increase available basis quantities
 				--  1.3. Increase basis deliveries if DWG
-				SET @FinalQty = CASE WHEN @strProcess = 'Price Delete' THEN @dblQty ELSE @dblOrigQty END
+				IF (@dblContractQty = @TotalConsumed)
+				BEGIN
+					SET @FinalQty = 0.00
+				END
+				ELSE
+				BEGIN
+					SET @FinalQty = CASE WHEN @strProcess = 'Price Delete' THEN @dblQty ELSE @dblOrigQty END
+				END
 				
 				-- Negate all the priced quantities
 				UPDATE @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = 1, strTransactionReference = 'Price Fixation'
