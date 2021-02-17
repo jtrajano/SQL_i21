@@ -3194,11 +3194,12 @@ BEGIN TRY
 				, strFutureMarket
 				, DER.intFutureMarketId
 				, dblPrice
-				, dblOpenQty = dblOpenContract * dblContractSize
+				, dblOpenQty = dbo.fnCTConvertQuantityToTargetCommodityUOM(fm.intUnitMeasureId, @intQuantityUOMId,dblOpenContract * DER.dblContractSize)
 				, dblInvFuturePrice = SP.dblLastSettle
-				, intCurrencyId
+				, DER.intCurrencyId
 			FROM fnRKGetOpenFutureByDate (@intCommodityId, '1/1/1900', @dtmEndDate, 1) DER
 			LEFT JOIN @tblGetSettlementPrice SP ON SP.intFutureMarketId = DER.intFutureMarketId AND SP.intFutureMonthId = DER.intFutureMonthId
+			LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = DER.intFutureMarketId
 			WHERE intCommodityId = @intCommodityId 
 				AND ysnExpired = 0
 				AND intInstrumentTypeId = 1
