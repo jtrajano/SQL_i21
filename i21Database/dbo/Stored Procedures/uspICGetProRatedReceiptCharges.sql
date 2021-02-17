@@ -353,7 +353,8 @@ BEGIN
 		)  IRCT
 
 	WHERE
-		A.intInventoryReceiptId = @intInventoryReceiptId	
+		A.intInventoryReceiptId = @intInventoryReceiptId
+		AND A.intEntityVendorId = r.intEntityId
 		AND ISNULL(A.intContractHeaderId, 0) = ISNULL(@intContractHeaderId, 0)
 		AND ISNULL(A.intContractDetailId, 0) = ISNULL(@intContractDetailId, 0)
 		AND ISNULL(rc.strChargesLink, '') = ISNULL(@strChargesLink, '')
