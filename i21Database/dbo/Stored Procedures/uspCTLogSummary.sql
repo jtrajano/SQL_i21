@@ -37,7 +37,7 @@ BEGIN TRY
 	--- Uncomment line below when debugging ---
 	-------------------------------------------
 	-- SELECT strSource = @strSource, strProcess = @strProcess
-	
+
 	IF @strProcess IN 
 	(
 		'Update Scheduled Quantity',
@@ -883,7 +883,6 @@ BEGIN TRY
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
-				--AND cbl.dblQty <> 0
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE IF @strProcess = 'Delete Invoice'
@@ -970,7 +969,6 @@ BEGIN TRY
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
-				--AND cbl.dblQty <> 0
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE
@@ -2489,7 +2487,7 @@ BEGIN TRY
 			) tbl
 		END
 	END
-
+		
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
 			@intId INT,
@@ -3111,14 +3109,11 @@ BEGIN TRY
 				SET @_dblRemaining = ABS(@dblQty)
 				SET @_dblBasis = ISNULL(@dblBasisQty, 0)
 				SET @_dblPriced = ISNULL(@dblPricedQty, 0)
-
-				SELECT '@_dblPriced',@dblPricedQty,@dblReturn
 				
 				-- Return 1000 | Basis 500 | Priced 500 | PrevReturn 0				
 				-- Log basis
 				IF @_dblBasis > 0
 				BEGIN
-					SELECT '@_dblActualQty',@ysnUnposted, @_dblBasis, @_dblRemaining
 					SET @_dblActualQty = (CASE WHEN @_dblBasis > @_dblRemaining THEN @_dblRemaining ELSE @_dblBasis END)
 					UPDATE @cbLogSpecific SET dblQty = (CASE WHEN @ysnUnposted = 1 THEN @_dblActualQty *- 1 ELSE @_dblActualQty END), intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END, intActionId = 19
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
@@ -3424,8 +3419,6 @@ BEGIN TRY
 					-- IS/IR/SS: - 1000 | Priced 0 Basis 0 | CB: P 0 B 0
 					-- IS/IR/SS: - 1000 | Priced 0 Basis 0 | CB: P 0 B 0
 					-- Negate previous record
-
-					
 					IF @dblQty < 0
 					BEGIN
 						IF (@TotalBasis < @dblOrigQty)
@@ -3434,7 +3427,7 @@ BEGIN TRY
 						END
 						ELSE
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = dblQty
+							UPDATE @cbLogSpecific SET dblQty = dblQty * - 1
 						END
 					END
 					ELSE
