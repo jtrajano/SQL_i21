@@ -289,6 +289,8 @@
     <Build Include="dbo\Tables\tblGLSummary.sql" />
     <Build Include="dbo\Tables\tblGLTempAccount.sql" />
     <Build Include="dbo\Tables\tblGLTempAccountToBuild.sql" />
+    <Build Include="dbo\Tables\tblGLImportCSVLog.sql" />
+    <Build Include="dbo\Tables\tblGLImportCSVDetailLog.sql" />
     <Build Include="dbo\Tables\tblRMArchive.sql" />
     <Build Include="dbo\Tables\tblRMConfiguration.sql" />
     <Build Include="dbo\Tables\tblRMConnection.sql" />
