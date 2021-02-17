@@ -33,8 +33,7 @@ AS
 			,strDiscountCodeDescription
 			,WeightedAverageReading	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE (SUM(WeightedAverageReading) / SUM(Net)) END
 			,WeightedAverageShrink	= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE  (SUM(WeightedAverageShrink) / SUM(Net)) END
-			,Discount				= CASE WHEN ISNULL(SUM(Net),0) = 0 THEN 0 ELSE  (SUM(dblDiscountAmount) / SUM(Net)) END
-			-- ,Discount				= (dblDiscountAmount)
+			,Discount				= SUM(dblDiscountAmount)
 			,Amount					= SUM(dblAmount)
 			,Tax					= SUM(dblTax)
 		FROM	(	
@@ -57,7 +56,7 @@ AS
 					intItemId, 
 					strDiscountCode, 
 					strDiscountCodeDescription, 
-					[dblDiscountAmount] = (isnull(S1.dblDiscountAmount, 0) * Net) + (isnull(S2.dblDiscountAmount, 0) * Net), 
+					dblDiscountAmount, 
 					dblAmount, 
 					dblTax, 
 					Net, 
@@ -72,7 +71,6 @@ AS
 					SELECT					
 						dblShrinkPercent			= ISNULL(ScaleDiscount.dblShrinkPercent, 0)
 						,dblGradeReading			= ISNULL(ScaleDiscount.dblGradeReading, 0)								
-						,dblDiscountAmount			= ISNULL(ScaleDiscount.dblDiscountAmount, 0)
 					FROM tblICInventoryReceiptCharge INVRCPTCHR 
 					LEFT JOIN tblICInventoryReceipt INVRCPT 
 						ON INVRCPTCHR.intInventoryReceiptId = INVRCPT.intInventoryReceiptId
@@ -90,7 +88,6 @@ AS
 								   ,DCode.intItemId
 								   ,QM.dblGradeReading
 								   ,QM.dblShrinkPercent
-								   ,QM.dblDiscountAmount
 								FROM tblQMTicketDiscount QM
 								JOIN tblGRDiscountScheduleCode DCode 
 									ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -106,14 +103,13 @@ AS
 					SELECT 
 						dblShrinkPercent			= ISNULL(StorageDiscount.dblShrinkPercent, 0)
 						,dblGradeReading			= ISNULL(StorageDiscount.dblGradeReading, 0)			
-						,dblDiscountAmount			= ISNULL(StorageDiscount.dblDiscountAmount, 0)
+					
 					FROM (
 								 SELECT 
 									 QM.intTicketFileId
 									,DCode.intItemId
 									,QM.dblGradeReading
 									,QM.dblShrinkPercent
-									,QM.dblDiscountAmount
 								FROM tblQMTicketDiscount QM
 								JOIN tblGRDiscountScheduleCode DCode 
 									ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
@@ -132,7 +128,6 @@ AS
 GROUP BY intPaymentId
 	,strDiscountCode
 	,strDiscountCodeDescription
-	-- ,dblDiscountAmount
 /*SELECT 
 	intPaymentId
 	,strDiscountCode
