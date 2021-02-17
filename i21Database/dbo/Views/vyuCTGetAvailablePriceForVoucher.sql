@@ -29,7 +29,7 @@
 					,dblFinalprice = dbo.fnCTConvertToSeqFXCurrency(cd.intContractDetailId,pc.intFinalCurrencyId,iu.intItemUOMId,pfd.dblFinalPrice)      
 					,dblBilledQuantity = (case when isnull(cd.intNoOfLoad,0) = 0 then isnull(sum(dbo.fnCTConvertQtyToTargetItemUOM(bd.intUnitOfMeasureId,cd.intItemUOMId,bd.dblQtyReceived)),0) else pfd.dblQuantity end)
 					,intBilledLoad = (case when isnull(cd.intNoOfLoad,0) = 0 then 0 else isnull(count(distinct bd.intBillId),0) end)
-					,intPriceItemUOMId = iu.intItemUOMId
+					,intPriceItemUOMId = pfd.intQtyItemUOMId
 	 				,cd.intPricingTypeId
 					,cd.intFreightTermId 
 					,cd.intCompanyLocationId 
@@ -56,7 +56,8 @@
 					,cd.intNoOfLoad
 	 				,cd.intPricingTypeId
 					,cd.intFreightTermId 
-					,cd.intCompanyLocationId 
+					,cd.intCompanyLocationId
+					,pfd.intQtyItemUOMId 
 
                 union all
 
