@@ -9,8 +9,9 @@
 	END
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
-	
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Applicator License Category' AND strModuleName = 'Agronomy')
+
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Commitment Pricing' AND strModuleName = 'Manufacturing')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -4471,6 +4472,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Shifts' A
 	VALUES (N'Shifts', N'Manufacturing', @ManufacturingMaintenanceParentMenuId, N'Shifts', N'Maintenance', N'Screen', N'Manufacturing.view.Shift', N'small-menu-maintenance', 0, 0, 0, 1, 10, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'Manufacturing.view.Shift' WHERE strMenuName = 'Shifts' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Additional Basis' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Additional Basis', N'Manufacturing', @ManufacturingMaintenanceParentMenuId, N'Additional Basis', N'Maintenance', N'Screen', N'Manufacturing.view.AdditionalBasis?showSearch=true', N'small-menu-maintenance', 0, 0, 0, 1, 11, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'Manufacturing.view.AdditionalBasis?showSearch=true' WHERE strMenuName = 'Additional Basis' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingMaintenanceParentMenuId
 	
 -- View
 
@@ -4533,6 +4540,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Yield Vie
 	VALUES (N'Yield View', N'Manufacturing', @ManufacturingViewParentMenuId, N'Yield View', N'View', N'Screen', N'Manufacturing.view.YieldView', N'small-menu-view', 0, 0, 0, 1, 8, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 8, strCommand = N'Manufacturing.view.YieldView' WHERE strMenuName = 'Yield View' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Commitment Pricing' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Commitment Pricing', N'Manufacturing', @ManufacturingViewParentMenuId, N'Commitment Pricing', N'View', N'Screen', N'Manufacturing.view.CommitmentPricing?showSearch=true', N'small-menu-view', 0, 0, 0, 1, 9, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 9, strCommand = N'Manufacturing.view.CommitmentPricing?showSearch=true' WHERE strMenuName = 'Commitment Pricing' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingViewParentMenuId
 
 -- Report
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Ingredient Demand' AND strModuleName = 'Manufacturing' AND intParentMenuID = @ManufacturingReportParentMenuId)
