@@ -64,7 +64,7 @@
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntity_intOrderedById] FOREIGN KEY ([intOrderedById]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblAGApplicationType_intApplicationTypeId] FOREIGN KEY ([intApplicationTypeId]) REFERENCES [dbo].[tblAGApplicationType] ([intApplicationTypeId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntity_intEntityApplicatorId] FOREIGN KEY ([intEntityApplicatorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
- CONSTRAINT [FK_tblAGWorkOrder_tblAGApplicatorLicense_intApplicatorLicenseId] FOREIGN KEY ([intApplicatorLicenseId]) REFERENCES [dbo].[tblAGApplicatorLicense] ([intApplicatorLicenseId])
+ CONSTRAINT [FK_tblAGWorkOrder_tblAGApplicatorLicense_intApplicatorLicenseId] FOREIGN KEY ([intApplicatorLicenseId]) REFERENCES [dbo].[tblAGApplicatorLicense] ([intApplicatorLicenseId]),
  CONSTRAINT [PK_dbo.tblAGWorkOrder_intWorkOrderId] PRIMARY KEY CLUSTERED ([intWorkOrderId] ASC)
 
 );
