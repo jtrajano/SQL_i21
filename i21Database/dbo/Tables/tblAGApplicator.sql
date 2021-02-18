@@ -12,6 +12,6 @@
     [intConcurrencyId]				INT NOT NULL DEFAULT (1), 
 
     CONSTRAINT [PK_tblAGApplicator] PRIMARY KEY CLUSTERED ([intEntityId] ASC), 
-    CONSTRAINT [AK_tblAGApplicator_strApplicatorId] UNIQUE ([strApplicatorId]),
+    --CONSTRAINT [AK_tblAGApplicator_strApplicatorId] UNIQUE ([strApplicatorId]),
 	CONSTRAINT [FK_dbo_tblAGApplicator_tblEMEntity_intEntityId] FOREIGN KEY ([intEntityId]) REFERENCES [dbo].tblEMEntity ([intEntityId]) ON DELETE CASCADE,
 );
