@@ -871,9 +871,9 @@ BEGIN TRY
 				, cbl.intContractStatusId
 				, cbl.intBookId
 				, cbl.intSubBookId
-				, strNotes = NULL
+				, strNotes = ''
 				, cbl.intUserId
-				, intActionId = 17
+				, intActionId = 16
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
@@ -959,13 +959,187 @@ BEGIN TRY
 				, cbl.intContractStatusId
 				, cbl.intBookId
 				, cbl.intSubBookId
-				, strNotes = NULL
+				, strNotes = ''
 				, cbl.intUserId
 				, intActionId = 17
 				, strProcess = @strProcess
 			FROM tblCTContractBalanceLog cbl
 			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
 			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Invoice' AND pLog.strProcess = 'Create Invoice' AND pLog.intTransactionReferenceDetailId = @intTransactionId
+			WHERE cbl.intPricingTypeId = 1			
+				AND cbl.intContractHeaderId = @intContractHeaderId
+				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
+			ORDER BY cbl.intContractBalanceLogId DESC
+		END
+		ELSE IF @strProcess = 'Create Credit Memo'
+		BEGIN
+			INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, dblOrigQty
+				, dblDynamic
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess)
+			SELECT TOP 1 NULL
+				, cbl.dtmTransactionDate
+				, strTransactionType = 'Contract Balance'
+				, strTransactionReference = 'Credit Memo'
+				, intTransactionReferenceId = id.intInvoiceId
+				, intTransactionReferenceDetailId = id.intInvoiceDetailId
+				, strTransactionReferenceNo = i.strInvoiceNumber
+				, cbl.intContractDetailId
+				, cbl.intContractHeaderId
+				, cbl.strContractNumber
+				, cbl.intContractSeq
+				, cbl.intContractTypeId
+				, cbl.intEntityId
+				, cbl.intCommodityId
+				, cbl.intItemId
+				, cbl.intLocationId
+				, cbl.intPricingTypeId
+				, cbl.intFutureMarketId
+				, cbl.intFutureMonthId
+				, cbl.dblBasis
+				, dblFutures = pfd.dblFutures
+				, cbl.intQtyUOMId
+				, cbl.intQtyCurrencyId
+				, cbl.intBasisUOMId
+				, cbl.intBasisCurrencyId
+				, cbl.intPriceUOMId
+				, cbl.dtmStartDate
+				, cbl.dtmEndDate
+				, dblQty = @dblTransactionQty
+				, dblOrigQty = @dblTransactionQty
+				, dblDynamic = @dblTransactionQty
+				, cbl.intContractStatusId
+				, cbl.intBookId
+				, cbl.intSubBookId
+				, strNotes = ''
+				, cbl.intUserId
+				, intActionId = 64
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog cbl
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
+			INNER JOIN tblARInvoiceDetail id ON id.intInvoiceDetailId = @intTransactionId
+			INNER JOIN tblARInvoice i ON i.intInvoiceId = id.intInvoiceId
+			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = id.intPriceFixationDetailId
+			WHERE cbl.intPricingTypeId = 1			
+				AND cbl.intContractHeaderId = @intContractHeaderId
+				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
+			ORDER BY cbl.intContractBalanceLogId DESC
+		END
+		ELSE IF @strProcess = 'Delete Credit Memo'
+		BEGIN
+			INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, dblOrigQty
+				, dblDynamic
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess)
+			SELECT TOP 1 NULL
+				, cbl.dtmTransactionDate
+				, strTransactionType = 'Contract Balance'
+				, strTransactionReference = 'Credit Memo'
+				, intTransactionReferenceId = pLog.intTransactionReferenceId
+				, intTransactionReferenceDetailId = pLog.intTransactionReferenceDetailId
+				, strTransactionReferenceNo = pLog.strTransactionReferenceNo
+				, cbl.intContractDetailId
+				, cbl.intContractHeaderId
+				, cbl.strContractNumber
+				, cbl.intContractSeq
+				, cbl.intContractTypeId
+				, cbl.intEntityId
+				, cbl.intCommodityId
+				, cbl.intItemId
+				, cbl.intLocationId
+				, cbl.intPricingTypeId
+				, cbl.intFutureMarketId
+				, cbl.intFutureMonthId
+				, cbl.dblBasis
+				, dblFutures = pLog.dblFutures
+				, cbl.intQtyUOMId
+				, cbl.intQtyCurrencyId
+				, cbl.intBasisUOMId
+				, cbl.intBasisCurrencyId
+				, cbl.intPriceUOMId
+				, cbl.dtmStartDate
+				, cbl.dtmEndDate
+				, dblQty = @dblTransactionQty
+				, dblOrigQty = @dblTransactionQty
+				, dblDynamic = @dblTransactionQty
+				, cbl.intContractStatusId
+				, cbl.intBookId
+				, cbl.intSubBookId
+				, strNotes = ''
+				, cbl.intUserId
+				, intActionId = 65
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog cbl
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
+			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Credit Memo' AND pLog.strProcess = 'Create Credit Memo' AND pLog.intTransactionReferenceDetailId = @intTransactionId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
@@ -2487,7 +2661,7 @@ BEGIN TRY
 			) tbl
 		END
 	END
-		
+
 	DECLARE @currentContractDetalId INT,
 			@cbLogSpecific AS CTContractBalanceLog,
 			@intId INT,
@@ -3091,7 +3265,7 @@ BEGIN TRY
 		END
 		ELSE IF @strSource = 'Inventory'
 		BEGIN
-			IF @strProcess = 'Create Invoice' OR @strProcess = 'Delete Invoice'
+			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo')
 			BEGIN
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 
@@ -3116,7 +3290,7 @@ BEGIN TRY
 				SET @_dblRemaining = ABS(@dblQty)
 				SET @_dblBasis = ISNULL(@dblBasisQty, 0)
 				SET @_dblPriced = ISNULL(@dblPricedQty, 0)
-				
+
 				-- Return 1000 | Basis 500 | Priced 500 | PrevReturn 0				
 				-- Log basis
 				IF @_dblBasis > 0
