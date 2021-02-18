@@ -103,7 +103,7 @@ BEGIN TRY
 	UPDATE tblARInvoice SET intUserIdforDelete =@UserId  WHERE intInvoiceId = @InvoiceId
 
 	--UPDATE PREPAID ITEM CONTRACT
-	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0)
+	IF(ISNULL(@intTransactionDetailId, 0) <> 0 AND ISNULL(@ysnFromItemContract, 0) = 0 AND @strTransactionType != 'Customer Prepayment')
 	BEGIN
 		EXEC uspCTItemContractUpdateRemainingDollarValue @intItemContractHeaderId, @dblValueToUpdate, @intUserId, @intTransactionDetailId , @strScreenName,  @strRowState, @intInvoiceId
 	END	
