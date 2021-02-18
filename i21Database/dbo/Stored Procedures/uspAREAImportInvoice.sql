@@ -45,6 +45,7 @@ INSERT INTO @InvoiceEntries (
 	, strBinNumber
 	, strGroupNumber
 	, strFeedDiet
+	, ysnPost
 )
 SELECT intId				= I.intId 
 	, strTransactionType	= I.strTransactionType
@@ -82,6 +83,7 @@ SELECT intId				= I.intId
 	, strBinNumber			= I.strBinNumber
 	, strGroupNumber		= I.strGroupNumber
 	, strFeedDiet			= I.strFeedDiet
+	, ysnPost				= CAST(0 AS BIT)
 FROM @InvoiceEAEntries I
 INNER JOIN tblARCustomer C ON RTRIM(LTRIM(I.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(I.intEntityId, 0)
 INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber))
