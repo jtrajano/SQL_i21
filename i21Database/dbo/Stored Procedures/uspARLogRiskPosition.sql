@@ -315,7 +315,10 @@ BEGIN
                 , @intTransactionId  = intTransactionRecordId  
                 , @dblTransactionQty = dblQty  
                 , @strSource   = 'Inventory'  
-                , @strProcess   = CASE WHEN dblQty > 0 THEN 'Delete Invoice' ELSE 'Create Invoice' END  
+                , @strProcess   = CASE WHEN dblQty > 0 
+                                       THEN CASE WHEN strTransactionType <> 'Credit Memo' THEN 'Delete Invoice' ELSE 'Create Credit Memo' END
+                                       ELSE CASE WHEN strTransactionType <> 'Credit Memo' THEN 'Create Invoice' ELSE 'Delete Credit Memo' END
+                                  END  
         FROM @tblSummaryLog  
   
         DECLARE @contractDetailList AS ContractDetailTable  
