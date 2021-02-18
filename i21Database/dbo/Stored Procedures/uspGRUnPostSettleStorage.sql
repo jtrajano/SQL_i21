@@ -139,9 +139,10 @@ BEGIN TRY
 			,@userId = @UserId
 			,@success = @success OUTPUT
 
-		IF(@success = 0)
+		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId IN (@BillIdParams);
+
+		IF (@ErrMsg NOT IN ('Transaction successfully posted.','Transaction successfully unposted.'))
 		BEGIN
-			SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId IN (@BillIdParams);
 			RAISERROR (@ErrMsg, 16, 1);
 			GOTO SettleStorage_Exit;
 		END
