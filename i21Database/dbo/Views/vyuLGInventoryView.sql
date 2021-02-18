@@ -358,7 +358,7 @@ FROM (
 		,intBookId = PCH.intBookId
 		,strBook = BK.strBook
 		,intSubBookId = PCH.intSubBookId
-		,strSubBook = SBK.strBook
+		,strSubBook = SBK.strSubBook
 		,intCropYear = PCH.intCropYearId
 		,strCropYear = CRY.strCropYear
 		,strProducer = PRO.strName
@@ -376,7 +376,7 @@ FROM (
 		LEFT JOIN tblSMCompanyLocationSubLocation WH ON WH.intCompanyLocationSubLocationId = PCD.intSubLocationId
 		LEFT JOIN tblICStorageLocation WHU ON WHU.intStorageLocationId = PCD.intStorageLocationId
 		LEFT JOIN tblCTBook BK ON BK.intBookId = PCH.intBookId
-		LEFT JOIN tblCTBook SBK ON SBK.intBookId = PCH.intSubBookId
+		LEFT JOIN tblCTSubBook SBK ON SBK.intSubBookId = PCH.intSubBookId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PCD.intUnitMeasureId
 		LEFT JOIN tblICItemUOM IUOM ON IUOM.intItemUOMId = PCD.intItemUOMId 
 		LEFT JOIN tblICUnitMeasure IUM ON IUM.intUnitMeasureId = IUOM.intUnitMeasureId
@@ -387,7 +387,7 @@ FROM (
 		LEFT JOIN tblICItemUOM BIU ON BIU.intItemUOMId = PCD.intBasisUOMId
 		LEFT JOIN tblICUnitMeasure BUM ON BUM.intUnitMeasureId = BIU.intUnitMeasureId
 		LEFT JOIN tblICItem PBun ON PBun.intItemId = PCD.intItemBundleId
-		LEFT JOIN tblCTContractBasis CB ON CB.intContractBasisId = PCH.intContractBasisId
+		LEFT JOIN tblSMFreightTerms CB ON CB.intFreightTermId = PCH.intFreightTermId
 		LEFT JOIN tblCTCropYear CRY ON CRY.intCropYearId = PCH.intCropYearId
 		LEFT JOIN tblEMEntity PRO ON PRO.intEntityId = PCH.intProducerId
 		LEFT JOIN tblSMTerm Term ON Term.intTermID = PCH.intTermId
