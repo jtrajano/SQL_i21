@@ -134,8 +134,8 @@ as
 		update
 			pfd
 		set
-			pfd.dblQuantityAppliedAndPriced = pp.dblCorrectQuantityAppliedAndPriced
-			,pfd.dblLoadAppliedAndPriced = pp.dblCorrectLoadAppliedAndPriced
+			pfd.dblQuantityAppliedAndPriced = case when pfd.dblQuantity > pp.dblCorrectQuantityAppliedAndPriced then pp.dblCorrectQuantityAppliedAndPriced else pfd.dblQuantity end
+			,pfd.dblLoadAppliedAndPriced = case when pfd.dblLoadPriced > pp.dblCorrectLoadAppliedAndPriced then pp.dblCorrectLoadAppliedAndPriced else pfd.dblLoadPriced end
 		from
 			tblCTPriceFixationDetail pfd
 			,@PurchasePricing pp
