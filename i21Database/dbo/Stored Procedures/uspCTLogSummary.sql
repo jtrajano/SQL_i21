@@ -1145,6 +1145,180 @@ BEGIN TRY
 				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
+		ELSE IF @strProcess = 'Create Voucher'
+		BEGIN
+			INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, dblOrigQty
+				, dblDynamic
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess)
+			SELECT TOP 1 NULL
+				, cbl.dtmTransactionDate
+				, strTransactionType = 'Purchase Basis Deliveries'
+				, strTransactionReference = 'Voucher'
+				, intTransactionReferenceId = bd.intBillId
+				, intTransactionReferenceDetailId = bd.intBillDetailId
+				, strTransactionReferenceNo = b.strBillId
+				, cbl.intContractDetailId
+				, cbl.intContractHeaderId
+				, cbl.strContractNumber
+				, cbl.intContractSeq
+				, cbl.intContractTypeId
+				, cbl.intEntityId
+				, cbl.intCommodityId
+				, cbl.intItemId
+				, cbl.intLocationId
+				, cbl.intPricingTypeId
+				, cbl.intFutureMarketId
+				, cbl.intFutureMonthId
+				, cbl.dblBasis
+				, dblFutures = pfd.dblFutures
+				, cbl.intQtyUOMId
+				, cbl.intQtyCurrencyId
+				, cbl.intBasisUOMId
+				, cbl.intBasisCurrencyId
+				, cbl.intPriceUOMId
+				, cbl.dtmStartDate
+				, cbl.dtmEndDate
+				, dblQty = @dblTransactionQty
+				, dblOrigQty = @dblTransactionQty
+				, dblDynamic = @dblTransactionQty
+				, cbl.intContractStatusId
+				, cbl.intBookId
+				, cbl.intSubBookId
+				, strNotes = ''
+				, cbl.intUserId
+				, intActionId = 15
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog cbl
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
+			INNER JOIN tblAPBillDetail bd ON bd.intBillDetailId = @intTransactionId
+			INNER JOIN tblAPBill b ON b.intBillId = bd.intBillId
+			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
+			WHERE cbl.intPricingTypeId = 1			
+				AND cbl.intContractHeaderId = @intContractHeaderId
+				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
+			ORDER BY cbl.intContractBalanceLogId DESC
+		END
+		ELSE IF @strProcess = 'Delete Voucher'
+		BEGIN
+			INSERT INTO @cbLogCurrent (strBatchId
+				, dtmTransactionDate
+				, strTransactionType
+				, strTransactionReference
+				, intTransactionReferenceId
+				, intTransactionReferenceDetailId
+				, strTransactionReferenceNo
+				, intContractDetailId
+				, intContractHeaderId
+				, strContractNumber
+				, intContractSeq
+				, intContractTypeId
+				, intEntityId
+				, intCommodityId
+				, intItemId
+				, intLocationId
+				, intPricingTypeId
+				, intFutureMarketId
+				, intFutureMonthId
+				, dblBasis
+				, dblFutures
+				, intQtyUOMId
+				, intQtyCurrencyId
+				, intBasisUOMId
+				, intBasisCurrencyId
+				, intPriceUOMId
+				, dtmStartDate
+				, dtmEndDate
+				, dblQty
+				, dblOrigQty
+				, dblDynamic
+				, intContractStatusId
+				, intBookId
+				, intSubBookId
+				, strNotes
+				, intUserId
+				, intActionId
+				, strProcess)
+			SELECT TOP 1 NULL
+				, cbl.dtmTransactionDate
+				, strTransactionType = 'Purchase Basis Deliveries'
+				, strTransactionReference = 'Voucher'
+				, intTransactionReferenceId = pLog.intTransactionReferenceId
+				, intTransactionReferenceDetailId = pLog.intTransactionReferenceDetailId
+				, strTransactionReferenceNo = pLog.strTransactionReferenceNo
+				, cbl.intContractDetailId
+				, cbl.intContractHeaderId
+				, cbl.strContractNumber
+				, cbl.intContractSeq
+				, cbl.intContractTypeId
+				, cbl.intEntityId
+				, cbl.intCommodityId
+				, cbl.intItemId
+				, cbl.intLocationId
+				, cbl.intPricingTypeId
+				, cbl.intFutureMarketId
+				, cbl.intFutureMonthId
+				, cbl.dblBasis
+				, dblFutures = pLog.dblFutures
+				, cbl.intQtyUOMId
+				, cbl.intQtyCurrencyId
+				, cbl.intBasisUOMId
+				, cbl.intBasisCurrencyId
+				, cbl.intPriceUOMId
+				, cbl.dtmStartDate
+				, cbl.dtmEndDate
+				, dblQty = @dblTransactionQty
+				, dblOrigQty = @dblTransactionQty
+				, dblDynamic = @dblTransactionQty
+				, cbl.intContractStatusId
+				, cbl.intBookId
+				, cbl.intSubBookId
+				, strNotes = ''
+				, cbl.intUserId
+				, intActionId = 62
+				, strProcess = @strProcess
+			FROM tblCTContractBalanceLog cbl
+			INNER JOIN tblCTContractBalanceLog cbl1 ON cbl.intContractBalanceLogId = cbl1.intContractBalanceLogId AND cbl1.strProcess = 'Price Fixation'
+			INNER JOIN @cbLogPrev pLog ON pLog.strTransactionReference = 'Voucher' AND pLog.strProcess = 'Create Voucher' AND pLog.intTransactionReferenceDetailId = @intTransactionId
+			WHERE cbl.intPricingTypeId = 1			
+				AND cbl.intContractHeaderId = @intContractHeaderId
+				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
+			ORDER BY cbl.intContractBalanceLogId DESC
+		END
 		ELSE
 		BEGIN
 			-- Inventory Receipt/Shipment:
@@ -3265,7 +3439,7 @@ BEGIN TRY
 		END
 		ELSE IF @strSource = 'Inventory'
 		BEGIN
-			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo')
+			IF @strProcess IN ('Create Invoice', 'Delete Invoice', 'Create Credit Memo', 'Delete Credit Memo', 'Create Voucher', 'Delete Voucher')
 			BEGIN
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0  
 
@@ -3279,8 +3453,7 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
-			BEGIN				
-			
+			BEGIN
 				DECLARE @_dblRemaining NUMERIC(24, 10),
 						@_dblBasis NUMERIC(24, 10),
 						@_dblPriced NUMERIC(24, 10),
@@ -3290,7 +3463,7 @@ BEGIN TRY
 				SET @_dblRemaining = ABS(@dblQty)
 				SET @_dblBasis = ISNULL(@dblBasisQty, 0)
 				SET @_dblPriced = ISNULL(@dblPricedQty, 0)
-
+								
 				-- Return 1000 | Basis 500 | Priced 500 | PrevReturn 0				
 				-- Log basis
 				IF @_dblBasis > 0
