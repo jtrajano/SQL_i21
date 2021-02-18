@@ -266,7 +266,7 @@ BEGIN TRY
 	WHERE strTranNo = @strTranNoPNS
 
 	DECLARE @newRowId INT
-	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewMatched FROM tblRKOptionsMatchPnS WHERE intOptionsMatchPnSHeaderId > @MaxRow
+	SELECT DISTINCT intOptionsMatchPnSHeaderId INTO #tmpNewMatched FROM tblRKOptionsMatchPnS WHERE intMatchOptionsPnSId > @MaxRow
 	WHILE EXISTS (SELECT TOP 1 1 FROM #tmpNewMatched)
 	BEGIN
 		SELECT TOP 1 @newRowId = intOptionsMatchPnSHeaderId FROM #tmpNewMatched
