@@ -12,6 +12,8 @@ AS
 	, WO.strStatus
 	, WO.strOrderNumber
 	, WO.intEntityCustomerId
+	, WO.intEntityApplicatorId
+	, APPLICATOR.strName AS strApplicatorName
 	, CUSTOMER.strName AS strCustomerName
 	, WO.intFarmFieldId
 	, WO.intTermId
@@ -22,7 +24,8 @@ AS
 	, WO.dtmProcessDate
 	, WO.dtmApplyDate
 	, WO.dtmDueDate
-	, strApplicatorLicenseNumber
+	, WO.intApplicatorLicenseId
+	, LICENSE.strLicenseNumber AS strApplicatorLicenseNo
 	, WO.intOrderedById
 	, ORDEREDBY.strName  AS strOrderedBy
 	, WO.intEntitySalesRepId
@@ -108,4 +111,15 @@ LEFT JOIN (
 		strType
 		FROM tblAGApplicationType WITH (NOLOCK)
 ) TYPE ON TYPE.intApplicationTypeId = WO.intApplicationTypeId
+LEFT JOIN (
+	SELECT strName,
+	intEntityId FROM
+	tblEMEntity WITH (NOLOCK)
+) APPLICATOR ON WO.intEntityApplicatorId = APPLICATOR.intEntityId
+LEFT JOIN (
+	SELECT intApplicatorLicenseId,
+	strLicenseNumber
+	FROM tblAGApplicatorLicense WITH (NOLOCK)
+
+) LICENSE ON WO.intApplicatorLicenseId = LICENSE.intApplicatorLicenseId
 ) 
