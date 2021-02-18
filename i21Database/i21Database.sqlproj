@@ -9064,6 +9064,8 @@
     <Build Include="dbo\Tables\tblMFAdditionalBasis.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasisDetail.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasisOtherCharges.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractPrintCommitmentSalesMP.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractCommitmentDetailSalesMP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

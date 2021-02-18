@@ -16,6 +16,7 @@ AS
 			,CP.intCleanCostCurrencyId
 			,CP.intCleanCostUOMId
 			,CP.strDefaultContractReport
+			,CP.strDefaultContractReportFuture
 			,CP.ysnShowReportLangaugeSelection
 			,CP.strDefaultAmendmentReport
 			,CP.strDefaultPricingConfirmation
