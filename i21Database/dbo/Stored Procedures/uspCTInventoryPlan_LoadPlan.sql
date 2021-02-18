@@ -210,7 +210,7 @@ BEGIN
 	SELECT @intNoOfMonths = 12
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50)'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50),intLocationId int,strLocationName nvarchar(50)'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
@@ -288,7 +288,9 @@ BEGIN
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
 											THEN M.strItemNo
 										Else MI.strItemNo + '' [ '' + M.strItemNo + '' ]'' 
-										END	AS strGroupByColumn '
+										END	AS strGroupByColumn 
+										,IsNULL(L.intCompanyLocationId, 999) intLocationId
+										,IsNULL(L.strLocationName, ''All'') AS strLocationName '
 	SET @Cnt = 1
 
 	WHILE @Cnt <= @intNoOfMonths
@@ -299,7 +301,7 @@ BEGIN
 
 	SET @SQL = @SQL + ' FROM (
 					Select * from (
-					select	intInvPlngReportMasterID,intReportAttributeID,intItemId,strFieldName,strValue,intMainItemId
+					select	intInvPlngReportMasterID,intReportAttributeID,intItemId,strFieldName,strValue,intMainItemId,intLocationId
 					from	tblCTInvPlngReportAttributeValue s
 					 ) as st
 						pivot
@@ -323,8 +325,9 @@ BEGIN
 					JOIN dbo.tblCTReportAttribute RA ON RA.intReportAttributeID = Ext.intReportAttributeID
 					LEFT JOIN tblICItem MI ON MI.intItemId = Ext.intMainItemId
 					Left JOIN #tblMFItemBook IB on IB.intItemId=Ext.intItemId
+					LEFT JOIN dbo.tblSMCompanyLocation L ON L.intCompanyLocationId = Ext.intLocationId
 					order by Ext.intInvPlngReportMasterID,Ext.intItemId, Ext.intReportAttributeID '
-	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By IsNULL(T.strMainItemNo,T.strItemNo), T.strItemNo, RA.intDisplayOrder '
+	SET @SQL = CHAR(13) + @SQL + ' SELECT T.* FROM @Table T JOIN tblCTReportAttribute RA ON RA.intReportAttributeID = T.AttributeId ORDER By T.intLocationId,IsNULL(T.strMainItemNo,T.strItemNo), T.strItemNo, RA.intDisplayOrder '
 
 	--SELECT @SQL		
 	EXEC (@SQL)

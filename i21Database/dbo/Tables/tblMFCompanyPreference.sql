@@ -94,5 +94,6 @@
 	ysnDisplayRestrictedBookInDemandView BIT,
 	intNoofdaystoconsiderforDemandBatches INT,
 	intDemandAnalysisMonthlyCutOffDay INT,
+	ysnForecastedConsumptionByRemainingDays BIT,
 	CONSTRAINT [PK_tblMFCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )
