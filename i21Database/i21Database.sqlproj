@@ -9066,6 +9066,8 @@
     <Build Include="dbo\Tables\tblMFAdditionalBasisOtherCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractPrintCommitmentSalesMP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractCommitmentDetailSalesMP.sql" />
+    <Build Include="dbo\Tables\tblICImportStagingItemCostWithEffectiveDate.sql" />
+    <Build Include="dbo\Stored Procedures\uspICImportItemCostWithEffectiveDateFromStaging.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[tblICEffectiveItemCost]
 	[dtmDateModified] DATETIME NULL,
 	[intCreatedByUserId] INT NULL,
 	[intModifiedByUserId] INT NULL,
+	[intDataSourceId] TINYINT NULL,
+	[intImportFlagInternal] INT NULL,
 	CONSTRAINT [PK_intEffectiveItemCostId] PRIMARY KEY ([intEffectiveItemCostId]),
 	CONSTRAINT [FK_intEffectiveItemCostId_tblICItemLocation] FOREIGN KEY ([intItemLocationId]) REFERENCES [tblICItemLocation]([intItemLocationId]) ON DELETE CASCADE,
 	CONSTRAINT [FK_intEffectiveItemCostId_tblICItem] FOREIGN KEY ([intItemId]) REFERENCES [tblICItem]([intItemId])
