@@ -665,7 +665,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 						ARI.dblAmountDue	= ARI.dblInvoiceTotal + T.[Discount],
 						ARI.dblBaseAmountDue = ARI.dblInvoiceTotal + T.[Discount],
 						ARI.dblInvoiceSubtotal   =  ARI.dblInvoiceSubtotal +  T.[Discount],
-						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount]
+						ARI.dblBaseInvoiceSubtotal  =  ARI.dblBaseInvoiceSubtotal + T.[Discount],
+						ARI.ysnImportFromCSV = 1
 
 						FROM tblARInvoice ARI
 						INNER JOIN fnGetRowsFromDelimitedValues(@CreatedIvoices) I ON ARI.intInvoiceId = I.intID
