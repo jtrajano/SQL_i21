@@ -1459,7 +1459,7 @@ BEGIN TRY
 				AND suh.intExternalHeaderId is not null
 			) tbl
 			WHERE Row_Num = 1
-
+			
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
 			BEGIN
@@ -3453,7 +3453,8 @@ BEGIN TRY
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0
 			END
 			ELSE IF @ysnReturn = 1
-			BEGIN
+			BEGIN				
+			
 				DECLARE @_dblRemaining NUMERIC(24, 10),
 						@_dblBasis NUMERIC(24, 10),
 						@_dblPriced NUMERIC(24, 10),
@@ -3463,7 +3464,7 @@ BEGIN TRY
 				SET @_dblRemaining = ABS(@dblQty)
 				SET @_dblBasis = ISNULL(@dblBasisQty, 0)
 				SET @_dblPriced = ISNULL(@dblPricedQty, 0)
-								
+
 				-- Return 1000 | Basis 500 | Priced 500 | PrevReturn 0				
 				-- Log basis
 				IF @_dblBasis > 0
@@ -3493,7 +3494,7 @@ BEGIN TRY
 				END
 			END
 			ELSE
-			BEGIN				
+			BEGIN
 				-- Get previous totals
 				DECLARE @_basis 		NUMERIC(24, 10) = 0,
 						@_priced 		NUMERIC(24, 10) = 0,
@@ -3522,7 +3523,7 @@ BEGIN TRY
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
 				END
-				
+
 				IF @strProcess = 'Update Sequence Balance - DWG'
 				BEGIN
 					IF @dblQty * - 1 > 0
@@ -3566,6 +3567,14 @@ BEGIN TRY
 						IF  @dblQty <> 0
 						BEGIN
 							UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 2, intActionId = 18
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						END
+					END
+					ELSE IF (@currPricingTypeId = 1)
+					BEGIN						
+						IF  @dblQty <> 0
+						BEGIN
+							UPDATE @cbLogSpecific SET dblQty = @dblQty, strTransactionType = 'Sales Basis Deliveries', intPricingTypeId = 1, intActionId = 46
 							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 					END
