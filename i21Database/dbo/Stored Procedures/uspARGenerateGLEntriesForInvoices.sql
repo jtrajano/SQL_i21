@@ -1282,7 +1282,7 @@ WHERE
 	AND ARID.[dblTotal] > 0
 	AND ARID.[intSourceType] = 4
 
---FINAL INVOICES (DROP SHIP/COGS)
+--FINAL INVOICES (DROP SHIP / COGS)
 INSERT #ARInvoiceGLEntries
     ([dtmDate]
     ,[strBatchId]
@@ -1417,6 +1417,226 @@ WHERE
 	AND I.[dblInvoiceTotal] <> @ZeroDecimal
 	AND ARID.[dblTotal] > 0
 	AND ARID.[intSourceType] = 4
+
+--CarQuest Import (Inventory)
+INSERT #ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = dbo.fnGetItemGLAccount(ARID.[intItemId], ICIL.[intItemLocationId], 'Inventory')
+    ,[dblDebit]                     = @ZeroDecimal
+    ,[dblCredit]                    = IM.[dblCOGSAmount]
+    ,[dblDebitUnit]                 = @ZeroDecimal
+    ,[dblCreditUnit]                = 1
+    ,[strDescription]               = 'Inventory -' + ARID.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'CarQuest Import'
+    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = @ZeroDecimal
+    ,[dblDebitReport]               = @ZeroDecimal
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
+    ,[dblForeignRate]               = I.[dblAverageExchangeRate]
+    ,[strRateType]                  = NULL
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[ysnRebuild]                   = NULL
+FROM
+    #ARPostInvoiceHeader I
+INNER JOIN 
+     #ARPostInvoiceDetail ARID
+ON I.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN (
+	SELECT [intItemId], [strType], [strDescription] FROM tblICItem WITH(NOLOCK)
+) ICI 
+ON ARID.[intItemId] = ICI.[intItemId]
+INNER JOIN (
+    SELECT [intItemId], [intLocationId], [intItemLocationId] FROM tblICItemLocation WITH(NOLOCK)
+) ICIL 
+ON ICI.[intItemId] = ICIL.[intItemId]
+AND I.[intCompanyLocationId] = ICIL.[intLocationId]
+OUTER APPLY (
+	SELECT TOP 1 dblCOGSAmount
+	FROM tblARImportLogDetail WITH(NOLOCK) 
+	WHERE strTransactionNumber = I.strInvoiceNumber
+    ORDER BY intImportLogDetailId DESC
+) IM
+WHERE
+    I.[strImportFormat] = 'CarQuest'
+
+--CarQuest Import (COGS)
+INSERT #ARInvoiceGLEntries
+    ([dtmDate]
+    ,[strBatchId]
+    ,[intAccountId]
+    ,[dblDebit]
+    ,[dblCredit]
+    ,[dblDebitUnit]
+    ,[dblCreditUnit]
+    ,[strDescription]
+    ,[strCode]
+    ,[strReference]
+    ,[intCurrencyId]
+    ,[dblExchangeRate]
+    ,[dtmDateEntered]
+    ,[dtmTransactionDate]
+    ,[strJournalLineDescription]
+    ,[intJournalLineNo]
+    ,[ysnIsUnposted]
+    ,[intUserId]
+    ,[intEntityId]
+    ,[strTransactionId]
+    ,[intTransactionId]
+    ,[strTransactionType]
+    ,[strTransactionForm]
+    ,[strModuleName]
+    ,[intConcurrencyId]
+    ,[dblDebitForeign]
+    ,[dblDebitReport]
+    ,[dblCreditForeign]
+    ,[dblCreditReport]
+    ,[dblReportingRate]
+    ,[dblForeignRate]
+    ,[strRateType]
+    ,[strDocument]
+    ,[strComments]
+    ,[strSourceDocumentId]
+    ,[intSourceLocationId]
+    ,[intSourceUOMId]
+    ,[dblSourceUnitDebit]
+    ,[dblSourceUnitCredit]
+    ,[intCommodityId]
+    ,[intSourceEntityId]
+    ,[ysnRebuild])
+SELECT
+     [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
+    ,[strBatchId]                   = I.[strBatchId]
+    ,[intAccountId]                 = dbo.fnGetItemGLAccount(ARID.[intItemId], ICIL.[intItemLocationId], 'Cost of Goods')
+    ,[dblDebit]                     = IM.[dblCOGSAmount]
+    ,[dblCredit]                    = @ZeroDecimal
+    ,[dblDebitUnit]                 = 1
+    ,[dblCreditUnit]                = @ZeroDecimal
+    ,[strDescription]               = 'COGS -' + ARID.[strDescription]
+    ,[strCode]                      = @CODE
+    ,[strReference]                 = I.[strCustomerNumber]
+    ,[intCurrencyId]                = I.[intCurrencyId]
+    ,[dblExchangeRate]              = I.[dblAverageExchangeRate]
+    ,[dtmDateEntered]               = I.[dtmDatePosted]
+    ,[dtmTransactionDate]           = I.[dtmDate]
+    ,[strJournalLineDescription]    = 'CarQuest Import'
+    ,[intJournalLineNo]             = I.[intInvoiceId]
+    ,[ysnIsUnposted]                = 0
+    ,[intUserId]                    = I.[intUserId]
+    ,[intEntityId]                  = I.[intEntityId]
+    ,[strTransactionId]             = I.[strInvoiceNumber]
+    ,[intTransactionId]             = I.[intInvoiceId]
+    ,[strTransactionType]           = I.[strTransactionType]
+    ,[strTransactionForm]           = @SCREEN_NAME
+    ,[strModuleName]                = @MODULE_NAME
+    ,[intConcurrencyId]             = 1
+    ,[dblDebitForeign]              = @ZeroDecimal
+    ,[dblDebitReport]               = @ZeroDecimal
+    ,[dblCreditForeign]             = @ZeroDecimal
+    ,[dblCreditReport]              = @ZeroDecimal
+    ,[dblReportingRate]             = I.[dblAverageExchangeRate]
+    ,[dblForeignRate]               = I.[dblAverageExchangeRate]
+    ,[strRateType]                  = NULL
+    ,[strDocument]                  = NULL
+    ,[strComments]                  = NULL
+    ,[strSourceDocumentId]          = NULL
+    ,[intSourceLocationId]          = NULL
+    ,[intSourceUOMId]               = NULL
+    ,[dblSourceUnitDebit]           = NULL
+    ,[dblSourceUnitCredit]          = NULL
+    ,[intCommodityId]               = NULL
+    ,[intSourceEntityId]            = I.[intEntityCustomerId]
+    ,[ysnRebuild]                   = NULL
+FROM
+    #ARPostInvoiceHeader I
+INNER JOIN 
+     #ARPostInvoiceDetail ARID
+ON I.[intInvoiceId] = ARID.[intInvoiceId]
+INNER JOIN (
+	SELECT [intItemId], [strType], [strDescription] FROM tblICItem WITH(NOLOCK)
+) ICI 
+ON ARID.[intItemId] = ICI.[intItemId]
+INNER JOIN (
+    SELECT [intItemId], [intLocationId], [intItemLocationId] FROM tblICItemLocation WITH(NOLOCK)
+) ICIL 
+ON ICI.[intItemId] = ICIL.[intItemId]
+AND I.[intCompanyLocationId] = ICIL.[intLocationId]
+OUTER APPLY (
+	SELECT TOP 1 dblCOGSAmount
+	FROM tblARImportLogDetail WITH(NOLOCK) 
+	WHERE strTransactionNumber = I.strInvoiceNumber
+    ORDER BY intImportLogDetailId DESC
+) IM
+WHERE
+    I.[strImportFormat] = 'CarQuest'
 
 --DEBIT MEMO DEBIT
 INSERT #ARInvoiceGLEntries
