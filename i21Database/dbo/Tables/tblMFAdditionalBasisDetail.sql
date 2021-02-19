@@ -8,6 +8,7 @@
 	intItemUOMId INT,
 		
 	CONSTRAINT [PK_tblMFAdditionalBasisDetail] PRIMARY KEY (intAdditionalBasisDetailId), 
+	CONSTRAINT [AK_tblMFAdditionalBasisDetail_intAdditionalBasisId_intItemId] UNIQUE (intAdditionalBasisId, intItemId),
 	CONSTRAINT [FK_tblMFAdditionalBasisDetail_tblMFAdditionalBasis] FOREIGN KEY (intAdditionalBasisId) REFERENCES [tblMFAdditionalBasis](intAdditionalBasisId) ON DELETE CASCADE, 
 	CONSTRAINT [FK_tblMFAdditionalBasisDetail_tblICItem] FOREIGN KEY (intItemId) REFERENCES [tblICItem](intItemId),
 	CONSTRAINT [FK_tblMFAdditionalBasisDetail_tblSMCurrency] FOREIGN KEY (intCurrencyId) REFERENCES [tblSMCurrency](intCurrencyID),

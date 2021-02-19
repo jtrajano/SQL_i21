@@ -9074,6 +9074,9 @@
     <Build Include="dbo\Stored Procedures\uspICImportItemPriceWithEffectiveDateFromStaging.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasisImport.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasisImportError.sql" />
+    <Build Include="dbo\Views\vyuMFAdditionalBasisDetailNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFGetAdditionalBasis.sql" />
+    <Build Include="dbo\Views\vyuMFGetAdditionalBasisDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
