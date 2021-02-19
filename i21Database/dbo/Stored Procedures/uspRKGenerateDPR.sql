@@ -662,6 +662,7 @@ BEGIN TRY
 		, strDeliveryDate
 		, strType
 		, intOrigUOMId
+		, strTransactionType
 	INTO #tblInTransit
 	FROM dbo.fnRKGetBucketInTransit(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE intLocationId = ISNULL(@intLocationId, intLocationId)
@@ -1803,7 +1804,8 @@ BEGIN TRY
 		, strContractNumber
 		, intCommodityId
 		, intFromCommodityUnitMeasureId
-		, strContractEndMonth)
+		, strContractEndMonth
+		, strTransactionType)
 	SELECT intSeqId = 3 
 		, 'Purchase In-Transit' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
@@ -1819,6 +1821,7 @@ BEGIN TRY
 		, @intCommodityId
 		, @intCommodityUnitMeasureId
 		, strContractEndMonth
+		, strTransactionType
 	FROM #tblInTransit
 	WHERE strType = 'Purchase'
 		
@@ -1846,7 +1849,8 @@ BEGIN TRY
 		, strTicketNumber
 		, strContractEndMonth
 		, strFutureMonth
-		, strDeliveryDate)
+		, strDeliveryDate
+		, strTransactionType)
 	SELECT intSeqId = 4
 		, 'Sales In-Transit' COLLATE Latin1_General_CI_AS
 		, @strCommodityCode
@@ -1872,6 +1876,7 @@ BEGIN TRY
 		, strContractEndMonth
 		, strFutureMonth
 		, strDeliveryDate
+		, strTransactionType
 	FROM (
 		SELECT dblTotal 
 			, strLocationName
@@ -1891,6 +1896,7 @@ BEGIN TRY
 			, strContractEndMonth = 'Near By' COLLATE Latin1_General_CI_AS
 			, strFutureMonth
 			, strDeliveryDate
+			, strTransactionType
 		FROM #tblInTransit i
 		WHERE strType = 'Sales'
 	)t
@@ -3804,7 +3810,8 @@ BEGIN TRY
 				, intFromCommodityUnitMeasureId
 				, intCommodityId
 				, intContractHeaderId
-				, strContractNumber)
+				, strContractNumber
+				, strTranType)
 			SELECT strCommodityCode = @strCommodityCode
 				, strType = 'Price Risk' COLLATE Latin1_General_CI_AS
 				, strContractType = 'Purchase In-Transit' COLLATE Latin1_General_CI_AS
@@ -3818,6 +3825,7 @@ BEGIN TRY
 				, intCommodityId = @intCommodityId		
 				, intContractHeaderId
 				, strContractNumber
+				, strTransactionType
 			FROM #tblInTransit
 			WHERE strType = 'Purchase'
 
@@ -3837,7 +3845,8 @@ BEGIN TRY
 				, intTicketId
 				, strTicketNumber
 				, strShipmentNumber
-				, intInventoryShipmentId)
+				, intInventoryShipmentId
+				, strTranType)
 			SELECT strCommodityCode = @strCommodityCode
 				, strType = 'Price Risk' COLLATE Latin1_General_CI_AS
 				, strContractType = 'Sales In-Transit' COLLATE Latin1_General_CI_AS
@@ -3855,6 +3864,7 @@ BEGIN TRY
 				, strTicketNumber
 				, strShipmentNumber
 				, intInventoryShipmentId
+				, strTransactionType
 			FROM (
 				SELECT intFromCommodityUnitMeasureId= @intCommodityUnitMeasureId
 					, dblTotal
@@ -3870,6 +3880,7 @@ BEGIN TRY
 					, strTicketNumber
 					, strShipmentNumber
 					, intInventoryShipmentId
+					, strTransactionType
 				FROM #tblInTransit i
 				WHERE strType = 'Sales'
 			) t 
@@ -6367,13 +6378,15 @@ BEGIN TRY
 				, dblTotal
 				, strLocationName
 				, intFromCommodityUnitMeasureId
-				, strInventoryType)
+				, strInventoryType
+				, strTransactionType)
 			SELECT @intCommodityId
 				, @strCommodityCode
 				, dblTotal = SUM(dblTotal)
 				, strLocationName
 				, @intCommodityUnitMeasureId
 				, strInventoryType = 'Purchase In-Transit' COLLATE Latin1_General_CI_AS
+				, strTransactionType
 			FROM #tblInTransit
 			WHERE strType = 'Purchase'
 			GROUP BY strLocationName
@@ -6383,13 +6396,15 @@ BEGIN TRY
 				, strLocationName
 				, intCommodityId
 				, intFromCommodityUnitMeasureId
-				, strInventoryType)
+				, strInventoryType
+				, strTransactionType)
 			SELECT @strCommodityCode
 				, dblTotal = SUM(dblTotal)
 				, strLocationName
 				, intCommodityId
 				, @intCommodityUnitMeasureId
 				, strInventoryType = 'Sales In-Transit' COLLATE Latin1_General_CI_AS
+				, strTransactionType
 			FROM #tblInTransit
 			WHERE strType = 'Sales'
 			GROUP BY strLocationName
