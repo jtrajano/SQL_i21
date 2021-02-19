@@ -55,7 +55,9 @@ SELECT
 	intVoucherType		=	A.intVoucherType,
 	dtmDate				=	CONVERT(DATETIME, SUBSTRING(A.dtmDate,1,2) + '/'+SUBSTRING(A.dtmDate,3,2) + '/'+SUBSTRING(A.dtmDate,5,4)),
 	dtmVoucherDate		=	CONVERT(DATETIME, SUBSTRING(A.strDateOrAccount,1,2) + '/'+SUBSTRING(A.strDateOrAccount,3,2) + '/'+SUBSTRING(A.strDateOrAccount,5,4)),
-    dblQuantityToBill	=	1,
+    dblQuantityToBill	=	1 * 
+							(CASE WHEN CAST(details.dblDebit AS DECIMAL(18,2)) - CAST(details.dblCredit AS DECIMAL(18,2))
+								< 0 THEN -1 ELSE 1 END),
 	strDetailInfo		=	details.strDetailInfo,
     dblCost				=	ABS(CAST(details.dblCredit AS DECIMAL(18,2)) - CAST(details.dblDebit AS DECIMAL(18,2))),
 	intAccountId		=	details.intAccountId,
