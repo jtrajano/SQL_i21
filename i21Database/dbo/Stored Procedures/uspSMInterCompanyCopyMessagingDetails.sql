@@ -651,8 +651,10 @@ BEGIN
 						strComment = (
 							SELECT strComment FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
 						),
-						dtmModified = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + '''
-						strInterCompanyEntityName = strInterCompanyEntityName
+						dtmModified = ''' + LEFT(CONVERT(VARCHAR, @dtmSourceDate, 121), 23) + ''',
+						strInterCompanyEntityName = (
+							SELECT strInterCompanyEntityName FROM [' + @strCurrentDatabaseName + '].dbo.[tblSMComment] WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempSourceCommentId) + '
+						)
 						WHERE intCommentId = ' + CONVERT(VARCHAR, @intTempDestinationCommentId);
 					EXEC sp_executesql @sql
 
