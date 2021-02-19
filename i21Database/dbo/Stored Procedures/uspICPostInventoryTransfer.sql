@@ -322,16 +322,17 @@ BEGIN
 	EXEC dbo.uspSMGetStartingNumber @STARTING_NUMBER_BATCH, @strBatchId OUTPUT, @intLocationId 
 END 
 
--- insert into the temp table
-BEGIN 
-	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
-END 
-
 -- Check the locations if GL entries will be required. 
 SELECT	@ysnGLEntriesRequired = 1
 FROM	tblICInventoryTransfer 
 WHERE	intInventoryTransferId = @intTransactionId 
 		AND intFromLocationId <> intToLocationId
+
+-- Add to the "not-to-log" list if shipment is not required 
+IF @ysnShipmentRequired <> 1
+BEGIN 
+	INSERT INTO #tmpICLogRiskPositionFromOnHandSkipList (strBatchId) VALUES (@strBatchId) 
+END 
 
 --------------------------------------------------------------------------------------------  
 -- If POST, call the post routines  
