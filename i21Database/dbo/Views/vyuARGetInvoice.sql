@@ -159,6 +159,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
      , dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
      , intCreditStopDays					= CUS.intCreditStopDays
+     , ysnImportFromCSV						= ISNULL(INV.ysnImportFromCSV, 0)
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
