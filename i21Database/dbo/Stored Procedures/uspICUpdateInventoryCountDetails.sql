@@ -134,23 +134,51 @@ BEGIN
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
-			---- Convert the last cost from Stock UOM to stock.intItemUOMId
-			ISNULL(CASE 
-				WHEN il.intCostingMethod = 1 THEN 
-					AVERAGE.dblCost
-				WHEN il.intCostingMethod = 2 THEN 
-					dbo.fnCalculateCostBetweenUOM(
-						COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId)
-						,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-						,COALESCE(FIFO.dblCost, p.dblLastCost)
-					)
-				ELSE 
-					dbo.fnCalculateCostBetweenUOM(
+			------ Convert the last cost from Stock UOM to stock.intItemUOMId
+			--ISNULL(CASE 
+			--	WHEN il.intCostingMethod = 1 THEN 
+			--		AVERAGE.dblCost
+			--	WHEN il.intCostingMethod = 2 THEN 
+			--		dbo.fnCalculateCostBetweenUOM(
+			--			COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId)
+			--			,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+			--			,COALESCE(FIFO.dblCost, p.dblLastCost)
+			--		)
+			--	ELSE 
+			--		dbo.fnCalculateCostBetweenUOM(
+			--			stockUOM.intItemUOMId
+			--			, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+			--			, COALESCE(stock.dblLastCost, p.dblLastCost)
+			--		)
+			--END, 0)
+
+			-- Convert the last cost from Stock UOM to stock.intItemUOMId
+			CASE 
+				-- Get the average cost. 
+				WHEN il.intCostingMethod = 1 THEN 				
+					dbo.fnCalculateCostBetweenUOM (
 						stockUOM.intItemUOMId
-						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-						, COALESCE(stock.dblLastCost, p.dblLastCost)
+						,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						,ISNULL(
+							dbo.fnICGetMovingAverageCost(
+								i.intItemId
+								,il.intItemLocationId
+								,lastTransaction.intInventoryTransactionId
+							
+							)
+							,p.dblLastCost
+						)					
 					)
-			END, 0)
+					
+				-- Or else, get the last cost. 
+				ELSE 				
+					dbo.fnCalculateQtyBetweenUOM (
+						lastTransaction.intItemUOMId
+						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						, lastTransaction.dblCost
+					)
+			END 
+
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 		, ysnRecount = 0
@@ -224,10 +252,31 @@ BEGIN
 					AND dbo.fnDateLessThanEquals(dtmDate, @AsOfDate) = 1 
 			ORDER BY dtmDate ASC
 		) FIFO 
-		OUTER APPLY(
-			SELECT MAX(dblAverageCost) dblCost
-			FROM [dbo].[fnGetItemAverageCostTable](i.intItemId, @AsOfDate)
-		) AVERAGE
+
+		--OUTER APPLY(
+		--	SELECT MAX(dblAverageCost) dblCost
+		--	FROM [dbo].[fnGetItemAverageCostTable](i.intItemId, @AsOfDate)
+		--) AVERAGE
+
+		-- last transaction
+		OUTER APPLY (
+			SELECT
+				TOP 1 
+				t.intItemUOMId
+				,t.dblCost
+				,t.intInventoryTransactionId
+			FROM 
+				tblICInventoryTransaction t
+			WHERE 
+				t.intItemId = i.intItemId
+				AND t.intItemLocationId = il.intItemLocationId 
+				AND t.dblQty > 0 
+				AND ISNULL(t.ysnIsUnposted, 0) = 0 
+				AND dbo.fnDateLessThanEquals(CONVERT(VARCHAR(10), t.dtmDate,112), @AsOfDate) = 1
+			ORDER BY
+				t.intInventoryTransactionId DESC 		
+		) lastTransaction 
+
 	WHERE il.intLocationId = @intLocationId
 		AND ((stock.dblOnHand <> 0 AND @ysnIncludeZeroOnHand = 0) OR (@ysnIncludeZeroOnHand = 1))
 		AND (i.intCategoryId = @intCategoryId OR ISNULL(@intCategoryId, 0) = 0)
