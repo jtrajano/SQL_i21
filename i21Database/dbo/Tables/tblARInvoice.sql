@@ -129,6 +129,8 @@
 	[strBillingMethod]					NVARCHAR(100)   COLLATE Latin1_General_CI_AS 	NULL,
 	[strApplicatorLicense]				NVARCHAR(50)    COLLATE Latin1_General_CI_AS 	NULL,
 	[intPeriodId]						INT												NULL,
+    [intUserIdforDelete]				INT												NULL,
+	[ysnImportFromCSV] 					BIT											    NULL	CONSTRAINT [DF_tblARInvoice_ysnImportFromCSV] DEFAULT ((0))
     CONSTRAINT [PK_tblARInvoice_intInvoiceId] PRIMARY KEY CLUSTERED ([intInvoiceId] ASC),
 	CONSTRAINT [UK_tblARInvoice_strInvoiceNumber] UNIQUE ([strInvoiceNumber]),
     CONSTRAINT [FK_tblARInvoice_tblARCustomer_intEntityCustomerId] FOREIGN KEY ([intEntityCustomerId]) REFERENCES [dbo].[tblARCustomer] ([intEntityId]),
