@@ -315,9 +315,9 @@ BEGIN TRY
 	select top 1 @strUnitMeasure = strUnitMeasure from tblICUnitMeasure where intUnitMeasureId = @intUnitMeasureId;
 	select top 1 @intUnitMeasureId2 = intUnitMeasureId from tblICItemUOM where intItemUOMId = @intPriceItemUOMId		
 	select top 1 @strUnitMeasure2 = strUnitMeasure from tblICUnitMeasure where intUnitMeasureId = @intUnitMeasureId2
-	select top 1 @strFromCurrency = strSymbol +''+ strCurrency from tblSMCurrency c
+	select top 1 @strFromCurrency = ISNULL(strSymbol,'') +''+ strCurrency from tblSMCurrency c
 	INNER JOIN tblSMCurrencyExchangeRate er ON c.intCurrencyID = er.intFromCurrencyId and intCurrencyExchangeRateId = @intCurrencyExchangeRateId
-	select top 1 @strToCurrency = strSymbol +''+ strCurrency from tblSMCurrency c
+	select top 1 @strToCurrency = ISNULL(strSymbol,'')  +''+ strCurrency from tblSMCurrency c
 	INNER JOIN tblSMCurrencyExchangeRate er ON c.intCurrencyID = er.intToCurrencyId and intCurrencyExchangeRateId = @intCurrencyExchangeRateId
 
 
