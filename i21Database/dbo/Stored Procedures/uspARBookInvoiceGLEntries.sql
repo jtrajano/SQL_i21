@@ -226,10 +226,15 @@ IF @Post = 0
 
 IF EXISTS (SELECT TOP 1 1 FROM @GLPost) 
 	BEGIN
+		DECLARE @SkipICValidation BIT = 0
+
+		IF EXISTS(SELECT TOP 1 1 FROM @GLPost WHERE [strJournalLineDescription] = 'CarQuest Import')
+			SET @SkipICValidation = 1
+
 		EXEC dbo.uspGLBookEntries @GLEntries			= @GLPost
 								, @ysnPost				= @Post
 								, @SkipGLValidation		= 1
-								, @SkipICValidation		= 0
+								, @SkipICValidation		= @SkipICValidation
 	END
 
 END TRY
