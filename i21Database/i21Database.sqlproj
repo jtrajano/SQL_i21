@@ -4808,6 +4808,7 @@
     <Build Include="dbo\Views\vyuCTContractFeed.sql" />
     <Build Include="dbo\Views\vyuCTRestApiContractDetails.sql" />
     <Build Include="dbo\Views\vyuCTRestApiContractHeader.sql" />
+    <Build Include="dbo\Views\vyuCTRestApiContractCost.sql" />
     <Build Include="dbo\Views\vyuCTGetRawToWipConversion.sql" />
     <Build Include="dbo\Views\vyuCTCommodityFutures.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCompareRecords.sql" />

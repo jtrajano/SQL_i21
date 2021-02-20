@@ -172,23 +172,18 @@ SELECT
 	, dbo.fnCTConvertQtyToTargetItemUOM(cd.intItemUOMId, cd.intPriceItemUOMId, cd.dblQuantity) AS dblQtyInPriceUOM
 	, dbo.fnCTConvertQtyToTargetItemUOM(cd.intItemUOMId, sm.intItemUOMId, cd.dblQuantity) AS dblQtyInStockUOM
 	, dbo.fnCTConvertQtyToTargetItemUOM(sm.intItemUOMId, cd.intPriceItemUOMId, cd.dblCashPrice) AS dblCashPriceInStockUOM
-	, dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(ad.intSeqPriceUOMId, ISNULL(cd.intPriceItemUOMId, cd.intAdjItemUOMId)), cd.intItemUOMId,1) AS dblPriceToQtyConvFactor
 	, dbo.fnCTConvertQtyToTargetItemUOM(cd.intNetWeightUOMId, cd.intItemUOMId,1) AS dblWeightToQtyConvFactor
 	, dbo.fnCTConvertQtyToTargetItemUOM(cd.intItemUOMId, cd.intNetWeightUOMId, ISNULL(cd.dblBalance,0) - ISNULL(cd.dblScheduleQty,0)) AS dblAvailableNetWeight
 	, cd.dblBalanceLoad - ISNULL(cd.dblScheduleLoad, 0) AS dblAvailableLoad
-	, cd.dblFutures	/ CASE WHEN ISNULL(cu.intCent,0) = 0 THEN 1 ELSE cu.intCent END AS dblMainFutures
-	, cd.dblBasis / CASE WHEN ISNULL(cu.intCent,0) = 0 THEN 1 ELSE cu.intCent END AS dblMainBasis
-	, cd.dblCashPrice / CASE WHEN ISNULL(cu.intCent,0) = 0 THEN 1 ELSE cu.intCent END AS dblMainCashPrice
 	, cs.strContractStatus
 	, fm.strFutMarketName
 	, mo.strFutureMonth
 FROM tblCTContractDetail cd
 JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
-LEFT JOIN tblCTPriceFixation pf	ON	pf.intContractDetailId = cd.intContractDetailId
-LEFT JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
+LEFT JOIN tblCTPriceFixation pf	ON pf.intContractHeaderId = ch.intContractHeaderId
+	AND pf.intContractDetailId = cd.intContractDetailId
+JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
 LEFT JOIN tblICItemUOM sm ON sm.intItemId = cd.intItemId
-CROSS APPLY dbo.fnCTGetAdditionalColumnForDetailView(cd.intContractDetailId) ad
-LEFT JOIN tblSMCurrency cu ON cu.intCurrencyID = cd.intCurrencyId
-LEFT JOIN tblCTContractStatus cs ON cs.intContractStatusId = cd.intContractStatusId
+JOIN tblCTContractStatus cs ON cs.intContractStatusId = cd.intContractStatusId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth	mo ON mo.intFutureMonthId =	cd.intFutureMonthId
