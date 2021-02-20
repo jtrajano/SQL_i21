@@ -9078,6 +9078,7 @@
     <Build Include="dbo\Views\vyuMFAdditionalBasisDetailNotMapped.sql" />
     <Build Include="dbo\Views\vyuMFGetAdditionalBasis.sql" />
     <Build Include="dbo\Views\vyuMFGetAdditionalBasisDetail.sql" />
+    <Build Include="dbo\Views\vyuAGWorkOrderReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
