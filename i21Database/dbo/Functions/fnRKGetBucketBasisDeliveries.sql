@@ -203,7 +203,7 @@ BEGIN
 		SELECT intContractDetailId
 		FROM @returntable
 		GROUP BY intContractDetailId
-		HAVING SUM(dblQty) <= 0
+		HAVING SUM(dblQty) < 0
 	)
 
 
