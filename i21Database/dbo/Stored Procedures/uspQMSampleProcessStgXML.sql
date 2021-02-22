@@ -134,6 +134,11 @@ BEGIN TRY
 	DECLARE @intCurrentCompanyId INT
 		,@intParentCompanyId INT
 		,@ysnIgnoreContract BIT
+		,@strLogXML NVARCHAR(MAX)
+		,@strAuditXML NVARCHAR(MAX)
+		,@intLogId INT
+		,@strUserName NVARCHAR(50)
+		,@intAuditLogUserId INT
 
 	SELECT @intCurrentCompanyId = intCompanyId
 	FROM tblIPMultiCompany WITH (NOLOCK)
@@ -185,6 +190,9 @@ BEGIN TRY
 			,@intScreenId = NULL
 			,@intTransactionRefId = NULL
 			,@intCompanyRefId = NULL
+			,@strLogXML = NULL
+			,@strAuditXML = NULL
+			,@intLogId = NULL
 
 		SELECT @intSampleId = intSampleId
 			,@strSampleNumber = strSampleNumber
@@ -203,6 +211,8 @@ BEGIN TRY
 			,@intToBookId = intToBookId
 			,@intTransactionId = intTransactionId
 			,@intCompanyId = intCompanyId
+			,@strLogXML = strLogXML
+			,@strAuditXML = strAuditXML
 		FROM tblQMSampleStage WITH (NOLOCK)
 		WHERE intSampleStageId = @intSampleStageId
 
@@ -2401,7 +2411,9 @@ BEGIN TRY
 					FROM @tblQMTestResult
 					)
 
-			--EXEC sp_xml_removedocument @idoc
+			IF @idoc <> 0
+				EXEC sp_xml_removedocument @idoc
+
 			SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
 
 			EXEC uspCTGetTableDataInXML 'tblQMSample'
@@ -2470,6 +2482,125 @@ BEGIN TRY
 			WHERE intRecordId = @intNewSampleId
 				AND intScreenId = @intScreenId
 
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strLogXML
+
+			SELECT @strUserName = NULL
+
+			SELECT @strUserName = strName
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (strName NVARCHAR(100) Collate Latin1_General_CI_AS)
+
+			SELECT @intAuditLogUserId = NULL
+
+			SELECT @intAuditLogUserId = CE.intEntityId
+			FROM tblEMEntity CE
+			JOIN tblEMEntityType ET1 ON ET1.intEntityId = CE.intEntityId
+			WHERE ET1.strType = 'User'
+				AND CE.strName = @strUserName
+				AND CE.strEntityNo <> ''
+
+			IF @intAuditLogUserId IS NULL
+			BEGIN
+				SELECT TOP 1 @intAuditLogUserId = intEntityId
+				FROM tblSMUserSecurity
+				WHERE strUserName = 'irelyadmin'
+			END
+
+			INSERT INTO tblSMLog (
+				dtmDate
+				,strRoute
+				,intTransactionId
+				,intConcurrencyId
+				,intEntityId
+				,strType
+				)
+			SELECT dtmDate
+				,strRoute
+				,@intTransactionRefId
+				,1
+				,@intAuditLogUserId
+				,'Audit'
+			FROM OPENXML(@idoc, 'vyuIPLogViews/vyuIPLogView', 2) WITH (
+					intLogId INT
+					,dtmDate DATETIME
+					,strRoute NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					)
+
+			SELECT @intLogId = SCOPE_IDENTITY();
+
+			EXEC sp_xml_removedocument @idoc
+
+			EXEC sp_xml_preparedocument @idoc OUTPUT
+				,@strAuditXML
+
+			DECLARE @tblSMAudit TABLE (
+				intAuditId INT
+				,intAuditRefId INT
+				)
+
+			DELETE
+			FROM @tblSMAudit
+
+			INSERT INTO tblSMAudit (
+				intLogId
+				,strAction
+				,strChange
+				,strFrom
+				,strTo
+				,strAlias
+				,ysnField
+				,ysnHidden
+				,intKeyValue
+				--,intParentAuditId
+				,intConcurrencyId
+				)
+			OUTPUT inserted.intAuditId
+				,inserted.intKeyValue
+			INTO @tblSMAudit
+			SELECT @intLogId
+				,strAction
+				,strChange
+				,strFrom
+				,strTo
+				,strAlias
+				,ysnField
+				,ysnHidden
+				,intAuditId
+				--,(
+				--	SELECT TOP 1 A.intAuditId
+				--	FROM tblSMAudit A
+				--	WHERE intLogId = @intLogId
+				--		AND A.intKeyValue = x.intParentAuditId
+				--	)
+				,1
+			FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+					intLogId INT
+					,strAction NVARCHAR(100) Collate Latin1_General_CI_AS
+					,strChange NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strFrom NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strTo NVARCHAR(MAX) Collate Latin1_General_CI_AS
+					,strAlias NVARCHAR(205) Collate Latin1_General_CI_AS
+					,ysnField BIT
+					,ysnHidden BIT
+					,intAuditId INT
+					,intParentAuditId INT
+					) x
+
+			UPDATE A1
+			SET intParentAuditId = (
+					SELECT TOP 1 A2.intAuditId
+					FROM OPENXML(@idoc, 'vyuIPAuditViews/vyuIPAuditView', 2) WITH (
+							intAuditId INT
+							,intParentAuditId INT
+							) x
+					JOIN @tblSMAudit A2 ON A2.intAuditRefId = x.intParentAuditId
+					WHERE x.intAuditId = A.intAuditRefId
+					)
+			FROM @tblSMAudit A
+			JOIN tblSMAudit A1 ON A.intAuditId = A1.intAuditId
+
+			EXEC sp_xml_removedocument @idoc
+			
 			IF @ysnParent = 1
 			BEGIN
 				SELECT TOP 1 @intMultiCompanyId = intCompanyId
@@ -2569,7 +2700,8 @@ BEGIN TRY
 				END
 			END
 
-			EXEC sp_xml_removedocument @idoc
+			IF @idoc <> 0
+				EXEC sp_xml_removedocument @idoc
 
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Processed'
