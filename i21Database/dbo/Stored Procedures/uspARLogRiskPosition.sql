@@ -293,6 +293,21 @@ BEGIN
     INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId
     WHERE ISNULL(ISI.ysnDestinationWeightsAndGrades, 0) = 1   
 
+    --DELETE IF RETURN
+    DELETE SL
+    FROM @tblSummaryLog SL
+    INNER JOIN tblARInvoiceDetail ID ON SL.intTransactionRecordId = ID.intInvoiceDetailId
+    INNER JOIN tblARInvoice INV ON ID.intInvoiceId = INV.intInvoiceId
+      CROSS APPLY (
+        SELECT TOP 1 intInvoiceId 
+        FROM tblARInvoice I
+        WHERE I.strTransactionType = 'Invoice'
+          AND I.ysnReturned = 1
+          AND INV.strInvoiceOriginId = I.strInvoiceNumber
+          AND INV.intOriginalInvoiceId = I.intInvoiceId
+      ) RI
+    WHERE SL.strTransactionType = 'Credit Memo'
+
     IF EXISTS (SELECT TOP 1 NULL FROM @tblSummaryLog)
     BEGIN
         EXEC dbo.uspRKLogRiskPosition @tblSummaryLog, 0, 0
