@@ -2677,6 +2677,7 @@ SELECT intInvoiceId			= intInvoiceId
 	, ysnFromReturn			= ysnFromReturn
 FROM #ARItemsForContracts
 WHERE strType = 'Contract Balance'
+  AND ysnFromReturn = 0
 
 INSERT INTO #ARInvalidInvoiceData (
 		[intInvoiceId]
