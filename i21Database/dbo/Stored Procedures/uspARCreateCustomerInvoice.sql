@@ -747,6 +747,9 @@ BEGIN TRY
         ,@ItemAddonDetailKey            = @ItemAddonDetailKey
         ,@ItemAddonParent               = @ItemAddonParent
         ,@ItemAddOnQuantity             = @ItemAddOnQuantity
+		,@ItemCurrencyExchangeRateTypeId	= @ItemCurrencyExchangeRateTypeId
+		,@ItemCurrencyExchangeRateId		= @ItemCurrencyExchangeRateId
+		,@ItemCurrencyExchangeRate			= @ItemCurrencyExchangeRate
 
 		IF LEN(ISNULL(@AddDetailError,'')) > 0
 			BEGIN
