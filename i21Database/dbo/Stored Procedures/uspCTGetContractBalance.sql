@@ -9,6 +9,7 @@
 	, @strPositionIncludes NVARCHAR(MAX) = NULL
 	, @strCallingApp NVARCHAR(MAX) = NULL
 	, @strPrintOption NVARCHAR(MAX) = NULL
+	, @IntLocalTimeOffset int  = null	
 
 AS
 
@@ -45,7 +46,7 @@ BEGIN
 	(
 		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC), intContractDetailId, intContractStatusId
 		FROM tblCTContractBalanceLog
-		WHERE dbo.fnRemoveTimeOnDate(dtmTransactionDate) <= @dtmEndDate
+		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmTransactionDate)) else dtmTransactionDate end)) <= @dtmEndDate
 	) tbl
 	WHERE intRowNumber = 1
 
