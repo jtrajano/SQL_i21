@@ -3,8 +3,7 @@ CREATE TABLE [dbo].[tblGLImportCSVLog](
 	[dtmDate] [datetime] NULL,
 	[intEntityId] [int] NULL,
 	[strVersion] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL ,
-	[strEvent] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL ,
-	[strMachine] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL ,
+	[strEvent] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL 
  CONSTRAINT [PK_tblGLImportCSVLog] PRIMARY KEY CLUSTERED 
 (
 	[intImportLogId] ASC

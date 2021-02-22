@@ -2,7 +2,8 @@ CREATE TABLE [dbo].[tblGLImportCSVLogDetail](
 	[intImportLogDetailId] [int] IDENTITY(1,1) NOT NULL,
 	[intImportLogId] [int] NULL,
 	[intLineNo] [int] NULL,
-	[strEvent] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,
+	[strKeyId]	nvarchar(20) COLLATE Latin1_General_CI_AS NULL,
+	[strEvent] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,
  CONSTRAINT [PK_tblGLImportCSVLogDetail] PRIMARY KEY CLUSTERED 
 (
 	[intImportLogDetailId] ASC
