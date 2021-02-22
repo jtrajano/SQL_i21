@@ -1039,9 +1039,9 @@ BEGIN TRY
 				, cbl.intPriceUOMId
 				, cbl.dtmStartDate
 				, cbl.dtmEndDate
-				, dblQty = @dblTransactionQty
-				, dblOrigQty = @dblTransactionQty
-				, dblDynamic = @dblTransactionQty
+				, dblQty = CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblTransactionQty END
+				, dblOrigQty = CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblTransactionQty END
+				, dblDynamic = CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad ELSE @dblTransactionQty END
 				, cbl.intContractStatusId
 				, cbl.intBookId
 				, cbl.intSubBookId
@@ -1127,9 +1127,9 @@ BEGIN TRY
 				, cbl.intPriceUOMId
 				, cbl.dtmStartDate
 				, cbl.dtmEndDate
-				, dblQty = @dblTransactionQty
-				, dblOrigQty = @dblTransactionQty
-				, dblDynamic = @dblTransactionQty
+				, dblQty = CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad * - 1 ELSE @dblTransactionQty END
+				, dblOrigQty = CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad * - 1 ELSE @dblTransactionQty END
+				, dblDynamic = CASE WHEN @ysnLoadBased = 1 THEN @dblQuantityPerLoad * - 1 ELSE @dblTransactionQty END
 				, cbl.intContractStatusId
 				, cbl.intBookId
 				, cbl.intSubBookId
@@ -1459,7 +1459,7 @@ BEGIN TRY
 				AND suh.intExternalHeaderId is not null
 			) tbl
 			WHERE Row_Num = 1
-			
+
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
 			BEGIN
@@ -3350,7 +3350,21 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					SET @FinalQty = CASE WHEN @strProcess = 'Price Delete' THEN @dblQty ELSE @dblOrigQty END
+					IF (@strProcess = 'Price Delete')
+					BEGIN
+						SET @FinalQty = @dblQty
+					END
+					ELSE
+					BEGIN
+						IF ((@dblContractQty - @TotalConsumed) < @dblOrigQty)
+						BEGIN
+							SET @FinalQty = @dblContractQty - @TotalConsumed
+						END
+						ELSE
+						BEGIN
+							SET @FinalQty = @dblOrigQty
+						END
+					END
 				END
 				
 				-- Negate all the priced quantities
