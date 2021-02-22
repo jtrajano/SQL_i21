@@ -23,5 +23,7 @@
 	ysnMailSent				BIT CONSTRAINT DF_tblQMSampleStage_ysnMailSent DEFAULT 0,
 	intTransactionId		INT,
 	intCompanyId			INT,
-	intStatusId				INT
+	intStatusId				INT,
+	strLogXML				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
+	strAuditXML				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 )
