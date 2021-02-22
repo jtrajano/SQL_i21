@@ -259,7 +259,7 @@ SET @strHeader = '<tr><th>&nbsp;SerialNo</th>
 					</tr>'
 
 SELECT @strDetail = @strDetail + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
-			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + strPValue + '</td>' + '<td>&nbsp;' + strSValue + '</td> 
+			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + IsNULL(strPValue,'') + '</td>' + '<td>&nbsp;' + IsNULL(strSValue,'') + '</td> 
 	</tr>'
 FROM @Data2
 ORDER BY intRecordId
@@ -268,7 +268,7 @@ SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
 SET @strMessage = @strStyle + @strHtml
 
-IF ISNULL(@strDetail, '') = ''
+IF ISNULL(@strDetail, '') = ''and ISNULL(@strDetail2, '') = ''
 	SET @strMessage = ''
 
 SELECT @strMessage AS strMessage
