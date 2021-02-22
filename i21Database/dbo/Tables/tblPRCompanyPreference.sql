@@ -9,6 +9,7 @@
 	[ysnPreventNegativeTimeOff] BIT NOT NULL DEFAULT ((0)), 
 	[dtmLastTimeOffAdjustmentReset] DATETIME NULL,
 	[intCommissionEarningId] [int] NULL,
+	[intFirstDayOfWorkWeek] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (
