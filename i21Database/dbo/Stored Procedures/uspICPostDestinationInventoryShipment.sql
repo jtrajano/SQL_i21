@@ -329,6 +329,14 @@ BEGIN
 				,@ysnPost
 
 			IF @intReturnValue < 0 GOTO _ExitWithError
+
+			-- Post the Add-Payables for the shipment. 
+			EXEC @intReturnValue = dbo.uspICProcessPayables
+				@intReceiptId = NULL 
+				,@intShipmentId = @intShipmentId
+				,@ysnPost = @ysnPost
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
+
 		END 
 
 		-- Create and post the inventory adjustment
@@ -445,6 +453,13 @@ BEGIN
 				,@ysnPost 
 
 			IF @intReturnValue < 0 GOTO _ExitWithError
+
+			-- Unpost the Add-Payables for the shipment. 
+			EXEC @intReturnValue = dbo.uspICProcessPayables
+				@intReceiptId = NULL 
+				,@intShipmentId = @intShipmentId
+				,@ysnPost = @ysnPost
+				,@intEntityUserSecurityId = @intEntityUserSecurityId
 		END 
 
 		-- Even on unpost, create and post a new inventory adjustment
@@ -498,6 +513,7 @@ BEGIN
 		@DestinationItems
 		,@ysnPost
 		,@intEntityUserSecurityId
+
 
 	-- Clear the existing other charges
 	DELETE	sCharge
