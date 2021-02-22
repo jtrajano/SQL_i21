@@ -1,11 +1,18 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchInterCompanyLocation]
-	@DatabaseName NVARCHAR(50)
+	@intInterCompanyId INT = 0
 AS
+	DECLARE @strDatabaseName NVARCHAR(50) = ''
+
+	SELECT @strDatabaseName = strDatabaseName
+	FROM tblSMInterCompany
+	WHERE intInterCompanyId = @intInterCompanyId
+
 	DECLARE @strQuery NVARCHAR(MAX) = 
 	'SELECT 
 		 [intInterCompanyLocationId] = intCompanyLocationId
 		,[strInterCompanyLocationId] = strLocationName
-	FROM [' + @DatabaseName + '].[dbo].[tblSMCompanyLocation]'
+	FROM [' + @strDatabaseName + '].[dbo].[tblSMCompanyLocation]'
 
-	EXEC sp_executesql @strQuery
+	IF ISNULL(@strDatabaseName, '') <> ''
+		EXEC sp_executesql @strQuery
 RETURN 0

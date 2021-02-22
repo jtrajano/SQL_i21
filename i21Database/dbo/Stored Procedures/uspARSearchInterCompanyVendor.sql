@@ -1,6 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspARSearchInterCompanyVendor]
-	@DatabaseName NVARCHAR(50)
+	@intInterCompanyId INT = 0
 AS
+	DECLARE @strDatabaseName NVARCHAR(50) = ''
+
+	SELECT @strDatabaseName = strDatabaseName
+	FROM tblSMInterCompany
+	WHERE intInterCompanyId = @intInterCompanyId
+
 	DECLARE @strQuery NVARCHAR(MAX) = 
 	'SELECT 
 		 [intInterCompanyVendorId] = intEntityId
@@ -8,5 +14,6 @@ AS
 	FROM [' + @strDatabaseName + '].[dbo].[vyuAPVendor] V
 	ORDER BY strName'
 
-	EXEC sp_executesql @strQuery
+	IF ISNULL(@strDatabaseName, '') <> ''
+		EXEC sp_executesql @strQuery
 RETURN 0
