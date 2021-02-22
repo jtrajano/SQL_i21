@@ -1018,6 +1018,9 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM @tblInvoicesToUpdate)
 		DELETE FROM @tblInvoicesToUpdate WHERE intId = @intInvoiceId
 	END
 
+--Create inventory receipt to another company
+EXEC [dbo].[uspARInterCompanyIntegrationSource] @BatchId = @BatchId, @Post = @Post
+
 --AUDIT LOG
 DECLARE @InvoiceLog dbo.[AuditLogStagingTable]
 DELETE FROM @InvoiceLog

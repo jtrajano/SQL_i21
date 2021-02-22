@@ -9059,11 +9059,17 @@
     <Build Include="dbo\Stored Procedures\uspAGProcessWOToItemShipment.sql" />
     <Build Include="dbo\Tables\tblEMEntityFarmDetail.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderPreStage.sql" />
+    <Build Include="dbo\Tables\tblARInventoryReceipt.sql" />
+    <Build Include="dbo\Tables\tblARInventoryReceiptStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInterCompanyIntegrationDestination.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInterCompanyIntegrationSource.sql" />
+    <Build Include="dbo\Functions\fnARGetInterCompany.sql" />
     <Build Include="dbo\Tables\tblAGRestrictedChemical.sql" />
     <Build Include="dbo\Tables\tblAGApplicatorLicenseCategory.sql" />
     <Build Include="dbo\Tables\tblAGApplicatorCategory.sql" />
     <Build Include="dbo\Stored Procedures\uspICBeforePostValidateInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblMFVirtualRecipeMap.sql" />
+    <Build Include="dbo\Tables\tblARInventoryReceiptLog.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasis.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasisDetail.sql" />
     <Build Include="dbo\Tables\tblMFAdditionalBasisOtherCharges.sql" />
@@ -9079,6 +9085,8 @@
     <Build Include="dbo\Views\vyuMFGetAdditionalBasis.sql" />
     <Build Include="dbo\Views\vyuMFGetAdditionalBasisDetail.sql" />
     <Build Include="dbo\Views\vyuAGWorkOrderReport.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchInterCompanyLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspARSearchInterCompanyVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

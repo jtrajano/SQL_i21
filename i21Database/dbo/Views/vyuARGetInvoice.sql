@@ -145,7 +145,7 @@ SELECT intInvoiceId							= INV.intInvoiceId
 	 , strSubBook							= CSBOOK.strSubBook
 	 , strCreditCode						= CUS.strCreditCode
 	 , intPurchaseSale						= LG.intPurchaseSale
-     , strReceiptNumber						= ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber)
+     , strReceiptNumber						= CASE WHEN ysnInterCompany = 1 THEN INV.strReceiptNumber ELSE ISNULL(POS.strReceiptNumber,POSMixedTransactionCreditMemo.strReceiptNumber) END
      , strEODNumber							= ISNULL(POS.strEODNo,POSMixedTransactionCreditMemo.strEODNo)
      , strEODStatus                         = CASE WHEN POS.ysnClosed = 1 OR POSMixedTransactionCreditMemo.ysnClosed = 1 THEN 'Completed' ELSE 'Open' END
      , strEODPOSDrawerName                  = ISNULL(POS.strPOSDrawerName, POSMixedTransactionCreditMemo.strPOSDrawerName)
@@ -159,7 +159,10 @@ SELECT intInvoiceId							= INV.intInvoiceId
      , ysnHasCreditApprover					= CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 OR USERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
      , dblCreditStopDays					= CUSTOMERAGING.dblCreditStopDays
      , intCreditStopDays					= CUS.intCreditStopDays
+	 , ysnInvoiceReturned					= ISNULL(ReturnInvoice.ysnReturned,0)
+	 , ysnInterCompany						= ISNULL(INV.ysnInterCompany, 0)
      , ysnImportFromCSV						= ISNULL(INV.ysnImportFromCSV, 0)
+     , strInterCompanyName					= INTERCOMPANY.strCompanyName
 FROM tblARInvoice INV WITH (NOLOCK)
 INNER JOIN (
     SELECT intEntityId
@@ -173,6 +176,7 @@ INNER JOIN (
 		 , strCreditCode
 		 , intEntityContactId
          , intCreditStopDays
+         , intInterCompanyId
     FROM vyuARCustomerSearch WITH (NOLOCK)
 ) CUS ON CUS.intEntityId = INV.intEntityCustomerId
 INNER JOIN (
@@ -350,6 +354,11 @@ OUTER APPLY(
 	FROM dbo.vyuARCustomerInquiry
 	WHERE intEntityCustomerId = INV.intEntityCustomerId
 ) CUSTOMERAGING
+OUTER APPLY(
+	SELECT TOP 1 strCompanyName
+	FROM dbo.tblSMInterCompany
+	WHERE intInterCompanyId = CUS.intInterCompanyId
+) INTERCOMPANY
 LEFT JOIN
 (
 	SELECT  ysnReturned,intInvoiceId FROM tblARInvoice  WITH (NOLOCK) 

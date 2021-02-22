@@ -24,6 +24,13 @@ IF @Recap = @ZeroBit
 DECLARE @ItemsForContracts					[InvoicePostingTable]
 EXEC [dbo].[uspARPopulateContractDetails]
 
+DECLARE @strDatabaseName NVARCHAR(50)
+DECLARE @strCompanyName NVARCHAR(50)
+DECLARE @intInvoiceId INT = 0
+
+SELECT @intInvoiceId = intInvoiceId FROM #ARPostInvoiceHeader
+SELECT @strDatabaseName = strDatabaseName, @strCompanyName = strCompanyName FROM [dbo].[fnARGetInterCompany](@intInvoiceId)
+
 IF @Post = @OneBit
 BEGIN
     DECLARE @InvoiceIds 						[InvoiceId]
@@ -338,6 +345,45 @@ BEGIN
 	--		ON I.[intEntityCustomerId] = ARC.[intEntityId]						
 	WHERE
 		I.[ysnCustomerActive] = @ZeroBit
+
+	IF(ISNULL(@strDatabaseName, '') <> '')
+	BEGIN
+		DECLARE @ysnVendorExistQuery nvarchar(500)
+		DECLARE @ysnVendorExistParam NVARCHAR(500)
+		DECLARE @ysnVendorExist BIT = 0 
+		DECLARE @intInterCompanyVendorId INT
+		DECLARE @strInterCompanyVendorId NVARCHAR(50)
+
+		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId] FROM #ARPostInvoiceHeader
+		SELECT @ysnVendorExistQuery = N'SELECT @ysnVendorExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblAPVendor WHERE intEntityId = ''' + @intInterCompanyVendorId + ''''
+
+		SET @ysnVendorExistParam = N'@ysnVendorExist int OUTPUT'
+
+		EXEC sp_executesql @ysnVendorExistQuery, @ysnVendorExistParam, @ysnVendorExist = @ysnVendorExist OUTPUT
+
+		IF(@ysnVendorExist = 0)
+		BEGIN
+			INSERT INTO #ARInvalidInvoiceData
+				([intInvoiceId]
+				,[strInvoiceNumber]
+				,[strTransactionType]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[strBatchId]
+				,[strPostingError])
+			--Vendor not existing in inter-company database
+			SELECT
+				 [intInvoiceId]			= I.[intInvoiceId]
+				,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+				,[strTransactionType]	= I.[strTransactionType]
+				,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+				,[intItemId]			= I.[intItemId]
+				,[strBatchId]			= I.[strBatchId]
+				,[strPostingError]		= 'Vendor - ' + I.strInterCompanyVendorId + ' is not existing in Company ' + ISNULL(@strCompanyName, '') + '!'
+			FROM 
+				#ARPostInvoiceHeader I
+		END
+	END
 			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1959,7 +2005,7 @@ BEGIN
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
-    SELECT PID.* FROM #ARPostInvoiceDetail PID INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
+    SELECT PID.*, NULL, NULL, NULL, NULL, NULL FROM #ARPostInvoiceDetail PID INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1984,7 +2030,7 @@ BEGIN
 	--MFG Auto Blend
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @OneBit AND PID.[ysnAutoBlend] = @OneBit
+	SELECT PID.*, NULL, NULL, NULL, NULL, NULL FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @OneBit AND PID.[ysnAutoBlend] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2311,6 +2357,49 @@ BEGIN
 	INNER JOIN tblARInvoice I2
 		ON I2.intInvoiceId = D2.intInvoiceId
 
+	IF(ISNULL(@strDatabaseName, '') <> '')
+	BEGIN
+		DECLARE @ysnVoucherExistQuery nvarchar(500)
+		DECLARE @ysnVoucherExistParam NVARCHAR(500)
+		DECLARE @ysnVoucherExist BIT = 0 
+		DECLARE @strInterCompanyReceiptNumber NVARCHAR(50)
+
+		SELECT @strInterCompanyReceiptNumber = [strReceiptNumber] FROM #ARPostInvoiceHeader
+		SELECT @ysnVoucherExistQuery = N'SELECT @ysnVoucherExist = 1 FROM tblICInventoryReceipt IR 
+										 INNER JOIN tblICInventoryReceiptItem IRI 
+										 ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId 
+										 INNER JOIN tblAPBillDetail BD
+										 ON IRI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
+										 WHERE IR.strReceiptNumber = ''' + @strInterCompanyReceiptNumber + ''''
+
+		SET @ysnVoucherExistParam = N'@ysnVoucherExist int OUTPUT'
+
+		EXEC sp_executesql @ysnVoucherExistQuery, @ysnVoucherExistParam, @ysnVoucherExist = @ysnVoucherExist OUTPUT
+
+		IF(@ysnVoucherExist = 0)
+		BEGIN
+			INSERT INTO #ARInvalidInvoiceData
+				([intInvoiceId]
+				,[strInvoiceNumber]
+				,[strTransactionType]
+				,[intInvoiceDetailId]
+				,[intItemId]
+				,[strBatchId]
+				,[strPostingError])
+			--Inventory receipt has voucher already in inter-company database
+			SELECT
+				 [intInvoiceId]			= I.[intInvoiceId]
+				,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+				,[strTransactionType]	= I.[strTransactionType]
+				,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+				,[intItemId]			= I.[intItemId]
+				,[strBatchId]			= I.[strBatchId]
+				,[strPostingError]		= 'The inventory receipt has already been vouchered, the Invoice cannot be unposted at this time!'
+			FROM 
+				#ARPostInvoiceHeader I
+			WHERE I.ysnInterCompany = 1
+		END
+	END
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2524,7 +2613,7 @@ BEGIN
 	--TM Sync
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM #ARPostInvoiceDetail PID INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
+	SELECT PID.*, NULL, NULL, NULL, NULL, NULL FROM #ARPostInvoiceDetail PID INNER JOIN (SELECT [intSiteID] FROM tblTMSite WITH (NOLOCK)) TMS ON PID.[intSiteId] = TMS.[intSiteID]
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -2549,7 +2638,7 @@ BEGIN
 	--MFG Auto Blend
 	DELETE FROM @PostInvoiceDataFromIntegration
 	INSERT INTO @PostInvoiceDataFromIntegration
-	SELECT PID.* FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @ZeroBit AND PID.[ysnAutoBlend] = @OneBit
+	SELECT PID.*, NULL, NULL, NULL, NULL, NULL FROM #ARPostInvoiceDetail PID WHERE PID.[ysnBlended] <> @ZeroBit AND PID.[ysnAutoBlend] = @OneBit
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]

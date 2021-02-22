@@ -198,7 +198,13 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId])
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -353,10 +359,15 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
-    
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM tblARInvoice ARI
 INNER JOIN (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH(NoLock)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH(NoLock)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
 ) ARC ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
 LEFT OUTER JOIN (
@@ -541,7 +552,13 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId])
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -696,7 +713,12 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName, '')
                                             END		
-    
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM
     (
     SELECT LD.[intInvoiceId], LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM tblARInvoiceIntegrationLogDetail LD
@@ -712,7 +734,7 @@ INNER JOIN
         ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH (NOLOCK)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
@@ -877,7 +899,13 @@ INSERT #ARPostInvoiceHeader
     ,[strOptionType]
     ,[strSourceType]
     ,[strPostingMessage]
-    ,[strDescription])
+    ,[strDescription]
+    ,[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]
+    ,[intInterCompanyId]
+    ,[strReceiptNumber]
+    ,[ysnInterCompany]
+    ,[intInterCompanyVendorId])
 SELECT 
      [intInvoiceId]                     = ARI.[intInvoiceId]
     ,[strInvoiceNumber]                 = ARI.[strInvoiceNumber]
@@ -1032,7 +1060,12 @@ SELECT
                                                 WHEN ARI.[intOriginalInvoiceId] IS NOT NULL AND ARI.[intSourceId] IS NOT NULL AND ARI.[intOriginalInvoiceId] <> 0 AND ARI.[intSourceId] = 2 THEN SUBSTRING(('Final Invoice' + ISNULL((' - ' + ARC.[strName]),'')), 1 , 255)
                                                 ELSE ARI.[strTransactionType] + ' for ' + ISNULL(ARC.strName , '')
                                             END		
-    
+    ,[strInterCompanyVendorId]          = ARC.[strInterCompanyVendorId]
+    ,[strInterCompanyLocationId]        = ARC.[strInterCompanyLocationId]
+    ,[intInterCompanyId]                = ARC.[intInterCompanyId]
+    ,[strReceiptNumber]                 = ARI.[strReceiptNumber]
+    ,[ysnInterCompany]                  = ARI.[ysnInterCompany]
+    ,[intInterCompanyVendorId]          = ARC.[intInterCompanyVendorId]
 FROM
     (
     SELECT LD.[intHeaderId] AS 'intInvoiceId', LD.[ysnPost], LD.[ysnRecap], LD.[ysnAccrueLicense], LD.[strBatchId] FROM @InvoiceIds LD
@@ -1046,7 +1079,7 @@ INNER JOIN
         ON ARILD.[intInvoiceId] = ARI.[intInvoiceId]
 INNER JOIN
     (
-    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit] FROM tblARCustomer C WITH (NOLOCK)
+    SELECT C.[intEntityId], EM.strName, [strCustomerNumber], C.[ysnActive], [dblCreditLimit], [strInterCompanyVendorId], [strInterCompanyLocationId], [intInterCompanyId], [intInterCompanyVendorId] FROM tblARCustomer C WITH (NOLOCK)
     INNER JOIN tblEMEntity EM ON C.intEntityId = EM.intEntityId
     ) ARC
         ON ARI.[intEntityCustomerId] = ARC.[intEntityId]
