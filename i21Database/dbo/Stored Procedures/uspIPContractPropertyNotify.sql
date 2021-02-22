@@ -4,6 +4,8 @@ DECLARE @strStyle NVARCHAR(MAX)
 	,@strHtml NVARCHAR(MAX)
 	,@strHeader NVARCHAR(MAX)
 	,@strDetail NVARCHAR(MAX) = ''
+	,@strHeader2 NVARCHAR(MAX)
+	,@strDetail2 NVARCHAR(MAX) = ''
 	,@strMessage NVARCHAR(MAX)
 
 SET @strStyle = '<style type="text/css" scoped>
@@ -40,6 +42,17 @@ SET @strHtml = '<html>
 
 					<table class="GeneratedTable">
 						<tbody>
+							@header2
+							@detail2
+						</tbody>
+					</table>
+					<br>
+					<br>
+					<br>
+					<br>
+					<br>
+					<table class="GeneratedTable">
+						<tbody>
 							@header
 							@detail
 						</tbody>
@@ -49,9 +62,16 @@ SET @strHtml = '<html>
 				</html>'
 
 DECLARE @Data TABLE (
-	intRecordId int identity(1,1)
+	intRecordId INT identity(1, 1)
 	,strAllocationNumber NVARCHAR(50)
 	,strPContractNumber NVARCHAR(50)
+	,strSContractNumber NVARCHAR(50)
+	,strName NVARCHAR(50)
+	,strPValue NVARCHAR(50)
+	,strSValue NVARCHAR(50)
+	)
+DECLARE @Data2 TABLE (
+	intRecordId INT identity(1, 1)
 	,strSContractNumber NVARCHAR(50)
 	,strName NVARCHAR(50)
 	,strPValue NVARCHAR(50)
@@ -170,8 +190,8 @@ SELECT strAllocationNumber
 	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
 	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Start Date'
-	,Convert(char(10),P.dtmStartDate,126)
-	,Convert(char(10),S.dtmStartDate,126)
+	,Convert(CHAR(10), P.dtmStartDate, 126)
+	,Convert(CHAR(10), S.dtmStartDate, 126)
 FROM dbo.tblLGAllocationDetail AD
 JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
@@ -189,8 +209,8 @@ SELECT strAllocationNumber
 	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
 	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'End Date'
-	,Convert(char(10),P.dtmEndDate,126)
-	,Convert(char(10),S.dtmEndDate,126)
+	,Convert(CHAR(10), P.dtmEndDate, 126)
+	,Convert(CHAR(10), S.dtmEndDate, 126)
 FROM dbo.tblLGAllocationDetail AD
 JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
@@ -203,23 +223,17 @@ WHERE P.dtmEndDate <> S.dtmEndDate
 		OR S.intContractStatusId = 1
 		)
 
-INSERT INTO @Data
-SELECT strAllocationNumber
-	,PH.strContractNumber + '/' + ltrim(P.intContractSeq)
-	,SH.strContractNumber + '/' + ltrim(S.intContractSeq)
+INSERT INTO @Data2
+SELECT SH.strContractNumber + '/' + ltrim(S.intContractSeq)
 	,'Quantity'
-	,[dbo].[fnRemoveTrailingZeroes](AD.dblSAllocatedQty)
+	,[dbo].[fnRemoveTrailingZeroes](S.dblAllocatedQty)
 	,[dbo].[fnRemoveTrailingZeroes](S.dblQuantity)
-FROM dbo.tblLGAllocationDetail AD
-JOIN tblLGAllocationHeader A ON A.intAllocationHeaderId = AD.intAllocationHeaderId
-JOIN dbo.tblCTContractDetail P ON P.intContractDetailId = AD.intPContractDetailId
-JOIN dbo.tblCTContractHeader PH ON PH.intContractHeaderId = P.intContractHeaderId
-JOIN dbo.tblCTContractDetail S ON S.intContractDetailId = AD.intSContractDetailId
-	AND S.intContractStatusId = 1
+FROM dbo.tblCTContractDetail S 
 JOIN dbo.tblCTContractHeader SH ON SH.intContractHeaderId = S.intContractHeaderId
-WHERE AD.dblSAllocatedQty <> S.dblQuantity
+WHERE S.dblAllocatedQty <> S.dblQuantity AND S.intContractStatusId = 1
+AND SH.intContractTypeId=2
 
-SET @strHeader = '<tr><th>&nbsp;SerialNo</th>
+SET @strHeader2 = '<tr><th>&nbsp;SerialNo</th>
 						<th>&nbsp;AllocationNumber</th>
 						<th>&nbsp;P-ContractNumber</th>
 						<th>&nbsp;S-ContractNumber</th>
@@ -228,11 +242,28 @@ SET @strHeader = '<tr><th>&nbsp;SerialNo</th>
 						<th>&nbsp;S-Contract Value</th>
 					</tr>'
 
-SELECT @strDetail = @strDetail + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
+SELECT @strDetail2 = @strDetail2 + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
 			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strAllocationNumber), '') + '</td>' + '<td>&nbsp;' + ISNULL(strPContractNumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + strPValue + '</td>' + '<td>&nbsp;' + strSValue + '</td> 
 	</tr>'
 FROM @Data
-Order by intRecordId
+ORDER BY intRecordId
+
+SET @strHtml = REPLACE(@strHtml, '@header2', @strHeader2)
+SET @strHtml = REPLACE(@strHtml, '@detail2', @strDetail2)
+
+SET @strHeader = '<tr><th>&nbsp;SerialNo</th>
+						<th>&nbsp;S-ContractNumber</th>
+						<th>&nbsp;Attribute</th>
+						<th>&nbsp;Quantity</th>
+						<th>&nbsp;Allocated Qty</th>
+					</tr>'
+
+SELECT @strDetail = @strDetail + '<tr><td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intRecordId), '') + '</td>
+			<td>&nbsp;' + ISNULL(strSContractNumber, '') + '</td>' + '<td>&nbsp;' + strName + '</td>' + '<td>&nbsp;' + strPValue + '</td>' + '<td>&nbsp;' + strSValue + '</td> 
+	</tr>'
+FROM @Data2
+ORDER BY intRecordId
+
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
 SET @strMessage = @strStyle + @strHtml
@@ -241,4 +272,3 @@ IF ISNULL(@strDetail, '') = ''
 	SET @strMessage = ''
 
 SELECT @strMessage AS strMessage
-
