@@ -208,13 +208,13 @@ BEGIN TRY
 			a.intContractHeaderId = @intContractHeaderId
 		) t
 		left join tblEMEntitySignature g on g.intEntityId = t.intParentSubmitBy
-		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId
+		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId AND @strTransactionApprovalStatus = 'Approved'
 		left join tblEMEntitySignature i on i.intEntityId = t.intParentApprovedBy
-		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId
+		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId AND @strTransactionApprovalStatus = 'Approved'
 		left join tblEMEntitySignature k on k.intEntityId = t.intChildSubmitBy
 		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
-		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId
+		left join tblSMSignature n  on n.intEntityId = m.intEntityId and n.intSignatureId = m.intElectronicSignatureId 
 	
 	SELECT @ysnExternal = (case when intBookVsEntityId > 0 then convert(bit,1) else convert(bit,0) end)		
 	FROM tblCTContractHeader CH
