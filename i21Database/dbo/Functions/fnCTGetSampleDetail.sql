@@ -25,7 +25,10 @@ BEGIN
 	BEGIN
 		SELECT @dblRepresentingQty = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intRepresentingUOMId,@intUnitMeasureId, dblRepresentingQty)) FROM tblQMSample WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
 		IF @dblRepresentingQty >= @dblQuantity
+			BEGIN
+			SET @dblRepresentingQty = @dblQuantity
 			SET @strSampleStatus = 'Approved'
+			END
 		ELSE
 			SET @strSampleStatus = 'Partially Approved'
 	END		
