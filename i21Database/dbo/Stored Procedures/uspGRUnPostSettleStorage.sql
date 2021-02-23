@@ -139,9 +139,12 @@ BEGIN TRY
 			,@userId = @UserId
 			,@success = @success OUTPUT
 
-		SELECT TOP 1 @ErrMsg = strMessage FROM tblAPPostResult WHERE intTransactionId IN (@BillIdParams);
+		SELECT TOP 1 @ErrMsg = strMessage 
+		FROM tblAPPostResult 
+		WHERE intTransactionId IN (SELECT * FROM [dbo].fnGetRowsFromDelimitedValues(@BillIdParams))
+			AND strMessage NOT IN ('Transaction successfully posted.','Transaction successfully unposted.');
 
-		IF (@ErrMsg NOT IN ('Transaction successfully posted.','Transaction successfully unposted.'))
+		IF ISNULL(@ErrMsg,'') <> ''
 		BEGIN
 			RAISERROR (@ErrMsg, 16, 1);
 			GOTO SettleStorage_Exit;
