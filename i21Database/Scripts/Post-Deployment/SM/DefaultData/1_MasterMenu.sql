@@ -22,7 +22,7 @@ GO
 	END
 GO	
 	
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Formats'	AND strModuleName = 'Cash Management' AND (strCommand = 'CashManagement.controller.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat?showSearch=true'))
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy Unit Measure'	AND strModuleName = 'Agronomy' AND (strCommand = 'Agronomy.view.AgronomyUOM'))
 	BEGIN
 		DELETE FROM tblSMMasterMenu
 		
@@ -6669,6 +6669,13 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Applicato
 	VALUES (N'Applicator License Category', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Applicator License Category', N'Activity', N'Screen', N'Agronomy.view.ApplicatorLicenseCategory?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 2, 1)
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.ApplicatorLicenseCategory?showSearch=true' WHERE strMenuName = 'Applicator License Category' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy Unit Measure' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Agronomy Unit Measure', N'Agronomy', @AgronomyMaintenanceParentMenuId, N'Agronomy Unit Measure', N'Activity', N'Screen', N'Agronomy.view.AgronomyUOM', N'small-menu-activity', 1, 0, 0, 1, 3, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.AgronomyUOM' WHERE strMenuName = 'Agronomy Unit Measure' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
