@@ -1566,6 +1566,7 @@ BEGIN TRY
 					INNER JOIN tblICItem I
 						ON I.intItemId = SV2.intItemId
 							AND I.ysnInventoryCost = 1
+							AND SV2.intItemType = 3
 				) DiscountCost				
 
 				INSERT INTO @ItemsToPost 
