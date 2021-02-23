@@ -124,13 +124,11 @@ FROM tblICInventoryShipmentCharge ShipmentCharge INNER JOIN tblICItem Item
 	--LEFT JOIN tblGLAccount OtherChargeAPClearing
 	--	ON [dbo].[fnGetItemGLAccount](Item.intItemId, ItemLocation.intItemLocationId, 'AP Clearing') = OtherChargeAPClearing.intAccountId
 
-WHERE 
-	ShipmentCharge.intEntityVendorId IS NOT NULL
-	AND (
-		ISNULL(ShipmentCharge.dblAmountBilled, 0) < ROUND(ShipmentCharge.dblAmount, 6) 
-		OR (
-			ISNULL(ShipmentCharge.dblAmountBilled, 0) = 0 
-			AND ROUND(ShipmentCharge.dblAmount, 6) = 0 
+WHERE ShipmentCharge.intEntityVendorId IS NOT NULL
+		AND (
+			ISNULL(ShipmentCharge.dblAmountBilled, 0) < ROUND(ShipmentCharge.dblAmount, 6) 
+			OR (
+				ISNULL(ShipmentCharge.dblAmountBilled, 0) = 0 
+				AND ROUND(ShipmentCharge.dblAmount, 6) = 0 
+			)
 		)
-	)
-	AND ISNULL(ShipmentCharge.ysnAllowVoucher, 1) = 1
