@@ -4102,3 +4102,24 @@ WHERE AV.intLocationId IS NULL
 	AND M.intCompanyLocationId IS NOT NULL
 	AND M.ysnPost =0
 Go
+IF EXISTS (
+		SELECT *
+		FROM tblCTReportAttribute
+		WHERE ysnVisible IS NULL
+		)
+BEGIN
+	UPDATE tblCTReportAttribute
+	SET ysnVisible = 0
+	WHERE strAttributeName IN (
+			'Inventory Transfer'
+			,'Forecasted Consumption - Additional'
+			)
+
+	UPDATE tblCTReportAttribute
+	SET ysnVisible = 1
+	WHERE strAttributeName NOT IN (
+			'Inventory Transfer'
+			,'Forecasted Consumption - Additional'
+			)
+END
+Go

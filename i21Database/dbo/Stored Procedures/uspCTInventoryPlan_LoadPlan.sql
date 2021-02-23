@@ -210,7 +210,7 @@ BEGIN
 	SELECT @intNoOfMonths = 12
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50),intLocationId int,strLocationName nvarchar(50)'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50),intLocationId int,strLocationName nvarchar(50),ysnEditable int'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
@@ -286,11 +286,12 @@ BEGIN
 						, MI.strItemNo
 						, CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
-											THEN M.strItemNo
-										Else MI.strItemNo + '' [ '' + M.strItemNo + '' ]'' 
+											THEN M.strItemNo+ '' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]''
+										Else MI.strItemNo + '' [ '' + M.strItemNo + '' ]''+'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 										END	AS strGroupByColumn 
 										,IsNULL(L.intCompanyLocationId, 999) intLocationId
-										,IsNULL(L.strLocationName, ''All'') AS strLocationName '
+										,IsNULL(L.strLocationName, ''All'') AS strLocationName
+										,RA.ysnEditable '
 	SET @Cnt = 1
 
 	WHILE @Cnt <= @intNoOfMonths

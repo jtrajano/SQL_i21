@@ -615,12 +615,12 @@ BEGIN TRY
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-			,intLocationId
+			,LId
 		FROM OPENXML(@idoc, 'root/OP', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
-				,intLocationId INT
+				,LId INT
 				)
 
 		EXEC sp_xml_removedocument @idoc
@@ -640,12 +640,12 @@ BEGIN TRY
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-			,intLocationId
+			,LId
 		FROM OPENXML(@idoc, 'root/PP', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
-				,intLocationId INT
+				,LId INT
 				)
 
 		EXEC sp_xml_removedocument @idoc
@@ -665,16 +665,16 @@ BEGIN TRY
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,- SUM([Value])
-			,intLocationId
+			,LId
 		FROM OPENXML(@idoc, 'root/FC', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
-				,intLocationId INT
+				,LId INT
 				)
 		GROUP BY [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0')
-			,intLocationId
+			,LId
 
 		EXEC sp_xml_removedocument @idoc
 	END
@@ -693,16 +693,16 @@ BEGIN TRY
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,- SUM([Value])
-			,intLocationId
+			,LId
 		FROM OPENXML(@idoc, 'root/AFC', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
-				,intLocationId INT
+				,LId INT
 				)
 		GROUP BY [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0')
-			,intLocationId
+			,LId
 
 		EXEC sp_xml_removedocument @idoc
 	END
@@ -767,12 +767,12 @@ BEGIN TRY
 		SELECT [intItemId]
 			,Replace(Replace([Name], 'strMonth', ''), 'PastDue', '0') AS [Name]
 			,[Value]
-			,intLocationId
+			,LId
 		FROM OPENXML(@idoc, 'root/WST', 2) WITH (
 				[intItemId] INT
 				,[Name] NVARCHAR(50)
 				,[Value] DECIMAL(24, 6)
-				,intLocationId INT
+				,LId INT
 				)
 
 		EXEC sp_xml_removedocument @idoc
@@ -2527,6 +2527,7 @@ BEGIN TRY
 		,strGroupByColumn
 		,intLocationId
 		,strLocationName
+		,ysnEditable
 	FROM (
 		SELECT I.intItemId
 			,CASE 
@@ -2642,11 +2643,12 @@ BEGIN TRY
 			,CASE 
 				WHEN I.intItemId = MI.intItemId
 					OR MI.intItemId IS NULL
-					THEN I.strItemNo
-				ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]'
+					THEN I.strItemNo+ ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
+				ELSE MI.strItemNo + ' [ ' + I.strItemNo + ' ]'+ ' [ ' + IsNULL(L.strLocationName, 'All') + ' ]'
 				END AS strGroupByColumn
 			,IsNULL(L.intCompanyLocationId, 999) intLocationId
 			,IsNULL(L.strLocationName, 'All') AS strLocationName
+			,A.ysnEditable
 		FROM #tblMFDemandList DL
 		JOIN tblCTReportAttribute A ON A.intReportAttributeID = DL.intAttributeId
 		JOIN tblICItem I ON I.intItemId = DL.intItemId
