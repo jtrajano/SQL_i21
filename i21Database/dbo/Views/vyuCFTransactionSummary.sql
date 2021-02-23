@@ -60,6 +60,7 @@ END) AS strName
 ,ISNULL(cfTransaction.dblTransferCost,0) AS dblTransferCost
 
 ,ROUND(ISNULL(cfTransaction.dblCalculatedTotalPrice,0),2) AS dblSalesAmount
+,ROUND((ISNULL(cfTransaction.dblQuantity,0) * ISNULL(cfTransaction.dblTransferCost,0)),2) AS dblNetworkCost
 
 ,(CASE  
 		WHEN cfTransaction.strTransactionType IN ('Local/Network','Foreign Sale','Foreign Sales') AND ISNULL(cfTransaction.dblInventoryCost,0) > 0
