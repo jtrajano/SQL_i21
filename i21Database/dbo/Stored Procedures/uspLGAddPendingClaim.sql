@@ -141,7 +141,7 @@ BEGIN
 						CROSS APPLY (SELECT dblNet = SUM(ISNULL(IRI.dblNet,0)),dblGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 										JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 										WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId 
-											AND IRI.intContainerId = CLNW.intLoadContainerId
+											AND IRI.intContainerId = CLNW.intLoadContainerId AND IRI.ysnWeighed = 1
 											AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return') RI
 						CROSS APPLY (SELECT dblIRNet = SUM(ISNULL(IRI.dblNet,0)),dblIRGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 										JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
@@ -155,9 +155,11 @@ BEGIN
 							AND LC.intLoadContainerId = @intLoadContainerId
 							AND WC.intWeightClaimId IS NULL
 							AND (LD.ysnNoClaim IS NULL OR LD.ysnNoClaim = 0)
+							AND RI.dblGross <> 0
 							AND NOT EXISTS (SELECT TOP 1 1 FROM tblLGPendingClaim WHERE intLoadId = @intLoadId AND intPurchaseSale = @intPurchaseSale
 											AND intLoadContainerId = CLNW.intLoadContainerId)
 						) LI
+					WHERE [dblClaimableWt] <> 0
 				END
 				ELSE
 				BEGIN
