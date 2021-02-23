@@ -640,6 +640,10 @@ print 'BEGIN POST DEPLOYMENT'
 -- Vendor rebate
 :r .\VR\1_UpdateColumnTableProgramItem.sql
 
+-- AGRONOMY
+:r .\AG\1_AGUOMDefaultData.sql
+
+
 --MIGRATE AUDIT LOGS
 :r .\SM\1910_MigrateAuditLog.sql
 

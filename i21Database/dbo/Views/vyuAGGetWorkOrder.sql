@@ -53,7 +53,12 @@ AS
 	, WO.ysnFinalized
 	, WO.dblWorkOrderTotal
 	, WO.dblWorkOrderSubtotal
-	, WO.dblTotalDiscount 
+	, WO.dblTotalDiscount
+	, WO.strApplicationRateUOM
+	, WO.intAGQtyUOMId
+	, WO.intAGAreaUOMId
+	, QTYUOM.strSymbol AS strQtyUOM
+	, AREAUOM.strSymbol AS strAreaUOM
 	, WO.intConcurrencyId
     FROM tblAGWorkOrder WO WITH(NOLOCK)  
 
@@ -122,4 +127,14 @@ LEFT JOIN (
 	FROM tblAGApplicatorLicense WITH (NOLOCK)
 
 ) LICENSE ON WO.intApplicatorLicenseId = LICENSE.intApplicatorLicenseId
+LEFT JOIN (
+	SELECT intAGUnitMeasureId,
+			strSymbol
+	FROM tblAGUnitMeasure WITH(NOLOCK)  
+) QTYUOM ON WO.intAGQtyUOMId = QTYUOM.intAGUnitMeasureId
+LEFT JOIN (
+	SELECT intAGUnitMeasureId,
+			strSymbol
+	FROM tblAGUnitMeasure WITH(NOLOCK)   
+) AREAUOM ON WO.intAGAreaUOMId = AREAUOM.intAGUnitMeasureId
 ) 

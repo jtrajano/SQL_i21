@@ -36,6 +36,7 @@
  [dtmStartTime] DATETIME NULL,
  [dblAppliedAcres] NUMERIC(18,6) NULL,
  [dblApplicationRate] NUMERIC (18,6) NULL,
+ [strApplicationRateUOM] NVARCHAR(25) COLLATE Latin1_General_CI_AS NULL,
  [dblWorkOrderSubtotal] NUMERIC(18,6) NULL,
  [dblShipping] NUMERIC(18,6) NULL,
  [dblTax] NUMERIC(18,6) NULL,
@@ -53,6 +54,8 @@
  [dtmEndTime] DATETIME NULL,
  [ysnShipped] BIT NOT NULL DEFAULT(0),
  [ysnFinalized] BIT NOT NULL DEFAULT(0),
+ [intAGQtyUOMId] INT NULL,
+ [intAGAreaUOMId] INT NULL,
  [intConcurrencyId] INT NOT NULL DEFAULT(0),
  CONSTRAINT [UK_tblAGWorkOrder_strOrderNumber] UNIQUE ([strOrderNumber]),
  CONSTRAINT [FK_tblAGWorkOrder_tblSMCompanyLocation_intCompanyLocationId] FOREIGN KEY ([intCompanyLocationId]) REFERENCES [dbo].[tblSMCompanyLocation] ([intCompanyLocationId]),
@@ -65,6 +68,8 @@
  CONSTRAINT [FK_tblAGWorkOrder_tblAGApplicationType_intApplicationTypeId] FOREIGN KEY ([intApplicationTypeId]) REFERENCES [dbo].[tblAGApplicationType] ([intApplicationTypeId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblEMEntity_intEntityApplicatorId] FOREIGN KEY ([intEntityApplicatorId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),
  CONSTRAINT [FK_tblAGWorkOrder_tblAGApplicatorLicense_intApplicatorLicenseId] FOREIGN KEY ([intApplicatorLicenseId]) REFERENCES [dbo].[tblAGApplicatorLicense] ([intApplicatorLicenseId]),
+ CONSTRAINT [FK_tblAGWorkOrder_tblAGUnitMeasure_intAGQtyUOMId] FOREIGN KEY ([intAGQtyUOMId]) REFERENCES [dbo].[tblAGUnitMeasure] ([intAGUnitMeasureId]),
+ CONSTRAINT [FK_tblAGWorkOrder_tblAGUnitMeasure_intAGAreaUOMId] FOREIGN KEY ([intAGAreaUOMId]) REFERENCES [dbo].[tblAGUnitMeasure] ([intAGUnitMeasureId]),
  CONSTRAINT [PK_dbo.tblAGWorkOrder_intWorkOrderId] PRIMARY KEY CLUSTERED ([intWorkOrderId] ASC)
 
 );

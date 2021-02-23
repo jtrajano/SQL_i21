@@ -9090,7 +9090,7 @@
     <Build Include="dbo\Tables\tblAGUnitMeasure.sql" />
     <Build Include="dbo\Tables\tblAGUnitMeasureConversion.sql" />
     <Build Include="dbo\Views\vyuAGGetUOMConversion.sql" />
-
+    <None Include="Scripts\Post-Deployment\AG\1_AGUOMDefaultData.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

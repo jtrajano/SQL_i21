@@ -84,6 +84,10 @@ AS
 		, WOD.dblRate
 		, WOD.strLineNo
 		, WOD.intItemWeightUOMId
+		, WOD.intAGQtyUOMId
+		, WOD.intAGAreaUOMId
+		, QTYUOM.strUnitMeasure AS strQtyUOM
+		, AREAUOM.strUnitMeasure AS strAreaUOM
 		, WOD.intConcurrencyId
 	FROM tblAGWorkOrderDetail WOD WITH(NOLOCK)  
 
@@ -145,5 +149,14 @@ LEFT JOIN (
    , strCurrencyExchangeRateType  
  FROM tblSMCurrencyExchangeRateType WITH(NOLOCK)  
 ) CURRENCYTYPE ON WOD.intCurrencyExchangeRateTypeId = CURRENCYTYPE.intCurrencyExchangeRateTypeId 
-
+LEFT JOIN (
+	SELECT intAGUnitMeasureId,
+			strUnitMeasure
+	FROM tblAGUnitMeasure WITH(NOLOCK)  
+) QTYUOM ON WOD.intAGQtyUOMId = QTYUOM.intAGUnitMeasureId
+LEFT JOIN (
+	SELECT intAGUnitMeasureId,
+			strUnitMeasure
+	FROM tblAGUnitMeasure WITH(NOLOCK)   
+) AREAUOM ON WOD.intAGAreaUOMId = AREAUOM.intAGUnitMeasureId
 )
