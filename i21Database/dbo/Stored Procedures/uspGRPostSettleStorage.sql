@@ -1548,22 +1548,24 @@ BEGIN TRY
 						ISNULL(
 							SUM(
 								ROUND(
-									(SV.dblCashPrice * 
-										CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 
+									(SV2.dblCashPrice * 
+										CASE WHEN ISNULL(SV2.dblSettleContractUnits,0) > 0 
 											THEN 
-												CASE WHEN SV.ysnDiscountFromGrossWeight = 1 then  
-														((SV.dblSettleContractUnits / @dblGrossUnits) * @dblSelectedUnits) 
-												else SV.dblSettleContractUnits end
+												CASE WHEN SV2.ysnDiscountFromGrossWeight = 1 then  
+														((SV2.dblSettleContractUnits / @dblGrossUnits) * @dblSelectedUnits) 
+												else SV2.dblSettleContractUnits end
 												
-											ELSE SV.dblUnits
+											ELSE SV2.dblUnits
 										END)									 
 								, 2) 
 							) 
 						,0)  AS dblTotalCashPrice
 						--ISNULL(SUM((ROUND(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END, 2)) / SV.dblUnits),0)  AS dblTotalCashPrice
 						--ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice
-					FROM @SettleVoucherCreate SV
-						where ysnInventoryCost = 1
+					FROM @SettleVoucherCreate SV2
+					INNER JOIN tblICItem I
+						ON I.intItemId = SV2.intItemId
+							AND I.ysnInventoryCost = 1
 				) DiscountCost				
 
 				INSERT INTO @ItemsToPost 
@@ -1628,22 +1630,24 @@ BEGIN TRY
 						ISNULL(
 							SUM(
 								ROUND(
-									(SV.dblCashPrice * 
-										CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 
+									(SV2.dblCashPrice * 
+										CASE WHEN ISNULL(SV2.dblSettleContractUnits,0) > 0 
 											THEN 
-												CASE WHEN SV.ysnDiscountFromGrossWeight = 1 then  
-														((SV.dblSettleContractUnits / @dblSelectedUnits) * @dblGrossUnits) 
-												else SV.dblSettleContractUnits end
+												CASE WHEN SV2.ysnDiscountFromGrossWeight = 1 then  
+														((SV2.dblSettleContractUnits / @dblSelectedUnits) * @dblGrossUnits) 
+												else SV2.dblSettleContractUnits end
 												
-											ELSE SV.dblUnits
+											ELSE SV2.dblUnits
 										END)									 
 								, 2) 
 							) 
 						,0)  AS dblTotalCashPrice
 						--ISNULL(Round((Sum(SV.dblCashPrice * CASE WHEN ISNULL(SV.dblSettleContractUnits,0) > 0 THEN SV.dblSettleContractUnits ELSE SV.dblUnits END)), 2  ),0)  AS dblTotalCashPrice
-					FROM @SettleVoucherCreate SV
-						Where SV.ysnInventoryCost = 1
-							and SV.intItemType = 3
+					FROM @SettleVoucherCreate SV2
+					INNER JOIN tblICItem I
+						ON I.intItemId = SV2.intItemId
+							AND I.ysnInventoryCost = 1
+							and SV2.intItemType = 3
 							--and not(SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL)
 				) DiscountCost
 				WHERE SV.intItemType = 1
