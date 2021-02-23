@@ -173,6 +173,7 @@ BEGIN
 					WHEN t.strTransactionForm = 'Inbound Shipments' THEN 31
 					WHEN t.strTransactionForm = 'Outbound Shipment' THEN 32
 					WHEN t.strTransactionForm = 'Invoice' THEN 48
+					WHEN t.strTransactionForm = 'Credit Memo' THEN 64
 					ELSE 
 						NULL
 				 END 
@@ -223,7 +224,7 @@ BEGIN
 					tblARInvoice inv INNER JOIN tblARInvoiceDetail invD
 						ON inv.intInvoiceId = invD.intInvoiceId
 				WHERE
-					t.strTransactionForm = 'Invoice'
+					t.strTransactionForm IN ('Invoice', 'Credit Memo') 
 					AND inv.strInvoiceNumber = t.strTransactionId
 					AND inv.intInvoiceId = t.intTransactionId
 					AND invD.intInvoiceDetailId = t.intTransactionDetailId
