@@ -60,8 +60,12 @@ AS
 	INNER JOIN tblICItemLocation ICIL
 		ON ICI.intItemId = ICIL.intItemId
 		AND SMCL.intCompanyLocationId = ICIL.intLocationId
-	INNER JOIN tblEMEntityLocation EMEL
-		ON ARIRS.intVendorId = EMEL.intEntityId
+	OUTER APPLY (
+		SELECT TOP 1 intEntityLocationId
+		FROM tblEMEntityLocation 
+		WHERE intEntityId = ARIRS.intVendorId
+		AND ysnDefaultLocation = 1
+	) EMEL
 	WHERE ISNULL([ysnProcessed], 0) = 0
 	AND ARIRS.strInvoiceNumber = @InvoiceNumber
 
