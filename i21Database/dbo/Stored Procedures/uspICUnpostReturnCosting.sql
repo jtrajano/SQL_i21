@@ -771,3 +771,13 @@ BEGIN
 		WHERE intId = @intIdSummaryValuation
 	END 
 END 
+
+-----------------------------------------
+-- Call the Risk Log sp
+-----------------------------------------
+BEGIN 
+	EXEC dbo.uspICLogRiskPositionFromOnHand
+		@strBatchId
+		,@strTransactionId
+		,@intEntityUserSecurityId
+END 
