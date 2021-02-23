@@ -9087,6 +9087,10 @@
     <Build Include="dbo\Views\vyuAGWorkOrderReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARSearchInterCompanyLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspARSearchInterCompanyVendor.sql" />
+    <Build Include="dbo\Tables\tblAGUnitMeasure.sql" />
+    <Build Include="dbo\Tables\tblAGUnitMeasureConversion.sql" />
+    <Build Include="dbo\Views\vyuAGGetUOMConversion.sql" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
