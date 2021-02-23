@@ -145,6 +145,26 @@ BEGIN
         AND ISNULL(P.[dblPayment], 0) <> @ZeroDecimal
         AND P.[strTransactionType] <> 'Claim'
 
+    INSERT INTO #ARInvalidPaymentData
+        ([intTransactionId]
+        ,[strTransactionId]
+        ,[strTransactionType]
+        ,[intTransactionDetailId]
+        ,[strBatchId]
+        ,[strError])
+	--CPP/COP/CREDIT MEMO HAS DISCOUNTS
+	SELECT
+         [intTransactionId]         = P.[intTransactionId]
+        ,[strTransactionId]         = P.[strTransactionId]
+        ,[strTransactionType]       = @TransType
+        ,[intTransactionDetailId]   = P.[intTransactionDetailId]
+        ,[strBatchId]               = P.[strBatchId]
+        ,[strError]                 = P.strTransactionType + ' ' + P.[strTransactionNumber] + ' shouldn''t have discount.'
+	FROM #ARPostPaymentDetail P
+    WHERE P.[ysnPost] = @OneBit
+      AND P.strTransactionType IN ('Customer Prepayment','Credit Memo','Overpayment')
+	  AND P.dblDiscount <> 0
+
  --   INSERT INTO #ARInvalidPaymentData
  --       ([intTransactionId]
  --       ,[strTransactionId]
