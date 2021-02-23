@@ -39,6 +39,7 @@ RETURNS @returntable TABLE
 	, strStorageTypeDescription NVARCHAR(50) COLLATE Latin1_General_CI_AS
 	, ysnActive BIT
 	, ysnExternal BIT
+	, intTicketId INT
 )
 AS
 BEGIN
@@ -76,6 +77,7 @@ BEGIN
 		, strStorageTypeDescription
 		, ysnActive
 		, ysnExternal
+		, intTicketId
 	FROM (
 		SELECT intRowNum = ROW_NUMBER() OVER (PARTITION BY sl.intTransactionRecordId, sl.intTransactionRecordHeaderId, sl.intContractHeaderId, sl.strInOut, sl.ysnNegate, sl.strTransactionType, sl.strTransactionNumber ORDER BY sl.intSummaryLogId DESC)
 			, sl.intSummaryLogId
@@ -111,6 +113,7 @@ BEGIN
 			, strStorageTypeDescription
 			, ysnActive
 			, ysnExternal = ISNULL(ysnExternal, 0)
+			, intTicketId
 		FROM vyuRKGetSummaryLog sl
 		CROSS APPLY (
 			SELECT strStorageTypeCode

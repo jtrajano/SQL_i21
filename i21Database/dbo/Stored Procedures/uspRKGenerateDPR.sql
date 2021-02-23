@@ -332,34 +332,37 @@ BEGIN TRY
 		, strLocationName
 		, strContractEndMonth = RIGHT(CONVERT(VARCHAR(11), dtmTransactionDate, 106), 8) COLLATE Latin1_General_CI_AS
 		, strDeliveryDate = RIGHT(CONVERT(VARCHAR(11), dtmTransactionDate, 106), 8) COLLATE Latin1_General_CI_AS
-		, intEntityId
+		, t.intEntityId
 		, strCustomerName = strEntityName
 		, dblBalance = dbo.fnCTConvertQuantityToTargetCommodityUOM(t.intOrigUOMId, @intCommodityUnitMeasureId, dblTotal) 
-		, intCommodityId
+		, t.intCommodityId
 		, strCommodityCode
 		, strOwnedPhysicalStock
 		, strStorageTypeDescription
 		, ysnReceiptedStorage = ISNULL(ysnReceiptedStorage, 0)
 		, ysnActive
-		, intItemId
+		, t.intItemId
 		, strItemNo
 		, intCategoryId
 		, strCategoryCode
 		, intOrigUOMId
 		, dtmTransactionDate
-		, intTicketId = intTransactionRecordId
-		, strTicketType = strTransactionType
-		, strTicketNumber = strTransactionNumber
-		, strContractNumber = strContractNumber
+		, t.intTicketId 
+		, strTransactionType
+		, strTicketNumber
+		, strContractNumber = t.strContractNumber
 		, intTypeId 
 		, t.intContractHeaderId
 		, ysnExternal
+		, intTransactionRecordId
+		, strTransactionNumber
 	INTO #tblCustomerOwnedAll
 	FROM dbo.fnRKGetBucketCustomerOwned(@dtmToDate, @intCommodityId, @intVendorId) t
+	LEFT JOIN tblSCTicket SC ON t.intTicketId = SC.intTicketId
 	WHERE ISNULL(strStorageType, '') <> 'ITR' AND intTypeId IN (1, 3, 4, 5, 8, 9)
 		AND CONVERT(DATETIME, CONVERT(VARCHAR(10), dtmTransactionDate, 110), 110) <= CONVERT(DATETIME, @dtmToDate)
-		AND intCommodityId = ISNULL(@intCommodityId, intCommodityId)
-		AND ISNULL(intEntityId, 0) = ISNULL(@intVendorId, ISNULL(intEntityId, 0))
+		AND t.intCommodityId = ISNULL(@intCommodityId, t.intCommodityId)
+		AND ISNULL(t.intEntityId, 0) = ISNULL(@intVendorId, ISNULL(t.intEntityId, 0))
 		AND intLocationId = ISNULL(@intLocationId, intLocationId)
 		AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
 
@@ -385,11 +388,13 @@ BEGIN TRY
 		, intOrigUOMId
 		, dtmTransactionDate
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
 		, strContractNumber
 		, intTypeId 
 		, intContractHeaderId
+		, intTransactionRecordId
+		, strTransactionNumber
 	INTO #tblCustomerOwned
 	FROM #tblCustomerOwnedAll
 	WHERE ISNULL(ysnExternal, 0) = 0
@@ -416,11 +421,13 @@ BEGIN TRY
 		, intOrigUOMId
 		, dtmTransactionDate
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
 		, strContractNumber
 		, intTypeId 
 		, intContractHeaderId
+		, intTransactionRecordId
+		, strTransactionNumber
 	INTO #tblOffSite
 	FROM #tblCustomerOwnedAll
 	WHERE ISNULL(ysnExternal, 0) = 1
@@ -1038,7 +1045,7 @@ BEGIN TRY
 		, dblTotal
 		, strCustomerName
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
 		, strContractEndMonth
 		, strDeliveryDate
@@ -1053,7 +1060,9 @@ BEGIN TRY
 		, strDistributionOption
 		, dtmTicketDateTime
 		, intContractHeaderId
-		, strContractNumber)
+		, strContractNumber
+		, intInventoryReceiptId
+		, strReceiptNumber)
 	SELECT 1 AS intSeqId
 		, strSeqHeader = 'In-House' COLLATE Latin1_General_CI_AS
 		, strCommodityCode = @strCommodityCode
@@ -1061,7 +1070,7 @@ BEGIN TRY
 		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId, @intCommodityUnitMeasureId, dblBalance)
 		, strCustomerName
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
 		, strContractEndMonth
 		, strDeliveryDate
@@ -1077,6 +1086,8 @@ BEGIN TRY
 		, dtmTransactionDate
 		, intContractHeaderId
 		, strContractNumber
+		, intTransactionRecordId
+		, strTransactionNumber
 	FROM #tblCustomerOwned s
 		
 	INSERT INTO @ListInventory(intSeqId
@@ -1208,7 +1219,7 @@ BEGIN TRY
 			, strContractEndMonth
 			, strDeliveryDate
 			, intTicketId
-			, strTicketType
+			, strTransactionType
 			, strTicketNumber
 			, strCustomerName
 			, intLocationId
@@ -1226,7 +1237,7 @@ BEGIN TRY
 		, dblTotal
 		, strCustomerName
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
 		, strContractEndMonth
 		, strDeliveryDate
@@ -1238,7 +1249,9 @@ BEGIN TRY
 		, intCommodityId
 		, intFromCommodityUnitMeasureId
 		, intCompanyLocationId
-		, dtmTicketDateTime)
+		, dtmTicketDateTime
+		, intInventoryReceiptId
+		, strReceiptNumber)
 	SELECT intSeqId = 5
 		, strSeqHeader = strDistributionType
 		, strCommodityCode = @strCommodityCode
@@ -1246,7 +1259,7 @@ BEGIN TRY
 		, dblTotal = dbo.fnCTConvertQuantityToTargetCommodityUOM(intOrigUOMId, @intCommodityUnitMeasureId, dblBalance)
 		, strCustomerName
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
 		, strContractEndMonth
 		, strDeliveryDate
@@ -1259,6 +1272,8 @@ BEGIN TRY
 		, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
 		, intLocationId
 		, dtmTransactionDate
+		, intTransactionRecordId
+		, strTransactionNumber
 	FROM #tblCustomerOwned s
 		
 	IF (@ysnDisplayAllStorage = 1)
@@ -1299,9 +1314,11 @@ BEGIN TRY
 		, intFromCommodityUnitMeasureId
 		, intCompanyLocationId
 		, intTicketId
-		, strTicketType
+		, strTransactionType
 		, strTicketNumber
-		, dtmTicketDateTime)
+		, dtmTicketDateTime
+		, intInventoryReceiptId
+		, strReceiptNumber)
 	SELECT * FROM (
 		SELECT intSeqId = 7
 			, strSeqHeader = 'Total Non-Receipted' COLLATE Latin1_General_CI_AS
@@ -1320,9 +1337,11 @@ BEGIN TRY
 			, intCommodityUnitMeasureId = @intCommodityUnitMeasureId
 			, intLocationId
 			, r.intTicketId
-			, r.strTicketType
+			, r.strTransactionType
 			, strTicketNumber
 			, dtmTransactionDate
+			, intInventoryReceiptId = intTransactionRecordId
+			, strReceiptNumber = strTransactionNumber
 		FROM #tblCustomerOwned r
 		WHERE ysnReceiptedStorage = 0
 			AND strOwnedPhysicalStock = 'Customer'
@@ -2059,7 +2078,7 @@ BEGIN TRY
 			, strContractEndMonth
 			, strDeliveryDate
 			, intTicketId
-			, strTicketType
+			, strTransactionType
 			, strTicketNumber
 			, strCustomerName
 			, intFromCommodityUnitMeasureId
@@ -2081,7 +2100,7 @@ BEGIN TRY
 			, strContractEndMonth
 			, strDeliveryDate
 			, intTicketId
-			, strTicketType
+			, strTransactionType
 			, strTicketNumber
 			, strCustomerName
 			, intFromCommodityUnitMeasureId = @intCommodityUnitMeasureId
@@ -2102,7 +2121,7 @@ BEGIN TRY
 				, strCustomerName
 				, intLocationId
 				, intTicketId
-				, strTicketType
+				, strTransactionType
 				, strTicketNumber
 				, dtmTransactionDate
 			FROM #tblOffSite CH
@@ -3736,7 +3755,7 @@ BEGIN TRY
 				, strContractType
 				, dblTotal
 				, intTicketId
-				, strTicketType
+				, strTranType
 				, strTicketNumber
 				, intItemId
 				, strItemNo
@@ -3750,7 +3769,7 @@ BEGIN TRY
 				, strContractType = 'OffSite' COLLATE Latin1_General_CI_AS
 				, dblTotal = SUM(dblTotal) 
 				, intTicketId
-				, strTicketType
+				, strTransactionType
 				, strTicketNumber
 				, intItemId
 				, strItemNo
@@ -3761,7 +3780,7 @@ BEGIN TRY
 				, strLocationName
 			FROM (
 				SELECT intTicketId
-					, strTicketType
+					, strTransactionType
 					, strTicketNumber
 					, dblTotal = dblBalance
 					, CH.intLocationId
@@ -3775,7 +3794,7 @@ BEGIN TRY
 				FROM #tblOffSite CH
 				) t
 			 GROUP BY intTicketId
-				, strTicketType
+				, strTransactionType
 				, strTicketNumber
 				, intItemId
 				, strItemNo
