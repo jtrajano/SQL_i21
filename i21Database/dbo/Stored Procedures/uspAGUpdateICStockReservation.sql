@@ -90,6 +90,7 @@ BEGIN
 						 ysnShipped = 1,
 						 ysnFinalized = 0,
 						 strStatus = 'In Progress'
+					WHERE intWorkOrderId = @AGWorkOrderId
 			END
 			ELSE
 				BEGIN
@@ -101,6 +102,7 @@ BEGIN
 						 ysnShipped = 0,
 						 ysnFinalized = 0,
 						 strStatus = 'Open'
+						WHERE intWorkOrderId = @AGWorkOrderId
 				END
 
 		
