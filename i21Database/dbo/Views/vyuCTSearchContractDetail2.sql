@@ -51,9 +51,10 @@ WITH shipmentstatus AS (
 
 , approved AS (
 	SELECT intContractDetailId
-		, dblRepresentingQty = SUM(dblRepresentingQty)
+		, dblRepresentingQty = CASE WHEN SUM(dblRepresentingQty) > dblQuantity THEN dblQuantity ELSE SUM(dblRepresentingQty) END
 	FROM (
 		SELECT ccc.intContractDetailId
+			,ccc.dblQuantity
 			, dblRepresentingQty = (CASE WHEN ISNULL(eee.dblUnitQty, 0) = 0 OR ISNULL(fff.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(eee.dblUnitQty, 0) = ISNULL(fff.dblUnitQty, 0) THEN ddd.dblRepresentingQty
 										ELSE ddd.dblRepresentingQty * (ISNULL(eee.dblUnitQty, 0) / ISNULL(fff.dblUnitQty, 0)) END)
@@ -69,7 +70,7 @@ WITH shipmentstatus AS (
 			AND fff.intUnitMeasureId = ccc.intUnitMeasureId
 			AND fff.intItemId = ccc.intItemId
 	) AS qasample
-	GROUP BY intContractDetailId)
+	GROUP BY intContractDetailId, dblQuantity)
 
 , prepaid AS (
 	SELECT jjj.intContractHeaderId
