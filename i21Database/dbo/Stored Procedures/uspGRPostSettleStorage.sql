@@ -1469,10 +1469,7 @@ BEGIN TRY
 														((SV.dblSettleContractUnits / @dblGrossUnits) * @dblSelectedUnits) 
 												else SV.dblSettleContractUnits end
 												
-											ELSE 
-												CASE WHEN SV.ysnDiscountFromGrossWeight = 1 then  
-														((SV.dblUnits  / @dblGrossUnits) * @dblSelectedUnits) 
-												else SV.dblUnits  end
+											ELSE SV.dblUnits
 										END)									 
 								, 2) 
 							) 
@@ -1521,7 +1518,7 @@ BEGIN TRY
 														WHEN SV.intPricingTypeId = 1 OR SV.intPricingTypeId = 6 OR SV.intPricingTypeId IS NULL THEN SV.[dblCashPrice]
 														ELSE @dblFutureMarkePrice + ISNULL(SV.dblBasis,0)
 												   END)
-												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice, CASE WHEN SV.ysnDiscountFromGrossWeight = 1 then @dblGrossUnits else @dblSelectedUnits end ))												   
+												   + (dbo.fnDivide(DiscountCost.dblTotalCashPrice,@dblSelectedUnits))												   
 												   --+ (@additionalDiscrepancy /  case when @useUnits = 1 then SV.dblUnits else 1  end )
 					,dblSalesPrice				= 0.00
 					,intCurrencyId				= @intCurrencyId
@@ -1554,10 +1551,7 @@ BEGIN TRY
 														((SV.dblSettleContractUnits / @dblSelectedUnits) * @dblGrossUnits) 
 												else SV.dblSettleContractUnits end
 												
-											ELSE 
-												CASE WHEN SV.ysnDiscountFromGrossWeight = 1 then  
-														((SV.dblUnits  / @dblSelectedUnits ) * @dblGrossUnits ) 
-												else SV.dblUnits  end
+											ELSE SV.dblUnits
 										END)									 
 								, 2) 
 							) 
