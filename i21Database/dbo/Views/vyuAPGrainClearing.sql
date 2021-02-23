@@ -307,7 +307,7 @@ SELECT DISTINCT--'e',
     ,unitMeasure.strUnitMeasure AS strUOM 
 	,0 AS dblVoucherTotal
     ,0 AS dblVoucherQty
-	,CAST(CASE
+	,CAST((CASE
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount < 0 
 			THEN ((QM.dblDiscountAmount * (CASE WHEN ISNULL(SS.dblCashPrice,0) > 0 THEN SS.dblCashPrice ELSE CD.dblCashPrice END) * -1))
 		WHEN QM.strDiscountChargeType = 'Percent' AND QM.dblDiscountAmount > 0 
