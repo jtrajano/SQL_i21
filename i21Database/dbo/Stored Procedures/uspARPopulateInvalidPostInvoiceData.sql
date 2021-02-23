@@ -354,8 +354,8 @@ BEGIN
 		DECLARE @intInterCompanyVendorId INT
 		DECLARE @strInterCompanyVendorId NVARCHAR(50)
 
-		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId] FROM #ARPostInvoiceHeader
-		SELECT @ysnVendorExistQuery = N'SELECT @ysnVendorExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblAPVendor WHERE intEntityId = ''' + @intInterCompanyVendorId + ''''
+		SELECT @strInterCompanyVendorId = [strInterCompanyVendorId], @intInterCompanyVendorId = [intInterCompanyVendorId] FROM #ARPostInvoiceHeader
+		SELECT @ysnVendorExistQuery = N'SELECT @ysnVendorExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblAPVendor WHERE intEntityId = ''' + CAST(@intInterCompanyVendorId AS NVARCHAR(50)) + ''''
 
 		SET @ysnVendorExistParam = N'@ysnVendorExist int OUTPUT'
 
