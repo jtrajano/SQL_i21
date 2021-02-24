@@ -26,11 +26,11 @@ BEGIN
 
 
 	/*
-		2 - Acre
-		1 - lbs
+		-2 - Acre
+		-1 - lbs
 	*/
-	SET @intAcreId = 2
-	SET @intLbsId = 1
+	SET @intAcreId = -2
+	SET @intLbsId = -1
 
 
 	--Get the Area UOM conversion (Acre Base)
