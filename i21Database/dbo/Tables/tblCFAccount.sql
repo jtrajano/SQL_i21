@@ -16,6 +16,7 @@
     [strPrimarySortOptions]           NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [strSecondarySortOptions]         NVARCHAR (250)  COLLATE Latin1_General_CI_AS NULL,
     [ysnSummaryByCard]                BIT             NULL,
+    [ysnSummaryByDepartmentProduct]   BIT             NULL,
     [ysnSummaryByVehicle]             BIT             NULL,
     [ysnSummaryByMiscellaneous]       BIT             NULL,
     [ysnSummaryByProduct]             BIT             NULL,
