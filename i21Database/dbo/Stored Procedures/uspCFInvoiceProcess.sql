@@ -479,6 +479,7 @@ BEGIN TRY
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
 		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
 		,ysnSummaryByMiscellaneous
 		,ysnSummaryByProduct
@@ -636,6 +637,7 @@ BEGIN TRY
 		,dblEligableGallon
 		,ysnPrintMiscellaneous
 		,ysnSummaryByCard
+		,ysnSummaryByDepartmentProduct
 		,ysnSummaryByDepartment
 		,ysnSummaryByMiscellaneous
 		,ysnSummaryByProduct

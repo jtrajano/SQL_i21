@@ -12,6 +12,7 @@ BEGIN
 	DECLARE @strPrintSiteAddress				NVARCHAR(MAX)
 	DECLARE @strDetailDisplay					NVARCHAR(MAX)
 	DECLARE @ysnSummaryByCard					BIT
+	DECLARE @ysnSummaryByDepartmentProduct		BIT
 	DECLARE @ysnSummaryByProduct				BIT
 	DECLARE @ysnSummaryByCardProd				BIT
 	DECLARE @ysnSummaryByVehicle				BIT
@@ -39,6 +40,7 @@ BEGIN
 	,@strPrintPricePerGallon			 =  strPrintPricePerGallon		
 	,@strPrintSiteAddress				 =  strPrintSiteAddress		
 	,@ysnSummaryByCard					 =  ysnSummaryByCard			
+	,@ysnSummaryByDepartmentProduct		 =  ysnSummaryByDepartmentProduct
 	,@ysnSummaryByProduct				 =  ysnSummaryByProduct		
 	,@ysnSummaryByCardProd				 =  ysnSummaryByCardProd		
 	,@ysnSummaryByVehicle				 =  ysnSummaryByVehicle		
@@ -69,7 +71,8 @@ BEGIN
 	,strPrintPricePerGallon			  = 	 @strPrintPricePerGallon		
 	,strPrintSiteAddress			  = 	 @strPrintSiteAddress		
 	,strDetailDisplay				  =		 @strDetailDisplay
-	,ysnSummaryByCard				  = 	 @ysnSummaryByCard				
+	,ysnSummaryByCard				  = 	 @ysnSummaryByCard	
+	,ysnSummaryByDepartmentProduct	  = 	 @ysnSummaryByDepartmentProduct	
 	,ysnSummaryByProduct			  = 	 @ysnSummaryByProduct			
 	,ysnSummaryByCardProd			  = 	 @ysnSummaryByCardProd			
 	,ysnSummaryByVehicle			  = 	 @ysnSummaryByVehicle			
