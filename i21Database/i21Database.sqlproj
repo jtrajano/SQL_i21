@@ -9089,6 +9089,7 @@
     <None Include="Scripts\Post-Deployment\AG\1_AGUOMDefaultData.sql" />
     <Build Include="dbo\Views\vyuMFGetExternalGroupItem.sql" />
     <Build Include="dbo\Views\vyuMFGetItemList.sql" />
+    <Build Include="Scripts\Post-Deployment\AP\InsertClearingTransactionsToClearingTable.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
