@@ -10,10 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy Unit Measure' AND strModuleName = 'Agronomy' AND intParentMenuID = (
-		SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Agronomy'
-	))
+	
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Management (Portal)' AND strModuleName = 'Document Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -6676,6 +6674,64 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy 
 ELSE
 	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'Agronomy.view.AgronomyUOM' WHERE strMenuName = 'Agronomy Unit Measure' AND strModuleName = 'Agronomy' AND intParentMenuID = @AgronomyMaintenanceParentMenuId
 
+
+
+
+
+/* SCHEDULING */
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Scheduling', N'Scheduling', 0, N'Scheduling', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 3 WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0
+
+DECLARE @SchedulingParentMenuId INT
+SELECT @SchedulingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0
+
+--ACTIVITIES
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Scheduling', @SchedulingParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+DECLARE @SchedulingActivitiesParentMenuId INT
+SELECT @SchedulingActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Distribution' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Report Distribution', N'Scheduling', @SchedulingActivitiesParentMenuId, N'Report Distribution', N'Activity', N'Screen', N'Scheduling.view.ReportDistribution?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Scheduling.view.ReportDistribution?showSearch=true' WHERE strMenuName = 'Report Distribution' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingActivitiesParentMenuId
+
+--MAINTENANCE
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Scheduling', @SchedulingParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+DECLARE @SchedulingMaintenanceParentMenuId INT
+SELECT @SchedulingMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Report Distribution Group' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Report Distribution Group', N'Scheduling', @SchedulingMaintenanceParentMenuId, N'Report Distribution Group', N'Maintenance', N'Screen', N'Scheduling.view.ReportDistributionGroup?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Scheduling.view.ReportDistributionGroup?showSearch=true' WHERE strMenuName = N'Report Distribution Group' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Schedule' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Schedule', N'Scheduling', @SchedulingMaintenanceParentMenuId, N'Schedule', N'Maintenance', N'Screen', N'Scheduling.view.Schedule?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Scheduling.view.Schedule?showSearch=true' WHERE strMenuName = N'Schedule' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId
+
+
+/* END SCHEDULING */
+
+
+
+
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------ CONTACT MENUS -------------------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
@@ -7546,60 +7602,54 @@ BEGIN
 	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @PRInventoryReceiptsMenuId)
 	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@PRInventoryReceiptsMenuId, 1)
 END
-GO
 
-/* SCHEDULING */
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Scheduling', N'Scheduling', 0, N'Scheduling', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 0)
+
+
+/*---------------------DMS---------------------*/
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Management (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Document Management (Portal)', N'Document Management', 0, N'Document Management (Portal)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 3, 2, 0)
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 3 WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0
+	UPDATE tblSMMasterMenu SET intSort = 0, intRow = 2 WHERE strMenuName = 'Document Management (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = 0
 
-DECLARE @SchedulingParentMenuId INT
-SELECT @SchedulingParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Scheduling' AND strModuleName = 'Scheduling' AND intParentMenuID = 0
+DECLARE @DMSPortalParentMenuId INT
+SELECT @DMSPortalParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Document Management (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = 0
 
---ACTIVITIES
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId)
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @DMSPortalParentMenuId)
+INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@DMSPortalParentMenuId, 1)
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Documents (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Activities', N'Scheduling', @SchedulingParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
-
-DECLARE @SchedulingActivitiesParentMenuId INT
-SELECT @SchedulingActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
-
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Report Distribution' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingActivitiesParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Report Distribution', N'Scheduling', @SchedulingActivitiesParentMenuId, N'Report Distribution', N'Activity', N'Screen', N'Scheduling.view.ReportDistribution?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+	VALUES (N'Add Documents (Portal)', N'Document Management', @DMSPortalParentMenuId, N'Add Documents (Portal)', N'Portal Menu', N'Screen', N'GlobalComponentEngine.view.DocumentPending?activeTab=Add', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Scheduling.view.ReportDistribution?showSearch=true' WHERE strMenuName = 'Report Distribution' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.DocumentPending?activeTab=Add' WHERE strMenuName = 'Add Documents (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId
 
---MAINTENANCE
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId)
+DECLARE @DMSAddDocumentsId INT
+SELECT  @DMSAddDocumentsId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Add Documents (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Documents (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @DMSAddDocumentsId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@DMSAddDocumentsId, 1)
+END
+
+--Document Manager
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Manager (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Maintenance', N'Scheduling', @SchedulingParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+	VALUES (N'Document Manager (Portal)', N'Document Management', @DMSPortalParentMenuId, N'Document Manager (Portal)', N'Portal Menu', N'Screen', N'GlobalComponentEngine.view.DocumentManager?showSearch=tru', N'small-menu-portal', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.DocumentManager?showSearch=true' WHERE strMenuName = 'Document Manager (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId
 
-DECLARE @SchedulingMaintenanceParentMenuId INT
-SELECT @SchedulingMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Scheduling' AND intParentMenuID = @SchedulingParentMenuId
+DECLARE @DMSDocumentManagerId INT
+SELECT  @DMSDocumentManagerId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Document Manager (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId
+IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Manager (Portal)' AND strModuleName = 'Document Management' AND intParentMenuID = @DMSPortalParentMenuId)
+BEGIN
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMContactMenu WHERE intMasterMenuId = @DMSDocumentManagerId)
+	INSERT [dbo].[tblSMContactMenu] ([intMasterMenuId], [ysnContactOnly]) VALUES (@DMSDocumentManagerId, 1)
+END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Report Distribution Group' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Report Distribution Group', N'Scheduling', @SchedulingMaintenanceParentMenuId, N'Report Distribution Group', N'Maintenance', N'Screen', N'Scheduling.view.ReportDistributionGroup?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Scheduling.view.ReportDistributionGroup?showSearch=true' WHERE strMenuName = N'Report Distribution Group' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId
+--
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Schedule' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId)
-	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Schedule', N'Scheduling', @SchedulingMaintenanceParentMenuId, N'Schedule', N'Maintenance', N'Screen', N'Scheduling.view.Schedule?showSearch=true', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
-ELSE
-	UPDATE tblSMMasterMenu SET intSort = 6, strCommand = N'Scheduling.view.Schedule?showSearch=true' WHERE strMenuName = N'Schedule' AND strModuleName = N'Scheduling' AND intParentMenuID = @SchedulingMaintenanceParentMenuId
-
-
-/* END SCHEDULING */
-
-
+GO
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------- ADJUST uspSMSortOriginMenus' sorting -------------------------------------------------------
 ----------------------------------------------------------------------------------------------------------------------------------------------------
