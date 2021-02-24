@@ -12,10 +12,10 @@ INSERT [dbo].[tblAGUnitMeasure] (
 		,[intDecimalPlaces] 
 		,[intConcurrencyId] 
 )
-SELECT  [intAGUnitMeasureId]      = 1
+SELECT  [intAGUnitMeasureId]      = -1
 		,[strUnitMeasure]         = N'Pound'
-		,[strSymbol]              = N'lbs'
-		,[strUnitType]            = N'Quantity'
+		,[strSymbol]              = N'lb'
+		,[strUnitType]            = N'Weight'
 		,[intDecimalPlaces]       = 6
 		,[intConcurrencyId]       = 1
 WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblAGUnitMeasure WHERE strUnitMeasure = N'Pound')
@@ -23,7 +23,7 @@ WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblAGUnitMeasure WHERE strUnitMeasure = N'
 UNION ALL
 
 
-SELECT  [intAGUnitMeasureId]      = 2
+SELECT  [intAGUnitMeasureId]      = -2
 		,[strUnitMeasure]         = N'Acre'
 		,[strSymbol]              = N'acre'
 		,[strUnitType]            = N'Area'
