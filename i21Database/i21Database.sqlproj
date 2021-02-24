@@ -9573,4 +9573,7 @@
   <ItemGroup>
     <None Include="Scripts\Post-Deployment\CCR\CrossReferenceDefault.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Post-Deployment\TF\DefaultData\FL_Florida.sql" />
+  </ItemGroup>
 </Project>

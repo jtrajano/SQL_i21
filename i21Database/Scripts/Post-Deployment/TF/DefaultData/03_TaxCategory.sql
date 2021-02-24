@@ -673,3 +673,26 @@ EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'GA', @TaxCategories = @TaxCa
 
 DELETE @TaxCategoryGA
 GO
+
+
+PRINT ('Deploying FL Tax Category')
+GO
+
+DECLARE @TaxCategoryFL AS TFTaxCategory
+
+INSERT INTO @TaxCategoryFL(
+	intTaxCategoryId
+	, strState
+	, strTaxCategory
+	, intMasterId
+)
+SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Excise Motor Fuel', intMasterId = 90001
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Excise Undyed Diesel Fuel', intMasterId = 90002
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Excise Aviation Fuel', intMasterId = 90003
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Local Option Tax Motor Fuel', intMasterId = 90004
+UNION ALL SELECT intTaxCategoryId = 0, strState = 'FL', strTaxCategory = 'FL Local Option Tax Undyed Diesel Fuel', intMasterId = 90005
+
+EXEC uspTFUpgradeTaxCategories @TaxAuthorityCode = 'FL', @TaxCategories = @TaxCategoryFL
+
+DELETE @TaxCategoryFL
+GO
