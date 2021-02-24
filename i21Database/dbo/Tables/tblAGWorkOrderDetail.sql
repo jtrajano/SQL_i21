@@ -97,8 +97,8 @@ CREATE TABLE [dbo].[tblAGWorkOrderDetail]
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblGRStorageType_intStorageScheduleTypeId] FOREIGN KEY ([intStorageScheduleTypeId]) REFERENCES [dbo].[tblGRStorageType] ([intStorageScheduleTypeId]),
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblSMCurrency_intSubCurrencyId] FOREIGN KEY ([intSubCurrencyId]) REFERENCES [dbo].[tblSMCurrency] ([intCurrencyID]),
 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblSMCurrencyExchangeRateType_intCurrencyExchangeRateTypeId] FOREIGN KEY ([intCurrencyExchangeRateTypeId]) REFERENCES [tblSMCurrencyExchangeRateType]([intCurrencyExchangeRateTypeId]),
- 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblAGUnitMeasure_intAGQtyUOMId] FOREIGN KEY ([intAGQtyUOM]) REFERENCES [dbo].[tblAGUnitMeasure] ([intAGUnitMeasureId]),
- 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblAGUnitMeasure_intAGAreaUOMId] FOREIGN KEY ([intAGAreaUOM]) REFERENCES [dbo].[tblAGUnitMeasure] ([intAGUnitMeasureId]),
+ 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblAGUnitMeasure_intAGQtyUOMId] FOREIGN KEY ([intAGQtyUOMId]) REFERENCES [dbo].[tblAGUnitMeasure] ([intAGUnitMeasureId]),
+ 	CONSTRAINT [FK_tblAGWorkOrderDetail_tblAGUnitMeasure_intAGAreaUOMId] FOREIGN KEY ([intAGAreaUOMId]) REFERENCES [dbo].[tblAGUnitMeasure] ([intAGUnitMeasureId]),
 	CONSTRAINT [PK_dbo.tblAGWorkOrderDetail_intWorkOrderDetailId] PRIMARY KEY CLUSTERED ([intWorkOrderDetailId] ASC) 
 	
 	
