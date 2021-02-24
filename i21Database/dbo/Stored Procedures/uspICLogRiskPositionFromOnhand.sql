@@ -173,7 +173,7 @@ BEGIN
 					WHEN t.strTransactionForm = 'Inbound Shipments' THEN 31
 					WHEN t.strTransactionForm = 'Outbound Shipment' THEN 32
 					WHEN t.strTransactionForm = 'Invoice' THEN 48
-					WHEN t.strTransactionForm = 'Credit Memo' THEN 64
+					WHEN t.strTransactionForm = 'Credit Memo' THEN 66
 					ELSE 
 						NULL
 				 END 
