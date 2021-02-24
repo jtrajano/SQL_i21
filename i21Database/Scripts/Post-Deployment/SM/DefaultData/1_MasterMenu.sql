@@ -11,8 +11,8 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Commitment Pricing' AND strModuleName = 'Manufacturing' AND intParentMenuID = (
-		SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Manufacturing'
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy Unit Measure' AND strModuleName = 'Agronomy' AND intParentMenuID = (
+		SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Agronomy'
 	))
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
@@ -22,7 +22,7 @@ GO
 	END
 GO	
 	
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Agronomy Unit Measure'	AND strModuleName = 'Agronomy' AND (strCommand = 'Agronomy.view.AgronomyUOM'))
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Bank File Formats'	AND strModuleName = 'Cash Management' AND (strCommand = 'CashManagement.controller.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat' OR strCommand = 'CashManagement.view.BankFileFormat?showSearch=true'))
 	BEGIN
 		DELETE FROM tblSMMasterMenu
 		
