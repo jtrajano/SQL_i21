@@ -262,6 +262,7 @@ BEGIN TRY
 	,dblAPR
 	,ysnPrintMiscellaneous
 	,ysnSummaryByCard
+	,ysnSummaryByDepartmentProduct
 	,ysnSummaryByDepartment
 	,ysnSummaryByMiscellaneous
 	,ysnSummaryByProduct
@@ -515,6 +516,7 @@ BEGIN TRY
 	,dblAPR
 	,ysnPrintMiscellaneous
 	,ysnSummaryByCard			
+	,ysnSummaryByDepartmentProduct
 	,ysnSummaryByDepartment		
 	,ysnSummaryByMiscellaneous	
 	,ysnSummaryByProduct			
