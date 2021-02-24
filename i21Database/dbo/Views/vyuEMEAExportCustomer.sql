@@ -33,7 +33,7 @@ INNER JOIN tblARCustomer c ON a.intEntityId = c.intEntityId
 INNER JOIN tblEMEntityToContact d ON a.intEntityId = d.intEntityId and d.ysnDefaultContact = 1
 INNER JOIN tblEMEntity e ON d.intEntityContactId = e.intEntityId
 INNER JOIN tblEMEntityLocation f ON a.intEntityId = f.intEntityId and f.ysnDefaultLocation = 1
-INNER JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = a.intEntityId
+LEFT OUTER JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = a.intEntityId
 OUTER APPLY ( 
 	SELECT TOP 1 strPhone = ISNULL(strPhone, '') 
 	FROM tblEMEntityPhoneNumber 
@@ -56,3 +56,4 @@ OUTER APPLY (
 	INNER JOIN tblEMContactDetailType bb ON aa.intContactDetailTypeId = bb.intContactDetailTypeId AND strField = 'Fax'
 	WHERE aa.intEntityId = d.intEntityContactId
 ) FAX
+WHERE a.ysnActive = 1
