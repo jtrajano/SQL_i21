@@ -320,7 +320,6 @@ BEGIN TRY
 	select top 1 @strToCurrency = ISNULL(strSymbol,'')  +''+ strCurrency from tblSMCurrency c
 	INNER JOIN tblSMCurrencyExchangeRate er ON c.intCurrencyID = er.intToCurrencyId and intCurrencyExchangeRateId = @intCurrencyExchangeRateId
 
-
 	set @strPriceCurrencyAndUOMForPriced2 = @strSequenceCurrency + ', per ' + @strUnitMeasure2;
 
 	select top 1 @strDestinationPort = strCity from tblSMCity where intCityId = @intDestinationPortId;
@@ -435,8 +434,18 @@ BEGIN TRY
 			WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId
 		LEFT JOIN tblCTContractText CTT
 			WITH  (NOLOCK) ON CTT.intContractTextId				=	CH.intContractTextId
-		LEFT JOIN tblCTContractCondition CC
-			WITH (NOLOCK) ON CC.intContractHeaderId = CH.intContractHeaderId
+		--LEFT JOIN tblCTContractCondition CC
+		--	WITH (NOLOCK) ON CC.intContractHeaderId = CH.intContractHeaderId
+		OUTER APPLY (
+			 SELECT 
+			 intContractHeaderId	= intContractHeaderId
+			,strConditionDescription= strConditionDescription
+			
+			FROM   tblCTContractCondition CC
+			INNER JOIN tblCTCondition C ON C.intConditionId = CC.intConditionId
+			WHERE  CC.intContractHeaderId =  CH.intContractHeaderId
+			AND C.strConditionName NOT LIKE UPPER('%DISCLAIMER%') 
+		)CC
 		
 	where CH.intContractHeaderId = @intContractHeaderId
 	

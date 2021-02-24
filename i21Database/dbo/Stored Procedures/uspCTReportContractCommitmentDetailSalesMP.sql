@@ -21,14 +21,16 @@ BEGIN TRY
 			,strCondition			= strConditionDescription
 			
 			FROM   tblCTContractCondition CC
-			WHERE  CC.intContractHeaderId = 	@intContractHeaderId
+			INNER JOIN tblCTCondition C ON C.intConditionId = CC.intConditionId
+			WHERE  CC.intContractHeaderId = @intContractHeaderId
+			AND C.strConditionName LIKE UPPER('%DISCLAIMER%') 
 	END
 
 END TRY
 
 BEGIN CATCH
 
-	SET @ErrMsg = 'uspCTReportContractCommitmentDetailSalesMP - '+ ERROR_MESSAGE() 
+	SET @ErrMsg = 'uspCTReportContractCommitmentDetailSalesMP - '+ ERROR_MESSAGE()  
 	RAISERROR (@ErrMsg,18,1,'WITH NOWAIT')  
 	
 END CATCH
