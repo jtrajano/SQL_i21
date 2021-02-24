@@ -122,6 +122,7 @@
     [dblEligableGallon]						NUMERIC (18, 6) NULL,
     [ysnPrintMiscellaneous]					BIT             NULL,
     [ysnSummaryByCard]						BIT             NULL,
+    [ysnSummaryByDepartmentProduct]			BIT             NULL,
     [ysnSummaryByDepartment]				BIT             NULL,
     [ysnSummaryByMiscellaneous]				BIT             NULL,
     [ysnSummaryByProduct]					BIT             NULL,

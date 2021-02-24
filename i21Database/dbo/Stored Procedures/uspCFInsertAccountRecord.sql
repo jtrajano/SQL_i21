@@ -20,6 +20,7 @@
 	,@ysnPrintTimeOnInvoices		NVARCHAR(MAX)	 =	 'Y'
 	,@ysnPrintTimeOnReports			NVARCHAR(MAX)	 =	 'Y'
 	,@ysnSummaryByCard				NVARCHAR(MAX)	 =	 'N'
+	,@ysnSummaryByDepartmentProduct	NVARCHAR(MAX)	 =	 'N'
 	,@ysnSummaryByMiscellaneous		NVARCHAR(MAX)	 =	 'N'
 	,@ysnSummaryByProduct			NVARCHAR(MAX)	 =	 'Y'
 	,@ysnSummaryByDepartment		NVARCHAR(MAX)	 =	 'N'
@@ -440,6 +441,24 @@ BEGIN
 			SET @ysnHasError = 1
 		END
 
+		
+	--Summary by Dept prod
+	IF (@ysnSummaryByDepartmentProduct = 'N')
+		BEGIN 
+			SET @ysnSummaryByDepartmentProduct = 0
+		END
+	ELSE IF (@ysnSummaryByDepartmentProduct = 'Y')
+		BEGIN
+			SET @ysnSummaryByDepartmentProduct = 1	
+		END
+	ELSE
+		BEGIN 
+			INSERT tblCFImportFromCSVLog (strImportFromCSVId,strNote)
+			VALUES (@strCustomerId,'Invalid summary by dept prod value '+ @ysnSummaryByDepartmentProduct +'. Value should be Y or N only')
+			SET @ysnHasError = 1
+		END
+
+
 	--Summary by card
 	IF (@ysnSummaryByCard = 'N')
 		BEGIN 
@@ -706,6 +725,7 @@ BEGIN
 			,strPrimarySortOptions
 			,strSecondarySortOptions
 			,ysnSummaryByCard
+			,ysnSummaryByDepartmentProduct
 			,ysnSummaryByMiscellaneous
 			,ysnSummaryByProduct
 			,ysnSummaryByDepartment
@@ -747,6 +767,7 @@ BEGIN
 			,@strPrimarySortOptions
 			,@strSecondarySortOptions
 			,@ysnSummaryByCard
+			,@ysnSummaryByDepartmentProduct
 			,@ysnSummaryByMiscellaneous
 			,@ysnSummaryByProduct
 			,@ysnSummaryByDepartment
