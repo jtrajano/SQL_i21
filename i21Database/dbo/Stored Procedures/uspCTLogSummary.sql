@@ -31,7 +31,8 @@ BEGIN TRY
 			@ysnNew					BIT = 0,
 			@ysnReturn				BIT = 0,
 			@ysnMultiPrice			BIT = 0,
-			@ysnDWGPriceOnly		BIT = 0;
+			@ysnDWGPriceOnly		BIT = 0,
+			@ysnReassign			BIT = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -43,7 +44,8 @@ BEGIN TRY
 		'Update Scheduled Quantity',
 		'Update Sequence Status',
 		'Missing History',
-		'Update Sequence Balance - DWG (Load-based)'
+		'Update Sequence Balance - DWG (Load-based)',
+		'Reassign Save'
 	)
 	BEGIN
 		RETURN
@@ -53,6 +55,13 @@ BEGIN TRY
 	OR (@strSource = 'Pricing-Old' AND @strProcess = 'Price Delete')
 	BEGIN
 		RETURN
+	END
+
+	IF (@strProcess LIKE  '% - Reassign')
+	BEGIN
+		RETURN
+		--SET @ysnReassign = 1
+		--SET @strProcess = REPLACE(@strProcess, '% - Reassign', '')
 	END
 
 	DECLARE @strBatchId NVARCHAR(50)
@@ -3424,7 +3433,13 @@ BEGIN TRY
 					ELSE IF (@qtyDiff < 0)
 					BEGIN
 						-- Qty decreased
-						SET @FinalQty = CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END
+						IF @dblAppliedQty = 0 BEGIN
+							SET @FinalQty = @qtyDiff
+						END
+						ELSE
+						BEGIN
+							SET @FinalQty = CASE WHEN @TotalPriced + @qtyDiff > 0 THEN @TotalPriced + @qtyDiff ELSE @TotalPriced * - 1 END
+						END
 					END
 					ELSE
 					BEGIN
@@ -3441,9 +3456,13 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					-- Increase basis, qtyDiff is negative so multiply to -1
-					UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					-- If Reassign prices, do not bring back Basis qty
+					IF (@ysnReassign = 0)
+					BEGIN
+						-- Increase basis, qtyDiff is negative so multiply to -1
+						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
 
 					-- Decrease Priced
 					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
