@@ -191,6 +191,7 @@
     <Folder Include="Scripts\Post-Deployment\SC\" />
     <Folder Include="Scripts\Post-Deployment\GL\StoredProcedures\" />
     <Folder Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1" />
+    <Folder Include="Scripts\Post-Deployment\AG\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\tblAPBill.sql" />
@@ -9090,6 +9091,9 @@
     <Build Include="dbo\Views\vyuMFGetExternalGroupItem.sql" />
     <Build Include="dbo\Views\vyuMFGetItemList.sql" />
     <Build Include="Scripts\Post-Deployment\AP\InsertClearingTransactionsToClearingTable.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetAdditionalBasisError.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFValidateAdditionalBasis.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFImportAdditionalBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
