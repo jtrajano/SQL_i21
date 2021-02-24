@@ -271,7 +271,6 @@
     <Build Include="dbo\Tables\tblGLCOATemplate.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplateDetail.sql" />
     <Build Include="dbo\Tables\tblGLConsolidateLog.sql" />
-    <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLCurrentFiscalYear.sql" />
     <Build Include="dbo\Tables\tblGLDetail.sql" />
     <Build Include="dbo\Tables\tblGLDetailRecap.sql" />
