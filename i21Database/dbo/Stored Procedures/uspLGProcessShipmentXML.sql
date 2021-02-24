@@ -4087,6 +4087,8 @@ BEGIN TRY
 				EXEC sp_xml_removedocument @idoc
 			END
 
+			EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
+
 			IF @ysnReplication = 1
 			BEGIN
 				SELECT @strHeaderCondition = 'intLoadId = ' + LTRIM(@intNewLoadId)
@@ -4559,7 +4561,7 @@ BEGIN TRY
 		WHERE LD.intLoadId = @intNewLoadId
 	END
 
-	EXEC uspLGUpdateContractQty @intLoadId = @intNewLoadId
+
 
 	IF ISNULL(@strInfo1, '') <> ''
 		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)
