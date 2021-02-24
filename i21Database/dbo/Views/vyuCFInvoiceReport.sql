@@ -44,6 +44,7 @@ SELECT
 ,cfAccount.ysnPrintMiscellaneous
 ,cfAccount.strPrintSiteAddress
 ,cfAccount.ysnSummaryByCard
+,cfAccount.ysnSummaryByDepartmentProduct
 ,cfAccount.ysnSummaryByDepartment
 ,cfAccount.ysnSummaryByMiscellaneous
 ,cfAccount.ysnSummaryByProduct
