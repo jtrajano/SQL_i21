@@ -210,7 +210,7 @@ BEGIN
 	SELECT @intNoOfMonths = 12
 
 	SET @SQL = ''
-	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50),intLocationId int,strLocationName nvarchar(50),ysnEditable int'
+	SET @SQL = @SQL + 'DECLARE @Table table(intItemId Int, strItemNo nvarchar(200), AttributeId int, strAttributeName nvarchar(50), OpeningInv nvarchar(35), PastDue nvarchar(35),intMainItemId Int, strMainItemNo nvarchar(50), strGroupByColumn nvarchar(50),intLocationId int,strLocationName nvarchar(50),ysnEditable BIT'
 
 	WHILE @Cnt <= @intNoOfMonths
 	BEGIN
