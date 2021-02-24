@@ -1,8 +1,8 @@
 ﻿CREATE VIEW [dbo].[vyuEMEAExportCustomer]
 AS 
-SELECT [intId] 				= a.intEntityId
-	 , [Id]					= LTRIM(RTRIM(a.strEntityNo)) COLLATE Latin1_General_CI_AS
-	 , [Description]		= LTRIM(RTRIM(a.strName)) COLLATE Latin1_General_CI_AS
+SELECT [intId] 				= e.intEntityId
+	 , [Id]					= LTRIM(RTRIM(e.strCustomerNumber)) COLLATE Latin1_General_CI_AS
+	 , [Description]		= LTRIM(RTRIM(e.strName)) COLLATE Latin1_General_CI_AS
 	 , [GroupRequired]		= CAST(0 AS BIT)
 	 , [LocationRequired]	= CAST(1 AS BIT)
 	 , [CreditHold]			= CAST(c.ysnCreditHold AS BIT)
@@ -13,11 +13,11 @@ SELECT [intId] 				= a.intEntityId
 	 , [LastName]			= ISNULL(SUBSTRING((CASE WHEN CHARINDEX(' ', e.strName) > 0 THEN SUBSTRING(SUBSTRING(e.strName,1,30),CHARINDEX(' ',e.strName) + 1, LEN(e.strName))END), 1, 20) , '') COLLATE Latin1_General_CI_AS
 	 , [FirstName]			= ISNULL(SUBSTRING((CASE WHEN CHARINDEX(' ', e.strName) > 0 THEN SUBSTRING(SUBSTRING(e.strName,1,30), 0, CHARINDEX(' ',e.strName)) ELSE SUBSTRING(e.strName,1,30)END), 1, 20) , '') COLLATE Latin1_General_CI_AS
 	 , [Name]				= ISNULL(e.strName, '') COLLATE Latin1_General_CI_AS
-	 , [Address1]			= ISNULL(dbo.fnEMSplitWithGetByIdx(f.strAddress,char(10),1) , '') COLLATE Latin1_General_CI_AS
-	 , [Address2]			= ISNULL(dbo.fnEMSplitWithGetByIdx(f.strAddress,char(10),2) , '') COLLATE Latin1_General_CI_AS
-	 , [City]				= ISNULL(f.strCity, '') COLLATE Latin1_General_CI_AS
-	 , [StateProv]			= ISNULL(f.strState, '') COLLATE Latin1_General_CI_AS
-	 , [PostalCode]			= ISNULL(f.strZipCode, '') COLLATE Latin1_General_CI_AS
+	 , [Address1]			= ISNULL(dbo.fnEMSplitWithGetByIdx(e.strAddress,char(10),1) , '') COLLATE Latin1_General_CI_AS
+	 , [Address2]			= ISNULL(dbo.fnEMSplitWithGetByIdx(e.strAddress,char(10),2) , '') COLLATE Latin1_General_CI_AS
+	 , [City]				= ISNULL(e.strCity, '') COLLATE Latin1_General_CI_AS
+	 , [StateProv]			= ISNULL(e.strState, '') COLLATE Latin1_General_CI_AS
+	 , [PostalCode]			= ISNULL(e.strZipCode, '') COLLATE Latin1_General_CI_AS
 	 , [Phone]				= ISNULL(PHONE.strPhone, '') COLLATE Latin1_General_CI_AS
 	 , [Mobile]				= ISNULL(MOBILE.strPhone, '') COLLATE Latin1_General_CI_AS
 	 , [Fax]				= ISNULL(FAX.strFax, '') COLLATE Latin1_General_CI_AS
@@ -27,13 +27,10 @@ SELECT [intId] 				= a.intEntityId
 	 , [Comment]			= ''
 	 , [LicenseApplicator] 	= g.strLicenseNo 
 	 , [LicenseExpirationDate] = g.dtmExpirationDate
-FROM tblEMEntity a
-INNER JOIN tblEMEntityType b ON a.intEntityId = b.intEntityId and b.strType = 'Customer'
-INNER JOIN tblARCustomer c ON a.intEntityId = c.intEntityId
-INNER JOIN tblEMEntityToContact d ON a.intEntityId = d.intEntityId and d.ysnDefaultContact = 1
-INNER JOIN tblEMEntity e ON d.intEntityContactId = e.intEntityId
-INNER JOIN tblEMEntityLocation f ON a.intEntityId = f.intEntityId and f.ysnDefaultLocation = 1
-LEFT OUTER JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = a.intEntityId
+FROM vyuEMEntityCustomerSearch e
+LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
+LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId
+LEFT JOIN tblEMEntityToContact d ON e.intEntityId = d.intEntityId and d.ysnDefaultContact = 1
 OUTER APPLY ( 
 	SELECT TOP 1 strPhone = ISNULL(strPhone, '') 
 	FROM tblEMEntityPhoneNumber 
@@ -56,4 +53,5 @@ OUTER APPLY (
 	INNER JOIN tblEMContactDetailType bb ON aa.intContactDetailTypeId = bb.intContactDetailTypeId AND strField = 'Fax'
 	WHERE aa.intEntityId = d.intEntityContactId
 ) FAX
-WHERE a.ysnActive = 1
+WHERE e.ysnActive = 1
+	AND e.intWarehouseId IN (-99,-99,1,2,3,4,5,6,7,8,9,10,11,12,13,36,41,42,45,46,51,52,53,56,57,58,59,60,61,63,66)
