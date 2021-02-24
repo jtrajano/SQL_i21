@@ -270,7 +270,6 @@
     <Build Include="dbo\Tables\tblGLCOAImportLogDetail.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplate.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplateDetail.sql" />
-    <Build Include="dbo\Tables\tblGLConsolidateLog.sql" />
     <Build Include="dbo\Tables\tblGLCurrentFiscalYear.sql" />
     <Build Include="dbo\Tables\tblGLDetail.sql" />
     <Build Include="dbo\Tables\tblGLDetailRecap.sql" />
@@ -446,8 +445,6 @@
     </Build>
     <Build Include="dbo\Stored Procedures\uspCMGetRPAccountIdByLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspGLPostFiscalYear.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLConsolidate.sql" />
-    <Build Include="dbo\Stored Procedures\uspGLConsolidateSubsidiary.sql" />
     <Build Include="dbo\Stored Procedures\uspAPExportPO.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBill.sql" />
     <Build Include="dbo\Stored Procedures\uspAPPostBillBatch.sql" />
@@ -3846,7 +3843,6 @@
     <Build Include="dbo\Tables\tblMFCostSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
     <Build Include="dbo\Views\vyuGLPostRemind.sql" />
-    <Build Include="dbo\Views\vyuGLConsolidateLog.sql" />
     <Build Include="dbo\Tables\tblSMRemoteServer.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
