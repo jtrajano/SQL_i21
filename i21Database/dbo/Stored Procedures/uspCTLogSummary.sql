@@ -32,7 +32,8 @@ BEGIN TRY
 			@ysnReturn				BIT = 0,
 			@ysnMultiPrice			BIT = 0,
 			@ysnDWGPriceOnly		BIT = 0,
-			@ysnReassign			BIT = 0;
+			@ysnReassign			BIT = 0,
+   			@ysnWithPriceFix BIT;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -98,6 +99,7 @@ BEGIN TRY
 		, dblBasis NUMERIC(18, 6)
 		, intBookId INT
 		, intSubBookId INT
+  		, ysnWithPriceFix bit
 	)
 
 	-- Get Contract Details
@@ -132,8 +134,12 @@ BEGIN TRY
 		, cd.dblBasis
 		, cd.intBookId
 		, cd.intSubBookId
+  		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then 0 else 1 end
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
+	 outer apply (
+		select pf.intPriceFixationId from tblCTPriceFixation pf where pf.intContractDetailId = @intContractDetailId
+	 ) priceFix
 	WHERE cd.intContractHeaderId = @intContractHeaderId
 		AND cd.intContractDetailId = @intContractDetailId
 
@@ -346,7 +352,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity FROM @tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
 				FROM tblCTContractHeader ch
@@ -3819,8 +3825,19 @@ BEGIN TRY
 						-- Increase SBD upon creation of IS
 						IF (@strTransactionReference = 'Inventory Shipment')
 						BEGIN
-							UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'
-							EXEC uspCTLogContractBalance @cbLogSpecific, 0
+							if (@currPricingTypeId = 1)
+							begin
+								if (isnull(@ysnWithPriceFix,0) = 1 )
+								begin
+									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+								end
+							end
+							else
+							begin
+								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
+								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
+							end
 						END
 
 					END				
