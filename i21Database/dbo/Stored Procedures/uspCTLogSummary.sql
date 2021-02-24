@@ -3542,10 +3542,9 @@ BEGIN TRY
 				BEGIN
 					IF @dblQty * - 1 > 0
 					BEGIN				
-						DECLARE @_prevQty NUMERIC(24,10),
-								@_prevType INT
+						DECLARE @_prevQty NUMERIC(24,10)
 
-						SELECT TOP 1 @_prevQty = prev.dblQty, @_prevType = prev.intPricingTypeId
+						SELECT TOP 1 @_prevQty = prev.dblQty
 						FROM @cbLogPrev prev
 						INNER JOIN @cbLogSpecific spfc ON prev.intTransactionReferenceId = spfc.intTransactionReferenceId
 							AND prev.intTransactionReferenceDetailId = spfc.intTransactionReferenceDetailId
@@ -3553,7 +3552,7 @@ BEGIN TRY
 							AND prev.intContractDetailId = @currentContractDetalId
 						ORDER BY prev.intId DESC
 								
-						UPDATE @cbLogSpecific SET dblQty = dblQty *- 1, intPricingTypeId = @_prevType, intActionId = CASE WHEN @_prevType = 1 THEN 46 ELSE 18 END
+						UPDATE @cbLogSpecific SET dblQty = dblQty *- 1, intPricingTypeId = @currPricingTypeId, intActionId = CASE WHEN @currPricingTypeId = 1 THEN 46 ELSE 18 END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 					ELSE
