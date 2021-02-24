@@ -628,13 +628,15 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		DECLARE @process NVARCHAR(20)
+		DECLARE @process NVARCHAR(50)
+			, @logProcess NVARCHAR(50)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
+		SELECT @logProcess = @process + CASE WHEN @strAction = 'Reassign' THEN ' - Reassign' ELSE '' END
 		
 		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 							 @intContractDetailId 	= 	@intContractDetailId,
 							 @strSource			 	= 	'Pricing',
-							 @strProcess		 	= 	@process,
+							 @strProcess		 	= 	@logProcess,
 							 @contractDetail 		= 	@contractDetails,
 							 @intUserId				= 	@intUserId
 
