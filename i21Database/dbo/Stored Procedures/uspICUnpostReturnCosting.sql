@@ -263,6 +263,7 @@ BEGIN
 			,[dblForexRate]
 			,[intSourceEntityId]
 			,[dtmDateCreated]
+			,[intCompanyLocationId]	
 	)			
 	SELECT	
 			[intItemId]								= ActualTransaction.intItemId
@@ -300,6 +301,7 @@ BEGIN
 			,[dblForexRate]							= ActualTransaction.dblForexRate
 			,[intSourceEntityId]					= ActualTransaction.intSourceEntityId
 			,[dtmDateCreated]						= GETUTCDATE()
+			,[intCompanyLocationId]					= ActualTransaction.intCompanyLocationId
 	FROM	#tmpInventoryTransactionStockToReverse tactionsToReverse INNER JOIN dbo.tblICInventoryTransaction ActualTransaction
 				ON tactionsToReverse.intInventoryTransactionId = ActualTransaction.intInventoryTransactionId
 	
@@ -591,6 +593,7 @@ BEGIN
 						,[intConcurrencyId]
 						,[strDescription]
 						,[dtmDateCreated]
+						,[intCompanyLocationId]
 				)			
 			SELECT	
 					[intItemId]								= @intItemId
@@ -635,9 +638,14 @@ BEGIN
 																, DEFAULT
 															)
 					,[dtmDateCreated]						= GETUTCDATE()
+					,[intCompanyLocationId]					= [location].intCompanyLocationId
 			FROM	dbo.tblICItemPricing AS ItemPricing INNER JOIN dbo.tblICItemStock AS Stock 
 						ON ItemPricing.intItemId = Stock.intItemId
 						AND ItemPricing.intItemLocationId = Stock.intItemLocationId
+					CROSS APPLY [dbo].[fnICGetCompanyLocation](
+						@intItemLocationId
+						, NULL --@intInTransitSourceLocationId
+					) [location]
 			WHERE	ItemPricing.intItemId = @intItemId
 					AND ItemPricing.intItemLocationId = @intItemLocationId			
 					AND dbo.fnMultiply(Stock.dblUnitOnHand, ItemPricing.dblAverageCost) - dbo.fnGetItemTotalValueFromTransactions(@intItemId, @intItemLocationId) <> 0
