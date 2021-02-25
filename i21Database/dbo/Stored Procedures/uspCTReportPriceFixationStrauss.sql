@@ -249,7 +249,7 @@ BEGIN TRY
 									case
 									when @ysnIsParent = 1
 									then @blbChildSubmitSignature
-									else null
+									else @blbParentSubmitSignature
 									end
 								end
 								,
@@ -265,7 +265,7 @@ BEGIN TRY
 										case
 										when @ysnIsParent = 1
 										then @blbChildApproveSignature
-										else null
+										else @blbParentApproveSignature
 										end
 									end
 									,
