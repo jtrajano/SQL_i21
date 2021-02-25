@@ -12,7 +12,7 @@ SELECT strTransactionType   =  'Inventory Shipment' COLLATE Latin1_General_CI_AS
    ,strSalesOrderNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS  
    ,dtmProcessDate  = GETDATE()  
    ,intInventoryShipmentId = ICSHIP.intInventoryShipmentId  
-   ,intInventoryShipmentItemId = NULL  
+   ,intInventoryShipmentItemId = SHIPITEM.intInventoryShipmentItemId  
    ,intInventoryShipmentChargeId = NULL  
    ,strInventoryShipmentNumber = CAST('' AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS   
    ,intShipmentId   = NULL  
@@ -93,8 +93,13 @@ INNER JOIN (
   ,strShipmentNumber  
  FROM tblICInventoryShipment WITH (NOLOCK)   
 ) ICSHIP   
-ON --ICSHIP.intInventoryShipmentId = WO.intWorkOrderId    
-  ICSHIP.strReferenceNumber = WO.strOrderNumber COLLATE Latin1_General_CI_AS    
+ON  ICSHIP.strReferenceNumber = WO.strOrderNumber COLLATE Latin1_General_CI_AS   --ICSHIP.intInventoryShipmentId = WO.intWorkOrderId    
+INNER JOIN (
+	SELECT 
+	intInventoryShipmentItemId,
+	intInventoryShipmentId
+	FROM tblICInventoryShipmentItem
+) SHIPITEM ON SHIPITEM.intInventoryShipmentId = ICSHIP.intInventoryShipmentId
   
 INNER JOIN (    
  SELECT [intItemId]    
