@@ -9099,6 +9099,8 @@
     <Build Include="dbo\Stored Procedures\uspMFImportAdditionalBasis.sql" />
     <Build Include="dbo\Functions\fnAGGetOrderedQuantityByUOMRate.sql" />
     <Build Include="dbo\Tables\tblAGCompanyPreference.sql" />
+    <Build Include="dbo\Views\vyuAGWorkOrderForInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGCreateInvoiceFromShipment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

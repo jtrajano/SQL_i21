@@ -270,12 +270,12 @@ BEGIN
 			  FROM #tmpAddItemShipmentResult  
 
 		--to adjust when invoice process comes to place
-		UPDATE tblAGWorkOrder
-		SET dtmProcessDate = GETDATE()
-			,ysnFinalized = 1
-			,ysnShipped = 1
-			,strStatus = 'Closed'
-		WHERE intWorkOrderId = @intWorkOrderId
+		-- UPDATE tblAGWorkOrder
+		-- SET dtmProcessDate = GETDATE()
+		-- 	,ysnFinalized = 1
+		-- 	,ysnShipped = 1
+		-- 	,strStatus = 'Closed'
+		-- WHERE intWorkOrderId = @intWorkOrderId
 
 
 END
