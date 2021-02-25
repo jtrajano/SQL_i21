@@ -32,8 +32,7 @@ BEGIN TRY
 			@ysnReturn				BIT = 0,
 			@ysnMultiPrice			BIT = 0,
 			@ysnDWGPriceOnly		BIT = 0,
-			@ysnReassign			BIT = 0,
-   			@ysnWithPriceFix BIT;
+			@ysnReassign			BIT = 0;
 
 	-------------------------------------------
 	--- Uncomment line below when debugging ---
@@ -99,7 +98,6 @@ BEGIN TRY
 		, dblBasis NUMERIC(18, 6)
 		, intBookId INT
 		, intSubBookId INT
-  		, ysnWithPriceFix bit
 	)
 
 	-- Get Contract Details
@@ -134,12 +132,8 @@ BEGIN TRY
 		, cd.dblBasis
 		, cd.intBookId
 		, cd.intSubBookId
-  		, ysnWithPriceFix = case when priceFix.intPriceFixationId is null then 0 else 1 end
 	FROM tblCTContractHeader ch
 	JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
-	 outer apply (
-		select pf.intPriceFixationId from tblCTPriceFixation pf where pf.intContractDetailId = @intContractDetailId
-	 ) priceFix
 	WHERE cd.intContractHeaderId = @intContractHeaderId
 		AND cd.intContractDetailId = @intContractDetailId
 
@@ -352,7 +346,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix FROM @tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
 				FROM tblCTContractHeader ch
@@ -458,8 +452,7 @@ BEGIN TRY
 			, strProcess  = @strProcess
 		FROM
 		(
-			SELECT 
-				ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
+			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC) AS Row_Num
 				, sh.intSequenceHistoryId
 				, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
 				, sh.intContractHeaderId
@@ -526,8 +519,8 @@ BEGIN TRY
 						, intContractStatusId
 						, COUNT (*)
 					FROM (
-						SELECT TOP 1 * FROM @cbLogTemp
-						UNION ALL SELECT TOP 1 * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId ORDER BY intId DESC
+						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp
+						UNION ALL SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY intId DESC) intRowId, * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) tbl WHERE intRowId = 1
 					) tbl
 					GROUP BY intContractDetailId
 						, intContractHeaderId
@@ -557,7 +550,6 @@ BEGIN TRY
 				DELETE FROM @cbLogTemp
 			END
 		END
-
 
 		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intContractStatusId = 4)
 		BEGIN
@@ -1534,7 +1526,7 @@ BEGIN TRY
 				AND suh.intExternalHeaderId is not null
 			) tbl
 			WHERE Row_Num = 1
-			
+
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
 			BEGIN
@@ -3353,8 +3345,7 @@ BEGIN TRY
 						UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
 						EXEC uspCTLogContractBalance @cbLogPrev, 0
 					END
-					
-					
+										
 					UPDATE a
 					SET a.dblQty = CASE 
 									WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty *- 1 FROM @cbLogPrev) 
@@ -3633,7 +3624,7 @@ BEGIN TRY
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
 				END
-
+								
 				IF @strProcess = 'Update Sequence Balance - DWG'
 				BEGIN
 					IF @dblQty * - 1 > 0
@@ -3829,19 +3820,8 @@ BEGIN TRY
 						-- Increase SBD upon creation of IS
 						IF (@strTransactionReference = 'Inventory Shipment')
 						BEGIN
-							if (@currPricingTypeId = 1)
-							begin
-								if (isnull(@ysnWithPriceFix,0) = 1 )
-								begin
-									UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
-									EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-								end
-							end
-							else
-							begin
-								UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'  
-								EXEC uspCTLogContractBalance @cbLogSpecific, 0 
-							end
+							UPDATE @cbLogSpecific SET dblQty = @_dblActual, intPricingTypeId = 1, strTransactionType = 'Sales Basis Deliveries'
+							EXEC uspCTLogContractBalance @cbLogSpecific, 0
 						END
 
 					END				
