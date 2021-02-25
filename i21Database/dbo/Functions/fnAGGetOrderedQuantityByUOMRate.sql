@@ -90,7 +90,7 @@ BEGIN
 		SELECT TOP 1  
 			@intItemStockUOMId = intItemUOMId
 		FROM tblICItemUOM
-		WHERE intUnitMeasureId = @intBaseUOMId 
+		WHERE  ysnStockUnit = 1
 			AND intItemId = @intItemId
 
 		--convert to stock UOM
