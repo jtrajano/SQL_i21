@@ -209,7 +209,8 @@ FROM
 	OUTER APPLY (
 		SELECT 
 			t.intItemUOMId
-			,t.intInventoryTransactionId
+			--,t.intInventoryTransactionId
+			,t.strTransactionId 
 			,dblCost = dbo.fnDivide(SUM(t.dblQty * t.dblCost), SUM(t.dblQty)) 
 		FROM
 			tblICInventoryTransaction t
@@ -220,7 +221,8 @@ FROM
 			AND t.dblQty < 0 
 		GROUP BY 
 			t.intItemUOMId
-			,t.intInventoryTransactionId
+			--,t.intInventoryTransactionId
+			,t.strTransactionId 
 	) postedTransaction	
 
 	OUTER APPLY (
@@ -231,7 +233,7 @@ FROM
 		FROM
 			tblICInventoryTransaction t
 		WHERE
-			postedTransaction.intInventoryTransactionId IS NULL 
+			postedTransaction.strTransactionId IS NULL 
 			AND t.intItemId = i.intItemId
 			AND t.intItemLocationId = costingMethod.intItemLocationId
 			AND dbo.fnDateLessThanEquals(t.dtmDate, Shipment.dtmShipDate) = 1
@@ -273,7 +275,7 @@ FROM
 	OUTER APPLY (
 		SELECT 
 			dblCost = CASE 
-				WHEN postedTransaction.intInventoryTransactionId IS NOT NULL THEN 
+				WHEN postedTransaction.strTransactionId IS NOT NULL THEN 
 					dbo.fnCalculateCostBetweenUOM(
 						postedTransaction.intItemUOMId
 						, ISNULL(ShipmentItem.intPriceUOMId, ShipmentItem.intItemUOMId)
