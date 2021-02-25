@@ -228,15 +228,15 @@ BEGIN
 							THEN (
 									CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
-											THEN M.strItemNo + '' - '' + M.strDescription
-										ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ]''
+											THEN M.strItemNo + '' - '' + M.strDescription +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
+										ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ]''+'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 										END
 									)
 						ELSE (
 								CASE 
 									WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
-										THEN M.strItemNo
-									ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ]''
+										THEN M.strItemNo +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
+									ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ]'' +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 									END
 								)
 						END )
@@ -246,19 +246,19 @@ BEGIN
 								THEN (
 										CASE 
 											WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
-												THEN M.strItemNo + '' - '' + M.strDescription
+												THEN M.strItemNo + '' - '' + M.strDescription +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 											WHEN M.intItemId <> IsNULL(MI.intItemId,M.intItemId) and strBook IS NULL
-												Then M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ]''
-											ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ] Restricted [''+strBook+'']''
+												Then M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ]'' +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
+											ELSE M.strItemNo + '' - '' + M.strDescription + '' [ '' + MI.strItemNo + '' - '' + MI.strDescription + '' ] Restricted [''+strBook+'']'' +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 											END
 										)
 							ELSE (
 									CASE 
 										WHEN M.intItemId = IsNULL(MI.intItemId,M.intItemId)
-											THEN M.strItemNo
+											THEN M.strItemNo+'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 										WHEN M.intItemId <> IsNULL(MI.intItemId,M.intItemId) and strBook IS NULL
-											Then M.strItemNo + '' [ '' + MI.strItemNo + '' ]'' 
-										ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ] Restricted [''+strBook+'']''
+											Then M.strItemNo + '' [ '' + MI.strItemNo + '' ]'' +'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
+										ELSE M.strItemNo + '' [ '' + MI.strItemNo + '' ] Restricted [''+strBook+'']''+'' [ '' + IsNULL(L.strLocationName, ''All'') + '' ]'' 
 										END
 									)
 							END
