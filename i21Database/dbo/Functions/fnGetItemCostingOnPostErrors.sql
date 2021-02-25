@@ -497,6 +497,7 @@ RETURN (
 			AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 1
 			AND ISNULL(@dblQty, 0) > 0
 			AND ISNULL(@dblCost, 0) = 0
+			AND @intTransactionTypeId NOT IN (9) -- Exemption: Allow zero cost for Produce transaction types. 
 
 	) AS Query		
 )
