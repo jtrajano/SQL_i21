@@ -83,7 +83,8 @@ as
 					from
 						tblCTPriceFixationDetailAPAR a
 						outer apply (select dblApplied = sum(b.dblQtyReceived) from tblAPBillDetail b where b.intBillDetailId = a.intBillDetailId) ap
-						outer apply (select dblApplied = sum(b.dblQtyShipped) from tblARInvoiceDetail b where b.intInvoiceDetailId = a.intInvoiceDetailId) ar
+						outer apply (select dblApplied = sum(b.dblQtyShipped) from tblARInvoiceDetail b where b.intInvoiceDetailId = a.intInvoiceDetailId and isnull(b.ysnReturned,0) = 0) ar
+					where isnull(a.ysnReturn,0) = 0
 				) tbl
 				where
 					tbl.intPriceFixationDetailId = pfd.intPriceFixationDetailId
