@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].uspCTReportContractPrintCommitmentSalesMP
+﻿CREATE PROCEDURE [dbo].[uspCTReportContractPrintCommitmentSalesMP]
 	@xmlParam NVARCHAR(MAX) = NULL
 AS
 
@@ -390,7 +390,7 @@ BEGIN TRY
 		,blbFooterLogo									= dbo.fnSMGetCompanyLogo('Footer')
 		,strSalesPerson									= ETS.strName
 		,strPrimaryContact								= PC.strName
-		,blbCompanySignature							= @blbPerCompanySignature
+		,blbCompanySignature							= SU.blbFile
 	FROM
 		tblCTContractHeader CH
 		LEFT JOIN vyuCTEntity	EC 
@@ -434,8 +434,12 @@ BEGIN TRY
 			WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId
 		LEFT JOIN tblCTContractText CTT
 			WITH  (NOLOCK) ON CTT.intContractTextId				=	CH.intContractTextId
-		--LEFT JOIN tblCTContractCondition CC
-		--	WITH (NOLOCK) ON CC.intContractHeaderId = CH.intContractHeaderId
+		LEFT JOIN tblARSalesperson SP  
+			WITH  (NOLOCK) ON SP.intEntityId = CH.intSalespersonId
+		LEFT JOIN tblSMAttachment SA  
+			WITH  (NOLOCK) ON SA.intAttachmentId= SP.intAttachmentSignatureId
+		LEFT JOIN tblSMUpload SU 
+			WITH  (NOLOCK) ON SU.intAttachmentId= SA.intAttachmentId
 		OUTER APPLY (
 			 SELECT 
 			 intContractHeaderId	= intContractHeaderId
