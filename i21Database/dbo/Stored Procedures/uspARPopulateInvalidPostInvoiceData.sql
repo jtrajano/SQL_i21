@@ -1817,7 +1817,7 @@ BEGIN
 	WHERE
 		I.[dblUnitPrice] <> @ZeroDecimal				
 		AND I.[strItemType] <> 'Other Charge'
-		AND I.strTransactionType <> 'Credit Memo'
+		AND I.strTransactionType NOT IN ('Credit Memo', 'Debit Memo')
 		AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(I.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 		AND ARCC.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0
