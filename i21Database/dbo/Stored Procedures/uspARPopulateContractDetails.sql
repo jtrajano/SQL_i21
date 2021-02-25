@@ -137,6 +137,8 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 			, ysnDestWtGrd
 			, dblShippedQty
 			, intShippedQtyUOMId
+			, intOriginalInvoiceId
+			, intOriginalInvoiceDetailId
 			, ysnFromReturn
 			, strPricing
 			, strBatchId
@@ -162,6 +164,8 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 			, ysnDestWtGrd			= CAST(1 AS BIT)
 			, dblShippedQty			= AVG(ISNULL(S.dblQuantity, ID.dblQtyShipped))
 			, intShippedQtyUOMId	= ISNULL(S.intItemUOMId, ID.intItemUOMId)
+			, intOriginalInvoiceId			= RI.intInvoiceId
+			, intOriginalInvoiceDetailId	= ID.intOriginalInvoiceDetailId
 			, ysnFromReturn			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 			, strPricing			= ID.strPricing	
 			, strBatchId			= I.strBatchId
