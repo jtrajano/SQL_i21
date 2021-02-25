@@ -286,6 +286,7 @@
     <Build Include="dbo\Tables\tblGLPostHistory.sql" />
     <Build Include="dbo\Tables\tblGLRecurringHistory.sql" />
     <Build Include="dbo\Tables\tblGLSummary.sql" />
+    <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLTempAccount.sql" />
     <Build Include="dbo\Tables\tblGLTempAccountToBuild.sql" />
     <Build Include="dbo\Tables\tblGLImportCSVLog.sql" />
@@ -965,6 +966,8 @@
     <Build Include="dbo\Tables\tblGLImportError.sql" />
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateSPMergeGLAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLCreateSPMergeSegmentAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDDivider.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateAccountIDStructure.sql" />
     <Build Include="dbo\Stored Procedures\uspGLUpdateOldAccountId.sql" />
