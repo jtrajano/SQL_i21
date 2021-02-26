@@ -9,6 +9,8 @@ BEGIN
 	DECLARE @intTicketNetQuantity NUMERIC(38,20)
 	DECLARE @ItemReservationTableType AS ItemReservationTableType
 	DECLARE @intTransctionTypeId INT = 59
+	DECLARE @strInvalidItemNo NVARCHAR(50)
+	DECLARE @intInvalidItemId INT 
 
 	DECLARE @ErrorMessage NVARCHAR(4000);
 	DECLARE @ErrorSeverity INT;
@@ -51,7 +53,7 @@ BEGIN
 				ON WO.intWorkOrderId = WOD.intWorkOrderId AND WOD.intItemId = SC.intItemId
 			WHERE SC.intTicketId = @intTicketId
 
-			EXEC uspICValidateStockReserves @ItemReservationTableType
+			EXEC uspICValidateStockReserves @ItemReservationTableType, @strInvalidItemNo, @intInvalidItemId 
 			EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intWorkOrderId,@intTransctionTypeId
 		END
 		ELSE
@@ -87,6 +89,7 @@ BEGIN
 				ON WO.intWorkOrderId = WOD.intWorkOrderId AND WOD.intItemId = SC.intItemId
 			WHERE SC.intTicketId = @intTicketId
 
+			EXEC uspICValidateStockReserves @ItemReservationTableType, @strInvalidItemNo, @intInvalidItemId 
 			EXEC dbo.uspICCreateStockReservation @ItemReservationTableType,@intWorkOrderId,59
 
 		END
