@@ -493,11 +493,19 @@ RETURN (
 			INNER JOIN tblICItemLocation IL ON IL.intItemId = @intItemId
 				AND IL.intItemLocationId = @intItemLocationId
 			INNER JOIN tblSMCompanyLocation Location ON Location.intCompanyLocationId = IL.intLocationId
-		WHERE Item.intItemId = @intItemId
-			AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 1
+		WHERE Item.intItemId = @intItemId			
 			AND ISNULL(@dblQty, 0) > 0
 			AND ISNULL(@dblCost, 0) = 0
-			AND @intTransactionTypeId NOT IN (9) -- Exemption: Allow zero cost for Produce transaction types. 
+			AND (
+				-- Do not allow zero cost if: 
+				-- 1. Allow Zero Cost = "No"
+				-- 2. Allow Zero Cost = "Yes on Produce" but transaction type is not Produce. 
+				ISNULL(IL.intAllowZeroCostTypeId, 1) = 1 
+				OR (
+					@intTransactionTypeId NOT IN (9)
+					AND ISNULL(IL.intAllowZeroCostTypeId, 1) = 4
+				)
+			)
 
 	) AS Query		
 )
