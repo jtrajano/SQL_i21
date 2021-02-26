@@ -9109,6 +9109,10 @@
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
     <Build Include="dbo\Stored Procedures\uspAGCreateInvoiceFromScaleShipment.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreatePrice.sql" />
+    <Build Include="dbo\Tables\tblMFCommitmentPricing.sql" />
+    <Build Include="dbo\Tables\tblMFCommitmentPricingSales.sql" />
+    <Build Include="dbo\Tables\tblMFCommitmentPricingMarketBasis.sql" />
+    <Build Include="dbo\Tables\tblMFCommitmentPricingRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
