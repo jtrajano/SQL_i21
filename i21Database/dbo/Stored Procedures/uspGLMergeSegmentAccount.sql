@@ -1,23 +1,52 @@
 /*
-    This will create stored procedure uspGLMergeAccountSegments for consolidate/ merging of segments
-    EXEC uspGLCreateSPMergeSegmentAccount 'select  strCode, strDescription, strAccountCategory, strAccountGroup,strAccountType, strStructureName  from merle01.dbo.vyuGLSegmentDetail     union select  strCode, strDescription, strAccountCategory, strAccountGroup,strAccountType, strStructureName  from merle02.dbo.vyuGLSegmentDetail'
+  This will create stored procedure uspGLMergeAccountSegments for consolidate/ merging of segments
+  EXEC uspGLCreateSPMergeSegmentAccount 
 	EXEC uspGLMergeSegmentAccount
 */
-CREATE PROCEDURE uspGLCreateSPMergeSegmentAccount
-@UnionSQL NVARCHAR(MAX)
+CREATE PROCEDURE uspGLMergeSegmentAccount
+(
+  @ysnMergeCOA BIT = 0,
+  @ysnClear BIT = 0
+)
 AS
 BEGIN
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure)
+BEGIN
+    RAISERROR( 'Account Structure is missing.',  16,1 )
+    RETURN
+END
 
-EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLMergeSegmentAccount'' and type = ''P'') 
-			DROP PROCEDURE [dbo].[uspGLMergeSegmentAccount];')
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLSubsidiaryCompany)
+BEGIN
+    RAISERROR( 'Subsidiary company is empty.',  16,1 )
+    RETURN
+END
+
+
+DECLARE @UnionSQL NVARCHAR(max) , @cnt INT
+SELECT @cnt = COUNT(1) FROM tblGLSubsidiaryCompany
+
+IF (@cnt > 1)
+BEGIN
+	SELECT @UnionSQL = COALESCE(@UnionSQL, '') + ' UNION ' + strSQLSegmentAccount from tblGLSubsidiaryCompany
+	SELECT @UnionSQL = STUFF (@UnionSQL, 1, 7, '')
+END
+ELSE
+	SELECT @UnionSQL = strSQLSegmentAccount from tblGLSubsidiaryCompany
+
+
+DELETE FROM tblGLAccountSegmentMapping
+DELETE FROM tblGLAccountSegment
+
+-- EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLMergeSegmentAccount'' and type = ''P'') 
+-- 			DROP PROCEDURE [dbo].[uspGLMergeSegmentAccount];')
 DECLARE @SqlMerge NVARCHAR(MAX) =
-  REPLACE(' CREATE PROCEDURE uspGLMergeSegmentAccount  
-AS  
-BEGIN  
+  REPLACE('
 DECLARE @tbl Table(  
     [strCode]				NVARCHAR (20) COLLATE Latin1_General_CI_AS NOT NULL,  
     [strDescription]        NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,  
+    [strChartDesc]        NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,  
     [strCategory]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,  
     [strAccountType]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,  
     [strStructureName]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,  
@@ -27,12 +56,13 @@ DECLARE @tbl Table(
 as(
 	[UnionSQL] 
 )
-INSERT INTO @tbl( strCode, strAccountGroup, strAccountType,  [strStructureName],[strCategory], strDescription)  
+INSERT INTO @tbl( strCode, strAccountGroup, strAccountType,  [strStructureName],[strCategory], strDescription,strChartDesc)  
 SELECT strCode,   
 MAX(isnull(strAccountGroup,'''')),   
 strAccountType, strStructureName,  
 MAX(isnull(strAccountCategory,'''')) strAccountCategory,   
-MAX(isnull(strDescription,'''')) strDescription
+MAX(isnull(strDescription,'''')) strDescription,
+MAX(isnull(strChartDesc,'''')) strChartDesc
 FROM tblUnionSegments   
 GROUP BY strCode, strAccountType,strStructureName  
 MERGE into tblGLAccountSegment  
@@ -41,11 +71,12 @@ AS SegmentTable
 USING (   
  select   
  strCode,  
- strDescription,  
  G.intAccountGroupId,  
  C.intAccountCategoryId,  
  S.intAccountStructureId,  
- A.strStructureName  
+ A.strStructureName,
+ A.strDescription,
+ A.strChartDesc
  from @tbl A   
  left join tblGLAccountGroup G on G.strAccountGroup = A.strAccountGroup  
  left join tblGLAccountCategory C on C.strAccountCategory = A.strCategory  
@@ -57,27 +88,36 @@ WHEN MATCHED THEN
   UPDATE   
   SET  SegmentTable.intAccountGroupId = MergedTable.intAccountGroupId,  
     SegmentTable.intAccountCategoryId = MergedTable.intAccountCategoryId,  
-    SegmentTable.strDescription = MergedTable.strDescription  
+    SegmentTable.strDescription = MergedTable.strDescription,
+    SegmentTable.strChartDesc = MergedTable.strChartDesc
 WHEN NOT MATCHED BY TARGET THEN  
  INSERT (  
   strCode,  
   intAccountGroupId,  
   intAccountCategoryId,  
-  intAccountStructureId  
+  intAccountStructureId,
+  strDescription,
+  strChartDesc
  )  
  VALUES  
  (  
   MergedTable.strCode,  
   MergedTable.intAccountGroupId,  
   MergedTable.intAccountCategoryId,  
-  MergedTable.intAccountStructureId    
+  MergedTable.intAccountStructureId,
+  MergedTable.strDescription,
+  MergedTable.strChartDesc
  );  
-END', '[UnionSQL]', @UnionSQL)
+', '[UnionSQL]', @UnionSQL)
  
 DECLARE  @DBExec NVARCHAR(MAX)
 	  
 SET @DBExec =  N'.sys.sp_executesql';
 
-	EXEC @DBExec @SqlMerge;
+EXEC @DBExec @SqlMerge;
+
+IF @@ERROR = 0	
+  IF @ysnMergeCOA = 1
+    EXEC uspGLMergeGLAccount @ysnClear
 
 END

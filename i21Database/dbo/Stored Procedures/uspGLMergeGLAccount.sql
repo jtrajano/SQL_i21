@@ -1,21 +1,47 @@
 /*
     This will create stored procedure uspGLMergeAccountSegments for consolidate/ merging of GL accounts
-    EXEC uspGLCreateSPMergeGLAccount 'select strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments from merle01.dbo.vyuGLAccountDetail union   
-	select strAccountId, strDescription, strAccountGroup,strAccountType,  strUOMCode, strComments from merle02.dbo.vyuGLAccountDetail'
+	EXEC uspGLCreateSPMergeGLAccount
 	EXEC uspGLMergeGLAccount
 */
-CREATE PROCEDURE uspGLCreateSPMergeGLAccount
-@UnionSQL NVARCHAR(MAX)
+CREATE PROCEDURE uspGLMergeGLAccount
+    @ysnClear BIT  = 0
 AS
 BEGIN
 
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLSubsidiaryCompany)
+BEGIN
+    RAISERROR( 'Subsidiary company is empty.',  16,1 )
+    RETURN
+END
 
-EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLMergeGLAccount'' and type = ''P'') 
-			DROP PROCEDURE [dbo].[uspGLMergeGLAccount];')
+DECLARE @UnionSQL NVARCHAR(max) , @cnt INT
+SELECT @cnt = COUNT(1) FROM tblGLSubsidiaryCompany
+
+IF (@cnt > 1)
+BEGIN
+	SELECT @UnionSQL = COALESCE(@UnionSQL, '') + ' UNION ' + strSQLGLAccount from tblGLSubsidiaryCompany
+	SELECT @UnionSQL = STUFF (@UnionSQL, 1, 7, '')
+END
+ELSE
+	SELECT @UnionSQL = strSQLGLAccount from tblGLSubsidiaryCompany
+
+
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountSegment)
+BEGIN
+    RAISERROR( 'Account Segments are missing.',  16,1 )
+    RETURN
+END
+
+IF @ysnClear = 1
+BEGIN
+    DELETE FROM tblGLAccount
+    DELETE FROM tblGLDetail
+END
+
+
 DECLARE @SqlMerge NVARCHAR(MAX) =
-  REPLACE('CREATE PROCEDURE uspGLMergeGLAccount
-AS  
-BEGIN  
+  REPLACE('
 DECLARE @tbl Table(  
     strAccountId		NVARCHAR (40)  COLLATE Latin1_General_CI_AS NOT NULL,  
 	strUOMCode			NVARCHAR (40)  COLLATE Latin1_General_CI_AS NOT NULL,  
@@ -80,12 +106,16 @@ WHEN NOT MATCHED BY TARGET THEN
     
  );  
   
-END', '[UnionSQL]', @UnionSQL)
+ EXEC uspGLRebuildSegmentMapping
  
-DECLARE  @DBExec NVARCHAR(MAX)
+ EXEC uspGLCreateSubsidiaryAccountMapping
+ 
+ ', '[UnionSQL]', @UnionSQL)
+ 
+DECLARE  @DBExec NVARCHAR(40)
 	  
 SET @DBExec =  N'.sys.sp_executesql';
 
-	EXEC @DBExec @SqlMerge;
+EXEC @DBExec @SqlMerge;
 
 END

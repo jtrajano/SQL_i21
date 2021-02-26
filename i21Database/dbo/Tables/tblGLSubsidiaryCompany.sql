@@ -6,6 +6,10 @@ CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[strCompany] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strCompanySegment] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
     [ysnCompanySegment] BIT NULL,
+	[strSQLGLAccount] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS,
+	[strSQLSegmentAccount] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS ,
+	[intLastGLDetailId] INT NULL,
+	[hasCompanySegment] BIT NULL,
  CONSTRAINT [PK_tblGLSubsidiaryCompany] PRIMARY KEY CLUSTERED 
 (
 	[intSubsidiaryCompanyId] ASC

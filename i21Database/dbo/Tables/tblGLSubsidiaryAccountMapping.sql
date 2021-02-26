@@ -1,0 +1,12 @@
+CREATE TABLE tblGLSubsidiaryAccountMapping
+(
+	intSubsidiaryMappingId INT IDENTITY (1,1),
+	intAccountId INT NOT NULL,
+	strDatabase NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
+	strAccountId NVARCHAR(40) COLLATE Latin1_General_CI_AS NOT NULL,
+CONSTRAINT [PK_tblGLSubsidiaryMapping] PRIMARY KEY CLUSTERED 
+(
+	intSubsidiaryMappingId ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
