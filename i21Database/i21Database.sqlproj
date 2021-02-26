@@ -9107,6 +9107,8 @@
 	<Build Include="dbo\Stored Procedures\uspTFUpgradeCountyLocation.sql" />
     <Build Include="dbo\User Defined Types\TFCountyLocation.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGCreateInvoiceFromScaleShipment.sql" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
