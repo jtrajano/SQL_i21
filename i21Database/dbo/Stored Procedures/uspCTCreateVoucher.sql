@@ -576,7 +576,9 @@ begin try
 					,[intTermId]		
 					,[intFreightTermId]				
 					,[strBillOfLading]					
-					,[ysnReturn]			
+					,[ysnReturn]
+					,[ysnStage]
+					,[dblRatio]			
 				)
 				EXEC uspICGetProRatedReceiptCharges
 					@intInventoryReceiptItemId = @intInventoryReceiptItemId
