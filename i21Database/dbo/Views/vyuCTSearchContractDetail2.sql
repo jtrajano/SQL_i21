@@ -62,6 +62,7 @@ WITH shipmentstatus AS (
 			, tblQMSample ddd WITH(NOLOCK)
 			, tblICItemUOM eee WITH(NOLOCK)
 			, tblICItemUOM fff WITH(NOLOCK)
+			
 		WHERE ddd.intProductValueId = ccc.intContractDetailId
 			AND intProductTypeId = 8
 			AND intSampleStatusId = 3
@@ -169,7 +170,7 @@ SELECT a.intContractDetailId
 	, z.dblAllocatedQty
 	, strApprovalBasis = au.strWeightGradeDesc
 	, ysnApproved = ISNULL(TR.ysnOnceApproved, 0)
-	, dblApprovedQty = aa.dblRepresentingQty
+	, dblApprovedQty = QA.dblApprovedQty
 	, strAssociationName = zb.strName
 	, a.dblAssumedFX
 	, dblBalLotsToHedge = a.dblNoOfLots - ISNULL(ab.dblHedgedLots, 0)
@@ -403,6 +404,7 @@ LEFT JOIN tblCTWeightGrade cl WITH(NOLOCK) ON cl.intWeightGradeId = b.intWeightI
 LEFT JOIN tblICItemUOM cm WITH(NOLOCK) ON cm.intItemUOMId = a.intNetWeightUOMId
 LEFT JOIN tblICUnitMeasure cn WITH(NOLOCK) ON cn.intUnitMeasureId = cm.intUnitMeasureId
 LEFT JOIN lgallocationS co ON co.intSContractDetailId = a.intContractDetailId
+OUTER	APPLY	dbo.fnCTGetSampleDetail(a.intContractDetailId)	QA
 LEFT JOIN (
     SELECT *
     FROM
