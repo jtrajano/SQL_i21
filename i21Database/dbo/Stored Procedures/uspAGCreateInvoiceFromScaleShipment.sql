@@ -1,7 +1,7 @@
 CREATE PROCEDURE [dbo].[uspAGCreateInvoiceFromScaleShipment]
 	@intWorkOrderId			AS INT
    ,@UserId					AS INT 
-   ,@NewInvoiceId			AS INT = NULL OUTPUT
+   ,@NewInvoiceId			AS INT OUTPUT
    
 
 AS
@@ -77,12 +77,12 @@ DECLARE @intInventoryShipmentId INT = NULL
 		EXEC uspAGCreateInvoiceFromShipment
 				@ShipmentId		 = @intInventoryShipmentId
 				,@UserId		 = @UserId
-				,@NewInvoiceId	 = @newIvoiceId OUTPUT
+				,@NewInvoiceId	 = @NewInvoiceId OUTPUT
 	 	
 
 	 DELETE FROM #tmpAGShipment WHERE id = @id
 END
 
-
+SELECT @NewInvoiceId
 
 END
