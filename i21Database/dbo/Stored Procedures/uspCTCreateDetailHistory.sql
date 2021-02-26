@@ -352,104 +352,7 @@ BEGIN TRY
 					, ysnCashPriceChange = 1
 				WHERE intSequenceHistoryId = @intSequenceHistoryId;
 			END;
-			
-			/*Chek if the new created sequence history has a difference from previous record*/
-			--IF (SELECT COUNT(*) FROM (
-			--	SELECT DISTINCT intContractStatusId
-			--		, intCompanyLocationId
-			--		, intItemId
-			--		, intPricingTypeId
-			--		, intFutureMarketId
-			--		, intFutureMonthId
-			--		, intDtlQtyInCommodityUOMId 
-			--		, intDtlQtyUnitMeasureId
-			--		, intBookId
-			--		, intSubBookId
-			--		, dtmStartDate
-			--		, dtmEndDate
-			--		, dblQuantity
-			--		, dblFutures
-			--		, dblBasis
-			--		, dblCashPrice
-			--		, dblLotsPriced
-			--		, dblLotsUnpriced
-			--		, dblQtyPriced
-			--		, dblQtyUnpriced
-			--		, dblFinalPrice
-			--		, dblRatio
-			--		, intContractSeq
-			--		, strPricingStatus
-			--		, intItemUOMId
-			--		, intPriceItemUOMId
-			--		, 
-			--	FROM ( 
-			--		SELECT intContractStatusId
-			--			, intCompanyLocationId
-			--			, intItemId
-			--			, intPricingTypeId
-			--			, intFutureMarketId
-			--			, intFutureMonthId
-			--			, intDtlQtyInCommodityUOMId 
-			--			, intDtlQtyUnitMeasureId
-			--			, intBookId
-			--			, intSubBookId
-			--			, dtmStartDate
-			--			, dtmEndDate
-			--			, dblQuantity
-			--			, dblFutures
-			--			, dblBasis
-			--			, dblCashPrice
-			--			, dblLotsPriced
-			--			, dblLotsUnpriced
-			--			, dblQtyPriced
-			--			, dblQtyUnpriced
-			--			, dblFinalPrice
-			--			, dblRatio
-			--			, intContractSeq
-			--			, strPricingStatus
-			--			, intItemUOMId
-			--			, intPriceItemUOMId
-						
-			--		FROM tblCTSequenceHistory
-			--		WHERE intSequenceHistoryId = @intPrevHistoryId
-
-			--		UNION ALL SELECT intContractStatusId
-			--			, intCompanyLocationId
-			--			, intItemId
-			--			, intPricingTypeId
-			--			, intFutureMarketId
-			--			, intFutureMonthId
-			--			, intDtlQtyInCommodityUOMId 
-			--			, intDtlQtyUnitMeasureId
-			--			, intBookId
-			--			, intSubBookId
-			--			, dtmStartDate
-			--			, dtmEndDate
-			--			, dblQuantity
-			--			, dblFutures
-			--			, dblBasis
-			--			, dblCashPrice
-			--			, dblLotsPriced
-			--			, dblLotsUnpriced
-			--			, dblQtyPriced
-			--			, dblQtyUnpriced
-			--			, dblFinalPrice
-			--			, dblRatio
-			--			, intContractSeq
-			--			, strPricingStatus
-			--			, intItemUOMId
-			--			, intPriceItemUOMId
-			--		FROM tblCTSequenceHistory
-			--		WHERE intSequenceHistoryId = @intSequenceHistoryId
-			--	) tbl
-			--) tbl) = 1
-			--BEGIN
-			--	DELETE FROM tblCTSequenceHistory WHERE intSequenceHistoryId = @intSequenceHistoryId
-			--END
 		END
-		--ELSE
-		--BEGIN
-		-- CONTRACT BALANCE LOG
 			
 		EXEC uspCTLogSummary @intContractHeaderId = @intContractHeaderId
 			, @intContractDetailId = @intContractDetailId
@@ -457,8 +360,7 @@ BEGIN TRY
 			, @strProcess = @strProcess
 			, @contractDetail = @contractDetails
 			, @intUserId = @intUserId;
-		--END
-
+		
 		SELECT @intSequenceHistoryId = MIN(intSequenceHistoryId)
 		FROM @SCOPE_IDENTITY
 		WHERE intSequenceHistoryId > @intSequenceHistoryId;
