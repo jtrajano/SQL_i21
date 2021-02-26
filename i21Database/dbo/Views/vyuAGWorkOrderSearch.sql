@@ -20,6 +20,7 @@ AS
 	, LOCATION.strLocationName
 	, ENTITY.strName AS 'strOrderedBy'
 	, WO.strStatus
+	, APPLICATOR.strName AS 'strApplicator'
 	FROM tblAGWorkOrder WO
 	LEFT JOIN (
 		SELECT 
@@ -66,5 +67,11 @@ AS
 	 	intCropId,
 		 strCrop
 	FROM tblAGCrop WITH(NOLOCK)
- ) CROP ON CROP.intCropId = WO.intCropId   
+ ) CROP ON CROP.intCropId = WO.intCropId
+ LEFT JOIN (
+	SELECT 
+		intEntityId,
+		strName
+	FROM tblEMEntity WITH(NOLOCK)
+ )  APPLICATOR ON APPLICATOR.intEntityId = WO.intEntityApplicatorId
 )
