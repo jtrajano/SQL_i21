@@ -9100,6 +9100,8 @@
     <Build Include="dbo\Tables\tblAGCompanyPreference.sql" />
     <Build Include="dbo\Views\vyuAGWorkOrderForInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspAGCreateInvoiceFromShipment.sql" />
+	<Build Include="dbo\Stored Procedures\uspTFUpgradeCountyLocation.sql" />
+    <Build Include="dbo\User Defined Types\TFCountyLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
