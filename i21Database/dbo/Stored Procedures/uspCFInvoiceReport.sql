@@ -430,10 +430,15 @@ BEGIN
 			BEGIN
 				SET @tableName = 'vyuCFInvoiceReportForReprint'
 			END
+			ELSE IF (ISNULL(@ysnIncludePrintedTransaction,0) = 1)
+			BEGIN
+				SET @tableName = 'vyuCFInvoiceReportAllTrans'
+			END
 			ELSE
 			BEGIN
 				SET @tableName = 'vyuCFInvoiceReportForNewPrint'
 			END
+
 
 			IF OBJECT_ID('tempdb..' + @temptable) IS NOT NULL
 			BEGIN
