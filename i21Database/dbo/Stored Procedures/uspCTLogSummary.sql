@@ -492,7 +492,7 @@ BEGIN TRY
 		) tbl
 		WHERE Row_Num = 1
 
-		IF (SELECT COUNT(*) FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) > 1
+		IF (SELECT COUNT(*) FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) >= 1
 		BEGIN
 			IF EXISTS(SELECT intContractDetailId
 						, intContractHeaderId
@@ -515,7 +515,7 @@ BEGIN TRY
 						, intPriceUOMId
 						, dtmStartDate
 						, dtmEndDate
-						, dblQty
+						, dblOrigQty
 						, intContractStatusId
 						, COUNT (*)
 					FROM (
@@ -543,7 +543,7 @@ BEGIN TRY
 						, intPriceUOMId
 						, dtmStartDate
 						, dtmEndDate
-						, dblQty
+						, dblOrigQty
 						, intContractStatusId
 					HAVING COUNT(*) > 1)
 			BEGIN
@@ -3271,7 +3271,7 @@ BEGIN TRY
 					UPDATE @cbLogSpecific SET dblQty = @dblPriced * - 1, intPricingTypeId = 1, intActionId = @_action
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
-				ELSE
+				IF ISNULL(@dblBasis, 0) <= 0 AND ISNULL(@dblPriced, 0) <= 0
 				BEGIN
 					SELECT @_action = CASE WHEN intContractStatusId = 3 THEN 54 ELSE 59 END
 					FROM @cbLogSpecific
@@ -3337,34 +3337,33 @@ BEGIN TRY
 						ORDER BY intSequenceHistoryId DESC
 					) b	
 
-					-- Negate previous if the value is not 0
-					IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
-					BEGIN		
-						DECLARE @_dtmCurrent datetime
-						SELECT @_dtmCurrent = dtmTransactionDate FROM @cbLogSpecific			
-						UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
-						EXEC uspCTLogContractBalance @cbLogPrev, 0
-					END
-										
-					UPDATE a
-					SET a.dblQty = CASE 
-									WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty *- 1 FROM @cbLogPrev) 
-									ELSE @dblQtys 
-								END
-					,a.intPricingTypeId = CASE 
-											WHEN @strProcess = 'Price Fixation' THEN 1 
-											ELSE a.intPricingTypeId
-										END
-					FROM @cbLogSpecific a				
-					OUTER APPLY
-					(
-						SELECT TOP 1 dblQtyPriced 
-						FROM tblCTSequenceHistory 
-						WHERE intContractDetailId = a.intContractDetailId
-						ORDER BY intSequenceHistoryId DESC
-					) b	
+					IF (@dblQtys != 0 OR @strProcess = 'Price Fixation')
+					BEGIN
+						-- Negate previous if the value is not 0
+						IF NOT EXISTS(SELECT TOP 1 1 FROM @cbLogPrev WHERE dblQty = 0)
+						BEGIN		
+							DECLARE @_dtmCurrent datetime
+							SELECT @_dtmCurrent = dtmTransactionDate FROM @cbLogSpecific			
+							UPDATE @cbLogPrev SET strBatchId = @strBatchId, strProcess = @strProcess, dtmTransactionDate = @_dtmCurrent
+							EXEC uspCTLogContractBalance @cbLogPrev, 0
+						END
 
-					EXEC uspCTLogContractBalance @cbLogSpecific, 0
+						UPDATE a
+						SET a.dblQty = CASE WHEN @strProcess = 'Price Fixation' THEN (SELECT dblQty *- 1 FROM @cbLogPrev)
+											ELSE @dblQtys END
+							, a.intPricingTypeId = CASE WHEN @strProcess = 'Price Fixation' THEN 1
+														ELSE a.intPricingTypeId END
+						FROM @cbLogSpecific a				
+						OUTER APPLY
+						(
+							SELECT TOP 1 dblQtyPriced 
+							FROM tblCTSequenceHistory 
+							WHERE intContractDetailId = a.intContractDetailId
+							ORDER BY intSequenceHistoryId DESC
+						) b	
+
+						EXEC uspCTLogContractBalance @cbLogSpecific, 0
+					END
 				END		
 				ELSE
 				BEGIN
@@ -3624,7 +3623,7 @@ BEGIN TRY
 					SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 					CONTINUE
 				END
-								
+
 				IF @strProcess = 'Update Sequence Balance - DWG'
 				BEGIN
 					IF @dblQty * - 1 > 0
