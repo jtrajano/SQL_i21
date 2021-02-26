@@ -1307,7 +1307,7 @@ BEGIN TRY
 							WHERE intWorkOrderId = @intTicketAGWorkOrderId
 								AND intItemId = @intTicketItemId
 
-							IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) = 0)
+							IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) > 0)
 							BEGIN
 								SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
 								SET @_strAuditDescription = 'Undistribution of Ticket - ' +  @strTicketNumber
