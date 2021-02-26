@@ -205,6 +205,8 @@ BEGIN
 		,[intFreightTermId]				
 		,[strBillOfLading]					
 		,[ysnReturn]
+		,[ysnStage]
+		,[dblRatio]
 	)
 	SELECT
 		[intEntityVendorId]	= A.intEntityVendorId
@@ -269,12 +271,13 @@ BEGIN
 				WHEN A.strCostMethod IN ('Per Unit', 'Gross Unit') THEN 					
 					rc.dblRate
 				ELSE 
-					CASE 
-						WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = r.intEntityVendorId THEN 
-							-ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
-						ELSE 
-							ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
-					END 
+					ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
+					--CASE 
+					--	WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = r.intEntityVendorId THEN 
+					--		-ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
+					--	ELSE 
+					--		ROUND(dbo.fnMultiply(rc.dblAmount, @dblRatio), 2)
+					--END 
 			END
 		,[dblCostUnitQty] = CAST(1 AS DECIMAL(38,20))					
 		,[intCostUOMId]	= A.intCostUnitMeasureId					
@@ -321,7 +324,10 @@ BEGIN
 					WHEN @billTypeToUse = @type_DebitMemo AND A.intEntityVendorId = r.intEntityVendorId THEN 1 
 					ELSE 0 
 				END
-			AS BIT)		
+			AS BIT)
+		,ysnStage = 
+			CASE WHEN hasExistingPayable.intVoucherPayableId IS NOT NULL THEN 1 ELSE 0 END 
+		,dblRatio = @dblRatio
 	FROM 
 		vyuICChargesForBilling A 
 		INNER JOIN tblICInventoryReceipt r
@@ -352,6 +358,16 @@ BEGIN
 				IRCT.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId
 		)  IRCT
 
+		OUTER APPLY (
+			SELECT TOP 1 
+				ap.intVoucherPayableId
+			FROM
+				tblAPVoucherPayable ap
+			WHERE
+				ap.strSourceNumber = r.strReceiptNumber
+				AND ap.intInventoryReceiptItemId = A.intInventoryReceiptItemId
+				AND ap.intInventoryReceiptChargeId = A.intInventoryReceiptChargeId		
+		) hasExistingPayable
 	WHERE
 		A.intInventoryReceiptId = @intInventoryReceiptId
 		AND A.intEntityVendorId = r.intEntityId
@@ -413,5 +429,7 @@ SELECT
 	,[intFreightTermId]				
 	,[strBillOfLading]					
 	,[ysnReturn]
+	,[ysnStage]
+	,[dblRatio]
 FROM 
 	@voucherPayable
