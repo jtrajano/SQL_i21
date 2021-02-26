@@ -1376,5 +1376,88 @@ where FP.intTaxAuthorityId = 22
 
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
+	-- County Location
+	DECLARE @CountyLocation AS TFCountyLocation
+
+	INSERT INTO @CountyLocation 
+	(
+		intCountyLocationId,
+		strCounty,
+		strLocation,
+		dblRate1,
+		dblRate2,
+		intMasterId
+	)
+	SELECT intCountyLocationId = 0, strCounty = 'Alachua', strLocation = '01', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900001
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Baker', strLocation = '02', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900002
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Bay', strLocation = '03', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900003
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Bradord', strLocation = '04', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900004
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Brevard', strLocation = '05', dblRate1 = 0, dblRate2 = 0, intMasterId = 900005
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Broward', strLocation = '06', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900006
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Calhoun', strLocation = '07', dblRate1 = 0, dblRate2 = 0, intMasterId = 900007
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Charlotte', strLocation = '08', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900008
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Citrus', strLocation = '09', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900009
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Clay', strLocation = '10', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900010
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Collier', strLocation = '11', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900011
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Columbia', strLocation = '12', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900012
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Dade (Miami-Dade)', strLocation = '13', dblRate1 = 0.01, dblRate2 = 0.03, intMasterId = 900013
+	UNION SELECT intCountyLocationId = 0, strCounty = 'De Soto', strLocation = '14', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900014
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Dixie', strLocation = '15', dblRate1 = 0, dblRate2 = 0, intMasterId = 900015
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Duval', strLocation = '16', dblRate1 = 0, dblRate2 = 0, intMasterId = 900016
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Escambia', strLocation = '17', dblRate1 = 0.01, dblRate2 = 0.04, intMasterId = 900017
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Flagler', strLocation = '18', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900018
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Franklin', strLocation = '19', dblRate1 = 0, dblRate2 = 0, intMasterId = 900019
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Gadsden', strLocation = '20', dblRate1 = 0, dblRate2 = 0, intMasterId = 900020
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Gilchrist', strLocation = '21', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900021
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Glades', strLocation = '22', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900022
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Gul', strLocation = '23', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900023
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Hamilton', strLocation = '24', dblRate1 = 0, dblRate2 = 0, intMasterId = 900024
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Hardee', strLocation = '25', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900025
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Hendry', strLocation = '26', dblRate1 = 0.01, dblRate2 = 0.02, intMasterId = 900026
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Hernando', strLocation = '27', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900027
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Highlands', strLocation = '28', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900028
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Hillsborough', strLocation = '29', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900029
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Holmes', strLocation = '30', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900030
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Indian River', strLocation = '31', dblRate1 = 0, dblRate2 = 0, intMasterId = 900031
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Jackson', strLocation = '32', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900032
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Jeerson', strLocation = '33', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900033
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Laayette', strLocation = '34', dblRate1 = 0, dblRate2 = 0, intMasterId = 900034
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Lake', strLocation = '35', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900035
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Lee', strLocation = '36', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900036
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Leon', strLocation = '37', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900037
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Levy', strLocation = '38', dblRate1 = 0, dblRate2 = 0.05, intMasterId = 900038
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Liberty', strLocation = '39', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900039
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Madison', strLocation = '40', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900040
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Manatee', strLocation = '41', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900041
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Marion', strLocation = '42', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900042
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Martin', strLocation = '43', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900043
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Monroe', strLocation = '44', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900044
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Nassau', strLocation = '45', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900045
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Okaloosa', strLocation = '46', dblRate1 = 0.01, dblRate2 = 0.03, intMasterId = 900046
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Okeechobee', strLocation = '47', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900047
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Orange', strLocation = '48', dblRate1 = 0, dblRate2 = 0, intMasterId = 900048
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Osceola', strLocation = '49', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900049
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Palm Beach', strLocation = '50', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900050
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Pasco', strLocation = '51', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900051
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Pinellas', strLocation = '52', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900052
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Polk', strLocation = '53', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900053
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Putnam', strLocation = '54', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900054
+	UNION SELECT intCountyLocationId = 0, strCounty = 'St. Johns', strLocation = '55', dblRate1 = 0, dblRate2 = 0, intMasterId = 900055
+	UNION SELECT intCountyLocationId = 0, strCounty = 'St. Lucie', strLocation = '56', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900056
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Santa Rosa', strLocation = '57', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900057
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Sarasota', strLocation = '58', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900058
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Seminole', strLocation = '59', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900059
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Sumter', strLocation = '60', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900060
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Suwannee', strLocation = '61', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900061
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Taylor', strLocation = '62', dblRate1 = 0, dblRate2 = 0, intMasterId = 900062
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Union', strLocation = '63', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900063
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Volusia', strLocation = '64', dblRate1 = 0.01, dblRate2 = 0.05, intMasterId = 900064
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Wakulla', strLocation = '65', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900065
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Walton', strLocation = '66', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900066
+	UNION SELECT intCountyLocationId = 0, strCounty = 'Washington', strLocation = '67', dblRate1 = 0.01, dblRate2 = 0, intMasterId = 900067
+
+
+	EXEC uspTFUpgradeCountyLocation @TaxAuthorityCode = @TaxAuthorityCode, @CountyLocation = @CountyLocation 
+
 END
 GO
