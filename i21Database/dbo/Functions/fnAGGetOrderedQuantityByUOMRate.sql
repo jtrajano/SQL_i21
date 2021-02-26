@@ -22,7 +22,11 @@ BEGIN
 	DECLARE @intLbsId	INT
 	DECLARE @intItemStockUOMId INT
 	DECLARE @intItemUOMId INT
-	DECLARE @intBaseUOMId INT
+	DECLARE @intBaseInvWeightUOMId INT = 0
+	DECLARE @intBaseInvVolumeUOMId INT = 0
+	DECLARE @intBaseInvAreaUOMId INT = 0
+	DECLARE @strUnitType NVARCHAR(20)
+
 
 
 	/*
@@ -31,6 +35,20 @@ BEGIN
 	*/
 	SET @intAcreId = -2
 	SET @intLbsId = -1
+
+	--Get Company preference setup
+	SELECT TOP 1
+		@intBaseInvAreaUOMId = intAreaUOMId
+		,@intBaseInvVolumeUOMId = intVolumeUOMId
+		,@intBaseInvWeightUOMId = intWeightUOMId
+	FROM tblAGCompanyPreference
+	
+
+	--Get the unit type 
+	SELECT TOP 1 
+		@strUnitType = strUnitType
+	FROM tblAGUnitMeasure
+	WHERE intAGUnitMeasureId = @intWeightUOMId
 
 
 	--Get the Area UOM conversion (Acre Base)
@@ -51,21 +69,23 @@ BEGIN
 
 
 	
-	--Get the Weight UOM conversion (lbs Base)
-	IF(@intWeightUOMId <> @intLbsId)
-	BEGIN
-		IF EXISTS (SELECT TOP 1 1 
-					FROM [tblAGUnitMeasureConversion] 
-					WHERE intAGUnitMeasureId =  @intWeightUOMId
-					AND intStockUnitMeasureId = @intLbsId)
+	--Get the Weight/volume/area UOM conversion (lbs Base)
+	
+		IF(@intWeightUOMId <> @intLbsId)
 		BEGIN
-			SELECT TOP 1
-				@dblWeightUOMConversion = ISNULL(dblConversionToStock,0)
-			FROM [tblAGUnitMeasureConversion] 
-			WHERE intAGUnitMeasureId =  @intWeightUOMId
-				AND intStockUnitMeasureId = @intLbsId
+			IF EXISTS (SELECT TOP 1 1 
+						FROM [tblAGUnitMeasureConversion] 
+						WHERE intAGUnitMeasureId =  @intWeightUOMId
+						AND intStockUnitMeasureId = @intLbsId)
+			BEGIN
+				SELECT TOP 1
+					@dblWeightUOMConversion = ISNULL(dblConversionToStock,0)
+				FROM [tblAGUnitMeasureConversion] 
+				WHERE intAGUnitMeasureId =  @intWeightUOMId
+					AND intStockUnitMeasureId = @intLbsId
+			END
 		END
-	END
+
 
 	
 	--totalQuantity in lbs
@@ -74,19 +94,38 @@ BEGIN
 	--convert lbs total quantity to item stock uom
 	BEGIN
 		--get the inventory UOM Id of the AG Base UOM
-		SELECT TOP 1  
-			@intBaseUOMId = intUnitMeasureId
-		FROM tblICUnitMeasure
-		WHERE strUnitMeasure = 'lb' --TODO change filter for searching base UOM from IC
+		--SELECT TOP 1  
+		--	@intBaseInvWeightUOMId = intUnitMeasureId
+		--FROM tblICUnitMeasure
+		--WHERE strUnitMeasure = 'lb' --TODO change filter for searching base UOM from IC
 
 		--get the ItemUOM ID
-		SELECT TOP 1  
-			@intItemUOMId = intItemUOMId
-		FROM tblICItemUOM
-		WHERE intUnitMeasureId = @intBaseUOMId 
-			AND intItemId = @intItemId
+		IF(@strUnitType = 'Weight')
+		BEGIN
+			SELECT TOP 1  
+				@intItemUOMId = intItemUOMId
+			FROM tblICItemUOM
+			WHERE intUnitMeasureId = @intBaseInvWeightUOMId 
+				AND intItemId = @intItemId
 
-		--get the stock ItemUOM ID
+		END
+		ELSE IF (@strUnitType = 'Volume')
+		BEGIN
+			SELECT TOP 1  
+				@intItemUOMId = intItemUOMId
+			FROM tblICItemUOM
+			WHERE intUnitMeasureId = @intBaseInvVolumeUOMId 
+				AND intItemId = @intItemId
+		END
+		ELSE IF (@strUnitType = 'Area')
+		BEGIN
+			SELECT TOP 1  
+				@intItemUOMId = intItemUOMId
+			FROM tblICItemUOM
+			WHERE intUnitMeasureId = @intBaseInvAreaUOMId 
+		END
+
+		--get the item stock ItemUOM ID
 		SELECT TOP 1  
 			@intItemStockUOMId = intItemUOMId
 		FROM tblICItemUOM
