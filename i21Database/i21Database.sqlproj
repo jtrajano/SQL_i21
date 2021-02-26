@@ -8944,6 +8944,7 @@
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
     <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
