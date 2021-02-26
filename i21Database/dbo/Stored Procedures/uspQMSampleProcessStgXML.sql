@@ -1801,6 +1801,9 @@ BEGIN TRY
 
 			DECLARE @tblQMSampleDetail TABLE (intSampleDetailId INT)
 
+			DELETE
+			FROM @tblQMSampleDetail
+
 			INSERT INTO @tblQMSampleDetail (intSampleDetailId)
 			SELECT intSampleDetailId
 			FROM OPENXML(@idoc, 'vyuQMSampleDetailViews/vyuQMSampleDetailView', 2) WITH (intSampleDetailId INT)
@@ -1943,6 +1946,9 @@ BEGIN TRY
 				,@strTestResultXML
 
 			DECLARE @tblQMTestResult TABLE (intTestResultId INT)
+
+			DELETE
+			FROM @tblQMTestResult
 
 			INSERT INTO @tblQMTestResult (intTestResultId)
 			SELECT intTestResultId
@@ -2138,13 +2144,13 @@ BEGIN TRY
 				IF @intTemplateProductTypeId = 1
 				BEGIN
 					SELECT @intTemplateProductValueId = t.intCategoryId
-					FROM tblICCategory t
+					FROM tblICCategory t WITH (NOLOCK)
 					WHERE t.strCategoryCode = @strTemplateProductValue
 				END
 				ELSE IF @intTemplateProductTypeId = 2
 				BEGIN
 					SELECT @intTemplateProductValueId = t.intItemId
-					FROM tblICItem t
+					FROM tblICItem t WITH (NOLOCK)
 					WHERE t.strItemNo = @strTemplateProductValue
 				END
 
@@ -2191,8 +2197,8 @@ BEGIN TRY
 					OR @intTemplateProductTypeId = 5
 				BEGIN
 					SELECT @intProductId = P.intProductId
-					FROM tblQMProduct P
-					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+					FROM tblQMProduct P WITH (NOLOCK)
+					JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
 						AND PC.intSampleTypeId = @intSampleTypeId
 					WHERE P.intProductTypeId = @intTemplateProductTypeId
 						AND P.ysnActive = 1
@@ -2204,8 +2210,8 @@ BEGIN TRY
 					AND @intTemplateProductValueId IS NOT NULL
 				BEGIN
 					SELECT @intProductId = P.intProductId
-					FROM tblQMProduct P
-					JOIN tblQMProductControlPoint PC ON PC.intProductId = P.intProductId
+					FROM tblQMProduct P WITH (NOLOCK)
+					JOIN tblQMProductControlPoint PC WITH (NOLOCK) ON PC.intProductId = P.intProductId
 						AND PC.intSampleTypeId = @intSampleTypeId
 					WHERE P.intProductTypeId = @intTemplateProductTypeId
 						AND P.intProductValueId = @intTemplateProductValueId
@@ -2411,9 +2417,6 @@ BEGIN TRY
 					FROM @tblQMTestResult
 					)
 
-			IF @idoc <> 0
-				EXEC sp_xml_removedocument @idoc
-
 			SELECT @strHeaderCondition = 'intSampleId = ' + LTRIM(@intNewSampleId)
 
 			EXEC uspCTGetTableDataInXML 'tblQMSample'
@@ -2445,32 +2448,32 @@ BEGIN TRY
 					AND TC.intToBookId = @intToBookId
 				JOIN tblCTBook B WITH (NOLOCK) ON B.intBookId = TC.intFromBookId
 
-				IF @strRowState = 'Added'
-				BEGIN
-					SELECT @StrDescription = 'Created from ' + @strFromBook + ': ' + @strSampleNumber
+				--IF @strRowState = 'Added'
+				--BEGIN
+				--	SELECT @StrDescription = 'Created from ' + @strFromBook + ': ' + @strSampleNumber
 
-					EXEC uspSMAuditLog @keyValue = @intNewSampleId
-						,@screenName = 'Quality.view.QualitySample'
-						,@entityId = @intLastModifiedUserId
-						,@actionType = 'Created'
-						,@actionIcon = 'small-new-plus'
-						,@changeDescription = @StrDescription
-						,@fromValue = ''
-						,@toValue = @strNewSampleNumber
-				END
-				ELSE IF @strRowState = 'Modified'
-				BEGIN
-					SELECT @StrDescription = 'Updated from ' + @strFromBook + ': ' + @strSampleNumber
+				--	EXEC uspSMAuditLog @keyValue = @intNewSampleId
+				--		,@screenName = 'Quality.view.QualitySample'
+				--		,@entityId = @intLastModifiedUserId
+				--		,@actionType = 'Created'
+				--		,@actionIcon = 'small-new-plus'
+				--		,@changeDescription = @StrDescription
+				--		,@fromValue = ''
+				--		,@toValue = @strNewSampleNumber
+				--END
+				--ELSE IF @strRowState = 'Modified'
+				--BEGIN
+				--	SELECT @StrDescription = 'Updated from ' + @strFromBook + ': ' + @strSampleNumber
 
-					EXEC uspSMAuditLog @keyValue = @intNewSampleId
-						,@screenName = 'Quality.view.QualitySample'
-						,@entityId = @intLastModifiedUserId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@changeDescription = @StrDescription
-						,@fromValue = ''
-						,@toValue = @strNewSampleNumber
-				END
+				--	EXEC uspSMAuditLog @keyValue = @intNewSampleId
+				--		,@screenName = 'Quality.view.QualitySample'
+				--		,@entityId = @intLastModifiedUserId
+				--		,@actionType = 'Updated'
+				--		,@actionIcon = 'small-tree-modified'
+				--		,@changeDescription = @StrDescription
+				--		,@fromValue = ''
+				--		,@toValue = @strNewSampleNumber
+				--END
 			END
 
 			SELECT @intScreenId = intScreenId
@@ -2481,6 +2484,26 @@ BEGIN TRY
 			FROM tblSMTransaction WITH (NOLOCK)
 			WHERE intRecordId = @intNewSampleId
 				AND intScreenId = @intScreenId
+
+			IF @intTransactionRefId IS NULL
+			BEGIN
+				INSERT INTO tblSMTransaction (
+					intScreenId
+					,intRecordId
+					,strTransactionNo
+					,intEntityId
+					,intConcurrencyId
+					)
+				SELECT @intScreenId
+					,@intNewSampleId
+					,@strNewSampleNumber
+					,@intLastModifiedUserId
+					,1
+
+				SELECT @intTransactionRefId = SCOPE_IDENTITY()
+			END
+
+			EXEC sp_xml_removedocument @idoc
 
 			EXEC sp_xml_preparedocument @idoc OUTPUT
 				,@strLogXML
@@ -2694,14 +2717,17 @@ BEGIN TRY
 				END
 				ELSE
 				BEGIN
-					EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
-						,@referenceTransactionId = @intTransactionId
-						,@referenceCompanyId = @intCompanyId
+					--BEGIN TRY
+						EXECUTE dbo.uspSMInterCompanyUpdateMapping @currentTransactionId = @intTransactionRefId
+							,@referenceTransactionId = @intTransactionId
+							,@referenceCompanyId = @intCompanyId
+					--END TRY
+					--BEGIN CATCH
+					--END CATCH
 				END
 			END
 
-			IF @idoc <> 0
-				EXEC sp_xml_removedocument @idoc
+			--EXEC sp_xml_removedocument @idoc
 
 			UPDATE tblQMSampleStage
 			SET strFeedStatus = 'Processed'
