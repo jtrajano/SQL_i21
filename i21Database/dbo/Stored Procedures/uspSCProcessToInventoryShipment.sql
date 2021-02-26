@@ -1071,16 +1071,16 @@ BEGIN TRY
 		IF(ISNULL(@InventoryShipmentId,0) > 0)
 		BEGIN
 			SELECT TOP 1
-				@dblAGWorkOrderReserveQuantity = CASE WHEN (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits) < 0 THEN 0 ELSE (ISNULL(dblQtyShipped,0) - @dblTicketNetUnits)  END
+				@dblAGWorkOrderReserveQuantity = ISNULL(dblQtyShipped,0) + @dblTicketNetUnits
 			FROM tblAGWorkOrderDetail
 			WHERE intWorkOrderId = @intTicketAGWorkOrderId
 				AND intItemId = @intItemId
 
-			IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) = 0)
+			IF(ISNULL(@dblAGWorkOrderReserveQuantity,0) > 0)
 			BEGIN
 				SET @dblAGWorkOrderReserveQuantity = (SELECT ROUND(@dblAGWorkOrderReserveQuantity,6))
 				SET @_strAuditDescription = 'Distribution of Ticket - ' +  @strTicketNumber
-				EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intItemId, dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
+				EXEC uspAGUpdateWOShippedQty @intTicketAGWorkOrderId, @intItemId, @dblAGWorkOrderReserveQuantity, @intUserId, @_strAuditDescription 
 			END
 		END
 	END
