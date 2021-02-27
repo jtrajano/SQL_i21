@@ -110,7 +110,10 @@ BEGIN TRY
 	SELECT @BillIdParams = STUFF(
 					(
 						SELECT ',' + CAST(intId AS NVARCHAR)
-						FROM @billList
+						FROM @billList B
+						INNER JOIN tblAPBill AP
+							ON AP.intBillId = B.intId
+								AND AP.ysnPosted = 1 --include only the posted vouchers
 						FOR XML PATH('')
 					),1,1,'')
 	
