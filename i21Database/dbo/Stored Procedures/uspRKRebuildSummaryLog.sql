@@ -237,7 +237,7 @@ BEGIN TRY
 				, intUserId = InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
 			FROM tblICInventoryTransaction InvTran
-			JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
+			JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId AND LD.intLoadDetailId = InvTran.intTransactionDetailId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 				AND CD.intContractHeaderId = CH.intContractHeaderId
