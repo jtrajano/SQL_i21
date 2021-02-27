@@ -2,7 +2,8 @@
 		
 	@intContractDetailId	INT,
 	@intUserId				INT = NULL,
-	@ysnDoUpdateCost		BIT = 0
+	@ysnDoUpdateCost		BIT = 0,
+	@intReceiptId           INT = NULL
 	
 AS
 
@@ -191,7 +192,8 @@ declare @dblQuantityForInvoice numeric(18,6);
 			tblICInventoryReceiptItem ri  
 			join tblICInventoryReceipt ir on ir.intInventoryReceiptId = ri.intInventoryReceiptId and ir.strReceiptType = 'Purchase Contract'  
 		where  
-			ri.intLineNo = @intContractDetailId  
+			ri.intLineNo = @intContractDetailId
+			and ri.intInventoryReceiptId = (case when isnull(@intReceiptId,0) = 0 then ri.intInventoryReceiptId else @intReceiptId end)
 		order by ir.intInventoryReceiptId  
   
   
