@@ -1674,10 +1674,21 @@ BEGIN TRY
 		, strCurrency
 		, strEntityName
 		, intContractSeq
+		, intContractDetailId
 	INTO #tempBasisDelivery
 	FROM dbo.fnRKGetBucketBasisDeliveries(@dtmToDate, @intCommodityId, @intVendorId) t
 	WHERE intLocationId = ISNULL(@intLocationId, intLocationId)
 		AND intLocationId IN (SELECT intCompanyLocationId FROM #LicensedLocation)
+
+	--DELETE NEGATIVE BASIS DELIVERIES
+	DELETE FROM #tempBasisDelivery
+	WHERE intContractDetailId IN (
+		SELECT intContractDetailId
+		FROM #tempBasisDelivery
+		GROUP BY intContractDetailId
+		HAVING SUM(dblTotal) < 0
+	)
+
 		
 	INSERT INTO @ListInventory (intSeqId
 		, strSeqHeader
