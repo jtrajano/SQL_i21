@@ -9113,6 +9113,7 @@
     <Build Include="dbo\Tables\tblMFCommitmentPricingSales.sql" />
     <Build Include="dbo\Tables\tblMFCommitmentPricingMarketBasis.sql" />
     <Build Include="dbo\Tables\tblMFCommitmentPricingRecipe.sql" />
+    <Build Include="dbo\Views\vyuMFGetCommitmentPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
