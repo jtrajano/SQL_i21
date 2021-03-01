@@ -79,7 +79,8 @@ BEGIN
 			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 			JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
 			OUTER APPLY (SELECT TOP 1 ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 1) FROM tblLGCompanyPreference) CP
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 AND CP.ysnWeightClaimsByContainer = 1
+			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 
+				AND LC.intLoadContainerId = PC.intLoadContainerId AND CP.ysnWeightClaimsByContainer = 1
 			OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink 
 									WHERE intLoadDetailId = LD.intLoadDetailId 
 									AND (LC.intLoadContainerId IS NULL OR intLoadContainerId = LC.intLoadContainerId)) CLNW
@@ -96,7 +97,7 @@ BEGIN
 			WHERE 
 				L.intLoadId = @intLoadId
 				AND L.intPurchaseSale = 1
-				AND (@intLoadContainerId IS NULL OR (@intLoadContainerId IS NOT NULL AND LC.intLoadContainerId = @intLoadContainerId))
+				AND (@intLoadContainerId IS NULL OR (@intLoadContainerId IS NOT NULL AND PC.intLoadContainerId = @intLoadContainerId))
 				AND (@intContractDetailId IS NULL OR (@intContractDetailId IS NOT NULL AND PC.intContractDetailId = @intContractDetailId))
 		
 	END
