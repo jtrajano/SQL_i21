@@ -565,7 +565,7 @@ LEFT JOIN (
 	UNION ALL 
 
 	SELECT PD.intInvoiceId
-		 , dblTotalPayment		= -(SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0)))
+		 , dblTotalPayment		= (SUM(ISNULL(dblPayment, 0)) + SUM(ISNULL(dblDiscount, 0)) - SUM(ISNULL(dblInterest, 0))) * -1
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId
