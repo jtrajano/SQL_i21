@@ -87,22 +87,22 @@ BEGIN
 						,intLoadContainerId = LC.intLoadContainerId
 						,intWeightUnitMeasureId = L.intWeightUnitMeasureId
 						,intWeightId = CH.intWeightId
-						,dblShippedNetWt = ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) - ISNULL(IRN.dblIRNet, 0)
+						,dblShippedNetWt = ISNULL(CLNW.dblLinkNetWt, 0) - ISNULL(IRN.dblIRNet, 0)
 						,dblReceivedNetWt = (RI.dblNet - ISNULL(IRN.dblIRNet, 0))
 						,dblReceivedGrossWt = (RI.dblGross - ISNULL(IRN.dblIRGross, 0))
 						,dblFranchisePercent = WG.dblFranchise
 						,dblFranchise = WG.dblFranchise / 100
-						,dblFranchiseWt = CASE WHEN (ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) * WG.dblFranchise / 100) <> 0.0
-											THEN ((ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt) - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
+						,dblFranchiseWt = CASE WHEN (ISNULL(CLNW.dblLinkNetWt, 0) * WG.dblFranchise / 100) <> 0.0
+											THEN ((ISNULL(CLNW.dblLinkNetWt, 0) - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100)
 											ELSE 0.0 END
-						,dblWeightLoss = CASE WHEN (RI.dblNet - ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt)) < 0.0
-											THEN (RI.dblNet - ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt))
-											ELSE (RI.dblNet - ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt)) 
+						,dblWeightLoss = CASE WHEN (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) < 0.0
+											THEN (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0))
+											ELSE (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) 
 											END
-						,dblClaimableWt = CASE WHEN ((RI.dblNet - ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt)) 
-												+ (ISNULL(LD.dblShippedNet, LD.dblNet) * WG.dblFranchise / 100)) < 0.0
-											THEN ((RI.dblNet - ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt)) + (ISNULL(LD.dblShippedNet, LD.dblNet) * WG.dblFranchise / 100))
-											ELSE (RI.dblNet - ISNULL(LC.dblShippedNetWt, CLNW.dblLinkNetWt))
+						,dblClaimableWt = CASE WHEN ((RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) 
+												+ (ISNULL(LD.dblNet, 0) * WG.dblFranchise / 100)) < 0.0
+											THEN ((RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) + (ISNULL(LD.dblNet, 0) * WG.dblFranchise / 100))
+											ELSE (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0))
 											END
 						,dblSeqPrice = AD.dblSeqPrice
 						,strSeqCurrency = AD.strSeqCurrency
