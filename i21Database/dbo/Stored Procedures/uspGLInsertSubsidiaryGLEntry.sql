@@ -1,22 +1,29 @@
 CREATE PROCEDURE uspGLInsertSubsidiaryGLEntry
+    @ysnClear BIT = DEFAULT
 AS
 
 DECLARE @tbl TABLE(
-    strDatabase NVARCHAR(40),
-    intLastGLDetailId INT NULL
+    strDatabase NVARCHAR(40), intLastGLDetailId INT
 )
 DECLARE @strDatabase NVARCHAR(40)
 DECLARE @intLastGLDetailId INT
 DECLARE @tSQL NVARCHAR(MAX)
 
+IF @ysnClear = 1
+BEGIN
+    DELETE FROM tblGLDetail
+    UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = NULL
+END
+
 INSERT INTO @tbl
     SELECT strDatabase, intLastGLDetailId FROM tblGLSubsidiaryCompany
+
 
 EXEC uspGLCreateSubsidiaryAccountMapping
 
 WHILE EXISTS(SELECT TOP 1 1 FROM @tbl)
 BEGIN
-    SELECT TOP 1 @strDatabase=strDatabase,  @intLastGLDetailId =intLastGLDetailId FROM @tbl
+    SELECT TOP 1 @strDatabase=strDatabase ,@intLastGLDetailId = intLastGLDetailId  FROM @tbl
     SET @tSQL =
     REPLACE(
     '
@@ -120,16 +127,17 @@ BEGIN
        strDocument,  
        D.strComments
     FROM [dbname].dbo.tblGLDetail D 
+
     JOIN tblGLSubsidiaryAccountMapping M on M.intAccountId = D.intAccountId and M.strDatabase = ''[dbname]''
     JOIN tblGLAccount A on A.strAccountId = M.strAccountId
     WHERE ysnIsUnposted = 0
-    
-    UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = @intMaxGLDetailID
-    WHERE strDatabase = ''[dbname]''', '[dbname]', @strDatabase)
+    AND intGLDetailId > [LastGLDetailId]
 
-    IF @intLastGLDetailId IS NOT NULL
-    SET @tSQL = @tSQL + ' AND intGLDetaiId > ' + CAST (@intLastGLDetailId AS NVARCHAR(20))
+    IF @@ERROR = 0
+        UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = @intMaxGLDetailID
+        WHERE strDatabase = ''[dbname]''', '[dbname]', @strDatabase)
 
+    SET @tSQL = REPLACE(@tSQL , '[LastGLDetailId]', CAST(ISNULL(@intLastGLDetailId,0) AS NVARCHAR(10)))
 
     DECLARE  @DBExec NVARCHAR(40)
 	  

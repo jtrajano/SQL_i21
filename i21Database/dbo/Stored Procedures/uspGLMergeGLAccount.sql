@@ -8,12 +8,6 @@ CREATE PROCEDURE uspGLMergeGLAccount
 AS
 BEGIN
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLSubsidiaryCompany)
-BEGIN
-    RAISERROR( 'Subsidiary company is empty.',  16,1 )
-    RETURN
-END
-
 DECLARE @UnionSQL NVARCHAR(max) , @cnt INT
 SELECT @cnt = COUNT(1) FROM tblGLSubsidiaryCompany
 

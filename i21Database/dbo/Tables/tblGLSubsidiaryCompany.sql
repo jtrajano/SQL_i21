@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[strDatabase] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
 	[strCompany] [nvarchar](50) COLLATE Latin1_General_CI_AS NOT NULL,
     [strCompanySegment] NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL,
+	[intCompanySegmentId] INT NULL,
     [ysnCompanySegment] BIT NULL,
 	[strSQLGLAccount] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS,
 	[strSQLSegmentAccount] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS ,

@@ -11,17 +11,10 @@ CREATE PROCEDURE uspGLMergeSegmentAccount
 AS
 BEGIN
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure)
-BEGIN
-    RAISERROR( 'Account Structure is missing.',  16,1 )
-    RETURN
-END
 
-IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLSubsidiaryCompany)
-BEGIN
-    RAISERROR( 'Subsidiary company is empty.',  16,1 )
-    RETURN
-END
+EXEC uspGLValidateSubsidiarySetting
+
+IF @@ERROR > 0 RETURN
 
 
 DECLARE @UnionSQL NVARCHAR(max) , @cnt INT
@@ -35,9 +28,14 @@ END
 ELSE
 	SELECT @UnionSQL = strSQLSegmentAccount from tblGLSubsidiaryCompany
 
+BEGIN TRANSACTION
+BEGIN TRY
 
-DELETE FROM tblGLAccountSegmentMapping
-DELETE FROM tblGLAccountSegment
+IF @ysnClear =  1
+BEGIN
+  DELETE FROM tblGLAccountSegmentMapping
+  DELETE A FROM tblGLAccountSegment A JOIN  vyuGLSegmentDetail B on A.intAccountSegmentId = B.intAccountSegmentId where intStructureType <> 6
+END
 
 -- EXEC('IF EXISTS (SELECT 1 FROM sys.objects WHERE name = ''uspGLMergeSegmentAccount'' and type = ''P'') 
 -- 			DROP PROCEDURE [dbo].[uspGLMergeSegmentAccount];')
@@ -119,5 +117,27 @@ EXEC @DBExec @SqlMerge;
 IF @@ERROR = 0	
   IF @ysnMergeCOA = 1
     EXEC uspGLMergeGLAccount @ysnClear
+		
+IF @@ERROR = 0	
+		COMMIT TRANSACTION
+ELSE
+		GOTO EndHere
+	
+
+END TRY
+
+BEGIN CATCH
+
+GOTO EndHere
+
+
+END CATCH
+
+RETURN
+
+EndHere:
+	IF @@TRANCOUNT > 0
+	ROLLBACK TRANSACTION
+
 
 END
