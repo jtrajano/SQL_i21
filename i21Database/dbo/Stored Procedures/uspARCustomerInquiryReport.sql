@@ -24,7 +24,7 @@ CREATE TABLE #CUSTOMERINQUIRY (
 	, strPhone1						NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
 	, strPhone2						NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
 	, strBusinessLocation			NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
-	, strInternalNotes				NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
+	, strInternalNotes				NVARCHAR(MAX)   COLLATE Latin1_General_CI_AS    NULL
 	, strBudgetStatus				NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
 	, strBillToAddress				NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
 	, strBillToCity					NVARCHAR(500)   COLLATE Latin1_General_CI_AS    NULL
