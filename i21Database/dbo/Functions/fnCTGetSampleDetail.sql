@@ -37,6 +37,8 @@ BEGIN
 			INNER JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
 			INNER JOIN dbo.fnSplitString((select strContractApprovalIncrements from tblCTCompanyPreference),',') STT ON RTRIM(LTRIM(STT.Item)) COLLATE Latin1_General_CI_AS = ST.strSampleTypeName COLLATE Latin1_General_CI_AS
 			WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
+			IF @dblRepresentingQty >= @dblQuantity
+			SET @dblRepresentingQty = @dblQuantity
 		END
 
 		IF @dblRepresentingQty >= @dblQuantity
