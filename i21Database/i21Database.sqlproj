@@ -9114,6 +9114,7 @@
     <Build Include="dbo\Tables\tblMFCommitmentPricingMarketBasis.sql" />
     <Build Include="dbo\Tables\tblMFCommitmentPricingRecipe.sql" />
     <Build Include="dbo\Views\vyuMFGetCommitmentPricing.sql" />
+    <Build Include="dbo\Views\vyuICGetShipmentAddWorkOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
