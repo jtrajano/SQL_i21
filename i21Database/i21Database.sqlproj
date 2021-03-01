@@ -9121,6 +9121,11 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPRecipe.sql" />
+    <Build Include="dbo\Views\vyuMFEntityList.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingSalesNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingMarketBasisNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingRecipeNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
