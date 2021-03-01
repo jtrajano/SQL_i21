@@ -32,7 +32,8 @@ CREATE TYPE [dbo].[ETTranslateSDToInvoiceTable] AS TABLE
 	[strPONumber] NVARCHAR(100) COLLATE Latin1_General_CI_AS  NULL,
 	[intKey] INT NULL, 
     [intTaxCodeId] INT NULL,
-    [ysnTaxExempt] BIT NULL
+    [ysnTaxExempt] BIT NULL,
+    [ysnVoid] BIT NULL
 )
 
 
