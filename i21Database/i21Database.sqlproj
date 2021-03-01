@@ -9120,6 +9120,7 @@
     <Build Include="dbo\Tables\tblIPStorageLocationArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPRecipe.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
