@@ -2,6 +2,7 @@ CREATE PROCEDURE [dbo].[uspGLDeleteAccount]
 @intAccountId INT
 AS
 
+DECLARE @strErrorMessage NVARCHAR(MAX)
 DECLARE @intLegacyReferenceId INT  = 0
 DECLARE @strSQL NVARCHAR(500)
 SELECT @intLegacyReferenceId = intLegacyReferenceId  
@@ -17,8 +18,11 @@ BEGIN
 	IF EXISTS (SELECT TOP 1 1 FROM tblGLCOACrossReference WHERE intLegacyReferenceId = @intLegacyReferenceId AND ysnOrigin = 1)
 	BEGIN
 		DECLARE @strAccountId NVARCHAR(50)
-		SELECT TOP 1 @strAccountId = strAccountId  FROM tblGLAccount WHERE intAccountId = @intAccountId 
-		RAISERROR (60014, 11,1,@strAccountId);
+		SELECT TOP 1 @strAccountId = strAccountId  FROM tblGLAccount WHERE intAccountId = @intAccountId
+		SELECT @strErrorMessage= REPLACE(strMessage,'{0}', @strAccountId)
+		FROM dbo.fnGLGetGLEntriesErrorMessage() 
+			WHERE intErrorCode = 60014
+		RAISERROR(@strErrorMessage, 16,1)
 		RETURN
 	END
 
@@ -33,3 +37,5 @@ END
 DELETE FROM tblGLCrossReferenceMapping WHERE intAccountId = @intAccountId
 DELETE FROM tblGLAccountSegmentMapping WHERE intAccountId = @intAccountId
 DELETE FROM tblGLAccount where intAccountId = @intAccountId
+
+
