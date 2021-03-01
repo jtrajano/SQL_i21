@@ -14,29 +14,7 @@ BEGIN
 
 	IF (ISNULL(@ysnAllowReweighs, 0) = 0) RETURN;
 
-	IF (@intShipmentStatus <> 4)
-	BEGIN
-		--Upon Posting, if Shipment is not yet received, copy Quantities and Weights to Shipped Fields
-		UPDATE tblLGLoadDetail
-			SET dblShippedQuantity = dblQuantity
-				,dblShippedGross = dblGross
-				,dblShippedTare = dblTare
-				,dblShippedNet = dblNet
-		WHERE intLoadId = @intLoadId
-			AND (@intContractDetailId IS NULL OR intPContractDetailId = @intContractDetailId)
-
-		UPDATE tblLGLoadContainer
-			SET dblShippedQuantity = dblQuantity
-				,dblShippedGrossWt = dblGrossWt
-				,dblShippedTareWt = dblTareWt
-				,dblShippedNetWt = dblNetWt
-		WHERE intLoadId = @intLoadId
-			AND intLoadContainerId IN 
-				(SELECT intLoadContainerId FROM tblLGLoadDetailContainerLink ldcl 
-					INNER JOIN tblLGLoadDetail ld ON ld.intLoadDetailId = ldcl.intLoadDetailId
-					WHERE (@intContractDetailId IS NULL OR ld.intPContractDetailId = @intContractDetailId))
-	END
-	ELSE
+	IF (@intShipmentStatus = 4)
 	BEGIN
 		--If Voucher exists, do not allow changing the Shipped Weights
 		IF EXISTS (SELECT TOP 1 1 FROM tblAPBillDetail BD
@@ -55,8 +33,8 @@ BEGIN
 
 		--Update Payables with Shipped Fields values
 		UPDATE VP
-			SET dblQuantityToBill = LD.dblShippedQuantity
-				,dblNetWeight = LD.dblShippedNet
+			SET dblQuantityToBill = LD.dblQuantity
+				,dblNetWeight = LD.dblNet
 		FROM tblAPVoucherPayable VP
 			INNER JOIN tblLGLoad L ON L.intLoadId = VP.intLoadShipmentId
 			INNER JOIN tblLGLoadDetail LD ON LD.intLoadDetailId = VP.intLoadShipmentDetailId
@@ -66,29 +44,29 @@ BEGIN
 
 		--Update Pending Claims with Shipped Fields values
 		UPDATE PC
-			SET dblShippedNetWt = (LC.dblShippedNetWt - ISNULL(IRN.dblIRNet, 0))
-				,dblFranchiseWt = CASE WHEN (LC.dblShippedNetWt * WG.dblFranchise / 100) <> 0.0
-										THEN (LC.dblShippedNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100
+			SET dblShippedNetWt = (LC.dblNetWt - ISNULL(IRN.dblIRNet, 0))
+				,dblFranchiseWt = CASE WHEN (LC.dblNetWt * WG.dblFranchise / 100) <> 0.0
+										THEN (LC.dblNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100
 									ELSE 0.0 END
-				,dblWeightLoss = RI.dblNet - LC.dblShippedNetWt
-				,dblClaimableWt = CASE WHEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-									THEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-									ELSE (RI.dblNet - LC.dblShippedNetWt)
+				,dblWeightLoss = RI.dblNet - LC.dblNetWt
+				,dblClaimableWt = CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+									THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
+									ELSE (RI.dblNet - LC.dblNetWt)
 									END
 				,dblClaimableAmount = ROUND(
 										CASE WHEN (
-												((CASE WHEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-													THEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-													ELSE (RI.dblNet - LC.dblShippedNetWt) END 
+												((CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+													THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
+													ELSE (RI.dblNet - LC.dblNetWt) END 
 													* dblSeqPriceInWeightUOM) 
 													/ CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
-												THEN ((CASE WHEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-														THEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-														ELSE (RI.dblNet - LC.dblShippedNetWt)
+												THEN ((CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+														THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
+														ELSE (RI.dblNet - LC.dblNetWt)
 														END * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) * - 1
-											ELSE ((CASE WHEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-													THEN ((RI.dblNet - LC.dblShippedNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-													ELSE (RI.dblNet - LC.dblShippedNetWt) END 
+											ELSE ((CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
+													THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
+													ELSE (RI.dblNet - LC.dblNetWt) END 
 													* dblSeqPriceInWeightUOM) 
 													/ CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END)
 											END
