@@ -620,7 +620,7 @@ END
 				BEGIN
 					IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 					BEGIN
-						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 0, @InventoryReceiptId 
 						SET @ysnHasUnpriced = 0;
 					END
 					SELECT @intContractDetailId = MIN(ri.intLineNo)

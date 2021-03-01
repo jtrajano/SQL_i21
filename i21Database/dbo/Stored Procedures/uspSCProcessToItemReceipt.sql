@@ -481,7 +481,7 @@ BEGIN TRY
 	BEGIN
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 		BEGIN
-			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+			EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 0, @InventoryReceiptId
 		END
 
 		SELECT @intContractDetailId = MIN(ri.intLineNo)
@@ -568,7 +568,7 @@ BEGIN TRY
 				BEGIN
 					IF EXISTS(SELECT TOP 1 1 FROM tblCTPriceFixation WHERE intContractDetailId = @intContractDetailId)
 					BEGIN
-						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId
+						EXEC uspCTCreateVoucherInvoiceForPartialPricing @intContractDetailId, @intUserId, 0, @InventoryReceiptId
 					END
 					SELECT @intContractDetailId = MIN(ri.intLineNo)
 					FROM tblICInventoryReceipt r 
