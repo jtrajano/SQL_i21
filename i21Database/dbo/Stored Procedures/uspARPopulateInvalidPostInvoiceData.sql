@@ -456,21 +456,7 @@ BEGIN
 		,[intItemId]			= I.[intItemId]
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'UOM is required for item ' + ISNULL(NULLIF(I.[strItemDescription], ''), I.[strItemNo]) + '.'
-	FROM 
-		#ARPostInvoiceDetail I	
-	--INNER JOIN dbo.tblARInvoiceDetail ARID
-	--		ON I.[intInvoiceId] = ARID.[intInvoiceId]
-	--LEFT OUTER JOIN dbo.vyuICGetItemStock IST
-	--		ON ARID.[intItemId] = IST.[intItemId] 
-	--		AND I.[intCompanyLocationId] = IST.[intLocationId]		 
-	--WHERE
-	--	I.[strTransactionType] = 'Invoice'	
-	--	AND (ARID.[intItemUOMId] IS NULL OR ARID.[intItemUOMId] = 0) 
-	--	AND (ARID.[intInventoryShipmentItemId] IS NULL OR ARID.[intInventoryShipmentItemId] = 0)
-	--	AND (ARID.[intSalesOrderDetailId] IS NULL OR ARID.[intSalesOrderDetailId] = 0)
-	--	AND (ARID.[intLoadDetailId] IS NULL OR ARID.[intLoadDetailId] = 0)
-	--	AND (ARID.[intItemId] IS NOT NULL OR ARID.[intItemId] <> 0)
-	--	AND ISNULL(IST.[strType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
+	FROM #ARPostInvoiceDetail I	
 	WHERE
 		I.[strTransactionType] = 'Invoice'	
 		AND (I.[intItemUOMId] IS NULL OR I.[intItemUOMId] = 0) 
@@ -479,33 +465,7 @@ BEGIN
 		AND (I.[intLoadDetailId] IS NULL OR I.[intLoadDetailId] = 0)
 		AND (I.[intItemId] IS NOT NULL OR I.[intItemId] <> 0)
 		AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software', 'Comment', '')	
-
-	INSERT INTO #ARInvalidInvoiceData
-		([intInvoiceId]
-		,[strInvoiceNumber]
-		,[strTransactionType]
-		,[intInvoiceDetailId]
-		,[intItemId]
-		,[strBatchId]
-		,[strPostingError])
-	--UOM is required
-	SELECT
-		 [intInvoiceId]			= I.[intInvoiceId]
-		,[strInvoiceNumber]		= I.[strInvoiceNumber]		
-		,[strTransactionType]	= I.[strTransactionType]
-		,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
-		,[intItemId]			= I.[intItemId]
-		,[strBatchId]			= I.[strBatchId]
-		,[strPostingError]		= 'The UOM of item '  +  ISNULL(NULLIF(I.[strItemDescription], ''), I.[strItemNo]) +  ' for ' + I.[strInvoiceNumber] + ' is blank and must be populated to complete this transaction.' 
-	FROM 
-		#ARPostInvoiceDetail I	
-		OUTER APPLY(
-		SELECT 	intItemUOMId FROM #ARItemsForCosting WHERE 	 intItemId  =  I.[intItemId]
-		)UOM
-		Where UOM.intItemUOMId IS  NULL
-		AND I.[intItemId] IS NOT NULL
-
-
+	
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
