@@ -35,7 +35,7 @@ BEGIN
 		BEGIN
 			SELECT @dblRepresentingQty = SUM(dbo.fnCTConvertQuantityToTargetItemUOM(@intItemId,intRepresentingUOMId,@intUnitMeasureId, S.dblRepresentingQty)) FROM tblQMSample  S
 			INNER JOIN tblQMSampleType ST ON ST.intSampleTypeId = S.intSampleTypeId
-			INNER JOIN dbo.fnSplitString((select strContractApprovalIncrements from tblCTCompanyPreference),',') STT ON TRIM(STT.Item) COLLATE Latin1_General_CI_AS = ST.strSampleTypeName COLLATE Latin1_General_CI_AS
+			INNER JOIN dbo.fnSplitString((select strContractApprovalIncrements from tblCTCompanyPreference),',') STT ON RTRIM(LTRIM(STT.Item)) COLLATE Latin1_General_CI_AS = ST.strSampleTypeName COLLATE Latin1_General_CI_AS
 			WHERE intContractDetailId = @intContractDetailId AND intSampleStatusId = 3
 		END
 
