@@ -63,14 +63,14 @@ BEGIN
 		LEFT JOIN tblICItem item
 			ON et.intItemId = item.intItemId
 		LEFT JOIN tblICCategory cat
-			ON item.intCategoryId = cat.intCategoryId
+			ON item.intCategoryId = cat.intCategoryId AND cat.ysnRetailValuation = 1
 		LEFT JOIN tblICItemLocation loc
 			ON loc.intItemId = item.intItemId AND et.intItemLocationId = loc.intItemLocationId
 		LEFT JOIN tblSMCompanyLocation cl
 			ON cl.intCompanyLocationId = loc.intLocationId
 		LEFT JOIN tblSTStore st
 			ON st.intCompanyLocationId = cl.intCompanyLocationId
-		WHERE st.intStoreNo = @intStoreNo
+		WHERE st.intStoreId = @intStoreNo
 	) preview
 
 END
