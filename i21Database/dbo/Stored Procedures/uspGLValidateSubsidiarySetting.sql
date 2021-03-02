@@ -1,13 +1,13 @@
-
-
 CREATE PROCEDURE uspGLValidateSubsidiarySetting
 AS
 DECLARE @strDatabase nvarchar(50)
 DECLARE @tbl TABLE 
 (
-	[intSubsidiaryCompanyId] [int],
 	[strDatabase] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL	
 )
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLAccountStructure)
+	RAISERROR ('Account Structure is missing. ', 16,1)
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblGLSubsidiaryCompany)
 	RAISERROR ('There are no subsidiary companies to merge. ', 16,1)
@@ -25,44 +25,37 @@ IF EXISTS (SELECT 1 from tblGLSubsidiaryCompany WHERE ISNULL(strCompanySegment,'
 	RAISERROR ('There are duplicate company segment. ', 16,1)
 
 
+IF @@ERROR > 0
+	RETURN
 
-INSERT INTO @tbl SELECT intSubsidiaryCompanyId, strDatabase FROM tblGLSubsidiaryCompany
 
-DECLARE @i int
-DECLARE @x INT = 1
-DECLARE @tblMessage TABLE(msg nvarchar(max))
+INSERT INTO @tbl SELECT strDatabase FROM tblGLSubsidiaryCompany
+
+DECLARE @subsidiaryCount int
 DECLARE @tSql NVARCHAR(MAX)
-DECLARE  @DBExec NVARCHAR(40)
-SET @DBExec =  N'.sys.sp_executesql';
-declare @s NVARCHAR(MAX)
+DECLARE @tblStructure TABLE (
+    
+    [intStructureType]       INT            NOT NULL,
+    [strStructureName]       NVARCHAR (25)  COLLATE Latin1_General_CI_AS NULL,
+    [strType]                NVARCHAR (20)   COLLATE Latin1_General_CI_AS NULL,
+    [intLength]              INT            NULL
+)
+
+
+
+INSERT INTO @tblStructure
+SELECT intStructureType, strStructureName, strType, intLength  from tblGLAccountStructure WHERE intStructureType <> 6
 
 WHILE EXISTS (SELECT TOP 1 1 FROM @tbl)
 BEGIN
-	SELECT TOP 1 @i = [intSubsidiaryCompanyId],@strDatabase = [strDatabase]
-	from @tbl
-	
-	SET @tSql =
-	REPLACE(
-	'DECLARE @strError NVARCHAR(MAX) = NULL
-
-	IF NOT EXISTS (select top 1 1  from [strDatabase].dbo.tblGLAccountStructure where intStructureType = 6 )
-	BEGIN
-		SELECT @strError =''Company '' + strDatabase + '' needs an company segment setting. ''  FROM tblGLSubsidiaryCompany where strDatabase =''[strDatabase]'' AND isnull(strCompanySegment,'''') = ''''
-		IF @strError IS NOT NULL
-			SELECT @strError
-	END','[strDatabase]', @strDatabase)
-
-	INSERT INTO  @tblMessage  EXEC @DBExec @tSql;
-	IF EXISTS(SELECT TOP 1 1 FROM @tblMessage )
-	BEGIN
-		SELECT TOP 1 @s = msg from @tblMessage
-		RAISERROR (@s, 16, 1)
-		RETURN
-	END
-	
-
-	DELETE FROM @tbl where [intSubsidiaryCompanyId] = @i
+	SELECT TOP 1 @strDatabase = strDatabase FROM @tbl
+	SET @tSql = REPLACE('select intStructureType, strStructureName, strType, intLength  from [strDatabase].dbo.tblGLAccountStructure WHERE intStructureType <> 6', '[strDatabase]', @strDatabase)
+	INSERT INTO @tblStructure EXEC (@tSql)
+	DELETE FROM @tbl where @strDatabase = strDatabase
 END
 
-
-
+SELECT @subsidiaryCount = COUNT(*) FROM tblGLAccountStructure where intStructureType <> 6
+	
+IF EXISTS(SELECT  1  FROM @tblStructure GROUP BY intStructureType,strStructureName, intLength HAVING COUNT(*) <> @subsidiaryCount)
+	RAISERROR('Account structure is not compatible for merging', 16, 1)
+	
