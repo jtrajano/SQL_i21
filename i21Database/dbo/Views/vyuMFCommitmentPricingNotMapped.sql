@@ -1,20 +1,12 @@
-﻿CREATE VIEW vyuMFGetCommitmentPricing
+﻿CREATE VIEW vyuMFCommitmentPricingNotMapped
 AS
 SELECT CP.intCommitmentPricingId
-	,CP.strPricingNumber
 	,C.strName
 	,C.strEntityNo AS strAliasName
-	,CP.dtmDeliveryFrom
-	,CP.dtmDeliveryTo
 	,UOM.strUnitMeasure
 	,CUR.strCurrency
-	,CP.dtmDate
 	,MB.dtmM2MBasisDate
 	,AB.dtmAdditionalBasisDate
-	,CP.strERPNo
-	,CP.dblBalanceQty
-	,CP.strComment
-	,CP.dblMarketArbitrage
 FROM tblMFCommitmentPricing CP
 LEFT JOIN tblEMEntity C on C.intEntityId = CP.intEntityId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CP.intUnitMeasureId

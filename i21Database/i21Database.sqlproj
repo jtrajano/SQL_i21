@@ -968,6 +968,7 @@
     <Build Include="dbo\Functions\fnCreateTableFromDelimitedValues.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateRecurringJournal.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeSegmentAccount.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLValidateSubsidiarySetting.sql" />
     <Build Include="dbo\Stored Procedures\uspGLMergeGLAccount.sql" />
     <Build Include="dbo\Stored Procedures\uspGLCreateSubsidiaryAccountMapping.sql" />
     <Build Include="dbo\Stored Procedures\uspGLInsertSubsidiaryGLEntry.sql" />
@@ -9121,6 +9122,12 @@
     <Build Include="dbo\Tables\tblIPStorageLocationArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPStorageLocation.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPStorageLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPRecipe.sql" />
+    <Build Include="dbo\Views\vyuMFEntityList.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingSalesNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingMarketBasisNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFCommitmentPricingRecipeNotMapped.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9392,6 +9399,7 @@
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

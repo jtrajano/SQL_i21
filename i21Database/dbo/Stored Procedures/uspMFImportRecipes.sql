@@ -28,6 +28,9 @@ DECLARE @dblRecipeDetailCalculatedQty NUMERIC(18, 6)
 DECLARE @dblRecipeDetailUpperTolerance NUMERIC(18, 6)
 DECLARE @dblRecipeDetailLowerTolerance NUMERIC(18, 6)
 	,@strRecipeItemType NVARCHAR(50)
+	,@strERPRecipeNo nvarchar(50)
+	,@strSubLocationName nvarchar(50)
+	,@intSubLocationId int
 
 --Recipe Delete
 IF @strImportType = 'Recipe Delete'
@@ -515,6 +518,9 @@ BEGIN
 		SET @intCustomerId = NULL
 		SET @strFarmNumber = NULL
 		SET @intFarmFieldId = NULL
+		Select @strERPRecipeNo=NULL
+		Select @strSubLocationName=NULL
+		Select @intSubLocationId=NULL
 
 		--Margin By
 		UPDATE tblMFRecipeStage
@@ -531,6 +537,8 @@ BEGIN
 			,@strLocationName = strLocationName
 			,@strCustomer = strCustomer
 			,@strFarmNumber = strFarm
+			,@strERPRecipeNo=strERPRecipeNo 
+			,@strSubLocationName=strSubLocationName
 		FROM tblMFRecipeStage
 		WHERE intRecipeStageId = @intMinId
 
@@ -541,6 +549,10 @@ BEGIN
 		SELECT @intLocationId = intCompanyLocationId
 		FROM tblSMCompanyLocation
 		WHERE strLocationName = @strLocationName
+
+		Select @intSubLocationId=intCompanyLocationSubLocationId
+		from tblSMCompanyLocationSubLocation 
+		Where strSubLocationName=@strSubLocationName
 
 		SELECT TOP 1 @intCustomerId = intEntityId
 		FROM vyuARCustomer
@@ -563,11 +575,22 @@ BEGIN
 		END
 
 		IF ISNULL(@strItemNo, '') <> '' --Production Recipe
-			SELECT TOP 1 @intRecipeId = intRecipeId
-			FROM tblMFRecipe
-			WHERE intItemId = @intItemId
-				AND intVersionNo = @intVersionNo
-				AND intLocationId = @intLocationId
+		BEGIN
+			IF @strERPRecipeNo IS NOT NULL
+			BEGIN
+				SELECT @intRecipeId = intRecipeId 
+				FROM tblMFRecipe
+				WHERE strERPRecipeNo=@strERPRecipeNo
+			END
+			ELSE
+			BEGIN
+				SELECT TOP 1 @intRecipeId = intRecipeId
+				FROM tblMFRecipe
+				WHERE intItemId = @intItemId
+					AND intVersionNo = @intVersionNo
+					AND intLocationId = @intLocationId
+			END
+		END
 		ELSE --Virtual Recipe
 			SELECT TOP 1 @intRecipeId = intRecipeId
 			FROM tblMFRecipe
@@ -575,6 +598,19 @@ BEGIN
 
 		IF @intRecipeId IS NULL --insert
 		BEGIN
+			if @intVersionNo is null
+			Begin
+				SELECT  @intVersionNo = Max(intVersionNo)
+				FROM tblMFRecipe
+				WHERE intItemId = @intItemId
+					AND intLocationId = @intLocationId
+					AND intSubLocationId = @intSubLocationId
+
+				if @intVersionNo is null
+				Select @intVersionNo=1
+				Else
+				Select @intVersionNo=@intVersionNo+1
+			End
 			INSERT INTO tblMFRecipe (
 				strName
 				,intItemId
@@ -599,13 +635,15 @@ BEGIN
 				,dtmLastModified
 				,dtmValidFrom
 				,dtmValidTo
+				,intSubLocationId
+				,strERPRecipeNo
 				)
 			SELECT TOP 1 s.strRecipeName
 				,i.intItemId
 				,s.[strQuantity]
 				,iu.intItemUOMId
 				,cl.intCompanyLocationId
-				,s.[strVersionNo]
+				,IsNULL(s.[strVersionNo],@intVersionNo)
 				,rt.intRecipeTypeId
 				,mp.intManufacturingProcessId
 				,0
@@ -623,6 +661,8 @@ BEGIN
 				,GETDATE()
 				,s.strValidFrom
 				,s.strValidTo
+				,@intSubLocationId
+				,@strERPRecipeNo
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId

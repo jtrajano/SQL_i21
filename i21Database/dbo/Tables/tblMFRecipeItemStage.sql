@@ -40,5 +40,7 @@
 	ysnMailSent BIT NULL,
 	intStatusId int,
 	ysnImport Bit Constraint DF_tblMFRecipeItemStage_ysnImport Default 1,
+	intTrxSequenceNo int,
+	intParentTrxSequenceNo int,
 	CONSTRAINT [PK_tblMFRecipeItemStage_intRecipeItemStageId] PRIMARY KEY ([intRecipeItemStageId]),
 )

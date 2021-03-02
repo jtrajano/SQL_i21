@@ -1,7 +1,6 @@
-
-
 CREATE PROCEDURE uspGLRebuildSegmentMapping
 AS
+SET XACT_ABORT ON
 
 DELETE FROM tblGLAccountSegmentMapping
 
@@ -20,7 +19,7 @@ BEGIN
 	intAccountId,
 	S.intAccountSegmentId,
 	1
-    FROM dbo.tblGLAccount A
+	FROM dbo.tblGLAccount A
 	OUTER APPLY(
 		SELECT intAccountSegmentId FROM tblGLAccountSegment WHERE intAccountStructureId = @i AND strCode = 
 		REVERSE(PARSENAME(REPLACE(REVERSE(A.strAccountId), '-', '.'), @x)) 
@@ -28,6 +27,8 @@ BEGIN
 	SET @x +=1
 	DELETE FROM @tbl where intAccountStructureId = @i
 END
+
+	
 
 
 
