@@ -9127,6 +9127,9 @@
     <Build Include="dbo\Views\vyuMFCommitmentPricingSalesNotMapped.sql" />
     <Build Include="dbo\Views\vyuMFCommitmentPricingMarketBasisNotMapped.sql" />
     <Build Include="dbo\Views\vyuMFCommitmentPricingRecipeNotMapped.sql" />
+    <Build Include="dbo\Views\vyuMFGetContractDetail.sql" />
+    <Build Include="dbo\Views\vyuMFGetVirtualRecipe.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGetMarketBasis.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

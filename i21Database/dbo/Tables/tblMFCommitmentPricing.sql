@@ -15,6 +15,7 @@
 	dblBalanceQty NUMERIC(18, 6),
 	strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	dblMarketArbitrage NUMERIC(18, 6),
+	ysnPost BIT CONSTRAINT [DF_tblMFCommitmentPricing_ysnPost] DEFAULT 0,
 
 	[dtmCreated] DATETIME, 
     [intCreatedUserId] INT,

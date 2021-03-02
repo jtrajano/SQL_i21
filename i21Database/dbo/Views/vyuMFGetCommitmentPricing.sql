@@ -15,6 +15,7 @@ SELECT CP.intCommitmentPricingId
 	,CP.dblBalanceQty
 	,CP.strComment
 	,CP.dblMarketArbitrage
+	,CP.ysnPost
 FROM tblMFCommitmentPricing CP
 LEFT JOIN tblEMEntity C on C.intEntityId = CP.intEntityId
 LEFT JOIN tblICUnitMeasure UOM ON UOM.intUnitMeasureId = CP.intUnitMeasureId
