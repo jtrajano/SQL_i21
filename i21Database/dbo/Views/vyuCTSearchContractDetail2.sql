@@ -268,7 +268,7 @@ SELECT a.intContractDetailId
 	, dblQtyInCommodityDefaultUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bt.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bt.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bt.dblUnitQty, 0)) END)
-	, strQualityApproval = QA.strSampleStatus
+	, strQualityApproval = QA1.strSampleStatus
 	, dblQtyInCommodityStockUOM = (CASE WHEN ISNULL(v.dblUnitQty, 0) = 0 OR ISNULL(bu.dblUnitQty, 0) = 0 THEN NULL
 										WHEN ISNULL(v.dblUnitQty, 0) = ISNULL(bu.dblUnitQty, 0) THEN a.dblQuantity
 										ELSE a.dblQuantity * (ISNULL(v.dblUnitQty, 0) / ISNULL(bu.dblUnitQty, 0)) END)
@@ -428,4 +428,4 @@ OUTER APPLY (
 	GROUP BY s.intSampleId
 		, s.intSampleStatusId
 	ORDER BY s.intSampleId DESC
-) QA
+) QA1
