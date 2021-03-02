@@ -2,7 +2,7 @@
     [intLogId]			 INT              IDENTITY (1, 1) NOT NULL,
     [strType]		     NVARCHAR(100)    COLLATE Latin1_General_CI_AS NULL,
     [dtmDate]			 DATETIME         NOT NULL,
-    [intEntityId]        INT              NOT NULL,
+    [intEntityId]        INT              NULL,
 	[strEntityName]	     NVARCHAR(500)    COLLATE Latin1_General_CI_AS NULL,
 	[strCustomerName]    NVARCHAR(500)    COLLATE Latin1_General_CI_AS NULL,
 	[intTransactionId]	 INT			  NULL,
