@@ -50,7 +50,7 @@ CROSS APPLY (
 		FROM dbo.tblAPPayment P
 		LEFT JOIN tblAPPaymentDetail PD ON PD.intPaymentId = P.intPaymentId
 		LEFT JOIN tblCMBankTransaction T ON T.strTransactionId = P.strPaymentRecordNum
-		WHERE PD.intBillId = B.intBillId
+		WHERE ISNULL(PD.intBillId, PD.intOrigBillId) = B.intBillId
 		UNION ALL
 		SELECT
 			PD.intBillId,
