@@ -19,7 +19,7 @@ BEGIN
 	BEGIN TRY
 		
 		--client side supported files, removed .3gp, .3g2, .xml due to mime comma value
-		DECLARE @validExtension NVARCHAR(MAX) = N'aac,abw,arc,avi,azw,bin,bmp,bz,bz2,csh,css,csv,doc,docx,eot,epub,gz,gif,html,htm,ico,ics,jar,jpeg,jpg,jsjson,jsonld,midi,mid,mjs,mp3,mpeg,mpkg,odp,ods,odt,oga,ogv,ogx,opus,otf,png,pdf,php,ppt,pptx,rar,rtf,sh,svg,swf,tar,tiff,tif,ts,ttf,txt,vsd,wav,weba,webm,webp,woff,woff2,xhtml,xls,xlsx,xml,xul,zip,3gp,3g2,7z'
+		DECLARE @validExtension NVARCHAR(MAX) = N'aac,abw,arc,avi,azw,bin,bmp,bz,bz2,csh,css,csv,doc,docx,eot,epub,gz,gif,html,htm,ico,ics,jar,jpeg,jpg,js,json,jsonld,midi,mid,mjs,mp3,mpeg,mpkg,odp,ods,odt,oga,ogv,ogx,opus,otf,png,pdf,php,ppt,pptx,rar,rtf,sh,svg,swf,tar,tiff,tif,ts,ttf,txt,vsd,wav,weba,webm,webp,woff,woff2,xhtml,xls,xlsx,xml,xul,zip,3gp,3g2,7z'
 		DECLARE @validExtesionMime NVARCHAR(MAX) = N'
 			audio/aac,
 			application/x-abiword,
@@ -49,6 +49,7 @@ BEGIN
 			text/javascript,
 			application/json,
 			application/ld+json,
+			audio/midi audio/x-midi,
 			audio/midi audio/x-midi,
 			text/javascript,
 			audio/mpeg,
