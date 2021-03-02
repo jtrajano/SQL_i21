@@ -152,6 +152,8 @@ SELECT
 	, cd.intRefFuturesCurrencyId
 	, cd.intRefFuturesMarketId
 	, cd.intRefFuturesMonthId
+	, c.strLocationName
+	, c.strLocationNumber
 	, dbo.fnCTGetCurrencyExchangeRate(cd.intContractDetailId,0) AS dblRate
 	, ISNULL(cd.intPriceItemUOMId,cd.intItemUOMId) AS intPriceItemUOMId
 	, dbo.fnCTGetCurrencyExchangeRate(cd.intContractDetailId,0) AS dblExchangeRate
@@ -187,3 +189,4 @@ LEFT JOIN tblICItemUOM sm ON sm.intItemId = cd.intItemId
 JOIN tblCTContractStatus cs ON cs.intContractStatusId = cd.intContractStatusId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth	mo ON mo.intFutureMonthId =	cd.intFutureMonthId
+INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = cd.intCompanyLocationId
