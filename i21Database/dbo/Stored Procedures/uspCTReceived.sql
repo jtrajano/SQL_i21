@@ -98,6 +98,50 @@ BEGIN TRY
 		END
 		ELSE
 		BEGIN
+			IF @intSourceType = 2
+			BEGIN
+				INSERT INTO @tblToProcess (
+					intInventoryReceiptDetailId
+					,intContractDetailId
+					,intItemUOMId
+					,dblQty
+					,intContainerId
+					,ysnLoad
+					,intPricingTypeId
+					,intSourceId
+					,intInventoryReceiptId
+					,intToItemUOMId
+				)
+				SELECT DISTINCT 
+					  MIN(ri.intInventoryReceiptItemId) intInventoryReceiptItemId
+					, cd.intContractDetailId
+					, ri.intUnitMeasureId
+					, dbo.fnMinNumeric(ch.intNoOfLoad, SUM(ri.intLoadReceive)) intLoad
+					, MIN(ri.intContainerId) intContainerId
+					, ch.ysnLoad
+					, cd.intPricingTypeId
+					, ri.intSourceId
+					, r.intInventoryReceiptId
+					, cd.intItemUOMId
+				FROM @ItemsFromInventoryReceipt r
+				INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = r.intInventoryReceiptDetailId
+				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intContractHeaderId
+				INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
+					AND cd.intContractDetailId = ri.intContractDetailId
+				INNER JOIN tblLGLoad l ON l.intLoadId = ri.intLoadShipmentId
+				WHERE ch.ysnLoad = 1
+				GROUP BY
+					  cd.intContractDetailId
+					, ri.intUnitMeasureId
+					, ch.ysnLoad
+					, cd.intPricingTypeId
+					, ri.intSourceId
+					, ch.intNoOfLoad 
+					, ch.dblQuantityPerLoad
+					, r.intInventoryReceiptId
+					, cd.intItemUOMId
+			END
+
 			INSERT	INTO @tblToProcess (
 				intInventoryReceiptDetailId
 				,intContractDetailId
@@ -125,8 +169,9 @@ BEGIN TRY
 				@ItemsFromInventoryReceipt	IR
 				JOIN tblCTContractDetail CD	ON	CD.intContractDetailId	=	IR.intLineNo
 				JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
-			WHERE	
+			WHERE
 				ISNULL(intLineNo, 0) > 0
+				AND CH.ysnLoad = 0 -- CT-4969
 		END
 	END
 
@@ -269,4 +314,3 @@ BEGIN CATCH
 	RAISERROR (@ErrMsg,16,1,'WITH NOWAIT')  
 	
 END CATCH
- 
