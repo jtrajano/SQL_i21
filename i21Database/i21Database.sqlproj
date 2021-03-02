@@ -9397,6 +9397,7 @@
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
