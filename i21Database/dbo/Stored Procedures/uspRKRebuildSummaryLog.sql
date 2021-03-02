@@ -269,11 +269,11 @@ BEGIN TRY
 				, CD.intContractDetailId
 				, InvTran.dtmDate
 				, @dtmEndDate AS dtmEndDate
-				, dblQuantity = CASE WHEN CH.ysnLoad = 1 THEN  
+				, dblQuantity = (CASE WHEN CH.ysnLoad = 1 THEN  
 									1 * CH.dblQuantityPerLoad
 								ELSE
 									ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)), 0)
-								END
+								END) * (CASE WHEN CD.intPricingTypeId = 5 THEN -1 ELSE 1 END)
 				, 0
 				, COUNT(DISTINCT Receipt.intInventoryReceiptId)
 				, Receipt.intInventoryReceiptId
