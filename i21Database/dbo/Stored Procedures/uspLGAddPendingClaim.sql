@@ -99,9 +99,8 @@ BEGIN
 											THEN (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0))
 											ELSE (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) 
 											END
-						,dblClaimableWt = CASE WHEN ((RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) 
-												+ (ISNULL(LD.dblNet, 0) * WG.dblFranchise / 100)) < 0.0
-											THEN ((RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) + (ISNULL(LD.dblNet, 0) * WG.dblFranchise / 100))
+						,dblClaimableWt = CASE WHEN ((RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) + (ISNULL(CLNW.dblLinkNetWt, 0) * WG.dblFranchise / 100)) < 0.0
+											THEN ((RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0)) + (ISNULL(CLNW.dblLinkNetWt, 0) * WG.dblFranchise / 100))
 											ELSE (RI.dblNet - ISNULL(CLNW.dblLinkNetWt, 0))
 											END
 						,dblSeqPrice = AD.dblSeqPrice

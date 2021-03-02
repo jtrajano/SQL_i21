@@ -43,62 +43,7 @@ BEGIN
 			AND (@intContractDetailId IS NULL OR VP.intContractDetailId = @intContractDetailId)
 
 		--Update Pending Claims with Shipped Fields values
-		UPDATE PC
-			SET dblShippedNetWt = (LC.dblNetWt - ISNULL(IRN.dblIRNet, 0))
-				,dblFranchiseWt = CASE WHEN (LC.dblNetWt * WG.dblFranchise / 100) <> 0.0
-										THEN (LC.dblNetWt - ISNULL(IRN.dblIRNet, 0)) * WG.dblFranchise / 100
-									ELSE 0.0 END
-				,dblWeightLoss = RI.dblNet - LC.dblNetWt
-				,dblClaimableWt = CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-									THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-									ELSE (RI.dblNet - LC.dblNetWt)
-									END
-				,dblClaimableAmount = ROUND(
-										CASE WHEN (
-												((CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-													THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-													ELSE (RI.dblNet - LC.dblNetWt) END 
-													* dblSeqPriceInWeightUOM) 
-													/ CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) < 0)
-												THEN ((CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-														THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-														ELSE (RI.dblNet - LC.dblNetWt)
-														END * dblSeqPriceInWeightUOM) / CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END) * - 1
-											ELSE ((CASE WHEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100)) < 0.0
-													THEN ((RI.dblNet - LC.dblNetWt) + (LD.dblNet * WG.dblFranchise / 100))
-													ELSE (RI.dblNet - LC.dblNetWt) END 
-													* dblSeqPriceInWeightUOM) 
-													/ CASE WHEN ysnSeqSubCurrency = 1 THEN 100 ELSE 1 END)
-											END
-										, 2)
-		FROM
-			tblLGPendingClaim PC 
-			JOIN tblLGLoad L ON L.intLoadId = PC.intLoadId
-			JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-			JOIN tblCTContractDetail CD ON CD.intContractDetailId = intPContractDetailId
-			JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
-			JOIN tblCTWeightGrade WG ON WG.intWeightGradeId = CH.intWeightId
-			OUTER APPLY (SELECT TOP 1 ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 1) FROM tblLGCompanyPreference) CP
-			LEFT JOIN tblLGLoadContainer LC ON LC.intLoadId = L.intLoadId AND L.intPurchaseSale = 1 
-				AND LC.intLoadContainerId = PC.intLoadContainerId AND CP.ysnWeightClaimsByContainer = 1
-			OUTER APPLY (SELECT dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink 
-									WHERE intLoadDetailId = LD.intLoadDetailId 
-									AND (LC.intLoadContainerId IS NULL OR intLoadContainerId = LC.intLoadContainerId)) CLNW
-			CROSS APPLY (SELECT dblNet = SUM(ISNULL(IRI.dblNet,0)),dblGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
-							JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-							WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
-								AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
-								AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return') RI
-			CROSS APPLY (SELECT dblIRNet = SUM(ISNULL(IRI.dblNet,0)),dblIRGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
-							JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
-							WHERE IR.ysnPosted = 1 AND IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
-								AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
-								AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType = 'Inventory Return') IRN
-			WHERE 
-				L.intLoadId = @intLoadId
-				AND L.intPurchaseSale = 1
-				AND (@intLoadContainerId IS NULL OR (@intLoadContainerId IS NOT NULL AND PC.intLoadContainerId = @intLoadContainerId))
-				AND (@intContractDetailId IS NULL OR (@intContractDetailId IS NOT NULL AND PC.intContractDetailId = @intContractDetailId))
+		EXEC uspLGAddPendingClaim @intLoadId, 1, @intLoadContainerId, 1
 		
 	END
 END
