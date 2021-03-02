@@ -41,6 +41,9 @@ SELECT DISTINCT
                                                 ELSE 0
                                             END AS BIT
                                         )
+    
+    --,intTicketPricingTypeId = ISNULL(CH_Ticket.intPricingTypeId, -99)
+    ,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 FROM tblGRCustomerStorage CS  
 JOIN tblGRStorageType ST 
     ON ST.intStorageScheduleTypeId = CS.intStorageTypeId  
