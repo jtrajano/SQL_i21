@@ -20,7 +20,7 @@ BEGIN
 	UPDATE tblCTContractDetail
 	SET intContractStatusId = 6, ysnAutoShortClosed = 1
 	WHERE intContractDetailId = @intContractDetailId
-
+	
 	DECLARE @strOldStatus NVARCHAR(50)
 	DECLARE @strNewStatus NVARCHAR(50)
 
@@ -47,6 +47,20 @@ BEGIN
 										@strProcess 			= 'Update Sequence Status',
 										@intUserId				= @intUserId
 
+	DECLARE @XML NVARCHAR(4000)
+	SET @XML = '<tblCTContractDetails><tblCTContractDetail><intContractDetailId>' 
+		+ CAST(@intContractDetailId AS NVARCHAR(1000)) 
+		+ '</intContractDetailId><strRowState>Modified</strRowState></tblCTContractDetail></tblCTContractDetails>'
+	EXEC uspCTBeforeSaveContract @intContractHeaderId, @intUserId, @XML
+
+	DECLARE @XML2 NVARCHAR(4000)
+	SET @XML2 = '<tblCTContractHeaders><tblCTContractHeader><intContractHeaderId>' + CAST(@intContractHeaderId AS NVARCHAR(1000)) 
+		+ '</intContractHeaderId></tblCTContractHeader></tblCTContractHeaders>'
+	EXEC uspCTValidateContractHeader @XML2, 'Modified'
+
+	EXEC uspCTSaveContract @intContractHeaderId, @intUserId, ''
+
+	EXEC uspCTValidateContractAfterSave @intContractHeaderId
 END
 
 END
