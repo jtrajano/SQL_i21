@@ -17,10 +17,10 @@ RETURNS @returntable TABLE
 	[intItemUOMId]				INT NULL,
 	[dblQuantity]				NUMERIC(18, 6) DEFAULT 0 NOT NULL,
 	[dblAmount]					NUMERIC(18, 6) DEFAULT 0 NOT NULL,
-	[intBillId]					INT NULL,
-	[strBillId]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NULL,
-	[intBillDetailId]			INT NULL,
-	[intBillDetailTaxId]		INT NULL,
+	[intOffsetId]				INT NULL,
+	[strOffsetId]				NVARCHAR(55) COLLATE Latin1_General_CI_AS NULL,
+	[intOffsetDetailId]			INT NULL,
+	[intOffsetDetailTaxId]		INT NULL,
 	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL
 )
 AS
