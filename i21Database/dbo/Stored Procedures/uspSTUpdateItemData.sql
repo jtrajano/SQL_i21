@@ -39,6 +39,9 @@ BEGIN TRY
 		DECLARE @ErrMsg					   NVARCHAR(MAX),
 				@idoc					   INT,
 				@strCompanyLocationId 	   NVARCHAR(MAX),
+				@Region					   NVARCHAR(20),
+				@District				   NVARCHAR(20),
+				@State					   NVARCHAR(20),
 				@strVendorId               NVARCHAR(MAX),
 				@strCategoryId             NVARCHAR(MAX),
 				@strFamilyId			   NVARCHAR(MAX),
@@ -100,6 +103,9 @@ BEGIN TRY
 				@strClassId				=   Class,
 				@intItemUOMId			=   intItemUOMId, --UPCCode,
 				@strDescription			=   ItmDescription,
+				@Region				    =   Region,
+				@District			    =   District,
+				@State				    =   State,
 				@dblPriceBetween1		=   PriceBetween1,
 				@dblPriceBetween2		=   PriceBetween2,
 
@@ -153,6 +159,9 @@ BEGIN TRY
 				Class                     NVARCHAR(MAX),
 				intItemUOMId              INT,
 				ItmDescription            NVARCHAR(250),
+				Region					  NVARCHAR(20),
+				District				  NVARCHAR(20),
+				State					  NVARCHAR(20),
 
 				PriceBetween1             DECIMAL (18,6),
 				PriceBetween2             DECIMAL (18,6),
@@ -203,7 +212,7 @@ BEGIN TRY
 
 		-- Create the temp table used for filtering. 
 		BEGIN
-			
+
 			IF OBJECT_ID('tempdb..#tmpUpdateItemForCStore_Location') IS NULL 
 				BEGIN
 
@@ -598,8 +607,30 @@ BEGIN TRY
 		--		,@intEntityUserSecurityId = @intCurrentEntityUserId
 		--END
 
+		
+	-- SELECT strDistrict, strRegion, strState, * FROM tblSTStore
+	-- ==========================================================================================
+	-- [START] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
+	-- ==========================================================================================
+	IF(@strCompanyLocationId IS NULL AND @Region IS NOT NULL AND @District IS NOT NULL AND @State IS NOT NULL)
+		BEGIN
+			
+			INSERT INTO #tmpUpdateItemForCStore_Location 
+			(
+				intLocationId
+			)
+			SELECT 
+				intLocationId = intCompanyLocationId
+			FROM tblSTStore
+			WHERE strRegion		= @Region
+				AND strDistrict = @District
+				AND strState	= @State
 
-
+		END
+	-- ==========================================================================================
+	-- [END] - IF (@Location=EMPTY OR IS NULL) (strDistrict and strRegion and strState are nulls)
+	-- ==========================================================================================
+	
 
 		BEGIN TRY
 			SET @strUpcCode			= NULLIF(@strUpcCode, '')
