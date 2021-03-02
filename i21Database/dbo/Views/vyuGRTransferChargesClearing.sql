@@ -176,11 +176,11 @@ AND ReceiptCharge.intEntityVendorId IS NOT NULL
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
 UNION ALL      
 --Transfer for Receipt Charges
-SELECT
+SELECT DISTINCT
     CS.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
-    ,IR.strReceiptNumber      
-    ,IR.intInventoryReceiptId      
+    ,TS.strTransferStorageTicket
+	,IR.intInventoryReceiptId
     ,TS.intTransferStorageId
     ,TS.strTransferStorageTicket
     ,SR.intTransferStorageReferenceId
@@ -188,10 +188,10 @@ SELECT
     ,IC.intItemId      
     ,CS.intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM  
-    ,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) * -1 AS dblTransferTotal
-    ,-1
-    ,0 AS dblReceiptChargeTotal  
-    ,0 AS dblReceiptChargeQty 
+    ,0 AS dblTransferTotal      
+    ,0 AS dblTransferQty  
+    ,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) * -1 dblReceiptChargeTotal  
+    ,ISNULL(IRC.dblQuantity,0) * -1 AS dblReceiptChargeQty 
     ,CS.intCompanyLocationId      
     ,CL.strLocationName      
     ,0
@@ -234,6 +234,70 @@ LEFT JOIN
 )  
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription LIKE '%Charges from %'
+
+UNION ALL      
+--Transfer for Receipt Charge Taxes
+SELECT DISTINCT
+    CS.intEntityId AS intEntityVendorId
+    ,TS.dtmTransferStorageDate AS dtmDate      
+    ,TS.strTransferStorageTicket
+	,IR.intInventoryReceiptId
+    ,TS.intTransferStorageId
+    ,TS.strTransferStorageTicket
+    ,SR.intTransferStorageReferenceId
+    ,IRC.intInventoryReceiptChargeId      
+    ,IC.intItemId      
+    ,CS.intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM  
+    ,0 AS dblTransferTotal      
+    ,0 AS dblTransferQty  
+    ,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) dblReceiptChargeTotal  
+    ,0 AS dblReceiptChargeQty 
+    ,CS.intCompanyLocationId      
+    ,CL.strLocationName      
+    ,0
+FROM vyuGLDetail GL
+INNER JOIN vyuGLAccountDetail APClearing
+    ON APClearing.intAccountId = GL.intAccountId 
+		AND APClearing.intAccountCategoryId = 45
+INNER JOIN tblGRTransferStorage TS
+	ON TS.intTransferStorageId = GL.intTransactionId
+		AND TS.strTransferStorageTicket = GL.strTransactionId
+INNER JOIN tblGRTransferStorageReference SR
+	ON SR.intTransferStorageId = TS.intTransferStorageId
+INNER JOIN tblGRCustomerStorage CS
+	ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+INNER JOIN tblSMCompanyLocation CL      
+    ON CL.intCompanyLocationId = CS.intCompanyLocationId
+INNER JOIN (
+	SELECT CS.intCustomerStorageId
+		,intInventoryReceiptId
+	FROM tblGRStorageHistory SH
+	INNER JOIN tblGRTransferStorageReference TSR
+		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblGRCustomerStorage CS
+		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
+			AND CS.ysnTransferStorage = 0
+			AND CS.intTicketId IS NOT NULL
+) IR_SOURCE	
+	ON IR_SOURCE.intCustomerStorageId = CS.intCustomerStorageId
+INNER JOIN tblICInventoryReceipt IR
+	ON IR.intInventoryReceiptId = IR_SOURCE.intInventoryReceiptId
+INNER JOIN tblICInventoryReceiptCharge IRC
+	ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
+INNER JOIN tblICItem IC
+	ON IC.intItemId = IRC.intChargeId
+	AND GL.strDescription LIKE CONCAT('%', IC.strItemNo, '%')
+INNER JOIN tblICInventoryReceiptChargeTax IRCT
+	ON IRCT.intInventoryReceiptChargeId = IRC.intInventoryReceiptChargeId
+LEFT JOIN   
+(  
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+)  
+    ON itemUOM.intItemUOMId = CS.intItemUOMId
+WHERE GL.strDescription NOT LIKE '%Charges from %'
+
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl

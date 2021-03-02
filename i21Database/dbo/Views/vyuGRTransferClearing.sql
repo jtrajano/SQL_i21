@@ -279,6 +279,10 @@ AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
+AND (
+    (ST_TO.ysnDPOwnedType = 0 AND ST_FROM.ysnDPOwnedType = 1) --DP to OS
+	OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 0) --OS to DP
+)
 
 UNION ALL
 --Transfer Storages
@@ -308,7 +312,13 @@ INNER JOIN tblGRStorageHistory SH
 	ON SH.intCustomerStorageId = TSR.intSourceCustomerStorageId
 		AND SH.strType = 'From Scale'
 INNER JOIN tblGRCustomerStorage CS
-	ON CS.intCustomerStorageId = TSR.intToCustomerStorageId
+	ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
+INNER JOIN tblGRStorageType ST
+	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
+INNER JOIN tblGRCustomerStorage CS_TO
+	ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+INNER JOIN tblGRStorageType ST_TO
+	ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSR.intTransferStorageId
 INNER JOIN tblICInventoryReceipt IR
@@ -334,6 +344,8 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
+WHERE (ST_TO.ysnDPOwnedType = 0 AND ST.ysnDPOwnedType = 1) --DP to OS
+		OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 0) --OS to DP
 /*END ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>>  ***DS/SC*** FOR OP TO DP*/
