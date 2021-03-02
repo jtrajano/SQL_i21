@@ -103,7 +103,9 @@ BEGIN
         MergedTable.strDescription,
         MergedTable. strComments 
     );  
-  
+    
+    UPDATE tblGLSubsidiaryCompany SET ysnMergedCOA = 1
+    
     EXEC uspGLRebuildSegmentMapping
    
 END

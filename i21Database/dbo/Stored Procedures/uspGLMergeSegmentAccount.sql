@@ -35,7 +35,7 @@ BEGIN
         DELETE FROM tblGLDetail
         DELETE FROM tblGLAccount
         DELETE A FROM tblGLAccountSegment A JOIN  vyuGLSegmentDetail B on A.intAccountSegmentId = B.intAccountSegmentId where intStructureType <> 6
-        UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = NULL
+        UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = NULL, ysnMergedCOA = 0
       END
 
       INSERT INTO @tblSubsidiary SELECT intSubsidiaryCompanyId, strDatabase FROM tblGLSubsidiaryCompany

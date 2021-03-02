@@ -10,6 +10,7 @@ CREATE TABLE [dbo].[tblGLSubsidiaryCompany](
 	[strSQLGLAccount] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS,
 	[strSQLSegmentAccount] NVARCHAR(MAX)  COLLATE Latin1_General_CI_AS ,
 	[intLastGLDetailId] INT NULL,
+	[ysnMergedCOA] BIT NULL,
 	[hasCompanySegment] BIT NULL,
  CONSTRAINT [PK_tblGLSubsidiaryCompany] PRIMARY KEY CLUSTERED 
 (

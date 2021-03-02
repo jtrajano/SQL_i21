@@ -16,6 +16,13 @@ SET XACT_ABORT ON
         UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = NULL
     END
 
+    IF EXISTS(SELECT 1 FROM tblGLSubsidiaryCompany WHERE ISNULL(ysnMergedCOA,0) = 0)
+	BEGIN
+		RAISERROR ('There are Chart of account from subsidiary  that are not yet merged', 16,1)
+		RETURN
+	END
+
+
     INSERT INTO @tbl
         SELECT strDatabase, intLastGLDetailId FROM tblGLSubsidiaryCompany
 
