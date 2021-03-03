@@ -186,8 +186,8 @@ BEGIN TRY
 
 	select
 		@ysnIsParent = t.ysnIsParent
-		,@blbParentSubmitSignature = CASE WHEN ysnIsParent = 0 THEN h.blbDetail ELSE CASE WHEN @strTransactionApprovalStatus = 'Approved' THEN h.blbDetail ELSE NULL END END
-		,@blbParentApproveSignature = CASE WHEN ysnIsParent = 0 THEN j.blbDetail ELSE CASE WHEN @strTransactionApprovalStatus = 'Approved' THEN j.blbDetail ELSE NULL END END
+		,@blbParentSubmitSignature = h.blbDetail
+		,@blbParentApproveSignature = j.blbDetail
 		,@blbChildSubmitSignature = l.blbDetail
 		,@blbChildApproveSignature = n.blbDetail
 	from
