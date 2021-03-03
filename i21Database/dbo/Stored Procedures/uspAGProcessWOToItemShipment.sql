@@ -185,7 +185,7 @@ BEGIN
 				FROM tblEMEntityLocation EL
 				INNER JOIN tblSMFreightTerms FTERMS 
 					ON FTERMS.intFreightTermId = EL.intFreightTermId
-				WHERE EL.intEntityId = WO.intEntityCustomerId
+				WHERE EL.intEntityId = WO.intEntityCustomerId AND EL.ysnDefaultLocation = 1
 		) FREIGHTTERMS
 		WHERE WO.intWorkOrderId = @intWorkOrderId
 		
