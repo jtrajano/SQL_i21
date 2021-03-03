@@ -1555,7 +1555,7 @@ GO
 			,[strModule]			= 'Manufacturing'
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
-	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Sample Number')
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Pricing Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO
