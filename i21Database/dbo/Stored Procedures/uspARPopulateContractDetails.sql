@@ -114,13 +114,14 @@ OUTER APPLY (
 ) RI
 WHERE ID.[intInventoryShipmentChargeId] IS NULL
 	AND	(
-		(ID.strTransactionType <> 'Credit Memo' AND ((ID.[intInventoryShipmentItemId] IS NULL AND (ID.[intLoadDetailId] IS NULL OR (ID.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3)))))
+		(ID.strTransactionType NOT IN ('Credit Memo', 'Debit Memo') AND ((ID.[intInventoryShipmentItemId] IS NULL AND (ID.[intLoadDetailId] IS NULL OR (ID.intLoadDetailId IS NOT NULL AND LG.intPurchaseSale = 3)))))
 		OR
 		(ID.strTransactionType = 'Credit Memo' AND (ID.[intInventoryShipmentItemId] IS NOT NULL OR ID.[intLoadDetailId] IS NOT NULL OR ISNULL(RI.[intInvoiceId], 0) <> 0))
 		)
     AND ISNULL(ID.[strItemType], '') <> 'Other Charge'
 	AND (ISNULL(RI.[intInvoiceId], 0) = 0 OR (ISNULL(RI.[intInvoiceId], 0) <> 0 AND (ID.intLoadDetailId IS NULL OR ID.[intTicketId] IS NOT NULL)))
 	AND ((ID.ysnFromProvisional = 1 AND PI.ysnPosted = 0) OR ID.ysnFromProvisional = 0)
+	AND (ISNULL(W.strWhereFinalized, '') <> 'Destination' AND ISNULL(G.strWhereFinalized, '') <> 'Destination')
 
 --DESTINATION WEIGHTS/GRADES
 IF NOT EXISTS(SELECT * FROM @tblToProcess)
@@ -136,6 +137,9 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 			, ysnDestWtGrd
 			, dblShippedQty
 			, intShippedQtyUOMId
+			, intOriginalInvoiceId
+			, intOriginalInvoiceDetailId
+			, ysnFromReturn
 			, strPricing
 			, strBatchId
 			, strInvoiceNumber
@@ -160,6 +164,9 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 			, ysnDestWtGrd			= CAST(1 AS BIT)
 			, dblShippedQty			= AVG(ISNULL(S.dblQuantity, ID.dblQtyShipped))
 			, intShippedQtyUOMId	= ISNULL(S.intItemUOMId, ID.intItemUOMId)
+			, intOriginalInvoiceId			= RI.intInvoiceId
+			, intOriginalInvoiceDetailId	= ID.intOriginalInvoiceDetailId
+			, ysnFromReturn			= CASE WHEN ISNULL(RI.intInvoiceId, 0) = 0 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END
 			, strPricing			= ID.strPricing	
 			, strBatchId			= I.strBatchId
 			, strInvoiceNumber		= I.strInvoiceNumber
@@ -176,13 +183,21 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 		LEFT JOIN tblICInventoryShipmentItem S ON S.intSourceId = I.intTicketId
 										 AND S.intLineNo IS NOT NULL
 										 AND I.intContractDetailId = S.intLineNo
+		OUTER APPLY (
+			SELECT TOP 1 intInvoiceId 
+			FROM tblARInvoice INV
+			WHERE INV.strTransactionType = 'Invoice'
+			  AND INV.ysnReturned = 1
+			  AND I.strInvoiceOriginId = INV.strInvoiceNumber
+			  AND I.intOriginalInvoiceId = INV.intInvoiceId
+		) RI
 		WHERE I.intTicketId IS NOT NULL 
 		  AND (W.strWhereFinalized = 'Destination' OR G.strWhereFinalized= 'Destination')
 		  AND I.intContractDetailId IS NOT NULL
 		  AND ID.intShipmentPurchaseSalesContractId IS NULL
 		  AND ISNULL(I.intLoadDetailId, 0) = 0
-		  --AND ISNULL(I.intTransactionId, 0) = 0
-		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate
+		  AND ISNULL(I.[strItemType], '') <> 'Other Charge'
+		GROUP BY I.[intInvoiceId], I.[intContractDetailId], I.[intContractHeaderId], I.[intItemUOMId], I.[intTicketId], ISNULL(S.intItemUOMId, ID.intItemUOMId), ID.[strPricing], ID.intInventoryShipmentItemId, I.strBatchId, I.strInvoiceNumber, I.strTransactionType, I.strItemNo,  I.dtmDate, RI.intInvoiceId, ID.intOriginalInvoiceDetailId
 	END
 
 
@@ -300,12 +315,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId	= CD.intContractHeaderId
 		LEFT JOIN tblSCTicket T	ON T.intTicketId =	P.intTicketId		
 		WHERE intUniqueId = @intUniqueId
-
-		--IF NOT EXISTS(SELECT * FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId)
-		--BEGIN
-		--	RAISERROR('Contract does not exist.',16,1)
-		--END
-
+		
 		IF @dblQty < 0
 			SET @dblQtyOrdered = -@dblQtyOrdered
 
@@ -313,15 +323,6 @@ WHILE ISNULL(@intUniqueId,0) > 0
 
 		SELECT @dblConvertedQty = dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId, @intToItemUOMId, @dblQty)
 		SELECT @dblConvertedQtyOrdered = dbo.fnCalculateQtyBetweenUOM(@intFromItemOrderedUOMId, @intToItemUOMId, @dblQtyOrdered)
-
-		--IF @ysnBestPriceOnly = 1
-		--BEGIN
-		--	EXEC uspARGetBestItemPrice @intItemId, @intCompanyLocationId, @intEntityId, @intPriceItemUOMId, @dblLowestPrice OUTPUT
-
-		--	IF	ISNULL(@dblLowestPrice,0) <> 0 AND @dblLowestPrice < @dblCashPrice
-		--		SET	@ReduceBalance	=	0
-				
-		--END
 
 		SELECT @dblSchQuantityToUpdate = CASE WHEN ABS(@dblQtyOrdered) > 0 AND ABS(@dblQty) > ABS(@dblQtyOrdered) THEN -@dblConvertedQtyOrdered ELSE -@dblConvertedQty END
 		SELECT @dblRemainingSchedQty = @dblConvertedQtyOrdered - @dblConvertedQty
@@ -455,8 +456,53 @@ WHILE ISNULL(@intUniqueId,0) > 0
 						END
 				END
 		END
+
+		
+		IF ISNULL(@ysnFromReturn, 0) = 1 AND ISNULL(@ysnDestWtGrd,0) = 1
+			BEGIN
+				INSERT INTO #ARItemsForContracts (
+					  intInvoiceId
+					, intInvoiceDetailId
+					, intOriginalInvoiceId
+					, intOriginalInvoiceDetailId
+					, intItemId
+					, intContractDetailId
+					, intContractHeaderId
+					, intEntityId
+					, intUserId
+					, dtmDate
+					, dblQuantity
+					, dblBalanceQty
+					, dblSheduledQty
+					, dblRemainingQty
+					, strType
+					, strTransactionType
+					, strInvoiceNumber
+					, strItemNo
+					, strBatchId
+					, ysnFromReturn
+				)
+				SELECT intInvoiceId					= @intInvoiceId
+					, intInvoiceDetailId			= @intInvoiceDetailId
+					, intOriginalInvoiceId			= @intOriginalInvoiceId
+					, intOriginalInvoiceDetailId	= @intOriginalInvoiceDetailId
+					, intItemId						= @intItemId
+					, intContractDetailId			= @intContractDetailId
+					, intContractHeaderId			= @intContractHeaderId
+					, intEntityId					= @intEntityId
+					, intUserId						= @intEntityId
+					, dtmDate						= @dtmDate
+					, dblQuantity					= @dblConvertedQty
+					, dblBalanceQty					= @dblConvertedQty
+					, dblSheduledQty				= 0
+					, dblRemainingQty				= 0
+					, strType						= 'Contract Balance'
+					, strTransactionType			= @strTransactionType
+					, strInvoiceNumber				= @strInvoiceNumber
+					, strItemNo						= @strItemNo
+					, strBatchId					= @strBatchId
+					, ysnFromReturn					= @ysnFromReturn
+			END
 	
 		SELECT @intUniqueId = MIN(intUniqueId) FROM @tblToProcess WHERE intUniqueId > @intUniqueId
 	END
-
-SELECT '#ARItemsForContracts', * FROM #ARItemsForContracts

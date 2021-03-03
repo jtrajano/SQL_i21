@@ -65,7 +65,7 @@ BEGIN
 				 , dblAvailableQty	= SUM(CASE WHEN ICT.intLotId IS NULL THEN ISNULL(IAC.dblStockIn, 0) - ISNULL(IAC.dblStockOut, 0) ELSE ISNULL(IL.dblStockIn, 0) - ISNULL(IL.dblStockOut, 0) END)
 			FROM tblICInventoryTransaction ICT 
 			LEFT JOIN tblICInventoryActualCost IAC ON ICT.strTransactionId = IAC.strTransactionId AND ICT.intTransactionId = IAC.intTransactionId AND ICT.intTransactionDetailId = IAC.intTransactionDetailId
-			LEFT JOIN tblICInventoryLot IL ON ICT.strTransactionId = IL.strTransactionId AND ICT.intTransactionId = IL.intTransactionId AND ICT.intTransactionDetailId = IL.intTransactionDetailId AND ICT.intLotId = IL.intLotId
+			LEFT JOIN tblICInventoryLot IL ON ICT.strTransactionId = IL.strTransactionId AND ICT.intTransactionId = IL.intTransactionId AND ICT.intTransactionDetailId = IL.intTransactionDetailId AND ICT.intLotId = IL.intLotId AND ICT.intItemLocationId = IL.intItemLocationId
 			WHERE ICT.ysnIsUnposted = 0
 			  AND ISNULL(IL.ysnIsUnposted, 0) = 0
   			  AND ISNULL(IAC.ysnIsUnposted, 0) = 0  
@@ -365,7 +365,7 @@ BEGIN
 	WHERE C.ysnHasCustomerCreditApprover = 0
       AND C.strCreditCode NOT IN ('Always Allow', 'Normal', 'Reject Orders', 'COD')
 	  AND ISNULL(C.strCreditCode, '') <> ''
-      AND ((I.dblInvoiceTotal + C.dblARBalance > C.dblCreditLimit) OR C.intCreditStopDays > 0)
+      AND ((I.dblInvoiceTotal + C.dblARBalance >= C.dblCreditLimit) OR C.intCreditStopDays >= 0)
 			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
@@ -1744,7 +1744,7 @@ BEGIN
 	WHERE
 		I.[dblUnitPrice] <> @ZeroDecimal				
 		AND I.[strItemType] <> 'Other Charge'
-		AND I.strTransactionType <> 'Credit Memo'
+		AND I.strTransactionType NOT IN ('Credit Memo', 'Debit Memo')
 		AND CAST(ISNULL(ARCC.[dblCashPrice], @ZeroDecimal) AS MONEY) <> CAST(ISNULL(I.[dblUnitPrice], @ZeroDecimal) AS MONEY)
 		AND ARCC.[strPricingType] <> 'Index'
 		AND ISNULL(I.[intLoadDetailId],0) = 0

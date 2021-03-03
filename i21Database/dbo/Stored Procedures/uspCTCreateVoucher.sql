@@ -138,7 +138,7 @@ begin try
 		,dblQuantityToBill decimal(38,15)
 		,intContractDetailId int
 		,intInventoryReceiptItemId int
-		,intBillItemUOMId int
+		,intQtyToBillUOMId int
 	);
 
 	declare @availablePrice as table (
@@ -173,7 +173,6 @@ begin try
 		,@ysnSuccessBillPosting bit
 		,@intId int
 		,@intPriceItemUOMId int
-		,@intBillItemUOMId int
 		,@intPricingTypeId int
 		,@intFreightTermId int
 		,@intCompanyLocationId int
@@ -186,6 +185,7 @@ begin try
 	   ,intInventoryReceiptId int
 	   ,intInventoryReceiptItemId int
 	   ,dblQtyReceived numeric(18,6)
+	   ,intQtyToBillUOMId int
 	);
 
 		insert into
@@ -195,7 +195,7 @@ begin try
 			,dblQuantityToBill = a.dblQuantityToBill
 			,intContractDetailId = a.intContractDetailId
 			,intInventoryReceiptItemId = a.intInventoryReceiptItemId
-			,intBillItemUOMId = a.intQtyToBillUOMId
+			,intQtyToBillUOMId = a.intQtyToBillUOMId
 		from
 			@voucherPayables a
 		where
@@ -212,7 +212,7 @@ begin try
 				,@dblQuantityToBill = dblQuantityToBill
 				,@intContractDetailId = intContractDetailId
 				,@intInventoryReceiptItemId = intInventoryReceiptItemId
-				,@intBillItemUOMId = intBillItemUOMId
+				,@intQtyToBillUOMId = intQtyToBillUOMId
 			from
 				@voucherPayablesDataTemp
 			where
@@ -242,7 +242,7 @@ begin try
 				,intPriceFixationId = intPriceFixationId  
 				,intPriceFixationDetailId = intPriceFixationDetailId  
 				,dblFinalPrice = dblFinalprice  
-				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intBillItemUOMId,dblAvailableQuantity)--dblAvailableQuantity
+				,dblAvailablePriceQuantity = dbo.fnCTConvertQtyToTargetItemUOM(intPriceItemUOMId,@intQtyToBillUOMId,dblAvailableQuantity)--dblAvailableQuantity
 				,dtmFixationDate = dtmFixationDate  
 				,dblPriceQuantity = dblQuantity  
 				,intAvailablePriceLoad = intAvailableLoad  
@@ -392,6 +392,7 @@ begin try
 					,dbl1099
 					,ysnStage
 					,intPriceFixationDetailId
+					,dblRatio
 				)
 				select
 					intPartitionId = vp.intPartitionId
@@ -465,7 +466,19 @@ begin try
 					,intWeightUOMId = vp.intWeightUOMId
 					,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
 					,dblExchangeRate = vp.dblExchangeRate
-					,intPurchaseTaxGroupId = (case when isnull(vp.intPurchaseTaxGroupId,0) = 0 then dbo.fnGetTaxGroupIdForVendor(vp.intEntityVendorId,@intCompanyLocationId,vp.intItemId,em.intEntityLocationId,@intFreightTermId) else vp.intPurchaseTaxGroupId end)
+					,intPurchaseTaxGroupId = 
+						CASE 
+							WHEN isnull(vp.intPurchaseTaxGroupId,0) = 0 THEN 
+								dbo.fnGetTaxGroupIdForVendor(
+									vp.intEntityVendorId
+									,@intCompanyLocationId
+									,vp.intItemId
+									,em.intEntityLocationId
+									,@intFreightTermId
+								) 
+							ELSE 
+								vp.intPurchaseTaxGroupId 
+						END
 					,dblTax = vp.dblTax
 					,dblDiscount = vp.dblDiscount
 					,dblDetailDiscountPercent = vp.dblDetailDiscountPercent
@@ -484,11 +497,30 @@ begin try
 					,int1099Form = vp.int1099Form
 					,int1099Category = vp.int1099Category
 					,dbl1099 = vp.dbl1099
-					,ysnStage = 0--vp.ysnStage
+					,ysnStage = --0--vp.ysnStage
+						CASE WHEN hasExistingPayable.intVoucherPayableId IS NOT NULL THEN 1 ELSE 0 END 
 					,intPriceFixationDetailId = @intPriceFixationDetailId
+					,dblRatio = 
+						dbo.fnDivide(
+							@dblTransactionQuantity
+							,dblQuantityToBill
+						)
 				from
 					@voucherPayables vp
-					left join tblEMEntityLocation em ON em.intEntityId = vp.intEntityVendorId and isnull(em.ysnDefaultLocation,0) = 1
+					LEFT JOIN tblEMEntityLocation em 
+						ON em.intEntityId = vp.intEntityVendorId 
+						AND isnull(em.ysnDefaultLocation,0) = 1
+					OUTER APPLY (
+						SELECT TOP 1 
+							ap.intVoucherPayableId
+						FROM
+							tblAPVoucherPayable ap
+						WHERE
+							ap.strSourceNumber = vp.strSourceNumber
+							AND ap.intInventoryReceiptItemId = vp.intInventoryReceiptItemId 
+							AND ap.intInventoryReceiptChargeId IS NULL 
+							AND vp.intInventoryReceiptChargeId IS NULL										
+					) hasExistingPayable
 				where
 					vp.intVoucherPayableId = @intVoucherPayableId
 
@@ -546,11 +578,13 @@ begin try
 					,[intTermId]		
 					,[intFreightTermId]				
 					,[strBillOfLading]					
-					,[ysnReturn]			
+					,[ysnReturn]
+					,[ysnStage]
+					,[dblRatio]			
 				)
 				EXEC uspICGetProRatedReceiptCharges
 					@intInventoryReceiptItemId = @intInventoryReceiptItemId
-					,@intBillUOMId = @intBillItemUOMId
+					,@intBillUOMId = @intQtyToBillUOMId
 					,@dblQtyBilled = @dblTransactionQuantity			
 			
 				-- Insert the pro-rated other charges. 
@@ -606,7 +640,9 @@ begin try
 					,[intTermId]		
 					,[intFreightTermId]				
 					,[strBillOfLading]					
-					,[ysnReturn]				
+					,[ysnReturn]
+					,[ysnStage]
+					,[dblRatio]
 				)
 				SELECT 
 					[intEntityVendorId]			
@@ -661,6 +697,8 @@ begin try
 					,[intFreightTermId]				
 					,[strBillOfLading]					
 					,[ysnReturn]
+					,[ysnStage]
+					,[dblRatio]
 				FROM 
 					@voucherPayableProRatedCharges
 
@@ -768,7 +806,7 @@ begin try
 					,dbl1099
 					,ysnStage
 		)
-		select
+		SELECT
 			intPartitionId = vp.intPartitionId
 			,intBillId = vp.intBillId
 			,intEntityVendorId = vp.intEntityVendorId
@@ -863,7 +901,8 @@ begin try
 		from
 			@voucherPayables vp
 		where
-			isnull(vp.intInventoryReceiptChargeId,0) = 0 and isnull(vp.intContractDetailId,0) = 0
+			--isnull(vp.intInventoryReceiptChargeId,0) = 0 and isnull(vp.intContractDetailId,0) = 0
+			ISNULL(vp.intContractDetailId,0) = 0
 
 		if exists (select top 1 1 from @voucherPayablesFinal)
 		begin
@@ -973,11 +1012,12 @@ begin try
 
 					select @intCreatedInventoryReceiptId = intInventoryReceiptId from tblICInventoryReceiptItem where intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId;
 
+					-- DO NOT USE uspICAddProRatedReceiptChargesToVoucher. Instead, use uspICGetProRatedReceiptCharges and uspICGetProRatedReceiptChargeTaxes
 					----1. Process Pro Rated Charges
 					--EXEC uspICAddProRatedReceiptChargesToVoucher
-					--	@intCreatedInventoryReceiptItemId
-					--	,@intCreatedBillId
-					--	,@intCreatedBillDetailId
+					--	@intInventoryReceiptItemId = @intCreatedInventoryReceiptItemId
+					--	,@intBillId = @intCreatedBillId
+					--	,@intBillDetailId = @intCreatedBillDetailId
 
 					--2. Insert into Contract Helper table tblCTPriceFixationDetailAPAR
 					if (isnull(@intCreatedPriceFixationDetailId,0) > 0)

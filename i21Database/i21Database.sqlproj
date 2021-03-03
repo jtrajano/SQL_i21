@@ -8916,7 +8916,9 @@
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
     <Build Include="dbo\Tables\tblGRTicketDiscountItemInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRModifyTicketDiscountItemInfo.sql" />
-    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />  
+    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
+    <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

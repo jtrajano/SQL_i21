@@ -63,7 +63,7 @@ BEGIN TRY
 				and intContractDetailId = CD.intContractDetailId
 			order by intSequenceHistoryId
 		) SH 
-		where SH.intContractStatusId NOT IN (3,5,6)
+		where SH.intContractStatusId NOT IN (3,5,6) and CD.intPricingTypeId <> 5
 
 
 		SELECT 
@@ -237,7 +237,7 @@ BEGIN TRY
 				, intUserId = InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
 			FROM tblICInventoryTransaction InvTran
-			JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId
+			JOIN tblLGLoadDetail LD ON LD.intLoadId = InvTran.intTransactionId AND LD.intLoadDetailId = InvTran.intTransactionDetailId
 			JOIN tblCTContractDetail CD ON CD.intContractDetailId = LD.intSContractDetailId
 			JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 				AND CD.intContractHeaderId = CH.intContractHeaderId
@@ -269,11 +269,11 @@ BEGIN TRY
 				, CD.intContractDetailId
 				, InvTran.dtmDate
 				, @dtmEndDate AS dtmEndDate
-				, dblQuantity = CASE WHEN CH.ysnLoad = 1 THEN  
+				, dblQuantity = (CASE WHEN CH.ysnLoad = 1 THEN  
 									1 * CH.dblQuantityPerLoad
 								ELSE
 									ISNULL(dbo.fnMFConvertCostToTargetItemUOM(CD.intItemUOMId,ReceiptItem.intUnitMeasureId,MAX(ReceiptItem.dblOpenReceive)), 0)
-								END
+								END) * (CASE WHEN CD.intPricingTypeId = 5 THEN -1 ELSE 1 END)
 				, 0
 				, COUNT(DISTINCT Receipt.intInventoryReceiptId)
 				, Receipt.intInventoryReceiptId
@@ -317,6 +317,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
+				, CD.intPricingTypeId
 
 			UNION ALL
 			SELECT CH.intContractTypeId
@@ -443,7 +444,54 @@ BEGIN TRY
 				tblGRStorageHistory SH_DP
 				INNER JOIN tblCTContractHeader CH
 					ON CH.intContractHeaderId = SH_DP.intContractHeaderId
-						AND (SH_DP.intTransactionTypeId IN (1,5) OR (SH_DP.intTransactionTypeId = 3 AND SH_DP.strType = 'From Transfer'))
+						AND SH_DP.intTransactionTypeId IN (1,5) 
+				INNER JOIN tblCTContractDetail CD
+					ON CD.intContractHeaderId = CH.intContractHeaderId
+			) ON SH_DP.intCustomerStorageId = SH.intCustomerStorageId
+			GROUP BY CH.intContractTypeId
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, SS.dtmCreated
+				, SS.intSettleStorageId
+				, SS.strStorageTicket
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, SS.intCreatedUserId
+				, SS.intItemUOMId
+
+			UNION ALL
+			SELECT 
+				CH.intContractTypeId
+				, CH.strContractNumber
+				, CD.intContractSeq
+				, CH.intContractHeaderId
+				, CD.intContractDetailId
+				, dbo.fnRemoveTimeOnDate(SS.dtmCreated)
+				, @dtmEndDate AS dtmEndDate
+				, SUM(SH.dblUnits) AS dblQuantity
+				, 0
+				, COUNT(DISTINCT SS.intSettleStorageId)
+				, SS.intSettleStorageId
+				, SS.strStorageTicket
+				, SS.intSettleStorageId
+				, 'Storage' --Settle Storage From Transfer
+				, CH.intCommodityId
+				, CH.ysnLoad
+				, CH.dblQuantityPerLoad
+				, CH.intEntityId
+				, intUserId = SS.intCreatedUserId
+				, SS.intItemUOMId
+			FROM tblGRSettleStorage SS
+			INNER JOIN tblGRStorageHistory SH ON SH.intSettleStorageId = SS.intSettleStorageId
+			INNER JOIN (
+				tblGRStorageHistory SH_DP
+				INNER JOIN tblCTContractHeader CH
+					ON CH.intContractHeaderId = SH_DP.intContractHeaderId
+						AND (SH_DP.intTransactionTypeId = 3 AND SH_DP.strType = 'From Transfer')
 				INNER JOIN tblCTContractDetail CD
 					ON CD.intContractHeaderId = CH.intContractHeaderId
 			) ON SH_DP.intCustomerStorageId = SH.intCustomerStorageId
@@ -472,7 +520,7 @@ BEGIN TRY
 				, CD_SOURCE.intContractDetailId
 				, dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate)
 				, @dtmEndDate AS dtmEndDate
-				, SUM(TSR.dblUnitQty) * -1 AS dblQuantity
+				, dblQuantity =  SUM(TSR.dblUnitQty)  
 				, 0
 				, COUNT(DISTINCT TS.intTransferStorageId)
 				, TS.intTransferStorageId
@@ -521,7 +569,7 @@ BEGIN TRY
 				, CD_SPLIT.intContractDetailId
 				, dbo.fnRemoveTimeOnDate(TS.dtmTransferStorageDate)
 				, @dtmEndDate AS dtmEndDate
-				, SUM(TSR.dblUnitQty) AS dblQuantity
+				, SUM(TSR.dblUnitQty) * -1 AS dblQuantity
 				, 0
 				, COUNT(DISTINCT TS.intTransferStorageId)
 				, TS.intTransferStorageId
