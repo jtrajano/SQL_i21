@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspAPRptOpenClearingOld]  
+﻿CREATE PROCEDURE [dbo].[uspAPRptOpenClearing]  
  @xmlParam NVARCHAR(MAX) = NULL  
 AS  
    
