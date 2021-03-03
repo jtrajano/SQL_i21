@@ -28,7 +28,10 @@ SET ANSI_WARNINGS OFF
 				@ysnReverse						BIT = 0,
 				@intLoadId						INT,
 				@dblNetWeight					NUMERIC(18,6),
-				@ysnWeightClaimsByContainer		BIT
+				@ysnWeightClaimsByContainer		BIT,
+				@intContractDetailId			INT,
+				@intItemUOMId					INT,
+				@dblQtyDifference				NUMERIC(18,6)
 
 	SELECT TOP 1 @ysnWeightClaimsByContainer = ISNULL(ysnWeightClaimsByContainer, 0) FROM tblLGCompanyPreference
 
@@ -92,12 +95,16 @@ SET ANSI_WARNINGS OFF
 					END
 						
 					UPDATE tblLGLoadDetailContainerLink 
-					SET dblReceivedQty = (@dblContainerQty + @dblQty)  
+					SET dblReceivedQty = (@dblContainerQty + @dblQty)
 					WHERE intLoadDetailId = @intSourceId 
 						AND intLoadContainerId = @intContainerId
 				END
 				
-				SELECT @dblContractQty = ISNULL(dblDeliveredQuantity,0) FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
+				SELECT 
+					@dblContractQty = ISNULL(dblDeliveredQuantity,0)
+					,@intContractDetailId = intPContractDetailId 
+					,@intItemUOMId = intItemUOMId
+				FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId
 
 				IF (@dblContractQty + @dblQty) < 0
 				BEGIN		
@@ -113,6 +120,24 @@ SET ANSI_WARNINGS OFF
 
 				IF @ysnReverse = 0
 				BEGIN
+					--CHECK IF ALLOW REWEIGHS
+					IF EXISTS(SELECT TOP 1 1 FROM tblLGLoad WHERE intLoadId = @intLoadId AND ISNULL(ysnAllowReweighs, 0) = 1)
+					BEGIN
+						SELECT @dblQtyDifference = (dblQuantity - @dblQty) * -1 FROM tblLGLoadContainer WHERE intLoadContainerId = @intContainerId AND dblQuantity <> @dblQty
+						
+						IF (@dblQtyDifference <> 0)
+						BEGIN
+							EXEC uspCTUpdateScheduleQuantityUsingUOM @intContractDetailId, @dblQtyDifference, @intUserId, @intSourceId, 'Load Schedule', @intItemUOMId
+
+							UPDATE tblLGLoadContainer SET dblQuantity = @dblQty WHERE intLoadContainerId = @intContainerId
+							UPDATE tblLGLoadDetailContainerLink SET dblQuantity = @dblQty WHERE intLoadContainerId = @intContainerId
+							UPDATE tblLGLoadDetail
+								SET dblQuantity = (SELECT SUM(dblQuantity) FROM tblLGLoadContainer WHERE intLoadId = @intLoadId)
+							WHERE intLoadId = @intLoadId AND intLoadDetailId = @intSourceId
+
+						END
+					END
+
 					IF EXISTS(SELECT 1 FROM tblLGLoadDetail WHERE intLoadDetailId = @intSourceId HAVING SUM(ISNULL(dblDeliveredQuantity, 0)) >= SUM(ISNULL(dblQuantity, 0)))
 						UPDATE tblLGLoad SET intShipmentStatus = 4 WHERE intLoadId = @intLoadId
 				
