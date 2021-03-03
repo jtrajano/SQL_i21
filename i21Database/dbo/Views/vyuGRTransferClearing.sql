@@ -1,6 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuGRTransferClearing]
 AS
 /*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP/DP*/
+--SELECT * FROM (
 --Receipt item
 SELECT	--'1.1' AS TEST,
     CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN CS_TO.intEntityId ELSE receipt.intEntityVendorId END AS intEntityVendorId
@@ -283,10 +284,9 @@ AND (
     (ST_TO.ysnDPOwnedType = 0 AND ST_FROM.ysnDPOwnedType = 1) --DP to OS
 	OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 0) --OS to DP
 )
-
 UNION ALL
 --Transfer Storages
-SELECT --'4' AS TEST,
+SELECT-- '4' AS TEST,
     CS.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,IR.strReceiptNumber
@@ -456,11 +456,7 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 Where Bill.ysnPosted = 1
-
-
 ----
-
-
 UNION ALL
 --Transfer Storages from above select statement
 SELECT DISTINCT --'6' AS TEST,
@@ -523,12 +519,6 @@ OUTER APPLY (
 		--AND intTransferStorageReferenceId = TSR.intTransferStorageReferenceId
 	GROUP BY intInventoryReceiptItemId
 ) TOTAL
---OUTER APPLY (
---	SELECT CASE WHEN ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) = receiptItem.dblOpenReceive
---		OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END AS isFullyTransferred
---		,ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) AS dblTransferredUnits
---		,S.intInventoryReceiptItemId
---) TRANSFER_TRAN
 LEFT JOIN (
 	SELECT DISTINCT intAccountId, intTransactionId, strDescription FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
@@ -544,4 +534,6 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS_TO.intItemUOMId
 WHERE APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***DS/SC*** FOR OP TO DP*/
-GO
+--) A 
+--WHERE dtmDate between '2021-03-03' and '2021-03-04'
+--AND strTransactionNumber LIKE 'TRA%'

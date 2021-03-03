@@ -8,7 +8,7 @@ SELECT
     ,APClearing.strAccountId  
 FROM (     
 --BILL ysnPrice = 1/Charge Entity      
-SELECT
+SELECT DISTINCT --'1' AS TEST,
     Receipt.intEntityVendorId AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber     
@@ -63,7 +63,7 @@ WHERE
 AND ReceiptCharge.ysnPrice = 1      
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
-SELECT
+SELECT DISTINCT --'2',
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber    
@@ -119,7 +119,7 @@ AND ReceiptCharge.ysnAccrue = 1
 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only    
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
-SELECT
+SELECT --'3',
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber    
@@ -176,7 +176,7 @@ AND ReceiptCharge.intEntityVendorId IS NOT NULL
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
 UNION ALL      
 --Transfer for Receipt Charges
-SELECT DISTINCT
+SELECT DISTINCT --'4',
     CS.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
     ,TS.strTransferStorageTicket
@@ -218,6 +218,13 @@ INNER JOIN (
 		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
 			AND CS.ysnTransferStorage = 0
 			AND CS.intTicketId IS NOT NULL
+    INNER JOIN tblGRStorageType ST_FROM
+        ON ST_FROM.intStorageScheduleTypeId = CS.intStorageTypeId
+    INNER JOIN tblGRCustomerStorage CS_TO
+        ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+    INNER JOIN tblGRStorageType ST_TO
+        ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+    WHERE ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1
 ) IR_SOURCE	
 	ON IR_SOURCE.intCustomerStorageId = CS.intCustomerStorageId
 INNER JOIN tblICItem IC
@@ -234,10 +241,77 @@ LEFT JOIN
 )  
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription LIKE '%Charges from %'
-
+UNION ALL
+SELECT DISTINCT --'4.1',
+   CS.intEntityId AS intEntityVendorId
+    ,TS.dtmTransferStorageDate AS dtmDate      
+    ,IR.strReceiptNumber      
+    ,IR.intInventoryReceiptId      
+    ,TS.intTransferStorageId
+    ,TS.strTransferStorageTicket
+    ,SR.intTransferStorageReferenceId
+    ,IRC.intInventoryReceiptChargeId      
+    ,IC.intItemId      
+    ,CS.intItemUOMId
+    ,unitMeasure.strUnitMeasure AS strUOM  
+    ,0
+    ,ISNULL(IRC.dblQuantity,0) AS dblReceiptChargeQty 
+    ,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) dblReceiptChargeTotal  
+    ,ISNULL(IRC.dblQuantity,0) AS dblReceiptChargeQty 
+    ,CS.intCompanyLocationId      
+    ,CL.strLocationName      
+    ,0
+FROM vyuGLDetail GL
+INNER JOIN vyuGLAccountDetail APClearing
+    ON APClearing.intAccountId = GL.intAccountId 
+		AND APClearing.intAccountCategoryId = 45
+INNER JOIN tblGRTransferStorage TS
+	ON TS.intTransferStorageId = GL.intTransactionId
+		AND TS.strTransferStorageTicket = GL.strTransactionId
+INNER JOIN tblGRTransferStorageReference SR
+	ON SR.intTransferStorageId = TS.intTransferStorageId
+INNER JOIN tblGRCustomerStorage CS
+	ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
+INNER JOIN tblSMCompanyLocation CL      
+    ON CL.intCompanyLocationId = CS.intCompanyLocationId
+INNER JOIN (
+	SELECT CS_.intCustomerStorageId
+		,intInventoryReceiptId
+	FROM tblGRStorageHistory SH
+	INNER JOIN tblGRTransferStorageReference TSR
+		ON TSR.intSourceCustomerStorageId = SH.intCustomerStorageId
+	INNER JOIN tblGRCustomerStorage CS_
+		ON CS_.intCustomerStorageId = TSR.intSourceCustomerStorageId
+			AND CS_.ysnTransferStorage = 0
+			AND CS_.intTicketId IS NOT NULL
+    INNER JOIN tblGRStorageType ST_FROM
+        ON ST_FROM.intStorageScheduleTypeId = CS_.intStorageTypeId
+    INNER JOIN tblGRCustomerStorage CS_TO
+        ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+    INNER JOIN tblGRStorageType ST_TO
+        ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+    WHERE ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0
+) IR_SOURCE	
+	ON IR_SOURCE.intCustomerStorageId = CS.intCustomerStorageId
+INNER JOIN tblICItem IC
+	ON IC.strItemNo = REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Charges from ', GL.strDescription), LEN(GL.strDescription) -1),'Charges from ','')
+INNER JOIN tblICInventoryReceipt IR
+	ON IR.intInventoryReceiptId = IR_SOURCE.intInventoryReceiptId
+INNER JOIN tblICInventoryReceiptCharge IRC
+	ON IRC.intInventoryReceiptId = IR.intInventoryReceiptId
+		AND IRC.intChargeId = IC.intItemId
+LEFT JOIN   
+(  
+    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
+        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
+)  
+    ON itemUOM.intItemUOMId = CS.intItemUOMId
+WHERE GL.strDescription LIKE '%Charges from %'
+--and TS.dtmTransferStorageDate between '2021-03-02' and '2021-03-03'
+AND (CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = SR.dblUnitQty)
 UNION ALL      
 --Transfer for Receipt Charge Taxes
-SELECT DISTINCT
+SELECT DISTINCT --'5',
     CS.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
     ,TS.strTransferStorageTicket
@@ -279,6 +353,13 @@ INNER JOIN (
 		ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
 			AND CS.ysnTransferStorage = 0
 			AND CS.intTicketId IS NOT NULL
+    INNER JOIN tblGRStorageType ST_FROM
+        ON ST_FROM.intStorageScheduleTypeId = CS.intStorageTypeId
+    INNER JOIN tblGRCustomerStorage CS_TO
+        ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
+    INNER JOIN tblGRStorageType ST_TO
+        ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+    WHERE ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1
 ) IR_SOURCE	
 	ON IR_SOURCE.intCustomerStorageId = CS.intCustomerStorageId
 INNER JOIN tblICInventoryReceipt IR
