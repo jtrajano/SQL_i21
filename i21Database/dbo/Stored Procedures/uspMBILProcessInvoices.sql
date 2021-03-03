@@ -16,7 +16,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN
+BEGIN TRANSACTION
 
 DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
@@ -44,9 +44,57 @@ CREATE TABLE #TempMBILInvoice (
 
 	IF EXISTS(SELECT TOP 1 1 FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL)
 	BEGIN
-		SET @ErrorMessage = 'Record already posted.'
-		RETURN
+		IF EXISTS(SELECT TOP 1 1 FROM tblARInvoice WHERE ysnPosted = 1 AND intInvoiceId = (SELECT TOP 1 inti21InvoiceId FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice) AND inti21InvoiceId IS NOT NULL))
+		BEGIN
+			UPDATE tblMBILInvoice SET ysnPosted = 1 WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+			SET @ErrorMessage = 'Record already posted.'
+			RETURN
+		END
+		ELSE
+		BEGIN			
+			DECLARE @success BIT
+			DECLARE @successfulCount INT
+			DECLARE @invalidCount INT
+			DECLARE @batchIdUsed NVARCHAR(MAX)
+			DECLARE @recapId BIT
+			DECLARE @RaiseError INT
+
+			DECLARE @invoice NVARCHAR(MAX)
+			SELECT TOP 1 @invoice = inti21InvoiceId FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+
+			EXEC uspARPostInvoice 
+				@post = 1, 
+				@recap = 0, 
+				@param = @invoice, 
+				@userId = @UserId, 
+				@batchId = default,
+				@exclude = N'',
+				@success = @success output,
+				@successfulCount = @successfulCount output,
+				@invalidCount = @invalidCount output,
+				@batchIdUsed = @batchIdUsed output,
+				@recapId = @recapId output,
+				@transType = default,
+				@raiseError = @RaiseError,
+				@accrueLicense = 0
+
+			SELECT @RaiseError
+			IF ISNULL(@RaiseError,0) = 1
+			BEGIN
+				SET @ErrorMessage = ERROR_MESSAGE();
+				ROLLBACK TRANSACTION
+				RETURN
+			END			
+
+			UPDATE tblMBILInvoice SET ysnPosted = 1 WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+			SET @ErrorMessage = 'Invoice successfully posted';
+
+			COMMIT TRANSACTION
+			RETURN
+			
+		END
 	END
+	
 	-------------------------------------------------------------
 	------------------- End of Validations ----------------------
 	-------------------------------------------------------------
@@ -225,8 +273,9 @@ CREATE TABLE #TempMBILInvoice (
 
 	END
 
-END
+--END
 
+COMMIT TRANSACTION
 
 
 
