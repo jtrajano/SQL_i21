@@ -7338,6 +7338,8 @@
     <Build Include="dbo\Stored Procedures\uspGRProcessBillStorage.sql" />
     <Build Include="dbo\Functions\fnGRGetBillStorageDetails.sql" />
     <Build Include="dbo\User Defined Types\StorageSchedulePeriodTableType.sql" />
+    <Build Include="dbo\User Defined Types\StoreItemPricePricing.sql" />
+    <Build Include="dbo\User Defined Types\StoreItemCostPricing.sql" />
     <Build Include="dbo\Functions\fnGRCalculateStorageCharge.sql" />
     <None Include="Scripts\Post-Deployment\AR\DefaultData\2_CleanStagingTables.sql" />
     <Build Include="dbo\Stored Procedures\uspGRUnpostTransfer.sql" />
@@ -7345,6 +7347,8 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateIntegrationPayableAvailableQty.sql" />
     <Build Include="dbo\Stored Procedures\uspGRCheckStorageTicketStatus.sql" />
     <Build Include="dbo\Views\vyuGRAccruedStorages.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterRetailItemPricing.sql" />
+    <Build Include="dbo\Views\vyuSTPricebookMasterCostItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGetTransporterBulkInvoiceTax.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBankReconClearedVoidedTransactionsSubReport.sql" />
     <Build Include="dbo\Stored Procedures\uspTFGenerateMNPDA49.sql" />

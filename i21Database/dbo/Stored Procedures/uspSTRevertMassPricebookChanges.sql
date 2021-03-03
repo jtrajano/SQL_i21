@@ -32,6 +32,7 @@ BEGIN TRY
 		SET @ysnSuccess = CAST(1 AS BIT)
 
 		DECLARE @intRevertType AS INT = (SELECT TOP 1 intRevertType FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
+		DECLARE @dtmEffectiveDate AS DATETIME = (SELECT TOP 1 dtmEffectiveDate FROM tblSTRevertHolder WHERE intRevertHolderId = @intRevertHolderId)
 
 		DECLARE @intRevertItemRecords INT = 0
 		DECLARE @intRevertItemLocationRecords INT = 0
@@ -891,7 +892,7 @@ BEGIN TRY
 									WHERE Uom.ysnStockUnit = 1
 									ORDER BY temp.intItemPricingId ASC
 										
-
+								
 
 									-- UPDATE ITEM PRICING
 									EXEC [dbo].[uspICUpdateItemPricingForCStore]
@@ -905,6 +906,7 @@ BEGIN TRY
 											,@dblStandardCost			= @dblStandardCost 
 											,@dblRetailPrice			= @dblSalePrice 
 											,@dblLastCost				= @dblLastCost
+											,@dtmEffectiveDate			= @dtmEffectiveDate
 											,@intEntityUserSecurityId	= @intEntityId -- *** ADD EntityId of the user who commited the revert ***
 
 			

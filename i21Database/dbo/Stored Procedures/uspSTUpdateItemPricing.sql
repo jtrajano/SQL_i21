@@ -31,6 +31,7 @@ BEGIN TRY
 			@StandardCost       DECIMAL (18,6),
 			@RetailPrice        DECIMAL (18,6),
 			@SalesPrice         DECIMAL (18,6),
+		    @EffectiveDate		NVARCHAR(50),
 		    @SalesStartDate		NVARCHAR(50),
 			@SalesEndDate   	NVARCHAR(50),
 			@ysnPreview			NVARCHAR(1),
@@ -54,6 +55,7 @@ BEGIN TRY
 			@StandardCost 	 = 	 Cost,
 			@RetailPrice   	 =	 Retail,
 			@SalesPrice		 =	 SalesPrice,
+			@EffectiveDate	 =	 EffectiveDate,
 			@SalesStartDate	 =	 SalesStartingDate,
 			@SalesEndDate	 =	 SalesEndingDate,
 			@ysnPreview		 =   ysnPreview,
@@ -75,6 +77,7 @@ BEGIN TRY
 			Cost		            DECIMAL (18,6),
 			Retail		            DECIMAL (18,6),
 			SalesPrice       		DECIMAL (18,6),
+			EffectiveDate			NVARCHAR(50),
 			SalesStartingDate		NVARCHAR(50),
 			SalesEndingDate			NVARCHAR(50),
 			ysnPreview				NVARCHAR(1),
@@ -153,11 +156,6 @@ BEGIN TRY
 			)
 		;
 	END
-
-
-
-
-
 
 	-- Add the filter records
 	BEGIN
@@ -254,21 +252,21 @@ BEGIN TRY
 
 	DECLARE @dblStandardCostConv AS NUMERIC(38, 20) = CAST(@StandardCost AS NUMERIC(38, 20))
 	DECLARE @dblRetailPriceConv AS NUMERIC(38, 20) = CAST(@RetailPrice AS NUMERIC(38, 20))
+	DECLARE @dtmEffectiveDateConv AS DATE = CAST(@EffectiveDate AS DATE)
 	DECLARE @intCurrentUserIdConv AS INT = CAST(@currentUserId AS INT)
-
-
-
 
 
 	BEGIN TRY
 		-- ITEM PRICING
 		EXEC [uspICUpdateItemPricingForCStore]
 			  @strUpcCode				= @strUpcCode
+			, @strScreen				= 'UpdateItemPricing'
 			, @strDescription			= @Description -- NOTE: Description cannot be '' or empty string, it should be NULL value instead of empty string
 			, @intItemId				= NULL
 			, @dblStandardCost			= @dblStandardCostConv
 			, @dblRetailPrice			= @dblRetailPriceConv
 			, @intEntityUserSecurityId	= @intCurrentUserIdConv
+			, @dtmEffectiveDate			= @dtmEffectiveDateConv
 	END TRY
 	BEGIN CATCH
 		SELECT 'uspICUpdateItemPricingForCStore', ERROR_MESSAGE()
