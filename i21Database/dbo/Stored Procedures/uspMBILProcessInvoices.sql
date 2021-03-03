@@ -16,7 +16,7 @@ SET NOCOUNT ON
 SET XACT_ABORT ON
 SET ANSI_WARNINGS OFF
 
-BEGIN TRANSACTION
+BEGIN
 
 DECLARE @ErrorSeverity INT
 DECLARE @ErrorState INT
@@ -62,36 +62,55 @@ CREATE TABLE #TempMBILInvoice (
 			DECLARE @invoice NVARCHAR(MAX)
 			SELECT TOP 1 @invoice = inti21InvoiceId FROM vyuMBILInvoiceItem WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
 
-			EXEC uspARPostInvoice 
-				@post = 1, 
-				@recap = 0, 
-				@param = @invoice, 
-				@userId = @UserId, 
-				@batchId = default,
-				@exclude = N'',
-				@success = @success output,
-				@successfulCount = @successfulCount output,
-				@invalidCount = @invalidCount output,
-				@batchIdUsed = @batchIdUsed output,
-				@recapId = @recapId output,
-				@transType = default,
-				@raiseError = @RaiseError,
-				@accrueLicense = 0
+			BEGIN TRY
+				BEGIN TRANSACTION
 
-			SELECT @RaiseError
-			IF ISNULL(@RaiseError,0) = 1
+				EXEC uspARPostInvoice 
+					@post = 1, 
+					@recap = 0, 
+					@param = @invoice, 
+					@userId = @UserId, 
+					@batchId = default,
+					@exclude = N'',
+					@success = @success output,
+					@successfulCount = @successfulCount output,
+					@invalidCount = @invalidCount output,
+					@batchIdUsed = @batchIdUsed output,
+					@recapId = @recapId output,
+					@transType = default,
+					@raiseError = @RaiseError,
+					@accrueLicense = 0
+
+				COMMIT TRANSACTION
+			END TRY
+			BEGIN CATCH
+				IF ISNULL(@RaiseError,0) = 1
+				BEGIN
+					SET @ErrorMessage = ERROR_MESSAGE();
+					PRINT @ErrorMessage
+					ROLLBACK TRANSACTION
+					RETURN
+				END	
+				IF @@TRANCOUNT>0
+				BEGIN
+					SET @ErrorMessage = ERROR_MESSAGE();
+					PRINT @ErrorMessage
+					ROLLBACK TRANSACTION
+					RETURN
+				END
+			END CATCH
+
+			IF ISNULL(@success,0) = 1
 			BEGIN
-				SET @ErrorMessage = ERROR_MESSAGE();
-				ROLLBACK TRANSACTION
+				UPDATE tblMBILInvoice SET ysnPosted = 1 WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
+				SET @ErrorMessage = 'Invoice successfully posted';
 				RETURN
-			END			
-
-			UPDATE tblMBILInvoice SET ysnPosted = 1 WHERE intInvoiceId IN (select intInvoiceId from #TempMBILInvoice)
-			SET @ErrorMessage = 'Invoice successfully posted';
-
-			COMMIT TRANSACTION
-			RETURN
-			
+			END	
+			ELSE
+			BEGIN
+				SET @ErrorMessage = 'Unable to post transction. Kindly check the created invoice for details.';
+				RETURN
+			END					
 		END
 	END
 	
@@ -273,9 +292,8 @@ CREATE TABLE #TempMBILInvoice (
 
 	END
 
---END
+END
 
-COMMIT TRANSACTION
 
 
 
