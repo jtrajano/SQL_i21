@@ -141,7 +141,7 @@ BEGIN
 			--------------------------------------------------VALIDATION PROCESS--------------------------------------------------
 
 			--check if record exists
-			IF NOT EXISTS(SELECT 1 FROM tblSMTransaction WHERE intTransactionId = ISNULL(@transactionid, 0))
+			IF NOT EXISTS(SELECT 1 FROM tblSMTransaction WHERE intTransactionId = ISNULL(@transactionId, 0))
 			BEGIN
 				SET @error =  'Transaction does not exists.';
 				IF @throwError = 1
