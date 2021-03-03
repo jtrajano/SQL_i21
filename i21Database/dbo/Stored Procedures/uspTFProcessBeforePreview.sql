@@ -418,6 +418,36 @@ BEGIN TRY
 				AND Trans.intTransactionId IS NOT NULL
 
 		END
+		ELSE IF (@TaxAuthorityCode = 'FL' AND @ScheduleCode = '5LO_Sum')
+		BEGIN
+			DELETE FROM tblTFTransactionDynamicFL
+			WHERE intTransactionId IN (
+				SELECT intTransactionId FROM #tmpTransaction
+			)
+
+			INSERT INTO tblTFTransactionDynamicFL (intTransactionId
+				, strFLCountyCode
+				, strFLCounty
+				, dblFLRate1
+				, dblFLRate2
+				, dblFLEntitled
+				, dblFLNotEntitled
+				, intConcurrencyId)
+			SELECT Trans.intTransactionId
+					, CL.strLocation
+					, CL.strCounty
+					, CL.dblRate1
+					, CL.dblRate2
+					, ISNULL(Trans.dblNet, 0) * ISNULL(CL.dblRate1, 0)
+					, ISNULL(Trans.dblNet, 0) * ISNULL(CL.dblRate2, 0)
+					, 1
+			FROM #tmpTransaction Trans
+			INNER JOIN tblTFTaxAuthorityCountyLocation TCL ON TCL.intTaxAuthorityCountyLocationId = Trans.intTaxAuthorityCountyLocationId
+			INNER JOIN tblTFCountyLocation CL ON CL.intCountyLocationId = TCL.intCountyLocationId
+			WHERE Trans.uniqTransactionGuid = @Guid
+				AND Trans.intTransactionId IS NOT NULL
+
+		END
 
 		DELETE FROM @tmpRC WHERE intReportingComponentId = @RCId
 
