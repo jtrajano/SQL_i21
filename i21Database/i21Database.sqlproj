@@ -8900,6 +8900,7 @@
     <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
+    <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
