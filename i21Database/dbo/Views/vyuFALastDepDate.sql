@@ -1,3 +1,4 @@
+
 CREATE VIEW vyuFALastDepDate
 AS
 WITH GetLatestDepDate AS(

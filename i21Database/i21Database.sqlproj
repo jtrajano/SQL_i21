@@ -464,6 +464,7 @@
     <Build Include="dbo\Stored Procedures\uspGLPostJournal.sql" />
     <Build Include="dbo\Views\vyuFAFixedAsset.sql" />
     <Build Include="dbo\Views\vyuFALastDepDate.sql" />
+    <Build Include="dbo\Views\vyuFANextDepreciation.sql" />
     <Build Include="dbo\Views\vyuCMBank.sql" />
     <Build Include="dbo\Views\vyuCMCheckNumberAudit.sql" />
     <Build Include="dbo\Views\vyuGLAccountGroupView.sql" />
