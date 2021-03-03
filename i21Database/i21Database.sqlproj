@@ -9135,6 +9135,8 @@
     <Build Include="dbo\Views\vyuMFGetVirtualRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetMarketBasis.sql" />
 	<Build Include="dbo\Tables\tblTFTransactionDynamicFL.sql" />
+    <Build Include="dbo\Views\vyuICSearchBundleDetails.sql" />
+    <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
