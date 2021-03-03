@@ -89,17 +89,6 @@ BEGIN TRY
 		IF ((SELECT COUNT(1)FROM @ContractSliceDetail) < 1)
 			RETURN;
 
-		IF EXISTS (
-				SELECT 1
-				FROM tblLGLoad L
-				JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
-				WHERE LD.intPContractDetailId = @intParentContractDetailId
-					AND L.intShipmentType = 1
-					AND L.intShipmentStatus NOT IN (4,10))
-		BEGIN
-			RAISERROR ('Shipment exists for the contract sequence. Cannot proceed.',16,1)
-		END
-
 		SELECT @strRowState = 'Modified'
 
 		SELECT @intUserId = intLastModifiedById
