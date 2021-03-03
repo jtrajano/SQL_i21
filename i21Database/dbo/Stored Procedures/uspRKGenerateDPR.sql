@@ -5639,7 +5639,7 @@ BEGIN TRY
 				)
 				SELECT 
 					intDPRRunLogId = @intDPRRunLogId
-					, strContractNumber + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END
+					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
 					, intSeqNo
 					, intContractHeaderId
 					, strInternalTradeNo
@@ -5803,7 +5803,7 @@ BEGIN TRY
 				)
 				SELECT 
 					intDPRRunLogId = @intDPRRunLogId
-					, strContractNumber + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END
+					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
 					, intSeqNo
 					, intContractHeaderId
 					, strInternalTradeNo
@@ -7608,7 +7608,7 @@ BEGIN TRY
 			)
 			SELECT 
 				intDPRRunLogId = @intDPRRunLogId
-				, strContractNumber + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END
+				, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
 				, intSeqNo
 				, intContractHeaderId
 				, strInternalTradeNo
