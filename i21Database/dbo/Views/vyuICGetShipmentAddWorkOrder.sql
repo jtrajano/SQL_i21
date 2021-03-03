@@ -2,7 +2,7 @@
 AS
 
 SELECT   
-   strOrderType = 'Work Order' COLLATE Latin1_General_CI_AS  
+   strOrderType = 'AG Work Order' COLLATE Latin1_General_CI_AS  
  , strSourceType = 'None' COLLATE Latin1_General_CI_AS  
  , intLocationId = WO.intCompanyLocationId  
  , strShipFromLocation = COMPANYLOCATION.strLocationName  
