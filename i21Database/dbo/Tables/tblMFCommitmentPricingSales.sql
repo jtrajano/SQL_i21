@@ -15,7 +15,6 @@
 	intBookId INT,
 	intSubBookId INT,
 	intSequenceNo INT,
-	dblArbitrage NUMERIC(18, 6),
 	
 	CONSTRAINT [PK_tblMFCommitmentPricingSales] PRIMARY KEY (intCommitmentPricingSalesId),
 	CONSTRAINT [FK_tblMFCommitmentPricingSales_tblMFCommitmentPricing] FOREIGN KEY (intCommitmentPricingId) REFERENCES tblMFCommitmentPricing(intCommitmentPricingId) ON DELETE CASCADE,

@@ -1547,6 +1547,15 @@ GO
 			,[ysnEnable]			= 1
 			,[intConcurrencyId]		= 1
 	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Contract Release Instruction' and strModule = 'Contract Management')
+	UNION ALL
+	SELECT	[intStartingNumberId]	= 159
+			,[strTransactionType]	= N'Pricing Number'
+			,[strPrefix]			= N'CP-'
+			,[intNumber]			= 1
+			,[strModule]			= 'Manufacturing'
+			,[ysnEnable]			= 1
+			,[intConcurrencyId]		= 1
+	WHERE NOT EXISTS (SELECT TOP 1 1 FROM tblSMStartingNumber WHERE strTransactionType = N'Sample Number')
 
 	SET IDENTITY_INSERT [dbo].[tblSMStartingNumber] OFF
 GO

@@ -16,6 +16,12 @@
 	strComment NVARCHAR(MAX) COLLATE Latin1_General_CI_AS,
 	dblMarketArbitrage NUMERIC(18, 6),
 	ysnPost BIT CONSTRAINT [DF_tblMFCommitmentPricing_ysnPost] DEFAULT 0,
+	dblCalculatedLots NUMERIC(18, 6),
+	dblCalculatedQuantity NUMERIC(18, 6),
+	dblCalculatedFutures NUMERIC(18, 6),
+	dblCalculatedFXPrice NUMERIC(18, 6),
+	dblCalculatedRefPrice NUMERIC(18, 6),
+	dblCalculatedArbitrage NUMERIC(18, 6),
 
 	[dtmCreated] DATETIME, 
     [intCreatedUserId] INT,
