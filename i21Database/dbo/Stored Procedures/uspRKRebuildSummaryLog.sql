@@ -317,6 +317,7 @@ BEGIN TRY
 				, CH.intEntityId
 				, InvTran.intCreatedEntityId
 				, InvTran.intItemUOMId
+				, CD.intPricingTypeId
 
 			UNION ALL
 			SELECT CH.intContractTypeId
