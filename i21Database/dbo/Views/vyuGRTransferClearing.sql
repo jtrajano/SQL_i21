@@ -431,7 +431,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
+-- WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
 UNION ALL
 -- Bill for Transfer Settlement
 SELECT 
@@ -594,10 +594,12 @@ SELECT DISTINCT
     ,CS_TO.intItemId
     ,CS_TO.intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * -1 AS dblTransferTotal  --Orig Calculation	
-    ,ISNULL(TSR.dblUnitQty, 0) * -1 AS dblTransferQty
-     ,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * -1 AS dblReceiptTotal
-    ,ISNULL(TSR.dblUnitQty, 0) * -1 AS dblReceiptQty
+    --,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+	
+    ,ISNULL(CAST((TSR.dblUnitQty) * case when ST_FROM.ysnDPOwnedType = 1 and ST_TO.ysnDPOwnedType = 0 then CS_FROM.dblBasis + CS_FROM.dblSettlementPrice else (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ','')) end AS DECIMAL(38,15) ),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,ISNULL(TSR.dblUnitQty, 0) AS dblTransferQty
+    ,0 AS dblReceiptTotal
+    ,0 AS dblReceiptQty
     ,CS_TO.intCompanyLocationId
     ,CL_TO.strLocationName
     ,0
