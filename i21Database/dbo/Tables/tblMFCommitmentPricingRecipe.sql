@@ -19,6 +19,7 @@
 	dblCost5 NUMERIC(18, 6),
 	dblVirtualTotalCost NUMERIC(18, 6),
 	dblActualTotalCost NUMERIC(18, 6),
+	strBlendCode NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	
 	CONSTRAINT [PK_tblMFCommitmentPricingRecipe] PRIMARY KEY (intCommitmentPricingRecipeId),
 	CONSTRAINT [FK_tblMFCommitmentPricingRecipe_tblMFCommitmentPricing] FOREIGN KEY (intCommitmentPricingId) REFERENCES tblMFCommitmentPricing(intCommitmentPricingId) ON DELETE CASCADE,
