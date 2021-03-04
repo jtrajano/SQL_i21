@@ -526,6 +526,40 @@ WHERE RC.intTaxAuthorityId = @TaxAuthorityId
 */
 	DECLARE @ReportingComponentConfigurations AS TFReportingComponentConfigurations
 
+	INSERT INTO @ReportingComponentConfigurations(
+		intReportTemplateId
+		, strFormCode
+		, strScheduleCode
+		, strType
+		, strTemplateItemId
+		, strReportSection
+		, intReportItemSequence
+		, intTemplateItemNumber
+		, strDescription
+		, strScheduleList
+		, strConfiguration
+		, ysnConfiguration
+		, ysnUserDefinedValue
+		, strLastIndexOf
+		, strSegment
+		, intSort
+		, ysnOutputDesigner
+		, strInputType
+		, intMasterId
+	)
+	SELECT intReportTemplateId = 0, strFormCode = 'DR-309632', strScheduleCode = '5LO_Sum', strType = 'Motor Fuel (Gasoline, Gasohol, Ethanol)', strTemplateItemId = '5LO_Sum_strFLCountyCode', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'strFLCountyCode', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 0, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = 1, strInputType = NULL, intMasterId = 900001
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'DR-309632', strScheduleCode = '5LO_Sum', strType = 'Motor Fuel (Gasoline, Gasohol, Ethanol)', strTemplateItemId = '5LO_Sum_strFLCounty', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'strFLCounty', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 0, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = 1, strInputType = NULL, intMasterId = 900002
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'DR-309632', strScheduleCode = '5LO_Sum', strType = 'Motor Fuel (Gasoline, Gasohol, Ethanol)', strTemplateItemId = '5LO_Sum_dblFLRate1', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'dblFLRate1', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 0, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '3', ysnOutputDesigner = 1, strInputType = NULL, intMasterId = 900003
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'DR-309632', strScheduleCode = '5LO_Sum', strType = 'Motor Fuel (Gasoline, Gasohol, Ethanol)', strTemplateItemId = '5LO_Sum_dblFLEntitled', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'dblFLEntitled', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 0, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '4', ysnOutputDesigner = 1, strInputType = NULL, intMasterId = 900004
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'DR-309632', strScheduleCode = '5LO_Sum', strType = 'Motor Fuel (Gasoline, Gasohol, Ethanol)', strTemplateItemId = '5LO_Sum_dblFLRate2', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'dblFLRate2', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 0, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '5', ysnOutputDesigner = 1, strInputType = NULL, intMasterId = 900005
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'DR-309632', strScheduleCode = '5LO_Sum', strType = 'Motor Fuel (Gasoline, Gasohol, Ethanol)', strTemplateItemId = '5LO_Sum_dblFLNotEntitled', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'dblFLNotEntitled', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 0, ysnUserDefinedValue = '0', strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '6', ysnOutputDesigner = 1, strInputType = NULL, intMasterId = 900006
+
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'FLEFile', strScheduleCode = 'FLEFile', strType = '', strTemplateItemId = 'FLEFile_strCompanyId', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Company Id', strScheduleList = NULL, strConfiguration = '', ysnConfiguration = 1, ysnUserDefinedValue = 1, strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '1', ysnOutputDesigner = 0, strInputType = NULL, intMasterId = 900007
+	UNION ALL SELECT intReportTemplateId = 0, strFormCode = 'FLEFile', strScheduleCode = 'FLEFile', strType = '', strTemplateItemId = 'FLEFile_intAmendedRecordId', strReportSection = '', intReportItemSequence = '0', intTemplateItemNumber = '0', strDescription = 'Amended Record Id (0 or 1)', strScheduleList = NULL, strConfiguration = '0', ysnConfiguration = 1, ysnUserDefinedValue = 1, strLastIndexOf = NULL, strSegment = NULL, intConfigurationSequence = '2', ysnOutputDesigner = 0, strInputType = 'integer', intMasterId = 900008
+
+	EXEC uspTFUpgradeReportingComponentConfigurations @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentConfigurations = @ReportingComponentConfigurations
+
+
 -- Reporting Component - Output Designer
 /* Generate script for Reporting Component - Output Designer. Specify Tax Authority Id to filter out specific Reporting Component - Output Designer only.
 select 'UNION ALL SELECT intScheduleColumnId = ' + CAST(ROW_NUMBER() OVER(ORDER BY RCF.intMasterId) AS NVARCHAR(10))
