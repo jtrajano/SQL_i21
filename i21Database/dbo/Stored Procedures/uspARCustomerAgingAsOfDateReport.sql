@@ -359,7 +359,7 @@ INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
-  AND ISNULL(ID.strDocumentNumber, '') <> ''
+  AND ISNULL(ID.strDocumentNumber, '') <> '' 
   AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
 GROUP BY ID.strDocumentNumber
 
