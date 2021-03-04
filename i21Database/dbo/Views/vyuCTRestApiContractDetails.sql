@@ -1,4 +1,4 @@
-CREATE VIEW vyuCTRestApiContractDetails
+CREATE VIEW [dbo].[vyuCTRestApiContractDetails]
 AS
 SELECT
 	cd.intContractDetailId
@@ -180,13 +180,25 @@ SELECT
 	, cs.strContractStatus
 	, fm.strFutMarketName
 	, mo.strFutureMonth
+	, CASE WHEN cd.intPricingTypeId IN(1, 6) THEN NULL ELSE cd.dblQuantity - ISNULL(qpf.dblQuantityPriceFixed, 0) END dblUnpricedQty
+	, CASE WHEN cd.intPricingTypeId IN(1, 6) THEN NULL ELSE cd.dblNoOfLots - ISNULL(pf.dblLotsFixed, 0) END dblUnpricedLots
 FROM tblCTContractDetail cd
 JOIN tblCTContractHeader ch ON ch.intContractHeaderId = cd.intContractHeaderId
 LEFT JOIN tblCTPriceFixation pf	ON pf.intContractHeaderId = ch.intContractHeaderId
 	AND pf.intContractDetailId = cd.intContractDetailId
+OUTER APPLY (
+	SELECT SUM(d.dblQuantity) dblQuantityPriceFixed
+	FROM tblCTPriceFixationDetail d
+	WHERE intPriceFixationId = pf.intPriceFixationId
+	GROUP BY intPriceFixationId
+) qpf
 JOIN tblCTPricingType pt ON pt.intPricingTypeId = cd.intPricingTypeId
 LEFT JOIN tblICItemUOM sm ON sm.intItemId = cd.intItemId
 JOIN tblCTContractStatus cs ON cs.intContractStatusId = cd.intContractStatusId
 LEFT JOIN tblRKFutureMarket fm ON fm.intFutureMarketId = cd.intFutureMarketId
 LEFT JOIN tblRKFuturesMonth	mo ON mo.intFutureMonthId =	cd.intFutureMonthId
 INNER JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = cd.intCompanyLocationId
+
+GO
+
+
