@@ -24,8 +24,11 @@ BEGIN
       )
       DECLARE @tblSubsidiary TABLE 
       (
-        [intSubsidiaryCompanyId] [int],
-        [strDatabase] [nvarchar](50) COLLATE Latin1_General_CI_AS NULL	
+        [intSubsidiaryCompanyId] INT,
+        [strCompany] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL	,
+        [strDatabase] NVARCHAR (50) COLLATE Latin1_General_CI_AS NULL	,
+        [ysnCompanySegment] BIT NULL,
+        [hasCompanySegment] BIT NULL
       )
 
       IF @ysnClear =  1
@@ -38,19 +41,40 @@ BEGIN
         UPDATE tblGLSubsidiaryCompany SET intLastGLDetailId = NULL, ysnMergedCOA = 0
       END
 
-      INSERT INTO @tblSubsidiary SELECT intSubsidiaryCompanyId, strDatabase FROM tblGLSubsidiaryCompany
+      INSERT INTO @tblSubsidiary SELECT intSubsidiaryCompanyId,strCompany, strDatabase, ysnCompanySegment , hasCompanySegment FROM tblGLSubsidiaryCompany
       DECLARE @strDatabase NVARCHAR(40)
+      DECLARE @strCompany NVARCHAR(40)
+      DECLARE @ysnCompanySegment BIT
+      DECLARE @hasCompanySegment BIT
+      DECLARE @strErrorMsg NVARCHAR(MAX)
 
       DECLARE @strSQL NVARCHAR(max)
 
       WHILE EXISTS (SELECT TOP 1 1 FROM @tblSubsidiary)
       BEGIN
-        SELECT TOP 1 @strDatabase = strDatabase FROM @tblSubsidiary
+        SELECT TOP 1 
+        @strCompany = strCompany,
+        @strDatabase = strDatabase ,
+        @hasCompanySegment = ISNULL(hasCompanySegment,0),
+        @ysnCompanySegment =ISNULL(ysnCompanySegment,0) FROM @tblSubsidiary
+
+
         SET @strSQL = 
-        REPLACE ('SELECT  strCode, strDescription,strChartDesc,  strAccountCategory, strAccountGroup,strAccountType, strStructureName  from [strDatabase].dbo.vyuGLSegmentDetail where intStructureType <> 6'
+        REPLACE ('SELECT  strCode, strDescription,strChartDesc,  strAccountCategory, strAccountGroup,strAccountType, 
+        strStructureName  from [strDatabase].dbo.vyuGLSegmentDetail '
         , '[strDatabase]', @strDatabase)
+
+        IF @ysnCompanySegment = 1
+          SET @strSQL = @strSQL + 'where intStructureType <> 6'
+        ELSE
+        BEGIN
+          IF @hasCompanySegment = 0
+            SET @strErrorMsg = 'Company ' + @strCompany + ' has no company segment.'
+            RAISERROR(@strErrorMsg, 16,1)
+            RETURN
+        END
+
         INSERT INTO @tblUnionSegments EXEC (@strSQL)
-        
         DELETE FROM @tblSubsidiary WHERE @strDatabase = strDatabase 
       END
 
