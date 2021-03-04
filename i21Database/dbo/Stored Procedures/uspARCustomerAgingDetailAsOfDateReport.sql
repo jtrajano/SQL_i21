@@ -233,7 +233,7 @@ WHERE ysnPosted = 1
 					WHERE (strAccountCategory IN ('AR Account', 'Customer Prepayments') OR (I.strTransactionType = 'Cash Refund' AND strAccountCategory = 'AP Account'))
 		) AC ON GLAS.intAccountCategoryId = AC.intAccountCategoryId
 	)
-	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
+	AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal	
 	AND (@strSourceTransactionLocal IS NULL OR strType LIKE '%'+@strSourceTransactionLocal+'%')
 
 --#CASHREFUNDS
@@ -247,9 +247,9 @@ INNER JOIN @tblCustomers C ON I.intEntityCustomerId = C.intEntityCustomerId
 INNER JOIN @tblCompanyLocation CL ON I.intCompanyLocationId = CL.intCompanyLocationId
 WHERE I.strTransactionType = 'Cash Refund'
   AND I.ysnPosted = 1
-  AND (ISNULL(I.intOriginalInvoiceId, '') <> '' OR ISNULL(ID.strDocumentNumber, '') <> '')
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
-GROUP BY I.intOriginalInvoiceId, ID.strDocumentNumber
+  AND ISNULL(ID.strDocumentNumber, '') <> ''
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal  
+GROUP BY ID.strDocumentNumber
 
 --#CASHRETURNS
 SELECT intInvoiceId
@@ -265,7 +265,7 @@ WHERE ysnPosted = 1
   AND strTransactionType = 'Credit Memo'
   AND intOriginalInvoiceId IS NOT NULL
   AND ISNULL(strInvoiceOriginId, '') <> ''
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmDate))) BETWEEN @dtmDateFromLocal AND @dtmDateToLocal
 
 IF ISNULL(@strSalespersonIdsLocal, '') <> ''
 	BEGIN
