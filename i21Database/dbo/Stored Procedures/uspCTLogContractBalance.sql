@@ -35,6 +35,7 @@ BEGIN
 		, @dtmStartDate DATETIME
 		, @dtmEndDate DATETIME
 		, @dblQty NUMERIC(24, 10)
+		, @dblOrigQty NUMERIC(24, 10)
 		, @intContractStatusId INT
 		, @intBookId INT
 		, @intSubBookId INT
@@ -45,8 +46,6 @@ BEGIN
 		, @ysnDeleted BIT
 		, @intTransCtr INT = 0
 		, @intTotal INT
-
-	
 	
 	SELECT @intTotal = COUNT(*) FROM @ContractSequences
 	
@@ -90,6 +89,7 @@ BEGIN
 		, [dtmStartDate] DATETIME
 		, [dtmEndDate] DATETIME
 		, [dblQty] NUMERIC(24, 10) NULL DEFAULT((0))
+		, [dblOrigQty] NUMERIC(24, 10) NULL DEFAULT((0))
 		, [intContractStatusId] INT NOT NULL
 		, [intBookId] INT NULL
 		, [intSubBookId] INT NULL
@@ -100,41 +100,6 @@ BEGIN
 		, [intActionId] INT NULL
 		, [strProcess] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
 		, [ysnDeleted] BIT DEFAULT((0)) NULL)
-
-	--DECLARE @PrevLog AS TABLE ([intContractBalanceLogId] INT
-	--	, [strBatchId] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	--	, [dtmTransactionDate] DATETIME
-	--	, [dtmCreatedDate] DATETIME
-	--	, [strTransactionType] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	--	, [strTransactionReference] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	--	, [intTransactionReferenceId] INT NOT NULL
-	--	, [strTransactionReferenceNo] NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL
-	--	, [intContractDetailId] INT NOT NULL
-	--	, [intContractHeaderId] INT NOT NULL
-	--	, [intContractTypeId] INT NOT NULL
-	--	, [intEntityId] INT NOT NULL
-	--	, [intCommodityId] INT NOT NULL
-	--	, [intItemId] INT NOT NULL
-	--	, [intLocationId] INT NULL
-	--	, [intPricingTypeId] INT NOT NULL
-	--	, [intFutureMarketId] INT NULL
-	--	, [intFutureMonthId] INT NULL
-	--	, [dblBasis] NUMERIC(24, 10) NULL DEFAULT((0))
-	--	, [dblFutures] NUMERIC(24, 10) NULL DEFAULT((0))
-	--	, [intQtyUOMId] INT NULL
-	--	, [intQtyCurrencyId] INT NULL
-	--	, [intBasisUOMId] INT NULL
-	--	, [intBasisCurrencyId] INT NULL
-	--	, [intPriceUOMId] INT NULL
-	--	, [dtmStartDate] DATETIME
-	--	, [dtmEndDate] DATETIME
-	--	, [dblQty] NUMERIC(24, 10) NULL DEFAULT((0))
-	--	, [intContractStatusId] INT NOT NULL
-	--	, [intBookId] INT NULL
-	--	, [intSubBookId] INT NULL
-	--	, [strNotes] NVARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	--	, [ysnNegated] BIT DEFAULT((0)) NULL
-	--	, [intRefContractBalanceId] INT NULL)
 
 	IF @Rebuild = 1 
 	BEGIN
@@ -171,6 +136,7 @@ BEGIN
 			, @dtmStartDate = dtmStartDate
 			, @dtmEndDate = dtmEndDate
 			, @dblQty = dblQty
+			, @dblOrigQty = dblOrigQty
 			, @intContractStatusId = intContractStatusId
 			, @intBookId = intBookId
 			, @intSubBookId = intSubBookId
@@ -181,133 +147,8 @@ BEGIN
 			, @ysnDeleted = ysnDeleted
 		FROM #tmpLogItems
 
-		--SELECT * INTO #tmpPrevLogList
-		--FROM tblCTContractBalanceLog
-		--WHERE intContractDetailId = @intContractDetailId
-		--	AND strTransactionType = @strTransactionType
-		--	AND ISNULL(ysnNegated, 0) = 0 
-		--	AND intRefContractBalanceId NOT IN (SELECT intContractBalanceLogId FROM tblCTContractBalanceLog WHERE ysnNegated = 1)
-		--ORDER BY intContractBalanceLogId ASC
-
-		--IF (SELECT COUNT(*) FROM #tmpPrevLogList ) > 1
-		--BEGIN
-		--	IF EXISTS(SELECT TOP 1 1 FROM #tmpPrevLogList WHERE intPricingTypeId = 1)
-		--	BEGIN
-		--		INSERT INTO @PrevLog
-		--		SELECT TOP 1 * FROM #tmpPrevLogList WHERE intPricingTypeId = 1
-		--		ORDER BY intContractBalanceLogId ASC
-		--	END
-		--	ELSE
-		--	BEGIN
-		--		INSERT INTO @PrevLog
-		--		SELECT TOP 1 * FROM #tmpPrevLogList ORDER BY intContractBalanceLogId ASC
-		--	END
-		--END
-		--ELSE
-		--BEGIN
-		--	INSERT INTO @PrevLog
-		--	SELECT TOP 1 * FROM #tmpPrevLogList
-		--END		
-
-		---- Validate if no changes was detected on fields with bearing
-		--IF EXISTS(SELECT TOP 1 1
-		--	FROM @PrevLog
-		--	WHERE @intContractDetailId = intContractDetailId
-		--		AND @intContractHeaderId = intContractHeaderId
-		--		AND @intContractTypeId = intContractTypeId
-		--		AND @intEntityId = intEntityId
-		--		AND @intCommodityId = intCommodityId
-		--		AND @intItemId = intItemId
-		--		AND @intLocationId = intLocationId
-		--		AND @intPricingTypeId = intPricingTypeId
-		--		AND @intFutureMarketId = intFutureMarketId
-		--		AND @intFutureMonthId = intFutureMonthId
-		--		AND @dblBasis = dblBasis
-		--		AND @dblFutures = dblFutures
-		--		AND @intQtyUOMId = intQtyUOMId
-		--		AND @intQtyCurrencyId = intQtyCurrencyId
-		--		AND @intBasisUOMId = intBasisUOMId
-		--		AND @intBasisCurrencyId = intBasisCurrencyId
-		--		AND @intPriceUOMId = intPriceUOMId
-		--		AND @dtmStartDate = dtmStartDate
-		--		AND @dtmEndDate = dtmEndDate
-		--		AND @dblQty = dblQty
-		--		AND @intContractStatusId = intContractStatusId
-		--		AND @intBookId = intBookId
-		--		AND @intSubBookId = intSubBookId)
-		--BEGIN
-		--	CONTINUE
-		--END
-
-		--IF EXISTS(SELECT TOP 1 1 FROM @PrevLog)
-		--BEGIN
-		--	INSERT INTO @FinalTable(strBatchId
-		--		, dtmTransactionDate
-		--		, strTransactionType
-		--		, strTransactionReference
-		--		, intTransactionReferenceId
-		--		, strTransactionReferenceNo
-		--		, intContractDetailId
-		--		, intContractHeaderId
-		--		, intContractTypeId
-		--		, intEntityId
-		--		, intCommodityId
-		--		, intItemId
-		--		, intLocationId
-		--		, intPricingTypeId
-		--		, intFutureMarketId
-		--		, intFutureMonthId
-		--		, dblBasis
-		--		, dblFutures
-		--		, intQtyUOMId
-		--		, intQtyCurrencyId
-		--		, intBasisUOMId
-		--		, intBasisCurrencyId
-		--		, intPriceUOMId
-		--		, dtmStartDate
-		--		, dtmEndDate
-		--		, dblQty
-		--		, intContractStatusId
-		--		, intBookId
-		--		, intSubBookId
-		--		, strNotes
-		--		, ysnNegated
-		--		, intRefContractBalanceId)
-		--	SELECT @strBatchId
-		--		, dtmTransactionDate
-		--		, strTransactionType
-		--		, strTransactionReference
-		--		, intTransactionReferenceId
-		--		, strTransactionReferenceNo
-		--		, intContractDetailId
-		--		, intContractHeaderId
-		--		, intContractTypeId
-		--		, intEntityId
-		--		, intCommodityId
-		--		, intItemId
-		--		, intLocationId
-		--		, intPricingTypeId
-		--		, intFutureMarketId
-		--		, intFutureMonthId
-		--		, dblBasis
-		--		, dblFutures
-		--		, intQtyUOMId
-		--		, intQtyCurrencyId
-		--		, intBasisUOMId
-		--		, intBasisCurrencyId
-		--		, intPriceUOMId
-		--		, dtmStartDate
-		--		, dtmEndDate
-		--		, dblQty
-		--		, intContractStatusId
-		--		, intBookId
-		--		, intSubBookId
-		--		, strNotes = ISNULL(strNotes, '')
-		--		, ysnNegated = 1
-		--		, intRefContractBalanceId = intContractBalanceLogId
-		--	FROM @PrevLog
-		--END
-
+		DECLARE @intHeaderPricingTypeId INT = 0
+		SELECT @intHeaderPricingTypeId = ISNULL(intPricingTypeId, 0) FROM tblCTContractHeader WHERE intContractHeaderId = @intContractHeaderId
 
 		INSERT INTO @FinalTable(strBatchId
 			, dtmTransactionDate
@@ -338,6 +179,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -375,6 +217,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -384,8 +227,7 @@ BEGIN
 			, strProcess
 			, ysnDeleted
 		FROM #tmpLogItems WHERE intId = @Id
-
-		--DROP TABLE #tmpPrevLogList
+		AND NOT (@intHeaderPricingTypeId = 1 AND strTransactionType LIKE '%Basis Deliveries%')
 
 		SET @intTransCtr += 1
 		IF (@intTransCtr % 10000 = 0)
@@ -431,6 +273,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -468,6 +311,7 @@ BEGIN
 			, dtmStartDate
 			, dtmEndDate
 			, dblQty
+			, dblOrigQty
 			, intContractStatusId
 			, intBookId
 			, intSubBookId
@@ -515,6 +359,7 @@ BEGIN
 		, dtmStartDate
 		, dtmEndDate
 		, dblQty
+		, dblOrigQty
 		, intContractStatusId
 		, intBookId
 		, intSubBookId
@@ -556,6 +401,7 @@ BEGIN
 		, dtmStartDate
 		, dtmEndDate
 		, dblQty
+		, dblOrigQty
 		, intContractStatusId
 		, intBookId
 		, intSubBookId

@@ -6,3 +6,5 @@ SELECT SL.*
 FROM tblSTPromotionSalesList SL
 INNER JOIN tblSTStore ST
 	ON SL.intStoreId = ST.intStoreId
+
+

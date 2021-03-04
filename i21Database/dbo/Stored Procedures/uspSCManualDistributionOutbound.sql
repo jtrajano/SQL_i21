@@ -530,6 +530,10 @@ IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 BEGIN
  	SET @intOrderId = 1
 END
+ELSE IF @strDistributionOption = 'ICN'
+BEGIN
+	SET @intOrderId = 5
+END
 ELSE
 BEGIN
  	SET @intOrderId = 4

@@ -761,9 +761,6 @@ BEGIN
 		IF @intReturnValue < 0 GOTO _TerminateLoop;
 	END 
 
-	-- Cache Item
-	EXEC dbo.uspICCacheItem @intItemId
-
 	-- Attempt to fetch the next row from cursor. 
 	FETCH NEXT FROM loopItems INTO 
 		@intId

@@ -154,7 +154,7 @@ BEGIN TRY
 		
 		
 
- 		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1 ELSE 4 END
+ 		SET @intOrderId = CASE WHEN @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD' THEN 1  WHEN @strDistributionOption = 'ICN' THEN 5 ELSE 4 END
 
 		IF @strDistributionOption = 'CNT' OR @strDistributionOption = 'LOD'
 		BEGIN

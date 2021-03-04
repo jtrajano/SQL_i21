@@ -10,8 +10,6 @@ CREATE PROCEDURE uspSCGetContractsAndAllocate
 	@ysnAutoDistribution	BIT = 1,
 	@strDistributionOption AS NVARCHAR(3)	 = ''
 	,@intLoadDetailId		INT = NULL
-	,@intFutureMarketId		INT = NULL
-	,@intFutureMonthId		INT = NULL
 AS
 
 BEGIN TRY

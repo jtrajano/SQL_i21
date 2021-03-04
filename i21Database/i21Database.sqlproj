@@ -271,6 +271,8 @@
     <Build Include="dbo\Tables\tblGLCOAImportLogDetail.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplate.sql" />
     <Build Include="dbo\Tables\tblGLCOATemplateDetail.sql" />
+    <Build Include="dbo\Tables\tblGLConsolidateLog.sql" />
+    <Build Include="dbo\Tables\tblGLSubsidiaryCompany.sql" />
     <Build Include="dbo\Tables\tblGLCurrentFiscalYear.sql" />
     <Build Include="dbo\Tables\tblGLDetail.sql" />
     <Build Include="dbo\Tables\tblGLDetailRecap.sql" />
@@ -3535,6 +3537,7 @@
     <Build Include="dbo\Views\vyuTRGetQuoteDetail.sql" />
     <Build Include="dbo\Views\vyuRKGetSalesIntransit.sql" />
     <Build Include="dbo\Functions\fnGLGetRetainedEarningSQLString.sql" />
+    <Build Include="dbo\Functions\fnGLGetRelativeDatabase.sql" />
     <Build Include="dbo\Tables\tblCFImportFromCSVLog.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInsertAccountRecord.sql" />
     <Build Include="dbo\Views\vyuQMTemplateControlPoint.sql" />
@@ -3851,6 +3854,7 @@
     <Build Include="dbo\Tables\tblMFCostSource.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetRecipeItemsCost.sql" />
     <Build Include="dbo\Views\vyuGLPostRemind.sql" />
+    <Build Include="dbo\Views\vyuGLConsolidateLog.sql" />
     <Build Include="dbo\Tables\tblSMRemoteServer.sql" />
     <Build Include="dbo\Stored Procedures\uspICRebuildInventoryValuation.sql" />
     <Build Include="dbo\Views\vyuRKGetBrokerByMarket.sql" />
@@ -8856,6 +8860,8 @@
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
+    <Build Include="dbo\Views\vyuLGClearingItemGL.sql" />
+    <Build Include="dbo\Views\vyuLGClearingItem.sql" />
     <None Include="Scripts\Post-Deployment\IC\25_TransactionTypeRename.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_LockAvgCost.sql" />
     <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
@@ -8920,8 +8926,6 @@
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
-    <Build Include="dbo\Tables\tblLGPendingClaim.sql" />
-    <Build Include="dbo\Stored Procedures\uspLGAddPendingClaim.sql" />
     <Build Include="dbo\Views\vyuIPLoadDetailView.sql" />
     <Build Include="dbo\Views\vyuIPLoadDetailLotsView.sql" />
     <Build Include="dbo\Views\vyuIPLoadNotifyParties.sql" />
@@ -8949,7 +8953,6 @@
     <Build Include="dbo\Stored Procedures\uspFRDGenerateCalculationDrillDownRows.sql" />
     <Build Include="dbo\Stored Procedures\uspFRDGetAccountsUsedForTotalCalculation.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicMD.sql" />
-    <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
     <Build Include="dbo\Tables\tblTFLocality.sql" />
     <Build Include="dbo\Stored Procedures\uspTFUpgradeLocality.sql" />
     <Build Include="dbo\User Defined Types\TFLocality.sql" />
@@ -8983,6 +8986,7 @@
     <Build Include="dbo\Tables\tblAPClearing.sql" />
     <Build Include="dbo\Stored Procedures\uspAPClearing.sql" />
     <Build Include="dbo\User Defined Types\APClearing.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
     <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicGA.sql" />
     <Build Include="dbo\Tables\tblLGWeightClaimPreStage.sql" />
@@ -8998,7 +9002,6 @@
     <Build Include="dbo\Tables\tblCCCrossReference.sql" />
     <Build Include="dbo\Views\vyuCCCrossReferenceVendor.sql" />
     <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
-    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Views\vyuAP1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />
@@ -9151,6 +9154,8 @@
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummaryOld.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingOld.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
+    <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9392,7 +9397,6 @@
     <Build Include="dbo\Views\vyuSCTicketContractUsed.sql" />
     <Build Include="dbo\Functions\fnARGetInvoiceForBatch.sql" />
     <Build Include="dbo\Views\vyuARGetPayment.sql" />
-    <Build Include="dbo\Stored Procedures\uspICCallInterCompanyPreStageItem.sql" />
     <Build Include="dbo\Functions\fnARGetItemContractPricingDetails.sql" />
     <Build Include="dbo\Views\vyuEMEntityLocationSearch.sql" />
     <Build Include="dbo\Stored Procedures\uspLGGetShippingInstructionConditionReport.sql" />

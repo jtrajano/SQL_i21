@@ -346,7 +346,7 @@ BEGIN
 
 
 	----Item Contract
-
+/*
 	INSERT INTO @ShipmentStagingTable(
 		intOrderType
 		,intEntityCustomerId
@@ -437,7 +437,7 @@ BEGIN
 		ON CTD.intItemContractHeaderId = CTH.intItemContractHeaderId
 	WHERE	SC.intTicketId = @intTicketId AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 		AND ISNULL(SC.intItemContractDetailId,0) > 0 
-
+*/
 
 	--SELECT * FROM @Items
 
@@ -1633,10 +1633,12 @@ END
 	SELECT @checkContract = COUNT(intTransactionDetailId) FROM @Items WHERE intTransactionDetailId > 0;
 	IF(@checkContract > 0)
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
+		WHERE intOrderType <> 5
 
 	SELECT @checkContract = COUNT(intOrderType) FROM @ShipmentStagingTable WHERE intOrderType = 1;
 	IF(@checkContract > 0)
 		UPDATE @ShipmentStagingTable SET intOrderType = 1
+		WHERE intOrderType <> 5
 
 	SELECT @total = COUNT(*) FROM @ShipmentStagingTable;
 	IF (@total = 0)

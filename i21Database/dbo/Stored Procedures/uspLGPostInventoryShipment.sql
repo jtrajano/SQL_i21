@@ -893,6 +893,9 @@ BEGIN
 		,@INVENTORY_SHIPMENT_TYPE
 		,@ysnPost
 
+	-- Add/Remove Pending Claim entry
+	EXEC uspLGAddPendingClaim @intTransactionId, 2, @ysnPost
+
 	COMMIT TRAN @TransactionName
 END
 ELSE

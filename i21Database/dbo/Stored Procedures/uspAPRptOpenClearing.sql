@@ -600,6 +600,50 @@ SET @cteQuery = N';WITH forClearing
      FROM vyuGRTransferChargesClearing   
      ' + @innerQueryFilter + '  
     ),  
+    grainTransferClearing  
+    AS  
+    (  
+	 SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptItemId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferClearing  
+     ' + @innerQueryFilter + '  
+    ),  
+    grainTransferChargeClearing  
+    AS  
+    (  
+	 SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptChargeId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptChargeTotal  
+        ,dblReceiptChargeQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferChargesClearing   
+     ' + @innerQueryFilter + '  
+    ),  
     patClearing  
     AS  
     (  
@@ -771,6 +815,48 @@ BEGIN
      FROM vyuAPGrainClearing A
 	 LEFT JOIN dbo.tblGLFiscalYearPeriod FP
 	 ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate
+    ),
+    grainTransferClearing
+    AS
+    (
+      SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptItemId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptTotal  
+        ,dblReceiptQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferClearing  
+    ),
+    grainTransferChargeClearing
+    AS
+    (
+      SELECT  
+        dtmDate  
+        ,strTransactionNumber  
+        ,intEntityVendorId  
+        ,intInventoryReceiptId  
+        ,intInventoryReceiptChargeId  
+        ,intItemId  
+        ,intTransferStorageId  
+        ,strTransferStorageTicket  
+        ,intTransferStorageReferenceId  
+        ,dblTransferTotal  
+        ,dblTransferQty  
+        ,dblReceiptChargeTotal  
+        ,dblReceiptChargeQty  
+        ,intLocationId  
+        ,strLocationName  
+     FROM vyuGRTransferChargesClearing  
     ),
     grainTransferClearing
     AS
@@ -1121,7 +1207,11 @@ SELECT *
    ,intLocationId  
    ,strLocationName
   --  HAVING 
-  --       (SUM(B.dblReceiptChargeQty) - SUM(B.dblVoucherQty)) != 0
+    --EXCLUDE THOSE CHARGES WHICH VOUCHER QTY IS LESS THAN SHIPMENT CHARGE QTY
+    --AND VOUCHER TOTAL IS LESS THAN SHIPMENT CHARGE AMOUNT
+    --EITHER ONE OF THE RULE FAILS, MEANS IT IS FULLY VOUCHERED
+        -- (SUM(B.dblVoucherQty) < SUM(B.dblReceiptChargeQty) AND 
+        --   SUM(B.dblVoucherTotal) < SUM(B.dblReceiptChargeTotal))
   --   OR  (SUM(B.dblReceiptChargeTotal) - SUM(B.dblVoucherTotal)) != 0
  ) tmpAPOpenClearing  
  INNER JOIN tblICInventoryShipmentCharge rc  
@@ -1131,7 +1221,12 @@ SELECT *
  INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
   ON tmpAPOpenClearing.intEntityVendorId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
- WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
+  -- WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
+  --EXCLUDE THOSE CHARGES WHICH VOUCHER QTY IS LESS THAN SHIPMENT CHARGE QTY
+    --AND VOUCHER TOTAL IS LESS THAN SHIPMENT CHARGE AMOUNT
+    --EITHER ONE OF THE RULE FAILS, MEANS IT IS FULLY VOUCHERED
+  WHERE 1 = CASE WHEN (dblVoucherQty) < dblReceiptChargeQty
+                 AND (dblVoucherTotal) <  dblReceiptChargeTotal THEN 1 ELSE 0 END
  UNION ALL
  --LOAD TRANSACTION ITEM
  SELECT  

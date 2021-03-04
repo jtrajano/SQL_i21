@@ -6,8 +6,6 @@ CREATE PROCEDURE [dbo].[uspSCStorageUpdate]
 	,@strDistributionOption AS NVARCHAR(3)
 	,@intDPContractId AS INT
 	,@intStorageScheduleId AS INT = NULL
-	,@intFutureMarketId AS INT = NULL
-	,@intFutureMonthId AS INT = NULL
 AS
 
 SET QUOTED_IDENTIFIER OFF
