@@ -7786,7 +7786,7 @@
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
     <Build Include="dbo\Views\vyuGRTransferChargesClearing_DPtoDP.sql" />
     <Build Include="dbo\Functions\fnGetLocationAwareGLAccount.sql" />
-    <Build Include="dbo\Views\vyuGRTransferChargesClearing_DPtoDP.sql" /> 
+    <Build Include="dbo\Views\vyuGRTransferChargesClearing_DPtoDP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspICAddProRatedReceiptChargesToVoucher.sql" />
@@ -7819,6 +7819,9 @@
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuild.sql" />
+    <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
+    <Build Include="dbo\Tables\tblARRebuildLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
