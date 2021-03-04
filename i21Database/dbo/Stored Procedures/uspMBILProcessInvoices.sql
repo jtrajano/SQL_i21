@@ -53,7 +53,7 @@ CREATE TABLE #TempMBILInvoice (
 		ELSE
 		BEGIN			
 			DECLARE @success BIT
-			DECLARE @successfulCount INT
+			DECLARE @successCount INT
 			DECLARE @invalidCount INT
 			DECLARE @batchIdUsed NVARCHAR(MAX)
 			DECLARE @recapId BIT
@@ -73,7 +73,7 @@ CREATE TABLE #TempMBILInvoice (
 					@batchId = default,
 					@exclude = N'',
 					@success = @success output,
-					@successfulCount = @successfulCount output,
+					@successfulCount = @successCount output,
 					@invalidCount = @invalidCount output,
 					@batchIdUsed = @batchIdUsed output,
 					@recapId = @recapId output,
