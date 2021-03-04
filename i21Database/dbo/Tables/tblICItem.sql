@@ -179,6 +179,7 @@ Type the overview for the table here.
 		[intDataSourceId] TINYINT NULL,
 		[ysnSeparateStockForUOMs] BIT NULL DEFAULT ((0)),
 		[ysnAutoAdjustAccrualDiff] BIT NULL DEFAULT(0),
+		[ysnAvgLocked] BIT NULL DEFAULT(0),
 		[intItemRefId] INT NULL,
 		CONSTRAINT [AK_tblICItem_strItemNo] UNIQUE ([strItemNo]), 
 		CONSTRAINT [PK_tblICItem] PRIMARY KEY ([intItemId]), 
