@@ -774,7 +774,7 @@ BEGIN TRY
 		, strSubHeading = 'Futures - Short'
 		, strSecondSubHeading = 'Futures - Short'
 		, strFutureMonth
-		, intOpenContract = - (dblNoOfContract - ISNULL(dblNoOfContract, 0)) * dblContractSize
+		, intOpenContract = - (dblNoOfContract - ISNULL(intOpenContract, 0)) * dblContractSize
 		, dblPrice
 		, strInternalTradeNo
 		, strLocationName
