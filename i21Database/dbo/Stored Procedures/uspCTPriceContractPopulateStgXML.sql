@@ -171,6 +171,8 @@ End
 		,NULL
 
 	---------------------------------------------Audit Log------------------------------------------
+	IF @strLogCondition IS NOT NULL
+	BEGIN
 	SELECT @strLogXML = NULL
 		,@strObjectName = NULL
 
@@ -193,7 +195,7 @@ End
 		,@strAuditXML OUTPUT
 		,NULL
 		,NULL
-
+	END
 
 	DECLARE @strSQL NVARCHAR(MAX)
 		,@strServerName NVARCHAR(50)
