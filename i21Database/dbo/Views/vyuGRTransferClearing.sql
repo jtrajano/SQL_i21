@@ -386,10 +386,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-
-
-
-
+-- WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
 UNION ALL
 -- Bill for Transfer Settlement
 SELECT 
@@ -405,7 +402,7 @@ SELECT
     ,CS.intItemId
     ,CS.intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST((TSR.dblUnitQty) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,ISNULL(CAST((BillDetail.dblQtyReceived) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
     ,BillDetail.dblQtyReceived AS dblTransferQty
     ,0 -- ISNULL(CAST((TSR.dblUnitQty) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblReceiptTotal
     ,0 -- ISNULL(TSR.dblUnitQty, 0) AS dblReceiptQty
@@ -455,6 +452,7 @@ Where Bill.ysnPosted = 1
 UNION ALL
 --Transfer Storages from above select statement
 SELECT DISTINCT --'6' AS TEST,
+	-- '6'  collate Latin1_General_CI_AS AS TEST,
     CS_TO.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,SH.strTransferTicket
@@ -466,7 +464,9 @@ SELECT DISTINCT --'6' AS TEST,
     ,CS_TO.intItemId
     ,CS_TO.intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    --,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+	
+    ,ISNULL(CAST((TSR.dblUnitQty) * case when ST_FROM.ysnDPOwnedType = 1 and ST_TO.ysnDPOwnedType = 0 then CS_FROM.dblBasis + CS_FROM.dblSettlementPrice else (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ','')) end AS DECIMAL(38,15) ),0) * 1 AS dblTransferTotal  --Orig Calculation	
     ,ISNULL(TSR.dblUnitQty, 0) AS dblTransferQty
     ,0 AS dblReceiptTotal
     ,0 AS dblReceiptQty
