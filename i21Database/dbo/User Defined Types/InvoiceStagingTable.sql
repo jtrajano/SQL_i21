@@ -24,6 +24,7 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 																											-- "Store"
 																											-- "Card Fueling"
 																											-- "Store Checkout"
+																											-- "Agronomy"
 	,[strSourceTransaction]					NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Valid values 
 																											-- 0. "Direct"
 																											-- 1. "Sales Order"
@@ -43,6 +44,8 @@ CREATE TYPE [dbo].[InvoiceStagingTable] AS TABLE
 																											-- 15. "Sales Contract"
 																											-- 16. "Load Schedule"
 																											-- 17. "CF Invoice"
+																											-- 18. "Ticket Management"
+																											-- 19. "Agronomy"
 	,[intSourceId]							INT												NULL		-- Id of the source transaction
 	,[strSourceId]							NVARCHAR(250)	COLLATE Latin1_General_CI_AS	NOT NULL	-- Transaction number source transaction
 	,[intInvoiceId]							INT												NULL		-- Invoice Id(Insert new Invoice if NULL, else Update existing) 

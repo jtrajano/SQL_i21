@@ -511,7 +511,7 @@ BEGIN
 	WHERE
 			([intId] = @Id OR @GroupingOption > 0)
 		AND ([intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND ([intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR [strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND ([intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL([intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST([dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -820,7 +820,7 @@ BEGIN
 	WHERE 
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -1192,7 +1192,7 @@ BEGIN
 	WHERE
 			(I.[intId] = @Id OR @GroupingOption > 0)
 		AND (I.[intEntityCustomerId] = @EntityCustomerIdTop1 OR (@EntityCustomerIdTop1 IS NULL AND @GroupingOption < 1))
-		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice'))))
+		AND (I.[intSourceId] = @SourceIdTop1 OR (@SourceIdTop1 IS NULL AND (@GroupingOption < 2 OR I.[strSourceTransaction] IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Agronomy'))))
 		AND (I.[intCompanyLocationId] = @CompanyLocationIdTop1 OR (@CompanyLocationIdTop1 IS NULL AND @GroupingOption < 3))
 		AND (ISNULL(I.[intCurrencyId],0) = ISNULL(@CurrencyIdTop1,0) OR (@CurrencyIdTop1 IS NULL AND @GroupingOption < 4))
 		AND (CAST(I.[dtmDate] AS DATE) = @DateTop11 OR (@DateTop11 IS NULL AND @GroupingOption < 5))
@@ -1500,7 +1500,7 @@ BEGIN TRY
 			[tblARInvoice]
 		SET 
 			 [strTransactionType]		= CASE WHEN ISNULL(@TransactionType, '') NOT IN ('Invoice', 'Credit Memo', 'Debit Memo', 'Cash', 'Cash Refund', 'Overpayment', 'Customer Prepayment', 'Proforma Invoice') THEN [tblARInvoice].[strTransactionType] ELSE @TransactionType END
-			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling') THEN [tblARInvoice].[strType] ELSE @Type END
+			,[strType]					= CASE WHEN ISNULL(@Type, '') NOT IN ('Meter Billing', 'Standard', 'POS', 'Store Checkout', 'Software', 'Tank Delivery', 'Provisional', 'Service Charge', 'Transport Delivery', 'Store', 'Card Fueling', 'Agronomy') THEN [tblARInvoice].[strType] ELSE @Type END
 			,[intEntityCustomerId]		= @EntityCustomerId
 			,[intCompanyLocationId]		= @CompanyLocationId
 			--,[intAccountId]				= @AccountId 
