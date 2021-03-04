@@ -217,9 +217,9 @@ FROM (
 		,strWarehouseRefNo = '' COLLATE Latin1_General_CI_AS
 		,dtmReceiptDate = CAST(NULL AS DATETIME)
 		,dblTotalCost = CAST(ISNULL((dbo.fnCTConvertQtyToTargetItemUOM(ISNULL(LCWUM.intWeightItemUOMId, LD.intWeightItemUOMId), PCD.intPriceItemUOMId, ISNULL(LDCL.dblLinkNetWt, LD.dblNet))) 
-										* dbo.fnCTGetSequencePrice(LD.intPContractDetailId,NULL),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
+										* ISNULL(AD.dblSeqPrice, AD.dblSeqPartialPrice),0) AS NUMERIC(18,6)) / CASE WHEN (BC.ysnSubCurrency = 1) THEN BC.intCent ELSE 1 END
 		,dblFutures = PCD.dblFutures
-		,dblCashPrice = PCD.dblCashPrice
+		,dblCashPrice = ISNULL(AD.dblSeqPrice, AD.dblSeqPartialPrice)
 		,dblBasis = PCD.dblBasis
 		,strPricingType = CASE WHEN PCH.intPricingTypeId = 2 
 							THEN  CASE WHEN ISNULL(PF.dblTotalLots,0) > 0 AND ISNULL(PF.dblLotsFixed,0) = 0 THEN 'Unfixed'
@@ -263,6 +263,7 @@ FROM (
 		--Purchase
 		INNER JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = LD.intPContractDetailId
 		INNER JOIN tblCTContractHeader PCH ON PCH.intContractHeaderId = PCD.intContractHeaderId
+		INNER JOIN vyuLGAdditionalColumnForContractDetailView AD ON AD.intContractDetailId = PCD.intContractDetailId
 		LEFT JOIN tblICUnitMeasure PUM ON PUM.intUnitMeasureId = PCD.intUnitMeasureId
 		LEFT JOIN tblEMEntity V ON V.intEntityId = LD.intVendorEntityId
 		LEFT JOIN tblSMCurrency BC ON BC.intCurrencyID = PCD.intBasisCurrencyId

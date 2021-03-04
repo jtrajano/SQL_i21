@@ -394,7 +394,7 @@ BEGIN
 					ELSE -1 * LD.dblQuantity
 					END
 		,[dblUOMQty] = IU.dblUnitQty
-		,[dblCost] = CD.dblCashPrice
+		,[dblCost] = 0 --field is required but not used for updating contract balance
 		,[intLineNo] = ISNULL(LD.intPContractDetailId, 0)
 		,[ysnLoad] = CH.ysnLoad
 		,[intLoadReceive] = CASE WHEN CH.ysnLoad = 1 THEN 

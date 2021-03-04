@@ -73,6 +73,8 @@ FROM (
 		,strOriginPort = ISNULL(SLP.strCity, PLP.strCity)
 		,strDestinationPort = ISNULL(SDP.strCity, PDP.strCity)
 		,strDestinationCity = ISNULL(SDC.strCity, PDC.strCity)
+		,intShippingLineEntityId = ISNULL(CDP.intShippingLineId, CDS.intShippingLineId)
+		,strShippingLine = ISNULL(ESLP.strName, ESLS.strName)
 		,intShipmentType = 1
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -126,6 +128,8 @@ FROM (
 	LEFT JOIN tblSMCity SLP ON SLP.intCityId = CDS.intLoadingPortId
 	LEFT JOIN tblSMCity SDP ON SDP.intCityId = CDS.intDestinationPortId
 	LEFT JOIN tblSMCity SDC ON SDC.intCityId = CDS.intDestinationCityId
+	LEFT JOIN tblEMEntity ESLP ON ESLP.intEntityId = CDP.intShippingLineId
+	LEFT JOIN tblEMEntity ESLS ON ESLS.intEntityId = CDS.intShippingLineId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)
@@ -220,6 +224,8 @@ FROM (
 		,strOriginPort = ISNULL(SLP.strCity, PLP.strCity)
 		,strDestinationPort = ISNULL(SDP.strCity, PDP.strCity)
 		,strDestinationCity = ISNULL(SDC.strCity, PDC.strCity)
+		,intShippingLineEntityId = ISNULL(CDP.intShippingLineId, CDS.intShippingLineId)
+		,strShippingLine = ISNULL(ESLP.strName, ESLS.strName)
 		,intShipmentType = 2
 	FROM tblLGAllocationDetail AD
 	JOIN tblLGAllocationHeader AH ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
@@ -273,6 +279,8 @@ FROM (
 	LEFT JOIN tblSMCity SLP ON SLP.intCityId = CDS.intLoadingPortId
 	LEFT JOIN tblSMCity SDP ON SDP.intCityId = CDS.intDestinationPortId
 	LEFT JOIN tblSMCity SDC ON SDC.intCityId = CDS.intDestinationCityId
+	LEFT JOIN tblEMEntity ESLP ON ESLP.intEntityId = CDP.intShippingLineId
+	LEFT JOIN tblEMEntity ESLS ON ESLS.intEntityId = CDS.intShippingLineId
 	LEFT JOIN tblCTBook BO ON BO.intBookId = AH.intBookId
 	LEFT JOIN tblCTSubBook SB ON SB.intSubBookId = AH.intSubBookId
 	OUTER APPLY (SELECT TOP 1 ysnUnapproved = CAST(1 AS BIT)

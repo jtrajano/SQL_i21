@@ -1285,6 +1285,171 @@ BEGIN
 	END
 END
 
+IF @strMessageType = 'Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Screen</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>' + '<td>&nbsp;' + 'Item' + '</td>
+	</tr>'
+		FROM tblICItemStage S WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblICItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType = 'Parent Item'
+BEGIN
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblICItemPreStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, S.intItemId), '') + '</td>' + '<td>&nbsp;' + ISNULL(I.strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(S.strRowState, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td>
+	</tr>'
+		FROM tblICItemPreStage S WITH (NOLOCK)
+		JOIN tblICItem I on I.intItemId=S.intItemId
+		WHERE S.intStatusId = @intStatusId --1--Processed/2--Failed
+			AND S.ysnMailSent IS NULL
+
+		UPDATE tblICItemPreStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType in('Sales Invoice','Credit Note for Weight Claim')
+BEGIN
+	DECLARE @intTransactionTypeId int
+	IF @strMessageType = 'Sales Invoice'
+		SELECT @intTransactionTypeId = 1
+	ELSE IF @strMessageType = 'Credit Note for Weight Claim'
+		SELECT @intTransactionTypeId = 11
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Id</th>
+						<th>&nbsp;Name</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblARInvoiceStage  WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+			AND intTransactionTypeId=@intTransactionTypeId
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, intInvoiceId), '') + '</td>' + '<td>&nbsp;' + ISNULL(strInvoiceNumber, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRowState, '') + '</td>' + '<td>&nbsp;' + 'Success' + '</td> 
+	</tr>'
+		FROM tblARInvoiceStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+			AND intTransactionTypeId=@intTransactionTypeId
+
+		UPDATE tblARInvoiceStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+			AND intTransactionTypeId=@intTransactionTypeId
+	END
+END
+
+IF @strMessageType ='Recipe'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Row State</th>
+						<th>&nbsp;Message</th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strTransactionType, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	</tr>'
+		FROM tblMFRecipeStage WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
+IF @strMessageType ='Recipe Item'
+BEGIN
+	
+	SET @strHeader = '<tr>
+						<th>&nbsp;Recipe Name</th>
+						<th>&nbsp;Recipe Header Item No</th>
+						<th>&nbsp;Item No</th>
+						<th>&nbsp;Message</th>
+						<th>&nbsp;Recipe Created Y/N? </th>
+					</tr>'
+
+	IF EXISTS (
+		SELECT *
+		FROM tblMFRecipeItemStage   WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+		)
+	BEGIN
+		SELECT @strDetail = @strDetail + '<tr>
+			<td>&nbsp;' + ISNULL(CONVERT(NVARCHAR, strRecipeName), '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeHeaderItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strRecipeItemNo, '') + '</td>' + '<td>&nbsp;' + ISNULL(strMessage, '') + '</td> 
+	<td>&nbsp;' + (Case When Exists(Select 1 from tblMFRecipeStage R Where R.strSessionId =RI.strSessionId and R.strItemNo =RI.strRecipeHeaderItemNo and R.strVersionNo =RI.strVersionNo and R.strMessage ='Success') Then 'Yes' Else 'No' End) + '</td> 
+	</tr>'
+		FROM tblMFRecipeItemStage RI WITH (NOLOCK)
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+
+		UPDATE tblMFRecipeItemStage
+		SET ysnMailSent = 1
+		WHERE intStatusId = @intStatusId --1--Processed/2--Failed
+			AND ysnMailSent IS NULL
+	END
+END
+
 SET @strHtml = REPLACE(@strHtml, '@header', @strHeader)
 SET @strHtml = REPLACE(@strHtml, '@detail', @strDetail)
 SET @strMessage = @strStyle + @strHtml

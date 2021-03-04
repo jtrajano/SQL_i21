@@ -78,7 +78,7 @@ FROM tblPREmployee [EMP]
 				FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [PC_Y]
 		ON PC_Y.intEntityEmployeeId = EMP.intEntityId AND PC_Y.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblHours = SUM(dblHours), dblTotal = SUM(dblTotal) 
-				FROM vyuPRPaycheckEarning WHERE strCalculationType NOT IN ('Reimbursement') GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Y] 
+				FROM vyuPRPaycheckEarning WHERE ysnVoid = 0 AND  strCalculationType NOT IN ('Reimbursement') GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Y] 
 		ON EARN_Y.intEntityEmployeeId = EMP.intEntityId AND EARN_Y.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblTotal = SUM(dblTotal)
 				FROM vyuPRPaycheckTax WHERE ysnVoid = 0 AND strPaidBy = 'Company' GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [COMTAX_Y]
@@ -98,7 +98,7 @@ FROM tblPREmployee [EMP]
 				FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND DATEPART(QQ, dtmPayDate) = 1 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [PC_Q1]
 		ON PC_Q1.intEntityEmployeeId = EMP.intEntityId AND PC_Q1.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblHours = SUM(dblHours), dblTotal = SUM(dblTotal)
-				FROM vyuPRPaycheckEarning WHERE strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 1 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q1] 
+				FROM vyuPRPaycheckEarning WHERE ysnVoid = 0 AND strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 1 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q1] 
 		ON EARN_Q1.intEntityEmployeeId = EMP.intEntityId AND EARN_Q1.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblTotal = SUM(dblTotal)
 				FROM vyuPRPaycheckTax WHERE ysnVoid = 0 AND strPaidBy = 'Company' AND DATEPART(QQ, dtmPayDate) = 1 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [COMTAX_Q1]
@@ -118,7 +118,7 @@ FROM tblPREmployee [EMP]
 				FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND DATEPART(QQ, dtmPayDate) = 2 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [PC_Q2]
 		ON PC_Q2.intEntityEmployeeId = EMP.intEntityId AND PC_Q2.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblHours = SUM(dblHours), dblTotal = SUM(dblTotal)
-				FROM vyuPRPaycheckEarning WHERE strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 2 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q2] 
+				FROM vyuPRPaycheckEarning WHERE ysnVoid = 0 AND strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 2 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q2] 
 		ON EARN_Q2.intEntityEmployeeId = EMP.intEntityId AND EARN_Q2.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblTotal = SUM(dblTotal)
 				FROM vyuPRPaycheckTax WHERE ysnVoid = 0 AND strPaidBy = 'Company' AND DATEPART(QQ, dtmPayDate) = 2 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [COMTAX_Q2]
@@ -138,7 +138,7 @@ FROM tblPREmployee [EMP]
 				FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND DATEPART(QQ, dtmPayDate) = 3 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [PC_Q3]
 		ON PC_Q3.intEntityEmployeeId = EMP.intEntityId AND PC_Q3.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblHours = SUM(dblHours), dblTotal = SUM(dblTotal)
-				FROM vyuPRPaycheckEarning WHERE strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 3 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q3] 
+				FROM vyuPRPaycheckEarning WHERE ysnVoid = 0 AND strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 3 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q3] 
 		ON EARN_Q3.intEntityEmployeeId = EMP.intEntityId AND EARN_Q3.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblTotal = SUM(dblTotal)
 				FROM vyuPRPaycheckTax WHERE ysnVoid = 0 AND strPaidBy = 'Company' AND DATEPART(QQ, dtmPayDate) = 3 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [COMTAX_Q3]
@@ -158,7 +158,7 @@ FROM tblPREmployee [EMP]
 				FROM tblPRPaycheck WHERE ysnPosted = 1 AND ysnVoid = 0 AND DATEPART(QQ, dtmPayDate) = 4 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [PC_Q4]
 		ON PC_Q4.intEntityEmployeeId = EMP.intEntityId AND PC_Q4.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblHours = SUM(dblHours), dblTotal = SUM(dblTotal)
-				FROM vyuPRPaycheckEarning WHERE strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 4 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q4] 
+				FROM vyuPRPaycheckEarning WHERE ysnVoid = 0 AND strCalculationType NOT IN ('Reimbursement') AND DATEPART(QQ, dtmPayDate) = 4 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [EARN_Q4] 
 		ON EARN_Q4.intEntityEmployeeId = EMP.intEntityId AND EARN_Q4.intYear = YR.intYear
 	LEFT JOIN (SELECT intYear = YEAR(dtmPayDate), intEntityEmployeeId, dblTotal = SUM(dblTotal)
 				FROM vyuPRPaycheckTax WHERE ysnVoid = 0 AND strPaidBy = 'Company' AND DATEPART(QQ, dtmPayDate) = 4 GROUP BY YEAR(dtmPayDate), intEntityEmployeeId) AS [COMTAX_Q4]

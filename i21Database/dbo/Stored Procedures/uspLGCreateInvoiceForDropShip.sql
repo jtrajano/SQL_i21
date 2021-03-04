@@ -58,7 +58,7 @@ BEGIN
 					tblCTContractDetail CD
 					JOIN tblLGLoadDetail LD ON CD.intContractDetailId = LD.intSContractDetailId
 					JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId 
-					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6))
+					WHERE L.intLoadId = @intLoadId AND CD.intPricingTypeId NOT IN (1, 6)) AND @intType = 1
 		BEGIN
 			SELECT TOP 1 
 				@strInvoiceNumber = CH.strContractNumber,
@@ -72,7 +72,7 @@ BEGIN
 
 			DECLARE @ErrorMessageNotPriced NVARCHAR(250)
 
-			SET @ErrorMessageNotPriced = 'Contract No. ' + @strInvoiceNumber + '/' + @strLoadNumber + ' is not Priced. Unable to create Invoice.';
+			SET @ErrorMessageNotPriced = 'Contract No. ' + @strInvoiceNumber + '/' + @strLoadNumber + ' is not Priced. Unable to create Direct Invoice.';
 
 			RAISERROR(@ErrorMessageNotPriced, 16, 1);
 			RETURN 0;

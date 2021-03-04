@@ -6612,6 +6612,7 @@
     <Build Include="dbo\Views\vyuLGInsurancePremiumFactor.sql" />
     <Build Include="dbo\Views\vyuLGShippingLineServiceContract.sql" />
     <Build Include="dbo\Views\vyuSTStore.sql" />
+    <Build Include="dbo\Views\vyuSTStoreRegister.sql" />
     <None Include="Scripts\Post-Deployment\SM\1810_Reset_Hours_Terms.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerChargesPreload.sql" />
     <Build Include="dbo\Views\vyuSTCheckoutCustomerPaymentsPreload.sql" />
@@ -7110,7 +7111,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPPNLIDOC_HE.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILCreateCustomer.sql" />
     <Build Include="dbo\Stored Procedures\uspMBILCreateSite.sql" />
-    <Build Include="dbo\Stored Procedures\uspMBILPostInvoice.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILProcessInvoices.sql" />
     <Build Include="dbo\Functions\fnMBILGetInvoiceStatus.sql" />
     <Build Include="dbo\Stored Procedures\uspCFCardSycnAuditLog.sql" />
     <Build Include="dbo\Stored Procedures\uspRKOptionPostMatchPnS.sql" />
@@ -8894,8 +8895,6 @@
     <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
     <Build Include="dbo\Views\vyuRKGetM2MPostPreview.sql" />
-    <Build Include="dbo\Stored Procedures\uspFAInsertReverseGLEntry.sql" />
-    <Build Include="dbo\Stored Procedures\uspFAReverseGLEntries.sql" />
     <Build Include="dbo\Views\vyuLGGetLoadData.sql" />
     <Build Include="dbo\Functions\fnMFGetLotUnitCost.sql" />
     <Build Include="dbo\Tables\tblSCDisconnectedSchedule.sql" />
@@ -8921,6 +8920,8 @@
     <Build Include="dbo\Views\vyuAPVoucherPayableTaxStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
     <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
+    <Build Include="dbo\Tables\tblLGPendingClaim.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddPendingClaim.sql" />
     <Build Include="dbo\Views\vyuIPLoadDetailView.sql" />
     <Build Include="dbo\Views\vyuIPLoadDetailLotsView.sql" />
     <Build Include="dbo\Views\vyuIPLoadNotifyParties.sql" />
@@ -8952,6 +8953,14 @@
     <Build Include="dbo\Tables\tblTFLocality.sql" />
     <Build Include="dbo\Stored Procedures\uspTFUpgradeLocality.sql" />
     <Build Include="dbo\User Defined Types\TFLocality.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Tables\tblCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblCMResponsiblePartyTask.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLog.sql" />
+    <Build Include="dbo\Views\vyuCMBankStatementImportLogDetail.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyMatching.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyMatchingBDEP.sql" />
+    <Build Include="dbo\Views\vyuCMResponsiblePartyTask.sql" />
     <Build Include="dbo\Views\vyuIPContractCostView.sql" />
     <Build Include="dbo\Views\vyuIPContractCertification.sql" />
     <Build Include="dbo\Views\vyuIPContractDocumentView.sql" />
@@ -8988,6 +8997,8 @@
     <Build Include="dbo\Tables\tblCCCrossReferenceVendor.sql" />
     <Build Include="dbo\Tables\tblCCCrossReference.sql" />
     <Build Include="dbo\Views\vyuCCCrossReferenceVendor.sql" />
+    <Build Include="dbo\Views\vyuSTLotteryBookForReturn.sql" />
+    <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Views\vyuAP1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NEC.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRpt1099NECTwoPart.sql" />

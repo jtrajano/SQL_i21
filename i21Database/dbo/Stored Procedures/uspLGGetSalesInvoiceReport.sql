@@ -234,8 +234,22 @@ BEGIN
 		,strTaxDescription = TaxG.strDescription
 		,intLineCount = 1
 		,FT.strFreightTerm
-		,strMVessel = CASE WHEN L.intPurchaseSale = 2 THEN ISNULL(PL.strMVessel, L.strMVessel) ELSE L.strMVessel END
-		,strTransshipmentVessel = UPPER(L.strMVessel + ' VOY.' + L.strMVoyageNumber
+		,strMVessel = CASE WHEN L.intPurchaseSale = 2 THEN 
+						CASE WHEN PL.strMVessel IS NOT NULL THEN
+								CASE WHEN ISNULL(PL.strMVessel, '') = '' THEN PL.strVessel1 ELSE PL.strMVessel END
+							ELSE
+								CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END
+							END
+						ELSE CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel END END
+		,strTransshipmentVessel = UPPER(
+									CASE WHEN L.intPurchaseSale = 2 THEN 
+										CASE WHEN PL.strMVessel IS NOT NULL THEN
+												CASE WHEN ISNULL(PL.strMVessel, '') = '' THEN PL.strVessel1 ELSE PL.strMVessel + ' VOY.' + PL.strMVoyageNumber END
+											ELSE
+												CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel + ' VOY.' + L.strMVoyageNumber END
+											END
+										ELSE CASE WHEN ISNULL(L.strMVessel, '') = '' THEN L.strVessel1 ELSE L.strMVessel + ' VOY.' + L.strMVoyageNumber END 
+									END
 									+ CASE WHEN ISNULL(L.strVessel2, '') <> '' THEN ', ' + L.strVessel2 ELSE '' END 
 									+ CASE WHEN ISNULL(L.strVessel3, '') <> '' THEN ', ' + L.strVessel3 ELSE '' END 
 									+ CASE WHEN ISNULL(L.strVessel4, '') <> '' THEN ', ' + L.strVessel4 ELSE '' END)
