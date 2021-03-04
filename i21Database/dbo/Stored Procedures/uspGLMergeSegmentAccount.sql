@@ -78,6 +78,13 @@ BEGIN
         DELETE FROM @tblSubsidiary WHERE @strDatabase = strDatabase 
       END
 
+      
+      IF EXISTS(SELECT 1 FROM sys.triggers WHERE [Name] = 'trg_tblGLAccountSegment')
+      BEGIN
+        ALTER TABLE tblGLAccountSegment
+        DISABLE TRIGGER trg_tblGLAccountSegment
+      END
+
       ;WITH tblUnionSegments  
       as(
 
@@ -134,6 +141,11 @@ BEGIN
         MergedTable.strChartDesc
       );  
 
+      IF EXISTS(SELECT 1 FROM sys.triggers WHERE [Name] = 'trg_tblGLAccountSegment')
+      BEGIN
+        ALTER TABLE tblGLAccountSegment
+        ENABLE TRIGGER trg_tblGLAccountSegment
+      END
 
       
       IF @ysnMergeCOA = 1
