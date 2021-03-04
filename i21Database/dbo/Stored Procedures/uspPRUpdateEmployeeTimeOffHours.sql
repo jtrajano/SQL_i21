@@ -19,6 +19,7 @@ BEGIN
 		,dtmNextAward = CAST(NULL AS DATETIME)
 		,dblAccruedHours = CAST(0 AS NUMERIC(18, 6))
 		,dblEarnedHours = CAST(0 AS NUMERIC(18, 6))
+		,dblBalance = (T.dblHoursCarryover + T.dblHoursEarned) - T.dblHoursUsed - ISNULL(TOYTD.dblHoursUsedYTD,0)
 		,dblRate
 		,dblPerPeriod
 		,strPeriod
@@ -37,45 +38,68 @@ BEGIN
 		LEFT JOIN (SELECT TOP 1 intPaycheckId, intEntityEmployeeId, ysnPosted, ysnVoid, dtmDateFrom, dtmDateTo 
 					FROM tblPRPaycheck WHERE intPaycheckId = @intPaycheckId) P
 			ON E.intEntityId = P.intEntityEmployeeId
+	LEFT JOIN(
+	SELECT intEntityEmployeeId
+		,intTypeTimeOffId
+		,intYear
+		,dblHoursUsedYTD = dblHoursUsed 
+	FROM vyuPREmployeeTimeOffUsedYTD
+	) TOYTD ON T.intEntityEmployeeId = TOYTD.intEntityEmployeeId AND T.intTypeTimeOffId = TOYTD.intTypeTimeOffId
 	WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
 
 	--Calculate Next Award Date
 	UPDATE #tmpEmployees 
-		SET dtmNextAward = CASE WHEN (strAwardPeriod = 'Start of Week') THEN
-								CAST(DATEADD(WK, DATEDIFF(WK, 6, GETDATE()), 0) AS DATE)
-							 WHEN (strAwardPeriod = 'End of Week') THEN
-								CASE WHEN (dtmLastAward) < CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE) THEN
-									DATEADD(DD, -7, CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())), GETDATE()) AS DATE))
-								ELSE 
-									CAST(DATEADD(DD, 7-(DATEPART(DW, GETDATE())) + 7, GETDATE()) AS DATE)
-								END
-							 WHEN (strAwardPeriod = 'Start of Month') THEN
+	SET dtmNextAward = CASE WHEN (#tmpEmployees.strAwardPeriod = 'Start of Week') THEN 
+							CASE WHEN DATEDIFF(D, DATEADD(DD,0 - (DATEPART(DW, GETDATE()) - 2) ,GETDATE()),GETDATE()) >= 1
+								THEN CAST(DATEADD(WK, 1, DATEADD(DD,0 - (DATEPART(DW, GETDATE()) - 2) , GETDATE())) AS DATE)
+							ELSE CAST(DATEADD(DD,0 - (DATEPART(DW, GETDATE()) - 2) ,GETDATE()) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'End of Week') THEN
+							CAST(DATEADD(DD,6 - (DATEPART(DW, GETDATE()) - 2) ,GETDATE()) AS DATE)
+						WHEN (#tmpEmployees.strAwardPeriod = 'Start of Month') THEN
+							CASE WHEN DATEDIFF(D, GETDATE(), #tmpEmployees.dtmLastAwardTemp) >= 0 THEN 
 								CAST(DATEADD(M, DATEDIFF(M, 0, GETDATE()), 0) AS DATE)
-							 WHEN (strAwardPeriod = 'End of Month') THEN
-								CAST(DATEADD(S, -1, DATEADD(MM, DATEDIFF(M, 0, GETDATE()) + 1, 0)) AS DATE)
-							 WHEN (strAwardPeriod = 'Start of Quarter') THEN
-								CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE)
-							 WHEN (strAwardPeriod = 'End of Quarter') THEN
+							ELSE 
+								CAST(DATEADD(M, 1, CAST(DATEADD(M, DATEDIFF(M, 0, GETDATE()), 0) AS DATE)) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'End of Month') THEN
+							CASE WHEN DATEDIFF(D, CAST(DATEADD(S, -1, DATEADD(MM, DATEDIFF(M, 0, #tmpEmployees.dtmPaycheckEndDate) + 1, 0)) AS DATE), GETDATE()) >= 0 
+									THEN CAST(DATEADD(S, -1, DATEADD(MM, DATEDIFF(M, 0, '2019-03-25 00:00:00.000') + 1, 0)) AS DATE)
+								ELSE CAST(DATEADD(S, -1, DATEADD(MM, DATEDIFF(M, 0, GETDATE()) + 1, 0)) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'Start of Quarter') THEN
+							CASE WHEN DATEDIFF(D, GETDATE(), CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE)) >= 0
+								THEN CAST(DATEADD(Q, DATEDIFF(Q, 0, GETDATE()), 0) AS DATE)
+							ELSE CAST(DATEADD(Q, 1,CAST(DATEADD(Q, DATEDIFF(Q, 17, GETDATE()), 0) AS DATE)) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'End of Quarter') THEN
+							CASE WHEN dtmLastAward IS NOT NULL THEN 
 								CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE)
-							 WHEN (strAwardPeriod = 'Start of Year') THEN
-								CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)) THEN
-									DATEADD(YY, DATEDIFF(YY,0,GETDATE()), 0)
-								ELSE 
-									DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, 0)
-								END
-							 WHEN (strAwardPeriod = 'End of Year') THEN
-								CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), -1)) THEN
-									DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1)
-								ELSE 
-									DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, -1)
-								END
-							 WHEN (strAwardPeriod = 'Anniversary Date') THEN
-								DATEADD(YY, YEAR(GETDATE()) - YEAR(dtmDateHired), dtmDateHired)
-							 WHEN (strAwardPeriod = 'Paycheck') THEN
-								dtmPaycheckEndDate
-							 ELSE NULL 
-						END
+							ELSE 
+								CAST(DATEADD(Q, 1, CAST(DATEADD(D, -1, DATEADD(Q, DATEDIFF(Q, 0, GETDATE()) + 1, 0)) AS DATE)) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'Start of Year') THEN
+							CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY, 0, GETDATE()), 0)) THEN
+								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()), 0) AS DATE)
+							ELSE 
+								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, 0) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'End of Year') THEN
+							CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1)) THEN
+								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()), -1) AS DATE)
+							ELSE 
+								CAST(DATEADD(YY, DATEDIFF(YY,0,GETDATE()) + 1, -1) AS DATE)
+							END
+						WHEN (#tmpEmployees.strAwardPeriod = 'Anniversary Date') THEN
+							CASE WHEN (dtmLastAward) < (DATEADD(YY, DATEDIFF(YY,0,getdate()), 0)) THEN
+								CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(#tmpEmployees.dtmDateHired), #tmpEmployees.dtmDateHired) AS DATE)
+							ELSE 
+								CAST(DATEADD(YY, YEAR(GETDATE()) - YEAR(#tmpEmployees.dtmDateHired) + 1, #tmpEmployees.dtmDateHired) AS DATE)
+							END							
+						WHEN (#tmpEmployees.strAwardPeriod = 'Paycheck') THEN #tmpEmployees.dtmDateHired
+						ELSE NULL 
+					END
 
 	--Calculate if Time Off is Scheduled for Reset
 	UPDATE #tmpEmployees
@@ -164,23 +188,20 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
-										CASE WHEN (T.ysnForReset = 1) THEN
-											CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-												dblMaxEarned
+			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) AND ysnPaycheckPosted = 1 
+								THEN 
+										CASE WHEN (dblMaxBalance IS NOT NULL AND dblBalance + T.dblEarnedHours > dblMaxBalance) THEN
+												dblHoursEarned + ISNULL(NULLIF(ABS(T.dblEarnedHours - (dblBalance - dblMaxBalance)), -(T.dblEarnedHours - (dblBalance - dblMaxBalance)) ),0)
 											ELSE
-												(dblHoursEarned + T.dblEarnedHours)
-											END
-										Else
-											dblHoursEarned
+											dblMaxEarned
 										END
-								 ELSE 
-								 		CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
-												dblMaxEarned
+							    ELSE 
+										CASE WHEN (dblMaxBalance IS NOT NULL AND dblBalance + T.dblEarnedHours > dblMaxBalance) THEN
+												dblHoursEarned + ISNULL(NULLIF(ABS(T.dblEarnedHours - (dblBalance - dblMaxBalance)), -(T.dblEarnedHours - (dblBalance - dblMaxBalance)) ),0)
 											ELSE
-												(dblHoursEarned + T.dblEarnedHours)
+											T.dblEarnedTotalHours + T.dblEarnedHours
 										END
-								 END
+								END
 								
 				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
 				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
