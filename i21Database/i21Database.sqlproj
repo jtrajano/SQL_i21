@@ -8859,8 +8859,6 @@
     <Build Include="dbo\Functions\fnCTCreateVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuAPPayablesAmountDue.sql" />
     <Build Include="dbo\Functions\fnAPGetPayVoucherForPaymentPayVoucher.sql" />
-    <Build Include="dbo\Views\vyuLGClearingItemGL.sql" />
-    <Build Include="dbo\Views\vyuLGClearingItem.sql" />
     <None Include="Scripts\Post-Deployment\IC\25_TransactionTypeRename.sql" />
     <None Include="Scripts\Post-Deployment\IC\26_LockAvgCost.sql" />
     <Build Include="dbo\Tables\tblICItemStockUsagePerPeriod.sql" />
@@ -9148,7 +9146,7 @@
     <Build Include="dbo\Views\vyuMFGetContractDetail.sql" />
     <Build Include="dbo\Views\vyuMFGetVirtualRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGetMarketBasis.sql" />
-	  <Build Include="dbo\Tables\tblTFTransactionDynamicFL.sql" />
+    <Build Include="dbo\Tables\tblTFTransactionDynamicFL.sql" />
     <Build Include="dbo\Views\vyuICSearchBundleDetails.sql" />
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
     <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummaryOld.sql" />
@@ -9157,6 +9155,8 @@
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Tables\tblGRTicketDiscountItemInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRModifyTicketDiscountItemInfo.sql" />
+    <Build Include="dbo\Views\vyuLGClearingItem.sql" />
+    <Build Include="dbo\Views\vyuLGClearingItemGL.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
