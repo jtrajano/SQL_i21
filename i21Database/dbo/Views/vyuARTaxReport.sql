@@ -147,8 +147,7 @@ INNER JOIN (
 			 , dblTax				
 			 , ysnTaxExempt
 			 , ysnTaxAdjusted
-			 , ysnInvalidSetup
-			 , intSalesTaxAccountId
+			 , ysnInvalidSetup			 
 		FROM dbo.tblARInvoiceDetailTax WITH (NOLOCK)
 	) IDT ON IDT.intInvoiceDetailId = ID.intInvoiceDetailId
 	LEFT JOIN (
