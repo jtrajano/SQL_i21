@@ -101,10 +101,13 @@ BEGIN TRY
 					EXEC uspLGProcessReweighs @intLoadId, NULL, NULL
 				END
 
-				IF (@ysnCancel = 1) 
-					EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
-				ELSE
-					EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				BEGIN	
+					IF (@ysnCancel = 1) 
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+					ELSE
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
 			END
 
 		END
@@ -148,10 +151,13 @@ BEGIN TRY
 					UPDATE tblLGLoad SET intShipmentStatus = 1, ysnPosted = @ysnPost, dtmPostedDate = GETDATE() WHERE intLoadId = @intLoadId AND @ysnCancel = 0
 				END
 
-				IF (@ysnCancel = 1) 
-					EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
-				ELSE
-					EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				BEGIN	
+					IF (@ysnCancel = 1) 
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+					ELSE
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
 
 				--Insert Pending Claim for Outbound
 				EXEC dbo.uspLGAddPendingClaim @intLoadId, 2, @ysnPost
@@ -187,11 +193,14 @@ BEGIN TRY
 				WHERE intLoadId = @intLoadId
 					AND @ysnCancel = 0
 
-				IF (@ysnCancel = 1) 
-					EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
-				ELSE
-					EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
-
+				IF(ISNULL(@strFOBPoint,'') = 'Origin')
+				BEGIN	
+					IF (@ysnCancel = 1) 
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, 0, @intEntityUserSecurityId
+					ELSE
+						EXEC dbo.uspLGProcessPayables @intLoadId, NULL, @ysnPost, @intEntityUserSecurityId
+				END
+			
 				--Insert Pending Claim for Inbound and Outbound
 				EXEC dbo.uspLGAddPendingClaim @intLoadId, 3, @ysnPost
 			END

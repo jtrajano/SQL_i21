@@ -214,6 +214,8 @@ BEGIN
 			,L.dtmBLDate
 			,L.dtmDeliveredDate
 			,strContractNumber = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber ELSE CH.strContractNumber END
+			,strContractNumberSeq = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strContractNumber + ' / ' + CAST(PCD.intContractSeq AS NVARCHAR(10)) 
+										ELSE CH.strContractNumber + ' / ' + CAST(CD.intContractSeq AS NVARCHAR(10)) END
 			,strCustomerContract = CASE WHEN (L.intPurchaseSale = 3) THEN PCH.strCustomerContract ELSE CH.strCustomerContract END 
 			,Item.strItemNo
 			,Item.strDescription AS strItemDescription

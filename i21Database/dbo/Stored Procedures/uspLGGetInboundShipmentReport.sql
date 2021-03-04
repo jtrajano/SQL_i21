@@ -116,10 +116,11 @@ BEGIN
 	LEFT JOIN tblLGLoadWarehouse LW ON CLSL.intCompanyLocationSubLocationId = LW.intSubLocationId
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 	
-	SELECT @strShippingLineName = E.strName
+	SELECT @strShippingLineName = CASE WHEN (ISNULL(SLLocation.strCheckPayeeName, '') <> '') THEN SLLocation.strCheckPayeeName ELSE E.strName END
 	FROM tblLGLoad L
 	JOIN tblEMEntity E ON E.intEntityId = L.intShippingLineEntityId
 	JOIN tblLGLoadWarehouse LW ON LW.intLoadId = L.intLoadId
+	LEFT JOIN tblEMEntityLocation SLLocation ON SLLocation.intEntityId = L.intShippingLineEntityId and SLLocation.ysnDefaultLocation = 1
 	WHERE LW.intLoadWarehouseId = @intLoadWarehouseId
 
 	SELECT @strReleaseOrderText = 'Attn '+ ISNULL(@strShippingLineName,'') +' : Please release the cargo in favour of ' + @strWarehouseEntityName
@@ -207,6 +208,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			L.strFVessel,
 			L.strMVoyageNumber,
 			L.strFVoyageNumber,
+			L.strComments,
 			ysnHasTransshipment = CAST(CASE WHEN ISNULL(L.strVessel1, '') <> '' AND ISNULL(L.strVessel2, '') <> '' THEN 1 ELSE 0 END AS BIT),
 			L.strVessel1, L.dtmETAPOD1, L.dtmETSPOL1, L.strOriginPort1, L.strDestinationPort1,
 			L.strVessel2, L.dtmETAPOD2, L.dtmETSPOL2, L.strOriginPort2, L.strDestinationPort2,
@@ -240,7 +242,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strCustomerState = CLocation.strState,
 			strCustomerZipCode = CLocation.strZipCode,
 
-  			strShippingLine = SLEntity.strName,
+  			strShippingLine = CASE WHEN (ISNULL(SLLocation.strCheckPayeeName, '') <> '') THEN SLLocation.strCheckPayeeName ELSE SLEntity.strName END,
 			strShippingLineEmail = SLEntity.strEmail,
 			strShippingLineFax = SLEntity.strFax,
 			strShippingLinePhone = SLEntity.strPhone,
@@ -251,7 +253,7 @@ IF ISNULL(@intLoadWarehouseId,0) = 0
 			strShippingLineCountry = SLLocation.strCountry,
 			strShippingLineState = SLLocation.strState,
 			strShippingLineZipCode = SLLocation.strZipCode,
-			strShippingLineWithAddress = SLEntity.strName + ', ' + ISNULL(SLLocation.strAddress,''),
+			strShippingLineWithAddress = CASE WHEN (ISNULL(SLLocation.strCheckPayeeName, '') <> '') THEN SLLocation.strCheckPayeeName ELSE SLEntity.strName END + ', ' + ISNULL(SLLocation.strAddress,''),
 
 			strTerminal = TerminalEntity.strName,
 			strTerminalEmail = TerminalEntity.strEmail,
