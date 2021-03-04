@@ -131,16 +131,15 @@ SET @query = '
 		SELECT
 			C.intTransactionType,
 			C.intTransactionDetailId,
-			C.intItemId,
 			dbo.fnTrim(ISNULL(V.strVendorId, E.strEntityNo) + '' - '' + ISNULL(E.strName, '''')) AS strVendorIdName,
 			C.strTransactionId,
 			C.dtmDate,
 			CL.strLocationName,
 			C.strReferenceNumber,
 			CASE WHEN C.intOffsetId > 0 THEN 0 ELSE C.dblQuantity END AS dblQuantity,
-			CASE WHEN C.intOffsetId > 0 THEN 0 ELSE ROUND(C.dblAmount, 2) END AS dblAmount,
+			CASE WHEN C.intOffsetId > 0 THEN 0 ELSE C.dblAmount END AS dblAmount,
 			CASE WHEN C.intOffsetId > 0 THEN C.dblQuantity * -1 ELSE 0 END AS dblOffsetQuantity,
-			CASE WHEN C.intOffsetId > 0 THEN ROUND(C.dblAmount * -1, 2) ELSE 0 END AS dblOffsetAmount,
+			CASE WHEN C.intOffsetId > 0 THEN C.dblAmount * -1 ELSE 0 END AS dblOffsetAmount,
 			A.strAccountId,
 			FP.strPeriod
 		FROM tblAPClearing C
@@ -166,9 +165,9 @@ SET @query = '
 			intTransactionType,
 			strVendorIdName,
 			strTransactionId,
-			MIN(dtmDate) dtmDate,
-			MAX(strLocationName) strLocationName,
-			MAX(strReferenceNumber) strReferenceNumber,
+			dtmDate = MIN(dtmDate),
+			strLocationName,
+			strReferenceNumber,
 			SUM(dblQuantity) AS dblQuantity,
 			SUM(dblAmount) AS dblAmount,
 			SUM(dblOffsetQuantity) AS dblOffsetQuantity,
@@ -179,9 +178,9 @@ SET @query = '
 			'+ @query +'
 		) filteredClearing
 		'+ @filterPerItem +'
-		GROUP BY intTransactionType, intTransactionDetailId, intItemId, strVendorIdName, strTransactionId
+		GROUP BY intTransactionType, intTransactionDetailId, strVendorIdName, strTransactionId, strLocationName, strReferenceNumber
 	) detailedClearing
-	WHERE detailedClearing.dblClearingAmount <> 0 AND detailedClearing.dblQuantity <> 0
+	WHERE detailedClearing.dblClearingAmount <> 0
 '
 
 --FINALIZE AND ADD HEADER INFORMATIONS
