@@ -10,10 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = (
-		SELECT intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'System Manager' AND strMenuName = 'Maintenance' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
-	))
+
+	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebuild' AND strModuleName = 'Accounts Receivable')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -2247,6 +2245,12 @@ IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Inquire B
 	VALUES (N'Inquire Balance', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Inquire Balance', N'Activity', N'Screen', N'AccountsReceivable.view.CustomerInquiry?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 10, 1)
 ELSE 
 	UPDATE tblSMMasterMenu SET intSort = 10, strCommand = N'AccountsReceivable.view.CustomerInquiry?showSearch=true' WHERE strMenuName = 'Inquire Balance' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebuild' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Rebuild', N'Accounts Receivable', @AccountsReceivableActivitiesParentMenuId, N'Rebuild', N'Activity', N'Screen', N'AccountsReceivable.view.Rebuild?showSearch=true', N'small-menu-activity', 1, 0, 0, 1, 11, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 11, strCommand = N'AccountsReceivable.view.Rebuild?showSearch=true' WHERE strMenuName = 'Rebuild' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId
 
 -- IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Notes Receivables' AND strModuleName = 'Accounts Receivable' AND intParentMenuID = @AccountsReceivableActivitiesParentMenuId)
 -- 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
