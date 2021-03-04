@@ -200,12 +200,11 @@ BEGIN
 
 		SET @strPrintCompanyHeading = ISNULL(@strPrintCompanyHeading,'0')
 		
+		DECLARE @SQLValue NVARCHAR(MAX) = NULL
 
 		IF(@ysnIsOriginIntegration = 1)
 		BEGIN
-			EXEC (
-				'
-				SELECT DISTINCT
+			SET @SQLValue = 'SELECT DISTINCT
 					strCompanyName = A.strCompanyName
 					,strCompanyAddress = A.strAddress
 					,strCompanyCity = A.strCity
@@ -218,7 +217,7 @@ BEGIN
 					,strCustomerZip = RTRIM(B.vwcus_zip)
 					,intEntityCustomerId = B.A4GLIdentity
 					,dblBudget = B.vwcus_budget_amt
-					,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
+					,dtmFirstDueDate = ''' + CONVERT(NVARCHAR, @strFirstPaymentDue, 101) + '''
 					,blbLetterBody = H.blbMessage 
 					,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
 					,intDeliveryTermId = I.A4GLIdentity
@@ -232,13 +231,10 @@ BEGIN
 					ON B.vwcus_terms_cd = I.vwtrm_key_n
 				,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
 				' + @strWhereClause
-				)
 		END
 		ELSE
 		BEGIN
-			EXEC (
-				'
-				SELECT DISTINCT
+			SET @SQLValue =	'SELECT DISTINCT
 					strCompanyName = A.strCompanyName
 					,strCompanyAddress = A.strAddress
 					,strCompanyCity = A.strCity
@@ -251,7 +247,7 @@ BEGIN
 					,strCustomerZip = E.strZipCode
 					,intEntityCustomerId = B.intEntityId
 					,dblBudget = B.dblMonthlyBudget
-					,dtmFirstDueDate = CAST(''' + @strFirstPaymentDue + ''' AS DATETIME)
+					,dtmFirstDueDate = ''' + CONVERT(NVARCHAR, @strFirstPaymentDue, 101) + '''
 					,blbLetterBody = H.blbMessage 
 					,ysnPrintCompanyHeading = ' + @strPrintCompanyHeading  + '
 					,intDeliveryTermId = B.intTermsId
@@ -267,9 +263,10 @@ BEGIN
 						AND ysnDefaultLocation = 1
 				,(SELECT TOP 1 * FROM tblSMLetter WHERE intLetterId = ' + @strBudgetLetterId + ') H
 				' + @strWhereClause
-				)
 		END
 		
+		EXEC (@SQLValue)
+
 	END
 END
 GO
