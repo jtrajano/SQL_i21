@@ -23,8 +23,8 @@ BEGIN
 					tblCTContractHeader ch INNER JOIN tblCTContractDetail cd
 						ON ch.intContractHeaderId = cd.intContractHeaderId
 				WHERE 
-					(ch.intCommodityId = @intCommodityId AND @intCommodityId IS NOT NULL)
-					AND (cd.intItemId = @intItemId AND @intItemId IS NOT NULL) 
+					--(ch.intCommodityId = @intCommodityId AND @intCommodityId IS NOT NULL)
+					(cd.intItemId = @intItemId AND @intItemId IS NOT NULL) 
 			)
 		)
 	)

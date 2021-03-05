@@ -162,12 +162,6 @@ BEGIN TRY
 			select @dblConvertedQty = @dblSequenceBalanceQuantity;
 		end
 
-		-- if @dblConvertedQty = 0
-		-- begin
-		-- 	select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
-		-- 	continue
-		-- end
-
 		EXEC	uspCTUpdateSequenceBalance
 				@intContractDetailId	=	@intContractDetailId,
 				@dblQuantityToUpdate	=	@dblConvertedQty,

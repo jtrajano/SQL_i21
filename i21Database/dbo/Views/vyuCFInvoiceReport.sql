@@ -1,4 +1,6 @@
-﻿CREATE VIEW [dbo].[vyuCFInvoiceReport]
+﻿
+
+CREATE VIEW [dbo].[vyuCFInvoiceReport]
 AS
 
 

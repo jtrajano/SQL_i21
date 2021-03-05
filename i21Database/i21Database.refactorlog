@@ -7651,4 +7651,18 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="intRebuildRTSLogId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="490399aa-597f-41c0-bb92-3c2b3535b7ac" ChangeDateTime="02/11/2021 08:54:26">
+    <Property Name="ElementName" Value="[dbo].[tblQMTicketDiscountItemInfo]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[tblGRTicketDiscountItemInfo]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e91213ed-0882-4288-a0cc-3479541992a6" ChangeDateTime="02/11/2021 08:56:45">
+    <Property Name="ElementName" Value="[dbo].[uspSCModifyTicketDiscountItemInfo]" />
+    <Property Name="ElementType" Value="SqlProcedure" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[uspGRModifyTicketDiscountItemInfo]" />
+  </Operation>
 </Operations>
