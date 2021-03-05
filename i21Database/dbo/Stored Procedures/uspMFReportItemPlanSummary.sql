@@ -173,6 +173,7 @@ BEGIN
 				THEN strLocationName
 			ELSE @strCompanyLocationName
 			END
+	AND ysnLocationActive=1
 
 	SET @dtmCurrentDate = dbo.fnGetBusinessDate(@dtmCurrentDateTime, @intCompanyLocationId)
 
@@ -340,6 +341,7 @@ BEGIN
 					THEN strLocationName
 				ELSE @strCompanyLocationName
 				END
+		AND ysnLocationActive=1
 	END
 
 	INSERT INTO @tblMFItemPlanSummary
