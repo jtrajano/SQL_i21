@@ -6,6 +6,8 @@
 	,ICItems.strItemNo
 	,ISNULL(c.dblPrice ,0) as dblPrice
 	,c.strPricing  COLLATE Latin1_General_CI_AS AS strPricing
+	,z.intEntityId
+	,ICItems.intLocationId
 	  
 	from tblARCustomerSpecialPrice a  
 	join tblARCustomer b  
@@ -22,11 +24,12 @@
 			OR (a.intItemId = ICItems.intItemId
 				--AND ICItems.intLocationId = d.intWarehouseId
 				AND a.intItemId IS NOT NULL)   
-	--INNER JOIN (SELECT DISTINCT intItemId FROM [vyuETExportItem]) ETItems ON ICItems.intItemId = ETItems.intItemId
+	INNER JOIN (SELECT DISTINCT intItemId FROM [vyuETExportItem]) ETItems ON ICItems.intItemId = ETItems.intItemId
+
 	CROSS APPLY dbo.[fnARGetItemPricingDetails](  
 			ICItems.intItemId,  
 			b.[intEntityId],  
-			NULL,  
+			ICItems.intLocationId,  
 			ICItems.intStockUOMId,  
 			(SELECT TOP 1 intDefaultCurrencyId FROM tblSMCompanyPreference),  
 			cast(GetDate() as date),  
@@ -59,5 +62,3 @@
 			null,
 			0  
 			) c  
-
-			
