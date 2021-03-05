@@ -18,6 +18,7 @@ SELECT CD.intContractDetailId
 	,NULL AS intSequenceNo
 	,CH.intEntityId
 	,CD.intContractStatusId
+	,CH.ysnEnableFutures
 FROM tblCTContractDetail CD
 JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 JOIN tblRKFutureMarket FM ON FM.intFutureMarketId = CD.intFutureMarketId
