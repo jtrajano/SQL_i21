@@ -181,7 +181,7 @@ BEGIN
 			WHERE b.strTransactionReferenceId NOT IN (SELECT strTransactionReferenceId FROM #tempFirstToSecond)
 		) t
 	) tbl
-	WHERE dblContractTotal <> 0;
+	WHERE dblContractTotal <> 0 AND dblDifference <> 0
 	
 	DROP TABLE #tmpResult;
 	DROP TABLE #FirstRun;
