@@ -41,7 +41,7 @@ CREATE TYPE [dbo].[InvoiceIntegrationStagingTable] AS TABLE
 																											-- 11. "Consumption Site"
 																											-- 12. "Meter Billing"
 																											-- 13. "Load/Shipment Schedules"
-																											-- 14. "Credit Card Reconciliation"
+																											-- 14. "Credit Card Reconciliation" / "Dealer Credit Card"
 																											-- 15. "Sales Contract"
 																											-- 16. "Load Schedule"
 																											-- 17. "CF Invoice"
