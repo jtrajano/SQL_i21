@@ -4,6 +4,7 @@
 	@fileExtension NVARCHAR(100),
 	@filePath NVARCHAR(500),
 	@screenNamespace NVARCHAR(500),
+	@useDocumentWatcher BIT = 0,
 	@throwError BIT = 1,
 	@attachmentId INT OUTPUT,
 	@error NVARCHAR(1000) = NULL OUTPUT 
@@ -183,108 +184,166 @@ BEGIN
 				RETURN;
 			END
 
-			--check if file name exist
-			IF ISNULL(@filePath, '') = ''
+			------------------------------------------------SP PROCESS ONLY------------------------------------------------
+			IF ISNULL(@useDocumentWatcher, 0) = 0
 			BEGIN
-				SET @error =  'File path is empty.';
-				IF @throwError = 1
+				
+				--check if file path exist
+				IF ISNULL(@filePath, '') = ''
 				BEGIN
-					RAISERROR(@error, 16, 1);
+					SET @error =  'File path is empty.';
+					IF @throwError = 1
+					BEGIN
+						RAISERROR(@error, 16, 1);
+					END
+					RETURN;
 				END
-				RETURN;
-			END
 
-			--check if file exist
-			EXEC master..xp_sprintf @fullFilePath OUTPUT, '%s\%s.%s', @filePath, @fileName, @fileExtension
+				--check if file exist
+				EXEC master..xp_sprintf @fullFilePath OUTPUT, '%s\%s.%s', @filePath, @fileName, @fileExtension
 
-			IF ISNULL(@fullFilePath, '') = ''
-			BEGIN
-				SET @error =  'Invalid file path.';
-				IF @throwError = 1
+				IF ISNULL(@fullFilePath, '') = ''
 				BEGIN
-					RAISERROR(@error, 16, 1);
+					SET @error =  'Invalid file path.';
+					IF @throwError = 1
+					BEGIN
+						RAISERROR(@error, 16, 1);
+					END
+					RETURN;
 				END
-				RETURN;
-			END
 
-			EXEC master..xp_fileexist @fullFilePath, @Exists OUT
-			IF ISNULL(@Exists, 0) = 0
-			BEGIN
-				EXEC xp_sprintf @error OUTPUT, 'Cannot find the file %s.%s in the path %s', @fileName, @fileExtension, @filePath
-				IF @throwError = 1
+				EXEC master..xp_fileexist @fullFilePath, @Exists OUT
+				IF ISNULL(@Exists, 0) = 0
 				BEGIN
-					RAISERROR(@error, 16, 1);
+					EXEC xp_sprintf @error OUTPUT, 'Cannot find the file %s.%s in the path %s', @fileName, @fileExtension, @filePath
+					IF @throwError = 1
+					BEGIN
+						RAISERROR(@error, 16, 1);
+					END
+					RETURN;
 				END
-				RETURN;
-			END
 			
 
-			--------------------------------------------------UPLOAD--------------------------------------------------
-			SET @sql = N'SET @paramOut = (SELECT * FROM  OPENROWSET(BULK N''' + @fullFilePath + ''', SINGLE_BLOB) AS import)'
-			EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @fileContent OUTPUT;
+				--------------------------------------------------UPLOAD--------------------------------------------------
+				SET @sql = N'SET @paramOut = (SELECT * FROM  OPENROWSET(BULK N''' + @fullFilePath + ''', SINGLE_BLOB) AS import)'
+				EXEC sp_executesql @sql, @ParamDefinition, @paramOut = @fileContent OUTPUT;
 
-			IF ISNULL(DATALENGTH(@fileContent), 0) = 0
-			BEGIN
-
-				SET @error =  'No file to upload.';
-				IF @throwError = 1
+				IF ISNULL(DATALENGTH(@fileContent), 0) = 0
 				BEGIN
-					RAISERROR(@error, 16, 1);
+
+					SET @error =  'No file to upload.';
+					IF @throwError = 1
+					BEGIN
+						RAISERROR(@error, 16, 1);
+					END
+					RETURN;
 				END
-				RETURN;
-			END
 
-			SELECT @screenId = intScreenId, @recordId = intRecordId FROM tblSMTransaction WHERE intTransactionId = @transactionId
-			SELECT @fileTypeMime = REPLACE(RTRIM(LTRIM(b.Description)), CHAR(9), '') 
-				FROM #TempFileExtension a  
-				LEFT OUTER JOIN #TempFileExtensionMime b On a.RowNum = b.RowNum 
-				WHERE LOWER(a.[Description]) = LOWER(@fileExtension)
-			SELECT @namespace = strNamespace FROM tblSMScreen WHERE intScreenId = @screenId
+				SELECT @screenId = intScreenId, @recordId = intRecordId FROM tblSMTransaction WHERE intTransactionId = @transactionId
+				SELECT @fileTypeMime = REPLACE(RTRIM(LTRIM(b.Description)), CHAR(9), '') 
+					FROM #TempFileExtension a  
+					LEFT OUTER JOIN #TempFileExtensionMime b On a.RowNum = b.RowNum 
+					WHERE LOWER(a.[Description]) = LOWER(@fileExtension)
+				SELECT @namespace = strNamespace FROM tblSMScreen WHERE intScreenId = @screenId
 
-			IF ISNULL(@screenNamespace, '') <> ''
-			BEGIN
-				SET @namespace = @screenNamespace
-			END
+				IF ISNULL(@screenNamespace, '') <> ''
+				BEGIN
+					SET @namespace = @screenNamespace
+				END
 
-			INSERT INTO tblSMUpload (
-				strFileIdentifier
-				, blbFile
-				, dtmDateUploaded
-				, intConcurrencyId
-			)
-			VALUES (
-				@fileIdentifier
-				, @fileContent
-				, GETDATE()
-				, 1
-			)
+				INSERT INTO tblSMUpload (
+					strFileIdentifier
+					, blbFile
+					, dtmDateUploaded
+					, intConcurrencyId
+				)
+				VALUES (
+					@fileIdentifier
+					, @fileContent
+					, GETDATE()
+					, 1
+				)
 
-			SELECT @uploadId = SCOPE_IDENTITY()
+				SELECT @uploadId = SCOPE_IDENTITY()
 
-			INSERT INTO tblSMAttachment (
-					strName
-				, strFileType
-				, strFileIdentifier
-				, strScreen	
-				, strRecordNo
-				, dtmDateModified
-				, intSize
-				, intConcurrencyId
-			)
-			VALUES (
-				@fileName + '.' + @fileExtension
-				, @fileTypeMime
-				, @fileIdentifier
-				, @namespace
-				, @recordId
-				, GETDATE()
-				, DATALENGTH(@fileContent)
-				, 1
-			)
+				INSERT INTO tblSMAttachment (
+						strName
+					, strFileType
+					, strFileIdentifier
+					, strScreen	
+					, strRecordNo
+					, dtmDateModified
+					, intSize
+					, intConcurrencyId
+				)
+				VALUES (
+					@fileName + '.' + @fileExtension
+					, @fileTypeMime
+					, @fileIdentifier
+					, @namespace
+					, @recordId
+					, GETDATE()
+					, DATALENGTH(@fileContent)
+					, 1
+				)
 				
-			SET @attachmentId = SCOPE_IDENTITY()
+				SET @attachmentId = SCOPE_IDENTITY()
 
-			UPDATE tblSMUpload SET intAttachmentId = @attachmentId WHERE intUploadId = @uploadId
+				UPDATE tblSMUpload SET intAttachmentId = @attachmentId WHERE intUploadId = @uploadId
+			END
+			------------------------------------------------DOCUMENT WACTHER PROCESS------------------------------------------------
+			ELSE
+			BEGIN
+				-- check if file exist
+				IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMNewDocument WHERE strName = @fileName + '.' + @fileExtension AND ysnForAttachment = 1 AND ysnPending = 1)
+				BEGIN
+					EXEC xp_sprintf @error OUTPUT, 'Cannot find the file %s.%s in the Document Watcher (tblSMNewDocument)', @fileName, @fileExtension
+					IF @throwError = 1
+					BEGIN
+						RAISERROR(@error, 16, 1);
+					END
+					RETURN;
+				END
+
+				SELECT @screenId = intScreenId, @recordId = intRecordId FROM tblSMTransaction WHERE intTransactionId = @transactionId
+				SELECT @namespace = strNamespace FROM tblSMScreen WHERE intScreenId = @screenId
+				SELECT @uploadId = intUploadId FROM tblSMNewDocument WHERE strName = @fileName + '.' + @fileExtension AND ysnForAttachment = 1 AND ysnPending = 1
+
+				IF ISNULL(@screenNamespace, '') <> ''
+				BEGIN
+					SET @namespace = @screenNamespace
+				END
+
+				--save to attachment
+				INSERT INTO tblSMAttachment (
+						strName
+					, strFileType
+					, strFileIdentifier
+					, strScreen	
+					, strRecordNo
+					, dtmDateModified
+					, intSize
+					, intConcurrencyId
+				)
+				SELECT doc.strName
+					, doc.strType
+					, upload.strFileIdentifier
+					, @namespace
+					, @recordId
+					, GETDATE()
+					, doc.intSize
+					, 1
+				FROM tblSMNewDocument doc 
+				INNER JOIN tblSMUpload upload ON doc.intUploadId = upload.intUploadId
+				WHERE doc.intUploadId = @uploadId
+				
+				SET @attachmentId = SCOPE_IDENTITY()
+
+				UPDATE tblSMUpload SET intAttachmentId = @attachmentId WHERE intUploadId = @uploadId
+				UPDATE tblSMNewDocument SET ysnPending = 0 WHERE intUploadId = @uploadId
+			END
+
+			
 
 
 

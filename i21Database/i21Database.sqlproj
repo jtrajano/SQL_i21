@@ -9444,6 +9444,7 @@
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
     <Build Include="dbo\Stored Procedures\uspSMCreateAttachmentFromFile.sql" />
+    <Build Include="dbo\Stored Procedures\uspSMCheckPendingAttachmentFileIfPresent.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
   </ItemGroup>
   <ItemGroup>
