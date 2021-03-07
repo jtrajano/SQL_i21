@@ -9176,6 +9176,9 @@
     <Build Include="dbo\Stored Procedures\uspMFGetVirtualAndActualRecipe.sql" />
     <Build Include="dbo\Stored Procedures\uspMFPostCommitmentPricing.sql" />
     <Build Include="dbo\Tables\tblMFCommitmentPricingStage.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummaryByLocation.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummaryByLocation.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
