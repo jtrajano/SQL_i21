@@ -271,6 +271,12 @@ BEGIN
 		WHEN @msgId = 80255 THEN '%s is a back-dated transaction. Please rebuild the stock from %d before closing the fiscal month.'
 		WHEN @msgId = 80256 THEN 'The "to" storage location in %s is invalid.'
 		WHEN @msgId = 80257 THEN 'The "to" storage unit in %s is invalid.'
+		WHEN @msgId = 80258 THEN 'Bill Amount for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80259 THEN 'Bill Amount as charge (or discount) for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80260 THEN 'Bill Quantity as charge (or discount) for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80261 THEN 'The Storage Location invalid in %s for %s.'
+		WHEN @msgId = 80262 THEN 'Unable to Post. The following contract(s) needs to be Priced:<p><br><div style="list-style-position: inside;"><ul>%s</ul></div></p>'
+		WHEN @msgId = 80263 THEN 'Category changed for item %s.'
 	END 
 
 	RETURN @msg
