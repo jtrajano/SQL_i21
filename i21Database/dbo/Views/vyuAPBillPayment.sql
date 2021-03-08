@@ -28,7 +28,7 @@ intId
 ,Payments.ysnCleared
 ,Payments.dtmDateReconciled
 ,Payments.strBatchId
-,Payments.ysnIsPaymentReleased
+,CAST(Payments.ysnIsPaymentReleased AS BIT) ysnIsPaymentReleased
 ,A2.strPaymentInfoKey COLLATE Latin1_General_CI_AS AS strPaymentInfoKey
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
