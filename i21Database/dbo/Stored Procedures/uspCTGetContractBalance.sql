@@ -159,7 +159,7 @@ BEGIN
 				,strDeliveryMonth					=	LEFT(DATENAME(MONTH, CD.dtmEndDate), 3) + ' ' + RIGHT(DATENAME(YEAR, CD.dtmEndDate),2)
 				,strFutureMonth						=	FH.strFutureMonth
 				,dblFutures							=	CASE WHEN CBL.intPricingTypeId IN (1, 3) THEN CBL.dblFutures ELSE NULL END
-				,dblBasis							=	CAST(CBL.dblBasis AS NUMERIC(20,6))
+				,dblBasis							=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(CBL.dblBasis AS NUMERIC(20,6)) END
 				,strBasisUOM						=	BUOM.strUnitMeasure
 				,dblQuantity						=	CBL.dblQty
 				,strQuantityUOM						=	IUM.strUnitMeasure
@@ -353,7 +353,7 @@ BEGIN
 													THEN CD.dblFutures
 													ELSE (case when CBL.intPricingTypeId = 1 then PF.dblPriceWORollArb else null end)
 													END  
-			    ,dblBasis						=	CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6))
+			    ,dblBasis						=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6)) END
 				,dblCashPrice					=	CASE
 													WHEN CBL.intPricingTypeId = 1
 													THEN (ISNULL(CD.dblFutures,isnull(PF.dblPriceWORollArb,0)) + ISNULL(CD.dblBasis,0))
