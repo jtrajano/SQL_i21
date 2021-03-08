@@ -411,7 +411,7 @@ BEGIN TRY
 				, CD.intContractDetailId
 				, dbo.fnRemoveTimeOnDate(SS.dtmCreated)
 				, @dtmEndDate AS dtmEndDate
-				, SUM(SH.dblUnits) * -1 AS dblQuantity
+				, SUM(SH.dblUnits) AS dblQuantity
 				, 0
 				, COUNT(DISTINCT SS.intSettleStorageId)
 				, SS.intSettleStorageId
