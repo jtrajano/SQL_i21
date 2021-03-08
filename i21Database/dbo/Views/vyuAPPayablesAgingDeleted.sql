@@ -76,7 +76,7 @@ SELECT  A.dtmDatePaid AS dtmDate,
 	-- 			WHEN C.intTransactionType NOT IN (1, 2, 14) AND B.dblPayment < 0 AND (E.intBankTransactionTypeId = 116  OR E.intBankTransactionTypeId = 19  OR E.intBankTransactionTypeId = 122)
 	-- 				THEN B.dblPayment * -1 --MAKE THE REVERSAL DEBIT MEMO TRANSACTION POSITIVE
 	-- 			ELSE B.dblPayment END) * A.dblExchangeRate AS DECIMAL(18,2)) AS dblAmountPaid,    
-	CAST(B.dblPayment  * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblAmountPaid, 
+	CAST(B.dblPayment  * ISNULL(A.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblAmountPaid, 
 	 dblTotal = 0 
 	, dblAmountDue = 0 
 	, dblWithheld = B.dblWithheld
@@ -92,12 +92,12 @@ SELECT  A.dtmDatePaid AS dtmDate,
 				ELSE 0
 				END
 			)
-			END * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblDiscount
+			END * ISNULL(A.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblDiscount
 	, CAST(CASE 
 			WHEN C.intTransactionType NOT IN (1,2,14) AND ABS(B.dblInterest) > 0 
 			THEN B.dblInterest --* -1 
 			ELSE B.dblInterest
-			END * ISNULL(avgRate.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblInterest 
+			END * ISNULL(A.dblExchangeRate,1) AS DECIMAL(18,2)) AS dblInterest 
 	, dblPrepaidAmount = 0 
 	, D.strVendorId 
 	, isnull(D.strVendorId,'') + ' - ' + isnull(D2.strName,'') as strVendorIdName 
