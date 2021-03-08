@@ -931,7 +931,7 @@ BEGIN TRY
 				, cbl.intPricingTypeId
 				, cbl.intFutureMarketId
 				, cbl.intFutureMonthId
-				, cbl.dblBasis
+				, dblBasis = pfd.dblBasis
 				, dblFutures = pfd.dblFutures
 				, cbl.intQtyUOMId
 				, cbl.intQtyCurrencyId
@@ -1105,7 +1105,7 @@ BEGIN TRY
 				, cbl.intPricingTypeId
 				, cbl.intFutureMarketId
 				, cbl.intFutureMonthId
-				, cbl.dblBasis
+				, dblBasis = pfd.dblBasis
 				, dblFutures = pfd.dblFutures
 				, cbl.intQtyUOMId
 				, cbl.intQtyCurrencyId
@@ -1279,7 +1279,7 @@ BEGIN TRY
 				, cbl.intPricingTypeId
 				, cbl.intFutureMarketId
 				, cbl.intFutureMonthId
-				, cbl.dblBasis
+				, dblBasis = pfd.dblBasis
 				, dblFutures = pfd.dblFutures
 				, cbl.intQtyUOMId
 				, cbl.intQtyCurrencyId
@@ -2197,7 +2197,7 @@ BEGIN TRY
 					, intTransactionId = cd.intContractDetailId
 					, strTransactionId = cd.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 					, dblFutures = pfd.dblFutures
-					, cd.dblBasis
+					, dblBasis = pfd.dblBasis
 					, cd.intBasisUOMId
 					, cd.intBasisCurrencyId
 					, intPriceUOMId = qu.intCommodityUnitMeasureId
@@ -2601,7 +2601,7 @@ BEGIN TRY
 					, intTransactionId = cd.intContractDetailId
 					, strTransactionId = cd.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 					, dblFutures = pfd.dblFutures
-					, cd.dblBasis
+					, dblBasis = pfd.dblBasis
 					, cd.intBasisUOMId
 					, cd.intBasisCurrencyId
 					, intPriceUOMId = qu.intCommodityUnitMeasureId
@@ -2741,7 +2741,7 @@ BEGIN TRY
 						, intTransactionId = cd.intContractDetailId
 						, strTransactionId = cd.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 						, dblFutures = pfd.dblFutures
-						, cd.dblBasis
+						, dblBasis = pfd.dblBasis
 						, cd.intBasisUOMId
 						, cd.intBasisCurrencyId
 						, intPriceUOMId = qu.intCommodityUnitMeasureId
@@ -2875,7 +2875,7 @@ BEGIN TRY
 					, intTransactionId = cd.intContractDetailId
 					, strTransactionId = cd.strContractNumber + '-' + CAST(cd.intContractSeq AS NVARCHAR(10))
 					, dblFutures = pfd.dblFutures
-					, cd.dblBasis
+					, dblBasis = pfd.dblBasis
 					, cd.intBasisUOMId
 					, cd.intBasisCurrencyId
 					, intPriceUOMId = qu.intCommodityUnitMeasureId
