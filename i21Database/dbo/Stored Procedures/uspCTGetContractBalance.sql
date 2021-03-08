@@ -353,27 +353,27 @@ BEGIN
 													THEN CD.dblFutures
 													ELSE (case when CBL.intPricingTypeId = 1 then PF.dblPriceWORollArb else null end)
 													END  
-			    ,dblBasis						=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(isnull(CD.dblBasis,0) AS NUMERIC(20,6)) END
+			    ,dblBasis						=	CASE WHEN CBL.intPricingTypeId = 3 THEN NULL ELSE CAST(isnull(CBL.dblBasis,0) AS NUMERIC(20,6)) END
 				,dblCashPrice					=	CASE
 													WHEN CBL.intPricingTypeId = 1
-													THEN (ISNULL(CD.dblFutures,isnull(PF.dblPriceWORollArb,0)) + ISNULL(CD.dblBasis,0))
+													THEN (ISNULL(CD.dblFutures,isnull(PF.dblPriceWORollArb,0)) + ISNULL(CBL.dblBasis,0))
 													ELSE NULL
 													END  
 			    ,dblAmount						=	CASE   
 													WHEN CBL.intPricingTypeId = 1
-													THEN CBL.dblQty * (ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0))
+													THEN CBL.dblQty * (ISNULL(CD.dblFutures,0) + ISNULL(CBL.dblBasis,0))
 													ELSE NULL  
 													END 
 			    ,dblCashPriceinCommodityStockUOM =	CASE   
 													WHEN CBL.intPricingTypeId = 1
-													THEN ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0)  
+													THEN ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId), ISNULL(CD.dblFutures,0) + ISNULL(CBL.dblBasis,0)),0)  
 													ELSE NULL  
 													END  
 			    ,dblAmountinCommodityStockUOM	=	CASE
 													WHEN CBL.intPricingTypeId = 1
 													THEN (dbo.fnCTConvertQtyToTargetCommodityUOM(CH.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),C1.intUnitMeasureId, CBL.dblQty))  
 														 *
-														 (ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId), ISNULL(CD.dblFutures,0) + ISNULL(CD.dblBasis,0)),0))  
+														 (ISNULL(dbo.fnCTConvertCostToTargetCommodityUOM(CH.intCommodityId,CD.intBasisUOMId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId), ISNULL(CD.dblFutures,0) + ISNULL(CBL.dblBasis,0)),0))  
 													ELSE NULL
 													END  
 
