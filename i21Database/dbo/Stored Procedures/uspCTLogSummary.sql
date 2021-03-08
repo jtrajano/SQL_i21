@@ -2917,6 +2917,27 @@ BEGIN TRY
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
 	BEGIN
+
+		--Check if the record is already negated and exit loop.
+		if exists (
+	  		select
+				top 1 1
+			from
+				@cbLogCurrent curr
+				join @cbLogCurrent cter on
+					cter.strBatchId = curr.strBatchId
+					and cter.strTransactionReference = curr.strTransactionReference
+					and cter.intTransactionReferenceId = curr.intTransactionReferenceId
+					and cter.intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+					and (cter.dblQty * -1) = curr.dblQty
+					and cter.intId <> curr.intId
+			where
+				curr.intId = @intId
+		)
+		begin
+			goto _exit;
+		end
+
 		DELETE FROM @cbLogPrev
 
 		INSERT INTO @cbLogSpecific (strBatchId
@@ -3933,6 +3954,8 @@ BEGIN TRY
 		END
 
 		DELETE FROM @cbLogSpecific
+
+		_Exit:
 
 		SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 	END
