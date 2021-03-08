@@ -38,6 +38,14 @@ BEGIN
 	--	ON [dbo].[#uspICValidateICAmountVsGLAmount_result](strTransactionType asc, strTransactionId asc, strBatchId asc, intAccountId asc)
 END 
 
+DECLARE @difference AS NUMERIC(18, 6) 
+		,@strItemDescription NVARCHAR(500) 
+		,@strAccountDescription NVARCHAR(500)
+
+DECLARE @strAccountCategory AS NVARCHAR(50)
+DECLARE @strItemNo AS NVARCHAR(50)
+
+
 DECLARE @glTransactions TABLE (
 	strTransactionId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 	,strBatchId NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
@@ -127,9 +135,6 @@ IF EXISTS (
 		t.intInTransitSourceLocationId IS NULL 
 )
 BEGIN 
-	DECLARE @strAccountCategory AS NVARCHAR(50)
-	DECLARE @strItemNo AS NVARCHAR(50)
-
 	-- Check the 'Inventory' Account
 	SELECT 
 		TOP 1 
@@ -724,42 +729,81 @@ BEGIN
 	order by gd.intJournalLineNo
 	**/
  
-	DECLARE @difference AS NUMERIC(18, 6) 
-			,@strItemDescription NVARCHAR(500) 
-			,@strAccountDescription NVARCHAR(500)
-	
-	SELECT TOP 1 
-		@strTransactionId = ISNULL(@strTransactionId, strTransactionId) 
-		,@strTransactionType = strTransactionType
-		,@difference = ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)
-		,@strItemDescription = strItemDescription
-		,@strAccountDescription = strAccountDescription
-	FROM 
-		#uspICValidateICAmountVsGLAmount_result
-	WHERE 
-		ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0) <> 0
-	SELECT * FROM #uspICValidateICAmountVsGLAmount_result
-	IF @strTransactionId IS NOT NULL 
-		AND @strItemDescription IS NOT NULL 
-		AND @strAccountDescription IS NOT NULL 
-		AND @ysnPost IS NOT NULL 
+	-- Check if there is an item that changed to a different category and the GL Account setup is different. 
 	BEGIN 
-
-		-- Inventory and GL mismatch in {Transaction Id}. Discrepancy of {#,##0.00} in {Item Description} does not match with {GL Account Description}. Cannot {Post|Unpost}.
-		IF @ysnPost = 1 
-		EXEC uspICRaiseError 80232, @strTransactionId, @difference, @strItemDescription, @strAccountDescription, 'Post'; 
-
-		IF @ysnPost = 0 
-		EXEC uspICRaiseError 80232, @strTransactionId, @difference, @strItemDescription, @strAccountDescription, 'Unpost'; 
+		SET @strItemNo = NULL 
+		SELECT TOP 1 			
+			@strItemNo = i.strItemNo
+		FROM 
+			tblICInventoryTransaction t 	
+			INNER JOIN tblICItem i 
+				ON i.intItemId = t.intItemId
+			LEFT JOIN (
+				tblICCategory original_category INNER JOIN tblICCategoryAccount original_categoryAccount
+					ON original_category.intCategoryId = original_categoryAccount.intCategoryId
+				INNER JOIN tblGLAccountCategory original_glAccountCategory
+					ON original_glAccountCategory.intAccountCategoryId = original_categoryAccount.intAccountCategoryId
+					AND original_glAccountCategory.strAccountCategory = 'Inventory'
+			)
+				ON original_category.intCategoryId = t.intCategoryId
 	
-		RETURN 80232
+			LEFT JOIN (
+				tblICCategory new_category INNER JOIN tblICCategoryAccount new_categoryAccount
+					ON new_category.intCategoryId = new_categoryAccount.intCategoryId
+				INNER JOIN tblGLAccountCategory new_glAccountCategory
+					ON new_glAccountCategory.intAccountCategoryId = new_categoryAccount.intAccountCategoryId
+					AND new_glAccountCategory.strAccountCategory = 'Inventory'
+			)
+				ON new_category.intCategoryId = i.intCategoryId
+		WHERE
+			t.strTransactionId = @strTransactionId
+			AND i.intCategoryId <> t.intCategoryId
+			AND original_categoryAccount.intAccountId <> new_categoryAccount.intAccountId
+
+
+		IF @strItemNo IS NOT NULL 
+		BEGIN 
+			-- Category changed for item {Item No}.
+			EXEC uspICRaiseError 80263, @strItemNo; 
+			RETURN 80263
+		END 
 	END 
+	
+	-- Otherwise, show the discrepancy 
+	BEGIN 
+		SELECT TOP 1 
+			@strTransactionId = ISNULL(@strTransactionId, strTransactionId) 
+			,@strTransactionType = strTransactionType
+			,@difference = ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0)
+			,@strItemDescription = strItemDescription
+			,@strAccountDescription = strAccountDescription
+		FROM 
+			#uspICValidateICAmountVsGLAmount_result
+		WHERE 
+			ISNULL(dblICAmount, 0) - ISNULL(dblGLAmount, 0) <> 0
 
-	SET @strTransactionType = ISNULL(@strTransactionType, 'Unknown type')
+		IF @strTransactionId IS NOT NULL 
+			AND @strItemDescription IS NOT NULL 
+			AND @strAccountDescription IS NOT NULL 
+			AND @ysnPost IS NOT NULL 
+		BEGIN 
 
-	-- Inventory and GL mismatch for {Transaction Id}. Discrepancy of {#,##0.00} is found for {Transaction Type}.
-	EXEC uspICRaiseError 80233, @strTransactionId, @difference, @strTransactionType; 
-	RETURN 80233
+			-- Inventory and GL mismatch in {Transaction Id}. Discrepancy of {#,##0.00} in {Item Description} does not match with {GL Account Description}. Cannot {Post|Unpost}.
+			IF @ysnPost = 1 
+			EXEC uspICRaiseError 80232, @strTransactionId, @difference, @strItemDescription, @strAccountDescription, 'Post'; 
+
+			IF @ysnPost = 0 
+			EXEC uspICRaiseError 80232, @strTransactionId, @difference, @strItemDescription, @strAccountDescription, 'Unpost'; 
+	
+			RETURN 80232
+		END 
+
+		SET @strTransactionType = ISNULL(@strTransactionType, 'Unknown type')
+
+		-- Inventory and GL mismatch for {Transaction Id}. Discrepancy of {#,##0.00} is found for {Transaction Type}.
+		EXEC uspICRaiseError 80233, @strTransactionId, @difference, @strTransactionType; 
+		RETURN 80233
+	END 
 END
 
 -- Else, return the result of the comparison 
