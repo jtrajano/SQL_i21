@@ -1571,8 +1571,10 @@ INNER JOIN tblGRTransferStorageReference rc
   ON tmpAPOpenClearing.intInventoryReceiptChargeId = rc.intTransferStorageReferenceId
  INNER JOIN tblGRTransferStorage r  
   ON r.intTransferStorageId = rc.intTransferStorageId  
+  INNER JOIN tblGRCustomerStorage CS
+	ON CS.intCustomerStorageId = rc.intToCustomerStorageId
   INNER JOIN (tblAPVendor vendor INNER JOIN tblEMEntity entity ON vendor.intEntityId = entity.intEntityId)  
-  ON r.intEntityId = vendor.intEntityId  
+  ON CS.intEntityId = vendor.intEntityId  
  CROSS APPLY tblSMCompanySetup compSetup  
 WHERE 1 = CASE WHEN (dblClearingQty) = 0 OR (dblClearingAmount) = 0 THEN 0 ELSE 1 END
    UNION ALL 
