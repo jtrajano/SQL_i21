@@ -28,7 +28,7 @@ intId
 ,Payments.ysnCleared
 ,Payments.dtmDateReconciled
 ,Payments.strBatchId
-,Payments.ysnIsPaymentReleased
+,CAST(Payments.ysnIsPaymentReleased AS BIT) ysnIsPaymentReleased
 ,A2.strPaymentInfoKey
 FROM dbo.tblAPBill A
 LEFT JOIN dbo.vyuAPVouchersPaymentInfo A2
