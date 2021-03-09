@@ -1305,7 +1305,8 @@ BEGIN TRY
 			LEFT JOIN tblCTPriceFixationDetail pfd ON pfd.intPriceFixationDetailId = bd.intPriceFixationDetailId
 			WHERE cbl.intPricingTypeId = 1			
 				AND cbl.intContractHeaderId = @intContractHeaderId
-				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId)
+				AND cbl.intContractDetailId = ISNULL(@intContractDetailId, cbl.intContractDetailId) 
+				and (select top 1 intHeaderPricingTypeId from @tmpContractDetail) <> 3
 			ORDER BY cbl.intContractBalanceLogId DESC
 		END
 		ELSE IF @strProcess = 'Delete Voucher'
