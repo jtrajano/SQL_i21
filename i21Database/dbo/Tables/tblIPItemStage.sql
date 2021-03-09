@@ -84,5 +84,14 @@
 		,strLoggedOnUserName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemStage_strLoggedOnUserName] DEFAULT((HOST_NAME()))
 		,dtmTransactionDate DATETIME NULL CONSTRAINT [DF_tblMFItemStage_dtmTransactionDate] DEFAULT((getdate()))
 		,strProductType NVARCHAR(100) COLLATE Latin1_General_CI_AS
+		,intTrxSequenceNo INT
+		,strCompanyLocation NVARCHAR(6) COLLATE Latin1_General_CI_AS
+		,intActionId INT
+		,ysnFairTradeCompliance BIT DEFAULT 0
+		,ysnOrganicItem BIT DEFAULT 0
+		,ysnRainForestCertified BIT DEFAULT 0
+		,strExternalGroup NVARCHAR(50) COLLATE Latin1_General_CI_AS
+		,strOrigin NVARCHAR(100) COLLATE Latin1_General_CI_AS
+
 		,CONSTRAINT [PK_tblIPItemStage_intStageItemId] PRIMARY KEY ([intStageItemId]) 
 )
