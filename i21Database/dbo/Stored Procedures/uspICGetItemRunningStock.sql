@@ -439,4 +439,6 @@ FROM @tblInventoryTransactionGrouped t INNER JOIN tblICItem i
 	LEFT JOIN tblICCostingMethod CostMethod
 		ON CostMethod.intCostingMethodId = t.intCostingMethodId
 	OUTER APPLY dbo.fnICGetItemCostByEffectiveDate(@dtmDate, i.intItemId, ItemLocation.intItemLocationId, 0) EffectivePricing
-	ORDER BY iUOM.strUnitMeasure ASC
+ORDER BY
+	ItemUOM.ysnStockUnit DESC 
+	,iUOM.strUnitMeasure ASC
