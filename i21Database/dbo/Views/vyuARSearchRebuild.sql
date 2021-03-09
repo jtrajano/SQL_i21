@@ -51,7 +51,7 @@ FROM (
 	UNION ALL
 
 	SELECT 
-		 [strIssue]			= 'Invoice missing IC' 
+		 [strIssue]			= 'Invoice missing inventory entry' 
 		,[dtmDate]			= ARI.dtmDate
 		,[intTransactionId] = ARI.intInvoiceId
 		,[strTransactionId] = ARI.strInvoiceNumber
@@ -65,11 +65,13 @@ FROM (
 	WHERE ysnPosted = 1
 	AND ysnImpactInventory = 1
 	AND strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblICInventoryTransaction)
+	AND ICI.strType = 'Inventory'
+
 
 	UNION ALL
 
 	SELECT 
-		 [strIssue]			= 'Invoice missing GL' 
+		 [strIssue]			= 'Invoice missing inventory GL' 
 		,[dtmDate]			= ARI.dtmDate
 		,[intTransactionId] = ARI.intInvoiceId
 		,[strTransactionId] = ARI.strInvoiceNumber
@@ -82,6 +84,7 @@ FROM (
 	ON ARID.intItemId = ICI.intItemId
 	WHERE ysnPosted = 1
 	AND ysnImpactInventory = 1
-	AND strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblGLDetail WHERE strCode <> 'AR')
+	AND strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblGLDetail WHERE strCode = 'IC')
+	AND ICI.strType = 'Inventory'
 ) R
 GROUP BY [strIssue], [dtmDate], [intTransactionId], [strTransactionId], [strBatchId], [ysnAllowRebuild]

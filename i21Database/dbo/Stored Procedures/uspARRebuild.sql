@@ -23,9 +23,7 @@ BEGIN TRY
 	SELECT * 
 	FROM [dbo].[vyuARSearchRebuild]
 	WHERE dtmDate BETWEEN @DateFrom AND @DateTo
-
-	DELETE FROM #tblARRebuildLog
-	WHERE [ysnAllowRebuild] = 1
+	AND [ysnAllowRebuild] = 1
 
 	--Update GL Details
 	UPDATE GL
@@ -34,27 +32,28 @@ BEGIN TRY
 	INNER JOIN #tblARRebuildLog DFL
 	ON GL.strTransactionId = DFL.strTransactionId COLLATE Latin1_General_CI_AS
 	AND GL.strBatchId = DFL.strBatchId
+	AND strIssue = 'Invoice and GL batch id mismatch'
 
 	--Update Inventory Transaction
-
 	UPDATE IT
 	SET ysnIsUnposted = 1
 	FROM tblICInventoryTransaction IT
 	INNER JOIN #tblARRebuildLog DFL
 	ON IT.strTransactionId = DFL.strTransactionId COLLATE Latin1_General_CI_AS
 	AND IT.strBatchId = DFL.strBatchId
+	AND strIssue = 'Invoice and inventory batch id mismatch'
 
 	--Log the affected records
 	INSERT INTO tblARRebuildLog
 	(
-			[strIssue]
+		[strIssue]
 		,[dtmDate]
 		,[intTransactionId]
 		,[strTransactionId]
 		,[strBatchId]
 	)
 	SELECT 
-			[strIssue]
+		[strIssue]
 		,[dtmDate]
 		,[intTransactionId]
 		,[strTransactionId]

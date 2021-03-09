@@ -6,6 +6,6 @@
 	[intTransactionId]	INT,
 	[strTransactionId]	NVARCHAR (50) COLLATE Latin1_General_CI_AS,
 	[strBatchId]		NVARCHAR (50) COLLATE Latin1_General_CI_AS,
-	[ysnAllowRebuild]	BIT,
+	[dtmRebuildDate]	DATE DEFAULT GETDATE(),
 	CONSTRAINT [PK_tblARRebuildLog_intRebuildLogId] PRIMARY KEY CLUSTERED ([intRebuildLogId] ASC)
 )
