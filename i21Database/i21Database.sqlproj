@@ -8298,6 +8298,9 @@
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuild.sql" />
+    <Build Include="dbo\Tables\tblARRebuildLog.sql" />
+    <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
