@@ -21,7 +21,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strItemDescription		= ITEM.strDescription
 	 , strComments				= I.strComments
 	 , dblQtyShipped			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblQtyShipped, 0) ELSE ISNULL(ID.dblQtyShipped, 0) * -1 END
-	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblItemWeight, 0) ELSE ISNULL(ID.dblItemWeight, 0) * -1 END
+	 , dblItemWeight			= CASE WHEN (I.strTransactionType  IN ('Invoice', 'Debit Memo', 'Cash', 'Proforma Invoice')) THEN ISNULL(ID.dblShipmentNetWt, 0) ELSE ISNULL(ID.dblShipmentNetWt, 0) * -1 END
 	 , dblUnitCost				= CASE WHEN CT.intContractHeaderId IS NOT NULL THEN ISNUlL(ID.dblUnitPrice,0) ELSE ISNULL( ID.dblPrice,0) END
 	 , dblCostPerUOM			= ISNULL(ID.dblPrice, 0)
 	 , dblUnitCostCurrency		= ISNULL(ID.dblPrice, 0)
@@ -50,6 +50,7 @@ INNER JOIN (
 		 , dblDiscount
 		 , dblTotal
 		 , strUnitCostCurrency = SC.strCurrency
+		 , dblShipmentNetWt
 	FROM dbo.tblARInvoiceDetail ID WITH (NOLOCK)
 	LEFT JOIN (
 		SELECT intCurrencyID
