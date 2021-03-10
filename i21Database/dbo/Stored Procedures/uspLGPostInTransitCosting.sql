@@ -11,6 +11,7 @@ BEGIN TRY
 	DECLARE @strLoadNumber NVARCHAR(100)
 	DECLARE @ItemsToPost ItemInTransitCostingTableType
 	DECLARE @GLEntries AS RecapTableType
+	DECLARE @APClearing AS APClearing
 	DECLARE @intReturnValue INT
 	DECLARE @STARTING_NUMBER_BATCH INT = 3
 	DECLARE @strBatchIdUsed NVARCHAR(20)
@@ -335,6 +336,55 @@ END
 ELSE
 BEGIN
 	EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost
+
+	--Insert AP Clearing
+	INSERT INTO @APClearing (
+		intTransactionId
+		,strTransactionId
+		,intTransactionType
+		,strReferenceNumber
+		,dtmDate
+		,intEntityVendorId
+		,intLocationId
+		,intTransactionDetailId
+		,intAccountId
+		,intItemId
+		,intItemUOMId
+		,dblQuantity
+		,dblAmount
+		,intOffsetId
+		,strOffsetId
+		,intOffsetDetailId
+		,intOffsetDetailTaxId
+		,strCode)
+	SELECT DISTINCT
+		intTransactionId = GL.intTransactionId
+		,strTransactionId = GL.strTransactionId
+		,intTransactionType = 4
+		,strReferenceNumber = L.strBLNumber
+		,dtmDate = GL.dtmDate
+		,intEntityVendorId = LD.intVendorEntityId
+		,intLocationId = IL.intItemLocationId
+		,intTransactionDetailId = LD.intLoadDetailId
+		,intAccountId = GL.intAccountId
+		,intItemId = LD.intItemId
+		,intItemUOMId = LD.intItemUOMId
+		,dblQuantity = LD.dblQuantity
+		,dblAmount = ABS(GL.dblDebit - GL.dblCredit)
+		,intOffsetId = NULL
+		,strOffsetId = NULL
+		,intOffsetDetailId = NULL
+		,intOffsetDetailTaxId = NULL
+		,strCode = GL.strCode
+	FROM tblLGLoad L
+		INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
+		INNER JOIN tblICInventoryTransaction ICT ON ICT.intTransactionId = L.intLoadId AND ICT.intTransactionDetailId = LD.intLoadDetailId AND ICT.intTransactionTypeId = 22
+		INNER JOIN @GLEntries GL ON GL.intTransactionId = L.intLoadId AND GL.intJournalLineNo = ICT.intInventoryTransactionId
+		LEFT JOIN tblICItemLocation IL ON IL.intItemId = LD.intItemId AND LD.intPCompanyLocationId = IL.intLocationId
+	WHERE intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
+
+	EXEC uspAPClearing @APClearing, @ysnPost
+
 	COMMIT TRAN @TransactionName
 END
 
