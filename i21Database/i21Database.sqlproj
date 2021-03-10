@@ -4820,6 +4820,7 @@
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
+    <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTGetRawToWipConversion.sql" />
     <Build Include="dbo\Views\vyuCTCommodityFutures.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCompareRecords.sql" />
