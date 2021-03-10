@@ -9519,6 +9519,7 @@
     <Build Include="dbo\Stored Procedures\uspSMCheckPendingAttachmentFileIfPresent.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
     <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
