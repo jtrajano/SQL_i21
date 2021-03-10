@@ -9187,6 +9187,7 @@
     <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
