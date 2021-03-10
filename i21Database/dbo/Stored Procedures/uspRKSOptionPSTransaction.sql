@@ -22,7 +22,7 @@ SELECT strInternalTradeNo
 	, CAST(isnull(dblOpenLots,0) AS NUMERIC(18, 6)) dblOpenLots
 	, strOptionType
 	, dblStrike
-	, dblPremium = - dblPremiumInBucks
+	, dblPremium = dblPremiumInBucks
 	, dblPremiumValue as dblPremiumValue
 	, dblCommission
 	, intFutOptTransactionId
