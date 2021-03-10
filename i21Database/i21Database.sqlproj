@@ -8880,6 +8880,7 @@
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
