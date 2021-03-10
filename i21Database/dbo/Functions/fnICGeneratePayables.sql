@@ -745,16 +745,27 @@ WHERE
 	(
 		@ysnForVoucher = 1 
 		AND A.intInventoryReceiptId = @intReceiptId 
-		AND (A.intEntityVendorId = IR.intEntityVendorId)		
+		AND (A.intEntityVendorId = IR.intEntityVendorId)
 		AND (
 			(
 				A.[intEntityVendorId] NOT IN (Billed.intEntityVendorId) 
 				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
 				OR Billed.dblQtyReceived IS NULL
 			)
-			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
-		)	
+			/*
+				1. Exclude the charge for conversion to voucher if it is for the Receipt Vendor and the contract is one of the following: 
+						2: BASIS 
+						5: DELAYED PRICING 
+
+			*/
+			AND 1 = 
+				CASE 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId) AND CD.intPricingTypeId IN (2, 5) THEN 
+						0 
+					ELSE 
+						1 
+				END 
+		)		
 		AND ISNULL(A.ysnAllowVoucher, 1) = 1
 	)
 	-- This condition is used to insert the other charges, including the 3rd party vendors, to the payable table. 
@@ -768,9 +779,22 @@ WHERE
 				AND (A.dblOrderQty <> ISNULL(Billed.dblQtyReceived,0)) 
 				OR Billed.dblQtyReceived IS NULL
 			)
-			AND 1 =  CASE WHEN CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId IN (2) THEN 0 ELSE 1 END  --EXLCUDE ALL BASIS
-			AND 1 = CASE WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IS NOT NULL AND CD.intPricingTypeId = 5) THEN 0 ELSE 1 END --EXCLUDE DELAYED PRICING TYPE FOR RECEIPT VENDOR
+			/*
+				Exclude the charge from the payable it is for the Receipt Vendor and the contract is one of the following: 
+				2: BASIS 
+				5: DELAYED PRICING 
+
+				Always include the payables for the 3rd-party vendors. 
+			*/
+			AND 1 = 
+				CASE 
+					WHEN (A.intEntityVendorId = IR.intEntityVendorId AND CD.intPricingTypeId IN (2, 5)) THEN 
+						0 
+					ELSE 
+						1 
+				END 
 		)
+
 		/*
 			IC-7556
 			If there's a contract involved and it already generated payables for costs/charges, don't re-generate them during posting but remove all of them during unposting.
