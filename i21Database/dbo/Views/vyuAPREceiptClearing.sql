@@ -1,4 +1,4 @@
-﻿ALTER VIEW [dbo].[vyuAPReceiptClearing]
+﻿CREATE VIEW [dbo].[vyuAPReceiptClearing]
 AS 
 
 --Receipt item,
