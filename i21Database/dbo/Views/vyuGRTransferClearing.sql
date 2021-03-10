@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuGRTransferClearing]
 AS
 /*START ====>>> ***DELIVERY SHEETS*** FOR DP TO OP/DP*/
---SELECT * FROM (
 --Receipt item
 SELECT	--'1.1' AS TEST,
     CASE WHEN isFullyTransferred = 1 AND ST.ysnDPOwnedType = 1 THEN CS_TO.intEntityId ELSE receipt.intEntityVendorId END AS intEntityVendorId
@@ -280,13 +279,10 @@ AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
 AND receipt.ysnPosted = 1
-AND (
-    (ST_TO.ysnDPOwnedType = 0 AND ST_FROM.ysnDPOwnedType = 1) --DP to OS
-	OR (ST_TO.ysnDPOwnedType = 1 AND ST_FROM.ysnDPOwnedType = 0) --OS to DP
-)
+
 UNION ALL
 --Transfer Storages
-SELECT-- '4' AS TEST,
+SELECT --'4' AS TEST,
     CS.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,IR.strReceiptNumber
@@ -312,13 +308,7 @@ INNER JOIN tblGRStorageHistory SH
 	ON SH.intCustomerStorageId = TSR.intSourceCustomerStorageId
 		AND SH.strType = 'From Scale'
 INNER JOIN tblGRCustomerStorage CS
-	ON CS.intCustomerStorageId = TSR.intSourceCustomerStorageId
-INNER JOIN tblGRStorageType ST
-	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-INNER JOIN tblGRCustomerStorage CS_TO
-	ON CS_TO.intCustomerStorageId = TSR.intToCustomerStorageId
-INNER JOIN tblGRStorageType ST_TO
-	ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
+	ON CS.intCustomerStorageId = TSR.intToCustomerStorageId
 INNER JOIN tblGRTransferStorage TS
 	ON TS.intTransferStorageId = TSR.intTransferStorageId
 INNER JOIN tblICInventoryReceipt IR
@@ -344,8 +334,6 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = COALESCE(IRI.intWeightUOMId, IRI.intUnitMeasureId)
-WHERE (ST_TO.ysnDPOwnedType = 0 AND ST.ysnDPOwnedType = 1) --DP to OS
-		OR (ST_TO.ysnDPOwnedType = 1 AND ST.ysnDPOwnedType = 0) --OS to DP
 /*END ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 UNION ALL
 /*START ====>>>  ***DS/SC*** FOR OP TO DP*/
@@ -398,7 +386,7 @@ LEFT JOIN
         ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE NOT EXISTS (SELECT intSourceCustomerStorageId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
+
 UNION ALL
 -- Bill for Transfer Settlement
 SELECT 
@@ -456,11 +444,11 @@ LEFT JOIN
 )
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 Where Bill.ysnPosted = 1
-----
+
 UNION ALL
 --Transfer Storages from above select statement
 SELECT DISTINCT --'6' AS TEST,
-    CS_FROM.intEntityId AS intEntityVendorId
+    CS_TO.intEntityId AS intEntityVendorId
     ,TSR.dtmProcessDate AS dtmDate
     ,SH.strTransferTicket
     ,SH.intTransferStorageId
@@ -471,10 +459,10 @@ SELECT DISTINCT --'6' AS TEST,
     ,CS_TO.intItemId
     ,CS_TO.intItemUOMId
     ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * -1 AS dblTransferTotal  --Orig Calculation	
-    ,ISNULL(TSR.dblUnitQty, 0) * -1 AS dblTransferQty
-     ,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * -1 AS dblReceiptTotal
-    ,ISNULL(TSR.dblUnitQty, 0) * -1 AS dblReceiptQty
+    ,ISNULL(CAST((TSR.dblUnitQty) * (REPLACE(SUBSTRING(GL.strDescription, CHARINDEX('Cost: ', GL.strDescription), LEN(GL.strDescription) -1),'Cost: ',''))  AS DECIMAL(38,15)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,ISNULL(TSR.dblUnitQty, 0) AS dblTransferQty
+    ,0 AS dblReceiptTotal
+    ,0 AS dblReceiptQty
     ,CS_TO.intCompanyLocationId
     ,CL_TO.strLocationName
     ,0
@@ -516,6 +504,12 @@ OUTER APPLY (
 		--AND intTransferStorageReferenceId = TSR.intTransferStorageReferenceId
 	GROUP BY intInventoryReceiptItemId
 ) TOTAL
+--OUTER APPLY (
+--	SELECT CASE WHEN ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) = receiptItem.dblOpenReceive
+--		OR TOTAL.dblTotal = receiptItem.dblOpenReceive THEN 1 ELSE 0 END AS isFullyTransferred
+--		,ROUND((ABS(S.dblShrinkage / S.dblNetUnits) * SIR.dblTransactionUnits) + SIR.dblTransactionUnits,2) AS dblTransferredUnits
+--		,S.intInventoryReceiptItemId
+--) TRANSFER_TRAN
 LEFT JOIN (
 	SELECT DISTINCT intAccountId, intTransactionId, strDescription FROM tblGLDetail WHERE ysnIsUnposted = 0 AND strTransactionType = 'Transfer Storage' AND strDescription LIKE '%Item: %'
 ) GL ON GL.intTransactionId = TSR.intTransferStorageId
@@ -531,6 +525,4 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS_TO.intItemUOMId
 WHERE APClearing.intAccountId IS NOT NULL
 /*END ====>>> ***DS/SC*** FOR OP TO DP*/
---) A 
---WHERE dtmDate between '2021-03-03' and '2021-03-04'
---AND strTransactionNumber LIKE 'TRA%'
+GO
