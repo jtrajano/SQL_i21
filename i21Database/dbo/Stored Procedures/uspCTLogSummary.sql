@@ -33,6 +33,7 @@ BEGIN TRY
 			@ysnMultiPrice			BIT = 0,
 			@ysnDWGPriceOnly		BIT = 0,
 			@ysnReassign			BIT = 0,
+			@intCurrStatusId		INT = 0,
    			@ysnWithPriceFix BIT;
 
 	-------------------------------------------
@@ -352,7 +353,7 @@ BEGIN TRY
 		RETURN
 	END
 
-	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix FROM @tmpContractDetail
+	SELECT @ysnLoadBased = ISNULL(ysnLoadBased, 0), @dblQuantityPerLoad = dblQuantityPerLoad, @ysnMultiPrice = ISNULL(ysnMultiPrice, 0), @dblContractQty = dblQuantity, @ysnWithPriceFix = ysnWithPriceFix, @intCurrStatusId = intContractStatusId FROM @tmpContractDetail
 
 	IF EXISTS(SELECT TOP 1 1
 				FROM tblCTContractHeader ch
@@ -1780,7 +1781,7 @@ BEGIN TRY
 					, dtmEndDate
 					, dblQty
 					, dblOrigQty
-					, intContractStatusId
+					, intContractStatusId = @intCurrStatusId
 					, intBookId
 					, intSubBookId
 					, strNotes-- = 'Unposted'
