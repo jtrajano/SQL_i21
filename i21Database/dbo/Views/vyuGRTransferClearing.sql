@@ -184,7 +184,7 @@ SELECT
 	'2.2'  collate Latin1_General_CI_AS AS TEST,
     --IR.intEntityVendorId AS intEntityVendorId
 	CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,IR.strReceiptNumber
     ,IR.intInventoryReceiptId
 	,TSR.intTransferStorageId
@@ -265,7 +265,7 @@ UNION ALL
 SELECT DISTINCT	
 	'3'  collate Latin1_General_CI_AS AS TEST,
     CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TSR.dtmProcessDate END AS dtmDate
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TS.dtmTransferStorageDate END AS dtmDate
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.strReceiptNumber ELSE TS.strTransferStorageTicket END AS strTransactionNumber
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intInventoryReceiptId ELSE TS.intTransferStorageId END AS intInventoryReceiptId
     ,NULL AS intTransferStorageId
@@ -351,7 +351,7 @@ UNION ALL
 SELECT 
 	'4' collate Latin1_General_CI_AS  AS TEST,
     CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,IR.strReceiptNumber
     ,IR.intInventoryReceiptId
 	,TSR.intTransferStorageId
@@ -419,7 +419,7 @@ SELECT
 
 	'5'  collate Latin1_General_CI_AS AS TEST,
     CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,TS.strTransferStorageTicket AS strReceiptNumber--IR.strReceiptNumber
     ,TS.intTransferStorageId AS intInventoryReceiptId--IR.intInventoryReceiptId
 	,NULL AS intTransferStorageId
@@ -474,7 +474,7 @@ SELECT
 	
 	'5.99'  collate Latin1_General_CI_AS AS TEST,
     CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,TS.strTransferStorageTicket AS strReceiptNumber--IR.strReceiptNumber
     ,TS.intTransferStorageId AS intInventoryReceiptId--IR.intInventoryReceiptId
 	,Bill.intBillId AS intTransferStorageId
@@ -620,11 +620,10 @@ Where Bill.ysnPosted = 1
 
 UNION ALL
 --Transfer Storages from above select statement
-SELECT DISTINCT 
-
-	'6'  collate Latin1_General_CI_AS AS TEST,
-    CS_TO.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+SELECT DISTINCT --'6' AS TEST,
+    '6'  collate Latin1_General_CI_AS AS TEST,
+    CS_FROM.intEntityId AS intEntityVendorId
+    ,TS_TO.dtmTransferStorageDate AS dtmDate
     ,SH.strTransferTicket
     ,SH.intTransferStorageId
 	,TSR.intTransferStorageId
