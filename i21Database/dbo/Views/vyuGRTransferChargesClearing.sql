@@ -8,7 +8,7 @@ SELECT
     ,APClearing.strAccountId  
 FROM (     
 --BILL ysnPrice = 1/Charge Entity      
-SELECT DISTINCT '1' AS TEST,
+SELECT DISTINCT --'1' AS TEST,
     Receipt.intEntityVendorId AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber     
@@ -63,7 +63,7 @@ WHERE
 AND ReceiptCharge.ysnPrice = 1      
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, receipt vendor    
-SELECT DISTINCT '2',
+SELECT DISTINCT --'2',
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber    
@@ -119,7 +119,7 @@ AND ReceiptCharge.ysnAccrue = 1
 AND Receipt.intEntityVendorId = ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) --make sure that the result would be for receipt vendor only    
 UNION ALL      
 --BILL ysnAccrue = 1/There is a vendor selected, third party vendor    
-SELECT '3',
+SELECT --'3',
     ISNULL(ReceiptCharge.intEntityVendorId, Receipt.intEntityVendorId) AS intEntityVendorId      
     ,Receipt.dtmReceiptDate AS dtmDate      
     ,Receipt.strReceiptNumber  AS strTransactionNumber    
@@ -176,7 +176,7 @@ AND ReceiptCharge.intEntityVendorId IS NOT NULL
 AND ReceiptCharge.intEntityVendorId != Receipt.intEntityVendorId --make sure that the result would be for third party vendor only    
 UNION ALL      
 --Transfer for Receipt Charges
-SELECT DISTINCT '4',
+SELECT DISTINCT --'4',
     CS.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
     ,TS.strTransferStorageTicket
@@ -242,7 +242,7 @@ LEFT JOIN
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription LIKE '%Charges from %'
 UNION ALL
-SELECT DISTINCT '4.1',
+SELECT DISTINCT --'4.1',
    CS.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
     ,IR.strReceiptNumber      
@@ -311,7 +311,7 @@ WHERE GL.strDescription LIKE '%Charges from %'
 AND (CASE WHEN GL.dblDebitUnit = 0 THEN GL.dblCreditUnit ELSE GL.dblDebitUnit END = SR.dblUnitQty)
 UNION ALL      
 --Transfer for Receipt Charge Taxes
-SELECT DISTINCT '5',
+SELECT DISTINCT --'5',
     CS.intEntityId AS intEntityVendorId
     ,TS.dtmTransferStorageDate AS dtmDate      
     ,TS.strTransferStorageTicket
@@ -378,207 +378,10 @@ LEFT JOIN
 )  
     ON itemUOM.intItemUOMId = CS.intItemUOMId
 WHERE GL.strDescription NOT LIKE '%Charges from %'
-UNION ALL
---TRANSFER DP
-SELECT DISTINCT '6',
-    CS.intEntityId AS intEntityVendorId
-    ,TS.dtmTransferStorageDate AS dtmDate      
-    ,TS.strTransferStorageTicket
-	,TS.intTransferStorageId --IR.intInventoryReceiptId
-    ,NULL
-    ,NULL--TS.strTransferStorageTicket
-    ,NULL
-    ,SR.intTransferStorageReferenceId--IRC.intInventoryReceiptChargeId      
-    ,IM.intItemId      
-    ,CS.intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM  
-    ,0 AS dblTransferTotal      
-    ,0 AS dblTransferQty  
-    --,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) dblReceiptChargeTotal  
-	,CAST((CASE
-		WHEN QM.strDiscountChargeType = 'Percent'
-			THEN (QM.dblDiscountAmount * (CS.dblBasis + CS.dblSettlementPrice) * -1)
-		WHEN QM.strDiscountChargeType = 'Dollar' THEN QM.dblDiscountAmount
-	END 
-	* (CASE 
-		WHEN QM.strCalcMethod = 3 
-			THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))	
-		ELSE SR.dblUnitQty
-	END) * -1) AS DECIMAL(18,2))
-    ,ROUND(((CASE WHEN QM.strCalcMethod = 3 
-		THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SR.dblUnitQty END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END)) ) * -1, 2) AS dblReceiptChargeQty 
-    ,CS.intCompanyLocationId      
-    ,CL.strLocationName      
-    ,0
-FROM vyuGLDetail GL
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
-INNER JOIN tblGRTransferStorage TS
-	ON TS.intTransferStorageId = GL.intTransactionId
-		AND TS.strTransferStorageTicket = GL.strTransactionId
-INNER JOIN tblGRTransferStorageReference SR
-	ON SR.intTransferStorageId = TS.intTransferStorageId
-INNER JOIN tblGRCustomerStorage CS
-	ON CS.intCustomerStorageId = SR.intToCustomerStorageId
-INNER JOIN tblGRStorageType ST
-	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-		AND ST.ysnDPOwnedType = 1
-INNER JOIN tblSMCompanyLocation CL
-    ON CL.intCompanyLocationId = CS.intCompanyLocationId
-INNER JOIN tblQMTicketDiscount QM	
-	ON QM.intTicketFileId = CS.intCustomerStorageId	
-		AND QM.strSourceType = 'Storage'
-INNER JOIN tblGRDiscountScheduleCode DSC
-	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-INNER JOIN tblICItem IM
-	ON DSC.intItemId = IM.intItemId
-OUTER APPLY
-(
-	SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit
-	FROM tblGLDetail GD
-	INNER JOIN vyuGLAccountDetail AD
-		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
-	WHERE GD.strTransactionId = TS.strTransferStorageTicket
-		AND GD.intTransactionId = TS.intTransferStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND GD.ysnIsUnposted = 0
-		AND GD.intAccountId NOT IN (
-			SELECT GD.intAccountId
-			FROM tblGLDetail		
-			WHERE strTransactionId = GD.strTransactionId
-				AND intTransactionId = GD.intTransactionId
-				AND strDescription = GD.strDescription
-				AND ysnIsUnposted = 0
-				AND intAccountId = GD.intAccountId
-				AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
-	)
-) GLDetail
-LEFT JOIN   
-(  
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
-)  
-    ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE GL.strDescription NOT LIKE '%Charges from %'
-AND NOT EXISTS(SELECT intTransferStorageReferenceId FROM tblGRTransferStorageReference WHERE intSourceCustomerStorageId = CS.intCustomerStorageId)
-AND QM.dblDiscountDue <> 0
-AND GLDetail.intAccountId IS NOT NULL
-UNION ALL
---DP TRANSFER STORAGE TO OS
-SELECT DISTINCT '7',
-    CS.intEntityId AS intEntityVendorId
-    ,TS.dtmTransferStorageDate AS dtmDate
-    ,ORIGIN.strTransferStorageTicket
-	,ORIGIN.intTransferStorageId --IR.intInventoryReceiptId
-    ,TS.intTransferStorageId
-    ,TS.strTransferStorageTicket--TS.strTransferStorageTicket
-    ,SR.intTransferStorageReferenceId
-    ,ORIGIN.intTransferStorageReferenceId--IRC.intInventoryReceiptChargeId      
-    ,IM.intItemId      
-    ,CS.intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM  
-    ,CAST((CASE
-		WHEN QM.strDiscountChargeType = 'Percent'
-			THEN (QM.dblDiscountAmount * (CS.dblBasis + CS.dblSettlementPrice) * -1)
-		WHEN QM.strDiscountChargeType = 'Dollar' THEN QM.dblDiscountAmount
-	END 
-	* (CASE 
-		WHEN QM.strCalcMethod = 3 
-			THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))	
-		ELSE SR.dblUnitQty
-	END) * -1) AS DECIMAL(18,2))
-    ,ROUND(((CASE WHEN QM.strCalcMethod = 3 
-		THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SR.dblUnitQty END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END)) * -1), 2) AS dblTransferQty  
-    --,ROUND((CASE WHEN GL.dblDebit <> 0 THEN GL.dblDebit ELSE GL.dblCredit END), 2) dblReceiptChargeTotal  
-	,CAST((CASE
-		WHEN QM.strDiscountChargeType = 'Percent'
-			THEN (QM.dblDiscountAmount * (CS.dblBasis + CS.dblSettlementPrice) * -1)
-		WHEN QM.strDiscountChargeType = 'Dollar' THEN QM.dblDiscountAmount
-	END 
-	* (CASE 
-		WHEN QM.strCalcMethod = 3 
-			THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))	
-		ELSE SR.dblUnitQty
-	END) * -1) AS DECIMAL(18,2))
-    ,ROUND(((CASE WHEN QM.strCalcMethod = 3 
-		THEN (CS.dblGrossQuantity * (SR.dblUnitQty / CS.dblOriginalBalance))--@dblGrossUnits 
-	ELSE SR.dblUnitQty END * (CASE WHEN QM.dblDiscountAmount > 0 THEN 1 ELSE -1 END)) ) * -1, 2) AS dblReceiptChargeQty 
-    ,CS.intCompanyLocationId      
-    ,CL.strLocationName      
-    ,0
-FROM vyuGLDetail GL
-INNER JOIN vyuGLAccountDetail APClearing
-    ON APClearing.intAccountId = GL.intAccountId 
-		AND APClearing.intAccountCategoryId = 45
-INNER JOIN tblGRTransferStorage TS
-	ON TS.intTransferStorageId = GL.intTransactionId
-		AND TS.strTransferStorageTicket = GL.strTransactionId
-INNER JOIN tblGRTransferStorageReference SR
-	ON SR.intTransferStorageId = TS.intTransferStorageId
-INNER JOIN tblGRCustomerStorage CS
-	ON CS.intCustomerStorageId = SR.intSourceCustomerStorageId
-		AND CS.ysnTransferStorage = 1
-INNER JOIN tblGRStorageType ST
-	ON ST.intStorageScheduleTypeId = CS.intStorageTypeId
-		AND ST.ysnDPOwnedType = 1
-OUTER APPLY (
-	SELECT TSR2.intTransferStorageReferenceId,TS2.intTransferStorageId,TS2.strTransferStorageTicket
-	FROM tblGRTransferStorageReference TSR2
-	INNER JOIN tblGRTransferStorage TS2
-		ON TS2.intTransferStorageId = TSR2.intTransferStorageId
-	WHERE TSR2.intToCustomerStorageId = SR.intSourceCustomerStorageId
-) ORIGIN
-INNER JOIN tblGRCustomerStorage CS_TO
-	ON CS_TO.intCustomerStorageId = SR.intToCustomerStorageId
-INNER JOIN tblGRStorageType ST_TO
-	ON ST_TO.intStorageScheduleTypeId = CS_TO.intStorageTypeId
-		AND ST_TO.ysnDPOwnedType = 0
-INNER JOIN tblSMCompanyLocation CL
-    ON CL.intCompanyLocationId = CS.intCompanyLocationId
-INNER JOIN tblQMTicketDiscount QM	
-	ON QM.intTicketFileId = CS.intCustomerStorageId	
-		AND QM.strSourceType = 'Storage'
-INNER JOIN tblGRDiscountScheduleCode DSC
-	ON DSC.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
-INNER JOIN tblICItem IM
-	ON DSC.intItemId = IM.intItemId
-OUTER APPLY
-(
-	SELECT GD.intAccountId, AD.strAccountId--, GD.dblDebit, GD.dblCredit, GD.dblCreditUnit, GD.dblDebitUnit
-	FROM tblGLDetail GD
-	INNER JOIN vyuGLAccountDetail AD
-		ON GD.intAccountId = AD.intAccountId AND AD.intAccountCategoryId = 45
-	WHERE GD.strTransactionId = TS.strTransferStorageTicket
-		AND GD.intTransactionId = TS.intTransferStorageId
-		AND GD.strDescription LIKE '%Charges from ' + IM.strItemNo
-		AND GD.ysnIsUnposted = 0
-		AND GD.intAccountId NOT IN (
-			SELECT GD.intAccountId
-			FROM tblGLDetail		
-			WHERE strTransactionId = GD.strTransactionId
-				AND intTransactionId = GD.intTransactionId
-				AND strDescription = GD.strDescription
-				AND ysnIsUnposted = 0
-				AND intAccountId = GD.intAccountId
-				AND (dblDebit = GD.dblCredit OR dblCredit = GD.dblDebit)
-	)
-) GLDetail
-LEFT JOIN   
-(  
-    tblICItemUOM itemUOM INNER JOIN tblICUnitMeasure unitMeasure  
-        ON itemUOM.intUnitMeasureId = unitMeasure.intUnitMeasureId  
-)  
-    ON itemUOM.intItemUOMId = CS.intItemUOMId
-WHERE GL.strDescription NOT LIKE '%Charges from %'
---AND TS.strTransferStorageTicket = 'TRA-563'
-AND QM.dblDiscountDue <> 0
-AND GLDetail.intAccountId IS NOT NULL
---AND TS.dtmTransferStorageDate between '03/03/2021' and '03/04/2021'
+
 ) charges  
 OUTER APPLY (
 SELECT TOP 1 intAccountId, strAccountId FROM vyuAPReceiptClearingGL gl
 	 WHERE gl.strTransactionId = charges.strTransactionNumber
 ) APClearing
+--WHERE dtmDate between '2021-03-02' and '2021-03-03'
