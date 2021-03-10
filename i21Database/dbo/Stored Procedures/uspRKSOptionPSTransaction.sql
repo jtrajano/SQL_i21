@@ -137,7 +137,7 @@ FROM (
 		JOIN tblRKBrokerageAccount ba on ot.intBrokerageAccountId=ba.intBrokerageAccountId
 		JOIN tblEMEntity e on e.intEntityId=ot.intEntityId
 		LEFT JOIN tblRKBrokerageCommission bc on bc.intFutureMarketId=ot.intFutureMarketId  AND ba.intBrokerageAccountId=bc.intBrokerageAccountId
-		LEFT JOIN tblSMCurrency c on c.intCurrencyID=case when isnull(bc.intOptCurrencyId,0)=0 then fm.intCurrencyId else bc.intOptCurrencyId end
+		LEFT JOIN tblSMCurrency c on c.intCurrencyID=fm.intCurrencyId
 		LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 		LEFT JOIN tblCTBook b on b.intBookId=ot.intBookId
 		LEFT JOIN tblCTSubBook sb on sb.intSubBookId=ot.intSubBookId where ot.intInstrumentTypeId=2 and strBuySell='Sell'
