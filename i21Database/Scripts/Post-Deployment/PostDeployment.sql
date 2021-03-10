@@ -399,6 +399,7 @@ print 'BEGIN POST DEPLOYMENT'
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
 :R .\GR\StorageInventoryReceipt.sql
+:R .\GR\Fix_NULL_SSId_in_voucher_details.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
