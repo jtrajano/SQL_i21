@@ -169,7 +169,7 @@ BEGIN TRY
 			JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 			LEFT JOIN tblRKBrokerageCommission bc ON bc.intFutureMarketId = ot.intFutureMarketId AND ba.intBrokerageAccountId = bc.intBrokerageAccountId
-			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = case when isnull(bc.intOptCurrencyId,0)=0 then fm.intCurrencyId else bc.intOptCurrencyId end
+			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
 			LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 			LEFT JOIN tblCTBook b ON b.intBookId = ot.intBookId
 			LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = ot.intSubBookId
