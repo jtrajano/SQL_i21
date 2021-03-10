@@ -2935,7 +2935,7 @@ BEGIN TRY
 				curr.intId = @intId
 		)
 		begin
-			goto _Exit;
+			goto _exit;
 		end
 
 		DELETE FROM @cbLogPrev
