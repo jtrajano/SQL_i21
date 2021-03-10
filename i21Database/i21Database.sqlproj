@@ -3172,6 +3172,7 @@
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Functions\fnFAComputeDepreciation.sql" />
+    <Build Include="dbo\Functions\fnFAIsOpenAccountingDate.sql" />
     <Build Include="dbo\Functions\fnFAComputeMultipleDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAValidateAssetDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAGetOldestDepreciatedAsset.sql" />
