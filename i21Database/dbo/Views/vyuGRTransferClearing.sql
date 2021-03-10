@@ -125,7 +125,7 @@ UNION ALL
 SELECT --'2.2' AS TEST,
     --IR.intEntityVendorId AS intEntityVendorId
 	CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,IR.strReceiptNumber
     ,IR.intInventoryReceiptId
 	,TSR.intTransferStorageId
@@ -203,7 +203,7 @@ UNION ALL
 /*START ====>>> ***SCALE TICKETS*** FOR DP TO OP*/
 SELECT DISTINCT	--'3' AS TEST,
     CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intEntityVendorId ELSE CS_TO.intEntityId END AS intEntityVendorId
-    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TSR.dtmProcessDate END AS dtmDate
+    ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.dtmReceiptDate ELSE TS.dtmTransferStorageDate END AS dtmDate
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.strReceiptNumber ELSE TS.strTransferStorageTicket END AS strTransactionNumber
     ,CASE WHEN ST_FROM.ysnDPOwnedType = 0 OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 0) OR (ST_FROM.ysnDPOwnedType = 1 AND ST_TO.ysnDPOwnedType = 1 AND CS.dblOpenBalance > 0) THEN receipt.intInventoryReceiptId ELSE TS.intTransferStorageId END AS intInventoryReceiptId
     ,NULL AS intTransferStorageId
@@ -288,7 +288,7 @@ UNION ALL
 --Transfer Storages
 SELECT-- '4' AS TEST,
     CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,IR.strReceiptNumber
     ,IR.intInventoryReceiptId
 	,TSR.intTransferStorageId
@@ -352,7 +352,7 @@ UNION ALL
 --Transfer Storages >> OS to DP >> there will be an OPEN CLEARING in the new transfer storage
 SELECT --'5' AS TEST,
     CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,TS.strTransferStorageTicket AS strReceiptNumber--IR.strReceiptNumber
     ,TS.intTransferStorageId AS intInventoryReceiptId--IR.intInventoryReceiptId
 	,NULL AS intTransferStorageId
@@ -404,7 +404,7 @@ UNION ALL
 SELECT 
 	--'5.99' AS TEST,
     CS.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS.dtmTransferStorageDate AS dtmDate
     ,TS.strTransferStorageTicket AS strReceiptNumber--IR.strReceiptNumber
     ,TS.intTransferStorageId AS intInventoryReceiptId--IR.intInventoryReceiptId
 	,NULL AS intTransferStorageId
@@ -461,7 +461,7 @@ UNION ALL
 --Transfer Storages from above select statement
 SELECT DISTINCT --'6' AS TEST,
     CS_FROM.intEntityId AS intEntityVendorId
-    ,TSR.dtmProcessDate AS dtmDate
+    ,TS_TO.dtmTransferStorageDate AS dtmDate
     ,SH.strTransferTicket
     ,SH.intTransferStorageId
 	,TSR.intTransferStorageId
