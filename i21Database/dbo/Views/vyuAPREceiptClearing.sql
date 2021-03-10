@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[vyuAPReceiptClearing]
+﻿ALTER VIEW [dbo].[vyuAPReceiptClearing]
 AS 
 
 --Receipt item,
@@ -340,7 +340,8 @@ SELECT
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 --SOME VOUCHER CREATED USING INCORRECT NET WEIGHT BUT TOTAL IS THE SAME
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                              --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
@@ -356,7 +357,8 @@ SELECT
                                 receiptItem.dblNet <> receiptItem.dblOpenReceive AND
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                              --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
@@ -374,7 +376,8 @@ SELECT
                                 receiptItem.dblNet <> receiptItem.dblOpenReceive AND
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                              --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
@@ -390,7 +393,8 @@ SELECT
                                 receiptItem.dblNet <> receiptItem.dblOpenReceive AND
                                 receiptItem.dblOpenReceive = billDetail.dblQtyReceived AND
                                 receiptItem.dblLineTotal <> billDetail.dblTotal AND
-                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01
+                                ABS(receiptItem.dblLineTotal - billDetail.dblTotal) <> .01 AND
+                                receiptItem.intWeightUOMId IS NOT NULL
                             THEN receiptItem.dblNet
                              --IF DIDN'T FALL TO HANDLING DATA, USE NORMAL LOGIC
                             WHEN billDetail.dblNetWeight <> 0
