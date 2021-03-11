@@ -503,7 +503,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 						  AND C.intContractHeaderId > @intContractHeaderId
 						  --AND C.intPricingTypeId <> 2
-						ORDER BY C.intContractHeaderId
+						ORDER BY C.intContractHeaderId, CD.intContractDetailId
 
 						WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTSBYCUSTOMER)
 							BEGIN
@@ -520,7 +520,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 										   , @dblQtyToApplyACBC			= CASE WHEN dblBalance > @dblQtyOverAged THEN @dblQtyOverAged ELSE dblBalance END
 										   , @dblCashPriceACBC			= dblCashPrice
 								FROM #AVAILABLECONTRACTSBYCUSTOMER
-								ORDER BY intContractHeaderId
+								ORDER BY intContractHeaderId, intContractDetailId
 
 								--BASIS CONTRACT OVERAGE
 								IF ISNULL(@intPricingTypeIdACBC, 0) = 2
