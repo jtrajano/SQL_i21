@@ -9152,8 +9152,6 @@
     <Build Include="dbo\Tables\tblTFTransactionDynamicFL.sql" />
     <Build Include="dbo\Views\vyuICSearchBundleDetails.sql" />
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingSummaryOld.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPRptOpenClearingOld.sql" />
     <Build Include="dbo\Tables\tblFRReportHierarchySecurity.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
