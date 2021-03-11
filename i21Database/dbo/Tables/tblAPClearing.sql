@@ -4,8 +4,8 @@
 	--HEADER
 	[intTransactionId]			INT NOT NULL,
 	[strTransactionId]			NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
-	[intTransactionType]		INT NOT NULL,
 	[strReferenceNumber]		NVARCHAR(55) COLLATE Latin1_General_CI_AS NULL,
+	[intTransactionType]		INT NOT NULL,
 	[dtmDate]					DATETIME NOT NULL,
 	[intEntityVendorId]			INT NOT NULL,
 	[intLocationId]				INT NOT NULL,
