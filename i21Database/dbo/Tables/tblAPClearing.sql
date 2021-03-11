@@ -14,8 +14,8 @@
 	[intAccountId]				INT NOT NULL,
 	[intItemId]					INT NULL,
 	[intItemUOMId]				INT NULL,
-	[dblQuantity]				NUMERIC(18, 6) NOT NULL DEFAULT 0,
-	[dblAmount]					NUMERIC(18, 6) NOT NULL DEFAULT 0,
+	[dblQuantity]				NUMERIC(18, 6) DEFAULT 0 NOT NULL,
+	[dblAmount]					NUMERIC(18, 6) DEFAULT 0 NOT NULL,
 	--VOUCHER
 	[intOffsetId]				INT NULL,
 	[strOffsetId]				NVARCHAR(55) COLLATE Latin1_General_CI_AS NULL,
@@ -23,7 +23,7 @@
 	[intOffsetDetailTaxId]		INT NULL,
 	--OTHER INFORMATION
 	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
-	[ysnPostAction]				BIT NOT NULL DEFAULT 1,
+	[ysnPostAction]				BIT DEFAULT 1 NOT NULL,
 	[dtmDateEntered]			DATETIME NOT NULL,
 
 	CONSTRAINT [PK_dbo.tblAPClearing] PRIMARY KEY CLUSTERED ([intClearingId] ASC)
