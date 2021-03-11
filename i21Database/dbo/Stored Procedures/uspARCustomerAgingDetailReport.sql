@@ -471,9 +471,9 @@ INNER JOIN (
 	FROM tblARCustomerAgingStagingTable 
 	WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 	GROUP BY intEntityCustomerId 
-	HAVING SUM(ISNULL(dblTotalAR, 0)) <= 0
-		AND SUM(ISNULL(dblCredits, 0)) <= 0
-		AND SUM(ISNULL(dblPrepayments, 0)) <= 0
+	HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
+		AND SUM(ISNULL(dblCredits, 0)) = 0
+		AND SUM(ISNULL(dblPrepayments, 0)) = 0
 ) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
 WHERE AGING.intEntityUserId = @intEntityUserId
   AND AGING.strAgingType = 'Detail'
