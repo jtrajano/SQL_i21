@@ -8983,9 +8983,6 @@
     <Build Include="dbo\Stored Procedures\uspTFGenerateMDS7762.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildPayment.sql" />
     <Build Include="dbo\Stored Procedures\uspARRebuildInvoice.sql" />
-    <Build Include="dbo\Tables\tblAPClearing.sql" />
-    <Build Include="dbo\Stored Procedures\uspAPClearing.sql" />
-    <Build Include="dbo\User Defined Types\APClearing.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
     <Build Include="dbo\Views\vyuIPContractDetailERPInfoView.sql" />
     <Build Include="dbo\Tables\tblTFTransactionDynamicGA.sql" />
