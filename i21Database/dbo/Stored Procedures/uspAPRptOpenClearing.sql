@@ -575,7 +575,9 @@ SET @cteQuery = N';WITH forClearing
         ,dblReceiptQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferClearing  
+     FROM vyuGRTransferClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
      ' + @innerQueryFilter + '  
     ),  
     grainTransferChargeClearing  
@@ -597,51 +599,9 @@ SET @cteQuery = N';WITH forClearing
         ,dblReceiptChargeQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferChargesClearing   
-     ' + @innerQueryFilter + '  
-    ),  
-    grainTransferClearing  
-    AS  
-    (  
-	 SELECT  
-        dtmDate  
-        ,strTransactionNumber  
-        ,intEntityVendorId  
-        ,intInventoryReceiptId  
-        ,intInventoryReceiptItemId  
-        ,intItemId  
-        ,intTransferStorageId  
-        ,strTransferStorageTicket  
-        ,intTransferStorageReferenceId  
-        ,dblTransferTotal  
-        ,dblTransferQty  
-        ,dblReceiptTotal  
-        ,dblReceiptQty  
-        ,intLocationId  
-        ,strLocationName  
-     FROM vyuGRTransferClearing  
-     ' + @innerQueryFilter + '  
-    ),  
-    grainTransferChargeClearing  
-    AS  
-    (  
-	 SELECT  
-        dtmDate  
-        ,strTransactionNumber  
-        ,intEntityVendorId  
-        ,intInventoryReceiptId  
-        ,intInventoryReceiptChargeId  
-        ,intItemId  
-        ,intTransferStorageId  
-        ,strTransferStorageTicket  
-        ,intTransferStorageReferenceId  
-        ,dblTransferTotal  
-        ,dblTransferQty  
-        ,dblReceiptChargeTotal  
-        ,dblReceiptChargeQty  
-        ,intLocationId  
-        ,strLocationName  
-     FROM vyuGRTransferChargesClearing   
+     FROM vyuGRTransferChargesClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
      ' + @innerQueryFilter + '  
     ),  
     patClearing  
@@ -835,7 +795,9 @@ BEGIN
         ,dblReceiptQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferClearing  
+     FROM vyuGRTransferClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
     ),
     grainTransferChargeClearing
     AS
@@ -856,49 +818,9 @@ BEGIN
         ,dblReceiptChargeQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferChargesClearing  
-    ),
-    grainTransferClearing
-    AS
-    (
-      SELECT  
-        dtmDate  
-        ,strTransactionNumber  
-        ,intEntityVendorId  
-        ,intInventoryReceiptId  
-        ,intInventoryReceiptItemId  
-        ,intItemId  
-        ,intTransferStorageId  
-        ,strTransferStorageTicket  
-        ,intTransferStorageReferenceId  
-        ,dblTransferTotal  
-        ,dblTransferQty  
-        ,dblReceiptTotal  
-        ,dblReceiptQty  
-        ,intLocationId  
-        ,strLocationName  
-     FROM vyuGRTransferClearing  
-    ),
-    grainTransferChargeClearing
-    AS
-    (
-      SELECT  
-        dtmDate  
-        ,strTransactionNumber  
-        ,intEntityVendorId  
-        ,intInventoryReceiptId  
-        ,intInventoryReceiptChargeId  
-        ,intItemId  
-        ,intTransferStorageId  
-        ,strTransferStorageTicket  
-        ,intTransferStorageReferenceId  
-        ,dblTransferTotal  
-        ,dblTransferQty  
-        ,dblReceiptChargeTotal  
-        ,dblReceiptChargeQty  
-        ,intLocationId  
-        ,strLocationName  
-     FROM vyuGRTransferChargesClearing  
+     FROM vyuGRTransferChargesClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
     ),
     patClearing  
     AS  

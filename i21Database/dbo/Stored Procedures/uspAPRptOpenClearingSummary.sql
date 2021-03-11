@@ -364,7 +364,9 @@ SET @cteQuery = N';WITH forClearing
         ,dblReceiptQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferClearing  
+     FROM vyuGRTransferClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
      ' + @innerQueryFilter + '  
     ),  
     grainTransferChargeClearing  
@@ -386,7 +388,9 @@ SET @cteQuery = N';WITH forClearing
         ,dblReceiptChargeQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferChargesClearing   
+     FROM vyuGRTransferChargesClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
      ' + @innerQueryFilter + '  
     ),  
     patClearing  
@@ -580,7 +584,9 @@ BEGIN
         ,dblReceiptQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferClearing  
+     FROM vyuGRTransferClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
     ),
     grainTransferChargeClearing
     AS
@@ -601,7 +607,9 @@ BEGIN
         ,dblReceiptChargeQty  
         ,intLocationId  
         ,strLocationName  
-     FROM vyuGRTransferChargesClearing  
+     FROM vyuGRTransferChargesClearing A
+     LEFT JOIN dbo.tblGLFiscalYearPeriod FP
+     ON A.dtmDate BETWEEN FP.dtmStartDate AND FP.dtmEndDate OR A.dtmDate = FP.dtmStartDate OR A.dtmDate = FP.dtmEndDate   
     ),
     patClearing
     AS
