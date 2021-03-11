@@ -339,7 +339,7 @@ INNER JOIN #COMPANYLOCATIONS CL ON CL.intCompanyLocationId = I.intCompanyLocatio
 WHERE I.ysnPosted  = 1		
   AND I.ysnCancelled = 0
   AND ((I.strType = 'Service Charge' AND I.ysnForgiven = 0) OR ((I.strType <> 'Service Charge' AND I.ysnForgiven = 1) OR (I.strType <> 'Service Charge' AND I.ysnForgiven = 0)))
-  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= @dtmDateToLocal
+  AND CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate)))  BETWEEN @dtmDateFrom  AND @dtmDateTo 
   AND I.intAccountId IN (SELECT intAccountId FROM dbo.vyuGLAccountDetail WITH (NOLOCK) WHERE strAccountCategory IN ('AR Account', 'Customer Prepayments'))
 
 --MAIN STATEMENT
