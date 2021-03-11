@@ -9193,6 +9193,10 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
+    <Build Include="dbo\Functions\fnGRComputeMyUnitFromShrinkage.sql" />
+    <Build Include="dbo\Functions\fnGRWhatIsMyTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTranferChecking.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRTransferFixDissection.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageXML_ERP.sql" />
     <Build Include="dbo\Tables\tblIPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateInitialAck_ERP.sql" />
