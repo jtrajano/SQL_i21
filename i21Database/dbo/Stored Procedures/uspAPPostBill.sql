@@ -1183,7 +1183,7 @@ BEGIN
 			SELECT intBillId FROM #tmpPostBillData
 
 			INSERT INTO @APClearing
-			SELECT * FROM fnAPClearing(@clearingIds)
+			SELECT * FROM fnAPClearing(@clearingIds, 0)
 
 			EXEC uspAPClearing @APClearing = @APClearing, @post = @post
 		END TRY

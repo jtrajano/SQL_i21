@@ -26,7 +26,6 @@ BEGIN TRY
 		intBillId,
 		strBillId,
 		intBillDetailId,
-		intBillDetailTaxId,
 		strCode,
 		ysnPostAction,
 		dtmDateEntered
@@ -48,7 +47,6 @@ BEGIN TRY
 		intBillId,
 		strBillId,
 		intBillDetailId,
-		intBillDetailTaxId,
 		strCode,
 		@post,
 		GETDATE()
