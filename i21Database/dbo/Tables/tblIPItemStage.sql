@@ -7,7 +7,7 @@
 		,strShortName NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strCommodity NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strCategoryCode NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-		,strItemStatus NVARCHAR(10) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemStage_strItemStatus] DEFAULT(('Active'))
+		,strItemStatus NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL CONSTRAINT [DF_tblIPItemStage_strItemStatus] DEFAULT(('Active'))
 		,strLotTracking NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,strItemControl NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL
 		,[strStockUOM] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL

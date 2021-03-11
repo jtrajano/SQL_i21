@@ -9188,6 +9188,8 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPVendor.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPItem.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPVendor.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
