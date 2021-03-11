@@ -774,7 +774,7 @@ BEGIN TRY
 		, strSubHeading = 'Futures - Short'
 		, strSecondSubHeading = 'Futures - Short'
 		, strFutureMonth
-		, intOpenContract = - (dblNoOfContract - ISNULL(dblNoOfContract, 0)) * dblContractSize
+		, intOpenContract = - (dblNoOfContract - ISNULL(intOpenContract, 0)) * dblContractSize
 		, dblPrice
 		, strInternalTradeNo
 		, strLocationName
@@ -2110,7 +2110,8 @@ BEGIN TRY
 		, ExRate DECIMAL(24,10)
 		, strCurrencyExchangeRateType NVARCHAR(200)
 		, intContractHeaderId INT
-		, intFutOptTransactionHeaderId INT)
+		, intFutOptTransactionHeaderId INT
+		, intSortingBy INT)
 	
 	DECLARE @strCommodityName NVARCHAR(100)
 		, @strSubHeading NVARCHAR(100)
@@ -2200,7 +2201,8 @@ BEGIN TRY
 		, ExRate
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
-		, intFutOptTransactionHeaderId)
+		, intFutOptTransactionHeaderId
+		, intSortingBy)
 	SELECT strCommodity
 		, strHeaderValue
 		, strSubHeading
@@ -2225,6 +2227,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 1
 	FROM @FinalList
 	WHERE (strSubHeading = 'Inventory')
 	
@@ -2252,6 +2255,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Purchase Quantity'
@@ -2284,6 +2288,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Purchase Quantity'
@@ -2316,6 +2321,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total')
 		AND strSecondSubHeading = 'Purchase Quantity'
@@ -2348,6 +2354,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Wt./Avg Futures'
@@ -2380,6 +2387,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 			AND strSecondSubHeading = 'Wt./Avg Futures'
@@ -2412,6 +2420,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Futures'
@@ -2444,6 +2453,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Wt./Avg Basis'
@@ -2476,6 +2486,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Basis'
@@ -2508,6 +2519,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Basis'
@@ -2540,6 +2552,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Wt./Avg Price'
@@ -2572,6 +2585,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Price'
@@ -2604,6 +2618,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') 
 		AND strSecondSubHeading = 'Wt./Avg Price'
@@ -2636,6 +2651,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Wt./Avg Cash'
@@ -2668,6 +2684,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Cash'
@@ -2700,6 +2717,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Cash'
@@ -2732,6 +2750,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Wt./Avg Freight'
@@ -2764,6 +2783,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Freight'
@@ -2796,6 +2816,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') 
 		AND strSecondSubHeading = 'Wt./Avg Freight'
@@ -2828,7 +2849,8 @@ BEGIN TRY
 		, ExRate
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
-		, intFutOptTransactionHeaderId)
+		, intFutOptTransactionHeaderId
+		, intSortingBy)
 	SELECT strCommodity
 		, strHeaderValue
 		, strSubHeading
@@ -2853,6 +2875,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' 
 		AND strSecondSubHeading LIKE 'Exchange -%'
@@ -2885,6 +2908,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading LIKE 'Exchange -%'
@@ -2917,6 +2941,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future','Total') 
 		AND strSecondSubHeading LIKE 'Exchange -%'
@@ -2949,7 +2974,8 @@ BEGIN TRY
 		, ExRate
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
-		, intFutOptTransactionHeaderId)
+		, intFutOptTransactionHeaderId
+		, intSortingBy)
 	SELECT strCommodity
 		, strHeaderValue
 		, strSubHeading
@@ -2974,6 +3000,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Purchase Total'
 
@@ -3001,6 +3028,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Purchase Total' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -3028,6 +3056,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Purchase Total'
 
@@ -3055,7 +3084,8 @@ BEGIN TRY
 		, ExRate
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
-		, intFutOptTransactionHeaderId)
+		, intFutOptTransactionHeaderId
+		, intSortingBy)
 	SELECT strCommodity
 		, strHeaderValue
 		, strSubHeading
@@ -3080,6 +3110,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Sale Quantity'
@@ -3112,6 +3143,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Sale Quantity'
@@ -3144,6 +3176,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') 
 		AND strSecondSubHeading = 'Sale Quantity'
@@ -3176,6 +3209,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' 
 		AND strSecondSubHeading = 'Wt./Avg Futures'
@@ -3208,6 +3242,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Futures'
@@ -3240,6 +3275,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') 
 		AND strSecondSubHeading = 'Wt./Avg Futures'
@@ -3272,6 +3308,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' 
 		AND strSecondSubHeading = 'Wt./Avg Basis'
@@ -3304,6 +3341,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Basis'
@@ -3336,6 +3374,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') 
 		AND strSecondSubHeading = 'Wt./Avg Basis'
@@ -3368,6 +3407,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' 
 		AND strSecondSubHeading = 'Wt./Avg Price'
@@ -3400,6 +3440,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Price'
@@ -3432,6 +3473,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future','Total') 
 		AND strSecondSubHeading = 'Wt./Avg Price'
@@ -3464,6 +3506,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		AND strSecondSubHeading = 'Wt./Avg Cash'
@@ -3496,6 +3539,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Cash'
@@ -3528,6 +3572,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous'
 		and strSecondSubHeading = 'Wt./Avg Freight'
@@ -3560,6 +3605,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading = 'Wt./Avg Freight'
@@ -3592,6 +3638,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future','Total') 
 		AND strSecondSubHeading = 'Wt./Avg Freight'
@@ -3624,6 +3671,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' 
 		AND strSecondSubHeading LIKE 'Exchange -%'
@@ -3656,6 +3704,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 		AND strSecondSubHeading LIKE 'Exchange -%'
@@ -3688,6 +3737,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') 
 		AND strSecondSubHeading LIKE 'Exchange -%'
@@ -3719,7 +3769,8 @@ BEGIN TRY
 		, ExRate
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
-		, intFutOptTransactionHeaderId)
+		, intFutOptTransactionHeaderId
+		, intSortingBy)
 	SELECT strCommodity
 		, strHeaderValue
 		, strSubHeading
@@ -3744,6 +3795,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Sale Total'
 
@@ -3771,6 +3823,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Sale Total' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -3798,6 +3851,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Sale Total'
 	----------------------------------- end
@@ -3825,7 +3879,8 @@ BEGIN TRY
 		, ExRate
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
-		, intFutOptTransactionHeaderId)
+		, intFutOptTransactionHeaderId
+		, intSortingBy)
 	SELECT strCommodity
 		, strHeaderValue
 		, strSubHeading
@@ -3850,6 +3905,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Net Physical Position'
 
@@ -3877,6 +3933,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Net Physical Position' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -3904,6 +3961,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Net Physical Position'
 
@@ -3931,6 +3989,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Cumulative physical position'
 
@@ -3958,6 +4017,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Cumulative physical position' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -3985,6 +4045,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Cumulative physical position'
 
@@ -4012,6 +4073,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Futures - Long'
 
@@ -4039,6 +4101,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Futures - Long' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -4066,6 +4129,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future','Total') AND strSubHeading = 'Futures - Long'
 
@@ -4093,6 +4157,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Futures - Short'
 
@@ -4120,6 +4185,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Futures - Short' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -4147,6 +4213,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future','Total') AND strSubHeading = 'Futures - Short'
 
@@ -4174,6 +4241,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Net Futures'
 
@@ -4201,6 +4269,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Net Futures' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -4228,6 +4297,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Net Futures'
 
@@ -4255,6 +4325,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Cash Exposure'
 
@@ -4282,6 +4353,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Cash Exposure' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -4309,6 +4381,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Cash Exposure'
 
@@ -4336,6 +4409,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 2
 	FROM @FinalList
 	WHERE strContractEndMonth = 'Previous' AND strSubHeading = 'Basis Exposure'
 
@@ -4363,6 +4437,7 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 3
 	FROM @FinalList
 	WHERE strSubHeading = 'Basis Exposure' AND strContractEndMonth NOT IN ('Previous', 'Future', 'Inventory', 'Total')
 
@@ -4390,17 +4465,24 @@ BEGIN TRY
 		, strCurrencyExchangeRateType
 		, intContractHeaderId
 		, intFutOptTransactionHeaderId
+		, intSortingBy = 4
 	FROM @FinalList
 	WHERE strContractEndMonth IN ('Future', 'Total') AND strSubHeading = 'Basis Exposure'
 
 	IF ISNULL(@ysnSummary,0) = 0
 	BEGIN 
-		SELECT * FROM @Result  order by intRowNumber
+		SELECT  * FROM @Result 
+		ORDER BY intSortingBy
+			, CASE WHEN strContractEndMonth NOT IN ('Inventory','Previous','Future', 'Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+			, intRowNumber
 	END
 	ELSE
 	BEGIN
 		SELECT * FROM @Result WHERE strSecondSubHeading  not LIKE '%Wt./Avg%'
 		AND strSecondSubHeading not LIKE '%' + @strCurrencyName + '%' 	
+		ORDER BY intSortingBy
+			, CASE WHEN strContractEndMonth NOT IN ('Inventory','Previous','Future', 'Total') THEN CONVERT(DATETIME, '01 ' + strContractEndMonth) END
+			, intRowNumber
 	END
 
 	DROP TABLE #CommodityList

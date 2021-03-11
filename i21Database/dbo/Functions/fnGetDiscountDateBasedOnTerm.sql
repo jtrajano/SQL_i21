@@ -12,7 +12,8 @@ DECLARE @Type NVARCHAR(100)
 DECLARE @DiscountDay INT, @DayMonthDue INT, @DueNextMonth INT
 DECLARE @DiscountDate datetime
 DECLARE @CurrentDate datetime
-DECLARE @MaxDaysInMonth int
+DECLARE @MaxDaysInMonth INT
+DECLARE @intDiscountDueNextMonth INT 
 
 SET @PaymentDate = CAST(ISNULL(@PaymentDate, GETDATE()) AS DATE)
 SET @TransactionDate = CAST(@TransactionDate AS DATE)
@@ -23,6 +24,7 @@ SELECT
 	,@DiscountDay = ISNULL(intDiscountDay, 1)
 	,@DiscountDate = ISNULL(dtmDiscountDate, @PaymentDate) 
 	,@MaxDaysInMonth = DATEDIFF(DAY, DATEADD(DAY, 1-DAY(@TransactionDate), @TransactionDate), DATEADD(MONTH, 1, DATEADD(DAY, 1-DAY(@TransactionDate), @TransactionDate)))
+	,@intDiscountDueNextMonth= ISNULL(intDiscountDueNextMonth,0)
 FROM
 	tblSMTerm
 WHERE
@@ -42,7 +44,14 @@ ELSE IF (@Type = 'Date Driven')
 		DECLARE @TempDiscountDate datetime
 		Set @TempDiscountDate = CONVERT(datetime, (CAST(@TransactionMonth AS nvarchar(10)) + '/' + CAST(@DiscountDay AS nvarchar(10)) + '/' + CAST(@TransactionYear AS nvarchar(10))), 101)
 				
-		RETURN CAST(ISNULL(@TempDiscountDate, DATEADD(DAY,@DiscountDay,@TransactionDate)) AS DATE)
+		IF @DiscountDay = 1 AND @intDiscountDueNextMonth <> 0 
+		BEGIN
+		RETURN CAST(ISNULL(DATEADD(DAY, @intDiscountDueNextMonth - DAY(DATEADD(MONTH,1,@TransactionDate)), DATEADD(MONTH,1,@TransactionDate)),@TempDiscountDate) AS DATE)
+        END
+		ELSE	
+		BEGIN
+		RETURN CAST(ISNULL(DATEADD(DAY,@DiscountDay,@TransactionDate),@TempDiscountDate) AS DATE)
+		END
 		
 	END	
 ELSE IF (@Type = 'Date Driven')

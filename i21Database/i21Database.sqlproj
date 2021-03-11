@@ -8916,7 +8916,17 @@
     <Build Include="dbo\Views\vyuIPAuditView.sql" />
     <Build Include="dbo\Tables\tblGRTicketDiscountItemInfo.sql" />
     <Build Include="dbo\Stored Procedures\uspGRModifyTicketDiscountItemInfo.sql" />
-    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />  
+    <Build Include="dbo\Views\vyuGRTransferClearing_FullDPtoDP.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportAllTrans.sql" />
+    <Build Include="dbo\Views\vyuICSearchBundleDetails.sql" />
+    <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummaryByLocation.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummaryByLocation.sql" />
+    <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
+    <Build Include="dbo\Tables\tblARRebuildLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuild.sql" />
+    <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -9184,6 +9194,8 @@
     <Build Include="dbo\Stored Procedures\uspSMFixStartingNumbers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTAddDiscountsChargesToInvoice.sql" />
     <None Include="Scripts\Post-Deployment\GR\StorageInventoryReceipt.sql" />
+    <None Include="Scripts\Post-Deployment\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql" />
+    <None Include="Scripts\Post-Deployment\GR\Fix_NULL_SSId_in_voucher_details.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />

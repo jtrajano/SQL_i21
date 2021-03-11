@@ -121,6 +121,7 @@ BEGIN
 		,intCntId = ROW_NUMBER() OVER (ORDER BY strCustomerNumber)
 	INTO #tmpUniqueInvoiceList
 	FROM #tmpSDToInvoice
+	WHERE ISNULL(ysnVoid,0) = 0
 	
 
 	

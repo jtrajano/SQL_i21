@@ -54,7 +54,7 @@ BEGIN TRY
 		, dblOpenLots = CAST(ISNULL(dblOpenLots, 0) AS NUMERIC(18, 6))
 		, strOptionType
 		, dblStrike
-		, dblPremium = - dblPremium
+		, dblPremium = - dblPremiumInBucks
 		, dblPremiumValue = - dblPremiumValue
 		, dblCommission
 		, intFutOptTransactionId
@@ -105,6 +105,7 @@ BEGIN TRY
 				, dblSelectedLot1 = ISNULL(sl.dblSelectedLot, 0)
 				, ot.strOptionType
 				, ot.dblStrike
+				, dblPremiumInBucks = ot.dblPrice
 				, dblPremium = ot.dblPrice / (CASE WHEN c.ysnSubCurrency = 1 THEN c.intCent ELSE 1 END)
 				, fm.dblContractSize
 				, dblOptCommission = ISNULL((select TOP 1 (case when bc.intOptionsRateType = 2 then 0
@@ -168,7 +169,7 @@ BEGIN TRY
 			JOIN tblRKBrokerageAccount ba ON ot.intBrokerageAccountId = ba.intBrokerageAccountId
 			JOIN tblEMEntity e ON e.intEntityId = ot.intEntityId
 			LEFT JOIN tblRKBrokerageCommission bc ON bc.intFutureMarketId = ot.intFutureMarketId AND ba.intBrokerageAccountId = bc.intBrokerageAccountId
-			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = case when isnull(bc.intOptCurrencyId,0)=0 then fm.intCurrencyId else bc.intOptCurrencyId end
+			LEFT JOIN tblSMCurrency c ON c.intCurrencyID = fm.intCurrencyId
 			LEFT JOIN tblSMCurrency MainCurrency ON MainCurrency.intCurrencyID = c.intMainCurrencyId
 			LEFT JOIN tblCTBook b ON b.intBookId = ot.intBookId
 			LEFT JOIN tblCTSubBook sb ON sb.intSubBookId = ot.intSubBookId

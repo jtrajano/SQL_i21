@@ -52,6 +52,7 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
+	  , @dblTotalAR							NUMERIC(18,6)		= NULL
 
 DECLARE @temp_statement_table TABLE(
 	 [intTempId]					INT IDENTITY(1,1)		
@@ -482,8 +483,12 @@ IF @ysnPrintOnlyPastDueLocal = 1
 	END
 
 
+SELECT @dblTotalAR = SUM(dblTotalAR) FROM tblARCustomerAgingStagingTable
+
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
+		IF @dblTotalAR = 0 
+		BEGIN
 		DELETE FROM @temp_statement_table WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) <= 0) AND strTransactionType <> 'Customer Budget'
 		DELETE FROM tblARCustomerAgingStagingTable WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0) AND intEntityUserId = @intEntityUserIdLocal AND strAgingType = 'Summary'
 
@@ -493,6 +498,7 @@ IF @ysnPrintZeroBalanceLocal = 0
 						tblARCustomerAgingStagingTable 
 							where  intEntityUserId = @intEntityUserIdLocal 
 								AND strAgingType = 'Summary')
+		END
 	END
 
 INSERT INTO @temp_cf_table (

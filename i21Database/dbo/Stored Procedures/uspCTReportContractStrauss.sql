@@ -119,9 +119,10 @@ BEGIN TRY
 	WHERE	[fieldname] = 'strSequenceHistoryId'
 
 	SELECT	TOP 1 @intContractHeaderId	= Item FROM dbo.fnSplitString(@strIds,',')
+	DECLARE @thisContractStatus NVARCHAR(100)
 
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
-	SELECT @intTransactionId=intTransactionId,@IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
+	SELECT @intTransactionId=intTransactionId, @thisContractStatus = strApprovalStatus, @IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
 	SELECT	TOP 1 @FirstApprovalId = intApproverId
 		, @intApproverGroupId = intApproverGroupId
@@ -187,8 +188,16 @@ BEGIN TRY
 		@ysnIsParent = t.ysnIsParent
 		,@blbParentSubmitSignature = h.blbDetail
 		,@blbParentApproveSignature = j.blbDetail
-		,@blbChildSubmitSignature = l.blbDetail
-		,@blbChildApproveSignature = n.blbDetail
+		,@blbChildSubmitSignature = 
+			CASE WHEN @thisContractStatus = 'Approved' AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus = 'Approved' THEN l.blbDetail 
+			ELSE 
+				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved') AND t.ysnIsParent = 0 THEN l.blbDetail ELSE NULL END 
+			END
+		,@blbChildApproveSignature = 
+			CASE WHEN @thisContractStatus = 'Approved' AND t.ysnIsParent = 1 AND @strTransactionApprovalStatus = 'Approved' THEN n.blbDetail
+			ELSE
+				CASE WHEN @thisContractStatus IN ('Waiting for Approval', 'Approved') AND t.ysnIsParent = 0 THEN n.blbDetail ELSE NULL END
+			END
 	from
 		(
 		select
@@ -208,9 +217,9 @@ BEGIN TRY
 			a.intContractHeaderId = @intContractHeaderId
 		) t
 		left join tblEMEntitySignature g on g.intEntityId = t.intParentSubmitBy
-		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId AND @strTransactionApprovalStatus = 'Approved'
+		left join tblSMSignature h  on h.intEntityId = g.intEntityId and h.intSignatureId = g.intElectronicSignatureId
 		left join tblEMEntitySignature i on i.intEntityId = t.intParentApprovedBy
-		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId AND @strTransactionApprovalStatus = 'Approved'
+		left join tblSMSignature j  on j.intEntityId = i.intEntityId and j.intSignatureId = i.intElectronicSignatureId
 		left join tblEMEntitySignature k on k.intEntityId = t.intChildSubmitBy
 		left join tblSMSignature l  on l.intEntityId = k.intEntityId and l.intSignatureId = k.intElectronicSignatureId
 		left join tblEMEntitySignature m on m.intEntityId = t.intChildApprovedBy
