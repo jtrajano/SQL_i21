@@ -448,17 +448,7 @@ AND billDetail.intInventoryReceiptChargeId IS NULL
 AND 1 = (CASE WHEN receipt.intSourceType = 2 AND ft.intFreightTermId > 0 AND ft.strFobPoint = 'Origin' THEN 0 ELSE 1 END) --Inbound Shipment
 AND receipt.strReceiptType != 'Transfer Order'
 AND receiptItem.intOwnershipType != 2
-AND NOT EXISTS (
-	--receipts in storage that were transferred
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing transferClr
-    WHERE transferClr.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-)
-AND NOT EXISTS (
-	--receipts in storage that were FULLY transferred from DP to DP only
-    SELECT intInventoryReceiptItemId
-    FROM vyuGRTransferClearing_FullDPtoDP transferClrDP
-    WHERE transferClrDP.intInventoryReceiptItemId = receiptItem.intInventoryReceiptItemId
-)
---AND receipt.dtmReceiptDate >= '2020-09-09'GO
+
+
+GO
 
