@@ -223,6 +223,8 @@ BEGIN
 
 	IF @ENABLE_ACCRUALS_FOR_OUTBOUND = 1
 	BEGIN 
+		EXEC uspLGRecalculateLoadCosts @intTransactionId, @intEntityUserSecurityId
+		
 		INSERT INTO @GLEntries (
 			[dtmDate] 
 			,[strBatchId]
