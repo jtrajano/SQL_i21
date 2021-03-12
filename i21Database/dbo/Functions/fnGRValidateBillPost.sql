@@ -23,26 +23,27 @@ BEGIN
 	--USER IS POSTING/UNPOSTING ON VOUCHER SCREEN
 	IF @transaction = 'Voucher'
 	BEGIN
-		IF @post = 0
-		BEGIN
-			INSERT INTO @returntable
-			SELECT	'Please unpost the voucher on settle storage screen.',
-					'Settle Storage',
-					SS.strStorageTicket,
-					SS.intSettleStorageId
-			FROM tblAPBill A
-			INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
-			INNER JOIN 
-			(
-				tblGRCustomerStorage CS
-				INNER JOIN tblGRSettleStorageTicket SST
-					ON SST.intCustomerStorageId = CS.intCustomerStorageId
-				INNER JOIN tblGRSettleStorage SS
-					ON SST.intSettleStorageId = SS.intSettleStorageId
-			) ON B.intCustomerStorageId = CS.intCustomerStorageId
-			WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
-		END
-		ELSE
+		-- IF @post = 0
+		-- BEGIN
+			-- INSERT INTO @returntable
+			-- SELECT	'Please unpost the voucher on settle storage screen.',
+			-- 		'Settle Storage',
+			-- 		SS.strStorageTicket,
+			-- 		SS.intSettleStorageId
+			-- FROM tblAPBill A
+			-- INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
+			-- INNER JOIN 
+			-- (
+			-- 	tblGRCustomerStorage CS
+			-- 	INNER JOIN tblGRSettleStorageTicket SST
+			-- 		ON SST.intCustomerStorageId = CS.intCustomerStorageId
+			-- 	INNER JOIN tblGRSettleStorage SS
+			-- 		ON SST.intSettleStorageId = SS.intSettleStorageId
+			-- ) ON B.intCustomerStorageId = CS.intCustomerStorageId
+			-- WHERE A.intBillId IN (SELECT [intBillId] FROM @tmpBills)
+		-- END
+		-- ELSE
+		IF @post = 1
 		BEGIN
 			--ALLOW POSTING ON VOUCHER SCREEN ONLY FOR DP
 			INSERT INTO @returntable
