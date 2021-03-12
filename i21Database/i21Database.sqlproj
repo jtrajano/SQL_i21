@@ -5227,6 +5227,7 @@
     <Build Include="dbo\Stored Procedures\uspFACopyDepreciationMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFAMergeBookDepreciation.sql" />
     <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepreciation.sql" />
@@ -5236,6 +5237,7 @@
     <Build Include="dbo\Tables\tblFADepreciateLogDetail.sql" />
     <Build Include="dbo\Tables\tblFAImportLog.sql" />
     <Build Include="dbo\Tables\tblFAImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblFABookDepreciation.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
