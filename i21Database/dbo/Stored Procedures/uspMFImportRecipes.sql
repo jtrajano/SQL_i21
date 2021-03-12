@@ -599,6 +599,7 @@ BEGIN
 				,dtmLastModified
 				,dtmValidFrom
 				,dtmValidTo
+				,intConcurrencyId
 				)
 			SELECT TOP 1 s.strRecipeName
 				,i.intItemId
@@ -623,6 +624,7 @@ BEGIN
 				,GETDATE()
 				,s.strValidFrom
 				,s.strValidTo
+				,1 As intConcurrencyId
 			FROM tblMFRecipeStage s
 			LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 			LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -676,6 +678,7 @@ BEGIN
 					,dtmCreated
 					,intLastModifiedUserId
 					,dtmLastModified
+					,intConcurrencyId
 					)
 				SELECT TOP 1 @intRecipeId
 					,@intItemId
@@ -712,6 +715,7 @@ BEGIN
 					,GETDATE()
 					,@intUserId
 					,GETDATE()
+					,1 AS intConcurrencyId
 				FROM tblMFRecipeStage s
 				LEFT JOIN tblICItem i ON s.strItemNo = i.strItemNo
 				LEFT JOIN tblICItemUOM iu ON i.intItemId = iu.intItemId
@@ -737,6 +741,7 @@ BEGIN
 				,r.dtmValidFrom = t.strValidFrom
 				,r.dtmValidTo = t.strValidTo
 				,r.intRecipeTypeId=t.intRecipeTypeId
+				,r.intConcurrencyId=r.intConcurrencyId+1
 			FROM tblMFRecipe r
 			CROSS JOIN (
 				SELECT TOP 1 s.strRecipeName
@@ -1360,6 +1365,7 @@ BEGIN
 				,dtmCreated
 				,intLastModifiedUserId
 				,dtmLastModified
+				,intConcurrencyId
 				)
 			SELECT @intRecipeId
 				,i.intItemId
@@ -1419,6 +1425,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,GETDATE()
+				,1 AS intConcurrencyId
 			FROM tblMFRecipeItemStage s
 			LEFT JOIN tblICItem i ON s.strRecipeItemNo = i.strItemNo
 			LEFT JOIN tblICUnitMeasure um ON um.strUnitMeasure = s.strUOM
@@ -1466,6 +1473,7 @@ BEGIN
 				,ri.ysnPartialFillConsumption = t.ysnPartialFillConsumption
 				,ri.intLastModifiedUserId = @intUserId
 				,ri.dtmLastModified = GETDATE()
+				,ri.intConcurrencyId=ri.intConcurrencyId+1
 			FROM tblMFRecipeItem ri
 			CROSS JOIN (
 				SELECT TOP 1 i.intItemId
@@ -1789,6 +1797,7 @@ BEGIN
 				,dtmCreated
 				,intLastModifiedUserId
 				,dtmLastModified
+				,intConcurrencyId
 				)
 			SELECT @intRecipeItemId
 				,@intRecipeId
@@ -1805,6 +1814,7 @@ BEGIN
 				,GETDATE()
 				,@intUserId
 				,GETDATE()
+				,1 AS intConcurrencyId
 			FROM tblMFRecipeSubstituteItemStage s
 			LEFT JOIN tblICItem i ON s.strSubstituteItemNo = i.strItemNo
 			WHERE s.intRecipeSubstituteItemStageId = @intMinId
@@ -1819,6 +1829,7 @@ BEGIN
 				,rs.dblCalculatedLowerTolerance = t.dblLowerTolerance
 				,rs.intLastModifiedUserId = @intUserId
 				,rs.dtmLastModified = GETDATE()
+				,rs.intConcurrencyId=1
 			FROM tblMFRecipeSubstituteItem rs
 			CROSS JOIN (
 				SELECT TOP 1 dbo.fnMFCalculateRecipeSubItemQuantity(@dblRecipeDetailCalculatedQty, s.[strSubstituteRatio], s.[strMaxSubstituteRatio]) dblQuantity
