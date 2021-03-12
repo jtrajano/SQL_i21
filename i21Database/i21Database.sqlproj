@@ -8927,6 +8927,8 @@
     <Build Include="dbo\Stored Procedures\uspARRebuild.sql" />
     <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
