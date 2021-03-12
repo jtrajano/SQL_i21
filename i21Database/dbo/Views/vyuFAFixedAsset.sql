@@ -2,6 +2,7 @@ CREATE VIEW vyuFAFixedAsset
 AS
 SELECT 
 FA.*,
+dblCost - FA.dblSalvageValue dblBasis,
 DM.intDepreciationMethodId,
 DM.strDepreciationMethodId,
 DM.strConvention,
