@@ -49,7 +49,6 @@ DECLARE @dtmDateToLocal						AS DATETIME			= NULL
 	  , @blbStretchedLogo					AS VARBINARY(MAX)	= NULL
 	  , @strCompanyName						AS NVARCHAR(500)	= NULL
 	  , @strCompanyAddress					AS NVARCHAR(500)	= NULL
-	  , @dblTotalAR							NUMERIC(18,6)		= NULL
 
 IF(OBJECT_ID('tempdb..#CUSTOMERS') IS NOT NULL)
 BEGIN
@@ -385,24 +384,19 @@ IF @ysnPrintOnlyPastDueLocal = 1
 		UPDATE #AGINGSUMMARY SET dbl0Days = 0
 	END
 
-SELECT @dblTotalAR = SUM(dblTotalAR) FROM tblARCustomerAgingStagingTable
-
 --FILTER OUT ZERO BALANCE
 IF @ysnPrintZeroBalanceLocal = 0
 	BEGIN
-		IF @dblTotalAR = 0 
-		BEGIN
-			DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) <= 0) AND strTransactionType <> 'Customer Budget'
-			DELETE FROM #AGINGSUMMARY WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0)
+		DELETE FROM #STATEMENTREPORT WHERE ((((ABS(dblAmountDue) * 10000) - CONVERT(FLOAT, (ABS(dblAmountDue) * 10000))) <> 0) OR ISNULL(dblAmountDue, 0) <= 0) AND strTransactionType <> 'Customer Budget'
+		DELETE FROM #AGINGSUMMARY WHERE ((((ABS(dblTotalAR) * 10000) - CONVERT(FLOAT, (ABS(dblTotalAR) * 10000))) <> 0) OR ISNULL(dblTotalAR, 0) <= 0)
 
-			DELETE C
-			FROM #CUSTOMERS C
-			LEFT JOIN (
-				SELECT DISTINCT intEntityCustomerId 
-				FROM #AGINGSUMMARY 
-			) AGING ON AGING.intEntityCustomerId = C.intEntityCustomerId
-			WHERE AGING.intEntityCustomerId IS NULL	
-		END
+		DELETE C
+		FROM #CUSTOMERS C
+		LEFT JOIN (
+			SELECT DISTINCT intEntityCustomerId 
+			FROM #AGINGSUMMARY 
+		) AGING ON AGING.intEntityCustomerId = C.intEntityCustomerId
+		WHERE AGING.intEntityCustomerId IS NULL					
 	END
 
 DELETE FROM #STATEMENTREPORT
