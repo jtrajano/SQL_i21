@@ -745,6 +745,7 @@ BEGIN TRY
 								,strFreightBilledBy
 								,ysnCompanyOwnedCarrier
 								,ysnActive
+								,intSort
 								)
 							SELECT @intEntityId
 								,@strName
@@ -752,6 +753,7 @@ BEGIN TRY
 								,'Other'
 								,0
 								,1
+								,0
 						END
 					END
 				END
@@ -843,7 +845,7 @@ BEGIN TRY
 							ELSE 0
 							END
 						)
-				OUTPUT deleted.intEntityLocationId
+				OUTPUT inserted.intEntityLocationId
 					,'Modified'
 					,deleted.strAddress
 					,deleted.strCity
@@ -994,6 +996,14 @@ BEGIN TRY
 
 				IF EXISTS (
 						SELECT 1
+						FROM @tblAPVendor
+						WHERE IsNULL(strOldTaxNumber, '') <> IsNULL(strNewTaxNumber, '')
+						)
+					SELECT @strDetails += '{"change":"strTaxNumber","iconCls":"small-gear","from":"' + IsNULL(strOldTaxNumber, '') + '","to":"' + IsNULL(strNewTaxNumber, '') + '","leaf":true,"changeDescription":"Tax No"},'
+					FROM @tblAPVendor
+
+				IF EXISTS (
+						SELECT 1
 						FROM @tblEMEntityType
 						)
 				BEGIN
@@ -1072,6 +1082,8 @@ BEGIN TRY
 						FROM @tblEMEntityLocation
 						)
 				BEGIN
+					SELECT @strLocationDetails = ''
+					
 					SELECT TOP 1 @intAuditDetailId = intEntityLocationId
 					FROM @tblEMEntityLocation
 
@@ -1120,7 +1132,7 @@ BEGIN TRY
 					LEFT JOIN tblSMTerm T ON T.intTermID = EL.intOldTermsId
 					LEFT JOIN tblSMTerm T1 ON T1.intTermID = EL.intNewTermsId
 					WHERE intEntityLocationId = @intAuditDetailId
-						AND IsNULL(intOldTermsId, '') <> IsNULL(intNewTermsId, '')
+						AND IsNULL(intOldTermsId, 0) <> IsNULL(intNewTermsId, 0)
 
 					SELECT @strLocationDetails += '{"change":"ysnDefaultLocation","iconCls":"small-gear","from":"' + LTRIM(ysnOldDefaultLocation) + '","to":"' + LTRIM(ysnNewDefaultLocation) + '","leaf":true,"changeDescription":"Default Location"},'
 					FROM @tblEMEntityLocation
@@ -1133,7 +1145,7 @@ BEGIN TRY
 
 						EXEC uspSMAuditLog @keyValue = @intAuditDetailId
 							,@screenName = 'EntityManagement.view.EntityLocation'
-							,@entityId = @intEntityId
+							,@entityId = @intUserId
 							,@actionType = 'Updated'
 							,@actionIcon = 'small-tree-modified'
 							,@details = @strLocationDetails
