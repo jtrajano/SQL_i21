@@ -143,12 +143,30 @@ BEGIN TRY
 					,TermsCode NVARCHAR(100)
 					) x
 
-			--UPDATE ET
-			--SET ET.intStageEntityId = E.intStageEntityId
-			--FROM tblIPEntityStage E
-			--JOIN tblIPEntityTermStage ET ON ET.intParentTrxSequenceNo = E.intTrxSequenceNo
+			INSERT INTO tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,5
+				,1
+				,'Success'
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
+
 			--Move to Archive
-			
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
 				,strType
@@ -175,6 +193,29 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
+			INSERT INTO tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,5
+				,0
+				,@ErrMsg
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
+			
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (
 				strXml

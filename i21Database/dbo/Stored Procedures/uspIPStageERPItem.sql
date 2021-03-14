@@ -142,10 +142,28 @@ BEGIN TRY
 					,IsStockUOM INT
 					) x
 
-			--UPDATE IUOM
-			--SET IUOM.intStageItemId = I.intStageItemId
-			--FROM tblIPItemStage I
-			--JOIN tblIPItemUOMStage IUOM ON IUOM.intParentTrxSequenceNo = I.intTrxSequenceNo
+			INSERT INTO tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,1
+				,1
+				,'Success'
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
 
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
@@ -173,6 +191,29 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+			INSERT INTO tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,1
+				,0
+				,@ErrMsg
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (
