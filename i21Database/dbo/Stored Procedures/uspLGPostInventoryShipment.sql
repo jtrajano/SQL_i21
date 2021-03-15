@@ -295,7 +295,7 @@ BEGIN
 			,strReferenceNumber = L.strBLNumber
 			,dtmDate = L.dtmPostedDate
 			,intEntityVendorId = LC.intVendorId
-			,intLocationId = IL.intItemLocationId
+			,intLocationId = IL.intLocationId
 			,intTransactionDetailId = LC.intLoadCostId
 			,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
 			,intItemId = LC.intItemId
@@ -722,7 +722,7 @@ BEGIN
 				,strReferenceNumber = L.strBLNumber
 				,dtmDate = L.dtmPostedDate
 				,intEntityVendorId = LC.intVendorId
-				,intLocationId = IL.intItemLocationId
+				,intLocationId = IL.intLocationId
 				,intTransactionDetailId = LC.intLoadCostId
 				,intAccountId = dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing')
 				,intItemId = LC.intItemId

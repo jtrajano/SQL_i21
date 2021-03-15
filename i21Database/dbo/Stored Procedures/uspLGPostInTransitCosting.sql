@@ -364,7 +364,7 @@ BEGIN
 		,strReferenceNumber = L.strBLNumber
 		,dtmDate = GL.dtmDate
 		,intEntityVendorId = LD.intVendorEntityId
-		,intLocationId = IL.intItemLocationId
+		,intLocationId = IL.intLocationId
 		,intTransactionDetailId = LD.intLoadDetailId
 		,intAccountId = GL.intAccountId
 		,intItemId = LD.intItemId
