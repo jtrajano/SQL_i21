@@ -45,6 +45,7 @@
 	[dblTwelfthWeek] [numeric](18, 6) NULL,
 	[dtmPlanDate] [datetime] NULL,
 	[strFilterKey] [nvarchar](36) COLLATE Latin1_General_CI_AS NULL,
+	[ysnBillable] [bit] NULL,
 	[intConcurrencyId] [int] NOT NULL DEFAULT 1,
 	CONSTRAINT [PK_tblHDRoughCountCapacity_intRoughCountCapacityId] PRIMARY KEY CLUSTERED ([intRoughCountCapacityId] ASC),
 	CONSTRAINT [FK_tblHDRoughCountCapacity_tblEMENtity_intSourceEntityId] FOREIGN KEY ([intSourceEntityId]) REFERENCES [dbo].[tblEMEntity] ([intEntityId]),

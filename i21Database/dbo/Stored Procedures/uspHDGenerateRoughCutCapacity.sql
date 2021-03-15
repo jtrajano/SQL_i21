@@ -1,6 +1,7 @@
 ﻿CREATE PROCEDURE [dbo].[uspHDGenerateRoughCutCapacity]  
  @dtmCriteriaDate datetime  
  ,@strIdentifier nvarchar(36)  
+ ,@ysnBillable INT = -1
 AS  
 BEGIN  
   
@@ -152,6 +153,7 @@ INSERT INTO tblHDRoughCountCapacity
     ,dblTwelfthWeek  
     ,dtmPlanDate  
     ,strFilterKey  
+	,ysnBillable
      )  
    select distinct   
       intSourceEntityId = b.intAssignedToEntity  
@@ -202,6 +204,7 @@ INSERT INTO tblHDRoughCountCapacity
       ,dblTwelfthWeek = (select sum(booked.dblHours) from booked where booked.intAgentEntityId = b.intAssignedToEntity and booked.intTicketId = b.intTicketId and booked.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)  
       ,dtmPlanDate = getdate()  
       ,strFilterKey = @strIdentifier  
+	  ,ysnBillable
    from  
     tblHDTicket b  
     join tblEMEntity c on c.intEntityId = b.intAssignedToEntity  
@@ -259,13 +262,25 @@ INSERT INTO tblHDRoughCountCapacity
       ,dblTwelfthWeek = (select sum(booked.dblHours) from booked where booked.intAgentEntityId = a.intAgentEntityId and booked.intTicketId = b.intTicketId and booked.intDate between @intTwelfthWeekDateFrom and @intTwelfthWeekDateTo)  
       ,dtmPlanDate = getdate()  
       ,strFilterKey = @strIdentifier  
+	  ,ysnBillable
    from  
     tblHDTicketHoursWorked a
     join tblHDTicket b  on b.intTicketId = a.intTicketId  
     join tblEMEntity c on c.intEntityId = a.intAgentEntityId  
     join tblEMEntity d on d.intEntityId = b.intCustomerId  
    where  
-    convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo
+	convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo
+	AND 
+	(CASE WHEN ISNULL(@ysnBillable, -1) <> -1 THEN a.ysnBillable ELSE -1 END)
+	=
+	(CASE ISNULL(@ysnBillable, -1)
+		WHEN -1 THEN -1
+		WHEN 0 THEN 0
+		WHEN 1 THEN 1
+	END)
+
+	
+	
 
 END
 
