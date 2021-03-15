@@ -368,8 +368,8 @@ BEGIN
 		,intTransactionDetailId = LD.intLoadDetailId
 		,intAccountId = GL.intAccountId
 		,intItemId = LD.intItemId
-		,intItemUOMId = LD.intItemUOMId
-		,dblQuantity = LD.dblQuantity
+		,intItemUOMId = ISNULL(LD.intWeightItemUOMId, LD.intItemUOMId)
+		,dblQuantity = ISNULL(LD.dblNet, LD.dblQuantity)
 		,dblAmount = ABS(GL.dblDebit - GL.dblCredit)
 		,intOffsetId = NULL
 		,strOffsetId = NULL
