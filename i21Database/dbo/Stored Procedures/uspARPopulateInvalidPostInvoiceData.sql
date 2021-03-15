@@ -2400,7 +2400,7 @@ BEGIN
 
 		EXEC sp_executesql @ysnVoucherExistQuery, @ysnVoucherExistParam, @ysnVoucherExist = @ysnVoucherExist OUTPUT
 
-		IF(@ysnVoucherExist = 0)
+		IF(@ysnVoucherExist = 1)
 		BEGIN
 			INSERT INTO #ARInvalidInvoiceData
 				([intInvoiceId]
