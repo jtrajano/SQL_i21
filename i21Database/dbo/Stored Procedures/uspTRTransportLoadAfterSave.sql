@@ -213,14 +213,13 @@ BEGIN
 			, previousSnapshot.dblQuantity * -1
 			, previousSnapshot.intContractDetailId
 		FROM #tmpPreviousSnapshot previousSnapshot
+			LEFT JOIN @tmpCurrentSnapshot currentSnapshot
+			ON previousSnapshot.intTransactionDetailId = currentSnapshot.intTransactionDetailId
 		WHERE
 			previousSnapshot.strSourceType = @SourceType_InventoryTransfer
 			AND previousSnapshot.intTransactionId IS NOT NULL
 			AND ISNULL(previousSnapshot.intSourceId, '') <> ''
-			AND previousSnapshot.intSourceId NOT IN (SELECT DISTINCT intInventoryTransferId
-													FROM tblTRLoadReceipt 
-													WHERE intLoadHeaderId = @LoadHeaderId
-														AND ISNULL(intInventoryTransferId, '') <> '')
+			--AND currentSnapshot.intTransactionId IS NULL
 
 		UNION ALL
 
