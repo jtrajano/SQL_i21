@@ -106,17 +106,20 @@ AS
 		FROM tblARInventoryReceiptLog
 		WHERE strInvoiceNumber = @InvoiceNumber
 
-		EXEC uspICPostInventoryReceipt 
-			 @ysnPost = @Post
-			,@ysnRecap = 0
-			,@strTransactionId = @strReceiptNumber
-			,@intEntityUserSecurityId = @UserId
+		IF(EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strReceiptNumber))
+		BEGIN
+			EXEC uspICPostInventoryReceipt 
+				 @ysnPost = @Post
+				,@ysnRecap = 0
+				,@strTransactionId = @strReceiptNumber
+				,@intEntityUserSecurityId = @UserId
 
-		EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @intInventoryReceiptId, @intEntityUserSecurityId = @UserId
+			EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @intInventoryReceiptId, @intEntityUserSecurityId = @UserId
 
-		UPDATE tblARInventoryReceiptLog
-		SET ysnDeleted = 1
-		WHERE strInvoiceNumber = @InvoiceNumber
+			UPDATE tblARInventoryReceiptLog
+			SET ysnDeleted = 1
+			WHERE strInvoiceNumber = @InvoiceNumber
+		END
 	END
 
 	SELECT @ReceiptNumber = @strReceiptNumber
