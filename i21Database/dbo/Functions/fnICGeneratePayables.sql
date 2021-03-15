@@ -271,9 +271,9 @@ SELECT DISTINCT
 		END
 	,[strCostUOM]				=	CostUOM.strUnitMeasure
 	,[strgrossNetUOM]			=	WeightUOM.strUnitMeasure
-	,[dblWeightUnitQty]			=	CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
-	,[dblCostUnitQty]			=	CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
-	,[dblUnitQty]				=	ISNULL(ItemUOM.dblUnitQty,1)
+	,[dblWeightUnitQty]			=	ItemWeightUOM.dblUnitQty --CAST(ISNULL(ItemWeightUOM.dblUnitQty,1)  AS DECIMAL(38,20))
+	,[dblCostUnitQty]			=	ItemCostUOM.dblUnitQty --CAST(ISNULL(ItemCostUOM.dblUnitQty,1) AS DECIMAL(38,20))
+	,[dblUnitQty]				=	ItemUOM.dblUnitQty --ISNULL(ItemUOM.dblUnitQty,1)
 	,[intCurrencyId]			=	ISNULL(A.intCurrencyId, companyPrefrence.intDefaultCurrencyId)
 	,[strCurrency]				=   H1.strCurrency
 	,[intCostCurrencyId]		=	CASE WHEN B.ysnSubCurrency > 0 THEN ISNULL(SubCurrency.intCurrencyID,0)
