@@ -132,8 +132,10 @@ SELECT --DISTINCT
 									THEN  CAST(RHD.strOldData AS VARCHAR(20))
 								WHEN RHD.strOldData = 'true' THEN 'Yes'
 								WHEN RHD.strOldData = 'false' THEN 'No'
+								WHEN RHD.strTableColumnDataType = 'INT' AND RHD.strPreviewOldData NOT LIKE '%[A-Za-z]%'
+									THEN ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
 								ELSE
-									ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
+									ISNULL(CAST(RHD.strPreviewOldData AS NVARCHAR(50)), RHD.strOldData)
 						END COLLATE Latin1_General_CI_AS
 --, strPreviewOldData = CASE
 --							WHEN RHD.strTableColumnName = 'intCategoryId'
