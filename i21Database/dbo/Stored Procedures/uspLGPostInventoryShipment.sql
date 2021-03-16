@@ -293,7 +293,7 @@ BEGIN
 			,strTransactionId = L.strLoadNumber
 			,intTransactionType = 5
 			,strReferenceNumber = L.strBLNumber
-			,dtmDate = L.dtmPostedDate
+			,dtmDate = GL.dtmDate
 			,intEntityVendorId = LC.intVendorId
 			,intLocationId = IL.intLocationId
 			,intTransactionDetailId = LC.intLoadCostId
@@ -311,6 +311,7 @@ BEGIN
 			INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 			INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
 			LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+			OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
 		WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
 			AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
 	END 
@@ -720,7 +721,7 @@ BEGIN
 				,strTransactionId = L.strLoadNumber
 				,intTransactionType = 5
 				,strReferenceNumber = L.strBLNumber
-				,dtmDate = L.dtmPostedDate
+				,dtmDate = GL.dtmDate
 				,intEntityVendorId = LC.intVendorId
 				,intLocationId = IL.intLocationId
 				,intTransactionDetailId = LC.intLoadCostId
@@ -738,6 +739,7 @@ BEGIN
 				INNER JOIN tblLGLoadDetail LD ON LD.intLoadId = L.intLoadId
 				INNER JOIN tblLGLoadCost LC ON LC.intLoadId = L.intLoadId AND LC.strEntityType = 'Vendor'
 				LEFT JOIN tblICItemLocation IL ON IL.intItemId = LC.intItemId AND LD.intSCompanyLocationId = IL.intLocationId
+				OUTER APPLY (SELECT TOP 1 dtmDate FROM @GLEntries) GL
 			WHERE L.intLoadId = @intTransactionId AND ISNULL(LC.ysnAccrue, 0) = 1 
 				AND dbo.fnGetItemGLAccount(LD.intItemId, IL.intItemLocationId, 'AP Clearing') IS NOT NULL
 				AND EXISTS (SELECT TOP 1 1 FROM tblAPClearing APC 
