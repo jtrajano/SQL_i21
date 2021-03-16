@@ -75,13 +75,13 @@ WHERE UPPER(fieldname) = UPPER('dtmAsOfDate')
 
 SET @dtmAsOfDate	= CAST(ISNULL(@dtmAsOfDate, GETDATE()) AS DATE)
 
-SELECT dblDSO			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (ANNUALSALES.dblAnnualSales / 365)), 2)
-     , dblBPDSO			= dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / CREDITSALES.dblCreditSales), 2)
-	 , dblADD			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (ANNUALSALES.dblAnnualSales / 365)), 2) - dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / (CREDITSALES.dblCreditSales / 365)), 2)
-	 , dblCEI			= dbo.fnRoundBanker(((BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblTotalAR) / (BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblCurrent)), 2) * 100
-	 , dblART			= dbo.fnRoundBanker(CREDITSALES.dblCreditSales / ((LASTYEARRECEIVABLES.dblTotalAR + ENDINGRECEIVABLES.dblTotalAR) / 2), 2)
+SELECT dblDSO			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (NULLIF(ANNUALSALES.dblAnnualSales, 0) / 365)), 2)
+     , dblBPDSO			= dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / NULLIF(CREDITSALES.dblCreditSales, 0)), 2)
+	 , dblADD			= dbo.fnRoundBanker((ENDINGRECEIVABLES.dblTotalAR / (NULLIF(ANNUALSALES.dblAnnualSales, 0) / 365)), 2) - dbo.fnRoundBanker(((ENDINGRECEIVABLES.dblCurrent * 365) / (NULLIF(CREDITSALES.dblCreditSales, 0) / 365)), 2)
+	 , dblCEI			= dbo.fnRoundBanker(((BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblTotalAR) / NULLIF((BEGINNINGRECEIVABLES.dblTotalAR + MONTHLYCREDITSALES.dblCreditSales - ENDINGRECEIVABLES.dblCurrent), 0)), 2) * 100
+	 , dblART			= dbo.fnRoundBanker(CREDITSALES.dblCreditSales / (NULLIF((LASTYEARRECEIVABLES.dblTotalAR + ENDINGRECEIVABLES.dblTotalAR), 0) / 2), 2)
 	 , strCompanyName	= COMPANY.strCompanyName COLLATE Latin1_General_CI_AS
-	, strCompanyAddress	= COMPANY.strCompanyAddress COLLATE Latin1_General_CI_AS
+	 , strCompanyAddress	= COMPANY.strCompanyAddress COLLATE Latin1_General_CI_AS
 	 , dtmAsOfDate		= @dtmAsOfDate
 FROM (
 	SELECT dblCreditSales = ISNULL(SUM(I.dblInvoiceTotal * CASE WHEN I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit', 'Customer Prepayment') THEN -1 ELSE 1 END), 0)
