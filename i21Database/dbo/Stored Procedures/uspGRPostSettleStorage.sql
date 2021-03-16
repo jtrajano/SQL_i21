@@ -2172,7 +2172,7 @@ BEGIN TRY
 																						AND IT.intItemId = a.intItemId
 																						AND IT.intTransactionDetailId = CC.intSettleContractId
 																			)
-																	WHEN CS.intStorageTypeId = 2 
+																	WHEN ST.ysnDPOwnedType = 1
 																		THEN (
 																				SELECT IT.dblCost 
 																				FROM tblICInventoryTransaction IT
