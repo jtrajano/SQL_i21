@@ -34,7 +34,9 @@ DECLARE @tblInventoryTransaction TABLE(
 	dblQty					NUMERIC(38, 20),
 	dblUnitStorage			NUMERIC(38, 20),
 	dblCost					NUMERIC(38, 20),
-	intOwnershipType		INT
+	intOwnershipType		INT,
+	strContainerNo          NVARCHAR(50), 
+	strMarkings				NVARCHAR(MAX)
 );
 
 INSERT INTO @tblInventoryTransaction (
@@ -50,6 +52,8 @@ INSERT INTO @tblInventoryTransaction (
 	,dblUnitStorage
 	,dblCost
 	,intOwnershipType
+	,strContainerNo
+	,strMarkings
 )
 -- Get the Lot that is Company-Owned 
 SELECT	
@@ -72,6 +76,8 @@ SELECT
 	,dblUnitStorage		= CAST(0 AS NUMERIC(38, 20))
 	,dblLastCost = dbo.fnCalculateCostBetweenUOM(iu.intItemUOMId, Lot.intItemUOMId, Lot.dblLastCost)
 	,intOwnershipType	= 1
+	,Lot.strContainerNo
+	,Lot.strMarkings
 FROM	
 	tblICInventoryTransaction t
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
@@ -106,6 +112,8 @@ SELECT	t.intItemId
 							END
 		,dblCost
 		,intOwnershipType	= 2
+		,Lot.strContainerNo
+		,Lot.strMarkings
 FROM	
 	tblICInventoryTransactionStorage t 
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
@@ -158,7 +166,9 @@ SELECT
 	,dblStorageAvailableQty			= SUM(t.dblUnitStorage) 
 	,dblCost						= MAX(t.dblCost)
 	,Lot.strWarehouseRefNo
-	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition) 
+	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition)
+	,Lot.strContainerNo
+	,Lot.strMarkings
 FROM 
 	@tblInventoryTransaction t 
 	INNER JOIN tblICItem i 
@@ -211,6 +221,8 @@ GROUP BY i.intItemId
 		,Lot.dblWeight
 		,Lot.dblWeightPerQty
 		,Lot.intWeightUOMId
+		,Lot.strContainerNo
+		,Lot.strMarkings
 		,wUOM.strUnitMeasure
 		,LotWeightUOM.dblUnitQty
 		,Lot.intLotStatusId
@@ -224,4 +236,4 @@ GROUP BY i.intItemId
 		,Lot.strWarehouseRefNo
 		,Lot.strCondition
 HAVING	(@ysnHasStockOnly = 1 AND (SUM(t.dblQty) <> 0 OR SUM(t.dblUnitStorage) <> 0))
-		OR @ysnHasStockOnly = 0 
+		OR @ysnHasStockOnly = 0
