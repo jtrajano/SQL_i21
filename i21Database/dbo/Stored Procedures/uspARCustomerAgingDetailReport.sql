@@ -463,6 +463,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 		WHERE intEntityUserId = @intEntityUserId 
 		  AND strAgingType = 'Detail'
 		  AND intEntityCustomerId NOT IN (SELECT intEntityCustomerId FROM #CUSTOMERWITHBALANCES)
+		  AND strTransactionType NOT IN  ('Credit Memo','Customer Prepayment')  
 	END
 
 DELETE AGING
