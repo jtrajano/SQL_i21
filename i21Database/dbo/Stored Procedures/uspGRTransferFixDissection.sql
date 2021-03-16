@@ -171,7 +171,7 @@ begin
 			AND strTransferStorageTicket IS NOT NULL
 			AND rctClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
 			--AND rctClr.strTransferStorageTicket = 'TRA-520'			
-			AND rctClr.TEST <> '2.3'
+			AND rctClr.strMark <> '2.3'
 			GROUP BY rctClr.strTransferStorageTicket 
 		) B  
 	
@@ -242,7 +242,7 @@ begin
 					pfxRct.intStartingNumberId = 23
 				AND strTransferStorageTicket IS NOT NULL
 				AND rctClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
-				AND rctClr.TEST <> '2.3'
+				AND rctClr.strMark <> '2.3'
 				--AND rctClr.strTransferStorageTicket = 'TRA-520'
 				--GROUP BY rctClr.strTransferStorageTicket
 			) B  
@@ -288,7 +288,7 @@ begin
 			AND traClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'
 			--AND traClr.strTransferStorageTicket = 'TRA-520'
 			and ( traClr.strTransferStorageTicket = @TransferTransaction)				
-			AND traClr.TEST <> '2.3'
+			AND traClr.strMark <> '2.3'
 			GROUP BY traClr.strTransferStorageTicket
 			UNION ALL
 			--TRA
@@ -318,7 +318,7 @@ begin
 			WHERE 
 				pfxTRA.intStartingNumberId = 72
 			AND traClr.strTransactionNumber LIKE pfxTRA.strPrefix + '%'					
-			AND traClr.TEST <> '2.3'
+			AND traClr.strMark <> '2.3'
 			AND glTRA.dblTotal <> 0
 			and ( traClr.strTransactionNumber = @TransferTransaction)
 		) A
@@ -358,7 +358,7 @@ begin
 			AND pfxRct.intStartingNumberId = 23
 			AND traClr.strTransferStorageTicket LIKE pfxTRA.strPrefix + '%'
 			AND traClr.strTransactionNumber LIKE pfxRct.strPrefix + '%'			
-			AND traClr.TEST <> '2.3'
+			AND traClr.strMark <> '2.3'
 			--AND traClr.strTransferStorageTicket = 'TRA-520'
 			and ( traClr.strTransferStorageTicket = @TransferTransaction)
 			--GROUP BY traClr.strTransferStorageTicket
@@ -394,7 +394,7 @@ begin
 			AND traClr.strTransactionNumber LIKE pfxTRA.strPrefix + '%'
 			AND glTRA.dblTotal <> 0
 			and ( traClr.strTransactionNumber = @TransferTransaction)			
-			AND traClr.TEST <> '2.3'
+			AND traClr.strMark <> '2.3'
 
 			
 			--select * from vyuGRTransferClearing where strTransferStorageTicket = @TransferTransaction
@@ -423,7 +423,7 @@ begin
 						OUTER APPLY tblSMStartingNumber pfxRct
 						WHERE
 							pfxRct.intStartingNumberId = 23			
-							AND tmptraClr.TEST <> '2.3'
+							AND tmptraClr.strMark <> '2.3'
 					) traClr
 					OUTER APPLY (
 						select 			
@@ -576,7 +576,7 @@ begin
 				OUTER APPLY tblSMStartingNumber pfxRct
 				WHERE
 					pfxRct.intStartingNumberId = 23	
-					AND tmptraClr.TEST <> '2.3'
+					AND tmptraClr.strMark <> '2.3'
 			) traClr
 			OUTER APPLY (
 				select 			
