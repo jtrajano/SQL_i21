@@ -117,13 +117,15 @@ SELECT
 FROM
 	#ARInvoiceGLEntries
 
+DECLARE @SkipICValidation BIT = 0
+ 
+IF EXISTS(SELECT TOP 1 1 FROM @GLPost WHERE [strJournalLineDescription] = 'CarQuest Import') OR @Post = 0
+    SET @SkipICValidation = 1
 
-EXEC dbo.uspGLBookEntries
-         @GLEntries         = @GLPost
-        ,@ysnPost           = @Post
-        ,@SkipGLValidation	= 1
-        ,@SkipICValidation	= 1
-		
+EXEC dbo.uspGLBookEntries @GLEntries            = @GLPost
+                        , @ysnPost              = @Post
+                        , @SkipGLValidation     = 1
+                        , @SkipICValidation     = @SkipICValidation		
 
 IF @Post = 0
     BEGIN
