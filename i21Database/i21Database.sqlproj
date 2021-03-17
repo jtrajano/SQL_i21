@@ -9086,7 +9086,6 @@
     <Build Include="dbo\Stored Procedures\uspAGProcessWOToItemShipment.sql" />
     <Build Include="dbo\Tables\tblEMEntityFarmDetail.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderPreStage.sql" />
-    <Build Include="dbo\Tables\tblARInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblARInventoryReceiptStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspARInterCompanyIntegrationDestination.sql" />
     <Build Include="dbo\Stored Procedures\uspARInterCompanyIntegrationSource.sql" />
