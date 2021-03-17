@@ -9190,6 +9190,8 @@
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPItem.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractMotherParkers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetailMotherParkers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
