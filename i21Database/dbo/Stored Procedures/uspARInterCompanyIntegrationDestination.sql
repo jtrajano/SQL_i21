@@ -48,7 +48,7 @@ AS
 		,[dblCost]				= ARIRS.dblCost
 		,[intSourceId]			= ARIRS.intInvoiceId
 		,[intSourceType]		= 0
-		,[intTaxGroupId]		= ARIRS.intTaxGroupId
+		,[intTaxGroupId]		= SMTG.intTaxGroupId
 	FROM
 		tblARInventoryReceiptStaging ARIRS
 	INNER JOIN tblICItem ICI
@@ -60,14 +60,15 @@ AS
 	INNER JOIN tblICItemLocation ICIL
 		ON ICI.intItemId = ICIL.intItemId
 		AND SMCL.intCompanyLocationId = ICIL.intLocationId
+	LEFT JOIN tblSMTaxGroup SMTG
+		ON ARIRS.strTaxGroup COLLATE SQL_Latin1_General_CP1_CS_AS = SMTG.strTaxGroup
 	OUTER APPLY (
 		SELECT TOP 1 intEntityLocationId
 		FROM tblEMEntityLocation 
 		WHERE intEntityId = ARIRS.intVendorId
 		AND ysnDefaultLocation = 1
 	) EMEL
-	WHERE ISNULL([ysnProcessed], 0) = 0
-	AND ARIRS.strInvoiceNumber = @InvoiceNumber
+	WHERE ARIRS.strInvoiceNumber = @InvoiceNumber
 
 	IF(@Post = 1)
 	BEGIN
@@ -84,9 +85,6 @@ AS
 			,@strTransactionId = @strReceiptNumber
 			,@intEntityUserSecurityId = @UserId
 
-		UPDATE tblARInventoryReceiptStaging 
-		SET [ysnProcessed] = 1
-		WHERE intInventoryReceiptStagingId IN (SELECT intInventoryReceiptId FROM #tmpAddItemReceiptResult)
 
 		INSERT INTO tblARInventoryReceiptLog(
 			 strInvoiceNumber
@@ -105,15 +103,19 @@ AS
 		SELECT TOP 1 @intInventoryReceiptId = intInventoryReceiptId, @strReceiptNumber = strReceiptNumber
 		FROM tblARInventoryReceiptLog
 		WHERE strInvoiceNumber = @InvoiceNumber
+		ORDER BY intInventoryReceiptLogId DESC
 
-		IF(EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strReceiptNumber))
+		IF(EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strReceiptNumber AND ysnPosted = 1))
 		BEGIN
 			EXEC uspICPostInventoryReceipt 
 				 @ysnPost = @Post
 				,@ysnRecap = 0
 				,@strTransactionId = @strReceiptNumber
 				,@intEntityUserSecurityId = @UserId
-
+		END
+		
+		IF(EXISTS(SELECT TOP 1 1 FROM tblICInventoryReceipt WHERE strReceiptNumber = @strReceiptNumber))
+		BEGIN
 			EXEC [dbo].[uspICDeleteInventoryReceipt] @InventoryReceiptId = @intInventoryReceiptId, @intEntityUserSecurityId = @UserId
 
 			UPDATE tblARInventoryReceiptLog
@@ -121,6 +123,8 @@ AS
 			WHERE strInvoiceNumber = @InvoiceNumber
 		END
 	END
+
+	DELETE FROM tblARInventoryReceiptStaging WHERE strInvoiceNumber = @InvoiceNumber
 
 	SELECT @ReceiptNumber = @strReceiptNumber
 
