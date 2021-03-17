@@ -23,9 +23,7 @@ FROM tblICItem AS I
 JOIN tblICCategory Cat 
 	ON Cat.intCategoryId = I.intCategoryId
 JOIN tblICItemLocation IL 
-	ON IL.intItemId = I.intItemId
-JOIN tblSTSubcategoryRegProd sr
-	ON IL.intProductCodeId = sr.intRegProdId
+	ON IL.intItemId = I.intItemId AND ISNULL(IL.intProductCodeId, 0) != 0
 LEFT JOIN tblSTSubcategoryRegProd SubCat 
 	ON SubCat.intRegProdId = IL.intProductCodeId
 JOIN tblSTStore ST 
@@ -130,3 +128,5 @@ WHERE (I.ysnFuelItem = 0)
 --	-- Between current date
 --	AND GETUTCDATE()
 --)
+
+
