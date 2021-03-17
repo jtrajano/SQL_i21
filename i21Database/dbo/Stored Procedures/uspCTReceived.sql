@@ -112,34 +112,39 @@ BEGIN TRY
 					,intInventoryReceiptId
 					,intToItemUOMId
 				)
-				SELECT DISTINCT 
-					  MIN(ri.intInventoryReceiptItemId) intInventoryReceiptItemId
+				SELECT DISTINCT ri.intInventoryReceiptItemId
 					, cd.intContractDetailId
 					, ri.intUnitMeasureId
-					, dbo.fnMinNumeric(ch.intNoOfLoad, SUM(ri.intLoadReceive)) intLoad
-					, MIN(ri.intContainerId) intContainerId
+					, intLoad = dbo.fnMinNumeric(ch.intNoOfLoad, ri.intLoadReceive) * CASE WHEN r.intLoadReceive >= 0 THEN 1 ELSE - 1 END
+					, ri.intContainerId
 					, ch.ysnLoad
 					, cd.intPricingTypeId
 					, ri.intSourceId
 					, r.intInventoryReceiptId
 					, cd.intItemUOMId
 				FROM @ItemsFromInventoryReceipt r
-				INNER JOIN tblICInventoryReceiptItem ri ON ri.intInventoryReceiptItemId = r.intInventoryReceiptDetailId
+				CROSS APPLY (
+					SELECT intLoadReceive = SUM(recItem.intLoadReceive)
+						, intInventoryReceiptItemId = MIN(recItem.intInventoryReceiptItemId)
+						, intContainerId = MIN(recItem.intContainerId)
+						, recItem.intSourceId
+						, recItem.intContractHeaderId
+						, recItem.intContractDetailId
+						, recItem.intLoadShipmentId
+						, recItem.intUnitMeasureId
+					FROM tblICInventoryReceiptItem recItem
+					WHERE recItem.intInventoryReceiptItemId = r.intInventoryReceiptDetailId
+					GROUP BY recItem.intSourceId
+						, recItem.intContractHeaderId
+						, recItem.intContractDetailId
+						, recItem.intLoadShipmentId
+						, recItem.intUnitMeasureId
+				) ri
 				INNER JOIN tblCTContractHeader ch ON ch.intContractHeaderId = ri.intContractHeaderId
 				INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 					AND cd.intContractDetailId = ri.intContractDetailId
 				INNER JOIN tblLGLoad l ON l.intLoadId = ri.intLoadShipmentId
 				WHERE ch.ysnLoad = 1
-				GROUP BY
-					  cd.intContractDetailId
-					, ri.intUnitMeasureId
-					, ch.ysnLoad
-					, cd.intPricingTypeId
-					, ri.intSourceId
-					, ch.intNoOfLoad 
-					, ch.dblQuantityPerLoad
-					, r.intInventoryReceiptId
-					, cd.intItemUOMId
 			END
 
 			INSERT	INTO @tblToProcess (
