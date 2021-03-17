@@ -9200,6 +9200,8 @@
     <Build Include="dbo\Stored Procedures\uspIPStageXML_ERP.sql" />
     <Build Include="dbo\Tables\tblIPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateInitialAck_ERP.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractMotherParkers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetailMotherParkers.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
