@@ -57,7 +57,7 @@ INSERT INTO #ARItemsForCosting
 SELECT 
 	 [intItemId]				= ARID.[intItemId] 
 	,[intItemLocationId]		= ARID.[intItemLocationId]
-	,[intItemUOMId]				= ARID.[intItemUOMId]
+	,[intItemUOMId]				= ISNULL(dbo.fnGetMatchingItemUOMId(ARID.[intItemId], ICIUOM.intUnitMeasureId), ARID.[intItemUOMId])
 	,[dtmDate]					= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
 	,[dblQty]					= (CASE WHEN ISNULL(ARID.[intInventoryShipmentItemId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblQtyShipped] > ARIDP.[dblQtyShipped] THEN ARID.[dblQtyShipped] - ARIDP.[dblQtyShipped]
 										WHEN ISNULL(ARID.[intLoadDetailId], 0) > 0 AND ARID.[strType] = 'Standard' AND ARID.[strTransactionType] = 'Invoice' AND ARID.[dblShipmentNetWt] > ARIDP.[dblShipmentNetWt] THEN ARID.[dblShipmentNetWt] - ARIDP.[dblShipmentNetWt]
@@ -128,6 +128,10 @@ LEFT OUTER JOIN
 LEFT OUTER JOIN 
 	(SELECT [intTicketId], [intTicketTypeId], [intTicketType], [strInOutFlag] FROM tblSCTicket WITH (NOLOCK)) T 
 		ON ARID.intTicketId = T.intTicketId
+LEFT OUTER JOIN 
+	(SELECT intUnitMeasureId,intItemUOMId FROM tblICItemUOM WITH (NOLOCK)) ICIUOM
+		ON ARID.intItemUOMId = ICIUOM.intItemUOMId
+
 WHERE
     ARID.[strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash', 'Cash Refund')
     AND ARID.[intPeriodsToAccrue] <= 1
