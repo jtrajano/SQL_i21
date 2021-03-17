@@ -149,6 +149,9 @@ begin try
 		,dtmFixationDate datetime
 		,dblPriceQuantity numeric(18,6)
 		,intAvailablePriceLoad int
+		,intPricingTypeId int
+		,intFreightTermId int
+		,intCompanyLocationId int
 	);
 
 	declare 
@@ -168,6 +171,9 @@ begin try
 		,@ysnSuccessBillPosting bit
   		,@receiptDetails InventoryUpdateBillQty
   		,@intId int
+		,@intPricingTypeId int
+		,@intFreightTermId int
+		,@intCompanyLocationId int
 		;
 
 	declare @CreatedVoucher as table(
@@ -237,7 +243,10 @@ begin try
 			,dblAvailablePriceQuantity = dblAvailableQuantity  
 			,dtmFixationDate = dtmFixationDate  
 			,dblPriceQuantity = dblQuantity  
-			,intAvailablePriceLoad = intAvailableLoad  
+			,intAvailablePriceLoad = intAvailableLoad
+			,intPricingTypeId = intPricingTypeId
+			,intFreightTermId = intFreightTermId
+			,intCompanyLocationId = intCompanyLocationId 
 		from  
 			vyuCTGetAvailablePriceForVoucher  
 		where  
@@ -257,7 +266,10 @@ begin try
 				,@dtmFixationDate = dtmFixationDate  
 				,@dblPriceQuantity = dblPriceQuantity  
 				,@intAvailablePriceLoad = intAvailablePriceLoad
-				,@intPriceFixationDetailId = intPriceFixationDetailId  
+				,@intPriceFixationDetailId = intPriceFixationDetailId 
+				,@intPricingTypeId = intPricingTypeId
+				,@intFreightTermId = intFreightTermId
+				,@intCompanyLocationId = intCompanyLocationId 
 			from  
 				@availablePrice  
 			where
@@ -448,7 +460,7 @@ begin try
 				,intWeightUOMId = vp.intWeightUOMId
 				,intCurrencyExchangeRateTypeId = vp.intCurrencyExchangeRateTypeId
 				,dblExchangeRate = vp.dblExchangeRate
-				,intPurchaseTaxGroupId = vp.intPurchaseTaxGroupId
+				,intPurchaseTaxGroupId = (case when isnull(vp.intPurchaseTaxGroupId,0) = 0 then dbo.fnGetTaxGroupIdForVendor(vp.intEntityVendorId,@intCompanyLocationId,vp.intItemId,em.intEntityLocationId,@intFreightTermId) else vp.intPurchaseTaxGroupId end)
 				,dblTax = vp.dblTax
 				,dblDiscount = vp.dblDiscount
 				,dblDetailDiscountPercent = vp.dblDetailDiscountPercent
@@ -477,6 +489,7 @@ begin try
 				--,intPriceFixationDetailId = @intPriceFixationDetailId
 			from
 				@voucherPayables vp
+				left join tblEMEntityLocation em ON em.intEntityId = vp.intEntityVendorId and isnull(em.ysnDefaultLocation,0) = 1
 				OUTER APPLY (
 					SELECT TOP 1 
 						ap.intVoucherPayableId
