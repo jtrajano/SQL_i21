@@ -9,7 +9,6 @@ AS
 -- 4. Register (based on Store)
 -- 5. Pricing
 -- 6. Special Pricing
--- 7. Product Code - As required in C-Store defined in ST-1737
 
 SELECT DISTINCT 
     x.dtmDateModified
@@ -24,8 +23,6 @@ JOIN tblICCategory Cat
 	ON Cat.intCategoryId = I.intCategoryId
 JOIN tblICItemLocation IL 
 	ON IL.intItemId = I.intItemId
-JOIN tblSTSubcategoryRegProd sr
-	ON IL.intProductCodeId = sr.intRegProdId
 LEFT JOIN tblSTSubcategoryRegProd SubCat 
 	ON SubCat.intRegProdId = IL.intProductCodeId
 JOIN tblSTStore ST 
