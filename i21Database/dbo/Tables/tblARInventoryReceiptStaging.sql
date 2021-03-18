@@ -10,4 +10,5 @@
 	[dblQty] [numeric](38, 20),
 	[dblCost] [numeric](38, 20),
 	[strTaxGroup] [nvarchar](50),
+	[strFreightTerm] [nvarchar](100),
     CONSTRAINT [PK_tblARInventoryReceiptStaging] PRIMARY KEY ([intInventoryReceiptStagingId]))

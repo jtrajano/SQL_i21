@@ -48,7 +48,7 @@ AS
 		,[dblCost]				= ARIRS.dblCost
 		,[intSourceId]			= ARIRS.intInvoiceId
 		,[intSourceType]		= 0
-		,[intTaxGroupId]		= SMTG.intTaxGroupId
+		,[intTaxGroupId]		= ISNULL([dbo].[fnGetTaxGroupIdForVendor](ARIRS.intVendorId, SMCL.intCompanyLocationId, ICI.intItemId, EMEL.intEntityLocationId, SMFT.intFreightTermId), SMTG.intTaxGroupId)
 	FROM
 		tblARInventoryReceiptStaging ARIRS
 	INNER JOIN tblICItem ICI
@@ -60,6 +60,8 @@ AS
 	INNER JOIN tblICItemLocation ICIL
 		ON ICI.intItemId = ICIL.intItemId
 		AND SMCL.intCompanyLocationId = ICIL.intLocationId
+	INNER JOIN tblSMFreightTerms SMFT
+		ON ARIRS.strFreightTerm COLLATE SQL_Latin1_General_CP1_CS_AS = SMFT.strFreightTerm
 	LEFT JOIN tblSMTaxGroup SMTG
 		ON ARIRS.strTaxGroup COLLATE SQL_Latin1_General_CP1_CS_AS = SMTG.strTaxGroup
 	OUTER APPLY (

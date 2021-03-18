@@ -512,6 +512,69 @@ BEGIN
 												
 			DELETE FROM #ARInterCompanyTaxGroup WHERE [strTaxGroup] = @strInterCompanyTaxGroup
 		END
+
+		--Check if all freight term exists
+		DECLARE @ysnAllFreightTermsExistQuery nvarchar(500)
+		DECLARE @ysnAllFreightTermsExistParam NVARCHAR(500)
+		DECLARE @ysnAllFreightTermsExist BIT = 0
+		DECLARE @intInterCompanyAllFreightTermsId INT
+		DECLARE @strInterCompanyAllFreightTermsId NVARCHAR(50)
+
+		IF(OBJECT_ID('tempdb..#ARInterCompanyFreightTerm') IS NOT NULL)
+		BEGIN
+			DROP TABLE #ARInterCompanyFreightTerm
+		END
+
+		CREATE TABLE #ARInterCompanyFreightTerm (
+			[strFreightTerm]	NVARCHAR(100)
+		)
+
+		INSERT INTO #ARInterCompanyFreightTerm
+		SELECT DISTINCT SMFT.strFreightTerm
+		FROM #ARPostInvoiceDetail PID
+		INNER JOIN tblSMFreightTerms SMFT
+		ON PID.intFreightTermId = SMFT.intFreightTermId
+
+		WHILE EXISTS(SELECT TOP 1 NULL FROM #ARInterCompanyFreightTerm)
+		BEGIN
+			DECLARE @strInterCompanyFreightTerm NVARCHAR(50)
+															
+			SELECT TOP 1 @strInterCompanyFreightTerm = [strFreightTerm] 
+			FROM #ARInterCompanyFreightTerm 
+
+			SELECT @ysnAllFreightTermsExistQuery = N'SELECT @ysnAllFreightTermsExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblSMFreightTerms WHERE strFreightTerm = ''' + CAST(@strInterCompanyFreightTerm AS NVARCHAR(50)) + ''''
+
+			SET @ysnAllFreightTermsExistParam = N'@ysnAllFreightTermsExist int OUTPUT'
+
+			EXEC sp_executesql @ysnAllFreightTermsExistQuery, @ysnAllFreightTermsExistParam, @ysnAllFreightTermsExist = @ysnAllFreightTermsExist OUTPUT
+
+			IF(@ysnAllFreightTermsExist = 0)
+			BEGIN
+				INSERT INTO #ARInvalidInvoiceData
+					([intInvoiceId]
+					,[strInvoiceNumber]
+					,[strTransactionType]
+					,[intInvoiceDetailId]
+					,[intItemId]
+					,[strBatchId]
+					,[strPostingError])
+				--Freight term not existing in inter-company database
+				SELECT
+					 [intInvoiceId]			= I.[intInvoiceId]
+					,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+					,[strTransactionType]	= I.[strTransactionType]
+					,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+					,[intItemId]			= I.[intItemId]
+					,[strBatchId]			= I.[strBatchId]
+					,[strPostingError]		= 'Freight term - ' + @strInterCompanyFreightTerm + ' is not existing in Company ' + ISNULL(@strCompanyName, '') + '!'
+				FROM 
+					#ARPostInvoiceHeader I
+			END
+
+			SET @ysnAllFreightTermsExist = 0
+												
+			DELETE FROM #ARInterCompanyFreightTerm WHERE [strFreightTerm] = @strInterCompanyFreightTerm
+		END
 	END
 			
 	INSERT INTO #ARInvalidInvoiceData
