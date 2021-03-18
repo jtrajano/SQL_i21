@@ -40,10 +40,10 @@ BEGIN
 			ON E.intEntityId = P.intEntityEmployeeId
 		LEFT JOIN(
 					SELECT intEntityEmployeeId
-					,intTypeTimeOffId
-					,intYear
-					,dblHoursUsedYTD = dblHoursUsed 
-					FROM vyuPREmployeeTimeOffUsedYTD
+				,intTypeTimeOffId
+				,intYear
+				,dblHoursUsedYTD = dblHoursUsed 
+				FROM vyuPREmployeeTimeOffUsedYTD			
 				) TOYTD ON T.intEntityEmployeeId = TOYTD.intEntityEmployeeId AND T.intTypeTimeOffId = TOYTD.intTypeTimeOffId
 	WHERE E.intEntityId = ISNULL(@intEntityEmployeeId, E.intEntityId)
 		 AND T.intTypeTimeOffId = @intTypeTimeOffId
@@ -172,20 +172,23 @@ BEGIN
 
 		--Update Earned Hours
 		UPDATE tblPREmployeeTimeOff
-			SET dblHoursEarned = CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) AND ysnPaycheckPosted = 1 
-								THEN 
-										CASE WHEN (dblMaxBalance IS NOT NULL AND dblBalance + T.dblEarnedHours > dblMaxBalance) THEN
-												dblHoursEarned + ISNULL(NULLIF(ABS(T.dblEarnedHours - (dblBalance - dblMaxBalance)), -(T.dblEarnedHours - (dblBalance - dblMaxBalance)) ),0)
+			SET dblHoursEarned = CASE WHEN (T.strAwardPeriod IN( 'Anniversary Date', 'End of Year')) THEN 
+										CASE WHEN (T.ysnForReset = 1) THEN
+											CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
+												dblMaxEarned
 											ELSE
-											dblMaxEarned
+												(dblHoursEarned + T.dblEarnedHours)
+											END
+										Else
+											dblHoursEarned
 										END
-							    ELSE 
-										CASE WHEN (dblMaxBalance IS NOT NULL AND dblBalance + T.dblEarnedHours > dblMaxBalance) THEN
-												dblHoursEarned + ISNULL(NULLIF(ABS(T.dblEarnedHours - (dblBalance - dblMaxBalance)), -(T.dblEarnedHours - (dblBalance - dblMaxBalance)) ),0)
+								 ELSE 
+								 		CASE WHEN ((dblHoursEarned + T.dblEarnedHours) > dblMaxEarned) THEN
+												dblMaxEarned
 											ELSE
-											T.dblEarnedTotalHours + T.dblEarnedHours
+												(dblHoursEarned + T.dblEarnedHours)
 										END
-								END
+								 END
 								
 				,dblHoursAccrued = CASE WHEN (T.strPeriod = 'Hour' AND T.strAwardPeriod <> 'Paycheck') THEN dblHoursAccrued - T.dblEarnedHours ELSE 0 END 
 				,dtmLastAward = CASE WHEN (T.strAwardPeriod = 'Paycheck' AND ysnPaycheckPosted = 0) THEN
