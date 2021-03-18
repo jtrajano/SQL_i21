@@ -177,7 +177,7 @@ FROM (
 			, strLifeTimeType			= item.strLifeTimeType
 			, ysnLoad					= CAST(0 AS BIT) 
 			, dblAvailableQty			= CAST(0 AS NUMERIC(38, 20))
-			, strBOL					= CAST(NULL AS NVARCHAR(50)) COLLATE Latin1_General_CI_AS
+			, strBOL					= h.strBolNumber
 			, dblFranchise				= CAST(0 AS NUMERIC(18, 6))
 			, dblContainerWeightPerQty	= CAST(0 AS NUMERIC(18, 6))
 			, ysnSubCurrency			= CAST(0 AS BIT) 
