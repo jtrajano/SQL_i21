@@ -343,6 +343,7 @@ BEGIN
 			AND ItemLocation.intItemId = Detail.intItemId
 		LEFT JOIN dbo.tblICItemPricing ItemPricing 
 			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+			AND ItemPricing.intItemId = Detail.intItemId 
 		LEFT JOIN dbo.tblICItemUOM ItemUOM 
 			ON Detail.intItemUOMId = ItemUOM.intItemUOMId
 		LEFT JOIN dbo.tblICItem Item 
