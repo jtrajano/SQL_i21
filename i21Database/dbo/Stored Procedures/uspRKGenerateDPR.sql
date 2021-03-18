@@ -255,6 +255,7 @@ BEGIN TRY
 		, intCommodityId
 		, intContractHeaderId
 		, strContractNumber
+		, intContractSeq
 		, strLocationName
 		, strContractEndMonth
 		, dtmEndDate
@@ -292,6 +293,7 @@ BEGIN TRY
 			, intCommodityId
 			, intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, strLocationName
 			, strContractEndMonth = (RIGHT(CONVERT(VARCHAR(11), dtmEndDate, 106), 8)) COLLATE Latin1_General_CI_AS
 			, dtmEndDate
@@ -1961,7 +1963,8 @@ BEGIN TRY
 		, strContractEndMonth
 		, strDeliveryDate
 		, strContractNumber
-		, intContractHeaderId)
+		, intContractHeaderId
+		, strTransactionType)
 	SELECT intSeqId = 15
 		, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 		, strCommodityCode
@@ -1992,6 +1995,7 @@ BEGIN TRY
 		, strDeliveryDate
 		, strContractNumber
 		, intContractHeaderId
+		, strTransactionType
 	FROM @ListInventory f
 	WHERE strSeqHeader = 'In-House' AND strType = 'Receipt' AND intCommodityId = @intCommodityId --AND ISNULL(Strg.ysnDPOwnedType, 0) = 0
 		AND strReceiptNumber NOT IN (SELECT strTransactionNumber FROM #tempTransfer)
@@ -2011,7 +2015,8 @@ BEGIN TRY
 		, intFutureMarketId
 		, intFutureMonthId
 		, strFutureMarket
-		, strFutureMonth)
+		, strFutureMonth
+		, strTransactionType)
 	SELECT * FROM (
 		SELECT DISTINCT intSeqId
 			, strSeqHeader
@@ -2029,6 +2034,7 @@ BEGIN TRY
 			, intFutureMonthId
 			, strFutureMarket
 			, strFutureMonth
+			, strTransactionType
 		FROM (
 			SELECT intSeqId = 15
 				, strSeqHeader = 'Company Titled Stock' COLLATE Latin1_General_CI_AS
@@ -2050,6 +2056,7 @@ BEGIN TRY
 				, strDeliveryDate
 				, strContractNumber
 				, intContractHeaderId
+				, strTransactionType
 			FROM @ListInventory
 			WHERE intSeqId IN (9,8) AND strType IN ('Warehouse Receipts - Purchase','Warehouse Receipts - Sales') AND intCommodityId = @intCommodityId
 		) t GROUP BY intSeqId
@@ -2071,6 +2078,7 @@ BEGIN TRY
 			, strDeliveryDate
 			, strContractNumber
 			, intContractHeaderId
+			, strTransactionType
 	) t WHERE dblTotal <> 0	
 		
 	IF (@ysnIncludeOffsiteInventoryInCompanyTitled = 1)
@@ -2295,7 +2303,8 @@ BEGIN TRY
 			, strTicketNumber
 			, strContractEndMonth
 			, strFutureMonth
-			, strDeliveryDate)
+			, strDeliveryDate
+			, strTransactionType)
 		SELECT intSeqId = 15
 			, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 			, @strCommodityCode
@@ -2320,6 +2329,7 @@ BEGIN TRY
 			, strContractEndMonth
 			, strFutureMonth
 			, strDeliveryDate
+			, strTransactionType
 		FROM @ListInventory WHERE strSeqHeader = 'Sales In-Transit' AND strType = 'Sales In-Transit'
 
 		INSERT INTO @ListInventory(intSeqId
@@ -2336,7 +2346,8 @@ BEGIN TRY
 			, strContractNumber
 			, intCommodityId
 			, intFromCommodityUnitMeasureId
-			, strContractEndMonth)
+			, strContractEndMonth
+			, strTransactionType)
 		SELECT intSeqId = 15
 			, 'Company Titled Stock' COLLATE Latin1_General_CI_AS
 			, @strCommodityCode
@@ -2352,6 +2363,7 @@ BEGIN TRY
 			, @intCommodityId
 			, @intCommodityUnitMeasureId
 			, strContractEndMonth
+			, strTransactionType
 		FROM @ListInventory WHERE strSeqHeader = 'Purchase In-Transit' AND strType = 'Purchase In-Transit'
 	END
 		
@@ -3956,7 +3968,7 @@ BEGIN TRY
 			, strBrokerTradeNo
 			, strNotes
 			, ysnPreCrush
-		FROM @ListContractHedge WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'OffSite' , 'Purchase In-Transit','Sales In-Transit', 'Sales Basis Deliveries' ) AND @ysnExchangeTraded = 1
+		FROM @ListContractHedge WHERE strType = 'Price Risk' AND strContractType IN ('Inventory', 'Collateral', 'OffSite' , 'Purchase In-Transit','Sales In-Transit') AND @ysnExchangeTraded = 1
 		GROUP BY strCommodityCode
 			, strContractType
 			, intContractHeaderId
@@ -4550,7 +4562,7 @@ BEGIN TRY
 			--, c.intCommodityId
 		FROM @FinalContractHedge f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-		WHERE dblTotal <> 0
+		--WHERE dblTotal <> 0
 		GROUP BY c.strCommodityCode
 			, strUnitMeasure
 			, strType
@@ -4573,7 +4585,7 @@ BEGIN TRY
 			, strLocationName
 		FROM @FinalContractHedge f
 		JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-		WHERE dblTotal <> 0
+		--WHERE dblTotal <> 0
 		GROUP BY c.strCommodityCode
 			, strUnitMeasure
 			, strType
@@ -4707,7 +4719,7 @@ BEGIN TRY
 				, strDeliveryDate
 			FROM @FinalContractHedge f
 			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-			WHERE dblTotal <> 0
+			--WHERE dblTotal <> 0
 			ORDER BY intSeqNo
 				, strType ASC
 				, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
@@ -4837,7 +4849,7 @@ BEGIN TRY
 				, strDeliveryDate
 			FROM @FinalContractHedge f
 			JOIN tblICCommodity c ON c.intCommodityId = f.intCommodityId
-			WHERE dblTotal <> 0 AND strSubType NOT LIKE '%' + @strPurchaseSales + '%'
+			WHERE strSubType NOT LIKE '%' + @strPurchaseSales + '%'
 			ORDER BY intSeqNo
 				, strType ASC
 				, CASE WHEN ISNULL(intContractHeaderId, 0) = 0 THEN intFutOptTransactionHeaderId ELSE intContractHeaderId END DESC
@@ -4853,6 +4865,7 @@ BEGIN TRY
 		DECLARE @ListHedgeByMonth AS TABLE (intRowNumber INT IDENTITY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intContractSeq INT
 			, intFutOptTransactionHeaderId INT
 			, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intCommodityId INT
@@ -4889,6 +4902,7 @@ BEGIN TRY
 		DECLARE @FinalHedgeByMonth AS TABLE (intRowNumber INT IDENTITY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intContractSeq INT
 			, intFutOptTransactionHeaderId INT
 			, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intCommodityId INT
@@ -4928,6 +4942,7 @@ BEGIN TRY
 			, intCommodityId
 			, intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, strType
 			, strLocationName
 			, strContractEndMonth
@@ -4950,6 +4965,7 @@ BEGIN TRY
 			, intCommodityId
 			, intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, strType
 			, strLocationName
 			, strContractEndMonth
@@ -4973,6 +4989,7 @@ BEGIN TRY
 				, CD.intCommodityId
 				, intContractHeaderId
 				, strContractNumber
+				, CD.intContractSeq
 				, CD.strType
 				, strLocationName
 				, strContractEndMonthNearBy = RIGHT(CONVERT(VARCHAR(11),dtmEndDate,106),8) COLLATE Latin1_General_CI_AS
@@ -5122,6 +5139,7 @@ BEGIN TRY
 		--Net Hedge option end			
 		INSERT INTO @ListHedgeByMonth (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5152,6 +5170,7 @@ BEGIN TRY
 			, ysnPreCrush)
 		SELECT strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5190,6 +5209,7 @@ BEGIN TRY
 
 		INSERT INTO @FinalHedgeByMonth (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5219,6 +5239,7 @@ BEGIN TRY
 			, ysnPreCrush)
 		SELECT strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5251,6 +5272,7 @@ BEGIN TRY
 
 		INSERT INTO @FinalHedgeByMonth (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5280,6 +5302,7 @@ BEGIN TRY
 			, ysnPreCrush)
 		SELECT strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5315,6 +5338,7 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO @FinalHedgeByMonth (strCommodityCode
 				, strContractNumber
+				, intContractSeq
 				, intContractHeaderId
 				, strInternalTradeNo
 				, intFutOptTransactionHeaderId
@@ -5344,6 +5368,7 @@ BEGIN TRY
 				, ysnPreCrush)
 			SELECT strCommodityCode
 				, strContractNumber
+				, intContractSeq
 				, intContractHeaderId
 				, strInternalTradeNo
 				, intFutOptTransactionHeaderId
@@ -5377,6 +5402,7 @@ BEGIN TRY
 		BEGIN
 			INSERT INTO @FinalHedgeByMonth (strCommodityCode
 				, strContractNumber
+				, intContractSeq
 				, intContractHeaderId
 				, strInternalTradeNo
 				, intFutOptTransactionHeaderId
@@ -5406,6 +5432,7 @@ BEGIN TRY
 				, ysnPreCrush)
 			SELECT strCommodityCode
 				, strContractNumber
+				, intContractSeq
 				, intContractHeaderId
 				, strInternalTradeNo
 				, intFutOptTransactionHeaderId
@@ -5440,6 +5467,7 @@ BEGIN TRY
 		--This is used to insert strType so that it will be displayed properly ON Position Report Detail by Month (RM-1902)
 		INSERT INTO @FinalHedgeByMonth (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -5459,6 +5487,7 @@ BEGIN TRY
 			, ysnPreCrush)
 		SELECT DISTINCT strCommodityCode
 			, strContractNumber = NULL
+			, intContractSeq = NULL
 			, intContractHeaderId = NULL
 			, strInternalTradeNo = NULL
 			, intFutOptTransactionHeaderId = NULL
@@ -5610,7 +5639,7 @@ BEGIN TRY
 				)
 				SELECT 
 					intDPRRunLogId = @intDPRRunLogId
-					, strContractNumber
+					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
 					, intSeqNo
 					, intContractHeaderId
 					, strInternalTradeNo
@@ -5774,7 +5803,7 @@ BEGIN TRY
 				)
 				SELECT 
 					intDPRRunLogId = @intDPRRunLogId
-					, strContractNumber
+					, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
 					, intSeqNo
 					, intContractHeaderId
 					, strInternalTradeNo
@@ -5828,6 +5857,7 @@ BEGIN TRY
 		DECLARE @ListCrushDetail AS TABLE (intRowNumber INT IDENTITY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intContractSeq INT
 			, intFutOptTransactionHeaderId INT
 			, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intCommodityId INT
@@ -5870,6 +5900,7 @@ BEGIN TRY
 		DECLARE @ListCrushAll AS TABLE (intRowNumber INT IDENTITY
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intContractSeq INT
 			, intFutOptTransactionHeaderId INT
 			, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intCommodityId INT
@@ -5931,6 +5962,7 @@ BEGIN TRY
 			, intCommodityId
 			, intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, strType
 			, strLocationName
 			, strContractEndMonth
@@ -5955,6 +5987,7 @@ BEGIN TRY
 			, intCommodityId
 			, intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, strType
 			, strLocationName
 			, strContractEndMonth
@@ -5979,6 +6012,7 @@ BEGIN TRY
 				, CD.intCommodityId
 				, CD.intContractHeaderId
 				, strContractNumber
+				, CD.intContractSeq
 				, CD.strType
 				, strLocationName
 				, strContractEndMonth = CASE WHEN @strPositionBy = 'Delivery Month' THEN RIGHT(CONVERT(VARCHAR(11), CD.dtmEndDate, 106), 8)
@@ -6011,6 +6045,7 @@ BEGIN TRY
 			
 		INSERT INTO @ListCrushAll (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6045,6 +6080,7 @@ BEGIN TRY
 			, intTransactionRecordId)
 		SELECT strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6281,6 +6317,7 @@ BEGIN TRY
 		
 		INSERT INTO @ListCrushAll(intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, intCommodityId
 			, strCommodityCode
 			, strType
@@ -6307,6 +6344,7 @@ BEGIN TRY
 			, intTransactionRecordId)
 		SELECT intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, intCommodityId
 			, strCommodityCode
 			, strType = 'Sales Basis Deliveries' COLLATE Latin1_General_CI_AS
@@ -6336,6 +6374,7 @@ BEGIN TRY
 
 		INSERT INTO @ListCrushAll(intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, intCommodityId
 			, strCommodityCode
 			, strType
@@ -6363,6 +6402,7 @@ BEGIN TRY
 			, intTransactionRecordId)
 		SELECT intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, intCommodityId
 			, strCommodityCode
 			, strType = 'Purchase Basis Deliveries' COLLATE Latin1_General_CI_AS
@@ -6440,6 +6480,7 @@ BEGIN TRY
 
 		INSERT INTO @ListCrushDetail(intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, intCommodityId
 			, strCommodityCode
 			, strType
@@ -6467,6 +6508,7 @@ BEGIN TRY
 			, intTransactionRecordId)
 		SELECT intContractHeaderId
 			, strContractNumber
+			, intContractSeq
 			, intCommodityId
 			, strCommodityCode
 			, strType
@@ -6497,6 +6539,7 @@ BEGIN TRY
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6531,6 +6574,7 @@ BEGIN TRY
 			, intTransactionRecordId)
 		SELECT strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6577,6 +6621,7 @@ BEGIN TRY
 
 		INSERT INTO @ListCrushDetail (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6611,6 +6656,7 @@ BEGIN TRY
 			, intTransactionRecordId)
 		SELECT strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -6756,6 +6802,7 @@ BEGIN TRY
 			, strNotes
 			, ysnPreCrush
 			, strContractNumber
+			, intContractSeq
 			, strContractEndMonth
 			, strContractEndMonthNearBy
 			, intContractHeaderId
@@ -6786,6 +6833,7 @@ BEGIN TRY
 			, strNotes
 			, ysnPreCrush
 			, strContractNumber
+			, intContractSeq
 			, strContractEndMonth
 			, strContractEndMonthNearBy = strContractEndMonth
 			, intContractHeaderId
@@ -7129,19 +7177,20 @@ BEGIN TRY
 			, strNotes
 			, ysnPreCrush
 
-		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure)
-		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure from @ListCrushDetail where intOrderId in(19, 20, 21, 22)
+		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure)
+		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,23 intOrderId,'Net Unpriced Position' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy, strItemNo, strCategory, strEntityName, strFutureMarket, strUnitMeasure from @ListCrushDetail where intOrderId in(19, 20, 21, 22)
 
-		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
-		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(1, 2, 6, 8, 19, 20) AND @ysnExchangeTraded = 1
+		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
+		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,25 intOrderId,'Basis Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(1, 2, 8, 19, 20) AND @ysnExchangeTraded = 1
 
-		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
-		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 16) AND @ysnExchangeTraded = 1
+		INSERT INTO @ListCrushDetail (strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,intOrderId,strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy)
+		SELECT strCommodityCode,dblTotal,strContractEndMonth,strLocationName,intCommodityId,intFromCommodityUnitMeasureId,26 intOrderId,'Price Risk' COLLATE Latin1_General_CI_AS strType,strInventoryType, intContractHeaderId, strContractNumber, intContractSeq, intFutOptTransactionHeaderId, strInternalTradeNo, strFutureMonth, strDeliveryDate, strContractEndMonthNearBy from @ListCrushDetail where intOrderId in(9, 16) AND @ysnExchangeTraded = 1
 
 		DECLARE @FinalCrush AS TABLE (intRowNumber1 INT IDENTITY
 			, intRowNumber INT
 			, intContractHeaderId INT
 			, strContractNumber NVARCHAR(200) COLLATE Latin1_General_CI_AS
+			, intContractSeq INT
 			, intFutOptTransactionHeaderId INT
 			, strInternalTradeNo NVARCHAR(200) COLLATE Latin1_General_CI_AS
 			, intCommodityId INT
@@ -7214,6 +7263,7 @@ BEGIN TRY
 			, intRowNumber
 			, strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -7250,6 +7300,7 @@ BEGIN TRY
 			, intRowNumber
 			, strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -7289,6 +7340,7 @@ BEGIN TRY
 			, intRowNumber
 			, strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -7325,6 +7377,7 @@ BEGIN TRY
 			, intRowNumber
 			, strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -7394,6 +7447,7 @@ BEGIN TRY
 
 		INSERT INTO @FinalCrush (strCommodityCode
 			, strContractNumber
+			, intContractSeq
 			, intContractHeaderId
 			, strInternalTradeNo
 			, intFutOptTransactionHeaderId
@@ -7415,6 +7469,7 @@ BEGIN TRY
 			, ysnPreCrush)
 		SELECT DISTINCT strCommodityCode
 			, strContractNumber = NULL
+			, intContractSeq = NULL
 			, intContractHeaderId = NULL
 			, strInternalTradeNo = NULL
 			, intFutOptTransactionHeaderId = NULL
@@ -7553,7 +7608,7 @@ BEGIN TRY
 			)
 			SELECT 
 				intDPRRunLogId = @intDPRRunLogId
-				, strContractNumber
+				, strContractNumber + CASE WHEN strContractNumber NOT LIKE '%' + CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END THEN CASE WHEN ISNULL(intContractSeq, 0) = 0 THEN '' ELSE '-' + CAST(intContractSeq AS NVARCHAR(10)) END ELSE '' END
 				, intSeqNo
 				, intContractHeaderId
 				, strInternalTradeNo
