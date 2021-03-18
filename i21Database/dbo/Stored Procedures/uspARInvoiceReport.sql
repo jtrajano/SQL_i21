@@ -55,9 +55,11 @@ FROM dbo.tblSMCompanySetup WITH (NOLOCK)
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) OR dtmCreated IS NULL
+DELETE FROM tblARInvoiceReportStagingTable 
+WHERE	(intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein'))
+OR		dtmCreated < DATEADD(day, DATEDIFF(day, 0, GETDATE()), 0) 
+OR		dtmCreated IS NULL
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat NOT IN ('Format 1 - MCP', 'Format 5 - Honstein')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   intInvoiceId
 	 , intCompanyLocationId
@@ -202,8 +204,8 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strFreightTerm			= FREIGHT.strFreightTerm
 	 , strDeliverPickup			= FREIGHT.strFobPoint
 	 , strComments				= dbo.fnEliminateHTMLTags(INV.strComments, 0)
-	 , strInvoiceHeaderComment	= INV.strComments
-	 , strInvoiceFooterComment	= INV.strFooterComments
+	 , strInvoiceHeaderComment	= ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Header', NULL, 1), INV.strComments)
+	 , strInvoiceFooterComment	= ISNULL(dbo.fnARGetDefaultComment(NULL,NULL,INV.strTransactionType, INV.strType, 'Footer', NULL, 1), INV.strFooterComments)
 	 , dblInvoiceSubtotal		= (ISNULL(INV.dblInvoiceSubtotal, 0) + CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePriceTotal, 0) ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblShipping				= ISNULL(INV.dblShipping, 0) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType)
 	 , dblTax					= CASE WHEN ISNULL(INVOICEDETAIL.intCommentTypeId, 0) = 0 THEN (ISNULL(INVOICEDETAIL.dblTotalTax, 0) - CASE WHEN INV.strType = 'Transport Delivery' THEN ISNULL(TOTALTAX.dblIncludePrice, 0) * INVOICEDETAIL.dblQtyShipped ELSE 0 END) * dbo.fnARGetInvoiceAmountMultiplier(INV.strTransactionType) ELSE NULL END

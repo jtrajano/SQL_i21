@@ -3172,6 +3172,7 @@
     <Build Include="dbo\Stored Procedures\uspGLGetTrialBalanceDetailReport.sql" />
     <Build Include="dbo\Functions\fnFormatMsg80003.sql" />
     <Build Include="dbo\Functions\fnFAComputeDepreciation.sql" />
+    <Build Include="dbo\Functions\fnFAIsOpenAccountingDate.sql" />
     <Build Include="dbo\Functions\fnFAComputeMultipleDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAValidateAssetDepreciation.sql" />
     <Build Include="dbo\Functions\fnFAGetOldestDepreciatedAsset.sql" />
@@ -4820,6 +4821,7 @@
     <Build Include="dbo\Views\vyuAPRestApiVoucher.sql" />
     <Build Include="dbo\Views\vyuAPRestApiVoucherDetail.sql" />
     <Build Include="dbo\Views\vyuSCRestApiTicketContracts.sql" />
+    <Build Include="dbo\Views\vyuGRRestApiCustomerStorageBalances.sql" />
     <Build Include="dbo\Views\vyuCTGetRawToWipConversion.sql" />
     <Build Include="dbo\Views\vyuCTCommodityFutures.sql" />
     <Build Include="dbo\Stored Procedures\uspCTCompareRecords.sql" />
@@ -5225,6 +5227,7 @@
     <Build Include="dbo\Stored Procedures\uspFACopyDepreciationMethod.sql" />
     <Build Include="dbo\Stored Procedures\uspFAReverseMultipleAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspFADepreciateMultipleAsset.sql" />
+    <Build Include="dbo\Stored Procedures\uspFASyncBookDepreciation.sql" />
     <Build Include="dbo\Tables\tblFAFixedAsset.sql" />
     <Build Include="dbo\Stored Procedures\uspRKM2MVendorExposureDetail.sql" />
     <Build Include="dbo\Tables\tblFAFixedAssetDepreciation.sql" />
@@ -5234,6 +5237,7 @@
     <Build Include="dbo\Tables\tblFADepreciateLogDetail.sql" />
     <Build Include="dbo\Tables\tblFAImportLog.sql" />
     <Build Include="dbo\Tables\tblFAImportLogDetail.sql" />
+    <Build Include="dbo\Tables\tblFABookDepreciation.sql" />
     <Build Include="dbo\Views\vyuCFInvoiceFee.sql" />
     <Build Include="dbo\Stored Procedures\uspCFInvoiceReportFee.sql" />
     <Build Include="dbo\Tables\tblSTstgRebatesPMMorris.sql" />
@@ -9082,7 +9086,6 @@
     <Build Include="dbo\Stored Procedures\uspAGProcessWOToItemShipment.sql" />
     <Build Include="dbo\Tables\tblEMEntityFarmDetail.sql" />
     <Build Include="dbo\Tables\tblMFWorkOrderPreStage.sql" />
-    <Build Include="dbo\Tables\tblARInventoryReceipt.sql" />
     <Build Include="dbo\Tables\tblARInventoryReceiptStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspARInterCompanyIntegrationDestination.sql" />
     <Build Include="dbo\Stored Procedures\uspARInterCompanyIntegrationSource.sql" />
@@ -9180,6 +9183,19 @@
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
+    <Build Include="dbo\Tables\tblARRebuildLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspARRebuild.sql" />
+    <Build Include="dbo\Views\vyuARSearchRebuild.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPItem.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPVendor.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessFinalSAPStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageXML_ERP.sql" />
+    <Build Include="dbo\Tables\tblIPInitialAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateInitialAck_ERP.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

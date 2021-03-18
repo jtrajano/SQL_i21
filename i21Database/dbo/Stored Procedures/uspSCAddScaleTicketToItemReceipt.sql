@@ -237,7 +237,7 @@ SELECT
 		,intShipFromEntityId		= SC.intEntityId
 		,[intLoadShipmentId] 		= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadId ELSE NULL END
 		,[intLoadShipmentDetailId] 	= CASE WHEN LI.strSourceTransactionId = 'LOD' THEN SC.intLoadDetailId ELSE NULL END
-		,intTaxGroupId				= CASE WHEN LI.strSourceTransactionId = 'DP' THEN -1 ELSE NULL END
+		,intTaxGroupId				= CASE WHEN StorageType.ysnDPOwnedType = 1 THEN -1 ELSE NULL END
 FROM	@Items LI INNER JOIN dbo.tblSCTicket SC ON SC.intTicketId = LI.intTransactionId 
 LEFT JOIN (
 	SELECT CTD.intContractHeaderId
@@ -279,6 +279,8 @@ LEFT JOIN tblEMEntityLocation VNDL
 		AND VNDL.ysnDefaultLocation = 1
 LEFT JOIN tblEMEntityLocation VNDSF
 	ON VND.intShipFromId = VNDSF.intEntityLocationId
+LEFT JOIN tblGRStorageType StorageType
+	ON LI.intStorageScheduleTypeId = StorageType.intStorageScheduleTypeId 
 WHERE	SC.intTicketId = @intTicketId 
 		AND (SC.dblNetUnits != 0 or SC.dblFreightRate != 0)
 

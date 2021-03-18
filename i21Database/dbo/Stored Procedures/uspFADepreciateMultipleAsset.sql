@@ -4,6 +4,7 @@ CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]
  @ysnPost   AS BIT    = 0,  
  @ysnRecap   AS BIT    = 0,  
  @intEntityId  AS INT    = 1,  
+ @ysnReverseCurrentDate BIT = 0,
  @successfulCount AS INT    = 0 OUTPUT,  
  @strBatchId   AS NVARCHAR(100) = '' OUTPUT  
 AS  
@@ -12,7 +13,8 @@ SET QUOTED_IDENTIFIER OFF
 SET ANSI_NULLS ON  
 SET NOCOUNT ON  
 SET XACT_ABORT ON  
-  
+
+DECLARE @ErrorMsg NVARCHAR(MAX)
 DECLARE @IdGood Id
 DECLARE @ysnSingleMode BIT = 0
 DECLARE @tblError TABLE (  
@@ -50,8 +52,26 @@ BEGIN
  IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))  
  BEGIN  
       DECLARE @ReverseResult INT  
-      EXEC @ReverseResult  = [dbo].[uspFAReverseMultipleAsset] @strBatchId,@IdGLDetail, @ysnRecap,
-      NULL, @intEntityId, @intCount OUT  
+	  DECLARE @dtmReverse DATETIME = NULL
+      BEGIN TRY
+		IF @ysnReverseCurrentDate = 1
+			SET @dtmReverse =  CAST(CONVERT(NVARCHAR(10), GETDATE(), 101) AS DATETIME)
+		IF EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYearPeriod where @dtmReverse BETWEEN dtmStartDate AND dtmEndDate 
+		AND (ysnFAOpen = 0 OR ysnOpen = 0))
+		BEGIN
+			RAISERROR('Current fiscal period is closed.', 16,1)
+			ROLLBACK TRANSACTION
+		END
+		
+
+        EXEC @ReverseResult  = [dbo].[uspFAReverseMultipleAsset] @strBatchId,@IdGLDetail, @ysnRecap,
+        @dtmReverse, @intEntityId,@intCount OUT  
+      END TRY
+      BEGIN CATCH
+        SELECT @ErrorMsg = ERROR_MESSAGE()
+        RAISERROR(@ErrorMsg, 16,1)
+		ROLLBACK TRANSACTION
+      END CATCH
       IF @ReverseResult <> 0 RETURN -1  
       SET @successfulCount = @intCount  
       IF ISNULL(@ysnRecap,0) = 0  

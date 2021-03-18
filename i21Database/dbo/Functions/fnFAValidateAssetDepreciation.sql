@@ -49,16 +49,13 @@ BEGIN
         
     END
 
-
+    IF (@ysnPost = 1)
     INSERT INTO @tbl
     SELECT A.intAssetId, 'There is Depreciation Date on a closed period in this asset.' 
     FROM tblFAFixedAssetDepreciation A 
     JOIN  tblFAFixedAsset B on A.intAssetId = B.intAssetId
 	JOIN @Id I on I.intId =  A.intAssetId
-    OUTER APPLY(
-        SELECT ISNULL([dbo].isOpenAccountingDate(A.[dtmDepreciationToDate]), 0)  isOpenAccountingDate
-    ) FiscalPeriod
-    WHERE FiscalPeriod.isOpenAccountingDate = 0
+    WHERE dbo.fnFAIsOpenAccountingDate(A.[dtmDepreciationToDate]) = 0
     GROUP BY  A.intAssetId
 
     IF EXISTS(SELECT TOP 1 1 FROM @tbl)

@@ -71,6 +71,7 @@ BEGIN
 					CREATE TABLE #tmpbatchpostingretailadjustmentId (
 						intItemId INT
 						,intRetailPriceAdjustmentId INT 
+						,dblPrice NUMERIC(38, 20) 
 					)
 				;
 			END
@@ -321,7 +322,9 @@ BEGIN
 									BEGIN 
 										SET @intSuccessPostCount = @intSuccessPostCount + 1
 
-										INSERT INTO #tmpbatchpostingretailadjustmentId (intItemId,intRetailPriceAdjustmentId ) VALUES (@intProcessItemId, @intRetailPriceAdjustmentId)
+									
+										INSERT INTO #tmpbatchpostingretailadjustmentId (intItemId,intRetailPriceAdjustmentId, dblPrice ) 
+										VALUES (@intProcessItemId, @intRetailPriceAdjustmentId, @dblRetailPriceConv)
 									END
 									ELSE
 									BEGIN
@@ -480,11 +483,11 @@ BEGIN
 							, trp.strRetailPriceAdjustmentNumber		AS strRetailPriceAdjustmentNumber
 					FROM @tblPreview tp
 						LEFT JOIN #tmpbatchpostingretailadjustmentId trpa
-							ON tp.intItemId = trpa.intItemId
+							ON tp.intItemId = trpa.intItemId AND CAST(tp.strPreviewNewData AS NUMERIC) = CAST(trpa.dblPrice AS NUMERIC)
 						LEFT JOIN tblSTRetailPriceAdjustment trp
 							ON trp.intRetailPriceAdjustmentId = trpa.intRetailPriceAdjustmentId
 					WHERE strPreviewOldData != strPreviewNewData
-					ORDER BY strItemNo, strLocationName ASC
+					ORDER BY trp.strRetailPriceAdjustmentNumber ASC
 				END
 			-- ==============================================================================================
 			-- [END] IF HAS PREVIEW REPORT

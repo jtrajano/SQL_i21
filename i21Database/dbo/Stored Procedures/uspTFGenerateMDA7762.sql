@@ -162,6 +162,8 @@ BEGIN TRY
 		SELECT @line21 = ISNULL(SUM(ISNULL(dblGross,0)), 0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strFormCode = 'A' AND strScheduleCode = '12'
 
 		SET @line23 = (@line18 - (@line19 + @line20)) + @line21
+		SET @line24A = @line23
+		SET @line24B = @line16
 
 		SET @line24C = @line24A + @line24B
 

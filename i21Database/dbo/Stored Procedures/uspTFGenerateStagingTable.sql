@@ -86,6 +86,10 @@ BEGIN TRY
 			BEGIN
 				SET @SP = 'uspTFGenerateSF900'
 			END
+			ELSE IF (@FormCode = 'SF-401')
+			BEGIN
+				SET @SP = 'uspTFGenerateSF401'
+			END
 			IF(@SP IS NOT NULL)
 			BEGIN
 				SET @ParamDefinition =  N'@Guid NVARCHAR(250), @FormCodeParam NVARCHAR(MAX), @ScheduleCodeParam NVARCHAR(MAX), @Refresh NVARCHAR(5)'

@@ -177,10 +177,10 @@ BEGIN TRY
 		,@intLogId INT
 		,@strETAPODReasonCode NVARCHAR(100)
 		,@strETAPOLReasonCode NVARCHAR(100)
-		,@strETSPOLReasonCode  NVARCHAR(100)
-		,@intETAPODReasonCodeId int
-		,@intETAPOLReasonCodeId int
-		,@intETSPOLReasonCodeId int
+		,@strETSPOLReasonCode NVARCHAR(100)
+		,@intETAPODReasonCodeId INT
+		,@intETAPOLReasonCodeId INT
+		,@intETSPOLReasonCodeId INT
 		,@strAuditUserName NVARCHAR(50)
 		,@intAuditLogUserId INT
 	DECLARE @tempLoadDetail TABLE (
@@ -463,9 +463,11 @@ BEGIN TRY
 					END
 
 			SELECT @strErrorMessage = ''
-			SELECT @intETAPODReasonCodeId=NULL
-			SELECT @intETAPODReasonCodeId=intReasonCodeId
-			FROM tblLGReasonCode 
+
+			SELECT @intETAPODReasonCodeId = NULL
+
+			SELECT @intETAPODReasonCodeId = intReasonCodeId
+			FROM tblLGReasonCode
 			WHERE strReasonCode = @strETAPODReasonCode
 
 			IF @strETAPODReasonCode IS NOT NULL
@@ -480,9 +482,11 @@ BEGIN TRY
 					SELECT @strErrorMessage = 'ETA POD ' + @strETAPODReasonCode + ' is not available.'
 				END
 			END
-			SELECT @intETAPOLReasonCodeId=NULL
-			SELECT @intETAPOLReasonCodeId=intReasonCodeId
-			FROM tblLGReasonCode 
+
+			SELECT @intETAPOLReasonCodeId = NULL
+
+			SELECT @intETAPOLReasonCodeId = intReasonCodeId
+			FROM tblLGReasonCode
 			WHERE strReasonCode = @strETAPOLReasonCode
 
 			IF @strETAPOLReasonCode IS NOT NULL
@@ -497,9 +501,11 @@ BEGIN TRY
 					SELECT @strErrorMessage = 'ETA POL ' + @strETAPOLReasonCode + ' is not available.'
 				END
 			END
-			SELECT @intETSPOLReasonCodeId=NULL
-			SELECT @intETSPOLReasonCodeId=intReasonCodeId
-			FROM tblLGReasonCode 
+
+			SELECT @intETSPOLReasonCodeId = NULL
+
+			SELECT @intETSPOLReasonCodeId = intReasonCodeId
+			FROM tblLGReasonCode
 			WHERE strReasonCode = @strETSPOLReasonCode
 
 			IF @strETSPOLReasonCode IS NOT NULL
@@ -893,6 +899,8 @@ BEGIN TRY
 
 			IF @intTransactionCount = 0
 				BEGIN TRANSACTION
+
+			EXEC uspIPUpdateContractQty @intLoadId = @intNewLoadId
 
 			IF @strRowState = 'Delete'
 			BEGIN
@@ -4560,8 +4568,6 @@ BEGIN TRY
 		JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
 		WHERE LD.intLoadId = @intNewLoadId
 	END
-
-
 
 	IF ISNULL(@strInfo1, '') <> ''
 		SELECT @strInfo1 = LEFT(@strInfo1, LEN(@strInfo1) - 1)

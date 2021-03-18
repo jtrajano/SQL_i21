@@ -139,7 +139,7 @@ IF ISNULL(@strInvoiceIds, '') <> ''
 						, intCompanyLocationId		= INV.intCompanyLocationId
 						, intCurrencyId				= INV.intCurrencyId
 						, intTermId					= INV.intTermId
-						, dtmDate					= @dtmDateToday
+						, dtmDate					= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmPostDate				= ISNULL(SCI.dtmForgiveDate, @dtmDateToday)
 						, dtmShipDate				= @dtmDateToday
 						, intEntitySalespersonId	= INV.intEntitySalespersonId

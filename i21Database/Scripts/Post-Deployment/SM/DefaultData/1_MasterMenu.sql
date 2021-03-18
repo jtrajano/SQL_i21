@@ -11,7 +11,8 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-	IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Rebuild' AND strModuleName = 'Accounts Receivable')
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Amendments' AND strModuleName = 'Contract Management')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -3189,9 +3190,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Amendments' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId])
-	VALUES (N'Amendments', N'Contract Management', @ContractManagementActivitiesParentMenuId, N'Amendments', N'Activity', N'Screen', N'ContractManagement.view.AmendmentSearch', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
+	VALUES (N'Amendments', N'Contract Management', @ContractManagementActivitiesParentMenuId, N'Amendments', N'Activity', N'Screen', N'ContractManagement.view.AmendmentSearch?multiGrouping=true', N'small-menu-activity', 0, 0, 0, 1, 6, 1)
 ELSE 
-	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'ContractManagement.view.AmendmentSearch' WHERE strMenuName = 'Amendments' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 7, strCommand = N'ContractManagement.view.AmendmentSearch?multiGrouping=true' WHERE strMenuName = 'Amendments' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Broker Commission Processing' AND strModuleName = 'Contract Management' AND intParentMenuID = @ContractManagementActivitiesParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 

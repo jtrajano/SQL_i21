@@ -348,6 +348,7 @@ BEGIN
 
 	IF(ISNULL(@strDatabaseName, '') <> '')
 	BEGIN
+		--Check if vendor exists
 		DECLARE @ysnVendorExistQuery nvarchar(500)
 		DECLARE @ysnVendorExistParam NVARCHAR(500)
 		DECLARE @ysnVendorExist BIT = 0 
@@ -382,6 +383,134 @@ BEGIN
 				,[strPostingError]		= 'Vendor - ' + I.strInterCompanyVendorId + ' is not existing in Company ' + ISNULL(@strCompanyName, '') + '!'
 			FROM 
 				#ARPostInvoiceHeader I
+		END
+
+		--Check if all items exists
+		DECLARE @ysnAllItemsExistQuery nvarchar(500)
+		DECLARE @ysnAllItemsExistParam NVARCHAR(500)
+		DECLARE @ysnAllItemsExist BIT = 0
+		DECLARE @intInterCompanyAllItemsId INT
+		DECLARE @strInterCompanyAllItemsId NVARCHAR(50)
+
+		IF(OBJECT_ID('tempdb..#ARInterCompanyItem') IS NOT NULL)
+		BEGIN
+			DROP TABLE #ARInterCompanyItem
+		END
+
+		CREATE TABLE #ARInterCompanyItem (
+			[strItemNo]	NVARCHAR(25)
+		)
+
+		INSERT INTO #ARInterCompanyItem
+		SELECT DISTINCT PID.strItemNo
+		FROM #ARPostInvoiceDetail PID
+		INNER JOIN tblICItem ICI
+		ON PID.intItemId = ICI.intItemId
+
+		WHILE EXISTS(SELECT TOP 1 NULL FROM #ARInterCompanyItem)
+		BEGIN
+			DECLARE @strInterCompanyItemNo NVARCHAR(50)
+															
+			SELECT TOP 1 @strInterCompanyItemNo = [strItemNo] 
+			FROM #ARInterCompanyItem 
+
+			SELECT @ysnAllItemsExistQuery = N'SELECT @ysnAllItemsExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblICItem WHERE strItemNo = ''' + CAST(@strInterCompanyItemNo AS NVARCHAR(25)) + ''''
+
+			SET @ysnAllItemsExistParam = N'@ysnAllItemsExist int OUTPUT'
+
+			EXEC sp_executesql @ysnAllItemsExistQuery, @ysnAllItemsExistParam, @ysnAllItemsExist = @ysnAllItemsExist OUTPUT
+
+			IF(@ysnAllItemsExist = 0)
+			BEGIN
+				INSERT INTO #ARInvalidInvoiceData
+					([intInvoiceId]
+					,[strInvoiceNumber]
+					,[strTransactionType]
+					,[intInvoiceDetailId]
+					,[intItemId]
+					,[strBatchId]
+					,[strPostingError])
+				--Item not existing in inter-company database
+				SELECT
+					 [intInvoiceId]			= I.[intInvoiceId]
+					,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+					,[strTransactionType]	= I.[strTransactionType]
+					,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+					,[intItemId]			= I.[intItemId]
+					,[strBatchId]			= I.[strBatchId]
+					,[strPostingError]		= 'Item - ' + @strInterCompanyItemNo + ' is not existing in Company ' + ISNULL(@strCompanyName, '') + '!'
+				FROM 
+					#ARPostInvoiceHeader I
+			END
+
+			SET @ysnAllItemsExist = 0
+												
+			DELETE FROM #ARInterCompanyItem WHERE [strItemNo] = @strInterCompanyItemNo
+		END
+
+		--Check if all tax group exists
+		DECLARE @ysnAllTaxGroupsExistQuery nvarchar(500)
+		DECLARE @ysnAllTaxGroupsExistParam NVARCHAR(500)
+		DECLARE @ysnAllTaxGroupsExist BIT = 0
+		DECLARE @intInterCompanyAllTaxGroupsId INT
+		DECLARE @strInterCompanyAllTaxGroupsId NVARCHAR(50)
+
+		IF(OBJECT_ID('tempdb..#ARInterCompanyTaxGroup') IS NOT NULL)
+		BEGIN
+			DROP TABLE #ARInterCompanyTaxGroup
+		END
+
+		CREATE TABLE #ARInterCompanyTaxGroup (
+			[strTaxGroup]	NVARCHAR(50)
+		)
+
+		INSERT INTO #ARInterCompanyTaxGroup
+		SELECT DISTINCT SMTG.strTaxGroup
+		FROM #ARPostInvoiceDetail PID
+		INNER JOIN tblARInvoiceDetailTax ARIDT
+		ON PID.intInvoiceDetailId = ARIDT.intInvoiceDetailId
+		INNER JOIN tblSMTaxGroup SMTG
+		ON ARIDT.intTaxGroupId = SMTG.intTaxGroupId
+
+		WHILE EXISTS(SELECT TOP 1 NULL FROM #ARInterCompanyTaxGroup)
+		BEGIN
+			DECLARE @strInterCompanyTaxGroup NVARCHAR(50)
+															
+			SELECT TOP 1 @strInterCompanyTaxGroup = [strTaxGroup] 
+			FROM #ARInterCompanyTaxGroup 
+
+			SELECT @ysnAllTaxGroupsExistQuery = N'SELECT @ysnAllTaxGroupsExist = 1 FROM [' + @strDatabaseName + '].[dbo].tblSMTaxGroup WHERE strTaxGroup = ''' + CAST(@strInterCompanyTaxGroup AS NVARCHAR(50)) + ''''
+
+			SET @ysnAllTaxGroupsExistParam = N'@ysnAllTaxGroupsExist int OUTPUT'
+
+			EXEC sp_executesql @ysnAllTaxGroupsExistQuery, @ysnAllTaxGroupsExistParam, @ysnAllTaxGroupsExist = @ysnAllTaxGroupsExist OUTPUT
+
+			IF(@ysnAllTaxGroupsExist = 0)
+			BEGIN
+				INSERT INTO #ARInvalidInvoiceData
+					([intInvoiceId]
+					,[strInvoiceNumber]
+					,[strTransactionType]
+					,[intInvoiceDetailId]
+					,[intItemId]
+					,[strBatchId]
+					,[strPostingError])
+				--Tax group not existing in inter-company database
+				SELECT
+					 [intInvoiceId]			= I.[intInvoiceId]
+					,[strInvoiceNumber]		= I.[strInvoiceNumber]		
+					,[strTransactionType]	= I.[strTransactionType]
+					,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
+					,[intItemId]			= I.[intItemId]
+					,[strBatchId]			= I.[strBatchId]
+					,[strPostingError]		= 'Tax group - ' + @strInterCompanyTaxGroup + ' is not existing in Company ' + ISNULL(@strCompanyName, '') + '!'
+				FROM 
+					#ARPostInvoiceHeader I
+			END
+
+			SET @ysnAllTaxGroupsExist = 0
+												
+			DELETE FROM #ARInterCompanyTaxGroup WHERE [strTaxGroup] = @strInterCompanyTaxGroup
 		END
 	END
 			
@@ -2336,7 +2465,7 @@ BEGIN
 
 		EXEC sp_executesql @ysnVoucherExistQuery, @ysnVoucherExistParam, @ysnVoucherExist = @ysnVoucherExist OUTPUT
 
-		IF(@ysnVoucherExist = 0)
+		IF(@ysnVoucherExist = 1)
 		BEGIN
 			INSERT INTO #ARInvalidInvoiceData
 				([intInvoiceId]
