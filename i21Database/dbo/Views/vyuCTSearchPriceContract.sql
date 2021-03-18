@@ -25,6 +25,7 @@ AS
 							FROM	 tblCTPriceFixationDetail WITH (NOLOCK)
 							GROUP BY intPriceFixationId
 						)								PD	ON	PD.intPriceFixationId				=		PF.intPriceFixationId
+		where CH.intPricingTypeId <> 3
 	),
 	x as 
 	(
