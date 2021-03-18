@@ -7826,6 +7826,7 @@
     <Build Include="dbo\Functions\fnGRWhatIsMyTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTranferChecking.sql" />
     <Build Include="dbo\Stored Procedures\uspGRTransferFixDissection.sql" />
+    <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
