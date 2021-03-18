@@ -15,6 +15,7 @@ AS
 	ON I.intEntityCustomerId = C.intEntityId
 	INNER JOIN tblSMInterCompany IC
 	ON C.intInterCompanyId = IC.intInterCompanyId
+	WHERE I.strTransactionType = 'Invoice'
 
 	IF(ISNULL(@strDatabaseName, '') <> '')
 	BEGIN
