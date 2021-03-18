@@ -33,7 +33,8 @@ AS
 				,[dblExchangeRate]
 				,[dblQty]
 				,[dblCost],
-				[strTaxGroup]) 
+				[strTaxGroup],
+				[strFreightTerm]) 
 			SELECT 
 				 [intInvoiceId]			= ARI.intInvoiceId
 				,[strInvoiceNumber]		= ARI.strInvoiceNumber
@@ -45,6 +46,7 @@ AS
 				,[dblQty]				= ARID.dblQtyShipped
 				,[dblCost]				= ARID.dblPrice
 				,[strTaxGroup]			= SMTG.strTaxGroup
+				,[strFreightTerm]		= SMFT.strFreightTerm
 			FROM 
 				tblARInvoice ARI
 			INNER JOIN tblARInvoiceDetail ARID
@@ -53,6 +55,8 @@ AS
 				ON ARID.intItemId = ICI.intItemId
 			INNER JOIN tblARCustomer ARC
 				ON ARI.intEntityCustomerId = ARC.intEntityId
+			INNER JOIN tblSMFreightTerms SMFT
+				ON ARI.intFreightTermId = SMFT.intFreightTermId
 			LEFT JOIN tblARInvoiceDetailTax ARIDT
 				ON ARID.intInvoiceDetailId = ARIDT.intInvoiceDetailId
 			LEFT JOIN tblSMTaxGroup SMTG
@@ -70,6 +74,7 @@ AS
 				,ARID.dblQtyShipped
 				,ARID.dblPrice
 				,SMTG.strTaxGroup
+				,SMFT.strFreightTerm
 		
 			EXEC [' + @strDatabaseName + '].[dbo].[uspARInterCompanyIntegrationDestination] @InvoiceNumber = ''' + @strInvoiceNumber + ''', @BatchId = ''' + ISNULL(@BatchId, '') +''', @Post = ' + CAST(@Post AS NVARCHAR(1))+ ', @UserId = 1, @ReceiptNumber = @ReceiptNumber OUTPUT
 		
