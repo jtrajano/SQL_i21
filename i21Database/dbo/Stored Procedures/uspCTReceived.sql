@@ -83,8 +83,8 @@ BEGIN TRY
 				IR.intInventoryReceiptDetailId
 				,CD.intContractDetailId
 				,IR.intItemUOMId
-				,CASE WHEN CH.ysnLoad=1 THEN IR.intLoadReceive ELSE IR.dblQty END
-				,CH.ysnLoad
+				,CASE WHEN ISNULL(CH.ysnLoad, 0) = 1 THEN IR.intLoadReceive ELSE IR.dblQty END
+				,ysnLoad = ISNULL(CH.ysnLoad, 0)
 				,CD.intPricingTypeId
 				,IR.intSourceId
 				,IR.intInventoryReceiptId
@@ -117,7 +117,7 @@ BEGIN TRY
 					, ri.intUnitMeasureId
 					, intLoad = dbo.fnMinNumeric(ch.intNoOfLoad, ri.intLoadReceive) * CASE WHEN r.intLoadReceive >= 0 THEN 1 ELSE - 1 END
 					, ri.intContainerId
-					, ch.ysnLoad
+					, ysnLoad = ISNULL(ch.ysnLoad, 0)
 					, cd.intPricingTypeId
 					, ri.intSourceId
 					, r.intInventoryReceiptId
@@ -144,7 +144,7 @@ BEGIN TRY
 				INNER JOIN tblCTContractDetail cd ON cd.intContractHeaderId = ch.intContractHeaderId
 					AND cd.intContractDetailId = ri.intContractDetailId
 				INNER JOIN tblLGLoad l ON l.intLoadId = ri.intLoadShipmentId
-				WHERE ch.ysnLoad = 1
+				WHERE ISNULL(ch.ysnLoad, 0) = 1
 			END
 
 			INSERT	INTO @tblToProcess (
@@ -163,9 +163,9 @@ BEGIN TRY
 				intInventoryReceiptDetailId
 				,CD.intContractDetailId
 				,IR.intItemUOMId
-				,CASE WHEN CH.ysnLoad=1 THEN IR.intLoadReceive ELSE dblQty END
+				,CASE WHEN ISNULL(CH.ysnLoad, 0) =1 THEN IR.intLoadReceive ELSE dblQty END
 				,intContainerId
-				,CH.ysnLoad
+				,ysnLoad = ISNULL(CH.ysnLoad, 0)
 				,CD.intPricingTypeId
 				,IR.intSourceId
 				,IR.intInventoryReceiptId
@@ -176,7 +176,7 @@ BEGIN TRY
 				JOIN tblCTContractHeader CH	ON	CD.intContractHeaderId	=	CH.intContractHeaderId
 			WHERE
 				ISNULL(intLineNo, 0) > 0
-				AND CH.ysnLoad = 0 -- CT-4969
+				AND ISNULL(CH.ysnLoad, 0) = 0 -- CT-4969
 		END
 	END
 

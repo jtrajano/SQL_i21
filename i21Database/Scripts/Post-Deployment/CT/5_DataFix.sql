@@ -286,3 +286,11 @@ BEGIN
 		AND dblQty IS NOT NULL
 END
 GO
+
+IF EXISTS (SELECT TOP 1 1 FROM tblCTContractHeader WHERE ysnLoad IS NULL)
+BEGIN
+	UPDATE tblCTContractHeader
+	SET ysnLoad = ISNULL(ysnLoad, 0)
+	WHERE ysnLoad IS NULL
+END
+GO
