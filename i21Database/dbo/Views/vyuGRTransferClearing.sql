@@ -462,8 +462,7 @@ SELECT
     ,TSR.intTransferStorageReferenceId AS intInventoryReceiptItemId--IRI.intInventoryReceiptItemId
     ,CS.intItemId
     ,CS.intItemUOMId
-    ,unitMeasure.strUnitMeasure AS strUOM
-    ,ISNULL(CAST((TSR.dblUnitQty) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
+    ,unitMeasure.strUnitMeasure AS strUOM    
     --,ISNULL(CAST((TSR.dblUnitQty) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
     ,ISNULL(CAST((BillDetail.dblQtyReceived) * (CS.dblBasis + CS.dblSettlementPrice)  AS DECIMAL(18,2)),0) * 1 AS dblTransferTotal  --Orig Calculation	
 	--
@@ -596,7 +595,9 @@ Where Bill.ysnPosted = 1
 
 UNION ALL
 --Transfer Storages from above select statement
-SELECT DISTINCT --'6' AS TEST,
+SELECT DISTINCT 
+
+    '6' AS TEST,
     CS_FROM.intEntityId AS intEntityVendorId
     ,TS_TO.dtmTransferStorageDate AS dtmDate
     ,SH.strTransferTicket
