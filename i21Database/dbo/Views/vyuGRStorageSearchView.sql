@@ -103,7 +103,7 @@ SELECT
 	,strStorageTransactionNumber = CASE WHEN CS.ysnTransferStorage = 1 THEN CS.strStorageTicketNumber ELSE TS.strTransferStorageTicket END
 	,CS.dblBasis
 	,CS.dblSettlementPrice
-	--,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
+	,intTicketPricingTypeId = ISNULL(CH.intPricingTypeId, -99)
 	,intTransferPricingTypeId = ISNULL(CH_Transfer.intPricingTypeId, -98)
 FROM tblGRCustomerStorage CS  
 JOIN tblSMCompanyLocation LOC
