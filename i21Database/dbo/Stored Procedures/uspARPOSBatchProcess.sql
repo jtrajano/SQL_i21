@@ -23,7 +23,7 @@ DECLARE @intDiscountAccountId			INT = NULL
 
 DECLARE @PROCESSLOGS TABLE  (
 		     intPOSId  INT
-			, strDescription	NVARCHAR(MAX)	
+			, strDescription	NVARCHAR(100)	
 			, ysnSuccess	BIT
 			, dtmDateProcessed	 DATE
 		)
