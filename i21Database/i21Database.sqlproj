@@ -9202,6 +9202,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateInitialAck_ERP.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractMotherParkers.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailMotherParkers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGCalculateWOTotal.sql" />
+    
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
