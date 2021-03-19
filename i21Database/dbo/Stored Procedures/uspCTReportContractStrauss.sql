@@ -200,7 +200,7 @@ BEGIN TRY
 		from
 			tblCTContractHeader a
 			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
-			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = 'Contract' and c.ysnApproval = 0
+			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = 'Contract' and c.ysnApproval = 1
 			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
 			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = 'Contract' and e.ysnApproval = 1
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
