@@ -23,8 +23,7 @@ BEGIN TRY
 		@FirstApprovalName      NVARCHAR(MAX),  
 		@SecondApprovalSign     VARBINARY(MAX),  
 		@SecondApprovalName     NVARCHAR(MAX),  
-		@strContractDocuments NVARCHAR(MAX),  
-		@strContractConditions NVARCHAR(MAX),  
+		@strContractDocuments NVARCHAR(MAX),
 		@ysnFairtrade   BIT = 0,  
 		@intContractDetailId  INT,  
 		@intPrevApprovedContractId INT,
@@ -139,20 +138,6 @@ BEGIN TRY
 	)
 	FROM tblCTContractHeader CH  
 	left join tblCTBookVsEntity be on be.intEntityId = CH.intEntityId  
-	WHERE CH.intContractHeaderId = @intContractHeaderId  
-  
-	SELECT @strContractConditions = STUFF(          
-		(  
-			SELECT CHAR(13)+CHAR(10) + DM.strConditionDesc
-			FROM tblCTContractCondition CD  WITH (NOLOCK)  
-			JOIN tblCTCondition   DM WITH (NOLOCK) ON DM.intConditionId = CD.intConditionId   
-			WHERE CD.intContractHeaderId = CH.intContractHeaderId   
-			ORDER BY DM.strConditionName    
-			FOR XML PATH(''), TYPE      
-		).value('.','varchar(max)')  
-		,1,2, ''        
-	)        
-	FROM tblCTContractHeader CH WITH (NOLOCK)        
 	WHERE CH.intContractHeaderId = @intContractHeaderId  
  
 	IF EXISTS  
@@ -271,7 +256,7 @@ BEGIN TRY
 										ELSE ''
 									END  
 								END  
-		,strAssociation = 'The contract has been closed on the conditions of the '+ AN.strComment + ' ('+AN.strName+')'+' latest edition.'  
+		,strAssociation = 'We confirm having' + CASE WHEN CH.intContractTypeId = 1 THEN ' bought from ' ELSE ' sold to ' END + 'you as follows:'
 		,strBuyerRefNo = CASE WHEN CH.intContractTypeId = 1 THEN CH.strContractNumber ELSE CH.strCustomerContract END  
 		,strContractBasis = CB.strFreightTerm  
 		,strPosition = PO.strPosition  
@@ -294,7 +279,13 @@ BEGIN TRY
 		,strGrade = W2.strWeightGradeDesc  
 		,strContractDocuments = @strContractDocuments  
 		,strPrintableRemarks = CH.strPrintableRemarks  
-		,strContractConditions = @strContractConditions  
+		,strContractConditions =  case
+									when CH.intPricingTypeId = 6
+									then ''
+									else
+										ISNULL(TX.strText,'') 
+								end
+		  
 		,strBuyer = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END  
 		,strSeller = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
 		,intContractHeaderId = CH.intContractHeaderId  
@@ -348,7 +339,8 @@ BEGIN TRY
 		LEFT JOIN tblCTCropYear    CY WITH (NOLOCK) ON CY.intCropYearId    = CH.intCropYearId    
 		LEFT JOIN tblCTWeightGrade   W1 WITH (NOLOCK) ON W1.intWeightGradeId    = CH.intWeightId       
 		LEFT JOIN tblSMTerm     TM WITH (NOLOCK) ON TM.intTermID     = CH.intTermId       
-		LEFT JOIN tblCTWeightGrade   W2 WITH (NOLOCK) ON W2.intWeightGradeId    = CH.intGradeId  
+		LEFT JOIN tblCTWeightGrade   W2 WITH (NOLOCK) ON W2.intWeightGradeId    = CH.intGradeId
+		LEFT JOIN tblCTContractText			TX	WITH (NOLOCK) ON	TX.intContractTextId			=	CH.intContractTextId		  
 
 	where
 		CH.intContractHeaderId = @intContractHeaderId

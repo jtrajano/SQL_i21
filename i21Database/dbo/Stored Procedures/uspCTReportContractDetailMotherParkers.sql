@@ -30,7 +30,8 @@ BEGIN TRY
 							END    
 					END, 
 		strItemNo = IM.strItemNo,  
-		strDescription   = ISNULL(IC.strContractItemName,IM.strDescription)
+		strDescription   = ISNULL(IC.strContractItemName,IM.strDescription),
+		strItemSpecification	= CD.strItemSpecification
   
 	FROM
 		tblCTContractDetail CD WITH (NOLOCK)
