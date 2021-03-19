@@ -8904,6 +8904,11 @@
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql" />
+    <Build Include="dbo\Tables\tblICItemCategoryChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStocksWithCategoryChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
