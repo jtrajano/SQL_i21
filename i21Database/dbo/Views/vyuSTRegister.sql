@@ -50,6 +50,10 @@ SELECT reg.intRegisterId
 									THEN dbo.fnAESDecryptASym(reg.strSAPPHIREPassword)
 								ELSE NULL
 							END COLLATE Latin1_General_CI_AS
+	, reg.ysnSAPPHIRECaptureTransactionLog
+	, reg.intSAPPHIRECaptureIntervalMinutes
+	, reg.strSAPPHIRELastTranslogReport
+	, reg.strSAPPHIRELastTranslogReportDayCloseTime
 	, reg.intSAPPHIRECheckoutPullTimePeriodId
 	, strSAPPHIRECheckoutPullTimePeriodId = CASE
 												WHEN (reg.intSAPPHIRECheckoutPullTimePeriodId = 1)
