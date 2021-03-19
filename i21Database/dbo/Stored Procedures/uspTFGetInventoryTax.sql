@@ -139,7 +139,7 @@ BEGIN TRY
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
-					, strVendorInvoiceNumber = CASE WHEN tblTRLoadReceipt.intLoadHeaderId IS NULL THEN APBill.strVendorOrderNumber ELSE tblTRLoadReceipt.strBillOfLading END
+					, strVendorInvoiceNumber = APBill.strVendorOrderNumber
 					, strCustomerLicenseNumber = NULL
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
@@ -328,7 +328,7 @@ BEGIN TRY
 					, strTransporterIdType = 'FEIN'
 					, strVendorIdType = 'FEIN'
 					, strCustomerIdType = 'FEIN'
-					, strVendorInvoiceNumber = CASE WHEN tblTRLoadReceipt.intLoadHeaderId IS NULL THEN APBill.strVendorOrderNumber ELSE tblTRLoadReceipt.strBillOfLading END
+					, strVendorInvoiceNumber = APBill.strVendorOrderNumber
 					, strCustomerLicenseNumber = NULL
 					, strCustomerAccountStatusCode = NULL
 					, strCustomerStreetAddress = NULL
