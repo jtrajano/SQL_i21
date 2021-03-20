@@ -9208,6 +9208,11 @@
     <Build Include="dbo\Tables\tblIPItemPriceArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPItemPrice.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPItemPrice.sql" />
+    <Build Include="dbo\Tables\tblIPCurrencyRateStage.sql" />
+    <Build Include="dbo\Tables\tblIPCurrencyRateError.sql" />
+    <Build Include="dbo\Tables\tblIPCurrencyRateArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPExchangeRate.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
