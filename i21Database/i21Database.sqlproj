@@ -9213,6 +9213,14 @@
     <Build Include="dbo\Tables\tblIPCurrencyRateArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPExchangeRate.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPExchangeRate.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteError.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteArchive.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPRoute.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPRoute.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
