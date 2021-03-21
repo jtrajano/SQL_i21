@@ -19,59 +19,58 @@ BEGIN TRY
 		,@intActionId INT
 		,@dtmCreatedDate DATETIME
 		,@strCreatedBy NVARCHAR(50)
-	DECLARE @intItemPriceStageId INT
-		,@strItemNo NVARCHAR(100)
-		,@dblStandardCost NUMERIC(18, 6)
-		,@strCurrency NVARCHAR(50)
+	DECLARE @intCurrencyRateStageId INT
+		,@strFromCurrency NVARCHAR(50)
+		,@strToCurrency NVARCHAR(50)
+		,@dblRate NUMERIC(18, 6)
+		,@strRateType NVARCHAR(50)
+		,@dtmEffectiveDate DATETIME
 	DECLARE @intCompanyLocationId INT
-		,@intItemId INT
-		,@intCurrencyID INT
-		,@intNewItemPriceStageId INT
-	DECLARE @tblICItemPricing TABLE (
-		intItemPricingId INT
-		,intItemLocationId INT
-		,strLocationName NVARCHAR(50)
-		,strRowState NVARCHAR(10)
-		,dblOldStandardCost NUMERIC(18, 6)
-		,dblNewStandardCost NUMERIC(18, 6)
-		,dtmOldDateChanged DATETIME
-		,dtmNewDateChanged DATETIME
+		,@intFromCurrencyID INT
+		,@intToCurrencyID INT
+		,@intRateTypeId INT
+		,@intCurrencyExchangeRateId INT
+		,@intCurrencyExchangeRateDetailId INT
+		,@intNewCurrencyRateStageId INT
+	DECLARE @tblSMCurrencyExchangeRateDetail TABLE (
+		intCurrencyExchangeRateDetailId INT
+		,intRateTypeId INT
+		,dblOldRate NUMERIC(18, 6)
+		,dblNewRate NUMERIC(18, 6)
 		)
-	DECLARE @intItemPricingId INT
-		,@strLocationName NVARCHAR(50)
-		,@dblOldStandardCost NUMERIC(18, 6)
-		,@dblNewStandardCost NUMERIC(18, 6)
-		,@dtmOldDateChanged DATETIME
-		,@dtmNewDateChanged DATETIME
+	DECLARE @dblOldRate NUMERIC(18, 6)
+		,@dblNewRate NUMERIC(18, 6)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
 	WHERE strUserName = 'IRELYADMIN'
 
-	SELECT @intItemPriceStageId = MIN(intItemPriceStageId)
-	FROM tblIPItemPriceStage
+	SELECT @intCurrencyRateStageId = MIN(intCurrencyRateStageId)
+	FROM tblIPCurrencyRateStage
 
 	SELECT @strInfo1 = ''
 		,@strInfo2 = ''
 
-	SELECT @strInfo1 = @strInfo1 + ISNULL(strItemNo, '') + ', '
-	FROM tblIPItemPriceStage
+	SELECT @strInfo1 = @strInfo1 + ISNULL(strFromCurrency, '') + ', '
+	FROM tblIPCurrencyRateStage
 
 	IF Len(@strInfo1) > 0
 	BEGIN
 		SELECT @strInfo1 = Left(@strInfo1, Len(@strInfo1) - 1)
 	END
 
-	--SELECT @strInfo2 = @strInfo2 + ISNULL(strCurrency, '') + ', '
-	--FROM (
-	--	SELECT DISTINCT strCurrency
-	--	FROM tblIPItemPriceStage
-	--	) AS DT
-	--IF Len(@strInfo2) > 0
-	--BEGIN
-	--	SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
-	--END
-	WHILE (@intItemPriceStageId IS NOT NULL)
+	SELECT @strInfo2 = @strInfo2 + ISNULL(strRateType, '') + ', '
+	FROM (
+		SELECT DISTINCT strRateType
+		FROM tblIPCurrencyRateStage
+		) AS DT
+
+	IF Len(@strInfo2) > 0
+	BEGIN
+		SELECT @strInfo2 = Left(@strInfo2, Len(@strInfo2) - 1)
+	END
+
+	WHILE (@intCurrencyRateStageId IS NOT NULL)
 	BEGIN
 		BEGIN TRY
 			SELECT @intTrxSequenceNo = NULL
@@ -80,29 +79,36 @@ BEGIN TRY
 				,@dtmCreatedDate = NULL
 				,@strCreatedBy = NULL
 
-			SELECT @strItemNo = NULL
-				,@dblStandardCost = NULL
-				,@strCurrency = NULL
+			SELECT @strFromCurrency = NULL
+				,@strToCurrency = NULL
+				,@dblRate = NULL
+				,@strRateType = NULL
+				,@dtmEffectiveDate = NULL
 
 			SELECT @intCompanyLocationId = NULL
-				,@intItemId = NULL
-				,@intCurrencyID = NULL
-				,@intNewItemPriceStageId = NULL
+				,@intFromCurrencyID = NULL
+				,@intToCurrencyID = NULL
+				,@intRateTypeId = NULL
+				,@intCurrencyExchangeRateId = NULL
+				,@intCurrencyExchangeRateDetailId = NULL
+				,@intNewCurrencyRateStageId = NULL
 
 			SELECT @intTrxSequenceNo = intTrxSequenceNo
 				,@strCompanyLocation = strCompanyLocation
 				,@intActionId = intActionId
 				,@dtmCreatedDate = dtmCreatedDate
 				,@strCreatedBy = strCreatedBy
-				,@strItemNo = strItemNo
-				,@dblStandardCost = dblStandardCost
-				,@strCurrency = strCurrency
-			FROM tblIPItemPriceStage
-			WHERE intItemPriceStageId = @intItemPriceStageId
+				,@strFromCurrency = strFromCurrency
+				,@strToCurrency = strToCurrency
+				,@dblRate = dblRate
+				,@strRateType = strRateType
+				,@dtmEffectiveDate = dtmEffectiveDate
+			FROM tblIPCurrencyRateStage
+			WHERE intCurrencyRateStageId = @intCurrencyRateStageId
 
 			IF EXISTS (
 					SELECT 1
-					FROM tblIPItemPriceArchive
+					FROM tblIPCurrencyRateArchive
 					WHERE intTrxSequenceNo = @intTrxSequenceNo
 					)
 			BEGIN
@@ -119,13 +125,17 @@ BEGIN TRY
 			FROM dbo.tblSMCompanyLocation
 			WHERE strLotOrigin = @strCompanyLocation
 
-			SELECT @intItemId = intItemId
-			FROM dbo.tblICItem WITH (NOLOCK)
-			WHERE strItemNo = @strItemNo
-
-			SELECT @intCurrencyID = intCurrencyID
+			SELECT @intFromCurrencyID = intCurrencyID
 			FROM dbo.tblSMCurrency WITH (NOLOCK)
-			WHERE strCurrency = @strCurrency
+			WHERE strCurrency = @strFromCurrency
+
+			SELECT @intToCurrencyID = intCurrencyID
+			FROM dbo.tblSMCurrency WITH (NOLOCK)
+			WHERE strCurrency = @strToCurrency
+
+			SELECT @intRateTypeId = intCurrencyExchangeRateTypeId
+			FROM dbo.tblSMCurrencyExchangeRateType WITH (NOLOCK)
+			WHERE strCurrencyExchangeRateType = @strRateType
 
 			IF @intCompanyLocationId IS NULL
 			BEGIN
@@ -138,9 +148,9 @@ BEGIN TRY
 						)
 			END
 
-			IF @intItemId IS NULL
+			IF @intFromCurrencyID IS NULL
 			BEGIN
-				SELECT @strError = 'Item not found.'
+				SELECT @strError = 'From Currency not found.'
 
 				RAISERROR (
 						@strError
@@ -149,9 +159,9 @@ BEGIN TRY
 						)
 			END
 
-			IF @intCurrencyID IS NULL
+			IF @intToCurrencyID IS NULL
 			BEGIN
-				SELECT @strError = 'Currency not found.'
+				SELECT @strError = 'To Currency not found.'
 
 				RAISERROR (
 						@strError
@@ -160,9 +170,31 @@ BEGIN TRY
 						)
 			END
 
-			IF @dblStandardCost IS NULL
+			IF ISNULL(@dblRate, 0) <= 0
 			BEGIN
-				SELECT @strError = 'Price not found.'
+				SELECT @strError = 'Rate should be greater than 0.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF ISNULL(@strRateType, '') = ''
+			BEGIN
+				SELECT @strError = 'Rate Type cannot be blank.'
+
+				RAISERROR (
+						@strError
+						,16
+						,1
+						)
+			END
+
+			IF @dtmEffectiveDate IS NULL
+			BEGIN
+				SELECT @strError = 'Effective date cannot be blank.'
 
 				RAISERROR (
 						@strError
@@ -173,226 +205,218 @@ BEGIN TRY
 
 			BEGIN TRAN
 
-			IF NOT EXISTS (
-					SELECT 1
-					FROM tblICItem I
-					JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-						AND IL.intLocationId = @intCompanyLocationId
-						AND I.intItemId = @intItemId
-					)
+			IF @intRateTypeId IS NULL
 			BEGIN
-				INSERT INTO tblICItemLocation (
-					intConcurrencyId
-					,intItemId
-					,intLocationId
-					,intCostingMethod
-					,intAllowNegativeInventory
-					,intAllowZeroCostTypeId
+				INSERT INTO tblSMCurrencyExchangeRateType (
+					strCurrencyExchangeRateType
+					,strDescription
+					,intConcurrencyId
 					)
-				SELECT 1
-					,@intItemId
-					,@intCompanyLocationId
-					,2
-					,3
-					,2
+				SELECT @strRateType
+					,@strRateType
+					,1
+
+				SELECT @intRateTypeId = intCurrencyExchangeRateTypeId
+				FROM dbo.tblSMCurrencyExchangeRateType
+				WHERE strCurrencyExchangeRateType = @strRateType
 			END
 
-			DELETE
-			FROM @tblICItemPricing
+			SELECT @intCurrencyExchangeRateId = intCurrencyExchangeRateId
+			FROM tblSMCurrencyExchangeRate ER
+			WHERE ER.intFromCurrencyId = @intFromCurrencyID
+				AND ER.intToCurrencyId = @intToCurrencyID
 
-			IF NOT EXISTS (
-					SELECT 1
-					FROM tblICItem I
-					JOIN tblICItemLocation IL ON IL.intItemId = I.intItemId
-						AND IL.intLocationId = @intCompanyLocationId
-						AND I.intItemId = @intItemId
-					JOIN tblICItemPricing IP ON IP.intItemId = I.intItemId
-						AND IP.intItemLocationId = IL.intItemLocationId
-					)
+			IF @intActionId = 4
 			BEGIN
-				INSERT INTO tblICItemPricing (
-					intConcurrencyId
-					,intItemId
-					,intItemLocationId
-					,strPricingMethod
-					,dblStandardCost
-					,dtmDateChanged
-					)
-				OUTPUT inserted.intItemPricingId
-					,inserted.intItemLocationId
-					,NULL
-					,'Added'
-					,NULL
-					,inserted.dblStandardCost
-					,NULL
-					,inserted.dtmDateChanged
-				INTO @tblICItemPricing
-				SELECT 1
-					,@intItemId
-					,IL.intItemLocationId
-					,'None'
-					,dbo.fnCTCalculateAmountBetweenCurrency(@intCurrencyID, NULL, @dblStandardCost, 1)
-					,GETDATE()
-				FROM tblICItemLocation IL
-				WHERE IL.intLocationId = @intCompanyLocationId
-					AND IL.intItemId = @intItemId
-
-				UPDATE IP
-				SET strLocationName = L.strLocationName
-				FROM @tblICItemPricing IP
-				JOIN tblICItemLocation IL ON IL.intItemLocationId = IP.intItemLocationId
-				JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
-			END
-			ELSE
-			BEGIN
-				UPDATE IP
-				SET intConcurrencyId = IP.intConcurrencyId + 1
-					,dblStandardCost = dbo.fnCTCalculateAmountBetweenCurrency(@intCurrencyID, NULL, @dblStandardCost, 1)
-					,dtmDateChanged = GETDATE()
-				OUTPUT inserted.intItemPricingId
-					,inserted.intItemLocationId
-					,L.strLocationName
-					,'Updated'
-					,deleted.dblStandardCost
-					,inserted.dblStandardCost
-					,deleted.dtmDateChanged
-					,inserted.dtmDateChanged
-				INTO @tblICItemPricing
-				FROM tblICItemPricing IP
-				JOIN tblICItemLocation IL ON IL.intItemLocationId = IP.intItemLocationId
-					AND IL.intItemId = @intItemId
-					AND IL.intLocationId = @intCompanyLocationId
-				JOIN tblSMCompanyLocation L ON L.intCompanyLocationId = IL.intLocationId
-			END
-
-			DECLARE @strDetails NVARCHAR(MAX) = ''
-
-			IF EXISTS (
-					SELECT 1
-					FROM @tblICItemPricing
-					WHERE strRowState = 'Added'
-					)
-			BEGIN
-				SELECT @strDetails += '{"change":"tblICItemPricings","children":['
-
-				SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + strLocationName + '","keyValue":' + ltrim(intItemPricingId) + ',"iconCls":"small-new-plus","leaf":true},'
-				FROM @tblICItemPricing
-				WHERE strRowState = 'Added'
-
-				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
-
-				SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Standard Cost/Price"},'
-
-				IF (LEN(@strDetails) > 1)
+				IF @intCurrencyExchangeRateId > 0
 				BEGIN
-					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+					DELETE
+					FROM tblSMCurrencyExchangeRate
+					WHERE intCurrencyExchangeRateId = @intCurrencyExchangeRateId
 
-					EXEC uspSMAuditLog @keyValue = @intItemId
-						,@screenName = 'Inventory.view.Item'
+					EXEC uspSMAuditLog @keyValue = @intCurrencyExchangeRateId
+						,@screenName = 'i21.view.CurrencyExchangeRate'
 						,@entityId = @intUserId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
-				END
-			END
-
-			WHILE EXISTS (
-					SELECT TOP 1 NULL
-					FROM @tblICItemPricing
-					WHERE strRowState = 'Updated'
-					)
-			BEGIN
-				SELECT @intItemPricingId = NULL
-					,@strLocationName = NULL
-					,@dblOldStandardCost = NULL
-					,@dblNewStandardCost = NULL
-					,@dtmOldDateChanged = NULL
-					,@dtmNewDateChanged = NULL
-					,@strDetails = NULL
-
-				SELECT TOP 1 @intItemPricingId = intItemPricingId
-					,@strLocationName = strLocationName
-					,@dblOldStandardCost = dblOldStandardCost
-					,@dblNewStandardCost = dblNewStandardCost
-					,@dtmOldDateChanged = dtmOldDateChanged
-					,@dtmNewDateChanged = dtmNewDateChanged
-				FROM @tblICItemPricing
-				WHERE strRowState = 'Updated'
-
-				SET @strDetails = '{  
-						"action":"Updated",
-						"change":"Updated - Record: ' + LTRIM(@strItemNo) + '",
-						"keyValue":' + LTRIM(@intItemId) + ',
-						"iconCls":"small-tree-modified",
-						"children":[  
-							{  
-								"change":"tblICItemPricings",
-								"children":[  
-									{  
-									"action":"Updated",
-									"change":"Updated - Record: ' + LTRIM(@strLocationName) + '",
-									"keyValue":' + LTRIM(@intItemPricingId) + ',
-									"iconCls":"small-tree-modified",
-									"children":
-										[   
-											'
-
-				IF @dtmOldDateChanged <> @dtmNewDateChanged
-					SET @strDetails = @strDetails + '
-											{  
-											"change":"dtmDateChanged",
-											"from":"' + LTRIM(@dtmOldDateChanged) + '",
-											"to":"' + LTRIM(@dtmNewDateChanged) + '",
-											"leaf":true,
-											"iconCls":"small-gear",
-											"isField":true,
-											"keyValue":' + LTRIM(@intItemPricingId) + ',
-											"associationKey":"tblICItemPricings",
-											"changeDescription":"Date Changed",
-											"hidden":false
-											},'
-
-				IF @dblOldStandardCost <> @dblNewStandardCost
-					SET @strDetails = @strDetails + '
-											{  
-											"change":"dblStandardCost",
-											"from":"' + LTRIM(@dblOldStandardCost) + '",
-											"to":"' + LTRIM(@dblNewStandardCost) + '",
-											"leaf":true,
-											"iconCls":"small-gear",
-											"isField":true,
-											"keyValue":' + LTRIM(@intItemPricingId) + ',
-											"associationKey":"tblICItemPricings",
-											"changeDescription":"Standard Cost",
-											"hidden":false
-											},'
-
-				IF RIGHT(@strDetails, 1) = ','
-					SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
-				SET @strDetails = @strDetails + '
-									]
-								}
-							],
-							"iconCls":"small-tree-grid",
-							"changeDescription":"Standard Cost/Price"
-							}
-						]
-						}'
-
-				IF @dtmOldDateChanged <> @dtmNewDateChanged
-					OR @dblOldStandardCost <> @dblNewStandardCost
-				BEGIN
-					EXEC uspSMAuditLog @keyValue = @intItemId
-						,@screenName = 'Inventory.view.Item'
-						,@entityId = @intUserId
-						,@actionType = 'Updated'
-						,@actionIcon = 'small-tree-modified'
-						,@details = @strDetails
+						,@actionType = 'Deleted'
 				END
 
-				DELETE
-				FROM @tblICItemPricing
-				WHERE intItemPricingId = @intItemPricingId
+				GOTO MOVE_TO_ARCHIVE
+			END
+			ELSE IF @intActionId = 1
+				OR @intActionId = 2
+			BEGIN
+				IF @intCurrencyExchangeRateId IS NULL
+				BEGIN
+					INSERT INTO tblSMCurrencyExchangeRate (
+						intFromCurrencyId
+						,intToCurrencyId
+						,intSort
+						,intConcurrencyId
+						)
+					SELECT @intFromCurrencyID
+						,@intToCurrencyID
+						,0
+						,1
+
+					SELECT @intCurrencyExchangeRateId = SCOPE_IDENTITY()
+
+					INSERT INTO tblSMCurrencyExchangeRateDetail (
+						intCurrencyExchangeRateId
+						,dblRate
+						,intRateTypeId
+						,dtmValidFromDate
+						,strSource
+						,dtmCreatedDate
+						,intConcurrencyId
+						)
+					SELECT @intCurrencyExchangeRateId
+						,@dblRate
+						,@intRateTypeId
+						,@dtmEffectiveDate
+						,'User Input'
+						,GETDATE()
+						,1
+
+					SELECT @intCurrencyExchangeRateDetailId = SCOPE_IDENTITY()
+
+					EXEC uspSMAuditLog @keyValue = @intCurrencyExchangeRateId
+						,@screenName = 'i21.view.CurrencyExchangeRate'
+						,@entityId = @intUserId
+						,@actionType = 'Created'
+						,@actionIcon = 'small-new-plus'
+						,@details = ''
+				END
+				ELSE
+				BEGIN
+					UPDATE tblSMCurrencyExchangeRate
+					SET intConcurrencyId = intConcurrencyId + 1
+					WHERE intCurrencyExchangeRateId = @intCurrencyExchangeRateId
+
+					SELECT @intCurrencyExchangeRateDetailId = intCurrencyExchangeRateDetailId
+					FROM tblSMCurrencyExchangeRateDetail
+					WHERE intCurrencyExchangeRateId = @intCurrencyExchangeRateId
+						AND intRateTypeId = @intRateTypeId
+						AND dtmValidFromDate = @dtmEffectiveDate
+
+					DELETE
+					FROM @tblSMCurrencyExchangeRateDetail
+
+					DECLARE @strDetails NVARCHAR(MAX) = ''
+
+					IF @intCurrencyExchangeRateDetailId IS NULL
+					BEGIN
+						INSERT INTO tblSMCurrencyExchangeRateDetail (
+							intCurrencyExchangeRateId
+							,dblRate
+							,intRateTypeId
+							,dtmValidFromDate
+							,strSource
+							,dtmCreatedDate
+							,intConcurrencyId
+							)
+						OUTPUT inserted.intCurrencyExchangeRateDetailId
+							,inserted.intRateTypeId
+							,NULL
+							,inserted.dblRate
+						INTO @tblSMCurrencyExchangeRateDetail
+						SELECT @intCurrencyExchangeRateId
+							,@dblRate
+							,@intRateTypeId
+							,@dtmEffectiveDate
+							,'User Input'
+							,GETDATE()
+							,1
+
+						SELECT @intCurrencyExchangeRateDetailId = SCOPE_IDENTITY()
+
+						IF EXISTS (
+								SELECT 1
+								FROM @tblSMCurrencyExchangeRateDetail
+								)
+						BEGIN
+							SELECT @strDetails += '{"change":"tblSMCurrencyExchangeRateDetails","children":['
+
+							SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + LTRIM(intCurrencyExchangeRateDetailId) + '","keyValue":' + LTRIM(intCurrencyExchangeRateDetailId) + ',"iconCls":"small-new-plus","leaf":true},'
+							FROM @tblSMCurrencyExchangeRateDetail ERD
+
+							SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+							SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Exchange Rate Details"}'
+						END
+					END
+					ELSE
+					BEGIN
+						UPDATE ERD
+						SET intConcurrencyId = ERD.intConcurrencyId + 1
+							,dblRate = @dblRate
+						OUTPUT inserted.intCurrencyExchangeRateDetailId
+							,inserted.intRateTypeId
+							,deleted.dblRate
+							,inserted.dblRate
+						INTO @tblSMCurrencyExchangeRateDetail
+						FROM tblSMCurrencyExchangeRateDetail ERD
+						WHERE intCurrencyExchangeRateDetailId = @intCurrencyExchangeRateDetailId
+
+						IF EXISTS (
+								SELECT 1
+								FROM @tblSMCurrencyExchangeRateDetail
+								WHERE dblOldRate <> dblNewRate
+								)
+						BEGIN
+							SELECT @dblOldRate = NULL
+								,@dblNewRate = NULL
+
+							SELECT @dblOldRate = dblOldRate
+								,@dblNewRate = dblNewRate
+							FROM @tblSMCurrencyExchangeRateDetail
+
+							SET @strDetails = '{  
+										"change":"tblSMCurrencyExchangeRateDetails",
+										"children":[  
+											{  
+											"action":"Updated",
+											"change":"Updated - Record: ' + LTRIM(@intCurrencyExchangeRateDetailId) + '",
+											"keyValue":' + LTRIM(@intCurrencyExchangeRateDetailId) + ',
+											"iconCls":"small-tree-modified",
+											"children":
+												[   
+													'
+							SET @strDetails = @strDetails + '
+													{  
+													"change":"dblRate",
+													"from":"' + LTRIM(@dblOldRate) + '",
+													"to":"' + LTRIM(@dblNewRate) + '",
+													"leaf":true,
+													"iconCls":"small-gear",
+													"isField":true,
+													"keyValue":' + LTRIM(@intCurrencyExchangeRateDetailId) + ',
+													"associationKey":"tblSMCurrencyExchangeRateDetails",
+													"changeDescription":"Rate",
+													"hidden":false
+													},'
+
+							IF RIGHT(@strDetails, 1) = ','
+								SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+							SET @strDetails = @strDetails + '
+											]
+										}
+									],
+									"iconCls":"small-tree-grid",
+									"changeDescription":"Exchange Rate Details"
+									}'
+						END
+					END
+
+					IF (LEN(@strDetails) > 1)
+					BEGIN
+						EXEC uspSMAuditLog @keyValue = @intCurrencyExchangeRateId
+							,@screenName = 'i21.view.CurrencyExchangeRate'
+							,@entityId = @intUserId
+							,@actionType = 'Updated'
+							,@actionIcon = 'small-tree-modified'
+							,@details = @strDetails
+					END
+				END
 			END
 
 			MOVE_TO_ARCHIVE:
@@ -420,13 +444,13 @@ BEGIN TRY
 				,strRateType
 				,dtmEffectiveDate
 			FROM tblIPCurrencyRateStage
-			WHERE intCurrencyRateStageId = @intItemPriceStageId
+			WHERE intCurrencyRateStageId = @intCurrencyRateStageId
 
-			SELECT @intNewItemPriceStageId = SCOPE_IDENTITY()
+			SELECT @intNewCurrencyRateStageId = SCOPE_IDENTITY()
 
 			DELETE
-			FROM tblIPItemPriceStage
-			WHERE intItemPriceStageId = @intItemPriceStageId
+			FROM tblIPCurrencyRateStage
+			WHERE intCurrencyRateStageId = @intCurrencyRateStageId
 
 			COMMIT TRAN
 		END TRY
@@ -464,18 +488,18 @@ BEGIN TRY
 				,dtmEffectiveDate
 				,@ErrMsg
 			FROM tblIPCurrencyRateStage
-			WHERE intCurrencyRateStageId = @intItemPriceStageId
+			WHERE intCurrencyRateStageId = @intCurrencyRateStageId
 
-			SELECT @intNewItemPriceStageId = SCOPE_IDENTITY()
+			SELECT @intNewCurrencyRateStageId = SCOPE_IDENTITY()
 
 			DELETE
-			FROM tblIPItemPriceStage
-			WHERE intItemPriceStageId = @intItemPriceStageId
+			FROM tblIPCurrencyRateStage
+			WHERE intCurrencyRateStageId = @intCurrencyRateStageId
 		END CATCH
 
-		SELECT @intItemPriceStageId = MIN(intItemPriceStageId)
-		FROM tblIPItemPriceStage
-		WHERE intItemPriceStageId > @intItemPriceStageId
+		SELECT @intCurrencyRateStageId = MIN(intCurrencyRateStageId)
+		FROM tblIPCurrencyRateStage
+		WHERE intCurrencyRateStageId > @intCurrencyRateStageId
 	END
 
 	IF ISNULL(@strFinalErrMsg, '') <> ''
