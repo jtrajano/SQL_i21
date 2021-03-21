@@ -9223,6 +9223,7 @@
     <Build Include="dbo\Stored Procedures\uspAPAddPaymentSchedules.sql" />
     <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
     <Build Include="dbo\Tables\tblICItemCategoryChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
