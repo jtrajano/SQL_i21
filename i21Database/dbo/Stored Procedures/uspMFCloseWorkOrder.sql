@@ -697,6 +697,24 @@ BEGIN TRY
 	EXEC [dbo].[uspICPostStockReservation] @intTransactionId = @intOrderHeaderId
 		,@intTransactionTypeId = 34
 		,@ysnPosted = 1
+	
+	DELETE
+	FROM dbo.tblMFWorkOrderPreStage
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND strRowState = 'Modified'
+		AND intStatusId IS NULL
+
+	INSERT INTO dbo.tblMFWorkOrderPreStage (
+		intWorkOrderId
+		,intWorkOrderStatusId
+		,intUserId
+		,strRowState
+		)
+	SELECT @intWorkOrderId
+		,13
+		,@userId
+		,'Modified'
+
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION

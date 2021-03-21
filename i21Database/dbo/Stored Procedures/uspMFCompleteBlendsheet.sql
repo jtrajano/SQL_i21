@@ -775,6 +775,23 @@ BEGIN TRY
 		WHERE intId > @intId
 	END
 
+	DELETE
+	FROM dbo.tblMFWorkOrderPreStage
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND strRowState = 'Modified'
+		AND intStatusId IS NULL
+
+	INSERT INTO dbo.tblMFWorkOrderPreStage (
+			intWorkOrderId
+			,intWorkOrderStatusId
+			,intUserId
+			,strRowState
+			)
+	SELECT @intWorkOrderId
+		,13
+		,@intUserId
+		,'Modified'
+
 	COMMIT TRANSACTION
 
 	EXEC sp_xml_removedocument @idoc
