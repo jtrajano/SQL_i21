@@ -9222,6 +9222,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPRoute.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPRoute.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessProductionOrderAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
