@@ -86,28 +86,58 @@ SELECT intId				= I.intId
 	, ysnPost				= CAST(0 AS BIT)
 FROM @InvoiceEAEntries I
 INNER JOIN tblARCustomer C ON RTRIM(LTRIM(I.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(I.intEntityId, 0)
-INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber))
+INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) OR RTRIM(LTRIM(I.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationName))
 LEFT JOIN tblICItem ITEM ON I.strItemNo = ITEM.strItemNo
 LEFT JOIN tblICUnitMeasure UOM ON I.intUnitMeasureId = UOM.intUnitMeasureId
 LEFT JOIN tblICItemUOM IUOM ON ITEM.intItemId = IUOM.intItemId AND I.intUnitMeasureId = IUOM.intUnitMeasureId
 
+DECLARE @Logs TABLE (strError NVARCHAR(500), strField NVARCHAR(100), strValue NVARCHAR(500), intLineNumber INT NULL, intLinePosition INT NULL, strLogLevel NVARCHAR(50))
+
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+SELECT 'The item does not exists.', 'itemId', 'Error', e.strItemNo
+FROM @InvoiceEAEntries e
+LEFT JOIN tblICItem i ON i.strItemNo = e.strItemNo
+WHERE i.intItemId IS NULL
+
 IF EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries IE INNER JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId)
-	RAISERROR('Invoice already exists', 16, 1)
+BEGIN
+	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+	SELECT 'The invoice already exists. Ensure that the invoiceOriginId is not yet in the system.', 'invoiceOriginId', 'Error',
+		(SELECT TOP 1 IE.strInvoiceOriginId FROM @InvoiceEntries IE LEFT JOIN tblARInvoice I ON IE.strInvoiceOriginId = I.strInvoiceOriginId)
+END
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(IE.intEntityId, 0))
-	 RAISERROR('Customer not found', 16, 1)
-ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)))
-	RAISERROR('Location not found', 16, 1)
+BEGIN
+	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+	SELECT 'The customer does not exists. Please ensure that the entityId or the customerId is correct.', 'entityId/customerId', 'Error',
+		(SELECT TOP 1 ISNULL(CAST(IE.intEntityId AS NVARCHAR(200)), IE.strCustomerNumber) FROM @InvoiceEAEntries IE LEFT JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(IE.intEntityId, 0))
+END
+ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) OR RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationName)))
+BEGIN
+	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+	SELECT 'The location does not exists.', 'companyLocationId', 'Error',
+		(SELECT TOP 1 IE.strCompanyLocation FROM @InvoiceEAEntries IE LEFT JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) OR RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationName)))
+END
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
-	RAISERROR('Invalid source transaction', 16, 1)
+BEGIN
+	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+	SELECT 'The source transaction is invalid.', 'sourceTransaction', 'Error',
+		(SELECT TOP 1 strSourceTransaction FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
+END
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
-	RAISERROR('No invoice to import', 16, 1)
+BEGIN
+	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+	SELECT 'There are no invoices to import.', null, 'Error', NULL
+END
 ELSE 
 BEGIN
 	EXEC uspARProcessInvoicesByBatch @InvoiceEntries, @LineItemTaxEntries, @intUserId, 15, 1, NULL, @ErrorMessage OUTPUT, @LogId OUTPUT
-
+	
 	SET @ErrorMessage = ISNULL(@ErrorMessage, 'Failed to import invoice')
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
 		RAISERROR(@ErrorMessage, 16, 1)
 END
 
+SELECT * FROM @Logs
+
 RETURN 0
+

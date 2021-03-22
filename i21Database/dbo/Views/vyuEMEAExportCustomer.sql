@@ -27,6 +27,7 @@ SELECT [intId] 				= e.intEntityId
 	 , [Comment]			= ''
 	 , [LicenseApplicator] 	= g.strLicenseNo 
 	 , [LicenseExpirationDate] = g.dtmExpirationDate
+	 , [Country]			= e.strCountry
 FROM vyuEMEntityCustomerSearch e
 LEFT JOIN tblARCustomer c ON c.intEntityId = e.intEntityId
 LEFT JOIN tblARCustomerApplicatorLicense g ON g.intEntityCustomerId = e.intEntityId

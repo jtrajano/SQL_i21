@@ -30,6 +30,7 @@
 	strAddress2				NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,	
 	--City
 	strCity					NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,	
+	strCountry				NVARCHAR(1000) COLLATE Latin1_General_CI_AS NULL,	
 	--StateProv
 	strStateProv			NVARCHAR(1000) COLLATE Latin1_General_CI_AS NOT NULL,	
 	--PostalCode

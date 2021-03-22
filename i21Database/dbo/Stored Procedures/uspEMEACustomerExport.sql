@@ -20,6 +20,7 @@ INSERT INTO tblAREACustomerExport (
 	, strFirstName
 	, strAddress1
 	, strAddress2
+	, strCountry
 	, strCity
 	, strStateProv
 	, strPostalCode
@@ -46,6 +47,7 @@ SELECT intEntityId			= intId
 	, strFirstName			= LTRIM(RTRIM(FirstName))
 	, strAddress1			= LTRIM(RTRIM(Address1))
 	, strAddress2			= LTRIM(RTRIM(Address2))
+	, strCountry			= LTRIM(RTRIM(Country))
 	, strCity				= LTRIM(RTRIM(City))
 	, strStateProv			= LTRIM(RTRIM(StateProv))
 	, strPostalCode			= LTRIM(RTRIM(PostalCode))
