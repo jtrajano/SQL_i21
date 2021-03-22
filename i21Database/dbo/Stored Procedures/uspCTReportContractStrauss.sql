@@ -240,7 +240,7 @@ BEGIN TRY
 			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
 			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and c.ysnApproval = 0
 			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
-			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = 'Contract' and e.ysnApproval = 1
+			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and e.ysnApproval = 1
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
 		where
 			a.intContractHeaderId = @intContractHeaderId
