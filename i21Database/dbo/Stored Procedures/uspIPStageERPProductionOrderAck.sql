@@ -42,7 +42,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Production Order'
+	WHERE strType = 'Production Order Ack'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -137,7 +137,7 @@ BEGIN TRY
 					,strInfo2
 					)
 				VALUES (
-					'Production Order'
+					'Production Order Ack'
 					,'Success'
 					,@WorkOrderNo
 					,@ERPShopOrderNo
@@ -196,7 +196,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Production Order'
+			AND strType = 'Production Order Ack'
 	END
 
 	SELECT strMessageType
