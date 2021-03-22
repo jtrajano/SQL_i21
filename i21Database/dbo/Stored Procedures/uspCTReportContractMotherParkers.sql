@@ -274,6 +274,8 @@ BEGIN TRY
 							END
 							+'''s Call vs '+ convert(nvarchar(20),convert(numeric(10,2),SQ.dblNoOfLots)) + ' lot(s) ' + SQ.strFutureMonth + ' ' + SQ.strFutMarketName
 					end
+		,strPricingLabel = case when CH.intPricingTypeId = 6 then null else 'Pricing' end
+		,strPricingLabelColon = case when CH.intPricingTypeId = 6 then null else ':' end
 		,strWeight = W1.strWeightGradeDesc  
 		,strTerm = TM.strTerm  
 		,strGrade = W2.strWeightGradeDesc  
@@ -285,6 +287,8 @@ BEGIN TRY
 									else
 										ISNULL(TX.strText,'') 
 								end
+		,strContractLabel = case when CH.intPricingTypeId = 6 then null else 'Contract' end
+		,strContractLabelColon = case when CH.intPricingTypeId = 6 then null else ':' end
 		  
 		,strBuyer = CASE WHEN CH.intContractTypeId = 1 THEN @strCompanyName ELSE EY.strEntityName END  
 		,strSeller = CASE WHEN CH.intContractTypeId = 2 THEN @strCompanyName ELSE EY.strEntityName END
