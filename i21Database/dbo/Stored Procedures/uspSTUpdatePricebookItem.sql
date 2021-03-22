@@ -1741,7 +1741,7 @@ BEGIN
 													@strUpcCode					= NULL 
 													, @strDescription			= NULL 
 													, @intItemId				= @intLoopRetailItemId 
-													, @intItemPricingId			= @intPricingId 
+													, @intItemPricingId			= @intRetailPricingId 
 													, @intEffectiveItemPriceId	= @intLoopRetailEffectiveItemCostId 
 
 													-- update params
