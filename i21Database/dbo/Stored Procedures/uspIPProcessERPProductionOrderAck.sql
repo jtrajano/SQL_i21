@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessProductionOrderAck
+﻿CREATE PROCEDURE uspIPProcessERPProductionOrderAck
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
