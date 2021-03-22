@@ -32,6 +32,17 @@ BEGIN TRY
 	DECLARE @intManufacturingCellId INT
 		,@intSubLocationId INT
 		,@intItemFactoryManufacturingCellId INT
+	DECLARE @tblICItemFactory TABLE (
+		intItemFactoryId INT
+		,strRowState NVARCHAR(50)
+		)
+	DECLARE @tblICItemFactoryManufacturingCell TABLE (
+		intItemFactoryManufacturingCellId INT
+		,intItemFactoryId INT
+		,intManufacturingCellId INT
+		,strRowState NVARCHAR(50)
+		)
+	DECLARE @strLocationName NVARCHAR(50)
 
 	SELECT @intUserId = intEntityId
 	FROM tblSMUserSecurity WITH (NOLOCK)
@@ -70,6 +81,7 @@ BEGIN TRY
 				,@strCreatedBy = NULL
 
 			SELECT @strItemNo = NULL
+				,@strLocationName = NULL
 
 			SELECT @intCompanyLocationId = NULL
 				,@intItemId = NULL
@@ -102,6 +114,7 @@ BEGIN TRY
 			END
 
 			SELECT @intCompanyLocationId = intCompanyLocationId
+				,@strLocationName = strLocationName
 			FROM dbo.tblSMCompanyLocation
 			WHERE strLotOrigin = @strCompanyLocation
 
@@ -138,13 +151,22 @@ BEGIN TRY
 			WHERE intItemId = @intItemId
 				AND intFactoryId = @intCompanyLocationId
 
+			DELETE
+			FROM @tblICItemFactory
+
+			DELETE
+			FROM @tblICItemFactoryManufacturingCell
+
 			IF @intActionId = 4
 			BEGIN
 				IF @intItemFactoryId > 0
 				BEGIN
-					DELETE
-					FROM tblICItemFactory
-					WHERE intItemFactoryId = @intItemFactoryId
+					DELETE F
+					OUTPUT deleted.intItemFactoryId
+						,'Deleted'
+					INTO @tblICItemFactory
+					FROM tblICItemFactory F
+					WHERE F.intItemFactoryId = @intItemFactoryId
 				END
 			END
 			ELSE IF @intActionId = 1
@@ -159,6 +181,9 @@ BEGIN TRY
 						,intSort
 						,intConcurrencyId
 						)
+					OUTPUT inserted.intItemFactoryId
+						,'Added'
+					INTO @tblICItemFactory
 					SELECT @intItemId
 						,@intCompanyLocationId
 						,0
@@ -249,6 +274,11 @@ BEGIN TRY
 							,intSort
 							,intConcurrencyId
 							)
+						OUTPUT inserted.intItemFactoryManufacturingCellId
+							,inserted.intItemFactoryId
+							,inserted.intManufacturingCellId
+							,'Added'
+						INTO @tblICItemFactoryManufacturingCell
 						SELECT @intItemFactoryId
 							,@intManufacturingCellId
 							,0
@@ -268,6 +298,90 @@ BEGIN TRY
 					WHERE intItemRouteDetailStageId > @intItemRouteDetailStageId
 						AND intItemRouteStageId = @intItemRouteStageId
 				END
+			END
+
+			DECLARE @strDetails NVARCHAR(MAX) = ''
+
+			IF EXISTS (
+					SELECT 1
+					FROM @tblICItemFactory
+					WHERE strRowState = 'Added'
+						OR strRowState = 'Deleted'
+					)
+			BEGIN
+				SELECT @strDetails += '{"change":"tblICItemFactories","children":['
+
+				SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + @strLocationName + '","keyValue":' + ltrim(intItemFactoryId) + ',"iconCls":"small-new-plus","leaf":true},'
+				FROM @tblICItemFactory
+				WHERE strRowState = 'Added'
+
+				SELECT @strDetails += '{"action":"Deleted","change":"Deleted - Record: ' + @strLocationName + '","keyValue":' + ltrim(intItemFactoryId) + ',"iconCls":"small-new-minus","leaf":true},'
+				FROM @tblICItemFactory
+				WHERE strRowState = 'Deleted'
+
+				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+				SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Factory Association"},'
+			END
+
+			IF (LEN(@strDetails) > 1)
+			BEGIN
+				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+				EXEC uspSMAuditLog @keyValue = @intItemId
+					,@screenName = 'Inventory.view.Item'
+					,@entityId = @intUserId
+					,@actionType = 'Updated'
+					,@actionIcon = 'small-tree-modified'
+					,@details = @strDetails
+			END
+
+			SELECT @strDetails = ''
+
+			IF EXISTS (
+					SELECT 1
+					FROM @tblICItemFactoryManufacturingCell
+					WHERE strRowState = 'Added'
+					)
+			BEGIN
+				SET @strDetails = '{
+							"change":"tblICItemFactories",
+										"children":[  
+											{  
+											"action":"Updated",
+											"change":"Updated - Record: ' + LTRIM(@strLocationName) + '",
+											"keyValue":' + LTRIM(@intItemFactoryId) + ',
+											"iconCls":"small-tree-modified",
+											"children":
+												['
+
+				SELECT @strDetails += '{"change":"tblICItemFactoryManufacturingCells","children":['
+
+				SELECT @strDetails += '{"action":"Created","change":"Created - Record: ' + MC.strCellName + '","keyValue":' + LTRIM(intItemFactoryManufacturingCellId) + ',"iconCls":"small-new-plus","leaf":true},'
+				FROM @tblICItemFactoryManufacturingCell FMC
+				JOIN tblMFManufacturingCell MC ON MC.intManufacturingCellId = FMC.intManufacturingCellId
+				WHERE strRowState = 'Added'
+
+				SET @strDetails = SUBSTRING(@strDetails, 0, LEN(@strDetails))
+
+				SELECT @strDetails += '],"iconCls":"small-tree-grid","changeDescription":"Manufacturing Cell Association"}'
+
+				SET @strDetails += '
+											]
+										}
+									],
+									"iconCls":"small-tree-grid",
+									"changeDescription":"Factory Association"
+									}
+								]
+							}'
+
+				EXEC uspSMAuditLog @keyValue = @intItemId
+					,@screenName = 'Inventory.view.Item'
+					,@entityId = @intUserId
+					,@actionType = 'Updated'
+					,@actionIcon = 'small-tree-modified'
+					,@details = @strDetails
 			END
 
 			MOVE_TO_ARCHIVE:
