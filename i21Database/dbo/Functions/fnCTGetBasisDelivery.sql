@@ -89,7 +89,24 @@ BEGIN
 		WHERE CBL1.strTransactionType LIKE '%Basis Deliveries'
 			AND CBL1.dtmTransactionDate < DATEADD(DAY, 1, @dtmDate)
 			AND isnull(CBL1.dblQty,0) <> 0
-	)
+	), DWGPrice as (
+		select
+			ar.intPriceFixationDetailId
+			,dblQtyShipped = sum(di.dblQtyShipped) * -1
+		from
+			tblCTContractBalanceLog price
+			join tblCTContractHeader ch on ch.intContractHeaderId = price.intContractHeaderId
+			join tblCTPriceFixationDetailAPAR ar on ar.intPriceFixationDetailId = price.intTransactionReferenceDetailId
+			join tblARInvoiceDetail di on di.intInvoiceDetailId = ar.intInvoiceDetailId
+			left join tblCTWeightGrade w on w.intWeightGradeId = ch.intWeightId
+			left join tblCTWeightGrade g on g.intWeightGradeId = ch.intGradeId
+		where
+			isnull(ch.ysnLoad,0) = 1
+			and price.strTransactionType = 'Sales Basis Deliveries'
+			and (w.strWhereFinalized = 'Destination' or g.strWhereFinalized = 'Destination')
+		group by
+			ar.intPriceFixationDetailId
+	 ) 
 
 	INSERT INTO @Transaction (intContractHeaderId
 		, intContractDetailId
@@ -148,9 +165,9 @@ BEGIN
 		, CBL1.intFutureMonthId
 		, intCurrencyId = CBL1.intBasisCurrencyId
 		, dtmDate = CBL1.dtmTransactionDate
-		, dblQuantity = CBL1.dblQty
+		, dblQuantity = isnull(DWGPrice.dblQtyShipped,CBL1.dblQty)
 		, dblRunningBalance = SUM(CBL2.dblQty)
-		, dblQtyInCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(CBL1.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),CUM.intUnitMeasureId,CBL1.dblQty)	
+		, dblQtyInCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(CBL1.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),CUM.intUnitMeasureId,isnull(DWGPrice.dblQtyShipped,CBL1.dblQty))	
 		, dblRunningBalanceInCommodityStockUOM = dbo.fnCTConvertQtyToTargetCommodityUOM(CBL1.intCommodityId,dbo.fnCTGetCommodityUnitMeasure(CH.intCommodityUOMId),CUM.intUnitMeasureId,SUM(CBL2.dblQty))
 		, OBC.intSequenceUnitMeasureId
 		, OBC.strSequenceUnitMeasure
@@ -174,6 +191,7 @@ BEGIN
 	INNER JOIN tblICCommodityUnitMeasure CUM ON CUM.intCommodityId = CH.intCommodityId AND CUM.ysnStockUnit=1
 	INNER JOIN OpenBasisContract OBC ON CBL1.intContractDetailId = OBC.intContractDetailId AND CBL1.intContractHeaderId = OBC.intContractHeaderId
 	INNER JOIN tblCTContractStatus CS ON CS.intContractStatusId = OBC.intContractStatusId
+ 	left join DWGPrice on DWGPrice.intPriceFixationDetailId = CBL1.intTransactionReferenceDetailId
 	GROUP BY CBL1.dtmCreatedDate
 		, CBL1.intContractBalanceLogId
 		, CBL1.intContractHeaderId
@@ -212,6 +230,7 @@ BEGIN
 		, OBC.intSubBookId
 		, CS.strContractStatus
 		, OBC.dblQtyUnpriced
+  		, DWGPrice.dblQtyShipped  
 	ORDER BY CBL1.dtmCreatedDate, CBL1.intContractBalanceLogId ASC;
  
  	DELETE FROM @Transaction
