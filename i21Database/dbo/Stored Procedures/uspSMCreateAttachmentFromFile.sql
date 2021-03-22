@@ -323,6 +323,7 @@ BEGIN
 					, strRecordNo
 					, dtmDateModified
 					, intSize
+					, intEntityId
 					, intConcurrencyId
 				)
 				SELECT doc.strName
@@ -332,6 +333,7 @@ BEGIN
 					, @recordId
 					, GETDATE()
 					, doc.intSize
+					, doc.intEntityId
 					, 1
 				FROM tblSMNewDocument doc 
 				INNER JOIN tblSMUpload upload ON doc.intUploadId = upload.intUploadId

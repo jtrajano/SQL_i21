@@ -46,9 +46,9 @@ BEGIN
 		BEGIN TRANSACTION
 
 		-- CROSS REFRENCE VENDOR MAPPING
-		UPDATE D SET D.intVendorDefaultId = V.intVendorDefaultId
+		UPDATE D SET D.intVendorDefaultId = CASE WHEN D.intVendorDefaultId = V.intVendorDefaultId AND D.ysnGeneric = 1 THEN V.intVendorDefaultId WHEN D.intVendorDefaultId IS NULL THEN  V.intVendorDefaultId ELSE NULL END
 		FROM tblCCImportDealerCreditCardReconDetail D
-		INNER JOIN vyuCCCrossReferenceVendor V ON V.strImportValue = D.strVendor
+		LEFT JOIN vyuCCCrossReferenceVendor V ON V.strImportValue = D.strVendor
 		WHERE D.ysnGeneric = 1
 
 

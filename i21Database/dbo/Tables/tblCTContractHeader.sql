@@ -48,7 +48,7 @@ CREATE TABLE [dbo].[tblCTContractHeader](
     [intCountryId] INT NULL, 
     [intCompanyLocationPricingLevelId] INT NULL, 
     [ysnProvisional] BIT NULL, 
-    [ysnLoad] BIT NULL, 
+    [ysnLoad] BIT NULL DEFAULT ((0)), 
     [intNoOfLoad] INT NULL, 
     [dblQuantityPerLoad] NUMERIC(18, 6) NULL, 
     [intLoadUOMId] INT NULL, 

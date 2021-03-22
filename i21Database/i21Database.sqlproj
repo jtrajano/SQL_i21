@@ -1334,6 +1334,8 @@
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustment.sql" />
     <Build Include="dbo\Tables\tblSTRetailPriceAdjustmentDetail.sql" />
     <Build Include="dbo\Views\vyuICGetLot.sql" />
+	<Build Include="dbo\Stored Procedures\uspSTCopyCostItemPricing.sql" />
+    <Build Include="dbo\Stored Procedures\uspSTCopyPriceItemPricing.sql" />
     <Build Include="dbo\Stored Procedures\uspSTRetailChangeReport.sql" />
     <Build Include="dbo\Stored Procedures\uspSTCommanderTranslog.sql" />
     <Build Include="dbo\Stored Procedures\uspSTUpdateItemDiscontinued.sql" />
@@ -9200,6 +9202,34 @@
     <Build Include="dbo\Stored Procedures\uspIPStageXML_ERP.sql" />
     <Build Include="dbo\Tables\tblIPInitialAck.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateInitialAck_ERP.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractMotherParkers.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetailMotherParkers.sql" />
+    <Build Include="dbo\Stored Procedures\uspAGCalculateWOTotal.sql" />
+    <Build Include="dbo\Tables\tblIPItemPriceStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemPriceError.sql" />
+    <Build Include="dbo\Tables\tblIPItemPriceArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPItemPrice.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPItemPrice.sql" />
+    <Build Include="dbo\Tables\tblIPCurrencyRateStage.sql" />
+    <Build Include="dbo\Tables\tblIPCurrencyRateError.sql" />
+    <Build Include="dbo\Tables\tblIPCurrencyRateArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPExchangeRate.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPExchangeRate.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteError.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteArchive.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteDetailStage.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteDetailError.sql" />
+    <Build Include="dbo\Tables\tblIPItemRouteDetailArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPRoute.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPRoute.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessProductionOrderAck.sql" />
+    <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql" />
+    <Build Include="dbo\Tables\tblICItemCategoryChangeLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspICRebuildStocksWithCategoryChange.sql" />
+    <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
+    <Build Include="dbo\Tables\tblICBackupDetail.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
