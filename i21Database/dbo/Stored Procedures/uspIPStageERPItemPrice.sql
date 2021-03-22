@@ -18,7 +18,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Item Price'
+	WHERE strType = 'Item Standard Price'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -170,7 +170,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Item Price'
+			AND strType = 'Item Standard Price'
 	END
 
 	IF (ISNULL(@strInfo1, '')) <> ''
