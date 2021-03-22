@@ -154,13 +154,13 @@ BEGIN TRY
 			SELECT @strDetailXML = ''
 
 			SELECT @strDetailXML = @strDetailXML + '<line  TrxSequenceNo="' + ltrim(WP.intWorkOrderInputParentLotId) + '" ParentTrxSequenceNo="' + ltrim(@intWorkOrderPreStageId) + '">'
-			--+'<TrxSequenceNo>'+ltrim(WP.intWorkOrderInputParentLotId) +'</TrxSequenceNo>'
-			--	+'<ItemNo>'+	I.strItemNo  +'</ItemNo>'
-			--	+'<MotherLotNo>'+	PL.strParentLotNumber   +'</MotherLotNo>'
-			--	+'<StorageUnit>'+	SL.strName    +'</StorageUnit>'
-			--	+'<Quantity>'+	ltrim(Convert(Numeric(18,6),WP.dblQuantity))    +'</Quantity>'
-			--	+'<QuantityUOM>'+	UM.strUnitMeasure    +'</QuantityUOM>'
-			--	+'</line>'FROM dbo.tblMFWorkOrderInputParentLot WP
+			+'<TrxSequenceNo>'+ltrim(WP.intWorkOrderInputParentLotId) +'</TrxSequenceNo>'
+				+'<ItemNo>'+	I.strItemNo  +'</ItemNo>'
+				+'<MotherLotNo>'+	PL.strParentLotNumber   +'</MotherLotNo>'
+				+'<StorageUnit>'+	SL.strName    +'</StorageUnit>'
+				+'<Quantity>'+	ltrim(Convert(Numeric(18,6),WP.dblQuantity))    +'</Quantity>'
+				+'<QuantityUOM>'+	UM.strUnitMeasure    +'</QuantityUOM>'
+				+'</line>'FROM dbo.tblMFWorkOrderInputParentLot WP
 			JOIN dbo.tblICParentLot PL ON PL.intParentLotId = WP.intParentLotId
 			JOIN dbo.tblICItem I ON I.intItemId = WP.intItemId
 			JOIN dbo.tblICItemUOM IU ON IU.intItemUOMId = WP.intItemUOMId
