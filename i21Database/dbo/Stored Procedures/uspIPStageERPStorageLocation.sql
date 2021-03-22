@@ -18,7 +18,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'StorageLocation'
+	WHERE strType = 'Storage Unit'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -127,7 +127,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'StorageLocation'
+			AND strType = 'Storage Unit'
 	END
 
 	IF (ISNULL(@strInfo1, '')) <> ''
