@@ -9223,7 +9223,7 @@
     <Build Include="dbo\Tables\tblIPItemRouteDetailArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPRoute.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPRoute.sql" />
-    <Build Include="dbo\Stored Procedures\uspMFGenerateProductionOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPProductionOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessProductionOrderAck.sql" />
     <None Include="Scripts\Post-Deployment\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql" />
     <Build Include="dbo\Tables\tblICItemCategoryChangeLog.sql" />
