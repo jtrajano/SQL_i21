@@ -35,7 +35,7 @@ BEGIN
 		, d.intContractHeaderId
 	FROM #ARPostInvoiceDetail d
 		INNER JOIN #ARPostInvoiceHeader h ON h.intInvoiceId = d.intInvoiceId
-	WHERE h.strTransactionType = 'Credit Memo'
+	WHERE h.strTransactionType = 'Credit Memo' AND d.intItemId <> NULL
 
 	EXEC uspICSubLedgerAddReportEntries @SubLedgerReportEntries = @InventorySubLedger, @intUserId = @intUserId
 END
