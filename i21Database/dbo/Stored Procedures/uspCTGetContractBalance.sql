@@ -24,13 +24,16 @@ BEGIN
 			@dblShipQtyToAllocate	NUMERIC(38,20),
 			@dblAllocatedQty		NUMERIC(38,20),
 			@dblPriceQtyToAllocate  NUMERIC(38,20),
-			@strCompanyName			NVARCHAR(500)
+			@strCompanyName			NVARCHAR(500),
+			@intPricingDecimals		INT
 		
 	SELECT	@strCompanyName	=	CASE 
 									WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL 
 									ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) 
 								END
 	FROM	tblSMCompanySetup
+
+	select top 1 @intPricingDecimals = intPricingDecimals from tblCTCompanyPreference
 
 	SELECT @blbHeaderLogo = dbo.fnSMGetCompanyLogo('Header')
 
@@ -46,13 +49,14 @@ BEGIN
 	SELECT intContractDetailId, intContractStatusId, dblFutures, dblBasis
 	FROM
 	(
-		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY intContractDetailId ORDER BY dtmCreatedDate DESC)
-			, intContractDetailId
-			, intContractStatusId
-			, dblFutures = CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE dblFutures END
-			, dblBasis = CASE WHEN strNotes LIKE '%Priced Quantity is%' OR strNotes LIKE '%Priced Load is%' THEN NULL ELSE dblBasis END
-		FROM tblCTContractBalanceLog
-		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), dtmTransactionDate)) else dtmTransactionDate end)) <= @dtmEndDate
+		SELECT intRowNumber = ROW_NUMBER() OVER (PARTITION BY cb.intContractDetailId ORDER BY cb.dtmCreatedDate DESC)
+			, cb.intContractDetailId
+			, cb.intContractStatusId
+			, dblFutures = case when cd.intPricingTypeId = 1 then cd.dblFutures else (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblFutures END) end
+			, dblBasis = case when cd.intPricingTypeId = 1 then cd.dblBasis else (CASE WHEN cb.strNotes LIKE '%Priced Quantity is%' OR cb.strNotes LIKE '%Priced Load is%' THEN NULL ELSE cb.dblBasis END) end
+		FROM tblCTContractBalanceLog cb
+		join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId
+		WHERE dbo.fnRemoveTimeOnDate((case when @IntLocalTimeOffset is not null then dateadd(minute,@IntLocalTimeOffset,DATEADD(hh, DATEDIFF(hh, GETDATE(), GETUTCDATE()), cb.dtmTransactionDate)) else cb.dtmTransactionDate end)) <= @dtmEndDate
 	) tbl
 	WHERE intRowNumber = 1
 
@@ -291,12 +295,12 @@ BEGIN
 			, strPriceUOM
 			, strStockUOM
 			, dblAvailableQty
-			, dblAmount 						= CASE WHEN intPricingTypeId = 1 THEN (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)) * dblQuantity ELSE NULL END
+			, dblAmount 						= CASE WHEN intPricingTypeId = 1 THEN round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals) * dblQuantity ELSE NULL END
 			, dblQtyinCommodityStockUOM
 			, dblFuturesinCommodityStockUOM 	= CASE WHEN intPricingTypeId IN (1, 3) THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), ISNULL(dblFutures, 0)), 0) ELSE NULL END
 			, dblBasisinCommodityStockUOM		= CASE WHEN intPricingTypeId <> 3 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), ISNULL(dblBasis, 0)), 0) ELSE NULL END
 			, dblCashPriceinCommodityStockUOM 	= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0))), 0) ELSE NULL END
-			, dblAmountinCommodityStockUOM 		= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), (ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)) * dblQuantity), 0) ELSE NULL END
+			, dblAmountinCommodityStockUOM 		= CASE WHEN intPricingTypeId = 1 THEN ISNULL(dbo.fnMFConvertCostToTargetItemUOM(intPriceItemUOMId, dbo.fnGetItemStockUOM(intItemId), round((ISNULL(dblFutures, 0) + ISNULL(dblBasis, 0)),@intPricingDecimals) * dblQuantity), 0) ELSE NULL END
 			, strPrintOption
 			, intContractStatusId
 		FROM (
@@ -325,8 +329,47 @@ BEGIN
 				, intFutureMonthId
 				, strDeliveryMonth
 				, strFutureMonth
-				, dblFutures 						= CASE WHEN MAX(Stat.dblFutures) IS NOT NULL THEN MAX(Stat.dblFutures) ELSE round((CASE WHEN ISNULL(MAX(cb.dblFutures), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(cb.dblFutures, 0) <> 0 THEN cb.dblFutures * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END),2) END
-				, dblBasis 							= CASE WHEN MAX(Stat.dblBasis) IS NOT NULL THEN MAX(Stat.dblBasis) ELSE round((CASE WHEN ISNULL(MAX(cb.dblBasis), 0) = 0 THEN NULL ELSE CASE WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0 THEN CAST (SUM(CASE WHEN ISNULL(cb.dblBasis, 0) <> 0 THEN cb.dblBasis * dblOrigQty ELSE 0 END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6)) ELSE NULL END END),2) END
+				, dblFutures 						=	CASE
+														WHEN MAX(Stat.dblFutures) IS NOT NULL
+														THEN MAX(Stat.dblFutures)
+														ELSE round((
+															CASE
+															WHEN ISNULL(MAX(cb.dblFutures), 0) = 0
+															THEN NULL
+															ELSE
+																CASE
+																WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0
+																THEN CAST (SUM(
+																		CASE
+																		WHEN ISNULL(cb.dblFutures, 0) <> 0
+																		THEN cb.dblFutures * dblOrigQty
+																		ELSE 0
+																		END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6))
+																ELSE NULL
+																END
+															END),2)
+														END
+				
+				, dblBasis 							= 	CASE
+														WHEN MAX(Stat.dblBasis) IS NOT NULL
+														THEN MAX(Stat.dblBasis)
+														ELSE round((
+															CASE
+															WHEN ISNULL(MAX(cb.dblBasis), 0) = 0
+															THEN NULL
+															ELSE
+																CASE
+																WHEN SUM(ISNULL(dblOrigQty, 0)) <> 0
+																THEN CAST (SUM(
+																		CASE
+																		WHEN ISNULL(cb.dblBasis, 0) <> 0
+																		THEN cb.dblBasis * dblOrigQty
+																		ELSE 0
+																		END) / SUM(ISNULL(dblOrigQty, 0)) AS NUMERIC(20,6))
+																ELSE NULL
+																END
+															END),2)
+														END
 				, strBasisUOM
 				, dblQuantity 						= CAST (SUM(dblQuantity) AS NUMERIC(20,6))
 				, strQuantityUOM
