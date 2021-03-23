@@ -63,7 +63,7 @@ BEGIN
 		SELECT 
 			*
 		FROM (
-			SELECT 
+			SELECT %top
 				com.strCommodityCode
 				,cl.intCompanyLocationId
 				,cl.strLocationName 
@@ -153,8 +153,8 @@ BEGIN
 	BEGIN 
 		SET @dtmDate = NULL 
 		SET @ysnLocationLicensed = NULL
-		SET @sqlStmt = 'SELECT TOP 1 FROM (' + @sqlStmt + ')'
-		
+		SET @sqlStmt = REPLACE(@sqlStmt, '%top', 'TOP 1')
+
 		EXEC sp_executesql 
 			@sqlStmt
 			,N'@dtmDate DATETIME, @ysnLocationLicensed BIT, @strLocationName NVARCHAR(MAX), @strPermission NVARCHAR(MAX)'
@@ -162,6 +162,8 @@ BEGIN
 	END 
 	ELSE
 	BEGIN 
+		SET @sqlStmt = REPLACE(@sqlStmt, '%top', '')
+
 		EXEC sp_executesql 
 			@sqlStmt
 			,N'@dtmDate DATETIME, @ysnLocationLicensed BIT, @strLocationName NVARCHAR(MAX), @strPermission NVARCHAR(MAX)'
