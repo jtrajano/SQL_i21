@@ -400,7 +400,7 @@ SELECT
 	,[intItemLocationId]			= ICIT.[intItemLocationId]
 	,[intItemUOMId]					= ICIT.[intItemUOMId]
 	,[dtmDate]						= ISNULL(ARID.[dtmPostDate], ARID.[dtmShipDate])
-	,[dblQty]						= (CAST(ARIDL.[dblQuantityShipped] AS NUMERIC(25, 13)) / CAST(AVGT.dblTotalQty AS NUMERIC(25, 13))) * ICIT.[dblQty] * CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN 1 ELSE -1 END
+	,[dblQty]						= CASE WHEN ARID.[strTransactionType] IN ('Credit Memo', 'Credit Note') THEN ICIT.[dblQty] ELSE -ICIT.[dblQty] END--ISNULL([dbo].[fnCalculateQtyBetweenUOM](ARID.[intItemWeightUOMId], ICIT.[intItemUOMId], ARID.[dblShipmentNetWt]), @ZeroDecimal)
 	,[dblUOMQty]					= ICIT.[dblUOMQty]
 	,[dblCost]						= ICIT.[dblCost]
 	,[dblValue]						= 0
@@ -447,26 +447,6 @@ INNER JOIN (
 	  AND ICIT.[strTransactionId] = LG.[strLoadNumber]
 	  AND ICIT.[intItemId] = ARID.[intItemId]
 	  AND ICIT.[intLotId] = ARIDL.[intLotId]
-INNER JOIN (
-	SELECT intTransactionId
-		 , strTransactionId
-		 , intTransactionDetailId
-		 , intItemId
-		 , intLotId
-		 , dblTotalQty = SUM(dblQty)
-	FROM tblICInventoryTransaction ICIT 
-	WHERE ICIT.[ysnIsUnposted] = 0
-	  AND ISNULL(ICIT.[intInTransitSourceLocationId], 0) <> 0
-	GROUP BY ICIT.[intTransactionId]
-		   , ICIT.[strTransactionId]
-		   , ICIT.[intTransactionDetailId]
-		   , ICIT.[intItemId]
-		   , ICIT.[intLotId]
-) AVGT ON AVGT.[intTransactionId] = LG.[intLoadId] 
-      AND AVGT.[strTransactionId] = LG.[strLoadNumber] 
-      AND AVGT.[intTransactionDetailId] = LG.[intLoadDetailId]
-      AND AVGT.[intItemId] = ARID.[intItemId]
-      AND AVGT.[intLotId] = ARIDL.[intLotId]
 LEFT JOIN (	
 	SELECT ICIS.[intInventoryShipmentId]		
 		 , ICIS.[strShipmentNumber]		
