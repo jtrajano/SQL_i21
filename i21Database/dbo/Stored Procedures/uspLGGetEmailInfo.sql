@@ -20,7 +20,7 @@ BEGIN
 	DECLARE @strContractNumber NVARCHAR(200)
 	DECLARE @strCustomerContract NVARCHAR(200)
 
-	IF (@strReportName IN  ('ShippingInstruction','ShippingInstruction2','ShippingInstruction3','ShippingInstruction4','ShippingInstruction5'))
+	IF (@strReportName LIKE 'ShippingInstruction%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale
@@ -138,7 +138,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('DeliveryOrder','DeliveryOrder2','DeliveryOrder3'))
+	ELSE IF (@strReportName LIKE 'DeliveryOrder%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
@@ -181,7 +181,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('ShippingAdvice','ShippingAdvice2','ShippingAdvice3','ShippingAdvice4'))
+	ELSE IF (@strReportName LIKE 'ShippingAdvice%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 				@intPurchaseSaleId = intPurchaseSale
@@ -224,7 +224,7 @@ BEGIN
 			,@Filter AS strFilters
 			,@body AS strMessage
 	END
-	ELSE IF (@strReportName IN ('In_store','In_store2','In_store3','In_store4'))
+	ELSE IF (@strReportName LIKE 'In_store%')
 	BEGIN
 		SELECT @strLoadNumber = strLoadNumber,
 			   @intPurchaseSaleId = intPurchaseSale
