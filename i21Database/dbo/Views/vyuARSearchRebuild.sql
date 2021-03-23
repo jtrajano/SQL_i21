@@ -1,7 +1,6 @@
 ﻿CREATE VIEW [dbo].[vyuARSearchRebuild]
 AS 
-
-SELECT *
+SELECT ARR.*, ysnFiscalOpen
 FROM (
 	--Get mismatched strBatchId in tblGLDetail
 	SELECT 
@@ -19,10 +18,9 @@ FROM (
 		WHERE ysnPosted = 1
 		AND strInvoiceNumber = GLD.strTransactionId
 		AND strBatchId = GLD.strBatchId
-	) I
+	) ARI
 	WHERE strTransactionForm = 'Invoice'
 	AND strInvoiceNumber IS NULL
-	AND strCode = 'IC'
 	AND ysnIsUnposted = 0
 
 	UNION ALL
@@ -43,10 +41,10 @@ FROM (
 		WHERE ysnPosted = 1
 		AND strInvoiceNumber = ICIT.strTransactionId
 		AND strBatchId = ICIT.strBatchId
-	) I
-	WHERE strTransactionForm = 'Invoice'
-	AND strInvoiceNumber IS NULL
-	AND ysnIsUnposted = 0
+	) ARI
+	WHERE ICIT.strTransactionForm = 'Invoice'
+	AND ARI.strInvoiceNumber IS NULL
+	AND ICIT.ysnIsUnposted = 0
 
 	UNION ALL
 
@@ -63,8 +61,8 @@ FROM (
 	INNER JOIN tblICItem ICI
 	ON ARID.intItemId = ICI.intItemId
 	WHERE ysnPosted = 1
-	AND ysnImpactInventory = 1
-	AND strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblICInventoryTransaction)
+	AND ARI.ysnImpactInventory = 1
+	AND ARI.strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblICInventoryTransaction)
 	AND ICI.strType = 'Inventory'
 
 
@@ -83,8 +81,36 @@ FROM (
 	INNER JOIN tblICItem ICI
 	ON ARID.intItemId = ICI.intItemId
 	WHERE ysnPosted = 1
-	AND ysnImpactInventory = 1
-	AND strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblGLDetail WHERE strCode = 'IC')
+	AND ARI.ysnImpactInventory = 1
+	AND ARI.strInvoiceNumber NOT IN (SELECT strTransactionId FROM tblGLDetail WHERE strCode = 'IC')
 	AND ICI.strType = 'Inventory'
-) R
-GROUP BY [strIssue], [dtmDate], [intTransactionId], [strTransactionId], [strBatchId], [ysnAllowRebuild]
+
+	UNION ALL
+
+	SELECT 
+		 [strIssue]			= 'Invoice not yet posted or deleted but has posted GL entry'
+		,[dtmDate]			= ARI.dtmDate
+		,[intTransactionId] = ARI.intInvoiceId
+		,[strTransactionId] = ARI.strInvoiceNumber 
+		,[strBatchId]		= GLD.strBatchId
+		,[ysnAllowRebuild]	= CAST(1 AS BIT)
+	FROM tblARInvoice ARI
+	OUTER APPLY
+	(
+		SELECT strTransactionId, strBatchId
+		FROM tblGLDetail
+		WHERE ysnIsUnposted = 0
+		AND  strTransactionId = ARI.strInvoiceNumber
+		AND strTransactionForm = 'Invoice'
+	) GLD
+	WHERE GLD.strTransactionId IS NOT NULL
+	AND ARI.ysnPosted = 0
+) ARR
+OUTER APPLY
+(
+	SELECT TOP 1 ysnFiscalOpen = CASE WHEN ysnOpen = 1 AND ysnAROpen = 1 AND ysnINVOpen = 1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+	FROM tblGLFiscalYearPeriod
+	WHERE CAST(ARR.dtmDate AS DATE) BETWEEN CAST(dtmStartDate AS DATE) AND CAST(dtmEndDate AS DATE)
+	ORDER BY dtmStartDate
+) ARI
+GROUP BY [strIssue], [dtmDate], [intTransactionId], [strTransactionId], [strBatchId], [ysnAllowRebuild], [ysnFiscalOpen]

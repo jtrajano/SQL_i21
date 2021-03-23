@@ -16,14 +16,23 @@ BEGIN TRY
 		[intTransactionId]	INT,
 		[strTransactionId]	NVARCHAR (50) COLLATE Latin1_General_CI_AS,
 		[strBatchId]		NVARCHAR (50) COLLATE Latin1_General_CI_AS,
-		[ysnAllowRebuild]	BIT
+		[ysnAllowRebuild]	BIT,
+		[ysnFiscalOpen]		BIT
 	)
 
 	INSERT INTO #tblARRebuildLog
-	SELECT * 
+	SELECT 
+		 [strIssue]
+		,[dtmDate]
+		,[intTransactionId]
+		,[strTransactionId]
+		,[strBatchId]
+		,[ysnAllowRebuild]
+		,[ysnFiscalOpen]
 	FROM [dbo].[vyuARSearchRebuild]
 	WHERE dtmDate BETWEEN @DateFrom AND @DateTo
 	AND [ysnAllowRebuild] = 1
+	AND [ysnFiscalOpen] = 1
 
 	--Update GL Details
 	UPDATE GL
@@ -32,7 +41,7 @@ BEGIN TRY
 	INNER JOIN #tblARRebuildLog DFL
 	ON GL.strTransactionId = DFL.strTransactionId COLLATE Latin1_General_CI_AS
 	AND GL.strBatchId = DFL.strBatchId
-	AND strIssue = 'Invoice and GL batch id mismatch'
+	AND strIssue IN ('Invoice and GL batch id mismatch', 'Invoice not yet posted or deleted but has posted GL entry')
 
 	--Update Inventory Transaction
 	UPDATE IT
@@ -60,10 +69,15 @@ BEGIN TRY
 		,[strBatchId]
 	FROM #tblARRebuildLog
 
-	EXEC uspICRebuildInventoryValuation
-		 @dtmStartDate = @DateFrom
-		,@isPeriodic = 1
-		,@intUserId = 1
+	IF EXISTS(SELECT TOP 1 1 FROM #tblARRebuildLog WHERE strIssue = 'Invoice and inventory batch id mismatch')
+	BEGIN
+		EXEC uspICRebuildInventoryValuation
+			 @dtmStartDate = @DateFrom
+			,@isPeriodic = 1
+			,@intUserId = 1
+	END
+
+	EXEC uspGLSummaryRecalculate
 
 	COMMIT TRANSACTION 
 END TRY
