@@ -1,12 +1,12 @@
 ﻿CREATE PROCEDURE [dbo].[uspICCommodityPositionReport]	
-	@ysnGetHeader	bit  = 0,
-	@dtmDate		date = null,
+	@ysnGetHeader bit  = 0,
+	@dtmDate date = null,
 	@strLocationName nvarchar(max) = '',
 	@ysnLocationLicensed bit = null,
-	@intUserId INT = NULL,
+	@intUserId int = NULL,
 	@strPermission nvarchar(max) = ''
 as
-begin
+BEGIN
 	DECLARE @Columns VARCHAR(MAX)
 	SELECT @Columns = COALESCE(@Columns + ', ','') + QUOTENAME(strCommodityCode)
 	FROM
@@ -15,117 +15,156 @@ begin
 		FROM   tblICCommodity 
 	   ) AS C
 
-	--select @Columns
+	-- Create the temp table for the location filter. 
+	IF OBJECT_ID('tempdb..#tmpCommodityPositionLocationFilter') IS NULL  
+	BEGIN 
+		CREATE TABLE #tmpCommodityPositionLocationFilter (
+			intCompanyLocationId INT NULL 
+		)
+	END 
+
+	IF LTRIM(RTRIM(ISNULL(@strLocationName, ''))) <> ''
+	BEGIN 
+		DECLARE @locationFilter_XML AS XML = CAST('<root><ID>' + REPLACE(@strLocationName, ',', '</ID><ID>') + '</ID><root>' AS XML) 	
+		INSERT INTO #tmpCommodityPositionLocationFilter (
+			intCompanyLocationId
+		)
+		SELECT f.x.value('.', 'INT') AS id
+		FROM @locationFilter_XML.nodes('/root/ID') f(x)
+	END 
+
+	DELETE FROM #tmpCommodityPositionLocationFilter WHERE intCompanyLocationId IS NULL 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpCommodityPositionLocationFilter)
+	INSERT INTO #tmpCommodityPositionLocationFilter (intCompanyLocationId) VALUES (NULL) 
+
+	-- Create the temp table for the permission location filter. 
+	IF OBJECT_ID('tempdb..#tmpCommodityPositionPermissionLocationFilter') IS NULL  
+	BEGIN 
+		CREATE TABLE #tmpCommodityPositionPermissionLocationFilter (
+			intCompanyLocationId INT NULL 
+		)
+	END 
+
+	IF LTRIM(RTRIM(ISNULL(@strPermission, ''))) <> ''
+	BEGIN 
+		DECLARE @locationPermissionFilter_XML AS XML = CAST('<root><ID>' + REPLACE(@strPermission, ',', '</ID><ID>') + '</ID><root>' AS XML) 	
+		INSERT INTO #tmpCommodityPositionPermissionLocationFilter (
+			intCompanyLocationId
+		)
+		SELECT f.x.value('.', 'INT') AS id
+		FROM @locationPermissionFilter_XML.nodes('/root/ID') f(x)
+	END 
+
+	DELETE FROM #tmpCommodityPositionPermissionLocationFilter WHERE intCompanyLocationId IS NULL 
+	IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpCommodityPositionPermissionLocationFilter)
+	INSERT INTO #tmpCommodityPositionPermissionLocationFilter (intCompanyLocationId) VALUES (NULL) 
 	
-	DECLARE @sql AS NVARCHAR(MAX)
-	DECLARE @top as nvarchar(20)
-	DECLARE @location_filter as nvarchar(max)
-	DECLARE @licensed_filter as nvarchar(100)
-	DECLARE @permission_filter as nvarchar(max)
+	DECLARE @sqlStmt NVARCHAR(MAX) = N'
+		SELECT 
+			*
+		FROM (
+			SELECT 
+				com.strCommodityCode
+				,cl.intCompanyLocationId
+				,cl.strLocationName 
+				, dblQty = 
+					ROUND(
+						ISNULL(t.dblQty, 0) + ISNULL(storage.dblQty, 0) 
+						, ISNULL(com.intDecimalDPR, 2)
+					)
+				, dtmDate = @dtmDate
+				, ysnLicensed = cl.ysnLicensed
+			FROM 
+				tblICItem i inner join tblICItemLocation il
+					on i.intItemId = il.intItemId
+				inner join tblSMCompanyLocation cl
+					on cl.intCompanyLocationId = il.intLocationId 
+					and (
+						cl.ysnLicensed = @ysnLocationLicensed
+						OR @ysnLocationLicensed IS NULL 
+					)
+				inner join tblICCommodity com
+					on com.intCommodityId = i.intCommodityId
 
-	IF ISNULL(@strLocationName, '') <> ''
-	BEGIN
-		SET @location_filter = ' AND intCompanyLocationId in ( '  + @strLocationName + ' ) '		
-	END
-	ELSE
-	BEGIN
-		SET @location_filter = ''
-	END
+				inner join #tmpCommodityPositionLocationFilter locationFilter
+					on cl.intCompanyLocationId = locationFilter.intCompanyLocationId
+					or locationFilter.intCompanyLocationId IS NULL 			 
 
-	IF ISNULL(@strPermission, '') <> ''
-	BEGIN
-		SET @permission_filter = ' AND intCompanyLocationId in ( '  + @strPermission + ' ) '		
-	END
-	ELSE
-	BEGIN
-		SET @permission_filter = ''
-	END
+				inner join #tmpCommodityPositionPermissionLocationFilter permissionFilter
+					on cl.intCompanyLocationId = permissionFilter.intCompanyLocationId
+					or permissionFilter.intCompanyLocationId IS NULL 
+					
+				cross apply (
+					select 
+						dblQty = 
+							ROUND (
+								SUM (
+									dbo.fnICConvertUOMtoStockUnit (
+										t.intItemId
+										,t.intItemUOMId
+										,t.dblQty
+									)
+								)
+								, ISNULL(com.intDecimalDPR, 2)
+							)
+					from 
+						tblICInventoryTransaction t 
+					where 
+						t.intItemId = i.intItemId
+						and t.intItemLocationId = il.intItemLocationId 
+						and t.ysnIsUnposted = 0
+						and (
+							FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT)) OR @dtmDate IS NULL
+						)
+				) t 
+				outer apply (
+					select 
+						dblQty = 
+							ROUND (
+								SUM (
+									dbo.fnICConvertUOMtoStockUnit (
+										storage.intItemId
+										,storage.intItemUOMId
+										,storage.dblQty
+									)
+								)
+								, ISNULL(com.intDecimalDPR, 2)
+							)					
+					from 
+						tblICInventoryTransactionStorage storage 
+					where 
+						storage.intItemId = i.intItemId
+						and storage.intItemLocationId = il.intItemLocationId 
+						and storage.ysnIsUnposted = 0
+						and (
+							FLOOR(CAST(storage.dtmDate AS FLOAT)) <= FLOOR(CAST(@dtmDate AS FLOAT)) OR @dtmDate IS NULL
+						)
+				) storage
+		) AS s	
+		PIVOT (
+			SUM( dblQty)
+			FOR strCommodityCode IN (' + @Columns + ')
+		) AS PVT
+		ORDER BY 
+			PVT.strLocationName'
 
-	SET @licensed_filter = ' '
-	IF (@ysnLocationLicensed is not null)
-	BEGIN
-		SET @licensed_filter = ' and ysnLicensed = ' + cast(@ysnLocationLicensed as nvarchar) + ' '
-	END
-
-	SET @top = ''
 
 	IF @ysnGetHeader = 1
-	BEGIN
-		SET @top = ' top 1'
+	BEGIN 
 		SET @dtmDate = NULL 
-		SET @licensed_filter = ''
-	END
-	SET @sql = 
-	'
-	DECLARE @dtmDate AS DATETIME = ' + ISNULL('''' + CAST(@dtmDate AS NVARCHAR(20)) + '''', 'NULL') + '
-	
-	SELECT ' + @top + ' * 
-	FROM (
-		SELECT ' + @top + ' 			
-			com.strCommodityCode
-			,cl.intCompanyLocationId
-			,cl.strLocationName 
-			, dblQty = CAST( ROUND(dbo.fnICConvertUOMtoStockUnit(t.intItemId, t.intItemUOMId, t.dblQty), ISNULL(com.intDecimalDPR,2)) AS NUMERIC(28, 2)) 
-			, dtmDate = @dtmDate
-			, ysnLicensed = cl.ysnLicensed
-		FROM 
-			tblICItem i inner join tblICItemLocation il
-				on i.intItemId = il.intItemId
-			inner join tblSMCompanyLocation cl
-				on cl.intCompanyLocationId = il.intLocationId ' + @licensed_filter + '
-			inner join tblICCommodity com
-				on com.intCommodityId = i.intCommodityId
-			inner join 
-				(
-					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransaction t where t.ysnIsUnposted = 0
-						union all
-					select intItemId, intItemLocationId, t.dblQty, t.intItemUOMId, dtmDate from tblICInventoryTransactionStorage t where t.ysnIsUnposted = 0					
-				)			
-				 t
-				on t.intItemId = i.intItemId
-				and t.intItemLocationId = il.intItemLocationId 
-		WHERE 
-			(dbo.fnDateLessThanEquals(t.dtmDate,  @dtmDate) = 1 OR @dtmDate IS NULL)'  
-			+ @location_filter + @permission_filter + '
-	) AS s	
-	/*outer apply (
-			SELECT						
-					Capacity = SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0))				
-					,PercentFull = 
-							CASE 
-								WHEN SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0)) <> 0 THEN 
-									dbo.fnMultiply (
-										dbo.fnDivide(
-											(
-												SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0))
-												- SUM(ISNULL(dblOnHand, 0)) 
-												- SUM(ISNULL(dblUnitStorage, 0))
-											)
-											, SUM(ISNULL(sl.dblEffectiveDepth,0) *  ISNULL(sl.dblUnitPerFoot, 0))
-										)
-										, 100
-									)
-								ELSE 
-									NULL 
-							END
-				
-					FROM	tblICItemStockUOM ItemStockUOM 
-						join tblICItem Item
-							on ItemStockUOM.intItemId = Item.intItemId			
-						JOIN tblICStorageLocation sl
-							ON sl.intStorageLocationId = ItemStockUOM.intStorageLocationId
-					where intLocationId = s.intCompanyLocationId
-					GROUP BY 
-							sl.intLocationId
-							--,Item.intCategoryId
-
-	) AS LocationStat */
-	PIVOT (
-		SUM( dblQty)
-		FOR strCommodityCode IN (' + @Columns + ')
-	) AS PVT
-	ORDER BY PVT.strLocationName 
-	'	
-	EXEC(@sql) 
-	
-end
+		SET @ysnLocationLicensed = NULL
+		SET @sqlStmt = 'SELECT TOP 1 FROM (' + @sqlStmt + ')'
+		
+		EXEC sp_executesql 
+			@sqlStmt
+			,N'@dtmDate DATETIME, @ysnLocationLicensed BIT, @strLocationName NVARCHAR(MAX), @strPermission NVARCHAR(MAX)'
+			,@dtmDate = @dtmDate, @ysnLocationLicensed = @ysnLocationLicensed, @strLocationName = @strLocationName, @strPermission = @strPermission
+	END 
+	ELSE
+	BEGIN 
+		EXEC sp_executesql 
+			@sqlStmt
+			,N'@dtmDate DATETIME, @ysnLocationLicensed BIT, @strLocationName NVARCHAR(MAX), @strPermission NVARCHAR(MAX)'
+			,@dtmDate = @dtmDate, @ysnLocationLicensed = @ysnLocationLicensed, @strLocationName = @strLocationName, @strPermission = @strPermission
+	END 		
+END
