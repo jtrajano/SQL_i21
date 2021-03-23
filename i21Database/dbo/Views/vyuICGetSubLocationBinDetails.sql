@@ -53,8 +53,20 @@ FROM
 
 	OUTER APPLY (
 		SELECT 
-				dblOnHand = SUM(dbo.fnCalculateQtyBetweenUOM(sm.intItemUOMId, stockUOM2.intItemUOMId, ISNULL(sm.dblOnHand, 0)))						
-				,dblUnitStorage = SUM(dbo.fnCalculateQtyBetweenUOM(sm.intItemUOMId, stockUOM2.intItemUOMId, ISNULL(sm.dblUnitStorage, 0)))						
+				dblOnHand = SUM(
+					dbo.fnICConvertUOMtoStockUnit (
+						sm.intItemId
+						,sm.intItemUOMId
+						,ISNULL(sm.dblOnHand, 0)
+					)
+				)						
+				,dblUnitStorage = SUM(
+					dbo.fnICConvertUOMtoStockUnit (
+						sm.intItemId
+						,sm.intItemUOMId
+						,ISNULL(sm.dblUnitStorage, 0)
+					)
+				)						
 				,sm.intSubLocationId
 				,sc.strSubLocationName
 		FROM 
@@ -67,7 +79,6 @@ FROM
 		WHERE		
 			sm.intItemLocationId = il.intItemLocationId
 			AND sm.intItemId = il.intItemId
-			--AND sm.intSubLocationId IS NOT NULL 
 			AND i.ysnSeparateStockForUOMs = 1
 			AND (i.strLotTracking = 'No' OR i.strLotTracking IS NULL) 
 		GROUP BY
@@ -77,8 +88,12 @@ FROM
 
 	OUTER APPLY (
 		SELECT 
-				dblOnHand = SUM(ISNULL(sm.dblOnHand, 0))
-				,dblUnitStorage = SUM(ISNULL(sm.dblUnitStorage, 0))
+				dblOnHand = SUM(
+					ISNULL(sm.dblOnHand, 0)
+				)
+				,dblUnitStorage = SUM(
+					ISNULL(sm.dblUnitStorage, 0)
+				)
 				,sm.intSubLocationId
 				,sc.strSubLocationName
 		FROM 
@@ -87,7 +102,6 @@ FROM
 		WHERE		
 			sm.intItemLocationId = il.intItemLocationId
 			AND sm.intItemId = il.intItemId
-			--AND sm.intSubLocationId IS NOT NULL 
 			AND sm.intItemUOMId = stockUOM.intItemUOMId
 			AND (
 				ISNULL(i.ysnSeparateStockForUOMs, 1) = 0 
