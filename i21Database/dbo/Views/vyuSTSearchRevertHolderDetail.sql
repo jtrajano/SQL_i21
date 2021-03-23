@@ -120,7 +120,10 @@ SELECT --DISTINCT
 								END
 								
 							 WHEN revertHolder.intRevertType = 3
-								THEN 'Discontinued'
+								THEN CASE 
+									WHEN RHD.strTableColumnName = 'strStatus'
+										THEN ISNULL(Item.strStatus, '')
+								END
 
 							ELSE  
 								ISNULL(RHD.strNewData, '')
@@ -196,7 +199,7 @@ INNER JOIN tblICCategory Category
 LEFT JOIN tblICItemLocation ItemLoc
 	ON RHD.intItemLocationId = ItemLoc.intItemLocationId
 LEFT JOIN tblICItemUOM Uom
-	ON Item.intItemId = Uom.intItemId
+	ON Item.intItemId = Uom.intItemId AND Uom.ysnStockUnit = 1
 LEFT JOIN tblSMCompanyLocation CompanyLoc
 	ON ItemLoc.intLocationId = CompanyLoc.intCompanyLocationId
 LEFT JOIN tblSTSubcategory SubCatFamily_New
