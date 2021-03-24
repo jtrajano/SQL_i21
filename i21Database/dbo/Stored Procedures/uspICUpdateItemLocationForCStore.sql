@@ -364,18 +364,18 @@ BEGIN
 							,ysnCountedDaily = ISNULL(@ysnCountedDaily, itemLocation.ysnCountedDaily) 
 							,strCounted = ISNULL(@strCounted, itemLocation.strCounted) 
 							,ysnCountBySINo = ISNULL(@ysnCountBySINo, itemLocation.ysnCountBySINo) 
-							,intFamilyId = CASE WHEN @intFamilyId = ''	
+							,intFamilyId = CASE WHEN @intFamilyId = 0
 													THEN NULL
 												ELSE 
 													ISNULL(@intFamilyId, itemLocation.intFamilyId) 
 												END
-							,intClassId = CASE WHEN @intClassId = ''	
+							,intClassId = CASE WHEN @intClassId = 0	
 													THEN NULL
 												ELSE 
 													ISNULL(@intClassId, itemLocation.intClassId) 
 												END
 							,intProductCodeId = ISNULL(@intProductCodeId, itemLocation.intProductCodeId) 
-							,intVendorId = CASE WHEN @intVendorId = ''	
+							,intVendorId = CASE WHEN @intVendorId = 0	
 													THEN NULL
 												ELSE 
 													ISNULL(@intVendorId, itemLocation.intVendorId) 

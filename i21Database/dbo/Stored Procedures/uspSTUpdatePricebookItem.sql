@@ -524,9 +524,9 @@ BEGIN
 						-- ===============================================
 						-- [END] - PREVIEW IF DEBUG (ITEM LOCATION)
 						-- ===============================================
-						SET @intFamilyId   =  ISNULL(@intFamilyId, '')
-						SET @intClassId	   =  ISNULL(@intClassId, '')
-						SET @intVendorId	   =  ISNULL(@intVendorId, '')
+						SET @intFamilyId   =  ISNULL(@intFamilyId, 0)
+						SET @intClassId	   =  ISNULL(@intClassId, 0)
+						SET @intVendorId   =  ISNULL(@intVendorId, 0)
 
 						EXEC [dbo].[uspICUpdateItemLocationForCStore]
 							@strUpcCode					= @strUpcCodeFilter 
@@ -569,9 +569,9 @@ BEGIN
 
 							,@intEntityUserSecurityId = @intEntityId
 							
-						SET @intFamilyId   =  CASE WHEN @intFamilyId = '' THEN NULL ELSE @intFamilyId END
-						SET @intClassId	   =  CASE WHEN @intClassId = '' THEN NULL ELSE @intClassId END
-						SET @intVendorId	   = CASE WHEN @intVendorId = '' THEN NULL ELSE @intVendorId END
+						SET @intFamilyId   =  CASE WHEN @intFamilyId = 0 THEN NULL ELSE @intFamilyId END
+						SET @intClassId	   =  CASE WHEN @intClassId = 0 THEN NULL ELSE @intClassId END
+						SET @intVendorId	   = CASE WHEN @intVendorId = 0 THEN NULL ELSE @intVendorId END
 
 						-- ===============================================
 						-- [START] - PREVIEW IF DEBUG (ITEM LOCATION)
