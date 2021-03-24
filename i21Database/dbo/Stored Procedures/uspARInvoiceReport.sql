@@ -185,7 +185,7 @@ SELECT intInvoiceId				= INV.intInvoiceId
 	 , strBillTo				= dbo.fnARFormatCustomerAddress(
 									 NULL
 									,NULL
-									,CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 4 - Zeeland' THEN ENTITYLOCATION.strCheckPayeeName ELSE INV.strBillToLocationName END
+									,ENTITYLOCATION.strCheckPayeeName
 									,INV.strBillToAddress
 									,INV.strBillToCity
 									,INV.strBillToState
