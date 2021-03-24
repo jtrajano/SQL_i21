@@ -36,7 +36,8 @@ DECLARE @tblInventoryTransaction TABLE(
 	dblCost					NUMERIC(38, 20),
 	intOwnershipType		INT,
 	strContainerNo          NVARCHAR(50), 
-	strMarkings				NVARCHAR(MAX)
+	strMarkings				NVARCHAR(MAX),
+	dblStandardWeight		NUMERIC(38, 20)
 );
 
 INSERT INTO @tblInventoryTransaction (
@@ -54,6 +55,7 @@ INSERT INTO @tblInventoryTransaction (
 	,intOwnershipType
 	,strContainerNo
 	,strMarkings
+	,dblStandardWeight
 )
 -- Get the Lot that is Company-Owned 
 SELECT	
@@ -78,6 +80,7 @@ SELECT
 	,intOwnershipType	= 1
 	,Lot.strContainerNo
 	,Lot.strMarkings
+	,iu.dblStandardWeight
 FROM	
 	tblICInventoryTransaction t
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
@@ -114,10 +117,12 @@ SELECT	t.intItemId
 		,intOwnershipType	= 2
 		,Lot.strContainerNo
 		,Lot.strMarkings
+		,ItemUOM.dblStandardWeight
 FROM	
 	tblICInventoryTransactionStorage t 
 	INNER JOIN tblICItemLocation IL ON IL.intItemLocationId = t.intItemLocationId
 	INNER JOIN tblICLot Lot ON Lot.intLotId = t.intLotId
+	INNER JOIN tblICItemUOM ItemUOM ON Lot.intItemId = ItemUOM.intItemId
 WHERE 
 	t.intItemId = @intItemId
 	AND IL.intLocationId = @intLocationId
@@ -169,6 +174,7 @@ SELECT
 	,strCondition					= COALESCE(NULLIF(Lot.strCondition, ''), @DefaultLotCondition)
 	,Lot.strContainerNo
 	,Lot.strMarkings
+	,ItemUOM.dblStandardWeight
 FROM 
 	@tblInventoryTransaction t 
 	INNER JOIN tblICItem i 
@@ -235,5 +241,6 @@ GROUP BY i.intItemId
 		,CostMethod.strCostingMethod
 		,Lot.strWarehouseRefNo
 		,Lot.strCondition
+		,ItemUOM.dblStandardWeight
 HAVING	(@ysnHasStockOnly = 1 AND (SUM(t.dblQty) <> 0 OR SUM(t.dblUnitStorage) <> 0))
 		OR @ysnHasStockOnly = 0
