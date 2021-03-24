@@ -132,6 +132,7 @@ SELECT
 	stock.ysnHasAddOn,
 	stock.ysnHasSubstitute,
 	stock.ysnHasAddOnOtherCharge,
+	stock.dblReceiveStandardWeight,
 	guiSessionId = tsession.guiSessionId,
 	dtmSessionDate = tsession.dtmTransactionDate
 FROM vyuICGetItemStock stock
