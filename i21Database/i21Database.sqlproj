@@ -9237,6 +9237,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrderAck.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailSequence.sql" />
+    <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
