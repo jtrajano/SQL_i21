@@ -9238,6 +9238,7 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddContainerDetailLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
