@@ -364,10 +364,22 @@ BEGIN
 							,ysnCountedDaily = ISNULL(@ysnCountedDaily, itemLocation.ysnCountedDaily) 
 							,strCounted = ISNULL(@strCounted, itemLocation.strCounted) 
 							,ysnCountBySINo = ISNULL(@ysnCountBySINo, itemLocation.ysnCountBySINo) 
-							,intFamilyId = ISNULL(@intFamilyId, itemLocation.intFamilyId) 
-							,intClassId = ISNULL(@intClassId, itemLocation.intClassId) 
+							,intFamilyId = CASE WHEN @intFamilyId = ''	
+													THEN NULL
+												ELSE 
+													ISNULL(@intFamilyId, itemLocation.intFamilyId) 
+												END
+							,intClassId = CASE WHEN @intClassId = ''	
+													THEN NULL
+												ELSE 
+													ISNULL(@intClassId, itemLocation.intClassId) 
+												END
 							,intProductCodeId = ISNULL(@intProductCodeId, itemLocation.intProductCodeId) 
-							,intVendorId = ISNULL(@intVendorId, itemLocation.intVendorId) 
+							,intVendorId = CASE WHEN @intVendorId = ''	
+													THEN NULL
+												ELSE 
+													ISNULL(@intVendorId, itemLocation.intVendorId) 
+												END
 							,intMinimumAge = ISNULL(@intMinimumAge, itemLocation.intMinimumAge) 
 							,dblMinOrder = ISNULL(@dblMinOrder, itemLocation.dblMinOrder) 
 							,dblSuggestedQty = ISNULL(@dblSuggestedQty, itemLocation.dblSuggestedQty) 
@@ -1181,4 +1193,4 @@ BEGIN
 	END 
 	CLOSE loopAuditLog;
 	DEALLOCATE loopAuditLog;
-END 
+END

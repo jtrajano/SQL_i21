@@ -9235,6 +9235,8 @@
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateFeedXML_ERP.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPProductionOrderAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractSequence.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTReportContractDetailSequence.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

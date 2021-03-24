@@ -80,7 +80,6 @@ BEGIN
 
 			SET @ysnResultSuccess = CAST(1 AS BIT)
 			SET @strResultMessage = ''
-
 		
 
 			--PRINT 'Commented'
@@ -333,22 +332,22 @@ BEGIN
 						-- ===============================================
 
 
-						--EXEC [dbo].[uspICUpdateItemForCStore]
-						--	-- filter params	
-						--	@strDescription				= NULL 
-						--	,@dblRetailPriceFrom		= NULL  
-						--	,@dblRetailPriceTo			= NULL 
-						--	,@intItemId					= @intItemId 
-						--	,@intItemUOMId				= @intItemUOMId 
-						--	-- update params
-						--	,@intCategoryId				= @intCategoryId
-						--	,@strCountCode				= NULL
-						--	,@strItemDescription		= @strDescription 	
-						--	,@strItemNo					= @strItemNo 
-						--	,@strShortName				= @strShortName 
-						--	,@strUpcCode				= @strUpcCode 
-						--	,@strLongUpcCode			= @strLongUpcCode 
-						--	,@intEntityUserSecurityId	= @intEntityId
+						EXEC [dbo].[uspICUpdateItemForCStore]
+							-- filter params	
+							@strDescription				= NULL 
+							,@dblRetailPriceFrom		= NULL  
+							,@dblRetailPriceTo			= NULL 
+							,@intItemId					= @intItemId 
+							,@intItemUOMId				= @intItemUOMId 
+							-- update params
+							,@intCategoryId				= @intCategoryId
+							,@strCountCode				= NULL
+							,@strItemDescription		= @strDescription 	
+							,@strItemNo					= @strItemNo 
+							,@strShortName				= @strShortName 
+							,@strUpcCode				= @strUpcCode 
+							,@strLongUpcCode			= @strLongUpcCode 
+							,@intEntityUserSecurityId	= @intEntityId
 
 						--OLD
 						-- EXEC [dbo].[uspICUpdateItemForCStore]
@@ -525,7 +524,9 @@ BEGIN
 						-- ===============================================
 						-- [END] - PREVIEW IF DEBUG (ITEM LOCATION)
 						-- ===============================================
-
+						SET @intFamilyId   =  ISNULL(@intFamilyId, '')
+						SET @intClassId	   =  ISNULL(@intClassId, '')
+						SET @intVendorId	   =  ISNULL(@intVendorId, '')
 
 						EXEC [dbo].[uspICUpdateItemLocationForCStore]
 							@strUpcCode					= @strUpcCodeFilter 
@@ -567,7 +568,10 @@ BEGIN
 							,@strItemLocationDescription = NULL --@strPOSDescription 
 
 							,@intEntityUserSecurityId = @intEntityId
-
+							
+						SET @intFamilyId   =  CASE WHEN @intFamilyId = '' THEN NULL ELSE @intFamilyId END
+						SET @intClassId	   =  CASE WHEN @intClassId = '' THEN NULL ELSE @intClassId END
+						SET @intVendorId	   = CASE WHEN @intVendorId = '' THEN NULL ELSE @intVendorId END
 
 						-- ===============================================
 						-- [START] - PREVIEW IF DEBUG (ITEM LOCATION)
@@ -924,8 +928,7 @@ BEGIN
 										, @intLoopCompanyLocationId		= temp.intCompanyLocationId
 									FROM @tblItemCostPricing temp
 									
-
-							
+														
 									-- ITEM PRICING
 									
 										-- ===============================================
@@ -1179,7 +1182,7 @@ BEGIN
 																,@intVendorId				= @intVendorId
 																,@intEntityUserSecurityId	= @intEntityId
 																,@intItemLocationId			= @intNewItemLocationId OUTPUT 
-										
+																
 																-- =================================================================================
 																-- [START] - ADD ITEM UOM DEBUG
 																-- =================================================================================
