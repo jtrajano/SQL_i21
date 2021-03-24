@@ -108,7 +108,7 @@ END
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(IE.intEntityId, 0))
 BEGIN
 	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-	SELECT 'The customer does not exists. Please ensure that the entityId or the customerId is correct.', 'entityId/customerId', 'Error',
+	SELECT 'The customer does not exists. Please ensure that the entityId is correct.', 'entityId', 'Error',
 		(SELECT TOP 1 ISNULL(CAST(IE.intEntityId AS NVARCHAR(200)), IE.strCustomerNumber) FROM @InvoiceEAEntries IE LEFT JOIN tblARCustomer C ON RTRIM(LTRIM(IE.strCustomerNumber)) = RTRIM(LTRIM(C.strCustomerNumber)) OR C.intEntityId = ISNULL(IE.intEntityId, 0))
 END
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries IE INNER JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) OR RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationName)))
