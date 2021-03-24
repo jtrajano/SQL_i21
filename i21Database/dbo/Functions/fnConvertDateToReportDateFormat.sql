@@ -32,8 +32,6 @@ BEGIN
 		SELECT @strFormatedDate = LTRIM(DATEPART(mm, @Date)) + '/' + LTRIM(DATEPART(dd, @Date)) + '/' + LTRIM(DATEPART(yyyy, @Date))
 	ELSE IF @strFormat = 'M/d/yy'
 		SELECT @strFormatedDate = LTRIM(DATEPART(mm, @Date)) + '/' + LTRIM(DATEPART(dd, @Date)) + '/' + RIGHT(LTRIM(DATEPART(yyyy, @Date)), 2)
-	ELSE IF @strFormat = 'dd-MMM-yyyy'
-		SELECT @strFormatedDate = REPLACE(TRIM(CONVERT(CHAR(15), @Date, 106)),' ','-') 
 
 	IF ISNULL(@strOnlyTime, '') <> ''
 		SELECT @strFormatedDate = @strFormatedDate + ' ' + @strOnlyTime
