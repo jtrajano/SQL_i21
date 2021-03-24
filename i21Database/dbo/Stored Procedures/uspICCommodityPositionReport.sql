@@ -25,7 +25,7 @@ BEGIN
 
 	IF LTRIM(RTRIM(ISNULL(@strLocationName, ''))) <> ''
 	BEGIN 
-		DECLARE @locationFilter_XML AS XML = CAST('<root><ID>' + REPLACE(@strLocationName, ',', '</ID><ID>') + '</ID><root>' AS XML) 	
+		DECLARE @locationFilter_XML AS XML = CAST('<root><ID>' + REPLACE(@strLocationName, ',', '</ID><ID>') + '</ID></root>' AS XML) 	
 		INSERT INTO #tmpCommodityPositionLocationFilter (
 			intCompanyLocationId
 		)
@@ -47,7 +47,7 @@ BEGIN
 
 	IF LTRIM(RTRIM(ISNULL(@strPermission, ''))) <> ''
 	BEGIN 
-		DECLARE @locationPermissionFilter_XML AS XML = CAST('<root><ID>' + REPLACE(@strPermission, ',', '</ID><ID>') + '</ID><root>' AS XML) 	
+		DECLARE @locationPermissionFilter_XML AS XML = CAST('<root><ID>' + REPLACE(@strPermission, ',', '</ID><ID>') + '</ID></root>' AS XML) 	
 		INSERT INTO #tmpCommodityPositionPermissionLocationFilter (
 			intCompanyLocationId
 		)
