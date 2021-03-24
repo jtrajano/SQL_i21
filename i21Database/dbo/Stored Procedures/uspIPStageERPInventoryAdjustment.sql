@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE [dbo].[uspIPStageERPStorageLocation] @strInfo1 NVARCHAR(MAX) = '' OUTPUT
+﻿CREATE PROCEDURE [dbo].[uspIPStageERPInventoryAdjustment] @strInfo1 NVARCHAR(MAX) = '' OUTPUT
 	,@strInfo2 NVARCHAR(MAX) = '' OUTPUT
 	,@intNoOfRowsAffected INT = 0 OUTPUT
 AS
@@ -9,7 +9,7 @@ BEGIN TRY
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	DECLARE @tblIPStorageLocation TABLE (strStorageLocation NVARCHAR(MAX))
+	DECLARE @tblIPLot TABLE (strLotNo NVARCHAR(250))
 	DECLARE @idoc INT
 	DECLARE @ErrMsg NVARCHAR(MAX) = ''
 		,@intRowNo INT
@@ -18,7 +18,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'Storage Unit'
+	WHERE strType = 'Quantity Adj'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -39,44 +39,63 @@ BEGIN TRY
 				,@strXml
 
 			DELETE
-			FROM @tblIPStorageLocation
+			FROM @tblIPLot
 
-			INSERT INTO dbo.tblIPStorageLocationStage (
-				intTrxSequenceNo 
-				,strCompanyLocation 
-				,intActionId 
-				,dtmCreatedDate 
-				,strCreatedBy 
-				,strStorageLocation 
-				,strStorageUnit 
-				,strDescription 
-				,strStorageUnitType
+			INSERT INTO dbo.tblIPInventoryAdjustmentStage (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,intActionId
+				,dtmCreatedDate
+				,strCreatedBy
+				,intTransactionTypeId
+				,strStorageLocation
+				,strItemNo
+				,strMotherLotNo
+				,strLotNo
+				,strStorageUnit
+				,dblQuantity
+				,strQuantityUOM
+				,strReasonCode
+				,strNotes
 				)
-			OUTPUT INSERTED.strStorageLocation
-			INTO @tblIPStorageLocation
-			SELECT TrxSequenceNo 
-				,CompanyLocation 
-				,ActionId 
-				,CreatedDate 
-				,CreatedBy 
-				,StorageLocation 
-				,StorageUnit 
-				,Description 
-				,StorageUnitType
+			OUTPUT INSERTED.strLotNo
+			INTO @tblIPLot
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,ActionId
+				,CreatedDate
+				,CreatedBy
+				,TransactionTypeId
+				,StorageLocation
+				,ItemNo
+				,MotherLotNo
+				,LotNo
+				,StorageUnit
+				,Quantity
+				,QuantityUOM
+				,ReasonCode
+				,Notes
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
 					TrxSequenceNo INT
 					,CompanyLocation NVARCHAR(6)
 					,ActionId INT
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
+					,TransactionTypeId INT
 					,StorageLocation NVARCHAR(50)
+					,ItemNo NVARCHAR(50)
+					,MotherLotNo NVARCHAR(50)
+					,LotNo NVARCHAR(50)
 					,StorageUnit NVARCHAR(50)
-					,Description NVARCHAR(100)
-					,StorageUnitType NVARCHAR(50)
+					,Quantity NUMERIC(18, 6)
+					,QuantityUOM NVARCHAR(50)
+					,ReasonCode NVARCHAR(50)
+					,Notes NVARCHAR(2048)
 					)
 
-			SELECT @strInfo1 = @strInfo1 + ISNULL(strStorageLocation, '') + ','
-			FROM @tblIPStorageLocation
+			SELECT @strInfo1 = @strInfo1 + ISNULL(strLotNo, '') + ','
+			FROM @tblIPLot
+
 			INSERT INTO dbo.tblIPInitialAck (
 				intTrxSequenceNo
 				,strCompanyLocation
@@ -90,7 +109,7 @@ BEGIN TRY
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
-				,7 AS intMessageTypeId
+				,15 AS intMessageTypeId
 				,1 AS intStatusId
 				,'Success' AS strStatusText
 			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
@@ -99,6 +118,7 @@ BEGIN TRY
 					,CreatedDate DATETIME
 					,CreatedBy NVARCHAR(50)
 					)
+
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
@@ -148,7 +168,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'Storage Unit'
+			AND strType = 'Quantity Adj'
 	END
 
 	IF (ISNULL(@strInfo1, '')) <> ''

@@ -9239,6 +9239,13 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddContainerDetailLink.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryAdjustmentStage.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryAdjustmentError.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryAdjustmentArchive.sql" />
+    <Build Include="dbo\Tables\tblIPInventoryAdjustmentAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPInventoryAdjustAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

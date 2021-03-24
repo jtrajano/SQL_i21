@@ -8,6 +8,12 @@ BEGIN TRY
 	BEGIN
 		EXEC dbo.uspMFGenerateERPProductionOrder @strCompanyLocation = @strCompanyLocation
 	END
+	ELSE IF @strType = 'Quantity Adj Ack'
+	BEGIN
+		EXEC dbo.uspMFGenerateERPInventoryAdjustAck @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+			,@intTransactionTypeId = 10
+	END
 END TRY
 
 BEGIN CATCH
