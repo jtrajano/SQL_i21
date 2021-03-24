@@ -130,6 +130,7 @@ v.intKey
 , v.ysnHasAddOn
 , v.ysnHasSubstitute
 , v.ysnHasAddOnOtherCharge
+, v.dblReceiveStandardWeight
 , guiSessionId = tsession.guiSessionId
 , dtmSessionDate = tsession.dtmTransactionDate
 FROM vyuICGetItemStock v
