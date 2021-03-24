@@ -9173,6 +9173,7 @@
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeByMonthSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRContractHedgeSummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspLGAddContainerDetailLink.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
