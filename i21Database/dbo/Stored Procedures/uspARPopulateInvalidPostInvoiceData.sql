@@ -2446,24 +2446,27 @@ BEGIN
 
 	IF(ISNULL(@strDatabaseName, '') <> '')
 	BEGIN
-		DECLARE @ysnVoucherExistQuery nvarchar(500)
+		DECLARE @ysnVoucherExistQuery nvarchar(MAX)
 		DECLARE @ysnVoucherExistParam NVARCHAR(500)
-		DECLARE @ysnVoucherExist BIT = 0 
+		DECLARE @strBillId NVARCHAR(500) = ''
 		DECLARE @strInterCompanyReceiptNumber NVARCHAR(50)
 
 		SELECT @strInterCompanyReceiptNumber = [strReceiptNumber] FROM #ARPostInvoiceHeader
-		SELECT @ysnVoucherExistQuery = N'SELECT @ysnVoucherExist = 1 FROM tblICInventoryReceipt IR 
-										 INNER JOIN tblICInventoryReceiptItem IRI 
-										 ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId 
-										 INNER JOIN tblAPBillDetail BD
-										 ON IRI.intInventoryReceiptItemId = BD.intInventoryReceiptItemId
-										 WHERE IR.strReceiptNumber = ''' + @strInterCompanyReceiptNumber + ''''
+		SELECT @ysnVoucherExistQuery = N'SELECT @strBillId = APB.strBillId 
+										 FROM [' + @strDatabaseName + '].[dbo].tblICInventoryReceipt ICIR 
+										 INNER JOIN [' + @strDatabaseName + '].[dbo].tblICInventoryReceiptItem ICIRI 
+										 ON ICIR.intInventoryReceiptId = ICIRI.intInventoryReceiptId 
+										 INNER JOIN [' + @strDatabaseName + '].[dbo].tblAPBillDetail APBD
+										 ON ICIRI.intInventoryReceiptItemId = APBD.intInventoryReceiptItemId
+										 INNER JOIN [' + @strDatabaseName + '].[dbo].tblAPBill APB
+										 ON APBD.intBillId = APB.intBillId
+										 WHERE ICIR.strReceiptNumber = ''' + @strInterCompanyReceiptNumber + ''''
 
-		SET @ysnVoucherExistParam = N'@ysnVoucherExist int OUTPUT'
+		SET @ysnVoucherExistParam = N'@strBillId NVARCHAR(500) OUTPUT'
 
-		EXEC sp_executesql @ysnVoucherExistQuery, @ysnVoucherExistParam, @ysnVoucherExist = @ysnVoucherExist OUTPUT
+		EXEC sp_executesql @ysnVoucherExistQuery, @ysnVoucherExistParam, @strBillId = @strBillId OUTPUT
 
-		IF(@ysnVoucherExist = 1)
+		IF(@strBillId <> '')
 		BEGIN
 			INSERT INTO #ARInvalidInvoiceData
 				([intInvoiceId]
@@ -2481,7 +2484,7 @@ BEGIN
 				,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 				,[intItemId]			= I.[intItemId]
 				,[strBatchId]			= I.[strBatchId]
-				,[strPostingError]		= 'The inventory receipt has already been vouchered, the Invoice cannot be unposted at this time!'
+				,[strPostingError]		= 'Unable to unpost. The inventory receipt(' + @strInterCompanyReceiptNumber + ') has a voucher(' + @strBillId + ') in company ' + ISNULL(@strCompanyName, '') + '.'
 			FROM 
 				#ARPostInvoiceHeader I
 			WHERE I.ysnInterCompany = 1
