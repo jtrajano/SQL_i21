@@ -464,7 +464,7 @@ ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE 
 A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 AND B.intInventoryReceiptChargeId IS NOT NULL 
--- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 AND (
 	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate
