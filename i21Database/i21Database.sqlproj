@@ -9246,6 +9246,9 @@
     <Build Include="dbo\Stored Procedures\uspIPStageERPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPInventoryAdjustment.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPInventoryAdjustAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPPO.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPValidateERPContractFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPPOAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
