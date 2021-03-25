@@ -97,6 +97,19 @@ DECLARE
 		RAISERROR('Please configure ''AR Account'' in company preference.',16,1)
 	END
 
+	IF OBJECT_ID (N'tempdb.dbo.#tmpLGContractPrice') IS NOT NULL DROP TABLE #tmpLGContractPrice
+	CREATE TABLE #tmpLGContractPrice (
+		intIdentityId INT
+		,intContractHeaderId int
+		,intContractDetailId int
+		,ysnLoad bit
+		,intPriceContractId int
+		,intPriceFixationId int
+		,intPriceFixationDetailId int
+		,dblQuantity numeric(18,6)
+		,dblPrice numeric(18,6)
+	)
+
 	SELECT
 		 @ShipmentNumber			= L.strLoadNumber
 		,@TransactionType			= CASE WHEN (@intType = 3) THEN 'Proforma Invoice' ELSE 'Invoice' END
@@ -410,19 +423,6 @@ DECLARE
 		WHERE L.intLoadId = @intLoadId
 
 	ELSE
-		IF OBJECT_ID (N'tempdb.dbo.#tmpLGContractPrice') IS NOT NULL DROP TABLE #tmpLGContractPrice
-		CREATE TABLE #tmpLGContractPrice (
-			intIdentityId INT
-			,intContractHeaderId int
-			,intContractDetailId int
-			,ysnLoad bit
-			,intPriceContractId int
-			,intPriceFixationId int
-			,intPriceFixationDetailId int
-			,dblQuantity numeric(18,6)
-			,dblPrice numeric(18,6)
-		)
-
 		IF(@intPricingTypeId = 2)
 		BEGIN
 			INSERT INTO #tmpLGContractPrice
@@ -727,7 +727,29 @@ DECLARE
 		,@UpdatedIvoices		= @UpdatedIvoices		OUTPUT
 
 		
-	SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))			
+	SELECT TOP 1 @NewInvoiceId = intInvoiceId FROM tblARInvoice WHERE intInvoiceId IN (SELECT intID FROM fnGetRowsFromDelimitedValues(@CreatedIvoices))		
+	
+	IF (@intType = 1 AND EXISTS(SELECT TOP 1 1 FROM #tmpLGContractPrice) AND EXISTS(SELECT TOP 1 1 FROM @EntriesForInvoice))
+	BEGIN
+		/* INSERT tblCTPriceFixationDetailAPAR */
+		INSERT INTO tblCTPriceFixationDetailAPAR (
+			intPriceFixationDetailId
+			, intInvoiceId
+			, intInvoiceDetailId
+			, intConcurrencyId
+		)
+		SELECT intPriceFixationDetailId = PRICE.intPriceFixationDetailId
+			, intInvoiceId				= ID.intInvoiceId
+			, intInvoiceDetailId		= ID.intInvoiceDetailId
+			, intConcurrencyId			= 1
+		FROM tblARInvoiceDetail ID
+		INNER JOIN #tmpLGContractPrice PRICE 
+			ON ID.intContractDetailId = PRICE.intContractDetailId 
+				AND ID.dblPrice = PRICE.dblPrice
+		WHERE ID.intInvoiceId = @NewInvoiceId
+		AND ID.intInventoryShipmentChargeId IS NULL
+			
+	END
          
 	RETURN @NewInvoiceId
 END
