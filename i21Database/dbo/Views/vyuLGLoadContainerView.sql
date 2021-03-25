@@ -25,8 +25,13 @@ SELECT   L.intLoadId
 		,LC.dblNetWt
 		,LC.dblQuantity
 		,LC.dblTareWt
-		,LC.dblTotalCost
-		,LC.dblUnitCost
+		,dblTotalCost = ROUND(
+							(WeightUOM.dblUnitQty / ISNULL(PriceUOM.dblUnitQty, 1)) * ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice) 
+							* LC.dblNetWt / ISNULL(PBCur.intCent, 1)
+						,2)
+		,dblUnitCost = ROUND(
+						(WeightUOM.dblUnitQty / ISNULL(PriceUOM.dblUnitQty, 1)) * ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice)
+					   ,2)
 		,LC.dtmUnloading
 		,LC.dtmCustoms
 		,LC.dtmFDA
@@ -160,6 +165,9 @@ LEFT JOIN tblCTContractDetail PDetail ON PDetail.intContractDetailId = LD.intPCo
 LEFT JOIN tblCTContractHeader PHeader ON PHeader.intContractHeaderId = PDetail.intContractHeaderId
 LEFT JOIN tblCTContractDetail SDetail ON SDetail.intContractDetailId = LD.intSContractDetailId
 LEFT JOIN tblCTContractHeader SHeader ON SHeader.intContractHeaderId = SDetail.intContractHeaderId
+LEFT JOIN tblSMCurrency PBCur ON PBCur.intCurrencyID = PDetail.intBasisCurrencyId 
+LEFT JOIN tblICItemUOM PriceUOM ON PriceUOM.intItemUOMId = PDetail.intPriceItemUOMId
+LEFT JOIN tblICItemUOM WeightUOM ON WeightUOM.intItemUOMId = LD.intWeightItemUOMId
 LEFT JOIN tblICItem PBundle ON PBundle.intItemId = PDetail.intItemBundleId
 LEFT JOIN tblICItem SBundle ON SBundle.intItemId = SDetail.intItemBundleId
 LEFT JOIN tblEMEntity CEN ON CEN.intEntityId = LD.intCustomerEntityId
