@@ -412,9 +412,9 @@ BEGIN TRY
 	declare @rtLocation nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Location'), 'Location');
 	declare @rtDocumentsRequired nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Documents Required'), 'Documents Required');
 	declare @rtContract2 nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Contract'), 'Contract');
-	declare @rtNotesRemarks nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Notes/Remarks'), 'Notes/Remarks');
+	declare @rtNotesRemarks nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Printable Remarks'), 'Printable Remarks');
 	declare @rtPriceBasis nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Price Basis'), 'Price Basis');
-	declare @rtOthers nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Others'), 'Others');
+	declare @rtOthers nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Contract'), 'Contract');
 	declare @rtCondition nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Condition'), 'Condition');
 	declare @rtProducer nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Producer'), 'Producer');
 	declare @rtShipper nvarchar(500) = isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipper'), 'Shipper');
@@ -532,7 +532,7 @@ BEGIN TRY
 			,strGrade								= dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W2.intWeightGradeId,@intLaguageId,'Name',W2.strWeightGradeDesc) 
 			,strQaulityAndInspection				= @rtStrQaulityAndInspection1 + ' ' + ' - ' + dbo.fnCTGetTranslation('ContractManagement.view.WeightGrades',W2.intWeightGradeId,@intLaguageId,'Name',W2.strWeightGradeDesc) + ' '+@rtStrQaulityAndInspection2+' ' + @strCompanyName + '''s '+@rtStrQaulityAndInspection3+'.'
 			,strContractDocuments					= @strContractDocuments
-			,strFirstHalfDocuments					= LTRIM(@strFirstHalfDocuments)
+			,strFirstHalfDocuments					= LTRIM(@strFirstHalfDocuments) + LTRIM(@strSecondHalfDocuments)
 			,strSecondHalfDocuments				    = LTRIM(@strSecondHalfDocuments)
 			,strArbitration							= @rtStrArbitration1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + '  '+@rtStrArbitration2+'. ' 
 														+ CHAR(13)+CHAR(10) +
@@ -642,9 +642,9 @@ BEGIN TRY
 			,lblAtlasArbitrationComment				= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN @rtContract2				ELSE NULL END
 			,lblAtlasArbitrationCommentColon		= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN ':'					ELSE NULL END
 			,lblBeGreenArbitrationComment			= CASE WHEN ISNULL(AN.strComment,'') <>''			   THEN 'Rule :'							ELSE NULL END
-			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks + ' :'				ELSE NULL END
-			,lblAtlasPrintableRemarks				= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks			ELSE NULL END
-			,lblAtlasPrintableRemarksColon			= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN ':'				ELSE NULL END
+			,lblPrintableRemarks					= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks + ' :'				ELSE @rtNotesRemarks END
+			,lblAtlasPrintableRemarks				= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN @rtNotesRemarks			ELSE @rtNotesRemarks END
+			,lblAtlasPrintableRemarksColon			= CASE WHEN ISNULL(CH.strPrintableRemarks,'') <>''	   THEN ':'				ELSE ' :' END
 			,lblContractBasis						= CASE WHEN ISNULL(CB.strFreightTerm,'') <>''		   THEN @rtPriceBasis + ' :'					ELSE NULL END
 			,lblIncoTerms							= CASE WHEN ISNULL(CB.strFreightTerm,'') <>''		   THEN 'Incoterms :'					ELSE NULL END
 			,lblContractText						= CASE WHEN ISNULL(TX.strText,'') <>''				   THEN @rtOthers + ' :'						ELSE NULL END
@@ -694,17 +694,47 @@ BEGIN TRY
 			--,StraussContractSubmitSignature			=  @StraussContractSubmitSignature
 			,StraussContractSubmitSignature   		=  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then null else @StraussContractSubmitSignature  end)
    			,StraussContractSubmitByParentSignature =  (case when @intMultiCompanyParentId > 0 and CH.intContractTypeId = 1 then @StraussContractSubmitSignature else null  end)
+			,blbFirstApprovalSignPurchase = case
+											when CH.intContractTypeId = 1
+											then @FirstApprovalSign
+											else null
+										end
+			,blbSecondApprovalSignPurchase = case
+												 when CH.intContractTypeId = 1
+												 then @SecondApprovalSign
+												 else null
+											 end
+			,blbFirstApprovalSignSale = case
+											when CH.intContractTypeId = 2
+											then @FirstApprovalSign
+											else null
+										end
+			,blbSecondApprovalSignSale = case
+											when CH.intContractTypeId = 2
+											then @SecondApprovalSign
+											else null
+										 end
 			,InterCompApprovalSign					= @InterCompApprovalSign
 			,strAmendedColumns						= @strAmendedColumns
 			,lblArbitration							= CASE WHEN ISNULL(AN.strComment,'') <>''	 AND ISNULL(AB.strState,'') <>''		 AND ISNULL(RY.strCountry,'') <>'' THEN @rtArbitration + ':'  ELSE NULL END
 			,lblPricing								= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN @rtPricing + ' :'		ELSE NULL END
-			,lblAtlasPricing						= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN @rtPricing ELSE NULL END
-			,lblAtlasPricingColon					= CASE WHEN ISNULL(SQ.strFixationBy,'') <>'' AND ISNULL(SQ.strFutMarketName,'') <>'' AND CH.intPricingTypeId=2		   THEN ':' ELSE NULL END
+			,lblAtlasPricing						= CASE when CH.intPricingTypeId = 6 then null else 'Pricing' end
+			,lblAtlasPricingColon					=  case when CH.intPricingTypeId = 6 then null else ':' end
 			,strCaller								= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s '+@rtCall+' ('+SQ.strFutMarketName+')' 
 			,strHersheyCaller						= CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL ELSE SQ.strFixationBy END+'''s '+@rtCall
 			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtBuyerRefNo + '. :'  ELSE NULL END
 			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtSellerRefNo + '. :' ELSE NULL END
-			,strAtlasCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' AND CH.intPricingTypeId = 2 THEN SQ.strFixationBy +'''s '+@rtCall+' vs '+LTRIM(@TotalAtlasLots)+' '+@rtLotssOf+' '+SQ.strFutMarketName + ' ' + @rtFutures ELSE NULL END
+			,strAtlasCaller							= CASE
+														when CH.intPricingTypeId = 6
+														then ''
+														else
+															CASE
+																WHEN LTRIM(RTRIM(SQ.strFixationBy)) = ''
+																THEN NULL
+																ELSE SQ.strFixationBy
+															END
+															+'''s Call vs '+ convert(nvarchar(20),convert(numeric(10,2),SQ.dblNoOfLots)) + ' lot(s) ' + SQ.strFutureMonth + ' ' + SQ.strFutMarketName
+													end
 			,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strEQTCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
@@ -799,24 +829,6 @@ BEGIN TRY
 			,strStraussQuantity						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strPackingDescription, '')
 			,strItemBundleNo						=	(case when @ysnExternal = convert(bit,1) then SQ.strItemBundleNo else null end)
 			,strItemBundleNoLabel					=	(case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end)
-			,strStraussPrice						=	CASE WHEN CH.intPricingTypeId = 2 THEN 
-															'Price to be fixed basis ' + strFutMarketName + ' ' + 
-															strFutureMonthYear + CASE WHEN SQ.dblBasis < 0 THEN ' '+@rtMinus+' ' ELSE ' '+@rtPlus+' ' END +
-															SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(abs(SQ.dblBasis),2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
-														ELSE
-															'' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + ' ' + strPriceCurrencyAndUOMForPriced2	
-															--'Priced ' + strFutMarketName + ' ' + 
-															--strFutureMonthYear + ' ' +
-															--SQ.strBasisCurrency + ' ' + dbo.fnCTChangeNumericScale(SQ.dblCashPrice,2) + '/'+ SQ.strBasisUnitMeasure +' at '+ SQ.strFixationBy+'''s option prior to first notice day of '+strFutureMonthYear+' or on presentation of documents,whichever is earlier.'
-														END
-			,strStraussCondition     				= 	CB.strFreightTerm + '('+CB.strDescription+')' + ' ' + isnull(CT.strCity,'') + ' ' + isnull(W1.strWeightGradeDesc,'')  
-			,strStraussApplicableLaw				=	@strApplicableLaw
-			,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
-			--,strStrussOtherCondition				=	W2.strWeightGradeDesc +  CHAR(13)+CHAR(10) + @strGeneralCondition
-		   --,strStrussOtherCondition    = isnull(W2.strWeightGradeDesc,'') +  CHAR(13)+CHAR(10) + isnull(@strGeneralCondition,'')    
-		   ,strStrussOtherCondition    = '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
-		   ,strStraussShipment      = datename(m,SQ.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,SQ.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end)   
-		   ,strStraussShipmentLabel      = (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end) 
 			,intContractTypeId						=	CH.intContractTypeId
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId
@@ -868,6 +880,7 @@ BEGIN TRY
 				SELECT		ROW_NUMBER() OVER (PARTITION BY CD.intContractHeaderId ORDER BY CD.intContractSeq ASC) AS intRowNum, 
 							CD.intContractSeq,
 							CD.intContractHeaderId,
+							CD.dblNoOfLots,
 							CL.strLocationName,
 							'Loading ' + CD.strLoadingPointType		AS	srtLoadingPoint,
 							LP.strCity								AS	strLoadingPointName,
@@ -884,10 +897,8 @@ BEGIN TRY
 							(SELECT SUM(dblNoOfLots) FROM tblCTContractDetail WHERE intContractHeaderId = @intContractHeaderId) AS dblTotalNoOfLots,
 							dbo.fnCTGetTranslation('Inventory.view.Item',IM.intItemId,@intLaguageId,'Description',IM.strDescription) + ISNULL(', ' + CD.strItemSpecification, '') AS strItemDescWithSpec,
 							dbo.fnCTGetTranslation('Inventory.view.Item',IM.intItemId,@intLaguageId,'Description',IM.strDescription) strItemDescription,
-							--CONVERT(NVARCHAR(20),CD.dtmStartDate,106) + ' - ' +  CONVERT(NVARCHAR(20),CD.dtmEndDate,106) AS strStartAndEndDate,
 							LEFT(DATENAME(DAY,CD.dtmStartDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmStartDate),3)), LEFT(DATENAME(MONTH,CD.dtmStartDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmStartDate),4) + ' - ' + LEFT(DATENAME(DAy,CD.dtmEndDate),2) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CD.dtmEndDate),3)), LEFT(DATENAME(MONTH,CD.dtmEndDate),3)) + ' ' + LEFT(DATENAME(YEAR,CD.dtmEndDate),4) AS strStartAndEndDate,
 							LTRIM(CD.intNumberOfContainers) + ' x ' + dbo.fnCTGetTranslation('Logistics.view.ContainerType',CT.intContainerTypeId,@intLaguageId,'Container Type',CT.strContainerType) AS strNoOfContainerAndType,
-							--DATENAME(mm,MO.dtmFutureMonthsDate) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
 							isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(mm,MO.dtmFutureMonthsDate)), DATENAME(mm,MO.dtmFutureMonthsDate)) + ' ' + DATENAME(yyyy,MO.dtmFutureMonthsDate) AS strFutureMonthYear,
 							CD.dblBasis,
 							CD.strBuyerSeller,
