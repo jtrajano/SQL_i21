@@ -343,7 +343,6 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\20_Remove_Duplicate_UPCs.sql
 :r .\IC\21_Refresh_IR_Details.sql
 :r .\IC\22_InventoryValuationPerformance.sql
-:r .\IC\23_DisablePricingUniqueIndex.sql
 :r .\IC\24_PopulateTransactionUOM.sql 
 :r .\IC\25_TransactionTypeRename.sql 
 :r .\IC\26_LockAvgCost.sql 
