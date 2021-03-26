@@ -105,8 +105,7 @@ BEGIN TRY
 			,strDestinationPointName				=	SQ.strDestinationPointName
 			,strItemDescription						=   strItemDescription
 			,strQuantity							=	dbo.fnRemoveTrailingZeroes(CD.dblQuantity) + ' ' + UM.strUnitMeasure
-			--,strShipment							=	LEFT(DATENAME(MONTH, SQ.dtmEndDate), 3) + ' ' + DATENAME(YEAR, SQ.dtmEndDate) + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + CASE WHEN NULLIF(SQ.strFixationBy, '') IS NOT NULL THEN ' at '+ SQ.strFixationBy+'''s option' ELSE '' END
-			,strShipment							=	replace(convert(varchar,SQ.dtmStartDate,103),' ','/') + ' - ' + replace(convert(varchar,SQ.dtmEndDate,103),' ','/') + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + CASE WHEN NULLIF(SQ.strFixationBy, '') IS NOT NULL THEN ' at '+ SQ.strFixationBy+'''s option' ELSE '' END
+			,strShipment							=	LEFT(DATENAME(MONTH, SQ.dtmEndDate), 3) + ' ' + DATENAME(YEAR, SQ.dtmEndDate) + ' ' + (case when pos.strPositionType = 'Shipment' then 'shipment' when pos.strPositionType = 'Spot' then 'delivery' else 'shipment' end) + CASE WHEN NULLIF(SQ.strFixationBy, '') IS NOT NULL THEN ' at '+ SQ.strFixationBy+'''s option' ELSE '' END
 
 		    ,strEntityAddress      					=   LTRIM(RTRIM(EY.strEntityName)) + ', '    + CHAR(13)+CHAR(10) +  
 										                ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +  
@@ -134,14 +133,6 @@ BEGIN TRY
 			,strPositionLabel						=   (case when pos.strPositionType = 'Shipment' then 'Shipment' when pos.strPositionType = 'Spot' then 'Delivery' else '' end)
 			,strContractCondtionDescription			=	(select top 1 a.strConditionDescription from tblCTContractCondition a, tblCTCondition b where a.intContractHeaderId = CH.intContractHeaderId and b.intConditionId = a.intConditionId and b.strConditionName like '%_SAMPLE_INSTRUCTION%')
 			, blbFooterLogo = dbo.fnSMGetCompanyLogo('Footer')
-
-			,strStraussEntityName = LTRIM(RTRIM(EY.strEntityName))
-			,strStraussStreetAddress = ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'')
-			,strStraussZipCodeAndCity = ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) + ' ' END,'') + ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'')
-			/*For strStraussState, replace the value with Country if the value is null or empty - this is to eliminate the gap between City and Country if no State is define*/
-			,strStraussState = ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN (CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END) ELSE LTRIM(RTRIM(EY.strEntityState))   END,'')
-			/*For strStraussCountry, replace the value with null if the strStraussState is null or empty - this is to eliminate the gap between City and Country if no State is define*/
-			,strStraussCountry = CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = '' THEN null else CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END end
 
 		FROM	tblCTContractHeader				CH
 		JOIN	tblCTContractDetail				CD	WITH (NOLOCK)	ON	CH.intContractHeaderId	= CD.intContractHeaderId
