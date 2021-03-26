@@ -6,6 +6,8 @@
     [strScreen]         NVARCHAR (50)    COLLATE Latin1_General_CI_AS NOT NULL,
     [strComment]        NVARCHAR (MAX)   COLLATE Latin1_General_CI_AS NULL,
     [strRecordNo]       NVARCHAR (50)    COLLATE Latin1_General_CI_AS NOT NULL,
+    [strType]           NVARCHAR (50)   COLLATE Latin1_General_CI_AS NULL DEFAULT('attachment'), -- attachment, ocr
+    [ysnOcrProcessed]   BIT NULL DEFAULT(0),
     [dtmDateModified]   DATETIME         NOT NULL,
     [intSize]           INT              NOT NULL,
     [intEntityId]       INT              NULL,
