@@ -9248,6 +9248,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPPO.sql" />
     <Build Include="dbo\Stored Procedures\uspIPValidateERPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPOAck.sql" />
+    <Build Include="dbo\Tables\tblMFProductionPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
