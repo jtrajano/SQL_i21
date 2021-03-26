@@ -174,10 +174,10 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN (
-					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.strVendorOrderNumber
+					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
 					FROM tblAPBillDetail 
 					INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
-				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId AND APBill.intItemId = tblICInventoryReceiptItem.intItemId
 				--LEFT JOIN (
 				--	SELECT  
 				--		tblTRLoadDistributionDetail.intLoadDistributionDetailId,
@@ -362,10 +362,10 @@ BEGIN TRY
 				LEFT JOIN tblTRLoadReceipt ON  tblTRLoadReceipt.intInventoryReceiptId = tblICInventoryReceipt.intInventoryReceiptId AND tblTRLoadReceipt.intItemId = tblICInventoryReceiptItem.intItemId
 				LEFT JOIN tblTRLoadHeader ON tblTRLoadHeader.intLoadHeaderId = tblTRLoadReceipt.intLoadHeaderId
 				LEFT JOIN (
-					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBill.strVendorOrderNumber
+					SELECT DISTINCT tblAPBillDetail.intInventoryReceiptItemId, tblAPBillDetail.intItemId, tblAPBill.strVendorOrderNumber
 					FROM tblAPBillDetail 
 					INNER JOIN tblAPBill ON tblAPBillDetail.intBillId = tblAPBill.intBillId
-				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId
+				) APBill ON APBill.intInventoryReceiptItemId = tblICInventoryReceiptItem.intInventoryReceiptItemId AND APBill.intItemId = tblICInventoryReceiptItem.intItemId
 				--LEFT JOIN (
 				--	SELECT  
 				--		tblTRLoadDistributionDetail.intLoadDistributionDetailId,
