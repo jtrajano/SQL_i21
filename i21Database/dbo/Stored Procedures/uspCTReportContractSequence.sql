@@ -634,7 +634,7 @@ BEGIN TRY
 			,strProducer							= PR.strName
 			,strPosition							= PO.strPosition
 			,strContractConditions				    = @strContractConditions
-			,lblAtlasLocation						= CASE WHEN ISNULL(CASE WHEN CB.strINCOLocationType = 'City' THEN CT.strCity ELSE SL.strSubLocationName END,'') <>''     THEN @rtLocation + ' :'					ELSE NULL END
+			,lblAtlasLocation						= @rtLocation + ' :'			
 			,lblContractDocuments					= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN @rtDocumentsRequired + ' :'			ELSE NULL END
 			,lblAtlasContractDocuments				= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN @rtDocumentsRequired			ELSE NULL END
 			,lblAtlasContractDocumentsColon			= CASE WHEN ISNULL(@strContractDocuments,'') <>''	   THEN ':'			ELSE NULL END
