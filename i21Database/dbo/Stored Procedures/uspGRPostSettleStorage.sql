@@ -2620,9 +2620,11 @@ BEGIN TRY
 
 				----- delete voucher payable that does not have quantity to bill -----
 				delete from @voucherPayable where dblQuantityToBill = 0
-				
-				IF @dblVoucherTotal > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
-				BEGIN
+
+				DECLARE @dblVoucherTotalPrecision DECIMAL(18,6) = round(@dblVoucherTotal,2)
+
+				IF @dblVoucherTotalPrecision > 0 AND EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory'  and dblOrderQty <> 0)
+				BEGIN					
 					update @voucherPayable set ysnStage = 0
 					EXEC uspAPCreateVoucher
 						@voucherPayables = @voucherPayable
@@ -2636,7 +2638,7 @@ BEGIN TRY
 					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))
 					BEGIN
 						BEGIN
-						RAISERROR('Total Voucher will be negative',16,1)
+						RAISERROR('Unable to post settlement. Voucher will have an invalid amount.',16,1)
 						END
 					END
 
