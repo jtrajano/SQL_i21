@@ -143,6 +143,11 @@ BEGIN TRY
 					,TermsCode NVARCHAR(100)
 					) x
 
+			UPDATE ET
+			SET ET.intStageEntityId = E.intStageEntityId
+			FROM tblIPEntityStage E
+			JOIN tblIPEntityTermStage ET ON ET.intParentTrxSequenceNo = E.intTrxSequenceNo
+
 			INSERT INTO tblIPInitialAck (
 				intTrxSequenceNo
 				,strCompanyLocation

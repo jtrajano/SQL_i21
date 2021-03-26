@@ -98,6 +98,11 @@ BEGIN TRY
 					,ParentTrxSequenceNo INT '@ParentTrxSequenceNo'
 					) x
 
+			UPDATE IRD
+			SET IRD.intItemRouteStageId = IR.intItemRouteStageId
+			FROM tblIPItemRouteStage IR
+			JOIN tblIPItemRouteDetailStage IRD ON IRD.intParentTrxSequenceNo = IR.intTrxSequenceNo
+
 			INSERT INTO tblIPInitialAck (
 				intTrxSequenceNo
 				,strCompanyLocation

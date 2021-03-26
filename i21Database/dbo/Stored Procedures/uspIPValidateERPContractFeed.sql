@@ -17,23 +17,114 @@ BEGIN
 		,@intBookId INT
 		,@intOldCompanyLocationId INT
 		,@strOldLocationName NVARCHAR(50)
+		,@intOldBookId INT
+		,@strOldBook NVARCHAR(100)
+		,@intContractFeedLogId INT
+		,@intContractFeedId INT
+	DECLARE @tblCTContractDetail TABLE (
+		intContractDetailId INT
+		,intContractHeaderId INT
+		)
 
 	SELECT TOP 1 @intContractDetailId = L.intContractDetailId
-		,@intOldCompanyLocationId = L.intCompanyLocationId
+		,@intContractHeaderId = L.intContractHeaderId
 	FROM tblIPContractFeedLog L
 	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
 	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
 		AND CD.intContractStatusId = 1
 	WHERE IsNULL(L.intCompanyLocationId, 0) <> IsNULL(CD.intCompanyLocationId, 0)
 
+	DELETE
+	FROM @tblCTContractDetail
+
 	IF @intContractDetailId IS NOT NULL
 	BEGIN
-		IF ISNULL(@intOldCompanyLocationId, 0) > 0
-		BEGIN
-			SELECT @strOldLocationName = strLocationName
-			FROM tblSMCompanyLocation
-			WHERE intCompanyLocationId = @intOldCompanyLocationId
+		INSERT INTO @tblCTContractDetail (
+			intContractDetailId
+			,intContractHeaderId
+			)
+		SELECT @intContractDetailId
+			,@intContractHeaderId
+	END
 
+	SELECT @intContractDetailId = NULL
+		,@intContractHeaderId = NULL
+
+	SELECT TOP 1 @intContractDetailId = L.intContractDetailId
+		,@intContractHeaderId = L.intContractHeaderId
+	FROM tblIPContractFeedLog L
+	JOIN tblCTContractHeader CH ON CH.intContractHeaderId = L.intContractHeaderId
+	JOIN tblCTContractDetail CD ON CD.intContractDetailId = L.intContractDetailId
+		AND CD.intContractStatusId = 1
+	WHERE IsNULL(L.intHeaderBookId, 0) <> IsNULL(CH.intBookId, 0)
+
+	IF @intContractHeaderId IS NOT NULL
+	BEGIN
+		INSERT INTO @tblCTContractDetail (
+			intContractDetailId
+			,intContractHeaderId
+			)
+		SELECT CL.intContractDetailId
+			,CL.intContractHeaderId
+		FROM tblCTContractHeader CH
+		JOIN tblCTContractDetail CD ON CD.intContractHeaderId = CH.intContractHeaderId
+			AND CD.intContractStatusId = 1
+			AND CD.intContractHeaderId = @intContractHeaderId
+		JOIN tblIPContractFeedLog CL ON CL.intContractDetailId = CD.intContractDetailId
+		WHERE CD.intContractDetailId NOT IN (
+				SELECT intContractDetailId
+				FROM @tblCTContractDetail
+				)
+	END
+
+	SELECT @intContractDetailId = NULL
+		,@intContractHeaderId = NULL
+
+	SELECT @intContractDetailId = MIN(intContractDetailId)
+	FROM @tblCTContractDetail
+
+	IF @intContractDetailId IS NULL
+	BEGIN
+		RETURN
+	END
+
+	WHILE @intContractDetailId IS NOT NULL
+	BEGIN
+		SELECT @intOldCompanyLocationId = NULL
+			,@intOldBookId = NULL
+			,@strOldLocationName = NULL
+			,@strOldBook = NULL
+			,@intContractFeedLogId = NULL
+			,@intContractHeaderId = NULL
+			,@intContractFeedId = NULL
+
+		SELECT @strContractSeq = NULL
+			,@strReference = NULL
+			,@intShipperId = NULL
+			,@intDestinationPortId = NULL
+			,@intCompanyLocationId = NULL
+			,@strContractNumber = NULL
+			,@strVendorRefNo = NULL
+			,@intBookId = NULL
+
+		SELECT @intContractFeedLogId = intContractFeedLogId
+			,@intContractHeaderId = intContractHeaderId
+			,@intOldCompanyLocationId = intCompanyLocationId
+			,@intOldBookId = intHeaderBookId
+		FROM tblIPContractFeedLog
+		WHERE intContractDetailId = @intContractDetailId
+
+		SELECT @strOldLocationName = strLocationName
+		FROM dbo.tblSMCompanyLocation
+		WHERE intCompanyLocationId = @intOldCompanyLocationId
+
+		SELECT @strOldBook = strBook
+		FROM dbo.tblCTBook
+		WHERE intBookId = @intOldBookId
+
+		IF ISNULL(@intOldCompanyLocationId, 0) > 0
+			OR ISNULL(@intOldBookId, 0) > 0
+		BEGIN
 			INSERT INTO tblCTContractFeed (
 				intContractHeaderId
 				,intContractDetailId
@@ -140,6 +231,26 @@ BEGIN
 				,'IGNORE'
 			FROM vyuCTContractFeed
 			WHERE intContractDetailId = @intContractDetailId
+
+			SELECT @intContractFeedId = SCOPE_IDENTITY()
+
+			IF NOT EXISTS (
+					SELECT 1
+					FROM tblIPThirdPartyContractFeed
+					WHERE intContractFeedId = @intContractFeedId
+					)
+				INSERT INTO tblIPThirdPartyContractFeed (
+					intContractFeedId
+					,strERPPONumber
+					,strRowState
+					,strBook
+					)
+				SELECT @intContractFeedId
+					,strERPPONumber
+					,'DELETE'
+					,@strOldBook
+				FROM vyuCTContractFeed
+				WHERE intContractDetailId = @intContractDetailId
 		END
 
 		INSERT INTO tblCTContractFeed (
@@ -290,5 +401,9 @@ BEGIN
 		SELECT @strInfo2 = @strReference
 
 		SELECT @intNoOfRowsAffected = 1
+
+		SELECT @intContractDetailId = MIN(intContractDetailId)
+		FROM @tblCTContractDetail
+		WHERE intContractDetailId > @intContractDetailId
 	END
 END

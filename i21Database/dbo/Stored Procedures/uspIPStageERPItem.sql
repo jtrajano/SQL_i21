@@ -142,6 +142,11 @@ BEGIN TRY
 					,IsStockUOM INT
 					) x
 
+			UPDATE IUOM
+			SET IUOM.intStageItemId = I.intStageItemId
+			FROM tblIPItemStage I
+			JOIN tblIPItemUOMStage IUOM ON IUOM.intParentTrxSequenceNo = I.intTrxSequenceNo
+			
 			INSERT INTO tblIPInitialAck (
 				intTrxSequenceNo
 				,strCompanyLocation

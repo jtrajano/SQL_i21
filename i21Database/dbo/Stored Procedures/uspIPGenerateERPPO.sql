@@ -136,11 +136,6 @@ BEGIN TRY
 		FROM dbo.tblCTContractFeed
 		WHERE intContractFeedId = @intContractFeedId
 
-		SELECT TOP 1 @intCurrencyId = intCurrencyID
-			,@strCurrency = strCurrency
-		FROM tblSMCurrency
-		WHERE strCurrency LIKE '%USD%'
-
 		SELECT @intBookId = intBookId
 			,@strCustomerContract = strCustomerContract
 		FROM dbo.tblCTContractHeader
@@ -149,6 +144,32 @@ BEGIN TRY
 		SELECT @strBook = strBook
 		FROM dbo.tblCTBook
 		WHERE intBookId = @intBookId
+
+		-- Add all the extra columns which are not avail in feed table
+		IF NOT EXISTS (
+				SELECT 1
+				FROM tblIPThirdPartyContractFeed
+				WHERE intContractFeedId = @intContractFeedId
+				)
+			INSERT INTO tblIPThirdPartyContractFeed (
+				intContractFeedId
+				,strERPPONumber
+				,strRowState
+				,strBook
+				)
+			SELECT @intContractFeedId
+				,@strERPPONumber
+				,@strRowState
+				,@strBook
+
+		SELECT @strBook = strBook
+		FROM tblIPThirdPartyContractFeed
+		WHERE intContractFeedId = @intContractFeedId
+
+		SELECT TOP 1 @intCurrencyId = intCurrencyID
+			,@strCurrency = strCurrency
+		FROM tblSMCurrency
+		WHERE strCurrency LIKE '%USD%'
 
 		SELECT @dtmUpdatedAvailabilityDate = CD.dtmUpdatedAvailabilityDate
 			,@strPricingType = PT.strPricingType
@@ -204,7 +225,7 @@ BEGIN TRY
 		BEGIN
 			UPDATE dbo.tblCTContractFeed
 			SET strMessage = @strError
-				,intStatusId = 2
+				,intStatusId = 1
 			WHERE intContractFeedId = @intContractFeedId
 
 			GOTO NextPO
@@ -213,6 +234,22 @@ BEGIN TRY
 		BEGIN
 			IF @strRowState <> 'Added'
 				AND IsNULL(@strERPPONumber, '') = ''
+			BEGIN
+				GOTO NextPO
+			END
+
+			-- If previous feed is waiting for acknowledgement then do not send the current feed
+			IF EXISTS (
+				SELECT TOP 1 1
+				FROM tblCTContractFeed CF
+				JOIN tblCTContractDetail CD ON CD.intContractDetailId = CF.intContractDetailId
+					AND CD.intContractDetailId = @intContractDetailId
+				JOIN tblSMCompanyLocation CL ON CL.intCompanyLocationId = CD.intCompanyLocationId
+					AND CL.strLotOrigin = @strCompanyLocation
+					AND CF.intContractFeedId < @intContractFeedId
+					AND intStatusId = 2
+				ORDER BY CF.intContractFeedId DESC
+			)
 			BEGIN
 				GOTO NextPO
 			END
@@ -366,32 +403,18 @@ BEGIN TRY
 			BEGIN
 				UPDATE dbo.tblCTContractFeed
 				SET strMessage = 'Detail XML not available. '
-					,intStatusId = 2
+					,intStatusId = 1
 				WHERE intContractFeedId = @intContractFeedId
 
 				GOTO NextPO
 			END
 		END
 
-		DELETE
-		FROM tblIPThirdPartyContractFeed
-		WHERE intContractFeedId = @intContractFeedId
-
-		-- Add all the extra columns which are not avail in feed table
-		INSERT INTO tblIPThirdPartyContractFeed (
-			intContractFeedId
-			,strERPPONumber
-			,strRowState
-			)
-		SELECT @intContractFeedId
-			,@strERPPONumber
-			,@strRowState
-
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
 			UPDATE tblCTContractFeed
-			SET intStatusId = 1
-				,strMessage = 'Success'
+			SET intStatusId = 2
+				,strMessage = NULL
 			WHERE intContractFeedId = @intContractFeedId
 		END
 
