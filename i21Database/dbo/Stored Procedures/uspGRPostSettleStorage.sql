@@ -2391,7 +2391,7 @@ BEGIN TRY
 					IF(EXISTS(SELECT NULL FROM @voucherPayable DS INNER JOIN tblICItem I on I.intItemId = DS.intItemId WHERE I.strType = 'Inventory' and dblOrderQty <> 0))
 					BEGIN
 						BEGIN
-						RAISERROR('Unable to post settlement. Total voucher amount will be zero or negative.',16,1)
+						RAISERROR('Unable to post settlement. Voucher will have an invalid amount.',16,1)
 						END
 					END
 
