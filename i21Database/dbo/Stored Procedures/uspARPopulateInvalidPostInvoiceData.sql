@@ -2484,7 +2484,7 @@ BEGIN
 				,[intInvoiceDetailId]	= I.[intInvoiceDetailId]
 				,[intItemId]			= I.[intItemId]
 				,[strBatchId]			= I.[strBatchId]
-				,[strPostingError]		= 'Unable to unpost. The inventory receipt(' + @strInterCompanyReceiptNumber + ') has a voucher(' + @strBillId + ') in company ' + ISNULL(@strCompanyName, '') + '.'
+				,[strPostingError]		= 'Unable to unpost. The inventory receipt (' + @strInterCompanyReceiptNumber + ') has a voucher (' + @strBillId + ') in company ' + ISNULL(@strCompanyName, '') + '.'
 			FROM 
 				#ARPostInvoiceHeader I
 			WHERE I.ysnInterCompany = 1
