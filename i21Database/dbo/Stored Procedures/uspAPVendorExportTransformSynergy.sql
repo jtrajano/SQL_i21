@@ -107,7 +107,8 @@ USING
 		strMobile			=	ISNULL(cntcDataStg.strMobile,''),
 		strFax				=	ISNULL(cntcDataStg.strFax,''),
 		strEmail			=	ISNULL(cntcDataStg.strEmail,''),
-		strWebsite			=	ISNULL(cntcDataStg.strWebsite,'')
+		strWebsite			=	ISNULL(cntcDataStg.strWebsite,''),
+		strCountry			=	ISNULL(cntcLocDataStg.strCountry, '')
 	FROM @insertedData stg
 	INNER JOIN tblEMEntityStaging entStg
 		ON stg.intEntityId = entStg.intEntityId
@@ -139,7 +140,8 @@ INSERT
 	strMobile,
 	strFax,
 	strEmail,
-	strWebsite
+	strWebsite,
+	strCountry
 )
 VALUES
 (
@@ -156,7 +158,8 @@ VALUES
 	strMobile,
 	strFax,
 	strEmail,
-	strWebsite
+	strWebsite,
+	strCountry
 );
 
 
