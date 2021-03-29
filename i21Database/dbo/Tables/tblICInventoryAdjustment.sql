@@ -26,6 +26,7 @@
 	[intTicketId] INT NULL,
 	[intInvoiceId] INT NULL,
 	[strIntegrationDocNo] NVARCHAR(150) COLLATE Latin1_General_CI_AS NULL,
+	[guiApiUniqueId] UNIQUEIDENTIFIER NULL,
     CONSTRAINT [PK_tblICInventoryAdjustment] PRIMARY KEY ([intInventoryAdjustmentId]), 
     CONSTRAINT [AK_tblICInventoryAdjustment_strAdjustmentNo] UNIQUE ([strAdjustmentNo]), 
     CONSTRAINT [FK_tblICInventoryAdjustment_tblSMCompanyLocation] FOREIGN KEY ([intLocationId]) REFERENCES [tblSMCompanyLocation]([intCompanyLocationId]) 
