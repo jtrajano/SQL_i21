@@ -552,7 +552,10 @@ WHERE
 	AND B.intOwnershipType <> 2	
 	AND C.strType <> 'Bundle'
 	AND ISNULL(A.strReceiptType, '') <> 'Transfer Order'
-	AND ISNULL(B.ysnAllowVoucher, 1) = 1
+	AND (
+		(@ysnForVoucher = 0 AND ISNULL(B.ysnAddPayable, 1) = 1) -- This condition determines if the item can be added into the Payable Staging table or not during posting. 
+		OR (@ysnForVoucher = 1 AND ISNULL(B.ysnAllowVoucher, 1) = 1) -- This condition determines if the item can be converted to Voucher or Debit Memo. 
+	)
 	AND NOT (
 		A.strReceiptType = 'Purchase Contract'
 		AND ISNULL(Contracts.intPricingTypeId, 0) = 2 -- 2 is Basis. 		
