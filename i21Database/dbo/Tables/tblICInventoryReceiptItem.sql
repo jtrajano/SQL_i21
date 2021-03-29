@@ -72,6 +72,7 @@ Type the overview for the table here.
 		[intLoadShipmentId] INT NULL,
 		[intLoadShipmentDetailId] INT NULL,
 		[ysnAllowVoucher] BIT NULL,
+		[ysnAddPayable] BIT NULL,
 		[strActualCostId] NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL,
 		[ysnWeighed] BIT NULL DEFAULT ((0)),
 		CONSTRAINT [PK_tblICInventoryReceiptItem] PRIMARY KEY ([intInventoryReceiptItemId]), 
