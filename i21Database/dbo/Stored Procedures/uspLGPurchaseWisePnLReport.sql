@@ -335,9 +335,9 @@ FROM
 				,dblNetShippedWt = SUM(dblQtyShipped)
 			FROM 
 				(SELECT ivd.intInvoiceId, ivd.intItemId, ivd.intContractDetailId, iv.ysnPosted
-					,dblTotal = dblTotal * CASE WHEN iv.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END
+					,dblTotal = dblTotal * CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
 					,dblQtyShipped = dbo.fnCalculateQtyBetweenUOM (intItemWeightUOMId, ToWUOM.intItemUOMId, dblShipmentNetWt) 
-									* CASE WHEN iv.strTransactionType IN ('Credit Memo') THEN -1 ELSE 1 END
+									* CASE WHEN (iv.strTransactionType IN ('Credit Memo') AND ISNULL(iv.ysnFromProvisional, 0) = 0) THEN -1 ELSE 1 END
 					FROM tblARInvoiceDetail ivd
 					INNER JOIN tblARInvoice iv on iv.intInvoiceId = ivd.intInvoiceId AND iv.strType = 'Standard') IVD 
 				INNER JOIN tblICItem IVDI ON IVDI.intItemId = IVD.intItemId
