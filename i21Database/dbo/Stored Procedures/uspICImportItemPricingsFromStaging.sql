@@ -51,7 +51,7 @@ SELECT
 	, dblAmountPercent		 = s.dblAmountPercent
 	, dblSalePrice			 = s.dblRetailPrice
 	, dblMSRPPrice			 = s.dblMSRP		
-	, strPricingMethod		 = s.strPricingMethod		
+	, strPricingMethod		 = ISNULL(s.strPricingMethod, 'None')
 	, dblLastCost			 = s.dblLastCost			
 	, dblStandardCost		 = s.dblStandardCost		
 	, dblAverageCost		 = s.dblAverageCost			
@@ -61,6 +61,7 @@ SELECT
 FROM tblICImportStagingItemPricing s
 	INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
 	INNER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+		OR LOWER(c.strLocationNumber) = LTRIM(RTRIM(LOWER(s.strLocation)))
 	INNER JOIN tblICItemLocation il ON il.intLocationId = c.intCompanyLocationId
 		AND il.intItemId = i.intItemId
 WHERE s.strImportIdentifier = @strIdentifier
@@ -97,7 +98,7 @@ WHEN MATCHED THEN
 		, dblAmountPercent		 = source.dblAmountPercent
 		, dblSalePrice			 = source.dblSalePrice
 		, dblMSRPPrice			 = source.dblMSRPPrice
-		, strPricingMethod		 = source.strPricingMethod
+		, strPricingMethod		 = ISNULL(source.strPricingMethod, 'None')
 		, dblLastCost			 = source.dblLastCost
 		, dblStandardCost		 = source.dblStandardCost
 		, dblAverageCost		 = source.dblAverageCost
