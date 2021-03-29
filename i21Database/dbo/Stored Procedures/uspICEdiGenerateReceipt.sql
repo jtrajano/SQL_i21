@@ -227,11 +227,13 @@ SELECT
 FROM 
 	@Invoices inv INNER JOIN @ReceiptStore st 
 		ON inv.FileIndex = st.FileIndex
+	INNER JOIN vyuAPVendor v 
+		ON v.intEntityId = @VendorId
 	INNER JOIN @Items i 
 		ON i.FileIndex = inv.FileIndex
 	CROSS APPLY (
 		SELECT 
-			intItemId = ISNULL(itemBasedonUpcCode.intItemId, itemBasedOnItemNumber.intItemId) 
+			intItemId = ISNULL(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
 		FROM 
 			(
 				SELECT TOP 1 
@@ -242,20 +244,26 @@ FROM
 				WHERE
 					SUBSTRING(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode), PATINDEX('%[^0]%', ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)+'.'), LEN(ISNULL(lookupUom.strLongUPCCode, lookupUom.strUpcCode)))
 					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
-			) itemBasedonUpcCode
+			) itemBasedOnUpcCode
 			FULL OUTER JOIN (
 				SELECT TOP 1 
 					item.intItemId
 				FROM
-					tblICItem item
+					tblICItem item INNER JOIN tblICItemVendorXref xref
+						ON item.intItemId = xref.intItemId
+					INNER JOIN tblAPVendor vendor
+						ON vendor.intEntityId = xref.intVendorId
+					INNER JOIN tblEMEntity e
+						ON e.intEntityId = vendor.intEntityId
 				WHERE					
-					SUBSTRING(item.strItemNo , PATINDEX('%[^0]%', item.strItemNo +'.'), LEN(item.strItemNo))					
-					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
-			) itemBasedOnItemNumber
+					e.intEntityId = v .intEntityId 
+					AND (
+						SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
+						= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
+					)
+			) itemBasedOnVendorItemNo
 				ON 1 = 1
 	) it
-	INNER JOIN vyuAPVendor v 
-		ON v.intEntityId = @VendorId
 	LEFT OUTER JOIN tblEMEntityLocation el 
 		ON el.intEntityId = @VendorId
 		AND el.ysnActive = 1
@@ -394,7 +402,7 @@ SELECT
 	, i.RecordIndex
 	, 'Item UPC'
 	, i.ItemUpc
-	, 'Cannot find the item that matches the UPC or Item No.: ' + i.ItemUpc
+	, 'Cannot find the item that matches the UPC or Vendor Item Code Xref.: ' + i.ItemUpc
 	, 'Skipped'
 	, 'Record not imported.'
 	, 1
@@ -402,7 +410,7 @@ FROM
 	@Items i 
 	OUTER APPLY (
 		SELECT 
-			intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnItemNo.intItemId) 
+			intItemId = COALESCE(itemBasedOnUpcCode.intItemId, itemBasedOnVendorItemNo.intItemId) 
 		FROM (
 			SELECT TOP 1 
 				it.intItemId
@@ -415,13 +423,21 @@ FROM
 		) itemBasedOnUpcCode
 		FULL OUTER JOIN (
 			SELECT TOP 1 
-				it.intItemId
-			FROM 
-				tblICItem it 
-			WHERE				
-				SUBSTRING(it.strItemNo , PATINDEX('%[^0]%', it.strItemNo +'.'), LEN(it.strItemNo))
-				= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))
-		) itemBasedOnItemNo
+				item.intItemId
+			FROM
+				tblICItem item INNER JOIN tblICItemVendorXref xref
+					ON item.intItemId = xref.intItemId
+				INNER JOIN tblAPVendor vendor
+					ON vendor.intEntityId = xref.intVendorId
+				INNER JOIN tblEMEntity e
+					ON e.intEntityId = vendor.intEntityId
+			WHERE					
+				e.intEntityId = @VendorId
+				AND (
+					SUBSTRING(xref.strVendorProduct , PATINDEX('%[^0]%', xref.strVendorProduct +'.'), LEN(xref.strVendorProduct))					
+					= SUBSTRING(i.ItemUpc, PATINDEX('%[^0]%', i.ItemUpc+'.'), LEN(i.ItemUpc))			
+				)
+		) itemBasedOnVendorItemNo
 			ON 1 = 1
 	) it
 WHERE 
