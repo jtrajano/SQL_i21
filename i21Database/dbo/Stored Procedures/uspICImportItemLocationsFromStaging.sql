@@ -199,7 +199,8 @@ SElECT
 	, intCreatedByUserId		= s.intCreatedByUserId
 FROM tblICImportStagingItemLocation s
 	INNER JOIN tblICItem i ON LOWER(i.strItemNo) = LTRIM(RTRIM(LOWER(s.strItemNo))) 
-	INNER JOIN tblSMCompanyLocation c ON LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+	INNER JOIN tblSMCompanyLocation c ON (LOWER(c.strLocationName) = LTRIM(RTRIM(LOWER(s.strLocation)))
+		OR LOWER(c.strLocationNumber) = LTRIM(RTRIM(LOWER(s.strLocation))))
 	LEFT OUTER JOIN vyuAPVendor v ON LOWER(v.strName) = LTRIM(RTRIM(LOWER(s.strVendorId)))
 	LEFT OUTER JOIN tblSMCompanyLocationSubLocation sl ON LOWER(sl.strSubLocationName) = LTRIM(RTRIM(LOWER(s.strStorageLocation)))
 	LEFT OUTER JOIN tblICStorageLocation su ON LOWER(su.strName) = LTRIM(RTRIM(LOWER(s.strStorageUnit)))

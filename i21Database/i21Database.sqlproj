@@ -1729,6 +1729,7 @@
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsage.sql" />
     <Build Include="dbo\Tables\tblApiMonthlyRequestUsageStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspApiMonthlyRequestUsageStagingTransform.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportItemsFromStaging.sql" />
     <Build Include="dbo\Views\vyuTRRackItems.sql" />
     <Build Include="dbo\Views\vyuTRRackPriceEquation.sql" />
     <Build Include="dbo\Views\vyuTRTerminal.sql" />
