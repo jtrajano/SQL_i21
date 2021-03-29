@@ -135,7 +135,7 @@ SELECT --DISTINCT
 									THEN  CAST(RHD.strOldData AS VARCHAR(20))
 								WHEN RHD.strOldData = 'true' THEN 'Yes'
 								WHEN RHD.strOldData = 'false' THEN 'No'
-								WHEN RHD.strTableColumnDataType = 'INT' AND RHD.strPreviewOldData NOT LIKE '%[A-Za-z]%'
+								WHEN (RHD.strTableColumnDataType = 'INT' OR RHD.strTableColumnDataType LIKE '%NUMERIC%') AND RHD.strPreviewOldData NOT LIKE '%[A-Za-z]%'
 									THEN ISNULL(CAST(CAST(RHD.strPreviewOldData AS FLOAT) AS NVARCHAR(50)), RHD.strOldData)
 								ELSE
 									ISNULL(CAST(RHD.strPreviewOldData AS NVARCHAR(50)), RHD.strOldData)
