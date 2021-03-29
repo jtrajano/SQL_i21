@@ -9,10 +9,10 @@ SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference
     AS
     (
         SELECT 1 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, 1 ysnClrOrig, 0 ysnCheckVoidOrig, 'Cleared Payment' strDescription	UNION
-		SELECT 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, 0 ysnClrOrig, 0 ysnCheckVoidOrig, 'Outstanding Checks' strDescription UNION
+		SELECT 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, NULL ysnClrOrig, 0 ysnCheckVoidOrig, 'Outstanding Checks' strDescription UNION
 		SELECT 1 ysnClr, 1 ysnCheckVoid, 1 ysnPayment, 1 ysnClrOrig, 1 ysnCheckVoidOrig, 'Voided Cleared Payment ' strDescription UNION
         SELECT 0 ysnClr, 0 ysnCheckVoid, 1 ysnPayment, 1 ysnClrOrig, 1 ysnCheckVoidOrig , 'Voided Uncleared Payment' strDescription UNION
-        SELECT 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, 0 ysnClrOrig, 0 ysnCheckVoidOrig, 'Uncleared Deposit' strDescription UNION
+        SELECT 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, NULL ysnClrOrig, 0 ysnCheckVoidOrig, 'Uncleared Deposit' strDescription UNION
         SELECT 1 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, 1 ysnClrOrig, 0 ysnCheckVoidOrig, 'Cleared Deposit' strDescription UNION
         SELECT 1 ysnClr, 1 ysnCheckVoid, 0 ysnPayment, 1 ysnClrOrig, 1 ysnCheckVoidOrig, 'Voided Deposit' strDescription UNION
         SELECT 0 ysnClr, 0 ysnCheckVoid, 0 ysnPayment, 1 ysnClrOrig, 1 ysnCheckVoidOrig , 'Voided Uncleared Deposit' strDescription
@@ -29,7 +29,7 @@ SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference
 		,strPayee = CASE WHEN  BT.intBankTransactionTypeId IN (21,121) AND @ysnMaskedPCHKPayee = 1 THEN '(restricted information)' ELSE ISNULL(Entity.strName, BT.strPayee) END 
 		,strMemo = BT.strMemo
 		,strRecordNo = BT.strTransactionId
-		,dblAmount = BT.dblAmount
+		,dblAmount = P.dblAmount
 		,intBankTransactionTypeId = BT.intBankTransactionTypeId
 		,strBankTransactionTypeName = BTYPE.strBankTransactionTypeName
     FROM 
@@ -38,7 +38,7 @@ SELECT @ysnMaskedPCHKPayee = ysnMaskEmployeeName from tblPRCompanyPreference
 	JOIN [dbo].[tblCMBankTransactionType] BTYPE
 			ON BT.intBankTransactionTypeId = BTYPE.intBankTransactionTypeId
 	CROSS APPLY(
-		SELECT q.strDescription, intTransactionId, b.ysnClr from A q
+		SELECT q.strDescription, intTransactionId, b.ysnClr, b.dblAmount from A q
 		cross apply dbo.fnCMGetReconGridResult(@intBankAccountId,@dtmStatementDate,q.ysnPayment,q.ysnCheckVoid,q.ysnClr, q.ysnClrOrig, q.ysnCheckVoidOrig) b
 		WHERE intTransactionId = BT.intTransactionId
 	)P
