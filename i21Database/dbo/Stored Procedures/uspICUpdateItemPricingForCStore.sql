@@ -1,7 +1,7 @@
 ﻿/*
 	This stored procedure will update the Sales Price in the Item Pricing and Item Pricing Level. 
 */
-ALTER PROCEDURE [dbo].[uspICUpdateItemPricingForCStore]
+CREATE PROCEDURE [dbo].[uspICUpdateItemPricingForCStore]
 	-- filter params
 	@strUpcCode AS NVARCHAR(50) = NULL 
 	,@strDescription AS NVARCHAR(250) = NULL 
