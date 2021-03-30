@@ -1512,6 +1512,56 @@ BEGIN
 					ON Lot.intLotId = ItemLot.intLotId
 		WHERE	Receipt.intInventoryReceiptId = @intTransactionId
 				AND Receipt.strReceiptNumber = @strTransactionId				
+
+		-- Unpost the IC-AP-Clearing
+		BEGIN 
+			INSERT INTO tblICAPClearing (
+				[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionType]
+				,[strReferenceNumber]
+				,[dtmDate]
+				,[intEntityVendorId]
+				,[intLocationId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptItemTaxId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptChargeTaxId]
+				,[intInventoryShipmentChargeId]
+				,[intInventoryShipmentChargeTaxId]
+				,[intAccountId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[dblQuantity]
+				,[dblAmount]
+				,[strBatchId]
+			)
+			SELECT 
+				[intTransactionId]
+				,[strTransactionId]
+				,[intTransactionType]
+				,[strReferenceNumber]
+				,[dtmDate]
+				,[intEntityVendorId]
+				,[intLocationId]
+				,[intInventoryReceiptItemId]
+				,[intInventoryReceiptItemTaxId]
+				,[intInventoryReceiptChargeId]
+				,[intInventoryReceiptChargeTaxId]
+				,[intInventoryShipmentChargeId]
+				,[intInventoryShipmentChargeTaxId]
+				,[intAccountId]
+				,[intItemId]
+				,[intItemUOMId]
+				,[dblQuantity]
+				,[dblAmount]
+				,[strBatchId] = @strBatchId
+			FROM 
+				tblICAPClearing
+			WHERE
+				strTransactionId = @strTransactionId
+				AND ysnIsUnposted = 0 
+		END 
 	END
 END   
 
@@ -1577,6 +1627,74 @@ BEGIN
 		EXEC dbo.uspGLBookEntries @GLEntries, @ysnPost 
 	END 
 	
+	-- Add the AP Clearing
+	BEGIN 
+		DECLARE @APClearing AS APClearing
+
+		INSERT INTO @APClearing (
+			[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionType]
+			,[strReferenceNumber]
+			,[dtmDate]
+			,[intEntityVendorId]
+			,[intLocationId]
+			,[intTransactionDetailId]
+			,[intAccountId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[dblQuantity]
+			,[dblAmount]	
+			,[strCode]
+		)
+		SELECT 
+			[intTransactionId]
+			,[strTransactionId]
+			,[intTransactionType]
+			,[strReferenceNumber]
+			,[dtmDate]
+			,[intEntityVendorId]
+			,[intLocationId]
+			,[intTransactionDetailId] = 
+				COALESCE(
+					intInventoryReceiptItemId
+					,intInventoryReceiptChargeId
+					,intInventoryShipmentChargeId
+				)
+			,[intAccountId]
+			,[intItemId]
+			,[intItemUOMId]
+			,[dblQuantity]
+			,[dblAmount]	
+			,[strCode] = 'RTN'
+		FROM 
+			tblICAPClearing
+		WHERE
+			strBatchId = @strBatchId
+
+		EXEC dbo.uspAPClearing
+			@APClearing
+			,@ysnPost
+
+		-- Update the IC-AP Clearing when unposting the transaction. 
+		IF @ysnPost = 0 
+		BEGIN 			
+			UPDATE tblICAPClearing
+			SET 				
+				dblAmount = -dblAmount -- Negate the Amount 
+			WHERE 
+				strTransactionId = @strTransactionId
+				AND strBatchId = @strBatchId
+
+			UPDATE tblICAPClearing
+			SET 
+				ysnIsUnposted = 1 -- Flag the AP Clearing as unposted. 
+			WHERE 
+				strTransactionId = @strTransactionId
+				AND ysnIsUnposted = 0 
+		END 
+	END 
+
 	-- Reuse this sp for Inventory Return 
 	EXEC dbo.uspICPostInventoryReceiptIntegrations 
 		@ysnPost
