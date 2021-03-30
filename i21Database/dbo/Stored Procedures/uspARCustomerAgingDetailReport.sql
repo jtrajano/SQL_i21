@@ -439,7 +439,8 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 			OR ((ISNULL(dbl30Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '11-30 Days')))
 			OR ((ISNULL(dbl60Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days')))
 			OR ((ISNULL(dbl90Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days')))
-			OR ((ISNULL(dbl91Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
+			OR ((ISNULL(dbl120Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
+			OR ((ISNULL(dbl121Days, 0) <> 0 AND EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
 		)
 
 
@@ -454,6 +455,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, ''
 			OR  ((ISNULL(dbl60Days, 0) <> 0  AND  NOT EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '31-60 Days')))
 			OR  ((ISNULL(dbl90Days, 0) <> 0  AND  NOT EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = '61-90 Days')))
 			OR  ((ISNULL(dbl120Days,0) <> 0  AND  NOT EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
+			OR  ((ISNULL(dbl121Days,0) <> 0  AND  NOT EXISTS (SELECT TOP 1 NULL FROM #AGEDBALANCES WHERE ISNULL(strAgedBalances, '') = 'Over 90 Days')))
 		)
 
 
@@ -470,9 +472,9 @@ INNER JOIN (
 	FROM tblARCustomerAgingStagingTable 
 	WHERE intEntityUserId = @intEntityUserId AND strAgingType = 'Detail'
 	GROUP BY intEntityCustomerId 
-	HAVING SUM(ISNULL(dblTotalAR, 0)) = 0
-		AND SUM(ISNULL(dblCredits, 0)) = 0
-		AND SUM(ISNULL(dblPrepayments, 0)) = 0
+	HAVING SUM(ISNULL(dblTotalAR, 0)) <= 0
+		AND SUM(ISNULL(dblCredits, 0)) <= 0
+		AND SUM(ISNULL(dblPrepayments, 0)) <= 0
 ) ENTITY ON AGING.intEntityCustomerId = ENTITY.intEntityCustomerId
 WHERE AGING.intEntityUserId = @intEntityUserId
   AND AGING.strAgingType = 'Detail'

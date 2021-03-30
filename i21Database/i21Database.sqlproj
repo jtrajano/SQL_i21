@@ -8897,7 +8897,6 @@
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
     <Build Include="dbo\Index\IX_tblGLDetail_strBatchId.sql" />
     <Build Include="dbo\Stored Procedures\uspSCUpdateDeliverySheetDate.sql" />
-    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptCharges.sql" />
     <Build Include="dbo\Stored Procedures\uspICGetProRatedReceiptChargeTaxes.sql" />
     <Build Include="dbo\Functions\fnAllowCommodityToChange.sql" />
@@ -8906,6 +8905,20 @@
     <Build Include="dbo\Views\vyuRKGetDPRInventorySummaryByLocation.sql" />
     <Build Include="dbo\Views\vyuCFTransactionAmountPotentialIssue.sql" />
     <Build Include="dbo\Stored Procedures\uspCFTransactionAuditLog.sql" />
+    <Build Include="dbo\Stored Procedures\uspMBILProcessPayments.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCategoryTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportContractExport.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerSpecialPricing.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerTaxExemption.sql" />
+    <Build Include="dbo\Views\vyuMBILExportItem.sql" />
+    <None Include="Scripts\Post-Deployment\CT\CTPreference.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPContractPropertyNotify.sql" />
+    <Build Include="dbo\Views\vyuIPLogView.sql" />
+    <Build Include="dbo\Views\vyuIPAuditView.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForNewPrint.sql" />
+    <Build Include="dbo\Views\vyuCFInvoiceReportForReprint.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
+    <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

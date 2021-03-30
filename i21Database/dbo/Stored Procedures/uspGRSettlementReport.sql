@@ -332,7 +332,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -624,7 +624,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -860,7 +860,7 @@ BEGIN
 			WHERE BNKTRN.intBankAccountId = @intBankAccountId
 				AND BNKTRN.strTransactionId = @strPaymentNo
 				and INVRCPTITEM.intInventoryReceiptItemId is null
-				--and InventoryReceipt.intSourceType = 1
+				and InventoryReceipt.intSourceType = 1
 			/*--------------------------------------------------------
 			*******************FROM SETTLE STORAGE********************
 			--------------------------------------------------------*/			
@@ -913,7 +913,7 @@ BEGIN
 													ELSE NULL 
 												END
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -948,8 +948,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1024,24 +1024,23 @@ BEGIN
 					AND BillDtl.intInventoryReceiptChargeId IS NULL			
 			JOIN tblICItem Item 
 				ON BillDtl.intItemId = Item.intItemId 
-					AND Item.strType <> 'Other Charge'
-			JOIN ( --DEV'S NOTE: GRN-2409; changed to cater multiple vouchers in settlements
-					tblGRSettleStorageBillDetail BD 
-					JOIN tblGRStorageHistory StrgHstry
-						ON StrgHstry.intSettleStorageId = BD.intSettleStorageId
-				) ON BD.intBillId = Bill.intBillId
-			-- JOIN tblGRStorageHistory StrgHstry 
-			-- 	ON Bill.intBillId = StrgHstry.intBillId
+					AND Item.strType <> 'Other Charge'	
+			JOIN tblGRStorageHistory StrgHstry 
+				ON ( 
+						Bill.intBillId = StrgHstry.intBillId
+						or (BillDtl.intCustomerStorageId =  StrgHstry.intCustomerStorageId
+							and StrgHstry.strType = 'Settlement'
+							)
+				)
 			JOIN tblGRCustomerStorage CS 
 				ON CS.intCustomerStorageId = StrgHstry.intCustomerStorageId
-			LEFT JOIN tblSCTicket SC  
+			JOIN tblSCTicket SC 
 				ON SC.intTicketId = CS.intTicketId
 			LEFT JOIN vyuSCGetScaleDistribution SD 
 				ON CS.intCustomerStorageId = SD.intCustomerStorageId
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -1049,10 +1048,8 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
-					,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
 				ON tblOtherCharge.intBillId = Bill.intBillId			
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1208,7 +1205,7 @@ BEGIN
 				,strCustomerReference			= ''
 				,lblTicketComment				= NULL
 				,strTicketComment				= NULL
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1243,8 +1240,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -1354,7 +1351,6 @@ BEGIN
 			LEFT JOIN (
 						SELECT 
 							A.intBillId
-							,isnull(A.intLinkingId, -90) as intLinkingId
 							,SUM(dblTotal) AS dblTotal
 							,SUM(dblTax) AS dblTax
 						FROM tblAPBillDetail A
@@ -1362,10 +1358,8 @@ BEGIN
 							ON A.intItemId = B.intItemId 
 								AND B.strType = 'Other Charge'
 						GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
 					) tblOtherCharge 
-					ON tblOtherCharge.intBillId = Bill.intBillId	
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)		
+					ON tblOtherCharge.intBillId = Bill.intBillId			
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -1522,7 +1516,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1813,7 +1807,7 @@ BEGIN
 													ELSE NULL 
 												END  
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](SC.intTicketId,'Scale')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -1964,6 +1958,14 @@ BEGIN
 			JOIN tblSCTicket SC 
 				ON SC.intTicketId = BillDtl.intScaleTicketId
 					AND BillDtl.intCustomerStorageId IS NULL
+
+			LEFT JOIN tblICInventoryReceiptItem INVRCPTITEM 
+				on SC.intTicketId = INVRCPTITEM.intSourceId
+			
+			LEFT JOIN tblICInventoryReceipt InventoryReceipt
+				on INVRCPTITEM.intInventoryReceiptId = InventoryReceipt.intInventoryReceiptId
+
+
 			LEFT JOIN tblEMEntitySplit EM 
 				ON EM.intSplitId = SC.intSplitId 
 					AND SC.intSplitId <> 0
@@ -2038,6 +2040,8 @@ BEGIN
 					) PartialPayment 
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
+				and INVRCPTITEM.intInventoryReceiptItemId is null
+				and InventoryReceipt.intSourceType = 1
 
 			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******
@@ -2090,7 +2094,7 @@ BEGIN
 													ELSE NULL 
 												END
 				,strTicketComment				= SC.strTicketComment
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -2125,8 +2129,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END 
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0))
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty)
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered
@@ -2211,7 +2215,6 @@ BEGIN
 			LEFT JOIN (
 					SELECT 
 						A.intBillId
-						,isnull(A.intLinkingId, -90) as intLinkingId
 						,SUM(dblTotal) AS dblTotal
 						,SUM(dblTax) AS dblTax
 					FROM tblAPBillDetail A
@@ -2219,10 +2222,8 @@ BEGIN
 						ON A.intItemId = B.intItemId 
 							AND B.strType = 'Other Charge'
 					GROUP BY A.intBillId
-							,isnull(A.intLinkingId, -90)
 				) tblOtherCharge 
-				ON tblOtherCharge.intBillId = Bill.intBillId				
-					and isnull(tblOtherCharge.intLinkingId, -90) = isnull(BillDtl.intLinkingId, -90)
+				ON tblOtherCharge.intBillId = Bill.intBillId			
 			INNER JOIN (
 						SELECT 
 							A.intBillId
@@ -2378,7 +2379,7 @@ BEGIN
 				,strCustomerReference			= ''
 				,lblTicketComment				= NULL
 				,strTicketComment				= NULL
-				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage',1)
+				,strDiscountReadings			= [dbo].[fnGRGetDiscountCodeReadings](CS.intCustomerStorageId,'Storage')
 				,lblFarmField					= CASE 
 													WHEN EntityFarm.strFarmNumber IS NOT NULL THEN 'Farm \ Field' 
 													ELSE NULL 
@@ -2413,8 +2414,8 @@ BEGIN
 														END
 													ELSE CNTRCT.strContractNumber
 												END
-				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) --* (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
-				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) )
+				,TotalDiscount					= ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered /tblInventory.dblTotalQty)   
+				,NetDue							= (BillDtl.dblTotal + BillDtl.dblTax) + ((BillDtl.dblQtyOrdered / tblInventory.dblTotalQty) * ISNULL(tblOtherCharge.dblTax, 0)) + (ISNULL(tblOtherCharge.dblTotal, 0) * (BillDtl.dblQtyOrdered / tblInventory.dblTotalQty))
 				,strId							= Bill.strBillId
 				,intPaymentId					= PYMT.intPaymentId
 				,InboundNetWeight				= BillDtl.dblQtyOrdered

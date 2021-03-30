@@ -475,7 +475,6 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	) PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
-AND  ISNULL(CR.dblRefundTotal, 0) = 0
 
 UNION ALL
 
@@ -495,8 +494,6 @@ FROM #POSTEDINVOICES I WITH (NOLOCK)
 	LEFT JOIN #INVOICETOTALPREPAYMENTS PD ON I.intInvoiceId = PD.intInvoiceId
 	LEFT JOIN #CASHREFUNDS CR ON (I.intInvoiceId = CR.intOriginalInvoiceId OR I.strInvoiceNumber = CR.strDocumentNumber) AND I.strTransactionType IN ('Credit Memo', 'Overpayment', 'Credit')
 WHERE I.strTransactionType = 'Customer Prepayment'
-AND  ISNULL(CR.dblRefundTotal, 0) = 0 
-
 						      
 UNION ALL      
       
@@ -528,7 +525,7 @@ LEFT JOIN (
 		 , P.intPaymentId
 		 , strRecordNumber	= strPaymentRecordNum
 		 , P.dtmDatePaid
-		 , dblTotalPayment	= (ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0))
+		 , dblTotalPayment	= (ISNULL(dblPayment, 0) + ISNULL(dblDiscount, 0) - ISNULL(dblInterest, 0)) * -1
 	FROM dbo.tblAPPaymentDetail PD WITH (NOLOCK)
 	INNER JOIN (
 		SELECT intPaymentId

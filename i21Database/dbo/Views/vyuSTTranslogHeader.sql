@@ -8,11 +8,13 @@ SELECT ROW_NUMBER() OVER (ORDER BY TRR.intTermMsgSN ASC) AS intId
 	  , TRR.intStoreId
 	  , TRR.intCheckoutId
 	  , TRR.dtmCheckoutDate
+	  , TRR.dtmClosedTime
 	  , CAST(TRR.intStoreNo AS NVARCHAR(100)) + ' ' + TRR.strStoreDescription AS strStoreDescription
 	  , TRR.strTransType
 	  , TRR.dtmDate
 	  , TRR.strCashier
 	  , TRR.dblTrpAmt
+	  , TRR.dblTrlQty AS dblTotalTrlQty
 	  , TRR.intCompanyLocationId
 	  --, TRR.intEntityId
 FROM
@@ -29,7 +31,9 @@ FROM
 		 , ST.strDescription AS strStoreDescription
 		 , ST.intCompanyLocationId
 		 , CH.dtmCheckoutDate
+		 , TR.dtmClosedTime
 		 , TR.dblTrpAmt
+		 , SUM(TR.dblTrlQty) AS dblTrlQty
 		 --, USec.intEntityId
 	FROM tblSTTranslogRebates TR
 	--JOIN tblSTCheckoutHeader CH 
@@ -45,6 +49,20 @@ FROM
 		-- AND ST.intCompanyLocationId = RolePerm.intCompanyLocationId
 	WHERE TR.strTrpPaycode = 'CASH'
 	AND TR.dblTrpAmt > 0
-	--ORDER BY TR.dtmDate OFFSET 0 ROWS
+	GROUP BY 
+		TR.intTermMsgSN
+		, TR.intTermMsgSNterm
+		, TR.intStoreId
+		, TR.intCheckoutId 
+		, TR.strTransType
+		, TR.dtmDate
+		, TR.strCashier
+		, ST.intStoreNo
+		, ST.strDescription
+		, ST.intCompanyLocationId
+		, CH.dtmCheckoutDate
+		, TR.dtmClosedTime
+		 , TR.dblTrpAmt
+	--OR, TR.dblTrpAmtDER BY TR.dtmDate OFFSET 0 ROWS
 ) TRR
 GO
