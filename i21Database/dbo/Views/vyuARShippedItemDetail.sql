@@ -22,7 +22,7 @@ SELECT
 	,[strOrderUnitMeasure]			= OUOM.[strUnitMeasure]
 	,[intItemUOMId]					= LS.[intItemUOMId]
 	,[strUnitMeasure]				= SUOM.[strUnitMeasure]
-	,[intPriceUOMId]				= LS.[intWeightUOMId]
+	,[intPriceUOMId]				= LS.[intPriceUOMId]
 	,[strPriceUnitMeasure]			= WUOM.[strUnitMeasure]
 	,[intShipmentItemUOMId]			= LS.[intShipmentItemUOMId]
 	,[strShipmentUnitMeasure]		= SUOM.[strUnitMeasure]
