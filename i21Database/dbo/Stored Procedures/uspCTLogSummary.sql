@@ -459,8 +459,7 @@ BEGIN TRY
 			, strProcess  = @strProcess
 		FROM
 		(
-			SELECT 
-				ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
+			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC) AS Row_Num
 				, sh.intSequenceHistoryId
 				, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
 				, sh.intContractHeaderId
@@ -527,8 +526,8 @@ BEGIN TRY
 						, intContractStatusId
 						, COUNT (*)
 					FROM (
-						SELECT TOP 1 * FROM @cbLogTemp
-						UNION ALL SELECT TOP 1 * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId ORDER BY intId DESC
+						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp
+						UNION ALL SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY intId DESC) intRowId, * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) tbl WHERE intRowId = 1
 					) tbl
 					GROUP BY intContractDetailId
 						, intContractHeaderId
@@ -558,7 +557,6 @@ BEGIN TRY
 				DELETE FROM @cbLogTemp
 			END
 		END
-
 
 		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intContractStatusId = 4)
 		BEGIN
@@ -1536,7 +1534,7 @@ BEGIN TRY
 				AND suh.intExternalHeaderId is not null
 			) tbl
 			WHERE Row_Num = 1
-			
+
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
 			BEGIN
@@ -3418,18 +3416,6 @@ BEGIN TRY
 			END
 			ELSE -- With changes with dblQty
 			BEGIN
-				--Check if the sequence is being update
-				if exists (select top 1 1 from @cbLogSpecific where intActionId = 43)  
-				begin
-					--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
-					if (@TotalPriced <= @dblContractQty)
-					begin
-						declare @intOrigHeaderPricingTypeId int;
-						select top 1 @intOrigHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
-						update @cbLogSpecific set intPricingTypeId = @intOrigHeaderPricingTypeId
-					end
-				end 
-
 				-- Add current record
 				UPDATE  @cbLogSpecific SET dblQty = @total * CASE WHEN @prevContractStatusId <> 3 AND @intContractStatusId = 3 THEN - 1 ELSE 1 END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0		

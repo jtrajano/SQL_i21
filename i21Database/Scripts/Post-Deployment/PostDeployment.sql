@@ -94,6 +94,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\SM\1910_DeleteDuplicateUserPreference.sql
 :r .\SM\2010_RemoveF9Shortcut.sql
 :r .\SM\1920_DeleteDuplicateEntityPhoneNumber.sql
+:r .\SM\2010_UpdateEntityInquiryPermissionFrom1920.sql
 
 
 -- Canned Report
@@ -397,6 +398,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ImportSettleStorageBillDetail.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
+:R .\GR\Fix_NULL_SSId_in_voucher_details.sql
 
 --Manufacturing
 :R .\MF\1_MasterTables.sql
