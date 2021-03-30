@@ -23,7 +23,7 @@ IF @Recap = @ZeroBit
 
 DECLARE @ItemsForInTransitCosting 			[ItemInTransitCostingTableType]
 DECLARE @ItemsForContracts					[InvoicePostingTable]
-EXEC [dbo].[uspARPopulateContractDetails]
+EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
 
 IF @Post = @OneBit
 BEGIN
