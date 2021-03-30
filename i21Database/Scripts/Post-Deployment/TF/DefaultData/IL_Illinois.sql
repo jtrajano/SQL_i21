@@ -188,6 +188,11 @@ where intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'RMFT-5', strFormName = 'Motor Fuel Distributor/Supplier Tax Return', strScheduleCode = 'LC_B', strScheduleName = 'Sales and Transfers of Other Fuels Delivered to Points Outside of IL (to Bulk)', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 352, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 1302252, intComponentTypeId = 1
 	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'RMFT-5', strFormName = 'Motor Fuel Distributor/Supplier Tax Return', strScheduleCode = 'SC_B', strScheduleName = 'Sales and Transfers of Special Fuel (Excluding Dyed Diesel) Delivered to Points Outside of IL (to Bulk)', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 353, strStoredProcedure = 'uspTFGetTransporterBulkInvoiceTax', intMasterId = 1302253, intComponentTypeId = 1
 	
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'RMFT-5', strFormName = 'Motor Fuel Distributor/Supplier Tax Return', strScheduleCode = 'C_TR', strScheduleName = 'Sales and Transfers of Gasoline Products Delivered to Points Outside of IL (TR Loads)', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 331, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 1302254, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'RMFT-5', strFormName = 'Motor Fuel Distributor/Supplier Tax Return', strScheduleCode = 'DC_TR', strScheduleName = 'Sales and Transfers of Dyed Diesel Delivered to Points Outside of IL (TR Loads)', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 341, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 1302255, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'RMFT-5', strFormName = 'Motor Fuel Distributor/Supplier Tax Return', strScheduleCode = 'LC_TR', strScheduleName = 'Sales and Transfers of Other Fuels Delivered to Points Outside of IL (TR Loads)', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 351, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 1302256, intComponentTypeId = 1
+	UNION ALL SELECT intReportingComponentId = 0, strFormCode = 'RMFT-5', strFormName = 'Motor Fuel Distributor/Supplier Tax Return', strScheduleCode = 'SC_TR', strScheduleName = 'Sales and Transfers of Special Fuel (Excluding Dyed Diesel) Delivered to Points Outside of IL (TR Loads)', strType = '', strNote = '', strTransactionType = 'Invoice', intSort = 361, strStoredProcedure = 'uspTFGetTransporterCustomerInvoiceTax', intMasterId = 1302257, intComponentTypeId = 1
+
 	EXEC uspTFUpgradeReportingComponents @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponent = @ReportingComponent
 
 
@@ -651,6 +656,21 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'RMFT-5', strScheduleCode = 'SC_B', strType = '', intMasterId = 1301666
 	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'RMFT-5', strScheduleCode = 'SC_B', strType = '', intMasterId = 1301667
 
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '065', strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', intMasterId = 1301668
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '124', strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', intMasterId = 1301669
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '999', strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', intMasterId = 1301670
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '072', strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', intMasterId = 1301671
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '228', strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', intMasterId = 1301672
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '999', strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', intMasterId = 1301673
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '073', strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', intMasterId = 1301674
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '125', strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', intMasterId = 1301675
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '130', strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', intMasterId = 1301676
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '145', strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', intMasterId = 1301677
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '999', strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', intMasterId = 1301678
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '142', strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', intMasterId = 1301679
+	UNION ALL SELECT intValidProductCodeId = 0, strProductCode = '160', strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', intMasterId = 1301680
+
+
 	INSERT INTO @ValidOriginStates(
 		intValidOriginStateId
 		, strFormCode
@@ -680,6 +700,12 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SA', strType = 'Received, Both MFT- and UST-/EIF-free', strState = 'IL', strStatus = 'Include', intMasterId = 13229
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SA', strType = 'Received, MFT-free Only', strState = 'IL', strStatus = 'Include', intMasterId = 13227
 	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SA', strType = 'Received, UST-/EIF-free Only', strState = 'IL', strStatus = 'Include', intMasterId = 13228
+	
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strState = 'IL', strStatus = 'Include', intMasterId = 1300236
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strState = 'IL', strStatus = 'Include', intMasterId = 1300237
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strState = 'IL', strStatus = 'Include', intMasterId = 1300238
+	UNION ALL SELECT intValidOriginStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strState = 'IL', strStatus = 'Include', intMasterId = 1300239
+
 
 	INSERT INTO @ValidDestinationStates(
 		intValidDestinationStateId
@@ -1516,7 +1542,6 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', strColumn = 'strProductCode', strCaption = 'Product Code', strFormat = '', strFooter = '', intWidth = 0, intMasterId = 1315337
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', strColumn = 'strInvoiceNumber', strCaption = 'Invoice Number', strFormat = '', strFooter = '', intWidth = 0, intMasterId = 1315338
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DD-1', strType = '', strColumn = 'dtmDate', strCaption = 'Invoice Date', strFormat = '', strFooter = '', intWidth = 0, intMasterId = 1315339
-
 	
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_B', strType = '', strColumn = 'dtmDate', strCaption = 'Invoice Date', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337182
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_B', strType = '', strColumn = 'strBillOfLading', strCaption = 'Invoice Number', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337183
@@ -1558,6 +1583,43 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_B', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337216
 	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_B', strType = '', strColumn = 'dblBillQty', strCaption = 'Invoiced Gals', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337217
 	
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Invoice Date', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337218
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Invoice Number', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337219
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337220
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Bill of Lading', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337221
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Purchaser Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337222
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337223
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337224
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337225
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strColumn = 'dblBillQty', strCaption = 'Invoiced Gals', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337226
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Invoice Date', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337227
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Invoice Number', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337228
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337229
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Bill of Lading', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337230
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Purchaser Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337231
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337232
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337233
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337234
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strColumn = 'dblBillQty', strCaption = 'Invoiced Gals', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337235
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Invoice Date', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337236
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Invoice Number', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337237
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337238
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Bill of Lading', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337239
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Purchaser Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337240
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337241
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337242
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337243
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strColumn = 'dblBillQty', strCaption = 'Invoiced Gals', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337244
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'dtmDate', strCaption = 'Invoice Date', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337245
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Invoice Number', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337246
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strTransporterName', strCaption = 'Carrier Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337247
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strBillOfLading', strCaption = 'Bill of Lading', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337248
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strCustomerName', strCaption = 'Purchaser Name', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337249
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strOriginCity', strCaption = 'Origin City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337250
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strDestinationCity', strCaption = 'Destination City', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337251
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'strDestinationState', strCaption = 'Destination State', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337252
+	UNION ALL SELECT intScheduleColumnId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strColumn = 'dblBillQty', strCaption = 'Invoiced Gals', strFormat = '', strFooter = 'No', intWidth = 0, intMasterId = 1337253
+
 	EXEC uspTFUpgradeReportingComponentOutputDesigners @TaxAuthorityCode = @TaxAuthorityCode, @ReportingComponentOutputDesigners = @ReportingComponentOutputDesigners
 
 
@@ -1668,6 +1730,11 @@ where FP.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_B', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 1302592
 	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_B', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 1302593
 
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 1302594
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 1302595
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 1302596
+	UNION ALL SELECT intFilingPacketId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', ysnStatus = 1, intFrequency = 1, intMasterId = 1302597
+	
 	EXEC uspTFUpgradeFilingPackets @TaxAuthorityCode = @TaxAuthorityCode, @FilingPackets = @FilingPackets
 
 END
