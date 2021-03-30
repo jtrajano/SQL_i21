@@ -5,6 +5,7 @@ CREATE TABLE [dbo].[tblFABookDepreciation](
 	[dblCost] [numeric](18, 6) NOT NULL,
 	[dblSalvageValue] [numeric](18, 6) NOT NULL,
 	[dtmPlacedInService] [datetime] NOT NULL,
+	[ysnFullyDepreciated]		BIT NULL,
 	[intConcurrencyId] [int] NOT NULL,
 	[intBookId] [int] NULL,
  CONSTRAINT [PK_tblFABookDepreciation] PRIMARY KEY CLUSTERED 

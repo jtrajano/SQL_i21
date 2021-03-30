@@ -1,6 +1,7 @@
   
 CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]  
- @Id    AS Id READONLY,   
+ @Id    AS Id READONLY, 
+ @BookId INT = 1,
  @ysnPost   AS BIT    = 0,  
  @ysnRecap   AS BIT    = 0,  
  @intEntityId  AS INT    = 1,  
@@ -26,7 +27,7 @@ EXEC uspSMGetStartingNumber @intStartingNumberId= 3, @strID = @strBatchId OUTPUT
 IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
 
 INSERT INTO @tblError 
-      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @Id)
+      SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @BookId, @Id)
 
 INSERT INTO @IdGood
     SELECT A.intId FROM @Id A LEFT JOIN @tblError B
@@ -116,7 +117,7 @@ BEGIN
   
       INSERT INTO @tblDepComputation(intAssetId,dblBasis,dblMonth, dblDepre, ysnFullyDepreciated, strError)
         SELECT intAssetId, dblBasis,dblMonth,dblDepre,ysnFullyDepreciated, strError
-        FROM dbo.fnFAComputeMultipleDepreciation(@IdGood) 
+        FROM dbo.fnFAComputeMultipleDepreciation(@IdGood, @BookId) 
 
       DELETE FROM @IdGood
 
@@ -134,7 +135,7 @@ BEGIN
       INSERT INTO @IdHasNoPlaceOfService 
         select intId from @IdGood 
 		    outer apply(	
-			    select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId 
+			    select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  AND ISNULL(intBookId,1) = @BookId
 		    )D
         where D.cnt = 0
       
@@ -142,7 +143,9 @@ BEGIN
 		select intId from @IdGood 
 		outer apply
 		(	
-			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  and strTransaction  in( 'Depreciation', 'Place in service')
+			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
+      AND ISNULL(intBookId,1) = @BookId
+      AND strTransaction  in( 'Depreciation', 'Place in service')
 		)D
         where D.cnt =1
 
@@ -150,7 +153,9 @@ BEGIN
 		select intId from @IdGood 
 		outer apply
 		(	
-			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  and strTransaction  in( 'Depreciation', 'Place in service')
+			select count(*) cnt from tblFAFixedAssetDepreciation WHERE  intAssetId = intId  
+      AND ISNULL(intBookId,1) = @BookId
+      AND strTransaction  in( 'Depreciation', 'Place in service')
 		)D
         where D.cnt >1
 
@@ -171,6 +176,7 @@ BEGIN
 
                 INSERT INTO tblFAFixedAssetDepreciation (  
                     [intAssetId],  
+                    [intBookId],
                     [intDepreciationMethodId],  
                     [dblBasis],  
                     [dtmDateInService],  
@@ -185,13 +191,14 @@ BEGIN
                   )  
                   SELECT  
                     F.intAssetId,  
+                    @BookId,
                     D.[intDepreciationMethodId],  
-                    dblCost - F.dblSalvageValue,  
-                    F.dtmDateInService,
+                    BD.dblCost - BD.dblSalvageValue,  
+                    BD.dtmPlacedInService,
                     NULL,  
-                    F.dtmDateInService,  
+                    BD.dtmPlacedInService,  
                     0,  
-                    F.dblSalvageValue,  
+                    BD.dblSalvageValue,  
                     'Place in service',  
                     @strTransactionId,  
                     D.strDepreciationType,  
@@ -199,6 +206,7 @@ BEGIN
                     FROM 
                     tblFAFixedAsset F 
                     JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
+                    JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
                     WHERE F.intAssetId = @i
                   
                   UPDATE @tblDepComputation SET strTransactionId = @strTransactionId WHERE intAssetId = @i
@@ -216,6 +224,7 @@ BEGIN
 
               INSERT INTO tblFAFixedAssetDepreciation (  
                   [intAssetId],  
+                  [intBookId],
                   [intDepreciationMethodId],  
                   [dblBasis],  
                   [dtmDateInService],  
@@ -230,24 +239,27 @@ BEGIN
                 )  
                   SELECT  
                   @i,  
+                  @BookId,
                   D.intDepreciationMethodId,  
                   E.dblBasis,  
-                  F.dtmDateInService,  
+                  BD.dtmPlacedInService,  
                   NULL,  
 				          DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 1, 0)) ,
                   E.dblDepre,  
-                  F.dblSalvageValue,  
+                  BD.dblSalvageValue,  
                   'Depreciation',  
                   @strTransactionId,  
                   D.strDepreciationType,
                   D.strConvention
                   FROM tblFAFixedAsset F 
                   JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
+                  JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
                   OUTER APPLY (
                     SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
-                    SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 
+                    SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation 
+                    WHERE [intAssetId] = @i AND intBookId = @BookId
                     ORDER BY dtmDepreciationToDate DESC
                   )Depreciation
                   WHERE F.intAssetId = @i
@@ -268,6 +280,7 @@ BEGIN
               EXEC uspSMGetStartingNumber  @intStartingNumberId = 113 , @strID= @strTransactionId OUTPUT  
               INSERT INTO tblFAFixedAssetDepreciation (  
                 [intAssetId],  
+                [intBookId],
                 [intDepreciationMethodId],  
                 [dblBasis],  
                 [dtmDateInService],  
@@ -282,24 +295,28 @@ BEGIN
               )  
               SELECT  
                 @i,
+                @BookId,
                 D.intDepreciationMethodId,
                 E.dblBasis,  
-                F.dtmDateInService,  
+                BD.dtmPlacedInService,  
                 NULL,  
 				        DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (Depreciation.dtmDepreciationToDate)) + 2, 0)) ,
                 E.dblDepre,  
-                F.dblSalvageValue,  
+                BD.dblSalvageValue,  
                 'Depreciation',  
                 @strTransactionId,  
                 D.strDepreciationType,  
                 D.strConvention
                 FROM tblFAFixedAsset F 
                   JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
+                  JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
+                  
                   OUTER APPLY (
                     SELECT dblDepre,dblBasis FROM @tblDepComputation WHERE intAssetId = @i
                   ) E
                   OUTER APPLY(
                     SELECT TOP 1 dtmDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] = @i 
+                    AND intBookId = @BookId
                     ORDER BY dtmDepreciationToDate DESC
                   )Depreciation
                   WHERE F.intAssetId = @i
@@ -388,7 +405,9 @@ BEGIN
       OUTER APPLY(
           SELECT TOP 1 B.[dtmDepreciationToDate] 
           FROM tblFAFixedAssetDepreciation B 
-          WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC
+          WHERE B.intAssetId = A.[intAssetId] 
+          AND ISNULL(intBookId,1) = @BookId
+          ORDER BY B.intAssetDepreciationId DESC
       )FAD
       
       UNION ALL  
@@ -430,7 +449,9 @@ BEGIN
       OUTER APPLY(
           SELECT TOP 1 B.[dtmDepreciationToDate] 
           FROM tblFAFixedAssetDepreciation B 
-          WHERE B.intAssetId = A.[intAssetId] ORDER BY B.intAssetDepreciationId DESC
+          WHERE B.intAssetId = A.[intAssetId] 
+          AND ISNULL(intBookId,1) = @BookId
+          ORDER BY B.intAssetDepreciationId DESC
       )FAD
         
   DECLARE @PostResult INT  
@@ -463,9 +484,9 @@ FROM tblFAFixedAsset  A JOIN  @tblDepComputation B ON B.intAssetId = A.intAssetI
 WHERE B.ysnDepreciated =1 
 
 
-UPDATE A  SET ysnFullyDepreciated  =1  
-  FROM tblFAFixedAsset A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
-  WHERE B.ysnFullyDepreciated = 1  
+UPDATE A  SET A.ysnFullyDepreciated  =1  
+  FROM tblFABookDepreciation A  JOIN @tblDepComputation B ON A.intAssetId = B.intAssetId  
+  WHERE B.ysnFullyDepreciated = 1  AND A.intBookId = @BookId
 
 --=====================================================================================================================================  
 --  RETURN TOTAL NUMBER OF VALID FIXEDASSETS  

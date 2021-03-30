@@ -2,6 +2,7 @@ CREATE TABLE [dbo].[tblFAFixedAssetDepreciation] (
     [intAssetDepreciationId]	INT IDENTITY (1, 1) NOT NULL,
 	
 	[intAssetId]				INT NULL,
+	[intBookId]					INT NULL,
 	[intDepreciationMethodId]	INT NULL,
 
 	[dblBasis]					NUMERIC (18, 6) NULL DEFAULT ((0)),

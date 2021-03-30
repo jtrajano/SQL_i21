@@ -1,8 +1,7 @@
-
-
 CREATE FUNCTION fnFAValidateAssetDepreciation
  (
 	@ysnPost   AS BIT    = 0,
+	@BookId INT =1 ,
 	@Id Id READONLY
 
 )
@@ -28,16 +27,20 @@ BEGIN
         INSERT INTO @tbl
         SELECT A.intAssetId, 'Asset already fully depreciated.' FROM tblFAFixedAsset A 
         JOIN @Id I on I.intId =  A.intAssetId
+        JOIN tblFABookDepreciation BD ON BD.intAssetId = A.intAssetId AND BD.intBookId = @BookId
         OUTER APPLY(
-            SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId ORDER BY dtmDepreciationToDate DESC
+            SELECT TOP 1 ROUND(dblDepreciationToDate,2) dblDepreciationToDate 
+            FROM tblFAFixedAssetDepreciation WHERE intAssetId = I.intId and ISNULL(intBookId,1) = @BookId
+            ORDER BY dtmDepreciationToDate DESC
         )D
-        WHERE D.dblDepreciationToDate >=(ISNULL(dblCost,0) - ISNULL(dblSalvageValue,0)) OR ISNULL(ysnFullyDepreciated,0) = 1 AND ISNULL(A.ysnDisposed, 0) = 0
+        WHERE D.dblDepreciationToDate >=(ISNULL(BD.dblCost,0) - ISNULL(BD.dblSalvageValue,0)) OR ISNULL(BD.ysnFullyDepreciated,0) = 1 AND ISNULL(A.ysnDisposed, 0) = 0
 
         IF EXISTS(SELECT TOP 1 1 FROM @tbl)
             RETURN
 
         INSERT INTO @tbl
         SELECT A.intId, 'Missing Depreciation Method' FROM @Id A LEFT JOIN tblFADepreciationMethod DM on DM.intAssetId = A.intId
+		JOIN tblFABookDepreciation BD on BD.intDepreciationMethodId = DM.intDepreciationMethodId AND BD.intBookId= @BookId
         WHERE DM.intAssetId IS NULL
 
         IF EXISTS(SELECT TOP 1 1 FROM @tbl)
@@ -56,6 +59,7 @@ BEGIN
     JOIN  tblFAFixedAsset B on A.intAssetId = B.intAssetId
 	JOIN @Id I on I.intId =  A.intAssetId
     WHERE dbo.fnFAIsOpenAccountingDate(A.[dtmDepreciationToDate]) = 0
+    AND A.intBookId = @BookId
     GROUP BY  A.intAssetId
 
     IF EXISTS(SELECT TOP 1 1 FROM @tbl)
@@ -68,7 +72,7 @@ BEGIN
         FROM @Id I 
             CROSS APPLY(
                 SELECT TOP 1  DATEADD(d, -1, DATEADD(m, DATEDIFF(m, 0, (dtmDepreciationToDate))+ 2, 0))  nextDate
-                FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId 
+                FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =I.intId AND ISNULL(intBookId,1) = @BookId
                 AND strTransaction = 'Depreciation'
                 ORDER BY intAssetDepreciationId DESC
             )Depreciation
