@@ -263,9 +263,9 @@ BEGIN TRY
 		SELECT @dblLine6_Col3 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'DB'
 
 		-- Line 7
-		SELECT @dblLine7_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('C','C_TR')
-		SELECT @dblLine7_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('SC', 'SC_TR')
-		SELECT @dblLine7_Col3 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('DC', 'DC_TR')
+		SELECT @dblLine7_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('C','C_TR','C_B')
+		SELECT @dblLine7_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('SC','SC_TR','SC_B')
+		SELECT @dblLine7_Col3 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('DC','DC_TR','DC_B')
 
 		-- Line 8a
 		SELECT @dblLine8a_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'D' AND strType IN ('MFT-free Only','Both MFT- and UST-/EIF-free')
