@@ -9252,6 +9252,8 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPOAck.sql" />
     <Build Include="dbo\Tables\tblMFProductionPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPCOAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPCO.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
