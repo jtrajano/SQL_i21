@@ -1,4 +1,5 @@
 CREATE PROCEDURE [dbo].[uspARPopulateContractDetails]
+	@Post BIT
 AS
 SET QUOTED_IDENTIFIER OFF  
 SET ANSI_NULLS ON  
@@ -447,8 +448,8 @@ WHILE ISNULL(@intUniqueId,0) > 0
 							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
 							UPDATE #ARItemsForContracts
-							SET dblQuantity = dblQuantity - @dblRemainingSchedQty
-							  , dblSheduledQty = dblSheduledQty - @dblRemainingSchedQty
+							SET dblQuantity = dblQuantity - CASE WHEN @Post = 1 AND @dblQty > 0 THEN @dblRemainingSchedQty ELSE 0 END
+							  , dblSheduledQty = dblSheduledQty - CASE WHEN @Post = 1 AND @dblQty > 0 THEN @dblRemainingSchedQty ELSE 0 END
 							WHERE strType = 'Contract Scheduled'
 							  AND intInvoiceDetailId = @intInvoiceDetailId
 							  AND intContractDetailId = @intContractDetailId
