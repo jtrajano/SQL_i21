@@ -39,9 +39,9 @@ BEGIN
             RETURN
 
         INSERT INTO @tbl
-        SELECT A.intId, 'Missing Depreciation Method' FROM @Id A LEFT JOIN tblFADepreciationMethod DM on DM.intAssetId = A.intId
-		JOIN tblFABookDepreciation BD on BD.intDepreciationMethodId = DM.intDepreciationMethodId AND BD.intBookId= @BookId
-        WHERE DM.intAssetId IS NULL
+        SELECT A.intId, 'Missing Depreciation Method' FROM @Id A 
+        LEFT JOIN tblFABookDepreciation BD on BD.intAssetId = A.intId AND BD.intBookId= @BookId
+        WHERE BD.intAssetId IS NULL
 
         IF EXISTS(SELECT TOP 1 1 FROM @tbl)
             RETURN
@@ -59,7 +59,7 @@ BEGIN
     JOIN  tblFAFixedAsset B on A.intAssetId = B.intAssetId
 	JOIN @Id I on I.intId =  A.intAssetId
     WHERE dbo.fnFAIsOpenAccountingDate(A.[dtmDepreciationToDate]) = 0
-    AND A.intBookId = @BookId
+    AND ISNULL(A.intBookId,1) = @BookId
     GROUP BY  A.intAssetId
 
     IF EXISTS(SELECT TOP 1 1 FROM @tbl)
