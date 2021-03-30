@@ -523,7 +523,7 @@ BEGIN TRY
 				AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
 					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
-			  THEN TR.dblTrlMatchLineTrlPromoAmount / 2 -- 2 Can Deal
+			  THEN TR.dblTrlMatchLineTrlPromoAmount / TR.dblTrlQty -- 2 Can Deal
 			  ELSE 0 END AS dblManufacturerMultipackDiscountAmount
 			, CASE WHEN DEPT.ysnTobacco = 1
 				AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
