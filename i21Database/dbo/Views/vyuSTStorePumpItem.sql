@@ -23,4 +23,4 @@ JOIN tblICItem I
 JOIN tblSTStore ST
 	ON PU.intStoreId = ST.intStoreId
 JOIN tblSMTaxGroup TG
-	ON ST.intTaxGroupId = TG.intTaxGroupId
+	ON PU.intTaxGroupId = TG.intTaxGroupId
