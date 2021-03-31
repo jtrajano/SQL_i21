@@ -114,7 +114,7 @@ SELECT
     ,[intSourceEntityId]
     ,[ysnRebuild]
 FROM
-	#ARInvoiceGLEntries
+	##ARInvoiceGLEntries
 
 DECLARE @SkipICValidation BIT = 0
  
@@ -176,7 +176,7 @@ IF @Post = 0
              [intInvoiceId]
             ,[strInvoiceNumber]
         FROM
-            #ARPostInvoiceDetail
+            ##ARPostInvoiceDetail
         WHERE
 		    [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
             AND [intItemId] IS NOT NULL
@@ -194,8 +194,8 @@ IF @Post = 0
             ORDER BY
                 [intInvoiceId]
 
-            SELECT @WStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
-            SELECT @WOStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
+            SELECT @WStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
+            SELECT @WOStorageCount = COUNT(1) FROM ##ARPostInvoiceDetail WHERE [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
             IF @WOStorageCount > 0
             BEGIN
 				-- Unpost onhand stocks. 
@@ -264,63 +264,7 @@ IF @Post = 0
 					,@ysnPost           = @Post
 					,@SkipGLValidation	= 1
 					,@SkipICValidation	= 1
-		END 
-
-  --      --Recap = 1
-		--DELETE FROM  @UnPostICInvoiceData
-  --      INSERT INTO @UnPostICInvoiceData
-  --          ([intInvoiceId]
-  --          ,[strTransactionId])
-  --      SELECT DISTINCT
-  --           [intInvoiceId]
-  --          ,[strInvoiceNumber]
-  --      FROM
-  --          #ARPostInvoiceDetail
-  --      WHERE
-  --          [ysnPost] = 0
-  --          AND [ysnRecap] = 1
-  --          AND [strTransactionType] IN ('Invoice', 'Credit Memo', 'Credit Note', 'Cash')				 	
-  --          AND [intItemId] IS NOT NULL
-  --          AND ISNULL([strItemType],'') NOT IN ('Non-Inventory','Service','Other Charge','Software')
-
-  --      WHILE EXISTS(SELECT TOP 1 NULL FROM @UnPostICInvoiceData ORDER BY intInvoiceId)
-  --      BEGIN					
-		--	SELECT TOP 1 
-  --               @intTransactionIdIC = [intInvoiceId]
-  --              ,@strTransactionIdIC = [strTransactionId]
-		--	FROM
-  --              @UnPostICInvoiceData
-  --          ORDER BY
-  --              [intInvoiceId]
-
-  --          SELECT @WStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [ysnPost] = 0 AND [ysnRecap] = 1 AND [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) <> 0)	
-  --          SELECT @WOStorageCount = COUNT(1) FROM #ARPostInvoiceDetail WHERE [ysnPost] = 0 AND [ysnRecap] = 1 AND [intInvoiceId] = @intTransactionIdIC AND (ISNULL([intItemId], 0) <> 0) AND (ISNULL([intStorageScheduleTypeId],0) = 0)
-  --          IF @WOStorageCount > 0
-  --          BEGIN
-  --              -- Unpost onhand stocks. 
-  --              EXEC dbo.uspICUnpostCosting
-  --                       @intTransactionIdIC
-  --                      ,@strTransactionIdIC
-  --                      ,@BatchId
-  --                      ,@UserId
-  --                      ,1
-  --          END
-
-  --          IF @WStorageCount > 0 
-  --          BEGIN 
-  --              -- Unpost storage stocks. 
-  --              EXEC dbo.uspICUnpostStorage
-  --                       @intTransactionId
-  --                      ,@strTransactionId
-  --                      ,@BatchId
-  --                      ,@UserId
-  --                      ,1
-  --          END					
-										
-  --          DELETE FROM @UnPostICInvoiceData 
-  --          WHERE	intInvoiceId = @intTransactionIdIC 
-		--		AND strTransactionId = @strTransactionIdIC 												
-  --      END	
+		END   
     END
 
 END TRY

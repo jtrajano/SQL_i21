@@ -30,7 +30,7 @@ DECLARE @tblToProcess TABLE (
 	  , dtmDate					DATETIME NULL
 )
 
-DELETE FROM #ARItemsForContracts
+DELETE FROM ##ARItemsForContracts
 DELETE FROM @tblToProcess
 INSERT INTO @tblToProcess (
 	  intInvoiceDetailId
@@ -83,7 +83,7 @@ SELECT intInvoiceDetailId	= ID.intInvoiceDetailId
 	, strTransactionType	= ID.strTransactionType
 	, strItemNo				= ID.strItemNo
 	, dtmDate				= ID.dtmDate
-FROM #ARPostInvoiceDetail ID
+FROM ##ARPostInvoiceDetail ID
 INNER JOIN tblARInvoiceDetail IDD ON ID.intInvoiceDetailId = IDD.intInvoiceDetailId
 INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 INNER JOIN tblICItem ITEM ON ID.intItemId = ITEM.intItemId
@@ -162,7 +162,7 @@ IF NOT EXISTS(SELECT * FROM @tblToProcess)
 			, strTransactionType	= I.strTransactionType
 			, strItemNo				= I.strItemNo
 			, dtmDate				= I.dtmDate
-		FROM #ARPostInvoiceDetail I
+		FROM ##ARPostInvoiceDetail I
 		INNER JOIN tblARInvoiceDetail ID ON I.intInvoiceDetailId = ID.intInvoiceDetailId
 		INNER JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId
 		INNER JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
@@ -317,7 +317,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 		BEGIN
 				IF	@ReduceBalance	=	1
 				BEGIN
-					INSERT INTO #ARItemsForContracts (
+					INSERT INTO ##ARItemsForContracts (
 						  intInvoiceId
 						, intInvoiceDetailId
 						, intItemId
@@ -357,7 +357,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 				
 				IF ISNULL(@ysnFromReturn, 0) = 0 AND (ISNULL(@intLoadDetailId, 0) = 0 OR (ISNULL(@intLoadDetailId, 0) <> 0 AND ISNULL(@intPurchaseSale, 0) = 3))
 				BEGIN
-					INSERT INTO #ARItemsForContracts (
+					INSERT INTO ##ARItemsForContracts (
 						  intInvoiceId
 						, intInvoiceDetailId
 						, intItemId
@@ -407,7 +407,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 								
 							SET @dblRemainingSchedQty = -@dblRemainingSchedQty
 
-							INSERT INTO #ARItemsForContracts (
+							INSERT INTO ##ARItemsForContracts (
 								  intInvoiceId
 								, intInvoiceDetailId
 								, intItemId
@@ -453,7 +453,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 			BEGIN
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) * -1	
 
-				INSERT INTO #ARItemsForContracts (
+				INSERT INTO ##ARItemsForContracts (
 					  intInvoiceId
 					, intInvoiceDetailId
 					, intItemId
@@ -492,7 +492,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 					
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
 
-				INSERT INTO #ARItemsForContracts (
+				INSERT INTO ##ARItemsForContracts (
 					  intInvoiceId
 					, intInvoiceDetailId
 					, intItemId
@@ -533,7 +533,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 			BEGIN
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intFromItemUOMId,@intToItemUOMId,@dblQty)
 
-				INSERT INTO #ARItemsForContracts (
+				INSERT INTO ##ARItemsForContracts (
 					  intInvoiceId
 					, intInvoiceDetailId
 					, intItemId
@@ -572,7 +572,7 @@ WHILE ISNULL(@intUniqueId,0) > 0
 						
 				SELECT @dblConvertedQty =	dbo.fnCalculateQtyBetweenUOM(@intShippedQtyUOMId,@intToItemUOMId,@dblShippedQty) 	
 
-				INSERT INTO #ARItemsForContracts (
+				INSERT INTO ##ARItemsForContracts (
 					  intInvoiceId
 					, intInvoiceDetailId
 					, intItemId
