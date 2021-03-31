@@ -1681,7 +1681,8 @@ BEGIN
 		BEGIN 			
 			UPDATE tblICAPClearing
 			SET 				
-				dblAmount = -dblAmount -- Negate the Amount 
+				dblQuantity = -dblQuantity -- Negate the Quantity
+				,dblAmount = -dblAmount -- Negate the Amount 
 			WHERE 
 				strTransactionId = @strTransactionId
 				AND strBatchId = @strBatchId

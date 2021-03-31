@@ -7,6 +7,7 @@
 	,@intRebuildItemId AS INT = NULL -- This is only used when rebuilding the stocks. 
 	,@strRebuildTransactionId AS NVARCHAR(50) = NULL -- This is only used when rebuilding the stocks. 
 	,@intRebuildCategoryId AS INT = NULL -- This is only used when rebuilding the stocks. 
+	,@ysnRebuild AS BIT = 0 
 AS
 
 SET QUOTED_IDENTIFIER OFF
@@ -1478,7 +1479,7 @@ WHERE	ForGLEntries_CTE.intTransactionTypeId NOT IN (
 
 -- Create the AP Clearing
 -- Do not re-add the AP clearing when rebuilding stocks. 
-IF NOT EXISTS (SELECT TOP 1 1 FROM #tmpRebuildList WHERE intItemId IS NOT NULL OR intCategoryId IS NOT NULL) 
+IF ISNULL(@ysnRebuild, 0) = 0 
 BEGIN 
 	DECLARE 
 	@intVoucherInvoiceNoOption TINYINT
@@ -1554,7 +1555,7 @@ BEGIN
 				WHEN ri.intWeightUOMId IS NOT NULL THEN -ri.dblNet 
 				ELSE -ri.dblOpenReceive
 			END 
-		,[dblAmount] = ri.dblLineTotal
+		,[dblAmount] = -ri.dblLineTotal
 		,strBatchId = @strBatchId	
 	FROM (
 			SELECT DISTINCT 
