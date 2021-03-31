@@ -11,7 +11,7 @@ BEGIN TRY
 	SET XACT_ABORT ON
 	SET ANSI_WARNINGS OFF
 
-	WHILE EXISTS(SELECT TOP 1 NULL FROM #ARItemsForContracts)
+	WHILE EXISTS(SELECT TOP 1 NULL FROM ##ARItemsForContracts)
 		BEGIN
 			DECLARE @intInvoiceDetailId		INT = NULL
 				  , @intContractDetailId	INT = NULL
@@ -28,7 +28,7 @@ BEGIN TRY
 					   , @dblBalanceQty			= dblBalanceQty
 					   , @dblSheduledQty		= dblSheduledQty
 					   , @dblRemainingQty		= dblRemainingQty
-			FROM #ARItemsForContracts
+			FROM ##ARItemsForContracts
 
 			IF @strType = 'Contract Balance' AND @dblBalanceQty <> 0
 				BEGIN
@@ -58,7 +58,7 @@ BEGIN TRY
 													  , @strScreenName		 = 'Invoice'
 				END
 
-			DELETE FROM #ARItemsForContracts 
+			DELETE FROM ##ARItemsForContracts 
 			WHERE intInvoiceDetailId = @intInvoiceDetailId 
 			  AND intContractDetailId = @intContractDetailId
 			  AND dblQuantity = @dblQuantity
