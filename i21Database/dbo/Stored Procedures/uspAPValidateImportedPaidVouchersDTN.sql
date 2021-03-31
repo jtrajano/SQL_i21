@@ -48,11 +48,17 @@ UPDATE A
 						B.intBillId IS NULL
 					THEN 'Voucher not found.'
 					WHEN 
-						(A.dblPayment + A.dblDiscount) > B.dblAmountDue
+						ABS(A.dblPayment + A.dblDiscount) > B.dblAmountDue
 					THEN 'Overpayment'
 					WHEN 
-						(A.dblPayment + A.dblDiscount) < B.dblAmountDue
+						(A.dblPayment + A.dblDiscount) < (B.dblAmountDue * (CASE WHEN B.intTransactionType = 3 THEN -1 ELSE 1 END))
 					THEN 'Underpayment'
+					WHEN 
+						A.dblPayment < 0 AND B.intTransactionType != 3
+					THEN 'Amount is negative. Debit Memo type is expected.'
+					WHEN 
+						A.dblPayment > 0 AND B.intTransactionType != 1
+					THEN 'Amount is positive. Voucher type is expected.'
 					ELSE NULL
 					END,
 		A.strBillId = B.strBillId,
