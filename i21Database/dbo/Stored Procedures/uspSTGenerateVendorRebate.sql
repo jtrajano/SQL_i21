@@ -411,7 +411,7 @@ BEGIN TRY
 									,strAccountLoyaltyIDNumber
 									,strCouponDescription
 								FROM ( 
-								SELECT DISTINCT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
+								SELECT intScanTransactionId ,(CASE WHEN ST.strDescription IS NULL THEN '' ELSE REPLACE(ST.strDescription, @Delimiter, '') END) as strOutletName
 			, ST.intStoreNo as intOutletNumber
 			, REPLACE(REPLACE(REPLACE(ST.strAddress, CHAR(10), ''), CHAR(13), ''), @Delimiter, '') as strOutletAddressOne
 			, '' as strOutletAddressTwo
@@ -485,7 +485,7 @@ BEGIN TRY
 				AND TR.strTrlMatchLineTrlMatchName IS NOT NULL 
 				AND TR.strTrlMatchLineTrlPromotionIDPromoType = 'mixAndMatchOffer' 
 					AND (TR.dblTrlQty >= 2 OR (SELECT SUM(dblTrlQty) FROM tblSTTranslogRebates where intTermMsgSN = TR.intTermMsgSN and dtmDate = TR.dtmDate and intStoreId = TR.intStoreId and strTrlMatchLineTrlPromotionID = TR.strTrlMatchLineTrlPromotionID GROUP BY intTermMsgSN, dtmDate ,intStoreId , strTrlMatchLineTrlPromotionID) >= 2) -- 2 Can Deal
-				THEN TR.dblTrlMatchLineTrlPromoAmount / 2 -- 2 Can Deal
+			  THEN TR.dblTrlMatchLineTrlPromoAmount / dblTrlQty -- 2 Can Deal
 			  WHEN strTrpCardInfoTrpcHostID IN ('VAPS') 
 			  THEN 0 
 			  WHEN strTrlMatchLineTrlPromotionIDPromoType IN ('mixAndMatchOffer', 'combinationOffer') 
