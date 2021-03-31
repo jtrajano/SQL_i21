@@ -1,4 +1,4 @@
-﻿ALTER PROCEDURE [dbo].[uspLGProcessToInventoryReceipt] 
+﻿CREATE PROCEDURE [dbo].[uspLGProcessToInventoryReceipt] 
 	 @intLoadId INT
 	,@intEntityUserSecurityId INT
 	,@intInventoryReceiptId INT OUTPUT
