@@ -68,8 +68,7 @@ SELECT
 	strDateOrAccount	=	details.strDateOrAccount,
 	strReference		=	A.strReference,
 	strVendorOrderNumber=	A.strInvoiceNumber,
-	strMiscDescription	=	details.strItemDescription,
-	ysnIsActive			=	C.ysnPymtCtrlActive
+	strMiscDescription	=	details.strItemDescription
 INTO #tmpConvertedLassusData
 FROM tblAPImportVoucherLassus A
 LEFT JOIN tblAPVendor C ON A.strVendorId = C.strVendorId
@@ -128,7 +127,6 @@ FROM #tmpConvertedLassusData A
 WHERE 
 	A.intEntityVendorId > 0
 AND A.intAccountId > 0
-AND A.ysnIsActive = 1
 AND (A.intTransactionType > 0)
 AND (A.dblQuantityToBill != 0)
 
@@ -172,8 +170,6 @@ INSERT INTO @invalidPayables
 SELECT strVendorOrderNumber, strError
 FROM (
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find vendor ' + strVendorId AS strError FROM #tmpConvertedLassusData WHERE intEntityVendorId IS NULL AND strVendorId IS NOT NULL
-	UNION ALL
-	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Vendor ' + strVendorId + ' is not an active vendor.' AS strError FROM #tmpConvertedLassusData WHERE ysnIsActive = 1
 	UNION ALL
 	SELECT intPartitionId, strVendorOrderNumber, 'Line with Invoice No. ' + strVendorOrderNumber + ': Cannot find transaction type ' + CAST(intVoucherType AS NVARCHAR) FROM #tmpConvertedLassusData WHERE intTransactionType IS NULL AND CAST(intVoucherType AS NVARCHAR) IS NOT NULL
 	UNION ALL
