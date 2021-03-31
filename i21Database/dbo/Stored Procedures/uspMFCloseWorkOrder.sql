@@ -698,19 +698,22 @@ BEGIN TRY
 		,@intTransactionTypeId = 34
 		,@ysnPosted = 1
 	
-	IF NOT EXISTS(SELECT *
-					FROM dbo.tblMFProductionPreStage
-					WHERE intWorkOrderId = @intWorkOrderId)
-	BEGIN
-		INSERT INTO dbo.tblMFProductionPreStage (
-				intWorkOrderId
-				,intWorkOrderStatusId
-				,intUserId
-				)
-		SELECT @intWorkOrderId
-			,13
-			,@intUserId
-	END
+	DELETE
+	FROM dbo.tblMFWorkOrderPreStage
+	WHERE intWorkOrderId = @intWorkOrderId
+		AND strRowState = 'Modified'
+		AND intStatusId IS NULL
+
+	INSERT INTO dbo.tblMFWorkOrderPreStage (
+		intWorkOrderId
+		,intWorkOrderStatusId
+		,intUserId
+		,strRowState
+		)
+	SELECT @intWorkOrderId
+		,13
+		,@userId
+		,'Modified'
 
 
 	IF @intTransactionCount = 0
