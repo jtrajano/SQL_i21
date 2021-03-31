@@ -29,9 +29,7 @@ SELECT   L.intLoadId
 							(WeightUOM.dblUnitQty / ISNULL(PriceUOM.dblUnitQty, 1)) * ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice) 
 							* LC.dblNetWt / ISNULL(PBCur.intCent, 1)
 						,2)
-		,dblUnitCost = ROUND(
-						(WeightUOM.dblUnitQty / ISNULL(PriceUOM.dblUnitQty, 1)) * ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice)
-					   ,2)
+		,dblUnitCost = ISNULL(LD.dblUnitPrice, PDetail.dblCashPrice)
 		,LC.dtmUnloading
 		,LC.dtmCustoms
 		,LC.dtmFDA
