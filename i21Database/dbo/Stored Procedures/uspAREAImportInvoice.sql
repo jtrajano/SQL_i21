@@ -134,7 +134,21 @@ BEGIN
 	
 	SET @ErrorMessage = ISNULL(@ErrorMessage, 'Failed to import invoice')
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
-		RAISERROR(@ErrorMessage, 16, 1)
+	BEGIN
+		INSERT INTO @Logs (strError, strLogLevel)
+		SELECT @ErrorMessage, 'Error'
+		RAISERROR (@ErrorMessage, 16, 1)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @Logs (intLineNumber, strLogLevel)
+		SELECT i.intInvoiceId, 'Ids'
+		FROM tblARInvoice i
+		INNER JOIN tblARInvoiceIntegrationLogDetail d ON i.intInvoiceId = d.intInvoiceId
+		WHERE d.intIntegrationLogId = @LogId 
+		  AND d.ysnSuccess = 1
+		  AND d.ysnHeader = 1
+	END
 END
 
 SELECT * FROM @Logs
