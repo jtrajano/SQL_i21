@@ -8077,6 +8077,7 @@
     <Build Include="dbo\Stored Procedures\uspARPopulateContractDetails.sql" />
     <Build Include="dbo\Stored Procedures\uspARUpdateContractOnPost.sql" />
     <Build Include="dbo\Stored Procedures\uspARPerformanceMatrix.sql" />
+    <Build Include="dbo\Stored Procedures\uspARInitializeTempTableForPosting.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
