@@ -262,8 +262,8 @@ BEGIN TRY
 							THEN 1
 						ELSE 2
 						END) + '</ActionId>' + 
-				'<i21CreatedDate>' + CONVERT(VARCHAR(33), GetDate(), 126) + '</i21CreatedDate>' + 
-				'<i21CreatedBy>' + @strUserName + '</i21CreatedBy>' + 
+				'<CreatedDate>' + CONVERT(VARCHAR(33), GetDate(), 126) + '</CreatedDate>' + 
+				'<CreatedByUser>' + @strUserName + '</CreatedByUser>' + 
 				'<ContractNo>' + @strContractNumber + '</ContractNo>' + 
 				'<ContractDate>' + IsNULL(convert(VARCHAR, CF.dtmContractDate, 112), '') + '</ContractDate>' + 
 				'<VendorAccountNo>' + @strVendorAccountNum + '</VendorAccountNo>' + 

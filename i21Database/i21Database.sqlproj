@@ -9250,6 +9250,8 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPPO.sql" />
     <Build Include="dbo\Stored Procedures\uspIPValidateERPContractFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPPOAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPCO.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPCOAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

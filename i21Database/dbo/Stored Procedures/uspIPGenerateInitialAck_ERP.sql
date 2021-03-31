@@ -90,9 +90,9 @@ BEGIN TRY
 
 			SELECT @strXML += '<CompanyLocation>' + @strCompanyLocation + '</CompanyLocation>'
 
-			SELECT @strXML += '<i21CreatedDate>' + CONVERT(VARCHAR(30), GETDATE(), 126) + '</i21CreatedDate>'
+			SELECT @strXML += '<CreatedDate>' + CONVERT(VARCHAR(30), GETDATE(), 126) + '</CreatedDate>'
 
-			SELECT @strXML += '<i21CreatedBy>' + @strCreatedBy + '</i21CreatedBy>'
+			SELECT @strXML += '<CreatedByUser>' + @strCreatedBy + '</CreatedByUser>'
 
 			SELECT @strXML += '<MessageTypeId>' + ISNULL(CONVERT(VARCHAR, @intMessageTypeId), '') + '</MessageTypeId>'
 

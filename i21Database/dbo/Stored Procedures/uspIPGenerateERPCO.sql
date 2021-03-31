@@ -341,9 +341,9 @@ BEGIN TRY
 
 			SELECT @strXML += '<ActionId>' + LTRIM(@intActionId) + '</ActionId>'
 
-			SELECT @strXML += '<i21CreatedDate>' + CONVERT(VARCHAR(33), GetDate(), 126) + '</i21CreatedDate>'
+			SELECT @strXML += '<CreatedDate>' + CONVERT(VARCHAR(33), GetDate(), 126) + '</CreatedDate>'
 
-			SELECT @strXML += '<i21CreatedBy>' + @strUserName + '</i21CreatedBy>'
+			SELECT @strXML += '<CreatedByUser>' + @strUserName + '</CreatedByUser>'
 
 			SELECT @strXML += '<ContractNo>' + @strContractNumber + '</ContractNo>'
 
