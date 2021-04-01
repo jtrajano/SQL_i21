@@ -44,8 +44,8 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 	EXEC dbo.uspSMGetStartingNumber 76, @strCountNo OUTPUT, @intLocationId
 	SET @I = @I + 1
-	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource)
-	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), @type)
+	INSERT INTO tblICInventoryCount(strCountNo, intLocationId, dtmCountDate, ysnCountByLots, intCreatedByUserId, dtmDateCreated, strDataSource, guiApiUniqueId)
+	VALUES(@strTempCountNo, @intLocationId, @dtmCountDate, @ysnCountByLots, @intUserId, GETDATE(), @type, @identifier)
 
 	SET @intCountId = SCOPE_IDENTITY()
 
@@ -86,7 +86,7 @@ BEGIN
 		AND il.ysnActive = 1
 
 	UPDATE tblICInventoryCount
-	SET strCountNo = @strCountNo
+	SET strCountNo = @strCountNo, guiApiUniqueId = @identifier
 	WHERE intInventoryCountId = @intCountId
 
 	INSERT INTO @Logs(strError, strValue, strField, intLineNumber, intLinePosition, strLogLevel)
