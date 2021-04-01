@@ -9256,6 +9256,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
     <Build Include="dbo\Tables\tblICAPClearing.sql" />
     <None Include="Scripts\Post-Deployment\IC\28_PopulateICAPClearing.sql" />
+    <Build Include="dbo\Tables\tblMFProductionPreStage.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
