@@ -9258,6 +9258,11 @@
     <None Include="Scripts\Post-Deployment\IC\28_PopulateICAPClearing.sql" />
     <Build Include="dbo\Tables\tblMFProductionPreStage.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPProduction.sql" />
+    <Build Include="dbo\tblIPBendDemandStage.sql" />
+    <Build Include="dbo\tblIPBendDemandError.sql" />
+    <Build Include="dbo\tblIPBendDemandArchive.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPStageERPBlendDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPBlendDemand.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
