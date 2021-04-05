@@ -9,7 +9,12 @@ A.intBillId
 				 + ISNULL(RTRIM(companySetup.strZip),'') + ' ' + ISNULL(RTRIM(companySetup.strCity), '') + ' ' + ISNULL(RTRIM(companySetup.strState), '') + CHAR(13) + char(10)
 				 + ISNULL('' + RTRIM(companySetup.strCountry) + CHAR(13) + char(10), '')
 				 + ISNULL(RTRIM(companySetup.strPhone)+ CHAR(13) + char(10), '')
+,strCompanyAddressNoName = ISNULL(RTRIM(companySetup.strAddress) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strZip),'') + ' ' + ISNULL(RTRIM(companySetup.strCity), '') + ' ' + ISNULL(RTRIM(companySetup.strState), '') + CHAR(13) + char(10)
+				 + ISNULL('' + RTRIM(companySetup.strCountry) + CHAR(13) + char(10), '')
+				 + ISNULL(RTRIM(companySetup.strPhone)+ CHAR(13) + char(10), '')
 ,strShipFrom = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, A.strShipFromState, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone) COLLATE Latin1_General_CI_AS
+,strShipFromNoState = [dbo].[fnAPFormatAddress](B2.strName,NULL, A.strShipFromAttention, A.strShipFromAddress, A.strShipFromCity, NULL, A.strShipFromZipCode, A.strShipFromCountry, A.strShipFromPhone) COLLATE Latin1_General_CI_AS
 ,strShipTo = [dbo].[fnAPFormatAddress](NULL,companySetup.strCompanyName, A.strShipToAttention, A.strShipToAddress, A.strShipToCity, A.strShipToState, A.strShipToZipCode, A.strShipToCountry, A.strShipToPhone) COLLATE Latin1_General_CI_AS
 ,dbo.fnTrim(ISNULL(B.strVendorId, B2.strEntityNo) + ' - ' + ISNULL(B2.strName,'')) as strVendorIdName 
 ,ISNULL(B2.strName,'') AS strVendorName 
