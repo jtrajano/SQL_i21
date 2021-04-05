@@ -757,6 +757,11 @@ where RC.intTaxAuthorityId = @TaxAuthorityId
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SD', strType = 'Both MFT- and UST-/EIF-free', strState = 'IL', strStatus = 'Include', intMasterId = 13250
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SD', strType = 'MFT-free Only', strState = 'IL', strStatus = 'Include', intMasterId = 13248
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SD', strType = 'UST-/EIF-free Only', strState = 'IL', strStatus = 'Include', intMasterId = 13249
+	
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_TR', strType = '', strState = 'IL', strStatus = 'Exclude', intMasterId = 1300257
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_TR', strType = '', strState = 'IL', strStatus = 'Exclude', intMasterId = 1300258
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'LC_TR', strType = '', strState = 'IL', strStatus = 'Exclude', intMasterId = 1300259
+	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'SC_TR', strType = '', strState = 'IL', strStatus = 'Exclude', intMasterId = 1300260
 
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'C_B', strType = '', strState = 'IL', strStatus = 'Exclude', intMasterId = 1301634
 	UNION ALL SELECT intValidDestinationStateId = 0, strFormCode = 'RMFT-5', strScheduleCode = 'DC_B', strType = '', strState = 'IL', strStatus = 'Exclude', intMasterId = 1301635
