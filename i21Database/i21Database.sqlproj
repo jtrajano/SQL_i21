@@ -9269,6 +9269,9 @@
     <Build Include="dbo\Tables\tblIPDemandArchive.sql" />
     <Build Include="dbo\Stored Procedures\uspIPStageERPDemand.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPDemand.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPGoodsReceipt.sql" />
+    <Build Include="dbo\Tables\tblIPInvReceiptFeed.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceiptAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

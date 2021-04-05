@@ -121,10 +121,17 @@ BEGIN TRY
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				SELECT @intContractDetailId = intContractDetailId
+				--SELECT @intContractDetailId = intContractDetailId
+				--	,@intContractHeaderId = intContractHeaderId
+				--FROM tblCTContractFeed
+				--WHERE intContractFeedId = @TrxSequenceNo
+				--	AND strContractNumber = @ContractNo
+
+				SELECT TOP 1 @intContractDetailId = intContractDetailId
 					,@intContractHeaderId = intContractHeaderId
+					,@TrxSequenceNo = intContractFeedId
 				FROM tblCTContractFeed
-				WHERE intContractFeedId = @TrxSequenceNo
+				WHERE intStatusId = 2
 					AND strContractNumber = @ContractNo
 
 				IF @StatusId = 1

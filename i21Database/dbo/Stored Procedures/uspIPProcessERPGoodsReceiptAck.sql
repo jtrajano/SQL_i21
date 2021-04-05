@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE uspIPProcessERPPOAck
+﻿CREATE PROCEDURE uspIPProcessERPGoodsReceiptAck
 AS
 BEGIN TRY
 	SET QUOTED_IDENTIFIER OFF
@@ -14,29 +14,24 @@ BEGIN TRY
 		,@CompanyLocation NVARCHAR(6)
 		,@CreatedDate DATETIME
 		,@CreatedBy NVARCHAR(50)
-		,@ContractNo NVARCHAR(50)
+		,@ReceiptNo NVARCHAR(50)
 		,@StatusId INT
 		,@StatusText NVARCHAR(2048)
+		,@ERPReferenceNo NVARCHAR(50)
 		,@intRowNo INT
 		,@strXml NVARCHAR(MAX)
 		,@intMinRowNo INT
-		,@intContractDetailId INT
-		,@intContractHeaderId INT
-		,@SequenceNo NVARCHAR(3)
-		,@ERPPONumber NVARCHAR(50)
-		,@ERPPOlineNo NVARCHAR(50)
+		,@intInventoryReceiptId INT
 	DECLARE @tblAcknowledgement AS TABLE (
 		intRowNo INT IDENTITY(1, 1)
 		,TrxSequenceNo INT
 		,CompanyLocation NVARCHAR(6)
 		,CreatedDate DATETIME
 		,CreatedBy NVARCHAR(50)
-		,ContractNo NVARCHAR(50)
+		,ReceiptNo NVARCHAR(50)
 		,StatusId INT
 		,StatusText NVARCHAR(2048)
-		,SequenceNo NVARCHAR(3)
-		,ERPPONumber NVARCHAR(50)
-		,ERPPOlineNo NVARCHAR(50)
+		,ERPReferenceNo NVARCHAR(50)
 		)
 	DECLARE @tblMessage AS TABLE (
 		strMessageType NVARCHAR(50)
@@ -47,7 +42,7 @@ BEGIN TRY
 
 	SELECT @intRowNo = MIN(intIDOCXMLStageId)
 	FROM tblIPIDOCXMLStage
-	WHERE strType = 'PO Ack'
+	WHERE strType = 'Goods Receipt Ack'
 
 	WHILE (ISNULL(@intRowNo, 0) > 0)
 	BEGIN
@@ -74,34 +69,28 @@ BEGIN TRY
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
-				,ContractNo
+				,ReceiptNo
 				,StatusId
 				,StatusText
-				,SequenceNo
-				,ERPPONumber
-				,ERPPOlineNo
+				,ERPReferenceNo
 				)
 			SELECT TrxSequenceNo
 				,CompanyLocation
 				,CreatedDate
 				,CreatedBy
-				,ContractNo
+				,ReceiptNo
 				,StatusId
 				,StatusText
-				,SequenceNo
-				,ERPPONumber
-				,ERPPOlineNo
-			FROM OPENXML(@idoc, 'root/data/header/line', 2) WITH (
-					TrxSequenceNo INT '../TrxSequenceNo'
-					,CompanyLocation NVARCHAR(6) '../CompanyLocation'
-					,CreatedDate DATETIME '../CreatedDate'
-					,CreatedBy NVARCHAR(50) '../CreatedBy'
-					,ContractNo NVARCHAR(50) '../ContractNo'
-					,StatusId INT '../StatusId'
-					,StatusText NVARCHAR(2048) '../StatusText'
-					,SequenceNo NVARCHAR(3)
-					,ERPPONumber NVARCHAR(50)
-					,ERPPOlineNo NVARCHAR(50)
+				,ERPReferenceNo
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					,ReceiptNo NVARCHAR(50)
+					,StatusId INT
+					,StatusText NVARCHAR(2048)
+					,ERPReferenceNo NVARCHAR(50)
 					)
 
 			SELECT @intMinRowNo = MIN(intRowNo)
@@ -113,69 +102,36 @@ BEGIN TRY
 					,@CompanyLocation = NULL
 					,@CreatedDate = NULL
 					,@CreatedBy = NULL
-					,@ContractNo = NULL
+					,@ReceiptNo = NULL
 					,@StatusId = NULL
 					,@StatusText = NULL
-					,@intContractDetailId = NULL
-					,@intContractHeaderId = NULL
-					,@SequenceNo = NULL
-					,@ERPPONumber = NULL
-					,@ERPPOlineNo = NULL
+					,@intInventoryReceiptId = NULL
+					,@ERPReferenceNo = NULL
 
 				SELECT @TrxSequenceNo = TrxSequenceNo
 					,@CompanyLocation = CompanyLocation
 					,@CreatedDate = CreatedDate
 					,@CreatedBy = CreatedBy
-					,@ContractNo = ContractNo
+					,@ReceiptNo = ReceiptNo
 					,@StatusId = StatusId
 					,@StatusText = StatusText
-					,@SequenceNo = SequenceNo
-					,@ERPPONumber = ERPPONumber
-					,@ERPPOlineNo = ERPPOlineNo
+					,@ERPReferenceNo = ERPReferenceNo
 				FROM @tblAcknowledgement
 				WHERE intRowNo = @intMinRowNo
 
-				--SELECT @intContractDetailId = intContractDetailId
-				--	,@intContractHeaderId = intContractHeaderId
-				--FROM tblCTContractFeed
-				--WHERE intContractFeedId = @TrxSequenceNo
-				--	AND strContractNumber = @ContractNo
-				--	AND intContractSeq = @SequenceNo
-
-				SELECT TOP 1 @intContractDetailId = intContractDetailId
-					,@intContractHeaderId = intContractHeaderId
-					,@TrxSequenceNo = intContractFeedId
-				FROM tblCTContractFeed
-				WHERE intStatusId = 2
-					AND strContractNumber = @ContractNo
-					AND intContractSeq = @SequenceNo
+				SELECT @intInventoryReceiptId = intInventoryReceiptId
+				FROM tblICInventoryReceipt
+				WHERE strReceiptNumber = @ReceiptNo
 
 				IF @StatusId = 1
 				BEGIN
-					UPDATE tblCTContractFeed
+					UPDATE tblIPInvReceiptFeed
 					SET intStatusId = 6
 						,strMessage = 'Success'
 						,strFeedStatus = 'Ack Rcvd'
-						,strERPPONumber = @ERPPONumber
-						,strERPItemNumber = @ERPPOlineNo
-					WHERE intContractFeedId = @TrxSequenceNo
-
-					--Update the PO Details in modified sequences
-					UPDATE tblCTContractFeed
-					SET strERPPONumber = @ERPPONumber
-						,strERPItemNumber = @ERPPOlineNo
-					WHERE intContractDetailId = @intContractDetailId
+						,strERPTransferOrderNo = @ERPReferenceNo
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
 						AND intStatusId IS NULL
-
-					UPDATE tblCTContractDetail
-					SET strERPPONumber = @ERPPONumber
-						,strERPItemNumber = @ERPPOlineNo
-						,intConcurrencyId = intConcurrencyId + 1
-					WHERE intContractDetailId = @intContractDetailId
-
-					UPDATE tblCTContractHeader
-					SET intConcurrencyId = intConcurrencyId + 1
-					WHERE intContractHeaderId = @intContractHeaderId
 
 					INSERT INTO @tblMessage (
 						strMessageType
@@ -184,19 +140,20 @@ BEGIN TRY
 						,strInfo2
 						)
 					VALUES (
-						'PO Ack'
+						'Goods Receipt Ack'
 						,'Success'
-						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
-						,@ERPPONumber
+						,@ReceiptNo
+						,@ERPReferenceNo
 						)
 				END
 				ELSE
 				BEGIN
-					UPDATE tblCTContractFeed
+					UPDATE tblIPInvReceiptFeed
 					SET intStatusId = 5
 						,strMessage = @StatusText
 						,strFeedStatus = 'Ack Rcvd'
-					WHERE intContractFeedId = @TrxSequenceNo
+					WHERE intInventoryReceiptId = @intInventoryReceiptId
+						AND intStatusId IS NULL
 
 					INSERT INTO @tblMessage (
 						strMessageType
@@ -205,10 +162,10 @@ BEGIN TRY
 						,strInfo2
 						)
 					VALUES (
-						'PO Ack'
+						'Goods Receipt Ack'
 						,@StatusText
-						,@ContractNo + ' / ' + ISNULL(@SequenceNo, '')
-						,@ERPPONumber
+						,@ReceiptNo
+						,@ERPReferenceNo
 						)
 				END
 
@@ -265,7 +222,7 @@ BEGIN TRY
 		SELECT @intRowNo = MIN(intIDOCXMLStageId)
 		FROM tblIPIDOCXMLStage
 		WHERE intIDOCXMLStageId > @intRowNo
-			AND strType = 'PO Ack'
+			AND strType = 'Goods Receipt Ack'
 	END
 
 	SELECT strMessageType
