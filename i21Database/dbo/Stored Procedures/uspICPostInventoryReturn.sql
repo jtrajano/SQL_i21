@@ -907,14 +907,6 @@ BEGIN
 				END
 
 				-- Do the inventory valuation
-				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
-						@CompanyOwnedItemsForPost  
-						,@strBatchId  
-						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
-						,@intEntityUserSecurityId
-
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
-
 				-- Create the GL entries specific for Inventory Return 
 				INSERT INTO @GLEntries (
 						[dtmDate] 
@@ -952,12 +944,13 @@ BEGIN
 						,[intSourceEntityId]
 						,[intCommodityId]
 				)
-				EXEC	@intReturnValue = uspICCreateReturnGLEntries
-						@strBatchId 
+				EXEC	@intReturnValue = dbo.uspICPostReturnCosting  
+						@CompanyOwnedItemsForPost  
+						,@strBatchId  
 						,@ACCOUNT_CATEGORY_TO_COUNTER_INVENTORY
 						,@intEntityUserSecurityId
 
-				IF @intReturnValue < 0 GOTO With_Rollback_Exit
+				IF @intReturnValue < 0 GOTO With_Rollback_Exit							
 			END
 		END
 	END 
@@ -1647,7 +1640,7 @@ BEGIN
 			,[dblAmount]	
 			,[strCode]
 		)
-		SELECT 
+		SELECT DISTINCT 
 			[intTransactionId]
 			,[strTransactionId]
 			,[intTransactionType]
@@ -1659,16 +1652,27 @@ BEGIN
 				COALESCE(
 					intInventoryReceiptItemId
 					,intInventoryReceiptChargeId
-					,intInventoryShipmentChargeId
 				)
 			,[intAccountId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[dblQuantity]
-			,[dblAmount]	
+			,[dblAmount] = g.dblAmount 
 			,[strCode] = 'RTN'
 		FROM 
-			tblICAPClearing
+			tblICAPClearing ap
+			CROSS APPLY (
+				SELECT 
+					dblAmount = SUM(g.dblAmount) 
+				FROM
+					tblICAPClearing g
+				WHERE
+					g.strBatchId = @strBatchId
+					AND (
+						(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
+						OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
+					)
+			) g
 		WHERE
 			strBatchId = @strBatchId
 

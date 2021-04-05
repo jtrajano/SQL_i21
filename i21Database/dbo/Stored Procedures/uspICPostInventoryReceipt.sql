@@ -2563,7 +2563,7 @@ BEGIN
 			,[dblAmount]	
 			,[strCode]
 		)
-		SELECT 
+		SELECT DISTINCT 
 			[intTransactionId]
 			,[strTransactionId]
 			,[intTransactionType]
@@ -2574,17 +2574,28 @@ BEGIN
 			,[intTransactionDetailId] = 
 				COALESCE(
 					intInventoryReceiptItemId
-					,intInventoryReceiptChargeId
-					,intInventoryShipmentChargeId
+					,intInventoryReceiptChargeId					
 				)
 			,[intAccountId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[dblQuantity]
-			,[dblAmount]	
+			,[dblAmount] = g.dblAmount
 			,[strCode] = 'IR'
 		FROM 
-			tblICAPClearing
+			tblICAPClearing ap
+			CROSS APPLY (
+				SELECT 
+					dblAmount = SUM(g.dblAmount) 
+				FROM
+					tblICAPClearing g
+				WHERE
+					g.strBatchId = @strBatchId
+					AND (
+						(g.intInventoryReceiptItemId = ap.intInventoryReceiptItemId AND ap.intInventoryReceiptItemId IS NOT NULL)
+						OR (g.intInventoryReceiptChargeId = ap.intInventoryReceiptChargeId AND ap.intInventoryReceiptChargeId IS NOT NULL)
+					)
+			) g
 		WHERE
 			strBatchId = @strBatchId
 

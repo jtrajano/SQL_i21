@@ -1403,7 +1403,7 @@ BEGIN
 			,[dblAmount]	
 			,[strCode]
 		)
-		SELECT 
+		SELECT DISTINCT 
 			[intTransactionId]
 			,[strTransactionId]
 			,[intTransactionType]
@@ -1411,20 +1411,24 @@ BEGIN
 			,[dtmDate]
 			,[intEntityVendorId]
 			,[intLocationId]
-			,[intTransactionDetailId] = 
-				COALESCE(
-					intInventoryReceiptItemId
-					,intInventoryReceiptChargeId
-					,intInventoryShipmentChargeId
-				)
+			,[intTransactionDetailId] = intInventoryShipmentChargeId
 			,[intAccountId]
 			,[intItemId]
 			,[intItemUOMId]
 			,[dblQuantity]
-			,[dblAmount]	
+			,[dblAmount] = g.dblAmount 
 			,[strCode] = 'IS'
 		FROM 
-			tblICAPClearing
+			tblICAPClearing ap
+			CROSS APPLY (
+				SELECT 
+					dblAmount = SUM(g.dblAmount) 
+				FROM
+					tblICAPClearing g
+				WHERE
+					g.strBatchId = @strBatchId
+					AND (g.intInventoryShipmentChargeId = ap.intInventoryShipmentChargeId AND ap.intInventoryShipmentChargeId IS NOT NULL)					
+			) g
 		WHERE
 			strBatchId = @strBatchId
 

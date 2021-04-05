@@ -888,7 +888,13 @@ BEGIN
 					ELSE
 						ReceiptTaxes.dblQty
 				END
-			,[dblAmount] = ReceiptTaxes.dblTax 
+			,[dblAmount] = 
+				CASE 
+					WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+						-ReceiptTaxes.dblTax 
+					ELSE
+						ReceiptTaxes.dblTax 
+				END
 			,strBatchId = gd.strBatchId
 		FROM	
 			dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptItem ReceiptItem
@@ -984,7 +990,13 @@ BEGIN
 					ELSE
 						ChargeTaxes.dblQty
 				END
-			,[dblAmount] = ChargeTaxes.dblTax 
+			,[dblAmount] =  
+				CASE 
+					WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+						-ChargeTaxes.dblTax
+					ELSE
+						ChargeTaxes.dblTax
+				END
 			,strBatchId = gd.strBatchId
 		FROM	
 			dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
@@ -1079,7 +1091,13 @@ BEGIN
 					ELSE
 						ChargeTaxes.dblQty
 				END
-			,[dblAmount] = ChargeTaxes.dblTax 
+			,[dblAmount] = 
+				CASE 
+					WHEN Receipt.strReceiptType = 'Inventory Return' THEN 
+						-ChargeTaxes.dblTax 
+					ELSE
+						ChargeTaxes.dblTax 
+				END
 			,strBatchId = gd.strBatchId
 		FROM	
 			dbo.tblICInventoryReceipt Receipt INNER JOIN dbo.tblICInventoryReceiptCharge ReceiptCharge
