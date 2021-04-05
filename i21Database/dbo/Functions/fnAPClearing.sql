@@ -1,4 +1,4 @@
-﻿ALTER FUNCTION [dbo].[fnAPClearing]
+﻿CREATE FUNCTION [dbo].[fnAPClearing]
 (
 	@ids Id READONLY
 )
