@@ -951,6 +951,7 @@ WHERE
 	    (I.[dblQtyShipped] = @ZeroDecimal AND I.[dblInvoiceTotal] = @ZeroDecimal)
         )
 
+
 -- --FINAL INVOICE DEBIT
 -- INSERT #ARInvoiceGLEntries
 --     ([dtmDate]
@@ -1049,6 +1050,7 @@ WHERE
 --     AND I.[intItemId] IS NOT NULL
 --     AND I.[strItemType] NOT IN ('Non-Inventory','Service','Other Charge','Software','Comment')
 --     AND I.[strTransactionType] NOT IN ('Cash Refund', 'Debit Memo')
+
 
 --FINAL INVOICE CREDIT
 INSERT #ARInvoiceGLEntries
@@ -1626,7 +1628,7 @@ INSERT #ARInvoiceGLEntries
 SELECT
      [dtmDate]                      = CAST(ISNULL(I.[dtmPostDate], I.[dtmDate]) AS DATE)
     ,[strBatchId]                   = I.[strBatchId]
-    ,[intAccountId]                 = ISNULL(IA.[intDiscountAccountId], I.[intDiscountAccountId])
+    ,[intAccountId]                 = ISNULL(I.[intDiscountAccountId], IA.[intDiscountAccountId])
     ,[dblDebit]                     = CASE WHEN I.[ysnIsInvoicePositive] = 1 THEN I.[dblBaseDiscountAmount] ELSE @ZeroDecimal END
     ,[dblCredit]                    = CASE WHEN I.[ysnIsInvoicePositive] = 0 THEN I.[dblBaseDiscountAmount] ELSE @ZeroDecimal END
     ,[dblDebitUnit]                 = @ZeroDecimal
