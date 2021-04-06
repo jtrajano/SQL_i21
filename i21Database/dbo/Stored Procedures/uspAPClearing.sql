@@ -30,7 +30,6 @@ BEGIN TRY
 		strCode,
 		ysnPostAction,
 		dtmDateEntered,
-		intReferenceId,
 		strRemarks
 	)
 	SELECT
@@ -54,7 +53,6 @@ BEGIN TRY
 		strCode,
 		@post,
 		GETDATE(),
-		intReferenceId,
 		strRemarks
 	FROM @APClearing
 END TRY
