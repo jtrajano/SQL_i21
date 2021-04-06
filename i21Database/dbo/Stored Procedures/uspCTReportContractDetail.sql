@@ -135,7 +135,7 @@ BEGIN TRY
 										   ELSE '' + dbo.fnCTChangeNumericScale(CD.dblCashPrice,2) + ' ' + BCU.strCurrency + ' per ' + PU.strUnitMeasure
 									   END,
 			strStraussShipmentLabel	= (case when PO.strPositionType = 'Spot' then 'DELIVERY' else 'SHIPMENT' end),
-			strStraussShipment		= datename(m,CD.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,CD.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end),
+			strStraussShipment		= CONVERT(NVARCHAR(50),CD.dtmStartDate,103) + ' -   ' + CONVERT(NVARCHAR(50),CD.dtmEndDate,103),--datename(m,CD.dtmEndDate) + ' ' + substring(CONVERT(VARCHAR,CD.dtmEndDate,107),9,4) + (case when PO.strPositionType = 'Spot' then ' delivery' else ' shipment' end),
 			strStraussDestinationPointName = (case when PO.strPositionType = 'Spot' then CT.strCity else CTY.strCity end)
 
 	FROM	tblCTContractDetail CD	WITH (NOLOCK)

@@ -340,12 +340,11 @@ BEGIN TRY
 															WHEN
 																CH.strReportTo = 'Buyer'
 															THEN
-																LTRIM(RTRIM(EC.strEntityName)) + '</br>'    +
+															    '<b>' + LTRIM(RTRIM(EC.strEntityName)) + '</b>' + '</br>'    +
 																ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + '</br>' +
-																ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') +   
-																ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END,'') +   
-																ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') +   
-																ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END,'') +  
+																ISNULL(''+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') +  ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') +  '</br>' + 
+																ISNULL(''+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END,'') +  '</br>' + 
+																ISNULL(''+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END,'') +  
 																CASE
 																WHEN @ysnFairtrade = 1
 																THEN ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': ' +
@@ -359,12 +358,11 @@ BEGIN TRY
 																	''
 																END               
 																ELSE
-																	LTRIM(RTRIM(EY.strEntityName)) + '</br>' +
+																	'<b>' + LTRIM(RTRIM(EY.strEntityName)) + '</b>' + '</br>' +
 																	ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + '</br>' +
-																	ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') +   
-																	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') +   
-																	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') +   
-																	ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +  
+																	ISNULL(''+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') + ' '+ ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + '</br>' +   
+																	ISNULL(''+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') +  '</br>' +  
+																	ISNULL(''+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END,'') +  
 																	CASE
 																	WHEN @ysnFairtrade = 1
 																	THEN ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': ' + 
@@ -400,7 +398,8 @@ BEGIN TRY
 	,strStraussContract						=	'In accordance with '+AN.strComment+' (latest edition)'
 	,strStrussOtherCondition				= '<span style="font-family:Arial;font-size:13px;">' + isnull(W2.strWeightGradeDesc,'') +  isnull(@strGeneralCondition,'') + '</span>'
 	,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
-
+	,strAbitration							= AB.strCity
+	,strReference							= CASE WHEN CH.strCustomerContract IS NOT NULL AND CH.strCustomerContract != '' THEN 'Your Ref. ' + strCustomerContract ELSE '' END
 	FROM
 		tblCTContractHeader CH
 		LEFT JOIN vyuCTEntity	EC WITH (NOLOCK)
@@ -424,6 +423,7 @@ BEGIN TRY
 	LEFT JOIN	tblSMTerm					TM	WITH (NOLOCK) ON	TM.intTermID					=	CH.intTermId
 	LEFT JOIN	tblCTAssociation			AN	WITH (NOLOCK) ON	AN.intAssociationId				=	CH.intAssociationId
 	LEFT JOIN	tblCTWeightGrade			W2	WITH (NOLOCK) ON	W2.intWeightGradeId				=	CH.intGradeId
+	LEFT JOIN	tblSMCity					AB	WITH (NOLOCK) ON	AB.intCityId					=	CH.intArbitrationId
 	where CH.intContractHeaderId = @intContractHeaderId
 	
 	SELECT @ysnFeedOnApproval = ysnFeedOnApproval FROM tblCTCompanyPreference
