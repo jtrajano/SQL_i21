@@ -8438,6 +8438,7 @@
     <Build Include="dbo\Functions\fnARGetInvalidGLEntries.sql" />
     <Build Include="dbo\Views\vyuARPostedTransactionForUndeposited.sql" />
     <Build Include="dbo\Views\vyuCMUndepositedCMvsAR.sql" />
+    <Build Include="dbo\Functions\fnARGetItemGLAccount.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="i21Database.refactorlog" />
