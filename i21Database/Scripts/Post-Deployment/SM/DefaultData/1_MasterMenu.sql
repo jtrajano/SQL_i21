@@ -6811,9 +6811,9 @@ SELECT @IDPCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Documents' AND strModuleName = 'Integrated Document Processing' AND intParentMenuID = @IDPCreateParentMenuId)
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
-	VALUES (N'Add Documents', N'Integrated Document Processing', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.AttachFile?type=ocr', N'small-folder', 1, 0, 0, 0, 0, 0, 1)
+	VALUES (N'Add Documents', N'Integrated Document Processing', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.AttachFile?type=ocr', N'small-menu-create', 1, 0, 0, 0, 0, 0, 1)
 ELSE
-	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.AttachFile?type=ocr', intSort = 0 WHERE strMenuName = 'Add Documents' AND strModuleName = 'Integrated Document Processing' AND intParentMenuID = @IDPCreateParentMenuId
+	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.AttachFile?type=ocr', intSort = 0, strIcon = N'small-menu-create' WHERE strMenuName = 'Add Documents' AND strModuleName = 'Integrated Document Processing' AND intParentMenuID = @IDPCreateParentMenuId
 
 /* END Integrated Document Processing */
 
