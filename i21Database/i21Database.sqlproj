@@ -1763,6 +1763,8 @@
     <Build Include="dbo\Stored Procedures\uspAPUpdateBillAmounts.sql" />
     <Build Include="dbo\Views\vyuAPBillStatus.sql" />
     <Build Include="dbo\Views\vyuARSalesAnalysisReport.sql" />
+    <Build Include="dbo\Views\vyuCTApiDollarContract.sql" />
+    <Build Include="dbo\Views\vyuCTApiItemContract.sql" />
     <Build Include="dbo\Views\vyuCTContractHeaderView.sql" />
     <Build Include="dbo\Stored Procedures\uspCTGetSalesContractLeadTime.sql" />
     <Build Include="dbo\Stored Procedures\uspCTUndoShortCloseContractSequence.sql" />
