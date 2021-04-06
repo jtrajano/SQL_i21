@@ -9277,6 +9277,7 @@
     <Build Include="dbo\Tables\tblIPInvReceiptFeed.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceiptAck.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesTrendReport.sql" />
+    <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
