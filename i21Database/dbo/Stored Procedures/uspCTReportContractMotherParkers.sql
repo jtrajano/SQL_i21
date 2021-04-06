@@ -331,7 +331,7 @@ BEGIN TRY
 				CD.intContractHeaderId,    
 				CL.strLocationName,    
 				CD.strFixationBy,
-				CD.dblNoOfLots,    
+				dblNoOfLots = isnull(CD.dblNoOfLots,0.00),    
 				strFutMarketName = MA.strFutMarketName,  
 				strFutureMonth = convert(nvarchar(3),datename(m,fm.dtmFutureMonthsDate)) + ' ' + convert(nvarchar(4),year(fm.dtmFutureMonthsDate))
 			FROM
