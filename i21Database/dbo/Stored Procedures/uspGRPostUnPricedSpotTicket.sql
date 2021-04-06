@@ -218,10 +218,10 @@ BEGIN TRY
 						,GP.[dblQtyToBillUnitQty]				
 						,GP.[intQtyToBillUOMId]				
 						,[dblCost] = CASE WHEN GP.[intInventoryReceiptChargeId] IS NOT NULL THEN GP.dblUnitCost ELSE @dblCashPrice END
-						,GP.[dblCostUnitQty]					
+						,ISNULL(GP.[dblCostUnitQty], 1) 
 						,GP.[intCostUOMId]						
 						,GP.[dblNetWeight]						
-						,[dblWeightUnitQty]					
+						,ISNULL([dblWeightUnitQty], 1) 
 						,GP.[intWeightUOMId]					
 						,GP.[intCostCurrencyId]
 						,GP.[dblTax]							

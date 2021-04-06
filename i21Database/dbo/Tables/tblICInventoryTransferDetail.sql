@@ -35,6 +35,7 @@
     [dblGross] NUMERIC(38,20) NULL,
     [dblTare] NUMERIC(38,20) NULL,
     [dblNet] NUMERIC(38,20) NULL,
+    [dblStandardWeight] NUMERIC(38, 20) NULL DEFAULT ((0)), 
     [intNewLotStatusId] INT NULL,
     [intGrossNetUOMId] INT NULL,
     [dblGrossNetUnitQty] NUMERIC(38,20) NULL,

@@ -124,6 +124,44 @@ BEGIN TRY
 	SELECT @intScreenId=intScreenId FROM tblSMScreen WITH (NOLOCK) WHERE ysnApproval=1 AND strNamespace='ContractManagement.view.Contract'
 	SELECT @intTransactionId=intTransactionId, @thisContractStatus = strApprovalStatus, @IsFullApproved = ysnOnceApproved FROM tblSMTransaction WITH (NOLOCK) WHERE intScreenId=@intScreenId AND intRecordId=@intContractHeaderId
 
+	IF (ISNULL(@strSequenceHistoryId, '') <> '')
+	BEGIN
+		INSERT INTO @tblSequenceHistoryId (intSequenceHistoryId)
+		SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @tblSequenceHistoryId (intSequenceHistoryId)
+		SELECT DISTINCT intSequenceHistoryId
+		FROM tblCTSequenceHistory
+		WHERE intContractHeaderId = @intContractHeaderId
+	END
+
+	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
+	BEGIN
+		DECLARE @dtmApproveDate DATETIME
+		
+		SELECT TOP 1 @dtmApproveDate = CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, A.dtmDate), DATENAME(TzOffset, SYSDATETIMEOFFSET())))
+		FROM tblSMApproval A
+		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
+		WHERE T.intScreenId = @intScreenId
+			AND strStatus = 'Approved'
+			AND T.intRecordId = @intContractHeaderId
+		ORDER BY intApprovalId
+
+		SELECT  @strAmendedColumns = STUFF((
+											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
+											FROM tblCTAmendmentApproval AAP
+											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
+											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
+											WHERE ISNULL(AAP.ysnAmendment,0) = 1
+												AND AL.dtmHistoryCreated >= @dtmApproveDate
+											FOR XML PATH('')
+											), 1, 1, '')
+	END
+
+	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
+
 	SELECT	TOP 1 @FirstApprovalId = intApproverId
 		, @intApproverGroupId = intApproverGroupId
 		, @StraussContractSubmitId = intSubmittedById
@@ -209,9 +247,9 @@ BEGIN TRY
 		from
 			tblCTContractHeader a
 			inner join tblSMMultiCompany b on b.intMultiCompanyId = a.intCompanyId
-			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = 'Contract' and c.ysnApproval = 0
+			left join tblCTIntrCompApproval c on c.intContractHeaderId = a.intContractHeaderId and c.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and c.ysnApproval = 0
 			left join tblSMUserSecurity d on lower(d.strUserName) = lower(c.strUserName)
-			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = 'Contract' and e.ysnApproval = 1
+			left join tblCTIntrCompApproval e on e.intContractHeaderId = a.intContractHeaderId and e.strScreen = (case when LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) > 0 then 'Amendment and Approvals' else 'Contract' end) and e.ysnApproval = 1
 			left join tblSMUserSecurity f on lower(f.strUserName) = lower(e.strUserName)
 		where
 			a.intContractHeaderId = @intContractHeaderId
@@ -241,45 +279,7 @@ BEGIN TRY
 	BEGIN
 		SET @ysnFairtrade = 1
 	END
-
-	IF (ISNULL(@strSequenceHistoryId, '') <> '')
-	BEGIN
-		INSERT INTO @tblSequenceHistoryId (intSequenceHistoryId)
-		SELECT strValues FROM dbo.fnARGetRowsFromDelimitedValues(@strSequenceHistoryId)
-	END
-	ELSE
-	BEGIN
-		INSERT INTO @tblSequenceHistoryId (intSequenceHistoryId)
-		SELECT DISTINCT intSequenceHistoryId
-		FROM tblCTSequenceHistory
-		WHERE intContractHeaderId = @intContractHeaderId
-	END
-
-	IF @strAmendedColumns IS NULL AND EXISTS(SELECT 1 FROM @tblSequenceHistoryId)
-	BEGIN
-		DECLARE @dtmApproveDate DATETIME
-		
-		SELECT TOP 1 @dtmApproveDate = CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, A.dtmDate), DATENAME(TzOffset, SYSDATETIMEOFFSET())))
-		FROM tblSMApproval A
-		JOIN tblSMTransaction T ON T.intTransactionId = A.intTransactionId
-		WHERE T.intScreenId = @intScreenId
-			AND strStatus = 'Approved'
-			AND T.intRecordId = @intContractHeaderId
-		ORDER BY intApprovalId
-
-		SELECT  @strAmendedColumns = STUFF((
-											SELECT DISTINCT ',' + LTRIM(RTRIM(AAP.strDataIndex))
-											FROM tblCTAmendmentApproval AAP
-											JOIN tblCTSequenceAmendmentLog AL WITH (NOLOCK) ON AL.intAmendmentApprovalId =AAP.intAmendmentApprovalId
-											JOIN @tblSequenceHistoryId SH  ON SH.intSequenceHistoryId = AL.intSequenceHistoryId  
-											WHERE ISNULL(AAP.ysnAmendment,0) = 1
-												AND AL.dtmHistoryCreated >= @dtmApproveDate
-											FOR XML PATH('')
-											), 1, 1, '')
-	END
-
-	IF @strAmendedColumns IS NULL SELECT @strAmendedColumns = ''
-
+	
 	SELECT	@strCompanyName	=	CASE WHEN LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) = '' THEN NULL ELSE LTRIM(RTRIM(tblSMCompanySetup.strCompanyName)) END
 	FROM	tblSMCompanySetup WITH (NOLOCK)
 

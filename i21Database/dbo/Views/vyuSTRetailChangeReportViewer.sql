@@ -1,7 +1,7 @@
 CREATE VIEW [dbo].[vyuSTRetailChangeReportViewer]
 AS
 	SELECT 
-		preview.intStoreNo,
+		preview.intStoreId,
 		preview.dtmEffectiveRetailPriceDateMin,
 		preview.dtmEffectiveRetailPriceDateMax,
 		preview.strCategoryDescription AS strCategoryDescription,
@@ -13,7 +13,7 @@ AS
 	FROM
 	(
 		SELECT 
-			st.intStoreNo,
+			st.intStoreId,
 			et.dtmEffectiveRetailPriceDateMin,
 			et.dtmEffectiveRetailPriceDateMax,
 			cat.strDescription AS strCategoryDescription,
@@ -29,7 +29,7 @@ AS
 				MAX(tblMaxRetail.dblRetailPrice) AS strNewData,  
 				MIN(te.dblRetailPrice) AS strOldData,
 				MIN(te.dtmEffectiveRetailPriceDate) AS dtmEffectiveRetailPriceDateMin,
-				MAX(te.dtmEffectiveRetailPriceDate) AS dtmEffectiveRetailPriceDateMax
+				MAX(tblMaxRetail.dtmEffectiveRetailPriceDate) AS dtmEffectiveRetailPriceDateMax
 			FROM (
 				SELECT *
 				FROM

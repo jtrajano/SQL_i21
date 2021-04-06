@@ -22,7 +22,7 @@ IF @Recap = @ZeroBit
 	EXEC dbo.uspARPostItemResevation
 
 DECLARE @ItemsForContracts					[InvoicePostingTable]
-EXEC [dbo].[uspARPopulateContractDetails]
+EXEC [dbo].[uspARPopulateContractDetails] @Post = @Post
 
 DECLARE @strDatabaseName NVARCHAR(50)
 DECLARE @strCompanyName NVARCHAR(50)

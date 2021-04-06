@@ -7034,10 +7034,13 @@ BEGIN
 				END
 			FROM tblICItemLocation where intItemId = @intExpensedItemId and intLocationId = @intLocationId
 
+			DECLARE @strExpensedItem NVARCHAR(MAX)
+			SELECT TOP 1 @strExpensedItem = strItemNo FROM tblICItem WHERE intItemId = @intExpensedItemId
+
 			IF(ISNULL(@isExpensedItemHaveSiteLocation,0) = 0)
 			BEGIN
-				DECLARE @strExpensedItem NVARCHAR(MAX)
-				SELECT TOP 1 @strExpensedItem = strItemNo FROM tblICItem WHERE intItemId = @intExpensedItemId
+				-- DECLARE @strExpensedItem NVARCHAR(MAX)
+				-- SELECT TOP 1 @strExpensedItem = strItemNo FROM tblICItem WHERE intItemId = @intExpensedItemId
 
 				DECLARE @strLocationId NVARCHAR(MAX)
 				SELECT TOP 1 @strLocationId = strLocationNumber + ' ' + strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId = @intLocationId
@@ -7935,6 +7938,7 @@ BEGIN
 			,@dblOutOriginalPumpPrice	 AS dblOriginalPumpPrice
 			,@ysnExpensed				 AS ysnExpensed
 			,@intExpensedItemId			 AS intExpensedItemId
+			,@strExpensedItem			 AS strExpensedItem
 
 		END
 	---------------------------------------------------
