@@ -8979,6 +8979,8 @@
     <Build Include="dbo\Tables\tblAGApplicationTarget.sql" />
     <Build Include="dbo\Views\vyuSCAgWorkOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDefaultFuturesMarketAndMonth.sql" />
+    <Build Include="dbo\Tables\tblSMUserRolePowerBIReport.sql" />
+    <Build Include="dbo\Tables\tblSMPowerBIReport.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
