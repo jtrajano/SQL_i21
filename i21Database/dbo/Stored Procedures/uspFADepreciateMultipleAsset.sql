@@ -1,4 +1,4 @@
-  
+
 CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]  
  @Id    AS Id READONLY, 
  @BookId INT = 1,
@@ -6,8 +6,9 @@ CREATE PROCEDURE [dbo].[uspFADepreciateMultipleAsset]
  @ysnRecap   AS BIT    = 0,  
  @intEntityId  AS INT    = 1,  
  @ysnReverseCurrentDate BIT = 0,
- @successfulCount AS INT    = 0 OUTPUT,  
- @strBatchId   AS NVARCHAR(100) = '' OUTPUT  
+ @strBatchId   AS NVARCHAR(100),
+ @successfulCount AS INT    = 0 OUTPUT
+ 
 AS  
   
 SET QUOTED_IDENTIFIER OFF  
@@ -17,14 +18,14 @@ SET XACT_ABORT ON
 
 DECLARE @ErrorMsg NVARCHAR(MAX)
 DECLARE @IdGood Id
-DECLARE @ysnSingleMode BIT = 0
+--DECLARE @ysnSingleMode BIT = 0
 DECLARE @tblError TABLE (  
   [intAssetId] [int] NOT NULL,  
   strError NVARCHAR(400) NULL
 )  
-EXEC uspSMGetStartingNumber @intStartingNumberId= 3, @strID = @strBatchId OUTPUT  
 
-IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
+
+--IF(SELECT COUNT(*) FROM @Id) = 1 SET @ysnSingleMode = 1
 
 INSERT INTO @tblError 
       SELECT intAssetId , strError FROM fnFAValidateAssetDepreciation(@ysnPost, @BookId, @Id)
@@ -48,44 +49,38 @@ BEGIN
     SELECT intGLDetailId FROM tblGLDetail GL JOIN tblFAFixedAsset A on GL.strReference = A.strAssetId
     JOIN @IdGood C on C.intId = A.intAssetId
     WHERE ysnIsUnposted = 0
-
-  
- IF (NOT EXISTS(SELECT TOP 1 1 FROM tblGLDetail WHERE strBatchId = @strBatchId))  
- BEGIN  
-      DECLARE @ReverseResult INT  
+    
+    DECLARE @ReverseResult INT  
 	  DECLARE @dtmReverse DATETIME = NULL
-      BEGIN TRY
-		IF @ysnReverseCurrentDate = 1
-			SET @dtmReverse =  CAST(CONVERT(NVARCHAR(10), GETDATE(), 101) AS DATETIME)
-		IF EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYearPeriod where @dtmReverse BETWEEN dtmStartDate AND dtmEndDate 
-		AND (ysnFAOpen = 0 OR ysnOpen = 0))
-		BEGIN
-			RAISERROR('Current fiscal period is closed.', 16,1)
-			ROLLBACK TRANSACTION
-		END
-		
+    BEGIN TRY
+      IF @ysnReverseCurrentDate = 1
+        SET @dtmReverse =  CAST(CONVERT(NVARCHAR(10), GETDATE(), 101) AS DATETIME)
+      IF EXISTS(SELECT TOP 1 1 FROM tblGLFiscalYearPeriod where @dtmReverse BETWEEN dtmStartDate AND dtmEndDate 
+      AND (ysnFAOpen = 0 OR ysnOpen = 0))
+      BEGIN
+        RAISERROR('Current fiscal period is closed.', 16,1)
+        ROLLBACK TRANSACTION
+      END
+          IF EXISTS(SELECT 1 FROM @IdGLDetail)
+            EXEC @ReverseResult  = [dbo].[uspFAReverseMultipleAsset] @strBatchId,@IdGLDetail, @ysnRecap,
+            @dtmReverse, @intEntityId,@intCount OUT  
+    END TRY
+    BEGIN CATCH
+          SELECT @ErrorMsg = ERROR_MESSAGE()
+          RAISERROR(@ErrorMsg, 16,1)
+          ROLLBACK TRANSACTION
+    END CATCH
 
-        EXEC @ReverseResult  = [dbo].[uspFAReverseMultipleAsset] @strBatchId,@IdGLDetail, @ysnRecap,
-        @dtmReverse, @intEntityId,@intCount OUT  
-      END TRY
-      BEGIN CATCH
-        SELECT @ErrorMsg = ERROR_MESSAGE()
-        RAISERROR(@ErrorMsg, 16,1)
-		ROLLBACK TRANSACTION
-      END CATCH
-      IF @ReverseResult <> 0 RETURN -1  
+      IF @ReverseResult <> 0 RETURN --1  
       SET @successfulCount = @intCount  
-      IF ISNULL(@ysnRecap,0) = 0  
-      BEGIN  
-        IF(@intCount > 0)  
-          BEGIN  
+        IF ISNULL(@ysnRecap,0) = 0  
+        BEGIN  
             UPDATE A SET ysnDepreciated = 0, ysnFullyDepreciated = 0, ysnDisposed = 0, ysnAcquired = 0
             FROM tblFAFixedAsset A JOIN @IdGood B ON A.intAssetId = B.intId
             DELETE A FROM tblFAFixedAssetDepreciation A JOIN @IdGood B ON B.intId =  A.intAssetId 
-          END    
-        END         
-      END  
-  END  
+        END
+     
+END  
 ELSE  
 BEGIN  
 --=====================================================================================================================================  
@@ -187,7 +182,8 @@ BEGIN
                     [strTransaction],  
                     [strTransactionId],  
                     [strType],  
-                    [strConvention]  
+                    [strConvention],
+                    [strBatchId]
                   )  
                   SELECT  
                     F.intAssetId,  
@@ -202,7 +198,8 @@ BEGIN
                     'Place in service',  
                     @strTransactionId,  
                     D.strDepreciationType,  
-                    D.strConvention  
+                    D.strConvention,
+                    @strBatchId
                     FROM 
                     tblFAFixedAsset F 
                     JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
@@ -235,7 +232,8 @@ BEGIN
                   [strTransaction],  
                   [strTransactionId],  
                   [strType],  
-                  [strConvention]  
+                  [strConvention],
+                  [strBatchId]
                 )  
                   SELECT  
                   @i,  
@@ -250,7 +248,8 @@ BEGIN
                   'Depreciation',  
                   @strTransactionId,  
                   D.strDepreciationType,
-                  D.strConvention
+                  D.strConvention,
+                  @strBatchId
                   FROM tblFAFixedAsset F 
                   JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
                   JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
@@ -291,7 +290,8 @@ BEGIN
                 [strTransaction],  
                 [strTransactionId],  
                 [strType],  
-                [strConvention]  
+                [strConvention],
+                [strBatchId]
               )  
               SELECT  
                 @i,
@@ -306,7 +306,8 @@ BEGIN
                 'Depreciation',  
                 @strTransactionId,  
                 D.strDepreciationType,  
-                D.strConvention
+                D.strConvention,
+                @strBatchId
                 FROM tblFAFixedAsset F 
                   JOIN tblFADepreciationMethod D ON D.intAssetId = F.intAssetId
                   JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId = D.intDepreciationMethodId AND BD.intBookId = @BookId
@@ -332,137 +333,136 @@ BEGIN
       IF NOT EXISTS(SELECT TOP 1 1 FROM @tblDepComputation)
         GOTO LogError
     
-      DELETE FROM @GLEntries  
-      INSERT INTO @GLEntries (
-       [strTransactionId]  
-      ,[intTransactionId]  
-      ,[intAccountId]  
-      ,[strDescription]  
-      ,[strReference]   
-      ,[dtmTransactionDate]  
-      ,[dblDebit]  
-      ,[dblCredit]  
-      ,[dblDebitForeign]     
-      ,[dblCreditForeign]  
-      ,[dblDebitReport]  
-      ,[dblCreditReport]  
-      ,[dblReportingRate]  
-      ,[dblForeignRate]  
-      ,[dblDebitUnit]  
-      ,[dblCreditUnit]  
-      ,[dtmDate]  
-      ,[ysnIsUnposted]  
-      ,[intConcurrencyId]   
-      ,[intCurrencyId]  
-      ,[dblExchangeRate]  
-      ,[intUserId]  
-      ,[intEntityId]     
-      ,[dtmDateEntered]  
-      ,[strBatchId]  
-      ,[strCode]     
-      ,[strJournalLineDescription]  
-      ,[intJournalLineNo]  
-      ,[strTransactionType]  
-      ,[strTransactionForm]  
-      ,[strModuleName]     
-        
-      )  
-      SELECT   
-       [strTransactionId]  = B.strTransactionId  
-      ,[intTransactionId]  = A.[intAssetId]  
-      ,[intAccountId]   = A.[intDepreciationAccountId]  
-      ,[strDescription]  = A.[strAssetDescription]  
-      ,[strReference]   = A.[strAssetId]  
-      ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
-      ,[dblDebit]    = ROUND(B.dblMonth,2)  
-      ,[dblCredit]   = 0  
-      ,[dblDebitForeign]  = 0  
-      ,[dblCreditForeign]  = 0  
-      ,[dblDebitReport]  = 0  
-      ,[dblCreditReport]  = 0  
-      ,[dblReportingRate]  = 0  
-      ,[dblForeignRate]  = 0  
-      ,[dblDebitUnit]   = 0  
-      ,[dblCreditUnit]  = 0  
-      ,[dtmDate]    =  FAD.dtmDepreciationToDate 
-      ,[ysnIsUnposted]  = 0   
-      ,[intConcurrencyId]  = 1  
-      ,[intCurrencyId]  = A.intCurrencyId  
-      ,[dblExchangeRate]  = 1  
-      ,[intUserId]   = 0  
-      ,[intEntityId]   = @intEntityId     
-      ,[dtmDateEntered]  = GETDATE()  
-      ,[strBatchId]   = @strBatchId  
-      ,[strCode]    = 'AMDPR'            
-      ,[strJournalLineDescription] = ''  
-      ,[intJournalLineNo]  = A.[intAssetId]     
-      ,[strTransactionType] = 'Depreciation'  
-      ,[strTransactionForm] = 'Fixed Assets'  
-      ,[strModuleName]  = 'Fixed Assets'  
-      FROM tblFAFixedAsset A  
-      JOIN @tblDepComputation B 
-      ON A.intAssetId = B.intAssetId
-      OUTER APPLY(
-          SELECT TOP 1 B.[dtmDepreciationToDate] 
-          FROM tblFAFixedAssetDepreciation B 
-          WHERE B.intAssetId = A.[intAssetId] 
-          AND ISNULL(intBookId,1) = @BookId
-          ORDER BY B.intAssetDepreciationId DESC
-      )FAD
-      
-      UNION ALL  
-      SELECT   
-       [strTransactionId]  = B.strTransactionId  
-      ,[intTransactionId]  = A.[intAssetId]  
-      ,[intAccountId]   = A.[intAccumulatedAccountId]  
-      ,[strDescription]  = A.[strAssetDescription]  
-      ,[strReference]   = A.[strAssetId]  
-      ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
-      ,[dblDebit]    = 0  
-      ,[dblCredit]   = ROUND(B.dblMonth,2)  
-      ,[dblDebitForeign]  = 0  
-      ,[dblCreditForeign]  = 0  
-      ,[dblDebitReport]  = 0  
-      ,[dblCreditReport]  = 0  
-      ,[dblReportingRate]  = 0  
-      ,[dblForeignRate]  = 0  
-      ,[dblDebitUnit]   = 0  
-      ,[dblCreditUnit]  = 0  
-      ,[dtmDate]    = FAD.dtmDepreciationToDate
-      ,[ysnIsUnposted]  = 0   
-      ,[intConcurrencyId]  = 1  
-      ,[intCurrencyId]  = A.intCurrencyId  
-      ,[dblExchangeRate]  = 1  
-      ,[intUserId]   = 0  
-      ,[intEntityId]   = @intEntityId     
-      ,[dtmDateEntered]  = GETDATE()  
-      ,[strBatchId]   = @strBatchId  
-      ,[strCode]    = 'AMDPR'  
-      ,[strJournalLineDescription] = ''  
-      ,[intJournalLineNo]  = A.[intAssetId]     
-      ,[strTransactionType] = 'Depreciation'  
-      ,[strTransactionForm] = 'Fixed Assets'  
-      ,[strModuleName]  = 'Fixed Assets'  
-      FROM tblFAFixedAsset A  
-      JOIN @tblDepComputation B 
-      ON A.intAssetId = B.intAssetId
-      OUTER APPLY(
-          SELECT TOP 1 B.[dtmDepreciationToDate] 
-          FROM tblFAFixedAssetDepreciation B 
-          WHERE B.intAssetId = A.[intAssetId] 
-          AND ISNULL(intBookId,1) = @BookId
-          ORDER BY B.intAssetDepreciationId DESC
-      )FAD
-        
-  DECLARE @PostResult INT  
-  EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1  
-  IF @@ERROR <> 0 OR @PostResult <> 0 RETURN -1  
+      IF @BookId = 1
+      BEGIN
 
-
-
-  
-  
- END  
+          DELETE FROM @GLEntries  
+          INSERT INTO @GLEntries (
+          [strTransactionId]  
+          ,[intTransactionId]  
+          ,[intAccountId]  
+          ,[strDescription]  
+          ,[strReference]   
+          ,[dtmTransactionDate]  
+          ,[dblDebit]  
+          ,[dblCredit]  
+          ,[dblDebitForeign]     
+          ,[dblCreditForeign]  
+          ,[dblDebitReport]  
+          ,[dblCreditReport]  
+          ,[dblReportingRate]  
+          ,[dblForeignRate]  
+          ,[dblDebitUnit]  
+          ,[dblCreditUnit]  
+          ,[dtmDate]  
+          ,[ysnIsUnposted]  
+          ,[intConcurrencyId]   
+          ,[intCurrencyId]  
+          ,[dblExchangeRate]  
+          ,[intUserId]  
+          ,[intEntityId]     
+          ,[dtmDateEntered]  
+          ,[strBatchId]  
+          ,[strCode]     
+          ,[strJournalLineDescription]  
+          ,[intJournalLineNo]  
+          ,[strTransactionType]  
+          ,[strTransactionForm]  
+          ,[strModuleName]     
+            
+          )  
+          SELECT   
+          [strTransactionId]  = B.strTransactionId  
+          ,[intTransactionId]  = A.[intAssetId]  
+          ,[intAccountId]   = A.[intDepreciationAccountId]  
+          ,[strDescription]  = A.[strAssetDescription]  
+          ,[strReference]   = A.[strAssetId]  
+          ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
+          ,[dblDebit]    = ROUND(B.dblMonth,2)  
+          ,[dblCredit]   = 0  
+          ,[dblDebitForeign]  = 0  
+          ,[dblCreditForeign]  = 0  
+          ,[dblDebitReport]  = 0  
+          ,[dblCreditReport]  = 0  
+          ,[dblReportingRate]  = 0  
+          ,[dblForeignRate]  = 0  
+          ,[dblDebitUnit]   = 0  
+          ,[dblCreditUnit]  = 0  
+          ,[dtmDate]    =  FAD.dtmDepreciationToDate 
+          ,[ysnIsUnposted]  = 0   
+          ,[intConcurrencyId]  = 1  
+          ,[intCurrencyId]  = A.intCurrencyId  
+          ,[dblExchangeRate]  = 1  
+          ,[intUserId]   = 0  
+          ,[intEntityId]   = @intEntityId     
+          ,[dtmDateEntered]  = GETDATE()  
+          ,[strBatchId]   = @strBatchId  
+          ,[strCode]    = 'AMDPR'            
+          ,[strJournalLineDescription] = ''  
+          ,[intJournalLineNo]  = A.[intAssetId]     
+          ,[strTransactionType] = 'Depreciation'  
+          ,[strTransactionForm] = 'Fixed Assets'  
+          ,[strModuleName]  = 'Fixed Assets'  
+          FROM tblFAFixedAsset A  
+          JOIN @tblDepComputation B 
+          ON A.intAssetId = B.intAssetId
+          OUTER APPLY(
+              SELECT TOP 1 B.[dtmDepreciationToDate] 
+              FROM tblFAFixedAssetDepreciation B 
+              WHERE B.intAssetId = A.[intAssetId] 
+              AND ISNULL(intBookId,1) = @BookId
+              ORDER BY B.intAssetDepreciationId DESC
+          )FAD
+          
+          UNION ALL  
+          SELECT   
+          [strTransactionId]  = B.strTransactionId  
+          ,[intTransactionId]  = A.[intAssetId]  
+          ,[intAccountId]   = A.[intAccumulatedAccountId]  
+          ,[strDescription]  = A.[strAssetDescription]  
+          ,[strReference]   = A.[strAssetId]  
+          ,[dtmTransactionDate] = FAD.dtmDepreciationToDate
+          ,[dblDebit]    = 0  
+          ,[dblCredit]   = ROUND(B.dblMonth,2)  
+          ,[dblDebitForeign]  = 0  
+          ,[dblCreditForeign]  = 0  
+          ,[dblDebitReport]  = 0  
+          ,[dblCreditReport]  = 0  
+          ,[dblReportingRate]  = 0  
+          ,[dblForeignRate]  = 0  
+          ,[dblDebitUnit]   = 0  
+          ,[dblCreditUnit]  = 0  
+          ,[dtmDate]    = FAD.dtmDepreciationToDate
+          ,[ysnIsUnposted]  = 0   
+          ,[intConcurrencyId]  = 1  
+          ,[intCurrencyId]  = A.intCurrencyId  
+          ,[dblExchangeRate]  = 1  
+          ,[intUserId]   = 0  
+          ,[intEntityId]   = @intEntityId     
+          ,[dtmDateEntered]  = GETDATE()  
+          ,[strBatchId]   = @strBatchId  
+          ,[strCode]    = 'AMDPR'  
+          ,[strJournalLineDescription] = ''  
+          ,[intJournalLineNo]  = A.[intAssetId]     
+          ,[strTransactionType] = 'Depreciation'  
+          ,[strTransactionForm] = 'Fixed Assets'  
+          ,[strModuleName]  = 'Fixed Assets'  
+          FROM tblFAFixedAsset A  
+          JOIN @tblDepComputation B 
+          ON A.intAssetId = B.intAssetId
+          OUTER APPLY(
+              SELECT TOP 1 B.[dtmDepreciationToDate] 
+              FROM tblFAFixedAssetDepreciation B 
+              WHERE B.intAssetId = A.[intAssetId] 
+              AND ISNULL(intBookId,1) = @BookId
+              ORDER BY B.intAssetDepreciationId DESC
+          )FAD
+            
+          DECLARE @PostResult INT  
+          EXEC @PostResult = uspGLBookEntries @GLEntries = @GLEntries, @ysnPost = @ysnPost, @SkipICValidation = 1  
+          IF @@ERROR <> 0 OR @PostResult <> 0 RETURN --1  
+      END
+END  
   
   
   
@@ -494,33 +494,67 @@ UPDATE A  SET A.ysnFullyDepreciated  =1
 LogError:
 DECLARE @intLogId INT
 
-INSERT INTO tblFADepreciateLog(strBatchId, dtmDate, intEntityId)
-SELECT @strBatchId, GETDATE(), @intEntityId
-
-SELECT @intLogId = SCOPE_IDENTITY()
-
-;WITH Q as(
-  SELECT strReference strAssetId, strTransactionId, 'Depreciated' strResult, dtmDate FROM tblGLDetail C WHERE @strBatchId = strBatchId
-  AND ysnIsUnposted = 0   
-  GROUP by strReference, strTransactionId, dtmDate
-  UNION
-  SELECT strAssetId,'' strTransactionId, strError strResult, null dtmDate FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
-)
-INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strResult, dtmDate) 
-SELECT @intLogId, strAssetId, strTransactionId, strResult, dtmDate FROM Q 
-
-IF @ysnSingleMode = 1 AND EXISTS (SELECT TOP 1 1 FROM @tblError)
+IF EXISTS(SELECT 1 FROM tblFADepreciateLog where strBatchId = @strBatchId )
 BEGIN
-  DECLARE @strError NVARCHAR(200)
-  SELECT TOP 1 @strError = strError FROM @tblError
-  RAISERROR (@strError,16,1)  
-  RETURN -1
+  SELECT @intLogId = intLogId  FROM tblFADepreciateLog WHERE strBatchId = @strBatchId
+END
+ELSE
+BEGIN
+  INSERT INTO tblFADepreciateLog(strBatchId, dtmDate, intEntityId)
+  SELECT @strBatchId, GETDATE(), @intEntityId
+  SELECT @intLogId = SCOPE_IDENTITY()
 END
 
+
+
+
+ 
+  ;WITH Q as(
+    SELECT strReference strAssetId, strTransactionId, 'Asset Depreciated' strResult,'GAAP' strBook, dtmDate FROM tblGLDetail C WHERE @strBatchId = strBatchId
+    AND ysnIsUnposted = 0  AND @BookId = 1
+    GROUP by strReference, strTransactionId, dtmDate
+    UNION
+    SELECT strAssetId, strTransactionId, 'Tax Depreciated' strResult, 'Tax' strBook, dtmDepreciationToDate FROM  tblFAFixedAssetDepreciation A 
+    JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId 
+	  WHERE @strBatchId = strBatchId AND A.intBookId <> 1 AND @BookId <> 1
+    UNION
+    SELECT strAssetId,'' strTransactionId, strError strResult, 
+	  case when @BookId = 1 then 'GAAP' 
+		when @BookId = 2 THEN 'Tax'
+		end strBook, 
+	
+	 null dtmDate FROM @tblError A JOIN tblFAFixedAsset B ON B.intAssetId = A.intAssetId
+  )
+  INSERT INTO tblFADepreciateLogDetail (intLogId, strAssetId ,strTransactionId, strBook, strResult, dtmDate) 
+  SELECT @intLogId, strAssetId, strTransactionId, strBook, strResult, dtmDate FROM Q 
+
+
+
+
+-- IF @ysnSingleMode = 1 AND EXISTS (SELECT TOP 1 1 FROM @tblError)
+-- BEGIN
+--   DECLARE @strError NVARCHAR(200)
+--   SELECT TOP 1 @strError = strError FROM @tblError
+--   RAISERROR (@strError,16,1)  
+--   RETURN -1
+-- END
+
 DECLARE @intGLEntry INT
-SELECT @intGLEntry = COUNT(*) FROM tblGLDetail WHERE @strBatchId = strBatchId AND ysnIsUnposted  = 0
-SET @successfulCount =  CASE WHEN @intGLEntry > 0 THEN @intGLEntry/2 ELSE 0 END
+
+IF @BookId = 1
+BEGIN
+  SELECT @intGLEntry = COUNT(*) FROM tblGLDetail WHERE @strBatchId = strBatchId AND ysnIsUnposted  = 0
+  SET @successfulCount =  CASE WHEN @intGLEntry > 0 THEN @intGLEntry/2 ELSE 0 END  
+END
+ELSE
+BEGIN
+  SELECT @successfulCount = COUNT(*) FROM  tblFAFixedAssetDepreciation A 
+  JOIN tblFAFixedAsset B on A.intAssetId = B.intAssetId WHERE @strBatchId = strBatchId AND intBookId <> 1
+END
+
+
+
   
 END  
   
-RETURN 0;  
+--RETURN 0;  
