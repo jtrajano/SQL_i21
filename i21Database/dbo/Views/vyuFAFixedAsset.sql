@@ -1,4 +1,4 @@
-ALTER VIEW vyuFAFixedAsset      
+CREATE VIEW vyuFAFixedAsset      
 AS      
 SELECT       
 FA.intAssetId, 
