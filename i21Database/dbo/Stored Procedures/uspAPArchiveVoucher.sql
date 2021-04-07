@@ -447,6 +447,8 @@ INSERT
 	,intLoadDetailId
 	,intLoadShipmentCostId
 	,intLoadId
+	,intWeightClaimId
+	,intWeightClaimDetailId
 	,intScaleTicketId
 	,intCCSiteDetailId
 	,intPrepayTypeId
@@ -529,6 +531,8 @@ VALUES
 	,SourceData.intLoadDetailId
 	,SourceData.intLoadShipmentCostId
 	,SourceData.intLoadId
+	,SourceData.intWeightClaimId
+	,SourceData.intWeightClaimDetailId
 	,SourceData.intScaleTicketId
 	,SourceData.intCCSiteDetailId
 	,SourceData.intPrepayTypeId
