@@ -822,6 +822,7 @@ BEGIN TRY
 						,intConcurrencyId
 						,intPriceContractRefId
 						,intCompanyId
+						,ysnReadOnlyInterCoPrice
 						)
 					SELECT @strNewPriceContractNo
 						,@intCommodityId
@@ -834,6 +835,7 @@ BEGIN TRY
 						,1 AS intConcurrencyId
 						,@intPriceContractId
 						,@intCompanyRefId
+						,1 As ysnReadOnlyInterCoPrice
 
 					SELECT @intNewPriceContractId = SCOPE_IDENTITY()
 
@@ -859,6 +861,7 @@ BEGIN TRY
 						,intLastModifiedById = @intLastModifiedById
 						,dtmLastModified = @dtmLastModified
 						,intConcurrencyId = intConcurrencyId + 1
+						,ysnReadOnlyInterCoPrice=1
 					WHERE intPriceContractRefId = @intPriceContractId
 						AND intPriceContractId = @intNewPriceContractId
 				END
