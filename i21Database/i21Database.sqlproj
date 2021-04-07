@@ -9250,6 +9250,8 @@
     <Build Include="dbo\Stored Procedures\uspCTReportContractSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspCTReportContractDetailSequence.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
+    <Build Include="dbo\Views\vyuGRTransferFlow.sql" />
+    <Build Include="dbo\Functions\fnGRCheckForSameTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspLGAddContainerDetailLink.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustmentStage.sql" />
     <Build Include="dbo\Tables\tblIPInventoryAdjustmentError.sql" />

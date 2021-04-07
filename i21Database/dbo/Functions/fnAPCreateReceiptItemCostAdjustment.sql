@@ -461,6 +461,7 @@ BEGIN
 		LEFT JOIN tblICItemUOM voucherCostUOM
 			ON voucherCostUOM.intItemUOMId = ISNULL(B.intCostUOMId, B.intUnitOfMeasureId)
 		WHERE ((ISNULL(C.dblBasis,0) + ISNULL(C.dblSettlementPrice,0)) != B.dblCost) AND B.intCustomerStorageId > 0 AND D.strType = 'Inventory'
+			and dbo.fnGRCheckForSameTransfer( C.intCustomerStorageId, 'DP') = 0
 
 		--DP STORAGES FROM THE DELIVERY SHEET
 		UNION ALL
