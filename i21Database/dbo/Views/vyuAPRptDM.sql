@@ -7,9 +7,9 @@ SELECT
 												AND ContractDetail.intItemContractId > 0
 												AND DMDetails.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
-										ELSE ISNULL(Item.strDescription, DMDetails.strMiscDescription)
+										ELSE ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, ''))
 									END
-		,strMiscQuality			=	ISNULL(I.strDescription, ISNULL(Item.strDescription, DMDetails.strMiscDescription))
+		,strMiscQuality			=	ISNULL(I.strDescription, ISNULL(Item.strDescription, ISNULL(DMDetails.strMiscDescription, '')))
 		,strItemNo				=	ISNULL(Item.strItemNo, DMDetails.strMiscDescription)
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -47,7 +47,6 @@ SELECT
 		,strContainerNumber		=	LCointainer.strContainerNumber
 		,strShipVia				=	shipVia.strShipVia
 		,ysnPaid				=	DM.ysnPaid
-		,strVendorOrderNumber	= 	DM.strVendorOrderNumber
 		,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
 		,dblDetailTotalWithTax	=	FORMAT((DMDetails.dblTotal + DMDetails.dblTax), 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
 		,dblHeaderTotal			=	FORMAT(DM.dblTotal, 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
