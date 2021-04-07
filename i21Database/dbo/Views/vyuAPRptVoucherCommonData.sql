@@ -1,4 +1,4 @@
-ALTER VIEW vyuAPRptVoucherCommonData
+CREATE VIEW vyuAPRptVoucherCommonData
 AS
 
 SELECT DISTINCT
