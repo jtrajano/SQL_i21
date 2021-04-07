@@ -360,6 +360,8 @@ USING
 		,A.intLoadDetailId
 		,A.intLoadShipmentCostId
 		,A.intLoadId
+		,A.intWeightClaimId
+		,A.intWeightClaimDetailId
 		,A.intScaleTicketId
 		,A.intCCSiteDetailId
 		,A.intPrepayTypeId
