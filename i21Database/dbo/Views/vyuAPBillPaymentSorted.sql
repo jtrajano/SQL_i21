@@ -34,12 +34,12 @@ SELECT
 								WHERE PD.intBillId = B.intBillId
 							) paymentData
 						FOR XML PATH('')), 1, 1, ''),
-	ysnIsPaymentReleased = CASE
-							    WHEN VP.ysnPosted = 1 AND LOWER(VP.strPaymentMethod) IN ('echeck','cash') THEN 1
-								WHEN VP.ysnCleared = 1 THEN 1
-								WHEN VP.ysnPrinted = 1 THEN 1
-								ELSE 0
-						   END
+	ysnIsPaymentReleased = CAST(CASE
+									WHEN VP.ysnPosted = 1 AND LOWER(VP.strPaymentMethod) IN ('echeck','cash') THEN 1
+									WHEN VP.ysnCleared = 1 THEN 1
+									WHEN VP.ysnPrinted = 1 THEN 1
+									ELSE 0
+						   		END AS BIT)
 FROM tblAPBill B
 CROSS APPLY (
 	SELECT TOP 1 * FROM (
