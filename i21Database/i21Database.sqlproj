@@ -9278,6 +9278,8 @@
     <Build Include="dbo\Stored Procedures\uspIPProcessERPGoodsReceiptAck.sql" />
     <Build Include="dbo\Stored Procedures\uspARSalesTrendReport.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
+    <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
+    <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
