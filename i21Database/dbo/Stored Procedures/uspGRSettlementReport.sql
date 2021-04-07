@@ -2038,7 +2038,6 @@ BEGIN
 					) PartialPayment 
 					ON PartialPayment.intPaymentId = PYMT.intPaymentId
 			WHERE PYMT.strPaymentRecordNum = @strPaymentNo AND PYMT.ysnPosted = 0
-				AND SC.intTicketType = 6 -- Direct In
 
 			/*-------------------------------------------------------
 			*****Temporary Settlement FROM SETTLE STORAGE*******
