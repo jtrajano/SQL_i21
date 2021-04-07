@@ -215,8 +215,13 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
+				OUTER APPLY (
+					SELECT TOP 1 intPriceFixationDetailAPARId 
+					FROM tblCTPriceFixationDetailAPAR APAR
+					WHERE APAR.intInvoiceDetailId = @intInvoiceDetailId
+				) APAR
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
-				  AND ID.intInvoiceDetailId NOT IN (SELECT DISTINCT intInvoiceDetailId FROM tblCTPriceFixationDetailAPAR)
+				  AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) = 0
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
