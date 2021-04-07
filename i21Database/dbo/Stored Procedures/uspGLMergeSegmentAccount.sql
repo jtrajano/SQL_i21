@@ -20,7 +20,8 @@ BEGIN
         [strAccountCategory]			NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,  
         [strAccountGroup]		NVARCHAR (100) COLLATE Latin1_General_CI_AS  NULL,
         [strAccountType]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,  
-        [strStructureName]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL  
+        [strStructureName]		NVARCHAR (100) COLLATE Latin1_General_CI_AS NULL,
+        idx   INT
       )
       DECLARE @tblSubsidiary TABLE 
       (
@@ -47,7 +48,7 @@ BEGIN
       DECLARE @ysnCompanySegment BIT
       DECLARE @hasCompanySegment BIT
       DECLARE @strErrorMsg NVARCHAR(MAX)
-
+      DECLARE @idx INT = 1
       DECLARE @strSQL NVARCHAR(max)
 
       WHILE EXISTS (SELECT TOP 1 1 FROM @tblSubsidiary)
@@ -61,8 +62,10 @@ BEGIN
 
         SET @strSQL = 
         REPLACE ('SELECT  strCode, strDescription,strChartDesc,  strAccountCategory, strAccountGroup,strAccountType, 
-        strStructureName  from [strDatabase].dbo.vyuGLSegmentDetail '
+        strStructureName , [idx]  from [strDatabase].dbo.vyuGLSegmentDetail '
         , '[strDatabase]', @strDatabase)
+
+        SET @strSQL = REPLACE (@strSQL, '[idx]' , CAST( @idx AS NVARCHAR(2)))
 
         IF @ysnCompanySegment = 1
           SET @strSQL = @strSQL + 'where intStructureType <> 6'
@@ -75,20 +78,26 @@ BEGIN
         END
 
         INSERT INTO @tblUnionSegments EXEC (@strSQL)
+        SET @idx+=1
         DELETE FROM @tblSubsidiary WHERE @strDatabase = strDatabase 
       END
 
-      ;WITH tblUnionSegments  
-      as(
-
+      ;WITH allAccounts AS(
         SELECT strCode,   
-        MAX(isnull(strAccountGroup,'')) strAccountGroup,   
-        strAccountType, strStructureName,  
-        MAX(isnull(strAccountCategory,'')) strAccountCategory,   
-        MAX(isnull(strDescription,'')) strDescription,
-        MAX(isnull(strChartDesc,'')) strChartDesc
-        FROM @tblUnionSegments   
-        GROUP BY strCode, strAccountType,strStructureName  
+        strAccountGroup,   
+        strAccountType, 
+        strStructureName,  
+        strAccountCategory,   
+        strDescription,
+        strChartDesc,
+        ROW_NUMBER() OVER(PARTITION BY strCode, strAccountType,strStructureName   ORDER BY idx) rowId
+        FROM @tblUnionSegments
+      )
+      ,tblUnionSegments  
+      as(
+        SELECT * 
+        FROM allAccounts   
+        WHERE rowId = 1
       )
       MERGE into tblGLAccountSegment  
       WITH (holdlock)  
