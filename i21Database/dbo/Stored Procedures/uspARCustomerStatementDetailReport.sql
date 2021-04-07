@@ -147,7 +147,7 @@ WHERE [fieldname] IN ('strName', 'strCustomerName')
 
 SELECT @strCustomerNumber = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
-WHERE [fieldname] IN ('strCustomerNumber')
+WHERE [fieldname] IN ('strName', 'strCustomerNumber')
 
 SELECT @strCustomerIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
