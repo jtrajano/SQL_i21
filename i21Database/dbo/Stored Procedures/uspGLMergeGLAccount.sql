@@ -26,7 +26,8 @@ BEGIN
         strAccountGroup		NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,  
 		strAccountType		NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,
 		strUOMCode			NVARCHAR (40)  COLLATE Latin1_General_CI_AS NULL,  
-        strComments			NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL
+        strComments			NVARCHAR (255) COLLATE Latin1_General_CI_AS NULL,
+        idx                 INT
     )  
 
     DECLARE @tblSubsidiary TABLE 
@@ -40,30 +41,44 @@ BEGIN
     DECLARE @strDatabase NVARCHAR(40)
     DECLARE @strCompanySegment NVARCHAR(10)
 	DECLARE @strSQL NVARCHAR(MAX)
+    DECLARE @idx INT = 1
 
+	
 
+	
+    
     WHILE EXISTS (SELECT TOP 1 1 FROM @tblSubsidiary)
         BEGIN
           SELECT TOP 1 @strDatabase = strDatabase, @strCompanySegment = ISNULL( '-' + strCompanySegment, '') FROM @tblSubsidiary
-          SET @strSQL = REPLACE ('select strAccountId + ''[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments from [strDatabase].dbo.vyuGLAccountDetail'
+          SET @strSQL = REPLACE ('select strAccountId + ''[strCompanySegment]'' strAccountId, strDescription, strAccountGroup, strAccountType, strUOMCode, strComments, [idx] from [strDatabase].dbo.vyuGLAccountDetail'
           , '[strDatabase]', @strDatabase)
 
+          SET @strSQL = REPLACE(@strSQL , '[idx]', cast( @idx as nvarchar(2)))
           SET @strSQL = REPLACE (@strSQL , '[strCompanySegment]', @strCompanySegment)
           INSERT INTO @tblUnionAccounts EXEC (@strSQL)
           
           DELETE FROM @tblSubsidiary WHERE @strDatabase = strDatabase 
     END
 
-    ;WITH tblUnionAccounts
+    ;WITH allAccounts
     as(
         SELECT strAccountId, 
-        MAX(isnull(strDescription,'''')) strDescription,  
-        MAX(isnull(strAccountGroup,'''')) strAccountGroup, 
-        MAX(isnull(strComments,'''')) strComments,
-        MAX(isnull(strUOMCode,'''')) strUOMCode 
+        strDescription,  
+        strAccountGroup, 
+        strComments,
+        strUOMCode,
+        ROW_NUMBER() OVER(PARTITION BY strAccountId, strAccountType  ORDER BY idx) rowId
 		from @tblUnionAccounts  
-        GROUP BY  strAccountId, strAccountType  
+        
+    ),
+    tblUnionAccounts AS(
+        SELECT * FROM allAccounts where rowId = 1
     )
+
+	
+
+	
+
     MERGE INTO tblGLAccount  
     WITH (holdlock)  
     AS AccountTable  
