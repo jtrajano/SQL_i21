@@ -29,7 +29,6 @@ DECLARE  @dtmDateTo					AS DATETIME
 		,@endgroup					AS NVARCHAR(50)
 		,@datatype					AS NVARCHAR(50)
 		,@strCustomerName			AS NVARCHAR(MAX)
-		,@strCustomerNumber			AS NVARCHAR(MAX)
 		,@strCustomerIds			AS NVARCHAR(MAX)
 		,@strCustomerIdsLocal		AS NVARCHAR(MAX)
 		,@ysnEmailOnly				AS BIT
@@ -145,10 +144,6 @@ SELECT @strCustomerName = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] IN ('strName', 'strCustomerName')
 
-SELECT @strCustomerNumber = REPLACE(ISNULL([from], ''), '''''', '''')
-FROM @temp_xml_table
-WHERE [fieldname] IN ('strName', 'strCustomerNumber')
-
 SELECT @strCustomerIds = REPLACE(ISNULL([from], ''), '''''', '''')
 FROM @temp_xml_table
 WHERE [fieldname] = 'strCustomerIds'
@@ -195,23 +190,6 @@ IF ISNULL(@strCustomerName, '') <> ''
 					, strName
 			FROM dbo.tblEMEntity WITH (NOLOCK)
 			WHERE strName = @strCustomerName
-		) EC ON C.intEntityId = EC.intEntityId
-		WHERE C.ysnActive = 1
-	END
-ELSE IF ISNULL(@strCustomerNumber, '') <> ''
-	BEGIN
-		INSERT INTO #CUSTOMERS
-		SELECT TOP 1 intEntityCustomerId	= C.intEntityId 
-				   , strCustomerNumber		= C.strCustomerNumber
-				   , strCustomerName		= EC.strName
-				   , dblCreditLimit         = C.dblCreditLimit
-				   , dblARBalance           = C.dblARBalance        
-		FROM tblARCustomer C WITH (NOLOCK)
-		INNER JOIN (
-			SELECT intEntityId
-					, strName
-			FROM dbo.tblEMEntity WITH (NOLOCK)
-			WHERE strEntityNo = @strCustomerNumber
 		) EC ON C.intEntityId = EC.intEntityId
 		WHERE C.ysnActive = 1
 	END
