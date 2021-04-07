@@ -7831,6 +7831,8 @@
     <Build Include="dbo\Stored Procedures\uspICLogCategoryChange.sql" />
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
     <Build Include="dbo\Stored Procedures\uspARImportShipVia.sql" />
+    <Build Include="dbo\Views\vyuGRTransferFlow.sql" />
+    <Build Include="dbo\Functions\fnGRCheckForSameTransfer.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
