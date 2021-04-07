@@ -70,7 +70,9 @@ INTO #INVOICEDETAILS
 FROM tblARInvoiceDetail ID
 INNER JOIN tblARInvoice I ON ID.intInvoiceId = I.intInvoiceId
 LEFT JOIN tblCTContractDetail CD ON ID.intContractDetailId = CD.intContractDetailId AND ID.intContractHeaderId = CD.intContractHeaderId
+LEFT JOIN tblCTContractHeader CH ON CD.intContractHeaderId = CH.intContractHeaderId
 WHERE I.intInvoiceId = @intInvoiceId
+  AND ISNULL(CH.ysnLoad, 0) = 0
 
 IF (SELECT COUNT(*) FROM #INVOICEDETAILS WHERE intContractDetailId IS NOT NULL) > 1
 	BEGIN
@@ -213,7 +215,13 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				FROM tblARInvoiceDetail ID
 				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
+				OUTER APPLY (
+					SELECT TOP 1 intPriceFixationDetailAPARId 
+					FROM tblCTPriceFixationDetailAPAR APAR
+					WHERE APAR.intInvoiceDetailId = @intInvoiceDetailId
+				) APAR
 				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+				  AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) = 0
 			END
 		ELSE IF ISNULL(@ysnFromSalesOrder, 0) = 1 AND @intContractDetailId IS NOT NULL
 			BEGIN
@@ -347,6 +355,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				  AND C.intEntityId = @intEntityCustomerId
 				  AND CD.intCompanyLocationId = @intCompanyLocationId
 				  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
+				  AND C.intPricingTypeId <> 2
 				ORDER BY CD.intContractSeq
 
 				WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTS)
@@ -414,6 +423,7 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 						  AND CD.intCompanyLocationId = @intCompanyLocationId
 						  AND CD.dblBalance - ISNULL(CD.dblScheduleQty, 0) > 0
 						  AND C.intContractHeaderId > @intContractHeaderId
+						  AND C.intPricingTypeId <> 2
 						ORDER BY C.intContractHeaderId
 
 						WHILE EXISTS (SELECT TOP 1 NULL FROM #AVAILABLECONTRACTSBYCUSTOMER)
@@ -536,6 +546,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId
 			, intSubLocationId
 			, intCompanyLocationSubLocationId
+			, strDocumentNumber
 		)
 		SELECT intInvoiceDetailId				= NULL
 		    , strSourceTransaction				= 'Direct'
@@ -567,6 +578,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId				= ID.intStorageLocationId
 			, intSubLocationId					= ID.intSubLocationId
 			, intCompanyLocationSubLocationId	= ID.intCompanyLocationSubLocationId
+			, strDocumentNumber					= ID.strDocumentNumber
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
@@ -614,6 +626,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILSTOADD)
 			, intStorageLocationId				= NULL
 			, intSubLocationId					= NULL
 			, intCompanyLocationSubLocationId	= NULL
+			, strDocumentNumber					= ID.strDocumentNumber
 		FROM #INVOICEDETAILSTOADD IDTOADD
 		CROSS APPLY (
 			SELECT TOP 1 ID.*
