@@ -375,7 +375,7 @@ BEGIN TRY
 		,blbFooterLogo						    = dbo.fnSMGetCompanyLogo('Footer') 
 		,ysnExternal							= @ysnExternal
 		,strArbitrationText						= (CASE WHEN @ysnExternal = CONVERT(BIT, 1) THEN ARB.strCity ELSE NULL END)
-		,strReferenceNo							= CASE WHEN LTRIM(RTRIM(ISNULL(CH.strCustomerContract, ''))) <> '' THEN 'Your Ref. ' + TRIM(CH.strCustomerContract) ELSE NULL END
+		,strReferenceNo							= CASE WHEN LTRIM(RTRIM(ISNULL(CH.strCustomerContract, ''))) <> '' THEN 'Your Ref. ' + ltrim(rtrim(CH.strCustomerContract)) ELSE NULL END
 
 	FROM tblCTContractHeader CH
 	LEFT JOIN vyuCTEntity EC WITH (NOLOCK) ON EC.intEntityId = CH.intCounterPartyId AND EC.strEntityType = 'Customer'
