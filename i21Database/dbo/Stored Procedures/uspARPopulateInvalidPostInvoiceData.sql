@@ -79,11 +79,11 @@ BEGIN
 		,[strBatchId]			= I.[strBatchId]
 		,[strPostingError]		= 'Duplicate Batch ID'
 	FROM 
-		#ARPostInvoiceHeader I
+		##ARPostInvoiceHeader I
 	WHERE  
 		EXISTS(SELECT strBatchId FROM tblGLDetail WHERE strBatchId = @BatchId)
 
-	INSERT INTO #ARInvalidInvoiceData
+	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
 		,[strInvoiceNumber]
 		,[strTransactionType]
@@ -1819,11 +1819,7 @@ BEGIN
 		,[intInTransitSourceLocationId]
 		,[intForexRateTypeId]
 		,[dblForexRate]
-	FROM
-		##ARItemsForCosting
-	WHERE
-		[ysnForValidation] IS NULL
-		OR [ysnForValidation] = @OneBit
+	FROM ##ARItemsForCosting
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]
