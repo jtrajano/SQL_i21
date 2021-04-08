@@ -66,8 +66,8 @@ AS
 				ON itemUOM.intItemId = item.intItemId AND itemUOM.ysnStockUnit = 1
 			LEFT JOIN tblICUnitMeasure unit
 				ON unit.intUnitMeasureId = itemUOM.intUnitMeasureId
-			LEFT JOIN tblICCategory cat
-				ON item.intCategoryId = cat.intCategoryId
+			JOIN tblICCategory cat
+				ON item.intCategoryId = cat.intCategoryId AND cat.ysnRetailValuation = 1
 			LEFT JOIN tblICItemLocation loc
 				ON loc.intItemId = item.intItemId AND et.intItemLocationId = loc.intItemLocationId
 			LEFT JOIN tblSMCompanyLocation cl
