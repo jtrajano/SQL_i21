@@ -184,9 +184,12 @@ IF(@totalInvalid > 0)
 		DELETE A
 		FROM ##ARItemsForContracts A
 		INNER JOIN ##ARInvalidInvoiceData B ON A.[intInvoiceId] = B.[intInvoiceId]	
+
+		DELETE GL
+		FROM ##ARInvoiceGLEntries GL
+		INNER JOIN ##ARInvalidInvoiceData B ON GL.[intTransactionId] = B.[intInvoiceId]	AND GL.[strTransactionId] = B.[strInvoiceNumber]
 							
-        DELETE FROM ##ARInvalidInvoiceData
-					
+        DELETE FROM ##ARInvalidInvoiceData					
 	END
 
 SELECT @totalRecords = COUNT([intInvoiceId]) FROM ##ARPostInvoiceHeader
