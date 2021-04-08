@@ -113,7 +113,8 @@ FROM
 		,CheckAmount				  = PYMT.dblAmountPaid
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL 
-		ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+		ON PYMT.intPaymentId = PYMTDTL.intPaymentId				
+		and PYMTDTL.dblPayment <> 0
 	JOIN tblAPBill Bill 
 		ON PYMTDTL.intBillId = Bill.intBillId
 	JOIN tblAPBillDetail BillDtl 
@@ -164,7 +165,8 @@ FROM
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
 			ON Bill.intBillId = APD.intBillId 
-				AND Bill.intTransactionType = 3
+				AND Bill.intTransactionType = 3				
+				and APD.dblPayment <> 0
 		GROUP BY Bill.intBillId
 	) BillByReceiptItem ON BillByReceiptItem.intBillId = Bill.intBillId			 
 	LEFT JOIN (
@@ -173,7 +175,8 @@ FROM
 			,SUM(BillDtl.dblTax) AS dblGradeFactorTax
 		FROM tblAPPayment PYMT
 		JOIN tblAPPaymentDetail PYMTDTL 
-			ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			ON PYMT.intPaymentId = PYMTDTL.intPaymentId								
+				and PYMTDTL.dblPayment <> 0
 		JOIN tblAPBillDetail BillDtl 
 			ON BillDtl.intBillId = PYMTDTL.intBillId
 		JOIN tblICItem B 
@@ -201,7 +204,8 @@ FROM
 			ON pay.intBillId = ap.intBillId
 		where ap.intTransactionType = 2
 		and ap.intBillId = Bill.intBillId
-		and pay.intPaymentId = PYMT.intPaymentId
+		and pay.intPaymentId = PYMT.intPaymentId						
+		and pay.dblPayment <> 0
 		
 
 		
@@ -211,7 +215,7 @@ FROM
 			intPaymentId
 			,SUM(dblPayment) dblPayment
 		FROM tblAPPaymentDetail
-		WHERE intInvoiceId IS NOT NULL
+		WHERE intInvoiceId IS NOT NULL and dblPayment <> 0
 		GROUP BY intPaymentId
 	) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId
 	LEFT JOIN (
@@ -221,7 +225,8 @@ FROM
 			,SUM(APD.dblPayment) dblPayment
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
-		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)
+		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
+			and APD.dblPayment <> 0
 		GROUP BY intPaymentId
 		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
 
@@ -331,7 +336,8 @@ FROM
 		,CheckAmount				    = PYMT.dblAmountPaid 		    
 	FROM tblAPPayment PYMT 
 	JOIN tblAPPaymentDetail PYMTDTL	
-		ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+		ON PYMT.intPaymentId = PYMTDTL.intPaymentId				
+			and PYMTDTL.dblPayment <> 0
 	JOIN tblAPBill Bill 
 		ON PYMTDTL.intBillId = Bill.intBillId
 	JOIN tblAPBillDetail BillDtl 
@@ -374,7 +380,8 @@ FROM
 			,SUM(APD.dblPayment) dblTotal
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill Bill 
-			ON Bill.intBillId = APD.intBillId 
+			ON Bill.intBillId = APD.intBillId 				
+				and APD.dblPayment <> 0
 				--AND Bill.intTransactionType = 3
 		JOIN tblAPBillDetail BD
 			ON BD.intBillId = Bill.intBillId
@@ -388,7 +395,8 @@ FROM
 			,SUM(BillDtl.dblTax) AS dblGradeFactorTax	
 		FROM tblAPPayment PYMT
 		JOIN tblAPPaymentDetail PYMTDTL 
-			ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+			ON PYMT.intPaymentId = PYMTDTL.intPaymentId				
+				and PYMTDTL.dblPayment <> 0
 		JOIN tblAPBillDetail BillDtl 
 			ON BillDtl.intBillId = PYMTDTL.intBillId
 		JOIN tblICItem B 
@@ -415,7 +423,8 @@ FROM
 			ON pay.intBillId = ap.intBillId
 		where ap.intTransactionType = 2
 		and ap.intBillId = Bill.intBillId
-		and pay.intPaymentId = PYMT.intPaymentId
+		and pay.intPaymentId = PYMT.intPaymentId				
+		and pay.dblPayment <> 0
 
 	) VendorPrepayment		
 	LEFT JOIN (
@@ -423,7 +432,7 @@ FROM
 			intPaymentId
 			,SUM(dblPayment) dblPayment 
 		FROM tblAPPaymentDetail 		
-		WHERE intInvoiceId IS NOT NULL
+		WHERE intInvoiceId IS NOT NULL and dblPayment <> 0
 		GROUP BY intPaymentId
 	) Invoice ON Invoice.intPaymentId = PYMT.intPaymentId			
 	LEFT JOIN (
@@ -433,7 +442,8 @@ FROM
 			,SUM(APD.dblPayment) dblPayment
 		FROM tblAPPaymentDetail APD
 		JOIN tblAPBill APB on APB.intBillId = APD.intBillId
-		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)
+		WHERE APD.intBillId IS NOT NULL and (APB.intTransactionType = 13 OR APB.intTransactionType = 3)				
+			and APD.dblPayment <> 0
 		GROUP BY intPaymentId
 		HAVING SUM(APD.dblTotal) <> SUM(APD.dblPayment)
 	) PartialPayment ON PartialPayment.intPaymentId = PYMT.intPaymentId

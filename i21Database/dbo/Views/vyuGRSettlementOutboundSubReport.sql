@@ -73,7 +73,8 @@ FROM (
 			,InvDtl.dblTotalTax AS dblTax
 			,PYMTDTL.dblTotal AS Net
 		FROM tblAPPayment PYMT
-		JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId
+		JOIN tblAPPaymentDetail PYMTDTL ON PYMT.intPaymentId = PYMTDTL.intPaymentId				
+					and PYMTDTL.dblPayment <> 0
 		JOIN tblARInvoice Inv ON PYMTDTL.intInvoiceId = Inv.intInvoiceId
 		JOIN tblARInvoiceDetail InvDtl ON InvDtl.intInvoiceId = Inv.intInvoiceId
 		JOIN tblICInventoryShipmentCharge INVSHIPCHR ON InvDtl.intInventoryShipmentChargeId = INVSHIPCHR.intInventoryShipmentChargeId
