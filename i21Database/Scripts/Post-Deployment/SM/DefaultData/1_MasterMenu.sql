@@ -10,10 +10,8 @@
 GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
-	
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Email Log' AND strModuleName = 'System Manager' AND intParentMenuID = (
-		SELECT intMenuID FROM tblSMMasterMenu WHERE strModuleName = 'System Manager' AND strMenuName = 'Maintenance' AND intParentMenuID = (SELECT intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'System Manager' AND strModuleName = 'System Manager' AND intParentMenuID = 0)
-	))
+
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Inventory Report' AND strCommand = ' Store.view.LotteryInventoryReport')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5188,9 +5186,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Inventory Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)	
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Lottery Inventory Report', N'Store', @StoreLotteryParentMenuId, N'Lottery Inventory Report', N'Lottery', N'Screen', N' Store.view.LotteryInventoryReport', N'small-menu-lottery', 0, 0, 0, 1, 1, 3)	
+	VALUES (N'Lottery Inventory Report', N'Store', @StoreLotteryParentMenuId, N'Lottery Inventory Report', N'Lottery', N'Screen', N'Store.view.LotteryInventoryReport', N'small-menu-lottery', 0, 0, 0, 1, 1, 3)	
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N' Store.view.LotteryInventoryReport' WHERE strMenuName = 'Lottery Inventory Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.LotteryInventoryReport' WHERE strMenuName = 'Lottery Inventory Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId
 
 --END LOTTERY
 
