@@ -42,6 +42,8 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , strShipToState			= RTRIM(strShipToState)
 	 , intEntitySalespersonId	= ID.intEntitySalespersonId
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
+	 , intBillToLocationId		= I.intBillToLocationId
+	 , intShipToLocationId		= I.intShipToLocationId
 FROM dbo.tblARInvoice I WITH (NOLOCK)
 INNER JOIN (
 	SELECT intInvoiceId
