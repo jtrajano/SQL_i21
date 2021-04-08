@@ -62,7 +62,7 @@ BEGIN
 		) et
 		LEFT JOIN tblICItem item
 			ON et.intItemId = item.intItemId
-		LEFT JOIN tblICCategory cat
+		JOIN tblICCategory cat
 			ON item.intCategoryId = cat.intCategoryId AND cat.ysnRetailValuation = 1
 		LEFT JOIN tblICItemLocation loc
 			ON loc.intItemId = item.intItemId AND et.intItemLocationId = loc.intItemLocationId
