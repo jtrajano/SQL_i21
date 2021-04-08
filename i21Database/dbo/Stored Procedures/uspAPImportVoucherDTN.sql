@@ -1,7 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[uspAPImportVoucherDTN]
 	@file NVARCHAR(500) = NULL,
 	@userId INT,
-	@intVendorId INT,
 	@importLogId INT OUTPUT
 AS
 
