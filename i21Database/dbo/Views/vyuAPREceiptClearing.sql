@@ -55,8 +55,8 @@ SELECT
         ELSE 1
         END
     )
-    +
-    CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
+    -- +
+    -- CASE WHEN ISNULL(voucherTax.intCount,0) = 0 THEN 0 ELSE receiptItem.dblTax END
     AS dblReceiptTotal
     ,ISNULL(receiptItem.dblOpenReceive, 0)
     *
@@ -97,7 +97,7 @@ OUTER APPLY (
     FROM (
         SELECT DISTINCT --TO HANDLE MULTIPLE VOUCHER PER RECEIPT ITEM
             rctTax.intInventoryReceiptItemId,
-            rctTax.intInventoryReceiptItemTaxId,
+            --rctTax.intInventoryReceiptItemTaxId,
             rctTax.dblTax AS dblTax
         FROM tblICInventoryReceiptItemTax rctTax
         LEFT JOIN tblAPBillDetail billDetail 
