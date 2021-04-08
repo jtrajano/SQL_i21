@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[vyuTRFreightSurcharge]
 	AS 
-SELECT DISTINCT
-	C.intShipViaId
+SELECT CF.intFreightXRefId
+	,C.intShipViaId
 	,ShipVia.strName AS strShipViaName
 	,CF.intCategoryId
 	,CAT.strCategoryCode AS strCategoryCode
@@ -15,10 +15,9 @@ SELECT DISTINCT
 	,C.dblReceiptFreightRate
 	,C.dblInvoiceFreightRate
 	,C.dtmSurchargeEffectiveDateTime
-	,C.dblInvoiceSurchargePercentage
-	,C.dblReceiptSurchargePercentage
+	,C.dblSurchargePercentage
 	,SupplyPointLoc.intEntityLocationId AS intSupplyPointId
-	,SupplyPointLoc.strLocationName AS strSupplyPointLocation
+	,SupplyPointLoc.strLocationName AS strSupplyPoint
 	,Vendor.intEntityId AS intEntityVendorId
 	,Vendor.strName  AS strVendorName
 FROM tblARCustomerFreightXRef CF 

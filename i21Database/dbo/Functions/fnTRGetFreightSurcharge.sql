@@ -9,8 +9,7 @@
 RETURNS @result TABLE (
 	dblReceiptFreightRate DECIMAL(18,6), 
 	dblInvoiceFreightRate DECIMAL(18,6),
-	dblReceiptSurchargePercentage DECIMAL(18,6), 
-	dblInvoiceSurchargePercentage DECIMAL(18,6),
+	dblSurchargePercentage DECIMAL(18,6), 
 	dtmEffectiveDateTime DATETIME,
 	intShipViaId INT,
 	dtmSurchargeEffectiveDateTime DATETIME
@@ -25,13 +24,12 @@ BEGIN
 		INSERT INTO @result (
 			dblReceiptFreightRate, 
 			dblInvoiceFreightRate,
-			dblReceiptSurchargePercentage, 
-			dblInvoiceSurchargePercentage,
+			dblSurchargePercentage,
 			dtmEffectiveDateTime,
 			intShipViaId,
 			dtmSurchargeEffectiveDateTime
 		)
-		 SELECT @dblRate, @dblRate, FS.dblFuelSurcharge, FS.dblFuelSurcharge, TA.dtmEffectiveDate, TA.intEntityId, FS.dtmEffectiveDate
+		 SELECT @dblRate, @dblRate, FS.dblFuelSurcharge, TA.dtmEffectiveDate, TA.intEntityId, FS.dtmEffectiveDate
 		 FROM [tblEMEntityTariff] TA INNER JOIN [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId			
 			LEFT JOIN [tblEMEntityTariffFuelSurcharge] FS ON FS.intEntityTariffId = TC.intEntityTariffId   
 	  	 WHERE TC.intCategoryId = @intCategoryid
@@ -42,13 +40,12 @@ BEGIN
 		INSERT INTO @result (
 			dblReceiptFreightRate, 
 			dblInvoiceFreightRate,
-			dblReceiptSurchargePercentage, 
-			dblInvoiceSurchargePercentage,
+			dblSurchargePercentage, 
 			dtmEffectiveDateTime,
 			intShipViaId,
 			dtmSurchargeEffectiveDateTime
 		)
-		SELECT TM.dblCostRatePerUnit, TM.dblInvoiceRatePerUnit, FS.dblFuelSurcharge, FS.dblFuelSurcharge, TA.dtmEffectiveDate, TA.intEntityId, FS.dtmEffectiveDate
+		SELECT TM.dblCostRatePerUnit, TM.dblInvoiceRatePerUnit, FS.dblFuelSurcharge, TA.dtmEffectiveDate, TA.intEntityId, FS.dtmEffectiveDate
 		FROM [tblEMEntityTariff] TA
 			JOIN [tblEMEntityTariffCategory] TC on TA.intEntityTariffId = TC.intEntityTariffId					   
 	  		LEFT JOIN [tblEMEntityTariffMileage] TM on TM.intEntityTariffId = TC.intEntityTariffId
