@@ -340,17 +340,17 @@ BEGIN TRY
 													CASE WHEN CH.strReportTo = 'Buyer'
 													THEN
 														'<b>' + LTRIM(RTRIM(EC.strEntityName)) + '</b></br>' +
-														ISNULL(LTRIM(RTRIM(EC.strEntityAddress)), '') + '</br>' +
+														CASE WHEN REPLACE(ISNULL(LTRIM(RTRIM(EC.strEntityAddress)), ''), CHAR(10), '</br>') = '' THEN '' ELSE REPLACE(ISNULL(LTRIM(RTRIM(EC.strEntityAddress)), ''), CHAR(10), '</br>') + '</br>' END +
 														CASE WHEN ISNULL(LTRIM(RTRIM(EC.strEntityZipCode)), '') = '' THEN '' ELSE LTRIM(RTRIM(EC.strEntityZipCode)) + ' ' END +
-														ISNULL(LTRIM(RTRIM(EC.strEntityCity)), '') + '</br>' +
-														ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END, '') + '</br>' +
+														CASE WHEN ISNULL(LTRIM(RTRIM(EC.strEntityCity)), '') = '' THEN CASE WHEN ISNULL(LTRIM(RTRIM(EC.strEntityZipCode)), '') = '' THEN '' ELSE '</br>' END ELSE LTRIM(RTRIM(EC.strEntityCity)) + '</br>' END +
+														ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) + '</br>' END, '') +
 														ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCountry)) END, '')
 													ELSE
 														'<b>' + LTRIM(RTRIM(EY.strEntityName)) + '</b></br>' +
-														ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), '') + '</br>' +
+														CASE WHEN REPLACE(ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), ''), CHAR(10), '</br>') = '' THEN '' ELSE REPLACE(ISNULL(LTRIM(RTRIM(EY.strEntityAddress)), ''), CHAR(10), '</br>') + '</br>' END +
 														CASE WHEN ISNULL(LTRIM(RTRIM(EY.strEntityZipCode)), '') = '' THEN '' ELSE LTRIM(RTRIM(EY.strEntityZipCode)) + ' ' END +
-														ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '') + '</br>' +
-														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END, '') + '</br>' +
+														CASE WHEN ISNULL(LTRIM(RTRIM(EY.strEntityCity)), '') = '' THEN CASE WHEN ISNULL(LTRIM(RTRIM(EY.strEntityZipCode)), '') = '' THEN '' ELSE '</br>' END ELSE LTRIM(RTRIM(EY.strEntityCity)) + '</br>' END +
+														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState)) + '</br>' END, '') +
 														ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCountry)) END, '')
 													END + '</span>'
 		 ,dtmContractDate						= CH.dtmContractDate
