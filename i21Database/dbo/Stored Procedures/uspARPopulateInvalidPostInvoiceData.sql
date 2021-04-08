@@ -1745,7 +1745,7 @@ BEGIN
 		,[intItemLocationId]
 		,[intItemUOMId]
 		,[dtmDate]
-		,[dblQty]
+		,CASE WHEN [strType] = 'CF Tran' THEN ABS([dblQty]) ELSE [dblQty] END
 		,[dblUOMQty]
 		,[dblCost]
 		,[dblValue]
@@ -1766,11 +1766,7 @@ BEGIN
 		,[intInTransitSourceLocationId]
 		,[intForexRateTypeId]
 		,[dblForexRate]
-	FROM
-		##ARItemsForCosting
-	WHERE
-		[ysnForValidation] IS NULL
-		OR [ysnForValidation] = @OneBit
+	FROM ##ARItemsForCosting
 
 	INSERT INTO ##ARInvalidInvoiceData
 		([intInvoiceId]

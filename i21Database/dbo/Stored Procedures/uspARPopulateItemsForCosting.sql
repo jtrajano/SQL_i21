@@ -51,7 +51,7 @@ INSERT INTO ##ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnForValidation]
+	,[strType]
 ) 
 
 SELECT 
@@ -108,7 +108,7 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = @OneBit
+	,[strType]					= ARID.[strType]
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -167,7 +167,7 @@ INSERT INTO ##ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnForValidation]
+	,[strType]
 ) 
 
 SELECT 
@@ -224,7 +224,7 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN ARID.ysnRetailValuation = 1 THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= ARID.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARID.[intItemId], ARID.[intItemLocationId]) = @CATEGORYCOST THEN ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = @ZeroBit
+	,[strType]					= ARID.[strType]
 FROM
     ##ARPostInvoiceDetail ARID
 LEFT OUTER JOIN
@@ -282,7 +282,7 @@ INSERT INTO ##ARItemsForCosting
     ,[dblUnitRetail]
 	,[intCategoryId]
 	,[dblAdjustRetailValue]
-	,[ysnForValidation]
+	,[strType]
 )
 SELECT
 	 [intItemId]				= ARIC.[intComponentItemId]
@@ -318,7 +318,7 @@ SELECT
     ,[dblUnitRetail]			= CASE WHEN IST.ysnRetailValuation = @OneBit THEN ARID.dblPrice ELSE NULL END
 	,[intCategoryId]			= IST.[intCategoryId]
 	,[dblAdjustRetailValue]		= CASE WHEN dbo.fnGetCostingMethod(ARIC.[intComponentItemId], IST.[intItemLocationId]) = @CATEGORYCOST THEN (ARID.[dblQtyShipped] * ARIC.[dblQuantity]) * ARID.[dblPrice] ELSE NULL END
-	,[ysnForValidation]         = NULL
+	,[strType]					= ARID.[strType]
 FROM
 	(SELECT [intComponentItemId], [intItemUnitMeasureId], [intCompanyLocationId],[dblQuantity], [intItemId], [strType] FROM vyuARGetItemComponents WITH (NOLOCK)) ARIC
 INNER JOIN
