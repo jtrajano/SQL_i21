@@ -1,7 +1,7 @@
-﻿CREATE VIEW [dbo].[vyuTFFreightSurcharge]
+﻿CREATE VIEW [dbo].[vyuTRFreightSurcharge]
 	AS 
-SELECT CF.intFreightXRefId
-	,C.intShipViaId
+SELECT DISTINCT
+	C.intShipViaId
 	,ShipVia.strName AS strShipViaName
 	,CF.intCategoryId
 	,CAT.strCategoryCode AS strCategoryCode
@@ -9,16 +9,26 @@ SELECT CF.intFreightXRefId
 	,CF.intEntityCustomerId
 	,Customer.strName AS strCustomerName
 	,C.dtmEffectiveDateTime
+	,CF.intEntityLocationId
+	,LOC.strLocationName AS strCustomerLocation
 	,CONVERT(int,CF.dblFreightMiles) intFreightMiles
 	,C.dblReceiptFreightRate
 	,C.dblInvoiceFreightRate
 	,C.dtmSurchargeEffectiveDateTime
 	,C.dblInvoiceSurchargePercentage
 	,C.dblReceiptSurchargePercentage
+	,SupplyPointLoc.intEntityLocationId AS intSupplyPointId
+	,SupplyPointLoc.strLocationName AS strSupplyPointLocation
+	,Vendor.intEntityId AS intEntityVendorId
+	,Vendor.strName  AS strVendorName
 FROM tblARCustomerFreightXRef CF 
 	INNER JOIN tblARCustomer AR on AR.intEntityId = CF.intEntityCustomerId
 	INNER JOIN tblICCategory CAT ON CAT.intCategoryId = CF.intCategoryId
 	INNER JOIN tblEMEntity Customer ON Customer.intEntityId = CF.intEntityCustomerId
+	INNER JOIN tblEMEntityLocation LOC ON LOC.intEntityLocationId = CF.intEntityLocationId  AND LOC.intEntityId = CF.intEntityCustomerId
+	INNER JOIN tblEMEntityLocation SupplyPointLoc ON SupplyPointLoc.strZipCode = CF.strZipCode
+	INNER JOIN tblAPVendor Supplier ON Supplier.intEntityId = SupplyPointLoc.intEntityId
+	INNER JOIN tblEMEntity Vendor ON Vendor.intEntityId = Supplier.intEntityId
 CROSS APPLY (
 	SELECT  * FROM dbo.fnTRGetFreightSurcharge(CF.strFreightType, CF.intCategoryId, AR.intEntityTariffTypeId, CF.dblFreightRate, CONVERT(int,CF.dblFreightMiles))
 ) C

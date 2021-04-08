@@ -9289,7 +9289,7 @@
     <Build Include="dbo\Tables\tblAPImportVoucherDTN.sql" />
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
     <Build Include="dbo\Functions\fnTRGetFreightSurcharge.sql" />
-    <Build Include="dbo\Views\vyuTFFreightSurcharge.sql" />
+    <Build Include="dbo\Views\vyuTRFreightSurcharge.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
