@@ -21,6 +21,7 @@ SELECT
 	, ch.strTerm
 	, ch.strSalesperson
 	, ch.strTextCode
+	, ch.intContractTextId
 	, ch.ysnPrepaid
 	, ch.ysnIsUsed
 	, ch.ysnSigned
@@ -32,7 +33,12 @@ SELECT
 	, ch.ysnMailSent
 	, ch.intShipToLocationId
 	, ch.strOpportunityName
+	, ch.intOpportunityId
+	, ch.intSalespersonId
 	, ch.ysnMarketSubCurrency
 	, ch.strPrepaidIds
+	, ch.intTermId
+	, ch.intLineOfBusinessId
+	, ch.strLineOfBusiness
 FROM vyuCTItemContractHeader ch
 WHERE ch.strContractCategoryId = 'Item'

@@ -4956,6 +4956,7 @@
     <Build Include="dbo\Stored Procedures\uspIPGenerateSAPReceiptIDOC.sql" />
     <Build Include="dbo\Tables\tblSMStartingNumberParameter.sql" />
     <Build Include="dbo\Views\vyuCMCashGLAccountSetup.sql" />
+    <Build Include="dbo\Views\vyuCTApiContractText.sql" />
     <Build Include="dbo\Functions\fnICGetReceiptTotals.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroup.sql" />
     <Build Include="dbo\Tables\tblICImportStagingUOM.sql" />
@@ -4964,6 +4965,9 @@
     <Build Include="dbo\Tables\tblICImportStagingItemPricing.sql" />
     <Build Include="dbo\Tables\tblICImportStagingOpeningBalance.sql" />
     <Build Include="dbo\Tables\tblICImportStagingCategoryLocation.sql" />
+    <Build Include="dbo\Tables\tblCTApiDollarContractDetailStaging.sql" />
+    <Build Include="dbo\Tables\tblCTApiItemContractDetailStaging.sql" />
+    <Build Include="dbo\Tables\tblCTApiItemContractStaging.sql" />
     <Build Include="dbo\Tables\tblSMApproverGroupUserSecurity.sql" />
     <Build Include="dbo\Tables\tblSMTransactionLockHistory.sql" />
     <Build Include="dbo\Tables\tblSMSignature.sql" />
@@ -4973,6 +4977,8 @@
     <Build Include="dbo\Tables\tblEMEntitySignature.sql" />
     <Build Include="dbo\Functions\fnICSplitStringToTable.sql" />
     <Build Include="dbo\Stored Procedures\uspICCopyItemLocation.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportDollarContractsFromStaging.sql" />
+    <Build Include="dbo\Stored Procedures\uspApiImportItemContractsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemsFromStaging.sql" />
     <Build Include="dbo\Stored Procedures\uspICApplyLocationsToItems.sql" />
     <Build Include="dbo\Stored Procedures\uspICImportItemLocationsFromStaging.sql" />
