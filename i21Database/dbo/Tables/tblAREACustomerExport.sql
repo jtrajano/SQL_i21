@@ -49,5 +49,9 @@
 	strComment				NVARCHAR(0100) COLLATE Latin1_General_CI_AS NOT NULL,
 	
 	strLicenseApplicator    NVARCHAR(50) COLLATE Latin1_General_CI_AS NULL, 
-	dtmLicenseExpirationDate DATETIME NULL
+	dtmLicenseExpirationDate DATETIME NULL,
+	dblARBalance NUMERIC(18, 6) NULL,
+	dblCreditLimit NUMERIC(18, 6) NULL,
+	dblShipToLatitude NUMERIC(18, 6) NULL,
+	dblShipToLongitude NUMERIC(18, 6) NULL
 )
