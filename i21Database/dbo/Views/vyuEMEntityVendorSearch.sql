@@ -74,6 +74,8 @@ SELECT DISTINCT
 	, ysnHasPastDueBalances	= CAST(0 AS BIT) 
 	, strEntityType = 'Vendor' COLLATE Latin1_General_CI_AS
 	, ysnHasCustomerCreditApprover	= NULL--CAST(CASE WHEN CUSTOMERCREDITAPPROVER.intApproverCount > 0 THEN 1 ELSE 0 END AS BIT)
+	, dblShipToLongitude		= shipLocation.dblLongitude
+	, dblShipToLatitude			= shipLocation.dblLatitude
 FROM tblAPVendor Vendor
 INNER JOIN tblEMEntity entityToVendor ON Vendor.intEntityId = entityToVendor.intEntityId
 --LEFT JOIN tblEMEntity entityToSalesperson ON Vendor.intSalespersonId = entityToSalesperson.intEntityId

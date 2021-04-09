@@ -32,6 +32,10 @@ INSERT INTO tblAREACustomerExport (
 	, strComment
 	, strLicenseApplicator
 	, dtmLicenseExpirationDate
+	, dblARBalance
+	, dblCreditLimit
+	, dblShipToLatitude
+	, dblShipToLongitude
 )
 SELECT intEntityId			= intId
 	, strEntityNo			= LTRIM(RTRIM(Id))
@@ -59,6 +63,10 @@ SELECT intEntityId			= intId
 	, strComment			= LTRIM(RTRIM(Comment))
 	, strLicenseApplicator  = LicenseApplicator
 	, dtmLicenseExpirationDate = LicenseExpirationDate
+	, dblARBalance			= ARBalance
+	, dblCreditLimit		= CreditLimit
+	, dblShipToLatitude		= ShipToLatitude
+	, dblShipToLongitude	= ShipToLongitude
 FROM vyuEMEAExportCustomer 
 WHERE (CAST(ModifiedDate AS DATE) BETWEEN @dtmFrom AND @dtmTo) OR (@dtmFrom IS NULL OR @dtmTo IS NULL)
 
