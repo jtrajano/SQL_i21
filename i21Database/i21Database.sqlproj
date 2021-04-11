@@ -9290,6 +9290,7 @@
     <Build Include="dbo\Stored Procedures\uspAPImportVoucherDTN.sql" />
     <Build Include="dbo\Functions\fnTRGetFreightSurcharge.sql" />
     <Build Include="dbo\Views\vyuTRFreightSurcharge.sql" />
+    <Build Include="dbo\Stored Procedures\uspMFGenerateERPServiceOrder.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
