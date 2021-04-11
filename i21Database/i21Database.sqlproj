@@ -9291,6 +9291,7 @@
     <Build Include="dbo\Functions\fnTRGetFreightSurcharge.sql" />
     <Build Include="dbo\Views\vyuTRFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPServiceOrder.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPServiceOrderAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
