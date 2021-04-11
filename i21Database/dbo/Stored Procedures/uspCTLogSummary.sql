@@ -1750,49 +1750,58 @@ BEGIN TRY
 					, intUserId
 					, intActionId
 					, strProcess
-				)		
+				)	
 				SELECT strBatchId = @strBatchId
 					, dtmTransactionDate = @_transactionDate
-					, strTransactionType
-					, strTransactionReference
-					, intTransactionReferenceId
-					, intTransactionReferenceDetailId
-					, strTransactionReferenceNo
-					, intContractDetailId
-					, intContractHeaderId
-					, strContractNumber		
-					, intContractSeq
-					, intContractTypeId
-					, intEntityId
-					, intCommodityId
-					, intItemId
-					, intLocationId
-					, intPricingTypeId
-					, intFutureMarketId
-					, intFutureMonthId
-					, dblBasis
-					, dblFutures
-					, intQtyUOMId
-					, intQtyCurrencyId
-					, intBasisUOMId
-					, intBasisCurrencyId
-					, intPriceUOMId
-					, dtmStartDate
-					, dtmEndDate
-					, dblQty
-					, dblOrigQty
+					, CBL.strTransactionType
+					, CBL.strTransactionReference
+					, CBL.intTransactionReferenceId
+					, CBL.intTransactionReferenceDetailId
+					, CBL.strTransactionReferenceNo
+					, CBL.intContractDetailId
+					, CBL.intContractHeaderId
+					, CBL.strContractNumber		
+					, CBL.intContractSeq
+					, CBL.intContractTypeId
+					, CBL.intEntityId
+					, CBL.intCommodityId
+					, CBL.intItemId
+					, CBL.intLocationId
+					, intPricingTypeId =
+											case
+												when
+													CBL.strTransactionType = 'Contract Balance'
+													and CBL.strTransactionReference = 'Inventory Shipment'
+													and isnull(shipmentItem.ysnAllowInvoice,0) = 1
+												then 1
+												else CBL.intPricingTypeId
+											end
+					, CBL.intFutureMarketId
+					, CBL.intFutureMonthId
+					, CBL.dblBasis
+					, CBL.dblFutures
+					, CBL.intQtyUOMId
+					, CBL.intQtyCurrencyId
+					, CBL.intBasisUOMId
+					, CBL.intBasisCurrencyId
+					, CBL.intPriceUOMId
+					, CBL.dtmStartDate
+					, CBL.dtmEndDate
+					, CBL.dblQty
+					, CBL.dblOrigQty
 					, intContractStatusId = @intCurrStatusId
-					, intBookId
-					, intSubBookId
-					, strNotes-- = 'Unposted'
+					, CBL.intBookId
+					, CBL.intSubBookId
+					, CBL.strNotes-- = 'Unposted'
 					, intUserId = @intUserId
-					, intActionId
+					, CBL.intActionId
 					, strProcess = @strProcess
-				FROM tblCTContractBalanceLog WITH (UPDLOCK)
-				WHERE intTransactionReferenceId = @intHeaderId
-				AND intTransactionReferenceDetailId = @intDetailId
-				AND intContractHeaderId = @intContractHeaderId
-				AND intContractDetailId = ISNULL(@intContractDetailId, intContractDetailId)
+				FROM tblCTContractBalanceLog CBL WITH (UPDLOCK)
+				left join tblICInventoryShipmentItem shipmentItem on shipmentItem.intInventoryShipmentItemId = CBL.intTransactionReferenceDetailId
+				WHERE CBL.intTransactionReferenceId = @intHeaderId
+				AND CBL.intTransactionReferenceDetailId = @intDetailId
+				AND CBL.intContractHeaderId = @intContractHeaderId
+				AND CBL.intContractDetailId = ISNULL(@intContractDetailId, CBL.intContractDetailId)
 
 				UPDATE CBL SET strNotes = 'Unposted'
 				FROM tblCTContractBalanceLog CBL
