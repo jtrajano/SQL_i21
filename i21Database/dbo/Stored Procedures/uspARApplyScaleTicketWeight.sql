@@ -201,8 +201,7 @@ BEGIN
 											   , @intScaleUOMId		= @intScaleUOMId
 											   , @intUserId			= @intUserId
 											   , @dblNetWeight		= @dblNetWeight
-											   , @ysnFromSalesOrder = 1
-											   , @intTicketId		= @intTicketId
+											   , @ysnFromSalesOrder = 1											   
 			
 			UPDATE SO 
 			SET SO.strOrderStatus = CASE WHEN SOD.dblQtyShipped >= SOD.dblQtyOrdered THEN 'Closed' ELSE 'Short Closed' END
