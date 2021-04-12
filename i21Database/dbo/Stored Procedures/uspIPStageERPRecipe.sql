@@ -215,6 +215,29 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,4 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
+
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (
 				strXml

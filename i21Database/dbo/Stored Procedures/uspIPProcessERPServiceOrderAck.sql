@@ -130,7 +130,8 @@ BEGIN TRY
 				WHERE intWorkOrderPreStageId = @TrxSequenceNo
 
 				UPDATE tblMFWorkOrderPreStage
-				SET intStatusId = 3
+				SET intStatusId = (Case When @StatusId=1 Then 6 Else 5 End)
+					,strMessage=@StatusText
 				WHERE intWorkOrderPreStageId = @TrxSequenceNo
 
 				UPDATE tblMFWorkOrder

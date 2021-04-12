@@ -77,28 +77,7 @@ BEGIN TRY
 
 			SELECT @strInfo1 = @strInfo1 + ISNULL(strStorageLocation, '') + ','
 			FROM @tblIPStorageLocation
-			INSERT INTO dbo.tblIPInitialAck (
-				intTrxSequenceNo
-				,strCompanyLocation
-				,dtmCreatedDate
-				,strCreatedBy
-				,intMessageTypeId
-				,intStatusId
-				,strStatusText
-				)
-			SELECT TrxSequenceNo
-				,CompanyLocation
-				,CreatedDate
-				,CreatedBy
-				,7 AS intMessageTypeId
-				,1 AS intStatusId
-				,'Success' AS strStatusText
-			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
-					TrxSequenceNo INT
-					,CompanyLocation NVARCHAR(6)
-					,CreatedDate DATETIME
-					,CreatedBy NVARCHAR(50)
-					)
+			
 			--Move to Archive
 			INSERT INTO tblIPIDOCXMLArchive (
 				strXml
@@ -125,6 +104,29 @@ BEGIN TRY
 
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
+
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT TrxSequenceNo
+				,CompanyLocation
+				,CreatedDate
+				,CreatedBy
+				,7 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
+			FROM OPENXML(@idoc, 'root/data/header', 2) WITH (
+					TrxSequenceNo INT
+					,CompanyLocation NVARCHAR(6)
+					,CreatedDate DATETIME
+					,CreatedBy NVARCHAR(50)
+					)
 
 			--Move to Error
 			INSERT INTO tblIPIDOCXMLError (

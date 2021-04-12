@@ -29,6 +29,16 @@ BEGIN TRY
 		EXEC dbo.uspIPGenerateERPGoodsReceipt @strCompanyLocation = @strCompanyLocation
 			,@ysnUpdateFeedStatus = 1
 	END
+	ELSE IF @strType = 'Service Order Ack'
+	BEGIN
+		EXEC dbo.uspMFGenerateERPServiceOrder @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
+	ELSE IF @strType = 'Production'
+	BEGIN
+		EXEC dbo.uspMFGenerateERPProduction @strCompanyLocation = @strCompanyLocation
+			,@ysnUpdateFeedStatus = 1
+	END
 END TRY
 
 BEGIN CATCH

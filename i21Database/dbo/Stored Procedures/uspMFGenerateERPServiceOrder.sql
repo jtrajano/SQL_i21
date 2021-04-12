@@ -31,8 +31,9 @@ BEGIN TRY
 
 	IF NOT EXISTS (
 			SELECT *
-			FROM dbo.tblMFWorkOrderPreStage
-			WHERE intServiceOrderStatusId IS NULL
+			FROM dbo.tblMFWorkOrderPreStage PS
+			JOIN dbo.tblMFWorkOrderWarehouseRateMatrixDetail  WWRMD on WWRMD.intWorkOrderId=PS.intWorkOrderId
+			WHERE PS.intServiceOrderStatusId IS NULL
 			)
 	BEGIN
 		RETURN
@@ -43,6 +44,7 @@ BEGIN TRY
 	FROM dbo.tblMFWorkOrderPreStage PS
 	JOIN dbo.tblMFWorkOrder W ON W.intWorkOrderId = PS.intWorkOrderId
 	JOIN dbo.tblSMCompanyLocation CL ON CL.intCompanyLocationId = W.intLocationId
+	JOIN dbo.tblMFWorkOrderWarehouseRateMatrixDetail  WWRMD on WWRMD.intWorkOrderId=PS.intWorkOrderId
 	WHERE PS.intServiceOrderStatusId IS NULL
 		AND CL.strLotOrigin = @strCompanyLocation
 
@@ -192,7 +194,7 @@ BEGIN TRY
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
 			UPDATE dbo.tblMFWorkOrderPreStage
-			SET intServiceOrderStatusId = 1
+			SET intServiceOrderStatusId = 2
 				,strMessage = 'Success'
 			WHERE intWorkOrderPreStageId = @intWorkOrderPreStageId
 		END
