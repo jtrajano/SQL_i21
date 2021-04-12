@@ -10,13 +10,13 @@ FROM tblCTApiItemContractStaging s
 LEFT JOIN tblSMCompanyLocation c ON c.intCompanyLocationId = s.intCompanyLocationId
 WHERE c.intCompanyLocationId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the customer with an entityId ''' + CAST(s.intEntityId AS NVARCHAR(50)) + '''', 'entityId', 'Error',  CAST(s.intEntityId AS NVARCHAR(50))
 FROM tblCTApiItemContractStaging s
 LEFT JOIN tblEMEntity e ON e.intEntityId = s.intEntityId
 WHERE e.intEntityId IS NULL
 
-INSERT INTO @Logs (strError, strField, strLogLevel, strvalue)
+INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
 SELECT 'Cannot find the category with a categoryId ''' + CAST(s.intCategoryId AS NVARCHAR(50)) + '''', 'categoryId', 'Error',  CAST(s.intCategoryId AS NVARCHAR(50))
 FROM tblCTApiDollarContractDetailStaging s
 LEFT JOIN tblICCategory e ON e.intCategoryId = s.intCategoryId
