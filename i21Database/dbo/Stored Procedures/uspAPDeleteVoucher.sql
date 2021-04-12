@@ -155,15 +155,17 @@ BEGIN TRY
 	--WHERE intRecordId = @intBillId 
 	--AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
 	
-	----Audit Log          
-	--EXEC dbo.uspSMAuditLog 
-	--	 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
-	--	,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
-	--	,@entityId			= @UserEntityID						-- Entity Id.
-	--	,@actionType		= 'Deleted'							-- Action Type
-	--	,@changeDescription	= ''								-- Description
-	--	,@fromValue			= ''								-- Previous Value
-	--	,@toValue			= ''								-- New Value
+	IF @callerModule <> 0
+	BEGIN
+		EXEC dbo.uspSMAuditLog 
+			 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
+			,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
+			,@entityId			= @UserEntityID						-- Entity Id.
+			,@actionType		= 'Deleted'							-- Action Type
+			,@changeDescription	= ''								-- Description
+			,@fromValue			= ''								-- Previous Value
+			,@toValue			= ''								-- New Value
+	END
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
