@@ -453,3 +453,24 @@ BEGIN
 	')
 END
 GO
+
+/* 
+* Populate Pending Claims table Receipt Date field
+*/
+IF EXISTS(SELECT * FROM sys.columns WHERE object_id = object_id('tblLGPendingClaim') AND name = 'dtmReceiptDate')
+BEGIN
+	EXEC('
+		UPDATE PC
+			SET dtmReceiptDate = IR.dtmReceiptDate
+		FROM tblLGPendingClaim PC
+		INNER JOIN tblCTContractDetail CD ON CD.intContractDetailId = PC.intContractDetailId
+		INNER JOIN tblCTContractHeader CH ON CH.intContractHeaderId = CD.intContractHeaderId
+		OUTER APPLY (SELECT TOP 1 IR.dtmReceiptDate FROM tblICInventoryReceipt IR
+							INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
+							WHERE IR.ysnPosted = 1 AND IRI.intLineNo = PC.intContractDetailId
+								AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> ''Inventory Return''
+								AND (PC.intLoadContainerId IS NULL OR IRI.intContainerId = PC.intLoadContainerId)) IR
+		WHERE PC.intPurchaseSale = 1 AND IR.dtmReceiptDate IS NOT NULL AND PC.dtmReceiptDate IS NULL
+	')
+END
+GO
