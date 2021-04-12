@@ -150,19 +150,20 @@ BEGIN TRY
 	--Update the tblAPBillBatch
 	EXEC uspAPUpdateBillBatch @billBatchId = @billBatchId
 
-	DELETE FROM dbo.tblSMTransaction
-	WHERE intRecordId = @intBillId 
-	AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
+	--Removed - FRM-9293
+	--DELETE FROM dbo.tblSMTransaction
+	--WHERE intRecordId = @intBillId 
+	--AND intScreenId = (SELECT intScreenId FROM tblSMScreen WHERE strNamespace = 'AccountsPayable.view.Voucher')
 	
-	--Audit Log          
-	EXEC dbo.uspSMAuditLog 
-		 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
-		,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
-		,@entityId			= @UserEntityID						-- Entity Id.
-		,@actionType		= 'Deleted'							-- Action Type
-		,@changeDescription	= ''								-- Description
-		,@fromValue			= ''								-- Previous Value
-		,@toValue			= ''								-- New Value
+	----Audit Log          
+	--EXEC dbo.uspSMAuditLog 
+	--	 @keyValue			= @intBillId						-- Primary Key Value of the Invoice. 
+	--	,@screenName		= 'AccountsPayable.view.Voucher'	-- Screen Namespace
+	--	,@entityId			= @UserEntityID						-- Entity Id.
+	--	,@actionType		= 'Deleted'							-- Action Type
+	--	,@changeDescription	= ''								-- Description
+	--	,@fromValue			= ''								-- Previous Value
+	--	,@toValue			= ''								-- New Value
 
 	IF @transCount = 0 COMMIT TRANSACTION
 
