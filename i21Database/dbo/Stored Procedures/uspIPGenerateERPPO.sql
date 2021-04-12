@@ -33,7 +33,7 @@ BEGIN TRY
 		,@dblQuantity NUMERIC(18, 6)
 		,@strPricingType NVARCHAR(50)
 		,@dtmFixationDate DATETIME
-		,@strCertificate NVARCHAR(MAX) = ''
+		,@strCertificate NVARCHAR(MAX)
 	DECLARE @intPricingTypeId INT
 		,@intFutureMarketId INT
 		,@intFutureMonthId INT
@@ -113,7 +113,7 @@ BEGIN TRY
 			,@dblQuantity = NULL
 			,@strPricingType = NULL
 			,@dtmFixationDate = NULL
-			,@strCertificate = ''
+			,@strCertificate = NULL
 
 		SELECT @intPricingTypeId = NULL
 			,@intFutureMarketId = NULL
@@ -306,7 +306,7 @@ BEGIN TRY
 			JOIN tblCTPriceFixationDetail PFD ON PFD.intPriceFixationId = PF.intPriceFixationId
 				AND PF.intContractDetailId = @intContractDetailId
 
-			SELECT @strCertificate += '<Certificate>' + C.strCertificationName + '</Certificate>'
+			SELECT @strCertificate = COALESCE(@strCertificate + ', ', '') + C.strCertificationName
 			FROM tblCTContractCertification CC
 			JOIN tblICCertification C ON C.intCertificationId = CC.intCertificationId
 				AND CC.intContractDetailId = @intContractDetailId
@@ -357,7 +357,7 @@ BEGIN TRY
 					'<LoadingPort>' + ISNULL(CF.strLoadingPoint, '') + '</LoadingPort>' + 
 					'<DestinationPort>' + ISNULL(DP.strCity, '') + '</DestinationPort>' + 
 					'<Shipper>' + ISNULL(S.strName, '') + '</Shipper>' + 
-					'<Certificates>' + ISNULL(@strCertificate, '') + '</Certificates>' + 
+					'<Certificate>' + ISNULL(@strCertificate, '') + '</Certificate>' + 
 					'<ERPPONumber>' + ISNULL(CF.strERPPONumber, '') + '</ERPPONumber>' + 
 					'<ERPPOlineNo>' + ISNULL(CF.strERPItemNumber, '') + '</ERPPOlineNo>' + 
 					'</line>'

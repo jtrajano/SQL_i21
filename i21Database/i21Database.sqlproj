@@ -9294,6 +9294,8 @@
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPServiceOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPServiceOrderAck.sql" />
     <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPGenerateERPVoucher.sql" />
+    <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucherAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
