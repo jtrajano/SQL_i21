@@ -9292,6 +9292,7 @@
     <Build Include="dbo\Views\vyuTRFreightSurcharge.sql" />
     <Build Include="dbo\Stored Procedures\uspMFGenerateERPServiceOrder.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPServiceOrderAck.sql" />
+    <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
