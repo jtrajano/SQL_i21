@@ -9296,6 +9296,9 @@
     <Build Include="dbo\Views\vyuARSpecialPricingEndpoint.sql" />
     <Build Include="dbo\Stored Procedures\uspIPGenerateERPVoucher.sql" />
     <Build Include="dbo\Stored Procedures\uspIPProcessERPVoucherAck.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRUnpostAPClearingTransfer.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToDP.sql" />
+    <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToOS.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
