@@ -618,7 +618,7 @@ FROM vyuARCustomerSearch C
 		) PCREDITS ON I.intPaymentId = PCREDITS.intPaymentId
 		WHERE ysnPosted = 1
 			--AND ((I.strType = ''Service Charge'' AND I.ysnForgiven = 0) OR ((I.strType <> ''Service Charge'' AND I.ysnForgiven = 1) OR (I.strType <> ''Service Charge'' AND I.ysnForgiven = 0)))		
-			AND I.dtmDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
+			AND I.dtmPostDate BETWEEN '+ @strDateFrom +' AND '+ @strDateTo +'
 			AND I.strType <> ''CF Tran''
 			AND (CONVERT(DATETIME, FLOOR(CONVERT(DECIMAL(18,6), I.dtmPostDate))) <= '+ @strDateTo +'
 				AND ((I.ysnPaid = 0 OR I.intInvoiceId IN (SELECT intInvoiceId 
