@@ -70,9 +70,11 @@ LEFT JOIN
 	FROM tblGRStorageHistory GSH
 	INNER JOIN tblCTContractHeader GCH
 		ON GCH.intContractHeaderId = GSH.intContractHeaderId
+			and GCH.intPricingTypeId = 5
 	INNER JOIN tblCTContractDetail GCD
 		ON GCH.intContractHeaderId = GCD.intContractHeaderId
-	WHERE GSH.strType IN ('From Transfer','From Delivery Sheet','From Scale')
+			and GCD.intPricingTypeId = 5
+	WHERE GSH.strType IN ('From Transfer','From Delivery Sheet','From Scale')		
 )GHistory
     on GHistory.intCustomerStorageId = CS.intCustomerStorageId
 		AND ST.ysnDPOwnedType = 1 
@@ -89,15 +91,19 @@ LEFT JOIN tblCTContractDetail CD_Ticket
     --ON CD_Ticket.intContractDetailId = SC.intContractId
 	ON CD_Ticket.intContractDetailId = IRI.intContractDetailId
 		AND CS.ysnTransferStorage = 0
+		and CD_Ticket.intPricingTypeId = 5
 LEFT JOIN tblCTContractHeader CH_Ticket 
     ON CH_Ticket.intContractHeaderId = CD_Ticket.intContractHeaderId
+		and CH_Ticket.intPricingTypeId = 5
 LEFT JOIN tblGRTransferStorageSplit TSS
 	ON TSS.intTransferToCustomerStorageId = CS.intCustomerStorageId
 LEFT JOIN tblCTContractDetail CD_Transfer
     ON CD_Transfer.intContractDetailId = TSS.intContractDetailId
 		AND CS.ysnTransferStorage = 1
+		and CD_Transfer.intPricingTypeId = 5
 LEFT JOIN tblCTContractHeader CH_Transfer
-    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId  
+    ON CH_Transfer.intContractHeaderId = CD_Transfer.intContractHeaderId
+	and CH_Transfer.intPricingTypeId = 5
 LEFT JOIN tblICInventoryReceipt IR 
     ON IR.intInventoryReceiptId = SC.intInventoryReceiptId
 LEFT JOIN (tblSCDeliverySheet DeliverySheet 
