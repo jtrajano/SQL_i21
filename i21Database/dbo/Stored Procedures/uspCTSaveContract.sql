@@ -233,7 +233,7 @@ BEGIN TRY
 
 		IF @intConcurrencyId = 1 AND ISNULL(@ysnAutoEvaluateMonth,0) = 1 AND @intPricingTypeId IN (1,2,3,8) AND @ysnSlice = 1
 		BEGIN
-			UPDATE @CDTableUpdate SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)
+			--UPDATE @CDTableUpdate SET dtmPlannedAvailabilityDate = DATEADD(DAY,@intNoOfDays,dtmStartDate), @dtmPlannedAvalability = DATEADD(DAY,@intNoOfDays,dtmStartDate)
 			
 			DECLARE @FutureMonthId INT
 
@@ -392,7 +392,7 @@ BEGIN TRY
 			@ysnFeedOnApproval		=	1	AND
 			NOT EXISTS (SELECT TOP 1 1 FROM tblCTApprovedContract WHERE intContractHeaderId = @intContractHeaderId)
 		BEGIN
-			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1
+			EXEC uspCTContractApproved	@intContractHeaderId, @intApproverId, @intContractDetailId, 1, 1
 		END
 
 		IF	@ysnBasisComponent = 1 AND @dblBasis = 0 AND
