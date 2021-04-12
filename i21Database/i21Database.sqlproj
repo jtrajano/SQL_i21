@@ -8896,6 +8896,7 @@
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
+    <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
