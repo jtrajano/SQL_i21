@@ -120,6 +120,67 @@ IF @strCustomerNumberLocal IS NOT NULL
 		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
 			AND C.strStatementFormat = @strStatementFormatLocal
 	END
+ELSE IF @strCustomerNameLocal IS NOT NULL
+	BEGIN
+		DECLARE @tblCustomerName TABLE (strCustomerName NVARCHAR(200) COLLATE Latin1_General_CI_AS)
+
+		SET @strCustomerNameLocal = REPLACE(@strCustomerNameLocal, '|^|', ',')
+
+		;WITH ValuesCTE AS (
+			SELECT 
+				CASE
+					WHEN CHARINDEX(',',@strCustomerNameLocal) = 0
+						THEN @strCustomerNameLocal
+					WHEN CHARINDEX(',',@strCustomerNameLocal) > 0
+						THEN LEFT(@strCustomerNameLocal,CHARINDEX(',',@strCustomerNameLocal) - 1)
+				END Value,     
+				CASE
+					WHEN CHARINDEX(',',@strCustomerNameLocal) > 0
+						THEN RIGHT(@strCustomerNameLocal,LEN(@strCustomerNameLocal) - CHARINDEX(',', @strCustomerNameLocal))
+					ELSE NULL
+				END Remainder
+			UNION ALL
+			SELECT 
+				CASE
+					WHEN CHARINDEX(',',Remainder) = 0
+						THEN Remainder
+					WHEN CHARINDEX(',',Remainder) > 0
+						THEN LEFT(Remainder,CHARINDEX(',',Remainder) - 1)
+				END Value,
+			
+				CASE
+					WHEN CHARINDEX(',',Remainder) > 0
+						THEN RIGHT(Remainder,LEN(Remainder) - CHARINDEX(',',Remainder))
+					ELSE NULL
+				END Remainder
+			
+			FROM ValuesCTE
+			WHERE Remainder IS NOT NULL
+		)
+
+		INSERT INTO @tblCustomerName
+		SELECT strCustomerName = CAST([dbo].fnTrimX(Value) AS NVARCHAR(500)) 
+		FROM ValuesCTE OPTION (MAXRECURSION 0)
+
+		INSERT INTO #CUSTOMERS
+		SELECT intEntityCustomerId  = intEntityCustomerId 
+			 , strCustomerNumber	= C.strCustomerNumber
+			 , strCustomerName      = EC.strName
+			 , strStatementFormat	= C.strStatementFormat
+			 , dblCreditLimit       = C.dblCreditLimit
+			 , dblARBalance         = C.dblARBalance
+		FROM tblARCustomer C WITH (NOLOCK)
+		INNER JOIN (
+			SELECT intEntityId
+				 , strName
+			FROM dbo.tblEMEntity E WITH (NOLOCK)
+			INNER JOIN @tblCustomerName CTE ON E.strName = CTE.strCustomerName
+		) EC ON C.intEntityCustomerId = EC.intEntityId
+		WHERE ((@ysnActiveCustomersLocal = 1 AND (C.ysnActive = 1 or C.dblARBalance <> 0 ) ) OR @ysnActiveCustomersLocal = 0)
+			AND C.strStatementFormat = @strStatementFormatLocal
+
+		SET @strCustomerNameLocal = NULL
+	END
 ELSE
 	BEGIN
 		INSERT INTO #CUSTOMERS
