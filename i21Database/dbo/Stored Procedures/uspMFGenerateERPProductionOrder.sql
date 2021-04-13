@@ -116,7 +116,7 @@ BEGIN TRY
 				GOTO NextPO
 			END;
 
-			SELECT @strXML = @strXML + '<header TrxSequenceNo="' + ltrim(@intWorkOrderPreStageId) + '">'
+			SELECT @strXML = @strXML + '<header id="' + ltrim(@intWorkOrderPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(@intWorkOrderPreStageId) +'</TrxSequenceNo>'
 			+'<CompanyLocation>'+CL.strLotOrigin +'</CompanyLocation>'
 				+'<ActionId>'+Ltrim(Case When @strRowState='Added' then 1 When @strRowState='Modified' then 2 else 4 End) +'</ActionId>'
@@ -153,7 +153,7 @@ BEGIN TRY
 
 			SELECT @strDetailXML = ''
 
-			SELECT @strDetailXML = @strDetailXML + '<line  TrxSequenceNo="' + ltrim(WP.intWorkOrderInputParentLotId) + '" ParentTrxSequenceNo="' + ltrim(@intWorkOrderPreStageId) + '">'
+			SELECT @strDetailXML = @strDetailXML + '<line  id="' + ltrim(WP.intWorkOrderInputParentLotId) + '" parentId="' + ltrim(@intWorkOrderPreStageId) + '">'
 			+'<TrxSequenceNo>'+ltrim(WP.intWorkOrderInputParentLotId) +'</TrxSequenceNo>'
 				+'<ItemNo>'+	I.strItemNo  +'</ItemNo>'
 				+'<MotherLotNo>'+	PL.strParentLotNumber   +'</MotherLotNo>'
@@ -181,7 +181,7 @@ BEGIN TRY
 		IF @ysnUpdateFeedStatus = 1
 		BEGIN
 			UPDATE dbo.tblMFWorkOrderPreStage
-			SET intStatusId = 1
+			SET intStatusId = 2
 				,strMessage = 'Success'
 			WHERE intWorkOrderPreStageId = @intWorkOrderPreStageId
 		END

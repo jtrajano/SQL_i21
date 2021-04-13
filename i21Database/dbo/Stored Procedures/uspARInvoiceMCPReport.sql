@@ -27,7 +27,7 @@ WHERE A.strScreen = 'SystemManager.CompanyPreference'
 
 SET @blbStretchedLogo = ISNULL(@blbStretchedLogo, @blbLogo)
 
-DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein')
+DELETE FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 1 - MCP', 'Format 5 - Honstein', 'Summarized Sales Tax')
 INSERT INTO tblARInvoiceReportStagingTable (
 	   strCompanyName
 	 , strCompanyAddress
@@ -43,6 +43,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , strTruckDriver
 	 , intBillToLocationId
 	 , intShipToLocationId
+	 , dtmShipDate
 	 , strBillToLocationName
 	 , strShipToLocationName
 	 , strBillTo		
@@ -106,6 +107,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 								  END
 	 , intBillToLocationId		= INV.intBillToLocationId
 	 , intShipToLocationId		= INV.intShipToLocationId
+	 , dtmShipDate				= INV.dtmShipDate
 	 , strBillToLocationName	= BILLTO.strEntityNo
 	 , strShipToLocationName	= SHIPTO.strEntityNo
 	 , strBillToAddress			= dbo.fnARFormatCustomerAddress(NULL, NULL, INV.strBillToLocationName, INV.strBillToAddress, INV.strBillToCity, INV.strBillToState, INV.strBillToZipCode, INV.strBillToCountry, CUSTOMER.strName, CUSTOMER.ysnIncludeEntityName)
@@ -126,7 +128,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , intInvoiceDetailId		= ISNULL(INVOICEDETAIL.intInvoiceDetailId,0)
 	 , intSiteId				= INVOICEDETAIL.intSiteId
 	 , dblQtyShipped			= INVOICEDETAIL.dblQtyShipped
-	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat = 'Format 5 - Honstein' THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
+	 , intItemId				= CASE WHEN SELECTEDINV.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax') THEN ISNULL(INVOICEDETAIL.intItemId, 99999999) ELSE INVOICEDETAIL.intItemId END
 	 , strItemNo				= INVOICEDETAIL.strItemNo
 	 , strItemDescription		= INVOICEDETAIL.strItemDescription
 	 , strContractNo			= INVOICEDETAIL.strContractNo
@@ -320,10 +322,10 @@ OUTER APPLY (
 ) MESSAGES
 WHERE STAGING.intEntityUserId = @intEntityUserId
   AND STAGING.strRequestId = @strRequestId
-  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein')
 
 --HONSTEIN TAX DETAILS
-IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat = 'Format 5 - Honstein')
+IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntityUserId = @intEntityUserId AND strRequestId = @strRequestId AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax'))
 	BEGIN
 		DECLARE @strRemitToAddress	NVARCHAR(MAX)	= NULL
 
@@ -350,7 +352,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		)
 		SELECT intEntityUserId		= @intEntityUserId
 			, strRequestId			= @strRequestId
-			, strInvoiceFormat		= 'Format 5 - Honstein'
+			, strInvoiceFormat		= strInvoiceFormat
 			, strItemComments		= STAGING.strItemComments
 			, dblInvoiceTotal		= STAGING.dblInvoiceTotal
 			, dblAmountDue			= STAGING.dblAmountDue
@@ -385,14 +387,14 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		) TAXES ON ID.intInvoiceDetailId = TAXES.intInvoiceDetailId
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		  AND ID.dblTotalTax <> 0
 
 		UNION ALL
 
 		SELECT intEntityUserId		= @intEntityUserId
 			, strRequestId			= @strRequestId
-			, strInvoiceFormat		= 'Format 5 - Honstein'
+			, strInvoiceFormat		= strInvoiceFormat
 			, strItemComments		= STAGING.strItemComments
 			, dblInvoiceTotal		= STAGING.dblInvoiceTotal
 			, dblAmountDue			= STAGING.dblAmountDue
@@ -413,10 +415,11 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 						  , dblAmountDue
 						  , blbSignature
 						  , strComments
+						  , strInvoiceFormat
 			FROM tblARInvoiceReportStagingTable
 			WHERE intEntityUserId = @intEntityUserId
 		      AND strRequestId = @strRequestId
-		      AND strInvoiceFormat = 'Format 5 - Honstein'
+		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		) STAGING 
 		INNER JOIN (
 			SELECT intInvoiceId			= ID.intInvoiceId
@@ -483,12 +486,12 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 			FROM tblARInvoiceReportStagingTable
 			WHERE intEntityUserId = @intEntityUserId
 		  	  AND strRequestId = @strRequestId
-		      AND strInvoiceFormat = 'Format 5 - Honstein'
+		      AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 			  AND blbLogo IS NOT NULL
 		) ORIG ON STAGING.intInvoiceId = ORIG.intInvoiceId AND (STAGING.intInvoiceDetailId = ORIG.intInvoiceDetailId OR STAGING.strItemNo = 'State Sales Tax')
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		  AND STAGING.strItemNo IN ('Tax', 'State Sales Tax')
 
 		UPDATE tblARInvoiceReportStagingTable
@@ -499,7 +502,7 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		  , intSortId			= CASE WHEN strItemNo IN ('Tax') THEN 99999999 ELSE intInvoiceDetailId END
 		WHERE intEntityUserId = @intEntityUserId
 		  AND strRequestId = @strRequestId
-		  AND strInvoiceFormat = 'Format 5 - Honstein'
+		  AND strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 
 		UPDATE STAGING
 		SET dblTotalTax = STAGING.dblTotalTax - SST.dblTotalSST
@@ -516,6 +519,6 @@ IF EXISTS (SELECT TOP 1 NULL FROM tblARInvoiceReportStagingTable WHERE intEntity
 		) SST ON STAGING.intInvoiceDetailId = SST.intInvoiceDetailId
 		WHERE STAGING.intEntityUserId = @intEntityUserId
 		  AND STAGING.strRequestId = @strRequestId
-		  AND STAGING.strInvoiceFormat = 'Format 5 - Honstein'
+		  AND STAGING.strInvoiceFormat IN ('Format 5 - Honstein', 'Summarized Sales Tax')
 		  AND STAGING.strItemNo <> 'State Sales Tax'
 	END

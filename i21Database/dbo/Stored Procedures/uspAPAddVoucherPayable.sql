@@ -41,6 +41,7 @@ BEGIN
 			AND ISNULL(C.intInventoryShipmentChargeId,-1) = ISNULL(A.intInventoryShipmentChargeId,-1)
 			AND ISNULL(C.intLoadShipmentDetailId,-1) = ISNULL(A.intLoadShipmentDetailId,-1)
 			AND ISNULL(C.intLoadShipmentCostId,-1) = ISNULL(A.intLoadShipmentCostId,-1)
+			AND ISNULL(C.intWeightClaimDetailId,-1) = ISNULL(A.intWeightClaimDetailId,-1)
 			AND ISNULL(C.intCustomerStorageId,-1) = ISNULL(A.intCustomerStorageId,-1)
 			AND ISNULL(C.intSettleStorageId,-1) = ISNULL(A.intSettleStorageId,-1)
 			AND ISNULL(C.intItemId,-1) = ISNULL(A.intItemId,-1)
@@ -96,6 +97,8 @@ BEGIN
 			,[intLoadShipmentId]				=	A.intLoadShipmentId
 			,[intLoadShipmentDetailId]			=	A.intLoadShipmentDetailId
 			,[intLoadShipmentCostId]			=	A.intLoadShipmentCostId
+			,[intWeightClaimId]					=	A.intWeightClaimId
+			,[intWeightClaimDetailId]			=	A.intWeightClaimDetailId
 			,[intCustomerStorageId]				=	A.intCustomerStorageId
 			,[intSettleStorageId]				=	A.intSettleStorageId
 			,[intItemId]						=	A.intItemId
@@ -342,6 +345,8 @@ BEGIN
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]		
 		,[intLoadShipmentCostId]	
+		,[intWeightClaimId]
+		,[intWeightClaimDetailId]
 		,[intCustomerStorageId]	
 		,[intSettleStorageId]
 		,[intItemId]						
@@ -426,7 +431,9 @@ BEGIN
 		,[intInventoryShipmentChargeId]
 		,[intLoadShipmentId]				
 		,[intLoadShipmentDetailId]	
-		,[intLoadShipmentCostId]		
+		,[intLoadShipmentCostId]	
+		,[intWeightClaimId]				
+		,[intWeightClaimDetailId]	
 		,[intCustomerStorageId]
 		,[intSettleStorageId]
 		,[intItemId]						

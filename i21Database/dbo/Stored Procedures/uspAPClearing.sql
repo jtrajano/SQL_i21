@@ -29,7 +29,8 @@ BEGIN TRY
 		intOffsetDetailTaxId,
 		strCode,
 		ysnPostAction,
-		dtmDateEntered
+		dtmDateEntered,
+		strRemarks
 	)
 	SELECT
 		intTransactionId,
@@ -51,7 +52,8 @@ BEGIN TRY
 		intOffsetDetailTaxId,
 		strCode,
 		@post,
-		GETDATE()
+		GETDATE(),
+		strRemarks
 	FROM @APClearing
 END TRY
 

@@ -25,6 +25,7 @@
 	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
 	[ysnPostAction]				BIT NOT NULL DEFAULT 1,
 	[dtmDateEntered]			DATETIME NOT NULL,
+	[strRemarks]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 
 	CONSTRAINT [PK_dbo.tblAPClearing] PRIMARY KEY CLUSTERED ([intClearingId] ASC)
 );

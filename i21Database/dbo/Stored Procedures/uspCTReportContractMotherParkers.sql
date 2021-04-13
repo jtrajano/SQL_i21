@@ -272,7 +272,16 @@ BEGIN TRY
 								THEN NULL
 								ELSE SQ.strFixationBy
 							END
-							+'''s Call vs '+ convert(nvarchar(20),convert(numeric(10,2),SQ.dblNoOfLots)) + ' lot(s) ' + SQ.strFutureMonth + ' ' + SQ.strFutMarketName
+							+ '''s Call vs '
+							+ case
+									when CH.ysnMultiplePriceFixation = 1 and SQ.dblNoOfLots <= 0
+									then convert(nvarchar(20),convert(numeric(10,2),isnull(CH.dblNoOfLots,0.00)))
+									else convert(nvarchar(20),convert(numeric(10,2),SQ.dblNoOfLots))
+							  end
+							+ ' lot(s) '
+							+ SQ.strFutureMonth
+							+ ' '
+							+ SQ.strFutMarketName
 					end
 		,strPricingLabel = case when CH.intPricingTypeId = 6 then null else 'Pricing' end
 		,strPricingLabelColon = case when CH.intPricingTypeId = 6 then null else ':' end
@@ -331,7 +340,7 @@ BEGIN TRY
 				CD.intContractHeaderId,    
 				CL.strLocationName,    
 				CD.strFixationBy,
-				CD.dblNoOfLots,    
+				dblNoOfLots = isnull(CD.dblNoOfLots,0.00),    
 				strFutMarketName = MA.strFutMarketName,  
 				strFutureMonth = convert(nvarchar(3),datename(m,fm.dtmFutureMonthsDate)) + ' ' + convert(nvarchar(4),year(fm.dtmFutureMonthsDate))
 			FROM

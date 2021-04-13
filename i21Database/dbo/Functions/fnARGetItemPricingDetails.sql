@@ -212,6 +212,11 @@ DECLARE	 @Price							NUMERIC(18,6)
 				SELECT @Price = @UOMQuantity * ep.dblRetailPrice
 				FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, DEFAULT) ep
 
+				IF ISNULL(@Price, 0) = 0
+				BEGIN
+					SET @Price = @UOMQuantity *	(SELECT	P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+				END
+
 				SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice
 				FROM tblICItemPricing P
 				WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId
@@ -713,6 +718,11 @@ DECLARE	 @Price							NUMERIC(18,6)
 	SET @dblCalculatedExchangeRate = ISNULL(@dblCalculatedExchangeRate, 1)
 	SELECT @Price = @UOMQuantity * ep.dblRetailPrice
 	FROM dbo.fnICGetItemPriceByEffectiveDate(CAST(@TransactionDate AS DATE), @ItemId, @ItemLocationId, DEFAULT) ep
+
+	IF ISNULL(@Price, 0) = 0
+	BEGIN
+		SET @Price = @UOMQuantity *	(SELECT	P.dblSalePrice FROM tblICItemPricing P WHERE P.intItemId = @ItemId AND P.intItemLocationId = @ItemLocationId)
+	END
 
 	SET @Price = (CASE WHEN @ysnToBse = 1 THEN @Price / @dblCalculatedExchangeRate ELSE @Price * @dblCalculatedExchangeRate END)
 	SELECT @OriginalGrossPrice = @UOMQuantity * P.dblDefaultGrossPrice

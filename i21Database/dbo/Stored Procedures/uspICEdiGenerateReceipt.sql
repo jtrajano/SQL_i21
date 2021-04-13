@@ -192,7 +192,7 @@ SELECT
 	,intItemUOMId = ISNULL(iu.intItemUOMId, im.intItemUOMId) 
 	,dblQuantity = 
 		CASE 
-			WHEN i.UnitMultiplier > 1 THEN i.Quantity * i.UnitMultiplier 
+			WHEN i.UnitMultiplier > 1 AND iu.intItemUOMId IS NULL THEN i.Quantity * i.UnitMultiplier 
 			ELSE i.Quantity 
 		END 
 	,dblCost = 

@@ -297,11 +297,11 @@ BEGIN
 			INSERT INTO #tmpCostUpdateItemPricingForCStore_ItemPricingAuditLog 
 			SELECT * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 
-			SELECT TOP 1 @strOldPriceData = dblCost 
-			FROM tblICEffectiveItemCost 
-			WHERE intItemId = (SELECT intItemId FROM #tmpCostUpdateItemPricingForCStore_ItemPricingAuditLog) 
-					AND intItemLocationId IN (SELECT intItemLocationId FROM #tmpCostUpdateItemPricingForCStore_ItemPricingAuditLog) 
-					AND dtmEffectiveCostDate = @dtmEffectiveDate 
+			--SELECT TOP 1 @strOldPriceData = dblCost 
+			--FROM tblICEffectiveItemCost 
+			--WHERE intItemId IN (SELECT intItemId FROM #tmpCostUpdateItemPricingForCStore_ItemPricingAuditLog) 
+			--		AND intItemLocationId IN (SELECT intItemLocationId FROM #tmpCostUpdateItemPricingForCStore_ItemPricingAuditLog) 
+			--		AND dtmEffectiveCostDate = @dtmEffectiveDate 
 
 			UPDATE tblICEffectiveItemCost
 			SET dblCost = @dblStandardCost,
@@ -327,7 +327,6 @@ BEGIN
 							)
 							BEGIN 
 							
-								SET  @strOldPriceData = 0 
 
 								SELECT @intCostItemId_New			= auditlog.intItemId
 									  ,@intCostItemLocationId_New	= il.intItemLocationId
@@ -478,17 +477,17 @@ BEGIN
 			INSERT INTO #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog 
 			SELECT * FROM #tmpUpdateItemPricingForCStore_ItemPricingAuditLog
 		
-			SELECT TOP 1 @strOldRetailPriceData = dblRetailPrice 
-			FROM tblICEffectiveItemPrice 
-			WHERE intItemId = (SELECT intItemId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
-					AND intItemLocationId IN (SELECT intItemLocationId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
-					AND dtmEffectiveRetailPriceDate = @dtmEffectiveDate 
+			--SELECT TOP 1 @strOldRetailPriceData = dblRetailPrice 
+			--FROM tblICEffectiveItemPrice 
+			--WHERE intItemId = (SELECT intItemId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
+			--		AND intItemLocationId IN (SELECT intItemLocationId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
+			--		AND dtmEffectiveRetailPriceDate = @dtmEffectiveDate 
 
 			UPDATE tblICEffectiveItemPrice
 			SET dblRetailPrice = @dblRetailPrice,
 				dtmDateModified = GETDATE(),
 				intModifiedByUserId = @intEntityUserSecurityId
-			WHERE intItemId = (SELECT intItemId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
+			WHERE intItemId IN (SELECT intItemId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
 					AND intItemLocationId IN (SELECT intItemLocationId FROM #tmpRetailUpdateItemPricingForCStore_ItemPricingAuditLog) 
 					AND dtmEffectiveRetailPriceDate = @dtmEffectiveDate 
 					

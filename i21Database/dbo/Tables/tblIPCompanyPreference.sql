@@ -6,5 +6,8 @@
 	ysnReplicationEnabled BIT CONSTRAINT [DF_ttblIPCompanyPreference_ysnReplicationEnabled] DEFAULT 1, 
 	intThirdPartyContractWaitingPeriod int,
 	ysnDestinationPortMandatoryInPOExport BIT,
+	strQuantityUOM NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strDefaultCurrency NVARCHAR(40) COLLATE Latin1_General_CI_AS,
+
 	CONSTRAINT [PK_tblIPCompanyPreference_intCompanyPreferenceId] PRIMARY KEY ([intCompanyPreferenceId]) 
 )

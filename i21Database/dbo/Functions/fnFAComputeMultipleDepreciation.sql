@@ -2,7 +2,8 @@
 
 CREATE FUNCTION [dbo].[fnFAComputeMultipleDepreciation]
 (
-    @Id Id READONLY
+    @Id Id READONLY,
+	@BookId INT = 1
 )
 RETURNS @tbl TABLE (
 	intAssetId INT ,
@@ -39,6 +40,9 @@ DECLARE @tblAssetInfo TABLE (
 ) 
 
 
+
+
+
 INSERT INTO  @tblAssetInfo(
 	intAssetId,
 	intDepreciationMethodId, 
@@ -52,14 +56,16 @@ SELECT
 intId,
 B.intDepreciationMethodId,
 strConvention,
-dblCost - A.dblSalvageValue,
-dtmDateInService,
+BD.dblCost - BD.dblSalvageValue,
+BD.dtmPlacedInService,
 Depreciation.dblDepreciationToDate,
 NULL
-FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intAssetId = B.intAssetId
+FROM tblFAFixedAsset A join tblFADepreciationMethod B on A.intAssetId = B.intAssetId 
+JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= B.intDepreciationMethodId AND BD.intBookId =@BookId
 JOIN @Id I on I.intId = A.intAssetId
 OUTER APPLY(
 	SELECT TOP 1 dblDepreciationToDate FROM tblFAFixedAssetDepreciation WHERE [intAssetId] =  A.intAssetId
+	AND ISNULL(intBookId,1) = @BookId
 	ORDER BY intAssetDepreciationId DESC
 )Depreciation
 
@@ -83,8 +89,10 @@ dblPercentage = E.dblPercentage,
 dblAnnualDep = (E.dblPercentage *.01) * dblBasis
 FROM @tblAssetInfo T JOIN
 tblFADepreciationMethod  M ON  M.intAssetId = T.intAssetId
+JOIN tblFABookDepreciation BD ON BD.intDepreciationMethodId= M.intDepreciationMethodId AND BD.intBookId =@BookId
 OUTER APPLY(
-	SELECT COUNT(1) intMonth FROM tblFAFixedAssetDepreciation WHERE intAssetId = T.intAssetId 
+	SELECT COUNT(1) intMonth FROM tblFAFixedAssetDepreciation B
+	WHERE B.intAssetId = T.intAssetId and ISNULL(intBookId,1) = @BookId
 ) D
 OUTER APPLY(
 	SELECT ISNULL(dblPercentage,1) dblPercentage FROM tblFADepreciationMethodDetail 

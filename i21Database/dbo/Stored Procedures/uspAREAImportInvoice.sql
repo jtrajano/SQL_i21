@@ -117,12 +117,12 @@ BEGIN
 	SELECT 'The location does not exists.', 'companyLocationId', 'Error',
 		(SELECT TOP 1 IE.strCompanyLocation FROM @InvoiceEAEntries IE LEFT JOIN tblSMCompanyLocation CL ON RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationNumber)) OR RTRIM(LTRIM(IE.strCompanyLocation)) = RTRIM(LTRIM(CL.strLocationName)))
 END
-ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
-BEGIN
-	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
-	SELECT 'The source transaction is invalid.', 'sourceTransaction', 'Error',
-		(SELECT TOP 1 strSourceTransaction FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
-END
+-- ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
+-- BEGIN
+-- 	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
+-- 	SELECT 'The source transaction is invalid.', 'sourceTransaction', 'Error',
+-- 		(SELECT TOP 1 strSourceTransaction FROM @InvoiceEAEntries WHERE strSourceTransaction IN ('Sale OffSite','Settle Storage','Process Grain Storage','Transfer Storage','Load/Shipment Schedules','Credit Card Reconciliation', 'CF Invoice', 'Direct'))
+-- END
 ELSE IF NOT EXISTS (SELECT TOP 1 NULL FROM @InvoiceEntries)
 BEGIN
 	INSERT INTO @Logs (strError, strField, strLogLevel, strValue)
@@ -134,7 +134,21 @@ BEGIN
 	
 	SET @ErrorMessage = ISNULL(@ErrorMessage, 'Failed to import invoice')
 	IF NOT EXISTS(SELECT TOP 1 NULL FROM tblARInvoiceIntegrationLogDetail WHERE intIntegrationLogId = @LogId)
-		RAISERROR(@ErrorMessage, 16, 1)
+	BEGIN
+		INSERT INTO @Logs (strError, strLogLevel)
+		SELECT @ErrorMessage, 'Error'
+		RAISERROR (@ErrorMessage, 16, 1)
+	END
+	ELSE
+	BEGIN
+		INSERT INTO @Logs (intLineNumber, strLogLevel)
+		SELECT i.intInvoiceId, 'Ids'
+		FROM tblARInvoice i
+		INNER JOIN tblARInvoiceIntegrationLogDetail d ON i.intInvoiceId = d.intInvoiceId
+		WHERE d.intIntegrationLogId = @LogId 
+		  AND d.ysnSuccess = 1
+		  AND d.ysnHeader = 1
+	END
 END
 
 SELECT * FROM @Logs

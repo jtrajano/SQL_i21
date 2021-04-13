@@ -17,6 +17,7 @@ BEGIN TRY
 		,@strAttributeValue NVARCHAR(50)
 		,@dtmExpectedDate DATETIME
 		,@intSubLocationId INT
+		,@intManufacturingCellId INT
 	DECLARE @tblMFWorkOrderRecipeItem TABLE (
 		intWorkOrderRecipeItemId INT
 		,[intWorkOrderId] INT
@@ -87,8 +88,16 @@ BEGIN TRY
 	SELECT @intManufacturingProcessId = intManufacturingProcessId
 		,@dtmExpectedDate = dtmExpectedDate
 		,@intSubLocationId = intSubLocationId
+		,@intManufacturingCellId = intManufacturingCellId
 	FROM tblMFWorkOrder
 	WHERE intWorkOrderId = @intWorkOrderId
+
+	IF @intSubLocationId IS NULL
+	BEGIN
+		SELECT @intSubLocationId = intSubLocationId
+		FROM tblMFManufacturingCell
+		WHERE intManufacturingCellId = @intManufacturingCellId
+	END
 
 	SELECT @intAttributeId = intAttributeId
 	FROM tblMFAttribute

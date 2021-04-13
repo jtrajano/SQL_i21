@@ -180,8 +180,8 @@ BEGIN TRY
 		SELECT @dblLine6c_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LB' AND strType = 'Diesel Sold to Ships'
 
 		-- Line 7
-		SELECT @dblLine7_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('C','DC','SC')
-		SELECT @dblLine7_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode = 'LC'
+		SELECT @dblLine7_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('C','DC','SC','C_TR','DC_TR','SC_TR','C_B','DC_B','SC_B')
+		SELECT @dblLine7_Col2 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('LC','LC_TR','LC_B')
 
 		-- Line 8
 		SELECT @dblLine8_Col1 = ISNULL(SUM(dblGross),0) FROM vyuTFGetTransaction WHERE uniqTransactionGuid = @Guid AND strScheduleCode IN ('D','DD','SD')

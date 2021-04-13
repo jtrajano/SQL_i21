@@ -267,7 +267,16 @@ SELECT
                 )
             ELSE billDetail.dblTotal END
         )
-    + billDetail.dblTax, 2) AS dblVoucherTotal      
+    + billDetail.dblTax, 2) 
+    *
+    (
+        CASE 
+        WHEN bill.intTransactionType = 3
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblVoucherTotal      
     ,ROUND(CASE       
         WHEN billDetail.intWeightUOMId IS NULL THEN       
             ISNULL(billDetail.dblQtyReceived, 0)       
@@ -278,7 +287,16 @@ SELECT
                 ELSE       
                     ISNULL(billDetail.dblNetWeight, 0)       
             END      
-    END,2) AS dblVoucherQty      
+    END,2) 
+    *
+    (
+        CASE 
+        WHEN bill.intTransactionType = 3
+        THEN -1
+        ELSE 1
+        END
+    )
+    AS dblVoucherQty      
     ,0 AS dblReceiptChargeTotal  
     ,0 AS dblReceiptChargeQty  
     -- ,((receiptCharge.dblAmount) * (CASE WHEN receiptCharge.ysnPrice = 1 THEN -1 ELSE 1 END))    

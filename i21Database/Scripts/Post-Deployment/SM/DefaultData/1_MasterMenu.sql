@@ -11,8 +11,7 @@ GO
 	/* UPDATE ENTITY CREDENTIAL CONCURRENCY */
 
 
-
-	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Amendments' AND strModuleName = 'Contract Management')
+	IF EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strModuleName = 'Integrated Document Processing')
 	BEGIN
 		EXEC uspSMIncreaseECConcurrency 0
 		
@@ -5322,9 +5321,9 @@ ELSE
 
 IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Lottery Inventory Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId)	
 	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
-	VALUES (N'Lottery Inventory Report', N'Store', @StoreLotteryParentMenuId, N'Lottery Inventory Report', N'Lottery', N'Screen', N' Store.view.LotteryInventoryReport', N'small-menu-lottery', 0, 0, 0, 1, 1, 3)	
+	VALUES (N'Lottery Inventory Report', N'Store', @StoreLotteryParentMenuId, N'Lottery Inventory Report', N'Lottery', N'Screen', N'Store.view.LotteryInventoryReport', N'small-menu-lottery', 0, 0, 0, 1, 1, 3)	
 ELSE
-	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N' Store.view.LotteryInventoryReport' WHERE strMenuName = 'Lottery Inventory Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'Store.view.LotteryInventoryReport' WHERE strMenuName = 'Lottery Inventory Report' AND strModuleName = 'Store' AND intParentMenuID = @StoreLotteryParentMenuId
 
 --END LOTTERY
 
@@ -6736,6 +6735,94 @@ ELSE
 
 
 /* END SCHEDULING */
+
+
+
+
+/* Integrated Document Processing */
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Document Processing (IDP)' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = 0)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Document Processing (IDP)', N'Document Processing (IDP)', 0, N'Document Processing (IDP)', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 21, 0)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 21 WHERE strMenuName = 'Document Processing (IDP)' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = 0
+
+DECLARE @IDPParentMenuId INT
+SELECT @IDPParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Document Processing (IDP)' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = 0
+
+--ACTIVITIES
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Activities', N'Document Processing (IDP)', @IDPParentMenuId, N'Activities', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0 WHERE strMenuName = 'Activities' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId
+
+DECLARE @IDPActivitiesParentMenuId INT
+SELECT @IDPActivitiesParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Activities' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Incoming Documents' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Incoming Documents', N'Document Processing (IDP)', @IDPActivitiesParentMenuId, N'Incoming Documents', N'Activity', N'Screen', N'GlobalComponentEngine.view.OcrIncomingDocuments', N'small-menu-activity', 1, 0, 0, 1, 0, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'GlobalComponentEngine.view.OcrIncomingDocuments' WHERE strMenuName = 'Incoming Documents' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPActivitiesParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Processed Vouchers' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPActivitiesParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Processed Vouchers', N'Document Processing (IDP)', @IDPActivitiesParentMenuId, N'Processed Vouchers', N'Activity', N'Screen', N'AccountsPayable.view.Voucher?showSearch=true&activeTab=Processed Vouchers', N'small-menu-activity', 1, 0, 0, 1, 1, 1)
+ELSE 
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'AccountsPayable.view.Voucher?showSearch=true&activeTab=Processed Vouchers' WHERE strMenuName = 'Processed Vouchers' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPActivitiesParentMenuId
+
+--MAINTENANCE
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Maintenance', N'Document Processing (IDP)', @IDPParentMenuId, N'Maintenance', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 1 WHERE strMenuName = 'Maintenance' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId
+
+DECLARE @IDPMaintenanceParentMenuId INT
+SELECT @IDPMaintenanceParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Maintenance' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Connection Setting' AND strModuleName = N'Document Processing (IDP)' AND intParentMenuID = @IDPMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Connection Setting', N'Document Processing (IDP)', @IDPMaintenanceParentMenuId, N'Connection Setting', N'Maintenance', N'Screen', N'fott/projects/SaeNIXI2z/settings?external=true', N'small-menu-maintenance', 1, 1, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 0, strCommand = N'fott/projects/SaeNIXI2z/settings?external=true' WHERE strMenuName = N'Connection Setting' AND strModuleName = N'Document Processing (IDP)' AND intParentMenuID = @IDPMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Custom Document Models' AND strModuleName = N'Document Processing (IDP)' AND intParentMenuID = @IDPMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Custom Document Models', N'Document Processing (IDP)', @IDPMaintenanceParentMenuId, N'Custom Document Models', N'Maintenance', N'Screen', N'fott?external=true', N'small-menu-maintenance', 1, 1, 0, 1, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 1, strCommand = N'fott?external=true' WHERE strMenuName = N'Custom Document Models' AND strModuleName = N'Document Processing (IDP)' AND intParentMenuID = @IDPMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = N'Default Values' AND strModuleName = N'Document Processing (IDP)' AND intParentMenuID = @IDPMaintenanceParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Default Values', N'Document Processing (IDP)', @IDPMaintenanceParentMenuId, N'Default Values', N'Maintenance', N'Screen', N'GlobalComponentEngine.view.OcrDefaultValues', N'small-menu-maintenance', 1, 1, 0, 1, 2, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET intSort = 2, strCommand = N'GlobalComponentEngine.view.OcrDefaultValues' WHERE strMenuName = N'Default Values' AND strModuleName = N'Document Processing (IDP)' AND intParentMenuID = @IDPMaintenanceParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intRow], [intConcurrencyId]) 
+	VALUES (N'Create', N'Document Processing (IDP)', @IDPParentMenuId, N'Create', NULL, N'Folder', N'', N'small-folder', 1, 0, 0, 0, 0, 1, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = NULL, strIcon = 'small-folder', strCommand = N'', intSort = 0, intRow = 1 WHERE strMenuName = 'Create' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId
+
+DECLARE @IDPCreateParentMenuId INT
+SELECT @IDPCreateParentMenuId = intMenuID FROM tblSMMasterMenu WHERE strMenuName = 'Create' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPParentMenuId
+
+IF NOT EXISTS(SELECT TOP 1 1 FROM tblSMMasterMenu WHERE strMenuName = 'Add Documents' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPCreateParentMenuId)
+	INSERT [dbo].[tblSMMasterMenu] ([strMenuName], [strModuleName], [intParentMenuID], [strDescription], [strCategory], [strType], [strCommand], [strIcon], [ysnVisible], [ysnExpanded], [ysnIsLegacy], [ysnLeaf], [intSort], [intConcurrencyId]) 
+	VALUES (N'Add Documents', N'Document Processing (IDP)', @IDPCreateParentMenuId, N'Add Documents', 'Create', N'Screen', N'GlobalComponentEngine.view.AttachFile?type=ocr', N'small-menu-create', 1, 0, 0, 1, 0, 1)
+ELSE
+	UPDATE tblSMMasterMenu SET strCategory = 'Create', strCommand = N'GlobalComponentEngine.view.AttachFile?type=ocr', intSort = 0, strIcon = N'small-menu-create', ysnLeaf = 1, intRow = NULL WHERE strMenuName = 'Add Documents' AND strModuleName = 'Document Processing (IDP)' AND intParentMenuID = @IDPCreateParentMenuId
+
+
+
+
+DELETE FROM tblSMMasterMenu WHERE strModuleName = 'Integrated Document Processing'
+
+
+
+/* END Integrated Document Processing */
 
 
 

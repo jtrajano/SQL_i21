@@ -781,7 +781,7 @@ BEGIN TRY
 	BEGIN
 		INSERT INTO dbo.tblMFProductionPreStage (
 				intWorkOrderId
-				,intWorkOrderStatusId
+				,intProductionStatusId
 				,intUserId
 				)
 		SELECT @intWorkOrderId

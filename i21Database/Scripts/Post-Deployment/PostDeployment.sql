@@ -349,6 +349,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\25_TransactionTypeRename.sql 
 :r .\IC\26_LockAvgCost.sql 
 :r .\IC\27_ActivateItemLocations.sql 
+:r .\IC\28_PopulateICAPClearing.sql 
 :r .\IC\Data_Fix_For_18.3\01_UpdateContractItemStatuses.sql 
 :r .\IC\Data_Fix_For_18.3\02_Update_ActualCostId_On_InventoryTransaction.sql 
 :r .\IC\Data_Fix_For_18.3\03_MigratePackedTypeToQuantityType.sql 

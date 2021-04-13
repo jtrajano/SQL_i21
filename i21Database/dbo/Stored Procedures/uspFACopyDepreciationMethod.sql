@@ -1,7 +1,7 @@
 CREATE PROCEDURE uspFACopyDepreciationMethod  
 (  
     @intDepreciationMethodId INT,  
-    @intAsssetId INT,  
+    @intAssetId INT,  
     @intBookId INT,
     @strName NVARCHAR(50)   
 )  
@@ -11,13 +11,13 @@ BEGIN
 	DECLARE @Id Id
     
 	INSERT INTO @Id
-	SELECT intDepreciationMethodId FROM tblFABookDepreciation WHERE @intAsssetId = @intAsssetId and intBookId = @intBookId
+	SELECT intDepreciationMethodId FROM tblFABookDepreciation WHERE intAssetId = @intAssetId and intBookId = @intBookId
 
 	DELETE A FROM tblFABookDepreciation A JOIN @Id I ON A.intDepreciationMethodId = I.intId
 	DELETE A FROM tblFADepreciationMethod A JOIN @Id I ON A.intDepreciationMethodId = I.intId
     
     INSERT INTO tblFADepreciationMethod(strDepreciationMethodId , strDepreciationType, intServiceYear, intMonth, dblSalvageValue,strConvention, dtmServiceDate, intConcurrencyId, intAssetId  )  
-    SELECT @strName, strDepreciationType, intServiceYear, intMonth, dblSalvageValue,strConvention, dtmServiceDate,1, @intAsssetId   
+    SELECT @strName, strDepreciationType, intServiceYear, intMonth, dblSalvageValue,strConvention, dtmServiceDate,1, @intAssetId   
     FROM tblFADepreciationMethod WHERE @intDepreciationMethodId = intDepreciationMethodId  
     
     SELECT  @intNewDepreciationMethodId = SCOPE_IDENTITY()  
@@ -27,5 +27,6 @@ BEGIN
     WHERE intDepreciationMethodId = @intDepreciationMethodId  
 
 	INSERT INTO tblFABookDepreciation(intAssetId, intBookId, intDepreciationMethodId, dblCost, dblSalvageValue, dtmPlacedInService, intConcurrencyId)
-	SELECT intAssetId, @intBookId, @intNewDepreciationMethodId, dblCost, dblSalvageValue, dtmDateInService,1 FROM tblFAFixedAsset WHERE @intAsssetId = intAssetId
+	SELECT intAssetId, @intBookId, @intNewDepreciationMethodId, dblCost, dblSalvageValue, dtmDateInService,1 FROM tblFAFixedAsset WHERE @intAssetId = intAssetId
 END
+

@@ -11,6 +11,7 @@ AS
 			ENLOC.strPhone, 
 			ENLOC.strFax,
 			ENTYPE.strType,
+			ENLOC.strNotes,
 			CONVERT(BIT,ENLOC.ysnActive)									AS ysnActive
 	FROM	[tblEMEntityLocation] ENLOC
 	JOIN	[tblEMEntityType] ENTYPE ON ENTYPE.intEntityId = ENLOC.intEntityId  
@@ -28,6 +29,7 @@ AS
 			L.strPhone, 
 			L.strFax,
 			'Company'														AS strType,
+			''																AS strNotes,
 			CONVERT(BIT,L.ysnActive) 										AS ysnActive
 	FROM	tblSMCompanyLocation L
 
@@ -44,5 +46,6 @@ AS
 			strPhone, 
 			strFax,
 			'Bank'															AS strType,
+			''																AS strNotes,
 			CONVERT(BIT,1)													AS ysnActive
 	FROM	tblCMBank

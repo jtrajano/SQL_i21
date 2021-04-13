@@ -10,7 +10,6 @@ BEGIN TRY
 
 	DECLARE @intInventoryAdjustmentStageId INT
 	DECLARE @ErrMsg NVARCHAR(max)
-	--DECLARE @strJson NVARCHAR(Max)
 	DECLARE @dtmDate DATETIME
 	DECLARE @intUserId INT
 	DECLARE @strUserName NVARCHAR(100)
@@ -151,7 +150,6 @@ BEGIN TRY
 						,1
 						)
 			END
-			--Select @strStorageLocation,@intCompanyLocationId
 			SELECT @intCompanyLocationSubLocationId = intCompanyLocationSubLocationId
 			FROM dbo.tblSMCompanyLocationSubLocation
 			WHERE strSubLocationName = @strStorageLocation
@@ -179,7 +177,6 @@ BEGIN TRY
 						,1
 						)
 			END
-			--Select @strStorageUnit,@intCompanyLocationSubLocationId
 			SELECT @intStorageLocationId = intStorageLocationId
 			FROM dbo.tblICStorageLocation
 			WHERE strName = @strStorageUnit
@@ -279,6 +276,23 @@ BEGIN TRY
 			WHERE intInventoryAdjustmentId = @intAdjustmentId
 
 			MOVE_TO_ARCHIVE:
+			
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,15 AS intMessageTypeId
+				,1 AS intStatusId
+				,'Success' AS strStatusText
 
 			--Move to Ack
 			INSERT INTO tblIPInventoryAdjustmentAck (
@@ -337,6 +351,22 @@ BEGIN TRY
 			SET @ErrMsg = ERROR_MESSAGE()
 			SET @strFinalErrMsg = @strFinalErrMsg + @ErrMsg
 
+			INSERT INTO dbo.tblIPInitialAck (
+				intTrxSequenceNo
+				,strCompanyLocation
+				,dtmCreatedDate
+				,strCreatedBy
+				,intMessageTypeId
+				,intStatusId
+				,strStatusText
+				)
+			SELECT @intTrxSequenceNo
+				,@strCompanyLocation
+				,@dtmCreatedDate
+				,@strCreatedBy
+				,15 AS intMessageTypeId
+				,0 AS intStatusId
+				,@ErrMsg AS strStatusText
 			--Move to Error
 			INSERT INTO tblIPInventoryAdjustmentAck (
 				intTrxSequenceNo

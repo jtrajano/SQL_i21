@@ -14,4 +14,5 @@
 	,dtmFeedDate DATETIME CONSTRAINT DF_tblMFWorkOrderPreStage_dtmFeedDate DEFAULT GETDATE()
 	,strMessage NVARCHAR(MAX) COLLATE Latin1_General_CI_AS
 	,ysnMailSent BIT
+	,intServiceOrderStatusId INT
 	)

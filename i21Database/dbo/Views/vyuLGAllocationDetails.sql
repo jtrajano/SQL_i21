@@ -45,6 +45,7 @@ SELECT AH.intAllocationHeaderId
 	,UMS.strUnitMeasure AS strSUnitMeasure
 	,AH.intUserSecurityId
 	,SEC.strUserName AS strAllocatedBy
+	,dblSLoadDeliveredQty = SLDQ.dblSLoadDeliveredQty
 FROM tblLGAllocationHeader AH
 JOIN tblLGAllocationDetail AD ON AH.intAllocationHeaderId = AD.intAllocationHeaderId
 JOIN tblCTContractDetail PCD ON PCD.intContractDetailId = AD.intPContractDetailId
@@ -66,3 +67,7 @@ LEFT JOIN tblSMCountry PCNT ON PCNT.intCountryID = PCA.intCountryID
 LEFT JOIN tblICCommodityAttribute SCA ON SCA.intCommodityAttributeId = SItem.intOriginId
 LEFT JOIN tblSMCountry SCNT ON SCNT.intCountryID = SCA.intCountryID
 LEFT JOIN tblSMUserSecurity SEC ON SEC.intEntityId = AH.intUserSecurityId
+OUTER APPLY (SELECT dblSLoadDeliveredQty = SUM(LD.dblQuantity) 
+			FROM tblLGLoadDetail LD JOIN tblLGLoad L ON L.intLoadId = LD.intLoadId
+			WHERE LD.intAllocationDetailId = AD.intAllocationDetailId 
+			AND L.ysnPosted = 1 AND L.intPurchaseSale IN (2, 3) AND L.intShipmentType = 1) SLDQ

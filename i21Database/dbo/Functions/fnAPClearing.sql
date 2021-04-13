@@ -21,7 +21,8 @@ RETURNS @returntable TABLE
 	[strOffsetId]				NVARCHAR(55) COLLATE Latin1_General_CI_AS NULL,
 	[intOffsetDetailId]			INT NULL,
 	[intOffsetDetailTaxId]		INT NULL,
-	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL
+	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
+	[strRemarks]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL
 )
 AS
 BEGIN
@@ -45,7 +46,8 @@ BEGIN
 		B.strBillId,
 		BD.intBillDetailId,
 		NULL,
-		'AP'
+		'AP',
+		NULL
 	FROM tblAPBill B
 	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 	INNER JOIN vyuGLAccountDetail AD ON AD.intAccountId = BD.intAccountId
@@ -87,7 +89,8 @@ BEGIN
 		B.strBillId,
 		BD.intBillDetailId,
 		DT.intBillDetailTaxId,
-		'AP'
+		'AP',
+		NULL
 	FROM tblAPBill B
 	INNER JOIN tblAPBillDetail BD ON BD.intBillId = B.intBillId
 	INNER JOIN tblAPBillDetailTax DT ON DT.intBillDetailId = BD.intBillDetailId

@@ -761,16 +761,16 @@ BEGIN
 			,intItemUOMId
 		)
 		SELECT
-			  d.intItemId
-			, @strAdjustmentType
-			, a.dtmAdjustmentDate
-			, 'Inventory Adjustment'
-			, a.strAdjustmentNo
-			, COALESCE(d.dblNewCost, d.dblCost, u.dblUnitQty, 1) * COALESCE(d.dblNewQuantity, d.dblQuantity)
-			, COALESCE(d.dblNewQuantity, d.dblQuantity)
-			, COALESCE(d.dblNewWeight, d.dblWeight)
-			, COALESCE(d.dblNewCost, d.dblCost)
-			, d.intItemUOMId
+			intItemId = d.intItemId
+			,strSourceTransactionType = @strAdjustmentType
+			,dtmDate = a.dtmAdjustmentDate
+			,strInvoiceType = 'Inventory Adjustment'
+			,strInvoiceNo = a.strAdjustmentNo 
+			,dblInvoiceAmount = COALESCE(d.dblNewCost, d.dblCost, 0) * COALESCE(d.dblNewQuantity, d.dblQuantity, 0)
+			,dblQty = COALESCE(d.dblNewQuantity, d.dblQuantity, 0)
+			,dblPricePerUOM = COALESCE(d.dblNewCost, d.dblCost, 0)
+			,dblNetWeight = COALESCE(d.dblNewWeight, d.dblWeight)
+			,intItemUOMId = d.intItemUOMId
 		FROM tblICInventoryAdjustment a
 		INNER JOIN tblICInventoryAdjustmentDetail d ON d.intInventoryAdjustmentId = a.intInventoryAdjustmentId
 		INNER JOIN tblICItem i ON i.intItemId = d.intItemId
