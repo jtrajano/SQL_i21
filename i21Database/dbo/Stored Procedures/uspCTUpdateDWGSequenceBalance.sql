@@ -69,17 +69,7 @@ BEGIN TRY
 		,dblSequenceBalanceQuantity = cd.dblBalance
 		,intToItemUOMId = cd.intItemUOMId
 		,intExternalId = cb.intExternalId
-		,dblOldQuantity =
-							case
-								when isnull(ch.ysnLoad,0) = 0
-								then
-									case
-										when cb.dblOldQuantity > cd.dblQuantity
-										then cd.dblQuantity
-										else cb.dblOldQuantity
-									end
-								else cb.dblOldQuantity
-							end
+		,dblOldQuantity = cb.dblOldQuantity
 		,dblQuantity = cb.dblQuantity
 		,intFromItemUOMId = cb.intItemUOMId
 		,strScreenName = (case when cb.strScreenName = 'Inventory' then 'Inventory Shipment' else cb.strScreenName end)
@@ -88,7 +78,6 @@ BEGIN TRY
 	from
 		@ContractSequenceBalance cb
 		left join tblCTContractDetail cd on cd.intContractDetailId = cb.intContractDetailId
-		left join tblCTContractHeader ch on ch.intContractHeaderId = cd.intContractHeaderId
 
 	select @intId = min(cb.intId) from @ContractSequenceBalance cb where cb.intId > @intId;
 
