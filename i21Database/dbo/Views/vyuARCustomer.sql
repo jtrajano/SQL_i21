@@ -28,8 +28,8 @@ SELECT Entity.intEntityId
 	 , strBillToState			= BillToLoc.strState
 	 , strBillToZipCode			= BillToLoc.strZipCode
 	 , strBillToCountry			= BillToLoc.strCountry
-	 , Cus.intShipToId
-	 , Cus.intBillToId
+	 , intShipToId				= ShipToLoc.intEntityLocationId
+	 , intBillToId				= BillToLoc.intEntityLocationId
 	 , dblCreditLimit			= ISNULL(Cus.dblCreditLimit, 0)
 	 , Cus.strVatNumber
 	 , strPhone1				= EnPhoneNo.strPhone
