@@ -3931,7 +3931,7 @@ BEGIN TRY
 					-- Priced 1000 | BD 0 /
 					-- Priced 500 | BD 0 /
 					-- Priced 400 | BD 100 /
-					IF (@_basis > 0 OR @_actual > 0) AND @ysnDirect <> 1
+					IF (@_basis > 0 OR @_actual > 0) AND @ysnDirect <> 1 AND isnull(@ysnLoadBased,0) = 0
 					BEGIN				
 						-- Basis Deliveries  
 						UPDATE @cbLogSpecific SET dblQty = CASE WHEN @ysnLoadBased = 1 THEN @_actual ELSE @_basis END,
