@@ -49,8 +49,8 @@ SELECT DISTINCT
 	, strBillToState		= billLocation.strState
 	, strBillToZipCode		= billLocation.strZipCode
 	, strBillToCountry		= billLocation.strCountry
-	, intShipToId			= CUSTOMER.intShipToId
-	, intBillToId			= CUSTOMER.intBillToId
+	, intShipToId			= shipLocation.intEntityLocationId
+	, intBillToId			= billLocation.intEntityLocationId
 	, dblARBalance			= CUSTOMER.dblARBalance
 	, strTerm				= custTerm.strTerm
 	, intCurrencyId			= CUSTOMER.intCurrencyId
