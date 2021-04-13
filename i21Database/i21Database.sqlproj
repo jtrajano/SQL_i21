@@ -9299,6 +9299,7 @@
     <Build Include="dbo\Stored Procedures\uspGRUnpostAPClearingTransfer.sql" />
     <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToDP.sql" />
     <Build Include="dbo\Stored Procedures\uspGRBookAPClearingTransferToOS.sql" />
+    <Build Include="dbo\Tables\tblSMDefaultValues.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
