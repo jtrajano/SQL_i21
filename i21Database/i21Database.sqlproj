@@ -7690,7 +7690,6 @@
     <Build Include="dbo\Views\vyuTRLoadDistributionDetailInfo.sql" />
     <Build Include="dbo\Views\vyuTRGetLoadBlendIngredient.sql" />
     <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
-    <None Include="Scripts\Post-Deployment\CT\fnCTGetBasisDeliveryAboveR2.sql" />
     <None Include="Scripts\Post-Deployment\IC\18_Set_Commodity_Market_To_Market_Default_Data.sql" />
     <Build Include="dbo\Views\vyuSTCashierReport.sql" />
     <Build Include="dbo\Stored Procedures\uspARPOSBatchProcess.sql" />
@@ -8896,6 +8895,8 @@
     <Build Include="dbo\Stored Procedures\uspIPReprocessFailedSAPStock.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
     <Build Include="dbo\Functions\fnAPFormatAddress2.sql" />
+    <Build Include="dbo\Stored Procedures\uspCTCreateVoucher.sql" />
+    <Build Include="dbo\Views\vyuCTGetAvailablePriceForVoucher.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
