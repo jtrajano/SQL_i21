@@ -598,6 +598,33 @@ BEGIN
 			,@strAdjustmentDescription
 
 		IF @intReturnValue < 0 GOTO With_Rollback_Exit
+		
+		BEGIN 
+			
+			DECLARE @TransactionLinks udtICTransactionLinks
+			DELETE FROM @TransactionLinks
+			
+			IF EXISTS (SELECT intSourceId FROM dbo.vyuICGetAdjustmentDetailSource WHERE intInventoryAdjustmentId = @intTransactionId AND intSourceId IS NOT NULL)
+			BEGIN
+			
+				INSERT INTO @TransactionLinks (
+					strOperation, -- Operation
+					intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+					intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+				)
+				SELECT 'Create',
+					Adjustment.intSourceId, 
+					Adjustment.strSourceTransactionNo, 
+					'None', 
+					'None',
+					@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Adjustment'
+				FROM dbo.vyuICGetAdjustmentDetailSource Adjustment
+				WHERE intInventoryAdjustmentId = @intTransactionId
+
+				EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+			END
+		END
 	END 
 END   
 

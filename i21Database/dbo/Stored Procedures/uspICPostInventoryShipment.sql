@@ -1024,6 +1024,51 @@ BEGIN
 			,@INVENTORY_SHIPMENT_TYPE
 			,1	
 	END
+
+	BEGIN 
+			
+		DECLARE @TransactionLinks udtICTransactionLinks
+		DECLARE @strSourceName AS NVARCHAR(50)
+		DECLARE @intShipmentItemId AS INT
+        
+		SELECT TOP 1 @intShipmentItemId = intInventoryShipmentItemId FROM tblICInventoryShipmentItem WHERE intInventoryShipmentId = @intTransactionId
+
+		IF EXISTS (SELECT intOrderId FROM dbo.vyuICGetShipmentItemSource WHERE intInventoryShipmentItemId = @intShipmentItemId AND intOrderId IS NOT NULL)
+		BEGIN
+        
+			SELECT	TOP 1 
+					@strSourceName = 
+					CASE 
+						WHEN Shipment.intOrderType = 0 THEN 'None'
+						WHEN Shipment.intOrderType = 1 THEN 'Sales Contract'
+						WHEN Shipment.intOrderType = 2 THEN 'Sales Order'
+						WHEN Shipment.intOrderType = 3 THEN 'Transfer Order'
+						WHEN Shipment.intOrderType = 4 THEN 'Direct'
+						WHEN Shipment.intOrderType = 5 THEN 'Item Contract'
+						WHEN Shipment.intOrderType = 6 THEN 'AG Work Order'
+					END COLLATE Latin1_General_CI_AS
+			FROM tblICInventoryShipment Shipment
+			WHERE Shipment.intInventoryShipmentId = @intTransactionId
+
+			DELETE FROM @TransactionLinks
+			INSERT INTO @TransactionLinks (
+				strOperation, -- Operation
+				intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+				intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+			)
+			SELECT 'Create',
+				Shipment.intOrderId, 
+				Shipment.strOrderNumber,
+				@strSourceName,
+				@strSourceName,
+				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Shipment'
+			FROM dbo.vyuICGetShipmentItemSource Shipment
+			WHERE intInventoryShipmentItemId = @intShipmentItemId
+
+			EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+		END
+	END
 END   
 
 --------------------------------------------------------------------------------------------  

@@ -957,6 +957,33 @@ BEGIN
 			,@intEntityUserSecurityId
 			,@strGLDescription		
 	END
+
+	BEGIN 
+			
+		DECLARE @TransactionLinks udtICTransactionLinks
+		DELETE FROM @TransactionLinks
+		
+		IF EXISTS (SELECT intSourceId FROM dbo.vyuICGetTransferDetailSource WHERE intInventoryTransferId = @intTransactionId AND intSourceId IS NOT NULL)
+		BEGIN
+		
+			INSERT INTO @TransactionLinks (
+				strOperation, -- Operation
+				intSrcId, strSrcTransactionNo, strSrcModuleName, strSrcTransactionType, -- Source Transaction
+				intDestId, strDestTransactionNo, strDestModuleName, strDestTransactionType	-- Destination Transaction
+			)
+			SELECT 'Create',
+				Transfer.intSourceId, 
+				Transfer.strSourceTransactionNo, 
+				Transfer.strSourceModule, 
+				Transfer.strSourceScreen,
+				@intTransactionId, @strTransactionId, 'Inventory', 'Inventory Transfer'
+			FROM dbo.vyuICGetTransferDetailSource Transfer
+			WHERE intInventoryTransferId = @intTransactionId
+
+			EXEC dbo.uspICAddTransactionLinks @TransactionLinks
+
+		END
+	END
 END   	
 
 --------------------------------------------------------------------------------------------  
