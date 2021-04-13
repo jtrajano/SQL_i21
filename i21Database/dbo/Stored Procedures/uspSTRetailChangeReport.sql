@@ -8,7 +8,7 @@ BEGIN
 	DECLARE @dtmDateTimeBeginChangeFrom AS DATETIME
 	DECLARE @dtmDateTimeBeginChangeTo AS DATETIME
 
-	SELECT 
+	SELECT DISTINCT
 		preview.strCategoryDescription AS strCategoryDescription,
 		preview.strItemNo,
 		preview.strDescription AS strItemDescription,
@@ -36,11 +36,11 @@ BEGIN
 							ep.*, 
 							COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
 							ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate ASC) ts
+												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
 						FROM tblICEffectiveItemPrice ep
-						WHERE ep.dtmEffectiveRetailPriceDate BETWEEN @dtmBeginChange AND @dtmEndChange
+						WHERE ep.dtmEffectiveRetailPriceDate < @dtmEndChange
 					) r
-					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 1
+					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
 				) te
 				JOIN
 				(
@@ -51,11 +51,11 @@ BEGIN
 								ep.*, 
 								COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
 								ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate ASC) ts
+													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
 							FROM tblICEffectiveItemPrice ep
 						WHERE ep.dtmEffectiveRetailPriceDate BETWEEN @dtmBeginChange AND @dtmEndChange
 					) r
-					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
+					WHERE r.ts = 1
 				) tblMaxRetail
 				ON te.intItemId = tblMaxRetail.intItemId AND te.intItemLocationId = tblMaxRetail.intItemLocationId
 				GROUP BY te.intItemId, te.intItemLocationId

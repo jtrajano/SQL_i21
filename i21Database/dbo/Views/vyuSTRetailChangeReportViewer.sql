@@ -38,10 +38,10 @@ AS
 							ep.*, 
 							COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
 							ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate ASC) ts
+												ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
 						FROM tblICEffectiveItemPrice ep
 					) r
-					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 1
+					WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
 				) te
 				JOIN
 				(
@@ -52,10 +52,10 @@ AS
 								ep.*, 
 								COUNT(*) OVER ( PARTITION BY ep.intItemId, intItemLocationId) AS intCountItem,
 								ROW_NUMBER() OVER(PARTITION BY ep.intItemId, ep.intItemLocationId
-													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate ASC) ts
+													ORDER BY ep.intItemId, ep.intItemLocationId, ep.dtmEffectiveRetailPriceDate DESC) ts
 							FROM tblICEffectiveItemPrice ep
 						) r
-						WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 2
+						WHERE r.ts <= 2  AND r.intCountItem > 1 AND r.ts = 1
 				) tblMaxRetail
 				ON te.intItemId = tblMaxRetail.intItemId AND te.intItemLocationId = tblMaxRetail.intItemLocationId
 				GROUP BY te.intItemId, te.intItemLocationId
