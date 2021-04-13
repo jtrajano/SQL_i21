@@ -92,40 +92,19 @@ BEGIN
 
 	SELECT @intSalespersonId = intSalespersonId FROM @loop
 
-	IF @strMailType = 'Contract'
-	BEGIN
-		SELECT	@strIds	=	STUFF(															
-										(
-											SELECT	DISTINCT												
-													'|^|' +	LTRIM(intEntityContactId)
-											FROM	vyuCTEntityToContact 
-											WHERE	intEntityId = @intEntityId
-											AND		ISNULL(strEmail,'') <> ''
-											AND		strEmailDistributionOption LIKE '%Contracts%'
-											FOR XML PATH('')
-										),1,3, ''
-									)
+	SELECT	@strIds	=	STUFF(															
+									(
+										SELECT	DISTINCT												
+												'|^|' +	LTRIM(intEntityContactId)
+										FROM	vyuCTEntityToContact 
+										WHERE	intEntityId = @intEntityId
+										AND		ISNULL(strEmail,'') <> ''
+										FOR XML PATH('')
+									),1,3, ''
+								)
 				
-		FROM	vyuCTEntityToContact CH
-		WHERE	intEntityId = @intEntityId
-	END
-	ELSE
-	BEGIN
-		SELECT	@strIds	=	STUFF(															
-										(
-											SELECT	DISTINCT												
-													'|^|' +	LTRIM(intEntityContactId)
-											FROM	vyuCTEntityToContact 
-											WHERE	intEntityId = @intEntityId
-											AND		ISNULL(strEmail,'') <> ''
-											FOR XML PATH('')
-										),1,3, ''
-									)
-				
-		FROM	vyuCTEntityToContact CH
-		WHERE	intEntityId = @intEntityId
-	END
-
+	FROM	vyuCTEntityToContact CH
+	WHERE	intEntityId = @intEntityId
 
 	SELECT	@strNumber	=	STUFF(															
 									(

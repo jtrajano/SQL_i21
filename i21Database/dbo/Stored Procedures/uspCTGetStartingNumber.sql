@@ -5,6 +5,6 @@
 
 AS
 BEGIN
-	SELECT @strNumber = strPrefix + LTRIM(intNumber+1) FROM tblSMStartingNumber WHERE strTransactionType = @strTransactionType
+	SELECT @strNumber = strPrefix + LTRIM(intNumber) FROM tblSMStartingNumber WHERE strTransactionType = @strTransactionType
 	UPDATE tblSMStartingNumber SET intNumber = intNumber + 1 WHERE  strTransactionType = @strTransactionType
 END

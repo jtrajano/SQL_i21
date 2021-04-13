@@ -65,7 +65,7 @@ BEGIN
 
 	ELSE IF @strTable = 'Origin' OR @strTable = 'ContractPlan'
 	BEGIN	  
-		IF @strTable = 'Origin'
+		IF @strTable = 'ORIGIN'
 		BEGIN
 			SELECT @intItemId = intItemId,@intItemContractId = intItemContractId FROM tblCTContractDetail WHERE intContractDetailId = @intId
 		END

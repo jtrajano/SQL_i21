@@ -27,18 +27,15 @@ BEGIN TRY
 	where
 		pfd.intPriceFixationDetailId = @intPriceFixationDetailId;
 
-	IF (@ysnDWG = 1)
-	BEGIN
-		EXEC uspCTLogSummary
-			@intContractHeaderId 	= 	@intContractHeaderId,
-			@intContractDetailId 	= 	@intContractDetailId,
-			@strSource			 	= 	'Pricing',
-			@strProcess		 		= 	'Price Update',
-			@contractDetail 		= 	@contractDetails,
-			@intUserId				= 	@intUserId,
-			@intTransactionId 		=	@intPriceFixationDetailId,
-			@dblTransactionQty		=	@dblTransactionQuantity
-	END
+	EXEC uspCTLogSummary
+		@intContractHeaderId 	= 	@intContractHeaderId,
+		@intContractDetailId 	= 	@intContractDetailId,
+		@strSource			 	= 	'Pricing',
+		@strProcess		 		= 	'Price Update',
+		@contractDetail 		= 	@contractDetails,
+		@intUserId				= 	@intUserId,
+		@intTransactionId 		=	@intPriceFixationDetailId,
+		@dblTransactionQty		=	@dblTransactionQuantity
 
 END TRY
 BEGIN CATCH

@@ -405,8 +405,8 @@ BEGIN TRY
 	SELECT	@intLotsHedged	= SUM([dblNoOfLots]) FROM tblCTPriceFixationDetail WHERE intPriceFixationId = @intNewPriceFixationId AND ysnHedge = 1
 	UPDATE	tblCTPriceFixation SET intLotsHedged = @intLotsHedged  WHERE intPriceFixationId = @intNewPriceFixationId
 
-	EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Reassign', @intUserId
-	EXEC uspCTPriceFixationSave	@intNewPriceFixationId, 'Reassign', @intUserId
+	EXEC uspCTPriceFixationSave	@intPriceFixationId, 'Save', @intUserId
+	EXEC uspCTPriceFixationSave	@intNewPriceFixationId, 'Save', @intUserId
 
 	EXEC uspCTUpdateAdditionalCost @intRecipientHeaderId
 	

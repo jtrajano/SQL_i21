@@ -99,7 +99,6 @@ BEGIN TRY
 	where
 		cd.intContractDetailId = @intContractDetailId
 		and ch.intContractHeaderId = cd.intContractHeaderId
-  		and ch.intContractTypeId = 2  
 
 	IF ISNULL(@intContractDetailId,0) > 0
 	BEGIN
@@ -628,15 +627,13 @@ BEGIN TRY
 
 		SELECT @intPricingTypeId = intPricingTypeId, @dblCashPrice = dblCashPrice FROM tblCTContractDetail WHERE intContractDetailId = @intContractDetailId
 		
-		DECLARE @process NVARCHAR(50)
-			, @logProcess NVARCHAR(50)
+		DECLARE @process NVARCHAR(20)
 		SELECT @process = CASE WHEN @ysnSaveContract = 0 THEN 'Price Fixation' ELSE 'Save Contract' END
-		SELECT @logProcess = @process + CASE WHEN @strAction = 'Reassign' THEN ' - Reassign' ELSE '' END
 		
 		EXEC uspCTLogSummary @intContractHeaderId 	= 	@intContractHeaderId,
 							 @intContractDetailId 	= 	@intContractDetailId,
 							 @strSource			 	= 	'Pricing',
-							 @strProcess		 	= 	@logProcess,
+							 @strProcess		 	= 	@process,
 							 @contractDetail 		= 	@contractDetails,
 							 @intUserId				= 	@intUserId
 

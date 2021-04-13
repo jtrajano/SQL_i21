@@ -2,8 +2,7 @@
 	@intContractHeaderId	INT,
 	@intApprovedById		INT,
 	@intContractDetailId	INT = NULL,
-	@ysnApproved			BIT = 0,
-	@ysnFromContractSave	BIT = 0 
+	@ysnApproved			BIT = 0
 AS
 
 BEGIN TRY
@@ -128,10 +127,7 @@ BEGIN TRY
 		-- Add Payables if Create Other Cost Payable on Save Contract set to true
 		IF EXISTS(SELECT TOP 1 1 FROM tblCTCompanyPreference WHERE ysnCreateOtherCostPayable = 1)
 		BEGIN
-			if (@ysnFromContractSave = 1)
-			begin
-				EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
-			end
+			EXEC uspCTManagePayable @intContractHeaderId, 'header', 0
 		END
 		
 		SELECT @intApprovedContractId = MIN(intApprovedContractId) FROM @SCOPE_IDENTITY WHERE intApprovedContractId > @intApprovedContractId
