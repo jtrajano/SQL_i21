@@ -351,6 +351,7 @@ print 'BEGIN POST DEPLOYMENT'
 :r .\IC\Data_Fix_For_18.3\13_PopulateLotInTransitQtyAndWgt.sql
 :r .\IC\Data_Fix_For_18.3\14_PopulateShipFromEntity.sql
 :r .\IC\Data_Fix_For_19.1\01_PopulateStockUsage.sql
+:r .\IC\Data_Fix_For_19.1\02_PopulateCategoryChangeLog.sql
 
 
 -- Patronage
@@ -398,6 +399,7 @@ print 'BEGIN POST DEPLOYMENT'
 :R .\GR\ImportSettleStorageBillDetail.sql
 
 :R .\GR\1920_Dev_Linking_Voucher_Discount.sql
+:R .\GR\StorageInventoryReceipt.sql
 :R .\GR\Fix_NULL_SSId_in_voucher_details.sql
 
 --Manufacturing

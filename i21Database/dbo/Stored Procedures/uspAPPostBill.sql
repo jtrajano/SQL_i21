@@ -166,7 +166,8 @@ BEGIN
 	INSERT INTO @voucherBillId
 	SELECT intBillId FROM #tmpPostBillData
 
-	IF @transactionType IS NULL
+	--.Net is sending default value if parameter is not provided
+	IF ISNULL(NULLIF(@transactionType,''),'') = ''
 	BEGIN
 		SET @transactionType = 'Voucher';
 	END
@@ -211,14 +212,14 @@ BEGIN
 		,intTransactionId
 		,26
 	FROM dbo.fnCCValidateAssociatedTransaction(@billIds, 1, @transactionType)
-	UNION ALL
-	SELECT
-		strError
-		,strTransactionType
-		,strTransactionNo
-		,intTransactionId
-		,27
-	FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
+	-- UNION ALL
+	-- SELECT
+	-- 	strError
+	-- 	,strTransactionType
+	-- 	,strTransactionNo
+	-- 	,intTransactionId
+	-- 	,27
+	-- FROM dbo.[fnGRValidateBillPost](@billIds, @post, @transactionType)
 	
 	--if there are invalid applied amount, undo updating of amountdue and payment
 	IF EXISTS(SELECT 1 FROM #tmpInvalidBillData WHERE intErrorKey = 1 OR intErrorKey = 33)
@@ -463,7 +464,7 @@ ON rc.intInventoryReceiptChargeId = B.intInventoryReceiptChargeId
 WHERE 
 A.intBillId IN (SELECT intBillId FROM #tmpPostBillData)
 AND B.intInventoryReceiptChargeId IS NOT NULL 
--- AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
+AND rc.ysnInventoryCost = 1 --create cost adjustment entries for Inventory only for inventory cost yes
 AND (
 	(B.dblCost <> (CASE WHEN rc.strCostMethod = 'Amount' THEN rc.dblAmount ELSE rc.dblRate END))
 	OR ISNULL(NULLIF(rc.dblForexRate,0),1) <> B.dblRate

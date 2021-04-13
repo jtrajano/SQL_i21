@@ -144,10 +144,10 @@ glPayables (
 			--INNER JOIN tblGLAccount B ON A.intAccountId = B.intAccountId
 			INNER JOIN vyuGLAccountDetail D ON A.intAccountId = D.intAccountId
 			INNER JOIN tblAPBill C ON A.strTransactionId = C.strBillId
-			INNER JOIN tblAPAppliedPrepaidAndDebit C2 ON C.intBillId = C2.intBillId AND C2.intTransactionId = A.intJournalLineNo
+			INNER JOIN tblAPAppliedPrepaidAndDebit C2 ON C.intBillId = C2.intBillId AND C2.intTransactionId = A.intJournalLineNo AND (A.dblDebit - A.dblCredit) = CAST(C2.dblAmountApplied AS DECIMAL(18,2))  
 			INNER JOIN tblAPBill C3 ON C2.intTransactionId = C3.intBillId
 			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
-			AND A.strJournalLineDescription = 'Applied Debit Memo'
+			AND A.strJournalLineDescription IN ('Applied Debit Memo','Applied Vendor Prepayment','Applied Basis Advance')    
 			AND A.dblDebit != 0 --GET THE PAYMENT FOR THE TRANSACTION ONLY
 			AND A.ysnIsUnposted = 0
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end
@@ -165,7 +165,7 @@ glPayables (
 			INNER JOIN tblAPAppliedPrepaidAndDebit C2 ON C.intBillId = C2.intBillId AND C2.intTransactionId = A.intJournalLineNo
 			INNER JOIN tblAPBill C3 ON C2.intTransactionId = C3.intBillId
 			WHERE D.intAccountCategoryId IN (@prepaymentCategory, @intPayablesCategory)
-			AND A.strJournalLineDescription = 'Applied Debit Memo'
+			AND A.strJournalLineDescription IN ('Applied Debit Memo','Applied Vendor Prepayment','Applied Basis Advance')    
 			AND A.dblCredit != 0 --GET THE PAYMENT FOR THE TRANSACTION ONLY
 			AND A.ysnIsUnposted = 0
 			AND DATEADD(dd, DATEDIFF(dd, 0,A.dtmDate), 0) BETWEEN @start AND @end

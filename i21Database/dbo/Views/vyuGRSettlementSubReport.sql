@@ -111,10 +111,12 @@ FROM
 		LEFT JOIN (
 				    SELECT 
 						QM.intTicketId
-					   ,DCode.intItemId
+					   ,isnull(QMII.intItemId, DCode.intItemId) as intItemId
 					   ,QM.dblGradeReading
 					   ,QM.dblShrinkPercent
 					FROM tblQMTicketDiscount QM
+					LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+						on QM.intTicketDiscountId = QMII.intTicketDiscountId
 					JOIN tblGRDiscountScheduleCode DCode 
 						ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 					WHERE QM.strSourceType = 'Scale'
@@ -124,10 +126,12 @@ FROM
 		LEFT JOIN (
 					 SELECT 
 						 QM.intTicketFileId
-						,DCode.intItemId
+					   	,isnull(QMII.intItemId, DCode.intItemId) as intItemId
 						,QM.dblGradeReading
 						,QM.dblShrinkPercent
 					FROM tblQMTicketDiscount QM
+					LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+						on QM.intTicketDiscountId = QMII.intTicketDiscountId
 					JOIN tblGRDiscountScheduleCode DCode 
 						ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 					WHERE QM.strSourceType = 'Storage'
@@ -248,10 +252,12 @@ FROM
 		LEFT JOIN (
 					SELECT 
 						QM.intTicketId
-					   ,DCode.intItemId
+					   ,isnull(QMII.intItemId, DCode.intItemId) as intItemId
 					   ,QM.dblGradeReading
 					   ,QM.dblShrinkPercent
 					FROM tblQMTicketDiscount QM
+					LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+						on QM.intTicketDiscountId = QMII.intTicketDiscountId						
 					JOIN tblGRDiscountScheduleCode DCode 
 						ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 					WHERE QM.strSourceType = 'Scale'
@@ -262,10 +268,12 @@ FROM
 		LEFT JOIN (
 					 SELECT 
 						 QM.intTicketFileId
-						,DCode.intItemId
+					  	,isnull(QMII.intItemId, DCode.intItemId) as intItemId
 						,QM.dblGradeReading
 						,QM.dblShrinkPercent
 					FROM tblQMTicketDiscount QM
+					LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+						on QM.intTicketDiscountId = QMII.intTicketDiscountId	
 					JOIN tblGRDiscountScheduleCode DCode 
 						ON DCode.intDiscountScheduleCodeId = QM.intDiscountScheduleCodeId
 					WHERE QM.strSourceType = 'Storage'
@@ -279,7 +287,7 @@ FROM
    )t3 
 		ON --t3.intBillId = t2.intBillId AND t3.intBillId = t1.intBillId
 				t3.intBillId = t1.intBillId 
-					and isnull(t3.intInventoryReceiptItemId, 0) = isnull(t1.intInventoryReceiptItemId, 0)
+					and isnull(t3.intInventoryReceiptItemId, isnull(t1.intInventoryReceiptItemId, 0)) = isnull(t1.intInventoryReceiptItemId, 0)
 					and ISNULL(t3.intLinkingId, 0) = ISNULL(t1.intLinkingId, 0)
 	WHERE t3.intItemId IS NOT NULL 
 )t	

@@ -7,7 +7,7 @@ BEGIN TRY
 	SET ANSI_NULLS ON
 	SET NOCOUNT ON
 	SET XACT_ABORT ON
-	SET ANSI_WARNINGS OFF
+	SET ANSI_WARNINGS ON
 
 	DECLARE @intMinRowNo INT
 		,@ErrMsg NVARCHAR(MAX)
@@ -1990,6 +1990,25 @@ BEGIN TRY
 					SELECT @strContainerErrMsg = 'Container mismatch is there. '
 				END
 			END
+
+			UPDATE LD
+			SET strContainerNumbers = STUFF((
+						SELECT ', ' + CAST(strContainerNumber AS VARCHAR(MAX)) [text()]
+						FROM tblLGLoadContainer LC
+						INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
+						WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
+						FOR XML PATH('')
+							,TYPE
+						).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+			FROM tblLGLoadDetail LD
+			WHERE LD.intLoadId = @intLoadId
+				AND strContainerNumbers IS NULL
+				AND EXISTS (
+					SELECT TOP 1 1
+					FROM tblLGLoadContainer LC
+					INNER JOIN tblLGLoadDetailContainerLink LDCL ON LC.intLoadContainerId = LDCL.intLoadContainerId
+					WHERE LDCL.intLoadDetailId = LD.intLoadDetailId
+					)
 
 			-- To set Contract Planned Availability Date and send Contract feed to SAP
 			-- Also it sends Shipment feed to SAP

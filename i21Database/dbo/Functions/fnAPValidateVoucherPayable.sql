@@ -22,6 +22,15 @@ BEGIN
 	LEFT JOIN tblAPVendor B ON A.intEntityVendorId = B.intEntityId
 	WHERE B.intEntityId IS NULL
 	UNION ALL
+	--DO NOT ALLOW NEGATIVE COST
+	SELECT TOP 1
+		A.intVoucherPayableId
+		,ISNULL(B.strItemNo, A.strMiscDescription) + ' has incorrect cost. Cost cannot be negative.'
+	FROM @voucherPayables A
+	LEFT JOIN tblICItem B ON A.intItemId = B.intItemId
+	WHERE 
+		A.dblCost < 0
+	UNION ALL
 	--DO NOT ALLOW THE intItemId TO BE NULL IF UOM PROVIDED
 	SELECT TOP 1
 		A.intVoucherPayableId

@@ -459,7 +459,8 @@ BEGIN TRY
 			, strProcess  = @strProcess
 		FROM
 		(
-			SELECT ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.intSequenceHistoryId DESC) AS Row_Num
+			SELECT 
+				ROW_NUMBER() OVER (PARTITION BY sh.intContractDetailId ORDER BY sh.dtmHistoryCreated DESC) AS Row_Num
 				, sh.intSequenceHistoryId
 				, dtmTransactionDate = CASE WHEN cd.intContractStatusId IN (3,6) THEN sh.dtmHistoryCreated ELSE DATEADD(mi, DATEDIFF(mi, GETUTCDATE(), GETDATE()), cd.dtmCreated) END
 				, sh.intContractHeaderId
@@ -526,8 +527,8 @@ BEGIN TRY
 						, intContractStatusId
 						, COUNT (*)
 					FROM (
-						SELECT TOP 1 intRowId = 1, * FROM @cbLogTemp
-						UNION ALL SELECT * FROM (SELECT ROW_NUMBER() OVER (ORDER BY intId DESC) intRowId, * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId) tbl WHERE intRowId = 1
+						SELECT TOP 1 * FROM @cbLogTemp
+						UNION ALL SELECT TOP 1 * FROM @cbLogPrev WHERE intContractDetailId = @intContractDetailId ORDER BY intId DESC
 					) tbl
 					GROUP BY intContractDetailId
 						, intContractHeaderId
@@ -557,6 +558,7 @@ BEGIN TRY
 				DELETE FROM @cbLogTemp
 			END
 		END
+
 
 		IF EXISTS(SELECT TOP 1 1 FROM @cbLogTemp WHERE intContractStatusId = 4)
 		BEGIN
@@ -1534,7 +1536,7 @@ BEGIN TRY
 				AND suh.intExternalHeaderId is not null
 			) tbl
 			WHERE Row_Num = 1
-
+			
 			-- Check if invoice
 			IF EXISTS (SELECT TOP 1 1 FROM @cbLogTemp WHERE strTransactionReference = 'Invoice')
 			BEGIN
@@ -2928,6 +2930,27 @@ BEGIN TRY
 	SELECT @intId = MIN(intId) FROM @cbLogCurrent
 	WHILE @intId > 0--EXISTS(SELECT TOP 1 1 FROM @cbLogCurrent)
 	BEGIN
+
+		--Check if the record is already negated and exit loop.
+		if exists (
+	  		select
+				top 1 1
+			from
+				@cbLogCurrent curr
+				join @cbLogCurrent cter on
+					cter.strBatchId = curr.strBatchId
+					and cter.strTransactionReference = curr.strTransactionReference
+					and cter.intTransactionReferenceId = curr.intTransactionReferenceId
+					and cter.intTransactionReferenceDetailId = curr.intTransactionReferenceDetailId
+					and (cter.dblQty * -1) = curr.dblQty
+					and cter.intId <> curr.intId
+			where
+				curr.intId = @intId
+		)
+		begin
+			goto _Exit;
+		end
+
 		DELETE FROM @cbLogPrev
 
 		INSERT INTO @cbLogSpecific (strBatchId
@@ -3425,6 +3448,18 @@ BEGIN TRY
 			END
 			ELSE -- With changes with dblQty
 			BEGIN
+				--Check if the sequence is being update
+				if exists (select top 1 1 from @cbLogSpecific where intActionId = 43)  
+				begin
+					--if the total priced qty is equal or less than contract qty, pricing type should be the pricing type of the header.
+					if (@TotalPriced <= @dblContractQty)
+					begin
+						declare @intOrigHeaderPricingTypeId int;
+						select top 1 @intOrigHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
+						update @cbLogSpecific set intPricingTypeId = @intOrigHeaderPricingTypeId
+					end
+				end 
+
 				-- Add current record
 				UPDATE  @cbLogSpecific SET dblQty = @total * CASE WHEN @prevContractStatusId <> 3 AND @intContractStatusId = 3 THEN - 1 ELSE 1 END
 				EXEC uspCTLogContractBalance @cbLogSpecific, 0		
@@ -3543,13 +3578,16 @@ BEGIN TRY
 					-- If Reassign prices, do not bring back Basis qty
 					IF (@ysnReassign = 0)
 					BEGIN
+
+						declare @intHeaderPricingTypeId int;
+						select top 1 @intHeaderPricingTypeId = intHeaderPricingTypeId from @tmpContractDetail
 						-- Increase basis, qtyDiff is negative so multiply to -1
-						UPDATE  @cbLogSpecific SET dblQty = @FinalQty * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE 2 END
+						UPDATE  @cbLogSpecific SET dblQty = (case when @FinalQty = 0 then dblOrigQty else @FinalQty end) * - 1, intPricingTypeId = CASE WHEN @currPricingTypeId = 3 THEN 3 ELSE @intHeaderPricingTypeId END
 						EXEC uspCTLogContractBalance @cbLogSpecific, 0
 					END
 
 					-- Decrease Priced
-					UPDATE  @cbLogSpecific SET dblQty = @FinalQty, intPricingTypeId = 1
+					UPDATE  @cbLogSpecific SET dblQty = (case when @FinalQty = 0 then dblOrigQty else @FinalQty end), intPricingTypeId = 1
 					EXEC uspCTLogContractBalance @cbLogSpecific, 0
 				END
 			END
@@ -3932,6 +3970,8 @@ BEGIN TRY
 		END
 
 		DELETE FROM @cbLogSpecific
+
+		_Exit:
 
 		SELECT @intId = MIN(intId) FROM @cbLogCurrent WHERE intId > @intId
 	END

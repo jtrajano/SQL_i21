@@ -12,7 +12,7 @@ FROM
 	   , TR.strTrlNetwCode
 	   , TR.strTrlUPC
 	   , TR.strTrlDesc
-	   , TR. dblTrlQty
+	   , TR.dblTrlQty
 	   , TR.dblTrlUnitPrice
 	   , TR.dblTrlLineTot
 	   , TR.intTermMsgSN
@@ -21,10 +21,8 @@ FROM
 	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
 	   --, USec.intEntityId
 	FROM tblSTTranslogRebates TR
-	JOIN tblSTCheckoutHeader CH 
-		ON TR.intCheckoutId = CH.intCheckoutId
 	JOIN tblSTStore ST 
-		ON CH.intStoreId = ST.intStoreId 
+		ON TR.intStoreId = ST.intStoreId 
 	-- OUTER APPLY tblSMUserSecurity USec
 	-- INNER JOIN tblSMUserSecurityCompanyLocationRolePermission RolePerm
 		-- ON USec.intEntityId = RolePerm.intEntityId

@@ -2,9 +2,6 @@
 	@strBatchId AS NVARCHAR(40)
 	,@SettleVoucherCreate AS SettleVoucherCreate READONLY
 AS
-	
-
-
 	MERGE	
 	INTO	dbo.[tblGRSettleVoucherCreateReferenceTable] 
 	WITH	(HOLDLOCK) 
@@ -29,7 +26,7 @@ AS
 			,a.dblCostUnitQty
 			,a.dblSettleContractUnits
 			,a.ysnDiscountFromGrossWeight
-			,ysnItemInventoryCost = b.ysnInventoryCost
+			,ysnItemInventoryCost = isnull(a.ysnInventoryCost, b.ysnInventoryCost)
 			from
 			@SettleVoucherCreate a
 				join tblICItem b

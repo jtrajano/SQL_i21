@@ -218,7 +218,7 @@ BEGIN
 		,[intChargeId]						= IC.intItemId
 		,[intForexRateTypeId]				= NULL
 		,[dblForexRate]						= NULL
-		,[ysnInventoryCost]					= IC.ysnInventoryCost
+		,[ysnInventoryCost]					= ISNULL(QMII.ysnInventoryCost, IC.ysnInventoryCost)
 		,[strCostMethod]					= IC.strCostMethod
 		,[dblRate]							= CASE WHEN CD.intPricingTypeId = 2 THEN --Basis
 											  	CASE
@@ -301,10 +301,12 @@ BEGIN
 	JOIN tblQMTicketDiscount QM 
 		ON QM.intTicketFileId = SST.intCustomerStorageId 
 			AND QM.strSourceType = 'Storage'
+	LEFT JOIN [tblGRTicketDiscountItemInfo] QMII
+		ON QM.intTicketDiscountId = QMII.intTicketDiscountId
 	JOIN tblGRDiscountScheduleCode GR 
 		ON QM.intDiscountScheduleCodeId = GR.intDiscountScheduleCodeId
 	JOIN tblICItem IC 
-		ON IC.intItemId = GR.intItemId
+		ON IC.intItemId = isnull(QMII.intItemId, GR.intItemId)
 	OUTER APPLY (
 		SELECT TOP 1 
 			dblFutureMarketPrice = ISNULL(a.dblLastSettle,0)

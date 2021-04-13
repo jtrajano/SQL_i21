@@ -80,6 +80,8 @@ AND (
 			bankTran.ysnClr = 1
 			OR
 			pay.intPaymentMethodId = 10 --CASH PAYMENT
+			OR
+			pay.intPaymentMethodId = 6 --eCheck
 		) 
 	)
 

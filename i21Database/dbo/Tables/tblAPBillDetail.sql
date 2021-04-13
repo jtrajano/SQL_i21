@@ -145,7 +145,10 @@ CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intSettleStorageId]
 		ON [dbo].[tblAPBillDetail]([intSettleStorageId] ASC)
 		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
 GO
-
+CREATE NONCLUSTERED INDEX [IX_tblAPBillDetail_intContractDetailId]
+		ON [dbo].[tblAPBillDetail]([intContractDetailId] ASC)
+		INCLUDE (intBillDetailId, intBillId, intUnitOfMeasureId, intCostUOMId, intWeightUOMId, intItemId, dblQtyReceived)
+GO
 CREATE NONCLUSTERED INDEX [IX_rptAging_1] ON [dbo].[tblAPBillDetail]
 (
 	[intBillId] ASC,

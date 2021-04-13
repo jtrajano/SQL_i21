@@ -352,7 +352,7 @@ END
 	,[intForexRateTypeId]				= RE.intForexRateTypeId
 	,[dblForexRate]						= RE.dblForexRate
 	,[ysnInventoryCost]					= IC.ysnInventoryCost
-	,[strCostMethod]					= IC.strCostMethod
+	,[strCostMethod]					= case when QM.strCalcMethod = '3' then 'Gross Unit' else IC.strCostMethod end
 	,[dblRate]							= CASE
 											WHEN IC.strCostMethod = 'Per Unit' THEN 
 											CASE 
@@ -415,6 +415,7 @@ END
 	) CNT ON CNT.intContractDetailId = RE.intContractDetailId
 	WHERE RE.intSourceId = @intTicketId AND (QM.dblDiscountAmount != 0 OR GR.ysnSpecialDiscountCode = 1) AND RE.ysnIsStorage = 0 AND ISNULL(intPricingTypeId,0) IN (0,1,2,5,6) 
 
+		and isnull(@intDeliverySheetId,0 ) = 0
 	--FOR FEE CHARGES
 	INSERT INTO @OtherCharges
 	(
