@@ -40,7 +40,7 @@ SELECT intInvoiceId				= I.intInvoiceId
 	 , intCategoryId			= CATEGORY.intCategoryId
 	 , strSalespersonName		= ESP.strName
 	 , strShipToState			= RTRIM(strShipToState)
-	 , intEntitySalespersonId	= ID.intEntitySalespersonId
+	 , intEntitySalespersonId	= I.intEntitySalespersonId
 	 , strAccountStatusCode 	= STATUSCODES.strAccountStatusCode
 	 , intBillToLocationId		= I.intBillToLocationId
 	 , intShipToLocationId		= I.intShipToLocationId
@@ -94,7 +94,7 @@ LEFT JOIN (
 LEFT JOIN (
 	tblARSalesperson SP 
 	INNER JOIN tblEMEntity ESP ON SP.[intEntityId] = ESP.intEntityId
-) ON ID.intEntitySalespersonId = SP.[intEntityId]
+) ON I.intEntitySalespersonId = SP.[intEntityId]
 OUTER APPLY (
 	 SELECT strAccountStatusCode = LEFT(strAccountStatusCode, LEN(strAccountStatusCode) - 1) COLLATE Latin1_General_CI_AS
 	 FROM (
