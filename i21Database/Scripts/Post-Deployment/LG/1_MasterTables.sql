@@ -470,7 +470,7 @@ BEGIN
 							WHERE IR.ysnPosted = 1 AND IRI.intLineNo = PC.intContractDetailId
 								AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> ''Inventory Return''
 								AND (PC.intLoadContainerId IS NULL OR IRI.intContainerId = PC.intLoadContainerId)
-							ORDER BY IR.intInventoryReceiptId DESC) IR
+							ORDER BY IR.dtmReceiptDate DESC) IR
 		WHERE PC.intPurchaseSale = 1 AND IR.dtmReceiptDate IS NOT NULL AND PC.dtmReceiptDate IS NULL
 	')
 END

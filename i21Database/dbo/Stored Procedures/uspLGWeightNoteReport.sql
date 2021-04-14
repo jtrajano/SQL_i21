@@ -102,7 +102,8 @@ BEGIN
 						LEFT JOIN tblSMCompanyLocationSubLocation clsl ON clsl.intCompanyLocationSubLocationId = iri.intSubLocationId
 					WHERE ir.ysnPosted = 1 AND iri.intOrderId = CH.intContractHeaderId 
 						AND ir.strReceiptType <> 'Inventory Return'
-						AND iri.intContainerId = LC.intLoadContainerId) IR
+						AND iri.intContainerId = LC.intLoadContainerId
+					ORDER BY ir.dtmReceiptDate DESC) IR
 		OUTER APPLY (SELECT dblDamagedQty = SUM(ISNULL(dblQuantity, 0))
 							,dblDamagedNet = SUM(ISNULL(iril.dblGrossWeight, 0) - ISNULL(iril.dblTareWeight, 0)) 
 					 FROM tblICLot lot 

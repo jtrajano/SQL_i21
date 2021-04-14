@@ -121,7 +121,7 @@ FROM tblLGPendingClaim PC
 				WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
 					AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
 					AND (LC.intLoadContainerId IS NULL OR IRI.intContainerId = LC.intLoadContainerId)
-					ORDER BY IR.intInventoryReceiptId DESC) IR
+					ORDER BY IR.dtmReceiptDate DESC) IR
 	OUTER APPLY (SELECT TOP 1 IV.dtmDate FROM tblARInvoice IV
 					INNER JOIN tblARInvoiceDetail IVD ON IVD.intInvoiceId = IV.intInvoiceId
 					WHERE IV.ysnPosted = 1 AND IVD.intContractDetailId = CD.intContractDetailId

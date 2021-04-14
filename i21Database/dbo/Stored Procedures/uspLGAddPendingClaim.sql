@@ -141,7 +141,7 @@ BEGIN
 										WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
 											AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
 											AND IRI.intContainerId = LC.intLoadContainerId
-										ORDER BY IR.intInventoryReceiptId DESC) IRD
+										ORDER BY IR.dtmReceiptDate DESC) IRD
 						CROSS APPLY (SELECT intLoadContainerId, dblLinkNetWt = SUM(ISNULL(dblLinkNetWt, 0)) FROM tblLGLoadDetailContainerLink 
 										WHERE intLoadDetailId = LD.intLoadDetailId 
 											AND intLoadContainerId = LC.intLoadContainerId AND ISNULL(dblReceivedQty, 0) >= dblQuantity
@@ -290,7 +290,7 @@ BEGIN
 										INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 										WHERE IR.ysnPosted = 1 AND IRI.intLineNo = CD.intContractDetailId
 											AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> 'Inventory Return'
-										ORDER BY IR.intInventoryReceiptId DESC) IRD
+										ORDER BY IR.dtmReceiptDate DESC) IRD
 							CROSS APPLY (SELECT dblNet = SUM(ISNULL(IRI.dblNet,0)),dblGross = SUM(ISNULL(IRI.dblGross,0)) FROM tblICInventoryReceipt IR 
 											JOIN tblICInventoryReceiptItem IRI ON IR.intInventoryReceiptId = IRI.intInventoryReceiptId
 											WHERE IRI.intSourceId = LD.intLoadDetailId AND IRI.intLineNo = CD.intContractDetailId
