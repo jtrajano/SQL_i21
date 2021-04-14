@@ -3,6 +3,7 @@
 SELECT
 	SP.intSpecialPriceId
 	,SP.intEntityCustomerId
+	,Customer.strEntityNo strCustomerEntityNo
 	,Customer.strName strCustomerName
 	,SP.intCustomerLocationId
 	,Loc.strLocationName strCustomerLocation
