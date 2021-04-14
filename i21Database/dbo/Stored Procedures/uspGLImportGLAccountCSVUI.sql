@@ -66,11 +66,11 @@ SET strAccountId = RTRIM(LTRIM(strPrimarySegment)) + @separator + RTRIM(LTRIM(st
  THEN ''    
  ELSE @separator + strLOBSegment  END  
 UPDATE [tblGLAccountImportDataStaging2] SET ysnNoDescription = 1 WHERE RTRIM(LTRIM(ISNULL([strDescription],''))) = ''  
-UPDATE [tblGLAccountImportDataStaging2] SET [ysnMissingLOBSegment] = 0  
+UPDATE [tblGLAccountImportDataStaging2] SET [ysnMissingLOBSegment] = CAST(0 AS BIT)
    
   
 -- UPDATE EXISTING GL ACCOUNT  
-UPDATE T SET [ysnGLAccountExist] = 1   
+UPDATE T SET [ysnGLAccountExist] = CAST(1 AS BIT)
 FROM  [tblGLAccountImportDataStaging2] T   
 JOIN tblGLAccount A ON A.strAccountId COLLATE Latin1_General_CI_AS = T.strAccountId COLLATE Latin1_General_CI_AS  
   
@@ -97,13 +97,13 @@ WHERE strStructureName = 'Location'
   
   
 IF @withLOB =1   
- UPDATE T SET [ysnMissingLOBSegment] = CASE WHEN A.strCode IS NULL THEN 1 ELSE 0 END ,[intLOBSegmentId] = A.intAccountSegmentId  
+ UPDATE T SET [ysnMissingLOBSegment] = CASE WHEN A.strCode IS NULL THEN CAST(1 AS BIT) ELSE CAST( 0 AS BIT ) END ,[intLOBSegmentId] = A.intAccountSegmentId  
  FROM  [tblGLAccountImportDataStaging2] T   
  LEFT JOIN tblGLAccountSegment A ON A.strCode COLLATE Latin1_General_CI_AS =RTRIM(LTRIM(T.strLOBSegment)) COLLATE Latin1_General_CI_AS  
  LEFT JOIN tblGLAccountStructure S on S.intAccountStructureId = A.intAccountStructureId  
  WHERE strStructureName = 'LOB'  
   
-UPDATE [tblGLAccountImportDataStaging2] SET ysnValid = 1   
+UPDATE [tblGLAccountImportDataStaging2] SET ysnValid = CAST(1 AS BIT)
 WHERE intPrimarySegmentId IS NOT NULL   
 AND intLocationSegmentId IS NOT NULL   
 AND [ysnMissingLOBSegment] =0   
@@ -167,16 +167,17 @@ WHERE A.strAccountId NOT IN (SELECT stri21Id FROM tblGLCOACrossReference WHERE s
  
  IF EXISTS (SELECT TOP 1 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[glactmst]') AND type IN (N'U'))    
  BEGIN  
-  EXEC uspGLAccountOriginSync @intEntityId    
+ SET ANSI_WARNINGS  OFF
+
+ EXEC uspGLAccountOriginSync @intEntityId    
   
- EXEC('  
- DECLARE @l int  
- SELECT @l = COL_LENGTH(''glactmst'', ''glact_desc'')  
- UPDATE G set glact_desc = LEFT( D.strDescription, @l)  
+ EXEC('
+ UPDATE G set glact_desc = LEFT( D.strDescription, 30)  
  FROM tblGLCOACrossReference C Join tblGLAccount A on A.intAccountId = C.inti21Id   
  JOIN [tblGLAccountImportDataStaging2] D  on D.intAccountId = A.intAccountId  
  join glactmst G on G.A4GLIdentity = C.intLegacyReferenceId  
  where isnull(ysnNoDescription,0) = 0')  
+ SET ANSI_WARNINGS  ON
 END  
   
   
