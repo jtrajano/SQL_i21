@@ -331,23 +331,31 @@ BEGIN
 						-- [END] - PREVIEW IF DEBUG (ITEM)
 						-- ===============================================
 
+						IF EXISTS (SELECT TOP 1 intItemId FROM tblICItemUOM WHERE intItemId != @intItemId AND (strUpcCode = @strUpcCode OR strLongUPCCode = @strLongUpcCode))
+							BEGIN
+							SET @ysnResultSuccess = 0
+							SET @strResultMessage = 'Error updating Item: Short UPC Code or UPC Code already existing on other item'  
 
-						EXEC [dbo].[uspICUpdateItemForCStore]
-							-- filter params	
-							@strDescription				= NULL 
-							,@dblRetailPriceFrom		= NULL  
-							,@dblRetailPriceTo			= NULL 
-							,@intItemId					= @intItemId 
-							,@intItemUOMId				= @intItemUOMId 
-							-- update params
-							,@intCategoryId				= @intCategoryId
-							,@strCountCode				= NULL
-							,@strItemDescription		= @strDescription 	
-							,@strItemNo					= @strItemNo 
-							,@strShortName				= @strShortName 
-							,@strUpcCode				= @strUpcCode 
-							,@strLongUpcCode			= @strLongUpcCode 
-							,@intEntityUserSecurityId	= @intEntityId
+							GOTO ExitWithRollback
+							END
+						ELSE 
+							EXEC [dbo].[uspICUpdateItemForCStore]
+								-- filter params	
+								@strDescription				= NULL 
+								,@dblRetailPriceFrom		= NULL  
+								,@dblRetailPriceTo			= NULL 
+								,@intItemId					= @intItemId 
+								,@intItemUOMId				= @intItemUOMId 
+								-- update params
+								,@intCategoryId				= @intCategoryId
+								,@strCountCode				= NULL
+								,@strItemDescription		= @strDescription 	
+								,@strItemNo					= @strItemNo 
+								,@strShortName				= @strShortName 
+								,@strUpcCode				= @strUpcCode 
+								,@strLongUpcCode			= @strLongUpcCode 
+								,@intEntityUserSecurityId	= @intEntityId
+							
 
 						--OLD
 						-- EXEC [dbo].[uspICUpdateItemForCStore]
