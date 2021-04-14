@@ -260,6 +260,7 @@
     <Build Include="dbo\Tables\tblGLAccountTemplate.sql" />
     <Build Include="dbo\Tables\tblGLAccountTemplateDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountUnit.sql" />
+    <Build Include="dbo\Tables\tblGLAccountImportStaging.sql" />
     <Build Include="dbo\Tables\tblGLBudget.sql" />
     <Build Include="dbo\Tables\tblGLBudgetCode.sql" />
     <Build Include="dbo\Tables\tblGLBudgetDetail.sql" />
@@ -404,6 +405,7 @@
     <Build Include="dbo\Stored Procedures\uspCMApplyCheckChangeForPrintFail.sql" />
     <Build Include="dbo\Stored Procedures\uspGLFixPostHistoryGroupings.sql" />
     <Build Include="dbo\Stored Procedures\uspGLImportGLAccountCSV.sql" />
+    <Build Include="dbo\Stored Procedures\uspGLImportGLAccountCSVUI.sql" />
     <Build Include="dbo\Stored Procedures\uspCMBookGLEntries.sql" />
     <Build Include="dbo\Stored Procedures\uspCMUndepositedFundReport.sql">
       <SuppressTSqlWarnings>71502</SuppressTSqlWarnings>
