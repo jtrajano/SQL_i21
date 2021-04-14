@@ -469,7 +469,8 @@ BEGIN
 							INNER JOIN tblICInventoryReceiptItem IRI ON IRI.intInventoryReceiptId = IR.intInventoryReceiptId
 							WHERE IR.ysnPosted = 1 AND IRI.intLineNo = PC.intContractDetailId
 								AND IRI.intOrderId = CH.intContractHeaderId AND IR.strReceiptType <> ''Inventory Return''
-								AND (PC.intLoadContainerId IS NULL OR IRI.intContainerId = PC.intLoadContainerId)) IR
+								AND (PC.intLoadContainerId IS NULL OR IRI.intContainerId = PC.intLoadContainerId)
+							ORDER BY IR.intInventoryReceiptId DESC) IR
 		WHERE PC.intPurchaseSale = 1 AND IR.dtmReceiptDate IS NOT NULL AND PC.dtmReceiptDate IS NULL
 	')
 END
