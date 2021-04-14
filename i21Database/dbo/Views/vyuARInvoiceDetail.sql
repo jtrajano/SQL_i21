@@ -31,6 +31,8 @@ SELECT
 	,D.strSCInvoiceNumber
 	,D.intContractDetailId
 	,D.intContractHeaderId
+	,D.intItemContractDetailId
+	,D.intItemContractHeaderId
 FROM         
 	[tblARInvoiceDetail] D
 INNER JOIN	

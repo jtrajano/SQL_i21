@@ -5004,6 +5004,7 @@
     <Build Include="dbo\Stored Procedures\uspQMSampleContractSlice.sql" />
     <Build Include="dbo\Stored Procedures\uspQMSampleContractCopy.sql" />
     <Build Include="dbo\Stored Procedures\uspSCGetDiscountRead.sql" />
+    <Build Include="dbo\Stored Procedures\uspRestApiImportInvoice.sql" />
     <Build Include="dbo\Views\vyuLGLoadDocumentTrackingSummary.sql" />
     <Build Include="dbo\Views\vyuARInvoicesForPayment.sql" />
     <Build Include="dbo\Views\vyuMFGetOwnerDetail.sql" />
@@ -5012,6 +5013,7 @@
     <Build Include="dbo\Stored Procedures\uspIPStageSAPBuyingPlan.sql" />
     <Build Include="dbo\Stored Procedures\uspPRUBGRetirementReport.sql" />
     <Build Include="dbo\Views\vyuRKGetFilledDate.sql" />
+    <Build Include="dbo\Tables\tblRestApiInvoiceStaging.sql" />
     <Build Include="dbo\Tables\tblHDTicketParticipant.sql" />
     <Build Include="dbo\Tables\tblAPVendorPricing.sql" />
     <Build Include="dbo\Views\vyuTMSiteDeliveryHistoryTotal.sql" />
