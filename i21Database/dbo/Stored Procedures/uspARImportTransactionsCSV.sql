@@ -52,6 +52,8 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 		DECLARE	@EntityCustomerId			INT
 			,@Date							DATETIME
 			,@CompanyLocationId				INT
+			,@LocationSalesAccountId		INT
+			,@LocationName					NVARCHAR(500)	= ''
 			,@EntityId						INT
 			,@NewTransactionId				INT				= NULL		
 			,@ErrorMessage					NVARCHAR(250)	= NULL
@@ -339,6 +341,11 @@ WHILE EXISTS(SELECT TOP 1 NULL FROM @InvoicesForImport)
 
 		IF ISNULL(@CompanyLocationId, 0) = 0
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Location Name provided does not exists. '
+
+		SELECT TOP 1 @LocationSalesAccountId = intSalesAccount, @LocationName = strLocationName FROM tblSMCompanyLocation WHERE intCompanyLocationId =  ISNULL(@CompanyLocationId, 0)
+
+		IF ISNULL(@LocationSalesAccountId, 0) = 0
+			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + CASE WHEN @LocationSalesAccountId IS NULL THEN 'The Sales account of Company Location ' + @LocationName + ' is not valid. ' ELSE 'The Sales account of Company Location ' + @LocationName + ' was not set. ' END
 	
 		IF @TermId IS NULL
 			SET @ErrorMessage = ISNULL(@ErrorMessage, '') + 'The Term Code provided does not exists. '
