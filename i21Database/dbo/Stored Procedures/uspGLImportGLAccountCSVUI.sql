@@ -1,48 +1,17 @@
 
-CREATE PROCEDURE uspGLImportGLAccountCSV  
+CREATE PROCEDURE uspGLImportGLAccountCSVUI
 (  
- @filePath NVARCHAR(MAX),
+ @strGUID NVARCHAR(40),
  @intEntityId INT,
  @strVersion NVARCHAR(100),
  @importLogId INT OUT 
 )  
 AS  
   
-IF object_id('tblStagingTable') IS NOT NULL   
- DROP TABLE dbo.tblStagingTable  
+
 IF object_id('tblGLAccountImportDataStaging2') IS NOT NULL   
  DROP TABLE dbo.tblGLAccountImportDataStaging2  
   
-  
-CREATE TABLE tblStagingTable (  
- [strPrimarySegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,  
- [strLocationSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NOT NULL,  
- [strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,  
- [strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,  
- [strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL  
-)  
-   
-  
-  
-BEGIN TRY  
- DECLARE @s NVARCHAR(MAX) =  
- 'BULK  
- INSERT tblStagingTable  
- FROM ''' +   @filePath +  
-  
- ''' WITH  
- (  
- FIELDTERMINATOR = '','',  
- ROWTERMINATOR = ''\n''  
- )'  
- --select @s  
- Exec(@s)  
-END TRY  
-BEGIN CATCH  
- RAISERROR('Bulk Load operation failed', 16, 1);  
- RETURN;  
-  
-END CATCH    
   
 --Check the content of the table.  
 CREATE TABLE tblGLAccountImportDataStaging2  
@@ -53,7 +22,7 @@ CREATE TABLE tblGLAccountImportDataStaging2
  [strLOBSegment] [nvarchar](40) COLLATE Latin1_General_CI_AS NULL,  
  [strDescription] [nvarchar](500) COLLATE Latin1_General_CI_AS NULL,  
  [strUOM] [nvarchar](20) COLLATE Latin1_General_CI_AS NULL,  
-  [intAccountId] [int] NULL,  
+ [intAccountId] [int] NULL,  
  [strAccountId] [nvarchar](40)  COLLATE Latin1_General_CI_AS NULL,  
  [ysnMissingSegment] [bit] NULL,  
  [ysnGLAccountExist] [bit] NULL,  
@@ -76,11 +45,9 @@ REPLACE(LTRIM(RTRIM([strPrimarySegment])),'"','')
 ,REPLACE(LTRIM(RTRIM([strLocationSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strLOBSegment])),'"','')  
 ,REPLACE(LTRIM(RTRIM([strDescription])),'"','')  
-,REPLACE(LTRIM(RTRIM([strUOM])),'"','') FROM tblStagingTable  
+,REPLACE(LTRIM(RTRIM([strUOM])),'"','') FROM tblGLAccountImportDataStaging  
+WHERE strGUID=@strGUID
   
-
-
-
   
 CREATE UNIQUE INDEX indunique  
   ON [tblGLAccountImportDataStaging2]([strAccountId])  
