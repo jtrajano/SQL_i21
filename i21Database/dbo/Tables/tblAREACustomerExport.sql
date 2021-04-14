@@ -53,5 +53,7 @@
 	dblARBalance NUMERIC(18, 6) NULL,
 	dblCreditLimit NUMERIC(18, 6) NULL,
 	dblShipToLatitude NUMERIC(18, 6) NULL,
-	dblShipToLongitude NUMERIC(18, 6) NULL
+	dblShipToLongitude NUMERIC(18, 6) NULL,
+	dtmDateCreated DATETIME NULL,
+	dtmDateModified DATETIME NULL
 )
