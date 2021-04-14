@@ -262,7 +262,7 @@ BEGIN TRY
 			lblAdditionalCostColon = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN ':' ELSE NULL END,
 			strEQTAdditionalCost = CASE WHEN ISNULL(PF.dblAdditionalCost,0) <> 0 THEN dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ELSE NULL END, 
 			strAdditionalCost = dbo.fnRemoveTrailingZeroes(PF.dblAdditionalCost) + ' ' + CY.strCurrency + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
-			strFinalPrice =	dbo.fnCTChangeNumericScale(PF.dblFinalPrice,2) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
+			strFinalPrice =	CONVERT(NVARCHAR,CAST(PF.dblFinalPrice  AS Money),1) + ' ' + CY.strDescription + ' ' + @per + ' ' + isnull(rtrt3.strTranslation,CM.strUnitMeasure) ,
 			strFinalPrice2 =	'=    ' + dbo.fnRemoveTrailingZeroes(ROUND(
 								CASE	WHEN	CD.intCurrencyId = CD.intInvoiceCurrencyId 
 										THEN	NULL
