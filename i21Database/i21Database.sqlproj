@@ -260,7 +260,7 @@
     <Build Include="dbo\Tables\tblGLAccountTemplate.sql" />
     <Build Include="dbo\Tables\tblGLAccountTemplateDetail.sql" />
     <Build Include="dbo\Tables\tblGLAccountUnit.sql" />
-    <Build Include="dbo\Tables\tblGLAccountImportStaging.sql" />
+    <Build Include="dbo\Tables\tblGLAccountImportDataStaging.sql" />
     <Build Include="dbo\Tables\tblGLBudget.sql" />
     <Build Include="dbo\Tables\tblGLBudgetCode.sql" />
     <Build Include="dbo\Tables\tblGLBudgetDetail.sql" />
