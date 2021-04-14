@@ -33,6 +33,7 @@ SELECT
 	,D.intContractHeaderId
 	,D.intItemContractDetailId
 	,D.intItemContractHeaderId
+	,D.intItemCategoryId
 FROM         
 	[tblARInvoiceDetail] D
 INNER JOIN	
