@@ -67,6 +67,7 @@ INSERT INTO tblARInvoiceReportStagingTable (
 	 , dblItemPrice
 	 , dblPriceWithTax
 	 , dblTotalPriceWithTax
+	 , dblInvoiceSubtotal
 	 , dblInvoiceTotal
 	 , dblAmountDue
 	 , dblInvoiceTax
@@ -137,6 +138,7 @@ SELECT strCompanyName			= COMPANY.strCompanyName
 	 , dblItemPrice				= INVOICEDETAIL.dblTotal
 	 , dblPriceWithTax			= INVOICEDETAIL.dblPriceWithTax
 	 , dblTotalPriceWithTax		= INVOICEDETAIL.dblTotalPriceWithTax
+	 , dblInvoiceSubtotal		= ISNULL(INV.dblInvoiceSubtotal, 0)
 	 , dblInvoiceTotal			= ISNULL(INV.dblInvoiceTotal, 0)
 	 , dblAmountDue				= ISNULL(INV.dblAmountDue, 0)
 	 , dblInvoiceTax			= ISNULL(INV.dblTax, 0)
