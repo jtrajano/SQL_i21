@@ -10,6 +10,7 @@
 	[dtmLastTimeOffAdjustmentReset] DATETIME NULL,
 	[intCommissionEarningId] [int] NULL,
 	[strWH32BaseAddress] [nvarchar](150) NULL,
+	[intFirstDayOfWorkWeek] [int] NULL,
 	[intConcurrencyId] [int] NULL,
     CONSTRAINT [PK_tblPRCompanyPreference] PRIMARY KEY CLUSTERED 
 (
