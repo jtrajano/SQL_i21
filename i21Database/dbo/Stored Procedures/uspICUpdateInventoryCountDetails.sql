@@ -389,10 +389,13 @@ BEGIN
 						dbo.fnCalculateCostBetweenUOM (
 							stockUOM.intItemUOMId
 							,itemUOM.intItemUOMId
-							,dbo.fnICGetMovingAverageCost(
-								il.intItemId
-								,il.intItemLocationId
-								,lastTransaction.intInventoryTransactionId
+							,COALESCE(
+								dbo.fnICGetMovingAverageCost(
+									il.intItemId
+									,il.intItemLocationId
+									,lastTransaction.intInventoryTransactionId
+								)
+								,p.dblLastCost
 							)
 						)
 					ELSE 
