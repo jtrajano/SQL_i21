@@ -134,25 +134,7 @@ BEGIN
 		, intLotId = NULL
 		, dblSystemCount = ISNULL(stockUnit.dblOnHand, 0)-- SUM(COALESCE(stock.dblOnHand, 0.00))
 		, dblLastCost =  
-			------ Convert the last cost from Stock UOM to stock.intItemUOMId
-			--ISNULL(CASE 
-			--	WHEN il.intCostingMethod = 1 THEN 
-			--		AVERAGE.dblCost
-			--	WHEN il.intCostingMethod = 2 THEN 
-			--		dbo.fnCalculateCostBetweenUOM(
-			--			COALESCE(FIFO.intItemUOMId, stockUOM.intItemUOMId)
-			--			,COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-			--			,COALESCE(FIFO.dblCost, p.dblLastCost)
-			--		)
-			--	ELSE 
-			--		dbo.fnCalculateCostBetweenUOM(
-			--			stockUOM.intItemUOMId
-			--			, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
-			--			, COALESCE(stock.dblLastCost, p.dblLastCost)
-			--		)
-			--END, 0)
-
-			-- Convert the last cost from Stock UOM to stock.intItemUOMId
+			-- Convert the last cost from Stock UOM to stock.intItemUOMId 
 			CASE 
 				-- Get the average cost. 
 				WHEN il.intCostingMethod = 1 THEN 				
@@ -170,14 +152,22 @@ BEGIN
 						)					
 					)
 					
-				-- Or else, get the last cost. 
-				ELSE 				
+				-- Get the last cost from the transactions
+				WHEN lastTransaction.dblCost IS NOT NULL THEN 
 					dbo.fnCalculateQtyBetweenUOM (
 						lastTransaction.intItemUOMId
 						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
 						, lastTransaction.dblCost
 					)
-			END 
+
+				-- If all above fails, use the item pricing's last cost. 
+				ELSE 				
+					dbo.fnCalculateQtyBetweenUOM (
+						stockUOM.intItemUOMId
+						, COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
+						, p.dblLastCost
+					)					
+			END
 
 		, strCountLine = @strHeaderNo + '-' + CAST(ROW_NUMBER() OVER(ORDER BY il.intItemId ASC, il.intItemLocationId ASC, stockUOM.intItemUOMId ASC) AS NVARCHAR(50))
 		, intItemUOMId = COALESCE(stock.intItemUOMId, stockUOM.intItemUOMId)
