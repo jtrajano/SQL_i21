@@ -25,7 +25,7 @@ BEGIN
 	USING(
 
 		SELECT intAccountId, strAccountId + ISNULL(''-'' + S.strCompanySegment,'''') strAccountId, ''[dbname]'' strDatabase  FROM [dbname].dbo.tblGLAccount A
-			OUTER APPLY(SELECT strCompanySegment FROM tblGLSubsidiaryCompany WHERE strDatabase = ''[dbname]'' and isnull(hasCompanySegment,0)  = 0 )S
+			OUTER APPLY(SELECT strCompanySegment FROM tblGLSubsidiaryCompany WHERE strDatabase = ''[dbname]'' and isnull(hasCompanySegment,0)  = 1 )S
 
 	)As MergedTable
 	ON MappingTable.intAccountId = MergedTable.intAccountId
