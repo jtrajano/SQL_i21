@@ -8884,6 +8884,7 @@
     <Build Include="dbo\Stored Procedures\uspIPUpdateContractQty.sql" />
     <Build Include="dbo\Views\vyuAPBillPaymentSorted.sql" />
     <Build Include="dbo\Views\vyuMBILExportCustomerMultiLevelPricing.sql" />
+    <Build Include="dbo\Tables\tblMBILExportFiles.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
