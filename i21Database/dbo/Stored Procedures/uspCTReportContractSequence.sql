@@ -543,28 +543,6 @@ BEGIN TRY
 			,strCompanyAddress						=   @strCompanyName + ', '		  + CHAR(13)+CHAR(10) +
 														ISNULL(@strAddress,'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(@strCity,'') + ISNULL(', '+@strState,'') + ISNULL(', '+@strZip,'') + ISNULL(', '+@strCountry,'')
-			,strStraussOtherPartyAddress     = '<span style="font-family:Arial;font-size:12px;">' + CASE   
-               WHEN CH.strReportTo = 'Buyer' THEN --Customer  
-                LTRIM(RTRIM(EC.strEntityName)) + '</br>'    +-- CHAR(13)+CHAR(10) +  
-                ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + '</br>' +-- CHAR(13)+CHAR(10) +  
-                ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') +   
-                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState))   END,'') +   
-                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') +   
-                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry))) END,'') +  
-                CASE WHEN @ysnFairtrade = 1 THEN  
-                 ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')  
-                ELSE '' END               
-               ELSE -- Seller (Vendor)  
-                LTRIM(RTRIM(EY.strEntityName)) + '</br>' + --CHAR(13)+CHAR(10) +  
-                ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + '</br>' + --CHAR(13)+CHAR(10) +  
-                ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') +   
-                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityState)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityState))   END,'') +   
-                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') +   
-                ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') +  
-                CASE WHEN @ysnFairtrade = 1 THEN  
-                 ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')  
-                ELSE '' END  
-               END + '</span>'
 			,strOtherPartyAddress					= CASE 
 													  WHEN CH.strReportTo = 'Buyer' THEN --Customer
 													  	LTRIM(RTRIM(EC.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
@@ -587,25 +565,6 @@ BEGIN TRY
 													  		ISNULL( CHAR(13)+CHAR(10) + @rtFLOID + ': '+CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')
 													  	ELSE '' END
 													  END
-			,strGABOtherPartyAddress				=	CASE 
-														WHEN CH.strReportTo = 'Buyer' THEN --Customer
-															LTRIM(RTRIM(EC.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
-															ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-															
-															ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') +
-															ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCity)) = ''   THEN NULL ELSE LTRIM(RTRIM(EC.strEntityCity))   END,'') + CHAR(13)+CHAR(10) + 
-															 
-															ISNULL(CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'') 
-														ELSE -- Seller (Vendor)
-															LTRIM(RTRIM(EY.strEntityName)) + ', '				+ CHAR(13)+CHAR(10) +
-															ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-															
-															ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EY.strEntityZipCode)) END,'') +
-															ISNULL(', '+CASE WHEN LTRIM(RTRIM(EY.strEntityCity)) = ''   THEN NULL ELSE LTRIM(RTRIM(EY.strEntityCity))   END,'')  + CHAR(13)+CHAR(10) + 
-															
-															
-															ISNULL(CASE WHEN LTRIM(RTRIM(EY.strEntityCountry)) = '' THEN NULL ELSE LTRIM(RTRIM(dbo.fnCTGetTranslation('i21.view.Country',rtc10.intCountryID,@intLaguageId,'Country',rtc10.strCountry))) END,'')
-														END
 			,strAtlasOtherPartyAddress				=   LTRIM(RTRIM(EY.strEntityName)) +' - '+ ISNULL(CASE WHEN LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) = '' THEN NULL ELSE LTRIM(RTRIM(ISNULL(VR.strFLOId,CR.strFLOId))) END,'')+ CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EY.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
 														ISNULL(LTRIM(RTRIM(EY.strEntityCity)),'') + 
@@ -671,7 +630,6 @@ BEGIN TRY
 			,lblContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN @rtConditions + ':'					ELSE NULL END
 			,lblAtlasContractCondition					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN @rtConditions				ELSE NULL END
 			,lblAtlasContractConditionColon					= CASE WHEN ISNULL(@strContractConditions,'') <>''	   THEN ':'					ELSE NULL END
-			--,strLocationWithDate					= SQ.strLocationName+', '+CONVERT(CHAR(11),CH.dtmContractDate,13)
 			,strLocationWithDate					= SQ.strLocationName+', '+DATENAME(dd,CH.dtmContractDate) + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + DATENAME(yyyy,CH.dtmContractDate)
 			,strContractText						= ISNULL(TX.strText,'') 
 	        ,strCondition							=	CASE WHEN LEN(LTRIM(RTRIM(ISNULL(@strAmendedColumns,'')))) = 0 THEN
@@ -725,16 +683,25 @@ BEGIN TRY
 			,lblBuyerRefNo							= CASE WHEN (CH.intContractTypeId = 1 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 1 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtBuyerRefNo + '. :'  ELSE NULL END
 			,lblSellerRefNo							= CASE WHEN (CH.intContractTypeId = 2 AND ISNULL(CH.strContractNumber,'') <>'') OR (CH.intContractTypeId <> 2 AND ISNULL(CH.strCustomerContract,'') <>'') THEN  @rtSellerRefNo + '. :' ELSE NULL END
 			,strAtlasCaller							= CASE
-														when CH.intPricingTypeId = 6
-														then ''
-														else
+														WHEN CH.intPricingTypeId = 6
+														THEN NULL
+														ELSE
 															CASE
 																WHEN LTRIM(RTRIM(SQ.strFixationBy)) = ''
-																THEN NULL
-																ELSE SQ.strFixationBy
+																THEN ''
+																ELSE ISNULL(SQ.strFixationBy,'')
 															END
-															+'''s Call vs '+ convert(nvarchar(20),convert(numeric(10,2),SQ.dblNoOfLots)) + ' lot(s) ' + SQ.strFutureMonth + ' ' + SQ.strFutMarketName
-													end
+															+ CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN '' ELSE '''s Call vs ' END
+															+ CASE
+																	WHEN CH.ysnMultiplePriceFixation = 1 and ISNULL(SQ.dblNoOfLots,0) <= 0
+																	THEN convert(nvarchar(20),convert(numeric(10,2),isnull(CH.dblNoOfLots,0.00)))
+																	ELSE convert(nvarchar(20),convert(numeric(10,2),ISNULL(SQ.dblNoOfLots,0)))
+															END
+															+ ' lot(s) '
+															+ SQ.strFutureMonth
+															+ ' '
+															+ SQ.strFutMarketName
+													   END
 			,strBeGreenCaller						= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strEQTCaller							= CASE WHEN ISNULL(SQ.strFixationBy,'') <> '' THEN SQ.strFixationBy +'''s Call vs '+LTRIM(@TotalLots)+' lots(s) of '+SQ.strFutMarketName + ' futures' ELSE NULL END
 			,strCallerDesc						    = CASE WHEN LTRIM(RTRIM(SQ.strFixationBy)) = '' THEN NULL 
@@ -754,70 +721,7 @@ BEGIN TRY
 														dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + 
 														' '+@rtStrPricing1+' ' + SQ.strBuyerSeller + 
 														'''s '+@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-			,strGABPricing							=	(
-															case
-															when pricingType.strPricingType = 'Basis'
-															then  SQ.strFutMarketName + ' ' + SQ.strFutureMonthYear
-																+
-																CASE
-																WHEN SQ.dblBasis < 0
-																THEN ' '+@rtMinus+' '
-																ELSE ' '+@rtPlus+' '
-																END
-																+  
-																dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOM + ' '+@rtStrPricing1+' ' + dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,SQ.strFixationBy)
-																+
-																CASE
-																WHEN dbo.fnCTGetReportLanguage(@intLaguageId) = 'Italian'
-																THEN ' '
-																ELSE '''s '
-																END
-																+
-																@rtStrPricing2+':'+dbo.fnRemoveTrailingZeroes(dblLotsToFix)+').'
-															when pricingType.strPricingType = 'Priced'
-															THEN dbo.fnRemoveTrailingZeroes(SQ.dblCashPrice) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
-															ELSE dbo.fnRemoveTrailingZeroes(SQ.dblBasis) + ' ' + SQ.strPriceCurrencyAndUOMForPriced
-															end
-														)
-			,strGABHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,TP.strContractType), TP.strContractType) + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
-			,striDealHeader							=	@rtConfirmationOf + ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Sale'), 'Sale') + ' ' + CASE WHEN @type = 'MULTIPLE' THEN '' ELSE CH.strContractNumber END --+ISNULL('-' + @ErrMsg , '')		
-			,strGABAssociation						=	CASE WHEN CH.intContractTypeId = 1 THEN @rtStrGABAssociation1 ELSE @rtStrGABAssociation3 END
-														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+':'
-			,striDealAssociation					=	@rtStriDealAssociation
-														+ ' ' + dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment) + ' ('+dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Name',AN.strName)+')'+' '+@rtStrGABAssociation2+'.'
-			,strEQTAssociation						=	@rtStrAssociation1 + ' '+ dbo.fnCTGetTranslation('ContractManagement.view.Associations',AN.intAssociationId,@intLaguageId,'Printable Contract Text',AN.strComment)+' '+@rtStrAssociation2+'.'
-			,strCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
-														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
-			
-			,strGABCompanyCityAndDate				=	ISNULL(@strCity + ', ', '') + LEFT(DATENAME(DAY,CH.dtmContractDate),2)
-														+ ' ' + isnull(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,LEFT(DATENAME(MONTH,CH.dtmContractDate),3)), LEFT(DATENAME(MONTH,CH.dtmContractDate),3)) + ' ' + LEFT(DATENAME(YEAR,CH.dtmContractDate),4)
 			,strCompanyName							=	@strCompanyName
-			,striDealShipment						=	ISNULL(dbo.fnCTGetTranslatedExpression(@strMonthLabelName,@intLaguageId,DATENAME(MONTH, SQ.dtmStartDate)), DATENAME(MONTH, SQ.dtmStartDate)) +'('+ RIGHT(YEAR(SQ.dtmStartDate), 2)+')'
-			,striDealSeller							=   LTRIM(RTRIM(EV.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
-														ISNULL(LTRIM(RTRIM(EV.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-														ISNULL(LTRIM(RTRIM(EV.strEntityCity)),'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityState)) END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EV.strEntityZipCode)) END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EV.strEntityCountry)) = '' THEN NULL ELSE dbo.fnCTGetTranslation('i21.view.Country',rtc11.intCountryID,@intLaguageId,'Country',rtc11.strCountry) END,'')
-
-			,striDealBuyer							=   LTRIM(RTRIM(EC.strEntityName)) + ', ' + CHAR(13)+CHAR(10) +
-														ISNULL(LTRIM(RTRIM(EC.strEntityAddress)),'') + ', ' + CHAR(13)+CHAR(10) +
-														ISNULL(LTRIM(RTRIM(EC.strEntityCity)),'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityState)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityState)) END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityZipCode)) = '' THEN NULL ELSE LTRIM(RTRIM(EC.strEntityZipCode)) END,'') + 
-														ISNULL(', '+CASE WHEN LTRIM(RTRIM(EC.strEntityCountry)) = '' THEN NULL ELSE dbo.fnCTGetTranslation('i21.view.Country',rtc12.intCountryID,@intLaguageId,'Country',rtc12.strCountry) END,'')
-			,striDealPrice							=	(
-															case
-															when pricingType.strPricingType = 'Basis'
-															then strFutMarketName + ' ' + strFutureMonth + ' ' + CONVERT(VARCHAR, CAST(SQ.dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															when pricingType.strPricingType = 'Priced'
-															--then 'At' + ' ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															--else 'At' + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															then dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'At') + ' ' + CONVERT(VARCHAR, CAST(SQ.dblCashPrice AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															else dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'At') + ' ' + CONVERT(VARCHAR, CAST(dblBasis AS MONEY), 1) +' '+ strBasisCurrency + '/' + strBasisUnitMeasure
-															end
-														)
-			,lblGABShipDelv							=	CASE WHEN strPosition = 'Spot' THEN dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Delivery') ELSE dbo.fnCTGetTranslatedExpression(@strExpressionLabelName,@intLaguageId,'Shipment') END
 			,strIds									=	@strIds
 			,strType								=	@type
 			,intLaguageId							=	@intLaguageId
@@ -826,9 +730,6 @@ BEGIN TRY
 			,strOurCommn							=	@strOurCommn
 			,strBrkgCommn							=	@strBrkgCommn
 			,strItemDescription						=	strItemDescription
-			,strStraussQuantity						=	dbo.fnRemoveTrailingZeroes(CH.dblQuantity) + ' ' + dbo.fnCTGetTranslation('Inventory.view.ReportTranslation',UM.intUnitMeasureId,@intLaguageId,'Name',UM.strUnitMeasure) + ' ' + ISNULL(SQ.strPackingDescription, '')
-			,strItemBundleNo						=	(case when @ysnExternal = convert(bit,1) then SQ.strItemBundleNo else null end)
-			,strItemBundleNoLabel					=	(case when @ysnExternal = convert(bit,1) then 'GROUP QUALITY CODE:' else null end)
 			,intContractTypeId						=	CH.intContractTypeId
 	FROM	tblCTContractHeader				CH
 	JOIN	tblICCommodity					CM	WITH (NOLOCK) ON	CM.intCommodityId				=	CH.intCommodityId

@@ -75,7 +75,7 @@ BEGIN TRY
 			strPrice				= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
 									  END,
-			strSequencePrice		= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 4))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
+			strSequencePrice		= CASE	WHEN	CD.intPricingTypeId IN (1,6) THEN LTRIM(CAST(CD.dblCashPrice AS NUMERIC(18, 6))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ' net' 
 											WHEN 	CD.intPricingTypeId = 2	THEN dbo.fnRemoveTrailingZeroes(CAST(CD.dblBasis AS NUMERIC(18, 2))) + ' ' + CY.strCurrency + ' per ' + PU.strUnitMeasure + ', ' + MO.strFutureMonth + CASE WHEN ISNULL(CH.ysnMultiplePriceFixation,0) = 0 THEN ' ('+ LTRIM(CAST(CD.dblNoOfLots AS INT)) +' Lots)' ELSE '' END 	
 									  END,
 			strQunatity				= CASE WHEN CP.strDefaultContractReport = 'ContractBeGreen' THEN CONVERT(NVARCHAR,CAST(CD.dblQuantity  AS Money),1) ELSE LTRIM(dbo.fnRemoveTrailingZeroes(CD.dblQuantity)) END + ' ' + UM.strUnitMeasure,
