@@ -8,6 +8,7 @@ CREATE VIEW [dbo].[vyuMBILExportCustomerMultiLevelPricing]
 		PLEVEL.intItemPricingLevelId,
 		PLEVEL.intCompanyLocationPricingLevelId,
 		PLEVEL.intItemId,
+		ICITEM.strItemNo,
 		PLEVEL.intItemLocationId,
 		PLEVEL.strPriceLevel,
 		PLEVEL.intItemUnitMeasureId,
@@ -23,6 +24,8 @@ CREATE VIEW [dbo].[vyuMBILExportCustomerMultiLevelPricing]
 		PLEVEL.intCurrencyId
 	FROM 
 		tblETExportFilterItem ITEM
+	INNER JOIN
+		tblICItem ICITEM ON ITEM.intItemId = ICITEM.intItemId
 	INNER JOIN
 		tblICItemPricingLevel PLEVEL ON ITEM.intItemId = PLEVEL.intItemId
 	INNER JOIN 
