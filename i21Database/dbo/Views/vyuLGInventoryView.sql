@@ -3,7 +3,11 @@ AS
 SELECT TOP 100 percent Convert(int, ROW_NUMBER() OVER (ORDER BY strStatus)) as intKeyColumn,*  
 FROM (
 	SELECT
-		'In-transit' COLLATE Latin1_General_CI_AS AS strStatus
+		strStatus = CASE WHEN (CP.ysnIncludeStrippingInstructionStatus = 1 AND Shipment.intStorageLocationId IS NOT NULL) 
+							THEN 'Stripping Instruction Created' 
+						 WHEN (CP.ysnIncludeArrivedInPortStatus = 1 AND Shipment.ysnArrivedInPort = 1) 
+							THEN 'Arrived in Port'
+						ELSE 'In-transit' END COLLATE Latin1_General_CI_AS
 		,strContractNumber = Shipment.strContractNumber
 		,intContractSeq = Shipment.intContractSeq
 		,intContractDetailId = Shipment.intContractDetailId
@@ -43,6 +47,7 @@ FROM (
 		,dtmETAPOL = Shipment.dtmETAPOL
 		,dtmETSPOL = Shipment.dtmETSPOL
 		,dtmETAPOD = Shipment.dtmETAPOD
+		,dtmUpdatedAvailabilityDate = Shipment.dtmUpdatedAvailabilityDate
 		,strTrackingNumber = '' COLLATE Latin1_General_CI_AS
 		,strBLNumber = Shipment.strBLNumber
 		,dtmBLDate = Shipment.dtmBLDate
@@ -88,6 +93,7 @@ FROM (
 		,strCertification = Shipment.strCertification
 		,strCertificationId = Shipment.strCertificationId
 	FROM vyuLGInboundShipmentView Shipment
+		OUTER APPLY (SELECT ysnIncludeArrivedInPortStatus, ysnIncludeStrippingInstructionStatus FROM tblLGCompanyPreference) CP
 	WHERE (Shipment.dblContainerContractQty - IsNull(Shipment.dblContainerContractReceivedQty, 0.0)) > 0.0 
 	   AND Shipment.ysnInventorized = 1
 
@@ -123,6 +129,7 @@ FROM (
 		,dtmETAPOL = CAST(NULL AS DATETIME)
 		,dtmETSPOL = CAST(NULL AS DATETIME)
 		,dtmETAPOD = CAST(NULL AS DATETIME)
+		,dtmUpdatedAvailabilityDate = CAST(NULL AS DATETIME)
 		,strTrackingNumber = Spot.strLoadNumber
 		,strBLNumber = Spot.strBLNumber
 		,dtmBLDate = Spot.dtmBLDate
@@ -201,6 +208,7 @@ FROM (
 		,dtmETAPOL = L.dtmETAPOL
 		,dtmETSPOL = L.dtmETSPOL
 		,dtmETAPOD = L.dtmETAPOD
+		,dtmUpdatedAvailabilityDate = PCD.dtmUpdatedAvailabilityDate
 		,strTrackingNumber = L.strLoadNumber
 		,strBLNumber = L.strBLNumber
 		,dtmBLDate = L.dtmBLDate
@@ -322,6 +330,7 @@ FROM (
 		,dtmETAPOL = NULL
 		,dtmETSPOL = NULL
 		,dtmETAPOD = PCD.dtmUpdatedAvailabilityDate
+		,dtmUpdatedAvailabilityDate = PCD.dtmUpdatedAvailabilityDate
 		,strTrackingNumber = NULL
 		,strBLNumber = NULL
 		,dtmBLDate = NULL
