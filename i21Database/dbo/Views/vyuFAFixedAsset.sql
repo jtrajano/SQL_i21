@@ -45,7 +45,7 @@ GLGainLoss.strAccountId strGainLossAccountId,
 D.dblDepreciationToDate,      
 Company.strLocationName strCompanyLocation,      
 Currency.strCurrency,
-ISNULL(BDF.ysnFullyDepreciated,1)ysnFullyDepreciated,
+ISNULL(BDF.ysnFullyDepreciated,0)ysnFullyDepreciated,
 FA.intConcurrencyId
 from tblFAFixedAsset FA     
 LEFT JOIN tblGLAccount GLAsset ON GLAsset.intAccountId = FA.intAssetAccountId      
