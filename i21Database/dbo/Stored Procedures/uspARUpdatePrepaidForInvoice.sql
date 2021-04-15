@@ -301,10 +301,10 @@ BEGIN TRY
 		FROM #OPENCREDITMEMO OM
 	) I
 	
-	DELETE PC
-	FROM tblARPrepaidAndCredit PC
-	INNER JOIN #APPLIEDCONTRACTS AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
-	WHERE PC.intInvoiceId = @InvoiceId
+	-- DELETE PC
+	-- FROM tblARPrepaidAndCredit PC
+	-- INNER JOIN #APPLIEDCONTRACTS AC ON PC.intPrepaymentDetailId = AC.intInvoiceDetailId AND PC.intPrepaymentId = AC.intInvoiceId
+	-- WHERE PC.intInvoiceId = @InvoiceId
 		
 	UPDATE A 
 	SET ysnApplied = 1
