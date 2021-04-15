@@ -527,12 +527,7 @@ BEGIN TRY
 					INNER JOIN tblICInventoryShipmentItem ISI ON ICIS.intInventoryShipmentId = ISI.intInventoryShipmentId
 					WHERE intSourceId = @intTicketId))
 				BEGIN
-					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId		= @intInvoiceId
-								   , @intScaleUOMId		= @intTicketItemUOMId
-								   , @intUserId			= @intUserId 
-								   , @dblNetWeight		= @dblNetUnits
-								   , @ysnFromSalesOrder	= 0
-								   , @ysnFromImport		= 0
+					EXEC dbo.uspARUpdateOverageContracts @intInvoiceId,@intTicketItemUOMId,@intUserId,@dblNetUnits
 				END
 			END
 		END
