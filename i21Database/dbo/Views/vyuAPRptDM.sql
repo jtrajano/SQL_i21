@@ -46,10 +46,6 @@ SELECT
 		,strContainerNumber		=	LCointainer.strContainerNumber
 		,strShipVia				=	shipVia.strShipVia
 		,ysnPaid				=	DM.ysnPaid
-		,strVendorOrderNumber	= 	DM.strVendorOrderNumber
-		,strContractNumberSeq	=	ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq)
-		,dblDetailTotalWithTax	=	DMDetails.dblTotal + DMDetails.dblTax
-		,dblHeaderTotal			=	DM.dblTotal
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
