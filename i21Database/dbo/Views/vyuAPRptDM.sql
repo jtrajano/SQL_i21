@@ -7,9 +7,8 @@ SELECT
 												AND ContractDetail.intItemContractId > 0
 												AND DMDetails.intContractCostId IS NULL
 										THEN ItemContract.strContractItemName
-										ELSE ISNULL(Item.strDescription, DMDetails.strMiscDescription)
+										ELSE ISNULL(Item.strDescription,'')
 									END
-		,strMiscQuality			=	ISNULL(I.strDescription, ISNULL(Item.strDescription, DMDetails.strMiscDescription))
 		,strItemNo				=	ISNULL(Item.strItemNo, DMDetails.strMiscDescription)
 		,strBillOfLading		=	Receipt.strBillOfLading
 		,strCountryOrigin		=	ISNULL(ItemOriginCountry.strCountry, CommAttr.strDescription)
@@ -48,9 +47,9 @@ SELECT
 		,strShipVia				=	shipVia.strShipVia
 		,ysnPaid				=	DM.ysnPaid
 		,strVendorOrderNumber	= 	DM.strVendorOrderNumber
-		,strContractNumberSeq	=	CASE WHEN ContractHeader.intContractHeaderId > 0 THEN ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq) ELSE '' END
-		,dblDetailTotalWithTax	=	FORMAT((DMDetails.dblTotal + DMDetails.dblTax), 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
-		,dblHeaderTotal			=	FORMAT(DM.dblTotal, 'n' + CONVERT(VARCHAR(2), CP.intCurrencyDecimal))
+		,strContractNumberSeq	=	ContractHeader.strContractNumber + ' / ' + CONVERT(NVARCHAR, ContractDetail.intContractSeq)
+		,dblDetailTotalWithTax	=	DMDetails.dblTotal + DMDetails.dblTax
+		,dblHeaderTotal			=	DM.dblTotal
 	FROM tblAPBill DM
 	INNER JOIN tblAPBillDetail DMDetails ON DM.intBillId = DMDetails.intBillId
 	INNER JOIN tblGLAccount DetailAccount ON DetailAccount.intAccountId = DMDetails.intAccountId
@@ -74,6 +73,4 @@ SELECT
 	LEFT JOIN tblLGLoadContainer LCointainer ON LCointainer.intLoadContainerId = ReceiptDetail.intContainerId
 	LEFT JOIN tblSMShipVia shipVia
 			ON shipVia.intEntityId = DM.intShipViaId
-	LEFT JOIN tblICItem I ON I.intItemId = ContractDetail.intItemId
-	CROSS JOIN tblSMCompanyPreference CP
 	WHERE DM.intTransactionType = 3
