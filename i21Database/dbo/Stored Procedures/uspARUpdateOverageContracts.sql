@@ -180,7 +180,7 @@ IF ISNULL(@strInvalidItem, '') <> '' AND ISNULL(@ysnFromSalesOrder, 0) = 0 AND I
 
 IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0
 	BEGIN
-		SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL THEN ISI.dblDestinationQuantity ELSE ISI.dblQuantity END)
+		SELECT @dblQtyOverAged = @dblNetWeight - SUM(CASE WHEN ISI.ysnDestinationWeightsAndGrades = 1 AND ISI.dblDestinationQuantity IS NOT NULL AND ISNULL(APAR.intPriceFixationDetailAPARId, 0) <> 0 THEN ISI.dblDestinationQuantity ELSE ISI.dblQuantity END)
 		FROM tblARInvoiceDetail ID
 		INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
 		INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
@@ -216,6 +216,33 @@ WHILE EXISTS (SELECT TOP 1 NULL FROM #INVOICEDETAILS)
 				   , @dtmDate						= dtmDate
 				   , @strDocumentNumber				= strDocumentNumber
 		FROM #INVOICEDETAILS
+
+		IF ISNULL(@ysnFromSalesOrder, 0) = 0 AND ISNULL(@ysnFromImport, 0) = 0 AND @intContractDetailId IS NOT NULL
+			BEGIN
+				UPDATE ID
+				SET dblQtyShipped	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
+												THEN CTD.dblOriginalQty 
+												ELSE 
+													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
+														THEN ISI.dblQuantity + CTD.dblBalance
+														ELSE ISI.dblDestinationQuantity
+													END
+											END
+									, ISI.dblQuantity)
+				  , dblUnitQuantity	= ISNULL(CASE WHEN ISI.dblDestinationQuantity > CTD.dblOriginalQty 
+												THEN CTD.dblOriginalQty 
+												ELSE 
+													CASE WHEN ISI.dblQuantity < ISI.dblDestinationQuantity AND ISI.dblDestinationQuantity > (CTD.dblBalance + ISI.dblQuantity)
+														THEN ISI.dblQuantity + CTD.dblBalance
+														ELSE ISI.dblDestinationQuantity
+													END
+											END
+									, ISI.dblQuantity)
+				FROM tblARInvoiceDetail ID
+				INNER JOIN tblICInventoryShipmentItem ISI ON ID.intInventoryShipmentItemId = ISI.intInventoryShipmentItemId AND ID.intTicketId = ISI.intSourceId
+				INNER JOIN tblCTContractDetail CTD ON ID.intContractDetailId = CTD.intContractDetailId AND ID.intContractHeaderId = CTD.intContractHeaderId
+				WHERE ID.intInvoiceDetailId = @intInvoiceDetailId
+			END
 
 		--UPDATE INVOICE DETAIL QTY SHIPPED = AVAILABLE CONTRACT QTY
 		IF ISNULL(@ysnFromSalesOrder, 0) = 1 OR ISNULL(@ysnFromImport, 0) = 1
