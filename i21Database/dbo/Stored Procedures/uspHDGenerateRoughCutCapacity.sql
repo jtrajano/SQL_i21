@@ -220,6 +220,7 @@ INSERT INTO tblHDRoughCountCapacity
     join tblEMEntity d on d.intEntityId = b.intCustomerId  
    where  
 	convert(int, convert(nvarchar(8), a.dtmDate, 112)) between @intDateFrom and @intDateTo
+	and b.intAssignedToEntity is not null and b.intAssignedToEntity <> 0
 
 	--FROM ACTIVITY SCREEN
 	union all
