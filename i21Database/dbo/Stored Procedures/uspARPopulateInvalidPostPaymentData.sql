@@ -711,7 +711,7 @@ BEGIN
         AND P.[dblPayment] <> @ZeroDecimal
         AND P.[ysnTransactionPaid] = @ZeroBit
         AND (P.[dblTransactionPayment] + P.[dblTransactionAmountDue] > ABS(P.[dblInvoiceTotal]) + P.[dblTransactionInterest] - P.[dblTransactionDiscount]
-        OR P.[dblPayment] > P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount])
+        OR ABS(P.[dblPayment]) > ABS(P.[dblInvoiceTotal] + P.[dblInterest] - P.[dblDiscount]))
 
     INSERT INTO #ARInvalidPaymentData
         ([intTransactionId]
