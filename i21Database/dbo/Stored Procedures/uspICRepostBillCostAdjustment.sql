@@ -410,6 +410,12 @@ BEGIN
 				,@strTransactionId = @strBillId
 		END 
 	END
+	ELSE 
+	BEGIN 			
+		-- 'Cost adjustment for {Transaction Id} is missing. Stock rebuild will abort.'
+		EXEC uspICRaiseError 80265, @strBillId; 	
+		RETURN -80265;
+	END 
 END 
 
 -- Create the g/l entries 
