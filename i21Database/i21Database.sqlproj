@@ -8204,6 +8204,7 @@
     <Build Include="dbo\Tables\tblICBackupDetail.sql" />
     <Build Include="dbo\Functions\fnAPGetVoucherShipmentChargeItemGLEntry.sql" />
     <Build Include="dbo\Stored Procedures\uspAP_APCQueryResults.sql" />
+    <Build Include="dbo\Stored Procedures\uspAP_APClearing.sql" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

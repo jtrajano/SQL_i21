@@ -1,12 +1,24 @@
-﻿CREATE PROCEDURE uspAP_APCQueryResults
+﻿IF OBJECT_ID(N'uspAP_APCQueryResults') IS NOT NULL
+DROP PROCEDURE uspAP_APCQueryResults
+GO
+CREATE PROCEDURE uspAP_APCQueryResults
 AS
 
 SET NOCOUNT ON
 --SET XACT_ABORT OFF
 
-PRINT 'APC1 Results'
-SELECT GETDATE()
+DECLARE @hasResult BIT = 0;
 
+--PRINT 'APC1 Results'
+
+DECLARE @tmpAPC1 TABLE (
+	strBillId NVARCHAR(50),
+	strReference NVARCHAR(200),
+	strMiscDescription NVARCHAR(500),
+	dblTotal DECIMAL(18,6)
+)
+
+INSERT INTO @tmpAPC1
 SELECT
 A2.strBillId, A2.strReference, A.strMiscDescription, A.dblTotal
 FROM tblAPBillDetail A
@@ -24,8 +36,20 @@ AND A.intInventoryShipmentChargeId IS NULL
 AND ISNULL(A.strMiscDescription,'') NOT LIKE '%Patronage%'
 AND (B.intAccountCategoryId = 45 OR glAccnt.intAccountCategoryId = 45)
 
-PRINT 'APC2 Results'
-SELECT GETDATE()
+SELECT * FROM @tmpAPC1
+
+--PRINT 'APC2 Results'
+
+DECLARE @tmpAPC2 TABLE
+(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemTaxId INT,
+	dblClearingTax DECIMAL(18,2)
+)
+
 
 DECLARE @nine TABLE
 (
@@ -108,14 +132,26 @@ AND NOT EXISTS (
 	AND A3.ysnIsUnposted = 0
 )
 
+INSERT INTO @tmpAPC2
 SELECT
 A.*
 FROM @nine A
 INNER JOIN @icTaxData B ON A.strReceiptNumber = B.strReceiptNumber
 	AND A.intInventoryReceiptItemTaxId = B.intInventoryReceiptItemTaxId
 
-PRINT 'APC3 Results'
-SELECT GETDATE()
+SELECT * FROM @tmpAPC2
+
+--PRINT 'APC3 Results'
+
+DECLARE @tmpAPC3 TABLE(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT,
+	intInventoryReceiptItemTaxId INT,
+	dblTax DECIMAL(18,2)
+)
 
 BEGIN TRY
 BEGIN TRAN
@@ -514,12 +550,16 @@ WHERE
 	newGLTax.dblTotal <> glTax.dblTotal
 AND newGLTax.strAccountCategory = glTax.strAccountCategory
 
+
+INSERT INTO @tmpAPC3
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @ten B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
 INNER JOIN @tenWithGLIssues ten ON ten.strBillId = A.strTransactionId AND ten.intBillDetailTaxId = A.intJournalLineNo
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC3
 
 ROLLBACK TRAN
 
@@ -530,8 +570,19 @@ BEGIN CATCH
 	PRINT @error_APC3
 END CATCH
 
-PRINT 'APC4 Results'
-SELECT GETDATE()
+
+--PRINT 'APC4 Results'
+
+DECLARE @tmpAPC4 TABLE
+(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT,
+	intInventoryReceiptItemTaxId INT,
+	dblClearingTax DECIMAL(18,2)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -924,12 +975,15 @@ AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountC
 
 --SELECT ''[threeglissue],* FROM @threeWithGLIssues
 
+INSERT INTO @tmpAPC4
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @three B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
 INNER JOIN @threeWithGLIssues three ON three.strBillId = A.strTransactionId AND three.intBillDetailTaxId = A.intJournalLineNo
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC4
 
 ROLLBACK TRAN
 
@@ -940,8 +994,18 @@ BEGIN CATCH
 	PRINT @error_APC4
 END CATCH
 
-PRINT 'APC5 Results'
-SELECT GETDATE()
+--PRINT 'APC5 Results'
+
+DECLARE @tmpAPC5 TABLE
+(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT,
+	intInventoryReceiptItemTaxId INT,
+	dblClearingTax DECIMAL(18,2)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -1318,12 +1382,15 @@ WHERE
 AND newGLTax.strAccountCategory = glTax.strAccountCategory
 
 --specific issue
+INSERT INTO @tmpAPC5
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @seventeen B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
 INNER JOIN @seventeenWithGLIssues seventeen ON seventeen.strBillId = A.strTransactionId AND seventeen.intBillDetailTaxId = A.intJournalLineNo
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC5
 
 ROLLBACK TRAN
 
@@ -1334,8 +1401,19 @@ BEGIN CATCH
 	PRINT @error_APC5
 END CATCH
 
-PRINT 'APC6 Results'
-SELECT GETDATE()
+--PRINT 'APC6 Results'
+
+DECLARE @tmpAPC6 TABLE
+(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT,
+	intInventoryReceiptItemTaxId INT,
+	--dblTax DECIMAL(18,2),
+	dblClearingTax DECIMAL(18,2)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -1710,12 +1788,15 @@ WHERE
 AND newGLTax.strAccountCategory = glTax.strAccountCategory
 
 --specific issue
+INSERT INTO @tmpAPC6
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @fifteen B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
 INNER JOIN @fifteenWithGLIssues fifteen ON fifteen.strBillId = A.strTransactionId AND fifteen.intBillDetailTaxId = A.intJournalLineNo
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC6
 
 ROLLBACK TRAN
 
@@ -1726,8 +1807,18 @@ BEGIN CATCH
 	PRINT @error_APC6
 END CATCH
 
-PRINT 'APC7 Results'
-SELECT GETDATE()
+--PRINT 'APC7 Results'
+
+DECLARE @tmpAPC7 TABLE
+(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT,
+	intInventoryReceiptItemTaxId INT,
+	dblClearingTax DECIMAL(18,2)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -2130,12 +2221,15 @@ WHERE
 	AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC7
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @eleven B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
 INNER JOIN @elevenWithGLIssues eleven ON A.strTransactionId = eleven.strBillId AND eleven.intBillDetailTaxId = A.intJournalLineNo 
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC7
 
 ROLLBACK TRAN
 
@@ -2146,8 +2240,21 @@ BEGIN CATCH
 	PRINT @error_APC7
 END CATCH
 
-PRINT 'APC8 Results'
-SELECT GETDATE()
+--PRINT 'APC8 Results'
+
+DECLARE @tmpAPC8 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemId INT,
+	intChargeExpenseAccountId INT,
+	intItemId INT,
+	dblTotalDiff DECIMAL(18,2),
+	dblTotalQtyDiff DECIMAL(38,20)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -2478,11 +2585,14 @@ WHERE
 	OR rcptClearing.dblTotal IS NULL
 
 --specific issue
+INSERT INTO @tmpAPC8
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @fourteen B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @fourteenWithGLIssues eleven ON A.strTransactionId = eleven.strBillId AND eleven.intBillDetailId = A.intJournalLineNo 
 WHERE A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC8
 
 ROLLBACK TRAN
 
@@ -2493,8 +2603,23 @@ BEGIN CATCH
 	PRINT @error_APC8
 END CATCH
 
-PRINT 'APC9 Results'
-SELECT GETDATE()
+--PRINT 'APC9 Results'
+
+DECLARE @tmpAPC9 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dblReceiptClearing DECIMAL(18,6),
+	dblVoucherClearing DECIMAL(18,6),
+	dblDiff DECIMAL(18,6),
+	dblGLDiff DECIMAL(18,6)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -2843,11 +2968,14 @@ WHERE
 		))
 	OR rcptClearing.dblTotal IS NULL
 
+INSERT INTO @tmpAPC9
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @eighteen B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @eighteenWithGLIssues eleven ON A.strTransactionId = eleven.strBillId AND eleven.intBillDetailId = A.intJournalLineNo 
 WHERE A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC9
 
 ROLLBACK TRAN
 
@@ -2858,8 +2986,17 @@ BEGIN CATCH
 	PRINT @error_APC9
 END CATCH
 
-PRINT 'APC10 Results'
-SELECT GETDATE()
+--PRINT 'APC10 Results'
+
+DECLARE @tmpAPC10 TABLE
+(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemTaxId INT,
+	dblClearingTax DECIMAL(18,2)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -2952,11 +3089,14 @@ AND NOT EXISTS (
 	AND A3.ysnIsUnposted = 0
 )
 
+INSERT INTO @tmpAPC10
 SELECT
 A.*
 FROM @nineteen A
 INNER JOIN @icTaxData B ON A.strReceiptNumber = B.strReceiptNumber
 	AND A.intInventoryReceiptItemTaxId = B.intInventoryReceiptItemTaxId
+
+SELECT * FROM @tmpAPC10
 
 ROLLBACK TRAN
 
@@ -2967,8 +3107,19 @@ BEGIN CATCH
 	PRINT @error_APC10
 END CATCH
 
-PRINT 'APC11 Results'
-SELECT GETDATE()
+--PRINT 'APC11 Results'
+
+DECLARE @tmpAPC11 TABLE(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT,
+	intInventoryReceiptItemId INT,
+	dblReceiptTax DECIMAL(18,6),
+	intVoucherCount INT,
+	ysnHasMultipleVoucher BIT
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -3440,12 +3591,15 @@ WHERE
 	AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC11
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @twenty B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
 INNER JOIN @twentyWithGLIssues twenty ON twenty.strBillId = A.strTransactionId AND twenty.intBillDetailTaxId = A.intJournalLineNo
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC11
 
 ROLLBACK TRAN
 
@@ -3456,8 +3610,18 @@ BEGIN CATCH
 	PRINT @error_APC11
 END CATCH
 
-PRINT 'APC12 Results'
-SELECT GETDATE()
+--PRINT 'APC12 Results'
+
+DECLARE @tmpAPC12 TABLE
+(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptChargeId INT,
+	dblDetailTotal DECIMAL(18,6),
+	dblChargeAmount DECIMAL(18,6)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -3742,12 +3906,15 @@ WHERE
 	AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC12
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN #twentyone B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @twentyoneWithGLIssues twentyone ON twentyone.strBillId = A.strTransactionId AND twentyone.intBillDetailId = A.intJournalLineNo
 WHERE 
 	A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC12
 
 ROLLBACK TRAN
 
@@ -3758,8 +3925,20 @@ BEGIN CATCH
 	PRINT @error_APC12
 END CATCH
 
-PRINT 'APC13 Results'
-SELECT GETDATE()
+--PRINT 'APC13 Results'
+
+DECLARE @tmpAPC13 TABLE(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intItemId INT,
+	intExpenseAccountId INT,
+	intInventoryReceiptChargeId INT,
+	dblDetailTotal DECIMAL(18,6),
+	dblChargeAmount DECIMAL(18,6),
+	intVoucherCount INT
+)
 
 DECLARE @twentytwo TABLE(intBillId INT, strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
 	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
@@ -3830,10 +4009,22 @@ WHERE A.intInventoryReceiptChargeId IN (
 	SELECT intInventoryReceiptChargeId FROM twentytwo B WHERE B.intVoucherCount > 1
 )
 
+INSERT INTO @tmpAPC13
 SELECT * FROM @twentytwo
 
-PRINT 'APC14 Results'
-SELECT GETDATE()
+SELECT * FROM @tmpAPC13
+
+--PRINT 'APC14 Results'
+
+DECLARE @tmpAPC14 TABLE(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptChargeId INT,
+	dblChargeAmount DECIMAL(18,6),
+	dblGLChargeAmount DECIMAL(18,6)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -4105,12 +4296,15 @@ WHERE
 	AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC14
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @twentythree B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @twentythreeWithGLIssues twentythree ON twentythree.strBillId = A.strTransactionId AND twentythree.intBillDetailId = A.intJournalLineNo
 WHERE 
 	A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC14
 
 ROLLBACK TRAN
 
@@ -4121,10 +4315,22 @@ BEGIN CATCH
 	PRINT @error_APC14
 END CATCH
 
-PRINT 'APC15 Results'
-SELECT GETDATE()
+--PRINT 'APC15 Results'
 
---SELECT TOP 1 * FROM tblAPBillDetail
+DECLARE @tmpAPC15 TABLE 
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dblVoucherClearing DECIMAL(18,6),
+	dblReceiptClearing DECIMAL(18,6),
+	dblDiff DECIMAL(18,6)
+)
 
 DECLARE @intFunctionalCurrencyId  AS INT 
 SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
@@ -4265,7 +4471,9 @@ WHERE
 --AND 
 ABS(dblAdjustment - dblGLAdjustment ) = .01
 
-SELECT A.* FROM #twentyfour A
+INSERT INTO @tmpAPC15
+SELECT A.* 
+FROM #twentyfour A
 WHERE NOT EXISTS (
 	SELECT 1 FROM tblGLDetail B
 	WHERE B.strTransactionId = A.strBillId
@@ -4273,12 +4481,25 @@ WHERE NOT EXISTS (
 	AND B.strComments LIKE '%.01 difference on ICA%'
 )
 
---NOT APC16 DATA FIX --PRINT 'APC16 Results'
+SELECT * FROM @tmpAPC15
 
-PRINT 'APC17 Results'
-SELECT GETDATE()
+--NOT APC16 DATA FIX ----PRINT 'APC16 Results'
 
---SELECT TOP 1 * FROM tblAPBillDetail
+--PRINT 'APC17 Results'
+
+DECLARE @tmpAPC17 TABLE 
+(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intItemId INT,
+	intExpenseAccountId INT,
+	intInventoryReceiptChargeId INT,
+	dblDetailTotal DECIMAL(18,6),
+	dblChargeAmount DECIMAL(18,6),
+	intVoucherCount INT
+)
 
 --DECLARE #apc17 TABLE
 CREATE TABLE #apc17
@@ -4353,11 +4574,22 @@ WHERE A.intInventoryReceiptChargeId IN (
 	SELECT intInventoryReceiptChargeId FROM twentytwo B WHERE B.intVoucherCount > 1
 )
 
+INSERT INTO @tmpAPC17
 SELECT * FROM #apc17
 
-PRINT 'APC18 Results'
-SELECT GETDATE()
+SELECT * FROM @tmpAPC17
 
+--PRINT 'APC18 Results'
+
+DECLARE @tmpAPC18 TABLE 
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptChargeId INT
+)
 --SELECT TOP 1 * FROM tblAPBillDetail
 --SELECT TOP 1 * FROM tblAPBill
 --SELECT TOP 1 * FROM tblICInventoryReceiptCharge
@@ -4628,12 +4860,15 @@ WHERE
 	AND (newGL.strAccountCategory = oldGL.strAccountCategory OR oldGL.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC18
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN #twentyseven B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @twentysevenWithGLIssues twentyseven ON twentyseven.strBillId = A.strTransactionId AND twentyseven.intBillDetailId = A.intJournalLineNo
 WHERE 
 	A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC18
 
 ROLLBACK TRAN
 
@@ -4644,8 +4879,17 @@ BEGIN CATCH
 	PRINT @error_APC18
 END CATCH
 
-PRINT 'APC19 Results'
-SELECT GETDATE()
+--PRINT 'APC19 Results'
+
+DECLARE @tmpAPC19 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intInventoryReceiptItemId INT,
+	intBillDetailId INT,
+	intBillDetailTaxId INT
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -4999,6 +5243,7 @@ WHERE
 	ISNULL(glTax.dblTotal,0) <> 0
 
 --specific issue
+INSERT INTO @tmpAPC19
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @twentyeight B ON A.strTransactionId = B.strBillId AND B.intBillDetailTaxId = A.intJournalLineNo
@@ -5006,6 +5251,7 @@ INNER JOIN @twentyeightWithGLIssues eleven ON A.strTransactionId = eleven.strBil
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
 
+SELECT * FROM @tmpAPC19
 
 ROLLBACK TRAN
 
@@ -5016,8 +5262,19 @@ BEGIN CATCH
 	PRINT @error_APC19
 END CATCH
 
-PRINT 'APC20 Results'
-SELECT GETDATE()
+--PRINT 'APC20 Results'
+
+DECLARE @tmpAPC20 TABLE(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptChargeId INT,
+	strChargeCostMethod NVARCHAR(50),
+	dblChargeAmount DECIMAL(18,6),
+	dblChargeRate DECIMAL(18,6),
+	dblTotal DECIMAL(18,6)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -5291,12 +5548,15 @@ WHERE
 	AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC20
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @thirty B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @thirtyWithGLIssues thirty ON thirty.strBillId = A.strTransactionId AND thirty.intBillDetailId = A.intJournalLineNo
 WHERE 
 	A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC20
 
 ROLLBACK TRAN
 
@@ -5307,8 +5567,23 @@ BEGIN CATCH
 	PRINT @error_APC20
 END CATCH
 
-PRINT 'APC21 Results'
-SELECT GETDATE()
+--PRINT 'APC21 Results'
+
+DECLARE @tmpAPC21 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dblVoucherClearing DECIMAL(18,6),
+	dblReceiptClearing DECIMAL(18,6),
+	dblDiff DECIMAL(18,6)
+)
+
 
 SET @intFunctionalCurrencyId = dbo.fnSMGetDefaultCurrency('FUNCTIONAL')
 --GET ALL ICA WHICH HAS .01 DISCREPANCY
@@ -5448,7 +5723,9 @@ WHERE
 --AND 
 ABS(dblAdjustment - dblGLAdjustment ) = .01
 
-SELECT A.* FROM @thirtyseven A
+INSERT INTO @tmpAPC21
+SELECT A.* 
+FROM @thirtyseven A
 WHERE NOT EXISTS (
 	SELECT 1 FROM tblGLDetail B
 	WHERE B.strTransactionId = A.strBillId
@@ -5456,8 +5733,24 @@ WHERE NOT EXISTS (
 	AND B.strComments LIKE '%.01 difference on AP Cost Adjustment%'
 )
 
-PRINT 'APC22 Results'
-SELECT GETDATE()
+SELECT * FROM @tmpAPC21
+
+--PRINT 'APC22 Results'
+
+DECLARE @tmpAPC22 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dblReceiptClearing DECIMAL(18,6),
+	dblVoucherClearing DECIMAL(18,6),
+	dblDiff DECIMAL(18,6)
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -5806,11 +6099,14 @@ WHERE
 		)
 	OR rcptClearing.dblTotal IS NULL
 
+INSERT INTO @tmpAPC22
 SELECT
 A.*
 FROM @thirtyeight A
 INNER JOIN @thirtyeightWithGLIssues B ON A.strBillId = B.strBillId
 AND A.intBillDetailId = B.intBillDetailId
+
+SELECT * FROM @tmpAPC22
 
 ROLLBACK TRAN
 
@@ -5821,8 +6117,22 @@ BEGIN CATCH
 	PRINT @error_APC22
 END CATCH
 
-PRINT 'APC23 Results'
-SELECT GETDATE()
+--PRINT 'APC23 Results'
+
+DECLARE @tmpAPC23 TABLE(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intInventoryReceiptChargeId INT,
+	dblDetailTotal DECIMAL(18,6),
+	dblChargeAmount DECIMAL(18,6),
+	dblDiff DECIMAL(18,6),
+	intVoucherCount INT
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -6139,9 +6449,12 @@ WHERE
 		)
 	OR rcptClearing.dblTotal IS NULL
 
+INSERT INTO @tmpAPC23
 SELECT A.*
 FROM @thirtynine A
 INNER JOIN @thirtynineWithGLIssues B ON A.strBillId = B.strBillId AND A.intBillDetailId = B.intBillDetailId
+
+SELECT * FROM @tmpAPC23
 
 ROLLBACK TRAN
 
@@ -6152,8 +6465,14 @@ BEGIN CATCH
 	PRINT @error_APC23
 END CATCH
 
-PRINT 'APC24 Results'
-SELECT GETDATE()
+--PRINT 'APC24 Results'
+
+DECLARE @tmpAPC24 TABLE(
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intBillDetailTaxId INT
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -6492,12 +6811,15 @@ WHERE
 	AND (newGLTax.strAccountCategory = glTax.strAccountCategory OR glTax.strAccountCategory IS NULL))
 
 --specific issue
+INSERT INTO @tmpAPC24
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @apc24 B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @apc24WithGLIssues thirtyeight ON thirtyeight.strBillId = A.strTransactionId AND thirtyeight.intBillDetailId = A.intJournalLineNo
 WHERE A.strJournalLineDescription = 'Purchase Tax'
 AND A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC24
 
 ROLLBACK TRAN
 
@@ -6508,8 +6830,17 @@ BEGIN CATCH
 	PRINT @error_APC24
 END CATCH
 
-PRINT 'APC25 Results'
-SELECT GETDATE()
+--PRINT 'APC25 Results'
+
+DECLARE @tmpAPC25 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strShipmentNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryShipmentChargeId INT
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -6864,12 +7195,15 @@ WHERE
 
 
 --specific issue
+INSERT INTO @tmpAPC25
 SELECT B.*
 FROM tblGLDetail A
 INNER JOIN @fourtyone B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @fourtyoneWithGLIssues twentyseven ON twentyseven.strBillId = A.strTransactionId AND twentyseven.intBillDetailId = A.intJournalLineNo
 WHERE 
 	A.ysnIsUnposted = 0
+
+SELECT * FROM @tmpAPC25
 	
 ROLLBACK TRAN
 
@@ -6880,8 +7214,22 @@ BEGIN CATCH
 	PRINT @error_APC25
 END CATCH
 
-PRINT 'APC26 Results'
-SELECT GETDATE()
+--PRINT 'APC26 Results'
+
+DECLARE @tmpAPC26 TABLE(
+	intBillId INT, 
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intInventoryShipmentChargeId INT,
+	dblDetailTotal DECIMAL(18,6),
+	dblChargeAmount DECIMAL(18,6),
+	dblDiff DECIMAL(18,6),
+	intVoucherCount INT
+)
 
 DELETE FROM @affectedTaxDetails
 DELETE FROM @billIds
@@ -7204,9 +7552,12 @@ WHERE
 		)
 	OR rcptClearing.dblTotal IS NULL
 
+INSERT INTO @tmpAPC26
 SELECT A.*
 FROM @fourty A
 INNER JOIN @fourtyWithGLIssues B ON A.strBillId = B.strBillId AND A.intBillDetailId = B.intBillDetailId
+
+SELECT * FROM @tmpAPC26
 
 ROLLBACK TRAN
 
@@ -7217,8 +7568,25 @@ BEGIN CATCH
 	PRINT @error_APC26
 END CATCH
 
-PRINT 'APC27 Results'
-SELECT GETDATE()
+--PRINT 'APC27 Results'
+
+DECLARE @tmpAPC27 TABLE
+(
+	dtmDate DATETIME,
+	intBillId INT,
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillDetailId INT,
+	intInventoryReceiptItemId INT,
+	intAccountId INT,
+	strItemNo NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	dblReceiptClearing DECIMAL(18,6),
+	dblVoucherClearing DECIMAL(18,6),
+	dblDiff DECIMAL(18,6),
+	dblGLDiff DECIMAL(18,6),
+	dblMultiTotal DECIMAL(18,6),
+	intVoucherCount INT
+)
 
 DELETE FROM @billIds
 DELETE FROM @GLEntries
@@ -7637,12 +8005,15 @@ FROM (
 WHERE 
 	ABS(dblVoucherTotal - dblReceiptTotal) IN (.01, .02)
 
+INSERT INTO @tmpAPC27
 SELECT DISTINCT B.*
 FROM tblGLDetail A
 INNER JOIN @apc27 B ON A.strTransactionId = B.strBillId AND B.intBillDetailId = A.intJournalLineNo
 INNER JOIN @apc27WithGLIssues eleven ON B.intInventoryReceiptItemId = eleven.intInventoryReceiptItemId
 WHERE A.ysnIsUnposted = 0
 AND B.intVoucherCount = 1
+
+SELECT * FROM @tmpAPC27
 
 ROLLBACK TRAN
 
@@ -7653,10 +8024,25 @@ BEGIN CATCH
 	PRINT @error_APC27
 END CATCH
 
-PRINT 'APC28 Results'
-SELECT GETDATE()
+--PRINT 'APC28 Results'
+
+DECLARE @tmpAPC28 TABLE
+(
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillId INT,
+	intBillDetailId INT,
+	intBillDetailAccountId INT,
+	intAccountId INT,
+	strAccountId NVARCHAR(50),
+	strReceiptNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intInventoryReceiptId INT,
+	intInventoryReceiptChargeId INT,
+	intReceiptChargeAccountId INT,
+	strReceiptChargeAccountId NVARCHAR(50)
+)
 
 --RECEIPT CHARGE ITEM
+INSERT INTO @tmpAPC28
 SELECT 
 	A.strBillId,
 	A.intBillId,
@@ -7667,8 +8053,8 @@ SELECT
 	C.strReceiptNumber,
 	C.intInventoryReceiptId,
 	C2.intInventoryReceiptChargeId,
-	E.intAccountId,
-	E2.strAccountId
+	E.intAccountId AS intReceiptChargeAccount,
+	E2.strAccountId AS strReceiptChargeAccount
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 INNER JOIN (tblICInventoryReceipt C INNER JOIN tblICInventoryReceiptCharge C2 ON C.intInventoryReceiptId = C2.intInventoryReceiptId)
@@ -7688,10 +8074,29 @@ AND	(
 	OR	D.intAccountId <> E.intAccountId --BILL DETAIL GL ACCOUNT NOT THE SAME WITH GL OF RECEIPT ITEM
 	)
 
-PRINT 'APC29 Results'
-SELECT GETDATE()
+SELECT * FROM @tmpAPC28
+
+--PRINT 'APC29 Results'
+
+DECLARE @tmpAPC29 TABLE
+(
+	strBillId NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intBillId INT,
+	intBillDetailId INT,
+	intBillDetailAccountId INT,
+	intAccountId INT,
+	strAccountId NVARCHAR(50),
+	intGLDetailId INT,
+	strShipmentNumber NVARCHAR(50) COLLATE Latin1_General_CI_AS,
+	intInventoryShipmentId INT,
+	intInventoryShipmentChargeId INT,
+	intShipmentChargeAccountId INT,
+	strShipmentChargeAccountId NVARCHAR(50),
+	strError NVARCHAR(200)
+)
 
 --SHIPMENT CHARGE ITEM
+INSERT INTO @tmpAPC29
 SELECT 
 	A.strBillId,
 	A.intBillId,
@@ -7703,12 +8108,12 @@ SELECT
 	C.strShipmentNumber,
 	C.intInventoryShipmentId,
 	C3.intInventoryShipmentChargeId,
-	E.intAccountId,
-	E2.strAccountId,
+	E.intAccountId AS intShipmentChargeAccount,
+	E2.strAccountId AS strShipmentChargeAccount,
 	CASE WHEN B.intAccountId <> D.intAccountId THEN 'Bill detail account not equal to GL'
 		WHEN B.intAccountId <> E.intAccountId THEN 'Bill detail account not equal to shipment charge account'
 		ELSE ''
-	END
+	END AS strError
 FROM tblAPBill A
 INNER JOIN tblAPBillDetail B ON A.intBillId = B.intBillId
 INNER JOIN (tblICInventoryShipment C INNER JOIN tblICInventoryShipmentItem C2 ON C.intInventoryShipmentId = C2.intInventoryShipmentId
@@ -7730,3 +8135,176 @@ AND	(
 	OR	B.intAccountId <> E.intAccountId --ACCOUNT IN BILL DETAIL NOT THE SAME WITH GL OF RECEIPT ITEM
 	OR	D.intAccountId <> E.intAccountId --BILL DETAIL GL ACCOUNT NOT THE SAME WITH GL OF RECEIPT ITEM
 	)
+
+SELECT * FROM @tmpAPC29
+
+--END QUERY RESULT
+
+IF OBJECT_ID('tempdb..##tmpAPC1') IS NOT NULL DROP TABLE ##tmpAPC1
+IF OBJECT_ID('tempdb..##tmpAPC2') IS NOT NULL DROP TABLE ##tmpAPC2
+IF OBJECT_ID('tempdb..##tmpAPC3') IS NOT NULL DROP TABLE ##tmpAPC3
+IF OBJECT_ID('tempdb..##tmpAPC4') IS NOT NULL DROP TABLE ##tmpAPC4
+IF OBJECT_ID('tempdb..##tmpAPC5') IS NOT NULL DROP TABLE ##tmpAPC5
+IF OBJECT_ID('tempdb..##tmpAPC6') IS NOT NULL DROP TABLE ##tmpAPC6
+IF OBJECT_ID('tempdb..##tmpAPC7') IS NOT NULL DROP TABLE ##tmpAPC7
+IF OBJECT_ID('tempdb..##tmpAPC8') IS NOT NULL DROP TABLE ##tmpAPC8
+IF OBJECT_ID('tempdb..##tmpAPC9') IS NOT NULL DROP TABLE ##tmpAPC9
+IF OBJECT_ID('tempdb..##tmpAPC10') IS NOT NULL DROP TABLE ##tmpAPC10
+IF OBJECT_ID('tempdb..##tmpAPC11') IS NOT NULL DROP TABLE ##tmpAPC11
+IF OBJECT_ID('tempdb..##tmpAPC12') IS NOT NULL DROP TABLE ##tmpAPC12
+IF OBJECT_ID('tempdb..##tmpAPC13') IS NOT NULL DROP TABLE ##tmpAPC13
+IF OBJECT_ID('tempdb..##tmpAPC14') IS NOT NULL DROP TABLE ##tmpAPC14
+IF OBJECT_ID('tempdb..##tmpAPC15') IS NOT NULL DROP TABLE ##tmpAPC15
+IF OBJECT_ID('tempdb..##tmpAPC17') IS NOT NULL DROP TABLE ##tmpAPC17
+IF OBJECT_ID('tempdb..##tmpAPC18') IS NOT NULL DROP TABLE ##tmpAPC18
+IF OBJECT_ID('tempdb..##tmpAPC19') IS NOT NULL DROP TABLE ##tmpAPC19
+IF OBJECT_ID('tempdb..##tmpAPC20') IS NOT NULL DROP TABLE ##tmpAPC20
+IF OBJECT_ID('tempdb..##tmpAPC21') IS NOT NULL DROP TABLE ##tmpAPC21
+IF OBJECT_ID('tempdb..##tmpAPC22') IS NOT NULL DROP TABLE ##tmpAPC22
+IF OBJECT_ID('tempdb..##tmpAPC23') IS NOT NULL DROP TABLE ##tmpAPC23
+IF OBJECT_ID('tempdb..##tmpAPC24') IS NOT NULL DROP TABLE ##tmpAPC24
+IF OBJECT_ID('tempdb..##tmpAPC25') IS NOT NULL DROP TABLE ##tmpAPC25
+IF OBJECT_ID('tempdb..##tmpAPC26') IS NOT NULL DROP TABLE ##tmpAPC26
+IF OBJECT_ID('tempdb..##tmpAPC27') IS NOT NULL DROP TABLE ##tmpAPC27
+IF OBJECT_ID('tempdb..##tmpAPC28') IS NOT NULL DROP TABLE ##tmpAPC28
+IF OBJECT_ID('tempdb..##tmpAPC29') IS NOT NULL DROP TABLE ##tmpAPC29
+
+IF EXISTS(SELECT 1 FROM @tmpAPC1) 
+BEGIN 
+	SELECT * INTO ##tmpAPC1 FROM @tmpAPC1
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC2) 
+BEGIN
+	SELECT * INTO ##tmpAPC2 FROM @tmpAPC2
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC3) 
+BEGIN
+	SELECT * INTO ##tmpAPC3 FROM @tmpAPC3
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC4) 
+BEGIN
+	SELECT * INTO ##tmpAPC4 FROM @tmpAPC4
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC5) 
+BEGIN
+	SELECT * INTO ##tmpAPC5 FROM @tmpAPC5
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC6) 
+BEGIN
+	SELECT * INTO ##tmpAPC6 FROM @tmpAPC6
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC7) 
+BEGIN
+	SELECT * INTO ##tmpAPC7 FROM @tmpAPC7
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC8) 
+BEGIN
+	SELECT * INTO ##tmpAPC8 FROM @tmpAPC8
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC9) 
+BEGIN
+	SELECT * INTO ##tmpAPC9 FROM @tmpAPC9
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC10) 
+BEGIN
+	SELECT * INTO ##tmpAPC10 FROM @tmpAPC10
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC11) 
+BEGIN
+	SELECT * INTO ##tmpAPC11 FROM @tmpAPC11
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC12) 
+BEGIN
+	SELECT * INTO ##tmpAPC12 FROM @tmpAPC12
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC13) 
+BEGIN
+	SELECT * INTO ##tmpAPC13 FROM @tmpAPC13
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC14) 
+BEGIN
+	SELECT * INTO ##tmpAPC14 FROM @tmpAPC14
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC15) 
+BEGIN
+	SELECT * INTO ##tmpAPC15 FROM @tmpAPC15
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC17) 
+BEGIN
+	SELECT * INTO ##tmpAPC17 FROM @tmpAPC17
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC18) 
+BEGIN
+	SELECT * INTO ##tmpAPC18 FROM @tmpAPC18
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC19) 
+BEGIN
+	SELECT * INTO ##tmpAPC19 FROM @tmpAPC19
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC20) 
+BEGIN
+	SELECT * INTO ##tmpAPC20 FROM @tmpAPC20
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC21) 
+BEGIN
+	SELECT * INTO ##tmpAPC21 FROM @tmpAPC21
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC22) 
+BEGIN
+	SELECT * INTO ##tmpAPC22 FROM @tmpAPC22
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC23) 
+BEGIN
+	SELECT * INTO ##tmpAPC23 FROM @tmpAPC23
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC24) 
+BEGIN
+	SELECT * INTO ##tmpAPC24 FROM @tmpAPC24
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC25) 
+BEGIN
+	SELECT * INTO ##tmpAPC25 FROM @tmpAPC25
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC26) 
+BEGIN
+	SELECT * INTO ##tmpAPC26 FROM @tmpAPC26
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC27) 
+BEGIN
+	SELECT * INTO ##tmpAPC27 FROM @tmpAPC27
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC28) 
+BEGIN
+	SELECT * INTO ##tmpAPC28 FROM @tmpAPC28
+END
+
+IF EXISTS(SELECT 1 FROM @tmpAPC29) 
+BEGIN
+	SELECT * INTO ##tmpAPC29 FROM @tmpAPC29
+END
