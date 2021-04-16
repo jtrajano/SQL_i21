@@ -22,7 +22,7 @@ RETURNS @returntable TABLE
 	[intOffsetDetailId]			INT NULL,
 	[intOffsetDetailTaxId]		INT NULL,
 	[strCode]					NVARCHAR(55) COLLATE Latin1_General_CI_AS NOT NULL,
-	[strRemarks]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NOT NULL
+	[strRemarks]				NVARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
 )
 AS
 BEGIN
