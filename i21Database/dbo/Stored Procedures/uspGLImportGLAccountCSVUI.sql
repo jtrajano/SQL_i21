@@ -111,18 +111,18 @@ WHERE (intPrimarySegmentId IS NULL
 OR intLocationSegmentId IS NULL)
   
   
-UPDATE T set strDescription = S.strChartDesc FROM [tblGLAccountImportDataStaging2] T   
+UPDATE T set strDescription = ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
 JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment))   
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strType = 'Primary'AND ISNULL(ysnInvalid,0) = 0 AND  ISNULL(T.[ysnNoDescription],0)  = 1  
   
-UPDATE T set strDescription = T.strDescription + '-' + S.strChartDesc FROM [tblGLAccountImportDataStaging2] T   
-JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment))   
+UPDATE T set strDescription = T.strDescription + '-' + ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
+JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strLocationSegment))   
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strStructureName = 'Location'AND ISNULL(ysnInvalid,0) = 0  AND  ISNULL(T.[ysnNoDescription],0)  = 1  
   
-UPDATE T set strDescription = T.strDescription + '-' + S.strChartDesc FROM [tblGLAccountImportDataStaging2] T   
-JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strPrimarySegment))   
+UPDATE T set strDescription = T.strDescription + '-' + ISNULL(S.strChartDesc,'') FROM [tblGLAccountImportDataStaging2] T   
+JOIN tblGLAccountSegment S ON S.strCode = RTRIM(LTRIM(T.strLOBSegment))   
 JOIN tblGLAccountStructure ST ON ST.intAccountStructureId = S.intAccountStructureId   
 WHERE  ST.strStructureName = 'LOB'AND ISNULL(ysnInvalid,0) = 0 AND  ISNULL(T.[ysnNoDescription],0)  = 1  
   
