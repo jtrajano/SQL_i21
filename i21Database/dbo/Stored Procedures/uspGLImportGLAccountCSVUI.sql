@@ -186,7 +186,7 @@ DECLARE @intInvalidCount INT = 0, @intValidCount INT = 0, @intStagedCount INT=0
 SELECT @intStagedCount = COUNT(*) FROM tblGLAccountImportDataStaging  
 SELECT @intInvalidCount = count(*) FROM tblGLAccountImportDataStaging2 where ISNULL(ysnInvalid,0) = 1  
 SELECT @intValidCount=COUNT(*) FROM tblGLAccount A JOIN tblGLAccountImportDataStaging2 B on B.intAccountId = A.intAccountId   
-WHERE ISNULL(ysnInvalid,0) = 1  
+WHERE ISNULL(ysnInvalid,0) = 0  
   
   
 DECLARE @m NVARCHAR(MAX)  
