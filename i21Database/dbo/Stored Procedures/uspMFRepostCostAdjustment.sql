@@ -578,6 +578,11 @@ BEGIN TRY
 				END
 		END
 	END
+	ELSE 
+	BEGIN 			
+		-- 'Cost adjustment for {Batch Id} is missing. Stock rebuild will abort.'
+		EXEC uspICRaiseError 80265, @strCostAdjustmentBatchId; 	
+	END 
 
 	IF @intTransactionCount = 0
 		COMMIT TRANSACTION
@@ -596,4 +601,6 @@ BEGIN CATCH
 			,1
 			,'WITH NOWAIT'
 			)
+
+	RETURN -1; 
 END CATCH
