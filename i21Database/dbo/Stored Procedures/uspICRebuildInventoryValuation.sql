@@ -1738,11 +1738,13 @@ BEGIN
 				--PRINT 'Reposting Bill Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostBillCostAdjustment creates and posts it own g/l entries 
-				EXEC uspICRepostBillCostAdjustment
+				EXEC @intReturnValue = uspICRepostBillCostAdjustment
 					@strTransactionId
 					,@strBatchId
 					,@intEntityUserSecurityId
 					,@ysnRegenerateBillGLEntries
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END
 
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Settle Storage'))
@@ -1750,10 +1752,12 @@ BEGIN
 				--PRINT 'Reposting Settle Storage Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
-				EXEC uspICRepostSettleStorageCostAdjustment
+				EXEC @intReturnValue = uspICRepostSettleStorageCostAdjustment
 					@strTransactionId
 					,@strBatchId
 					,@intEntityUserSecurityId
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END
 
 			ELSE IF EXISTS (SELECT 1 WHERE @strTransactionType IN ('Cost Adjustment') AND @strTransactionForm IN ('Produce', 'Consume'))
@@ -1761,10 +1765,12 @@ BEGIN
 				--PRINT 'Reposting MFG Cost Adjustments: ' + @strTransactionId
 				
 				-- uspICRepostSettleStorageCostAdjustment creates and posts it own g/l entries 
-				EXEC uspMFRepostCostAdjustment
+				EXEC @intReturnValue = uspMFRepostCostAdjustment
 					@strBatchId
 					,@intEntityUserSecurityId
 					,@dtmDate
+
+				IF @intReturnValue <> 0 GOTO _EXIT_WITH_ERROR
 			END
 
 			-- Repost 'Consume' and 'Produce'
