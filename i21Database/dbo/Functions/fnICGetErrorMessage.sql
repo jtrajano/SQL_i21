@@ -265,6 +265,20 @@ BEGIN
 		WHEN @msgId = 80249 THEN 'Shipment reversal is not allowed. It already has a credit memo. See %s.'
 		WHEN @msgId = 80250 THEN 'Inventory Account is set to %s for item %s.'
 		WHEN @msgId = 80251 THEN 'Work In Progress Account is set to %s for item %s.'
+		WHEN @msgId = 80252 THEN 'There are backdated transactions made in %s %i. Do you want to rebuild from %s %i?'
+		WHEN @msgId = 80253 THEN '%s charges is not linked to any items. Please check if Charges Link in %s were properly assigned.'
+		WHEN @msgId = 80254 THEN 'Rebuild is not allowed because it will impact the DPR Summary Log.'
+		WHEN @msgId = 80255 THEN '%s is a back-dated transaction. Please rebuild the stock from %d before closing the fiscal month.'
+		WHEN @msgId = 80256 THEN 'The "to" storage location in %s is invalid.'
+		WHEN @msgId = 80257 THEN 'The "to" storage unit in %s is invalid.'
+		WHEN @msgId = 80258 THEN 'Bill Amount for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80259 THEN 'Bill Amount as charge (or discount) for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80260 THEN 'Bill Quantity as charge (or discount) for %s is already %f. You cannot over bill the transaction'
+		WHEN @msgId = 80261 THEN 'The Storage Location invalid in %s for %s.'
+		WHEN @msgId = 80262 THEN 'Unable to Post. The following contract(s) needs to be Priced:<p><br><div style="list-style-position: inside;"><ul>%s</ul></div></p>'
+		WHEN @msgId = 80263 THEN 'Category changed for item %s.'
+		WHEN @msgId = 80264 THEN 'The item type for %s is not "stockable". Costing is not allowed.'
+		WHEN @msgId = 80265 THEN 'Cost adjustment for %s is missing. Stock rebuild will abort.'
 	END 
 
 	RETURN @msg
