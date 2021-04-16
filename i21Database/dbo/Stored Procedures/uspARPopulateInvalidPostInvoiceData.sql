@@ -564,7 +564,7 @@ BEGIN
 	WHERE ISNULL(SMT.strApprovalStatus, '') <> 'Approved'
 	AND VI.ysnHasCreditApprover = 0
     AND ISNULL(VI.strCreditCode, '') NOT IN ('', 'Always Allow', 'Normal', 'Reject Orders', 'COD')
-    AND ((I.dblInvoiceTotal + VI.dblARBalance >= VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) >= 0)
+    AND ((I.dblInvoiceTotal + VI.dblARBalance > VI.dblCreditLimit) OR ISNULL(VI.dblCreditStopDays, 0) >= 0)
 
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
