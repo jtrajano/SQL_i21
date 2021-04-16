@@ -178,6 +178,12 @@ BEGIN
 				,@strTransactionId = @strSettleTicketId
 		END 
 	END
+	ELSE 
+	BEGIN 			
+		-- 'Cost adjustment for {Transaction Id} is missing. Stock rebuild will abort.'
+		EXEC uspICRaiseError 80265, @strSettleTicketId; 	
+		RETURN -80265
+	END 
 
 	IF EXISTS (SELECT TOP 1 1 FROM @GLEntries)
 	BEGIN 
