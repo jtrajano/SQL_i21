@@ -16,8 +16,16 @@ FROM
 	   , TR.dblTrlUnitPrice
 	   , TR.dblTrlLineTot
 	   , TR.intTermMsgSN
-	   , TR.dtmDate
-	   , TR.intCashierPosNum
+	   , TR.dtmDate AS dtmDateTime
+	   , CONVERT(VARCHAR, TR.dtmDate, 23) AS dtmDate
+	   , CAST(TR.intCashierPosNum AS INT) AS intCashierPosNum
+	   , CAST(ST.intStoreId AS INT) AS intStoreId
+	   , CAST(ST.intStoreNo AS INT) AS intStoreNo
+	   , CAST(TR.intTrTickNumPosNum AS INT) AS intTicketPosNum -- Ticket Number
+	   , CAST(TR.intTrTickNumTrSeq AS INT) AS intTicketTrSeq -- Ticket Number
+	   , TR.strTransType 
+	   , CAST(TR.intCashierSysId AS INT) AS intCashierSysId
+	   , TR.strCashier
 	   , RIGHT('0' + CONVERT(VARCHAR(2), DATEPART(HOUR, TR.dtmDate)), 2) as Hr
 	   -- , USec.intEntityId
 	FROM tblSTTranslogRebates TR
