@@ -22,17 +22,27 @@ SELECT
 FROM
 (
 	SELECT
-		Item.intItemId,
-		Item.strItemNo,
-		cd.intInventoryCountDetailId,
-		cd.strCountLine,
-		c.strCountNo,
-		c.intInventoryCountId,
-		dblNewOnHand = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) ELSE LotTransactions.dblOnHand END, 0),
-		dblCountOnHand = cd.dblSystemCount,
-		cd.dblWeightQty,
-		dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0),
-		dblNewCost = ISNULL(CASE WHEN c.strDataSource = 'Import CSV' THEN cd.dblLastCost ELSE CASE 
+		Item.intItemId
+		,Item.strItemNo
+		,cd.intInventoryCountDetailId
+		,cd.strCountLine
+		,c.strCountNo
+		,c.intInventoryCountId
+		,dblNewOnHand = 
+			ISNULL(
+				CASE 
+					WHEN Item.strLotTracking = 'No' THEN 
+						dbo.fnCalculateQtyBetweenUOM(nonLotted.intItemUOMId, StockUOM.intItemUOMId, nonLotted.dblOnHand) 
+					ELSE 
+						LotTransactions.dblOnHand 
+				END
+				, 0
+			)
+			
+		,dblCountOnHand = cd.dblSystemCount
+		,cd.dblWeightQty
+		,dblNewWeightQty = ISNULL(CASE WHEN Item.strLotTracking = 'No' THEN 0 ELSE lotted.dblWeight END, 0)
+		,dblNewCost = ISNULL(CASE WHEN c.strDataSource = 'Import CSV' THEN cd.dblLastCost ELSE CASE 
 								WHEN ItemLocation.intCostingMethod = 1 AND Item.strLotTracking = 'No'  THEN -- AVG
 									dbo.fnGetItemAverageCost(
 										cd.intItemId
@@ -51,36 +61,45 @@ FROM
 										, COALESCE(cd.intItemUOMId, StockUOM.intItemUOMId)
 										, ItemPricing.dblLastCost
 									)
-								WHEN Item.strLotTracking != 'No' THEN
+								WHEN Item.strLotTracking <> 'No' THEN
 									ISNULL(ItemLot.dblLastCost, dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost))
 								ELSE
 									dbo.fnCalculateCostBetweenUOM(StockUOM.intItemUOMId, cd.intItemUOMId, ItemPricing.dblLastCost)
-							END END, 0),
-		dblCost = cd.dblLastCost,
-		intLotId = cd.intLotId,
-		strLotNo = cd.strLotNo
-	FROM tblICInventoryCountDetail cd
-		INNER JOIN tblICInventoryCount c ON cd.intInventoryCountId = c.intInventoryCountId
-		INNER JOIN tblICItem Item ON Item.intItemId = cd.intItemId
-		INNER JOIN dbo.tblICItemLocation ItemLocation ON ItemLocation.intLocationId = c.intLocationId
+							END END, 0)
+		,dblCost = cd.dblLastCost
+		,intLotId = cd.intLotId
+		,strLotNo = cd.strLotNo
+	FROM 
+		tblICInventoryCountDetail cd INNER JOIN tblICInventoryCount c 
+			ON cd.intInventoryCountId = c.intInventoryCountId
+		INNER JOIN tblICItem Item 
+			ON Item.intItemId = cd.intItemId
+		INNER JOIN dbo.tblICItemLocation ItemLocation 
+			ON ItemLocation.intLocationId = c.intLocationId
 			AND ItemLocation.intItemId = cd.intItemId
-		LEFT JOIN dbo.tblICItemPricing ItemPricing ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
-		LEFT JOIN dbo.tblICItemUOM ItemUOM ON cd.intItemUOMId = ItemUOM.intItemUOMId
-		LEFT JOIN dbo.tblICLot ItemLot ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
-		LEFT JOIN dbo.tblICItemUOM StockUOM ON cd.intItemId = StockUOM.intItemId AND StockUOM.ysnStockUnit = 1
+		LEFT JOIN dbo.tblICItemPricing ItemPricing 
+			ON ItemPricing.intItemLocationId = ItemLocation.intItemLocationId
+			AND ItemPricing.intItemId = Item.intItemId
+		LEFT JOIN dbo.tblICItemUOM ItemUOM 
+			ON cd.intItemUOMId = ItemUOM.intItemUOMId
+		LEFT JOIN dbo.tblICLot ItemLot 
+			ON ItemLot.intLotId = cd.intLotId AND Item.strLotTracking <> 'No'
+		LEFT JOIN dbo.tblICItemUOM StockUOM 
+			ON cd.intItemId = StockUOM.intItemId 
+			AND StockUOM.ysnStockUnit = 1
 		OUTER APPLY (
 			SELECT 
 				  ss.intItemId
 				, ss.intItemUOMId
 				, dblOnHand =  SUM(COALESCE(ss.dblOnHand, 0.00))
-				, dblLastCost = MAX(ISNULL(ss.dblLastCost, 0))
 			FROM vyuICGetItemStockSummary ss
 				INNER JOIN tblICItem i ON i.intItemId = ss.intItemId
-			WHERE ss.intItemId = cd.intItemId
+			WHERE 
+				ss.intItemId = cd.intItemId
 				AND ss.intItemLocationId = cd.intItemLocationId
-				AND CASE WHEN cd.intSubLocationId IS NULL THEN 0 ELSE ss.intSubLocationId END = ISNULL(cd.intSubLocationId, 0)
-				AND CASE WHEN cd.intStorageLocationId IS NULL THEN 0 ELSE ss.intStorageLocationId END = ISNULL(cd.intStorageLocationId, 0)
-				AND dbo.fnDateLessThanEquals(ss.dtmDate, c.dtmCountDate) = 1
+				AND (ss.intSubLocationId = cd.intSubLocationId OR NULLIF(cd.intSubLocationId, 0) IS NULL) 
+				AND (ss.intStorageLocationId = cd.intStorageLocationId OR NULLIF(cd.intSubLocationId, 0) IS NULL) 
+				AND FLOOR(CAST(ss.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 				AND i.strLotTracking = 'No'
 			GROUP BY 
 				ss.intItemId,
@@ -112,33 +131,29 @@ FROM
 			FROM tblICLot Lot
 				INNER JOIN tblICItem Item ON Item.intItemId = Lot.intItemId
 			WHERE Item.strLotTracking <> 'No'
-		) lotted ON lotted.intItemId = cd.intItemId
+		) lotted
+			ON lotted.intItemId = cd.intItemId
 			AND lotted.intItemLocationId = cd.intItemLocationId
 			AND lotted.intItemUOMId = cd.intItemUOMId
 			AND lotted.intSubLocationId = cd.intSubLocationId
 			AND lotted.intStorageLocationId = cd.intStorageLocationId
 			AND lotted.strLotNumber = cd.strLotNo
-		LEFT OUTER JOIN (
-			SELECT t.intItemId
-				, t.intItemLocationId
-				, t.intSubLocationId
-				, t.intStorageLocationId
-				, t.intItemUOMId
-				, t.intLotId
-				, dtmDate = CAST(CONVERT(VARCHAR(10), t.dtmDate,112) AS DATETIME)
-				, dblOnHand = SUM(t.dblQty)
-			FROM tblICInventoryTransaction t
-			GROUP BY t.intItemId, t.intItemLocationId, t.intSubLocationId, t.intStorageLocationId, t.intItemUOMId, t.intLotId, CONVERT(VARCHAR(10), t.dtmDate,112)
-		) LotTransactions ON LotTransactions.intItemId = Item.intItemId
-			AND LotTransactions.intItemLocationId = ItemLocation.intItemLocationId
-			AND LotTransactions.intSubLocationId = lotted.intSubLocationId
-			AND LotTransactions.intStorageLocationId = lotted.intStorageLocationId
-			AND LotTransactions.intLotId = lotted.intLotId
-			AND LotTransactions.intItemUOMId = lotted.intItemUOMId
-			AND dbo.fnDateLessThanEquals(LotTransactions.dtmDate, c.dtmCountDate) = 1
-	WHERE c.ysnPosted != 1
+		OUTER APPLY (
+			SELECT					
+				 dblOnHand = SUM(t.dblQty)
+			FROM 
+				tblICInventoryTransaction t
+			WHERE 
+				t.intItemId = Item.intItemId
+				AND t.intItemLocationId = ItemLocation.intItemLocationId
+				AND t.intSubLocationId = cd.intSubLocationId
+				AND t.intStorageLocationId = cd.intStorageLocationId
+				AND t.intLotId = cd.intLotId
+				AND t.intItemUOMId = cd.intItemUOMId						
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
+		) LotTransactions 			
+	WHERE c.ysnPosted <> 1
 ) x
---WHERE ((ROUND(x.dblNewOnHand - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
 GROUP BY x.intInventoryCountId
 	, x.intInventoryCountDetailId
 	, x.strCountNo
@@ -153,5 +168,5 @@ GROUP BY x.intInventoryCountId
 	, x.dblNewCost
 	, x.intLotId
 	, x.strLotNo
--- HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0) OR (ROUND(x.dblNewCost - x.dblCost, 6) != 0))
-HAVING ((ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) != 0))
+HAVING 
+	ROUND(SUM(x.dblNewOnHand) - x.dblCountOnHand, 6) <> 0
