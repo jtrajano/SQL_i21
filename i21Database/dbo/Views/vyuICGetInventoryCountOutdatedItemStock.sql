@@ -110,8 +110,16 @@ FROM
 				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = separateUOM.intSubLocationId THEN 0 ELSE 1 END) = 0)
 			)
 			AND (
-				(c.strCountBy = 'Item' AND dbo.fnDateLessThanEquals(separateUOM.dtmDate, c.dtmCountDate) = 1)
-				OR (c.strCountBy = 'Retail Count' AND dbo.fnDateLessThan(separateUOM.dtmDate, c.dtmCountDate) = 1) 
+				(
+					c.strCountBy = 'Item' 
+					--AND dbo.fnDateLessThanEquals(separateUOM.dtmDate, c.dtmCountDate) = 1
+					AND FLOOR(CAST(separateUOM.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
+				)
+				OR (
+					c.strCountBy = 'Retail Count' 
+					--AND dbo.fnDateLessThan(separateUOM.dtmDate, c.dtmCountDate) = 1
+					AND FLOOR(CAST(separateUOM.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
+				) 
 			)
 			AND Item.strLotTracking = 'No'
 			AND Item.ysnSeparateStockForUOMs = 1
@@ -142,8 +150,16 @@ FROM
 				((CASE WHEN cd.intSubLocationId IS NOT NULL AND cd.intStorageLocationId IS NULL AND cd.intSubLocationId = byStockUOM.intSubLocationId THEN 0 ELSE 1 END) = 0)
 			)
 			AND (
-				(c.strCountBy = 'Item' AND dbo.fnDateLessThanEquals(byStockUOM.dtmDate, c.dtmCountDate) = 1)
-				OR (c.strCountBy = 'Retail Count' AND dbo.fnDateLessThan(byStockUOM.dtmDate, c.dtmCountDate) = 1) 
+				(
+					c.strCountBy = 'Item' 
+					--AND dbo.fnDateLessThanEquals(byStockUOM.dtmDate, c.dtmCountDate) = 1
+					AND FLOOR(CAST(byStockUOM.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
+				)
+				OR (
+					c.strCountBy = 'Retail Count' 
+					--AND dbo.fnDateLessThan(byStockUOM.dtmDate, c.dtmCountDate) = 1
+					AND FLOOR(CAST(byStockUOM.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
+				) 
 			)
 			AND Item.strLotTracking = 'No'
 			AND ISNULL(Item.ysnSeparateStockForUOMs, 0) = 0
@@ -172,7 +188,8 @@ FROM
 				AND t.intSubLocationId = cd.intSubLocationId
 				AND t.intStorageLocationId = cd.intStorageLocationId
 				AND t.intLotId = cd.intLotId
-				AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1
+				--AND dbo.fnDateLessThanEquals(t.dtmDate, c.dtmCountDate) = 1
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 		) LotTransactions
 		OUTER APPLY (
 			SELECT	v.intItemId
@@ -188,7 +205,8 @@ FROM
 			WHERE	
 					v.intItemId = Item.intItemId
 					AND v.intItemLocationId = ItemLocation.intItemLocationId
-					AND dbo.fnDateLessThanEquals(v.dtmDate, c.dtmCountDate) = 1
+					--AND dbo.fnDateLessThanEquals(v.dtmDate, c.dtmCountDate) = 1
+					AND FLOOR(CAST(v.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 			GROUP BY 
 					v.intItemId
 					,u.intItemUOMId
@@ -206,12 +224,13 @@ FROM
 					tblICStockReservation sr
 					LEFT JOIN tblICInventoryTransaction xt 
 						ON xt.intTransactionId = sr.intTransactionId
-					CROSS APPLY dbo.udfDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), c.dtmCountDate) 
+					--CROSS APPLY dbo.udfDateLessThanEquals(CONVERT(VARCHAR(10), xt.dtmDate,112), c.dtmCountDate) 
 				WHERE sr.intItemId = cd.intItemId
 					AND sr.intItemLocationId = cd.intItemLocationId
 					AND ISNULL(sr.intStorageLocationId, 0) = ISNULL(cd.intStorageLocationId, 0)
 					AND ISNULL(sr.intSubLocationId, 0) = ISNULL(cd.intSubLocationId, 0)
 					AND ISNULL(sr.intLotId, 0) = ISNULL(cd.intLotId, 0)
+					AND FLOOR(CAST(xt.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 					
 				GROUP BY sr.strTransactionId, sr.dblQty
 			) AS ReservedQty
@@ -223,7 +242,7 @@ FROM
 				,t.intItemUOMId 
 			FROM 
 				tblICInventoryTransaction t 
-				CROSS APPLY dbo.udfDateLessThanEquals(t.dtmDate, c.dtmCountDate)
+				--CROSS APPLY dbo.udfDateLessThanEquals(t.dtmDate, c.dtmCountDate)
 			WHERE
 				t.intItemId = Item.intItemId
 				AND t.intItemLocationId = ItemLocation.intItemLocationId
@@ -235,6 +254,7 @@ FROM
 				)
 				AND ISNULL(t.intLotId, 0) = ISNULL(cd.intLotId, 0) 
 				AND t.ysnIsUnposted = 0 
+				AND FLOOR(CAST(t.dtmDate AS FLOAT)) <= FLOOR(CAST(c.dtmCountDate AS FLOAT))
 			ORDER BY
 				t.dtmDate DESC 
 				,t.intInventoryTransactionId DESC 
