@@ -102,6 +102,11 @@ Type the overview for the table here.
 		INCLUDE ([intCostingMethod])
 	GO
 
+	CREATE NONCLUSTERED INDEX [IX_tblICItemLocation_intLocationId]
+		ON [dbo].[tblICItemLocation]([intLocationId] ASC)
+		INCLUDE ([intItemId], [intCostingMethod])
+	GO
+
 	EXEC sp_addextendedproperty @name = N'MS_Description',
 		@value = N'Identity Field',
 		@level0type = N'SCHEMA',
