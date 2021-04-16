@@ -362,10 +362,15 @@ BEGIN
 		,[strPostingError]		= 'The Customer''s credit limit has been reached but there is no approver configured. This invoice cannot be posted without an authorized approver.'
 	FROM #ARPostInvoiceHeader I 
 	INNER JOIN vyuEMEntityCustomerSearch C ON C.intEntityId = I.intEntityCustomerId
+	OUTER APPLY(
+		SELECT TOP 1 dblCreditStopDays
+		FROM dbo.vyuARCustomerInquiry
+		WHERE intEntityCustomerId = I.intEntityCustomerId
+	) CUSTOMERAGING
 	WHERE C.ysnHasCustomerCreditApprover = 0
       AND C.strCreditCode NOT IN ('Always Allow', 'Normal', 'Reject Orders', 'COD')
 	  AND ISNULL(C.strCreditCode, '') <> ''
-      AND ((I.dblInvoiceTotal + C.dblARBalance > C.dblCreditLimit) OR C.intCreditStopDays >= 0)
+      AND ((I.dblInvoiceTotal + C.dblARBalance > C.dblCreditLimit) OR CUSTOMERAGING.dblCreditStopDays > 0)
 			
 	INSERT INTO #ARInvalidInvoiceData
 		([intInvoiceId]
